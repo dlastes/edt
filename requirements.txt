@@ -1,0 +1,9 @@
+python-memcached
+Django<=1.11.13
+django-import-export
+django-extensions
+django-colorfield
+django-cache-machine
+pulp
+psycopg2
+requests

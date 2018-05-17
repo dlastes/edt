@@ -1,0 +1,11 @@
+#Ignorer tous les fichiers pyc
+*.pyc
+*~
+#edt/edtweb/*/migrations
+FlOpEDT/pab-gur-mod/log_*
+FlOpEDT/log_*
+FlOpEDT/IIS_**
+FlOpEDT/*.log
+FlOpEDT/*.lp
+FlOpEDT/*.sol
+

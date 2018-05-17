@@ -1,0 +1,92 @@
+<!-- This file is part of the FlOpEDT/FlOpScheduler project.               -->
+<!-- Copyright (c) 2017                                                    -->
+<!-- Authors: Iulian Ober, Paul Renaud-Goud, Pablo Seban, et al.           -->
+<!--                                                                       -->
+<!-- This program is free software: you can redistribute it and/or modify  -->
+<!-- it under the terms of the GNU Affero General Public License as        -->
+<!-- published by the Free Software Foundation, either version 3 of the    -->
+<!-- License, or (at your option) any later version.                       -->
+<!--                                                                       -->
+<!-- This program is distributed in the hope that it will be useful, but   -->
+<!-- WITHOUT ANY WARRANTY; without even the implied warranty of            -->
+<!-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU      -->
+<!-- Affero General Public License for more details.                       -->
+<!--                                                                       -->
+<!-- You should have received a copy of the GNU Affero General Public      -->
+<!-- License along with this program. If not, see                          -->
+<!-- <http://www.gnu.org/licenses/>.                                       -->
+<!--                                                                       -->
+<!-- You can be released from the requirements of the license by purchasing -->
+<!-- a commercial license. Buying such a license is mandatory as soon as   -->
+<!-- you develop activities involving the FlOpEDT/FlOpScheduler software   -->
+<!-- without disclosing the source code of your own applications.          -->
+
+{% extends "base.html" %}
+
+{% csrf_token %}
+
+
+
+{% block title %} EDT {% endblock %}
+{% block content %}
+{% load static %}
+<link rel="stylesheet" href="{% static "modif/better.css" %}"/>
+  <script src="{% static "modif/d3.v4.min.js" %}"></script>
+  <script src="{% static "modif/jquery.min.js" %}"></script>
+  <!-- script src="https://d3js.org/d3.v4.min.js"></script -->
+  <!-- script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script -->
+  <script>
+    var url_fetch_stype = "{% url "fetch_stype" %}"; 
+    var url_stype = "{% url "stype" %}"; 
+    var url_dispos_changes = "{% url "dispos_changes"%}";
+    var usna = "{{ user.username }}" ;
+    var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+    var url_login = "{% url "login"%}";
+    var annee_courante = "{{ annee_courante }}" ;
+  </script>
+  </script>
+<body>
+    <!--    <div id="option">
+      <label>
+      <input name="dispoBox" 
+             type="checkbox" />
+      Dispos
+      </label>
+      <button onclick="fetchjson()">Json</button>
+      <button onclick="fetchcsv()">CSV</button>
+      <button onclick="fetch_dispo()">Dispos</button>
+    </div>-->
+    <div  id="tools-main" style="width: 100%; overflow: hidden;">
+      <div id="svg" style="width: 680px; float: left;"></div>
+      <div style="margin-left: 700px;">
+	<form style="white-space: nowrap;" name="app" action="javascript:apply_stype(false)">
+	  <fieldset>
+	    <legend>Semaines particulières</legend>
+	    Appliquer la configuration ci-contre<br/>
+	    de la semaine
+	    <input type="number" name="se_deb" style="width: 40px" value="{{ date_deb.semaine }}" min="1" max="53">, année
+	    <input type="number" name="an_deb" style="width: 60px" value="{{ date_deb.an }}" min="2017" max="2018"></br>
+	    à la semaine
+	    <input type="number" name="se_fin" style="width: 40px" value="{{ date_fin.semaine }}" min="1" max="53">, année
+	    <input type="number" name="an_fin" style="width: 60px" value="{{ date_fin.an }}" min="2017" max="2018"></br></br>
+	    <input type="submit" name="apply" value="Appliquer">
+	  </fieldset></br></br>
+	</form>
+	<fieldset>
+	  <legend>Semaine type</legend>
+	  <form style="white-space: nowrap;" name="sav"  action="javascript:apply_stype(true)">
+	    Redéfinir ma semaine type<br/>
+	    (ne provoque aucun changement sur les disponibilités)</br></br>
+	    <input type="submit" name="save" value="Sauvegarder"></br>	  </fieldset>
+	</form></br>
+	<!--{% if err %}<p><strong>{{ err }}</strong></p>{% endif %}
+	  -->
+	<span id="ack"></span>
+      </div>
+    </div>
+</body>
+<script type='text/javascript' src="{% static "modif/semaine-type.js" %}">
+    
+</script>
+
+{% endblock %}

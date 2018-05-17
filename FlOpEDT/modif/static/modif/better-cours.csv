@@ -1,0 +1,6 @@
+id_cours,num_cours,prof_nom,gpe_nom,gpe_promo,module,jour,heure,salle_nom
+1,1,AP,P,1,BPOO,1,5,A1
+2,3,PSE,1A,1,MD,1,4,B105
+3,2,PS,2A,0,IAP,1,4,B106
+4,3,MDM,1,0,IAP,2,2,B107
+5,3,PSE,3,1,MD,3,1,B007
