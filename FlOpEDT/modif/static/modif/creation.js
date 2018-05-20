@@ -5,7 +5,7 @@
     ----------------------     
   --------------------------   
 ------------------------------ 
-------    ONLY  ONCE    ------ 
+-------    CREATION    -------
 ------------------------------ 
   --------------------------   
     ----------------------     
@@ -91,6 +91,8 @@ function create_layouts(svg_cont, light) {
         .attr("id", "lay-prg");
 
     // module ground
+    // moved directly to the html
+    
     //  mog = d3.select("body").select("select")
     // svg_cont.append("g")
     // 	.attr("id","lay-mog")
@@ -102,8 +104,6 @@ function create_layouts(svg_cont, light) {
 
 
     if (!light) {
-        //console.log(modules.x);
-        //console.log(d3.select("svg").attr("width"));
 
         $("#div-mod").css("width", modules.width);
         $("#div-mod").css({
@@ -139,11 +139,6 @@ function create_layouts(svg_cont, light) {
     vg = svg_cont.append("g")
         .attr("id", "lay-vg");
 
-    /*vg.append("rect")
-    .attr("width", "100%")
-    .attr("height", "100%")
-    .attr("fill", "pink");*/
-
     // background, middleground, foreground, dragground
     var edtg = svg_cont.append("g")
         .attr("id", "lay-edtg");
@@ -170,9 +165,9 @@ function create_layouts(svg_cont, light) {
 
 
 
-/*----------------------
-  -------   DISPOS  -------
-  ----------------------*/
+/*---------------------------
+  ------- PREFERENCES -------
+  ---------------------------*/
 
 function create_alarm_dispos() {
     di = dig
@@ -198,7 +193,7 @@ function create_alarm_dispos() {
 
 
 
-// PRE: semaine_init, week_init, weeks.init_data
+// PRECONDITION: semaine_init, week_init, weeks.init_data
 function find_week(week_list) {
     var i, up;
     i = 0;
@@ -348,44 +343,11 @@ function create_clipweek() {
 
 
 
+
 /*----------------------
   -------- GRID --------
   ----------------------*/
 
-
-function create_bknews() {
-    var flash = fig
-	.append("g")
-	.attr("class", "flashinfo");
-
-
-    flash
-	.append("line")
-	.attr("class","bot-bar")
-        .attr("stroke", "black")
-        .attr("stroke-width", 4)
-        .attr("x1", 0)
-        .attr("y1", bknews_bot_y())
-        .attr("x2", grid_width())
-        .attr("y2", bknews_bot_y());
-
-    flash
-	.append("line")
-	.attr("class","top-bar")
-        .attr("stroke", "black")
-        .attr("stroke-width", 4)
-        .attr("x1", 0)
-        .attr("y1", bknews_top_y())
-        .attr("x2", grid_width())
-        .attr("y2", bknews_top_y());
-
-    var fl_txt = flash
-	.append("g")
-	.attr("class","txt-info");
-
-
-    
-}
 
 // PRE: groups
 function create_edt_grid() {
@@ -1048,8 +1010,44 @@ function create_menus() {
 
 
 /*---------------------
-  ------- BKNEWS -----
+  ------- BKNEWS ------
   ---------------------*/
+
+
+function create_bknews() {
+    var flash = fig
+	.append("g")
+	.attr("class", "flashinfo");
+
+
+    flash
+	.append("line")
+	.attr("class","bot-bar")
+        .attr("stroke", "black")
+        .attr("stroke-width", 4)
+        .attr("x1", 0)
+        .attr("y1", bknews_bot_y())
+        .attr("x2", grid_width())
+        .attr("y2", bknews_bot_y());
+
+    flash
+	.append("line")
+	.attr("class","top-bar")
+        .attr("stroke", "black")
+        .attr("stroke-width", 4)
+        .attr("x1", 0)
+        .attr("y1", bknews_top_y())
+        .attr("x2", grid_width())
+        .attr("y2", bknews_top_y());
+
+    var fl_txt = flash
+	.append("g")
+	.attr("class","txt-info");
+
+
+    
+}
+
 
 function translate_bknews_from_csv(d){
     return {
@@ -1064,9 +1062,9 @@ function translate_bknews_from_csv(d){
 
 
 
-/*--------------------
-   ------ COURS ------
-  --------------------*/
+/*----------------------
+   ------ COURSES ------
+  ----------------------*/
 
 
 function assign_fill_mod() {
@@ -1252,15 +1250,8 @@ function which_slot(x, y, w, h) {
         dim_dispo.plot *
         (dim_dispo.width + dim_dispo.right));
     var day = Math.floor((x + .5 * w) / wday);
-    // if (day < 0 || day >= nbPer ||
-    //     (x + .5 * w - day * wday > rootgp_width * labgp.width)) {
-    //     return null;
-    // }
     var hslot = nbRows * labgp.height;
     var slot = Math.floor((y + .5 * h) / hslot);
-    // if ((slot < 0 || slot >= nbSl) && !is_garbage(day, slot)) {
-    //     return null;
-    // }
     return {
         day: day,
         slot: slot
@@ -1278,9 +1269,9 @@ function is_free(day, hour, promo) {
 
 
 
-/*---------------------
-  ------- VALIDER -----
-  ---------------------*/
+/*--------------------
+  ------- TUTORS -----
+  --------------------*/
 
 function create_forall_prof() {
     var contg = prg
@@ -1334,7 +1325,7 @@ function create_val_but() {
         .attr("rx", 10)
         .attr("ry", 10)
         .attr("x", menus.x + menus.mx - 5)
-        .attr("y", did.tly); //menus.y+menus.h);
+        .attr("y", did.tly);
 
     edt_but
         .append("text")
@@ -1390,7 +1381,7 @@ function create_val_but() {
 function create_stype() {
     var t, dat, datdi, datsmi;
 
-    // sometimes, all dispos are not in the database
+    // sometimes, all preferences are not in the database
     // -> by default, not available
     for (var i = 0; i < user.dispos_type.length; i++) {
         if (typeof user.dispos_type[i] == 'undefined') {
@@ -1522,10 +1513,7 @@ function fetch_dispos_type() {
             async: true,
             contentType: "text/csv",
             success: function(msg) {
-                //console.log(msg);
-
-                //console.log("in");
-                user.dispos_type = new Array(nbSl * nbPer); // - nbSl/2);
+                user.dispos_type = new Array(nbSl * nbPer);
 
                 d3.csvParse(msg, translate_dispos_type_from_csv);
                 create_stype();
@@ -1552,9 +1540,7 @@ function translate_dispos_type_from_csv(d) {
         val: +d.valeur,
         off: -1
     };
-    //    if(!is_free(+d.jour,+d.heure)){
     user.dispos_type[day_hour_2_1D(d2p)] = d2p;
-    //    }
 }
 
 function create_dispo_default_from_index(ind) {
@@ -1564,7 +1550,6 @@ function create_dispo_default_from_index(ind) {
         val: 0,
         off: -1
     };
-    //d.day<4?d.day*nbSl+d.hour:d.day*nbSl+d.hour-3;
 }
 
 

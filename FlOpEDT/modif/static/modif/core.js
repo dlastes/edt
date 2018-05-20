@@ -105,9 +105,9 @@ var fetch = {
 //cours_ok pas très utile
 
 
-/*---------------------
-  ------- DISPOS ------
-  ---------------------*/
+/*--------------------------
+  ------- PREFERENCES ------
+  --------------------------*/
 
 // 3D array (username,id_day,id_slot)
 var dispos = [];
@@ -221,17 +221,17 @@ var garbage = {
 };
 
 
+/*----------------------
+  ------- BKNEWS -------
+  ----------------------*/
+
 // bknews = breaking news
 var bknews = {
     hour_bound:3, // flash info between hour #2 and hour #3
     ratio_height: .55,        // ratio over course height 
     ratio_margin: .15, // ratio over course height 
     cont: [],
-    // [{week: 15, year: 2018, x_beg:1, x_end:2, y:0, fill_col:"forestgreen", strk_col:"black", txt: "13h15, Amphi 2 : Réunion d'info"}, // mouvement UT2J"},
-    //  {week: 15, year: 2018, x_beg:1, x_end:2, y:1, fill_col:"forestgreen", strk_col:"black", txt: "Mouvement UT2J"},
-    // ],
     nb_rows: 0,
-//    2,
 };
 
 /*----------------------
@@ -311,7 +311,7 @@ var modules = {
 };
 
 /*--------------------
-   ------ SALLES ------
+   ------ ROOMS ------
    --------------------*/
 // salles (sel: selected, pl:scheduled (PLacé), pp: not scheduled (Pas Placé), all: all modules
 var salles = {
@@ -322,8 +322,8 @@ var salles = {
 };
 
 
-/*--------------------
-   ------ PROFS ------
+/*---------------------
+   ------ TUTORS ------
    --------------------*/
 
 // instructors of unscheduled courses
@@ -361,9 +361,9 @@ var first_fetch_prof = true;
 // listeners for Horizontal Scaling and Vertical Scaling buttons
 var drag_listener_hs, drag_listener_vs;
 
-/*--------------------
-   ------ COURS -------
-  --------------------*/
+/*-----------------------
+   ------ COURSES -------
+  -----------------------*/
 // fills for courses
 var couleurs_fond_texte = [
     ['coral', 'black'],
@@ -421,9 +421,9 @@ var drag = {
 // stores the courses that has been moved
 var cours_bouge = {};
 
-/*---------------------
-  ------- VALIDER -----
-  ---------------------*/
+/*----------------------
+  ------- VALIDATE -----
+  ----------------------*/
 
 // display parameters
 var valid = {
