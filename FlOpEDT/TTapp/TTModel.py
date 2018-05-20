@@ -129,6 +129,7 @@ class TTModel(object):
                  max_stab=5.,
                  lim_ld=1.):
         print "\nLet's start week #%g" % semaine
+        # beg_file = os.path.join('logs',"FlOpTT")
         self.model = LpProblem("FlOpTT", LpMinimize)
         self.min_ups_i = min_nps_i
         self.min_bhd_g = min_bhd_g

@@ -26,7 +26,6 @@
 
 from TTapp.TTModel import TTModel
 
-
 class MyTTModel(TTModel):
     def add_specific_constraints(self):
         """
