@@ -101,12 +101,12 @@ d3.select("body")
 	if(dispo_menu_appeared) {
 	    del_dispo_adv = true ;
 	    dispo_menu_appeared = false ;
-	    go_dispos(true);
+	    go_pref(true);
 	} else {
 	    if(del_dispo_adv) {
 		del_dispo_adv = false ;
 		data_dispo_adv_cur = [] ;
-		go_dispos(true);
+		go_pref(true);
 	    }
 	}
     }})

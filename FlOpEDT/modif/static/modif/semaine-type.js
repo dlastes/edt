@@ -97,19 +97,19 @@ d3.select("body")
 	if(dispo_menu_appeared) {
 	    del_dispo_adv = true ;
 	    dispo_menu_appeared = false ;
-	    go_dispos(true);
+	    go_pref(true);
 	} else {
 	    if(del_dispo_adv) {
 		del_dispo_adv = false ;
 		data_dispo_adv_cur = [] ;
-		go_dispos(true);
+		go_pref(true);
 	    }
 	}
     })
 
 
 
-function go_dispos(quick) {
+function go_pref(quick) {
     var t, dat, datdi, datsmi ;
 
     if(quick) {
@@ -412,7 +412,7 @@ function fetch_dispos() {
 	    }
 	    d3.csvParse(msg, translate_dispos_from_csv);
 	    create_dispos_user_data();
-	    go_dispos(true);
+	    go_pref(true);
 	    
         },
 	error: function(xhr, error) {
@@ -662,7 +662,7 @@ function apply_change_simple_pref(d){
     d.val = (d.val+par_dispos.nmax/2)%(3*par_dispos.nmax/2);
     dispos[user.nom][d.day][d.hour]=d.val;
     user.dispos[day_hour_2_1D(d)].val = d.val;
-    go_dispos(true);
+    go_pref(true);
 }
 
 
