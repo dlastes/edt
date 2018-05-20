@@ -79,6 +79,56 @@ salles.height = modules.height ;
   -------------------*/
 
 
+function on_group_rcv(dg) {
+
+    create_groups(dg);
+
+    go_gp_buttons();
+
+    create_edt_grid();
+
+    create_alarm_dispos();
+    create_val_but();
+    go_ack_msg();
+
+    create_bknews();
+
+    go_promo_gp_init() ;
+    go_gp_buttons();
+
+
+    fetch_cours();
+    fetch_bknews(true);
+
+    if (splash_id == 1) {
+    
+	var splash_mail = {
+	    id: "mail-sent",
+	    but: {list: [{txt: "Ok", click: function(d){} }]},
+	    com: {list: [{txt: "E-mail envoyé !", ftsi: 23}]}
+	}
+	splash(splash_mail);
+
+    } else if (splash_id == 2) {
+
+	var splash_quote = {
+	    id: "quote-sent",
+	    but: {list: [{txt: "Ok", click: function(d){} }]},
+	    com: {list: [{txt: "Citation envoyée ! (en attente de modération)", ftsi: 23}]}
+	}
+	splash(splash_quote);
+
+    }
+    
+    //go_edt(true);
+}
+
+
+
+/*---------------------
+  ------ STARTER ------
+  ---------------------*/
+
 
 create_general_svg(false);
 
@@ -110,6 +160,7 @@ d3.select("body")
 	    }
 	}
     }})
+
 
 
 

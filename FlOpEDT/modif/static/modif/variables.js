@@ -41,7 +41,7 @@ var labgp = {height: nb, width: nb, tot: nb, height_init: nb, width_init: nb};
 var dim_dispo = {height:2*labgp.height, width: 60, right: 10, plot:0,
 		 adv_v_margin: 5};
 */
-/*     \
+           /*     \
           ----------           
         --------------         
       ------------------       
@@ -55,7 +55,7 @@ var dim_dispo = {height:2*labgp.height, width: 60, right: 10, plot:0,
       ------------------       
         --------------         
           ----------           
-                 */
+           \     */
 
 /*--------------------
    ------ ALL -------
