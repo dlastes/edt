@@ -52,23 +52,23 @@
 background-color:forestgreen;
 color:white;
 }
-.profs-but {
+.tutor-button {
   cursor: pointer;
 }
-rect.profs-but-others {
+rect.tutor-button-others {
   stroke:black;
   stroke-width:1px;
   fill:forestgreen;
 }
-rect.profs-but-me {
+rect.tutor-button-me {
   stroke:#134e13;
   stroke-width:2px;
   fill:#31c831;
 }
-text.profs-but-others {
+text.tutor-button-others {
   fill:white;
 }
-text.profs-but-me {
+text.tutor-button-me {
   fill:black;
 }
 
@@ -136,7 +136,7 @@ width : 100%;
 cursor : wait;
 }
 
-/* logo-head-gribou-rc-hand.svg */
+/* loadingspin.svg */
 
 /* ************ Logo ************ */
 /*@font-face {

@@ -132,7 +132,7 @@ function go_dispos(quick) {
     var datdisi = datdi
 	.append("g")
 	.attr("class","dispo-si")
-    	.on("click",apply_change_simple_dispo);
+    	.on("click",apply_change_simple_pref);
 
 
     
@@ -655,7 +655,7 @@ function smile_trans(d) {
 }
 
 
-function apply_change_simple_dispo(d){
+function apply_change_simple_pref(d){
     if(Math.floor(d.val%(par_dispos.nmax/2))!=0) {
 	d.val = Math.floor(d.val/(par_dispos.nmax/2))*par_dispos.nmax/2;
     }

@@ -38,7 +38,7 @@ var svg = {height: tv_svg_h - margin.top - margin.bot, width: tv_svg_w - margin.
 var week = semaine_init ;
 var year = an_init;
 
-// filter the right flinf
+// filter the right bknews
 weeks = {sel: [0], init_data: [{semaine: week, an: year}]};
 
 
@@ -81,7 +81,6 @@ function on_group_rcv_light(dg) {
     create_edt_grid();
 
     create_bknews();
-    //go_flinf();
     
 
     fetch_cours_light();
@@ -195,7 +194,7 @@ function fetch_ended_light() {
 	fetch.done = true ;
 
 	go_grid(true);
-	go_cours(true);
+	go_courses(true);
 	go_bknews(true);
     }
 
