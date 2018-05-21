@@ -55,10 +55,10 @@ import datetime
 
 
 class WeekDB(object):
-    def __init__(self, semaine, an, promo=[1, 2, 3]):
+    def __init__(self, week, year, promo=[1, 2, 3]):
         self.slots = db.Creneau.objects.all()
-        self.week = semaine
-        self.year = an
+        self.week = week
+        self.year = year
         self.groups = db.Groupe.objects.filter(promo__in=promo)
         self.days = db.Jour.objects.all()
         self.rooms = db.Room.objects.all()
@@ -68,7 +68,7 @@ class WeekDB(object):
         self.room_groups_for_type = {}
         for t in self.room_types:
             self.room_groups_for_type[t] = db.RoomGroup.objects.filter(types=t)
-        self.courses = db.Cours.objects.filter(semaine=semaine, an=an, groupe__promo__in=promo)
+        self.courses = db.Cours.objects.filter(semaine=week, an=year, groupe__promo__in=promo)
         self.basic_groups = self.groups \
             .filter(basic=True,
                     id__in=self.courses
@@ -82,32 +82,32 @@ class WeekDB(object):
             self.courses_for_group[g] = self.courses.filter(groupe=g)
 
         self.availabilities = db.Disponibilite.objects \
-            .filter(semaine=semaine,
-                    an=an)
+            .filter(semaine=week,
+                    an=year)
         self.instructors = db.Prof.objects \
             .filter(id__in=self.courses
                     .values_list('prof_id')
                     .distinct())
         self.sched_courses = db.CoursPlace \
             .objects \
-            .filter(cours__semaine=semaine,
-                    cours__an=an,
+            .filter(cours__semaine=week,
+                    cours__an=year,
                     cours__groupe__promo__in=promo)
-        self.fixed_courses = db.CoursPlace.objects.filter(cours__semaine=semaine, cours__an=an,
+        self.fixed_courses = db.CoursPlace.objects.filter(cours__semaine=week, cours__an=year,
                                                           copie_travail=0) \
             .exclude(cours__groupe__promo__in=promo)
 
         self.courses_availabilities = db.DispoCours.objects \
-            .filter(semaine=semaine,
-                    an=an)
+            .filter(semaine=week,
+                    an=year)
         self.modules = db.Module.objects \
             .filter(id__in=self.courses
                     .values_list('module_id')
                     .distinct())
-        self.PVHDs = db.DemiJourFeriePromo.objects.filter(semaine=semaine,
-                                                          an=an)
-        self.Precede = db.Precede.objects.filter(cours1__semaine=semaine,
-                                                 cours2__semaine=semaine,
+        self.PVHDs = db.DemiJourFeriePromo.objects.filter(semaine=week,
+                                                          an=year)
+        self.Precede = db.Precede.objects.filter(cours1__semaine=week,
+                                                 cours2__semaine=week,
                                                  cours1__groupe__promo__in=promo)
         self.courses_for_prof = {}
         for i in self.instructors:
