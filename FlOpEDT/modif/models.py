@@ -98,8 +98,6 @@ class Groupe(models.Model):
                               verbose_name = 'Type de classe')
     taille = models.PositiveSmallIntegerField()
     surgroupe = models.ForeignKey('self', null = True, blank = True)
-    promo = models.PositiveSmallIntegerField(validators=[MinValueValidator(1),
-                                                         MaxValueValidator(3)])
     basic = models.BooleanField(verbose_name = 'Basic group?', default = False)
 
     def __unicode__(self):
@@ -218,7 +216,7 @@ class Module(models.Model):
     abbrev = models.CharField(max_length=10, verbose_name='Intitulé abbrégé')
     responsable = models.ForeignKey(User, null=True, blank=True)
     ppn = models.CharField(max_length=5, default='M')
-    promo = models.PositiveSmallIntegerField(default=1)
+    train_prog = models.ForeignKey('TrainingProgramme')
     nbTD = models.PositiveSmallIntegerField(default=1)
     nbTP = models.PositiveSmallIntegerField(default=1)
     nbCM = models.PositiveSmallIntegerField(default=1)
@@ -308,11 +306,11 @@ class DispoCours(models.Model):
     creneau = models.ForeignKey('Creneau')
     valeur = models.SmallIntegerField(
         validators = [MinValueValidator(0), MaxValueValidator(10)])
-    promo = models.PositiveSmallIntegerField(default = 1)
+    train_prog = models.ForeignKey('TrainingProgramme')
 
     def __str__(self):
         return "%s=Sem%s:%s-%s=%s" % \
-               (self.nature, self.semaine, self.creneau, self.promo,
+               (self.nature, self.semaine, self.creneau, self.train_prog,
                 self.valeur)
 
 
@@ -335,11 +333,11 @@ class DemiJourFeriePromo(models.Model):
     semaine = models.PositiveSmallIntegerField(
         validators = [MinValueValidator(0), MaxValueValidator(53)])
     an = models.PositiveSmallIntegerField()
-    promo = models.PositiveSmallIntegerField(
-        validators = [MinValueValidator(1), MaxValueValidator(2)])
+    train_prog = models.ForeignKey('TrainingProgramme')
+
 
     def __str__(self):
-        return "%s-sem %s- %sA" % (self.jour, self.semaine, self.promo)
+        return "%s-sem %s- %sA" % (self.jour, self.semaine, self.train_prog)
 
 # </editor-fold desc="PREFERENCES">
 

@@ -45,7 +45,6 @@ from modif.models import Cours, Heure  # , Module, Prof
 #     truc = models.CharField(max_length=10, verbose_name="Truc",default="")
 
 
-max_promo = 3
 max_weight = 10
 
 
@@ -73,17 +72,18 @@ class TTConstraint(models.Model):
 class LimitNaturePerPeriod(TTConstraint):  # , pond):
     """
     Bound the number of courses of nature 'nature' per day/half day
-    Permet de limiter le nombre de cours de la nature 'nature' par jour/demi-journee
+    Permet de limiter le nombre de cours de la nature 'nature' par
+    jour/demi-journee
     """
     nature = models.CharField(max_length=2,
                               choices=Cours.CHOIX_NATURE,
                               null=True)
     limit = models.PositiveSmallIntegerField()
-    promo = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(max_promo)],
-        null=True)
-    module = models.ForeignKey('modif.Module', null=True)
-    prof = models.ForeignKey('modif.Prof', null=True)
+    train_prog = models.ForeignKey('modif.TrainingProgramme',
+                                   null = True,
+                                   default = None)
+    module = models.ForeignKey('modif.Module', null = True)
+    prof = models.ForeignKey('modif.Prof', null = True)
     FULL_DAY = 'fd'
     HALF_DAY = 'hd'
     PERIOD_CHOICES = ((FULL_DAY, 'Full day'), (HALF_DAY, 'Half day'))
@@ -97,8 +97,8 @@ class LimitNaturePerPeriod(TTConstraint):  # , pond):
             fc = fc.filter(module=self.module)
         if self.nature:
             fc = fc.filter(nature=self.nature)
-        if self.promo:
-            fc = fc.filter(groupe__promo=self.promo)
+        if self.train_prog:
+            fc = fc.filter(groupe__train_prog = self.train_prog)
         if self.period == self.FULL_DAY:
             periods = ['']
         else:
@@ -120,13 +120,14 @@ class LimitNaturePerPeriod(TTConstraint):  # , pond):
 
 class ReasonableDays(TTConstraint):
     """
-    Allow to limit long days (with the first and last slot of a day). For a given parameter,
+    Allow to limit long days (with the first and last slot of a day). For a
+    given parameter,
     a None value builds the constraint for all possible values,
     e.g. promo = None => the constraint holds for all promos.
     """
-    promo = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(0), MaxValueValidator(max_promo)],
-        null=True)
+    train_prog = models.ForeignKey('modif.TrainingProgramme',
+                                   null = True,
+                                   default = None)
     group = models.ForeignKey('modif.Groupe', null=True)
     prof = models.ForeignKey('modif.Prof', null=True)
 
@@ -137,8 +138,8 @@ class ReasonableDays(TTConstraint):
             fc = ttmodel.wdb.courses
             if self.prof:
                 fc = fc.filter(prof=self.prof)
-            if self.promo:
-                fc = fc.filter(groupe__promo=self.promo)
+            if self.train_prog:
+                fc = fc.filter(groupe__train_prog=self.train_prog)
             if self.group:
                 fc = fc.filter(groupe=self.group)
             for c1 in fc:
@@ -156,18 +157,20 @@ class ReasonableDays(TTConstraint):
 class Stabilize(TTConstraint):
     """
     Allow to realy stabilize the courses of a category
-    If general is true, none of the other (except week and work_copy) is relevant.
+    If general is true, none of the other (except week and work_copy) is
+    relevant.
     --> In this case, each course c placed:
         - in a unused slot costs 1,
         - in a unused half day (for prof and/or group) cost ponderation
-    If general is False, it Fixes promo/prof/group courses (or tries to if self.weight)
+    If general is False, it Fixes promo/prof/group courses (or tries to if
+    self.weight)
     """
     general = models.BooleanField(
         verbose_name='Stabiliser tout?',
         default=False)
-    promo = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(0), MaxValueValidator(max_promo)],
-        null=True, default=None)
+    train_prog = models.ForeignKey('modif.TrainingProgramme',
+                                   null = True,
+                                   default = None)
     group = models.ForeignKey('modif.Groupe', null=True, default=None)
     module = models.ForeignKey('modif.Module', null=True, default=None)
     prof = models.ForeignKey('modif.Prof', null=True, default=None)
@@ -205,8 +208,8 @@ class Stabilize(TTConstraint):
                 fc = fc.filter(prof=self.prof)
             if self.nature:
                 fc = fc.filter(nature=self.nature)
-            if self.promo:
-                fc = fc.filter(groupe__promo=self.promo)
+            if self.train_prog:
+                fc = fc.filter(groupe__train_prog=self.train_prog)
             if self.group:
                 fc = fc.filter(groupe=self.group)
             if self.module:
@@ -307,15 +310,15 @@ class MinNonPreferedSlot(TTConstraint):
     NB: You HAVE TO chose either prof OR promo
     """
     prof = models.ForeignKey('modif.Prof', null=True)
-    promo = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(0), MaxValueValidator(max_promo)],
-        null=True)
+    train_prog = models.ForeignKey('modif.TrainingProgramme',
+                                   null = True,
+                                   default = None)
 
     # is not called when save() is
     def clean(self):
-        if not self.prof and not self.promo:
+        if not self.prof and not self.train_prog:
             raise ValidationError({
-                'promo': ValidationError(_('Si pas de prof alors promo.',
+                'train_prog': ValidationError(_('Si pas de prof alors promo.',
                                            code='invalid')),
                 'prof': ValidationError(_('Si pas de promo alors prof.',
                                           code='invalid'))})
@@ -326,12 +329,12 @@ class MinNonPreferedSlot(TTConstraint):
                 .filter(prof=self.prof)
         else:
             filtered_courses = ttmodel.wdb.courses \
-                .filter(groupe__promo=self.promo)
+                .filter(groupe__train_prog = self.train_prog)
             # On exclut les cours de sport!
             filtered_courses = \
                 filtered_courses.exclude(module__abbrev='SC')
         basic_groups = ttmodel.wdb.basic_groups \
-                              .filter(promo=self.promo)
+                              .filter(train_prog = self.train_prog)
         for sl in ttmodel.wdb.slots:
             for c in filtered_courses:
                 if self.prof:
@@ -346,7 +349,7 @@ class MinNonPreferedSlot(TTConstraint):
                             cost = self.local_weight() \
                                    * ponderation * ttmodel.TT[(sl, c)] \
                                    * ttmodel.unp_slot_cost_course[c.nature,
-                                                                  self.promo][sl]
+                                                                  self.train_prog.abbrev][sl]
                             ttmodel.add_to_group_cost(g, cost)
                             ttmodel.add_to_slot_cost(sl, cost)
 
@@ -359,9 +362,9 @@ class AvoidBothSlots(TTConstraint):
     """
     slot1 = models.ForeignKey('modif.Creneau', related_name='slot1')
     slot2 = models.ForeignKey('modif.Creneau', related_name='slot2')
-    promo = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(0), MaxValueValidator(max_promo)],
-        null=True)
+    train_prog = models.ForeignKey('modif.TrainingProgramme',
+                                   null = True,
+                                   default = None)
     group = models.ForeignKey('modif.Groupe', null=True)
     prof = models.ForeignKey('modif.Prof', null=True)
 
@@ -369,8 +372,8 @@ class AvoidBothSlots(TTConstraint):
         fc = ttmodel.wdb.courses
         if self.prof:
             fc = fc.filter(prof=self.prof)
-        if self.promo:
-            fc = fc.filter(groupe__promo=self.promo)
+        if self.train_prog:
+            fc = fc.filter(groupe__train_prog = self.train_prog)
         if self.group:
             fc = fc.filter(groupe=self.group)
         for c1 in fc:
@@ -389,9 +392,9 @@ class AvoidBothSlots(TTConstraint):
 #     Avoid the use of an isolated slot
 #     RESTE A FAIRE (est-ce possible en non quadratique?)
 #     """
-#     promo = models.PositiveSmallIntegerField(
-#         validators=[MinValueValidator(0), MaxValueValidator(max_promo)],
-#         null=True)
+#     train_prog = models.ForeignKey('modif.TrainingProgramme',
+#                                    null = True,
+#                                    default = None)
 #     group = models.ForeignKey('modif.Groupe', null=True)
 #     prof = models.ForeignKey('modif.Prof', null=True)
 #
@@ -399,8 +402,8 @@ class AvoidBothSlots(TTConstraint):
 #         fc = ttmodel.wdb.courses
 #         if self.prof:
 #             fc = fc.filter(prof=self.prof)
-#         if self.promo:
-#             fc = fc.filter(groupe__promo=self.promo)
+#         if self.train_prog:
+#             fc = fc.filter(groupe__train_prog = self.promo)
 #         if self.group:
 #             fc = fc.filter(groupe=self.group)
 
@@ -419,18 +422,25 @@ class SimultaneousCourses(TTConstraint):
             var1 = ttmodel.TT[(sl, self.course1)]
             var2 = ttmodel.TT[(sl, self.course2)]
             ttmodel.add_constraint(var1 - var2, '==', 0)
-            # A compléter, l'idée est que si les cours ont le même prof, ou des groupes qui se superposent, il faut
-            # veiller à supprimer les core_constraints qui empêchent que les cours soient simultanés...
+            # A compléter, l'idée est que si les cours ont le même prof, ou des
+            # groupes qui se superposent, il faut veiller à supprimer les core
+            # constraints qui empêchent que les cours soient simultanés...
             if same_prof:
-                name_prof_constr = str('core_prof_'+str(self.course1.prof)+'_'+str(sl))
+                name_prof_constr = str('core_prof_'
+                                       + str(self.course1.prof)
+                                       + '_'
+                                       + str(sl))
                 prof_constr = ttmodel.get_constraint(name_prof_constr)
                 print prof_constr
-                if (ttmodel.var_coeff(var1, prof_constr), ttmodel.var_coeff(var2, prof_constr)) == (1, 1):
+                if (ttmodel.var_coeff(var1, prof_constr),
+                    ttmodel.var_coeff(var2, prof_constr)) == (1, 1):
                     ttmodel.change_var_coeff(var2, prof_constr, 0)
             for bg in ttmodel.wdb.basic_groups:
                 bg_groups = ttmodel.wdb.basic_groups_surgroups[bg]
-                if self.course1.groupe in bg_groups and self.course2.groupe in bg_groups:
+                if self.course1.groupe in bg_groups \
+                        and self.course2.groupe in bg_groups:
                     name_group_constr = 'core_group_' + str(bg) + '_' + str(sl)
                     group_constr = ttmodel.get_constraint(name_group_constr)
-                    if (ttmodel.var_coeff(var1, group_constr), ttmodel.var_coeff(var2, group_constr)) == (1, 1):
+                    if (ttmodel.var_coeff(var1, group_constr),
+                        ttmodel.var_coeff(var2, group_constr)) == (1, 1):
                         ttmodel.change_var_coeff(var2, group_constr, 0)

@@ -25,7 +25,6 @@
 
 from django.http import HttpResponse, Http404, JsonResponse
 from django.shortcuts import render
-from django.db.models import Count
 
 from django.contrib.auth.decorators import login_required
 
@@ -60,7 +59,6 @@ from django.contrib.staticfiles.storage import staticfiles_storage
 from django.views.generic import RedirectView
 
 
-fav_regexp = r'^(?P<fav>(favicon.ico)|(site\.webmanifest)|(browserconfig\.xml)|(safari-pinned-tab.svg)|(mstile.*\.png)|(favicon.*\.png)|(android-chrome.*\.png)|(apple-touch-icon.*\.png))$'
 
 # Texte de l'image
 #randomVar = randint(0, 2)
@@ -73,61 +71,45 @@ if randomVar == 1:
 if randomVar == 2:
     imgtxt = "Et votre emploi du temps fera un <span id=\"flopRedDel\">flop</span> carton !"
 
+
+
+# <editor-fold desc="FAVICON">
+# ----------
+# FAVICON
+# ----------
+
+
+fav_regexp = r'^(?P<fav>(favicon.ico)|(site\.webmanifest)' \
+             r'|(browserconfig\.xml)|(safari-pinned-tab.svg)' \
+             r'|(mstile.*\.png)|(favicon.*\.png)|(android-chrome.*\.png)' \
+             r'|(apple-touch-icon.*\.png))$'
+
+
 def favicon(req, fav):
     return RedirectView.as_view(
         url=staticfiles_storage.url('modif/img/favicons/' + fav),
         permanent=False)(req)
 
+# </editor-fold desc="FAVICON">
 
-# def build_flashinfo(week, year):
-#     bn_by_x = {}
-#     for bn in BreakingNews.objects.filter(week__in = [week, None], year = year):
-#         add = {'y': bn.y, 'txt': bn.txt}
-#         if bn.x not in bn_by_x:
-#             bn_by_x[bn.x] = [add]
-#         else:
-#             bn_by_x[bn.x].append(add)
 
-#     final_list = []
-#     min_tot = None
-#     max_tot = None
-#     for x in bn_by_x:
-#         min_y = None
-#         max_y = None
-#         for z in bn_by_x[x]:
-#             if z.y < min_y or min_y is None:
-#                 min_y = z.y
-#             if z.y > max_y or max_y is None:
-#                 max_y = z.y
-#             final_list.append({'x': x, 'y': z.y, 'txt': z.txt})
-#         if min_y < min_tot or min_tot is None:
-#             min_tot = min_y
-#         if max_y > max_tot or max_tot is None:
-#             max_tot = max_y
-#     for a in final_list:
-#         a['y'] -= min_y
+# <editor-fold desc="VIEWERS">
+# ----------
+# VIEWERS
+# ----------
+
 
 def edt(req, semaine, an, splash_id = 0):
     cpp = []
 
-    if semaine == None or an == None:
-        today = current_week()
-        semaine = today['semaine']
-        an = today['an']
-    else:
-        semaine = int(semaine)
-        an = int(an)
+    semaine, an = clean_week(semaine, an)
+    promo = clean_train_prog(req)
 
     if req.GET:
-        promo = req.GET.get('promo', '0')
-        promo = int(promo)
-        if promo not in [1, 2, 3]:
-            promo = 0
         copie = req.GET.get('cop', '0')
         copie = int(copie)
-        gp = req.GET.get('gp','')
+        gp = req.GET.get('gp', '')
     else:
-        promo = 0
         copie = 0
         gp = ''
 
@@ -137,18 +119,12 @@ def edt(req, semaine, an, splash_id = 0):
     if req.user.is_authenticated():
         name_usr = req.user.username
         try:
-            rights_usr = Prof.objects.get(user=req.user).rights
+            rights_usr = Prof.objects.get(user = req.user).rights
         except ObjectDoesNotExist:
             rights_usr = 0
     else:
         name_usr = ''
         rights_usr = 0
-
-
-
-
-		
-		
 
     return render(req, 'modif/show-edt.html',
                   {'all_weeks': week_list(),
@@ -165,33 +141,23 @@ def edt(req, semaine, an, splash_id = 0):
                    'image': imgtxt})
 
 
-
-# .json
-
-
 def edt_light(req, semaine, an):
     cpp = []
-    if semaine == None or an == None:
-        today = current_week()
-        semaine = today['semaine']
-        an = today['an']
-    else:
-        semaine = int(semaine)
-        an = int(an)
+
+    semaine, an = clean_week(semaine, an)
+    promo = clean_train_prog(req)
 
     if req.GET:
         svg_h = req.GET.get('svg_h', '640')
         svg_w = req.GET.get('svg_w', '1370')
         gp_h = req.GET.get('gp_h', '40')
         gp_w = req.GET.get('gp_w', '30')
-        promo = req.GET.get('promo', '0')
         svg_top_m = req.GET.get('top_m', '40')
 
         svg_h = int(svg_h)
         svg_w = int(svg_w)
         gp_h = int(gp_h)
         gp_w = int(gp_w)
-        promo = int(promo)
         svg_top_m = int(svg_top_m)
 
     else:
@@ -199,15 +165,14 @@ def edt_light(req, semaine, an):
         svg_w = 1370
         gp_h = 40
         gp_w = 30
-        promo = 0
         svg_top_m = 40
 
-    une_salle = RoomGroup.objects.all()[0].name
+    une_salle = "salle par defaut" #RoomGroup.objects.all()[0].name
 
-    return render(req, 'modif/show-edt-light.html', \
-                  {'all_weeks': week_list(), \
-                   'semaine': semaine, \
-                   'an': an, \
+    return render(req, 'modif/show-edt-light.html',
+                  {'all_weeks': week_list(),
+                   'semaine': semaine,
+                   'an': an,
                    'jours': num_days(an, semaine),
                    'tv_svg_h': svg_h,
                    'tv_svg_w': svg_w,
@@ -275,15 +240,17 @@ def decale(req):
     for p in User.objects.all().order_by('username'):
         liste_profs.append(p.username.encode('utf8'))
 
-    return render(req, 'modif/show-decale.html', \
-                  {'all_weeks': week_list(), \
-                   'semaine_init': semaine_init, \
+    return render(req, 'modif/show-decale.html',
+                  {'all_weeks': week_list(),
+                   'semaine_init': semaine_init,
                    'an_init': an_init,
                    'profs': liste_profs,
                    'image': imgtxt})
 
+# </editor-fold desc="VIEWERS">
 
 
+# <editor-fold desc="FETCHERS">
 # ----------
 # FETCHERS
 # ----------
@@ -532,8 +499,9 @@ def fetch_bknews(req):
     response['an'] = year
     return response
 
+# </editor-fold desc="FETCHERS">
 
-
+# <editor-fold desc="CHANGERS">
 # ----------
 # CHANGERS
 # ----------
@@ -846,7 +814,9 @@ def decale_changes(req):
 
     return good_response
 
+# </editor-fold desc="CHANGERS">
 
+# <editor-fold desc="EMAILS">
 # ---------
 # E-MAILS
 # ---------
@@ -875,10 +845,43 @@ def contact(req):
                    'ack': ack,
                    'image': imgtxt})
 
+# </editor-fold desc="EMAILS">
 
+# <editor-fold desc="HELPERS">
 # ---------
 # HELPERS
 # ---------
+
+
+def clean_train_prog(req):
+    if req.GET:
+        promo = req.GET.get('promo', '0')
+        try:
+            promo = int(promo)
+        except ValueError:
+            promo = 0
+        if promo not in [1, 2, 3]:
+            promo = 0
+    else:
+        promo = 0
+    return promo
+
+
+def clean_week(week, year):
+    if semaine == None or an == None:
+        today = current_week()
+        semaine = today['semaine']
+        an = today['an']
+    else:
+        try:
+            semaine = int(semaine)
+            an = int(an)
+        except ValueError:
+            today = current_week()
+            semaine = today['semaine']
+            an = today['an']
+    return semaine, an
+
 
 def filt_m(r, module):
     if module != '':
@@ -900,3 +903,5 @@ def filt_g(r, groupe):
 
 def filt_sa(semaine, an):
     return Cours.objects.filter(semaine=semaine, an=an)
+
+# </editor-fold desc="HELPERS">
