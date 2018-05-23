@@ -868,19 +868,19 @@ def clean_train_prog(req):
 
 
 def clean_week(week, year):
-    if semaine == None or an == None:
+    if week == None or year == None:
         today = current_week()
-        semaine = today['semaine']
-        an = today['an']
+        week = today['semaine']
+        year = today['an']
     else:
         try:
-            semaine = int(semaine)
-            an = int(an)
+            week = int(week)
+            year = int(year)
         except ValueError:
             today = current_week()
-            semaine = today['semaine']
-            an = today['an']
-    return semaine, an
+            week = today['semaine']
+            year = today['an']
+    return week, year
 
 
 def filt_m(r, module):
