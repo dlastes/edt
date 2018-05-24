@@ -25,6 +25,23 @@
   ---- VARIABLES ----
   -------------------*/
 
+
+
+      // {"tot":15,
+      //  "colors":[]},
+      // {"tot":16,
+      //  "colors":[]},
+      // {"tot":18,
+      //  "colors":[]},
+      // {"tot":19,
+      //  "colors":[]},
+      // {"tot":20,
+      //  "colors":[]}
+
+
+
+
+
 var user = {nom: logged_usr.nom,
 	    dispos: [],
 	    dispos_bu: [],
