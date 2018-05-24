@@ -529,13 +529,21 @@ class Student(models.Model):  # for now: representative
 
 
 class ModuleDisplay(models.Model):
-    module = models.OneToOneField('Module')
+    module = models.OneToOneField('Module', related_name = 'display')
     color = models.CharField(max_length = 20)
 
 
 class TrainingProgrammeDisplay(models.Model):
-    training_programme = models.OneToOneField('TrainingProgramme')
+    training_programme = models.OneToOneField('TrainingProgramme',
+                                              related_name = 'display')
     row = models.PositiveSmallIntegerField()
+
+
+class GroupDisplay(models.Model):
+    group = models.OneToOneField('Groupe',
+                                 related_name = 'display')
+    button_height = models.PositiveIntegerField()
+    button_txt = models.CharField(max_length = 20)
 
 # </editor-fold desc="DISPLAY">
 

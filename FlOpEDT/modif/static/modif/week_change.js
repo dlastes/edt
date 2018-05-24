@@ -1,3 +1,28 @@
+// This file is part of the FlOpEDT/FlOpScheduler project.
+// Copyright (c) 2017
+// Authors: Iulian Ober, Paul Renaud-Goud, Pablo Seban, et al.
+// 
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+// Affero General Public License for more details.
+// 
+// You should have received a copy of the GNU Affero General Public
+// License along with this program. If not, see
+// <http://www.gnu.org/licenses/>.
+// 
+// You can be released from the requirements of the license by purchasing
+// a commercial license. Buying such a license is mandatory as soon as
+// you develop activities involving the FlOpEDT/FlOpScheduler software
+// without disclosing the source code of your own applications.
+
+
+
            /*     \
           ----------           
         --------------         
@@ -479,9 +504,9 @@ function translate_cours_pl_from_csv(d) {
         id_cours: +d.id_cours,
         no_cours: +d.num_cours,
         prof: d.prof_nom,
-        prof_full_name: d.prof_first_name + " " + d.prof_last_name,
+//        prof_full_name: d.prof_first_name + " " + d.prof_last_name,
         group: translate_gp_name(d.gpe_nom),
-        promo: set_promos.indexOf(+d.gpe_promo),
+        promo: set_promos.indexOf(d.gpe_promo),
         mod: d.module,
         day: +d.jour,
         slot: +d.heure,
@@ -618,11 +643,14 @@ function clean_prof_displayed() {
 }
 
 function translate_gp_name(gp) {
+    /*
     var ret = gp.slice(2);
     if (ret == "") {
         ret = "P";
     }
     return ret;
+    */
+    return gp ;
 }
 
 

@@ -1,12 +1,13 @@
 [{
-    "promo":1,
-    "name": "P",
+    "promo":"1A",
+    "name": "",
     "parent": "null",
     "row":0,
+    "buttxt": "Groupes prem. an.",
     "children": [
 	{
             "name": "1",
-            "parent": "P",
+            "parent": "",
             "children": [
 		{
 		    "name": "1A",
@@ -20,7 +21,7 @@
 	},
 	{
             "name": "2",
-            "parent": "P",
+            "parent": "",
             "children": [
 		{
 		    "name": "2A",
@@ -34,7 +35,7 @@
 	},
 	{
             "name": "3",
-            "parent": "P",
+            "parent": "",
             "children": [
 		{
 		    "name": "3A",
@@ -48,7 +49,7 @@
 	},
 	{
             "name": "4",
-            "parent": "P",
+            "parent": "",
             "children": [
 		{
 		    "name": "4A",
@@ -63,14 +64,15 @@
     ]
 },
  {
-     "promo":2,
-     "name": "P",
+     "promo":"2A",
+     "name": "",
      "parent": "null",
      "row":1,
+     "buttxt": "Groupes deux. an.",
      "children": [
 	 {
 	     "name": "1",
-	     "parent": "P",
+	     "parent": "",
 	     "buth":130,
 	     "children": [
 		 {
@@ -85,7 +87,7 @@
 	 },
 	 {
 	     "name": "23",
-	     "parent": "P",
+	     "parent": "",
 	     "buth":65,
 	     "children": [
 		 
@@ -93,6 +95,7 @@
 		     "name": "2",
 		     "parent": "23",
 		     "buth":65,
+		     "buttxt": "2 & 3",
 		     "children": [
 			 {
 			     "name": "2A",
@@ -125,7 +128,7 @@
  },
 
  {
-     "promo":3,
+     "promo":"3A",
      "name": "LP",
      "parent": "null",
      "row":1,
@@ -134,11 +137,13 @@
 	 {
 	     "name": "fakeLP1",
 	     "parent": "LP",
+	     "buttxt": "",
 	     "buth":0
 	 },
 	 {
 	     "name": "fakeLP2",
 	     "parent": "LP",
+	     "buttxt": "",
 	     "buth":0
 	 }
      ]
