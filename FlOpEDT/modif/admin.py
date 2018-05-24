@@ -56,12 +56,12 @@ class CoursPlaceResource(resources.ModelResource):
     prof = fields.Field(column_name='prof_nom',
                         attribute='cours__prof__user',
                         widget=ForeignKeyWidget(User, 'username'))
-    prof_first_name = fields.Field(column_name='prof_first_name',
-                                   attribute='cours__prof__user',
-                                   widget=ForeignKeyWidget(User, 'first_name'))
-    prof_last_name = fields.Field(column_name='prof_last_name',
-                                  attribute='cours__prof__user',
-                                  widget=ForeignKeyWidget(User, 'last_name'))
+    # prof_first_name = fields.Field(column_name='prof_first_name',
+    #                                attribute='cours__prof__user',
+    #                                widget=ForeignKeyWidget(User, 'first_name'))
+    # prof_last_name = fields.Field(column_name='prof_last_name',
+    #                               attribute='cours__prof__user',
+    #                               widget=ForeignKeyWidget(User, 'last_name'))
     groupe = fields.Field(column_name='gpe_nom',
                           attribute='cours__groupe',
                           widget=ForeignKeyWidget(Groupe, 'nom'))
@@ -86,7 +86,7 @@ class CoursPlaceResource(resources.ModelResource):
 
     class Meta:
         model = CoursPlace
-        fields = ('id', 'no', 'prof', 'prof_full_name', 'groupe', 'promo',
+        fields = ('id', 'no', 'groupe', 'promo',
                   'module', 'jour', 'heure', 'semaine', 'room')
 
 
