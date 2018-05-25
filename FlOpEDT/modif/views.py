@@ -59,17 +59,19 @@ from django.contrib.staticfiles.storage import staticfiles_storage
 from django.views.generic import RedirectView
 
 
-
 # Texte de l'image
-#randomVar = randint(0, 2)
+# # randomVar = randint(0, 2)
 randomVar = 1
 
 if randomVar == 0:
-    imgtxt = "\"Qui veut faire les EDT cette année ?\" ... Fl<span id=\"flopRed\">Op</span> !"
-if randomVar == 1:
-    imgtxt = "Créateur d'emploi du temps <span id=\"flopPasRed\">Fl</span>exible et <span id=\"flopRed\">Op</span>enSource"
-if randomVar == 2:
-    imgtxt = "Et votre emploi du temps fera un <span id=\"flopRedDel\">flop</span> carton !"
+    imgtxt = "\"Qui veut faire les EDT cette année ?\" ... Fl" \
+             "<span id=\"flopRed\">Op</span> !"
+elif randomVar == 1:
+    imgtxt = "Créateur d'emploi du temps <span id=\"flopPasRed\">Fl" \
+             "</span>exible et <span id=\"flopRed\">Op</span>enSource"
+elif randomVar == 2:
+    imgtxt = "Et votre emploi du temps fera un " \
+             "<span id=\"flopRedDel\">flop</span> carton !"
 
 
 
@@ -142,7 +144,6 @@ def edt(req, semaine, an, splash_id = 0):
 
 
 def edt_light(req, semaine, an):
-    cpp = []
 
     semaine, an = clean_week(semaine, an)
     promo = clean_train_prog(req)
@@ -174,6 +175,7 @@ def edt_light(req, semaine, an):
                    'semaine': semaine,
                    'an': an,
                    'jours': num_days(an, semaine),
+                   'une_salle': une_salle,
                    'tv_svg_h': svg_h,
                    'tv_svg_w': svg_w,
                    'tv_gp_h': gp_h,
@@ -267,6 +269,7 @@ def fetch_cours_pl(req):
         num_copie = int(num_copie)
         ok = False
         version = 0
+        dataset = None
         while not ok:
             if num_copie == 0:
                 version = EdtVersion.objects \
@@ -281,9 +284,11 @@ def fetch_cours_pl(req):
                         .order_by('creneau__jour',
                                   'creneau__heure'))  # all())#
             ok = num_copie != 0 \
-                 or (version \
+                 or (version
                      == EdtVersion.objects.get(semaine=semaine,
                                                an=an).version)
+        if dataset is None:
+            raise Http404("What are you trying to do?")
         response = HttpResponse(dataset.csv, content_type='text/csv')
         response['version'] = version
         response['semaine'] = semaine
@@ -526,18 +531,20 @@ def edt_changes(req):
             semaine = int(semaine)
             an = int(an)
             work_copy = int(work_copy)
+            version = None
 
             print req.body
             q = json.loads(req.body,
-                           object_hook \
-                               =lambda d: namedtuple('X', d.keys()) \
-                               (*d.values()))
+                           object_hook
+                           = lambda d: namedtuple('X', d.keys())(*d.values())
+                           )
 
             if work_copy == 0:
-                version = EdtVersion.objects \
-                    .get(semaine=semaine,
-                         an=an) \
-                    .version
+                edt_version = EdtVersion.objects\
+                    .get_or_create(semaine = semaine,
+                                   an = an,
+                                   defaults = {'version': 0})
+                version = edt_version.version
 
             if work_copy != 0 or q.v == version:
                 with transaction.atomic():
@@ -577,8 +584,7 @@ def edt_changes(req):
                             try:
                                 cren_n = Creneau \
                                     .objects \
-                                    .get(jour \
-                                             =Jour.objects \
+                                    .get(jour = Jour.objects \
                                          .get(no=new_day),
                                          heure \
                                              =Heure \
@@ -586,7 +592,7 @@ def edt_changes(req):
                                          .get(no=new_slot))
                             except ObjectDoesNotExist:
                                 bad_response['reason'] \
-                                    = u"Problème : créneau " + cren_n
+                                    = u"Problème : créneau " + new_day
                                 return bad_response
                             if non_place:
                                 cp.creneau = cren_n
@@ -712,8 +718,8 @@ def dispos_changes(req):
 
             prof = Prof.objects.get(user__username=usr_change)
 
-            if (prof != Prof.objects.get(user=req.user) \
-                        and (Prof.objects.get(user=req.user).rights >> 1 % 2 == 0)):
+            if (prof != Prof.objects.get(user=req.user)
+                    and (Prof.objects.get(user=req.user).rights >> 1 % 2 == 0)):
                 bad_response['reason'] \
                     = u'Non autorisé, réclamez plus de droits.'
                 return bad_response
@@ -837,10 +843,12 @@ def contact(req):
             dat = form.cleaned_data
             send_mail(
                 '[EdT IUT Blagnac] ' + dat.get("subject"),
-                u"(Cet e-mail vous a été envoyé depuis le site des emplois du temps de l'IUT de Blagnac)\n\n" + dat.get(
-                    "message"),
+                u"(Cet e-mail vous a été envoyé depuis le site des emplois"
+                u" du temps de l'IUT de Blagnac)\n\n"
+                + dat.get("message"),
                 dat.get("sender"),
-                [User.objects.get(username=dat.get("recipient")).email, dat.get("sender")],
+                [User.objects.get(username=dat.get("recipient")).email,
+                 dat.get("sender")],
             )
             return edt(req, None, None, 1)
     else:
