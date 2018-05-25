@@ -942,12 +942,7 @@ function go_courses(quick) {
         .attr("y", cours_y)
         .attr("width", 0)
         .merge(cg.select("rect"))
-        .attr("fill", function(d) {
-	    if (d.id_cours != -1) {
-		return mod2col[d.mod][0];
-	    }
-	    return "red";
-        })
+        .attr("fill", cours_fill)
         .transition(t)
         .attr("x", cours_x)
         .attr("y", cours_y)
@@ -966,12 +961,7 @@ function go_courses(quick) {
             return smi_fill(lDis / par_dispos.nmax);
         })
     } else {
-        d3.selectAll("rect.crect").style("fill", function(d) {
-	    if (d.id_cours != -1) {
-		return mod2col[d.mod][0];
-	    }
-	    return "red";
-        })
+        d3.selectAll("rect.crect").style("fill", cours_fill)
     }
 
     // Tutor's fullname 

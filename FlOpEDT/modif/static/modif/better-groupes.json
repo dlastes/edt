@@ -128,21 +128,22 @@
  },
 
  {
-     "promo":"3A",
-     "name": "LP",
+     "promo":"LP",
+     "name": "",
      "parent": "null",
      "row":1,
      "buth":165,
+     "buttxt":"LP",
      "children": [
 	 {
 	     "name": "fakeLP1",
-	     "parent": "LP",
+	     "parent": "",
 	     "buttxt": "",
 	     "buth":0
 	 },
 	 {
 	     "name": "fakeLP2",
-	     "parent": "LP",
+	     "parent": "",
 	     "buttxt": "",
 	     "buth":0
 	 }

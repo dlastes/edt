@@ -699,11 +699,29 @@ function cours_height(c) {
 function cours_txt_x(c) {
     return cours_x(c) + .5 * cours_width(c);
 }
+// function cours_txt_fill(c) {
+//     if (c.id_cours != -1) {
+// 	return mod2col[c.mod][1];
+//     }
+//     return "black";
+// }
+// function cours_fill(d) {
+//     if (d.id_cours != -1) {
+// 	return mod2col[d.mod][0];
+//     }
+//     return "red";
+// }
 function cours_txt_fill(c) {
     if (c.id_cours != -1) {
-	return mod2col[c.mod][1];
+	return c.color_txt;
     }
     return "black";
+}
+function cours_fill(c) {
+    if (c.id_cours != -1) {
+	return c.color_bg;
+    }
+    return "red";
 }
 function cours_txt_top_y(c) {
     return cours_y(c) + .25 * labgp.height;

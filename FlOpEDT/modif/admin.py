@@ -27,7 +27,7 @@ from django.contrib import admin
 
 from modif.models import Jour, RoomGroup, Module, Cours, Groupe, Creneau, \
     Disponibilite, Heure, CoursPlace, EdtVersion, CoursModification, \
-    PlanifModification, Prof, BreakingNews, TrainingProgramme
+    PlanifModification, Prof, BreakingNews, TrainingProgramme, ModuleDisplay
 
 from import_export import resources, fields
 from import_export.widgets import ForeignKeyWidget
@@ -83,10 +83,16 @@ class CoursPlaceResource(resources.ModelResource):
     room = fields.Field(column_name='room',
                         attribute='room',
                         widget=ForeignKeyWidget(RoomGroup, 'name'))
+    color_bg = fields.Field(column_name='color_bg',
+                        attribute='cours__module__display',
+                        widget=ForeignKeyWidget(ModuleDisplay, 'color_bg'))
+    color_txt = fields.Field(column_name='color_txt',
+                        attribute='cours__module__display',
+                        widget=ForeignKeyWidget(ModuleDisplay, 'color_txt'))
 
     class Meta:
         model = CoursPlace
-        fields = ('id', 'no', 'groupe', 'promo',
+        fields = ('id', 'no', 'groupe', 'promo', 'color_bg', 'color_txt',
                   'module', 'jour', 'heure', 'semaine', 'room')
 
 
@@ -103,10 +109,17 @@ class CoursResource(resources.ModelResource):
     groupe = fields.Field(column_name='groupe',
                           attribute='groupe',
                           widget=ForeignKeyWidget(Groupe, 'nom'))
+    color_bg = fields.Field(column_name='color_bg',
+                        attribute='module__display',
+                        widget=ForeignKeyWidget(ModuleDisplay, 'color_bg'))
+    color_txt = fields.Field(column_name='color_txt',
+                        attribute='module__display',
+                        widget=ForeignKeyWidget(ModuleDisplay, 'color_txt'))
 
     class Meta:
         model = Cours
-        fields = ('id', 'no', 'prof', 'groupe', 'promo', 'module')
+        fields = ('id', 'no', 'prof', 'groupe', 'promo', 'module',
+                  'color_bg', 'color_txt')
 
 
 class SemaineAnResource(resources.ModelResource):

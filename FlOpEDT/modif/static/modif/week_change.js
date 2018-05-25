@@ -510,7 +510,9 @@ function translate_cours_pl_from_csv(d) {
         mod: d.module,
         day: +d.jour,
         slot: +d.heure,
-        room: d.room
+        room: d.room,
+	color_bg: d.color_bg,
+	color_txt: d.color_txt,
     };
     //    console.log(co);
     return co;
@@ -536,7 +538,9 @@ function translate_cours_pp_from_csv(d) {
         mod: d.module,
         day: garbage.day,
         slot: garbage.slot,
-        room: une_salle
+        room: une_salle,
+	color_bg: d.color_bg,
+	color_txt: d.color_txt,
     };
     console.log(co);
     return co;

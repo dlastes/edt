@@ -530,7 +530,12 @@ class Student(models.Model):  # for now: representative
 
 class ModuleDisplay(models.Model):
     module = models.OneToOneField('Module', related_name = 'display')
-    color = models.CharField(max_length = 20)
+    color_bg = models.CharField(max_length = 20, default = "red")
+    color_txt = models.CharField(max_length = 20, default = "black")
+
+    def __unicode__(self):
+        return unicode(self.module) + u' -> BG: ' + unicode(self.color_bg)\
+               + u' ; TXT: ' + unicode(self.color_txt)
 
 
 class TrainingProgrammeDisplay(models.Model):
@@ -538,12 +543,19 @@ class TrainingProgrammeDisplay(models.Model):
                                               related_name = 'display')
     row = models.PositiveSmallIntegerField()
 
+    def __unicode__(self):
+        return unicode(self.training_programme) + u' : Row ' + unicode(self.row)
+
 
 class GroupDisplay(models.Model):
     group = models.OneToOneField('Groupe',
                                  related_name = 'display')
-    button_height = models.PositiveIntegerField()
-    button_txt = models.CharField(max_length = 20)
+    button_height = models.PositiveIntegerField(null = True, default = None)
+    button_txt = models.CharField(max_length = 20, null = True, default = None)
+
+    def __unicode__(self):
+        return unicode(self.group) + u' -> BH: ' + unicode(self.button_height)\
+               + u' ; BTXT: ' + unicode(self.button_txt)
 
 # </editor-fold desc="DISPLAY">
 

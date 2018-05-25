@@ -7,3 +7,5 @@ django-cache-machine
 pulp
 psycopg2
 requests
+numpy
+pyclustering
