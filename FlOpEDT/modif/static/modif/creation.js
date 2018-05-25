@@ -393,7 +393,6 @@ function remove_garbage(){
     while(!found && i < data_slot_grid.length){
 	if (data_slot_grid[i].day == garbage.day
 	    && data_slot_grid[i].slot == garbage.slot) {
-	    console.log('found');
 	    found = true ;
 	    data_slot_grid.splice(i,1);
 	}
@@ -1152,7 +1151,7 @@ function def_drag() {
                 drag.sel.attr("transform", "translate(" + drag.x + "," + drag.y + ")");
             }
         }).on("end", function(d) {
-            if (ckbox["edt-mod"].cked && fetch.done) {
+            if (cur_over != null && ckbox["edt-mod"].cked && fetch.done) {
 
                 mg.node().appendChild(drag.sel.node());
 

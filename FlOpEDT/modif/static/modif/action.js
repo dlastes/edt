@@ -608,14 +608,12 @@ function send_dis_change() {
 function edt_change_ack(msg) {
     if (msg.responseText == "OK") {
         version += 1;
-        ack.edt = "modifications EDT : OK !";
+        ack.edt = "Modifications EDT : OK !";
         cours_bouge = [];
     } else {
         ack.edt = msg.getResponseHeader('reason');
-        if (ack.edt.startsWith("Version")) {
-            ack.edt += "\nQuelqu'un a\nmodifié entre-temps."
-        } else {
-            ack.edt += "\nCall PSE or PRG"
+        if (ack.edt != null && ack.edt.startsWith("Version")) {
+            ack.edt += "Quelqu'un a modifié entre-temps."
         }
     }
     console.log(ack.edt);
@@ -626,10 +624,9 @@ function edt_change_ack(msg) {
 function dis_change_ack(msg, nbDispos) {
     console.log(msg);
     if (msg.responseText == "OK") {
-        ack.edt = "modifications dispos : OK !"
+        ack.edt = "Modifications dispos : OK !"
     } else {
         ack.edt = msg.getResponseHeader('reason');
-        ack.edt += "\nCall PSE or PRG"
     }
     go_ack_msg(true);
 

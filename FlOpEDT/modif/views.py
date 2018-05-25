@@ -114,7 +114,7 @@ def edt(req, semaine, an, splash_id = 0):
         gp = ''
 
     # une_salle = RoomGroup.objects.all()[1].name
-    une_salle = 'salle par defaut'
+    une_salle = 'salle?'
 
     if req.user.is_authenticated():
         name_usr = req.user.username
@@ -167,7 +167,7 @@ def edt_light(req, semaine, an):
         gp_w = 30
         svg_top_m = 40
 
-    une_salle = "salle par defaut" #RoomGroup.objects.all()[0].name
+    une_salle = "salle?" #RoomGroup.objects.all()[0].name
 
     return render(req, 'modif/show-edt-light.html',
                   {'all_weeks': week_list(),
@@ -586,7 +586,7 @@ def edt_changes(req):
                                          .get(no=new_slot))
                             except ObjectDoesNotExist:
                                 bad_response['reason'] \
-                                    = "Probleme creneau" + cren_n
+                                    = u"Problème : créneau " + cren_n
                                 return bad_response
                             if non_place:
                                 cp.creneau = cren_n
@@ -599,7 +599,14 @@ def edt_changes(req):
                             try:
                                 sal_n = RoomGroup.objects.get(name=new_room)
                             except ObjectDoesNotExist:
-                                bad_response['reason'] = "Probleme salle" + new_room
+                                if new_room == 'salle?':
+                                    bad_response['reason'] \
+                                        = u'Oublié de trouver une salle ' \
+                                          u'pour un cours ?'
+                                else:
+                                    bad_response['reason'] = \
+                                        u"Problème : salle " + new_room \
+                                        + u" inconnue"
                                 return bad_response
 
                             if non_place:
