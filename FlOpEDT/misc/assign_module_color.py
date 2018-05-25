@@ -96,7 +96,6 @@ def build_graph_matrices(train_prog = None):
     return keys, mat
 
 
-
 def get_color_set(filename, target_nb_colors):
     """
     Builds a color set from a json file which contains a list of
