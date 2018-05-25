@@ -28,9 +28,10 @@ from modif.weeks import week_list
 from modif.models import Cours, ModuleDisplay, TrainingProgramme, Module
 from django.core.exceptions import ObjectDoesNotExist
 from pyclustering.gcolor.dsatur import dsatur
-from numpy import matrix, diag, eye
+from numpy import diag, eye
 
 import json
+import os
 
 
 def assign_color(overwrite = True, diff_across_train_prog = False):
@@ -59,7 +60,7 @@ def optim_and_save(keys, mat, overwrite):
     opti.process()
     color_indices = opti.get_colors()
     print color_indices, max(color_indices)
-    color_set = get_color_set('modif/static/modif/colors.json',
+    color_set = get_color_set(os.path.join('misc', 'colors.json'),
                               max(color_indices))
     for mi in range(len(keys)):
         cbg = color_set[color_indices[mi]-1]

@@ -100,8 +100,11 @@ class Groupe(models.Model):
     surgroupe = models.ForeignKey('self', null = True, blank = True)
     basic = models.BooleanField(verbose_name = 'Basic group?', default = False)
 
-    def __unicode__(self):
+    def full_name(self):
         return self.train_prog.abbrev + self.nom
+
+    def __unicode__(self):
+        return self.full_name()
 
     def surgroupes(self):
         sg = []

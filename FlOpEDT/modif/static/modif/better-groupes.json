@@ -89,13 +89,13 @@
 	     "name": "23",
 	     "parent": "",
 	     "buth":65,
+	     "buttxt": "2 & 3",
 	     "children": [
 		 
 		 {
 		     "name": "2",
 		     "parent": "23",
 		     "buth":65,
-		     "buttxt": "2 & 3",
 		     "children": [
 			 {
 			     "name": "2A",
