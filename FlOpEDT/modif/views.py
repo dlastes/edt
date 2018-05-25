@@ -74,7 +74,6 @@ elif randomVar == 2:
              "<span id=\"flopRedDel\">flop</span> carton !"
 
 
-
 # <editor-fold desc="FAVICON">
 # ----------
 # FAVICON
@@ -102,7 +101,6 @@ def favicon(req, fav):
 
 
 def edt(req, semaine, an, splash_id = 0):
-    cpp = []
 
     semaine, an = clean_week(semaine, an)
     promo = clean_train_prog(req)
@@ -168,7 +166,7 @@ def edt_light(req, semaine, an):
         gp_w = 30
         svg_top_m = 40
 
-    une_salle = "salle?" #RoomGroup.objects.all()[0].name
+    une_salle = "salle?"  # RoomGroup.objects.all()[0].name
 
     return render(req, 'modif/show-edt-light.html',
                   {'all_weeks': week_list(),
@@ -280,13 +278,12 @@ def fetch_cours_pl(req):
                 .export(CoursPlace.objects \
                         .filter(cours__semaine=semaine,
                                 cours__an=an,
-                                copie_travail=num_copie) \
+                                copie_travail=num_copie)
                         .order_by('creneau__jour',
                                   'creneau__heure'))  # all())#
             ok = num_copie != 0 \
-                 or (version
-                     == EdtVersion.objects.get(semaine=semaine,
-                                               an=an).version)
+                or (version == EdtVersion.objects
+                    .get(semaine = semaine, an = an).version)
         if dataset is None:
             raise Http404("What are you trying to do?")
         response = HttpResponse(dataset.csv, content_type='text/csv')
@@ -341,13 +338,13 @@ def fetch_cours_pp(req):
         an = int(an)
         num_copie = int(num_copie)
         dataset = CoursResource() \
-            .export(Cours \
-                    .objects \
-                    .filter(semaine=semaine,
-                            an=an) \
-                    .exclude(pk__in=CoursPlace \
-                             .objects \
-                             .filter(copie_travail=num_copie) \
+            .export(Cours
+                    .objects
+                    .filter(semaine = semaine,
+                            an = an)
+                    .exclude(pk__in = CoursPlace
+                             .objects
+                             .filter(copie_travail = num_copie)
                              .values('cours')))
         response = HttpResponse(dataset.csv, content_type='text/csv')
         response['semaine'] = semaine
@@ -416,10 +413,9 @@ def fetch_stype(req):
 
 
 def fetch_decale(req):
-    bad_response = HttpResponse("KO")
-    good_response = HttpResponse("OK")
+
     if not req.is_ajax() or req.method != "GET":
-        return bad_response
+        return HttpResponse("KO")
 
     semaine = int(req.GET.get('s', '0'))
     an = int(req.GET.get('a', '0'))
@@ -566,17 +562,17 @@ def edt_changes(req):
 
                         m = CoursModification(cours=co,
                                               version_old=q.v,
-                                              user=req.user)  # User.objects.get(username=user.username))
-                        old_day = a.day.o
-                        old_slot = a.slot.o
+                                              user=req.user)
+                        # old_day = a.day.o
+                        # old_slot = a.slot.o
                         new_day = a.day.n
                         new_slot = a.slot.n
                         old_room = a.room.o
                         new_room = a.room.n
 
                         if non_place:
-                            old_day = new_day
-                            old_slot = new_slot
+                            # old_day = new_day
+                            # old_slot = new_slot
                             if a.room.n is None:
                                 new_room = old_room
 
@@ -713,8 +709,8 @@ def dispos_changes(req):
 
             print req.body
             q = json.loads(req.body,
-                           object_hook=lambda \
-                                   d: namedtuple('X', d.keys())(*d.values()))
+                           object_hook = lambda d:
+                           namedtuple('X', d.keys())(*d.values()))
 
             prof = Prof.objects.get(user__username=usr_change)
 
@@ -790,8 +786,8 @@ def decale_changes(req):
 
     print req.body
     q = json.loads(req.body,
-                   object_hook=lambda \
-                           d: namedtuple('X', d.keys())(*d.values()))
+                   object_hook=lambda d:
+                   namedtuple('X', d.keys())(*d.values()))
 
     a = q.new
 
@@ -885,7 +881,7 @@ def clean_train_prog(req):
 
 
 def clean_week(week, year):
-    if week == None or year == None:
+    if week is None or year is None:
         today = current_week()
         week = today['semaine']
         year = today['an']
