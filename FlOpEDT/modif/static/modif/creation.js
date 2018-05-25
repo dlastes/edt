@@ -427,15 +427,11 @@ function create_grid_data() {
             var gscp = {
                 row: r,
                 slot: s,
-                name: set_promos[row_gp[r].promos[0]] + "A"
+                name: set_promos[row_gp[r].promos[0]]
             };
             for (var p = 1; p < row_gp[r].promos.length; p++) {
                 gscp.name += "|";
-                if (set_promos[row_gp[r].promos[p]] == 3) {
-                    gscp.name += "LP";
-                } else {
-                    gscp.name += set_promos[row_gp[r].promos[p]] + "A";
-                }
+                gscp.name += set_promos[row_gp[r].promos[p]];
             }
             data_grid_scale_row.push(gscp);
         }
@@ -1238,7 +1234,7 @@ function check_cours(c2m, grid_slot) {
 
     if (is_free(grid_slot.day, grid_slot.slot, c2m.promo)) {
         grid_slot.dispo = false;
-        grid_slot.reason = "CRENEAU NON DISPO POUR " + set_promos[c2m.promo] + "A";
+        grid_slot.reason = "CRENEAU NON DISPO POUR " + set_promos[c2m.promo];
         return;
     }
 

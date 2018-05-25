@@ -382,14 +382,15 @@ function compute_changes(changes, profs, gps) {
 
 	    // add group if never seen
 	    gp_changed = groups[cur_course.promo][cur_course.group] ;
-	    if (set_promos[gp_changed.promo] == 3) {
-		gp_named = "LP" ;
-	    } else {
-		gp_named = set_promos[gp_changed.promo] + "A";
-		if(gp_changed.nom != "P") {
-		    gp_named += gp_changed.nom ;
-		}
-	    }
+	    gp_named = set_promos[gp_changed.promo] + gp_changed.nom ;
+	    // if (set_promos[gp_changed.promo] == 3) {
+	    // 	gp_named = "LP" ;
+	    // } else {
+	    // 	gp_named = set_promos[gp_changed.promo] + "A";
+	    // 	if(gp_changed.nom != "P") {
+	    // 	    gp_named += gp_changed.nom ;
+	    // 	}
+	    // }
             if (gps.indexOf(gp_named) == -1) {
                 gps.push(gp_named);
             }
@@ -418,7 +419,7 @@ function compute_changes(changes, profs, gps) {
 			       cur_course.slot,
 			       cur_course.promo)) {
 		alert("Pas de cours pour les " +
-                      set_promos[cur_course.promo] + "A"
+                      set_promos[cur_course.promo]
 		      + " le " + data_grid_scale_day[cur_course.day]
 		      + " sur le créneau "
 		      + data_grid_scale_hour[cur_course.slot]
