@@ -534,7 +534,7 @@ function translate_cours_pp_from_csv(d) {
         no_cours: +d.no,
         prof: d.prof,
         group: translate_gp_name(d.groupe),
-        promo: set_promos.indexOf(+d.promo),
+        promo: set_promos.indexOf(d.promo),
         mod: d.module,
         day: garbage.day,
         slot: garbage.slot,
@@ -696,7 +696,6 @@ function fetch_ended() {
         create_mod_dd();
         create_sal_dd();
         clean_prof_displayed();
-        assign_fill_mod();
         fetch.cours_ok = true;
     }
 

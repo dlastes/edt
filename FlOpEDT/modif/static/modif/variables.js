@@ -404,8 +404,6 @@ var cours = [];
 // listener for curses drag and drop 
 var dragListener;
 
-// assigns modules to fills
-var mod2col = [];
 
 // helper for the d&d
 var drag = {

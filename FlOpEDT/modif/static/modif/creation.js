@@ -1097,27 +1097,6 @@ function translate_bknews_from_csv(d){
   ----------------------*/
 
 
-function assign_fill_mod() {
-    for (var c = 0; c < cours.length; c++) {
-        var s = cours[c].mod;
-        if (Object.keys(mod2col).indexOf(s) == -1) {
-            var hash = 0,
-                i, chr;
-            if (s.length === 0) {
-                hash = 0;
-            }
-            for (i = 0; i < s.length; i++) {
-                chr = s.charCodeAt(i);
-                hash = ((hash << 2) - hash) + chr;
-                hash |= 0; // Convert to 32bit integer
-            }
-            hash = hash % couleurs_fond_texte.length;
-            mod2col[s] = couleurs_fond_texte[hash];
-        }
-    }
-}
-
-
 function def_drag() {
     var cur_over = null;
     var sl = null;

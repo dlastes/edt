@@ -183,7 +183,6 @@ function fetch_ended_light() {
        !fetch.ongoing_cours_pp){
 	cours = cours_pl.concat(cours_pp);
 	clean_prof_displayed();
-	assign_fill_mod();
 	fetch.cours_ok=true;
     }
     
