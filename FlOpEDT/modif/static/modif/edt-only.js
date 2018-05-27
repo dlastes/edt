@@ -44,16 +44,12 @@ weeks = {sel: [0], init_data: [{semaine: week, an: year}]};
 
 var labgp = {height: tv_gp_h, width: tv_gp_w, tot: 8, height_init: 40, width_init: 30};
 
-
-
-var dim_dispo = {height:2*labgp.height, width: 60, right: 10, plot:0,
-		 adv_v_margin: 5};
-
+dim_dispo.height = 2*labgp.height ;
 
 dragListener = d3.drag();
 
 
-
+pref_only = false ;
 
 
 /*-------------------

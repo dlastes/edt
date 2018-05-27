@@ -161,6 +161,18 @@ var dispo_menu_appeared = false;
 var required_dispos = -1;
 var filled_dispos = -1;
 
+// display only preferences
+var pref_only ;
+
+var dim_dispo = {
+    height: 0,
+    width: 60,
+    right: 10,
+    plot:0,
+    adv_v_margin: 5
+};
+
+
 /*---------------------
   ------- WEEKS -------
   ---------------------*/
@@ -364,36 +376,6 @@ var drag_listener_hs, drag_listener_vs;
 /*-----------------------
    ------ COURSES -------
   -----------------------*/
-// fills for courses
-var couleurs_fond_texte = [
-    ['coral', 'black'],
-    ['darkmagenta', 'white'],
-    ['deeppink', 'black'],
-    ['dodgerblue', 'black'],
-    ['goldenrod', 'black'],
-    ['lightgreen', 'black'],
-    ['mediumslateblue', 'black'],
-    ['plum', 'black'],
-    ['turquoise', 'black'],
-    ['deepskyblue', 'black'],
-    ['orange', 'black'],
-    ['yellow', 'black'],
-    ['peru', 'black'],
-    ['springgreen', 'black'],
-    ['aquamarine', 'black'],
-    ['chocolate', 'white'],
-    ['darkkhaki', 'black'],
-    ['steelblue', 'white'],
-    ['tomato', 'black'],
-    ['burlywood', 'black'],
-    ['darkred', 'white'],
-    ['lightcoral', 'black'],
-    ['gold', 'black'],
-    ['darkorchid', 'white'],
-    ['blanchedalmond', 'black'],
-    ['lavender', 'black']
-];
-
 // unscheduled curses
 var cours_pp = [];
 // scheduled curses

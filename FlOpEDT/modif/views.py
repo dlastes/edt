@@ -191,6 +191,7 @@ def stype(req):
                       'modif/show-stype.html',
                       {'date_deb': current_week(),
                        'date_fin': current_week(),
+                       'name_usr': req.user.username,
                        'err': err,
                        'annee_courante': annee_courante})
     elif req.method == 'POST':
@@ -219,6 +220,7 @@ def stype(req):
                       'modif/show-stype.html',
                       {'date_deb': date_deb,
                        'date_fin': date_fin,
+                       'name_usr': req.user.username,
                        'err': err,
                        'annee_courante': annee_courante,
                        'image': imgtxt})

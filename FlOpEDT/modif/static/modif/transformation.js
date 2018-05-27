@@ -127,8 +127,8 @@ function dispo_x(d) {
 }
 
 function dispo_y(d) {
-    var ret = d.hour * nbRows * (labgp.height);
-    if (d.hour >= bknews.hour_bound) {
+    var ret = d.hour * dispo_h(d) ;
+    if (!pref_only && d.hour >= bknews.hour_bound) {
 	ret += bknews_h() ;
     }
     return ret ;
@@ -136,6 +136,10 @@ function dispo_y(d) {
 
 function dispo_w(d) {
     return dim_dispo.plot * dim_dispo.width;
+}
+
+function dispo_h(d) {
+    return nbRows * labgp.height;
 }
 
 function dispo_short_fill(d) {
@@ -161,11 +165,11 @@ function trans_dispo(d) {
 
 
 function dispo_more_h(d) {
-    return .25 * nbRows * labgp.height;
+    return .25 * dispo_h(d);
 }
 
 function dispo_more_y(d) {
-    return dispo_y(d) + nbRows * labgp.height - dispo_more_h(d);
+    return dispo_y(d) + dispo_h(d) - dispo_more_h(d);
 }
 
 function dispo_more_x(d) {
@@ -173,8 +177,8 @@ function dispo_more_x(d) {
 }
 
 function dispo_all_x(d) {
-    return dispo_more_x(d) + dispo_more_h(d) -
-        par_dispos.adv_red * dispo_w(d);
+    return dispo_more_x(d) + dispo_more_h(d)
+       - par_dispos.adv_red * dispo_w(d);
 }
 
 function dispo_all_h(d) {
@@ -324,7 +328,7 @@ function smile_trans(d) {
     if (d.off == -1) {
         return "translate(" +
             (dispo_x(d) + .5 * dim_dispo.width) + "," +
-            (dispo_y(d) + .5 * nbRows * labgp.height) + ")";
+            (dispo_y(d) + .5 * dispo_h(d)) + ")";
     } else {
         return "translate(" +
             (dispo_x(d) + (1 - .5 * par_dispos.adv_red) * dispo_w(d)) + "," +
@@ -432,7 +436,7 @@ function gs_sc(d) {
 function gscg_x(datum) {
     // hack for LP
     var hack = 0;
-    if (datum.gp.nom == "fakeLP1") {
+    if (datum.gp.nom == "fLP1") {
         hack = .5 * labgp.width;
     }
     return datum.day * (rootgp_width * labgp.width +
@@ -454,9 +458,9 @@ function gscg_y(datum) {
 }
 
 function gscg_txt(datum) {
-    if (datum.gp.nom == "fakeLP1") {
+    if (datum.gp.nom == "fLP1") {
         return "LP";
-    } else if (datum.gp.nom == "fakeLP2") {
+    } else if (datum.gp.nom == "fLP2") {
         return "";
     } else {
         return datum.gp.nom;
@@ -499,8 +503,8 @@ function gsckh_x(datum) {
 }
 
 function gsckh_y(datum, i) {
-    var ret = (i + .5) * nbRows * (labgp.height);
-    if (i >= bknews.hour_bound) {
+    var ret = (i + .5) * dispo_h(datum);
+    if (!pref_only && i >= bknews.hour_bound) {
 	ret += bknews_h() ;
     }
     return ret ;

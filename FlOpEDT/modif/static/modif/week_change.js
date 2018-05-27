@@ -137,7 +137,11 @@ function create_dispos_user_data() {
             };
             user.dispos_bu.push(d2p);
             if (dispos[user.nom][j][k] < 0) {
-                dispos[user.nom][j][k] = user.dispos_type[day_hour_2_1D(d2p)].val; //par_dispos.nmax;
+		if (!pref_only) {
+                    dispos[user.nom][j][k] = user.dispos_type[day_hour_2_1D(d2p)].val;
+		} else {
+		    dispos[user.nom][j][k] = par_dispos.nmax
+		}
                 //console.log(j,k,day_hour_2_1D(d2p),user.dispos_type[day_hour_2_1D(d2p)])
             }
             user.dispos.push({

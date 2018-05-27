@@ -28,7 +28,7 @@ var svg = {height: 1000 - margin.top - margin.bot, width: 680 - margin.left - ma
 var nbPer = 5 ;
 var nbSl  = 6 ;
 
-var user = {nom: usna,
+var user = {nom: logged_usr.nom,
 	    dispos: [],
 	    dispos_bu: []};
 
@@ -497,7 +497,7 @@ function dispo_h(d){
     return did.h;
 }
 function dispo_more_h(d) {
-    return .25*did.h ;
+    return .25*dispo_h(d) ;
 }
 function dispo_more_y(d) {
     return dispo_y(d) + dispo_h(d) - dispo_more_h(d) ;
@@ -646,7 +646,7 @@ function smile_trans(d) {
     if(d.off==-1){
 	return "translate("+
 	(dispo_x(d)+.5*did.w) + "," +
-	    (dispo_y(d)+.5*did.h) + ")";
+	    (dispo_y(d)+.5*dispo_h(d)) + ")";
     } else {
 	return "translate("+
 	    (dispo_x(d)+(1-.5*par_dispos.adv_red)*dispo_w(d)) + "," +
@@ -783,7 +783,7 @@ function writeNext(i)
 
 
 
-function apply_stype(save) {
+function apply_stype_from_button(save) {
     console.log("app");
     console.log(document.forms['app']);
     console.log();

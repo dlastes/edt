@@ -88,7 +88,7 @@ function go_pref(quick) {
             .merge(dat.select(".dispo-bg"))
             .transition(t)
             .attr("width", dispo_w)
-            .attr("height", nbRows * labgp.height)
+            .attr("height", dispo_h)
             .attr("x", dispo_x)
             .attr("y", dispo_y)
             .attr("fill", function(d) {
@@ -247,8 +247,6 @@ function go_pref(quick) {
 // mid: container with new smileys
 // t:   transition
 function go_smiley(top, mid, t) {
-    console.log(top);
-    console.log(mid);
     
     var datsmi = mid
         .append("g")

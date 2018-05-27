@@ -71,8 +71,8 @@ var year = 2017;
 
 var labgp = {height: 40, width: 30, tot: 8, height_init: 40, width_init: 30, hm: 40, wm:15};
 
-var dim_dispo = {height:2*labgp.height, width: 60, right: 10, plot:0,
-		 adv_v_margin: 5};
+dim_dispo.height = 2*labgp.height ;
+
 
 
 butgp.tly = margin.but;//-margin_but.ver-6*butgp.height-80 ;
@@ -90,6 +90,7 @@ salles.y=modules.y-modules.height;//.6*butpr.height;
 salles.width = 150 ; 
 salles.height = modules.height ; 
 
+pref_only = false ;
 
 /*-------------------
   ------ BUILD ------

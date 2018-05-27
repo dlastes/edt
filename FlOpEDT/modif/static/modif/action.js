@@ -47,7 +47,7 @@
 
 // apply pref change when simple mode
 function apply_change_simple_pref(d) {
-    if (ckbox["dis-mod"].cked) {
+    if (pref_only || ckbox["dis-mod"].cked) {
         if (Math.floor(d.val % (par_dispos.nmax / 2)) != 0) {
             d.val = Math.floor(d.val / (par_dispos.nmax / 2)) * par_dispos.nmax / 2;
         }

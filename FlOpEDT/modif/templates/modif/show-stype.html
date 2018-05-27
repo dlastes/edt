@@ -39,7 +39,7 @@
     var url_fetch_stype = "{% url "fetch_stype" %}"; 
     var url_stype = "{% url "stype" %}"; 
     var url_dispos_changes = "{% url "dispos_changes"%}";
-    var usna = "{{ user.username }}" ;
+    var logged_usr = {nom:"{{ name_usr }}", rights: -1};
     var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
     var url_login = "{% url "login"%}";
     var annee_courante = "{{ annee_courante }}" ;
@@ -59,7 +59,7 @@
     <div  id="tools-main" style="width: 100%; overflow: hidden;">
       <div id="svg" style="width: 680px; float: left;"></div>
       <div style="margin-left: 700px;">
-	<form style="white-space: nowrap;" name="app" action="javascript:apply_stype(false)">
+	<form style="white-space: nowrap;" name="app" action="javascript:apply_stype_from_button(false)">
 	  <fieldset>
 	    <legend>Semaines particulières</legend>
 	    Appliquer la configuration ci-contre<br/>
@@ -74,7 +74,7 @@
 	</form>
 	<fieldset>
 	  <legend>Semaine type</legend>
-	  <form style="white-space: nowrap;" name="sav"  action="javascript:apply_stype(true)">
+	  <form style="white-space: nowrap;" name="sav"  action="javascript:apply_stype_from_button(true)">
 	    Redéfinir ma semaine type<br/>
 	    (ne provoque aucun changement sur les disponibilités)</br></br>
 	    <input type="submit" name="save" value="Sauvegarder"></br>	  </fieldset>
@@ -85,8 +85,12 @@
       </div>
     </div>
 </body>
-<script type='text/javascript' src="{% static "modif/semaine-type.js" %}">
-    
-</script>
+  <script type='text/javascript' src="{% static 'modif/week_change.js' %}"></script>
+  <script type='text/javascript' src="{% static 'modif/transformation.js' %}"></script>
+  <script type='text/javascript' src="{% static 'modif/creation.js' %}"></script>
+  <script type='text/javascript' src="{% static 'modif/action.js' %}"></script>
+  <script type='text/javascript' src="{% static 'modif/update.js' %}"></script>
+  <script type='text/javascript' src="{% static 'modif/variables.js' %}?2"></script>
+<script type='text/javascript' src="{% static "modif/stype.js" %}"></script>
 
 {% endblock %}
