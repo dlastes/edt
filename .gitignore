@@ -8,4 +8,5 @@ FlOpEDT/IIS_**
 FlOpEDT/*.log
 FlOpEDT/*.lp
 FlOpEDT/*.sol
+.idea/
 
