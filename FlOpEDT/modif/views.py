@@ -193,7 +193,8 @@ def stype(req):
                        'date_fin': current_week(),
                        'name_usr': req.user.username,
                        'err': err,
-                       'annee_courante': annee_courante})
+                       'annee_courante': annee_courante,
+                       'image': imgtxt})
     elif req.method == 'POST':
         if 'apply' in req.POST.keys():
             print req.POST['se_deb']

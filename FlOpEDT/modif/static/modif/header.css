@@ -48,7 +48,7 @@ h4 {
   font-size:16px;
 }
 body{
-    background-color: black;
+    background: linear-gradient(to bottom, rgb(176,176,176), rgb(255,255,255));
 }
 #edt-main{
   text-anchor:middle;
@@ -60,8 +60,6 @@ body{
 }
 
 #tools-main{
-  background: linear-gradient(to bottom, rgb(176,176,176), rgb(255,255,255));
-  min-height: 800px;
   padding-top:10px;
 }
 
@@ -159,7 +157,7 @@ div.tooltip {
 
 html, 
 body {
-    background: linear-gradient(to bottom, rgb(176,176,176), rgb(255,255,255));
+    min-height: 100%;
 }
 
 /* FlOp Logo */

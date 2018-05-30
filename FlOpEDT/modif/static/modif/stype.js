@@ -26,7 +26,7 @@
 
 var margin = {top: 50,  left: 100, right: 10, bot:10};
 
-var svg = {height: 1000 - margin.top - margin.bot, width: 680 - margin.left - margin.right};
+var svg = {height: 625 - margin.top - margin.bot, width: 680 - margin.left - margin.right};
 
 // check ack -> ack.edt ?
 
