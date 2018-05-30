@@ -80,10 +80,10 @@ class LimitNaturePerPeriod(TTConstraint):  # , pond):
                               null=True)
     limit = models.PositiveSmallIntegerField()
     train_prog = models.ForeignKey('modif.TrainingProgramme',
-                                   null = True,
-                                   default = None)
-    module = models.ForeignKey('modif.Module', null = True)
-    prof = models.ForeignKey('modif.Prof', null = True)
+                                   null=True,
+                                   default=None)
+    module = models.ForeignKey('modif.Module', null=True)
+    prof = models.ForeignKey('modif.Prof', null=True)
     FULL_DAY = 'fd'
     HALF_DAY = 'hd'
     PERIOD_CHOICES = ((FULL_DAY, 'Full day'), (HALF_DAY, 'Half day'))
@@ -98,7 +98,7 @@ class LimitNaturePerPeriod(TTConstraint):  # , pond):
         if self.nature:
             fc = fc.filter(nature=self.nature)
         if self.train_prog:
-            fc = fc.filter(groupe__train_prog = self.train_prog)
+            fc = fc.filter(groupe__train_prog=self.train_prog)
         if self.period == self.FULL_DAY:
             periods = ['']
         else:
@@ -126,8 +126,8 @@ class ReasonableDays(TTConstraint):
     e.g. promo = None => the constraint holds for all promos.
     """
     train_prog = models.ForeignKey('modif.TrainingProgramme',
-                                   null = True,
-                                   default = None)
+                                   null=True,
+                                   default=None)
     group = models.ForeignKey('modif.Groupe', null=True)
     prof = models.ForeignKey('modif.Prof', null=True)
 
@@ -169,8 +169,8 @@ class Stabilize(TTConstraint):
         verbose_name='Stabiliser tout?',
         default=False)
     train_prog = models.ForeignKey('modif.TrainingProgramme',
-                                   null = True,
-                                   default = None)
+                                   null=True,
+                                   default=None)
     group = models.ForeignKey('modif.Groupe', null=True, default=None)
     module = models.ForeignKey('modif.Module', null=True, default=None)
     prof = models.ForeignKey('modif.Prof', null=True, default=None)
@@ -311,15 +311,15 @@ class MinNonPreferedSlot(TTConstraint):
     """
     prof = models.ForeignKey('modif.Prof', null=True)
     train_prog = models.ForeignKey('modif.TrainingProgramme',
-                                   null = True,
-                                   default = None)
+                                   null=True,
+                                   default=None)
 
     # is not called when save() is
     def clean(self):
         if not self.prof and not self.train_prog:
             raise ValidationError({
                 'train_prog': ValidationError(_('Si pas de prof alors promo.',
-                                           code='invalid')),
+                                                code='invalid')),
                 'prof': ValidationError(_('Si pas de promo alors prof.',
                                           code='invalid'))})
 
@@ -329,12 +329,12 @@ class MinNonPreferedSlot(TTConstraint):
                 .filter(prof=self.prof)
         else:
             filtered_courses = ttmodel.wdb.courses \
-                .filter(groupe__train_prog = self.train_prog)
+                .filter(groupe__train_prog=self.train_prog)
             # On exclut les cours de sport!
             filtered_courses = \
                 filtered_courses.exclude(module__abbrev='SC')
         basic_groups = ttmodel.wdb.basic_groups \
-                              .filter(train_prog = self.train_prog)
+            .filter(train_prog=self.train_prog)
         for sl in ttmodel.wdb.slots:
             for c in filtered_courses:
                 if self.prof:
@@ -349,7 +349,7 @@ class MinNonPreferedSlot(TTConstraint):
                             cost = self.local_weight() \
                                    * ponderation * ttmodel.TT[(sl, c)] \
                                    * ttmodel.unp_slot_cost_course[c.nature,
-                                                                  self.train_prog.abbrev][sl]
+                                                                  self.train_prog][sl]
                             ttmodel.add_to_group_cost(g, cost)
                             ttmodel.add_to_slot_cost(sl, cost)
 
@@ -363,8 +363,8 @@ class AvoidBothSlots(TTConstraint):
     slot1 = models.ForeignKey('modif.Creneau', related_name='slot1')
     slot2 = models.ForeignKey('modif.Creneau', related_name='slot2')
     train_prog = models.ForeignKey('modif.TrainingProgramme',
-                                   null = True,
-                                   default = None)
+                                   null=True,
+                                   default=None)
     group = models.ForeignKey('modif.Groupe', null=True)
     prof = models.ForeignKey('modif.Prof', null=True)
 
@@ -373,7 +373,7 @@ class AvoidBothSlots(TTConstraint):
         if self.prof:
             fc = fc.filter(prof=self.prof)
         if self.train_prog:
-            fc = fc.filter(groupe__train_prog = self.train_prog)
+            fc = fc.filter(groupe__train_prog=self.train_prog)
         if self.group:
             fc = fc.filter(groupe=self.group)
         for c1 in fc:
