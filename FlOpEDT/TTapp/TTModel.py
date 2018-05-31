@@ -473,10 +473,10 @@ class TTModel(object):
                 # if sl == self.wdb.slots[0]:
                 #     print "R", r, quicksum(self.TTrooms[(sl, c, rg)] \
                 # for (c, rg) in room_course_compat[r])
-                if len(RoomUnavailability.objects.filter(semaine=self.semaine,
+                if RoomUnavailability.objects.filter(semaine=self.semaine,
                                                       an=self.an,
                                                       creneau=sl,
-                                                      room=r)) > 0:
+                                                      room=r).exists():
                     limit = 0
                 else:
                     limit = 1
@@ -496,11 +496,11 @@ class TTModel(object):
                     for c in self.wdb.courses.filter(room_type=rp.for_type))
                 preferred_is_unavailable = False
                 for r in rp.prefer.subrooms.all():
-                    if len(RoomUnavailability.objects.filter(
+                    if RoomUnavailability.objects.filter(
                             semaine=self.semaine,
                             an=self.an,
                             creneau=sl,
-                            room=r)) > 0:
+                            room=r).exists():
                         # print r, "unavailable for ",sl
                         preferred_is_unavailable = True
                         break
