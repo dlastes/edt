@@ -21,15 +21,25 @@ def create_fake_user(apps, schema_editor):
         )
         fu.save()
 
+
+def create_tutor_names(apps, schema_editor):
+
     Module = apps.get_model('Module')
     for m in Module.objects.all():
         m.head_name = m.responsable.username
+        m.save()
 
     CoursModification = apps.get_model('CoursModification')
     for cm in CoursModification.objects.all():
         cm.initiator_name = cm.user.username
+        cm.save()
 
     PlanifModification = apps.get_model('PlanifModification')
+    for pm in PlanifModification.objects.all():
+        pm.initiator_name = pm.user.username
+        pm.tutor_name_old = pm.prof_old
+        pm.save()
+
 
 
 class Migration(migrations.Migration):
@@ -59,4 +69,5 @@ class Migration(migrations.Migration):
             field=models.CharField(default='', max_length=150),
         ),
         migrations.RunPython(create_fake_user),
+        migrations.RunPython(create_tutor_names),
     ]
