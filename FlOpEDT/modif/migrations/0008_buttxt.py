@@ -15,7 +15,7 @@ def add_buttxt(apps, schema_editor):
         gpd.button_txt = u'LP'
         gpd.save()
     except:
-        raise Exception('what about group 23?')
+        print 'what about group 23?'
 
 class Migration(migrations.Migration):
 
