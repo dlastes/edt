@@ -30,14 +30,11 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 
 from django.db import models
 
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AbstractUser
 
 from caching.base import CachingManager, CachingMixin
 
 from colorfield.fields import ColorField
-
-
-max_promo = 3
 
 
 # <editor-fold desc="BKNEWS">
@@ -229,9 +226,12 @@ class Module(models.Model):
     nbTP = models.PositiveSmallIntegerField(default=1)
     nbCM = models.PositiveSmallIntegerField(default=1)
     nbDS = models.PositiveSmallIntegerField(default=1)
+    head_name = models.CharField(max_length = 150, default = '')
 
     def __str__(self):
         return self.abbrev
+
+
 
 
 # class Cours(models.Model):
@@ -372,8 +372,9 @@ class CoursModification(models.Model):
     room_old = models.ForeignKey('RoomGroup', blank = True, null = True)
     creneau_old = models.ForeignKey('Creneau', null = True)
     version_old = models.PositiveIntegerField()
-    updated_at = models.DateTimeField(auto_now = True)
+    updated_at = models.DateTimeField() # auto_now = True)
     user = models.ForeignKey(User)
+    initiator_name = models.CharField(max_length = 150)
 
     def __str__(self):
         olds = 'OLD:'
@@ -399,8 +400,10 @@ class PlanifModification(models.Model):
         validators = [MinValueValidator(0), MaxValueValidator(53)], null = True)
     an_old = models.PositiveSmallIntegerField(null=True)
     prof_old = models.ForeignKey(User, related_name='old_p')
-    updated_at = models.DateTimeField(auto_now=True)
+    tutor_name_old = models.CharField(max_length = 150)
+    updated_at = models.DateTimeField() # auto_now=True)
     user = models.ForeignKey(User, related_name='modif')
+    initiator_name = models.CharField(max_length = 150)
 
 # </editor-fold desc="MODIFICATIONS">
 
@@ -449,6 +452,45 @@ class DJLGroupe(models.Model):
 # -- TUTORS --
 # ------------
 
+
+# class Tutor(AbstractUser):
+#     VAC = 'Vac'
+#     BIATOS = 'BIA'
+#     FULL_STAFF = 'FuS'
+#     CHOIX_STATUT = ((VAC, 'Vacataire'),
+#                     (FULL_STAFF, 'Permanent UT2J (IUT ou non)'),
+#                     (BIATOS, 'BIATOS'))
+#     pref_slots_per_day = models.PositiveSmallIntegerField(
+#         verbose_name = "Combien de créneaux par jour au mieux ?",
+#         default = 4)
+#     rights = models.PositiveSmallIntegerField(verbose_name = "Peut forcer ?",
+#                                               default = 0)
+#     statut = models.CharField(max_length = 3,
+#                               choices = CHOIX_STATUT, default = FULL_STAFF)
+#     # 0b azyx en binaire
+#     # x==1 <=> quand "modifier Cours" coché, les cours sont colorés
+#     #          avec la dispo du prof
+#     # y==1 <=> je peux changer les dispos de tout le monde
+#     # FUTUR
+#     # z==1 <=> je peux changer les dispos des vacataires d'un module dont
+#     #          je suis responsable
+#     # a==1 <=> je peux surpasser les contraintes lors de la modification
+#     #          de cours
+#     LBD = models.PositiveSmallIntegerField(
+#         validators = [MinValueValidator(0), MaxValueValidator(4)],
+#         verbose_name = "Limitation du nombre de jours",
+#         default = 2)
+
+
+class FakeUser(models.Model):
+    username = models.CharField(max_length = 150)
+    first_name = models.CharField(max_length = 30)
+    last_name = models.CharField(max_length = 150)
+    email = models.EmailField()
+    password = models.CharField(max_length = 100)
+    is_staff = models.BooleanField()
+    is_active = models.BooleanField()
+    is_superuser = models.BooleanField()
 
 class Prof(models.Model):
     user = models.OneToOneField(User, related_name='proff')
