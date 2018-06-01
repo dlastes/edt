@@ -92,13 +92,14 @@ class Groupe(models.Model):
                     (TP, 'Groupe TP'))
     nom = models.CharField(max_length = 4)
     train_prog = models.ForeignKey('TrainingProgramme')
-    # action: remove null=True, and remove promo
     nature = models.CharField(max_length = 2,
                               choices = CHOIX_NATURE,
                               verbose_name = 'Type de classe')
-    taille = models.PositiveSmallIntegerField()
-    surgroupe = models.ForeignKey('self', null = True, blank = True)
+    size = models.PositiveSmallIntegerField()
     basic = models.BooleanField(verbose_name = 'Basic group?', default = False)
+    parent_groups = models.ManyToManyField('self',
+                                           blank = True,
+                                           related_name = "children_groups")
 
     def full_name(self):
         return self.train_prog.abbrev + self.nom
@@ -106,12 +107,15 @@ class Groupe(models.Model):
     def __unicode__(self):
         return self.full_name()
 
-    def surgroupes(self):
-        sg = []
-        if self.surgroupe:
-            sg.append(self.surgroupe)
-            sg += self.surgroupe.surgroupes()
-        return sg
+    def ancestor_groups(self):
+        """
+        :return: the set of all Groupe containing self (self not included)
+        """
+        all = set()
+        for gp in self.parent_groups:
+            for new_gp in gp.ancestor_groups():
+                all.add(new_gp)
+        return all
 
 # </editor-fold desc="GROUPS">
 

@@ -169,8 +169,9 @@ class ProfAdmin(admin.ModelAdmin):
 
 
 class GroupeAdmin(admin.ModelAdmin):
-    list_display = ('nom', 'nature', 'taille', 'surgroupe', 'train_prog')
-    ordering = ('taille',)
+    list_display = ('nom', 'nature', 'size', 'train_prog')
+    filter_horizontal = ('parent_groups', )
+    ordering = ('size',)
     list_filter = (('train_prog', DropdownFilterRel),
                    )
 

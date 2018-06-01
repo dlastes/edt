@@ -79,7 +79,7 @@ class WeekDB(object):
                     id__in=self.courses.values_list('groupe_id').distinct())
         self.basic_groups_surgroups = {}
         for g in self.basic_groups:
-            self.basic_groups_surgroups[g] = [g] + g.surgroupes()
+            self.basic_groups_surgroups[g] = [g] + list(g.ancestor_groups())
         self.courses_for_group = {}
         for g in self.groups:
             self.courses_for_group[g] = self.courses.filter(groupe=g)
@@ -252,7 +252,7 @@ class TTModel(object):
                     for sl in halfdayslots:
                         for c in self.wdb.courses_for_group[g]:
                             expr -= self.TT[(sl, c)]
-                        for sg in g.surgroupes():
+                        for sg in g.ancestor_groups():
                             for c in self.wdb.courses_for_group[sg]:
                                 expr -= self.TT[(sl, c)]
                     self.add_constraint(expr, '>=', 0)
