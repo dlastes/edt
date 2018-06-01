@@ -112,7 +112,8 @@ class Groupe(models.Model):
         :return: the set of all Groupe containing self (self not included)
         """
         all = set()
-        for gp in self.parent_groups:
+        for gp in self.parent_groups.all():
+            all.add(gp)
             for new_gp in gp.ancestor_groups():
                 all.add(new_gp)
         return all
