@@ -220,13 +220,14 @@ class Module(models.Model):
     nom = models.CharField(max_length=50, null=True)
     abbrev = models.CharField(max_length=10, verbose_name='Intitulé abbrégé')
     responsable = models.ForeignKey(User, null=True, blank=True)
+    head_name = models.CharField(max_length = 150, null = True, default = None)
     ppn = models.CharField(max_length=5, default='M')
     train_prog = models.ForeignKey('TrainingProgramme')
     nbTD = models.PositiveSmallIntegerField(default=1)
     nbTP = models.PositiveSmallIntegerField(default=1)
     nbCM = models.PositiveSmallIntegerField(default=1)
     nbDS = models.PositiveSmallIntegerField(default=1)
-    head_name = models.CharField(max_length = 150, default = '')
+
 
     def __str__(self):
         return self.abbrev
@@ -249,8 +250,15 @@ class Cours(CachingMixin, models.Model):
     room_type = models.ForeignKey('RoomType', null = True)
     no = models.PositiveSmallIntegerField(null = True, blank = True)
     prof = models.ForeignKey('Prof', related_name = 'proprof', null = True)
+    tutor_name = models.CharField(max_length = 150,
+                                  null = True,
+                                  default = None)
     profsupp = models.ForeignKey('Prof', related_name = 'profsupp',
                                  null = True, blank = True)
+    supp_tutor_name = models.CharField(max_length = 150,
+                                       null = True,
+                                       default = None,
+                                       blank = True)
     groupe = models.ForeignKey('Groupe')
     module = models.ForeignKey('Module', related_name = 'module')
     modulesupp = models.ForeignKey('Module', related_name = 'modulesupp',
@@ -292,6 +300,7 @@ class CoursPlace(CachingMixin, models.Model):
 class Disponibilite(models.Model):
     #    prof = models.ForeignKey(User)
     prof = models.ForeignKey('Prof')
+    tutor_name = models.CharField(max_length = 150, null = True, default = None)
     semaine = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)], null = True)
     an = models.PositiveSmallIntegerField(null = True)
@@ -374,7 +383,9 @@ class CoursModification(models.Model):
     version_old = models.PositiveIntegerField()
     updated_at = models.DateTimeField() # auto_now = True)
     user = models.ForeignKey(User)
-    initiator_name = models.CharField(max_length = 150)
+    initiator_name = models.CharField(max_length = 150,
+                                      null = True,
+                                      default = None)
 
     def __str__(self):
         olds = 'OLD:'
@@ -400,10 +411,14 @@ class PlanifModification(models.Model):
         validators = [MinValueValidator(0), MaxValueValidator(53)], null = True)
     an_old = models.PositiveSmallIntegerField(null=True)
     prof_old = models.ForeignKey(User, related_name='old_p')
-    tutor_name_old = models.CharField(max_length = 150)
+    tutor_name_old = models.CharField(max_length = 150,
+                                      null = True,
+                                      default = None)
     updated_at = models.DateTimeField() # auto_now=True)
     user = models.ForeignKey(User, related_name='modif')
-    initiator_name = models.CharField(max_length = 150)
+    initiator_name = models.CharField(max_length = 150,
+                                      null = True,
+                                      default = None)
 
 # </editor-fold desc="MODIFICATIONS">
 
@@ -418,6 +433,9 @@ class CoutProf(models.Model):
         validators = [MinValueValidator(0), MaxValueValidator(53)])
     an = models.PositiveSmallIntegerField()
     prof = models.ForeignKey('Prof')
+    tutor_name = models.CharField(max_length = 150,
+                                  null = True,
+                                  default = None)
     valeur = models.FloatField()
 
     def __str__(self):
@@ -483,6 +501,12 @@ class DJLGroupe(models.Model):
 
 
 class FakeUser(models.Model):
+    VAC = 'Vac'
+    BIATOS = 'BIA'
+    FULL_STAFF = 'FuS'
+    CHOICE_STATUS = ((VAC, 'Vacataire'),
+                    (FULL_STAFF, 'Permanent UT2J (IUT ou non)'),
+                    (BIATOS, 'BIATOS'))
     username = models.CharField(max_length = 150)
     first_name = models.CharField(max_length = 30)
     last_name = models.CharField(max_length = 150)
@@ -491,6 +515,29 @@ class FakeUser(models.Model):
     is_staff = models.BooleanField()
     is_active = models.BooleanField()
     is_superuser = models.BooleanField()
+    status = models.CharField(max_length = 3,
+                              choices = CHOICE_STATUS,
+                              default = FULL_STAFF)
+
+    pref_slots_per_day = models.PositiveSmallIntegerField(
+        verbose_name = "Combien de créneaux par jour au mieux ?",
+        default = 4)
+    rights = models.PositiveSmallIntegerField(verbose_name = "Peut forcer ?",
+                                              default = 0)
+    # 0b azyx en binaire
+    # x==1 <=> quand "modifier Cours" coché, les cours sont colorés
+    #          avec la dispo du prof
+    # y==1 <=> je peux changer les dispos de tout le monde
+    # FUTUR
+    # z==1 <=> je peux changer les dispos des vacataires d'un module dont
+    #          je suis responsable
+    # a==1 <=> je peux surpasser les contraintes lors de la modification
+    #          de cours
+    LBD = models.PositiveSmallIntegerField(
+        validators = [MinValueValidator(0), MaxValueValidator(4)],
+        verbose_name = "Limitation du nombre de jours",
+        default = 2)
+
 
 class Prof(models.Model):
     user = models.OneToOneField(User, related_name='proff')
@@ -534,6 +581,12 @@ class FullStaff(Prof):
         self.statut = Prof.FULL_STAFF
 
 
+class FullStaffTmp(models.Model):
+    tutor_name = models.CharField(max_length = 150)
+    department = models.CharField(max_length = 50, default = 'INFO')
+    is_iut = models.BooleanField(default = True)
+
+
 class Vacataire(Prof):
     employer = models.CharField(max_length = 50,
                                 verbose_name = "Employeur ?",
@@ -546,6 +599,17 @@ class Vacataire(Prof):
     def __init__(self, *args, **kwargs):
         super(Vacataire, self).__init__(*args, **kwargs)
         self.statut = Prof.VAC
+
+class VacataireTmp(Prof):
+    tutor_name = models.CharField(max_length = 150)
+    employer = models.CharField(max_length = 50,
+                                verbose_name = "Employeur ?",
+                                null = True)
+    qualite = models.CharField(max_length = 50, null = True)
+    field = models.CharField(max_length = 50,
+                             verbose_name = "Domaine ?",
+                             null = True)
+
 
 
 class BIATOS(Prof):
@@ -562,13 +626,15 @@ class BIATOS(Prof):
         # # 1h CM <=> 1.5h TD
         # TPeqTD = models.BooleanField()self.periode
 
+class BIATOSTmp(Prof):
+    tutor_name = models.CharField(max_length = 150)
 
-class Student(models.Model):  # for now: representative
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    group = models.ForeignKey('Groupe')
-
-    def __str__(self):
-        return str(self.user) + u'(G:' + str(self.group) + u')'
+# class Student(models.Model):  # for now: representative
+#     user = models.OneToOneField(User, on_delete=models.CASCADE)
+#     group = models.ForeignKey('Groupe')
+#
+#     def __str__(self):
+#         return str(self.user) + u'(G:' + str(self.group) + u')'
 
 # </editor-fold desc="TUTORS">
 

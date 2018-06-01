@@ -154,7 +154,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('nom', models.CharField(max_length=4)),
                 ('nature', models.CharField(choices=[('to', 'Classe enti\xe8re'), ('TD', 'Groupe TD'), ('TP', 'Groupe TP')], max_length=2, verbose_name='Type de classe')),
-                ('taille', models.PositiveSmallIntegerField()),
+                ('size', models.PositiveSmallIntegerField()),
                 ('basic', models.BooleanField(default=False, verbose_name='Basic group?')),
                 ('surgroupe', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='modif.Groupe')),
             ],
