@@ -38,7 +38,8 @@ from .forms import ContactForm
 
 from .models import Cours, Disponibilite, CoursPlace, EdtVersion, \
     CoursModification, Creneau, Jour, Heure, RoomGroup, PlanifModification, \
-    Regen, Prof, BreakingNews
+    Regen,  BreakingNews
+# Prof,
 
 from .admin import CoursResource, DispoResource, \
     CoursPlaceResource, BreakingNewsResource

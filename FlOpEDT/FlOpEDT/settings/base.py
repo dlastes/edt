@@ -166,4 +166,4 @@ CSRF_USE_SESSION = True
 
 # LOGIN_URL = '/login'
 
-# AUTH_USER_MODEL = 'modif.Tutor'
+AUTH_USER_MODEL = 'modif.Tutor'

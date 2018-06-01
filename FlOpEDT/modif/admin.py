@@ -27,11 +27,12 @@ from django.contrib import admin
 
 from modif.models import Jour, RoomGroup, Module, Cours, Groupe, Creneau, \
     Disponibilite, Heure, CoursPlace, EdtVersion, CoursModification, \
-    PlanifModification, Prof, BreakingNews, TrainingProgramme, ModuleDisplay
+    PlanifModification, BreakingNews, TrainingProgramme, ModuleDisplay
+# Prof
 
 from import_export import resources, fields
 from import_export.widgets import ForeignKeyWidget
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
 
 from FlOpEDT.filters import DropdownFilterAll, DropdownFilterRel, \
     DropdownFilterCho
@@ -53,9 +54,12 @@ class CoursPlaceResource(resources.ModelResource):
     no = fields.Field(column_name='num_cours',
                       attribute='cours',
                       widget=ForeignKeyWidget(Cours, 'no'))
+#    prof = fields.Field(column_name='prof_nom',
+#                        attribute='cours__prof__user',
+#                        widget=ForeignKeyWidget(User, 'username'))
     prof = fields.Field(column_name='prof_nom',
-                        attribute='cours__prof__user',
-                        widget=ForeignKeyWidget(User, 'username'))
+                        attribute='cours',
+                        widget=ForeignKeyWidget(Cours, 'tutor_name'))
     # prof_first_name = fields.Field(column_name='prof_first_name',
     #                                attribute='cours__prof__user',
     #                                widget=ForeignKeyWidget(User, 'first_name'))
@@ -100,9 +104,9 @@ class CoursResource(resources.ModelResource):
     promo = fields.Field(column_name='promo',
                          attribute='groupe__train_prog',
                          widget=ForeignKeyWidget(TrainingProgramme, 'abbrev'))
-    prof = fields.Field(column_name='prof',
-                        attribute='prof__user',
-                        widget=ForeignKeyWidget(User, 'username'))
+#    prof = fields.Field(column_name='prof',
+#                        attribute='prof__user',
+#                        widget=ForeignKeyWidget(User, 'username'))
     module = fields.Field(column_name='module',
                           attribute='module',
                           widget=ForeignKeyWidget(Module, 'abbrev'))
@@ -118,8 +122,8 @@ class CoursResource(resources.ModelResource):
 
     class Meta:
         model = Cours
-        fields = ('id', 'no', 'prof', 'groupe', 'promo', 'module',
-                  'color_bg', 'color_txt')
+        fields = ('id', 'no', 'tutor_name', 'groupe', 'promo', 'module',
+                  'color_bg', 'color_txt') # prof
 
 
 class SemaineAnResource(resources.ModelResource):
@@ -129,8 +133,8 @@ class SemaineAnResource(resources.ModelResource):
 
 
 class DispoResource(resources.ModelResource):
-    prof = fields.Field(attribute='prof__user',
-                        widget=ForeignKeyWidget(User, 'username'))
+#    prof = fields.Field(attribute='prof__user',
+#                        widget=ForeignKeyWidget(User, 'username'))
     jour = fields.Field(attribute='creneau__jour',
                         widget=ForeignKeyWidget(Jour, 'no'))
     heure = fields.Field(attribute='creneau__heure',
@@ -138,7 +142,7 @@ class DispoResource(resources.ModelResource):
 
     class Meta:
         model = Disponibilite
-        fields = ('prof', 'jour', 'heure', 'valeur')
+        fields = ('tutor_name', 'jour', 'heure', 'valeur') # prof
 
 
 class BreakingNewsResource(resources.ModelResource):
@@ -159,13 +163,13 @@ class JourAdmin(admin.ModelAdmin):
 #    ordering = ('jour','apm')
 
 
-class ProfAdmin(admin.ModelAdmin):
-    list_display = ('LBD',)
-# # from django.utils.text import Truncator
-# ordering = ('abbrev',)
-#    def abb_name(self,prof):
-#        return Truncator(prof.nom).chars(4, truncate='.')
-#    abb_name.short_description = 'Aperçu du nom'
+# class ProfAdmin(admin.ModelAdmin):
+#    list_display = ('LBD',)
+ # # from django.utils.text import Truncator
+ # ordering = ('abbrev',)
+ #    def abb_name(self,prof):
+ #        return Truncator(prof.nom).chars(4, truncate='.')
+ #    abb_name.short_description = 'Aperçu du nom'
 
 
 class GroupeAdmin(admin.ModelAdmin):
@@ -184,20 +188,26 @@ class RoomGroupAdmin(admin.ModelAdmin):
 
 
 class ModuleAdmin(admin.ModelAdmin):
-    list_display = ('nom', 'ppn', 'abbrev', 'responsable', 'train_prog')
+    list_display = ('nom', 'ppn', 'abbrev',
+#                    'responsable',
+                    'train_prog')
     ordering = ('abbrev',)
-    list_filter = (('responsable', DropdownFilterRel),
+    list_filter = (
+#        ('responsable', DropdownFilterRel),
                    ('train_prog', DropdownFilterRel),)
 
 
 class CoursAdmin(admin.ModelAdmin):
-    list_display = ('module', 'nature', 'groupe', 'prof', 'semaine', 'an')
-    ordering = ('an', 'semaine', 'module', 'nature', 'no', 'groupe', 'prof')
-    list_filter = (('prof__user', DropdownFilterRel),
-                   ('an', DropdownFilterAll),
-                   ('semaine', DropdownFilterAll),
-                   ('nature', DropdownFilterCho),
-                   ('groupe', DropdownFilterAll),
+    list_display = ('module', 'nature', 'groupe', 'tutor_name', 'semaine', 'an') # prof
+    ordering = ('an', 'semaine', 'module', 'nature', 'no', 'groupe',
+#                'prof'
+                )
+    list_filter = (
+#        ('prof__user', DropdownFilterRel),
+        ('an', DropdownFilterAll),
+        ('semaine', DropdownFilterAll),
+        ('nature', DropdownFilterCho),
+        ('groupe', DropdownFilterAll),
                    )
 
 
@@ -221,7 +231,8 @@ class CoursPlaceAdmin(admin.ModelAdmin):
     
     list_display = (cours_semaine, cours_an, 'cours', 'creneau', 'room')
     ordering = ('creneau', 'cours', 'room')
-    list_filter = (('cours__prof__user', DropdownFilterRel),
+    list_filter = (
+        #('cours__prof__user', DropdownFilterRel),
                    ('cours__an', DropdownFilterAll),
                    ('cours__semaine', DropdownFilterAll),)
 
@@ -248,28 +259,40 @@ class CoursMAdmin(admin.ModelAdmin):
 
     list_display = ('cours', cours_semaine, cours_an,
                     'version_old', 'room_old', 'creneau_old',
-                    'updated_at', 'user')
-    list_filter = (('user', DropdownFilterRel),
+                    'updated_at',
+#                    'user'
+                    )
+    list_filter = (
+#        ('user', DropdownFilterRel),
                    ('cours__an', DropdownFilterAll),
                    ('cours__semaine', DropdownFilterAll),)
     ordering = ('-updated_at', 'an_old', 'semaine_old')
 
 
 class PlanifMAdmin(admin.ModelAdmin):
-    list_display = ('cours', 'semaine_old', 'an_old', 'prof_old', 'updated_at',
-                    'user')
+    list_display = ('cours', 'semaine_old', 'an_old',
+#                    'prof_old',
+                    'updated_at',
+#                    'user'
+                    )
     ordering = ('-updated_at', 'an_old', 'semaine_old')
-    list_filter = (('user', DropdownFilterRel),
+    list_filter = (
+#        ('user', DropdownFilterRel),
                    ('semaine_old', DropdownFilterAll),
                    ('an_old', DropdownFilterAll),)
 
 
 class DispoAdmin(admin.ModelAdmin):
-    list_display = ('prof', 'creneau', 'valeur', 'semaine', 'an')
-    ordering = ('prof', 'an', 'semaine', 'creneau', 'valeur')
+    list_display = (
+#        'prof',
+        'creneau', 'valeur', 'semaine', 'an')
+    ordering = (
+#        'prof',
+        'an', 'semaine', 'creneau', 'valeur')
     list_filter = (('creneau', DropdownFilterRel),
                    ('semaine', DropdownFilterAll),
-                   ('prof', DropdownFilterRel),)
+#                   ('prof', DropdownFilterRel),
+                   )
 
 
 class BreakingNewsAdmin(admin.ModelAdmin):

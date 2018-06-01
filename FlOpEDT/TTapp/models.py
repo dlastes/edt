@@ -83,7 +83,8 @@ class LimitNaturePerPeriod(TTConstraint):  # , pond):
                                    null=True,
                                    default=None)
     module = models.ForeignKey('modif.Module', null=True)
-    prof = models.ForeignKey('modif.Prof', null=True)
+    prof = models.CharField(max_length = 150)
+#        models.ForeignKey('modif.Prof', null=True)
     FULL_DAY = 'fd'
     HALF_DAY = 'hd'
     PERIOD_CHOICES = ((FULL_DAY, 'Full day'), (HALF_DAY, 'Half day'))
@@ -129,7 +130,8 @@ class ReasonableDays(TTConstraint):
                                    null=True,
                                    default=None)
     group = models.ForeignKey('modif.Groupe', null=True)
-    prof = models.ForeignKey('modif.Prof', null=True)
+    prof = models.CharField(max_length = 150)
+#    prof = models.ForeignKey('modif.Prof', null=True)
 
     def enrich_model(self, ttmodel, ponderation=1):
         for d in ttmodel.wdb.days:
@@ -173,7 +175,8 @@ class Stabilize(TTConstraint):
                                    default=None)
     group = models.ForeignKey('modif.Groupe', null=True, default=None)
     module = models.ForeignKey('modif.Module', null=True, default=None)
-    prof = models.ForeignKey('modif.Prof', null=True, default=None)
+#    prof = models.ForeignKey('modif.Prof', null=True, default=None)
+    prof = models.CharField(max_length = 150)
     nature = models.CharField(
         max_length=2,
         choices=Cours.CHOIX_NATURE,
@@ -240,7 +243,8 @@ class MinHalfDays(TTConstraint):
     Optional : if 2 courses only, possibility to join it
     """
     module = models.ForeignKey('modif.Module', null=True)
-    prof = models.ForeignKey('modif.Prof', null=True)
+    prof = models.CharField(max_length = 150)
+#    prof = models.ForeignKey('modif.Prof', null=True)
     join2courses = models.BooleanField(
         verbose_name='If 2 or 4 courses only, join it?',
         default=False)
@@ -309,7 +313,8 @@ class MinNonPreferedSlot(TTConstraint):
     Minimize the use of unprefered Slots
     NB: You HAVE TO chose either prof OR promo
     """
-    prof = models.ForeignKey('modif.Prof', null=True)
+    prof = models.CharField(max_length = 150)
+#    prof = models.ForeignKey('modif.Prof', null=True)
     train_prog = models.ForeignKey('modif.TrainingProgramme',
                                    null=True,
                                    default=None)
@@ -366,7 +371,8 @@ class AvoidBothSlots(TTConstraint):
                                    null=True,
                                    default=None)
     group = models.ForeignKey('modif.Groupe', null=True)
-    prof = models.ForeignKey('modif.Prof', null=True)
+    prof = models.CharField(max_length = 150)
+#    prof = models.ForeignKey('modif.Prof', null=True)
 
     def enrich_model(self, ttmodel, ponderation=1):
         fc = ttmodel.wdb.courses
