@@ -600,7 +600,7 @@ class Vacataire(Prof):
         super(Vacataire, self).__init__(*args, **kwargs)
         self.statut = Prof.VAC
 
-class VacataireTmp(Prof):
+class VacataireTmp(models.Model):
     tutor_name = models.CharField(max_length = 150)
     employer = models.CharField(max_length = 50,
                                 verbose_name = "Employeur ?",
@@ -626,7 +626,7 @@ class BIATOS(Prof):
         # # 1h CM <=> 1.5h TD
         # TPeqTD = models.BooleanField()self.periode
 
-class BIATOSTmp(Prof):
+class BIATOSTmp(models.Model):
     tutor_name = models.CharField(max_length = 150)
 
 # class Student(models.Model):  # for now: representative

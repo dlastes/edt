@@ -5,10 +5,11 @@ from __future__ import unicode_literals
 from django.db import migrations, models
 from django.db.models.deletion import CASCADE
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.contrib.auth import get_user_model
 
 
 def create_fake_user(apps, schema_editor):
-    User = apps.get_model('django.contrib.auth.models.User')
+    User = get_user_model() #apps.get_model('django.contrib.auth.models', 'User')
     FakeUser = apps.get_model('FakeUser')
     for u in User.objects.all():
         fu = FakeUser(
@@ -95,7 +96,7 @@ def create_tutor_names(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('modif', '0001_initial'),
+        ('modif', '0002_auto_20180601_2048'),
     ]
 
     operations = [
@@ -212,13 +213,6 @@ class Migration(migrations.Migration):
             field = models.CharField(choices = [('Vac', 'Vacataire'), (
             'FuS', 'Permanent UT2J (IUT ou non)'), ('BIA', 'BIATOS')],
                                      default = 'FuS', max_length = 3),
-        ),
-        migrations.AddField(
-            model_name = 'groupe',
-            name = 'parent_groups',
-            field = models.ManyToManyField(blank = True,
-                                           related_name = '_groupe_parent_groups_+',
-                                           to = 'modif.Groupe'),
         ),
         migrations.AddField(
             model_name = 'planifmodification',
