@@ -77,14 +77,16 @@ class LimitNaturePerPeriod(TTConstraint):  # , pond):
     """
     nature = models.CharField(max_length=2,
                               choices=Cours.CHOIX_NATURE,
-                              null=True)
+                              null = True)
     limit = models.PositiveSmallIntegerField()
     train_prog = models.ForeignKey('modif.TrainingProgramme',
-                                   null=True,
-                                   default=None)
+                                   null = True,
+                                   default = None)
     module = models.ForeignKey('modif.Module', null=True)
     prof = models.CharField(max_length = 150)
-#        models.ForeignKey('modif.Prof', null=True)
+    tutor = models.ForeignKey('modif.Tutor',
+                              null=True,
+                              default = None)
     FULL_DAY = 'fd'
     HALF_DAY = 'hd'
     PERIOD_CHOICES = ((FULL_DAY, 'Full day'), (HALF_DAY, 'Half day'))
@@ -131,7 +133,9 @@ class ReasonableDays(TTConstraint):
                                    default=None)
     group = models.ForeignKey('modif.Groupe', null=True)
     prof = models.CharField(max_length = 150)
-#    prof = models.ForeignKey('modif.Prof', null=True)
+    tutor = models.ForeignKey('modif.Tutor',
+                              null = True,
+                              default = None)
 
     def enrich_model(self, ttmodel, ponderation=1):
         for d in ttmodel.wdb.days:
@@ -175,12 +179,15 @@ class Stabilize(TTConstraint):
                                    default=None)
     group = models.ForeignKey('modif.Groupe', null=True, default=None)
     module = models.ForeignKey('modif.Module', null=True, default=None)
-#    prof = models.ForeignKey('modif.Prof', null=True, default=None)
     prof = models.CharField(max_length = 150)
+    tutor = models.ForeignKey('modif.Tutor',
+                              null=True,
+                              default = None)
     nature = models.CharField(
-        max_length=2,
-        choices=Cours.CHOIX_NATURE,
-        null=True, default=None)
+        max_length = 2,
+        choices = Cours.CHOIX_NATURE,
+        null = True,
+        default = None)
     work_copy = models.PositiveSmallIntegerField(default=0)
 
     def enrich_model(self, ttmodel, ponderation=1):
@@ -244,7 +251,9 @@ class MinHalfDays(TTConstraint):
     """
     module = models.ForeignKey('modif.Module', null=True)
     prof = models.CharField(max_length = 150)
-#    prof = models.ForeignKey('modif.Prof', null=True)
+    tutor = models.ForeignKey('modif.Tutor',
+                              null=True,
+                              default = None)
     join2courses = models.BooleanField(
         verbose_name='If 2 or 4 courses only, join it?',
         default=False)
@@ -314,7 +323,9 @@ class MinNonPreferedSlot(TTConstraint):
     NB: You HAVE TO chose either prof OR promo
     """
     prof = models.CharField(max_length = 150)
-#    prof = models.ForeignKey('modif.Prof', null=True)
+    tutor = models.ForeignKey('modif.Tutor',
+                              null=True,
+                              default = None)
     train_prog = models.ForeignKey('modif.TrainingProgramme',
                                    null=True,
                                    default=None)
@@ -372,7 +383,9 @@ class AvoidBothSlots(TTConstraint):
                                    default=None)
     group = models.ForeignKey('modif.Groupe', null=True)
     prof = models.CharField(max_length = 150)
-#    prof = models.ForeignKey('modif.Prof', null=True)
+    tutor = models.ForeignKey('modif.Tutor',
+                              null = True,
+                              default = None)
 
     def enrich_model(self, ttmodel, ponderation=1):
         fc = ttmodel.wdb.courses

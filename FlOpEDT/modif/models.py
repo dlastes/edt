@@ -219,7 +219,7 @@ class RoomPreference(models.Model):
 class Module(models.Model):
     nom = models.CharField(max_length=50, null=True)
     abbrev = models.CharField(max_length=10, verbose_name='Intitulé abbrégé')
-#    responsable = models.ForeignKey(User, null=True, blank=True)
+    head = models.ForeignKey('Tutor', null=True, default = None, blank=True)
     head_name = models.CharField(max_length = 150, null = True, default = None)
     ppn = models.CharField(max_length=5, default='M')
     train_prog = models.ForeignKey('TrainingProgramme')
@@ -227,7 +227,6 @@ class Module(models.Model):
     nbTP = models.PositiveSmallIntegerField(default=1)
     nbCM = models.PositiveSmallIntegerField(default=1)
     nbDS = models.PositiveSmallIntegerField(default=1)
-
 
     def __str__(self):
         return self.abbrev
@@ -249,12 +248,18 @@ class Cours(CachingMixin, models.Model):
     nature = models.CharField(max_length = 2, choices = CHOIX_NATURE)
     room_type = models.ForeignKey('RoomType', null = True)
     no = models.PositiveSmallIntegerField(null = True, blank = True)
-#    prof = models.ForeignKey('Prof', related_name = 'proprof', null = True)
+    tutor = models.ForeignKey('Tutor',
+                              related_name = 'taught_courses',
+                              null = True,
+                              default = None)
     tutor_name = models.CharField(max_length = 150,
                                   null = True,
                                   default = None)
-#    profsupp = models.ForeignKey('Prof', related_name = 'profsupp',
-#                                 null = True, blank = True)
+    supp_tutor = models.ForeignKey('Tutor',
+                                   related_name = 'courses_as_supp',
+                                   null = True,
+                                   default = None,
+                                   blank = True)
     supp_tutor_name = models.CharField(max_length = 150,
                                        null = True,
                                        default = None,
@@ -299,7 +304,9 @@ class CoursPlace(CachingMixin, models.Model):
 
 class Disponibilite(models.Model):
     #    prof = models.ForeignKey(User)
-#    prof = models.ForeignKey('Prof')
+    tutor = models.ForeignKey('Tutor',
+                              null = True,
+                              default = None)
     tutor_name = models.CharField(max_length = 150, null = True, default = None)
     semaine = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)], null = True)
@@ -382,7 +389,9 @@ class CoursModification(models.Model):
     creneau_old = models.ForeignKey('Creneau', null = True)
     version_old = models.PositiveIntegerField()
     updated_at = models.DateTimeField() # auto_now = True)
-#    user = models.ForeignKey(User)
+    initiator = models.ForeignKey('Tutor',
+                                  null = True,
+                                  default = None)
     initiator_name = models.CharField(max_length = 150,
                                       null = True,
                                       default = None)
@@ -410,12 +419,18 @@ class PlanifModification(models.Model):
     semaine_old = models.PositiveSmallIntegerField(
         validators = [MinValueValidator(0), MaxValueValidator(53)], null = True)
     an_old = models.PositiveSmallIntegerField(null=True)
-#    prof_old = models.ForeignKey(User, related_name='old_p')
+    tutor_old = models.ForeignKey('Tutor',
+                                  related_name = 'impacted_by_planif_modif',
+                                  null = True,
+                                  default = None)
     tutor_name_old = models.CharField(max_length = 150,
                                       null = True,
                                       default = None)
     updated_at = models.DateTimeField() # auto_now=True)
-#    user = models.ForeignKey(User, related_name='modif')
+    initiator = models.ForeignKey('Tutor',
+                                  related_name = 'operated_planif_modif',
+                                  null = True,
+                                  default = None)
     initiator_name = models.CharField(max_length = 150,
                                       null = True,
                                       default = None)
@@ -432,7 +447,9 @@ class CoutProf(models.Model):
     semaine = models.PositiveSmallIntegerField(
         validators = [MinValueValidator(0), MaxValueValidator(53)])
     an = models.PositiveSmallIntegerField()
-#    prof = models.ForeignKey('Prof')
+    tutor = models.ForeignKey('Tutor',
+                              null = True,
+                              default = None)
     tutor_name = models.CharField(max_length = 150,
                                   null = True,
                                   default = None)
@@ -583,6 +600,9 @@ class FakeUser(models.Model):
 
 
 class FullStaffTmp(models.Model):
+    tutor = models.ForeignKey('Tutor',
+                              null = True,
+                              default = None)
     tutor_name = models.CharField(max_length = 150)
     department = models.CharField(max_length = 50, default = 'INFO')
     is_iut = models.BooleanField(default = True)
@@ -602,6 +622,9 @@ class FullStaffTmp(models.Model):
 #        self.statut = Prof.VAC
 
 class VacataireTmp(models.Model):
+    tutor = models.ForeignKey('Tutor',
+                              null = True,
+                              default = None)
     tutor_name = models.CharField(max_length = 150)
     employer = models.CharField(max_length = 50,
                                 verbose_name = "Employeur ?",
@@ -628,6 +651,9 @@ class VacataireTmp(models.Model):
         # TPeqTD = models.BooleanField()self.periode
 
 class BIATOSTmp(models.Model):
+    tutor = models.ForeignKey('Tutor',
+                              null = True,
+                              default = None)
     tutor_name = models.CharField(max_length = 150)
 
 # class Student(models.Model):  # for now: representative
