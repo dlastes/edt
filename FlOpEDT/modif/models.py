@@ -220,7 +220,7 @@ class Module(models.Model):
     nom = models.CharField(max_length=50, null=True)
     abbrev = models.CharField(max_length=10, verbose_name='Intitulé abbrégé')
     head = models.ForeignKey('Tutor', null=True, default = None, blank=True)
-    head_name = models.CharField(max_length = 150, null = True, default = None)
+#    head_name = models.CharField(max_length = 150, null = True, default = None)
     ppn = models.CharField(max_length=5, default='M')
     train_prog = models.ForeignKey('TrainingProgramme')
     nbTD = models.PositiveSmallIntegerField(default=1)
@@ -252,18 +252,18 @@ class Cours(CachingMixin, models.Model):
                               related_name = 'taught_courses',
                               null = True,
                               default = None)
-    tutor_name = models.CharField(max_length = 150,
-                                  null = True,
-                                  default = None)
+#    tutor_name = models.CharField(max_length = 150,
+#                                  null = True,
+#                                  default = None)
     supp_tutor = models.ForeignKey('Tutor',
                                    related_name = 'courses_as_supp',
                                    null = True,
                                    default = None,
                                    blank = True)
-    supp_tutor_name = models.CharField(max_length = 150,
-                                       null = True,
-                                       default = None,
-                                       blank = True)
+#    supp_tutor_name = models.CharField(max_length = 150,
+#                                       null = True,
+#                                       default = None,
+#                                       blank = True)
     groupe = models.ForeignKey('Groupe')
     module = models.ForeignKey('Module', related_name = 'module')
     modulesupp = models.ForeignKey('Module', related_name = 'modulesupp',
@@ -307,7 +307,7 @@ class Disponibilite(models.Model):
     tutor = models.ForeignKey('Tutor',
                               null = True,
                               default = None)
-    tutor_name = models.CharField(max_length = 150, null = True, default = None)
+#    tutor_name = models.CharField(max_length = 150, null = True, default = None)
     semaine = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)], null = True)
     an = models.PositiveSmallIntegerField(null = True)
@@ -318,7 +318,7 @@ class Disponibilite(models.Model):
 
     def __str__(self):
         return "%s-Sem%s: %s=%s" % \
-               (self.tutor_name, self.semaine, self.creneau, self.valeur)
+               (self.tutor.username, self.semaine, self.creneau, self.valeur)
 
 
 class DispoCours(models.Model):
@@ -388,13 +388,13 @@ class CoursModification(models.Model):
     room_old = models.ForeignKey('RoomGroup', blank = True, null = True)
     creneau_old = models.ForeignKey('Creneau', null = True)
     version_old = models.PositiveIntegerField()
-    updated_at = models.DateTimeField() # auto_now = True)
+    updated_at = models.DateTimeField(auto_now = True)
     initiator = models.ForeignKey('Tutor',
                                   null = True,
                                   default = None)
-    initiator_name = models.CharField(max_length = 150,
-                                      null = True,
-                                      default = None)
+#    initiator_name = models.CharField(max_length = 150,
+#                                      null = True,
+#                                      default = None)
 
     def __str__(self):
         olds = 'OLD:'
@@ -408,7 +408,7 @@ class CoursModification(models.Model):
             olds += u' Cren ' + str(self.creneau_old) + u' ;'
         if self.version_old:
             olds += u' NumV ' + str(self.version_old) + u' ;'
-        return "by %s, at %s\n%s <- %s" % (self.initiator_name,
+        return "by %s, at %s\n%s <- %s" % (self.initiator.username,
                                            self.updated_at,
                                            self.cours,
                                            olds)
@@ -423,17 +423,17 @@ class PlanifModification(models.Model):
                                   related_name = 'impacted_by_planif_modif',
                                   null = True,
                                   default = None)
-    tutor_name_old = models.CharField(max_length = 150,
-                                      null = True,
-                                      default = None)
-    updated_at = models.DateTimeField() # auto_now=True)
+#    tutor_name_old = models.CharField(max_length = 150,
+#                                      null = True,
+#                                      default = None)
+    updated_at = models.DateTimeField(auto_now=True)
     initiator = models.ForeignKey('Tutor',
                                   related_name = 'operated_planif_modif',
                                   null = True,
                                   default = None)
-    initiator_name = models.CharField(max_length = 150,
-                                      null = True,
-                                      default = None)
+#    initiator_name = models.CharField(max_length = 150,
+#                                      null = True,
+#                                      default = None)
 
 # </editor-fold desc="MODIFICATIONS">
 
@@ -450,13 +450,13 @@ class CoutProf(models.Model):
     tutor = models.ForeignKey('Tutor',
                               null = True,
                               default = None)
-    tutor_name = models.CharField(max_length = 150,
-                                  null = True,
-                                  default = None)
+#    tutor_name = models.CharField(max_length = 150,
+#                                  null = True,
+#                                  default = None)
     valeur = models.FloatField()
 
     def __str__(self):
-        return "sem%s-%s:%s" % (self.semaine, self.tutor_name, self.valeur)
+        return "sem%s-%s:%s" % (self.semaine, self.tutor.username, self.valeur)
 
 
 class CoutGroupe(models.Model):
@@ -600,10 +600,8 @@ class FakeUser(models.Model):
 
 
 class FullStaffTmp(models.Model):
-    tutor = models.ForeignKey('Tutor',
-                              null = True,
-                              default = None)
-    tutor_name = models.CharField(max_length = 150)
+    tutor = models.OneToOneField('Tutor')
+#    tutor_name = models.CharField(max_length = 150)
     department = models.CharField(max_length = 50, default = 'INFO')
     is_iut = models.BooleanField(default = True)
 
@@ -622,10 +620,8 @@ class FullStaffTmp(models.Model):
 #        self.statut = Prof.VAC
 
 class VacataireTmp(models.Model):
-    tutor = models.ForeignKey('Tutor',
-                              null = True,
-                              default = None)
-    tutor_name = models.CharField(max_length = 150)
+    tutor = models.OneToOneField('Tutor')
+#    tutor_name = models.CharField(max_length = 150)
     employer = models.CharField(max_length = 50,
                                 verbose_name = "Employeur ?",
                                 null = True)
@@ -651,10 +647,8 @@ class VacataireTmp(models.Model):
         # TPeqTD = models.BooleanField()self.periode
 
 class BIATOSTmp(models.Model):
-    tutor = models.ForeignKey('Tutor',
-                              null = True,
-                              default = None)
-    tutor_name = models.CharField(max_length = 150)
+    tutor = models.OneToOneField('Tutor')
+#    tutor_name = models.CharField(max_length = 150)
 
 # class Student(models.Model):  # for now: representative
 #     user = models.OneToOneField(User, on_delete=models.CASCADE)
