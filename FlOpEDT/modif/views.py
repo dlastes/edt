@@ -44,8 +44,6 @@ from .models import Cours, Disponibilite, CoursPlace, EdtVersion, \
 from .admin import CoursResource, DispoResource, \
     CoursPlaceResource, BreakingNewsResource
 
-from django.contrib.auth.models import User
-
 from weeks import *
 
 from collections import namedtuple
@@ -120,7 +118,7 @@ def edt(req, semaine, an, splash_id = 0):
     if req.user.is_authenticated():
         name_usr = req.user.username
         try:
-            rights_usr = Prof.objects.get(user = req.user).rights
+            rights_usr = req.user.rights
         except ObjectDoesNotExist:
             rights_usr = 0
     else:
@@ -241,7 +239,7 @@ def decale(req):
     semaine_init = req.GET.get('s', '-1')
     an_init = req.GET.get('a', '-1')
     liste_profs = []
-    for p in User.objects.all().order_by('username'):
+    for p in Tutor.objects.all().order_by('username'):
         liste_profs.append(p.username.encode('utf8'))
 
     return render(req, 'modif/show-decale.html',
@@ -304,23 +302,21 @@ def fetch_cours_pl(req):
         if req.user.is_authenticated():
             response['reqDispos'] = Cours \
                                         .objects \
-                                        .filter(prof__user__username \
-                                                    =req.user.username,
-                                                semaine=semaine,
-                                                an=an) \
+                                        .filter(tutor = req.user,
+                                                semaine = semaine,
+                                                an = an) \
                                         .count() * 2
             week_av = Disponibilite \
                 .objects \
-                .filter(prof__user__username=req.user.username,
-                        semaine=semaine,
-                        an=an)
+                .filter(tutor = req.user,
+                        semaine = semaine,
+                        an = an)
             if week_av.count() == 0:
                 response['filDispos'] = Disponibilite \
                     .objects \
-                    .filter(prof__user__username \
-                                =req.user.username,
-                            semaine=None,
-                            valeur__gte=1) \
+                    .filter(tutor = req.user,
+                            semaine = None,
+                            valeur__gte = 1) \
                     .count()
             else:
                 response['filDispos'] = week_av \
@@ -366,28 +362,27 @@ def fetch_dispos(req):
             semaine = req.GET.get('s', '')
             an = req.GET.get('a', '')
 
-            busy_inst = Cours.objects.filter(semaine=semaine,
-                                             an=an) \
-                .distinct('prof') \
-                .values_list('prof')
+            busy_inst = Cours.objects.filter(semaine = semaine,
+                                             an = an) \
+                .distinct('tutor') \
+                .values_list('tutor')
 
-            busy_inst = list(chain(busy_inst,
-                                   Prof.objects.filter(user=req.user)))
+            busy_inst = list(chain(busy_inst, req.user))
 
             week_avail = Disponibilite.objects \
-                .filter(semaine=semaine,
-                        an=an,
-                        prof__in=busy_inst) \
-                .order_by('prof')
+                .filter(semaine = semaine,
+                        an = an,
+                        tutor__in = busy_inst) \
+                .order_by('tutor')
 
             default_avail = Disponibilite.objects \
-                .exclude(prof__in \
+                .exclude(tutor__in \
                              =week_avail \
-                         .distinct('prof') \
-                         .values_list('prof')) \
+                         .distinct('tutor') \
+                         .values_list('tutor')) \
                 .filter(semaine=None,
-                        prof__in=busy_inst) \
-                .order_by('prof')
+                        tutor__in=busy_inst) \
+                .order_by('tutor')
 
             dataset = DispoResource() \
                 .export(list(chain(week_avail,
@@ -408,8 +403,8 @@ def fetch_stype(req):
     # if req.method == 'GET':
     dataset = DispoResource() \
         .export(Disponibilite.objects \
-                .filter(semaine=None,
-                        prof__user=req.user))  # all())#
+                .filter(semaine = None,
+                        tutor = req.user))  # all())#
     response = HttpResponse(dataset.csv, content_type='text/csv')
     return response
     # else:
@@ -442,17 +437,17 @@ def fetch_decale(req):
 
     for c in cours:
         try:
-            cp = CoursPlace.objects.get(cours=c,
-                                        copie_travail=0)
+            cp = CoursPlace.objects.get(cours = c,
+                                        copie_travail = 0)
             j = cp.creneau.jour.no
             h = cp.creneau.heure.no
         except ObjectDoesNotExist:
             j = -1
             h = -1
-        if c.prof:
+        if c.tutor is not None:
             liste_cours.append({'i': c.id,
                                 'm': c.module.nom,
-                                'p': c.prof.user.username,
+                                'p': c.tutor.username,
                                 'g': c.groupe.nom,
                                 'j': j,
                                 'h': h})
@@ -464,19 +459,19 @@ def fetch_decale(req):
         liste_module.append(c.module.nom)
 
     cours = filt_g(filt_m(filt_sa(semaine, an), module), groupe) \
-        .order_by('prof__user__username') \
-        .distinct('prof__user__username')
+        .order_by('tutor__username') \
+        .distinct('tutor__username')
     for c in cours:
-        if c.prof:
-            liste_prof.append(c.prof.user.username)
+        if c.tutor is not None:
+            liste_prof.append(c.tutor.username)
 
     if module != '':
         cours = filt_m(Cours.objects, module) \
-            .order_by('prof__user__username') \
-            .distinct('prof__user__username')
+            .order_by('tutor__username') \
+            .distinct('tutor__username')
         for c in cours:
-            if c.prof:
-                liste_prof_module.append(c.prof.user.username)
+            if c.tutor is not None:
+                liste_prof_module.append(c.tutor.username)
 
     cours = filt_p(filt_m(filt_sa(semaine, an), module), prof) \
         .distinct('groupe')
@@ -630,7 +625,7 @@ def edt_changes(req):
 
                         if a.week.n or a.year.n or a.day.n or a.slot.n:
                             msg += str(co) + '\n'
-                            impacted_inst.add(co.prof.user.username)
+                            impacted_inst.add(co.tutor.username)
 
                             msg += u'(' + str(a.week.o) + u', ' \
                                    + str(a.year.o) + u', ' \
@@ -716,10 +711,15 @@ def dispos_changes(req):
                            object_hook = lambda d:
                            namedtuple('X', d.keys())(*d.values()))
 
-            prof = Prof.objects.get(user__username=usr_change)
+            prof = None
+            try:
+                prof = Tutor.objects.get(username = usr_change)
+            except ObjectDoesNotExist:
+                bad_response['reason'] \
+                    = u"Problème d'utilisateur."
+                return bad_response
 
-            if (prof != Prof.objects.get(user=req.user)
-                    and (Prof.objects.get(user=req.user).rights >> 1 % 2 == 0)):
+            if prof != req.user and req.user.rights >> 1 % 2 == 0:
                 bad_response['reason'] \
                     = u'Non autorisé, réclamez plus de droits.'
                 return bad_response
@@ -728,20 +728,20 @@ def dispos_changes(req):
 
             # if no availability was present for this week, first copy the
             # default availabilities
-            if not Disponibilite.objects.filter(prof=prof,
-                                                semaine=semaine,
-                                                an=an).exists():
+            if not Disponibilite.objects.filter(tutor = prof,
+                                                semaine = semaine,
+                                                an = an).exists():
                 for c in Creneau.objects.all():
                     def_dispo, created = Disponibilite\
                                          .objects\
                                          .get_or_create(
-                                             prof = prof,
+                                             tutor = prof,
                                              semaine = None,
                                              an = annee_courante,
                                              creneau = c,
                                              defaults = {'valeur':
                                                          0})
-                    new_dispo = Disponibilite(prof = prof,
+                    new_dispo = Disponibilite(tutor = prof,
                                               semaine = semaine,
                                               an = an,
                                               creneau = c,
@@ -758,11 +758,11 @@ def dispos_changes(req):
                     return bad_response
                 di, didi = Disponibilite \
                     .objects \
-                    .update_or_create(prof=prof,
-                                      semaine=semaine,
-                                      an=an,
-                                      creneau=cr,
-                                      defaults={'valeur': a.val})
+                    .update_or_create(tutor = prof,
+                                      semaine = semaine,
+                                      an = an,
+                                      creneau = cr,
+                                      defaults = {'valeur': a.val})
                 print di
                 print didi
             return good_response
@@ -808,18 +808,18 @@ def decale_changes(req):
             cours = Cours.objects.get(id=c.i)
             # note: add copie_travail in Cours might be of interest
 
-        pm = PlanifModification(cours=cours,
-                                semaine_old=cours.semaine,
-                                an_old=cours.an,
-                                prof_old=cours.prof.user,
-                                user=req.user)
+        pm = PlanifModification(cours = cours,
+                                semaine_old = cours.semaine,
+                                an_old = cours.an,
+                                tutor_old = cours.tutor,
+                                initiator = req.user)
         pm.save()
 
         cours.semaine = a.ns
         cours.an = a.na
         if a.na != 0:
             # cours.prof=User.objects.get(username=a.np)
-            cours.prof = Prof.objects.get(user__username=a.np)
+            cours.tutor = Tutor.objects.get(username = a.np)
         cours.save()
 
         # flush the whole cache
@@ -902,23 +902,24 @@ def clean_week(week, year):
 
 def filt_m(r, module):
     if module != '':
-        r = r.filter(module__nom=module)
+        r = r.filter(module__nom = module)
     return r
 
 
 def filt_p(r, prof):
     if prof != '':
-        r = r.filter(prof__user__username=prof)
+        r = r.filter(tutor__username = prof)
     return r
 
 
 def filt_g(r, groupe):
     if groupe != '':
-        r = r.filter(groupe__nom=groupe)
+        r = r.filter(groupe__nom = groupe)
     return r
 
 
 def filt_sa(semaine, an):
-    return Cours.objects.filter(semaine=semaine, an=an)
+    return Cours.objects.filter(semaine = semaine,
+                                an = an)
 
 # </editor-fold desc="HELPERS">
