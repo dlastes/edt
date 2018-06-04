@@ -37,7 +37,7 @@ from pulp import GUROBI_CMD, PULP_CBC_CMD
 
 from modif.models import Creneau, Groupe, Jour, Heure, \
     Room, RoomGroup, RoomPreference, RoomType, RoomUnavailability, \
-    Cours, CoursPlace, Disponibilite, Prof, DispoCours, \
+    Cours, CoursPlace, Disponibilite, Tutor, DispoCours, \
     Module, TrainingProgramme, \
     DemiJourFeriePromo, Precede, CoutProf, DJLGroupe, CoutGroupe
 
@@ -86,8 +86,8 @@ class WeekDB(object):
 
         self.availabilities = Disponibilite.objects.filter(semaine=week,
                                                            an=year)
-        self.instructors = Prof.objects \
-            .filter(id__in=self.courses.values_list('prof_id').distinct())
+        self.instructors = Tutor.objects \
+            .filter(id__in=self.courses.values_list('tutor_id').distinct())
         self.sched_courses = CoursPlace \
             .objects \
             .filter(cours__semaine=week,
@@ -110,12 +110,12 @@ class WeekDB(object):
             cours1__semaine=week,
             cours2__semaine=week,
             cours1__groupe__train_prog__in=self.train_prog)
-        self.courses_for_prof = {}
+        self.courses_for_tutor = {}
         for i in self.instructors:
-            self.courses_for_prof[i] = self.courses.filter(prof=i)
-        self.courses_for_profsupp = {}
+            self.courses_for_tutor[i] = self.courses.filter(tutor=i)
+        self.courses_for_supp_tutor = {}
         for i in self.instructors:
-            self.courses_for_profsupp[i] = self.courses.filter(profsupp=i)
+            self.courses_for_supp_tutor[i] = self.courses.filter(supp_tutor=i)
 
 
 class TTModel(object):
@@ -183,12 +183,12 @@ class TTModel(object):
                 card = 2 * len(dayslots)
                 expr = self.lin_expr()
                 expr += card * self.IBD[(i, d)]
-                for c in self.wdb.courses_for_prof[i]:
+                for c in self.wdb.courses_for_tutor[i]:
                     for sl in dayslots:
                         expr -= self.TT[(sl, c)]
                 self.add_constraint(expr, '>=', 0)
 
-                if self.wdb.fixed_courses.filter(cours__prof=i,
+                if self.wdb.fixed_courses.filter(cours__tutor=i,
                                                  creneau__jour=d):
                     self.add_constraint(self.IBD[(i, d)], '==', 1)
                     # This next constraint impides to force IBD to be 1
@@ -223,12 +223,12 @@ class TTModel(object):
                     expr = self.lin_expr()
                     expr += card * self.IBHD[(i, d, apm)]
                     for sl in halfdayslots:
-                        for c in self.wdb.courses_for_prof[i]:
+                        for c in self.wdb.courses_for_tutor[i]:
                             expr -= self.TT[(sl, c)]
                     self.add_constraint(expr, '>=', 0)
                     # This constraint impides to force IBHD to be 1
                     # (if there is a meeting, for example...)
-                    if self.wdb.fixed_courses.filter(cours__prof=i,
+                    if self.wdb.fixed_courses.filter(cours__tutor=i,
                                                      creneau__jour=d,
                                                      creneau__heure__apm=apm):
                         self.add_constraint(self.IBHD[(i, d, apm)], '==', 1)
@@ -412,9 +412,9 @@ class TTModel(object):
 
         for sl in self.wdb.slots:
             for i in self.wdb.instructors:
-                if self.wdb.fixed_courses.filter(cours__prof=i, creneau=sl):
-                    name = 'fixed_course_prof_' + str(i) + '_' + str(sl)
-                    instr_courses = self.wdb.courses_for_prof[i]
+                if self.wdb.fixed_courses.filter(cours__tutor=i, creneau=sl):
+                    name = 'fixed_course_tutor_' + str(i) + '_' + str(sl)
+                    instr_courses = self.wdb.courses_for_tutor[i]
                     self.add_constraint(
                         self.sum(self.TT[(sl, c)] for c in instr_courses),
                         '==',
@@ -422,11 +422,11 @@ class TTModel(object):
                         name=name)
                 else:
                     expr = self.lin_expr()
-                    for c in self.wdb.courses_for_prof[i]:
+                    for c in self.wdb.courses_for_tutor[i]:
                         expr += self.TT[(sl, c)]
-                    for c in self.wdb.courses_for_profsupp[i]:
+                    for c in self.wdb.courses_for_supp_tutor[i]:
                         expr += self.TT[(sl, c)]
-                    name = 'core_prof_' + str(i) + '_' + str(sl)
+                    name = 'core_tutor_' + str(i) + '_' + str(sl)
                     self.add_constraint(expr,
                                         '<=',
                                         self.avail_instr[i][sl],
@@ -593,21 +593,21 @@ class TTModel(object):
         # unpreferred slots for an instructor costs
         # min((float(nb_avail_slots) / min(2*nb_teaching_slots,22)),1)
         for i in self.wdb.instructors:
-            nb_teaching_slots = len(self.wdb.courses_for_prof[i])
+            nb_teaching_slots = len(self.wdb.courses_for_tutor[i])
             avail_instr[i] = {}
             unp_slot_cost[i] = {}
-            if self.wdb.availabilities.filter(prof=i):
-                availabilities = self.wdb.availabilities.filter(prof=i)
+            if self.wdb.availabilities.filter(tutor=i):
+                availabilities = self.wdb.availabilities.filter(tutor=i)
             else:
                 availabilities = Disponibilite \
                     .objects \
-                    .filter(prof=i,
+                    .filter(tutor=i,
                             semaine=None,
                             an=annee_courante)
 
             if not availabilities:
                 print "%s has given no availability information !" \
-                      % i.user.username
+                      % i.username
                 for slot in self.wdb.slots:
                     unp_slot_cost[i][slot] = 0
                     avail_instr[i][slot] = 1
@@ -622,7 +622,7 @@ class TTModel(object):
                 if nb_avail_slots < nb_teaching_slots:
                     print "%s has given %g available slots for %g courses..." \
                           " Every slot is considered available !" \
-                          % (i.user.username, nb_avail_slots, nb_teaching_slots)
+                          % (i.username, nb_avail_slots, nb_teaching_slots)
                     for a in availabilities:
                         avail_instr[i][a.creneau] = 1
                         if a.valeur >= 1:
@@ -647,7 +647,7 @@ class TTModel(object):
                                         and all(x.creneau.jour.no == 0
                                                 for x in availabilities.filter(valeur__gte=1))):
                     print "%s has given availabilities only on vacation days!" \
-                          % i.user.username
+                          % i.username
                     for a in availabilities:
                         avail_instr[i][a.creneau] = 1
                         if a.valeur >= 1:
@@ -674,7 +674,7 @@ class TTModel(object):
                             and nb_avail_slots < 2 * nb_teaching_slots:
                         print "%s: only %g available slots dispos " \
                               "for %g courses..." \
-                              % (i.user.username,
+                              % (i.username,
                                  nb_avail_slots,
                                  nb_teaching_slots)
                         for a in availabilities:
@@ -771,7 +771,7 @@ class TTModel(object):
                                   an=self.wdb.year).delete()
 
         for i in self.wdb.instructors:
-            cp = CoutProf(prof=i, an=self.wdb.year, semaine=self.wdb.week,
+            cp = CoutProf(tutor=i, an=self.wdb.year, semaine=self.wdb.week,
                           valeur=self.get_expr_value(self.cost_I[i]))
             cp.save()
 
@@ -794,7 +794,7 @@ class TTModel(object):
         # first objective  => minimise use of unpreferred slots for teachers
         # ponderation MIN_UPS_I
         for i in self.wdb.instructors:
-            MinNonPreferedSlot(prof=i,
+            MinNonPreferedSlot(tutor=i,
                                weight=max_weight) \
                 .enrich_model(self,
                               ponderation=self.min_ups_i)
