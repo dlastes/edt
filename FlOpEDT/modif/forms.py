@@ -24,22 +24,10 @@
 # without disclosing the source code of your own applications.
 
 from django import forms
-# from .models import Prof
+from .models import Tutor
 from django.contrib.auth.models import User
 
 
-# class ProfForm(forms.ModelForm):
-#    class Meta:
-#        model=Prof
-#        fields = '__all__'
-
-
-class UserForm(forms.ModelForm):
-    abbrev = forms.CharField(label='Votre abbréviation', max_length=3)
-
-    class Meta:
-        model = User
-        fields = '__all__'  # ('username', 'email', 'password')
 
 
 class ContactForm(forms.Form):
@@ -58,6 +46,6 @@ class ContactForm(forms.Form):
 
     def clean_recipient(self):
         recipient = self.cleaned_data['recipient']
-        if not User.objects.filter(username=recipient).exists():
+        if not Tutor.objects.filter(username = recipient).exists():
             raise forms.ValidationError("Cette personne n'existe pas.")
         return recipient

@@ -38,7 +38,7 @@ from .forms import ContactForm
 
 from .models import Cours, Disponibilite, CoursPlace, EdtVersion, \
     CoursModification, Creneau, Jour, Heure, RoomGroup, PlanifModification, \
-    Regen,  BreakingNews
+    Regen,  BreakingNews, Tutor
 # Prof,
 
 from .admin import CoursResource, DispoResource, \
@@ -367,7 +367,7 @@ def fetch_dispos(req):
                 .distinct('tutor') \
                 .values_list('tutor')
 
-            busy_inst = list(chain(busy_inst, req.user))
+            busy_inst = list(chain(busy_inst, [req.user]))
 
             week_avail = Disponibilite.objects \
                 .filter(semaine = semaine,
@@ -535,7 +535,7 @@ def edt_changes(req):
                            )
 
             if work_copy == 0:
-                edt_version = EdtVersion.objects\
+                edt_version, created = EdtVersion.objects\
                     .get_or_create(semaine = semaine,
                                    an = an,
                                    defaults = {'version': 0})
@@ -559,9 +559,9 @@ def edt_changes(req):
                             cp = CoursPlace(cours=co,
                                             copie_travail=work_copy)
 
-                        m = CoursModification(cours=co,
-                                              version_old=q.v,
-                                              user=req.user)
+                        m = CoursModification(cours = co,
+                                              version_old = q.v,
+                                              initiator = req.user)
                         # old_day = a.day.o
                         # old_slot = a.slot.o
                         new_day = a.day.n
@@ -841,15 +841,25 @@ def contact(req):
         form = ContactForm(req.POST)
         if form.is_valid():
             dat = form.cleaned_data
-            send_mail(
+            recip_send = [Tutor.objects.get(username =
+                                            dat.get("recipient")).email,
+                 dat.get("sender")]
+            try:
+                send_mail(
                 '[EdT IUT Blagnac] ' + dat.get("subject"),
                 u"(Cet e-mail vous a été envoyé depuis le site des emplois"
                 u" du temps de l'IUT de Blagnac)\n\n"
                 + dat.get("message"),
                 dat.get("sender"),
-                [User.objects.get(username=dat.get("recipient")).email,
-                 dat.get("sender")],
-            )
+                recip_send,
+                )
+            except:
+                ack = u'Envoi du mail impossible !'
+                return render(req, 'modif/contact.html',
+                              {'form': form,
+                               'ack': ack,
+                               'image': imgtxt})
+
             return edt(req, None, None, 1)
     else:
         init_mail = ''
