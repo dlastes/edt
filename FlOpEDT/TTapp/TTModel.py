@@ -38,8 +38,8 @@ from pulp import GUROBI_CMD, PULP_CBC_CMD
 from modif.models import Slot, Group, Day, Time, \
     Room, RoomGroup, RoomSort, RoomType, RoomPreference, \
     Course, ScheduledCourse, UserPreference, Tutor, CoursePreference, \
-    Module, TrainingProgramme, \
-    DemiJourFeriePromo, Dependency, TutorCost, GroupFreeHalfDay, GroupCost
+    Module, TrainingProgramme, CourseType, \
+    Dependency, TutorCost, GroupFreeHalfDay, GroupCost, HollyHalfDay
 
 from modif.weeks import annee_courante
 
@@ -99,7 +99,7 @@ class WeekDB(object):
                                                                       an=year)
         self.modules = Module.objects \
             .filter(id__in=self.courses.values_list('module_id').distinct())
-        self.PVHDs = DemiJourFeriePromo.objects.filter(
+        self.PVHDs = HollyHalfDay.objects.filter(
             semaine=week,
             an=year,
             train_prog__in=self.train_prog)
@@ -112,7 +112,7 @@ class WeekDB(object):
             self.courses_for_tutor[i] = self.courses.filter(tutor=i)
         self.courses_for_supp_tutor = {}
         for i in self.instructors:
-            self.courses_for_supp_tutor[i] = self.courses.filter(supp_tutor=i)
+            self.courses_for_supp_tutor[i] = i.courses_as_supp_set.all()
 
 
 class TTModel(object):
@@ -473,7 +473,7 @@ class TTModel(object):
                 if RoomPreference.objects.filter(semaine=self.semaine,
                                                  an=self.an,
                                                  creneau=sl,
-                                                 room=r).exists():
+                                                 room=r, valeur=0).exists():
                     limit = 0
                 else:
                     limit = 1
@@ -497,7 +497,7 @@ class TTModel(object):
                             semaine=self.semaine,
                             an=self.an,
                             creneau=sl,
-                            room=r).exists():
+                            room=r, valeur=0).exists():
                         # print r, "unavailable for ",sl
                         preferred_is_unavailable = True
                         break
@@ -697,16 +697,16 @@ class TTModel(object):
 
         non_prefered_slot_cost_course = {}
         avail_course = {}
-        for nature in [Course.TP, Course.TD, Course.DS, Course.CM]:
+        for type in CourseType.objects.all():
             for promo in self.train_prog:
-                avail_course[(nature, promo)] = {}
-                non_prefered_slot_cost_course[(nature, promo)] = {}
+                avail_course[(type, promo)] = {}
+                non_prefered_slot_cost_course[(type, promo)] = {}
                 courses_avail = self.wdb \
                     .courses_availabilities \
-                    .filter(nature=nature, train_prog=promo)
+                    .filter(type=type, train_prog=promo)
                 if not courses_avail:
                     courses_avail = CoursePreference.objects \
-                        .filter(nature=nature,
+                        .filter(type=type,
                                 train_prog=promo,
                                 semaine=None,
                                 an=annee_courante)
@@ -714,19 +714,19 @@ class TTModel(object):
                     try:
                         a = courses_avail.get(creneau=sl)
                         if a.valeur == 0:
-                            avail_course[(nature, promo)][a.creneau] = 0
-                            non_prefered_slot_cost_course[(nature,
+                            avail_course[(type, promo)][a.creneau] = 0
+                            non_prefered_slot_cost_course[(type,
                                                            promo)][
                                 a.creneau] = 5
                         else:
-                            avail_course[(nature, promo)][a.creneau] = 1
-                            non_prefered_slot_cost_course[(nature,
+                            avail_course[(type, promo)][a.creneau] = 1
+                            non_prefered_slot_cost_course[(type,
                                                            promo)][a.creneau] \
-                                = 1 - float(a.valeur) / 10
+                                = 1 - float(a.valeur) / 8
                     except:
                         print "Course availability problem " \
                               "for %s - promo%g on slot %s" \
-                              % (nature, promo, sl)
+                              % (type, promo, sl)
 
         return non_prefered_slot_cost_course, avail_course
 

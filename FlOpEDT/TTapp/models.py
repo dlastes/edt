@@ -69,16 +69,13 @@ class TTConstraint(models.Model):
         raise NotImplementedError
 
 
-
-class LimitNaturePerPeriod(TTConstraint):  # , pond):
+class LimitCourseTypePerPeriod(TTConstraint):  # , pond):
     """
-    Bound the number of courses of nature 'nature' per day/half day
-    Permet de limiter le nombre de cours de la nature 'nature' par
+    Bound the number of courses of type 'type' per day/half day
+    Permet de limiter le nombre de cours du type 'type' par
     jour/demi-journee
     """
-    nature = models.CharField(max_length=2,
-                              choices=Course.CHOIX_NATURE,
-                              null = True)
+    type = models.ForeignKey('modif.CourseType')
     limit = models.PositiveSmallIntegerField()
     train_prog = models.ForeignKey('modif.TrainingProgramme',
                                    null = True,
@@ -98,8 +95,8 @@ class LimitNaturePerPeriod(TTConstraint):  # , pond):
             fc = fc.filter(tutor = self.tutor)
         if self.module is not None:
             fc = fc.filter(module = self.module)
-        if self.nature is not None:
-            fc = fc.filter(nature = self.nature)
+        if self.type is not None:
+            fc = fc.filter(type = self.type)
         if self.train_prog is not None:
             fc = fc.filter(groupe__train_prog = self.train_prog)
         if self.period == self.FULL_DAY:
@@ -114,7 +111,7 @@ class LimitNaturePerPeriod(TTConstraint):  # , pond):
                     for c in fc:
                         expr += ttmodel.TT[(sl, c)]
                 if self.weight:
-                    var = ttmodel.add_floor('limit nature per period', expr,
+                    var = ttmodel.add_floor('limit course type per period', expr,
                                             int(self.limit) + 1, 100)
                     ttmodel.obj += self.local_weight() * ponderation * var
                 else:
@@ -183,11 +180,7 @@ class Stabilize(TTConstraint):
     tutor = models.ForeignKey('modif.Tutor',
                               null=True,
                               default = None)
-    nature = models.CharField(
-        max_length = 2,
-        choices = Course.CHOIX_NATURE,
-        null = True,
-        default = None)
+    type = models.ForeignKey('modif.CourseType', null = True, default = None)
     work_copy = models.PositiveSmallIntegerField(default=0)
 
     def enrich_model(self, ttmodel, ponderation=1):
@@ -218,8 +211,8 @@ class Stabilize(TTConstraint):
             fc = ttmodel.wdb.courses
             if self.tutor is not None:
                 fc = fc.filter(tutor = self.tutor)
-            if self.nature is not None:
-                fc = fc.filter(nature = self.nature)
+            if self.type is not None:
+                fc = fc.filter(type = self.type)
             if self.train_prog is not None:
                 fc = fc.filter(groupe__train_prog = self.train_prog)
             if self.group:
@@ -375,7 +368,7 @@ class MinNonPreferedSlot(TTConstraint):
                         if c.groupe in ttmodel.wdb.basic_groups_surgroups[g]:
                             cost = self.local_weight() \
                                    * ponderation * ttmodel.TT[(sl, c)] \
-                                   * ttmodel.unp_slot_cost_course[c.nature,
+                                   * ttmodel.unp_slot_cost_course[c.type,
                                                                   self.train_prog][sl]
                             ttmodel.add_to_group_cost(g, cost)
                             ttmodel.add_to_slot_cost(sl, cost)
@@ -476,16 +469,3 @@ class SimultaneousCourses(TTConstraint):
                     if (ttmodel.var_coeff(var1, group_constr),
                         ttmodel.var_coeff(var2, group_constr)) == (1, 1):
                         ttmodel.change_var_coeff(var2, group_constr, 0)
-
-
-class HollyHalfDay(TTConstraint):
-    apm = models.CharField(max_length = 2, choices = Time.CHOIX_DEMI_JOUR,
-                           verbose_name = "Demi-journée", null=True, default=None, blank=True)
-    day = models.ForeignKey('modif.models.Day')
-    week = models.PositiveSmallIntegerField(
-        validators = [MinValueValidator(0), MaxValueValidator(53)])
-    year = models.PositiveSmallIntegerField()
-    train_prog = models.ForeignKey('TrainingProgramme', null = True, default = None, blank=True)
-
-    def enrich_model(self, ttmodel, ponderation=1):
-        pass

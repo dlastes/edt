@@ -28,7 +28,7 @@ from __future__ import unicode_literals
 
 from django.contrib import admin
 
-from TTapp.models import LimitNaturePerPeriod, ReasonableDays, Stabilize, \
+from TTapp.models import LimitCourseTypePerPeriod, ReasonableDays, Stabilize, \
     MinHalfDays, MinNonPreferedSlot, AvoidBothSlots, SimultaneousCourses
 
 
@@ -54,7 +54,7 @@ from FlOpEDT.filters import DropdownFilterAll, DropdownFilterRel, \
 # admin.site.register(TestJour, TestJourAdmin)
 
 class LimitNaturePerPeriodAdmin(admin.ModelAdmin):
-    list_display = ('week', 'year', 'nature', 'limit', 'train_prog',
+    list_display = ('week', 'year', 'type', 'limit', 'train_prog',
                     'module', 'tutor', 'period', 'comment')
     ordering = ()
     empty_value_display = 'All!'
@@ -79,7 +79,7 @@ class ReasonableDaysAdmin(admin.ModelAdmin):
 
 class StabilizeAdmin(admin.ModelAdmin):
     list_display = ('week', 'year', 'train_prog', 'general',
-                    'group', 'tutor', 'module', 'nature', 'comment')
+                    'group', 'tutor', 'module', 'type', 'comment')
     ordering = ()
     empty_value_display = 'All!'
     list_filter = (('week', DropdownFilterAll),
@@ -88,7 +88,7 @@ class StabilizeAdmin(admin.ModelAdmin):
                    ('group', DropdownFilterRel),
                    ('tutor', DropdownFilterRel),
                    ('module', DropdownFilterRel),
-                   ('nature', DropdownFilterAll),
+                   ('type', DropdownFilterAll),
     )
 
 class MinHalfDaysAdmin(admin.ModelAdmin):
@@ -141,7 +141,7 @@ class SimultaneousCoursesAdmin(admin.ModelAdmin):
     )
 
 
-admin.site.register(LimitNaturePerPeriod, LimitNaturePerPeriodAdmin)
+admin.site.register(LimitCourseTypePerPeriod, LimitNaturePerPeriodAdmin)
 admin.site.register(ReasonableDays, ReasonableDaysAdmin)
 admin.site.register(Stabilize, StabilizeAdmin)
 admin.site.register(MinHalfDays, MinHalfDaysAdmin)

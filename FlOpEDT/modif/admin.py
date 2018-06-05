@@ -170,7 +170,7 @@ class TutorAdmin(admin.ModelAdmin):
 
 
 class GroupeAdmin(admin.ModelAdmin):
-    list_display = ('nom', 'nature', 'size', 'train_prog')
+    list_display = ('nom', 'type', 'size', 'train_prog')
     filter_horizontal = ('parent_groups', )
     ordering = ('size',)
     list_filter = (('train_prog', DropdownFilterRel),
@@ -195,13 +195,13 @@ class ModuleAdmin(admin.ModelAdmin):
 
 
 class CoursAdmin(admin.ModelAdmin):
-    list_display = ('module', 'nature', 'groupe', 'tutor', 'semaine', 'an')
-    ordering = ('an', 'semaine', 'module', 'nature', 'no', 'groupe', 'tutor')
+    list_display = ('module', 'type', 'groupe', 'tutor', 'semaine', 'an')
+    ordering = ('an', 'semaine', 'module', 'type', 'no', 'groupe', 'tutor')
     list_filter = (
         ('tutor', DropdownFilterRel),
         ('an', DropdownFilterAll),
         ('semaine', DropdownFilterAll),
-        ('nature', DropdownFilterCho),
+        ('type', DropdownFilterRel),
         ('groupe', DropdownFilterAll),
                    )
 
@@ -292,7 +292,7 @@ class BreakingNewsAdmin(admin.ModelAdmin):
 # search_fields = ['prof__username']
 # @admin.register(Cours)
 # class ModuleAggAdmin(admin.ModelAdmin):
-#     list_display = ('module','nature','semaine','prof','volh')
+#     list_display = ('module','type','semaine','prof','volh')
 #     list_filter = ('module','prof')
 
 #     def volh(self, obj):
@@ -301,7 +301,7 @@ class BreakingNewsAdmin(admin.ModelAdmin):
 #     def get_queryset(self, request):
 #         qs = super(ModuleAggAdmin, self).get_queryset(request)
 #         print qs
-#         return qs.values('nature', 'prof', 'module').annotate(volh=Count('id',
+#         return qs.values('type', 'prof', 'module').annotate(volh=Count('id',
 #                                                                distinct=True))
 
 admin.site.register(Tutor, TutorAdmin)

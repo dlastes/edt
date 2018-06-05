@@ -79,7 +79,7 @@ def basic_reassign_rooms(semaine, an, target_work_copy):
             # test if precedent.room is available
             prec_is_unavailable = False
             for r in precedent.room.subrooms.all():
-                if len(RoomPreference.objects.filter(semaine=semaine, an=an, creneau=sl, room=r)) > 0:
+                if RoomPreference.objects.filter(semaine=semaine, an=an, creneau=sl, room=r, valeur=0).exists():
                     prec_is_unavailable = True
                     break
             if prec_is_unavailable:

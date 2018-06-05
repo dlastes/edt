@@ -155,6 +155,16 @@ class Slot(CachingMixin, models.Model):
     def __str__(self):
         return "%s_%s" % (self.jour, self.heure)
 
+
+class HollyHalfDay(models.Model):
+    apm = models.CharField(max_length = 2, choices = Time.CHOIX_DEMI_JOUR,
+                           verbose_name = "Demi-journée", null=True, default=None, blank=True)
+    day = models.ForeignKey('modif.models.Day')
+    week = models.PositiveSmallIntegerField(
+        validators = [MinValueValidator(0), MaxValueValidator(53)])
+    year = models.PositiveSmallIntegerField()
+    train_prog = models.ForeignKey('TrainingProgramme', null = True, default = None, blank=True)
+
 # </editor-fold>
 
 # <editor-fold desc="ROOMS">
@@ -339,6 +349,7 @@ class RoomPreference(models.Model):
 
     def __str__(self):
         return "%s-Sem%s-cren%s=%s" % (self.room, self.semaine, self.creneau.id, self.valeur)
+
 
 
 
@@ -616,4 +627,5 @@ class Regen(models.Model):
 
         return ret
 
+# </editor-fold desc="MISC">
 # </editor-fold desc="MISC">
