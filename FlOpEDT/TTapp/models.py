@@ -45,7 +45,7 @@ from modif.models import Course, Time  # , Module
 #     truc = models.CharField(max_length=10, verbose_name="Truc",default="")
 
 
-max_weight = 10
+max_weight = 8
 
 
 class TTConstraint(models.Model):
@@ -110,7 +110,7 @@ class LimitCourseTypePerPeriod(TTConstraint):  # , pond):
                                                    heure__apm__contains=per):
                     for c in fc:
                         expr += ttmodel.TT[(sl, c)]
-                if self.weight:
+                if self.weight is not None:
                     var = ttmodel.add_floor('limit course type per period', expr,
                                             int(self.limit) + 1, 100)
                     ttmodel.obj += self.local_weight() * ponderation * var
@@ -146,7 +146,7 @@ class ReasonableDays(TTConstraint):
                 fc = fc.filter(groupe = self.group)
             for c1 in fc:
                 for c2 in fc.exclude(id__lte = c1.id):
-                    if self.weight:
+                    if self.weight is not None:
                         conj_var = ttmodel.add_conjunct(
                             ttmodel.TT[(slfirst, c1)],
                             ttmodel.TT[(sllast, c2)])
@@ -226,7 +226,7 @@ class Stabilize(TTConstraint):
                          copie_travail = self.work_copy)
                 chosen_slot = sched_c.creneau
                 chosen_roomgroup = sched_c.room
-                if self.weight:
+                if self.weight is not None:
                     ttmodel.obj -= self.local_weight() \
                                    * ponderation * ttmodel.TT[(chosen_slot, c)]
 
@@ -297,7 +297,7 @@ class MinHalfDays(TTConstraint):
         ttmodel.add_constraint(local_var, '==', 1)
         limit = (len(fc) - 1) / 3 + 1
 
-        if self.weight:
+        if self.weight is not None:
             ttmodel.obj += self.local_weight() \
                            * ponderation \
                            * (b_h_ds - limit * local_var)
@@ -400,7 +400,7 @@ class AvoidBothSlots(TTConstraint):
             fc = fc.filter(groupe = self.group)
         for c1 in fc:
             for c2 in fc.exclude(id__lte=c1.id):
-                if self.weight:
+                if self.weight is not None:
                     conj_var = ttmodel.add_conjunct(
                         ttmodel.TT[(self.slot1, c1)],
                         ttmodel.TT[(self.slot2, c2)])
