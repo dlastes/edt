@@ -54,6 +54,7 @@ class BreakingNews(models.Model):
     y = models.PositiveSmallIntegerField(null = True, default = None,
                                          blank = True)
     txt = models.CharField(max_length = 200)
+    is_linked = models.URLField(max_length = 200, null=True, blank=True, default=None)
     fill_color = ColorField(default = '#228B22')
     # stroke color
     strk_color = ColorField(default = '#000000')
@@ -79,19 +80,17 @@ class TrainingProgramme(models.Model):
     def __unicode__(self):
         return self.abbrev
 
+class GroupType(models.Model):
+    name = models.CharField(max_length = 50)
 
-class Groupe(models.Model):
-    ENTIERE = 'to'
-    TD = 'TD'
-    TP = 'TP'
-    CHOIX_NATURE = ((ENTIERE, 'Classe entière'),
-                    (TD, 'Groupe TD'),
-                    (TP, 'Groupe TP'))
+    def __unicode__(self):
+        return self.name
+
+
+class Group(models.Model):
     nom = models.CharField(max_length = 4)
     train_prog = models.ForeignKey('TrainingProgramme')
-    nature = models.CharField(max_length = 2,
-                              choices = CHOIX_NATURE,
-                              verbose_name = 'Type de classe')
+    type = models.ForeignKey('GroupType')
     size = models.PositiveSmallIntegerField()
     basic = models.BooleanField(verbose_name = 'Basic group?', default = False)
     parent_groups = models.ManyToManyField('self',
@@ -123,22 +122,22 @@ class Groupe(models.Model):
 # ------------
 
 
-class Jour(models.Model):
+class Day(models.Model):
     no = models.PositiveSmallIntegerField(primary_key = True,
-                                          verbose_name = "Numéro")
-    nom = models.CharField(max_length=10, verbose_name = "Nom")
+                                          verbose_name = "Number")
+    nom = models.CharField(max_length=10, verbose_name = "Name")
 
-    def __str__(self):
+    def __unicode__(self):
         return self.nom[:3]
 
 
-class Heure(models.Model):
+class Time(models.Model):
     MATIN = 'AM'
     APREM = 'PM'
-    CHOIX_DEMI_JOUR = ((MATIN, 'Matin'), (APREM, 'Après-midi'))
+    CHOIX_DEMI_JOUR = ((MATIN, 'AM'), (APREM, 'PM'))
     apm = models.CharField(max_length = 2,
                            choices = CHOIX_DEMI_JOUR,
-                           verbose_name = "Demi-journée",
+                           verbose_name = "Half day",
                            default = MATIN)
     no = models.PositiveSmallIntegerField(primary_key=True)
     nom = models.CharField(max_length=20)
@@ -148,10 +147,10 @@ class Heure(models.Model):
 
 
 # class Creneau(models.Model):
-class Creneau(CachingMixin, models.Model):
+class Slot(CachingMixin, models.Model):
     objects = CachingManager()
-    jour = models.ForeignKey('Jour')
-    heure = models.ForeignKey('Heure')
+    jour = models.ForeignKey('modif.models.Day')
+    heure = models.ForeignKey('modif.models.Time')
 
     def __str__(self):
         return "%s_%s" % (self.jour, self.heure)
@@ -197,7 +196,7 @@ class Room(CachingMixin, models.Model):
         return self.name
 
 
-class RoomPreference(models.Model):
+class RoomSort(models.Model):
     for_type = models.ForeignKey(RoomType, blank = True, null = True,
                                  related_name = '+')
     prefer = models.ForeignKey(RoomGroup, blank = True, null = True,
@@ -235,19 +234,16 @@ class Module(models.Model):
 
 
 
+class CourseType(models.Model):
+    name = models.CharField(max_length=50)
+
+    def __unicode__(self):
+        return self.name
 
 # class Cours(models.Model):
-class Cours(CachingMixin, models.Model):
+class Course(CachingMixin, models.Model):
     objects = CachingManager()
-    CM = 'CM'
-    TD = 'TD'
-    TP = 'TP'
-    DS = 'DS'
-    CHOIX_NATURE = ((CM, 'Cours magistral'),
-                    (TD, 'Travaux Dirigés'),
-                    (TP, 'Travaux Pratiques'),
-                    (DS, 'Devoir surveillé'))
-    nature = models.CharField(max_length = 2, choices = CHOIX_NATURE)
+    type = models.ForeignKey('modif.models.CourseType')
     room_type = models.ForeignKey('RoomType', null = True)
     no = models.PositiveSmallIntegerField(null = True, blank = True)
     tutor = models.ForeignKey('Tutor',
@@ -259,7 +255,7 @@ class Cours(CachingMixin, models.Model):
                                    null = True,
                                    default = None,
                                    blank = True)
-    groupe = models.ForeignKey('Groupe')
+    groupe = models.ForeignKey('modif.models.Group')
     module = models.ForeignKey('Module', related_name = 'module')
     modulesupp = models.ForeignKey('Module', related_name = 'modulesupp',
                                    null = True, blank = True)
@@ -271,16 +267,16 @@ class Cours(CachingMixin, models.Model):
 
     def __str__(self):
         return "%s-%s-%s-%s" % \
-               (self.module, self.nature,
+               (self.module, self.type,
                 self.tutor.username if self.tutor is not None else '-no_tut-',
                 self.groupe)
 
 
 # class CoursPlace(models.Model):
-class CoursPlace(CachingMixin, models.Model):
+class ScheduledCourse(CachingMixin, models.Model):
     objects = CachingManager()
-    cours = models.ForeignKey('Cours')
-    creneau = models.ForeignKey('Creneau')
+    cours = models.ForeignKey('modif.models.Course')
+    creneau = models.ForeignKey('modif.models.Slot')
     room = models.ForeignKey('RoomGroup', blank=True, null=True)
     no = models.PositiveSmallIntegerField(null=True, blank=True)
     noprec = models.BooleanField(
@@ -299,31 +295,31 @@ class CoursPlace(CachingMixin, models.Model):
 # -----------------
 
 
-class Disponibilite(models.Model):
-    tutor = models.ForeignKey('User')
+class UserPreference(models.Model):
+    user = models.ForeignKey('User')
     semaine = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)], null = True)
     an = models.PositiveSmallIntegerField(null = True)
-    creneau = models.ForeignKey('Creneau')
+    creneau = models.ForeignKey('modif.models.Slot')
     valeur = models.SmallIntegerField(
-        validators = [MinValueValidator(0), MaxValueValidator(10)],
-        default = 10)
+        validators = [MinValueValidator(0), MaxValueValidator(8)],
+        default = 8)
 
     def __str__(self):
         return "%s-Sem%s: %s=%s" % \
-               (self.tutor.username, self.semaine, self.creneau, self.valeur)
+               (self.user.username, self.semaine, self.creneau, self.valeur)
 
 
-class DispoCours(models.Model):
-    nature = models.CharField(max_length = 2, choices = Cours.CHOIX_NATURE)
-    semaine = models.PositiveSmallIntegerField(
-        validators = [MinValueValidator(0), MaxValueValidator(53)],
-        null = True)
-    an = models.PositiveSmallIntegerField(null = True)
-    creneau = models.ForeignKey('Creneau')
-    valeur = models.SmallIntegerField(
-        validators = [MinValueValidator(0), MaxValueValidator(10)])
+class CoursePreference(models.Model):
+    course_type = models.ForeignKey('modif.models.CourseType')
     train_prog = models.ForeignKey('TrainingProgramme')
+    semaine = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(0), MaxValueValidator(53)], null = True)
+    an = models.PositiveSmallIntegerField(null = True)
+    creneau = models.ForeignKey('modif.models.Slot')
+    valeur = models.SmallIntegerField(
+        validators = [MinValueValidator(0), MaxValueValidator(8)],
+        default = 8)
 
     def __str__(self):
         return "%s=Sem%s:%s-%s=%s" % \
@@ -331,29 +327,20 @@ class DispoCours(models.Model):
                 self.valeur)
 
 
-class RoomUnavailability(models.Model):
+class RoomPreference(models.Model):
     room = models.ForeignKey('Room')
     semaine = models.PositiveSmallIntegerField(
-        validators = [MinValueValidator(0), MaxValueValidator(53)])
-    an = models.PositiveSmallIntegerField()
-    creneau = models.ForeignKey('Creneau')
+        validators=[MinValueValidator(0), MaxValueValidator(53)], null = True)
+    an = models.PositiveSmallIntegerField(null = True)
+    creneau = models.ForeignKey('modif.models.Slot')
+    valeur = models.SmallIntegerField(
+        validators = [MinValueValidator(0), MaxValueValidator(8)],
+        default = 8)
 
     def __str__(self):
-        return "%s-Sem%s-cren%s" % (self.room, self.semaine, self.creneau.id)
+        return "%s-Sem%s-cren%s=%s" % (self.room, self.semaine, self.creneau.id, self.valeur)
 
 
-class DemiJourFeriePromo(models.Model):
-    apm = models.CharField(max_length = 2, choices = Heure.CHOIX_DEMI_JOUR,
-                           verbose_name = "Demi-journée",
-                           default = Heure.MATIN)
-    jour = models.ForeignKey('Jour')
-    semaine = models.PositiveSmallIntegerField(
-        validators = [MinValueValidator(0), MaxValueValidator(53)])
-    an = models.PositiveSmallIntegerField()
-    train_prog = models.ForeignKey('TrainingProgramme')
-
-    def __str__(self):
-        return "%s-sem %s- %sA" % (self.jour, self.semaine, self.train_prog)
 
 # </editor-fold desc="PREFERENCES">
 
@@ -372,13 +359,13 @@ class EdtVersion(models.Model):
 
 
 # null iff no change
-class CoursModification(models.Model):
-    cours = models.ForeignKey('Cours')
+class CourseModification(models.Model):
+    cours = models.ForeignKey('modif.models.Course')
     semaine_old = models.PositiveSmallIntegerField(
         validators = [MinValueValidator(0), MaxValueValidator(53)], null = True)
     an_old = models.PositiveSmallIntegerField(null = True)
     room_old = models.ForeignKey('RoomGroup', blank = True, null = True)
-    creneau_old = models.ForeignKey('Creneau', null = True)
+    creneau_old = models.ForeignKey('modif.models.Slot', null = True)
     version_old = models.PositiveIntegerField()
     updated_at = models.DateTimeField(auto_now = True)
     initiator = models.ForeignKey('Tutor')
@@ -401,8 +388,8 @@ class CoursModification(models.Model):
                                            olds)
 
 
-class PlanifModification(models.Model):
-    cours = models.ForeignKey('Cours')
+class PlanningModification(models.Model):
+    cours = models.ForeignKey('modif.models.Course')
     semaine_old = models.PositiveSmallIntegerField(
         validators = [MinValueValidator(0), MaxValueValidator(53)], null = True)
     an_old = models.PositiveSmallIntegerField(null=True)
@@ -422,7 +409,7 @@ class PlanifModification(models.Model):
 # -----------
 
 
-class CoutProf(models.Model):
+class TutorCost(models.Model):
     semaine = models.PositiveSmallIntegerField(
         validators = [MinValueValidator(0), MaxValueValidator(53)])
     an = models.PositiveSmallIntegerField()
@@ -433,22 +420,22 @@ class CoutProf(models.Model):
         return "sem%s-%s:%s" % (self.semaine, self.tutor.username, self.valeur)
 
 
-class CoutGroupe(models.Model):
+class GroupCost(models.Model):
     semaine = models.PositiveSmallIntegerField(
         validators = [MinValueValidator(0), MaxValueValidator(53)])
     an = models.PositiveSmallIntegerField()
-    groupe = models.ForeignKey('Groupe')
+    groupe = models.ForeignKey('modif.models.Group')
     valeur = models.FloatField()
 
     def __str__(self):
         return "sem%s-%s:%s" % (self.semaine, self.groupe, self.valeur)
 
 
-class DJLGroupe(models.Model):
+class GroupFreeHalfDay(models.Model):
     semaine = models.PositiveSmallIntegerField(
         validators = [MinValueValidator(0), MaxValueValidator(53)])
     an = models.PositiveSmallIntegerField()
-    groupe = models.ForeignKey('Groupe')
+    groupe = models.ForeignKey('modif.models.Group')
     DJL = models.PositiveSmallIntegerField()
 
     def __str__(self):
@@ -462,18 +449,13 @@ class DJLGroupe(models.Model):
 # ------------
 
 
-class Tutor(AbstractUser):
-    VAC = 'Vac'
-    BIATOS = 'BIA'
-    FULL_STAFF = 'FuS'
-    CHOICE_STATUS = ((VAC, 'Vacataire'),
-                    (FULL_STAFF, 'Permanent UT2J (IUT ou non)'),
-                    (BIATOS, 'BIATOS'))
-    status = models.CharField(max_length = 3,
-                              choices = CHOICE_STATUS,
-                              default = FULL_STAFF)
+class User(AbstractUser):
+    pass
+
+
+class Tutor(User):
     pref_slots_per_day = models.PositiveSmallIntegerField(
-        verbose_name = "Combien de créneaux par jour au mieux ?",
+        verbose_name = "How many slots per day would you prefer ?",
         default = 4)
     rights = models.PositiveSmallIntegerField(verbose_name = "Peut forcer ?",
                                               default = 0)
@@ -524,12 +506,11 @@ class BIATOS(models.Model):
 # TPeqTD = models.BooleanField()self.periode
 
 
-# class Student(models.Model):  # for now: representative
-#     user = models.OneToOneField(User, on_delete=models.CASCADE)
-#     group = models.ForeignKey('Groupe')
-#
-#     def __str__(self):
-#         return str(self.user) + u'(G:' + str(self.group) + u')'
+class Student(User):  # for now: representative
+    group = models.ForeignKey('Groupe')
+
+    def __str__(self):
+        return str(self.username) + u'(G:' + str(self.group) + u')'
 
 # </editor-fold desc="TUTORS">
 
@@ -559,7 +540,7 @@ class TrainingProgrammeDisplay(models.Model):
 
 
 class GroupDisplay(models.Model):
-    group = models.OneToOneField('Groupe',
+    group = models.OneToOneField('modif.models.Group',
                                  related_name = 'display')
     button_height = models.PositiveIntegerField(null = True, default = None)
     button_txt = models.CharField(max_length = 20, null = True, default = None)
@@ -576,9 +557,9 @@ class GroupDisplay(models.Model):
 # ----------
 
 
-class Precede(models.Model):
-    cours1 = models.ForeignKey('Cours', related_name='cours1')
-    cours2 = models.ForeignKey('Cours', related_name='cours2')
+class Dependency(models.Model):
+    cours1 = models.ForeignKey('modif.models.Course', related_name='cours1')
+    cours2 = models.ForeignKey('modif.models.Course', related_name='cours2')
     successifs = models.BooleanField(verbose_name='Successifs?', default=False)
     ND = models.BooleanField(verbose_name='Jours differents', default=False)
 
@@ -636,33 +617,3 @@ class Regen(models.Model):
         return ret
 
 # </editor-fold desc="MISC">
-
-
-# Possible evolutions
-# ====================
-
-
-# from django.contrib.auth.models import AbstractUser
-# class User(AbstractUser):
-#    abbrev = models.CharField(max_length=3, blank=False)
-
-# need postgresql !
-#
-# class Dispo(models.Model):
-#     prof = models.ForeignKey("Prof")
-#     semaine = models.PositiveSmallIntegerField(
-#                 validators=[MinValueValidator(0),MaxValueValidator(53)])
-#     an = models.PositiveSmallIntegerField()
-#     dispo = ArrayField(models.SmallIntegerField(),size=30)
-
-
-# class ProfU(models.Model):
-#     id = models.UUIDField(primary_key=True,
-#                           default=uuid.uuid4,
-#                           editable=False)
-#     user = models.ForeignKey(User, related_name='user',null=True)
-#     LBD = models.PositiveSmallIntegerField(
-#                      validators=[MinValueValidator(0),MaxValueValidator(4)],
-#     verbose_name="Limitation du nombre de jours", default=2)
-#     def __str__(self):
-#         return self.abbrev

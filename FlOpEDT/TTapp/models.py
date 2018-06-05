@@ -38,7 +38,7 @@ from django.utils.translation import ugettext_lazy as _
 
 # from caching.base import CachingManager, CachingMixin
 
-from modif.models import Cours, Heure  # , Module
+from modif.models import Course, Time  # , Module
 
 # class TestJour(models.Model):
 #     jour = models.ForeignKey('modif.Jour')
@@ -69,6 +69,7 @@ class TTConstraint(models.Model):
         raise NotImplementedError
 
 
+
 class LimitNaturePerPeriod(TTConstraint):  # , pond):
     """
     Bound the number of courses of nature 'nature' per day/half day
@@ -76,7 +77,7 @@ class LimitNaturePerPeriod(TTConstraint):  # , pond):
     jour/demi-journee
     """
     nature = models.CharField(max_length=2,
-                              choices=Cours.CHOIX_NATURE,
+                              choices=Course.CHOIX_NATURE,
                               null = True)
     limit = models.PositiveSmallIntegerField()
     train_prog = models.ForeignKey('modif.TrainingProgramme',
@@ -104,7 +105,7 @@ class LimitNaturePerPeriod(TTConstraint):  # , pond):
         if self.period == self.FULL_DAY:
             periods = ['']
         else:
-            periods = [Heure.MATIN, Heure.APREM]
+            periods = [Time.MATIN, Time.APREM]
         for d in ttmodel.wdb.days:
             for per in periods:
                 expr = ttmodel.lin_expr()
@@ -130,7 +131,7 @@ class ReasonableDays(TTConstraint):
     train_prog = models.ForeignKey('modif.TrainingProgramme',
                                    null=True,
                                    default=None)
-    group = models.ForeignKey('modif.Groupe', null=True)
+    group = models.ForeignKey('modif.Group', null=True)
     tutor = models.ForeignKey('modif.Tutor',
                               null = True,
                               default = None)
@@ -177,14 +178,14 @@ class Stabilize(TTConstraint):
     train_prog = models.ForeignKey('modif.TrainingProgramme',
                                    null=True,
                                    default=None)
-    group = models.ForeignKey('modif.Groupe', null=True, default=None)
+    group = models.ForeignKey('modif.Group', null=True, default=None)
     module = models.ForeignKey('modif.Module', null=True, default=None)
     tutor = models.ForeignKey('modif.Tutor',
                               null=True,
                               default = None)
     nature = models.CharField(
         max_length = 2,
-        choices = Cours.CHOIX_NATURE,
+        choices = Course.CHOIX_NATURE,
         null = True,
         default = None)
     work_copy = models.PositiveSmallIntegerField(default=0)
@@ -267,7 +268,7 @@ class MinHalfDays(TTConstraint):
             b_h_ds = ttmodel.sum(
                 ttmodel.IBHD[(self.tutor, d, apm)]
                 for d in ttmodel.wdb.days
-                for apm in [Heure.MATIN, Heure.APREM])
+                for apm in [Time.MATIN, Time.APREM])
             local_var = ttmodel.add_var("MinIBHD_var_%s" % self.tutor)
         elif self.module is not None:
             local_var = ttmodel.add_var("MinMBHD_var_%s" % self.module)
@@ -295,7 +296,7 @@ class MinHalfDays(TTConstraint):
             b_h_ds = ttmodel.sum(
                 mod_b_h_d[(self.module, d, apm)]
                 for d in ttmodel.wdb.days
-                for apm in [Heure.MATIN, Heure.APREM])
+                for apm in [Time.MATIN, Time.APREM])
         else:
             print "MinHalfDays must have module or prof --> Ignored"
             return
@@ -386,12 +387,12 @@ class AvoidBothSlots(TTConstraint):
     Idéalement, on pourrait paramétrer slot1, et slot2 à partir de slot1... Genre slot1
     c'est 8h n'importe quel jour, et slot2 14h le même jour...
     """
-    slot1 = models.ForeignKey('modif.Creneau', related_name='slot1')
-    slot2 = models.ForeignKey('modif.Creneau', related_name='slot2')
+    slot1 = models.ForeignKey('modif.Slot', related_name='slot1')
+    slot2 = models.ForeignKey('modif.Slot', related_name='slot2')
     train_prog = models.ForeignKey('modif.TrainingProgramme',
                                    null=True,
                                    default=None)
-    group = models.ForeignKey('modif.Groupe', null=True)
+    group = models.ForeignKey('modif.Group', null=True)
     tutor = models.ForeignKey('modif.Tutor',
                               null = True,
                               default = None)
@@ -444,8 +445,8 @@ class SimultaneousCourses(TTConstraint):
     Force two courses to be simultaneous
     It modifies the core constraints that impides such a simultaneity
     """
-    course1 = models.ForeignKey('modif.Cours', related_name='course1')
-    course2 = models.ForeignKey('modif.Cours', related_name='course2')
+    course1 = models.ForeignKey('modif.Course', related_name='course1')
+    course2 = models.ForeignKey('modif.Course', related_name='course2')
 
     def enrich_model(self, ttmodel, ponderation=1):
         same_tutor = (self.course1.tutor == self.course2.tutor)
@@ -475,3 +476,16 @@ class SimultaneousCourses(TTConstraint):
                     if (ttmodel.var_coeff(var1, group_constr),
                         ttmodel.var_coeff(var2, group_constr)) == (1, 1):
                         ttmodel.change_var_coeff(var2, group_constr, 0)
+
+
+class HollyHalfDay(TTConstraint):
+    apm = models.CharField(max_length = 2, choices = Time.CHOIX_DEMI_JOUR,
+                           verbose_name = "Demi-journée", null=True, default=None, blank=True)
+    day = models.ForeignKey('modif.models.Day')
+    week = models.PositiveSmallIntegerField(
+        validators = [MinValueValidator(0), MaxValueValidator(53)])
+    year = models.PositiveSmallIntegerField()
+    train_prog = models.ForeignKey('TrainingProgramme', null = True, default = None, blank=True)
+
+    def enrich_model(self, ttmodel, ponderation=1):
+        pass

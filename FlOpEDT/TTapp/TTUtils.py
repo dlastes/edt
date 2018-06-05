@@ -25,7 +25,7 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from modif.models import Creneau, CoursPlace, RoomUnavailability
+from modif.models import Slot, ScheduledCourse, RoomPreference
 from django.db.models import Max
 
 def basic_reassign_rooms(semaine, an, target_work_copy):
@@ -33,16 +33,16 @@ def basic_reassign_rooms(semaine, an, target_work_copy):
     Reassign the rooms...
     """
     print "reassigning rooms to minimize moves...",
-    for sl in Creneau.objects.all():
+    for sl in Slot.objects.all():
         if sl.heure.no in [0, 3]:
             continue
-        nsl = CoursPlace.objects.filter(cours__semaine=semaine,
-                                        cours__an=an,
-                                        creneau=sl,
-                                        copie_travail=target_work_copy)
+        nsl = ScheduledCourse.objects.filter(cours__semaine=semaine,
+                                             cours__an=an,
+                                             creneau=sl,
+                                             copie_travail=target_work_copy)
         # print sl
         for CP in nsl:
-            precedent = CoursPlace \
+            precedent = ScheduledCourse \
                 .objects \
                 .filter(cours__semaine=semaine,
                         cours__an=an,
@@ -52,7 +52,7 @@ def basic_reassign_rooms(semaine, an, target_work_copy):
                         cours__groupe=CP.cours.groupe,
                         copie_travail=target_work_copy)
             if len(precedent) == 0:
-                precedent = CoursPlace \
+                precedent = ScheduledCourse \
                     .objects \
                     .filter(cours__semaine=semaine,
                             cours__an=an,
@@ -65,7 +65,7 @@ def basic_reassign_rooms(semaine, an, target_work_copy):
                     continue
             precedent = precedent[0]
             # print "### has prec, trying to reassign:", precedent, "\n\t",
-            cp_using_prec = CoursPlace \
+            cp_using_prec = ScheduledCourse \
                 .objects \
                 .filter(cours__semaine=semaine,
                         cours__an=an,
@@ -79,7 +79,7 @@ def basic_reassign_rooms(semaine, an, target_work_copy):
             # test if precedent.room is available
             prec_is_unavailable = False
             for r in precedent.room.subrooms.all():
-                if len(RoomUnavailability.objects.filter(semaine=semaine, an=an, creneau=sl, room=r)) > 0:
+                if len(RoomPreference.objects.filter(semaine=semaine, an=an, creneau=sl, room=r)) > 0:
                     prec_is_unavailable = True
                     break
             if prec_is_unavailable:
@@ -104,7 +104,7 @@ def basic_reassign_rooms(semaine, an, target_work_copy):
 def basic_swap_version(week, year, copy_a, copy_b=0):
 
     try:
-        tmp_wc = CoursPlace \
+        tmp_wc = ScheduledCourse \
                      .objects \
                      .filter(cours__semaine=week,
                              cours__an=year) \
@@ -113,14 +113,14 @@ def basic_swap_version(week, year, copy_a, copy_b=0):
         print 'No scheduled courses'
         return
 
-    for cp in CoursPlace.objects.filter(cours__an=year, cours__semaine=week, copie_travail=copy_a):
+    for cp in ScheduledCourse.objects.filter(cours__an=year, cours__semaine=week, copie_travail=copy_a):
         cp.copie_travail = tmp_wc
         cp.save()
 
-    for cp in CoursPlace.objects.filter(cours__an=year, cours__semaine=week, copie_travail=copy_b):
+    for cp in ScheduledCourse.objects.filter(cours__an=year, cours__semaine=week, copie_travail=copy_b):
         cp.copie_travail = copy_a
         cp.save()
 
-    for cp in CoursPlace.objects.filter(cours__an=year, cours__semaine=week, copie_travail=tmp_wc):
+    for cp in ScheduledCourse.objects.filter(cours__an=year, cours__semaine=week, copie_travail=tmp_wc):
         cp.copie_travail = copy_b
         cp.save()

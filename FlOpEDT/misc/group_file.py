@@ -1,4 +1,4 @@
-from modif.models import Groupe, TrainingProgramme, GroupDisplay, \
+from modif.models import Group, TrainingProgramme, GroupDisplay, \
     TrainingProgrammeDisplay
 from django.core.exceptions import ObjectDoesNotExist
 import json
@@ -12,7 +12,7 @@ def generate_group_file():
 
         gp_dict_children = {}
         gp_master = None
-        for gp in Groupe.objects.filter(train_prog = train_prog):
+        for gp in Group.objects.filter(train_prog = train_prog):
             if gp.full_name() in gp_dict_children:
                 raise Exception('Group name should be unique')
             if len(gp.parent_groups) == 0:
@@ -25,7 +25,7 @@ def generate_group_file():
                                 'handled')
             gp_dict_children[gp.full_name()] = []
 
-        for gp in Groupe.objects.filter(train_prog = train_prog):
+        for gp in Group.objects.filter(train_prog = train_prog):
             for new_gp in gp.parent_groups:
                 gp_dict_children[new_gp.full_name()].append(gp)
 

@@ -25,9 +25,9 @@
 
 from django.contrib import admin
 
-from modif.models import Jour, RoomGroup, Module, Cours, Groupe, Creneau, \
-    Disponibilite, Heure, CoursPlace, EdtVersion, CoursModification, \
-    PlanifModification, BreakingNews, TrainingProgramme, ModuleDisplay, Tutor
+from modif.models import Day, RoomGroup, Module, Course, Group, Slot, \
+    UserPreference, Time, ScheduledCourse, EdtVersion, CourseModification, \
+    PlanningModification, BreakingNews, TrainingProgramme, ModuleDisplay, Tutor
 # Prof
 
 from import_export import resources, fields
@@ -49,10 +49,10 @@ from FlOpEDT.filters import DropdownFilterAll, DropdownFilterRel, \
 class CoursPlaceResource(resources.ModelResource):
     id = fields.Field(column_name='id_cours',
                       attribute='cours',
-                      widget=ForeignKeyWidget(Cours, 'id'))
+                      widget=ForeignKeyWidget(Course, 'id'))
     no = fields.Field(column_name='num_cours',
                       attribute='cours',
-                      widget=ForeignKeyWidget(Cours, 'no'))
+                      widget=ForeignKeyWidget(Course, 'no'))
     prof = fields.Field(column_name='prof_nom',
                         attribute='cours__tutor',
                         widget=ForeignKeyWidget(Tutor, 'username'))
@@ -65,7 +65,7 @@ class CoursPlaceResource(resources.ModelResource):
     #                               widget=ForeignKeyWidget(Tutor, 'last_name'))
     groupe = fields.Field(column_name='gpe_nom',
                           attribute='cours__groupe',
-                          widget=ForeignKeyWidget(Groupe, 'nom'))
+                          widget=ForeignKeyWidget(Group, 'nom'))
     promo = fields.Field(column_name='gpe_promo',
                          attribute='cours__groupe__train_prog',
                          widget=ForeignKeyWidget(TrainingProgramme, 'abbrev'))
@@ -74,10 +74,10 @@ class CoursPlaceResource(resources.ModelResource):
                           widget=ForeignKeyWidget(Module, 'abbrev'))
     jour = fields.Field(column_name='jour',
                         attribute='creneau__jour',
-                        widget=ForeignKeyWidget(Jour, 'no'))
+                        widget=ForeignKeyWidget(Day, 'no'))
     heure = fields.Field(column_name='heure',
                          attribute='creneau__heure',
-                         widget=ForeignKeyWidget(Heure, 'no'))
+                         widget=ForeignKeyWidget(Time, 'no'))
     # salle = fields.Field(column_name = 'salle',
     #                      attribute = 'salle',
     #                      widget = ForeignKeyWidget(Salle,'nom'))
@@ -92,7 +92,7 @@ class CoursPlaceResource(resources.ModelResource):
                         widget=ForeignKeyWidget(ModuleDisplay, 'color_txt'))
 
     class Meta:
-        model = CoursPlace
+        model = ScheduledCourse
         fields = ('id', 'no', 'groupe', 'promo', 'color_bg', 'color_txt',
                   'module', 'jour', 'heure', 'semaine', 'room', 'prof')
 
@@ -109,7 +109,7 @@ class CoursResource(resources.ModelResource):
                           widget=ForeignKeyWidget(Module, 'abbrev'))
     groupe = fields.Field(column_name='groupe',
                           attribute='groupe',
-                          widget=ForeignKeyWidget(Groupe, 'nom'))
+                          widget=ForeignKeyWidget(Group, 'nom'))
     color_bg = fields.Field(column_name='color_bg',
                         attribute='module__display',
                         widget=ForeignKeyWidget(ModuleDisplay, 'color_bg'))
@@ -118,28 +118,28 @@ class CoursResource(resources.ModelResource):
                         widget=ForeignKeyWidget(ModuleDisplay, 'color_txt'))
 
     class Meta:
-        model = Cours
+        model = Course
         fields = ('id', 'no', 'tutor_name', 'groupe', 'promo', 'module',
                   'color_bg', 'color_txt', 'prof')
 
 
 class SemaineAnResource(resources.ModelResource):
     class Meta:
-        model = Cours
+        model = Course
         fields = ("semaine", "an")
 
 
 class DispoResource(resources.ModelResource):
-    prof = fields.Field(attribute='tutor',
-                        widget=ForeignKeyWidget(Tutor, 'username'))
+    prof = fields.Field(attribute='user',
+                        widget=ForeignKeyWidget(User, 'username'))
     jour = fields.Field(attribute='creneau__jour',
-                        widget=ForeignKeyWidget(Jour, 'no'))
+                        widget=ForeignKeyWidget(Day, 'no'))
     heure = fields.Field(attribute='creneau__heure',
-                         widget=ForeignKeyWidget(Heure, 'no'))
+                         widget=ForeignKeyWidget(Time, 'no'))
 
     class Meta:
-        model = Disponibilite
-        fields = ('tutor_name', 'jour', 'heure', 'valeur', 'prof')
+        model = UserPreference
+        fields = ('jour', 'heure', 'valeur', 'prof')
 
 
 class BreakingNewsResource(resources.ModelResource):
@@ -307,14 +307,14 @@ class BreakingNewsAdmin(admin.ModelAdmin):
 admin.site.register(Tutor, TutorAdmin)
 # admin.site.register(Jour, JourAdmin)
 # admin.site.register(DemiJour, DemiJourAdmin)
-admin.site.register(Groupe, GroupeAdmin)
+admin.site.register(Group, GroupeAdmin)
 admin.site.register(RoomGroup, RoomGroupAdmin)
 admin.site.register(Module, ModuleAdmin)
-admin.site.register(Cours, CoursAdmin)
+admin.site.register(Course, CoursAdmin)
 admin.site.register(EdtVersion, EdtVAdmin)
-admin.site.register(CoursModification, CoursMAdmin)
-admin.site.register(PlanifModification, PlanifMAdmin)
-admin.site.register(CoursPlace, CoursPlaceAdmin)
+admin.site.register(CourseModification, CoursMAdmin)
+admin.site.register(PlanningModification, PlanifMAdmin)
+admin.site.register(ScheduledCourse, CoursPlaceAdmin)
 # admin.site.register(CoursLP, CoursLPAdmin)
-admin.site.register(Disponibilite, DispoAdmin)
+admin.site.register(UserPreference, DispoAdmin)
 admin.site.register(BreakingNews, BreakingNewsAdmin)

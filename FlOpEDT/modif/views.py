@@ -36,8 +36,8 @@ import json
 
 from .forms import ContactForm
 
-from .models import Cours, Disponibilite, CoursPlace, EdtVersion, \
-    CoursModification, Creneau, Jour, Heure, RoomGroup, PlanifModification, \
+from .models import Course, UserPreference, ScheduledCourse, EdtVersion, \
+    CourseModification, Slot, Day, Time, RoomGroup, PlanningModification, \
     Regen,  BreakingNews, Tutor
 # Prof,
 
@@ -277,7 +277,7 @@ def fetch_cours_pl(req):
                          an=an) \
                     .version
             dataset = CoursPlaceResource() \
-                .export(CoursPlace.objects \
+                .export(ScheduledCourse.objects \
                         .filter(cours__semaine=semaine,
                                 cours__an=an,
                                 copie_travail=num_copie)
@@ -300,21 +300,21 @@ def fetch_cours_pl(req):
             regen = 'I'
         response['regen'] = regen
         if req.user.is_authenticated():
-            response['reqDispos'] = Cours \
+            response['reqDispos'] = Course \
                                         .objects \
                                         .filter(tutor = req.user,
                                                 semaine = semaine,
                                                 an = an) \
                                         .count() * 2
-            week_av = Disponibilite \
+            week_av = UserPreference \
                 .objects \
-                .filter(tutor = req.user,
+                .filter(user = req.user,
                         semaine = semaine,
                         an = an)
             if week_av.count() == 0:
-                response['filDispos'] = Disponibilite \
+                response['filDispos'] = UserPreference \
                     .objects \
-                    .filter(tutor = req.user,
+                    .filter(user = req.user,
                             semaine = None,
                             valeur__gte = 1) \
                     .count()
@@ -338,11 +338,11 @@ def fetch_cours_pp(req):
         an = int(an)
         num_copie = int(num_copie)
         dataset = CoursResource() \
-            .export(Cours
+            .export(Course
                     .objects
                     .filter(semaine = semaine,
                             an = an)
-                    .exclude(pk__in = CoursPlace
+                    .exclude(pk__in = ScheduledCourse
                              .objects
                              .filter(copie_travail = num_copie)
                              .values('cours')))
@@ -362,27 +362,27 @@ def fetch_dispos(req):
             semaine = req.GET.get('s', '')
             an = req.GET.get('a', '')
 
-            busy_inst = Cours.objects.filter(semaine = semaine,
-                                             an = an) \
+            busy_inst = Course.objects.filter(semaine = semaine,
+                                              an = an) \
                 .distinct('tutor') \
                 .values_list('tutor')
 
             busy_inst = list(chain(busy_inst, [req.user]))
 
-            week_avail = Disponibilite.objects \
+            week_avail = UserPreference.objects \
                 .filter(semaine = semaine,
                         an = an,
-                        tutor__in = busy_inst) \
-                .order_by('tutor')
+                        user__in = busy_inst) \
+                .order_by('user')
 
-            default_avail = Disponibilite.objects \
-                .exclude(tutor__in \
+            default_avail = UserPreference.objects \
+                .exclude(user__in \
                              =week_avail \
-                         .distinct('tutor') \
-                         .values_list('tutor')) \
+                         .distinct('user') \
+                         .values_list('user')) \
                 .filter(semaine=None,
-                        tutor__in=busy_inst) \
-                .order_by('tutor')
+                        user__in=busy_inst) \
+                .order_by('user')
 
             dataset = DispoResource() \
                 .export(list(chain(week_avail,
@@ -402,9 +402,9 @@ def fetch_dispos(req):
 def fetch_stype(req):
     # if req.method == 'GET':
     dataset = DispoResource() \
-        .export(Disponibilite.objects \
+        .export(UserPreference.objects \
                 .filter(semaine = None,
-                        tutor = req.user))  # all())#
+                        user = req.user))  # all())#
     response = HttpResponse(dataset.csv, content_type='text/csv')
     return response
     # else:
@@ -437,8 +437,8 @@ def fetch_decale(req):
 
     for c in cours:
         try:
-            cp = CoursPlace.objects.get(cours = c,
-                                        copie_travail = 0)
+            cp = ScheduledCourse.objects.get(cours = c,
+                                             copie_travail = 0)
             j = cp.creneau.jour.no
             h = cp.creneau.heure.no
         except ObjectDoesNotExist:
@@ -466,7 +466,7 @@ def fetch_decale(req):
             liste_prof.append(c.tutor.username)
 
     if module != '':
-        cours = filt_m(Cours.objects, module) \
+        cours = filt_m(Course.objects, module) \
             .order_by('tutor__username') \
             .distinct('tutor__username')
         for c in cours:
@@ -550,18 +550,18 @@ def edt_changes(req):
                             .get(semaine=semaine, an=an)
                     for a in q.tab:
                         non_place = False
-                        co = Cours.objects.get(id=a.id)
+                        co = Course.objects.get(id=a.id)
                         try:
-                            cp = CoursPlace.objects.get(cours=co,
-                                                        copie_travail=work_copy)
+                            cp = ScheduledCourse.objects.get(cours=co,
+                                                             copie_travail=work_copy)
                         except ObjectDoesNotExist:
                             non_place = True
-                            cp = CoursPlace(cours=co,
-                                            copie_travail=work_copy)
+                            cp = ScheduledCourse(cours=co,
+                                                 copie_travail=work_copy)
 
-                        m = CoursModification(cours = co,
-                                              version_old = q.v,
-                                              initiator = req.user)
+                        m = CourseModification(cours = co,
+                                               version_old = q.v,
+                                               initiator = req.user)
                         # old_day = a.day.o
                         # old_slot = a.slot.o
                         new_day = a.day.n
@@ -577,12 +577,12 @@ def edt_changes(req):
 
                         if new_day is not None:
                             try:
-                                cren_n = Creneau \
+                                cren_n = Slot \
                                     .objects \
-                                    .get(jour = Jour.objects \
+                                    .get(jour = Day.objects \
                                          .get(no=new_day),
                                          heure \
-                                             =Heure \
+                                             =Time \
                                          .objects \
                                          .get(no=new_slot))
                             except ObjectDoesNotExist:
@@ -728,37 +728,37 @@ def dispos_changes(req):
 
             # if no availability was present for this week, first copy the
             # default availabilities
-            if not Disponibilite.objects.filter(tutor = prof,
-                                                semaine = semaine,
-                                                an = an).exists():
-                for c in Creneau.objects.all():
-                    def_dispo, created = Disponibilite\
+            if not UserPreference.objects.filter(user = prof,
+                                                 semaine = semaine,
+                                                 an = an).exists():
+                for c in Slot.objects.all():
+                    def_dispo, created = UserPreference\
                                          .objects\
                                          .get_or_create(
-                                             tutor = prof,
+                                             user = prof,
                                              semaine = None,
                                              an = annee_courante,
                                              creneau = c,
                                              defaults = {'valeur':
                                                          0})
-                    new_dispo = Disponibilite(tutor = prof,
-                                              semaine = semaine,
-                                              an = an,
-                                              creneau = c,
-                                              valeur = def_dispo.valeur)
+                    new_dispo = UserPreference(user = prof,
+                                               semaine = semaine,
+                                               an = an,
+                                               creneau = c,
+                                               valeur = def_dispo.valeur)
                     new_dispo.save()
 
             for a in q:
                 print a
-                cr = Creneau.objects \
-                    .get(jour=Jour.objects.get(no=a.day),
-                         heure=Heure.objects.get(no=a.hour))
+                cr = Slot.objects \
+                    .get(jour=Day.objects.get(no=a.day),
+                         heure=Time.objects.get(no=a.hour))
                 if cr is None:
                     bad_response['reason'] = "Creneau pas trouve"
                     return bad_response
-                di, didi = Disponibilite \
+                di, didi = UserPreference \
                     .objects \
-                    .update_or_create(tutor = prof,
+                    .update_or_create(user = prof,
                                       semaine = semaine,
                                       an = an,
                                       creneau = cr,
@@ -798,21 +798,21 @@ def decale_changes(req):
     for c in q.liste:
         # try:
         if c.j != -1 and c.h != -1:
-            cours_place = CoursPlace \
+            cours_place = ScheduledCourse \
                 .objects \
                 .get(cours__id=c.i,
                      copie_travail=0)
             cours = cours_place.cours
             cours_place.delete()
         else:
-            cours = Cours.objects.get(id=c.i)
+            cours = Course.objects.get(id=c.i)
             # note: add copie_travail in Cours might be of interest
 
-        pm = PlanifModification(cours = cours,
-                                semaine_old = cours.semaine,
-                                an_old = cours.an,
-                                tutor_old = cours.tutor,
-                                initiator = req.user)
+        pm = PlanningModification(cours = cours,
+                                  semaine_old = cours.semaine,
+                                  an_old = cours.an,
+                                  tutor_old = cours.tutor,
+                                  initiator = req.user)
         pm.save()
 
         cours.semaine = a.ns
@@ -929,7 +929,7 @@ def filt_g(r, groupe):
 
 
 def filt_sa(semaine, an):
-    return Cours.objects.filter(semaine = semaine,
-                                an = an)
+    return Course.objects.filter(semaine = semaine,
+                                 an = an)
 
 # </editor-fold desc="HELPERS">

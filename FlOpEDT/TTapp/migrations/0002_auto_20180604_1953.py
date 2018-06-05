@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='stabilize',
             name='group',
-            field=models.ForeignKey(default=None, null=True, on_delete=django.db.models.deletion.CASCADE, to='modif.Groupe'),
+            field=models.ForeignKey(default=None, null=True, on_delete=django.db.models.deletion.CASCADE, to='modif.Group'),
         ),
         migrations.AddField(
             model_name='stabilize',
@@ -41,17 +41,17 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='simultaneouscourses',
             name='course1',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='course1', to='modif.Cours'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='course1', to='modif.Course'),
         ),
         migrations.AddField(
             model_name='simultaneouscourses',
             name='course2',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='course2', to='modif.Cours'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='course2', to='modif.Course'),
         ),
         migrations.AddField(
             model_name='reasonabledays',
             name='group',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='modif.Groupe'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='modif.Group'),
         ),
         migrations.AddField(
             model_name='reasonabledays',
@@ -101,17 +101,17 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='avoidbothslots',
             name='group',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='modif.Groupe'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='modif.Group'),
         ),
         migrations.AddField(
             model_name='avoidbothslots',
             name='slot1',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='slot1', to='modif.Creneau'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='slot1', to='modif.Slot'),
         ),
         migrations.AddField(
             model_name='avoidbothslots',
             name='slot2',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='slot2', to='modif.Creneau'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='slot2', to='modif.Slot'),
         ),
         migrations.AddField(
             model_name='avoidbothslots',

@@ -34,4 +34,3 @@ def reassign_rooms(week, year, target_work_copy):
 
 def swap_version(week, year, copy_a, copy_b=0):
     basic_swap_version(week, year, copy_a, copy_b)
-

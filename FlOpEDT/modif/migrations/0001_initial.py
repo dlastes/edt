@@ -93,7 +93,7 @@ class Migration(migrations.Migration):
                 ('an_old', models.PositiveSmallIntegerField(null=True)),
                 ('version_old', models.PositiveIntegerField()),
                 ('updated_at', models.DateTimeField(auto_now=True)),
-                ('cours', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='modif.Cours')),
+                ('cours', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='modif.Course')),
             ],
         ),
         migrations.CreateModel(
@@ -103,7 +103,7 @@ class Migration(migrations.Migration):
                 ('no', models.PositiveSmallIntegerField(blank=True, null=True)),
                 ('noprec', models.BooleanField(default=True, verbose_name='vrai si on ne veut pas garder la salle')),
                 ('copie_travail', models.PositiveSmallIntegerField(default=0)),
-                ('cours', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='modif.Cours')),
+                ('cours', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='modif.Course')),
             ],
             bases=(caching.base.CachingMixin, models.Model),
         ),
@@ -150,7 +150,7 @@ class Migration(migrations.Migration):
                 ('semaine', models.PositiveSmallIntegerField(null=True, validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(53)])),
                 ('an', models.PositiveSmallIntegerField(null=True)),
                 ('valeur', models.SmallIntegerField(validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(10)])),
-                ('creneau', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='modif.Creneau')),
+                ('creneau', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='modif.Slot')),
             ],
         ),
         migrations.CreateModel(
@@ -160,7 +160,7 @@ class Migration(migrations.Migration):
                 ('semaine', models.PositiveSmallIntegerField(null=True, validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(53)])),
                 ('an', models.PositiveSmallIntegerField(null=True)),
                 ('valeur', models.SmallIntegerField(default=10, validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(10)])),
-                ('creneau', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='modif.Creneau')),
+                ('creneau', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='modif.Slot')),
                 ('tutor', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
         ),
@@ -207,7 +207,7 @@ class Migration(migrations.Migration):
                 ('nature', models.CharField(choices=[('to', 'Classe enti\xe8re'), ('TD', 'Groupe TD'), ('TP', 'Groupe TP')], max_length=2, verbose_name='Type de classe')),
                 ('size', models.PositiveSmallIntegerField()),
                 ('basic', models.BooleanField(default=False, verbose_name='Basic group?')),
-                ('parent_groups', models.ManyToManyField(blank=True, related_name='_groupe_parent_groups_+', to='modif.Groupe')),
+                ('parent_groups', models.ManyToManyField(blank=True, related_name='_groupe_parent_groups_+', to='modif.Group')),
             ],
         ),
         migrations.CreateModel(
@@ -255,7 +255,7 @@ class Migration(migrations.Migration):
                 ('semaine_old', models.PositiveSmallIntegerField(null=True, validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(53)])),
                 ('an_old', models.PositiveSmallIntegerField(null=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
-                ('cours', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='modif.Cours')),
+                ('cours', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='modif.Course')),
                 ('initiator', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='operated_planif_modif', to=settings.AUTH_USER_MODEL)),
                 ('tutor_old', models.ForeignKey(default=None, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='impacted_by_planif_modif', to=settings.AUTH_USER_MODEL)),
             ],
@@ -266,8 +266,8 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('successifs', models.BooleanField(default=False, verbose_name='Successifs?')),
                 ('ND', models.BooleanField(default=False, verbose_name='Jours differents')),
-                ('cours1', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='cours1', to='modif.Cours')),
-                ('cours2', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='cours2', to='modif.Cours')),
+                ('cours1', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='cours1', to='modif.Course')),
+                ('cours2', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='cours2', to='modif.Course')),
             ],
         ),
         migrations.CreateModel(
@@ -322,7 +322,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('semaine', models.PositiveSmallIntegerField(validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(53)])),
                 ('an', models.PositiveSmallIntegerField()),
-                ('creneau', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='modif.Creneau')),
+                ('creneau', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='modif.Slot')),
                 ('room', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='modif.Room')),
             ],
         ),
@@ -390,12 +390,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='groupdisplay',
             name='group',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='display', to='modif.Groupe'),
+            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='display', to='modif.Group'),
         ),
         migrations.AddField(
             model_name='djlgroupe',
             name='groupe',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='modif.Groupe'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='modif.Group'),
         ),
         migrations.AddField(
             model_name='dispocours',
@@ -405,7 +405,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='demijourferiepromo',
             name='jour',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='modif.Jour'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='modif.Day'),
         ),
         migrations.AddField(
             model_name='demijourferiepromo',
@@ -415,22 +415,22 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='creneau',
             name='heure',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='modif.Heure'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='modif.Time'),
         ),
         migrations.AddField(
             model_name='creneau',
             name='jour',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='modif.Jour'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='modif.Day'),
         ),
         migrations.AddField(
             model_name='coutgroupe',
             name='groupe',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='modif.Groupe'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='modif.Group'),
         ),
         migrations.AddField(
             model_name='coursplace',
             name='creneau',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='modif.Creneau'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='modif.Slot'),
         ),
         migrations.AddField(
             model_name='coursplace',
@@ -440,7 +440,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='coursmodification',
             name='creneau_old',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='modif.Creneau'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='modif.Slot'),
         ),
         migrations.AddField(
             model_name='coursmodification',
@@ -455,7 +455,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='cours',
             name='groupe',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='modif.Groupe'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='modif.Group'),
         ),
         migrations.AddField(
             model_name='cours',

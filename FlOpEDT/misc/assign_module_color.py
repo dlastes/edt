@@ -25,7 +25,7 @@
 # without disclosing the source code of your own applications.
 
 from modif.weeks import week_list
-from modif.models import Cours, ModuleDisplay, TrainingProgramme, Module
+from modif.models import Course, ModuleDisplay, TrainingProgramme, Module
 from django.core.exceptions import ObjectDoesNotExist
 from pyclustering.gcolor.dsatur import dsatur
 from numpy import diag, eye
@@ -87,9 +87,9 @@ def build_graph_matrices(train_prog = None):
     for mi in range(len(keys)):
         for mj in range(mi+1, len(keys)):
             for wy in wl:
-                if Cours.objects.filter(semaine = wy['semaine'],
-                                        an = wy['an'],
-                                        module__in = [keys[mi], keys[mj]])\
+                if Course.objects.filter(semaine = wy['semaine'],
+                                         an = wy['an'],
+                                         module__in = [keys[mi], keys[mj]])\
                         .distinct('module').count() == 2:
                     mat[(mi, mj)] = 1
                     break
