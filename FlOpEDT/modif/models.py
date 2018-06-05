@@ -254,7 +254,7 @@ class Cours(CachingMixin, models.Model):
                               related_name = 'taught_courses',
                               null = True,
                               default = None)
-    supp_tutor = models.ForeignKey('Tutor',
+    supp_tutor = models.ManyToManyField('Tutor',
                                    related_name = 'courses_as_supp',
                                    null = True,
                                    default = None,
@@ -300,7 +300,7 @@ class CoursPlace(CachingMixin, models.Model):
 
 
 class Disponibilite(models.Model):
-    tutor = models.ForeignKey('Tutor')
+    tutor = models.ForeignKey('User')
     semaine = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)], null = True)
     an = models.PositiveSmallIntegerField(null = True)
