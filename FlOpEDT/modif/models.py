@@ -356,7 +356,7 @@ class CoursePreference(models.Model):
 
     def __str__(self):
         return "%s=Sem%s:%s-%s=%s" % \
-               (self.nature, self.semaine, self.creneau, self.train_prog,
+               (self.course_type, self.semaine, self.creneau, self.train_prog,
                 self.valeur)
 
 
