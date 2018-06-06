@@ -49,21 +49,22 @@ class BreakingNews(models.Model):
         null=True, blank=True)
     year = models.PositiveSmallIntegerField()
     # x_beg and x_end in terms of day width
-    x_beg = models.FloatField(default = 2., blank = True)
-    x_end = models.FloatField(default = 3., blank = True)
-    y = models.PositiveSmallIntegerField(null = True, default = None,
-                                         blank = True)
-    txt = models.CharField(max_length = 200)
-    is_linked = models.URLField(max_length = 200, null=True, blank=True, default=None)
-    fill_color = ColorField(default = '#228B22')
+    x_beg = models.FloatField(default=2., blank=True)
+    x_end = models.FloatField(default=3., blank=True)
+    y = models.PositiveSmallIntegerField(null=True, default=None,
+                                         blank=True)
+    txt = models.CharField(max_length=200)
+    is_linked = models.URLField(max_length=200, null=True, blank=True, default=None)
+    fill_color = ColorField(default='#228B22')
     # stroke color
-    strk_color = ColorField(default = '#000000')
-    
+    strk_color = ColorField(default='#000000')
+
     def __unicode__(self):
         return u'@(' + unicode(self.x_beg) + u'--' + unicode(self.x_end) \
-            + u',' + unicode(self.y) \
-            + u')-W' + unicode(self.week) + u',Y' \
-            + unicode(self.year) + u': ' + unicode(self.txt)
+               + u',' + unicode(self.y) \
+               + u')-W' + unicode(self.week) + u',Y' \
+               + unicode(self.year) + u': ' + unicode(self.txt)
+
 
 # </editor-fold>
 
@@ -74,28 +75,29 @@ class BreakingNews(models.Model):
 
 
 class TrainingProgramme(models.Model):
-    name = models.CharField(max_length = 50)
-    abbrev = models.CharField(max_length = 5)
+    name = models.CharField(max_length=50)
+    abbrev = models.CharField(max_length=5)
 
     def __unicode__(self):
         return self.abbrev
 
+
 class GroupType(models.Model):
-    name = models.CharField(max_length = 50)
+    name = models.CharField(max_length=50)
 
     def __unicode__(self):
         return self.name
 
 
 class Group(models.Model):
-    nom = models.CharField(max_length = 4)
+    nom = models.CharField(max_length=4)
     train_prog = models.ForeignKey('TrainingProgramme')
     type = models.ForeignKey('GroupType')
     size = models.PositiveSmallIntegerField()
-    basic = models.BooleanField(verbose_name = 'Basic group?', default = False)
+    basic = models.BooleanField(verbose_name='Basic group?', default=False)
     parent_groups = models.ManyToManyField('self',
-                                           blank = True,
-                                           related_name = "children_groups")
+                                           blank=True,
+                                           related_name="children_groups")
 
     def full_name(self):
         return self.train_prog.abbrev + self.nom
@@ -114,6 +116,7 @@ class Group(models.Model):
                 all.add(new_gp)
         return all
 
+
 # </editor-fold desc="GROUPS">
 
 # <editor-fold desc="TIMING">
@@ -123,9 +126,9 @@ class Group(models.Model):
 
 
 class Day(models.Model):
-    no = models.PositiveSmallIntegerField(primary_key = True,
-                                          verbose_name = "Number")
-    nom = models.CharField(max_length=10, verbose_name = "Name")
+    no = models.PositiveSmallIntegerField(primary_key=True,
+                                          verbose_name="Number")
+    nom = models.CharField(max_length=10, verbose_name="Name")
 
     def __unicode__(self):
         return self.nom[:3]
@@ -135,10 +138,10 @@ class Time(models.Model):
     MATIN = 'AM'
     APREM = 'PM'
     CHOIX_DEMI_JOUR = ((MATIN, 'AM'), (APREM, 'PM'))
-    apm = models.CharField(max_length = 2,
-                           choices = CHOIX_DEMI_JOUR,
-                           verbose_name = "Half day",
-                           default = MATIN)
+    apm = models.CharField(max_length=2,
+                           choices=CHOIX_DEMI_JOUR,
+                           verbose_name="Half day",
+                           default=MATIN)
     no = models.PositiveSmallIntegerField(primary_key=True)
     nom = models.CharField(max_length=20)
 
@@ -152,28 +155,30 @@ class Slot(CachingMixin, models.Model):
     jour = models.ForeignKey('modif.models.Day')
     heure = models.ForeignKey('modif.models.Time')
     duration = models.PositiveSmallIntegerField(
-        validators = [MinValueValidator(0), MaxValueValidator(240)], default=90)
+        validators=[MinValueValidator(0), MaxValueValidator(240)], default=90)
 
     def __str__(self):
         return "%s_%s" % (self.jour, self.heure)
 
 
 class Holiday(models.Model):
-    apm = models.CharField(max_length = 2, choices = Time.CHOIX_DEMI_JOUR,
-                           verbose_name = "Demi-journée", null=True, default=None, blank=True)
+    apm = models.CharField(max_length=2, choices=Time.CHOIX_DEMI_JOUR,
+                           verbose_name="Demi-journée", null=True, default=None, blank=True)
     day = models.ForeignKey('modif.models.Day')
     week = models.PositiveSmallIntegerField(
-        validators = [MinValueValidator(0), MaxValueValidator(53)])
+        validators=[MinValueValidator(0), MaxValueValidator(53)])
     year = models.PositiveSmallIntegerField()
 
+
 class TrainingHalfDay(models.Model):
-    apm = models.CharField(max_length = 2, choices = Time.CHOIX_DEMI_JOUR,
-                           verbose_name = "Demi-journée", null=True, default=None, blank=True)
+    apm = models.CharField(max_length=2, choices=Time.CHOIX_DEMI_JOUR,
+                           verbose_name="Demi-journée", null=True, default=None, blank=True)
     day = models.ForeignKey('modif.models.Day')
     week = models.PositiveSmallIntegerField(
-        validators = [MinValueValidator(0), MaxValueValidator(53)])
+        validators=[MinValueValidator(0), MaxValueValidator(53)])
     year = models.PositiveSmallIntegerField()
-    train_prog = models.ForeignKey('TrainingProgramme', null = True, default = None, blank=True)
+    train_prog = models.ForeignKey('TrainingProgramme', null=True, default=None, blank=True)
+
 
 # </editor-fold>
 
@@ -195,10 +200,10 @@ class RoomType(CachingMixin, models.Model):
 # class RoomGroup(models.Model):
 class RoomGroup(CachingMixin, models.Model):
     objects = CachingManager()
-    name = models.CharField(max_length = 20)
+    name = models.CharField(max_length=20)
     types = models.ManyToManyField(RoomType,
-                                   blank = True,
-                                   related_name = "members")
+                                   blank=True,
+                                   related_name="members")
 
     def __str__(self):
         return self.name
@@ -209,23 +214,24 @@ class Room(CachingMixin, models.Model):
     objects = CachingManager()
     name = models.CharField(max_length=20)
     subroom_of = models.ManyToManyField(RoomGroup,
-                                        blank = True,
-                                        related_name = "subrooms")
+                                        blank=True,
+                                        related_name="subrooms")
 
     def __str__(self):
         return self.name
 
 
 class RoomSort(models.Model):
-    for_type = models.ForeignKey(RoomType, blank = True, null = True,
-                                 related_name = '+')
-    prefer = models.ForeignKey(RoomGroup, blank = True, null = True,
-                               related_name = '+')
-    unprefer = models.ForeignKey(RoomGroup, blank = True, null = True,
-                                 related_name = '+')
+    for_type = models.ForeignKey(RoomType, blank=True, null=True,
+                                 related_name='+')
+    prefer = models.ForeignKey(RoomGroup, blank=True, null=True,
+                               related_name='+')
+    unprefer = models.ForeignKey(RoomGroup, blank=True, null=True,
+                                 related_name='+')
 
     def __str__(self):
         return "%s-pref-%s-to-%s" % (self.for_type, self.prefer, self.unprefer)
+
 
 # </editor-fold>
 
@@ -239,8 +245,8 @@ class Module(models.Model):
     nom = models.CharField(max_length=50, null=True)
     abbrev = models.CharField(max_length=10, verbose_name='Intitulé abbrégé')
     head = models.ForeignKey('Tutor',
-                             null = True,
-                             default = None,
+                             null=True,
+                             default=None,
                              blank=True)
     ppn = models.CharField(max_length=5, default='M')
     train_prog = models.ForeignKey('TrainingProgramme')
@@ -253,37 +259,37 @@ class Module(models.Model):
         return self.abbrev
 
 
-
 class CourseType(models.Model):
     name = models.CharField(max_length=50)
 
     def __unicode__(self):
         return self.name
 
+
 # class Cours(models.Model):
 class Course(CachingMixin, models.Model):
     objects = CachingManager()
     type = models.ForeignKey('modif.models.CourseType')
-    room_type = models.ForeignKey('RoomType', null = True)
-    no = models.PositiveSmallIntegerField(null = True, blank = True)
+    room_type = models.ForeignKey('RoomType', null=True)
+    no = models.PositiveSmallIntegerField(null=True, blank=True)
     tutor = models.ForeignKey('Tutor',
-                              related_name = 'taught_courses',
-                              null = True,
-                              default = None)
+                              related_name='taught_courses',
+                              null=True,
+                              default=None)
     supp_tutor = models.ManyToManyField('Tutor',
-                                   related_name = 'courses_as_supp',
-                                   null = True,
-                                   default = None,
-                                   blank = True)
+                                        related_name='courses_as_supp',
+                                        null=True,
+                                        default=None,
+                                        blank=True)
     groupe = models.ForeignKey('modif.models.Group')
-    module = models.ForeignKey('Module', related_name = 'module')
-    modulesupp = models.ForeignKey('Module', related_name = 'modulesupp',
-                                   null = True, blank = True)
+    module = models.ForeignKey('Module', related_name='module')
+    modulesupp = models.ForeignKey('Module', related_name='modulesupp',
+                                   null=True, blank=True)
     semaine = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)],
-        null = True, blank = True)
+        null=True, blank=True)
     an = models.PositiveSmallIntegerField()
-    suspens = models.BooleanField(verbose_name = 'En suspens?', default = False)
+    suspens = models.BooleanField(verbose_name='En suspens?', default=False)
 
     def __str__(self):
         return "%s-%s-%s-%s" % \
@@ -300,12 +306,14 @@ class ScheduledCourse(CachingMixin, models.Model):
     room = models.ForeignKey('RoomGroup', blank=True, null=True)
     no = models.PositiveSmallIntegerField(null=True, blank=True)
     noprec = models.BooleanField(
-        verbose_name = 'vrai si on ne veut pas garder la salle', default = True)
-    copie_travail = models.PositiveSmallIntegerField(default = 0)
+        verbose_name='vrai si on ne veut pas garder la salle', default=True)
+    copie_travail = models.PositiveSmallIntegerField(default=0)
+
     # les utilisateurs auront acces à la copie publique (0)
 
     def __str__(self):
         return "%s%s:%s-%s" % (self.cours, self.no, self.creneau.id, self.room)
+
 
 # </editor-fold desc="COURSES">
 
@@ -318,12 +326,12 @@ class ScheduledCourse(CachingMixin, models.Model):
 class UserPreference(models.Model):
     user = models.ForeignKey('User')
     semaine = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(0), MaxValueValidator(53)], null = True)
-    an = models.PositiveSmallIntegerField(null = True)
+        validators=[MinValueValidator(0), MaxValueValidator(53)], null=True)
+    an = models.PositiveSmallIntegerField(null=True)
     creneau = models.ForeignKey('modif.models.Slot')
     valeur = models.SmallIntegerField(
-        validators = [MinValueValidator(0), MaxValueValidator(8)],
-        default = 8)
+        validators=[MinValueValidator(0), MaxValueValidator(8)],
+        default=8)
 
     def __str__(self):
         return "%s-Sem%s: %s=%s" % \
@@ -334,12 +342,12 @@ class CoursePreference(models.Model):
     course_type = models.ForeignKey('modif.models.CourseType')
     train_prog = models.ForeignKey('TrainingProgramme')
     semaine = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(0), MaxValueValidator(53)], null = True)
-    an = models.PositiveSmallIntegerField(null = True)
+        validators=[MinValueValidator(0), MaxValueValidator(53)], null=True)
+    an = models.PositiveSmallIntegerField(null=True)
     creneau = models.ForeignKey('modif.models.Slot')
     valeur = models.SmallIntegerField(
-        validators = [MinValueValidator(0), MaxValueValidator(8)],
-        default = 8)
+        validators=[MinValueValidator(0), MaxValueValidator(8)],
+        default=8)
 
     def __str__(self):
         return "%s=Sem%s:%s-%s=%s" % \
@@ -350,17 +358,15 @@ class CoursePreference(models.Model):
 class RoomPreference(models.Model):
     room = models.ForeignKey('Room')
     semaine = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(0), MaxValueValidator(53)], null = True)
-    an = models.PositiveSmallIntegerField(null = True)
+        validators=[MinValueValidator(0), MaxValueValidator(53)], null=True)
+    an = models.PositiveSmallIntegerField(null=True)
     creneau = models.ForeignKey('modif.models.Slot')
     valeur = models.SmallIntegerField(
-        validators = [MinValueValidator(0), MaxValueValidator(8)],
-        default = 8)
+        validators=[MinValueValidator(0), MaxValueValidator(8)],
+        default=8)
 
     def __str__(self):
         return "%s-Sem%s-cren%s=%s" % (self.room, self.semaine, self.creneau.id, self.valeur)
-
-
 
 
 # </editor-fold desc="PREFERENCES">
@@ -373,9 +379,11 @@ class RoomPreference(models.Model):
 
 class EdtVersion(models.Model):
     semaine = models.PositiveSmallIntegerField(
-        validators = [MinValueValidator(0), MaxValueValidator(53)])
+        validators=[MinValueValidator(0), MaxValueValidator(53)])
     an = models.PositiveSmallIntegerField()
     version = models.PositiveIntegerField(default=0)
+
+
 #    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
 
@@ -383,12 +391,12 @@ class EdtVersion(models.Model):
 class CourseModification(models.Model):
     cours = models.ForeignKey('modif.models.Course')
     semaine_old = models.PositiveSmallIntegerField(
-        validators = [MinValueValidator(0), MaxValueValidator(53)], null = True)
-    an_old = models.PositiveSmallIntegerField(null = True)
-    room_old = models.ForeignKey('RoomGroup', blank = True, null = True)
-    creneau_old = models.ForeignKey('modif.models.Slot', null = True)
+        validators=[MinValueValidator(0), MaxValueValidator(53)], null=True)
+    an_old = models.PositiveSmallIntegerField(null=True)
+    room_old = models.ForeignKey('RoomGroup', blank=True, null=True)
+    creneau_old = models.ForeignKey('modif.models.Slot', null=True)
     version_old = models.PositiveIntegerField()
-    updated_at = models.DateTimeField(auto_now = True)
+    updated_at = models.DateTimeField(auto_now=True)
     initiator = models.ForeignKey('Tutor')
 
     def __str__(self):
@@ -412,15 +420,16 @@ class CourseModification(models.Model):
 class PlanningModification(models.Model):
     cours = models.ForeignKey('modif.models.Course')
     semaine_old = models.PositiveSmallIntegerField(
-        validators = [MinValueValidator(0), MaxValueValidator(53)], null = True)
+        validators=[MinValueValidator(0), MaxValueValidator(53)], null=True)
     an_old = models.PositiveSmallIntegerField(null=True)
     tutor_old = models.ForeignKey('Tutor',
-                                  related_name = 'impacted_by_planif_modif',
-                                  null = True,
-                                  default = None)
+                                  related_name='impacted_by_planif_modif',
+                                  null=True,
+                                  default=None)
     updated_at = models.DateTimeField(auto_now=True)
     initiator = models.ForeignKey('Tutor',
-                                  related_name = 'operated_planif_modif')
+                                  related_name='operated_planif_modif')
+
 
 # </editor-fold desc="MODIFICATIONS">
 
@@ -432,7 +441,7 @@ class PlanningModification(models.Model):
 
 class TutorCost(models.Model):
     semaine = models.PositiveSmallIntegerField(
-        validators = [MinValueValidator(0), MaxValueValidator(53)])
+        validators=[MinValueValidator(0), MaxValueValidator(53)])
     an = models.PositiveSmallIntegerField()
     tutor = models.ForeignKey('Tutor')
     valeur = models.FloatField()
@@ -443,7 +452,7 @@ class TutorCost(models.Model):
 
 class GroupCost(models.Model):
     semaine = models.PositiveSmallIntegerField(
-        validators = [MinValueValidator(0), MaxValueValidator(53)])
+        validators=[MinValueValidator(0), MaxValueValidator(53)])
     an = models.PositiveSmallIntegerField()
     groupe = models.ForeignKey('modif.models.Group')
     valeur = models.FloatField()
@@ -454,13 +463,14 @@ class GroupCost(models.Model):
 
 class GroupFreeHalfDay(models.Model):
     semaine = models.PositiveSmallIntegerField(
-        validators = [MinValueValidator(0), MaxValueValidator(53)])
+        validators=[MinValueValidator(0), MaxValueValidator(53)])
     an = models.PositiveSmallIntegerField()
     groupe = models.ForeignKey('modif.models.Group')
     DJL = models.PositiveSmallIntegerField()
 
     def __str__(self):
         return "sem%s-%s:%s" % (self.semaine, self.groupe, self.DJL)
+
 
 # </editor-fold desc="COSTS">
 
@@ -476,10 +486,10 @@ class User(AbstractUser):
 
 class Tutor(User):
     pref_slots_per_day = models.PositiveSmallIntegerField(
-        verbose_name = "How many slots per day would you prefer ?",
-        default = 4)
-    rights = models.PositiveSmallIntegerField(verbose_name = "Peut forcer ?",
-                                              default = 0)
+        verbose_name="How many slots per day would you prefer ?",
+        default=4)
+    rights = models.PositiveSmallIntegerField(verbose_name="Peut forcer ?",
+                                              default=0)
     # 0b azyx en binaire
     # x==1 <=> quand "modifier Cours" coché, les cours sont colorés
     #          avec la dispo du prof
@@ -490,15 +500,17 @@ class Tutor(User):
     # a==1 <=> je peux surpasser les contraintes lors de la modification
     #          de cours
     LBD = models.PositiveSmallIntegerField(
-        validators = [MinValueValidator(0), MaxValueValidator(4)],
-        verbose_name = "Limitation du nombre de jours",
-        default = 2)
+        validators=[MinValueValidator(0), MaxValueValidator(4)],
+        verbose_name="Limitation du nombre de jours",
+        default=2)
 
 
 class FullStaff(models.Model):
     tutor = models.OneToOneField('Tutor')
-    department = models.CharField(max_length = 50, default = 'INFO')
-    is_iut = models.BooleanField(default = True)
+    department = models.CharField(max_length=50, default='INFO')
+    is_iut = models.BooleanField(default=True)
+
+
 #    def __init__(self, *args, **kwargs):
 #        super(FullStaff, self).__init__(*args, **kwargs)
 #        self.statut = Prof.FULL_STAFF
@@ -506,17 +518,19 @@ class FullStaff(models.Model):
 
 class SupplyStaff(models.Model):
     tutor = models.OneToOneField('Tutor')
-    employer = models.CharField(max_length = 50,
-                                verbose_name = "Employeur ?",
-                                null = True)
-    qualite = models.CharField(max_length = 50, null = True)
-    field = models.CharField(max_length = 50,
-                             verbose_name = "Domaine ?",
-                             null = True)
+    employer = models.CharField(max_length=50,
+                                verbose_name="Employeur ?",
+                                null=True)
+    qualite = models.CharField(max_length=50, null=True)
+    field = models.CharField(max_length=50,
+                             verbose_name="Domaine ?",
+                             null=True)
 
 
 class BIATOS(models.Model):
     tutor = models.OneToOneField('Tutor')
+
+
 # --- Notes sur Prof ---
 #    MinDemiJournees=models.BooleanField(
 #       verbose_name="Min Demi-journées?", default=False)
@@ -533,6 +547,7 @@ class Student(User):  # for now: representative
     def __str__(self):
         return str(self.username) + u'(G:' + str(self.group) + u')'
 
+
 # </editor-fold desc="TUTORS">
 
 # <editor-fold desc="DISPLAY">
@@ -542,18 +557,18 @@ class Student(User):  # for now: representative
 
 
 class ModuleDisplay(models.Model):
-    module = models.OneToOneField('Module', related_name = 'display')
-    color_bg = models.CharField(max_length = 20, default = "red")
-    color_txt = models.CharField(max_length = 20, default = "black")
+    module = models.OneToOneField('Module', related_name='display')
+    color_bg = models.CharField(max_length=20, default="red")
+    color_txt = models.CharField(max_length=20, default="black")
 
     def __unicode__(self):
-        return unicode(self.module) + u' -> BG: ' + unicode(self.color_bg)\
+        return unicode(self.module) + u' -> BG: ' + unicode(self.color_bg) \
                + u' ; TXT: ' + unicode(self.color_txt)
 
 
 class TrainingProgrammeDisplay(models.Model):
     training_programme = models.OneToOneField('TrainingProgramme',
-                                              related_name = 'display')
+                                              related_name='display')
     row = models.PositiveSmallIntegerField()
 
     def __unicode__(self):
@@ -562,13 +577,14 @@ class TrainingProgrammeDisplay(models.Model):
 
 class GroupDisplay(models.Model):
     group = models.OneToOneField('modif.models.Group',
-                                 related_name = 'display')
-    button_height = models.PositiveIntegerField(null = True, default = None)
-    button_txt = models.CharField(max_length = 20, null = True, default = None)
+                                 related_name='display')
+    button_height = models.PositiveIntegerField(null=True, default=None)
+    button_txt = models.CharField(max_length=20, null=True, default=None)
 
     def __unicode__(self):
-        return unicode(self.group) + u' -> BH: ' + unicode(self.button_height)\
+        return unicode(self.group) + u' -> BH: ' + unicode(self.button_height) \
                + u' ; BTXT: ' + unicode(self.button_txt)
+
 
 # </editor-fold desc="DISPLAY">
 
