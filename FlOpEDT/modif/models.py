@@ -163,6 +163,14 @@ class HollyHalfDay(models.Model):
     week = models.PositiveSmallIntegerField(
         validators = [MinValueValidator(0), MaxValueValidator(53)])
     year = models.PositiveSmallIntegerField()
+
+class TrainingHalfDay(models.Model):
+    apm = models.CharField(max_length = 2, choices = Time.CHOIX_DEMI_JOUR,
+                           verbose_name = "Demi-journée", null=True, default=None, blank=True)
+    day = models.ForeignKey('modif.models.Day')
+    week = models.PositiveSmallIntegerField(
+        validators = [MinValueValidator(0), MaxValueValidator(53)])
+    year = models.PositiveSmallIntegerField()
     train_prog = models.ForeignKey('TrainingProgramme', null = True, default = None, blank=True)
 
 # </editor-fold>

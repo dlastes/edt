@@ -39,7 +39,7 @@ from modif.models import Slot, Group, Day, Time, \
     Room, RoomGroup, RoomSort, RoomType, RoomPreference, \
     Course, ScheduledCourse, UserPreference, Tutor, CoursePreference, \
     Module, TrainingProgramme, CourseType, \
-    Dependency, TutorCost, GroupFreeHalfDay, GroupCost, HollyHalfDay
+    Dependency, TutorCost, GroupFreeHalfDay, GroupCost, HollyHalfDay, TrainingHalfDay
 
 from modif.weeks import annee_courante
 
@@ -99,7 +99,10 @@ class WeekDB(object):
                                                                       an=year)
         self.modules = Module.objects \
             .filter(id__in=self.courses.values_list('module_id').distinct())
-        self.PVHDs = HollyHalfDay.objects.filter(
+        self.holly_half_days = HollyHalfDay.objects.filter(
+            semaine=week,
+            an=year)
+        self.training_half_days = TrainingHalfDay.objects.filter(
             semaine=week,
             an=year,
             train_prog__in=self.train_prog)
@@ -429,12 +432,18 @@ class TTModel(object):
                                         self.avail_instr[i][sl],
                                         name=name)
 
-        # Promo Vacation Half Days (TO BE CHANGED!)
-        for PVHD in self.wdb.PVHDs:
-            for sl in self.wdb.slots.filter(jour=PVHD.jour,
-                                            heure__apm=PVHD.apm):
-                for c in self.wdb.courses.filter(
-                        groupe__train_prog=PVHD.train_prog):
+        # Holly half day
+        for holly_half_day in self.wdb.holly_half_days:
+            for sl in self.wdb.slots.filter(jour=holly_half_day.jour,
+                                            heure__apm=holly_half_day.apm):
+                for c in self.wdb.courses:
+                    self.add_constraint(self.TT[(sl, c)], '==', 0)
+
+        # Training half day
+        for training_half_day in self.wdb.training_half_days:
+            for sl in self.wdb.slots.filter(jour=training_half_day.jour,
+                                            heure__apm=training_half_day.apm):
+                for c in self.wdb.courses.filter(group__train_prog=training_half_day.train_prog):
                     self.add_constraint(self.TT[(sl, c)], '==', 0)
 
     def add_rooms_constraints(self):
