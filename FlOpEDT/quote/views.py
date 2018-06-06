@@ -32,20 +32,21 @@ from .forms import QuoteForm  # ProfForm, UserForm
 from .models import Quote
 from modif.views import edt
 
+
 def submit(req):
     visu = ''
     if req.method == 'POST':
         form = QuoteForm(req.POST)
         if form.is_valid():
             if req.POST.get('but') == 'Visualiser':
-                visu = str(form.save(commit = False))
+                visu = str(form.save(commit=False))
             elif req.POST.get('but') == 'Envoyer':
                 form.save()
                 return edt(req, None, None, 2)
             # dat = form.cleaned_data
             # return edt(req, None, None, 2)
     else:
-        form = QuoteForm() #initial = {}
+        form = QuoteForm()  # initial = {}
     return render(req, 'quote/submit.html',
                   {'form': form,
                    'visu': visu})

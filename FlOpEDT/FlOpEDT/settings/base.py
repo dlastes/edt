@@ -40,7 +40,6 @@ import sys
 BASE_DIR = os.path.dirname(os.path.dirname(
     os.path.dirname(os.path.abspath(__file__))))
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.10/howto/deployment/checklist/
 
@@ -104,14 +103,13 @@ CACHES = {
         'LOCATION': [
             '127.0.0.1:11211',
         ],
-        'TIMEOUT': 24*3600,
+        'TIMEOUT': 24 * 3600,
         'KEY_PREFIX': 'etd:',
     }
 }
 
-CACHE_COUNT_TIMEOUT = 24*3600
+CACHE_COUNT_TIMEOUT = 24 * 3600
 CACHE_INVALIDATE_ON_CREATE = 'whole-model'
-
 
 # Avec sqlite
 # -----------

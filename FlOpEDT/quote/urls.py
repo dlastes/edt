@@ -29,6 +29,6 @@ from django.contrib.staticfiles.storage import staticfiles_storage
 urlpatterns = [
     # directly reachable by users
     # ----------------------------
-    url(r'^citations/proposer$', views.submit, name = "submission"),
-    url(r'^citations/moderer$', views.moderate, name = "moderation"),
+    url(r'^citations/proposer$', views.submit, name="submission"),
+    url(r'^citations/moderer$', views.moderate, name="moderation"),
 ]

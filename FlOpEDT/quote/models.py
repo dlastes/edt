@@ -29,43 +29,43 @@ from django.db import models
 
 
 class QuoteType(models.Model):
-    name = models.CharField(max_length = 40)
-    abbrev = models.CharField(max_length = 10, null = True, blank = True)
-    parent = models.ForeignKey('self', null = True, blank = True)
+    name = models.CharField(max_length=40)
+    abbrev = models.CharField(max_length=10, null=True, blank=True)
+    parent = models.ForeignKey('self', null=True, blank=True)
 
     def __unicode__(self):
         return unicode(self.name)
 
 
 class Quote(models.Model):
-    quote = models.CharField(max_length = 400, null = True,
-                             blank = True, default = None)
-    last_name = models.CharField(max_length = 40, null = True,
-                                 blank = True, default = None)
-    for_name = models.CharField(max_length = 40, null = True,
-                                blank = True, default = None)
-    nick_name = models.CharField(max_length = 40, null = True,
-                                blank = True, default = None)
-    desc_author = models.CharField(max_length = 40, null = True,
-                                   blank = True, default = None)
-    date = models.CharField(max_length = 40, null = True,
-                            blank = True, default = None)
-    header = models.CharField(max_length = 20, null = True,
-                              blank = True, default = None)
-    quote_type = models.ForeignKey('QuoteType', blank = True,
-                                   null = True, default = None)
-    votes = models.PositiveIntegerField(default = 0)
-    id_acc = models.PositiveIntegerField(default = 0)
-    
+    quote = models.CharField(max_length=400, null=True,
+                             blank=True, default=None)
+    last_name = models.CharField(max_length=40, null=True,
+                                 blank=True, default=None)
+    for_name = models.CharField(max_length=40, null=True,
+                                blank=True, default=None)
+    nick_name = models.CharField(max_length=40, null=True,
+                                 blank=True, default=None)
+    desc_author = models.CharField(max_length=40, null=True,
+                                   blank=True, default=None)
+    date = models.CharField(max_length=40, null=True,
+                            blank=True, default=None)
+    header = models.CharField(max_length=20, null=True,
+                              blank=True, default=None)
+    quote_type = models.ForeignKey('QuoteType', blank=True,
+                                   null=True, default=None)
+    votes = models.PositiveIntegerField(default=0)
+    id_acc = models.PositiveIntegerField(default=0)
+
     PENDING = 'P'
     ACCEPTED = 'A'
     REJECTED = 'R'
     STATUS_CHOICES = ((PENDING, 'En attente'),
                       (ACCEPTED, 'Acceptée'),
                       (REJECTED, 'Rejetée'))
-    status = models.CharField(max_length = 2,
-                              choices = STATUS_CHOICES,
-                              default = PENDING)
+    status = models.CharField(max_length=2,
+                              choices=STATUS_CHOICES,
+                              default=PENDING)
 
     def __unicode__(self):
         sep = u', '
@@ -88,7 +88,7 @@ class Quote(models.Model):
             quo += unicode(self.quote)
         else:
             quo += u'\u00AB ' + unicode(self.quote) + u' »'
-        return (quo 
-                + (sep + auth if auth != u'' else u'') 
+        return (quo
+                + (sep + auth if auth != u'' else u'')
                 + (sep + unicode(self.desc_author) if self.desc_author is not None else u'')
                 + (sep + unicode(self.date) if self.date is not None else u''))

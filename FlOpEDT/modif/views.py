@@ -38,7 +38,7 @@ from .forms import ContactForm
 
 from .models import Course, UserPreference, ScheduledCourse, EdtVersion, \
     CourseModification, Slot, Day, Time, RoomGroup, PlanningModification, \
-    Regen,  BreakingNews, Tutor
+    Regen, BreakingNews, Tutor
 # Prof,
 
 from .admin import CoursResource, DispoResource, \
@@ -57,7 +57,6 @@ from django.core.mail import send_mail
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.views.generic import RedirectView
 
-
 # Texte de l'image
 # # randomVar = randint(0, 2)
 randomVar = 1
@@ -71,7 +70,6 @@ elif randomVar == 1:
 elif randomVar == 2:
     imgtxt = "Et votre emploi du temps fera un " \
              "<span id=\"flopRedDel\">flop</span> carton !"
-
 
 # <editor-fold desc="FAVICON">
 # ----------
@@ -90,6 +88,7 @@ def favicon(req, fav):
         url=staticfiles_storage.url('modif/img/favicons/' + fav),
         permanent=False)(req)
 
+
 # </editor-fold desc="FAVICON">
 
 
@@ -99,8 +98,7 @@ def favicon(req, fav):
 # ----------
 
 
-def edt(req, semaine, an, splash_id = 0):
-
+def edt(req, semaine, an, splash_id=0):
     semaine, an = clean_week(semaine, an)
     promo = clean_train_prog(req)
 
@@ -141,7 +139,6 @@ def edt(req, semaine, an, splash_id = 0):
 
 
 def edt_light(req, semaine, an):
-
     semaine, an = clean_week(semaine, an)
     promo = clean_train_prog(req)
 
@@ -228,7 +225,7 @@ def stype(req):
 
 def aide(req):
     return render(req, 'modif/aide.html', {
-                   'image': imgtxt})
+        'image': imgtxt})
 
 
 @login_required
@@ -248,6 +245,7 @@ def decale(req):
                    'an_init': an_init,
                    'profs': liste_profs,
                    'image': imgtxt})
+
 
 # </editor-fold desc="VIEWERS">
 
@@ -284,8 +282,8 @@ def fetch_cours_pl(req):
                         .order_by('creneau__jour',
                                   'creneau__heure'))  # all())#
             ok = num_copie != 0 \
-                or (version == EdtVersion.objects
-                    .get(semaine = semaine, an = an).version)
+                 or (version == EdtVersion.objects
+                     .get(semaine=semaine, an=an).version)
         if dataset is None:
             raise Http404("What are you trying to do?")
         response = HttpResponse(dataset.csv, content_type='text/csv')
@@ -302,21 +300,21 @@ def fetch_cours_pl(req):
         if req.user.is_authenticated():
             response['reqDispos'] = Course \
                                         .objects \
-                                        .filter(tutor = req.user,
-                                                semaine = semaine,
-                                                an = an) \
+                                        .filter(tutor=req.user,
+                                                semaine=semaine,
+                                                an=an) \
                                         .count() * 2
             week_av = UserPreference \
                 .objects \
-                .filter(user = req.user,
-                        semaine = semaine,
-                        an = an)
+                .filter(user=req.user,
+                        semaine=semaine,
+                        an=an)
             if week_av.count() == 0:
                 response['filDispos'] = UserPreference \
                     .objects \
-                    .filter(user = req.user,
-                            semaine = None,
-                            valeur__gte = 1) \
+                    .filter(user=req.user,
+                            semaine=None,
+                            valeur__gte=1) \
                     .count()
             else:
                 response['filDispos'] = week_av \
@@ -340,11 +338,11 @@ def fetch_cours_pp(req):
         dataset = CoursResource() \
             .export(Course
                     .objects
-                    .filter(semaine = semaine,
-                            an = an)
-                    .exclude(pk__in = ScheduledCourse
+                    .filter(semaine=semaine,
+                            an=an)
+                    .exclude(pk__in=ScheduledCourse
                              .objects
-                             .filter(copie_travail = num_copie)
+                             .filter(copie_travail=num_copie)
                              .values('cours')))
         response = HttpResponse(dataset.csv, content_type='text/csv')
         response['semaine'] = semaine
@@ -362,17 +360,17 @@ def fetch_dispos(req):
             semaine = req.GET.get('s', '')
             an = req.GET.get('a', '')
 
-            busy_inst = Course.objects.filter(semaine = semaine,
-                                              an = an) \
+            busy_inst = Course.objects.filter(semaine=semaine,
+                                              an=an) \
                 .distinct('tutor') \
                 .values_list('tutor')
 
             busy_inst = list(chain(busy_inst, [req.user]))
 
             week_avail = UserPreference.objects \
-                .filter(semaine = semaine,
-                        an = an,
-                        user__in = busy_inst) \
+                .filter(semaine=semaine,
+                        an=an,
+                        user__in=busy_inst) \
                 .order_by('user')
 
             default_avail = UserPreference.objects \
@@ -403,8 +401,8 @@ def fetch_stype(req):
     # if req.method == 'GET':
     dataset = DispoResource() \
         .export(UserPreference.objects \
-                .filter(semaine = None,
-                        user = req.user))  # all())#
+                .filter(semaine=None,
+                        user=req.user))  # all())#
     response = HttpResponse(dataset.csv, content_type='text/csv')
     return response
     # else:
@@ -412,7 +410,6 @@ def fetch_stype(req):
 
 
 def fetch_decale(req):
-
     if not req.is_ajax() or req.method != "GET":
         return HttpResponse("KO")
 
@@ -437,8 +434,8 @@ def fetch_decale(req):
 
     for c in cours:
         try:
-            cp = ScheduledCourse.objects.get(cours = c,
-                                             copie_travail = 0)
+            cp = ScheduledCourse.objects.get(cours=c,
+                                             copie_travail=0)
             j = cp.creneau.jour.no
             h = cp.creneau.heure.no
         except ObjectDoesNotExist:
@@ -489,15 +486,16 @@ def fetch_decale(req):
 def fetch_bknews(req):
     week = int(req.GET.get('w', '0'))
     year = int(req.GET.get('y', '0'))
-    
+
     dataset = BreakingNewsResource() \
-              .export(BreakingNews.objects.filter(year = year,
-                                                  week = week))
+        .export(BreakingNews.objects.filter(year=year,
+                                            week=week))
     response = HttpResponse(dataset.json,
                             content_type='text/json')
     response['semaine'] = week
     response['an'] = year
     return response
+
 
 # </editor-fold desc="FETCHERS">
 
@@ -531,14 +529,14 @@ def edt_changes(req):
             print req.body
             q = json.loads(req.body,
                            object_hook
-                           = lambda d: namedtuple('X', d.keys())(*d.values())
+                           =lambda d: namedtuple('X', d.keys())(*d.values())
                            )
 
             if work_copy == 0:
-                edt_version, created = EdtVersion.objects\
-                    .get_or_create(semaine = semaine,
-                                   an = an,
-                                   defaults = {'version': 0})
+                edt_version, created = EdtVersion.objects \
+                    .get_or_create(semaine=semaine,
+                                   an=an,
+                                   defaults={'version': 0})
                 version = edt_version.version
 
             if work_copy != 0 or q.v == version:
@@ -559,9 +557,9 @@ def edt_changes(req):
                             cp = ScheduledCourse(cours=co,
                                                  copie_travail=work_copy)
 
-                        m = CourseModification(cours = co,
-                                               version_old = q.v,
-                                               initiator = req.user)
+                        m = CourseModification(cours=co,
+                                               version_old=q.v,
+                                               initiator=req.user)
                         # old_day = a.day.o
                         # old_slot = a.slot.o
                         new_day = a.day.n
@@ -579,7 +577,7 @@ def edt_changes(req):
                             try:
                                 cren_n = Slot \
                                     .objects \
-                                    .get(jour = Day.objects \
+                                    .get(jour=Day.objects \
                                          .get(no=new_day),
                                          heure \
                                              =Time \
@@ -708,12 +706,12 @@ def dispos_changes(req):
 
             print req.body
             q = json.loads(req.body,
-                           object_hook = lambda d:
+                           object_hook=lambda d:
                            namedtuple('X', d.keys())(*d.values()))
 
             prof = None
             try:
-                prof = Tutor.objects.get(username = usr_change)
+                prof = Tutor.objects.get(username=usr_change)
             except ObjectDoesNotExist:
                 bad_response['reason'] \
                     = u"Problème d'utilisateur."
@@ -728,24 +726,24 @@ def dispos_changes(req):
 
             # if no availability was present for this week, first copy the
             # default availabilities
-            if not UserPreference.objects.filter(user = prof,
-                                                 semaine = semaine,
-                                                 an = an).exists():
+            if not UserPreference.objects.filter(user=prof,
+                                                 semaine=semaine,
+                                                 an=an).exists():
                 for c in Slot.objects.all():
-                    def_dispo, created = UserPreference\
-                                         .objects\
-                                         .get_or_create(
-                                             user = prof,
-                                             semaine = None,
-                                             an = annee_courante,
-                                             creneau = c,
-                                             defaults = {'valeur':
-                                                         0})
-                    new_dispo = UserPreference(user = prof,
-                                               semaine = semaine,
-                                               an = an,
-                                               creneau = c,
-                                               valeur = def_dispo.valeur)
+                    def_dispo, created = UserPreference \
+                        .objects \
+                        .get_or_create(
+                        user=prof,
+                        semaine=None,
+                        an=annee_courante,
+                        creneau=c,
+                        defaults={'valeur':
+                                      0})
+                    new_dispo = UserPreference(user=prof,
+                                               semaine=semaine,
+                                               an=an,
+                                               creneau=c,
+                                               valeur=def_dispo.valeur)
                     new_dispo.save()
 
             for a in q:
@@ -758,11 +756,11 @@ def dispos_changes(req):
                     return bad_response
                 di, didi = UserPreference \
                     .objects \
-                    .update_or_create(user = prof,
-                                      semaine = semaine,
-                                      an = an,
-                                      creneau = cr,
-                                      defaults = {'valeur': a.val})
+                    .update_or_create(user=prof,
+                                      semaine=semaine,
+                                      an=an,
+                                      creneau=cr,
+                                      defaults={'valeur': a.val})
                 print di
                 print didi
             return good_response
@@ -808,24 +806,25 @@ def decale_changes(req):
             cours = Course.objects.get(id=c.i)
             # note: add copie_travail in Cours might be of interest
 
-        pm = PlanningModification(cours = cours,
-                                  semaine_old = cours.semaine,
-                                  an_old = cours.an,
-                                  tutor_old = cours.tutor,
-                                  initiator = req.user)
+        pm = PlanningModification(cours=cours,
+                                  semaine_old=cours.semaine,
+                                  an_old=cours.an,
+                                  tutor_old=cours.tutor,
+                                  initiator=req.user)
         pm.save()
 
         cours.semaine = a.ns
         cours.an = a.na
         if a.na != 0:
             # cours.prof=User.objects.get(username=a.np)
-            cours.tutor = Tutor.objects.get(username = a.np)
+            cours.tutor = Tutor.objects.get(username=a.np)
         cours.save()
 
         # flush the whole cache
         cache.clear()
 
     return good_response
+
 
 # </editor-fold desc="CHANGERS">
 
@@ -841,17 +840,17 @@ def contact(req):
         form = ContactForm(req.POST)
         if form.is_valid():
             dat = form.cleaned_data
-            recip_send = [Tutor.objects.get(username =
+            recip_send = [Tutor.objects.get(username=
                                             dat.get("recipient")).email,
-                 dat.get("sender")]
+                          dat.get("sender")]
             try:
                 send_mail(
-                '[EdT IUT Blagnac] ' + dat.get("subject"),
-                u"(Cet e-mail vous a été envoyé depuis le site des emplois"
-                u" du temps de l'IUT de Blagnac)\n\n"
-                + dat.get("message"),
-                dat.get("sender"),
-                recip_send,
+                    '[EdT IUT Blagnac] ' + dat.get("subject"),
+                    u"(Cet e-mail vous a été envoyé depuis le site des emplois"
+                    u" du temps de l'IUT de Blagnac)\n\n"
+                    + dat.get("message"),
+                    dat.get("sender"),
+                    recip_send,
                 )
             except:
                 ack = u'Envoi du mail impossible !'
@@ -865,12 +864,13 @@ def contact(req):
         init_mail = ''
         if req.user.is_authenticated():
             init_mail = req.user.email
-        form = ContactForm(initial = {
+        form = ContactForm(initial={
             'sender': init_mail})
     return render(req, 'modif/contact.html',
                   {'form': form,
                    'ack': ack,
                    'image': imgtxt})
+
 
 # </editor-fold desc="EMAILS">
 
@@ -912,24 +912,24 @@ def clean_week(week, year):
 
 def filt_m(r, module):
     if module != '':
-        r = r.filter(module__nom = module)
+        r = r.filter(module__nom=module)
     return r
 
 
 def filt_p(r, prof):
     if prof != '':
-        r = r.filter(tutor__username = prof)
+        r = r.filter(tutor__username=prof)
     return r
 
 
 def filt_g(r, groupe):
     if groupe != '':
-        r = r.filter(groupe__nom = groupe)
+        r = r.filter(groupe__nom=groupe)
     return r
 
 
 def filt_sa(semaine, an):
-    return Course.objects.filter(semaine = semaine,
-                                 an = an)
+    return Course.objects.filter(semaine=semaine,
+                                 an=an)
 
 # </editor-fold desc="HELPERS">

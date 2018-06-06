@@ -14,7 +14,6 @@ import django.utils.timezone
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -28,20 +27,41 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('password', models.CharField(max_length=128, verbose_name='password')),
                 ('last_login', models.DateTimeField(blank=True, null=True, verbose_name='last login')),
-                ('is_superuser', models.BooleanField(default=False, help_text='Designates that this user has all permissions without explicitly assigning them.', verbose_name='superuser status')),
-                ('username', models.CharField(error_messages={'unique': 'A user with that username already exists.'}, help_text='Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.', max_length=150, unique=True, validators=[django.contrib.auth.validators.ASCIIUsernameValidator()], verbose_name='username')),
+                ('is_superuser', models.BooleanField(default=False,
+                                                     help_text='Designates that this user has all permissions without explicitly assigning them.',
+                                                     verbose_name='superuser status')),
+                ('username', models.CharField(error_messages={'unique': 'A user with that username already exists.'},
+                                              help_text='Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.',
+                                              max_length=150, unique=True,
+                                              validators=[django.contrib.auth.validators.ASCIIUsernameValidator()],
+                                              verbose_name='username')),
                 ('first_name', models.CharField(blank=True, max_length=30, verbose_name='first name')),
                 ('last_name', models.CharField(blank=True, max_length=30, verbose_name='last name')),
                 ('email', models.EmailField(blank=True, max_length=254, verbose_name='email address')),
-                ('is_staff', models.BooleanField(default=False, help_text='Designates whether the user can log into this admin site.', verbose_name='staff status')),
-                ('is_active', models.BooleanField(default=True, help_text='Designates whether this user should be treated as active. Unselect this instead of deleting accounts.', verbose_name='active')),
+                ('is_staff', models.BooleanField(default=False,
+                                                 help_text='Designates whether the user can log into this admin site.',
+                                                 verbose_name='staff status')),
+                ('is_active', models.BooleanField(default=True,
+                                                  help_text='Designates whether this user should be treated as active. Unselect this instead of deleting accounts.',
+                                                  verbose_name='active')),
                 ('date_joined', models.DateTimeField(default=django.utils.timezone.now, verbose_name='date joined')),
-                ('status', models.CharField(choices=[('Vac', 'Vacataire'), ('FuS', 'Permanent UT2J (IUT ou non)'), ('BIA', 'BIATOS')], default='FuS', max_length=3)),
-                ('pref_slots_per_day', models.PositiveSmallIntegerField(default=4, verbose_name='Combien de cr\xe9neaux par jour au mieux ?')),
+                ('status', models.CharField(
+                    choices=[('Vac', 'Vacataire'), ('FuS', 'Permanent UT2J (IUT ou non)'), ('BIA', 'BIATOS')],
+                    default='FuS', max_length=3)),
+                ('pref_slots_per_day', models.PositiveSmallIntegerField(default=4,
+                                                                        verbose_name='Combien de cr\xe9neaux par jour au mieux ?')),
                 ('rights', models.PositiveSmallIntegerField(default=0, verbose_name='Peut forcer ?')),
-                ('LBD', models.PositiveSmallIntegerField(default=2, validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(4)], verbose_name='Limitation du nombre de jours')),
-                ('groups', models.ManyToManyField(blank=True, help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.', related_name='user_set', related_query_name='user', to='auth.Group', verbose_name='groups')),
-                ('user_permissions', models.ManyToManyField(blank=True, help_text='Specific permissions for this user.', related_name='user_set', related_query_name='user', to='auth.Permission', verbose_name='user permissions')),
+                ('LBD', models.PositiveSmallIntegerField(default=2,
+                                                         validators=[django.core.validators.MinValueValidator(0),
+                                                                     django.core.validators.MaxValueValidator(4)],
+                                                         verbose_name='Limitation du nombre de jours')),
+                ('groups', models.ManyToManyField(blank=True,
+                                                  help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.',
+                                                  related_name='user_set', related_query_name='user', to='auth.Group',
+                                                  verbose_name='groups')),
+                ('user_permissions', models.ManyToManyField(blank=True, help_text='Specific permissions for this user.',
+                                                            related_name='user_set', related_query_name='user',
+                                                            to='auth.Permission', verbose_name='user permissions')),
             ],
             options={
                 'abstract': False,
@@ -56,14 +76,17 @@ class Migration(migrations.Migration):
             name='BIATOS',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('tutor', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ('tutor',
+                 models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
         ),
         migrations.CreateModel(
             name='BreakingNews',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('week', models.PositiveSmallIntegerField(blank=True, null=True, validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(53)])),
+                ('week', models.PositiveSmallIntegerField(blank=True, null=True,
+                                                          validators=[django.core.validators.MinValueValidator(0),
+                                                                      django.core.validators.MaxValueValidator(53)])),
                 ('year', models.PositiveSmallIntegerField()),
                 ('x_beg', models.FloatField(blank=True, default=2.0)),
                 ('x_end', models.FloatField(blank=True, default=3.0)),
@@ -77,9 +100,14 @@ class Migration(migrations.Migration):
             name='Cours',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('nature', models.CharField(choices=[('CM', 'Cours magistral'), ('TD', 'Travaux Dirig\xe9s'), ('TP', 'Travaux Pratiques'), ('DS', 'Devoir surveill\xe9')], max_length=2)),
+                ('nature', models.CharField(
+                    choices=[('CM', 'Cours magistral'), ('TD', 'Travaux Dirig\xe9s'), ('TP', 'Travaux Pratiques'),
+                             ('DS', 'Devoir surveill\xe9')], max_length=2)),
                 ('no', models.PositiveSmallIntegerField(blank=True, null=True)),
-                ('semaine', models.PositiveSmallIntegerField(blank=True, null=True, validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(53)])),
+                ('semaine', models.PositiveSmallIntegerField(blank=True, null=True,
+                                                             validators=[django.core.validators.MinValueValidator(0),
+                                                                         django.core.validators.MaxValueValidator(
+                                                                             53)])),
                 ('an', models.PositiveSmallIntegerField()),
                 ('suspens', models.BooleanField(default=False, verbose_name='En suspens?')),
             ],
@@ -89,7 +117,8 @@ class Migration(migrations.Migration):
             name='CoursModification',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('semaine_old', models.PositiveSmallIntegerField(null=True, validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(53)])),
+                ('semaine_old', models.PositiveSmallIntegerField(null=True, validators=[
+                    django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(53)])),
                 ('an_old', models.PositiveSmallIntegerField(null=True)),
                 ('version_old', models.PositiveIntegerField()),
                 ('updated_at', models.DateTimeField(auto_now=True)),
@@ -111,7 +140,9 @@ class Migration(migrations.Migration):
             name='CoutGroupe',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('semaine', models.PositiveSmallIntegerField(validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(53)])),
+                ('semaine', models.PositiveSmallIntegerField(validators=[django.core.validators.MinValueValidator(0),
+                                                                         django.core.validators.MaxValueValidator(
+                                                                             53)])),
                 ('an', models.PositiveSmallIntegerField()),
                 ('valeur', models.FloatField()),
             ],
@@ -120,7 +151,9 @@ class Migration(migrations.Migration):
             name='CoutProf',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('semaine', models.PositiveSmallIntegerField(validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(53)])),
+                ('semaine', models.PositiveSmallIntegerField(validators=[django.core.validators.MinValueValidator(0),
+                                                                         django.core.validators.MaxValueValidator(
+                                                                             53)])),
                 ('an', models.PositiveSmallIntegerField()),
                 ('valeur', models.FloatField()),
                 ('tutor', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
@@ -137,8 +170,11 @@ class Migration(migrations.Migration):
             name='DemiJourFeriePromo',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('apm', models.CharField(choices=[('AM', 'Matin'), ('PM', 'Apr\xe8s-midi')], default='AM', max_length=2, verbose_name='Demi-journ\xe9e')),
-                ('semaine', models.PositiveSmallIntegerField(validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(53)])),
+                ('apm', models.CharField(choices=[('AM', 'Matin'), ('PM', 'Apr\xe8s-midi')], default='AM', max_length=2,
+                                         verbose_name='Demi-journ\xe9e')),
+                ('semaine', models.PositiveSmallIntegerField(validators=[django.core.validators.MinValueValidator(0),
+                                                                         django.core.validators.MaxValueValidator(
+                                                                             53)])),
                 ('an', models.PositiveSmallIntegerField()),
             ],
         ),
@@ -146,10 +182,16 @@ class Migration(migrations.Migration):
             name='DispoCours',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('nature', models.CharField(choices=[('CM', 'Cours magistral'), ('TD', 'Travaux Dirig\xe9s'), ('TP', 'Travaux Pratiques'), ('DS', 'Devoir surveill\xe9')], max_length=2)),
-                ('semaine', models.PositiveSmallIntegerField(null=True, validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(53)])),
+                ('nature', models.CharField(
+                    choices=[('CM', 'Cours magistral'), ('TD', 'Travaux Dirig\xe9s'), ('TP', 'Travaux Pratiques'),
+                             ('DS', 'Devoir surveill\xe9')], max_length=2)),
+                ('semaine', models.PositiveSmallIntegerField(null=True,
+                                                             validators=[django.core.validators.MinValueValidator(0),
+                                                                         django.core.validators.MaxValueValidator(
+                                                                             53)])),
                 ('an', models.PositiveSmallIntegerField(null=True)),
-                ('valeur', models.SmallIntegerField(validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(10)])),
+                ('valeur', models.SmallIntegerField(validators=[django.core.validators.MinValueValidator(0),
+                                                                django.core.validators.MaxValueValidator(10)])),
                 ('creneau', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='modif.Slot')),
             ],
         ),
@@ -157,9 +199,14 @@ class Migration(migrations.Migration):
             name='Disponibilite',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('semaine', models.PositiveSmallIntegerField(null=True, validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(53)])),
+                ('semaine', models.PositiveSmallIntegerField(null=True,
+                                                             validators=[django.core.validators.MinValueValidator(0),
+                                                                         django.core.validators.MaxValueValidator(
+                                                                             53)])),
                 ('an', models.PositiveSmallIntegerField(null=True)),
-                ('valeur', models.SmallIntegerField(default=10, validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(10)])),
+                ('valeur', models.SmallIntegerField(default=10, validators=[django.core.validators.MinValueValidator(0),
+                                                                            django.core.validators.MaxValueValidator(
+                                                                                10)])),
                 ('creneau', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='modif.Slot')),
                 ('tutor', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
@@ -168,7 +215,9 @@ class Migration(migrations.Migration):
             name='DJLGroupe',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('semaine', models.PositiveSmallIntegerField(validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(53)])),
+                ('semaine', models.PositiveSmallIntegerField(validators=[django.core.validators.MinValueValidator(0),
+                                                                         django.core.validators.MaxValueValidator(
+                                                                             53)])),
                 ('an', models.PositiveSmallIntegerField()),
                 ('DJL', models.PositiveSmallIntegerField()),
             ],
@@ -177,7 +226,9 @@ class Migration(migrations.Migration):
             name='EdtVersion',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('semaine', models.PositiveSmallIntegerField(validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(53)])),
+                ('semaine', models.PositiveSmallIntegerField(validators=[django.core.validators.MinValueValidator(0),
+                                                                         django.core.validators.MaxValueValidator(
+                                                                             53)])),
                 ('an', models.PositiveSmallIntegerField()),
                 ('version', models.PositiveIntegerField(default=0)),
             ],
@@ -188,7 +239,8 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('department', models.CharField(default='INFO', max_length=50)),
                 ('is_iut', models.BooleanField(default=True)),
-                ('tutor', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ('tutor',
+                 models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
         ),
         migrations.CreateModel(
@@ -204,16 +256,20 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('nom', models.CharField(max_length=4)),
-                ('nature', models.CharField(choices=[('to', 'Classe enti\xe8re'), ('TD', 'Groupe TD'), ('TP', 'Groupe TP')], max_length=2, verbose_name='Type de classe')),
+                ('nature',
+                 models.CharField(choices=[('to', 'Classe enti\xe8re'), ('TD', 'Groupe TD'), ('TP', 'Groupe TP')],
+                                  max_length=2, verbose_name='Type de classe')),
                 ('size', models.PositiveSmallIntegerField()),
                 ('basic', models.BooleanField(default=False, verbose_name='Basic group?')),
-                ('parent_groups', models.ManyToManyField(blank=True, related_name='_groupe_parent_groups_+', to='modif.Group')),
+                ('parent_groups',
+                 models.ManyToManyField(blank=True, related_name='_groupe_parent_groups_+', to='modif.Group')),
             ],
         ),
         migrations.CreateModel(
             name='Heure',
             fields=[
-                ('apm', models.CharField(choices=[('AM', 'Matin'), ('PM', 'Apr\xe8s-midi')], default='AM', max_length=2, verbose_name='Demi-journ\xe9e')),
+                ('apm', models.CharField(choices=[('AM', 'Matin'), ('PM', 'Apr\xe8s-midi')], default='AM', max_length=2,
+                                         verbose_name='Demi-journ\xe9e')),
                 ('no', models.PositiveSmallIntegerField(primary_key=True, serialize=False)),
                 ('nom', models.CharField(max_length=20)),
             ],
@@ -236,7 +292,9 @@ class Migration(migrations.Migration):
                 ('nbTP', models.PositiveSmallIntegerField(default=1)),
                 ('nbCM', models.PositiveSmallIntegerField(default=1)),
                 ('nbDS', models.PositiveSmallIntegerField(default=1)),
-                ('head', models.ForeignKey(blank=True, default=None, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ('head',
+                 models.ForeignKey(blank=True, default=None, null=True, on_delete=django.db.models.deletion.CASCADE,
+                                   to=settings.AUTH_USER_MODEL)),
             ],
         ),
         migrations.CreateModel(
@@ -245,19 +303,24 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('color_bg', models.CharField(default='red', max_length=20)),
                 ('color_txt', models.CharField(default='black', max_length=20)),
-                ('module', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='display', to='modif.Module')),
+                ('module', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='display',
+                                                to='modif.Module')),
             ],
         ),
         migrations.CreateModel(
             name='PlanifModification',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('semaine_old', models.PositiveSmallIntegerField(null=True, validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(53)])),
+                ('semaine_old', models.PositiveSmallIntegerField(null=True, validators=[
+                    django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(53)])),
                 ('an_old', models.PositiveSmallIntegerField(null=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('cours', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='modif.Course')),
-                ('initiator', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='operated_planif_modif', to=settings.AUTH_USER_MODEL)),
-                ('tutor_old', models.ForeignKey(default=None, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='impacted_by_planif_modif', to=settings.AUTH_USER_MODEL)),
+                ('initiator',
+                 models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='operated_planif_modif',
+                                   to=settings.AUTH_USER_MODEL)),
+                ('tutor_old', models.ForeignKey(default=None, null=True, on_delete=django.db.models.deletion.CASCADE,
+                                                related_name='impacted_by_planif_modif', to=settings.AUTH_USER_MODEL)),
             ],
         ),
         migrations.CreateModel(
@@ -266,15 +329,19 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('successifs', models.BooleanField(default=False, verbose_name='Successifs?')),
                 ('ND', models.BooleanField(default=False, verbose_name='Jours differents')),
-                ('cours1', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='cours1', to='modif.Course')),
-                ('cours2', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='cours2', to='modif.Course')),
+                ('cours1', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='cours1',
+                                             to='modif.Course')),
+                ('cours2', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='cours2',
+                                             to='modif.Course')),
             ],
         ),
         migrations.CreateModel(
             name='Regen',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('semaine', models.PositiveSmallIntegerField(validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(53)])),
+                ('semaine', models.PositiveSmallIntegerField(validators=[django.core.validators.MinValueValidator(0),
+                                                                         django.core.validators.MaxValueValidator(
+                                                                             53)])),
                 ('an', models.PositiveSmallIntegerField()),
                 ('full', models.BooleanField(default=True, verbose_name='Compl\xe8te')),
                 ('fday', models.PositiveSmallIntegerField(default=1, verbose_name='Jour')),
@@ -320,7 +387,9 @@ class Migration(migrations.Migration):
             name='RoomUnavailability',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('semaine', models.PositiveSmallIntegerField(validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(53)])),
+                ('semaine', models.PositiveSmallIntegerField(validators=[django.core.validators.MinValueValidator(0),
+                                                                         django.core.validators.MaxValueValidator(
+                                                                             53)])),
                 ('an', models.PositiveSmallIntegerField()),
                 ('creneau', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='modif.Slot')),
                 ('room', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='modif.Room')),
@@ -333,7 +402,8 @@ class Migration(migrations.Migration):
                 ('employer', models.CharField(max_length=50, null=True, verbose_name='Employeur ?')),
                 ('qualite', models.CharField(max_length=50, null=True)),
                 ('field', models.CharField(max_length=50, null=True, verbose_name='Domaine ?')),
-                ('tutor', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ('tutor',
+                 models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
         ),
         migrations.CreateModel(
@@ -349,23 +419,28 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('row', models.PositiveSmallIntegerField()),
-                ('training_programme', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='display', to='modif.TrainingProgramme')),
+                ('training_programme',
+                 models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='display',
+                                      to='modif.TrainingProgramme')),
             ],
         ),
         migrations.AddField(
             model_name='roompreference',
             name='for_type',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='+', to='modif.RoomType'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE,
+                                    related_name='+', to='modif.RoomType'),
         ),
         migrations.AddField(
             model_name='roompreference',
             name='prefer',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='+', to='modif.RoomGroup'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE,
+                                    related_name='+', to='modif.RoomGroup'),
         ),
         migrations.AddField(
             model_name='roompreference',
             name='unprefer',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='+', to='modif.RoomGroup'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE,
+                                    related_name='+', to='modif.RoomGroup'),
         ),
         migrations.AddField(
             model_name='roomgroup',
@@ -390,7 +465,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='groupdisplay',
             name='group',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='display', to='modif.Group'),
+            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='display',
+                                       to='modif.Group'),
         ),
         migrations.AddField(
             model_name='djlgroupe',
@@ -435,7 +511,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='coursplace',
             name='room',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='modif.RoomGroup'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE,
+                                    to='modif.RoomGroup'),
         ),
         migrations.AddField(
             model_name='coursmodification',
@@ -450,7 +527,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='coursmodification',
             name='room_old',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='modif.RoomGroup'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE,
+                                    to='modif.RoomGroup'),
         ),
         migrations.AddField(
             model_name='cours',
@@ -460,12 +538,14 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='cours',
             name='module',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='module', to='modif.Module'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='module',
+                                    to='modif.Module'),
         ),
         migrations.AddField(
             model_name='cours',
             name='modulesupp',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='modulesupp', to='modif.Module'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE,
+                                    related_name='modulesupp', to='modif.Module'),
         ),
         migrations.AddField(
             model_name='cours',
@@ -475,11 +555,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='cours',
             name='supp_tutor',
-            field=models.ForeignKey(blank=True, default=None, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='courses_as_supp', to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(blank=True, default=None, null=True, on_delete=django.db.models.deletion.CASCADE,
+                                    related_name='courses_as_supp', to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name='cours',
             name='tutor',
-            field=models.ForeignKey(default=None, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='taught_courses', to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(default=None, null=True, on_delete=django.db.models.deletion.CASCADE,
+                                    related_name='taught_courses', to=settings.AUTH_USER_MODEL),
         ),
     ]

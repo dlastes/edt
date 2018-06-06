@@ -64,6 +64,5 @@ urlpatterns = [
     url(r'$', RedirectView.as_view(pattern_name='edt', permanent=False)),
 ]
 
-
 # https://pypi.python.org/pypi/django-live-log
 # https://github.com/abdullatheef/django_live_log

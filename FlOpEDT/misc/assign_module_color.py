@@ -34,7 +34,7 @@ import json
 import os
 
 
-def assign_color(overwrite = True, diff_across_train_prog = False):
+def assign_color(overwrite=True, diff_across_train_prog=False):
     """
     Assigns a color to each module
     :param overwrite: if overwrite, overwrites all preexisting colors,
@@ -63,33 +63,33 @@ def optim_and_save(keys, mat, overwrite):
     color_set = get_color_set(os.path.join('misc', 'colors.json'),
                               max(color_indices))
     for mi in range(len(keys)):
-        cbg = color_set[color_indices[mi]-1]
+        cbg = color_set[color_indices[mi] - 1]
         try:
-            mod_disp = ModuleDisplay.objects.get(module = keys[mi])
+            mod_disp = ModuleDisplay.objects.get(module=keys[mi])
             if overwrite:
                 mod_disp.color_bg = cbg
                 mod_disp.color_txt = compute_luminance(cbg)
                 mod_disp.save()
         except ObjectDoesNotExist:
-            mod_disp = ModuleDisplay(module = keys[mi],
-                                     color_bg = cbg,
-                                     color_txt = compute_luminance(cbg))
+            mod_disp = ModuleDisplay(module=keys[mi],
+                                     color_bg=cbg,
+                                     color_txt=compute_luminance(cbg))
             mod_disp.save()
 
 
-def build_graph_matrices(train_prog = None):
+def build_graph_matrices(train_prog=None):
     if train_prog is None:
         keys = list(Module.objects.all())
-    keys = list(Module.objects.filter(train_prog = train_prog))
+    keys = list(Module.objects.filter(train_prog=train_prog))
     mat = eye(len(keys))
     wl = week_list()
 
     for mi in range(len(keys)):
-        for mj in range(mi+1, len(keys)):
+        for mj in range(mi + 1, len(keys)):
             for wy in wl:
-                if Course.objects.filter(semaine = wy['semaine'],
-                                         an = wy['an'],
-                                         module__in = [keys[mi], keys[mj]])\
+                if Course.objects.filter(semaine=wy['semaine'],
+                                         an=wy['an'],
+                                         module__in=[keys[mi], keys[mj]]) \
                         .distinct('module').count() == 2:
                     mat[(mi, mj)] = 1
                     break
@@ -145,8 +145,6 @@ def compute_luminance(col):
     else:
         return '#000000'
 
-
-
 # def compute_luminance(l):
 #     color_txt = []
 #     for el in l:
@@ -159,8 +157,6 @@ def compute_luminance(col):
 #         else:
 #             color_txt.append('#000000')
 #     return color_txt
-
-
 
 
 #     wl = week_list()

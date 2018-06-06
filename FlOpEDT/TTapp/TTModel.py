@@ -434,9 +434,9 @@ class TTModel(object):
 
         # Holidays
         for holiday in self.wdb.holidays:
-            holislots=self.wdb.slots.filter(jour=holiday.jour)
+            holislots = self.wdb.slots.filter(jour=holiday.jour)
             if holiday.apm is not None:
-                holislots=holislots.filter(heure__apm=holiday.apm)
+                holislots = holislots.filter(heure__apm=holiday.apm)
             for sl in holislots:
                 for c in self.wdb.courses:
                     self.add_constraint(self.TT[(sl, c)], '==', 0)
@@ -445,7 +445,7 @@ class TTModel(object):
         for training_half_day in self.wdb.training_half_days:
             training_slots = self.wdb.slots.filter(jour=training_half_day.jour)
             if training_half_day.apm is not None:
-                training_slots=training_slots.filter(heure__apm=training_half_day.apm)
+                training_slots = training_slots.filter(heure__apm=training_half_day.apm)
             training_progs = self.train_prog
             if training_half_day.train_prog is not None:
                 training_progs = [training_half_day.train_prog]
@@ -648,17 +648,17 @@ class TTModel(object):
                       and all(x.creneau.jour.no == 0
                               for x in availabilities.filter(valeur__gte=1)
                               )
-                      ) or ((self.wdb.week == 18)
-                            and all(x.creneau.jour.no == 1
-                                    for x in availabilities.filter(valeur__gte=1)
-                                    )
-                            ) or ((self.wdb.week == 19)
-                                  and all(x.creneau.jour.no in [1, 3, 4]
-                                          for x in availabilities.filter(valeur__gte=1)
-                                          )
-                                  ) or ((self.wdb.week == 21)
-                                        and all(x.creneau.jour.no == 0
-                                                for x in availabilities.filter(valeur__gte=1))):
+                ) or ((self.wdb.week == 18)
+                      and all(x.creneau.jour.no == 1
+                              for x in availabilities.filter(valeur__gte=1)
+                              )
+                ) or ((self.wdb.week == 19)
+                      and all(x.creneau.jour.no in [1, 3, 4]
+                              for x in availabilities.filter(valeur__gte=1)
+                              )
+                ) or ((self.wdb.week == 21)
+                      and all(x.creneau.jour.no == 0
+                              for x in availabilities.filter(valeur__gte=1))):
                     print "%s has given availabilities only on vacation days!" \
                           % i.username
                     for a in availabilities:
@@ -793,8 +793,8 @@ class TTModel(object):
                                     an=self.wdb.year,
                                     semaine=self.wdb.week,
                                     DJL=self.get_expr_value(self.FHD_G['PM'][g]) +
-                                 0.5 * self.get_expr_value(
-                                     self.FHD_G['AM'][g]))
+                                        0.5 * self.get_expr_value(
+                                        self.FHD_G['AM'][g]))
             djlg.save()
             cg = GroupCost(groupe=g,
                            an=self.wdb.year,
@@ -828,8 +828,8 @@ class TTModel(object):
         for constraint_type in TTConstraint.__subclasses__():
             for constr in \
                     constraint_type.objects.filter(Q(week=self.semaine)
-                                                           & Q(year=self.an)
-                                                           | Q(week__isnull=True)):
+                                                   & Q(year=self.an)
+                                                   | Q(week__isnull=True)):
                 constr.enrich_model(self)
 
     def update_objective(self):

@@ -78,12 +78,12 @@ class LimitCourseTypePerPeriod(TTConstraint):  # , pond):
     type = models.ForeignKey('modif.CourseType')
     limit = models.PositiveSmallIntegerField()
     train_prog = models.ForeignKey('modif.TrainingProgramme',
-                                   null = True,
-                                   default = None)
+                                   null=True,
+                                   default=None)
     module = models.ForeignKey('modif.Module', null=True)
     tutor = models.ForeignKey('modif.Tutor',
                               null=True,
-                              default = None)
+                              default=None)
     FULL_DAY = 'fd'
     HALF_DAY = 'hd'
     PERIOD_CHOICES = ((FULL_DAY, 'Full day'), (HALF_DAY, 'Half day'))
@@ -92,13 +92,13 @@ class LimitCourseTypePerPeriod(TTConstraint):  # , pond):
     def enrich_model(self, ttmodel, ponderation=1.):
         fc = ttmodel.wdb.courses
         if self.tutor is not None:
-            fc = fc.filter(tutor = self.tutor)
+            fc = fc.filter(tutor=self.tutor)
         if self.module is not None:
-            fc = fc.filter(module = self.module)
+            fc = fc.filter(module=self.module)
         if self.type is not None:
-            fc = fc.filter(type = self.type)
+            fc = fc.filter(type=self.type)
         if self.train_prog is not None:
-            fc = fc.filter(groupe__train_prog = self.train_prog)
+            fc = fc.filter(groupe__train_prog=self.train_prog)
         if self.period == self.FULL_DAY:
             periods = ['']
         else:
@@ -130,8 +130,8 @@ class ReasonableDays(TTConstraint):
                                    default=None)
     group = models.ForeignKey('modif.Group', null=True)
     tutor = models.ForeignKey('modif.Tutor',
-                              null = True,
-                              default = None)
+                              null=True,
+                              default=None)
 
     def enrich_model(self, ttmodel, ponderation=1):
         for d in ttmodel.wdb.days:
@@ -139,13 +139,13 @@ class ReasonableDays(TTConstraint):
             sllast = ttmodel.wdb.slots.get(heure__no=5, jour=d)
             fc = ttmodel.wdb.courses
             if self.tutor is not None:
-                fc = fc.filter(tutor = self.tutor)
+                fc = fc.filter(tutor=self.tutor)
             if self.train_prog is not None:
-                fc = fc.filter(groupe__train_prog = self.train_prog)
+                fc = fc.filter(groupe__train_prog=self.train_prog)
             if self.group is not None:
-                fc = fc.filter(groupe = self.group)
+                fc = fc.filter(groupe=self.group)
             for c1 in fc:
-                for c2 in fc.exclude(id__lte = c1.id):
+                for c2 in fc.exclude(id__lte=c1.id):
                     if self.weight is not None:
                         conj_var = ttmodel.add_conjunct(
                             ttmodel.TT[(slfirst, c1)],
@@ -179,8 +179,8 @@ class Stabilize(TTConstraint):
     module = models.ForeignKey('modif.Module', null=True, default=None)
     tutor = models.ForeignKey('modif.Tutor',
                               null=True,
-                              default = None)
-    type = models.ForeignKey('modif.CourseType', null = True, default = None)
+                              default=None)
+    type = models.ForeignKey('modif.CourseType', null=True, default=None)
     work_copy = models.PositiveSmallIntegerField(default=0)
 
     def enrich_model(self, ttmodel, ponderation=1):
@@ -190,40 +190,40 @@ class Stabilize(TTConstraint):
             # nb_changements_I=dict(zip(ttmodel.wdb.instructors,[0 for i in ttmodel.wdb.instructors]))
             for sl in ttmodel.wdb.slots:
                 for c in ttmodel.wdb.courses:
-                    if not sched_courses.filter(cours__tutor = c.tutor,
-                                                creneau = sl,
+                    if not sched_courses.filter(cours__tutor=c.tutor,
+                                                creneau=sl,
                                                 ):
                         ttmodel.obj += ttmodel.TT[(sl, c)]
                         # nb_changements_I[c.tutor]+=ttmodel.TT[(sl,c)]
-                    if not sched_courses.filter(cours__tutor = c.tutor,
-                                                creneau__jour = sl.jour,
-                                                creneau__heure__apm =
+                    if not sched_courses.filter(cours__tutor=c.tutor,
+                                                creneau__jour=sl.jour,
+                                                creneau__heure__apm=
                                                 sl.heure.apm):
                         ttmodel.obj += ponderation * ttmodel.TT[(sl, c)]
                         # nb_changements_I[i]+=ttmodel.TT[(sl,c)]
-                    if not sched_courses.filter(cours__groupe = c.groupe,
-                                                creneau__jour = sl.jour,
-                                                creneau__heure__apm =
+                    if not sched_courses.filter(cours__groupe=c.groupe,
+                                                creneau__jour=sl.jour,
+                                                creneau__heure__apm=
                                                 sl.heure.apm):
                         ttmodel.obj += ponderation * ttmodel.TT[(sl, c)]
 
         else:
             fc = ttmodel.wdb.courses
             if self.tutor is not None:
-                fc = fc.filter(tutor = self.tutor)
+                fc = fc.filter(tutor=self.tutor)
             if self.type is not None:
-                fc = fc.filter(type = self.type)
+                fc = fc.filter(type=self.type)
             if self.train_prog is not None:
-                fc = fc.filter(groupe__train_prog = self.train_prog)
+                fc = fc.filter(groupe__train_prog=self.train_prog)
             if self.group:
-                fc = fc.filter(groupe = self.group)
+                fc = fc.filter(groupe=self.group)
             if self.module:
-                fc = fc.filter(module = self.module)
+                fc = fc.filter(module=self.module)
             for c in fc:
                 sched_c = ttmodel.wdb \
                     .sched_courses \
-                    .get(cours = c,
-                         copie_travail = self.work_copy)
+                    .get(cours=c,
+                         copie_travail=self.work_copy)
                 chosen_slot = sched_c.creneau
                 chosen_roomgroup = sched_c.room
                 if self.weight is not None:
@@ -249,7 +249,7 @@ class MinHalfDays(TTConstraint):
     module = models.ForeignKey('modif.Module', null=True)
     tutor = models.ForeignKey('modif.Tutor',
                               null=True,
-                              default = None)
+                              default=None)
     join2courses = models.BooleanField(
         verbose_name='If 2 or 4 courses only, join it?',
         default=False)
@@ -257,7 +257,7 @@ class MinHalfDays(TTConstraint):
     def enrich_model(self, ttmodel, ponderation=1):
         fc = ttmodel.wdb.courses
         if self.tutor is not None:
-            fc = fc.filter(tutor = self.tutor)
+            fc = fc.filter(tutor=self.tutor)
             b_h_ds = ttmodel.sum(
                 ttmodel.IBHD[(self.tutor, d, apm)]
                 for d in ttmodel.wdb.days
@@ -275,8 +275,8 @@ class MinHalfDays(TTConstraint):
                                       % (self.module, d, 'PM'))
                 # add constraint linking MBHD to TT
                 for apm in ['AM', 'PM']:
-                    halfdayslots = ttmodel.wdb.slots.filter(jour = d,
-                                                            heure__apm = apm)
+                    halfdayslots = ttmodel.wdb.slots.filter(jour=d,
+                                                            heure__apm=apm)
                     card = len(halfdayslots)
                     expr = ttmodel.lin_expr()
                     expr += card * mod_b_h_d[(self.module, d, apm)]
@@ -285,7 +285,7 @@ class MinHalfDays(TTConstraint):
                             expr -= ttmodel.TT[(sl, c)]
                     ttmodel.add_constraint(expr, '>=', 0)
                     ttmodel.add_constraint(expr, '<=', card - 1)
-            fc = fc.filter(module = self.module)
+            fc = fc.filter(module=self.module)
             b_h_ds = ttmodel.sum(
                 mod_b_h_d[(self.module, d, apm)]
                 for d in ttmodel.wdb.days
@@ -329,7 +329,7 @@ class MinNonPreferedSlot(TTConstraint):
     """
     tutor = models.ForeignKey('modif.Tutor',
                               null=True,
-                              default = None)
+                              default=None)
     train_prog = models.ForeignKey('modif.TrainingProgramme',
                                    null=True,
                                    default=None)
@@ -341,18 +341,18 @@ class MinNonPreferedSlot(TTConstraint):
                 'train_prog': ValidationError(_('Si pas de prof alors promo.',
                                                 code='invalid')),
                 'tutor': ValidationError(_('Si pas de promo alors prof.',
-                                          code='invalid'))})
+                                           code='invalid'))})
 
     def enrich_model(self, ttmodel, ponderation=1):
         if self.tutor is not None:
             filtered_courses = ttmodel.wdb.courses \
-                .filter(tutor = self.tutor)
+                .filter(tutor=self.tutor)
         else:
             filtered_courses = ttmodel.wdb.courses \
-                .filter(groupe__train_prog = self.train_prog)
+                .filter(groupe__train_prog=self.train_prog)
             # On exclut les cours de sport!
             filtered_courses = \
-                filtered_courses.exclude(module__abbrev = 'SC')
+                filtered_courses.exclude(module__abbrev='SC')
         basic_groups = ttmodel.wdb.basic_groups \
             .filter(train_prog=self.train_prog)
         for sl in ttmodel.wdb.slots:
@@ -387,17 +387,17 @@ class AvoidBothSlots(TTConstraint):
                                    default=None)
     group = models.ForeignKey('modif.Group', null=True)
     tutor = models.ForeignKey('modif.Tutor',
-                              null = True,
-                              default = None)
+                              null=True,
+                              default=None)
 
     def enrich_model(self, ttmodel, ponderation=1):
         fc = ttmodel.wdb.courses
         if self.tutor is not None:
-            fc = fc.filter(tutor = self.tutor)
+            fc = fc.filter(tutor=self.tutor)
         if self.train_prog is not None:
-            fc = fc.filter(groupe__train_prog = self.train_prog)
+            fc = fc.filter(groupe__train_prog=self.train_prog)
         if self.group:
-            fc = fc.filter(groupe = self.group)
+            fc = fc.filter(groupe=self.group)
         for c1 in fc:
             for c2 in fc.exclude(id__lte=c1.id):
                 if self.weight is not None:

@@ -28,6 +28,7 @@
 from modif.models import Slot, ScheduledCourse, RoomPreference
 from django.db.models import Max
 
+
 def basic_reassign_rooms(semaine, an, target_work_copy):
     """
     Reassign the rooms...
@@ -102,7 +103,6 @@ def basic_reassign_rooms(semaine, an, target_work_copy):
 
 
 def basic_swap_version(week, year, copy_a, copy_b=0):
-
     try:
         tmp_wc = ScheduledCourse \
                      .objects \

@@ -7,7 +7,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -18,9 +17,13 @@ class Migration(migrations.Migration):
             name='AvoidBothSlots',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('week', models.PositiveSmallIntegerField(default=None, null=True, validators=[django.core.validators.MinValueValidator(1), django.core.validators.MaxValueValidator(52)])),
+                ('week', models.PositiveSmallIntegerField(default=None, null=True,
+                                                          validators=[django.core.validators.MinValueValidator(1),
+                                                                      django.core.validators.MaxValueValidator(52)])),
                 ('year', models.PositiveSmallIntegerField(default=None, null=True)),
-                ('weight', models.PositiveSmallIntegerField(default=None, null=True, validators=[django.core.validators.MinValueValidator(1), django.core.validators.MaxValueValidator(10)])),
+                ('weight', models.PositiveSmallIntegerField(default=None, null=True,
+                                                            validators=[django.core.validators.MinValueValidator(1),
+                                                                        django.core.validators.MaxValueValidator(10)])),
                 ('comment', models.CharField(blank=True, default=None, max_length=100, null=True)),
             ],
             options={
@@ -31,11 +34,17 @@ class Migration(migrations.Migration):
             name='LimitNaturePerPeriod',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('week', models.PositiveSmallIntegerField(default=None, null=True, validators=[django.core.validators.MinValueValidator(1), django.core.validators.MaxValueValidator(52)])),
+                ('week', models.PositiveSmallIntegerField(default=None, null=True,
+                                                          validators=[django.core.validators.MinValueValidator(1),
+                                                                      django.core.validators.MaxValueValidator(52)])),
                 ('year', models.PositiveSmallIntegerField(default=None, null=True)),
-                ('weight', models.PositiveSmallIntegerField(default=None, null=True, validators=[django.core.validators.MinValueValidator(1), django.core.validators.MaxValueValidator(10)])),
+                ('weight', models.PositiveSmallIntegerField(default=None, null=True,
+                                                            validators=[django.core.validators.MinValueValidator(1),
+                                                                        django.core.validators.MaxValueValidator(10)])),
                 ('comment', models.CharField(blank=True, default=None, max_length=100, null=True)),
-                ('nature', models.CharField(choices=[('CM', 'Cours magistral'), ('TD', 'Travaux Dirig\xe9s'), ('TP', 'Travaux Pratiques'), ('DS', 'Devoir surveill\xe9')], max_length=2, null=True)),
+                ('nature', models.CharField(
+                    choices=[('CM', 'Cours magistral'), ('TD', 'Travaux Dirig\xe9s'), ('TP', 'Travaux Pratiques'),
+                             ('DS', 'Devoir surveill\xe9')], max_length=2, null=True)),
                 ('limit', models.PositiveSmallIntegerField()),
                 ('period', models.CharField(choices=[('fd', 'Full day'), ('hd', 'Half day')], max_length=2)),
             ],
@@ -47,9 +56,13 @@ class Migration(migrations.Migration):
             name='MinHalfDays',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('week', models.PositiveSmallIntegerField(default=None, null=True, validators=[django.core.validators.MinValueValidator(1), django.core.validators.MaxValueValidator(52)])),
+                ('week', models.PositiveSmallIntegerField(default=None, null=True,
+                                                          validators=[django.core.validators.MinValueValidator(1),
+                                                                      django.core.validators.MaxValueValidator(52)])),
                 ('year', models.PositiveSmallIntegerField(default=None, null=True)),
-                ('weight', models.PositiveSmallIntegerField(default=None, null=True, validators=[django.core.validators.MinValueValidator(1), django.core.validators.MaxValueValidator(10)])),
+                ('weight', models.PositiveSmallIntegerField(default=None, null=True,
+                                                            validators=[django.core.validators.MinValueValidator(1),
+                                                                        django.core.validators.MaxValueValidator(10)])),
                 ('comment', models.CharField(blank=True, default=None, max_length=100, null=True)),
                 ('join2courses', models.BooleanField(default=False, verbose_name='If 2 or 4 courses only, join it?')),
             ],
@@ -61,9 +74,13 @@ class Migration(migrations.Migration):
             name='MinNonPreferedSlot',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('week', models.PositiveSmallIntegerField(default=None, null=True, validators=[django.core.validators.MinValueValidator(1), django.core.validators.MaxValueValidator(52)])),
+                ('week', models.PositiveSmallIntegerField(default=None, null=True,
+                                                          validators=[django.core.validators.MinValueValidator(1),
+                                                                      django.core.validators.MaxValueValidator(52)])),
                 ('year', models.PositiveSmallIntegerField(default=None, null=True)),
-                ('weight', models.PositiveSmallIntegerField(default=None, null=True, validators=[django.core.validators.MinValueValidator(1), django.core.validators.MaxValueValidator(10)])),
+                ('weight', models.PositiveSmallIntegerField(default=None, null=True,
+                                                            validators=[django.core.validators.MinValueValidator(1),
+                                                                        django.core.validators.MaxValueValidator(10)])),
                 ('comment', models.CharField(blank=True, default=None, max_length=100, null=True)),
             ],
             options={
@@ -74,9 +91,13 @@ class Migration(migrations.Migration):
             name='ReasonableDays',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('week', models.PositiveSmallIntegerField(default=None, null=True, validators=[django.core.validators.MinValueValidator(1), django.core.validators.MaxValueValidator(52)])),
+                ('week', models.PositiveSmallIntegerField(default=None, null=True,
+                                                          validators=[django.core.validators.MinValueValidator(1),
+                                                                      django.core.validators.MaxValueValidator(52)])),
                 ('year', models.PositiveSmallIntegerField(default=None, null=True)),
-                ('weight', models.PositiveSmallIntegerField(default=None, null=True, validators=[django.core.validators.MinValueValidator(1), django.core.validators.MaxValueValidator(10)])),
+                ('weight', models.PositiveSmallIntegerField(default=None, null=True,
+                                                            validators=[django.core.validators.MinValueValidator(1),
+                                                                        django.core.validators.MaxValueValidator(10)])),
                 ('comment', models.CharField(blank=True, default=None, max_length=100, null=True)),
             ],
             options={
@@ -87,9 +108,13 @@ class Migration(migrations.Migration):
             name='SimultaneousCourses',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('week', models.PositiveSmallIntegerField(default=None, null=True, validators=[django.core.validators.MinValueValidator(1), django.core.validators.MaxValueValidator(52)])),
+                ('week', models.PositiveSmallIntegerField(default=None, null=True,
+                                                          validators=[django.core.validators.MinValueValidator(1),
+                                                                      django.core.validators.MaxValueValidator(52)])),
                 ('year', models.PositiveSmallIntegerField(default=None, null=True)),
-                ('weight', models.PositiveSmallIntegerField(default=None, null=True, validators=[django.core.validators.MinValueValidator(1), django.core.validators.MaxValueValidator(10)])),
+                ('weight', models.PositiveSmallIntegerField(default=None, null=True,
+                                                            validators=[django.core.validators.MinValueValidator(1),
+                                                                        django.core.validators.MaxValueValidator(10)])),
                 ('comment', models.CharField(blank=True, default=None, max_length=100, null=True)),
             ],
             options={
@@ -100,12 +125,18 @@ class Migration(migrations.Migration):
             name='Stabilize',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('week', models.PositiveSmallIntegerField(default=None, null=True, validators=[django.core.validators.MinValueValidator(1), django.core.validators.MaxValueValidator(52)])),
+                ('week', models.PositiveSmallIntegerField(default=None, null=True,
+                                                          validators=[django.core.validators.MinValueValidator(1),
+                                                                      django.core.validators.MaxValueValidator(52)])),
                 ('year', models.PositiveSmallIntegerField(default=None, null=True)),
-                ('weight', models.PositiveSmallIntegerField(default=None, null=True, validators=[django.core.validators.MinValueValidator(1), django.core.validators.MaxValueValidator(10)])),
+                ('weight', models.PositiveSmallIntegerField(default=None, null=True,
+                                                            validators=[django.core.validators.MinValueValidator(1),
+                                                                        django.core.validators.MaxValueValidator(10)])),
                 ('comment', models.CharField(blank=True, default=None, max_length=100, null=True)),
                 ('general', models.BooleanField(default=False, verbose_name='Stabiliser tout?')),
-                ('nature', models.CharField(choices=[('CM', 'Cours magistral'), ('TD', 'Travaux Dirig\xe9s'), ('TP', 'Travaux Pratiques'), ('DS', 'Devoir surveill\xe9')], default=None, max_length=2, null=True)),
+                ('nature', models.CharField(
+                    choices=[('CM', 'Cours magistral'), ('TD', 'Travaux Dirig\xe9s'), ('TP', 'Travaux Pratiques'),
+                             ('DS', 'Devoir surveill\xe9')], default=None, max_length=2, null=True)),
                 ('work_copy', models.PositiveSmallIntegerField(default=0)),
             ],
             options={

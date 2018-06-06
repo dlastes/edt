@@ -27,24 +27,22 @@ from django import forms
 from .models import Tutor
 
 
-
-
 class ContactForm(forms.Form):
-    sender = forms.EmailField(label = 'Votre adresse mail :')
+    sender = forms.EmailField(label='Votre adresse mail :')
     recipient = forms.CharField(
-        label = 'Destinataire :',
-        max_length = 4,
-        help_text = "Acronyme : 4 caractères max")
+        label='Destinataire :',
+        max_length=4,
+        help_text="Acronyme : 4 caractères max")
     subject = forms.CharField(
-        label = 'Sujet du mail :',
-        max_length = 100,
-        help_text = "100 caractères max")
+        label='Sujet du mail :',
+        max_length=100,
+        help_text="100 caractères max")
     message = forms.CharField(label='Corps du mail :',
                               max_length=2000,
                               widget=forms.Textarea())
 
     def clean_recipient(self):
         recipient = self.cleaned_data['recipient']
-        if not Tutor.objects.filter(username = recipient).exists():
+        if not Tutor.objects.filter(username=recipient).exists():
             raise forms.ValidationError("Cette personne n'existe pas.")
         return recipient

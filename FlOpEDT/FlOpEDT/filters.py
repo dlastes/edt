@@ -47,13 +47,13 @@
 from django.contrib.admin.filters import AllValuesFieldListFilter, RelatedFieldListFilter, ChoicesFieldListFilter
 
 
-
 class DropdownFilterAll(AllValuesFieldListFilter):
     template = 'admin/dropdown_filter.html'
-    
+
 
 class DropdownFilterRel(RelatedFieldListFilter):
     template = 'admin/dropdown_filter.html'
+
 
 class DropdownFilterCho(ChoicesFieldListFilter):
     template = 'admin/dropdown_filter.html'

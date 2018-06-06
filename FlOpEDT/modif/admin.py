@@ -85,11 +85,11 @@ class CoursPlaceResource(resources.ModelResource):
                         attribute='room',
                         widget=ForeignKeyWidget(RoomGroup, 'name'))
     color_bg = fields.Field(column_name='color_bg',
-                        attribute='cours__module__display',
-                        widget=ForeignKeyWidget(ModuleDisplay, 'color_bg'))
+                            attribute='cours__module__display',
+                            widget=ForeignKeyWidget(ModuleDisplay, 'color_bg'))
     color_txt = fields.Field(column_name='color_txt',
-                        attribute='cours__module__display',
-                        widget=ForeignKeyWidget(ModuleDisplay, 'color_txt'))
+                             attribute='cours__module__display',
+                             widget=ForeignKeyWidget(ModuleDisplay, 'color_txt'))
 
     class Meta:
         model = ScheduledCourse
@@ -111,11 +111,11 @@ class CoursResource(resources.ModelResource):
                           attribute='groupe',
                           widget=ForeignKeyWidget(Group, 'nom'))
     color_bg = fields.Field(column_name='color_bg',
-                        attribute='module__display',
-                        widget=ForeignKeyWidget(ModuleDisplay, 'color_bg'))
+                            attribute='module__display',
+                            widget=ForeignKeyWidget(ModuleDisplay, 'color_bg'))
     color_txt = fields.Field(column_name='color_txt',
-                        attribute='module__display',
-                        widget=ForeignKeyWidget(ModuleDisplay, 'color_txt'))
+                             attribute='module__display',
+                             widget=ForeignKeyWidget(ModuleDisplay, 'color_txt'))
 
     class Meta:
         model = Course
@@ -162,16 +162,18 @@ class JourAdmin(admin.ModelAdmin):
 
 class TutorAdmin(admin.ModelAdmin):
     list_display = ('LBD',)
- # # from django.utils.text import Truncator
- # ordering = ('abbrev',)
- #    def abb_name(self,prof):
- #        return Truncator(prof.nom).chars(4, truncate='.')
- #    abb_name.short_description = 'Aperçu du nom'
+
+
+# # from django.utils.text import Truncator
+# ordering = ('abbrev',)
+#    def abb_name(self,prof):
+#        return Truncator(prof.nom).chars(4, truncate='.')
+#    abb_name.short_description = 'Aperçu du nom'
 
 
 class GroupeAdmin(admin.ModelAdmin):
     list_display = ('nom', 'type', 'size', 'train_prog')
-    filter_horizontal = ('parent_groups', )
+    filter_horizontal = ('parent_groups',)
     ordering = ('size',)
     list_filter = (('train_prog', DropdownFilterRel),
                    )
@@ -203,7 +205,7 @@ class CoursAdmin(admin.ModelAdmin):
         ('semaine', DropdownFilterAll),
         ('type', DropdownFilterRel),
         ('groupe', DropdownFilterAll),
-                   )
+    )
 
 
 # class CoursLPAdmin(admin.ModelAdmin):
@@ -215,6 +217,7 @@ class CoursPlaceAdmin(admin.ModelAdmin):
 
     def cours_semaine(o):
         return str(o.cours.semaine)
+
     cours_semaine.short_description = 'Semaine'
     cours_semaine.admin_order_field = 'cours__semaine'
 
@@ -223,7 +226,7 @@ class CoursPlaceAdmin(admin.ModelAdmin):
 
     cours_an.short_description = 'Année'
     cours_an.admin_order_field = 'cours__an'
-    
+
     list_display = (cours_semaine, cours_an, 'cours', 'creneau', 'room')
     ordering = ('creneau', 'cours', 'room')
     list_filter = (
@@ -243,6 +246,7 @@ class EdtVAdmin(admin.ModelAdmin):
 class CoursMAdmin(admin.ModelAdmin):
     def cours_semaine(o):
         return str(o.cours.semaine)
+
     cours_semaine.short_description = 'Semaine'
     cours_semaine.admin_order_field = 'cours__semaine'
 

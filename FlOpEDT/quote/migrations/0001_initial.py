@@ -7,7 +7,6 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -27,7 +26,9 @@ class Migration(migrations.Migration):
                 ('header', models.CharField(blank=True, default=None, max_length=20, null=True)),
                 ('votes', models.PositiveIntegerField(default=0)),
                 ('id_acc', models.PositiveIntegerField(default=0)),
-                ('status', models.CharField(choices=[('P', 'En attente'), ('A', 'Accept\xe9e'), ('R', 'Rejet\xe9e')], default='P', max_length=2)),
+                ('status',
+                 models.CharField(choices=[('P', 'En attente'), ('A', 'Accept\xe9e'), ('R', 'Rejet\xe9e')], default='P',
+                                  max_length=2)),
             ],
         ),
         migrations.CreateModel(
@@ -36,12 +37,14 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=40)),
                 ('abbrev', models.CharField(blank=True, max_length=10, null=True)),
-                ('parent', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='quote.QuoteType')),
+                ('parent', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE,
+                                             to='quote.QuoteType')),
             ],
         ),
         migrations.AddField(
             model_name='quote',
             name='quote_type',
-            field=models.ForeignKey(blank=True, default=None, null=True, on_delete=django.db.models.deletion.CASCADE, to='quote.QuoteType'),
+            field=models.ForeignKey(blank=True, default=None, null=True, on_delete=django.db.models.deletion.CASCADE,
+                                    to='quote.QuoteType'),
         ),
     ]

@@ -40,28 +40,35 @@ def accept(modeladmin, request, queryset):
         q.id_acc = next
         q.save()
         next += 1
+
+
 accept.short_description = u'Accept selected quotes'
 
+
 def reject(modeladmin, request, queryset):
-    queryset.update(status = Quote.REJECTED, id_acc = 0)
+    queryset.update(status=Quote.REJECTED, id_acc=0)
+
+
 reject.short_description = u'Reject selected quotes'
 
 
 class QuoteAdmin(admin.ModelAdmin):
     def strquote(o):
         return str(o)
+
     strquote.short_description = 'Quote'
     strquote.admin_order_field = 'id_acc'
-    
-    list_display = (strquote,'quote_type','votes','status', 'id_acc')
-    ordering = ('status','id_acc')
+
+    list_display = (strquote, 'quote_type', 'votes', 'status', 'id_acc')
+    ordering = ('status', 'id_acc')
     actions = [accept, reject]
     list_filter = (('quote_type', DropdownFilterRel),
                    ('status', DropdownFilterCho))
 
 
 class QuoteTypeAdmin(admin.ModelAdmin):
-    list_display = ('name','abbrev')
+    list_display = ('name', 'abbrev')
+
 
 admin.site.register(Quote, QuoteAdmin)
 admin.site.register(QuoteType, QuoteTypeAdmin)

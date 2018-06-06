@@ -8,7 +8,6 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -21,32 +20,38 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='stabilize',
             name='group',
-            field=models.ForeignKey(default=None, null=True, on_delete=django.db.models.deletion.CASCADE, to='modif.Group'),
+            field=models.ForeignKey(default=None, null=True, on_delete=django.db.models.deletion.CASCADE,
+                                    to='modif.Group'),
         ),
         migrations.AddField(
             model_name='stabilize',
             name='module',
-            field=models.ForeignKey(default=None, null=True, on_delete=django.db.models.deletion.CASCADE, to='modif.Module'),
+            field=models.ForeignKey(default=None, null=True, on_delete=django.db.models.deletion.CASCADE,
+                                    to='modif.Module'),
         ),
         migrations.AddField(
             model_name='stabilize',
             name='train_prog',
-            field=models.ForeignKey(default=None, null=True, on_delete=django.db.models.deletion.CASCADE, to='modif.TrainingProgramme'),
+            field=models.ForeignKey(default=None, null=True, on_delete=django.db.models.deletion.CASCADE,
+                                    to='modif.TrainingProgramme'),
         ),
         migrations.AddField(
             model_name='stabilize',
             name='tutor',
-            field=models.ForeignKey(default=None, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(default=None, null=True, on_delete=django.db.models.deletion.CASCADE,
+                                    to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name='simultaneouscourses',
             name='course1',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='course1', to='modif.Course'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='course1',
+                                    to='modif.Course'),
         ),
         migrations.AddField(
             model_name='simultaneouscourses',
             name='course2',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='course2', to='modif.Course'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='course2',
+                                    to='modif.Course'),
         ),
         migrations.AddField(
             model_name='reasonabledays',
@@ -56,22 +61,26 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='reasonabledays',
             name='train_prog',
-            field=models.ForeignKey(default=None, null=True, on_delete=django.db.models.deletion.CASCADE, to='modif.TrainingProgramme'),
+            field=models.ForeignKey(default=None, null=True, on_delete=django.db.models.deletion.CASCADE,
+                                    to='modif.TrainingProgramme'),
         ),
         migrations.AddField(
             model_name='reasonabledays',
             name='tutor',
-            field=models.ForeignKey(default=None, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(default=None, null=True, on_delete=django.db.models.deletion.CASCADE,
+                                    to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name='minnonpreferedslot',
             name='train_prog',
-            field=models.ForeignKey(default=None, null=True, on_delete=django.db.models.deletion.CASCADE, to='modif.TrainingProgramme'),
+            field=models.ForeignKey(default=None, null=True, on_delete=django.db.models.deletion.CASCADE,
+                                    to='modif.TrainingProgramme'),
         ),
         migrations.AddField(
             model_name='minnonpreferedslot',
             name='tutor',
-            field=models.ForeignKey(default=None, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(default=None, null=True, on_delete=django.db.models.deletion.CASCADE,
+                                    to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name='minhalfdays',
@@ -81,7 +90,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='minhalfdays',
             name='tutor',
-            field=models.ForeignKey(default=None, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(default=None, null=True, on_delete=django.db.models.deletion.CASCADE,
+                                    to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name='limitnatureperperiod',
@@ -91,12 +101,14 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='limitnatureperperiod',
             name='train_prog',
-            field=models.ForeignKey(default=None, null=True, on_delete=django.db.models.deletion.CASCADE, to='modif.TrainingProgramme'),
+            field=models.ForeignKey(default=None, null=True, on_delete=django.db.models.deletion.CASCADE,
+                                    to='modif.TrainingProgramme'),
         ),
         migrations.AddField(
             model_name='limitnatureperperiod',
             name='tutor',
-            field=models.ForeignKey(default=None, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(default=None, null=True, on_delete=django.db.models.deletion.CASCADE,
+                                    to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name='avoidbothslots',
@@ -116,11 +128,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='avoidbothslots',
             name='train_prog',
-            field=models.ForeignKey(default=None, null=True, on_delete=django.db.models.deletion.CASCADE, to='modif.TrainingProgramme'),
+            field=models.ForeignKey(default=None, null=True, on_delete=django.db.models.deletion.CASCADE,
+                                    to='modif.TrainingProgramme'),
         ),
         migrations.AddField(
             model_name='avoidbothslots',
             name='tutor',
-            field=models.ForeignKey(default=None, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(default=None, null=True, on_delete=django.db.models.deletion.CASCADE,
+                                    to=settings.AUTH_USER_MODEL),
         ),
     ]

@@ -4,15 +4,15 @@ from django.core.exceptions import ObjectDoesNotExist
 import json
 import os
 
-def generate_group_file():
 
+def generate_group_file():
     final_groups = []
 
     for train_prog in TrainingProgramme.objects.all():
 
         gp_dict_children = {}
         gp_master = None
-        for gp in Group.objects.filter(train_prog = train_prog):
+        for gp in Group.objects.filter(train_prog=train_prog):
             if gp.full_name() in gp_dict_children:
                 raise Exception('Group name should be unique')
             if len(gp.parent_groups) == 0:
@@ -25,7 +25,7 @@ def generate_group_file():
                                 'handled')
             gp_dict_children[gp.full_name()] = []
 
-        for gp in Group.objects.filter(train_prog = train_prog):
+        for gp in Group.objects.filter(train_prog=train_prog):
             for new_gp in gp.parent_groups:
                 gp_dict_children[new_gp.full_name()].append(gp)
 
@@ -43,7 +43,7 @@ def get_descendant_groups(gp, children):
         tp = gp.train_prog
         current['promo'] = tp.abbrev
         try:
-            tpd = TrainingProgrammeDisplay.objects.get(training_programme = tp)
+            tpd = TrainingProgrammeDisplay.objects.get(training_programme=tp)
             current['row'] = tpd.row
         except ObjectDoesNotExist:
             raise Exception('You should indicate on which row a training '
@@ -51,7 +51,7 @@ def get_descendant_groups(gp, children):
                             '(cf TrainingProgrammeDisplay)')
     current['name'] = gp.nom
     try:
-        gpd = GroupDisplay.objects.get(group = gp)
+        gpd = GroupDisplay.objects.get(group=gp)
         if gpd.button_height is not None:
             current['buth'] = gpd.button_height
         if gpd.button_txt is not None:
