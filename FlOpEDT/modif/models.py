@@ -180,6 +180,12 @@ class TrainingHalfDay(models.Model):
     train_prog = models.ForeignKey('TrainingProgramme', null=True, default=None, blank=True)
 
 
+class Period(models.Model):
+    name = models.CharField(max_length=20)
+    starting_week = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(0), MaxValueValidator(53)])
+    ending_week = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(0), MaxValueValidator(53)])
 # </editor-fold>
 
 # <editor-fold desc="ROOMS">
@@ -250,10 +256,11 @@ class Module(models.Model):
                              blank=True)
     ppn = models.CharField(max_length=5, default='M')
     train_prog = models.ForeignKey('TrainingProgramme')
-    nbTD = models.PositiveSmallIntegerField(default=1)
-    nbTP = models.PositiveSmallIntegerField(default=1)
-    nbCM = models.PositiveSmallIntegerField(default=1)
-    nbDS = models.PositiveSmallIntegerField(default=1)
+    period = models.ForeignKey('Period')
+    # nbTD = models.PositiveSmallIntegerField(default=1)
+    # nbTP = models.PositiveSmallIntegerField(default=1)
+    # nbCM = models.PositiveSmallIntegerField(default=1)
+    # nbDS = models.PositiveSmallIntegerField(default=1)
 
     def __str__(self):
         return self.abbrev
