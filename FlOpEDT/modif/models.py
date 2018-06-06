@@ -151,6 +151,8 @@ class Slot(CachingMixin, models.Model):
     objects = CachingManager()
     jour = models.ForeignKey('modif.models.Day')
     heure = models.ForeignKey('modif.models.Time')
+    duration = models.PositiveSmallIntegerField(
+        validators = [MinValueValidator(0), MaxValueValidator(240)], default=90)
 
     def __str__(self):
         return "%s_%s" % (self.jour, self.heure)
