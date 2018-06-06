@@ -158,7 +158,7 @@ class Slot(CachingMixin, models.Model):
         return "%s_%s" % (self.jour, self.heure)
 
 
-class HollyHalfDay(models.Model):
+class Holiday(models.Model):
     apm = models.CharField(max_length = 2, choices = Time.CHOIX_DEMI_JOUR,
                            verbose_name = "Demi-journée", null=True, default=None, blank=True)
     day = models.ForeignKey('modif.models.Day')
