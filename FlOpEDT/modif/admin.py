@@ -27,7 +27,7 @@ from django.contrib import admin
 
 from modif.models import Day, RoomGroup, Module, Course, Group, Slot, \
     UserPreference, Time, ScheduledCourse, EdtVersion, CourseModification, \
-    PlanningModification, BreakingNews, TrainingProgramme, ModuleDisplay, Tutor
+    PlanningModification, BreakingNews, TrainingProgramme, ModuleDisplay, Tutor, User
 # Prof
 
 from import_export import resources, fields
@@ -279,11 +279,11 @@ class PlanifMAdmin(admin.ModelAdmin):
 
 
 class DispoAdmin(admin.ModelAdmin):
-    list_display = ('tutor', 'creneau', 'valeur', 'semaine', 'an')
-    ordering = ('tutor', 'an', 'semaine', 'creneau', 'valeur')
+    list_display = ('user', 'creneau', 'valeur', 'semaine', 'an')
+    ordering = ('user', 'an', 'semaine', 'creneau', 'valeur')
     list_filter = (('creneau', DropdownFilterRel),
                    ('semaine', DropdownFilterAll),
-                   ('tutor', DropdownFilterRel),
+                   ('user', DropdownFilterRel),
                    )
 
 
