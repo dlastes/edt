@@ -473,11 +473,14 @@ class TTModel(object):
                 # if sl == self.wdb.slots[0]:
                 #     print "R", r, quicksum(self.TTrooms[(sl, c, rg)] \
                 # for (c, rg) in room_course_compat[r])
-                limit = 1 - len(
-                    RoomUnavailability.objects.filter(semaine=self.semaine,
+                if len(RoomUnavailability.objects.filter(semaine=self.semaine,
                                                       an=self.an,
                                                       creneau=sl,
-                                                      room=r))
+                                                      room=r)) > 0:
+                    limit = 0
+                else:
+                    limit = 1
+
                 # print "limit=",limit,".",
                 self.add_constraint(
                     self.sum(self.TTrooms[(sl, c, rg)]
