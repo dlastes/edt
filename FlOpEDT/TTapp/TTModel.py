@@ -53,6 +53,7 @@ from django.db.models import Q, Max
 
 import datetime
 
+
 class WeekDB(object):
     def __init__(self, week, year, train_prog):
         self.train_prog = train_prog
