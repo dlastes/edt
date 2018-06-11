@@ -25,6 +25,23 @@
   ---- VARIABLES ----
   -------------------*/
 
+
+
+      // {"tot":15,
+      //  "colors":[]},
+      // {"tot":16,
+      //  "colors":[]},
+      // {"tot":18,
+      //  "colors":[]},
+      // {"tot":19,
+      //  "colors":[]},
+      // {"tot":20,
+      //  "colors":[]}
+
+
+
+
+
 var user = {nom: logged_usr.nom,
 	    dispos: [],
 	    dispos_bu: [],
@@ -54,8 +71,8 @@ var year = 2017;
 
 var labgp = {height: 40, width: 30, tot: 8, height_init: 40, width_init: 30, hm: 40, wm:15};
 
-var dim_dispo = {height:2*labgp.height, width: 60, right: 10, plot:0,
-		 adv_v_margin: 5};
+dim_dispo.height = 2*labgp.height ;
+
 
 
 butgp.tly = margin.but;//-margin_but.ver-6*butgp.height-80 ;
@@ -73,11 +90,62 @@ salles.y=modules.y-modules.height;//.6*butpr.height;
 salles.width = 150 ; 
 salles.height = modules.height ; 
 
+pref_only = false ;
 
 /*-------------------
   ------ BUILD ------
   -------------------*/
 
+
+function on_group_rcv(dg) {
+
+    create_groups(dg);
+
+    go_gp_buttons();
+
+    create_edt_grid();
+
+    create_alarm_dispos();
+    create_val_but();
+    go_ack_msg();
+
+    create_bknews();
+
+    go_promo_gp_init() ;
+    go_gp_buttons();
+
+
+    fetch_cours();
+    fetch_bknews(true);
+
+    if (splash_id == 1) {
+    
+	var splash_mail = {
+	    id: "mail-sent",
+	    but: {list: [{txt: "Ok", click: function(d){} }]},
+	    com: {list: [{txt: "E-mail envoyé !", ftsi: 23}]}
+	}
+	splash(splash_mail);
+
+    } else if (splash_id == 2) {
+
+	var splash_quote = {
+	    id: "quote-sent",
+	    but: {list: [{txt: "Ok", click: function(d){} }]},
+	    com: {list: [{txt: "Citation envoyée ! (en attente de modération)", ftsi: 23}]}
+	}
+	splash(splash_quote);
+
+    }
+    
+    //go_edt(true);
+}
+
+
+
+/*---------------------
+  ------ STARTER ------
+  ---------------------*/
 
 
 create_general_svg(false);
@@ -101,15 +169,16 @@ d3.select("body")
 	if(dispo_menu_appeared) {
 	    del_dispo_adv = true ;
 	    dispo_menu_appeared = false ;
-	    go_dispos(true);
+	    go_pref(true);
 	} else {
 	    if(del_dispo_adv) {
 		del_dispo_adv = false ;
 		data_dispo_adv_cur = [] ;
-		go_dispos(true);
+		go_pref(true);
 	    }
 	}
     }})
+
 
 
 

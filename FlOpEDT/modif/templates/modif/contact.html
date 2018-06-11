@@ -25,7 +25,7 @@
 
 {% block title %} EDT {% endblock %}
 {% block content %}
-<font color="white">
+<font color="black">
 <form method="post" novalidate>
   {% csrf_token %}
   <table cellpadding="10">
@@ -33,6 +33,7 @@
   </table>
   <button type="submit">Envoyer</button>
   <div> {{ ack }} </div>
+  <div> <br/><br/> </div>
 </form>
 </font>
 {% endblock %}

@@ -38,22 +38,18 @@ var svg = {height: tv_svg_h - margin.top - margin.bot, width: tv_svg_w - margin.
 var week = semaine_init ;
 var year = an_init;
 
-// filter the right flinf
+// filter the right bknews
 weeks = {sel: [0], init_data: [{semaine: week, an: year}]};
 
 
 var labgp = {height: tv_gp_h, width: tv_gp_w, tot: 8, height_init: 40, width_init: 30};
 
-
-
-var dim_dispo = {height:2*labgp.height, width: 60, right: 10, plot:0,
-		 adv_v_margin: 5};
-
+dim_dispo.height = 2*labgp.height ;
 
 dragListener = d3.drag();
 
 
-
+pref_only = false ;
 
 
 /*-------------------
@@ -81,7 +77,6 @@ function on_group_rcv_light(dg) {
     create_edt_grid();
 
     create_bknews();
-    //go_flinf();
     
 
     fetch_cours_light();
@@ -184,7 +179,6 @@ function fetch_ended_light() {
        !fetch.ongoing_cours_pp){
 	cours = cours_pl.concat(cours_pp);
 	clean_prof_displayed();
-	assign_fill_mod();
 	fetch.cours_ok=true;
     }
     
@@ -195,7 +189,7 @@ function fetch_ended_light() {
 	fetch.done = true ;
 
 	go_grid(true);
-	go_cours(true);
+	go_courses(true);
 	go_bknews(true);
     }
 

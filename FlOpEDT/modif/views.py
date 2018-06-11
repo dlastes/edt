@@ -25,7 +25,6 @@
 
 from django.http import HttpResponse, Http404, JsonResponse
 from django.shortcuts import render
-from django.db.models import Count
 
 from django.contrib.auth.decorators import login_required
 
@@ -60,95 +59,72 @@ from django.contrib.staticfiles.storage import staticfiles_storage
 from django.views.generic import RedirectView
 
 
-fav_regexp = r'^(?P<fav>(favicon.ico)|(site\.webmanifest)|(browserconfig\.xml)|(safari-pinned-tab.svg)|(mstile.*\.png)|(favicon.*\.png)|(android-chrome.*\.png)|(apple-touch-icon.*\.png))$'
-
 # Texte de l'image
-#randomVar = randint(0, 2)
+# # randomVar = randint(0, 2)
 randomVar = 1
 
 if randomVar == 0:
-    imgtxt = "\"Qui veut faire les EDT cette année ?\" ... Fl<span id=\"flopRed\">Op</span> !"
-if randomVar == 1:
-    imgtxt = "Créateur d'emploi du temps <span id=\"flopPasRed\">Fl</span>exible et <span id=\"flopRed\">Op</span>enSource"
-if randomVar == 2:
-    imgtxt = "Et votre emploi du temps fera un <span id=\"flopRedDel\">flop</span> carton !"
+    imgtxt = "\"Qui veut faire les EDT cette année ?\" ... Fl" \
+             "<span id=\"flopRed\">Op</span> !"
+elif randomVar == 1:
+    imgtxt = "Créateur d'emploi du temps <span id=\"flopPasRed\">Fl" \
+             "</span>exible et <span id=\"flopRed\">Op</span>enSource"
+elif randomVar == 2:
+    imgtxt = "Et votre emploi du temps fera un " \
+             "<span id=\"flopRedDel\">flop</span> carton !"
+
+
+# <editor-fold desc="FAVICON">
+# ----------
+# FAVICON
+# ----------
+
+
+fav_regexp = r'^(?P<fav>(favicon.ico)|(site\.webmanifest)' \
+             r'|(browserconfig\.xml)|(safari-pinned-tab.svg)' \
+             r'|(mstile.*\.png)|(favicon.*\.png)|(android-chrome.*\.png)' \
+             r'|(apple-touch-icon.*\.png))$'
+
 
 def favicon(req, fav):
     return RedirectView.as_view(
         url=staticfiles_storage.url('modif/img/favicons/' + fav),
         permanent=False)(req)
 
+# </editor-fold desc="FAVICON">
 
-# def build_flashinfo(week, year):
-#     bn_by_x = {}
-#     for bn in BreakingNews.objects.filter(week__in = [week, None], year = year):
-#         add = {'y': bn.y, 'txt': bn.txt}
-#         if bn.x not in bn_by_x:
-#             bn_by_x[bn.x] = [add]
-#         else:
-#             bn_by_x[bn.x].append(add)
 
-#     final_list = []
-#     min_tot = None
-#     max_tot = None
-#     for x in bn_by_x:
-#         min_y = None
-#         max_y = None
-#         for z in bn_by_x[x]:
-#             if z.y < min_y or min_y is None:
-#                 min_y = z.y
-#             if z.y > max_y or max_y is None:
-#                 max_y = z.y
-#             final_list.append({'x': x, 'y': z.y, 'txt': z.txt})
-#         if min_y < min_tot or min_tot is None:
-#             min_tot = min_y
-#         if max_y > max_tot or max_tot is None:
-#             max_tot = max_y
-#     for a in final_list:
-#         a['y'] -= min_y
+# <editor-fold desc="VIEWERS">
+# ----------
+# VIEWERS
+# ----------
+
 
 def edt(req, semaine, an, splash_id = 0):
-    cpp = []
 
-    if semaine == None or an == None:
-        today = current_week()
-        semaine = today['semaine']
-        an = today['an']
-    else:
-        semaine = int(semaine)
-        an = int(an)
+    semaine, an = clean_week(semaine, an)
+    promo = clean_train_prog(req)
 
     if req.GET:
-        promo = req.GET.get('promo', '0')
-        promo = int(promo)
-        if promo not in [1, 2, 3]:
-            promo = 0
         copie = req.GET.get('cop', '0')
         copie = int(copie)
-        gp = req.GET.get('gp','')
+        gp = req.GET.get('gp', '')
     else:
-        promo = 0
         copie = 0
         gp = ''
 
     # une_salle = RoomGroup.objects.all()[1].name
-    une_salle = 'salle par defaut'
+    une_salle = 'salle?'
 
     if req.user.is_authenticated():
         name_usr = req.user.username
         try:
-            rights_usr = Prof.objects.get(user=req.user).rights
+            rights_usr = Prof.objects.get(user = req.user).rights
         except ObjectDoesNotExist:
             rights_usr = 0
     else:
         name_usr = ''
         rights_usr = 0
-
-
-
-
-		
-		
 
     return render(req, 'modif/show-edt.html',
                   {'all_weeks': week_list(),
@@ -165,33 +141,22 @@ def edt(req, semaine, an, splash_id = 0):
                    'image': imgtxt})
 
 
-
-# .json
-
-
 def edt_light(req, semaine, an):
-    cpp = []
-    if semaine == None or an == None:
-        today = current_week()
-        semaine = today['semaine']
-        an = today['an']
-    else:
-        semaine = int(semaine)
-        an = int(an)
+
+    semaine, an = clean_week(semaine, an)
+    promo = clean_train_prog(req)
 
     if req.GET:
         svg_h = req.GET.get('svg_h', '640')
         svg_w = req.GET.get('svg_w', '1370')
         gp_h = req.GET.get('gp_h', '40')
         gp_w = req.GET.get('gp_w', '30')
-        promo = req.GET.get('promo', '0')
         svg_top_m = req.GET.get('top_m', '40')
 
         svg_h = int(svg_h)
         svg_w = int(svg_w)
         gp_h = int(gp_h)
         gp_w = int(gp_w)
-        promo = int(promo)
         svg_top_m = int(svg_top_m)
 
     else:
@@ -199,16 +164,16 @@ def edt_light(req, semaine, an):
         svg_w = 1370
         gp_h = 40
         gp_w = 30
-        promo = 0
         svg_top_m = 40
 
-    une_salle = RoomGroup.objects.all()[0].name
+    une_salle = "salle?"  # RoomGroup.objects.all()[0].name
 
-    return render(req, 'modif/show-edt-light.html', \
-                  {'all_weeks': week_list(), \
-                   'semaine': semaine, \
-                   'an': an, \
+    return render(req, 'modif/show-edt-light.html',
+                  {'all_weeks': week_list(),
+                   'semaine': semaine,
+                   'an': an,
                    'jours': num_days(an, semaine),
+                   'une_salle': une_salle,
                    'tv_svg_h': svg_h,
                    'tv_svg_w': svg_w,
                    'tv_gp_h': gp_h,
@@ -226,8 +191,10 @@ def stype(req):
                       'modif/show-stype.html',
                       {'date_deb': current_week(),
                        'date_fin': current_week(),
+                       'name_usr': req.user.username,
                        'err': err,
-                       'annee_courante': annee_courante})
+                       'annee_courante': annee_courante,
+                       'image': imgtxt})
     elif req.method == 'POST':
         if 'apply' in req.POST.keys():
             print req.POST['se_deb']
@@ -254,6 +221,7 @@ def stype(req):
                       'modif/show-stype.html',
                       {'date_deb': date_deb,
                        'date_fin': date_fin,
+                       'name_usr': req.user.username,
                        'err': err,
                        'annee_courante': annee_courante,
                        'image': imgtxt})
@@ -275,142 +243,17 @@ def decale(req):
     for p in User.objects.all().order_by('username'):
         liste_profs.append(p.username.encode('utf8'))
 
-    return render(req, 'modif/show-decale.html', \
-                  {'all_weeks': week_list(), \
-                   'semaine_init': semaine_init, \
+    return render(req, 'modif/show-decale.html',
+                  {'all_weeks': week_list(),
+                   'semaine_init': semaine_init,
                    'an_init': an_init,
                    'profs': liste_profs,
                    'image': imgtxt})
 
-
-@login_required
-def saghe(req):
-    volumes_raw_s1a1 = Cours.objects.filter(semaine__gt=35,
-                                            an=2017,
-                                            prof__statut=Prof.VAC) \
-        .values('nature',
-                'prof__user__username',
-                'prof__user__first_name',
-                'prof__user__last_name',
-                'module__ppn', 'module__abbrev',
-                'groupe__nom') \
-        .annotate(volh=Count('id')) \
-        .order_by('module__ppn',
-                  'prof__user__username',
-                  'nature')
-    volumes_raw_s1a2 = Cours.objects.filter(semaine__lt=12,
-                                            an=2018,
-                                            prof__statut=Prof.VAC) \
-        .values('nature',
-                'prof__user__username',
-                'prof__user__first_name',
-                'prof__user__last_name',
-                'module__ppn',
-                'module__abbrev',
-                'groupe__nom') \
-        .annotate(volh=Count('id')) \
-        .order_by('module__ppn',
-                  'prof__user__username',
-                  'nature')
-    volumes_raw = list(chain(volumes_raw_s1a1, volumes_raw_s1a2))
-    print volumes_raw
-    volumes = {}
-    plan = ['alt', 'reg']
-    cren2h = 1.5
-    tot = {}
-    profs = set()
-    natures = set()
-
-    for vol in volumes_raw:
-        gp = vol['groupe__nom']
-        mod = str(vol['module__ppn']) \
-              + ' (' + str(vol['module__abbrev']) \
-              + ')'
-        nat = vol['nature']
-        vhtot = vol['volh']
-        pr = vol['prof__user__username'] + ' ' + vol['prof__user__first_name'] + ' ' + vol['prof__user__last_name']
-
-        profs.add(pr)
-        natures.add(nat)
-
-        if pr and nat != 'DS':
-            vh = [0, 0]
-            if gp[0] == '2':
-                if len(gp) == 2:
-                    vh[0] = vhtot * (cren2h / 6)
-                    vh[1] = vhtot * cren2h - vh[0]
-                elif gp[2] == '3':
-                    if len(gp) == 3:
-                        vh[0] = vhtot * (cren2h / 2)
-                        vh[1] = vhtot * cren2h - vh[0]
-                        # print vhtot*cren2h
-                        # print vh
-                    elif gp[3] == 'B':
-                        vh[0] = vhtot * cren2h
-                        vh[1] = vhtot * cren2h - vh[0]
-
-            if vh[0] == 0 and vh[1] == 0:
-                vh[0] = 0
-                vh[1] = vhtot * cren2h
-
-            for p in range(len(plan)):
-                if vh[p] > 0:
-                    if mod not in volumes:
-                        volumes[mod] = {}
-                        volumes[mod]['promo'] = gp[0]
-                        volumes[mod]['profs'] = {}
-                    if pr not in volumes[mod]['profs']:
-                        volumes[mod]['profs'][pr] = {'cours': {}}
-                    if nat not in volumes[mod]['profs'][pr]['cours']:
-                        volumes[mod]['profs'][pr]['cours'][nat] = {'vh': [0, 0]}
-                    # for i in range(2):
-                    volumes[mod]['profs'][pr]['cours'][nat]['vh'][p] += vh[p]
-                    if pr == 'LN':
-                        print pr, mod, gp, p
-                        print volumes[mod]['profs'][pr]['cours'][nat]['vh'][p]
-
-                        # if nat =='TP':
-                        #     volumes[mod]['profs'][pr]['TP'] = vh
-                        # elif nat=='TD':
-                        #     volumes[mod]['profs'][pr]['TD'] = vh
-                        # elif nat=='CM':
-                        #     volumes[mod]['profs'][pr]['CM'] = vh
-                        # elif nat=='DS':
-                        #     volumes[mod]['profs'][pr]['DS'] = vh
-                        # else:
-                        #     volumes[mod]['profs'][pr]['autre'] = vh
-
-    # sort by modules
-    #
-
-    for pr in profs:
-        tot[pr] = {}
-        for nat in natures:
-            tot[pr][nat] = [0, 0]
-            for module in volumes:
-                if pr in volumes[module]['profs'] \
-                        and nat in volumes[module]['profs'][pr]['cours']:
-                    for pl in range(len(plan)):
-                        print(tot[pr][nat][pl])
-                        print("________________________")
-                        tot[pr][nat][pl] += volumes[module]['profs'][pr]['cours'][nat]['vh'][pl]
-
-    mod_tot = '-TOT-'
-    volumes[mod_tot] = {'profs': {}}
-    for pr in profs:
-        volumes[mod_tot]['profs'][pr] = {'cours': {}}
-        for nat in natures:
-            volumes[mod_tot]['profs'][pr]['cours'][nat] = {'vh': tot[pr][nat]}
-
-    print volumes
-
-    return render(req, 'modif/show-saghe.html', \
-                  {'volumes': volumes,
-                   'image': img
-                   })
-    # json.dumps(volumes)
+# </editor-fold desc="VIEWERS">
 
 
+# <editor-fold desc="FETCHERS">
 # ----------
 # FETCHERS
 # ----------
@@ -427,6 +270,7 @@ def fetch_cours_pl(req):
         num_copie = int(num_copie)
         ok = False
         version = 0
+        dataset = None
         while not ok:
             if num_copie == 0:
                 version = EdtVersion.objects \
@@ -437,13 +281,14 @@ def fetch_cours_pl(req):
                 .export(CoursPlace.objects \
                         .filter(cours__semaine=semaine,
                                 cours__an=an,
-                                copie_travail=num_copie) \
+                                copie_travail=num_copie)
                         .order_by('creneau__jour',
                                   'creneau__heure'))  # all())#
             ok = num_copie != 0 \
-                 or (version \
-                     == EdtVersion.objects.get(semaine=semaine,
-                                               an=an).version)
+                or (version == EdtVersion.objects
+                    .get(semaine = semaine, an = an).version)
+        if dataset is None:
+            raise Http404("What are you trying to do?")
         response = HttpResponse(dataset.csv, content_type='text/csv')
         response['version'] = version
         response['semaine'] = semaine
@@ -496,13 +341,13 @@ def fetch_cours_pp(req):
         an = int(an)
         num_copie = int(num_copie)
         dataset = CoursResource() \
-            .export(Cours \
-                    .objects \
-                    .filter(semaine=semaine,
-                            an=an) \
-                    .exclude(pk__in=CoursPlace \
-                             .objects \
-                             .filter(copie_travail=num_copie) \
+            .export(Cours
+                    .objects
+                    .filter(semaine = semaine,
+                            an = an)
+                    .exclude(pk__in = CoursPlace
+                             .objects
+                             .filter(copie_travail = num_copie)
                              .values('cours')))
         response = HttpResponse(dataset.csv, content_type='text/csv')
         response['semaine'] = semaine
@@ -571,10 +416,9 @@ def fetch_stype(req):
 
 
 def fetch_decale(req):
-    bad_response = HttpResponse("KO")
-    good_response = HttpResponse("OK")
+
     if not req.is_ajax() or req.method != "GET":
-        return bad_response
+        return HttpResponse("KO")
 
     semaine = int(req.GET.get('s', '0'))
     an = int(req.GET.get('a', '0'))
@@ -659,8 +503,9 @@ def fetch_bknews(req):
     response['an'] = year
     return response
 
+# </editor-fold desc="FETCHERS">
 
-
+# <editor-fold desc="CHANGERS">
 # ----------
 # CHANGERS
 # ----------
@@ -685,18 +530,20 @@ def edt_changes(req):
             semaine = int(semaine)
             an = int(an)
             work_copy = int(work_copy)
+            version = None
 
             print req.body
             q = json.loads(req.body,
-                           object_hook \
-                               =lambda d: namedtuple('X', d.keys()) \
-                               (*d.values()))
+                           object_hook
+                           = lambda d: namedtuple('X', d.keys())(*d.values())
+                           )
 
             if work_copy == 0:
-                version = EdtVersion.objects \
-                    .get(semaine=semaine,
-                         an=an) \
-                    .version
+                edt_version = EdtVersion.objects\
+                    .get_or_create(semaine = semaine,
+                                   an = an,
+                                   defaults = {'version': 0})
+                version = edt_version.version
 
             if work_copy != 0 or q.v == version:
                 with transaction.atomic():
@@ -718,17 +565,17 @@ def edt_changes(req):
 
                         m = CoursModification(cours=co,
                                               version_old=q.v,
-                                              user=req.user)  # User.objects.get(username=user.username))
-                        old_day = a.day.o
-                        old_slot = a.slot.o
+                                              user=req.user)
+                        # old_day = a.day.o
+                        # old_slot = a.slot.o
                         new_day = a.day.n
                         new_slot = a.slot.n
                         old_room = a.room.o
                         new_room = a.room.n
 
                         if non_place:
-                            old_day = new_day
-                            old_slot = new_slot
+                            # old_day = new_day
+                            # old_slot = new_slot
                             if a.room.n is None:
                                 new_room = old_room
 
@@ -736,8 +583,7 @@ def edt_changes(req):
                             try:
                                 cren_n = Creneau \
                                     .objects \
-                                    .get(jour \
-                                             =Jour.objects \
+                                    .get(jour = Jour.objects \
                                          .get(no=new_day),
                                          heure \
                                              =Heure \
@@ -745,7 +591,7 @@ def edt_changes(req):
                                          .get(no=new_slot))
                             except ObjectDoesNotExist:
                                 bad_response['reason'] \
-                                    = "Probleme creneau" + cren_n
+                                    = u"Problème : créneau " + new_day
                                 return bad_response
                             if non_place:
                                 cp.creneau = cren_n
@@ -758,7 +604,14 @@ def edt_changes(req):
                             try:
                                 sal_n = RoomGroup.objects.get(name=new_room)
                             except ObjectDoesNotExist:
-                                bad_response['reason'] = "Probleme salle" + new_room
+                                if new_room == 'salle?':
+                                    bad_response['reason'] \
+                                        = u'Oublié de trouver une salle ' \
+                                          u'pour un cours ?'
+                                else:
+                                    bad_response['reason'] = \
+                                        u"Problème : salle " + new_room \
+                                        + u" inconnue"
                                 return bad_response
 
                             if non_place:
@@ -859,13 +712,13 @@ def dispos_changes(req):
 
             print req.body
             q = json.loads(req.body,
-                           object_hook=lambda \
-                                   d: namedtuple('X', d.keys())(*d.values()))
+                           object_hook = lambda d:
+                           namedtuple('X', d.keys())(*d.values()))
 
             prof = Prof.objects.get(user__username=usr_change)
 
-            if (prof != Prof.objects.get(user=req.user) \
-                        and (Prof.objects.get(user=req.user).rights >> 1 % 2 == 0)):
+            if (prof != Prof.objects.get(user=req.user)
+                    and (Prof.objects.get(user=req.user).rights >> 1 % 2 == 0)):
                 bad_response['reason'] \
                     = u'Non autorisé, réclamez plus de droits.'
                 return bad_response
@@ -936,8 +789,8 @@ def decale_changes(req):
 
     print req.body
     q = json.loads(req.body,
-                   object_hook=lambda \
-                           d: namedtuple('X', d.keys())(*d.values()))
+                   object_hook=lambda d:
+                   namedtuple('X', d.keys())(*d.values()))
 
     a = q.new
 
@@ -973,10 +826,14 @@ def decale_changes(req):
 
     return good_response
 
+# </editor-fold desc="CHANGERS">
 
+# <editor-fold desc="EMAILS">
 # ---------
 # E-MAILS
 # ---------
+
+
 def contact(req):
     ack = ''
     if req.method == 'POST':
@@ -985,10 +842,12 @@ def contact(req):
             dat = form.cleaned_data
             send_mail(
                 '[EdT IUT Blagnac] ' + dat.get("subject"),
-                u"(Cet e-mail vous a été envoyé depuis le site des emplois du temps de l'IUT de Blagnac)\n\n" + dat.get(
-                    "message"),
+                u"(Cet e-mail vous a été envoyé depuis le site des emplois"
+                u" du temps de l'IUT de Blagnac)\n\n"
+                + dat.get("message"),
                 dat.get("sender"),
-                [User.objects.get(username=dat.get("recipient")).email, dat.get("sender")],
+                [User.objects.get(username=dat.get("recipient")).email,
+                 dat.get("sender")],
             )
             return edt(req, None, None, 1)
     else:
@@ -1002,10 +861,43 @@ def contact(req):
                    'ack': ack,
                    'image': imgtxt})
 
+# </editor-fold desc="EMAILS">
 
+# <editor-fold desc="HELPERS">
 # ---------
 # HELPERS
 # ---------
+
+
+def clean_train_prog(req):
+    if req.GET:
+        promo = req.GET.get('promo', '0')
+        try:
+            promo = int(promo)
+        except ValueError:
+            promo = 0
+        if promo not in [1, 2, 3]:
+            promo = 0
+    else:
+        promo = 0
+    return promo
+
+
+def clean_week(week, year):
+    if week is None or year is None:
+        today = current_week()
+        week = today['semaine']
+        year = today['an']
+    else:
+        try:
+            week = int(week)
+            year = int(year)
+        except ValueError:
+            today = current_week()
+            week = today['semaine']
+            year = today['an']
+    return week, year
+
 
 def filt_m(r, module):
     if module != '':
@@ -1027,3 +919,5 @@ def filt_g(r, groupe):
 
 def filt_sa(semaine, an):
     return Cours.objects.filter(semaine=semaine, an=an)
+
+# </editor-fold desc="HELPERS">

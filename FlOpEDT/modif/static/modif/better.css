@@ -52,23 +52,23 @@
 background-color:forestgreen;
 color:white;
 }
-.profs-but {
+.tutor-button {
   cursor: pointer;
 }
-rect.profs-but-others {
+rect.tutor-button-others {
   stroke:black;
   stroke-width:1px;
   fill:forestgreen;
 }
-rect.profs-but-me {
+rect.tutor-button-me {
   stroke:#134e13;
   stroke-width:2px;
   fill:#31c831;
 }
-text.profs-but-others {
+text.tutor-button-others {
   fill:white;
 }
-text.profs-but-me {
+text.tutor-button-me {
   fill:black;
 }
 
@@ -123,11 +123,12 @@ g[class^="gp-but-"] {
   text-anchor:end;
 }
 
+
 /* ************ Loader ************ */
 .loader {
 position : fixed;
 z-index: 9999;
-background : rgba(0,0,0,0.6) url('loadingspin.svg') no-repeat 50% 50%;
+background : rgba(0,0,0,0.6) url('logo-head-gribou-rc-hand.svg') no-repeat 50% 50%;
 /*background-size:30% 30%;*/
 top : 50px;
 left : 0px;
@@ -135,6 +136,8 @@ height : 100%;
 width : 100%;
 cursor : wait;
 }
+
+/* loadingspin.svg */
 
 /* ************ Logo ************ */
 /*@font-face {

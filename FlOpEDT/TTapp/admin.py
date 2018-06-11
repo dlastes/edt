@@ -52,11 +52,11 @@ from FlOpEDT.filters import DropdownFilterAll, DropdownFilterRel, DropdownFilter
 # admin.site.register(TestJour, TestJourAdmin)
 
 class LimitNaturePerPeriodAdmin(admin.ModelAdmin):
-    list_display = ('week', 'year', 'nature', 'limit', 'promo',
+    list_display = ('week', 'year', 'nature', 'limit', 'train_prog',
                     'module', 'prof', 'period', 'comment')
     ordering = ()
     empty_value_display = 'All!'
-    list_filter = (('promo', DropdownFilterAll),
+    list_filter = (('train_prog', DropdownFilterRel),
                    ('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
                    ('prof', DropdownFilterRel),
@@ -64,11 +64,11 @@ class LimitNaturePerPeriodAdmin(admin.ModelAdmin):
     )
 
 class ReasonableDaysAdmin(admin.ModelAdmin):
-    list_display = ('week', 'year', 'promo',
+    list_display = ('week', 'year', 'train_prog',
                     'group', 'prof', 'comment')
     ordering = ()
     empty_value_display = 'All!'
-    list_filter = (('promo', DropdownFilterAll),
+    list_filter = (('train_prog', DropdownFilterRel),
                    ('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
                    ('group', DropdownFilterRel),
@@ -76,13 +76,13 @@ class ReasonableDaysAdmin(admin.ModelAdmin):
     )
 
 class StabilizeAdmin(admin.ModelAdmin):
-    list_display = ('week', 'year', 'promo', 'general',
+    list_display = ('week', 'year', 'train_prog', 'general',
                     'group', 'prof', 'module', 'nature', 'comment')
     ordering = ()
     empty_value_display = 'All!'
     list_filter = (('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
-                   ('promo', DropdownFilterAll),                   
+                   ('train_prog', DropdownFilterRel),
                    ('group', DropdownFilterRel),
                    ('prof', DropdownFilterRel),
                    ('module', DropdownFilterRel),
@@ -102,28 +102,27 @@ class MinHalfDaysAdmin(admin.ModelAdmin):
 
 
 class MinNonPreferedSlotAdmin(admin.ModelAdmin):
-    list_display = ('week', 'year', 'prof', 'promo', 'comment')
+    list_display = ('week', 'year', 'prof', 'train_prog', 'comment')
     ordering = ()
     empty_value_display = 'All!'
     list_filter = (('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
                    ('prof', DropdownFilterRel),
-                   ('promo', DropdownFilterAll),                   
+                   ('train_prog', DropdownFilterRel),
     )
 
 
 
 class AvoidBothSlotsAdmin(admin.ModelAdmin):
     list_display = ('week', 'year', 'prof', 'prof', 'group',
-                    'promo','slot1','slot2', 'comment')
+                    'train_prog','slot1','slot2', 'comment')
     ordering = ()
     empty_value_display = 'All!'
     list_filter = (('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
-                   ('promo', DropdownFilterAll),                   
+                   ('train_prog', DropdownFilterRel),
                    ('prof', DropdownFilterRel),
                    ('group', DropdownFilterRel),
-                   ('promo', DropdownFilterAll),                   
                    ('slot1', DropdownFilterRel),                   
                    ('slot2', DropdownFilterRel),                   
     )
@@ -138,24 +137,6 @@ class SimultaneousCoursesAdmin(admin.ModelAdmin):
                    ('course1', DropdownFilterRel),                   
                    ('course2', DropdownFilterRel),                   
     )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 admin.site.register(LimitNaturePerPeriod, LimitNaturePerPeriodAdmin)

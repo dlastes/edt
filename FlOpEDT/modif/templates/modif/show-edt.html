@@ -37,9 +37,7 @@
   <!-- script src='https://d3js.org/d3.v4.min.js'></script -->
   <!-- script src='https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js></script -->
   <script>
-    //var cours_fi = "{% static 'modif/better-cours.csv' %}";
-    //var dispos_fi = "{% static 'modif/better-dispos.json' %}";
-    var groupes_fi = "{% static 'modif/better-groupes.json' %}";
+    var groupes_fi = "{% static 'modif/groups.json' %}";
 
     var url_cours_pl = "{% url "fetch_cours_pl" %}";
     var url_cours_pp = "{% url "fetch_cours_pp" %}";
@@ -72,7 +70,12 @@
   </script>
 
   <!--   <script type='text/javascript' src="{% static "modif/better.js" %}"></script>-->
-  <script type='text/javascript' src="{% static 'modif/core.js' %}?2"></script>
+  <script type='text/javascript' src="{% static 'modif/week_change.js' %}"></script>
+  <script type='text/javascript' src="{% static 'modif/transformation.js' %}"></script>
+  <script type='text/javascript' src="{% static 'modif/creation.js' %}"></script>
+  <script type='text/javascript' src="{% static 'modif/action.js' %}"></script>
+  <script type='text/javascript' src="{% static 'modif/update.js' %}"></script>
+  <script type='text/javascript' src="{% static 'modif/variables.js' %}?2"></script>
   <script type='text/javascript' src="{% static 'modif/all.js' %}"></script>
     
 

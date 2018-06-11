@@ -41,8 +41,6 @@ urlpatterns = [
     url(r'^aide$', views.aide, name="aide"),
     url(r'^decale$', views.decale, name="decale"),
     url(r'^contact$', views.contact, name="contact"),
-    # by aware user
-    url(r'^saghe$', views.saghe, name="saghe"),
 
     # exchanges with the db via django
     # ---------------------------------
