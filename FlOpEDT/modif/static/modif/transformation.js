@@ -90,6 +90,9 @@ function bknews_row_txt_y(d){
 function bknews_row_txt_strk(d){
     return d.strk_color ;
 }
+function bknews_link(d){
+    return d.is_linked ;
+}
 
 
 /*---------------------
@@ -904,14 +907,23 @@ function st_but_back() {
 
 
 /*---------------------
-  ------- VALIDER -----
+  ------- REGEN -----
   ---------------------*/
 
 function ack_reg_y() {
     return grid_height()  + 1.5 *  labgp.height;
 }
 
+/*---------------------
+  ------- QUOTE -----
+  ---------------------*/
 
+function quote_y() {
+    return ack_reg_y() ;
+}
+function quote_x() {
+    return 0 ;
+}
 
 /*--------------------
    ------ ALL -------

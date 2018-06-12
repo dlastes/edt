@@ -697,7 +697,9 @@ function go_bknews(quick) {
     var ffl = fl_all
 	.enter()
 	.append("g")
-	.attr("class", "bn-all");
+	.attr("class", "bn-all")
+	.append("a")
+	.attr("xlink:href", bknews_link);
 
     ffl
 	.append("rect")
@@ -729,6 +731,21 @@ function go_bknews(quick) {
     fl_all.exit().remove();
     
 }
+
+
+/*----------------------
+  ------- QUOTES -------
+  ----------------------*/
+
+
+function go_quote() {
+    vg.select(".quote").select("text")
+        .transition(d3.transition())
+        .attr("x", quote_x())
+        .attr("y", quote_y());
+}
+
+
 
 
 /*----------------------
@@ -1237,4 +1254,5 @@ function go_edt(t) {
     go_bknews(t);
     go_alarm_pref();
     go_regen(null);
+    go_quote();
 }

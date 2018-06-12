@@ -309,7 +309,7 @@ def fetch_cours_pl(req):
                 .filter(user=req.user,
                         semaine=semaine,
                         an=an)
-            if week_av.count() == 0:
+            if not week_av.exists():
                 response['filDispos'] = UserPreference \
                     .objects \
                     .filter(user=req.user,
@@ -391,7 +391,7 @@ def fetch_dispos(req):
             response['an'] = an
             return response
         else:
-            return HttpResponse("Pas connecte", status=500)
+            return HttpResponse(u"Pas connecté", status=500)
     else:
         return HttpResponse("Pas GET", status=500)
 
@@ -692,17 +692,24 @@ def dispos_changes(req):
     good_response = HttpResponse("OK")
     if req.is_ajax():
         if req.method == "POST":
-            semaine = req.GET.get('s', '')
-            an = req.GET.get('a', '')
+            try:
+                semaine = req.GET.get('s', '')
+                an = req.GET.get('a', '')
+                semaine = int(semaine)
+                an = int(an)
+            except ValueError:
+                bad_response['reason'] \
+                    = u"Problème semaine ou année."
+                return bad_response
+                
             usr_change = req.GET.get('u', '')
-            if usr_change is None or usr_change == '':
+            if usr_change == '':
                 usr_change = req.user.username
-            semaine = int(semaine)
-            an = int(an)
 
             # Default week at None
-            if semaine == 0:
+            if semaine == 0 or an == 0:
                 semaine = None
+                an = None
 
             print req.body
             q = json.loads(req.body,
@@ -724,7 +731,7 @@ def dispos_changes(req):
 
             print q
 
-            # if no availability was present for this week, first copy the
+            # if no preference was present for this week, first copy the
             # default availabilities
             if not UserPreference.objects.filter(user=prof,
                                                  semaine=semaine,
@@ -735,7 +742,6 @@ def dispos_changes(req):
                         .get_or_create(
                         user=prof,
                         semaine=None,
-                        an=annee_courante,
                         creneau=c,
                         defaults={'valeur':
                                       0})
