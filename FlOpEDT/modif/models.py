@@ -522,6 +522,9 @@ class User(AbstractUser):
 
 
 class Tutor(User):
+    FULLSTAFF = "fullstaff"
+    SUPPLYSTAFF = "supplystaff"
+    STATUS_CHOICES = ((FULLSTAFF, "fullstaff"), (SUPPLYSTAFF, "supplystaff"))
     pref_slots_per_day = models.PositiveSmallIntegerField(
         verbose_name="How many slots per day would you prefer ?",
         default=4)
@@ -540,7 +543,9 @@ class Tutor(User):
         validators=[MinValueValidator(0), MaxValueValidator(4)],
         verbose_name="Limitation du nombre de jours",
         default=2)
-
+    status = models.CharField(max_length=9,
+                           choices=STATUS_CHOICES,
+                           default=FULLSTAFF)
 
 class FullStaff(models.Model):
     tutor = models.OneToOneField('Tutor')
