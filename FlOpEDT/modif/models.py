@@ -95,7 +95,7 @@ class Group(models.Model):
     type = models.ForeignKey('GroupType')
     size = models.PositiveSmallIntegerField()
     basic = models.BooleanField(verbose_name='Basic group?', default=False)
-    parent_groups = models.ManyToManyField('self',
+    parent_groups = models.ManyToManyField('self', symmetrical=False,
                                            blank=True,
                                            related_name="children_groups")
 
@@ -109,11 +109,13 @@ class Group(models.Model):
         """
         :return: the set of all Groupe containing self (self not included)
         """
-        all = set()
+        all = set(self.parent_groups.all())
+
         for gp in self.parent_groups.all():
-            all.add(gp)
+
             for new_gp in gp.ancestor_groups():
                 all.add(new_gp)
+
         return all
 
 
@@ -126,28 +128,58 @@ class Group(models.Model):
 
 
 class Day(models.Model):
-    no = models.PositiveSmallIntegerField(primary_key=True,
-                                          verbose_name="Number")
-    nom = models.CharField(max_length=10, verbose_name="Name")
+    #no = models.PositiveSmallIntegerField(primary_key=True,
+    #                                      verbose_name="Number")
+    #nom = models.CharField(max_length=10, verbose_name="Name")
+
+    MONDAY = "m"
+    TUESDAY = "tu"
+    WEDNESDAY = "w"
+    THURSDAY = "th"
+    FRIDAY = "f"
+
+    WEEK_DAYS = ((MONDAY, "m"), (TUESDAY, "tu"), (WEDNESDAY, "w"), (THURSDAY, "th"), (FRIDAY, "f"))
+
+    day = models.CharField(max_length=2,
+                           choices=WEEK_DAYS)
 
     def __unicode__(self):
-        return self.nom[:3]
+        # return self.nom[:3]
+        return self.day
 
 
 class Time(models.Model):
-    MATIN = 'AM'
-    APREM = 'PM'
-    CHOIX_DEMI_JOUR = ((MATIN, 'AM'), (APREM, 'PM'))
-    apm = models.CharField(max_length=2,
-                           choices=CHOIX_DEMI_JOUR,
-                           verbose_name="Half day",
-                           default=MATIN)
-    no = models.PositiveSmallIntegerField(primary_key=True)
-    nom = models.CharField(max_length=20)
+    AM = 'AM'
+    PM = 'PM'
+    #CHOIX_DEMI_JOUR = ((MATIN, 'AM'), (APREM, 'PM'))
+    #apm = models.CharField(max_length=2,
+    #                       choices=CHOIX_DEMI_JOUR,
+    #                       verbose_name="Half day",
+    #                       default=MATIN)
+    #no = models.PositiveSmallIntegerField(primary_key=True)
+    #nom = models.CharField(max_length=20)
+    hours = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(0), MaxValueValidator(23)], default=8)
+    minutes = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(0), MaxValueValidator(59)], default=0)
 
-    def __str__(self):
-        return self.nom
 
+    def __unicode__(self):
+        if self.hours < 10:
+            message = "0" + self.hours + ":"
+        else:
+            message = self.hours + ":"
+        if self.minutes < 10:
+            message += "0" + self.minutes
+        else:
+            message += self.minutes
+        return message
+
+    def apm(self):
+        if self.hours < 12:
+            return Time.AM
+        else:
+            return Time.PM
 
 # class Creneau(models.Model):
 class Slot(CachingMixin, models.Model):
