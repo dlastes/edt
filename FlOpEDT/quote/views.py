@@ -32,6 +32,9 @@ from .forms import QuoteForm  # ProfForm, UserForm
 from .models import Quote
 from modif.views import edt
 
+from random import randint
+from django.http import JsonResponse
+
 
 def submit(req):
     visu = ''
@@ -54,3 +57,9 @@ def submit(req):
 
 def moderate(req):
     pass
+
+
+def fetch_quote(req):
+    nb_quotes = Quote.objects.all().count()
+    chosen_quote = Quote.objects.all()[randint(0,nb_quotes)]
+    return JsonResponse({'quote': unicode(chosen_quote)})

@@ -105,8 +105,11 @@ function on_group_rcv(dg) {
 
     create_edt_grid();
 
-    create_alarm_dispos();
-    create_val_but();
+    create_alarm_dispos() ;
+    create_val_but() ;
+    create_regen() ;
+    create_quote() ;
+    
     go_ack_msg();
 
     create_bknews();
@@ -149,6 +152,7 @@ function on_group_rcv(dg) {
 
 
 create_general_svg(false);
+create_quote()
 
 def_drag();
 create_clipweek();

@@ -1042,6 +1042,15 @@ function create_menus() {
   ------- BKNEWS ------
   ---------------------*/
 
+function create_regen() {
+    vg
+        .append("g")
+        .attr("class", "ack-reg")
+        .append("text");
+}
+
+
+
 
 function create_bknews() {
     var flash = fig
@@ -1087,6 +1096,42 @@ function translate_bknews_from_csv(d){
 	strk_col: d.strk_col,
 	txt: d.txt
     }
+}
+
+
+/*---------------------
+  ------- QUOTES ------
+  ---------------------*/
+
+function create_quote() {
+    vg
+	.append("g")
+	.attr("class", "quote")
+	.append("text");
+
+    show_loader(true);
+    $.ajax({
+        type: "GET", //rest Type
+        dataType: 'text',
+        url: url_quote,
+        async: true,
+        contentType: "text/json",
+        success: function(msg) {
+            //console.log(msg);
+
+            quote = JSON.parse(msg).quote ;
+	    vg.select(".quote").select("text")
+		.text(quote);
+
+
+            show_loader(false);
+
+        },
+        error: function(msg) {
+            console.log("error");
+            show_loader(false);
+        }
+    });
 }
 
 
@@ -1370,12 +1415,6 @@ function create_val_but() {
         .attr("y", did.tly + 94 + 15);
 
     edt_message.attr("visibility", "hidden");
-
-    vg
-        .append("g")
-        .attr("class", "ack-reg")
-        .append("text");
-
 
 }
 

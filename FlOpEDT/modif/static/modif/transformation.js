@@ -904,14 +904,23 @@ function st_but_back() {
 
 
 /*---------------------
-  ------- VALIDER -----
+  ------- REGEN -----
   ---------------------*/
 
 function ack_reg_y() {
     return grid_height()  + 1.5 *  labgp.height;
 }
 
+/*---------------------
+  ------- QUOTE -----
+  ---------------------*/
 
+function quote_y() {
+    return ack_reg_y() ;
+}
+function quote_x() {
+    return 0 ;
+}
 
 /*--------------------
    ------ ALL -------

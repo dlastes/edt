@@ -54,7 +54,8 @@ class Quote(models.Model):
                               blank=True, default=None)
     quote_type = models.ForeignKey('QuoteType', blank=True,
                                    null=True, default=None)
-    votes = models.PositiveIntegerField(default=0)
+    positive_votes = models.PositiveIntegerField(default=0)
+    negative_votes = models.PositiveIntegerField(default=0)
     id_acc = models.PositiveIntegerField(default=0)
 
     PENDING = 'P'

@@ -732,6 +732,21 @@ function go_bknews(quick) {
 
 
 /*----------------------
+  ------- QUOTES -------
+  ----------------------*/
+
+
+function go_quote() {
+    vg.select(".quote").select("text")
+        .transition(d3.transition())
+        .attr("x", quote_x())
+        .attr("y", quote_y());
+}
+
+
+
+
+/*----------------------
   ------- GROUPS -------
   ----------------------*/
 
@@ -1237,4 +1252,5 @@ function go_edt(t) {
     go_bknews(t);
     go_alarm_pref();
     go_regen(null);
+    go_quote();
 }

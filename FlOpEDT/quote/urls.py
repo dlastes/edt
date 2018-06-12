@@ -31,4 +31,8 @@ urlpatterns = [
     # ----------------------------
     url(r'^citations/proposer$', views.submit, name="submission"),
     url(r'^citations/moderer$', views.moderate, name="moderation"),
+    # fetch 
+    # ----------------------------
+    url(r'^citations/fetch$', views.fetch_quote, name="fetch_quote"),
+    
 ]
