@@ -90,6 +90,9 @@ function bknews_row_txt_y(d){
 function bknews_row_txt_strk(d){
     return d.strk_color ;
 }
+function bknews_link(d){
+    return d.is_linked ;
+}
 
 
 /*---------------------

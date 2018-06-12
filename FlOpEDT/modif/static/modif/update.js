@@ -697,7 +697,9 @@ function go_bknews(quick) {
     var ffl = fl_all
 	.enter()
 	.append("g")
-	.attr("class", "bn-all");
+	.attr("class", "bn-all")
+	.append("a")
+	.attr("xlink:href", bknews_link);
 
     ffl
 	.append("rect")
