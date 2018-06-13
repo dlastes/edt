@@ -270,10 +270,11 @@ def fetch_cours_pl(req):
         dataset = None
         while not ok:
             if num_copie == 0:
-                version = EdtVersion.objects \
-                    .get(semaine=semaine,
-                         an=an) \
-                    .version
+                edtversion, created = EdtVersion.objects \
+                    .get_or_create(semaine=semaine,
+                                   an=an,
+                                   defaults={'version': 0})
+                version = edtversion.version
             dataset = CoursPlaceResource() \
                 .export(ScheduledCourse.objects \
                         .filter(cours__semaine=semaine,
