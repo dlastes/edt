@@ -43,7 +43,7 @@
     
         <fieldset style="width:300px">
           <legend>Authentification</legend>
-        <form method="post" action="{% url 'login' %}">
+        <form method="post" action="{% url 'auth:login' %}">
     {% csrf_token %}
     <table>
     <tr>
@@ -61,7 +61,7 @@
     </form>
     </fieldset>
     {# Assumes you setup the password_reset view in your URLconf #}
-    <p><a href="{% url 'password_reset' %}">Mot de passe perdu ?</a></p>
+    <p><a href="{% url 'auth:password_reset' %}">Mot de passe perdu ?</a></p>
     <!--<p><a href="{ % url 'add_user' % }">Créer un nouveau compte</a></p>-->
     
 </div>
