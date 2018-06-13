@@ -305,8 +305,8 @@ class BIATOSAdmin(admin.ModelAdmin):
         app_label = 'auth'
 
 
-admin.site.unregister(django.contrib.auth.User)
-admin.site.unregister(django.contrib.auth.Group)
+admin.site.unregister(django.contrib.auth.models.User)
+admin.site.unregister(django.contrib.auth.models.Group)
 
 admin.site.register(FullStaff, FullStaffAdmin)
 admin.site.register(SupplyStaff, SupplyStaffAdmin)
