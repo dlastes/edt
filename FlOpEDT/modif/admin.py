@@ -30,6 +30,10 @@ from modif.models import Day, RoomGroup, Module, Course, Group, Slot, \
     PlanningModification, BreakingNews, TrainingProgramme, ModuleDisplay, FullStaff, SupplyStaff, BIATOS, Tutor, User
 # Prof
 
+
+import django.contrib.auth as auth
+
+
 from import_export import resources, fields
 from import_export.widgets import ForeignKeyWidget
 
@@ -305,8 +309,8 @@ class BIATOSAdmin(admin.ModelAdmin):
         app_label = 'auth'
 
 
-admin.site.unregister(django.contrib.auth.models.User)
-admin.site.unregister(django.contrib.auth.models.Group)
+# admin.site.unregister(auth.models.User)
+admin.site.unregister(auth.models.Group)
 
 admin.site.register(FullStaff, FullStaffAdmin)
 admin.site.register(SupplyStaff, SupplyStaffAdmin)

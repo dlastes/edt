@@ -59,7 +59,7 @@ class QuoteAdmin(admin.ModelAdmin):
     strquote.short_description = 'Quote'
     strquote.admin_order_field = 'id_acc'
 
-    list_display = (strquote, 'quote_type', 'votes', 'status', 'id_acc')
+    list_display = (strquote, 'quote_type', 'positive_votes', 'negative_votes', 'status', 'id_acc')
     ordering = ('status', 'id_acc')
     actions = [accept, reject]
     list_filter = (('quote_type', DropdownFilterRel),
