@@ -24,7 +24,7 @@
 # without disclosing the source code of your own applications.
 
 from django import forms
-from .models import Tutor
+from .models import Tutor, FullStaff
 
 
 class ContactForm(forms.Form):
@@ -46,3 +46,4 @@ class ContactForm(forms.Form):
         if not Tutor.objects.filter(username=recipient).exists():
             raise forms.ValidationError("Cette personne n'existe pas.")
         return recipient
+

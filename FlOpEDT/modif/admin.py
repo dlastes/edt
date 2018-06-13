@@ -27,7 +27,7 @@ from django.contrib import admin
 
 from modif.models import Day, RoomGroup, Module, Course, Group, Slot, \
     UserPreference, Time, ScheduledCourse, EdtVersion, CourseModification, \
-    PlanningModification, BreakingNews, TrainingProgramme, ModuleDisplay, Tutor, User
+    PlanningModification, BreakingNews, TrainingProgramme, ModuleDisplay, FullStaff, SupplyStaff, BIATOS, Tutor, User
 # Prof
 
 from import_export import resources, fields
@@ -160,10 +160,6 @@ class JourAdmin(admin.ModelAdmin):
 #    ordering = ('jour','apm')
 
 
-class TutorAdmin(admin.ModelAdmin):
-    list_display = ('LBD',)
-
-
 # # from django.utils.text import Truncator
 # ordering = ('abbrev',)
 #    def abb_name(self,prof):
@@ -206,11 +202,6 @@ class CoursAdmin(admin.ModelAdmin):
         ('type', DropdownFilterRel),
         ('groupe', DropdownFilterAll),
     )
-
-
-# class CoursLPAdmin(admin.ModelAdmin):
-#     list_display = ('cours','periode')
-#     ordering = ('cours__an','cours__semaine','periode')
 
 
 class CoursPlaceAdmin(admin.ModelAdmin):
@@ -293,22 +284,34 @@ class BreakingNewsAdmin(admin.ModelAdmin):
     ordering = ('week', 'year')
 
 
-# search_fields = ['prof__username']
-# @admin.register(Cours)
-# class ModuleAggAdmin(admin.ModelAdmin):
-#     list_display = ('module','type','semaine','prof','volh')
-#     list_filter = ('module','prof')
 
-#     def volh(self, obj):
-#         return obj.volh
 
-#     def get_queryset(self, request):
-#         qs = super(ModuleAggAdmin, self).get_queryset(request)
-#         print qs
-#         return qs.values('type', 'prof', 'module').annotate(volh=Count('id',
-#                                                                distinct=True))
 
-admin.site.register(Tutor, TutorAdmin)
+class FullStaffAdmin(admin.ModelAdmin):
+
+    class Meta:
+        app_label = 'auth'
+
+
+class SupplyStaffAdmin(admin.ModelAdmin):
+
+    class Meta:
+        app_label = 'auth'
+
+
+class BIATOSAdmin(admin.ModelAdmin):
+
+    class Meta:
+        app_label = 'auth'
+
+
+admin.site.unregister(django.contrib.auth.User)
+admin.site.unregister(django.contrib.auth.Group)
+
+admin.site.register(FullStaff, FullStaffAdmin)
+admin.site.register(SupplyStaff, SupplyStaffAdmin)
+admin.site.register(BIATOS, BIATOSAdmin)
+# admin.site.register(Tutor, TutorAdmin)
 # admin.site.register(Jour, JourAdmin)
 # admin.site.register(DemiJour, DemiJourAdmin)
 admin.site.register(Group, GroupeAdmin)

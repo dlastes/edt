@@ -522,9 +522,6 @@ class User(AbstractUser):
 
 
 class Tutor(User):
-    FULLSTAFF = "fullstaff"
-    SUPPLYSTAFF = "supplystaff"
-    STATUS_CHOICES = ((FULLSTAFF, "fullstaff"), (SUPPLYSTAFF, "supplystaff"))
     pref_slots_per_day = models.PositiveSmallIntegerField(
         verbose_name="How many slots per day would you prefer ?",
         default=4)
@@ -539,16 +536,8 @@ class Tutor(User):
     #          je suis responsable
     # a==1 <=> je peux surpasser les contraintes lors de la modification
     #          de cours
-    LBD = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(0), MaxValueValidator(4)],
-        verbose_name="Limitation du nombre de jours",
-        default=2)
-    status = models.CharField(max_length=9,
-                           choices=STATUS_CHOICES,
-                           default=FULLSTAFF)
 
-class FullStaff(models.Model):
-    tutor = models.OneToOneField('Tutor')
+class FullStaff(Tutor):
     department = models.CharField(max_length=50, default='INFO')
     is_iut = models.BooleanField(default=True)
 
@@ -558,8 +547,7 @@ class FullStaff(models.Model):
 #        self.statut = Prof.FULL_STAFF
 
 
-class SupplyStaff(models.Model):
-    tutor = models.OneToOneField('Tutor')
+class SupplyStaff(Tutor):
     employer = models.CharField(max_length=50,
                                 verbose_name="Employeur ?",
                                 null=True)
@@ -569,8 +557,8 @@ class SupplyStaff(models.Model):
                              null=True)
 
 
-class BIATOS(models.Model):
-    tutor = models.OneToOneField('Tutor')
+class BIATOS(Tutor):
+    pass
 
 
 # --- Notes sur Prof ---
