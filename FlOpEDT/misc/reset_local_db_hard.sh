@@ -28,20 +28,20 @@ read rep
 if [ $rep = "oui" ]
 then
     BASE='..'
-    sudo -u postgres psql -c 'drop database edtdatabase'
-    sudo -u postgres createdb edtdatabase
+    sudo -u postgres psql -c 'drop database "FlOp_database"'
+    sudo -u postgres createdb FlOp_database
     mig='modif/migrations'
-    for i in `ls $BASE/$mig --hide=""__init__.py*`
+    for i in `ls $BASE/$mig --hide=__init__.py`
     do
 	rm $BASE/$mig/$i
     done
     mig='TTapp/migrations'
-    for i in `ls $BASE/$mig --hide=""__init__.py*`
+    for i in `ls $BASE/$mig --hide=__init__.py`
     do
 	rm $BASE/$mig/$i
     done
     mig='quote/migrations'
-    for i in `ls $BASE/$mig --hide=""__init__.py*`
+    for i in `ls $BASE/$mig --hide=__init__.py`
     do
 	rm $BASE/$mig/$i
     done
