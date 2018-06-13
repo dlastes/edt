@@ -192,8 +192,6 @@ class Slot(CachingMixin, models.Model):
 
 
 class Holiday(models.Model):
-    apm = models.CharField(max_length=2, choices=Time.HALF_DAY_CHOICES,
-                           verbose_name="Demi-journée", null=True, default=None, blank=True)
     day = models.ForeignKey('Day')
     week = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)])

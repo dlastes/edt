@@ -57,7 +57,7 @@ import datetime
 class WeekDB(object):
     def __init__(self, week, year, train_prog):
         self.train_prog = train_prog
-        self.slots = Slot.objects.all()
+        self.slots = Slot.objects.all().order_by('jour', 'heure')
         self.week = week
         self.year = year
         self.groups = Group.objects.filter(train_prog__in=self.train_prog)
@@ -100,12 +100,10 @@ class WeekDB(object):
                                                                       an=year)
         self.modules = Module.objects \
             .filter(id__in=self.courses.values_list('module_id').distinct())
-        self.holidays = Holiday.objects.filter(
-            semaine=week,
-            an=year)
+        self.holidays = Holiday.objects.filter(week=week, year=year)
         self.training_half_days = TrainingHalfDay.objects.filter(
-            semaine=week,
-            an=year,
+            week=week,
+            year=year,
             train_prog__in=self.train_prog)
         self.dependencies = Dependency.objects.filter(
             cours1__semaine=week, cours1__an=year,
@@ -116,7 +114,7 @@ class WeekDB(object):
             self.courses_for_tutor[i] = self.courses.filter(tutor=i)
         self.courses_for_supp_tutor = {}
         for i in self.instructors:
-            self.courses_for_supp_tutor[i] = i.courses_as_supp_set.all()
+            self.courses_for_supp_tutor[i] = i.courses_as_supp.filter(id__in=self.courses)
 
 
 class TTModel(object):
@@ -143,20 +141,20 @@ class TTModel(object):
         self.var_nb = 0
         self.semaine = semaine
         self.an = an
-        if promo is None:
-            promo = TrainingProgramme.objects.all()
+        if train_prog is None:
+            train_prog = TrainingProgramme.objects.all()
         try:
-            _ = iter(promo)
+            _ = iter(train_prog)
         except TypeError:
-            promo = [promo]
-        self.train_prog = promo
+            train_prog = [train_prog]
+        self.train_prog = train_prog
         self.stabilize_work_copy = stabilize_work_copy
         self.wdb = WeekDB(semaine, an, self.train_prog)
         self.obj = self.lin_expr()
         self.cost_I = dict(zip(self.wdb.instructors,
                                [self.lin_expr() for _ in self.wdb.instructors]))
         self.FHD_G = {}
-        for apm in [Time.MATIN, Time.APREM]:
+        for apm in [Time.AM, Time.PM]:
             self.FHD_G[apm] = dict(
                 zip(self.wdb.basic_groups,
                     [self.lin_expr() for _ in self.wdb.basic_groups]))
@@ -212,12 +210,10 @@ class TTModel(object):
         self.IBHD = {}
         for i in self.wdb.instructors:
             for d in self.wdb.days:
-                self.IBHD[(i, d, 'AM')] \
-                    = self.add_var("IBHD(%s,%s,%s)" % (i, d, 'AM'))
-                self.IBHD[(i, d, 'PM')] \
-                    = self.add_var("IBHD(%s,%s,%s)" % (i, d, 'PM'))
                 # add constraint linking IBHD to TT
-                for apm in ['AM', 'PM']:
+                for apm in [Time.AM, Time.PM]:
+                    self.IBHD[(i, d, apm)] \
+                        = self.add_var("IBHD(%s,%s,%s)" % (i, d, apm))
                     halfdayslots = self.wdb.slots.filter(jour=d,
                                                          heure__apm=apm)
                     card = 2 * len(halfdayslots)
@@ -239,12 +235,10 @@ class TTModel(object):
         self.GBHD = {}
         for g in self.wdb.basic_groups:
             for d in self.wdb.days:
-                self.GBHD[(g, d, 'AM')] \
-                    = self.add_var("GBHD(%s,%s,%s)" % (g, d, 'AM'))
-                self.GBHD[(g, d, 'PM')] \
-                    = self.add_var("GBHD(%s,%s,%s)" % (g, d, 'PM'))
                 # add constraint linking IBD to EDT
-                for apm in [Time.MATIN, Time.APREM]:
+                for apm in [Time.AM, Time.PM]:
+                    self.GBHD[(g, d, apm)] \
+                        = self.add_var("GBHD(%s,%s,%s)" % (g, d, apm))
                     halfdayslots = self.wdb.slots.filter(jour=d,
                                                          heure__apm=apm)
                     card = 2 * len(halfdayslots)
@@ -371,7 +365,7 @@ class TTModel(object):
 
     def add_stabilization_constraints(self):
         if len(self.train_prog) < TrainingProgramme.objects.count():
-            print 'Will modify only courses of promo(s)', self.train_prog
+            print 'Will modify only courses of training programme(s)', self.train_prog
 
         # maximize stability
         if self.stabilize_work_copy is not None:
@@ -570,15 +564,13 @@ class TTModel(object):
         for p in self.wdb.dependencies:
             c1 = p.cours1
             c2 = p.cours2
+            slots_list=list(self.wdb.slots)
             for sl1 in self.wdb.slots:
                 for sl2 in self.wdb.slots:
-                    if (p.ND and (sl2.jour == sl1.jour)) \
-                            or (p.successifs
-                                and (sl2.heure.no != sl1.heure.no + 1
-                                     or sl2.jour != sl1.jour)) \
-                            or (sl2.jour.no < sl1.jour.no
-                                or (sl2.jour == sl1.jour
-                                    and sl2.heure.no < sl1.heure.no)):
+                    if (p.ND and (sl2.jour == sl1.jour))\
+                            or (p.successifs and (slots_list.index(sl2) != slots_list.index(sl2) + 1
+                                                  or sl2.jour != sl1.jour)) \
+                            or (slots_list.index(sl2) < slots_list.index(sl2)):
                         if not weight:
                             self.add_constraint(self.TT[(sl1, c1)]
                                                 + self.TT[(sl2, c2)], '<=', 1)
@@ -610,8 +602,8 @@ class TTModel(object):
             nb_teaching_slots = len(self.wdb.courses_for_tutor[i])
             avail_instr[i] = {}
             unp_slot_cost[i] = {}
-            if self.wdb.availabilities.filter(tutor=i):
-                availabilities = self.wdb.availabilities.filter(tutor=i)
+            if self.wdb.availabilities.filter(user=i):
+                availabilities = self.wdb.availabilities.filter(user=i)
             else:
                 availabilities = UserPreference \
                     .objects \
@@ -720,10 +712,10 @@ class TTModel(object):
                 non_prefered_slot_cost_course[(type, promo)] = {}
                 courses_avail = self.wdb \
                     .courses_availabilities \
-                    .filter(type=type, train_prog=promo)
+                    .filter(course_type=type, train_prog=promo)
                 if not courses_avail:
                     courses_avail = CoursePreference.objects \
-                        .filter(type=type,
+                        .filter(course_type=type,
                                 train_prog=promo,
                                 semaine=None,
                                 an=annee_courante)
@@ -741,9 +733,13 @@ class TTModel(object):
                                                            promo)][a.creneau] \
                                 = 1 - float(a.valeur) / 8
                     except:
-                        print "Course availability problem " \
-                              "for %s - promo%g on slot %s" \
-                              % (type, promo, sl)
+                        avail_course[(type, promo)][sl] = 1
+                        non_prefered_slot_cost_course[(type,
+                                                       promo)][sl] \
+                            = 0
+                        # print "Course availability problem " \
+                        #       "for %s - %s on slot %s" \
+                        #       % (type, promo, sl)
 
         return non_prefered_slot_cost_course, avail_course
 
@@ -793,7 +789,7 @@ class TTModel(object):
             djlg = GroupFreeHalfDay(groupe=g,
                                     an=self.wdb.year,
                                     semaine=self.wdb.week,
-                                    DJL=self.get_expr_value(self.FHD_G['PM'][g]) +
+                                    DJL=self.get_expr_value(self.FHD_G[Time.PM][g]) +
                                         0.5 * self.get_expr_value(
                                         self.FHD_G['AM'][g]))
             djlg.save()
@@ -815,7 +811,6 @@ class TTModel(object):
 
         # second objective  => minimise use of unpreferred slots for courses
         # ponderation MIN_UPS_C
-        #for promo in [1, 2, 3]:
         for promo in self.train_prog:
             MinNonPreferedSlot(train_prog=promo,
                                weight=max_weight) \
@@ -886,7 +881,7 @@ class TTModel(object):
         is reached.
 
         If stabilize_work_copy is None: does not move the scheduled courses
-        whose year group is not in promo and fetches from the remote database
+        whose year group is not in train_prog and fetches from the remote database
         these scheduled courses with work copy 0.
 
         If target_work_copy is given, stores the resulting schedule under this
