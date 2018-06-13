@@ -61,5 +61,7 @@ def moderate(req):
 
 def fetch_quote(req):
     nb_quotes = Quote.objects.all().count()
-    chosen_quote = Quote.objects.all()[randint(0,nb_quotes)]
+    chosen_quote = ''
+    if nb_quotes > 0:
+        chosen_quote = Quote.objects.all()[randint(0,nb_quotes)]
     return JsonResponse({'quote': unicode(chosen_quote)})
