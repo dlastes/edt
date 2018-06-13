@@ -116,7 +116,9 @@ def edt(req, semaine, an, splash_id=0):
     if req.user.is_authenticated():
         name_usr = req.user.username
         try:
-            rights_usr = req.user.rights
+            rights_usr = req.user.tutor.rights
+        except AttributeError:
+            rights_usr = 0
         except ObjectDoesNotExist:
             rights_usr = 0
     else:
