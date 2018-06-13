@@ -41,7 +41,7 @@
 
     var usna = "{{ user.username }}" ;
     var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
-    var url_login = "{% url "login"%}";
+    var url_login = "{% url "auth:login"%}";
     var annee_courante = "{{ annee_courante }}" ;
     var semaine_an_list = {{ all_weeks|safe }};
     var profs = {{ profs|safe }};

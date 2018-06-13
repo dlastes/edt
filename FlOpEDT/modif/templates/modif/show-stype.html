@@ -41,7 +41,7 @@
     var url_dispos_changes = "{% url "dispos_changes"%}";
     var logged_usr = {nom:"{{ name_usr }}", rights: -1};
     var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
-    var url_login = "{% url "login"%}";
+    var url_login = "{% url "auth:login"%}";
     var annee_courante = "{{ annee_courante }}" ;
   </script>
   </script>

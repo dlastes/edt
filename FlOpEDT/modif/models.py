@@ -148,6 +148,7 @@ class Day(models.Model):
         # return self.nom[:3]
         return self.day
 
+
 class Time(models.Model):
     AM = 'AM'
     PM = 'PM'

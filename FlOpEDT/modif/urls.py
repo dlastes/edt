@@ -60,7 +60,6 @@ urlpatterns = [
 
     # predefined
     # ------------
-    url('^accounts/', include('django.contrib.auth.urls')),
     url(r'$', RedirectView.as_view(pattern_name='edt', permanent=False)),
 ]
 
