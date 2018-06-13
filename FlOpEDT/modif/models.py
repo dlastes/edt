@@ -31,6 +31,8 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
 from django.contrib.auth.models import AbstractUser
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
 
 from caching.base import CachingManager, CachingMixin
 
@@ -100,7 +102,7 @@ class Group(models.Model):
                                            related_name="children_groups")
 
     def full_name(self):
-        return self.train_prog.abbrev + self.nom
+        return self.train_prog.abbrev + "-" + self.nom
 
     def __unicode__(self):
         return self.full_name()
@@ -138,24 +140,22 @@ class Day(models.Model):
     THURSDAY = "th"
     FRIDAY = "f"
 
-    WEEK_DAYS = ((MONDAY, "m"), (TUESDAY, "tu"), (WEDNESDAY, "w"), (THURSDAY, "th"), (FRIDAY, "f"))
+    CHOICES = ((MONDAY, "m"), (TUESDAY, "tu"), (WEDNESDAY, "w"), (THURSDAY, "th"), (FRIDAY, "f"))
 
-    day = models.CharField(max_length=2,
-                           choices=WEEK_DAYS)
+    day = models.CharField(max_length=2, choices=CHOICES, default=MONDAY)
 
     def __unicode__(self):
         # return self.nom[:3]
         return self.day
 
-
 class Time(models.Model):
     AM = 'AM'
     PM = 'PM'
-    #CHOIX_DEMI_JOUR = ((MATIN, 'AM'), (APREM, 'PM'))
-    #apm = models.CharField(max_length=2,
-    #                       choices=CHOIX_DEMI_JOUR,
-    #                       verbose_name="Half day",
-    #                       default=MATIN)
+    HALF_DAY_CHOICES = ((AM, 'AM'), (PM, 'PM'))
+    apm = models.CharField(max_length=2,
+                           choices=HALF_DAY_CHOICES,
+                           verbose_name="Half day",
+                           default=AM)
     #no = models.PositiveSmallIntegerField(primary_key=True)
     #nom = models.CharField(max_length=20)
     hours = models.PositiveSmallIntegerField(
@@ -163,23 +163,20 @@ class Time(models.Model):
     minutes = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(59)], default=0)
 
-
     def __unicode__(self):
+        message = ""
         if self.hours < 10:
-            message = "0" + self.hours + ":"
-        else:
-            message = self.hours + ":"
+            message += "0"
+        message += str(self.hours) + ":"
         if self.minutes < 10:
-            message += "0" + self.minutes
-        else:
-            message += self.minutes
+            message += "0"
+        message += str(self.minutes)
         return message
 
-    def apm(self):
-        if self.hours < 12:
-            return Time.AM
-        else:
-            return Time.PM
+@receiver(pre_save, sender=Time)
+def define_apm(sender, instance, *args, **kwargs):
+    if instance.hours >= 12:
+        instance.apm = Time.PM
 
 # class Creneau(models.Model):
 class Slot(CachingMixin, models.Model):
@@ -194,7 +191,7 @@ class Slot(CachingMixin, models.Model):
 
 
 class Holiday(models.Model):
-    apm = models.CharField(max_length=2, choices=Time.CHOIX_DEMI_JOUR,
+    apm = models.CharField(max_length=2, choices=Time.HALF_DAY_CHOICES,
                            verbose_name="Demi-journée", null=True, default=None, blank=True)
     day = models.ForeignKey('Day')
     week = models.PositiveSmallIntegerField(
@@ -203,7 +200,7 @@ class Holiday(models.Model):
 
 
 class TrainingHalfDay(models.Model):
-    apm = models.CharField(max_length=2, choices=Time.CHOIX_DEMI_JOUR,
+    apm = models.CharField(max_length=2, choices=Time.HALF_DAY_CHOICES,
                            verbose_name="Demi-journée", null=True, default=None, blank=True)
     day = models.ForeignKey('Day')
     week = models.PositiveSmallIntegerField(
@@ -280,13 +277,13 @@ class RoomSort(models.Model):
 
 
 class Module(models.Model):
-    nom = models.CharField(max_length=50, null=True)
+    nom = models.CharField(max_length=100, null=True)
     abbrev = models.CharField(max_length=10, verbose_name='Intitulé abbrégé')
     head = models.ForeignKey('Tutor',
                              null=True,
                              default=None,
                              blank=True)
-    ppn = models.CharField(max_length=5, default='M')
+    ppn = models.CharField(max_length=6, default='M')
     train_prog = models.ForeignKey('TrainingProgramme')
     period = models.ForeignKey('Period')
     # nbTD = models.PositiveSmallIntegerField(default=1)
