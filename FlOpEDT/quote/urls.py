@@ -29,10 +29,10 @@ from django.contrib.staticfiles.storage import staticfiles_storage
 urlpatterns = [
     # directly reachable by users
     # ----------------------------
-    url(r'^citations/proposer$', views.submit, name="submission"),
-    url(r'^citations/moderer$', views.moderate, name="moderation"),
+    url(r'^proposer$', views.submit, name="submission"),
+    url(r'^moderer$', views.moderate, name="moderation"),
     # fetch 
     # ----------------------------
-    url(r'^citations/fetch$', views.fetch_quote, name="fetch_quote"),
+    url(r'^fetch$', views.fetch_quote, name="fetch_quote"),
     
 ]

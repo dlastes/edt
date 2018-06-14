@@ -58,6 +58,7 @@ urlpatterns = [
     url(r'^change_dispos/$', views.dispos_changes, name="dispos_changes"),
     url(r'^change_decale/$', views.decale_changes, name="decale_changes"),
 
+
     # predefined
     # ------------
     url(r'$', RedirectView.as_view(pattern_name='edt', permanent=False)),

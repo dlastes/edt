@@ -65,7 +65,7 @@ from django.views.generic import RedirectView
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^', include('quote.urls', namespace="quote")),
-    url('^accounts/', include('django.contrib.auth.urls', namespace="auth")),
+    url(r'^accounts/', include('people.urls')),
+    url(r'^citations/', include('quote.urls', namespace="quote")),
     url(r'^', include('modif.urls')),
 ]
