@@ -608,8 +608,7 @@ class TTModel(object):
                 availabilities = UserPreference \
                     .objects \
                     .filter(user=i,
-                            semaine=None,
-                            an=annee_courante)
+                            semaine=None)
 
             if not availabilities:
                 print "%s has given no availability information !" \
