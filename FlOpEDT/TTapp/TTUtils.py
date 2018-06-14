@@ -25,7 +25,7 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from modif.models import Slot, ScheduledCourse, RoomPreference, Day, Time
+from modif.models import Slot, ScheduledCourse, RoomPreference
 from django.db.models import Max
 
 
@@ -35,7 +35,7 @@ def basic_reassign_rooms(semaine, an, target_work_copy):
     """
     print "reassigning rooms to minimize moves...",
 
-    slots = Slot.objects.all().order_by('jour','heure')
+    slots = Slot.objects.all().order_by('jour', 'heure')
     for sl in slots:
         rank = list(slots.filter(jour=sl.jour, heure__apm=sl.heure.apm)).index(sl)
         if rank == 0:

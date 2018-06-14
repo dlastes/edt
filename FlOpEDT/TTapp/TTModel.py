@@ -37,9 +37,11 @@ from pulp import GUROBI_CMD, PULP_CBC_CMD
 
 from modif.models import Slot, Group, Day, Time, \
     Room, RoomGroup, RoomSort, RoomType, RoomPreference, \
-    Course, ScheduledCourse, UserPreference, Tutor, CoursePreference, \
+    Course, ScheduledCourse, UserPreference, CoursePreference, \
     Module, TrainingProgramme, CourseType, \
     Dependency, TutorCost, GroupFreeHalfDay, GroupCost, Holiday, TrainingHalfDay
+
+from people.models import Tutor
 
 from modif.weeks import annee_courante
 
