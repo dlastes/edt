@@ -296,6 +296,9 @@ class Module(models.Model):
 
 class CourseType(models.Model):
     name = models.CharField(max_length=50)
+    group_types = models.ManyToManyField(GroupType,
+                                         blank=True,
+                                         related_name="compatible_course_types")
 
     def __unicode__(self):
         return self.name

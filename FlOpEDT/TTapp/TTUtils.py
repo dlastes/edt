@@ -25,7 +25,7 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from modif.models import Slot, ScheduledCourse, RoomPreference
+from modif.models import Slot, ScheduledCourse, RoomPreference, Day, Time
 from django.db.models import Max
 
 
@@ -34,9 +34,14 @@ def basic_reassign_rooms(semaine, an, target_work_copy):
     Reassign the rooms...
     """
     print "reassigning rooms to minimize moves...",
-    for sl in Slot.objects.all():
-        if sl.heure.no in [0, 3]:
+
+    slots = Slot.objects.all().order_by('jour','heure')
+    for sl in slots:
+        rank = list(slots.filter(jour=sl.jour, heure__apm=sl.heure.apm)).index(sl)
+        if rank == 0:
             continue
+        slots_list = list(slots)
+        precedent_sl = slots_list[slots_list.index(sl) - 1]
         nsl = ScheduledCourse.objects.filter(cours__semaine=semaine,
                                              cours__an=an,
                                              creneau=sl,
@@ -47,8 +52,7 @@ def basic_reassign_rooms(semaine, an, target_work_copy):
                 .objects \
                 .filter(cours__semaine=semaine,
                         cours__an=an,
-                        creneau__heure__no=sl.heure.no - 1,
-                        creneau__jour=sl.jour,
+                        creneau=precedent_sl,
                         cours__room_type=CP.cours.room_type,
                         cours__groupe=CP.cours.groupe,
                         copie_travail=target_work_copy)
@@ -57,10 +61,9 @@ def basic_reassign_rooms(semaine, an, target_work_copy):
                     .objects \
                     .filter(cours__semaine=semaine,
                             cours__an=an,
-                            creneau__heure__no=sl.heure.no - 1,
-                            creneau__jour=sl.jour,
+                            creneau=precedent_sl,
                             cours__room_type=CP.cours.room_type,
-                            cours__prof=CP.cours.prof,
+                            cours__tutor=CP.cours.tutor,
                             copie_travail=target_work_copy)
                 if len(precedent) == 0:
                     continue
