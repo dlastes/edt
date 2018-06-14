@@ -50,9 +50,12 @@ def submit(req):
             # return edt(req, None, None, 2)
     else:
         form = QuoteForm()  # initial = {}
+    imgtxt = "Créateur d'emploi du temps <span id=\"flopPasRed\">Fl" \
+             "</span>exible et <span id=\"flopRed\">Op</span>enSource"
     return render(req, 'quote/submit.html',
                   {'form': form,
-                   'visu': visu})
+                   'visu': visu,
+                   'image': imgtxt})
 
 
 def moderate(req):
