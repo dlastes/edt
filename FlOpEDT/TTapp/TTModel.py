@@ -864,7 +864,7 @@ class TTModel(object):
                                           maxSeconds=time_limit))
         status = LpStatus[self.model.status]
         print status
-        if status == "Not Solved":
+        if status in ["Not Solved", "Infeasible"]:
             print 'lpfile has been saved in FlOpTT-pulp.lp'
             return None
         elif status == "Optimal":
