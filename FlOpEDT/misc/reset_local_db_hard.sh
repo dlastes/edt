@@ -30,21 +30,25 @@ then
     BASE='..'
     sudo -u postgres psql -c 'drop database "FlOp_database"'
     sudo -u postgres createdb FlOp_database
-    mig='modif/migrations'
-    for i in `ls $BASE/$mig --hide=__init__.py`
+    apps="modif TTapp quote people"
+    for a in $apps
     do
-	rm $BASE/$mig/$i
+	mig=$a/migrations
+	for i in `ls $BASE/$mig --hide=__init__.py`
+	do
+	    rm $BASE/$mig/$i
+	done
     done
-    mig='TTapp/migrations'
-    for i in `ls $BASE/$mig --hide=__init__.py`
-    do
-	rm $BASE/$mig/$i
-    done
-    mig='quote/migrations'
-    for i in `ls $BASE/$mig --hide=__init__.py`
-    do
-	rm $BASE/$mig/$i
-    done
+    # mig='TTapp/migrations'
+    # for i in `ls $BASE/$mig --hide=__init__.py`
+    # do
+    # 	rm $BASE/$mig/$i
+    # done
+    # mig='quote/migrations'
+    # for i in `ls $BASE/$mig --hide=__init__.py`
+    # do
+    # 	rm $BASE/$mig/$i
+    # done
     m=$BASE/"manage.py"
     s="FlOpEDT.settings.local"
     python $m makemigrations --settings=$s
