@@ -24,7 +24,7 @@
 # without disclosing the source code of your own applications.
 
 from django import forms
-from .models import Tutor, FullStaff
+from people.models import Tutor, FullStaff
 
 
 class ContactForm(forms.Form):

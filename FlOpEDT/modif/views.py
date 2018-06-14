@@ -38,7 +38,9 @@ from .forms import ContactForm
 
 from .models import Course, UserPreference, ScheduledCourse, EdtVersion, \
     CourseModification, Slot, Day, Time, RoomGroup, PlanningModification, \
-    Regen, BreakingNews, Tutor
+    Regen, BreakingNews
+
+from people.models import Tutor
 # Prof,
 
 from .admin import CoursResource, DispoResource, \
@@ -116,9 +118,7 @@ def edt(req, semaine, an, splash_id=0):
     if req.user.is_authenticated():
         name_usr = req.user.username
         try:
-            rights_usr = req.user.tutor.rights
-        except AttributeError:
-            rights_usr = 0
+            rights_usr = req.user.rights
         except ObjectDoesNotExist:
             rights_usr = 0
     else:

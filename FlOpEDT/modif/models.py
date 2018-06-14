@@ -278,7 +278,7 @@ class RoomSort(models.Model):
 class Module(models.Model):
     nom = models.CharField(max_length=100, null=True)
     abbrev = models.CharField(max_length=10, verbose_name='Intitulé abbrégé')
-    head = models.ForeignKey('Tutor',
+    head = models.ForeignKey('people.Tutor',
                              null=True,
                              default=None,
                              blank=True)
@@ -307,11 +307,11 @@ class Course(CachingMixin, models.Model):
     type = models.ForeignKey('CourseType')
     room_type = models.ForeignKey('RoomType', null=True)
     no = models.PositiveSmallIntegerField(null=True, blank=True)
-    tutor = models.ForeignKey('Tutor',
+    tutor = models.ForeignKey('people.Tutor',
                               related_name='taught_courses',
                               null=True,
                               default=None)
-    supp_tutor = models.ManyToManyField('Tutor',
+    supp_tutor = models.ManyToManyField('people.Tutor',
                                         related_name='courses_as_supp',
                                         blank=True)
     groupe = models.ForeignKey('Group')
@@ -357,7 +357,7 @@ class ScheduledCourse(CachingMixin, models.Model):
 
 
 class UserPreference(models.Model):
-    user = models.ForeignKey('User')
+    user = models.ForeignKey('people.User')
     semaine = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)], null=True)
     an = models.PositiveSmallIntegerField(null=True)
@@ -430,7 +430,7 @@ class CourseModification(models.Model):
     creneau_old = models.ForeignKey('Slot', null=True)
     version_old = models.PositiveIntegerField()
     updated_at = models.DateTimeField(auto_now=True)
-    initiator = models.ForeignKey('Tutor')
+    initiator = models.ForeignKey('people.Tutor')
 
     def __str__(self):
         olds = 'OLD:'
@@ -455,12 +455,12 @@ class PlanningModification(models.Model):
     semaine_old = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)], null=True)
     an_old = models.PositiveSmallIntegerField(null=True)
-    tutor_old = models.ForeignKey('Tutor',
+    tutor_old = models.ForeignKey('people.Tutor',
                                   related_name='impacted_by_planif_modif',
                                   null=True,
                                   default=None)
     updated_at = models.DateTimeField(auto_now=True)
-    initiator = models.ForeignKey('Tutor',
+    initiator = models.ForeignKey('people.Tutor',
                                   related_name='operated_planif_modif')
 
 
@@ -476,7 +476,7 @@ class TutorCost(models.Model):
     semaine = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)])
     an = models.PositiveSmallIntegerField()
-    tutor = models.ForeignKey('Tutor')
+    tutor = models.ForeignKey('people.Tutor')
     valeur = models.FloatField()
 
     def __str__(self):
@@ -507,74 +507,7 @@ class GroupFreeHalfDay(models.Model):
 
 # </editor-fold desc="COSTS">
 
-# <editor-fold desc="TUTORS">
-# ------------
-# -- TUTORS --
-# ------------
 
-
-class User(AbstractUser):
-    pass
-
-
-class Tutor(User):
-    pref_slots_per_day = models.PositiveSmallIntegerField(
-        verbose_name="How many slots per day would you prefer ?",
-        default=4)
-    rights = models.PositiveSmallIntegerField(verbose_name="Peut forcer ?",
-                                              default=0)
-    # 0b azyx en binaire
-    # x==1 <=> quand "modifier Cours" coché, les cours sont colorés
-    #          avec la dispo du prof
-    # y==1 <=> je peux changer les dispos de tout le monde
-    # FUTUR
-    # z==1 <=> je peux changer les dispos des vacataires d'un module dont
-    #          je suis responsable
-    # a==1 <=> je peux surpasser les contraintes lors de la modification
-    #          de cours
-
-class FullStaff(Tutor):
-    department = models.CharField(max_length=50, default='INFO')
-    is_iut = models.BooleanField(default=True)
-
-
-#    def __init__(self, *args, **kwargs):
-#        super(FullStaff, self).__init__(*args, **kwargs)
-#        self.statut = Prof.FULL_STAFF
-
-
-class SupplyStaff(Tutor):
-    employer = models.CharField(max_length=50,
-                                verbose_name="Employeur ?",
-                                null=True)
-    qualite = models.CharField(max_length=50, null=True)
-    field = models.CharField(max_length=50,
-                             verbose_name="Domaine ?",
-                             null=True)
-
-
-class BIATOS(Tutor):
-    pass
-
-
-# --- Notes sur Prof ---
-#    MinDemiJournees=models.BooleanField(
-#       verbose_name="Min Demi-journées?", default=False)
-#    unparjour=models.BooleanField(verbose_name="Un créneau par jour?",
-#                                  default=False)
-# # (biatos | vacataire) => TPeqTD=false (donc 3h TP <=> 2h TD)
-# # 1h CM <=> 1.5h TD
-# TPeqTD = models.BooleanField()self.periode
-
-
-class Student(User):  # for now: representative
-    group = models.ForeignKey('Group')
-
-    def __str__(self):
-        return str(self.username) + u'(G:' + str(self.group) + u')'
-
-
-# </editor-fold desc="TUTORS">
 
 # <editor-fold desc="DISPLAY">
 # -------------
@@ -679,5 +612,4 @@ class Regen(models.Model):
 
         return ret
 
-# </editor-fold desc="MISC">
 # </editor-fold desc="MISC">

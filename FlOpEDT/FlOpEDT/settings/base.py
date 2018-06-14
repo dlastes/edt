@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'modif',
     'TTapp',
     'quote',
+    'people',
 ]
 
 MIDDLEWARE = [
@@ -164,4 +165,4 @@ CSRF_USE_SESSION = True
 
 # LOGIN_URL = '/login'
 
-AUTH_USER_MODEL = 'modif.User'
+AUTH_USER_MODEL = 'people.User'

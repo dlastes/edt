@@ -81,7 +81,7 @@ class LimitCourseTypePerPeriod(TTConstraint):  # , pond):
                                    null=True,
                                    default=None)
     module = models.ForeignKey('modif.Module', null=True)
-    tutor = models.ForeignKey('modif.Tutor',
+    tutor = models.ForeignKey('people.Tutor',
                               null=True,
                               default=None)
     FULL_DAY = 'fd'
@@ -129,7 +129,7 @@ class ReasonableDays(TTConstraint):
                                    null=True,
                                    default=None)
     group = models.ForeignKey('modif.Group', null=True)
-    tutor = models.ForeignKey('modif.Tutor',
+    tutor = models.ForeignKey('people.Tutor',
                               null=True,
                               default=None)
 
@@ -177,7 +177,7 @@ class Stabilize(TTConstraint):
                                    default=None)
     group = models.ForeignKey('modif.Group', null=True, default=None)
     module = models.ForeignKey('modif.Module', null=True, default=None)
-    tutor = models.ForeignKey('modif.Tutor',
+    tutor = models.ForeignKey('people.Tutor',
                               null=True,
                               default=None)
     type = models.ForeignKey('modif.CourseType', null=True, default=None)
@@ -247,7 +247,7 @@ class MinHalfDays(TTConstraint):
     Optional : if 2 courses only, possibility to join it
     """
     module = models.ForeignKey('modif.Module', null=True)
-    tutor = models.ForeignKey('modif.Tutor',
+    tutor = models.ForeignKey('people.Tutor',
                               null=True,
                               default=None)
     join2courses = models.BooleanField(
@@ -327,7 +327,7 @@ class MinNonPreferedSlot(TTConstraint):
     Minimize the use of unprefered Slots
     NB: You HAVE TO chose either tutor OR train_prog
     """
-    tutor = models.ForeignKey('modif.Tutor',
+    tutor = models.ForeignKey('people.Tutor',
                               null=True,
                               default=None)
     train_prog = models.ForeignKey('modif.TrainingProgramme',
@@ -386,7 +386,7 @@ class AvoidBothSlots(TTConstraint):
                                    null=True,
                                    default=None)
     group = models.ForeignKey('modif.Group', null=True)
-    tutor = models.ForeignKey('modif.Tutor',
+    tutor = models.ForeignKey('people.Tutor',
                               null=True,
                               default=None)
 
@@ -421,7 +421,7 @@ class AvoidBothSlots(TTConstraint):
 #                                    null = True,
 #                                    default = None)
 #     group = models.ForeignKey('modif.Groupe', null=True)
-#     tutor = models.ForeignKey('modif.Tutor', null=True)
+#     tutor = models.ForeignKey('people.Tutor', null=True)
 #
 #     def enrich_model(self, ttmodel, ponderation=1):
 #         fc = ttmodel.wdb.courses
