@@ -32,7 +32,7 @@
   <div style="float: left; width:400px">    
     <fieldset style="width:300px">
       <legend>Authentification</legend>
-      <form method="post" action="{% url 'auth:login' %}">
+      <form method="post" action="{% url 'people:auth:login' %}">
 	{% csrf_token %}
 	<table>
 	  <tr>
@@ -61,11 +61,12 @@
       please login with an account that has access.</p>
     {% endif %}
     {% endif %}
-    <p><a href="{% url 'auth:password_reset' %}">Mot de passe perdu ?</a></p>
+    <p><a href="{% url 'people:auth:password_reset' %}">Mot de passe perdu ?</a></p>
   </div>
 	
     {# Assumes you setup the password_reset view in your URLconf #}
-    <!--<p><a href="{ % url 'add_user' % }">Créer un nouveau compte</a></p>-->
+    <!--
+<p><a href="{ % url 'add_user' % }">Créer un nouveau compte</a></p> -->
     
 </div>
 <br style="clear: both" />
