@@ -37,6 +37,8 @@
 <link rel="shortcut icon" href="/favicon.ico?v=5AeyQYqgW7">
 <meta name="msapplication-TileColor" content="#048c04">
 <meta name="theme-color" content="#000000">
+<script src="{% static 'modif/jquery.min.js' %}"></script>
+<!-- script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script -->
 <title>{% block title %}Emplois du temps{% endblock %}</title>
 </head>
 <body>
@@ -65,30 +67,58 @@
 
    </section>
 
-<a class="hide_this_link" target="_blank" href="https://framagit.org/flopedt/flopedt" >
-<div id=image>
-
-	 <img id="flop"  src="{% static 'modif/img/android-chrome-512x512.png' %}" alt="flop" /> 
-	<div id="texteImage"> 
-
-		<span id="txtFlop"> 
-			Fl<span id=opRed >Op</span>EDT<br> 
-		</span>
-
-		<div id="texteSous">
-
-		{% autoescape off %}
-			<span id="txtFlop2">
-				{{ image }}
-			</span>
-		{% endautoescape %}
-
-			<span id="agpl">
-				AGPL v.3
-			</span>
-		</div>
-	</div>
+   <a class="hide_this_link" target="_blank" href="https://framagit.org/flopedt/flopedt" >
+     <div id="image">
+       
+       <div id="live-logo">
+       </div>
+       <div id="texteImage"> 
+	 
+	 <span id="txtFlop"> 
+	   Fl<span id=opRed >Op</span>EDT<br> 
+	 </span>
+	 
+	 <div id="texteSous">
+	   
+	   {% autoescape off %}
+	   <span id="txtFlop2">
+	     {{ image }}
+	   </span>
+	   {% endautoescape %}
+	   
+	   <span id="agpl">
+	     AGPL v.3
+	   </span>
+	 </div>
+       </div>
 </div>
+<script>
+  var url_logo = "{% static 'modif/logo-clock.svg' %}";
+  xhr = new XMLHttpRequest();
+  xhr.open("GET",url_logo,false);
+  xhr.overrideMimeType("image/svg+xml");
+  xhr.send("");
+  var lolo = document.getElementById("live-logo");
+  lolo.appendChild(xhr.responseXML.documentElement);
+  var d = new Date();
+  var hm = new Array(2);
+  hm[0] = 360*(d.getHours() % 12 + d.getMinutes()/60)/12;
+  hm[1] = 360*(d.getMinutes()+d.getSeconds()/60)/60;
+  console.log(hm);
+  var anim = new Array(2);
+  anim[0] = document.getElementById("csh")
+      .getElementsByTagName("animateTransform")[0];
+  anim[1] = document.getElementById("clh")
+    .getElementsByTagName("animateTransform")[0];
+  for (var i = 0 ; i<2 ; i++) {
+      var from = anim[i].getAttribute("from").split(" ");
+      from[0] = (+from[0]) + hm[i] ;
+      anim[i].setAttribute("from", from.join(" "));
+      var to = anim[i].getAttribute("to").split(" ");
+      to[0] = (+to[0]) + hm[i] ;
+      anim[i].setAttribute("to", to.join(" "));
+  }
+</script>  
 
 </a>
 
