@@ -2,7 +2,6 @@
 *.pyc
 *~
 FlOpEDT/*/migrations
-FlOpEDT/pab-gur-mod/log_*
 FlOpEDT/log_*
 FlOpEDT/IIS_**
 FlOpEDT/*.log
