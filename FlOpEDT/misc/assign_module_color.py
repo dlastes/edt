@@ -26,7 +26,10 @@
 
 from modif.weeks import week_list
 from modif.models import Course, ModuleDisplay, TrainingProgramme, Module
+
 from django.core.exceptions import ObjectDoesNotExist
+from django.conf import settings
+
 from pyclustering.gcolor.dsatur import dsatur
 from numpy import diag, eye
 
@@ -60,7 +63,9 @@ def optim_and_save(keys, mat, overwrite):
     opti.process()
     color_indices = opti.get_colors()
     print color_indices, max(color_indices)
-    color_set = get_color_set(os.path.join('misc', 'colors.json'),
+    color_set = get_color_set(os.path.join(settings.BASE_DIR,
+                                           'misc',
+                                           'colors.json'),
                               max(color_indices))
     for mi in range(len(keys)):
         cbg = color_set[color_indices[mi] - 1]
@@ -101,7 +106,7 @@ def get_color_set(filename, target_nb_colors):
     """
     Builds a color set from a json file which contains a list of
     {"tot": number_of_colors, "colors": list of colors maximizing the
-    perceptual distance within the list}, cf http://vrl.cs.brown.edu/color.
+    perceptual distance within the list}, cf. http://vrl.cs.brown.edu/color.
     :param filename: the colors.json
     :param target_nb_colors: minimum number of colors
     :return: a set of colors, not smaller than needed
@@ -144,82 +149,3 @@ def compute_luminance(col):
         return '#FFFFFF'
     else:
         return '#000000'
-
-# def compute_luminance(l):
-#     color_txt = []
-#     for el in l:
-#         hexa = el[1:]
-#         perceived_luminance = 0.299 * int('0x' + hexa[0:2], 16) \
-#                               + 0.587 * int('0x' + hexa[2:4], 16) \
-#                               + 0.114 * int('0x' + hexa[4:6], 16)
-#         if perceived_luminance < 127.5:
-#             color_txt.append('#FFFFFF')
-#         else:
-#             color_txt.append('#000000')
-#     return color_txt
-
-
-#     wl = week_list()
-#
-#     for train_prog in TrainingProgramme.objects.all():
-#         # find the biggest number of simultaneous modules
-#         module_max = 0
-#         motley = -1
-#         for wy in wl:
-#             number_modules = Cours.objects.filter(
-#                 semaine = wy['semaine'],
-#                 an = wy['an'],
-#                 groupe__train_prog = train_prog)\
-#                 .distinct('module').count()
-#             if number_modules > module_max:
-#                 motley = wl.index(wy)
-#                 module_max = number_modules
-#
-#         print train_prog, module_max
-#
-#         all_colors = get_color_set('modif/static/modif/colors.json',
-#                                     module_max)
-#         txt_colors = compute_luminance(all_colors)
-#         all_colors = zip(all_colors, txt_colors)
-#         print len(all_colors)
-#
-#         for wi in range(motley, -1, -1) + range(motley + 1, len(wl)):
-#             module_to_assign = []
-#             free_colors = all_colors[:]
-#             taken = []
-#             print wi, len(wl), len(free_colors)
-#             for c in Cours.objects.filter(
-#                     semaine = wl[wi]['semaine'],
-#                     an = wl[wi]['an'],
-#                     groupe__train_prog = train_prog)\
-#                     .distinct('module'):
-#                 try:
-#                     module_display = ModuleDisplay.objects\
-#                         .get(module = c.module)
-#                     for col in free_colors:
-# #                        print col[0], module_display.color_bg
-#                         if col[0] == module_display.color_bg:
-#                             pair = col
-#                             print 'found'
-#                             break
-#                     #print len(free_colors)
-#                     try:
-#                         free_colors.remove(pair)
-#                         taken.append(pair)
-#                     except:
-#                         print 'WTF where is'
-#                         print module_display.color_bg
-#                         print free_colors
-#                         print taken
-#                         return
-#                     #print len(free_colors)
-#                 except ObjectDoesNotExist:
-#                     module_to_assign.append(c.module)
-#
-#             for m in module_to_assign:
-#                 color = free_colors.pop()
-#                 module_display = ModuleDisplay(module = m,
-#                                                color_bg = color[0],
-#                                                color_txt = color[1])
-#                 module_display.save()
-#                 #print module_display
