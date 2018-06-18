@@ -49,18 +49,18 @@ def generate_group_file():
         for gp in Group.objects.filter(train_prog=train_prog):
             if gp.full_name() in gp_dict_children:
                 raise Exception('Group name should be unique')
-            if len(gp.parent_groups) == 0:
+            if gp.parent_groups.all().count() == 0:
                 if gp_master is not None:
                     raise Exception('One single group is able to be without '
                                     'parents')
                 gp_master = gp
-            elif len(gp.parent_groups) > 1:
+            elif gp.parent_groups.all().count() > 1:
                 raise Exception('Not tree-like group structures are not yet '
                                 'handled')
             gp_dict_children[gp.full_name()] = []
 
         for gp in Group.objects.filter(train_prog=train_prog):
-            for new_gp in gp.parent_groups:
+            for new_gp in gp.parent_groups.all():
                 gp_dict_children[new_gp.full_name()].append(gp)
 
         final_groups.append(get_descendant_groups(gp_master, gp_dict_children))
@@ -78,7 +78,7 @@ def get_descendant_groups(gp, children):
     :return: an object containing the informations on gp and its descendants
     """
     current = {}
-    if len(gp.surgroupe) == 0:
+    if not gp.parent_groups.all().exists():
         current['parent'] = 'null'
         tp = gp.train_prog
         current['promo'] = tp.abbrev
