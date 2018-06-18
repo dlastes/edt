@@ -165,6 +165,9 @@ class Time(models.Model):
         validators=[MinValueValidator(0), MaxValueValidator(59)], default=0)
 
     def __unicode__(self):
+        return str(self.hours)
+
+    def full_name(self):
         message = str(self.hours) + ":"
         if self.minutes < 10:
             message += "0"

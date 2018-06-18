@@ -404,7 +404,7 @@ class TTModel(object):
                 for sg in self.wdb.basic_groups_surgroups[g]:
                     for c in self.wdb.courses_for_group[sg]:
                         expr += self.TT[(sl, c)]
-                name = 'core_group_' + str(g) + '_' + str(sl)
+                name = 'core_group_' + g.full_name() + '_' + str(sl)
                 self.add_constraint(expr, '<=', 1, name=name)
 
         for sl in self.wdb.slots:
