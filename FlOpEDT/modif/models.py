@@ -105,7 +105,7 @@ class Group(models.Model):
         return self.train_prog.abbrev + "-" + self.nom
 
     def __unicode__(self):
-        return self.full_name()
+        return self.nom
 
     def ancestor_groups(self):
         """
@@ -165,10 +165,7 @@ class Time(models.Model):
         validators=[MinValueValidator(0), MaxValueValidator(59)], default=0)
 
     def __unicode__(self):
-        message = ""
-        if self.hours < 10:
-            message += "0"
-        message += str(self.hours) + ":"
+        message = str(self.hours) + ":"
         if self.minutes < 10:
             message += "0"
         message += str(self.minutes)
@@ -327,7 +324,12 @@ class Course(CachingMixin, models.Model):
     an = models.PositiveSmallIntegerField()
     suspens = models.BooleanField(verbose_name='En suspens?', default=False)
 
-    def __str__(self):
+    def __unicode__(self):
+        return "%s-%s-%s" % \
+               (self.module, self.tutor.username if self.tutor is not None else '-no_tut-',
+                self.groupe)
+    
+    def full_name(self):
         return "%s-%s-%s-%s" % \
                (self.module, self.type,
                 self.tutor.username if self.tutor is not None else '-no_tut-',
