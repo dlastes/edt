@@ -130,8 +130,7 @@ class Group(models.Model):
 
 
 class Day(models.Model):
-    #no = models.PositiveSmallIntegerField(primary_key=True,
-    #                                      verbose_name="Number")
+    no = models.PositiveSmallIntegerField(default=0)
     #nom = models.CharField(max_length=10, verbose_name="Name")
 
     MONDAY = "m"
@@ -139,8 +138,13 @@ class Day(models.Model):
     WEDNESDAY = "w"
     THURSDAY = "th"
     FRIDAY = "f"
+    SATURDAY = "sa"
+    SUNDAY = "su"    
 
-    CHOICES = ((MONDAY, "m"), (TUESDAY, "tu"), (WEDNESDAY, "w"), (THURSDAY, "th"), (FRIDAY, "f"))
+    CHOICES = ((MONDAY, "monday"), (TUESDAY, "tuesday"),
+               (WEDNESDAY, "wednesday"), (THURSDAY, "thursday"),
+               (FRIDAY, "friday"),(SATURDAY, "saturday"),
+               (SUNDAY,"sunday"))
 
     day = models.CharField(max_length=2, choices=CHOICES, default=MONDAY)
 
@@ -157,7 +161,7 @@ class Time(models.Model):
                            choices=HALF_DAY_CHOICES,
                            verbose_name="Half day",
                            default=AM)
-    #no = models.PositiveSmallIntegerField(primary_key=True)
+    no = models.PositiveSmallIntegerField(default=0)
     #nom = models.CharField(max_length=20)
     hours = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(23)], default=8)

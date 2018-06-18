@@ -59,6 +59,9 @@ def assign_color(overwrite=True, diff_across_train_prog=False):
 
 
 def optim_and_save(keys, mat, overwrite):
+    if len(mat) == 0:
+        print "No course in this training programme!"
+        return
     opti = dsatur(mat)
     opti.process()
     color_indices = opti.get_colors()
