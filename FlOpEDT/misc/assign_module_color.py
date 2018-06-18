@@ -88,7 +88,8 @@ def optim_and_save(keys, mat, overwrite):
 def build_graph_matrices(train_prog=None):
     if train_prog is None:
         keys = list(Module.objects.all())
-    keys = list(Module.objects.filter(train_prog=train_prog))
+    else:
+        keys = list(Module.objects.filter(train_prog=train_prog))
     mat = eye(len(keys))
     wl = week_list()
 
