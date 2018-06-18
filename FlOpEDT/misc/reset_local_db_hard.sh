@@ -28,6 +28,7 @@ read rep
 if [ $rep = "oui" ]
 then
     BASE='..'
+    systemctl restart postgresql
     sudo -u postgres psql -c 'drop database "FlOp_database"'
     sudo -u postgres createdb FlOp_database
     apps="modif TTapp quote people"
