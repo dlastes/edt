@@ -24,7 +24,7 @@
 # without disclosing the source code of your own applications.
 
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.db import transaction
 
 from .models import Student, User, FullStaff, SupplyStaff, BIATOS, Tutor
@@ -48,6 +48,26 @@ class AddStudentForm(UserCreationForm):
         student.save()
         student.belong_to.add(*self.cleaned_data.get('gps'))
         return student
+
+
+class ChangeStudentForm(UserChangeForm):
+    class Meta(UserChangeForm.Meta):
+        model = Student
+
+
+class ChangeFullStaffTutorForm(UserChangeForm):
+    class Meta(UserChangeForm.Meta):
+        model = Student
+
+
+class ChangeSupplyStaffTutorForm(UserChangeForm):
+    class Meta(UserChangeForm.Meta):
+        model = Student
+
+class ChangeBIATOSTutorForm(UserChangeForm):
+    class Meta(UserChangeForm.Meta):
+        model = Student
+
 
 
 class AddFullStaffTutorForm(UserCreationForm):

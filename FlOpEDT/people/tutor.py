@@ -25,9 +25,10 @@
 
 from django.contrib.auth import login
 from django.shortcuts import redirect
-from django.views.generic import CreateView
+from django.views.generic import CreateView, UpdateView
 
 from .forms import AddFullStaffTutorForm, AddSupplyStaffTutorForm, AddBIATOSTutorForm
+from .forms import ChangeFullStaffTutorForm, ChangeSupplyStaffTutorForm, ChangeBIATOSTutorForm
 from .models import User, FullStaff, SupplyStaff, BIATOS
 
 class AddFullStaffTutor(CreateView):
@@ -62,3 +63,38 @@ class AddBIATOSTutor(CreateView):
         login(self.request, user)
         next = self.request.GET.get('next', 'edt')
         return redirect(next)
+
+
+class ChangeFullStaffTutor(UpdateView):
+    model = FullStaff
+    from_class = ChangeFullStaffTutorForm
+    template_name = 'people/changeuser.html'
+    fields = ('username', 'email', 'department', 'is_iut', )
+    success_url = '/'
+    
+    def get_object(self, queryset=None):
+        return self.request.user if self.request.user.is_authenticated() else None
+         
+
+class ChangeSupplyStaffTutor(UpdateView):
+    model = SupplyStaff
+    from_class = ChangeSupplyStaffTutorForm
+    template_name = 'people/changeuser.html'
+    fields = ('username', 'email', 'employer', 'position', 'field', )
+    success_url = '/'
+    
+    def get_object(self, queryset=None):
+        return self.request.user if self.request.user.is_authenticated() else None
+         
+
+class ChangeBIATOSTutor(UpdateView):
+    model = BIATOS
+    from_class = ChangeBIATOSTutorForm
+    template_name = 'people/changeuser.html'
+    fields = ('username', 'email', )
+    success_url = '/'
+    
+    def get_object(self, queryset=None):
+        return self.request.user if self.request.user.is_authenticated() else None
+         
+

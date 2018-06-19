@@ -1,6 +1,32 @@
+# -*- coding: utf-8 -*-
+
+# This file is part of the FlOpEDT/FlOpScheduler project.
+# Copyright (c) 2017
+# Authors: Iulian Ober, Paul Renaud-Goud, Pablo Seban, et al.
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# Affero General Public License for more details.
+# 
+# You should have received a copy of the GNU Affero General Public
+# License along with this program. If not, see
+# <http://www.gnu.org/licenses/>.
+# 
+# You can be released from the requirements of the license by purchasing
+# a commercial license. Buying such a license is mandatory as soon as
+# you develop activities involving the FlOpEDT/FlOpScheduler software
+# without disclosing the source code of your own applications.
+
 from django.conf.urls import url, include
-from .student import AddStudent
-from .tutor import AddFullStaffTutor, AddSupplyStaffTutor, AddBIATOSTutor
+from people.student import AddStudent, ChangeStudent
+from people.tutor import AddFullStaffTutor, AddSupplyStaffTutor, AddBIATOSTutor
+from people.tutor import ChangeFullStaffTutor, ChangeSupplyStaffTutor, ChangeBIATOSTutor
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
@@ -38,16 +64,28 @@ urlpatterns = [
         auth_views.password_reset_confirm,
         {'template_name':'people/password_reset_confirm.html'},
         name='password_reset_confirm'),
-    url(r'^add-student/$',
+    url(r'^add/student/$',
         AddStudent.as_view(),
         name="add_student"),
-    url(r'^add-fullstaff/$',
+    url(r'^add/fullstaff/$',
         AddFullStaffTutor.as_view(),
         name="add_fullstaff"),
-    url(r'^add-supplystaff/$',
+    url(r'^add/supplystaff/$',
         AddSupplyStaffTutor.as_view(),
-        name="add_supplystaff"),
-    url(r'^add-biatos/$',
+        name="add/supplystaff"),
+    url(r'^add/biatos/$',
         AddBIATOSTutor.as_view(),
         name="add_bi"),
+    url(r'^change/student/$',
+        ChangeStudent.as_view(),
+        name="chg_student"),
+    url(r'^change/fullstaff/$',
+        ChangeFullStaffTutor.as_view(),
+        name="chg_fullstaff"),
+    url(r'^change/supplystaff/$',
+        ChangeSupplyStaffTutor.as_view(),
+        name="chg_supplystaff"),
+    url(r'^change/biatos/$',
+        ChangeBIATOSTutor.as_view(),
+        name="chg_biatos"),
     ]

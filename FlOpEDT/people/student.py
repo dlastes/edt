@@ -25,9 +25,9 @@
 
 from django.contrib.auth import login
 from django.shortcuts import redirect
-from django.views.generic import CreateView
+from django.views.generic import CreateView, UpdateView
 
-from .forms import AddStudentForm
+from .forms import AddStudentForm, ChangeStudentForm
 from .models import User, Student
 
 class AddStudent(CreateView):
@@ -40,3 +40,14 @@ class AddStudent(CreateView):
         login(self.request, user)
         next = self.request.GET.get('next', 'edt')
         return redirect(next)
+
+class ChangeStudent(UpdateView):
+    model = Student
+    from_class = ChangeStudentForm
+    template_name = 'people/changeuser.html'
+    fields = ('username', 'email', 'belong_to', )
+    success_url = '/'
+    
+    def get_object(self, queryset=None):
+        return self.request.user if self.request.user.is_authenticated() else None
+         
