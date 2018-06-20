@@ -39,7 +39,7 @@
     var url_dispos_changes = "{% url "dispos_changes"%}";
     var logged_usr = {nom:"{{ name_usr }}", rights: -1};
     var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
-    var url_login = "{% url "auth:login"%}";
+    var url_login = "{% url "people:login"%}";
     var annee_courante = "{{ annee_courante }}" ;
   </script>
   </script>
@@ -63,10 +63,10 @@
 	    Appliquer la configuration ci-contre<br/>
 	    de la semaine
 	    <input type="number" name="se_deb" style="width: 40px" value="{{ date_deb.semaine }}" min="1" max="53">, année
-	    <input type="number" name="an_deb" style="width: 60px" value="{{ date_deb.an }}" min="2017" max="2018"></br>
+	    <input type="number" name="an_deb" style="width: 60px" value="{{ date_deb.an }}" min="{{annee_courante}}" max="{{annee_courante|add:"1"}}"></br>
 	    à la semaine
 	    <input type="number" name="se_fin" style="width: 40px" value="{{ date_fin.semaine }}" min="1" max="53">, année
-	    <input type="number" name="an_fin" style="width: 60px" value="{{ date_fin.an }}" min="2017" max="2018"></br></br>
+	    <input type="number" name="an_fin" style="width: 60px" value="{{ date_fin.an }}" min="{{annee_courante}}" max="{{annee_courante|add:"1"}}"></br></br>
 	    <input type="submit" name="apply" value="Appliquer">
 	  </fieldset></br></br>
 	</form>
