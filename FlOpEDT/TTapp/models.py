@@ -58,6 +58,7 @@ class TTConstraint(models.Model):
         validators=[MinValueValidator(1), MaxValueValidator(max_weight)],
         null=True, default=None)
     comment = models.CharField(max_length=100, null=True, default=None, blank=True)
+    is_active = models.BooleanField(verbose_name='Contrainte active?', default=True)
 
     def local_weight(self):
         return float(self.weight) / max_weight
