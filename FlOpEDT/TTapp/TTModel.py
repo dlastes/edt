@@ -570,9 +570,9 @@ class TTModel(object):
             for sl1 in self.wdb.slots:
                 for sl2 in self.wdb.slots:
                     if (p.ND and (sl2.jour == sl1.jour))\
-                            or (p.successifs and (slots_list.index(sl2) != slots_list.index(sl2) + 1
+                            or (p.successifs and (slots_list.index(sl2) != slots_list.index(sl1) + 1
                                                   or sl2.jour != sl1.jour)) \
-                            or (slots_list.index(sl2) < slots_list.index(sl2)):
+                            or (slots_list.index(sl2) < slots_list.index(sl1)):
                         if not weight:
                             self.add_constraint(self.TT[(sl1, c1)]
                                                 + self.TT[(sl2, c2)], '<=', 1)
