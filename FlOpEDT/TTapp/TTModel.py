@@ -554,15 +554,15 @@ class TTModel(object):
     #                 )
     #         l.append(rgp)
 
-    def add_precedence_constraints(self, weight=None):
+    def add_dependency_constraints(self, weight=None):
         """
-        Add the constraints of precedence saved on the DB:
+        Add the constraints of dependency saved on the DB:
         -include dependencies
         -include non same-day constraint
-        -include simultaneity (double precedence)
+        -include simultaneity (double dependency)
         If there is a weight, it's a preference, else it's a constraint...
         """
-        print 'adding precedence constraints'
+        print 'adding dependency constraints'
         for p in self.wdb.dependencies:
             c1 = p.cours1
             c2 = p.cours2
@@ -845,7 +845,7 @@ class TTModel(object):
 
         self.add_slot_preferences()
 
-        self.add_precedence_constraints()
+        self.add_dependency_constraints()
 
         self.add_specific_constraints()
 
