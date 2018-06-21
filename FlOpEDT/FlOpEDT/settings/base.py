@@ -46,6 +46,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(
 # Application definition
 
 INSTALLED_APPS = [
+    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -59,6 +60,7 @@ INSTALLED_APPS = [
     'TTapp',
     'quote',
     'people',
+    'solve_board',
 ]
 
 MIDDLEWARE = [
@@ -166,3 +168,17 @@ CSRF_USE_SESSION = True
 # LOGIN_URL = '/login'
 
 AUTH_USER_MODEL = 'people.User'
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "asgi_redis.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("localhost", 6379)],
+        },
+        "ROUTING": "solve_board.routing.channel_routing",
+    },
+    # "default": {
+    #     "BACKEND": "asgiref.inmemory.ChannelLayer",
+    #     "ROUTING": "solve_board.routing.channel_routing",
+    # },
+}

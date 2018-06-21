@@ -59,6 +59,8 @@ from django.core.mail import send_mail
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.views.generic import RedirectView
 
+
+
 # Texte de l'image
 # # randomVar = randint(0, 2)
 randomVar = 1
@@ -101,6 +103,7 @@ def favicon(req, fav):
 
 
 def edt(req, semaine, an, splash_id=0):
+    
     semaine, an = clean_week(semaine, an)
     promo = clean_train_prog(req)
 

@@ -9,3 +9,5 @@ psycopg2
 requests
 numpy
 pyclustering
+channels<2
+asgi_redis
