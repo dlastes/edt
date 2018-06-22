@@ -273,6 +273,11 @@ class TTModel(object):
 
         self.update_objective()
 
+        if self.warnings:
+            print "Relevant warnings :"
+            for key, key_warnings in self.warnings.iteritems():
+                print "%s : %s" % (key, ", ".join([str(x) for x in key_warnings]))
+
     def add_var(self, name):
         """
         Create a PuLP binary variable
