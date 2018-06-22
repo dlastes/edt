@@ -43,6 +43,5 @@ class SolveRun(models.Model):
         validators=[MinValueValidator(0), MaxValueValidator(53)],
         null=True, blank=True)
     end_year = models.PositiveSmallIntegerField(null=True, blank=True)
-    pid = models.PositiveIntegerField(null=True,default=None)
     log_file = models.CharField(null=True, default=None, max_length = 1000)
     iis_file = models.CharField(null=True, default=None, max_length = 1000)

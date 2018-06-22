@@ -45,11 +45,22 @@ function stop(){
 }
 
 
+function format_zero(x) {
+    if ( x < 10 ) {
+	return "0" + x ;
+    }
+    return x ;
+}
+
+
 function open_connection(date){
     var now = new Date();
-    opti_timestamp = now.getFullYear() + "-" + now.getMonth() + "-"
-	+ now.getDate() + "--" + now.getHours() + "-" + now.getMinutes()
-	+ "-" + now.getSeconds() ;
+    opti_timestamp = now.getFullYear() + "-"
+	+ format_zero(now.getMonth() + 1) + "-"
+	+ format_zero(now.getDate()) + "--"
+	+ format_zero(now.getHours()) + "-"
+	+ format_zero(now.getMinutes()) + "-"
+	+ format_zero(now.getSeconds()) ;
     
     socket = new WebSocket("ws://" + window.location.host + "/solver/"
 			  + opti_timestamp);
@@ -58,7 +69,7 @@ function open_connection(date){
 	txt_area.textContent += "\n" + e.data ;
     }
     socket.onopen = function() {
-	socket.send("C'est ti-par.\n"+opti_timestamp+"\nAllô solveur ?");
+	socket.send("C'est ti-par.\n"+opti_timestamp+"\nSolver ok?");
     }
 
     // Call onopen directly if socket is already open
@@ -76,9 +87,9 @@ function open_connection(date){
         success: function(msg) {
             console.log(msg);
 	    var rec = JSON.parse(msg) ;
-            socket.send(rec['text']) ;
-            socket.send("PID:"+rec['pid']) ;
-	    console.log(rec);
+	    if (rec['text'] != 'ok') {
+		socket.send(rec['text']) ;
+	    }
         },
         error: function(msg) {
             console.log("error");
