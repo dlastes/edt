@@ -182,3 +182,7 @@ CHANNEL_LAYERS = {
     #     "ROUTING": "solve_board.routing.channel_routing",
     # },
 }
+
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'static'),
+    )
