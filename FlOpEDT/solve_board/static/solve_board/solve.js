@@ -25,6 +25,8 @@ var socket ;
 
 var opti_timestamp ;
 
+var txt_area = document.getElementsByTagName("textarea")[0];
+
 function extract_week_year(){
     return {
 	start:{week: +document.forms['week_form'].elements['start_week'].value,
@@ -65,8 +67,13 @@ function open_connection(date){
     socket = new WebSocket("ws://" + window.location.host + "/solver/"
 			  + opti_timestamp);
     socket.onmessage = function(e) {
-	var txt_area = document.getElementsByTagName("textarea")[0];
-	txt_area.textContent += "\n" + e.data ;
+	var s = e.data ;
+	while (s.length > 0 && s.slice(-1) == '\n') {
+	    s = s.substring(0,s.length-1);
+	}
+	if (s.length > 0) {
+	    txt_area.textContent += "\n" + s ;
+	}
     }
     socket.onopen = function() {
 	socket.send("C'est ti-par.\n"+opti_timestamp+"\nSolver ok?");
