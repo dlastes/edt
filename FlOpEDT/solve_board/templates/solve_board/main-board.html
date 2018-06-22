@@ -33,7 +33,6 @@
 <link rel="stylesheet" href="{% static "modif/better.css" %}"/>
 <script src="{% static "modif/d3.v4.min.js" %}"></script>
   <!-- script src="https://d3js.org/d3.v4.min.js"></script -->
-  <script type='text/javascript' src="{% static "solve_board/solve.js" %}"></script>
   <script>
     var semaine_an_list = {{ all_weeks|safe }};
     var url_run = "{% url "solve_board:run" %}" ;
@@ -54,5 +53,6 @@
     
   <br style="clear: both" />
   
+  <script type='text/javascript' src="{% static "solve_board/solve.js" %}"></script>
   
 {% endblock %}
