@@ -105,6 +105,8 @@ var fetch = {
 //cours_ok pas très utile
 
 
+var svg_cont ;
+
 /*--------------------------
   ------- PREFERENCES ------
   --------------------------*/
