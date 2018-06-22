@@ -89,3 +89,11 @@ class Comm(Thread):
         self.group.send({
             "text": "Solver fired."
         })
+
+# class Tee(StringIO):                      
+#      def __init__(self, fn, g):
+#          self.gp = g
+#          self.file = open(fn, 'w')
+#      def write(self, s):
+#          g.send({'text':s})
+#          sys.__stdout__.write(s)      
