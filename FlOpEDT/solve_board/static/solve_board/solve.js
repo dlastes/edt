@@ -43,7 +43,6 @@ function start(){
 }
 function stop(){
     console.log("STOOOOP");
-    var dates = extract_week_year();
 }
 
 
@@ -76,32 +75,37 @@ function open_connection(date){
 	}
     }
     socket.onopen = function() {
-	socket.send("C'est ti-par.\n"+opti_timestamp+"\nSolver ok?");
+	socket.send(JSON.stringify({'text':
+				    "C'est ti-par.\n"+opti_timestamp+"\nSolver ok?",
+				    'action':"go",
+				    'week':date.start.week,
+				    'year':date.start.year,
+				    'timestamp':opti_timestamp}))
     }
 
     // Call onopen directly if socket is already open
     if (socket.readyState == WebSocket.OPEN) socket.onopen();
 
-    $.ajax({
-        type: "GET", //rest Type
-        dataType: 'text',
-        url: url_run + opti_timestamp + "?sw=" + date.start.week
-	    + "&sy=" + date.start.year
-	    + "&ew=" + date.end.week
-	    + "&ey=" + date.end.year,
-        async: true,
-        contentType: "text/json",
-        success: function(msg) {
-            console.log(msg);
-	    var rec = JSON.parse(msg) ;
-	    if (rec['text'] != 'ok') {
-		socket.send(rec['text']) ;
-	    }
-        },
-        error: function(msg) {
-            console.log("error");
-        }
-    });
+    // $.ajax({
+    //     type: "GET", //rest Type
+    //     dataType: 'text',
+    //     url: url_run + opti_timestamp + "?sw=" + date.start.week
+    // 	    + "&sy=" + date.start.year
+    // 	    + "&ew=" + date.end.week
+    // 	    + "&ey=" + date.end.year,
+    //     async: true,
+    //     contentType: "text/json",
+    //     success: function(msg) {
+    //         console.log(msg);
+    // 	    var rec = JSON.parse(msg) ;
+    // 	    if (rec['text'] != 'ok') {
+    // 		socket.send(rec['text']) ;
+    // 	    }
+    //     },
+    //     error: function(msg) {
+    //         console.log("error");
+    //     }
+    // });
 
 
 }

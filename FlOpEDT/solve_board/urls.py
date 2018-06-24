@@ -27,5 +27,5 @@ from solve_board import views
 
 urlpatterns = [
     url(r'^main/$', views.main_board, name="main_board"),
-    url(r'^run/(?P<timestamp>[0-9-]+)?$', views.run, name="run"),
+#    url(r'^run/(?P<timestamp>[0-9-]+)?$', views.run, name="run"),
 ]

@@ -26,7 +26,8 @@
 from django.http import HttpResponse
 from channels.handler import AsgiHandler
 from channels import Group, Channel
-
+from tasks import run
+import json
 
 def ws_message(message):
     # ASGI WebSocket packet-received and send-packet message types
@@ -34,27 +35,33 @@ def ws_message(message):
     # message.reply_channel.send({
     #     "text": message.content['text'],
     # })
-    Group("solver").send({
-        "text": message.content['text'],
-    })
+    msg_reply = message.reply_channel.name
+    data = json.loads(message['text'])
+    Channel(msg_reply).send({'text':data['text']})
+    if data['action'] == 'go':
+        run.delay(data['week'],data['year'],
+                  data['timestamp'],
+                  message.reply_channel.name)
 
 
 # Connected to websocket.connect
 def ws_add(message):
     # Accept the incoming connection
     message.reply_channel.send({"accept": True})
-    # Add them to the chat group
-    Group("solver").add(message.reply_channel)
+    # # Add them to the chat group
+    # Group("solver").add(message.reply_channel)
 
 
 # Connected to websocket.disconnect
-def ws_disconnect(message):
-    Group("solver").discard(message.reply_channel)
+# def ws_disconnect(message):
+#     Group("solver").discard(message.reply_channel)
 
 
 
 
-
+# https://vincenttide.com/blog/1/django-channels-and-celery-example/
+# http://docs.celeryproject.org/en/master/django/first-steps-with-django.html#django-first-steps
+# http://docs.celeryproject.org/en/master/getting-started/next-steps.html#next-steps
 
 
 

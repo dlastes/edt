@@ -23,13 +23,27 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from channels.routing import route
+from __future__ import absolute_import, unicode_literals
+import os
+from celery import Celery
 
-from solve_board.consumers import ws_add, ws_message#, ws_disconnect
+# set the default Django settings module for the 'celery' program.
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'FlOpEDT.settings.local')
 
-channel_routing = [
-    route("websocket.connect", ws_add),
-    route("websocket.receive", ws_message),
-#    route("websocket.disconnect", ws_disconnect),
-#    route("http.request", "solve_board.consumers.http_consumer"),
-]
+app = Celery('FlOpEDT', backend='redis://localhost', broker='pyamqp://')
+
+# Using a string here means the worker doesn't have to serialize
+# the configuration object to child processes.
+# - namespace='CELERY' means all celery-related configuration keys
+#   should have a `CELERY_` prefix.
+app.config_from_object('django.conf:settings', namespace='CELERY')
+
+# Load task modules from all registered Django app configs.
+app.autodiscover_tasks()
+
+app.conf.broker_url = 'redis://localhost:6379/0'
+
+
+@app.task(bind=True)
+def debug_task(self):
+    print('Request: {0!r}'.format(self.request))

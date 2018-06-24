@@ -25,22 +25,24 @@
 
 from __future__ import unicode_literals
 
-from django.shortcuts import render
-
 from modif import weeks
-
+from people.models import FullStaff
 from solve_board.models import SolveRun
+from solve_board.consumers import ws_add
+from MyFlOp.MyTTModel import MyTTModel
 
+from django.shortcuts import render
 from django.contrib.admin.views.decorators import staff_member_required
-
 from django.http import Http404, JsonResponse
-
-from multiprocessing import Process
-from threading import Thread
+from django.conf import settings
 
 from channels import Group
 
-from solve_board.consumers import ws_add
+from multiprocessing import Process
+from threading import Thread
+from StringIO import StringIO
+import os
+import sys
 
 @staff_member_required
 def main_board(req):
@@ -52,48 +54,72 @@ def main_board(req):
                    'current_year': weeks.annee_courante})
 
 
-def run(req, timestamp):
-    ret = {'text': u'ok'}
-    if req.GET:
-        start_week = int(req.GET.get('sw','0'))
-        start_year = int(req.GET.get('sy','0'))
-        end_week = int(req.GET.get('ew','0'))
-        end_year = int(req.GET.get('ey','0'))
-    else:
-        ret.text = 'Sorry ?'
-        return JsonResponse(ret)
-    if start_week == 0 or start_year == 0 or end_week == 0 or end_year == 0:
-        ret.text = "Parameters issue. 0 or not provided..."
-        return JsonResponse(ret)
-        
-    sr = SolveRun(run_label=timestamp,
-                  start_week=start_week,
-                  start_year=start_year,
-                  end_week=end_week,
-                  end_year=end_year)
-    sr.save()
+# def pripri(s):
+#     print s
+#     Group("solver").send({'text':'qwe'})
+#     Group("solver").send({'text':s})
+#     for p in FullStaff.objects.all():
+#         print p
 
-    p = Comm(Group("solver"),timestamp)
-    p.start()
+# def run(req, timestamp):
+#     ret = {'text': u'ok'}
+#     if req.GET:
+#         start_week = int(req.GET.get('sw','0'))
+#         start_year = int(req.GET.get('sy','0'))
+#         end_week = int(req.GET.get('ew','0'))
+#         end_year = int(req.GET.get('ey','0'))
+#     else:
+#         ret.text = u'Sorry ?'
+#         return JsonResponse(ret)
+#     if start_week == 0 or start_year == 0 or end_week == 0 or end_year == 0:
+#         ret.text = u"Parameters issue. 0 or not provided..."
+#         return JsonResponse(ret)
 
-    return JsonResponse(ret)
+#     if end_year < start_year \
+#        or end_year == start_year and end_week < start_week:
+#         ret.text = u"End before start?"
+#         return JsonResponse(ret)
+
+#     for year in range(start_year, end_year + 1):
+#         for week in range(1,54):
+#             if (week >= start_week and year == start_year \
+#                 or year > start_year) \
+#                 and (week <= end_week and year == end_year \
+#                      or year < end_year):
+#                 sr = SolveRun(run_label=timestamp,
+#                               start_week=week,
+#                               start_year=year,
+#                               end_week=week,
+#                               end_year=year)
+#                 sr.save()
+# #                p = Process(target=pripri, args=('wewr',))
+# #                p = SpawnSolve(Group("solver"), timestamp, week, year)
+# #                p.start()
+
+#     return JsonResponse(ret)
 
 
-class Comm(Thread):
-    def __init__(self, group, timestamp):
-        Thread.__init__(self)
-        self.group = group
-        self.setName(timestamp)
 
-    def run(self):
-        self.group.send({
-            "text": "Solver fired."
-        })
+# class SpawnSolve(Thread):
+#     def __init__(self, group, timestamp, week, year):
+#         Thread.__init__(self)
+#         self.group = group
+#         self.setName(timestamp)
+#         self.week = week
+#         self.year = year
+#         self.group.send({'text':
+#                          'Year: ' + str(year) + ' ; week: ' + str(week) })
 
-# class Tee(StringIO):                      
-#      def __init__(self, fn, g):
-#          self.gp = g
-#          self.file = open(fn, 'w')
-#      def write(self, s):
-#          g.send({'text':s})
-#          sys.__stdout__.write(s)      
+#     def run(self):
+#         out = Tee(str(self.year)+ '-' + str(self.week) + '--'
+#                   + self.getName() + '.log', self.group)
+#         sys.stdout = out
+
+#         try:
+#             t = MyTTModel(self.week, self.year)
+#             t.solve()
+#         finally:
+#             out.close()
+#             sys.stdout = sys.__stdout__
+
+
