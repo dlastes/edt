@@ -105,6 +105,7 @@ def favicon(req, fav):
 
 
 def edt(req, semaine, an, splash_id=0):
+    
     semaine, an = clean_week(semaine, an)
     promo = clean_train_prog(req)
 
