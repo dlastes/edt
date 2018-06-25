@@ -27,6 +27,12 @@ var opti_timestamp ;
 
 var txt_area = document.getElementsByTagName("textarea")[0];
 
+var select_opti_date, select_opti_train_prog;
+var week_year_sel, train_prog_sel;
+
+init_dropdowns();
+
+/*
 function extract_week_year(){
     return {
 	start:{week: +document.forms['week_form'].elements['start_week'].value,
@@ -35,11 +41,11 @@ function extract_week_year(){
 	      year: +document.forms['week_form'].elements['end_year'].value},
     }
 }
-
+*/
 function start(){
     console.log("GOOO");
-    var dates = extract_week_year();
-    open_connection(dates);
+    //var dates = extract_week_year();
+    open_connection();
 }
 function stop(){
     console.log("STOOOOP");
@@ -54,7 +60,7 @@ function format_zero(x) {
 }
 
 
-function open_connection(date){
+function open_connection(){
     var now = new Date();
     opti_timestamp = now.getFullYear() + "-"
 	+ format_zero(now.getMonth() + 1) + "-"
@@ -78,34 +84,55 @@ function open_connection(date){
 	socket.send(JSON.stringify({'text':
 				    "C'est ti-par.\n"+opti_timestamp+"\nSolver ok?",
 				    'action':"go",
-				    'week':date.start.week,
-				    'year':date.start.year,
+				    'week':week_year_sel.week,
+				    'year':week_year_sel.week,
+				    'train_prog':train_prog_sel,
 				    'timestamp':opti_timestamp}))
     }
 
     // Call onopen directly if socket is already open
     if (socket.readyState == WebSocket.OPEN) socket.onopen();
-
-    // $.ajax({
-    //     type: "GET", //rest Type
-    //     dataType: 'text',
-    //     url: url_run + opti_timestamp + "?sw=" + date.start.week
-    // 	    + "&sy=" + date.start.year
-    // 	    + "&ew=" + date.end.week
-    // 	    + "&ey=" + date.end.year,
-    //     async: true,
-    //     contentType: "text/json",
-    //     success: function(msg) {
-    //         console.log(msg);
-    // 	    var rec = JSON.parse(msg) ;
-    // 	    if (rec['text'] != 'ok') {
-    // 		socket.send(rec['text']) ;
-    // 	    }
-    //     },
-    //     error: function(msg) {
-    //         console.log("error");
-    //     }
-    // });
+}
 
 
+function init_dropdowns() {
+    // create drop down for week selection
+    select_opti_date =  d3.select("#opti_date");
+    select_opti_date.on("change",function(){ choose_week(true); });
+    select_opti_date
+	.selectAll("option")
+	.data(week_year_list)
+	.enter()
+	.append("option")
+	.text(function(d){return d['semaine'];});
+
+    // create drop down for training programme selection
+    select_opti_train_prog =  d3.select("#opti_train_prog");
+    select_opti_train_prog.on("change",function(){ choose_train_prog(true); });
+    select_opti_train_prog
+	.selectAll("option")
+	.data(train_prog_list)
+	.enter()
+	.append("option")
+	.text(function(d){return d;});
+
+    choose_week();
+    choose_train_prog();
+}
+
+function choose_week() {
+    var di = select_opti_date.property('selectedIndex');
+    var sa = select_opti_date
+	.selectAll("option")
+	.filter(function(d,i){return i==di;})
+	.datum();
+    week_year_sel = {week: sa.semaine, year: sa.an};
+}
+function choose_train_prog() {
+    var di = select_opti_train_prog.property('selectedIndex');
+    var sa = select_opti_train_prog
+	.selectAll("option")
+	.filter(function(d,i){return i==di;})
+	.datum();
+    train_prog_sel = sa ;
 }

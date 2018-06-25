@@ -41,6 +41,7 @@ def ws_message(message):
     if data['action'] == 'go':
         run.delay(data['week'],data['year'],
                   data['timestamp'],
+                  data['train_prog'],
                   message.reply_channel.name)
 
 

@@ -32,18 +32,27 @@ import os
 from django.conf import settings
 import sys
 from MyFlOp.MyTTModel import MyTTModel
+from modif.models import TrainingProgramme
+from django.core.exceptions import ObjectDoesNotExist
 
 @shared_task
-def run(week, year, timestamp, msg_reply):
-    out = Tee(str(year)+ '-' + str(week) + '--'
-                  + timestamp + '.log', msg_reply)
-    sys.stdout = out
+def run(week, year, timestamp, train_prog, msg_reply):
     try:
-        t = MyTTModel(week, year)
+        tp = TrainingProgramme.objects.get(abbrev=train_prog)
+    except ObjectDoesNotExist:
+        tp = None
+
+    out = Tee(str(year)+ '-' + str(week) + '--'
+              + timestamp + '.log', msg_reply)
+    sys.stdout = out
+    sys.stderr = out
+    try:
+        t = MyTTModel(week, year, )
         t.solve()
     finally:
         out.close()
         sys.stdout = sys.__stdout__
+        sys.stderr = sys.__stderr__
 
 
 

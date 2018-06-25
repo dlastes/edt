@@ -34,17 +34,22 @@
 <script src="{% static "modif/d3.v4.min.js" %}"></script>
   <!-- script src="https://d3js.org/d3.v4.min.js"></script -->
   <script>
-    var semaine_an_list = {{ all_weeks|safe }};
+    var week_year_list = {{ all_weeks|safe }};
+    var train_prog_list = {{ all_train_progs|safe }} ;
   </script>
   <form style="white-space: nowrap;" name="week_form">
     <fieldset style="width: 300px; float: left;">
-      <legend>Quand ?</legend>
+      <legend>Optimisation</legend>
+      <!--
       De la semaine
       <input type="number" name="start_week" style="width: 40px" value="{{ start_date.semaine }}" min="1" max="53">, année
       <input type="number" name="start_year" style="width: 60px" value="{{ start_date.an }}" min="{{current_year}}" max="{{current_year|add:"1"}}"></br>
       à la semaine
       <input type="number" name="end_week" style="width: 40px" value="{{ end_date.semaine }}" min="1" max="53">, année
       <input type="number" name="end_year" style="width: 60px" value="{{ end_date.an }}" min="{{current_year}}" max="{{current_year|add:"1"}}"></br></br>
+      -->
+      <p>Semaine : <select id="opti_date"></select></p>
+      <p>Promotion : <select id="opti_train_prog"></select></p>
       <input type="button" name="action" value="Go !" onClick="start()"/><input style="float: right;" type="button" name="action" value="Stop !" onClick="stop()"/>
     </fieldset>
   </form>
