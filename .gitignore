@@ -1,8 +1,7 @@
 #Ignorer tous les fichiers pyc
 *.pyc
 *~
-FlOpEDT/log_*
-FlOpEDT/IIS_**
+FlOpEDT/logs/*
 FlOpEDT/*.log
 FlOpEDT/*.lp
 FlOpEDT/*.sol
