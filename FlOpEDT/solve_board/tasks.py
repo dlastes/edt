@@ -47,7 +47,7 @@ def run(week, year, timestamp, train_prog, msg_reply):
     sys.stdout = out
     sys.stderr = out
     try:
-        t = MyTTModel(week, year, )
+        t = MyTTModel(week, year, train_prog=tp)
         t.solve()
     finally:
         out.close()
