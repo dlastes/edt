@@ -143,6 +143,7 @@ class TTModel(object):
         self.var_nb = 0
         self.semaine = semaine
         self.an = an
+        self.warnings={}
         if train_prog is None:
             train_prog = TrainingProgramme.objects.all()
         try:
@@ -272,6 +273,11 @@ class TTModel(object):
 
         self.update_objective()
 
+        if self.warnings:
+            print "Relevant warnings :"
+            for key, key_warnings in self.warnings.iteritems():
+                print "%s : %s" % (key, ", ".join([str(x) for x in key_warnings]))
+
     def add_var(self, name):
         """
         Create a PuLP binary variable
@@ -364,6 +370,12 @@ class TTModel(object):
 
     def add_to_group_cost(self, group, cost):
         self.cost_G[group] += cost
+
+    def add_warning(self, key, warning):
+        if key in self.warnings:
+            self.warnings[key].append(warning)
+        else:
+            self.warnings[key]=[warning]
 
     def add_stabilization_constraints(self):
         if len(self.train_prog) < TrainingProgramme.objects.count():
@@ -554,15 +566,15 @@ class TTModel(object):
     #                 )
     #         l.append(rgp)
 
-    def add_precedence_constraints(self, weight=None):
+    def add_dependency_constraints(self, weight=None):
         """
-        Add the constraints of precedence saved on the DB:
+        Add the constraints of dependency saved on the DB:
         -include dependencies
         -include non same-day constraint
-        -include simultaneity (double precedence)
+        -include simultaneity (double dependency)
         If there is a weight, it's a preference, else it's a constraint...
         """
-        print 'adding precedence constraints'
+        print 'adding dependency constraints'
         for p in self.wdb.dependencies:
             c1 = p.cours1
             c2 = p.cours2
@@ -570,9 +582,9 @@ class TTModel(object):
             for sl1 in self.wdb.slots:
                 for sl2 in self.wdb.slots:
                     if (p.ND and (sl2.jour == sl1.jour))\
-                            or (p.successifs and (slots_list.index(sl2) != slots_list.index(sl2) + 1
+                            or (p.successifs and (slots_list.index(sl2) != slots_list.index(sl1) + 1
                                                   or sl2.jour != sl1.jour)) \
-                            or (slots_list.index(sl2) < slots_list.index(sl2)):
+                            or (slots_list.index(sl2) < slots_list.index(sl1)):
                         if not weight:
                             self.add_constraint(self.TT[(sl1, c1)]
                                                 + self.TT[(sl2, c2)], '<=', 1)
@@ -612,9 +624,8 @@ class TTModel(object):
                     .filter(user=i,
                             semaine=None)
 
-            if not availabilities:
-                print "%s has given no availability information !" \
-                      % i.username
+            if not availabilities.exists():
+                self.add_warning(i,"no availability information given")
                 for slot in self.wdb.slots:
                     unp_slot_cost[i][slot] = 0
                     avail_instr[i][slot] = 1
@@ -627,9 +638,7 @@ class TTModel(object):
                                           valeur__lte=maximum - 1))
 
                 if nb_avail_slots < nb_teaching_slots:
-                    print "%s has given %g available slots for %g courses..." \
-                          " Every slot is considered available !" \
-                          % (i.username, nb_avail_slots, nb_teaching_slots)
+                    self.add_warning(i, "%g available slots < %g courses"% (nb_avail_slots, nb_teaching_slots))
                     for a in availabilities:
                         avail_instr[i][a.creneau] = 1
                         if a.valeur >= 1:
@@ -637,24 +646,9 @@ class TTModel(object):
                         else:
                             unp_slot_cost[i][a.creneau] = 1
 
-                # TROP TORDU A AMELIORER --> JOURS FERIES POUR DE VRAI!
-                elif ((self.wdb.week == 14)
-                      and all(x.creneau.jour.no == 0
-                              for x in availabilities.filter(valeur__gte=1)
-                              )
-                ) or ((self.wdb.week == 18)
-                      and all(x.creneau.jour.no == 1
-                              for x in availabilities.filter(valeur__gte=1)
-                              )
-                ) or ((self.wdb.week == 19)
-                      and all(x.creneau.jour.no in [1, 3, 4]
-                              for x in availabilities.filter(valeur__gte=1)
-                              )
-                ) or ((self.wdb.week == 21)
-                      and all(x.creneau.jour.no == 0
-                              for x in availabilities.filter(valeur__gte=1))):
-                    print "%s has given availabilities only on vacation days!" \
-                          % i.username
+                elif all(Holiday.objects.filter(day=x.creneau.jour).exists()
+                         for x in availabilities.filter(valeur__gte=1)):
+                    self.add_warning(i, "availabilities only on vacation days!")
                     for a in availabilities:
                         avail_instr[i][a.creneau] = 1
                         if a.valeur >= 1:
@@ -679,11 +673,8 @@ class TTModel(object):
 
                     if nb_teaching_slots < 9 \
                             and nb_avail_slots < 2 * nb_teaching_slots:
-                        print "%s: only %g available slots dispos " \
-                              "for %g courses..." \
-                              % (i.username,
-                                 nb_avail_slots,
-                                 nb_teaching_slots)
+                        self.add_warning(i, "only %g available slots dispos for %g courses" % (nb_avail_slots,\
+                                 nb_teaching_slots))
                         for a in availabilities:
                             unp_slot_cost[i][a.creneau] = 0
                     else:
@@ -845,7 +836,7 @@ class TTModel(object):
 
         self.add_slot_preferences()
 
-        self.add_precedence_constraints()
+        self.add_dependency_constraints()
 
         self.add_specific_constraints()
 
