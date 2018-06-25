@@ -166,3 +166,7 @@ CSRF_USE_SESSION = True
 # LOGIN_URL = '/login'
 
 AUTH_USER_MODEL = 'people.User'
+
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'static'),
+    )

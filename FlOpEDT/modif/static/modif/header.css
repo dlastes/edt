@@ -177,10 +177,11 @@ body {
 }
 
 #texteImage {
-	padding-top: 3px;
+	padding-top: 0px;
 	font-family: 'flog';
 	display: flex; 
-	flex-direction: column; 
+	flex-direction: row;
+	color:black
 }
 
 #texteSous {
@@ -193,22 +194,25 @@ body {
 #txtFlop {
 	font-size: 70px;
 	font-family: inherit;
+	font-weight:normal;
 }
 
 #txtFlop2 {
 	
-	font-size: 14px;
+	font-size: 16px;
 	font-family: 'Verdana';
 	font-weight: bold;
 	opacity: .7;
-	margin-top: -2px;
+	margin-top: 45px;
+	margin-left: 10px;
 }
 
 #agpl {
 	font-size: 10px;
-	margin-left: 15px;
+	margin-left: auto;
+	margin-top: 40px;
+	margin-right: 10px;
 	font-weight: 600;
-	opacity: .7;
 }
 
 #opRed {

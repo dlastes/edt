@@ -59,19 +59,23 @@ from django.core.mail import send_mail
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.views.generic import RedirectView
 
+from random import randint
+
 # Texte de l'image
-# # randomVar = randint(0, 2)
+randomVar = randint(0, 3)
 randomVar = 1
 
 if randomVar == 0:
     imgtxt = "\"Qui veut faire les EDT cette année ?\" ... Fl" \
              "<span id=\"flopRed\">Op</span> !"
 elif randomVar == 1:
-    imgtxt = "Créateur d'emploi du temps <span id=\"flopPasRed\">Fl" \
+    imgtxt = "Gestionnaire d'emploi du temps <span id=\"flopPasRed\">Fl" \
              "</span>exible et <span id=\"flopRed\">Op</span>enSource"
 elif randomVar == 2:
     imgtxt = "Et votre emploi du temps fera un " \
              "<span id=\"flopRedDel\">flop</span> carton !"
+elif randomVar == 3:
+    imgtxt = "Et même votre logo sera à l'heure..."
 
 # <editor-fold desc="FAVICON">
 # ----------

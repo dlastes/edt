@@ -356,8 +356,8 @@ function adapt_labgp(first) {
         }
     } // sinon ?
     svg.height = svg_height() ;
-    d3.select("svg").attr("height", svg.height);
-
+    console.log(svg.height);
+    d3.select("#edt-main").attr("height", svg.height);
 
     if (first) {
 	expected_ext_grid_dim = svg.width - margin.left - margin.right;
@@ -367,7 +367,7 @@ function adapt_labgp(first) {
 	} else {
             labgp.width = labgp.wm;
 	}
-	d3.select("svg").attr("width", svg.width);
+	d3.select("#edt-main").attr("width", svg.width);
     }
 
 }

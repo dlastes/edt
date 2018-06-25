@@ -546,7 +546,7 @@ function def_drag_sca() {
                 drag.sel = d3.select(this);
                 drag.x = 0;
                 drag.y = 0;
-                drag.svg = d3.select("svg");
+                drag.svg = d3.select("#edt-main");
                 drag.svg_w = +drag.svg.attr("width");
                 drag.init = +drag.sel.select("rect").attr("x");
                 dg.node().appendChild(drag.sel.node());
@@ -603,7 +603,7 @@ function def_drag_sca() {
                 drag.y = 0;
                 drag.init = +drag.sel.select("rect").attr("y");
                 dg.node().appendChild(drag.sel.node());
-                drag.svg = d3.select("svg")
+                drag.svg = d3.select("#edt-main")
                 drag.svg_h = +drag.svg.attr("height"); //+200;
 
                 drag.sel
@@ -646,7 +646,7 @@ function def_drag_sca() {
                 drag.sel.select(".v-sca-l").remove();
 
 		svg.height = svg_height() ;
-		d3.select("svg").attr("height", svg.height);
+		d3.select("#edt-main").attr("height", svg.height);
 
 //		drag.svg.attr("height", svg_height());
             }
