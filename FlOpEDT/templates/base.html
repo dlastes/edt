@@ -67,6 +67,10 @@
 	    <li><a href="{% url "stype" %}">Semaine type</a></li>
 	    <li><a href="{% url "aide" %}">Aide</a></li>
 	    <li><a href="{% url "contact" %}">Contact</a></li>
+	    {% if user.is_authenticated and user.is_staff %}
+	    <li><a href="{% url "solve_board:main_board" %}">Générer</a></li>
+	    <li><a href="{% url "admin:index" %}">Admin</a></li>
+	    {% endif %}
 	    <li style="float:right">{% if user.is_authenticated %}<a href="{% url "people:logout"%}?next={{request.path}}">Déconnexion</a>
 	    {% else %}
 	    <a href="{% url "people:login"%}?next={{request.path}}">Se connecter</a>
