@@ -176,7 +176,7 @@ body {
 	margin-right: 3px;
 }
 
-#texteImage {
+#full_logo {
 	padding-top: 0px;
 	font-family: 'flog';
 	display: flex; 
@@ -191,13 +191,13 @@ body {
 	align-items: baseline;
 }
 
-#txtFlop {
+#acro_logo {
 	font-size: 70px;
 	font-family: inherit;
 	font-weight:normal;
 }
 
-#txtFlop2 {
+#head_logo {
 	
 	font-size: 16px;
 	font-family: 'Verdana';
@@ -232,6 +232,7 @@ body {
 	font-size: 18px;
 	font-family: inherit;
 	font-weight: inherit;
+	opacity: 1;
 }
 
 #flopRedDel {
