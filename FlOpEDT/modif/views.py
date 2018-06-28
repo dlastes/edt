@@ -434,7 +434,7 @@ def fetch_decale(req):
             h = -1
         if c.tutor is not None:
             liste_cours.append({'i': c.id,
-                                'm': c.module.nom,
+                                'm': c.module.abbrev,
                                 'p': c.tutor.username,
                                 'g': c.groupe.nom,
                                 'j': j,
@@ -909,7 +909,7 @@ def clean_week(week, year):
 
 def filt_m(r, module):
     if module != '':
-        r = r.filter(module__nom=module)
+        r = r.filter(module__abbrev=module)
     return r
 
 
