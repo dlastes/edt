@@ -67,6 +67,7 @@ class Solve(Thread):
         self.year = year
         self.timesamp = timestamp
         self.channel = chan
+        # if all train progs are called, training_programme=''
         try:
             self.training_programme = TrainingProgramme.objects.get(abbrev=training_programme)
         except ObjectDoesNotExist:

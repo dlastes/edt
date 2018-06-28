@@ -30,6 +30,8 @@ var txt_area = document.getElementsByTagName("textarea")[0];
 var select_opti_date, select_opti_train_prog;
 var week_year_sel, train_prog_sel;
 
+var text_all = 'Toute' ;
+
 init_dropdowns();
 
 /*
@@ -81,6 +83,10 @@ function open_connection(){
 	}
     }
     socket.onopen = function() {
+	var tp = '' ;
+	if (train_prog_sel != text_all) {
+	    tp = train_prog_sel ;
+	}
 	socket.send(JSON.stringify({'text':
 				    "C'est ti-par.\n"+opti_timestamp+"\nSolver ok?",
 				    'action':"go",
@@ -107,6 +113,7 @@ function init_dropdowns() {
 	.text(function(d){return d['semaine'];});
 
     // create drop down for training programme selection
+    train_prog_list.unshift(text_all);
     select_opti_train_prog =  d3.select("#opti_train_prog");
     select_opti_train_prog.on("change",function(){ choose_train_prog(true); });
     select_opti_train_prog
