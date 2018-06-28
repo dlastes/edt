@@ -441,10 +441,10 @@ def fetch_decale(req):
                                 'h': h})
 
     cours = filt_p(filt_g(filt_sa(semaine, an), groupe), prof) \
-        .order_by('module__nom') \
-        .distinct('module__nom')
+        .order_by('module__abbrev') \
+        .distinct('module__abbrev')
     for c in cours:
-        liste_module.append(c.module.nom)
+        liste_module.append(c.module.abbrev)
 
     cours = filt_g(filt_m(filt_sa(semaine, an), module), groupe) \
         .order_by('tutor__username') \

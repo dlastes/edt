@@ -125,7 +125,7 @@ function initiate() {
 // fetch the data corresponding to the current selection
 function go_filter(){
     var sel, di, sa, i ;
-    var url = url_fetch_decale+"?a="+filtered.an+"&s="+filtered.semaine;
+    var url_fd_full = url_fetch_decale+"?a="+filtered.an+"&s="+filtered.semaine;
     var prof_changed = false ;
 
     // remember the current selections (module, prof, group)
@@ -137,7 +137,7 @@ function go_filter(){
 	    .filter(function(d,i){return i==di;})
 	    .datum();
 	if(sa!=default_dd){
-	    url+="&"+filtered.mod_prof_gp[i].get+"="+sa;
+	    url_fd_full+="&"+filtered.mod_prof_gp[i].get+"="+sa;
 	}
 	if(i==1 && sa!=filtered.mod_prof_gp[i].val){
 	    prof_changed = true ;
@@ -161,10 +161,11 @@ function go_filter(){
 	aim.prof = sa ;
     }
 
+    show_loader(true);
     $.ajax({
         type: "GET",
         dataType: 'json',
-        url: url,
+        url: url_fd_full,
         async: false,
         contentType: "application/json; charset=utf-8",
         success: function (msg) {
@@ -219,13 +220,16 @@ function go_filter(){
 
 
 	    go_cours();
+	    show_loader(false);
 
         },
 	error: function(msg) {
 	    console.log("error");
+	    show_loader(false);
 	},
 	complete: function(msg) {
 	    console.log("complete");
+	    show_loader(false);
 	}
     });
 }
@@ -512,7 +516,8 @@ function send_cours(){
 	    tot.ns = 0 ;
 	    tot.na = 0 ;
 	}
-	
+
+	show_loader(true);
 	$.ajax({
 	    url: url_change_decale,
 	    type: 'POST',
@@ -521,9 +526,11 @@ function send_cours(){
 	    dataType: 'json',
 	    success: function(msg) {
 		recv(msg.responseText);
+		show_loader(false);
 	    },
 	    error: function(msg){
 		recv(msg.responseText);
+		show_loader(false);
 	    }
 	});
     }

@@ -124,18 +124,6 @@ g[class^="gp-but-"] {
 }
 
 
-/* ************ Loader ************ */
-.loader {
-position : fixed;
-z-index: 9999;
-background : rgba(0,0,0,0.6) url('logo-head-gribou-rc-hand.svg') no-repeat 50% 50%;
-/*background-size:30% 30%;*/
-top : 0px;
-left : 0px;
-height : 100%;
-width : 100%;
-cursor : wait;
-}
 
 /* loadingspin.svg */
 
