@@ -125,8 +125,8 @@ def edt(req, semaine, an, splash_id=0):
                    'gp': gp,
                    'name_usr': name_usr,
                    'rights_usr': rights_usr,
-                   'splash_id': splash_id,
-                   'image': imgtxt})
+                   'splash_id': splash_id
+                  })
 
 
 def edt_light(req, semaine, an):
@@ -166,8 +166,8 @@ def edt_light(req, semaine, an):
                    'tv_gp_h': gp_h,
                    'tv_gp_w': gp_w,
                    'promo': promo,
-                   'tv_svg_top_m': svg_top_m,
-                   'image': imgtxt})
+                   'tv_svg_top_m': svg_top_m
+                  })
 
 
 @login_required
@@ -180,8 +180,8 @@ def stype(req):
                        'date_fin': current_week(),
                        'name_usr': req.user.username,
                        'err': err,
-                       'annee_courante': annee_courante,
-                       'image': imgtxt})
+                       'annee_courante': annee_courante
+                      })
     elif req.method == 'POST':
         if 'apply' in req.POST.keys():
             print req.POST['se_deb']
@@ -210,13 +210,12 @@ def stype(req):
                        'date_fin': date_fin,
                        'name_usr': req.user.username,
                        'err': err,
-                       'annee_courante': annee_courante,
-                       'image': imgtxt})
+                       'annee_courante': annee_courante
+                      })
 
 
 def aide(req):
-    return render(req, 'modif/aide.html', {
-        'image': imgtxt})
+    return render(req, 'modif/aide.html')
 
 
 @login_required
@@ -234,8 +233,8 @@ def decale(req):
                   {'all_weeks': week_list(),
                    'semaine_init': semaine_init,
                    'an_init': an_init,
-                   'profs': liste_profs,
-                   'image': imgtxt})
+                   'profs': liste_profs
+                  })
 
 
 # </editor-fold desc="VIEWERS">
@@ -854,8 +853,8 @@ def contact(req):
                 ack = u'Envoi du mail impossible !'
                 return render(req, 'modif/contact.html',
                               {'form': form,
-                               'ack': ack,
-                               'image': imgtxt})
+                               'ack': ack
+                              })
 
             return edt(req, None, None, 1)
     else:
@@ -866,8 +865,8 @@ def contact(req):
             'sender': init_mail})
     return render(req, 'modif/contact.html',
                   {'form': form,
-                   'ack': ack,
-                   'image': imgtxt})
+                   'ack': ack
+                  })
 
 
 # </editor-fold desc="EMAILS">
