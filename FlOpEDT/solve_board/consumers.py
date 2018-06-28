@@ -35,6 +35,8 @@ from MyFlOp.MyTTModel import MyTTModel
 from modif.models import TrainingProgramme
 from multiprocessing import Process
 import os
+from django.conf import settings
+
 
 def ws_message(message):
     # ASGI WebSocket packet-received and send-packet message types
@@ -77,13 +79,12 @@ class Solve(Thread):
     def run(self):
         print 'start running'
         with CaptureOutput(relay=False, channel=self.channel) as cap:
-            print self.week
-            print self.year
-            print self.training_programme
-            
             t = MyTTModel(self.week, self.year, train_prog=self.training_programme)
             t.solve(time_limit=20)
-            cap.save_to_path('/home/prenaud/trash/modcap.log')
+            cap.save_to_path(os.path.join(settings.BASE_DIR,
+                                          'logs',
+                                          str(year)+ '-' + str(week) + '--'
+                                          + timestamp + '.log'))
         print 'stop running'
 
 
