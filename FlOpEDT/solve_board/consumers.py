@@ -28,6 +28,13 @@ from channels.handler import AsgiHandler
 from channels import Group, Channel
 from tasks import run
 import json
+from threading import Thread
+from .modified_capturer import CaptureOutput
+from django.core.exceptions import ObjectDoesNotExist
+from MyFlOp.MyTTModel import MyTTModel
+from modif.models import TrainingProgramme
+from multiprocessing import Process
+import os
 
 def ws_message(message):
     # ASGI WebSocket packet-received and send-packet message types
@@ -39,12 +46,63 @@ def ws_message(message):
     data = json.loads(message['text'])
     Channel(msg_reply).send({'text':data['text']})
     if data['action'] == 'go':
-        run.delay(data['week'],data['year'],
+        # run.delay(data['week'],data['year'],
+        #           data['timestamp'],
+        #           data['train_prog'],
+        #           message.reply_channel.name)
+
+        Solve(data['week'],data['year'],
                   data['timestamp'],
                   data['train_prog'],
-                  message.reply_channel.name)
+        Channel(msg_reply)).start()
+
+        # p = Process(target=ruru, args=(data['week'],data['year'],Channel(msg_reply)))
+        # p.start()
 
 
+class Solve(Thread):
+    def __init__(self, week, year, timestamp, training_programme, chan):
+        super(Solve, self).__init__()
+        self.week = week
+        self.year = year
+        self.timesamp = timestamp
+        self.channel = chan
+        try:
+            self.training_programme = TrainingProgramme.objects.get(abbrev=training_programme)
+        except ObjectDoesNotExist:
+            self.training_programme = None
+        
+    
+    def run(self):
+        print 'start running'
+        with CaptureOutput(relay=False, channel=self.channel) as cap:
+            print self.week
+            print self.year
+            print self.training_programme
+            
+            t = MyTTModel(self.week, self.year, train_prog=self.training_programme)
+            t.solve(time_limit=20)
+            cap.save_to_path('/home/prenaud/trash/modcap.log')
+        print 'stop running'
+
+
+
+def ruru(week, year, channel):
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "FlOpEDT.settings.local")
+    print 'start running'
+    with CaptureOutput(relay=False, channel=channel) as cap:
+        print week
+        print year
+        print channel
+        print 'qqweqw'
+        
+        t = MyTTModel(week, year)
+        t.solve(time_limit=20)
+        cap.save_to_path('/home/prenaud/trash/modcap.log')
+    print 'stop running'
+    
+
+        
 # Connected to websocket.connect
 def ws_add(message):
     # Accept the incoming connection

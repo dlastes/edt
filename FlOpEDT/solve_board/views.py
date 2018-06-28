@@ -40,7 +40,6 @@ from django.conf import settings
 from channels import Group
 
 from multiprocessing import Process
-from threading import Thread
 from StringIO import StringIO
 import os
 import sys
@@ -58,3 +57,4 @@ def main_board(req):
                    'end_date': weeks.current_week(),
                    'current_year': weeks.annee_courante,
                    'all_train_progs': json.dumps(all_tps)})
+

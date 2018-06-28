@@ -85,7 +85,7 @@ function open_connection(){
 				    "C'est ti-par.\n"+opti_timestamp+"\nSolver ok?",
 				    'action':"go",
 				    'week':week_year_sel.week,
-				    'year':week_year_sel.week,
+				    'year':week_year_sel.year,
 				    'train_prog':train_prog_sel,
 				    'timestamp':opti_timestamp}))
     }

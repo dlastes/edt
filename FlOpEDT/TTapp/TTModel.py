@@ -844,7 +844,7 @@ class TTModel(object):
         if solver == 'gurobi':
             # ignore SIGINT while solver is running
             # => SIGINT is still delivered to the solver, which is what we want
-            signal.signal(signal.SIGINT, signal.SIG_IGN)
+            # signal.signal(signal.SIGINT, signal.SIG_IGN)
             self.model.solve(GUROBI_CMD(keepFiles=1,
                                         msg=True,
                                         options=[("TimeLimit", time_limit),
