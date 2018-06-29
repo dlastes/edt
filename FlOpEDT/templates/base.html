@@ -81,7 +81,7 @@
 	    {% endif %}
 	    </li>
 	    <li style="float:right">{% if user.is_authenticated %}
-	      <div>Connecté&middot;e sous {{ user.username }} </div> {% endif %}
+	      <a href="{% url 'people:change_redirect' %}">Connecté&middot;e sous {{ user.username }} </a> {% endif %}
 	    </li>
        </ul>
        {% endblock %}

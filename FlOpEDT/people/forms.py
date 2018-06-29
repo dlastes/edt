@@ -57,16 +57,16 @@ class ChangeStudentForm(UserChangeForm):
 
 class ChangeFullStaffTutorForm(UserChangeForm):
     class Meta(UserChangeForm.Meta):
-        model = Student
+        model = FullStaff
 
 
 class ChangeSupplyStaffTutorForm(UserChangeForm):
     class Meta(UserChangeForm.Meta):
-        model = Student
+        model = SupplyStaff
 
 class ChangeBIATOSTutorForm(UserChangeForm):
     class Meta(UserChangeForm.Meta):
-        model = Student
+        model = BIATOS
 
 
 
@@ -167,7 +167,7 @@ class AddBIATOSTutorForm(UserCreationForm):
 
     @transaction.atomic
     def save(self):
-        bi = super(BIATOS, self).save(commit=False)
+        bi = super(AddBIATOSTutorForm, self).save(commit=False)
         bi.is_tutor = True
         bi.status = Tutor.BIATOS
         bi.save()

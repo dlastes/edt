@@ -28,6 +28,7 @@ from people.student import AddStudent, ChangeStudent
 from people.tutor import AddFullStaffTutor, AddSupplyStaffTutor, AddBIATOSTutor
 from people.tutor import ChangeFullStaffTutor, ChangeSupplyStaffTutor, ChangeBIATOSTutor
 from django.contrib.auth import views as auth_views
+from . import views
 
 urlpatterns = [
 #    url(r'^login', views.login, name="login"),
@@ -64,6 +65,9 @@ urlpatterns = [
         auth_views.password_reset_confirm,
         {'template_name':'people/password_reset_confirm.html'},
         name='password_reset_confirm'),
+    url(r'^add/some/(?P<kind>[A-Za-z]*)$',
+        views.redirect_add_people_kind,
+        name="add_redirect"),
     url(r'^add/student/$',
         AddStudent.as_view(),
         name="add_student"),
@@ -72,20 +76,23 @@ urlpatterns = [
         name="add_fullstaff"),
     url(r'^add/supplystaff/$',
         AddSupplyStaffTutor.as_view(),
-        name="add/supplystaff"),
+        name="add_supplystaff"),
     url(r'^add/biatos/$',
         AddBIATOSTutor.as_view(),
-        name="add_bi"),
+        name="add_BIATOS"),
+    url(r'^change/some/$',
+        views.redirect_change_people_kind,
+        name="change_redirect"),
     url(r'^change/student/$',
         ChangeStudent.as_view(),
-        name="chg_student"),
+        name="change_student"),
     url(r'^change/fullstaff/$',
         ChangeFullStaffTutor.as_view(),
-        name="chg_fullstaff"),
+        name="change_fullstaff"),
     url(r'^change/supplystaff/$',
         ChangeSupplyStaffTutor.as_view(),
-        name="chg_supplystaff"),
+        name="change_supplystaff"),
     url(r'^change/biatos/$',
         ChangeBIATOSTutor.as_view(),
-        name="chg_biatos"),
+        name="change_BIATOS"),
     ]
