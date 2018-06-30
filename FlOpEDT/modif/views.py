@@ -26,7 +26,7 @@
 from django.http import HttpResponse, Http404, JsonResponse
 from django.shortcuts import render
 
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 
 from django.core.cache import cache
 
@@ -501,6 +501,11 @@ def edt_changes(req):
     bad_response = HttpResponse("KO")
     good_response = HttpResponse("OK")
 
+    if not req.user.is_tutor:
+        bad_response['reason'] = u"Pas membre de l'équipe encadrante"
+        return bad_response
+        
+
     impacted_inst = set()
 
     msg = 'Notation : (numero_semaine, numero_annee, ' \
@@ -550,7 +555,7 @@ def edt_changes(req):
 
                         m = CourseModification(cours=co,
                                                version_old=q.v,
-                                               initiator=req.user)
+                                               initiator=req.user.tutor)
                         # old_day = a.day.o
                         # old_slot = a.slot.o
                         new_day = a.day.n

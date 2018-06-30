@@ -1268,6 +1268,10 @@ function check_cours(c2m, grid_slot) {
 	return ;
     }
 
+    if ((logged_usr.rights >> 2) % 2 == 1) {
+	return ;
+    }
+
     if (c2m.id_cours == -1) {
 	grid_slot.dispo = false;
 	grid_slot.reason = "Cours fixe";

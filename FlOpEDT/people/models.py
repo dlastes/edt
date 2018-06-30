@@ -40,8 +40,8 @@ class User(AbstractUser):
     # x==1 <=> quand "modifier Cours" coché, les cours sont colorés
     #          avec la dispo du prof
     # y==1 <=> je peux changer les dispos de tout le monde
+    # m==1 <=> je peux modifier l'emploi du temps comme bon me semble
     # FUTUR
-    # m==1 <=> je peux modifier l'emploi du temps
     # z==1 <=> je peux changer les dispos des vacataires d'un module dont
     #          je suis responsable
     # a==1 <=> je peux surpasser les contraintes lors de la modification
