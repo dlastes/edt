@@ -651,6 +651,7 @@ function clean_splash(class_id) {
 
 function splash(splash_ds){
 
+
     if (splash_ds.bg === undefined) {
 	splash_ds.bg = {x:0,
 			y:0,
@@ -823,9 +824,11 @@ function apply_stype() {
 
 /*--------------------
    ------ ALL -------
-  --------------------*/
-function add_bouge(d) {
+   --------------------*/
 
+// add the initial comfiguration of a course to cours_bouge if
+// it has not been moved until now
+function add_bouge(d) {
     console.log("new");
     if (Object.keys(cours_bouge).indexOf(d.id_cours.toString()) == -1) {
         cours_bouge[d.id_cours] = {

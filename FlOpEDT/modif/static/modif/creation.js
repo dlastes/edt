@@ -1168,7 +1168,7 @@ function def_drag() {
             if (ckbox["edt-mod"].cked && fetch.done) {
 
                 data_slot_grid.forEach(function(sl) {
-                    check_cours(c, sl);
+                    fill_grid_slot(c, sl);
                 });
 
                 drag.x = 0;
@@ -1176,7 +1176,6 @@ function def_drag() {
 
                 drag.sel = d3.select(this);
                 dg.node().appendChild(drag.sel.node());
-
 
             }
         })
@@ -1225,17 +1224,55 @@ function def_drag() {
 
 
                 if (!is_garbage(cur_over.day,cur_over.slot)) {
+
                     var ngs = data_slot_grid.filter(function(s) {
                         return s.day == cur_over.day && s.slot == cur_over.slot;
                     })[0];
 
 
                     if (ngs.dispo) {
-                        add_bouge(d);
-                        ////console.log(cours_bouge);
+
+			add_bouge(d);
                         d.day = cur_over.day;
                         d.slot = cur_over.slot;
-                    } else {
+
+		    } else if (!ngs.dispo && (logged_usr.rights >> 2) % 2 == 1) {
+
+			var warn_check = warning_check(d, cur_over.slot, cur_over.day);
+
+			var splash_violate_constraint = {
+			    id: "viol_constraint",
+			    but: {
+				list: [{txt: "Confirmer",
+					click:
+					function(d){
+					    add_bouge(d.saved_data.course);
+					    d.saved_data.course.day = d.saved_data.grid_slot.day;
+					    d.saved_data.course.slot = d.saved_data.grid_slot.slot;
+					    go_grid(true);
+					    go_courses(true);
+					    return ;
+					},
+					saved_data:
+					{course: d,
+					 grid_slot: {day: cur_over.day, slot: cur_over.slot}}
+				       },
+				       {txt: "Annuler",
+					click: function(d){
+					    return ;
+					}
+				       }]
+				      },
+			    com: {list: [{txt: "Attention", ftsi: 23},
+					 {txt: ""},
+					 {txt: "Des privilèges vous ont été accordés, et vous en profitez pour outrepasser la contrainte suivante :"},
+					 {txt: warn_check},
+					 {txt: "C'est bien ce que je voulais faire."}]
+				 }
+			}
+			splash(splash_violate_constraint);
+
+		    } else {
                         ngs.pop = true;
                     }
                 } else {
@@ -1257,67 +1294,133 @@ function def_drag() {
 
 }
 
-function check_cours(c2m, grid_slot) {
 
 
+
+function fill_grid_slot(c2m, grid_slot) {
     grid_slot.dispo = true;
     grid_slot.reason = "";
 
+    // // the user has the right to do whatever s/he wants
+    // if ((logged_usr.rights >> 2) % 2 == 1) {
+    // 	return ;
+    // }
 
-    if (is_garbage(grid_slot.day, grid_slot.slot)) {
+    var check = check_course(c2m, grid_slot.slot, grid_slot.day);
+    
+    if (check.constraints_ok) {
+	return ;
+    } else {
+	grid_slot.dispo = false;
+	if (check.nok_type == 'stable') {
+	    grid_slot.reason = "Cours fixe";
+	} else if (check.nok_type == 'train_prog_unavailable') {
+            grid_slot.reason = "CRENEAU NON DISPO POUR " + check.train_prog;
+	} else if (check.nok_type == 'tutor_busy') {
+            grid_slot.reason = "PB PROF OCCUPE";
+	} else if (check.nok_type == 'group_busy') {
+            grid_slot.reason = "PB GROUPE";
+	} else if (check.nok_type == 'tutor_unavailable') {
+            grid_slot.reason = "PB PROF PAS DISPO";
+	}
 	return ;
     }
 
-    if ((logged_usr.rights >> 2) % 2 == 1) {
-	return ;
+}
+
+function warning_check(c2m, slot, day) {
+    var ret = '';
+    var check = check_course(c2m, slot, day);
+    if (check.nok_type == 'stable') {
+	ret = "Le cours était censé être fixe.";
+    } else if (check.nok_type == 'train_prog_unavailable') {
+        ret = "La promo " + check.train_prog + " ne devait pas avoir cours à ce moment-là.";
+    } else if (check.nok_type == 'tutor_busy') {
+        ret = "L'enseignant·e " + check.tutor + " avait déjà un cours prévu.";
+    } else if (check.nok_type == 'group_busy') {
+        ret = "Le groupe " + check.group + " avait déjà un cours prévu.";
+    } else if (check.nok_type == 'tutor_unavailable') {
+        ret = "L'enseignant·e " + check.tutor + " s'était déclaré·e indisponible.";
     }
+    return ret ;
+}
+
+
+/*
+ check whether it is possible to schedule c2m on slot slot, day day. 
+ returns an object containing at least contraints_ok: true iff it is, and
+ - nok_type: 'stable' -> course cannot be moved
+ - nok_type: 'train_prog_unavailable', train_prog: abbrev_train_prog -> students
+   from training programme abbrev_train_prog are not available
+ - nok_type: 'tutor_busy', tutor: tutor_username -> the tutor has already
+   another course
+ - nok_type: 'group_busy', group: gp_name -> the group has already another course
+ - nok_type: 'tutor_unavailable', tutor: tutor_username -> the tutor is 
+   unavailable
+ */
+function check_course(c2m, slot, day) {
+
+    var ret = {constraints_ok: false};
+
+
+    if (is_garbage(day, slot)) {
+	ret.constraints_ok = true ;
+	return ret ;
+    }
+
+    // if ((logged_usr.rights >> 2) % 2 == 1) {
+    // 	return ;
+    // }
 
     if (c2m.id_cours == -1) {
-	grid_slot.dispo = false;
-	grid_slot.reason = "Cours fixe";
-	return ;
+	ret.nok_type = 'stable' ;
+	return ret;
     }
 
-    if (is_free(grid_slot.day, grid_slot.slot, c2m.promo)) {
-        grid_slot.dispo = false;
-        grid_slot.reason = "CRENEAU NON DISPO POUR " + set_promos[c2m.promo];
-        return;
+    if (is_free(day, slot, c2m.promo)) {
+	ret.nok_type = 'train_prog_unavailable' ;
+	ret.train_prog = set_promos[c2m.promo] ;
+        return ret;
     }
 
 
     var cs = cours.filter(function(c) {
-        return (c.day == grid_slot.day &&
-            c.slot == grid_slot.slot &&
-            c.prof == c2m.prof);
+        return (c.day == day &&
+		c.slot == slot &&
+		c.prof == c2m.prof &&
+		c.id_cours != c2m.id_cours);
     });
-    if (cs.length > 0 && cs[0] != c2m) {
-        grid_slot.dispo = false;
-        grid_slot.reason = "PB PROF OCCUPE";
-        return;
+    if (cs.length > 0) {
+	ret.nok_type = 'tutor_busy';
+	ret.tutor = c2m.prof;
+        return ret;
     }
 
 
     cs = cours.filter(function(c) {
-        return (c.day == grid_slot.day &&
-            c.slot == grid_slot.slot &&
-            (c.group == c2m.group ||
-                groups[c2m.promo][c2m.group].ancetres.indexOf(c.group) > -1 ||
-                groups[c2m.promo][c2m.group].descendants.indexOf(c.group) > -1) &&
-            c.promo == c2m.promo);
+        return (c.day == day &&
+		c.slot == slot &&
+		(c.group == c2m.group ||
+		 groups[c2m.promo][c2m.group].ancetres.indexOf(c.group) > -1 ||
+		 groups[c2m.promo][c2m.group].descendants.indexOf(c.group) > -1) &&
+		c.promo == c2m.promo  &&
+		c.id_cours != c2m.id_cours);
     });
-    if (cs.length > 0 && cs[0] != c2m) {
-        grid_slot.dispo = false;
-        grid_slot.reason = "PB GROUPE";
-        return;
+    if (cs.length > 0) {
+	ret.nok_type = 'group_busy';
+	ret.group = c2m.group;
+        return ret;
     }
 
     if (dispos[c2m.prof] !== undefined &&
-        dispos[c2m.prof][grid_slot.day][grid_slot.slot] == 0) {
-        grid_slot.dispo = false;
-        grid_slot.reason = "PB PROF PAS DISPO";
-        return;
+        dispos[c2m.prof][day][slot] == 0) {
+	ret.nok_type = 'tutor_unavailable' ;
+	ret.tutor = c2m.prof ;
+        return ret;
     }
 
+    ret.constraints_ok = true ;
+    return ret ;
 
 }
 
