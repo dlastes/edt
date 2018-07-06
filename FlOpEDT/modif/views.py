@@ -812,7 +812,7 @@ def decale_changes(req):
                                   semaine_old=cours.semaine,
                                   an_old=cours.an,
                                   tutor_old=cours.tutor,
-                                  initiator=req.user)
+                                  initiator=req.user.tutor)
         pm.save()
 
         cours.semaine = a.ns
