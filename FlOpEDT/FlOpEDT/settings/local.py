@@ -38,7 +38,19 @@ DATABASES = {
     }
 }
 
-
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "asgi_redis.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("localhost", 6379)],
+        },
+        "ROUTING": "solve_board.routing.channel_routing",
+    },
+    # "default": {
+    #     "BACKEND": "asgiref.inmemory.ChannelLayer",
+    #     "ROUTING": "solve_board.routing.channel_routing",
+    # },
+}
 
 CACHES = {
     'default': {

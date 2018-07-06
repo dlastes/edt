@@ -29,8 +29,8 @@ if [ $rep = "oui" ]
 then
     BASE='..'
     sudo systemctl restart postgresql
-    sudo -u postgres psql -c 'drop database "FlOp_database"'
-    sudo -u postgres createdb FlOp_database
+    sudo -u postgres psql -c 'drop database "FlOp_database_abst-gen"'
+    sudo -u postgres createdb "FlOp_database_abst-gen"
     apps="modif TTapp quote people"
     for a in $apps
     do

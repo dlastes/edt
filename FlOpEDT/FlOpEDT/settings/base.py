@@ -169,19 +169,6 @@ CSRF_USE_SESSION = True
 
 AUTH_USER_MODEL = 'people.User'
 
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "asgi_redis.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [("localhost", 6379)],
-        },
-        "ROUTING": "solve_board.routing.channel_routing",
-    },
-    # "default": {
-    #     "BACKEND": "asgiref.inmemory.ChannelLayer",
-    #     "ROUTING": "solve_board.routing.channel_routing",
-    # },
-}
 
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),

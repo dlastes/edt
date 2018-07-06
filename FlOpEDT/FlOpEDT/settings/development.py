@@ -34,6 +34,21 @@ DATABASES = {
     }
 }
 
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "asgi_redis.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("redis", 6379)],
+        },
+        "ROUTING": "solve_board.routing.channel_routing",
+    },
+    # "default": {
+    #     "BACKEND": "asgiref.inmemory.ChannelLayer",
+    #     "ROUTING": "solve_board.routing.channel_routing",
+    # },
+}
+
+
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'al0bzdna)@6&n9mfn_vlm0wl&38#xrf@h%&^^h-q783g$e&*h!'
 

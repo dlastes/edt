@@ -5,12 +5,16 @@ services:
     image: postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data/
+  redis:
+    image: redis:latest
+
   web:
     build: .
     command: 
       - /bin/sh
       - -c
       - |
+        /code/FlOpEDT/manage.py makemigrations --settings=FlOpEDT.settings.${EDT_CONFIG:-development}
         /code/FlOpEDT/manage.py migrate --settings=FlOpEDT.settings.${EDT_CONFIG:-development}
         /code/FlOpEDT/manage.py runserver 0.0.0.0:8000 --settings=FlOpEDT.settings.${EDT_CONFIG:-development}
     volumes:
@@ -19,5 +23,6 @@ services:
       - "8000:8000"
     depends_on:
       - db
+      - redis
 volumes:
   postgres_data:

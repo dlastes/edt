@@ -11,4 +11,5 @@ numpy
 pyclustering
 channels<2
 asgi_redis
-redis-server
+celery
+humanfriendly
