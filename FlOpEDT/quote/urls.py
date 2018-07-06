@@ -30,7 +30,7 @@ urlpatterns = [
     # directly reachable by users
     # ----------------------------
     url(r'^proposer$', views.submit, name="submission"),
-    url(r'^moderer$', views.moderate, name="moderation"),
+    # url(r'^moderer$', views.moderate, name="moderation"),
     # fetch 
     # ----------------------------
     url(r'^fetch$', views.fetch_quote, name="fetch_quote"),

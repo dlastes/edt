@@ -122,6 +122,9 @@ g[class^="gp-but-"] {
 .ack-reg {
   text-anchor:end;
 }
+.quote {
+  text-anchor:start;
+}
 
 
 

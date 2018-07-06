@@ -541,9 +541,11 @@ class TrainingProgrammeDisplay(models.Model):
     training_programme = models.OneToOneField('TrainingProgramme',
                                               related_name='display')
     row = models.PositiveSmallIntegerField()
+    short_name = models.CharField(max_length=20, default="red")
 
     def __unicode__(self):
-        return unicode(self.training_programme) + u' : Row ' + unicode(self.row)
+        return unicode(self.training_programme) + u' : Row ' + unicode(self.row) \
+            u' ; Name ' + unicode(self.short_name)
 
 
 class GroupDisplay(models.Model):
