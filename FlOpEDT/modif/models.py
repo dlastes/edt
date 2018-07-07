@@ -545,7 +545,7 @@ class TrainingProgrammeDisplay(models.Model):
 
     def __unicode__(self):
         return unicode(self.training_programme) + u' : Row ' + unicode(self.row) \
-            u' ; Name ' + unicode(self.short_name)
+            + u' ; Name ' + unicode(self.short_name)
 
 
 class GroupDisplay(models.Model):
