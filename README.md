@@ -29,17 +29,17 @@ Lancer la commande suivante pour récupérer les images de base et instancier le
 
 `docker-compose build` 
 
-Vous pouvez importer le fichier dump.json (qui est une base pour jouer avec l'interface) avec la commande :
-
-`docker-compose run --rm web ./FlOpEDT/manage.py loaddata dump.json --settings=FlOpEDT.settings.development`
-
-Une fois le serveur lancé, vous pourrez vous connecter avec l'utilisateur 'MOI' et le mot de passe 'mon mot de passe a moi'. (En fait, tous les utilisateurs ont le même mot de passe !)
-
-Pour lancer le serveur :
+Ensuite, vous pourrez lancer le serveur à l'aide de la commande:
 
 `docker-compose up` (Ctrl+C pour arrêter l'application)
 
 L'application sera accessible à l'adresse http://localhost:8000.
+
+Vous pouvez importer le fichier dump.json (qui est une base pour jouer avec l'interface) avec la commande :
+
+`docker-compose run --rm web ./FlOpEDT/manage.py loaddata dump.json --settings=FlOpEDT.settings.development`
+
+Vous pourrez alors vous connecter avec l'utilisateur 'MOI' et le mot de passe 'passe'. (En fait, tous les utilisateurs ont le même mot de passe !)
 
 Les paramètres de la configuration courante se trouvent dans `FlOpEDT/settings`. Par défaut, on utilise la configuration `development`. On peut spécifier une autre configuration en modifiant la variable d'environnement `EDT_CONFIG` comme suit :
 
