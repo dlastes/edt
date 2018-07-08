@@ -24,7 +24,7 @@
 # without disclosing the source code of your own applications.
 
 from __future__ import absolute_import, unicode_literals
-from celery import shared_task
+#from celery import shared_task
 from people.models import FullStaff
 from StringIO import StringIO
 from channels import Channel
@@ -34,29 +34,29 @@ import sys
 
 from .modified_capturer import CaptureOutput
 
-@shared_task
-def run(week, year, timestamp, train_prog, msg_reply):
-    try:
-        tp = TrainingProgramme.objects.get(abbrev=train_prog)
-    except ObjectDoesNotExist:
-        tp = None
-
-    # out = Tee(str(year)+ '-' + str(week) + '--'
-    #           + timestamp + '.log', msg_reply)
-    # sys.stdout = out
-    # sys.stderr = out
-    # try:
-    #     t = MyTTModel(week, year, train_prog=tp)
-    #     t.solve()
-    # finally:
-    #     out.close()
-    #     sys.stdout = sys.__stdout__
-    #     sys.stderr = sys.__stderr__
-    
-    with CaptureOutput(relay=False) as cap:
-        t = MyTTModel(week, year, train_prog=tp)
-        t.solve()
-        cap.save_to_path('home/prenaud/trash/modcap.log')
+# @shared_task
+# def run(week, year, timestamp, train_prog, msg_reply):
+#     try:
+#         tp = TrainingProgramme.objects.get(abbrev=train_prog)
+#     except ObjectDoesNotExist:
+#         tp = None
+#
+#     # out = Tee(str(year)+ '-' + str(week) + '--'
+#     #           + timestamp + '.log', msg_reply)
+#     # sys.stdout = out
+#     # sys.stderr = out
+#     # try:
+#     #     t = MyTTModel(week, year, train_prog=tp)
+#     #     t.solve()
+#     # finally:
+#     #     out.close()
+#     #     sys.stdout = sys.__stdout__
+#     #     sys.stderr = sys.__stderr__
+#
+#     with CaptureOutput(relay=False) as cap:
+#         t = MyTTModel(week, year, train_prog=tp)
+#         t.solve()
+#         cap.save_to_path('home/prenaud/trash/modcap.log')
         
 
 
