@@ -756,7 +756,7 @@ class TTModel(object):
 
     def add_specific_constraints(self):
         """
-        Add the speficic constraints stored in the database.
+        Add the specific constraints stored in the database.
         """
         for constraint_type in TTConstraint.__subclasses__():
             for constr in \
