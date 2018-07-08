@@ -31,7 +31,7 @@
 
 from pulp import LpVariable, LpConstraint, LpBinary, LpConstraintEQ, \
     LpConstraintGE, LpConstraintLE, LpAffineExpression, LpProblem, LpStatus, \
-    LpMinimize, lpSum
+    LpMinimize, lpSum, LpStatusOptimal, LpStatusNotSolved
 
 from pulp import GUROBI_CMD, PULP_CBC_CMD
 
@@ -865,16 +865,14 @@ class TTModel(object):
                                           maxSeconds=time_limit))
         status = LpStatus[self.model.status]
         print status
-        if status in ["Infeasible", "Undefined"]:
+        if status in [LpStatusOptimal, LpStatusNotSolved]:
+            return self.get_obj_coeffs()
+
+        else:
             print 'lpfile has been saved in FlOpTT-pulp.lp'
             return None
-        elif status in ["Optimal", "Not Solved"]:
-            return self.get_obj_coeffs()
-        else:
-            raise Exception("Strange result status...")
 
-    def solve(self, time_limit=3600, target_work_copy=None,
-              solver='gurobi'):
+    def solve(self, time_limit=3600, target_work_copy=None, solver='gurobi'):
         """
         Generates a schedule from the TTModel
         The solver stops either when the best schedule is obtained or timeLimit
