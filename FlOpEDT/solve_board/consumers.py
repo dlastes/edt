@@ -99,7 +99,7 @@ def ruru(week, year, channel):
         print 'qqweqw'
         
         t = MyTTModel(week, year)
-        t.solve(time_limit=20)
+        t.solve(time_limit=120, solver='CBC')
         cap.save_to_path('/home/prenaud/trash/modcap.log')
     print 'stop running'
     
