@@ -67,7 +67,7 @@ class Solve(Thread):
         super(Solve, self).__init__()
         self.week = week
         self.year = year
-        self.timesamp = timestamp
+        self.timestamp = timestamp
         self.channel = chan
         # if all train progs are called, training_programme=''
         try:
@@ -80,11 +80,11 @@ class Solve(Thread):
         print 'start running'
         with CaptureOutput(relay=False, channel=self.channel) as cap:
             t = MyTTModel(self.week, self.year, train_prog=self.training_programme)
-            t.solve(time_limit=20)
+            t.solve(time_limit=300)
             cap.save_to_path(os.path.join(settings.BASE_DIR,
                                           'logs',
-                                          str(year)+ '-' + str(week) + '--'
-                                          + timestamp + '.log'))
+                                          str(self.year)+ '-' + str(self.week) + '--'
+                                          + self.timestamp + '.log'))
         print 'stop running'
 
 
@@ -99,7 +99,7 @@ def ruru(week, year, channel):
         print 'qqweqw'
         
         t = MyTTModel(week, year)
-        t.solve(time_limit=120, solver='CBC')
+        t.solve(time_limit=300)
         cap.save_to_path('/home/prenaud/trash/modcap.log')
     print 'stop running'
     
