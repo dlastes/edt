@@ -25,6 +25,7 @@
 # without disclosing the source code of your own applications.
 
 from TTapp.TTModel import TTModel
+from modif.models import Time, Day
 
 class MyTTModel(TTModel):
     def add_specific_constraints(self):
@@ -52,6 +53,18 @@ class MyTTModel(TTModel):
                 else:
                     break
             self.add_to_inst_cost(i, self.min_bd_i * slot_by_day_cost)
+
+        # Minimize students' half days
+        # It should be stored in the database
+        gbhd_var = self.add_var('GBHD_var')
+        self.add_constraint(gbhd_var, '==', 1)
+        for g in self.wdb.basic_groups:
+            for d in self.wdb.days:
+                for apm in [Time.AM, Time.PM]:
+                    if (d.day, apm) != (Day.THURSDAY, Time.PM):
+                        self.FHD_G[apm][g] += gbhd_var - self.GBHD[(g, d, apm)]
+            self.add_to_group_cost(g, - self.min_bhd_g * self.FHD_G[Time.PM][g])
+            self.add_to_group_cost(g, - 0.5 * self.min_bhd_g * self.FHD_G[Time.AM][g])
 
 
     def solve(self, time_limit=3600, solver='CBC', target_work_copy=None):
