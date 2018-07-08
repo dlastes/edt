@@ -735,6 +735,56 @@ class TTModel(object):
 
         return non_prefered_slot_cost_course, avail_course
 
+    def add_slot_preferences(self):
+        print "adding slot preferences"
+        # first objective  => minimise use of unpreferred slots for teachers
+        # ponderation MIN_UPS_I
+        for i in self.wdb.instructors:
+            MinNonPreferedSlot(tutor=i,
+                               weight=max_weight) \
+                .enrich_model(self,
+                              ponderation=self.min_ups_i)
+
+        # second objective  => minimise use of unpreferred slots for courses
+        # ponderation MIN_UPS_C
+        for promo in self.train_prog:
+            MinNonPreferedSlot(train_prog=promo,
+                               weight=max_weight) \
+                .enrich_model(self,
+                              ponderation=self.min_ups_c)
+
+    def add_specific_constraints(self):
+        """
+        Add the speficic constraints stored in the database.
+        """
+        for constraint_type in TTConstraint.__subclasses__():
+            for constr in \
+                    constraint_type.objects.filter(Q(week=self.semaine)
+                                                   & Q(year=self.an)
+                                                   | Q(week__isnull=True)):
+                constr.enrich_model(self)
+
+    def update_objective(self):
+        for i in self.wdb.instructors:
+            self.obj += self.cost_I[i]
+        for g in self.wdb.basic_groups:
+            self.obj += self.cost_G[g]
+        self.set_objective(self.obj)
+
+    def add_TT_constraints(self):
+        self.add_stabilization_constraints()
+
+        self.add_core_constraints()
+
+        self.add_rooms_constraints()
+
+        self.add_slot_preferences()
+
+        self.add_dependency_constraints()
+
+        self.add_specific_constraints()
+
+
     def add_tt_to_db(self, target_work_copy):
         ScheduledCourse.objects.filter(cours__semaine=self.semaine, copie_travail=target_work_copy).delete()
         for sl in self.wdb.slots:
@@ -791,54 +841,6 @@ class TTModel(object):
                            valeur=self.get_expr_value(self.cost_G[g]))
             cg.save()
 
-    def add_slot_preferences(self):
-        print "adding slot preferences"
-        # first objective  => minimise use of unpreferred slots for teachers
-        # ponderation MIN_UPS_I
-        for i in self.wdb.instructors:
-            MinNonPreferedSlot(tutor=i,
-                               weight=max_weight) \
-                .enrich_model(self,
-                              ponderation=self.min_ups_i)
-
-        # second objective  => minimise use of unpreferred slots for courses
-        # ponderation MIN_UPS_C
-        for promo in self.train_prog:
-            MinNonPreferedSlot(train_prog=promo,
-                               weight=max_weight) \
-                .enrich_model(self,
-                              ponderation=self.min_ups_c)
-
-    def add_specific_constraints(self):
-        """
-        Add the speficic constraints stored in the database.
-        """
-        for constraint_type in TTConstraint.__subclasses__():
-            for constr in \
-                    constraint_type.objects.filter(Q(week=self.semaine)
-                                                   & Q(year=self.an)
-                                                   | Q(week__isnull=True)):
-                constr.enrich_model(self)
-
-    def update_objective(self):
-        for i in self.wdb.instructors:
-            self.obj += self.cost_I[i]
-        for g in self.wdb.basic_groups:
-            self.obj += self.cost_G[g]
-        self.set_objective(self.obj)
-
-    def add_TT_constraints(self):
-        self.add_stabilization_constraints()
-
-        self.add_core_constraints()
-
-        self.add_rooms_constraints()
-
-        self.add_slot_preferences()
-
-        self.add_dependency_constraints()
-
-        self.add_specific_constraints()
 
     def optimize(self, time_limit, solver, presolve=2):
         if solver == 'gurobi':
