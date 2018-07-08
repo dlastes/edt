@@ -23,17 +23,17 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from django.http import HttpResponse
-from channels.handler import AsgiHandler
+# from django.http import HttpResponse
+# from channels.handler import AsgiHandler
 from channels import Group, Channel
-from tasks import run
+# from tasks import run
 import json
 from threading import Thread
 from .modified_capturer import CaptureOutput
 from django.core.exceptions import ObjectDoesNotExist
 from MyFlOp.MyTTModel import MyTTModel
 from modif.models import TrainingProgramme
-from multiprocessing import Process
+# from multiprocessing import Process
 import os
 from django.conf import settings
 

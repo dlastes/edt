@@ -24,8 +24,8 @@
 # without disclosing the source code of your own applications.
 
 from __future__ import absolute_import, unicode_literals
-#from celery import shared_task
-from people.models import FullStaff
+# from celery import shared_task
+# from people.models import FullStaff
 from StringIO import StringIO
 from channels import Channel
 import os
