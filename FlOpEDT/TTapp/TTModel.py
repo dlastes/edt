@@ -690,11 +690,12 @@ class TTModel(object):
 
     def compute_non_prefered_slot_cost_course(self):
         """
-         il renvoie:
-         non_prefered_slot_cost_course :
-             a dict { Type de cours
-                      => { créneau non préféré => cout (float in [0,1])}}
-         avail_course : a 2 level-dictionary { Type de cours => slot => 0/1 }
+         :returns
+         non_prefered_slot_cost_course :a 2 level dictionary
+         { (CourseType, TrainingProgram)=> { Non-prefered slot => cost (float in [0,1])}}
+
+         avail_course : a 2 level-dictionary
+         { (CourseType, TrainingProgram) => slot => availability (0/1) }
         """
 
         non_prefered_slot_cost_course = {}
@@ -737,6 +738,9 @@ class TTModel(object):
         return non_prefered_slot_cost_course, avail_course
 
     def add_slot_preferences(self):
+        """
+         Add the constraints derived from the slot preferences expressed on the database
+         """
         print "adding slot preferences"
         # first objective  => minimise use of unpreferred slots for teachers
         # ponderation MIN_UPS_I
@@ -758,6 +762,7 @@ class TTModel(object):
         """
         Add the specific constraints stored in the database.
         """
+        print "adding specific constraints"
         for constraint_type in TTConstraint.__subclasses__():
             for constr in \
                     constraint_type.objects.filter(Q(week=self.semaine)
@@ -860,13 +865,13 @@ class TTModel(object):
                                           maxSeconds=time_limit))
         status = LpStatus[self.model.status]
         print status
-        if status in ["Not Solved", "Infeasible", "Undefined"]:
+        if status in ["Infeasible", "Undefined"]:
             print 'lpfile has been saved in FlOpTT-pulp.lp'
             return None
-        elif status == "Optimal":
+        elif status in ["Optimal", "Not Solved"]:
             return self.get_obj_coeffs()
         else:
-            raise Exception("Strange result: nor Solved nor not Solved...")
+            raise Exception("Strange result status...")
 
     def solve(self, time_limit=3600, target_work_copy=None,
               solver='gurobi'):
