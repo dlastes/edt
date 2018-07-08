@@ -5,7 +5,7 @@ django-extensions
 django-colorfield
 django-cache-machine
 pulp
-psycopg2
+psycopg2-binary
 requests
 numpy
 pyclustering
