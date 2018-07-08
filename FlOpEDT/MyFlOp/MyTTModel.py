@@ -35,8 +35,8 @@ class MyTTModel(TTModel):
         TTModel.add_specific_constraints(self)
 
 
-    def solve(self, time_limit=3600, target_work_copy=None):
+    def solve(self, time_limit=3600, solver='CBC', target_work_copy=None):
         """
         If you shall add pre (or post) processing apps, you may write them down here.
         """
-        TTModel.solve(self, time_limit=time_limit, target_work_copy=target_work_copy)
+        TTModel.solve(self, time_limit=time_limit, solver=solver, target_work_copy=target_work_copy)
