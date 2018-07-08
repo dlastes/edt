@@ -42,10 +42,6 @@ CHANNEL_LAYERS = {
         },
         "ROUTING": "solve_board.routing.channel_routing",
     },
-    # "default": {
-    #     "BACKEND": "asgiref.inmemory.ChannelLayer",
-    #     "ROUTING": "solve_board.routing.channel_routing",
-    # },
 }
 
 
