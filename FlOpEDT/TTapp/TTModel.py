@@ -864,8 +864,8 @@ class TTModel(object):
                                           presolve=presolve,
                                           maxSeconds=time_limit))
         status = self.model.status
-        print status
-        if status in [LpStatusOptimal, LpStatusNotSolved]:
+        print LpStatus[status]
+        if status == LpStatusOptimal or (solver != 'gurobi' and status == LpStatusNotSolved):
             return self.get_obj_coeffs()
 
         else:
