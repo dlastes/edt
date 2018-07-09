@@ -104,7 +104,7 @@ def edt(req, semaine, an, splash_id=0):
     # une_salle = RoomGroup.objects.all()[1].name
     une_salle = 'salle?'
 
-    if req.user.is_authenticated():
+    if req.user.is_authenticated:
         name_usr = req.user.username
         try:
             rights_usr = req.user.rights
@@ -288,7 +288,7 @@ def fetch_cours_pl(req):
         except ObjectDoesNotExist:
             regen = 'I'
         response['regen'] = regen
-        if req.user.is_authenticated():
+        if req.user.is_authenticated:
             response['reqDispos'] = Course \
                                         .objects \
                                         .filter(tutor=req.user,
@@ -346,7 +346,7 @@ def fetch_cours_pp(req):
 def fetch_dispos(req):
     print(req)
     if req.GET:
-        if req.user.is_authenticated():
+        if req.user.is_authenticated:
             print("================")
             semaine = req.GET.get('s', '')
             an = req.GET.get('a', '')
@@ -864,7 +864,7 @@ def contact(req):
             return edt(req, None, None, 1)
     else:
         init_mail = ''
-        if req.user.is_authenticated():
+        if req.user.is_authenticated:
             init_mail = req.user.email
         form = ContactForm(initial={
             'sender': init_mail})
