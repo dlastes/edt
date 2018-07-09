@@ -24,8 +24,16 @@
 # without disclosing the source code of your own applications.
 
 
-from channels.routing import ProtocolTypeRouter
+from channels.routing import ProtocolTypeRouter, URLRouter
+from channels.auth import AuthMiddlewareStack
+
+import solve_board.routing
 
 application = ProtocolTypeRouter({
     # (http->django views is added by default)
+    'websocket': AuthMiddlewareStack(
+        URLRouter(
+            solve_board.routing.websocket_urlpatterns
+        )
+    ),
 })

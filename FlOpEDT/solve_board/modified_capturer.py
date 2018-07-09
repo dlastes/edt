@@ -17,6 +17,7 @@ import signal
 import sys
 import tempfile
 import time
+import json
 
 # External dependencies.
 from humanfriendly.text import compact, dedent
@@ -645,7 +646,7 @@ class PseudoTerminal(MultiProcessHelper):
                 # Read from the master end of the pseudo terminal.
                 output = os.read(self.master_fd, self.chunk_size)
                 if output:
-                    self.channel.send({'text':output})
+                    self.channel.send(text_data=json.dumps({'message':output}))
                     # Store the output in the temporary file.
                     os.write(self.output_fd, output)
                     

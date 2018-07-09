@@ -61,7 +61,6 @@ function format_zero(x) {
     return x ;
 }
 
-
 function open_connection(){
     var now = new Date();
     opti_timestamp = now.getFullYear() + "-"
@@ -71,10 +70,11 @@ function open_connection(){
 	+ format_zero(now.getMinutes()) + "-"
 	+ format_zero(now.getSeconds()) ;
     
-    socket = new WebSocket("ws://" + window.location.host + "/solver/"
-			  + opti_timestamp);
+    socket = new WebSocket("ws://" + window.location.host + "/solver/");
+//			  + opti_timestamp);
     socket.onmessage = function(e) {
-	var s = e.data ;
+	var dat = JSON.parse(e.data) ;
+	var s = dat['message'] ;
 	while (s.length > 0 && s.slice(-1) == '\n') {
 	    s = s.substring(0,s.length-1);
 	}
@@ -87,7 +87,7 @@ function open_connection(){
 	if (train_prog_sel != text_all) {
 	    tp = train_prog_sel ;
 	}
-	socket.send(JSON.stringify({'text':
+	socket.send(JSON.stringify({'message':
 				    "C'est ti-par.\n"+opti_timestamp+"\nSolver ok?",
 				    'action':"go",
 				    'week':week_year_sel.week,
@@ -96,6 +96,9 @@ function open_connection(){
 				    'timestamp':opti_timestamp}))
     }
 
+    socket.onclose = function(e) {
+        console.error('Chat socket closed unexpectedly');
+    };
     // Call onopen directly if socket is already open
     if (socket.readyState == WebSocket.OPEN) socket.onopen();
 }

@@ -23,13 +23,11 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from channels.routing import route
+from django.conf.urls import url
 
-from solve_board.consumers import ws_add, ws_message#, ws_disconnect
+from . import consumers
 
-channel_routing = [
-    route("websocket.connect", ws_add),
-    route("websocket.receive", ws_message),
-#    route("websocket.disconnect", ws_disconnect),
-#    route("http.request", "solve_board.consumers.http_consumer"),
+websocket_urlpatterns = [
+    url(r'^solver/$', consumers.SolverConsumer),
+#(?P<timestamp>[0-9-]+)?
 ]

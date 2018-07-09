@@ -45,21 +45,35 @@ from django.conf import settings
 from channels.generic.websocket import WebsocketConsumer
 import json
 
-class ChatConsumer(WebsocketConsumer):
+class SolverConsumer(WebsocketConsumer):
     def connect(self):
         # ws_message()
         self.accept()
+        self.send(text_data=json.dumps({
+            'message': 'hello'
+        }))
+
 
     def disconnect(self, close_code):
         pass
 
     def receive(self, text_data):
-        text_data_json = json.loads(text_data)
-        message = text_data_json['message']
+        data = json.loads(text_data)
+        message = data['message']
 
         self.send(text_data=json.dumps({
             'message': message
         }))
+        if data['action'] == 'go':
+            self.send(text_data=json.dumps({
+                'message': 'you want me to go. I got it.'
+            }))
+        Solve(data['week'],data['year'],
+              data['timestamp'],
+              data['train_prog'],
+              self).start()
+            
+
         # ws_add(text_data)
 
 
@@ -92,30 +106,30 @@ class ChatConsumer(WebsocketConsumer):
 #         # p.start()
 
 
-# class Solve(Thread):
-#     def __init__(self, week, year, timestamp, training_programme, chan):
-#         super(Solve, self).__init__()
-#         self.week = week
-#         self.year = year
-#         self.timestamp = timestamp
-#         self.channel = chan
-#         # if all train progs are called, training_programme=''
-#         try:
-#             self.training_programme = TrainingProgramme.objects.get(abbrev=training_programme)
-#         except ObjectDoesNotExist:
-#             self.training_programme = None
+class Solve(Thread):
+    def __init__(self, week, year, timestamp, training_programme, chan):
+        super(Solve, self).__init__()
+        self.week = week
+        self.year = year
+        self.timestamp = timestamp
+        self.channel = chan
+        # if all train progs are called, training_programme=''
+        try:
+            self.training_programme = TrainingProgramme.objects.get(abbrev=training_programme)
+        except ObjectDoesNotExist:
+            self.training_programme = None
         
     
-#     def run(self):
-#         print('start running')
-#         with CaptureOutput(relay=False, channel=self.channel) as cap:
-#             t = MyTTModel(self.week, self.year, train_prog=self.training_programme)
-#             t.solve(time_limit=300)
-#             cap.save_to_path(os.path.join(settings.BASE_DIR,
-#                                           'logs',
-#                                           str(self.year)+ '-' + str(self.week) + '--'
-#                                           + self.timestamp + '.log'))
-#         print('stop running')
+    def run(self):
+        print('start running')
+        with CaptureOutput(relay=False, channel=self.channel) as cap:
+            t = MyTTModel(self.week, self.year, train_prog=self.training_programme)
+            t.solve(time_limit=300)
+            cap.save_to_path(os.path.join(settings.BASE_DIR,
+                                          'logs',
+                                          str(self.year)+ '-' + str(self.week) + '--'
+                                          + self.timestamp + '.log'))
+        print('stop running')
 
 
 
