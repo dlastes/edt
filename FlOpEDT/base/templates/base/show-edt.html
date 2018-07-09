@@ -30,11 +30,11 @@
 
 
 {% load static %}
-<link rel="stylesheet" href="{% static 'modif/better.css' %}?2"/>
-  <script src="{% static 'modif/d3.v4.min.js' %}"></script>
+<link rel="stylesheet" href="{% static 'base/better.css' %}?2"/>
+  <script src="{% static 'base/d3.v4.min.js' %}"></script>
   <!-- script src='https://d3js.org/d3.v4.min.js'></script -->
   <script>
-    var groupes_fi = "{% static 'modif/groups.json' %}";
+    var groupes_fi = "{% static 'base/groups.json' %}";
 
     var url_cours_pl = "{% url "fetch_cours_pl" %}";
     var url_cours_pp = "{% url "fetch_cours_pp" %}";
@@ -67,14 +67,14 @@
     var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
   </script>
 
-  <!--   <script type='text/javascript' src="{% static "modif/better.js" %}"></script>-->
-  <script type='text/javascript' src="{% static 'modif/week_change.js' %}"></script>
-  <script type='text/javascript' src="{% static 'modif/transformation.js' %}"></script>
-  <script type='text/javascript' src="{% static 'modif/creation.js' %}"></script>
-  <script type='text/javascript' src="{% static 'modif/action.js' %}"></script>
-  <script type='text/javascript' src="{% static 'modif/update.js' %}"></script>
-  <script type='text/javascript' src="{% static 'modif/variables.js' %}?2"></script>
-  <script type='text/javascript' src="{% static 'modif/all.js' %}"></script>
+  <!--   <script type='text/javascript' src="{% static "base/better.js" %}"></script>-->
+  <script type='text/javascript' src="{% static 'base/week_change.js' %}"></script>
+  <script type='text/javascript' src="{% static 'base/transformation.js' %}"></script>
+  <script type='text/javascript' src="{% static 'base/creation.js' %}"></script>
+  <script type='text/javascript' src="{% static 'base/action.js' %}"></script>
+  <script type='text/javascript' src="{% static 'base/update.js' %}"></script>
+  <script type='text/javascript' src="{% static 'base/variables.js' %}?2"></script>
+  <script type='text/javascript' src="{% static 'base/all.js' %}"></script>
     
 
 {% endblock %}

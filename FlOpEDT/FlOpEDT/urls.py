@@ -46,5 +46,5 @@ urlpatterns = [
     url(r'^accounts/', include('people.urls', namespace="people")),
     url(r'^citations/', include('quote.urls', namespace="quote")),
     url(r'^solve-board/', include('solve_board.urls', namespace="solve_board")),
-    url(r'^', include('modif.urls')),
+    url(r'^', include('base.urls')),
 ]

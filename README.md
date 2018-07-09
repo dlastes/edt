@@ -1,4 +1,4 @@
-![Logo](./FlOpEDT/modif/static/modif/img/flop2.png)
+![Logo](./FlOpEDT/base/static/base/img/flop2.png)
 
 FlOpEDT/FlOpScheduler est un outil de gestion
 d'emplois du temps comprenant :

@@ -35,7 +35,7 @@ from pulp import LpVariable, LpConstraint, LpBinary, LpConstraintEQ, \
 
 from pulp import GUROBI_CMD, PULP_CBC_CMD
 
-from modif.models import Slot, Group, Day, Time, \
+from base.models import Slot, Group, Day, Time, \
     Room, RoomGroup, RoomSort, RoomType, RoomPreference, \
     Course, ScheduledCourse, UserPreference, CoursePreference, \
     Module, TrainingProgramme, CourseType, \
@@ -43,7 +43,7 @@ from modif.models import Slot, Group, Day, Time, \
 
 from people.models import Tutor
 
-from modif.weeks import annee_courante
+from base.weeks import annee_courante
 
 from TTapp.models import MinNonPreferedSlot, max_weight, Stabilize, TTConstraint
 

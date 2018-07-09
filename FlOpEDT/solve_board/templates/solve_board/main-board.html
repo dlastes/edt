@@ -29,9 +29,9 @@
 
 {% block title %} Génération {% endblock %}
 {% block content %}
-<link rel="stylesheet" href="{% static "modif/header.css" %}"/>
-<link rel="stylesheet" href="{% static "modif/better.css" %}"/>
-<script src="{% static "modif/d3.v4.min.js" %}"></script>
+<link rel="stylesheet" href="{% static "base/header.css" %}"/>
+<link rel="stylesheet" href="{% static "base/better.css" %}"/>
+<script src="{% static "base/d3.v4.min.js" %}"></script>
   <!-- script src="https://d3js.org/d3.v4.min.js"></script -->
   <script>
     var week_year_list = {{ all_weeks|safe }};

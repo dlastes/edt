@@ -460,7 +460,7 @@ function confirm_change() {
     compute_changes(changes, profs_conc, gps);
 
     if (changes.length == 0) {
-        ack.edt = "modif EdT : RAS";
+        ack.edt = "base EdT : RAS";
         go_ack_msg(true);
     } else {
 
@@ -547,7 +547,7 @@ function send_dis_change() {
     var nbDispos = 0;
 
     if (user.dispos_bu.length == 0) {
-        ack.edt = "modif dispo : RAS";
+        ack.edt = "base dispo : RAS";
         go_ack_msg(true);
         return;
     }
@@ -574,7 +574,7 @@ function send_dis_change() {
 
 
     if (changes.length == 0) {
-        ack.edt = "modif dispo : RAS";
+        ack.edt = "base dispo : RAS";
         go_ack_msg(true);
     } else {
 

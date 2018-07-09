@@ -121,7 +121,7 @@ class BIATOS(Tutor):
 
 
 class Student(User):  # for now: representative
-    belong_to = models.ManyToManyField('modif.Group',
+    belong_to = models.ManyToManyField('base.Group',
                                        blank=True)
 
     def __str__(self):

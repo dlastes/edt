@@ -31,7 +31,7 @@
 
 @font-face {
   font-family: 'flog';
-  src: url('/static/modif/fonts/FFF_Tusj.ttf')  format("truetype"),
+  src: url('/static/base/fonts/FFF_Tusj.ttf')  format("truetype"),
        local('flog');
 }
 

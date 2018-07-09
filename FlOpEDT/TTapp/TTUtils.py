@@ -25,7 +25,7 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from modif.models import Slot, ScheduledCourse, RoomPreference
+from base.models import Slot, ScheduledCourse, RoomPreference
 from django.db.models import Max
 
 

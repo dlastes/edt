@@ -24,7 +24,7 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from modif.models import Time, Day, Slot
+from base.models import Time, Day, Slot
 
 from django.core.exceptions import ObjectDoesNotExist
 

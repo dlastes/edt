@@ -25,7 +25,7 @@
 
 from django.contrib import admin
 
-from modif.models import Day, RoomGroup, Module, Course, Group, Slot, \
+from base.models import Day, RoomGroup, Module, Course, Group, Slot, \
     UserPreference, Time, ScheduledCourse, EdtVersion, CourseModification, \
     PlanningModification, BreakingNews, TrainingProgramme, ModuleDisplay
 

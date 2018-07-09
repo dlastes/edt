@@ -32,7 +32,7 @@ from threading import Thread
 from .modified_capturer import CaptureOutput
 from django.core.exceptions import ObjectDoesNotExist
 from MyFlOp.MyTTModel import MyTTModel
-from modif.models import TrainingProgramme
+from base.models import TrainingProgramme
 # from multiprocessing import Process
 import os
 from django.conf import settings

@@ -24,7 +24,7 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from modif.models import Group, TrainingProgramme, GroupDisplay, \
+from base.models import Group, TrainingProgramme, GroupDisplay, \
     TrainingProgrammeDisplay
 
 from django.core.exceptions import ObjectDoesNotExist
@@ -65,7 +65,7 @@ def generate_group_file():
 
         final_groups.append(get_descendant_groups(gp_master, gp_dict_children))
 
-    with open(os.path.join(settings.BASE_DIR, 'modif', 'static', 'modif',
+    with open(os.path.join(settings.BASE_DIR, 'base', 'static', 'base',
                            'groups.json'), 'w') as fp:
         json.dump(final_groups, fp)
 

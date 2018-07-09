@@ -738,8 +738,8 @@ Reste :
   x couleur modules
   x display filtre prof
   x semaines (fetch, go_course, go_dispo)
-  x modif edt (d&d, struct edt, check, display conflits, semaine pro)
-  o modif dispos (simple, 0-9, semaine type)
+  x base edt (d&d, struct edt, check, display conflits, semaine pro)
+  o base dispos (simple, 0-9, semaine type)
   o plot par défaut
   x move next week
 */

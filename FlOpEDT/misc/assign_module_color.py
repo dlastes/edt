@@ -24,8 +24,8 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from modif.weeks import week_list
-from modif.models import Course, ModuleDisplay, TrainingProgramme, Module
+from base.weeks import week_list
+from base.models import Course, ModuleDisplay, TrainingProgramme, Module
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings

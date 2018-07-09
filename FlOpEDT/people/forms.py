@@ -28,7 +28,7 @@ from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.db import transaction
 
 from .models import Student, User, FullStaff, SupplyStaff, BIATOS, Tutor
-from modif.models import Group
+from base.models import Group
 
 class AddStudentForm(UserCreationForm):
     gps = forms.ModelMultipleChoiceField(

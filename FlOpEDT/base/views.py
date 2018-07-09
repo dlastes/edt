@@ -75,7 +75,7 @@ fav_regexp = r'^(?P<fav>(favicon.ico)|(site\.webmanifest)' \
 
 def favicon(req, fav):
     return RedirectView.as_view(
-        url=staticfiles_storage.url('modif/img/favicons/' + fav),
+        url=staticfiles_storage.url('base/img/favicons/' + fav),
         permanent=False)(req)
 
 
@@ -114,7 +114,7 @@ def edt(req, semaine, an, splash_id=0):
         name_usr = ''
         rights_usr = 0
 
-    return render(req, 'modif/show-edt.html',
+    return render(req, 'base/show-edt.html',
                   {'all_weeks': week_list(),
                    'semaine': semaine,
                    'an': an,
@@ -155,7 +155,7 @@ def edt_light(req, semaine, an):
 
     une_salle = "salle?"  # RoomGroup.objects.all()[0].name
 
-    return render(req, 'modif/show-edt-light.html',
+    return render(req, 'base/show-edt-light.html',
                   {'all_weeks': week_list(),
                    'semaine': semaine,
                    'an': an,
@@ -175,7 +175,7 @@ def stype(req):
     err = ''
     if req.method == 'GET':
         return render(req,
-                      'modif/show-stype.html',
+                      'base/show-stype.html',
                       {'date_deb': current_week(),
                        'date_fin': current_week(),
                        'name_usr': req.user.username,
@@ -205,7 +205,7 @@ def stype(req):
             print req.POST['save']
 
         return render(req,
-                      'modif/show-stype.html',
+                      'base/show-stype.html',
                       {'date_deb': date_deb,
                        'date_fin': date_fin,
                        'name_usr': req.user.username,
@@ -215,13 +215,13 @@ def stype(req):
 
 
 def aide(req):
-    return render(req, 'modif/aide.html')
+    return render(req, 'base/aide.html')
 
 
 @login_required
 def decale(req):
     if req.method != 'GET':
-        return render(req, 'modif/aide.html', {})
+        return render(req, 'base/aide.html', {})
 
     semaine_init = req.GET.get('s', '-1')
     an_init = req.GET.get('a', '-1')
@@ -229,7 +229,7 @@ def decale(req):
     for p in Tutor.objects.all().order_by('username'):
         liste_profs.append(p.username.encode('utf8'))
 
-    return render(req, 'modif/show-decale.html',
+    return render(req, 'base/show-decale.html',
                   {'all_weeks': week_list(),
                    'semaine_init': semaine_init,
                    'an_init': an_init,
@@ -856,7 +856,7 @@ def contact(req):
                 )
             except:
                 ack = u'Envoi du mail impossible !'
-                return render(req, 'modif/contact.html',
+                return render(req, 'base/contact.html',
                               {'form': form,
                                'ack': ack
                               })
@@ -868,7 +868,7 @@ def contact(req):
             init_mail = req.user.email
         form = ContactForm(initial={
             'sender': init_mail})
-    return render(req, 'modif/contact.html',
+    return render(req, 'base/contact.html',
                   {'form': form,
                    'ack': ack
                   })

@@ -38,7 +38,7 @@ from django.utils.translation import ugettext_lazy as _
 
 # from caching.base import CachingManager, CachingMixin
 
-from modif.models import Course, Time  # , Module
+from base.models import Course, Time  # , Module
 
 # class TestJour(models.Model):
 #     jour = models.ForeignKey('modif.Jour')
@@ -76,12 +76,12 @@ class LimitCourseTypePerPeriod(TTConstraint):  # , pond):
     Permet de limiter le nombre de cours du type 'type' par
     jour/demi-journee
     """
-    type = models.ForeignKey('modif.CourseType')
+    type = models.ForeignKey('base.CourseType')
     limit = models.PositiveSmallIntegerField()
-    train_prog = models.ForeignKey('modif.TrainingProgramme',
+    train_prog = models.ForeignKey('base.TrainingProgramme',
                                    null=True,
                                    default=None)
-    module = models.ForeignKey('modif.Module', null=True)
+    module = models.ForeignKey('base.Module', null=True)
     tutor = models.ForeignKey('people.Tutor',
                               null=True,
                               default=None)
@@ -126,10 +126,10 @@ class ReasonableDays(TTConstraint):
     a None value builds the constraint for all possible values,
     e.g. promo = None => the constraint holds for all promos.
     """
-    train_prog = models.ForeignKey('modif.TrainingProgramme',
+    train_prog = models.ForeignKey('base.TrainingProgramme',
                                    null=True,
                                    default=None)
-    group = models.ForeignKey('modif.Group', null=True)
+    group = models.ForeignKey('base.Group', null=True)
     tutor = models.ForeignKey('people.Tutor',
                               null=True,
                               default=None)
@@ -173,15 +173,15 @@ class Stabilize(TTConstraint):
     general = models.BooleanField(
         verbose_name='Stabiliser tout?',
         default=False)
-    train_prog = models.ForeignKey('modif.TrainingProgramme',
+    train_prog = models.ForeignKey('base.TrainingProgramme',
                                    null=True,
                                    default=None)
-    group = models.ForeignKey('modif.Group', null=True, default=None)
-    module = models.ForeignKey('modif.Module', null=True, default=None)
+    group = models.ForeignKey('base.Group', null=True, default=None)
+    module = models.ForeignKey('base.Module', null=True, default=None)
     tutor = models.ForeignKey('people.Tutor',
                               null=True,
                               default=None)
-    type = models.ForeignKey('modif.CourseType', null=True, default=None)
+    type = models.ForeignKey('base.CourseType', null=True, default=None)
     work_copy = models.PositiveSmallIntegerField(default=0)
 
     def enrich_model(self, ttmodel, ponderation=1):
@@ -247,7 +247,7 @@ class MinHalfDays(TTConstraint):
     All courses will fit in a minimum of half days
     Optional : if 2 courses only, possibility to join it
     """
-    module = models.ForeignKey('modif.Module', null=True)
+    module = models.ForeignKey('base.Module', null=True)
     tutor = models.ForeignKey('people.Tutor',
                               null=True,
                               default=None)
@@ -331,7 +331,7 @@ class MinNonPreferedSlot(TTConstraint):
     tutor = models.ForeignKey('people.Tutor',
                               null=True,
                               default=None)
-    train_prog = models.ForeignKey('modif.TrainingProgramme',
+    train_prog = models.ForeignKey('base.TrainingProgramme',
                                    null=True,
                                    default=None)
 
@@ -381,12 +381,12 @@ class AvoidBothSlots(TTConstraint):
     Idéalement, on pourrait paramétrer slot1, et slot2 à partir de slot1... Genre slot1
     c'est 8h n'importe quel jour, et slot2 14h le même jour...
     """
-    slot1 = models.ForeignKey('modif.Slot', related_name='slot1')
-    slot2 = models.ForeignKey('modif.Slot', related_name='slot2')
-    train_prog = models.ForeignKey('modif.TrainingProgramme',
+    slot1 = models.ForeignKey('base.Slot', related_name='slot1')
+    slot2 = models.ForeignKey('base.Slot', related_name='slot2')
+    train_prog = models.ForeignKey('base.TrainingProgramme',
                                    null=True,
                                    default=None)
-    group = models.ForeignKey('modif.Group', null=True)
+    group = models.ForeignKey('base.Group', null=True)
     tutor = models.ForeignKey('people.Tutor',
                               null=True,
                               default=None)
@@ -418,10 +418,10 @@ class AvoidBothSlots(TTConstraint):
 #     Avoid the use of an isolated slot
 #     RESTE A FAIRE (est-ce possible en non quadratique?)
 #     """
-#     train_prog = models.ForeignKey('modif.TrainingProgramme',
+#     train_prog = models.ForeignKey('base.TrainingProgramme',
 #                                    null = True,
 #                                    default = None)
-#     group = models.ForeignKey('modif.Groupe', null=True)
+#     group = models.ForeignKey('base.Groupe', null=True)
 #     tutor = models.ForeignKey('people.Tutor', null=True)
 #
 #     def enrich_model(self, ttmodel, ponderation=1):
@@ -439,8 +439,8 @@ class SimultaneousCourses(TTConstraint):
     Force two courses to be simultaneous
     It modifies the core constraints that impides such a simultaneity
     """
-    course1 = models.ForeignKey('modif.Course', related_name='course1')
-    course2 = models.ForeignKey('modif.Course', related_name='course2')
+    course1 = models.ForeignKey('base.Course', related_name='course1')
+    course2 = models.ForeignKey('base.Course', related_name='course2')
 
     def enrich_model(self, ttmodel, ponderation=1):
         same_tutor = (self.course1.tutor == self.course2.tutor)

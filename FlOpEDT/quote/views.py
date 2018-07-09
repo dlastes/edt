@@ -30,7 +30,7 @@ from django.shortcuts import render
 from .forms import QuoteForm  # ProfForm, UserForm
 
 from .models import Quote
-from modif.views import edt
+from base.views import edt
 
 from random import randint
 from django.http import JsonResponse

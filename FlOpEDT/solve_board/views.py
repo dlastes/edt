@@ -25,8 +25,8 @@
 
 from __future__ import unicode_literals
 
-from modif import weeks
-from modif.models import TrainingProgramme
+from base import weeks
+from base.models import TrainingProgramme
 from people.models import FullStaff
 from solve_board.models import SolveRun
 from solve_board.consumers import ws_add

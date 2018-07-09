@@ -56,7 +56,7 @@ INSTALLED_APPS = [
     'django_extensions',
     'import_export',
     'colorfield',
-    'modif',
+    'base',
     'TTapp',
     'quote',
     'people',
@@ -145,7 +145,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 STATIC_URL = '/static/'
 
-# AUTH_USER_MODEL = 'modif.User'
+# AUTH_USER_MODEL = 'base.User'
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.10/topics/i18n/
