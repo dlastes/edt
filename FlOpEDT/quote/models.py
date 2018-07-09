@@ -31,7 +31,8 @@ from django.db import models
 class QuoteType(models.Model):
     name = models.CharField(max_length=40)
     abbrev = models.CharField(max_length=10, null=True, blank=True)
-    parent = models.ForeignKey('self', null=True, blank=True)
+    parent = models.ForeignKey('self', null=True, blank=True,
+                               on_delete=models.CASCADE)
 
     def __unicode__(self):
         return str(self.name)
@@ -53,7 +54,8 @@ class Quote(models.Model):
     header = models.CharField(max_length=20, null=True,
                               blank=True, default=None)
     quote_type = models.ForeignKey('QuoteType', blank=True,
-                                   null=True, default=None)
+                                   null=True, default=None,
+                                   on_delete=models.CASCADE)
     positive_votes = models.PositiveIntegerField(default=0)
     negative_votes = models.PositiveIntegerField(default=0)
     id_acc = models.PositiveIntegerField(default=0)

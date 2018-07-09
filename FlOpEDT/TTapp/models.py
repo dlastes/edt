@@ -41,7 +41,7 @@ from django.utils.translation import ugettext_lazy as _
 from base.models import Course, Time  # , Module
 
 # class TestJour(models.Model):
-#     jour = models.ForeignKey('modif.Jour')
+#     jour = models.ForeignKey('modif.Jour', on_delete=models.CASCADE)
 #     truc = models.CharField(max_length=10, verbose_name="Truc",default="")
 
 
@@ -76,15 +76,17 @@ class LimitCourseTypePerPeriod(TTConstraint):  # , pond):
     Permet de limiter le nombre de cours du type 'type' par
     jour/demi-journee
     """
-    type = models.ForeignKey('base.CourseType')
+    type = models.ForeignKey('base.CourseType', on_delete=models.CASCADE)
     limit = models.PositiveSmallIntegerField()
     train_prog = models.ForeignKey('base.TrainingProgramme',
                                    null=True,
-                                   default=None)
-    module = models.ForeignKey('base.Module', null=True)
+                                   default=None,
+                                   on_delete=models.CASCADE)
+    module = models.ForeignKey('base.Module', null=True, on_delete=models.CASCADE)
     tutor = models.ForeignKey('people.Tutor',
                               null=True,
-                              default=None)
+                              default=None,
+                              on_delete=models.CASCADE)
     FULL_DAY = 'fd'
     HALF_DAY = 'hd'
     PERIOD_CHOICES = ((FULL_DAY, 'Full day'), (HALF_DAY, 'Half day'))
@@ -128,11 +130,13 @@ class ReasonableDays(TTConstraint):
     """
     train_prog = models.ForeignKey('base.TrainingProgramme',
                                    null=True,
-                                   default=None)
-    group = models.ForeignKey('base.Group', null=True)
+                                   default=None,
+                                   on_delete=models.CASCADE)
+    group = models.ForeignKey('base.Group', null=True, on_delete=models.CASCADE)
     tutor = models.ForeignKey('people.Tutor',
                               null=True,
-                              default=None)
+                              default=None,
+                              on_delete=models.CASCADE)
 
     def enrich_model(self, ttmodel, ponderation=1):
         for d in ttmodel.wdb.days:
@@ -175,13 +179,15 @@ class Stabilize(TTConstraint):
         default=False)
     train_prog = models.ForeignKey('base.TrainingProgramme',
                                    null=True,
-                                   default=None)
-    group = models.ForeignKey('base.Group', null=True, default=None)
-    module = models.ForeignKey('base.Module', null=True, default=None)
+                                   default=None,
+                                   on_delete=models.CASCADE)
+    group = models.ForeignKey('base.Group', null=True, default=None, on_delete=models.CASCADE)
+    module = models.ForeignKey('base.Module', null=True, default=None, on_delete=models.CASCADE)
     tutor = models.ForeignKey('people.Tutor',
                               null=True,
-                              default=None)
-    type = models.ForeignKey('base.CourseType', null=True, default=None)
+                              default=None,
+                              on_delete=models.CASCADE)
+    type = models.ForeignKey('base.CourseType', null=True, default=None, on_delete=models.CASCADE)
     work_copy = models.PositiveSmallIntegerField(default=0)
 
     def enrich_model(self, ttmodel, ponderation=1):
@@ -247,10 +253,11 @@ class MinHalfDays(TTConstraint):
     All courses will fit in a minimum of half days
     Optional : if 2 courses only, possibility to join it
     """
-    module = models.ForeignKey('base.Module', null=True)
+    module = models.ForeignKey('base.Module', null=True, on_delete=models.CASCADE)
     tutor = models.ForeignKey('people.Tutor',
                               null=True,
-                              default=None)
+                              default=None,
+                              on_delete=models.CASCADE)
     join2courses = models.BooleanField(
         verbose_name='If 2 or 4 courses only, join it?',
         default=False)
@@ -330,10 +337,12 @@ class MinNonPreferedSlot(TTConstraint):
     """
     tutor = models.ForeignKey('people.Tutor',
                               null=True,
-                              default=None)
+                              default=None,
+                              on_delete=models.CASCADE)
     train_prog = models.ForeignKey('base.TrainingProgramme',
                                    null=True,
-                                   default=None)
+                                   default=None,
+                                   on_delete=models.CASCADE)
 
     # is not called when save() is
     def clean(self):
@@ -381,15 +390,17 @@ class AvoidBothSlots(TTConstraint):
     Idéalement, on pourrait paramétrer slot1, et slot2 à partir de slot1... Genre slot1
     c'est 8h n'importe quel jour, et slot2 14h le même jour...
     """
-    slot1 = models.ForeignKey('base.Slot', related_name='slot1')
-    slot2 = models.ForeignKey('base.Slot', related_name='slot2')
+    slot1 = models.ForeignKey('base.Slot', related_name='slot1', on_delete=models.CASCADE)
+    slot2 = models.ForeignKey('base.Slot', related_name='slot2', on_delete=models.CASCADE)
     train_prog = models.ForeignKey('base.TrainingProgramme',
                                    null=True,
-                                   default=None)
-    group = models.ForeignKey('base.Group', null=True)
+                                   default=None,
+                                   on_delete=models.CASCADE)
+    group = models.ForeignKey('base.Group', null=True, on_delete=models.CASCADE)
     tutor = models.ForeignKey('people.Tutor',
                               null=True,
-                              default=None)
+                              default=None,
+                              on_delete=models.CASCADE)
 
     def enrich_model(self, ttmodel, ponderation=1):
         fc = ttmodel.wdb.courses
@@ -420,9 +431,10 @@ class AvoidBothSlots(TTConstraint):
 #     """
 #     train_prog = models.ForeignKey('base.TrainingProgramme',
 #                                    null = True,
-#                                    default = None)
-#     group = models.ForeignKey('base.Groupe', null=True)
-#     tutor = models.ForeignKey('people.Tutor', null=True)
+#                                    default = None,
+#                                    on_delete=models.CASCADE)
+#     group = models.ForeignKey('base.Groupe', null=True, on_delete=models.CASCADE)
+#     tutor = models.ForeignKey('people.Tutor', null=True, on_delete=models.CASCADE)
 #
 #     def enrich_model(self, ttmodel, ponderation=1):
 #         fc = ttmodel.wdb.courses
@@ -439,8 +451,8 @@ class SimultaneousCourses(TTConstraint):
     Force two courses to be simultaneous
     It modifies the core constraints that impides such a simultaneity
     """
-    course1 = models.ForeignKey('base.Course', related_name='course1')
-    course2 = models.ForeignKey('base.Course', related_name='course2')
+    course1 = models.ForeignKey('base.Course', related_name='course1', on_delete=models.CASCADE)
+    course2 = models.ForeignKey('base.Course', related_name='course2', on_delete=models.CASCADE)
 
     def enrich_model(self, ttmodel, ponderation=1):
         same_tutor = (self.course1.tutor == self.course2.tutor)
