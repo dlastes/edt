@@ -1,6 +1,6 @@
 # coding:utf-8
 
-# !/usr/bin/python
+# !/usr/bin/python3
 
 # This file is part of the FlOpEDT/FlOpScheduler project.
 # Copyright (c) 2017

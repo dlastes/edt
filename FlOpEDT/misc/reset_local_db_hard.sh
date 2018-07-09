@@ -52,6 +52,6 @@ then
     # done
     m=$BASE/"manage.py"
     s="FlOpEDT.settings.local"
-    python $m makemigrations --settings=$s
-    python $m migrate --settings=$s
+    python3 $m makemigrations --settings=$s
+    python3 $m migrate --settings=$s
 fi

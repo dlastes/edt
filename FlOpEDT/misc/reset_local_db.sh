@@ -29,5 +29,5 @@ if [ $rep = "oui" ]
 then
     sudo -u postgres psql -c 'drop database "FlOp_database"'
     sudo -u postgres createdb FlOp_database
-    python ../manage.py migrate --settings=FlOpEDT.settings.local
+    python3 ../manage.py migrate --settings=FlOpEDT.settings.local
 fi
