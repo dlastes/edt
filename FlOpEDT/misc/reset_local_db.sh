@@ -27,7 +27,7 @@ echo "Continuer ? (oui ?)"
 read rep
 if [ $rep = "oui" ]
 then
-    sudo -u postgres psql -c 'drop database "FlOp_database"'
-    sudo -u postgres createdb FlOp_database
+    sudo -u postgres psql -c 'drop database "FlOp_database_abst-gen"'
+    sudo -u postgres createdb FlOp_database_abst-gen
     python3 ../manage.py migrate --settings=FlOpEDT.settings.local
 fi
