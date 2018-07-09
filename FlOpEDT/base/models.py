@@ -34,7 +34,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
-from caching.base import CachingManager, CachingMixin
+# from caching.base import CachingManager, CachingMixin
 
 from colorfield.fields import ColorField
 
@@ -61,7 +61,7 @@ class BreakingNews(models.Model):
     # stroke color
     strk_color = ColorField(default='#000000')
 
-    def __unicode__(self):
+    def __str__(self):
         return '@(' + str(self.x_beg) + '--' + str(self.x_end) \
                + ',' + str(self.y) \
                + ')-W' + str(self.week) + ',Y' \
@@ -80,14 +80,14 @@ class TrainingProgramme(models.Model):
     name = models.CharField(max_length=50)
     abbrev = models.CharField(max_length=5)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.abbrev
 
 
 class GroupType(models.Model):
     name = models.CharField(max_length=50)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
@@ -104,7 +104,7 @@ class Group(models.Model):
     def full_name(self):
         return self.train_prog.abbrev + "-" + self.nom
 
-    def __unicode__(self):
+    def __str__(self):
         return self.nom
 
     def ancestor_groups(self):
@@ -148,7 +148,7 @@ class Day(models.Model):
 
     day = models.CharField(max_length=2, choices=CHOICES, default=MONDAY)
 
-    def __unicode__(self):
+    def __str__(self):
         # return self.nom[:3]
         return self.day
 
@@ -168,7 +168,7 @@ class Time(models.Model):
     minutes = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(59)], default=0)
 
-    def __unicode__(self):
+    def __str__(self):
         return str(self.hours)
 
     def full_name(self):
@@ -183,9 +183,9 @@ def define_apm(sender, instance, *args, **kwargs):
     if instance.hours >= 12:
         instance.apm = Time.PM
 
-# class Creneau(models.Model):
-class Slot(CachingMixin, models.Model):
-    objects = CachingManager()
+class Slot(models.Model):
+#class Slot(CachingMixin, models.Model):
+#    objects = CachingManager()
     jour = models.ForeignKey('Day', on_delete=models.CASCADE)
     heure = models.ForeignKey('Time', on_delete=models.CASCADE)
     duration = models.PositiveSmallIntegerField(
@@ -226,18 +226,18 @@ class Period(models.Model):
 # -----------
 
 
-# class RoomType(models.Model):
-class RoomType(CachingMixin, models.Model):
-    objects = CachingManager()
+class RoomType(models.Model):
+# class RoomType(CachingMixin, models.Model):
+#    objects = CachingManager()
     name = models.CharField(max_length=20)
 
     def __str__(self):
         return self.name
 
 
-# class RoomGroup(models.Model):
-class RoomGroup(CachingMixin, models.Model):
-    objects = CachingManager()
+class RoomGroup(models.Model):
+# class RoomGroup(CachingMixin, models.Model):
+#    objects = CachingManager()
     name = models.CharField(max_length=20)
     types = models.ManyToManyField(RoomType,
                                    blank=True,
@@ -247,9 +247,9 @@ class RoomGroup(CachingMixin, models.Model):
         return self.name
 
 
-# class Room(models.Model):
-class Room(CachingMixin, models.Model):
-    objects = CachingManager()
+class Room(models.Model):
+# class Room(CachingMixin, models.Model):
+#    objects = CachingManager()
     name = models.CharField(max_length=20)
     subroom_of = models.ManyToManyField(RoomGroup,
                                         blank=True,
@@ -305,13 +305,13 @@ class CourseType(models.Model):
                                          blank=True,
                                          related_name="compatible_course_types")
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
-# class Cours(models.Model):
-class Course(CachingMixin, models.Model):
-    objects = CachingManager()
+class Course(models.Model):
+#class Course(CachingMixin, models.Model):
+#    objects = CachingManager()
     type = models.ForeignKey('CourseType', on_delete=models.CASCADE)
     room_type = models.ForeignKey('RoomType', null=True, on_delete=models.CASCADE)
     no = models.PositiveSmallIntegerField(null=True, blank=True)
@@ -333,7 +333,7 @@ class Course(CachingMixin, models.Model):
     an = models.PositiveSmallIntegerField()
     suspens = models.BooleanField(verbose_name='En suspens?', default=False)
 
-    def __unicode__(self):
+    def __str__(self):
         return "%s-%s-%s" % \
                (self.module, self.tutor.username if self.tutor is not None else '-no_tut-',
                 self.groupe)
@@ -345,9 +345,9 @@ class Course(CachingMixin, models.Model):
                 self.groupe)
 
 
-# class CoursPlace(models.Model):
-class ScheduledCourse(CachingMixin, models.Model):
-    objects = CachingManager()
+class ScheduledCourse(models.Model):
+#class ScheduledCourse(CachingMixin, models.Model):
+#    objects = CachingManager()
     cours = models.ForeignKey('Course', on_delete=models.CASCADE)
     creneau = models.ForeignKey('Slot', on_delete=models.CASCADE)
     room = models.ForeignKey('RoomGroup', blank=True, null=True, on_delete=models.CASCADE)
@@ -536,7 +536,7 @@ class ModuleDisplay(models.Model):
     color_bg = models.CharField(max_length=20, default="red")
     color_txt = models.CharField(max_length=20, default="black")
 
-    def __unicode__(self):
+    def __str__(self):
         return str(self.module) + ' -> BG: ' + str(self.color_bg) \
                + ' ; TXT: ' + str(self.color_txt)
 
@@ -548,7 +548,7 @@ class TrainingProgrammeDisplay(models.Model):
     row = models.PositiveSmallIntegerField()
     short_name = models.CharField(max_length=20, default="red")
 
-    def __unicode__(self):
+    def __str__(self):
         return str(self.training_programme) + ' : Row ' + str(self.row) \
             + ' ; Name ' + str(self.short_name)
 
@@ -560,7 +560,7 @@ class GroupDisplay(models.Model):
     button_height = models.PositiveIntegerField(null=True, default=None)
     button_txt = models.CharField(max_length=20, null=True, default=None)
 
-    def __unicode__(self):
+    def __str__(self):
         return str(self.group) + ' -> BH: ' + str(self.button_height) \
                + ' ; BTXT: ' + str(self.button_txt)
 
