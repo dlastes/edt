@@ -1,5 +1,5 @@
 python-memcached
-Django<=1.11.13
+Django
 django-import-export
 django-extensions
 django-colorfield
@@ -9,6 +9,6 @@ psycopg2-binary
 requests
 numpy
 pyclustering
-channels<2
+channels
 asgi_redis
 humanfriendly
