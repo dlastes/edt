@@ -23,7 +23,7 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from __future__ import unicode_literals
+
 
 from django.contrib import admin
 
@@ -42,14 +42,14 @@ def accept(modeladmin, request, queryset):
         next += 1
 
 
-accept.short_description = u'Accept selected quotes'
+accept.short_description = 'Accept selected quotes'
 
 
 def reject(modeladmin, request, queryset):
     queryset.update(status=Quote.REJECTED, id_acc=0)
 
 
-reject.short_description = u'Reject selected quotes'
+reject.short_description = 'Reject selected quotes'
 
 
 class QuoteAdmin(admin.ModelAdmin):

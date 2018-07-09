@@ -130,7 +130,7 @@ class TTModel(object):
                  min_nps_c=1.,
                  max_stab=5.,
                  lim_ld=1.):
-        print "\nLet's start week #%g" % semaine
+        print("\nLet's start week #%g" % semaine)
         # beg_file = os.path.join('logs',"FlOpTT")
         self.model = LpProblem("FlOpTT", LpMinimize)
         self.min_ups_i = min_nps_i
@@ -154,18 +154,18 @@ class TTModel(object):
         self.stabilize_work_copy = stabilize_work_copy
         self.wdb = WeekDB(semaine, an, self.train_prog)
         self.obj = self.lin_expr()
-        self.cost_I = dict(zip(self.wdb.instructors,
-                               [self.lin_expr() for _ in self.wdb.instructors]))
+        self.cost_I = dict(list(zip(self.wdb.instructors,
+                               [self.lin_expr() for _ in self.wdb.instructors])))
         self.FHD_G = {}
         for apm in [Time.AM, Time.PM]:
             self.FHD_G[apm] = dict(
-                zip(self.wdb.basic_groups,
-                    [self.lin_expr() for _ in self.wdb.basic_groups]))
-        self.cost_SL = dict(zip(self.wdb.slots,
-                                [self.lin_expr() for _ in self.wdb.slots]))
+                list(zip(self.wdb.basic_groups,
+                    [self.lin_expr() for _ in self.wdb.basic_groups])))
+        self.cost_SL = dict(list(zip(self.wdb.slots,
+                                [self.lin_expr() for _ in self.wdb.slots])))
         self.cost_G = dict(
-            zip(self.wdb.basic_groups,
-                [self.lin_expr() for _ in self.wdb.basic_groups]))
+            list(zip(self.wdb.basic_groups,
+                [self.lin_expr() for _ in self.wdb.basic_groups])))
         self.TT = {}
         self.TTrooms = {}
         for sl in self.wdb.slots:
@@ -274,9 +274,9 @@ class TTModel(object):
         self.update_objective()
 
         if self.warnings:
-            print "Relevant warnings :"
-            for key, key_warnings in self.warnings.iteritems():
-                print "%s : %s" % (key, ", ".join([str(x) for x in key_warnings]))
+            print("Relevant warnings :")
+            for key, key_warnings in self.warnings.items():
+                print("%s : %s" % (key, ", ".join([str(x) for x in key_warnings])))
 
     def add_var(self, name):
         """
@@ -319,7 +319,7 @@ class TTModel(object):
         """
         get the coeff of each var in the objective
         """
-        l = [(weight, var) for (var, weight) in self.obj.iteritems()
+        l = [(weight, var) for (var, weight) in self.obj.items()
              if var.value() != 0 and round(weight) != 0]
         l.sort(reverse=True)
         return l
@@ -379,17 +379,17 @@ class TTModel(object):
 
     def add_stabilization_constraints(self):
         if len(self.train_prog) < TrainingProgramme.objects.count():
-            print 'Will modify only courses of training programme(s)', self.train_prog
+            print('Will modify only courses of training programme(s)', self.train_prog)
 
         # maximize stability
         if self.stabilize_work_copy is not None:
             Stabilize(general=True,
                       work_copy=self.stabilize_work_copy) \
                 .enrich_model(self, self.max_stab)
-            print 'Will stabilize from remote work copy #', \
-                self.stabilize_work_copy
+            print('Will stabilize from remote work copy #', \
+                self.stabilize_work_copy)
         else:
-            print 'No stabilization'
+            print('No stabilization')
 
     def add_core_constraints(self):
         """
@@ -401,7 +401,7 @@ class TTModel(object):
             - no course on vacation days
         """
 
-        print "adding core constraints"
+        print("adding core constraints")
         for c in self.wdb.courses:
             name = 'core_course_' + str(c) + "_" + str(c.id)
             self.add_constraint(
@@ -464,7 +464,7 @@ class TTModel(object):
 
 
     def add_rooms_constraints(self):
-        print "adding room constraints"
+        print("adding room constraints")
         # constraint Rooms : there are enough rooms of each type for each slot
         # for each Room, first build the list of courses that may use it
         room_course_compat = {}
@@ -575,7 +575,7 @@ class TTModel(object):
         -include simultaneity (double dependency)
         If there is a weight, it's a preference, else it's a constraint...
         """
-        print 'adding dependency constraints'
+        print('adding dependency constraints')
         for p in self.wdb.dependencies:
             c1 = p.cours1
             c2 = p.cours2
@@ -741,7 +741,7 @@ class TTModel(object):
         """
          Add the constraints derived from the slot preferences expressed on the database
          """
-        print "adding slot preferences"
+        print("adding slot preferences")
         # first objective  => minimise use of unpreferred slots for teachers
         # ponderation MIN_UPS_I
         for i in self.wdb.instructors:
@@ -762,7 +762,7 @@ class TTModel(object):
         """
         Add the specific constraints stored in the database.
         """
-        print "adding specific constraints"
+        print("adding specific constraints")
         for constraint_type in TTConstraint.__subclasses__():
             for constr in \
                     constraint_type.objects.filter(Q(week=self.semaine)
@@ -864,12 +864,12 @@ class TTModel(object):
                                           presolve=presolve,
                                           maxSeconds=time_limit))
         status = self.model.status
-        print LpStatus[status]
+        print(LpStatus[status])
         if status == LpStatusOptimal or (solver != 'gurobi' and status == LpStatusNotSolved):
             return self.get_obj_coeffs()
 
         else:
-            print 'lpfile has been saved in FlOpTT-pulp.lp'
+            print('lpfile has been saved in FlOpTT-pulp.lp')
             return None
 
     def solve(self, time_limit=3600, target_work_copy=None, solver='gurobi'):
@@ -889,7 +889,7 @@ class TTModel(object):
         considered week.
         Returns the number of the work copy
         """
-        print "\nLet's solve week #%g" % self.semaine
+        print("\nLet's solve week #%g" % self.semaine)
 
         if target_work_copy is None:
             local_max_wc = ScheduledCourse \
@@ -902,13 +902,13 @@ class TTModel(object):
 
             target_work_copy = local_max_wc + 1
 
-        print "Will be stored with work_copy = #%g" % target_work_copy
+        print("Will be stored with work_copy = #%g" % target_work_copy)
 
-        print "Optimization started at", \
-            datetime.datetime.today().strftime('%Hh%M')
+        print("Optimization started at", \
+            datetime.datetime.today().strftime('%Hh%M'))
         result = self.optimize(time_limit, solver)
-        print "Optimization ended at", \
-            datetime.datetime.today().strftime('%Hh%M')
+        print("Optimization ended at", \
+            datetime.datetime.today().strftime('%Hh%M'))
 
         if result is not None:
             self.add_tt_to_db(target_work_copy)

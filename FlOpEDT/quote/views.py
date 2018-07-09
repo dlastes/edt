@@ -23,7 +23,7 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from __future__ import unicode_literals
+
 
 from django.shortcuts import render
 
@@ -67,4 +67,4 @@ def fetch_quote(req):
     chosen_quote = ''
     if nb_quotes > 0:
         chosen_quote = Quote.objects.all()[randint(0,nb_quotes)]
-    return JsonResponse({'quote': unicode(chosen_quote)})
+    return JsonResponse({'quote': str(chosen_quote)})

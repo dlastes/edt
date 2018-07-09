@@ -23,7 +23,7 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from __future__ import unicode_literals
+
 
 from base import weeks
 from base.models import TrainingProgramme
@@ -40,7 +40,7 @@ from django.conf import settings
 from channels import Group
 
 from multiprocessing import Process
-from StringIO import StringIO
+from io import StringIO
 import os
 import sys
 import json

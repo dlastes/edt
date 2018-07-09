@@ -604,7 +604,7 @@ class PseudoTerminal(MultiProcessHelper):
         output = self.get_bytes(partial)
         output = output.decode(self.encoding)
         if interpreted:
-            output = u'\n'.join(interpret_carriage_returns(output))
+            output = '\n'.join(interpret_carriage_returns(output))
         return output
 
     def save_to_handle(self, handle, partial=PARTIAL_DEFAULT):

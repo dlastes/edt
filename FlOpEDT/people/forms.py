@@ -71,9 +71,9 @@ class ChangeBIATOSTutorForm(UserChangeForm):
 
 
 class AddFullStaffTutorForm(UserCreationForm):
-    dept = forms.CharField(max_length=50, help_text=u'Département')
+    dept = forms.CharField(max_length=50, help_text='Département')
     pref_slots_per_day = forms.IntegerField(required=False,
-                                            help_text=u'Nombre de créneaux préférés par jour')
+                                            help_text='Nombre de créneaux préférés par jour')
     is_iut = forms.BooleanField()
 
     class Meta(UserCreationForm.Meta):
@@ -92,11 +92,11 @@ class AddFullStaffTutorForm(UserCreationForm):
         return fs
 
 class AddSupplyStaffTutorForm(UserCreationForm):
-    employer = forms.CharField(max_length=50, help_text=u'Employeur')
+    employer = forms.CharField(max_length=50, help_text='Employeur')
     position = forms.CharField(max_length=50,
-                               help_text=u'Qualité')
+                               help_text='Qualité')
     field = forms.CharField(max_length=50,
-                             help_text=u"Domaine")
+                             help_text="Domaine")
 
     class Meta(UserCreationForm.Meta):
         model = SupplyStaff
@@ -116,11 +116,11 @@ class AddSupplyStaffTutorForm(UserCreationForm):
     
 
 class AddSupplyStaffTutorForm(UserCreationForm):
-    employer = forms.CharField(max_length=50, help_text=u'Employeur')
+    employer = forms.CharField(max_length=50, help_text='Employeur')
     position = forms.CharField(max_length=50,
-                               help_text=u'Qualité')
+                               help_text='Qualité')
     field = forms.CharField(max_length=50,
-                             help_text=u"Domaine")
+                             help_text="Domaine")
 
     class Meta(UserCreationForm.Meta):
         model = SupplyStaff

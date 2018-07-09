@@ -23,7 +23,7 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from __future__ import unicode_literals
+
 
 from django.db import models
 
@@ -34,7 +34,7 @@ class QuoteType(models.Model):
     parent = models.ForeignKey('self', null=True, blank=True)
 
     def __unicode__(self):
-        return unicode(self.name)
+        return str(self.name)
 
 
 class Quote(models.Model):
@@ -69,27 +69,27 @@ class Quote(models.Model):
                               default=PENDING)
 
     def __unicode__(self):
-        sep = u', '
-        quo = (u'[' + unicode(self.header) + u'] ' if self.header is not None else u'')
-        auth = u''
+        sep = ', '
+        quo = ('[' + str(self.header) + '] ' if self.header is not None else '')
+        auth = ''
         if self.for_name is not None:
-            auth += unicode(self.for_name)
+            auth += str(self.for_name)
             if self.last_name is not None:
-                auth += u' ' + unicode(self.last_name)
+                auth += ' ' + str(self.last_name)
             if self.nick_name is not None:
-                auth += u' dit '
+                auth += ' dit '
         else:
             if self.last_name is not None:
-                auth += unicode(self.last_name)
+                auth += str(self.last_name)
                 if self.nick_name is not None:
-                    auth += u' dit '
+                    auth += ' dit '
         if self.nick_name is not None:
-            auth += unicode(self.nick_name)
-        if auth == u'':
-            quo += unicode(self.quote)
+            auth += str(self.nick_name)
+        if auth == '':
+            quo += str(self.quote)
         else:
-            quo += u'\u00AB ' + unicode(self.quote) + u' »'
+            quo += '\u00AB ' + str(self.quote) + ' »'
         return (quo
-                + (sep + auth if auth != u'' else u'')
-                + (sep + unicode(self.desc_author) if self.desc_author is not None else u'')
-                + (sep + unicode(self.date) if self.date is not None else u''))
+                + (sep + auth if auth != '' else '')
+                + (sep + str(self.desc_author) if self.desc_author is not None else '')
+                + (sep + str(self.date) if self.date is not None else ''))

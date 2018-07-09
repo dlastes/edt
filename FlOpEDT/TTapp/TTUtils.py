@@ -33,7 +33,7 @@ def basic_reassign_rooms(semaine, an, target_work_copy):
     """
     Reassign the rooms...
     """
-    print "reassigning rooms to minimize moves...",
+    print("reassigning rooms to minimize moves...", end=' ')
 
     slots = Slot.objects.all().order_by('jour', 'heure')
     for sl in slots:
@@ -102,7 +102,7 @@ def basic_reassign_rooms(semaine, an, target_work_copy):
                 CP.save()
                 sib.save()
                 # print "swapped", CP, " with", sib
-    print "done"
+    print("done")
 
 
 def basic_swap_version(week, year, copy_a, copy_b=0):
@@ -113,7 +113,7 @@ def basic_swap_version(week, year, copy_a, copy_b=0):
                              cours__an=year) \
                      .aggregate(Max('copie_travail'))['copie_travail__max'] + 1
     except KeyError:
-        print 'No scheduled courses'
+        print('No scheduled courses')
         return
 
     for cp in ScheduledCourse.objects.filter(cours__an=year, cours__semaine=week, copie_travail=copy_a):

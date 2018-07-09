@@ -24,7 +24,7 @@
 # without disclosing the source code of your own applications.
 
 
-from __future__ import unicode_literals
+
 
 from django.core.validators import MinValueValidator, MaxValueValidator
 
@@ -292,7 +292,7 @@ class MinHalfDays(TTConstraint):
                 for d in ttmodel.wdb.days
                 for apm in [Time.MATIN, Time.APREM])
         else:
-            print "MinHalfDays must have module or prof --> Ignored"
+            print("MinHalfDays must have module or prof --> Ignored")
             return
 
         ttmodel.add_constraint(local_var, '==', 1)
@@ -457,7 +457,7 @@ class SimultaneousCourses(TTConstraint):
                                         + '_'
                                         + str(sl))
                 tutor_constr = ttmodel.get_constraint(name_tutor_constr)
-                print tutor_constr
+                print(tutor_constr)
                 if (ttmodel.var_coeff(var1, tutor_constr),
                     ttmodel.var_coeff(var2, tutor_constr)) == (1, 1):
                     ttmodel.change_var_coeff(var2, tutor_constr, 0)

@@ -23,7 +23,7 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from __future__ import unicode_literals
+
 
 from django.utils.translation import gettext_lazy as _
 
@@ -38,14 +38,14 @@ class QuoteForm(ModelForm):
         model = Quote
         fields = ['quote', 'last_name', 'for_name', 'nick_name', 'desc_author', 'date', 'header', 'quote_type']
         labels = {
-            'quote': _(u'Citation ').encode('utf-8'),
-            'last_name': _(u'Nom ').encode('utf-8'),
-            'for_name': _(u'Prénom ').encode('utf-8'),
-            'nick_name': _(u'Pseudo ').encode('utf-8'),
-            'desc_author': mark_safe(_(u"Fonction, description<br/> de l'auteur/autrice ").encode('utf-8')),
-            'date': _(u'Date ').encode('utf-8'),
-            'header': _(u'En-tête ').encode('utf-8'),
-            'quote_type': _(u'Catégorie ').encode('utf-8'),
+            'quote': _('Citation ').encode('utf-8'),
+            'last_name': _('Nom ').encode('utf-8'),
+            'for_name': _('Prénom ').encode('utf-8'),
+            'nick_name': _('Pseudo ').encode('utf-8'),
+            'desc_author': mark_safe(_("Fonction, description<br/> de l'auteur/autrice ").encode('utf-8')),
+            'date': _('Date ').encode('utf-8'),
+            'header': _('En-tête ').encode('utf-8'),
+            'quote_type': _('Catégorie ').encode('utf-8'),
         }
         required = {
             'last_name': False,

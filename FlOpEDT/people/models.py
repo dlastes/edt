@@ -23,7 +23,7 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from __future__ import unicode_literals
+
 
 from django.db import models
 from django.contrib.auth.models import AbstractUser
@@ -54,7 +54,7 @@ class User(AbstractUser):
         if self.is_tutor:
             ret += 'T'
         ret += '>'
-        ret += '(' + unicode(self.rights) + ')'
+        ret += '(' + str(self.rights) + ')'
         return ret
         
 
@@ -75,7 +75,7 @@ class Tutor(User):
 
     def uni_extended(self):
         ret = super(Tutor,self).uni_extended()
-        ret += '-' + self.status + '-' + 'S' + unicode(self.pref_slots_per_day)
+        ret += '-' + self.status + '-' + 'S' + str(self.pref_slots_per_day)
         return ret
 
     
@@ -125,4 +125,4 @@ class Student(User):  # for now: representative
                                        blank=True)
 
     def __str__(self):
-        return str(self.username) + u'(G:' + str(self.belong_to) + u')'
+        return str(self.username) + '(G:' + str(self.belong_to) + ')'

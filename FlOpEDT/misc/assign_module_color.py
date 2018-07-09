@@ -53,19 +53,19 @@ def assign_color(overwrite=True, diff_across_train_prog=False):
         optim_and_save(keys, mat, overwrite)
     else:
         for train_prog in TrainingProgramme.objects.all():
-            print train_prog
+            print(train_prog)
             keys, mat = build_graph_matrices(train_prog)
             optim_and_save(keys, mat, overwrite)
 
 
 def optim_and_save(keys, mat, overwrite):
     if len(mat) == 0:
-        print "No course in this training programme!"
+        print("No course in this training programme!")
         return
     opti = dsatur(mat)
     opti.process()
     color_indices = opti.get_colors()
-    print color_indices, max(color_indices)
+    print(color_indices, max(color_indices))
     color_set = get_color_set(os.path.join(settings.BASE_DIR,
                                            'misc',
                                            'colors.json'),
@@ -129,7 +129,7 @@ def get_color_set(filename, target_nb_colors):
                 if len(init_color_set['colors']) >= target_nb_colors:
                     color_set = init_color_set['colors']
 
-        print color_set
+        print(color_set)
 
         # extend the color set if needed
         if len(color_set) < target_nb_colors:

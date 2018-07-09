@@ -77,7 +77,7 @@ class Solve(Thread):
         
     
     def run(self):
-        print 'start running'
+        print('start running')
         with CaptureOutput(relay=False, channel=self.channel) as cap:
             t = MyTTModel(self.week, self.year, train_prog=self.training_programme)
             t.solve(time_limit=300)
@@ -85,23 +85,23 @@ class Solve(Thread):
                                           'logs',
                                           str(self.year)+ '-' + str(self.week) + '--'
                                           + self.timestamp + '.log'))
-        print 'stop running'
+        print('stop running')
 
 
 
 def ruru(week, year, channel):
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "FlOpEDT.settings.local")
-    print 'start running'
+    print('start running')
     with CaptureOutput(relay=False, channel=channel) as cap:
-        print week
-        print year
-        print channel
-        print 'qqweqw'
+        print(week)
+        print(year)
+        print(channel)
+        print('qqweqw')
         
         t = MyTTModel(week, year)
         t.solve(time_limit=300)
         cap.save_to_path('/home/prenaud/trash/modcap.log')
-    print 'stop running'
+    print('stop running')
     
 
         

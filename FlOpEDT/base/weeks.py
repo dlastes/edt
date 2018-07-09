@@ -66,20 +66,20 @@ def num_days(y, w):
 def week_list():
     li = []
     if annee_courante == 2017:
-        for i in range(36, 44) + range(45, 52):
+        for i in list(range(36, 44)) + list(range(45, 52)):
             li.append({'semaine': i, 'an': 2017})
-        for i in range(2, 9) + range(10, 16) + range(18, 31):
+        for i in list(range(2, 9)) + list(range(10, 16)) + list(range(18, 31)):
             li.append({'semaine': i, 'an': 2018})
         return li
     elif annee_courante == 2018:
-        for i in range(36, 44) + range(45, 52):
+        for i in list(range(36, 44)) + list(range(45, 52)):
             li.append({'semaine': i, 'an': 2018})
-        for i in range(2, 9) + range(10, 16) + range(18, 31):
+        for i in list(range(2, 9)) + list(range(10, 16)) + list(range(18, 31)):
             li.append({'semaine': i, 'an': 2019})
         return li
     else:
-        for i in range(36, 44) + range(45, 52):
+        for i in list(range(36, 44)) + list(range(45, 52)):
             li.append({'semaine': i, 'an': annee_courante})
-        for i in range(2, 9) + range(10, 16) + range(18, 31):
+        for i in list(range(2, 9)) + list(range(10, 16)) + list(range(18, 31)):
             li.append({'semaine': i, 'an': annee_courante+1})
         return li

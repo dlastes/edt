@@ -24,7 +24,7 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from __future__ import unicode_literals
+
 
 from django.core.validators import MinValueValidator, MaxValueValidator
 
@@ -62,10 +62,10 @@ class BreakingNews(models.Model):
     strk_color = ColorField(default='#000000')
 
     def __unicode__(self):
-        return u'@(' + unicode(self.x_beg) + u'--' + unicode(self.x_end) \
-               + u',' + unicode(self.y) \
-               + u')-W' + unicode(self.week) + u',Y' \
-               + unicode(self.year) + u': ' + unicode(self.txt)
+        return '@(' + str(self.x_beg) + '--' + str(self.x_end) \
+               + ',' + str(self.y) \
+               + ')-W' + str(self.week) + ',Y' \
+               + str(self.year) + ': ' + str(self.txt)
 
 
 # </editor-fold>
@@ -447,15 +447,15 @@ class CourseModification(models.Model):
     def __str__(self):
         olds = 'OLD:'
         if self.semaine_old:
-            olds += u' Sem ' + str(self.semaine_old) + u' ;'
+            olds += ' Sem ' + str(self.semaine_old) + ' ;'
         if self.an_old:
-            olds += u' An ' + str(self.an_old) + u' ;'
+            olds += ' An ' + str(self.an_old) + ' ;'
         if self.room_old:
-            olds += u' Salle ' + str(self.room_old) + u' ;'
+            olds += ' Salle ' + str(self.room_old) + ' ;'
         if self.creneau_old:
-            olds += u' Cren ' + str(self.creneau_old) + u' ;'
+            olds += ' Cren ' + str(self.creneau_old) + ' ;'
         if self.version_old:
-            olds += u' NumV ' + str(self.version_old) + u' ;'
+            olds += ' NumV ' + str(self.version_old) + ' ;'
         return "by %s, at %s\n%s <- %s" % (self.initiator.username,
                                            self.updated_at,
                                            self.cours,
@@ -533,8 +533,8 @@ class ModuleDisplay(models.Model):
     color_txt = models.CharField(max_length=20, default="black")
 
     def __unicode__(self):
-        return unicode(self.module) + u' -> BG: ' + unicode(self.color_bg) \
-               + u' ; TXT: ' + unicode(self.color_txt)
+        return str(self.module) + ' -> BG: ' + str(self.color_bg) \
+               + ' ; TXT: ' + str(self.color_txt)
 
 
 class TrainingProgrammeDisplay(models.Model):
@@ -544,8 +544,8 @@ class TrainingProgrammeDisplay(models.Model):
     short_name = models.CharField(max_length=20, default="red")
 
     def __unicode__(self):
-        return unicode(self.training_programme) + u' : Row ' + unicode(self.row) \
-            + u' ; Name ' + unicode(self.short_name)
+        return str(self.training_programme) + ' : Row ' + str(self.row) \
+            + ' ; Name ' + str(self.short_name)
 
 
 class GroupDisplay(models.Model):
@@ -555,8 +555,8 @@ class GroupDisplay(models.Model):
     button_txt = models.CharField(max_length=20, null=True, default=None)
 
     def __unicode__(self):
-        return unicode(self.group) + u' -> BH: ' + unicode(self.button_height) \
-               + u' ; BTXT: ' + unicode(self.button_txt)
+        return str(self.group) + ' -> BH: ' + str(self.button_height) \
+               + ' ; BTXT: ' + str(self.button_txt)
 
 
 # </editor-fold desc="DISPLAY">
@@ -601,28 +601,28 @@ class Regen(models.Model):
     def __str__(self):
         pre = ''
         if self.full:
-            pre = u'C,' + str(self.fday) + u"/" + str(self.fmonth) \
-                  + u"/" + str(self.fyear) + u" "
+            pre = 'C,' + str(self.fday) + "/" + str(self.fmonth) \
+                  + "/" + str(self.fyear) + " "
         if self.stabilize:
-            pre = u'S,' + str(self.sday) + u"/" + str(self.smonth) \
-                  + u"/" + str(self.syear)
+            pre = 'S,' + str(self.sday) + "/" + str(self.smonth) \
+                  + "/" + str(self.syear)
         if not self.full and not self.stabilize:
-            pre = u'N'
+            pre = 'N'
         return pre
 
     def strplus(self):
-        ret = u"Semaine " + str(self.semaine).encode('utf8') \
-              + u" (" + str(self.an).encode('utf8') + u") : "
+        ret = "Semaine " + str(self.semaine).encode('utf8') \
+              + " (" + str(self.an).encode('utf8') + ") : "
         # ret.encode('utf8')
 
         if self.full:
-            ret += u'Génération complète le ' + self.fday.encode('utf8') \
-                   + u"/" + str(self.fmonth) + u"/" + str(self.fyear)
+            ret += 'Génération complète le ' + self.fday.encode('utf8') \
+                   + "/" + str(self.fmonth) + "/" + str(self.fyear)
         elif self.stabilize:
-            ret += u'Génération stabilisée le ' + str(self.sday) + u"/" \
-                   + str(self.smonth) + u"/" + str(self.syear)
+            ret += 'Génération stabilisée le ' + str(self.sday) + "/" \
+                   + str(self.smonth) + "/" + str(self.syear)
         else:
-            ret += u"Pas de (re-)génération prévue"
+            ret += "Pas de (re-)génération prévue"
 
         return ret
 

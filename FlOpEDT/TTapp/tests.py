@@ -24,7 +24,7 @@
 # without disclosing the source code of your own applications.
 
 
-from __future__ import unicode_literals
+
 
 from django.test import TestCase
 

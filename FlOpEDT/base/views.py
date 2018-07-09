@@ -46,7 +46,7 @@ from people.models import Tutor
 from .admin import CoursResource, DispoResource, \
     CoursPlaceResource, BreakingNewsResource
 
-from weeks import *
+from .weeks import *
 
 from collections import namedtuple
 
@@ -183,8 +183,8 @@ def stype(req):
                        'annee_courante': annee_courante
                       })
     elif req.method == 'POST':
-        if 'apply' in req.POST.keys():
-            print req.POST['se_deb']
+        if 'apply' in list(req.POST.keys()):
+            print(req.POST['se_deb'])
             date_deb = {'semaine': req.POST['se_deb'],
                         'an': req.POST['an_deb']}
             date_fin = {'semaine': req.POST['se_fin'],
@@ -192,7 +192,7 @@ def stype(req):
             if date_deb['an'] < date_fin['an'] or \
                     (date_deb['an'] == date_fin['an']
                      and date_deb['semaine'] <= date_fin['semaine']):
-                print req.POST['apply']
+                print(req.POST['apply'])
             else:
                 date_deb = current_week()
                 date_fin = current_week()
@@ -202,7 +202,7 @@ def stype(req):
             date_deb = current_week()
             date_fin = current_week()
 
-            print req.POST['save']
+            print(req.POST['save'])
 
         return render(req,
                       'base/show-stype.html',
@@ -247,7 +247,7 @@ def decale(req):
 
 
 def fetch_cours_pl(req):
-    print req
+    print(req)
     if req.GET:
         semaine = req.GET.get('s', '')
         an = req.GET.get('a', '')
@@ -318,7 +318,7 @@ def fetch_cours_pl(req):
 
 
 def fetch_cours_pp(req):
-    print req
+    print(req)
     if req.GET:
         semaine = req.GET.get('s', '')
         an = req.GET.get('a', '')
@@ -344,10 +344,10 @@ def fetch_cours_pp(req):
 
 # @login_required
 def fetch_dispos(req):
-    print req
+    print(req)
     if req.GET:
         if req.user.is_authenticated():
-            print "================"
+            print("================")
             semaine = req.GET.get('s', '')
             an = req.GET.get('a', '')
 
@@ -382,7 +382,7 @@ def fetch_dispos(req):
             response['an'] = an
             return response
         else:
-            return HttpResponse(u"Pas connecté", status=500)
+            return HttpResponse("Pas connecté", status=500)
     else:
         return HttpResponse("Pas GET", status=500)
 
@@ -502,7 +502,7 @@ def edt_changes(req):
     good_response = HttpResponse("OK")
 
     if not req.user.is_tutor:
-        bad_response['reason'] = u"Pas membre de l'équipe encadrante"
+        bad_response['reason'] = "Pas membre de l'équipe encadrante"
         return bad_response
         
 
@@ -511,7 +511,7 @@ def edt_changes(req):
     msg = 'Notation : (numero_semaine, numero_annee, ' \
           + 'numero_jour, numero_creneau)\n\n'
 
-    print req
+    print(req)
     if req.is_ajax():
         if req.method == "POST":
             semaine = req.GET.get('s', '')
@@ -522,10 +522,10 @@ def edt_changes(req):
             work_copy = int(work_copy)
             version = None
 
-            print req.body
+            print(req.body)
             q = json.loads(req.body,
                            object_hook
-                           =lambda d: namedtuple('X', d.keys())(*d.values())
+                           =lambda d: namedtuple('X', list(d.keys()))(*list(d.values()))
                            )
 
             if work_copy == 0:
@@ -581,27 +581,27 @@ def edt_changes(req):
                                          .get(no=new_slot))
                             except ObjectDoesNotExist:
                                 bad_response['reason'] \
-                                    = u"Problème : créneau " + new_day
+                                    = "Problème : créneau " + new_day
                                 return bad_response
                             if non_place:
                                 cp.creneau = cren_n
                             m.creneau_old = cp.creneau
                             cp.creneau = cren_n
-                            print cren_n
-                            print m
-                            print cp
+                            print(cren_n)
+                            print(m)
+                            print(cp)
                         if new_room is not None:
                             try:
                                 sal_n = RoomGroup.objects.get(name=new_room)
                             except ObjectDoesNotExist:
                                 if new_room == 'salle?':
                                     bad_response['reason'] \
-                                        = u'Oublié de trouver une salle ' \
-                                          u'pour un cours ?'
+                                        = 'Oublié de trouver une salle ' \
+                                          'pour un cours ?'
                                 else:
                                     bad_response['reason'] = \
-                                        u"Problème : salle " + new_room \
-                                        + u" inconnue"
+                                        "Problème : salle " + new_room \
+                                        + " inconnue"
                                 return bad_response
 
                             if non_place:
@@ -621,11 +621,11 @@ def edt_changes(req):
                             msg += str(co) + '\n'
                             impacted_inst.add(co.tutor.username)
 
-                            msg += u'(' + str(a.week.o) + u', ' \
-                                   + str(a.year.o) + u', ' \
-                                   + str(a.day.o) + u', ' \
-                                   + str(a.slot.o) + u')'
-                            msg += u' -> ('
+                            msg += '(' + str(a.week.o) + ', ' \
+                                   + str(a.year.o) + ', ' \
+                                   + str(a.day.o) + ', ' \
+                                   + str(a.slot.o) + ')'
+                            msg += ' -> ('
                             if a.week.n:
                                 msg += str(a.week.n)
                             else:
@@ -651,8 +651,8 @@ def edt_changes(req):
                         edt_version.version += 1
                         edt_version.save()
 
-                subject = u'[Modif sur tierce] ' + req.user.username \
-                          + u' a déplacé '
+                subject = '[Modif sur tierce] ' + req.user.username \
+                          + ' a déplacé '
                 for inst in impacted_inst:
                     if inst is not req.user.username:
                         subject += inst + ' '
@@ -695,7 +695,7 @@ def dispos_changes(req):
                 an = int(an)
             except ValueError:
                 bad_response['reason'] \
-                    = u"Problème semaine ou année."
+                    = "Problème semaine ou année."
                 return bad_response
                 
             usr_change = req.GET.get('u', '')
@@ -707,25 +707,25 @@ def dispos_changes(req):
                 semaine = None
                 an = None
 
-            print req.body
+            print(req.body)
             q = json.loads(req.body,
                            object_hook=lambda d:
-                           namedtuple('X', d.keys())(*d.values()))
+                           namedtuple('X', list(d.keys()))(*list(d.values())))
 
             prof = None
             try:
                 prof = Tutor.objects.get(username=usr_change)
             except ObjectDoesNotExist:
                 bad_response['reason'] \
-                    = u"Problème d'utilisateur."
+                    = "Problème d'utilisateur."
                 return bad_response
 
             if prof != req.user and req.user.rights >> 1 % 2 == 0:
                 bad_response['reason'] \
-                    = u'Non autorisé, réclamez plus de droits.'
+                    = 'Non autorisé, réclamez plus de droits.'
                 return bad_response
 
-            print q
+            print(q)
 
             # if no preference was present for this week, first copy the
             # default availabilities
@@ -749,7 +749,7 @@ def dispos_changes(req):
                     new_dispo.save()
 
             for a in q:
-                print a
+                print(a)
                 cr = Slot.objects \
                     .get(jour=Day.objects.get(no=a.day),
                          heure=Time.objects.get(no=a.hour))
@@ -763,8 +763,8 @@ def dispos_changes(req):
                                       an=an,
                                       creneau=cr,
                                       defaults={'valeur': a.val})
-                print di
-                print didi
+                print(di)
+                print(didi)
             return good_response
         else:
             bad_response['reason'] = "Non POST"
@@ -778,7 +778,7 @@ def dispos_changes(req):
 def decale_changes(req):
     bad_response = HttpResponse("KO")
     good_response = HttpResponse("OK")
-    print req
+    print(req)
 
     if not req.is_ajax():
         bad_response['reason'] = "Non ajax"
@@ -788,10 +788,10 @@ def decale_changes(req):
         bad_response['reason'] = "Non POST"
         return bad_response
 
-    print req.body
+    print(req.body)
     q = json.loads(req.body,
                    object_hook=lambda d:
-                   namedtuple('X', d.keys())(*d.values()))
+                   namedtuple('X', list(d.keys()))(*list(d.values())))
 
     a = q.new
 
@@ -848,14 +848,14 @@ def contact(req):
             try:
                 send_mail(
                     '[EdT IUT Blagnac] ' + dat.get("subject"),
-                    u"(Cet e-mail vous a été envoyé depuis le site des emplois"
-                    u" du temps de l'IUT de Blagnac)\n\n"
+                    "(Cet e-mail vous a été envoyé depuis le site des emplois"
+                    " du temps de l'IUT de Blagnac)\n\n"
                     + dat.get("message"),
                     dat.get("sender"),
                     recip_send,
                 )
             except:
-                ack = u'Envoi du mail impossible !'
+                ack = 'Envoi du mail impossible !'
                 return render(req, 'base/contact.html',
                               {'form': form,
                                'ack': ack

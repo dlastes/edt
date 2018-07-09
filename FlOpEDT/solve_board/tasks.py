@@ -23,10 +23,10 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from __future__ import absolute_import, unicode_literals
+
 # from celery import shared_task
 # from people.models import FullStaff
-from StringIO import StringIO
+from io import StringIO
 from channels import Channel
 import os
 from django.conf import settings
@@ -74,7 +74,7 @@ class Tee(StringIO):
         sys.__stdout__.write(s)
 
     def close(self):
-        self.chan.send({'text': u'Solver ended.'})
+        self.chan.send({'text': 'Solver ended.'})
         self.file.close()
         
 
