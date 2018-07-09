@@ -25,7 +25,7 @@
 # without disclosing the source code of your own applications.
 
 from TTapp.TTModel import TTModel
-from modif.models import Time, Day
+from base.models import Time, Day
 
 class MyTTModel(TTModel):
     def add_specific_constraints(self):
