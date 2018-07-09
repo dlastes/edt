@@ -30,6 +30,8 @@ from people.tutor import ChangeFullStaffTutor, ChangeSupplyStaffTutor, ChangeBIA
 from django.contrib.auth import views as auth_views
 from . import views
 
+app_name="people"
+
 urlpatterns = [
 #    url(r'^login', views.login, name="login"),
     url(r'^login/$',

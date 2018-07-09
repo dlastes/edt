@@ -29,7 +29,7 @@ from base import weeks
 from base.models import TrainingProgramme
 from people.models import FullStaff
 from solve_board.models import SolveRun
-from solve_board.consumers import ws_add
+# from solve_board.consumers import ws_add
 from MyFlOp.MyTTModel import MyTTModel
 
 from django.shortcuts import render
@@ -37,7 +37,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.http import Http404, JsonResponse
 from django.conf import settings
 
-from channels import Group
+# from channels import Group
 
 from multiprocessing import Process
 from io import StringIO

@@ -25,6 +25,8 @@ from django.conf.urls import url, include
 
 from solve_board import views
 
+app_name="solve_board"
+
 urlpatterns = [
     url(r'^main/$', views.main_board, name="main_board"),
 #    url(r'^run/(?P<timestamp>[0-9-]+)?$', views.run, name="run"),

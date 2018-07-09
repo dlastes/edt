@@ -25,8 +25,9 @@
 
 # from django.http import HttpResponse
 # from channels.handler import AsgiHandler
-from channels import Group, Channel
+# from channels import Group, Channel
 # from tasks import run
+
 import json
 from threading import Thread
 from .modified_capturer import CaptureOutput
@@ -38,79 +39,108 @@ import os
 from django.conf import settings
 
 
-def ws_message(message):
-    # ASGI WebSocket packet-received and send-packet message types
-    # both have a "text" key for their textual data.
-    # message.reply_channel.send({
-    #     "text": message.content['text'],
-    # })
-    msg_reply = message.reply_channel.name
-    data = json.loads(message['text'])
-    Channel(msg_reply).send({'text':data['text']})
-    if data['action'] == 'go':
-        # run.delay(data['week'],data['year'],
-        #           data['timestamp'],
-        #           data['train_prog'],
-        #           message.reply_channel.name)
-
-        Solve(data['week'],data['year'],
-                  data['timestamp'],
-                  data['train_prog'],
-        Channel(msg_reply)).start()
-
-        # p = Process(target=ruru, args=(data['week'],data['year'],Channel(msg_reply)))
-        # p.start()
 
 
-class Solve(Thread):
-    def __init__(self, week, year, timestamp, training_programme, chan):
-        super(Solve, self).__init__()
-        self.week = week
-        self.year = year
-        self.timestamp = timestamp
-        self.channel = chan
-        # if all train progs are called, training_programme=''
-        try:
-            self.training_programme = TrainingProgramme.objects.get(abbrev=training_programme)
-        except ObjectDoesNotExist:
-            self.training_programme = None
+
+from channels.generic.websocket import WebsocketConsumer
+import json
+
+class ChatConsumer(WebsocketConsumer):
+    def connect(self):
+        # ws_message()
+        self.accept()
+
+    def disconnect(self, close_code):
+        pass
+
+    def receive(self, text_data):
+        text_data_json = json.loads(text_data)
+        message = text_data_json['message']
+
+        self.send(text_data=json.dumps({
+            'message': message
+        }))
+        # ws_add(text_data)
+
+
+
+
+
+
+
+# def ws_message(message):
+#     # ASGI WebSocket packet-received and send-packet message types
+#     # both have a "text" key for their textual data.
+#     # message.reply_channel.send({
+#     #     "text": message.content['text'],
+#     # })
+#     msg_reply = message.reply_channel.name
+#     data = json.loads(message['text'])
+#     Channel(msg_reply).send({'text':data['text']})
+#     if data['action'] == 'go':
+#         # run.delay(data['week'],data['year'],
+#         #           data['timestamp'],
+#         #           data['train_prog'],
+#         #           message.reply_channel.name)
+
+#         Solve(data['week'],data['year'],
+#                   data['timestamp'],
+#                   data['train_prog'],
+#         Channel(msg_reply)).start()
+
+#         # p = Process(target=ruru, args=(data['week'],data['year'],Channel(msg_reply)))
+#         # p.start()
+
+
+# class Solve(Thread):
+#     def __init__(self, week, year, timestamp, training_programme, chan):
+#         super(Solve, self).__init__()
+#         self.week = week
+#         self.year = year
+#         self.timestamp = timestamp
+#         self.channel = chan
+#         # if all train progs are called, training_programme=''
+#         try:
+#             self.training_programme = TrainingProgramme.objects.get(abbrev=training_programme)
+#         except ObjectDoesNotExist:
+#             self.training_programme = None
         
     
-    def run(self):
-        print('start running')
-        with CaptureOutput(relay=False, channel=self.channel) as cap:
-            t = MyTTModel(self.week, self.year, train_prog=self.training_programme)
-            t.solve(time_limit=300)
-            cap.save_to_path(os.path.join(settings.BASE_DIR,
-                                          'logs',
-                                          str(self.year)+ '-' + str(self.week) + '--'
-                                          + self.timestamp + '.log'))
-        print('stop running')
+#     def run(self):
+#         print('start running')
+#         with CaptureOutput(relay=False, channel=self.channel) as cap:
+#             t = MyTTModel(self.week, self.year, train_prog=self.training_programme)
+#             t.solve(time_limit=300)
+#             cap.save_to_path(os.path.join(settings.BASE_DIR,
+#                                           'logs',
+#                                           str(self.year)+ '-' + str(self.week) + '--'
+#                                           + self.timestamp + '.log'))
+#         print('stop running')
 
 
 
-def ruru(week, year, channel):
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "FlOpEDT.settings.local")
-    print('start running')
-    with CaptureOutput(relay=False, channel=channel) as cap:
-        print(week)
-        print(year)
-        print(channel)
-        print('qqweqw')
+# def ruru(week, year, channel):
+#     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "FlOpEDT.settings.local")
+#     print('start running')
+#     with CaptureOutput(relay=False, channel=channel) as cap:
+#         print(week)
+#         print(year)
+#         print(channel)
+#         print('qqweqw')
         
-        t = MyTTModel(week, year)
-        t.solve(time_limit=300)
-        cap.save_to_path('/home/prenaud/trash/modcap.log')
-    print('stop running')
+#         t = MyTTModel(week, year)
+#         t.solve(time_limit=300)
+#         cap.save_to_path('/home/prenaud/trash/modcap.log')
+#     print('stop running')
     
 
         
-# Connected to websocket.connect
-def ws_add(message):
-    # Accept the incoming connection
-    message.reply_channel.send({"accept": True})
-    # # Add them to the chat group
-    # Group("solver").add(message.reply_channel)
+# # Connected to websocket.connect
+# def ws_add(message):
+#     # Accept the incoming connection
+#     message.reply_channel.send({"accept": True})
+#     # # Add them to the chat group
+#     # Group("solver").add(message.reply_channel)
 
 
 # Connected to websocket.disconnect

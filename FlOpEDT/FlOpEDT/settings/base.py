@@ -173,3 +173,8 @@ AUTH_USER_MODEL = 'people.User'
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
     )
+
+
+# mysite/settings.py
+# Channels
+ASGI_APPLICATION = 'FlOpEDT.routing.application'

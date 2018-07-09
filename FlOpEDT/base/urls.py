@@ -26,6 +26,9 @@ from . import views
 from django.views.generic import RedirectView
 from django.contrib.staticfiles.storage import staticfiles_storage
 
+
+app_name="base"
+
 urlpatterns = [
     # favicon
     # ----------------------------

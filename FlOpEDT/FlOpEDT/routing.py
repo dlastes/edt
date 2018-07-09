@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # This file is part of the FlOpEDT/FlOpScheduler project.
 # Copyright (c) 2017
 # Authors: Iulian Ober, Paul Renaud-Goud, Pablo Seban, et al.
@@ -21,20 +23,9 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from django.conf.urls import url, include
-from . import views
-from django.views.generic import RedirectView
-from django.contrib.staticfiles.storage import staticfiles_storage
 
-app_name="quote"
+from channels.routing import ProtocolTypeRouter
 
-urlpatterns = [
-    # directly reachable by users
-    # ----------------------------
-    url(r'^proposer$', views.submit, name="submission"),
-    # url(r'^moderer$', views.moderate, name="moderation"),
-    # fetch 
-    # ----------------------------
-    url(r'^fetch$', views.fetch_quote, name="fetch_quote"),
-    
-]
+application = ProtocolTypeRouter({
+    # (http->django views is added by default)
+})
