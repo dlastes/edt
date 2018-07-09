@@ -43,8 +43,9 @@ from django.views.generic import RedirectView
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^accounts/', include('people.urls', namespace="people")),
-    url(r'^citations/', include('quote.urls', namespace="quote")),
-    url(r'^solve-board/', include('solve_board.urls', namespace="solve_board")),
-    url(r'^', include('base.urls')),
+    url(r'^accounts/', include('people.urls')),
+    url(r'^citations/', include('quote.urls')),
+    url(r'^solve-board/', include('solve_board.urls')),
+    url(r'^edt/', include('base.urls')),
+    url(r'$', RedirectView.as_view(pattern_name='base:edt', permanent=False)),
 ]

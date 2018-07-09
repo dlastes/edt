@@ -66,11 +66,11 @@
 
        {% block nav %}
        <ul>
-	    <li><a href="{% url "edt" %}">Consulter</a></li>
-	    <li><a href="{% url "decale" %}">Décaler/Annuler</a></li>
-	    <li><a href="{% url "stype" %}">Semaine type</a></li>
-	    <li><a href="{% url "aide" %}">Aide</a></li>
-	    <li><a href="{% url "contact" %}">Contact</a></li>
+	    <li><a href="{% url "base:edt" %}">Consulter</a></li>
+	    <li><a href="{% url "base:decale" %}">Décaler/Annuler</a></li>
+	    <li><a href="{% url "base:stype" %}">Semaine type</a></li>
+	    <li><a href="{% url "base:aide" %}">Aide</a></li>
+	    <li><a href="{% url "base:contact" %}">Contact</a></li>
 	    {% if user.is_authenticated and user.is_staff %}
 	    <li><a href="{% url "solve_board:main_board" %}">Générer</a></li>
 	    <li><a href="{% url "admin:index" %}">Admin</a></li>

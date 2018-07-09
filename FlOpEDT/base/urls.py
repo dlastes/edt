@@ -38,8 +38,8 @@ urlpatterns = [
 
     # directly reachable by users
     # ----------------------------
-    url(r'^edt/(?P<an>\d+)?(/(?P<semaine>\d+))?$', views.edt, name="edt"),
-    url(r'^edt-tv/(?P<semaine>\d+)?(/(?P<an>\d+))?$', views.edt_light, name="edt_light"),
+    url(r'^(?P<an>\d+)?(/(?P<semaine>\d+))?$', views.edt, name="edt"),
+    url(r'^tv/(?P<semaine>\d+)?(/(?P<an>\d+))?$', views.edt_light, name="edt_light"),
     url(r'^semaine-type$', views.stype, name="stype"),
     url(r'^aide$', views.aide, name="aide"),
     url(r'^decale$', views.decale, name="decale"),
@@ -64,7 +64,6 @@ urlpatterns = [
 
     # predefined
     # ------------
-    url(r'$', RedirectView.as_view(pattern_name='edt', permanent=False)),
 ]
 
 # https://pypi.python.org/pypi/django-live-log

@@ -36,15 +36,15 @@
   <script>
     var groupes_fi = "{% static 'base/groups.json' %}";
 
-    var url_cours_pl = "{% url "fetch_cours_pl" %}";
-    var url_cours_pp = "{% url "fetch_cours_pp" %}";
-    var url_dispos = "{% url "fetch_dispos" %}";
+    var url_cours_pl = "{% url "base:fetch_cours_pl" %}";
+    var url_cours_pp = "{% url "base:fetch_cours_pp" %}";
+    var url_dispos = "{% url "base:fetch_dispos" %}";
     var url_login = "{% url "people:login"%}";
-    var url_edt = "{% url "edt"%}";
-    var url_edt_changes = "{% url "edt_changes"%}";
-    var url_dispos_changes = "{% url "dispos_changes"%}";
-    var url_fetch_stype = "{% url "fetch_stype" %}"; 
-    var url_bknews = "{% url "fetch_bknews" %}"; 
+    var url_edt = "{% url "base:edt"%}";
+    var url_edt_changes = "{% url "base:edt_changes"%}";
+    var url_dispos_changes = "{% url "base:dispos_changes"%}";
+    var url_fetch_stype = "{% url "base:fetch_stype" %}"; 
+    var url_bknews = "{% url "base:fetch_bknews" %}"; 
     var url_quote = "{% url "quote:fetch_quote" %}"; 
 
     var semaine_an_list = {{ all_weeks|safe }};
