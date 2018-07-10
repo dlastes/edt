@@ -33,7 +33,7 @@ def basic_reassign_rooms(semaine, an, target_work_copy):
     """
     Reassign the rooms...
     """
-    print("reassigning rooms to minimize moves...", end=' ')
+    print("reassigning rooms to minimize moves...")
 
     slots = Slot.objects.all().order_by('jour', 'heure')
     for sl in slots:
