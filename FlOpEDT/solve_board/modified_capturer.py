@@ -19,6 +19,11 @@ import tempfile
 import time
 import json
 
+import channels.layers
+from asgiref.sync import async_to_sync
+from django.conf import settings
+
+
 # External dependencies.
 from humanfriendly.text import compact, dedent
 from humanfriendly.terminal import clean_terminal_output
@@ -241,6 +246,18 @@ class CaptureOutput(MultiProcessHelper):
         self.stdout_stream = self.initialize_stream(sys.stdout, STDOUT_FD)
         self.stderr_stream = self.initialize_stream(sys.stderr, STDERR_FD)
         self.channel = channel
+        async_to_sync(self.channel.group_send)(
+            "testGroup",
+            {'type': 'echo_msg',
+             'message':'created old chan'})
+        channel_layer = channels.layers.get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            "testGroup",
+            {'type': 'echo_msg',
+             'message':'created new chan'})
+        
+
+
 
     def initialize_stream(self, file_obj, expected_fd):
         """
@@ -282,6 +299,11 @@ class CaptureOutput(MultiProcessHelper):
 
     def __enter__(self):
         """Automatically call :func:`start_capture()` when entering a :keyword:`with` block."""
+        async_to_sync(self.channel.group_send)(
+            "testGroup",
+            {'type': 'echo_msg',
+             'message':'created in enter'})
+
         self.start_capture()
         return self
 
@@ -336,6 +358,12 @@ class CaptureOutput(MultiProcessHelper):
         for pseudo_terminal in self.pseudo_terminals:
             pseudo_terminal.start_capture()
 
+        async_to_sync(self.channel.group_send)(
+            "testGroup",
+            {'type': 'echo_msg',
+             'message':'end start capture'})
+
+
     def finish_capture(self):
         """
         Stop capturing the standard output and error streams.
@@ -356,6 +384,11 @@ class CaptureOutput(MultiProcessHelper):
         Internal shortcut for :func:`start_capture()` to allocate multiple
         pseudo terminals without code duplication.
         """
+        async_to_sync(self.channel.group_send)(
+            "testGroup",
+            {'type': 'echo_msg',
+             'message':'created bef pseudo'})
+
         obj = PseudoTerminal(
             self.encoding, self.termination_delay, self.chunk_size,
             relay_fd=relay_fd, output_queue=output_queue,
@@ -478,6 +511,11 @@ class PseudoTerminal(MultiProcessHelper):
         self.output_fd, output_file = tempfile.mkstemp()
         self.output_handle = open(output_file, 'rb')
         self.channel=channel
+        async_to_sync(self.channel.group_send)(
+            "testGroup",
+            {'type': 'echo_msg',
+             'message':'created in Pseudo'})
+
         # Unlink the temporary file because we have a readable file descriptor
         # and a writable file descriptor and that's all we need! If this
         # surprises you I suggest you investigate why unlink() was named the
@@ -641,12 +679,18 @@ class PseudoTerminal(MultiProcessHelper):
         """
         self.enable_graceful_shutdown()
         started_event.set()
+        #channel_layer = channels.layers.get_channel_layer()
         try:
             while True:
                 # Read from the master end of the pseudo terminal.
                 output = os.read(self.master_fd, self.chunk_size)
                 if output:
-                    self.channel.send(text_data=json.dumps({'message':output}))
+
+                    async_to_sync(self.channel.group_send)(
+                        "testGroup",
+                        {'type': 'echo_msg',
+                         'message':output})
+#                    self.channel.send(text_data=json.dumps({'message':output}))
                     # Store the output in the temporary file.
                     os.write(self.output_fd, output)
                     

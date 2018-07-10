@@ -179,15 +179,15 @@ STATICFILES_DIRS = (
 # Channels
 ASGI_APPLICATION = 'FlOpEDT.routing.application'
 
-# CHANNEL_LAYERS = {
-#     "default": {
-#         "BACKEND": "channels_redis.RedisChannelLayer",
-#         "CONFIG": {
-#             "hosts": [("localhost", 6379)],
-#         },
-#     },
-#     # "default": {
-#     #     "BACKEND": "asgiref.inmemory.ChannelLayer",
-#     #     "ROUTING": "solve_board.routing.channel_routing",
-#     # },
-# }
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
+    # "default": {
+    #     "BACKEND": "asgiref.inmemory.ChannelLayer",
+    #     "ROUTING": "solve_board.routing.channel_routing",
+    # },
+}

@@ -73,6 +73,7 @@ function open_connection(){
     socket = new WebSocket("ws://" + window.location.host + "/solver/");
 //			  + opti_timestamp);
     socket.onmessage = function(e) {
+	console.log(e);
 	var dat = JSON.parse(e.data) ;
 	var s = dat['message'] ;
 	while (s.length > 0 && s.slice(-1) == '\n') {

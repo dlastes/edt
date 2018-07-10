@@ -24,10 +24,12 @@
 # without disclosing the source code of your own applications.
 
 
-from channels.routing import ProtocolTypeRouter, URLRouter
+from channels.routing import ChannelNameRouter, ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
 
 import solve_board.routing
+
+from solve_board.consumers import SolveWorker
 
 application = ProtocolTypeRouter({
     # (http->django views is added by default)
@@ -36,4 +38,7 @@ application = ProtocolTypeRouter({
             solve_board.routing.websocket_urlpatterns
         )
     ),
+    "channel":ChannelNameRouter({
+        "solve_worker": SolveWorker,
+    }),
 })
