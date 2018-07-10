@@ -533,7 +533,12 @@ class PseudoTerminal(MultiProcessHelper):
 
     def start_capture(self):
         """Start the child process(es) responsible for capturing and relaying output."""
-        self.start_child(self.capture_loop)
+        async_to_sync(self.channel.group_send)(
+            "testGroup",
+            {'type': 'echo_msg',
+             'message':'bef capttt'})
+
+        self.start_child(self.capture_loop, self.channel)
 
     def finish_capture(self):
         """Stop the process of capturing output and destroy the pseudo terminal."""
@@ -666,7 +671,7 @@ class PseudoTerminal(MultiProcessHelper):
         with open(filename, 'wb') as handle:
             self.save_to_handle(handle, partial)
 
-    def capture_loop(self, started_event):
+    def capture_loop(self, started_event, chan_layer):
         """
         Continuously read from the master end of the pseudo terminal and relay the output.
 
@@ -680,13 +685,17 @@ class PseudoTerminal(MultiProcessHelper):
         self.enable_graceful_shutdown()
         started_event.set()
         #channel_layer = channels.layers.get_channel_layer()
+        async_to_sync(chan_layer.group_send)(
+            "testGroup",
+            {'type': 'echo_msg',
+             'message':'created in capture'})
         try:
             while True:
                 # Read from the master end of the pseudo terminal.
                 output = os.read(self.master_fd, self.chunk_size)
                 if output:
 
-                    async_to_sync(self.channel.group_send)(
+                    async_to_sync(chan_layer.group_send)(
                         "testGroup",
                         {'type': 'echo_msg',
                          'message':output})

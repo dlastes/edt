@@ -157,6 +157,7 @@ class SolveWorker(SyncConsumer):
                 'type': 'echo_msg',
                 'message': 'is inside'
             })
+            print('proooot')
             t = MyTTModel(week, year, train_prog=training_programme)
             t.solve(time_limit=20)
             cap.save_to_path(os.path.join(settings.BASE_DIR,
