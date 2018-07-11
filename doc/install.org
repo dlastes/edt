@@ -41,9 +41,9 @@ Deux scripts à ne pas oublier :
   contiennent, il est *nécessaire* d'appeler la fonction
   ~generate_group_file~, qui se trouve [[../misc/group_file.py][ici]], pour regrouper toutes les
   informations.
-- après avoir défini tous les cours ~Course~ qui auront lieu pendant
+- après avoir créé tous les cours ~Course~ qui auront lieu pendant
   l'année, il est *possible* d'assigner automatiquement une couleur à
-  chacune des modules en appelant la fonction ~assign_color~, écrite
+  chacun des modules en appelant la fonction ~assign_color~, définie
   [[../FlOpEDT/misc/assign_module_color.py][ici]]. Autre possibilité : définir les ~ModuleDisplay~ un à un.
 
 
