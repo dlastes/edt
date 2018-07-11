@@ -95,7 +95,7 @@ class LimitCourseTypePerPeriod(TTConstraint):  # , pond):
         if self.period == self.FULL_DAY:
             periods = ['']
         else:
-            periods = [Time.MATIN, Time.APREM]
+            periods = [Time.AM, Time.PM]
         for d in ttmodel.wdb.days:
             for per in periods:
                 expr = ttmodel.lin_expr()
@@ -495,6 +495,7 @@ class SimultaneousCourses(TTConstraint):
                     if (ttmodel.var_coeff(var1, group_constr), ttmodel.var_coeff(var2, group_constr)) == (1, 1):
                         ttmodel.change_var_coeff(var2, group_constr, 0)
 
+
 class LimitedSlotChoices(TTConstraint):
     """
     Limit the possible slots for the fources
@@ -532,8 +533,8 @@ class LimitedSlotChoices(TTConstraint):
             fc = fc.filter(type=self.type)
         if self.train_prog is not None:
             fc = fc.filter(groupe__train_prog=self.train_prog)
-        if self.groupe is not None:
-            fc = fc.filter(groupe=self.groupe)
+        if self.group is not None:
+            fc = fc.filter(groupe=self.group)
         possible_slots_ids = self.possible_slots.values_list('id', flat=True)
 
         for c in fc:
