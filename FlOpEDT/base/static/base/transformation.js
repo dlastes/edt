@@ -450,7 +450,7 @@ function gscg_x(datum) {
 }
 
 function gscg_y(datum) {
-    if (datum.gp.promo == 0) {
+    if (datum.gp.promo == 0 || set_rows.length == 1) {
         return -.25 * labgp.height_init;
     } else {
         // if (datum.day == 3) {

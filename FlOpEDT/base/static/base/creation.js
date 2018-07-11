@@ -662,15 +662,39 @@ function def_drag_sca() {
 
 // Only for the current case
 function set_butgp() {
-    var topx = 620;
+    var topx = 615 + 4*30;
 
-    root_gp[0].buty = margin.but;
-    root_gp[0].butx = topx;
-    root_gp[1].buty = root_gp[0].buty + 3 * butgp.height + margin_but.ver;
-    root_gp[1].butx = topx - .5 * margin_but.hor;
-    root_gp[2].buty = root_gp[1].buty;
-    root_gp[2].butx = root_gp[1].butx + margin_but.hor;
+    if (set_promos.length == 2) {
+	root_gp[0].buty = margin.but;
+	root_gp[0].butx = topx - .5*root_gp[0].gp.width * butgp.width ;
+	root_gp[1].buty = root_gp[0].buty + root_gp[0].maxby * butgp.height + margin_but.ver;
+	root_gp[1].butx = topx - .5*root_gp[1].gp.width * butgp.width - root_gp[0].gp.width * butgp.width ;//- .5 * margin_but.hor;
+    } else {
+	var cur_buty = margin.but ;
+	var cur_rootgp ;
+	for (var nrow=0 ; nrow<set_rows.length ; nrow++) {
+	    var cur_maxby = 0 ;
+	    var tot_row_gp = 0 ;
 
+	    for (var npro=0 ; npro<row_gp[nrow].promos.length ; npro++){
+		cur_rootgp = root_gp[row_gp[nrow].promos[npro]] ;
+		cur_rootgp.buty = cur_buty ;
+		if (cur_rootgp.maxby > cur_maxby) {
+		    cur_maxby = cur_rootgp.maxby ; 
+		}
+		tot_row_gp += cur_rootgp.gp.width ;
+		cur_rootgp.butx = (npro==0)?topx:(topx+npro*margin_but.hor) ;
+	    }
+	    cur_buty += margin_but.ver + cur_maxby ;
+	    for (var npro=0 ; npro<row_gp[nrow].promos.length ; npro++){
+		cur_rootgp = root_gp[row_gp[nrow].promos[npro]] ;
+		cur_rootgp.butx -= .5*tot_row_gp*butgp.width ;
+	    }
+
+	}
+//    root_gp[2].buty = root_gp[1].buty;
+//    root_gp[2].butx = root_gp[1].butx + margin_but.hor;
+    }
 
 }
 
@@ -707,8 +731,8 @@ function go_promo_gp_init(button_available) {
 
 function create_groups(data_groups) {
     extract_all_groups_structure(data_groups);
-    set_butgp();
     update_all_groups();
+    set_butgp();
 }
 
 
@@ -717,6 +741,11 @@ function extract_all_groups_structure(r) {
     for (var npro = 0; npro < init_nbPromos; npro++) {
         extract_groups_structure(r[npro], -1, -1);
     }
+    var sorted_rows = set_rows.sort() ;
+    for(var npro = 0 ; npro<set_promos.length ; npro++){
+	root_gp[npro].row = sorted_rows.indexOf(set_rows[root_gp[npro].row]) ;
+    }
+    set_rows = sorted_rows ;
 }
 
 function extract_groups_structure(r, npro, nrow) {
