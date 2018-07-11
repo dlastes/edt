@@ -20,7 +20,7 @@ sudo apt-get install postgresql
 * Paramétrage base de données et Django 
 
 La plupart des paramètres génériques nécessaires au fonctionnement de
-Django sont définis dans [[../FlOpEDT/FlOpEDT/base.py][ce fichier]]. A priori, rien à modifier ici.
+Django sont définis dans [[../FlOpEDT/FlOpEDT/settings/base.py][ce fichier]]. A priori, rien à modifier ici.
 
 Peuvent être utilisés les deux modes classiques :
 - développement, en local, qui utilise [[../FlOpEDT/FlOpEDT/settings/local.py][ce fichier]],
@@ -35,7 +35,7 @@ Dans ces deux fichiers, sont à redéfinir :
 
 Deux scripts à ne pas oublier :
 - après avoir fourni tous les renseignements sur les groupes,
-  i.e. après la création des promotions ~TrainingProgramme~, de leur
+  /i.e./ après la création des promotions ~TrainingProgramme~, de leur
   assignation à des lignes dans l'affichage (via
   ~TrainingProgrammeDisplay~) et des groupes ~Group~ qu'elles
   contiennent, il est *nécessaire* d'appeler la fonction
