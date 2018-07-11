@@ -93,9 +93,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'FlOpEDT.wsgi.application'
 
-# Database
-# https://docs.djangoproject.com/en/1.10/ref/settings/#databases
-
 
 CACHES = {
     # 'default': {
@@ -113,20 +110,6 @@ CACHES = {
 
 CACHE_COUNT_TIMEOUT = 24 * 3600
 CACHE_INVALIDATE_ON_CREATE = 'whole-model'
-
-# Avec sqlite
-# -----------
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-#     }
-# }
-
-
-# Password validation
-# https://docs.djangoproject.com/en/1.10/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -160,12 +143,7 @@ USE_L10N = True
 
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.10/howto/static-files/
-
 CSRF_USE_SESSION = True
-
-# LOGIN_URL = '/login'
 
 AUTH_USER_MODEL = 'people.User'
 
@@ -175,19 +153,5 @@ STATICFILES_DIRS = (
     )
 
 
-# mysite/settings.py
-# Channels
 ASGI_APPLICATION = 'FlOpEDT.routing.application'
 
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [('127.0.0.1', 6379)],
-        },
-    },
-    # "default": {
-    #     "BACKEND": "asgiref.inmemory.ChannelLayer",
-    #     "ROUTING": "solve_board.routing.channel_routing",
-    # },
-}
