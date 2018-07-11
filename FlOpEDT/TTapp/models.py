@@ -65,8 +65,6 @@ class TTConstraint(models.Model):
 class LimitCourseTypePerPeriod(TTConstraint):  # , pond):
     """
     Bound the number of courses of type 'type' per day/half day
-    Permet de limiter le nombre de cours du type 'type' par
-    jour/demi-journee
     """
     type = models.ForeignKey('base.CourseType', on_delete=models.CASCADE)
     limit = models.PositiveSmallIntegerField()
@@ -240,7 +238,8 @@ class Stabilize(TTConstraint):
 class MinHalfDays(TTConstraint):
     """
     All courses will fit in a minimum of half days
-    Optional : if 2 courses only, possibility to join it
+    You have to chose EITHER tutor OR group OR module
+    Optional for tutors : if 2 courses only, possibility to join it
     """
     tutor = models.ForeignKey('people.Tutor',
                               null=True,
@@ -436,6 +435,9 @@ class AvoidBothSlots(TTConstraint):
                                            '<=',
                                            1)
 
+# ========================================
+# The following constraints have to be checked!!!
+# ========================================
 
 # class AvoidIsolatedSlot(TTConstraint):
 #     """
@@ -492,3 +494,51 @@ class SimultaneousCourses(TTConstraint):
                     group_constr = ttmodel.get_constraint(name_group_constr)
                     if (ttmodel.var_coeff(var1, group_constr), ttmodel.var_coeff(var2, group_constr)) == (1, 1):
                         ttmodel.change_var_coeff(var2, group_constr, 0)
+
+class LimitedSlotChoices(TTConstraint):
+    """
+    Limit the possible slots for the fources
+    """
+    train_prog = models.ForeignKey('base.TrainingProgramme',
+                                   null=True,
+                                   default=None,
+                                   on_delete=models.CASCADE)
+    module = models.ForeignKey('base.Module',
+                               null=True,
+                               default=None,
+                               on_delete=models.CASCADE)
+    tutor = models.ForeignKey('people.Tutor',
+                              null=True,
+                              default=None,
+                              on_delete=models.CASCADE)
+    group = models.ForeignKey('base.Group',
+                              null=True,
+                              default=None,
+                              on_delete=models.CASCADE)
+    type = models.ForeignKey('base.CourseType',
+                              null=True,
+                              default=None,
+                              on_delete=models.CASCADE)
+    possible_slots = models.ManyToManyField('base.Slot',
+                                            related_name="limited courses")
+
+    def enrich_model(self, ttmodel, ponderation=1.):
+        fc = ttmodel.wdb.courses
+        if self.tutor is not None:
+            fc = fc.filter(tutor=self.tutor)
+        if self.module is not None:
+            fc = fc.filter(module=self.module)
+        if self.type is not None:
+            fc = fc.filter(type=self.type)
+        if self.train_prog is not None:
+            fc = fc.filter(groupe__train_prog=self.train_prog)
+        if self.groupe is not None:
+            fc = fc.filter(groupe=self.groupe)
+        possible_slots_ids = self.possible_slots.values_list('id', flat=True)
+
+        for c in fc:
+            for sl in ttmodel.wdb.slots.exclude(id__in = possible_slots_ids):
+                if self.weight is not None:
+                    ttmodel.obj += self.local_weight() * ponderation * ttmodel.TT[(sl, c)]
+                else:
+                    ttmodel.add_constraint(ttmodel.TT[(sl, c)], '==', 0)
