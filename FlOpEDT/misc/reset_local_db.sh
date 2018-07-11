@@ -21,13 +21,31 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-echo "ATTENTION -- WARNING -- ACHTUNG"
-echo "Tout ce qui se trouve sur cette base de donnée sera perdu"
-echo "Continuer ? (oui ?)"
-read rep
-if [ $rep = "oui" ]
+if [ $# -gt 1 ]
 then
-    sudo -u postgres psql -c 'drop database "FlOp_database_abst-gen"'
-    sudo -u postgres createdb FlOp_database_abst-gen
-    python3 ../manage.py migrate --settings=FlOpEDT.settings.local
+    echo "usage: $0 [name of the setting file]"
+    echo "by default: local"
+else
+    SETTING_FILE="FlOpEDT.settings"
+    if [ "$1" == "" ]
+    then
+	SETTING_FILE="$SETTING_FILE.local"
+    else
+	SETTING_FILE="$SETTING_FILE.$1"
+    fi
+    echo "Setting file: $SETTING_FILE"
+    echo "ATTENTION -- WARNING -- ACHTUNG"
+    echo "Tout ce qui se trouve sur cette base de donnée sera perdu"
+    echo "Continuer ? (oui ?)"
+    read rep
+    if [ $rep = "oui" ]
+    then
+	SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+	DB="$($SCRIPT_DIR/../manage.py shell --settings=$SETTING_FILE -c "from django.conf import settings ; print(settings.DATABASES['default']['NAME'])")"
+	echo "Database name: $DB"
+    	sudo -u postgres psql -c 'drop database '"\"$DB\""
+    	sudo -u postgres createdb $DB
+    	$SCRIPT_DIR/../manage.py migrate --settings=$SETTING_FILE
+    fi
 fi
+

@@ -21,37 +21,44 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-echo "ATTENTION -- WARNING -- ACHTUNG"
-echo "Tout ce qui se trouve sur cette base de donnée sera perdu"
-echo "Continuer ? (oui ?)"
-read rep
-if [ $rep = "oui" ]
+if [ $# -gt 1 ]
 then
-    BASE='..'
-    sudo systemctl restart postgresql
-    sudo -u postgres psql -c 'drop database "FlOp_database_Py3-gen"'
-    sudo -u postgres createdb "FlOp_database_Py3-gen"
-    apps="base TTapp quote people"
-    for a in $apps
-    do
-	mig=$a/migrations
-	for i in `ls $BASE/$mig --hide=__init__.py`
+    echo "usage: $0 [name of the setting file]"
+    echo "by default: local"
+else
+    SETTING_FILE="FlOpEDT.settings"
+    if [ "$1" == "" ]
+    then
+	SETTING_FILE="$SETTING_FILE.local"
+    else
+	SETTING_FILE="$SETTING_FILE.$1"
+    fi
+    echo "Setting file: $SETTING_FILE"
+    echo "ATTENTION -- WARNING -- ACHTUNG"
+    echo "Tout ce qui se trouve sur cette base de donnée sera perdu"
+    echo "Continuer ? (oui ?)"
+    read rep
+    if [ $rep = "oui" ]
+    then
+	SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+	DB="$($SCRIPT_DIR/../manage.py shell --settings=$SETTING_FILE -c "from django.conf import settings ; print(settings.DATABASES['default']['NAME'])")"
+	echo "Database name: $DB"
+
+	sudo systemctl restart postgresql
+    	sudo -u postgres psql -c 'drop database '"\"$DB\""
+    	sudo -u postgres createdb $DB
+
+	apps="base TTapp quote people solve_board"
+	echo "Remove migrations from: $apps"
+	for a in $apps
 	do
-	    rm $BASE/$mig/$i
+	    mig=$a/migrations
+	    for i in `ls $SCRIPT_DIR/../$mig --hide=__init__.py`
+	    do
+		rm $SCRIPT_DIR/../$mig/$i
+	    done
 	done
-    done
-    # mig='TTapp/migrations'
-    # for i in `ls $BASE/$mig --hide=__init__.py`
-    # do
-    # 	rm $BASE/$mig/$i
-    # done
-    # mig='quote/migrations'
-    # for i in `ls $BASE/$mig --hide=__init__.py`
-    # do
-    # 	rm $BASE/$mig/$i
-    # done
-    m=$BASE/"manage.py"
-    s="FlOpEDT.settings.local"
-    python3 $m makemigrations --settings=$s
-    python3 $m migrate --settings=$s
+    	$SCRIPT_DIR/../manage.py makemigrations --settings=$SETTING_FILE
+    	$SCRIPT_DIR/../manage.py migrate --settings=$SETTING_FILE
+    fi
 fi
