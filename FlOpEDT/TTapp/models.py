@@ -23,9 +23,6 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-
-
-
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 from django.db import models
@@ -39,11 +36,6 @@ from django.utils.translation import ugettext_lazy as _
 # from caching.base import CachingManager, CachingMixin
 
 from base.models import Course, Time  # , Module
-
-# class TestJour(models.Model):
-#     jour = models.ForeignKey('modif.Jour', on_delete=models.CASCADE)
-#     truc = models.CharField(max_length=10, verbose_name="Truc",default="")
-
 
 max_weight = 8
 
@@ -155,8 +147,7 @@ class ReasonableDays(TTConstraint):
                         conj_var = ttmodel.add_conjunct(
                             ttmodel.TT[(slfirst, c1)],
                             ttmodel.TT[(sllast, c2)])
-                        ttmodel.obj += self.local_weight() \
-                                       * ponderation * conj_var
+                        ttmodel.obj += self.local_weight() * ponderation * conj_var
                     else:
                         ttmodel.add_constraint(ttmodel.TT[(slfirst, c1)] +
                                                ttmodel.TT[(sllast, c2)],
@@ -204,14 +195,12 @@ class Stabilize(TTConstraint):
                         # nb_changements_I[c.tutor]+=ttmodel.TT[(sl,c)]
                     if not sched_courses.filter(cours__tutor=c.tutor,
                                                 creneau__jour=sl.jour,
-                                                creneau__heure__apm=
-                                                sl.heure.apm):
+                                                creneau__heure__apm=sl.heure.apm):
                         ttmodel.obj += ponderation * ttmodel.TT[(sl, c)]
                         # nb_changements_I[i]+=ttmodel.TT[(sl,c)]
                     if not sched_courses.filter(cours__groupe=c.groupe,
                                                 creneau__jour=sl.jour,
-                                                creneau__heure__apm=
-                                                sl.heure.apm):
+                                                creneau__heure__apm=sl.heure.apm):
                         ttmodel.obj += ponderation * ttmodel.TT[(sl, c)]
 
         else:
@@ -257,7 +246,7 @@ class MinHalfDays(TTConstraint):
                               null=True,
                               default=None,
                               on_delete=models.CASCADE)
-    group = models.ForeignKey('base.Groupe',
+    group = models.ForeignKey('base.Group',
                               null=True,
                               default=None,
                               on_delete=models.CASCADE)
@@ -276,7 +265,7 @@ class MinHalfDays(TTConstraint):
             b_h_ds = ttmodel.sum(
                 ttmodel.IBHD[(self.tutor, d, apm)]
                 for d in ttmodel.wdb.days
-                for apm in [Time.MATIN, Time.APREM])
+                for apm in [Time.AM, Time.PM])
             local_var = ttmodel.add_var("MinIBHD_var_%s" % self.tutor)
 
         elif self.group is not None:
@@ -291,14 +280,14 @@ class MinHalfDays(TTConstraint):
             local_var = ttmodel.add_var("MinMBHD_var_%s" % self.module)
             mod_b_h_d = {}
             for d in ttmodel.wdb.days:
-                mod_b_h_d[(self.module, d, 'AM')] \
+                mod_b_h_d[(self.module, d, Time.AM)] \
                     = ttmodel.add_var("ModBHD(%s,%s,%s)"
-                                      % (self.module, d, 'AM'))
-                mod_b_h_d[(self.module, d, 'PM')] \
+                                      % (self.module, d, Time.AM))
+                mod_b_h_d[(self.module, d, Time.PM)] \
                     = ttmodel.add_var("ModBHD(%s,%s,%s)"
-                                      % (self.module, d, 'PM'))
+                                      % (self.module, d, Time.PM))
                 # add constraint linking MBHD to TT
-                for apm in ['AM', 'PM']:
+                for apm in [Time.AM, Time.PM]:
                     halfdayslots = ttmodel.wdb.slots.filter(jour=d,
                                                             heure__apm=apm)
                     card = len(halfdayslots)
@@ -313,9 +302,9 @@ class MinHalfDays(TTConstraint):
             b_h_ds = ttmodel.sum(
                 mod_b_h_d[(self.module, d, apm)]
                 for d in ttmodel.wdb.days
-                for apm in [Time.MATIN, Time.APREM])
+                for apm in [Time.AM, Time.PM])
         else:
-            print("MinHalfDays must have tuor or group or module --> Ignored")
+            print("MinHalfDays must have tutor or group or module --> Ignored")
             return
 
         ttmodel.add_constraint(local_var, '==', 1)
@@ -494,15 +483,12 @@ class SimultaneousCourses(TTConstraint):
                                         + str(sl))
                 tutor_constr = ttmodel.get_constraint(name_tutor_constr)
                 print(tutor_constr)
-                if (ttmodel.var_coeff(var1, tutor_constr),
-                    ttmodel.var_coeff(var2, tutor_constr)) == (1, 1):
+                if (ttmodel.var_coeff(var1, tutor_constr), ttmodel.var_coeff(var2, tutor_constr)) == (1, 1):
                     ttmodel.change_var_coeff(var2, tutor_constr, 0)
             for bg in ttmodel.wdb.basic_groups:
                 bg_groups = ttmodel.wdb.basic_groups_surgroups[bg]
-                if self.course1.groupe in bg_groups \
-                        and self.course2.groupe in bg_groups:
+                if self.course1.groupe in bg_groups and self.course2.groupe in bg_groups:
                     name_group_constr = 'core_group_' + str(bg) + '_' + str(sl)
                     group_constr = ttmodel.get_constraint(name_group_constr)
-                    if (ttmodel.var_coeff(var1, group_constr),
-                        ttmodel.var_coeff(var2, group_constr)) == (1, 1):
+                    if (ttmodel.var_coeff(var1, group_constr), ttmodel.var_coeff(var2, group_constr)) == (1, 1):
                         ttmodel.change_var_coeff(var2, group_constr, 0)
