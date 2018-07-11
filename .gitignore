@@ -1,6 +1,7 @@
 #Ignorer tous les fichiers pyc
 *.pyc
 *~
+*.bak
 FlOpEDT/logs/*
 FlOpEDT/*.log
 FlOpEDT/*.lp
