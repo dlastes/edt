@@ -253,13 +253,20 @@ class MinHalfDays(TTConstraint):
     All courses will fit in a minimum of half days
     Optional : if 2 courses only, possibility to join it
     """
-    module = models.ForeignKey('base.Module', null=True, on_delete=models.CASCADE)
     tutor = models.ForeignKey('people.Tutor',
                               null=True,
                               default=None,
                               on_delete=models.CASCADE)
+    group = models.ForeignKey('base.Groupe',
+                              null=True,
+                              default=None,
+                              on_delete=models.CASCADE)
+    module = models.ForeignKey('base.Module',
+                               null=True,
+                               default=None,
+                               on_delete=models.CASCADE)
     join2courses = models.BooleanField(
-        verbose_name='If 2 or 4 courses only, join it?',
+        verbose_name='If a tutor has 2 or 4 courses only, join it?',
         default=False)
 
     def enrich_model(self, ttmodel, ponderation=1):
@@ -271,6 +278,15 @@ class MinHalfDays(TTConstraint):
                 for d in ttmodel.wdb.days
                 for apm in [Time.MATIN, Time.APREM])
             local_var = ttmodel.add_var("MinIBHD_var_%s" % self.tutor)
+
+        elif self.group is not None:
+            fc = fc.filter(groupe=self.group)
+            b_h_ds = ttmodel.sum(
+                ttmodel.GBHD[(self.tutor, d, apm)]
+                for d in ttmodel.wdb.days
+                for apm in [Time.AM, Time.PM])
+            local_var = ttmodel.add_var("MinGBHD_var_%s" % self.tutor)
+
         elif self.module is not None:
             local_var = ttmodel.add_var("MinMBHD_var_%s" % self.module)
             mod_b_h_d = {}
@@ -299,20 +315,28 @@ class MinHalfDays(TTConstraint):
                 for d in ttmodel.wdb.days
                 for apm in [Time.MATIN, Time.APREM])
         else:
-            print("MinHalfDays must have module or prof --> Ignored")
+            print("MinHalfDays must have tuor or group or module --> Ignored")
             return
 
         ttmodel.add_constraint(local_var, '==', 1)
         limit = (len(fc) - 1) / 3 + 1
 
         if self.weight is not None:
-            ttmodel.obj += self.local_weight() \
-                           * ponderation \
-                           * (b_h_ds - limit * local_var)
+            if self.tutor is not None:
+                ttmodel.add_to_inst_cost(self.tutor,
+                                         self.local_weight() * ponderation * (b_h_ds - limit * local_var))
+
+            elif self.group is not None:
+                ttmodel.add_to_group_cost(self.group,
+                                          self.local_weight() * ponderation * (b_h_ds - limit * local_var))
+
+            else:
+                ttmodel.obj += self.local_weight() * ponderation * (b_h_ds - limit * local_var)
+                
         else:
             ttmodel.add_constraint(b_h_ds, '<=', limit)
 
-        if self.join2courses and len(fc) in [2, 4]:
+        if self.tutor is not None and self.join2courses and len(fc) in [2, 4]:
             for d in ttmodel.wdb.days:
                 sl8h = ttmodel.wdb.slots.get(jour=d, heure__no=0)
                 sl11h = ttmodel.wdb.slots.get(jour=d, heure__no=2)
