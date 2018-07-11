@@ -270,10 +270,10 @@ class MinHalfDays(TTConstraint):
         elif self.group is not None:
             fc = fc.filter(groupe=self.group)
             b_h_ds = ttmodel.sum(
-                ttmodel.GBHD[(self.tutor, d, apm)]
+                ttmodel.GBHD[(self.group, d, apm)]
                 for d in ttmodel.wdb.days
                 for apm in [Time.AM, Time.PM])
-            local_var = ttmodel.add_var("MinGBHD_var_%s" % self.tutor)
+            local_var = ttmodel.add_var("MinGBHD_var_%s" % self.group)
 
         elif self.module is not None:
             local_var = ttmodel.add_var("MinMBHD_var_%s" % self.module)
@@ -521,7 +521,7 @@ class LimitedSlotChoices(TTConstraint):
                               default=None,
                               on_delete=models.CASCADE)
     possible_slots = models.ManyToManyField('base.Slot',
-                                            related_name="limited courses")
+                                            related_name="limited_courses")
 
     def enrich_model(self, ttmodel, ponderation=1.):
         fc = ttmodel.wdb.courses
