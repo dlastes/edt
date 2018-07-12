@@ -682,13 +682,14 @@ function set_butgp() {
 		if (cur_rootgp.maxby > cur_maxby) {
 		    cur_maxby = cur_rootgp.maxby ; 
 		}
-		tot_row_gp += cur_rootgp.gp.width ;
+		tot_row_gp += cur_rootgp.gp.width*butgp.width ;
+		tot_row_gp += (npro==0)?0:(margin_but.hor) ;
 		cur_rootgp.butx = (npro==0)?topx:(topx+npro*margin_but.hor) ;
 	    }
-	    cur_buty += margin_but.ver + cur_maxby ;
+	    cur_buty += margin_but.ver + cur_maxby*butgp.height ;
 	    for (var npro=0 ; npro<row_gp[nrow].promos.length ; npro++){
 		cur_rootgp = root_gp[row_gp[nrow].promos[npro]] ;
-		cur_rootgp.butx -= .5*tot_row_gp*butgp.width ;
+		cur_rootgp.butx -= .5*tot_row_gp ;
 	    }
 
 	}
