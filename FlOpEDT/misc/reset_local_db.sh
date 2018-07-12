@@ -44,7 +44,7 @@ else
 	DB="$($SCRIPT_DIR/../manage.py shell --settings=$SETTING_FILE -c "from django.conf import settings ; print(settings.DATABASES['default']['NAME'])")"
 	echo "Database name: $DB"
     	sudo -u postgres psql -c 'drop database '"\"$DB\""
-    	sudo -u postgres createdb $DB
+    	sudo -u postgres createdb "$DB"
     	$SCRIPT_DIR/../manage.py migrate --settings=$SETTING_FILE
     fi
 fi

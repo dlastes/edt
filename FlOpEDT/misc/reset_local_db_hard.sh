@@ -46,7 +46,7 @@ else
 
 	sudo systemctl restart postgresql
     	sudo -u postgres psql -c 'drop database '"\"$DB\""
-    	sudo -u postgres createdb $DB
+    	sudo -u postgres createdb "$DB"
 
 	apps="base TTapp quote people solve_board"
 	echo "Remove migrations from: $apps"
