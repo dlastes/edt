@@ -29,8 +29,6 @@ from channels.auth import AuthMiddlewareStack
 
 import solve_board.routing
 
-from solve_board.consumers import SolveWorker
-
 application = ProtocolTypeRouter({
     # (http->django views is added by default)
     'websocket': AuthMiddlewareStack(
@@ -38,7 +36,4 @@ application = ProtocolTypeRouter({
             solve_board.routing.websocket_urlpatterns
         )
     ),
-    "channel":ChannelNameRouter({
-        "solve_worker": SolveWorker,
-    }),
 })
