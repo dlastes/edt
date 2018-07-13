@@ -38,6 +38,7 @@ from base.models import TrainingProgramme
 import os
 import io
 import traceback
+import signal
 from django.core.cache import cache
 from django.conf import settings
 
@@ -65,23 +66,30 @@ class SolverConsumer(WebsocketConsumer):
         data = json.loads(text_data)
         message = data['message']
 
-        self.send(text_data=json.dumps({
-            'message': message
-        }))
+        # self.send(text_data=json.dumps({
+        #     'message': message
+        # }))
         if data['action'] == 'go':
-            self.send(text_data=json.dumps({
-                'message': 'you want me to go. I got it.'
-            }))
-        Solve(data['week'],data['year'],
-              data['timestamp'],
-              data['train_prog'],
-              self).start()
-            
+            # self.send(text_data=json.dumps({
+            #     'message': 'you want me to go. I got it.'
+            # }))
+            Solve(data['week'],data['year'],
+                  data['timestamp'],
+                  data['train_prog'],
+                  self).start()
+        elif data['action'] == 'stop':
+            solver_child_process = cache.get("solver_child_process")
+            if solver_child_process:
+                self.send(text_data=json.dumps({
+                    'message': 'sending SIGINT to solver (PID:'+str(solver_child_process)+')...'
+                }))
+                os.kill(solver_child_process, signal.SIGINT)
+            else:
+                self.send(text_data=json.dumps({
+                    'message': 'there is no running solver!'
+                }))
 
         # ws_add(text_data)
-
-
-
 
 
 
@@ -125,7 +133,7 @@ class Solve():
     def start(self):
         solver_child_process = cache.get("solver_child_process")
         if solver_child_process:
-            self.channel.send(text_data=json.dumps({'message': "another solver is currently running, let's wait"}))
+            self.channel.send(text_data=json.dumps({'message': "another solver is currently running (PID:"+str(solver_child_process)+"), let's wait"}))
             return
         try:
             (rd,wd) = os.pipe()
@@ -133,21 +141,36 @@ class Solve():
             if solver_child_process == 0:
                 os.dup2(wd,1)   # redirect stdout
                 os.dup2(wd,2)   # redirect stderr
-                # print('start running')
-                t = MyTTModel(self.week, self.year, train_prog=self.training_programme)
-                t.solve(time_limit=300)
+                try:
+                    t = MyTTModel(self.week, self.year, train_prog=self.training_programme)
+                    t.solve(time_limit=300)
+                except:
+                    traceback.print_exc()
+                    print("solver aborting...")
+                    os._exit(1)
+                finally:
+                    print("solver exiting")
+                    os._exit(0)
             else:
-                cache.set("solver_child_process", str(solver_child_process), None)
-                print("starting solver sub-process " + cache.get("solver_child_process"))
+                cache.set("solver_child_process", solver_child_process, None)
+                print("starting solver sub-process " + str(solver_child_process))
+                if solver_child_process != cache.get("solver_child_process"):
+                    print("unable to store solver_child_process PID, cache not working?")
+                    self.channel.send(text_data=json.dumps({'message': "unable to store solver_child_process PID, you won't be able to stop it via the browser! Is Django cache not working?"}))
                 os.close(wd)
                 with io.TextIOWrapper(io.FileIO(rd)) as tube:
                     for line in tube:
-                        # print(line)
                         self.channel.send(text_data=json.dumps({'message': line}))
-                os.wait()
+                while 1:
+                    (child,status) = os.wait()
+                    if child == solver_child_process and os.WIFEXITED(status):
+                        break
                 cache.delete('solver_child_process')
+                if os.WEXITSTATUS(status) != 0:
+                    self.channel.send(text_data=json.dumps({'message': 'solver process has aborted'}))
 
         except OSError as e:
+            print("Exception while launching a solver sub-process:")
             traceback.print_exc()
             print("Continuing business as usual...")
 

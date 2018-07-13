@@ -49,8 +49,35 @@ function start(){
     //var dates = extract_week_year();
     open_connection();
 }
+
 function stop(){
     console.log("STOOOOP");
+    socket = new WebSocket("ws://" + window.location.host + "/solver/");
+    socket.onmessage = function(e) {
+	var dat = JSON.parse(e.data) ;
+	var s = dat['message'] ;
+	while (s.length > 0 && s.slice(-1) == '\n') {
+	    s = s.substring(0,s.length-1);
+	}
+	if (s.length > 0) {
+	    txt_area.textContent += "\n" + s ;
+	}
+    }
+    socket.onopen = function() {
+	var tp = '' ;
+	if (train_prog_sel != text_all) {
+	    tp = train_prog_sel ;
+	}
+	socket.send(JSON.stringify({'message':'kill',
+				    'action':"stop",
+				    'timestamp':opti_timestamp}))
+    }
+
+    socket.onclose = function(e) {
+        console.error('Chat socket closed unexpectedly');
+    };
+    // Call onopen directly if socket is already open
+    if (socket.readyState == WebSocket.OPEN) socket.onopen();
 }
 
 
