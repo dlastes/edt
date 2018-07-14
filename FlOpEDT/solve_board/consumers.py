@@ -30,7 +30,6 @@
 
 import json
 from threading import Thread
-from .modified_capturer import CaptureOutput
 from django.core.exceptions import ObjectDoesNotExist
 from MyFlOp.MyTTModel import MyTTModel
 from base.models import TrainingProgramme
