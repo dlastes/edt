@@ -741,12 +741,13 @@ def dispos_changes(req):
                         creneau=c,
                         defaults={'valeur':
                                       0})
-                    new_dispo = UserPreference(user=prof,
-                                               semaine=semaine,
-                                               an=an,
-                                               creneau=c,
-                                               valeur=def_dispo.valeur)
-                    new_dispo.save()
+                    if semaine is not None:
+                        new_dispo = UserPreference(user=prof,
+                                                   semaine=semaine,
+                                                   an=an,
+                                                   creneau=c,
+                                                   valeur=def_dispo.valeur)
+                        new_dispo.save()
 
             for a in q:
                 print(a)
