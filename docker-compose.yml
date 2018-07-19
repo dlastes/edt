@@ -3,20 +3,19 @@ version: '3'
 services:
   db:
     image: postgres
-    volumes:
-      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      PGDATA: /var/lib/postgresql/data/flopedt-${BRANCH:-default}
   redis:
     image: redis:latest
-
   web:
     build: .
-    command: 
+    command:
       - /bin/sh
       - -c
       - |
-        /code/FlOpEDT/manage.py makemigrations --settings=FlOpEDT.settings.${EDT_CONFIG:-development}
-        /code/FlOpEDT/manage.py migrate --settings=FlOpEDT.settings.${EDT_CONFIG:-development}
-        /code/FlOpEDT/manage.py runserver 0.0.0.0:8000 --settings=FlOpEDT.settings.${EDT_CONFIG:-development}
+        /code/FlOpEDT/manage.py makemigrations --settings=FlOpEDT.settings.${CONFIG:-development}
+        /code/FlOpEDT/manage.py migrate --settings=FlOpEDT.settings.${CONFIG:-development}
+        /code/FlOpEDT/manage.py runserver 0.0.0.0:8000 --settings=FlOpEDT.settings.${CONFIG:-development}
     volumes:
       - .:/code
     ports:
@@ -24,5 +23,3 @@ services:
     depends_on:
       - db
       - redis
-volumes:
-  postgres_data:
