@@ -98,11 +98,20 @@ CACHES = {
     # 'default': {
     #     'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
     # }
-    'default': {
-        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-        'LOCATION': [
-            '127.0.0.1:11211',
-        ],
+    # 'default': {
+    #     'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+    #     'LOCATION': [
+    #         '127.0.0.1:11211',
+    #     ],
+    #     'TIMEOUT': 24 * 3600,
+    #     'KEY_PREFIX': 'etd:',
+    # }
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient"
+        },
         'TIMEOUT': 24 * 3600,
         'KEY_PREFIX': 'etd:',
     }
@@ -110,6 +119,8 @@ CACHES = {
 
 CACHE_COUNT_TIMEOUT = 24 * 3600
 CACHE_INVALIDATE_ON_CREATE = 'whole-model'
+CACHE_MACHINE_USE_REDIS = True
+REDIS_BACKEND = 'redis://127.0.0.1:6379/1'
 
 AUTH_PASSWORD_VALIDATORS = [
     {

@@ -20,6 +20,7 @@ maximisent la satisfaction générale.
 - [PostgreSQL](https://www.postgresql.org/) pour la base de données
 - [PuLP](https://github.com/coin-or/pulp) pour la modélisation en ILP (Integer Linear Programming)
 - Un solveur de ILP, e.g. [CBC](https://projects.coin-or.org/Cbc), [Gurobi](gurobi.com)
+- [Redis](https://redis.io) pour le cache de Django (optionnel)
 
 ## Lancement dans un container Docker
 

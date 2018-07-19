@@ -1,5 +1,5 @@
-python-memcached
 Django
+django_redis
 django-import-export
 django-extensions
 django-colorfield
@@ -11,4 +11,4 @@ numpy
 pyclustering
 channels
 asgi_redis
-humanfriendly
+mysql-connector-python
