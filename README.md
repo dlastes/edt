@@ -24,7 +24,7 @@ maximisent la satisfaction générale.
 
 ## Lancement de l'application dans Docker
 
-Après l'installation de `docker` et `docker-compose, lancez la commande suivante pour récupérer les images de base et générer les containers. Cette commande n'est à exécuter qu'une seule fois et peut prendre un peu de temps.
+Après l'installation de `docker` et `docker-compose`, lancez la commande suivante pour récupérer les images de base et générer les containers. Cette commande n'est à exécuter qu'une seule fois et peut prendre un peu de temps.
 
 `make build` 
 
