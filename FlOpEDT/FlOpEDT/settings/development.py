@@ -34,15 +34,29 @@ DATABASES = {
     }
 }
 
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://redis:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient"
+        },
+        'TIMEOUT': 24 * 3600,
+        'KEY_PREFIX': 'etd:',
+    }
+}
+
+REDIS_BACKEND = 'redis://redis:6379/1'
+
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "asgi_redis.RedisChannelLayer",
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
             "hosts": [("redis", 6379)],
         },
-        "ROUTING": "solve_board.routing.channel_routing",
     },
 }
+# "ROUTING": "solve_board.routing.channel_routing",
 
 
 # SECURITY WARNING: keep the secret key used in production secret!
