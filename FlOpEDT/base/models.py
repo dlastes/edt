@@ -546,7 +546,7 @@ class TrainingProgrammeDisplay(models.Model):
                                               related_name='display',
                                               on_delete=models.CASCADE)
     row = models.PositiveSmallIntegerField()
-    short_name = models.CharField(max_length=20, default="red")
+    short_name = models.CharField(max_length=20, default="")
 
     def __str__(self):
         return str(self.training_programme) + ' : Row ' + str(self.row) \

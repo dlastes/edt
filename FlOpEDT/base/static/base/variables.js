@@ -270,6 +270,8 @@ var row_gp = []; // indexed by numrow
 
 // set of promo numbers
 var set_promos = [];
+// set of promo short description
+var set_promos_txt = [];
 // set of row numbers
 var set_rows = [];
 

@@ -84,6 +84,10 @@ def get_descendant_groups(gp, children):
         current['promo'] = tp.abbrev
         try:
             tpd = TrainingProgrammeDisplay.objects.get(training_programme=tp)
+            if tpd.short_name != '':
+                current['promotxt'] = tpd.short_name
+            else:
+                current['promotxt'] = tp.abbrev
             current['row'] = tpd.row
         except ObjectDoesNotExist:
             raise Exception('You should indicate on which row a training '

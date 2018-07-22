@@ -445,11 +445,11 @@ function create_grid_data() {
             var gscp = {
                 row: r,
                 slot: s,
-                name: set_promos[row_gp[r].promos[0]]
+                name: set_promos_txt[row_gp[r].promos[0]]
             };
             for (var p = 1; p < row_gp[r].promos.length; p++) {
                 gscp.name += "|";
-                gscp.name += set_promos[row_gp[r].promos[p]];
+                gscp.name += set_promos_txt[row_gp[r].promos[p]];
             }
             data_grid_scale_row.push(gscp);
         }
@@ -781,6 +781,7 @@ function extract_groups_structure(r, npro, nrow) {
 
         // promo number should be unique
         set_promos.push(r.promo);
+        set_promos_txt.push(r.promotxt);
 
         npro = set_promos.indexOf(r.promo);
 
