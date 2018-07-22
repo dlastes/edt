@@ -38,6 +38,8 @@ import os
 import io
 import traceback
 import signal
+import time
+
 from django.core.cache import cache
 from django.conf import settings
 
@@ -116,6 +118,11 @@ class SolverConsumer(WebsocketConsumer):
 #         # p = Process(target=ruru, args=(data['week'],data['year'],Channel(msg_reply)))
 #         # p.start()
 
+def solver_subprocess_SIGINT_handler(sig, stack):
+    # ignore in current process and forward to process group (=> gurobi)
+    signal.signal(signal.SIGINT, signal.SIG_IGN)
+    os.kill(0, signal.SIGINT)
+
 class Solve():
     def __init__(self, week, year, timestamp, training_programme, chan):
         super(Solve, self).__init__()
@@ -142,6 +149,8 @@ class Solve():
                 os.dup2(wd,2)   # redirect stderr
                 try:
                     t = MyTTModel(self.week, self.year, train_prog=self.training_programme)
+                    os.setpgid(os.getpid(), os.getpid())
+                    signal.signal(signal.SIGINT, solver_subprocess_SIGINT_handler)
                     t.solve(time_limit=300)
                 except:
                     traceback.print_exc()
