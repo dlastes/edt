@@ -43,5 +43,5 @@ echo "manage.py migrate..."
 $SCRIPT_PATH/../manage.py migrate --settings=FlOpEDT.settings.${CONFIG}
 
 echo "manage.py loaddata..."
-$SCRIPT_PATH/../manage.py loaddata dumpPy3.json --settings=FlOpEDT.settings.${CONFIG}
+$SCRIPT_PATH/../manage.py loaddata dump.json --settings=FlOpEDT.settings.${CONFIG}
 
