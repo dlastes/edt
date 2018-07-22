@@ -1297,7 +1297,7 @@ function def_drag() {
 					 {txt: ""},
 					 {txt: "Des privilèges vous ont été accordés, et vous en profitez pour outrepasser la contrainte suivante :"},
 					 {txt: warn_check},
-					 {txt: "C'est bien ce que je voulais faire."}]
+					 {txt: "Confirmer la modification ?"}]
 				 }
 			}
 			splash(splash_violate_constraint);
