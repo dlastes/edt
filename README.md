@@ -26,9 +26,13 @@ maximisent la satisfaction générale.
 
 Après l'installation de `docker` et `docker-compose`, lancez la commande suivante pour récupérer les images de base et générer les containers. Cette commande n'est à exécuter qu'une seule fois et peut prendre un peu de temps.
 
-`make build` 
+(En cas de
+`ERROR: Couldn't connect to Docker daemon at http+docker://localhost - is it running?`
+songez à une exécution en `sudo`.)
 
-Ensuite, vous pourrez lancer le serveur à l'aide de la commande:
+`make build`
+x
+Ensuite, vous pourrez lancer le serveur à l'aide de la commande :
 
 `make start` (`make stop` pour arrêter l'application)
 
