@@ -45,16 +45,6 @@ else
 	echo "Database name: $DB"
     	sudo -u postgres psql -c 'drop database '"\"$DB\""
     	sudo -u postgres createdb "$DB"
-	apps="base TTapp quote people solve_board"
-	for a in $apps
-	do
-	    mig=$a/migrations
-	    for i in `ls $SCRIPT_DIR/../$mig/*.pyc`
-	    do
-		echo "rm $i"
-		rm -f $i
-	    done
-	done
     	$SCRIPT_DIR/../manage.py migrate --settings=$SETTING_FILE
     fi
 fi
