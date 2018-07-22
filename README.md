@@ -27,11 +27,13 @@ maximisent la satisfaction générale.
 Après l'installation de `docker` et `docker-compose`, lancez la commande suivante pour récupérer les images de base et générer les containers. Cette commande n'est à exécuter qu'une seule fois et peut prendre un peu de temps.
 
 (En cas de
+
 `ERROR: Couldn't connect to Docker daemon at http+docker://localhost - is it running?`
+
 songez à une exécution en `sudo`.)
 
 `make build`
-x
+
 Ensuite, vous pourrez lancer le serveur à l'aide de la commande :
 
 `make start` (`make stop` pour arrêter l'application)
@@ -42,7 +44,11 @@ Vous pouvez importer le fichier dumpPy3.json (qui est une base pour jouer avec l
 
 `make init` 
 
-Vous pourrez alors vous connecter avec l'utilisateur 'MOI' et le mot de passe 'passe'. (En fait, tous les utilisateurs ont le même mot de passe !)
+Vous pourrez alors vous connecter avec l'utilisateur `MOI` et le mot
+de passe `passe`. Cet utilisateur possède les droits associés aux
+responsables des emplois du temps. Pour la vision d'une personne
+enseignante classique, utiliser l'un des autres login (En fait, tous
+les utilisateurs ont le même mot de passe !).
 
 Les paramètres de la configuration courante se trouvent dans `FlOpEDT/settings`. Par défaut, on utilise la configuration `development`. On peut spécifier une autre configuration en modifiant la variable d'environnement `CONFIG` comme suit :
 
