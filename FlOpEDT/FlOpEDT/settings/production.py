@@ -33,6 +33,16 @@ DATABASES = {
     }
 }
 
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "asgi_redis.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("redis", 6379)],
+        },
+        "ROUTING": "solve_board.routing.channel_routing",
+    },
+}
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 

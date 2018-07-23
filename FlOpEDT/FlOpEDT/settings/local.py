@@ -30,7 +30,7 @@ DEBUG = True
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'FlOp_database',
+        'NAME': 'FlOp_database_Py3-gen',
         'USER': 'FlOp_user',
         'PASSWORD': 'your_password',
         'HOST': '127.0.0.1',
@@ -39,4 +39,21 @@ DATABASES = {
 }
 
 
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+#     }
+# }
 
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
+    # "default": {
+    #     "BACKEND": "asgiref.inmemory.ChannelLayer",
+    #     "ROUTING": "solve_board.routing.channel_routing",
+    # },
+}

@@ -1,6 +1,6 @@
 # coding:utf-8
 
-# !/usr/bin/python
+# !/usr/bin/python3
 
 # This file is part of the FlOpEDT/FlOpScheduler project.
 # Copyright (c) 2017
@@ -34,4 +34,3 @@ def reassign_rooms(week, year, target_work_copy):
 
 def swap_version(week, year, copy_a, copy_b=0):
     basic_swap_version(week, year, copy_a, copy_b)
-

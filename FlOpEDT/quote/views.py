@@ -23,14 +23,18 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from __future__ import unicode_literals
+
 
 from django.shortcuts import render
 
 from .forms import QuoteForm  # ProfForm, UserForm
 
 from .models import Quote
-from modif.views import edt
+from base.views import edt
+
+from random import randint
+from django.http import JsonResponse
+
 
 def submit(req):
     visu = ''
@@ -38,18 +42,29 @@ def submit(req):
         form = QuoteForm(req.POST)
         if form.is_valid():
             if req.POST.get('but') == 'Visualiser':
-                visu = str(form.save(commit = False))
+                visu = str(form.save(commit=False))
             elif req.POST.get('but') == 'Envoyer':
                 form.save()
                 return edt(req, None, None, 2)
             # dat = form.cleaned_data
             # return edt(req, None, None, 2)
     else:
-        form = QuoteForm() #initial = {}
+        form = QuoteForm()  # initial = {}
+    imgtxt = "Créateur d'emploi du temps <span id=\"flopPasRed\">Fl" \
+             "</span>exible et <span id=\"flopRed\">Op</span>enSource"
     return render(req, 'quote/submit.html',
                   {'form': form,
-                   'visu': visu})
+                   'visu': visu,
+                   'image': imgtxt})
 
 
 def moderate(req):
     pass
+
+
+def fetch_quote(req):
+    nb_quotes = Quote.objects.all().count()
+    chosen_quote = ''
+    if nb_quotes > 0:
+        chosen_quote = Quote.objects.all()[randint(0,nb_quotes)]
+    return JsonResponse({'quote': str(chosen_quote)})

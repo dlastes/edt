@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 # This file is part of the FlOpEDT/FlOpScheduler project.
@@ -25,6 +25,7 @@
 # without disclosing the source code of your own applications.
 
 from TTapp.TTModel import TTModel
+from TTapp.models import MinHalfDays, max_weight
 
 class MyTTModel(TTModel):
     def add_specific_constraints(self):
@@ -34,9 +35,33 @@ class MyTTModel(TTModel):
         """
         TTModel.add_specific_constraints(self)
 
+        # Minimize the number of busy days for tutors
+        # (if it does not overcome the bound expressed in pref_slots_per_day)
+        # It should be stored in the database
+        for i in self.wdb.instructors:
+            slot_by_day_cost = 0
+            # need to be sorted
+            frontier_pref_busy_days = [i.pref_slots_per_day * d for d in range(4, 0, -1)]
 
-    def solve(self, time_limit=3600, target_work_copy=None):
+            nb_courses = len(self.wdb.courses_for_tutor[i])
+            nb_days = 5
+
+            for fr in frontier_pref_busy_days:
+                if nb_courses <= fr:
+                    slot_by_day_cost += self.IBD_GTE[nb_days][i]
+                    nb_days -= 1
+                else:
+                    break
+            self.add_to_inst_cost(i, self.min_bd_i * slot_by_day_cost)
+
+        # Minimize students' half days
+        # It should be stored in the database
+        for g in self.wdb.basic_groups:
+            MinHalfDays(group=g, weight=max_weight).enrich_model(self)
+
+
+    def solve(self, time_limit=3600, solver='CBC', target_work_copy=None):
         """
         If you shall add pre (or post) processing apps, you may write them down here.
         """
-        TTModel.solve(self, time_limit=time_limit, target_work_copy=target_work_copy)
+        TTModel.solve(self, time_limit=time_limit, solver=solver, target_work_copy=target_work_copy)

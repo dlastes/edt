@@ -40,13 +40,13 @@ import sys
 BASE_DIR = os.path.dirname(os.path.dirname(
     os.path.dirname(os.path.abspath(__file__))))
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.10/howto/deployment/checklist/
 
 # Application definition
 
 INSTALLED_APPS = [
+    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -56,9 +56,11 @@ INSTALLED_APPS = [
     'django_extensions',
     'import_export',
     'colorfield',
-    'modif',
+    'base',
     'TTapp',
     'quote',
+    'people',
+    'solve_board',
 ]
 
 MIDDLEWARE = [
@@ -91,41 +93,34 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'FlOpEDT.wsgi.application'
 
-# Database
-# https://docs.djangoproject.com/en/1.10/ref/settings/#databases
-
 
 CACHES = {
     # 'default': {
     #     'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
     # }
-    'default': {
-        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-        'LOCATION': [
-            '127.0.0.1:11211',
-        ],
-        'TIMEOUT': 24*3600,
+    # 'default': {
+    #     'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+    #     'LOCATION': [
+    #         '127.0.0.1:11211',
+    #     ],
+    #     'TIMEOUT': 24 * 3600,
+    #     'KEY_PREFIX': 'etd:',
+    # }
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient"
+        },
+        'TIMEOUT': 24 * 3600,
         'KEY_PREFIX': 'etd:',
     }
 }
 
-CACHE_COUNT_TIMEOUT = 24*3600
+CACHE_COUNT_TIMEOUT = 24 * 3600
 CACHE_INVALIDATE_ON_CREATE = 'whole-model'
-
-
-# Avec sqlite
-# -----------
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-#     }
-# }
-
-
-# Password validation
-# https://docs.djangoproject.com/en/1.10/ref/settings/#auth-password-validators
+CACHE_MACHINE_USE_REDIS = True
+REDIS_BACKEND = 'redis://127.0.0.1:6379/1'
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -144,7 +139,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 STATIC_URL = '/static/'
 
-# AUTH_USER_MODEL = 'modif.User'
+# AUTH_USER_MODEL = 'base.User'
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.10/topics/i18n/
@@ -159,9 +154,15 @@ USE_L10N = True
 
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.10/howto/static-files/
-
 CSRF_USE_SESSION = True
 
-# LOGIN_URL = '/login'
+AUTH_USER_MODEL = 'people.User'
+
+
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'static'),
+    )
+
+
+ASGI_APPLICATION = 'FlOpEDT.routing.application'
+

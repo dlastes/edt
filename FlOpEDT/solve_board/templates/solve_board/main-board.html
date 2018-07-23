@@ -1,0 +1,62 @@
+<!-- This file is part of the FlOpEDT/FlOpScheduler project.               -->
+<!-- Copyright (c) 2017                                                    -->
+<!-- Authors: Iulian Ober, Paul Renaud-Goud, Pablo Seban, et al.           -->
+<!--                                                                       -->
+<!-- This program is free software: you can redistribute it and/or modify  -->
+<!-- it under the terms of the GNU Affero General Public License as        -->
+<!-- published by the Free Software Foundation, either version 3 of the    -->
+<!-- License, or (at your option) any later version.                       -->
+<!--                                                                       -->
+<!-- This program is distributed in the hope that it will be useful, but   -->
+<!-- WITHOUT ANY WARRANTY; without even the implied warranty of            -->
+<!-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU      -->
+<!-- Affero General Public License for more details.                       -->
+<!--                                                                       -->
+<!-- You should have received a copy of the GNU Affero General Public      -->
+<!-- License along with this program. If not, see                          -->
+<!-- <http://www.gnu.org/licenses/>.                                       -->
+<!--                                                                       -->
+<!-- You can be released from the requirements of the license by purchasing -->
+<!-- a commercial license. Buying such a license is mandatory as soon as   -->
+<!-- you develop activities involving the FlOpEDT/FlOpScheduler software   -->
+<!-- without disclosing the source code of your own applications.          -->
+
+{% extends "base.html" %}
+{% load static %}
+
+{% csrf_token %}
+
+
+{% block title %} Génération {% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{% static "base/header.css" %}"/>
+<link rel="stylesheet" href="{% static "base/better.css" %}"/>
+<script src="{% static "base/d3.v4.min.js" %}"></script>
+  <!-- script src="https://d3js.org/d3.v4.min.js"></script -->
+  <script>
+    var week_year_list = {{ all_weeks|safe }};
+    var train_prog_list = {{ all_train_progs|safe }} ;
+  </script>
+  <form style="white-space: nowrap;" name="week_form">
+    <fieldset style="width: 300px; float: left;">
+      <legend>Optimisation</legend>
+      <!--
+      De la semaine
+      <input type="number" name="start_week" style="width: 40px" value="{{ start_date.semaine }}" min="1" max="53">, année
+      <input type="number" name="start_year" style="width: 60px" value="{{ start_date.an }}" min="{{current_year}}" max="{{current_year|add:"1"}}"></br>
+      à la semaine
+      <input type="number" name="end_week" style="width: 40px" value="{{ end_date.semaine }}" min="1" max="53">, année
+      <input type="number" name="end_year" style="width: 60px" value="{{ end_date.an }}" min="{{current_year}}" max="{{current_year|add:"1"}}"></br></br>
+      -->
+      <p>Semaine : <select id="opti_date"></select></p>
+      <p>Promotion : <select id="opti_train_prog"></select></p>
+      <input type="button" name="action" value="Go !" onClick="start()"/><input style="float: right;" type="button" name="action" value="Stop !" onClick="stop()"/>
+    </fieldset>
+  </form>
+  <textarea style="float: left; height: 200px; width: 500px; background-color: black; color: white; "></textarea>
+    
+  <br style="clear: both" />
+  
+  <script type='text/javascript' src="{% static "solve_board/solve.js" %}"></script>
+  
+{% endblock %}

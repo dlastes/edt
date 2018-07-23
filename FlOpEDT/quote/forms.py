@@ -23,39 +23,38 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from __future__ import unicode_literals
+
 
 from django.utils.translation import gettext_lazy as _
-
 
 from django.forms import ModelForm, Textarea
 from .models import Quote
 
 from django.utils.safestring import mark_safe
 
+
 class QuoteForm(ModelForm):
-    
     class Meta:
         model = Quote
-        fields = ['quote','last_name','for_name','nick_name','desc_author','date','header','quote_type']
+        fields = ['quote', 'last_name', 'for_name', 'nick_name', 'desc_author', 'date', 'header', 'quote_type']
         labels = {
-            'quote' :  _(u'Citation ').encode('utf-8'),
-            'last_name' : _(u'Nom ').encode('utf-8'),
-            'for_name' : _(u'Prénom ').encode('utf-8'),
-            'nick_name' : _(u'Pseudo ').encode('utf-8'),
-            'desc_author' : mark_safe(_(u"Fonction, description<br/> de l'auteur/autrice ").encode('utf-8')),
-            'date' : _(u'Date ').encode('utf-8'),
-            'header' : _(u'En-tête ').encode('utf-8'),
-            'quote_type' : _(u'Catégorie ').encode('utf-8'),
+            'quote': _('Citation '),
+            'last_name': _('Nom '),
+            'for_name': _('Prénom '),
+            'nick_name': _('Pseudo '),
+            'desc_author': mark_safe(_("Fonction, description<br/> de l'auteur/autrice ")),
+            'date': _('Date '),
+            'header': _('En-tête '),
+            'quote_type': _('Catégorie '),
         }
         required = {
-            'last_name' :  False,
-            'for_name' :   False,
-            'nick_name' :  False,
+            'last_name': False,
+            'for_name': False,
+            'nick_name': False,
             'desc_author': False,
-            'date' : False,
-            'header' : False,
-            'quote_type' : False,
+            'date': False,
+            'header': False,
+            'quote_type': False,
         }
         widgets = {
             'quote': Textarea(attrs={'cols': 60, 'rows': 5}),

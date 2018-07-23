@@ -1,11 +1,14 @@
-python-memcached
-Django<=1.11.13
+Django
+django_redis
 django-import-export
 django-extensions
 django-colorfield
 django-cache-machine
 pulp
-psycopg2
+psycopg2-binary
 requests
 numpy
 pyclustering
+channels
+asgi_redis
+channels_redis

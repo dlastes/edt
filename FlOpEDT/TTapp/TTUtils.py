@@ -25,47 +25,51 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from modif.models import Creneau, CoursPlace, RoomUnavailability
+from base.models import Slot, ScheduledCourse, RoomPreference
 from django.db.models import Max
+
 
 def basic_reassign_rooms(semaine, an, target_work_copy):
     """
     Reassign the rooms...
     """
-    print "reassigning rooms to minimize moves...",
-    for sl in Creneau.objects.all():
-        if sl.heure.no in [0, 3]:
+    print("reassigning rooms to minimize moves...")
+
+    slots = Slot.objects.all().order_by('jour', 'heure')
+    for sl in slots:
+        rank = list(slots.filter(jour=sl.jour, heure__apm=sl.heure.apm)).index(sl)
+        if rank == 0:
             continue
-        nsl = CoursPlace.objects.filter(cours__semaine=semaine,
-                                        cours__an=an,
-                                        creneau=sl,
-                                        copie_travail=target_work_copy)
+        slots_list = list(slots)
+        precedent_sl = slots_list[slots_list.index(sl) - 1]
+        nsl = ScheduledCourse.objects.filter(cours__semaine=semaine,
+                                             cours__an=an,
+                                             creneau=sl,
+                                             copie_travail=target_work_copy)
         # print sl
         for CP in nsl:
-            precedent = CoursPlace \
+            precedent = ScheduledCourse \
                 .objects \
                 .filter(cours__semaine=semaine,
                         cours__an=an,
-                        creneau__heure__no=sl.heure.no - 1,
-                        creneau__jour=sl.jour,
+                        creneau=precedent_sl,
                         cours__room_type=CP.cours.room_type,
                         cours__groupe=CP.cours.groupe,
                         copie_travail=target_work_copy)
             if len(precedent) == 0:
-                precedent = CoursPlace \
+                precedent = ScheduledCourse \
                     .objects \
                     .filter(cours__semaine=semaine,
                             cours__an=an,
-                            creneau__heure__no=sl.heure.no - 1,
-                            creneau__jour=sl.jour,
+                            creneau=precedent_sl,
                             cours__room_type=CP.cours.room_type,
-                            cours__prof=CP.cours.prof,
+                            cours__tutor=CP.cours.tutor,
                             copie_travail=target_work_copy)
                 if len(precedent) == 0:
                     continue
             precedent = precedent[0]
             # print "### has prec, trying to reassign:", precedent, "\n\t",
-            cp_using_prec = CoursPlace \
+            cp_using_prec = ScheduledCourse \
                 .objects \
                 .filter(cours__semaine=semaine,
                         cours__an=an,
@@ -79,7 +83,7 @@ def basic_reassign_rooms(semaine, an, target_work_copy):
             # test if precedent.room is available
             prec_is_unavailable = False
             for r in precedent.room.subrooms.all():
-                if len(RoomUnavailability.objects.filter(semaine=semaine, an=an, creneau=sl, room=r)) > 0:
+                if RoomPreference.objects.filter(semaine=semaine, an=an, creneau=sl, room=r, valeur=0).exists():
                     prec_is_unavailable = True
                     break
             if prec_is_unavailable:
@@ -98,29 +102,28 @@ def basic_reassign_rooms(semaine, an, target_work_copy):
                 CP.save()
                 sib.save()
                 # print "swapped", CP, " with", sib
-    print "done"
+    print("done")
 
 
 def basic_swap_version(week, year, copy_a, copy_b=0):
-
     try:
-        tmp_wc = CoursPlace \
+        tmp_wc = ScheduledCourse \
                      .objects \
                      .filter(cours__semaine=week,
                              cours__an=year) \
                      .aggregate(Max('copie_travail'))['copie_travail__max'] + 1
     except KeyError:
-        print 'No scheduled courses'
+        print('No scheduled courses')
         return
 
-    for cp in CoursPlace.objects.filter(cours__an=year, cours__semaine=week, copie_travail=copy_a):
+    for cp in ScheduledCourse.objects.filter(cours__an=year, cours__semaine=week, copie_travail=copy_a):
         cp.copie_travail = tmp_wc
         cp.save()
 
-    for cp in CoursPlace.objects.filter(cours__an=year, cours__semaine=week, copie_travail=copy_b):
+    for cp in ScheduledCourse.objects.filter(cours__an=year, cours__semaine=week, copie_travail=copy_b):
         cp.copie_travail = copy_a
         cp.save()
 
-    for cp in CoursPlace.objects.filter(cours__an=year, cours__semaine=week, copie_travail=tmp_wc):
+    for cp in ScheduledCourse.objects.filter(cours__an=year, cours__semaine=week, copie_travail=tmp_wc):
         cp.copie_travail = copy_b
         cp.save()
