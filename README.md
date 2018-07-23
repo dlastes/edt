@@ -24,7 +24,10 @@ maximisent la satisfaction générale.
 
 ## Lancement de l'application dans Docker
 
-Après l'installation de `docker` et `docker-compose`, lancez la commande suivante pour récupérer les images de base et générer les containers. Cette commande n'est à exécuter qu'une seule fois et peut prendre un peu de temps.
+Après l'installation de `docker` et `docker-compose`, lancez la
+commande suivante :
+
+`make start` (`make stop` pour arrêter l'application)
 
 (En cas de
 
@@ -32,15 +35,10 @@ Après l'installation de `docker` et `docker-compose`, lancez la commande suivan
 
 songez à une exécution en `sudo`.)
 
-`make build`
-
-Ensuite, vous pourrez lancer le serveur à l'aide de la commande :
-
-`make start` (`make stop` pour arrêter l'application)
-
 L'application sera accessible à l'adresse http://localhost:8000.
 
-Vous pouvez importer le fichier dumpPy3.json (qui est une base pour jouer avec l'interface) avec la commande :
+Vous pouvez importer le fichier ![dump.json](./dump.json) (qui est une
+base pour jouer avec l'interface) avec la commande :
 
 `make init` 
 
@@ -48,9 +46,12 @@ Vous pourrez alors vous connecter avec l'utilisateur `MOI` et le mot
 de passe `passe`. Cet utilisateur possède les droits associés aux
 responsables des emplois du temps. Pour la vision d'une personne
 enseignante classique, utiliser l'un des autres login (En fait, tous
-les utilisateurs ont le même mot de passe !).
+les utilisateurs ont le même mot de passe `passe` !).
 
-Les paramètres de la configuration courante se trouvent dans `FlOpEDT/settings`. Par défaut, on utilise la configuration `development`. On peut spécifier une autre configuration en modifiant la variable d'environnement `CONFIG` comme suit :
+Les paramètres de la configuration courante se trouvent dans
+`FlOpEDT/settings`. Par défaut, on utilise la configuration
+`development`. On peut spécifier une autre configuration en modifiant
+la variable d'environnement `CONFIG` comme suit :
 
 `export CONFIG=production && make start`
 
