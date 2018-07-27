@@ -56,7 +56,7 @@ la variable d'environnement `CONFIG` comme suit :
 `export CONFIG=production && make start`
 
 ## Contributions
-- [Discuter](https://flopedt.slack.com)
+- [Discuter](https://framateam.org/flopedt/)
 - [Soulever une issue](https://framagit.org/FlOpEDT/FlOpEDT/issues)
 
 
