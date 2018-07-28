@@ -35,7 +35,7 @@ from django.utils.translation import ugettext_lazy as _
 
 # from caching.base import CachingManager, CachingMixin
 
-from base.models import Course, Time  # , Module
+from base.models import Time  # , Module
 
 max_weight = 8
 
@@ -498,7 +498,7 @@ class SimultaneousCourses(TTConstraint):
 
 class LimitedSlotChoices(TTConstraint):
     """
-    Limit the possible slots for the fources
+    Limit the possible slots for the cources
     """
     train_prog = models.ForeignKey('base.TrainingProgramme',
                                    null=True,
@@ -543,3 +543,47 @@ class LimitedSlotChoices(TTConstraint):
                     ttmodel.obj += self.local_weight() * ponderation * ttmodel.TT[(sl, c)]
                 else:
                     ttmodel.add_constraint(ttmodel.TT[(sl, c)], '==', 0)
+
+
+class LimitedRoomChoices(TTConstraint):
+    """
+    Limit the possible rooms for the cources
+    """
+    module = models.ForeignKey('base.Module',
+                               null=True,
+                               default=None,
+                               on_delete=models.CASCADE)
+    tutor = models.ForeignKey('people.Tutor',
+                              null=True,
+                              default=None,
+                              on_delete=models.CASCADE)
+    group = models.ForeignKey('base.Group',
+                              null=True,
+                              default=None,
+                              on_delete=models.CASCADE)
+    type = models.ForeignKey('base.CourseType',
+                              null=True,
+                              default=None,
+                              on_delete=models.CASCADE)
+    possible_rooms = models.ManyToManyField('base.RoomGroup',
+                                            related_name="limited_rooms")
+
+    def enrich_model(self, ttmodel, ponderation=1.):
+        fc = ttmodel.wdb.courses
+        if self.tutor is not None:
+            fc = fc.filter(tutor=self.tutor)
+        if self.module is not None:
+            fc = fc.filter(module=self.module)
+        if self.type is not None:
+            fc = fc.filter(type=self.type)
+        if self.group is not None:
+            fc = fc.filter(groupe=self.group)
+        possible_rooms_ids = self.possible_rooms.values_list('id', flat=True)
+
+        for c in fc:
+            for sl in ttmodel.wdb.slots:
+                for rg in ttmodel.wdb.room_groups.filter(types__in=[c.room_type]).exclude(id__in = possible_rooms_ids):
+                    if self.weight is not None:
+                        ttmodel.obj += self.local_weight() * ponderation * ttmodel.TTrooms[(sl, c, rg)]
+                    else:
+                        ttmodel.add_constraint(ttmodel.TTrooms[(sl, c,rg)], '==', 0)
