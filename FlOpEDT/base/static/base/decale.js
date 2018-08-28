@@ -517,12 +517,17 @@ function send_cours(){
 	    tot.na = 0 ;
 	}
 
+	var sent_data = {} ;
+	sent_data['new'] = JSON.stringify(tot) ; 
+	sent_data['liste'] = JSON.stringify(commit) ;
+	console.log(sent_data);
+
 	show_loader(true);
 	$.ajax({
 	    url: url_change_decale,
 	    type: 'POST',
-	    contentType: 'application/json; charset=utf-8',
-	    data: JSON.stringify({'new':tot,'liste':commit}),
+//	    contentType: 'application/json; charset=utf-8',
+	    data: sent_data, //JSON.stringify({'new':tot,'liste':commit}),
 	    dataType: 'json',
 	    success: function(msg) {
 		recv(msg.responseText);

@@ -789,24 +789,20 @@ def decale_changes(req):
         bad_response['reason'] = "Non POST"
         return bad_response
 
-    print(req.body)
-    q = json.loads(req.body,
-                   object_hook=lambda d:
-                   namedtuple('X', list(d.keys()))(*list(d.values())))
+    new_assignment = json.loads(req.POST.get('new',{}))
+    change_list = json.loads(req.POST.get('liste',[]))
 
-    a = q.new
-
-    for c in q.liste:
+    for c in change_list:
         # try:
-        if c.j != -1 and c.h != -1:
+        if c['j'] != -1 and c['h'] != -1:
             cours_place = ScheduledCourse \
                 .objects \
-                .get(cours__id=c.i,
+                .get(cours__id=c['i'],
                      copie_travail=0)
             cours = cours_place.cours
             cours_place.delete()
         else:
-            cours = Course.objects.get(id=c.i)
+            cours = Course.objects.get(id=c['i'])
             # note: add copie_travail in Cours might be of interest
 
         pm = PlanningModification(cours=cours,
@@ -816,11 +812,11 @@ def decale_changes(req):
                                   initiator=req.user.tutor)
         pm.save()
 
-        cours.semaine = a.ns
-        cours.an = a.na
-        if a.na != 0:
+        cours.semaine = new_assignment['ns']
+        cours.an = new_assignment['na']
+        if new_assignment['na'] != 0:
             # cours.prof=User.objects.get(username=a.np)
-            cours.tutor = Tutor.objects.get(username=a.np)
+            cours.tutor = Tutor.objects.get(username=new_assignment['np'])
         cours.save()
 
         # flush the whole cache
