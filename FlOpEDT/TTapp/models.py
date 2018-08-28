@@ -307,7 +307,7 @@ class MinHalfDays(TTConstraint):
             return
 
         ttmodel.add_constraint(local_var, '==', 1)
-        limit = (len(fc) - 1) / 3 + 1
+        limit = (len(fc) - 1) // 3 + 1
 
         if self.weight is not None:
             if self.tutor is not None:

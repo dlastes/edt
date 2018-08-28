@@ -134,7 +134,7 @@ def get_color_set(filename, target_nb_colors):
         # extend the color set if needed
         if len(color_set) < target_nb_colors:
             sliced = color_set[:]
-            add_factor = target_nb_colors / len(color_set)
+            add_factor = target_nb_colors // len(color_set)
             for i in range(add_factor):
                 color_set += sliced
             # shrink the color set if needed

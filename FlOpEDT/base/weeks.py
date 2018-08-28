@@ -47,7 +47,7 @@ def current_week():
     if now.weekday() > 4:
         now = now + datetime.timedelta(2)
     delta = now - mond
-    return {'semaine': 2 + (delta.days / 7), 'an': now.year}
+    return {'semaine': 2 + (delta.days // 7), 'an': now.year}
 
 
 # list of days
