@@ -227,7 +227,7 @@ def decale(req):
     an_init = req.GET.get('a', '-1')
     liste_profs = []
     for p in Tutor.objects.all().order_by('username'):
-        liste_profs.append(p.username.encode('utf8'))
+        liste_profs.append(p.username)
 
     return render(req, 'base/show-decale.html',
                   {'all_weeks': week_list(),
