@@ -54,7 +54,7 @@ def basic_reassign_rooms(semaine, an, target_work_copy):
                         cours__an=an,
                         creneau=precedent_sl,
                         cours__room_type=CP.cours.room_type,
-                        cours__groupe=CP.cours.groupe,
+                        cours__tutor=CP.cours.tutor,
                         copie_travail=target_work_copy)
             if len(precedent) == 0:
                 precedent = ScheduledCourse \
@@ -63,7 +63,7 @@ def basic_reassign_rooms(semaine, an, target_work_copy):
                             cours__an=an,
                             creneau=precedent_sl,
                             cours__room_type=CP.cours.room_type,
-                            cours__tutor=CP.cours.tutor,
+                            cours__groupe=CP.cours.groupe,
                             copie_travail=target_work_copy)
                 if len(precedent) == 0:
                     continue
