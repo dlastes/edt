@@ -151,7 +151,7 @@ class DispoResource(resources.ModelResource):
 class BreakingNewsResource(resources.ModelResource):
     class Meta:
         model = BreakingNews
-        fields = ("x_beg", "x_end", "y", "txt", "fill_color", "strk_color", "is_linked")
+        fields = ("id", "x_beg", "x_end", "y", "txt", "fill_color", "strk_color", "is_linked")
 
 
 # Register your models here.

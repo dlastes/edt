@@ -692,7 +692,8 @@ function go_bknews(quick) {
 
     var fl_all = flash
 	.selectAll(".bn-all")
-	.data(bknews.cont);
+	.data(bknews.cont,
+	      function(d) { return d.id ; });
 
     var ffl = fl_all
 	.enter()
