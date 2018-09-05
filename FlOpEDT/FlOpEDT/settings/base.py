@@ -95,17 +95,6 @@ WSGI_APPLICATION = 'FlOpEDT.wsgi.application'
 
 
 CACHES = {
-    # 'default': {
-    #     'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
-    # }
-    # 'default': {
-    #     'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-    #     'LOCATION': [
-    #         '127.0.0.1:11211',
-    #     ],
-    #     'TIMEOUT': 24 * 3600,
-    #     'KEY_PREFIX': 'etd:',
-    # }
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": "redis://127.0.0.1:6379/1",
