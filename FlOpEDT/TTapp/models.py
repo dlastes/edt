@@ -332,14 +332,22 @@ class MinHalfDays(TTConstraint):
                 sl17h = ttmodel.wdb.slots.get(jour=d, heure__no=5)
                 for c in fc:
                     for c2 in fc.exclude(id=c.id):
-                        ttmodel.add_constraint(
-                            ttmodel.TT[(sl8h, c)] + ttmodel.TT[(sl11h, c2)],
-                            '<=',
-                            1)
-                        ttmodel.add_constraint(
-                            ttmodel.TT[(sl14h, c)] + ttmodel.TT[(sl17h, c2)],
-                            '<=',
-                            1)
+                        if self.weight:
+                            conj_var_AM = ttmodel.add_conjunct(ttmodel.TT[(sl8h, c)],
+                                                               ttmodel.TT[(sl11h, c2)])
+                            conj_var_PM = ttmodel.add_conjunct(ttmodel.TT[(sl14h, c)],
+                                                               ttmodel.TT[(sl17h, c2)])
+                            ttmodel.add_to_inst_cost(self.tutor,
+                                                     self.local_weight() * ponderation * (conj_var_AM + conj_var_PM)/2)
+                        else:
+                            ttmodel.add_constraint(
+                                ttmodel.TT[(sl8h, c)] + ttmodel.TT[(sl11h, c2)],
+                                '<=',
+                                1)
+                            ttmodel.add_constraint(
+                                ttmodel.TT[(sl14h, c)] + ttmodel.TT[(sl17h, c2)],
+                                '<=',
+                                1)
 
 
 class MinNonPreferedSlot(TTConstraint):
