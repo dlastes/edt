@@ -55,12 +55,12 @@ function fetch_dispos() {
     $.ajax({
         type: "GET", //rest Type
         dataType: 'text',
-        url: url_dispos + "?s=" + semaine_att + "&a=" + an_att,
+        url: url_dispos + an_att + "/" + semaine_att ,
         async: true,
         contentType: "text/csv",
         success: function(msg) {
             console.log("in");
-            //console.log(msg);
+//            console.log(msg);
             prev_prof = "";
 
             if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&

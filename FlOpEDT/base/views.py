@@ -61,6 +61,8 @@ from django.views.generic import RedirectView
 
 from random import randint
 
+from django.views.decorators.cache import cache_page
+
 # <editor-fold desc="FAVICON">
 # ----------
 # FAVICON
@@ -350,49 +352,53 @@ def fetch_cours_pp(req, week, year, num_copy):
     return response
 
 
-# @login_required
-def fetch_dispos(req):
+@login_required
+@cache_page(60 * 15)
+def fetch_dispos(req, week, year):
     print(req)
-    if req.GET:
-        if req.user.is_authenticated:
-            print("================")
-            semaine = req.GET.get('s', '')
-            an = req.GET.get('a', '')
+#    if req.GET:
+#        if req.user.is_authenticated:
+    print("================")
+    try:
+        week = int(week)
+        year = int(year)
+    except ValueError:
+        return HttpResponse("KO")
 
-            busy_inst = Course.objects.filter(semaine=semaine,
-                                              an=an) \
-                .distinct('tutor') \
-                .values_list('tutor')
+    busy_inst = Course.objects.filter(semaine=week,
+                                      an=year) \
+        .distinct('tutor') \
+        .values_list('tutor')
 
-            busy_inst = list(chain(busy_inst, [req.user]))
+    busy_inst = list(chain(busy_inst, [req.user]))
 
-            week_avail = UserPreference.objects \
-                .filter(semaine=semaine,
-                        an=an,
-                        user__in=busy_inst) \
-                .order_by('user')
+    week_avail = UserPreference.objects \
+        .filter(semaine=week,
+                an=year,
+                user__in=busy_inst) \
+        .order_by('user')
 
-            default_avail = UserPreference.objects \
-                .exclude(user__in \
-                             =week_avail \
-                         .distinct('user') \
-                         .values_list('user')) \
-                .filter(semaine=None,
-                        user__in=busy_inst) \
-                .order_by('user')
+    default_avail = UserPreference.objects \
+        .exclude(user__in \
+                     =week_avail \
+                 .distinct('user') \
+                 .values_list('user')) \
+        .filter(semaine=None,
+                user__in=busy_inst) \
+        .order_by('user')
 
-            dataset = DispoResource() \
-                .export(list(chain(week_avail,
-                                   default_avail)))  # all())#
-            response = HttpResponse(dataset.csv,
-                                    content_type='text/csv')
-            response['semaine'] = semaine
-            response['an'] = an
-            return response
-        else:
-            return HttpResponse("Pas connecté", status=500)
-    else:
-        return HttpResponse("Pas GET", status=500)
+    dataset = DispoResource() \
+        .export(list(chain(week_avail,
+                           default_avail)))  # all())#
+    response = HttpResponse(dataset.csv,
+                            content_type='text/csv')
+    response['week'] = week
+    response['year'] = year
+    return response
+#        else:
+#            return HttpResponse("Pas connecté", status=500)
+#    else:
+#        return HttpResponse("Pas GET", status=500)
 
 
 @login_required

@@ -27,6 +27,7 @@ from . import views
 from django.views.generic import RedirectView
 from django.contrib.staticfiles.storage import staticfiles_storage
 
+from django.views.decorators.cache import cache_page
 
 app_name="base"
 
@@ -51,9 +52,9 @@ urlpatterns = [
 
     # from db to screen
 #    url(r'^fetch_cours_pl/$', views.fetch_cours_pl, name="fetch_cours_pl"),
-    url(r'^fetch_cours_pl/((?P<year>\d+)/(?P<week>\d+)/(?P<num_copy>\d+))?$', views.fetch_cours_pl, name="fetch_cours_pl"),
-    url(r'^fetch_cours_pp/((?P<year>\d+)/(?P<week>\d+)/(?P<num_copy>\d+))?$', views.fetch_cours_pp, name="fetch_cours_pp"),
-    url(r'^fetch_dispos/$', views.fetch_dispos, name="fetch_dispos"),
+    url(r'^fetch_cours_pl/((?P<year>\d+)/(?P<week>\d+)/(?P<num_copy>\d+))?$', cache_page(60 * 15)(views.fetch_cours_pl), name="fetch_cours_pl"),
+    url(r'^fetch_cours_pp/((?P<year>\d+)/(?P<week>\d+)/(?P<num_copy>\d+))?$', cache_page(60 * 15)(views.fetch_cours_pp), name="fetch_cours_pp"),
+    url(r'^fetch_dispos/((?P<year>\d+)/(?P<week>\d+))?$', views.fetch_dispos, name="fetch_dispos"),
     url(r'^fetch_stype/$', views.fetch_stype, name="fetch_stype"),
     url(r'^fetch_decale/$', views.fetch_decale, name="fetch_decale"),
     url(r'^fetch_bknews/$', views.fetch_bknews, name="fetch_bknews"),
