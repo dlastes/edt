@@ -88,9 +88,10 @@ def favicon(req, fav):
 # ----------
 
 
-def edt(req, semaine, an, splash_id=0):
-    
+def edt(req,  an, semaine,splash_id=0):
+
     semaine, an = clean_week(semaine, an)
+
     promo = clean_train_prog(req)
 
     if req.GET:
@@ -246,100 +247,107 @@ def decale(req):
 # ----------
 
 
-def fetch_cours_pl(req):
+def fetch_cours_pl(req, year, week, num_copy):
     print(req)
-    if req.GET:
-        semaine = req.GET.get('s', '')
-        an = req.GET.get('a', '')
-        num_copie = req.GET.get('c', '')
-        semaine = int(semaine)
-        an = int(an)
-        num_copie = int(num_copie)
-        ok = False
-        version = 0
-        dataset = None
-        while not ok:
-            if num_copie == 0:
-                edtversion, created = EdtVersion.objects \
-                    .get_or_create(semaine=semaine,
-                                   an=an,
-                                   defaults={'version': 0})
-                version = edtversion.version
-            dataset = CoursPlaceResource() \
-                .export(ScheduledCourse.objects \
-                        .filter(cours__semaine=semaine,
-                                cours__an=an,
-                                copie_travail=num_copie)
-                        .order_by('creneau__jour',
-                                  'creneau__heure'))  # all())#
-            ok = num_copie != 0 \
-                 or (version == EdtVersion.objects
-                     .get(semaine=semaine, an=an).version)
-        if dataset is None:
-            raise Http404("What are you trying to do?")
-        response = HttpResponse(dataset.csv, content_type='text/csv')
-        response['version'] = version
-        response['semaine'] = semaine
-        response['an'] = an
-        response['jours'] = str(num_days(an, semaine))
-        response['num_copie'] = num_copie
-        try:
-            regen = str(Regen.objects.get(semaine=semaine, an=an))
-        except ObjectDoesNotExist:
-            regen = 'I'
-        response['regen'] = regen
-        if req.user.is_authenticated:
-            response['reqDispos'] = Course \
-                                        .objects \
-                                        .filter(tutor=req.user,
-                                                semaine=semaine,
-                                                an=an) \
-                                        .count() * 2
-            week_av = UserPreference \
+
+    try:
+        week = int(week)
+        year = int(year)
+        num_copy = int(num_copy)
+    except ValueError:
+        return HttpResponse("KO")
+
+    print("W",week, " Y",year, " N", num_copy)
+
+    ok = False
+    version = 0
+    dataset = None
+    while not ok:
+        if num_copy == 0:
+            edtversion, created = EdtVersion.objects \
+                .get_or_create(semaine=week,
+                               an=year,
+                               defaults={'version': 0})
+            version = edtversion.version
+        dataset = CoursPlaceResource() \
+            .export(ScheduledCourse.objects \
+                    .filter(cours__semaine=week,
+                            cours__an=year,
+                            copie_travail=num_copy)
+                    .order_by('creneau__jour',
+                              'creneau__heure'))  # all())#
+        ok = num_copy != 0 \
+             or (version == EdtVersion.objects
+                 .get(semaine=week, an=year).version)
+    if dataset is None:
+        raise Http404("What are you trying to do?")
+    response = HttpResponse(dataset.csv, content_type='text/csv')
+    response['version'] = version
+    response['week'] = week
+    response['year'] = year
+    response['jours'] = str(num_days(year, week))
+    response['num_copy'] = num_copy
+    try:
+        regen = str(Regen.objects.get(semaine=week, an=year))
+    except ObjectDoesNotExist:
+        regen = 'I'
+    response['regen'] = regen
+    if req.user.is_authenticated:
+        response['reqDispos'] = Course \
+                                    .objects \
+                                    .filter(tutor=req.user,
+                                            semaine=week,
+                                            an=year) \
+                                    .count() * 2
+        week_av = UserPreference \
+            .objects \
+            .filter(user=req.user,
+                    semaine=week,
+                    an=year)
+        if not week_av.exists():
+            response['filDispos'] = UserPreference \
                 .objects \
                 .filter(user=req.user,
-                        semaine=semaine,
-                        an=an)
-            if not week_av.exists():
-                response['filDispos'] = UserPreference \
-                    .objects \
-                    .filter(user=req.user,
-                            semaine=None,
-                            valeur__gte=1) \
-                    .count()
-            else:
-                response['filDispos'] = week_av \
-                    .filter(valeur__gte=1) \
-                    .count()
+                        semaine=None,
+                        valeur__gte=1) \
+                .count()
         else:
-            response['reqDispos'] = -1
-            response['filDispos'] = -1
-        return response
+            response['filDispos'] = week_av \
+                .filter(valeur__gte=1) \
+                .count()
+    else:
+        response['reqDispos'] = -1
+        response['filDispos'] = -1
+    return response
 
 
-def fetch_cours_pp(req):
+def fetch_cours_pp(req, week, year, num_copy):
     print(req)
-    if req.GET:
-        semaine = req.GET.get('s', '')
-        an = req.GET.get('a', '')
-        num_copie = req.GET.get('c', '')
-        semaine = int(semaine)
-        an = int(an)
-        num_copie = int(num_copie)
-        dataset = CoursResource() \
-            .export(Course
-                    .objects
-                    .filter(semaine=semaine,
-                            an=an)
-                    .exclude(pk__in=ScheduledCourse
-                             .objects
-                             .filter(copie_travail=num_copie)
-                             .values('cours')))
-        response = HttpResponse(dataset.csv, content_type='text/csv')
-        response['semaine'] = semaine
-        response['an'] = an
 
-        return response
+    try:
+        week = int(week)
+        year = int(year)
+        num_copy = int(num_copy)
+    except ValueError:
+        return HttpResponse("KO")
+
+    print("W",week, " Y",year, " N", num_copy)
+
+
+    dataset = CoursResource() \
+        .export(Course
+                .objects
+                .filter(semaine=week,
+                        an=year)
+                .exclude(pk__in=ScheduledCourse
+                         .objects
+                         .filter(copie_travail=num_copy)
+                         .values('cours')))
+    response = HttpResponse(dataset.csv, content_type='text/csv')
+    response['week'] = week
+    response['year'] = year
+
+    return response
 
 
 # @login_required

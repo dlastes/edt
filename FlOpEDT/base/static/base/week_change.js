@@ -397,12 +397,13 @@ function fetch_cours() {
     $.ajax({
         type: "GET", //rest Type
         dataType: 'text',
-        url: url_cours_pl + "?s=" + semaine_att + "&a=" + an_att + "&c=" + num_copie,
+        url: url_cours_pl + an_att + "/" + semaine_att + "/" + num_copie,
         async: true,
         contentType: "text/csv",
         success: function(msg, ts, req) {
             //console.log(msg);
             version = +req.getResponseHeader('version');
+	    console.log(version);
             required_dispos = +req.getResponseHeader('reqDispos');
             filled_dispos = +req.getResponseHeader('filDispos');
 
@@ -410,6 +411,7 @@ function fetch_cours() {
             go_alarm_pref();
 
             var day_arr = JSON.parse(req.getResponseHeader('jours').replace(/\'/g, '"'));
+	    
             for (var i = 0; i < day_arr.length; i++) {
                 data_grid_scale_day[i] = data_grid_scale_day_init[i] + " " + day_arr[i];
             }
@@ -448,7 +450,7 @@ function fetch_cours() {
     $.ajax({
         type: "GET", //rest Type
         dataType: 'text',
-        url: url_cours_pp + "?s=" + semaine_att + "&a=" + an_att + "&c=" + num_copie,
+        url: url_cours_pp  + an_att + "/" + semaine_att + "/" + num_copie,
         async: true,
         contentType: "text/csv",
         success: function(msg, ts, req) {
@@ -462,19 +464,19 @@ function fetch_cours() {
                 salles.pp = [];
 
                 //console.log(msg);
-		console.log(semaine_att,an_att,num_copie);
+    		console.log(semaine_att,an_att,num_copie);
 
                 cours_pp = d3.csvParse(msg, translate_cours_pp_from_csv);
 
-		if (cours_pp.length > 0 && !garbage_plot){
-		    garbage_plot = true ;
-		    add_garbage();
-		    go_grid(true);
-		} else if (cours_pp.length == 0 && garbage_plot) {
-		    garbage_plot = false ;
-		    remove_garbage();
-		    go_grid(true);
-		}
+    		if (cours_pp.length > 0 && !garbage_plot){
+    		    garbage_plot = true ;
+    		    add_garbage();
+    		    go_grid(true);
+    		} else if (cours_pp.length == 0 && garbage_plot) {
+    		    garbage_plot = false ;
+    		    remove_garbage();
+    		    go_grid(true);
+    		}
 
                 //console.log(msg);
 
