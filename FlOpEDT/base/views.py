@@ -537,10 +537,17 @@ def edt_changes(req):
             version = None
 
             print(req.body)
-            q = json.loads(req.body,
-                           object_hook
-                           =lambda d: namedtuple('X', list(d.keys()))(*list(d.values()))
-                           )
+            print(req.POST)
+            old_version = json.loads(req.POST.get('v',-1))
+            recv_changes = json.loads(req.POST.get('tab',[]))
+
+            print(old_version)
+            print(recv_changes)
+            print('********')
+            # q = json.loads(req.body,
+            #                object_hook
+            #                =lambda d: namedtuple('X', list(d.keys()))(*list(d.values()))
+            #                )
 
             if work_copy == 0:
                 edt_version, created = EdtVersion.objects \
@@ -549,16 +556,16 @@ def edt_changes(req):
                                    defaults={'version': 0})
                 version = edt_version.version
 
-            if work_copy != 0 or q.v == version:
+            if work_copy != 0 or old_version == version:
                 with transaction.atomic():
                     if work_copy == 0:
                         edt_version = EdtVersion \
                             .objects \
                             .select_for_update() \
                             .get(semaine=semaine, an=an)
-                    for a in q.tab:
+                    for a in recv_changes:
                         non_place = False
-                        co = Course.objects.get(id=a.id)
+                        co = Course.objects.get(id=a['id'])
                         try:
                             cp = ScheduledCourse.objects.get(cours=co,
                                                              copie_travail=work_copy)
@@ -568,19 +575,24 @@ def edt_changes(req):
                                                  copie_travail=work_copy)
 
                         m = CourseModification(cours=co,
-                                               version_old=q.v,
+                                               version_old=old_version,
                                                initiator=req.user.tutor)
                         # old_day = a.day.o
                         # old_slot = a.slot.o
-                        new_day = a.day.n
-                        new_slot = a.slot.n
-                        old_room = a.room.o
-                        new_room = a.room.n
+                        new_day = a['day']['n']
+                        new_slot = a['slot']['n']
+                        old_slot = a['slot']['o']
+                        old_room = a['room']['o']
+                        new_room = a['room']['n']
+                        new_week = a['week']['n']
+                        old_week = a['week']['o']
+                        new_year = a['year']['n']
+                        old_year = a['year']['o']
 
                         if non_place:
                             # old_day = new_day
                             # old_slot = new_slot
-                            if a.room.n is None:
+                            if new_room is None:
                                 new_room = old_room
 
                         if new_day is not None:
@@ -622,41 +634,41 @@ def edt_changes(req):
                                 cp.room = sal_n
                             m.room_old = cp.room
                             cp.room = sal_n
-                        if a.week.n is not None:
-                            m.semaine_old = a.week.o
-                            m.an_old = a.year.o
-                            cp.cours.semaine = a.week.n
-                            cp.cours.an = a.year.n
+                        if new_week is not None:
+                            m.semaine_old = old_week
+                            m.an_old = old_year
+                            cp.cours.semaine = new_week
+                            cp.cours.an = new_year
                         cp.save()
                         if work_copy == 0:
                             m.save()
 
-                        if a.week.n or a.year.n or a.day.n or a.slot.n:
+                        if new_week or new_year or new_day or new_slot:
                             msg += str(co) + '\n'
                             impacted_inst.add(co.tutor.username)
 
-                            msg += '(' + str(a.week.o) + ', ' \
-                                   + str(a.year.o) + ', ' \
-                                   + str(a.day.o) + ', ' \
-                                   + str(a.slot.o) + ')'
+                            msg += '(' + str(old_week) + ', ' \
+                                   + str(old_year) + ', ' \
+                                   + str(old_day) + ', ' \
+                                   + str(old_slot) + ')'
                             msg += ' -> ('
-                            if a.week.n:
-                                msg += str(a.week.n)
+                            if new_week:
+                                msg += str(new_week)
                             else:
                                 msg += '-'
                             msg += ', '
-                            if a.year.n:
-                                msg += str(a.year.n)
+                            if new_year:
+                                msg += str(new_year)
                             else:
                                 msg += '-'
                             msg += ', '
-                            if a.day.n:
-                                msg += str(a.day.n)
+                            if new_day:
+                                msg += str(new_day)
                             else:
                                 msg += '-'
                             msg += ', '
-                            if a.slot.n:
-                                msg += str(a.slot.n)
+                            if new_slot:
+                                msg += str(new_slot)
                             else:
                                 msg += '-'
                             msg += ')\n\n'
@@ -686,7 +698,7 @@ def edt_changes(req):
                 bad_response['reason'] = "Version: " \
                                          + str(version) \
                                          + " VS " \
-                                         + str(q.v)
+                                         + str(old_version)
                 return bad_response
         else:
             bad_response['reason'] = "Non POST"

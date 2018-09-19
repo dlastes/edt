@@ -515,6 +515,10 @@ function array_to_msg(a) {
 
 
 function send_edt_change(changes) {
+    var sent_data = {} ;
+    sent_data['v'] = JSON.stringify(version) ; 
+    sent_data['tab'] = JSON.stringify(changes) ;
+
     show_loader(true);
     $.ajax({
         url: url_edt_changes
@@ -522,11 +526,12 @@ function send_edt_change(changes) {
 	    + "&a=" + weeks.init_data[weeks.sel[0]].an
 	    + "&c=" + num_copie,
         type: 'POST',
-        contentType: 'application/json; charset=utf-8',
-        data: JSON.stringify({
-            v: version,
-            tab: changes
-        }),
+//        contentType: 'application/json; charset=utf-8',
+        data: // JSON.stringify({
+        //     v: version,
+        //     tab: changes
+        // }),
+	sent_data,
         dataType: 'json',
         success: function(msg) {
             edt_change_ack(msg);
