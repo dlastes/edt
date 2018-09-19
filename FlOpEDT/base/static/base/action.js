@@ -526,7 +526,7 @@ function send_edt_change(changes) {
 	    + "&a=" + weeks.init_data[weeks.sel[0]].an
 	    + "&c=" + num_copie,
         type: 'POST',
-//        contentType: 'application/json; charset=utf-8',
+        contentType: 'application/json; charset=utf-8',
         data: // JSON.stringify({
         //     v: version,
         //     tab: changes
@@ -583,6 +583,9 @@ function send_dis_change() {
         go_ack_msg(true);
     } else {
 
+	var sent_data = {} ;
+	sent_data['changes'] = JSON.stringify(changes) ; 
+
         show_loader(true);
         $.ajax({
             url: url_dispos_changes
@@ -590,8 +593,8 @@ function send_dis_change() {
 		+ "&a=" + weeks.init_data[weeks.sel[0]].an
 		+ "&u=" + user.nom,
             type: 'POST',
-            contentType: 'application/json; charset=utf-8',
-            data: JSON.stringify(changes),
+//            contentType: 'application/json; charset=utf-8',
+            data: sent_data , //JSON.stringify(changes),
             dataType: 'json',
             success: function(msg) {
                 show_loader(false);
