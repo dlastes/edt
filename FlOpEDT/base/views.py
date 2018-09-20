@@ -23,12 +23,10 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from django.http import HttpResponse, Http404, JsonResponse
+from django.http import HttpResponse, Http404, JsonResponse, HttpRequest
 from django.shortcuts import render
 
 from django.contrib.auth.decorators import login_required, user_passes_test
-
-from django.core.cache import cache
 
 from django.db import transaction
 
@@ -61,7 +59,7 @@ from django.views.generic import RedirectView
 
 from random import randint
 
-from django.views.decorators.cache import cache_page
+from django.core.cache import cache
 
 # <editor-fold desc="FAVICON">
 # ----------
@@ -261,6 +259,11 @@ def fetch_cours_pl(req, year, week, num_copy):
 
     print("W",week, " Y",year, " N", num_copy)
 
+    cache_key = get_key_course_pl(year, week, num_copy)
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return cached
+
     ok = False
     version = 0
     dataset = None
@@ -320,6 +323,8 @@ def fetch_cours_pl(req, year, week, num_copy):
     else:
         response['reqDispos'] = -1
         response['filDispos'] = -1
+
+    cached = cache.set(cache_key, response)
     return response
 
 
@@ -335,6 +340,10 @@ def fetch_cours_pp(req, week, year, num_copy):
 
     print("W",week, " Y",year, " N", num_copy)
 
+    cache_key = get_key_course_pp(year, week, num_copy)
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return cached
 
     dataset = CoursResource() \
         .export(Course
@@ -349,21 +358,29 @@ def fetch_cours_pp(req, week, year, num_copy):
     response['week'] = week
     response['year'] = year
 
+    cache.set(cache_key, response)
     return response
 
 
 @login_required
-@cache_page(60 * 15)
-def fetch_dispos(req, week, year):
+def fetch_dispos(req, year, week):
     print(req)
-#    if req.GET:
-#        if req.user.is_authenticated:
     print("================")
+    # if req.GET:
+    #     if req.user.is_authenticated:
+    print("================")
+
+
     try:
         week = int(week)
         year = int(year)
     except ValueError:
         return HttpResponse("KO")
+
+    cache_key = get_key_preferences(year, week)
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return cached
 
     busy_inst = Course.objects.filter(semaine=week,
                                       an=year) \
@@ -394,11 +411,13 @@ def fetch_dispos(req, week, year):
                             content_type='text/csv')
     response['week'] = week
     response['year'] = year
+
+    cache.set(cache_key, response)
     return response
-#        else:
-#            return HttpResponse("Pas connecté", status=500)
-#    else:
-#        return HttpResponse("Pas GET", status=500)
+    #     else:
+    #         return HttpResponse("Pas connecté", status=500)
+    # else:
+    #     return HttpResponse("Pas GET", status=500)
 
 
 @login_required
@@ -585,6 +604,7 @@ def edt_changes(req):
                 # old_day = a.day.o
                 # old_slot = a.slot.o
                 new_day = a['day']['n']
+                old_day = a['day']['o']
                 new_slot = a['slot']['n']
                 old_slot = a['slot']['o']
                 old_room = a['room']['o']
@@ -682,21 +702,25 @@ def edt_changes(req):
                 edt_version.version += 1
                 edt_version.save()
 
+            if new_week is not None and new_year is not None:
+                cache.delete(get_key_course_pl(new_year, new_week, work_copy))
+            cache.delete(get_key_course_pl(old_year, old_week, work_copy))
+
         subject = '[Modif sur tierce] ' + req.user.username \
                   + ' a déplacé '
         for inst in impacted_inst:
             if inst is not req.user.username:
                 subject += inst + ' '
 
-        if len(impacted_inst) > 0 and work_copy == 0:
-            if len(impacted_inst) > 1 \
-                    or req.user.username not in impacted_inst:
-                send_mail(
-                    subject,
-                    msg,
-                    'edt@iut-blagnac',
-                    ['edt.info.iut.blagnac@gmail.com']
-                )
+        # if len(impacted_inst) > 0 and work_copy == 0:
+        #     if len(impacted_inst) > 1 \
+        #             or req.user.username not in impacted_inst:
+        #         send_mail(
+        #             subject,
+        #             msg,
+        #             'edt@iut-blagnac',
+        #             ['edt.info.iut.blagnac@gmail.com']
+        #         )
 
         return good_response
     else:
@@ -722,10 +746,10 @@ def dispos_changes(req):
 
 
     try:
-        semaine = req.GET.get('s', '')
-        an = req.GET.get('a', '')
-        semaine = int(semaine)
-        an = int(an)
+        week = req.GET.get('s', '')
+        year = req.GET.get('a', '')
+        week = int(week)
+        year = int(year)
     except ValueError:
         bad_response['reason'] \
             = "Problème semaine ou année."
@@ -736,9 +760,9 @@ def dispos_changes(req):
         usr_change = req.user.username
 
     # Default week at None
-    if semaine == 0 or an == 0:
-        semaine = None
-        an = None
+    if week == 0 or year == 0:
+        week = None
+        year = None
 
     print(req.body)
     print(req.POST)
@@ -768,8 +792,8 @@ def dispos_changes(req):
     # if no preference was present for this week, first copy the
     # default availabilities
     if not UserPreference.objects.filter(user=prof,
-                                         semaine=semaine,
-                                         an=an).exists():
+                                         semaine=week,
+                                         an=year).exists():
         for c in Slot.objects.all():
             def_dispo, created = UserPreference \
                 .objects \
@@ -779,10 +803,10 @@ def dispos_changes(req):
                 creneau=c,
                 defaults={'valeur':
                               0})
-            if semaine is not None:
+            if week is not None:
                 new_dispo = UserPreference(user=prof,
-                                           semaine=semaine,
-                                           an=an,
+                                           semaine=week,
+                                           an=year,
                                            creneau=c,
                                            valeur=def_dispo.valeur)
                 new_dispo.save()
@@ -798,12 +822,17 @@ def dispos_changes(req):
         di, didi = UserPreference \
             .objects \
             .update_or_create(user=prof,
-                              semaine=semaine,
-                              an=an,
+                              semaine=week,
+                              an=year,
                               creneau=cr,
                               defaults={'valeur': a['val']})
         print(di)
         print(didi)
+        
+    if week is not None and year is not None:
+        cache.delete(get_key_course_preferences(year, week))
+
+        
     return good_response
 
 
@@ -832,9 +861,15 @@ def decale_changes(req):
                 .get(cours__id=c['i'],
                      copie_travail=0)
             cours = cours_place.cours
+            cache.delete(get_key_course_pl(cours.semaine,
+                                           cours.an,
+                                           cours_place.copie_travail))
             cours_place.delete()
         else:
             cours = Course.objects.get(id=c['i'])
+            cache.delete(get_key_course_pp(cours.semaine,
+                                           cours.an,
+                                           0))
             # note: add copie_travail in Cours might be of interest
 
         pm = PlanningModification(cours=cours,
@@ -849,10 +884,11 @@ def decale_changes(req):
         if new_assignment['na'] != 0:
             # cours.prof=User.objects.get(username=a.np)
             cours.tutor = Tutor.objects.get(username=new_assignment['np'])
+        cache.delete(get_key_course_pp(cours.semaine,
+                                       cours.an,
+                                       0))
         cours.save()
 
-        # flush the whole cache
-        cache.clear()
 
     return good_response
 
@@ -963,4 +999,25 @@ def filt_sa(semaine, an):
     return Course.objects.filter(semaine=semaine,
                                  an=an)
 
+
+def get_key_course_pl(year, week, num_copy):
+    if year is None or week is None or num_copy is None:
+        return ''
+    return 'CPL-Y' + str(year) + '-W' + str(week) + '-C' + str(num_copy) 
+
+
+def get_key_course_pp(year, week, num_copy):
+    if year is None or week is None or num_copy is None:
+        return ''
+    return 'CPP-Y' + str(year) + '-W' + str(week) + '-C' + str(num_copy) 
+
+
+def get_key_preferences(year, week):
+    if year is None or week is None:
+        return ''
+    return 'PREF-Y' + str(year) + '-W' + str(week)
+
 # </editor-fold desc="HELPERS">
+
+
+
