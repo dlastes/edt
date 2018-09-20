@@ -526,7 +526,7 @@ function send_edt_change(changes) {
 	    + "&a=" + weeks.init_data[weeks.sel[0]].an
 	    + "&c=" + num_copie,
         type: 'POST',
-        contentType: 'application/json; charset=utf-8',
+//        contentType: 'application/json; charset=utf-8',
         data: // JSON.stringify({
         //     v: version,
         //     tab: changes
