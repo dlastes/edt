@@ -830,7 +830,7 @@ def dispos_changes(req):
         print(didi)
         
     if week is not None and year is not None:
-        cache.delete(get_key_course_preferences(year, week))
+        cache.delete(get_key_preferences(year, week))
 
         
     return good_response
