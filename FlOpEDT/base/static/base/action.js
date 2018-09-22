@@ -100,7 +100,7 @@ function apply_wk_change(d, i) { //if(fetch.done) {
     fetch_bknews(false);
 
     
-    if (ckbox["dis-mod"].cked) {
+    if (ckbox["dis-mod"].cked || ckbox["edt-mod"].cked) {
         fetch_dispos();
     };
 
