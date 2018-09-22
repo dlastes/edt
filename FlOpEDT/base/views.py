@@ -705,6 +705,8 @@ def edt_changes(req):
             if new_week is not None and new_year is not None:
                 cache.delete(get_key_course_pl(new_year, new_week, work_copy))
             cache.delete(get_key_course_pl(old_year, old_week, work_copy))
+            cache.delete(get_key_course_pp(old_year, old_week, work_copy))
+            
 
         subject = '[Modif sur tierce] ' + req.user.username \
                   + ' a déplacé '
@@ -861,14 +863,14 @@ def decale_changes(req):
                 .get(cours__id=c['i'],
                      copie_travail=0)
             cours = cours_place.cours
-            cache.delete(get_key_course_pl(cours.semaine,
-                                           cours.an,
+            cache.delete(get_key_course_pl(cours.an,
+                                           cours.semaine,
                                            cours_place.copie_travail))
             cours_place.delete()
         else:
             cours = Course.objects.get(id=c['i'])
-            cache.delete(get_key_course_pp(cours.semaine,
-                                           cours.an,
+            cache.delete(get_key_course_pp(cours.an,
+                                           cours.semaine,
                                            0))
             # note: add copie_travail in Cours might be of interest
 
@@ -884,8 +886,8 @@ def decale_changes(req):
         if new_assignment['na'] != 0:
             # cours.prof=User.objects.get(username=a.np)
             cours.tutor = Tutor.objects.get(username=new_assignment['np'])
-        cache.delete(get_key_course_pp(cours.semaine,
-                                       cours.an,
+        cache.delete(get_key_course_pp(cours.an,
+                                       cours.semaine,
                                        0))
         cours.save()
 
