@@ -3,6 +3,8 @@
 # get the current git branch name
 BRANCH := $(shell git branch 2>/dev/null | grep '^*' | colrm 1 2)
 CONFIG ?= development
+
+export CONFIG
 export BRANCH
 
 # initialize database with basics datas #docker-compose build && 
@@ -19,4 +21,3 @@ start:
 # stops edt's docker services
 stop:
 	docker-compose stop
-

@@ -37,11 +37,11 @@ echo "Wait until Postgres is definitely ready to start migrations"
 $SCRIPT_PATH/wait-for-it.sh db:5432 -- echo "Postgres is up"
 
 echo "manage.py makemigrations..."
-$SCRIPT_PATH/../manage.py makemigrations --settings=FlOpEDT.settings.${CONFIG}
+$SCRIPT_PATH/../manage.py makemigrations
 
 echo "manage.py migrate..."
-$SCRIPT_PATH/../manage.py migrate --settings=FlOpEDT.settings.${CONFIG}
+$SCRIPT_PATH/../manage.py migrate
 
 echo "manage.py loaddata..."
-$SCRIPT_PATH/../manage.py loaddata dump.json --settings=FlOpEDT.settings.${CONFIG}
+$SCRIPT_PATH/../manage.py loaddata dump.json
 
