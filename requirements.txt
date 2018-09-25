@@ -5,10 +5,9 @@ django-extensions
 django-colorfield
 django-cache-machine
 pulp
-psycopg2-binary
+psycopg2
 requests
 numpy
 pyclustering
 channels
-asgi_redis
 channels_redis
