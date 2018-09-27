@@ -347,9 +347,9 @@ class TTModel(object):
         Crée une nouvelle variable qui est la conjonction des deux
         et l'ajoute au modèle
         """
-        l_conj_var = self.add_var("%s*%s" % (str(v1), str(v2)))
+        l_conj_var = self.add_var("%s AND %s" % (str(v1), str(v2)))
         self.add_constraint(l_conj_var - (v1 + v2), '>=', -1)
-        self.add_constraint(l_conj_var - ((v1 + v2) / 2), '<=', 0)
+        self.add_constraint(2 * l_conj_var - (v1 + v2) , '<=', 0)
         return l_conj_var
 
     def add_floor(self, name, expr, floor, bound):

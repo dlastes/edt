@@ -43,7 +43,7 @@ from django.db import IntegrityError
 
 import json
 
-bookname='MyFlOp/IUT_special_apps/ExtractPlanif/database_file_iut.xlsx'
+bookname='misc/deploy_database/database_file.xlsx'
 
 def extract_database_file(bookname=bookname):
     book = load_workbook(filename=bookname, data_only=True)
@@ -53,77 +53,6 @@ def extract_database_file(bookname=bookname):
     modules_extract(book)
     slots_extract(book)
     courses_extract(book)
-    misc()
-
-def misc():
-    for semaine in range(36,53):
-        edtv, created = EdtVersion.objects.get_or_create(semaine=semaine, an=annee_courante)
-        if created:
-            edtv.save()
-
-    for semaine in range(1,27):
-        edtv, created = EdtVersion.objects.get_or_create(semaine=semaine, an=annee_courante+1)
-        if created:
-            edtv.save()
-
-    if not UserPreference.objects.all().exists():
-        with open('MyFlOp/IUT_special_apps/ExtractPlanif/Dispos.txt', 'r') as file:
-            Dispo = json.load(file)
-        translation = {'m': 'lun', 'tu': 'mar', 'w': 'mer', 'th': 'jeu', 'f': 'ven',
-              '8':'8h', '9':'9h30', '11':'11h', '14':'14h15', '15':'15h45', '17':'17h15'}
-        for sl in Slot.objects.all():
-            sl_name = str(sl).split('_')
-            nom_creneau = translation[sl_name[0]]+'_'+translation[sl_name[1]]
-            for t in Tutor.objects.all():
-                if t.username in Dispo:
-                    up = UserPreference(user=t, semaine=None, creneau=sl, valeur= Dispo[t.username][nom_creneau])
-                    up.save()
-        i=0
-        for tutor in Tutor.objects.all():
-            i=(i+1)%5
-            daylist = ['m', 'tu', 'w', 'th', 'f']
-            days = [daylist[i], daylist[(i+2)%5]]
-            if UserPreference.objects.filter(user=tutor, semaine=None).exists():
-                for pref in UserPreference.objects.filter(user=tutor, semaine=None, creneau__jour__day__in = days):
-                    pref.valeur = 8
-                    pref.save()
-    print("Tutor Preferences imported")
-
-    if not CoursePreference.objects.all().exists():
-        for ct in CourseType.objects.all():
-            for tp in TrainingProgramme.objects.all():
-                for sl in Slot.objects.all():
-                    course_pref=CoursePreference(course_type=ct, train_prog=tp, creneau=sl)
-                    if sl.heure.hours == 8:
-                        if sl.jour.day == Day.MONDAY:
-                            course_pref.valeur = 1
-                        else:
-                            course_pref.valeur = 4
-                    if sl.heure.hours == 17:
-                        if ct.name in ['CM', 'CTRL']:
-                            course_pref.valeur = 0
-                        elif sl.jour.day == Day.FRIDAY:
-                            course_pref.valeur = 1
-                        else:
-                            course_pref.valeur = 4
-                    course_pref.save()
-
-    for U in Tutor.objects.all():
-        U.first_name = "prenom_de_" + U.username
-        U.last_name = "nom_de_" + U.username
-        U.email = "mail_de_" + U.email
-        U.set_password("passe")
-        U.save()
-
-    PSE = Tutor.objects.get(username='PSE')
-    PSE.username = 'MOI'
-    PSE.is_staff = True
-    PSE.is_superuser = True
-    PSE.rights = 6
-    PSE.save()
-    print("Anonimization done")
-
-
 
 
 def tutors_extract(book):
