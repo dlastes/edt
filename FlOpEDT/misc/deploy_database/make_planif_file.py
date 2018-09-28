@@ -31,7 +31,7 @@ from base.models import Room, RoomType, RoomGroup, TrainingProgramme,\
 
 from openpyxl.styles import PatternFill, Font, colors
 
-bookname='MyFlOp/IUT_special_apps/ExtractPlanif/empty_planif_file.xlsx'
+bookname='misc/deploy_database/empty_planif_file.xlsx'
 
 def make_planif_file(bookname=bookname):
 
@@ -99,5 +99,5 @@ def make_planif_file(bookname=bookname):
 
     book.remove(basic_sheet)
 
-    filename='MyFlOp/IUT_special_apps/ExtractPlanif/planif_file.xlsx'
+    filename='misc/deploy_database/planif_file.xlsx'
     book.save(filename=filename)
