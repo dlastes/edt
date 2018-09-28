@@ -481,16 +481,21 @@ class TTModel(object):
             course_rg_compat[c] = c.room_type.members.all()
 
         for sl in self.wdb.slots:
-            # print '***', sl
             # constraint : each course is assigned to a RoomGroup
             for c in self.wdb.courses:
-                # if sl == self.wdb.slots[0]:
-                #     print "C", c, quicksum(self.TTrooms[(sl, c, rg)] \
-                # for rg in course_rg_compat[c]) == self.TT[
-                #         (sl, c)]
                 self.add_constraint(
                     self.sum(self.TTrooms[(sl, c, rg)] for rg in
-                             course_rg_compat[c]) - self.TT[(sl, c)], '==', 0)
+                                 course_rg_compat[c]) - self.TT[(sl, c)], '==', 0)
+
+            # constraint : fixed_courses rooms are not available
+            for rg in self.wdb.room_groups:
+                if self.wdb.fixed_courses.filter(room=rg, creneau=sl).exists():
+                    for r in rg.subrooms.all():
+                        name = 'fixed_room' + str(r) + '_' + str(sl)
+                        self.add_constraint(self.sum(self.TTrooms[(sl, c, room)] for c in 
+                                            self.wdb.courses for room in
+                                            course_rg_compat[c] if r in room.subrooms.all()), '==', 0, name=name)
+
             # constraint : each Room is only used once and only when available
             for r in self.wdb.rooms:
                 # if sl == self.wdb.slots[0]:
