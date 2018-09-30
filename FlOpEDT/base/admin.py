@@ -206,7 +206,7 @@ class CoursAdmin(admin.ModelAdmin):
         ('an', DropdownFilterAll),
         ('semaine', DropdownFilterAll),
         ('type', DropdownFilterRel),
-        ('groupe', DropdownFilterAll),
+        ('groupe', DropdownFilterRel),
     )
 
 
