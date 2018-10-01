@@ -27,7 +27,8 @@ from django.contrib import admin
 
 from base.models import Day, RoomGroup, Module, Course, Group, Slot, \
     UserPreference, Time, ScheduledCourse, EdtVersion, CourseModification, \
-    PlanningModification, BreakingNews, TrainingProgramme, ModuleDisplay
+    PlanningModification, BreakingNews, TrainingProgramme, ModuleDisplay, \
+    Regen
 
 from people.models import FullStaff, SupplyStaff, BIATOS, Tutor, User
 # Prof
@@ -290,6 +291,10 @@ class BreakingNewsAdmin(admin.ModelAdmin):
     ordering = ('week', 'year')
 
 
+class RegenAdmin(admin.ModelAdmin):
+    list_display = ('an', 'semaine', 'full', 'fday', 'fmonth', 'fyear', 'stabilize', 'sday', 'smonth', 'syear', )
+    ordering = ('-an', '-semaine')
+
 
 
 
@@ -331,3 +336,4 @@ admin.site.register(ScheduledCourse, CoursPlaceAdmin)
 # admin.site.register(CoursLP, CoursLPAdmin)
 admin.site.register(UserPreference, DispoAdmin)
 admin.site.register(BreakingNews, BreakingNewsAdmin)
+admin.site.register(Regen,RegenAdmin)
