@@ -366,6 +366,10 @@ function compute_changes(changes, profs, gps) {
 
     var cur_course, cb ;
 
+    var splash_case, msg ;
+    var msgRetry = "Corrigez, puis réessayez." ;
+    var butOK = {list: [{txt: "Ok", click: function(d){}}]} ;
+
     
     for (i = 0; i < Object.keys(cours_bouge).length ; i++) {
 	id = Object.keys(cours_bouge)[i] ;
@@ -374,6 +378,62 @@ function compute_changes(changes, profs, gps) {
 
 	if (had_moved(cb , cur_course)) {
 
+	    /* Sanity checks */
+	    
+	    // No course has been moved to garbage slots
+            if (is_garbage(cur_course.day, cur_course.slot)) {
+		splash_case = {
+		    id: "garb-sched",
+		    but: butOK,
+		    com: {list: [{txt: "Vous avez déplacé, puis laissé des cours non placés."},
+				 {txt: msgRetry}]}
+		}
+		
+		splash(splash_case);
+		return false ;
+            } 
+	    // Course in unavailable slots for some training programme
+	    else if (is_free(cur_course.day,
+			     cur_course.slot,
+			     cur_course.promo)) {
+		
+		msg = "Pas de cours pour les ";
+		if (set_promos[gp_changed.promo] == 3) {
+		    msg += "LP" ;
+		} else {
+		    msg += set_promos[cur_course.promo] + "A" ;
+		    
+		}
+		msg += " le " + data_grid_scale_day[cur_course.day]
+		    + " sur le créneau "
+		    + data_grid_scale_hour[cur_course.slot]
+		    + "."
+		
+		splash_case = {
+		    id: "unav-tp",
+		    but: butOK,
+		    com: {list: [{txt: msg},
+				 {txt: msgRetry}]}
+		}
+		
+		splash(splash_case);
+		return false ;
+            } else if (cur_course.room == une_salle){
+		splash_case = {
+		    id: "def-room",
+		    but: butOK,
+		    com: {list: [{txt: "Vous avez laissé la salle 'par défaut'."},
+				 {txt: "Pour l'instant, le changement n'est pas accepté."},
+				 {txt: "Merci de chercher et de renseigner une salle disponible."}]}
+		}
+		
+		splash(splash_case);
+		return false ;
+	    }
+	    
+	    
+	    /* Change is accepted now */
+	    
 	    // add instructor if never seen
             if (profs.indexOf(cur_course.prof) == -1
 		&& cur_course.prof != logged_usr.nom) {
@@ -413,19 +473,6 @@ function compute_changes(changes, profs, gps) {
 	    
 	    
             console.log("change", change);
-            if (is_garbage(cur_course.day, cur_course.slot)) {
-		alert("Il y a des cours non placés.");
-            } else if (is_free(cur_course.day,
-			       cur_course.slot,
-			       cur_course.promo)) {
-		alert("Pas de cours pour les " +
-                      set_promos[cur_course.promo]
-		      + " le " + data_grid_scale_day[cur_course.day]
-		      + " sur le créneau "
-		      + data_grid_scale_hour[cur_course.slot]
-		      + ".");
-            } else {
-		
 		if (cb.day != cur_course.day ||
                     cb.slot != cur_course.slot) {
                     change.day.n = cur_course.day;
@@ -437,7 +484,7 @@ function compute_changes(changes, profs, gps) {
 
 		changes.push(change);
 		
-            }
+            
 	    
 	}
 
@@ -449,6 +496,8 @@ function compute_changes(changes, profs, gps) {
         tab: changes
     }));
 
+    return true ;
+
 }
 
 
@@ -457,7 +506,11 @@ function confirm_change() {
     changes = [];
     profs_conc = [];
     gps = [];
-    compute_changes(changes, profs_conc, gps);
+    var changesOK = compute_changes(changes, profs_conc, gps);
+
+    if (!changesOK) {
+	return ;
+    }
 
     if (changes.length == 0) {
         ack.edt = "base EdT : RAS";
