@@ -28,17 +28,19 @@ SCRIPT_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 echo "Wait until Postgres is definitely ready to start migrations"
 $SCRIPT_PATH/wait-for-it.sh db:5432 -- echo "Postgres is up - continuing"
 
-if [ "x$DJANGO_COLLECTSTATIC" = 'xon' ]; then
+
+if [ "$DJANGO_COLLECTSTATIC" = 'on' ]; then
+    echo "DJANGO_COLLECTSTATIC"  
     /code/FlOpEDT/manage.py collectstatic --noinput
 fi
 
-if [ "x$DJANGO_MIGRATE" = 'xon' ]; then
+if [ "$DJANGO_MIGRATE" = 'on' ]; then
     echo "manage.py migrate..."
     /code/FlOpEDT/manage.py makemigrations
     /code/FlOpEDT/manage.py migrate --noinput
 fi
 
-if [ "x$DJANGO_LOADDATA" = 'xon' ]; then
+if [ "$DJANGO_LOADDATA" = 'on' ]; then
   echo "manage.py loaddata..."
   /code/FlOpEDT/manage.py loaddata dump.json
 fi

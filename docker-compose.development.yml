@@ -13,16 +13,12 @@ services:
       args:
         CONFIG: development
     environment:
-      DJANGO_SETTINGS_MODULE: FlOpEDT.settings.development
-      DJANGO_LOADDATA: "on"
+      - DJANGO_SETTINGS_MODULE=FlOpEDT.settings.development
+      - DJANGO_COLLECTSTATIC=off
+      - DJANGO_MIGRATE=on
+      - DJANGO_LOADDATA
     entrypoint: /code/docker/script/init.sh      
-    command: 
-      - /bin/sh
-      - -c
-      - |
-        /code/FlOpEDT/manage.py makemigrations
-        /code/FlOpEDT/manage.py migrate
-        /code/FlOpEDT/manage.py runserver 0.0.0.0:8000
+    command: /code/FlOpEDT/manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/code
     ports:

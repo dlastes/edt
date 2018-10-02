@@ -21,3 +21,6 @@ start:
 # stops edt's docker services
 stop:
 	docker-compose stop
+
+test:
+	echo $(CONFIG)------------
