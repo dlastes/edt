@@ -26,13 +26,15 @@
 
 from openpyxl import load_workbook
 
+from base.weeks import annee_courante
+
 from base.models import Course, Group, Module, GroupType, Period, CourseType, RoomType
 
 from people.models import FullStaff, SupplyStaff, Tutor
 
 from misc.assign_module_color import assign_color
 
-bookname='MyFlOp/IUT_special_apps/ExtractPlanif/planif_file_GIM.xlsx'
+bookname='misc/deploy_database/planif_file.xlsx'
 
 def deploy_planif_file(bookname=bookname):
 
@@ -76,21 +78,14 @@ def deploy_planif_file(bookname=bookname):
                 courses_nb = sheet.cell(row=cell_row, column=cell_col).value
                 if courses_nb is not None:
                     if week > 30:
-                        year = 2018
+                        year = annee_courante
                     else:
-                        year = 2019
+                        year = annee_courante + 1
                     for group in Group.objects.filter(type__name=group_type_name, train_prog=train_prog):
 ############################ We must define a room_type for each course!
                         for _ in range(courses_nb):
-                            if course_type_name == 'TD':
-                                room_type = RoomType.objects.get(name='TD')
-                            elif course_type_name == 'Amphi':
-                                room_type = RoomType.objects.get(name='AmphiX')
-                            elif course_type_name == 'Examen':
-                                room_type = RoomType.objects.get(name='Exam')
-                            else:
-                                R = RoomType.objects.exclude(name__in=['TD','Exam','AmphiX','Amphi23'])
-                                room_type = R[cell_row % 10]
+                            R = RoomType.objects.all()
+                            room_type = R[0]
 ############################ We must define a tutor for each course!
                             c = Course(semaine=week, an=year, groupe=group, type=course_type,
                                        module=module, tutor=module.head, room_type=room_type)
