@@ -230,9 +230,11 @@ function rearrange_dispos(save) {
 
 function apply_stype_from_button(save) {
     console.log("app");
-    console.log(document.forms['app']);
+//    console.log(document.forms['app']);
     console.log();
     var changes = rearrange_dispos();
+    var sent_data = {} ;
+    sent_data['changes'] = JSON.stringify(changes) ; 
 
     var se_deb,an_deb,se_fin,an_fin;
     var an, se;
@@ -274,6 +276,7 @@ function apply_stype_from_button(save) {
 		}
 		
 		for (se=se_min ; se<=se_max ; se++) {
+
 		    //console.log(se,an);
     		    $.ajax({
     			url: url_dispos_changes
@@ -281,8 +284,8 @@ function apply_stype_from_button(save) {
 			    + "&a=" + an
 			    + "&u=" + user.nom,
 			type: 'POST',
-			contentType: 'application/json; charset=utf-8',
-			data: JSON.stringify(changes),
+//			contentType: 'application/json; charset=utf-8',
+			data: sent_data, //JSON.stringify(changes),
 			dataType: 'json',
     			success: function(msg) {
 
