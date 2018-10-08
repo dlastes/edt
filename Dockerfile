@@ -7,6 +7,8 @@ ARG CONFIG
 RUN mkdir /code
 WORKDIR /code
 
+RUN apt-get update && apt-get -y install memcached
+
 COPY requirements.txt /code/
 RUN pip install --no-cache-dir -r requirements.txt
 
