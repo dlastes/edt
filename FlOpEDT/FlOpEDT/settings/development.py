@@ -34,6 +34,22 @@ DATABASES = {
     }
 }
 
+
+
+
+# soon: memcached
+# ---------------
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+#         'LOCATION': '127.0.0.1:11211',
+#     }
+# }
+
+
+
+# old redis cache
+# ---------------
 # CACHES = {
 #     "default": {
 #         "BACKEND": "django_redis.cache.RedisCache",
