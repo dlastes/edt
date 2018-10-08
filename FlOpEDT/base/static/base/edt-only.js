@@ -99,7 +99,7 @@ function fetch_cours_light() {
     $.ajax({
         type: "GET", //rest Type
         dataType: 'text',
-        url: url_cours_pl+"?s="+semaine_att+"&a="+an_att+"&c=0",
+        url: url_cours_pl+"/"+an_att+"/"+semaine_att+"/0",
         async: false,
         contentType: "text/csv",
         success: function (msg, ts, req) {

@@ -846,7 +846,11 @@ function compute_promo_est_n_wh(node) {
 
     node.width = 0;
     if (node.children.length == 0) {
-        node.width = 1;
+	if (node.display) {
+            node.width = 1;
+	} else {
+            node.width = 0;
+	}
     } else {
         for (var i = 0; i < node.children.length; i++) {
             child = groups[node.promo][node.children[i]];
