@@ -11,4 +11,3 @@ numpy
 pyclustering
 channels
 channels_redis
-python-memcached
