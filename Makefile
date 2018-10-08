@@ -2,7 +2,7 @@
 
 # get the current git branch name
 BRANCH := $(shell git branch 2>/dev/null | grep '^*' | colrm 1 2)
-CONFIG ?= production
+CONFIG ?= development
 
 export CONFIG
 export BRANCH
@@ -20,7 +20,4 @@ start:
 
 # stops edt's docker services
 stop:
-	docker-compose stop
-
-test:
-	echo $(CONFIG)------------
+	docker-compose -f docker-compose.$(CONFIG).yml stop

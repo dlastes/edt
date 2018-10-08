@@ -46,11 +46,7 @@ services:
       - db
       - redis      
     entrypoint: /code/docker/script/init.sh
-    command: 
-      - /bin/sh
-      - -c
-      - |
-        gunicorn --chdir /code/FlOpEDT FlOpEDT.wsgi:application -b 0.0.0.0:8000
+    command: gunicorn --chdir /code/FlOpEDT FlOpEDT.wsgi:application -b 0.0.0.0:8000
 
 volumes:
   static-volume:

@@ -10,7 +10,7 @@ WORKDIR /code
 COPY requirements.txt /code/
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY requirements /code/requirements/
-RUN pip install --no-cache-dir -r requirements/requirements.$CONFIG.txt
+COPY docker/requirements /code/requirements/
+RUN pip install --no-cache-dir -r /code/requirements/$CONFIG.txt
 
 COPY . /code/
