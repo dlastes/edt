@@ -28,10 +28,10 @@ from django.contrib import admin
 from base.models import Day, RoomGroup, Module, Course, Group, Slot, \
     UserPreference, Time, ScheduledCourse, EdtVersion, CourseModification, \
     PlanningModification, BreakingNews, TrainingProgramme, ModuleDisplay, \
-    Regen
+    Regen, Holiday, TrainingHalfDay, RoomPreference, RoomSort, \
+    CoursePreference, Dependency
 
-from people.models import FullStaff, SupplyStaff, BIATOS, Tutor, User
-# Prof
+from people.models import Tutor, User
 
 
 import django.contrib.auth as auth
@@ -51,6 +51,11 @@ from FlOpEDT.filters import DropdownFilterAll, DropdownFilterRel, \
 #    class Meta:
 #        model = Prof
 #        # fields = ('abbrev',)
+
+# <editor-fold desc="RESOURCES">
+# -----------------
+# -- PREFERENCES --
+# -----------------
 
 
 class CoursPlaceResource(resources.ModelResource):
@@ -155,12 +160,42 @@ class BreakingNewsResource(resources.ModelResource):
         fields = ("id", "x_beg", "x_end", "y", "txt", "fill_color", "strk_color", "is_linked")
 
 
-# Register your models here.
+
+# </editor-fold desc="RESOURCES">
+
+
+
+        
+# <editor-fold desc="ADMIN_MENU">
+# ----------------
+# -- ADMIN MENU --
+# ----------------
+
+class BreakingNewsAdmin(admin.ModelAdmin):
+    list_display = ('week', 'year', 'x_beg', 'x_end', 'y', 'txt',
+                    'fill_color', 'strk_color')
+    ordering = ('-year', '-week')
+
 
 class JourAdmin(admin.ModelAdmin):
     list_display = ('nom', 'no')
     ordering = ('no',)
 
+    
+class HolidayAdmin(admin.ModelAdmin):
+    list_display = ('day', 'week', 'year')
+    ordering = ('-year', '-week', 'day')
+    list_filter = (
+        ('day', DropdownFilterRel),
+        ('year', DropdownFilterAll),
+        ('week', DropdownFilterAll),
+    )
+
+
+class TrainingHalfDayAdmin(admin.ModelAdmin):
+    list_display = ('train_prog', 'day', 'week', 'year', 'apm')
+    ordering = ('-year', '-week', 'train_prog', 'day')
+    
 
 # class DemiJourAdmin(admin.ModelAdmin):
 #    list_display = ('jour','apm')
@@ -188,7 +223,26 @@ class GroupeAdmin(admin.ModelAdmin):
 class RoomGroupAdmin(admin.ModelAdmin):
     list_display = ('name',)
 
+    
+class RoomPreferenceAdmin(admin.ModelAdmin):
+    list_display = ('room', 'semaine', 'an', 'creneau', 'valeur')
+    ordering = ('-an','-semaine','creneau')
+    list_filter = (
+        ('room', DropdownFilterRel),
+        ('an', DropdownFilterAll),
+        ('semaine', DropdownFilterAll),
+    )
 
+    
+class RoomSortAdmin(admin.ModelAdmin):
+    list_display = ('for_type', 'prefer', 'unprefer',)
+    list_filter = (
+        ('for_type', DropdownFilterRel),
+        ('prefer', DropdownFilterRel),
+        ('unprefer', DropdownFilterRel),
+    )
+
+    
 class ModuleAdmin(admin.ModelAdmin):
     list_display = ('nom', 'ppn', 'abbrev',
                     'head',
@@ -235,12 +289,41 @@ class CoursPlaceAdmin(admin.ModelAdmin):
 
 class EdtVAdmin(admin.ModelAdmin):
     list_display = ('semaine', 'version', 'an')
-    ordering = ('an', 'semaine', 'version')
+    ordering = ('-an', '-semaine', 'version')
     list_filter = (('semaine', DropdownFilterAll),
                    ('an', DropdownFilterAll)
                    )
 
 
+class CoursePreferenceAdmin(admin.ModelAdmin):
+    list_display = ('course_type', 'train_prog', 'creneau',
+                    'valeur', 'semaine', 'an')
+    ordering = ('-an', '-semaine')
+    list_filter = (('semaine', DropdownFilterAll),
+                   ('an', DropdownFilterAll),
+                   ('train_prog', DropdownFilterRel),
+                   )
+    
+
+class DependencyAdmin(admin.ModelAdmin):
+    def cours1_semaine(o):
+        return str(o.cours.semaine)
+
+    cours1_semaine.short_description = 'Semaine'
+    cours1_semaine.admin_order_field = 'cours1__semaine'
+
+    def cours1_an(o):
+        return str(o.cours.an)
+
+    cours1_an.short_description = 'Année'
+    cours1_an.admin_order_field = 'cours1__an'
+
+    list_display = ('cours1', 'cours2', 'successifs', 'ND')
+    list_filter = (('cours1__an', DropdownFilterAll),
+                   ('cours1__semaine', DropdownFilterAll),
+                   )
+
+    
 class CoursMAdmin(admin.ModelAdmin):
     def cours_semaine(o):
         return str(o.cours.semaine)
@@ -285,11 +368,6 @@ class DispoAdmin(admin.ModelAdmin):
                    )
 
 
-class BreakingNewsAdmin(admin.ModelAdmin):
-    list_display = ('week', 'year', 'x_beg', 'x_end', 'y', 'txt',
-                    'fill_color', 'strk_color')
-    ordering = ('week', 'year')
-
 
 class RegenAdmin(admin.ModelAdmin):
     list_display = ('an', 'semaine', 'full', 'fday', 'fmonth', 'fyear', 'stabilize', 'sday', 'smonth', 'syear', )
@@ -298,39 +376,30 @@ class RegenAdmin(admin.ModelAdmin):
 
 
 
-class FullStaffAdmin(admin.ModelAdmin):
-
-    class Meta:
-        app_label = 'auth'
 
 
-class SupplyStaffAdmin(admin.ModelAdmin):
-
-    class Meta:
-        app_label = 'auth'
+# </editor-fold desc="ADMIN_MENU">
 
 
-class BIATOSAdmin(admin.ModelAdmin):
-
-    class Meta:
-        app_label = 'auth'
 
 
 # admin.site.unregister(auth.models.User)
 admin.site.unregister(auth.models.Group)
 
-admin.site.register(FullStaff, FullStaffAdmin)
-admin.site.register(SupplyStaff, SupplyStaffAdmin)
-admin.site.register(BIATOS, BIATOSAdmin)
-# admin.site.register(Tutor, TutorAdmin)
 # admin.site.register(Jour, JourAdmin)
 # admin.site.register(DemiJour, DemiJourAdmin)
+admin.site.register(Holiday, HolidayAdmin)
+admin.site.register(TrainingHalfDay, TrainingHalfDayAdmin)
 admin.site.register(Group, GroupeAdmin)
 admin.site.register(RoomGroup, RoomGroupAdmin)
+admin.site.register(RoomPreference, RoomPreferenceAdmin)
+admin.site.register(RoomSort, RoomSortAdmin)
 admin.site.register(Module, ModuleAdmin)
 admin.site.register(Course, CoursAdmin)
 admin.site.register(EdtVersion, EdtVAdmin)
 admin.site.register(CourseModification, CoursMAdmin)
+admin.site.register(CoursePreference, CoursePreferenceAdmin)
+admin.site.register(Dependency, DependencyAdmin)
 admin.site.register(PlanningModification, PlanifMAdmin)
 admin.site.register(ScheduledCourse, CoursPlaceAdmin)
 # admin.site.register(CoursLP, CoursLPAdmin)
