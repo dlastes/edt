@@ -35,6 +35,7 @@
   <!-- script src='https://d3js.org/d3.v4.min.js'></script -->
   <script>
     var groupes_fi = "{% static 'base/groups.json' %}";
+    var rooms_fi = "{% static 'base/rooms.json' %}";
 
     var url_cours_pl = "{% url "base:fetch_cours_pl" 0 0 0 %}";
     url_cours_pl = url_cours_pl.slice(0,-5);
