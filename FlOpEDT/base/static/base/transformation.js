@@ -189,7 +189,11 @@ function dispo_all_h(d) {
 }
 
 function dispo_all_y(d) {
-    return dispo_more_y(d) + d.off * dispo_all_h(d);
+    if (d.hour < nbSl/2) {
+	return dispo_more_y(d) + d.off * dispo_all_h(d);
+    } else {
+	return dispo_more_y(d) - d.off * dispo_all_h(d);
+    }
 }
 
 function dispo_all_w(d) {
