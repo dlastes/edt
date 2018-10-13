@@ -517,6 +517,7 @@ function translate_cours_pl_from_csv(d) {
         day: +d.jour,
         slot: +d.heure,
         room: d.room,
+	room_type: d.room_type,
 	color_bg: d.color_bg,
 	color_txt: d.color_txt,
     };
@@ -545,6 +546,7 @@ function translate_cours_pp_from_csv(d) {
         day: garbage.day,
         slot: garbage.slot,
         room: une_salle,
+	room_type: d.room_type,
 	color_bg: d.color_bg,
 	color_txt: d.color_txt,
     };
