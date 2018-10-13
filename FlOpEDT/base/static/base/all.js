@@ -145,7 +145,10 @@ function on_group_rcv(dg) {
 }
 
 
-
+function on_room_rcv(room_data) {
+    rooms = room_data;
+}
+    
 /*---------------------
   ------ STARTER ------
   ---------------------*/
@@ -166,6 +169,8 @@ fetch_dispos_type();
 d3.json(groupes_fi,
  	on_group_rcv);
 
+d3.json(rooms_fi,
+ 	on_room_rcv);
 
 
 d3.select("body")
