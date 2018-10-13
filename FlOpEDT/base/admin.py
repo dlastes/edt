@@ -29,7 +29,7 @@ from base.models import Day, RoomGroup, Module, Course, Group, Slot, \
     UserPreference, Time, ScheduledCourse, EdtVersion, CourseModification, \
     PlanningModification, BreakingNews, TrainingProgramme, ModuleDisplay, \
     Regen, Holiday, TrainingHalfDay, RoomPreference, RoomSort, \
-    CoursePreference, Dependency
+    CoursePreference, Dependency, RoomType
 
 from people.models import Tutor, User
 
@@ -96,6 +96,9 @@ class CoursPlaceResource(resources.ModelResource):
     room = fields.Field(column_name='room',
                         attribute='room',
                         widget=ForeignKeyWidget(RoomGroup, 'name'))
+    room_type = fields.Field(column_name='room_type',
+                             attribute='cours__room_type',
+                             widget=ForeignKeyWidget(RoomType, 'name'))
     color_bg = fields.Field(column_name='color_bg',
                             attribute='cours__module__display',
                             widget=ForeignKeyWidget(ModuleDisplay, 'color_bg'))
@@ -106,7 +109,8 @@ class CoursPlaceResource(resources.ModelResource):
     class Meta:
         model = ScheduledCourse
         fields = ('id', 'no', 'groupe', 'promo', 'color_bg', 'color_txt',
-                  'module', 'jour', 'heure', 'semaine', 'room', 'prof')
+                  'module', 'jour', 'heure', 'semaine', 'room', 'prof',
+                  'room_type')
 
 
 class CoursResource(resources.ModelResource):
@@ -128,11 +132,14 @@ class CoursResource(resources.ModelResource):
     color_txt = fields.Field(column_name='color_txt',
                              attribute='module__display',
                              widget=ForeignKeyWidget(ModuleDisplay, 'color_txt'))
+    room_type = fields.Field(column_name='room_type',
+                             attribute='room_type',
+                             widget=ForeignKeyWidget(RoomType, 'name'))
 
     class Meta:
         model = Course
         fields = ('id', 'no', 'tutor_name', 'groupe', 'promo', 'module',
-                  'color_bg', 'color_txt', 'prof')
+                  'color_bg', 'color_txt', 'prof', 'room_type')
 
 
 class SemaineAnResource(resources.ModelResource):
