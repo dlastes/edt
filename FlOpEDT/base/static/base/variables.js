@@ -81,7 +81,7 @@ var rootgp_width = 0;
 var pos_rootgp_width = 0;
 
 // different grounds where to plot
-var fg, mg, bg, dg, meg, vg, gpg, prg, stg, mog, sag, fig, log;
+var fg, mg, bg, dg, meg, vg, gpg, prg, stg, mog, sag, fig, log, cmpg, cmtg;
 var wg = {
     upper: null,
     bg: null,

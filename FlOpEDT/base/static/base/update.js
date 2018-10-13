@@ -197,45 +197,7 @@ function go_pref(quick) {
             .attr("r", par_dispos.rad_cross * smiley.tete);
 
 
-
-
-	// preference menu
-
-        var dis_men_dat = dg
-            .selectAll(".dispo-menu")
-            .data(data_dispo_adv_cur);
-
-        var dis_men = dis_men_dat
-            .enter()
-            .append("g")
-            .attr("class", "dispo-menu")
-            .attr("cursor", "pointer")
-            .on("click", function(d) {
-                dispos[user.nom][d.day][d.hour] = d.off;
-                user.dispos[day_hour_2_1D(d)].val = d.off
-            });
-
-        dis_men
-            .append("rect")
-            .attr("class", "dis-men-bg")
-            .merge(dis_men_dat.select(".dis-men-bg"))
-            .transition(t)
-            .attr("x", dispo_all_x)
-            .attr("y", dispo_all_y)
-            .attr("width", dispo_all_w)
-            .attr("height", dispo_all_h)
-            .attr("fill", function(d) {
-                return smi_fill(d.off / par_dispos.nmax);
-            })
-            .attr("stroke", "darkslategrey")
-            .attr("stroke-width", 2);
-
-        go_smiley(dis_men_dat, dis_men, t);
-
-
-        dis_men_dat.exit().remove();
-
-
+	go_cm_advanced_pref(quick) ;
 
 
     }
@@ -370,6 +332,51 @@ function go_smiley(top, mid, t) {
         });
 
 
+}
+
+
+// advanced preference menu
+function go_cm_advanced_pref(quick) {
+        if (quick) {
+            t = d3.transition()
+                .duration(0);
+        } else {
+            t = d3.transition();
+        }
+
+        var dis_men_dat = cmpg
+            .selectAll(".dispo-menu")
+            .data(data_dispo_adv_cur);
+
+        var dis_men = dis_men_dat
+            .enter()
+            .append("g")
+            .attr("class", "dispo-menu")
+            .attr("cursor", "pointer")
+            .on("click", function(d) {
+                dispos[user.nom][d.day][d.hour] = d.off;
+                user.dispos[day_hour_2_1D(d)].val = d.off
+            });
+
+        dis_men
+            .append("rect")
+            .attr("class", "dis-men-bg")
+            .merge(dis_men_dat.select(".dis-men-bg"))
+            .transition(t)
+            .attr("x", dispo_all_x)
+            .attr("y", dispo_all_y)
+            .attr("width", dispo_all_w)
+            .attr("height", dispo_all_h)
+            .attr("fill", function(d) {
+                return smi_fill(d.off / par_dispos.nmax);
+            })
+            .attr("stroke", "darkslategrey")
+            .attr("stroke-width", 2);
+
+        go_smiley(dis_men_dat, dis_men, t);
+
+
+        dis_men_dat.exit().remove();
 }
 
 

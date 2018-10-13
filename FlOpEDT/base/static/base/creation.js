@@ -178,6 +178,15 @@ function create_layouts(svg_cont, light) {
     fg = edtg.append("g")
         .attr("id", "lay-fg");
 
+    // context menus ground
+    var cmg = svg_cont.append("g")
+        .attr("id", "lay-cmg");
+    cmpg = cmg.append("g")
+	.attr("id", "lay-cmpg");
+    cmtg = cmg.append("g")
+	.attr("id", "lay-cmtg");
+    
+
     // logo ground
     log = edtg.append("g")
         .attr("id", "lay-log");
