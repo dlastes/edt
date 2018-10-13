@@ -213,8 +213,6 @@ function select_tutor_change(c) {
 
 function go_cm_tutor_change() {
 
-    console.log('redraw');
-    
     var tut_cm_course_dat = cmtg
         .selectAll(".tut-chg")
         .data(room_change.course,
