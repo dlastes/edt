@@ -165,6 +165,151 @@ function apply_tutor_display_all() {
     }
 }
 
+
+// c: course
+function select_tutor_change(c) {
+    room_change.course = [c] ;
+    room_change.old_room = c.room ;
+    room_change.cur_room = c.room ;
+
+    var fake_id = new Date() ;
+    fake_id = fake_id.getMilliseconds() + "-" + c.id_cours ;
+    room_change.proposal = [] ;
+
+    var occupied_rooms = cours
+	.filter(function(d) {
+	    return d.day==c.day && d.slot==c.slot && d.id_cours!=c.id_cours ;
+	})
+	.map(function(d) {
+	    return d.room ;
+	})
+    
+
+    for (var i = 0 ; i < rooms[c.room_type].length ; i++) {
+	if (occupied_rooms.indexOf(rooms[c.room_type][i]) == -1) {
+	    var cur_prop = {} ;
+	    cur_prop.fid = fake_id ;
+	    cur_prop.room = rooms[c.room_type][i] ;
+	    
+	    room_change.proposal.push(cur_prop) ;
+	}
+    }
+
+    room_change.but.nlin = Math.ceil(room_change.proposal.length / room_change.but.ncol) ;
+    if (cours_x(c) + .5 * cours_width(c) + tut_chg_bg_width() < grid_width() ) {
+    	room_change.posh = 'e';
+    } else {
+    	room_change.posh = 'w';
+    }
+    if (cours_y(c)  + .5 * cours_height(c) + tut_chg_bg_height() < grid_height()) {
+    	room_change.posv = 's';
+    } else {
+    	room_change.posv = 'n';
+    }
+
+}
+
+
+
+function go_cm_tutor_change() {
+
+    console.log('redraw');
+    
+    var tut_cm_course_dat = cmtg
+        .selectAll(".tut-chg")
+        .data(room_change.course,
+              function(d) {
+                  return d.id_cours;
+              });
+    
+    var tut_cm_course_g = tut_cm_course_dat
+        .enter()
+        .append("g")
+        .attr("class", "tut-chg")
+        .attr("cursor", "pointer");
+    
+
+    tut_cm_course_g
+        .append("rect")
+        .attr("class", "tut-chg-bg")
+        .merge(tut_cm_course_dat.select(".tut-chg-bg"))
+        .attr("x", tut_chg_bg_x)
+        .attr("y", tut_chg_bg_y)
+        .attr("width", tut_chg_bg_width)
+        .attr("height", tut_chg_bg_height)
+        .attr("fill", "white");
+        // .attr("stroke", "darkslategrey")
+        // .attr("stroke-width", 2);
+
+    tut_cm_course_g
+        .append("text")
+        .attr("class", "tut-chg-comm")
+        .merge(tut_cm_course_dat.select(".tut-chg-comm"))
+        .attr("x", tut_chg_txt_x)
+        .attr("y", tut_chg_txt_y)
+        .text(tut_chg_txt);
+        // .attr("stroke", "darkslategrey")
+        // .attr("stroke-width", 2);
+
+    tut_cm_course_dat.exit().remove();
+
+
+
+    var tut_cm_room_dat = cmtg
+        .selectAll(".tut-chg-rooms")
+        .data(room_change.proposal,
+              function(d,i) {
+                  return d.fid + "-" + i;
+              });
+    
+    var tut_cm_room_g = tut_cm_room_dat
+        .enter()
+        .append("g")
+        .attr("class", "tut-chg-rooms")
+        .attr("cursor", "pointer")
+	.on("click", function(d){
+	    context_menu.room_hold = true ;
+	    var c = room_change.course[0] ;
+            add_bouge(c);
+            c.room = d.room;
+	    //room_change.cur_room = d.room;
+	    room_change.course = [] ;
+	    room_change.proposal = [] ;
+	    go_courses() ;
+	})
+    
+
+    tut_cm_room_g
+        .append("rect")
+        .attr("class", "tut-chg-rec")
+        .merge(tut_cm_room_dat.select(".tut-chg-rec"))
+        .attr("x", tut_chg_but_x)
+        .attr("y", tut_chg_but_y)
+        .attr("width", tut_chg_but_width)
+        .attr("height", tut_chg_but_height)
+        .attr("fill", tut_chg_but_fill)
+        .attr("stroke", "black")
+        .attr("stroke-width", tut_chg_but_stk);
+
+    tut_cm_room_g
+        .append("text")
+        .attr("class", "tut-chg-bt")
+        .merge(tut_cm_room_dat.select(".tut-chg-bt"))
+        .attr("x", tut_chg_but_txt_x)
+        .attr("y", tut_chg_but_txt_y)
+        .text(tut_chg_but_txt);
+        // .attr("stroke", "darkslategrey")
+        // .attr("stroke-width", 2);
+
+    tut_cm_room_dat.exit().remove();
+
+    
+}
+
+
+
+
+
 /*----------------------
   ------- GROUPS -------
   ----------------------*/

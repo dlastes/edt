@@ -157,7 +157,6 @@ for (var i = 0; i <= par_dispos.nmax; i++) {
 }
 var data_dispo_adv_cur = [];
 var del_dispo_adv = false;
-var dispo_menu_appeared = false;
 
 // number of required and provided availability slots
 var required_dispos = -1;
@@ -322,6 +321,12 @@ ckbox["dis-mod"] = {
 };
 
 
+
+var context_menu = {
+    dispo_hold: false,
+    room_hold: false
+};
+
 /*--------------------
    ------ MODULES ------
    --------------------*/
@@ -346,6 +351,24 @@ var salles = {
 
 var rooms ;
 
+var room_change = {
+    course: [],
+    old_room: "",
+    proposal: [],
+    cur_room: "",
+    but:
+    { w: 45,
+      h: 18,
+      fs: 10,
+      mx: 5,
+      my: 3,
+      ncol: 3,
+      nlin: 0
+    },
+    top: 30,
+    posv: 's',
+    posh: 'w'
+};
 
 /*---------------------
    ------ TUTORS ------

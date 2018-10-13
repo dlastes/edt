@@ -1257,7 +1257,8 @@ function def_drag() {
                 drag.y += d3.event.dy;
                 drag.sel.attr("transform", "translate(" + drag.x + "," + drag.y + ")");
             }
-        }).on("end", function(d) {
+        })
+	.on("end", function(d) {
             if (cur_over != null && ckbox["edt-mod"].cked && fetch.done) {
 
                 mg.node().appendChild(drag.sel.node());
