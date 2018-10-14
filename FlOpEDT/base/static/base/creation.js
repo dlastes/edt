@@ -1280,6 +1280,14 @@ function def_drag() {
 			add_bouge(d);
                         d.day = cur_over.day;
                         d.slot = cur_over.slot;
+			var disp_cont_menu = select_room_change(d) ;
+			console.log(disp_cont_menu);
+			if (disp_cont_menu) {
+			    go_cm_room_change();
+			} else {
+			    room_change.course = [] ;
+			    room_change.proposal = [] ;
+			}
 
 		    } else if (!ngs.dispo && (logged_usr.rights >> 2) % 2 == 1) {
 

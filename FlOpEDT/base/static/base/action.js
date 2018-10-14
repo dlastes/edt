@@ -167,6 +167,7 @@ function apply_tutor_display_all() {
 
 
 // c: course
+// return: true iff a change is needed (i.e. unassigned room or already occupied)
 function select_room_change(c) {
     room_change.course = [c] ;
     room_change.old_room = c.room ;
@@ -205,6 +206,13 @@ function select_room_change(c) {
     	room_change.posv = 's';
     } else {
     	room_change.posv = 'n';
+    }
+
+    if (c.room == une_salle ||
+	occupied_rooms.indexOf(c.room) != -1) {
+	return true;
+    } else {
+	return false ;
     }
 
 }
