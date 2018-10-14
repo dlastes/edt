@@ -167,7 +167,7 @@ function apply_tutor_display_all() {
 
 
 // c: course
-function select_tutor_change(c) {
+function select_room_change(c) {
     room_change.course = [c] ;
     room_change.old_room = c.room ;
     room_change.cur_room = c.room ;
@@ -211,7 +211,7 @@ function select_tutor_change(c) {
 
 
 
-function go_cm_tutor_change() {
+function go_cm_room_change() {
 
     var tut_cm_course_dat = cmtg
         .selectAll(".tut-chg")

@@ -187,7 +187,7 @@ d3.select("body")
 	    if (room_change.course.length > 0) {
 		room_change.course = [] ;
 		room_change.proposal = [] ;
-		go_cm_tutor_change();
+		go_cm_room_change();
 	    }
 	    
 	}
