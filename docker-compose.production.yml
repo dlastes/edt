@@ -1,0 +1,52 @@
+version: '3'
+
+services:
+
+  db:
+    restart: always
+    image: postgres
+    env_file:
+      - ./docker/env/db.prod.env
+    expose:
+      - "5432"
+
+  nginx:
+    restart: always
+    image: "nginx"
+    ports:
+      - "80:80"
+    volumes:
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d
+      - static-volume:/static
+    links:
+      - web
+
+  redis:
+    image: redis:latest
+
+  web:
+    #restart: always
+    build: 
+      context: .
+      args:
+        CONFIG: production
+    env_file: 
+      - ./docker/env/db.prod.env
+      - ./docker/env/web.prod.env
+    environment:
+      - DJANGO_SETTINGS_MODULE=FlOpEDT.settings.production
+      - DJANGO_COLLECTSTATIC=on
+      - DJANGO_MIGRATE=on
+      - DJANGO_LOADDATA
+    expose:
+      - "8000"
+    volumes:
+      - static-volume:/code/FlOpEDT/static      
+    depends_on:
+      - db
+      - redis      
+    entrypoint: /code/docker/script/init.sh
+    command: gunicorn --chdir /code/FlOpEDT FlOpEDT.wsgi:application -b 0.0.0.0:8000
+
+volumes:
+  static-volume:

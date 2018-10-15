@@ -7,4 +7,5 @@ FlOpEDT/*.log
 FlOpEDT/*.lp
 FlOpEDT/*.sol
 .idea/
+.vscode/
 

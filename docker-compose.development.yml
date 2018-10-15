@@ -1,0 +1,28 @@
+version: '3'
+
+services:
+  db:
+    image: postgres
+    environment:
+      PGDATA: /var/lib/postgresql/data/flopedt-${BRANCH:-master}
+  redis:
+    image: redis:latest
+  web:
+    build:
+      context: .
+      args:
+        CONFIG: development
+    environment:
+      - DJANGO_SETTINGS_MODULE=FlOpEDT.settings.development
+      - DJANGO_COLLECTSTATIC=off
+      - DJANGO_MIGRATE=on
+      - DJANGO_LOADDATA
+    entrypoint: /code/docker/script/init.sh      
+    command: /code/FlOpEDT/manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis

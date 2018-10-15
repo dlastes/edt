@@ -25,23 +25,24 @@
 
 SCRIPT_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 
-if [ -z "$CONFIG" ]; then
-  CONFIG=development
+echo "Wait until Postgres is definitely ready to start migrations"
+$SCRIPT_PATH/wait-for-it.sh db:5432 -- echo "Postgres is up - continuing"
+
+
+if [ "$DJANGO_COLLECTSTATIC" = 'on' ]; then
+    echo "DJANGO_COLLECTSTATIC"  
+    /code/FlOpEDT/manage.py collectstatic --noinput
 fi
 
-echo "Database initialisation script execution : $SCRIPT_PATH"
-echo "Configuration :${CONFIG}"
-echo "Working directory :$(pwd)"
+if [ "$DJANGO_MIGRATE" = 'on' ]; then
+    echo "manage.py migrate..."
+    /code/FlOpEDT/manage.py makemigrations
+    /code/FlOpEDT/manage.py migrate --noinput
+fi
 
-echo "Wait until Postgres is definitely ready to start migrations"
-$SCRIPT_PATH/wait-for-it.sh db:5432 -- echo "Postgres is up"
+if [ "$DJANGO_LOADDATA" = 'on' ]; then
+  echo "manage.py loaddata..."
+  /code/FlOpEDT/manage.py loaddata dump.json
+fi
 
-echo "manage.py makemigrations..."
-$SCRIPT_PATH/../manage.py makemigrations --settings=FlOpEDT.settings.${CONFIG}
-
-echo "manage.py migrate..."
-$SCRIPT_PATH/../manage.py migrate --settings=FlOpEDT.settings.${CONFIG}
-
-echo "manage.py loaddata..."
-$SCRIPT_PATH/../manage.py loaddata dump.json --settings=FlOpEDT.settings.${CONFIG}
-
+exec "$@"
