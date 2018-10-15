@@ -23,12 +23,10 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from django.http import HttpResponse, Http404, JsonResponse
+from django.http import HttpResponse, Http404, JsonResponse, HttpRequest
 from django.shortcuts import render
 
 from django.contrib.auth.decorators import login_required, user_passes_test
-
-from django.core.cache import cache
 
 from django.db import transaction
 
@@ -61,6 +59,8 @@ from django.views.generic import RedirectView
 
 from random import randint
 
+from django.core.cache import cache
+
 # <editor-fold desc="FAVICON">
 # ----------
 # FAVICON
@@ -88,9 +88,10 @@ def favicon(req, fav):
 # ----------
 
 
-def edt(req, semaine, an, splash_id=0):
-    
+def edt(req,  an, semaine,splash_id=0):
+
     semaine, an = clean_week(semaine, an)
+
     promo = clean_train_prog(req)
 
     if req.GET:
@@ -246,145 +247,177 @@ def decale(req):
 # ----------
 
 
-def fetch_cours_pl(req):
+def fetch_cours_pl(req, year, week, num_copy):
     print(req)
-    if req.GET:
-        semaine = req.GET.get('s', '')
-        an = req.GET.get('a', '')
-        num_copie = req.GET.get('c', '')
-        semaine = int(semaine)
-        an = int(an)
-        num_copie = int(num_copie)
-        ok = False
-        version = 0
-        dataset = None
-        while not ok:
-            if num_copie == 0:
-                edtversion, created = EdtVersion.objects \
-                    .get_or_create(semaine=semaine,
-                                   an=an,
-                                   defaults={'version': 0})
-                version = edtversion.version
-            dataset = CoursPlaceResource() \
-                .export(ScheduledCourse.objects \
-                        .filter(cours__semaine=semaine,
-                                cours__an=an,
-                                copie_travail=num_copie)
-                        .order_by('creneau__jour',
-                                  'creneau__heure'))  # all())#
-            ok = num_copie != 0 \
-                 or (version == EdtVersion.objects
-                     .get(semaine=semaine, an=an).version)
-        if dataset is None:
-            raise Http404("What are you trying to do?")
-        response = HttpResponse(dataset.csv, content_type='text/csv')
-        response['version'] = version
-        response['semaine'] = semaine
-        response['an'] = an
-        response['jours'] = str(num_days(an, semaine))
-        response['num_copie'] = num_copie
-        try:
-            regen = str(Regen.objects.get(semaine=semaine, an=an))
-        except ObjectDoesNotExist:
-            regen = 'I'
-        response['regen'] = regen
-        if req.user.is_authenticated:
-            response['reqDispos'] = Course \
-                                        .objects \
-                                        .filter(tutor=req.user,
-                                                semaine=semaine,
-                                                an=an) \
-                                        .count() * 2
-            week_av = UserPreference \
+
+    try:
+        week = int(week)
+        year = int(year)
+        num_copy = int(num_copy)
+    except ValueError:
+        return HttpResponse("KO")
+
+    print("W",week, " Y",year, " N", num_copy)
+
+    cache_key = get_key_course_pl(year, week, num_copy)
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return cached
+
+    ok = False
+    version = 0
+    dataset = None
+    while not ok:
+        if num_copy == 0:
+            edtversion, created = EdtVersion.objects \
+                .get_or_create(semaine=week,
+                               an=year,
+                               defaults={'version': 0})
+            version = edtversion.version
+        dataset = CoursPlaceResource() \
+            .export(ScheduledCourse.objects \
+                    .filter(cours__semaine=week,
+                            cours__an=year,
+                            copie_travail=num_copy)
+                    .order_by('creneau__jour',
+                              'creneau__heure'))  # all())#
+        ok = num_copy != 0 \
+             or (version == EdtVersion.objects
+                 .get(semaine=week, an=year).version)
+    if dataset is None:
+        raise Http404("What are you trying to do?")
+    response = HttpResponse(dataset.csv, content_type='text/csv')
+    response['version'] = version
+    response['week'] = week
+    response['year'] = year
+    response['jours'] = str(num_days(year, week))
+    response['num_copy'] = num_copy
+    try:
+        regen = str(Regen.objects.get(semaine=week, an=year))
+    except ObjectDoesNotExist:
+        regen = 'I'
+    response['regen'] = regen
+    if req.user.is_authenticated:
+        response['reqDispos'] = Course \
+                                    .objects \
+                                    .filter(tutor=req.user,
+                                            semaine=week,
+                                            an=year) \
+                                    .count() * 2
+        week_av = UserPreference \
+            .objects \
+            .filter(user=req.user,
+                    semaine=week,
+                    an=year)
+        if not week_av.exists():
+            response['filDispos'] = UserPreference \
                 .objects \
                 .filter(user=req.user,
-                        semaine=semaine,
-                        an=an)
-            if not week_av.exists():
-                response['filDispos'] = UserPreference \
-                    .objects \
-                    .filter(user=req.user,
-                            semaine=None,
-                            valeur__gte=1) \
-                    .count()
-            else:
-                response['filDispos'] = week_av \
-                    .filter(valeur__gte=1) \
-                    .count()
+                        semaine=None,
+                        valeur__gte=1) \
+                .count()
         else:
-            response['reqDispos'] = -1
-            response['filDispos'] = -1
-        return response
-
-
-def fetch_cours_pp(req):
-    print(req)
-    if req.GET:
-        semaine = req.GET.get('s', '')
-        an = req.GET.get('a', '')
-        num_copie = req.GET.get('c', '')
-        semaine = int(semaine)
-        an = int(an)
-        num_copie = int(num_copie)
-        dataset = CoursResource() \
-            .export(Course
-                    .objects
-                    .filter(semaine=semaine,
-                            an=an)
-                    .exclude(pk__in=ScheduledCourse
-                             .objects
-                             .filter(copie_travail=num_copie)
-                             .values('cours')))
-        response = HttpResponse(dataset.csv, content_type='text/csv')
-        response['semaine'] = semaine
-        response['an'] = an
-
-        return response
-
-
-# @login_required
-def fetch_dispos(req):
-    print(req)
-    if req.GET:
-        if req.user.is_authenticated:
-            print("================")
-            semaine = req.GET.get('s', '')
-            an = req.GET.get('a', '')
-
-            busy_inst = Course.objects.filter(semaine=semaine,
-                                              an=an) \
-                .distinct('tutor') \
-                .values_list('tutor')
-
-            busy_inst = list(chain(busy_inst, [req.user]))
-
-            week_avail = UserPreference.objects \
-                .filter(semaine=semaine,
-                        an=an,
-                        user__in=busy_inst) \
-                .order_by('user')
-
-            default_avail = UserPreference.objects \
-                .exclude(user__in \
-                             =week_avail \
-                         .distinct('user') \
-                         .values_list('user')) \
-                .filter(semaine=None,
-                        user__in=busy_inst) \
-                .order_by('user')
-
-            dataset = DispoResource() \
-                .export(list(chain(week_avail,
-                                   default_avail)))  # all())#
-            response = HttpResponse(dataset.csv,
-                                    content_type='text/csv')
-            response['semaine'] = semaine
-            response['an'] = an
-            return response
-        else:
-            return HttpResponse("Pas connecté", status=500)
+            response['filDispos'] = week_av \
+                .filter(valeur__gte=1) \
+                .count()
     else:
-        return HttpResponse("Pas GET", status=500)
+        response['reqDispos'] = -1
+        response['filDispos'] = -1
+
+    cached = cache.set(cache_key, response)
+    return response
+
+
+def fetch_cours_pp(req, week, year, num_copy):
+    print(req)
+
+    try:
+        week = int(week)
+        year = int(year)
+        num_copy = int(num_copy)
+    except ValueError:
+        return HttpResponse("KO")
+
+    print("W",week, " Y",year, " N", num_copy)
+
+    cache_key = get_key_course_pp(year, week, num_copy)
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return cached
+
+    dataset = CoursResource() \
+        .export(Course
+                .objects
+                .filter(semaine=week,
+                        an=year)
+                .exclude(pk__in=ScheduledCourse
+                         .objects
+                         .filter(copie_travail=num_copy)
+                         .values('cours')))
+    response = HttpResponse(dataset.csv, content_type='text/csv')
+    response['week'] = week
+    response['year'] = year
+
+    cache.set(cache_key, response)
+    return response
+
+
+@login_required
+def fetch_dispos(req, year, week):
+    print(req)
+    print("================")
+    # if req.GET:
+    #     if req.user.is_authenticated:
+    print("================")
+
+
+    try:
+        week = int(week)
+        year = int(year)
+    except ValueError:
+        return HttpResponse("KO")
+
+    cache_key = get_key_preferences(year, week)
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return cached
+
+    busy_inst = Course.objects.filter(semaine=week,
+                                      an=year) \
+        .distinct('tutor') \
+        .values_list('tutor')
+
+    busy_inst = list(chain(busy_inst, [req.user]))
+
+    week_avail = UserPreference.objects \
+        .filter(semaine=week,
+                an=year,
+                user__in=busy_inst) \
+        .order_by('user')
+
+    default_avail = UserPreference.objects \
+        .exclude(user__in \
+                     =week_avail \
+                 .distinct('user') \
+                 .values_list('user')) \
+        .filter(semaine=None,
+                user__in=busy_inst) \
+        .order_by('user')
+
+    dataset = DispoResource() \
+        .export(list(chain(week_avail,
+                           default_avail)))  # all())#
+    response = HttpResponse(dataset.csv,
+                            content_type='text/csv')
+    response['week'] = week
+    response['year'] = year
+
+    cache.set(cache_key, response)
+    return response
+    #     else:
+    #         return HttpResponse("Pas connecté", status=500)
+    # else:
+    #     return HttpResponse("Pas GET", status=500)
 
 
 @login_required
@@ -511,174 +544,192 @@ def edt_changes(req):
     msg = 'Notation : (numero_semaine, numero_annee, ' \
           + 'numero_jour, numero_creneau)\n\n'
 
-    print(req)
-    if req.is_ajax():
-        if req.method == "POST":
-            semaine = req.GET.get('s', '')
-            an = req.GET.get('a', '')
-            work_copy = req.GET.get('c', '')
-            semaine = int(semaine)
-            an = int(an)
-            work_copy = int(work_copy)
-            version = None
+    if not req.is_ajax():
+        bad_response['reason'] = "Non ajax"
+        return bad_response
 
-            print(req.body)
-            q = json.loads(req.body,
-                           object_hook
-                           =lambda d: namedtuple('X', list(d.keys()))(*list(d.values()))
-                           )
+    if req.method != "POST":
+        bad_response['reason'] = "Non POST"
+        return bad_response
+
+
+    try:
+        semaine = req.GET.get('s', '')
+        an = req.GET.get('a', '')
+        work_copy = req.GET.get('c', '')
+        semaine = int(semaine)
+        an = int(an)
+        work_copy = int(work_copy)
+        version = None
+    except ValueError:
+        bad_response['reason'] \
+            = "Problème semaine, année ou work_copy."
+        return bad_response
+
+
+    print(req.body)
+    print(req.POST)
+    old_version = json.loads(req.POST.get('v',-1))
+    recv_changes = json.loads(req.POST.get('tab',[]))
+
+
+    if work_copy == 0:
+        edt_version, created = EdtVersion.objects \
+            .get_or_create(semaine=semaine,
+                           an=an,
+                           defaults={'version': 0})
+        version = edt_version.version
+
+    if work_copy != 0 or old_version == version:
+        with transaction.atomic():
+            if work_copy == 0:
+                edt_version = EdtVersion \
+                    .objects \
+                    .select_for_update() \
+                    .get(semaine=semaine, an=an)
+            for a in recv_changes:
+                non_place = False
+                co = Course.objects.get(id=a['id'])
+                try:
+                    cp = ScheduledCourse.objects.get(cours=co,
+                                                     copie_travail=work_copy)
+                except ObjectDoesNotExist:
+                    non_place = True
+                    cp = ScheduledCourse(cours=co,
+                                         copie_travail=work_copy)
+
+                m = CourseModification(cours=co,
+                                       version_old=old_version,
+                                       initiator=req.user.tutor)
+                # old_day = a.day.o
+                # old_slot = a.slot.o
+                new_day = a['day']['n']
+                old_day = a['day']['o']
+                new_slot = a['slot']['n']
+                old_slot = a['slot']['o']
+                old_room = a['room']['o']
+                new_room = a['room']['n']
+                new_week = a['week']['n']
+                old_week = a['week']['o']
+                new_year = a['year']['n']
+                old_year = a['year']['o']
+
+                if non_place:
+                    # old_day = new_day
+                    # old_slot = new_slot
+                    if new_room is None:
+                        new_room = old_room
+
+                if new_day is not None:
+                    try:
+                        cren_n = Slot \
+                            .objects \
+                            .get(jour=Day.objects \
+                                 .get(no=new_day),
+                                 heure \
+                                     =Time \
+                                 .objects \
+                                 .get(no=new_slot))
+                    except ObjectDoesNotExist:
+                        bad_response['reason'] \
+                            = "Problème : créneau " + new_day
+                        return bad_response
+                    if non_place:
+                        cp.creneau = cren_n
+                    m.creneau_old = cp.creneau
+                    cp.creneau = cren_n
+                    print(cren_n)
+                    print(m)
+                    print(cp)
+                if new_room is not None:
+                    try:
+                        sal_n = RoomGroup.objects.get(name=new_room)
+                    except ObjectDoesNotExist:
+                        if new_room == 'salle?':
+                            bad_response['reason'] \
+                                = 'Oublié de trouver une salle ' \
+                                  'pour un cours ?'
+                        else:
+                            bad_response['reason'] = \
+                                "Problème : salle " + new_room \
+                                + " inconnue"
+                        return bad_response
+
+                    if non_place:
+                        cp.room = sal_n
+                    m.room_old = cp.room
+                    cp.room = sal_n
+                if new_week is not None:
+                    m.semaine_old = old_week
+                    m.an_old = old_year
+                    cp.cours.semaine = new_week
+                    cp.cours.an = new_year
+                cp.save()
+                if work_copy == 0:
+                    m.save()
+
+                if new_week or new_year or new_day or new_slot:
+                    msg += str(co) + '\n'
+                    impacted_inst.add(co.tutor.username)
+
+                    msg += '(' + str(old_week) + ', ' \
+                           + str(old_year) + ', ' \
+                           + str(old_day) + ', ' \
+                           + str(old_slot) + ')'
+                    msg += ' -> ('
+                    if new_week:
+                        msg += str(new_week)
+                    else:
+                        msg += '-'
+                    msg += ', '
+                    if new_year:
+                        msg += str(new_year)
+                    else:
+                        msg += '-'
+                    msg += ', '
+                    if new_day:
+                        msg += str(new_day)
+                    else:
+                        msg += '-'
+                    msg += ', '
+                    if new_slot:
+                        msg += str(new_slot)
+                    else:
+                        msg += '-'
+                    msg += ')\n\n'
 
             if work_copy == 0:
-                edt_version, created = EdtVersion.objects \
-                    .get_or_create(semaine=semaine,
-                                   an=an,
-                                   defaults={'version': 0})
-                version = edt_version.version
+                edt_version.version += 1
+                edt_version.save()
 
-            if work_copy != 0 or q.v == version:
-                with transaction.atomic():
-                    if work_copy == 0:
-                        edt_version = EdtVersion \
-                            .objects \
-                            .select_for_update() \
-                            .get(semaine=semaine, an=an)
-                    for a in q.tab:
-                        non_place = False
-                        co = Course.objects.get(id=a.id)
-                        try:
-                            cp = ScheduledCourse.objects.get(cours=co,
-                                                             copie_travail=work_copy)
-                        except ObjectDoesNotExist:
-                            non_place = True
-                            cp = ScheduledCourse(cours=co,
-                                                 copie_travail=work_copy)
+            if new_week is not None and new_year is not None:
+                cache.delete(get_key_course_pl(new_year, new_week, work_copy))
+            cache.delete(get_key_course_pl(old_year, old_week, work_copy))
+            cache.delete(get_key_course_pp(old_year, old_week, work_copy))
+            
 
-                        m = CourseModification(cours=co,
-                                               version_old=q.v,
-                                               initiator=req.user.tutor)
-                        # old_day = a.day.o
-                        # old_slot = a.slot.o
-                        new_day = a.day.n
-                        new_slot = a.slot.n
-                        old_room = a.room.o
-                        new_room = a.room.n
+        subject = '[Modif sur tierce] ' + req.user.username \
+                  + ' a déplacé '
+        for inst in impacted_inst:
+            if inst is not req.user.username:
+                subject += inst + ' '
 
-                        if non_place:
-                            # old_day = new_day
-                            # old_slot = new_slot
-                            if a.room.n is None:
-                                new_room = old_room
+        # if len(impacted_inst) > 0 and work_copy == 0:
+        #     if len(impacted_inst) > 1 \
+        #             or req.user.username not in impacted_inst:
+        #         send_mail(
+        #             subject,
+        #             msg,
+        #             'edt@iut-blagnac',
+        #             ['edt.info.iut.blagnac@gmail.com']
+        #         )
 
-                        if new_day is not None:
-                            try:
-                                cren_n = Slot \
-                                    .objects \
-                                    .get(jour=Day.objects \
-                                         .get(no=new_day),
-                                         heure \
-                                             =Time \
-                                         .objects \
-                                         .get(no=new_slot))
-                            except ObjectDoesNotExist:
-                                bad_response['reason'] \
-                                    = "Problème : créneau " + new_day
-                                return bad_response
-                            if non_place:
-                                cp.creneau = cren_n
-                            m.creneau_old = cp.creneau
-                            cp.creneau = cren_n
-                            print(cren_n)
-                            print(m)
-                            print(cp)
-                        if new_room is not None:
-                            try:
-                                sal_n = RoomGroup.objects.get(name=new_room)
-                            except ObjectDoesNotExist:
-                                if new_room == 'salle?':
-                                    bad_response['reason'] \
-                                        = 'Oublié de trouver une salle ' \
-                                          'pour un cours ?'
-                                else:
-                                    bad_response['reason'] = \
-                                        "Problème : salle " + new_room \
-                                        + " inconnue"
-                                return bad_response
-
-                            if non_place:
-                                cp.room = sal_n
-                            m.room_old = cp.room
-                            cp.room = sal_n
-                        if a.week.n is not None:
-                            m.semaine_old = a.week.o
-                            m.an_old = a.year.o
-                            cp.cours.semaine = a.week.n
-                            cp.cours.an = a.year.n
-                        cp.save()
-                        if work_copy == 0:
-                            m.save()
-
-                        if a.week.n or a.year.n or a.day.n or a.slot.n:
-                            msg += str(co) + '\n'
-                            impacted_inst.add(co.tutor.username)
-
-                            msg += '(' + str(a.week.o) + ', ' \
-                                   + str(a.year.o) + ', ' \
-                                   + str(a.day.o) + ', ' \
-                                   + str(a.slot.o) + ')'
-                            msg += ' -> ('
-                            if a.week.n:
-                                msg += str(a.week.n)
-                            else:
-                                msg += '-'
-                            msg += ', '
-                            if a.year.n:
-                                msg += str(a.year.n)
-                            else:
-                                msg += '-'
-                            msg += ', '
-                            if a.day.n:
-                                msg += str(a.day.n)
-                            else:
-                                msg += '-'
-                            msg += ', '
-                            if a.slot.n:
-                                msg += str(a.slot.n)
-                            else:
-                                msg += '-'
-                            msg += ')\n\n'
-
-                    if work_copy == 0:
-                        edt_version.version += 1
-                        edt_version.save()
-
-                subject = '[Modif sur tierce] ' + req.user.username \
-                          + ' a déplacé '
-                for inst in impacted_inst:
-                    if inst is not req.user.username:
-                        subject += inst + ' '
-
-                if len(impacted_inst) > 0 and work_copy == 0:
-                    if len(impacted_inst) > 1 \
-                            or req.user.username not in impacted_inst:
-                        send_mail(
-                            subject,
-                            msg,
-                            'edt@iut-blagnac',
-                            ['edt.info.iut.blagnac@gmail.com']
-                        )
-
-                return good_response
-            else:
-                bad_response['reason'] = "Version: " \
-                                         + str(version) \
-                                         + " VS " \
-                                         + str(q.v)
-                return bad_response
-        else:
-            bad_response['reason'] = "Non POST"
-            return bad_response
+        return good_response
     else:
-        bad_response['reason'] = "Non ajax"
+        bad_response['reason'] = "Version: " \
+                                 + str(version) \
+                                 + " VS " \
+                                 + str(old_version)
         return bad_response
 
 
@@ -686,93 +737,105 @@ def edt_changes(req):
 def dispos_changes(req):
     bad_response = HttpResponse("KO")
     good_response = HttpResponse("OK")
-    if req.is_ajax():
-        if req.method == "POST":
-            try:
-                semaine = req.GET.get('s', '')
-                an = req.GET.get('a', '')
-                semaine = int(semaine)
-                an = int(an)
-            except ValueError:
-                bad_response['reason'] \
-                    = "Problème semaine ou année."
-                return bad_response
-                
-            usr_change = req.GET.get('u', '')
-            if usr_change == '':
-                usr_change = req.user.username
 
-            # Default week at None
-            if semaine == 0 or an == 0:
-                semaine = None
-                an = None
-
-            print(req.body)
-            q = json.loads(req.body,
-                           object_hook=lambda d:
-                           namedtuple('X', list(d.keys()))(*list(d.values())))
-
-            prof = None
-            try:
-                prof = Tutor.objects.get(username=usr_change)
-            except ObjectDoesNotExist:
-                bad_response['reason'] \
-                    = "Problème d'utilisateur."
-                return bad_response
-
-            if prof != req.user and req.user.rights >> 1 % 2 == 0:
-                bad_response['reason'] \
-                    = 'Non autorisé, réclamez plus de droits.'
-                return bad_response
-
-            print(q)
-
-            # if no preference was present for this week, first copy the
-            # default availabilities
-            if not UserPreference.objects.filter(user=prof,
-                                                 semaine=semaine,
-                                                 an=an).exists():
-                for c in Slot.objects.all():
-                    def_dispo, created = UserPreference \
-                        .objects \
-                        .get_or_create(
-                        user=prof,
-                        semaine=None,
-                        creneau=c,
-                        defaults={'valeur':
-                                      0})
-                    if semaine is not None:
-                        new_dispo = UserPreference(user=prof,
-                                                   semaine=semaine,
-                                                   an=an,
-                                                   creneau=c,
-                                                   valeur=def_dispo.valeur)
-                        new_dispo.save()
-
-            for a in q:
-                print(a)
-                cr = Slot.objects \
-                    .get(jour=Day.objects.get(no=a.day),
-                         heure=Time.objects.get(no=a.hour))
-                if cr is None:
-                    bad_response['reason'] = "Creneau pas trouve"
-                    return bad_response
-                di, didi = UserPreference \
-                    .objects \
-                    .update_or_create(user=prof,
-                                      semaine=semaine,
-                                      an=an,
-                                      creneau=cr,
-                                      defaults={'valeur': a.val})
-                print(di)
-                print(didi)
-            return good_response
-        else:
-            bad_response['reason'] = "Non POST"
-            return bad_response
-    else:
-        bad_response['reason'] = "Non Ajax"
+    if not req.is_ajax():
+        bad_response['reason'] = "Non ajax"
         return bad_response
+
+    if req.method != "POST":
+        bad_response['reason'] = "Non POST"
+        return bad_response
+
+
+    try:
+        week = req.GET.get('s', '')
+        year = req.GET.get('a', '')
+        week = int(week)
+        year = int(year)
+    except ValueError:
+        bad_response['reason'] \
+            = "Problème semaine ou année."
+        return bad_response
+
+    usr_change = req.GET.get('u', '')
+    if usr_change == '':
+        usr_change = req.user.username
+
+    # Default week at None
+    if week == 0 or year == 0:
+        week = None
+        year = None
+
+    print(req.body)
+    print(req.POST)
+    # q = json.loads(req.body,
+    #                object_hook=lambda d:
+    #                namedtuple('X', list(d.keys()))(*list(d.values())))
+    q = json.loads(req.POST.get('changes','{}'))
+    for a in q:
+        print(a)
+
+    
+    prof = None
+    try:
+        prof = Tutor.objects.get(username=usr_change)
+    except ObjectDoesNotExist:
+        bad_response['reason'] \
+            = "Problème d'utilisateur."
+        return bad_response
+
+    if prof != req.user and req.user.rights >> 1 % 2 == 0:
+        bad_response['reason'] \
+            = 'Non autorisé, réclamez plus de droits.'
+        return bad_response
+
+    print(q)
+
+    # if no preference was present for this week, first copy the
+    # default availabilities
+    if not UserPreference.objects.filter(user=prof,
+                                         semaine=week,
+                                         an=year).exists():
+        for c in Slot.objects.all():
+            def_dispo, created = UserPreference \
+                .objects \
+                .get_or_create(
+                user=prof,
+                semaine=None,
+                creneau=c,
+                defaults={'valeur':
+                              0})
+            if week is not None:
+                new_dispo = UserPreference(user=prof,
+                                           semaine=week,
+                                           an=year,
+                                           creneau=c,
+                                           valeur=def_dispo.valeur)
+                new_dispo.save()
+
+    for a in q:
+        print(a)
+        cr = Slot.objects \
+            .get(jour=Day.objects.get(no=a['day']),
+                 heure=Time.objects.get(no=a['hour']))
+        if cr is None:
+            bad_response['reason'] = "Creneau pas trouve"
+            return bad_response
+        di, didi = UserPreference \
+            .objects \
+            .update_or_create(user=prof,
+                              semaine=week,
+                              an=year,
+                              creneau=cr,
+                              defaults={'valeur': a['val']})
+        print(di)
+        print(didi)
+        
+    if week is not None and year is not None:
+        cache.delete(get_key_preferences(year, week))
+
+        
+    return good_response
 
 
 @login_required
@@ -800,9 +863,15 @@ def decale_changes(req):
                 .get(cours__id=c['i'],
                      copie_travail=0)
             cours = cours_place.cours
+            cache.delete(get_key_course_pl(cours.an,
+                                           cours.semaine,
+                                           cours_place.copie_travail))
             cours_place.delete()
         else:
             cours = Course.objects.get(id=c['i'])
+            cache.delete(get_key_course_pp(cours.an,
+                                           cours.semaine,
+                                           0))
             # note: add copie_travail in Cours might be of interest
 
         pm = PlanningModification(cours=cours,
@@ -817,10 +886,11 @@ def decale_changes(req):
         if new_assignment['na'] != 0:
             # cours.prof=User.objects.get(username=a.np)
             cours.tutor = Tutor.objects.get(username=new_assignment['np'])
+        cache.delete(get_key_course_pp(cours.an,
+                                       cours.semaine,
+                                       0))
         cours.save()
 
-        # flush the whole cache
-        cache.clear()
 
     return good_response
 
@@ -931,4 +1001,25 @@ def filt_sa(semaine, an):
     return Course.objects.filter(semaine=semaine,
                                  an=an)
 
+
+def get_key_course_pl(year, week, num_copy):
+    if year is None or week is None or num_copy is None:
+        return ''
+    return 'CPL-Y' + str(year) + '-W' + str(week) + '-C' + str(num_copy) 
+
+
+def get_key_course_pp(year, week, num_copy):
+    if year is None or week is None or num_copy is None:
+        return ''
+    return 'CPP-Y' + str(year) + '-W' + str(week) + '-C' + str(num_copy) 
+
+
+def get_key_preferences(year, week):
+    if year is None or week is None:
+        return ''
+    return 'PREF-Y' + str(year) + '-W' + str(week)
+
 # </editor-fold desc="HELPERS">
+
+
+

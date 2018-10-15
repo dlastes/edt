@@ -389,8 +389,11 @@ class CoursePreference(models.Model):
     course_type = models.ForeignKey('CourseType', on_delete=models.CASCADE)
     train_prog = models.ForeignKey('TrainingProgramme', on_delete=models.CASCADE)
     semaine = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(0), MaxValueValidator(53)], null=True)
-    an = models.PositiveSmallIntegerField(null=True)
+        validators=[MinValueValidator(0), MaxValueValidator(53)],
+        null=True,
+        blank=True)
+    an = models.PositiveSmallIntegerField(null=True,
+                                          blank=True)
     creneau = models.ForeignKey('Slot', on_delete=models.CASCADE)
     valeur = models.SmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(8)],
@@ -405,8 +408,11 @@ class CoursePreference(models.Model):
 class RoomPreference(models.Model):
     room = models.ForeignKey('Room', on_delete=models.CASCADE)
     semaine = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(0), MaxValueValidator(53)], null=True)
-    an = models.PositiveSmallIntegerField(null=True)
+        validators=[MinValueValidator(0), MaxValueValidator(53)],
+        null=True,
+        blank=True)
+    an = models.PositiveSmallIntegerField(null=True,
+                                          blank=True)
     creneau = models.ForeignKey('Slot', on_delete=models.CASCADE)
     valeur = models.SmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(8)],

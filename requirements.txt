@@ -10,4 +10,6 @@ requests
 numpy
 pyclustering
 channels
+asgi_redis
 channels_redis
+python-memcached
