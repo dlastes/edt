@@ -42,7 +42,7 @@ from people.models import Tutor
 # Prof,
 
 from .admin import CoursResource, DispoResource, \
-    CoursPlaceResource, BreakingNewsResource
+    CoursPlaceResource, BreakingNewsResource, UnavailableRoomsResource
 
 from .weeks import *
 
@@ -419,6 +419,38 @@ def fetch_dispos(req, year, week):
     # else:
     #     return HttpResponse("Pas GET", status=500)
 
+
+def fetch_unavailable_rooms(req, year, week):
+    print(req)
+    print("================")
+    # if req.GET:
+    #     if req.user.is_authenticated:
+    print("================")
+
+
+    try:
+        week = int(week)
+        year = int(year)
+    except ValueError:
+        return HttpResponse("KO")
+
+    cache_key = get_key_unavailable_rooms(year, week)
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return cached
+
+    dataset = DispoResource() \
+        .export(RoomPreferences.objects.filter(semaine=week,
+                                               an=year,
+                                               valeur=0))
+    response = HttpResponse(dataset.csv,
+                            content_type='text/csv')
+    response['week'] = week
+    response['year'] = year
+
+    cache.set(cache_key, response)
+    return response
+   
 
 @login_required
 def fetch_stype(req):
@@ -1018,6 +1050,12 @@ def get_key_preferences_tutor(year, week):
     if year is None or week is None:
         return ''
     return 'PREFT-Y' + str(year) + '-W' + str(week)
+
+
+def get_key_unavailable_rooms(year, week):
+    if year is None or week is None:
+        return ''
+    return 'UNAVR-Y' + str(year) + '-W' + str(week)
 
 # </editor-fold desc="HELPERS">
 

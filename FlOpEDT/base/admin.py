@@ -161,6 +161,12 @@ class DispoResource(resources.ModelResource):
         fields = ('jour', 'heure', 'valeur', 'prof')
 
 
+class UnavailableRoomsResource(resources.ModelResource):
+    class Meta:
+        model = RoomPreference
+        fields = ("room", "creneau")
+
+
 class BreakingNewsResource(resources.ModelResource):
     class Meta:
         model = BreakingNews

@@ -55,6 +55,7 @@ urlpatterns = [
     url(r'^fetch_stype/$', views.fetch_stype, name="fetch_stype"),
     url(r'^fetch_decale/$', views.fetch_decale, name="fetch_decale"),
     url(r'^fetch_bknews/$', views.fetch_bknews, name="fetch_bknews"),
+    url(r'^fetch_unavailable_rooms/(?P<year>\d+)/(?P<week>\d+)/$', views.fetch_unavailable_rooms, name="fetch_unavailable_rooms"),
 
     # from screen to db
     url(r'^change_edt/$', views.edt_changes, name="edt_changes"),
