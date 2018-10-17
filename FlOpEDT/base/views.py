@@ -377,7 +377,7 @@ def fetch_dispos(req, year, week):
     except ValueError:
         return HttpResponse("KO")
 
-    cache_key = get_key_preferences(year, week)
+    cache_key = get_key_preferences_tutor(year, week)
     cached = cache.get(cache_key)
     if cached is not None:
         return cached
@@ -832,7 +832,7 @@ def dispos_changes(req):
         print(didi)
         
     if week is not None and year is not None:
-        cache.delete(get_key_preferences(year, week))
+        cache.delete(get_key_preferences_tutor(year, week))
 
         
     return good_response
@@ -1014,10 +1014,10 @@ def get_key_course_pp(year, week, num_copy):
     return 'CPP-Y' + str(year) + '-W' + str(week) + '-C' + str(num_copy) 
 
 
-def get_key_preferences(year, week):
+def get_key_preferences_tutor(year, week):
     if year is None or week is None:
         return ''
-    return 'PREF-Y' + str(year) + '-W' + str(week)
+    return 'PREFT-Y' + str(year) + '-W' + str(week)
 
 # </editor-fold desc="HELPERS">
 
