@@ -75,10 +75,18 @@ class BreakingNews(models.Model):
 # -- GROUPS --
 # ------------
 
+class Department(models.Model):
+    name = models.CharField(max_length=50)
+    abbrev = models.CharField(max_length=5)    
+
+    def __str__(self):
+        return self.abbrev
+
 
 class TrainingProgramme(models.Model):
     name = models.CharField(max_length=50)
     abbrev = models.CharField(max_length=5)
+    department =  models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return self.abbrev
@@ -254,6 +262,9 @@ class Room(models.Model):
     subroom_of = models.ManyToManyField(RoomGroup,
                                         blank=True,
                                         related_name="subrooms")
+    departments =  models.ManyToManyField(Department,
+                                        blank=True,
+                                        related_name="rooms")                                        
 
     def __str__(self):
         return self.name
