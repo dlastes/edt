@@ -27,6 +27,7 @@
 
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from base.models import Department
 
 # Create your models here.
 
@@ -72,6 +73,7 @@ class Tutor(User):
     pref_slots_per_day = models.PositiveSmallIntegerField(
         verbose_name="How many slots per day would you prefer ?",
         default=4)
+    departments =  models.ManyToManyField(Department, blank=True)   
 
     def uni_extended(self):
         ret = super(Tutor,self).uni_extended()
