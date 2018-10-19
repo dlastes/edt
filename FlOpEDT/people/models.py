@@ -82,7 +82,7 @@ class Tutor(User):
 
     
 class FullStaff(Tutor):
-    department = models.CharField(max_length=50, default='INFO')
+    departments =  models.ManyToManyField(Department, blank=True)
     is_iut = models.BooleanField(default=True)
 
     def uni_extended(self):
