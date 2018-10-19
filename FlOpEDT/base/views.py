@@ -88,7 +88,7 @@ def favicon(req, fav):
 # ----------
 
 
-def edt(req,  an, semaine,splash_id=0):
+def edt(req,  departement=None, an=None, semaine=None, splash_id=0):
 
     semaine, an = clean_week(semaine, an)
 
