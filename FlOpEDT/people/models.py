@@ -82,7 +82,8 @@ class Tutor(User):
 
     
 class FullStaff(Tutor):
-    departments =  models.ManyToManyField(Department, blank=True)
+    # deprected since multi departements insertion
+    department = models.CharField(max_length=50, default='INFO')
     is_iut = models.BooleanField(default=True)
 
     def uni_extended(self):
