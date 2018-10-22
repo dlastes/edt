@@ -56,6 +56,7 @@ urlpatterns = [
     url(r'^fetch_stype/$', views.fetch_stype, name="fetch_stype"),
     url(r'^fetch_decale/$', views.fetch_decale, name="fetch_decale"),
     url(r'^fetch_bknews/$', views.fetch_bknews, name="fetch_bknews"),
+    url(r'^fetch_groups/(?P<department>\w+)$', views.fetch_groups, name="fetch_groups"),    
 
     # from screen to db
     url(r'^change_edt/$', views.edt_changes, name="edt_changes"),

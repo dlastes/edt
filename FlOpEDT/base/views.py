@@ -30,6 +30,8 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 
 from django.db import transaction
 
+from django.views.decorators.cache import cache_page
+
 import json
 
 from .forms import ContactForm
@@ -60,6 +62,8 @@ from django.views.generic import RedirectView
 from random import randint
 
 from django.core.cache import cache
+
+import core.data_models as data_models
 
 # <editor-fold desc="FAVICON">
 # ----------
@@ -522,6 +526,14 @@ def fetch_bknews(req):
     response['an'] = year
     return response
 
+
+@cache_page(15 * 60)
+def fetch_groups(req, department=None):
+    """
+    Return groups tree for a given department
+    """
+    groups = data_models.get_groups(department)
+    return JsonResponse(groups, safe=False)
 
 # </editor-fold desc="FETCHERS">
 
