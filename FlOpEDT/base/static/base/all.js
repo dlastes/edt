@@ -118,8 +118,7 @@ function on_group_rcv(dg) {
     go_gp_buttons();
 
 
-    fetch_cours();
-    fetch_bknews(true);
+    fetch_all(true);
 
     if (splash_id == 1) {
     

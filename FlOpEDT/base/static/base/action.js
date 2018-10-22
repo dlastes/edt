@@ -91,21 +91,29 @@ function apply_wk_change(d, i) { //if(fetch.done) {
     }
     dispos = [];
     user.dispos = [];
-    fetch.cours_ok = false;
-    fetch.dispos_ok = false;
 
-
-    fetch_cours();
-
-    fetch_bknews(false);
-
-    
-    if (ckbox["dis-mod"].cked || ckbox["edt-mod"].cked) {
-        fetch_dispos();
-    };
+    fetch_all(false);
 
     go_week_menu(false);
 } //}
+
+
+function fetch_all(first){
+    fetch.done = false;
+
+    fetch.ongoing_cours_pp = true;
+    fetch.ongoing_cours_pl = true;
+    if (ckbox["dis-mod"].cked || ckbox["edt-mod"].cked) {
+	fetch.ongoing_dispos = true;
+    }
+    fetch.ongoing_bknews = true;
+
+    fetch_cours();
+    if (ckbox["dis-mod"].cked || ckbox["edt-mod"].cked) {
+        fetch_dispos();
+    }
+    fetch_bknews(first);
+}
 
 
 /*----------------------

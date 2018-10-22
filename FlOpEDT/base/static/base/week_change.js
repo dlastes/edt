@@ -44,9 +44,6 @@
   ------- DISPOS ------
   ---------------------*/
 function fetch_dispos() {
-    fetch.ongoing_dispos = true;
-    fetch.done = false;
-    fetch.dispos_ok = true;
 
     var semaine_att = weeks.init_data[weeks.sel[0]].semaine;
     var an_att = weeks.init_data[weeks.sel[0]].an;
@@ -295,7 +292,6 @@ function create_pr_buttons() {
   ------ BKNEWS -------
   --------------------*/
 function fetch_bknews(first) {
-    fetch.ongoing_bknews = true;
     var semaine_att = weeks.init_data[weeks.sel[0]].semaine;
     var an_att = weeks.init_data[weeks.sel[0]].an;
 
@@ -380,11 +376,6 @@ function adapt_labgp(first) {
 function fetch_cours() {
     var garbage_plot ;
     
-    fetch.ongoing_cours_pp = true;
-    fetch.ongoing_cours_pl = true;
-    fetch.cours_ok = false;
-
-    fetch.done = false;
     ack.edt = "";
     go_ack_msg(true);
 
@@ -704,12 +695,11 @@ function fetch_ended() {
         create_mod_dd();
         create_sal_dd();
         clean_prof_displayed();
-        fetch.cours_ok = true;
     }
 
     if (!fetch.ongoing_cours_pp &&
         !fetch.ongoing_cours_pl &&
-        !fetch.ongoing_dispos &&
+        !fetch.ongoing_dispos   &&
         !fetch.ongoing_bknews) {
 
         fetch.done = true;

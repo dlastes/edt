@@ -46,7 +46,6 @@
 
 // update all preferences
 function go_pref(quick) {
-    if (fetch.dispos_ok) {
         var t, dat, datdi, datsmi;
 
         if (quick) {
@@ -198,7 +197,6 @@ function go_pref(quick) {
 	go_cm_advanced_pref(quick) ;
 
 
-    }
 }
 
 
