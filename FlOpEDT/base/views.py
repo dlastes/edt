@@ -88,10 +88,9 @@ def favicon(req, fav):
 # ----------
 
 
-def edt(req,  departement=None, an=None, semaine=None, splash_id=0):
+def edt(req, department=None, an=None, semaine=None, splash_id=0):
 
-    semaine, an = clean_week(semaine, an)
-
+    department, semaine, an = clean_edt_view_params(department, semaine, an)
     promo = clean_train_prog(req)
 
     if req.GET:
@@ -116,22 +115,24 @@ def edt(req,  departement=None, an=None, semaine=None, splash_id=0):
         rights_usr = 0
 
     return render(req, 'base/show-edt.html',
-                  {'all_weeks': week_list(),
-                   'semaine': semaine,
-                   'an': an,
-                   'jours': num_days(an, semaine),
-                   'promo': promo,
-                   'une_salle': une_salle,
-                   'copie': copie,
-                   'gp': gp,
-                   'name_usr': name_usr,
-                   'rights_usr': rights_usr,
-                   'splash_id': splash_id
+                  {
+                    'all_weeks': week_list(),
+                    'department': department,
+                    'semaine': semaine,
+                    'an': an,
+                    'jours': num_days(an, semaine),
+                    'promo': promo,
+                    'une_salle': une_salle,
+                    'copie': copie,
+                    'gp': gp,
+                    'name_usr': name_usr,
+                    'rights_usr': rights_usr,
+                    'splash_id': splash_id
                   })
 
 
-def edt_light(req, semaine, an):
-    semaine, an = clean_week(semaine, an)
+def edt_light(req, department=None, an=None, semaine=None):
+    department, semaine, an = clean_edt_view_params(department, semaine, an)
     promo = clean_train_prog(req)
 
     if req.GET:
@@ -158,6 +159,7 @@ def edt_light(req, semaine, an):
 
     return render(req, 'base/show-edt-light.html',
                   {'all_weeks': week_list(),
+                   'department': department,                  
                    'semaine': semaine,
                    'an': an,
                    'jours': num_days(an, semaine),
@@ -247,7 +249,7 @@ def decale(req):
 # ----------
 
 
-def fetch_cours_pl(req, year, week, num_copy):
+def fetch_cours_pl(req, department, year, week, num_copy):
     print(req)
 
     try:
@@ -328,7 +330,7 @@ def fetch_cours_pl(req, year, week, num_copy):
     return response
 
 
-def fetch_cours_pp(req, week, year, num_copy):
+def fetch_cours_pp(req, department, week, year, num_copy):
     print(req)
 
     try:
@@ -963,7 +965,11 @@ def clean_train_prog(req):
     return promo
 
 
-def clean_week(week, year):
+def clean_edt_view_params(department, week, year):
+
+    if not department:
+        department = 'default'
+
     if week is None or year is None:
         today = current_week()
         week = today['semaine']
@@ -976,7 +982,8 @@ def clean_week(week, year):
             today = current_week()
             week = today['semaine']
             year = today['an']
-    return week, year
+
+    return department, week, year
 
 
 def filt_m(r, module):

@@ -21,66 +21,20 @@
 <!-- you develop activities involving the FlOpEDT/FlOpScheduler software   -->
 <!-- without disclosing the source code of your own applications.          -->
 
-{% extends "base.html" %}
-
-{% csrf_token %}
-
-{% block title %} EDT {% endblock %}
-{% block content %}
-
+{% extends "base/edt-base.html" %}
 
 {% load static %}
-<link rel="stylesheet" href="{% static 'base/better.css' %}?2"/>
-  <script src="{% static 'base/d3.v4.min.js' %}"></script>
-  <!-- script src='https://d3js.org/d3.v4.min.js'></script -->
-  <script>
-    var groupes_fi = "{% static 'base/groups.json' %}";
 
-    var url_cours_pl = "{% url "base:fetch_cours_pl" 0 0 0 %}";
-    url_cours_pl = url_cours_pl.slice(0,-5);
-    var url_cours_pp = "{% url "base:fetch_cours_pp" 0 0 0 %}";
-    url_cours_pp = url_cours_pp.slice(0,-5);
-    var url_dispos = "{% url "base:fetch_dispos" 0 0 %}";
-    url_dispos = url_dispos.slice(0,-3);
-    var url_login = "{% url "people:login"%}";
-    var url_edt = "{% url "base:edt"%}";
-    var url_edt_changes = "{% url "base:edt_changes"%}";
-    var url_dispos_changes = "{% url "base:dispos_changes"%}";
-    var url_fetch_stype = "{% url "base:fetch_stype" %}"; 
-    var url_bknews = "{% url "base:fetch_bknews" %}"; 
-    var url_quote = "{% url "quote:fetch_quote" %}"; 
-
-    var semaine_an_list = {{ all_weeks|safe }};
-    var jours_list = {{ jours|safe }};
-    var semaine_init = +"{{ semaine }}";
-    var an_init = +"{{ an }}";
-
+{% block script_variable %}
+<script>
     var promo_init = +"{{ promo }}";
-    var num_copie = +"{{ copie }}";
     var gp_init = "{{ gp }}";
-
-//    var cours_pp = {{ cpp|safe }};
-
-    var une_salle = "{{ une_salle }}";
-    
-    var logged_usr = {nom:"{{ name_usr }}", rights: "{{ rights_usr }}"};
-
-    var splash_id = "{{ splash_id }}" ; 
-
-    var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
-  </script>
-
-  <!--   <script type='text/javascript' src="{% static "base/better.js" %}"></script>-->
-  <script type='text/javascript' src="{% static 'base/variables.js' %}?2"></script>
-  <script type='text/javascript' src="{% static 'base/week_change.js' %}"></script>
-  <script type='text/javascript' src="{% static 'base/transformation.js' %}"></script>
-  <script type='text/javascript' src="{% static 'base/creation.js' %}"></script>
-  <script type='text/javascript' src="{% static 'base/action.js' %}"></script>
-  <script type='text/javascript' src="{% static 'base/update.js' %}"></script>
-  <script type='text/javascript' src="{% static 'base/all.js' %}"></script>
-    
-
+    var num_copie = +"{{ copie }}";
+    var logged_usr = { nom: "{{ name_usr }}", rights: "{{ rights_usr }}" };
+    var splash_id = "{{ splash_id }}";
+</script>
 {% endblock %}
 
-
-
+{% block script_file %}
+<script type='text/javascript' src="{% static 'base/all.js' %}"></script>
+{% endblock %}
