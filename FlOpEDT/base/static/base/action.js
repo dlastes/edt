@@ -178,7 +178,9 @@ function select_room_change(c) {
     
 
     for (var i = 0 ; i < rooms[c.room_type].length ; i++) {
-	if (occupied_rooms.indexOf(rooms[c.room_type][i]) == -1) {
+	if (occupied_rooms.indexOf(rooms[c.room_type][i]) == -1
+	    && (is_garbage
+		|| unavailable_rooms[c.day][c.slot].indexOf(rooms[c.room_type][i]) == -1)) {
 	    var cur_prop = {} ;
 	    cur_prop.fid = fake_id ;
 	    cur_prop.room = rooms[c.room_type][i] ;

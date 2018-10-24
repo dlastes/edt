@@ -674,9 +674,6 @@ function fetch_unavailable_rooms() {
     var semaine_att = weeks.init_data[weeks.sel[0]].semaine;
     var an_att = weeks.init_data[weeks.sel[0]].an;
 
-    console.log("come");
-    console.log(url_unavailable_rooms + an_att + "/" + semaine_att + "/" + num_copie);
-    
     show_loader(true);
     $.ajax({
         type: "GET", //rest Type
