@@ -47,5 +47,6 @@ urlpatterns = [
     url(r'^citations/', include('quote.urls')),
     url(r'^solve-board/', include('solve_board.urls')),
     url(r'^edt/', include('base.urls')),
+    url(r'^ical/', include('synchro.urls')),
     url(r'$', RedirectView.as_view(pattern_name='base:edt', permanent=False)),
 ]
