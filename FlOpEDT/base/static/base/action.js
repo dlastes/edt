@@ -98,23 +98,6 @@ function apply_wk_change(d, i) { //if(fetch.done) {
 } //}
 
 
-function fetch_all(first){
-    fetch.done = false;
-
-    fetch.ongoing_cours_pp = true;
-    fetch.ongoing_cours_pl = true;
-    if (ckbox["dis-mod"].cked || ckbox["edt-mod"].cked) {
-	fetch.ongoing_dispos = true;
-    }
-    fetch.ongoing_bknews = true;
-
-    fetch_cours();
-    if (ckbox["dis-mod"].cked || ckbox["edt-mod"].cked) {
-        fetch_dispos();
-    }
-    fetch_bknews(first);
-}
-
 
 /*----------------------
   -------- GRID --------
@@ -452,14 +435,19 @@ function apply_ckbox(dk) {
                 if (rootgp_width != 0) {
                     labgp.width *= 1 - (dim_dispo.width + dim_dispo.right) / (rootgp_width * labgp.width);
                 }
-                if (!fetch.dispos_ok) {
-                    fetch_dispos();
-                } else {
-                    if (user.dispos.length == 0) {
-                        create_dispos_user_data();
-                    }
-                    go_edt(false);
-                }
+		
+                // if (!fetch.dispos_ok) {
+                //     fetch_dispos();
+                // } else {
+                //     if (user.dispos.length == 0) {
+                //         create_dispos_user_data();
+                //     }
+                //     go_edt(false);
+                // }
+                if (dispos.length == 0) {
+		    fetch_dispos();
+		}
+		
             } else {
                 user.dispos = [];
                 //ckbox["dis-mod"].disp = false;
@@ -472,6 +460,7 @@ function apply_ckbox(dk) {
             }
         } else if (dk == "edt-mod") {
             if (ckbox[dk].cked) {
+		fetch_unavailable_rooms();
 		if (total_regen) {
 
 		    ckbox[dk].cked = false ;
@@ -489,11 +478,15 @@ function apply_ckbox(dk) {
 		}
 		
                 edt_but.attr("visibility", "visible");
-                if (!fetch.dispos_ok) {
-                    fetch_dispos();
-                } else {
-                    go_edt(true);
-                }
+
+		if (dispos.length == 0) {
+		    fetch_dispos();
+		}
+                // if (!fetch.dispos_ok) {
+                //     fetch_dispos();
+                // } else {
+                //     go_edt(true);
+                // }
             } else {
                 edt_but.attr("visibility", "hidden");
                 go_edt(true);

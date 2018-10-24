@@ -98,6 +98,7 @@ var fetch = {
     ongoing_dispos: false,
     ongoing_cours_pp: false,
     ongoing_bknews: false,
+    ongoing_un_rooms: false,
     done: false,
     cours_ok: false,
     dispos_ok: false
@@ -369,6 +370,13 @@ var room_change = {
     posv: 's',
     posh: 'w'
 };
+
+var unavailable_rooms = [] ;
+unavailable_rooms = new Array(nbPer);
+for (var i = 0; i < nbPer; i++) {
+    unavailable_rooms[i] = new Array(nbSl);
+}
+
 
 /*---------------------
    ------ TUTORS ------

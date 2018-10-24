@@ -162,9 +162,16 @@ class DispoResource(resources.ModelResource):
 
 
 class UnavailableRoomsResource(resources.ModelResource):
+    day = fields.Field(column_name='jour',
+                        attribute='creneau__jour',
+                        widget=ForeignKeyWidget(Day, 'no'))
+    slot = fields.Field(column_name='heure',
+                         attribute='creneau__heure',
+                         widget=ForeignKeyWidget(Time, 'no'))
+    
     class Meta:
         model = RoomPreference
-        fields = ("room", "creneau")
+        fields = ("room", "day", "slot")
 
 
 class BreakingNewsResource(resources.ModelResource):

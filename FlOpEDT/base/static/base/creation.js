@@ -1501,6 +1501,20 @@ function is_free(day, hour, promo) {
 
 
 
+/*---------------------
+  ------- ROOMS -------
+   ---------------------*/
+
+function clean_unavailable_rooms() {
+    console.log("clean unavailable");
+    for (var i = 0; i < nbPer; i++) {
+	for (var j = 0; j < nbSl; j++) {
+	    unavailable_rooms[i][j] = [] ;
+	}
+    }
+}
+
+
 /*--------------------
   ------- TUTORS -----
   --------------------*/

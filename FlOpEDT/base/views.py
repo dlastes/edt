@@ -36,7 +36,7 @@ from .forms import ContactForm
 
 from .models import Course, UserPreference, ScheduledCourse, EdtVersion, \
     CourseModification, Slot, Day, Time, RoomGroup, PlanningModification, \
-    Regen, BreakingNews
+    Regen, BreakingNews, RoomPreference
 
 from people.models import Tutor
 # Prof,
@@ -440,7 +440,7 @@ def fetch_unavailable_rooms(req, year, week):
         return cached
 
     dataset = DispoResource() \
-        .export(RoomPreferences.objects.filter(semaine=week,
+        .export(RoomPreference.objects.filter(semaine=week,
                                                an=year,
                                                valeur=0))
     response = HttpResponse(dataset.csv,

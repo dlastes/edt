@@ -44,7 +44,7 @@
     var url_dispos = "{% url "base:fetch_dispos" 0 0 %}";
     url_dispos = url_dispos.slice(0,-3);
     var url_unavailable_rooms = "{% url "base:fetch_unavailable_rooms" 0 0 %}";
-    url_unavailable_rooms = url_dispos.slice(0,-3);
+    url_unavailable_rooms = url_unavailable_rooms.slice(0,-3);
     var url_login = "{% url "people:login"%}";
     var url_edt = "{% url "base:edt"%}";
     var url_edt_changes = "{% url "base:edt_changes"%}";
