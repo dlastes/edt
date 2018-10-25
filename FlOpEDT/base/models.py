@@ -77,7 +77,7 @@ class BreakingNews(models.Model):
 
 class Department(models.Model):
     name = models.CharField(max_length=50)
-    abbrev = models.CharField(max_length=5)    
+    abbrev = models.CharField(max_length=7)    
 
     def __str__(self):
         return self.abbrev
@@ -442,6 +442,7 @@ class RoomPreference(models.Model):
 
 
 class EdtVersion(models.Model):
+    department =  models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
     semaine = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)])
     an = models.PositiveSmallIntegerField()

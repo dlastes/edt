@@ -25,9 +25,49 @@
 # without disclosing the source code of your own applications.
 
 from base.models import Group, TrainingProgramme, GroupDisplay, \
-    TrainingProgrammeDisplay
+    TrainingProgrammeDisplay, ScheduledCourse, EdtVersion, Department
 
 from django.core.exceptions import ObjectDoesNotExist
+
+def create_first_department():    
+    department = Department.objects.create(name="Default Department", abbrev="default")
+    
+    # Update all existing TrainingProgramme
+    TrainingProgramme.objects.all().update(department=department)
+    
+    # Update all existing EdtVersion
+    EdtVersion.objects.all().update(department=department)    
+    
+    return department
+
+def get_edt_version(department, week, year, create=False):
+
+    params = {'semaine': week, 'an': year, 'department__abbrev': department}
+
+    if create:
+        edt_version, _ = EdtVersion.objects \
+                            .get_or_create(defaults={'version': 0}, **params)
+        version = edt_version.version
+    else:
+        """
+        Raise model.DoesNotExist to simulate get behaviour 
+        when no item is matching filter parameters
+        """
+        try:
+            version = EdtVersion.objects.filter(**params).values_list("version", flat=True)[0]   
+        except IndexError:
+            raise(EdtVersion.DoesNotExist)
+    return version
+
+def get_scheduled_courses(department, week, year, num_copy):
+
+    qs = ScheduledCourse.objects \
+                    .filter(
+                        cours__module__train_prog__department__abbrev=department,
+                        cours__semaine=week,
+                        cours__an=year,
+                        copie_travail=num_copy)
+    return qs    
 
 def get_groups(department=None):
     """
@@ -36,7 +76,7 @@ def get_groups(department=None):
     final_groups = []
 
     # Filter TrainingProgramme by department
-    if department and department != "default":
+    if department:
         training_program_query = TrainingProgramme.objects.filter(department__abbrev=department)
     else:        
         training_program_query = TrainingProgramme.objects.all()
@@ -65,7 +105,6 @@ def get_groups(department=None):
         final_groups.append(get_descendant_groups(gp_master, gp_dict_children))
 
     return final_groups
-
 
 def get_descendant_groups(gp, children):
     """

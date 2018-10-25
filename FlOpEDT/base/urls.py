@@ -38,9 +38,8 @@ urlpatterns = [
 
     # directly reachable by users
     # ----------------------------
-    url(r'^(?P<an>\d{4})?(/?(?P<semaine>\d{1,2}))?$', views.edt, name="edt"),
-    url(r'^(?P<department>[a-zA-Z]\w{1,5})?(/(?P<an>\d{4}))?(/(?P<semaine>\d{1,2}))?$', views.edt, name="edt"),
-    url(r'^tv/(?P<department>[a-zA-Z]\w{1,5})?(/(?P<semaine>\d+))?(/(?P<an>\d+))?$', views.edt_light, name="edt_light"),
+    url(r'^(?P<department>[a-zA-Z]\w{1,7})(/(?P<an>\d{4}))?(/(?P<semaine>\d{1,2}))?$', views.edt, name="edt"),
+    url(r'^tv/(?P<department>[a-zA-Z]\w{1,5})(/(?P<semaine>\d+))?(/(?P<an>\d+))?$', views.edt_light, name="edt_light"),
     url(r'^semaine-type$', views.stype, name="stype"),
     url(r'^aide$', views.aide, name="aide"),
     url(r'^decale$', views.decale, name="decale"),

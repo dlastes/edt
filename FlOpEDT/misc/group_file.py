@@ -24,7 +24,7 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from core.data_models import get_groups
+from base.queries import get_groups
 from django.conf import settings
 
 import json

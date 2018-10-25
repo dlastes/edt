@@ -24,11 +24,12 @@
 # without disclosing the source code of your own applications.
 
 from django.http import HttpResponse, Http404, JsonResponse, HttpRequest
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 
 from django.contrib.auth.decorators import login_required, user_passes_test
 
 from django.db import transaction
+from django.urls import reverse
 
 from django.views.decorators.cache import cache_page
 
@@ -38,7 +39,7 @@ from .forms import ContactForm
 
 from .models import Course, UserPreference, ScheduledCourse, EdtVersion, \
     CourseModification, Slot, Day, Time, RoomGroup, PlanningModification, \
-    Regen, BreakingNews
+    Regen, BreakingNews, Department
 
 from people.models import Tutor
 # Prof,
@@ -63,7 +64,7 @@ from random import randint
 
 from django.core.cache import cache
 
-import core.data_models as data_models
+import base.queries as queries
 
 # <editor-fold desc="FAVICON">
 # ----------
@@ -90,7 +91,22 @@ def favicon(req, fav):
 # ----------
 # VIEWERS
 # ----------
+def index(req):
 
+    def redirect_to_edt(department):
+        reverse_url = reverse('base:edt', kwargs={'department': department.abbrev})
+        print(f"reverse_url:{reverse_url}")
+        return reverse_url
+
+    departments = Department.objects.all()
+
+    if not departments:        
+        department = queries.create_first_department()
+        return redirect(redirect_to_edt(department))
+    elif len(departments) == 1:
+        return redirect(redirect_to_edt(departments[0]))
+    else:
+        return HttpResponse("NOT IMPLEMENTED YET")
 
 def edt(req, department=None, an=None, semaine=None, splash_id=0):
 
@@ -263,7 +279,7 @@ def fetch_cours_pl(req, department, year, week, num_copy):
     except ValueError:
         return HttpResponse("KO")
 
-    print("W",week, " Y",year, " N", num_copy)
+    print("D", department, "W",week, " Y",year, " N", num_copy)
 
     cache_key = get_key_course_pl(year, week, num_copy)
     cached = cache.get(cache_key)
@@ -275,29 +291,35 @@ def fetch_cours_pl(req, department, year, week, num_copy):
     dataset = None
     while not ok:
         if num_copy == 0:
-            edtversion, created = EdtVersion.objects \
-                .get_or_create(semaine=week,
-                               an=year,
-                               defaults={'version': 0})
-            version = edtversion.version
+            version = queries.get_edt_version(department=department,
+                    week=week,
+                    year=year, create=True)
+        
         dataset = CoursPlaceResource() \
-            .export(ScheduledCourse.objects \
-                    .filter(cours__semaine=week,
-                            cours__an=year,
-                            copie_travail=num_copy)
+            .export(queries.get_scheduled_courses(
+                        department=department,                         
+                        week=week,
+                        year=year,
+                        num_copy=num_copy) \
                     .order_by('creneau__jour',
                               'creneau__heure'))  # all())#
         ok = num_copy != 0 \
-             or (version == EdtVersion.objects
-                 .get(semaine=week, an=year).version)
+             or (version == queries \
+                                .get_edt_version(
+                                    department=department, 
+                                    week=week, 
+                                    year=year))
+
     if dataset is None:
         raise Http404("What are you trying to do?")
+
     response = HttpResponse(dataset.csv, content_type='text/csv')
     response['version'] = version
     response['week'] = week
     response['year'] = year
     response['jours'] = str(num_days(year, week))
     response['num_copy'] = num_copy
+    
     try:
         regen = str(Regen.objects.get(semaine=week, an=year))
     except ObjectDoesNotExist:
@@ -532,7 +554,7 @@ def fetch_groups(req, department=None):
     """
     Return groups tree for a given department
     """
-    groups = data_models.get_groups(department)
+    groups = queries.get_groups(department)
     return JsonResponse(groups, safe=False)
 
 # </editor-fold desc="FETCHERS">

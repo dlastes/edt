@@ -41,11 +41,13 @@ from django.conf.urls import url, include
 from django.contrib import admin
 from django.views.generic import RedirectView
 
+import base.views
+
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^accounts/', include('people.urls')),
     url(r'^citations/', include('quote.urls')),
     url(r'^solve-board/', include('solve_board.urls')),
     url(r'^edt/', include('base.urls')),
-    url(r'$', RedirectView.as_view(pattern_name='base:edt', permanent=False)),
+    url(r'$', base.views.index),
 ]
