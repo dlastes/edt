@@ -362,12 +362,13 @@ def fetch_cours_pp(req, week, year, num_copy):
     return response
 
 
-@login_required
+#@login_required
 def fetch_dispos(req, year, week):
     print(req)
     print("================")
-    # if req.GET:
-    #     if req.user.is_authenticated:
+    if req.GET:
+        if not req.user.is_authenticated:
+            return HttpResponse("Pas connecte")
     print("================")
 
 
