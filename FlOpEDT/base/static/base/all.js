@@ -183,9 +183,9 @@ d3.select("body")
 	}
 	
 	if(ckbox["edt-mod"].cked) {
-	    if (room_change.course.length > 0) {
-		room_change.course = [] ;
-		room_change.proposal = [] ;
+	    if (room_tutor_change.course.length > 0) {
+		room_tutor_change.course = [] ;
+		room_tutor_change.proposal = [] ;
 		go_cm_room_change();
 	    }
 	    

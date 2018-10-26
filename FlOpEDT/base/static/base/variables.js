@@ -352,12 +352,21 @@ var salles = {
 
 var rooms ;
 
-var room_change = {
-    course: [],
-    old_room: "",
+var room_tutor_change = {
+    course: [],    // 1-cell array for d3.js
+    old_value: "",  
     proposal: [],
-    cur_room: "",
-    but:
+    cur_value: "",
+    but_room:
+    { w: 45,
+      h: 18,
+      fs: 10,
+      mx: 5,
+      my: 3,
+      ncol: 3,
+      nlin: 0
+    },
+    but_tut:
     { w: 45,
       h: 18,
       fs: 10,

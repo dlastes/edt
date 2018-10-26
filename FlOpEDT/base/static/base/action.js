@@ -160,13 +160,13 @@ function apply_tutor_display_all() {
 // c: course
 // return: true iff a change is needed (i.e. unassigned room or already occupied)
 function select_room_change(c) {
-    room_change.course = [c] ;
-    room_change.old_room = c.room ;
-    room_change.cur_room = c.room ;
+    room_tutor_change.course = [c] ;
+    room_tutor_change.old_value = c.room ;
+    room_tutor_change.cur_value = c.room ;
 
     var fake_id = new Date() ;
     fake_id = fake_id.getMilliseconds() + "-" + c.id_cours ;
-    room_change.proposal = [] ;
+    room_tutor_change.proposal = [] ;
 
     var occupied_rooms = cours
 	.filter(function(d) {
@@ -185,20 +185,20 @@ function select_room_change(c) {
 	    cur_prop.fid = fake_id ;
 	    cur_prop.room = rooms[c.room_type][i] ;
 	    
-	    room_change.proposal.push(cur_prop) ;
+	    room_tutor_change.proposal.push(cur_prop) ;
 	}
     }
 
-    room_change.but.nlin = Math.ceil(room_change.proposal.length / room_change.but.ncol) ;
+    room_tutor_change.but_room.nlin = Math.ceil(room_tutor_change.proposal.length / room_tutor_change.but_room.ncol) ;
     if (cours_x(c) + .5 * cours_width(c) + tut_chg_bg_width() < grid_width() ) {
-    	room_change.posh = 'e';
+    	room_tutor_change.posh = 'e';
     } else {
-    	room_change.posh = 'w';
+    	room_tutor_change.posh = 'w';
     }
     if (cours_y(c)  + .5 * cours_height(c) + tut_chg_bg_height() < grid_height()) {
-    	room_change.posv = 's';
+    	room_tutor_change.posv = 's';
     } else {
-    	room_change.posv = 'n';
+    	room_tutor_change.posv = 'n';
     }
 
     if (c.room == une_salle ||
@@ -216,7 +216,7 @@ function go_cm_room_change() {
 
     var tut_cm_course_dat = cmtg
         .selectAll(".tut-chg")
-        .data(room_change.course,
+        .data(room_tutor_change.course,
               function(d) {
                   return d.id_cours;
               });
@@ -256,7 +256,7 @@ function go_cm_room_change() {
 
     var tut_cm_room_dat = cmtg
         .selectAll(".tut-chg-rooms")
-        .data(room_change.proposal,
+        .data(room_tutor_change.proposal,
               function(d,i) {
                   return d.fid + "-" + i;
               });
@@ -268,12 +268,12 @@ function go_cm_room_change() {
         .attr("cursor", "pointer")
 	.on("click", function(d){
 	    context_menu.room_hold = true ;
-	    var c = room_change.course[0] ;
+	    var c = room_tutor_change.course[0] ;
             add_bouge(c);
             c.room = d.room;
-	    //room_change.cur_room = d.room;
-	    room_change.course = [] ;
-	    room_change.proposal = [] ;
+	    //room_tutor_change.cur_value = d.room;
+	    room_tutor_change.course = [] ;
+	    room_tutor_change.proposal = [] ;
 	    go_courses() ;
 	})
     

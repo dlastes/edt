@@ -1285,8 +1285,8 @@ function def_drag() {
 			if (disp_cont_menu) {
 			    go_cm_room_change();
 			} else {
-			    room_change.course = [] ;
-			    room_change.proposal = [] ;
+			    room_tutor_change.course = [] ;
+			    room_tutor_change.proposal = [] ;
 			}
 
 		    } else if (!ngs.dispo && (logged_usr.rights >> 2) % 2 == 1) {
