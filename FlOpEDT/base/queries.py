@@ -76,17 +76,14 @@ def get_scheduled_courses(department, week, year, num_copy):
                         copie_travail=num_copy)
     return qs    
 
-def get_groups(department=None):
+def get_groups(department_abbrev):
     """
     Return the groups hierachical representation from database
     """
     final_groups = []
 
     # Filter TrainingProgramme by department
-    if department:
-        training_program_query = TrainingProgramme.objects.filter(department__abbrev=department)
-    else:        
-        training_program_query = TrainingProgramme.objects.all()
+    training_program_query = TrainingProgramme.objects.filter(department__abbrev=department_abbrev)
 
     for train_prog in training_program_query:
 

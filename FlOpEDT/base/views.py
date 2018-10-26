@@ -92,15 +92,21 @@ def favicon(req, fav):
 # VIEWERS
 # ----------
 def index(req):
-
+    """
+    Display department selection view.
+    
+    The view create a default department if not exist and 
+    redirects to edt vue if only one department exist
+    """
     def redirect_to_edt(department):
-        reverse_url = reverse('base:edt', kwargs={'department': department.abbrev})
+        reverse_url = reverse('base:edt', kwargs={'department_abbrev': department.abbrev})
         print(f"reverse_url:{reverse_url}")
         return reverse_url
 
     departments = Department.objects.all()
 
     if not departments:        
+        # Create first department
         department = queries.create_first_department()
         return redirect(redirect_to_edt(department))
     elif len(departments) == 1:
@@ -108,9 +114,9 @@ def index(req):
     else:
         return HttpResponse("NOT IMPLEMENTED YET")
 
-def edt(req, department=None, an=None, semaine=None, splash_id=0):
+def edt(req, department_abbrev, an=None, semaine=None, splash_id=0):
 
-    department, semaine, an = clean_edt_view_params(department, semaine, an)
+    department, semaine, an = clean_edt_view_params(department_abbrev, semaine, an)
     promo = clean_train_prog(req)
 
     if req.GET:
@@ -137,7 +143,7 @@ def edt(req, department=None, an=None, semaine=None, splash_id=0):
     return render(req, 'base/show-edt.html',
                   {
                     'all_weeks': week_list(),
-                    'department': department,
+                    'department': department.abbrev,
                     'semaine': semaine,
                     'an': an,
                     'jours': num_days(an, semaine),
@@ -151,8 +157,8 @@ def edt(req, department=None, an=None, semaine=None, splash_id=0):
                   })
 
 
-def edt_light(req, department=None, an=None, semaine=None):
-    department, semaine, an = clean_edt_view_params(department, semaine, an)
+def edt_light(req, department_abbrev, an=None, semaine=None):
+    department, semaine, an = clean_edt_view_params(department_abbrev, semaine, an)
     promo = clean_train_prog(req)
 
     if req.GET:
@@ -179,7 +185,7 @@ def edt_light(req, department=None, an=None, semaine=None):
 
     return render(req, 'base/show-edt-light.html',
                   {'all_weeks': week_list(),
-                   'department': department,                  
+                   'department': department.abbrev,                  
                    'semaine': semaine,
                    'an': an,
                    'jours': num_days(an, semaine),
@@ -242,7 +248,7 @@ def aide(req):
 
 
 @login_required
-def decale(req):
+def decale(req, department_abbrev):
     if req.method != 'GET':
         return render(req, 'base/aide.html', {})
 
@@ -254,6 +260,7 @@ def decale(req):
 
     return render(req, 'base/show-decale.html',
                   {'all_weeks': week_list(),
+                   'department': department_abbrev,
                    'semaine_init': semaine_init,
                    'an_init': an_init,
                    'profs': liste_profs
@@ -269,19 +276,20 @@ def decale(req):
 # ----------
 
 
-def fetch_cours_pl(req, department, year, week, num_copy):
+def fetch_cours_pl(req, department_abbrev, year, week, num_copy):
     print(req)
 
     try:
         week = int(week)
         year = int(year)
         num_copy = int(num_copy)
-    except ValueError:
+        department = Department.objects.get(abbrev=department_abbrev)
+    except:
         return HttpResponse("KO")
 
     print("D", department, "W",week, " Y",year, " N", num_copy)
 
-    cache_key = get_key_course_pl(year, week, num_copy)
+    cache_key = get_key_course_pl(department.abbrev, year, week, num_copy)
     cached = cache.get(cache_key)
     if cached is not None:
         return cached
@@ -321,10 +329,11 @@ def fetch_cours_pl(req, department, year, week, num_copy):
     response['num_copy'] = num_copy
     
     try:
-        regen = str(Regen.objects.get(semaine=week, an=year))
+        regen = str(Regen.objects.get(department=department, semaine=week, an=year))
     except ObjectDoesNotExist:
         regen = 'I'
     response['regen'] = regen
+
     if req.user.is_authenticated:
         response['reqDispos'] = Course \
                                     .objects \
@@ -356,19 +365,20 @@ def fetch_cours_pl(req, department, year, week, num_copy):
     return response
 
 
-def fetch_cours_pp(req, department, week, year, num_copy):
+def fetch_cours_pp(req, department_abbrev, week, year, num_copy):
     print(req)
 
     try:
         week = int(week)
         year = int(year)
         num_copy = int(num_copy)
+        department = Department.objects.get(abbrev=department_abbrev)
     except ValueError:
         return HttpResponse("KO")
 
-    print("W",week, " Y",year, " N", num_copy)
+    print("D", department ,"W",week, " Y",year, " N", num_copy)
 
-    cache_key = get_key_course_pp(year, week, num_copy)
+    cache_key = get_key_course_pp(department.abbrev, year, week, num_copy)
     cached = cache.get(cache_key)
     if cached is not None:
         return cached
@@ -376,11 +386,15 @@ def fetch_cours_pp(req, department, week, year, num_copy):
     dataset = CoursResource() \
         .export(Course
                 .objects
-                .filter(semaine=week,
+                .filter(
+                        module__train_prog__department=department,
+                        semaine=week,
                         an=year)
                 .exclude(pk__in=ScheduledCourse
                          .objects
-                         .filter(copie_travail=num_copy)
+                         .filter(
+                             cours__module__train_prog__department=department,
+                             copie_travail=num_copy)
                          .values('cours')))
     response = HttpResponse(dataset.csv, content_type='text/csv')
     response['week'] = week
@@ -461,7 +475,7 @@ def fetch_stype(req):
     #    return HttpResponse("Pas GET",status=500)
 
 
-def fetch_decale(req):
+def fetch_decale(req, department_abbrev):
     if not req.is_ajax() or req.method != "GET":
         return HttpResponse("KO")
 
@@ -482,7 +496,7 @@ def fetch_decale(req):
     else:
         liste_jours = []
 
-    cours = filt_p(filt_g(filt_m(filt_sa(semaine, an), module), groupe), prof)
+    cours = filt_p(filt_g(filt_m(filt_sa(department_abbrev, semaine, an), module), groupe), prof)
 
     for c in cours:
         try:
@@ -501,13 +515,13 @@ def fetch_decale(req):
                                 'j': j,
                                 'h': h})
 
-    cours = filt_p(filt_g(filt_sa(semaine, an), groupe), prof) \
+    cours = filt_p(filt_g(filt_sa(department_abbrev, semaine, an), groupe), prof) \
         .order_by('module__abbrev') \
         .distinct('module__abbrev')
     for c in cours:
         liste_module.append(c.module.abbrev)
 
-    cours = filt_g(filt_m(filt_sa(semaine, an), module), groupe) \
+    cours = filt_g(filt_m(filt_sa(department_abbrev, semaine, an), module), groupe) \
         .order_by('tutor__username') \
         .distinct('tutor__username')
     for c in cours:
@@ -522,7 +536,7 @@ def fetch_decale(req):
             if c.tutor is not None:
                 liste_prof_module.append(c.tutor.username)
 
-    cours = filt_p(filt_m(filt_sa(semaine, an), module), prof) \
+    cours = filt_p(filt_m(filt_sa(department_abbrev, semaine, an), module), prof) \
         .distinct('groupe')
     for c in cours:
         liste_groupe.append(c.groupe.nom)
@@ -550,11 +564,11 @@ def fetch_bknews(req):
 
 
 @cache_page(15 * 60)
-def fetch_groups(req, department=None):
+def fetch_groups(req, department_abbrev):
     """
     Return groups tree for a given department
     """
-    groups = queries.get_groups(department)
+    groups = queries.get_groups(department_abbrev)
     return JsonResponse(groups, safe=False)
 
 # </editor-fold desc="FETCHERS">
@@ -566,7 +580,7 @@ def fetch_groups(req, department=None):
 
 
 @login_required
-def edt_changes(req):
+def edt_changes(req, department_abbrev):
     bad_response = HttpResponse("KO")
     good_response = HttpResponse("OK")
 
@@ -597,7 +611,8 @@ def edt_changes(req):
         an = int(an)
         work_copy = int(work_copy)
         version = None
-    except ValueError:
+        department = Department.objects.get(abbrev=department_abbrev)
+    except:
         bad_response['reason'] \
             = "Problème semaine, année ou work_copy."
         return bad_response
@@ -610,11 +625,7 @@ def edt_changes(req):
 
 
     if work_copy == 0:
-        edt_version, created = EdtVersion.objects \
-            .get_or_create(semaine=semaine,
-                           an=an,
-                           defaults={'version': 0})
-        version = edt_version.version
+        version = get_edt_version(department, semaine, an, create=True)
 
     if work_copy != 0 or old_version == version:
         with transaction.atomic():
@@ -622,7 +633,7 @@ def edt_changes(req):
                 edt_version = EdtVersion \
                     .objects \
                     .select_for_update() \
-                    .get(semaine=semaine, an=an)
+                    .get(department=department, semaine=semaine, an=an)
             for a in recv_changes:
                 non_place = False
                 co = Course.objects.get(id=a['id'])
@@ -739,9 +750,9 @@ def edt_changes(req):
                 edt_version.save()
 
             if new_week is not None and new_year is not None:
-                cache.delete(get_key_course_pl(new_year, new_week, work_copy))
-            cache.delete(get_key_course_pl(old_year, old_week, work_copy))
-            cache.delete(get_key_course_pp(old_year, old_week, work_copy))
+                cache.delete(get_key_course_pl(department.abbrev, new_year, new_week, work_copy))
+            cache.delete(get_key_course_pl(department.abbrev, old_year, old_week, work_copy))
+            cache.delete(get_key_course_pp(department.abbrev, old_year, old_week, work_copy))
             
 
         subject = '[Modif sur tierce] ' + req.user.username \
@@ -875,7 +886,7 @@ def dispos_changes(req):
 
 
 @login_required
-def decale_changes(req):
+def decale_changes(req, department_abbrev):
     bad_response = HttpResponse("KO")
     good_response = HttpResponse("OK")
     print(req)
@@ -899,13 +910,15 @@ def decale_changes(req):
                 .get(cours__id=c['i'],
                      copie_travail=0)
             cours = cours_place.cours
-            cache.delete(get_key_course_pl(cours.an,
+            cache.delete(get_key_course_pl(department_abbrev,
+                                           cours.an,
                                            cours.semaine,
                                            cours_place.copie_travail))
             cours_place.delete()
         else:
             cours = Course.objects.get(id=c['i'])
-            cache.delete(get_key_course_pp(cours.an,
+            cache.delete(get_key_course_pp(department_abbrev, 
+                                           cours.an,
                                            cours.semaine,
                                            0))
             # note: add copie_travail in Cours might be of interest
@@ -922,7 +935,8 @@ def decale_changes(req):
         if new_assignment['na'] != 0:
             # cours.prof=User.objects.get(username=a.np)
             cours.tutor = Tutor.objects.get(username=new_assignment['np'])
-        cache.delete(get_key_course_pp(cours.an,
+        cache.delete(get_key_course_pp(department_abbrev,
+                                       cours.an,
                                        cours.semaine,
                                        0))
         cours.save()
@@ -999,10 +1013,17 @@ def clean_train_prog(req):
     return promo
 
 
-def clean_edt_view_params(department, week, year):
+def clean_edt_view_params(department__abbrev, week, year):
 
-    if not department:
-        department = 'default'
+    # Get department object represented by department__abbrev
+    value_error_string = "a valid department must be specified"
+    if not department__abbrev:
+        raise ValueError(value_error_string)
+    else:
+        try:
+            department = Department.objects.get(abbrev=department__abbrev)
+        except ObjectDoesNotExist:
+            raise ValueError(value_error_string)
 
     if week is None or year is None:
         today = current_week()
@@ -1038,21 +1059,22 @@ def filt_g(r, groupe):
     return r
 
 
-def filt_sa(semaine, an):
-    return Course.objects.filter(semaine=semaine,
+def filt_sa(department_abbrev, semaine, an):
+    return Course.objects.filter(module__train_prog__department__abbrev=department_abbrev,
+                                 semaine=semaine,
                                  an=an)
 
 
-def get_key_course_pl(year, week, num_copy):
+def get_key_course_pl(department_abbrev, year, week, num_copy):
     if year is None or week is None or num_copy is None:
         return ''
-    return 'CPL-Y' + str(year) + '-W' + str(week) + '-C' + str(num_copy) 
+    return 'CPL-D' + department_abbrev + '-Y' + str(year) + '-W' + str(week) + '-C' + str(num_copy) 
 
 
-def get_key_course_pp(year, week, num_copy):
+def get_key_course_pp(department_abbrev, year, week, num_copy):
     if year is None or week is None or num_copy is None:
         return ''
-    return 'CPP-Y' + str(year) + '-W' + str(week) + '-C' + str(num_copy) 
+    return 'CPP-D' + department_abbrev + '-Y' + str(year) + '-W' + str(week) + '-C' + str(num_copy) 
 
 
 def get_key_preferences(year, week):
