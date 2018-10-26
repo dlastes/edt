@@ -602,6 +602,8 @@ class Dependency(models.Model):
 
 
 class Regen(models.Model):
+
+    department =  models.ForeignKey(Department, on_delete=models.CASCADE, null=True)   
     semaine = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)])
     an = models.PositiveSmallIntegerField()

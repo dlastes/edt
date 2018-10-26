@@ -24,30 +24,37 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
+import logging
+
 from base.models import Group, TrainingProgramme, GroupDisplay, \
-    TrainingProgrammeDisplay, ScheduledCourse, EdtVersion, Department
+    TrainingProgrammeDisplay, ScheduledCourse, EdtVersion, Department, Regen
 
 from django.core.exceptions import ObjectDoesNotExist
+
+logger = logging.getLogger(__name__)
 
 def create_first_department():    
     department = Department.objects.create(name="Default Department", abbrev="default")
     
-    # Update all existing TrainingProgramme
-    TrainingProgramme.objects.all().update(department=department)
-    
-    # Update all existing EdtVersion
-    EdtVersion.objects.all().update(department=department)    
+    # Update all existing department related models
+    models = [TrainingProgramme, EdtVersion, Regen]
+    for model in models:
+        model.objects.all().update(department=department)
     
     return department
 
 def get_edt_version(department, week, year, create=False):
 
-    params = {'semaine': week, 'an': year, 'department__abbrev': department}
+    params = {'semaine': week, 'an': year, 'department': department}
 
     if create:
-        edt_version, _ = EdtVersion.objects \
-                            .get_or_create(defaults={'version': 0}, **params)
-        version = edt_version.version
+        try:
+            edt_version, _ = EdtVersion.objects.get_or_create(defaults={'version': 0}, **params)
+        except EdtVersion.MultipleObjectsReturned as e:
+            logger.error(f'get_edt_version: database inconsistency, multiple objects returned for {params}')
+            raise(e)
+        else:    
+            version = edt_version.version
     else:
         """
         Raise model.DoesNotExist to simulate get behaviour 
@@ -63,7 +70,7 @@ def get_scheduled_courses(department, week, year, num_copy):
 
     qs = ScheduledCourse.objects \
                     .filter(
-                        cours__module__train_prog__department__abbrev=department,
+                        cours__module__train_prog__department=department,
                         cours__semaine=week,
                         cours__an=year,
                         copie_travail=num_copy)
