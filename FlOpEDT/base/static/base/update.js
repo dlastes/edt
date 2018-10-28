@@ -991,7 +991,7 @@ function go_courses(quick) {
             return smi_fill(lDis / par_dispos.nmax);
         })
     } else {
-        d3.selectAll("rect.crect").style("fill", cours_fill)
+        d3.selectAll("rect.crect").style("fill", cours_fill);
     }
 
     // Tutor's fullname 
@@ -1026,19 +1026,19 @@ function go_courses(quick) {
         .merge(cg.select("[st=m]"))
         .transition(t)
         .attr("x", cours_txt_x)
-        .attr("y", cours_txt_top_y)
+        .attr("y", cours_txt_top_y);
 
     incg
         .append("text")
         .attr("st", "p")
-        .attr("x", cours_txt_x)
-        .attr("y", cours_txt_mid_y)
-        .text(cours_txt_mid_txt)
         .attr("fill", cours_txt_fill)
         .merge(cg.select("[st=p]"))
         .transition(t)
         .attr("x", cours_txt_x)
         .attr("y", cours_txt_mid_y)
+        .attr("x", cours_txt_x)
+        .attr("y", cours_txt_mid_y)
+        .text(cours_txt_mid_txt);
 
     incg
         .append("text")
@@ -1050,7 +1050,7 @@ function go_courses(quick) {
         .attr("fill", cours_txt_fill)
         .transition(t)
         .attr("x", cours_txt_x)
-        .attr("y", cours_txt_bot_y)
+        .attr("y", cours_txt_bot_y);
 
     cg.exit()
         .remove();

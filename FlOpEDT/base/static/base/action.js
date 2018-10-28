@@ -253,9 +253,9 @@ function select_tutor_module_change() {
     room_tutor_change.old_value = c.prof ;
     room_tutor_change.cur_value = c.prof ;
 
-    var tutor_same_module = course
+    var tutor_same_module = cours
 	.filter(function(c) {
-	    return c.mod == room_tutor_change.course[0];
+	    return c.mod == room_tutor_change.course[0].mod;
 	})
 	.map(function(c){ return c.prof; });
     
@@ -272,7 +272,11 @@ function select_tutor_module_change() {
     });
 
     room_tutor_change.proposal.push({fid: fake_id, content: "+"});
+
+    room_tutor_change.cm_settings.nlin = Math.ceil(room_tutor_change.proposal.length / room_tutor_change.cm_settings.ncol) ;
+
 }
+
 // unicode →
 
 
@@ -1118,7 +1122,8 @@ function add_bouge(d) {
             id: d.id_cours,
             day: d.day,
             slot: d.slot,
-            room: d.room
+            room: d.room,
+	    prof: d.prof
         };
         console.log(cours_bouge[d.id_cours]);
     }

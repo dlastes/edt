@@ -1836,9 +1836,9 @@ function def_cm_change() {
     tutor_module_cm_settings.click = function(d) {
 	context_menu.room_tutor_hold = true ;
 	if(d.content == '+') {
-	    select_room_change();
+	    select_tutor_filters_change();
 	} else {
-	    select_tutor_module_change();
+	    confirm_tutor_change(d);
 	}
 	go_cm_room_tutor_change();
     };

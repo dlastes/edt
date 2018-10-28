@@ -820,14 +820,14 @@ function cm_chg_but_txt(d,i) {
     return d.content ;
 }
 function cm_chg_but_stk(d) {
-    if (d.room == room_tutor_change.cur_value) {
+    if (d.content == room_tutor_change.cur_value) {
 	return 3 ; 
     } else {
 	return 0 ;
     }
 }
 function cm_chg_but_fill(d){
-    if (d.room == room_tutor_change.old_value) {
+    if (d.content == room_tutor_change.old_value) {
 	return "darkslategrey" ;
     } else {
 	return "steelblue" ;
