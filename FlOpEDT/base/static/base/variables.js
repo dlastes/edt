@@ -420,6 +420,9 @@ var prev_prof;
 // has any instructor been fetched?
 var first_fetch_prof = true;
 
+// all tutors (to propose changes)
+var all_tutors = [] ;
+
 /*--------------------
    ------ SCALE ------
   --------------------*/

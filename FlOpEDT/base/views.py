@@ -453,6 +453,17 @@ def fetch_unavailable_rooms(req, year, week):
     return response
    
 
+def fetch_all_tutors(req):
+    cache_key = get_key_all_tutors()
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return cached
+    tutor_list = [t.username for t in Tutor.objects.all()]
+    response = JsonResponse({'tutors': tutor_list})
+    cache.set(cache_key, response)
+    return response
+
+
 @login_required
 def fetch_stype(req):
     # if req.method == 'GET':
@@ -1057,6 +1068,10 @@ def get_key_unavailable_rooms(year, week):
     if year is None or week is None:
         return ''
     return 'UNAVR-Y' + str(year) + '-W' + str(week)
+
+
+def get_key_all_tutors():
+    return 'ALL-TUT'
 
 # </editor-fold desc="HELPERS">
 
