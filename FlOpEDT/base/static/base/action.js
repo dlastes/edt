@@ -139,8 +139,6 @@ function select_room_change() {
 	    return d.room ;
 	})
 
-    console.log(occupied_rooms);
-
     for (var i = 0 ; i < rooms[c.room_type].length ; i++) {
 	if (occupied_rooms.indexOf(rooms[c.room_type][i]) == -1
 	    && (is_garbage(c.day,c.slot)
@@ -166,7 +164,6 @@ function select_room_change() {
 
 
 function confirm_room_change(d){
-    context_menu.room_hold = true ;
     var c = room_tutor_change.course[0] ;
     add_bouge(c);
     c.room = d.content;
@@ -251,9 +248,44 @@ function fetch_all_tutors() {
 
 function select_tutor_module_change() {
     room_tutor_change.cm_settings = tutor_module_cm_settings ;
+
+    var c = room_tutor_change.course[0] ;
+    room_tutor_change.old_value = c.prof ;
+    room_tutor_change.cur_value = c.prof ;
+
+    var tutor_same_module = course
+	.filter(function(c) {
+	    return c.mod == room_tutor_change.course[0];
+	})
+	.map(function(c){ return c.prof; });
     
+    tutor_same_module = tutor_same_module.filter(function(t,i) {
+	return tutor_same_module.indexOf(t)==i ;
+    }) ;
+
+    var fake_id = new Date() ;
+    fake_id = fake_id.getMilliseconds() + "-" + c.id_cours ;
+    room_tutor_change.proposal = [] ;
+
+    room_tutor_change.proposal = tutor_same_module.map(function(t) {
+	return {fid: fake_id, content: t};
+    });
+
+    room_tutor_change.proposal.push({fid: fake_id, content: "+"});
 }
 // unicode →
+
+
+function confirm_tutor_change(d){
+    var c = room_tutor_change.course[0] ;
+    add_bouge(c);
+    c.prof = d.content;
+    //room_tutor_change.cur_value = d.room;
+    room_tutor_change.course = [] ;
+    room_tutor_change.proposal = [] ;
+    go_courses() ;
+}
+
 
 
 

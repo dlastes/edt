@@ -500,7 +500,8 @@ var total_regen = false ;
 
 // 
 var entry_cm_settings =
-    {w: 100,
+    {type: 'entry',
+     w: 100,
      h: 18,
      fs: 10,
      mx: 5,
@@ -510,7 +511,8 @@ var entry_cm_settings =
      txt_intro: {'default':"Quoi changer ?"}
     };
 var tutor_module_cm_settings =
-    {w: 45,
+    {type: 'tutor_module',
+     w: 45,
      h: 18,
      fs: 10,
      mx: 5,
@@ -520,7 +522,8 @@ var tutor_module_cm_settings =
      txt_intro: {'default':"Profs du module ?"}
     };
 var tutor_cm_settings =
-    {w: 45,
+    {type: 'tutor',
+     w: 45,
      h: 18,
      fs: 10,
      mx: 5,
@@ -533,7 +536,8 @@ var tutor_cm_settings =
 		}
     };
 var room_cm_settings =
-    {w: 45,
+    {type: 'room',
+     w: 45,
      h: 18,
      fs: 10,
      mx: 5,

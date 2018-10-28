@@ -1827,12 +1827,22 @@ function def_cm_change() {
 	context_menu.room_tutor_hold = true ;
 	if(d.content == 'Salle') {
 	    select_room_change();
-	    go_cm_room_tutor_change();
 	} else {
-	    room_tutor_change.cm_settings = tutor_module_cm_settings ;
 	    select_tutor_module_change();
 	}
+	go_cm_room_tutor_change();
     };
+    
+    tutor_module_cm_settings.click = function(d) {
+	context_menu.room_tutor_hold = true ;
+	if(d.content == '+') {
+	    select_room_change();
+	} else {
+	    select_tutor_module_change();
+	}
+	go_cm_room_tutor_change();
+    };
+
     room_cm_settings.click = function(d) {
 	context_menu.room_tutor_hold = true ;
 	confirm_room_change(d) ;
