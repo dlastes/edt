@@ -250,10 +250,10 @@ function fetch_all_tutors() {
 
 
 function select_tutor_module_change() {
-    room_tutor_change.cm_settings = _cm_settings ;
+    room_tutor_change.cm_settings = tutor_module_cm_settings ;
     
 }
-// unicode arrow: →
+// unicode →
 
 
 
