@@ -955,9 +955,13 @@ function go_courses(quick) {
         .attr("cursor", ckbox["edt-mod"].cked ? "pointer" : "default")
         .on("contextmenu", function(d) { if (ckbox["edt-mod"].cked) {
 	    d3.event.preventDefault();
-	    context_menu.room_hold = true ;
-	    select_room_change(d);
-	    go_cm_room_change();
+	    context_menu.room_tutor_hold = true ;
+	    room_tutor_change.cm_settings = entry_cm_settings ;
+	    room_tutor_change.course = [d] ;
+	    compute_cm_room_tutor_direction(d);
+	    //select_room_change(d);
+	    select_entry_cm(d);
+	    go_cm_room_tutor_change();
 	}})
         .call(dragListener);
     
@@ -1051,7 +1055,7 @@ function go_courses(quick) {
     cg.exit()
         .remove();
 
-    go_cm_room_change();
+    go_cm_room_tutor_change();
 }
 
 

@@ -1794,4 +1794,49 @@ function create_dispo_default_from_index(ind) {
 
 
 
+/*--------------------
+   ------ ALL ------
+   --------------------*/
+
+// function cm_room_launch(d) {
+//     if (ckbox["edt-mod"].cked) {
+// 	d3.event.preventDefault();
+// 	context_menu.room_tutor_hold = true ;
+// 	compute_cm_room_tutor_direction();
+// 	select_room_change(d);
+// 	go_cm_room_tutor_change();
+//     }
+// }
+
+function select_entry_cm(d) {
+    room_tutor_change.cm_settings = entry_cm_settings;
+    room_tutor_change.course = [d];
+    var fake_id = new Date() ;
+    fake_id = fake_id.getMilliseconds() + "-" + d.id_cours ;
+    room_tutor_change.proposal = [{fid:fake_id,
+				   content:"Prof"},
+				   {fid:fake_id,
+				    content:"Salle"}] ;
+}
+
+
+
+
+function def_cm_change() {
+    entry_cm_settings.click = function(d) {
+	context_menu.room_tutor_hold = true ;
+	if(d.content == 'Salle') {
+	    select_room_change();
+	    go_cm_room_tutor_change();
+	} else {
+	    room_tutor_change.cm_settings = tutor_module_cm_settings ;
+	    select_tutor_module_change();
+	}
+    };
+    room_cm_settings.click = function(d) {
+	context_menu.room_tutor_hold = true ;
+	confirm_room_change(d) ;
+    }
+
+}
 

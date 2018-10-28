@@ -325,7 +325,7 @@ ckbox["dis-mod"] = {
 
 var context_menu = {
     dispo_hold: false,
-    room_hold: false
+    room_tutor_hold: false
 };
 
 /*--------------------
@@ -352,33 +352,6 @@ var salles = {
 
 var rooms ;
 
-var room_tutor_change = {
-    course: [],    // 1-cell array for d3.js
-    old_value: "",  
-    proposal: [],
-    cur_value: "",
-    but_room:
-    { w: 45,
-      h: 18,
-      fs: 10,
-      mx: 5,
-      my: 3,
-      ncol: 3,
-      nlin: 0
-    },
-    but_tut:
-    { w: 45,
-      h: 18,
-      fs: 10,
-      mx: 5,
-      my: 3,
-      ncol: 3,
-      nlin: 0
-    },
-    top: 30,
-    posv: 's',
-    posh: 'w'
-};
 
 var unavailable_rooms = [] ;
 unavailable_rooms = new Array(nbPer);
@@ -525,5 +498,64 @@ var user = {nom: logged_usr.nom,
 var total_regen = false ;
 
 
+// 
+var entry_cm_settings =
+    {w: 100,
+     h: 18,
+     fs: 10,
+     mx: 5,
+     my: 3,
+     ncol: 1,
+     nlin: 2,
+     txt_intro: {'default':"Quoi changer ?"}
+    };
+var tutor_module_cm_settings =
+    {w: 45,
+     h: 18,
+     fs: 10,
+     mx: 5,
+     my: 3,
+     ncol: 3,
+     nlin: 0,
+     txt_intro: {'default':"Profs du module ?"}
+    };
+var tutor_cm_settings =
+    {w: 45,
+     h: 18,
+     fs: 10,
+     mx: 5,
+     my: 3,
+     ncol: 3,
+     nlin: 0,
+     txt_intro: {'0':"Aucune salle disponible",
+		 '1':"Salle disponible :",
+		 'default':"Salles disponibles :"
+		}
+    };
+var room_cm_settings =
+    {w: 45,
+     h: 18,
+     fs: 10,
+     mx: 5,
+     my: 3,
+     ncol: 3,
+     nlin: 0,
+     txt_intro: {'0':"Aucune salle disponible",
+		 '1':"Salle disponible :",
+		 'default':"Salles disponibles :"
+		}
+    };
+
+
+var room_tutor_change = {
+    course: [],    // 1-cell array for d3.js
+    proposal: [],
+    old_value: "",  
+    cur_value: "",
+    cm_settings:{},
+    top: 30,
+    posv: 's',
+    posh: 'w'
+};
 
 

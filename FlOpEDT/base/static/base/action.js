@@ -114,6 +114,70 @@ function clear_pop(gs) {
 }
 
 
+/*--------------------
+  ------- ROOMS ------
+  --------------------*/
+
+
+// return: true iff a change is needed (i.e. unassigned room or already occupied)
+function select_room_change() {
+    room_tutor_change.cm_settings = room_cm_settings ;
+
+    var c = room_tutor_change.course[0] ;
+    room_tutor_change.old_value = c.room ;
+    room_tutor_change.cur_value = c.room ;
+
+    var fake_id = new Date() ;
+    fake_id = fake_id.getMilliseconds() + "-" + c.id_cours ;
+    room_tutor_change.proposal = [] ;
+
+    var occupied_rooms = cours
+	.filter(function(d) {
+	    return d.day==c.day && d.slot==c.slot && d.id_cours!=c.id_cours ;
+	})
+	.map(function(d) {
+	    return d.room ;
+	})
+
+    console.log(occupied_rooms);
+
+    for (var i = 0 ; i < rooms[c.room_type].length ; i++) {
+	if (occupied_rooms.indexOf(rooms[c.room_type][i]) == -1
+	    && (is_garbage(c.day,c.slot)
+		|| unavailable_rooms[c.day][c.slot].indexOf(rooms[c.room_type][i]) == -1)) {
+	    var cur_prop = {} ;
+	    cur_prop.fid = fake_id ;
+	    cur_prop.content = rooms[c.room_type][i] ;
+	    
+	    room_tutor_change.proposal.push(cur_prop) ;
+	}
+    }
+
+    room_tutor_change.cm_settings.nlin = Math.ceil(room_tutor_change.proposal.length / room_tutor_change.cm_settings.ncol) ;
+
+    if (c.room == une_salle ||
+	occupied_rooms.indexOf(c.room) != -1) {
+	return true;
+    } else {
+	return false ;
+    }
+
+}
+
+
+function confirm_room_change(d){
+    context_menu.room_hold = true ;
+    var c = room_tutor_change.course[0] ;
+    add_bouge(c);
+    c.room = d.content;
+    //room_tutor_change.cur_value = d.room;
+    room_tutor_change.course = [] ;
+    room_tutor_change.proposal = [] ;
+    go_courses() ;
+}
+
+
+
 /*---------------------
   ------- TUTORS ------
   ---------------------*/
@@ -157,65 +221,47 @@ function apply_tutor_display_all() {
 }
 
 
-// c: course
-// return: true iff a change is needed (i.e. unassigned room or already occupied)
-function select_room_change(c) {
-    room_tutor_change.course = [c] ;
-    room_tutor_change.old_value = c.room ;
-    room_tutor_change.cur_value = c.room ;
-
-    var fake_id = new Date() ;
-    fake_id = fake_id.getMilliseconds() + "-" + c.id_cours ;
-    room_tutor_change.proposal = [] ;
-
-    var occupied_rooms = cours
-	.filter(function(d) {
-	    return d.day==c.day && d.slot==c.slot && d.id_cours!=c.id_cours ;
-	})
-	.map(function(d) {
-	    return d.room ;
-	})
-    
-
-    for (var i = 0 ; i < rooms[c.room_type].length ; i++) {
-	if (occupied_rooms.indexOf(rooms[c.room_type][i]) == -1
-	    && (is_garbage
-		|| unavailable_rooms[c.day][c.slot].indexOf(rooms[c.room_type][i]) == -1)) {
-	    var cur_prop = {} ;
-	    cur_prop.fid = fake_id ;
-	    cur_prop.room = rooms[c.room_type][i] ;
-	    
-	    room_tutor_change.proposal.push(cur_prop) ;
+function fetch_all_tutors() {
+    show_loader(true);
+    $.ajax({
+        type: "GET",
+        dataType: 'json',
+        url: url_all_tutors,
+        async: false,
+        contentType: "application/json; charset=utf-8",
+        success: function (msg) {
+	    all_tutors = msg.tutors;
+	    all_tutors.filter(function(d) {
+		return d>'A';
+	    })
+		.sort();
+	    show_loader(false);
+        },
+	error: function(msg) {
+	    console.log("error");
+	    show_loader(false);
+	},
+	complete: function(msg) {
+	    console.log("complete");
+	    show_loader(false);
 	}
-    }
-
-    room_tutor_change.but_room.nlin = Math.ceil(room_tutor_change.proposal.length / room_tutor_change.but_room.ncol) ;
-    if (cours_x(c) + .5 * cours_width(c) + tut_chg_bg_width() < grid_width() ) {
-    	room_tutor_change.posh = 'e';
-    } else {
-    	room_tutor_change.posh = 'w';
-    }
-    if (cours_y(c)  + .5 * cours_height(c) + tut_chg_bg_height() < grid_height()) {
-    	room_tutor_change.posv = 's';
-    } else {
-    	room_tutor_change.posv = 'n';
-    }
-
-    if (c.room == une_salle ||
-	occupied_rooms.indexOf(c.room) != -1) {
-	return true;
-    } else {
-	return false ;
-    }
-
+    });
 }
 
 
+function select_tutor_module_change() {
+    room_tutor_change.cm_settings = _cm_settings ;
+    
+}
+// unicode arrow: →
 
-function go_cm_room_change() {
+
+
+
+function go_cm_room_tutor_change() {
 
     var tut_cm_course_dat = cmtg
-        .selectAll(".tut-chg")
+        .selectAll(".cm-chg")
         .data(room_tutor_change.course,
               function(d) {
                   return d.id_cours;
@@ -224,29 +270,29 @@ function go_cm_room_change() {
     var tut_cm_course_g = tut_cm_course_dat
         .enter()
         .append("g")
-        .attr("class", "tut-chg")
+        .attr("class", "cm-chg")
         .attr("cursor", "pointer");
     
 
     tut_cm_course_g
         .append("rect")
-        .attr("class", "tut-chg-bg")
-        .merge(tut_cm_course_dat.select(".tut-chg-bg"))
-        .attr("x", tut_chg_bg_x)
-        .attr("y", tut_chg_bg_y)
-        .attr("width", tut_chg_bg_width)
-        .attr("height", tut_chg_bg_height)
+        .attr("class", "cm-chg-bg")
+        .merge(tut_cm_course_dat.select(".cm-chg-bg"))
+        .attr("x", cm_chg_bg_x)
+        .attr("y", cm_chg_bg_y)
+        .attr("width", cm_chg_bg_width)
+        .attr("height", cm_chg_bg_height)
         .attr("fill", "white");
         // .attr("stroke", "darkslategrey")
         // .attr("stroke-width", 2);
 
     tut_cm_course_g
         .append("text")
-        .attr("class", "tut-chg-comm")
-        .merge(tut_cm_course_dat.select(".tut-chg-comm"))
-        .attr("x", tut_chg_txt_x)
-        .attr("y", tut_chg_txt_y)
-        .text(tut_chg_txt);
+        .attr("class", "cm-chg-comm")
+        .merge(tut_cm_course_dat.select(".cm-chg-comm"))
+        .attr("x", cm_chg_txt_x)
+        .attr("y", cm_chg_txt_y)
+        .text(cm_chg_txt);
         // .attr("stroke", "darkslategrey")
         // .attr("stroke-width", 2);
 
@@ -255,7 +301,7 @@ function go_cm_room_change() {
 
 
     var tut_cm_room_dat = cmtg
-        .selectAll(".tut-chg-rooms")
+        .selectAll(".cm-chg-rooms")
         .data(room_tutor_change.proposal,
               function(d,i) {
                   return d.fid + "-" + i;
@@ -264,39 +310,30 @@ function go_cm_room_change() {
     var tut_cm_room_g = tut_cm_room_dat
         .enter()
         .append("g")
-        .attr("class", "tut-chg-rooms")
+        .attr("class", "cm-chg-rooms")
         .attr("cursor", "pointer")
-	.on("click", function(d){
-	    context_menu.room_hold = true ;
-	    var c = room_tutor_change.course[0] ;
-            add_bouge(c);
-            c.room = d.room;
-	    //room_tutor_change.cur_value = d.room;
-	    room_tutor_change.course = [] ;
-	    room_tutor_change.proposal = [] ;
-	    go_courses() ;
-	})
+	.on("click", room_tutor_change.cm_settings.click);
     
 
     tut_cm_room_g
         .append("rect")
-        .attr("class", "tut-chg-rec")
-        .merge(tut_cm_room_dat.select(".tut-chg-rec"))
-        .attr("x", tut_chg_but_x)
-        .attr("y", tut_chg_but_y)
-        .attr("width", tut_chg_but_width)
-        .attr("height", tut_chg_but_height)
-        .attr("fill", tut_chg_but_fill)
+        .attr("class", "cm-chg-rec")
+        .merge(tut_cm_room_dat.select(".cm-chg-rec"))
+        .attr("x", cm_chg_but_x)
+        .attr("y", cm_chg_but_y)
+        .attr("width", cm_chg_but_width)
+        .attr("height", cm_chg_but_height)
+        .attr("fill", cm_chg_but_fill)
         .attr("stroke", "black")
-        .attr("stroke-width", tut_chg_but_stk);
+        .attr("stroke-width", cm_chg_but_stk);
 
     tut_cm_room_g
         .append("text")
-        .attr("class", "tut-chg-bt")
-        .merge(tut_cm_room_dat.select(".tut-chg-bt"))
-        .attr("x", tut_chg_but_txt_x)
-        .attr("y", tut_chg_but_txt_y)
-        .text(tut_chg_but_txt);
+        .attr("class", "cm-chg-bt")
+        .merge(tut_cm_room_dat.select(".cm-chg-bt"))
+        .attr("x", cm_chg_but_txt_x)
+        .attr("y", cm_chg_but_txt_y)
+        .text(cm_chg_but_txt);
         // .attr("stroke", "darkslategrey")
         // .attr("stroke-width", 2);
 
@@ -304,8 +341,6 @@ function go_cm_room_change() {
 
     
 }
-
-
 
 
 
@@ -463,6 +498,7 @@ function apply_ckbox(dk) {
         } else if (dk == "edt-mod") {
             if (ckbox[dk].cked) {
 		fetch_unavailable_rooms();
+		fetch_all_tutors();
 		if (total_regen) {
 
 		    ckbox[dk].cked = false ;
@@ -1082,3 +1118,22 @@ function get_course(id){
     }
     
 }
+
+
+function compute_cm_room_tutor_direction(c) {
+    var cm_start_x, cm_start_y;
+    cm_start_x = cours_x(c) + .5 * cours_width(c) ;
+    cm_start_y = cours_y(c)  + .5 * cours_height(c) ;
+    if (grid_width() - cm_start_x < cm_start_x) {
+    	room_tutor_change.posh = 'w';
+    } else {
+    	room_tutor_change.posh = 'e';
+    }
+    if (grid_height() - cm_start_y < cm_start_y) {
+    	room_tutor_change.posv = 'n';
+    } else {
+    	room_tutor_change.posv = 's';
+    }
+}
+
+

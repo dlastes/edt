@@ -157,12 +157,15 @@ create_general_svg(false);
 create_quote()
 
 def_drag();
+def_cm_change();
+
 create_clipweek();
 create_menus();
 create_forall_prof();
 
-
 fetch_dispos_type();
+
+
 
 
 d3.json(groupes_fi,
@@ -183,12 +186,14 @@ d3.select("body")
 	}
 	
 	if(ckbox["edt-mod"].cked) {
-	    if (room_tutor_change.course.length > 0) {
-		room_tutor_change.course = [] ;
-		room_tutor_change.proposal = [] ;
-		go_cm_room_change();
+	    if(!context_menu.room_tutor_hold) {
+		if (room_tutor_change.course.length > 0) {
+		    room_tutor_change.course = [] ;
+		    room_tutor_change.proposal = [] ;
+		    go_cm_room_tutor_change();
+		}
 	    }
-	    
+	    context_menu.room_tutor_hold = false ;
 	}
     })
 

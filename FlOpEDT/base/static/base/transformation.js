@@ -746,86 +746,87 @@ function cours_txt_bot_txt(c) {
   ------ ROOMS -------
   --------------------*/
 
-function tut_chg_bg_width() {
-    return room_tutor_change.but_room.mx * (room_tutor_change.but_room.ncol + 1 )
-	+ room_tutor_change.but_room.w * room_tutor_change.but_room.ncol ;
+function cm_chg_bg_width() {
+    return room_tutor_change.cm_settings.mx * (room_tutor_change.cm_settings.ncol + 1 )
+	+ room_tutor_change.cm_settings.w * room_tutor_change.cm_settings.ncol ;
 }
-function tut_chg_bg_height() {
-    return room_tutor_change.but_room.my * (room_tutor_change.but_room.nlin + 1 )
-	+ room_tutor_change.but_room.h * room_tutor_change.but_room.nlin
+function cm_chg_bg_height() {
+    return room_tutor_change.cm_settings.my * (room_tutor_change.cm_settings.nlin + 1 )
+	+ room_tutor_change.cm_settings.h * room_tutor_change.cm_settings.nlin
 	+ room_tutor_change.top ;
 }
 
-function tut_chg_bg_x() {
+function cm_chg_bg_x() {
     var c = room_tutor_change.course[0] ;
     if (room_tutor_change.posh == 'w') {
-	return cours_x(c) + .5 * cours_width(c) - tut_chg_bg_width();
+	return cours_x(c) + .5 * cours_width(c) - cm_chg_bg_width();
     } else {
 	return cours_x(c) + .5 * cours_width(c);
     }
 }
-function tut_chg_bg_y() {
+function cm_chg_bg_y() {
     var c = room_tutor_change.course[0] ;
     if (room_tutor_change.posv == 's') {
 	return cours_y(c)  + .5 * cours_height(c) ;
     } else {
-	return cours_y(c)  + .5 * cours_height(c) - tut_chg_bg_height() ;
+	return cours_y(c)  + .5 * cours_height(c) - cm_chg_bg_height() ;
     }
 }
 
-function tut_chg_txt_x() {
-    return tut_chg_bg_x() + .5*tut_chg_bg_width() ;
+function cm_chg_txt_x() {
+    return cm_chg_bg_x() + .5*cm_chg_bg_width() ;
 }
-function tut_chg_txt_y() {
-    return tut_chg_bg_y() + .5*room_tutor_change.top ;
+function cm_chg_txt_y() {
+    return cm_chg_bg_y() + .5*room_tutor_change.top ;
 }
-function tut_chg_txt() {
-    if (room_tutor_change.proposal.length==0){
-	return "Aucune salle disponible";
-    } else if (room_tutor_change.proposal.length==1) {
-	return "Salle disponible :";
+function cm_chg_txt() {
+    if (Object
+	.keys(room_tutor_change.cm_settings.txt_intro)
+	.indexOf(room_tutor_change.proposal.length.toString())
+	!= -1){
+	return room_tutor_change.cm_settings.txt_intro[room_tutor_change.proposal.length.toString()];
     } else {
-	return "Salles disponibles :";
+	return room_tutor_change.cm_settings.txt_intro['default'];
     }
 }
 
 
-function tut_chg_but_width() {
-    return room_tutor_change.but_room.w ;
+function cm_chg_but_width() {
+    return room_tutor_change.cm_settings.w ;
 }
-function tut_chg_but_height() {
-    return room_tutor_change.but_room.h ;
+function cm_chg_but_height() {
+    return room_tutor_change.cm_settings.h ;
 }
 
-function tut_chg_but_x(d, i) {
-    var c = i % room_tutor_change.but_room.ncol ;
-    var ret = tut_chg_bg_x() + room_tutor_change.but_room.mx 
-	+ ( room_tutor_change.but_room.mx + tut_chg_but_width(d, i) ) * c ;
+function cm_chg_but_x(d, i) {
+    var c = i % room_tutor_change.cm_settings.ncol ;
+    var ret = cm_chg_bg_x() + room_tutor_change.cm_settings.mx 
+	+ ( room_tutor_change.cm_settings.mx + cm_chg_but_width(d, i) ) * c ;
     return ret ;
 }
-function tut_chg_but_y(d,i) {
-    var l = Math.floor(i/room_tutor_change.but_room.ncol) ;
-    return tut_chg_bg_y() + room_tutor_change.top + room_tutor_change.but_room.my
-	+ ( room_tutor_change.but_room.my + tut_chg_but_height(d, i) ) * l ;
+function cm_chg_but_y(d,i) {
+    var l = Math.floor(i/room_tutor_change.cm_settings.ncol) ;
+    return cm_chg_bg_y() + room_tutor_change.top + room_tutor_change.cm_settings.my
+	+ ( room_tutor_change.cm_settings.my + cm_chg_but_height(d, i) ) * l ;
 }
 
-function tut_chg_but_txt_x(d,i) {
-    return tut_chg_but_x(d,i) + .5*tut_chg_but_width(d,i) ;
+function cm_chg_but_txt_x(d,i) {
+    return cm_chg_but_x(d,i) + .5*cm_chg_but_width(d,i) ;
 }
-function tut_chg_but_txt_y(d,i) {
-    return tut_chg_but_y(d,i) + .5*tut_chg_but_height(d,i) ;
+function cm_chg_but_txt_y(d,i) {
+    return cm_chg_but_y(d,i) + .5*cm_chg_but_height(d,i) ;
 }
-function tut_chg_but_txt(d,i) {
-    return d.room;
+function cm_chg_but_txt(d,i) {
+    return d.content ;
 }
-function tut_chg_but_stk(d) {
+function cm_chg_but_stk(d) {
     if (d.room == room_tutor_change.cur_value) {
 	return 3 ; 
     } else {
 	return 0 ;
     }
 }
-function tut_chg_but_fill(d){
+function cm_chg_but_fill(d){
     if (d.room == room_tutor_change.old_value) {
 	return "darkslategrey" ;
     } else {
