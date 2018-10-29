@@ -521,6 +521,17 @@ var tutor_module_cm_settings =
      nlin: 0,
      txt_intro: {'default':"Profs du module ?"}
     };
+var tutor_filters_cm_settings =
+    {type: 'tutor_filters',
+     w: 120,
+     h: 18,
+     fs: 10,
+     mx: 5,
+     my: 3,
+     ncol: 1,
+     nlin: 0,
+     txt_intro: {'default':"Ordre alphabétique :"}
+    };
 var tutor_cm_settings =
     {type: 'tutor',
      w: 45,
@@ -529,11 +540,8 @@ var tutor_cm_settings =
      mx: 5,
      my: 3,
      ncol: 3,
-     nlin: 0,
-     txt_intro: {'0':"Aucune salle disponible",
-		 '1':"Salle disponible :",
-		 'default':"Salles disponibles :"
-		}
+     nlin: 4,
+     txt_intro: {'default':"Ordre alphabétique :"}
     };
 var room_cm_settings =
     {type: 'room',
@@ -562,4 +570,6 @@ var room_tutor_change = {
     posh: 'w'
 };
 
-
+var arrow =
+    {right: "→",
+     back: "↩"} ;

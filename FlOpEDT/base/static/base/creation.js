@@ -1843,6 +1843,22 @@ function def_cm_change() {
 	go_cm_room_tutor_change();
     };
 
+    tutor_filters_cm_settings.click = function(d) {
+	context_menu.room_tutor_hold = true ;
+	select_tutor_change(d);
+	go_cm_room_tutor_change();
+    };
+    
+    tutor_cm_settings.click = function(d) {
+	context_menu.room_tutor_hold = true ;
+	if (d.content == arrow.back) {
+	    select_tutor_filters_change();
+	} else {
+	    confirm_tutor_change(d);
+	}
+	go_cm_room_tutor_change();
+    };
+
     room_cm_settings.click = function(d) {
 	context_menu.room_tutor_hold = true ;
 	confirm_room_change(d) ;

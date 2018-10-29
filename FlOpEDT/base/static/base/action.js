@@ -219,31 +219,33 @@ function apply_tutor_display_all() {
 
 
 function fetch_all_tutors() {
-    show_loader(true);
-    $.ajax({
-        type: "GET",
-        dataType: 'json',
-        url: url_all_tutors,
-        async: false,
-        contentType: "application/json; charset=utf-8",
-        success: function (msg) {
-	    all_tutors = msg.tutors;
-	    all_tutors.filter(function(d) {
-		return d>'A';
-	    })
-		.sort();
+    if(all_tutors.length == 0) {
+	show_loader(true);
+	$.ajax({
+            type: "GET",
+            dataType: 'json',
+            url: url_all_tutors,
+            async: false,
+            contentType: "application/json; charset=utf-8",
+            success: function (msg) {
+		all_tutors = msg.tutors.filter(function(d) {
+		    return d>'A';
+		});
+		all_tutors.sort();
+		show_loader(false);
+            },
+	    error: function(msg) {
+		console.log("error");
+		show_loader(false);
+	    },
+	    complete: function(msg) {
+		console.log("complete");
 	    show_loader(false);
-        },
-	error: function(msg) {
-	    console.log("error");
-	    show_loader(false);
-	},
-	complete: function(msg) {
-	    console.log("complete");
-	    show_loader(false);
-	}
-    });
+	    }
+	});
+    }
 }
+
 
 
 function select_tutor_module_change() {
@@ -276,6 +278,64 @@ function select_tutor_module_change() {
     room_tutor_change.cm_settings.nlin = Math.ceil(room_tutor_change.proposal.length / room_tutor_change.cm_settings.ncol) ;
 
 }
+
+
+function select_tutor_filters_change() {
+    room_tutor_change.cm_settings = tutor_filters_cm_settings ;
+
+    var c = room_tutor_change.course[0] ;
+
+    var chunk_size = tutor_cm_settings.ncol * tutor_cm_settings.nlin - 2 ;
+
+    var rest = all_tutors.length % chunk_size ;
+
+    room_tutor_change.proposal = [] ;
+    
+    var i = 0 ; var i_end ;
+    while(i < all_tutors.length) {
+	i_end = i + chunk_size - 1 ;
+	if(rest > 0) {
+	    i_end++;
+	    rest--;
+	} 
+	room_tutor_change.proposal.push(all_tutors[i]
+					+ arrow.right
+					+ all_tutors[i_end]);
+	i = i_end + 1 ;
+    }
+    
+    var fake_id = new Date() ;
+    fake_id = fake_id.getMilliseconds() + "-" + c.id_cours ;
+    room_tutor_change.proposal = room_tutor_change.proposal.map(function(t) {
+	return {fid: fake_id, content: t};
+    });
+
+    room_tutor_change.cm_settings.nlin = Math.ceil(room_tutor_change.proposal.length / room_tutor_change.cm_settings.ncol) ;
+
+}
+
+function select_tutor_change(f) {
+    room_tutor_change.cm_settings = tutor_cm_settings ;
+
+    
+    var c = room_tutor_change.course[0] ;
+
+    var ends = f.content.split(arrow.right);
+
+    room_tutor_change.proposal = all_tutors.filter(function(t) {
+	return t >= ends[0] && t <= ends[1] ;
+    });
+
+    room_tutor_change.proposal.push(arrow.back) ;
+    
+    var fake_id = new Date() ;
+    fake_id = fake_id.getMilliseconds() + "-" + c.id_cours ;
+    room_tutor_change.proposal = room_tutor_change.proposal.map(function(t) {
+	return {fid: fake_id, content: t};
+    });
+
+}
+
 
 // unicode →
 
