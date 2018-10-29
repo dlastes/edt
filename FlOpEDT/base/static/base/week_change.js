@@ -691,8 +691,8 @@ function fetch_unavailable_rooms() {
                 d3.csvParse(msg, translate_unavailable_rooms);
 
             }
-	    console.log(unavailable_rooms);
             show_loader(false);
+	    fetch.ongoing_un_rooms = false;
         },
         error: function(msg) {
             console.log("error");
