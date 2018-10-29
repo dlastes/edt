@@ -1280,10 +1280,10 @@ function def_drag() {
 			add_bouge(d);
                         d.day = cur_over.day;
                         d.slot = cur_over.slot;
-			var disp_cont_menu = select_room_change(d) ;
-			console.log(disp_cont_menu);
+			room_tutor_change.course.push(d)
+			var disp_cont_menu = select_room_change() ;
 			if (disp_cont_menu) {
-			    go_cm_room_change();
+			    go_cm_room_tutor_change();
 			} else {
 			    room_tutor_change.course = [] ;
 			    room_tutor_change.proposal = [] ;
