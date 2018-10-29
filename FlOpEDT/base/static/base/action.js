@@ -662,7 +662,7 @@ function compute_changes(changes, profs, gps) {
 	cur_course = get_course(id) ;
 	cb = cours_bouge[id] ;
 
-	if (had_moved(cb , cur_course)) {
+	if (had_moved(cb , cur_course) || cur_course.prof != cb.prof) {
 
 	    /* Sanity checks */
 	    
@@ -725,6 +725,10 @@ function compute_changes(changes, profs, gps) {
 		&& cur_course.prof != logged_usr.nom) {
                 profs.push(cur_course.prof);
             }
+            if (profs.indexOf(cb.prof) == -1
+		&& cur_course.prof != logged_usr.nom) {
+                profs.push(cb.prof);
+            }
 
 	    // add group if never seen
 	    gp_changed = groups[cur_course.promo][cur_course.group] ;
@@ -754,21 +758,26 @@ function compute_changes(changes, profs, gps) {
 		      week: {o: weeks.init_data[weeks.sel[0]].semaine,
 			     n: null },
 		      year: {o: weeks.init_data[weeks.sel[0]].an,
+			     n: null},
+		      tutor:{o: cb.prof,
 			     n: null}
 		     };
 	    
 	    
             console.log("change", change);
-		if (cb.day != cur_course.day ||
-                    cb.slot != cur_course.slot) {
-                    change.day.n = cur_course.day;
-                    change.slot.n = cur_course.slot;
-		}
-		if (cb.room != cur_course.room) {
-                    change.room.n = cur_course.room;
-		}
-
-		changes.push(change);
+	    if (cb.day != cur_course.day ||
+                cb.slot != cur_course.slot) {
+                change.day.n = cur_course.day;
+                change.slot.n = cur_course.slot;
+	    }
+	    if (cb.room != cur_course.room) {
+                change.room.n = cur_course.room;
+	    }
+	    if (cb.prof != cur_course.prof) {
+                change.tutor.n = cur_course.prof;
+	    }
+	    
+	    changes.push(change);
 		
             
 	    
