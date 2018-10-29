@@ -1217,7 +1217,8 @@ function get_course(id){
 }
 
 
-function compute_cm_room_tutor_direction(c) {
+function compute_cm_room_tutor_direction() {
+    var c = room_tutor_change.course[0] ;
     var cm_start_x, cm_start_y;
     cm_start_x = cours_x(c) + .5 * cours_width(c) ;
     cm_start_y = cours_y(c)  + .5 * cours_height(c) ;

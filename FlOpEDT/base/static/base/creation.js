@@ -1280,7 +1280,8 @@ function def_drag() {
 			add_bouge(d);
                         d.day = cur_over.day;
                         d.slot = cur_over.slot;
-			room_tutor_change.course.push(d)
+			room_tutor_change.course.push(d) ;
+			compute_cm_room_tutor_direction() ;
 			var disp_cont_menu = select_room_change() ;
 			if (disp_cont_menu) {
 			    go_cm_room_tutor_change();
