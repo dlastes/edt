@@ -856,7 +856,7 @@ def dispos_changes(req):
             = "Problème d'utilisateur."
         return bad_response
 
-    if prof != req.user and req.user.rights >> 1 % 2 == 0:
+    if prof.username != req.user.username and req.user.rights >> 1 % 2 == 0:
         bad_response['reason'] \
             = 'Non autorisé, réclamez plus de droits.'
         return bad_response
