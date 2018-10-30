@@ -91,21 +91,12 @@ function apply_wk_change(d, i) { //if(fetch.done) {
     }
     dispos = [];
     user.dispos = [];
-    fetch.cours_ok = false;
-    fetch.dispos_ok = false;
 
-
-    fetch_cours();
-
-    fetch_bknews(false);
-
-    
-    if (ckbox["dis-mod"].cked || ckbox["edt-mod"].cked) {
-        fetch_dispos();
-    };
+    fetch_all(false);
 
     go_week_menu(false);
 } //}
+
 
 
 /*----------------------
@@ -121,6 +112,67 @@ function clear_pop(gs) {
         go_grid(false);
     }
 }
+
+
+/*--------------------
+  ------- ROOMS ------
+  --------------------*/
+
+
+// return: true iff a change is needed (i.e. unassigned room or already occupied)
+function select_room_change() {
+    room_tutor_change.cm_settings = room_cm_settings ;
+
+    var c = room_tutor_change.course[0] ;
+    room_tutor_change.old_value = c.room ;
+    room_tutor_change.cur_value = c.room ;
+
+    var fake_id = new Date() ;
+    fake_id = fake_id.getMilliseconds() + "-" + c.id_cours ;
+    room_tutor_change.proposal = [] ;
+
+    var occupied_rooms = cours
+	.filter(function(d) {
+	    return d.day==c.day && d.slot==c.slot && d.id_cours!=c.id_cours ;
+	})
+	.map(function(d) {
+	    return d.room ;
+	})
+
+    for (var i = 0 ; i < rooms[c.room_type].length ; i++) {
+	if (occupied_rooms.indexOf(rooms[c.room_type][i]) == -1
+	    && (is_garbage(c.day,c.slot)
+		|| unavailable_rooms[c.day][c.slot].indexOf(rooms[c.room_type][i]) == -1)) {
+	    var cur_prop = {} ;
+	    cur_prop.fid = fake_id ;
+	    cur_prop.content = rooms[c.room_type][i] ;
+	    
+	    room_tutor_change.proposal.push(cur_prop) ;
+	}
+    }
+
+    room_tutor_change.cm_settings.nlin = Math.ceil(room_tutor_change.proposal.length / room_tutor_change.cm_settings.ncol) ;
+
+    if (c.room == une_salle ||
+	occupied_rooms.indexOf(c.room) != -1) {
+	return true;
+    } else {
+	return false ;
+    }
+
+}
+
+
+function confirm_room_change(d){
+    var c = room_tutor_change.course[0] ;
+    add_bouge(c);
+    c.room = d.content;
+    //room_tutor_change.cur_value = d.room;
+    room_tutor_change.course = [] ;
+    room_tutor_change.proposal = [] ;
+    go_courses() ;
+}
+
 
 
 /*---------------------
@@ -164,6 +216,229 @@ function apply_tutor_display_all() {
         go_tutors();
     }
 }
+
+
+function fetch_all_tutors() {
+    if(all_tutors.length == 0) {
+	show_loader(true);
+	$.ajax({
+            type: "GET",
+            dataType: 'json',
+            url: url_all_tutors,
+            async: false,
+            contentType: "application/json; charset=utf-8",
+            success: function (msg) {
+		all_tutors = msg.tutors.filter(function(d) {
+		    return d>'A';
+		});
+		all_tutors.sort();
+		show_loader(false);
+            },
+	    error: function(msg) {
+		console.log("error");
+		show_loader(false);
+	    },
+	    complete: function(msg) {
+		console.log("complete");
+	    show_loader(false);
+	    }
+	});
+    }
+}
+
+
+
+function select_tutor_module_change() {
+    room_tutor_change.cm_settings = tutor_module_cm_settings ;
+
+    var c = room_tutor_change.course[0] ;
+    room_tutor_change.old_value = c.prof ;
+    room_tutor_change.cur_value = c.prof ;
+
+    var tutor_same_module = cours
+	.filter(function(c) {
+	    return c.mod == room_tutor_change.course[0].mod;
+	})
+	.map(function(c){ return c.prof; });
+    
+    tutor_same_module = tutor_same_module.filter(function(t,i) {
+	return tutor_same_module.indexOf(t)==i ;
+    }) ;
+
+    var fake_id = new Date() ;
+    fake_id = fake_id.getMilliseconds() + "-" + c.id_cours ;
+    room_tutor_change.proposal = [] ;
+
+    room_tutor_change.proposal = tutor_same_module.map(function(t) {
+	return {fid: fake_id, content: t};
+    });
+
+    room_tutor_change.proposal.push({fid: fake_id, content: "+"});
+
+    room_tutor_change.cm_settings.nlin = Math.ceil(room_tutor_change.proposal.length / room_tutor_change.cm_settings.ncol) ;
+
+}
+
+
+function select_tutor_filters_change() {
+    room_tutor_change.cm_settings = tutor_filters_cm_settings ;
+
+    var c = room_tutor_change.course[0] ;
+
+    var chunk_size = tutor_cm_settings.ncol * tutor_cm_settings.nlin - 2 ;
+
+    var rest = all_tutors.length % chunk_size ;
+
+    room_tutor_change.proposal = [] ;
+    
+    var i = 0 ; var i_end ;
+    while(i < all_tutors.length) {
+	i_end = i + chunk_size - 1 ;
+	if(rest > 0) {
+	    i_end++;
+	    rest--;
+	} 
+	room_tutor_change.proposal.push(all_tutors[i]
+					+ arrow.right
+					+ all_tutors[i_end]);
+	i = i_end + 1 ;
+    }
+    
+    var fake_id = new Date() ;
+    fake_id = fake_id.getMilliseconds() + "-" + c.id_cours ;
+    room_tutor_change.proposal = room_tutor_change.proposal.map(function(t) {
+	return {fid: fake_id, content: t};
+    });
+
+    room_tutor_change.cm_settings.nlin = Math.ceil(room_tutor_change.proposal.length / room_tutor_change.cm_settings.ncol) ;
+
+}
+
+function select_tutor_change(f) {
+    room_tutor_change.cm_settings = tutor_cm_settings ;
+
+    
+    var c = room_tutor_change.course[0] ;
+
+    var ends = f.content.split(arrow.right);
+
+    room_tutor_change.proposal = all_tutors.filter(function(t) {
+	return t >= ends[0] && t <= ends[1] ;
+    });
+
+    room_tutor_change.proposal.push(arrow.back) ;
+    
+    var fake_id = new Date() ;
+    fake_id = fake_id.getMilliseconds() + "-" + c.id_cours ;
+    room_tutor_change.proposal = room_tutor_change.proposal.map(function(t) {
+	return {fid: fake_id, content: t};
+    });
+
+}
+
+
+// unicode →
+
+
+function confirm_tutor_change(d){
+    var c = room_tutor_change.course[0] ;
+    add_bouge(c);
+    c.prof = d.content;
+    //room_tutor_change.cur_value = d.room;
+    room_tutor_change.course = [] ;
+    room_tutor_change.proposal = [] ;
+    go_courses() ;
+}
+
+
+
+
+
+function go_cm_room_tutor_change() {
+
+    var tut_cm_course_dat = cmtg
+        .selectAll(".cm-chg")
+        .data(room_tutor_change.course,
+              function(d) {
+                  return d.id_cours;
+              });
+    
+    var tut_cm_course_g = tut_cm_course_dat
+        .enter()
+        .append("g")
+        .attr("class", "cm-chg")
+        .attr("cursor", "pointer");
+    
+
+    tut_cm_course_g
+        .append("rect")
+        .attr("class", "cm-chg-bg")
+        .merge(tut_cm_course_dat.select(".cm-chg-bg"))
+        .attr("x", cm_chg_bg_x)
+        .attr("y", cm_chg_bg_y)
+        .attr("width", cm_chg_bg_width)
+        .attr("height", cm_chg_bg_height)
+        .attr("fill", "white");
+        // .attr("stroke", "darkslategrey")
+        // .attr("stroke-width", 2);
+
+    tut_cm_course_g
+        .append("text")
+        .attr("class", "cm-chg-comm")
+        .merge(tut_cm_course_dat.select(".cm-chg-comm"))
+        .attr("x", cm_chg_txt_x)
+        .attr("y", cm_chg_txt_y)
+        .text(cm_chg_txt);
+        // .attr("stroke", "darkslategrey")
+        // .attr("stroke-width", 2);
+
+    tut_cm_course_dat.exit().remove();
+
+
+
+    var tut_cm_room_dat = cmtg
+        .selectAll(".cm-chg-rooms")
+        .data(room_tutor_change.proposal,
+              function(d,i) {
+                  return d.fid + "-" + i;
+              });
+    
+    var tut_cm_room_g = tut_cm_room_dat
+        .enter()
+        .append("g")
+        .attr("class", "cm-chg-rooms")
+        .attr("cursor", "pointer")
+	.on("click", room_tutor_change.cm_settings.click);
+    
+
+    tut_cm_room_g
+        .append("rect")
+        .attr("class", "cm-chg-rec")
+        .merge(tut_cm_room_dat.select(".cm-chg-rec"))
+        .attr("x", cm_chg_but_x)
+        .attr("y", cm_chg_but_y)
+        .attr("width", cm_chg_but_width)
+        .attr("height", cm_chg_but_height)
+        .attr("fill", cm_chg_but_fill)
+        .attr("stroke", "black")
+        .attr("stroke-width", cm_chg_but_stk);
+
+    tut_cm_room_g
+        .append("text")
+        .attr("class", "cm-chg-bt")
+        .merge(tut_cm_room_dat.select(".cm-chg-bt"))
+        .attr("x", cm_chg_but_txt_x)
+        .attr("y", cm_chg_but_txt_y)
+        .text(cm_chg_but_txt);
+        // .attr("stroke", "darkslategrey")
+        // .attr("stroke-width", 2);
+
+    tut_cm_room_dat.exit().remove();
+
+    
+}
+
+
 
 /*----------------------
   ------- GROUPS -------
@@ -293,14 +568,19 @@ function apply_ckbox(dk) {
                 if (rootgp_width != 0) {
                     labgp.width *= 1 - (dim_dispo.width + dim_dispo.right) / (rootgp_width * labgp.width);
                 }
-                if (!fetch.dispos_ok) {
-                    fetch_dispos();
-                } else {
-                    if (user.dispos.length == 0) {
-                        create_dispos_user_data();
-                    }
-                    go_edt(false);
-                }
+		
+                // if (!fetch.dispos_ok) {
+                //     fetch_dispos();
+                // } else {
+                //     if (user.dispos.length == 0) {
+                //         create_dispos_user_data();
+                //     }
+                //     go_edt(false);
+                // }
+                if (dispos.length == 0) {
+		    fetch_dispos();
+		}
+		
             } else {
                 user.dispos = [];
                 //ckbox["dis-mod"].disp = false;
@@ -313,6 +593,8 @@ function apply_ckbox(dk) {
             }
         } else if (dk == "edt-mod") {
             if (ckbox[dk].cked) {
+		fetch_unavailable_rooms();
+		fetch_all_tutors();
 		if (total_regen) {
 
 		    ckbox[dk].cked = false ;
@@ -330,11 +612,15 @@ function apply_ckbox(dk) {
 		}
 		
                 edt_but.attr("visibility", "visible");
-                if (!fetch.dispos_ok) {
-                    fetch_dispos();
-                } else {
-                    go_edt(true);
-                }
+
+		if (dispos.length == 0) {
+		    fetch_dispos();
+		}
+                // if (!fetch.dispos_ok) {
+                //     fetch_dispos();
+                // } else {
+                //     go_edt(true);
+                // }
             } else {
                 edt_but.attr("visibility", "hidden");
                 go_edt(true);
@@ -376,7 +662,7 @@ function compute_changes(changes, profs, gps) {
 	cur_course = get_course(id) ;
 	cb = cours_bouge[id] ;
 
-	if (had_moved(cb , cur_course)) {
+	if (had_moved(cb , cur_course) || cur_course.prof != cb.prof) {
 
 	    /* Sanity checks */
 	    
@@ -439,6 +725,10 @@ function compute_changes(changes, profs, gps) {
 		&& cur_course.prof != logged_usr.nom) {
                 profs.push(cur_course.prof);
             }
+            if (profs.indexOf(cb.prof) == -1
+		&& cur_course.prof != logged_usr.nom) {
+                profs.push(cb.prof);
+            }
 
 	    // add group if never seen
 	    gp_changed = groups[cur_course.promo][cur_course.group] ;
@@ -468,21 +758,26 @@ function compute_changes(changes, profs, gps) {
 		      week: {o: weeks.init_data[weeks.sel[0]].semaine,
 			     n: null },
 		      year: {o: weeks.init_data[weeks.sel[0]].an,
+			     n: null},
+		      tutor:{o: cb.prof,
 			     n: null}
 		     };
 	    
 	    
             console.log("change", change);
-		if (cb.day != cur_course.day ||
-                    cb.slot != cur_course.slot) {
-                    change.day.n = cur_course.day;
-                    change.slot.n = cur_course.slot;
-		}
-		if (cb.room != cur_course.room) {
-                    change.room.n = cur_course.room;
-		}
-
-		changes.push(change);
+	    if (cb.day != cur_course.day ||
+                cb.slot != cur_course.slot) {
+                change.day.n = cur_course.day;
+                change.slot.n = cur_course.slot;
+	    }
+	    if (cb.room != cur_course.room) {
+                change.room.n = cur_course.room;
+	    }
+	    if (cb.prof != cur_course.prof) {
+                change.tutor.n = cur_course.prof;
+	    }
+	    
+	    changes.push(change);
 		
             
 	    
@@ -896,7 +1191,8 @@ function add_bouge(d) {
             id: d.id_cours,
             day: d.day,
             slot: d.slot,
-            room: d.room
+            room: d.room,
+	    prof: d.prof
         };
         console.log(cours_bouge[d.id_cours]);
     }
@@ -928,3 +1224,23 @@ function get_course(id){
     }
     
 }
+
+
+function compute_cm_room_tutor_direction() {
+    var c = room_tutor_change.course[0] ;
+    var cm_start_x, cm_start_y;
+    cm_start_x = cours_x(c) + .5 * cours_width(c) ;
+    cm_start_y = cours_y(c)  + .5 * cours_height(c) ;
+    if (grid_width() - cm_start_x < cm_start_x) {
+    	room_tutor_change.posh = 'w';
+    } else {
+    	room_tutor_change.posh = 'e';
+    }
+    if (grid_height() - cm_start_y < cm_start_y) {
+    	room_tutor_change.posv = 'n';
+    } else {
+    	room_tutor_change.posv = 's';
+    }
+}
+
+

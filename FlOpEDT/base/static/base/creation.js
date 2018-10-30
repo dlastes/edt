@@ -178,6 +178,15 @@ function create_layouts(svg_cont, light) {
     fg = edtg.append("g")
         .attr("id", "lay-fg");
 
+    // context menus ground
+    var cmg = svg_cont.append("g")
+        .attr("id", "lay-cmg");
+    cmpg = cmg.append("g")
+	.attr("id", "lay-cmpg");
+    cmtg = cmg.append("g")
+	.attr("id", "lay-cmtg");
+    
+
     // logo ground
     log = edtg.append("g")
         .attr("id", "lay-log");
@@ -1248,7 +1257,8 @@ function def_drag() {
                 drag.y += d3.event.dy;
                 drag.sel.attr("transform", "translate(" + drag.x + "," + drag.y + ")");
             }
-        }).on("end", function(d) {
+        })
+	.on("end", function(d) {
             if (cur_over != null && ckbox["edt-mod"].cked && fetch.done) {
 
                 mg.node().appendChild(drag.sel.node());
@@ -1270,6 +1280,15 @@ function def_drag() {
 			add_bouge(d);
                         d.day = cur_over.day;
                         d.slot = cur_over.slot;
+			room_tutor_change.course.push(d) ;
+			compute_cm_room_tutor_direction() ;
+			var disp_cont_menu = select_room_change() ;
+			if (disp_cont_menu) {
+			    go_cm_room_tutor_change();
+			} else {
+			    room_tutor_change.course = [] ;
+			    room_tutor_change.proposal = [] ;
+			}
 
 		    } else if (!ngs.dispo && (logged_usr.rights >> 2) % 2 == 1) {
 
@@ -1481,6 +1500,19 @@ function is_free(day, hour, promo) {
     return (promo < 2 && (day == 3 && hour > 2));
 }
 
+
+
+/*---------------------
+  ------- ROOMS -------
+   ---------------------*/
+
+function clean_unavailable_rooms() {
+    for (var i = 0; i < nbPer; i++) {
+	for (var j = 0; j < nbSl; j++) {
+	    unavailable_rooms[i][j] = [] ;
+	}
+    }
+}
 
 
 /*--------------------
@@ -1763,4 +1795,75 @@ function create_dispo_default_from_index(ind) {
 
 
 
+/*--------------------
+   ------ ALL ------
+   --------------------*/
+
+// function cm_room_launch(d) {
+//     if (ckbox["edt-mod"].cked) {
+// 	d3.event.preventDefault();
+// 	context_menu.room_tutor_hold = true ;
+// 	compute_cm_room_tutor_direction();
+// 	select_room_change(d);
+// 	go_cm_room_tutor_change();
+//     }
+// }
+
+function select_entry_cm(d) {
+    room_tutor_change.cm_settings = entry_cm_settings;
+    room_tutor_change.course = [d];
+    var fake_id = new Date() ;
+    fake_id = fake_id.getMilliseconds() + "-" + d.id_cours ;
+    room_tutor_change.proposal = [{fid:fake_id,
+				   content:"Prof"},
+				   {fid:fake_id,
+				    content:"Salle"}] ;
+}
+
+
+
+
+function def_cm_change() {
+    entry_cm_settings.click = function(d) {
+	context_menu.room_tutor_hold = true ;
+	if(d.content == 'Salle') {
+	    select_room_change();
+	} else {
+	    select_tutor_module_change();
+	}
+	go_cm_room_tutor_change();
+    };
+    
+    tutor_module_cm_settings.click = function(d) {
+	context_menu.room_tutor_hold = true ;
+	if(d.content == '+') {
+	    select_tutor_filters_change();
+	} else {
+	    confirm_tutor_change(d);
+	}
+	go_cm_room_tutor_change();
+    };
+
+    tutor_filters_cm_settings.click = function(d) {
+	context_menu.room_tutor_hold = true ;
+	select_tutor_change(d);
+	go_cm_room_tutor_change();
+    };
+    
+    tutor_cm_settings.click = function(d) {
+	context_menu.room_tutor_hold = true ;
+	if (d.content == arrow.back) {
+	    select_tutor_filters_change();
+	} else {
+	    confirm_tutor_change(d);
+	}
+	go_cm_room_tutor_change();
+    };
+
+    room_cm_settings.click = function(d) {
+	context_menu.room_tutor_hold = true ;
+	confirm_room_change(d) ;
+    }
+
+}
 

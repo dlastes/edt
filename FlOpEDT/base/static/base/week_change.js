@@ -44,9 +44,8 @@
   ------- DISPOS ------
   ---------------------*/
 function fetch_dispos() {
+
     fetch.ongoing_dispos = true;
-    fetch.done = false;
-    fetch.dispos_ok = true;
 
     var semaine_att = weeks.init_data[weeks.sel[0]].semaine;
     var an_att = weeks.init_data[weeks.sel[0]].an;
@@ -296,6 +295,7 @@ function create_pr_buttons() {
   --------------------*/
 function fetch_bknews(first) {
     fetch.ongoing_bknews = true;
+
     var semaine_att = weeks.init_data[weeks.sel[0]].semaine;
     var an_att = weeks.init_data[weeks.sel[0]].an;
 
@@ -378,13 +378,11 @@ function adapt_labgp(first) {
   --------------------*/
 
 function fetch_cours() {
-    var garbage_plot ;
-    
     fetch.ongoing_cours_pp = true;
     fetch.ongoing_cours_pl = true;
-    fetch.cours_ok = false;
-
-    fetch.done = false;
+    
+    var garbage_plot ;
+    
     ack.edt = "";
     go_ack_msg(true);
 
@@ -517,6 +515,7 @@ function translate_cours_pl_from_csv(d) {
         day: +d.jour,
         slot: +d.heure,
         room: d.room,
+	room_type: d.room_type,
 	color_bg: d.color_bg,
 	color_txt: d.color_txt,
     };
@@ -545,6 +544,7 @@ function translate_cours_pp_from_csv(d) {
         day: garbage.day,
         slot: garbage.slot,
         room: une_salle,
+	room_type: d.room_type,
 	color_bg: d.color_bg,
 	color_txt: d.color_txt,
     };
@@ -664,9 +664,79 @@ function translate_gp_name(gp) {
 }
 
 
+
+/*--------------------
+   ------ ROOMS ------
+  --------------------*/
+function fetch_unavailable_rooms() {
+    fetch.ongoing_un_rooms = true;
+    
+    var semaine_att = weeks.init_data[weeks.sel[0]].semaine;
+    var an_att = weeks.init_data[weeks.sel[0]].an;
+
+    show_loader(true);
+    $.ajax({
+        type: "GET", //rest Type
+        dataType: 'text',
+        url: url_unavailable_rooms + an_att + "/" + semaine_att ,
+        async: true,
+        contentType: "text/csv",
+        success: function(msg, ts, req) {
+            if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
+                an_att == weeks.init_data[weeks.sel[0]].an) {
+
+		console.log(msg);
+
+		clean_unavailable_rooms();
+                d3.csvParse(msg, translate_unavailable_rooms);
+
+            }
+            show_loader(false);
+	    fetch.ongoing_un_rooms = false;
+        },
+        error: function(msg) {
+            console.log("error");
+            show_loader(false);
+        }
+    });
+}
+
+function translate_unavailable_rooms(d) {
+    console.log(d);
+    var slot = +d.heure ;
+    var day = +d.jour ;
+    unavailable_rooms[day][slot].push(d.room);
+}
+
 /*--------------------
    ------ ALL -------
-  --------------------*/
+   --------------------*/
+
+function fetch_all(first){
+    fetch.done = false;
+
+    fetch.ongoing_cours_pp = true;
+    fetch.ongoing_cours_pl = true;
+    if (ckbox["dis-mod"].cked || ckbox["edt-mod"].cked) {
+	fetch.ongoing_dispos = true;
+    }
+    if (ckbox["edt-mod"].cked) {
+	fetch.ongoing_un_rooms = true;
+    }
+    fetch.ongoing_bknews = true;
+
+    fetch_cours();
+    if (ckbox["dis-mod"].cked || ckbox["edt-mod"].cked) {
+        fetch_dispos();
+    }
+    if (ckbox["edt-mod"].cked) {
+	fetch_unavailable_rooms() ;
+    }
+    fetch_bknews(first);
+}
+
+
+
 function fetch_ended() {
     if (!fetch.ongoing_cours_pl &&
         !fetch.ongoing_cours_pp) {
@@ -702,12 +772,12 @@ function fetch_ended() {
         create_mod_dd();
         create_sal_dd();
         clean_prof_displayed();
-        fetch.cours_ok = true;
     }
 
     if (!fetch.ongoing_cours_pp &&
         !fetch.ongoing_cours_pl &&
-        !fetch.ongoing_dispos &&
+        !fetch.ongoing_dispos   &&
+        !fetch.ongoing_un_rooms &&
         !fetch.ongoing_bknews) {
 
         fetch.done = true;
