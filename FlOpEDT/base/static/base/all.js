@@ -118,8 +118,7 @@ function on_group_rcv(dg) {
     go_gp_buttons();
 
 
-    fetch_cours();
-    fetch_bknews(true);
+    fetch_all(true);
 
     if (splash_id == 1) {
     
@@ -145,7 +144,10 @@ function on_group_rcv(dg) {
 }
 
 
-
+function on_room_rcv(room_data) {
+    rooms = room_data;
+}
+    
 /*---------------------
   ------ STARTER ------
   ---------------------*/
@@ -155,33 +157,45 @@ create_general_svg(false);
 create_quote()
 
 def_drag();
+def_cm_change();
+
 create_clipweek();
 create_menus();
 create_forall_prof();
 
-
 fetch_dispos_type();
+
+
 
 
 d3.json(groupes_fi,
  	on_group_rcv);
 
+d3.json(rooms_fi,
+ 	on_room_rcv);
 
 
 d3.select("body")
-    .on("click", function(d) {if(ckbox["dis-mod"].cked) {
-	if(dispo_menu_appeared) {
-	    del_dispo_adv = true ;
-	    dispo_menu_appeared = false ;
-	    go_pref(true);
-	} else {
-	    if(del_dispo_adv) {
-		del_dispo_adv = false ;
+    .on("click", function(d) {
+	if(ckbox["dis-mod"].cked) {
+	    if(! context_menu.dispo_hold) {
 		data_dispo_adv_cur = [] ;
-		go_pref(true);
+		go_cm_advanced_pref(true);
 	    }
+	    context_menu.dispo_hold = false ;
 	}
-    }})
+	
+	if(ckbox["edt-mod"].cked) {
+	    if(!context_menu.room_tutor_hold) {
+		if (room_tutor_change.course.length > 0) {
+		    room_tutor_change.course = [] ;
+		    room_tutor_change.proposal = [] ;
+		    go_cm_room_tutor_change();
+		}
+	    }
+	    context_menu.room_tutor_hold = false ;
+	}
+    })
 
 
 

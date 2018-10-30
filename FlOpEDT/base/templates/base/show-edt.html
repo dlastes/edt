@@ -35,6 +35,7 @@
   <!-- script src='https://d3js.org/d3.v4.min.js'></script -->
   <script>
     var groupes_fi = "{% static 'base/groups.json' %}";
+    var rooms_fi = "{% static 'base/rooms.json' %}";
 
     var url_cours_pl = "{% url "base:fetch_cours_pl" 0 0 0 %}";
     url_cours_pl = url_cours_pl.slice(0,-5);
@@ -42,6 +43,9 @@
     url_cours_pp = url_cours_pp.slice(0,-5);
     var url_dispos = "{% url "base:fetch_dispos" 0 0 %}";
     url_dispos = url_dispos.slice(0,-3);
+    var url_unavailable_rooms = "{% url "base:fetch_unavailable_rooms" 0 0 %}";
+    url_unavailable_rooms = url_unavailable_rooms.slice(0,-3);
+    var url_all_tutors = "{% url "base:fetch_all_tutors" %}";
     var url_login = "{% url "people:login"%}";
     var url_edt = "{% url "base:edt"%}";
     var url_edt_changes = "{% url "base:edt_changes"%}";

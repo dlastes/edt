@@ -27,6 +27,8 @@
 from base.models import Group, TrainingProgramme, GroupDisplay, \
     TrainingProgrammeDisplay
 
+from base.models import Room, RoomType, RoomGroup, RoomSort
+
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
 
@@ -111,3 +113,28 @@ def get_descendant_groups(gp, children):
             current['children'].append(gp_obj)
 
     return current
+
+
+def generate_room_file():
+    """
+    From the data stored in the database, fill the room description file, that
+    will be used by the website
+    :return:
+    """
+    d = {}
+    for rt in RoomType.objects.all():
+        d[str(rt)] = []
+        for rg in rt.members.all():
+            for r in rg.subrooms.all():
+                if str(r) not in d[str(rt)]:
+                    d[str(rt)].append(str(r))
+    
+    with open(os.path.join(settings.BASE_DIR, 'base',
+                           'static', 'base',
+                           'rooms.json'), 'w') as fp:
+        json.dump(d, fp)
+
+    return d
+            
+                
+        

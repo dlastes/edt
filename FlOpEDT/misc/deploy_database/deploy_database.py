@@ -35,7 +35,7 @@ from base.weeks import annee_courante
 
 from misc.check_slots import assign_day_time_numbers
 
-from misc.group_file import generate_group_file
+from misc.generate_static_files import generate_group_file
 
 from people.models import FullStaff, SupplyStaff, Tutor
 
