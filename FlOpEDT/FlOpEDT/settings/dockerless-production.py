@@ -23,45 +23,11 @@
 
 from .base import *
 
-SECRET_KEY = 'your_secret_key'
-
-DEBUG = True
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'flop_database',
-        'USER': 'flop_user',
-        'PASSWORD': 'your_password',
-        'HOST': '127.0.0.1',
-        'PORT': '5432',
-    }
-}
+STATIC_ROOT = '/var/www/edt/static/'
 
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'LOCATION': '127.0.0.1:11211',
     }
-}
-
-# if you want some cache, use the following instead:
-#
-# CACHES = {
-#    'default': {
-#        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-#        'LOCATION': 'flop',
-#    }
-# }
-
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [('127.0.0.1', 6379)],
-        },
-    },
-    # "default": {
-    #     "BACKEND": "asgiref.inmemory.ChannelLayer",
-    #     "ROUTING": "solve_board.routing.channel_routing",
-    # },
 }
