@@ -1682,7 +1682,7 @@ function create_stype() {
     stap_but
         .append("rect")
         .attr("width", stbut.w)
-        .attr("height", stbut.h + 20)
+        .attr("height", stbut.h)
         .attr("x", dispot_but_x)
         .attr("y", dispot_but_y("app"))
         .attr("rx", 10)
@@ -1696,7 +1696,7 @@ function create_stype() {
         .attr("font-size", 18)
         .attr("fill", "white")
         .attr("x", dispot_but_txt_x)
-        .attr("y", dispot_but_txt_y("app"))
+        .attr("y", dispot_but_txt_y("app") - 10)
         .text("Appliquer");
 
     stap_but
@@ -1704,7 +1704,7 @@ function create_stype() {
         .attr("font-size", 18)
         .attr("fill", "white")
         .attr("x", dispot_but_txt_x)
-        .attr("y", dispot_but_txt_y("app") + 20)
+        .attr("y", dispot_but_txt_y("app") + 10)
         .text("Semaine type");
 
 }
