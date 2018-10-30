@@ -25,6 +25,21 @@ from .base import *
 
 STATIC_ROOT = '/var/www/edt/static/'
 
+SECRET_KEY = 'your_secret_key'
+
+DEBUG = False
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'flop_database',
+        'USER': 'flop_user',
+        'PASSWORD': 'your_password',
+        'HOST': '127.0.0.1',
+        'PORT': '5432',
+    }
+}
+
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
