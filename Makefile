@@ -3,20 +3,21 @@
 # get the current git branch name
 BRANCH := $(shell git branch 2>/dev/null | grep '^*' | colrm 1 2)
 CONFIG ?= development
+
+export CONFIG
 export BRANCH
 
 # initialize database with basics datas #docker-compose build && 
 init:
-	docker-compose build && docker-compose run --rm -e BRANCH -e CONFIG web ./FlOpEDT/misc/init.sh
+	docker-compose -f docker-compose.$(CONFIG).yml run --rm -e BRANCH -e DJANGO_LOADDATA=on -e CONFIG web
 
 build:
-	docker-compose build
+	docker-compose -f docker-compose.$(CONFIG).yml build
 
 # starts edt's docker services
 start:
-	docker-compose up -d
+	docker-compose -f docker-compose.$(CONFIG).yml up --build -d
 
 # stops edt's docker services
 stop:
-	docker-compose stop
-
+	docker-compose -f docker-compose.$(CONFIG).yml stop

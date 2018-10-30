@@ -26,8 +26,9 @@ from .base import *
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres',
+        'NAME': os.environ['POSTGRES_DB'],
+        'USER': os.environ['POSTGRES_USER'],
+        'PASSWORD':  os.environ['POSTGRES_PASSWORD'],
         'HOST': 'db',
         'PORT': 5432,
     }
@@ -35,7 +36,7 @@ DATABASES = {
 
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "asgi_redis.RedisChannelLayer",
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
             "hosts": [("redis", 6379)],
         },
@@ -47,4 +48,10 @@ CHANNEL_LAYERS = {
 DEBUG = False
 
 # YOU NEED TO SPECIFY ALLOWED_HOSTS FOR PRODUCTION ENVIRONMENT
-# ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS','localhost').split(',')
+
+SECRET_KEY = os.environ['SECRET_KEY']
+
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
+STATICFILES_DIRS = ()
