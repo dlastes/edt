@@ -1,3 +1,5 @@
+import logging
+
 from django.shortcuts import render, redirect
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -21,15 +23,9 @@ class EdtContextMiddleware:
         return response
 
     def process_view(self, request, view_func, view_args, view_kwargs):
-
         if 'department' in view_kwargs:
-            try:
-                request.department = Department.objects.get(abbrev=view_kwargs['department'])
+            department = view_kwargs['department']
+            try:                
+                request.department = Department.objects.get(abbrev=department)
             except ObjectDoesNotExist:
                 return redirect('/')
-        else:
-            return redirect('/')
-
-    def process_template_response(self, request, response):
-        if request.department:
-            response.context_data.apppend({'department': request.department})

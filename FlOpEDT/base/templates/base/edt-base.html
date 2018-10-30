@@ -39,14 +39,14 @@
     url_cours_pl = url_cours_pl.slice(0, -5);
     var url_cours_pp = "{% url "base:fetch_cours_pp" department 0 0 0 %}";
     url_cours_pp = url_cours_pp.slice(0, -5);
-    var url_dispos = "{% url "base:fetch_dispos" 0 0 %}";
+    var url_dispos = "{% url "base:fetch_dispos" department 0 0 %}";
     url_dispos = url_dispos.slice(0, -3);
-    var url_login = "{% url "people:login"%}";
-    var url_edt = "{% url "base:edt"  department %}";
+    var url_login = "{% url "people:login" %}";
+    var url_edt = "{% url "base:edt" department %}";
     var url_edt_changes = "{% url "base:edt_changes" department %}";
-    var url_dispos_changes = "{% url "base:dispos_changes"%}";
-    var url_fetch_stype = "{% url "base:fetch_stype" %}";
-    var url_bknews = "{% url "base:fetch_bknews" %}";
+    var url_dispos_changes = "{% url "base:dispos_changes" department %}";
+    var url_fetch_stype = "{% url "base:fetch_stype" department %}";
+    var url_bknews = "{% url "base:fetch_bknews" department %}";
     var url_quote = "{% url "quote:fetch_quote" %}";
 
     var semaine_an_list = {{ all_weeks| safe }};

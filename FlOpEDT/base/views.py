@@ -56,7 +56,7 @@ from itertools import chain
 from django.core.exceptions import ObjectDoesNotExist
 
 from django.core.mail import send_mail
-
+from django.template.response import TemplateResponse
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.views.generic import RedirectView
 
@@ -78,7 +78,7 @@ fav_regexp = r'^(?P<fav>(favicon.ico)|(site\.webmanifest)' \
              r'|(apple-touch-icon.*\.png))$'
 
 
-def favicon(req, fav):
+def favicon(req, fav, **kwargs):
     return RedirectView.as_view(
         url=staticfiles_storage.url('base/img/favicons/' + fav),
         permanent=False)(req)
@@ -99,8 +99,7 @@ def index(req):
     redirects to edt vue if only one department exist
     """
     def redirect_to_edt(department):
-        reverse_url = reverse('base:edt', kwargs={'department_abbrev': department.abbrev})
-        print(f"reverse_url:{reverse_url}")
+        reverse_url = reverse('base:edt', department=department.abbrev)
         return reverse_url
 
     departments = Department.objects.all()
@@ -114,9 +113,9 @@ def index(req):
     else:
         return HttpResponse("NOT IMPLEMENTED YET")
 
-def edt(req, department_abbrev, an=None, semaine=None, splash_id=0):
+def edt(req, an=None, semaine=None, splash_id=0, **kwargs):
 
-    department, semaine, an = clean_edt_view_params(department_abbrev, semaine, an)
+    semaine, an = clean_edt_view_params(semaine, an)
     promo = clean_train_prog(req)
 
     if req.GET:
@@ -140,10 +139,9 @@ def edt(req, department_abbrev, an=None, semaine=None, splash_id=0):
         name_usr = ''
         rights_usr = 0
 
-    return render(req, 'base/show-edt.html',
+    return TemplateResponse(req, 'base/show-edt.html',
                   {
                     'all_weeks': week_list(),
-                    'department': department.abbrev,
                     'semaine': semaine,
                     'an': an,
                     'jours': num_days(an, semaine),
@@ -157,8 +155,8 @@ def edt(req, department_abbrev, an=None, semaine=None, splash_id=0):
                   })
 
 
-def edt_light(req, department_abbrev, an=None, semaine=None):
-    department, semaine, an = clean_edt_view_params(department_abbrev, semaine, an)
+def edt_light(req, an=None, semaine=None, **kwargs):
+    semaine, an = clean_edt_view_params(semaine, an)
     promo = clean_train_prog(req)
 
     if req.GET:
@@ -183,9 +181,8 @@ def edt_light(req, department_abbrev, an=None, semaine=None):
 
     une_salle = "salle?"  # RoomGroup.objects.all()[0].name
 
-    return render(req, 'base/show-edt-light.html',
+    return TemplateResponse(req, 'base/show-edt-light.html',
                   {'all_weeks': week_list(),
-                   'department': department.abbrev,                  
                    'semaine': semaine,
                    'an': an,
                    'jours': num_days(an, semaine),
@@ -200,10 +197,10 @@ def edt_light(req, department_abbrev, an=None, semaine=None):
 
 
 @login_required
-def stype(req):
+def stype(req, **kwargs):
     err = ''
     if req.method == 'GET':
-        return render(req,
+        return TemplateResponse(req,
                       'base/show-stype.html',
                       {'date_deb': current_week(),
                        'date_fin': current_week(),
@@ -233,7 +230,7 @@ def stype(req):
 
             print(req.POST['save'])
 
-        return render(req,
+        return TemplateResponse(req,
                       'base/show-stype.html',
                       {'date_deb': date_deb,
                        'date_fin': date_fin,
@@ -243,14 +240,14 @@ def stype(req):
                       })
 
 
-def aide(req):
-    return render(req, 'base/aide.html')
+def aide(req, **kwargs):
+    return TemplateResponse(req, 'base/aide.html')
 
 
 @login_required
-def decale(req, department_abbrev):
+def decale(req, **kwargs):
     if req.method != 'GET':
-        return render(req, 'base/aide.html', {})
+        return TemplateResponse(req, 'base/aide.html', {})
 
     semaine_init = req.GET.get('s', '-1')
     an_init = req.GET.get('a', '-1')
@@ -258,9 +255,8 @@ def decale(req, department_abbrev):
     for p in Tutor.objects.all().order_by('username'):
         liste_profs.append(p.username)
 
-    return render(req, 'base/show-decale.html',
+    return TemplateResponse(req, 'base/show-decale.html',
                   {'all_weeks': week_list(),
-                   'department': department_abbrev,
                    'semaine_init': semaine_init,
                    'an_init': an_init,
                    'profs': liste_profs
@@ -276,14 +272,14 @@ def decale(req, department_abbrev):
 # ----------
 
 
-def fetch_cours_pl(req, department_abbrev, year, week, num_copy):
+def fetch_cours_pl(req, year, week, num_copy, **kwargs):
     print(req)
 
     try:
         week = int(week)
         year = int(year)
         num_copy = int(num_copy)
-        department = Department.objects.get(abbrev=department_abbrev)
+        department = req.department
     except:
         return HttpResponse("KO")
 
@@ -365,14 +361,14 @@ def fetch_cours_pl(req, department_abbrev, year, week, num_copy):
     return response
 
 
-def fetch_cours_pp(req, department_abbrev, week, year, num_copy):
+def fetch_cours_pp(req, week, year, num_copy, **kwargs):
     print(req)
 
     try:
         week = int(week)
         year = int(year)
         num_copy = int(num_copy)
-        department = Department.objects.get(abbrev=department_abbrev)
+        department = req.department
     except ValueError:
         return HttpResponse("KO")
 
@@ -405,7 +401,7 @@ def fetch_cours_pp(req, department_abbrev, week, year, num_copy):
 
 
 @login_required
-def fetch_dispos(req, year, week):
+def fetch_dispos(req, year, week, **kwargs):
     print(req)
     print("================")
     # if req.GET:
@@ -463,7 +459,7 @@ def fetch_dispos(req, year, week):
 
 
 @login_required
-def fetch_stype(req):
+def fetch_stype(req, **kwargs):
     # if req.method == 'GET':
     dataset = DispoResource() \
         .export(UserPreference.objects \
@@ -475,7 +471,7 @@ def fetch_stype(req):
     #    return HttpResponse("Pas GET",status=500)
 
 
-def fetch_decale(req, department_abbrev):
+def fetch_decale(req, **kwargs):
     if not req.is_ajax() or req.method != "GET":
         return HttpResponse("KO")
 
@@ -484,6 +480,7 @@ def fetch_decale(req, department_abbrev):
     module = req.GET.get('m', '')
     prof = req.GET.get('p', '')
     groupe = req.GET.get('g', '')
+    department = req.department
 
     liste_cours = []
     liste_module = []
@@ -496,7 +493,7 @@ def fetch_decale(req, department_abbrev):
     else:
         liste_jours = []
 
-    cours = filt_p(filt_g(filt_m(filt_sa(department_abbrev, semaine, an), module), groupe), prof)
+    cours = filt_p(filt_g(filt_m(filt_sa(department, semaine, an), module), groupe), prof)
 
     for c in cours:
         try:
@@ -515,13 +512,13 @@ def fetch_decale(req, department_abbrev):
                                 'j': j,
                                 'h': h})
 
-    cours = filt_p(filt_g(filt_sa(department_abbrev, semaine, an), groupe), prof) \
+    cours = filt_p(filt_g(filt_sa(department, semaine, an), groupe), prof) \
         .order_by('module__abbrev') \
         .distinct('module__abbrev')
     for c in cours:
         liste_module.append(c.module.abbrev)
 
-    cours = filt_g(filt_m(filt_sa(department_abbrev, semaine, an), module), groupe) \
+    cours = filt_g(filt_m(filt_sa(department, semaine, an), module), groupe) \
         .order_by('tutor__username') \
         .distinct('tutor__username')
     for c in cours:
@@ -536,7 +533,7 @@ def fetch_decale(req, department_abbrev):
             if c.tutor is not None:
                 liste_prof_module.append(c.tutor.username)
 
-    cours = filt_p(filt_m(filt_sa(department_abbrev, semaine, an), module), prof) \
+    cours = filt_p(filt_m(filt_sa(department, semaine, an), module), prof) \
         .distinct('groupe')
     for c in cours:
         liste_groupe.append(c.groupe.nom)
@@ -549,7 +546,7 @@ def fetch_decale(req, department_abbrev):
                          'jours': liste_jours})
 
 
-def fetch_bknews(req):
+def fetch_bknews(req, **kwargs):
     week = int(req.GET.get('w', '0'))
     year = int(req.GET.get('y', '0'))
 
@@ -564,11 +561,11 @@ def fetch_bknews(req):
 
 
 @cache_page(15 * 60)
-def fetch_groups(req, department_abbrev):
+def fetch_groups(req, **kwargs):
     """
     Return groups tree for a given department
     """
-    groups = queries.get_groups(department_abbrev)
+    groups = queries.get_groups(req.department)
     return JsonResponse(groups, safe=False)
 
 # </editor-fold desc="FETCHERS">
@@ -580,7 +577,7 @@ def fetch_groups(req, department_abbrev):
 
 
 @login_required
-def edt_changes(req, department_abbrev):
+def edt_changes(req, **kwargs):
     bad_response = HttpResponse("KO")
     good_response = HttpResponse("OK")
 
@@ -611,7 +608,7 @@ def edt_changes(req, department_abbrev):
         an = int(an)
         work_copy = int(work_copy)
         version = None
-        department = Department.objects.get(abbrev=department_abbrev)
+        department = req.department
     except:
         bad_response['reason'] \
             = "Problème semaine, année ou work_copy."
@@ -781,7 +778,7 @@ def edt_changes(req, department_abbrev):
 
 
 @login_required
-def dispos_changes(req):
+def dispos_changes(req, **kwargs):
     bad_response = HttpResponse("KO")
     good_response = HttpResponse("OK")
 
@@ -886,7 +883,7 @@ def dispos_changes(req):
 
 
 @login_required
-def decale_changes(req, department_abbrev):
+def decale_changes(req, **kwargs):
     bad_response = HttpResponse("KO")
     good_response = HttpResponse("OK")
     print(req)
@@ -910,14 +907,14 @@ def decale_changes(req, department_abbrev):
                 .get(cours__id=c['i'],
                      copie_travail=0)
             cours = cours_place.cours
-            cache.delete(get_key_course_pl(department_abbrev,
+            cache.delete(get_key_course_pl(req.department,
                                            cours.an,
                                            cours.semaine,
                                            cours_place.copie_travail))
             cours_place.delete()
         else:
             cours = Course.objects.get(id=c['i'])
-            cache.delete(get_key_course_pp(department_abbrev, 
+            cache.delete(get_key_course_pp(req.department, 
                                            cours.an,
                                            cours.semaine,
                                            0))
@@ -953,7 +950,7 @@ def decale_changes(req, department_abbrev):
 # ---------
 
 
-def contact(req):
+def contact(req, **kwargs):
     ack = ''
     if req.method == 'POST':
         form = ContactForm(req.POST)
@@ -973,7 +970,7 @@ def contact(req):
                 )
             except:
                 ack = 'Envoi du mail impossible !'
-                return render(req, 'base/contact.html',
+                return TemplateResponse(req, 'base/contact.html',
                               {'form': form,
                                'ack': ack
                               })
@@ -985,7 +982,7 @@ def contact(req):
             init_mail = req.user.email
         form = ContactForm(initial={
             'sender': init_mail})
-    return render(req, 'base/contact.html',
+    return TemplateResponse(req, 'base/contact.html',
                   {'form': form,
                    'ack': ack
                   })
@@ -1013,17 +1010,7 @@ def clean_train_prog(req):
     return promo
 
 
-def clean_edt_view_params(department__abbrev, week, year):
-
-    # Get department object represented by department__abbrev
-    value_error_string = "a valid department must be specified"
-    if not department__abbrev:
-        raise ValueError(value_error_string)
-    else:
-        try:
-            department = Department.objects.get(abbrev=department__abbrev)
-        except ObjectDoesNotExist:
-            raise ValueError(value_error_string)
+def clean_edt_view_params(week, year):
 
     if week is None or year is None:
         today = current_week()
@@ -1038,7 +1025,7 @@ def clean_edt_view_params(department__abbrev, week, year):
             week = today['semaine']
             year = today['an']
 
-    return department, week, year
+    return week, year
 
 
 def filt_m(r, module):
@@ -1059,8 +1046,8 @@ def filt_g(r, groupe):
     return r
 
 
-def filt_sa(department_abbrev, semaine, an):
-    return Course.objects.filter(module__train_prog__department__abbrev=department_abbrev,
+def filt_sa(department, semaine, an):
+    return Course.objects.filter(module__train_prog__department=department,
                                  semaine=semaine,
                                  an=an)
 

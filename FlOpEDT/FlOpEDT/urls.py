@@ -47,7 +47,7 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^accounts/', include('people.urls')),
     url(r'^citations/', include('quote.urls')),
-    url(r'^solve-board/', include('solve_board.urls')),
-    url(r'^edt/', include('base.urls')),
+    url(r'^edt/(?P<department>[a-zA-Z]\w{1,7})/', include('base.urls')),    
+    url(r'^solve-board/(?P<department>[a-zA-Z]\w{1,7})/', include('solve_board.urls')),    
     url(r'$', base.views.index),
 ]

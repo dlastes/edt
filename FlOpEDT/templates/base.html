@@ -68,20 +68,20 @@
        <ul>
 	    <li><a href="{% url "base:edt" department %}">Consulter</a></li>
 	    <li><a href="{% url "base:decale" department %}">Décaler/Annuler</a></li>
-	    <li><a href="{% url "base:stype" %}">Semaine type</a></li>
-	    <li><a href="{% url "base:aide" %}">Aide</a></li>
-	    <li><a href="{% url "base:contact" %}">Contact</a></li>
+	    <li><a href="{% url "base:stype" department %}">Semaine type</a></li>
+	    <li><a href="{% url "base:aide" department %}">Aide</a></li>
+	    <li><a href="{% url "base:contact" department %}">Contact</a></li>
 	    {% if user.is_authenticated and user.is_staff %}
-	    <li><a href="{% url "solve_board:main_board" %}">Générer</a></li>
+	    <li><a href="{% url "solve_board:main_board" department %}">Générer</a></li>
 	    <li><a href="{% url "admin:index" %}">Admin</a></li>
 	    {% endif %}
-	    <li style="float:right">{% if user.is_authenticated %}<a href="{% url "people:logout"%}?next={{request.path}}">Déconnexion</a>
+	    <li style="float:right">{% if user.is_authenticated %}<a href="{% url "people:logout" %}?next={% url "base:edt" department %}">Déconnexion</a>
 	    {% else %}
-	    <a href="{% url "people:login"%}?next={{request.path}}">Se connecter</a>
+	    <a href="{% url "people:login" %}?next={{request.path}}">Se connecter</a>
 	    {% endif %}
 	    </li>
 	    <li style="float:right">{% if user.is_authenticated %}
-	      <a href="{% url 'people:change_redirect' %}">Connecté&middot;e sous {{ user.username }} </a> {% endif %}
+	      <a href="{% url "people:change_redirect" %}">Connecté&middot;e sous {{ user.username }} </a> {% endif %}
 	    </li>
        </ul>
        {% endblock %}
