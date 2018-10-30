@@ -20,7 +20,7 @@ class IndexViewTest(unittest.TestCase):
         
         self.assertEqual(count_before, 0)
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response['location'], reverse('base:edt', kwargs={'department': 'default'}))
+        self.assertEqual(response['location'], reverse('base:edt'))
         self.assertEqual(count_after, 1)
 
     def test_single_department_redirection(self):
