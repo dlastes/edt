@@ -45,12 +45,14 @@ import os
 import sys
 import json
 
+from django.template.response import TemplateResponse
+
 @staff_member_required
-def main_board(req):
+def main_board(req, **kwargs):
     all_tps = []
     for tp in TrainingProgramme.objects.all():
         all_tps.append(tp.abbrev)
-    return render(req,
+    return TemplateResponse(req,
                   'solve_board/main-board.html',
                   {'all_weeks': weeks.week_list(),
                    'start_date': weeks.current_week(),
