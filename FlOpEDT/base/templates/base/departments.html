@@ -1,0 +1,12 @@
+
+{% csrf_token %}
+
+{% if departments %}
+    <ul>
+    {% for department in departments %}
+        <li><a href="{% url "base:edt" department.abbrev %}">{{ department.name }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No departments are available.</p>
+{% endif %}

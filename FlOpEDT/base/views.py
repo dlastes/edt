@@ -112,7 +112,7 @@ def index(req):
     elif len(departments) == 1:
         return redirect(redirect_to_edt(departments[0]))
     else:
-        return HttpResponse("NOT IMPLEMENTED YET")
+        return TemplateResponse(req, 'base/departments.html', {'departments': departments})
 
 def edt(req, an=None, semaine=None, splash_id=0, **kwargs):
 
