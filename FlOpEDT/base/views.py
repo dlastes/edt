@@ -252,8 +252,13 @@ def decale(req, **kwargs):
 
     semaine_init = req.GET.get('s', '-1')
     an_init = req.GET.get('a', '-1')
+    department = req.department
+
     liste_profs = []
-    for p in Tutor.objects.all().order_by('username'):
+
+    for p in Tutor.objects \
+                    .filter(departments=department) \
+                    .order_by('username'):
         liste_profs.append(p.username)
 
     return TemplateResponse(req, 'base/show-decale.html',
@@ -574,7 +579,8 @@ def fetch_decale(req, **kwargs):
             liste_prof.append(c.tutor.username)
 
     if module != '':
-        cours = filt_m(Course.objects, module) \
+        cours_queryset = Course.objects.filter(module__train_prog__department=department)        
+        cours = filt_m(cours_queryset, module) \
             .order_by('tutor__username') \
             .distinct('tutor__username')
         for c in cours:
