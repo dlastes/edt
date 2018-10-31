@@ -56,6 +56,7 @@ urlpatterns = [
     url(r'^fetch_decale$', views.fetch_decale, name="fetch_decale"),
     url(r'^fetch_bknews/$', views.fetch_bknews, name="fetch_bknews"),
     url(r'^fetch_groups$', views.fetch_groups, name="fetch_groups"),    
+    url(r'^fetch_rooms$', views.fetch_rooms, name="fetch_rooms"),    
     url(r'^fetch_unavailable_rooms/(?P<year>\d+)/(?P<week>\d+)$', views.fetch_unavailable_rooms, name="fetch_unavailable_rooms"),
     url(r'^fetch_all_tutors/$', views.fetch_all_tutors, name="fetch_all_tutors"),
 

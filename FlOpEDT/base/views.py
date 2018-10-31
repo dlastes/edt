@@ -613,8 +613,16 @@ def fetch_groups(req, **kwargs):
     """
     Return groups tree for a given department
     """
-    groups = queries.get_groups(req.department)
+    groups = queries.get_groups(req.department.abbrev)
     return JsonResponse(groups, safe=False)
+
+#@cache_page(15 * 60)
+def fetch_rooms(req, **kwargs):
+    """
+    Return groups tree for a given department
+    """
+    rooms = queries.get_rooms(req.department.abbrev)
+    return JsonResponse(rooms, safe=False)    
 
 # </editor-fold desc="FETCHERS">
 

@@ -29,6 +29,8 @@ import logging
 from base.models import Group, TrainingProgramme, GroupDisplay, \
     TrainingProgrammeDisplay, ScheduledCourse, EdtVersion, Department, Regen
 
+from base.models import Room, RoomType, RoomGroup, RoomSort
+
 from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger(__name__)
@@ -40,6 +42,10 @@ def create_first_department():
     models = [TrainingProgramme, EdtVersion, Regen]
     for model in models:
         model.objects.all().update(department=department)
+
+    # Update all many to many relations
+    for room in Room.objects.all():
+        room.departments.add(department)
     
     return department
 
@@ -151,3 +157,19 @@ def get_descendant_groups(gp, children):
             current['children'].append(gp_obj)
 
     return current        
+
+def get_rooms(department_abbrev):
+    """
+    From the data stored in the database, fill the room description file, that
+    will be used by the website
+    :return:
+    """
+    d = {}
+    for rt in RoomType.objects.all():
+        d[str(rt)] = []
+        for rg in rt.members.all():
+            for r in rg.subrooms.filter(departments__abbrev=department_abbrev):
+                if str(r) not in d[str(rt)]:
+                    d[str(rt)].append(str(r))
+
+    return d
