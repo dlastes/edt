@@ -25,6 +25,9 @@
 # without disclosing the source code of your own applications.
 
 from base.queries import get_groups
+from base.models import Room, RoomType, RoomGroup, RoomSort
+
+from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
 
 import json
@@ -39,3 +42,25 @@ def generate_group_file(department=None):
     with open(os.path.join(settings.BASE_DIR, 'base', 'static', 'base',
                            'groups.json'), 'w') as fp:
         json.dump(get_groups(department), fp)
+
+
+def generate_room_file():
+    """
+    From the data stored in the database, fill the room description file, that
+    will be used by the website
+    :return:
+    """
+    d = {}
+    for rt in RoomType.objects.all():
+        d[str(rt)] = []
+        for rg in rt.members.all():
+            for r in rg.subrooms.all():
+                if str(r) not in d[str(rt)]:
+                    d[str(rt)].append(str(r))
+    
+    with open(os.path.join(settings.BASE_DIR, 'base',
+                           'static', 'base',
+                           'rooms.json'), 'w') as fp:
+        json.dump(d, fp)
+
+    return d

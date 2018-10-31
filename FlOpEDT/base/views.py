@@ -39,13 +39,13 @@ from .forms import ContactForm
 
 from .models import Course, UserPreference, ScheduledCourse, EdtVersion, \
     CourseModification, Slot, Day, Time, RoomGroup, PlanningModification, \
-    Regen, BreakingNews, Department
+    Regen, BreakingNews, RoomPreference, Department
 
 from people.models import Tutor
 # Prof,
 
 from .admin import CoursResource, DispoResource, \
-    CoursPlaceResource, BreakingNewsResource
+    CoursPlaceResource, BreakingNewsResource, UnavailableRoomsResource
 
 from .weeks import *
 
@@ -99,7 +99,8 @@ def index(req):
     redirects to edt vue if only one department exist
     """
     def redirect_to_edt(department):
-        reverse_url = reverse('base:edt', department=department.abbrev)
+        reverse_url = reverse('base:edt', kwargs={'department': department.abbrev})
+        #reverse_url = reverse('base:edt', department=department.abbrev)
         return reverse_url
 
     departments = Department.objects.all()
@@ -400,12 +401,13 @@ def fetch_cours_pp(req, week, year, num_copy, **kwargs):
     return response
 
 
-@login_required
-def fetch_dispos(req, year, week, **kwargs):
+#@login_required
+def fetch_dispos(req, year, week):
     print(req)
     print("================")
-    # if req.GET:
-    #     if req.user.is_authenticated:
+    if req.GET:
+        if not req.user.is_authenticated:
+            return HttpResponse("Pas connecte")
     print("================")
 
 
@@ -415,7 +417,7 @@ def fetch_dispos(req, year, week, **kwargs):
     except ValueError:
         return HttpResponse("KO")
 
-    cache_key = get_key_preferences(year, week)
+    cache_key = get_key_preferences_tutor(year, week)
     cached = cache.get(cache_key)
     if cached is not None:
         return cached
@@ -456,6 +458,52 @@ def fetch_dispos(req, year, week, **kwargs):
     #         return HttpResponse("Pas connecté", status=500)
     # else:
     #     return HttpResponse("Pas GET", status=500)
+
+
+def fetch_unavailable_rooms(req, year, week, **kwargs):
+    print(req)
+    print("================")
+    # if req.GET:
+    #     if req.user.is_authenticated:
+    print("================")
+
+
+    try:
+        week = int(week)
+        year = int(year)
+        department = req.department
+    except ValueError:
+        return HttpResponse("KO")
+
+    cache_key = get_key_unavailable_rooms(department.abbrev, year, week)
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return cached
+
+    dataset = DispoResource() \
+        .export(RoomPreference.objects.filter(
+                                            room__departments = department, 
+                                            semaine=week,
+                                            an=year,
+                                            valeur=0))
+    response = HttpResponse(dataset.csv,
+                            content_type='text/csv')
+    response['week'] = week
+    response['year'] = year
+
+    cache.set(cache_key, response)
+    return response
+   
+
+def fetch_all_tutors(req, **kwargs):
+    cache_key = get_key_all_tutors()
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return cached
+    tutor_list = [t.username for t in Tutor.objects.all()]
+    response = JsonResponse({'tutors': tutor_list})
+    cache.set(cache_key, response)
+    return response
 
 
 @login_required
@@ -589,7 +637,7 @@ def edt_changes(req, **kwargs):
     impacted_inst = set()
 
     msg = 'Notation : (numero_semaine, numero_annee, ' \
-          + 'numero_jour, numero_creneau)\n\n'
+          + 'numero_jour, numero_creneau, prof)\n\n'
 
     if not req.is_ajax():
         bad_response['reason'] = "Non ajax"
@@ -657,6 +705,8 @@ def edt_changes(req, **kwargs):
                 old_week = a['week']['o']
                 new_year = a['year']['n']
                 old_year = a['year']['o']
+                new_tutor = a['tutor']['n']
+                old_tutor = a['tutor']['o']
 
                 if non_place:
                     # old_day = new_day
@@ -712,14 +762,36 @@ def edt_changes(req, **kwargs):
                 if work_copy == 0:
                     m.save()
 
-                if new_week or new_year or new_day or new_slot:
+                if new_tutor is not None:
+                    try:
+                        prev_tut = co.tutor
+                        co.tutor = Tutor.objects.get(username=new_tutor)
+                        co.save()
+                        pm = PlanningModification(cours=co,
+                                                  semaine_old=co.semaine,
+                                                  an_old=co.an,
+                                                  tutor_old=prev_tut,
+                                                  initiator=req.user.tutor)
+                        pm.save()
+                    except ObjectDoesNotExist:
+                        bad_response['reason'] = \
+                            "Problème : prof " + new_room \
+                            + " inconnu"
+                        return bad_response
+
+                if new_week is not None or new_year is not None \
+                   or new_day is not None or new_slot is not None \
+                   or new_tutor is not None:
                     msg += str(co) + '\n'
                     impacted_inst.add(co.tutor.username)
+                    if new_tutor is not None:
+                        impacted_inst.add(old_tutor)
 
                     msg += '(' + str(old_week) + ', ' \
                            + str(old_year) + ', ' \
                            + str(old_day) + ', ' \
-                           + str(old_slot) + ')'
+                           + str(old_slot) + ', ' \
+                           + str(old_tutor) + ')'
                     msg += ' -> ('
                     if new_week:
                         msg += str(new_week)
@@ -736,6 +808,10 @@ def edt_changes(req, **kwargs):
                     else:
                         msg += '-'
                     msg += ', '
+                    if new_slot:
+                        msg += str(new_slot)
+                    else:
+                        msg += '-'
                     if new_slot:
                         msg += str(new_slot)
                     else:
@@ -828,7 +904,7 @@ def dispos_changes(req, **kwargs):
             = "Problème d'utilisateur."
         return bad_response
 
-    if prof != req.user and req.user.rights >> 1 % 2 == 0:
+    if prof.username != req.user.username and req.user.rights >> 1 % 2 == 0:
         bad_response['reason'] \
             = 'Non autorisé, réclamez plus de droits.'
         return bad_response
@@ -876,7 +952,7 @@ def dispos_changes(req, **kwargs):
         print(didi)
         
     if week is not None and year is not None:
-        cache.delete(get_key_preferences(year, week))
+        cache.delete(get_key_preferences_tutor(year, week))
 
         
     return good_response
@@ -1064,10 +1140,20 @@ def get_key_course_pp(department_abbrev, year, week, num_copy):
     return 'CPP-D' + department_abbrev + '-Y' + str(year) + '-W' + str(week) + '-C' + str(num_copy) 
 
 
-def get_key_preferences(year, week):
+def get_key_preferences_tutor(year, week):
     if year is None or week is None:
         return ''
-    return 'PREF-Y' + str(year) + '-W' + str(week)
+    return 'PREFT-Y' + str(year) + '-W' + str(week)
+
+
+def get_key_unavailable_rooms(department_abbrev, year, week):
+    if year is None or week is None:
+        return ''
+    return 'UNAVR-D' + department_abbrev + '-Y' + str(year) + '-W' + str(week)
+
+
+def get_key_all_tutors():
+    return 'ALL-TUT'
 
 # </editor-fold desc="HELPERS">
 

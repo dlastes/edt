@@ -34,8 +34,6 @@ from django.contrib.auth.models import AbstractUser
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
-# from caching.base import CachingManager, CachingMixin
-
 from colorfield.fields import ColorField
 
 
@@ -192,8 +190,6 @@ def define_apm(sender, instance, *args, **kwargs):
         instance.apm = Time.PM
 
 class Slot(models.Model):
-#class Slot(CachingMixin, models.Model):
-#    objects = CachingManager()
     jour = models.ForeignKey('Day', on_delete=models.CASCADE)
     heure = models.ForeignKey('Time', on_delete=models.CASCADE)
     duration = models.PositiveSmallIntegerField(
@@ -235,8 +231,6 @@ class Period(models.Model):
 
 
 class RoomType(models.Model):
-# class RoomType(CachingMixin, models.Model):
-#    objects = CachingManager()
     name = models.CharField(max_length=20)
 
     def __str__(self):
@@ -244,8 +238,6 @@ class RoomType(models.Model):
 
 
 class RoomGroup(models.Model):
-# class RoomGroup(CachingMixin, models.Model):
-#    objects = CachingManager()
     name = models.CharField(max_length=20)
     types = models.ManyToManyField(RoomType,
                                    blank=True,
@@ -256,8 +248,6 @@ class RoomGroup(models.Model):
 
 
 class Room(models.Model):
-# class Room(CachingMixin, models.Model):
-#    objects = CachingManager()
     name = models.CharField(max_length=20)
     subroom_of = models.ManyToManyField(RoomGroup,
                                         blank=True,
@@ -321,8 +311,6 @@ class CourseType(models.Model):
 
 
 class Course(models.Model):
-#class Course(CachingMixin, models.Model):
-#    objects = CachingManager()
     type = models.ForeignKey('CourseType', on_delete=models.CASCADE)
     room_type = models.ForeignKey('RoomType', null=True, on_delete=models.CASCADE)
     no = models.PositiveSmallIntegerField(null=True, blank=True)
@@ -357,8 +345,6 @@ class Course(models.Model):
 
 
 class ScheduledCourse(models.Model):
-#class ScheduledCourse(CachingMixin, models.Model):
-#    objects = CachingManager()
     cours = models.ForeignKey('Course', on_delete=models.CASCADE)
     creneau = models.ForeignKey('Slot', on_delete=models.CASCADE)
     room = models.ForeignKey('RoomGroup', blank=True, null=True, on_delete=models.CASCADE)

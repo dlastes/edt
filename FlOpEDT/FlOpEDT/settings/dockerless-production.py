@@ -21,19 +21,28 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-"""
-WSGI config for FlOpEDT project.
+from .base import *
 
-It exposes the WSGI callable as a module-level variable named ``application``.
+STATIC_ROOT = '/var/www/edt/static/'
 
-For more information on this file, see
-https://docs.djangoproject.com/en/1.10/howto/deployment/wsgi/
-"""
+SECRET_KEY = 'your_secret_key'
 
-import os
+DEBUG = False
 
-from django.core.wsgi import get_wsgi_application
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'flop_database',
+        'USER': 'flop_user',
+        'PASSWORD': 'your_password',
+        'HOST': '127.0.0.1',
+        'PORT': '5432',
+    }
+}
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "FlOpEDT.settings.dockerless-production")
-
-application = get_wsgi_application()
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'LOCATION': '127.0.0.1:11211',
+    }
+}
