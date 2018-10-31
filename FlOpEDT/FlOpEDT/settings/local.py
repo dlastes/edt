@@ -40,14 +40,17 @@ DATABASES = {
 
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'flop',
+        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
     }
 }
+
+# if you want some cache, use the following instead:
+#
 # CACHES = {
-#     'default': {
-#         'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
-#     }
+#    'default': {
+#        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+#        'LOCATION': 'flop',
+#    }
 # }
 
 CHANNEL_LAYERS = {
