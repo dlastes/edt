@@ -30,6 +30,7 @@ from base.models import Group, TrainingProgramme, GroupDisplay, \
     TrainingProgrammeDisplay, ScheduledCourse, EdtVersion, Department, Regen
 
 from base.models import Room, RoomType, RoomGroup, RoomSort
+from people.models import Tutor
 
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -43,9 +44,11 @@ def create_first_department():
     for model in models:
         model.objects.all().update(department=department)
 
-    # Update all many to many relations
-    for room in Room.objects.all():
-        room.departments.add(department)
+    # Update all ManyToMany relations with Department
+    models = [Room, Tutor]
+    for model in models:
+        for model_instance in model.objects.all():
+            model_instance.departments.add(department)
     
     return department
 
