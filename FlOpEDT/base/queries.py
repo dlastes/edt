@@ -168,10 +168,10 @@ def get_rooms(department_abbrev):
     :return:
     """
     d = {}
-    for rt in RoomType.objects.all():
+    for rt in RoomType.objects.filter(department__abbrev=department_abbrev):
         d[str(rt)] = []
         for rg in rt.members.all():
-            for r in rg.subrooms.filter(departments__abbrev=department_abbrev):
+            for r in rg.subrooms.objects.all():
                 if str(r) not in d[str(rt)]:
                     d[str(rt)].append(str(r))
 
