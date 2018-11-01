@@ -57,7 +57,7 @@ import datetime
 
 
 class WeekDB(object):
-    def __init__(self, week, year, train_prog):
+    def __init__(self, department, week, year, train_prog):
         self.train_prog = train_prog
         self.slots = Slot.objects.all().order_by('jour', 'heure')
         self.week = week
@@ -120,7 +120,7 @@ class WeekDB(object):
 
 
 class TTModel(object):
-    def __init__(self, semaine, an,
+    def __init__(self, department, semaine, an,
                  train_prog=None,
                  stabilize_work_copy=None,
                  min_nps_i=1.,
@@ -152,7 +152,7 @@ class TTModel(object):
             train_prog = [train_prog]
         self.train_prog = train_prog
         self.stabilize_work_copy = stabilize_work_copy
-        self.wdb = WeekDB(semaine, an, self.train_prog)
+        self.wdb = WeekDB(department, semaine, an, self.train_prog)
         self.obj = self.lin_expr()
         self.cost_I = dict(list(zip(self.wdb.instructors,
                                [self.lin_expr() for _ in self.wdb.instructors])))

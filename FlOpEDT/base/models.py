@@ -231,6 +231,7 @@ class Period(models.Model):
 
 
 class RoomType(models.Model):
+    department =  models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
     name = models.CharField(max_length=20)
 
     def __str__(self):
@@ -251,10 +252,7 @@ class Room(models.Model):
     name = models.CharField(max_length=20)
     subroom_of = models.ManyToManyField(RoomGroup,
                                         blank=True,
-                                        related_name="subrooms")
-    departments =  models.ManyToManyField(Department,
-                                        blank=True,
-                                        related_name="rooms")                                        
+                                        related_name="subrooms")                                       
 
     def __str__(self):
         return self.name

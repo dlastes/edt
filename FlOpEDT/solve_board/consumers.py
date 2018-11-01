@@ -74,10 +74,13 @@ class SolverConsumer(WebsocketConsumer):
             # self.send(text_data=json.dumps({
             #     'message': 'you want me to go. I got it.'
             # }))
-            Solve(data['week'],data['year'],
-                  data['timestamp'],
-                  data['train_prog'],
-                  self).start()
+            Solve(
+                data['department'],
+                data['week'],
+                data['year'],
+                data['timestamp'],
+                data['train_prog'],
+                self).start()
         elif data['action'] == 'stop':
             solver_child_process = cache.get("solver_child_process")
             if solver_child_process:
@@ -124,8 +127,9 @@ def solver_subprocess_SIGINT_handler(sig, stack):
     os.kill(0, signal.SIGINT)
 
 class Solve():
-    def __init__(self, week, year, timestamp, training_programme, chan):
+    def __init__(self, department, week, year, timestamp, training_programme, chan):
         super(Solve, self).__init__()
+        self.department = department
         self.week = week
         self.year = year
         self.timestamp = timestamp
@@ -148,7 +152,7 @@ class Solve():
                 os.dup2(wd,1)   # redirect stdout
                 os.dup2(wd,2)   # redirect stderr
                 try:
-                    t = MyTTModel(self.week, self.year, train_prog=self.training_programme)
+                    t = MyTTModel(self.department, self.week, self.year, train_prog=self.training_programme)
                     os.setpgid(os.getpid(), os.getpid())
                     signal.signal(signal.SIGINT, solver_subprocess_SIGINT_handler)
                     t.solve(time_limit=300)

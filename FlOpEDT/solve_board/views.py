@@ -49,12 +49,18 @@ from django.template.response import TemplateResponse
 
 @staff_member_required
 def main_board(req, **kwargs):
+
     all_tps = []
-    for tp in TrainingProgramme.objects.all():
+    department = req.department
+    
+    for tp in TrainingProgramme.objects.filter(department=department):
         all_tps.append(tp.abbrev)
+    
     return TemplateResponse(req,
                   'solve_board/main-board.html',
-                  {'all_weeks': weeks.week_list(),
+                  {
+                   'department': department, 
+                   'all_weeks': weeks.week_list(),
                    'start_date': weeks.current_week(),
                    'end_date': weeks.current_week(),
                    'current_year': weeks.annee_courante,

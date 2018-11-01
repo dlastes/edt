@@ -117,7 +117,8 @@ function open_connection(){
 	}
 	socket.send(JSON.stringify({'message':
 				    "C'est ti-par.\n"+opti_timestamp+"\nSolver ok?",
-				    'action':"go",
+					'action':"go",
+					'department': department,
 				    'week':week_year_sel.week,
 				    'year':week_year_sel.year,
 				    'train_prog':train_prog_sel,
