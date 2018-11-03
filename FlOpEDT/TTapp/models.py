@@ -35,12 +35,13 @@ from django.utils.translation import ugettext_lazy as _
 
 # from caching.base import CachingManager, CachingMixin
 
-from base.models import Time  # , Module
+from base.models import Time, Department
 
 max_weight = 8
 
 
 class TTConstraint(models.Model):
+    department = models.ForeignKey(Department, null=True, on_delete=models.CASCADE)
     week = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(52)],
         null=True,
