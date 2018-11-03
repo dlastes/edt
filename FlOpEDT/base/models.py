@@ -366,7 +366,7 @@ class ScheduledCourse(models.Model):
 
 
 class UserPreference(models.Model):
-    user = models.ForeignKey('people.User', on_delete=models.CASCADE)
+    user = models.ForeignKey('people.Tutor', on_delete=models.CASCADE)
     semaine = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)], null=True)
     an = models.PositiveSmallIntegerField(null=True)
