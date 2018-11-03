@@ -37,18 +37,19 @@ from django.core.exceptions import ObjectDoesNotExist
 logger = logging.getLogger(__name__)
 
 def create_first_department():    
+
     department = Department.objects.create(name="Default Department", abbrev="default")
     
     # Update all existing department related models
-    models = [TrainingProgramme, EdtVersion, Regen]
+    models = [TrainingProgramme, EdtVersion, Regen, RoomType]
     for model in models:
         model.objects.all().update(department=department)
 
     # Update all ManyToMany relations with Department
-    models = [Room, Tutor]
+    models = [Tutor]
     for model in models:
-        for model_instance in model.objects.all():
-            model_instance.departments.add(department)
+        for model_class in model.objects.all():
+            model_class.departments.add(department)
     
     return department
 
