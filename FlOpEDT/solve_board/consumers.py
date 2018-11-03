@@ -127,9 +127,9 @@ def solver_subprocess_SIGINT_handler(sig, stack):
     os.kill(0, signal.SIGINT)
 
 class Solve():
-    def __init__(self, department, week, year, timestamp, training_programme, chan):
+    def __init__(self, department_abbrev, week, year, timestamp, training_programme, chan):
         super(Solve, self).__init__()
-        self.department = department
+        self.department_abbrev = department_abbrev
         self.week = week
         self.year = year
         self.timestamp = timestamp
@@ -152,7 +152,7 @@ class Solve():
                 os.dup2(wd,1)   # redirect stdout
                 os.dup2(wd,2)   # redirect stderr
                 try:
-                    t = MyTTModel(self.department, self.week, self.year, train_prog=self.training_programme)
+                    t = MyTTModel(self.department_abbrev, self.week, self.year, train_prog=self.training_programme)
                     os.setpgid(os.getpid(), os.getpid())
                     signal.signal(signal.SIGINT, solver_subprocess_SIGINT_handler)
                     t.solve(time_limit=300)
