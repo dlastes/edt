@@ -103,8 +103,12 @@ def rooms_extract(book):
     sheet = book['Salles']
     ######################## Creating RoomTypes ####################################
 
-    SALLES_CAT_ROW = 20
-    idCat = sheet.cell(row=SALLES_CAT_ROW, column=5).value
+    ROOM_CATEGORY_START_ROW = 20
+    ROOM_CATEGORY_START_COL = 5
+    
+    row = ROOM_CATEGORY_START_ROW
+    col = ROOM_CATEGORY_START_COL
+    idCat = sheet.cell(row=row, column=col).value
 
     while idCat is not None :
 
@@ -120,13 +124,17 @@ def rooms_extract(book):
                 print("A constraint has not been respected creating the RoomType %s : \n" %idCat, ie)
                 pass
 
-        SALLES_CAT_ROW+=1
-        idCat = sheet.cell(row=SALLES_CAT_ROW, column=5).value
+        row += 1
+        idCat = sheet.cell(row=row, column=col).value
 
     ######################## Creating Rooms ####################################
 
-    SALLES_ROOM_ROW = 3
-    idRoom = sheet.cell(row=SALLES_ROOM_ROW, column=1).value
+    ROOM_DECLARATION_START_ROW = 3
+    ROOM_DECLARATION_COL = 1
+    
+    row = ROOM_DECLARATION_START_ROW
+    col = ROOM_DECLARATION_COL
+    idRoom = sheet.cell(row=row, column=col).value
 
 
     while idRoom is not None :
@@ -149,13 +157,17 @@ def rooms_extract(book):
                 print("A constraint has not been respected creating the Room %s : \n" %idRoom, ie)
                 pass
 
-        SALLES_ROOM_ROW += 1
-        idRoom = sheet.cell(row=SALLES_ROOM_ROW, column=1).value
+        row += 1
+        idRoom = sheet.cell(row=row, column=col).value
 
     ######################## Creating RoomGroups ####################################
 
-    SALLES_ROOMG_ROW = 3
-    idRoomGroup = sheet.cell(row=SALLES_ROOMG_ROW, column=2).value
+    ROOMGROUP_DECLARATION_START_ROW = 3
+    ROOMGROUP_DECLARATION_COL = 2
+
+    row = ROOMGROUP_DECLARATION_START_ROW
+    col = ROOMGROUP_DECLARATION_COL
+    idRoomGroup = sheet.cell(row=row, column=col).value
 
     while idRoomGroup is not None :
 
@@ -172,49 +184,57 @@ def rooms_extract(book):
                 print("A constraint has not been respected creating the RoomGroup %s : \n" %idRoomGroup, ie)
                 pass
 
-        SALLES_ROOMG_ROW += 1
-        idRoomGroup = sheet.cell(row=SALLES_ROOMG_ROW, column=2).value
+        row += 1
+        idRoomGroup = sheet.cell(row=row, column=col).value
 
     ######################## Filling the RoomGroups with Rooms ####################################
 
-    SALLES_GROUPS_ROW = 4
-    idGroup = sheet.cell(row=SALLES_GROUPS_ROW, column=5).value
+    ROOMGROUP_DEFINITION_START_ROW = 4
+    ROOMGROUP_DEFINITION_START_COL = 5
+
+    row = ROOMGROUP_DEFINITION_START_ROW
+    col = ROOMGROUP_DEFINITION_START_COL
+    idGroup = sheet.cell(row=row, column=col).value
 
     while idGroup is not None :
 
-        SALLES_GROUPS_COL = 3
-        idRoom = sheet.cell(row=SALLES_GROUPS_ROW, column=SALLES_GROUPS_COL).value
+        col = ROOMGROUP_DEFINITION_START_COL + 1
+        idRoom = sheet.cell(row=row, column=col).value
 
 
         while idRoom is not None :
 
+            print('Gp', idGroup, ' ; Room', idRoom)
+
             R = Room.objects.get(name=idRoom)
             R.subroom_of.add(RoomGroup.objects.get(name=idGroup))
             R.save()
-            SALLES_GROUPS_COL += 1
-            idRoom = sheet.cell(row=SALLES_GROUPS_ROW, column=SALLES_GROUPS_COL).value
+            col += 1
+            idRoom = sheet.cell(row=row, column=col).value
 
-        SALLES_GROUPS_ROW += 1
-        idGroup = sheet.cell(row=SALLES_GROUPS_ROW, column=5).value
+        row += 1
+        idGroup = sheet.cell(row=row,
+                             column=ROOMGROUP_DEFINITION_START_COL).value
 
     ######################## Giving a RoomType to each RoomGroup ####################################
 
-    SALLES_CAT_ROW = 20
-    idCat = sheet.cell(row=SALLES_CAT_ROW, column=5).value
+    row = ROOM_CATEGORY_START_ROW
+    col = ROOM_CATEGORY_START_COL
+    idCat = sheet.cell(row=row, column=col).value
 
     while idCat is not None :
 
-        ROOMGROUP_COL = 6
-        idRoomGroup = sheet.cell(row=SALLES_CAT_ROW, column=ROOMGROUP_COL).value
+        col = ROOM_CATEGORY_START_COL + 1
+        idRoomGroup = sheet.cell(row=row, column=col).value
 
         while idRoomGroup is not None :
 
             RoomGroup.objects.get(name=idRoomGroup).types.add(RoomType.objects.get(name=idCat))
-            ROOMGROUP_COL += 1
-            idRoomGroup = sheet.cell(row=SALLES_CAT_ROW, column=ROOMGROUP_COL).value
+            col += 1
+            idRoomGroup = sheet.cell(row=row, column=col).value
 
-        SALLES_CAT_ROW += 1
-        idCat = sheet.cell(row=SALLES_CAT_ROW, column=5).value
+        row += 1
+        idCat = sheet.cell(row=row, column=ROOM_CATEGORY_START_COL).value
 
     print("Rooms extraction done")
 
