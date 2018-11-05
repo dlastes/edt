@@ -7,28 +7,26 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('base', '0004_auto_20181018_1344'),
+        ('base', '0004_auto_20181030_1440'),
     ]
 
     operations = [
-        migrations.AlterField(
-            model_name='coursepreference',
-            name='an',
-            field=models.PositiveSmallIntegerField(blank=True, null=True),
+        migrations.CreateModel(
+            name='Department',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('name', models.CharField(max_length=50)),
+                ('abbrev', models.CharField(max_length=5)),
+            ],
         ),
-        migrations.AlterField(
-            model_name='coursepreference',
-            name='semaine',
-            field=models.PositiveSmallIntegerField(blank=True, null=True, validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(53)]),
+        migrations.AddField(
+            model_name='room',
+            name='departments',
+            field=models.ManyToManyField(blank=True, related_name='rooms', to='base.Department'),
         ),
-        migrations.AlterField(
-            model_name='roompreference',
-            name='an',
-            field=models.PositiveSmallIntegerField(blank=True, null=True),
-        ),
-        migrations.AlterField(
-            model_name='roompreference',
-            name='semaine',
-            field=models.PositiveSmallIntegerField(blank=True, null=True, validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(53)]),
+        migrations.AddField(
+            model_name='trainingprogramme',
+            name='department',
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='base.Department'),
         ),
     ]
