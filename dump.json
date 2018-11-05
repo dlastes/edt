@@ -468,7 +468,7 @@
     "pk": 1,
     "fields": {
         "name": "Default Department",
-        "abbrev": "default"
+        "abbrev": "info"
     }
 },
 {
