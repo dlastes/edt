@@ -41,7 +41,7 @@ def create_first_department():
     department = Department.objects.create(name="Default Department", abbrev="default")
     
     # Update all existing department related models
-    models = [TrainingProgramme, EdtVersion, Regen, RoomType]
+    models = [TrainingProgramme, EdtVersion, Regen, RoomType, Period]
     for model in models:
         model.objects.all().update(department=department)
 

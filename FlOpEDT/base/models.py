@@ -217,7 +217,9 @@ class TrainingHalfDay(models.Model):
 
 
 class Period(models.Model):
+    
     name = models.CharField(max_length=20)
+    department =  models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
     starting_week = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)])
     ending_week = models.PositiveSmallIntegerField(
