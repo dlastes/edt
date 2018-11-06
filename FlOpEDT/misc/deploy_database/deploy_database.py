@@ -24,7 +24,7 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-import string
+import string, logging
 
 from django.db import transaction
 from openpyxl import load_workbook
@@ -46,9 +46,9 @@ from people.models import FullStaff, SupplyStaff, Tutor
 
 from django.db import IntegrityError
 
-import json
 
 bookname='misc/deploy_database/database_file.xlsx'
+logger = logging.getLogger('base')
 
 @transaction.atomic
 def extract_database_file(bookname=bookname, department_name=None, department_abbrev=None):
@@ -81,33 +81,37 @@ def tutors_extract(department, book):
         last_name = sheet.cell(row=INTER_ID_ROW, column=3).value
         status = sheet.cell(row=INTER_ID_ROW, column=4).value
         email = sheet.cell(row=INTER_ID_ROW, column=5).value
-        verif = Tutor.objects.filter(username=id)
-
-        if not verif.exists():
+        
+        try:
+            tutor = Tutor.objects.get(username=id)
+            logger.debug(f'update tutor : [{id}]')
+        except Tutor.DoesNotExist:
 
             try:
+                params = { 'username': id, 'first_name': name, 'last_name': last_name, 'email': email, }    
+                
                 if status == "Permanent":
-                    tutor = FullStaff(username=id, first_name=name, last_name=last_name, email=email)
-                    tutor.set_password("passe")
-                    tutor.is_tutor = True
-                    tutor.save()
-
-                    tutor.departments.add(department)
-
+                    tutor = FullStaff(**params)
                 else:
                     employer = sheet.cell(row=INTER_ID_ROW, column=9).value
                     position = sheet.cell(row=INTER_ID_ROW, column=8).value
-                    tutor = SupplyStaff(username=id, password="passe", first_name=name, last_name=last_name,
-                                        email=email, employer=employer, position=position)
-                    tutor.set_password("passe")
-                    tutor.is_tutor = True
-                    tutor.save()
 
-                    tutor.departments.add(department)
+                    params.update({'employer': employer, 'position': position})
+                    tutor = SupplyStaff(**params)
+
+
+                tutor.set_password("passe")
+                tutor.is_tutor = True
+                tutor.save()
+
 
             except IntegrityError as ie :
                 print("A constraint has not been respected creation the Professor : \n", ie)
                 pass
+            else:
+                logger.debug(f'create tutor with id:{id}')
+        else:
+            tutor.departments.add(department)
 
         INTER_ID_ROW += 1
         id = sheet.cell(row=INTER_ID_ROW, column=1).value
@@ -129,20 +133,14 @@ def rooms_extract(department, book):
 
     # Create temporary RoomType for import purposes. This type 
     # will be deleted at the end of the process
-    temporay_room_random_key = ''.join(choice(string.ascii_lowercase + string.digits) for _ in range(8))
+    temporay_room_random_key = ''.join(choice(string.ascii_lowercase + string.digits) for _ in range(6))
     temporay_room_type = RoomType.objects.create(department=department, name=f"temp_{department.abbrev}_{temporay_room_random_key}")
 
     while idCat is not None :
-
-        verif = RoomType.objects.filter(department=department, name=idCat)
-
-        if not verif.exists():
-
-            try:
-                roomType = RoomType.objects.create(department=department, name=idCat)
-            except IntegrityError as ie:
-                print("A constraint has not been respected creating the RoomType %s : \n" %idCat, ie)
-                pass
+        try:
+            RoomType.objects.get_or_create(department=department, name=idCat)
+        except IntegrityError as ie:
+            print("A constraint has not been respected creating the RoomType %s : \n" %idCat, ie)
 
         row += 1
         idCat = sheet.cell(row=row, column=col).value
@@ -156,26 +154,20 @@ def rooms_extract(department, book):
     col = ROOM_DECLARATION_COL
     idRoom = sheet.cell(row=row, column=col).value
 
-
     while idRoom is not None :
 
-        verif = Room.objects.filter(
-                    subroom_of__types__department=department, 
-                    name=idRoom).distinct() 
+        try:
+            room, _ = Room.objects.get_or_create(name=idRoom)
+            
+            room_group, _ = RoomGroup.objects.get_or_create(name=idRoom)
+            room_group.types.add(temporay_room_type)
+            
+            # Ensure that a room_group exits with the same roomid
+            room.subroom_of.add(room_group)
 
-        if not verif.exists():
 
-            try:
-
-                room_group = RoomGroup.objects.create(name=idRoom)
-                room_group.types.add(temporay_room_type)
-
-                room = Room.objects.create(name=idRoom)
-                room.subroom_of.add(room_group)
-
-            except IntegrityError as ie:
-                print("A constraint has not been respected creating the Room %s : \n" %idRoom, ie)
-                pass
+        except IntegrityError as ie:
+            print("A constraint has not been respected creating the Room %s : \n" %idRoom, ie)
 
         row += 1
         idRoom = sheet.cell(row=row, column=col).value
@@ -187,25 +179,22 @@ def rooms_extract(department, book):
 
     row = ROOMGROUP_DECLARATION_START_ROW
     col = ROOMGROUP_DECLARATION_COL
-    idRoomGroup = sheet.cell(row=row, column=col).value
+    room_group_id = sheet.cell(row=row, column=col).value
 
-    while idRoomGroup is not None :
+    while room_group_id is not None :
 
-        verif = RoomGroup.objects.filter(types__department=department, name=idRoomGroup)
-
-        if not verif.exists():
-
-            try:
-
-                room_group = RoomGroup.objects.create(name=idRoomGroup)
+        try:
+            if not Room.objects.filter(name=room_group_id).exists():
+                room_group = RoomGroup.objects.create(name=room_group_id)
                 room_group.types.add(temporay_room_type)
+            else:
+                print(f"A custom group can't have the same name thant an existing Room : {room_group_id}")
 
-            except IntegrityError as ie:
-                print("A constraint has not been respected creating the RoomGroup %s : \n" %idRoomGroup, ie)
-                pass
+        except IntegrityError as ie:
+            print("A constraint has not been respected creating the RoomGroup %s : \n" %room_group_id, ie)
 
         row += 1
-        idRoomGroup = sheet.cell(row=row, column=col).value
+        room_group_id = sheet.cell(row=row, column=col).value
 
     ######################## Filling the RoomGroups with Rooms ####################################
 
@@ -223,21 +212,16 @@ def rooms_extract(department, book):
 
         while idRoom is not None :
 
-            print('Gp', idGroup, ' ; Room', idRoom)
+            logger.info(f"Add room [{idRoom}] to group : {idGroup}")
             
-            # Get existing room or newly created room by checking 
-            # RoomType reference
             try:                
-
-                room_qs = Room.objects.filter(name=idRoom, subroom_of__types__in=[temporay_room_type]).distinct()
-                
-                if len(room_qs):
-                    room = room_qs[0]                    
-                    room_group = RoomGroup.objects.get(name=idGroup, types__in=[temporay_room_type])
-                    room.subroom_of.add(room_group)
+                room = Room.objects.get(name=idRoom)
+                room_group = RoomGroup.objects.get(name=idGroup, types__in=[temporay_room_type,])
+                room.subroom_of.add(room_group)
 
             except Room.DoesNotExist:
                 print(f"unable to find room '{idRoom}' with correct RoomType'")
+            
             except RoomGroup.DoesNotExist:
                 print(f"unable to find  RoomGroup '{idGroup}' with correct RoomType'")                            
 
@@ -257,15 +241,24 @@ def rooms_extract(department, book):
     while idCat is not None :
 
         col = ROOM_CATEGORY_START_COL + 1
-        idRoomGroup = sheet.cell(row=row, column=col).value
+        room_group_id = sheet.cell(row=row, column=col).value
 
         room_type = RoomType.objects.get(department=department, name=idCat)
 
-        while idRoomGroup is not None :
-            room_group = RoomGroup.objects.get(name=idRoomGroup, types__in=[temporay_room_type])
-            room_group.types.add(room_type)
+        while room_group_id is not None :
+            try:
+                # Test if group is a common room based group or a department custom group
+                try:
+                    room_group = RoomGroup.objects.get(subrooms__id=room_group_id)
+                except:
+                    room_group = RoomGroup.objects.get(name=room_group_id, types__in=[temporay_room_type,])
+
+                room_group.types.add(room_type)
+            except RoomGroup.DoesNotExist:
+                print(f"unable to find  RoomGroup '{idroom_group_idGroup}'")
+
             col += 1
-            idRoomGroup = sheet.cell(row=row, column=col).value
+            room_group_id = sheet.cell(row=row, column=col).value
 
         row += 1
         idCat = sheet.cell(row=row, column=ROOM_CATEGORY_START_COL).value
@@ -445,7 +438,7 @@ def groups_extract(department, book):
         id_per = sheet.cell(row=PERIOD_ROW, column=7).value
 
     for index, tp in enumerate(TrainingProgramme.objects.filter(department=department)):        
-        TrainingProgrammeDisplay.objects.create_or_update(training_programme=tp).update(row=index)
+        TrainingProgrammeDisplay.objects.get_or_create(training_programme=tp, row=index)
         
 
     #generate_group_file(department.abbrev)
