@@ -172,7 +172,7 @@ def get_rooms(department_abbrev):
     for rt in RoomType.objects.filter(department__abbrev=department_abbrev):
         d[str(rt)] = []
         for rg in rt.members.all():
-            for r in rg.subrooms.objects.all():
+            for r in rg.subrooms.all():
                 if str(r) not in d[str(rt)]:
                     d[str(rt)].append(str(r))
 
