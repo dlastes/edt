@@ -29,7 +29,7 @@ import logging
 from base.models import Group, TrainingProgramme, GroupDisplay, \
     TrainingProgrammeDisplay, ScheduledCourse, EdtVersion, Department, Regen
 
-from base.models import Room, RoomType, RoomGroup, RoomSort
+from base.models import Room, RoomType, RoomGroup, RoomSort, Period
 from people.models import Tutor
 
 from django.core.exceptions import ObjectDoesNotExist
