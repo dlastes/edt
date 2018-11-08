@@ -1,0 +1,39 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:FLOP-EDT V1.0
+METHOD:PUBLISH
+BEGIN:VTIMEZONE
+TZID:Europe/Paris
+X-LIC-LOCATION:Europe/Paris
+BEGIN:DAYLIGHT
+TZOFFSETFROM:+0100
+TZOFFSETTO:+0200
+TZNAME:CEST
+DTSTART:19700329T020000
+RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=3
+END:DAYLIGHT
+BEGIN:STANDARD
+TZOFFSETFROM:+0200
+TZOFFSETTO:+0100
+TZNAME:CET
+DTSTART:19701025T030000
+RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10
+END:STANDARD
+END:VTIMEZONE
+{% for course in courses %}
+
+{{ course.cours.groupe.nom }}
+{{ course.cours.an }} - {{ course.cours.semaine }} - {{ course.creneau.jour_id }} 
+
+BEGIN:VEVENT
+UID:{{ course.id }}@schedule
+DTSTAMP:20181108T085509Z_TODO
+SUMMARY:1A4B_TODO {{ course.cours.module }} {{ course.cours.type }} - {{ course.cours.tutor.username }}
+LOCATION:{{ course.room.name }}
+DESCRIPTION:Cours \: {{ course.cours.module }} {{ course.cours.type }}\nGroupe \: 1A4B_TODO\nSalle \: {{ course.room.name }}
+DTSTART;TZID=Europe/Paris:20181127T080000_TODO
+DTEND;TZID=Europe/Paris:20181127T092500_TODO
+END:VEVENT
+
+{% endfor %}
+END:VCALENDAR
