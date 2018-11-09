@@ -63,7 +63,7 @@ def moderate(req):
 
 
 def fetch_quote(req):
-    nb_quotes = Quote.objects.all().count()
+    nb_quotes = Quote.objects.filter(status=Quote.ACCEPTED).count()
     chosen_quote = ''
     if nb_quotes > 0:
         chosen_quote = Quote.objects.all()[randint(0,nb_quotes)]
