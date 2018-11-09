@@ -614,8 +614,8 @@ def fetch_bknews(req, year, week, **kwargs):
                                         department=req.department,
                                         year=year,
                                         week=week))
-    response = HttpResponse(dataset.json,
-                            content_type='text/json')
+    response = HttpResponse(dataset.csv,
+                            content_type='text/csv')
     response['semaine'] = week
     response['an'] = year
     return response

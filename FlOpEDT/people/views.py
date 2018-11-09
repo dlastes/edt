@@ -2,10 +2,11 @@
 
 
 from django.shortcuts import render
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
 from .models import Tutor
+from .admin import TutorResource
 
 def redirect_add_people_kind(req, kind):
     if kind == "stud":
@@ -34,3 +35,12 @@ def redirect_change_people_kind(req):
     else:
         raise Http404("Who are you?")
             
+
+def fetch_tutors(req):
+	dataset = TutorResource().export( Tutor.objects.all() )
+	response = HttpResponse(dataset.csv,
+                            content_type='text/csv')
+	return response
+
+
+

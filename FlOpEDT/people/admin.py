@@ -5,6 +5,8 @@ from django.contrib import admin
 
 from people.models import FullStaff, SupplyStaff, BIATOS, Tutor, User
 
+from import_export import resources, fields
+
 
 class FullStaffAdmin(admin.ModelAdmin):
 
@@ -22,6 +24,13 @@ class BIATOSAdmin(admin.ModelAdmin):
 
     class Meta:
         app_label = 'auth'
+
+class TutorResource(resources.ModelResource):
+
+	class Meta:
+		model = Tutor
+		fields = ( "username", "first_name", "last_name", "email" )
+		
 
 
 
