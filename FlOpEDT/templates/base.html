@@ -69,6 +69,7 @@
 	    <li><a href="{% url "base:edt" %}">Consulter</a></li>
 	    <li><a href="{% url "base:decale" %}">Décaler/Annuler</a></li>
 	    <li><a href="{% url "base:stype" %}">Semaine type</a></li>
+	    <li><a href="{% url "synchro:index" %}">iCal</a></li>
 	    <li><a href="{% url "base:aide" %}">Aide</a></li>
 	    <li><a href="{% url "base:contact" %}">Contact</a></li>
 	    {% if user.is_authenticated and user.is_staff %}
