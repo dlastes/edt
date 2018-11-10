@@ -3,8 +3,8 @@ VERSION:2.0
 PRODID:FLOP-EDT V1.0
 METHOD:PUBLISH
 BEGIN:VTIMEZONE
-TZID:Europe/Paris
-X-LIC-LOCATION:Europe/Paris
+TZID:{{ timezone }}
+X-LIC-LOCATION:{{ timezone }}
 BEGIN:DAYLIGHT
 TZOFFSETFROM:+0100
 TZOFFSETTO:+0200
@@ -20,19 +20,16 @@ DTSTART:19701025T030000
 RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10
 END:STANDARD
 END:VTIMEZONE
-{% for course in courses %}
-
-{{ course.cours.groupe.nom }}
-{{ course.cours.an }} - {{ course.cours.semaine }} - {{ course.creneau.jour_id }} 
+{% for e in events %}
 
 BEGIN:VEVENT
-UID:{{ course.id }}@schedule
-DTSTAMP:20181108T085509Z_TODO
-SUMMARY:1A4B_TODO {{ course.cours.module }} {{ course.cours.type }} - {{ course.cours.tutor.username }}
-LOCATION:{{ course.room.name }}
-DESCRIPTION:Cours \: {{ course.cours.module }} {{ course.cours.type }}\nGroupe \: 1A4B_TODO\nSalle \: {{ course.room.name }}
-DTSTART;TZID=Europe/Paris:20181127T080000_TODO
-DTEND;TZID=Europe/Paris:20181127T092500_TODO
+UID:{{ e.id }}@schedule
+DTSTAMP:{% now 'Ymd\THis\Z' %}
+SUMMARY:{{ e.title }}
+LOCATION:{{ e.location }}
+DESCRIPTION:{{ e.description }}
+DTSTART;TZID={{ timezone }}:{{ e.begin|date:'Ymd\THis' }}
+DTEND;TZID={{ timezone }}:{{ e.end|date:'Ymd\THis' }}
 END:VEVENT
 
 {% endfor %}

@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     'quote',
     'people',
     'solve_board',
+    'synchro'
 ]
 
 MIDDLEWARE = [
