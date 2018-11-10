@@ -1150,18 +1150,6 @@ function create_bknews() {
 }
 
 
-function translate_bknews_from_csv(d){
-    return {
-	x_beg: +d.x_beg,
-	x_end: +d.x_end,
-	y: +d.y,
-	fill_col: d.fill_col,
-	strk_col: d.strk_col,
-	txt: d.txt
-    }
-}
-
-
 /*---------------------
   ------- QUOTES ------
   ---------------------*/
