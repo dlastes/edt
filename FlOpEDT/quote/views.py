@@ -24,16 +24,15 @@
 # without disclosing the source code of your own applications.
 
 
+from random import randint
 
 from django.shortcuts import render
+from django.http import HttpResponse
 
-from .forms import QuoteForm  # ProfForm, UserForm
-
-from .models import Quote
 from base.views import edt
-
-from random import randint
-from django.http import JsonResponse
+from quote.forms import QuoteForm  # ProfForm, UserForm
+from quote.models import Quote
+from quote.admin import QuoteResource
 
 
 def submit(req):
@@ -63,8 +62,11 @@ def moderate(req):
 
 
 def fetch_quote(req):
-    nb_quotes = Quote.objects.filter(status=Quote.ACCEPTED).count()
-    chosen_quote = ''
-    if nb_quotes > 0:
-        chosen_quote = Quote.objects.all()[randint(0,nb_quotes)]
-    return JsonResponse({'quote': str(chosen_quote)})
+    ids = Quote.objects.filter(status=Quote.ACCEPTED).values_list('id',
+                                                                  flat=True)
+    nb_quotes = len(ids)
+    chosen_id = ids[randint(0,nb_quotes)] if nb_quotes > 0 else -1
+    dataset = QuoteResource()\
+        .export(Quote.objects.filter(id=chosen_id))
+    print(Quote.objects.filter(id=chosen_id))
+    return HttpResponse(dataset.csv, content_type='text/csv')

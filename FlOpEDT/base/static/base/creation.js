@@ -1178,11 +1178,17 @@ function create_quote() {
         dataType: 'text',
         url: url_quote,
         async: true,
-        contentType: "text/json",
+        contentType: "text/csv",
         success: function(msg) {
-            //console.log(msg);
+            console.log(msg);
 
-            quote = JSON.parse(msg).quote ;
+            var quotes = d3.csvParse(msg, translate_quote_from_csv);
+	    if(quotes.length > 0){
+		quote = quotes[0] ; 
+	    } else {
+		quote = '' ;
+	    }
+		
 	    vg.select(".quote").select("text")
 		.text(quote);
 
@@ -1195,6 +1201,10 @@ function create_quote() {
             show_loader(false);
         }
     });
+}
+
+function translate_quote_from_csv(d) {
+    return d.txt;
 }
 
 
