@@ -65,7 +65,7 @@ def fetch_quote(req):
     ids = Quote.objects.filter(status=Quote.ACCEPTED).values_list('id',
                                                                   flat=True)
     nb_quotes = len(ids)
-    chosen_id = ids[randint(0,nb_quotes)] if nb_quotes > 0 else -1
+    chosen_id = ids[randint(0,nb_quotes-1)] if nb_quotes > 0 else -1
     dataset = QuoteResource()\
         .export(Quote.objects.filter(id=chosen_id))
     print(Quote.objects.filter(id=chosen_id))
