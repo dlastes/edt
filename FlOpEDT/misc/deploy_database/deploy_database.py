@@ -470,7 +470,7 @@ def modules_extract(department, book):
             profMod = sheet.cell(row=MODULE_ROW, column=5).value
             tpModule = TrainingProgramme.objects.get(abbrev=tpMod)
             profesMod = Tutor.objects.get(username=profMod)
-            periodMod = Period.objects.get(name=period)
+            periodMod = Period.objects.get(name=period, department=department)
 
             try:
 
