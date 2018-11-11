@@ -302,6 +302,7 @@ class Module(models.Model):
 
 class CourseType(models.Model):
     name = models.CharField(max_length=50)
+    department =  models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
     group_types = models.ManyToManyField(GroupType,
                                          blank=True,
                                          related_name="compatible_course_types")

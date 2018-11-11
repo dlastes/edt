@@ -592,13 +592,13 @@ def courses_extract(department, book):
 
         TYPE_COL = 2
 
-        verif = CourseType.objects.filter(name=idType)
+        verif = CourseType.objects.filter(name=idType, department=department)
 
         if not verif.exists():
 
             try:
 
-                course = CourseType(name=idType)
+                course = CourseType(name=idType, department=department)
                 course.save()
 
             except IntegrityError as ie:
