@@ -38,18 +38,16 @@ application = get_wsgi_application()
 
 
 from openpyxl import *
-from base.models import Group, Module, Course, Room, CourseType, RoomType, TrainingProgramme, Dependency, Period
+from base.models import Group, Module, Course, Room, CourseType, RoomType, TrainingProgramme, Dependency, Period, Department
 
 from people.models import Tutor
 
 from misc.assign_module_color import assign_color
 
-bookname = 'misc/deploy_database/Planification_2018_2019_yleboulanger.xlsx'
 
-
-def ReadPlanifWeek(book, feuille, semaine, an):
+def ReadPlanifWeek(department, book, feuille, semaine, an):
     sheet = book[feuille]
-    period=Period.objects.get(name=feuille)
+    period=Period.objects.get(name=feuille, department=department)
 
     # lookup week row:
 
@@ -111,8 +109,8 @@ def ReadPlanifWeek(book, feuille, semaine, an):
             salle = sheet.cell(row=row, column=salle_COL).value
             prof = sheet.cell(row=row, column=prof_COL).value
             grps = sheet.cell(row=row, column=groupe_COL).value
-            COURSE_TYPE = CourseType.objects.get(name=nature)
-            ROOMTYPE = RoomType.objects.get(name=salle)
+            COURSE_TYPE = CourseType.objects.get(name=nature, department=department)
+            ROOMTYPE = RoomType.objects.get(name=salle, department=department)
             if prof is None:
                 TUTOR, created = Tutor.objects.get_or_create(username='---')
                 if created:
@@ -179,20 +177,22 @@ def ReadPlanifWeek(book, feuille, semaine, an):
             raise
 
 
-def extract_period(book, period):
+def extract_period(department, book, period):
     sheet = book[period.name]
     if period.starting_week < period.ending_week:
         for week in range(period.starting_week, period.ending_week + 1):
-            ReadPlanifWeek(book, sheet, week, 2018)
+            ReadPlanifWeek(department, book, sheet, week, 2018)
     else:
         for week in range(period.starting_week, 53):
-            ReadPlanifWeek(book, sheet, week, 2018)
+            ReadPlanifWeek(department, book, sheet, week, 2018)
         for week in range(1, period.ending_week + 1):
-            ReadPlanifWeek(book, sheet, week, 2019)
+            ReadPlanifWeek(department, book, sheet, week, 2019)
 
-def extract_planif(bookname):
+def extract_planif(department, bookname=None):
+    if bookname is None:
+        bookname = 'misc/deploy_database/planif_file_'+department.abbrev+'.xlsx'
     book = load_workbook(filename=bookname, data_only=True)
-    for period in Period.objects.all():
-        extract_period(book, period)
+    for period in Period.objects.filter(department=department):
+        extract_period(department, book, period)
     assign_color()
 
