@@ -26,13 +26,15 @@
 
 import logging
 
+from django.core.exceptions import ObjectDoesNotExist
+
 from base.models import Group, TrainingProgramme, GroupDisplay, \
     TrainingProgrammeDisplay, ScheduledCourse, EdtVersion, Department, Regen
 
 from base.models import Room, RoomType, RoomGroup, RoomSort, Period
 from people.models import Tutor
+from TTapp.models import TTConstraint
 
-from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger(__name__)
 
@@ -50,6 +52,13 @@ def create_first_department():
     for model in models:
         for model_class in model.objects.all():
             model_class.departments.add(department)
+
+    # Update existing Constraint
+    types = TTConstraint.__subclasses__()
+
+    for type in types:
+        for constraint in type.objects.filter(query):
+            constraint.objects.all().update(department=department)
     
     return department
 

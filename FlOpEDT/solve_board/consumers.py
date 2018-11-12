@@ -33,6 +33,8 @@ from threading import Thread
 from django.core.exceptions import ObjectDoesNotExist
 from MyFlOp.MyTTModel import MyTTModel
 from base.models import TrainingProgramme
+import TTapp.models as TTClasses
+
 # from multiprocessing import Process
 import os
 import io
@@ -44,15 +46,16 @@ from django.core.cache import cache
 from django.conf import settings
 
 
-
-
-
 from channels.generic.websocket import WebsocketConsumer
-import json
+import json, sys
 
 _solver_child_process = 0
 
 class SolverConsumer(WebsocketConsumer):
+
+    def get_constraint_class(self, str):
+        return getattr(sys.modules[TTClasses.__name__], str)
+
     def connect(self):
         # ws_message()
         self.accept()
@@ -71,9 +74,20 @@ class SolverConsumer(WebsocketConsumer):
         #     'message': message
         # }))
         if data['action'] == 'go':
-            # self.send(text_data=json.dumps({
-            #     'message': 'you want me to go. I got it.'
-            # }))
+
+            # Save constraints state
+            for constraint in data['constraints']:
+                try:
+                    type = self.get_constraint_class(constraint['model'])
+                    instance = type.objects.get(pk=constraint['pk'])
+                    instance.is_active = constraint['is_active']
+                    instance.save()
+                except ObjectDoesNotExist:
+                    print(f"unable to find {constraint['model']} for id {constraint['pk']}")    
+                except AttributeError:
+                    print(f"error while importing {constraint['model']} model")    
+
+            # Start solver
             Solve(
                 data['department'],
                 data['week'],
@@ -81,6 +95,7 @@ class SolverConsumer(WebsocketConsumer):
                 data['timestamp'],
                 data['train_prog'],
                 self).start()
+
         elif data['action'] == 'stop':
             solver_child_process = cache.get("solver_child_process")
             if solver_child_process:
@@ -134,6 +149,7 @@ class Solve():
         self.year = year
         self.timestamp = timestamp
         self.channel = chan
+
         # if all train progs are called, training_programme=''
         try:
             self.training_programme = TrainingProgramme.objects.get(abbrev=training_programme)
