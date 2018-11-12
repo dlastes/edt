@@ -480,23 +480,30 @@ def fetch_unavailable_rooms(req, year, week, **kwargs):
     except ValueError:
         return HttpResponse("KO")
 
-    cache_key = get_key_unavailable_rooms(department.abbrev, year, week)
-    cached = cache.get(cache_key)
-    if cached is not None:
-        return cached
+    # ----------------
+    # To be done later
+    # ----------------
+    #
+    # cache_key = get_key_unavailable_rooms(department.abbrev, year, week)
+    # cached = cache.get(cache_key)
+    # if cached is not None:
+    #     return cached
 
-    dataset = DispoResource() \
-        .export(RoomPreference.objects.filter(
-                                            room__departments = department, 
-                                            semaine=week,
-                                            an=year,
-                                            valeur=0))
-    response = HttpResponse(dataset.csv,
-                            content_type='text/csv')
+    # dataset = DispoResource() \
+    #     .export(RoomPreference.objects.filter(
+    #                                         room__departments = department, 
+    #                                         semaine=week,
+    #                                         an=year,
+    #                                         valeur=0))
+    # response = HttpResponse(dataset.csv,
+    #                         content_type='text/csv')
+    # cache.set(cache_key, response)
+
+
+    response = HttpResponse(content_type='text/csv')
     response['week'] = week
     response['year'] = year
 
-    cache.set(cache_key, response)
     return response
    
 
