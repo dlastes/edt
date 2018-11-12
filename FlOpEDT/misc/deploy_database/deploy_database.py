@@ -470,7 +470,7 @@ def modules_extract(department, book):
             profMod = sheet.cell(row=MODULE_ROW, column=5).value
             tpModule = TrainingProgramme.objects.get(abbrev=tpMod)
             profesMod = Tutor.objects.get(username=profMod)
-            periodMod = Period.objects.get(name=period)
+            periodMod = Period.objects.get(name=period, department=department)
 
             try:
 
@@ -592,13 +592,13 @@ def courses_extract(department, book):
 
         TYPE_COL = 2
 
-        verif = CourseType.objects.filter(name=idType)
+        verif = CourseType.objects.filter(name=idType, department=department)
 
         if not verif.exists():
 
             try:
 
-                course = CourseType(name=idType)
+                course = CourseType(name=idType, department=department)
                 course.save()
 
             except IntegrityError as ie:

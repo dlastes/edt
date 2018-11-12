@@ -48,7 +48,7 @@ def append_row(work_sheet, rows_to_append, row_number, rank, untill):
             new_cell.protection = copy(cell.protection)
             new_cell.alignment = copy(cell.alignment)
 
-empty_bookname='misc/deploy_database/empty_planif_file_new.xlsx'
+empty_bookname='misc/deploy_database/empty_planif_file.xlsx'
 
 def make_planif_file(department, empty_bookname=empty_bookname):
     new_book = load_workbook(filename=empty_bookname)
@@ -89,8 +89,7 @@ def make_planif_file(department, empty_bookname=empty_bookname):
 
         ################ A line per module per CourseType ################
         for mod in Module.objects.filter(period=p):
-            for ct in CourseType.objects.all():
-            #for ct in CourseType.objects.filter(department=department):
+            for ct in CourseType.objects.filter(department=department):
                 rank += 1
                 append_row(sheet, empty_rows, 2, rank, cols)
                 sheet.cell(row=rank, column=1).value = mod.abbrev
@@ -128,5 +127,5 @@ def make_planif_file(department, empty_bookname=empty_bookname):
 
 
     new_book.remove(new_book['empty'])
-    filename='misc/deploy_database/planif_file'+department.name+'.xlsx'
+    filename='misc/deploy_database/planif_file_'+department.abbrev+'.xlsx'
     new_book.save(filename=filename)
