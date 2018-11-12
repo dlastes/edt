@@ -1007,14 +1007,14 @@ def decale_changes(req, **kwargs):
                 .get(cours__id=c['i'],
                      copie_travail=0)
             cours = cours_place.cours
-            cache.delete(get_key_course_pl(req.department,
+            cache.delete(get_key_course_pl(req.department.abbrev,
                                            cours.an,
                                            cours.semaine,
                                            cours_place.copie_travail))
             cours_place.delete()
         else:
             cours = Course.objects.get(id=c['i'])
-            cache.delete(get_key_course_pp(req.department, 
+            cache.delete(get_key_course_pp(req.department.abbrev, 
                                            cours.an,
                                            cours.semaine,
                                            0))
@@ -1032,7 +1032,7 @@ def decale_changes(req, **kwargs):
         if new_assignment['na'] != 0:
             # cours.prof=User.objects.get(username=a.np)
             cours.tutor = Tutor.objects.get(username=new_assignment['np'])
-        cache.delete(get_key_course_pp(department_abbrev,
+        cache.delete(get_key_course_pp(req.department.abbrev,
                                        cours.an,
                                        cours.semaine,
                                        0))
