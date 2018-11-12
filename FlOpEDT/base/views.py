@@ -692,7 +692,7 @@ def edt_changes(req, **kwargs):
 
 
     if work_copy == 0:
-        version = get_edt_version(department, semaine, an, create=True)
+        version = queries.get_edt_version(department, semaine, an, create=True)
 
     if work_copy != 0 or old_version == version:
         with transaction.atomic():
