@@ -407,7 +407,7 @@ def fetch_cours_pp(req, week, year, num_copy, **kwargs):
 
 
 #@login_required
-def fetch_dispos(req, year, week):
+def fetch_dispos(req, year, week, **kwargs):
     print(req)
     print("================")
     if req.GET:
@@ -415,20 +415,21 @@ def fetch_dispos(req, year, week):
             return HttpResponse("Pas connecte")
     print("================")
 
-
     try:
         week = int(week)
         year = int(year)
+        department = req.department
     except ValueError:
         return HttpResponse("KO")
 
-    cache_key = get_key_preferences_tutor(year, week)
+    cache_key = get_key_preferences_tutor(department.abbrev, year, week)
     cached = cache.get(cache_key)
     if cached is not None:
         return cached
 
     busy_inst = Course.objects.filter(semaine=week,
-                                      an=year) \
+                                      an=year,
+                                      module__train_prog__department=department) \
         .distinct('tutor') \
         .values_list('tutor')
 
@@ -973,8 +974,10 @@ def dispos_changes(req, **kwargs):
         print(didi)
         
     if week is not None and year is not None:
-        cache.delete(get_key_preferences_tutor(year, week))
-
+        for c in Course.objects.filter(semaine=week,
+                                       an=year).distinct('module__train_prog__department'):
+            cache.delete(get_key_preferences_tutor(c.module.train_prog.department.abbrev,
+                                                   year, week))
         
     return good_response
 
@@ -1161,10 +1164,10 @@ def get_key_course_pp(department_abbrev, year, week, num_copy):
     return 'CPP-D' + department_abbrev + '-Y' + str(year) + '-W' + str(week) + '-C' + str(num_copy) 
 
 
-def get_key_preferences_tutor(year, week):
+def get_key_preferences_tutor(department_abbrev, year, week):
     if year is None or week is None:
         return ''
-    return 'PREFT-Y' + str(year) + '-W' + str(week)
+    return 'PREFT-D' + department_abbrev + '-Y' + str(year) + '-W' + str(week)
 
 
 def get_key_unavailable_rooms(department_abbrev, year, week):
