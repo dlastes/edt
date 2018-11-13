@@ -55,6 +55,8 @@ from django.db.models import Q, Max
 
 import datetime
 
+import logging
+logger = logging.getLogger('base')
 
 class WeekDB(object):
     def __init__(self, department, week, year, train_prog):
@@ -792,15 +794,16 @@ class TTModel(object):
 
     def add_specific_constraints(self):
         """
-        Add the specific constraints stored in the database.
+        Add the active specific constraints stored in the database.
         """
-        print("adding specific constraints")
-        for constraint_type in TTConstraint.__subclasses__():
-            for constr in \
-                    constraint_type.objects.filter(Q(department=self.department)
-                                                   & Q(week=self.semaine)
-                                                   & Q(year=self.an)
-                                                   | Q(week__isnull=True)):
+        print("adding active specific constraints")
+        for promo in self.train_prog:
+            for constr in get_constraints(
+                                self.department,
+                                week = self.week,
+                                year = self.year, 
+                                train_prog = promo, 
+                                is_active = True):
                 constr.enrich_model(self)
 
     def update_objective(self):
@@ -960,3 +963,39 @@ class TTModel(object):
             self.add_tt_to_db(target_work_copy)
             reassign_rooms(self.semaine, self.an, target_work_copy)
             return target_work_copy
+
+
+def get_constraints(department, week=None, year=None, train_prog=None, is_active=None):
+    #
+    #  Return constraints corresponding to the specific filters
+    #  
+    query = Q(department=department)
+
+    if is_active:
+        query &= Q(is_active=is_active)
+
+    if week and not year:
+        logger.warning(f"Unable to filter constraint for week {week} without specifing year")
+        return
+        
+    if week and train_prog:
+        query &= \
+            Q(train_prog__abbrev=train_prog) & Q(week=week) & Q(year=year) | \
+            Q(train_prog__isnull=True) & Q(week__isnull=True) & Q(year__isnull=True)
+    elif week:
+        query &= Q(week=week) & Q(year=year) | Q(week__isnull=True) & Q(year__isnull=True)            
+    elif train_prog:
+        query &= Q(train_prog__abbrev=train_prog) | Q(train_prog__isnull=True)
+
+    # Look up the TTConstraint subclasses records to update
+    types = TTConstraint.__subclasses__()
+    for type in types:
+        queryset = type.objects.filter(query)
+        
+        # Get prefetch  attributes list for the current type
+        atributes = type.get_viewmodel_prefetch_attributes()
+        if atributes:
+            queryset = queryset.prefetch_related(*atributes)
+            
+        for constraint in queryset.order_by('id'):
+            yield constraint

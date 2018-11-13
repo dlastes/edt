@@ -31,11 +31,14 @@ from people.models import FullStaff
 from solve_board.models import SolveRun
 # from solve_board.consumers import ws_add
 from MyFlOp.MyTTModel import MyTTModel
+from TTapp.models import TTConstraint
+from TTapp.TTModel import get_constraints
 
 from django.shortcuts import render
 from django.contrib.admin.views.decorators import staff_member_required
-from django.http import Http404, JsonResponse
+from django.http import Http404, JsonResponse, HttpResponse
 from django.conf import settings
+from django.db.models import Q
 
 # from channels import Group
 
@@ -47,22 +50,56 @@ import json
 
 from django.template.response import TemplateResponse
 
+
+# String used to specify all filter
+text_all='Toute'
+
+def get_constraints_viewmodel(department, **kwargs):
+    #
+    # Extract simplified datas from constraints instances
+    #
+    constraints = get_constraints(department, **kwargs)
+    return [c.get_viewmodel() for c in constraints]
+
+
+@staff_member_required
+def fetch_constraints(req, train_prog, year, week, **kwargs):
+
+    params = {}
+
+    if not train_prog == text_all:
+        params.update({'train_prog':train_prog})
+
+    if week and not week == text_all:
+        params.update({'week':int(week), 'year':int(year)})
+    
+    constraints_view_model = get_constraints_viewmodel(req.department, **params)
+
+    return HttpResponse(json.dumps(constraints_view_model), content_type='text/json')
+
 @staff_member_required
 def main_board(req, **kwargs):
 
-    all_tps = []
     department = req.department
-    
+    all_tps = []
+    week_list = weeks.week_list()
+
+    # Get the first week matching constraints
+    params = {'week':week_list[0]['semaine'] , 'year':week_list[0]['an']}
+    constraints_view_model = get_constraints_viewmodel(department, **params)
+
     for tp in TrainingProgramme.objects.filter(department=department):
         all_tps.append(tp.abbrev)
     
-    return TemplateResponse(req,
-                  'solve_board/main-board.html',
+    return TemplateResponse(req, 'solve_board/main-board.html',
                   {
-                   'department': department, 
-                   'all_weeks': weeks.week_list(),
+                   'department': department,
+                   'text_all': text_all,
+                   'all_weeks': week_list,
                    'start_date': weeks.current_week(),
                    'end_date': weeks.current_week(),
                    'current_year': weeks.annee_courante,
-                   'all_train_progs': json.dumps(all_tps)})
+                   'all_train_progs': json.dumps(all_tps),
+                   'constraints': json.dumps(constraints_view_model),
+                   })
 
