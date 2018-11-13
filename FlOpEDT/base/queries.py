@@ -168,11 +168,18 @@ def get_rooms(department_abbrev):
     will be used by the website
     :return:
     """
-    d = {}
+    dic_rt = {}
     for rt in RoomType.objects.filter(department__abbrev=department_abbrev):
-        d[str(rt)] = []
+        dic_rt[str(rt)] = []
         for rg in rt.members.all():
-            if str(rg) not in d[str(rt)]:
-                d[str(rt)].append(str(rg))
+            if str(rg) not in dic_rt[str(rt)]:
+                dic_rt[str(rt)].append(str(rg))
 
-    return d
+    dic_rg = {}
+    for rg in RoomGroup.objects.all():
+        dic_rg[str(rg)] = []
+        for r in rg.subrooms.all():
+            dic_rg[str(rg)].append(str(r))
+
+    return {'roomtypes':dic_rt,
+            'roomgroups':dic_rg}
