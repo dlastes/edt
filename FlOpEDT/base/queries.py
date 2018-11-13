@@ -28,10 +28,14 @@ import logging
 
 from django.core.exceptions import ObjectDoesNotExist
 
-from base.models import Group, TrainingProgramme, GroupDisplay, \
-    TrainingProgrammeDisplay, ScheduledCourse, EdtVersion, Department, Regen
+from base.models import Group, TrainingProgramme, \
+                        GroupDisplay, TrainingProgrammeDisplay, \
+                        ScheduledCourse, EdtVersion, Department, Regen
 
-from base.models import Room, RoomType, RoomGroup, RoomSort, Period, CourseType
+from base.models import Room, RoomType, RoomGroup, \
+                        RoomSort, Period, CourseType, \
+                        TutorCost
+
 from people.models import Tutor
 from TTapp.models import TTConstraint
 
@@ -43,7 +47,10 @@ def create_first_department():
     department = Department.objects.create(name="Default Department", abbrev="default")
     
     # Update all existing department related models
-    models = [TrainingProgramme, EdtVersion, Regen, RoomType, Period, CourseType]
+    models = [
+        TrainingProgramme, EdtVersion, Regen, \
+        RoomType, Period, CourseType, BreakingNews, \
+        TutorCost]
     for model in models:
         model.objects.all().update(department=department)
 

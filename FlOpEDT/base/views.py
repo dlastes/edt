@@ -613,8 +613,10 @@ def fetch_bknews(req, **kwargs):
     year = int(req.GET.get('y', '0'))
 
     dataset = BreakingNewsResource() \
-        .export(BreakingNews.objects.filter(year=year,
-                                            week=week))
+        .export(BreakingNews.objects.filter(
+                                        department=req.department,
+                                        year=year,
+                                        week=week))
     response = HttpResponse(dataset.json,
                             content_type='text/json')
     response['semaine'] = week

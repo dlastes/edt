@@ -36,38 +36,6 @@ from django.dispatch import receiver
 
 from colorfield.fields import ColorField
 
-
-# <editor-fold desc="BKNEWS">
-# ------------
-# -- BKNEWS --
-# ------------
-
-
-class BreakingNews(models.Model):
-    week = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(0), MaxValueValidator(53)],
-        null=True, blank=True)
-    year = models.PositiveSmallIntegerField()
-    # x_beg and x_end in terms of day width
-    x_beg = models.FloatField(default=2., blank=True)
-    x_end = models.FloatField(default=3., blank=True)
-    y = models.PositiveSmallIntegerField(null=True, default=None,
-                                         blank=True)
-    txt = models.CharField(max_length=200)
-    is_linked = models.URLField(max_length=200, null=True, blank=True, default=None)
-    fill_color = ColorField(default='#228B22')
-    # stroke color
-    strk_color = ColorField(default='#000000')
-
-    def __str__(self):
-        return '@(' + str(self.x_beg) + '--' + str(self.x_end) \
-               + ',' + str(self.y) \
-               + ')-W' + str(self.week) + ',Y' \
-               + str(self.year) + ': ' + str(self.txt)
-
-
-# </editor-fold>
-
 # <editor-fold desc="GROUPS">
 # ------------
 # -- GROUPS --
@@ -128,6 +96,38 @@ class Group(models.Model):
 
 
 # </editor-fold desc="GROUPS">
+
+# <editor-fold desc="BKNEWS">
+# ------------
+# -- BKNEWS --
+# ------------
+
+
+class BreakingNews(models.Model):
+    department =  models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
+    week = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(0), MaxValueValidator(53)],
+        null=True, blank=True)
+    year = models.PositiveSmallIntegerField()
+    # x_beg and x_end in terms of day width
+    x_beg = models.FloatField(default=2., blank=True)
+    x_end = models.FloatField(default=3., blank=True)
+    y = models.PositiveSmallIntegerField(null=True, default=None,
+                                         blank=True)
+    txt = models.CharField(max_length=200)
+    is_linked = models.URLField(max_length=200, null=True, blank=True, default=None)
+    fill_color = ColorField(default='#228B22')
+    # stroke color
+    strk_color = ColorField(default='#000000')
+
+    def __str__(self):
+        return '@(' + str(self.x_beg) + '--' + str(self.x_end) \
+               + ',' + str(self.y) \
+               + ')-W' + str(self.week) + ',Y' \
+               + str(self.year) + ': ' + str(self.txt)
+
+
+# </editor-fold>
 
 # <editor-fold desc="TIMING">
 # ------------
@@ -494,6 +494,7 @@ class PlanningModification(models.Model):
 
 
 class TutorCost(models.Model):
+    department =  models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
     semaine = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)])
     an = models.PositiveSmallIntegerField()
