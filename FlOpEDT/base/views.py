@@ -608,10 +608,7 @@ def fetch_decale(req, **kwargs):
                          'jours': liste_jours})
 
 
-def fetch_bknews(req, **kwargs):
-    week = int(req.GET.get('w', '0'))
-    year = int(req.GET.get('y', '0'))
-
+def fetch_bknews(req, year, week, **kwargs):
     dataset = BreakingNewsResource() \
         .export(BreakingNews.objects.filter(
                                         department=req.department,
