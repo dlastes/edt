@@ -70,3 +70,11 @@ def fetch_quote(req):
         .export(Quote.objects.filter(id=chosen_id))
     print(Quote.objects.filter(id=chosen_id))
     return HttpResponse(dataset.csv, content_type='text/csv')
+
+def fetch_all_quotes(req):
+
+    dataset = QuoteResource() \
+        .export(Quote.objects.filter(status='A'))
+    response = HttpResponse(dataset.json,
+                            content_type='text/json')
+    return response

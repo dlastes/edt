@@ -44,7 +44,7 @@ from .models import Course, UserPreference, ScheduledCourse, EdtVersion, \
 from people.models import Tutor
 # Prof,
 
-from .admin import CoursResource, DispoResource, \
+from .admin import CoursResource, DispoResource, VersionResource, \
     CoursPlaceResource, BreakingNewsResource, UnavailableRoomsResource
 
 from .weeks import *
@@ -618,6 +618,14 @@ def fetch_bknews(req, year, week, **kwargs):
                             content_type='text/csv')
     response['semaine'] = week
     response['an'] = year
+    return response
+
+def fetch_version(req):
+
+    dataset = VersionResource() \
+        .export(EdtVersion.objects.all() )
+    response = HttpResponse(dataset.json,
+                            content_type='text/json')
     return response
 
 
