@@ -92,18 +92,23 @@
     padding: 1em;
   }
 
+  .constraint{
+    margin-bottom: 10px;
+    border: #f0e6e6 1pt solid;
+  }
+
   .title{
     font-size: 15px;
     font-weight: 500;
   }
 
-  .content{
-    margin-left: 2em;
+  .details{
+    padding: 1em;
   }
 
-  /* .description{
-
-  } */
+  .description{
+    padding: 1em;
+  }
 
   .comment{
     font-style: italic;
@@ -121,11 +126,12 @@
     var constraints = JSON.parse('{{ constraints|escapejs }}');
   </script>
   <template id="constraints_template">
-    <div>
+    <div class="constraint">
       <input type="checkbox" />
       <label class="title"></label>
       <div id="description" class="description"></div>
       <div id="comment" class="comment"></div>
+      <div id="details" class="details"></div>
     </div>
   </template>
   <form style="white-space: nowrap;" name="week_form">

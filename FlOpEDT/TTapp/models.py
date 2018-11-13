@@ -69,35 +69,39 @@ class TTConstraint(models.Model):
     def enrich_model(self, ttmodel, ponderation=1):
         raise NotImplementedError
 
-    def fullname(self):
+    def full_name(self):
         # Return a human readable constraint name
         return str(self)
 
-    @property
     def description(self):
         # Return a human readable constraint name
-        raise NotImplementedError
+        return "global constraint description"
 
     def get_viewmodel(self):
         #
         # Return a dictionnary with view-related data
         #
         if self.train_prog:
-            train_prog_value = self.train_prog.name
+            train_prog_value = f"{self.train_prog.name} ({self.train_prog.abbrev})" 
         else:
             train_prog_value = 'All'
         
+        if self.week:
+            week_value = f"{self.week} ({self.year})" 
+        else:
+            week_value = 'All'
+
         return {
             'model': self.__class__.__name__,
             'pk': self.pk, 
             'is_active': self.is_active,
-            'name': self.fullname(),
-            'description': 'description...',
+            'name': self.full_name(),
+            'description': self.description(),
             'comment': self.comment,
-            'train_prog': train_prog_value,
-            'week': self.week,
-            'year': self.year,
-            'details': {}
+            'details': {
+                'train_prog': train_prog_value,
+                'week': week_value,
+                }
             }
 
     @classmethod
@@ -148,8 +152,8 @@ class LimitCourseTypePerPeriod(TTConstraint):  # , pond):
                 else:
                     ttmodel.add_constraint(expr, '<=', self.limit)
 
-    def fullname(self):
-        return "LimitCourseTypePerPeriod"
+    def full_name(self):
+        return "Limit Course Type Per Period"
 
     @classmethod
     def get_viewmodel_prefetch_attributes(cls):

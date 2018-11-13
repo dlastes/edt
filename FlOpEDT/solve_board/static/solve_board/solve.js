@@ -210,22 +210,36 @@ function init_constraints(constraints) {
 
 			var clone = document.importNode(t.content, true);
 
+			// Display state 
 			var checkbox = clone.querySelector("input[type=checkbox]");
 			checkbox.setAttribute('id', constraintId);
 			checkbox.setAttribute('value', index);
 			checkbox.checked = constraint.is_active;
 
+			// Display title
 			var label = clone.querySelector("label");
 			label.setAttribute('for', constraintId)
 			label.textContent = constraint.name;
 
-			// display details
+			// Display description
+			var description = clone.querySelector("#description");
+			description.textContent = constraint.description;
+
+			// Display comment
+			if(constraint.comment){
+				var comment = clone.querySelector("#comment");
+				comment.textContent = constraint.comment;			
+			}
+
+			// Display details items
+			var details = clone.querySelector("#details")
+
 			for(var key in constraint.details){
 				var detail = document.createElement("div")
-				clone.appendChild(detail)
-				
-				var detail_content = document.createTextNode(`${key} : ${constraint.details[key]}`)
-				detail.appendChild(detail_content)
+				details.appendChild(detail)
+
+				var content = document.createTextNode(`${key} : ${constraint.details[key]}`)
+				detail.appendChild(content)
 			}
 
 			target.appendChild(clone);
