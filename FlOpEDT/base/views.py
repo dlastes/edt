@@ -407,7 +407,7 @@ def fetch_cours_pp(req, week, year, num_copy, **kwargs):
 
 
 #@login_required
-def fetch_dispos(req, year, week):
+def fetch_dispos(req, year, week, **kwargs):
     print(req)
     print("================")
     if req.GET:
@@ -415,20 +415,21 @@ def fetch_dispos(req, year, week):
             return HttpResponse("Pas connecte")
     print("================")
 
-
     try:
         week = int(week)
         year = int(year)
+        department = req.department
     except ValueError:
         return HttpResponse("KO")
 
-    cache_key = get_key_preferences_tutor(year, week)
+    cache_key = get_key_preferences_tutor(department.abbrev, year, week)
     cached = cache.get(cache_key)
     if cached is not None:
         return cached
 
     busy_inst = Course.objects.filter(semaine=week,
-                                      an=year) \
+                                      an=year,
+                                      module__train_prog__department=department) \
         .distinct('tutor') \
         .values_list('tutor')
 
@@ -480,23 +481,30 @@ def fetch_unavailable_rooms(req, year, week, **kwargs):
     except ValueError:
         return HttpResponse("KO")
 
-    cache_key = get_key_unavailable_rooms(department.abbrev, year, week)
-    cached = cache.get(cache_key)
-    if cached is not None:
-        return cached
+    # ----------------
+    # To be done later
+    # ----------------
+    #
+    # cache_key = get_key_unavailable_rooms(department.abbrev, year, week)
+    # cached = cache.get(cache_key)
+    # if cached is not None:
+    #     return cached
 
-    dataset = DispoResource() \
-        .export(RoomPreference.objects.filter(
-                                            room__departments = department, 
-                                            semaine=week,
-                                            an=year,
-                                            valeur=0))
-    response = HttpResponse(dataset.csv,
-                            content_type='text/csv')
+    # dataset = DispoResource() \
+    #     .export(RoomPreference.objects.filter(
+    #                                         room__departments = department, 
+    #                                         semaine=week,
+    #                                         an=year,
+    #                                         valeur=0))
+    # response = HttpResponse(dataset.csv,
+    #                         content_type='text/csv')
+    # cache.set(cache_key, response)
+
+
+    response = HttpResponse(content_type='text/csv')
     response['week'] = week
     response['year'] = year
 
-    cache.set(cache_key, response)
     return response
    
 
@@ -684,7 +692,7 @@ def edt_changes(req, **kwargs):
 
 
     if work_copy == 0:
-        version = get_edt_version(department, semaine, an, create=True)
+        version = queries.get_edt_version(department, semaine, an, create=True)
 
     if work_copy != 0 or old_version == version:
         with transaction.atomic():
@@ -966,8 +974,10 @@ def dispos_changes(req, **kwargs):
         print(didi)
         
     if week is not None and year is not None:
-        cache.delete(get_key_preferences_tutor(year, week))
-
+        for c in Course.objects.filter(semaine=week,
+                                       an=year).distinct('module__train_prog__department'):
+            cache.delete(get_key_preferences_tutor(c.module.train_prog.department.abbrev,
+                                                   year, week))
         
     return good_response
 
@@ -997,14 +1007,14 @@ def decale_changes(req, **kwargs):
                 .get(cours__id=c['i'],
                      copie_travail=0)
             cours = cours_place.cours
-            cache.delete(get_key_course_pl(req.department,
+            cache.delete(get_key_course_pl(req.department.abbrev,
                                            cours.an,
                                            cours.semaine,
                                            cours_place.copie_travail))
             cours_place.delete()
         else:
             cours = Course.objects.get(id=c['i'])
-            cache.delete(get_key_course_pp(req.department, 
+            cache.delete(get_key_course_pp(req.department.abbrev, 
                                            cours.an,
                                            cours.semaine,
                                            0))
@@ -1022,7 +1032,7 @@ def decale_changes(req, **kwargs):
         if new_assignment['na'] != 0:
             # cours.prof=User.objects.get(username=a.np)
             cours.tutor = Tutor.objects.get(username=new_assignment['np'])
-        cache.delete(get_key_course_pp(department_abbrev,
+        cache.delete(get_key_course_pp(req.department.abbrev,
                                        cours.an,
                                        cours.semaine,
                                        0))
@@ -1154,10 +1164,10 @@ def get_key_course_pp(department_abbrev, year, week, num_copy):
     return 'CPP-D' + department_abbrev + '-Y' + str(year) + '-W' + str(week) + '-C' + str(num_copy) 
 
 
-def get_key_preferences_tutor(year, week):
+def get_key_preferences_tutor(department_abbrev, year, week):
     if year is None or week is None:
         return ''
-    return 'PREFT-Y' + str(year) + '-W' + str(week)
+    return 'PREFT-D' + department_abbrev + '-Y' + str(year) + '-W' + str(week)
 
 
 def get_key_unavailable_rooms(department_abbrev, year, week):

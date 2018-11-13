@@ -1209,6 +1209,8 @@ function def_drag() {
     var sl = null;
     dragListener = d3.drag()
         .on("start", function(c) {
+	    cancel_cm_adv_preferences();
+	    cancel_cm_room_tutor_change();
             if (ckbox["edt-mod"].cked && fetch.done) {
 
                 data_slot_grid.forEach(function(sl) {
