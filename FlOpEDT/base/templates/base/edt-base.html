@@ -50,7 +50,8 @@
     var url_edt_changes = "{% url "base:edt_changes" department %}";
     var url_dispos_changes = "{% url "base:dispos_changes" department %}";
     var url_fetch_stype = "{% url "base:fetch_stype" department %}";
-    var url_bknews = "{% url "base:fetch_bknews" department %}";
+    var url_bknews = "{% url "base:fetch_bknews" department 0 0 %}";
+    url_bknews = url_bknews.slice(0, -3);
     var url_quote = "{% url "quote:fetch_quote" %}";
 
     var semaine_an_list = {{ all_weeks| safe }};
