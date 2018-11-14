@@ -34,7 +34,7 @@ from base.models import Group, TrainingProgramme, \
 
 from base.models import Room, RoomType, RoomGroup, \
                         RoomSort, Period, CourseType, \
-                        TutorCost
+                        BreakingNews, TutorCost
 
 from people.models import Tutor
 from TTapp.models import TTConstraint
