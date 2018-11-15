@@ -32,6 +32,19 @@ from .models import Quote, QuoteType
 from django.db.models import Max
 from FlOpEDT.filters import DropdownFilterAll, DropdownFilterRel, DropdownFilterCho
 
+from import_export import resources, fields
+
+
+class QuoteResource(resources.ModelResource):
+    txt = fields.Field()
+
+    def dehydrate_txt(self, quote):
+        return str(quote)
+
+    class Meta:
+        Quote
+        fields = ('txt')
+
 
 def accept(modeladmin, request, queryset):
     next = Quote.objects.all().aggregate(Max('id_acc'))['id_acc__max'] + 1
