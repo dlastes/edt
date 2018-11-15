@@ -305,11 +305,21 @@ function fetch_bknews(first) {
         dataType: 'text',
         url: url_bknews  + an_att + "/" + semaine_att,
         async: true,
-        contentType: "text/json",
+        contentType: "text/csv",
+//        contentType: "text/json",
         success: function(msg) {
-            //console.log(msg);
+	    console.log("excuseme");
+            console.log(msg);
 
-            bknews.cont = JSON.parse(msg) ;
+	    //            bknews.cont = JSON.parse(msg) ;
+	    console.log("here");
+	    console.log(bknews.cont.length);
+	    bknews.cont = d3.csvParse(msg,
+				      translate_bknews_from_csv);
+	    console.log(bknews.cont.length);
+	    console.log("tere");
+	    proutos = d3.csvParse(msg,
+				      translate_bknews_from_csv);
 
             if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
                 an_att == weeks.init_data[weeks.sel[0]].an) {
@@ -342,6 +352,20 @@ function fetch_bknews(first) {
 
 
 }
+
+function translate_bknews_from_csv(d){
+    return {
+	x_beg: +d.x_beg,
+	x_end: +d.x_end,
+	y: +d.y,
+	is_linked: d.is_linked,
+	fill_color: d.fill_color,
+	strk_color: d.strk_color,
+	txt: d.txt
+    }
+}
+
+
 
 function adapt_labgp(first) {
     var expected_ext_grid_dim = svg.height - margin.top - margin.bot ;
@@ -519,7 +543,6 @@ function translate_cours_pl_from_csv(d) {
 	color_bg: d.color_bg,
 	color_txt: d.color_txt,
     };
-    //    console.log(co);
     return co;
 }
 

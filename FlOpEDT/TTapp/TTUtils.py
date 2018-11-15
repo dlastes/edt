@@ -25,7 +25,7 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from base.models import Slot, ScheduledCourse, RoomPreference
+from base.models import Slot, ScheduledCourse, RoomPreference, EdtVersion
 from django.db.models import Max
 
 
@@ -116,6 +116,8 @@ def basic_swap_version(week, year, copy_a, copy_b=0):
         print('No scheduled courses')
         return
 
+    version_copy_b = EdtVersion.objects.get(semaine=week, an=year)
+
     for cp in ScheduledCourse.objects.filter(cours__an=year, cours__semaine=week, copie_travail=copy_a):
         cp.copie_travail = tmp_wc
         cp.save()
@@ -127,3 +129,6 @@ def basic_swap_version(week, year, copy_a, copy_b=0):
     for cp in ScheduledCourse.objects.filter(cours__an=year, cours__semaine=week, copie_travail=tmp_wc):
         cp.copie_travail = copy_b
         cp.save()
+
+    version_copy_b.version += 1
+    version_copy_b.save()
