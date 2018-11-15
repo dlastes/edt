@@ -32,9 +32,11 @@ class EdtContextMiddleware:
         def set_request_department(rquest, department, set_session=True, set_cache=False):
             request.department = department
 
-            if set_session and not request.session[department_key] == department.abbrev:
-                logger.debug(f'store department [{department.abbrev}] in session with key [{department_key}]')
-                request.session[department_key] = department.abbrev
+            if set_session:
+                session = request.session.get(department_key, '')
+                if not session == department.abbrev:
+                    logger.debug(f'store department [{department.abbrev}] in session with key [{department_key}]')
+                    request.session[department_key] = department.abbrev
             
             if set_cache:
                 logger.debug(f'store department [{department.abbrev}] in cache with key [{department_key}]')
@@ -67,7 +69,7 @@ class EdtContextMiddleware:
             else: 
                 try:        
                     logger.debug(f'load department from database : [{department_abbrev}]')
-                    department = Department.objects.get(abbrev=department_abbrev)        
+                    department = Department.objects.get(abbrev=department_abbrev)
                     set_request_department(request, department, set_cache=True)
                 except ObjectDoesNotExist:
                     logger.warning(f'wrong department value : [{department_abbrev}]')
