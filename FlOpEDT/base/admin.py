@@ -22,7 +22,7 @@
 # a commercial license. Buying such a license is mandatory as soon as
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
-
+import logging
 from django.contrib import admin
 
 from base.models import Day, RoomGroup, Module, Course, Group, Slot, \
@@ -35,6 +35,7 @@ from people.models import Tutor, User
 
 
 import django.contrib.auth as auth
+from django.core.exceptions import FieldDoesNotExist
 
 
 from import_export import resources, fields
@@ -43,6 +44,7 @@ from import_export.widgets import ForeignKeyWidget
 from FlOpEDT.filters import DropdownFilterAll, DropdownFilterRel, \
     DropdownFilterCho
 
+logger = logging.getLogger('admin')
 
 # from core.models import Book
 
@@ -191,11 +193,78 @@ class BreakingNewsResource(resources.ModelResource):
 # -- ADMIN MENU --
 # ----------------
 
-class BreakingNewsAdmin(admin.ModelAdmin):
+class DepartmentModelAdmin(admin.ModelAdmin):
+    #
+    # Support filter and udpate of department specific related items
+    #
+    department_field_name = 'department'
+    department_field_tuple = (department_field_name,)
+
+    def get_exclude(self, request, obj=None):
+        list = super().get_exclude(request, obj)
+
+        # Hide department field if a department attribute exists 
+        # on the related model and a department value has been set
+        try:
+            self.model._meta.get_field(self.department_field_name)        
+            if hasattr(request, 'department'):
+                if list:
+                    list += self.department_field_tuple
+                else:
+                    list = self.department_field_tuple
+        except FieldDoesNotExist:
+            pass
+
+        return list
+
+
+    def get_queryset(self, request):
+        #
+        # Filter only department related instances
+        #
+        qs = super().get_queryset(request)
+        
+        try:
+            self.model._meta.get_field(self.department_field_name)        
+            if hasattr(request, 'department'):
+                qs = qs.filter(department = request.department)
+        except FieldDoesNotExist:
+            pass
+
+        return qs
+
+    def save_model(self, request, obj, form, change):
+        #
+        # Set department field value if exists on the model
+        #
+        self.model._meta.get_field(self.department_field_name)        
+        try:
+            self.model._meta.get_field(self.department_field_name)        
+            if hasattr(request, 'department'):
+                obj.department = request.department
+        except FieldDoesNotExist:
+            pass
+        
+        super().save_model(request, obj, form, change)        
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        #
+        # Filter form fields for with specific department related items
+        #
+        if hasattr(request, 'department'):
+            logger.debug("db_field: " + db_field.name)
+            if db_field.name == "train_prog":
+                kwargs["queryset"] = TrainingProgramme.objects.filter(department=request.department)
+
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+
+
+
+class BreakingNewsAdmin(DepartmentModelAdmin):
     list_display = ('week', 'year', 'x_beg', 'x_end', 'y', 'txt',
                     'fill_color', 'strk_color')
     ordering = ('-year', '-week')
-
 
 class JourAdmin(admin.ModelAdmin):
     list_display = ('nom', 'no')
@@ -229,7 +298,7 @@ class TrainingHalfDayAdmin(admin.ModelAdmin):
 #    abb_name.short_description = 'Aperçu du nom'
 
 
-class GroupeAdmin(admin.ModelAdmin):
+class GroupAdmin(admin.ModelAdmin):
     list_display = ('nom', 'type', 'size', 'train_prog')
     filter_horizontal = ('parent_groups',)
     ordering = ('size',)
@@ -272,8 +341,7 @@ class ModuleAdmin(admin.ModelAdmin):
         ('head', DropdownFilterRel),
         ('train_prog', DropdownFilterRel),)
 
-
-class CoursAdmin(admin.ModelAdmin):
+class CourseAdmin(admin.ModelAdmin):
     list_display = ('module', 'type', 'groupe', 'tutor', 'semaine', 'an')
     ordering = ('an', 'semaine', 'module', 'type', 'no', 'groupe', 'tutor')
     list_filter = (
@@ -315,7 +383,7 @@ class EdtVAdmin(admin.ModelAdmin):
                    )
 
 
-class CoursePreferenceAdmin(admin.ModelAdmin):
+class CoursePreferenceAdmin(DepartmentModelAdmin):
     list_display = ('course_type', 'train_prog', 'creneau',
                     'valeur', 'semaine', 'an')
     ordering = ('-an', '-semaine')
@@ -410,12 +478,12 @@ admin.site.unregister(auth.models.Group)
 # admin.site.register(DemiJour, DemiJourAdmin)
 admin.site.register(Holiday, HolidayAdmin)
 admin.site.register(TrainingHalfDay, TrainingHalfDayAdmin)
-admin.site.register(Group, GroupeAdmin)
+admin.site.register(Group, GroupAdmin)
 admin.site.register(RoomGroup, RoomGroupAdmin)
 admin.site.register(RoomPreference, RoomPreferenceAdmin)
 admin.site.register(RoomSort, RoomSortAdmin)
 admin.site.register(Module, ModuleAdmin)
-admin.site.register(Course, CoursAdmin)
+admin.site.register(Course, CourseAdmin)
 admin.site.register(EdtVersion, EdtVAdmin)
 admin.site.register(CourseModification, CoursMAdmin)
 admin.site.register(CoursePreference, CoursePreferenceAdmin)
