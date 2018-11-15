@@ -15,7 +15,7 @@ def index(request):
     groupe_list = Group.objects.filter(basic=True).order_by('train_prog__abbrev', 'nom')
     salle_list = Room.objects.order_by('name')
     context = { 'enseignants': enseignant_list, 'groupes':groupe_list, 'salles':salle_list }
-    return render(request, 'index.html', context)
+    return render(request, 'synchro/index.html', context)
 
 
 def tutor(request, id):
@@ -24,7 +24,7 @@ def tutor(request, id):
         e = create_event(c)
         e['title'] = c.cours.module.abbrev + ' ' + c.cours.type.name + ' - ' + c.cours.groupe.train_prog.abbrev + ' ' + c.cours.groupe.nom
         events.append(e)
-    return render(request, 'ical.ics', {'events':events, 'timezone':tz})
+    return render(request, 'synchro/ical.ics', {'events':events, 'timezone':tz})
 
 
 def group(request, promo_id, groupe_id):
@@ -36,7 +36,7 @@ def group(request, promo_id, groupe_id):
         e = create_event(c)
         e['title'] = c.cours.module.abbrev + ' ' + c.cours.type.name + ' - ' + c.cours.tutor.username
         events.append(e)
-    return render(request, 'ical.ics', {'events':events, 'timezone':tz})
+    return render(request, 'synchro/ical.ics', {'events':events, 'timezone':tz})
 
 
 def room(request, id):
@@ -44,7 +44,7 @@ def room(request, id):
     for c in  get_course_list().filter(room__name=id):
         e = create_event(c)
         events.append(e)
-    return render(request, 'ical.ics', {'events':events, 'timezone':tz})
+    return render(request, 'synchro/ical.ics', {'events':events, 'timezone':tz})
 
 
 def get_course_list():
