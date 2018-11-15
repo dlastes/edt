@@ -89,15 +89,28 @@ function create_layouts_pref_only(svg_cont){
 	.attr("id","lay-vg");
     
     // background, middleground, foreground, dragground
-    bg = svg_cont.append("g")
+    var edtg = svg_cont.append("g")
+        .attr("id", "lay-edtg");
+    bg = edtg.append("g")
         .attr("id", "lay-bg");
-    mg = svg_cont.append("g")
-	.attr("id","lay-mg");
-    fg = svg_cont.append("g")
-	.attr("id","lay-fg");
-    dg = svg_cont.append("g")
-	.attr("id","lay-dg");
+    mg = edtg.append("g")
+        .attr("id", "lay-mg");
+    // fig = edtg.append("g")
+    //     .attr("id", "lay-fig");
+    fg = edtg.append("g")
+        .attr("id", "lay-fg");
 
+    // context menus ground
+    var cmg = svg_cont.append("g")
+        .attr("id", "lay-cmg");
+    cmpg = cmg.append("g")
+	.attr("id", "lay-cmpg");
+    cmtg = cmg.append("g")
+	.attr("id", "lay-cmtg");
+    
+    // drag ground
+    dg = svg_cont.append("g")
+        .attr("id", "lay-dg");
 
     
 }

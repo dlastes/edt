@@ -33,6 +33,8 @@ from threading import Thread
 from django.core.exceptions import ObjectDoesNotExist
 from MyFlOp.MyTTModel import MyTTModel
 from base.models import TrainingProgramme
+import TTapp.models as TTClasses
+
 # from multiprocessing import Process
 import os
 import io
@@ -44,15 +46,16 @@ from django.core.cache import cache
 from django.conf import settings
 
 
-
-
-
 from channels.generic.websocket import WebsocketConsumer
-import json
+import json, sys
 
 _solver_child_process = 0
 
 class SolverConsumer(WebsocketConsumer):
+
+    def get_constraint_class(self, str):
+        return getattr(sys.modules[TTClasses.__name__], str)
+
     def connect(self):
         # ws_message()
         self.accept()
@@ -71,13 +74,28 @@ class SolverConsumer(WebsocketConsumer):
         #     'message': message
         # }))
         if data['action'] == 'go':
-            # self.send(text_data=json.dumps({
-            #     'message': 'you want me to go. I got it.'
-            # }))
-            Solve(data['week'],data['year'],
-                  data['timestamp'],
-                  data['train_prog'],
-                  self).start()
+
+            # Save constraints state
+            for constraint in data['constraints']:
+                try:
+                    type = self.get_constraint_class(constraint['model'])
+                    instance = type.objects.get(pk=constraint['pk'])
+                    instance.is_active = constraint['is_active']
+                    instance.save()
+                except ObjectDoesNotExist:
+                    print(f"unable to find {constraint['model']} for id {constraint['pk']}")    
+                except AttributeError:
+                    print(f"error while importing {constraint['model']} model")    
+
+            # Start solver
+            Solve(
+                data['department'],
+                data['week'],
+                data['year'],
+                data['timestamp'],
+                data['train_prog'],
+                self).start()
+
         elif data['action'] == 'stop':
             solver_child_process = cache.get("solver_child_process")
             if solver_child_process:
@@ -124,12 +142,14 @@ def solver_subprocess_SIGINT_handler(sig, stack):
     os.kill(0, signal.SIGINT)
 
 class Solve():
-    def __init__(self, week, year, timestamp, training_programme, chan):
+    def __init__(self, department_abbrev, week, year, timestamp, training_programme, chan):
         super(Solve, self).__init__()
+        self.department_abbrev = department_abbrev
         self.week = week
         self.year = year
         self.timestamp = timestamp
         self.channel = chan
+
         # if all train progs are called, training_programme=''
         try:
             self.training_programme = TrainingProgramme.objects.get(abbrev=training_programme)
@@ -148,7 +168,7 @@ class Solve():
                 os.dup2(wd,1)   # redirect stdout
                 os.dup2(wd,2)   # redirect stderr
                 try:
-                    t = MyTTModel(self.week, self.year, train_prog=self.training_programme)
+                    t = MyTTModel(self.department_abbrev, self.week, self.year, train_prog=self.training_programme)
                     os.setpgid(os.getpid(), os.getpid())
                     signal.signal(signal.SIGINT, solver_subprocess_SIGINT_handler)
                     t.solve(time_limit=300)
