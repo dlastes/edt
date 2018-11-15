@@ -35,20 +35,28 @@ from django.utils.translation import ugettext_lazy as _
 
 # from caching.base import CachingManager, CachingMixin
 
-from base.models import Time  # , Module
+from base.models import Time, Department
 
 max_weight = 8
 
 
 class TTConstraint(models.Model):
+
+    department = models.ForeignKey(Department, null=True, on_delete=models.CASCADE)
+    train_prog = models.ForeignKey('base.TrainingProgramme',
+                                   null=True,
+                                   default=None, 
+                                   blank=True, 
+                                   on_delete=models.CASCADE)    
     week = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(52)],
         null=True,
-        default=None)
-    year = models.PositiveSmallIntegerField(null=True, default=None)
+        default=None, 
+        blank=True)
+    year = models.PositiveSmallIntegerField(null=True, default=None, blank=True)
     weight = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(max_weight)],
-        null=True, default=None)
+        null=True, default=None, blank=True)
     comment = models.CharField(max_length=100, null=True, default=None, blank=True)
     is_active = models.BooleanField(verbose_name='Contrainte active?', default=True)
 
@@ -61,6 +69,44 @@ class TTConstraint(models.Model):
     def enrich_model(self, ttmodel, ponderation=1):
         raise NotImplementedError
 
+    def full_name(self):
+        # Return a human readable constraint name
+        return str(self)
+
+    def description(self):
+        # Return a human readable constraint name
+        return "global constraint description"
+
+    def get_viewmodel(self):
+        #
+        # Return a dictionnary with view-related data
+        #
+        if self.train_prog:
+            train_prog_value = f"{self.train_prog.name} ({self.train_prog.abbrev})" 
+        else:
+            train_prog_value = 'All'
+        
+        if self.week:
+            week_value = f"{self.week} ({self.year})" 
+        else:
+            week_value = 'All'
+
+        return {
+            'model': self.__class__.__name__,
+            'pk': self.pk, 
+            'is_active': self.is_active,
+            'name': self.full_name(),
+            'description': self.description(),
+            'comment': self.comment,
+            'details': {
+                'train_prog': train_prog_value,
+                'week': week_value,
+                }
+            }
+
+    @classmethod
+    def get_viewmodel_prefetch_attributes(cls):
+        return ['train_prog', 'department',]
 
 class LimitCourseTypePerPeriod(TTConstraint):  # , pond):
     """
@@ -68,10 +114,6 @@ class LimitCourseTypePerPeriod(TTConstraint):  # , pond):
     """
     type = models.ForeignKey('base.CourseType', on_delete=models.CASCADE)
     limit = models.PositiveSmallIntegerField()
-    train_prog = models.ForeignKey('base.TrainingProgramme',
-                                   null=True,
-                                   default=None,
-                                   on_delete=models.CASCADE)
     module = models.ForeignKey('base.Module', null=True, on_delete=models.CASCADE)
     tutor = models.ForeignKey('people.Tutor',
                               null=True,
@@ -110,6 +152,40 @@ class LimitCourseTypePerPeriod(TTConstraint):  # , pond):
                 else:
                     ttmodel.add_constraint(expr, '<=', self.limit)
 
+    def full_name(self):
+        return "Limit Course Type Per Period"
+
+    @classmethod
+    def get_viewmodel_prefetch_attributes(cls):
+        attributes = super().get_viewmodel_prefetch_attributes()
+        attributes += ['module', 'tutor', 'type']
+        return attributes
+
+    def get_viewmodel(self):
+        view_model = super().get_viewmodel()
+
+        if self.type:
+            type_value = self.type.name
+        else:
+            type_value = 'All'
+
+        if self.module:
+            module_value = self.module.abbrev
+        else:
+            module_value = 'All'
+
+        if self.tutor:
+            tutor_value = self.tutor.username
+        else:
+            tutor_value = 'All'
+
+        view_model['details'].update({
+            'type': type_value,
+            'tutor': tutor_value,
+            'module': module_value ,})
+
+        return view_model
+
 
 class ReasonableDays(TTConstraint):
     """
@@ -118,10 +194,6 @@ class ReasonableDays(TTConstraint):
     a None value builds the constraint for all possible values,
     e.g. promo = None => the constraint holds for all promos.
     """
-    train_prog = models.ForeignKey('base.TrainingProgramme',
-                                   null=True,
-                                   default=None,
-                                   on_delete=models.CASCADE)
     group = models.ForeignKey('base.Group', null=True, on_delete=models.CASCADE)
     tutor = models.ForeignKey('people.Tutor',
                               null=True,
@@ -166,10 +238,7 @@ class Stabilize(TTConstraint):
     general = models.BooleanField(
         verbose_name='Stabiliser tout?',
         default=False)
-    train_prog = models.ForeignKey('base.TrainingProgramme',
-                                   null=True,
-                                   default=None,
-                                   on_delete=models.CASCADE)
+
     group = models.ForeignKey('base.Group', null=True, default=None, on_delete=models.CASCADE)
     module = models.ForeignKey('base.Module', null=True, default=None, on_delete=models.CASCADE)
     tutor = models.ForeignKey('people.Tutor',
@@ -359,10 +428,6 @@ class MinNonPreferedSlot(TTConstraint):
                               null=True,
                               default=None,
                               on_delete=models.CASCADE)
-    train_prog = models.ForeignKey('base.TrainingProgramme',
-                                   null=True,
-                                   default=None,
-                                   on_delete=models.CASCADE)
 
     # is not called when save() is
     def clean(self):
@@ -412,10 +477,6 @@ class AvoidBothSlots(TTConstraint):
     """
     slot1 = models.ForeignKey('base.Slot', related_name='slot1', on_delete=models.CASCADE)
     slot2 = models.ForeignKey('base.Slot', related_name='slot2', on_delete=models.CASCADE)
-    train_prog = models.ForeignKey('base.TrainingProgramme',
-                                   null=True,
-                                   default=None,
-                                   on_delete=models.CASCADE)
     group = models.ForeignKey('base.Group', null=True, on_delete=models.CASCADE)
     tutor = models.ForeignKey('people.Tutor',
                               null=True,
@@ -508,10 +569,6 @@ class LimitedSlotChoices(TTConstraint):
     """
     Limit the possible slots for the cources
     """
-    train_prog = models.ForeignKey('base.TrainingProgramme',
-                                   null=True,
-                                   default=None,
-                                   on_delete=models.CASCADE)
     module = models.ForeignKey('base.Module',
                                null=True,
                                default=None,
