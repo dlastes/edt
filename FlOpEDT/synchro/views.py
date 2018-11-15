@@ -18,7 +18,7 @@ def index(request):
     return render(request, 'index.html', context)
 
 
-def enseignant(request, id):
+def tutor(request, id):
     events=[]
     for c in get_course_list().filter(cours__tutor__username=id):
         e = create_event(c)
@@ -27,7 +27,7 @@ def enseignant(request, id):
     return render(request, 'ical.ics', {'events':events, 'timezone':tz})
 
 
-def groupe(request, promo_id, groupe_id):
+def group(request, promo_id, groupe_id):
     g = Group.objects.get(nom=groupe_id, train_prog__abbrev=promo_id)
     g_list = g.ancestor_groups()
     g_list.add(g)
@@ -39,7 +39,7 @@ def groupe(request, promo_id, groupe_id):
     return render(request, 'ical.ics', {'events':events, 'timezone':tz})
 
 
-def salle(request, id):
+def room(request, id):
     events=[]
     for c in  get_course_list().filter(room__name=id):
         e = create_event(c)
