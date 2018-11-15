@@ -2,7 +2,8 @@ from django.shortcuts import render
 from django.template import loader
 from django.template.loader import get_template
 from django.http import HttpResponse
-from base.models import ScheduledCourse
+from base.models import ScheduledCourse, Group, Room
+from people.models import Tutor
 from datetime import datetime
 from datetime import timedelta
 
@@ -10,9 +11,9 @@ tz='Europe/Paris'
 
 
 def index(request):
-    enseignant_list = []#TODO is_active=True, is_tutor=True
-    groupe_list = []#TODO basic=True
-    salle_list = []#TODO
+    enseignant_list = Tutor.objects.filter(is_active=True, is_tutor=True).order_by('username')
+    groupe_list = Group.objects.filter(basic=True).order_by('train_prog__abbrev', 'nom')
+    salle_list = Room.objects.order_by('name')
     context = { 'enseignants': enseignant_list, 'groupes':groupe_list, 'salles':salle_list }
     return render(request, 'index.html', context)
 
@@ -27,8 +28,11 @@ def enseignant(request, id):
 
 
 def groupe(request, promo_id, groupe_id):
+    g = Group.objects.get(nom=groupe_id, train_prog__abbrev=promo_id)
+    g_list = g.ancestor_groups()
+    g_list.add(g)
     events=[]
-    for c in get_course_list().filter(cours__groupe__basic=True, cours__groupe__nom=groupe_id, cours__groupe__train_prog__abbrev=promo_id):
+    for c in get_course_list().filter(cours__groupe__in=g_list):
         e = create_event(c)
         e['title'] = c.cours.module.abbrev + ' ' + c.cours.type.name + ' - ' + c.cours.tutor.username
         events.append(e)

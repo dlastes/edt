@@ -31,6 +31,5 @@ DESCRIPTION:{{ e.description }}
 DTSTART;TZID={{ timezone }}:{{ e.begin|date:'Ymd\THis' }}
 DTEND;TZID={{ timezone }}:{{ e.end|date:'Ymd\THis' }}
 END:VEVENT
-
 {% endfor %}
 END:VCALENDAR
