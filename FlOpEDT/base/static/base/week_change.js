@@ -303,7 +303,7 @@ function fetch_bknews(first) {
     $.ajax({
         type: "GET", //rest Type
         dataType: 'text',
-        url: url_bknews + "?w=" + semaine_att + "&y=" + an_att,
+        url: url_bknews  + an_att + "/" + semaine_att,
         async: true,
         contentType: "text/json",
         success: function(msg) {

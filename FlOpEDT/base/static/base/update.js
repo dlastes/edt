@@ -955,7 +955,6 @@ function go_courses(quick) {
         .attr("cursor", ckbox["edt-mod"].cked ? "pointer" : "default")
         .on("contextmenu", function(d) { if (ckbox["edt-mod"].cked) {
 	    d3.event.preventDefault();
-	    context_menu.room_tutor_hold = true ;
 	    room_tutor_change.cm_settings = entry_cm_settings ;
 	    room_tutor_change.course = [d] ;
 	    compute_cm_room_tutor_direction();

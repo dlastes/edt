@@ -30,7 +30,7 @@ DEBUG = True
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'flop_database_ical',
+        'NAME': 'flop_database_dev',
         'USER': 'flop_user',
         'PASSWORD': 'your_password',
         'HOST': '127.0.0.1',
@@ -40,15 +40,41 @@ DATABASES = {
 
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'flop',
+        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
     }
 }
+
+# if you want some cache, use the following instead:
+#
 # CACHES = {
-#     'default': {
-#         'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
-#     }
+#    'default': {
+#        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+#        'LOCATION': 'flop',
+#    }
 # }
+
+LOGGING = {  
+    'version': 1,  
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+        }
+    },
+    'loggers': {
+        'base': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },        
+        'django.db.backends': {
+            'level': 'INFO',
+            'handlers': ['console'],
+            'propagate': False,
+        }
+    }
+}
 
 CHANNEL_LAYERS = {
     "default": {

@@ -51,7 +51,7 @@ from FlOpEDT.filters import DropdownFilterAll, DropdownFilterRel, \
 # admin.site.register(TestJour, TestJourAdmin)
 
 class LimitNaturePerPeriodAdmin(admin.ModelAdmin):
-    list_display = ('week', 'year', 'type', 'limit', 'train_prog',
+    list_display = ('week', 'year', 'train_prog', 'type', 'limit',
                     'module', 'tutor', 'period', 'comment')
     ordering = ()
     empty_value_display = 'All!'
@@ -92,7 +92,7 @@ class StabilizeAdmin(admin.ModelAdmin):
 
 
 class MinHalfDaysAdmin(admin.ModelAdmin):
-    list_display = ('week', 'year', 'tutor', 'module', 'join2courses', 'comment')
+    list_display = ('week', 'year', 'train_prog', 'tutor', 'module', 'join2courses', 'comment')
     ordering = ()
     empty_value_display = 'All!'
     list_filter = (('week', DropdownFilterAll),
@@ -104,7 +104,7 @@ class MinHalfDaysAdmin(admin.ModelAdmin):
 
 
 class MinNonPreferedSlotAdmin(admin.ModelAdmin):
-    list_display = ('week', 'year', 'tutor', 'train_prog', 'comment')
+    list_display = ('week', 'year', 'train_prog', 'tutor', 'comment')
     ordering = ()
     empty_value_display = 'All!'
     list_filter = (('week', DropdownFilterAll),
@@ -115,8 +115,7 @@ class MinNonPreferedSlotAdmin(admin.ModelAdmin):
 
 
 class AvoidBothSlotsAdmin(admin.ModelAdmin):
-    list_display = ('week', 'year', 'tutor', 'group',
-                    'train_prog', 'slot1', 'slot2', 'comment')
+    list_display = ('week', 'year', 'train_prog', 'tutor', 'group', 'slot1', 'slot2', 'comment')
     ordering = ()
     empty_value_display = 'All!'
     list_filter = (('week', DropdownFilterAll),
@@ -130,7 +129,7 @@ class AvoidBothSlotsAdmin(admin.ModelAdmin):
 
 
 class SimultaneousCoursesAdmin(admin.ModelAdmin):
-    list_display = ('week', 'year', 'course1', 'course2', 'comment')
+    list_display = ('week', 'year', 'train_prog', 'course1', 'course2', 'comment')
     ordering = ()
     empty_value_display = 'All!'
     list_filter = (('week', DropdownFilterAll),
