@@ -620,10 +620,11 @@ def fetch_bknews(req, year, week, **kwargs):
     response['an'] = year
     return response
 
-def fetch_version(req):
+
+def fetch_all_versions(req, **kwargs):
 
     dataset = VersionResource() \
-        .export(EdtVersion.objects.all() )
+        .export(EdtVersion.objects.filter(department=req.department))
     response = HttpResponse(dataset.json,
                             content_type='text/json')
     return response

@@ -37,9 +37,9 @@ def redirect_change_people_kind(req):
             
 
 def fetch_tutors(req):
-	dataset = TutorResource().export( Tutor.objects.all() )
+	dataset = TutorResource().export(Tutor.objects.all())
 	response = HttpResponse(dataset.csv,
-                            content_type='text/csv')
+                                content_type='text/csv')
 	return response
 
 

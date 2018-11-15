@@ -59,7 +59,7 @@ urlpatterns = [
     url(r'^fetch_rooms$', views.fetch_rooms, name="fetch_rooms"),    
     url(r'^fetch_unavailable_rooms/(?P<year>\d+)/(?P<week>\d+)$', views.fetch_unavailable_rooms, name="fetch_unavailable_rooms"),
     url(r'^fetch_all_tutors/$', views.fetch_all_tutors, name="fetch_all_tutors"),
-	url(r'^fetch_version/$', views.fetch_version, name="fetch_version"),
+    url(r'^fetch_all_versions/$', views.fetch_all_versions, name="fetch_all_version"),
 
     # from screen to db
     url(r'^change_edt$', views.edt_changes, name="edt_changes"),
