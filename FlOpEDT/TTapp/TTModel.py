@@ -38,7 +38,7 @@ from pulp import GUROBI_CMD, PULP_CBC_CMD
 from base.models import Slot, Group, Day, Time, \
     Room, RoomGroup, RoomSort, RoomType, RoomPreference, \
     Course, ScheduledCourse, UserPreference, CoursePreference, \
-    Module, TrainingProgramme, CourseType, \
+    Department, Module, TrainingProgramme, CourseType, \
     Dependency, TutorCost, GroupFreeHalfDay, GroupCost, Holiday, TrainingHalfDay
 
 from people.models import Tutor
@@ -55,72 +55,98 @@ from django.db.models import Q, Max
 
 import datetime
 
+import logging
+logger = logging.getLogger('base')
 
 class WeekDB(object):
-    def __init__(self, week, year, train_prog):
+    def __init__(self, department, week, year, train_prog):
         self.train_prog = train_prog
-        self.slots = Slot.objects.all().order_by('jour', 'heure')
         self.week = week
         self.year = year
-        self.groups = Group.objects.filter(train_prog__in=self.train_prog)
+        
         self.days = Day.objects.all()
-        self.rooms = Room.objects.all()
-        self.room_groups = RoomGroup.objects.all()
-        self.room_types = RoomType.objects.all()
-        self.room_prefs = RoomSort.objects.all()
-        self.room_groups_for_type = {}
-        for t in self.room_types:
-            self.room_groups_for_type[t] = RoomGroup.objects.filter(types=t)
+        self.slots = Slot.objects.all().order_by('jour', 'heure')
+        
+        # ROOMS
+        self.room_types = RoomType.objects.filter(department=department)
+        self.room_groups = RoomGroup.objects.filter(types__department=department).distinct()
+        self.rooms = Room.objects.filter(subroom_of__types__department=department).distinct()
+        self.room_prefs = RoomSort.objects.filter(for_type__department=department)
+              
+        self.room_groups_for_type = {t:t.members.all() for t in self.room_types}
+        
+        # COURSES
         self.courses = Course.objects.filter(
             semaine=week, an=year,
             groupe__train_prog__in=self.train_prog)
-        self.basic_groups = self.groups \
-            .filter(basic=True,
-                    id__in=self.courses.values_list('groupe_id').distinct())
-        self.basic_groups_surgroups = {}
-        for g in self.basic_groups:
-            self.basic_groups_surgroups[g] = [g] + list(g.ancestor_groups())
-        self.courses_for_group = {}
-        for g in self.groups:
-            self.courses_for_group[g] = self.courses.filter(groupe=g)
-
-        self.availabilities = UserPreference.objects.filter(semaine=week,
-                                                            an=year)
-        self.instructors = Tutor.objects \
-            .filter(id__in=self.courses.values_list('tutor_id').distinct())
+        
         self.sched_courses = ScheduledCourse \
             .objects \
             .filter(cours__semaine=week,
                     cours__an=year,
                     cours__groupe__train_prog__in=self.train_prog)
-        self.fixed_courses = ScheduledCourse.objects.filter(cours__semaine=week,
-                                                            cours__an=year,
-                                                            copie_travail=0) \
+        
+        self.fixed_courses = ScheduledCourse.objects \
+            .filter(cours__groupe__train_prog__department=department,
+                    cours__semaine=week,
+                    cours__an=year,
+                    copie_travail=0) \
             .exclude(cours__groupe__train_prog__in=self.train_prog)
 
-        self.courses_availabilities = CoursePreference.objects.filter(semaine=week,
-                                                                      an=year)
+        self.courses_availabilities = CoursePreference.objects \
+            .filter(train_prog__department=department,
+                    semaine=week,
+                    an=year)
+      
         self.modules = Module.objects \
             .filter(id__in=self.courses.values_list('module_id').distinct())
+        
+        self.dependencies = Dependency.objects.filter(
+            cours1__semaine=week,
+            cours1__an=year,
+            cours2__semaine=week,
+            cours1__groupe__train_prog__in=self.train_prog)
+       
+        # GROUPS
+        self.groups = Group.objects.filter(train_prog__in=self.train_prog)
+        
+        self.basic_groups = self.groups \
+            .filter(basic=True,
+                    id__in=self.courses.values_list('groupe_id').distinct())
+        
+        self.basic_groups_surgroups = {}
+        for g in self.basic_groups:
+            self.basic_groups_surgroups[g] = [g] + list(g.ancestor_groups())
+        
+        self.courses_for_group = {}
+        for g in self.groups:
+            self.courses_for_group[g] = self.courses.filter(groupe=g)
+        
         self.holidays = Holiday.objects.filter(week=week, year=year)
+        
         self.training_half_days = TrainingHalfDay.objects.filter(
             week=week,
             year=year,
             train_prog__in=self.train_prog)
-        self.dependencies = Dependency.objects.filter(
-            cours1__semaine=week, cours1__an=year,
-            cours2__semaine=week,
-            cours1__groupe__train_prog__in=self.train_prog)
+
+        # USERS
+        self.instructors = Tutor.objects \
+            .filter(id__in=self.courses.values_list('tutor_id').distinct())
+        
         self.courses_for_tutor = {}
         for i in self.instructors:
             self.courses_for_tutor[i] = self.courses.filter(tutor=i)
+        
         self.courses_for_supp_tutor = {}
         for i in self.instructors:
             self.courses_for_supp_tutor[i] = i.courses_as_supp.filter(id__in=self.courses)
 
+        self.availabilities = UserPreference.objects \
+                                .filter(semaine=week,
+                                    an=year)
 
 class TTModel(object):
-    def __init__(self, semaine, an,
+    def __init__(self, department_abbrev, semaine, an,
                  train_prog=None,
                  stabilize_work_copy=None,
                  min_nps_i=1.,
@@ -144,15 +170,17 @@ class TTModel(object):
         self.semaine = semaine
         self.an = an
         self.warnings={}
+
+        self.department=Department.objects.get(abbrev=department_abbrev)
         if train_prog is None:
-            train_prog = TrainingProgramme.objects.all()
+            train_prog = TrainingProgramme.objects.filter(department=self.department)
         try:
             _ = iter(train_prog)
         except TypeError:
             train_prog = [train_prog]
         self.train_prog = train_prog
         self.stabilize_work_copy = stabilize_work_copy
-        self.wdb = WeekDB(semaine, an, self.train_prog)
+        self.wdb = WeekDB(self.department, semaine, an, self.train_prog)
         self.obj = self.lin_expr()
         self.cost_I = dict(list(zip(self.wdb.instructors,
                                [self.lin_expr() for _ in self.wdb.instructors])))
@@ -501,10 +529,11 @@ class TTModel(object):
                 # if sl == self.wdb.slots[0]:
                 #     print "R", r, quicksum(self.TTrooms[(sl, c, rg)] \
                 # for (c, rg) in room_course_compat[r])
-                if RoomPreference.objects.filter(semaine=self.semaine,
-                                                 an=self.an,
-                                                 creneau=sl,
-                                                 room=r, valeur=0).exists():
+                if RoomPreference.objects \
+                    .filter(semaine=self.semaine,
+                        an=self.an,
+                        creneau=sl,
+                        room=r, valeur=0).exists():
                     limit = 0
                 else:
                     limit = 1
@@ -765,14 +794,16 @@ class TTModel(object):
 
     def add_specific_constraints(self):
         """
-        Add the specific constraints stored in the database.
+        Add the active specific constraints stored in the database.
         """
-        print("adding specific constraints")
-        for constraint_type in TTConstraint.__subclasses__():
-            for constr in \
-                    constraint_type.objects.filter(Q(week=self.semaine)
-                                                   & Q(year=self.an)
-                                                   | Q(week__isnull=True)):
+        print("adding active specific constraints")
+        for promo in self.train_prog:
+            for constr in get_constraints(
+                                self.department,
+                                week = self.week,
+                                year = self.year, 
+                                train_prog = promo, 
+                                is_active = True):
                 constr.enrich_model(self)
 
     def update_objective(self):
@@ -795,9 +826,17 @@ class TTModel(object):
 
         self.add_specific_constraints()
 
-
     def add_tt_to_db(self, target_work_copy):
-        ScheduledCourse.objects.filter(cours__semaine=self.semaine, copie_travail=target_work_copy).delete()
+        
+        # remove target working copy
+        ScheduledCourse.objects \
+            .filter(
+                cours__module__train_prog__department=self.department,                
+                cours__semaine=self.semaine, 
+                cours__an=self.an,
+                copie_travail=target_work_copy) \
+            .delete()
+        
         for sl in self.wdb.slots:
             for c in self.wdb.courses:
                 if self.get_var_value(self.TT[(sl, c)]) == 1:
@@ -818,6 +857,7 @@ class TTModel(object):
                         if self.get_var_value(self.TTrooms[(sl, c, rg)]) == 1:
                             cp.room = rg
                     cp.save()
+        
         for fc in self.wdb.fixed_courses:
             cp = ScheduledCourse(cours=fc.cours,
                                  creneau=fc.creneau,
@@ -896,12 +936,16 @@ class TTModel(object):
         """
         print("\nLet's solve week #%g" % self.semaine)
 
+
         if target_work_copy is None:
             local_max_wc = ScheduledCourse \
                 .objects \
-                .filter(cours__semaine=self.semaine,
-                        cours__an=self.an) \
+                .filter(
+                    cours__module__train_prog__department=self.department,
+                    cours__semaine=self.semaine,
+                    cours__an=self.an) \
                 .aggregate(Max('copie_travail'))['copie_travail__max']
+
             if local_max_wc is None:
                 local_max_wc = -1
 
@@ -919,3 +963,39 @@ class TTModel(object):
             self.add_tt_to_db(target_work_copy)
             reassign_rooms(self.semaine, self.an, target_work_copy)
             return target_work_copy
+
+
+def get_constraints(department, week=None, year=None, train_prog=None, is_active=None):
+    #
+    #  Return constraints corresponding to the specific filters
+    #  
+    query = Q(department=department)
+
+    if is_active:
+        query &= Q(is_active=is_active)
+
+    if week and not year:
+        logger.warning(f"Unable to filter constraint for week {week} without specifing year")
+        return
+        
+    if week and train_prog:
+        query &= \
+            Q(train_prog__abbrev=train_prog) & Q(week=week) & Q(year=year) | \
+            Q(train_prog__isnull=True) & Q(week__isnull=True) & Q(year__isnull=True)
+    elif week:
+        query &= Q(week=week) & Q(year=year) | Q(week__isnull=True) & Q(year__isnull=True)            
+    elif train_prog:
+        query &= Q(train_prog__abbrev=train_prog) | Q(train_prog__isnull=True)
+
+    # Look up the TTConstraint subclasses records to update
+    types = TTConstraint.__subclasses__()
+    for type in types:
+        queryset = type.objects.filter(query)
+        
+        # Get prefetch  attributes list for the current type
+        atributes = type.get_viewmodel_prefetch_attributes()
+        if atributes:
+            queryset = queryset.prefetch_related(*atributes)
+            
+        for constraint in queryset.order_by('id'):
+            yield constraint

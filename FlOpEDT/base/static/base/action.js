@@ -119,6 +119,7 @@ function clear_pop(gs) {
   --------------------*/
 
 
+
 // return: true iff a change is needed (i.e. unassigned room or already occupied)
 function select_room_change() {
     room_tutor_change.cm_settings = room_cm_settings ;
@@ -127,31 +128,58 @@ function select_room_change() {
     room_tutor_change.old_value = c.room ;
     room_tutor_change.cur_value = c.room ;
 
+    var busy_rooms, cur_roomgroup, is_occupied ;
+    var i, j ;
+
     var fake_id = new Date() ;
     fake_id = fake_id.getMilliseconds() + "-" + c.id_cours ;
     room_tutor_change.proposal = [] ;
 
-    var occupied_rooms = cours
+    // find rooms where a course take place
+    var simultaneous_courses = cours
 	.filter(function(d) {
 	    return d.day==c.day && d.slot==c.slot && d.id_cours!=c.id_cours ;
-	})
-	.map(function(d) {
-	    return d.room ;
-	})
+	});
+    var occupied_rooms = [] ;
+    for (i = 0 ; i < simultaneous_courses.length ; i++) {
+	busy_rooms = rooms.roomgroups[simultaneous_courses[i].room] ;
+	for (j = 0 ; j<busy_rooms.length ; j++) {
+	    if (occupied_rooms.indexOf(busy_rooms[j])==-1) {
+		occupied_rooms.push(busy_rooms[j]) ;
+	    }
+	}
+    }
+    
+    for (i = 0 ; i < rooms.roomtypes[c.room_type].length ; i++) {
+	cur_roomgroup = rooms.roomtypes[c.room_type][i] ;
+	if (is_garbage(c.day,c.slot)
+	    || unavailable_rooms[c.day][c.slot]
+	    .indexOf(rooms.roomtypes[c.room_type][i]) == -1) {
 
-    for (var i = 0 ; i < rooms[c.room_type].length ; i++) {
-	if (occupied_rooms.indexOf(rooms[c.room_type][i]) == -1
-	    && (is_garbage(c.day,c.slot)
-		|| unavailable_rooms[c.day][c.slot].indexOf(rooms[c.room_type][i]) == -1)) {
-	    var cur_prop = {} ;
-	    cur_prop.fid = fake_id ;
-	    cur_prop.content = rooms[c.room_type][i] ;
+	    // is a room in the roomgroup occupied?
+	    is_occupied = false ;
+	    j = 0;
+	    while(!is_occupied
+		  && j<rooms.roomgroups[cur_roomgroup].length) {
+		is_occupied = (occupied_rooms
+			       .indexOf(rooms.roomgroups[cur_roomgroup][j])
+			       != -1);
+		j++ ;
+	    }
+
+	    if(!is_occupied) {
+		var cur_prop = {} ;
+		cur_prop.fid = fake_id ;
+		cur_prop.content = rooms.roomtypes[c.room_type][i] ;
 	    
-	    room_tutor_change.proposal.push(cur_prop) ;
+		room_tutor_change.proposal.push(cur_prop) ;
+	    }
 	}
     }
 
-    room_tutor_change.cm_settings.nlin = Math.ceil(room_tutor_change.proposal.length / room_tutor_change.cm_settings.ncol) ;
+    room_tutor_change.cm_settings.nlin
+	= Math.ceil(room_tutor_change.proposal.length
+		    / room_tutor_change.cm_settings.ncol) ;
 
     if (c.room == une_salle ||
 	occupied_rooms.indexOf(c.room) != -1) {
@@ -260,7 +288,8 @@ function select_tutor_module_change() {
 	    return c.mod == room_tutor_change.course[0].mod;
 	})
 	.map(function(c){ return c.prof; });
-    
+
+    // remove duplicate 
     tutor_same_module = tutor_same_module.filter(function(t,i) {
 	return tutor_same_module.indexOf(t)==i ;
     }) ;

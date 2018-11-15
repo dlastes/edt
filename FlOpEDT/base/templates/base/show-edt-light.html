@@ -20,61 +20,27 @@
 <!-- a commercial license. Buying such a license is mandatory as soon as   -->
 <!-- you develop activities involving the FlOpEDT/FlOpScheduler software   -->
 <!-- without disclosing the source code of your own applications.          -->
+{% extends "base/edt-base.html" %}
 
-
-{% csrf_token %}
-
-
-<title>EdT</title>
-{% block content %}
 {% load static %}
-<link rel="stylesheet" href="{% static "base/header.css" %}"/>
-<link rel="stylesheet" href="{% static "base/better.css" %}"/>
-  <script src="{% static "base/d3.v4.min.js" %}"></script>
-  <script src="{% static 'base/jquery.min.js' %}"></script>
-  <!-- script src="https://d3js.org/d3.v4.min.js"></script -->
-  <script>
-    var groupes_fi = "{% static "base/groups.json" %}";
-    var url_cours_pl = "{% url "base:fetch_cours_pl" 0 0 0 %}";
-    url_cours_pl = url_cours_pl.slice(0,-5);
-    var url_dispos = "{% url "base:fetch_dispos" 0 0 %}";
-    url_dispos = url_dispos.slice(0,-3);
-    var url_login = "{% url "people:login"%}";
-    var url_edt = "{% url "base:edt"%}";
-    var url_edt_changes = "{% url "base:edt_changes"%}";
-    var url_dispos_changes = "{% url "base:dispos_changes"%}";
-    var url_fetch_stype = "{% url "base:fetch_stype" %}"; 
-    var url_bknews = "{% url "base:fetch_bknews" %}"; 
 
-    var semaine_an_list = {{ all_weeks|safe }};
-    var jours_list = {{ jours|safe }};
-    var semaine_init = +"{{ semaine }}";
-    var an_init = +"{{ an }}";
-    var une_salle = "{{ une_salle }}";
+{% block script_variable %}
+<script>
 
-    
-    var usna = "{{ user.username }}" ;
-    var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
-    var tv_svg_h = "{{ tv_svg_h }}" ;
-    var tv_svg_w = "{{ tv_svg_w }}" ;
-    var tv_gp_h = "{{ tv_gp_h }}" ;
-    var tv_gp_w = "{{ tv_gp_w }}" ;
-    var promo_init = "{{ promo }}";
-    var gp_init = "";
-    var tv_svg_top_m = "{{ tv_svg_top_m }}" ;
-    var logged_usr = {};
-    
-  </script>
-  </script>
-<body>
-</body>
-  <script type='text/javascript' src="{% static "base/variables.js" %}?3"></script>
-  <script type='text/javascript' src="{% static 'base/week_change.js' %}"></script>
-  <script type='text/javascript' src="{% static 'base/transformation.js' %}"></script>
-  <script type='text/javascript' src="{% static "base/creation.js" %}?3"></script>
-  <script type='text/javascript' src="{% static 'base/action.js' %}"></script>
-  <script type='text/javascript' src="{% static "base/update.js" %}?3"></script>
-  <script type='text/javascript' src="{% static "base/edt-only.js" %}?3"></script>
-    
+  var promo_init = "{{ promo }}";
+  var gp_init = "";  
+  var logged_usr = {};
+  var usna = "{{ user.username }}" ;
 
+  var tv_svg_h = "{{ tv_svg_h }}" ;
+  var tv_svg_w = "{{ tv_svg_w }}" ;
+  var tv_gp_h = "{{ tv_gp_h }}" ;
+  var tv_gp_w = "{{ tv_gp_w }}" ;
+  var tv_svg_top_m = "{{ tv_svg_top_m }}" ;
+  
+</script>
+{% endblock %}
+
+{% block script_file %}
+<script type='text/javascript' src="{% static "base/edt-only.js" %}"></script>
 {% endblock %}
