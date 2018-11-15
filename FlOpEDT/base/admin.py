@@ -29,8 +29,9 @@ from base.models import Day, RoomGroup, Module, Course, Group, Slot, \
     UserPreference, Time, ScheduledCourse, EdtVersion, CourseModification, \
     PlanningModification, BreakingNews, TrainingProgramme, ModuleDisplay, \
     Regen, Holiday, TrainingHalfDay, RoomPreference, RoomSort, \
-    CoursePreference, Dependency, RoomType
+    CoursePreference, Dependency, RoomType, Department
 
+from base.models import CourseType
 from people.models import Tutor, User
 
 
@@ -200,11 +201,35 @@ class DepartmentModelAdmin(admin.ModelAdmin):
     department_field_name = 'department'
     department_field_tuple = (department_field_name,)
 
-    def get_exclude(self, request, obj=None):
-        list = super().get_exclude(request, obj)
+    def get_department_lookup(self, field, department, include_field_name=True):
+        # List filter to apply for department filtering 
+        # of model instances depending on their fields 
+        if field.related_model:
+            lookups_by_model = {
+                Department: '',
+                CourseType: 'department',
+                TrainingProgramme: 'department',
+                Module: 'train_prog__department',
+                }
+            
+            lookup = lookups_by_model.get(field.related_model, None)
 
+            if not lookup is None:
+                if lookup is '':
+                    lookup_name = 'department' 
+                elif include_field_name:
+                    lookup_name = f"{field.name}__{lookup}"
+                else:
+                    lookup_name = lookup
+
+                return {lookup_name: department}
+
+        return None      
+
+    def get_exclude(self, request, obj=None):
         # Hide department field if a department attribute exists 
         # on the related model and a department value has been set
+        list = super().get_exclude(request, obj)
         try:
             self.model._meta.get_field(self.department_field_name)        
             if hasattr(request, 'department'):
@@ -225,9 +250,11 @@ class DepartmentModelAdmin(admin.ModelAdmin):
         qs = super().get_queryset(request)
         
         try:
-            self.model._meta.get_field(self.department_field_name)        
             if hasattr(request, 'department'):
-                qs = qs.filter(department = request.department)
+                for f in self.model._meta.get_fields():
+                    related_filter = self.get_department_lookup(f, request.department)
+                    if related_filter:
+                        return qs.filter(**related_filter)
         except FieldDoesNotExist:
             pass
 
@@ -251,10 +278,10 @@ class DepartmentModelAdmin(admin.ModelAdmin):
         #
         # Filter form fields for with specific department related items
         #
-        if hasattr(request, 'department'):
-            logger.debug("db_field: " + db_field.name)
-            if db_field.name == "train_prog":
-                kwargs["queryset"] = TrainingProgramme.objects.filter(department=request.department)
+        if hasattr(request, 'department') and db_field.related_model: 
+            related_filter = self.get_department_lookup(db_field, request.department, include_field_name=False)
+            if related_filter:
+                kwargs["queryset"] = db_field.related_model.objects.filter(**related_filter)
 
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
