@@ -85,7 +85,10 @@ def basic_reassign_rooms(semaine, an, target_work_copy):
             for r in precedent.room.subrooms.all():
                 if RoomPreference.objects.filter(semaine=semaine, an=an, creneau=sl, room=r, valeur=0).exists():
                     prec_is_unavailable = True
-                    break
+                if ScheduledCourse.objects.filter(cours__semaine=semaine, cours__an=an, creneau=sl,
+                                                  copie_travail=target_work_copy,
+                                                  room__in=r.subroom_of.exclude(id=precedent.room.id)).exists()
+                    prec_is_unavailable = True
             if prec_is_unavailable:
                 # print "room is not available"
                 continue
