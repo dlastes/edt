@@ -588,7 +588,7 @@ class Dependency(models.Model):
         return f"{self.cours1} avant {self.cours2}"
 
 
-class CourseStartTime(models.Model):
+class CourseStartTimeConstraint(models.Model):
     # foreignkey instead of onetoone to leave room for a day attribute
     course_type = models.ForeignKey('CourseType', on_delete=models.CASCADE)
     allowed_start_times = ArrayField(models.PositiveSmallIntegerField(), blank=True)
