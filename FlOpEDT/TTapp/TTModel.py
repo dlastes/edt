@@ -800,8 +800,8 @@ class TTModel(object):
         for promo in self.train_prog:
             for constr in get_constraints(
                                 self.department,
-                                week = self.week,
-                                year = self.year, 
+                                week = self.semaine,
+                                year = self.an,
                                 train_prog = promo, 
                                 is_active = True):
                 constr.enrich_model(self)
