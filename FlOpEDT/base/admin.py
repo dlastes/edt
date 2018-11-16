@@ -84,12 +84,9 @@ class CoursPlaceResource(resources.ModelResource):
     module = fields.Field(column_name='module',
                           attribute='cours__module',
                           widget=ForeignKeyWidget(Module, 'abbrev'))
-    jour = fields.Field(column_name='jour',
-                        attribute='creneau__jour',
+    day = fields.Field(column_name='day',
+                        attribute='day',
                         widget=ForeignKeyWidget(Day, 'no'))
-    heure = fields.Field(column_name='heure',
-                         attribute='creneau__heure',
-                         widget=ForeignKeyWidget(Time, 'no'))
     # salle = fields.Field(column_name = 'salle',
     #                      attribute = 'salle',
     #                      widget = ForeignKeyWidget(Salle,'nom'))
@@ -109,7 +106,7 @@ class CoursPlaceResource(resources.ModelResource):
     class Meta:
         model = ScheduledCourse
         fields = ('id', 'no', 'groupe', 'promo', 'color_bg', 'color_txt',
-                  'module', 'jour', 'heure', 'semaine', 'room', 'prof',
+                  'module', 'day', 'start_time', 'semaine', 'room', 'prof',
                   'room_type')
 
 
@@ -304,8 +301,8 @@ class CoursPlaceAdmin(admin.ModelAdmin):
     cours_an.short_description = 'Année'
     cours_an.admin_order_field = 'cours__an'
 
-    list_display = (cours_semaine, cours_an, 'cours', 'creneau', 'room')
-    ordering = ('creneau', 'cours', 'room')
+    list_display = (cours_semaine, cours_an, 'cours', 'day', 'start_time', 'room')
+    ordering = ('day', 'start_time', 'cours', 'room')
     list_filter = (
         ('cours__tutor', DropdownFilterRel),
         ('cours__an', DropdownFilterAll),

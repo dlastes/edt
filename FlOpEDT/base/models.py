@@ -346,9 +346,9 @@ class Course(models.Model):
 
 class ScheduledCourse(models.Model):
     cours = models.ForeignKey('Course', on_delete=models.CASCADE)
-    creneau = models.ForeignKey('Slot', on_delete=models.CASCADE)
+    day = models.ForeignKey('Day', on_delete=models.CASCADE)
     # in minutes from 12AM
-    start_time = models.PositiveSmallIntegerField(default=0)
+    start_time = models.PositiveSmallIntegerField()
     room = models.ForeignKey('RoomGroup', blank=True, null=True, on_delete=models.CASCADE)
     no = models.PositiveSmallIntegerField(null=True, blank=True)
     noprec = models.BooleanField(
