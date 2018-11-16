@@ -31,6 +31,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
 from django.contrib.auth.models import AbstractUser
+from django.contrib.postgres.fields import ArrayField
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
@@ -303,6 +304,7 @@ class Module(models.Model):
 class CourseType(models.Model):
     name = models.CharField(max_length=50)
     department =  models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
+    duration = models.PositiveSmallIntegerField(default=90)
     group_types = models.ManyToManyField(GroupType,
                                          blank=True,
                                          related_name="compatible_course_types")
@@ -348,6 +350,8 @@ class Course(models.Model):
 class ScheduledCourse(models.Model):
     cours = models.ForeignKey('Course', on_delete=models.CASCADE)
     creneau = models.ForeignKey('Slot', on_delete=models.CASCADE)
+    # in minutes from 12AM
+    start_time = models.PositiveSmallIntegerField(default=0)
     room = models.ForeignKey('RoomGroup', blank=True, null=True, on_delete=models.CASCADE)
     no = models.PositiveSmallIntegerField(null=True, blank=True)
     noprec = models.BooleanField(
@@ -587,6 +591,13 @@ class Dependency(models.Model):
 
     def __str__(self):
         return "%s avant %s" % (self.cours1, self.cours2)
+
+
+class CourseStartTime(models.Model):
+    # foreignkey instead of onetoone to leave room for a day attribute
+    course_type = models.ForeignKey('CourseType', on_delete=models.CASCADE)
+    allowed_start_times = ArrayField(models.PositiveSmallIntegerField(), blank=True)
+    
 
 
 class Regen(models.Model):
