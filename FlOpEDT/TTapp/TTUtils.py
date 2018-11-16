@@ -31,7 +31,7 @@ from django.db.models import Max
 
 def basic_reassign_rooms(semaine, an, target_work_copy):
     """
-    Reassign the rooms...
+    Reassign the rooms to minimize moves...
     """
     print("reassigning rooms to minimize moves...")
 
@@ -87,7 +87,7 @@ def basic_reassign_rooms(semaine, an, target_work_copy):
                     prec_is_unavailable = True
                 if ScheduledCourse.objects.filter(cours__semaine=semaine, cours__an=an, creneau=sl,
                                                   copie_travail=target_work_copy,
-                                                  room__in=r.subroom_of.exclude(id=precedent.room.id)).exists()
+                                                  room__in=r.subroom_of.exclude(id=precedent.room.id)).exists():
                     prec_is_unavailable = True
             if prec_is_unavailable:
                 # print "room is not available"
