@@ -10,15 +10,17 @@ from datetime import timedelta
 tz='Europe/Paris'
 
 
-def index(request):
+def index(request, **kwargs):
     enseignant_list = Tutor.objects.filter(is_active=True, is_tutor=True).order_by('username')
-    groupe_list = Group.objects.filter(basic=True).order_by('train_prog__abbrev', 'nom')
+    groupe_list = Group.objects.filter(basic=True,
+                                       train_prog__department=request.department)\
+                               .order_by('train_prog__abbrev', 'nom')
     salle_list = Room.objects.order_by('name')
     context = { 'enseignants': enseignant_list, 'groupes':groupe_list, 'salles':salle_list }
     return render(request, 'synchro/index.html', context)
 
 
-def tutor(request, id):
+def tutor(request, id, **kwargs):
     events=[]
     for c in get_course_list().filter(cours__tutor__username=id):
         e = create_event(c)
@@ -27,7 +29,7 @@ def tutor(request, id):
     return render(request, 'synchro/ical.ics', {'events':events, 'timezone':tz})
 
 
-def group(request, promo_id, groupe_id):
+def group(request, promo_id, groupe_id, **kwargs):
     g = Group.objects.get(nom=groupe_id, train_prog__abbrev=promo_id)
     g_list = g.ancestor_groups()
     g_list.add(g)
@@ -39,7 +41,7 @@ def group(request, promo_id, groupe_id):
     return render(request, 'synchro/ical.ics', {'events':events, 'timezone':tz})
 
 
-def room(request, id):
+def room(request, id, **kwargs):
     events=[]
     for c in  get_course_list().filter(room__name=id):
         e = create_event(c)
