@@ -197,7 +197,7 @@ class Slot(models.Model):
         validators=[MinValueValidator(0), MaxValueValidator(240)], default=90)
 
     def __str__(self):
-        return "%s_%s" % (self.jour, self.heure)
+        return f"{self.jour}_{self.heure}"
 
 
 class Holiday(models.Model):
@@ -270,7 +270,7 @@ class RoomSort(models.Model):
                                  related_name='+', on_delete=models.CASCADE)
 
     def __str__(self):
-        return "%s-pref-%s-to-%s" % (self.for_type, self.prefer, self.unprefer)
+        return "{self.for_type}-pref-{self.prefer}-to-{self.unprefer}"
 
 
 # </editor-fold>
@@ -336,15 +336,12 @@ class Course(models.Model):
     suspens = models.BooleanField(verbose_name='En suspens?', default=False)
 
     def __str__(self):
-        return "%s-%s-%s" % \
-               (self.module, self.tutor.username if self.tutor is not None else '-no_tut-',
-                self.groupe)
+        username_mod = self.tutor.username if self.tutor is not None else '-no_tut-'
+        return f"{self.module}-{username_mod}-{self.groupe}"
     
     def full_name(self):
-        return "%s-%s-%s-%s" % \
-               (self.module, self.type,
-                self.tutor.username if self.tutor is not None else '-no_tut-',
-                self.groupe)
+        username_mod = self.tutor.username if self.tutor is not None else '-no_tut-'
+        return f"{self.module}-{self.type}-{username_mod}-{self.groupe}"
 
 
 class ScheduledCourse(models.Model):
@@ -361,7 +358,7 @@ class ScheduledCourse(models.Model):
     # les utilisateurs auront acces à la copie publique (0)
 
     def __str__(self):
-        return "%s%s:%s-%s" % (self.cours, self.no, self.creneau.id, self.room)
+        return f"{self.cours}{self.no}:{self.creneau.id}-{self.room}"
 
 
 # </editor-fold desc="COURSES">
@@ -383,8 +380,8 @@ class UserPreference(models.Model):
         default=8)
 
     def __str__(self):
-        return "%s-Sem%s: %s=%s" % \
-               (self.user.username, self.semaine, self.creneau, self.valeur)
+        return f"{self.user.username}-Sem{self.semaine}: " + \
+            f"{self.creneau}={self.valeur}"
 
 
 class CoursePreference(models.Model):
@@ -402,10 +399,9 @@ class CoursePreference(models.Model):
         default=8)
 
     def __str__(self):
-        return "%s=Sem%s:%s-%s=%s" % \
-               (self.course_type, self.semaine, self.creneau, self.train_prog,
-                self.valeur)
-
+        return f"{self.course_type}=Sem{self.semaine}:" + \
+            f"{self.creneau}-{self.train_prog}={self.valeur}"
+    
 
 class RoomPreference(models.Model):
     room = models.ForeignKey('Room', on_delete=models.CASCADE)
@@ -421,7 +417,8 @@ class RoomPreference(models.Model):
         default=8)
 
     def __str__(self):
-        return "%s-Sem%s-cren%s=%s" % (self.room, self.semaine, self.creneau.id, self.valeur)
+        return f"{self.room}-Sem{self.semaine}" + \
+            f"-cren{self.creneau.id}={self.valeur}"
 
 
 # </editor-fold desc="PREFERENCES">
@@ -467,10 +464,8 @@ class CourseModification(models.Model):
             olds += ' Cren ' + str(self.creneau_old) + ' ;'
         if self.version_old:
             olds += ' NumV ' + str(self.version_old) + ' ;'
-        return "by %s, at %s\n%s <- %s" % (self.initiator.username,
-                                           self.updated_at,
-                                           self.cours,
-                                           olds)
+        return f"by {self.initiator.username}, at {self.updated_at}\n" + \
+            f"{self.cours} <- {olds}"
 
 
 class PlanningModification(models.Model):
@@ -506,7 +501,7 @@ class TutorCost(models.Model):
     valeur = models.FloatField()
 
     def __str__(self):
-        return "sem%s-%s:%s" % (self.semaine, self.tutor.username, self.valeur)
+        return f"sem{self.semaine}-{self.tutor.username}:{self.valeur}"
 
 
 class GroupCost(models.Model):
@@ -517,7 +512,7 @@ class GroupCost(models.Model):
     valeur = models.FloatField()
 
     def __str__(self):
-        return "sem%s-%s:%s" % (self.semaine, self.groupe, self.valeur)
+        return f"sem{self.semaine}-{self.groupe}:{self.valeur}"
 
 
 class GroupFreeHalfDay(models.Model):
@@ -528,7 +523,7 @@ class GroupFreeHalfDay(models.Model):
     DJL = models.PositiveSmallIntegerField()
 
     def __str__(self):
-        return "sem%s-%s:%s" % (self.semaine, self.groupe, self.DJL)
+        return f"sem{self.semaine}-{self.groupe}:{self.DJL}"
 
 
 # </editor-fold desc="COSTS">
@@ -542,13 +537,13 @@ class GroupFreeHalfDay(models.Model):
 
 
 class ModuleDisplay(models.Model):
-    module = models.OneToOneField('Module', related_name='display', on_delete=models.CASCADE)
+    module = models.OneToOneField('Module', related_name='display',
+                                  on_delete=models.CASCADE)
     color_bg = models.CharField(max_length=20, default="red")
     color_txt = models.CharField(max_length=20, default="black")
 
     def __str__(self):
-        return str(self.module) + ' -> BG: ' + str(self.color_bg) \
-               + ' ; TXT: ' + str(self.color_txt)
+        return f"{self.module} -> BG: {self.color_bg} ; TXT: {self.color_txt}"
 
 
 class TrainingProgrammeDisplay(models.Model):
@@ -559,8 +554,8 @@ class TrainingProgrammeDisplay(models.Model):
     short_name = models.CharField(max_length=20, default="")
 
     def __str__(self):
-        return str(self.training_programme) + ' : Row ' + str(self.row) \
-            + ' ; Name ' + str(self.short_name)
+        return f"{self.training_programme} : Row {self.row} ; " + \
+            f"Name {self.short_name}"
 
 
 class GroupDisplay(models.Model):
@@ -571,8 +566,8 @@ class GroupDisplay(models.Model):
     button_txt = models.CharField(max_length=20, null=True, default=None)
 
     def __str__(self):
-        return str(self.group) + ' -> BH: ' + str(self.button_height) \
-               + ' ; BTXT: ' + str(self.button_txt)
+        return f"{self.group} -> BH: {self.button_height} ; " + \
+            f"BTXT: {self.button_txt}"
 
 
 # </editor-fold desc="DISPLAY">
@@ -590,7 +585,7 @@ class Dependency(models.Model):
     ND = models.BooleanField(verbose_name='Jours differents', default=False)
 
     def __str__(self):
-        return "%s avant %s" % (self.cours1, self.cours2)
+        return f"{self.cours1} avant {self.cours2}"
 
 
 class CourseStartTime(models.Model):
@@ -626,26 +621,22 @@ class Regen(models.Model):
     def __str__(self):
         pre = ''
         if self.full:
-            pre = 'C,' + str(self.fday) + "/" + str(self.fmonth) \
-                  + "/" + str(self.fyear) + " "
+            pre = f'C,{self.fday}/{self.fmonth}/{self.fyear} '
         if self.stabilize:
-            pre = 'S,' + str(self.sday) + "/" + str(self.smonth) \
-                  + "/" + str(self.syear)
+            pre = f'S,{self.sday}/{self.smonth}/{self.syear}'
         if not self.full and not self.stabilize:
             pre = 'N'
         return pre
 
     def strplus(self):
-        ret = "Semaine " + str(self.semaine).encode('utf8') \
-              + " (" + str(self.an).encode('utf8') + ") : "
-        # ret.encode('utf8')
+        ret = f"Semaine {self.semaine} ({self.an}) : "
 
         if self.full:
-            ret += 'Génération complète le ' + self.fday.encode('utf8') \
-                   + "/" + str(self.fmonth) + "/" + str(self.fyear)
+            ret += f'Génération complète le ' + \
+                f'{self.fday}/{self.fmonth}/{self.fyear}'
         elif self.stabilize:
-            ret += 'Génération stabilisée le ' + str(self.sday) + "/" \
-                   + str(self.smonth) + "/" + str(self.syear)
+            ret += 'Génération stabilisée le ' + \
+                f'{self.sday}/{self.smonth}/{self.syear}'
         else:
             ret += "Pas de (re-)génération prévue"
 
