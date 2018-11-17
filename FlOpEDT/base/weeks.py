@@ -61,6 +61,16 @@ def num_days(y, w):
         cur_day += datetime.timedelta(1)
     return day_list
 
+# list of days
+def num_all_days(y, w):
+    if w == 0:
+        return []
+    cur_day = monday_w2(y) + datetime.timedelta(7 * (w - 2))
+    day_list = []
+    for d in range(7):
+        day_list.append("%02d/%02d" % (cur_day.day, cur_day.month))
+        cur_day += datetime.timedelta(1)
+    return day_list
 
 # More or less working weeks
 def week_list():

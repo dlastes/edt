@@ -532,16 +532,16 @@ def fetch_decale(req, **kwargs):
     groupe = req.GET.get('g', '')
     department = req.department
 
-    liste_cours = []
-    liste_module = []
-    liste_prof = []
-    liste_prof_module = []
-    liste_groupe = []
+    courses = []
+    modules = []
+    tutors = []
+    module_tutors = []
+    groups = []
 
     if an > 0 and semaine > 0:
-        liste_jours = num_days(an, semaine)
+        days = num_all_days(an, semaine)
     else:
-        liste_jours = []
+        days = []
 
     cours = filt_p(filt_g(filt_m(filt_sa(department, semaine, an), module), groupe), prof)
 
@@ -549,31 +549,31 @@ def fetch_decale(req, **kwargs):
         try:
             cp = ScheduledCourse.objects.get(cours=c,
                                              copie_travail=0)
-            j = cp.creneau.jour.no
-            h = cp.creneau.heure.no
+            day = cp.day
+            time = cp.start_time
         except ObjectDoesNotExist:
-            j = -1
-            h = -1
+            day = ''
+            time = -1
         if c.tutor is not None:
-            liste_cours.append({'i': c.id,
-                                'm': c.module.abbrev,
-                                'p': c.tutor.username,
-                                'g': c.groupe.nom,
-                                'j': j,
-                                'h': h})
+            courses.append({'i': c.id,
+                            'm': c.module.abbrev,
+                            'p': c.tutor.username,
+                            'g': c.groupe.nom,
+                            'd': day,
+                            't': time})
 
     cours = filt_p(filt_g(filt_sa(department, semaine, an), groupe), prof) \
         .order_by('module__abbrev') \
         .distinct('module__abbrev')
     for c in cours:
-        liste_module.append(c.module.abbrev)
+        modules.append(c.module.abbrev)
 
     cours = filt_g(filt_m(filt_sa(department, semaine, an), module), groupe) \
         .order_by('tutor__username') \
         .distinct('tutor__username')
     for c in cours:
         if c.tutor is not None:
-            liste_prof.append(c.tutor.username)
+            tutors.append(c.tutor.username)
 
     if module != '':
         cours_queryset = Course.objects.filter(module__train_prog__department=department)        
@@ -582,19 +582,19 @@ def fetch_decale(req, **kwargs):
             .distinct('tutor__username')
         for c in cours:
             if c.tutor is not None:
-                liste_prof_module.append(c.tutor.username)
+                module_tutors.append(c.tutor.username)
 
     cours = filt_p(filt_m(filt_sa(department, semaine, an), module), prof) \
         .distinct('groupe')
     for c in cours:
-        liste_groupe.append(c.groupe.nom)
+        groups.append(c.groupe.nom)
 
-    return JsonResponse({'cours': liste_cours,
-                         'modules': liste_module,
-                         'profs': liste_prof,
-                         'profs_module': liste_prof_module,
-                         'groupes': liste_groupe,
-                         'jours': liste_jours})
+    return JsonResponse({'cours': courses,
+                         'modules': modules,
+                         'profs': tutors,
+                         'profs_module': module_tutors,
+                         'groupes': groups,
+                         'jours': days})
 
 
 def fetch_bknews(req, year, week, **kwargs):

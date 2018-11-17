@@ -49,9 +49,13 @@ var first_when = true ;
 var commit = [];
 
 
-var hours = ["8h-9h25","9h30-10h55","11h05-12h30","14h15-15h40","15h45-17h10","17h15-18h40"];
-
-var days = ["Lun.","Mar.","Mer.","Jeu.","Ven."];
+var days = {"m" :{name:"Lun.",num:0}, 
+	    "tu":{name:"Mar.",num:1},
+	    "w" :{name:"Mer.",num:2},
+	    "th":{name:"Jeu.",num:3},
+	    "f" :{name:"Ven.",num:4},
+	    "sa":{name:"Sam.",num:5},
+	    "su":{name:"Dim.",num:6}};
 
 
 
@@ -611,8 +615,12 @@ function go_cours(){
 
 function plot_cours(d){
     var ret = d.m+"-"+d.p+"-"+d.g+" (";
+    var h, m;
     if(d.j>=0 && d.h>=0){
-	ret +=  days[d.j] + " "+ liste_jours[d.j] + " " + hours[d.h];
+	h = Math.floor(d.t/60);
+	m = d.t - h*60 ;
+	ret +=  days[d.d].name + " "+ liste_jours[days[d.d].num]
+	    + " " + h + ":" + m;
     } else {
 	ret += "non placé"
     }
