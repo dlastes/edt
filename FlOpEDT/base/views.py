@@ -682,8 +682,8 @@ def edt_changes(req, **kwargs):
         return bad_response
 
 
-    print(req.body)
-    print(req.POST)
+    logger.info(f"REQ: edt change; {req.body}")
+    logger.info(req.POST)
     old_version = json.loads(req.POST.get('v',-1))
     recv_changes = json.loads(req.POST.get('tab',[]))
 
@@ -896,14 +896,15 @@ def dispos_changes(req, **kwargs):
         week = None
         year = None
 
-    print(req.body)
-    print(req.POST)
+    logger.info(f"REQ: dispo change; {req.body}")
+    logger.info(req.POST)
     # q = json.loads(req.body,
     #                object_hook=lambda d:
     #                namedtuple('X', list(d.keys()))(*list(d.values())))
     q = json.loads(req.POST.get('changes','{}'))
+    logger.info("List of changes")
     for a in q:
-        print(a)
+        logger.info(a)
 
     
     prof = None
@@ -919,7 +920,7 @@ def dispos_changes(req, **kwargs):
             = 'Non autorisé, réclamez plus de droits.'
         return bad_response
 
-    print(q)
+    # print(q)
 
     # if no preference was present for this week, first copy the
     # default availabilities
@@ -944,7 +945,7 @@ def dispos_changes(req, **kwargs):
                 new_dispo.save()
 
     for a in q:
-        print(a)
+        logger.info(f"Change {a}")
         cr = Slot.objects \
             .get(jour=Day.objects.get(no=a['day']),
                  heure=Time.objects.get(no=a['hour']))
@@ -958,8 +959,9 @@ def dispos_changes(req, **kwargs):
                               an=year,
                               creneau=cr,
                               defaults={'valeur': a['val']})
-        print(di)
-        print(didi)
+        logger.info("  Update or create")
+        logger.info(f"  {di}")
+        logger.info(f"  {didi}")
         
     if week is not None and year is not None:
         for c in Course.objects.filter(semaine=week,
