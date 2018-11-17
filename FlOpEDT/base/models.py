@@ -455,15 +455,15 @@ class CourseModification(models.Model):
     def __str__(self):
         olds = 'OLD:'
         if self.semaine_old:
-            olds += ' Sem ' + str(self.semaine_old) + ' ;'
+            olds += f' Sem {self.semaine_old} ;'
         if self.an_old:
-            olds += ' An ' + str(self.an_old) + ' ;'
+            olds += f' An {self.an_old} ;'
         if self.room_old:
-            olds += ' Salle ' + str(self.room_old) + ' ;'
+            olds += f' Salle {self.room_old} ;'
         if self.creneau_old:
-            olds += ' Cren ' + str(self.creneau_old) + ' ;'
+            olds += f' Cren {self.creneau_old} ;'
         if self.version_old:
-            olds += ' NumV ' + str(self.version_old) + ' ;'
+            olds += f' NumV {self.version_old} ;'
         return f"by {self.initiator.username}, at {self.updated_at}\n" + \
             f"{self.cours} <- {olds}"
 
