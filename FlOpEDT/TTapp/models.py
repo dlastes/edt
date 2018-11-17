@@ -104,6 +104,10 @@ class TTConstraint(models.Model):
                 }
             }
 
+    def one_line_description(self):
+        # Return a human readable constraint name with its attributes
+        raise NotImplementedError
+
     @classmethod
     def get_viewmodel_prefetch_attributes(cls):
         return ['train_prog', 'department',]
@@ -186,6 +190,23 @@ class LimitCourseTypePerPeriod(TTConstraint):  # , pond):
 
         return view_model
 
+    def one_line_description(self):
+        text = "Pas plus de " + str(self.limit) +' '+ str(self.type)
+        if self.module:
+            text += " de " + str(self.module)
+        text += " par "
+        if self.period == self.FULL_DAY:
+            text += 'jour'
+        else:
+            text += 'demi-journée'
+        if self.tutor:
+            text += ' pour ' + str(self.tutor)
+        if self.train_prog:
+            text += ' en ' + str(self.train_prog)
+        if self.group:
+            text += ' avec le groupe ' + str(self.group)
+        return text
+
 
 class ReasonableDays(TTConstraint):
     """
@@ -222,6 +243,16 @@ class ReasonableDays(TTConstraint):
                         ttmodel.add_constraint(ttmodel.TT[(slfirst, c1)] +
                                                ttmodel.TT[(sllast, c2)],
                                                '<=', 1)
+
+    def one_line_description(self):
+        text = "Des journées pas trop longues"
+        if self.tutor:
+            text += ' pour ' + str(self.tutor)
+        if self.train_prog:
+            text += ' en ' + str(self.train_prog)
+        if self.group:
+            text += ' avec le groupe ' + str(self.group)
+        return text
 
 
 class Stabilize(TTConstraint):
@@ -302,6 +333,21 @@ class Stabilize(TTConstraint):
                             ttmodel.TTrooms[(chosen_slot, c, chosen_roomgroup)],
                             '==',
                             1)
+
+    def one_line_description(self):
+        text = "Minimiser les changements"
+        if self.type:
+            text += " pour les " + str(self.type)
+        if self.module:
+            text += " de " + str(self.module)
+        if self.tutor:
+            text += ' pour ' + str(self.tutor)
+        if self.train_prog:
+            text += ' en ' + str(self.train_prog)
+        if self.group:
+            text += ' du groupe ' + str(self.group)
+        text += ': copie ' + str(self.work_copy)
+        return text
 
 
 class MinHalfDays(TTConstraint):
@@ -417,7 +463,17 @@ class MinHalfDays(TTConstraint):
                                 ttmodel.TT[(sl14h, c)] + ttmodel.TT[(sl17h, c2)],
                                 '<=',
                                 1)
-
+    def one_line_description(self):
+        text = "Minimise les demie-journées"
+        if self.tutor:
+            text += ' de ' + str(self.tutor)
+        if self.module:
+            text += " de " + str(self.module)
+        if self.train_prog:
+            text += ' en ' + str(self.train_prog)
+        if self.group:
+            text += ' du groupe ' + str(self.group)
+        return text
 
 class MinNonPreferedSlot(TTConstraint):
     """
@@ -468,6 +524,14 @@ class MinNonPreferedSlot(TTConstraint):
                             ttmodel.add_to_group_cost(g, cost)
                             ttmodel.add_to_slot_cost(sl, cost)
 
+    def one_line_description(self):
+        text = "Respecte les préférences"
+        if self.tutor:
+            text += ' de ' + str(self.tutor)
+        if self.train_prog:
+            text += ' des groupes de ' + str(self.train_prog)
+        return text
+
 
 class AvoidBothSlots(TTConstraint):
     """
@@ -503,6 +567,16 @@ class AvoidBothSlots(TTConstraint):
                                            + ttmodel.TT[(self.slot2, c2)],
                                            '<=',
                                            1)
+
+    def one_line_description(self):
+        text = "Pas à la fois " + str(self.slot1) + " et " + str(self.slot2)
+        if self.tutor:
+            text += ' pour ' + str(self.tutor)
+        if self.group:
+            text += ' avec le groupe ' + str(self.group)
+        if self.train_prog:
+            text += ' en ' + str(self.train_prog)
+        return text
 
 # ========================================
 # The following constraints have to be checked!!!
@@ -564,6 +638,8 @@ class SimultaneousCourses(TTConstraint):
                     if (ttmodel.var_coeff(var1, group_constr), ttmodel.var_coeff(var2, group_constr)) == (1, 1):
                         ttmodel.change_var_coeff(var2, group_constr, 0)
 
+    def one_line_description(self):
+        text = "Les cours " + str(self.course1) + " et " + str(self.course2) + " doivent être simultanés !"
 
 class LimitedSlotChoices(TTConstraint):
     """
@@ -609,6 +685,25 @@ class LimitedSlotChoices(TTConstraint):
                 else:
                     ttmodel.add_constraint(ttmodel.TT[(sl, c)], '==', 0)
 
+    def one_line_description(self):
+        text = "Les "
+        if self.type:
+            text += str(self.type)
+        else:
+            text += "cours"
+        if self.module:
+            text += " de " + str(self.module)
+        if self.tutor:
+            text += ' de ' + str(self.tutor)
+        if self.train_prog:
+            text += ' en ' + str(self.train_prog)
+        if self.group:
+            text += ' avec le groupe ' + str(self.group)
+        text += " ne peuvent avoir lieu qu'à "
+        for sl in self.possible_slots.values_list:
+            text += str(sl) + ', '
+        return text
+
 
 class LimitedRoomChoices(TTConstraint):
     """
@@ -652,3 +747,22 @@ class LimitedRoomChoices(TTConstraint):
                         ttmodel.obj += self.local_weight() * ponderation * ttmodel.TTrooms[(sl, c, rg)]
                     else:
                         ttmodel.add_constraint(ttmodel.TTrooms[(sl, c,rg)], '==', 0)
+
+    def one_line_description(self):
+        text = "Les "
+        if self.type:
+            text += str(self.type)
+        else:
+            text += "cours"
+        if self.module:
+            text += " de " + str(self.module)
+        if self.tutor:
+            text += ' de ' + str(self.tutor)
+        if self.train_prog:
+            text += ' en ' + str(self.train_prog)
+        if self.group:
+            text += ' avec le groupe ' + str(self.group)
+        text += " ne peuvent avoir lieu qu'en salle "
+        for sl in self.possible_rooms.values_list:
+            text += str(sl) + ', '
+        return text
