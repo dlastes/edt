@@ -29,7 +29,11 @@ class EdtContextMiddleware:
 
         department_key = 'department'
 
-        def set_request_department(rquest, department, set_session=True, set_cache=False):
+        def del_request_department():
+            del request.session[department_key]
+            cache.delete(department_key)
+
+        def set_request_department(request, department, set_session=True, set_cache=False):
             request.department = department
 
             if set_session:
@@ -45,7 +49,7 @@ class EdtContextMiddleware:
 
         def get_department_abbrev(lookup_items):
             #
-            # Lookup department abbrev
+            # Lookup department abbrev from request collections
             #
             department_abbrev = ''
 
@@ -56,22 +60,26 @@ class EdtContextMiddleware:
                     return department_abbrev
 
             return department_abbrev
-       
-        # Lookup department abbrev
-        department_abbrev = get_department_abbrev((view_kwargs, request.GET, request.session,))
-        
-        if department_abbrev:            
-            # Lookup for a department cached item
-            department = cache.get(department_key)
-            logger.debug(f'get department from cache : {department}')
-            if department and department.abbrev == department_abbrev:
-                set_request_department(request, department)
-            else: 
-                try:        
-                    logger.debug(f'load department from database : [{department_abbrev}]')
-                    department = Department.objects.get(abbrev=department_abbrev)
-                    set_request_department(request, department, set_cache=True)
-                except ObjectDoesNotExist:
-                    logger.warning(f'wrong department value : [{department_abbrev}]')
-                    return redirect('/')  
+
+        if request.path == '/':
+            del_request_department()
+        else:
+            # Lookup department abbrev
+            department_abbrev = get_department_abbrev((view_kwargs, request.GET, request.session,))
+            
+            if department_abbrev:            
+                # Lookup for a department cached item
+                department = cache.get(department_key)
+                logger.debug(f'get department from cache : {department}')
+                if department and department.abbrev == department_abbrev:
+                    set_request_department(request, department)
+                else: 
+                    try:        
+                        logger.debug(f'load department from database : [{department_abbrev}]')
+                        department = Department.objects.get(abbrev=department_abbrev)
+                        set_request_department(request, department, set_cache=True)
+                    except ObjectDoesNotExist:
+                        logger.warning(f'wrong department value : [{department_abbrev}]')
+                        return redirect('/')
+
 
