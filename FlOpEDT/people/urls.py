@@ -89,4 +89,7 @@ urlpatterns = [
     url(r'^change/biatos/$',
         ChangeBIATOSTutor.as_view(),
         name="change_BIATOS"),
+	url(r'^fetch_tutors/$',
+        views.fetch_tutors,
+        name="fetch_tutors"),
     ]

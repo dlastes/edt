@@ -49,5 +49,6 @@ urlpatterns = [
     url(r'^citations/', include('quote.urls')),
     url(r'^edt/(?P<department>[a-zA-Z]\w{1,7})/', include('base.urls')),    
     url(r'^solve-board/(?P<department>[a-zA-Z]\w{1,7})/', include('solve_board.urls')),    
+    url(r'^ical/(?P<department>[a-zA-Z]\w{1,7})/', include('synchro.urls')),
     url(r'$', base.views.index),
 ]

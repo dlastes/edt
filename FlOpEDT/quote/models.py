@@ -34,7 +34,7 @@ class QuoteType(models.Model):
     parent = models.ForeignKey('self', null=True, blank=True,
                                on_delete=models.CASCADE)
 
-    def __unicode__(self):
+    def __str__(self):
         return str(self.name)
 
 
@@ -70,7 +70,7 @@ class Quote(models.Model):
                               choices=STATUS_CHOICES,
                               default=PENDING)
 
-    def __unicode__(self):
+    def __str__(self):
         sep = ', '
         quo = ('[' + str(self.header) + '] ' if self.header is not None else '')
         auth = ''
