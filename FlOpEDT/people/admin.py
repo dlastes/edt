@@ -2,27 +2,25 @@
 
 
 from django.contrib import admin
+from base.admin import DepartmentModelAdmin
 
-from people.models import FullStaff, SupplyStaff, BIATOS, Tutor, User
-
-
-class FullStaffAdmin(admin.ModelAdmin):
-
-    class Meta:
-        app_label = 'auth'
+from people.models import FullStaff, SupplyStaff, BIATOS
 
 
-class SupplyStaffAdmin(admin.ModelAdmin):
+class FullStaffAdmin(DepartmentModelAdmin):
 
     class Meta:
         app_label = 'auth'
 
-
-class BIATOSAdmin(admin.ModelAdmin):
+class SupplyStaffAdmin(DepartmentModelAdmin):
 
     class Meta:
         app_label = 'auth'
 
+class BIATOSAdmin(DepartmentModelAdmin):
+
+    class Meta:
+        app_label = 'auth'
 
 
 admin.site.register(FullStaff, FullStaffAdmin)

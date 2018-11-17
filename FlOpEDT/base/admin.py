@@ -32,11 +32,13 @@ from base.models import Day, RoomGroup, Module, Course, Group, Slot, \
     CoursePreference, Dependency, RoomType, Department
 
 from base.models import CourseType
+from core.department import get_department_lookup
 from people.models import Tutor, User
 
 
 import django.contrib.auth as auth
 from django.core.exceptions import FieldDoesNotExist
+from django.db .models.fields import related as related_fields
 
 
 from import_export import resources, fields
@@ -201,47 +203,39 @@ class DepartmentModelAdmin(admin.ModelAdmin):
     department_field_name = 'department'
     department_field_tuple = (department_field_name,)
 
-    def get_department_lookup(self, field, department, include_field_name=True):
-        # List filter to apply for department filtering 
-        # of model instances depending on their fields 
-        if field.related_model:
-            lookups_by_model = {
-                Department: '',
-                CourseType: 'department',
-                TrainingProgramme: 'department',
-                Module: 'train_prog__department',
-                }
-            
-            lookup = lookups_by_model.get(field.related_model, None)
-
-            if not lookup is None:
-                if lookup is '':
-                    lookup_name = 'department' 
-                elif include_field_name:
-                    lookup_name = f"{field.name}__{lookup}"
-                else:
-                    lookup_name = lookup
-
-                return {lookup_name: department}
-
-        return None      
-
     def get_exclude(self, request, obj=None):
         # Hide department field if a department attribute exists 
         # on the related model and a department value has been set
-        list = super().get_exclude(request, obj)
-        try:
-            self.model._meta.get_field(self.department_field_name)        
-            if hasattr(request, 'department'):
-                if list:
-                    list += self.department_field_tuple
-                else:
-                    list = self.department_field_tuple
-        except FieldDoesNotExist:
-            pass
+        base = super().get_exclude(request, obj)
+        exclude = list() if base is None else base
 
-        return list
+        if hasattr(request, 'department'):
+            for field in self.model._meta.get_fields():
+                if not field.auto_created and field.related_model == Department:
+                    exclude.append(field.name)
 
+        return exclude
+
+    def save_model(self, request, obj, form, change):
+        #
+        # Set department field value if exists on the model
+        #
+        if hasattr(request, 'department'):
+            for field in self.model._meta.get_fields():
+                if not field.auto_created and field.related_model == Department:
+                    if isinstance(field, related_fields.ForeignKey):
+                        setattr(obj, field.name, request.department)
+        
+        super().save_model(request, obj, form, change)        
+
+    def save_related(self, request, form, formsets, change):
+        super().save_related(request, form, formsets, change)
+        model = form.instance
+        if hasattr(request, 'department') and not change:
+            for field in model._meta.get_fields():
+                if field.related_model == Department:
+                    if isinstance(field, related_fields.ManyToManyField):
+                        field.save_form_data(model, [request.department,])
 
     def get_queryset(self, request):
         #
@@ -252,40 +246,33 @@ class DepartmentModelAdmin(admin.ModelAdmin):
         try:
             if hasattr(request, 'department'):
                 for f in self.model._meta.get_fields():
-                    related_filter = self.get_department_lookup(f, request.department)
+                    related_filter = get_department_lookup(f, request.department)
                     if related_filter:
-                        return qs.filter(**related_filter)
+                        return qs.filter(**related_filter).distinct()
         except FieldDoesNotExist:
             pass
 
         return qs
 
-    def save_model(self, request, obj, form, change):
-        #
-        # Set department field value if exists on the model
-        #
-        self.model._meta.get_field(self.department_field_name)        
-        try:
-            self.model._meta.get_field(self.department_field_name)        
-            if hasattr(request, 'department'):
-                obj.department = request.department
-        except FieldDoesNotExist:
-            pass
-        
-        super().save_model(request, obj, form, change)        
 
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+    def formfield_with_department_filtering(self, db_field, request, kwargs):
         #
         # Filter form fields for with specific department related items
         #
         if hasattr(request, 'department') and db_field.related_model: 
-            related_filter = self.get_department_lookup(db_field, request.department, include_field_name=False)
+            related_filter = get_department_lookup(db_field, request.department, include_field_name=False)
             if related_filter:
-                kwargs["queryset"] = db_field.related_model.objects.filter(**related_filter)
+                kwargs["queryset"] = db_field.related_model.objects.filter(**related_filter).distinct()
 
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        self.formfield_with_department_filtering(db_field, request, kwargs)
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
+    def formfield_for_manytomany(self, db_field, request, **kwargs):
+        self.formfield_with_department_filtering(db_field, request, kwargs)
+        return super().formfield_for_manytomany(db_field, request, **kwargs)
 
 
 class BreakingNewsAdmin(DepartmentModelAdmin):
@@ -293,12 +280,8 @@ class BreakingNewsAdmin(DepartmentModelAdmin):
                     'fill_color', 'strk_color')
     ordering = ('-year', '-week')
 
-class JourAdmin(admin.ModelAdmin):
-    list_display = ('nom', 'no')
-    ordering = ('no',)
-
     
-class HolidayAdmin(admin.ModelAdmin):
+class HolidayAdmin(DepartmentModelAdmin):
     list_display = ('day', 'week', 'year')
     ordering = ('-year', '-week', 'day')
     list_filter = (
@@ -308,39 +291,23 @@ class HolidayAdmin(admin.ModelAdmin):
     )
 
 
-class TrainingHalfDayAdmin(admin.ModelAdmin):
+class TrainingHalfDayAdmin(DepartmentModelAdmin):
     list_display = ('train_prog', 'day', 'week', 'year', 'apm')
     ordering = ('-year', '-week', 'train_prog', 'day')
     
 
-# class DemiJourAdmin(admin.ModelAdmin):
-#    list_display = ('jour','apm')
-#    ordering = ('jour','apm')
-
-
-# # from django.utils.text import Truncator
-# ordering = ('abbrev',)
-#    def abb_name(self,prof):
-#        return Truncator(prof.nom).chars(4, truncate='.')
-#    abb_name.short_description = 'Aperçu du nom'
-
-
-class GroupAdmin(admin.ModelAdmin):
+class GroupAdmin(DepartmentModelAdmin):
     list_display = ('nom', 'type', 'size', 'train_prog')
     filter_horizontal = ('parent_groups',)
     ordering = ('size',)
     list_filter = (('train_prog', DropdownFilterRel),
                    )
 
-
-# class SalleAdmin(admin.ModelAdmin):
-#     list_display = ('nom','tp_ok','td_ok','ce_ok','machine','exam')
-
-class RoomGroupAdmin(admin.ModelAdmin):
+class RoomGroupAdmin(DepartmentModelAdmin):
     list_display = ('name',)
 
     
-class RoomPreferenceAdmin(admin.ModelAdmin):
+class RoomPreferenceAdmin(DepartmentModelAdmin):
     list_display = ('room', 'semaine', 'an', 'creneau', 'valeur')
     ordering = ('-an','-semaine','creneau')
     list_filter = (
@@ -350,7 +317,7 @@ class RoomPreferenceAdmin(admin.ModelAdmin):
     )
 
     
-class RoomSortAdmin(admin.ModelAdmin):
+class RoomSortAdmin(DepartmentModelAdmin):
     list_display = ('for_type', 'prefer', 'unprefer',)
     list_filter = (
         ('for_type', DropdownFilterRel),
@@ -359,7 +326,7 @@ class RoomSortAdmin(admin.ModelAdmin):
     )
 
     
-class ModuleAdmin(admin.ModelAdmin):
+class ModuleAdmin(DepartmentModelAdmin):
     list_display = ('nom', 'ppn', 'abbrev',
                     'head',
                     'train_prog')
@@ -368,7 +335,7 @@ class ModuleAdmin(admin.ModelAdmin):
         ('head', DropdownFilterRel),
         ('train_prog', DropdownFilterRel),)
 
-class CourseAdmin(admin.ModelAdmin):
+class CourseAdmin(DepartmentModelAdmin):
     list_display = ('module', 'type', 'groupe', 'tutor', 'semaine', 'an')
     ordering = ('an', 'semaine', 'module', 'type', 'no', 'groupe', 'tutor')
     list_filter = (
@@ -380,7 +347,7 @@ class CourseAdmin(admin.ModelAdmin):
     )
 
 
-class CoursPlaceAdmin(admin.ModelAdmin):
+class CoursPlaceAdmin(DepartmentModelAdmin):
 
     def cours_semaine(o):
         return str(o.cours.semaine)
@@ -402,7 +369,7 @@ class CoursPlaceAdmin(admin.ModelAdmin):
         ('cours__semaine', DropdownFilterAll),)
 
 
-class EdtVAdmin(admin.ModelAdmin):
+class EdtVersionAdmin(DepartmentModelAdmin):
     list_display = ('semaine', 'version', 'an')
     ordering = ('-an', '-semaine', 'version')
     list_filter = (('semaine', DropdownFilterAll),
@@ -420,7 +387,7 @@ class CoursePreferenceAdmin(DepartmentModelAdmin):
                    )
     
 
-class DependencyAdmin(admin.ModelAdmin):
+class DependencyAdmin(DepartmentModelAdmin):
     def cours1_semaine(o):
         return str(o.cours.semaine)
 
@@ -439,7 +406,7 @@ class DependencyAdmin(admin.ModelAdmin):
                    )
 
     
-class CoursMAdmin(admin.ModelAdmin):
+class CourseModificationAdmin(DepartmentModelAdmin):
     def cours_semaine(o):
         return str(o.cours.semaine)
 
@@ -462,7 +429,7 @@ class CoursMAdmin(admin.ModelAdmin):
     ordering = ('-updated_at', 'an_old', 'semaine_old')
 
 
-class PlanifMAdmin(admin.ModelAdmin):
+class PlanningModificationAdmin(DepartmentModelAdmin):
     list_display = ('cours', 'semaine_old', 'an_old',
                     'tutor_old',
                     'updated_at',
@@ -474,7 +441,7 @@ class PlanifMAdmin(admin.ModelAdmin):
                    ('an_old', DropdownFilterAll),)
 
 
-class DispoAdmin(admin.ModelAdmin):
+class DispoAdmin(DepartmentModelAdmin):
     list_display = ('user', 'creneau', 'valeur', 'semaine', 'an')
     ordering = ('user', 'an', 'semaine', 'creneau', 'valeur')
     list_filter = (('creneau', DropdownFilterRel),
@@ -483,14 +450,9 @@ class DispoAdmin(admin.ModelAdmin):
                    )
 
 
-
-class RegenAdmin(admin.ModelAdmin):
+class RegenAdmin(DepartmentModelAdmin):
     list_display = ('an', 'semaine', 'full', 'fday', 'fmonth', 'fyear', 'stabilize', 'sday', 'smonth', 'syear', )
     ordering = ('-an', '-semaine')
-
-
-
-
 
 
 # </editor-fold desc="ADMIN_MENU">
@@ -501,8 +463,6 @@ class RegenAdmin(admin.ModelAdmin):
 # admin.site.unregister(auth.models.User)
 admin.site.unregister(auth.models.Group)
 
-# admin.site.register(Jour, JourAdmin)
-# admin.site.register(DemiJour, DemiJourAdmin)
 admin.site.register(Holiday, HolidayAdmin)
 admin.site.register(TrainingHalfDay, TrainingHalfDayAdmin)
 admin.site.register(Group, GroupAdmin)
@@ -511,13 +471,12 @@ admin.site.register(RoomPreference, RoomPreferenceAdmin)
 admin.site.register(RoomSort, RoomSortAdmin)
 admin.site.register(Module, ModuleAdmin)
 admin.site.register(Course, CourseAdmin)
-admin.site.register(EdtVersion, EdtVAdmin)
-admin.site.register(CourseModification, CoursMAdmin)
+admin.site.register(EdtVersion, EdtVersionAdmin)
+admin.site.register(CourseModification, CourseModificationAdmin)
 admin.site.register(CoursePreference, CoursePreferenceAdmin)
 admin.site.register(Dependency, DependencyAdmin)
-admin.site.register(PlanningModification, PlanifMAdmin)
+admin.site.register(PlanningModification, PlanningModificationAdmin)
 admin.site.register(ScheduledCourse, CoursPlaceAdmin)
-# admin.site.register(CoursLP, CoursLPAdmin)
 admin.site.register(UserPreference, DispoAdmin)
 admin.site.register(BreakingNews, BreakingNewsAdmin)
 admin.site.register(Regen,RegenAdmin)
