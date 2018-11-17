@@ -54,6 +54,8 @@ import base.queries as queries
 from base.weeks import *
 
 
+logger = logging.getLogger(__name__)
+
 # <editor-fold desc="FAVICON">
 # ----------
 # FAVICON
@@ -267,7 +269,7 @@ def decale(req, **kwargs):
 
 
 def fetch_cours_pl(req, year, week, num_copy, **kwargs):
-    print(req)
+    logger.info(f'REQ: fetch sched courses: {req}')
 
     try:
         week = int(week)
@@ -277,7 +279,7 @@ def fetch_cours_pl(req, year, week, num_copy, **kwargs):
     except:
         return HttpResponse("KO")
 
-    print("D", department, "W",week, " Y",year, " N", num_copy)
+    logger.info(f"D{department} W{week} Y{year} N{num_copy}")
 
     cache_key = get_key_course_pl(department.abbrev, year, week, num_copy)
     cached = cache.get(cache_key)
