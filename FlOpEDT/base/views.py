@@ -23,48 +23,36 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from django.http import HttpResponse, Http404, JsonResponse, HttpRequest
-from django.shortcuts import render, redirect
-
-from django.contrib.auth.decorators import login_required, user_passes_test
-
-from django.db import transaction
-from django.urls import reverse
-
-from django.views.decorators.cache import cache_page
-
 import json
-
-from .forms import ContactForm
-
-from .models import Course, UserPreference, ScheduledCourse, EdtVersion, \
-    CourseModification, Slot, Day, Time, RoomGroup, PlanningModification, \
-    Regen, BreakingNews, RoomPreference, Department
-
-from people.models import Tutor
-# Prof,
-
-from .admin import CoursResource, DispoResource, VersionResource, \
-    CoursPlaceResource, BreakingNewsResource, UnavailableRoomsResource
-
-from .weeks import *
-
 from collections import namedtuple
-
 from itertools import chain
+from random import randint
+import logging
 
-from django.core.exceptions import ObjectDoesNotExist
-
-from django.core.mail import send_mail
-from django.template.response import TemplateResponse
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.staticfiles.storage import staticfiles_storage
+from django.core.cache import cache
+from django.core.exceptions import ObjectDoesNotExist
+from django.core.mail import send_mail
+from django.db import transaction
+from django.http import HttpResponse, Http404, JsonResponse, HttpRequest
+from django.template.response import TemplateResponse
+from django.urls import reverse
+from django.views.decorators.cache import cache_page
 from django.views.generic import RedirectView
 
-from random import randint
+from people.models import Tutor
 
-from django.core.cache import cache
-
+from base.admin import CoursResource, DispoResource, VersionResource, \
+    CoursPlaceResource, BreakingNewsResource, UnavailableRoomsResource
+from base.forms import ContactForm
+from base.models import Course, UserPreference, ScheduledCourse, EdtVersion, \
+    CourseModification, Slot, Day, Time, RoomGroup, PlanningModification, \
+    Regen, BreakingNews, RoomPreference, Department
 import base.queries as queries
+from base.weeks import *
+
 
 # <editor-fold desc="FAVICON">
 # ----------
