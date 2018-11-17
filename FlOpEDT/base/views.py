@@ -716,8 +716,8 @@ def edt_changes(req, **kwargs):
                 # old_slot = a.slot.o
                 new_day = a['day']['n']
                 old_day = a['day']['o']
-                new_slot = a['slot']['n']
-                old_slot = a['slot']['o']
+                new_time = a['time']['n']
+                old_time = a['time']['o']
                 old_room = a['room']['o']
                 new_room = a['room']['n']
                 new_week = a['week']['n']
@@ -734,26 +734,17 @@ def edt_changes(req, **kwargs):
                         new_room = old_room
 
                 if new_day is not None:
-                    try:
-                        cren_n = Slot \
-                            .objects \
-                            .get(jour=Day.objects \
-                                 .get(no=new_day),
-                                 heure \
-                                     =Time \
-                                 .objects \
-                                 .get(no=new_slot))
-                    except ObjectDoesNotExist:
-                        bad_response['reason'] \
-                            = "Problème : créneau " + new_day
-                        return bad_response
+                    # None, None means no change
+                    # same, same means not scheduled before
                     if non_place:
-                        cp.creneau = cren_n
-                    m.creneau_old = cp.creneau
-                    cp.creneau = cren_n
-                    print(cren_n)
-                    print(m)
-                    print(cp)
+                        cp.day = new_day
+                        cp.start_time = new_time
+                    m.day_old = cp.day
+                    m.start_time_old = cp.start_time
+                    cp.day = new_day
+                    cp.start_time = new_time
+                    logger.info(f"Course modification: {m}")
+                    logger.info(f"New scheduled course: {cp}")
                 if new_room is not None:
                     try:
                         sal_n = RoomGroup.objects.get(name=new_room)
