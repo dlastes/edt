@@ -26,7 +26,8 @@
 # without disclosing the source code of your own applications.
 
 from base.models import Slot, ScheduledCourse, RoomPreference, EdtVersion
-from django.db.models import Max
+from django.db.models import Max, Q
+from TTapp.models import LimitedRoomChoices
 
 
 def basic_reassign_rooms(semaine, an, target_work_copy):
@@ -77,7 +78,7 @@ def basic_reassign_rooms(semaine, an, target_work_copy):
                         room=precedent.room,
                         copie_travail=target_work_copy)
             # test if lucky
-            if len(cp_using_prec) == 1 and cp_using_prec[0] == CP:
+            if cp_using_prec.count() == 1 and cp_using_prec[0] == CP:
                 # print "lucky, no change needed"
                 continue
             # test if precedent.room is available
@@ -93,18 +94,25 @@ def basic_reassign_rooms(semaine, an, target_work_copy):
                 # print "room is not available"
                 continue
             # test if precedent.room is used for course of the same room_type and swap
-            if len(cp_using_prec) == 0:
+            if not cp_using_prec.exists():
                 CP.room = precedent.room
                 CP.save()
                 # print "assigned", CP
-            elif cp_using_prec[0].cours.room_type == CP.cours.room_type:
-                r = CP.room
-                CP.room = precedent.room
+            elif cp_using_prec.count() == 1:
                 sib = cp_using_prec[0]
-                sib.room = r
-                CP.save()
-                sib.save()
-                # print "swapped", CP, " with", sib
+                if sib.cours.room_type == CP.cours.room_type \
+                        and not LimitedRoomChoices.objects\
+                        .filter(Q(week=semaine) | Q(week=None),
+                                Q(year=an) | Q(year=None),
+                                Q(train_prog=sib.train_prog) | Q(module=sib.module) | Q(group=sib.group) |
+                                Q(tutor=sib.tutor) | Q(type=sib.type),
+                                possible_rooms=sib.room).exists():
+                    r = CP.room
+                    CP.room = precedent.room
+                    sib.room = r
+                    CP.save()
+                    sib.save()
+                    # print "swapped", CP, " with", sib
     print("done")
 
 
