@@ -80,10 +80,10 @@ class Tutor(User):
         ret += '-' + self.status + '-' + 'S' + str(self.pref_slots_per_day)
         return ret
 
-    
+
 class FullStaff(Tutor):
     # deprected since multi departements insertion
-    department = models.CharField(max_length=50, default='INFO')
+    department = models.CharField(max_length=50, default='INFO', null=True, blank=True)
     is_iut = models.BooleanField(default=True)
 
     def uni_extended(self):
@@ -93,6 +93,9 @@ class FullStaff(Tutor):
             ret += 'n'
         ret += 'IUT'
         return ret
+
+    class Meta:
+        verbose_name = 'FullStaff' 
 
 
 class SupplyStaff(Tutor):
@@ -108,10 +111,16 @@ class SupplyStaff(Tutor):
         ret += '-Dom:' + self.field
         return ret
 
+    class Meta:
+        verbose_name = 'SupplyStaff'
+
 
 class BIATOS(Tutor):
     def uni_extended(self):
         return super(BIATOS,self).uni_extended()
+
+    class Meta:
+        verbose_name = 'BIATOS'
 
 # --- Notes sur Prof ---
 #    MinDemiJournees=models.BooleanField(
