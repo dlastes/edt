@@ -300,9 +300,8 @@ def fetch_cours_pl(req, year, week, num_copy, **kwargs):
                         department=department,                         
                         week=week,
                         year=year,
-                        num_copy=num_copy) \
-                    .order_by('creneau__jour',
-                              'creneau__heure'))  # all())#
+                        num_copy=num_copy)
+            ))
         ok = num_copy != 0 \
              or (version == queries \
                                 .get_edt_version(
