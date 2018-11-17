@@ -181,12 +181,12 @@ def extract_period(department, book, period):
     sheet = book[period.name]
     if period.starting_week < period.ending_week:
         for week in range(period.starting_week, period.ending_week + 1):
-            ReadPlanifWeek(department, book, sheet, week, 2018)
+            ReadPlanifWeek(department, book, period.name, week, 2018)
     else:
         for week in range(period.starting_week, 53):
-            ReadPlanifWeek(department, book, sheet, week, 2018)
+            ReadPlanifWeek(department, book, period.name, week, 2018)
         for week in range(1, period.ending_week + 1):
-            ReadPlanifWeek(department, book, sheet, week, 2019)
+            ReadPlanifWeek(department, book, period.name, week, 2019)
 
 def extract_planif(department, bookname=None):
     if bookname is None:
