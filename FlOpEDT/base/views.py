@@ -998,7 +998,7 @@ def decale_changes(req, **kwargs):
 
     for c in change_list:
         # try:
-        if c['j'] != -1 and c['h'] != -1:
+        if c['d'] != '' and c['t'] != -1:
             cours_place = ScheduledCourse \
                 .objects \
                 .get(cours__id=c['i'],
