@@ -95,7 +95,7 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
                     nominal = 1
                     # le nominal est le nombre de cours par groupe (de TP ou TD)
                 if Cell.comment:
-                    comments = Cell.comment.text.replace(' ', '').replace('\n', '').split(';')
+                    comments = Cell.comment.text.replace(' ', '').replace('\n', '').replace(',', ';').split(';')
                 else:
                     comments = []
 
@@ -119,12 +119,13 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
             else:
                 assert isinstance(prof, str) and prof is not None
                 profs = prof.split(";")
-                prof=profs[0]
-                TUTOR=Tutor.objects.get(username=prof)
-                supp_profs=profs[1:]
+                prof = profs[0]
+                TUTOR = Tutor.objects.get(username=prof)
+                supp_profs = profs[1:]
+            SUPP_TUTORS = Tutor.objects.filter(username__in=supp_profs)
 
             if Cell.comment:
-                local_comments = Cell.comment.text.replace(' ', '').split(';')
+                local_comments = Cell.comment.text.replace(' ', '').replace('\n', '').replace(',', ';').split(';')
             else:
                 local_comments = []
 
@@ -132,14 +133,13 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
                 grps = str(int(grps))
             if not grps:
                 grps = []
-            elif ';' in grps:
-                grps = grps.replace(' ', '').split(';')
             else:
-                grps = grps.replace(' ', '').split(',')
+                grps = grps.replace(' ', '').replace(',', ';').split(';')
             groupes = [str(g) for g in grps]
 
             GROUPS = list(Group.objects.filter(nom__in=groupes, train_prog=PROMO))
 
+            N=int(N)
             Diff = N - len(groupes) * nominal
             if Diff != 0:
                 print("Nombre incohérent ligne %g semaine %s de %s : %s \n" % (row, semaine, feuille, module))
@@ -149,13 +149,13 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
                 C = Course(tutor=TUTOR, type=COURSE_TYPE, module=MODULE, groupe=GROUPE, semaine=semaine, an=an,
                            room_type=ROOMTYPE)
                 C.save()
-                for sp in supp_profs:
+                for sp in SUPP_TUTORS:
                     C.supp_tutor.add(sp)
                     C.save()
                 for after_type in [x for x in comments + local_comments if x[0] == 'A']:
                     course_type = after_type[1:]
                     course = Course.objects.filter(type__name=course_type, module=MODULE, semaine=semaine, an=an,
-                                               groupe__in = list(GROUPE.ancestor_groups()) + [GROUPE])[0]
+                                                   groupe__in = list(GROUPE.ancestor_groups()) + [GROUPE])[0]
                     P = Dependency(cours1=course, cours2=C)
                     P.save()
 
@@ -178,7 +178,6 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
 
 
 def extract_period(department, book, period):
-    sheet = book[period.name]
     if period.starting_week < period.ending_week:
         for week in range(period.starting_week, period.ending_week + 1):
             ReadPlanifWeek(department, book, period.name, week, 2018)
