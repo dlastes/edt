@@ -84,9 +84,9 @@ class CoursPlaceResource(resources.ModelResource):
     module = fields.Field(column_name='module',
                           attribute='cours__module',
                           widget=ForeignKeyWidget(Module, 'abbrev'))
-    day = fields.Field(column_name='day',
-                        attribute='day',
-                        widget=ForeignKeyWidget(Day, 'no'))
+    # day = fields.Field(column_name='day',
+    #                     attribute='day',
+    #                     widget=ForeignKeyWidget(Day, 'no'))
     # salle = fields.Field(column_name = 'salle',
     #                      attribute = 'salle',
     #                      widget = ForeignKeyWidget(Salle,'nom'))
@@ -360,8 +360,8 @@ class CoursMAdmin(admin.ModelAdmin):
     cours_an.admin_order_field = 'cours__an'
 
     list_display = ('cours', cours_semaine, cours_an,
-                    'version_old', 'room_old', 'creneau_old',
-                    'updated_at', 'initiator'
+                    'version_old', 'room_old', 'day_old',
+                    'start_time_old', 'updated_at', 'initiator'
                     )
     list_filter = (('initiator', DropdownFilterRel),
                    ('cours__an', DropdownFilterAll),

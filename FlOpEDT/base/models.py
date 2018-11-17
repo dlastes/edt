@@ -346,7 +346,7 @@ class Course(models.Model):
 
 class ScheduledCourse(models.Model):
     cours = models.ForeignKey('Course', on_delete=models.CASCADE)
-    day = models.ForeignKey('Day', on_delete=models.CASCADE)
+    day = models.CharField(max_length=2, choices=Day.CHOICES, default=Day.MONDAY)
     # in minutes from 12AM
     start_time = models.PositiveSmallIntegerField()
     room = models.ForeignKey('RoomGroup', blank=True, null=True, on_delete=models.CASCADE)
@@ -358,7 +358,7 @@ class ScheduledCourse(models.Model):
     # les utilisateurs auront acces à la copie publique (0)
 
     def __str__(self):
-        return f"{self.cours}{self.no}:{self.creneau.id}-{self.room}"
+        return f"{self.cours}{self.no}:{self.day}-t{self.start_time}-{self.room}"
 
 
 # </editor-fold desc="COURSES">
@@ -447,22 +447,23 @@ class CourseModification(models.Model):
         validators=[MinValueValidator(0), MaxValueValidator(53)], null=True)
     an_old = models.PositiveSmallIntegerField(null=True)
     room_old = models.ForeignKey('RoomGroup', blank=True, null=True, on_delete=models.CASCADE)
-    creneau_old = models.ForeignKey('Slot', null=True, on_delete=models.CASCADE)
+    day_old = models.CharField(max_length=2, choices=Day.CHOICES, default=None, null=True)
+    start_time_old = models.PositiveSmallIntegerField(default=None, null=True)
     version_old = models.PositiveIntegerField()
     updated_at = models.DateTimeField(auto_now=True)
     initiator = models.ForeignKey('people.Tutor', on_delete=models.CASCADE)
 
     def __str__(self):
         olds = 'OLD:'
-        if self.semaine_old:
+        if self.semaine_old is not None:
             olds += f' Sem {self.semaine_old} ;'
-        if self.an_old:
+        if self.an_old is not None:
             olds += f' An {self.an_old} ;'
-        if self.room_old:
+        if self.room_old is not None:
             olds += f' Salle {self.room_old} ;'
-        if self.creneau_old:
-            olds += f' Cren {self.creneau_old} ;'
-        if self.version_old:
+        if self.day_old is not None:
+            olds += f' Cren {self.day_old}-{self.start_time_old} ;'
+        if self.version_old is not None:
             olds += f' NumV {self.version_old} ;'
         return f"by {self.initiator.username}, at {self.updated_at}\n" + \
             f"{self.cours} <- {olds}"
