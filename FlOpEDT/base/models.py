@@ -233,7 +233,6 @@ class TimeGeneralSettings(models.Model):
     days = ArrayField(models.CharField(max_length=2,
                                        choices=Day.CHOICES))
 
-
     def __str__(self):
         dsh, dsm = hr_min(self.day_start_time)
         lsh, lsm = hr_min(self.lunch_break_start_time)

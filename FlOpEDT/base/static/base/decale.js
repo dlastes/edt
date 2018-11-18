@@ -49,18 +49,6 @@ var first_when = true ;
 var commit = [];
 
 
-var days = {"m" :{name:"Lun.",num:0}, 
-	    "tu":{name:"Mar.",num:1},
-	    "w" :{name:"Mer.",num:2},
-	    "th":{name:"Jeu.",num:3},
-	    "f" :{name:"Ven.",num:4},
-	    "sa":{name:"Sam.",num:5},
-	    "su":{name:"Dim.",num:6}};
-
-
-
-
-
 initiate();
 
 function initiate() {
