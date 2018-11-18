@@ -128,7 +128,7 @@ function initiate() {
 
 // fetch the data corresponding to the current selection
 function go_filter(){
-    var sel, di, sa, i ;
+    var sel, di, sa, i, cur ;
     var url_fd_full = url_fetch_decale+"?a="+filtered.an+"&s="+filtered.semaine;
     var prof_changed = false ;
 
@@ -179,8 +179,11 @@ function go_filter(){
 	    filtered.mod_prof_gp[0].arr = msg.modules;
 	    filtered.mod_prof_gp[1].arr = msg.profs;
 	    filtered.mod_prof_gp[2].arr = msg.groupes;
-	    liste_cours = msg.cours;
-	    liste_jours = msg.jours;
+	    liste_cours = {};
+	    for(i = 0 ; i<msg.jours.length ; i++) {
+		cur = msg.jours[i] ;
+		liste_jours[cur.ref] = {date: cur.date, name: cur.name};
+	    }
 
 	    fill_aim_prof(msg.profs_module);
 
@@ -619,7 +622,7 @@ function plot_cours(d){
     if(d.j>=0 && d.h>=0){
 	h = Math.floor(d.t/60);
 	m = d.t - h*60 ;
-	ret +=  days[d.d].name + " "+ liste_jours[days[d.d].num]
+	ret +=  liste_jours[d.d].name + " "+ liste_jours[d.d].date
 	    + " " + h + ":" + m;
     } else {
 	ret += "non placé"
