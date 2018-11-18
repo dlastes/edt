@@ -230,6 +230,9 @@ class TimeGeneralSettings(models.Model):
     day_finish_time = models.PositiveSmallIntegerField()
     lunch_break_start_time = models.PositiveSmallIntegerField()
     lunch_break_finish_time = models.PositiveSmallIntegerField()
+    days = ArrayField(models.CharField(max_length=2,
+                                       choices=Day.CHOICES))
+
 
     def __str__(self):
         dsh, dsm = hr_min(self.day_start_time)
@@ -238,7 +241,8 @@ class TimeGeneralSettings(models.Model):
         lfh, lfm = hr_min(self.lunch_break_finish_time)
         return f"Dept {self.department.abbrev}: " + \
             f"{dsh}:{dsm:02d} - {lsh}:{lsm:02d}" + \
-            f" | {lfh}:{lfm:02d} - {dfh}:{dfm:02d}"
+            f" | {lfh}:{lfm:02d} - {dfh}:{dfm:02d};" + \
+            f" Days: {self.days}"
     
 # </editor-fold>
 
