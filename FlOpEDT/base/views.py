@@ -365,7 +365,7 @@ def fetch_cours_pl(req, year, week, num_copy, **kwargs):
 
 
 def fetch_cours_pp(req, week, year, num_copy, **kwargs):
-    print(req)
+    logger.info(f"REQ: unscheduled courses; {req}")
 
     try:
         week = int(week)
@@ -375,7 +375,7 @@ def fetch_cours_pp(req, week, year, num_copy, **kwargs):
     except ValueError:
         return HttpResponse("KO")
 
-    print("D", department ,"W",week, " Y",year, " N", num_copy)
+    logger.info(f"D{department} W{week} Y{year} N{num_copy}")
 
     cache_key = get_key_course_pp(department.abbrev, year, week, num_copy)
     cached = cache.get(cache_key)
@@ -405,12 +405,10 @@ def fetch_cours_pp(req, week, year, num_copy, **kwargs):
 
 #@login_required
 def fetch_dispos(req, year, week, **kwargs):
-    print(req)
-    print("================")
+    logger.info(f"REQ: fetch dispos; {req}")
     if req.GET:
         if not req.user.is_authenticated:
             return HttpResponse("Pas connecte")
-    print("================")
 
     try:
         week = int(week)
