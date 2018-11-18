@@ -432,12 +432,15 @@ function fetch_cours() {
             go_regen(req.getResponseHeader('regen'));
             go_alarm_pref();
 
-            var day_arr = JSON.parse(req.getResponseHeader('jours').replace(/\'/g, '"'));
+            var all_days = JSON.parse(req.getResponseHeader('jours').replace(/\'/g, '"'));
+
+	    days = all_days.filter(function(d){
+		return time_settings.days.indexOf(d.ref) >= 0 ;})
+
+	    for(i=0 ; i<days.length ; i++) {
+		days.num = i ;
+	    }
 	    
-            for (var i = 0; i < day_arr.length; i++) {
-                data_grid_scale_day[i] = data_grid_scale_day_init[i] + " " + day_arr[i];
-            }
-            //console.log(data_grid_scale_day);
             if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
                 an_att == weeks.init_data[weeks.sel[0]].an) {
 

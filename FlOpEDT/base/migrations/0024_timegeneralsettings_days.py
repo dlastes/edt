@@ -7,7 +7,7 @@ def add_days_general_settings(apps, schema_editor):
     TimeGeneralSettings = apps.get_model('base', 'TimeGeneralSettings')
     Day = apps.get_model('base', 'Day')
     ts = TimeGeneralSettings.objects.all()[0]
-    ts.days = ['m', 'tu', 'w', 'th', 'f', 'sa', 'su']
+    ts.days = ['m', 'tu', 'w', 'th', 'f']
     ts.save()
 
 class Migration(migrations.Migration):

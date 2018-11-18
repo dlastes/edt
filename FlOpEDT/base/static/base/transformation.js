@@ -502,7 +502,7 @@ function gsckd_y(datum) {
 }
 
 function gsckd_txt(d) {
-    return d;
+    return d.name + " " + d.date;
 }
 
 function gsckh_x(datum) {

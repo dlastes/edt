@@ -49,7 +49,7 @@ from base.admin import CoursResource, DispoResource, VersionResource, \
 from base.forms import ContactForm
 from base.models import Course, UserPreference, ScheduledCourse, EdtVersion, \
     CourseModification, Slot, Day, Time, RoomGroup, PlanningModification, \
-    Regen, BreakingNews, RoomPreference, Department
+    Regen, BreakingNews, RoomPreference, Department, TimeGeneralSettings
 import base.queries as queries
 from base.weeks import *
 
@@ -130,19 +130,29 @@ def edt(req, an=None, semaine=None, splash_id=0, **kwargs):
         name_usr = ''
         rights_usr = 0
 
+    
+    ts = TimeGeneralSettings.objects.get(department=req.department)
+    time_settings = {'time':
+                     {'day_start_time': ts.day_start_time,
+                      'day_finish_time': ts.day_finish_time,
+                      'lunch_break_start_time': ts.lunch_break_start_time,
+                      'lunch_break_finish_time': ts.lunch_break_finish_time},
+                     'days': ts.days}
+    
     return TemplateResponse(req, 'base/show-edt.html',
-                  {
-                    'all_weeks': week_list(),
-                    'semaine': semaine,
-                    'an': an,
-                    'promo': promo,
-                    'une_salle': une_salle,
-                    'copie': copie,
-                    'gp': gp,
-                    'name_usr': name_usr,
-                    'rights_usr': rights_usr,
-                    'splash_id': splash_id
-                  })
+            {
+                'all_weeks': week_list(),
+                'semaine': semaine,
+                'an': an,
+                'promo': promo,
+                'une_salle': une_salle,
+                'copie': copie,
+                'gp': gp,
+                'name_usr': name_usr,
+                'rights_usr': rights_usr,
+                'splash_id': splash_id,
+                'time_settings': time_settings
+            })
 
 
 def edt_light(req, an=None, semaine=None, **kwargs):
@@ -314,7 +324,7 @@ def fetch_cours_pl(req, year, week, num_copy, **kwargs):
     response['version'] = version
     response['week'] = week
     response['year'] = year
-    response['jours'] = str(num_days(year, week))
+    response['jours'] = str(num_all_days(year, week))
     response['num_copy'] = num_copy
     
     try:

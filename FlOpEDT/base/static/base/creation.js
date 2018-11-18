@@ -469,17 +469,17 @@ function create_grid_data() {
 
 
 function create_dh_keys() {
-    bg
-        .selectAll(".gridsckd")
-        .data(data_grid_scale_day)
-        .enter()
-        .append("text")
-        .attr("class", "gridsckd")
-        .attr("x", gsckd_x)
-        .attr("y", gsckd_y)
-        .attr("font-size", 13)
-        .attr("font-weight", "bold")
-        .text(gsckd_txt);
+    // bg
+    //     .selectAll(".gridsckd")
+    //     .data(days)
+    //     .enter()
+    //     .append("text")
+    //     .attr("class", "gridsckd")
+    //     .attr("x", gsckd_x)
+    //     .attr("y", gsckd_y)
+    //     .attr("font-size", 13)
+    //     .attr("font-weight", "bold")
+    //     .text(gsckd_txt);
 
     bg
         .selectAll(".gridsckh")

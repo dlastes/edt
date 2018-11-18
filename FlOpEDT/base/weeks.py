@@ -70,10 +70,10 @@ def num_all_days(y, w):
     cur_day = monday_w2(y) + datetime.timedelta(7 * (w - 2))
     day_list = []
     for d in range(7):
-        day_list.append({num:d,
-                         date:f"{cur_day.day:02d}/{cur_day.month:02d}",
-                         ref:week_ref_days[d],
-                         name:week_display_days[d]})
+        day_list.append({'num':d,
+                         'date':f"{cur_day.day:02d}/{cur_day.month:02d}",
+                         'ref':week_ref_days[d],
+                         'name':week_display_days[d]})
         cur_day += datetime.timedelta(1)
     return day_list
 

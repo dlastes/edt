@@ -624,15 +624,25 @@ function go_grid(quick) {
 
 
 
-    bg
+    day_scale = bg
         .selectAll(".gridsckd")
-        .data(data_grid_scale_day)
-        .transition(t)
-        .text(gsckd_txt)
+        .data(days, function(d) {
+	    return d.date;});
+
+    day_scale
+	.enter()
+        .append("text")
+        .attr("class", "gridsckd")
         .attr("fill", "darkslateblue")
         .attr("font-size", 22)
+	.merge(day_scale)
+        .transition(t)
+        .text(gsckd_txt)
         .attr("x", gsckd_x)
         .attr("y", gsckd_y);
+
+    day_scale.exit().remove();
+    
     bg
         .selectAll(".gridsckh")
         .data(data_grid_scale_hour)

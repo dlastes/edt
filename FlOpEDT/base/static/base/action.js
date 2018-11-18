@@ -719,7 +719,7 @@ function compute_changes(changes, profs, gps) {
 		    msg += set_promos[cur_course.promo] + "A" ;
 		    
 		}
-		msg += " le " + data_grid_scale_day[cur_course.day]
+		msg += " le " + days[cur_course.day].date
 		    + " sur le créneau "
 		    + data_grid_scale_hour[cur_course.slot]
 		    + "."
