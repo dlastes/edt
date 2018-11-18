@@ -216,13 +216,30 @@ class TrainingHalfDay(models.Model):
 
 
 class Period(models.Model):
-    
     name = models.CharField(max_length=20)
     department =  models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
     starting_week = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)])
     ending_week = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)])
+
+
+class TimeGeneralSettings(models.Model):
+    department =  models.OneToOneField(Department, on_delete=models.CASCADE)
+    day_start_time = models.PositiveSmallIntegerField()
+    day_finish_time = models.PositiveSmallIntegerField()
+    lunch_break_start_time = models.PositiveSmallIntegerField()
+    lunch_break_finish_time = models.PositiveSmallIntegerField()
+
+    def __str__(self):
+        dsh, dsm = hr_min(self.day_start_time)
+        lsh, lsm = hr_min(self.lunch_break_start_time)
+        dfh, dfm = hr_min(self.day_finish_time)
+        lfh, lfm = hr_min(self.lunch_break_finish_time)
+        return f"Dept {self.department.abbrev}: " + \
+            f"{dsh}:{dsm:02d} - {lsh}:{lsm:02d}" + \
+            f" | {lfh}:{lfm:02d} - {dfh}:{dfm:02d}"
+    
 # </editor-fold>
 
 # <editor-fold desc="ROOMS">
