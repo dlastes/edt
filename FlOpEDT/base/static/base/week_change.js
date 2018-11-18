@@ -372,12 +372,13 @@ function adapt_labgp(first) {
     var new_gp_dim;
 
     if (nbRows > 0) {
-        new_gp_dim = expected_ext_grid_dim / (nb_vert_labgp_in_grid() + nbRows) ;
-        if (new_gp_dim > labgp.hm) {
-            labgp.height = new_gp_dim;
-        } else {
-            labgp.height = labgp.hm;
-        }
+	// including bottom garbage
+        scale = expected_ext_grid_dim / (nb_minutes_in_grid() + 60*nbRows) ;
+        // if (new_gp_dim > labgp.hm) {
+        //     labgp.height = new_gp_dim;
+        // } else {
+        //     labgp.height = labgp.hm;
+        // }
     } // sinon ?
     svg.height = svg_height() ;
     console.log(svg.height);
@@ -531,6 +532,9 @@ function translate_cours_pl_from_csv(d) {
     if (salles.pl.indexOf(d.room) == -1) {
         salles.pl.push(d.room);
     }
+    var nd = days.filter(function(dd) {
+	return dd.ref == d.day;
+    });
     var co = {
         id_cours: +d.id_cours,
         no_cours: +d.num_cours,
@@ -539,8 +543,10 @@ function translate_cours_pl_from_csv(d) {
         group: translate_gp_name(d.gpe_nom),
         promo: set_promos.indexOf(d.gpe_promo),
         mod: d.module,
-        day: +d.jour,
-        slot: +d.heure,
+	c_type: d.coursetype,
+        day: d.day,
+        nday: nd[0].num,
+        start: +d.start_time,
         room: d.room,
 	room_type: d.room_type,
 	color_bg: d.color_bg,
@@ -567,6 +573,7 @@ function translate_cours_pp_from_csv(d) {
         group: translate_gp_name(d.groupe),
         promo: set_promos.indexOf(d.promo),
         mod: d.module,
+	c_type: d.coursetype,
         day: garbage.day,
         slot: garbage.slot,
         room: une_salle,
@@ -600,52 +607,52 @@ function add_exception_course(cur_week, cur_year, targ_week, targ_year,
 
 
 // Pseudo fonction pour des possibles exceptions //
-/*
-"Passeport Avenir (Bénéficiaires d'une bourse)"
-"--- 13h30 ---"
-"Amphi 1"
-"exception"
-function add_exception(sem_att, an_att, sem_voulue, an_voulu, nom, l1, l2, l3){
-    if(sem_att==sem_voulue && an_att==an_voulu){
-	var gro = dg.append("g")
-	    .attr("class",nom);
+//
+// "Passeport Avenir (Bénéficiaires d'une bourse)"
+// "--- 13h30 ---"
+// "Amphi 1"
+// "exception"
+// function add_exception(sem_att, an_att, sem_voulue, an_voulu, nom, l1, l2, l3){
+//     if(sem_att==sem_voulue && an_att==an_voulu){
+// 	var gro = dg.append("g")
+// 	    .attr("class",nom);
 
-	var tlx = 3*(rootgp_width*labgp.width
-		     + dim_dispo.plot*(dim_dispo.width+dim_dispo.right))
-	    + groups[0]["P"].x*labgp.width ;
-	var tlx2 = tlx + .5*groups[0]["P"].width*labgp.width;
+// 	var tlx = 3*(rootgp_width*labgp.width
+// 		     + dim_dispo.plot*(dim_dispo.width+dim_dispo.right))
+// 	    + groups[0]["P"].x*labgp.width ;
+// 	var tlx2 = tlx + .5*groups[0]["P"].width*labgp.width;
 
-	var tly = (3*nbPromos + row_gp[0].y)*(labgp.height) ;
+// 	var tly = (3*nbPromos + row_gp[0].y)*(labgp.height) ;
 	
-	gro
-	    .append("rect")
-	    .attr("x", tlx  )
-	    .attr("y", tly )
-	    .attr("fill","red")
-	    .attr("width",groups[0]["P"].width*labgp.width)
-	    .attr("height",labgp.height);
+// 	gro
+// 	    .append("rect")
+// 	    .attr("x", tlx  )
+// 	    .attr("y", tly )
+// 	    .attr("fill","red")
+// 	    .attr("width",groups[0]["P"].width*labgp.width)
+// 	    .attr("height",labgp.height);
 
-	gro.append("text")
-	    .text(l1)
-	    .attr("font-weight","bold")
-	    .attr("x",tlx2 )
-	    .attr("y",tly + labgp.height/4);
-	gro.append("text")
-	    .text(l2)
-	    .attr("font-weight","bold")
-	    .attr("x",tlx2 )
-	    .attr("y",tly + 2*labgp.height/4);
-	gro.append("text")
-	    .text(l3)
-	    .attr("font-weight","bold")
-	    .attr("x",tlx2 )
-	    .attr("y",tly + 3*labgp.height/4);
+// 	gro.append("text")
+// 	    .text(l1)
+// 	    .attr("font-weight","bold")
+// 	    .attr("x",tlx2 )
+// 	    .attr("y",tly + labgp.height/4);
+// 	gro.append("text")
+// 	    .text(l2)
+// 	    .attr("font-weight","bold")
+// 	    .attr("x",tlx2 )
+// 	    .attr("y",tly + 2*labgp.height/4);
+// 	gro.append("text")
+// 	    .text(l3)
+// 	    .attr("font-weight","bold")
+// 	    .attr("x",tlx2 )
+// 	    .attr("y",tly + 3*labgp.height/4);
 	
-    } else {
-	d3.select("."+nom).remove();
-    }
-}
-*/
+//     } else {
+// 	d3.select("."+nom).remove();
+//     }
+// }
+
 
 function clean_prof_displayed() {
 

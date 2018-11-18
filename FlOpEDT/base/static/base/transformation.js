@@ -46,7 +46,8 @@
   ------------------------*/
 
 function bknews_top_y() {
-    return nbRows * labgp.height * bknews.hour_bound ;
+    var t = time_settings.time ;
+    return nbRows * scale * (t.lunch_break_start_time - t.day_start_time);
 }
 function bknews_bot_y() {
     return bknews_top_y() +  bknews_h() ;
@@ -56,7 +57,7 @@ function bknews_h() {
 	return 0;
     } else {
 	return bknews.nb_rows * bknews_row_height()
-	    + 2 * bknews.ratio_margin * labgp.height ;
+	    + 2 * bknews.time_margin * scale ;
     }
 }
 
@@ -65,8 +66,8 @@ function bknews_row_x(d){
 		       + dim_dispo.plot * (dim_dispo.width + dim_dispo.right))) ;
 }
 function bknews_row_y(d){
-    return bknews_top_y() + bknews.ratio_margin * labgp.height
-	+ d.y * bknews.ratio_height * labgp.height ;
+    return bknews_top_y() + bknews.time_margin * scale
+	+ d.y * bknews.time_height * scale ;
 }
 function bknews_row_fill(d){
     return d.fill_color ;
@@ -76,7 +77,7 @@ function bknews_row_width(d){
 		       + dim_dispo.plot * (dim_dispo.width + dim_dispo.right))) ;
 }
 function bknews_row_height(d){
-    return bknews.ratio_height * labgp.height ;
+    return bknews.time_height * scale ;
 }
 function bknews_row_txt(d){
     return d.txt ;
@@ -101,7 +102,8 @@ function bknews_link(d){
 
 function svg_height() {
     //    return margin.top + ack_reg_y() + 4*margin.bot ;
-    return margin.top + grid_height() + labgp.height * nbRows + margin.bot ;
+    return margin.top + grid_height() + margin.bot
+     + scale * 60 * nbRows;
 }
 
 function svg_width() {
@@ -528,19 +530,22 @@ function gsclb_y() {
 */
 
 function grid_height() {
-    return nbSl * labgp.height * nbRows + bknews_h();
+    return scale * nb_minutes_in_grid();
 }
 
-function nb_vert_labgp_in_grid() {
-    var tot_labgp =  bknews.nb_rows * bknews.ratio_height + nbRows * nbSl;
+function nb_minutes_in_grid() {
+    var t = time_settings.time ;
+    var minutes =  bknews.nb_rows * bknews.time_height
+	+ nbRows * (t.lunch_break_start_time - t.day_start_time
+		   + t.day_finish_time - t.lunch_break_finish_time) ;
     if (bknews.nb_rows != 0) {
-	tot_labgp += 2 * bknews.ratio_margin ;
+	minutes += 2 * bknews.time_margin ;
     }
-    return tot_labgp ;
+    return minutes ;
 }
 
-function labgp_from_grid_height(gh) {
-    return gh / nb_vert_labgp_in_grid() ;
+function scale_from_grid_height(gh) {
+    return gh / nb_minutes_in_grid() ;
 }
 
 
@@ -685,15 +690,17 @@ function butpr_class(p) {
   ------ COURS -------
   --------------------*/
 function cours_x(c) {
-    return c.day * (rootgp_width * labgp.width +
+    return c.nday * (rootgp_width * labgp.width +
             dim_dispo.plot * (dim_dispo.width + dim_dispo.right)) +
         groups[c.promo][c.group].x * labgp.width;
 }
 
 function cours_y(c) {
-    var ret = (c.slot * nbRows + row_gp[root_gp[c.promo].row].y) * (labgp.height);
-    if (c.slot >= bknews.hour_bound) {
-	ret += bknews_h() ;
+    var t = time_settings.time ;
+    var ret = (c.start-t.day_start_time) * nbRows * scale
+	+ row_gp[root_gp[c.promo].row].y * rev_constraints[c.start.toString()] * scale ;
+    if (c.start >= t.lunch_break_finish_time) {
+	ret += bknews_h() - (t.lunch_break_finish_time - t.lunch_break_start_time)*scale ;
     }
     return ret ;
 }
@@ -704,7 +711,7 @@ function cours_width(c) {
 }
 
 function cours_height(c) {
-    return labgp.height;
+    return scale * constraints[c.c_type].duration ;
 }
 
 function cours_txt_x(c) {
@@ -723,19 +730,19 @@ function cours_fill(c) {
     return "red";
 }
 function cours_txt_top_y(c) {
-    return cours_y(c) + .25 * labgp.height;
+    return cours_y(c) + .25 * cours_height(c);
 }
 function cours_txt_top_txt(c) {
     return c.mod;
 }
 function cours_txt_mid_y(c) {
-    return cours_y(c) + .5 * labgp.height;
+    return cours_y(c) + .5 * cours_height(c);
 }
 function cours_txt_mid_txt(c) {
     return c.prof;
 }
 function cours_txt_bot_y(c) {
-    return cours_y(c) + .75 * labgp.height;
+    return cours_y(c) + .75 * cours_height(c);
 }
 function cours_txt_bot_txt(c) {
     return c.room;
@@ -1007,7 +1014,7 @@ function st_but_back() {
   ---------------------*/
 
 function ack_reg_y() {
-    return grid_height()  + 1.5 *  labgp.height;
+    return grid_height()  + 30 * scale ;
 }
 
 /*---------------------

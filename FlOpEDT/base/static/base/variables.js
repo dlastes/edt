@@ -23,23 +23,24 @@
 
 /* INPUTS
 
-var user = {nom: string,
-	    dispos: [],
-	    dispos_bu: [],
-	    dispos_type: [],
-	   };
+// var user = {nom: string,
+// 	    dispos: [],
+// 	    dispos_bu: [],
+// 	    dispos_type: [],
+// 	   };
 
-var margin = {top: nb, left: nb, right: nb, bot: nb};
+// var margin = {top: nb, left: nb, right: nb, bot: nb};
 
-var svg = {height: nb, width: nb};
+// var svg = {height: nb, width: nb};
 
-var week = nb ;
-var year = nb;
+// var week = nb ;
+// var year = nb;
 
-var labgp = {height: nb, width: nb, tot: nb, height_init: nb, width_init: nb};
+// var labgp = {height: nb, width: nb, tot: nb, height_init: nb, width_init: nb};
 
-var dim_dispo = {height:2*labgp.height, width: 60, right: 10, plot:0,
-		 adv_v_margin: 5};
+// var dim_dispo = {height:2*labgp.height, width: 60, right: 10, plot:0,
+// 		 adv_v_margin: 5};
+
 */
            /*     \
           ----------           
@@ -224,8 +225,8 @@ var garbage = {
     // day: 3,
     // slot: nbSl,
     // cell: {
-        day: 3,
-        slot: nbSl,
+        day: 'th',
+        start: 1125,
         display: false,
         dispo: false,
         pop: false,
@@ -242,6 +243,8 @@ var garbage = {
 var bknews = {
     hour_bound:3, // flash info between hour #2 and hour #3
     ratio_height: .55,        // ratio over course height 
+    time_height: 60,
+    time_margin: 15,
     ratio_margin: .15, // ratio over course height 
     cont: [],
     nb_rows: 0,
@@ -431,6 +434,10 @@ var cours_bouge = {};
 
 // stores the constraints regarding course types
 var constraints ;
+var rev_constraints = {};
+
+// scale factor for vertical display: time*factor -> y 
+var scale = 1 ;
 
 /*----------------------
   ------- VALIDATE -----

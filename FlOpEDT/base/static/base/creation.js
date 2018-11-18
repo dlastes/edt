@@ -645,7 +645,7 @@ function def_drag_sca() {
                 if (drag.init + drag.y < 0) {
                     drag.y = -(drag.init);
                 }
-                labgp.height = labgp_from_grid_height(drag.init + drag.y) ;
+                scale = scale_from_grid_height(drag.init + drag.y) ;
 		//                drag.sel.select("path").attr("d", but_sca_tri_v(drag.y));
                 drag.sel.attr("transform", "translate(0,0)");
                 drag.sel.select("rect").attr("y", grid_height());
@@ -1010,7 +1010,7 @@ function update_all_groups() {
         if (pos_nbRows == 0) {
             pos_nbRows = nbRows;
         }
-        labgp.height *= pos_nbRows / nbRows;
+        scale *= pos_nbRows / nbRows;
         pos_nbRows = nbRows;
     }
 

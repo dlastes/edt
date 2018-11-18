@@ -71,7 +71,7 @@ var year = 2017;
 
 var labgp = {height: 40, width: 30, tot: 8, height_init: 40, width_init: 30, hm: 40, wm:15};
 
-dim_dispo.height = 2*labgp.height ;
+//dim_dispo.height = 2*labgp.height ;
 
 
 
@@ -150,6 +150,14 @@ function on_room_rcv(room_data) {
 
 function on_constraints_rcv(cst_data) {
     constraints = cst_data;
+    var i, j, keys ;
+    keys = Object.keys(constraints) ;
+    for(i=0 ; i<keys.length ; i++) {
+	for(j=0 ; j<constraints[keys[i]].allowed_st.length ; j++){
+	    rev_constraints[constraints[keys[i]].allowed_st[j].toString()]
+		= constraints[keys[i]].duration ;
+	}
+    }
 }
 
 
