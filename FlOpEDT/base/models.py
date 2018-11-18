@@ -24,18 +24,16 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-
-
-from django.core.validators import MinValueValidator, MaxValueValidator
-
-from django.db import models
+from colorfield.fields import ColorField
 
 from django.contrib.auth.models import AbstractUser
 from django.contrib.postgres.fields import ArrayField
+from django.core.validators import MinValueValidator, MaxValueValidator
+from django.db import models
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
-from colorfield.fields import ColorField
+from base.weeks import hr_min
 
 # <editor-fold desc="GROUPS">
 # ------------
