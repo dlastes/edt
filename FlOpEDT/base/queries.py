@@ -34,7 +34,7 @@ from base.models import Group, TrainingProgramme, \
 
 from base.models import Room, RoomType, RoomGroup, \
                         RoomSort, Period, CourseType, \
-                        BreakingNews, TutorCost
+                        BreakingNews, TutorCost, CourseStartTimeConstraint
 
 from people.models import Tutor
 from TTapp.models import TTConstraint
@@ -199,3 +199,20 @@ def get_rooms(department_abbrev):
 
     return {'roomtypes':dic_rt,
             'roomgroups':dic_rg}
+
+
+def get_coursetype_constraints(department_abbrev):
+    """
+    From the data stored in the database, fill the course type 
+    description file (duration and allowed start times), that will
+    be used by the website
+    :return:
+    """
+    dic = {}
+    for ct in CourseType.objects.filter(department__abbrev=department_abbrev):
+        dic[ct.name] = {'duration':ct.duration,
+                        'allowed_st':[]}
+        for ct_constraint in \
+              CourseStartTimeConstraint.objects.filter(course_type=ct):
+            dic[ct.name]['allowed_st'] += ct_constraint.allowed_start_times
+    return dic

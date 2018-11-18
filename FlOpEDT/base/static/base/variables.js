@@ -429,6 +429,9 @@ var drag = {
 // stores the courses that has been moved
 var cours_bouge = {};
 
+// stores the constraints regarding course types
+var constraints ;
+
 /*----------------------
   ------- VALIDATE -----
   ----------------------*/

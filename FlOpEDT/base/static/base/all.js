@@ -148,6 +148,9 @@ function on_room_rcv(room_data) {
     rooms = room_data;
 }
 
+function on_constraints_rcv(cst_data) {
+    constraints = cst_data;
+}
 
 
 
@@ -206,6 +209,8 @@ d3.json(groupes_fi,
 d3.json(rooms_fi,
  	on_room_rcv);
 
+d3.json(constraints_fi,
+ 	on_constraints_rcv);
 
     
 

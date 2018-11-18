@@ -638,10 +638,17 @@ def fetch_groups(req, **kwargs):
 #@cache_page(15 * 60)
 def fetch_rooms(req, **kwargs):
     """
-    Return groups tree for a given department
+    Return rooms for a given department
     """
     rooms = queries.get_rooms(req.department.abbrev)
     return JsonResponse(rooms, safe=False)    
+
+def fetch_constraints(req, **kwargs):
+    """
+    Return course type constraints for a given department
+    """
+    constraints = queries.get_coursetype_constraints(req.department.abbrev)
+    return JsonResponse(constraints, safe=False)    
 
 # </editor-fold desc="FETCHERS">
 

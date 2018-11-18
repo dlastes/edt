@@ -23,26 +23,20 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from django.contrib import admin
+from import_export import resources, fields
+from import_export.widgets import ForeignKeyWidget
 
+from django.contrib import admin
+import django.contrib.auth as auth
+
+from FlOpEDT.filters import DropdownFilterAll, DropdownFilterRel, \
+    DropdownFilterCho
+from people.models import Tutor, User
 from base.models import Day, RoomGroup, Module, Course, Group, Slot, \
     UserPreference, Time, ScheduledCourse, EdtVersion, CourseModification, \
     PlanningModification, BreakingNews, TrainingProgramme, ModuleDisplay, \
     Regen, Holiday, TrainingHalfDay, RoomPreference, RoomSort, \
-    CoursePreference, Dependency, RoomType
-
-from people.models import Tutor, User
-
-
-import django.contrib.auth as auth
-
-
-from import_export import resources, fields
-from import_export.widgets import ForeignKeyWidget
-
-from FlOpEDT.filters import DropdownFilterAll, DropdownFilterRel, \
-    DropdownFilterCho
-
+    CoursePreference, Dependency, RoomType, CourseType
 
 # from core.models import Book
 
@@ -84,6 +78,9 @@ class CoursPlaceResource(resources.ModelResource):
     module = fields.Field(column_name='module',
                           attribute='cours__module',
                           widget=ForeignKeyWidget(Module, 'abbrev'))
+    coursetype = fields.Field(column_name='coursetype',
+                          attribute='cours__type',
+                          widget=ForeignKeyWidget(CourseType, 'name'))
     # day = fields.Field(column_name='day',
     #                     attribute='day',
     #                     widget=ForeignKeyWidget(Day, 'no'))
@@ -106,8 +103,8 @@ class CoursPlaceResource(resources.ModelResource):
     class Meta:
         model = ScheduledCourse
         fields = ('id', 'no', 'groupe', 'promo', 'color_bg', 'color_txt',
-                  'module', 'day', 'start_time', 'semaine', 'room', 'prof',
-                  'room_type')
+                  'module', 'coursetype', 'day', 'start_time',
+                  'semaine', 'room', 'prof', 'room_type')
 
 
 class CoursResource(resources.ModelResource):
@@ -120,6 +117,11 @@ class CoursResource(resources.ModelResource):
     module = fields.Field(column_name='module',
                           attribute='module',
                           widget=ForeignKeyWidget(Module, 'abbrev'))
+    coursetype = fields.Field(column_name='coursetype',
+                          attribute='type',
+                          widget=ForeignKeyWidget(CourseType, 'name'))
+    duration = fields.Field(column_name='duration',
+                          attribute='cours__type__duration')
     groupe = fields.Field(column_name='groupe',
                           attribute='groupe',
                           widget=ForeignKeyWidget(Group, 'nom'))
@@ -136,7 +138,7 @@ class CoursResource(resources.ModelResource):
     class Meta:
         model = Course
         fields = ('id', 'no', 'tutor_name', 'groupe', 'promo', 'module',
-                  'color_bg', 'color_txt', 'prof', 'room_type')
+                  'coursetype', 'color_bg', 'color_txt', 'prof', 'room_type')
 
 
 class SemaineAnResource(resources.ModelResource):
