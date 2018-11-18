@@ -301,7 +301,7 @@ def fetch_cours_pl(req, year, week, num_copy, **kwargs):
                         week=week,
                         year=year,
                         num_copy=num_copy)
-            ))
+            )
         ok = num_copy != 0 \
              or (version == queries \
                                 .get_edt_version(
