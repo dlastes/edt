@@ -28,6 +28,8 @@ import datetime
 
 annee_courante = 2018
 
+week_ref_days = ['m', 'tu', 'w', 'th', 'f', 'sa', 'su']
+week_display_days = ['Lun.', 'Mar.', 'Mer.', 'Jeu.', 'Ven.', 'Sam.', 'Dim.']
 
 # monday of Week #2
 def monday_w2(y):
@@ -68,7 +70,10 @@ def num_all_days(y, w):
     cur_day = monday_w2(y) + datetime.timedelta(7 * (w - 2))
     day_list = []
     for d in range(7):
-        day_list.append("%02d/%02d" % (cur_day.day, cur_day.month))
+        day_list.append({num:d,
+                         date:f"{cur_day.day:02d}/{cur_day.month:02d}",
+                         ref:week_ref_days[d],
+                         name:week_display_days[d]})
         cur_day += datetime.timedelta(1)
     return day_list
 
