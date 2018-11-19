@@ -247,11 +247,20 @@ class Stabilize(TTConstraint):
                               on_delete=models.CASCADE)
     type = models.ForeignKey('base.CourseType', null=True, default=None, on_delete=models.CASCADE)
     work_copy = models.PositiveSmallIntegerField(default=0)
+    fixed_days = models.ManyToManyField('base.Day',
+                                        related_name='days_to_fix',
+                                        blank=True)
 
     def enrich_model(self, ttmodel, ponderation=1):
+        sched_courses = ttmodel.wdb.sched_courses.filter(copie_travail=self.work_copy)
+        for day in self.fixed_days.all():
+            for sc in sched_courses.filter(creneau__jour=day):
+                ttmodel.add_constraint(ttmodel.TT[(sc.creneau, sc.cours)], '==', 1)
+            for sc in sched_courses.exclude(creneau__jour=day):
+                for sl in ttmodel.wdb.slots.filter(jour=day):
+                    ttmodel.add_constraint(ttmodel.TT[(sl, sc.cours)], '==', 0)
+
         if self.general:
-            sched_courses = ttmodel.wdb.sched_courses \
-                .filter(copie_travail=self.work_copy)
             # nb_changements_I=dict(zip(ttmodel.wdb.instructors,[0 for i in ttmodel.wdb.instructors]))
             for sl in ttmodel.wdb.slots:
                 for c in ttmodel.wdb.courses:
