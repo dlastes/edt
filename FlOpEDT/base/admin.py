@@ -184,6 +184,11 @@ class BreakingNewsResource(resources.ModelResource):
         model = BreakingNews
         fields = ("id", "x_beg", "x_end", "y", "txt", "fill_color", "strk_color", "is_linked")
 
+class VersionResource(resources.ModelResource):
+    class Meta:
+        model = EdtVersion;
+        fields = ("an", "semaine", "version")
+
 
 
 # </editor-fold desc="RESOURCES">
