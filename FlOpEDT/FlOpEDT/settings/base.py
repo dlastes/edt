@@ -47,7 +47,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(
 
 INSTALLED_APPS = [
     'channels',
-    'django.contrib.admin',
+    'apps.FlOpEDTAdminConfig',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
