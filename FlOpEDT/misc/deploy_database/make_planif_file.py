@@ -96,7 +96,8 @@ def make_planif_file(department, empty_bookname=empty_bookname):
                 sheet.cell(row=rank, column=2).value = ct.name
                 sheet.cell(row=rank, column=3).value = 'Prof'
                 sheet.cell(row=rank, column=4).value = 'Salle'
-                sheet.cell(row=rank, column=5).value = 'Groupes'
+                sheet.cell(row=rank, column=5).value = 'Durée'
+                sheet.cell(row=rank, column=6).value = 'Groupes'
 
                 if Group.objects.filter(type__in=ct.group_types.all(), train_prog=mod.train_prog).count() > 0:
                     for g in Group.objects.filter(type__in=ct.group_types.all(), train_prog=mod.train_prog):
@@ -104,7 +105,7 @@ def make_planif_file(department, empty_bookname=empty_bookname):
                         append_row(sheet, empty_rows, 3, rank, cols)
                         sheet.cell(row=rank, column=1).value = mod.abbrev
                         sheet.cell(row=rank, column=2).value = ct.name
-                        sheet.cell(row=rank, column=5).value = g.nom
+                        sheet.cell(row=rank, column=6).value = g.nom
                 else:
                     rank += 1
                     append_row(sheet, empty_rows, 3, rank, cols)
