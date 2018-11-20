@@ -450,20 +450,25 @@ function create_grid_data() {
     }
 
 
-    for (var s = 0; s < nbSl; s++) {
-        for (var r = 0; r < set_rows.length; r++) {
-            var gscp = {
-                row: r,
-                slot: s,
-                name: set_promos_txt[row_gp[r].promos[0]]
-            };
-            for (var p = 1; p < row_gp[r].promos.length; p++) {
-                gscp.name += "|";
-                gscp.name += set_promos_txt[row_gp[r].promos[p]];
+    if (init_nbRows != 1) {
+	for (var s = 0; s < Object.keys(rev_constraints).length ; s++) {
+            for (var r = 0; r < set_rows.length; r++) {
+		var start = Object.keys(rev_constraints)[s] ;
+		var gscp = {
+                    row: r,
+                    start: start,
+		    duration: rev_constraints[start],
+                    name: set_promos_txt[row_gp[r].promos[0]]
+		};
+		for (var p = 1; p < row_gp[r].promos.length; p++) {
+                    gscp.name += "|";
+                    gscp.name += set_promos_txt[row_gp[r].promos[p]];
+		}
+		data_grid_scale_row.push(gscp);
             }
-            data_grid_scale_row.push(gscp);
-        }
+	}
     }
+    
     create_dh_keys();
 }
 

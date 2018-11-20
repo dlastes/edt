@@ -590,7 +590,7 @@ function go_grid(quick) {
                 return row_gp[d.row].display;
             }),
             function(d) {
-                return d.row + "," + d.slot;
+                return d.row + "," + d.start;
             });
 
     grid

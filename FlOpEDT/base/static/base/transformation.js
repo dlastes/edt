@@ -480,13 +480,14 @@ function gscp_x(datum) {
     return -.7 * labgp.width_init;
 }
 
-function gscp_y(datum) {
-    var ret = (datum.slot * nbRows + row_gp[datum.row].y) * (labgp.height) + .5 * labgp.height;
-    if (datum.slot >= bknews.hour_bound) {
-	ret += bknews_h() ;
+function gscp_y(d) {
+    var t = time_settings.time ;
+    var ret = (d.start-t.day_start_time) * nbRows * scale
+	+ row_gp[d.row].y * rev_constraints[d.start.toString()] * scale ;
+    if (d.start >= t.lunch_break_finish_time) {
+	ret += bknews_h() - (t.lunch_break_finish_time - t.lunch_break_start_time)*nbRows*scale ;
     }
-    return ret ;
-
+    return ret + .5*d.duration*scale;
 }
 
 function gscp_txt(d) {
