@@ -700,7 +700,7 @@ function cours_y(c) {
     var ret = (c.start-t.day_start_time) * nbRows * scale
 	+ row_gp[root_gp[c.promo].row].y * rev_constraints[c.start.toString()] * scale ;
     if (c.start >= t.lunch_break_finish_time) {
-	ret += bknews_h() - (t.lunch_break_finish_time - t.lunch_break_start_time)*scale ;
+	ret += bknews_h() - (t.lunch_break_finish_time - t.lunch_break_start_time)*nbRows*scale ;
     }
     return ret ;
 }
