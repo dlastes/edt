@@ -432,19 +432,19 @@ function remove_garbage(){
 
 
 function create_grid_data() {
-    for (var j = 0; j < nbPer; j++) {
-        for (var s = 0; s < nbSl; s++) {
-            var gs = {
-                day: j,
-                slot: s,
-                display: false,
-                dispo: false,
-                pop: false,
-                reason: ""
-            };
-            data_slot_grid.push(gs);
-        }
-    }
+    // for (var j = 0; j < nbPer; j++) {
+    //     for (var s = 0; s < nbSl; s++) {
+    //         var gs = {
+    //             day: j,
+    //             slot: s,
+    //             display: false,
+    //             dispo: false,
+    //             pop: false,
+    //             reason: ""
+    //         };
+    //         data_slot_grid.push(gs);
+    //     }
+    // }
 
     for (var p = 0; p < set_promos.length; p++) {
         compute_promo_leaves(root_gp[p].gp);
