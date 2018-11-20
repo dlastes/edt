@@ -439,7 +439,7 @@ function fetch_cours() {
 		return time_settings.days.indexOf(d.ref) >= 0 ;})
 
 	    for(i=0 ; i<days.length ; i++) {
-		days.num = i ;
+		days[i].num = i ;
 	    }
 	    
             if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
