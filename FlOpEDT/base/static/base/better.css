@@ -22,11 +22,6 @@
 /* without disclosing the source code of your own applications.             */
 
 /* ************ grille EdT ************ */
-.gridm {
-  stroke: powderblue;
-  stroke-width: .5;
-  fill: aliceblue;
-}
 .rbg {
   stroke: none;
   fill: white;

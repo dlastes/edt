@@ -495,33 +495,8 @@ function go_grid(quick) {
         t = d3.transition();
     }
 
-    var grid = bg.selectAll(".gridm")
-        .data(data_mini_slot_grid
-            .filter(function(d) {
-                return d.gp.display;
-            }),
-            function(d) {
-                return d.gp.promo + "," + d.gp.nom + "," + d.day + "," + d.slot;
-            });
 
-    grid
-        .enter()
-        .append("rect")
-        .attr("class", "gridm")
-        .attr("x", gm_x)
-        .attr("y", gm_y)
-        .attr("width", 0)
-        .merge(grid)
-        .transition(t)
-        .attr("x", gm_x)
-        .attr("y", gm_y)
-        .attr("width", labgp.width)
-        .attr("height", labgp.height);
 
-    grid.exit()
-        .transition(t)
-        .attr("width", 0)
-        .remove();
     bg
 	.select("rbg")
 	.attr("x",0)

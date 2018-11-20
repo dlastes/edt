@@ -1032,15 +1032,6 @@ function compute_promo_leaves(node) {
                 day: j,
                 gp: node
             });
-            for (var s = 0; s < nbSl; s++) {
-                if (!is_free(j, s, node.promo)) {
-                    data_mini_slot_grid.push({
-                        day: j,
-                        slot: s,
-                        gp: node
-                    });
-                }
-            }
         }
     }
 
