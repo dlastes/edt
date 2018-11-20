@@ -414,7 +414,25 @@ function create_edt_grid() {
 
 
 function add_garbage(){
-    data_slot_grid.push(garbage);
+
+    var nd = days.filter(function(dd) {
+	return dd.num == garbage.iday;
+    });
+
+    
+    garbage.day = nd[0].ref ;
+
+    var garbage_dsg = {
+	iday: garbage.iday,
+	start: garbage.start,
+	duration: rev_constraints[garbage.start],
+	display: false,
+	dispo: false,
+	pop: false,
+	reason: ""
+    };
+
+    data_slot_grid.push(garbage_dsg);
 }
 function remove_garbage(){
     var found = false ;
@@ -435,16 +453,18 @@ function create_grid_data() {
 	for(var d = 0 ; d<7 ; d++) {
 	    for (var s = 0; s < Object.keys(rev_constraints).length ; s++) {
 		var start = Object.keys(rev_constraints)[s] ;
-		var gs = {
-                    iday: d,
-                    start: start,
-		    duration: rev_constraints[start],
-                    display: false,
-                    dispo: false,
-                    pop: false,
-                    reason: ""
-		};
-		data_slot_grid.push(gs);
+		if (start < time_settings.time.day_finish_time){
+		    var gs = {
+			iday: d,
+			start: start,
+			duration: rev_constraints[start],
+			display: false,
+			dispo: false,
+			pop: false,
+			reason: ""
+		    };
+		    data_slot_grid.push(gs);
+		}
             }
 	}
     }
@@ -458,17 +478,19 @@ function create_grid_data() {
 	for (var s = 0; s < Object.keys(rev_constraints).length ; s++) {
             for (var r = 0; r < set_rows.length; r++) {
 		var start = Object.keys(rev_constraints)[s] ;
-		var gscp = {
-                    row: r,
-                    start: start,
-		    duration: rev_constraints[start],
-                    name: set_promos_txt[row_gp[r].promos[0]]
-		};
-		for (var p = 1; p < row_gp[r].promos.length; p++) {
-                    gscp.name += "|";
-                    gscp.name += set_promos_txt[row_gp[r].promos[p]];
+		if (start < time_settings.time.day_finish_time) {
+		    var gscp = {
+			row: r,
+			start: start,
+			duration: rev_constraints[start],
+			name: set_promos_txt[row_gp[r].promos[0]]
+		    } ;
+		    for (var p = 1; p < row_gp[r].promos.length; p++) {
+			gscp.name += "|";
+			gscp.name += set_promos_txt[row_gp[r].promos[p]];
+		    }
+		    data_grid_scale_row.push(gscp);
 		}
-		data_grid_scale_row.push(gscp);
             }
 	}
     }

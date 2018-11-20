@@ -222,16 +222,8 @@ var days = [];
 
 // Garbage parameters
 var garbage = {
-    // day: 3,
-    // slot: nbSl,
-    // cell: {
-    day: 'th',
     start: 1125,
-    display: false,
-    dispo: false,
-    pop: false,
-    reason: ""
-//    }
+    duration: 90,
 };
 
 

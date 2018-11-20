@@ -373,7 +373,7 @@ function adapt_labgp(first) {
 
     if (nbRows > 0) {
 	// including bottom garbage
-        scale = expected_ext_grid_dim / (nb_minutes_in_grid() + 60*nbRows) ;
+        scale = expected_ext_grid_dim / (nb_minutes_in_grid() + garbage.duration*nbRows) ;
         // if (new_gp_dim > labgp.hm) {
         //     labgp.height = new_gp_dim;
         // } else {
@@ -436,11 +436,14 @@ function fetch_cours() {
             var all_days = JSON.parse(req.getResponseHeader('jours').replace(/\'/g, '"'));
 
 	    days = all_days.filter(function(d){
-		return time_settings.days.indexOf(d.ref) >= 0 ;})
+		return time_settings.days.indexOf(d.ref) >= 0 ;
+	    })
 
 	    for(i=0 ; i<days.length ; i++) {
 		days[i].num = i ;
 	    }
+	    
+	    garbage.iday = days.length-2 ;
 	    
             if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
                 an_att == weeks.init_data[weeks.sel[0]].an) {
@@ -575,6 +578,7 @@ function translate_cours_pp_from_csv(d) {
         mod: d.module,
 	c_type: d.coursetype,
         day: garbage.day,
+        nday: garbage.iday,
         start: garbage.start,
         room: une_salle,
 	room_type: d.room_type,

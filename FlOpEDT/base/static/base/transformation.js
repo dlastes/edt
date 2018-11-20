@@ -103,7 +103,7 @@ function bknews_link(d){
 function svg_height() {
     //    return margin.top + ack_reg_y() + 4*margin.bot ;
     return margin.top + grid_height() + margin.bot
-     + scale * 60 * nbRows;
+     + scale * garbage.duration * nbRows;
 }
 
 function svg_width() {
@@ -579,7 +579,7 @@ function nb_minutes_in_grid() {
 }
 
 function scale_from_grid_height(gh) {
-    return gh / nb_minutes_in_grid() ;
+    return gh / nb_minutes_in_grid()  ;
 }
 
 

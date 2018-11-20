@@ -158,6 +158,7 @@ function on_constraints_rcv(cst_data) {
 		= constraints[keys[i]].duration ;
 	}
     }
+    rev_constraints[garbage.start.toString()] = garbage.duration ;
 }
 
 
