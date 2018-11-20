@@ -25,35 +25,26 @@ var socket;
 
 var opti_timestamp;
 
-var txt_area = document.getElementsByTagName("textarea")[0];
-
 var select_opti_date, select_opti_train_prog;
-var week_year_sel, train_prog_sel;
+var week_year_sel, train_prog_sel, txt_area;
 
-init_dropdowns();
-init_constraints(constraints);
+var launchButton;
+var started = false;
 
-/*
-function extract_week_year(){
-    return {
-	start:{week: +document.forms['week_form'].elements['start_week'].value,
-	       year: +document.forms['week_form'].elements['start_year'].value},
-	end :{week: +document.forms['week_form'].elements['end_week'].value,
-	      year: +document.forms['week_form'].elements['end_year'].value},
-    }
-}
-*/
+
 function start() {
 	console.log("GOOO");
-	//var dates = extract_week_year();
 	open_connection();
 }
 
 function stop() {
 	console.log("STOOOOP");
+
 	socket = new WebSocket("ws://" + window.location.host + "/solver/");
 	socket.onmessage = function (e) {
 		var dat = JSON.parse(e.data);
+		dispatchAction(dat);
+
 		var s = dat['message'];
 		while (s.length > 0 && s.slice(-1) == '\n') {
 			s = s.substring(0, s.length - 1);
@@ -77,7 +68,6 @@ function stop() {
 	if (socket.readyState == WebSocket.OPEN) socket.onopen();
 }
 
-
 function format_zero(x) {
 	if (x < 10) {
 		return "0" + x;
@@ -97,8 +87,8 @@ function open_connection() {
 	socket = new WebSocket("ws://" + window.location.host + "/solver/");
 	//			  + opti_timestamp);
 	socket.onmessage = function (e) {
-		//	console.log(e);
 		var dat = JSON.parse(e.data);
+		dispatchAction(dat);
 		var s = dat['message'];
 		while (s.length > 0 && s.slice(-1) == '\n') {
 			s = s.substring(0, s.length - 1);
@@ -117,6 +107,10 @@ function open_connection() {
 		// Update constraints activation state
 		update_constraints_state();
 
+		// Get solver parameters
+		solver = solver_select.value;
+		time_limit = parseInt(time_limit_select.value);
+
 		socket.send(JSON.stringify({
 			'message':
 				"C'est ti-par.\n" + opti_timestamp + "\nSolver ok?",
@@ -126,7 +120,9 @@ function open_connection() {
 			'year': week_year_sel.year,
 			'train_prog': tp,
 			'constraints': constraints,
-			'timestamp': opti_timestamp
+			'timestamp': opti_timestamp,
+			'time_limit': time_limit,
+			'solver': solver
 		}))
 	}
 
@@ -144,7 +140,7 @@ function open_connection() {
 function init_dropdowns() {
 	// create drop down for week selection
 	select_opti_date = d3.select("#opti_date");
-	select_opti_date.on("change", function () { choose_week(true); fetch_constraints();});
+	select_opti_date.on("change", function () { choose_week(true); fetch_constraints(); });
 	select_opti_date
 		.selectAll("option")
 		.data(week_year_list)
@@ -155,7 +151,7 @@ function init_dropdowns() {
 	// create drop down for training programme selection
 	train_prog_list.unshift(text_all);
 	select_opti_train_prog = d3.select("#opti_train_prog");
-	select_opti_train_prog.on("change", function () { choose_train_prog(true); fetch_constraints();});
+	select_opti_train_prog.on("change", function () { choose_train_prog(true); fetch_constraints(); });
 	select_opti_train_prog
 		.selectAll("option")
 		.data(train_prog_list)
@@ -200,8 +196,9 @@ function init_constraints(constraints) {
 
 		// On clone la ligne et on l'insère dans le tableau
 		var container = document.querySelector("#constraints");
-		var current = container.firstChild;
+		var current = container.querySelector("#constraints_list");
 		var target = document.createElement("div");
+		target.id = "constraints_list";
 		container.replaceChild(target, current);
 
 		// Create new template for each constraint
@@ -219,22 +216,36 @@ function init_constraints(constraints) {
 			// Display title
 			var label = clone.querySelector("label");
 			label.setAttribute('for', constraintId)
+			label.className = "title"
 			label.textContent = constraint.name;
+
+			// Display mandatory
+			if (constraint.details.weight) {
+				label.classList.add("mandatory");
+			}
 
 			// Display description
 			var description = clone.querySelector("#description");
-			description.textContent = constraint.description;
+			if (constraint.description) {
+				description.textContent = constraint.description;
+			}
+
+			// Display explanation
+			var explanation = clone.querySelector("#explanation");
+			if (constraint.explanation) {
+				explanation.textContent = constraint.explanation;
+			}
 
 			// Display comment
-			if(constraint.comment){
+			if (constraint.comment) {
 				var comment = clone.querySelector("#comment");
-				comment.textContent = constraint.comment;			
+				comment.textContent = constraint.comment;
 			}
 
 			// Display details items
 			var details = clone.querySelector("#details")
 
-			for(var key in constraint.details){
+			for (var key in constraint.details) {
 				var detail = document.createElement("div")
 				details.appendChild(detail)
 
@@ -256,9 +267,9 @@ function init_constraints(constraints) {
 	Get constraints list with updated state propepety
 */
 
-function update_constraints_state(){
+function update_constraints_state() {
 	var checkboxes = document.querySelectorAll("#constraints input[type=checkbox]");
-	checkboxes.forEach(c =>{
+	checkboxes.forEach(c => {
 		constraints[c.value].is_active = c.checked;
 	});
 }
@@ -288,7 +299,7 @@ function fetch_constraints() {
 		success: function (filtered_constraints) {
 			constraints = filtered_constraints;
 			init_constraints(constraints);
-		 },
+		},
 		error: function (msg) {
 			console.log("error");
 		},
@@ -297,3 +308,68 @@ function fetch_constraints() {
 		}
 	});
 }
+
+
+/*
+	Start or stop edt resolution
+*/
+function manageSolverProcess(event) {
+	if (started) {
+		changeState('stop');
+	}
+	else {
+		changeState('start');
+	}
+}
+/* 
+Update interface state
+*/
+function changeState(targetState) {
+	switch (targetState) {
+		case 'start':
+			launchButton.value = 'Stop';
+			started = true;
+			start();
+			break;
+		case 'stop':
+			launchButton.value = 'Go';
+			started = false;
+			stop();
+		case 'stopped':
+			launchButton.value = 'Go';
+			started = false;
+		default:
+			break;
+	}
+}
+
+/*
+	Dispatch websocket received action 
+*/
+function dispatchAction(token) {
+	let action = token.action;
+	let message = token.message;
+
+	if (!action) {
+		console.log('unrecognized action' + action);
+		return;
+	}
+
+	if (action != 'info')
+		changeState('stopped');
+}
+
+/*
+	Main process
+*/
+
+solver_select = document.querySelector("#solver")
+time_limit_select = document.querySelector("#limit")
+txt_area = document.getElementsByTagName("textarea")[0];
+
+launchButton = document.querySelector("#launch")
+if (launchButton)
+	launchButton.addEventListener("click", manageSolverProcess);
+
+init_dropdowns();
+init_constraints(constraints);

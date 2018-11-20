@@ -900,7 +900,11 @@ class TTModel(object):
 
 
     def optimize(self, time_limit, solver, presolve=2):
-        if solver == 'gurobi':
+
+        # The solver value shall one of the available 
+        # solver corresponding pulp command
+
+        if 'gurobi' in solver.lower():
             # ignore SIGINT while solver is running
             # => SIGINT is still delivered to the solver, which is what we want
             # signal.signal(signal.SIGINT, signal.SIG_IGN)
@@ -910,13 +914,15 @@ class TTModel(object):
                                                  ("Presolve", presolve),
                                                  ("MIPGapAbs", 0.2)]))
         else:
+            # TODO Use the solver parameter to get
+            # the target class by reflection
             self.model.solve(PULP_CBC_CMD(keepFiles=1,
                                           msg=True,
                                           presolve=presolve,
                                           maxSeconds=time_limit))
         status = self.model.status
         print(LpStatus[status])
-        if status == LpStatusOptimal or (solver != 'gurobi' and status == LpStatusNotSolved):
+        if status == LpStatusOptimal or (not (solver.lower() == 'gurobi') and status == LpStatusNotSolved):
             return self.get_obj_coeffs()
 
         else:

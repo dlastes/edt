@@ -33,6 +33,61 @@
 <link rel="stylesheet" href="{% static "base/better.css" %}"/>
 <style type="text/css">
 
+
+  .solver{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    height: 100%;
+    width: 100%;
+  }
+
+  .solver > * {
+    border: 1pt black solid;
+    padding: 10px;
+    flex-basis: 15%;
+    margin: 10px;
+  }
+
+  .solver > * div.header {
+    display: flex;
+    background-color: #7a7a7a;
+    padding: 0.6em;
+    color: white;
+    margin-bottom: 1em;
+    height: 20px; 
+    vertical-align: baseline;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .resolve{
+    border: #bfb;
+    border-radius: 4px;
+    background: #7a7a7a;
+    height: 16px;
+  }
+
+  .settings{
+    flex-grow: 1;
+  }
+
+  .console{
+    flex-grow: 3; 
+    background-color: black; 
+    color: white;
+  }
+  
+  /*
+    Constraints
+  */
+
+  #constraints{
+    flex-grow: 2;
+    padding: 1em;
+  }
+
+
   /*
     Checkbox
   */
@@ -84,34 +139,50 @@
     border-color: #bfb;
   }
 
-  /*
-    Constraints
-  */
-
-  #constraints{
-    padding: 1em;
-  }
-
   .constraint{
     margin-bottom: 10px;
-    border: #f0e6e6 1pt solid;
+    border: #d3d3d3 2pt solid;
+    padding: 5px;
+    background-color: #ededed;
+    border-radius: 4px;
+  }
+
+  .constraint > div{
+    padding: 0.8em;
   }
 
   .title{
     font-size: 15px;
-    font-weight: 500;
   }
 
+  .title:hover ~ .hiddable {
+    display: block;
+  }
+
+  #description{
+    padding: 0 0.8em 0.4em 2.5em
+  }
+
+ 
   .details{
-    padding: 1em;
-  }
-
-  .description{
     padding: 1em;
   }
 
   .comment{
     font-style: italic;
+    font-size: 1em;
+  }
+
+  .mandatory{
+    font-weight: 600;
+  }
+
+  .hidden, .hiddable{
+    display: none;
+  }
+
+  .show{
+    display: block;
   }
 
 </style>
@@ -130,32 +201,51 @@
       <input type="checkbox" />
       <label class="title"></label>
       <div id="description" class="description"></div>
-      <div id="comment" class="comment"></div>
-      <div id="details" class="details"></div>
+      <div id="explanation" class="explanation"></div>
+      <div id="comment" class="comment hiddable"></div>
+      <div id="details" class="details hiddable"></div>
     </div>
   </template>
-  <form style="white-space: nowrap;" name="week_form">
-    <fieldset style="width: 300px; float: left;">
-      <legend>Optimisation</legend>
-      <!--
-      De la semaine
-      <input type="number" name="start_week" style="width: 40px" value="{{ start_date.semaine }}" min="1" max="53">, année
-      <input type="number" name="start_year" style="width: 60px" value="{{ start_date.an }}" min="{{current_year}}" max="{{current_year|add:"1"}}"></br>
-      à la semaine
-      <input type="number" name="end_week" style="width: 40px" value="{{ end_date.semaine }}" min="1" max="53">, année
-      <input type="number" name="end_year" style="width: 60px" value="{{ end_date.an }}" min="{{current_year}}" max="{{current_year|add:"1"}}"></br></br>
-      -->
-      <p>Semaine : <select id="opti_date"></select></p>
-      <p>Promotion : <select id="opti_train_prog"></select></p>
-      <input type="button" name="action" value="Go !" onClick="start()"/><input style="float: right;" type="button" name="action" value="Stop !" onClick="stop()"/>
-    
-      <div id="constraints"><div></div></div>
-    
-    </fieldset>
-  </form>
-  <textarea style="float: left; height: 200px; width: 500px; background-color: black; color: white; "></textarea>
-    
-  <br style="clear: both" />
+
+  <div class="solver">
+    <div id="constraints">
+        <div class="header"><span>Contraintes</span></div>
+        <div style="margin: 15px 2px;">(*) Les contraintes apparaissant en gras - avec un poids non défini - seront prises en compte de manière obligatoire, les autres seront utilisées dans la résolution comme des préférences.</div>
+        <div id="constraints_list"></div>
+    </div>   
+    <div id="settings" class="settings">
+      <div class="header">
+        <span>Configuration</span>
+        <input type="button" id="launch" name="action" value="Go"/>
+      </div>
+      <div>Semaine : <select id="opti_date"></select></div>
+      <div>Promotion : <select id="opti_train_prog"></select></div>
+      <div>
+        {% if solvers|length > 1 %}  
+          <label for="solver">Solveur :</label>
+          <select id="solver">
+            {% for key, name in solvers %}
+              <option value="{{ key }}">{{ name }}</option>
+            {% endfor %}
+          </select>
+        {% else  %}
+          <input type="hidden" id="solver" value="{{ solvers.0.0 }}"/>
+        {% endif %}
+      </div>
+      <div>
+        <label for="limit">Durée de résolution maximale (minutes):</label>
+        <select id="limit">
+          <option value="300" selected>5</option>
+          <option value="600">10</option>
+          <option value="1800">30</option>
+          <option value="3600">60</option>
+          <option value="0">Illimité</option>
+        </select>
+      </div>
+    </div>
+    <textarea class="console"></textarea>
+  </div>
+
   
   <script type='text/javascript' src="{% static "solve_board/solve.js" %}"></script>
   

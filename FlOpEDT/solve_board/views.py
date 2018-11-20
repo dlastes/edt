@@ -49,10 +49,44 @@ import sys
 import json
 
 from django.template.response import TemplateResponse
+from django.conf import settings
 
+import pulp.solvers as pulp_solvers
 
 # String used to specify all filter
 text_all='Toute'
+
+def get_pulp_solvers(available=True):
+    def recurse_solver_hierachy(solvers):
+        for s in solvers:
+            if available:
+                if s().available():
+                    yield s
+            else:
+                yield s
+
+            yield from recurse_solver_hierachy(s.__subclasses__())
+    
+    solvers = pulp_solvers.LpSolver_CMD.__subclasses__()
+    return tuple(recurse_solver_hierachy(solvers))
+
+
+def get_pulp_solvers_viewmodel():   
+
+    # Build a dictionnary of supported solver 
+    # classnames and readable names
+
+    # Get available solvers only on production environment
+    solvers = get_pulp_solvers(not settings.DEBUG)
+    
+    # Get readable solver name from solver class name
+    viewmodel = []
+    for s in solvers:
+        key = s.__name__
+        name = key.replace('PULP_', '').replace('_CMD', '')
+        viewmodel.append((key, name))
+
+    return viewmodel
 
 def get_constraints_viewmodel(department, **kwargs):
     #
@@ -87,6 +121,7 @@ def main_board(req, **kwargs):
     # Get the first week matching constraints
     params = {'week':week_list[0]['semaine'] , 'year':week_list[0]['an']}
     constraints_view_model = get_constraints_viewmodel(department, **params)
+    solvers_viewmodel = get_pulp_solvers_viewmodel()
 
     for tp in TrainingProgramme.objects.filter(department=department):
         all_tps.append(tp.abbrev)
@@ -101,5 +136,6 @@ def main_board(req, **kwargs):
                    'current_year': weeks.annee_courante,
                    'all_train_progs': json.dumps(all_tps),
                    'constraints': json.dumps(constraints_view_model),
+                   'solvers': solvers_viewmodel,
                    })
 

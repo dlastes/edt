@@ -29,6 +29,8 @@
 # from tasks import run
 
 import json
+import logging
+
 from threading import Thread
 from django.core.exceptions import ObjectDoesNotExist
 from MyFlOp.MyTTModel import MyTTModel
@@ -51,6 +53,8 @@ import json, sys
 
 _solver_child_process = 0
 
+logger = logging.getLogger(__name__)
+
 class SolverConsumer(WebsocketConsumer):
 
     def get_constraint_class(self, str):
@@ -68,11 +72,8 @@ class SolverConsumer(WebsocketConsumer):
 
     def receive(self, text_data):
         data = json.loads(text_data)
-        message = data['message']
+        logger.debug(f" WebSocket receive data : {data}")
 
-        # self.send(text_data=json.dumps({
-        #     'message': message
-        # }))
         if data['action'] == 'go':
 
             # Save constraints state
@@ -88,24 +89,31 @@ class SolverConsumer(WebsocketConsumer):
                     print(f"error while importing {constraint['model']} model")    
 
             # Start solver
+            time_limit = data['time_limit'] or None
+
             Solve(
                 data['department'],
                 data['week'],
                 data['year'],
                 data['timestamp'],
                 data['train_prog'],
-                self).start()
+                self,
+                time_limit,
+                data['solver']
+                ).start()
 
         elif data['action'] == 'stop':
             solver_child_process = cache.get("solver_child_process")
             if solver_child_process:
                 self.send(text_data=json.dumps({
-                    'message': 'sending SIGINT to solver (PID:'+str(solver_child_process)+')...'
+                    'message': 'sending SIGINT to solver (PID:'+str(solver_child_process)+')...',
+                    'action': 'aborted'
                 }))
                 os.kill(solver_child_process, signal.SIGINT)
             else:
                 self.send(text_data=json.dumps({
-                    'message': 'there is no running solver!'
+                    'message': 'there is no running solver!',
+                    'action': 'aborted'
                 }))
 
         # ws_add(text_data)
@@ -142,13 +150,15 @@ def solver_subprocess_SIGINT_handler(sig, stack):
     os.kill(0, signal.SIGINT)
 
 class Solve():
-    def __init__(self, department_abbrev, week, year, timestamp, training_programme, chan):
+    def __init__(self, department_abbrev, week, year, timestamp, training_programme, chan, time_limit, solver):
         super(Solve, self).__init__()
         self.department_abbrev = department_abbrev
         self.week = week
         self.year = year
         self.timestamp = timestamp
         self.channel = chan
+        self.time_limit = time_limit
+        self.solver = solver
 
         # if all train progs are called, training_programme=''
         try:
@@ -171,7 +181,7 @@ class Solve():
                     t = MyTTModel(self.department_abbrev, self.week, self.year, train_prog=self.training_programme)
                     os.setpgid(os.getpid(), os.getpid())
                     signal.signal(signal.SIGINT, solver_subprocess_SIGINT_handler)
-                    t.solve(time_limit=300)
+                    t.solve(time_limit=self.time_limit, solver=self.solver)
                 except:
                     traceback.print_exc()
                     print("solver aborting...")
@@ -184,68 +194,31 @@ class Solve():
                 print("starting solver sub-process " + str(solver_child_process))
                 if solver_child_process != cache.get("solver_child_process"):
                     print("unable to store solver_child_process PID, cache not working?")
-                    self.channel.send(text_data=json.dumps({'message': "unable to store solver_child_process PID, you won't be able to stop it via the browser! Is Django cache not working?"}))
+                    self.channel.send(text_data=json.dumps(
+                        {'message': "unable to store solver_child_process PID, you won't be able to stop it via the browser! Is Django cache not working?", 'action': 'error'}))
                 os.close(wd)
+                
                 with io.TextIOWrapper(io.FileIO(rd)) as tube:
                     for line in tube:
-                        self.channel.send(text_data=json.dumps({'message': line}))
+                        self.channel.send(text_data=json.dumps({'message': line, 'action': 'info'}))
+                
                 while 1:
                     (child,status) = os.wait()
                     if child == solver_child_process and os.WIFEXITED(status):
                         break
+                
                 cache.delete('solver_child_process')
                 if os.WEXITSTATUS(status) != 0:
-                    self.channel.send(text_data=json.dumps({'message': 'solver process has aborted'}))
+                    self.channel.send(text_data=json.dumps({'message': f'solver process has aborted with a {os.WEXITSTATUS(status)} error code', 'action': 'error'}))
+                else:
+                    self.channel.send(text_data=json.dumps({'message': 'solver process has finished', 'action': 'finished'}))
 
         except OSError as e:
             print("Exception while launching a solver sub-process:")
             traceback.print_exc()
             print("Continuing business as usual...")
 
-    # def run(self):
-    #     print('start running')
-    #     with CaptureOutput(relay=False, channel=self.channel) as cap:
-    #         t = MyTTModel(self.week, self.year, train_prog=self.training_programme)
-    #         t.solve(time_limit=300)
-    #         cap.save_to_path(os.path.join(settings.BASE_DIR,
-    #                                       'logs',
-    #                                       str(self.year)+ '-' + str(self.week) + '--'
-    #                                       + self.timestamp + '.log'))
-    #     print('stop running')
-
-
-
-# def ruru(week, year, channel):
-#     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "FlOpEDT.settings.local")
-#     print('start running')
-#     with CaptureOutput(relay=False, channel=channel) as cap:
-#         print(week)
-#         print(year)
-#         print(channel)
-#         print('qqweqw')
-        
-#         t = MyTTModel(week, year)
-#         t.solve(time_limit=300)
-#         cap.save_to_path('/home/prenaud/trash/modcap.log')
-#     print('stop running')
     
-
-        
-# # Connected to websocket.connect
-# def ws_add(message):
-#     # Accept the incoming connection
-#     message.reply_channel.send({"accept": True})
-#     # # Add them to the chat group
-#     # Group("solver").add(message.reply_channel)
-
-
-# Connected to websocket.disconnect
-# def ws_disconnect(message):
-#     Group("solver").discard(message.reply_channel)
-
-
-
-
 # https://vincenttide.com/blog/1/django-channels-and-celery-example/
 # http://docs.celeryproject.org/en/master/django/first-steps-with-django.html#django-first-steps
 # http://docs.celeryproject.org/en/master/getting-started/next-steps.html#next-steps
