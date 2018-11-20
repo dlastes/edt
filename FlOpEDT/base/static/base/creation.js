@@ -195,7 +195,9 @@ function create_layouts(svg_cont, light) {
     dg = svg_cont.append("g")
         .attr("id", "lay-dg");
 
-
+    bg
+	.append("rect")
+	.attr("class","rbg");
 }
 
 

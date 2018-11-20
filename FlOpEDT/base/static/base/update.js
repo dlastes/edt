@@ -522,6 +522,14 @@ function go_grid(quick) {
         .transition(t)
         .attr("width", 0)
         .remove();
+    bg
+	.select("rbg")
+	.attr("x",0)
+	.attr("y",0)
+	.attr("height",grid_height())
+	.attr("width",grid_width());
+    
+    
 
     grid = fg.selectAll(".grids")
         .data(data_slot_grid);

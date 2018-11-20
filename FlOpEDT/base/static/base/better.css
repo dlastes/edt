@@ -27,6 +27,10 @@
   stroke-width: .5;
   fill: aliceblue;
 }
+.rbg {
+  stroke: none;
+  fill: white;
+}
 /* jours de la semaine */
 .gridsckd {
   font-size:20px;
