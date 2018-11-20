@@ -129,7 +129,6 @@ function create_layouts(svg_cont, light) {
     // 	.attr("id","dd-mod")
     //	.on("change",go_modules);
 
-
     if (!light) {
 
         $("#div-mod").css("width", modules.width);

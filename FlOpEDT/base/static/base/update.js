@@ -506,7 +506,7 @@ function go_grid(quick) {
     
     
 
-    grid = fg.selectAll(".grids")
+    var grid = fg.selectAll(".grids")
         .data(data_slot_grid);
 
     var gridg = grid
@@ -532,10 +532,6 @@ function go_grid(quick) {
         .attr("height", gs_height)
         .attr("fill", gs_fill);
 
-    grid
-	.exit()
-	.remove();
-
     gridg
         .append("text")
         .attr("stroke", "none")
@@ -556,6 +552,12 @@ function go_grid(quick) {
         })
         .text(gs_txt);
 
+    grid
+	.exit()
+	.remove();
+
+
+    
 
     grid = bg.selectAll(".gridscg")
         .data(data_grid_scale_gp
@@ -607,24 +609,52 @@ function go_grid(quick) {
 
 
 
-    day_scale = bg
+
+    
+
+    day_scale = fg
         .selectAll(".gridsckd")
         .data(days, function(d) {
-	    return d.date;});
+    	    return d.date;});
 
-    day_scale
-	.enter()
-        .append("text")
-        .attr("class", "gridsckd")
-        .attr("fill", "darkslateblue")
-        .attr("font-size", 22)
-	.merge(day_scale)
+    var day_sc_g = day_scale
+    	.enter()
+        .append("g")
+        .attr("class", "gridsckd");
+    
+    day_sc_g
+    	.append("text")
+    	.attr("class", "txt_scl")
+    	.merge(day_scale.select(".txt_scl"))
         .transition(t)
         .text(gsckd_txt)
         .attr("x", gsckd_x)
         .attr("y", gsckd_y);
 
+    day_sc_g
+    	.append("rect")
+    	.attr("class", "day_am")
+    	.merge(day_scale.select(".day_am"))
+        .transition(t)
+    	.attr("x", grid_day_am_x)
+    	.attr("y", grid_day_am_y)
+    	.attr("height", grid_day_am_height)
+    	.attr("width", grid_day_am_width);
+
+    day_sc_g
+    	.append("rect")
+    	.attr("class", "day_pm")
+    	.merge(day_scale.select(".day_pm"))
+        .transition(t)
+    	.attr("x", grid_day_pm_x)
+    	.attr("y", grid_day_pm_y)
+    	.attr("height", grid_day_pm_height)
+    	.attr("width", grid_day_pm_width);
+
     day_scale.exit().remove();
+
+
+
     
     bg
         .selectAll(".gridsckh")

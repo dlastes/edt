@@ -507,6 +507,38 @@ function gsckd_txt(d) {
     return d.name + " " + d.date;
 }
 
+
+function grid_day_am_x(d) {
+    return d.num * (rootgp_width * labgp.width +
+            dim_dispo.plot * (dim_dispo.width + dim_dispo.right));
+}
+function grid_day_am_y(d) {
+    return 0 ;
+}
+function grid_day_am_height(d) {
+    var t = time_settings.time ;
+    return scale*nbRows*(t.lunch_break_start_time - t.day_start_time) ;
+}
+function grid_day_am_width(d) {
+    return rootgp_width * labgp.width ;
+}
+function grid_day_pm_x(d) {
+    return grid_day_am_x(d) ;
+}
+function grid_day_pm_y(d) {
+    var t = time_settings.time ;
+    return grid_day_am_y(d) + grid_day_am_height(d)
+	+ bknews_h() ;
+}
+function grid_day_pm_height(d) {
+    var t = time_settings.time ;
+    return scale*nbRows*(t.day_finish_time - t.lunch_break_finish_time) ;
+}
+function grid_day_pm_width(d) {
+    return rootgp_width * labgp.width ;
+}
+
+
 function gsckh_x(datum) {
     return grid_width() + 5 ;//.25 * labgp.width;
 }

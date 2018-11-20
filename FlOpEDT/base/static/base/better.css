@@ -26,10 +26,21 @@
   stroke: none;
   fill: white;
 }
+.day_am{
+    stroke:black;
+    stroke-width: 2;
+    fill: none;
+}
+.day_pm{
+    stroke:black;
+    stroke-width: 2;
+    fill: none;
+}
 /* jours de la semaine */
-.gridsckd {
-  font-size:20px;
-  font-weight:bold;
+.txt_scl {
+    fill:darkslateblue;
+    font-size:20px;
+    font-weight:bold;
 }
 /* groupes */
 .gridscg, .gridscp {
