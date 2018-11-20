@@ -507,7 +507,10 @@ function go_grid(quick) {
     
 
     var grid = fg.selectAll(".grids")
-        .data(data_slot_grid);
+        .data(data_slot_grid
+	      .filter(function(d) {
+		  return d.iday < days.length ;
+	      }));
 
     var gridg = grid
         .enter()

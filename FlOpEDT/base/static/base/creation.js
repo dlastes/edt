@@ -431,19 +431,23 @@ function remove_garbage(){
 
 
 function create_grid_data() {
-    // for (var j = 0; j < nbPer; j++) {
-    //     for (var s = 0; s < nbSl; s++) {
-    //         var gs = {
-    //             day: j,
-    //             slot: s,
-    //             display: false,
-    //             dispo: false,
-    //             pop: false,
-    //             reason: ""
-    //         };
-    //         data_slot_grid.push(gs);
-    //     }
-    // }
+    if (init_nbRows != 1) {
+	for(var d = 0 ; d<7 ; d++) {
+	    for (var s = 0; s < Object.keys(rev_constraints).length ; s++) {
+		var start = Object.keys(rev_constraints)[s] ;
+		var gs = {
+                    iday: d,
+                    start: start,
+		    duration: rev_constraints[start],
+                    display: false,
+                    dispo: false,
+                    pop: false,
+                    reason: ""
+		};
+		data_slot_grid.push(gs);
+            }
+	}
+    }
 
     for (var p = 0; p < set_promos.length; p++) {
         compute_promo_leaves(root_gp[p].gp);

@@ -390,15 +390,16 @@ function gm_y(datum) {
     return ret ;
 }
 
-function gs_x(datum) {
-    return datum.day * (rootgp_width * labgp.width +
+function gs_x(d) {
+    return d.iday * (rootgp_width * labgp.width +
         dim_dispo.plot * (dim_dispo.width + dim_dispo.right));
 }
 
-function gs_y(datum) {
-    var ret = (datum.slot * nbRows) * (labgp.height) ;
-    if (datum.slot >= bknews.hour_bound) {
-	ret += bknews_h() ;
+function gs_y(d) {
+    var t = time_settings.time ;
+    var ret = (d.start - t.day_start_time) * nbRows * scale ;
+    if (d.start >= t.lunch_break_finish_time) {
+	ret += bknews_h() - (t.lunch_break_finish_time - t.lunch_break_start_time)*nbRows*scale ;
     }
     return ret ;
 }
@@ -408,7 +409,7 @@ function gs_width(d) {
 }
 
 function gs_height(d) {
-    return labgp.height * nbRows;
+    return d.duration * nbRows * scale ;
 }
 
 function gs_fill(d) {
@@ -438,7 +439,7 @@ function gs_sw(d) {
 
 function gs_sc(d) {
     //    return d.day==3&&d.slot==5?"red":"black";
-    return d.slot < nbSl ? "black" : "red";
+    return d.start < time_settings.time.day_finish_time ? "black" : "red";
 }
 
 
