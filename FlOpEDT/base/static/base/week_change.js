@@ -575,7 +575,7 @@ function translate_cours_pp_from_csv(d) {
         mod: d.module,
 	c_type: d.coursetype,
         day: garbage.day,
-        slot: garbage.slot,
+        start: garbage.start,
         room: une_salle,
 	room_type: d.room_type,
 	color_bg: d.color_bg,
