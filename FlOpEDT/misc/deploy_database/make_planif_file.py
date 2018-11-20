@@ -64,7 +64,7 @@ def make_planif_file(department, empty_bookname=empty_bookname):
 
         if p.starting_week < p.ending_week:
             weeks = p.ending_week - p.starting_week + 1
-            cols = weeks + 6
+            cols = weeks + 7
             append_row(sheet, empty_rows, 1, rank, cols)
             for i in range(p.starting_week, p.ending_week+1):
 
@@ -73,7 +73,7 @@ def make_planif_file(department, empty_bookname=empty_bookname):
 
         else:
             weeks = (53 - p.starting_week) + p.ending_week
-            cols = weeks + 6
+            cols = weeks + 7
             append_row(sheet, empty_rows, 1, rank, cols)
             for i in range(p.starting_week, 53):
                 sheet.cell(row=rank, column=WEEK_COL).value = i
