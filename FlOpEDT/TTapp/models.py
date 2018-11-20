@@ -75,7 +75,7 @@ class TTConstraint(models.Model):
 
     def description(self):
         # Return a human readable constraint name
-        return "global constraint description"
+        return self. __doc__ or str(self)
 
     def get_viewmodel(self):
         #
@@ -97,10 +97,12 @@ class TTConstraint(models.Model):
             'is_active': self.is_active,
             'name': self.full_name(),
             'description': self.description(),
+            'explanation': self.one_line_description(),
             'comment': self.comment,
             'details': {
                 'train_prog': train_prog_value,
                 'week': week_value,
+                'weight': self.weight,
                 }
             }
 
@@ -203,8 +205,7 @@ class LimitCourseTypePerPeriod(TTConstraint):  # , pond):
             text += ' pour ' + str(self.tutor)
         if self.train_prog:
             text += ' en ' + str(self.train_prog)
-        if self.group:
-            text += ' avec le groupe ' + str(self.group)
+
         return text
 
 
