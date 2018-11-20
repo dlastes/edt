@@ -4,7 +4,7 @@
 from django.contrib import admin
 from base.admin import DepartmentModelAdmin
 
-from people.models import FullStaff, SupplyStaff, BIATOS
+from people.models import FullStaff, SupplyStaff, BIATOS, Tutor
 
 from import_export import resources, fields
 
