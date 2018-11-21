@@ -189,11 +189,13 @@ class TTModel(object):
             self.FHD_G[apm] = dict(
                 list(zip(self.wdb.basic_groups,
                     [self.lin_expr() for _ in self.wdb.basic_groups])))
+        
         self.cost_SL = dict(list(zip(self.wdb.slots,
                                 [self.lin_expr() for _ in self.wdb.slots])))
         self.cost_G = dict(
             list(zip(self.wdb.basic_groups,
                 [self.lin_expr() for _ in self.wdb.basic_groups])))
+        
         self.TT = {}
         self.TTrooms = {}
         for sl in self.wdb.slots:
@@ -872,16 +874,26 @@ class TTModel(object):
             cp.save()
 
         # On enregistre les coûts dans la BDD
-        TutorCost.objects.filter(semaine=self.wdb.week,
-                                 an=self.wdb.year).delete()
-        GroupFreeHalfDay.objects.filter(semaine=self.wdb.week,
-                                        an=self.wdb.year).delete()
-        GroupCost.objects.filter(semaine=self.wdb.week,
-                                 an=self.wdb.year).delete()
+        TutorCost.objects.filter(
+                            department=self.department,
+                            semaine=self.wdb.week,
+                            an=self.wdb.year).delete()
+        GroupFreeHalfDay.objects.filter(
+                            groupe__train_prog__department=self.department,
+                            semaine=self.wdb.week,
+                            an=self.wdb.year).delete()
+        GroupCost.objects.filter(
+                            groupe__train_prog__department=self.department,
+                            semaine=self.wdb.week,
+                            an=self.wdb.year).delete()
 
         for i in self.wdb.instructors:
-            cp = TutorCost(tutor=i, an=self.wdb.year, semaine=self.wdb.week,
-                           valeur=self.get_expr_value(self.cost_I[i]))
+            cp = TutorCost(
+                        department=self.department,
+                        tutor=i,
+                        an=self.wdb.year, 
+                        semaine=self.wdb.week,
+                        valeur=self.get_expr_value(self.cost_I[i]))
             cp.save()
 
         for g in self.wdb.basic_groups:
