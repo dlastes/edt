@@ -100,18 +100,17 @@ def basic_reassign_rooms(semaine, an, target_work_copy):
                 # print "assigned", CP
             elif cp_using_prec.count() == 1:
                 sib = cp_using_prec[0]
-                if sib.cours.room_type == CP.cours.room_type \
-                        and not LimitedRoomChoices.objects\
-                        .filter(Q(week=semaine) | Q(week=None),
+                if sib.cours.room_type == CP.cours.room_type and sib.cours:
+                    if not LimitedRoomChoices.objects.filter(
+                                Q(week=semaine) | Q(week=None),
                                 Q(year=an) | Q(year=None),
-                                Q(train_prog=sib.train_prog) | Q(module=sib.module) | Q(group=sib.group) |
-                                Q(tutor=sib.tutor) | Q(type=sib.type),
+                                Q(module=sib.cours.module) | Q(group=sib.cours.groupe) | Q(tutor=sib.cours.tutor) | Q(type=sib.cours.type),
                                 possible_rooms=sib.room).exists():
-                    r = CP.room
-                    CP.room = precedent.room
-                    sib.room = r
-                    CP.save()
-                    sib.save()
+                        r = CP.room
+                        CP.room = precedent.room
+                        sib.room = r
+                        CP.save()
+                        sib.save()
                     # print "swapped", CP, " with", sib
     print("done")
 
