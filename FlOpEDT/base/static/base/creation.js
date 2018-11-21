@@ -1254,8 +1254,7 @@ function def_drag() {
 				      drag.y +
 				      parseInt(drag.sel.select("rect")
 					       .attr("y")),
-				      cours_width(d),
-				      cours_height(d));
+				      d);
 
                 if (!is_garbage(cur_over.day,cur_over.slot)) {
                     sl = data_slot_grid.filter(function(c) {
@@ -1501,16 +1500,14 @@ function check_course(c2m, slot, day) {
 
 }
 
-function which_slot(x, y, w, h) {
+function which_slot(x, y, c) {
     var wday = (rootgp_width * labgp.width +
         dim_dispo.plot *
         (dim_dispo.width + dim_dispo.right));
-    var day = Math.floor((x + .5 * w) / wday);
-    var hslot = nbRows * labgp.height;
-    var slot = Math.floor((y + .5 * h) / hslot);
+    var iday = Math.floor((x + .5 * cours_width(c)) / wday);
     return {
-        day: day,
-        slot: slot
+        iday: iday,
+        start: indexOf_constraints(c, y)
     };
 }
 
@@ -1523,6 +1520,30 @@ function is_free(day, hour, promo) {
     return (promo < 2 && (day == 3 && hour > 2));
 }
 
+function indexOf_constraints(c, start){
+    var after = false ;
+    var i = 0 ;
+    var cst = constraints[c.c_type].allowed_st ;
+    while(! after && i < cst.length) {
+	if (cst[i] > start) {
+	    after = true ;
+	} else {
+	    i ++ ;
+	}
+    }
+    if (i==cst.length) {
+	return time_settings.time.day_finish_time ;
+	// constraints[keys[keys.length-1]] ;
+    } else if (i==cst.length - 1) {
+	return cst[i] ;
+    } else {
+	if (start - cst[i] > cst[i+1] - start) {
+	    return cst[i+1];
+	} else {
+	    return cst[i];
+	}
+    }
+}
 
 
 /*---------------------
