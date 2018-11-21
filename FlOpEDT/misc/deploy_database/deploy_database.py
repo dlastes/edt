@@ -610,7 +610,7 @@ def courses_extract(department, book):
 
             while idGroup is not None:
 
-                group = GroupType.objects.get(name=idGroup, department=department)
+                group = GroupType.objects.get(name=idGroup)
                 course.group_types.add(group)
                 course.save()
 
