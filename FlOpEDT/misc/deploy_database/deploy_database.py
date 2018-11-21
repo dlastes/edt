@@ -253,7 +253,7 @@ def rooms_extract(department, book):
                 except:
                     room_group = RoomGroup.objects.get(name=room_group_id, types__in=[temporay_room_type,])
 
-                room_group.types.add(room_type)
+                room_group.types.add(room_type)https://askubuntu.com/questions/949136/permission-denied-usr-local-lib-python2-7-dist-packages-pytz-2017-2-dist-info
             except RoomGroup.DoesNotExist:
                 print(f"unable to find  RoomGroup '{idroom_group_idGroup}'")
 
@@ -610,7 +610,7 @@ def courses_extract(department, book):
 
             while idGroup is not None:
 
-                group = GroupType.objects.get(name=idGroup)
+                group = GroupType.objects.get(name=idGroup, department=department)
                 course.group_types.add(group)
                 course.save()
 
