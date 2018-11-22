@@ -53,5 +53,3 @@ def generate_room_file(department_abbrev):
                            'static', 'base',
                            'rooms.json'), 'w') as fp:
         json.dump(get_rooms(department_abbrev), fp)
-
-    return d
