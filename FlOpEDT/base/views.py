@@ -151,7 +151,8 @@ def edt(req, an=None, semaine=None, splash_id=0, **kwargs):
                 'name_usr': name_usr,
                 'rights_usr': rights_usr,
                 'splash_id': splash_id,
-                'time_settings': time_settings
+                'time_settings': time_settings,
+                'days': num_all_days(an, semaine, req.department)
             })
 
 
@@ -324,7 +325,6 @@ def fetch_cours_pl(req, year, week, num_copy, **kwargs):
     response['version'] = version
     response['week'] = week
     response['year'] = year
-    response['jours'] = str(num_all_days(year, week))
     response['num_copy'] = num_copy
     
     try:
@@ -545,7 +545,7 @@ def fetch_decale(req, **kwargs):
     groups = []
 
     if an > 0 and semaine > 0:
-        days = num_all_days(an, semaine)
+        days = num_all_days(an, semaine, req.department)
     else:
         days = []
 

@@ -433,18 +433,6 @@ function fetch_cours() {
             go_regen(req.getResponseHeader('regen'));
             go_alarm_pref();
 
-            var all_days = JSON.parse(req.getResponseHeader('jours').replace(/\'/g, '"'));
-
-	    days = all_days.filter(function(d){
-		return time_settings.days.indexOf(d.ref) >= 0 ;
-	    })
-
-	    for(i=0 ; i<days.length ; i++) {
-		days[i].num = i ;
-	    }
-	    
-	    garbage.iday = days.length-2 ;
-	    
             if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
                 an_att == weeks.init_data[weeks.sel[0]].an) {
 

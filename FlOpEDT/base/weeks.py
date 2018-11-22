@@ -64,17 +64,22 @@ def num_days(y, w):
     return day_list
 
 # list of days
-def num_all_days(y, w):
+def num_all_days(y, w, dept):
     if w == 0:
         return []
     cur_day = monday_w2(y) + datetime.timedelta(7 * (w - 2))
     day_list = []
-    for d in range(7):
-        day_list.append({'num':d,
-                         'date':f"{cur_day.day:02d}/{cur_day.month:02d}",
-                         'ref':week_ref_days[d],
-                         'name':week_display_days[d]})
-        cur_day += datetime.timedelta(1)
+    dept_day_list = TimeGeneralSettings.objects.get(department=dept)
+    iday = 0
+    for i in range(len(week_ref_days)):
+        d_ref = week_ref_days[i]
+        if d_ref is in dept_dayList:
+            day_list.append({'num':iday,
+                             'date':f"{cur_day.day:02d}/{cur_day.month:02d}",
+                             'ref':d_ref,
+                             'name':week_display_days[i]})
+            cur_day += datetime.timedelta(1)
+            iday += 1
     return day_list
 
 # More or less working weeks

@@ -224,6 +224,7 @@ var days = [];
 var garbage = {
     start: 1125,
     duration: 90,
+    iday: days.length-2 ;
 };
 
 
