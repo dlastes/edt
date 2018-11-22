@@ -57,13 +57,14 @@ def create_event(c):
     p = str(c.cours.an) + '-W' + str(c.cours.semaine) + '-w' + str(c.creneau.jour_id) + ' ' + str(c.creneau.heure.hours) + ':'+ str(c.creneau.heure.minutes)
     begin = datetime.strptime(p, '%Y-W%W-w%w %H:%M')
     end = begin + timedelta(minutes=c.creneau.duration)
+    location = c.room.name if c.room is not None else ''
     return {'id':c.id,
          'title': c.cours.module.abbrev + ' ' + c.cours.type.name + ' - ' + c.cours.groupe.train_prog.abbrev + ' ' + c.cours.groupe.nom + ' - ' + c.cours.tutor.username,
-         'location': c.room.name,
+         'location': location,
          'begin': begin,
          'end': end,
          'description': 'Cours \: ' + c.cours.module.abbrev + ' ' + c.cours.type.name +'\\n'+
            'Groupe \: ' + c.cours.groupe.train_prog.abbrev + ' ' + c.cours.groupe.nom +'\\n'+
            'Enseignant : ' + c.cours.tutor.username +'\\n' +
-           'Salle \: ' + c.room.name
+           'Salle \: ' + location
     }
