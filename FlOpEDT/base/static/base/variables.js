@@ -217,14 +217,12 @@ var data_grid_scale_gp = [];
 var data_grid_scale_row = [];
 var data_grid_scale_hour = ["8h-9h25", "9h30-10h55", "11h05-12h30", "14h15-15h40", "15h45-17h10", "17h15-18h40"];
 
-// Names of the days
-var days = [];
 
 // Garbage parameters
 var garbage = {
     start: 1125,
     duration: 90,
-    iday: days.length-2 ;
+    iday: days.length-2
 };
 
 

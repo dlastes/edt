@@ -26,6 +26,7 @@
 
 import datetime
 
+from base import models
 annee_courante = 2018
 
 week_ref_days = ['m', 'tu', 'w', 'th', 'f', 'sa', 'su']
@@ -69,11 +70,11 @@ def num_all_days(y, w, dept):
         return []
     cur_day = monday_w2(y) + datetime.timedelta(7 * (w - 2))
     day_list = []
-    dept_day_list = TimeGeneralSettings.objects.get(department=dept)
+    dept_day_list = models.TimeGeneralSettings.objects.get(department=dept).days
     iday = 0
     for i in range(len(week_ref_days)):
         d_ref = week_ref_days[i]
-        if d_ref in dept_dayList:
+        if d_ref in dept_day_list:
             day_list.append({'num':iday,
                              'date':f"{cur_day.day:02d}/{cur_day.month:02d}",
                              'ref':d_ref,
