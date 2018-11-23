@@ -104,8 +104,8 @@ def basic_reassign_rooms(semaine, an, target_work_copy):
                         and not LimitedRoomChoices.objects\
                         .filter(Q(week=semaine) | Q(week=None),
                                 Q(year=an) | Q(year=None),
-                                Q(train_prog=sib.train_prog) | Q(module=sib.module) | Q(group=sib.group) |
-                                Q(tutor=sib.tutor) | Q(type=sib.type),
+                                Q(train_prog=sib.cours.module.train_prog) | Q(module=sib.cours.module) | Q(group=sib.cours.groupe) |
+                                Q(tutor=sib.cours.tutor) | Q(type=sib.cours.type),
                                 possible_rooms=sib.room).exists():
                     r = CP.room
                     CP.room = precedent.room
