@@ -627,6 +627,12 @@ class TTModel(object):
                             conj_var = self.add_conjunct(self.TT[(sl1, c1)],
                                                          self.TT[(sl2, c2)])
                             self.obj += conj_var * weight
+                    if (p.successifs and slots_list.index(sl2) == slots_list.index(sl1) + 1
+                                                  and sl2.jour == sl1.jour):
+                        for rg1 in self.wdb.room_groups_for_type[c1.room_type]:
+                            for rg2 in self.wdb.room_groups_for_type[c2.room_type].exclude(rg1):
+                                self.add_constraint(self.TTrooms[(sl1, c1, rg1)]
+                                                    + self.TTrooms[(sl2, c2, rg2)], '<=', 1)
 
     def compute_non_prefered_slot_cost(self):
         """
