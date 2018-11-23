@@ -73,7 +73,7 @@ def num_all_days(y, w, dept):
     iday = 0
     for i in range(len(week_ref_days)):
         d_ref = week_ref_days[i]
-        if d_ref is in dept_dayList:
+        if d_ref in dept_dayList:
             day_list.append({'num':iday,
                              'date':f"{cur_day.day:02d}/{cur_day.month:02d}",
                              'ref':d_ref,
