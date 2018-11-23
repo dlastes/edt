@@ -188,6 +188,7 @@ def define_apm(sender, instance, *args, **kwargs):
     if instance.hours >= 12:
         instance.apm = Time.PM
 
+
 class Slot(models.Model):
     jour = models.ForeignKey('Day', on_delete=models.CASCADE)
     heure = models.ForeignKey('Time', on_delete=models.CASCADE)
@@ -198,6 +199,25 @@ class Slot(models.Model):
         return f"{self.jour}_{self.heure}"
 
 
+class GeneralSlot(models.Model):
+    day = models.CharField(max_length=2, choices=Day.CHOICES, default=Day.MONDAY)
+    start_time = models.PositiveSmallIntegerField()
+    duration = models.PositiveSmallIntegerField()
+    
+    def __str__(self):
+        h,m = hr_min(self.start_time)
+        hd,md = hr_min(self.duration)
+        return f"{self.day}({h:02d}:{m:02d} - {hd:02d}:{md:02d})"
+
+
+class Step(GeneralSlot):
+    pass
+
+
+class CourseSlot(GeneralSlot):
+    pass
+
+    
 class Holiday(models.Model):
     day = models.ForeignKey('Day', on_delete=models.CASCADE)
     week = models.PositiveSmallIntegerField(
