@@ -21,6 +21,7 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
+import os
 from .base import *
 
 # DEFAULT POSTGRES CREDENTIALS
@@ -29,8 +30,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'postgres',
         'USER': 'postgres',
-        'HOST': 'db',
-        'PORT': 5432,
+        'HOST': os.environ.get('POSTGRES_HOST', 'db'),
+        'PORT': 5445,
     }
 }
 
