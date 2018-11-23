@@ -18,6 +18,10 @@ build:
 start:
 	docker-compose -f docker-compose.$(CONFIG).yml up --build -d
 
+# starts edt's docker database service
+start-db:
+	docker-compose -f docker-compose.$(CONFIG).yml up db
+
 # stops edt's docker services
 stop:
 	docker-compose -f docker-compose.$(CONFIG).yml stop
