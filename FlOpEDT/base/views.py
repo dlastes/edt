@@ -659,7 +659,7 @@ def edt_changes(req, **kwargs):
     bad_response = HttpResponse("KO")
     good_response = HttpResponse("OK")
 
-    if not req.user.is_tutor:
+    if not (req.user.is_tutor and req.user.is_staff):
         bad_response['reason'] = "Pas membre de l'équipe encadrante"
         return bad_response
         
