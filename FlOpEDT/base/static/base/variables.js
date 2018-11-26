@@ -113,8 +113,8 @@ var svg_cont ;
   ------- PREFERENCES ------
   --------------------------*/
 
-// 3D array (username,id_day,id_slot)
-var dispos = [];
+// 2D array of list (username,iday,list of intervals)
+var dispos = {};
 
 // parameters for availability
 var par_dispos = {
