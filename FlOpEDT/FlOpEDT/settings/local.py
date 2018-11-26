@@ -30,28 +30,27 @@ DEBUG = True
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'flop_database_dev',
-        'USER': 'flop_user',
-        'PASSWORD': 'your_password',
+        'NAME': 'postgres',
+        'USER': 'postgres',
         'HOST': '127.0.0.1',
-        'PORT': '5432',
+        'PORT': '5445',
     }
 }
 
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
-    }
-}
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+#     }
+# }
 
 # if you want some cache, use the following instead:
 #
-# CACHES = {
-#    'default': {
-#        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-#        'LOCATION': 'flop',
-#    }
-# }
+CACHES = {
+   'default': {
+       'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+       'LOCATION': 'flop',
+   }
+}
 
 LOGGING = {  
     'version': 1,  
@@ -69,7 +68,7 @@ LOGGING = {
             'propagate': True,
         },        
         'django.db.backends': {
-            'level': 'INFO',
+            'level': 'DEBUG',
             'handlers': ['console'],
             'propagate': False,
         }

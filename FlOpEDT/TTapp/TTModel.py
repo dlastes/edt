@@ -189,11 +189,13 @@ class TTModel(object):
             self.FHD_G[apm] = dict(
                 list(zip(self.wdb.basic_groups,
                     [self.lin_expr() for _ in self.wdb.basic_groups])))
+        
         self.cost_SL = dict(list(zip(self.wdb.slots,
                                 [self.lin_expr() for _ in self.wdb.slots])))
         self.cost_G = dict(
             list(zip(self.wdb.basic_groups,
                 [self.lin_expr() for _ in self.wdb.basic_groups])))
+        
         self.TT = {}
         self.TTrooms = {}
         for sl in self.wdb.slots:
@@ -807,7 +809,7 @@ class TTModel(object):
             for constr in get_constraints(
                                 self.department,
                                 week = self.semaine,
-                                year = self.an, 
+                                year = self.an,
                                 train_prog = promo, 
                                 is_active = True):
                 constr.enrich_model(self)
@@ -872,16 +874,26 @@ class TTModel(object):
             cp.save()
 
         # On enregistre les coûts dans la BDD
-        TutorCost.objects.filter(semaine=self.wdb.week,
-                                 an=self.wdb.year).delete()
-        GroupFreeHalfDay.objects.filter(semaine=self.wdb.week,
-                                        an=self.wdb.year).delete()
-        GroupCost.objects.filter(semaine=self.wdb.week,
-                                 an=self.wdb.year).delete()
+        TutorCost.objects.filter(
+                            department=self.department,
+                            semaine=self.wdb.week,
+                            an=self.wdb.year).delete()
+        GroupFreeHalfDay.objects.filter(
+                            groupe__train_prog__department=self.department,
+                            semaine=self.wdb.week,
+                            an=self.wdb.year).delete()
+        GroupCost.objects.filter(
+                            groupe__train_prog__department=self.department,
+                            semaine=self.wdb.week,
+                            an=self.wdb.year).delete()
 
         for i in self.wdb.instructors:
-            cp = TutorCost(tutor=i, an=self.wdb.year, semaine=self.wdb.week,
-                           valeur=self.get_expr_value(self.cost_I[i]))
+            cp = TutorCost(
+                        department=self.department,
+                        tutor=i,
+                        an=self.wdb.year, 
+                        semaine=self.wdb.week,
+                        valeur=self.get_expr_value(self.cost_I[i]))
             cp.save()
 
         for g in self.wdb.basic_groups:
@@ -900,7 +912,11 @@ class TTModel(object):
 
 
     def optimize(self, time_limit, solver, presolve=2):
-        if solver == 'gurobi':
+
+        # The solver value shall one of the available 
+        # solver corresponding pulp command
+
+        if 'gurobi' in solver.lower():
             # ignore SIGINT while solver is running
             # => SIGINT is still delivered to the solver, which is what we want
             # signal.signal(signal.SIGINT, signal.SIG_IGN)
@@ -910,13 +926,15 @@ class TTModel(object):
                                                  ("Presolve", presolve),
                                                  ("MIPGapAbs", 0.2)]))
         else:
+            # TODO Use the solver parameter to get
+            # the target class by reflection
             self.model.solve(PULP_CBC_CMD(keepFiles=1,
                                           msg=True,
                                           presolve=presolve,
                                           maxSeconds=time_limit))
         status = self.model.status
         print(LpStatus[status])
-        if status == LpStatusOptimal or (solver != 'gurobi' and status == LpStatusNotSolved):
+        if status == LpStatusOptimal or (not (solver.lower() == 'gurobi') and status == LpStatusNotSolved):
             return self.get_obj_coeffs()
 
         else:
@@ -967,7 +985,7 @@ class TTModel(object):
 
         if result is not None:
             self.add_tt_to_db(target_work_copy)
-            reassign_rooms(self.semaine, self.an, target_work_copy)
+            reassign_rooms(self.department, self.semaine, self.an, target_work_copy)
             return target_work_copy
 
 

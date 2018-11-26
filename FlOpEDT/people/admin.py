@@ -2,25 +2,24 @@
 
 
 from django.contrib import admin
+from base.admin import DepartmentModelAdmin
 
-from people.models import FullStaff, SupplyStaff, BIATOS, Tutor, User
+from people.models import FullStaff, SupplyStaff, BIATOS, Tutor
 
 from import_export import resources, fields
 
 
-class FullStaffAdmin(admin.ModelAdmin):
+class FullStaffAdmin(DepartmentModelAdmin):
 
     class Meta:
         app_label = 'auth'
 
-
-class SupplyStaffAdmin(admin.ModelAdmin):
+class SupplyStaffAdmin(DepartmentModelAdmin):
 
     class Meta:
         app_label = 'auth'
 
-
-class BIATOSAdmin(admin.ModelAdmin):
+class BIATOSAdmin(DepartmentModelAdmin):
 
     class Meta:
         app_label = 'auth'
@@ -31,7 +30,6 @@ class TutorResource(resources.ModelResource):
 		model = Tutor
 		fields = ( "username", "first_name", "last_name", "email" )
 		
-
 
 
 admin.site.register(FullStaff, FullStaffAdmin)

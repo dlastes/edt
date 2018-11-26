@@ -2,10 +2,37 @@
 
 
 from django.test import TestCase
-from solve_board.views import get_constraints
+from solve_board.views import get_constraints, get_pulp_solvers, get_pulp_solvers_viewmodel
 from base import models as base
+import pulp.solvers as solver_classes
+
 
 from TTapp.models import *
+
+def funcname(self, parameter_list):
+    raise NotImplementedError
+
+class GetPulpSolversViewModelTestCase(TestCase):
+
+    def test_cbc(self):
+        viewmodel = get_pulp_solvers_viewmodel()
+        self.assertIn(('PULP_CBC_CMD', 'CBC'), viewmodel)
+
+
+class GetAvailableSolversTestCase(TestCase):
+
+    def test_coin_cmd(self):
+        solvers = get_pulp_solvers(False)
+        self.assertIn(solver_classes.COIN_CMD, solvers)
+
+    def test_cbc_cmd(self):
+        solvers = get_pulp_solvers(False)
+        self.assertIn(solver_classes.PULP_CBC_CMD, solvers)
+
+    def test_default_available_solver(self):
+        solvers = get_pulp_solvers(True)
+        self.assertIn(solver_classes.PULP_CBC_CMD, solvers)
+
 
 class GetConstraintsTestCase(TestCase):
 

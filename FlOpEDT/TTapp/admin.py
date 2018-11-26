@@ -27,6 +27,7 @@
 
 
 from django.contrib import admin
+from base.admin import DepartmentModelAdmin
 
 from TTapp.models import LimitCourseTypePerPeriod, ReasonableDays, Stabilize, \
     MinHalfDays, MinNonPreferedSlot, AvoidBothSlots, SimultaneousCourses
@@ -42,15 +43,7 @@ from FlOpEDT.filters import DropdownFilterAll, DropdownFilterRel, \
     DropdownFilterCho
 
 
-# class TestJourResource(resources.ModelResource):
-#     id = fields.Field(column_name='id_jour',attribute='jour',widget=ForeignKeyWidget(Jour,'id'))
-
-# class TestJourAdmin(admin.ModelAdmin):
-#     list_display = ('jour','truc')
-
-# admin.site.register(TestJour, TestJourAdmin)
-
-class LimitNaturePerPeriodAdmin(admin.ModelAdmin):
+class LimitNaturePerPeriodAdmin(DepartmentModelAdmin):
     list_display = ('week', 'year', 'train_prog', 'type', 'limit',
                     'module', 'tutor', 'period', 'comment')
     ordering = ()
@@ -63,7 +56,7 @@ class LimitNaturePerPeriodAdmin(admin.ModelAdmin):
                    )
 
 
-class ReasonableDaysAdmin(admin.ModelAdmin):
+class ReasonableDaysAdmin(DepartmentModelAdmin):
     list_display = ('week', 'year', 'train_prog',
                     'group', 'tutor', 'comment')
     ordering = ()
@@ -76,7 +69,7 @@ class ReasonableDaysAdmin(admin.ModelAdmin):
                    )
 
 
-class StabilizeAdmin(admin.ModelAdmin):
+class StabilizeAdmin(DepartmentModelAdmin):
     list_display = ('week', 'year', 'train_prog', 'general',
                     'group', 'tutor', 'module', 'type', 'comment')
     ordering = ()
@@ -91,7 +84,7 @@ class StabilizeAdmin(admin.ModelAdmin):
                    )
 
 
-class MinHalfDaysAdmin(admin.ModelAdmin):
+class MinHalfDaysAdmin(DepartmentModelAdmin):
     list_display = ('week', 'year', 'train_prog', 'tutor', 'module', 'join2courses', 'comment')
     ordering = ()
     empty_value_display = 'All!'
@@ -103,7 +96,7 @@ class MinHalfDaysAdmin(admin.ModelAdmin):
                    )
 
 
-class MinNonPreferedSlotAdmin(admin.ModelAdmin):
+class MinNonPreferedSlotAdmin(DepartmentModelAdmin):
     list_display = ('week', 'year', 'train_prog', 'tutor', 'comment')
     ordering = ()
     empty_value_display = 'All!'
@@ -114,7 +107,7 @@ class MinNonPreferedSlotAdmin(admin.ModelAdmin):
                    )
 
 
-class AvoidBothSlotsAdmin(admin.ModelAdmin):
+class AvoidBothSlotsAdmin(DepartmentModelAdmin):
     list_display = ('week', 'year', 'train_prog', 'tutor', 'group', 'slot1', 'slot2', 'comment')
     ordering = ()
     empty_value_display = 'All!'
@@ -128,7 +121,7 @@ class AvoidBothSlotsAdmin(admin.ModelAdmin):
                    )
 
 
-class SimultaneousCoursesAdmin(admin.ModelAdmin):
+class SimultaneousCoursesAdmin(DepartmentModelAdmin):
     list_display = ('week', 'year', 'train_prog', 'course1', 'course2', 'comment')
     ordering = ()
     empty_value_display = 'All!'
