@@ -64,7 +64,7 @@ function fetch_dispos() {
 
             if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
                 an_att == weeks.init_data[weeks.sel[0]].an) {
-                dispos = [];
+                dispos = {};
                 //user.dispos = [];
                 d3.csvParse(msg, translate_dispos_from_csv);
 
@@ -93,15 +93,16 @@ function fetch_dispos() {
 
 
 function translate_dispos_from_csv(d) {
-    if (d.prof != prev_prof) {
-        prev_prof = d.prof;
-        dispos[d.prof] = new Array(nbPer);
-        for (var i = 0; i < nbPer; i++) {
-            dispos[d.prof][i] = new Array(nbSl);
-            dispos[d.prof][i].fill(-1);
-        }
+    if(Object.keys(dispos).indexOf(d.prof)==-1){
+	dispos[d.prof] = new Array(days.length);
+        for (var i = 0; i < days.length; i++) {
+	    dispos[d.prof][i] = [] ;
+	}	
     }
-    dispos[d.prof][+d.jour][+d.heure] = +d.valeur;
+    var iday = get_day(d.day).iday;
+    dispos[d.prof][iday].push({start_time:+d.start_time,
+			       duration: +d.duration,
+			       value: + d.valeur});
 }
 
 
