@@ -24,10 +24,11 @@
 # without disclosing the source code of your own applications.
 
 from django.conf.urls import url, include
+from django.contrib.auth import views as auth_views
+from django.urls import reverse_lazy
 from people.student import AddStudent, ChangeStudent
 from people.tutor import AddFullStaffTutor, AddSupplyStaffTutor, AddBIATOSTutor
 from people.tutor import ChangeFullStaffTutor, ChangeSupplyStaffTutor, ChangeBIATOSTutor
-from django.contrib.auth import views as auth_views
 from . import views
 
 app_name="people"
@@ -41,9 +42,11 @@ urlpatterns = [
         auth_views.LogoutView.as_view( next_page= '/'),
         name='logout'),
     url(r'^password-reset/$',
-        auth_views.PasswordResetView.as_view( template_name='people/password_reset_form.html', email_template_name='people/password_reset_email.html',
-         subject_template_name='people/password_reset_subject.txt',
-         success_url='people:password_reset_done'),
+        auth_views.PasswordResetView.as_view(
+            template_name='people/password_reset_form.html',
+            email_template_name='people/password_reset_email.html',
+            subject_template_name='people/password_reset_subject.txt',
+            success_url=reverse_lazy('people:password_reset_done')),
         name='password_reset'),
     url(r'^pwd-reset-done/$',
         auth_views.PasswordResetDoneView.as_view( template_name='people/password_reset_done.html'),
