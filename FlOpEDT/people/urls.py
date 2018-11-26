@@ -49,18 +49,22 @@ urlpatterns = [
             success_url=reverse_lazy('people:password_reset_done')),
         name='password_reset'),
     url(r'^pwd-reset-done/$',
-        auth_views.PasswordResetDoneView.as_view( template_name='people/password_reset_done.html'),
+        auth_views.PasswordResetDoneView.as_view(
+            template_name='people/password_reset_done.html'),
         name='password_reset_done'),
     url(r'^password-change/$',
-        auth_views.PasswordChangeView.as_view(template_name='people/password_change_form.html',
-         success_url='people:password_change_done'),
+        auth_views.PasswordChangeView.as_view(
+            template_name='people/password_change_form.html',
+            success_url=reverse_lazy('people:password_change_done')),
         name='password_change'),
     url(r'^pwd-chg-done/$',
-        auth_views.PasswordChangeDoneView.as_view(template_name='people/password_change_done.html'),
+        auth_views.PasswordChangeDoneView.as_view(
+            template_name='people/password_change_done.html'),
         name='password_change_done'),
     url(r'^reset/(?P<uidb64>[0-9A-Za-z_\-]+)/'
         r'(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
-        auth_views.PasswordResetConfirmView.as_view( template_name='people/password_reset_confirm.html'),
+        auth_views.PasswordResetConfirmView.as_view(
+            template_name='people/password_reset_confirm.html'),
         name='password_reset_confirm'),
     url(r'^add/some/(?P<kind>[A-Za-z]*)$',
         views.redirect_add_people_kind,
