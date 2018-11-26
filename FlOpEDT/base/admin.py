@@ -150,27 +150,16 @@ class SemaineAnResource(resources.ModelResource):
 class DispoResource(resources.ModelResource):
     prof = fields.Field(attribute='user',
                         widget=ForeignKeyWidget(User, 'username'))
-    jour = fields.Field(attribute='creneau__jour',
-                        widget=ForeignKeyWidget(Day, 'no'))
-    heure = fields.Field(attribute='creneau__heure',
-                         widget=ForeignKeyWidget(Time, 'no'))
 
     class Meta:
         model = UserPreference
-        fields = ('jour', 'heure', 'valeur', 'prof')
+        fields = ('day', 'start_time', 'duration', 'valeur', 'prof')
 
 
 class UnavailableRoomsResource(resources.ModelResource):
-    day = fields.Field(column_name='jour',
-                        attribute='creneau__jour',
-                        widget=ForeignKeyWidget(Day, 'no'))
-    slot = fields.Field(column_name='heure',
-                         attribute='creneau__heure',
-                         widget=ForeignKeyWidget(Time, 'no'))
-    
     class Meta:
         model = RoomPreference
-        fields = ("room", "day", "slot")
+        fields = ("room", "day", "start_time", "duration")
 
 
 class BreakingNewsResource(resources.ModelResource):
@@ -249,8 +238,9 @@ class RoomGroupAdmin(admin.ModelAdmin):
 
     
 class RoomPreferenceAdmin(admin.ModelAdmin):
-    list_display = ('room', 'semaine', 'an', 'creneau', 'valeur')
-    ordering = ('-an','-semaine','creneau')
+    list_display = ('room', 'semaine', 'an', 'day', 'start_time',
+                    'duration', 'valeur')
+    ordering = ('-an','-semaine', 'day', 'start_time')
     list_filter = (
         ('room', DropdownFilterRel),
         ('an', DropdownFilterAll),
@@ -320,8 +310,8 @@ class EdtVAdmin(admin.ModelAdmin):
 
 
 class CoursePreferenceAdmin(admin.ModelAdmin):
-    list_display = ('course_type', 'train_prog', 'creneau',
-                    'valeur', 'semaine', 'an')
+    list_display = ('course_type', 'train_prog', 'day', 'start_time',
+                    'duration', 'valeur', 'semaine', 'an')
     ordering = ('-an', '-semaine')
     list_filter = (('semaine', DropdownFilterAll),
                    ('an', DropdownFilterAll),
@@ -384,9 +374,10 @@ class PlanifMAdmin(admin.ModelAdmin):
 
 
 class DispoAdmin(admin.ModelAdmin):
-    list_display = ('user', 'creneau', 'valeur', 'semaine', 'an')
-    ordering = ('user', 'an', 'semaine', 'creneau', 'valeur')
-    list_filter = (('creneau', DropdownFilterRel),
+    list_display = ('user', 'day', 'start_time', 'duration', 'valeur',
+                    'semaine', 'an')
+    ordering = ('user', 'an', 'semaine', 'day', 'start_time', 'valeur')
+    list_filter = (('start_time', DropdownFilterAll),
                    ('semaine', DropdownFilterAll),
                    ('user', DropdownFilterRel),
                    )

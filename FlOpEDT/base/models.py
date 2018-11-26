@@ -33,7 +33,7 @@ from django.db import models
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
-from base.timing import hr_min
+from base.timing import hr_min, str_slot
 
 # <editor-fold desc="GROUPS">
 # ------------
@@ -133,7 +133,8 @@ class BreakingNews(models.Model):
 # -- TIMING --
 # ------------
 
-
+# will be used only for constants
+# TO BE CLEANED at the end (fields and ForeignKeys)
 class Day(models.Model):
     no = models.PositiveSmallIntegerField(default=0)
     #nom = models.CharField(max_length=10, verbose_name="Name")
@@ -158,6 +159,8 @@ class Day(models.Model):
         return self.day
 
 
+# will not be used
+# TO BE DELETED at the end
 class Time(models.Model):
     AM = 'AM'
     PM = 'PM'
@@ -197,25 +200,6 @@ class Slot(models.Model):
 
     def __str__(self):
         return f"{self.jour}_{self.heure}"
-
-
-class GeneralSlot(models.Model):
-    day = models.CharField(max_length=2, choices=Day.CHOICES, default=Day.MONDAY)
-    start_time = models.PositiveSmallIntegerField()
-    duration = models.PositiveSmallIntegerField()
-    
-    def __str__(self):
-        h,m = hr_min(self.start_time)
-        hd,md = hr_min(self.duration)
-        return f"{self.day}({h:02d}:{m:02d} - {hd:02d}:{md:02d})"
-
-
-class Step(GeneralSlot):
-    pass
-
-
-class CourseSlot(GeneralSlot):
-    pass
 
     
 class Holiday(models.Model):
@@ -412,14 +396,17 @@ class UserPreference(models.Model):
     semaine = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)], null=True)
     an = models.PositiveSmallIntegerField(null=True)
-    creneau = models.ForeignKey('Slot', on_delete=models.CASCADE)
+    day = models.CharField(max_length=2, choices=Day.CHOICES, default=Day.MONDAY)
+    start_time = models.PositiveSmallIntegerField()
+    duration = models.PositiveSmallIntegerField()
     valeur = models.SmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(8)],
         default=8)
 
     def __str__(self):
         return f"{self.user.username}-Sem{self.semaine}: " + \
-            f"{self.creneau}={self.valeur}"
+            f"({str_slot(self.day, self.start_time, self.duration)})" + \
+            f"={self.valeur}"
 
 
 class CoursePreference(models.Model):
@@ -431,14 +418,17 @@ class CoursePreference(models.Model):
         blank=True)
     an = models.PositiveSmallIntegerField(null=True,
                                           blank=True)
-    creneau = models.ForeignKey('Slot', on_delete=models.CASCADE)
+    day = models.CharField(max_length=2, choices=Day.CHOICES, default=Day.MONDAY)
+    start_time = models.PositiveSmallIntegerField()
+    duration = models.PositiveSmallIntegerField()
     valeur = models.SmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(8)],
         default=8)
 
     def __str__(self):
         return f"{self.course_type}=Sem{self.semaine}:" + \
-            f"{self.creneau}-{self.train_prog}={self.valeur}"
+            f"({str_slot(self.day, self.start_time, self.duration)})" + \
+            f"--{self.train_prog}={self.valeur}"
     
 
 class RoomPreference(models.Model):
@@ -449,14 +439,17 @@ class RoomPreference(models.Model):
         blank=True)
     an = models.PositiveSmallIntegerField(null=True,
                                           blank=True)
-    creneau = models.ForeignKey('Slot', on_delete=models.CASCADE)
+    day = models.CharField(max_length=2, choices=Day.CHOICES, default=Day.MONDAY)
+    start_time = models.PositiveSmallIntegerField()
+    duration = models.PositiveSmallIntegerField()
     valeur = models.SmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(8)],
         default=8)
 
     def __str__(self):
-        return f"{self.room}-Sem{self.semaine}" + \
-            f"-cren{self.creneau.id}={self.valeur}"
+        return f"{self.room}-Sem{self.semaine}:" + \
+            f"({str_slot(self.day, self.start_time, self.duration)})" + \
+            f"={self.valeur}"
 
 
 # </editor-fold desc="PREFERENCES">
