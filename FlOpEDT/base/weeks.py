@@ -104,8 +104,3 @@ def week_list():
         for i in list(range(2, 9)) + list(range(10, 16)) + list(range(18, 31)):
             li.append({'semaine': i, 'an': annee_courante+1})
         return li
-
-def hr_min(t):
-    h = t//60
-    m = t - h*60
-    return h,m
