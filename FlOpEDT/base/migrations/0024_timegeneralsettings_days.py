@@ -6,9 +6,11 @@ from django.db import migrations, models
 def add_days_general_settings(apps, schema_editor):
     TimeGeneralSettings = apps.get_model('base', 'TimeGeneralSettings')
     Day = apps.get_model('base', 'Day')
-    ts = TimeGeneralSettings.objects.all()[0]
-    ts.days = ['m', 'tu', 'w', 'th', 'f']
-    ts.save()
+    qs = TimeGeneralSettings.objects.all()
+    if qs.exists():
+        ts = TimeGeneralSettings.objects.all().first()
+        ts.days = ['m', 'tu', 'w', 'th', 'f']
+        ts.save()
 
 class Migration(migrations.Migration):
 

@@ -6,12 +6,17 @@ import django.db.models.deletion
 def create_time_general_settings(apps, schema_editor):
     TimeGeneralSettings = apps.get_model('base', 'TimeGeneralSettings')
     Department = apps.get_model('base', 'Department')
-    ts = TimeGeneralSettings(department=Department.objects.get(abbrev='info'),
-                             day_start_time=8*60,
-                             day_finish_time=18*60+45,
-                             lunch_break_start_time=12*60+30,
-                             lunch_break_finish_time=14*60+15)
-    ts.save()
+
+    try:
+        department=Department.objects.get(abbrev='info')
+        ts = TimeGeneralSettings(department=department,
+                                day_start_time=8*60,
+                                day_finish_time=18*60+45,
+                                lunch_break_start_time=12*60+30,
+                                lunch_break_finish_time=14*60+15)
+        ts.save()
+    except:
+        print(f"unable to find department [info]")
 
 class Migration(migrations.Migration):
 
