@@ -346,11 +346,7 @@ var salles = {
 var rooms ;
 
 
-var unavailable_rooms = [] ;
-unavailable_rooms = new Array(nbPer);
-for (var i = 0; i < nbPer; i++) {
-    unavailable_rooms[i] = new Array(nbSl);
-}
+var unavailable_rooms = {} ;
 
 
 /*---------------------

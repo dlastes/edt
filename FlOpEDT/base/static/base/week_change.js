@@ -727,10 +727,17 @@ function fetch_unavailable_rooms() {
 }
 
 function translate_unavailable_rooms(d) {
+    var i ;
     console.log(d);
-    var slot = +d.heure ;
-    var day = +d.jour ;
-    unavailable_rooms[day][slot].push(d.room);
+    if (Object.keys(unavailable_rooms).indexOf(d.room)==-1){
+	unavailable_rooms[d.room] = new Array(days.length);
+	for (i=0 ; i<days.length ; i++){
+	    unavailable_rooms[d.room][i] = [] ;
+	}
+    }
+    var iday = get_day(d.day).iday ;
+    unavailable_rooms[d.room][iday].push({start_time: +d.start_time,
+					  duration: +d.duration});
 }
 
 /*--------------------

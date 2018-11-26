@@ -42,6 +42,19 @@
                  */
 
 
+/*----------------------
+  -------   ROOMS  -------
+  ----------------------*/
+
+function get_day(ref){
+    var nd = days.filter(function(dd) {
+	return dd.ref == ref;
+    });
+    if (nd.length != 1) {
+	return null ;
+    }
+    return nd[0];
+}
 
 
 /*----------------------
@@ -1551,11 +1564,7 @@ function indexOf_constraints(c, start){
    ---------------------*/
 
 function clean_unavailable_rooms() {
-    for (var i = 0; i < nbPer; i++) {
-	for (var j = 0; j < nbSl; j++) {
-	    unavailable_rooms[i][j] = [] ;
-	}
-    }
+    unavailable_rooms = {} ;
 }
 
 
