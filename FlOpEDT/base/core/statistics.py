@@ -21,15 +21,14 @@ def get_period(year):
         (year + 1, tuple(range(1, end_week + 1))),
         )
 
+
 def get_holiday_list(period):
     for year, _ in period:
         for holiday in Holiday.objects.filter(year=year):
             yield year, holiday.week, holiday.day.no
 
-def get_open_days():
-    pass
 
-def get_holidays_weeks_for_period(period):
+def get_holidays_weeks(period):
     
     # HACK : Get holidays week list by checking courses scheduling
     for current_year, weeks in period:
@@ -38,6 +37,7 @@ def get_holidays_weeks_for_period(period):
                         an=current_year,
                         semaine=current_week).exists():
                     yield current_week
+
 
 def get_room_activity_by_day(department, year):
 
@@ -74,7 +74,7 @@ def get_room_activity_by_day(department, year):
         .distinct())
 
     # Holidays
-    holidays = set(get_holidays_weeks_for_period(period))
+    holidays = set(get_holidays_weeks(period))
     holiday_list = set(get_holiday_list(period))
     
     # TODO : nb_open_days

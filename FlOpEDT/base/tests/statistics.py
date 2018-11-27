@@ -3,7 +3,7 @@ from django.core.management import call_command
 
 import base.models as models
 from base.core.statistics import    get_room_activity_by_day, \
-                                    get_holidays_weeks_for_period, \
+                                    get_holidays_weeks, \
                                     get_holiday_list, \
                                     get_period
 
@@ -20,9 +20,9 @@ class StatisticsRoomTestCase(TestCase):
         get_room_activity_by_day(department, 2018)
         self.assertTrue(True)
 
-    def test_get_holidays_weeks_for_period(self):
+    def test_get_holidays_weeks(self):
         period = get_period(2018)
-        holidays = list(get_holidays_weeks_for_period(period))
+        holidays = list(get_holidays_weeks(period))
         self.assertIn(44, holidays)
 
     def test_get_holiday_list(self):
