@@ -29,8 +29,7 @@ def get_holiday_list(period):
 
 
 def get_holidays_weeks(period):
-    
-    # HACK : Get holidays week list by checking courses scheduling
+    # Get holidays week list by checking courses scheduling
     for current_year, weeks in period:
         for current_week in weeks:
                 if not Course.objects.filter(
@@ -41,14 +40,14 @@ def get_holidays_weeks(period):
 
 def get_room_activity_by_day(department, year):
 
-    # Return a room occupancy array for a department
-    # and a given period. If the period is not ended
-    # occupancy is computed until the current week
+    # Return a array containing each room of a department 
+    # with the number of days a room is unoccupied 
+    # during a given period. 
 
-    # We consider occupancy relatively to the number of
-    # days where a room is not occupied
+    # TODO : If the period is not ended occupancy is 
+    # computed until the current week
 
-    # year : correponds to the first period year
+    # year : correponds to the first period's year
     period = get_period(year)
 
     # Get room list 
@@ -77,9 +76,10 @@ def get_room_activity_by_day(department, year):
     holidays = set(get_holidays_weeks(period))
     holiday_list = set(get_holiday_list(period))
     
-    # TODO : nb_open_days
+    # Get the total number of open days
     all_weeks = set()
     period_weeks = [all_weeks.update(weeks) for _, weeks in period]
+
     nb_open_days = len(all_weeks - holidays) * 5
 
     # Get the number of day per room where the room is not utilized
@@ -92,6 +92,7 @@ def get_room_activity_by_day(department, year):
 
         for current_year, weeks in period:
             for current_week in weeks:
+    
                 # Skip holidays weeks
                 if not current_week in holidays:
                     for week_day in tuple(range(1,6)):
