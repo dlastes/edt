@@ -473,7 +473,7 @@ function remove_garbage(){
 
 
 function create_grid_data() {
-    if (init_nbRows != 1) {
+    if (slot_case) {
 	for(var d = 0 ; d<7 ; d++) {
 	    for (var s = 0; s < Object.keys(rev_constraints).length ; s++) {
 		var start = Object.keys(rev_constraints)[s] ;
@@ -498,7 +498,7 @@ function create_grid_data() {
     }
 
 
-    if (init_nbRows != 1) {
+    if (slot_case) {
 	for (var s = 0; s < Object.keys(rev_constraints).length ; s++) {
             for (var r = 0; r < set_rows.length; r++) {
 		var start = Object.keys(rev_constraints)[s] ;
@@ -1264,9 +1264,10 @@ function def_drag() {
 	    cancel_cm_room_tutor_change();
             if (ckbox["edt-mod"].cked && fetch.done) {
 
-                data_slot_grid.forEach(function(sl) {
-                    fill_grid_slot(c, sl);
-                });
+		// precompute avoided
+                // data_slot_grid.forEach(function(sl) {
+                //     fill_grid_slot(c, sl);
+                // });
 
                 drag.x = 0;
                 drag.y = 0;
@@ -1554,6 +1555,7 @@ function indexOf_constraints(c, start){
     var after = false ;
     var i = 0 ;
     var cst = constraints[c.c_type].allowed_st ;
+    var t = time_settings.time ;
     while(! after && i < cst.length) {
 	if (cst[i] > start) {
 	    after = true ;
