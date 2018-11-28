@@ -67,7 +67,8 @@ urlpatterns = [
     # ---------------------------------
     path('statistics/', include([
         path('', statistics.index, name="statistics"),
-        path('room_activity/', statistics.fetch_room_activity, name="room_activity"),
+        path('rooms/', statistics.fetch_room_activity, name="room_activity"),
+        path('tutors/', statistics.fetch_tutor_hours, name="tutor_hours"),
     ])),
 
     # from screen to db

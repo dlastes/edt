@@ -1,8 +1,8 @@
 import datetime
 
-from django.db.models import Q
+from django.db.models import Q, Count
 from base.models import ScheduledCourse, RoomGroup, Course, Holiday
-
+from people.models import Tutor
 
 def get_period(year):
 
@@ -20,6 +20,24 @@ def get_period(year):
         (year, tuple(range(start_week, max_week + 1))),
         (year + 1, tuple(range(1, end_week + 1))),
         )
+
+
+def get_period_filter(period, related_path='cours'):
+
+    # Return a Q filter to restrict records returned 
+    # by course query to a given period
+
+    filter = None
+    for year, weeks in period:
+        
+        kwargs = { f"{related_path}__an": year, f"{related_path}__semaine__in": weeks}
+
+        if filter:
+            filter |= Q(**kwargs)
+        else:
+            filter = Q(**kwargs)
+    
+    return filter
 
 
 def get_holiday_list(period):
@@ -50,19 +68,14 @@ def get_room_activity_by_day(department, year):
     # year : correponds to the first period's year
     period = get_period(year)
 
+    # Filter all the scheduled courses for the period
+    period_filter = get_period_filter(period)
+
     # Get room list 
     rooms = tuple(RoomGroup.objects \
         .filter(types__department = department) \
         .values_list('name', flat=True)
         .distinct())
-
-    # Filter all the scheduled courses for the period
-    period_filter = None
-    for current_year, weeks in period:
-        if period_filter:
-            period_filter |= Q(cours__an=current_year) and Q(cours__semaine__in=weeks)
-        else:
-            period_filter = Q(cours__an=current_year) and Q(cours__semaine__in=weeks)
 
     scheduled = set(ScheduledCourse.objects \
         .filter(
@@ -109,3 +122,26 @@ def get_room_activity_by_day(department, year):
         
 
     return {'open_days':nb_open_days, 'room_activity': unused_days_by_room}
+
+
+def get_tutor_hours(department, year):
+
+    # Return a tutor list with the numbers 
+    # of hours of given courses
+
+    # year : correponds to the first period's year
+    period = get_period(year)
+
+    # Filter all the scheduled courses for the period
+    period_filter = get_period_filter(period, related_path='taught_courses')    
+    
+    query = Tutor.objects \
+        .filter(
+            period_filter,
+            departments=department,
+            taught_courses__scheduledcourse__copie_travail=0,
+            ) \
+        .values_list('pk', 'username', 'first_name', 'last_name') \
+        .annotate(slots=Count('taught_courses__scheduledcourse'))
+
+    return list(query)
