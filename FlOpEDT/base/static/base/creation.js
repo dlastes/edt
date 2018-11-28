@@ -43,7 +43,7 @@
 
 
 /*----------------------
-  -------   ROOMS  -------
+  -------   TIME  -------
   ----------------------*/
 
 function get_day(ref){
@@ -54,6 +54,17 @@ function get_day(ref){
 	return null ;
     }
     return nd[0];
+}
+
+function update_pref_interval(tutor, iday, start_time, value) {
+    var pref = dispos[user.nom][iday];
+    var p = pref.filter(function(d) {
+	return d.start_time == start_time;
+    });
+    if (p.length != 1) {
+	console.log("Interval not found");
+    }
+    p.val = value ;
 }
 
 
@@ -526,15 +537,21 @@ function create_dh_keys() {
     //     .attr("font-weight", "bold")
     //     .text(gsckd_txt);
 
-    bg
-        .selectAll(".gridsckh")
-        .data(data_grid_scale_hour)
-        .enter()
-        .append("text")
-        .attr("class", "gridsckh")
-        .attr("x", gsckh_x)
-        .attr("y", gsckh_y)
-        .text(gsckh_txt);
+    // -- no slot --
+    // --  begin  --
+
+    // bg
+    //     .selectAll(".gridsckh")
+    //     .data(data_grid_scale_hour)
+    //     .enter()
+    //     .append("text")
+    //     .attr("class", "gridsckh")
+    //     .attr("x", gsckh_x)
+    //     .attr("y", gsckh_y)
+    //     .text(gsckh_txt);
+
+    // --   end   --
+    // -- no slot --
 
 
 }
@@ -1806,9 +1823,9 @@ function fetch_dispos_type() {
             async: true,
             contentType: "text/csv",
             success: function(msg) {
-                user.dispos_type = new Array(nbSl * nbPer);
+                user.dispos_type = [] ;
 
-                d3.csvParse(msg, translate_dispos_type_from_csv);
+                user.dispos_type = d3.csvParse(msg, translate_dispos_type_from_csv);
                 create_stype();
                 show_loader(false);
             },
@@ -1827,13 +1844,13 @@ function fetch_dispos_type() {
 
 
 function translate_dispos_type_from_csv(d) {
-    var d2p = {
-        day: +d.jour,
-        hour: +d.heure,
+    return {
+        day: d.day,
+	start_time: +d.start_time,
+	duration: +d.duration,
         val: +d.valeur,
         off: -1
     };
-    user.dispos_type[day_hour_2_1D(d2p)] = d2p;
 }
 
 function create_dispo_default_from_index(ind) {
@@ -1844,6 +1861,24 @@ function create_dispo_default_from_index(ind) {
         off: -1
     };
 }
+
+
+// -- no slot --
+// --  begin  --
+// to be extended: intervals could be different
+// dt {day, start_time}
+function get_dispos_type(dt) {
+    var s = user.dispos_type.filter(function(d){
+	return d.day==dt.day && d.start_time==dt.start_time;
+    });
+    if (s.length!=1) {
+	return null;
+    } else {
+	return s[0];
+    }
+}
+// --   end   --
+// -- no slot --
 
 
 

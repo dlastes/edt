@@ -126,25 +126,38 @@ function day_hour_2_1D(d) {
 
 
 function dispo_x(d) {
-    return d.day * (rootgp_width * labgp.width +
+    return idays[d.day].num * (rootgp_width * labgp.width +
             dim_dispo.plot * (dim_dispo.width + dim_dispo.right)) +
-        rootgp_width * labgp.width;
+        rootgp_width * labgp.width ;
 }
 
+
+
+// -- no slot --
+// --  begin  --
+// TO BE IMPROVED for multi-line, and lunch break
 function dispo_y(d) {
-    var ret = d.hour * dispo_h(d) ;
-    if (!pref_only && d.hour >= bknews.hour_bound) {
-	ret += bknews_h() ;
+    var t = time_settings.time ;
+    var ret = (d.start_time-t.day_start_time) * nbRows * scale ;
+//	+ row_gp[root_gp[c.promo].row].y * rev_constraints[c.start.toString()] * scale ;
+    if (d.start_time >= t.lunch_break_finish_time) {
+	ret += bknews_h() - (t.lunch_break_finish_time - t.lunch_break_start_time)*nbRows*scale ;
     }
     return ret ;
 }
+// --   end   --
+// -- no slot --
 
 function dispo_w(d) {
     return dim_dispo.plot * dim_dispo.width;
 }
 
 function dispo_h(d) {
-    return nbRows * labgp.height;
+    return nbRows * d.duration * scale ;
+}
+
+function dispo_fill(d) {
+    return smi_fill(d.val / par_dispos.nmax);
 }
 
 function dispo_short_fill(d) {
@@ -261,7 +274,12 @@ function txt_filDispos() {
 
 //ratio content
 function rc(d) {
-    return d.off == -1 ? dispos[user.nom][d.day][d.hour] / par_dispos.nmax : d.off / par_dispos.nmax;
+    // -- no slot --
+    // --  begin  --
+    // TO CHECK
+    return d.off == -1 ? d.val / par_dispos.nmax : d.off / par_dispos.nmax;
+    // --   end   --
+    // -- no slot --
 }
 
 
@@ -945,11 +963,19 @@ function but_sca_tri_v(add) {
    ------ STYPE ------
   --------------------*/
 function dispot_x(d) {
-    return d.day * (did.w + did.mh);
+    return idays[d.day].num * (did.w + did.mh);
 }
 
 function dispot_y(d) {
-    return valid.h * 1.25 + d.hour * did.h;
+    var ts = time_settings.time ;
+    var ret = 1.25 * valid.h
+	+ (d.start_time - ts.day_start_time) * did.scale;
+    if(d.start_time>=ts.lunch_break_finish_time) {
+	ret -= (ts.lunch_break_finish_time
+		- ts.lunch_break_start_time)
+	    * did.scale ;
+    }
+    return ret ;
 }
 
 function dispot_w(d) {
@@ -957,11 +983,11 @@ function dispot_w(d) {
 }
 
 function dispot_h(d) {
-    return did.h;
+    return d.duration * did.scale ;
 }
 
 function dispot_more_h(d) {
-    return .25 * did.h;
+    return  did.shift_s * did.scale;
 }
 
 function dispot_more_y(d) {
@@ -990,11 +1016,13 @@ function dispot_all_w(d) {
 }
 
 function gsclbt_y() {
-    return valid.h * 1.25 + did.h * .5 * nbSl;
+    return dispot_y({start_time:
+		     time_settings.time.lunch_break_start_time});
+    //valid.h * 1.25 + did.h * .5 * nbSl;
 }
 
 function gsclbt_x() {
-    return (did.w + did.mh) * nbPer - did.mh;
+    return (did.w + did.mh) * days.length - did.mh;
 }
 
 function dispot_but_x() {

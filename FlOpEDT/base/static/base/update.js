@@ -81,18 +81,14 @@ function go_pref(quick) {
             .attr("height", 0)
             .attr("x", dispo_x)
             .attr("y", dispo_y)
-            .attr("fill", function(d) {
-                return smi_fill(d.val / par_dispos.nmax);
-            })
+            .attr("fill", dispo_fill)
             .merge(dat.select(".dispo-bg"))
             .transition(t)
             .attr("width", dispo_w)
             .attr("height", dispo_h)
             .attr("x", dispo_x)
             .attr("y", dispo_y)
-            .attr("fill", function(d) {
-                return smi_fill(d.val / par_dispos.nmax);
-            });
+            .attr("fill", dispo_fill);
 
         var datex = dat
             .exit();
@@ -124,7 +120,8 @@ function go_pref(quick) {
                         function(c) {
                             return {
                                 day: d.day,
-                                hour: d.hour,
+                                start_time: d.start_time,
+				duration: d.duration,
                                 off: c.off
                             };
                         });
@@ -657,17 +654,23 @@ function go_grid(quick) {
     day_scale.exit().remove();
 
 
+    // -- no slot --
+    // --  begin  --
+    
+    
+    // bg
+    //     .selectAll(".gridsckh")
+    //     .data(data_grid_scale_hour)
+    //     .transition(t)
+    //     .attr("x", gsckh_x)
+    //     .attr("y", gsckh_y);
+
+
+    // --   end   --
+    // -- no slot --
+
 
     
-    bg
-        .selectAll(".gridsckh")
-        .data(data_grid_scale_hour)
-        .transition(t)
-        .attr("x", gsckh_x)
-        .attr("y", gsckh_y);
-
-
-
     fg.select(".h-sca").select("rect")
         .transition(t)
         .attr("x", but_sca_h_x())

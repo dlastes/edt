@@ -59,8 +59,6 @@ function fetch_dispos() {
         contentType: "text/csv",
         success: function(msg) {
             console.log("in");
-//            console.log(msg);
-            prev_prof = "";
 
             if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
                 an_att == weeks.init_data[weeks.sel[0]].an) {
@@ -94,23 +92,88 @@ function fetch_dispos() {
 
 function translate_dispos_from_csv(d) {
     if(Object.keys(dispos).indexOf(d.prof)==-1){
-	dispos[d.prof] = new Array(days.length);
+	dispos[d.prof] = {} ;
         for (var i = 0; i < days.length; i++) {
-	    dispos[d.prof][i] = [] ;
+	    dispos[d.prof][days[i].ref] = [] ;
 	}	
     }
-    var iday = get_day(d.day).iday;
-    dispos[d.prof][iday].push({start_time:+d.start_time,
+    dispos[d.prof][d.day].push({start_time:+d.start_time,
 			       duration: +d.duration,
-			       value: + d.valeur});
+			       value: +d.valeur});
+}
+
+// insert a valued interval into a list of valued interval
+// (splices it and divides it if needed)
+// pref: {start_time, duration, value}
+// list: list of pref
+function insert_interval(pref, list) {
+    var ts = time_settings.time ;
+    if (pref.start_time < ts.lunch_break_start_time) {
+	if (pref.start_time < ts.day_start_time) {
+	    pref.duration -= ts.day_start_time - pref.start_time ;
+	    pref.start_time = ts.day_start_time ;
+	}
+	if(pref.start_time + pref.duration > ts.lunch_break_start_time) {
+	    if(pref.start_time + pref.duration < ts.lunch_break_finish_time) {
+		pref.duration -= pref.start_time + pref.duration - ts.lunch_break_start_time ;
+	    } else {
+		insert_normalized_interval(
+		    {start_time: ts.lunch_break_finish_time,
+		     duration: pref.start_time + pref.duration - ts.lunch_break_finish_time,
+		     value: pref.value},
+		    list) ;
+		pref.duration = ts.lunch_break_start_time - pref.start_time ;
+	    }
+	}
+    } else if (pref.start_time + pref.duration < ts.lunch_break_finish_time) {
+	return ;
+    } else if (pref.start_time < ts.lunch_break_finish_time){
+	pref.duration -= ts.lunch_break_finish_time - pref.start_time ;
+	pref.start_time = ts.lunch_break_finish_time ;
+    }
+    insert_normalized_interval(pref,list);
+}
+
+// PRECOND: interval fully within the working hours
+// pref: {start_time, duration, value}
+// list: list of pref
+function insert_normalized_interval(pref, list) {
+//    list.splice(index, nbElements, item)
 }
 
 
+function allocate_dispos(tutor) {
+    dispos[tutor] = {} ;
+    for (var i = 0; i < days.length; i++) {
+	dispos[d.prof][days[i].ref] = [] ;
+    }	
+}
 
+// -- no slot --
+// --  begin  --
+// to change, maybe, if splitting intervals is not allowed
+// in the interface
+function fill_missing_preferences(tutor) {
+    for (var i = 0; i < days.length; i++) {
+	insert_interval({start_time: ts.day_start_time,
+			 duration: ts.day_finish_time-ts.day_start_time,
+			 value: -1},
+			dispos[tutor][days[i].ref]);
+    }
+
+}
+// --   end   --
+// -- no slot --
+
+
+// -- no slot --
+// --  begin  --
+// to be cleaned: user.dispos should be avoidable
 // off: offset useful for the view. Quite unclean.
 function create_dispos_user_data() {
 
-    var d, j, k, d2p;
+    var d, j, k, d2p, pref_list;
+    var ts = time_settings.time ;
 
     user.dispos = [];
     user.dispos_bu = [];
@@ -118,44 +181,47 @@ function create_dispos_user_data() {
     var current;
 
     if (dispos[user.nom] === undefined) {
-        dispos[user.nom] = new Array(nbPer);
-        for (var i = 0; i < nbPer; i++) {
-            dispos[user.nom][i] = new Array(nbSl);
-            dispos[user.nom][i].fill(-1);
-        }
+	allocate_dispos(tutor);
+	fill_missing_preferences(tutor);
     }
 
-
-    for (var j = 0; j < nbPer; j++) {
-        for (var k = 0; k < nbSl; k++) {
-            //	    if(!is_free(j,k)) {
+    for (var i = 0; i < days.length; i++) {
+	pref_list = dispos[user.nom][days[i].ref] ;
+	for (var k = 0 ; k<pref_list.length ; k++) {
             d2p = {
-                day: j,
-                hour: k,
-                val: dispos[user.nom][j][k],
-                off: -1
+		day: days[i].ref,
+		start_time: pref_list[k].start_time,
+		duration: pref_list[k].duration,
+		val: pref_list[k].value,
+		off: -1
             };
             user.dispos_bu.push(d2p);
-            if (dispos[user.nom][j][k] < 0) {
+            if (pref_list[k].value < 0) {
 		if (!pref_only) {
-                    dispos[user.nom][j][k] = user.dispos_type[day_hour_2_1D(d2p)].val;
+                    pref_list[k].val = get_dispos_type(d2p).val;
 		} else {
-		    dispos[user.nom][j][k] = par_dispos.nmax
+		    pref_list[k].val = par_dispos.nmax
 		}
-                //console.log(j,k,day_hour_2_1D(d2p),user.dispos_type[day_hour_2_1D(d2p)])
+		//console.log(j,k,day_hour_2_1D(d2p),user.dispos_type[day_hour_2_1D(d2p)])
             }
+	    
+	    // different object
             user.dispos.push({
-                day: j,
-                hour: k,
-                val: dispos[user.nom][j][k],
-                off: -1
+		day: days[i].ref,
+		start_time: pref_list[k].start_time,
+		duration: pref_list[k].duration,
+		val: pref_list[k].value,
+		off: -1
             });
+	}
 
-            //	    }
-        }
     }
 
+    
+
 }
+// --   end   --
+// -- no slot --
 
 
 

@@ -109,6 +109,17 @@ var fetch = {
 
 var svg_cont ;
 
+
+/*--------------------------
+  ------- TIME ------
+  --------------------------*/
+
+var idays = {} ;
+for (var i = 0 ; i<days.length ; i++){
+    idays[days[i].ref] = days[i] ;
+}
+
+
 /*--------------------------
   ------- PREFERENCES ------
   --------------------------*/
@@ -153,7 +164,8 @@ var data_dispo_adv_init = [];
 for (var i = 0; i <= par_dispos.nmax; i++) {
     data_dispo_adv_init.push({
         day: 0,
-        hour: 0,
+        start_time: 0,
+	duration: 0,
         off: i
     });
 }
@@ -375,10 +387,6 @@ var butpr = {
     tlx: 900
 };
 
-// helper variable
-// the fetched data is sorted by instructor -> avoid full traversal
-var prev_prof;
-
 // has any instructor been fetched?
 var first_fetch_prof = true;
 
@@ -453,13 +461,18 @@ var ack = {
 
 // display parameters
 var did = {
-    h: 10,
+    h: 60,
     w: 15,
     mh: 5,
     mav: 10,
     tlx: 316,
-    tly: -180
+    tly: -180,
+    shift_s: 20
 };
+did.scale = did.h / (time_settings.time.day_finish_time
+		     - time_settings.time.lunch_break_finish_time
+		     + time_settings.time.lunch_break_start_time
+		     - time_settings.time.day_start_time) ;
 var stbut = {
     w: 104,
     h: 60

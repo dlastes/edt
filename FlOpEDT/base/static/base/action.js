@@ -52,8 +52,9 @@ function apply_change_simple_pref(d) {
             d.val = Math.floor(d.val / (par_dispos.nmax / 2)) * par_dispos.nmax / 2;
         }
         d.val = (d.val + par_dispos.nmax / 2) % (3 * par_dispos.nmax / 2);
-        dispos[user.nom][d.day][d.hour] = d.val;
-        user.dispos[day_hour_2_1D(d)].val = d.val;
+	update_pref_interval(user.nom, idays[d.day].num, d.start_time, d.val)
+        //dispos[user.nom][idays[d.day]][d.hour] = d.val;
+        //user.dispos[day_hour_2_1D(d)].val = d.val;
         go_pref(true);
     }
 }
@@ -89,7 +90,7 @@ function apply_wk_change(d, i) { //if(fetch.done) {
     if (i > 0 && i <= weeks.ndisp) {
         weeks.sel[0] = i + weeks.fdisp;
     }
-    dispos = [];
+    dispos = {};
     user.dispos = [];
 
     fetch_all(false);
@@ -606,8 +607,11 @@ function apply_ckbox(dk) {
                 //     }
                 //     go_edt(false);
                 // }
-                if (dispos.length == 0) {
+                if (Object.keys(dispos).length == 0) {
 		    fetch_dispos();
+		} else {
+		    create_dispos_user_data();
+		    go_edt(false);
 		}
 		
             } else {
@@ -642,7 +646,7 @@ function apply_ckbox(dk) {
 		
                 edt_but.attr("visibility", "visible");
 
-		if (dispos.length == 0) {
+		if (Object.keys(dispos).length == 0) {
 		    fetch_dispos();
 		}
                 // if (!fetch.dispos_ok) {
