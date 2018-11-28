@@ -21,26 +21,80 @@
 // you develop activities involving the FlOpEDT/FlOpScheduler software
 // without disclosing the source code of your own applications.
 
+/*
+    Display the department's tutor list with 
+    their total number of hours of activity
+*/
+function displayTutorHours(data) {
+    let container = d3.select('#statistics table')
 
+    // Clear table
+    container.selectAll('tr').remove();
+
+    tutor =  container.selectAll('tr')
+        .data(data)
+        .enter()
+        .append('tr')
+
+    // Tutor name
+    tutor
+        .append('td')
+        .text((d) => d[1])
+
+    // Number of slots
+    tutor
+        .append('td')
+        .text((d) =>  d[4])
+}
 
 /*
     Display the number of days of inactivity for each room
 */
-function displayRoomActivity(data){
-    rooms = d3.select('#statistics')
+function displayRoomActivity(data) {
+    
+    let container = d3.select('#statistics table')
+    
+    // Clear table
+    container.selectAll('tr').remove();
+
+    rooms =  container.selectAll('tr')
         .data(data.room_activity)
         .enter()
-        .append('div')
+        .append('tr')
 
     // Room name
     rooms
-        .append('div')
-        .text((d)=> d.room)
+        .append('td')
+        .text((d) => d.room)
 
     // Number of days of inactivity
     rooms
-        .append('div')
-        .text((d)=> d.count)        
+        .append('td')
+        .text((d) => d.count)
+}
+
+/*
+    Global method to display 
+*/
+function displayStatistic(label){
+    let statistic = available_statistics[label]
+    if(statistic){
+        // TODO : loading
+
+        // // Reset view
+        // if(statisticContainer){
+        //     while (statisticContainer.hasChildNodes()) {
+        //         statisticContainer.removeChild(statisticContainer.firstChild);
+        //      }            
+        // }
+
+        // Request server to get datas
+        fetchStatistcs(statistic.url, statistic.callback);
+    }
+}
+
+function changeStatisticEventHandler(event){
+    displayStatistic(event.target.value);
 }
 
 /*
@@ -64,4 +118,33 @@ function fetchStatistcs(url, callback) {
     });
 }
 
-document.addEventListener('DOMContentLoaded', () => fetchStatistcs(url_room_activity, displayRoomActivity));
+/*
+    Initialization
+*/
+function init(){
+    statisticContainer = document.querySelector('#statistics');
+    
+    statisticSelect = document.querySelector('#select_statistic');
+    statisticSelect.onchange= changeStatisticEventHandler;
+
+    displayStatistic(statisticSelect.options[statisticSelect.selectedIndex].value);
+}
+
+/*
+    Main process
+*/
+var statisticContainer;
+var statisticSelect;
+
+var available_statistics = {
+    'room_activity': {
+        url: statistics_urls['room_activity'], 
+        callback: displayRoomActivity,
+    },
+    'tutor_hours': {
+        url: statistics_urls['tutor_hours'],
+        callback: displayTutorHours,
+    },
+}
+
+document.addEventListener('DOMContentLoaded', init);

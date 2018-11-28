@@ -31,25 +31,75 @@
 
 {% load static %}
 
+<style type="text/css">
+    #statistics{
+        margin: 20px auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 600px;
+    }
+    #statistics select {
+        margin: 20px auto;
+    }
+
+    #statistics table {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 500px;
+    }
+
+    #statistics td,
+    #statistics th {
+        border: 1px solid #ddd;
+        padding: 8px;
+    }
+
+    #statistics tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+
+    #statistics tr:hover {
+        background-color: #ddd;
+    }
+
+    #statistics th {
+        padding-top: 12px;
+        padding-bottom: 12px;
+        text-align: left;
+        background-color: #4CAF50;
+        color: white;
+    }
+</style>
+</style>
+
 {% block script_variable %}
 
 <link rel="stylesheet" href="{% static 'base/better.css' %}?2" />
 <script src="{% static 'base/d3.v4.min.js' %}"></script>
 <script>
-    var url_room_activity = "{% url "base:room_activity" department %}";
+    var statistics_urls = {
+        room_activity: "{% url "base:room_activity" department %}",
+        tutor_hours: "{% url "base:tutor_hours" department %}",
+    }
     var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
 </script>
 
 {% endblock %}
+
+<div id="statistics">
+    <select id="select_statistic">
+        <option value="room_activity">Nombre de jours d'innocupation des salles</option>
+        <option value="tutor_hours">Nombre d'heures de cours données par professeur</option>
+    </select>
+
+    <table></table>
+</div>
 
 {% block script_file %}
 
 <script type='text/javascript' src="{% static 'base/statistics.js' %}"></script>
 
 {% endblock %}
-
-<div id="statistics">
-
-</div>
 
 {% endblock %}
