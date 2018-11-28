@@ -409,7 +409,7 @@ function gm_y(datum) {
 }
 
 function gs_x(d) {
-    return d.iday * (rootgp_width * labgp.width +
+    return idays[d.day].num * (rootgp_width * labgp.width +
         dim_dispo.plot * (dim_dispo.width + dim_dispo.right));
 }
 

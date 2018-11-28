@@ -474,12 +474,12 @@ function remove_garbage(){
 
 function create_grid_data() {
     if (slot_case) {
-	for(var d = 0 ; d<7 ; d++) {
+	for(var i = 0 ; i<days.length ; i++) {
 	    for (var s = 0; s < Object.keys(rev_constraints).length ; s++) {
 		var start = Object.keys(rev_constraints)[s] ;
 		if (start < time_settings.time.day_finish_time){
 		    var gs = {
-			iday: d,
+			day: days[i].ref,
 			start: start,
 			duration: rev_constraints[start],
 			display: false,
@@ -1264,10 +1264,10 @@ function def_drag() {
 	    cancel_cm_room_tutor_change();
             if (ckbox["edt-mod"].cked && fetch.done) {
 
-		// precompute avoided
-                // data_slot_grid.forEach(function(sl) {
-                //     fill_grid_slot(c, sl);
-                // });
+		// no data_slot_grid when uniline
+                data_slot_grid.forEach(function(sl) {
+                    fill_grid_slot(c, sl);
+                });
 
                 drag.x = 0;
                 drag.y = 0;
