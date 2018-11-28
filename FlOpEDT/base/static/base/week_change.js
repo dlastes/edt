@@ -176,10 +176,26 @@ function create_dispos_user_data() {
 
 function create_mod_dd() {
 
+    var high_mod = relevant_modules();
+
+    var high_items = new Array();
+    var low_items = new Array();
+    modules.all.forEach(function(m) {
+        if (high_mod.has(m)) {
+            high_items.push(m);
+        } else {
+            low_items.push(m);
+        }
+    });
+    var items = high_items.concat(low_items);
+
+    mog
+        .selectAll("option")
+        .remove();
 
     var seldd = mog
         .selectAll("option")
-        .data(modules.all, function(d, i) {
+        .data(items, function(d, i) {
             return d;
         });
 
@@ -194,16 +210,13 @@ function create_mod_dd() {
             return d;
         });
 
-    seldd.exit().remove();
-
-    seldd
+    mog
+        .selectAll("option")
         .each(function(d, i) {
             if (d == modules.sel) {
                 d3.select(this).attr("selected", "");
             }
         });
-
-
 }
 
 
