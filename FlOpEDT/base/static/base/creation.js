@@ -1562,10 +1562,16 @@ function indexOf_constraints(c, start){
 	}
     }
     if (i==cst.length) {
-	return time_settings.time.day_finish_time ;
+	return t.day_finish_time ;
 	// constraints[keys[keys.length-1]] ;
     } else if (i==cst.length - 1) {
 	return cst[i] ;
+    } else if (i==0) {
+	if (start < t.day_start_time - c.duration) {
+	    return start ;
+	} else {
+	    return t.day_start_time ;
+	}
     } else {
 	if (start - cst[i] > cst[i+1] - start) {
 	    return cst[i+1];
