@@ -56,17 +56,6 @@ function get_day(ref){
     return nd[0];
 }
 
-function update_pref_interval(tutor, iday, start_time, value) {
-    var pref = dispos[user.nom][iday];
-    var p = pref.filter(function(d) {
-	return d.start_time == start_time;
-    });
-    if (p.length != 1) {
-	console.log("Interval not found");
-    }
-    p.val = value ;
-}
-
 
 /*----------------------
   -------   SVG  -------

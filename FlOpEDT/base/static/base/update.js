@@ -347,8 +347,7 @@ function go_cm_advanced_pref(quick) {
         .attr("class", "dispo-menu")
         .attr("cursor", "pointer")
         .on("click", function(d) {
-            dispos[user.nom][d.day][d.hour] = d.off;
-            user.dispos[day_hour_2_1D(d)].val = d.off;
+	    update_pref_interval(user.nom, d.day, d.start_time, d.off) ;
 	    data_dispo_adv_cur = [] ;
 	    go_pref(true);
         });

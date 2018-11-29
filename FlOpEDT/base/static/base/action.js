@@ -52,7 +52,7 @@ function apply_change_simple_pref(d) {
             d.val = Math.floor(d.val / (par_dispos.nmax / 2)) * par_dispos.nmax / 2;
         }
         d.val = (d.val + par_dispos.nmax / 2) % (3 * par_dispos.nmax / 2);
-	update_pref_interval(user.nom, idays[d.day].num, d.start_time, d.val)
+	update_pref_interval(user.nom, d.day, d.start_time, d.val) ;
         //dispos[user.nom][idays[d.day]][d.hour] = d.val;
         //user.dispos[day_hour_2_1D(d)].val = d.val;
         go_pref(true);
@@ -137,9 +137,8 @@ function select_room_change() {
     room_tutor_change.proposal = [] ;
 
     // find rooms where a course take place
-    console.log(c);
+
     var concurrent_courses = simultaneous_courses(c.day, c.start, c.duration, c.id_cours) ;
-    console.log(concurrent_courses);
     
     var occupied_rooms = [] ;
     for (i = 0 ; i < concurrent_courses.length ; i++) {

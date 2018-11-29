@@ -112,3 +112,30 @@ function no_overlap(list, start_time, duration) {
     }
     return false ;
 }
+
+
+
+function update_pref_interval(tutor, day, start_time, value) {
+    var pref = dispos[user.nom][day];
+    var p = pref.filter(function(d) {
+	return d.start_time == start_time;
+    });
+    if (p.length == 1) {
+	p[0].val = value ;
+    } else {
+	console.log("Problem with the time interval");
+    }
+    if (user.nom == tutor) {
+	pref = user.dispos ;
+	p = pref.filter(function(d) {
+	    return d.day == day && d.start_time == start_time;
+	});
+	console.log(p);
+	if (p.length == 1) {
+	    p[0].val = value ;
+	} else {
+	    console.log("Problem with the time interval");
+	}
+    }
+}
+
