@@ -140,7 +140,8 @@ function on_group_rcv(dg) {
 
     }
     
-    //go_edt(true);
+    fetch.groups_ok = true;
+    create_grid_data();
 }
 
 
@@ -159,7 +160,11 @@ function on_constraints_rcv(cst_data) {
 	}
     }
     rev_constraints[garbage.start.toString()] = garbage.duration ;
+    fetch.constraints_ok = true;
+    create_grid_data();
 }
+
+
 
 
 

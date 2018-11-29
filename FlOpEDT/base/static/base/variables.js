@@ -58,6 +58,15 @@
           ----------           
            \     */
 
+/*--------------------------
+  ------- TIME ------
+  --------------------------*/
+
+var idays = {} ;
+for (var i = 0 ; i<days.length ; i++){
+    idays[days[i].ref] = days[i] ;
+}
+
 /*--------------------
    ------ ALL -------
   --------------------*/
@@ -102,7 +111,9 @@ var fetch = {
     ongoing_un_rooms: false,
     done: false,
     cours_ok: false,
-    dispos_ok: false
+    dispos_ok: false,
+    groups_ok: false,
+    constraints_ok: false
 };
 //cours_ok pas très utile
 
@@ -110,14 +121,6 @@ var fetch = {
 var svg_cont ;
 
 
-/*--------------------------
-  ------- TIME ------
-  --------------------------*/
-
-var idays = {} ;
-for (var i = 0 ; i<days.length ; i++){
-    idays[days[i].ref] = days[i] ;
-}
 
 
 /*--------------------------
@@ -234,7 +237,7 @@ var data_grid_scale_hour = ["8h-9h25", "9h30-10h55", "11h05-12h30", "14h15-15h40
 var garbage = {
     start: 1125,
     duration: 90,
-    iday: days.length-2
+    day: days[days.length-2].ref
 };
 
 
