@@ -137,7 +137,9 @@ function select_room_change() {
     room_tutor_change.proposal = [] ;
 
     // find rooms where a course take place
-    var concurrent_courses = simultaneous_courses(c) ;
+    console.log(c);
+    var concurrent_courses = simultaneous_courses(c.day, c.start, c.duration, c.id_cours) ;
+    console.log(concurrent_courses);
     
     var occupied_rooms = [] ;
     for (i = 0 ; i < concurrent_courses.length ; i++) {
@@ -148,20 +150,22 @@ function select_room_change() {
 	    }
 	}
     }
-    
+
     for (i = 0 ; i < rooms.roomtypes[c.room_type].length ; i++) {
 	cur_roomgroup = rooms.roomtypes[c.room_type][i] ;
 	if (! is_garbage({day:c.day,start_time:c.start})) {
 
 	    // is a room in the roomgroup occupied?
 	    is_occupied = false ;
+	    is_available = true ;
 	    j = 0;
 	    while(!is_occupied && is_available
 		  && j<rooms.roomgroups[cur_roomgroup].length) {
 		cur_room = rooms.roomgroups[cur_roomgroup][j] ;
 		is_occupied = (occupied_rooms.indexOf(cur_room) != -1);
-		is_available = no_overlap(unavailable_rooms[cur_room][c.day],
-					  c.start, c.duration) ;
+		is_available = (Object.keys(unavailable_rooms).indexOf(cur_room) == -1
+				|| no_overlap(unavailable_rooms[cur_room][c.day],
+					      c.start, c.duration)) ;
 		j++ ;
 	    }
 

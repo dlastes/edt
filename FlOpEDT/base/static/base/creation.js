@@ -1316,12 +1316,7 @@ function def_drag() {
         })
 	.on("end", function(d) {
 
-	    console.log("end");
-	    
             if (cur_over != null && ckbox["edt-mod"].cked && fetch.done) {
-
-		console.log("meaniningful");
-
 
                 mg.node().appendChild(drag.sel.node());
 
@@ -1482,23 +1477,7 @@ function warning_check(c2m, day, start_time) {
 
 
 function simultaneous_courses(day, start_time, duration, id) {
-    // console.log(day,start_time,duration);
-
-    // for (var i = 0 ; i< cours.length ; i++){
-    // 	c = cours[i];
-    // 	console.log(c.day, c.start, c.duration);
-	
-    // 	console.log(c.start, start_time, duration, (c.start < start_time+duration
-    // 		     && c.start >= start_time));
-    // 	console.log((c.start + c.duration < start_time+duration
-    // 		     && c.start +c.duration > start_time));
-    // 	console.log((c.start <= start_time
-    // 		     && c.start + c.duration > start_time + duration));
-	
-	
-    // }
-    
-    var ret = cours.filter(function(c) {
+    return cours.filter(function(c) {
         return (c.day == day 
 		&& ((c.start < start_time+duration
 		     && c.start >= start_time)
@@ -1508,8 +1487,6 @@ function simultaneous_courses(day, start_time, duration, id) {
 			&& c.start + c.duration > start_time + duration))
 		&& c.id_cours != id);
     });
-    // console.log(ret);
-    return ret ;
 }
 
 /*
