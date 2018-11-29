@@ -129,21 +129,19 @@ function select_room_change() {
     room_tutor_change.old_value = c.room ;
     room_tutor_change.cur_value = c.room ;
 
-    var busy_rooms, cur_roomgroup, is_occupied ;
-    var i, j ;
+    var busy_rooms, cur_roomgroup, cur_room, is_occupied, is_available ;
+    var i, j, i_unav ;
 
     var fake_id = new Date() ;
     fake_id = fake_id.getMilliseconds() + "-" + c.id_cours ;
     room_tutor_change.proposal = [] ;
 
     // find rooms where a course take place
-    var simultaneous_courses = cours
-	.filter(function(d) {
-	    return d.day==c.day && d.slot==c.slot && d.id_cours!=c.id_cours ;
-	});
+    var concurrent_courses = simultaneous_courses(c) ;
+    
     var occupied_rooms = [] ;
-    for (i = 0 ; i < simultaneous_courses.length ; i++) {
-	busy_rooms = rooms.roomgroups[simultaneous_courses[i].room] ;
+    for (i = 0 ; i < concurrent_courses.length ; i++) {
+	busy_rooms = rooms.roomgroups[concurrent_courses[i].room] ;
 	for (j = 0 ; j<busy_rooms.length ; j++) {
 	    if (occupied_rooms.indexOf(busy_rooms[j])==-1) {
 		occupied_rooms.push(busy_rooms[j]) ;
@@ -153,22 +151,21 @@ function select_room_change() {
     
     for (i = 0 ; i < rooms.roomtypes[c.room_type].length ; i++) {
 	cur_roomgroup = rooms.roomtypes[c.room_type][i] ;
-	if (is_garbage(c.day,c.slot)
-	    || unavailable_rooms[c.day][c.slot]
-	    .indexOf(rooms.roomtypes[c.room_type][i]) == -1) {
+	if (! is_garbage({day:c.day,start_time:c.start})) {
 
 	    // is a room in the roomgroup occupied?
 	    is_occupied = false ;
 	    j = 0;
-	    while(!is_occupied
+	    while(!is_occupied && is_available
 		  && j<rooms.roomgroups[cur_roomgroup].length) {
-		is_occupied = (occupied_rooms
-			       .indexOf(rooms.roomgroups[cur_roomgroup][j])
-			       != -1);
+		cur_room = rooms.roomgroups[cur_roomgroup][j] ;
+		is_occupied = (occupied_rooms.indexOf(cur_room) != -1);
+		is_available = no_overlap(unavailable_rooms[cur_room][c.day],
+					  c.start, c.duration) ;
 		j++ ;
 	    }
 
-	    if(!is_occupied) {
+	    if(!is_occupied && is_available) {
 		var cur_prop = {} ;
 		cur_prop.fid = fake_id ;
 		cur_prop.content = rooms.roomtypes[c.room_type][i] ;
@@ -184,7 +181,7 @@ function select_room_change() {
 
     if (c.room == une_salle ||
 	occupied_rooms.indexOf(c.room) != -1) {
-	return true;
+	return true ;
     } else {
 	return false ;
     }

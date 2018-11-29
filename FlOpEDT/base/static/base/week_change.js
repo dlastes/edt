@@ -590,9 +590,6 @@ function translate_cours_pl_from_csv(d) {
     if (salles.pl.indexOf(d.room) == -1) {
         salles.pl.push(d.room);
     }
-    var nd = days.filter(function(dd) {
-	return dd.ref == d.day;
-    });
     var co = {
         id_cours: +d.id_cours,
         no_cours: +d.num_cours,
@@ -603,8 +600,8 @@ function translate_cours_pl_from_csv(d) {
         mod: d.module,
 	c_type: d.coursetype,
         day: d.day,
-        nday: nd[0].num,
         start: +d.start_time,
+        duration: constraints[d.coursetype].duration,
         room: d.room,
 	room_type: d.room_type,
 	color_bg: d.color_bg,
@@ -633,8 +630,8 @@ function translate_cours_pp_from_csv(d) {
         mod: d.module,
 	c_type: d.coursetype,
         day: garbage.day,
-        nday: garbage.iday,
         start: garbage.start,
+        duration: constraints[d.coursetype].duration,
         room: une_salle,
 	room_type: d.room_type,
 	color_bg: d.color_bg,
@@ -797,14 +794,13 @@ function translate_unavailable_rooms(d) {
     var i ;
     console.log(d);
     if (Object.keys(unavailable_rooms).indexOf(d.room)==-1){
-	unavailable_rooms[d.room] = new Array(days.length);
+	unavailable_rooms[d.room] = {} ; 
 	for (i=0 ; i<days.length ; i++){
-	    unavailable_rooms[d.room][i] = [] ;
+	    unavailable_rooms[d.room][days[i].ref] = [] ;
 	}
     }
-    var iday = get_day(d.day).iday ;
-    unavailable_rooms[d.room][iday].push({start_time: +d.start_time,
-					  duration: +d.duration});
+    unavailable_rooms[d.room][days[i].ref].push({start_time: +d.start_time,
+						 duration: +d.duration});
 }
 
 /*--------------------

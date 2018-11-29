@@ -30,8 +30,7 @@
 function index_in_pref(list, instant) {
     var after = false ;
     var i = 0 ;
-    var t = time_settings.time ;
-    
+
     while(! after && i < list.length) {
 	if (list[i] > instant) {
 	    after = true ;
@@ -53,9 +52,10 @@ function get_preference(day, start_time, duration, tutor) {
     var pref = dispos[tutor][day];
     var t = time_settings.time ;
     
-    var i_start = index_in_pref(pref, start_time) ;
-    var i_end = index_in_pref(pref, start_time+duration) ;
-    var i, tot_weight, start_inter, end_inter ;
+    var i_start = index_in_pref(pref.map(function(d){return d.start_time;}), start_time) ;
+    var i_end = index_in_pref(pref.map(function(d){return d.start_time;}), start_time+duration) ;
+
+    var i, tot_weight, start_inter, end_inter, w ;
     var average_pref = 0 ;
     var unknown = false ;
     var unavailable = false ;
@@ -65,21 +65,23 @@ function get_preference(day, start_time, duration, tutor) {
     }
 
     i = i_start - 1 ;
+    tot_weight = 0 ;
     while (!unknown && !unavailable && i < i_end) {
 	if(i==i_start - 1) {
 	    start_inter = start_time ;
 	} else {
-	    start_inter = pref.start_time ;
+	    start_inter = pref[i].start_time ;
 	}
 	if(i==i_end - 1) {
 	    end_inter = start_time + duration ;
 	} else {
-	    end_inter = pref.start_time + pref.duration ;
+	    end_inter = pref[i].start_time + pref[i].duration ;
 	}
-	average_pref += (end_inter-start_inter) * pref.value ;
-	tot_weight += end_inter-start_inter ;
-	unknown = (pref.value == -1) ;
-	unavailable = (pref.value == 0) ;
+	w = (end_inter-start_inter) ;
+	average_pref += w * pref[i].value ;
+	tot_weight += w ;
+	unknown = (pref[i].value == -1 && w>0) ;
+	unavailable = (pref[i].value == 0 && w>0) ;
 	i++;
     }
     if (unavailable) {
@@ -94,8 +96,8 @@ function get_preference(day, start_time, duration, tutor) {
 
 
 function no_overlap(list, start_time, duration) {
-    var i_start = index_in_pref(list, start_time) ;
-    var i_end = index_in_pref(list, start_time+duration) ;
+    var i_start = index_in_pref(list.map(function(d){return d.start_time;}), start_time) ;
+    var i_end = index_in_pref(list.map(function(d){return d.start_time;}), start_time+duration) ;
 
     if (i_start != i_end) {
 	return false ;

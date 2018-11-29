@@ -742,7 +742,7 @@ function butpr_class(p) {
   ------ COURS -------
   --------------------*/
 function cours_x(c) {
-    return c.nday * (rootgp_width * labgp.width +
+    return idays[c.day].num * (rootgp_width * labgp.width +
             dim_dispo.plot * (dim_dispo.width + dim_dispo.right)) +
         groups[c.promo][c.group].x * labgp.width;
 }
