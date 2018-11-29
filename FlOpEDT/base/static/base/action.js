@@ -1223,7 +1223,7 @@ function add_bouge(d) {
         cours_bouge[d.id_cours] = {
             id: d.id_cours,
             day: d.day,
-            slot: d.slot,
+            start: d.start,
             room: d.room,
 	    prof: d.prof
         };

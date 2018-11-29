@@ -247,6 +247,74 @@ function create_alarm_dispos() {
         .text(txt_filDispos);
 }
 
+// list: list of time interval
+// instant: moment in time
+// return the index i such that list[i-1]<=instant<list[i] if exists
+//        0 if instant<list[0]
+//        list.length if instant>list[j]
+function index_in_pref(list, instant) {
+    var after = false ;
+    var i = 0 ;
+    var t = time_settings.time ;
+    
+    while(! after && i < pref.length) {
+	if (pref[i] > start_time) {
+	    after = true ;
+	} else {
+	    i ++ ;
+	}
+    }
+    return i ;
+}
+
+
+
+
+// get the aggregated preference score of tutor on day, on an interval
+// lasting duration, starting at start_time
+function get_preference(day, start_time, duration, tutor) {
+    var after = false ;
+    var pref = dispos[tutor][day];
+    var t = time_settings.time ;
+    
+    var i_start = index_in_pref(pref, start_time) ;
+    var i_end = index_in_pref(pref, start_time+duration) ;
+    var i, tot_weight, start_inter, end_inter ;
+    var average_pref = 0 ;
+    var unknown = false ;
+    var unavailable = false ;
+
+    if (i_start==0 || i_start==pref.length || i_end==0 || i_end==pref.length){
+	return -1 ;
+    }
+
+    i = i_start - 1 ;
+    while (!unknown && !unavailable && i < i_end) {
+	if(i==i_start - 1) {
+	    start_inter = start_time ;
+	} else {
+	    start_inter = pref.start_time ;
+	}
+	if(i==i_end - 1) {
+	    end_inter = start_time + duration ;
+	} else {
+	    end_inter = pref.start_time + pref.duration ;
+	}
+	average_pref += (end_inter-start_inter) * pref.value ;
+	tot_weight += end_inter-start_inter ;
+	unknown = (pref.value == -1) ;
+	unavailable = (pref.value == 0) ;
+	i++;
+    }
+    if (unavailable) {
+	return 0 ;
+    }
+    if (unknown) {
+	return -1 ;
+    }
+    
+    return average_pref/tot_weight ;
+}
 
 /*---------------------
   ------- WEEKS -------
@@ -1286,10 +1354,12 @@ function def_drag() {
 				      parseInt(drag.sel.select("rect")
 					       .attr("y")),
 				      d);
+		console.log(cur_over.day, cur_over.start_time);
 
-                if (!is_garbage(cur_over.day,cur_over.slot)) {
+                if (!is_garbage(cur_over)) {
                     sl = data_slot_grid.filter(function(c) {
-                        return c.day == cur_over.day && c.slot == cur_over.slot;
+                        return c.day == cur_over.day
+			    && c.start == cur_over.start_time;
                     });
                     if (sl != null && sl.length > 0) {
                         if (!sl[0].display) {
@@ -1321,10 +1391,11 @@ function def_drag() {
                 });
 
 
-                if (!is_garbage(cur_over.day,cur_over.slot)) {
+                if (!is_garbage(cur_over)) {
 
                     var ngs = data_slot_grid.filter(function(s) {
-                        return s.day == cur_over.day && s.slot == cur_over.slot;
+                        return s.day == cur_over.day
+			    && s.start == cur_over.start_time;
                     })[0];
 
 
@@ -1332,7 +1403,7 @@ function def_drag() {
 
 			add_bouge(d);
                         d.day = cur_over.day;
-                        d.slot = cur_over.slot;
+                        d.start = cur_over.start_time;
 			room_tutor_change.course.push(d) ;
 			compute_cm_room_tutor_direction() ;
 			var disp_cont_menu = select_room_change() ;
@@ -1345,7 +1416,7 @@ function def_drag() {
 
 		    } else if (!ngs.dispo && (logged_usr.rights >> 2) % 2 == 1) {
 
-			var warn_check = warning_check(d, cur_over.slot, cur_over.day);
+			var warn_check = warning_check(d, cur_over.day, cur_over.start_time);
 
 			var splash_violate_constraint = {
 			    id: "viol_constraint",
@@ -1355,14 +1426,14 @@ function def_drag() {
 					function(d){
 					    add_bouge(d.saved_data.course);
 					    d.saved_data.course.day = d.saved_data.grid_slot.day;
-					    d.saved_data.course.slot = d.saved_data.grid_slot.slot;
+					    d.saved_data.course.start = d.saved_data.grid_slot.start_time;
 					    go_grid(true);
 					    go_courses(true);
 					    return ;
 					},
 					saved_data:
 					{course: d,
-					 grid_slot: {day: cur_over.day, slot: cur_over.slot}}
+					 grid_slot: {day: cur_over.day, start_time: cur_over.start_time}}
 				       },
 				       {txt: "Annuler",
 					click: function(d){
@@ -1413,7 +1484,7 @@ function fill_grid_slot(c2m, grid_slot) {
     // 	return ;
     // }
 
-    var check = check_course(c2m, grid_slot.slot, grid_slot.day);
+    var check = check_course(c2m, {day:grid_slot.day, start_time:grid_slot.start});
     
     if (check.constraints_ok) {
 	return ;
@@ -1435,9 +1506,9 @@ function fill_grid_slot(c2m, grid_slot) {
 
 }
 
-function warning_check(c2m, slot, day) {
+function warning_check(c2m, day, start_time) {
     var ret = '';
-    var check = check_course(c2m, slot, day);
+    var check = check_course(c2m, {day:day, start_time:start_time});
     if (check.nok_type == 'stable') {
 	ret = "Le cours était censé être fixe.";
     } else if (check.nok_type == 'train_prog_unavailable') {
@@ -1464,13 +1535,17 @@ function warning_check(c2m, slot, day) {
  - nok_type: 'group_busy', group: gp_name -> the group has already another course
  - nok_type: 'tutor_unavailable', tutor: tutor_username -> the tutor is 
    unavailable
- */
-function check_course(c2m, slot, day) {
+*/
+// c2m element of course
+// date {day, start_time}
+function check_course(c2m, date) {
 
     var ret = {constraints_ok: false};
+    var possible_conflicts = [] ;
+    var conflicts = [] ;
 
 
-    if (is_garbage(day, slot)) {
+    if (is_garbage(date)) {
 	ret.constraints_ok = true ;
 	return ret ;
     }
@@ -1484,46 +1559,53 @@ function check_course(c2m, slot, day) {
 	return ret;
     }
 
-    if (is_free(day, slot, c2m.promo)) {
+    if (is_free(date, c2m.promo)) {
 	ret.nok_type = 'train_prog_unavailable' ;
 	ret.train_prog = set_promos[c2m.promo] ;
         return ret;
     }
 
 
-    var cs = cours.filter(function(c) {
-        return (c.day == day &&
-		c.slot == slot &&
-		c.prof == c2m.prof &&
-		c.id_cours != c2m.id_cours);
+    possible_conflicts = cours.filter(function(c) {
+        return (c.day == date.day 
+		&& ((c.start < c2m.start+c2m.duration
+		     && c.start > c2m.start)
+		    || (c2m.start < c.start+c.duration
+			&& c2m.start > c.start))
+		&& c.id_cours != c2m.id_cours);
     });
-    if (cs.length > 0) {
+    
+
+    conflicts = possible_conflicts.filter(function(c) {
+        return (c.prof == c2m.prof);
+    });
+    
+    if (conflicts.length > 0) {
 	ret.nok_type = 'tutor_busy';
 	ret.tutor = c2m.prof;
         return ret;
     }
 
 
-    cs = cours.filter(function(c) {
-        return (c.day == day &&
-		c.slot == slot &&
-		(c.group == c2m.group ||
-		 groups[c2m.promo][c2m.group].ancetres.indexOf(c.group) > -1 ||
-		 groups[c2m.promo][c2m.group].descendants.indexOf(c.group) > -1) &&
-		c.promo == c2m.promo  &&
-		c.id_cours != c2m.id_cours);
+    conflicts = possible_conflicts.filter(function(c) {
+        return ((c.group == c2m.group
+		 || groups[c2m.promo][c2m.group].ancetres.indexOf(c.group) > -1
+		 || groups[c2m.promo][c2m.group].descendants.indexOf(c.group) > -1)
+		&& c.promo == c2m.promo);
     });
-    if (cs.length > 0) {
+    if (conflicts.length > 0) {
 	ret.nok_type = 'group_busy';
 	ret.group = c2m.group;
         return ret;
     }
 
-    if (dispos[c2m.prof] !== undefined &&
-        dispos[c2m.prof][day][slot] == 0) {
-	ret.nok_type = 'tutor_unavailable' ;
-	ret.tutor = c2m.prof ;
-        return ret;
+    if (dispos[c2m.prof] !== undefined) {
+	if (get_preference(date.day, date.start_time, c2m.duration,
+			   c2m.prof) == 0) {
+	    ret.nok_type = 'tutor_unavailable' ;
+	    ret.tutor = c2m.prof ;
+            return ret;
+	}
     }
 
     ret.constraints_ok = true ;
@@ -1537,27 +1619,41 @@ function which_slot(x, y, c) {
         (dim_dispo.width + dim_dispo.right));
     var iday = Math.floor((x + .5 * cours_width(c)) / wday);
     return {
-        iday: iday,
-        start: indexOf_constraints(c, y)
+        day: days[iday].ref,
+        start_time: indexOf_constraints(c, y) // day-independent
     };
 }
 
-
-function is_garbage(day, hour) {
-    return (hour >= nbSl || hour < 0 || day < 0 || day >= nbPer);
+// date {day, start_time}
+function is_garbage(date) {
+    var t = time_settings.time ;
+    return (date.start_time >= t.day_start_time
+	    && date.start_time <= t.day_finish_time) ;
 }
 
-function is_free(day, hour, promo) {
-    return (promo < 2 && (day == 3 && hour > 2));
+function is_free(date, promo) {
+    return false ;
+//    return (promo < 2 && (day == 3 && hour > 2));
 }
 
-function indexOf_constraints(c, start){
+// find the closest possible start_time in the current day,
+// in terms of distance on the screen
+function indexOf_constraints(c, y){
     var after = false ;
     var i = 0 ;
-    var cst = constraints[c.c_type].allowed_st ;
+    var cst = constraints[c.c_type].allowed_st.map(
+	function(d){
+	    return {y:cours_y({
+		start:d,
+		promo:c.promo,
+	    }),
+		    start:d};
+	}
+    );
     var t = time_settings.time ;
+    
     while(! after && i < cst.length) {
-	if (cst[i] > start) {
+	if (cst[i].y > y) {
 	    after = true ;
 	} else {
 	    i ++ ;
@@ -1566,19 +1662,17 @@ function indexOf_constraints(c, start){
     if (i==cst.length) {
 	return t.day_finish_time ;
 	// constraints[keys[keys.length-1]] ;
-    } else if (i==cst.length - 1) {
-	return cst[i] ;
     } else if (i==0) {
-	if (start < t.day_start_time - c.duration) {
-	    return start ;
+	if (y < t.day_start_time - c.duration) {
+	    return t.day_start_time - c.duration ;
 	} else {
 	    return t.day_start_time ;
 	}
     } else {
-	if (start - cst[i] > cst[i+1] - start) {
-	    return cst[i+1];
+	if (y - cst[i-1].y > cst[i].y - y) {
+	    return cst[i].start;
 	} else {
-	    return cst[i];
+	    return cst[i-1].start;
 	}
     }
 }
