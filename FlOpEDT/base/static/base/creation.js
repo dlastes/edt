@@ -1345,53 +1345,81 @@ function def_drag() {
 			    room_tutor_change.proposal = [] ;
 			}
 
-		    } else if ((logged_usr.rights >> 2) % 2 == 1) { //if (!ngs.dispo) {
+		    } else  { //if (!ngs.dispo) {
 			// -- no slot --
 			// && (logged_usr.rights >> 2) % 2 == 1) {
+
+			
 			
 			console.log(warn_check);
+
+			var splash_violate_constraint ;
+
+			if ((logged_usr.rights >> 2) % 2 == 1) {
 			
-			var splash_violate_constraint = {
-			    id: "viol_constraint",
-			    but: {
-				list: [{txt: "Confirmer",
-					click:
-					function(d){
-					    add_bouge(d.saved_data.course);
-					    d.saved_data.course.day = d.saved_data.grid_slot.day;
-					    d.saved_data.course.start = d.saved_data.grid_slot.start_time;
-					    go_grid(true);
-					    go_courses(true);
-					    return ;
-					},
-					saved_data:
-					{course: d,
-					 grid_slot: {day: cur_over.day, start_time: cur_over.start_time}}
-				       },
-				       {txt: "Annuler",
-					click: function(d){
-					    return ;
-					}
-				       }]
-			    },
-			    com: {list: [{txt: "Attention", ftsi: 23},
-					 {txt: ""},
-					 {txt: "Des privilèges vous ont été accordés, et vous en profitez pour outrepasser la contrainte suivante :"},
-					 {txt: warn_check},
-					 {txt: "Confirmer la modification ?"}]
-				 }
-			}
-			splash(splash_violate_constraint);
+			    splash_violate_constraint = {
+				id: "viol_constraint",
+				but: {
+				    list: [{txt: "Confirmer",
+					    click:
+					    function(d){
+						add_bouge(d.saved_data.course);
+						d.saved_data.course.day = d.saved_data.grid_slot.day;
+						d.saved_data.course.start = d.saved_data.grid_slot.start_time;
+						go_grid(true);
+						go_courses(true);
+						return ;
+					    },
+					    saved_data:
+					    {course: d,
+					     grid_slot: {day: cur_over.day, start_time: cur_over.start_time}}
+					   },
+					   {txt: "Annuler",
+					    click: function(d){
+						return ;
+					    }
+					   }]
+				},
+				com: {list: [{txt: "Attention", ftsi: 23},
+					     {txt: ""},
+					     {txt: "Des privilèges vous ont été accordés, et vous en profitez pour outrepasser la contrainte suivante :"},
+					     {txt: warn_check},
+					     {txt: "Confirmer la modification ?"}]
+				     }
+			    }
+			    splash(splash_violate_constraint);
+
 			
-		    } else {
-			var gs = data_slot_grid.filter(function(s) {
-                            return s.day == cur_over.day
-		    		&& s.start == cur_over.start_time;
-			});
-			console.log(gs);
-			if (gs.length==1) {
-                            gs[0].pop = true;
+			} else {
+			    if (slot_case) {
+				var gs = data_slot_grid.filter(function(s) {
+				    return s.day == cur_over.day
+		    			&& s.start == cur_over.start_time;
+				});
+				console.log(gs);
+				if (gs.length==1) {
+				    gs[0].pop = true;
+				}
+			    } else {
+				splash_violate_constraint = {
+				    id: "viol_constraint",
+				    but: {
+					list: [{txt: "Ah ok",
+						click: function(d){
+						    return ;
+						}
+					       }]
+				    },
+				    com: {list: [{txt: "Vous tentez d'outrepasser la contrainte suivante :", ftsi: 23},
+						 {txt: warn_check},
+						 {txt: "Vous n'avez pas les droits pour le faire..."}]
+					 }
+				}
+				splash(splash_violate_constraint);
+			    }
+			    
 			}
+			
                     }
                 } else {
                     d.day = cur_over.day ;
