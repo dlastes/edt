@@ -21,6 +21,19 @@
 // you develop activities involving the FlOpEDT/FlOpScheduler software
 // without disclosing the source code of your own applications.
 
+
+/*
+    HELPER : remove child nodes
+*/
+function removeChildNodes(parentNode){
+    if(parentNode){
+        while (parentNode.hasChildNodes()) {
+            parentNode.removeChild(parentNode.firstChild);
+         }            
+    }
+}
+
+
 /*
     Display the department's tutor list with 
     their total number of hours of activity
@@ -28,8 +41,13 @@
 function displayTutorHours(data) {
     let container = d3.select('#statistics table')
 
-    // Clear table
-    container.selectAll('tr').remove();
+    // Clear table    
+    removeChildNodes(container.node());
+
+    // Insert header 
+    header = container.append('tr')
+    header.append('th').text('Professeur')
+    header.append('th').text('Nombre de cours')
 
     tutor =  container.selectAll('tr')
         .data(data)
@@ -55,7 +73,12 @@ function displayRoomActivity(data) {
     let container = d3.select('#statistics table')
     
     // Clear table
-    container.selectAll('tr').remove();
+    removeChildNodes(container.node());
+
+    // Insert header 
+    header = container.append('tr')
+    header.append('th').text('Salle')
+    header.append('th').text('Nombre de jours')    
 
     rooms =  container.selectAll('tr')
         .data(data.room_activity)
@@ -81,13 +104,6 @@ function displayStatistic(label){
     if(statistic){
         // TODO : loading
 
-        // // Reset view
-        // if(statisticContainer){
-        //     while (statisticContainer.hasChildNodes()) {
-        //         statisticContainer.removeChild(statisticContainer.firstChild);
-        //      }            
-        // }
-
         // Request server to get datas
         fetchStatistcs(statistic.url, statistic.callback);
     }
@@ -101,19 +117,22 @@ function changeStatisticEventHandler(event){
     Global method to request statistics 
 */
 function fetchStatistcs(url, callback) {
+    show_loader(true);
     $.ajax({
         type: "GET",
-        dataType: 'text',
+        dataType: 'json',
         url: url,
         async: true,
         contentType: "text/json",
         success: function (value) {
-            data = JSON.parse(value)
-            callback(data);
+            callback(value);
         },
         error: function (xhr, error) {
             console.log(xhr);
             console.log(error);
+        },
+        complete: function(){
+            show_loader(false);
         }
     });
 }
