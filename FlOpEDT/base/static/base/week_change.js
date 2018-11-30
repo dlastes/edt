@@ -65,7 +65,7 @@ function fetch_dispos() {
                 dispos = {};
                 //user.dispos = [];
                 d3.csvParse(msg, translate_dispos_from_csv);
-
+		sort_preferences();
                 fetch.ongoing_dispos = false;
                 if (ckbox["dis-mod"].cked) {
                     create_dispos_user_data();
@@ -100,6 +100,20 @@ function translate_dispos_from_csv(d) {
     dispos[d.prof][d.day].push({start_time:+d.start_time,
 			       duration: +d.duration,
 			       value: +d.valeur});
+}
+
+function sort_preferences() {
+    var i, d ;
+    var tutors = Object.keys(dispos) ;
+    for(i = 0 ; i < tutors.length ; i++) {
+	for(d = 0 ; d < days.length ; d++) {
+	    dispos[tutors[i]][days[d].ref].sort(
+		function (a,b) {
+		    return a.start_time - b.start_time ;
+		}
+	    );
+	}
+    }
 }
 
 // insert a valued interval into a list of valued interval

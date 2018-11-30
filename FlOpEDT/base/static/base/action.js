@@ -831,7 +831,7 @@ function confirm_change() {
     }
 
     if (changes.length == 0) {
-        ack.edt = "base EdT : RAS";
+        ack.edt = "Modif EdT : RAS";
         go_ack_msg(true);
     } else {
 
@@ -917,24 +917,47 @@ function send_edt_change(changes) {
 function send_dis_change() {
     var changes = [];
     var nbDispos = 0;
+    var cur_pref ;
+    var modified_days = []
 
     if (user.dispos_bu.length == 0) {
-        ack.edt = "base dispo : RAS";
+        ack.edt = "Modif dispo : RAS";
         go_ack_msg(true);
         return;
     }
 
+
     for (var i = 0; i < Object.keys(user.dispos).length; i++) {
-        if (user.dispos[i].val > 0) {
+	if(user.dispos[i].val != user.dispos_bu[i]
+	   && modified_days.indexOf(user.dispos[i].day) == -1) {
+	    modified_days.push(user.dispos[i].day);
+	}
+    }
+
+    for(i=0 ; i<modified_days.length ; i++) {
+	changes.push({day:modified_days[i],
+		      val_inter:[]});
+    }
+	
+    
+    for (var i = 0; i < Object.keys(user.dispos).length; i++) {
+	cur_pref = user.dispos[i] ;
+	bu_pref = user.dispos_bu[i] ;
+        if (cur_pref.val > 0) {
             nbDispos++;
         }
-        if (user.dispos[i].val != user.dispos_bu[i].val) {
-            changes.push(user.dispos[i]);
+        if (modified_days.indexOf(cur_pref.day) != -1) {
+
+            changes.filter(function(d){
+		return d.day == cur_pref.day ;
+	    })[0].val_inter.push({start_time:cur_pref.start_time,
+					duration: cur_pref.duration,
+					value: cur_pref.val});
         }
-        user.dispos_bu[i].day = user.dispos[i].day;
-        user.dispos_bu[i].hour = user.dispos[i].hour;
-        user.dispos_bu[i].val = user.dispos[i].val;
-        user.dispos_bu[i].off = user.dispos[i].off;
+        bu_pref.day = cur_pref.day;
+        bu_pref.start_time = cur_pref.start_time;
+        bu_pref.val = cur_pref.val;
+        bu_pref.off = cur_pref.off;
     }
 
 
@@ -946,7 +969,7 @@ function send_dis_change() {
 
 
     if (changes.length == 0) {
-        ack.edt = "base dispo : RAS";
+        ack.edt = "Modif dispo : RAS";
         go_ack_msg(true);
     } else {
 

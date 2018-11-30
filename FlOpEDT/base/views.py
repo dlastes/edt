@@ -816,7 +816,7 @@ def edt_changes(req, **kwargs):
                     msg += str(new_day) if new_day is not None else '-'
                     msg += ', '
                     msg += str(new_start_time) if new_start_time is not None else '-'
-                    msg += '-'
+                    msg += ','
                     msg += str(new_tutor) if new_tutor is not None else '-'
                     msg += ')\n\n'
 
@@ -916,44 +916,55 @@ def dispos_changes(req, **kwargs):
 
     # if no preference was present for this week, first copy the
     # default availabilities
+
     if not UserPreference.objects.filter(user=prof,
                                          semaine=week,
                                          an=year).exists():
-        for c in Slot.objects.all():
-            def_dispo, created = UserPreference \
-                .objects \
-                .get_or_create(
-                user=prof,
-                semaine=None,
-                creneau=c,
-                defaults={'valeur':
-                              0})
-            if week is not None:
-                new_dispo = UserPreference(user=prof,
-                                           semaine=week,
-                                           an=year,
-                                           creneau=c,
-                                           valeur=def_dispo.valeur)
-                new_dispo.save()
+        for pref in UserPreference.objects.filter(user=prof,
+                                                  semaine=None):
+            new_dispo = UserPreference(user=prof,
+                                       semaine=week,
+                                       an=year,
+                                       day=pref.day,
+                                       start_time=pref.start_time,
+                                       duration=pref.duration,
+                                       valeur=pref.valeur)
+            logger.info(new_dispo)
+            new_dispo.save()
 
     for a in q:
         logger.info(f"Change {a}")
-        cr = Slot.objects \
-            .get(jour=Day.objects.get(no=a['day']),
-                 heure=Time.objects.get(no=a['hour']))
-        if cr is None:
-            bad_response['reason'] = "Creneau pas trouve"
-            return bad_response
-        di, didi = UserPreference \
-            .objects \
-            .update_or_create(user=prof,
-                              semaine=week,
-                              an=year,
-                              creneau=cr,
-                              defaults={'valeur': a['val']})
-        logger.info("  Update or create")
-        logger.info(f"  {di}")
-        logger.info(f"  {didi}")
+        UserPreference.objects.filter(user=prof,
+                                      semaine=week,
+                                      an=year,
+                                      day=a['day']).delete()
+        for pref in a['val_inter']:
+            new_dispo = UserPreference(user=prof,
+                                       semaine=week,
+                                       an=year,
+                                       day=a['day'],
+                                       start_time=pref['start_time'],
+                                       duration=pref['duration'],
+                                       valeur=pref['value'])
+            logger.info(new_dispo)
+            new_dispo.save()
+            
+        # cr = Slot.objects \
+        #     .get(jour=Day.objects.get(no=a['day']),
+        #          heure=Time.objects.get(no=a['hour']))
+        # if cr is None:
+        #     bad_response['reason'] = "Creneau pas trouve"
+        #     return bad_response
+        # di, didi = UserPreference \
+        #     .objects \
+        #     .update_or_create(user=prof,
+        #                       semaine=week,
+        #                       an=year,
+        #                       creneau=cr,
+        #                       defaults={'valeur': a['val']})
+        # logger.info("  Update or create")
+        # logger.info(f"  {di}")
+        # logger.info(f"  {didi}")
         
     if week is not None and year is not None:
         for c in Course.objects.filter(semaine=week,
