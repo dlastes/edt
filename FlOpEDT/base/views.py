@@ -727,8 +727,8 @@ def edt_changes(req, **kwargs):
                 # old_slot = a.slot.o
                 new_day = a['day']['n']
                 old_day = a['day']['o']
-                new_time = a['time']['n']
-                old_time = a['time']['o']
+                new_start_time = a['start']['n']
+                old_start_time = a['start']['o']
                 old_room = a['room']['o']
                 new_room = a['room']['n']
                 new_week = a['week']['n']
@@ -749,11 +749,11 @@ def edt_changes(req, **kwargs):
                     # same, same means not scheduled before
                     if non_place:
                         cp.day = new_day
-                        cp.start_time = new_time
+                        cp.start_time = new_start_time
                     m.day_old = cp.day
                     m.start_time_old = cp.start_time
                     cp.day = new_day
-                    cp.start_time = new_time
+                    cp.start_time = new_start_time
                     logger.info(f"Course modification: {m}")
                     logger.info(f"New scheduled course: {cp}")
                 if new_room is not None:
@@ -766,8 +766,7 @@ def edt_changes(req, **kwargs):
                                   'pour un cours ?'
                         else:
                             bad_response['reason'] = \
-                                "Problème : salle " + new_room \
-                                + " inconnue"
+                                f"Problème : salle {new_room} inconnue"
                         return bad_response
 
                     if non_place:
@@ -796,47 +795,29 @@ def edt_changes(req, **kwargs):
                         pm.save()
                     except ObjectDoesNotExist:
                         bad_response['reason'] = \
-                            "Problème : prof " + new_room \
-                            + " inconnu"
+                            f"Problème : prof {new_tutor} inconnu"
                         return bad_response
 
                 if new_week is not None or new_year is not None \
-                   or new_day is not None or new_slot is not None \
+                   or new_day is not None or new_start_time is not None \
                    or new_tutor is not None:
                     msg += str(co) + '\n'
                     impacted_inst.add(co.tutor.username)
                     if new_tutor is not None:
                         impacted_inst.add(old_tutor)
 
-                    msg += '(' + str(old_week) + ', ' \
-                           + str(old_year) + ', ' \
-                           + str(old_day) + ', ' \
-                           + str(old_slot) + ', ' \
-                           + str(old_tutor) + ')'
+                    msg += f'({old_week}, {old_year}, ' \
+                           + f'{old_day}, {old_start_time}, {old_tutor})'
                     msg += ' -> ('
-                    if new_week:
-                        msg += str(new_week)
-                    else:
-                        msg += '-'
+                    msg += str(new_week) if new_week is not None else '-'
                     msg += ', '
-                    if new_year:
-                        msg += str(new_year)
-                    else:
-                        msg += '-'
+                    msg += str(new_year) if new_year is not None else '-'
                     msg += ', '
-                    if new_day:
-                        msg += str(new_day)
-                    else:
-                        msg += '-'
+                    msg += str(new_day) if new_day is not None else '-'
                     msg += ', '
-                    if new_slot:
-                        msg += str(new_slot)
-                    else:
-                        msg += '-'
-                    if new_slot:
-                        msg += str(new_slot)
-                    else:
-                        msg += '-'
+                    msg += str(new_start_time) if new_start_time is not None else '-'
+                    msg += '-'
+                    msg += str(new_tutor) if new_tutor is not None else '-'
                     msg += ')\n\n'
 
             if work_copy == 0:
@@ -849,11 +830,11 @@ def edt_changes(req, **kwargs):
             cache.delete(get_key_course_pp(department.abbrev, old_year, old_week, work_copy))
             
 
-        subject = '[Modif sur tierce] ' + req.user.username \
-                  + ' a déplacé '
-        for inst in impacted_inst:
-            if inst is not req.user.username:
-                subject += inst + ' '
+        # subject = '[Modif sur tierce] ' + req.user.username \
+        #           + ' a déplacé '
+        # for inst in impacted_inst:
+        #     if inst is not req.user.username:
+        #         subject += inst + ' '
 
         # if len(impacted_inst) > 0 and work_copy == 0:
         #     if len(impacted_inst) > 1 \
@@ -864,13 +845,13 @@ def edt_changes(req, **kwargs):
         #             'edt@iut-blagnac',
         #             ['edt.info.iut.blagnac@gmail.com']
         #         )
+        logger.info('Envoi de mail')
+        logger.info(msg)
+        
 
         return good_response
     else:
-        bad_response['reason'] = "Version: " \
-                                 + str(version) \
-                                 + " VS " \
-                                 + str(old_version)
+        bad_response['reason'] = f"Version: {version} VS {old_version}"
         return bad_response
 
 

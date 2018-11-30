@@ -266,10 +266,6 @@ function fetch_all_tutors() {
 	    error: function(msg) {
 		console.log("error");
 		show_loader(false);
-	    },
-	    complete: function(msg) {
-		console.log("complete");
-	    show_loader(false);
 	    }
 	});
     }
@@ -681,7 +677,7 @@ function apply_ckbox(dk) {
    ----------------------*/
 
 function compute_changes(changes, profs, gps) {
-    var i, id, change, prof_changed, gp_changed, gp_named;
+    var i, id, change, prof_changed, gp_changed, gp_named, date;
 
     var cur_course, cb ;
 
@@ -694,50 +690,51 @@ function compute_changes(changes, profs, gps) {
 	id = Object.keys(cours_bouge)[i] ;
 	cur_course = get_course(id) ;
 	cb = cours_bouge[id] ;
+	date = {day: cur_course.day,
+		start_time: cur_course.start};
 
-	if (had_moved(cb , cur_course) || cur_course.prof != cb.prof) {
-
+	if (has_changed(cb , cur_course)) {
+	    
 	    /* Sanity checks */
 	    
-	    // No course has been moved to garbage slots
-            if (is_garbage(cur_course.day, cur_course.slot)) {
-		splash_case = {
-		    id: "garb-sched",
-		    but: butOK,
-		    com: {list: [{txt: "Vous avez déplacé, puis laissé des cours non placés."},
-				 {txt: msgRetry}]}
-		}
+	    // // No course has been moved to garbage slots
+            // if (is_garbage(date) {
+	    // 	splash_case = {
+	    // 	    id: "garb-sched",
+	    // 	    but: butOK,
+	    // 	    com: {list: [{txt: "Vous avez déplacé, puis laissé des cours non placés."},
+	    // 			 {txt: msgRetry}]}
+	    // 	}
 		
-		splash(splash_case);
-		return false ;
-            } 
-	    // Course in unavailable slots for some training programme
-	    else if (is_free(cur_course.day,
-			     cur_course.slot,
-			     cur_course.promo)) {
+	    // 	splash(splash_case);
+	    // 	return false ;
+            // } 
+	    // // Course in unavailable slots for some training programme
+	    // else if (is_free(date, cur_course.promo)) {
 		
-		msg = "Pas de cours pour les ";
-		if (set_promos[gp_changed.promo] == 3) {
-		    msg += "LP" ;
-		} else {
-		    msg += set_promos[cur_course.promo] + "A" ;
+	    // 	msg = "Pas de cours pour les ";
+	    // 	if (set_promos[gp_changed.promo] == 3) {
+	    // 	    msg += "LP" ;
+	    // 	} else {
+	    // 	    msg += set_promos[cur_course.promo] + "A" ;
 		    
-		}
-		msg += " le " + days[cur_course.day].date
-		    + " sur le créneau "
-		    + data_grid_scale_hour[cur_course.slot]
-		    + "."
+	    // 	}
+	    // 	msg += " le " + days[cur_course.day].date
+	    // 	    + " sur le créneau "
+	    // 	    + data_grid_scale_hour[cur_course.slot]
+	    // 	    + "."
 		
-		splash_case = {
-		    id: "unav-tp",
-		    but: butOK,
-		    com: {list: [{txt: msg},
-				 {txt: msgRetry}]}
-		}
+	    // 	splash_case = {
+	    // 	    id: "unav-tp",
+	    // 	    but: butOK,
+	    // 	    com: {list: [{txt: msg},
+	    // 			 {txt: msgRetry}]}
+	    // 	}
 		
-		splash(splash_case);
-		return false ;
-            } else if (cur_course.room == une_salle){
+	    // 	splash(splash_case);
+	    // 	return false ;
+            // } else 
+	    if (cur_course.room == une_salle){
 		splash_case = {
 		    id: "def-room",
 		    but: butOK,
@@ -752,6 +749,7 @@ function compute_changes(changes, profs, gps) {
 	    
 	    
 	    /* Change is accepted now */
+	    /* Compute who is concerned by the change */
 	    
 	    // add instructor if never seen
             if (profs.indexOf(cur_course.prof) == -1
@@ -766,14 +764,6 @@ function compute_changes(changes, profs, gps) {
 	    // add group if never seen
 	    gp_changed = groups[cur_course.promo][cur_course.group] ;
 	    gp_named = set_promos[gp_changed.promo] + gp_changed.nom ;
-	    // if (set_promos[gp_changed.promo] == 3) {
-	    // 	gp_named = "LP" ;
-	    // } else {
-	    // 	gp_named = set_promos[gp_changed.promo] + "A";
-	    // 	if(gp_changed.nom != "P") {
-	    // 	    gp_named += gp_changed.nom ;
-	    // 	}
-	    // }
             if (gps.indexOf(gp_named) == -1) {
                 gps.push(gp_named);
             }
@@ -784,7 +774,7 @@ function compute_changes(changes, profs, gps) {
             change = {id: id,
 		      day: {o: cb.day,
 			    n: null },
-		      slot: {o: cb.slot,
+		      start: {o: cb.start,
 			     n: null },
 		      room: {o: cb.room,
 			     n: null },
@@ -799,9 +789,9 @@ function compute_changes(changes, profs, gps) {
 	    
             console.log("change", change);
 	    if (cb.day != cur_course.day ||
-                cb.slot != cur_course.slot) {
+                cb.start != cur_course.start) {
                 change.day.n = cur_course.day;
-                change.slot.n = cur_course.slot;
+                change.start.n = cur_course.start;
 	    }
 	    if (cb.room != cur_course.room) {
                 change.room.n = cur_course.room;
@@ -908,11 +898,7 @@ function send_edt_change(changes) {
 	    + "&c=" + num_copie,
         type: 'POST',
 //        contentType: 'application/json; charset=utf-8',
-        data: // JSON.stringify({
-        //     v: version,
-        //     tab: changes
-        // }),
-	sent_data,
+        data: sent_data,
         dataType: 'json',
         success: function(msg) {
             edt_change_ack(msg);
@@ -1231,10 +1217,11 @@ function add_bouge(d) {
     }
 }
 
-function had_moved(cb, c){
+function has_changed(cb, c){
     return cb.day != c.day
-	|| cb.slot != c.slot
-	|| cb.room != c.room ;
+	|| cb.start != c.start
+	|| cb.room != c.room
+	|| cb.prof != c.prof;
 }
 
 

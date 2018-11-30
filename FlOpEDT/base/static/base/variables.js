@@ -78,7 +78,7 @@ var nbPer = 5;
 var nbSl = 6;
 
 // initial number of promos
-var slot_case = true ;
+var slot_case = false ; //true ;
 
 // current number of rows
 var nbRows;
