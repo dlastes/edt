@@ -524,10 +524,11 @@ class TTModel(object):
                             0,
                            name=name)
                 else:
+                    count += 1
                     expr = self.lin_expr()
                     for c in self.wdb.courses_for_tutor[i] | self.wdb.courses_for_supp_tutor[i]:
                         expr += self.TT[(sl, c)]
-                    name = 'core_prof_' +str(sl)+ '_' + str(i)
+                    name = 'core_prof_' +str(sl)+ '_' + str(i) +str(count)
                     self.add_constraint(expr,
                                         '<=',
                                         self.avail_instr[i][sl],
@@ -583,7 +584,7 @@ class TTModel(object):
             # constraint : fixed_courses rooms are not available
             for rg in self.wdb.room_groups:
                 if self.wdb.fixed_courses.filter((Q(start_time__lt=sl.start_time + sl.duration) |
-                                                  Q(start_time__gt=sl.start_time - F('duration'))),
+                                                  Q(start_time__gt=sl.start_time - F('cours__type__duration'))),
                                                  room=rg, day=sl.day).exists():
                     for r in rg.subrooms.all():
                         name = 'fixed_room' + str(r) + '_' + str(sl)
@@ -803,10 +804,10 @@ class TTModel(object):
                         .filter(course_type=course_type,
                                 train_prog=promo,
                                 semaine=None)
-                for sl in filter(self.wdb.slots, course_type=course_type):
-                    try:
-                        avail = courses_avail.filter(Q(start_time__lt=sl + course_type.duration) |
-                                                     Q(start_time__gt=sl - F('duration')))
+                for sl in self.wdb.slots:
+                    #try:
+                        avail = courses_avail.filter(Q(start_time__lt=sl.start_time + course_type.duration) |
+                                                     Q(start_time__gt=sl.start_time - F('duration')))
                         if min(a.valeur for a in avail) == 0:
                             avail_course[(course_type, promo)][sl] = 0
                             non_prefered_slot_cost_course[(course_type,
@@ -817,12 +818,12 @@ class TTModel(object):
                             non_prefered_slot_cost_course[(course_type,
                                                            promo)][sl] \
                                 = 1 - value / 8
-                    except:
-                        avail_course[(course_type, promo)][sl] = 1
-                        non_prefered_slot_cost_course[(course_type,
-                                                       promo)][sl] \
-                            = 0
-                        print("Course availability problem for %s - %s on start time %s" % (type, promo, sl))
+                    # except:
+                    #     avail_course[(course_type, promo)][sl] = 1
+                    #     non_prefered_slot_cost_course[(course_type,
+                    #                                    promo)][sl] \
+                    #         = 0
+                    #     print("Course availability problem for %s - %s on start time %s" % (type, promo, sl))
 
         return non_prefered_slot_cost_course, avail_course
 
