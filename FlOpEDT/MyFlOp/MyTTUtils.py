@@ -24,13 +24,56 @@
 # a commercial license. Buying such a license is mandatory as soon as
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
+import functools
 
 from TTapp.TTUtils import basic_reassign_rooms, basic_swap_version
+from base.models import ScheduledCourse, Department
+from people.models import Tutor
 
+def resolve_department(func):
+    
+    # Replace department attribute by the target 
+    # department instance if needed
 
-def reassign_rooms(week, year, target_work_copy):
-    basic_reassign_rooms(week, year, target_work_copy)
+    @functools.wraps(func)
+    def _wraper_function(department, *args, **kwargs):
 
+        if type(department) is str:
+            department = Department.objects.get(abbrev=department)
 
-def swap_version(week, year, copy_a, copy_b=0):
-    basic_swap_version(week, year, copy_a, copy_b)
+        func(department, *args, **kwargs)
+
+    return _wraper_function
+
+def print_differences(week, year, old_copy, new_copy, tutors=Tutor.objects.all()):
+    for tutor in tutors:
+        SCa = ScheduledCourse.objects.filter(cours__tutor=tutor, copie_travail=old_copy, cours__semaine=week,
+                                             cours__an=year)
+        SCb = ScheduledCourse.objects.filter(cours__tutor=tutor, copie_travail=new_copy, cours__semaine=week,
+                                             cours__an=year)
+        slots_a = set([x.creneau for x in SCa])
+        slots_b = set([x.creneau for x in SCb])
+        if slots_a ^ slots_b:
+            result = "For %s old copy has :" % tutor
+            for sl in slots_a - slots_b:
+                result += "%s, " % sl
+            result += "and new copy has :"
+            for sl in slots_b - slots_a:
+                result += "%s, " % sl
+            print(result)
+
+@resolve_department
+def reassign_rooms(department, week, year, target_work_copy):
+    basic_reassign_rooms(department, week, year, target_work_copy)
+
+@resolve_department
+def swap_version(department, week, year, copy_a, copy_b=0):
+    if copy_b == 0:
+        if check_week_on_grr(week, an=2018, work_copy=copy_a) is None:
+            print('Swap not done : problem on GRR')
+        else:
+            basic_swap_version(department, week, year, copy_a, copy_b)
+            save_week_on_grr(week, year)
+    else:
+        basic_swap_version(department, week, year, copy_a, copy_b)
+

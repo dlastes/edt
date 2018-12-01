@@ -25,43 +25,47 @@
 # without disclosing the source code of your own applications.
 
 from TTapp.TTModel import TTModel
-from TTapp.models import MinHalfDays, max_weight
+
+from MyFlOp.MyTTUtils import print_differences
+
 
 class MyTTModel(TTModel):
+    def __init__(self, department_abbrev, semaine, an,
+                 train_prog=None,
+                 stabilize_work_copy=None,
+                 min_bhd_g=0.5):
+        TTModel.__init__(self, department_abbrev, semaine, an,
+                         train_prog=train_prog,
+                         stabilize_work_copy=stabilize_work_copy,
+                         min_bhd_g=min_bhd_g)
+
     def add_specific_constraints(self):
         """
-        The specific constraints stored in the database are added by the TTModel class.
+        The speficic constraints stored in the database are added by the
+        TTModel class.
         If you shall add more specific ones, you may write it down here.
         """
         TTModel.add_specific_constraints(self)
 
-        # Minimize the number of busy days for tutors
-        # (if it does not overcome the bound expressed in pref_slots_per_day)
-        # It should be stored in the database
-        for i in self.wdb.instructors:
-            slot_by_day_cost = 0
-            # need to be sorted
-            frontier_pref_busy_days = [i.pref_slots_per_day * d for d in range(4, 0, -1)]
-
-            nb_courses = len(self.wdb.courses_for_tutor[i])
-            nb_days = 5
-
-            for fr in frontier_pref_busy_days:
-                if nb_courses <= fr:
-                    slot_by_day_cost += self.IBD_GTE[nb_days][i]
-                    nb_days -= 1
-                else:
-                    break
-            self.add_to_inst_cost(i, self.min_bd_i * slot_by_day_cost)
-
-        # Minimize students' half days
-        # It should be stored in the database
-        for g in self.wdb.basic_groups:
-            MinHalfDays(group=g, weight=max_weight).enrich_model(self)
-
-
-    def solve(self, time_limit=3600, solver='CBC', target_work_copy=None):
+    def solve(self, time_limit=3600, target_work_copy=None,
+              solver='gurobi'):
         """
-        If you shall add pre (or post) processing apps, you may write them down here.
+        If you shall add pre (or post) processing apps, you may write them down
+        here.
         """
-        TTModel.solve(self, time_limit=time_limit, solver=solver, target_work_copy=target_work_copy)
+        result = TTModel.solve(self,
+                               time_limit=time_limit,
+                               target_work_copy=target_work_copy,
+                               solver=solver)
+        if result is None:
+            from gurobipy import read
+            lp = "FlOpTT-pulp.lp"
+            m = read(lp)
+            m.optimize()
+            m.computeIIS()
+            m.write("logs/IIS_week%s.ilp" % self.semaine)
+            print("IIS written in file logs/IIS_week%s.ilp" % (self.semaine))
+
+        else :
+            if self.stabilize_work_copy is not None:
+                print_differences(self.semaine, self.an, self.stabilize_work_copy, target_work_copy, self.wdb.instructors)

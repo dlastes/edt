@@ -529,6 +529,7 @@ class TTModel(object):
                                                  start_time=sl.start_time,
                                                  cours__type__duration=sl.duration,
                                                  day=sl.day).exists():
+                    print('patate')
                     test = True
                 for s_sl in self.wdb.slots_intersecting[sl]:
                     if self.wdb.fixed_courses.filter(cours__tutor=i,
