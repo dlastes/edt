@@ -531,7 +531,7 @@ class TutorCost(models.Model):
     an = models.PositiveSmallIntegerField()
     tutor = models.ForeignKey('people.Tutor', on_delete=models.CASCADE)
     valeur = models.FloatField()
-    work_copy = models.PositiveSmallIntegerField()
+    work_copy = models.PositiveSmallIntegerField(default=0)
 
     def __str__(self):
         return f"sem{self.semaine}-{self.tutor.username}:{self.valeur}"
@@ -543,7 +543,7 @@ class GroupCost(models.Model):
     an = models.PositiveSmallIntegerField()
     groupe = models.ForeignKey('Group', on_delete=models.CASCADE)
     valeur = models.FloatField()
-    work_copy = models.PositiveSmallIntegerField()
+    work_copy = models.PositiveSmallIntegerField(default=0)
 
 
     def __str__(self):
@@ -556,7 +556,7 @@ class GroupFreeHalfDay(models.Model):
     an = models.PositiveSmallIntegerField()
     groupe = models.ForeignKey('Group', on_delete=models.CASCADE)
     DJL = models.PositiveSmallIntegerField()
-    work_copy = models.PositiveSmallIntegerField()
+    work_copy = models.PositiveSmallIntegerField(default=0)
 
 
     def __str__(self):

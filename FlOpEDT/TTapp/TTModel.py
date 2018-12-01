@@ -67,7 +67,9 @@ class WeekDB(object):
         self.week = week
         self.year = year
         self.days = Day.objects.all()
+
         #SLOTS
+        print('Slot tools definition')
         self.slots = []
         for cc in CourseStartTimeConstraint.objects.all():
             if cc.course_type is not None:
@@ -76,6 +78,16 @@ class WeekDB(object):
             else:
                 self.slots += [Slot(d, start_time)
                                for d in self.days for start_time in cc.allowed_start_times]
+        self.slots_by_day = {}
+        for d in self.days:
+            self.slots_by_day[d] = filter(self.slots, day=d)
+        self.slots_intersecting = {}
+        for sl in self.slots:
+            self.slots_intersecting[sl] = filter(self.slots, simultaneous_to=sl)
+        self.slots_by_half_day = {}
+        for d in self.days:
+            for apm in [Time.AM, Time.PM]:
+                self.slots_by_half_day[(d,apm)] = filter(self.slots, day=d, apm=apm)
         # ROOMS
         self.room_types = RoomType.objects.filter(department=department)
         self.room_groups = RoomGroup.objects.filter(types__department=department).distinct()
@@ -191,7 +203,7 @@ class TTModel(object):
         self.var_nb = 0
         self.semaine = semaine
         self.an = an
-        self.warnings={}
+        self.warnings = {}
 
         self.department=Department.objects.get(abbrev=department_abbrev)
         if train_prog is None:
@@ -231,7 +243,7 @@ class TTModel(object):
             for d in self.wdb.days:
                 self.IBD[(i, d)] = self.add_var("IBD(%s,%s)" % (i, d))
                 # Linking the variable to the TT
-                dayslots = filter(self.wdb.slots, day=d)
+                dayslots = self.wdb.slots_by_day[d]
                 card = 2 * len(dayslots)
                 expr = self.lin_expr()
                 expr += card * self.IBD[(i, d)]
@@ -267,7 +279,7 @@ class TTModel(object):
                 for apm in [Time.AM, Time.PM]:
                     self.IBHD[(i, d, apm)] \
                         = self.add_var("IBHD(%s,%s,%s)" % (i, d, apm))
-                    halfdayslots = filter(self.wdb.slots, day=d, apm=apm)
+                    halfdayslots = self.wdb.slots_by_half_day[(d, apm)]
                     card = 2 * len(halfdayslots)
                     expr = self.lin_expr()
                     expr += card * self.IBHD[(i, d, apm)]
@@ -291,7 +303,7 @@ class TTModel(object):
                 for apm in [Time.AM, Time.PM]:
                     self.GBHD[(g, d, apm)] \
                         = self.add_var("GBHD(%s,%s,%s)" % (g, d, apm))
-                    halfdayslots = filter(self.wdb.slots, day=d, apm=apm)
+                    halfdayslots = self.wdb.slots_by_half_day[(d, apm)]
                     card = 2 * len(halfdayslots)
                     expr = self.lin_expr()
                     expr += card * self.GBHD[(g, d, apm)]
@@ -453,6 +465,8 @@ class TTModel(object):
 
         print("adding core constraints")
 
+        print('Slot_type constraints')
+
         for c in self.wdb.courses:
             name = 'slot_type_' + str(c) + str(c.id)
             self.add_constraint(
@@ -466,16 +480,19 @@ class TTModel(object):
         # constraint : only one course on simultaneous slots
         name = 'simul_slots'
         count = 0
+
+        print('Simultaneous slots constraints')
+
         for sl1 in self.wdb.slots:
             for i in self.wdb.instructors:
-                for sl2 in filter(self.wdb.slots, simultaneous_to=sl1):
+                for sl2 in self.wdb.slots_intersecting[sl1]:
                     name = name+str(count)
                     count += 1
                     self.add_constraint(self.sum(self.TT[(sl1, c1)] for c1 in self.wdb.courses_for_tutor[i]) +
                                         self.sum(self.TT[(sl2, c2)] for c2 in self.wdb.courses_for_tutor[i]),
                                         '<=', 1, name=name)
             for bg in self.wdb.basic_groups:
-                for sl2 in filter(self.wdb.slots, simultaneous_to=sl1):
+                for sl2 in self.wdb.slots_intersecting[sl1]:
                     name = 'core_group_' + bg.full_name() + '_' + str(sl1) + str(count)
                     count += 1
                     self.add_constraint(self.sum(self.TT[(sl1, c1)] for c1 in self.wdb.courses_for_basic_group[bg]) +
@@ -486,7 +503,7 @@ class TTModel(object):
         count = 0
         for c in self.wdb.courses:
             name = 'core_course_' + str(c) + str(count)
-            count+=1
+            count += 1
             self.add_constraint(
                 self.sum([self.TT[(sl, c)] for sl in self.wdb.slots]),
                 '==',
@@ -501,6 +518,8 @@ class TTModel(object):
         #         name = 'core_group_' + bg.full_name() + '_' + str(sl)
         #         self.add_constraint(expr, '<=', 1, name=name)
 
+        print('Core prof constraints')
+
         for sl in self.wdb.slots:
             for i in self.wdb.instructors:
                 test = False
@@ -509,7 +528,7 @@ class TTModel(object):
                                                  cours__type__duration=sl.duration,
                                                  day=sl.day).exists():
                     test = True
-                for s_sl in filter(self.wdb.slots, simultaneous_to=sl):
+                for s_sl in self.wdb.slots_intersecting[sl]:
                     if self.wdb.fixed_courses.filter(cours__tutor=i,
                                                      start_time=s_sl.start_time,
                                                      cours__type__duration=s_sl.duration,
@@ -536,7 +555,7 @@ class TTModel(object):
 
         # Holidays
         for holiday in self.wdb.holidays:
-            holislots = filter(self.wdb.slots, day=holiday.day)
+            holislots = self.wdb.slots_by_day[holiday.day]
             if holiday.apm is not None:
                 holislots = filter(holislots, apm=holiday.apm)
             for sl in holislots:
@@ -545,7 +564,7 @@ class TTModel(object):
 
         # Training half day
         for training_half_day in self.wdb.training_half_days:
-            training_slots = filter(self.wdb.slots, day=training_half_day.day)
+            training_slots = self.wdb.slots_by_day[training_half_day.day]
             if training_half_day.apm is not None:
                 training_slots = filter(training_slots, apm=training_half_day.apm)
             training_progs = self.train_prog
@@ -573,7 +592,21 @@ class TTModel(object):
         for c in self.wdb.courses:
             course_rg_compat[c] = c.room_type.members.all()
 
+        # constraint : each Room is only used once on simultaneous slots
+        for r in self.wdb.rooms:
+            count = 0
+            for sl1 in self.wdb.slots:
+                for sl2 in self.wdb.slots_intersecting[sl1]:
+                    count += 1
+                    name = 'simul_slots_rooms' + str(r) + '_' + str(count)
+                    self.add_constraint(self.sum(self.TTrooms[(sl1, c, rg)]
+                                                 for (c, rg) in room_course_compat[r]) +
+                                        self.sum(self.TTrooms[(sl2, c, rg)]
+                                                 for (c, rg) in room_course_compat[r]),
+                                        '<=', 1, name=name)
+        count = 0
         for sl in self.wdb.slots:
+            count += 1
             # constraint : each course is assigned to a RoomGroup
             for c in self.wdb.courses:
                 self.add_constraint(
@@ -590,7 +623,7 @@ class TTModel(object):
                         name = 'fixed_room' + str(r) + '_' + str(sl)
                         self.add_constraint(self.sum(self.TTrooms[(s_sl, c, room)]
                                                      for c in self.wdb.courses
-                                                     for s_sl in filter(self.wdb.slots, simultaneous_to=sl)
+                                                     for s_sl in self.wdb.slots_intersecting[sl]
                                                      for room in course_rg_compat[c] if r in room.subrooms.all()),
                                             '==',
                                             0,
@@ -603,16 +636,8 @@ class TTModel(object):
                              for (c, rg) in room_course_compat[r]),
                     '<=',
                     self.avail_room[r][sl],
-                    name='core_room_' + str(r) + '_' + str(sl))
+                    name='core_room_' + str(r) + '_' + str(sl) + '_' + str(count))
 
-            # constraint : each Room is only used once on simultaneous slots
-            for r in self.wdb.rooms:
-                name = 'simul_slots'+str(r)
-                for sl1 in self.wdb.slots:
-                    for sl2 in filter(self.wdb.slots, simultaneous_to=sl1):
-                        self.add_constraint(self.sum(self.TTrooms[(sl1, c1, r)] for c1 in self.wdb.courses) +
-                                            self.sum(self.TTrooms[(sl2, c2, r)] for c2 in self.wdb.courses),
-                                            '<=', 1, name=name)
 
             ########TO BE CHECKED################
             # constraint : respect preference order,
@@ -678,8 +703,8 @@ class TTModel(object):
         for p in self.wdb.dependencies:
             c1 = p.cours1
             c2 = p.cours2
-            for sl1 in filter(self.wdb.slots):
-                for sl2 in filter(self.wdb.slots):
+            for sl1 in self.wdb.slots:
+                for sl2 in self.wdb.slots:
                     if not sl2.is_after(sl1) \
                             or (p.ND and (sl2.day == sl1.day)) \
                             or (p.successifs and not sl2.is_successor_of(sl1)):
@@ -805,7 +830,7 @@ class TTModel(object):
                                 train_prog=promo,
                                 semaine=None)
                 for sl in self.wdb.slots:
-                    #try:
+                    try:
                         avail = courses_avail.filter(Q(start_time__lt=sl.start_time + course_type.duration) |
                                                      Q(start_time__gt=sl.start_time - F('duration')))
                         if min(a.valeur for a in avail) == 0:
@@ -818,12 +843,12 @@ class TTModel(object):
                             non_prefered_slot_cost_course[(course_type,
                                                            promo)][sl] \
                                 = 1 - value / 8
-                    # except:
-                    #     avail_course[(course_type, promo)][sl] = 1
-                    #     non_prefered_slot_cost_course[(course_type,
-                    #                                    promo)][sl] \
-                    #         = 0
-                    #     print("Course availability problem for %s - %s on start time %s" % (type, promo, sl))
+                    except:
+                         avail_course[(course_type, promo)][sl] = 1
+                         non_prefered_slot_cost_course[(course_type,
+                                                        promo)][sl] \
+                             = 0
+                         print("Course availability problem for %s - %s on start time %s" % (type, promo, sl))
 
         return non_prefered_slot_cost_course, avail_course
 
@@ -875,10 +900,10 @@ class TTModel(object):
         for promo in self.train_prog:
             for constr in get_constraints(
                                 self.department,
-                                week = self.week,
-                                year = self.year, 
-                                train_prog = promo, 
-                                is_active = True):
+                                week=self.semaine,
+                                year=self.an,
+                                train_prog=promo,
+                                is_active=True):
                 constr.enrich_model(self)
 
     def update_objective(self):
@@ -912,7 +937,7 @@ class TTModel(object):
             .delete()
 
         for c in self.wdb.courses:
-            for sl in filter(self.wdb.slots, course_type=c.type):
+            for sl in self.wdb.slots:
                 if self.get_var_value(self.TT[(sl, c)]) == 1:
                     # No = len(self.wdb.sched_courses \
                     #          .filter(cours__module=c.module,

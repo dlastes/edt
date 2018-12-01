@@ -201,7 +201,7 @@ class LimitCourseTypePerPeriod(TTConstraint):  # , pond):
         for d in ttmodel.wdb.days:
             for per in periods:
                 expr = ttmodel.lin_expr()
-                for sl in filter(ttmodel.wdb.slots, day=d, apm=per):
+                for sl in self.wdb.slots_by_half_day[(d, per)]:
                     for c in fc:
                         expr += ttmodel.TT[(sl, c)]
                 if self.weight is not None:
@@ -264,11 +264,11 @@ class ReasonableDays(TTConstraint):
             try:
                 first_slot = sorted(filter(ttmodel.wdb.slots, day=d, course_type=c1.type))[0]
             except IndexError:
-                first_slot = sorted(filter(ttmodel.wdb.slots, day=d))[0]
+                first_slot = sorted(self.wdb.slots_byday[d])[0]
             try:
                 last_slot = sorted(filter(ttmodel.wdb.slots, day=d, course_type=c1.type))[-1]
             except IndexError:
-                last_slot = sorted(filter(ttmodel.wdb.slots, day=d))[-1]
+                last_slot = sorted(self.wdb.slots_by_day[d])[-1]
             fc = ttmodel.wdb.courses
             if self.tutor is not None:
                 fc = fc.filter(tutor=self.tutor)
@@ -452,7 +452,7 @@ class MinHalfDays(TTConstraint):
                                       % (self.module, d, Time.PM))
                 # add constraint linking MBHD to TT
                 for apm in [Time.AM, Time.PM]:
-                    halfdayslots = filter(ttmodel.wdb.slots, day=d, apm=apm)
+                    halfdayslots = self.wdb.slots_by_half_day[(d, apm)]
                     card = len(halfdayslots)
                     expr = ttmodel.lin_expr()
                     expr += card * mod_b_h_d[(self.module, d, apm)]
@@ -494,7 +494,7 @@ class MinHalfDays(TTConstraint):
                 # sl11h = ttmodel.wdb.slots.get(jour=d, heure__no=2)
                 # sl14h = ttmodel.wdb.slots.get(jour=d, heure__no=3)
                 # sl17h = ttmodel.wdb.slots.get(jour=d, heure__no=5)
-                slots = sorted(filter(ttmodel.wdb.slots, day=d))
+                slots = sorted(self.wdb.slots_by_day[d])
 
                 for c in fc:
                     try:
@@ -565,17 +565,17 @@ class MinNonPreferedSlot(TTConstraint):
                     cost = (float(self.weight) / max_weight) \
                            * ponderation * ttmodel.TT[(sl, c)] \
                            * ttmodel.unp_slot_cost[c.tutor][sl]
-                    ttmodel.add_to_slot_cost(sl, cost)
+                    #ttmodel.add_to_slot_cost(sl, cost)
                     ttmodel.add_to_inst_cost(c.tutor, cost)
                 else:
                     for g in basic_groups:
-                        if c.groupe in ttmodel.wdb.basic_groups_surgroups[g]:
+                        if c.groupe in ttmodel.wdb.all_groups_of[g]:
                             cost = self.local_weight() \
                                    * ponderation * ttmodel.TT[(sl, c)] \
                                    * ttmodel.unp_slot_cost_course[c.type,
                                                                   self.train_prog][sl]
                             ttmodel.add_to_group_cost(g, cost)
-                            ttmodel.add_to_slot_cost(sl, cost)
+                            #ttmodel.add_to_slot_cost(sl, cost)
 
 
 class AvoidBothSlots(TTConstraint):
@@ -669,7 +669,7 @@ class SimultaneousCourses(TTConstraint):
                 if ttmodel.var_coeff(var1, tutor_constr) == 1:
                     ttmodel.change_var_coeff(var1, tutor_constr, 0)
             for bg in ttmodel.wdb.basic_groups:
-                bg_groups = ttmodel.wdb.basic_groups_surgroups[bg]
+                bg_groups = ttmodel.wdb.all_groups_of[bg]
                 if self.course1.groupe in bg_groups and self.course2.groupe in bg_groups:
                     name_group_constr = 'core_group_' + str(bg) + '_' + str(sl)
                     group_constr = ttmodel.get_constraint(name_group_constr)
