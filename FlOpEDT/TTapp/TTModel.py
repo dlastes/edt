@@ -454,7 +454,7 @@ class TTModel(object):
         print("adding core constraints")
 
         for c in self.wdb.courses:
-            name = 'slot_type_' + str(c)
+            name = 'slot_type_' + str(c) + str(c.id)
             self.add_constraint(
                 self.sum([self.TT[(sl, c)] for ct in self.wdb.course_types.exclude(id=c.type.id)
                           for sl in filter(self.wdb.slots, course_type=ct)])
@@ -465,22 +465,28 @@ class TTModel(object):
 
         # constraint : only one course on simultaneous slots
         name = 'simul_slots'
+        count = 0
         for sl1 in self.wdb.slots:
             for i in self.wdb.instructors:
                 for sl2 in filter(self.wdb.slots, simultaneous_to=sl1):
+                    name = name+str(count)
+                    count += 1
                     self.add_constraint(self.sum(self.TT[(sl1, c1)] for c1 in self.wdb.courses_for_tutor[i]) +
                                         self.sum(self.TT[(sl2, c2)] for c2 in self.wdb.courses_for_tutor[i]),
                                         '<=', 1, name=name)
             for bg in self.wdb.basic_groups:
-                name = 'core_group_' + bg.full_name() + '_' + str(sl1)
                 for sl2 in filter(self.wdb.slots, simultaneous_to=sl1):
+                    name = 'core_group_' + bg.full_name() + '_' + str(sl1) + str(count)
+                    count += 1
                     self.add_constraint(self.sum(self.TT[(sl1, c1)] for c1 in self.wdb.courses_for_basic_group[bg]) +
                                         self.sum(self.TT[(sl2, c2)] for c2 in self.wdb.courses_for_basic_group[bg]),
                                         '<=', 1, name=name)
 
         # constraint : every course is scheduled only once
+        count = 0
         for c in self.wdb.courses:
-            name = 'core_course_' + str(c)
+            name = 'core_course_' + str(c) + str(count)
+            count+=1
             self.add_constraint(
                 self.sum([self.TT[(sl, c)] for sl in self.wdb.slots]),
                 '==',
@@ -500,27 +506,28 @@ class TTModel(object):
                 test = False
                 if self.wdb.fixed_courses.filter(cours__tutor=i,
                                                  start_time=sl.start_time,
-                                                 cours__duration=sl.duration,
+                                                 cours__type__duration=sl.duration,
                                                  day=sl.day).exists():
                     test = True
                 for s_sl in filter(self.wdb.slots, simultaneous_to=sl):
                     if self.wdb.fixed_courses.filter(cours__tutor=i,
                                                      start_time=s_sl.start_time,
-                                                     cours__duration=s_sl.duration,
+                                                     cours__type__duration=s_sl.duration,
                                                      day=s_sl.day).exists():
                         test = True
-                if test:
-                    name = 'fixed_course_tutor_' + str(i) + '_' + str(sl)
-                    instr_courses = self.wdb.courses_for_tutor[i]
-                    self.add_constraint(
-                        self.sum(self.TT[(sl, c)] for c in instr_courses),
-                        '==',
-                        0,
-                        name=name)
+                    if test:
+                        name = 'fixed_course_tutor_' + str(i) + '_' + str(sl)
+                        instr_courses = self.wdb.courses_for_tutor[i]
+                        self.add_constraint(
+                           self.sum(self.TT[(sl, c)] for c in instr_courses),
+                            '==',
+                            0,
+                           name=name)
                 else:
                     expr = self.lin_expr()
                     for c in self.wdb.courses_for_tutor[i] | self.wdb.courses_for_supp_tutor[i]:
                         expr += self.TT[(sl, c)]
+                    name = 'core_prof_' +str(sl)+ '_' + str(i)
                     self.add_constraint(expr,
                                         '<=',
                                         self.avail_instr[i][sl],
