@@ -35,7 +35,7 @@ from pulp import LpVariable, LpConstraint, LpBinary, LpConstraintEQ, \
 
 from pulp import GUROBI_CMD, PULP_CBC_CMD
 
-from base.models import Slot, Group, Day, Time, \
+from base.models import Group, Day, Time, \
     Room, RoomGroup, RoomSort, RoomType, RoomPreference, \
     Course, ScheduledCourse, UserPreference, CoursePreference, \
     Department, Module, TrainingProgramme, CourseType, \
@@ -88,6 +88,7 @@ class WeekDB(object):
         for d in self.days:
             for apm in [Time.AM, Time.PM]:
                 self.slots_by_half_day[(d,apm)] = filter(self.slots, day=d, apm=apm)
+        SLOTS=self.slots
         # ROOMS
         self.room_types = RoomType.objects.filter(department=department)
         self.room_groups = RoomGroup.objects.filter(types__department=department).distinct()
@@ -494,6 +495,7 @@ class TTModel(object):
             for bg in self.wdb.basic_groups:
                 for sl2 in self.wdb.slots_intersecting[sl1]:
                     name = 'core_group_' + bg.full_name() + '_' + str(sl1) + str(count)
+                    print(name)
                     count += 1
                     self.add_constraint(self.sum(self.TT[(sl1, c1)] for c1 in self.wdb.courses_for_basic_group[bg]) +
                                         self.sum(self.TT[(sl2, c2)] for c2 in self.wdb.courses_for_basic_group[bg]),
