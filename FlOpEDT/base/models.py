@@ -531,6 +531,7 @@ class TutorCost(models.Model):
     an = models.PositiveSmallIntegerField()
     tutor = models.ForeignKey('people.Tutor', on_delete=models.CASCADE)
     valeur = models.FloatField()
+    work_copy = models.PositiveSmallIntegerField()
 
     def __str__(self):
         return f"sem{self.semaine}-{self.tutor.username}:{self.valeur}"
@@ -542,6 +543,8 @@ class GroupCost(models.Model):
     an = models.PositiveSmallIntegerField()
     groupe = models.ForeignKey('Group', on_delete=models.CASCADE)
     valeur = models.FloatField()
+    work_copy = models.PositiveSmallIntegerField()
+
 
     def __str__(self):
         return f"sem{self.semaine}-{self.groupe}:{self.valeur}"
@@ -553,6 +556,8 @@ class GroupFreeHalfDay(models.Model):
     an = models.PositiveSmallIntegerField()
     groupe = models.ForeignKey('Group', on_delete=models.CASCADE)
     DJL = models.PositiveSmallIntegerField()
+    work_copy = models.PositiveSmallIntegerField()
+
 
     def __str__(self):
         return f"sem{self.semaine}-{self.groupe}:{self.DJL}"
@@ -622,7 +627,7 @@ class Dependency(models.Model):
 
 class CourseStartTimeConstraint(models.Model):
     # foreignkey instead of onetoone to leave room for a day attribute
-    course_type = models.ForeignKey('CourseType', on_delete=models.CASCADE)
+    course_type = models.ForeignKey('CourseType', null=True, default=None, on_delete=models.CASCADE)
     allowed_start_times = ArrayField(models.PositiveSmallIntegerField(), blank=True)
     
 
