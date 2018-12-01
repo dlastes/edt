@@ -1058,7 +1058,7 @@ class TTModel(object):
 
         if result is not None:
             self.add_tt_to_db(target_work_copy)
-            reassign_rooms(self.semaine, self.an, target_work_copy)
+            reassign_rooms(self.department, self.semaine, self.an, target_work_copy)
             return target_work_copy
 
 

@@ -43,7 +43,7 @@ max_weight = 8
 
 slot_pause = 30
 
-basic_slot_duration = 85
+basic_slot_duration = 90
 
 
 class Slot(object):
@@ -62,20 +62,21 @@ class Slot(object):
             self.apm = Time.AM
 
     def is_simultaneous_to(self, other):
-        if self.day == other.day \
-                and other.start_time - self.duration < self.start_time < other.end_time:
+        if self.day == other.day and \
+                (other.start_time < self.start_time < other.end_time
+                 or self.start_time < other.start_time < self.end_time):
             return True
         else:
             return False
 
     def is_after(self, other):
-        if self.day.no > other.day.no or self.day == other.day and self.start_time > other.end_time:
+        if self.day.no > other.day.no or self.day == other.day and self.start_time >= other.end_time:
             return True
         else:
             return False
 
     def is_successor_of(self,other):
-        if self.day == other.day and other.end_time < self.start_time < other.end_time + slot_pause:
+        if self.day == other.day and other.end_time <= self.start_time <= other.end_time + slot_pause:
             return True
         else:
             return False
