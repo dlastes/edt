@@ -211,8 +211,8 @@ class TTModel(object):
             self.FHD_G[apm] = dict(
                 list(zip(self.wdb.basic_groups,
                     [self.lin_expr() for _ in self.wdb.basic_groups])))
-        self.cost_SL = dict(list(zip(self.wdb.slots,
-                                [self.lin_expr() for _ in self.wdb.slots])))
+        # self.cost_SL = dict(list(zip(self.wdb.slots,
+        #                         [self.lin_expr() for _ in self.wdb.slots])))
         self.cost_G = dict(
             list(zip(self.wdb.basic_groups,
                 [self.lin_expr() for _ in self.wdb.basic_groups])))
@@ -458,7 +458,7 @@ class TTModel(object):
             self.add_constraint(
                 self.sum([self.TT[(sl, c)] for ct in self.wdb.course_types.exclude(id=c.type.id)
                           for sl in filter(self.wdb.slots, course_type=ct)])
-                + self.sum([self.TT[(sl, c)] for sl in self.wdb.slots if sl.duration != c.duration]),
+                + self.sum([self.TT[(sl, c)] for sl in self.wdb.slots if sl.duration != c.type.duration]),
                 '==',
                 0,
                 name=name)
@@ -575,7 +575,9 @@ class TTModel(object):
 
             # constraint : fixed_courses rooms are not available
             for rg in self.wdb.room_groups:
-                if self.wdb.fixed_courses.filter(room=rg, creneau=sl).exists():
+                if self.wdb.fixed_courses.filter((Q(start_time__lt=sl.start_time + sl.duration) |
+                                                  Q(start_time__gt=sl.start_time - F('duration'))),
+                                                 room=rg, day=sl.day).exists():
                     for r in rg.subrooms.all():
                         name = 'fixed_room' + str(r) + '_' + str(sl)
                         self.add_constraint(self.sum(self.TTrooms[(s_sl, c, room)]
@@ -726,8 +728,8 @@ class TTModel(object):
             else:
                 avail_time = sum(a.duration for a in availabilities.filter(valeur__gte=1))
                 maximum = max([a.valeur for a in availabilities])
-                non_prefered_duration = sum(a.duration for a in availabilities.filter(valeur__gte=1,
-                                                                                      valeur__lte=maximum - 1))
+                non_prefered_duration = max(1, sum(a.duration for a in availabilities.filter(valeur__gte=1,
+                                                                                      valeur__lte=maximum - 1)))
 
                 if avail_time < teaching_duration:
                     self.add_warning(i, "%g available minuts < %g courses time" % (avail_time, teaching_duration))
@@ -735,7 +737,7 @@ class TTModel(object):
                         unp_slot_cost[i][sl] = 0
                         avail_instr[i][sl] = 1
 
-                elif all(Holiday.objects.filter(day=x.creneau.jour).exists()
+                elif all(Holiday.objects.filter(day__day=x.day).exists()
                          for x in availabilities.filter(valeur__gte=1)):
                     self.add_warning(i, "availabilities only on vacation days!")
                     for sl in self.wdb.slots:
@@ -749,7 +751,7 @@ class TTModel(object):
                     for sl in self.wdb.slots:
                         avail = availabilities.filter(Q(start_time__lt=sl.start_time + sl.duration) |
                                                       Q(start_time__gt=sl.start_time - F('duration')),
-                                                      day=sl.day)
+                                                      day=sl.day.day)
                         if min(a.valeur for a in avail) == 0:
                             avail_instr[i][sl] = 0
                             unp_slot_cost[i][sl] = 0
@@ -825,7 +827,7 @@ class TTModel(object):
                 if RoomPreference.objects.filter(
                         Q(start_time__lt=sl.start_time + sl.duration) |
                         Q(start_time__gt=sl.start_time - F('duration')),
-                        day=sl.day,
+                        day=sl.day.day,
                         semaine=self.semaine,
                         an=self.an,
                         room=room, valeur=0).exists():

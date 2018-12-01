@@ -69,7 +69,7 @@ class Slot(object):
             return False
 
     def is_after(self, other):
-        if self.day > other.day or self.day == other.day and self.start_time > other.end_time:
+        if self.day.no > other.day.no or self.day == other.day and self.start_time > other.end_time:
             return True
         else:
             return False
@@ -82,9 +82,6 @@ class Slot(object):
 
     def __lt__(self, other):
         return other.is_after(self)
-
-    def __eq__(self, other):
-        return (self.start_time, self.day, self.duration) == (other.start_time, other.day, other.duration)
 
     def __str__(self):
         return str(self.day) + '-' + str(self.start_time)
@@ -654,7 +651,9 @@ class SimultaneousCourses(TTConstraint):
         same_tutor = (self.course1.tutor == self.course2.tutor)
         for sl in ttmodel.wdb.slots:
             var1 = ttmodel.TT[(sl, self.course1)]
-            var2 = ttmodel.sum(ttmodel.TT[(sl2, self.course2)] for sl2 in ttmodel.wdb.slots if sl2 == sl)
+            var2 = ttmodel.sum(ttmodel.TT[(sl2, self.course2)]
+                               for sl2 in ttmodel.wdb.slots
+                               if (sl2.start_time, sl2.day, sl2.duration) == (sl.start_time, sl.day, sl.duration))
             ttmodel.add_constraint(var1 - var2, '==', 0)
             # A compléter, l'idée est que si les cours ont le même prof, ou des
             # groupes qui se superposent, il faut veiller à supprimer les core
