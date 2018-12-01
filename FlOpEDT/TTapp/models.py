@@ -43,7 +43,7 @@ max_weight = 8
 
 slot_pause = 30
 
-basic_slot_duration = 90
+basic_slot_duration = 85
 
 
 class Slot(object):

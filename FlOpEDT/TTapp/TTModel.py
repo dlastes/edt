@@ -78,16 +78,21 @@ class WeekDB(object):
             else:
                 self.slots += [Slot(d, start_time)
                                for d in self.days for start_time in cc.allowed_start_times]
+
         self.slots_by_day = {}
         for d in self.days:
             self.slots_by_day[d] = filter(self.slots, day=d)
+
         self.slots_intersecting = {}
         for sl in self.slots:
             self.slots_intersecting[sl] = filter(self.slots, simultaneous_to=sl)
+
         self.slots_by_half_day = {}
         for d in self.days:
             for apm in [Time.AM, Time.PM]:
                 self.slots_by_half_day[(d,apm)] = filter(self.slots, day=d, apm=apm)
+
+
         # ROOMS
         self.room_types = RoomType.objects.filter(department=department)
         self.room_groups = RoomGroup.objects.filter(types__department=department).distinct()
@@ -468,7 +473,6 @@ class TTModel(object):
         print("adding core constraints")
 
         print('Slot_type constraints')
-
         for c in self.wdb.courses:
             name = 'slot_type_' + str(c)
             self.add_constraint(
@@ -483,7 +487,6 @@ class TTModel(object):
 
 
         print('Simultaneous slots constraints')
-
         for sl1 in self.wdb.slots:
             for i in self.wdb.instructors:
                 name = 'simul_slots' + str(i) + '_' + str(sl1)
@@ -707,7 +710,7 @@ class TTModel(object):
                             self.obj += conj_var * weight
                     if p.successifs and sl2.is_successor_of(sl1):
                         for rg1 in self.wdb.room_groups_for_type[c1.room_type]:
-                            for rg2 in self.wdb.room_groups_for_type[c2.room_type].exclude(rg1):
+                            for rg2 in self.wdb.room_groups_for_type[c2.room_type].exclude(id=rg1.id):
                                 self.add_constraint(self.TTrooms[(sl1, c1, rg1)]
                                                     + self.TTrooms[(sl2, c2, rg2)], '<=', 1)
 
