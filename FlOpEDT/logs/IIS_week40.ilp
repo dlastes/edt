@@ -3,6 +3,6 @@
 Minimize
  
 Subject To
- _C1001: __dummy <= -1
+ C_1000: __dummy <= -1
 Bounds
 End

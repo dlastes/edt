@@ -88,7 +88,6 @@ class WeekDB(object):
         for d in self.days:
             for apm in [Time.AM, Time.PM]:
                 self.slots_by_half_day[(d,apm)] = filter(self.slots, day=d, apm=apm)
-        SLOTS=self.slots
         # ROOMS
         self.room_types = RoomType.objects.filter(department=department)
         self.room_groups = RoomGroup.objects.filter(types__department=department).distinct()
@@ -202,6 +201,7 @@ class TTModel(object):
         self.max_stab = max_stab
         self.lim_ld = lim_ld
         self.var_nb = 0
+        self.constraint_nb = 0
         self.semaine = semaine
         self.an = an
         self.warnings = {}
@@ -350,7 +350,7 @@ class TTModel(object):
         self.var_nb += 1
         return LpVariable(countedname, cat=LpBinary)
 
-    def add_constraint(self, expr, relation, value, name=None):
+    def add_constraint(self, expr, relation, value, name='C'):
         """
         Add a constraint to the model
         """
@@ -364,7 +364,8 @@ class TTModel(object):
             raise Exception("relation must be either '==' or '>=' or '<='")
 
         self.model += LpConstraint(e=expr, sense=pulp_relation,
-                                   rhs=value, name=name)
+                                   rhs=value, name=name + '_' + str(self.constraint_nb))
+        self.constraint_nb += 1
 
     def lin_expr(self, expr=None):
         return LpAffineExpression(expr)
@@ -469,7 +470,7 @@ class TTModel(object):
         print('Slot_type constraints')
 
         for c in self.wdb.courses:
-            name = 'slot_type_' + str(c) + str(c.id)
+            name = 'slot_type_' + str(c)
             self.add_constraint(
                 self.sum([self.TT[(sl, c)] for ct in self.wdb.course_types.exclude(id=c.type.id)
                           for sl in filter(self.wdb.slots, course_type=ct)])
@@ -479,82 +480,71 @@ class TTModel(object):
                 name=name)
 
         # constraint : only one course on simultaneous slots
-        name = 'simul_slots'
-        count = 0
+
 
         print('Simultaneous slots constraints')
 
         for sl1 in self.wdb.slots:
             for i in self.wdb.instructors:
+                name = 'simul_slots' + str(i) + '_' + str(sl1)
                 for sl2 in self.wdb.slots_intersecting[sl1]:
-                    name = name+str(count)
-                    count += 1
                     self.add_constraint(self.sum(self.TT[(sl1, c1)] for c1 in self.wdb.courses_for_tutor[i]) +
                                         self.sum(self.TT[(sl2, c2)] for c2 in self.wdb.courses_for_tutor[i]),
                                         '<=', 1, name=name)
             for bg in self.wdb.basic_groups:
+                name = 'simul_slots' + bg.full_name() + '_' + str(sl1)
                 for sl2 in self.wdb.slots_intersecting[sl1]:
-                    name = 'core_group_' + bg.full_name() + '_' + str(sl1) + str(count)
-                    print(name)
-                    count += 1
                     self.add_constraint(self.sum(self.TT[(sl1, c1)] for c1 in self.wdb.courses_for_basic_group[bg]) +
                                         self.sum(self.TT[(sl2, c2)] for c2 in self.wdb.courses_for_basic_group[bg]),
                                         '<=', 1, name=name)
 
         # constraint : every course is scheduled only once
-        count = 0
         for c in self.wdb.courses:
-            name = 'core_course_' + str(c) + str(count)
-            count += 1
+            name = 'core_course_' + str(c)
             self.add_constraint(
                 self.sum([self.TT[(sl, c)] for sl in self.wdb.slots]),
                 '==',
                 1,
                 name=name)
 
-        # for sl in self.wdb.slots:
-        #     for bg in self.wdb.basic_groups:
-        #         expr = self.lin_expr()
-        #         for c in self.wdb.courses_for_basic_group[bg]:
-        #                 expr += self.TT[(sl, c)]
-        #         name = 'core_group_' + bg.full_name() + '_' + str(sl)
-        #         self.add_constraint(expr, '<=', 1, name=name)
+        for sl in self.wdb.slots:
+            for bg in self.wdb.basic_groups:
+                expr = self.lin_expr()
+                for c in self.wdb.courses_for_basic_group[bg]:
+                        expr += self.TT[(sl, c)]
+                name = 'core_group_' + bg.full_name() + '_' + str(sl)
+                self.add_constraint(expr, '<=', 1, name=name)
 
         print('Core prof constraints')
 
         for sl in self.wdb.slots:
             for i in self.wdb.instructors:
+                expr = self.lin_expr()
+                for c in self.wdb.courses_for_tutor[i] | self.wdb.courses_for_supp_tutor[i]:
+                    expr += self.TT[(sl, c)]
+                name = 'core_prof_' + str(sl) + '_' + str(i)
+                self.add_constraint(expr,
+                                    '<=',
+                                    self.avail_instr[i][sl],
+                                    name=name)
+
+        for sl in self.wdb.slots:
+            for i in self.wdb.instructors:
                 test = False
-                if self.wdb.fixed_courses.filter(cours__tutor=i,
-                                                 start_time=sl.start_time,
-                                                 cours__type__duration=sl.duration,
-                                                 day=sl.day).exists():
-                    print('patate')
-                    test = True
                 for s_sl in self.wdb.slots_intersecting[sl]:
                     if self.wdb.fixed_courses.filter(cours__tutor=i,
                                                      start_time=s_sl.start_time,
                                                      cours__type__duration=s_sl.duration,
                                                      day=s_sl.day).exists():
                         test = True
-                    if test:
-                        name = 'fixed_course_tutor_' + str(i) + '_' + str(sl)
-                        instr_courses = self.wdb.courses_for_tutor[i]
-                        self.add_constraint(
-                           self.sum(self.TT[(sl, c)] for c in instr_courses),
-                            '==',
-                            0,
-                           name=name)
-                else:
-                    count += 1
-                    expr = self.lin_expr()
-                    for c in self.wdb.courses_for_tutor[i] | self.wdb.courses_for_supp_tutor[i]:
-                        expr += self.TT[(sl, c)]
-                    name = 'core_prof_' +str(sl)+ '_' + str(i) +str(count)
-                    self.add_constraint(expr,
-                                        '<=',
-                                        self.avail_instr[i][sl],
-                                        name=name)
+                if test:
+                    name = 'fixed_course_tutor_' + str(i) + '_' + str(sl)
+                    instr_courses = self.wdb.courses_for_tutor[i]
+                    self.add_constraint(
+                       self.sum(self.TT[(sl, c)] for c in instr_courses),
+                        '==',
+                        0,
+                       name=name)
 
         # Holidays
         for holiday in self.wdb.holidays:
@@ -597,19 +587,16 @@ class TTModel(object):
 
         # constraint : each Room is only used once on simultaneous slots
         for r in self.wdb.rooms:
-            count = 0
             for sl1 in self.wdb.slots:
                 for sl2 in self.wdb.slots_intersecting[sl1]:
-                    count += 1
-                    name = 'simul_slots_rooms' + str(r) + '_' + str(count)
+                    name = 'simul_slots_rooms' + str(r) + '_'
                     self.add_constraint(self.sum(self.TTrooms[(sl1, c, rg)]
                                                  for (c, rg) in room_course_compat[r]) +
                                         self.sum(self.TTrooms[(sl2, c, rg)]
                                                  for (c, rg) in room_course_compat[r]),
                                         '<=', 1, name=name)
-        count = 0
+
         for sl in self.wdb.slots:
-            count += 1
             # constraint : each course is assigned to a RoomGroup
             for c in self.wdb.courses:
                 self.add_constraint(
@@ -639,7 +626,7 @@ class TTModel(object):
                              for (c, rg) in room_course_compat[r]),
                     '<=',
                     self.avail_room[r][sl],
-                    name='core_room_' + str(r) + '_' + str(sl) + '_' + str(count))
+                    name = 'core_room_' + str(r) + '_' + str(sl))
 
 
             ########TO BE CHECKED################
