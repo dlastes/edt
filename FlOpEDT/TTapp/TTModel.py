@@ -944,6 +944,7 @@ class TTModel(object):
                     #                   copie_travail=target_work_copy))
                     cp = ScheduledCourse(cours=c,
                                          start_time=sl.start_time,
+                                         day=sl.day.day,
                                          copie_travail=target_work_copy)
                     for rg in c.room_type.members.all():
                         if self.get_var_value(self.TTrooms[(sl, c, rg)]) == 1:
