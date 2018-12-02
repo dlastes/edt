@@ -72,10 +72,16 @@ for (var i = 0 ; i<days.length ; i++){
   --------------------*/
 
 // number of days in the week
-var nbPer = 5;
+var nbPer = Object.keys(idays).length ;
 
+
+// -- no slot --
+// --  begin  --
+// TO BE REMOVED: still appears in stype.js
 // number of slots within 1 day
 var nbSl = 6;
+// --   end   --
+// -- no slot --
 
 // initial number of promos
 var slot_case = false ; //true ;

@@ -119,12 +119,6 @@ function svg_width() {
 /*---------------------
   ------- DISPOS ------
   ---------------------*/
-function day_hour_2_1D(d) {
-    return d.day * nbSl + d.hour;
-    //d.day<4?d.day*nbSl+d.hour:d.day*nbSl+d.hour-3;
-}
-
-
 function dispo_x(d) {
     return idays[d.day].num * (rootgp_width * labgp.width +
             dim_dispo.plot * (dim_dispo.width + dim_dispo.right)) +
@@ -204,7 +198,8 @@ function dispo_all_h(d) {
 }
 
 function dispo_all_y(d) {
-    if (d.hour < nbSl/2) {
+    var ts = time_settings.time ;
+    if (d.start_time < ts.lunch_break_start_time) {
 	return dispo_more_y(d) + d.off * dispo_all_h(d);
     } else {
 	return dispo_more_y(d) - d.off * dispo_all_h(d);
@@ -574,12 +569,6 @@ function gsckh_y(datum, i) {
 function gsckh_txt(d) {
     return d;
 }
-
-/*
-function gsclb_y() {
-    return nbRows * labgp.height * .5 * nbSl;
-}
-*/
 
 function grid_height() {
     return scale * nb_minutes_in_grid();
@@ -1018,7 +1007,6 @@ function dispot_all_w(d) {
 function gsclbt_y() {
     return dispot_y({start_time:
 		     time_settings.time.lunch_break_start_time});
-    //valid.h * 1.25 + did.h * .5 * nbSl;
 }
 
 function gsclbt_x() {

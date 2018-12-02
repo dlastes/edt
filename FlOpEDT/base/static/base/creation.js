@@ -1774,16 +1774,17 @@ function create_val_but() {
 function create_stype() {
     var t, dat, datdi, datsmi;
 
+    // -- no slot --
+    // --  begin  --
+    // TO BE CHECKED: fill missing preferences if needed
+
     // sometimes, all preferences are not in the database
     // -> by default, not available
-    for (var i = 0; i < user.dispos_type.length; i++) {
-        if (typeof user.dispos_type[i] == 'undefined') {
-            // cf translate_dispos_type_from_csv
-            user.dispos_type[i] = create_dispo_default_from_index(i);
-        }
-    }
 
+    // --   end   --
+    // -- no slot --
 
+    
     dat = stg.selectAll(".dispot")
         .data(user.dispos_type);
 
@@ -1935,16 +1936,6 @@ function translate_dispos_type_from_csv(d) {
         off: -1
     };
 }
-
-function create_dispo_default_from_index(ind) {
-    return {
-        day: Math.floor(ind / nbSl),
-        hour: ind % nbSl,
-        val: 0,
-        off: -1
-    };
-}
-
 
 // -- no slot --
 // --  begin  --
