@@ -701,7 +701,7 @@ class LimitedSlotChoices(TTConstraint):
         if self.group:
             text += ' avec le groupe ' + str(self.group)
         text += " ne peuvent avoir lieu qu'à "
-        for sl in self.possible_slots.values_list:
+        for sl in self.possible_slots.values_list():
             text += str(sl) + ', '
         return text
 
@@ -764,6 +764,6 @@ class LimitedRoomChoices(TTConstraint):
         if self.group:
             text += ' avec le groupe ' + str(self.group)
         text += " ne peuvent avoir lieu qu'en salle "
-        for sl in self.possible_rooms.values_list:
+        for sl in self.possible_rooms.values_list():
             text += str(sl) + ', '
         return text
