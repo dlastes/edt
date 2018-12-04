@@ -9,21 +9,21 @@ class PeriodWeeks():
     def __init__(self, year=None, start=None, end=None):
 
         # school year
-        self.start_year = year
-        self.end_year = year + 1
+        self.start_year = year if year else PeriodWeeks.get_current_school_year()
+        self.end_year = self.start_year + 1
 
         # TODO : ensure that start.year corresponds to year 
 
         # By default, we assume that a school year starts at 
         # september, 1 and ends at juny, 30
-        self.start_day = start if start else datetime.date(self.start_year, 9, 1)
-        self.end_day = end if end else datetime.date(self.end_year, 6, 30)
+        self.start_day = datetime.date(self.start_year, 9, 1)
+        self.end_day = datetime.date(self.end_year, 6, 30)
 
         _, self.start_week, _ = self.start_day.isocalendar()
         _, self.end_week, _ = self.end_day.isocalendar()
 
         # Get the correct last year week number (52 or 53)
-        _, self.max_week, _ = datetime.date(year, 12, 28).isocalendar()
+        _, self.max_week, _ = datetime.date(self.start_year, 12, 28).isocalendar()
 
         self.__period_raw = (
             (self.start_year, set(range(self.start_week, self.max_week + 1))),
@@ -49,11 +49,15 @@ class PeriodWeeks():
     def __str__(self):
         return f"School year {self.start_year}-{self.end_year}"            
 
-
-    def get_default_limits(self):
-        start = datetime.date(self.start_year, 9, 1)
-        end = datetime.date(self.end_year, 6, 30)
-        return (start, end)
+    @classmethod
+    def get_current_school_year(cls):
+        now = datetime.datetime.now()
+        # TODO find a alternative way to test the swap month
+        if now.month <= 7:
+            school_year = now.year - 1
+        else:
+            school_year = now.year
+        return school_year
         
     def get_weeks(self, year=None):
 
