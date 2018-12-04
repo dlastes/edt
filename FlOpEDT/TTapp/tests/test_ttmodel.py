@@ -16,7 +16,7 @@ def mock_add_tt_to_db(target_work_copy):
 
 class TTModelTestCase(TestCase):
 
-    fixtures = ['base.json']
+    fixtures = ['dump.json']
 
     @skip("redondant testting")
     def test_init(self):   
