@@ -130,15 +130,6 @@ def edt(req, an=None, semaine=None, splash_id=0, **kwargs):
         name_usr = ''
         rights_usr = 0
 
-    
-    ts = TimeGeneralSettings.objects.get(department=req.department)
-    time_settings = {'time':
-                     {'day_start_time': ts.day_start_time,
-                      'day_finish_time': ts.day_finish_time,
-                      'lunch_break_start_time': ts.lunch_break_start_time,
-                      'lunch_break_finish_time': ts.lunch_break_finish_time},
-                     'days': ts.days}
-    
     return TemplateResponse(req, 'base/show-edt.html',
             {
                 'all_weeks': week_list(),
@@ -151,7 +142,7 @@ def edt(req, an=None, semaine=None, splash_id=0, **kwargs):
                 'name_usr': name_usr,
                 'rights_usr': rights_usr,
                 'splash_id': splash_id,
-                'time_settings': time_settings,
+                'time_settings': queries.get_time_settings(req.department),
                 'days': num_all_days(an, semaine, req.department)
             })
 

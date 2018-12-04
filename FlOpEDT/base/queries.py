@@ -34,7 +34,8 @@ from base.models import Group, TrainingProgramme, \
 
 from base.models import Room, RoomType, RoomGroup, \
                         RoomSort, Period, CourseType, \
-                        BreakingNews, TutorCost, CourseStartTimeConstraint
+                        BreakingNews, TutorCost, CourseStartTimeConstraint, \
+                        TimeGeneralSettings
 
 from people.models import Tutor
 from TTapp.models import TTConstraint
@@ -182,7 +183,8 @@ def get_rooms(department_abbrev):
     """
     From the data stored in the database, fill the room description file, that
     will be used by the website
-    :return:
+    :return: an object containing one dictionary roomtype -> (list of roomgroups),
+    and one dictionary roomgroup -> (list of rooms)
     """
     dic_rt = {}
     for rt in RoomType.objects.filter(department__abbrev=department_abbrev):
@@ -206,7 +208,8 @@ def get_coursetype_constraints(department_abbrev):
     From the data stored in the database, fill the course type 
     description file (duration and allowed start times), that will
     be used by the website
-    :return:
+    :return: a dictionary course type -> (object containing duration
+    and list of allowed start times)
     """
     dic = {}
     for ct in CourseType.objects.filter(department__abbrev=department_abbrev):
@@ -219,3 +222,17 @@ def get_coursetype_constraints(department_abbrev):
             dic[ct.name]['allowed_st'] += \
                 CourseStartTimeConstraint.objects.get(course_type=None).allowed_start_times
     return dic
+
+
+def get_time_settings(dept):
+    """
+    :return: time general settings
+    """
+    ts = TimeGeneralSettings.objects.get(department=dept)
+    time_settings = {'time':
+                     {'day_start_time': ts.day_start_time,
+                      'day_finish_time': ts.day_finish_time,
+                      'lunch_break_start_time': ts.lunch_break_start_time,
+                      'lunch_break_finish_time': ts.lunch_break_finish_time},
+                     'days': ts.days}
+    return time_settings
