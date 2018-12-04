@@ -197,7 +197,9 @@ def stype(req, **kwargs):
                        'date_fin': current_week(),
                        'name_usr': req.user.username,
                        'err': err,
-                       'annee_courante': annee_courante
+                       'annee_courante': annee_courante,
+                       'time_settings': queries.get_time_settings(req.department),
+                       'days': num_all_days(1, 1, req.department)
                       })
     elif req.method == 'POST':
         if 'apply' in list(req.POST.keys()):
@@ -227,7 +229,9 @@ def stype(req, **kwargs):
                        'date_fin': date_fin,
                        'name_usr': req.user.username,
                        'err': err,
-                       'annee_courante': annee_courante
+                       'annee_courante': annee_courante,
+                       'time_settings': queries.get_time_settings(req.department),
+                       'days': num_all_days(1, 1, req.department)
                       })
 
 

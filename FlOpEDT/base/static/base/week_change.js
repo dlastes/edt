@@ -214,7 +214,7 @@ function create_dispos_user_data() {
 		if (!pref_only) {
                     pref_list[k].val = get_dispos_type(d2p).val;
 		} else {
-		    pref_list[k].val = par_dispos.nmax
+		    pref_list[k].val = par_dispos.nmax;
 		}
 		//console.log(j,k,day_hour_2_1D(d2p),user.dispos_type[day_hour_2_1D(d2p)])
             }
