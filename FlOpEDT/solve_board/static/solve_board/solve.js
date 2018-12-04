@@ -108,8 +108,11 @@ function open_connection() {
 		update_constraints_state();
 
 		// Get solver parameters
-		solver = solver_select.value;
-		time_limit = parseInt(time_limit_select.value);
+		var solver = solver_select.value;
+        var time_limit = parseInt(time_limit_select.value);
+        
+        // Get working copy number for stabilization
+        var stabilize_working_copy = stabilize_select.value;
 
 		socket.send(JSON.stringify({
 			'message':
@@ -119,7 +122,8 @@ function open_connection() {
 			'week': week_year_sel.week,
 			'year': week_year_sel.year,
 			'train_prog': tp,
-			'constraints': constraints,
+            'constraints': constraints,
+            'stabilize': stabilize_working_copy,
 			'timestamp': opti_timestamp,
 			'time_limit': time_limit,
 			'solver': solver
@@ -140,7 +144,7 @@ function open_connection() {
 function init_dropdowns() {
 	// create drop down for week selection
 	select_opti_date = d3.select("#opti_date");
-	select_opti_date.on("change", function () { choose_week(true); fetch_constraints(); });
+	select_opti_date.on("change", function () { choose_week(true); fetch_context(); });
 	select_opti_date
 		.selectAll("option")
 		.data(week_year_list)
@@ -151,7 +155,7 @@ function init_dropdowns() {
 	// create drop down for training programme selection
 	train_prog_list.unshift(text_all);
 	select_opti_train_prog = d3.select("#opti_train_prog");
-	select_opti_train_prog.on("change", function () { choose_train_prog(true); fetch_constraints(); });
+	select_opti_train_prog.on("change", function () { choose_train_prog(true); fetch_context(); });
 	select_opti_train_prog
 		.selectAll("option")
 		.data(train_prog_list)
@@ -181,10 +185,52 @@ function choose_train_prog() {
 }
 
 /* 
-	Constraints view initialization
+	Context view initialization
 */
 
-function init_constraints(constraints) {
+function update_context_view(context) {
+
+    if(context){
+        work_copies = context.work_copies;
+        constraints = context.constraints;
+    }
+
+    init_work_copies(work_copies);
+    init_constraints(constraints);
+}
+
+/* 
+	Working copies view initialization
+*/
+function init_work_copies(work_copies){
+    
+    copies = work_copies.slice(0);
+    copies.unshift("-");
+
+	// create drop down for week selection
+    stabilize_div = d3.select("#stabilize");
+    if(work_copies.length==0){
+        stabilize_div.style("display", "none");
+    }
+    else{
+        stabilize_div.style("display", "block");
+    }
+    
+    stabilize_sel = stabilize_div.select("select");
+	stabilize_sel
+		.selectAll("option")
+		.data(copies)
+		.enter()
+        .append("option")
+        .attr('value', (d)=> d)
+		.text((d)=> d);
+}
+
+
+/* 
+    Constraints view initialization
+*/
+function init_constraints(constraints) {  
 
 	// On vérifie si le navigateur prend en charge
 	// l'élément HTML template en vérifiant la présence
@@ -286,19 +332,18 @@ function get_constraints_url(train_prog, year, week) {
 		return Object.values(params).join('/');
 	}
 
-	return fetch_constraints_url_template.replace(regexp, replacer)
+	return fetch_context_url_template.replace(regexp, replacer)
 }
 
-function fetch_constraints() {
+function fetch_context() {
 	$.ajax({
 		type: "GET",
 		dataType: 'json',
 		url: get_constraints_url(train_prog_sel, week_year_sel.year, week_year_sel.week),
 		async: true,
 		contentType: "application/json; charset=utf-8",
-		success: function (filtered_constraints) {
-			constraints = filtered_constraints;
-			init_constraints(constraints);
+		success: function (context) {
+			update_context_view(context);
 		},
 		error: function (msg) {
 			console.log("error");
@@ -351,7 +396,7 @@ function dispatchAction(token) {
 	let message = token.message;
 
 	if (!action) {
-		console.log('unrecognized action' + action);
+		console.log('unrecognized action' + token);
 		return;
 	}
 
@@ -363,7 +408,9 @@ function dispatchAction(token) {
 	Main process
 */
 
-solver_select = document.querySelector("#solver")
+var solver_select = document.querySelector("#solver")
+var stabilize_select = document.querySelector("#stabilize select")
+
 time_limit_select = document.querySelector("#limit")
 txt_area = document.getElementsByTagName("textarea")[0];
 
@@ -372,4 +419,4 @@ if (launchButton)
 	launchButton.addEventListener("click", manageSolverProcess);
 
 init_dropdowns();
-init_constraints(constraints);
+update_context_view();

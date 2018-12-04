@@ -193,8 +193,9 @@
     var week_year_list = {{ all_weeks|safe }};
     var train_prog_list = {{ all_train_progs|safe }};
     var department = '{{ department }}';
-    var fetch_constraints_url_template = '{% url "solve_board:fetch_constraints" department 'tp' 1111 11 %}';
+    var fetch_context_url_template = '{% url "solve_board:fetch_context" department 'tp' 1111 11 %}';
     var constraints = JSON.parse('{{ constraints|escapejs }}');
+    var work_copies = JSON.parse('{{ work_copies|escapejs }}');
   </script>
   <template id="constraints_template">
     <div class="constraint">
@@ -218,8 +219,18 @@
         <span>Configuration</span>
         <input type="button" id="launch" name="action" value="Go"/>
       </div>
-      <div>Semaine : <select id="opti_date"></select></div>
-      <div>Promotion : <select id="opti_train_prog"></select></div>
+      <div>
+          <label for="opti_date">Semaine : </label> 
+        <select id="opti_date"></select>
+      </div>
+      <div>
+        <label for="opti_train_prog">Promotion : </label>
+        <select id="opti_train_prog"></select>
+      </div>
+      <div id="stabilize">
+        <label for="stabilize_selector">Stabilisation : </label>
+        <select id="stabilize_selector"></select>
+      </div>
       <div>
         {% if solvers|length > 1 %}  
           <label for="solver">Solveur :</label>
