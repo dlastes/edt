@@ -1,44 +1,35 @@
+# -*- coding: utf-8 -*-
+
+# This file is part of the FlOpEDT/FlOpScheduler project.
+# Copyright (c) 2017
+# Authors: Iulian Ober, Paul Renaud-Goud, Pablo Seban, et al.
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# Affero General Public License for more details.
+# 
+# You should have received a copy of the GNU Affero General Public
+# License along with this program. If not, see
+# <http://www.gnu.org/licenses/>.
+# 
+# You can be released from the requirements of the license by purchasing
+# a commercial license. Buying such a license is mandatory as soon as
+# you develop activities involving the FlOpEDT/FlOpScheduler software
+# without disclosing the source code of your own applications.
+
 import datetime
 
-from django.db.models import Q, Count
+from django.db.models import Count
 from base.models import ScheduledCourse, RoomGroup, Course, Holiday
+from base.core.period_weeks import PeriodWeeks
+
 from people.models import Tutor
-
-def get_period(year):
-
-    # We assume that :
-    #   a period starts after the summer holidays (week 40)
-    _, period_week_swap, _ = datetime.date(year, 8, 1).isocalendar()
-
-    # TODO : Determine the week period limits based on
-    # the first period starts week value
-    _, start_week, _ = datetime.date(year, 9, 1).isocalendar()
-    _, end_week, _ = datetime.date(year + 1, 6, 30).isocalendar()
-    _, max_week, _ = datetime.date(year, 12, 28).isocalendar()
-
-    return (
-        (year, tuple(range(start_week, max_week + 1))),
-        (year + 1, tuple(range(1, end_week + 1))),
-        )
-
-
-def get_period_filter(period, related_path='cours'):
-
-    # Return a Q filter to restrict records returned 
-    # by course query to a given period
-
-    filter = None
-    for year, weeks in period:
-        
-        kwargs = { f"{related_path}__an": year, f"{related_path}__semaine__in": weeks}
-
-        if filter:
-            filter |= Q(**kwargs)
-        else:
-            filter = Q(**kwargs)
-    
-    return filter
-
 
 def get_holiday_list(period):
     for year, _ in period:
@@ -66,17 +57,16 @@ def get_room_activity_by_day(department, year):
     # computed until the current week
 
     # year : correponds to the first period's year
-    period = get_period(year)
-
-    # Filter all the scheduled courses for the period
-    period_filter = get_period_filter(period)
-
+    period = PeriodWeeks(year)
+    period_filter = period.get_filter()
+    
     # Get room list 
     rooms = tuple(RoomGroup.objects \
         .filter(types__department = department) \
         .values_list('name', flat=True)
         .distinct())
 
+    # Filter all the scheduled courses for the period
     scheduled = set(ScheduledCourse.objects \
         .filter(
             period_filter,
@@ -91,7 +81,8 @@ def get_room_activity_by_day(department, year):
     
     # Get the total number of open days
     all_weeks = set()
-    period_weeks = [all_weeks.update(weeks) for _, weeks in period]
+    for _, weeks in period:
+        all_weeks.update(weeks)
 
     nb_open_days = len(all_weeks - holidays) * 5
 
@@ -130,11 +121,11 @@ def get_tutor_hours(department, year):
     # of hours of given courses
 
     # year : correponds to the first period's year
-    period = get_period(year)
-
-    # Filter all the scheduled courses for the period
-    period_filter = get_period_filter(period, related_path='taught_courses')    
+    period = PeriodWeeks(year)
+    period_filter = period.get_filter(related_path='taught_courses')    
     
+    # Filter all the scheduled courses for the period
+    # and group by tutor    
     query = Tutor.objects \
         .filter(
             period_filter,
