@@ -67,6 +67,36 @@ for (var i = 0 ; i<days.length ; i++){
     idays[days[i].ref] = days[i] ;
 }
 
+
+/*-------------------------
+  - CONTEXT MENUS HELPERS -
+  -------------------------*/
+
+function cancel_cm_adv_preferences(){
+    if(ckbox["dis-mod"].cked) {
+	if(! context_menu.dispo_hold) {
+	    data_dispo_adv_cur = [] ;
+	    go_cm_advanced_pref(true);
+	}
+	context_menu.dispo_hold = false ;
+    }
+}
+
+function cancel_cm_room_tutor_change(){
+    if(ckbox["edt-mod"].cked) {
+	if(!context_menu.room_tutor_hold) {
+	    if (room_tutor_change.course.length > 0) {
+		room_tutor_change.course = [] ;
+		room_tutor_change.proposal = [] ;
+		go_cm_room_tutor_change();
+	    }
+	}
+	context_menu.room_tutor_hold = false ;
+    }
+}
+
+
+
 /*--------------------
    ------ ALL -------
   --------------------*/
