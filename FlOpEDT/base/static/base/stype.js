@@ -135,11 +135,6 @@ function fetch_pref_only() {
 	    
 	    console.log("in");
 
-	    // dispos[user.nom] = new Array(nbPer);
-	    // for(var i=0 ; i<nbPer ; i++) {
-	    // 	dispos[user.nom][i] = new Array(nbSl);
-	    // 	dispos[user.nom][i].fill(-1);
-	    // }
 	    user.dispos_type = [] ;
 	    user.dispos_type = d3.csvParse(msg, translate_dispos_from_csv);
 	    create_dispos_user_data();
@@ -211,49 +206,15 @@ d3.select("body")
     .on("click", function(d) {
 	cancel_cm_adv_preferences();
 	cancel_cm_room_tutor_change();
-	// if(dispo_menu_appeared) {
-	//     del_dispo_adv = true ;
-	//     dispo_menu_appeared = false ;
-	//     go_pref(true);
-	// } else {
-	//     if(del_dispo_adv) {
-	// 	del_dispo_adv = false ;
-	// 	data_dispo_adv_cur = [] ;
-	// 	go_pref(true);
-	//     }
-	// }
     })
-
-
-
-
-
-
-function rearrange_dispos(save) {
-    var changes = [] ;
-    var i =0;
-    
-    for(var j = 0 ; j<nbPer ; j++) {
-	for(var k = 0 ; k<nbSl ; k++) {
-	    if(!save ||
-	       user.dispos[i].val != user.dispos_bu[i].val) {
-		changes.push({ day: j, hour: k, val:user.dispos[i].val});
-	    }
-		i+=1;
-	}
-    }
-
-    user.dispos_bu = user.dispos.slice(0);
-    
-    return changes ;
-}
 
 
 function apply_stype_from_button(save) {
     console.log("app");
 //    console.log(document.forms['app']);
     console.log();
-    var changes = rearrange_dispos();
+    var changes = [] ;
+    compute_pref_changes(changes) ;
     var sent_data = {} ;
     sent_data['changes'] = JSON.stringify(changes) ; 
 

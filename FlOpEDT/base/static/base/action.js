@@ -912,20 +912,10 @@ function send_edt_change(changes) {
 }
 
 
-
-
-function send_dis_change() {
-    var changes = [];
+//
+function compute_pref_changes(changes) {
     var nbDispos = 0;
-    var cur_pref ;
     var modified_days = []
-
-    if (user.dispos_bu.length == 0) {
-        ack.edt = "Modif dispo : RAS";
-        go_ack_msg(true);
-        return;
-    }
-
 
     for (var i = 0; i < Object.keys(user.dispos).length; i++) {
 	if(user.dispos[i].val != user.dispos_bu[i]
@@ -951,16 +941,27 @@ function send_dis_change() {
             changes.filter(function(d){
 		return d.day == cur_pref.day ;
 	    })[0].val_inter.push({start_time:cur_pref.start_time,
-					duration: cur_pref.duration,
-					value: cur_pref.val});
+				  duration: cur_pref.duration,
+				  value: cur_pref.val});
         }
-        bu_pref.day = cur_pref.day;
-        bu_pref.start_time = cur_pref.start_time;
-        bu_pref.val = cur_pref.val;
-        bu_pref.off = cur_pref.off;
+    }
+    user.dispos_bu = user.dispos.slice(0);
+
+    return nbDispos ;
+}
+
+
+function send_dis_change() {
+    var nbDispos = 0;
+
+    if (user.dispos_bu.length == 0) {
+        ack.edt = "Modif dispo : RAS";
+        go_ack_msg(true);
+        return;
     }
 
-
+    var changes = [];
+    nbDispos = compute_pref_changes(changes) ;
 
     // console.log(nbDispos);
     // console.log(changes);
