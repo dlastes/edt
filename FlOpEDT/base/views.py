@@ -66,6 +66,8 @@ from django.core.cache import cache
 
 import base.queries as queries
 
+from django.db.models import Q
+
 # <editor-fold desc="FAVICON">
 # ----------
 # FAVICON
@@ -1006,46 +1008,60 @@ def decale_changes(req, **kwargs):
 
     new_assignment = json.loads(req.POST.get('new',{}))
     change_list = json.loads(req.POST.get('liste',[]))
+    new_week = new_assignment['ns']
+    new_year = new_assignment['na']
 
     for c in change_list:
-        # try:
-        if c['j'] != -1 and c['h'] != -1:
-            cours_place = ScheduledCourse \
-                .objects \
-                .get(cours__id=c['i'],
-                     copie_travail=0)
-            cours = cours_place.cours
-            cache.delete(get_key_course_pl(req.department.abbrev,
-                                           cours.an,
-                                           cours.semaine,
-                                           cours_place.copie_travail))
-            cours_place.delete()
-        else:
-            cours = Course.objects.get(id=c['i'])
-            cache.delete(get_key_course_pp(req.department.abbrev, 
-                                           cours.an,
-                                           cours.semaine,
+        changing_course = Course.objects.get(id=c['i'])
+        old_week = changing_course.semaine
+        old_year = changing_course.an
+
+        edt_versions = EdtVersion.objects.select_for_update().filter(
+            (Q(semaine=old_week)&Q(an=old_year))
+             |(Q(semaine=new_week)&Q(an=new_year)))
+        with transaction.atomic():
+            # was the course was scheduled before?
+            if c['j'] != -1 and c['h'] != -1:
+                scheduled_course = ScheduledCourse \
+                    .objects \
+                    .get(cours=changing_course,
+                         copie_travail=0)
+                cache.delete(get_key_course_pl(req.department.abbrev,
+                                               old_year,
+                                               old_week,
+                                               scheduled_course.copie_travail))
+                scheduled_course.delete()
+                ev = edt_versions.objects.get(an=old_year, semaine=old_week)
+                ev.version += 1
+                ev.save()
+            else:
+                cache.delete(get_key_course_pp(req.department.abbrev, 
+                                               old_year,
+                                               old_week,
+                                               0))
+                # note: add copie_travail in Cours might be of interest
+
+            pm = PlanningModification(cours=changing_course,
+                                      semaine_old=old_week,
+                                      an_old=old_year,
+                                      tutor_old=changing_course.tutor,
+                                      initiator=req.user.tutor)
+            pm.save()
+
+            changing_course.semaine = new_week
+            changing_course.an = new_year
+            if new_year != 0:
+                cours.tutor = Tutor.objects.get(username=new_assignment['np'])
+            cache.delete(get_key_course_pp(req.department.abbrev,
+                                           new_year,
+                                           new_week,
                                            0))
-            # note: add copie_travail in Cours might be of interest
-
-        pm = PlanningModification(cours=cours,
-                                  semaine_old=cours.semaine,
-                                  an_old=cours.an,
-                                  tutor_old=cours.tutor,
-                                  initiator=req.user.tutor)
-        pm.save()
-
-        cours.semaine = new_assignment['ns']
-        cours.an = new_assignment['na']
-        if new_assignment['na'] != 0:
-            # cours.prof=User.objects.get(username=a.np)
-            cours.tutor = Tutor.objects.get(username=new_assignment['np'])
-        cache.delete(get_key_course_pp(req.department.abbrev,
-                                       cours.an,
-                                       cours.semaine,
-                                       0))
-        cours.save()
-
+            changing_course.save()
+            ev = edt_versions.objects.update_or_create(
+                an=new_year,
+                semaine=new_week)
+            ev.version += 1
+            ev.save()
 
     return good_response
 
