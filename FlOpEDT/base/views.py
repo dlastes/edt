@@ -989,7 +989,7 @@ def dispos_changes(req, **kwargs):
         # for c in Course.objects.filter(semaine=week,
         #                               an=year).distinct('module__train_prog__department'):
         for dep in Department.objects.all():
-            cache.delete(get_key_preferences_tutor(dep, year, week))
+            cache.delete(get_key_preferences_tutor(dep.abbrev, year, week))
         
     return good_response
 
