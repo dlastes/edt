@@ -984,10 +984,12 @@ def dispos_changes(req, **kwargs):
         print(didi)
         
     if week is not None and year is not None:
-        for c in Course.objects.filter(semaine=week,
-                                       an=year).distinct('module__train_prog__department'):
-            cache.delete(get_key_preferences_tutor(c.module.train_prog.department.abbrev,
-                                                   year, week))
+        # invalidate merely the keys where the tutor has courses:
+        # bad idea if the courses have not been generated yet
+        # for c in Course.objects.filter(semaine=week,
+        #                               an=year).distinct('module__train_prog__department'):
+        for dep in Department.objects.all():
+            cache.delete(get_key_preferences_tutor(dep, year, week))
         
     return good_response
 
