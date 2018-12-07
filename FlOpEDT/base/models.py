@@ -248,8 +248,7 @@ class RoomGroup(models.Model):
 
     def __str__(self):
         return self.name
-
-
+        
 class Room(models.Model):
     name = models.CharField(max_length=20)
     subroom_of = models.ManyToManyField(RoomGroup,
@@ -298,6 +297,9 @@ class Module(models.Model):
 
     def __str__(self):
         return self.abbrev
+
+    class Meta:
+       ordering = ['abbrev',]         
 
 
 class CourseType(models.Model):

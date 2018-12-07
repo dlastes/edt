@@ -164,7 +164,7 @@ class LimitCourseTypePerPeriod(TTConstraint):  # , pond):
     @classmethod
     def get_viewmodel_prefetch_attributes(cls):
         attributes = super().get_viewmodel_prefetch_attributes()
-        attributes += ['module', 'tutor', 'type']
+        attributes.extend(['module', 'tutor', 'type'])
         return attributes
 
     def get_viewmodel(self):
@@ -216,7 +216,7 @@ class ReasonableDays(TTConstraint):
     a None value builds the constraint for all possible values,
     e.g. promo = None => the constraint holds for all promos.
     """
-    group = models.ForeignKey('base.Group', null=True, on_delete=models.CASCADE)
+    group = models.ForeignKey('base.Group', null=True, blank=True, on_delete=models.CASCADE)
     tutor = models.ForeignKey('people.Tutor',
                               null=True,
                               default=None,
@@ -256,6 +256,13 @@ class ReasonableDays(TTConstraint):
         return text
 
 
+    @classmethod
+    def get_viewmodel_prefetch_attributes(cls):
+        attributes = super().get_viewmodel_prefetch_attributes()
+        attributes.extend(['group', 'tutor'])
+        return attributes
+
+
 class Stabilize(TTConstraint):
     """
     Allow to realy stabilize the courses of a category
@@ -279,6 +286,12 @@ class Stabilize(TTConstraint):
                               on_delete=models.CASCADE)
     type = models.ForeignKey('base.CourseType', null=True, default=None, on_delete=models.CASCADE)
     work_copy = models.PositiveSmallIntegerField(default=0)
+
+    @classmethod
+    def get_viewmodel_prefetch_attributes(cls):
+        attributes = super().get_viewmodel_prefetch_attributes()
+        attributes.extend(['group', 'module', 'tutor', 'type'])
+        return attributes
 
     def enrich_model(self, ttmodel, ponderation=1):
         if self.general:
@@ -364,14 +377,24 @@ class MinHalfDays(TTConstraint):
     group = models.ForeignKey('base.Group',
                               null=True,
                               default=None,
+                              blank=True,
                               on_delete=models.CASCADE)
     module = models.ForeignKey('base.Module',
                                null=True,
                                default=None,
+                               blank=True,
                                on_delete=models.CASCADE)
     join2courses = models.BooleanField(
         verbose_name='If a tutor has 2 or 4 courses only, join it?',
         default=False)
+
+
+    @classmethod
+    def get_viewmodel_prefetch_attributes(cls):
+        attributes = super().get_viewmodel_prefetch_attributes()
+        attributes.extend(['group', 'module', 'tutor'])
+        return attributes
+
 
     def enrich_model(self, ttmodel, ponderation=1):
         fc = ttmodel.wdb.courses
@@ -486,6 +509,12 @@ class MinNonPreferedSlot(TTConstraint):
                               default=None,
                               on_delete=models.CASCADE)
 
+    @classmethod
+    def get_viewmodel_prefetch_attributes(cls):
+        attributes = super().get_viewmodel_prefetch_attributes()
+        attributes.extend(['tutor'])
+        return attributes                              
+
     # is not called when save() is
     def clean(self):
         if not self.tutor and not self.train_prog:
@@ -547,6 +576,12 @@ class AvoidBothSlots(TTConstraint):
                               null=True,
                               default=None,
                               on_delete=models.CASCADE)
+
+    @classmethod
+    def get_viewmodel_prefetch_attributes(cls):
+        attributes = super().get_viewmodel_prefetch_attributes()
+        attributes.extend(['group', 'tutor'])
+        return attributes                              
 
     def enrich_model(self, ttmodel, ponderation=1):
         fc = ttmodel.wdb.courses
@@ -612,6 +647,12 @@ class SimultaneousCourses(TTConstraint):
     """
     course1 = models.ForeignKey('base.Course', related_name='course1', on_delete=models.CASCADE)
     course2 = models.ForeignKey('base.Course', related_name='course2', on_delete=models.CASCADE)
+
+    @classmethod
+    def get_viewmodel_prefetch_attributes(cls):
+        attributes = super().get_viewmodel_prefetch_attributes()
+        attributes.extend(['course1', 'course2'])
+        return attributes
 
     def enrich_model(self, ttmodel, ponderation=1):
         same_tutor = (self.course1.tutor == self.course2.tutor)
