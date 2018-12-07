@@ -44,7 +44,8 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from django.contrib.admin.filters import AllValuesFieldListFilter, RelatedFieldListFilter, ChoicesFieldListFilter
+from django.contrib.admin.filters import AllValuesFieldListFilter, RelatedFieldListFilter, \
+                                        ChoicesFieldListFilter, RelatedOnlyFieldListFilter
 from core.department import get_department_lookup
 from django.db.models.fields import BLANK_CHOICE_DASH
 
@@ -56,16 +57,18 @@ class DropdownFilterDepartmentMixin():
         if hasattr(request, 'department'):
             lookup = get_department_lookup(field, request.department, include_field_name=False)
             if lookup:
-                queryset = field.related_model._default_manager.filter(**lookup).distinct()
+                queryset = field.related_model._default_manager \
+                                .filter(**lookup) \
+                                .distinct()
 
         return [(x.pk, str(x)) for x in queryset]
 
 
-class DropdownFilterAll(DropdownFilterDepartmentMixin, AllValuesFieldListFilter):
+class DropdownFilterAll(AllValuesFieldListFilter):
     template = 'admin/dropdown_filter.html'
 
 
-class DropdownFilterRel(DropdownFilterDepartmentMixin, RelatedFieldListFilter):
+class DropdownFilterRel(DropdownFilterDepartmentMixin, RelatedOnlyFieldListFilter):
     template = 'admin/dropdown_filter.html'
 
 

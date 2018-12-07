@@ -47,12 +47,11 @@ class LimitNaturePerPeriodAdmin(DepartmentModelAdmin):
     list_display = ('week', 'year', 'train_prog', 'type', 'limit',
                     'module', 'tutor', 'period', 'comment')
     ordering = ()
-    empty_value_display = 'All!'
     list_filter = (('train_prog', DropdownFilterRel),
                    ('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
                    ('tutor', DropdownFilterRel),
-
+                   ('type', DropdownFilterRel),
                    )
 
 
@@ -60,7 +59,6 @@ class ReasonableDaysAdmin(DepartmentModelAdmin):
     list_display = ('week', 'year', 'train_prog',
                     'group', 'tutor', 'comment')
     ordering = ()
-    empty_value_display = 'All!'
     list_filter = (('train_prog', DropdownFilterRel),
                    ('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
@@ -73,21 +71,19 @@ class StabilizeAdmin(DepartmentModelAdmin):
     list_display = ('week', 'year', 'train_prog', 'general',
                     'group', 'tutor', 'module', 'type', 'comment')
     ordering = ()
-    empty_value_display = 'All!'
     list_filter = (('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
                    ('train_prog', DropdownFilterRel),
                    ('group', DropdownFilterRel),
                    ('tutor', DropdownFilterRel),
                    ('module', DropdownFilterRel),
-                   ('type', DropdownFilterAll),
+                   ('type', DropdownFilterRel),
                    )
 
 
 class MinHalfDaysAdmin(DepartmentModelAdmin):
     list_display = ('week', 'year', 'train_prog', 'tutor', 'module', 'join2courses', 'comment')
     ordering = ()
-    empty_value_display = 'All!'
     list_filter = (('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
                    ('tutor', DropdownFilterRel),
@@ -99,7 +95,6 @@ class MinHalfDaysAdmin(DepartmentModelAdmin):
 class MinNonPreferedSlotAdmin(DepartmentModelAdmin):
     list_display = ('week', 'year', 'train_prog', 'tutor', 'comment')
     ordering = ()
-    empty_value_display = 'All!'
     list_filter = (('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
                    ('tutor', DropdownFilterRel),
@@ -110,7 +105,6 @@ class MinNonPreferedSlotAdmin(DepartmentModelAdmin):
 class AvoidBothSlotsAdmin(DepartmentModelAdmin):
     list_display = ('week', 'year', 'train_prog', 'tutor', 'group', 'slot1', 'slot2', 'comment')
     ordering = ()
-    empty_value_display = 'All!'
     list_filter = (('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
                    ('train_prog', DropdownFilterRel),
@@ -124,7 +118,6 @@ class AvoidBothSlotsAdmin(DepartmentModelAdmin):
 class SimultaneousCoursesAdmin(DepartmentModelAdmin):
     list_display = ('week', 'year', 'train_prog', 'course1', 'course2', 'comment')
     ordering = ()
-    empty_value_display = 'All!'
     list_filter = (('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
                    ('course1', DropdownFilterRel),
