@@ -581,7 +581,7 @@ def fetch_decale(req, **kwargs):
     for c in cours:
         liste_module.append(c.module.abbrev)
 
-    cours = filt_g(filt_m(filt_sa(department, semaine, an), module), groupe) \
+    cours = filt_g(filt_sa(department, semaine, an), groupe) \
         .order_by('tutor__username') \
         .distinct('tutor__username')
     for c in cours:
@@ -1053,7 +1053,7 @@ def decale_changes(req, **kwargs):
             changing_course.semaine = new_week
             changing_course.an = new_year
             if new_year != 0:
-                cours.tutor = Tutor.objects.get(username=new_assignment['np'])
+                changing_course.tutor = Tutor.objects.get(username=new_assignment['np'])
             cache.delete(get_key_course_pp(req.department.abbrev,
                                            new_year,
                                            new_week,
