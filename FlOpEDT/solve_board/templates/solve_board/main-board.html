@@ -93,7 +93,7 @@
   */
 
   input[type=checkbox] + label {
-    display: block;
+    display: inline-block;
     margin: 0.2em;
     cursor: pointer;
     padding: 0.2em;
@@ -159,15 +159,6 @@
     display: block;
   }
 
-  #description{
-    padding: 0 0.8em 0.4em 2.5em
-  }
-
- 
-  .details{
-    padding: 1em;
-  }
-
   .comment{
     font-style: italic;
     font-size: 1em;
@@ -201,8 +192,8 @@
     <div class="constraint">
       <input type="checkbox" />
       <label class="title"></label>
-      <div id="description" class="description"></div>
       <div id="explanation" class="explanation"></div>
+      <div id="description" class="description hiddable"></div>
       <div id="comment" class="comment hiddable"></div>
       <div id="details" class="details hiddable"></div>
     </div>
