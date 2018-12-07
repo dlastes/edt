@@ -57,6 +57,9 @@ class User(AbstractUser):
         ret += '>'
         ret += '(' + str(self.rights) + ')'
         return ret
+
+    class Meta:
+       ordering = ['username',]        
         
 
 class Tutor(User):
