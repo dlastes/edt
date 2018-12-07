@@ -1059,7 +1059,7 @@ def decale_changes(req, **kwargs):
                                            new_week,
                                            0))
             changing_course.save()
-            ev = EdtVersion.objects.update_or_create(
+            ev, res = EdtVersion.objects.update_or_create(
                 an=new_year,
                 semaine=new_week)
             ev.version += 1
