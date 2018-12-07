@@ -38,21 +38,6 @@ DATABASES = {
     }
 }
 
-# CACHES = {
-#     'default': {
-#         'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
-#     }
-# }
-
-# if you want some cache, use the following instead:
-#
-CACHES = {
-   'default': {
-       'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-       'LOCATION': 'flop',
-   }
-}
-
 LOGGING = {  
     'version': 1,  
     'disable_existing_loggers': False,
@@ -69,7 +54,7 @@ LOGGING = {
             'propagate': True,
         },        
         'django.db.backends': {
-            'level': 'DEBUG',
+            'level': 'INFO',
             'handlers': ['console'],
             'propagate': False,
         }

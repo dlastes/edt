@@ -16,6 +16,7 @@ services:
         CONFIG: development
     env_file: 
       - ./docker/env/db.dev.env
+      - ./docker/env/web.env
     environment:
       - DJANGO_SETTINGS_MODULE=FlOpEDT.settings.development
       - DJANGO_COLLECTSTATIC=off

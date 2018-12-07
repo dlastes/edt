@@ -1252,6 +1252,7 @@
     "pk": 1,
     "fields": {
         "name": "S1",
+        "department": 1,
         "starting_week": 36,
         "ending_week": 5
     }
@@ -1261,6 +1262,7 @@
     "pk": 2,
     "fields": {
         "name": "S2",
+        "department": 1,
         "starting_week": 4,
         "ending_week": 26
     }
@@ -1270,6 +1272,7 @@
     "pk": 3,
     "fields": {
         "name": "S3",
+        "department": 1,
         "starting_week": 36,
         "ending_week": 5
     }
@@ -1279,6 +1282,7 @@
     "pk": 4,
     "fields": {
         "name": "S4",
+        "department": 1,
         "starting_week": 4,
         "ending_week": 26
     }
@@ -1867,6 +1871,7 @@
     "pk": 1,
     "fields": {
         "name": "CM",
+        "department": 1,
         "group_types": [
             3
         ]
@@ -1877,6 +1882,7 @@
     "pk": 2,
     "fields": {
         "name": "TD",
+        "department": 1,
         "group_types": [
             2
         ]
@@ -1887,6 +1893,7 @@
     "pk": 3,
     "fields": {
         "name": "TP",
+        "department": 1,
         "group_types": [
             1
         ]
@@ -1897,6 +1904,7 @@
     "pk": 4,
     "fields": {
         "name": "CTRL",
+        "department": 1,
         "group_types": [
             3
         ]
@@ -23446,12 +23454,12 @@
     "pk": 1,
     "fields": {
         "department": null,
+        "train_prog": null,
         "week": null,
         "year": null,
         "weight": null,
         "comment": null,
         "is_active": true,
-        "train_prog": null,
         "module": 60,
         "tutor": null,
         "group": null,
@@ -23466,6 +23474,7 @@
     "model": "base.tutorcost",
     "pk": 1,
     "fields": {
+        "department": 1,
         "semaine": 36,
         "an": 2018,
         "tutor": 3,
@@ -23476,6 +23485,7 @@
     "model": "base.tutorcost",
     "pk": 2,
     "fields": {
+        "department": 1,
         "semaine": 36,
         "an": 2018,
         "tutor": 11,
@@ -23486,6 +23496,7 @@
     "model": "base.tutorcost",
     "pk": 3,
     "fields": {
+        "department": 1,
         "semaine": 36,
         "an": 2018,
         "tutor": 17,
@@ -23496,6 +23507,7 @@
     "model": "base.tutorcost",
     "pk": 4,
     "fields": {
+        "department": 1,
         "semaine": 36,
         "an": 2018,
         "tutor": 28,
@@ -23506,6 +23518,7 @@
     "model": "base.tutorcost",
     "pk": 5,
     "fields": {
+        "department": 1,
         "semaine": 36,
         "an": 2018,
         "tutor": 31,
@@ -23516,6 +23529,7 @@
     "model": "base.tutorcost",
     "pk": 6,
     "fields": {
+        "department": 1,
         "semaine": 36,
         "an": 2018,
         "tutor": 32,
@@ -23526,6 +23540,7 @@
     "model": "base.tutorcost",
     "pk": 7,
     "fields": {
+        "department": 1,
         "semaine": 36,
         "an": 2018,
         "tutor": 34,
@@ -23536,6 +23551,7 @@
     "model": "base.tutorcost",
     "pk": 8,
     "fields": {
+        "department": 1,
         "semaine": 36,
         "an": 2018,
         "tutor": 40,
@@ -23546,6 +23562,7 @@
     "model": "base.tutorcost",
     "pk": 9,
     "fields": {
+        "department": 1,
         "semaine": 36,
         "an": 2018,
         "tutor": 44,
@@ -23556,6 +23573,7 @@
     "model": "base.tutorcost",
     "pk": 10,
     "fields": {
+        "department": 1,
         "semaine": 36,
         "an": 2018,
         "tutor": 45,
@@ -23566,6 +23584,7 @@
     "model": "base.tutorcost",
     "pk": 11,
     "fields": {
+        "department": 1,
         "semaine": 36,
         "an": 2018,
         "tutor": 47,
@@ -23576,6 +23595,7 @@
     "model": "base.tutorcost",
     "pk": 12,
     "fields": {
+        "department": 1,
         "semaine": 36,
         "an": 2018,
         "tutor": 48,
@@ -23586,6 +23606,7 @@
     "model": "base.tutorcost",
     "pk": 13,
     "fields": {
+        "department": 1,
         "semaine": 36,
         "an": 2018,
         "tutor": 57,
@@ -23596,6 +23617,7 @@
     "model": "base.tutorcost",
     "pk": 14,
     "fields": {
+        "department": 1,
         "semaine": 36,
         "an": 2018,
         "tutor": 59,
@@ -23606,6 +23628,7 @@
     "model": "base.tutorcost",
     "pk": 15,
     "fields": {
+        "department": 1,
         "semaine": 36,
         "an": 2018,
         "tutor": 60,
@@ -23616,6 +23639,7 @@
     "model": "base.tutorcost",
     "pk": 16,
     "fields": {
+        "department": 1,
         "semaine": 36,
         "an": 2018,
         "tutor": 61,
@@ -23626,6 +23650,7 @@
     "model": "base.tutorcost",
     "pk": 17,
     "fields": {
+        "department": 1,
         "semaine": 37,
         "an": 2018,
         "tutor": 3,
@@ -23636,6 +23661,7 @@
     "model": "base.tutorcost",
     "pk": 18,
     "fields": {
+        "department": 1,
         "semaine": 37,
         "an": 2018,
         "tutor": 4,
@@ -23646,6 +23672,7 @@
     "model": "base.tutorcost",
     "pk": 19,
     "fields": {
+        "department": 1,
         "semaine": 37,
         "an": 2018,
         "tutor": 5,
@@ -23656,6 +23683,7 @@
     "model": "base.tutorcost",
     "pk": 20,
     "fields": {
+        "department": 1,
         "semaine": 37,
         "an": 2018,
         "tutor": 9,
@@ -23666,6 +23694,7 @@
     "model": "base.tutorcost",
     "pk": 21,
     "fields": {
+        "department": 1,
         "semaine": 37,
         "an": 2018,
         "tutor": 11,
@@ -23676,6 +23705,7 @@
     "model": "base.tutorcost",
     "pk": 22,
     "fields": {
+        "department": 1,
         "semaine": 37,
         "an": 2018,
         "tutor": 12,
@@ -23686,6 +23716,7 @@
     "model": "base.tutorcost",
     "pk": 23,
     "fields": {
+        "department": 1,
         "semaine": 37,
         "an": 2018,
         "tutor": 17,
@@ -23696,6 +23727,7 @@
     "model": "base.tutorcost",
     "pk": 24,
     "fields": {
+        "department": 1,
         "semaine": 37,
         "an": 2018,
         "tutor": 23,
@@ -23706,6 +23738,7 @@
     "model": "base.tutorcost",
     "pk": 25,
     "fields": {
+        "department": 1,
         "semaine": 37,
         "an": 2018,
         "tutor": 25,
@@ -23716,6 +23749,7 @@
     "model": "base.tutorcost",
     "pk": 26,
     "fields": {
+        "department": 1,
         "semaine": 37,
         "an": 2018,
         "tutor": 27,
@@ -23726,6 +23760,7 @@
     "model": "base.tutorcost",
     "pk": 27,
     "fields": {
+        "department": 1,
         "semaine": 37,
         "an": 2018,
         "tutor": 28,
@@ -23736,6 +23771,7 @@
     "model": "base.tutorcost",
     "pk": 28,
     "fields": {
+        "department": 1,
         "semaine": 37,
         "an": 2018,
         "tutor": 31,
@@ -23746,6 +23782,7 @@
     "model": "base.tutorcost",
     "pk": 29,
     "fields": {
+        "department": 1,
         "semaine": 37,
         "an": 2018,
         "tutor": 32,
@@ -23756,6 +23793,7 @@
     "model": "base.tutorcost",
     "pk": 30,
     "fields": {
+        "department": 1,
         "semaine": 37,
         "an": 2018,
         "tutor": 34,
@@ -23766,6 +23804,7 @@
     "model": "base.tutorcost",
     "pk": 31,
     "fields": {
+        "department": 1,
         "semaine": 37,
         "an": 2018,
         "tutor": 35,
@@ -23776,6 +23815,7 @@
     "model": "base.tutorcost",
     "pk": 32,
     "fields": {
+        "department": 1,
         "semaine": 37,
         "an": 2018,
         "tutor": 38,
@@ -23786,6 +23826,7 @@
     "model": "base.tutorcost",
     "pk": 33,
     "fields": {
+        "department": 1,
         "semaine": 37,
         "an": 2018,
         "tutor": 40,
@@ -23796,6 +23837,7 @@
     "model": "base.tutorcost",
     "pk": 34,
     "fields": {
+        "department": 1,
         "semaine": 37,
         "an": 2018,
         "tutor": 42,
@@ -23806,6 +23848,7 @@
     "model": "base.tutorcost",
     "pk": 35,
     "fields": {
+        "department": 1,
         "semaine": 37,
         "an": 2018,
         "tutor": 6,
@@ -23816,6 +23859,7 @@
     "model": "base.tutorcost",
     "pk": 36,
     "fields": {
+        "department": 1,
         "semaine": 37,
         "an": 2018,
         "tutor": 18,
@@ -23826,6 +23870,7 @@
     "model": "base.tutorcost",
     "pk": 37,
     "fields": {
+        "department": 1,
         "semaine": 37,
         "an": 2018,
         "tutor": 39,
@@ -23836,6 +23881,7 @@
     "model": "base.tutorcost",
     "pk": 38,
     "fields": {
+        "department": 1,
         "semaine": 37,
         "an": 2018,
         "tutor": 44,
@@ -23846,6 +23892,7 @@
     "model": "base.tutorcost",
     "pk": 39,
     "fields": {
+        "department": 1,
         "semaine": 37,
         "an": 2018,
         "tutor": 45,
@@ -23856,6 +23903,7 @@
     "model": "base.tutorcost",
     "pk": 40,
     "fields": {
+        "department": 1,
         "semaine": 37,
         "an": 2018,
         "tutor": 47,
@@ -23866,6 +23914,7 @@
     "model": "base.tutorcost",
     "pk": 41,
     "fields": {
+        "department": 1,
         "semaine": 37,
         "an": 2018,
         "tutor": 48,
@@ -23876,6 +23925,7 @@
     "model": "base.tutorcost",
     "pk": 42,
     "fields": {
+        "department": 1,
         "semaine": 37,
         "an": 2018,
         "tutor": 55,
@@ -23886,6 +23936,7 @@
     "model": "base.tutorcost",
     "pk": 43,
     "fields": {
+        "department": 1,
         "semaine": 37,
         "an": 2018,
         "tutor": 58,
@@ -23896,6 +23947,7 @@
     "model": "base.tutorcost",
     "pk": 44,
     "fields": {
+        "department": 1,
         "semaine": 37,
         "an": 2018,
         "tutor": 59,
@@ -23906,6 +23958,7 @@
     "model": "base.tutorcost",
     "pk": 45,
     "fields": {
+        "department": 1,
         "semaine": 37,
         "an": 2018,
         "tutor": 60,
@@ -23916,6 +23969,7 @@
     "model": "base.tutorcost",
     "pk": 46,
     "fields": {
+        "department": 1,
         "semaine": 37,
         "an": 2018,
         "tutor": 61,
@@ -23926,6 +23980,7 @@
     "model": "base.tutorcost",
     "pk": 47,
     "fields": {
+        "department": 1,
         "semaine": 37,
         "an": 2018,
         "tutor": 62,
@@ -23936,6 +23991,7 @@
     "model": "base.tutorcost",
     "pk": 48,
     "fields": {
+        "department": 1,
         "semaine": 37,
         "an": 2018,
         "tutor": 63,
@@ -23946,6 +24002,7 @@
     "model": "base.tutorcost",
     "pk": 49,
     "fields": {
+        "department": 1,
         "semaine": 38,
         "an": 2018,
         "tutor": 3,
@@ -23956,6 +24013,7 @@
     "model": "base.tutorcost",
     "pk": 50,
     "fields": {
+        "department": 1,
         "semaine": 38,
         "an": 2018,
         "tutor": 4,
@@ -23966,6 +24024,7 @@
     "model": "base.tutorcost",
     "pk": 51,
     "fields": {
+        "department": 1,
         "semaine": 38,
         "an": 2018,
         "tutor": 5,
@@ -23976,6 +24035,7 @@
     "model": "base.tutorcost",
     "pk": 52,
     "fields": {
+        "department": 1,
         "semaine": 38,
         "an": 2018,
         "tutor": 9,
@@ -23986,6 +24046,7 @@
     "model": "base.tutorcost",
     "pk": 53,
     "fields": {
+        "department": 1,
         "semaine": 38,
         "an": 2018,
         "tutor": 11,
@@ -23996,6 +24057,7 @@
     "model": "base.tutorcost",
     "pk": 54,
     "fields": {
+        "department": 1,
         "semaine": 38,
         "an": 2018,
         "tutor": 12,
@@ -24006,6 +24068,7 @@
     "model": "base.tutorcost",
     "pk": 55,
     "fields": {
+        "department": 1,
         "semaine": 38,
         "an": 2018,
         "tutor": 14,
@@ -24016,6 +24079,7 @@
     "model": "base.tutorcost",
     "pk": 56,
     "fields": {
+        "department": 1,
         "semaine": 38,
         "an": 2018,
         "tutor": 17,
@@ -24026,6 +24090,7 @@
     "model": "base.tutorcost",
     "pk": 57,
     "fields": {
+        "department": 1,
         "semaine": 38,
         "an": 2018,
         "tutor": 23,
@@ -24036,6 +24101,7 @@
     "model": "base.tutorcost",
     "pk": 58,
     "fields": {
+        "department": 1,
         "semaine": 38,
         "an": 2018,
         "tutor": 25,
@@ -24046,6 +24112,7 @@
     "model": "base.tutorcost",
     "pk": 59,
     "fields": {
+        "department": 1,
         "semaine": 38,
         "an": 2018,
         "tutor": 26,
@@ -24056,6 +24123,7 @@
     "model": "base.tutorcost",
     "pk": 60,
     "fields": {
+        "department": 1,
         "semaine": 38,
         "an": 2018,
         "tutor": 27,
@@ -24066,6 +24134,7 @@
     "model": "base.tutorcost",
     "pk": 61,
     "fields": {
+        "department": 1,
         "semaine": 38,
         "an": 2018,
         "tutor": 28,
@@ -24076,6 +24145,7 @@
     "model": "base.tutorcost",
     "pk": 62,
     "fields": {
+        "department": 1,
         "semaine": 38,
         "an": 2018,
         "tutor": 31,
@@ -24086,6 +24156,7 @@
     "model": "base.tutorcost",
     "pk": 63,
     "fields": {
+        "department": 1,
         "semaine": 38,
         "an": 2018,
         "tutor": 32,
@@ -24096,6 +24167,7 @@
     "model": "base.tutorcost",
     "pk": 64,
     "fields": {
+        "department": 1,
         "semaine": 38,
         "an": 2018,
         "tutor": 34,
@@ -24106,6 +24178,7 @@
     "model": "base.tutorcost",
     "pk": 65,
     "fields": {
+        "department": 1,
         "semaine": 38,
         "an": 2018,
         "tutor": 35,
@@ -24116,6 +24189,7 @@
     "model": "base.tutorcost",
     "pk": 66,
     "fields": {
+        "department": 1,
         "semaine": 38,
         "an": 2018,
         "tutor": 38,
@@ -24126,6 +24200,7 @@
     "model": "base.tutorcost",
     "pk": 67,
     "fields": {
+        "department": 1,
         "semaine": 38,
         "an": 2018,
         "tutor": 40,
@@ -24136,6 +24211,7 @@
     "model": "base.tutorcost",
     "pk": 68,
     "fields": {
+        "department": 1,
         "semaine": 38,
         "an": 2018,
         "tutor": 42,
@@ -24146,6 +24222,7 @@
     "model": "base.tutorcost",
     "pk": 69,
     "fields": {
+        "department": 1,
         "semaine": 38,
         "an": 2018,
         "tutor": 6,
@@ -24156,6 +24233,7 @@
     "model": "base.tutorcost",
     "pk": 70,
     "fields": {
+        "department": 1,
         "semaine": 38,
         "an": 2018,
         "tutor": 18,
@@ -24166,6 +24244,7 @@
     "model": "base.tutorcost",
     "pk": 71,
     "fields": {
+        "department": 1,
         "semaine": 38,
         "an": 2018,
         "tutor": 39,
@@ -24176,6 +24255,7 @@
     "model": "base.tutorcost",
     "pk": 72,
     "fields": {
+        "department": 1,
         "semaine": 38,
         "an": 2018,
         "tutor": 44,
@@ -24186,6 +24266,7 @@
     "model": "base.tutorcost",
     "pk": 73,
     "fields": {
+        "department": 1,
         "semaine": 38,
         "an": 2018,
         "tutor": 45,
@@ -24196,6 +24277,7 @@
     "model": "base.tutorcost",
     "pk": 74,
     "fields": {
+        "department": 1,
         "semaine": 38,
         "an": 2018,
         "tutor": 47,
@@ -24206,6 +24288,7 @@
     "model": "base.tutorcost",
     "pk": 75,
     "fields": {
+        "department": 1,
         "semaine": 38,
         "an": 2018,
         "tutor": 48,
@@ -24216,6 +24299,7 @@
     "model": "base.tutorcost",
     "pk": 76,
     "fields": {
+        "department": 1,
         "semaine": 38,
         "an": 2018,
         "tutor": 51,
@@ -24226,6 +24310,7 @@
     "model": "base.tutorcost",
     "pk": 77,
     "fields": {
+        "department": 1,
         "semaine": 38,
         "an": 2018,
         "tutor": 55,
@@ -24236,6 +24321,7 @@
     "model": "base.tutorcost",
     "pk": 78,
     "fields": {
+        "department": 1,
         "semaine": 38,
         "an": 2018,
         "tutor": 58,
@@ -24246,6 +24332,7 @@
     "model": "base.tutorcost",
     "pk": 79,
     "fields": {
+        "department": 1,
         "semaine": 38,
         "an": 2018,
         "tutor": 59,
@@ -24256,6 +24343,7 @@
     "model": "base.tutorcost",
     "pk": 80,
     "fields": {
+        "department": 1,
         "semaine": 38,
         "an": 2018,
         "tutor": 60,
@@ -24266,6 +24354,7 @@
     "model": "base.tutorcost",
     "pk": 81,
     "fields": {
+        "department": 1,
         "semaine": 38,
         "an": 2018,
         "tutor": 61,
@@ -24276,6 +24365,7 @@
     "model": "base.tutorcost",
     "pk": 82,
     "fields": {
+        "department": 1,
         "semaine": 38,
         "an": 2018,
         "tutor": 62,
@@ -24286,6 +24376,7 @@
     "model": "base.tutorcost",
     "pk": 83,
     "fields": {
+        "department": 1,
         "semaine": 38,
         "an": 2018,
         "tutor": 63,
@@ -24296,6 +24387,7 @@
     "model": "base.tutorcost",
     "pk": 84,
     "fields": {
+        "department": 1,
         "semaine": 38,
         "an": 2018,
         "tutor": 64,
@@ -24306,6 +24398,7 @@
     "model": "base.tutorcost",
     "pk": 85,
     "fields": {
+        "department": 1,
         "semaine": 39,
         "an": 2018,
         "tutor": 3,
@@ -24316,6 +24409,7 @@
     "model": "base.tutorcost",
     "pk": 86,
     "fields": {
+        "department": 1,
         "semaine": 39,
         "an": 2018,
         "tutor": 4,
@@ -24326,6 +24420,7 @@
     "model": "base.tutorcost",
     "pk": 87,
     "fields": {
+        "department": 1,
         "semaine": 39,
         "an": 2018,
         "tutor": 11,
@@ -24336,6 +24431,7 @@
     "model": "base.tutorcost",
     "pk": 88,
     "fields": {
+        "department": 1,
         "semaine": 39,
         "an": 2018,
         "tutor": 12,
@@ -24346,6 +24442,7 @@
     "model": "base.tutorcost",
     "pk": 89,
     "fields": {
+        "department": 1,
         "semaine": 39,
         "an": 2018,
         "tutor": 14,
@@ -24356,6 +24453,7 @@
     "model": "base.tutorcost",
     "pk": 90,
     "fields": {
+        "department": 1,
         "semaine": 39,
         "an": 2018,
         "tutor": 17,
@@ -24366,6 +24464,7 @@
     "model": "base.tutorcost",
     "pk": 91,
     "fields": {
+        "department": 1,
         "semaine": 39,
         "an": 2018,
         "tutor": 23,
@@ -24376,6 +24475,7 @@
     "model": "base.tutorcost",
     "pk": 92,
     "fields": {
+        "department": 1,
         "semaine": 39,
         "an": 2018,
         "tutor": 25,
@@ -24386,6 +24486,7 @@
     "model": "base.tutorcost",
     "pk": 93,
     "fields": {
+        "department": 1,
         "semaine": 39,
         "an": 2018,
         "tutor": 26,
@@ -24396,6 +24497,7 @@
     "model": "base.tutorcost",
     "pk": 94,
     "fields": {
+        "department": 1,
         "semaine": 39,
         "an": 2018,
         "tutor": 27,
@@ -24406,6 +24508,7 @@
     "model": "base.tutorcost",
     "pk": 95,
     "fields": {
+        "department": 1,
         "semaine": 39,
         "an": 2018,
         "tutor": 28,
@@ -24416,6 +24519,7 @@
     "model": "base.tutorcost",
     "pk": 96,
     "fields": {
+        "department": 1,
         "semaine": 39,
         "an": 2018,
         "tutor": 31,
@@ -24426,6 +24530,7 @@
     "model": "base.tutorcost",
     "pk": 97,
     "fields": {
+        "department": 1,
         "semaine": 39,
         "an": 2018,
         "tutor": 32,
@@ -24436,6 +24541,7 @@
     "model": "base.tutorcost",
     "pk": 98,
     "fields": {
+        "department": 1,
         "semaine": 39,
         "an": 2018,
         "tutor": 34,
@@ -24446,6 +24552,7 @@
     "model": "base.tutorcost",
     "pk": 99,
     "fields": {
+        "department": 1,
         "semaine": 39,
         "an": 2018,
         "tutor": 35,
@@ -24456,6 +24563,7 @@
     "model": "base.tutorcost",
     "pk": 100,
     "fields": {
+        "department": 1,
         "semaine": 39,
         "an": 2018,
         "tutor": 38,
@@ -24466,6 +24574,7 @@
     "model": "base.tutorcost",
     "pk": 101,
     "fields": {
+        "department": 1,
         "semaine": 39,
         "an": 2018,
         "tutor": 40,
@@ -24476,6 +24585,7 @@
     "model": "base.tutorcost",
     "pk": 102,
     "fields": {
+        "department": 1,
         "semaine": 39,
         "an": 2018,
         "tutor": 42,
@@ -24486,6 +24596,7 @@
     "model": "base.tutorcost",
     "pk": 103,
     "fields": {
+        "department": 1,
         "semaine": 39,
         "an": 2018,
         "tutor": 6,
@@ -24496,6 +24607,7 @@
     "model": "base.tutorcost",
     "pk": 104,
     "fields": {
+        "department": 1,
         "semaine": 39,
         "an": 2018,
         "tutor": 18,
@@ -24506,6 +24618,7 @@
     "model": "base.tutorcost",
     "pk": 105,
     "fields": {
+        "department": 1,
         "semaine": 39,
         "an": 2018,
         "tutor": 39,
@@ -24516,6 +24629,7 @@
     "model": "base.tutorcost",
     "pk": 106,
     "fields": {
+        "department": 1,
         "semaine": 39,
         "an": 2018,
         "tutor": 44,
@@ -24526,6 +24640,7 @@
     "model": "base.tutorcost",
     "pk": 107,
     "fields": {
+        "department": 1,
         "semaine": 39,
         "an": 2018,
         "tutor": 45,
@@ -24536,6 +24651,7 @@
     "model": "base.tutorcost",
     "pk": 108,
     "fields": {
+        "department": 1,
         "semaine": 39,
         "an": 2018,
         "tutor": 47,
@@ -24546,6 +24662,7 @@
     "model": "base.tutorcost",
     "pk": 109,
     "fields": {
+        "department": 1,
         "semaine": 39,
         "an": 2018,
         "tutor": 48,
@@ -24556,6 +24673,7 @@
     "model": "base.tutorcost",
     "pk": 110,
     "fields": {
+        "department": 1,
         "semaine": 39,
         "an": 2018,
         "tutor": 51,
@@ -24566,6 +24684,7 @@
     "model": "base.tutorcost",
     "pk": 111,
     "fields": {
+        "department": 1,
         "semaine": 39,
         "an": 2018,
         "tutor": 55,
@@ -24576,6 +24695,7 @@
     "model": "base.tutorcost",
     "pk": 112,
     "fields": {
+        "department": 1,
         "semaine": 39,
         "an": 2018,
         "tutor": 58,
@@ -24586,6 +24706,7 @@
     "model": "base.tutorcost",
     "pk": 113,
     "fields": {
+        "department": 1,
         "semaine": 39,
         "an": 2018,
         "tutor": 59,
@@ -24596,6 +24717,7 @@
     "model": "base.tutorcost",
     "pk": 114,
     "fields": {
+        "department": 1,
         "semaine": 39,
         "an": 2018,
         "tutor": 60,
@@ -24606,6 +24728,7 @@
     "model": "base.tutorcost",
     "pk": 115,
     "fields": {
+        "department": 1,
         "semaine": 39,
         "an": 2018,
         "tutor": 61,
@@ -24616,6 +24739,7 @@
     "model": "base.tutorcost",
     "pk": 116,
     "fields": {
+        "department": 1,
         "semaine": 39,
         "an": 2018,
         "tutor": 62,
@@ -24626,6 +24750,7 @@
     "model": "base.tutorcost",
     "pk": 117,
     "fields": {
+        "department": 1,
         "semaine": 39,
         "an": 2018,
         "tutor": 63,
@@ -24636,6 +24761,7 @@
     "model": "base.tutorcost",
     "pk": 118,
     "fields": {
+        "department": 1,
         "semaine": 39,
         "an": 2018,
         "tutor": 64,

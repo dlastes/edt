@@ -35,41 +35,14 @@ DATABASES = {
     }
 }
 
-
-
-
-# soon: memcached
-# ---------------
-# CACHES = {
-#     'default': {
-#         'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-#         'LOCATION': '127.0.0.1:11211',
-#     }
-# }
-
-
-
-# old redis cache
-# ---------------
-# CACHES = {
-#     "default": {
-#         "BACKEND": "django_redis.cache.RedisCache",
-#         "LOCATION": "redis://redis:6379/1",
-#         "OPTIONS": {
-#             "CLIENT_CLASS": "django_redis.client.DefaultClient"
-#         },
-#         'TIMEOUT': 24 * 3600,
-#         'KEY_PREFIX': 'etd:',
-#     }
-# }
-
-REDIS_BACKEND = 'redis://redis:6379/1'
+REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
+REDIS_BACKEND = f'redis://{REDIS_HOST}:6379/1'
 
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("redis", 6379)],
+            "hosts": [(REDIS_HOST, 6379)],
         },
     },
 }
