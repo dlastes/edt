@@ -1033,7 +1033,7 @@ def decale_changes(req, **kwargs):
                                                old_week,
                                                scheduled_course.copie_travail))
                 scheduled_course.delete()
-                ev = edt_versions.objects.get(an=old_year, semaine=old_week)
+                ev = EdtVersion.objects.get(an=old_year, semaine=old_week)
                 ev.version += 1
                 ev.save()
             else:
