@@ -193,7 +193,7 @@ class LimitCourseTypePerPeriod(TTConstraint):  # , pond):
         return view_model
 
     def one_line_description(self):
-        text = "Pas plus de " + str(self.limit) +' '+ str(self.type)
+        text = "Pas plus de " + str(self.limit) + ' ' + str(self.type)
         if self.module:
             text += " de " + str(self.module)
         text += " par "
