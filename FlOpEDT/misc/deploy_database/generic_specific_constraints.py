@@ -65,7 +65,7 @@ def add_iut_blagnac_basics():
 
     # Libérer des demi-journées aux étudiants
     for g in Group.objects.exclude(train_prog=lp):
-        M=MinHalfDays(group=g, weight=max_weight, department=info)
+        M = MinHalfDays(group=g, weight=max_weight, department=info)
         M.save()
 
 
@@ -81,10 +81,10 @@ def add_iut_blagnac_specials():
     pas_plus_de_2_exams_par_jour = True
     if pas_plus_de_2_exams_par_jour:
         for promo in TrainingProgramme.objects.all():
-            L=LimitCourseTypePerPeriod(limit=2, department=info,
-                                     type=DS,
-                                     period=LimitCourseTypePerPeriod.FULL_DAY,
-                                     train_prog=promo)
+            L = LimitCourseTypePerPeriod(limit=2, department=info,
+                                         type=DS,
+                                         period=LimitCourseTypePerPeriod.FULL_DAY,
+                                         train_prog=promo)
             L.save()
 
     # Pas plus de 2 amphis par demie journée
