@@ -1,12 +1,16 @@
 import datetime
 from django.db.models import Q
+from base.models import Course
+
 
 class PeriodWeeks():
 
     """
     Week oriented school year description
     """    
-    def __init__(self, year=None, start=None, end=None):
+    def __init__(self, department=None, year=None, start=None, end=None, exclude_empty_weeks=False):
+
+        self .department = department
 
         # school year
         self.start_year = year if year else PeriodWeeks.get_current_school_year()
@@ -25,9 +29,31 @@ class PeriodWeeks():
         # Get the correct last year week number (52 or 53)
         _, self.max_week, _ = datetime.date(self.start_year, 12, 28).isocalendar()
 
+        # Get weeks list for each year
+        if exclude_empty_weeks:
+
+            if not department:
+                raise ValueError(f"the department argument is required for weeks exclusion deduction")
+
+            start_weeks = PeriodWeeks.filter_empty_weeks(
+                            self.department,
+                            self.start_year, 
+                            self.start_week, 
+                            self.max_week)
+
+            end_weeks = PeriodWeeks.filter_empty_weeks(
+                            self.department,
+                            self.end_year,
+                            1, 
+                            self.end_week)
+        else:
+            start_weeks = range(self.start_week, self.max_week + 1)
+            end_weeks = range(1, self.end_week + 1)
+
+        # Set final lists
         self.__period_raw = (
-            (self.start_year, set(range(self.start_week, self.max_week + 1))),
-            (self.end_year, set(range(1, self.end_week + 1))),
+            (self.start_year, set(start_weeks)),
+            (self.end_year, set(end_weeks)),
             )
 
         self.__period_weeks = self.__period_raw[0][1] | self.__period_raw[1][1]
@@ -48,6 +74,21 @@ class PeriodWeeks():
 
     def __str__(self):
         return f"School year {self.start_year}-{self.end_year}"            
+
+
+    @classmethod
+    def filter_empty_weeks(cls, department, year, start, end):
+        """
+        Exclude weeks that doesn't have any planned course 
+        """        
+        return Course.objects \
+                .filter(
+                    an=year,
+                    semaine__in=list(range(start, end + 1)),
+                    module__train_prog__department=department) \
+                .distinct() \
+                .values_list('semaine', flat=True)
+
 
     @classmethod
     def get_current_school_year(cls):
