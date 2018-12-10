@@ -30,8 +30,11 @@ class EdtContextMiddleware:
         department_key = 'department'
 
         def del_request_department():
-            del request.session[department_key]
-            cache.delete(department_key)
+            try:
+                del request.session[department_key]
+                cache.delete(department_key)
+            except:
+                logger.debug(f'an error has occured when deleting session and cache for [{department_key}]')
 
         def set_request_department(request, department, set_session=True, set_cache=False):
             request.department = department
