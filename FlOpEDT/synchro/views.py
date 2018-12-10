@@ -6,6 +6,8 @@ from base.models import ScheduledCourse, Group, Room
 from people.models import Tutor
 from datetime import datetime
 from datetime import timedelta
+#from base.weeks import get_course_datetime_start
+from isoweek import Week
 
 tz='Europe/Paris'
 
@@ -36,7 +38,8 @@ def group(request, promo_id, groupe_id, **kwargs):
     events=[]
     for c in get_course_list().filter(cours__groupe__in=g_list):
         e = create_event(c)
-        e['title'] = c.cours.module.abbrev + ' ' + c.cours.type.name + ' - ' + c.cours.tutor.username
+        tutor = c.cours.tutor.username if c.cours.tutor is not None else ''
+        e['title'] = c.cours.module.abbrev + ' ' + c.cours.type.name + ' - ' + tutor
         events.append(e)
     return render(request, 'synchro/ical.ics', {'events':events, 'timezone':tz})
 
@@ -54,12 +57,12 @@ def get_course_list():
 
 
 def create_event(c):
-    p = str(c.cours.an) + '-W' + str(c.cours.semaine) + '-w' + str(c.creneau.jour_id) + ' ' + str(c.creneau.heure.hours) + ':'+ str(c.creneau.heure.minutes)
-    begin = datetime.strptime(p, '%Y-W%W-w%w %H:%M')
+    begin = datetime.combine(Week(c.cours.an, c.cours.semaine).day(c.creneau.jour_id-1), datetime.min.time())+timedelta(hours=c.creneau.heure.hours)
     end = begin + timedelta(minutes=c.creneau.duration)
+    tutor = c.cours.tutor.username if c.cours.tutor is not None else ''
     location = c.room.name if c.room is not None else ''
     return {'id':c.id,
-         'title': c.cours.module.abbrev + ' ' + c.cours.type.name + ' - ' + c.cours.groupe.train_prog.abbrev + ' ' + c.cours.groupe.nom + ' - ' + c.cours.tutor.username,
+         'title': c.cours.module.abbrev + ' ' + c.cours.type.name + ' - ' + c.cours.groupe.train_prog.abbrev + ' ' + c.cours.groupe.nom + ' - ' + tutor,
          'location': location,
          'begin': begin,
          'end': end,
