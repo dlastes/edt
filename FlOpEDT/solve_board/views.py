@@ -146,9 +146,6 @@ def main_board(req, **kwargs):
 
     department = req.department
     week_list = weeks.week_list()
-    
-    current_week = weeks.current_week()
-    current_year = weeks.annee_courante
 
     # Get solver list
     solvers_viewmodel = get_pulp_solvers_viewmodel()
