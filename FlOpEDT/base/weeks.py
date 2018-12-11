@@ -74,7 +74,7 @@ def week_list():
     elif annee_courante == 2018:
         for i in list(range(36, 44)) + list(range(45, 52)):
             li.append({'semaine': i, 'an': 2018})
-        for i in list(range(2, 9)) + list(range(10, 16)) + list(range(18, 31)):
+        for i in list(range(2, 10)) + list(range(11, 17)) + list(range(19, 31)):
             li.append({'semaine': i, 'an': 2019})
         return li
     else:
