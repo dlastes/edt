@@ -51,6 +51,7 @@ def create_first_department():
         TrainingProgramme, EdtVersion, Regen, \
         RoomType, Period, CourseType, BreakingNews, \
         TutorCost]
+   
     for model in models:
         model.objects.all().update(department=department)
 
@@ -64,8 +65,7 @@ def create_first_department():
     types = TTConstraint.__subclasses__()
 
     for type in types:
-        for constraint in type.objects.filter(query):
-            constraint.objects.all().update(department=department)
+        type.objects.all().update(department=department)
     
     return department
 
