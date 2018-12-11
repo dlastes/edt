@@ -47,7 +47,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(
 
 INSTALLED_APPS = [
     'channels',
-    'django.contrib.admin',
+    'apps.FlOpEDTAdminConfig',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -97,21 +97,11 @@ TEMPLATES = [
 WSGI_APPLICATION = 'FlOpEDT.wsgi.application'
 
 CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
-    }
+   'default': {
+       'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+       'LOCATION': 'flop',
+   }
 }
-# CACHES = {
-#     "default": {
-#         "BACKEND": "django_redis.cache.RedisCache",
-#         "LOCATION": "redis://127.0.0.1:6379/1",
-#         "OPTIONS": {
-#             "CLIENT_CLASS": "django_redis.client.DefaultClient"
-#         },
-#         'TIMEOUT': 24 * 3600,
-#         'KEY_PREFIX': 'etd:',
-#     }
-# }
 
 CACHE_COUNT_TIMEOUT = 24 * 3600
 CACHE_INVALIDATE_ON_CREATE = 'whole-model'

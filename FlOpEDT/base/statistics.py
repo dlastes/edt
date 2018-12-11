@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # This file is part of the FlOpEDT/FlOpScheduler project.
 # Copyright (c) 2017
 # Authors: Iulian Ober, Paul Renaud-Goud, Pablo Seban, et al.
@@ -21,14 +23,21 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from django.conf.urls import url, include
+from datetime import datetime
+from django.http import JsonResponse
+from django.template.response import TemplateResponse 
+from base.core.statistics import get_room_activity_by_day, get_tutor_hours
 
-from solve_board import views
+#@login_required
+def fetch_room_activity(req, **kwargs):
+    current_year = datetime.now().year
+    return JsonResponse(get_room_activity_by_day(req.department, current_year))
 
-app_name="solve_board"
+#@login_required
+def fetch_tutor_hours(req, **kwargs):
+    current_year = datetime.now().year
+    return JsonResponse(get_tutor_hours(req.department, current_year), safe=False)
 
-urlpatterns = [
-    url(r'^fetch_context/(?P<train_prog>[a-zA-Z]\w{1,4})/(?P<year>\d{4})/(?P<week>\d{2})/$', views.fetch_context, name="fetch_context"),
-    url(r'^main/$', views.main_board, name="main_board"),
-#    url(r'^run/(?P<timestamp>[0-9-]+)?$', views.run, name="run"),
-]
+#@login_required
+def index(req, **kwargs):
+    return TemplateResponse(req, 'base/statistics.html')

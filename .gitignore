@@ -5,7 +5,8 @@
 FlOpEDT/logs/*
 FlOpEDT/*.log
 FlOpEDT/*.lp
-FlOpEDT/*.sol
+*.sol
+*.mps
 .idea/
 .vscode/
 

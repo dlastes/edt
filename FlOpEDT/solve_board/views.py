@@ -26,7 +26,8 @@
 
 
 from base import weeks
-from base.models import TrainingProgramme
+from base.models import TrainingProgramme, ScheduledCourse
+from base.core.period_weeks import PeriodWeeks
 from people.models import FullStaff
 from solve_board.models import SolveRun
 # from solve_board.consumers import ws_add
@@ -49,10 +50,59 @@ import sys
 import json
 
 from django.template.response import TemplateResponse
+from django.conf import settings
 
+import pulp.solvers as pulp_solvers
 
 # String used to specify all filter
-text_all='Toute'
+text_all='All'
+
+
+def get_work_copies(department, week):
+    """
+    Get the list of working copies for a target week
+    """
+    period_filter = PeriodWeeks().get_filter(week=week)
+    work_copies = ScheduledCourse.objects \
+                    .filter(
+                        period_filter,
+                        cours__module__train_prog__department=department) \
+                    .values_list('copie_travail', flat=True) \
+                    .distinct()     
+    
+    return list(work_copies)
+
+def get_pulp_solvers(available=True):
+    def recurse_solver_hierachy(solvers):
+        for s in solvers:
+            if available:
+                if s().available():
+                    yield s
+            else:
+                yield s
+
+            yield from recurse_solver_hierachy(s.__subclasses__())
+    
+    solvers = pulp_solvers.LpSolver_CMD.__subclasses__()
+    return tuple(recurse_solver_hierachy(solvers))
+
+
+def get_pulp_solvers_viewmodel():   
+
+    # Build a dictionnary of supported solver 
+    # classnames and readable names
+
+    # Get available solvers only on production environment
+    solvers = get_pulp_solvers(not settings.DEBUG)
+    
+    # Get readable solver name from solver class name
+    viewmodel = []
+    for s in solvers:
+        key = s.__name__
+        name = key.replace('PULP_', '').replace('_CMD', '')
+        viewmodel.append((key, name))
+
+    return viewmodel
 
 def get_constraints_viewmodel(department, **kwargs):
     #
@@ -62,44 +112,64 @@ def get_constraints_viewmodel(department, **kwargs):
     return [c.get_viewmodel() for c in constraints]
 
 
-@staff_member_required
-def fetch_constraints(req, train_prog, year, week, **kwargs):
+def get_context(department, year, week, train_prog=None):
+    #
+    #   Get contextual datas
+    #
+    params = {'week':int(week), 'year':int(year)}
 
-    params = {}
-
-    if not train_prog == text_all:
+    # Get constraints
+    if train_prog and not train_prog == text_all:
         params.update({'train_prog':train_prog})
 
-    if week and not week == text_all:
-        params.update({'week':int(week), 'year':int(year)})
-    
-    constraints_view_model = get_constraints_viewmodel(req.department, **params)
+    constraints = get_constraints_viewmodel(department, **params)
 
-    return HttpResponse(json.dumps(constraints_view_model), content_type='text/json')
+    # Get working copy list
+    work_copies = get_work_copies(department, int(week))
+
+    context = { 
+        'constraints': constraints,
+        'work_copies': work_copies,
+    }
+
+    return context
+
+
+@staff_member_required
+def fetch_context(req, train_prog, year, week, **kwargs):
+
+    context = get_context(req.department, year, week, train_prog)
+    return HttpResponse(json.dumps(context), content_type='text/json')
+
 
 @staff_member_required
 def main_board(req, **kwargs):
 
     department = req.department
-    all_tps = []
-    week_list = weeks.week_list()
 
-    # Get the first week matching constraints
-    params = {'week':week_list[0]['semaine'] , 'year':week_list[0]['an']}
-    constraints_view_model = get_constraints_viewmodel(department, **params)
+    # Get week list
+    period = PeriodWeeks(department, exclude_empty_weeks=True)
+    week_list = period.get_weeks(format=True)
 
-    for tp in TrainingProgramme.objects.filter(department=department):
-        all_tps.append(tp.abbrev)
-    
-    return TemplateResponse(req, 'solve_board/main-board.html',
-                  {
+    # Get solver list
+    solvers_viewmodel = get_pulp_solvers_viewmodel()
+
+    # Get all TrainingProgramme
+    all_tps = list(TrainingProgramme.objects \
+                    .filter(department=department) \
+                    .values_list('abbrev', flat=True)) 
+
+    view_context = {
                    'department': department,
                    'text_all': text_all,
-                   'all_weeks': week_list,
-                   'start_date': weeks.current_week(),
-                   'end_date': weeks.current_week(),
-                   'current_year': weeks.annee_courante,
-                   'all_train_progs': json.dumps(all_tps),
-                   'constraints': json.dumps(constraints_view_model),
-                   })
+                   'weeks': json.dumps(week_list),
+                   'train_progs': json.dumps(all_tps),
+                   'solvers': solvers_viewmodel,
+                   }
+    
+    # Get contextual datas (constraints, work_copies)
+    data_context = get_context(department, year=week_list[0][0], week=week_list[0][1])
+    view_context.update({ k:json.dumps(v) for k, v in data_context.items()})
+    
+    return TemplateResponse(req, 'solve_board/main-board.html', view_context)
 
