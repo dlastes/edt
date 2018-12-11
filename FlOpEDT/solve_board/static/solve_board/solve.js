@@ -149,10 +149,10 @@ function init_dropdowns() {
     select_opti_date.on("change", function () { choose_week(true); fetch_context(); });
     select_opti_date
         .selectAll("option")
-        .data(week_year_list)
+        .data(week_list)
         .enter()
         .append("option")
-        .text(function (d) { return d['semaine']; });
+        .text(function (d) { return d[1]; });
 
     // create drop down for training programme selection
     train_prog_list.unshift(text_all);
@@ -175,7 +175,7 @@ function choose_week() {
         .selectAll("option")
         .filter(function (d, i) { return i == di; })
         .datum();
-    week_year_sel = { week: sa.semaine, year: sa.an };
+    week_year_sel = { week: sa[1], year: sa[0] };
 }
 function choose_train_prog() {
     var di = select_opti_train_prog.property('selectedIndex');
