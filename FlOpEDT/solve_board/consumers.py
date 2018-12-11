@@ -124,38 +124,13 @@ class SolverConsumer(WebsocketConsumer):
                     'action': 'aborted'
                 }))
 
-        # ws_add(text_data)
 
-
-
-
-# def ws_message(message):
-#     # ASGI WebSocket packet-received and send-packet message types
-#     # both have a "text" key for their textual data.
-#     # message.reply_channel.send({
-#     #     "text": message.content['text'],
-#     # })
-#     msg_reply = message.reply_channel.name
-#     data = json.loads(message['text'])
-#     Channel(msg_reply).send({'text':data['text']})
-#     if data['action'] == 'go':
-#         # run.delay(data['week'],data['year'],
-#         #           data['timestamp'],
-#         #           data['train_prog'],
-#         #           message.reply_channel.name)
-
-#         Solve(data['week'],data['year'],
-#                   data['timestamp'],
-#                   data['train_prog'],
-#         Channel(msg_reply)).start()
-
-#         # p = Process(target=ruru, args=(data['week'],data['year'],Channel(msg_reply)))
-#         # p.start()
 
 def solver_subprocess_SIGINT_handler(sig, stack):
     # ignore in current process and forward to process group (=> gurobi)
     signal.signal(signal.SIGINT, signal.SIG_IGN)
     os.kill(0, signal.SIGINT)
+
 
 class Solve():
     def __init__(self, department_abbrev, week, year, timestamp, training_programme, chan, time_limit, solver, stabilize_work_copy=None):
