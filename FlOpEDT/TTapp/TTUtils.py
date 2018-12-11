@@ -28,7 +28,8 @@
 from base.models import Slot, ScheduledCourse, RoomPreference, EdtVersion, Department
 from django.db.models import Max, Q
 from TTapp.models import LimitedRoomChoices
-
+from base.views import get_key_course_pl, get_key_course_pp
+from django.core.cache import cache
 
 def basic_reassign_rooms(department, semaine, an, target_work_copy):
     """
@@ -119,6 +120,10 @@ def basic_reassign_rooms(department, semaine, an, target_work_copy):
                         CP.save()
                         sib.save()
                     # print "swapped", CP, " with", sib
+    cache.delete(get_key_course_pl(department.abbrev,
+                                   an,
+                                   semaine,
+                                   target_work_copy))
     print("done")
 
 
@@ -139,7 +144,7 @@ def basic_swap_version(department, week, year, copy_a, copy_b=0):
         print('No scheduled courses')
         return
 
-    version_copy_b = EdtVersion.objects.get(department=department, semaine=week, an=year)
+    version_copy = EdtVersion.objects.get(department=department, semaine=week, an=year)
 
     for cp in ScheduledCourse.objects.filter(copie_travail=copy_a, **scheduled_courses_params):
         cp.copie_travail = tmp_wc
@@ -153,5 +158,23 @@ def basic_swap_version(department, week, year, copy_a, copy_b=0):
         cp.copie_travail = copy_b
         cp.save()
 
-    version_copy_b.version += 1
-    version_copy_b.save()
+    if copy_a ==0 or copy_b == 0:
+        version_copy.version += 1
+        version_copy.save()
+
+    cache.delete(get_key_course_pl(department.abbrev,
+                                   year,
+                                   week,
+                                   copy_a))
+    cache.delete(get_key_course_pl(department.abbrev,
+                                   year,
+                                   week,
+                                   copy_b))
+    cache.delete(get_key_course_pp(department.abbrev,
+                                   year,
+                                   week,
+                                   copy_a))
+    cache.delete(get_key_course_pp(department.abbrev,
+                                   year,
+                                   week,
+                                   copy_b))
