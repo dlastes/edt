@@ -4,10 +4,10 @@ from base.models import Course
 
 
 class PeriodWeeks():
-
     """
     Week oriented school year description
     """    
+    
     def __init__(self, department=None, year=None, start=None, end=None, exclude_empty_weeks=False):
 
         self .department = department
@@ -63,6 +63,7 @@ class PeriodWeeks():
         self.current_year_index = 0
         return self
 
+
     def __next__(self):
         index = self.current_year_index
         self.current_year_index += 1
@@ -71,6 +72,7 @@ class PeriodWeeks():
             return self.__period_raw[index]
         else:
             raise StopIteration
+
 
     def __str__(self):
         return f"School year {self.start_year}-{self.end_year}"            
@@ -87,6 +89,7 @@ class PeriodWeeks():
                     semaine__in=list(range(start, end + 1)),
                     module__train_prog__department=department) \
                 .distinct() \
+                .order_by('semaine') \
                 .values_list('semaine', flat=True)
 
 
@@ -100,19 +103,37 @@ class PeriodWeeks():
             school_year = now.year
         return school_year
         
-    def get_weeks(self, year=None):
 
-        weeks = None
-        if year and year == self.start_year:
-            weeks = self.__period_raw[0][1]
-        elif year and year == self.end_year:
-            weeks = self.__period_raw[1][1]
+    def get_weeks(self, year=None, format=False):
+
+        periods = None
+
+        if year == self.start_year:
+            periods = self.__period_raw[0],
+        elif year == self.end_year:
+            periods = self.__period_raw[1],
         else:
-            weeks = self.__period_raw[0][1] | self.__period_raw[1][1]
+            periods = self.__period_raw
 
-        return weeks
+        if format:
+            return tuple(self.format_week_list(periods, include_year=True))
+        else:
+            return tuple(self.format_week_list(periods, include_year=False))
 
-    
+
+    def format_week_list(self, periods, include_year=True):
+        """
+        Yield weeks contained in periods objects
+
+        :param include_year: yield a tuple with the week and its related year
+        """
+        for period in periods:
+            for week in period[1]:
+                if include_year:
+                    yield period[0], week
+                else:
+                    yield week                
+
     def get_raw(self):
         return self.__period_raw
 
