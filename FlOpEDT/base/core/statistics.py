@@ -26,7 +26,7 @@
 import datetime
 
 from django.db.models import Count
-from base.models import ScheduledCourse, RoomGroup, Course, Holiday
+from base.models import ScheduledCourse, RoomGroup, Holiday
 from base.core.period_weeks import PeriodWeeks
 
 from people.models import Tutor
@@ -35,17 +35,6 @@ def get_holiday_list(period):
     for year, _ in period:
         for holiday in Holiday.objects.filter(year=year):
             yield year, holiday.week, holiday.day.no
-
-
-def get_holidays_weeks(period):
-    # Get holidays week list by checking courses scheduling
-    for current_year, weeks in period:
-        for current_week in weeks:
-                if not Course.objects.filter(
-                        an=current_year,
-                        semaine=current_week).exists():
-                    yield current_week
-
 
 def get_room_activity_by_day(department, year):
 
@@ -57,7 +46,7 @@ def get_room_activity_by_day(department, year):
     # computed until the current week
 
     # year : correponds to the first period's year
-    period = PeriodWeeks(year)
+    period = PeriodWeeks(department=department, year=year, exclude_empty_weeks=True)
     period_filter = period.get_filter()
     
     # Get room list 
@@ -75,16 +64,12 @@ def get_room_activity_by_day(department, year):
         .values_list('room__name', 'cours__an', 'cours__semaine', 'creneau__jour') \
         .distinct())
 
-    # Holidays
-    holidays = set(get_holidays_weeks(period))
+    # Holiday list
     holiday_list = set(get_holiday_list(period))
     
     # Get the total number of open days
-    all_weeks = set()
-    for _, weeks in period:
-        all_weeks.update(weeks)
-
-    nb_open_days = len(all_weeks - holidays) * 5
+    all_weeks = period.get_weeks()
+    nb_open_days = len(all_weeks) * 5
 
     # Get the number of day per room where the room is not utilized
     unused_days_by_room = []
@@ -96,20 +81,17 @@ def get_room_activity_by_day(department, year):
 
         for current_year, weeks in period:
             for current_week in weeks:
-    
-                # Skip holidays weeks
-                if not current_week in holidays:
-                    for week_day in tuple(range(1,6)):
+                for week_day in tuple(range(1,6)):
 
-                        # Test if the current day is a holiday
-                        if (current_year, current_week, week_day,) in holiday_list:
-                            continue
-                        
-                        # Test if a course has been realised in the 
-                        # current room for a given day number
-                        room_availability = (room, current_year, current_week, week_day)
-                        if not(room_availability in scheduled):
-                            room_context['count'] += 1 
+                    # Test if the current day is a holiday
+                    if (current_year, current_week, week_day,) in holiday_list:
+                        continue
+                    
+                    # Test if a course has been realised in the 
+                    # current room for a given day number
+                    room_availability = (room, current_year, current_week, week_day)
+                    if not(room_availability in scheduled):
+                        room_context['count'] += 1 
         
 
     return {'open_days':nb_open_days, 'room_activity': unused_days_by_room}
@@ -121,7 +103,7 @@ def get_tutor_hours(department, year):
     # of hours of given courses
 
     # year : correponds to the first period's year
-    period = PeriodWeeks(year)
+    period = PeriodWeeks(year=year)
     period_filter = period.get_filter(related_path='taught_courses')    
     
     # Filter all the scheduled courses for the period

@@ -55,7 +55,8 @@ from django.conf import settings
 import pulp.solvers as pulp_solvers
 
 # String used to specify all filter
-text_all='Toute'
+text_all='All'
+
 
 def get_work_copies(department, week):
     """
@@ -145,10 +146,10 @@ def fetch_context(req, train_prog, year, week, **kwargs):
 def main_board(req, **kwargs):
 
     department = req.department
-    week_list = weeks.week_list()
-    
-    current_week = weeks.current_week()
-    current_year = weeks.annee_courante
+
+    # Get week list
+    period = PeriodWeeks(department, exclude_empty_weeks=True)
+    week_list = period.get_weeks(format=True)
 
     # Get solver list
     solvers_viewmodel = get_pulp_solvers_viewmodel()
@@ -161,13 +162,13 @@ def main_board(req, **kwargs):
     view_context = {
                    'department': department,
                    'text_all': text_all,
-                   'all_weeks': week_list,
-                   'all_train_progs': json.dumps(all_tps),
+                   'weeks': json.dumps(week_list),
+                   'train_progs': json.dumps(all_tps),
                    'solvers': solvers_viewmodel,
                    }
     
     # Get contextual datas (constraints, work_copies)
-    data_context = get_context(department, year=week_list[0]['an'], week=week_list[0]['semaine'])
+    data_context = get_context(department, year=week_list[0][0], week=week_list[0][1])
     view_context.update({ k:json.dumps(v) for k, v in data_context.items()})
     
     return TemplateResponse(req, 'solve_board/main-board.html', view_context)
