@@ -634,7 +634,7 @@ def fetch_all_versions(req, **kwargs):
     return response
 
 
-def fetch_all_versions(req, year, week, **kwargs):
+def fetch_version(req, year, week, **kwargs):
     """
     Export the EdtVersion of a given week
     """
