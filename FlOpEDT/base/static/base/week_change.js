@@ -308,17 +308,8 @@ function fetch_bknews(first) {
         contentType: "text/csv",
 //        contentType: "text/json",
         success: function(msg) {
-	    console.log("excuseme");
-            console.log(msg);
-
 	    //            bknews.cont = JSON.parse(msg) ;
-	    console.log("here");
-	    console.log(bknews.cont.length);
 	    bknews.cont = d3.csvParse(msg,
-				      translate_bknews_from_csv);
-	    console.log(bknews.cont.length);
-	    console.log("tere");
-	    proutos = d3.csvParse(msg,
 				      translate_bknews_from_csv);
 
             if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
