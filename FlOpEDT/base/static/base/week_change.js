@@ -346,6 +346,7 @@ function fetch_bknews(first) {
 
 function translate_bknews_from_csv(d){
     return {
+	id: +d.id,
 	x_beg: +d.x_beg,
 	x_end: +d.x_end,
 	y: +d.y,
