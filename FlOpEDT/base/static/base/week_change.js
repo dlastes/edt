@@ -414,9 +414,6 @@ function fetch_cours() {
         async: true,
         contentType: "text/csv",
         success: function(msg, ts, req) {
-            //console.log(msg);
-            version = +req.getResponseHeader('version');
-	    console.log(version);
             required_dispos = +req.getResponseHeader('reqDispos');
             filled_dispos = +req.getResponseHeader('filDispos');
 
@@ -739,6 +736,7 @@ function fetch_all(first){
     }
     fetch.ongoing_bknews = true;
 
+    fetch_version();
     fetch_cours();
     if (ckbox["dis-mod"].cked || ckbox["edt-mod"].cked) {
         fetch_dispos();
@@ -749,6 +747,45 @@ function fetch_all(first){
     fetch_bknews(first);
 }
 
+
+function fetch_version() {
+    var semaine_att = weeks.init_data[weeks.sel[0]].semaine;
+    var an_att = weeks.init_data[weeks.sel[0]].an;
+
+    show_loader(true);
+    $.ajax({
+        type: "GET", //rest Type
+        dataType: 'text',
+        url: url_version  + an_att + "/" + semaine_att,
+        async: true,
+        contentType: "text/csv",
+//        contentType: "text/json",
+        success: function(msg) {
+	    //            bknews.cont = JSON.parse(msg) ;
+	    var version_parsed = d3.csvParse(msg,
+					     translate_bknews_from_csv);
+	    if (version_parsed.length != 1) {
+		console.log("Version issue");
+		return ;
+	    }
+
+            if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
+                an_att == weeks.init_data[weeks.sel[0]].an) {
+		version = version_parsed[0] ;
+            }
+            show_loader(false);
+        },
+        error: function(msg) {
+            console.log("error");
+            show_loader(false);
+        }
+    });
+
+}
+
+function translate_version_from_csv(d){
+    return +d.version ;
+}
 
 
 function fetch_ended() {

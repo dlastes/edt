@@ -624,13 +624,28 @@ def fetch_bknews(req, year, week, **kwargs):
 
 
 def fetch_all_versions(req, **kwargs):
-
+    """
+    Export all EdtVersions in json
+    """
     dataset = VersionResource() \
         .export(EdtVersion.objects.filter(department=req.department))
     response = HttpResponse(dataset.json,
                             content_type='text/json')
     return response
 
+
+def fetch_all_versions(req, year, week, **kwargs):
+    """
+    Export the EdtVersion of a given week
+    """
+
+    dataset = VersionResource() \
+        .export(EdtVersion.objects.filter(department=req.department,
+                                          semaine=week,
+                                          an=year))
+    response = HttpResponse(dataset.json,
+                            content_type='text/json')
+    return response
 
 @cache_page(15 * 60)
 def fetch_groups(req, **kwargs):
