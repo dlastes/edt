@@ -762,8 +762,7 @@ function fetch_version() {
 //        contentType: "text/json",
         success: function(msg) {
 	    //            bknews.cont = JSON.parse(msg) ;
-	    var version_parsed = d3.csvParse(msg,
-					     translate_bknews_from_csv);
+	    var version_parsed = JSON.parse(msg);
 	    if (version_parsed.length != 1) {
 		console.log("Version issue");
 		return ;
@@ -771,7 +770,7 @@ function fetch_version() {
 
             if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
                 an_att == weeks.init_data[weeks.sel[0]].an) {
-		version = version_parsed[0] ;
+		version = +version_parsed[0].version ;
             }
             show_loader(false);
         },
