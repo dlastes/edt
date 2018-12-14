@@ -125,7 +125,11 @@ class LimitCourseTypePerPeriod(TTConstraint):  # , pond):
     """
     type = models.ForeignKey('base.CourseType', on_delete=models.CASCADE)
     limit = models.PositiveSmallIntegerField()
-    module = models.ForeignKey('base.Module', null=True, on_delete=models.CASCADE)
+    module = models.ForeignKey('base.Module',
+                                   null=True,
+                                   default=None, 
+                                   blank=True,
+                                   on_delete=models.CASCADE)
     tutors = models.ManyToManyField('people.Tutor',
                                     blank=True,
                                     related_name="Course_type_limits")
@@ -297,7 +301,7 @@ class ReasonableDays(TTConstraint):
         if self.train_prog:
             text += ' en ' + str(self.train_prog)
         if self.groups.count():
-            text += ' avec les groupe ' + str([group for group in self.groups.all()])
+            text += ' avec les groupes ' + str([group for group in self.groups.all()])
         return text
 
 
