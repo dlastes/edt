@@ -125,9 +125,7 @@ class LimitCourseTypePerPeriod(TTConstraint):  # , pond):
     """
     type = models.ForeignKey('base.CourseType', on_delete=models.CASCADE)
     limit = models.PositiveSmallIntegerField()
-    modules = models.ManyToManyField('base.Module',
-                                     blank=True,
-                                     related_name="Course_type_limits")
+    module = models.ForeignKey('base.Module', null=True, on_delete=models.CASCADE)
     tutors = models.ManyToManyField('people.Tutor',
                                     blank=True,
                                     related_name="Course_type_limits")
@@ -136,47 +134,74 @@ class LimitCourseTypePerPeriod(TTConstraint):  # , pond):
     PERIOD_CHOICES = ((FULL_DAY, 'Full day'), (HALF_DAY, 'Half day'))
     period = models.CharField(max_length=2, choices=PERIOD_CHOICES)
 
-    def enrich_model(self, ttmodel, ponderation=1.):
-        fc = ttmodel.wdb.courses
+
+    def get_courses_queryset(self, ttmodel, tutor = None):
+        """
+        Filter courses depending on constraints parameters
+        """
+        courses_qs = ttmodel.wdb.courses
+        courses_filter = {}
+
+        if tutor is not None:
+            courses_filter['tutor'] = tutor
+
+        if self.module is not None:
+            courses_filter['module'] = self.module
+
         if self.type is not None:
-            fc = fc.filter(type=self.type)
+            courses_filter['type'] = self.type
+
         if self.train_prog is not None:
-            fc = fc.filter(groupe__train_prog=self.train_prog)
+            courses_filter['groupe__train_prog'] = self.train_prog
+
+        return courses_qs.filter(courses_filter)
+
+
+    def register_expression(ttmodel, day, period, ponderation, tutor=None):
+
+        courses = self.get_courses_queryset(ttmodel, tutor)
+        expr = ttmodel.lin_expr()
+        slots = ttmodel.wdb.slots \
+                    .filter(jour=d,heure__apm__contains=period)
+
+        for slot in slots:
+            for course in courses:
+                expr += ttmodel.TT[(slot, course)]
+
+        if self.weight is not None:
+            var = ttmodel.add_floor(
+                            'limit course type per period', 
+                            expr,
+                            int(self.limit) + 1, 100)
+            ttmodel.obj += self.local_weight() * ponderation * var
+        else:
+            ttmodel.add_constraint(expr, '<=', self.limit)
+
+
+    def enrich_model(self, ttmodel, ponderation=1.):
+        
         if self.period == self.FULL_DAY:
             periods = ['']
         else:
             periods = [Time.AM, Time.PM]
-        if self.tutors.exists():
-            tutors_lists = [[tutor] for tutor in self.tutors.all()]
-        else:
-            tutors_lists = [[Tutor.objects.all()]]
-        if self.modules.exists():
-            modules_lists = [[module] for module in self.modules.all()]
-        else:
-            modules_lists = [[Module.objects.all()]]
 
-        for d in ttmodel.wdb.days:
-            for per in periods:
-                for tutors_list in tutors_lists:
-                    for modules_list in modules_lists:
-                        expr = ttmodel.lin_expr()
-                        for sl in ttmodel.wdb.slots.filter(jour=d, heure__apm__contains=per):
-                            for c in fc.filter(tutor__in=tutors_list, module__in=modules_list,):
-                                expr += ttmodel.TT[(sl, c)]
-                                if self.weight is not None:
-                                    var = ttmodel.add_floor('limit course type per period', expr,
-                                                            int(self.limit) + 1, 100)
-                                    ttmodel.obj += self.local_weight() * ponderation * var
-                                else:
-                                    ttmodel.add_constraint(expr, '<=', self.limit)
+        for day in ttmodel.wdb.days:
+            for period in periods:
+                if self.tutors.count():
+                    for tutor in self.tutors.all():
+                        self.register_expression(ttmodel, day, period, ponderation, tutor=tutor)
+                else:
+                    self.register_expression(ttmodel, day, period, ponderation)
+
 
     def full_name(self):
         return "Limit Course Type Per Period"
 
+
     @classmethod
     def get_viewmodel_prefetch_attributes(cls):
         attributes = super().get_viewmodel_prefetch_attributes()
-        attributes.extend(['module', 'tutor', 'type'])
+        attributes.extend(['module', 'tutors', 'type'])
         return attributes
 
     def get_viewmodel(self):
@@ -187,13 +212,13 @@ class LimitCourseTypePerPeriod(TTConstraint):  # , pond):
         else:
             type_value = 'All'
 
-        if self.modules.exists():
-            module_value = str([module.abbrev for module in self.modules.all()])
+        if self.module:
+            module_value = self.module.nom
         else:
             module_value = 'All'
 
-        if self.tutors.exists():
-            tutor_value = str([tutor.username for tutor in self.tutors.all()])
+        if self.tutors:
+            tutor_value = ', '.join([tutor.username for tutor in self.tutors.all()])
         else:
             tutor_value = 'All'
 
@@ -206,15 +231,15 @@ class LimitCourseTypePerPeriod(TTConstraint):  # , pond):
 
     def one_line_description(self):
         text = "Pas plus de " + str(self.limit) + ' ' + str(self.type)
-        if self.modules.exists():
-            text += " de " + str([module.abbrev for module in self.modules.all()])
+        if self.module:
+            text += " de " + self.module.nom
         text += " par "
         if self.period == self.FULL_DAY:
             text += 'jour'
         else:
             text += 'demi-journée'
         if self.tutors.exists():
-            text += ' pour ' + str([tutor.username for tutor in self.tutors.all()])
+            text += ' pour ' + ', '.join([tutor.username for tutor in self.tutors.all()])
         if self.train_prog:
             text += ' en ' + str(self.train_prog)
 
@@ -242,7 +267,7 @@ class ReasonableDays(TTConstraint):
             fc = ttmodel.wdb.courses
             if self.train_prog is not None:
                 fc = fc.filter(groupe__train_prog=self.train_prog)
-            if self.tutors.exists():
+            if self.tutors.count():
                 tutors_lists = [[tutor] for tutor in self.tutors.all()]
             else:
                 tutors_lists = [[Tutor.objects.all()]]
@@ -267,11 +292,11 @@ class ReasonableDays(TTConstraint):
 
     def one_line_description(self):
         text = "Des journées pas trop longues"
-        if self.tutors.exists():
+        if self.tutors.count():
             text += ' pour ' + str([tutor.username for tutor in self.tutors.all()])
         if self.train_prog:
             text += ' en ' + str(self.train_prog)
-        if self.groups.exists:
+        if self.groups.count():
             text += ' avec les groupe ' + str([group for group in self.groups.all()])
         return text
 
@@ -279,7 +304,7 @@ class ReasonableDays(TTConstraint):
     @classmethod
     def get_viewmodel_prefetch_attributes(cls):
         attributes = super().get_viewmodel_prefetch_attributes()
-        attributes.extend(['group', 'tutor'])
+        attributes.extend(['groups', 'tutors'])
         return attributes
 
 

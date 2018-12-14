@@ -43,27 +43,31 @@ from FlOpEDT.filters import DropdownFilterAll, DropdownFilterRel, \
     DropdownFilterCho
 
 
-class LimitNaturePerPeriodAdmin(DepartmentModelAdmin):
-    list_display = ('week', 'year', 'train_prog', 'type', 'limit',
-                    'module', 'tutor', 'period', 'comment')
+class LimitCourseTypePerPeriodAdmin(DepartmentModelAdmin):
+    list_display = ('week', 
+                    'year', 
+                    'train_prog', 
+                    'type', 
+                    'limit', 
+                    'period', 
+                    'comment')
     ordering = ()
     list_filter = (('train_prog', DropdownFilterRel),
                    ('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
-                   ('tutor', DropdownFilterRel),
+                   ('tutors', DropdownFilterRel),
                    ('type', DropdownFilterRel),
                    )
 
 
 class ReasonableDaysAdmin(DepartmentModelAdmin):
-    list_display = ('week', 'year', 'train_prog',
-                    'group', 'tutor', 'comment')
+    list_display = ('week', 'year', 'train_prog', 'comment')
     ordering = ()
     list_filter = (('train_prog', DropdownFilterRel),
                    ('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
-                   ('group', DropdownFilterRel),
-                   ('tutor', DropdownFilterRel),
+                   ('groups', DropdownFilterRel),
+                   ('tutors', DropdownFilterRel),
                    )
 
 
@@ -125,7 +129,7 @@ class SimultaneousCoursesAdmin(DepartmentModelAdmin):
                    )
 
 
-admin.site.register(LimitCourseTypePerPeriod, LimitNaturePerPeriodAdmin)
+admin.site.register(LimitCourseTypePerPeriod, LimitCourseTypePerPeriodAdmin)
 admin.site.register(ReasonableDays, ReasonableDaysAdmin)
 admin.site.register(Stabilize, StabilizeAdmin)
 admin.site.register(MinHalfDays, MinHalfDaysAdmin)
