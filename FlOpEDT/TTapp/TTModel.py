@@ -25,9 +25,6 @@
 # without disclosing the source code of your own applications.
 
 
-# ### Have to do this for it to work in 1.9.x!
-# from django.core.wsgi import get_wsgi_application
-# application = get_wsgi_application()
 
 from pulp import LpVariable, LpConstraint, LpBinary, LpConstraintEQ, \
     LpConstraintGE, LpConstraintLE, LpAffineExpression, LpProblem, LpStatus, \
@@ -51,12 +48,13 @@ from MyFlOp.MyTTUtils import reassign_rooms
 
 import signal
 
+from django.conf import settings
 from django.db.models import Q, Max
 
 import datetime
 
 import logging
-logger = logging.getLogger('base')
+logger = logging.getLogger(__name__)
 
 class WeekDB(object):
     def __init__(self, department, week, year, train_prog):
@@ -307,6 +305,9 @@ class TTModel(object):
             print("Relevant warnings :")
             for key, key_warnings in self.warnings.items():
                 print("%s : %s" % (key, ", ".join([str(x) for x in key_warnings])))
+
+        if settings.DEBUG:
+            self.model.writeLP('FlOpEDT.lp')
 
     def add_var(self, name):
         """
