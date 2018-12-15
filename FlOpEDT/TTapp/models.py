@@ -158,10 +158,10 @@ class LimitCourseTypePerPeriod(TTConstraint):  # , pond):
         if self.train_prog is not None:
             courses_filter['groupe__train_prog'] = self.train_prog
 
-        return courses_qs.filter(courses_filter)
+        return courses_qs.filter(**courses_filter)
 
 
-    def register_expression(ttmodel, period_by_day, ponderation, tutor=None):
+    def register_expression(self, ttmodel, period_by_day, ponderation, tutor=None):
 
         courses = self.get_courses_queryset(ttmodel, tutor)
 
@@ -279,14 +279,14 @@ class ReasonableDays(TTConstraint):
             if self.tutors.count():
                 tutors_lists = [[tutor] for tutor in self.tutors.all()]
             else:
-                tutors_lists = [[Tutor.objects.all()]]
+                tutors_lists = [[tutor for tutor in Tutor.objects.all()]]
             if self.groups.exists():
                 groups_lists = [[group] for group in self.groups.all()]
             else:
-                groups_lists = [[Group.objects.all()]]
+                groups_lists = [[group for group in Group.objects.all()]]
             for tutor_list in tutors_lists:
                 for groups_list in groups_lists:
-                    filtered_courses = fc.filter(group__in=groups_list, tutor__in=tutor_list)
+                    filtered_courses = fc.filter(groupe__in=list(groups_list), tutor__in=list(tutor_list))
                     for c1 in filtered_courses:
                         for c2 in filtered_courses.exclude(id__lte=c1.id):
                             if self.weight is not None:
@@ -302,11 +302,11 @@ class ReasonableDays(TTConstraint):
     def one_line_description(self):
         text = "Des journées pas trop longues"
         if self.tutors.count():
-            text += ' pour ' + str([tutor.username for tutor in self.tutors.all()])
+            text += ' pour ' + ', '.join([tutor.username for tutor in self.tutors.all()])
         if self.train_prog:
             text += ' en ' + str(self.train_prog)
         if self.groups.count():
-            text += ' avec les groupes ' + str([group for group in self.groups.all()])
+            text += ' avec les groupes ' + ', '.join([group for group in self.groups.all()])
         return text
 
 
