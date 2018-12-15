@@ -161,25 +161,27 @@ class LimitCourseTypePerPeriod(TTConstraint):  # , pond):
         return courses_qs.filter(courses_filter)
 
 
-    def register_expression(ttmodel, day, period, ponderation, tutor=None):
+    def register_expression(ttmodel, period_by_day, ponderation, tutor=None):
 
         courses = self.get_courses_queryset(ttmodel, tutor)
-        expr = ttmodel.lin_expr()
-        slots = ttmodel.wdb.slots \
-                    .filter(jour=d,heure__apm__contains=period)
 
-        for slot in slots:
-            for course in courses:
-                expr += ttmodel.TT[(slot, course)]
+        for day, period in period_by_day:
+            expr = ttmodel.lin_expr()
+            slots = ttmodel.wdb.slots \
+                        .filter(jour=day, heure__apm__contains=period)
 
-        if self.weight is not None:
-            var = ttmodel.add_floor(
-                            'limit course type per period', 
-                            expr,
-                            int(self.limit) + 1, 100)
-            ttmodel.obj += self.local_weight() * ponderation * var
-        else:
-            ttmodel.add_constraint(expr, '<=', self.limit)
+            for slot in slots:
+                for course in courses:
+                    expr += ttmodel.TT[(slot, course)]
+
+            if self.weight is not None:
+                var = ttmodel.add_floor(
+                                'limit course type per period', 
+                                expr,
+                                int(self.limit) + 1, 100)
+                ttmodel.obj += self.local_weight() * ponderation * var
+            else:
+                ttmodel.add_constraint(expr, '<=', self.limit)
 
 
     def enrich_model(self, ttmodel, ponderation=1.):
@@ -189,13 +191,16 @@ class LimitCourseTypePerPeriod(TTConstraint):  # , pond):
         else:
             periods = [Time.AM, Time.PM]
 
+        period_by_day = []
         for day in ttmodel.wdb.days:
             for period in periods:
-                if self.tutors.count():
-                    for tutor in self.tutors.all():
-                        self.register_expression(ttmodel, day, period, ponderation, tutor=tutor)
-                else:
-                    self.register_expression(ttmodel, day, period, ponderation)
+                period_by_day.append((day, period,))
+
+        if self.tutors.count():
+            for tutor in self.tutors.all():
+                self.register_expression(ttmodel, period_by_day, ponderation, tutor=tutor)
+        else:
+            self.register_expression(ttmodel, period_by_day, ponderation)
 
 
     def full_name(self):

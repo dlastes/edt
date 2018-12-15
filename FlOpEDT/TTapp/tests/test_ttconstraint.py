@@ -46,14 +46,16 @@ class TTConstraintTestCase(TestCase):
         attrs = {'wdb.days': (0,1,2,)}
         ttmodel = Mock(**attrs)
 
-        calls = [
-            call(ttmodel, 0, Time.AM, 1.),
-            call(ttmodel, 0, Time.PM, 1.),
-            call(ttmodel, 1, Time.AM, 1.),
-            call(ttmodel, 1, Time.PM, 1.),
-            call(ttmodel, 2, Time.AM, 1.),
-            call(ttmodel, 2, Time.PM, 1.),            
+        period_by_day = [
+            (0, Time.AM),
+            (0, Time.PM),
+            (1, Time.AM),
+            (1, Time.PM),
+            (2, Time.AM),
+            (2, Time.PM),            
             ]
+
+        calls = [call(ttmodel, period_by_day, 1.),]
 
         constraint = LimitCourseTypePerPeriod.objects.create(limit=1, type=self.TD, department=self.info)
         constraint.period == LimitCourseTypePerPeriod.FULL_DAY
@@ -72,11 +74,18 @@ class TTConstraintTestCase(TestCase):
         attrs = {'wdb.days': (0,1,2,)}
         ttmodel = Mock(**attrs)
 
-        for day in ttmodel.wdb.days:
-            for period in [Time.AM, Time.PM]:
-                for tutor in Tutor.objects.filter(username__in=['AB', 'AJ', 'CDU', 'FMA']):
-                    calls.append(call(ttmodel, day, period, 1., tutor=tutor))
-                    constraint.tutors.add(tutor)
+        period_by_day = [
+            (0, Time.AM),
+            (0, Time.PM),
+            (1, Time.AM),
+            (1, Time.PM),
+            (2, Time.AM),
+            (2, Time.PM),            
+            ]
+
+        for tutor in Tutor.objects.filter(username__in=['AB', 'AJ', 'CDU', 'FMA']):
+            calls.append(call(ttmodel, period_by_day, 1., tutor=tutor))
+            constraint.tutors.add(tutor)
 
         constraint.enrich_model(ttmodel)
         register_expression.assert_has_calls(calls)
