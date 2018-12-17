@@ -88,17 +88,16 @@ class Slot(object):
         return str(self.day) + '-' + str(self.start_time)
 
 
-def filter(slot_list, day=None, apm=None, course_type=None, simultaneous_to=None):
-    slots = slot_list
+def filter(slot_set, day=None, apm=None, course_type=None, simultaneous_to=None):
+    slots = slot_set
     if day is not None:
-        slots = [sl for sl in slots if sl.day == day]
+        slots = set(sl for sl in slots if sl.day == day)
     if course_type is not None:
-        slots = [sl for sl in slots if sl.course_type == course_type]
+        slots = set(sl for sl in slots if sl.course_type == course_type)
     if apm is not None:
-        slots = [sl for sl in slots if sl.apm == apm]
+        slots = set(sl for sl in slots if sl.apm == apm)
     if simultaneous_to is not None:
-        slots = [sl for sl in slots if sl.is_simultaneous_to(simultaneous_to) and sl != simultaneous_to]
-    slots.sort()
+        slots = set(sl for sl in slots if sl.is_simultaneous_to(simultaneous_to) and sl != simultaneous_to)
     return slots
 
 class TTConstraint(models.Model):

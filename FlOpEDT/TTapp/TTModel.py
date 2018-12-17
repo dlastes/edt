@@ -69,15 +69,15 @@ class WeekDB(object):
         self.days = Day.objects.all()
 
         #SLOTS
-        print('Slot tools definition')
-        self.slots = []
+        print('Slot tools definition', end=', ')
+        self.slots = set()
         for cc in CourseStartTimeConstraint.objects.all():
             if cc.course_type is not None:
-                self.slots += [Slot(d, start_time, cc.course_type)
-                               for d in self.days for start_time in cc.allowed_start_times]
+                self.slots |= set(Slot(d, start_time, cc.course_type)
+                               for d in self.days for start_time in cc.allowed_start_times)
             else:
-                self.slots += [Slot(d, start_time)
-                               for d in self.days for start_time in cc.allowed_start_times]
+                self.slots |= set(Slot(d, start_time)
+                               for d in self.days for start_time in cc.allowed_start_times)
 
         self.slots_by_day = {}
         for d in self.days:
@@ -91,7 +91,7 @@ class WeekDB(object):
         for d in self.days:
             for apm in [Time.AM, Time.PM]:
                 self.slots_by_half_day[(d,apm)] = filter(self.slots, day=d, apm=apm)
-
+        print('Ok')
 
         # ROOMS
         self.room_types = RoomType.objects.filter(department=department)
@@ -167,7 +167,7 @@ class WeekDB(object):
             week=week,
             year=year,
             train_prog__in=self.train_prog)
-
+        
         # USERS
         self.instructors = Tutor.objects \
             .filter(id__in=self.courses.values_list('tutor_id').distinct())
