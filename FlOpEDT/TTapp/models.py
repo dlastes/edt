@@ -37,7 +37,7 @@ from django.utils.translation import ugettext_lazy as _
 
 # from caching.base import CachingManager, CachingMixin
 
-from base.models import Time, Department, Module, Group
+from base.models import Time, Department, Module, Group, Slot
 
 from people.models import Tutor
 
@@ -269,35 +269,82 @@ class ReasonableDays(TTConstraint):
                                     blank=True,
                                     related_name="reasonable_day_constraints")
 
+
+    def get_courses_queryset(self, ttmodel, tutor=None, group=None):
+        """
+        Filter courses depending on constraints parameters
+        """
+        courses_qs = ttmodel.wdb.courses
+        courses_filter = {}
+
+        if tutor is not None:
+            courses_filter['tutor'] = tutor
+
+        if group is not None:
+            courses_filter['groupe'] = group
+
+        if self.train_prog is not None:
+            courses_filter['groupe__train_prog'] = self.train_prog
+
+        return courses_qs.filter(**courses_filter)
+
+
+    def update_combinations(self, ttmodel, slot_boundaries, combinations, tutor=None, group=None):
+        """
+        Update courses combinations for slot boundaries with all courses 
+        corresponding to the given filters (tutors, groups)
+        """
+        courses_query = self.get_courses_queryset(ttmodel, tutor=tutor, group=group)
+        courses_set = set(courses_query)
+        
+        for first_slot, last_slot in slot_boundaries:
+            while courses_set:
+                c1 = courses_set.pop()
+                for c2 in courses_set:
+                    combinations.add(((first_slot, c1), (last_slot, c2),))
+
+
+    def register_expression(self, ttmodel, ponderation, combinations):
+        """
+        Update model with expressions corresponding to 
+        all courses combinations
+        """
+        for first, last in combinations:
+            if self.weight is not None:
+                conj_var = ttmodel.add_conjunct(ttmodel.TT[first], ttmodel.TT[last])
+                ttmodel.obj += self.local_weight() * ponderation * conj_var
+            else:
+                ttmodel.add_constraint(ttmodel.TT[first] + ttmodel.TT[last], '<=', 1)
+
+
     def enrich_model(self, ttmodel, ponderation=1):
-        for d in ttmodel.wdb.days:
-            slfirst = ttmodel.wdb.slots.get(heure__no=0, jour=d)
-            sllast = ttmodel.wdb.slots.get(heure__no=5, jour=d)
-            fc = ttmodel.wdb.courses
-            if self.train_prog is not None:
-                fc = fc.filter(groupe__train_prog=self.train_prog)
-            if self.tutors.count():
-                tutors_lists = [[tutor] for tutor in self.tutors.all()]
-            else:
-                tutors_lists = [[tutor for tutor in Tutor.objects.all()]]
-            if self.groups.exists():
-                groups_lists = [[group] for group in self.groups.all()]
-            else:
-                groups_lists = [[group for group in Group.objects.all()]]
-            for tutor_list in tutors_lists:
-                for groups_list in groups_lists:
-                    filtered_courses = fc.filter(groupe__in=list(groups_list), tutor__in=list(tutor_list))
-                    for c1 in filtered_courses:
-                        for c2 in filtered_courses.exclude(id__lte=c1.id):
-                            if self.weight is not None:
-                                conj_var = ttmodel.add_conjunct(
-                                    ttmodel.TT[(slfirst, c1)],
-                                    ttmodel.TT[(sllast, c2)])
-                                ttmodel.obj += self.local_weight() * ponderation * conj_var
-                            else:
-                                ttmodel.add_constraint(ttmodel.TT[(slfirst, c1)] +
-                                                       ttmodel.TT[(sllast, c2)],
-                                                       '<=', 1)
+
+        # Using a set type ensure that all combinations are 
+        # unique throw tutor and group filters
+        combinations = set()
+
+        # Get a dict with the first and last slot by day
+        slots = Slot.objects \
+                    .filter(heure__no__in=[0,5,]) \
+                    .order_by('heure__no') 
+        
+        slot_boundaries = {}
+        for slot in slots: 
+            slot_boundaries.setdefault(slot.jour, []).append(slot)
+              
+        # Create all combinations with slot boundaries for all courses 
+        # corresponding to the given filters (tutors, groups)
+        if self.tutors.count():
+            for tutor in self.tutors.all():
+                self.update_combinations(ttmodel, slot_boundaries.values(), combinations, tutor=tutor)
+        elif self.groups.count():
+            for group in self.groups.all():
+                self.update_combinations(ttmodel, slot_boundaries.values(), combinations, group=group)
+        else:
+            self.update_combinations(ttmodel, slot_boundaries.values(), combinations)
+
+        self.register_expression(ttmodel, ponderation, combinations)
+
 
     def one_line_description(self):
         text = "Des journées pas trop longues"
