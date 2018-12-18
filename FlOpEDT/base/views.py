@@ -326,7 +326,6 @@ def fetch_cours_pl(req, year, week, num_copy, **kwargs):
         raise Http404("What are you trying to do?")
 
     response = HttpResponse(dataset.csv, content_type='text/csv')
-    response['version'] = version
     response['week'] = week
     response['year'] = year
     response['jours'] = str(num_days(year, week))
@@ -337,33 +336,6 @@ def fetch_cours_pl(req, year, week, num_copy, **kwargs):
     except ObjectDoesNotExist:
         regen = 'I'
     response['regen'] = regen
-
-    if req.user.is_authenticated:
-        response['reqDispos'] = Course \
-                                    .objects \
-                                    .filter(tutor=req.user,
-                                            semaine=week,
-                                            an=year) \
-                                    .count() * 2
-        week_av = UserPreference \
-            .objects \
-            .filter(user=req.user,
-                    semaine=week,
-                    an=year)
-        if not week_av.exists():
-            response['filDispos'] = UserPreference \
-                .objects \
-                .filter(user=req.user,
-                        semaine=None,
-                        valeur__gte=1) \
-                .count()
-        else:
-            response['filDispos'] = week_av \
-                .filter(valeur__gte=1) \
-                .count()
-    else:
-        response['reqDispos'] = -1
-        response['filDispos'] = -1
 
     cached = cache.set(cache_key, response)
     return response

@@ -415,8 +415,6 @@ function fetch_cours() {
         async: true,
         contentType: "text/csv",
         success: function(msg, ts, req) {
-            required_dispos = +req.getResponseHeader('reqDispos');
-            filled_dispos = +req.getResponseHeader('filDispos');
 
             go_regen(req.getResponseHeader('regen'));
             go_alarm_pref();
