@@ -290,6 +290,7 @@ class TTModel(object):
         self.unp_slot_cost_course, self.avail_course \
             = self.compute_non_prefered_slot_cost_course()
 
+        # Hack : permet que ça marche même si les dispos sur la base sont pas complètes
         for i in self.wdb.instructors:
             for sl in self.wdb.slots:
                 if sl not in self.avail_instr[i]:
