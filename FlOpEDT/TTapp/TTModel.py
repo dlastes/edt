@@ -435,6 +435,8 @@ class TTModel(object):
         """
 
         print("adding core constraints")
+
+        # a course is scheduled once and only once
         for c in self.wdb.courses:
             name = 'core_course_' + str(c) + "_" + str(c.id)
             self.add_constraint(
@@ -443,6 +445,7 @@ class TTModel(object):
                 1,
                 name=name)
 
+        # no group has two courses in parallel
         for sl in self.wdb.slots:
             for g in self.wdb.basic_groups:
                 expr = self.lin_expr()
@@ -452,6 +455,8 @@ class TTModel(object):
                 name = 'core_group_' + g.full_name() + '_' + str(sl)
                 self.add_constraint(expr, '<=', 1, name=name)
 
+        # no teacher have 2 courses in parallel
+        # teachers are available on the chosen slots
         for sl in self.wdb.slots:
             for i in self.wdb.instructors:
                 if self.wdb.fixed_courses.filter(cours__tutor=i, creneau=sl):
