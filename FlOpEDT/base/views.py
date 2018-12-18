@@ -634,18 +634,56 @@ def fetch_all_versions(req, **kwargs):
     return response
 
 
-def fetch_version(req, year, week, **kwargs):
+def fetch_week_infos(req, year, week, **kwargs):
     """
-    Export the EdtVersion of a given week
+    Export aggregated infos of a given week:
+    version number, required number of available slots,
+    proposed number of available slots
+    (not cached)
     """
+    edt_v = EdtVersion.objects.get(department=req.department,
+                                  semaine=week,
+                                  an=year)
 
-    dataset = VersionResource() \
-        .export(EdtVersion.objects.filter(department=req.department,
-                                          semaine=week,
-                                          an=year))
-    response = HttpResponse(dataset.json,
-                            content_type='text/json')
+    proposed_pref, required_pref = \
+        pref_requirements(req.user, year, week) if req.user.is_authenticated \
+        else (-1, -1)
+
+    response = JsonResponse({'version': edt_v.version,
+                             'proposed_pref': proposed_pref,
+                             'required_pref': required_pref})
     return response
+
+
+def pref_requirements(tutor, year, week):
+    """
+    Return a pair (filled, required): number of preferences
+    that have been proposed VS required number of prefs, according
+    to local policy
+    """
+    nb_courses = Course.objects.filter(tutor=tutor,
+                                       semaine=week,
+                                       an=year) \
+                               .count()
+    week_av = UserPreference \
+        .objects \
+        .filter(user=tutor,
+                semaine=week,
+                an=year)
+    if not week_av.exists():
+        filled = UserPreference \
+            .objects \
+            .filter(user=tutor,
+                    semaine=None,
+                    valeur__gte=1) \
+            .count()
+    else:
+        filled = week_av \
+            .filter(valeur__gte=1) \
+            .count()
+    return filled, 2*nb_courses
+
+
 
 @cache_page(15 * 60)
 def fetch_groups(req, **kwargs):

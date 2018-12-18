@@ -757,22 +757,21 @@ function fetch_version() {
     $.ajax({
         type: "GET", //rest Type
         dataType: 'text',
-        url: url_version  + an_att + "/" + semaine_att,
+        url: url_week_infos  + an_att + "/" + semaine_att,
         async: true,
-        contentType: "text/csv",
+        contentType: "text/json",
 //        contentType: "text/json",
         success: function(msg) {
 	    //            bknews.cont = JSON.parse(msg) ;
-	    var version_parsed = JSON.parse(msg);
-	    if (version_parsed.length != 1) {
-		console.log("Version issue");
-		return ;
-	    }
+	    var parsed = JSON.parse(msg);
 
             if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
                 an_att == weeks.init_data[weeks.sel[0]].an) {
-		version = +version_parsed[0].version ;
+		version = parsed.version ;
+		filled_dispos = parsed.proposed_pref ;
+		required_dispos = parsed.required_pref ;
             }
+	    
             show_loader(false);
         },
         error: function(msg) {
