@@ -413,7 +413,6 @@ def fetch_dispos(req, year, week, **kwargs):
         .filter(semaine=week,
                 an=year,
                 user__in=busy_inst) \
-        .order_by('user')
 
     default_avail = UserPreference.objects \
         .exclude(user__in \
@@ -422,7 +421,6 @@ def fetch_dispos(req, year, week, **kwargs):
                  .values_list('user')) \
         .filter(semaine=None,
                 user__in=busy_inst) \
-        .order_by('user')
 
     dataset = DispoResource() \
         .export(list(chain(week_avail,

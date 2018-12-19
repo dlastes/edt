@@ -386,10 +386,6 @@ var butpr = {
     tlx: 900
 };
 
-// helper variable
-// the fetched data is sorted by instructor -> avoid full traversal
-var prev_prof;
-
 // has any instructor been fetched?
 var first_fetch_prof = true;
 
