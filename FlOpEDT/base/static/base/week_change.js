@@ -60,7 +60,6 @@ function fetch_dispos() {
         success: function(msg) {
             console.log("in");
 //            console.log(msg);
-            prev_prof = "";
 
             if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
                 an_att == weeks.init_data[weeks.sel[0]].an) {
@@ -93,8 +92,8 @@ function fetch_dispos() {
 
 
 function translate_dispos_from_csv(d) {
-    if (d.prof != prev_prof) {
-        prev_prof = d.prof;
+    // when merge with no-slot, take no-slot version
+    if(Object.keys(dispos).indexOf(d.prof)==-1){
         dispos[d.prof] = new Array(nbPer);
         for (var i = 0; i < nbPer; i++) {
             dispos[d.prof][i] = new Array(nbSl);
