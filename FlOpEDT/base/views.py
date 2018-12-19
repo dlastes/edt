@@ -382,11 +382,9 @@ def fetch_cours_pp(req, week, year, num_copy, **kwargs):
 
 #@login_required
 def fetch_dispos(req, year, week, **kwargs):
-    print(req)
     print("================")
-    if req.GET:
-        if not req.user.is_authenticated:
-            return HttpResponse("Pas connecte")
+    if not req.user.is_authenticated:
+        return HttpResponse("Pas connecte", status=500)
     print("================")
 
     try:
@@ -406,7 +404,7 @@ def fetch_dispos(req, year, week, **kwargs):
                                       module__train_prog__department=department) \
         .distinct('tutor') \
         .values_list('tutor')
-
+    
     busy_inst = list(chain(busy_inst, [req.user]))
 
     week_avail = UserPreference.objects \
