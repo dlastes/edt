@@ -413,9 +413,11 @@ class TTModel(object):
 
         # maximize stability
         if self.stabilize_work_copy is not None:
-            Stabilize(general=True,
-                      work_copy=self.stabilize_work_copy) \
-                .enrich_model(self, self.max_stab)
+            s = Stabilize(general=True,
+                          work_copy=self.stabilize_work_copy)
+            s.save()
+            s.enrich_model(self, self.max_stab)
+            s.delete()
             print('Will stabilize from remote work copy #', \
                 self.stabilize_work_copy)
         else:

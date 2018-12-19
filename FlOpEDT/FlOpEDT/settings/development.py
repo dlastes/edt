@@ -48,6 +48,35 @@ CHANNEL_LAYERS = {
 }
 # "ROUTING": "solve_board.routing.channel_routing",
 
+LOGGING = {  
+    'version': 1,  
+    'disable_existing_loggers': False,
+    'formatters': {
+        'simple': {
+            'format': '[{asctime}] - {levelname} - {module} - {message}',
+            'style': '{',
+        },
+    },    
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        }
+    },
+    'loggers': {
+        '': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': True,
+        },        
+        'django.db.backends': {
+            'level':  os.environ.get('DJANGO_LOG_LEVEL', 'WARNING'),
+            'handlers': ['console'],
+            'propagate': True,
+        }
+    }
+}
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'al0bzdna)@6&n9mfn_vlm0wl&38#xrf@h%&^^h-q783g$e&*h!'

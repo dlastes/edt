@@ -308,17 +308,8 @@ function fetch_bknews(first) {
         contentType: "text/csv",
 //        contentType: "text/json",
         success: function(msg) {
-	    console.log("excuseme");
-            console.log(msg);
-
 	    //            bknews.cont = JSON.parse(msg) ;
-	    console.log("here");
-	    console.log(bknews.cont.length);
 	    bknews.cont = d3.csvParse(msg,
-				      translate_bknews_from_csv);
-	    console.log(bknews.cont.length);
-	    console.log("tere");
-	    proutos = d3.csvParse(msg,
 				      translate_bknews_from_csv);
 
             if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
@@ -355,6 +346,7 @@ function fetch_bknews(first) {
 
 function translate_bknews_from_csv(d){
     return {
+	id: +d.id,
 	x_beg: +d.x_beg,
 	x_end: +d.x_end,
 	y: +d.y,
@@ -423,11 +415,6 @@ function fetch_cours() {
         async: true,
         contentType: "text/csv",
         success: function(msg, ts, req) {
-            //console.log(msg);
-            version = +req.getResponseHeader('version');
-	    console.log(version);
-            required_dispos = +req.getResponseHeader('reqDispos');
-            filled_dispos = +req.getResponseHeader('filDispos');
 
             go_regen(req.getResponseHeader('regen'));
             go_alarm_pref();
@@ -748,6 +735,7 @@ function fetch_all(first){
     }
     fetch.ongoing_bknews = true;
 
+    fetch_version();
     fetch_cours();
     if (ckbox["dis-mod"].cked || ckbox["edt-mod"].cked) {
         fetch_dispos();
@@ -758,6 +746,43 @@ function fetch_all(first){
     fetch_bknews(first);
 }
 
+
+function fetch_version() {
+    var semaine_att = weeks.init_data[weeks.sel[0]].semaine;
+    var an_att = weeks.init_data[weeks.sel[0]].an;
+
+    show_loader(true);
+    $.ajax({
+        type: "GET", //rest Type
+        dataType: 'text',
+        url: url_week_infos  + an_att + "/" + semaine_att,
+        async: true,
+        contentType: "text/json",
+//        contentType: "text/json",
+        success: function(msg) {
+	    //            bknews.cont = JSON.parse(msg) ;
+	    var parsed = JSON.parse(msg);
+
+            if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
+                an_att == weeks.init_data[weeks.sel[0]].an) {
+		version = parsed.version ;
+		filled_dispos = parsed.proposed_pref ;
+		required_dispos = parsed.required_pref ;
+            }
+	    
+            show_loader(false);
+        },
+        error: function(msg) {
+            console.log("error");
+            show_loader(false);
+        }
+    });
+
+}
+
+function translate_version_from_csv(d){
+    return +d.version ;
+}
 
 
 function fetch_ended() {

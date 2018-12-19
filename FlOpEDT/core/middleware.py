@@ -6,7 +6,7 @@ from django.core.cache import cache
 
 from base.models import Department
 
-logger = logging.getLogger('base')
+logger = logging.getLogger(__name__)
 
 class EdtContextMiddleware:
     def __init__(self, get_response):
@@ -32,9 +32,8 @@ class EdtContextMiddleware:
         def del_request_department():
             try:
                 del request.session[department_key]
-                cache.delete(department_key)
-            except:
-                logger.debug(f'an error has occured when deleting session and cache for [{department_key}]')
+            except KeyError:
+                pass
 
         def set_request_department(request, department, set_session=True, set_cache=False):
             request.department = department
