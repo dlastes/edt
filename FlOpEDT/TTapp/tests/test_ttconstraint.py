@@ -2,7 +2,7 @@
 from django.test import TestCase
 from unittest.mock import patch, Mock, call
 
-from base.models import Department, TrainingProgramme, CourseType, Time
+from base.models import Department, TrainingProgramme, Course, CourseType, Time
 from people.models import Tutor
 from TTapp.models import LimitCourseTypePerPeriod
 from TTapp.TTModel import TTModel
@@ -41,7 +41,7 @@ class TTConstraintTestCase(TestCase):
 
 
     @patch('TTapp.models.LimitCourseTypePerPeriod.register_expression')
-    def test_register_expression_without_tutors(self, register_expression):      
+    def test_limit_register_expression_without_tutors(self, register_expression):      
 
         attrs = {'wdb.days': (0,1,2,)}
         ttmodel = Mock(**attrs)
@@ -65,7 +65,7 @@ class TTConstraintTestCase(TestCase):
 
 
     @patch('TTapp.models.LimitCourseTypePerPeriod.register_expression')
-    def test_register_expression_with_tutors(self, register_expression):      
+    def test_limit_register_expression_with_tutors(self, register_expression):      
 
         constraint = LimitCourseTypePerPeriod.objects.create(limit=1, type=self.TD, department=self.info)
         constraint.period == LimitCourseTypePerPeriod.FULL_DAY
@@ -89,3 +89,8 @@ class TTConstraintTestCase(TestCase):
 
         constraint.enrich_model(ttmodel)
         register_expression.assert_has_calls(calls)
+
+    @patch('TTapp.models.ReasonableDays.register_expression')
+    def test_reasonable_register_expression_with_tutors(self, register_expression):
+        pass
+        
