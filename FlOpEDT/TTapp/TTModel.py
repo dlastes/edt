@@ -515,6 +515,7 @@ class TTModel(object):
         for sl in self.wdb.slots:
             # constraint : each course is assigned to a RoomGroup
             for c in self.wdb.courses:
+                name = 'core_roomtype_' + str(r) + '_' + str(sl)
                 self.add_constraint(
                     self.sum(self.TTrooms[(sl, c, rg)] for rg in
                                  course_rg_compat[c]) - self.TT[(sl, c)], '==', 0)
