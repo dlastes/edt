@@ -41,6 +41,18 @@ class PeriodWeeksTestCase(TestCase):
         self.assertEqual(str(filter_all), "(OR: (AND: ('cours__an', 2018), ('cours__semaine__in', {35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52})), (AND: ('cours__an', 2019), ('cours__semaine__in', {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26})))")
 
 
+    def test_filter_not_none(self):
+        pw = PeriodWeeks(department=self.department, year=1917)
+        filter = pw.get_filter()
+        self.assertIsNotNone(filter)
+
+
+    def test_filter_none_with_exclude_empty_weeks(self):
+        pw = PeriodWeeks(department=self.department, year=1917, exclude_empty_weeks=True)
+        filter = pw.get_filter()
+        self.assertIsNone(filter)        
+
+
     @patch('base.core.period_weeks.datetime')
     def test_get_current_school_year(self, mock_datetime):
         target_datetime = datetime.datetime(2011, 6, 21)
@@ -59,7 +71,6 @@ class PeriodWeeksTestCase(TestCase):
         year_2018_without_weeks = {36, 37, 38, 39, 40, 41, 42, 43, 45, 46, 47, 48, 49, 50, 51}
         pw = PeriodWeeks(department=self.department, year=2018, exclude_empty_weeks=True).get_raw()
         self.assertSetEqual(pw[0][1], year_2018_without_weeks)
-
 
 
     def test_get_weeks_full_period(self):
