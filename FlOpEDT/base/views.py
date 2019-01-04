@@ -326,7 +326,6 @@ def fetch_cours_pl(req, year, week, num_copy, **kwargs):
         raise Http404("What are you trying to do?")
 
     response = HttpResponse(dataset.csv, content_type='text/csv')
-    response['version'] = version
     response['week'] = week
     response['year'] = year
     response['jours'] = str(num_days(year, week))
@@ -337,33 +336,6 @@ def fetch_cours_pl(req, year, week, num_copy, **kwargs):
     except ObjectDoesNotExist:
         regen = 'I'
     response['regen'] = regen
-
-    if req.user.is_authenticated:
-        response['reqDispos'] = Course \
-                                    .objects \
-                                    .filter(tutor=req.user,
-                                            semaine=week,
-                                            an=year) \
-                                    .count() * 2
-        week_av = UserPreference \
-            .objects \
-            .filter(user=req.user,
-                    semaine=week,
-                    an=year)
-        if not week_av.exists():
-            response['filDispos'] = UserPreference \
-                .objects \
-                .filter(user=req.user,
-                        semaine=None,
-                        valeur__gte=1) \
-                .count()
-        else:
-            response['filDispos'] = week_av \
-                .filter(valeur__gte=1) \
-                .count()
-    else:
-        response['reqDispos'] = -1
-        response['filDispos'] = -1
 
     cached = cache.set(cache_key, response)
     return response
@@ -410,11 +382,9 @@ def fetch_cours_pp(req, week, year, num_copy, **kwargs):
 
 #@login_required
 def fetch_dispos(req, year, week, **kwargs):
-    print(req)
     print("================")
-    if req.GET:
-        if not req.user.is_authenticated:
-            return HttpResponse("Pas connecte")
+    if not req.user.is_authenticated:
+        return HttpResponse("Pas connecte", status=500)
     print("================")
 
     try:
@@ -434,14 +404,13 @@ def fetch_dispos(req, year, week, **kwargs):
                                       module__train_prog__department=department) \
         .distinct('tutor') \
         .values_list('tutor')
-
+    
     busy_inst = list(chain(busy_inst, [req.user]))
 
     week_avail = UserPreference.objects \
         .filter(semaine=week,
                 an=year,
                 user__in=busy_inst) \
-        .order_by('user')
 
     default_avail = UserPreference.objects \
         .exclude(user__in \
@@ -450,7 +419,6 @@ def fetch_dispos(req, year, week, **kwargs):
                  .values_list('user')) \
         .filter(semaine=None,
                 user__in=busy_inst) \
-        .order_by('user')
 
     dataset = DispoResource() \
         .export(list(chain(week_avail,
@@ -624,12 +592,65 @@ def fetch_bknews(req, year, week, **kwargs):
 
 
 def fetch_all_versions(req, **kwargs):
-
+    """
+    Export all EdtVersions in json
+    """
     dataset = VersionResource() \
         .export(EdtVersion.objects.filter(department=req.department))
     response = HttpResponse(dataset.json,
                             content_type='text/json')
     return response
+
+
+def fetch_week_infos(req, year, week, **kwargs):
+    """
+    Export aggregated infos of a given week:
+    version number, required number of available slots,
+    proposed number of available slots
+    (not cached)
+    """
+    edt_v = EdtVersion.objects.get(department=req.department,
+                                  semaine=week,
+                                  an=year)
+
+    proposed_pref, required_pref = \
+        pref_requirements(req.user, year, week) if req.user.is_authenticated \
+        else (-1, -1)
+
+    response = JsonResponse({'version': edt_v.version,
+                             'proposed_pref': proposed_pref,
+                             'required_pref': required_pref})
+    return response
+
+
+def pref_requirements(tutor, year, week):
+    """
+    Return a pair (filled, required): number of preferences
+    that have been proposed VS required number of prefs, according
+    to local policy
+    """
+    nb_courses = Course.objects.filter(tutor=tutor,
+                                       semaine=week,
+                                       an=year) \
+                               .count()
+    week_av = UserPreference \
+        .objects \
+        .filter(user=tutor,
+                semaine=week,
+                an=year)
+    if not week_av.exists():
+        filled = UserPreference \
+            .objects \
+            .filter(user=tutor,
+                    semaine=None,
+                    valeur__gte=1) \
+            .count()
+    else:
+        filled = week_av \
+            .filter(valeur__gte=1) \
+            .count()
+    return filled, 2*nb_courses
+
 
 
 @cache_page(15 * 60)

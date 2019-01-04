@@ -102,7 +102,10 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
 
                 sumtotal += nominal
                 continue
-
+            try:
+                comments = comments
+            except:
+                comments = []
             # handle light green lines - Vert clair
             MODULE = Module.objects.get(abbrev=module, period=period)
             PROMO = MODULE.train_prog
@@ -156,11 +159,11 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
                     C.save()
                 for after_type in [x for x in comments + local_comments if x[0] == 'A']:
                     try:
-                        n=int(after_type[1])
-                        s=2
-                    Except:
-                        n=1
-                        s=1
+                        n = int(after_type[1])
+                        s = 2
+                    except ValueError:
+                        n = 1
+                        s = 1
                     course_type = after_type[s:]
                     courses = Course.objects.filter(type__name=course_type, module=MODULE, semaine=semaine, an=an,
                                                    groupe__in = list(GROUPE.ancestor_groups()) + [GROUPE])
