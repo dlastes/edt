@@ -111,8 +111,9 @@ class WeekDB(object):
         self.groups = Group.objects.filter(train_prog__in=self.train_prog)
         
         self.basic_groups = self.groups \
-            .filter(basic=True,
-                    id__in=self.courses.values_list('groupe_id').distinct())
+            .filter(basic=True)
+                    # ,
+                    # id__in=self.courses.values_list('groupe_id').distinct())
         
         self.basic_groups_surgroups = {}
         for g in self.basic_groups:
