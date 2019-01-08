@@ -624,7 +624,7 @@ function apply_ckbox(dk) {
             if (ckbox[dk].cked) {
 		fetch_unavailable_rooms();
 		fetch_all_tutors();
-		if (total_regen) {
+		if (total_regen && (logged_usr.rights >> 2) % 2 == 0) {
 
 		    ckbox[dk].cked = false ;
 		
