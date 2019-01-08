@@ -36,13 +36,13 @@ def get_holiday_list(period):
         for holiday in Holiday.objects.filter(year=year):
             yield year, holiday.week, holiday.day.no
 
-def get_room_activity_by_day(department, year):
+def get_room_activity_by_day(department, year=None):
 
     # Return a array containing each room of a department 
     # with the number of days a room is unoccupied 
     # during a given period. 
 
-    # TODO : If the period is not ended occupancy is 
+    # TODO: If the period is not ended occupancy is 
     # computed until the current week
 
     # year : correponds to the first period's year
@@ -56,13 +56,16 @@ def get_room_activity_by_day(department, year):
         .distinct())
 
     # Filter all the scheduled courses for the period
-    scheduled = set(ScheduledCourse.objects \
-        .filter(
-            period_filter,
-            copie_travail=0,
-            cours__module__train_prog__department=department) \
-        .values_list('room__name', 'cours__an', 'cours__semaine', 'creneau__jour') \
-        .distinct())
+    scheduled = set()
+    
+    if period_filter:
+        scheduled.update(ScheduledCourse.objects \
+            .filter(
+                period_filter,
+                copie_travail=0,
+                cours__module__train_prog__department=department) \
+            .values_list('room__name', 'cours__an', 'cours__semaine', 'creneau__jour') \
+            .distinct())
 
     # Holiday list
     holiday_list = set(get_holiday_list(period))
@@ -97,7 +100,7 @@ def get_room_activity_by_day(department, year):
     return {'open_days':nb_open_days, 'room_activity': unused_days_by_room}
 
 
-def get_tutor_hours(department, year):
+def get_tutor_hours(department, year=None):
 
     # Return a tutor list with the numbers 
     # of hours of given courses

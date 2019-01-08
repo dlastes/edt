@@ -25,9 +25,6 @@
 # without disclosing the source code of your own applications.
 
 
-# ### Have to do this for it to work in 1.9.x!
-# from django.core.wsgi import get_wsgi_application
-# application = get_wsgi_application()
 
 from pulp import LpVariable, LpConstraint, LpBinary, LpConstraintEQ, \
     LpConstraintGE, LpConstraintLE, LpAffineExpression, LpProblem, LpStatus, \
@@ -51,12 +48,13 @@ from MyFlOp.MyTTUtils import reassign_rooms
 
 import signal
 
+from django.conf import settings
 from django.db.models import Q, Max
 
 import datetime
 
 import logging
-logger = logging.getLogger('base')
+logger = logging.getLogger(__name__)
 
 class WeekDB(object):
     def __init__(self, department, week, year, train_prog):
@@ -293,6 +291,7 @@ class TTModel(object):
         self.unp_slot_cost_course, self.avail_course \
             = self.compute_non_prefered_slot_cost_course()
 
+        # Hack : permet que ça marche même si les dispos sur la base sont pas complètes
         for i in self.wdb.instructors:
             for sl in self.wdb.slots:
                 if sl not in self.avail_instr[i]:
@@ -308,6 +307,9 @@ class TTModel(object):
             print("Relevant warnings :")
             for key, key_warnings in self.warnings.items():
                 print("%s : %s" % (key, ", ".join([str(x) for x in key_warnings])))
+
+        if settings.DEBUG:
+            self.model.writeLP('FlOpEDT.lp')
 
     def add_var(self, name):
         """
@@ -435,6 +437,8 @@ class TTModel(object):
         """
 
         print("adding core constraints")
+
+        # a course is scheduled once and only once
         for c in self.wdb.courses:
             name = 'core_course_' + str(c) + "_" + str(c.id)
             self.add_constraint(
@@ -443,6 +447,7 @@ class TTModel(object):
                 1,
                 name=name)
 
+        # no group has two courses in parallel
         for sl in self.wdb.slots:
             for g in self.wdb.basic_groups:
                 expr = self.lin_expr()
@@ -452,6 +457,8 @@ class TTModel(object):
                 name = 'core_group_' + g.full_name() + '_' + str(sl)
                 self.add_constraint(expr, '<=', 1, name=name)
 
+        # no teacher have 2 courses in parallel
+        # teachers are available on the chosen slots
         for sl in self.wdb.slots:
             for i in self.wdb.instructors:
                 if self.wdb.fixed_courses.filter(cours__tutor=i, creneau=sl):

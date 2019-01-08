@@ -9,6 +9,12 @@ class PeriodWeeks():
     """    
     
     def __init__(self, department=None, year=None, start=None, end=None, exclude_empty_weeks=False):
+        """    
+        Parameters
+        ----------
+        exclude_empty_weeks : bool
+            exclude weeks from lists when no courses are planned (default is False)
+        """
 
         self .department = department
 
@@ -142,6 +148,9 @@ class PeriodWeeks():
         """
         Return a Q filter to restrict records returned 
         by course query to a given period
+
+        When exclude_empty_weeks parameter is set to True, the method 
+        could return None if no course is planned for the period
         """
         filter = None
         for year, weeks in self.__period_raw:
