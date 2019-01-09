@@ -173,19 +173,44 @@ function create_dispos_user_data() {
   ------ MODULES -------
   ----------------------*/
 
+function mod_dd_items() {
+
+    var high_mod = relevant_modules();
+
+    var high_items = new Array();
+    var low_items = new Array();
+    modules.all.forEach(function(m) {
+        if (high_mod.has(m)) {
+            high_items.push(m);
+        } else {
+            low_items.push(m);
+        }
+    });
+
+    return high_items.concat(low_items);
+}
+
+// Create or update the filter-by-module list.
 function create_mod_dd() {
 
+    var items = mod_dd_items();
 
     var seldd = mog
         .selectAll("option")
-        .data(modules.all, function(d, i) {
-            return d;
+        .data(items, function(m) {
+           return m;
         });
+
+    seldd
+        .exit()
+        .remove();
+
+    seldd
+        .order();
 
     seldd
         .enter()
         .append("option")
-        .merge(seldd.select("option"))
         .attr("value", function(d) {
             return d;
         })
@@ -193,16 +218,9 @@ function create_mod_dd() {
             return d;
         });
 
-    seldd.exit().remove();
-
-    seldd
-        .each(function(d, i) {
-            if (d == modules.sel) {
-                d3.select(this).attr("selected", "");
-            }
-        });
-
-
+    mog
+        .select('option[value="' + modules.sel + '"]')
+        .attr("selected", "");
 }
 
 
