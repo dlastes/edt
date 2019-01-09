@@ -4,9 +4,10 @@
 *.bak
 FlOpEDT/logs/*
 FlOpEDT/*.log
-FlOpEDT/*.lp
 *.sol
 *.mps
 .idea/
 .vscode/
+node_modules
+*.lp
 
