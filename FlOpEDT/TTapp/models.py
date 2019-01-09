@@ -196,10 +196,13 @@ class LimitCourseTypePerPeriod(TTConstraint):  # , pond):
             for period in periods:
                 period_by_day.append((day, period,))
 
-        if self.tutors.count():
-            for tutor in self.tutors.all():
-                self.register_expression(ttmodel, period_by_day, ponderation, tutor=tutor)
-        else:
+        try:
+            if self.tutors.count():
+                for tutor in self.tutors.all():
+                    self.register_expression(ttmodel, period_by_day, ponderation, tutor=tutor)
+            else:
+                self.register_expression(ttmodel, period_by_day, ponderation)
+        except ValueError:
             self.register_expression(ttmodel, period_by_day, ponderation)
 
 
@@ -334,13 +337,16 @@ class ReasonableDays(TTConstraint):
               
         # Create all combinations with slot boundaries for all courses 
         # corresponding to the given filters (tutors, groups)
-        if self.tutors.count():
-            for tutor in self.tutors.all():
-                self.update_combinations(ttmodel, slot_boundaries.values(), combinations, tutor=tutor)
-        elif self.groups.count():
-            for group in self.groups.all():
-                self.update_combinations(ttmodel, slot_boundaries.values(), combinations, group=group)
-        else:
+        try:
+            if self.tutors.count():
+                for tutor in self.tutors.all():
+                    self.update_combinations(ttmodel, slot_boundaries.values(), combinations, tutor=tutor)
+            elif self.groups.count():
+                for group in self.groups.all():
+                    self.update_combinations(ttmodel, slot_boundaries.values(), combinations, group=group)
+            else:
+                self.update_combinations(ttmodel, slot_boundaries.values(), combinations)
+        except ValueError:
             self.update_combinations(ttmodel, slot_boundaries.values(), combinations)
 
         self.register_expression(ttmodel, ponderation, combinations)
