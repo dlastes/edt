@@ -1282,7 +1282,8 @@ function def_drag() {
                         d.slot = cur_over.slot;
 			room_tutor_change.course.push(d) ;
 			compute_cm_room_tutor_direction() ;
-			var disp_cont_menu = select_room_change(true) ;
+			room_cm_level = 0 ;
+			var disp_cont_menu = select_room_change() ;
 			if (disp_cont_menu) {
 			    go_cm_room_tutor_change();
 			} else {
@@ -1827,7 +1828,8 @@ function def_cm_change() {
     entry_cm_settings.click = function(d) {
 	context_menu.room_tutor_hold = true ;
 	if(d.content == 'Salle') {
-	    select_room_change(true);
+	    room_cm_level = 0 ;
+	    select_room_change();
 	} else {
 	    select_tutor_module_change();
 	}
@@ -1860,14 +1862,17 @@ function def_cm_change() {
 	go_cm_room_tutor_change();
     };
 
-    room_cm_settings.click = function(d) {
-	context_menu.room_tutor_hold = true ;
-	if(d.content == '+') {
-	    select_room_change(false);
-	} else {
-	    confirm_room_change(d) ;
+    for (var level = 0 ; level<room_cm_settings.length ; level++) {
+	room_cm_settings[level].click = function(d) {
+	    context_menu.room_tutor_hold = true ;
+	    if(d.content == '+') {
+		room_cm_level += 1 ;
+		select_room_change();
+	    } else {
+		confirm_room_change(d) ;
+	    }
+	    go_cm_room_tutor_change();
 	}
-	go_cm_room_tutor_change();
     }
 
 }

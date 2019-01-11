@@ -119,24 +119,22 @@ function clear_pop(gs) {
   --------------------*/
 
 
-// strict: if true, compute a set of rooms that fulfill the constraints
-//         if false, all rooms are considered
-// return: true iff a change is needed (i.e. unassigned room or already occupied) or non strict
-function select_room_change(strict) {
-    room_tutor_change.cm_settings = room_cm_settings ;
+// return: true iff a change is needed (i.e. unassigned room or already occupied) (or level>0)
+function select_room_change() {
+    var level = room_cm_level;
+    room_tutor_change.cm_settings = room_cm_settings[level] ;
 
     var c = room_tutor_change.course[0] ;
     room_tutor_change.old_value = c.room ;
     room_tutor_change.cur_value = c.room ;
 
-    var busy_rooms, cur_roomgroup, is_occupied ;
+    var busy_rooms, cur_roomgroup, is_occupied, proposed_rg, initial_rg ;
     var i, j ;
 
-    var fake_id = new Date() ;
-    fake_id = fake_id.getMilliseconds() + "-" + c.id_cours ;
-    room_tutor_change.proposal = [] ;
+    proposed_rg = [] ;
 
-    if (strict) {
+    if (level < room_cm_settings.length - 1) {
+
 	// find rooms where a course take place
 	var simultaneous_courses = cours
 	    .filter(function(d) {
@@ -151,12 +149,21 @@ function select_room_change(strict) {
 		}
 	    }
 	}
-	
-	for (i = 0 ; i < rooms.roomtypes[c.room_type].length ; i++) {
-	    cur_roomgroup = rooms.roomtypes[c.room_type][i] ;
+
+
+	if (level == 0) {
+	    initial_rg = rooms.roomtypes[c.room_type] ;
+	} else if (level == 1) {
+	    initial_rg = Object.keys(rooms.roomgroups) ;
+	} else {
+	    // should not go here
+	    initial_rg = [] ;
+	}
+	for (i = 0 ; i < initial_rg.length ; i++) {
+	    cur_roomgroup = initial_rg[i] ;
 	    if (is_garbage(c.day,c.slot)
 		|| unavailable_rooms[c.day][c.slot]
-		.indexOf(rooms.roomtypes[c.room_type][i]) == -1) {
+		.indexOf(cur_roomgroup) == -1) {
 
 		// is a room in the roomgroup occupied?
 		is_occupied = false ;
@@ -170,37 +177,43 @@ function select_room_change(strict) {
 		}
 
 		if(!is_occupied) {
-		    var cur_prop = {} ;
-		    cur_prop.fid = fake_id ;
-		    cur_prop.content = rooms.roomtypes[c.room_type][i] ;
-		    
-		    room_tutor_change.proposal.push(cur_prop) ;
+		    proposed_rg.push(initial_rg[i]);
 		}
 	    }
 	}
 
-	room_tutor_change.proposal.push({fid: fake_id, content: "+"});
-	console.log(room_tutor_change.proposal);
-
     } else {
-	// atomic rooms first, then composed
-	var rg, atomic_rooms, composed_rooms, room;
-	atomic_rooms = [];
-	composed_rooms = [];
-	for (rg = 0 ; rg < Object.keys(rooms.roomgroups).length ; rg++) {
-	    
-	    atomic_rooms.push({fid: fake_id, content: Object.keys(rooms.roomgroups)[rg]});
-	}
-	
-	room_tutor_change.proposal = atomic_rooms.concat(composed_rooms);
+	proposed_rg = Object.keys(rooms.roomgroups) ;
+    }
 
+
+    // atomic rooms first, then composed
+    var rg, atomic_rooms, composed_rooms, room;
+    atomic_rooms = [];
+    composed_rooms = [];
+    var fake_id = new Date() ;
+    fake_id = fake_id.getMilliseconds() + "-" + c.id_cours ;
+    room_tutor_change.proposal = [] ;
+
+    for (rg = 0 ; rg < proposed_rg.length ; rg++) {
+	room = {fid: fake_id, content: proposed_rg[rg]} ;
+	if(rooms.roomgroups[room.content].length == 1) {
+	    atomic_rooms.push(room);
+	} else {
+	    composed_rooms.push(room);
+	}
+    }
+    room_tutor_change.proposal = atomic_rooms.concat(composed_rooms);
+
+    if(level < room_cm_settings.length - 1) {
+	room_tutor_change.proposal.push({fid: fake_id, content: "+"});
     }
 
     room_tutor_change.cm_settings.nlin
 	= Math.ceil(room_tutor_change.proposal.length
 		    / room_tutor_change.cm_settings.ncol) ;
 
-    if (!strict || c.room == une_salle ||
+    if (level > 0 || c.room == une_salle ||
 	occupied_rooms.indexOf(c.room) != -1) {
 	return true;
     } else {
