@@ -384,7 +384,7 @@ def fetch_cours_pp(req, week, year, num_copy, **kwargs):
 def fetch_dispos(req, year, week, **kwargs):
     print("================")
     if not req.user.is_authenticated:
-        return HttpResponse("Pas connecte", status=500)
+        return HttpResponse("Pas connecte", status=401)
     print("================")
 
     try:
@@ -430,10 +430,6 @@ def fetch_dispos(req, year, week, **kwargs):
 
     cache.set(cache_key, response)
     return response
-    #     else:
-    #         return HttpResponse("Pas connecté", status=500)
-    # else:
-    #     return HttpResponse("Pas GET", status=500)
 
 
 def fetch_unavailable_rooms(req, year, week, **kwargs):
@@ -491,15 +487,12 @@ def fetch_all_tutors(req, **kwargs):
 
 @login_required
 def fetch_stype(req, **kwargs):
-    # if req.method == 'GET':
     dataset = DispoResource() \
         .export(UserPreference.objects \
                 .filter(semaine=None,
                         user=req.user))  # all())#
     response = HttpResponse(dataset.csv, content_type='text/csv')
     return response
-    # else:
-    #    return HttpResponse("Pas GET",status=500)
 
 
 def fetch_decale(req, **kwargs):

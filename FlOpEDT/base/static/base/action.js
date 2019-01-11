@@ -119,9 +119,10 @@ function clear_pop(gs) {
   --------------------*/
 
 
-
-// return: true iff a change is needed (i.e. unassigned room or already occupied)
-function select_room_change() {
+// strict: if true, compute a set of rooms that fulfill the constraints
+//         if false, all rooms are considered
+// return: true iff a change is needed (i.e. unassigned room or already occupied) or non strict
+function select_room_change(strict) {
     room_tutor_change.cm_settings = room_cm_settings ;
 
     var c = room_tutor_change.course[0] ;
@@ -135,53 +136,71 @@ function select_room_change() {
     fake_id = fake_id.getMilliseconds() + "-" + c.id_cours ;
     room_tutor_change.proposal = [] ;
 
-    // find rooms where a course take place
-    var simultaneous_courses = cours
-	.filter(function(d) {
-	    return d.day==c.day && d.slot==c.slot && d.id_cours!=c.id_cours ;
-	});
-    var occupied_rooms = [] ;
-    for (i = 0 ; i < simultaneous_courses.length ; i++) {
-	busy_rooms = rooms.roomgroups[simultaneous_courses[i].room] ;
-	for (j = 0 ; j<busy_rooms.length ; j++) {
-	    if (occupied_rooms.indexOf(busy_rooms[j])==-1) {
-		occupied_rooms.push(busy_rooms[j]) ;
+    if (strict) {
+	// find rooms where a course take place
+	var simultaneous_courses = cours
+	    .filter(function(d) {
+		return d.day==c.day && d.slot==c.slot && d.id_cours!=c.id_cours ;
+	    });
+	var occupied_rooms = [] ;
+	for (i = 0 ; i < simultaneous_courses.length ; i++) {
+	    busy_rooms = rooms.roomgroups[simultaneous_courses[i].room] ;
+	    for (j = 0 ; j<busy_rooms.length ; j++) {
+		if (occupied_rooms.indexOf(busy_rooms[j])==-1) {
+		    occupied_rooms.push(busy_rooms[j]) ;
+		}
 	    }
 	}
-    }
-    
-    for (i = 0 ; i < rooms.roomtypes[c.room_type].length ; i++) {
-	cur_roomgroup = rooms.roomtypes[c.room_type][i] ;
-	if (is_garbage(c.day,c.slot)
-	    || unavailable_rooms[c.day][c.slot]
-	    .indexOf(rooms.roomtypes[c.room_type][i]) == -1) {
+	
+	for (i = 0 ; i < rooms.roomtypes[c.room_type].length ; i++) {
+	    cur_roomgroup = rooms.roomtypes[c.room_type][i] ;
+	    if (is_garbage(c.day,c.slot)
+		|| unavailable_rooms[c.day][c.slot]
+		.indexOf(rooms.roomtypes[c.room_type][i]) == -1) {
 
-	    // is a room in the roomgroup occupied?
-	    is_occupied = false ;
-	    j = 0;
-	    while(!is_occupied
-		  && j<rooms.roomgroups[cur_roomgroup].length) {
-		is_occupied = (occupied_rooms
-			       .indexOf(rooms.roomgroups[cur_roomgroup][j])
-			       != -1);
-		j++ ;
+		// is a room in the roomgroup occupied?
+		is_occupied = false ;
+		j = 0;
+		while(!is_occupied
+		      && j<rooms.roomgroups[cur_roomgroup].length) {
+		    is_occupied = (occupied_rooms
+				   .indexOf(rooms.roomgroups[cur_roomgroup][j])
+				   != -1);
+		    j++ ;
+		}
+
+		if(!is_occupied) {
+		    var cur_prop = {} ;
+		    cur_prop.fid = fake_id ;
+		    cur_prop.content = rooms.roomtypes[c.room_type][i] ;
+		    
+		    room_tutor_change.proposal.push(cur_prop) ;
+		}
 	    }
+	}
 
-	    if(!is_occupied) {
-		var cur_prop = {} ;
-		cur_prop.fid = fake_id ;
-		cur_prop.content = rooms.roomtypes[c.room_type][i] ;
+	room_tutor_change.proposal.push({fid: fake_id, content: "+"});
+	console.log(room_tutor_change.proposal);
+
+    } else {
+	// atomic rooms first, then composed
+	var rg, atomic_rooms, composed_rooms, room;
+	atomic_rooms = [];
+	composed_rooms = [];
+	for (rg = 0 ; rg < Object.keys(rooms.roomgroups).length ; rg++) {
 	    
-		room_tutor_change.proposal.push(cur_prop) ;
-	    }
+	    atomic_rooms.push({fid: fake_id, content: Object.keys(rooms.roomgroups)[rg]});
 	}
+	
+	room_tutor_change.proposal = atomic_rooms.concat(composed_rooms);
+
     }
 
     room_tutor_change.cm_settings.nlin
 	= Math.ceil(room_tutor_change.proposal.length
 		    / room_tutor_change.cm_settings.ncol) ;
 
-    if (c.room == une_salle ||
+    if (!strict || c.room == une_salle ||
 	occupied_rooms.indexOf(c.room) != -1) {
 	return true;
     } else {
@@ -624,7 +643,7 @@ function apply_ckbox(dk) {
             if (ckbox[dk].cked) {
 		fetch_unavailable_rooms();
 		fetch_all_tutors();
-		if (total_regen) {
+		if (total_regen && (logged_usr.rights >> 2) % 2 == 0) {
 
 		    ckbox[dk].cked = false ;
 		
