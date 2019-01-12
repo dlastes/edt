@@ -2,6 +2,11 @@ version: '3'
 
 services:
 
+  memcached:
+    image: memcached
+    ports:
+      - "11211"
+
   db:
     restart: always
     image: postgres
@@ -39,6 +44,7 @@ services:
       - DJANGO_COLLECTSTATIC=on
       - DJANGO_MIGRATE=on
       - DJANGO_LOADDATA
+      - CONFIG
     expose:
       - "8000"
     volumes:
@@ -46,8 +52,7 @@ services:
     depends_on:
       - db
       - redis      
-    entrypoint: /code/docker/script/init.sh
-    command: gunicorn --chdir /code/FlOpEDT FlOpEDT.wsgi:application -b 0.0.0.0:8000
+    entrypoint: /code/docker/script/init.sh  
 
 volumes:
   static-volume:
