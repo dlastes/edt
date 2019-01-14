@@ -28,7 +28,9 @@ def tutor(request, id, **kwargs):
         e = create_event(c)
         e['title'] = c.cours.module.abbrev + ' ' + c.cours.type.name + ' - ' + c.cours.groupe.train_prog.abbrev + ' ' + c.cours.groupe.nom
         events.append(e)
-    return render(request, 'synchro/ical.ics', {'events':events, 'timezone':tz})
+    response = render(request, 'synchro/ical.ics', {'events':events, 'timezone':tz})
+    response['Content-Disposition'] = f'attachment; filename={id}.ics'
+    return response
 
 
 def group(request, promo_id, groupe_id, **kwargs):
@@ -41,7 +43,9 @@ def group(request, promo_id, groupe_id, **kwargs):
         tutor = c.cours.tutor.username if c.cours.tutor is not None else ''
         e['title'] = c.cours.module.abbrev + ' ' + c.cours.type.name + ' - ' + tutor
         events.append(e)
-    return render(request, 'synchro/ical.ics', {'events':events, 'timezone':tz})
+    response = render(request, 'synchro/ical.ics', {'events':events, 'timezone':tz})
+    response['Content-Disposition'] = f'attachment; filename={promo_id}{groupe_id}.ics'
+    return response
 
 
 def room(request, id, **kwargs):
@@ -49,7 +53,9 @@ def room(request, id, **kwargs):
     for c in  get_course_list().filter(room__name=id):
         e = create_event(c)
         events.append(e)
-    return render(request, 'synchro/ical.ics', {'events':events, 'timezone':tz})
+    response = render(request, 'synchro/ical.ics', {'events':events, 'timezone':tz})
+    response['Content-Disposition'] = f'attachment; filename={id}.ics'
+    return response
 
 
 def get_course_list():
