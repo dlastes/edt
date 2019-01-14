@@ -34,13 +34,15 @@ from base.models import Group, TrainingProgramme, \
 
 from base.models import Room, RoomType, RoomGroup, \
                         RoomSort, Period, CourseType, \
-                        BreakingNews, TutorCost
+                        BreakingNews, TutorCost, GroupType
 
 from people.models import Tutor
+
 from TTapp.models import TTConstraint
 
 
 logger = logging.getLogger(__name__)
+
 
 def create_first_department():    
 
@@ -50,7 +52,7 @@ def create_first_department():
     models = [
         TrainingProgramme, EdtVersion, Regen, \
         RoomType, Period, CourseType, BreakingNews, \
-        TutorCost]
+        TutorCost, GroupType]
    
     for model in models:
         model.objects.all().update(department=department)
@@ -68,6 +70,7 @@ def create_first_department():
         type.objects.all().update(department=department)
     
     return department
+
 
 def get_edt_version(department, week, year, create=False):
 
@@ -92,6 +95,7 @@ def get_edt_version(department, week, year, create=False):
             raise(EdtVersion.DoesNotExist)
     return version
 
+
 def get_scheduled_courses(department, week, year, num_copy):
 
     qs = ScheduledCourse.objects \
@@ -101,6 +105,7 @@ def get_scheduled_courses(department, week, year, num_copy):
                         cours__an=year,
                         copie_travail=num_copy)
     return qs    
+
 
 def get_groups(department_abbrev):
     """
@@ -135,6 +140,7 @@ def get_groups(department_abbrev):
         final_groups.append(get_descendant_groups(gp_master, gp_dict_children))
 
     return final_groups
+
 
 def get_descendant_groups(gp, children):
     """
@@ -176,7 +182,8 @@ def get_descendant_groups(gp, children):
             gp_obj['parent'] = gp.nom
             current['children'].append(gp_obj)
 
-    return current        
+    return current
+
 
 def get_rooms(department_abbrev):
     """

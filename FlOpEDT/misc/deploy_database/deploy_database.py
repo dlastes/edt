@@ -308,13 +308,13 @@ def groups_extract(department, book):
 
     while idGroupType is not None:
 
-        verif = GroupType.objects.filter(name=idGroupType)
+        verif = GroupType.objects.filter(name=idGroupType, department=department)
 
         if not verif.exists():
 
             try:
 
-                gt = GroupType(name=idGroupType)
+                gt = GroupType(name=idGroupType, department=department)
                 gt.save()
 
             except IntegrityError as ie:
@@ -344,7 +344,7 @@ def groups_extract(department, book):
                 tpGroup = TrainingProgramme.objects.get(abbrev=tpGr)
 
                 gt = sheet.cell(row=GROUP_ROW, column=5).value
-                groupType = GroupType.objects.get(name=gt)
+                groupType = GroupType.objects.get(name=gt, department=department)
 
                 group = Group(nom=idGroup, size=0, train_prog=tpGroup, type=groupType)
                 group.save()
@@ -610,7 +610,7 @@ def courses_extract(department, book):
 
             while idGroup is not None:
 
-                group = GroupType.objects.get(name=idGroup)
+                group = GroupType.objects.get(name=idGroup, department=department)
                 course.group_types.add(group)
                 course.save()
 
