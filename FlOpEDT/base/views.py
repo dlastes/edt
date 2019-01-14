@@ -602,7 +602,7 @@ def fetch_week_infos(req, year, week, **kwargs):
     proposed number of available slots
     (not cached)
     """
-    edt_v = EdtVersion.objects.get(department=req.department,
+    edt_v, _ = EdtVersion.objects.get_or_create(department=req.department,
                                   semaine=week,
                                   an=year)
 
