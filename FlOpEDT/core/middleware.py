@@ -63,6 +63,7 @@ class EdtContextMiddleware:
 
             return department_abbrev
 
+
         if request.path == '/':
             del_request_department()
         else:
