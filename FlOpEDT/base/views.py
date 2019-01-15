@@ -331,12 +331,6 @@ def fetch_cours_pl(req, year, week, num_copy, **kwargs):
     response['jours'] = str(num_days(year, week))
     response['num_copy'] = num_copy
     
-    try:
-        regen = str(Regen.objects.get(department=department, semaine=week, an=year))
-    except ObjectDoesNotExist:
-        regen = 'I'
-    response['regen'] = regen
-
     cached = cache.set(cache_key, response)
     return response
 
@@ -610,9 +604,15 @@ def fetch_week_infos(req, year, week, **kwargs):
         pref_requirements(req.user, year, week) if req.user.is_authenticated \
         else (-1, -1)
 
+    try:
+        regen = str(Regen.objects.get(department=req.department, semaine=week, an=year))
+    except ObjectDoesNotExist:
+        regen = 'I'
+        
     response = JsonResponse({'version': edt_v.version,
                              'proposed_pref': proposed_pref,
-                             'required_pref': required_pref})
+                             'required_pref': required_pref,
+                             'regen':regen})
     return response
 
 
