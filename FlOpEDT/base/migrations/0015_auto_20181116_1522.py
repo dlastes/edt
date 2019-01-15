@@ -31,7 +31,7 @@ def create_ct_constraints(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('base', '0014_auto_20181113_1042'),
+        ('base', '0016_grouptype_department'),
     ]
 
     operations = [

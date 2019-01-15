@@ -1021,7 +1021,7 @@ def decale_changes(req, **kwargs):
         
         with transaction.atomic():
             # was the course was scheduled before?
-        if c['d'] != '' and c['t'] != -1:
+            if c['d'] != '' and c['t'] != -1:
                 scheduled_course = ScheduledCourse \
                     .objects \
                     .get(cours=changing_course,

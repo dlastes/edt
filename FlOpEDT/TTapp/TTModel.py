@@ -1023,7 +1023,7 @@ class TTModel(object):
                            an=self.wdb.year,
                            semaine=self.wdb.week,
                            valeur=self.get_expr_value(self.cost_I[i]),
-                           department=self.department, work_copy=target_work_copy)
+                           work_copy=target_work_copy)
             tc.save()
 
         for g in self.wdb.basic_groups:
