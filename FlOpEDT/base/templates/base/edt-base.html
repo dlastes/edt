@@ -54,6 +54,8 @@
     var url_bknews = "{% url "base:fetch_bknews" department 0 0 %}";
     url_bknews = url_bknews.slice(0, -3);
     var url_quote = "{% url "quote:fetch_quote" %}";
+    var url_week_infos = "{% url "base:fetch_week_infos" department 0 0 %}";
+    url_week_infos = url_week_infos.slice(0, -3);
 
     var semaine_an_list = {{ all_weeks| safe }};
     var semaine_init = +"{{ semaine }}";

@@ -56,6 +56,8 @@ from base.weeks import *
 
 logger = logging.getLogger(__name__)
 
+from django.db.models import Q
+
 # <editor-fold desc="FAVICON">
 # ----------
 # FAVICON
@@ -317,44 +319,10 @@ def fetch_cours_pl(req, year, week, num_copy, **kwargs):
         raise Http404("What are you trying to do?")
 
     response = HttpResponse(dataset.csv, content_type='text/csv')
-    response['version'] = version
     response['week'] = week
     response['year'] = year
     response['num_copy'] = num_copy
     
-    try:
-        regen = str(Regen.objects.get(department=department, semaine=week, an=year))
-    except ObjectDoesNotExist:
-        regen = 'I'
-    response['regen'] = regen
-
-    if req.user.is_authenticated:
-        response['reqDispos'] = Course \
-                                    .objects \
-                                    .filter(tutor=req.user,
-                                            semaine=week,
-                                            an=year) \
-                                    .count() * 2
-        week_av = UserPreference \
-            .objects \
-            .filter(user=req.user,
-                    semaine=week,
-                    an=year)
-        if not week_av.exists():
-            response['filDispos'] = UserPreference \
-                .objects \
-                .filter(user=req.user,
-                        semaine=None,
-                        valeur__gte=1) \
-                .count()
-        else:
-            response['filDispos'] = week_av \
-                .filter(valeur__gte=1) \
-                .count()
-    else:
-        response['reqDispos'] = -1
-        response['filDispos'] = -1
-
     cached = cache.set(cache_key, response)
     return response
 
@@ -401,9 +369,8 @@ def fetch_cours_pp(req, week, year, num_copy, **kwargs):
 #@login_required
 def fetch_dispos(req, year, week, **kwargs):
     logger.info(f"REQ: fetch dispos; {req}")
-    if req.GET:
-        if not req.user.is_authenticated:
-            return HttpResponse("Pas connecte")
+    if not req.user.is_authenticated:
+        return HttpResponse("Pas connecte", status=401)
 
     try:
         week = int(week)
@@ -422,7 +389,7 @@ def fetch_dispos(req, year, week, **kwargs):
                                       module__train_prog__department=department) \
         .distinct('tutor') \
         .values_list('tutor')
-
+    
     busy_inst = list(chain(busy_inst, [req.user]))
 
     week_avail = UserPreference.objects \
@@ -448,10 +415,6 @@ def fetch_dispos(req, year, week, **kwargs):
 
     cache.set(cache_key, response)
     return response
-    #     else:
-    #         return HttpResponse("Pas connecté", status=500)
-    # else:
-    #     return HttpResponse("Pas GET", status=500)
 
 
 def fetch_unavailable_rooms(req, year, week, **kwargs):
@@ -509,15 +472,12 @@ def fetch_all_tutors(req, **kwargs):
 
 @login_required
 def fetch_stype(req, **kwargs):
-    # if req.method == 'GET':
     dataset = DispoResource() \
         .export(UserPreference.objects \
                 .filter(semaine=None,
                         user=req.user))  # all())#
     response = HttpResponse(dataset.csv, content_type='text/csv')
     return response
-    # else:
-    #    return HttpResponse("Pas GET",status=500)
 
 
 def fetch_decale(req, **kwargs):
@@ -567,7 +527,7 @@ def fetch_decale(req, **kwargs):
     for c in cours:
         modules.append(c.module.abbrev)
 
-    cours = filt_g(filt_m(filt_sa(department, semaine, an), module), groupe) \
+    cours = filt_g(filt_sa(department, semaine, an), groupe) \
         .order_by('tutor__username') \
         .distinct('tutor__username')
     for c in cours:
@@ -610,12 +570,71 @@ def fetch_bknews(req, year, week, **kwargs):
 
 
 def fetch_all_versions(req, **kwargs):
-
+    """
+    Export all EdtVersions in json
+    """
     dataset = VersionResource() \
         .export(EdtVersion.objects.filter(department=req.department))
     response = HttpResponse(dataset.json,
                             content_type='text/json')
     return response
+
+
+def fetch_week_infos(req, year, week, **kwargs):
+    """
+    Export aggregated infos of a given week:
+    version number, required number of available slots,
+    proposed number of available slots
+    (not cached)
+    """
+    edt_v, _ = EdtVersion.objects.get_or_create(department=req.department,
+                                  semaine=week,
+                                  an=year)
+
+    proposed_pref, required_pref = \
+        pref_requirements(req.user, year, week) if req.user.is_authenticated \
+        else (-1, -1)
+
+    try:
+        regen = str(Regen.objects.get(department=req.department, semaine=week, an=year))
+    except ObjectDoesNotExist:
+        regen = 'I'
+        
+    response = JsonResponse({'version': edt_v.version,
+                             'proposed_pref': proposed_pref,
+                             'required_pref': required_pref,
+                             'regen':regen})
+    return response
+
+
+def pref_requirements(tutor, year, week):
+    """
+    Return a pair (filled, required): number of preferences
+    that have been proposed VS required number of prefs, according
+    to local policy
+    """
+    nb_courses = Course.objects.filter(tutor=tutor,
+                                       semaine=week,
+                                       an=year) \
+                               .count()
+    week_av = UserPreference \
+        .objects \
+        .filter(user=tutor,
+                semaine=week,
+                an=year)
+    if not week_av.exists():
+        filled = UserPreference \
+            .objects \
+            .filter(user=tutor,
+                    semaine=None,
+                    valeur__gte=1) \
+            .count()
+    else:
+        filled = week_av \
+            .filter(valeur__gte=1) \
+            .count()
+    return filled, 2*nb_courses
+
 
 
 @cache_page(15 * 60)
@@ -654,7 +673,7 @@ def edt_changes(req, **kwargs):
     bad_response = HttpResponse("KO")
     good_response = HttpResponse("OK")
 
-    if not req.user.is_tutor:
+    if not (req.user.is_tutor and req.user.is_staff):
         bad_response['reason'] = "Pas membre de l'équipe encadrante"
         return bad_response
         
@@ -962,10 +981,12 @@ def dispos_changes(req, **kwargs):
         # logger.info(f"  {didi}")
         
     if week is not None and year is not None:
-        for c in Course.objects.filter(semaine=week,
-                                       an=year).distinct('module__train_prog__department'):
-            cache.delete(get_key_preferences_tutor(c.module.train_prog.department.abbrev,
-                                                   year, week))
+        # invalidate merely the keys where the tutor has courses:
+        # bad idea if the courses have not been generated yet
+        # for c in Course.objects.filter(semaine=week,
+        #                               an=year).distinct('module__train_prog__department'):
+        for dep in Department.objects.all():
+            cache.delete(get_key_preferences_tutor(dep.abbrev, year, week))
         
     return good_response
 
@@ -986,46 +1007,62 @@ def decale_changes(req, **kwargs):
 
     new_assignment = json.loads(req.POST.get('new',{}))
     change_list = json.loads(req.POST.get('liste',[]))
+    new_week = new_assignment['ns']
+    new_year = new_assignment['na']
 
     for c in change_list:
-        # try:
+        changing_course = Course.objects.get(id=c['i'])
+        old_week = changing_course.semaine
+        old_year = changing_course.an
+
+        edt_versions = EdtVersion.objects.select_for_update().filter(
+            (Q(semaine=old_week) & Q(an=old_year))
+             |(Q(semaine=new_week) & Q(an=new_year)), department=req.department)
+        
+        with transaction.atomic():
+            # was the course was scheduled before?
         if c['d'] != '' and c['t'] != -1:
-            cours_place = ScheduledCourse \
-                .objects \
-                .get(cours__id=c['i'],
-                     copie_travail=0)
-            cours = cours_place.cours
-            cache.delete(get_key_course_pl(req.department.abbrev,
-                                           cours.an,
-                                           cours.semaine,
-                                           cours_place.copie_travail))
-            cours_place.delete()
-        else:
-            cours = Course.objects.get(id=c['i'])
-            cache.delete(get_key_course_pp(req.department.abbrev, 
-                                           cours.an,
-                                           cours.semaine,
+                scheduled_course = ScheduledCourse \
+                    .objects \
+                    .get(cours=changing_course,
+                         copie_travail=0)
+                cache.delete(get_key_course_pl(req.department.abbrev,
+                                               old_year,
+                                               old_week,
+                                               scheduled_course.copie_travail))
+                scheduled_course.delete()
+                ev = EdtVersion.objects.get(an=old_year, semaine=old_week, department=req.department)
+                ev.version += 1
+                ev.save()
+            else:
+                cache.delete(get_key_course_pp(req.department.abbrev, 
+                                               old_year,
+                                               old_week,
+                                               0))
+                # note: add copie_travail in Cours might be of interest
+
+            pm = PlanningModification(cours=changing_course,
+                                      semaine_old=old_week,
+                                      an_old=old_year,
+                                      tutor_old=changing_course.tutor,
+                                      initiator=req.user.tutor)
+            pm.save()
+
+            changing_course.semaine = new_week
+            changing_course.an = new_year
+            if new_year != 0:
+                changing_course.tutor = Tutor.objects.get(username=new_assignment['np'])
+            cache.delete(get_key_course_pp(req.department.abbrev,
+                                           new_year,
+                                           new_week,
                                            0))
-            # note: add copie_travail in Cours might be of interest
-
-        pm = PlanningModification(cours=cours,
-                                  semaine_old=cours.semaine,
-                                  an_old=cours.an,
-                                  tutor_old=cours.tutor,
-                                  initiator=req.user.tutor)
-        pm.save()
-
-        cours.semaine = new_assignment['ns']
-        cours.an = new_assignment['na']
-        if new_assignment['na'] != 0:
-            # cours.prof=User.objects.get(username=a.np)
-            cours.tutor = Tutor.objects.get(username=new_assignment['np'])
-        cache.delete(get_key_course_pp(req.department.abbrev,
-                                       cours.an,
-                                       cours.semaine,
-                                       0))
-        cours.save()
-
+            changing_course.save()
+            ev, _ = EdtVersion.objects.update_or_create(
+                an=new_year,
+                semaine=new_week, 
+                department=req.department)
+            ev.version += 1
+            ev.save()
 
     return good_response
 

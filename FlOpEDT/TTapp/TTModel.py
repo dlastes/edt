@@ -25,9 +25,6 @@
 # without disclosing the source code of your own applications.
 
 
-# ### Have to do this for it to work in 1.9.x!
-# from django.core.wsgi import get_wsgi_application
-# application = get_wsgi_application()
 
 from pulp import LpVariable, LpConstraint, LpBinary, LpConstraintEQ, \
     LpConstraintGE, LpConstraintLE, LpAffineExpression, LpProblem, LpStatus, \
@@ -54,11 +51,12 @@ from MyFlOp.MyTTUtils import reassign_rooms
 import signal
 
 from django.db.models import Q, Max, F
+from django.conf import settings
 
 import datetime
 
 import logging
-logger = logging.getLogger('base')
+logger = logging.getLogger(__name__)
 
 
 class WeekDB(object):
@@ -157,8 +155,9 @@ class WeekDB(object):
         self.groups = Group.objects.filter(train_prog__in=self.train_prog)
         
         self.basic_groups = self.groups \
-            .filter(basic=True,
-                    id__in=self.courses.values_list('groupe_id').distinct())
+            .filter(basic=True)
+                    # ,
+                    # id__in=self.courses.values_list('groupe_id').distinct())
         
         self.all_groups_of = {}
         for g in self.basic_groups:
@@ -247,11 +246,19 @@ class TTModel(object):
             self.FHD_G[apm] = dict(
                 list(zip(self.wdb.basic_groups,
                     [self.lin_expr() for _ in self.wdb.basic_groups])))
+# Précision si pas clair : suite commentée dans no-slot, mais pas dans dev
+# <<<<<<< variant A
         # self.cost_SL = dict(list(zip(self.wdb.slots,
         #                         [self.lin_expr() for _ in self.wdb.slots])))
+# >>>>>>> variant B
+        
+#         self.cost_SL = dict(list(zip(self.wdb.slots,
+#                                 [self.lin_expr() for _ in self.wdb.slots])))
+# ======= end
         self.cost_G = dict(
             list(zip(self.wdb.basic_groups,
                 [self.lin_expr() for _ in self.wdb.basic_groups])))
+        
         self.TT = {}
         self.TTrooms = {}
         for sl in self.wdb.slots:
@@ -346,8 +353,12 @@ class TTModel(object):
         self.unp_slot_cost_course, self.avail_course \
             = self.compute_non_prefered_slot_cost_course()
 
+# <<<<<<< variant A
         self.avail_room = self.compute_avail_room()
 
+# >>>>>>> variant B
+#         # Hack : permet que ça marche même si les dispos sur la base sont pas complètes
+# ======= end
         for i in self.wdb.instructors:
             for sl in self.wdb.slots:
                 if sl not in self.avail_instr[i]:
@@ -363,6 +374,9 @@ class TTModel(object):
             print("Relevant warnings :")
             for key, key_warnings in self.warnings.items():
                 print("%s : %s" % (key, ", ".join([str(x) for x in key_warnings])))
+
+        if settings.DEBUG:
+            self.model.writeLP('FlOpEDT.lp')
 
     def add_var(self, name):
         """
@@ -470,9 +484,11 @@ class TTModel(object):
 
         # maximize stability
         if self.stabilize_work_copy is not None:
-            Stabilize(general=True,
-                      work_copy=self.stabilize_work_copy) \
-                .enrich_model(self, self.max_stab)
+            s = Stabilize(general=True,
+                          work_copy=self.stabilize_work_copy)
+            s.save()
+            s.enrich_model(self, self.max_stab)
+            s.delete()
             print('Will stabilize from remote work copy #', \
                 self.stabilize_work_copy)
         else:
@@ -522,7 +538,7 @@ class TTModel(object):
                                                                             & self.wdb.compatible_courses[sl2]),
                                         '<=', 1, name=name)
 
-        # constraint : every course is scheduled only once
+        # a course is scheduled once and only once
         for c in self.wdb.courses:
             name = 'core_course_' + str(c)
             self.add_constraint(
@@ -531,6 +547,7 @@ class TTModel(object):
                 1,
                 name=name)
 
+        # no group has two courses in parallel
         for sl in self.wdb.slots:
             for bg in self.wdb.basic_groups:
                 expr = self.lin_expr()
@@ -553,6 +570,8 @@ class TTModel(object):
                                     self.avail_instr[i][sl],
                                     name=name)
 
+        # no teacher have 2 courses in parallel
+        # teachers are available on the chosen slots
         for sl in self.wdb.slots:
             for i in self.wdb.instructors:
                 test = False
@@ -627,6 +646,7 @@ class TTModel(object):
         for sl in self.wdb.slots:
             # constraint : each course is assigned to a RoomGroup
             for c in self.wdb.compatible_courses[sl]:
+                name = 'core_roomtype_' + str(r) + '_' + str(sl)
                 self.add_constraint(
                     self.sum(self.TTrooms[(sl, c, rg)] for rg in course_rg_compat[c]) - self.TT[(sl, c)],
                     '==',
@@ -984,20 +1004,26 @@ class TTModel(object):
             cp.save()
 
         # On enregistre les coûts dans la BDD
-        TutorCost.objects.filter(semaine=self.wdb.week,
-                                 an=self.wdb.year, department=self.department,
+        TutorCost.objects.filter(department=self.department,
+                                 semaine=self.wdb.week,
+                                 an=self.wdb.year, 
                                  work_copy=target_work_copy).delete()
-        GroupFreeHalfDay.objects.filter(semaine=self.wdb.week,
+        GroupFreeHalfDay.objects.filter(groupe__train_prog__department=self.department,
+                                        semaine=self.wdb.week,
                                         an=self.wdb.year,
                                         work_copy=target_work_copy).delete()
-        GroupCost.objects.filter(semaine=self.wdb.week,
+        GroupCost.objects.filter(groupe__train_prog__department=self.department,
+                                 semaine=self.wdb.week,
                                  an=self.wdb.year,
                                  work_copy=target_work_copy).delete()
 
         for i in self.wdb.instructors:
-            tc = TutorCost(tutor=i, an=self.wdb.year, semaine=self.wdb.week,
-                           department=self.department, work_copy=target_work_copy,
-                           valeur=self.get_expr_value(self.cost_I[i]))
+            tc = TutorCost(department=self.department,
+                           tutor=i,
+                           an=self.wdb.year,
+                           semaine=self.wdb.week,
+                           valeur=self.get_expr_value(self.cost_I[i]),
+                           department=self.department, work_copy=target_work_copy)
             tc.save()
 
         for g in self.wdb.basic_groups:
@@ -1017,23 +1043,29 @@ class TTModel(object):
             cg.save()
 
     def optimize(self, time_limit, solver, presolve=2):
-        if solver == 'gurobi':
+
+        # The solver value shall one of the available 
+        # solver corresponding pulp command
+
+        if 'gurobi' in solver.lower():
             # ignore SIGINT while solver is running
             # => SIGINT is still delivered to the solver, which is what we want
-            # signal.signal(signal.SIGINT, signal.SIG_IGN)
+            signal.signal(signal.SIGINT, signal.SIG_IGN)
             self.model.solve(GUROBI_CMD(keepFiles=1,
                                         msg=True,
                                         options=[("TimeLimit", time_limit),
                                                  ("Presolve", presolve),
                                                  ("MIPGapAbs", 0.2)]))
         else:
+            # TODO Use the solver parameter to get
+            # the target class by reflection
             self.model.solve(PULP_CBC_CMD(keepFiles=1,
                                           msg=True,
                                           presolve=presolve,
                                           maxSeconds=time_limit))
         status = self.model.status
         print(LpStatus[status])
-        if status == LpStatusOptimal or (solver != 'gurobi' and status == LpStatusNotSolved):
+        if status == LpStatusOptimal or (not (solver.lower() == 'gurobi') and status == LpStatusNotSolved):
             return self.get_obj_coeffs()
 
         else:

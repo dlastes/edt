@@ -913,6 +913,30 @@ function go_modules() {
     go_opac_cours();
 }
 
+// Tries to determine the relevant modules for the viewer.
+function relevant_modules() {
+
+    // The relevant tutors
+    var tutors = new Set();
+    if (prof_displayed.length < profs.length) { // some tutors are selected
+        prof_displayed.forEach(function (p) {
+            tutors.add(p);
+        });
+    } else if (user.nom) {
+        tutors.add(user.nom);
+    }
+
+    // The relevant modules
+    var modules = new Set();
+    cours.forEach(function(c) {
+        if (tutors.has(c.prof)) {
+            modules.add(c.mod);
+        }
+    });
+
+    return modules;
+}
+
 /*--------------------
   ------ ROOMS -------
   --------------------*/
@@ -944,6 +968,7 @@ function go_tutors() {
             return prof_displayed.indexOf(p) > -1 ? 1 : opac;
         });
 
+    create_mod_dd();
     go_opac_cours();
 }
 

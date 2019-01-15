@@ -29,133 +29,78 @@
 
 {% block title %} Génération {% endblock %}
 {% block content %}
-<link rel="stylesheet" href="{% static "base/header.css" %}"/>
-<link rel="stylesheet" href="{% static "base/better.css" %}"/>
-<style type="text/css">
-
-  /*
-    Checkbox
-  */
-
-  input[type=checkbox] + label {
-    display: block;
-    margin: 0.2em;
-    cursor: pointer;
-    padding: 0.2em;
-  }
-
-  input[type=checkbox] {
-    display: none;
-  }
-
-  input[type=checkbox] + label:before {
-    content: "\2714";
-    border: 0.1em solid #000;
-    border-radius: 0.2em;
-    display: inline-block;
-    width: 1em;
-    height: 1em;
-    padding-left: 0.2em;
-    padding-bottom: 0.3em;
-    margin-right: 0.2em;
-    vertical-align: bottom;
-    color: transparent;
-    transition: .2s;
-  }
-
-  input[type=checkbox] + label:active:before {
-    transform: scale(0);
-  }
-
-  input[type=checkbox]:checked + label:before {
-    background-color: MediumSeaGreen;
-    border-color: MediumSeaGreen;
-    color: #fff;
-  }
-
-  input[type=checkbox]:disabled + label:before {
-    transform: scale(1);
-    border-color: #aaa;
-  }
-
-  input[type=checkbox]:checked:disabled + label:before {
-    transform: scale(1);
-    background-color: #bfb;
-    border-color: #bfb;
-  }
-
-  /*
-    Constraints
-  */
-
-  #constraints{
-    padding: 1em;
-  }
-
-  .constraint{
-    margin-bottom: 10px;
-    border: #f0e6e6 1pt solid;
-  }
-
-  .title{
-    font-size: 15px;
-    font-weight: 500;
-  }
-
-  .details{
-    padding: 1em;
-  }
-
-  .description{
-    padding: 1em;
-  }
-
-  .comment{
-    font-style: italic;
-  }
-
-</style>
-<script src="{% static "base/d3.v4.min.js" %}"></script>
-  <!-- script src="https://d3js.org/d3.v4.min.js"></script -->
+  <link rel="stylesheet" href="{% static "base/header.css" %}"/>
+  <link rel="stylesheet" href="{% static "solve_board/solve.css" %}"/>
+  <script src="{% static "base/d3.v4.min.js" %}"></script>
   <script>
     var text_all = '{{ text_all|safe }}';
-    var week_year_list = {{ all_weeks|safe }};
-    var train_prog_list = {{ all_train_progs|safe }};
+    var week_list = {{ weeks|safe }};
+    var train_prog_list = {{ train_progs|safe }};
     var department = '{{ department }}';
-    var fetch_constraints_url_template = '{% url "solve_board:fetch_constraints" department 'tp' 1111 11 %}';
+    var fetch_context_url_template = '{% url "solve_board:fetch_context" department 'tp' 1111 11 %}';
     var constraints = JSON.parse('{{ constraints|escapejs }}');
+    var work_copies = JSON.parse('{{ work_copies|escapejs }}');
   </script>
+
   <template id="constraints_template">
     <div class="constraint">
       <input type="checkbox" />
       <label class="title"></label>
-      <div id="description" class="description"></div>
-      <div id="comment" class="comment"></div>
-      <div id="details" class="details"></div>
+      <div id="explanation" class="explanation"></div>
+      <div id="description" class="description hiddable"></div>
+      <div id="comment" class="comment hiddable"></div>
+      <div id="details" class="details hiddable"></div>
     </div>
   </template>
-  <form style="white-space: nowrap;" name="week_form">
-    <fieldset style="width: 300px; float: left;">
-      <legend>Optimisation</legend>
-      <!--
-      De la semaine
-      <input type="number" name="start_week" style="width: 40px" value="{{ start_date.semaine }}" min="1" max="53">, année
-      <input type="number" name="start_year" style="width: 60px" value="{{ start_date.an }}" min="{{current_year}}" max="{{current_year|add:"1"}}"></br>
-      à la semaine
-      <input type="number" name="end_week" style="width: 40px" value="{{ end_date.semaine }}" min="1" max="53">, année
-      <input type="number" name="end_year" style="width: 60px" value="{{ end_date.an }}" min="{{current_year}}" max="{{current_year|add:"1"}}"></br></br>
-      -->
-      <p>Semaine : <select id="opti_date"></select></p>
-      <p>Promotion : <select id="opti_train_prog"></select></p>
-      <input type="button" name="action" value="Go !" onClick="start()"/><input style="float: right;" type="button" name="action" value="Stop !" onClick="stop()"/>
-    
-      <div id="constraints"><div></div></div>
-    
-    </fieldset>
-  </form>
-  <textarea style="float: left; height: 200px; width: 500px; background-color: black; color: white; "></textarea>
-    
-  <br style="clear: both" />
+
+  <div class="solver">
+    <div id="constraints">
+        <div class="header"><span>Contraintes</span></div>
+        <div class="remarks">(*) Les contraintes apparaissant en gras - avec un poids non défini - seront prises en compte de manière obligatoire, les autres seront utilisées dans la résolution comme des préférences.</div>
+        <div id="constraints_list"></div>
+    </div>   
+    <div id="settings" class="settings">
+      <div class="header">
+        <span>Configuration</span>
+        <input type="button" id="launch" name="action" value="Go"/>
+      </div>
+      <div>
+          <label for="opti_date">Semaine : </label> 
+        <select id="opti_date"></select>
+      </div>
+      <div>
+        <label for="opti_train_prog">Promotion : </label>
+        <select id="opti_train_prog"></select>
+      </div>
+      <div id="stabilize">
+        <label for="stabilize_selector">Stabilisation : </label>
+        <select id="stabilize_selector"></select>
+      </div>
+      <div>
+        {% if solvers|length > 1 %}  
+          <label for="solver">Solveur :</label>
+          <select id="solver">
+            {% for key, name in solvers %}
+              <option value="{{ key }}">{{ name }}</option>
+            {% endfor %}
+          </select>
+        {% else  %}
+          <input type="hidden" id="solver" value="{{ solvers.0.0 }}"/>
+        {% endif %}
+      </div>
+      <div>
+        <label for="limit">Durée de résolution maximale (minutes):</label>
+        <select id="limit">
+          <option value="300" selected>5</option>
+          <option value="600">10</option>
+          <option value="1800">30</option>
+          <option value="3600">60</option>
+          <option value="0">Illimité</option>
+        </select>
+      </div>
+    </div>
+    <textarea class="console"></textarea>
+  </div>
   
   <script type='text/javascript' src="{% static "solve_board/solve.js" %}"></script>
   

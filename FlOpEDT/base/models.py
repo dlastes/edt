@@ -59,7 +59,8 @@ class TrainingProgramme(models.Model):
 
 class GroupType(models.Model):
     name = models.CharField(max_length=50)
-
+    department =  models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
+    
     def __str__(self):
         return self.name
 
@@ -271,8 +272,7 @@ class RoomGroup(models.Model):
 
     def __str__(self):
         return self.name
-
-
+        
 class Room(models.Model):
     name = models.CharField(max_length=20)
     subroom_of = models.ManyToManyField(RoomGroup,
@@ -321,6 +321,9 @@ class Module(models.Model):
 
     def __str__(self):
         return self.abbrev
+
+    class Meta:
+       ordering = ['abbrev',]         
 
 
 class CourseType(models.Model):
@@ -658,7 +661,7 @@ class Regen(models.Model):
     def __str__(self):
         pre = ''
         if self.full:
-            pre = f'C,{self.fday}/{self.fmonth}/{self.fyear} '
+            pre = f'C,{self.fday}/{self.fmonth}/{self.fyear}'
         if self.stabilize:
             pre = f'S,{self.sday}/{self.smonth}/{self.syear}'
         if not self.full and not self.stabilize:

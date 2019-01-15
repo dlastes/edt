@@ -6,6 +6,8 @@ from base.models import ScheduledCourse, Group, Room
 from people.models import Tutor
 from datetime import datetime
 from datetime import timedelta
+#from base.weeks import get_course_datetime_start
+from isoweek import Week
 
 tz='Europe/Paris'
 
@@ -17,7 +19,7 @@ def index(request, **kwargs):
                                .order_by('train_prog__abbrev', 'nom')
     salle_list = Room.objects.order_by('name')
     context = { 'enseignants': enseignant_list, 'groupes':groupe_list, 'salles':salle_list }
-    return render(request, 'synchro/index.html', context)
+    return render(request, 'synchro/index.html', context=context)
 
 
 def tutor(request, id, **kwargs):
@@ -26,7 +28,9 @@ def tutor(request, id, **kwargs):
         e = create_event(c)
         e['title'] = c.cours.module.abbrev + ' ' + c.cours.type.name + ' - ' + c.cours.groupe.train_prog.abbrev + ' ' + c.cours.groupe.nom
         events.append(e)
-    return render(request, 'synchro/ical.ics', {'events':events, 'timezone':tz})
+    response = render(request, 'synchro/ical.ics', context={'events':events, 'timezone':tz}, content_type='text/calendar; charset=utf8')
+    response['Content-Disposition'] = f'attachment; filename={id}.ics'
+    return response
 
 
 def group(request, promo_id, groupe_id, **kwargs):
@@ -36,9 +40,12 @@ def group(request, promo_id, groupe_id, **kwargs):
     events=[]
     for c in get_course_list().filter(cours__groupe__in=g_list):
         e = create_event(c)
-        e['title'] = c.cours.module.abbrev + ' ' + c.cours.type.name + ' - ' + c.cours.tutor.username
+        tutor = c.cours.tutor.username if c.cours.tutor is not None else ''
+        e['title'] = c.cours.module.abbrev + ' ' + c.cours.type.name + ' - ' + tutor
         events.append(e)
-    return render(request, 'synchro/ical.ics', {'events':events, 'timezone':tz})
+    response = render(request, 'synchro/ical.ics', context={'events':events, 'timezone':tz}, content_type='text/calendar; charset=utf8')
+    response['Content-Disposition'] = f'attachment; filename={promo_id}{groupe_id}.ics'
+    return response
 
 
 def room(request, id, **kwargs):
@@ -46,7 +53,9 @@ def room(request, id, **kwargs):
     for c in  get_course_list().filter(room__name=id):
         e = create_event(c)
         events.append(e)
-    return render(request, 'synchro/ical.ics', {'events':events, 'timezone':tz})
+    response = render(request, 'synchro/ical.ics', context={'events':events, 'timezone':tz}, content_type='text/calendar; charset=utf8')
+    response['Content-Disposition'] = f'attachment; filename={id}.ics'
+    return response
 
 
 def get_course_list():
@@ -54,16 +63,20 @@ def get_course_list():
 
 
 def create_event(c):
-    p = str(c.cours.an) + '-W' + str(c.cours.semaine) + '-w' + str(c.creneau.jour_id) + ' ' + str(c.creneau.heure.hours) + ':'+ str(c.creneau.heure.minutes)
-    begin = datetime.strptime(p, '%Y-W%W-w%w %H:%M')
+    begin = datetime.combine(Week(c.cours.an, c.cours.semaine).day(c.creneau.jour_id-1),
+                             datetime.min.time()) \
+                             + timedelta(hours=c.creneau.heure.hours,
+                                         minutes=c.creneau.heure.minutes)
     end = begin + timedelta(minutes=c.creneau.duration)
+    tutor = c.cours.tutor.username if c.cours.tutor is not None else ''
+    location = c.room.name if c.room is not None else ''
     return {'id':c.id,
-         'title': c.cours.module.abbrev + ' ' + c.cours.type.name + ' - ' + c.cours.groupe.train_prog.abbrev + ' ' + c.cours.groupe.nom + ' - ' + c.cours.tutor.username,
-         'location': c.room.name,
+         'title': c.cours.module.abbrev + ' ' + c.cours.type.name + ' - ' + c.cours.groupe.train_prog.abbrev + ' ' + c.cours.groupe.nom + ' - ' + tutor,
+         'location': location,
          'begin': begin,
          'end': end,
          'description': 'Cours \: ' + c.cours.module.abbrev + ' ' + c.cours.type.name +'\\n'+
            'Groupe \: ' + c.cours.groupe.train_prog.abbrev + ' ' + c.cours.groupe.nom +'\\n'+
            'Enseignant : ' + c.cours.tutor.username +'\\n' +
-           'Salle \: ' + c.room.name
+           'Salle \: ' + location
     }

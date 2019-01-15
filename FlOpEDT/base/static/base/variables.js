@@ -592,20 +592,37 @@ var tutor_cm_settings =
      txt_intro: {'default':"Ordre alphabétique :"}
     };
 var room_cm_settings =
-    {type: 'room',
-     w: 45,
-     h: 18,
-     fs: 10,
-     mx: 5,
-     my: 3,
-     ncol: 3,
-     nlin: 0,
-     txt_intro: {'0':"Aucune salle disponible",
-		 '1':"Salle disponible :",
-		 'default':"Salles disponibles :"
-		}
-    };
-
+    [{type: 'room_available',
+      txt_intro: {'0':"Aucune salle disponible",
+		  '1':"Salle disponible",
+		  'default':"Salles disponibles"
+		 }
+     },
+     {type: 'room_available_same_type',
+      txt_intro: {'0':"Aucune salle disponible (tout type)",
+		  '1':"Salle disponible (tout type)",
+		  'default':"Salles disponibles (tout type)"
+		 }
+     },
+     {type: 'room',
+      txt_intro: {'0':"Aucune salle",
+		  '1':"Salle",
+		  'default':"Toutes les salles"
+		 }
+     }];
+for(var l = 0 ; l < room_cm_settings.length ; l++) {
+    room_cm_settings[l].w = 45 ;
+    room_cm_settings[l].h = 18 ;
+    room_cm_settings[l].fs = 10 ;
+    room_cm_settings[l].mx = 5 ;
+    room_cm_settings[l].my = 3 ;
+    room_cm_settings[l].ncol = 3 ;
+    room_cm_settings[l].nlin = 0 ;
+}
+// level=0: the proposed rooms are available and of the same type
+//       1: the proposed rooms are available
+//       2: all rooms are proposed
+var room_cm_level = 0 ;
 
 var room_tutor_change = {
     course: [],    // 1-cell array for d3.js
