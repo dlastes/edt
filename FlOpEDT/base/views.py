@@ -1033,8 +1033,9 @@ def decale_changes(req, **kwargs):
         old_year = changing_course.an
 
         edt_versions = EdtVersion.objects.select_for_update().filter(
-            (Q(semaine=old_week)&Q(an=old_year))
-             |(Q(semaine=new_week)&Q(an=new_year)))
+            (Q(semaine=old_week) & Q(an=old_year))
+             |(Q(semaine=new_week) & Q(an=new_year)), department=req.department)
+        
         with transaction.atomic():
             # was the course was scheduled before?
             if c['j'] != -1 and c['h'] != -1:
@@ -1047,7 +1048,7 @@ def decale_changes(req, **kwargs):
                                                old_week,
                                                scheduled_course.copie_travail))
                 scheduled_course.delete()
-                ev = EdtVersion.objects.get(an=old_year, semaine=old_week)
+                ev = EdtVersion.objects.get(an=old_year, semaine=old_week, department=req.department)
                 ev.version += 1
                 ev.save()
             else:
@@ -1073,9 +1074,10 @@ def decale_changes(req, **kwargs):
                                            new_week,
                                            0))
             changing_course.save()
-            ev, res = EdtVersion.objects.update_or_create(
+            ev, _ = EdtVersion.objects.update_or_create(
                 an=new_year,
-                semaine=new_week)
+                semaine=new_week, 
+                department=req.department)
             ev.version += 1
             ev.save()
 
