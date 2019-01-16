@@ -103,10 +103,13 @@ class FullStaff(Tutor):
 
 class SupplyStaff(Tutor):
     employer = models.CharField(max_length=50,
-                                verbose_name="Employeur ?")
-    position = models.CharField(max_length=50)
+                                verbose_name="Employeur ?",
+                                default=None, null=True, blank=True)
+    position = models.CharField(max_length=50,
+                                default=None, null=True, blank=True)
     field = models.CharField(max_length=50,
-                             verbose_name="Domaine ?")
+                             verbose_name="Domaine ?",
+                             default=None, null=True, blank=True)
     def uni_extended(self):
         ret = super(SupplyStaff,self).uni_extended()
         ret += '-Emp:' + self.employer + '-'
