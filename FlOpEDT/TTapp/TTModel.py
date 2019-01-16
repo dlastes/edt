@@ -245,16 +245,8 @@ class TTModel(object):
         for apm in [Time.AM, Time.PM]:
             self.FHD_G[apm] = dict(
                 list(zip(self.wdb.basic_groups,
-                    [self.lin_expr() for _ in self.wdb.basic_groups])))
-# Précision si pas clair : suite commentée dans no-slot, mais pas dans dev
-# <<<<<<< variant A
-        # self.cost_SL = dict(list(zip(self.wdb.slots,
-        #                         [self.lin_expr() for _ in self.wdb.slots])))
-# >>>>>>> variant B
-        
-#         self.cost_SL = dict(list(zip(self.wdb.slots,
-#                                 [self.lin_expr() for _ in self.wdb.slots])))
-# ======= end
+                         [self.lin_expr() for _ in self.wdb.basic_groups])))
+
         self.cost_G = dict(
             list(zip(self.wdb.basic_groups,
                 [self.lin_expr() for _ in self.wdb.basic_groups])))
@@ -353,12 +345,9 @@ class TTModel(object):
         self.unp_slot_cost_course, self.avail_course \
             = self.compute_non_prefered_slot_cost_course()
 
-# <<<<<<< variant A
         self.avail_room = self.compute_avail_room()
 
-# >>>>>>> variant B
-#         # Hack : permet que ça marche même si les dispos sur la base sont pas complètes
-# ======= end
+        # Hack : permet que ça marche même si les dispos sur la base sont pas complètes
         for i in self.wdb.instructors:
             for sl in self.wdb.slots:
                 if sl not in self.avail_instr[i]:

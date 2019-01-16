@@ -68,16 +68,4 @@ def reassign_rooms(department, week, year, target_work_copy):
 
 @resolve_department
 def swap_version(department, week, year, copy_a, copy_b=0):
-# <<<<<<< variant A
-#     if copy_b == 0:
-#         if check_week_on_grr(week, an=2018, work_copy=copy_a) is None:
-#             print('Swap not done : problem on GRR')
-#         else:
-#             basic_swap_version(department, week, year, copy_a, copy_b)
-#             save_week_on_grr(week, year)
-#     else:
-#         basic_swap_version(department, week, year, copy_a, copy_b)
-#
-# >>>>>>> variant B
     basic_swap_version(department, week, year, copy_a, copy_b)
-# ======= end

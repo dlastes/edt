@@ -225,8 +225,7 @@ class LimitCourseTypePerPeriod(TTConstraint):  # , pond):
 
         for day, period in period_by_day:
             expr = ttmodel.lin_expr()
-            slots = ttmodel.wdb.slots \
-                        .filter(jour=day, heure__apm__contains=period)
+            slots = self.wdb.slots_by_half_day[(day, period)]
 
             for slot in slots:
                 for course in courses:
@@ -248,36 +247,21 @@ class LimitCourseTypePerPeriod(TTConstraint):  # , pond):
             periods = [None]
         else:
             periods = [Time.AM, Time.PM]
-#<<<<<<< variant A
-        for d in ttmodel.wdb.days:
-            for per in periods:
-                expr = ttmodel.lin_expr()
-                for sl in self.wdb.slots_by_half_day[(d, per)]:
-                    for c in fc:
-                        expr += ttmodel.TT[(sl, c)]
-                if self.weight is not None:
-                    var = ttmodel.add_floor('limit course type per period', expr,
-                                            int(self.limit) + 1, 100)
-                    ttmodel.obj += self.local_weight() * ponderation * var
-                else:
-                    ttmodel.add_constraint(expr, '<=', self.limit)
-# >>>>>>> variant B
 
-#         period_by_day = []
-#         for day in ttmodel.wdb.days:
-#             for period in periods:
-#                 period_by_day.append((day, period,))
+        period_by_day = []
+        for day in ttmodel.wdb.days:
+            for period in periods:
+                period_by_day.append((day, period,))
 
-#         try:
-#             if self.tutors.count():
-#                 for tutor in self.tutors.all():
-#                     self.register_expression(ttmodel, period_by_day, ponderation, tutor=tutor)
-#             else:
-#                 self.register_expression(ttmodel, period_by_day, ponderation)
-#         except ValueError:
-#             self.register_expression(ttmodel, period_by_day, ponderation)
+        try:
+            if self.tutors.count():
+                for tutor in self.tutors.all():
+                    self.register_expression(ttmodel, period_by_day, ponderation, tutor=tutor)
+            else:
+                self.register_expression(ttmodel, period_by_day, ponderation)
+        except ValueError:
+            self.register_expression(ttmodel, period_by_day, ponderation)
 
-# ======= end
 
     def full_name(self):
         return "Limit Course Type Per Period"
@@ -394,83 +378,53 @@ class ReasonableDays(TTConstraint):
 
 
     def enrich_model(self, ttmodel, ponderation=1):
-#<<<<<<< variant A
-        for d in ttmodel.wdb.days:
-            try:
-                first_slot = sorted(filter(ttmodel.wdb.slots, day=d, course_type=c1.type))[0]
-            except IndexError:
-                first_slot = sorted(self.wdb.slots_byday[d])[0]
-            try:
-                last_slot = sorted(filter(ttmodel.wdb.slots, day=d, course_type=c1.type))[-1]
-            except IndexError:
-                last_slot = sorted(self.wdb.slots_by_day[d])[-1]
-            fc = ttmodel.wdb.courses
-            if self.tutor is not None:
-                fc = fc.filter(tutor=self.tutor)
-            if self.train_prog is not None:
-                fc = fc.filter(groupe__train_prog=self.train_prog)
-            if self.group is not None:
-                fc = fc.filter(groupe=self.group)
-            for c1 in fc:
-                for c2 in fc.exclude(id__lte=c1.id):
-                    if self.weight is not None:
-                        conj_var = ttmodel.add_conjunct(
-                            ttmodel.TT[(first_slot, c1)],
-                            ttmodel.TT[(last_slot, c2)])
-                        ttmodel.obj += self.local_weight() * ponderation * conj_var
-                    else:
-                        ttmodel.add_constraint(ttmodel.TT[(first_slot, c1)] +
-                                               ttmodel.TT[(last_slot, c2)],
-                                               '<=', 1)
-# >>>>>>> variant B
+        # Using a set type ensure that all combinations are
+        # unique throw tutor and group filters
+        combinations = set()
 
-#         # Using a set type ensure that all combinations are 
-#         # unique throw tutor and group filters
-#         combinations = set()
-
-#         # Get a dict with the first and last slot by day
-#         slots = Slot.objects \
-#                     .filter(heure__no__in=[0,5,]) \
-#                     .order_by('heure__no') 
+        # Get a dict with the first and last slot by day
+        slots = Slot.objects \
+                    .filter(heure__no__in=[0,5,]) \
+                    .order_by('heure__no')
         
-#         slot_boundaries = {}
-#         for slot in slots: 
-#             slot_boundaries.setdefault(slot.jour, []).append(slot)
+        slot_boundaries = {}
+        for slot in slots:
+            slot_boundaries.setdefault(slot.jour, []).append(slot)
               
-#         # Create all combinations with slot boundaries for all courses 
-#         # corresponding to the given filters (tutors, groups)
-#         try:
-#             if self.tutors.count():
-#                 for tutor in self.tutors.all():
-#                     self.update_combinations(ttmodel, slot_boundaries.values(), combinations, tutor=tutor)
-#             elif self.groups.count():
-#                 for group in self.groups.all():
-#                     self.update_combinations(ttmodel, slot_boundaries.values(), combinations, group=group)
-#             else:
-#                 self.update_combinations(ttmodel, slot_boundaries.values(), combinations)
-#         except ValueError:
-#             self.update_combinations(ttmodel, slot_boundaries.values(), combinations)
+        # Create all combinations with slot boundaries for all courses
+        # corresponding to the given filters (tutors, groups)
+        try:
+            if self.tutors.count():
+                for tutor in self.tutors.all():
+                    self.update_combinations(ttmodel, slot_boundaries.values(), combinations, tutor=tutor)
+            elif self.groups.count():
+                for group in self.groups.all():
+                    self.update_combinations(ttmodel, slot_boundaries.values(), combinations, group=group)
+            else:
+                self.update_combinations(ttmodel, slot_boundaries.values(), combinations)
+        except ValueError:
+            self.update_combinations(ttmodel, slot_boundaries.values(), combinations)
 
-#         self.register_expression(ttmodel, ponderation, combinations)
-
-
-#     def one_line_description(self):
-#         text = "Des journées pas trop longues"
-#         if self.tutors.count():
-#             text += ' pour ' + ', '.join([tutor.username for tutor in self.tutors.all()])
-#         if self.train_prog:
-#             text += ' en ' + str(self.train_prog)
-#         if self.groups.count():
-#             text += ' avec les groupes ' + ', '.join([group for group in self.groups.all()])
-#         return text
+        self.register_expression(ttmodel, ponderation, combinations)
 
 
-#     @classmethod
-#     def get_viewmodel_prefetch_attributes(cls):
-#         attributes = super().get_viewmodel_prefetch_attributes()
-#         attributes.extend(['groups', 'tutors'])
-#         return attributes
-# ======= end
+    def one_line_description(self):
+        text = "Des journées pas trop longues"
+        if self.tutors.count():
+            text += ' pour ' + ', '.join([tutor.username for tutor in self.tutors.all()])
+        if self.train_prog:
+            text += ' en ' + str(self.train_prog)
+        if self.groups.count():
+            text += ' avec les groupes ' + ', '.join([group for group in self.groups.all()])
+        return text
+
+
+    @classmethod
+    def get_viewmodel_prefetch_attributes(cls):
+        attributes = super().get_viewmodel_prefetch_attributes()
+        attributes.extend(['groups', 'tutors'])
+        return attributes
+
 
 
 class Stabilize(TTConstraint):
