@@ -141,6 +141,8 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
             groupes = [str(g) for g in grps]
 
             GROUPS = list(Group.objects.filter(nom__in=groupes, train_prog=PROMO))
+            if GROUPS == []:
+                GROUPS = list(Group.objects.filter(nom='CE', train_prog=PROMO))
 
             N=int(N)
             Diff = N - len(groupes) * nominal
@@ -148,7 +150,7 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
                 print("Nombre incohérent ligne %g semaine %s de %s : %s \n" % (row, semaine, feuille, module))
 
             for i in range(N):
-                GROUPE = GROUPS[i % len(groupes)]
+                GROUPE = GROUPS[i % len(GROUPS)]
                 C = Course(tutor=TUTOR, type=COURSE_TYPE, module=MODULE, groupe=GROUPE, semaine=semaine, an=an,
                            room_type=ROOMTYPE)
                 C.save()
@@ -173,7 +175,7 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
                 for GROUPE in GROUPS:
                     Cours = Course.objects.filter(type=COURSE_TYPE, module=MODULE, groupe=GROUPE, an=an,
                                                   semaine=semaine)
-                    for i in range(N//2):
+                    for i in range(N//2-1):
                         P = Dependency(cours1=Cours[2*i], cours2=Cours[2*i+1], successifs=True)
                         P.save()
             if 'ND' in comments or 'ND' in local_comments  and N >= 2:
