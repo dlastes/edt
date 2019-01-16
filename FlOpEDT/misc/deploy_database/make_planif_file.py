@@ -60,7 +60,7 @@ def make_planif_file(department, empty_bookname=empty_bookname):
 	
         ################ Writing line 1 with weeks ################
         rank = 1
-        WEEK_COL = 7
+        WEEK_COL = 6
 
         if p.starting_week < p.ending_week:
             weeks = p.ending_week - p.starting_week + 1
@@ -73,7 +73,7 @@ def make_planif_file(department, empty_bookname=empty_bookname):
 
         else:
             weeks = (53 - p.starting_week) + p.ending_week
-            cols = weeks + 7
+            cols = weeks + 6
             append_row(sheet, empty_rows, 1, rank, cols)
             for i in range(p.starting_week, 53):
                 sheet.cell(row=rank, column=WEEK_COL).value = i
@@ -96,8 +96,7 @@ def make_planif_file(department, empty_bookname=empty_bookname):
                 sheet.cell(row=rank, column=2).value = ct.name
                 sheet.cell(row=rank, column=3).value = 'Prof'
                 sheet.cell(row=rank, column=4).value = 'Salle'
-                sheet.cell(row=rank, column=5).value = 'Durée'
-                sheet.cell(row=rank, column=6).value = 'Groupes'
+                sheet.cell(row=rank, column=5).value = 'Groupes'
 
                 if Group.objects.filter(type__in=ct.group_types.all(), train_prog=mod.train_prog).count() > 0:
                     for g in Group.objects.filter(type__in=ct.group_types.all(), train_prog=mod.train_prog):
@@ -105,7 +104,7 @@ def make_planif_file(department, empty_bookname=empty_bookname):
                         append_row(sheet, empty_rows, 3, rank, cols)
                         sheet.cell(row=rank, column=1).value = mod.abbrev
                         sheet.cell(row=rank, column=2).value = ct.name
-                        sheet.cell(row=rank, column=6).value = g.nom
+                        sheet.cell(row=rank, column=5).value = g.nom
                 else:
                     rank += 1
                     append_row(sheet, empty_rows, 3, rank, cols)

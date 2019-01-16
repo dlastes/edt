@@ -67,8 +67,7 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
     nature_COL = 2
     prof_COL = 3
     salle_COL = 4
-    groupe_COL = 6
-    durée_COL = 5
+    groupe_COL = 5
     sumtotal = 0
     while 1:
         row += 1
@@ -115,7 +114,6 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
             grps = sheet.cell(row=row, column=groupe_COL).value
             COURSE_TYPE = CourseType.objects.get(name=nature, department=department)
             ROOMTYPE = RoomType.objects.get(name=salle, department=department)
-            duration = int(duration)
             if prof is None:
                 TUTOR, created = Tutor.objects.get_or_create(username='---')
                 if created:
@@ -152,7 +150,7 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
             for i in range(N):
                 GROUPE = GROUPS[i % len(groupes)]
                 C = Course(tutor=TUTOR, type=COURSE_TYPE, module=MODULE, groupe=GROUPE, semaine=semaine, an=an,
-                           room_type=ROOMTYPE, duration=duration)
+                           room_type=ROOMTYPE)
                 C.save()
                 for sp in SUPP_TUTORS:
                     C.supp_tutor.add(sp)
@@ -171,7 +169,7 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
                         P = Dependency(cours1=course, cours2=C)
                         P.save()
 
-            if 'D' in comments or 'D' in local_comments  and N >= 2:
+            if 'D' in comments or 'D' in local_comments and N >= 2:
                 for GROUPE in GROUPS:
                     Cours = Course.objects.filter(type=COURSE_TYPE, module=MODULE, groupe=GROUPE, an=an,
                                                   semaine=semaine)
