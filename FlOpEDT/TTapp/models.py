@@ -37,7 +37,7 @@ from django.utils.translation import ugettext_lazy as _
 
 # from caching.base import CachingManager, CachingMixin
 
-from base.models import Time, Department, Module, Group, Slot
+from base.models import Time, Department, Module, Group, Day
 
 from people.models import Tutor
 
@@ -47,9 +47,13 @@ slot_pause = 30
 
 basic_slot_duration = 90
 
+days_list = [c[0] for c in Day.CHOICES]
+days_index = {}
+for c in Day.CHOICES:
+    days_index[c[0]]=days_list.index(c[0])
+
 
 class Slot(object):
-
     def __init__(self, day, start_time, course_type=None):
         self.course_type = course_type
         self.day = day
@@ -65,19 +69,20 @@ class Slot(object):
 
     def is_simultaneous_to(self, other):
         if self.day == other.day and \
-                (other.start_time < self.start_time < other.end_time
-                 or self.start_time < other.start_time < self.end_time):
+                (other.start_time <= self.start_time < other.end_time
+                 or self.start_time <= other.start_time < self.end_time):
             return True
         else:
             return False
 
     def is_after(self, other):
-        if self.day.no > other.day.no or self.day == other.day and self.start_time >= other.end_time:
+        if days_index[self.day] > days_index[other.day] \
+                or self.day == other.day and self.start_time >= other.end_time:
             return True
         else:
             return False
 
-    def is_successor_of(self,other):
+    def is_successor_of(self, other):
         if self.day == other.day and other.end_time <= self.start_time <= other.end_time + slot_pause:
             return True
         else:
@@ -87,7 +92,14 @@ class Slot(object):
         return other.is_after(self)
 
     def __str__(self):
-        return str(self.day) + '-' + str(self.start_time)
+        hours = self.start_time//60
+        minuts = self.start_time % 60
+        if minuts == 0:
+            minuts = ''
+        return str(self.day) + '_' + str(hours) + 'h' + str(minuts) + '_' + str(self.duration) + "mn"
+
+    def __repr__(self):
+        return str(self)
 
 
 def filter(slot_set, day=None, apm=None, course_type=None, simultaneous_to=None):
@@ -743,18 +755,18 @@ class MinNonPreferedSlot(TTConstraint):
 
     def enrich_model(self, ttmodel, ponderation=1):
         if self.tutor is not None:
-            filtered_courses = ttmodel.wdb.courses \
-                .filter(tutor=self.tutor)
+            filtered_courses = ttmodel.wdb.courses_for_tutor[self.tutor]
         else:
             filtered_courses = ttmodel.wdb.courses \
                 .filter(groupe__train_prog=self.train_prog)
             # On exclut les cours de sport!
             filtered_courses = \
                 filtered_courses.exclude(module__abbrev='SC')
+            filtered_courses = set(filtered_courses)
         basic_groups = ttmodel.wdb.basic_groups \
             .filter(train_prog=self.train_prog)
         for sl in ttmodel.wdb.slots:
-            for c in filtered_courses:
+            for c in filtered_courses & ttmodel.wdb.compatible_courses[sl]:
                 if self.tutor is not None:
                     cost = (float(self.weight) / max_weight) \
                            * ponderation * ttmodel.TT[(sl, c)] \
