@@ -37,7 +37,7 @@ from base.models import Group, Day, Time, \
     Course, ScheduledCourse, UserPreference, CoursePreference, \
     Department, Module, TrainingProgramme, CourseType, \
     Dependency, TutorCost, GroupFreeHalfDay, GroupCost, Holiday, TrainingHalfDay, \
-    CourseStartTimeConstraint
+    CourseStartTimeConstraint, TimeGeneralSettings
 
 from people.models import Tutor
 
@@ -64,18 +64,19 @@ class WeekDB(object):
         self.train_prog = train_prog
         self.week = week
         self.year = year
-        self.days = Day.objects.all()
+        self.days = TimeGeneralSettings.objects.get(department=department).days
 
         #SLOTS
         print('Slot tools definition', end=', ')
         self.slots = set()
-        for cc in CourseStartTimeConstraint.objects.all():
+        for cc in CourseStartTimeConstraint.objects.filter(Q(course_type__department=department)
+                                                           | Q(course_type=None)):
             if cc.course_type is not None:
                 self.slots |= set(Slot(d, start_time, cc.course_type)
-                               for d in self.days for start_time in cc.allowed_start_times)
+                                  for d in self.days for start_time in cc.allowed_start_times)
             else:
                 self.slots |= set(Slot(d, start_time)
-                               for d in self.days for start_time in cc.allowed_start_times)
+                                  for d in self.days for start_time in cc.allowed_start_times)
 
         self.slots_by_day = {}
         for d in self.days:
@@ -172,11 +173,11 @@ class WeekDB(object):
         
         self.courses_for_group = {}
         for g in self.groups:
-            self.courses_for_group[g] = self.courses.filter(groupe=g)
+            self.courses_for_group[g] = set(self.courses.filter(groupe=g))
 
         self.courses_for_basic_group = {}
         for bg in self.basic_groups:
-            self.courses_for_basic_group[bg] = self.courses.filter(groupe__in=self.all_groups_of[bg])
+            self.courses_for_basic_group[bg] = set(self.courses.filter(groupe__in=self.all_groups_of[bg]))
         
         self.holidays = Holiday.objects.filter(week=week, year=year)
         
@@ -191,11 +192,11 @@ class WeekDB(object):
         
         self.courses_for_tutor = {}
         for i in self.instructors:
-            self.courses_for_tutor[i] = self.courses.filter(tutor=i)
+            self.courses_for_tutor[i] = set(self.courses.filter(tutor=i))
         
         self.courses_for_supp_tutor = {}
         for i in self.instructors:
-            self.courses_for_supp_tutor[i] = i.courses_as_supp.filter(id__in=self.courses)
+            self.courses_for_supp_tutor[i] = set(i.courses_as_supp.filter(id__in=self.courses))
 
         self.availabilities = UserPreference.objects \
                                 .filter(semaine=week,
@@ -660,7 +661,8 @@ class TTModel(object):
             for r in self.wdb.rooms:
                 self.add_constraint(
                     self.sum(self.TTrooms[(sl, c, rg)]
-                             for (c, rg) in room_course_compat[r]),
+                             for (c, rg) in room_course_compat[r]
+                             if c in self.wdb.compatible_courses[sl]),
                     '<=',
                     self.avail_room[r][sl],
                     name = 'core_room_' + str(r) + '_' + str(sl))
@@ -678,8 +680,9 @@ class TTModel(object):
                     if self.avail_room[r][sl]:
                         preferred_is_unavailable = True
                         break
-                    e -= self.sum(self.TTrooms[(sl, c, rg)] for (c, rg) in
-                                  room_course_compat[r] if c in self.wdb.compatible_courses[sl])
+                    e -= self.sum(self.TTrooms[(sl, c, rg)]
+                                  for (c, rg) in room_course_compat[r]
+                                  if c in self.wdb.compatible_courses[sl])
                 if preferred_is_unavailable:
                     continue
                 # print "### slot :", sl, rp.unprefer, "after", rp.prefer
@@ -797,7 +800,7 @@ class TTModel(object):
                         unp_slot_cost[i][sl] = 0
                         avail_instr[i][sl] = 1
 
-                elif all(Holiday.objects.filter(day__day=x.day).exists()
+                elif all(Holiday.objects.filter(day=x.day).exists()
                          for x in availabilities.filter(valeur__gte=1)):
                     self.add_warning(i, "availabilities only on vacation days!")
                     for sl in self.wdb.slots:
@@ -811,7 +814,7 @@ class TTModel(object):
                     for sl in self.wdb.slots:
                         avail = availabilities.filter(Q(start_time__lt=sl.start_time + sl.duration) |
                                                       Q(start_time__gt=sl.start_time - F('duration')),
-                                                      day=sl.day.day)
+                                                      day=sl.day)
                         if min(a.valeur for a in avail) == 0:
                             avail_instr[i][sl] = 0
                             unp_slot_cost[i][sl] = 0
@@ -860,24 +863,27 @@ class TTModel(object):
                     try:
                         avail = courses_avail.filter(Q(start_time__lt=sl.start_time + course_type.duration) |
                                                      Q(start_time__gt=sl.start_time - F('duration')))
-                        if min(a.valeur for a in avail) == 0:
-                            avail_course[(course_type, promo)][sl] = 0
-                            non_prefered_slot_cost_course[(course_type,
-                                                           promo)][sl] = 5
+                        if avail:
+                            if min(a.valeur for a in avail) == 0:
+                                avail_course[(course_type, promo)][sl] = 0
+                                non_prefered_slot_cost_course[(course_type,
+                                                               promo)][sl] = 5
+                            else:
+                                avail_course[(course_type, promo)][sl] = 1
+                                value = max(a.valeur for a in avail)
+                                non_prefered_slot_cost_course[(course_type, promo)][sl] \
+                                    = 1 - value / 8
                         else:
-                            avail_course[(course_type, promo)][sl] = True
-                            value = max(a.valeur for a in avail)
-                            non_prefered_slot_cost_course[(course_type,
-                                                           promo)][sl] \
-                                = 1 - value / 8
+                            avail_course[(course_type, promo)][sl] = 1
+                            non_prefered_slot_cost_course[(course_type, promo)][sl] = 0
+
                     except:
-                         avail_course[(course_type, promo)][sl] = 1
-                         non_prefered_slot_cost_course[(course_type,
-                                                        promo)][sl] \
-                             = 0
-                         print("Course availability problem for %s - %s on start time %s" % (type, promo, sl))
+                        avail_course[(course_type, promo)][sl] = 1
+                        non_prefered_slot_cost_course[(course_type,promo)][sl]= 0
+                        print("Course availability problem for %s - %s on start time %s" % (type, promo, sl))
 
         return non_prefered_slot_cost_course, avail_course
+
 
     def compute_avail_room(self):
         avail_room = {}
@@ -887,7 +893,7 @@ class TTModel(object):
                 if RoomPreference.objects.filter(
                         Q(start_time__lt=sl.start_time + sl.duration) |
                         Q(start_time__gt=sl.start_time - F('duration')),
-                        day=sl.day.day,
+                        day=sl.day,
                         semaine=self.semaine,
                         an=self.an,
                         room=room, valeur=0).exists():
@@ -978,7 +984,7 @@ class TTModel(object):
                     #                   copie_travail=target_work_copy))
                     cp = ScheduledCourse(cours=c,
                                          start_time=sl.start_time,
-                                         day=sl.day.day,
+                                         day=sl.day,
                                          copie_travail=target_work_copy)
                     for rg in c.room_type.members.all():
                         if self.get_var_value(self.TTrooms[(sl, c, rg)]) == 1:
