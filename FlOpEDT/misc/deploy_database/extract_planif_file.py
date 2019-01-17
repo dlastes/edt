@@ -205,5 +205,5 @@ def extract_planif(department, bookname=None):
     book = load_workbook(filename=bookname, data_only=True)
     for period in Period.objects.filter(department=department):
         extract_period(department, book, period)
-    assign_color()
+    assign_color(department)
 
