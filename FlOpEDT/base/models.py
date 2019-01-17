@@ -204,7 +204,7 @@ class Slot(models.Model):
 
     
 class Holiday(models.Model):
-    day = models.ForeignKey('Day', on_delete=models.CASCADE)
+    day = models.CharField(max_length=2, choices=Day.CHOICES, default=Day.MONDAY)
     week = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)])
     year = models.PositiveSmallIntegerField()
@@ -213,7 +213,7 @@ class Holiday(models.Model):
 class TrainingHalfDay(models.Model):
     apm = models.CharField(max_length=2, choices=Time.HALF_DAY_CHOICES,
                            verbose_name="Demi-journée", null=True, default=None, blank=True)
-    day = models.ForeignKey('Day', on_delete=models.CASCADE)
+    day = models.CharField(max_length=2, choices=Day.CHOICES, default=Day.MONDAY)
     week = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)])
     year = models.PositiveSmallIntegerField()
