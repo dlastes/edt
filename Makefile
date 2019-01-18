@@ -23,7 +23,10 @@ start: stop
 
 # starts edt's docker database service
 start-db:
-	docker-compose -f docker-compose.$(CONFIG).yml up db
+	docker-compose -f docker-compose.$(CONFIG).yml up -d db
+
+stop-db:
+	docker-compose -f docker-compose.$(CONFIG).yml stop db
 
 # stops edt's docker services
 stop:
