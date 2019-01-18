@@ -619,7 +619,7 @@ class Regen(models.Model):
         pre = ''
         if self.full:
             pre = 'C,' + str(self.fday) + "/" + str(self.fmonth) \
-                  + "/" + str(self.fyear) + " "
+                  + "/" + str(self.fyear)
         if self.stabilize:
             pre = 'S,' + str(self.sday) + "/" + str(self.smonth) \
                   + "/" + str(self.syear)

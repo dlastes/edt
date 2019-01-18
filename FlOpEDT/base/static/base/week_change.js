@@ -433,7 +433,7 @@ function fetch_cours() {
         contentType: "text/csv",
         success: function(msg, ts, req) {
 
-            go_regen(req.getResponseHeader('regen'));
+            go_regen(null);
             go_alarm_pref();
 
             var day_arr = JSON.parse(req.getResponseHeader('jours').replace(/\'/g, '"'));
@@ -785,6 +785,7 @@ function fetch_version() {
 		version = parsed.version ;
 		filled_dispos = parsed.proposed_pref ;
 		required_dispos = parsed.required_pref ;
+		go_regen(parsed.regen);
             }
 	    
             show_loader(false);
