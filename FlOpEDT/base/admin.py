@@ -24,6 +24,7 @@
 # without disclosing the source code of your own applications.
 import logging
 from django.contrib import admin
+from django.db.models.fields.related import RelatedField
 
 from base.models import Day, RoomGroup, Module, Course, Group, Slot, \
     UserPreference, Time, ScheduledCourse, EdtVersion, CourseModification, \
@@ -221,6 +222,7 @@ class DepartmentModelAdmin(admin.ModelAdmin):
 
         return exclude
 
+    
     def save_model(self, request, obj, form, change):
         #
         # Set department field value if exists on the model
@@ -233,6 +235,7 @@ class DepartmentModelAdmin(admin.ModelAdmin):
         
         super().save_model(request, obj, form, change)        
 
+    
     def save_related(self, request, form, formsets, change):
         super().save_related(request, form, formsets, change)
         model = form.instance
@@ -242,6 +245,7 @@ class DepartmentModelAdmin(admin.ModelAdmin):
                     if isinstance(field, related_fields.ManyToManyField):
                         field.save_form_data(model, [request.department,])
 
+    
     def get_queryset(self, request):
         #
         # Filter only department related instances
@@ -250,10 +254,11 @@ class DepartmentModelAdmin(admin.ModelAdmin):
         
         try:
             if hasattr(request, 'department'):
-                for f in self.model._meta.get_fields():
-                    related_filter = get_department_lookup(f, request.department)
-                    if related_filter:
-                        return qs.filter(**related_filter).distinct()
+                for f in self.model._meta.get_fields(include_parents=False):
+                    if hasattr(f, 'many_to_one') and f.many_to_one:
+                        related_filter = get_department_lookup(f, request.department)
+                        if related_filter:
+                            return qs.filter(**related_filter).distinct()
         except FieldDoesNotExist:
             pass
 
@@ -267,7 +272,10 @@ class DepartmentModelAdmin(admin.ModelAdmin):
         if hasattr(request, 'department') and db_field.related_model: 
             related_filter = get_department_lookup(db_field, request.department, include_field_name=False)
             if related_filter:
-                kwargs["queryset"] = db_field.related_model.objects.filter(**related_filter).distinct()
+                db = kwargs.get('using')
+                queryset = self.get_field_queryset(db, db_field, request)
+                if queryset:
+                    kwargs["queryset"] = queryset
 
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
@@ -275,9 +283,26 @@ class DepartmentModelAdmin(admin.ModelAdmin):
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
-    def formfield_for_manytomany(self, db_field, request, **kwargs):
-        self.formfield_with_department_filtering(db_field, request, kwargs)
-        return super().formfield_for_manytomany(db_field, request, **kwargs)
+    # def formfield_for_manytomany(self, db_field, request, **kwargs):
+    #     self.formfield_with_department_filtering(db_field, request, kwargs)
+    #     return super().formfield_for_manytomany(db_field, request, **kwargs)
+
+
+    def get_field_queryset(self, db, db_field, request):
+
+        queryset = super().get_field_queryset(db, db_field, request)
+        related_filter = get_department_lookup(db_field, request.department, include_field_name=False)
+
+        if related_filter:
+            if queryset:
+                return queryset.filter(**related_filter).distinct()
+            else:
+                return db_field.remote_field \
+                        .model._default_manager \
+                        .using(db) \
+                        .filter(**related_filter).distinct()
+
+        return queryset       
 
 
 class BreakingNewsAdmin(DepartmentModelAdmin):

@@ -1,5 +1,6 @@
 from base.models import Department, CourseType, TrainingProgramme, Module, Group
-from people.models import Tutor, FullStaff
+from base.models import BreakingNews, Period, GroupType, RoomType, TutorCost, EdtVersion, Regen, Course
+
 
 def get_department_lookup(field, department, include_field_name=True):
     # Get filter to apply for department filtering 
@@ -7,11 +8,17 @@ def get_department_lookup(field, department, include_field_name=True):
     if not field.auto_created and field.related_model:
         lookups_by_model = {
             Department: '',
-            FullStaff: '',
             CourseType: 'department',
+            BreakingNews: 'department',
+            Period: 'department',
             TrainingProgramme: 'department',
+            GroupType: 'department',
+            RoomType: 'department',
+            TutorCost: 'department',
+            EdtVersion: 'department',
+            Regen: 'department',
+            Course:'type__department',
             Module: 'train_prog__department',
-            Tutor: 'departments',
             Group: 'train_prog__department',
             }
         
