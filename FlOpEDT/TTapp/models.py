@@ -233,14 +233,17 @@ class LimitCourseTypePerPeriod(TTConstraint):  # , pond):
 
     def register_expression(self, ttmodel, period_by_day, ponderation, tutor=None):
 
-        courses = self.get_courses_queryset(ttmodel, tutor)
+        courses = set(self.get_courses_queryset(ttmodel, tutor))
 
         for day, period in period_by_day:
             expr = ttmodel.lin_expr()
-            slots = self.wdb.slots_by_half_day[(day, period)]
+            if period is None:
+                slots = ttmodel.wdb.slots_by_day[day]
+            else:
+                slots = ttmodel.wdb.slots_by_half_day[(day, period)]
 
             for slot in slots:
-                for course in courses:
+                for course in courses & ttmodel.wdb.compatible_courses[slot]:
                     expr += ttmodel.TT[(slot, course)]
 
             if self.weight is not None:
@@ -395,13 +398,11 @@ class ReasonableDays(TTConstraint):
         combinations = set()
 
         # Get a dict with the first and last slot by day
-        slots = Slot.objects \
-                    .filter(heure__no__in=[0,5,]) \
-                    .order_by('heure__no')
+        slots = set([slot for slot in ttmodel.wdb.slots if slot.start_time < 9*60 or slot.end_time > 18*60])
         
         slot_boundaries = {}
         for slot in slots:
-            slot_boundaries.setdefault(slot.jour, []).append(slot)
+            slot_boundaries.setdefault(slot.day, []).append(slot)
               
         # Create all combinations with slot boundaries for all courses
         # corresponding to the given filters (tutors, groups)
@@ -525,7 +526,7 @@ class Stabilize(TTConstraint):
                                    * ponderation * ttmodel.TT[(chosen_slot, c)]
 
                 else:
-                    for slot in self.wdb.slots:
+                    for slot in ttmodel.wdb.slots & ttmodel.wdb.compatible_slots[c]:
                         if not slot.is_simultaneous_to(chosen_slot):
                             ttmodel.add_constraint(ttmodel.TT[(slot, c)],
                                                    '==',
@@ -642,7 +643,7 @@ class MinHalfDays(TTConstraint):
                                       % (self.module, d, Time.PM))
                 # add constraint linking MBHD to TT
                 for apm in [Time.AM, Time.PM]:
-                    halfdayslots = self.wdb.slots_by_half_day[(d, apm)]
+                    halfdayslots = ttmodel.wdb.slots_by_half_day[(d, apm)]
                     card = len(halfdayslots)
                     expr = ttmodel.lin_expr()
                     expr += card * mod_b_h_d[(self.module, d, apm)]
@@ -684,7 +685,7 @@ class MinHalfDays(TTConstraint):
                 # sl11h = ttmodel.wdb.slots.get(jour=d, heure__no=2)
                 # sl14h = ttmodel.wdb.slots.get(jour=d, heure__no=3)
                 # sl17h = ttmodel.wdb.slots.get(jour=d, heure__no=5)
-                slots = sorted(self.wdb.slots_by_day[d])
+                slots = ttmodel.wdb.slots_by_day[d]
 
                 for c in fc:
                     try:

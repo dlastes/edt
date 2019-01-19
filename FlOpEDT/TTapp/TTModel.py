@@ -733,6 +733,9 @@ class TTModel(object):
         for p in self.wdb.dependencies:
             c1 = p.cours1
             c2 = p.cours2
+            if c1 == c2:
+                print("Warning: %s is declared depend on itself" % c1)
+                continue
             for sl1 in self.wdb.compatible_slots[c1]:
                 for sl2 in self.wdb.compatible_slots[c2]:
                     if not sl2.is_after(sl1) \
