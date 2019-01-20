@@ -64,6 +64,7 @@ class WeekDB(object):
         self.train_prog = train_prog
         self.week = week
         self.year = year
+<<<<<<< ours
         self.days = TimeGeneralSettings.objects.get(department=department).days
 
         #SLOTS
@@ -92,6 +93,21 @@ class WeekDB(object):
                 self.slots_by_half_day[(d,apm)] = filter(self.slots, day=d, apm=apm)
         print('Ok')
 
+=======
+        
+        # TIME
+        self.days = Day.objects.all()
+        self.slots = Slot.objects.all().order_by('jour', 'heure')
+        
+        # Build a week representation containing slots lists grouped by 
+        # day and half-day. (i.e : {(Day, Half-Day): [Slot1, Slot2]})
+        self.slots_by_days = {}
+        for day in self.days:
+            for apm in [Time.AM, Time.PM]:
+                apm_slots = [s for s in self.slots if s.heure.apm == apm and s.jour == day]
+                self.slots_by_days.update({(day, apm,): apm_slots})
+        
+>>>>>>> theirs
         # ROOMS
         self.room_types = RoomType.objects.filter(department=department)
         self.room_groups = RoomGroup.objects.filter(types__department=department).distinct()
@@ -399,6 +415,16 @@ class TTModel(object):
 
     def sum(self, *args):
         return lpSum(list(*args))
+
+    def check_and_sum(self, dict, *args):
+        """
+        This helper method get a variable list check if the corresponding 
+        expression exists in the given dict and returns the lpSum of 
+        available expressions
+        """
+        expressions =  [dict(v) for v in args if v in dict]
+        return lpSum(expressions)
+
 
     def get_var_value(self, ttvar):
         return round(ttvar.value())

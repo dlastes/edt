@@ -41,6 +41,8 @@ from base.models import Time, Department, Module, Group, Day
 
 from people.models import Tutor
 
+from TTapp.helpers.minhalfdays import MinHalfDaysHelperGroup, MinHalfDaysHelperModule, MinHalfDaysHelperTutor
+
 max_weight = 8
 
 slot_pause = 30
@@ -587,42 +589,18 @@ class MinHalfDays(TTConstraint):
     You have to chose EITHER tutor OR group OR module
     Optional for tutors : if 2 courses only, possibility to join it
     """
-    tutor = models.ForeignKey('people.Tutor',
-                              null=True,
-                              default=None,
-                              on_delete=models.CASCADE)
-    group = models.ForeignKey('base.Group',
-                              null=True,
-                              default=None,
-                              blank=True,
-                              on_delete=models.CASCADE)
-    module = models.ForeignKey('base.Module',
-                               null=True,
-                               default=None,
-                               blank=True,
-                               on_delete=models.CASCADE)
+    groups = models.ManyToManyField('base.Group', blank=True)
+    tutors = models.ManyToManyField('people.Tutor', blank=True)
+    modules = models.ManyToManyField('base.Module', blank=True)
+
     join2courses = models.BooleanField(
         verbose_name='If a tutor has 2 or 4 courses only, join it?',
         default=False)
 
 
-    @classmethod
-    def get_viewmodel_prefetch_attributes(cls):
-        attributes = super().get_viewmodel_prefetch_attributes()
-        attributes.extend(['group', 'module', 'tutor'])
-        return attributes
-
-
     def enrich_model(self, ttmodel, ponderation=1):
-        fc = ttmodel.wdb.courses
-        if self.tutor is not None:
-            fc = fc.filter(tutor=self.tutor)
-            b_h_ds = ttmodel.sum(
-                ttmodel.IBHD[(self.tutor, d, apm)]
-                for d in ttmodel.wdb.days
-                for apm in [Time.AM, Time.PM])
-            local_var = ttmodel.add_var("MinIBHD_var_%s" % self.tutor)
 
+<<<<<<< ours
         elif self.group is not None:
             fc = fc.filter(groupe=self.group)
             b_h_ds = ttmodel.sum(
@@ -657,22 +635,45 @@ class MinHalfDays(TTConstraint):
                 mod_b_h_d[(self.module, d, apm)]
                 for d in ttmodel.wdb.days
                 for apm in [Time.AM, Time.PM])
+=======
+        if self.tutors.exists():
+            helper = MinHalfDaysHelperTutor(ttmodel, self, ponderation)
+            for tutor in self.tutors.all():
+                helper.enrich_model(tutor=tutor)
+
+        elif self.modules.exists():
+            helper = MinHalfDaysHelperModule(ttmodel, self, ponderation)
+            for module in self.modules.all():
+                helper.enrich_model(module=module)
+
+        elif self.groups.exists():
+            helper = MinHalfDaysHelperGroup(ttmodel, self, ponderation)
+            for group in self.groups.all():
+                helper.enrich_model(group=group)
+                
+>>>>>>> theirs
         else:
-            print("MinHalfDays must have tutor or group or module --> Ignored")
+            print("MinHalfDays must have at least one tutor or one group or one module --> Ignored")
             return
 
-        ttmodel.add_constraint(local_var, '==', 1)
-        limit = (len(fc) - 1) // 3 + 1
 
-        if self.weight is not None:
-            if self.tutor is not None:
-                ttmodel.add_to_inst_cost(self.tutor,
-                                         self.local_weight() * ponderation * (b_h_ds - limit * local_var))
+    def get_viewmodel(self):
+        view_model = super().get_viewmodel()
+        details = view_model['details']
 
-            elif self.group is not None:
-                ttmodel.add_to_group_cost(self.group,
-                                          self.local_weight() * ponderation * (b_h_ds - limit * local_var))
+        if self.tutors.exists():
+            details.update({'tutors': ', '.join([tutor.username for tutor in self.tutors.all()])})
 
+        if self.groups.exists():
+            details.update({'groups': ', '.join([group.nom for group in self.groups.all()])})
+
+        if self.modules.exists():
+            details.update({'modules': ', '.join([module.username for module in self.modules.all()])})
+
+        return view_model
+        
+
+<<<<<<< ours
             else:
                 ttmodel.obj += self.local_weight() * ponderation * (b_h_ds - limit * local_var)
                 
@@ -717,17 +718,25 @@ class MinHalfDays(TTConstraint):
                                 ttmodel.TT[(sl14h, c)] + ttmodel.TT[(sl17h, c2)],
                                 '<=',
                                 1)
+=======
+>>>>>>> theirs
     def one_line_description(self):
         text = "Minimise les demie-journées"
-        if self.tutor:
-            text += ' de ' + str(self.tutor)
-        if self.module:
-            text += " de " + str(self.module)
+
+        if self.tutors.exists():
+            text += ' de : ' + ', '.join([tutor.username for tutor in self.tutors.all()])
+
+        if self.groups.exists():
+            text += ' du(des) groupe(s) : ' + ', '.join([group.nom for group in self.groups.all()])
+
+        if self.modules.exists():
+            text += ' de : ' + ', '.join([str(module) for module in self.modules.all()])
+            
         if self.train_prog:
             text += ' en ' + str(self.train_prog)
-        if self.group:
-            text += ' du groupe ' + str(self.group)
+
         return text
+        
 
 class MinNonPreferedSlot(TTConstraint):
     """

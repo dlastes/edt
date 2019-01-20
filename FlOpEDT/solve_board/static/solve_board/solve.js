@@ -257,6 +257,9 @@ function init_constraints(constraints) {
 
         // Create new template for each constraint
         constraints.forEach((constraint, index) => {
+            if(!constraint)
+                return;
+                
             var constraintId = `${constraint.model}_${constraint.pk}`;
 
             var clone = document.importNode(t.content, true);
