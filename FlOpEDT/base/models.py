@@ -438,7 +438,8 @@ class EdtVersion(models.Model):
     an = models.PositiveSmallIntegerField()
     version = models.PositiveIntegerField(default=0)
 
-
+    class Meta:
+        unique_together = (("department","semaine","an"),)
 #    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
 
