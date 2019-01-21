@@ -80,6 +80,11 @@ class AddFullStaffTutorForm(UserCreationForm):
         model = FullStaff
         fields = ('email', 'username', 'first_name', 'last_name')
 
+    def __init__(self, *args, **kwargs):
+        super(AddFullStaffTutorForm, self).__init__(*args, **kwargs)
+        for key in self.fields:
+            self.fields[key].required = True
+            
     @transaction.atomic
     def save(self):
         fs = super(AddFullStaffTutorForm, self).save(commit=False)
@@ -104,6 +109,11 @@ class AddSupplyStaffTutorForm(UserCreationForm):
         model = SupplyStaff
         fields = ('email', 'username', 'first_name', 'last_name')
 
+    def __init__(self, *args, **kwargs):
+        super(AddSupplyStaffTutorForm, self).__init__(*args, **kwargs)
+        for key in self.fields:
+            self.fields[key].required = True
+            
     @transaction.atomic
     def save(self):
         sus = super(AddFullStaffTutorForm, self).save(commit=False)
@@ -122,6 +132,11 @@ class AddBIATOSTutorForm(UserCreationForm):
         model = BIATOS
         fields = ('email', 'username', 'first_name', 'last_name')
 
+    def __init__(self, *args, **kwargs):
+        super(AddBIATOSTutorForm, self).__init__(*args, **kwargs)
+        for key in self.fields:
+            self.fields[key].required = True
+            
     @transaction.atomic
     def save(self):
         bi = super(AddBIATOSTutorForm, self).save(commit=False)
