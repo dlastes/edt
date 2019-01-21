@@ -78,6 +78,7 @@ class AddFullStaffTutorForm(UserCreationForm):
 
     class Meta(UserCreationForm.Meta):
         model = FullStaff
+        fields = ('email', 'username', 'first_name', 'last_name')
 
     @transaction.atomic
     def save(self):
@@ -91,6 +92,7 @@ class AddFullStaffTutorForm(UserCreationForm):
         fs.save()
         return fs
 
+    
 class AddSupplyStaffTutorForm(UserCreationForm):
     employer = forms.CharField(max_length=50, help_text='Employeur')
     position = forms.CharField(max_length=50,
@@ -100,56 +102,11 @@ class AddSupplyStaffTutorForm(UserCreationForm):
 
     class Meta(UserCreationForm.Meta):
         model = SupplyStaff
+        fields = ('email', 'username', 'first_name', 'last_name')
 
     @transaction.atomic
     def save(self):
         sus = super(AddFullStaffTutorForm, self).save(commit=False)
-        data = self.cleaned_data
-        sus.is_tutor = True
-        sus.status = Tutor.SUPP_STAFF
-        # sus.employer = data.get('employer')
-        # sus.position = data.get('position')
-        # sus.field = data.get('field')
-        sus.save()
-        return sus
-
-    
-
-class AddSupplyStaffTutorForm(UserCreationForm):
-    employer = forms.CharField(max_length=50, help_text='Employeur')
-    position = forms.CharField(max_length=50,
-                               help_text='Qualité')
-    field = forms.CharField(max_length=50,
-                             help_text="Domaine")
-
-    class Meta(UserCreationForm.Meta):
-        model = SupplyStaff
-
-    @transaction.atomic
-    def save(self):
-        sus = super(AddFullStaffTutorForm, self).save(commit=False)
-        data = self.cleaned_data
-        sus.is_tutor = True
-        sus.status = Tutor.SUPP_STAFF
-        # sus.employer = data.get('employer')
-        # sus.position = data.get('position')
-        # sus.field = data.get('field')
-        sus.save()
-        return sus
-
-    
-
-class AddSupplyStaffTutorForm(UserCreationForm):
-    employer = forms.CharField(max_length=50)
-    position = forms.CharField(max_length=50)
-    field = forms.CharField(max_length=50)
-
-    class Meta(UserCreationForm.Meta):
-        model = SupplyStaff
-
-    @transaction.atomic
-    def save(self):
-        sus = super(AddSupplyStaffTutorForm, self).save(commit=False)
         data = self.cleaned_data
         sus.is_tutor = True
         sus.status = Tutor.SUPP_STAFF
@@ -160,10 +117,10 @@ class AddSupplyStaffTutorForm(UserCreationForm):
         return sus
 
     
-
 class AddBIATOSTutorForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         model = BIATOS
+        fields = ('email', 'username', 'first_name', 'last_name')
 
     @transaction.atomic
     def save(self):

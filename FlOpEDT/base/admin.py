@@ -27,15 +27,15 @@ from import_export import resources, fields
 from import_export.widgets import ForeignKeyWidget
 import logging
 
+from core.department import get_model_department_lookup
+
 from django.core.exceptions import FieldDoesNotExist
 from django.db.models.fields import related as related_fields
 
 from django.contrib import admin
 import django.contrib.auth as auth
 
-from FlOpEDT.filters import DropdownFilterAll, DropdownFilterRel, \
-    DropdownFilterCho
-from core.department import get_department_lookup
+from FlOpEDT.filters import DropdownFilterAll, DropdownFilterRel
 from people.models import Tutor, User
 from base.models import Day, RoomGroup, Module, Course, Group, Slot, \
     UserPreference, Time, ScheduledCourse, EdtVersion, CourseModification, \
@@ -234,20 +234,25 @@ class DepartmentModelAdmin(admin.ModelAdmin):
                     if isinstance(field, related_fields.ManyToManyField):
                         field.save_form_data(model, [request.department,])
 
+
+    def get_department_lookup(self, department):
+        """
+        Hook for overriding default department lookup research
+        """
+        return get_model_department_lookup(self.model, department)
+
     
     def get_queryset(self, request):
-        #
-        # Filter only department related instances
-        #
+        """
+        Filter only department related instances
+        """
         qs = super().get_queryset(request)
         
         try:
             if hasattr(request, 'department'):
-                for f in self.model._meta.get_fields(include_parents=False):
-                    if hasattr(f, 'many_to_one') and f.many_to_one:
-                        related_filter = get_department_lookup(f, request.department)
-                        if related_filter:
-                            return qs.filter(**related_filter).distinct()
+                related_filter = self.get_department_lookup(request.department)
+                if related_filter:                    
+                    return qs.filter(**related_filter).distinct()
         except FieldDoesNotExist:
             pass
 
@@ -255,11 +260,12 @@ class DepartmentModelAdmin(admin.ModelAdmin):
 
 
     def formfield_with_department_filtering(self, db_field, request, kwargs):
-        #
-        # Filter form fields for with specific department related items
-        #
+        """
+        Filter form fields for with specific department related items
+        """
+
         if hasattr(request, 'department') and db_field.related_model: 
-            related_filter = get_department_lookup(db_field, request.department, include_field_name=False)
+            related_filter = get_model_department_lookup(db_field.related_model, request.department)
             if related_filter:
                 db = kwargs.get('using')
                 queryset = self.get_field_queryset(db, db_field, request)
@@ -280,7 +286,7 @@ class DepartmentModelAdmin(admin.ModelAdmin):
     def get_field_queryset(self, db, db_field, request):
 
         queryset = super().get_field_queryset(db, db_field, request)
-        related_filter = get_department_lookup(db_field, request.department, include_field_name=False)
+        related_filter = get_model_department_lookup(db_field.related_model, request.department)
 
         if related_filter:
             if queryset:
@@ -291,7 +297,7 @@ class DepartmentModelAdmin(admin.ModelAdmin):
                         .using(db) \
                         .filter(**related_filter).distinct()
 
-        return queryset       
+        return queryset
 
 
 class BreakingNewsAdmin(DepartmentModelAdmin):
