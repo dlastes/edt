@@ -1610,7 +1610,7 @@ function which_slot(x, y, c) {
 function is_garbage(date) {
     var t = time_settings.time ;
     return (date.start_time < t.day_start_time
-	    || date.start_time > t.day_finish_time) ;
+	    || date.start_time >= t.day_finish_time) ;
 }
 
 function is_free(date, promo) {
@@ -1621,8 +1621,7 @@ function is_free(date, promo) {
 // find the closest possible start_time in the current day,
 // in terms of distance on the screen
 function indexOf_constraints(c, y){
-    var after = false ;
-    var i = 0 ;
+    var course_duration_y = c.duration * nbRows * scale ;
     var cst = constraints[c.c_type].allowed_st.map(
 	function(d){
 	    return {y:cours_y({
@@ -1634,6 +1633,8 @@ function indexOf_constraints(c, y){
     );
     var t = time_settings.time ;
     
+    var after = false ;
+    var i = 0 ;
     while(! after && i < cst.length) {
 	if (cst[i].y > y) {
 	    after = true ;
@@ -1642,14 +1643,17 @@ function indexOf_constraints(c, y){
 	}
     }
     if (i==cst.length) {
-	return t.day_finish_time ;
-	// constraints[keys[keys.length-1]] ;
-    } else if (i==0) {
-	if (y < t.day_start_time - c.duration) {
-	    return t.day_start_time - c.duration ;
+	if (y < cst[cst.length-1].y + course_duration_y) {
+	    return cst[cst.length-1].start ;
 	} else {
-	    return t.day_start_time ;
+	    return t.day_finish_time ;
 	}
+    } else if (i==0) {
+	// if (y < 0 - course_duration_y) {
+	//     return t.day_start_time - c.duration ;
+	// } else {
+	    return t.day_start_time ;
+	// }
     } else {
 	if (y - cst[i-1].y > cst[i].y - y) {
 	    return cst[i].start;
