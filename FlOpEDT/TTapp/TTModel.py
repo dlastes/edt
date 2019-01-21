@@ -71,11 +71,7 @@ class WeekDB(object):
         self.slots = set()
         for cc in CourseStartTimeConstraint.objects.filter(Q(course_type__department=department)
                                                            | Q(course_type=None)):
-            if cc.course_type is not None:
-                self.slots |= set(Slot(d, start_time, cc.course_type)
-                                  for d in self.days for start_time in cc.allowed_start_times)
-            else:
-                self.slots |= set(Slot(d, start_time)
+            self.slots |= set(Slot(d, start_time, cc.course_type)
                                   for d in self.days for start_time in cc.allowed_start_times)
 
         self.slots_by_day = {}
@@ -91,16 +87,6 @@ class WeekDB(object):
             for apm in [Time.AM, Time.PM]:
                 self.slots_by_half_day[(d,apm)] = filter(self.slots, day=d, apm=apm)
         print('Ok')
-
-        # To be checked
-        # # Build a week representation containing slots lists grouped by
-        # # day and half-day. (i.e : {(Day, Half-Day): [Slot1, Slot2]})
-        # self.slots_by_days = {}
-        # for day in self.days:
-        #     for apm in [Time.AM, Time.PM]:
-        #         apm_slots = [s for s in self.slots if s.heure.apm == apm and s.jour == day]
-        #         self.slots_by_days.update({(day, apm,): apm_slots})
-        #
 
         # ROOMS
         self.room_types = RoomType.objects.filter(department=department)
