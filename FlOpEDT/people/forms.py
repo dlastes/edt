@@ -78,6 +78,7 @@ class AddFullStaffTutorForm(UserCreationForm):
 
     class Meta(UserCreationForm.Meta):
         model = FullStaff
+        fields = ('email', 'username', 'first_name', 'last_name')
 
     @transaction.atomic
     def save(self):
@@ -100,6 +101,7 @@ class AddSupplyStaffTutorForm(UserCreationForm):
 
     class Meta(UserCreationForm.Meta):
         model = SupplyStaff
+        fields = ('email', 'username', 'first_name', 'last_name')
 
     @transaction.atomic
     def save(self):
@@ -124,6 +126,7 @@ class AddSupplyStaffTutorForm(UserCreationForm):
 
     class Meta(UserCreationForm.Meta):
         model = SupplyStaff
+        fields = ('email', 'username', 'first_name', 'last_name')
 
     @transaction.atomic
     def save(self):
@@ -164,6 +167,7 @@ class AddSupplyStaffTutorForm(UserCreationForm):
 class AddBIATOSTutorForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         model = BIATOS
+        fields = ('email', 'username', 'first_name', 'last_name')
 
     @transaction.atomic
     def save(self):
