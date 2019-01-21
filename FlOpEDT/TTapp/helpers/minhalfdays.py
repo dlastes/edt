@@ -49,7 +49,7 @@ class MinHalfDaysHelperBase():
     
     def add_constraint(self, expression, courses, local_var):
         self.ttmodel.add_constraint(local_var, '==', 1)
-        limit = (len(courses) - 1)
+        limit = (len(courses) - 1) // 3 + 1
 
         if self.constraint.weight:
             cost = self.constraint.local_weight() * self.ponderation * (expression - limit * local_var)
@@ -142,7 +142,7 @@ class MinHalfDaysHelperGroup(MinHalfDaysHelperBase):
 class MinHalfDaysHelperTutor(MinHalfDaysHelperBase):
 
     def build_variables(self):
-        courses = self.ttmodel.wdb.courses.filter(groupe=self.tutor)
+        courses = self.ttmodel.wdb.courses.filter(tutor=self.tutor)
         expression = self.ttmodel.sum(
             self.ttmodel.IBHD[(self.tutor, d, apm)]
             for d in self.ttmodel.wdb.days

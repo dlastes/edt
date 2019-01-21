@@ -719,7 +719,7 @@ class TTModel(object):
                         else:
                             unp_slot_cost[i][a.creneau] = 1
 
-                elif all(Holiday.objects.filter(day=x.creneau.jour).exists()
+                elif all(self.wdb.holidays.filter(day=x.creneau.jour).exists()
                          for x in availabilities.filter(valeur__gte=1)):
                     self.add_warning(i, "availabilities only on vacation days!")
                     for a in availabilities:
@@ -772,40 +772,35 @@ class TTModel(object):
 
         non_prefered_slot_cost_course = {}
         avail_course = {}
-        for type in CourseType.objects.all():
+        for course_type in CourseType.objects.all():
             for promo in self.train_prog:
-                avail_course[(type, promo)] = {}
-                non_prefered_slot_cost_course[(type, promo)] = {}
+                avail_course[(course_type, promo)] = {}
+                non_prefered_slot_cost_course[(course_type, promo)] = {}
                 courses_avail = self.wdb \
                     .courses_availabilities \
-                    .filter(course_type=type, train_prog=promo)
-                if not courses_avail:
+                    .filter(course_type=course_type, train_prog=promo)
+                if not courses_avail.exists():
                     courses_avail = CoursePreference.objects \
-                        .filter(course_type=type,
+                        .filter(course_type=course_type,
                                 train_prog=promo,
                                 semaine=None,
                                 an=annee_courante)
+                if not courses_avail.exists():
+                    print("No course availability given for %s - %s"% (course_type, promo))
+
                 for sl in self.wdb.slots:
                     try:
-                        a = courses_avail.get(creneau=sl)
-                        if a.valeur == 0:
-                            avail_course[(type, promo)][a.creneau] = 0
-                            non_prefered_slot_cost_course[(type,
-                                                           promo)][
-                                a.creneau] = 5
-                        else:
-                            avail_course[(type, promo)][a.creneau] = 1
-                            non_prefered_slot_cost_course[(type,
-                                                           promo)][a.creneau] \
-                                = 1 - float(a.valeur) / 8
+                        valeur = courses_avail.get(creneau=sl).valeur
                     except:
-                        avail_course[(type, promo)][sl] = 1
-                        non_prefered_slot_cost_course[(type,
+                        valeur = min(c.valeur for c in courses_avail.filter(creneau=sl))
+                    if valeur == 0:
+                        avail_course[(course_type, promo)][sl] = 0
+                        non_prefered_slot_cost_course[(course_type, promo)][sl] = 5
+                    else:
+                        avail_course[(course_type, promo)][sl] = 1
+                        non_prefered_slot_cost_course[(course_type,
                                                        promo)][sl] \
-                            = 0
-                        # print "Course availability problem " \
-                        #       "for %s - %s on slot %s" \
-                        #       % (type, promo, sl)
+                            = 1 - float(valeur) / 8
 
         return non_prefered_slot_cost_course, avail_course
 
