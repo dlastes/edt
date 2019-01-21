@@ -8,6 +8,7 @@ from datetime import datetime
 from datetime import timedelta
 #from base.weeks import get_course_datetime_start
 from isoweek import Week
+from django.core.cache import cache
 
 tz='Europe/Paris'
 
@@ -23,6 +24,11 @@ def index(request, **kwargs):
 
 
 def tutor(request, id, **kwargs):
+    cache_key = get_key_tutor(id)
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return cached
+    
     events=[]
     for c in get_course_list().filter(cours__tutor__username=id):
         e = create_event(c)
@@ -30,6 +36,8 @@ def tutor(request, id, **kwargs):
         events.append(e)
     response = render(request, 'synchro/ical.ics', context={'events':events, 'timezone':tz}, content_type='text/calendar; charset=utf8')
     response['Content-Disposition'] = f'attachment; filename={id}.ics'
+
+    cached = cache.set(cache_key, response, 60*10)
     return response
 
 
@@ -80,3 +88,9 @@ def create_event(c):
            'Enseignant : ' + c.cours.tutor.username +'\\n' +
            'Salle \: ' + location
     }
+
+def get_key_tutor(tutor):
+    return f'ICS-TUT-{tutor}'
+
+def get_key_group(training_programme, group):
+    return f'ICS-TP-{training_programme}-GP-{group}'
