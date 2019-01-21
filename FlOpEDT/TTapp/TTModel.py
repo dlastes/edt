@@ -809,7 +809,7 @@ class TTModel(object):
                         unp_slot_cost[i][sl] = 0
                         avail_instr[i][sl] = 1
 
-                elif all(self.holidays.filter(day=x.day).exists()
+                elif all(self.wdb.holidays.filter(day=x.day).exists()
                          for x in availabilities.filter(valeur__gte=1)):
                     self.add_warning(i, "availabilities only on vacation days!")
                     for sl in self.wdb.slots:
