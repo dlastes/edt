@@ -49,7 +49,7 @@ class MinHalfDaysHelperBase():
     
     def add_constraint(self, expression, courses, local_var):
         self.ttmodel.add_constraint(local_var, '==', 1)
-        limit = (len(courses) - 1)
+        limit = (len(courses) - 1) // 3 + 1
 
         if self.constraint.weight:
             cost = self.constraint.local_weight() * self.ponderation * (expression - limit * local_var)
