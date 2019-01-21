@@ -729,18 +729,20 @@ function compute_changes(changes, profs, gps) {
 	    
 	    /* Sanity checks */
 	    
-	    // // No course has been moved to garbage slots
-            // if (is_garbage(date) {
-	    // 	splash_case = {
-	    // 	    id: "garb-sched",
-	    // 	    but: butOK,
-	    // 	    com: {list: [{txt: "Vous avez déplacé, puis laissé des cours non placés."},
-	    // 			 {txt: msgRetry}]}
-	    // 	}
+	    // No course has been moved to garbage slots
+            if (is_garbage(date)) {
+	    	splash_case = {
+	    	    id: "garb-sched",
+	    	    but: butOK,
+	    	    com: {list: [{txt: "Vous avez déplacé, puis laissé des cours non placés."},
+	    			 {txt: msgRetry}]}
+	    	} ;
 		
-	    // 	splash(splash_case);
-	    // 	return false ;
-            // } 
+	    	splash(splash_case);
+	    	return false ;
+            }
+
+		
 	    // // Course in unavailable slots for some training programme
 	    // else if (is_free(date, cur_course.promo)) {
 		
@@ -766,6 +768,8 @@ function compute_changes(changes, profs, gps) {
 	    // 	splash(splash_case);
 	    // 	return false ;
             // } else 
+
+
 	    if (cur_course.room == une_salle){
 		splash_case = {
 		    id: "def-room",
