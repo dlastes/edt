@@ -1610,7 +1610,7 @@ function which_slot(x, y, c) {
 function is_garbage(date) {
     var t = time_settings.time ;
     return (date.start_time < t.day_start_time
-	    || date.start_time > t.day_finish_time) ;
+	    || date.start_time >= t.day_finish_time) ;
 }
 
 function is_free(date, promo) {
