@@ -399,8 +399,11 @@ class ReasonableDays(TTConstraint):
         # unique throw tutor and group filters
         combinations = set()
 
-        # Get a dict with the first and last slot by day
-        slots = set([slot for slot in ttmodel.wdb.slots if slot.start_time < 9*60 or slot.end_time > 18*60])
+        # Get two dicts with the first and last slot by day
+        first_slots = set([slot for slot in ttmodel.wdb.slots if slot.start_time <= 9*60])
+        last_slots = set([slot for slot in ttmodel.wdb.slots if slot.end_time > 18*60])
+        slots = first_slots | last_slots
+
         
         slot_boundaries = {}
         for slot in slots:
