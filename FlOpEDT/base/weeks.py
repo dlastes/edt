@@ -26,7 +26,7 @@
 
 import datetime
 
-annee_courante = 2019
+annee_courante = 2018
 
 
 # monday of Week #2
