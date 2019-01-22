@@ -119,7 +119,7 @@ class MinHalfDaysHelperGroup(MinHalfDaysHelperBase):
 
         expression = self.ttmodel.check_and_sum(
             self.ttmodel.GBHD,
-            ((self.group, d, apm) for d, apm in self.ttmodel.wdb.slots_by_days))
+            ((self.group, d, apm) for d, apm in self.ttmodel.wdb.slots_by_half_day))
 
         local_var = self.ttmodel.add_var("MinGBHD_var_%s" % self.group)
 
