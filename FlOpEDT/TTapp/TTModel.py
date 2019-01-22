@@ -863,11 +863,14 @@ class TTModel(object):
                 courses_avail = self.wdb \
                     .courses_availabilities \
                     .filter(course_type=course_type, train_prog=promo)
-                if not courses_avail:
+                if not courses_avail.exists():
                     courses_avail = CoursePreference.objects \
                         .filter(course_type=course_type,
                                 train_prog=promo,
                                 semaine=None)
+                if not courses_avail.exists():
+                    print("No course availability given for %s - %s"% (course_type, promo))
+
                 for sl in self.wdb.slots:
                     try:
                         avail = courses_avail.filter(Q(start_time__lt=sl.start_time + course_type.duration) |
@@ -888,8 +891,9 @@ class TTModel(object):
 
                     except:
                         avail_course[(course_type, promo)][sl] = 1
-                        non_prefered_slot_cost_course[(course_type,promo)][sl]= 0
-                        print("Course availability problem for %s - %s on start time %s" % (type, promo, sl))
+                        non_prefered_slot_cost_course[(course_type,promo)][sl] = 0
+                        print("Course availability problem for %s - %s on start time %s" % (course_type, promo, sl))
+
 
         return non_prefered_slot_cost_course, avail_course
 
