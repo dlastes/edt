@@ -874,30 +874,29 @@ class TTModel(object):
                         avail_course[(course_type, promo)][sl] = 1
                         non_prefered_slot_cost_course[(course_type,
                                                        promo)][sl] = 0
-                        continue
-                        
-                for sl in self.wdb.slots:
-                    try:
-                        avail = courses_avail.filter(Q(start_time__lt=sl.start_time + course_type.duration) |
-                                                     Q(start_time__gt=sl.start_time - F('duration')))
-                        if avail:
-                            if min(a.valeur for a in avail) == 0:
-                                avail_course[(course_type, promo)][sl] = 0
-                                non_prefered_slot_cost_course[(course_type,
-                                                               promo)][sl] = 5
+                else:
+                    for sl in self.wdb.slots:
+                        try:
+                            avail = courses_avail.filter(Q(start_time__lt=sl.start_time + course_type.duration) |
+                                                         Q(start_time__gt=sl.start_time - F('duration')))
+                            if avail:
+                                if min(a.valeur for a in avail) == 0:
+                                    avail_course[(course_type, promo)][sl] = 0
+                                    non_prefered_slot_cost_course[(course_type,
+                                                                   promo)][sl] = 5
+                                else:
+                                    avail_course[(course_type, promo)][sl] = 1
+                                    value = max(a.valeur for a in avail)
+                                    non_prefered_slot_cost_course[(course_type, promo)][sl] \
+                                        = 1 - value / 8
                             else:
                                 avail_course[(course_type, promo)][sl] = 1
-                                value = max(a.valeur for a in avail)
-                                non_prefered_slot_cost_course[(course_type, promo)][sl] \
-                                    = 1 - value / 8
-                        else:
-                            avail_course[(course_type, promo)][sl] = 1
-                            non_prefered_slot_cost_course[(course_type, promo)][sl] = 0
+                                non_prefered_slot_cost_course[(course_type, promo)][sl] = 0
 
-                    except:
-                        avail_course[(course_type, promo)][sl] = 1
-                        non_prefered_slot_cost_course[(course_type,promo)][sl] = 0
-                        print("Course availability problem for %s - %s on start time %s" % (course_type, promo, sl))
+                        except:
+                            avail_course[(course_type, promo)][sl] = 1
+                            non_prefered_slot_cost_course[(course_type,promo)][sl] = 0
+                            print("Course availability problem for %s - %s on start time %s" % (course_type, promo, sl))
 
 
         return non_prefered_slot_cost_course, avail_course
