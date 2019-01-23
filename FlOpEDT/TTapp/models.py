@@ -634,7 +634,7 @@ class MinHalfDays(TTConstraint):
             details.update({'groups': ', '.join([group.nom for group in self.groups.all()])})
 
         if self.modules.exists():
-            details.update({'modules': ', '.join([module.username for module in self.modules.all()])})
+            details.update({'modules': ', '.join([module.nom for module in self.modules.all()])})
 
         return view_model
         
