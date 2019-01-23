@@ -78,6 +78,7 @@ def tutors_extract(department, book):
         try:
             tutor = Tutor.objects.get(username=id)
             logger.debug(f'update tutor : [{id}]')
+
         except Tutor.DoesNotExist:
 
             try:
@@ -248,7 +249,7 @@ def rooms_extract(department, book):
 
                 room_group.types.add(room_type)
             except RoomGroup.DoesNotExist:
-                print(f"unable to find  RoomGroup '{idroom_group_idGroup}'")
+                print(f"unable to find  RoomGroup '{room_group_id}'")
 
             col += 1
             room_group_id = sheet.cell(row=row, column=col).value
@@ -449,7 +450,7 @@ def modules_extract(department, book):
 
 
     while idMod is not None:
-
+        idMod = idMod.replace(' ','')
         tpMod = sheet.cell(row=MODULE_ROW, column=4).value
         period = sheet.cell(row=MODULE_ROW, column=6).value
         verif = Module.objects.filter(abbrev=idMod, train_prog__abbrev=tpMod, period__name=period)
@@ -458,6 +459,7 @@ def modules_extract(department, book):
         if not verif.exists():
 
             codeMod = sheet.cell(row=MODULE_ROW, column=2).value
+            codeMod = codeMod.replace(' ','')
             nameMod = sheet.cell(row=MODULE_ROW, column=3).value
             tpMod = sheet.cell(row=MODULE_ROW, column=4).value
             profMod = sheet.cell(row=MODULE_ROW, column=5).value
