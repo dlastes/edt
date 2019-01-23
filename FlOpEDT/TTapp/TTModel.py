@@ -791,21 +791,20 @@ class TTModel(object):
                         avail_course[(course_type, promo)][sl] = 1
                         non_prefered_slot_cost_course[(course_type,
                                                        promo)][sl] = 0
-                        continue
-                        
-                for sl in self.wdb.slots:
-                    try:
-                        valeur = courses_avail.get(creneau=sl).valeur
-                    except:
-                        valeur = min(c.valeur for c in courses_avail.filter(creneau=sl))
-                    if valeur == 0:
-                        avail_course[(course_type, promo)][sl] = 0
-                        non_prefered_slot_cost_course[(course_type, promo)][sl] = 5
-                    else:
-                        avail_course[(course_type, promo)][sl] = 1
-                        non_prefered_slot_cost_course[(course_type,
-                                                       promo)][sl] \
-                            = 1 - float(valeur) / 8
+                else:
+                    for sl in self.wdb.slots:
+                        try:
+                            valeur = courses_avail.get(creneau=sl).valeur
+                        except:
+                            valeur = min(c.valeur for c in courses_avail.filter(creneau=sl))
+                        if valeur == 0:
+                            avail_course[(course_type, promo)][sl] = 0
+                            non_prefered_slot_cost_course[(course_type, promo)][sl] = 5
+                        else:
+                            avail_course[(course_type, promo)][sl] = 1
+                            non_prefered_slot_cost_course[(course_type,
+                                                           promo)][sl] \
+                                = 1 - float(valeur) / 8
 
         return non_prefered_slot_cost_course, avail_course
 
