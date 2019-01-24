@@ -39,16 +39,16 @@ services:
       - ./docker/env/web.env
       - ./docker/env/db.prod.env
       - ./docker/env/web.prod.env
+      - ./docker/env/secret.env
     environment:
       - DJANGO_SETTINGS_MODULE=FlOpEDT.settings.production
-      - DJANGO_COLLECTSTATIC=on
-      - DJANGO_MIGRATE=on
+      - START_SERVER=${START_SERVER:-on}
       - DJANGO_LOADDATA
-      - CONFIG
+      - CONFIG=production
     expose:
       - "8000"
     volumes:
-      - static-volume:/code/FlOpEDT/static      
+      - static-volume:/code/FlOpEDT/static
     depends_on:
       - db
       - redis      
