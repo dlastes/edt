@@ -1485,7 +1485,18 @@ function which_slot(x, y, w, h) {
         (dim_dispo.width + dim_dispo.right));
     var day = Math.floor((x + .5 * w) / wday);
     var hslot = nbRows * labgp.height;
-    var slot = Math.floor((y + .5 * h) / hslot);
+    var partial_y = y + .5 * h ;
+    
+    if (partial_y > bknews_top_y()) {
+	if (partial_y < bknews_bot_y()) {
+	    return null ;
+	} else {
+	    partial_y -= bknews_h() ;
+	}
+    }
+    
+    var slot = Math.floor(partial_y / hslot);
+
     return {
         day: day,
         slot: slot
