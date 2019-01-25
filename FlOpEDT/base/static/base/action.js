@@ -300,7 +300,6 @@ function fetch_all_tutors() {
 	    },
 	    complete: function(msg) {
 		console.log("complete");
-	    show_loader(false);
 	    }
 	});
     }
