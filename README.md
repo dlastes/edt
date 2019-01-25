@@ -53,7 +53,10 @@ Les paramètres de la configuration courante se trouvent dans
 `development`. On peut spécifier une autre configuration en modifiant
 la variable d'environnement `CONFIG` comme suit :
 
-`export CONFIG=production && make start`
+`CONFIG=production make [build|init|start|stop]`
+
+Dans cet exemple de configuration pour un environnement de production, il est nécessaire de définir la variable `SECRET_KEY=your_very_secret_key` dans le fichier `/docker/env/secret.env`.
+
 
 ## Contributions
 - [Discuter](https://framateam.org/flopedt/)

@@ -19,11 +19,10 @@ services:
       - ./docker/env/web.env
     environment:
       - DJANGO_SETTINGS_MODULE=FlOpEDT.settings.development
-      - DJANGO_COLLECTSTATIC=off
-      - DJANGO_MIGRATE=on
+      - START_SERVER=${START_SERVER:-on}
       - DJANGO_LOADDATA
+      - CONFIG=development
     entrypoint: /code/docker/script/init.sh      
-    command: /code/FlOpEDT/manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/code
     ports:
