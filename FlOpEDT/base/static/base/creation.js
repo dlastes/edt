@@ -1488,7 +1488,11 @@ function which_slot(x, y, w, h) {
     var partial_y = y + .5 * h ;
     
     if (partial_y > bknews_top_y()) {
-	partial_y -= bknews_h() ;
+        if (partial_y < bknews_bot_y()) {
+            partial_y = nbSl * hslot ;
+        } else {
+	    partial_y -= bknews_h() ;
+        }
     }
     
     var slot = Math.floor(partial_y / hslot);
