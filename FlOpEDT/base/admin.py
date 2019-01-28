@@ -342,7 +342,7 @@ class GroupAdmin(DepartmentModelAdmin):
 class RoomGroupAdmin(DepartmentModelAdmin):
     list_display = ('name',)
 
-    
+  
 class RoomPreferenceAdmin(DepartmentModelAdmin):
     list_display = ('room', 'semaine', 'an', 'creneau', 'valeur')
     ordering = ('-an','-semaine','creneau')
@@ -403,14 +403,6 @@ class CoursPlaceAdmin(DepartmentModelAdmin):
         ('cours__tutor', DropdownFilterRel),
         ('cours__an', DropdownFilterAll),
         ('cours__semaine', DropdownFilterAll),)
-
-
-class EdtVersionAdmin(DepartmentModelAdmin):
-    list_display = ('semaine', 'version', 'an')
-    ordering = ('-an', '-semaine', 'version')
-    list_filter = (('semaine', DropdownFilterAll),
-                   ('an', DropdownFilterAll)
-                   )
 
 
 class CoursePreferenceAdmin(DepartmentModelAdmin):
@@ -507,7 +499,6 @@ admin.site.register(RoomPreference, RoomPreferenceAdmin)
 admin.site.register(RoomSort, RoomSortAdmin)
 admin.site.register(Module, ModuleAdmin)
 admin.site.register(Course, CourseAdmin)
-admin.site.register(EdtVersion, EdtVersionAdmin)
 admin.site.register(CourseModification, CourseModificationAdmin)
 admin.site.register(CoursePreference, CoursePreferenceAdmin)
 admin.site.register(Dependency, DependencyAdmin)
