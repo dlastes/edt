@@ -35,7 +35,8 @@ from django.db.models.fields import related as related_fields
 from django.contrib import admin
 import django.contrib.auth as auth
 
-from FlOpEDT.filters import DropdownFilterAll, DropdownFilterRel
+from FlOpEDT.filters import DropdownFilterAll, DropdownFilterRel, DropdownFilterSimple
+
 from people.models import Tutor, User
 from base.models import Day, RoomGroup, Module, Course, Group, Slot, \
     UserPreference, Time, ScheduledCourse, EdtVersion, CourseModification, \
@@ -306,11 +307,11 @@ class BreakingNewsAdmin(DepartmentModelAdmin):
     ordering = ('-year', '-week')
 
     
-class HolidayAdmin(DepartmentModelAdmin):
+class HolidayAdmin(admin.ModelAdmin):
     list_display = ('day', 'week', 'year')
     ordering = ('-year', '-week', 'day')
     list_filter = (
-        ('day', DropdownFilterRel),
+        ('day', DropdownFilterSimple),
         ('year', DropdownFilterAll),
         ('week', DropdownFilterAll),
     )

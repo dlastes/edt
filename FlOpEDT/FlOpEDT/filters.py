@@ -74,3 +74,7 @@ class DropdownFilterRel(DropdownFilterDepartmentMixin, RelatedOnlyFieldListFilte
 
 class DropdownFilterCho(DropdownFilterDepartmentMixin, ChoicesFieldListFilter):
     template = 'admin/dropdown_filter.html'
+
+
+class DropdownFilterSimple(DropdownFilterDepartmentMixin, ChoicesFieldListFilter):
+    template = 'admin/dropdown_filter.html'
