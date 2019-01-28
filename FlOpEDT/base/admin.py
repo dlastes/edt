@@ -26,14 +26,13 @@ import logging
 from django.contrib import admin
 from django.db.models.fields.related import RelatedField
 
+from people.models import Tutor, User
+
 from base.models import Day, RoomGroup, Module, Course, Group, Slot, \
     UserPreference, Time, ScheduledCourse, EdtVersion, CourseModification, \
     PlanningModification, BreakingNews, TrainingProgramme, ModuleDisplay, \
     Regen, Holiday, TrainingHalfDay, RoomPreference, RoomSort, \
-    CoursePreference, Dependency, RoomType, Department
-
-from base.models import CourseType
-from people.models import Tutor, User
+    CoursePreference, Dependency, RoomType, Department, CourseType
 
 from core.department import get_model_department_lookup
 
@@ -41,12 +40,10 @@ import django.contrib.auth as auth
 from django.core.exceptions import FieldDoesNotExist
 from django.db.models.fields import related as related_fields
 
-
 from import_export import resources, fields
 from import_export.widgets import ForeignKeyWidget
 
-from FlOpEDT.filters import DropdownFilterAll, DropdownFilterRel, \
-    DropdownFilterCho
+from FlOpEDT.filters import DropdownFilterAll, DropdownFilterRel, DropdownFilterSimple
 
 logger = logging.getLogger('admin')
 
@@ -317,11 +314,11 @@ class BreakingNewsAdmin(DepartmentModelAdmin):
     ordering = ('-year', '-week')
 
     
-class HolidayAdmin(DepartmentModelAdmin):
+class HolidayAdmin(admin.ModelAdmin):
     list_display = ('day', 'week', 'year')
     ordering = ('-year', '-week', 'day')
     list_filter = (
-        ('day', DropdownFilterRel),
+        ('day', DropdownFilterSimple),
         ('year', DropdownFilterAll),
         ('week', DropdownFilterAll),
     )
