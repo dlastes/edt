@@ -20,7 +20,7 @@ class EventFeed(ICalFeed):
     def item_title(self, scourse):
         course = scourse.cours
         return (f'{course.module.abbrev} {course.type.name} '
-                f'- {course.groupe.train_prog.abbrev} {course.groupe.nom}'
+                f'- {course.groupe.train_prog.abbrev} G{course.groupe.nom}'
         )
 
     def item_description(self, scourse):
@@ -61,7 +61,7 @@ class TutorEventFeed(EventFeed):
         course = scourse.cours
         location = scourse.room.name if scourse.room is not None else ''
         return (f'{course.module.abbrev} {course.type.name} '
-                f'- {course.groupe.train_prog.abbrev}{course.groupe.nom} '
+                f'- {course.groupe.train_prog.abbrev} G{course.groupe.nom} '
                 f'- {location}'
         )
 
@@ -82,7 +82,7 @@ class RoomEventFeed(EventFeed):
     def item_title(self, scourse):
         course = scourse.cours
         return (f'{course.module.abbrev} {course.type.name} '
-                f'- {course.groupe.train_prog.abbrev}{course.groupe.nom}'
+                f'- {course.groupe.train_prog.abbrev} G{course.groupe.nom}'
                 f'- {course.tutor.username}'
         )
 
