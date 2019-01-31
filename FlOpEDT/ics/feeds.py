@@ -57,6 +57,13 @@ class TutorEventFeed(EventFeed):
     def items(self, tutor):
         return ScheduledCourse.objects.filter(cours__tutor=tutor, copie_travail=0).order_by('-cours__an','-cours__semaine')
 
+    def item_title(self, scourse):
+        course = scourse.cours
+        location = scourse.room.name if scourse.room is not None else ''
+        return (f'{course.module.abbrev} {course.type.name} '
+                f'- {course.groupe.train_prog.abbrev}{course.groupe.nom} '
+                f'- {location}'
+        )
 
 class RoomEventFeed(EventFeed):
     def get_object(self, request, department, room):
@@ -72,6 +79,13 @@ class RoomEventFeed(EventFeed):
     def items(self, room_groups):
         return ScheduledCourse.objects.filter(room__in=room_groups, copie_travail=0).order_by('-cours__an','-cours__semaine')
 
+    def item_title(self, scourse):
+        course = scourse.cours
+        return (f'{course.module.abbrev} {course.type.name} '
+                f'- {course.groupe.train_prog.abbrev}{course.groupe.nom}'
+                f'- {course.tutor.username}'
+        )
+
 
 class GroupEventFeed(EventFeed):
     def get_object(self, request, department, training_programme, group):
@@ -84,3 +98,11 @@ class GroupEventFeed(EventFeed):
 
     def items(self, groups):
         return ScheduledCourse.objects.filter(cours__groupe__in=groups, copie_travail=0).order_by('-cours__an','-cours__semaine')
+
+    def item_title(self, scourse):
+        course = scourse.cours
+        location = scourse.room.name if scourse.room is not None else ''
+        return (f'{course.module.abbrev} {course.type.name} '
+                f'- {course.tutor.username} '
+                f'- {location}'
+        )
