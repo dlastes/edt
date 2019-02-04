@@ -24,28 +24,26 @@
 # without disclosing the source code of your own applications.
 import logging
 from django.contrib import admin
+from django.db.models.fields.related import RelatedField
+
+from people.models import Tutor, User
 
 from base.models import Day, RoomGroup, Module, Course, Group, Slot, \
     UserPreference, Time, ScheduledCourse, EdtVersion, CourseModification, \
     PlanningModification, BreakingNews, TrainingProgramme, ModuleDisplay, \
     Regen, Holiday, TrainingHalfDay, RoomPreference, RoomSort, \
-    CoursePreference, Dependency, RoomType, Department
+    CoursePreference, Dependency, RoomType, Department, CourseType
 
-from base.models import CourseType
-from core.department import get_department_lookup
-from people.models import Tutor, User
-
+from core.department import get_model_department_lookup
 
 import django.contrib.auth as auth
 from django.core.exceptions import FieldDoesNotExist
-from django.db .models.fields import related as related_fields
-
+from django.db.models.fields import related as related_fields
 
 from import_export import resources, fields
 from import_export.widgets import ForeignKeyWidget
 
-from FlOpEDT.filters import DropdownFilterAll, DropdownFilterRel, \
-    DropdownFilterCho
+from FlOpEDT.filters import DropdownFilterAll, DropdownFilterRel, DropdownFilterSimple
 
 logger = logging.getLogger('admin')
 
@@ -221,6 +219,7 @@ class DepartmentModelAdmin(admin.ModelAdmin):
 
         return exclude
 
+    
     def save_model(self, request, obj, form, change):
         #
         # Set department field value if exists on the model
@@ -233,6 +232,7 @@ class DepartmentModelAdmin(admin.ModelAdmin):
         
         super().save_model(request, obj, form, change)        
 
+    
     def save_related(self, request, form, formsets, change):
         super().save_related(request, form, formsets, change)
         model = form.instance
@@ -242,18 +242,25 @@ class DepartmentModelAdmin(admin.ModelAdmin):
                     if isinstance(field, related_fields.ManyToManyField):
                         field.save_form_data(model, [request.department,])
 
+
+    def get_department_lookup(self, department):
+        """
+        Hook for overriding default department lookup research
+        """
+        return get_model_department_lookup(self.model, department)
+
+    
     def get_queryset(self, request):
-        #
-        # Filter only department related instances
-        #
+        """
+        Filter only department related instances
+        """
         qs = super().get_queryset(request)
         
         try:
             if hasattr(request, 'department'):
-                for f in self.model._meta.get_fields():
-                    related_filter = get_department_lookup(f, request.department)
-                    if related_filter:
-                        return qs.filter(**related_filter).distinct()
+                related_filter = self.get_department_lookup(request.department)
+                if related_filter:                    
+                    return qs.filter(**related_filter).distinct()
         except FieldDoesNotExist:
             pass
 
@@ -261,13 +268,17 @@ class DepartmentModelAdmin(admin.ModelAdmin):
 
 
     def formfield_with_department_filtering(self, db_field, request, kwargs):
-        #
-        # Filter form fields for with specific department related items
-        #
+        """
+        Filter form fields for with specific department related items
+        """
+
         if hasattr(request, 'department') and db_field.related_model: 
-            related_filter = get_department_lookup(db_field, request.department, include_field_name=False)
+            related_filter = get_model_department_lookup(db_field.related_model, request.department)
             if related_filter:
-                kwargs["queryset"] = db_field.related_model.objects.filter(**related_filter).distinct()
+                db = kwargs.get('using')
+                queryset = self.get_field_queryset(db, db_field, request)
+                if queryset:
+                    kwargs["queryset"] = queryset
 
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
@@ -275,9 +286,26 @@ class DepartmentModelAdmin(admin.ModelAdmin):
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
-    def formfield_for_manytomany(self, db_field, request, **kwargs):
-        self.formfield_with_department_filtering(db_field, request, kwargs)
-        return super().formfield_for_manytomany(db_field, request, **kwargs)
+    # def formfield_for_manytomany(self, db_field, request, **kwargs):
+    #     self.formfield_with_department_filtering(db_field, request, kwargs)
+    #     return super().formfield_for_manytomany(db_field, request, **kwargs)
+
+
+    def get_field_queryset(self, db, db_field, request):
+
+        queryset = super().get_field_queryset(db, db_field, request)
+        related_filter = get_model_department_lookup(db_field.related_model, request.department)
+
+        if related_filter:
+            if queryset:
+                return queryset.filter(**related_filter).distinct()
+            else:
+                return db_field.remote_field \
+                        .model._default_manager \
+                        .using(db) \
+                        .filter(**related_filter).distinct()
+
+        return queryset
 
 
 class BreakingNewsAdmin(DepartmentModelAdmin):
@@ -286,11 +314,11 @@ class BreakingNewsAdmin(DepartmentModelAdmin):
     ordering = ('-year', '-week')
 
     
-class HolidayAdmin(DepartmentModelAdmin):
+class HolidayAdmin(admin.ModelAdmin):
     list_display = ('day', 'week', 'year')
     ordering = ('-year', '-week', 'day')
     list_filter = (
-        ('day', DropdownFilterRel),
+        ('day', DropdownFilterSimple),
         ('year', DropdownFilterAll),
         ('week', DropdownFilterAll),
     )
@@ -311,7 +339,7 @@ class GroupAdmin(DepartmentModelAdmin):
 class RoomGroupAdmin(DepartmentModelAdmin):
     list_display = ('name',)
 
-    
+  
 class RoomPreferenceAdmin(DepartmentModelAdmin):
     list_display = ('room', 'semaine', 'an', 'creneau', 'valeur')
     ordering = ('-an','-semaine','creneau')
@@ -372,14 +400,6 @@ class CoursPlaceAdmin(DepartmentModelAdmin):
         ('cours__tutor', DropdownFilterRel),
         ('cours__an', DropdownFilterAll),
         ('cours__semaine', DropdownFilterAll),)
-
-
-class EdtVersionAdmin(DepartmentModelAdmin):
-    list_display = ('semaine', 'version', 'an')
-    ordering = ('-an', '-semaine', 'version')
-    list_filter = (('semaine', DropdownFilterAll),
-                   ('an', DropdownFilterAll)
-                   )
 
 
 class CoursePreferenceAdmin(DepartmentModelAdmin):
@@ -476,7 +496,6 @@ admin.site.register(RoomPreference, RoomPreferenceAdmin)
 admin.site.register(RoomSort, RoomSortAdmin)
 admin.site.register(Module, ModuleAdmin)
 admin.site.register(Course, CourseAdmin)
-admin.site.register(EdtVersion, EdtVersionAdmin)
 admin.site.register(CourseModification, CourseModificationAdmin)
 admin.site.register(CoursePreference, CoursePreferenceAdmin)
 admin.site.register(Dependency, DependencyAdmin)

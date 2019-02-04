@@ -60,7 +60,8 @@ class TrainingProgramme(models.Model):
 
 class GroupType(models.Model):
     name = models.CharField(max_length=50)
-
+    department =  models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
+    
     def __str__(self):
         return self.name
 
@@ -437,7 +438,8 @@ class EdtVersion(models.Model):
     an = models.PositiveSmallIntegerField()
     version = models.PositiveIntegerField(default=0)
 
-
+    class Meta:
+        unique_together = (("department","semaine","an"),)
 #    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
 
@@ -618,7 +620,7 @@ class Regen(models.Model):
         pre = ''
         if self.full:
             pre = 'C,' + str(self.fday) + "/" + str(self.fmonth) \
-                  + "/" + str(self.fyear) + " "
+                  + "/" + str(self.fyear)
         if self.stabilize:
             pre = 'S,' + str(self.sday) + "/" + str(self.smonth) \
                   + "/" + str(self.syear)

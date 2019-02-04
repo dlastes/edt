@@ -331,12 +331,6 @@ def fetch_cours_pl(req, year, week, num_copy, **kwargs):
     response['jours'] = str(num_days(year, week))
     response['num_copy'] = num_copy
     
-    try:
-        regen = str(Regen.objects.get(department=department, semaine=week, an=year))
-    except ObjectDoesNotExist:
-        regen = 'I'
-    response['regen'] = regen
-
     cached = cache.set(cache_key, response)
     return response
 
@@ -384,7 +378,7 @@ def fetch_cours_pp(req, week, year, num_copy, **kwargs):
 def fetch_dispos(req, year, week, **kwargs):
     print("================")
     if not req.user.is_authenticated:
-        return HttpResponse("Pas connecte", status=500)
+        return HttpResponse("Pas connecte", status=401)
     print("================")
 
     try:
@@ -430,10 +424,6 @@ def fetch_dispos(req, year, week, **kwargs):
 
     cache.set(cache_key, response)
     return response
-    #     else:
-    #         return HttpResponse("Pas connecté", status=500)
-    # else:
-    #     return HttpResponse("Pas GET", status=500)
 
 
 def fetch_unavailable_rooms(req, year, week, **kwargs):
@@ -491,15 +481,12 @@ def fetch_all_tutors(req, **kwargs):
 
 @login_required
 def fetch_stype(req, **kwargs):
-    # if req.method == 'GET':
     dataset = DispoResource() \
         .export(UserPreference.objects \
                 .filter(semaine=None,
                         user=req.user))  # all())#
     response = HttpResponse(dataset.csv, content_type='text/csv')
     return response
-    # else:
-    #    return HttpResponse("Pas GET",status=500)
 
 
 def fetch_decale(req, **kwargs):
@@ -609,7 +596,7 @@ def fetch_week_infos(req, year, week, **kwargs):
     proposed number of available slots
     (not cached)
     """
-    edt_v = EdtVersion.objects.get(department=req.department,
+    edt_v, _ = EdtVersion.objects.get_or_create(department=req.department,
                                   semaine=week,
                                   an=year)
 
@@ -617,9 +604,15 @@ def fetch_week_infos(req, year, week, **kwargs):
         pref_requirements(req.user, year, week) if req.user.is_authenticated \
         else (-1, -1)
 
+    try:
+        regen = str(Regen.objects.get(department=req.department, semaine=week, an=year))
+    except ObjectDoesNotExist:
+        regen = 'I'
+        
     response = JsonResponse({'version': edt_v.version,
                              'proposed_pref': proposed_pref,
-                             'required_pref': required_pref})
+                             'required_pref': required_pref,
+                             'regen':regen})
     return response
 
 
@@ -1040,8 +1033,9 @@ def decale_changes(req, **kwargs):
         old_year = changing_course.an
 
         edt_versions = EdtVersion.objects.select_for_update().filter(
-            (Q(semaine=old_week)&Q(an=old_year))
-             |(Q(semaine=new_week)&Q(an=new_year)))
+            (Q(semaine=old_week) & Q(an=old_year))
+             |(Q(semaine=new_week) & Q(an=new_year)), department=req.department)
+        
         with transaction.atomic():
             # was the course was scheduled before?
             if c['j'] != -1 and c['h'] != -1:
@@ -1054,7 +1048,7 @@ def decale_changes(req, **kwargs):
                                                old_week,
                                                scheduled_course.copie_travail))
                 scheduled_course.delete()
-                ev = EdtVersion.objects.get(an=old_year, semaine=old_week)
+                ev = EdtVersion.objects.get(an=old_year, semaine=old_week, department=req.department)
                 ev.version += 1
                 ev.save()
             else:
@@ -1080,9 +1074,10 @@ def decale_changes(req, **kwargs):
                                            new_week,
                                            0))
             changing_course.save()
-            ev, res = EdtVersion.objects.update_or_create(
+            ev, _ = EdtVersion.objects.update_or_create(
                 an=new_year,
-                semaine=new_week)
+                semaine=new_week, 
+                department=req.department)
             ev.version += 1
             ev.save()
 

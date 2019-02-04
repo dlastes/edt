@@ -62,8 +62,17 @@ class WeekDB(object):
         self.week = week
         self.year = year
         
+        # TIME
         self.days = Day.objects.all()
         self.slots = Slot.objects.all().order_by('jour', 'heure')
+        
+        # Build a week representation containing slots lists grouped by 
+        # day and half-day. (i.e : {(Day, Half-Day): [Slot1, Slot2]})
+        self.slots_by_days = {}
+        for day in self.days:
+            for apm in [Time.AM, Time.PM]:
+                apm_slots = [s for s in self.slots if s.heure.apm == apm and s.jour == day]
+                self.slots_by_days.update({(day, apm,): apm_slots})
         
         # ROOMS
         self.room_types = RoomType.objects.filter(department=department)
@@ -341,6 +350,16 @@ class TTModel(object):
 
     def sum(self, *args):
         return lpSum(list(*args))
+
+    def check_and_sum(self, dict, *args):
+        """
+        This helper method get a variable list check if the corresponding 
+        expression exists in the given dict and returns the lpSum of 
+        available expressions
+        """
+        expressions =  [dict(v) for v in args if v in dict]
+        return lpSum(expressions)
+
 
     def get_var_value(self, ttvar):
         return round(ttvar.value())
@@ -700,7 +719,7 @@ class TTModel(object):
                         else:
                             unp_slot_cost[i][a.creneau] = 1
 
-                elif all(Holiday.objects.filter(day=x.creneau.jour).exists()
+                elif all(self.wdb.holidays.filter(day=x.creneau.jour).exists()
                          for x in availabilities.filter(valeur__gte=1)):
                     self.add_warning(i, "availabilities only on vacation days!")
                     for a in availabilities:
@@ -753,40 +772,39 @@ class TTModel(object):
 
         non_prefered_slot_cost_course = {}
         avail_course = {}
-        for type in CourseType.objects.all():
+        for course_type in CourseType.objects.all():
             for promo in self.train_prog:
-                avail_course[(type, promo)] = {}
-                non_prefered_slot_cost_course[(type, promo)] = {}
+                avail_course[(course_type, promo)] = {}
+                non_prefered_slot_cost_course[(course_type, promo)] = {}
                 courses_avail = self.wdb \
                     .courses_availabilities \
-                    .filter(course_type=type, train_prog=promo)
-                if not courses_avail:
+                    .filter(course_type=course_type, train_prog=promo)
+                if not courses_avail.exists():
                     courses_avail = CoursePreference.objects \
-                        .filter(course_type=type,
+                        .filter(course_type=course_type,
                                 train_prog=promo,
                                 semaine=None,
                                 an=annee_courante)
-                for sl in self.wdb.slots:
-                    try:
-                        a = courses_avail.get(creneau=sl)
-                        if a.valeur == 0:
-                            avail_course[(type, promo)][a.creneau] = 0
-                            non_prefered_slot_cost_course[(type,
-                                                           promo)][
-                                a.creneau] = 5
+                if not courses_avail.exists():
+                    print("No course availability given for %s - %s"% (course_type, promo))
+                    for sl in self.wdb.slots:
+                        avail_course[(course_type, promo)][sl] = 1
+                        non_prefered_slot_cost_course[(course_type,
+                                                       promo)][sl] = 0
+                else:
+                    for sl in self.wdb.slots:
+                        try:
+                            valeur = courses_avail.get(creneau=sl).valeur
+                        except:
+                            valeur = min(c.valeur for c in courses_avail.filter(creneau=sl))
+                        if valeur == 0:
+                            avail_course[(course_type, promo)][sl] = 0
+                            non_prefered_slot_cost_course[(course_type, promo)][sl] = 5
                         else:
-                            avail_course[(type, promo)][a.creneau] = 1
-                            non_prefered_slot_cost_course[(type,
-                                                           promo)][a.creneau] \
-                                = 1 - float(a.valeur) / 8
-                    except:
-                        avail_course[(type, promo)][sl] = 1
-                        non_prefered_slot_cost_course[(type,
-                                                       promo)][sl] \
-                            = 0
-                        # print "Course availability problem " \
-                        #       "for %s - %s on slot %s" \
-                        #       % (type, promo, sl)
+                            avail_course[(course_type, promo)][sl] = 1
+                            non_prefered_slot_cost_course[(course_type,
+                                                           promo)][sl] \
+                                = 1 - float(valeur) / 8
 
         return non_prefered_slot_cost_course, avail_course
 
@@ -930,7 +948,7 @@ class TTModel(object):
         if 'gurobi' in solver.lower():
             # ignore SIGINT while solver is running
             # => SIGINT is still delivered to the solver, which is what we want
-            # signal.signal(signal.SIGINT, signal.SIG_IGN)
+            signal.signal(signal.SIGINT, signal.SIG_IGN)
             self.model.solve(GUROBI_CMD(keepFiles=1,
                                         msg=True,
                                         options=[("TimeLimit", time_limit),
@@ -1015,7 +1033,9 @@ def get_constraints(department, week=None, year=None, train_prog=None, is_active
         
     if week and train_prog:
         query &= \
+            Q(train_prog__abbrev=train_prog) & Q(week__isnull=True) & Q(year__isnull=True) | \
             Q(train_prog__abbrev=train_prog) & Q(week=week) & Q(year=year) | \
+            Q(train_prog__isnull=True) & Q(week=week) & Q(year=year) | \
             Q(train_prog__isnull=True) & Q(week__isnull=True) & Q(year__isnull=True)
     elif week:
         query &= Q(week=week) & Q(year=year) | Q(week__isnull=True) & Q(year__isnull=True)            

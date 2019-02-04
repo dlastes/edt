@@ -4,7 +4,7 @@ from unittest.mock import patch, Mock, call
 
 from base.models import Department, TrainingProgramme, Course, CourseType, Time
 from people.models import Tutor
-from TTapp.models import LimitCourseTypePerPeriod
+from TTapp.models import LimitCourseTypePerPeriod, MinHalfDays
 from TTapp.TTModel import TTModel
 
 
@@ -93,4 +93,19 @@ class TTConstraintTestCase(TestCase):
     @patch('TTapp.models.ReasonableDays.register_expression')
     def test_reasonable_register_expression_with_tutors(self, register_expression):
         pass
+
+    @patch('TTapp.helpers.minhalfdays.MinHalfDaysHelperTutor.enrich_model')
+    def test_minhalfdayshelpertutor(self, enrich_model):
+
+        ttmodel = Mock()
+
+        # Ensure enrich_model has been called with correct tutor
+        calls = []
+        constraint = MinHalfDays.objects.create(department=self.info)
+        for tutor in Tutor.objects.filter(username__in=['AB', 'AJ', 'CDU', 'FMA']):
+            calls.append(call(tutor=tutor))
+            constraint.tutors.add(tutor)
+
+        constraint.enrich_model(ttmodel)
+        enrich_model.assert_has_calls(calls)
         

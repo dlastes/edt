@@ -46,7 +46,7 @@
 
 from django.contrib.admin.filters import AllValuesFieldListFilter, RelatedFieldListFilter, \
                                         ChoicesFieldListFilter, RelatedOnlyFieldListFilter
-from core.department import get_department_lookup
+from core.department import get_model_department_lookup
 from django.db.models.fields import BLANK_CHOICE_DASH
 
 class DropdownFilterDepartmentMixin():
@@ -55,7 +55,7 @@ class DropdownFilterDepartmentMixin():
         queryset = field.related_model._default_manager.all()
         
         if hasattr(request, 'department'):
-            lookup = get_department_lookup(field, request.department, include_field_name=False)
+            lookup = get_model_department_lookup(field.related_model, request.department)
             if lookup:
                 queryset = field.related_model._default_manager \
                                 .filter(**lookup) \
@@ -73,4 +73,8 @@ class DropdownFilterRel(DropdownFilterDepartmentMixin, RelatedOnlyFieldListFilte
 
 
 class DropdownFilterCho(DropdownFilterDepartmentMixin, ChoicesFieldListFilter):
+    template = 'admin/dropdown_filter.html'
+
+
+class DropdownFilterSimple(DropdownFilterDepartmentMixin, ChoicesFieldListFilter):
     template = 'admin/dropdown_filter.html'

@@ -448,22 +448,6 @@
     }
 },
 {
-    "model": "sessions.session",
-    "pk": "bms08t6ob8wqr8rhbsts4z7ojyulr3vr",
-    "fields": {
-        "session_data": "Y2UwMzdhZGVmNWVhNzg1MmQ1ZmUyN2ExYmFjOTU4NmFiYzE1MzgzZDp7Il9hdXRoX3VzZXJfaWQiOiI0NiIsIl9hdXRoX3VzZXJfYmFja2VuZCI6ImRqYW5nby5jb250cmliLmF1dGguYmFja2VuZHMuTW9kZWxCYWNrZW5kIiwiX2F1dGhfdXNlcl9oYXNoIjoiNmE5NTU5ZGM1MzUxOGFkYjMzMjM4YzcxNzExYTgyYWY1YTI0ZDVjNCJ9",
-        "expire_date": "2018-11-19T08:36:47.908Z"
-    }
-},
-{
-    "model": "sessions.session",
-    "pk": "zqc9uwwghdc7owbzojfryxlcettg1ikt",
-    "fields": {
-        "session_data": "ODMyNThiNjhlNTk2YWE0MjMwNTBhNWZiZWQwOWU5ZGRmZmJhNzM0ZDp7Il9hdXRoX3VzZXJfaWQiOiI0NiIsIl9hdXRoX3VzZXJfYmFja2VuZCI6ImRqYW5nby5jb250cmliLmF1dGguYmFja2VuZHMuTW9kZWxCYWNrZW5kIiwiX2F1dGhfdXNlcl9oYXNoIjoiMDFjMTNlYWM4MGNhYzBhY2Q1NTdjZmMxYzA5YmZhNTc2MmQ1ZTdjYiJ9",
-        "expire_date": "2018-07-27T22:55:52.860Z"
-    }
-},
-{
     "model": "base.department",
     "pk": 1,
     "fields": {
@@ -502,21 +486,24 @@
     "model": "base.grouptype",
     "pk": 1,
     "fields": {
-        "name": "TP"
+        "name": "TP",
+        "department": 1
     }
 },
 {
     "model": "base.grouptype",
     "pk": 2,
     "fields": {
-        "name": "TD"
+        "name": "TD",
+        "department": 1
     }
 },
 {
     "model": "base.grouptype",
     "pk": 3,
     "fields": {
-        "name": "CE"
+        "name": "CE",
+        "department": 1
     }
 },
 {
@@ -20423,7 +20410,7 @@
         "username": "ALE",
         "first_name": "prenom_de_ALE",
         "last_name": "nom_de_ALE",
-        "email": "mail_de_amelie.legrand@univ-tlse2.fr",
+        "email": "ALE@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:48.813Z",
@@ -20444,7 +20431,7 @@
         "username": "AB",
         "first_name": "prenom_de_AB",
         "last_name": "nom_de_AB",
-        "email": "mail_de_aniela.bastide@gmail.com",
+        "email": "AB@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:49.005Z",
@@ -20465,7 +20452,7 @@
         "username": "AL",
         "first_name": "prenom_de_AL",
         "last_name": "nom_de_AL",
-        "email": "mail_de_al.coachingpro@gmail.com",
+        "email": "AL@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:49.161Z",
@@ -20486,7 +20473,7 @@
         "username": "AP",
         "first_name": "prenom_de_AP",
         "last_name": "nom_de_AP",
-        "email": "mail_de_andre.peninou@univ-tlse2.fr",
+        "email": "AP@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:49.304Z",
@@ -20507,7 +20494,7 @@
         "username": "CCL",
         "first_name": "prenom_de_CCL",
         "last_name": "nom_de_CCL",
-        "email": "mail_de_celine.classe@akka.eu",
+        "email": "CCL@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:49.450Z",
@@ -20528,7 +20515,7 @@
         "username": "CDE",
         "first_name": "prenom_de_CDE",
         "last_name": "nom_de_CDE",
-        "email": "mail_de_cdelagarde.professionnal@gmail.com",
+        "email": "CDE@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:49.593Z",
@@ -20549,7 +20536,7 @@
         "username": "CDU",
         "first_name": "prenom_de_CDU",
         "last_name": "nom_de_CDU",
-        "email": "mail_de_cedric.dutour@yahoo.fr",
+        "email": "CDU@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:49.738Z",
@@ -20570,7 +20557,7 @@
         "username": "CLA",
         "first_name": "prenom_de_CLA",
         "last_name": "nom_de_CLA",
-        "email": "mail_de_carole.lauby@gmail.com",
+        "email": "CLA@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:49.882Z",
@@ -20591,7 +20578,7 @@
         "username": "CMG",
         "first_name": "prenom_de_CMG",
         "last_name": "nom_de_CMG",
-        "email": "mail_de_c.morand.guibert@gmail.com",
+        "email": "CMG@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:50.026Z",
@@ -20612,7 +20599,7 @@
         "username": "EA",
         "first_name": "prenom_de_EA",
         "last_name": "nom_de_EA",
-        "email": "mail_de_evelyne.armstrong@univ-perp.fr",
+        "email": "EA@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:50.171Z",
@@ -20633,7 +20620,7 @@
         "username": "EP",
         "first_name": "prenom_de_EP",
         "last_name": "nom_de_EP",
-        "email": "mail_de_esther.pendaries@univ-tlse2.fr",
+        "email": "EP@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:50.315Z",
@@ -20654,7 +20641,7 @@
         "username": "EPE",
         "first_name": "prenom_de_EPE",
         "last_name": "nom_de_EPE",
-        "email": "mail_de_eric.peladan@gmail.com",
+        "email": "EPE@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:50.448Z",
@@ -20675,7 +20662,7 @@
         "username": "FG",
         "first_name": "prenom_de_FG",
         "last_name": "nom_de_FG",
-        "email": "mail_de_galinierflo@gmail.com",
+        "email": "FG@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:50.594Z",
@@ -20696,7 +20683,7 @@
         "username": "FMO",
         "first_name": "prenom_de_FMO",
         "last_name": "nom_de_FMO",
-        "email": "mail_de_fmtlse31@gmail.com",
+        "email": "FMO@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:50.737Z",
@@ -20717,7 +20704,7 @@
         "username": "FP",
         "first_name": "prenom_de_FP",
         "last_name": "nom_de_FP",
-        "email": "mail_de_fabrice.pelleau@univ-tlse2.fr",
+        "email": "FP@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:50.882Z",
@@ -20738,7 +20725,7 @@
         "username": "GRJ",
         "first_name": "prenom_de_GRJ",
         "last_name": "nom_de_GRJ",
-        "email": "mail_de_geoffrey.romanjimenez@univ-nantes.fr",
+        "email": "GRJ@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:51.038Z",
@@ -20759,7 +20746,7 @@
         "username": "IC",
         "first_name": "prenom_de_IC",
         "last_name": "nom_de_IC",
-        "email": "mail_de_isabelle.clavel@univ-tlse2.fr",
+        "email": "IC@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:51.182Z",
@@ -20780,7 +20767,7 @@
         "username": "IO",
         "first_name": "prenom_de_IO",
         "last_name": "nom_de_IO",
-        "email": "mail_de_iulian.ober@univ-tlse2.fr",
+        "email": "IO@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:51.326Z",
@@ -20801,7 +20788,7 @@
         "username": "JBS",
         "first_name": "prenom_de_JBS",
         "last_name": "nom_de_JBS",
-        "email": "mail_de_saudan@hpe.com",
+        "email": "JBS@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:51.471Z",
@@ -20822,7 +20809,7 @@
         "username": "JC",
         "first_name": "prenom_de_JC",
         "last_name": "nom_de_JC",
-        "email": "mail_de_Jerome.Courtine@ac-toulouse.fr",
+        "email": "JC@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:51.626Z",
@@ -20843,7 +20830,7 @@
         "username": "JD",
         "first_name": "prenom_de_JD",
         "last_name": "nom_de_JD",
-        "email": "mail_de_jerome.djebari@gmail.com",
+        "email": "JD@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:51.771Z",
@@ -20864,7 +20851,7 @@
         "username": "JL",
         "first_name": "prenom_de_JL",
         "last_name": "nom_de_JL",
-        "email": "mail_de_jerome.lopusniac@univ-tlse2.fr",
+        "email": "JL@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:51.916Z",
@@ -20885,7 +20872,7 @@
         "username": "JMB",
         "first_name": "prenom_de_JMB",
         "last_name": "nom_de_JMB",
-        "email": "mail_de_jean-michel.bruel@univ-tlse2.fr",
+        "email": "JMB@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:52.060Z",
@@ -20906,7 +20893,7 @@
         "username": "LC",
         "first_name": "prenom_de_LC",
         "last_name": "nom_de_LC",
-        "email": "mail_de_louis.chanouha+iut@univ-toulouse.fr",
+        "email": "LC@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:52.205Z",
@@ -20927,7 +20914,7 @@
         "username": "LD",
         "first_name": "prenom_de_LD",
         "last_name": "nom_de_LD",
-        "email": "mail_de_laurent.demay@univ-tlse2.fr",
+        "email": "LD@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:52.350Z",
@@ -20948,7 +20935,7 @@
         "username": "LG",
         "first_name": "prenom_de_LG",
         "last_name": "nom_de_LG",
-        "email": "mail_de_lucie.guiteras@laposte.net",
+        "email": "LG@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:52.526Z",
@@ -20969,7 +20956,7 @@
         "username": "LN",
         "first_name": "prenom_de_LN",
         "last_name": "nom_de_LN",
-        "email": "mail_de_laurent.nonne@univ-tlse2.fr",
+        "email": "LN@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:52.682Z",
@@ -20990,7 +20977,7 @@
         "username": "LR",
         "first_name": "prenom_de_LR",
         "last_name": "nom_de_LR",
-        "email": "mail_de_laurence.redon@univ-tlse2.fr",
+        "email": "LR@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:52.848Z",
@@ -21011,7 +20998,7 @@
         "username": "MAC",
         "first_name": "prenom_de_MAC",
         "last_name": "nom_de_MAC",
-        "email": "mail_de_marieange.castillon@free.fr",
+        "email": "MAC@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:53.005Z",
@@ -21032,7 +21019,7 @@
         "username": "MD",
         "first_name": "prenom_de_MD",
         "last_name": "nom_de_MD",
-        "email": "mail_de_mathieu@dartic.fr",
+        "email": "MD@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:53.148Z",
@@ -21053,7 +21040,7 @@
         "username": "MDM",
         "first_name": "prenom_de_MDM",
         "last_name": "nom_de_MDM",
-        "email": "mail_de_marianne.de-michiel@univ-tlse2.fr",
+        "email": "MDM@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:53.293Z",
@@ -21074,7 +21061,7 @@
         "username": "MFC",
         "first_name": "prenom_de_MFC",
         "last_name": "nom_de_MFC",
-        "email": "mail_de_marie-francoise.canut@univ-tlse2.fr",
+        "email": "MFC@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:53.438Z",
@@ -21095,7 +21082,7 @@
         "username": "MJT",
         "first_name": "prenom_de_MJT",
         "last_name": "nom_de_MJT",
-        "email": "mail_de_marie-jo.tragin@wanadoo.fr",
+        "email": "MJT@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:53.582Z",
@@ -21116,7 +21103,7 @@
         "username": "MN",
         "first_name": "prenom_de_MN",
         "last_name": "nom_de_MN",
-        "email": "mail_de_muriel@adelante-solutions.fr",
+        "email": "MN@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:53.726Z",
@@ -21137,7 +21124,7 @@
         "username": "NH",
         "first_name": "prenom_de_NH",
         "last_name": "nom_de_NH",
-        "email": "mail_de_nabil.hanine@free.fr",
+        "email": "NH@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:53.870Z",
@@ -21158,7 +21145,7 @@
         "username": "NJ",
         "first_name": "prenom_de_NJ",
         "last_name": "nom_de_NJ",
-        "email": "mail_de_baptiste@irit.fr",
+        "email": "NJ@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:54.015Z",
@@ -21179,7 +21166,7 @@
         "username": "NJO",
         "first_name": "prenom_de_NJO",
         "last_name": "nom_de_NJO",
-        "email": "mail_de_nathalie.joie@orange.fr",
+        "email": "NJO@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:54.160Z",
@@ -21200,7 +21187,7 @@
         "username": "OM",
         "first_name": "prenom_de_OM",
         "last_name": "nom_de_OM",
-        "email": "mail_de_o.martin@wanadoo.fr",
+        "email": "OM@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:54.304Z",
@@ -21221,7 +21208,7 @@
         "username": "OR",
         "first_name": "prenom_de_OR",
         "last_name": "nom_de_OR",
-        "email": "mail_de_olivier.roques@univ-toulouse.fr",
+        "email": "OR@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:54.449Z",
@@ -21242,7 +21229,7 @@
         "username": "OT",
         "first_name": "prenom_de_OT",
         "last_name": "nom_de_OT",
-        "email": "mail_de_teste@irit.fr",
+        "email": "OT@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:54.593Z",
@@ -21263,7 +21250,7 @@
         "username": "PC",
         "first_name": "prenom_de_PC",
         "last_name": "nom_de_PC",
-        "email": "mail_de_phcasteran@wanadoo.fr",
+        "email": "PC@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:54.737Z",
@@ -21284,7 +21271,7 @@
         "username": "PDU",
         "first_name": "prenom_de_PDU",
         "last_name": "nom_de_PDU",
-        "email": "mail_de_patrick_duc@yahoo.fr",
+        "email": "PDU@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:54.905Z",
@@ -21305,7 +21292,7 @@
         "username": "PG",
         "first_name": "prenom_de_PG",
         "last_name": "nom_de_PG",
-        "email": "mail_de_garciap@icloud.com",
+        "email": "PG@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:55.048Z",
@@ -21326,7 +21313,7 @@
         "username": "PRG",
         "first_name": "prenom_de_PRG",
         "last_name": "nom_de_PRG",
-        "email": "mail_de_paul.renaud-goud@univ-tlse2.fr",
+        "email": "PRG@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:55.194Z",
@@ -21347,7 +21334,7 @@
         "username": "PS",
         "first_name": "prenom_de_PS",
         "last_name": "nom_de_PS",
-        "email": "mail_de_patricia.stolf@univ-tlse2.fr",
+        "email": "PS@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:55.338Z",
@@ -21368,7 +21355,7 @@
         "username": "MOI",
         "first_name": "prenom_de_PSE",
         "last_name": "nom_de_PSE",
-        "email": "mail_de_pablo.seban@univ-tlse2.fr",
+        "email": "MOI@flopedt.net",
         "is_staff": true,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:55.482Z",
@@ -21389,7 +21376,7 @@
         "username": "PSO",
         "first_name": "prenom_de_PSO",
         "last_name": "nom_de_PSO",
-        "email": "mail_de_pascal.sotin@univ-tlse2.fr",
+        "email": "PSO@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:55.626Z",
@@ -21410,7 +21397,7 @@
         "username": "RB",
         "first_name": "prenom_de_RB",
         "last_name": "nom_de_RB",
-        "email": "mail_de_remi.boulle@univ-tlse2.fr",
+        "email": "RB@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:55.771Z",
@@ -21431,7 +21418,7 @@
         "username": "RBA",
         "first_name": "prenom_de_RBA",
         "last_name": "nom_de_RBA",
-        "email": "mail_de_Ronan.Baduel@irit.fr",
+        "email": "RBA@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:55.915Z",
@@ -21452,7 +21439,7 @@
         "username": "RL",
         "first_name": "prenom_de_RL",
         "last_name": "nom_de_RL",
-        "email": "mail_de_remy.liscia@univ-tlse2.fr",
+        "email": "RL@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:56.060Z",
@@ -21473,7 +21460,7 @@
         "username": "TA",
         "first_name": "prenom_de_TA",
         "last_name": "nom_de_TA",
-        "email": "mail_de_thierry.alhalel@univ-tlse2.fr",
+        "email": "TA@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:56.204Z",
@@ -21494,7 +21481,7 @@
         "username": "XB",
         "first_name": "prenom_de_XB",
         "last_name": "nom_de_XB",
-        "email": "mail_de_xavier.baril@free.fr",
+        "email": "XB@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:56.349Z",
@@ -21515,7 +21502,7 @@
         "username": "YA",
         "first_name": "prenom_de_YA",
         "last_name": "nom_de_YA",
-        "email": "mail_de_yahya.azzouz@univ-tlse2.fr",
+        "email": "YA@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:56.493Z",
@@ -21536,7 +21523,7 @@
         "username": "YB",
         "first_name": "prenom_de_YB",
         "last_name": "nom_de_YB",
-        "email": "mail_de_y.bouteldja@gmail.com",
+        "email": "YB@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:56.638Z",
@@ -21557,7 +21544,7 @@
         "username": "YF",
         "first_name": "prenom_de_YF",
         "last_name": "nom_de_YF",
-        "email": "mail_de_yahn.formanczak@gmail.com",
+        "email": "YF@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:56.782Z",
@@ -21578,7 +21565,7 @@
         "username": "YG",
         "first_name": "prenom_de_YG",
         "last_name": "nom_de_YG",
-        "email": "mail_de_madame.guillet@orange.fr",
+        "email": "YG@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:56.950Z",
@@ -21599,7 +21586,7 @@
         "username": "MGAD",
         "first_name": "prenom_de_MGAD",
         "last_name": "nom_de_MGAD",
-        "email": "mail_de_monsieur.MGAD@truc.com",
+        "email": "MGAD@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:57.105Z",
@@ -21620,7 +21607,7 @@
         "username": "JS",
         "first_name": "prenom_de_JS",
         "last_name": "nom_de_JS",
-        "email": "mail_de_j.s@u.com",
+        "email": "JS@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:40:57.249Z",
@@ -21641,7 +21628,7 @@
         "username": "AO",
         "first_name": "",
         "last_name": "",
-        "email": "",
+        "email": "AO@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:42:36.149Z",
@@ -21662,7 +21649,7 @@
         "username": "FMA",
         "first_name": "",
         "last_name": "",
-        "email": "",
+        "email": "FMA@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:42:36.245Z",
@@ -21683,7 +21670,7 @@
         "username": "VG",
         "first_name": "",
         "last_name": "",
-        "email": "",
+        "email": "VG@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:42:42.031Z",
@@ -21704,7 +21691,7 @@
         "username": "XXX",
         "first_name": "",
         "last_name": "",
-        "email": "",
+        "email": "XXX@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:42:53.146Z",
@@ -21725,7 +21712,7 @@
         "username": "PSE",
         "first_name": "",
         "last_name": "",
-        "email": "",
+        "email": "PSE@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:42:53.652Z",
@@ -21746,7 +21733,7 @@
         "username": "?",
         "first_name": "",
         "last_name": "",
-        "email": "",
+        "email": "?@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:43:18.556Z",
@@ -21767,7 +21754,7 @@
         "username": "MB",
         "first_name": "",
         "last_name": "",
-        "email": "",
+        "email": "MB@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:45:19.764Z",
@@ -21788,7 +21775,7 @@
         "username": "JMD",
         "first_name": "",
         "last_name": "",
-        "email": "",
+        "email": "JMD@flopedt.net",
         "is_staff": false,
         "is_active": true,
         "date_joined": "2018-07-13T22:46:01.820Z",
@@ -21801,7 +21788,7 @@
 },
 {
     "model": "people.tutor",
-    "pk": 1,
+    "pk": 64,
     "fields": {
         "status": "fs",
         "pref_slots_per_day": 4,
@@ -21840,709 +21827,7 @@
 },
 {
     "model": "people.tutor",
-    "pk": 4,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 5,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 6,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 7,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 8,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 9,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 10,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 11,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 12,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 13,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 14,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 15,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 16,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 17,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 18,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 19,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 20,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 21,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 22,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 23,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 24,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 25,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 26,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 27,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 28,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 29,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 30,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 31,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 32,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 33,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 34,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 35,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 36,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 37,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 38,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 39,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 40,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 41,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 42,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 43,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 44,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 45,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 46,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 47,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 48,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 49,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 50,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 51,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 52,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 53,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 54,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 55,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 56,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 57,
-    "fields": {
-        "status": "fs",
-        "pref_slots_per_day": 4,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.tutor",
-    "pk": 58,
+    "pk": 1,
     "fields": {
         "status": "fs",
         "pref_slots_per_day": 4,
@@ -22568,6 +21853,136 @@
 },
 {
     "model": "people.tutor",
+    "pk": 4,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 5,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 6,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 7,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 8,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 9,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 10,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 11,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 12,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 13,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
     "pk": 60,
     "fields": {
         "status": "fs",
@@ -22581,7 +21996,7 @@
 },
 {
     "model": "people.tutor",
-    "pk": 61,
+    "pk": 14,
     "fields": {
         "status": "fs",
         "pref_slots_per_day": 4,
@@ -22594,7 +22009,7 @@
 },
 {
     "model": "people.tutor",
-    "pk": 62,
+    "pk": 15,
     "fields": {
         "status": "fs",
         "pref_slots_per_day": 4,
@@ -22607,7 +22022,7 @@
 },
 {
     "model": "people.tutor",
-    "pk": 63,
+    "pk": 16,
     "fields": {
         "status": "fs",
         "pref_slots_per_day": 4,
@@ -22620,7 +22035,189 @@
 },
 {
     "model": "people.tutor",
-    "pk": 64,
+    "pk": 17,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 18,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 19,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 20,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 21,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 22,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 23,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 66,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 58,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 24,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 25,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 26,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 27,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 28,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 29,
     "fields": {
         "status": "fs",
         "pref_slots_per_day": 4,
@@ -22646,7 +22243,397 @@
 },
 {
     "model": "people.tutor",
-    "pk": 66,
+    "pk": 30,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 31,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 32,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 57,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 33,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 34,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 46,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 35,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 36,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 37,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 38,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 39,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 40,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 41,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 42,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 43,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 44,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 45,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 63,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 47,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 48,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 49,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 50,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 51,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 61,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 52,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 62,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 53,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 54,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 55,
+    "fields": {
+        "status": "fs",
+        "pref_slots_per_day": 4,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.tutor",
+    "pk": 56,
     "fields": {
         "status": "fs",
         "pref_slots_per_day": 4,
@@ -22750,6 +22737,19 @@
 },
 {
     "model": "people.fullstaff",
+    "pk": 58,
+    "fields": {
+        "department": "INFO",
+        "is_iut": true,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.fullstaff",
     "pk": 25,
     "fields": {
         "department": "INFO",
@@ -22815,6 +22815,19 @@
 },
 {
     "model": "people.fullstaff",
+    "pk": 46,
+    "fields": {
+        "department": "INFO",
+        "is_iut": true,
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.fullstaff",
     "pk": 40,
     "fields": {
         "department": "INFO",
@@ -22854,19 +22867,6 @@
 },
 {
     "model": "people.fullstaff",
-    "pk": 46,
-    "fields": {
-        "department": "INFO",
-        "is_iut": true,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.fullstaff",
     "pk": 47,
     "fields": {
         "department": "INFO",
@@ -22894,19 +22894,6 @@
 {
     "model": "people.fullstaff",
     "pk": 51,
-    "fields": {
-        "department": "INFO",
-        "is_iut": true,
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.fullstaff",
-    "pk": 58,
     "fields": {
         "department": "INFO",
         "is_iut": true,
@@ -23199,6 +23186,20 @@
 },
 {
     "model": "people.supplystaff",
+    "pk": 57,
+    "fields": {
+        "employer": "Le patron",
+        "position": "Salari\u00e9",
+        "field": "",
+        "groups": [],
+        "user_permissions": [],
+        "departments": [
+            1
+        ]
+    }
+},
+{
+    "model": "people.supplystaff",
     "pk": 33,
     "fields": {
         "employer": "Le patron",
@@ -23424,20 +23425,6 @@
 {
     "model": "people.supplystaff",
     "pk": 56,
-    "fields": {
-        "employer": "Le patron",
-        "position": "Salari\u00e9",
-        "field": "",
-        "groups": [],
-        "user_permissions": [],
-        "departments": [
-            1
-        ]
-    }
-},
-{
-    "model": "people.supplystaff",
-    "pk": 57,
     "fields": {
         "employer": "Le patron",
         "position": "Salari\u00e9",

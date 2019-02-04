@@ -26,23 +26,28 @@
 SCRIPT_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 
 echo "Wait until Postgres is definitely ready to start migrations"
-$SCRIPT_PATH/wait-for-it.sh db:5432 -- echo "Postgres is up - continuing"
-
-
-if [ "$DJANGO_COLLECTSTATIC" = 'on' ]; then
-    echo "DJANGO_COLLECTSTATIC"  
-    /code/FlOpEDT/manage.py collectstatic --noinput
-fi
+$SCRIPT_PATH/wait-for-it.sh $POSTGRES_HOST:5432 -- echo "Postgres is up - continuing"
 
 if [ "$DJANGO_MIGRATE" = 'on' ]; then
     echo "manage.py migrate..."
-    /code/FlOpEDT/manage.py makemigrations
     /code/FlOpEDT/manage.py migrate --noinput
 fi
 
 if [ "$DJANGO_LOADDATA" = 'on' ]; then
   echo "manage.py loaddata..."
   /code/FlOpEDT/manage.py loaddata dump.json
+fi
+
+if [ "$DJANGO_COLLECTSTATIC" = 'on' ]; then
+    echo "DJANGO_COLLECTSTATIC"  
+    /code/FlOpEDT/manage.py collectstatic --noinput
+fi
+
+if [ "$START_SERVER" = 'on' ]; then
+    echo "run $CONFIG server"
+    cd /code/FlOpEDT
+    [ "$CONFIG" = 'production' ] && daphne -b 0.0.0.0 -p 8000 FlOpEDT.asgi:application
+    [ "$CONFIG" = 'development' ] && /code/FlOpEDT/manage.py runserver 0.0.0.0:8000
 fi
 
 exec "$@"

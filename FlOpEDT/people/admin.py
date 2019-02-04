@@ -8,21 +8,17 @@ from people.models import FullStaff, SupplyStaff, BIATOS, Tutor
 
 from import_export import resources, fields
 
+class TutorModelAdmin(DepartmentModelAdmin):
 
-class FullStaffAdmin(DepartmentModelAdmin):
-
-    class Meta:
-        app_label = 'auth'
-
-class SupplyStaffAdmin(DepartmentModelAdmin):
-
-    class Meta:
-        app_label = 'auth'
-
-class BIATOSAdmin(DepartmentModelAdmin):
+    def get_department_lookup(self, department):
+        """
+        Hook for overriding default department lookup research
+        """
+        return {'departments': department}
 
     class Meta:
         app_label = 'auth'
+
 
 class TutorResource(resources.ModelResource):
 
@@ -32,7 +28,6 @@ class TutorResource(resources.ModelResource):
 		
 
 
-admin.site.register(FullStaff, FullStaffAdmin)
-admin.site.register(SupplyStaff, SupplyStaffAdmin)
-admin.site.register(BIATOS, BIATOSAdmin)
-# admin.site.register(Tutor, TutorAdmin)
+admin.site.register(FullStaff, TutorModelAdmin)
+admin.site.register(SupplyStaff, TutorModelAdmin)
+admin.site.register(BIATOS, TutorModelAdmin)

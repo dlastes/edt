@@ -119,69 +119,101 @@ function clear_pop(gs) {
   --------------------*/
 
 
-
-// return: true iff a change is needed (i.e. unassigned room or already occupied)
+// return: true iff a change is needed (i.e. unassigned room or already occupied) (or level>0)
 function select_room_change() {
-    room_tutor_change.cm_settings = room_cm_settings ;
+    var level = room_cm_level;
+    room_tutor_change.cm_settings = room_cm_settings[level] ;
 
     var c = room_tutor_change.course[0] ;
     room_tutor_change.old_value = c.room ;
     room_tutor_change.cur_value = c.room ;
 
-    var busy_rooms, cur_roomgroup, is_occupied ;
+    var busy_rooms, cur_roomgroup, is_occupied, proposed_rg, initial_rg ;
     var i, j ;
 
+    proposed_rg = [] ;
+
+    if (level < room_cm_settings.length - 1) {
+
+	// find rooms where a course take place
+	var simultaneous_courses = cours
+	    .filter(function(d) {
+		return d.day==c.day && d.slot==c.slot && d.id_cours!=c.id_cours ;
+	    });
+	var occupied_rooms = [] ;
+	for (i = 0 ; i < simultaneous_courses.length ; i++) {
+	    busy_rooms = rooms.roomgroups[simultaneous_courses[i].room] ;
+	    for (j = 0 ; j<busy_rooms.length ; j++) {
+		if (occupied_rooms.indexOf(busy_rooms[j])==-1) {
+		    occupied_rooms.push(busy_rooms[j]) ;
+		}
+	    }
+	}
+
+
+	if (level == 0) {
+	    initial_rg = rooms.roomtypes[c.room_type] ;
+	} else if (level == 1) {
+	    initial_rg = Object.keys(rooms.roomgroups) ;
+	} else {
+	    // should not go here
+	    initial_rg = [] ;
+	}
+	for (i = 0 ; i < initial_rg.length ; i++) {
+	    cur_roomgroup = initial_rg[i] ;
+	    if (is_garbage(c.day,c.slot)
+		|| unavailable_rooms[c.day][c.slot]
+		.indexOf(cur_roomgroup) == -1) {
+
+		// is a room in the roomgroup occupied?
+		is_occupied = false ;
+		j = 0;
+		while(!is_occupied
+		      && j<rooms.roomgroups[cur_roomgroup].length) {
+		    is_occupied = (occupied_rooms
+				   .indexOf(rooms.roomgroups[cur_roomgroup][j])
+				   != -1);
+		    j++ ;
+		}
+
+		if(!is_occupied) {
+		    proposed_rg.push(initial_rg[i]);
+		}
+	    }
+	}
+
+    } else {
+	proposed_rg = Object.keys(rooms.roomgroups) ;
+    }
+
+
+    // atomic rooms first, then composed
+    var rg, atomic_rooms, composed_rooms, room;
+    atomic_rooms = [];
+    composed_rooms = [];
     var fake_id = new Date() ;
     fake_id = fake_id.getMilliseconds() + "-" + c.id_cours ;
     room_tutor_change.proposal = [] ;
 
-    // find rooms where a course take place
-    var simultaneous_courses = cours
-	.filter(function(d) {
-	    return d.day==c.day && d.slot==c.slot && d.id_cours!=c.id_cours ;
-	});
-    var occupied_rooms = [] ;
-    for (i = 0 ; i < simultaneous_courses.length ; i++) {
-	busy_rooms = rooms.roomgroups[simultaneous_courses[i].room] ;
-	for (j = 0 ; j<busy_rooms.length ; j++) {
-	    if (occupied_rooms.indexOf(busy_rooms[j])==-1) {
-		occupied_rooms.push(busy_rooms[j]) ;
-	    }
+    for (rg = 0 ; rg < proposed_rg.length ; rg++) {
+	room = {fid: fake_id, content: proposed_rg[rg]} ;
+	if(rooms.roomgroups[room.content].length == 1) {
+	    atomic_rooms.push(room);
+	} else {
+	    composed_rooms.push(room);
 	}
     }
-    
-    for (i = 0 ; i < rooms.roomtypes[c.room_type].length ; i++) {
-	cur_roomgroup = rooms.roomtypes[c.room_type][i] ;
-	if (is_garbage(c.day,c.slot)
-	    || unavailable_rooms[c.day][c.slot]
-	    .indexOf(rooms.roomtypes[c.room_type][i]) == -1) {
+    room_tutor_change.proposal = atomic_rooms.concat(composed_rooms);
 
-	    // is a room in the roomgroup occupied?
-	    is_occupied = false ;
-	    j = 0;
-	    while(!is_occupied
-		  && j<rooms.roomgroups[cur_roomgroup].length) {
-		is_occupied = (occupied_rooms
-			       .indexOf(rooms.roomgroups[cur_roomgroup][j])
-			       != -1);
-		j++ ;
-	    }
-
-	    if(!is_occupied) {
-		var cur_prop = {} ;
-		cur_prop.fid = fake_id ;
-		cur_prop.content = rooms.roomtypes[c.room_type][i] ;
-	    
-		room_tutor_change.proposal.push(cur_prop) ;
-	    }
-	}
+    if(level < room_cm_settings.length - 1) {
+	room_tutor_change.proposal.push({fid: fake_id, content: "+"});
     }
 
     room_tutor_change.cm_settings.nlin
 	= Math.ceil(room_tutor_change.proposal.length
 		    / room_tutor_change.cm_settings.ncol) ;
 
-    if (c.room == une_salle ||
+    if (level > 0 || c.room == une_salle ||
 	occupied_rooms.indexOf(c.room) != -1) {
 	return true;
     } else {
@@ -268,7 +300,6 @@ function fetch_all_tutors() {
 	    },
 	    complete: function(msg) {
 		console.log("complete");
-	    show_loader(false);
 	    }
 	});
     }
@@ -624,7 +655,7 @@ function apply_ckbox(dk) {
             if (ckbox[dk].cked) {
 		fetch_unavailable_rooms();
 		fetch_all_tutors();
-		if (total_regen) {
+		if (total_regen && (logged_usr.rights >> 2) % 2 == 0) {
 
 		    ckbox[dk].cked = false ;
 		

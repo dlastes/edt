@@ -202,14 +202,14 @@ function update_context_view(context) {
 }
 
 /* 
-	Working copies view initialization
+	Working copies list initialization
 */
 function init_work_copies(work_copies) {
 
     copies = work_copies.slice(0);
     copies.unshift("-");
 
-    // create drop down for week selection
+    // Display or hide working copies list
     stabilize_div = d3.select("#stabilize");
     if (work_copies.length == 0) {
         stabilize_div.style("display", "none");
@@ -218,14 +218,20 @@ function init_work_copies(work_copies) {
         stabilize_div.style("display", "block");
     }
 
+    // Update working copies list
     stabilize_sel = stabilize_div.select("select");
-    stabilize_sel
+
+    stabilize_sel_data = stabilize_sel 
         .selectAll("option")
-        .data(copies)
+        .data(copies);
+
+    stabilize_sel_data    
         .enter()
         .append("option")
         .attr('value', (d) => d)
         .text((d) => d);
+
+    stabilize_sel_data.exit().remove();
 }
 
 
@@ -251,6 +257,9 @@ function init_constraints(constraints) {
 
         // Create new template for each constraint
         constraints.forEach((constraint, index) => {
+            if(!constraint)
+                return;
+                
             var constraintId = `${constraint.model}_${constraint.pk}`;
 
             var clone = document.importNode(t.content, true);

@@ -86,14 +86,25 @@ class StabilizeAdmin(DepartmentModelAdmin):
 
 
 class MinHalfDaysAdmin(DepartmentModelAdmin):
-    list_display = ('week', 'year', 'train_prog', 'tutor', 'module', 'join2courses', 'comment')
+    list_display = ('week', 'year', 'train_prog', 'join2courses', 'comment')
     ordering = ()
     list_filter = (('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
-                   ('tutor', DropdownFilterRel),
-                   ('module', DropdownFilterRel),
+                   ('groups', DropdownFilterRel),
+                   ('tutors', DropdownFilterRel),
+                   ('modules', DropdownFilterRel),
                    'join2courses',
                    )
+
+    
+    def get_field_queryset(self, db, db_field, request):
+
+        queryset = super().get_field_queryset(db, db_field, request)
+
+        if queryset and db_field.name == 'groups':
+            return queryset.filter(basic=True).distinct()
+
+        return queryset                          
 
 
 class MinNonPreferedSlotAdmin(DepartmentModelAdmin):

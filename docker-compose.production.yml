@@ -2,6 +2,11 @@ version: '3'
 
 services:
 
+  memcached:
+    image: memcached
+    ports:
+      - "11211"
+
   db:
     restart: always
     image: postgres
@@ -34,20 +39,20 @@ services:
       - ./docker/env/web.env
       - ./docker/env/db.prod.env
       - ./docker/env/web.prod.env
+      - ./docker/env/secret.env
     environment:
       - DJANGO_SETTINGS_MODULE=FlOpEDT.settings.production
-      - DJANGO_COLLECTSTATIC=on
-      - DJANGO_MIGRATE=on
+      - START_SERVER=${START_SERVER:-on}
       - DJANGO_LOADDATA
+      - CONFIG=production
     expose:
       - "8000"
     volumes:
-      - static-volume:/code/FlOpEDT/static      
+      - static-volume:/code/FlOpEDT/static
     depends_on:
       - db
       - redis      
-    entrypoint: /code/docker/script/init.sh
-    command: gunicorn --chdir /code/FlOpEDT FlOpEDT.wsgi:application -b 0.0.0.0:8000
+    entrypoint: /code/docker/script/init.sh  
 
 volumes:
   static-volume:

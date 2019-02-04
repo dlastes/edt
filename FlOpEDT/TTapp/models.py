@@ -41,6 +41,8 @@ from base.models import Time, Department, Module, Group, Slot
 
 from people.models import Tutor
 
+from TTapp.helpers.minhalfdays import MinHalfDaysHelperGroup, MinHalfDaysHelperModule, MinHalfDaysHelperTutor
+
 max_weight = 8
 
 
@@ -196,10 +198,13 @@ class LimitCourseTypePerPeriod(TTConstraint):  # , pond):
             for period in periods:
                 period_by_day.append((day, period,))
 
-        if self.tutors.count():
-            for tutor in self.tutors.all():
-                self.register_expression(ttmodel, period_by_day, ponderation, tutor=tutor)
-        else:
+        try:
+            if self.tutors.count():
+                for tutor in self.tutors.all():
+                    self.register_expression(ttmodel, period_by_day, ponderation, tutor=tutor)
+            else:
+                self.register_expression(ttmodel, period_by_day, ponderation)
+        except ValueError:
             self.register_expression(ttmodel, period_by_day, ponderation)
 
 
@@ -334,13 +339,16 @@ class ReasonableDays(TTConstraint):
               
         # Create all combinations with slot boundaries for all courses 
         # corresponding to the given filters (tutors, groups)
-        if self.tutors.count():
-            for tutor in self.tutors.all():
-                self.update_combinations(ttmodel, slot_boundaries.values(), combinations, tutor=tutor)
-        elif self.groups.count():
-            for group in self.groups.all():
-                self.update_combinations(ttmodel, slot_boundaries.values(), combinations, group=group)
-        else:
+        try:
+            if self.tutors.count():
+                for tutor in self.tutors.all():
+                    self.update_combinations(ttmodel, slot_boundaries.values(), combinations, tutor=tutor)
+            elif self.groups.count():
+                for group in self.groups.all():
+                    self.update_combinations(ttmodel, slot_boundaries.values(), combinations, group=group)
+            else:
+                self.update_combinations(ttmodel, slot_boundaries.values(), combinations)
+        except ValueError:
             self.update_combinations(ttmodel, slot_boundaries.values(), combinations)
 
         self.register_expression(ttmodel, ponderation, combinations)
@@ -480,134 +488,70 @@ class MinHalfDays(TTConstraint):
     You have to chose EITHER tutor OR group OR module
     Optional for tutors : if 2 courses only, possibility to join it
     """
-    tutor = models.ForeignKey('people.Tutor',
-                              null=True,
-                              default=None,
-                              on_delete=models.CASCADE)
-    group = models.ForeignKey('base.Group',
-                              null=True,
-                              default=None,
-                              blank=True,
-                              on_delete=models.CASCADE)
-    module = models.ForeignKey('base.Module',
-                               null=True,
-                               default=None,
-                               blank=True,
-                               on_delete=models.CASCADE)
+    groups = models.ManyToManyField('base.Group', blank=True)
+    tutors = models.ManyToManyField('people.Tutor', blank=True)
+    modules = models.ManyToManyField('base.Module', blank=True)
+
     join2courses = models.BooleanField(
         verbose_name='If a tutor has 2 or 4 courses only, join it?',
         default=False)
 
 
-    @classmethod
-    def get_viewmodel_prefetch_attributes(cls):
-        attributes = super().get_viewmodel_prefetch_attributes()
-        attributes.extend(['group', 'module', 'tutor'])
-        return attributes
-
-
     def enrich_model(self, ttmodel, ponderation=1):
-        fc = ttmodel.wdb.courses
-        if self.tutor is not None:
-            fc = fc.filter(tutor=self.tutor)
-            b_h_ds = ttmodel.sum(
-                ttmodel.IBHD[(self.tutor, d, apm)]
-                for d in ttmodel.wdb.days
-                for apm in [Time.AM, Time.PM])
-            local_var = ttmodel.add_var("MinIBHD_var_%s" % self.tutor)
 
-        elif self.group is not None:
-            fc = fc.filter(groupe=self.group)
-            b_h_ds = ttmodel.sum(
-                ttmodel.GBHD[(self.group, d, apm)]
-                for d in ttmodel.wdb.days
-                for apm in [Time.AM, Time.PM])
-            local_var = ttmodel.add_var("MinGBHD_var_%s" % self.group)
+        if self.tutors.exists():
+            helper = MinHalfDaysHelperTutor(ttmodel, self, ponderation)
+            for tutor in self.tutors.all():
+                helper.enrich_model(tutor=tutor)
 
-        elif self.module is not None:
-            local_var = ttmodel.add_var("MinMBHD_var_%s" % self.module)
-            mod_b_h_d = {}
-            for d in ttmodel.wdb.days:
-                mod_b_h_d[(self.module, d, Time.AM)] \
-                    = ttmodel.add_var("ModBHD(%s,%s,%s)"
-                                      % (self.module, d, Time.AM))
-                mod_b_h_d[(self.module, d, Time.PM)] \
-                    = ttmodel.add_var("ModBHD(%s,%s,%s)"
-                                      % (self.module, d, Time.PM))
-                # add constraint linking MBHD to TT
-                for apm in [Time.AM, Time.PM]:
-                    halfdayslots = ttmodel.wdb.slots.filter(jour=d,
-                                                            heure__apm=apm)
-                    card = len(halfdayslots)
-                    expr = ttmodel.lin_expr()
-                    expr += card * mod_b_h_d[(self.module, d, apm)]
-                    for sl in halfdayslots:
-                        for c in ttmodel.wdb.courses.filter(module=self.module):
-                            expr -= ttmodel.TT[(sl, c)]
-                    ttmodel.add_constraint(expr, '>=', 0)
-                    ttmodel.add_constraint(expr, '<=', card - 1)
-            fc = fc.filter(module=self.module)
-            b_h_ds = ttmodel.sum(
-                mod_b_h_d[(self.module, d, apm)]
-                for d in ttmodel.wdb.days
-                for apm in [Time.AM, Time.PM])
-        else:
-            print("MinHalfDays must have tutor or group or module --> Ignored")
-            return
+        elif self.modules.exists():
+            helper = MinHalfDaysHelperModule(ttmodel, self, ponderation)
+            for module in self.modules.all():
+                helper.enrich_model(module=module)
 
-        ttmodel.add_constraint(local_var, '==', 1)
-        limit = (len(fc) - 1) // 3 + 1
-
-        if self.weight is not None:
-            if self.tutor is not None:
-                ttmodel.add_to_inst_cost(self.tutor,
-                                         self.local_weight() * ponderation * (b_h_ds - limit * local_var))
-
-            elif self.group is not None:
-                ttmodel.add_to_group_cost(self.group,
-                                          self.local_weight() * ponderation * (b_h_ds - limit * local_var))
-
-            else:
-                ttmodel.obj += self.local_weight() * ponderation * (b_h_ds - limit * local_var)
+        elif self.groups.exists():
+            helper = MinHalfDaysHelperGroup(ttmodel, self, ponderation)
+            for group in self.groups.all():
+                helper.enrich_model(group=group)
                 
         else:
-            ttmodel.add_constraint(b_h_ds, '<=', limit)
+            print("MinHalfDays must have at least one tutor or one group or one module --> Ignored")
+            return
 
-        if self.tutor is not None and self.join2courses and len(fc) in [2, 4]:
-            for d in ttmodel.wdb.days:
-                sl8h = ttmodel.wdb.slots.get(jour=d, heure__no=0)
-                sl11h = ttmodel.wdb.slots.get(jour=d, heure__no=2)
-                sl14h = ttmodel.wdb.slots.get(jour=d, heure__no=3)
-                sl17h = ttmodel.wdb.slots.get(jour=d, heure__no=5)
-                for c in fc:
-                    for c2 in fc.exclude(id=c.id):
-                        if self.weight:
-                            conj_var_AM = ttmodel.add_conjunct(ttmodel.TT[(sl8h, c)],
-                                                               ttmodel.TT[(sl11h, c2)])
-                            conj_var_PM = ttmodel.add_conjunct(ttmodel.TT[(sl14h, c)],
-                                                               ttmodel.TT[(sl17h, c2)])
-                            ttmodel.add_to_inst_cost(self.tutor,
-                                                     self.local_weight() * ponderation * (conj_var_AM + conj_var_PM)/2)
-                        else:
-                            ttmodel.add_constraint(
-                                ttmodel.TT[(sl8h, c)] + ttmodel.TT[(sl11h, c2)],
-                                '<=',
-                                1)
-                            ttmodel.add_constraint(
-                                ttmodel.TT[(sl14h, c)] + ttmodel.TT[(sl17h, c2)],
-                                '<=',
-                                1)
+
+    def get_viewmodel(self):
+        view_model = super().get_viewmodel()
+        details = view_model['details']
+
+        if self.tutors.exists():
+            details.update({'tutors': ', '.join([tutor.username for tutor in self.tutors.all()])})
+
+        if self.groups.exists():
+            details.update({'groups': ', '.join([group.nom for group in self.groups.all()])})
+
+        if self.modules.exists():
+            details.update({'modules': ', '.join([module.nom for module in self.modules.all()])})
+
+        return view_model
+        
+
     def one_line_description(self):
         text = "Minimise les demie-journées"
-        if self.tutor:
-            text += ' de ' + str(self.tutor)
-        if self.module:
-            text += " de " + str(self.module)
+
+        if self.tutors.exists():
+            text += ' de : ' + ', '.join([tutor.username for tutor in self.tutors.all()])
+
+        if self.groups.exists():
+            text += ' du(des) groupe(s) : ' + ', '.join([group.nom for group in self.groups.all()])
+
+        if self.modules.exists():
+            text += ' de : ' + ', '.join([str(module) for module in self.modules.all()])
+            
         if self.train_prog:
             text += ' en ' + str(self.train_prog)
-        if self.group:
-            text += ' du groupe ' + str(self.group)
+
         return text
+        
 
 class MinNonPreferedSlot(TTConstraint):
     """

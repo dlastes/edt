@@ -37,9 +37,10 @@ import json
 import os
 
 
-def assign_color(overwrite=True, diff_across_train_prog=False):
+def assign_color(department, overwrite=True, diff_across_train_prog=False):
     """
     Assigns a color to each module
+    :param department department
     :param overwrite: if overwrite, overwrites all preexisting colors,
     otherwise does not touch the existing colors, but considers that they do not
     belong to the colors chosen in colors.json
@@ -48,13 +49,15 @@ def assign_color(overwrite=True, diff_across_train_prog=False):
     belong to different training programmes
     :return:
     """
+    if department is None:
+        raise Exception('Please provide a department')
     if diff_across_train_prog:
-        keys, mat = build_graph_matrices(None)
+        keys, mat = build_graph_matrices(None, department)
         optim_and_save(keys, mat, overwrite)
     else:
-        for train_prog in TrainingProgramme.objects.all():
+        for train_prog in TrainingProgramme.objects.filter(department=department):
             print(train_prog)
-            keys, mat = build_graph_matrices(train_prog)
+            keys, mat = build_graph_matrices(train_prog, department)
             optim_and_save(keys, mat, overwrite)
 
 
@@ -85,9 +88,11 @@ def optim_and_save(keys, mat, overwrite):
             mod_disp.save()
 
 
-def build_graph_matrices(train_prog=None):
+def build_graph_matrices(train_prog, department=None):
+    if train_prog is None and department is None:
+        raise Exception('You need to provide at least a department')
     if train_prog is None:
-        keys = list(Module.objects.all())
+        keys = list(Module.objects.filter(train_prog__department=department))
     else:
         keys = list(Module.objects.filter(train_prog=train_prog))
     mat = eye(len(keys))
