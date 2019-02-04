@@ -54,11 +54,6 @@ class MyTTModel(TTModel):
                     break
             self.add_to_inst_cost(i, self.min_bd_i * slot_by_day_cost)
 
-        # Minimize students' half days
-        # It should be stored in the database
-        for g in self.wdb.basic_groups:
-            MinHalfDays(group=g, weight=max_weight).enrich_model(self)
-
 
     def solve(self, time_limit=3600, solver='CBC', target_work_copy=None):
         """
