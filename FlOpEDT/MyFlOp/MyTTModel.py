@@ -35,25 +35,6 @@ class MyTTModel(TTModel):
         """
         TTModel.add_specific_constraints(self)
 
-        # Minimize the number of busy days for tutors
-        # (if it does not overcome the bound expressed in pref_slots_per_day)
-        # It should be stored in the database
-        for i in self.wdb.instructors:
-            slot_by_day_cost = 0
-            # need to be sorted
-            frontier_pref_busy_days = [i.pref_slots_per_day * d for d in range(4, 0, -1)]
-
-            nb_courses = len(self.wdb.courses_for_tutor[i])
-            nb_days = 5
-
-            for fr in frontier_pref_busy_days:
-                if nb_courses <= fr:
-                    slot_by_day_cost += self.IBD_GTE[nb_days][i]
-                    nb_days -= 1
-                else:
-                    break
-            self.add_to_inst_cost(i, self.min_bd_i * slot_by_day_cost)
-
 
     def solve(self, time_limit=3600, solver='CBC', target_work_copy=None):
         """
