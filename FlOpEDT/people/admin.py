@@ -2,30 +2,32 @@
 
 
 from django.contrib import admin
+from base.admin import DepartmentModelAdmin
 
-from people.models import FullStaff, SupplyStaff, BIATOS, Tutor, User
+from people.models import FullStaff, SupplyStaff, BIATOS, Tutor
 
+from import_export import resources, fields
 
-class FullStaffAdmin(admin.ModelAdmin):
+class TutorModelAdmin(DepartmentModelAdmin):
 
-    class Meta:
-        app_label = 'auth'
-
-
-class SupplyStaffAdmin(admin.ModelAdmin):
-
-    class Meta:
-        app_label = 'auth'
-
-
-class BIATOSAdmin(admin.ModelAdmin):
+    def get_department_lookup(self, department):
+        """
+        Hook for overriding default department lookup research
+        """
+        return {'departments': department}
 
     class Meta:
         app_label = 'auth'
 
 
+class TutorResource(resources.ModelResource):
 
-admin.site.register(FullStaff, FullStaffAdmin)
-admin.site.register(SupplyStaff, SupplyStaffAdmin)
-admin.site.register(BIATOS, BIATOSAdmin)
-# admin.site.register(Tutor, TutorAdmin)
+	class Meta:
+		model = Tutor
+		fields = ( "username", "first_name", "last_name", "email" )
+		
+
+
+admin.site.register(FullStaff, TutorModelAdmin)
+admin.site.register(SupplyStaff, TutorModelAdmin)
+admin.site.register(BIATOS, TutorModelAdmin)

@@ -23,9 +23,19 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
+from datetime import datetime
+from django.http import JsonResponse
+from django.template.response import TemplateResponse 
+from base.core.statistics import get_room_activity_by_day, get_tutor_hours
 
+#@login_required
+def fetch_room_activity(req, **kwargs):
+    return JsonResponse(get_room_activity_by_day(req.department))
 
+#@login_required
+def fetch_tutor_hours(req, **kwargs):
+    return JsonResponse(get_tutor_hours(req.department), safe=False)
 
-from django.test import TestCase
-
-# Create your tests here.
+#@login_required
+def index(req, **kwargs):
+    return TemplateResponse(req, 'base/statistics.html')

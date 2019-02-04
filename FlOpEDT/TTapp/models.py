@@ -27,6 +27,8 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 
 from django.db import models
 
+from django.db.models import Q
+
 # from django.contrib.auth.models import User
 
 from django.core.exceptions import ValidationError
@@ -35,20 +37,32 @@ from django.utils.translation import ugettext_lazy as _
 
 # from caching.base import CachingManager, CachingMixin
 
-from base.models import Time  # , Module
+from base.models import Time, Department, Module, Group, Slot
+
+from people.models import Tutor
+
+from TTapp.helpers.minhalfdays import MinHalfDaysHelperGroup, MinHalfDaysHelperModule, MinHalfDaysHelperTutor
 
 max_weight = 8
 
 
 class TTConstraint(models.Model):
+
+    department = models.ForeignKey(Department, null=True, on_delete=models.CASCADE)
+    train_prog = models.ForeignKey('base.TrainingProgramme',
+                                   null=True,
+                                   default=None, 
+                                   blank=True, 
+                                   on_delete=models.CASCADE)    
     week = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(52)],
         null=True,
-        default=None)
-    year = models.PositiveSmallIntegerField(null=True, default=None)
+        default=None, 
+        blank=True)
+    year = models.PositiveSmallIntegerField(null=True, default=None, blank=True)
     weight = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(max_weight)],
-        null=True, default=None)
+        null=True, default=None, blank=True)
     comment = models.CharField(max_length=100, null=True, default=None, blank=True)
     is_active = models.BooleanField(verbose_name='Contrainte active?', default=True)
 
@@ -61,6 +75,51 @@ class TTConstraint(models.Model):
     def enrich_model(self, ttmodel, ponderation=1):
         raise NotImplementedError
 
+    def full_name(self):
+        # Return a human readable constraint name
+        return str(self)
+
+    def description(self):
+        # Return a human readable constraint name
+        return self. __doc__ or str(self)
+
+    def get_viewmodel(self):
+        #
+        # Return a dictionnary with view-related data
+        #
+        if self.train_prog:
+            train_prog_value = f"{self.train_prog.name} ({self.train_prog.abbrev})" 
+        else:
+            train_prog_value = 'All'
+        
+        if self.week:
+            week_value = f"{self.week} ({self.year})" 
+        else:
+            week_value = 'All'
+
+        return {
+            'model': self.__class__.__name__,
+            'pk': self.pk, 
+            'is_active': self.is_active,
+            'name': self.full_name(),
+            'description': self.description(),
+            'explanation': self.one_line_description(),
+            'comment': self.comment,
+            'details': {
+                'train_prog': train_prog_value,
+                'week': week_value,
+                'weight': self.weight,
+                }
+            }
+
+    def one_line_description(self):
+        # Return a human readable constraint name with its attributes
+        raise NotImplementedError
+
+    @classmethod
+    def get_viewmodel_prefetch_attributes(cls):
+        return ['train_prog', 'department',]
+
 
 class LimitCourseTypePerPeriod(TTConstraint):  # , pond):
     """
@@ -68,47 +127,137 @@ class LimitCourseTypePerPeriod(TTConstraint):  # , pond):
     """
     type = models.ForeignKey('base.CourseType', on_delete=models.CASCADE)
     limit = models.PositiveSmallIntegerField()
-    train_prog = models.ForeignKey('base.TrainingProgramme',
+    module = models.ForeignKey('base.Module',
                                    null=True,
-                                   default=None,
+                                   default=None, 
+                                   blank=True,
                                    on_delete=models.CASCADE)
-    module = models.ForeignKey('base.Module', null=True, on_delete=models.CASCADE)
-    tutor = models.ForeignKey('people.Tutor',
-                              null=True,
-                              default=None,
-                              on_delete=models.CASCADE)
+    tutors = models.ManyToManyField('people.Tutor',
+                                    blank=True,
+                                    related_name="Course_type_limits")
     FULL_DAY = 'fd'
     HALF_DAY = 'hd'
     PERIOD_CHOICES = ((FULL_DAY, 'Full day'), (HALF_DAY, 'Half day'))
     period = models.CharField(max_length=2, choices=PERIOD_CHOICES)
 
-    def enrich_model(self, ttmodel, ponderation=1.):
-        fc = ttmodel.wdb.courses
-        if self.tutor is not None:
-            fc = fc.filter(tutor=self.tutor)
+
+    def get_courses_queryset(self, ttmodel, tutor = None):
+        """
+        Filter courses depending on constraints parameters
+        """
+        courses_qs = ttmodel.wdb.courses
+        courses_filter = {}
+
+        if tutor is not None:
+            courses_filter['tutor'] = tutor
+
         if self.module is not None:
-            fc = fc.filter(module=self.module)
+            courses_filter['module'] = self.module
+
         if self.type is not None:
-            fc = fc.filter(type=self.type)
+            courses_filter['type'] = self.type
+
         if self.train_prog is not None:
-            fc = fc.filter(groupe__train_prog=self.train_prog)
+            courses_filter['groupe__train_prog'] = self.train_prog
+
+        return courses_qs.filter(**courses_filter)
+
+
+    def register_expression(self, ttmodel, period_by_day, ponderation, tutor=None):
+
+        courses = self.get_courses_queryset(ttmodel, tutor)
+
+        for day, period in period_by_day:
+            expr = ttmodel.lin_expr()
+            slots = ttmodel.wdb.slots \
+                        .filter(jour=day, heure__apm__contains=period)
+
+            for slot in slots:
+                for course in courses:
+                    expr += ttmodel.TT[(slot, course)]
+
+            if self.weight is not None:
+                var = ttmodel.add_floor(
+                                'limit course type per period', 
+                                expr,
+                                int(self.limit) + 1, 100)
+                ttmodel.obj += self.local_weight() * ponderation * var
+            else:
+                ttmodel.add_constraint(expr, '<=', self.limit)
+
+
+    def enrich_model(self, ttmodel, ponderation=1.):
+        
         if self.period == self.FULL_DAY:
             periods = ['']
         else:
             periods = [Time.AM, Time.PM]
-        for d in ttmodel.wdb.days:
-            for per in periods:
-                expr = ttmodel.lin_expr()
-                for sl in ttmodel.wdb.slots.filter(jour=d,
-                                                   heure__apm__contains=per):
-                    for c in fc:
-                        expr += ttmodel.TT[(sl, c)]
-                if self.weight is not None:
-                    var = ttmodel.add_floor('limit course type per period', expr,
-                                            int(self.limit) + 1, 100)
-                    ttmodel.obj += self.local_weight() * ponderation * var
-                else:
-                    ttmodel.add_constraint(expr, '<=', self.limit)
+
+        period_by_day = []
+        for day in ttmodel.wdb.days:
+            for period in periods:
+                period_by_day.append((day, period,))
+
+        try:
+            if self.tutors.count():
+                for tutor in self.tutors.all():
+                    self.register_expression(ttmodel, period_by_day, ponderation, tutor=tutor)
+            else:
+                self.register_expression(ttmodel, period_by_day, ponderation)
+        except ValueError:
+            self.register_expression(ttmodel, period_by_day, ponderation)
+
+
+    def full_name(self):
+        return "Limit Course Type Per Period"
+
+
+    @classmethod
+    def get_viewmodel_prefetch_attributes(cls):
+        attributes = super().get_viewmodel_prefetch_attributes()
+        attributes.extend(['module', 'tutors', 'type'])
+        return attributes
+
+    def get_viewmodel(self):
+        view_model = super().get_viewmodel()
+
+        if self.type:
+            type_value = self.type.name
+        else:
+            type_value = 'All'
+
+        if self.module:
+            module_value = self.module.nom
+        else:
+            module_value = 'All'
+
+        if self.tutors:
+            tutor_value = ', '.join([tutor.username for tutor in self.tutors.all()])
+        else:
+            tutor_value = 'All'
+
+        view_model['details'].update({
+            'type': type_value,
+            'tutor': tutor_value,
+            'module': module_value, })
+
+        return view_model
+
+    def one_line_description(self):
+        text = "Pas plus de " + str(self.limit) + ' ' + str(self.type)
+        if self.module:
+            text += " de " + self.module.nom
+        text += " par "
+        if self.period == self.FULL_DAY:
+            text += 'jour'
+        else:
+            text += 'demi-journée'
+        if self.tutors.exists():
+            text += ' pour ' + ', '.join([tutor.username for tutor in self.tutors.all()])
+        if self.train_prog:
+            text += ' en ' + str(self.train_prog)
+
+        return text
 
 
 class ReasonableDays(TTConstraint):
@@ -118,38 +267,109 @@ class ReasonableDays(TTConstraint):
     a None value builds the constraint for all possible values,
     e.g. promo = None => the constraint holds for all promos.
     """
-    train_prog = models.ForeignKey('base.TrainingProgramme',
-                                   null=True,
-                                   default=None,
-                                   on_delete=models.CASCADE)
-    group = models.ForeignKey('base.Group', null=True, on_delete=models.CASCADE)
-    tutor = models.ForeignKey('people.Tutor',
-                              null=True,
-                              default=None,
-                              on_delete=models.CASCADE)
+    groups = models.ManyToManyField('base.Group',
+                                    blank=True,
+                                    related_name="reasonable_day_constraints")
+    tutors = models.ManyToManyField('people.Tutor',
+                                    blank=True,
+                                    related_name="reasonable_day_constraints")
+
+
+    def get_courses_queryset(self, ttmodel, tutor=None, group=None):
+        """
+        Filter courses depending on constraints parameters
+        """
+        courses_qs = ttmodel.wdb.courses
+        courses_filter = {}
+
+        if tutor is not None:
+            courses_filter['tutor'] = tutor
+
+        if group is not None:
+            courses_filter['groupe'] = group
+
+        if self.train_prog is not None:
+            courses_filter['groupe__train_prog'] = self.train_prog
+
+        return courses_qs.filter(**courses_filter)
+
+
+    def update_combinations(self, ttmodel, slot_boundaries, combinations, tutor=None, group=None):
+        """
+        Update courses combinations for slot boundaries with all courses 
+        corresponding to the given filters (tutors, groups)
+        """
+        courses_query = self.get_courses_queryset(ttmodel, tutor=tutor, group=group)
+        courses_set = set(courses_query)
+        
+        for first_slot, last_slot in slot_boundaries:
+            while courses_set:
+                c1 = courses_set.pop()
+                for c2 in courses_set:
+                    combinations.add(((first_slot, c1), (last_slot, c2),))
+
+
+    def register_expression(self, ttmodel, ponderation, combinations):
+        """
+        Update model with expressions corresponding to 
+        all courses combinations
+        """
+        for first, last in combinations:
+            if self.weight is not None:
+                conj_var = ttmodel.add_conjunct(ttmodel.TT[first], ttmodel.TT[last])
+                ttmodel.obj += self.local_weight() * ponderation * conj_var
+            else:
+                ttmodel.add_constraint(ttmodel.TT[first] + ttmodel.TT[last], '<=', 1)
+
 
     def enrich_model(self, ttmodel, ponderation=1):
-        for d in ttmodel.wdb.days:
-            slfirst = ttmodel.wdb.slots.get(heure__no=0, jour=d)
-            sllast = ttmodel.wdb.slots.get(heure__no=5, jour=d)
-            fc = ttmodel.wdb.courses
-            if self.tutor is not None:
-                fc = fc.filter(tutor=self.tutor)
-            if self.train_prog is not None:
-                fc = fc.filter(groupe__train_prog=self.train_prog)
-            if self.group is not None:
-                fc = fc.filter(groupe=self.group)
-            for c1 in fc:
-                for c2 in fc.exclude(id__lte=c1.id):
-                    if self.weight is not None:
-                        conj_var = ttmodel.add_conjunct(
-                            ttmodel.TT[(slfirst, c1)],
-                            ttmodel.TT[(sllast, c2)])
-                        ttmodel.obj += self.local_weight() * ponderation * conj_var
-                    else:
-                        ttmodel.add_constraint(ttmodel.TT[(slfirst, c1)] +
-                                               ttmodel.TT[(sllast, c2)],
-                                               '<=', 1)
+
+        # Using a set type ensure that all combinations are 
+        # unique throw tutor and group filters
+        combinations = set()
+
+        # Get a dict with the first and last slot by day
+        slots = Slot.objects \
+                    .filter(heure__no__in=[0,5,]) \
+                    .order_by('heure__no') 
+        
+        slot_boundaries = {}
+        for slot in slots: 
+            slot_boundaries.setdefault(slot.jour, []).append(slot)
+              
+        # Create all combinations with slot boundaries for all courses 
+        # corresponding to the given filters (tutors, groups)
+        try:
+            if self.tutors.count():
+                for tutor in self.tutors.all():
+                    self.update_combinations(ttmodel, slot_boundaries.values(), combinations, tutor=tutor)
+            elif self.groups.count():
+                for group in self.groups.all():
+                    self.update_combinations(ttmodel, slot_boundaries.values(), combinations, group=group)
+            else:
+                self.update_combinations(ttmodel, slot_boundaries.values(), combinations)
+        except ValueError:
+            self.update_combinations(ttmodel, slot_boundaries.values(), combinations)
+
+        self.register_expression(ttmodel, ponderation, combinations)
+
+
+    def one_line_description(self):
+        text = "Des journées pas trop longues"
+        if self.tutors.count():
+            text += ' pour ' + ', '.join([tutor.username for tutor in self.tutors.all()])
+        if self.train_prog:
+            text += ' en ' + str(self.train_prog)
+        if self.groups.count():
+            text += ' avec les groupes ' + ', '.join([group for group in self.groups.all()])
+        return text
+
+
+    @classmethod
+    def get_viewmodel_prefetch_attributes(cls):
+        attributes = super().get_viewmodel_prefetch_attributes()
+        attributes.extend(['groups', 'tutors'])
+        return attributes
 
 
 class Stabilize(TTConstraint):
@@ -166,10 +386,7 @@ class Stabilize(TTConstraint):
     general = models.BooleanField(
         verbose_name='Stabiliser tout?',
         default=False)
-    train_prog = models.ForeignKey('base.TrainingProgramme',
-                                   null=True,
-                                   default=None,
-                                   on_delete=models.CASCADE)
+
     group = models.ForeignKey('base.Group', null=True, default=None, on_delete=models.CASCADE)
     module = models.ForeignKey('base.Module', null=True, default=None, on_delete=models.CASCADE)
     tutor = models.ForeignKey('people.Tutor',
@@ -178,11 +395,26 @@ class Stabilize(TTConstraint):
                               on_delete=models.CASCADE)
     type = models.ForeignKey('base.CourseType', null=True, default=None, on_delete=models.CASCADE)
     work_copy = models.PositiveSmallIntegerField(default=0)
+    fixed_days = models.ManyToManyField('base.Day',
+                                        related_name='days_to_fix',
+                                        blank=True)
+
+    @classmethod
+    def get_viewmodel_prefetch_attributes(cls):
+        attributes = super().get_viewmodel_prefetch_attributes()
+        attributes.extend(['group', 'module', 'tutor', 'type'])
+        return attributes
 
     def enrich_model(self, ttmodel, ponderation=1):
+        sched_courses = ttmodel.wdb.sched_courses.filter(copie_travail=self.work_copy)
+        for day in self.fixed_days.all():
+            for sc in sched_courses.filter(creneau__jour=day):
+                ttmodel.add_constraint(ttmodel.TT[(sc.creneau, sc.cours)], '==', 1)
+            for sc in sched_courses.exclude(creneau__jour=day):
+                for sl in ttmodel.wdb.slots.filter(jour=day):
+                    ttmodel.add_constraint(ttmodel.TT[(sl, sc.cours)], '==', 0)
+
         if self.general:
-            sched_courses = ttmodel.wdb.sched_courses \
-                .filter(copie_travail=self.work_copy)
             # nb_changements_I=dict(zip(ttmodel.wdb.instructors,[0 for i in ttmodel.wdb.instructors]))
             for sl in ttmodel.wdb.slots:
                 for c in ttmodel.wdb.courses:
@@ -234,6 +466,21 @@ class Stabilize(TTConstraint):
                             '==',
                             1)
 
+    def one_line_description(self):
+        text = "Minimiser les changements"
+        if self.type:
+            text += " pour les " + str(self.type)
+        if self.module:
+            text += " de " + str(self.module)
+        if self.tutor:
+            text += ' pour ' + str(self.tutor)
+        if self.train_prog:
+            text += ' en ' + str(self.train_prog)
+        if self.group:
+            text += ' du groupe ' + str(self.group)
+        text += ': copie ' + str(self.work_copy)
+        return text
+
 
 class MinHalfDays(TTConstraint):
     """
@@ -241,114 +488,70 @@ class MinHalfDays(TTConstraint):
     You have to chose EITHER tutor OR group OR module
     Optional for tutors : if 2 courses only, possibility to join it
     """
-    tutor = models.ForeignKey('people.Tutor',
-                              null=True,
-                              default=None,
-                              on_delete=models.CASCADE)
-    group = models.ForeignKey('base.Group',
-                              null=True,
-                              default=None,
-                              on_delete=models.CASCADE)
-    module = models.ForeignKey('base.Module',
-                               null=True,
-                               default=None,
-                               on_delete=models.CASCADE)
+    groups = models.ManyToManyField('base.Group', blank=True)
+    tutors = models.ManyToManyField('people.Tutor', blank=True)
+    modules = models.ManyToManyField('base.Module', blank=True)
+
     join2courses = models.BooleanField(
         verbose_name='If a tutor has 2 or 4 courses only, join it?',
         default=False)
 
+
     def enrich_model(self, ttmodel, ponderation=1):
-        fc = ttmodel.wdb.courses
-        if self.tutor is not None:
-            fc = fc.filter(tutor=self.tutor)
-            b_h_ds = ttmodel.sum(
-                ttmodel.IBHD[(self.tutor, d, apm)]
-                for d in ttmodel.wdb.days
-                for apm in [Time.AM, Time.PM])
-            local_var = ttmodel.add_var("MinIBHD_var_%s" % self.tutor)
 
-        elif self.group is not None:
-            fc = fc.filter(groupe=self.group)
-            b_h_ds = ttmodel.sum(
-                ttmodel.GBHD[(self.group, d, apm)]
-                for d in ttmodel.wdb.days
-                for apm in [Time.AM, Time.PM])
-            local_var = ttmodel.add_var("MinGBHD_var_%s" % self.group)
+        if self.tutors.exists():
+            helper = MinHalfDaysHelperTutor(ttmodel, self, ponderation)
+            for tutor in self.tutors.all():
+                helper.enrich_model(tutor=tutor)
 
-        elif self.module is not None:
-            local_var = ttmodel.add_var("MinMBHD_var_%s" % self.module)
-            mod_b_h_d = {}
-            for d in ttmodel.wdb.days:
-                mod_b_h_d[(self.module, d, Time.AM)] \
-                    = ttmodel.add_var("ModBHD(%s,%s,%s)"
-                                      % (self.module, d, Time.AM))
-                mod_b_h_d[(self.module, d, Time.PM)] \
-                    = ttmodel.add_var("ModBHD(%s,%s,%s)"
-                                      % (self.module, d, Time.PM))
-                # add constraint linking MBHD to TT
-                for apm in [Time.AM, Time.PM]:
-                    halfdayslots = ttmodel.wdb.slots.filter(jour=d,
-                                                            heure__apm=apm)
-                    card = len(halfdayslots)
-                    expr = ttmodel.lin_expr()
-                    expr += card * mod_b_h_d[(self.module, d, apm)]
-                    for sl in halfdayslots:
-                        for c in ttmodel.wdb.courses.filter(module=self.module):
-                            expr -= ttmodel.TT[(sl, c)]
-                    ttmodel.add_constraint(expr, '>=', 0)
-                    ttmodel.add_constraint(expr, '<=', card - 1)
-            fc = fc.filter(module=self.module)
-            b_h_ds = ttmodel.sum(
-                mod_b_h_d[(self.module, d, apm)]
-                for d in ttmodel.wdb.days
-                for apm in [Time.AM, Time.PM])
-        else:
-            print("MinHalfDays must have tutor or group or module --> Ignored")
-            return
+        elif self.modules.exists():
+            helper = MinHalfDaysHelperModule(ttmodel, self, ponderation)
+            for module in self.modules.all():
+                helper.enrich_model(module=module)
 
-        ttmodel.add_constraint(local_var, '==', 1)
-        limit = (len(fc) - 1) // 3 + 1
-
-        if self.weight is not None:
-            if self.tutor is not None:
-                ttmodel.add_to_inst_cost(self.tutor,
-                                         self.local_weight() * ponderation * (b_h_ds - limit * local_var))
-
-            elif self.group is not None:
-                ttmodel.add_to_group_cost(self.group,
-                                          self.local_weight() * ponderation * (b_h_ds - limit * local_var))
-
-            else:
-                ttmodel.obj += self.local_weight() * ponderation * (b_h_ds - limit * local_var)
+        elif self.groups.exists():
+            helper = MinHalfDaysHelperGroup(ttmodel, self, ponderation)
+            for group in self.groups.all():
+                helper.enrich_model(group=group)
                 
         else:
-            ttmodel.add_constraint(b_h_ds, '<=', limit)
+            print("MinHalfDays must have at least one tutor or one group or one module --> Ignored")
+            return
 
-        if self.tutor is not None and self.join2courses and len(fc) in [2, 4]:
-            for d in ttmodel.wdb.days:
-                sl8h = ttmodel.wdb.slots.get(jour=d, heure__no=0)
-                sl11h = ttmodel.wdb.slots.get(jour=d, heure__no=2)
-                sl14h = ttmodel.wdb.slots.get(jour=d, heure__no=3)
-                sl17h = ttmodel.wdb.slots.get(jour=d, heure__no=5)
-                for c in fc:
-                    for c2 in fc.exclude(id=c.id):
-                        if self.weight:
-                            conj_var_AM = ttmodel.add_conjunct(ttmodel.TT[(sl8h, c)],
-                                                               ttmodel.TT[(sl11h, c2)])
-                            conj_var_PM = ttmodel.add_conjunct(ttmodel.TT[(sl14h, c)],
-                                                               ttmodel.TT[(sl17h, c2)])
-                            ttmodel.add_to_inst_cost(self.tutor,
-                                                     self.local_weight() * ponderation * (conj_var_AM + conj_var_PM)/2)
-                        else:
-                            ttmodel.add_constraint(
-                                ttmodel.TT[(sl8h, c)] + ttmodel.TT[(sl11h, c2)],
-                                '<=',
-                                1)
-                            ttmodel.add_constraint(
-                                ttmodel.TT[(sl14h, c)] + ttmodel.TT[(sl17h, c2)],
-                                '<=',
-                                1)
 
+    def get_viewmodel(self):
+        view_model = super().get_viewmodel()
+        details = view_model['details']
+
+        if self.tutors.exists():
+            details.update({'tutors': ', '.join([tutor.username for tutor in self.tutors.all()])})
+
+        if self.groups.exists():
+            details.update({'groups': ', '.join([group.nom for group in self.groups.all()])})
+
+        if self.modules.exists():
+            details.update({'modules': ', '.join([module.nom for module in self.modules.all()])})
+
+        return view_model
+        
+
+    def one_line_description(self):
+        text = "Minimise les demie-journées"
+
+        if self.tutors.exists():
+            text += ' de : ' + ', '.join([tutor.username for tutor in self.tutors.all()])
+
+        if self.groups.exists():
+            text += ' du(des) groupe(s) : ' + ', '.join([group.nom for group in self.groups.all()])
+
+        if self.modules.exists():
+            text += ' de : ' + ', '.join([str(module) for module in self.modules.all()])
+            
+        if self.train_prog:
+            text += ' en ' + str(self.train_prog)
+
+        return text
+        
 
 class MinNonPreferedSlot(TTConstraint):
     """
@@ -359,10 +562,12 @@ class MinNonPreferedSlot(TTConstraint):
                               null=True,
                               default=None,
                               on_delete=models.CASCADE)
-    train_prog = models.ForeignKey('base.TrainingProgramme',
-                                   null=True,
-                                   default=None,
-                                   on_delete=models.CASCADE)
+
+    @classmethod
+    def get_viewmodel_prefetch_attributes(cls):
+        attributes = super().get_viewmodel_prefetch_attributes()
+        attributes.extend(['tutor'])
+        return attributes                              
 
     # is not called when save() is
     def clean(self):
@@ -403,6 +608,14 @@ class MinNonPreferedSlot(TTConstraint):
                             ttmodel.add_to_group_cost(g, cost)
                             ttmodel.add_to_slot_cost(sl, cost)
 
+    def one_line_description(self):
+        text = "Respecte les préférences"
+        if self.tutor:
+            text += ' de ' + str(self.tutor)
+        if self.train_prog:
+            text += ' des groupes de ' + str(self.train_prog)
+        return text
+
 
 class AvoidBothSlots(TTConstraint):
     """
@@ -412,15 +625,17 @@ class AvoidBothSlots(TTConstraint):
     """
     slot1 = models.ForeignKey('base.Slot', related_name='slot1', on_delete=models.CASCADE)
     slot2 = models.ForeignKey('base.Slot', related_name='slot2', on_delete=models.CASCADE)
-    train_prog = models.ForeignKey('base.TrainingProgramme',
-                                   null=True,
-                                   default=None,
-                                   on_delete=models.CASCADE)
     group = models.ForeignKey('base.Group', null=True, on_delete=models.CASCADE)
     tutor = models.ForeignKey('people.Tutor',
                               null=True,
                               default=None,
                               on_delete=models.CASCADE)
+
+    @classmethod
+    def get_viewmodel_prefetch_attributes(cls):
+        attributes = super().get_viewmodel_prefetch_attributes()
+        attributes.extend(['group', 'tutor'])
+        return attributes                              
 
     def enrich_model(self, ttmodel, ponderation=1):
         fc = ttmodel.wdb.courses
@@ -442,6 +657,16 @@ class AvoidBothSlots(TTConstraint):
                                            + ttmodel.TT[(self.slot2, c2)],
                                            '<=',
                                            1)
+
+    def one_line_description(self):
+        text = "Pas à la fois " + str(self.slot1) + " et " + str(self.slot2)
+        if self.tutor:
+            text += ' pour ' + str(self.tutor)
+        if self.group:
+            text += ' avec le groupe ' + str(self.group)
+        if self.train_prog:
+            text += ' en ' + str(self.train_prog)
+        return text
 
 # ========================================
 # The following constraints have to be checked!!!
@@ -477,6 +702,12 @@ class SimultaneousCourses(TTConstraint):
     course1 = models.ForeignKey('base.Course', related_name='course1', on_delete=models.CASCADE)
     course2 = models.ForeignKey('base.Course', related_name='course2', on_delete=models.CASCADE)
 
+    @classmethod
+    def get_viewmodel_prefetch_attributes(cls):
+        attributes = super().get_viewmodel_prefetch_attributes()
+        attributes.extend(['course1', 'course2'])
+        return attributes
+
     def enrich_model(self, ttmodel, ponderation=1):
         same_tutor = (self.course1.tutor == self.course2.tutor)
         for sl in ttmodel.wdb.slots:
@@ -503,15 +734,13 @@ class SimultaneousCourses(TTConstraint):
                     if (ttmodel.var_coeff(var1, group_constr), ttmodel.var_coeff(var2, group_constr)) == (1, 1):
                         ttmodel.change_var_coeff(var2, group_constr, 0)
 
+    def one_line_description(self):
+        text = "Les cours " + str(self.course1) + " et " + str(self.course2) + " doivent être simultanés !"
 
 class LimitedSlotChoices(TTConstraint):
     """
     Limit the possible slots for the cources
     """
-    train_prog = models.ForeignKey('base.TrainingProgramme',
-                                   null=True,
-                                   default=None,
-                                   on_delete=models.CASCADE)
     module = models.ForeignKey('base.Module',
                                null=True,
                                default=None,
@@ -551,6 +780,25 @@ class LimitedSlotChoices(TTConstraint):
                     ttmodel.obj += self.local_weight() * ponderation * ttmodel.TT[(sl, c)]
                 else:
                     ttmodel.add_constraint(ttmodel.TT[(sl, c)], '==', 0)
+
+    def one_line_description(self):
+        text = "Les "
+        if self.type:
+            text += str(self.type)
+        else:
+            text += "cours"
+        if self.module:
+            text += " de " + str(self.module)
+        if self.tutor:
+            text += ' de ' + str(self.tutor)
+        if self.train_prog:
+            text += ' en ' + str(self.train_prog)
+        if self.group:
+            text += ' avec le groupe ' + str(self.group)
+        text += " ne peuvent avoir lieu qu'à "
+        for sl in self.possible_slots.values_list():
+            text += str(sl) + ', '
+        return text
 
 
 class LimitedRoomChoices(TTConstraint):
@@ -595,3 +843,22 @@ class LimitedRoomChoices(TTConstraint):
                         ttmodel.obj += self.local_weight() * ponderation * ttmodel.TTrooms[(sl, c, rg)]
                     else:
                         ttmodel.add_constraint(ttmodel.TTrooms[(sl, c,rg)], '==', 0)
+
+    def one_line_description(self):
+        text = "Les "
+        if self.type:
+            text += str(self.type)
+        else:
+            text += "cours"
+        if self.module:
+            text += " de " + str(self.module)
+        if self.tutor:
+            text += ' de ' + str(self.tutor)
+        if self.train_prog:
+            text += ' en ' + str(self.train_prog)
+        if self.group:
+            text += ' avec le groupe ' + str(self.group)
+        text += " ne peuvent avoir lieu qu'en salle "
+        for sl in self.possible_rooms.values_list():
+            text += str(sl) + ', '
+        return text

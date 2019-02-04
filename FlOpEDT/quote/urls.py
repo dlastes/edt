@@ -36,5 +36,6 @@ urlpatterns = [
     # fetch 
     # ----------------------------
     url(r'^fetch$', views.fetch_quote, name="fetch_quote"),
+    url(r'^fetch_all$', views.fetch_all_quotes, name="fetch_all_quotes")
     
 ]

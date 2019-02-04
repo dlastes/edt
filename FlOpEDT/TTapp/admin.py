@@ -27,6 +27,7 @@
 
 
 from django.contrib import admin
+from base.admin import DepartmentModelAdmin
 
 from TTapp.models import LimitCourseTypePerPeriod, ReasonableDays, Stabilize, \
     MinHalfDays, MinNonPreferedSlot, AvoidBothSlots, SimultaneousCourses
@@ -42,71 +43,73 @@ from FlOpEDT.filters import DropdownFilterAll, DropdownFilterRel, \
     DropdownFilterCho
 
 
-# class TestJourResource(resources.ModelResource):
-#     id = fields.Field(column_name='id_jour',attribute='jour',widget=ForeignKeyWidget(Jour,'id'))
-
-# class TestJourAdmin(admin.ModelAdmin):
-#     list_display = ('jour','truc')
-
-# admin.site.register(TestJour, TestJourAdmin)
-
-class LimitNaturePerPeriodAdmin(admin.ModelAdmin):
-    list_display = ('week', 'year', 'type', 'limit', 'train_prog',
-                    'module', 'tutor', 'period', 'comment')
+class LimitCourseTypePerPeriodAdmin(DepartmentModelAdmin):
+    list_display = ('week', 
+                    'year', 
+                    'train_prog', 
+                    'type', 
+                    'limit', 
+                    'period', 
+                    'comment')
     ordering = ()
-    empty_value_display = 'All!'
     list_filter = (('train_prog', DropdownFilterRel),
                    ('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
-                   ('tutor', DropdownFilterRel),
-
+                   ('tutors', DropdownFilterRel),
+                   ('type', DropdownFilterRel),
                    )
 
 
-class ReasonableDaysAdmin(admin.ModelAdmin):
-    list_display = ('week', 'year', 'train_prog',
-                    'group', 'tutor', 'comment')
+class ReasonableDaysAdmin(DepartmentModelAdmin):
+    list_display = ('week', 'year', 'train_prog', 'comment')
     ordering = ()
-    empty_value_display = 'All!'
     list_filter = (('train_prog', DropdownFilterRel),
                    ('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
-                   ('group', DropdownFilterRel),
-                   ('tutor', DropdownFilterRel),
+                   ('groups', DropdownFilterRel),
+                   ('tutors', DropdownFilterRel),
                    )
 
 
-class StabilizeAdmin(admin.ModelAdmin):
+class StabilizeAdmin(DepartmentModelAdmin):
     list_display = ('week', 'year', 'train_prog', 'general',
                     'group', 'tutor', 'module', 'type', 'comment')
     ordering = ()
-    empty_value_display = 'All!'
     list_filter = (('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
                    ('train_prog', DropdownFilterRel),
                    ('group', DropdownFilterRel),
                    ('tutor', DropdownFilterRel),
                    ('module', DropdownFilterRel),
-                   ('type', DropdownFilterAll),
+                   ('type', DropdownFilterRel),
                    )
 
 
-class MinHalfDaysAdmin(admin.ModelAdmin):
-    list_display = ('week', 'year', 'tutor', 'module', 'join2courses', 'comment')
+class MinHalfDaysAdmin(DepartmentModelAdmin):
+    list_display = ('week', 'year', 'train_prog', 'join2courses', 'comment')
     ordering = ()
-    empty_value_display = 'All!'
     list_filter = (('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
-                   ('tutor', DropdownFilterRel),
-                   ('module', DropdownFilterRel),
+                   ('groups', DropdownFilterRel),
+                   ('tutors', DropdownFilterRel),
+                   ('modules', DropdownFilterRel),
                    'join2courses',
                    )
 
+    
+    def get_field_queryset(self, db, db_field, request):
 
-class MinNonPreferedSlotAdmin(admin.ModelAdmin):
-    list_display = ('week', 'year', 'tutor', 'train_prog', 'comment')
+        queryset = super().get_field_queryset(db, db_field, request)
+
+        if queryset and db_field.name == 'groups':
+            return queryset.filter(basic=True).distinct()
+
+        return queryset                          
+
+
+class MinNonPreferedSlotAdmin(DepartmentModelAdmin):
+    list_display = ('week', 'year', 'train_prog', 'tutor', 'comment')
     ordering = ()
-    empty_value_display = 'All!'
     list_filter = (('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
                    ('tutor', DropdownFilterRel),
@@ -114,11 +117,9 @@ class MinNonPreferedSlotAdmin(admin.ModelAdmin):
                    )
 
 
-class AvoidBothSlotsAdmin(admin.ModelAdmin):
-    list_display = ('week', 'year', 'tutor', 'group',
-                    'train_prog', 'slot1', 'slot2', 'comment')
+class AvoidBothSlotsAdmin(DepartmentModelAdmin):
+    list_display = ('week', 'year', 'train_prog', 'tutor', 'group', 'slot1', 'slot2', 'comment')
     ordering = ()
-    empty_value_display = 'All!'
     list_filter = (('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
                    ('train_prog', DropdownFilterRel),
@@ -129,10 +130,9 @@ class AvoidBothSlotsAdmin(admin.ModelAdmin):
                    )
 
 
-class SimultaneousCoursesAdmin(admin.ModelAdmin):
-    list_display = ('week', 'year', 'course1', 'course2', 'comment')
+class SimultaneousCoursesAdmin(DepartmentModelAdmin):
+    list_display = ('week', 'year', 'train_prog', 'course1', 'course2', 'comment')
     ordering = ()
-    empty_value_display = 'All!'
     list_filter = (('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
                    ('course1', DropdownFilterRel),
@@ -140,7 +140,7 @@ class SimultaneousCoursesAdmin(admin.ModelAdmin):
                    )
 
 
-admin.site.register(LimitCourseTypePerPeriod, LimitNaturePerPeriodAdmin)
+admin.site.register(LimitCourseTypePerPeriod, LimitCourseTypePerPeriodAdmin)
 admin.site.register(ReasonableDays, ReasonableDaysAdmin)
 admin.site.register(Stabilize, StabilizeAdmin)
 admin.site.register(MinHalfDays, MinHalfDaysAdmin)

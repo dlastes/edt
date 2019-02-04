@@ -27,6 +27,7 @@
 
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from base.models import Department
 
 # Create your models here.
 
@@ -56,6 +57,9 @@ class User(AbstractUser):
         ret += '>'
         ret += '(' + str(self.rights) + ')'
         return ret
+
+    class Meta:
+       ordering = ['username',]        
         
 
 class Tutor(User):
@@ -72,15 +76,17 @@ class Tutor(User):
     pref_slots_per_day = models.PositiveSmallIntegerField(
         verbose_name="How many slots per day would you prefer ?",
         default=4)
+    departments =  models.ManyToManyField(Department, blank=True)   
 
     def uni_extended(self):
         ret = super(Tutor,self).uni_extended()
         ret += '-' + self.status + '-' + 'S' + str(self.pref_slots_per_day)
         return ret
 
-    
+
 class FullStaff(Tutor):
-    department = models.CharField(max_length=50, default='INFO')
+    # deprected since multi departements insertion
+    department = models.CharField(max_length=50, default='INFO', null=True, blank=True)
     is_iut = models.BooleanField(default=True)
 
     def uni_extended(self):
@@ -90,6 +96,9 @@ class FullStaff(Tutor):
             ret += 'n'
         ret += 'IUT'
         return ret
+
+    class Meta:
+        verbose_name = 'FullStaff' 
 
 
 class SupplyStaff(Tutor):
@@ -105,10 +114,16 @@ class SupplyStaff(Tutor):
         ret += '-Dom:' + self.field
         return ret
 
+    class Meta:
+        verbose_name = 'SupplyStaff'
+
 
 class BIATOS(Tutor):
     def uni_extended(self):
         return super(BIATOS,self).uni_extended()
+
+    class Meta:
+        verbose_name = 'BIATOS'
 
 # --- Notes sur Prof ---
 #    MinDemiJournees=models.BooleanField(

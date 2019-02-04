@@ -5,6 +5,8 @@ services:
     image: postgres
     environment:
       PGDATA: /var/lib/postgresql/data/flopedt-${BRANCH:-master}
+    ports:
+      - "5445:5432"
   redis:
     image: redis:latest
   web:
@@ -12,13 +14,15 @@ services:
       context: .
       args:
         CONFIG: development
+    env_file: 
+      - ./docker/env/db.dev.env
+      - ./docker/env/web.env
     environment:
       - DJANGO_SETTINGS_MODULE=FlOpEDT.settings.development
-      - DJANGO_COLLECTSTATIC=off
-      - DJANGO_MIGRATE=on
+      - START_SERVER=${START_SERVER:-on}
       - DJANGO_LOADDATA
+      - CONFIG=development
     entrypoint: /code/docker/script/init.sh      
-    command: /code/FlOpEDT/manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/code
     ports:

@@ -34,51 +34,25 @@ from django.contrib.auth.models import AbstractUser
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
-# from caching.base import CachingManager, CachingMixin
-
 from colorfield.fields import ColorField
-
-
-# <editor-fold desc="BKNEWS">
-# ------------
-# -- BKNEWS --
-# ------------
-
-
-class BreakingNews(models.Model):
-    week = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(0), MaxValueValidator(53)],
-        null=True, blank=True)
-    year = models.PositiveSmallIntegerField()
-    # x_beg and x_end in terms of day width
-    x_beg = models.FloatField(default=2., blank=True)
-    x_end = models.FloatField(default=3., blank=True)
-    y = models.PositiveSmallIntegerField(null=True, default=None,
-                                         blank=True)
-    txt = models.CharField(max_length=200)
-    is_linked = models.URLField(max_length=200, null=True, blank=True, default=None)
-    fill_color = ColorField(default='#228B22')
-    # stroke color
-    strk_color = ColorField(default='#000000')
-
-    def __str__(self):
-        return '@(' + str(self.x_beg) + '--' + str(self.x_end) \
-               + ',' + str(self.y) \
-               + ')-W' + str(self.week) + ',Y' \
-               + str(self.year) + ': ' + str(self.txt)
-
-
-# </editor-fold>
 
 # <editor-fold desc="GROUPS">
 # ------------
 # -- GROUPS --
 # ------------
 
+class Department(models.Model):
+    name = models.CharField(max_length=50)
+    abbrev = models.CharField(max_length=7)    
+
+    def __str__(self):
+        return self.abbrev
+
 
 class TrainingProgramme(models.Model):
     name = models.CharField(max_length=50)
     abbrev = models.CharField(max_length=5)
+    department =  models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return self.abbrev
@@ -86,7 +60,8 @@ class TrainingProgramme(models.Model):
 
 class GroupType(models.Model):
     name = models.CharField(max_length=50)
-
+    department =  models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
+    
     def __str__(self):
         return self.name
 
@@ -122,6 +97,38 @@ class Group(models.Model):
 
 
 # </editor-fold desc="GROUPS">
+
+# <editor-fold desc="BKNEWS">
+# ------------
+# -- BKNEWS --
+# ------------
+
+
+class BreakingNews(models.Model):
+    department =  models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
+    week = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(0), MaxValueValidator(53)],
+        null=True, blank=True)
+    year = models.PositiveSmallIntegerField()
+    # x_beg and x_end in terms of day width
+    x_beg = models.FloatField(default=2., blank=True)
+    x_end = models.FloatField(default=3., blank=True)
+    y = models.PositiveSmallIntegerField(null=True, default=None,
+                                         blank=True)
+    txt = models.CharField(max_length=200)
+    is_linked = models.URLField(max_length=200, null=True, blank=True, default=None)
+    fill_color = ColorField(default='#228B22')
+    # stroke color
+    strk_color = ColorField(default='#000000')
+
+    def __str__(self):
+        return '@(' + str(self.x_beg) + '--' + str(self.x_end) \
+               + ',' + str(self.y) \
+               + ')-W' + str(self.week) + ',Y' \
+               + str(self.year) + ': ' + str(self.txt)
+
+
+# </editor-fold>
 
 # <editor-fold desc="TIMING">
 # ------------
@@ -184,8 +191,6 @@ def define_apm(sender, instance, *args, **kwargs):
         instance.apm = Time.PM
 
 class Slot(models.Model):
-#class Slot(CachingMixin, models.Model):
-#    objects = CachingManager()
     jour = models.ForeignKey('Day', on_delete=models.CASCADE)
     heure = models.ForeignKey('Time', on_delete=models.CASCADE)
     duration = models.PositiveSmallIntegerField(
@@ -213,7 +218,9 @@ class TrainingHalfDay(models.Model):
 
 
 class Period(models.Model):
+    
     name = models.CharField(max_length=20)
+    department =  models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
     starting_week = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)])
     ending_week = models.PositiveSmallIntegerField(
@@ -227,8 +234,7 @@ class Period(models.Model):
 
 
 class RoomType(models.Model):
-# class RoomType(CachingMixin, models.Model):
-#    objects = CachingManager()
+    department =  models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
     name = models.CharField(max_length=20)
 
     def __str__(self):
@@ -236,8 +242,6 @@ class RoomType(models.Model):
 
 
 class RoomGroup(models.Model):
-# class RoomGroup(CachingMixin, models.Model):
-#    objects = CachingManager()
     name = models.CharField(max_length=20)
     types = models.ManyToManyField(RoomType,
                                    blank=True,
@@ -245,15 +249,12 @@ class RoomGroup(models.Model):
 
     def __str__(self):
         return self.name
-
-
+        
 class Room(models.Model):
-# class Room(CachingMixin, models.Model):
-#    objects = CachingManager()
     name = models.CharField(max_length=20)
     subroom_of = models.ManyToManyField(RoomGroup,
                                         blank=True,
-                                        related_name="subrooms")
+                                        related_name="subrooms")                                       
 
     def __str__(self):
         return self.name
@@ -298,9 +299,13 @@ class Module(models.Model):
     def __str__(self):
         return self.abbrev
 
+    class Meta:
+       ordering = ['abbrev',]         
+
 
 class CourseType(models.Model):
     name = models.CharField(max_length=50)
+    department =  models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
     group_types = models.ManyToManyField(GroupType,
                                          blank=True,
                                          related_name="compatible_course_types")
@@ -310,8 +315,6 @@ class CourseType(models.Model):
 
 
 class Course(models.Model):
-#class Course(CachingMixin, models.Model):
-#    objects = CachingManager()
     type = models.ForeignKey('CourseType', on_delete=models.CASCADE)
     room_type = models.ForeignKey('RoomType', null=True, on_delete=models.CASCADE)
     no = models.PositiveSmallIntegerField(null=True, blank=True)
@@ -346,8 +349,6 @@ class Course(models.Model):
 
 
 class ScheduledCourse(models.Model):
-#class ScheduledCourse(CachingMixin, models.Model):
-#    objects = CachingManager()
     cours = models.ForeignKey('Course', on_delete=models.CASCADE)
     creneau = models.ForeignKey('Slot', on_delete=models.CASCADE)
     room = models.ForeignKey('RoomGroup', blank=True, null=True, on_delete=models.CASCADE)
@@ -371,7 +372,7 @@ class ScheduledCourse(models.Model):
 
 
 class UserPreference(models.Model):
-    user = models.ForeignKey('people.User', on_delete=models.CASCADE)
+    user = models.ForeignKey('people.Tutor', on_delete=models.CASCADE)
     semaine = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)], null=True)
     an = models.PositiveSmallIntegerField(null=True)
@@ -431,12 +432,14 @@ class RoomPreference(models.Model):
 
 
 class EdtVersion(models.Model):
+    department =  models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
     semaine = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)])
     an = models.PositiveSmallIntegerField()
     version = models.PositiveIntegerField(default=0)
 
-
+    class Meta:
+        unique_together = (("department","semaine","an"),)
 #    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
 
@@ -495,6 +498,7 @@ class PlanningModification(models.Model):
 
 
 class TutorCost(models.Model):
+    department =  models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
     semaine = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)])
     an = models.PositiveSmallIntegerField()
@@ -590,6 +594,8 @@ class Dependency(models.Model):
 
 
 class Regen(models.Model):
+
+    department =  models.ForeignKey(Department, on_delete=models.CASCADE, null=True)   
     semaine = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)])
     an = models.PositiveSmallIntegerField()
@@ -614,7 +620,7 @@ class Regen(models.Model):
         pre = ''
         if self.full:
             pre = 'C,' + str(self.fday) + "/" + str(self.fmonth) \
-                  + "/" + str(self.fyear) + " "
+                  + "/" + str(self.fyear)
         if self.stabilize:
             pre = 'S,' + str(self.sday) + "/" + str(self.smonth) \
                   + "/" + str(self.syear)

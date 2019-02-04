@@ -44,9 +44,8 @@
   ------- DISPOS ------
   ---------------------*/
 function fetch_dispos() {
+
     fetch.ongoing_dispos = true;
-    fetch.done = false;
-    fetch.dispos_ok = true;
 
     var semaine_att = weeks.init_data[weeks.sel[0]].semaine;
     var an_att = weeks.init_data[weeks.sel[0]].an;
@@ -61,7 +60,6 @@ function fetch_dispos() {
         success: function(msg) {
             console.log("in");
 //            console.log(msg);
-            prev_prof = "";
 
             if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
                 an_att == weeks.init_data[weeks.sel[0]].an) {
@@ -94,8 +92,8 @@ function fetch_dispos() {
 
 
 function translate_dispos_from_csv(d) {
-    if (d.prof != prev_prof) {
-        prev_prof = d.prof;
+    // when merge with no-slot, take no-slot version
+    if(Object.keys(dispos).indexOf(d.prof)==-1){
         dispos[d.prof] = new Array(nbPer);
         for (var i = 0; i < nbPer; i++) {
             dispos[d.prof][i] = new Array(nbSl);
@@ -175,19 +173,44 @@ function create_dispos_user_data() {
   ------ MODULES -------
   ----------------------*/
 
+function mod_dd_items() {
+
+    var high_mod = relevant_modules();
+
+    var high_items = new Array();
+    var low_items = new Array();
+    modules.all.forEach(function(m) {
+        if (high_mod.has(m)) {
+            high_items.push(m);
+        } else {
+            low_items.push(m);
+        }
+    });
+
+    return high_items.concat(low_items);
+}
+
+// Create or update the filter-by-module list.
 function create_mod_dd() {
 
+    var items = mod_dd_items();
 
     var seldd = mog
         .selectAll("option")
-        .data(modules.all, function(d, i) {
-            return d;
+        .data(items, function(m) {
+           return m;
         });
+
+    seldd
+        .exit()
+        .remove();
+
+    seldd
+        .order();
 
     seldd
         .enter()
         .append("option")
-        .merge(seldd.select("option"))
         .attr("value", function(d) {
             return d;
         })
@@ -195,16 +218,9 @@ function create_mod_dd() {
             return d;
         });
 
-    seldd.exit().remove();
-
-    seldd
-        .each(function(d, i) {
-            if (d == modules.sel) {
-                d3.select(this).attr("selected", "");
-            }
-        });
-
-
+    mog
+        .select('option[value="' + modules.sel + '"]')
+        .attr("selected", "");
 }
 
 
@@ -296,6 +312,7 @@ function create_pr_buttons() {
   --------------------*/
 function fetch_bknews(first) {
     fetch.ongoing_bknews = true;
+
     var semaine_att = weeks.init_data[weeks.sel[0]].semaine;
     var an_att = weeks.init_data[weeks.sel[0]].an;
 
@@ -303,13 +320,14 @@ function fetch_bknews(first) {
     $.ajax({
         type: "GET", //rest Type
         dataType: 'text',
-        url: url_bknews + "?w=" + semaine_att + "&y=" + an_att,
+        url: url_bknews  + an_att + "/" + semaine_att,
         async: true,
-        contentType: "text/json",
+        contentType: "text/csv",
+//        contentType: "text/json",
         success: function(msg) {
-            //console.log(msg);
-
-            bknews.cont = JSON.parse(msg) ;
+	    //            bknews.cont = JSON.parse(msg) ;
+	    bknews.cont = d3.csvParse(msg,
+				      translate_bknews_from_csv);
 
             if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
                 an_att == weeks.init_data[weeks.sel[0]].an) {
@@ -342,6 +360,21 @@ function fetch_bknews(first) {
 
 
 }
+
+function translate_bknews_from_csv(d){
+    return {
+	id: +d.id,
+	x_beg: +d.x_beg,
+	x_end: +d.x_end,
+	y: +d.y,
+	is_linked: d.is_linked,
+	fill_color: d.fill_color,
+	strk_color: d.strk_color,
+	txt: d.txt
+    }
+}
+
+
 
 function adapt_labgp(first) {
     var expected_ext_grid_dim = svg.height - margin.top - margin.bot ;
@@ -378,13 +411,11 @@ function adapt_labgp(first) {
   --------------------*/
 
 function fetch_cours() {
-    var garbage_plot ;
-    
     fetch.ongoing_cours_pp = true;
     fetch.ongoing_cours_pl = true;
-    fetch.cours_ok = false;
-
-    fetch.done = false;
+    
+    var garbage_plot ;
+    
     ack.edt = "";
     go_ack_msg(true);
 
@@ -401,13 +432,8 @@ function fetch_cours() {
         async: true,
         contentType: "text/csv",
         success: function(msg, ts, req) {
-            //console.log(msg);
-            version = +req.getResponseHeader('version');
-	    console.log(version);
-            required_dispos = +req.getResponseHeader('reqDispos');
-            filled_dispos = +req.getResponseHeader('filDispos');
 
-            go_regen(req.getResponseHeader('regen'));
+            go_regen(null);
             go_alarm_pref();
 
             var day_arr = JSON.parse(req.getResponseHeader('jours').replace(/\'/g, '"'));
@@ -517,10 +543,10 @@ function translate_cours_pl_from_csv(d) {
         day: +d.jour,
         slot: +d.heure,
         room: d.room,
+	room_type: d.room_type,
 	color_bg: d.color_bg,
 	color_txt: d.color_txt,
     };
-    //    console.log(co);
     return co;
 }
 
@@ -545,6 +571,7 @@ function translate_cours_pp_from_csv(d) {
         day: garbage.day,
         slot: garbage.slot,
         room: une_salle,
+	room_type: d.room_type,
 	color_bg: d.color_bg,
 	color_txt: d.color_txt,
     };
@@ -664,9 +691,118 @@ function translate_gp_name(gp) {
 }
 
 
+
+/*--------------------
+   ------ ROOMS ------
+  --------------------*/
+function fetch_unavailable_rooms() {
+    fetch.ongoing_un_rooms = true;
+    
+    var semaine_att = weeks.init_data[weeks.sel[0]].semaine;
+    var an_att = weeks.init_data[weeks.sel[0]].an;
+
+    show_loader(true);
+    $.ajax({
+        type: "GET", //rest Type
+        dataType: 'text',
+        url: url_unavailable_rooms + an_att + "/" + semaine_att ,
+        async: true,
+        contentType: "text/csv",
+        success: function(msg, ts, req) {
+            if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
+                an_att == weeks.init_data[weeks.sel[0]].an) {
+
+		console.log(msg);
+
+		clean_unavailable_rooms();
+                d3.csvParse(msg, translate_unavailable_rooms);
+
+            }
+            show_loader(false);
+	    fetch.ongoing_un_rooms = false;
+        },
+        error: function(msg) {
+            console.log("error");
+            show_loader(false);
+        }
+    });
+}
+
+function translate_unavailable_rooms(d) {
+    console.log(d);
+    var slot = +d.heure ;
+    var day = +d.jour ;
+    unavailable_rooms[day][slot].push(d.room);
+}
+
 /*--------------------
    ------ ALL -------
-  --------------------*/
+   --------------------*/
+
+function fetch_all(first){
+    fetch.done = false;
+
+    fetch.ongoing_cours_pp = true;
+    fetch.ongoing_cours_pl = true;
+    if (ckbox["dis-mod"].cked || ckbox["edt-mod"].cked) {
+	fetch.ongoing_dispos = true;
+    }
+    if (ckbox["edt-mod"].cked) {
+	fetch.ongoing_un_rooms = true;
+    }
+    fetch.ongoing_bknews = true;
+
+    fetch_version();
+    fetch_cours();
+    if (ckbox["dis-mod"].cked || ckbox["edt-mod"].cked) {
+        fetch_dispos();
+    }
+    if (ckbox["edt-mod"].cked) {
+	fetch_unavailable_rooms() ;
+    }
+    fetch_bknews(first);
+}
+
+
+function fetch_version() {
+    var semaine_att = weeks.init_data[weeks.sel[0]].semaine;
+    var an_att = weeks.init_data[weeks.sel[0]].an;
+
+    show_loader(true);
+    $.ajax({
+        type: "GET", //rest Type
+        dataType: 'text',
+        url: url_week_infos  + an_att + "/" + semaine_att,
+        async: true,
+        contentType: "text/json",
+//        contentType: "text/json",
+        success: function(msg) {
+	    //            bknews.cont = JSON.parse(msg) ;
+	    var parsed = JSON.parse(msg);
+
+            if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
+                an_att == weeks.init_data[weeks.sel[0]].an) {
+		version = parsed.version ;
+		filled_dispos = parsed.proposed_pref ;
+		required_dispos = parsed.required_pref ;
+		go_regen(parsed.regen);
+            }
+	    
+            show_loader(false);
+        },
+        error: function(msg) {
+            console.log("error");
+            show_loader(false);
+        }
+    });
+
+}
+
+function translate_version_from_csv(d){
+    return +d.version ;
+}
+
+
 function fetch_ended() {
     if (!fetch.ongoing_cours_pl &&
         !fetch.ongoing_cours_pp) {
@@ -702,12 +838,12 @@ function fetch_ended() {
         create_mod_dd();
         create_sal_dd();
         clean_prof_displayed();
-        fetch.cours_ok = true;
     }
 
     if (!fetch.ongoing_cours_pp &&
         !fetch.ongoing_cours_pl &&
-        !fetch.ongoing_dispos &&
+        !fetch.ongoing_dispos   &&
+        !fetch.ongoing_un_rooms &&
         !fetch.ongoing_bknews) {
 
         fetch.done = true;

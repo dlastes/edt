@@ -46,7 +46,6 @@
 
 // update all preferences
 function go_pref(quick) {
-    if (fetch.dispos_ok) {
         var t, dat, datdi, datsmi;
 
         if (quick) {
@@ -120,10 +119,7 @@ function go_pref(quick) {
             .merge(dat.select(".dispo-a"))
             .on("click", function(d) {
                 if (ckbox["dis-mod"].cked) {
-                    if (del_dispo_adv) {
-                        del_dispo_adv = false;
-                    }
-                    dispo_menu_appeared = true;
+		    context_menu.dispo_hold = true ;
                     data_dispo_adv_cur = data_dispo_adv_init.map(
                         function(c) {
                             return {
@@ -132,6 +128,7 @@ function go_pref(quick) {
                                 off: c.off
                             };
                         });
+		    go_cm_advanced_pref(true);
                 }
             });
 
@@ -197,48 +194,9 @@ function go_pref(quick) {
             .attr("r", par_dispos.rad_cross * smiley.tete);
 
 
+	go_cm_advanced_pref(quick) ;
 
 
-	// preference menu
-
-        var dis_men_dat = dg
-            .selectAll(".dispo-menu")
-            .data(data_dispo_adv_cur);
-
-        var dis_men = dis_men_dat
-            .enter()
-            .append("g")
-            .attr("class", "dispo-menu")
-            .attr("cursor", "pointer")
-            .on("click", function(d) {
-                dispos[user.nom][d.day][d.hour] = d.off;
-                user.dispos[day_hour_2_1D(d)].val = d.off
-            });
-
-        dis_men
-            .append("rect")
-            .attr("class", "dis-men-bg")
-            .merge(dis_men_dat.select(".dis-men-bg"))
-            .transition(t)
-            .attr("x", dispo_all_x)
-            .attr("y", dispo_all_y)
-            .attr("width", dispo_all_w)
-            .attr("height", dispo_all_h)
-            .attr("fill", function(d) {
-                return smi_fill(d.off / par_dispos.nmax);
-            })
-            .attr("stroke", "darkslategrey")
-            .attr("stroke-width", 2);
-
-        go_smiley(dis_men_dat, dis_men, t);
-
-
-        dis_men_dat.exit().remove();
-
-
-
-
-    }
 }
 
 
@@ -370,6 +328,53 @@ function go_smiley(top, mid, t) {
         });
 
 
+}
+
+
+// advanced preference menu
+function go_cm_advanced_pref(quick) {
+    if (quick) {
+        t = d3.transition()
+            .duration(0);
+    } else {
+        t = d3.transition();
+    }
+    
+    var dis_men_dat = cmpg
+        .selectAll(".dispo-menu")
+        .data(data_dispo_adv_cur);
+    
+    var dis_men = dis_men_dat
+        .enter()
+        .append("g")
+        .attr("class", "dispo-menu")
+        .attr("cursor", "pointer")
+        .on("click", function(d) {
+            dispos[user.nom][d.day][d.hour] = d.off;
+            user.dispos[day_hour_2_1D(d)].val = d.off;
+	    data_dispo_adv_cur = [] ;
+	    go_pref(true);
+        });
+    
+    dis_men
+        .append("rect")
+        .attr("class", "dis-men-bg")
+        .merge(dis_men_dat.select(".dis-men-bg"))
+        .transition(t)
+        .attr("x", dispo_all_x)
+        .attr("y", dispo_all_y)
+        .attr("width", dispo_all_w)
+        .attr("height", dispo_all_h)
+        .attr("fill", function(d) {
+            return smi_fill(d.off / par_dispos.nmax);
+            })
+        .attr("stroke", "darkslategrey")
+        .attr("stroke-width", 2);
+    
+    go_smiley(dis_men_dat, dis_men, t);
+    
+
+    dis_men_dat.exit().remove();
 }
 
 
@@ -883,6 +888,30 @@ function go_modules() {
     go_opac_cours();
 }
 
+// Tries to determine the relevant modules for the viewer.
+function relevant_modules() {
+
+    // The relevant tutors
+    var tutors = new Set();
+    if (prof_displayed.length < profs.length) { // some tutors are selected
+        prof_displayed.forEach(function (p) {
+            tutors.add(p);
+        });
+    } else if (user.nom) {
+        tutors.add(user.nom);
+    }
+
+    // The relevant modules
+    var modules = new Set();
+    cours.forEach(function(c) {
+        if (tutors.has(c.prof)) {
+            modules.add(c.mod);
+        }
+    });
+
+    return modules;
+}
+
 /*--------------------
   ------ ROOMS -------
   --------------------*/
@@ -914,6 +943,7 @@ function go_tutors() {
             return prof_displayed.indexOf(p) > -1 ? 1 : opac;
         });
 
+    create_mod_dd();
     go_opac_cours();
 }
 
@@ -948,9 +978,17 @@ function go_courses(quick) {
         .append("g")
         .attr("class", "cours")
         .attr("cursor", ckbox["edt-mod"].cked ? "pointer" : "default")
-        .on("contextmenu", make_editable)
+        .on("contextmenu", function(d) { if (ckbox["edt-mod"].cked) {
+	    d3.event.preventDefault();
+	    room_tutor_change.cm_settings = entry_cm_settings ;
+	    room_tutor_change.course = [d] ;
+	    compute_cm_room_tutor_direction();
+	    //select_room_change(d);
+	    select_entry_cm(d);
+	    go_cm_room_tutor_change();
+	}})
         .call(dragListener);
-
+    
     incg
         .append("rect")
         .attr("class", "crect")
@@ -977,7 +1015,7 @@ function go_courses(quick) {
             return smi_fill(lDis / par_dispos.nmax);
         })
     } else {
-        d3.selectAll("rect.crect").style("fill", cours_fill)
+        d3.selectAll("rect.crect").style("fill", cours_fill);
     }
 
     // Tutor's fullname 
@@ -1012,19 +1050,19 @@ function go_courses(quick) {
         .merge(cg.select("[st=m]"))
         .transition(t)
         .attr("x", cours_txt_x)
-        .attr("y", cours_txt_top_y)
+        .attr("y", cours_txt_top_y);
 
     incg
         .append("text")
         .attr("st", "p")
-        .attr("x", cours_txt_x)
-        .attr("y", cours_txt_mid_y)
-        .text(cours_txt_mid_txt)
         .attr("fill", cours_txt_fill)
         .merge(cg.select("[st=p]"))
         .transition(t)
         .attr("x", cours_txt_x)
         .attr("y", cours_txt_mid_y)
+        .attr("x", cours_txt_x)
+        .attr("y", cours_txt_mid_y)
+        .text(cours_txt_mid_txt);
 
     incg
         .append("text")
@@ -1036,93 +1074,15 @@ function go_courses(quick) {
         .attr("fill", cours_txt_fill)
         .transition(t)
         .attr("x", cours_txt_x)
-        .attr("y", cours_txt_bot_y)
+        .attr("y", cours_txt_bot_y);
 
     cg.exit()
         .remove();
+
+    go_cm_room_tutor_change();
 }
 
 
-// help function to modify room number with a right click
-
-function make_editable(d) {
-    if (ckbox["edt-mod"].cked) {
-
-        d3.event.preventDefault();
-
-        var p = this; //.parentNode;
-
-        var del = false;
-
-        var p_el = d3.select(p);
-
-        var frm = dg.append("foreignObject").attr("class", "fo");
-
-        var inp = frm
-            .attr("x", cours_x(d) + .4 * cours_width(d))
-            .attr("y", cours_y(d) + .6 * labgp.height)
-            .attr("width", 50)
-            .attr("height", 25)
-            .append("xhtml:form")
-            .append("input")
-            .attr("value", function() {
-                // nasty spot to place this call, but here we are sure that the <input> tag is available
-                // and is handily pointed at by 'this':
-
-                this.focus();
-
-                return d.room;
-            })
-            .attr("style", "width: 50px;")
-            .on("blur", function() {
-                //console.log("blur", this, arguments);
-
-                var txt = inp.node().value;
-                //console.log(txt);
-                add_bouge(d);
-                d.room = txt;
-
-                // Note to self: frm.remove() will remove the entire <g> group! Remember the D3 selection logic!
-                //console.log("rembl");
-                if (!del) {
-                    del = true;
-                    dg.selectAll(".fo").remove();
-                    go_courses(true);
-                }
-            })
-            .on("keypress", function() {
-                //console.log("keypress", this, arguments);
-
-                // IE fix
-                if (!d3.event)
-                    d3.event = window.event;
-                var e = d3.event;
-                if (e.keyCode == 13) {
-                    if (typeof(e.cancelBubble) !== 'undefined') // IE
-                        e.cancelBubble = true;
-                    if (e.stopPropagation)
-                        e.stopPropagation();
-                    e.preventDefault();
-
-                    var txt = inp.node().value;
-
-                    add_bouge(d);
-                    d.room = txt;
-
-                    // odd. Should work in Safari, but the debugger crashes on this instead.
-                    // Anyway, it SHOULD be here and it doesn't hurt otherwise.
-                    //console.log("remkp");
-                    if (!del) {
-                        del = true;
-                        dg.selectAll(".fo").remove();
-                        go_courses(true);
-                    }
-                }
-
-            });
-
-    }
-}
 
 
 

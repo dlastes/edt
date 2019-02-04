@@ -44,16 +44,37 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from django.contrib.admin.filters import AllValuesFieldListFilter, RelatedFieldListFilter, ChoicesFieldListFilter
+from django.contrib.admin.filters import AllValuesFieldListFilter, RelatedFieldListFilter, \
+                                        ChoicesFieldListFilter, RelatedOnlyFieldListFilter
+from core.department import get_model_department_lookup
+from django.db.models.fields import BLANK_CHOICE_DASH
+
+class DropdownFilterDepartmentMixin():
+    def field_choices(self, field, request, model_admin, blank_choice=BLANK_CHOICE_DASH):
+        
+        queryset = field.related_model._default_manager.all()
+        
+        if hasattr(request, 'department'):
+            lookup = get_model_department_lookup(field.related_model, request.department)
+            if lookup:
+                queryset = field.related_model._default_manager \
+                                .filter(**lookup) \
+                                .distinct()
+
+        return [(x.pk, str(x)) for x in queryset]
 
 
 class DropdownFilterAll(AllValuesFieldListFilter):
     template = 'admin/dropdown_filter.html'
 
 
-class DropdownFilterRel(RelatedFieldListFilter):
+class DropdownFilterRel(DropdownFilterDepartmentMixin, RelatedOnlyFieldListFilter):
     template = 'admin/dropdown_filter.html'
 
 
-class DropdownFilterCho(ChoicesFieldListFilter):
+class DropdownFilterCho(DropdownFilterDepartmentMixin, ChoicesFieldListFilter):
+    template = 'admin/dropdown_filter.html'
+
+
+class DropdownFilterSimple(DropdownFilterDepartmentMixin, ChoicesFieldListFilter):
     template = 'admin/dropdown_filter.html'

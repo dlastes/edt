@@ -81,7 +81,7 @@ var rootgp_width = 0;
 var pos_rootgp_width = 0;
 
 // different grounds where to plot
-var fg, mg, bg, dg, meg, vg, gpg, prg, stg, mog, sag, fig, log;
+var fg, mg, bg, dg, meg, vg, gpg, prg, stg, mog, sag, fig, log, cmpg, cmtg;
 var wg = {
     upper: null,
     bg: null,
@@ -98,6 +98,7 @@ var fetch = {
     ongoing_dispos: false,
     ongoing_cours_pp: false,
     ongoing_bknews: false,
+    ongoing_un_rooms: false,
     done: false,
     cours_ok: false,
     dispos_ok: false
@@ -157,7 +158,6 @@ for (var i = 0; i <= par_dispos.nmax; i++) {
 }
 var data_dispo_adv_cur = [];
 var del_dispo_adv = false;
-var dispo_menu_appeared = false;
 
 // number of required and provided availability slots
 var required_dispos = -1;
@@ -322,6 +322,12 @@ ckbox["dis-mod"] = {
 };
 
 
+
+var context_menu = {
+    dispo_hold: false,
+    room_tutor_hold: false
+};
+
 /*--------------------
    ------ MODULES ------
    --------------------*/
@@ -343,6 +349,15 @@ var salles = {
     pp: [],
     all: []
 };
+
+var rooms ;
+
+
+var unavailable_rooms = [] ;
+unavailable_rooms = new Array(nbPer);
+for (var i = 0; i < nbPer; i++) {
+    unavailable_rooms[i] = new Array(nbSl);
+}
 
 
 /*---------------------
@@ -371,12 +386,11 @@ var butpr = {
     tlx: 900
 };
 
-// helper variable
-// the fetched data is sorted by instructor -> avoid full traversal
-var prev_prof;
-
 // has any instructor been fetched?
 var first_fetch_prof = true;
+
+// all tutors (to propose changes)
+var all_tutors = [] ;
 
 /*--------------------
    ------ SCALE ------
@@ -480,5 +494,95 @@ var user = {nom: logged_usr.nom,
 var total_regen = false ;
 
 
+// 
+var entry_cm_settings =
+    {type: 'entry',
+     w: 100,
+     h: 18,
+     fs: 10,
+     mx: 5,
+     my: 3,
+     ncol: 1,
+     nlin: 2,
+     txt_intro: {'default':"Quoi changer ?"}
+    };
+var tutor_module_cm_settings =
+    {type: 'tutor_module',
+     w: 45,
+     h: 18,
+     fs: 10,
+     mx: 5,
+     my: 3,
+     ncol: 3,
+     nlin: 0,
+     txt_intro: {'default':"Profs du module ?"}
+    };
+var tutor_filters_cm_settings =
+    {type: 'tutor_filters',
+     w: 120,
+     h: 18,
+     fs: 10,
+     mx: 5,
+     my: 3,
+     ncol: 1,
+     nlin: 0,
+     txt_intro: {'default':"Ordre alphabétique :"}
+    };
+var tutor_cm_settings =
+    {type: 'tutor',
+     w: 45,
+     h: 18,
+     fs: 10,
+     mx: 5,
+     my: 3,
+     ncol: 3,
+     nlin: 4,
+     txt_intro: {'default':"Ordre alphabétique :"}
+    };
+var room_cm_settings =
+    [{type: 'room_available',
+      txt_intro: {'0':"Aucune salle disponible",
+		  '1':"Salle disponible",
+		  'default':"Salles disponibles"
+		 }
+     },
+     {type: 'room_available_same_type',
+      txt_intro: {'0':"Aucune salle disponible (tout type)",
+		  '1':"Salle disponible (tout type)",
+		  'default':"Salles disponibles (tout type)"
+		 }
+     },
+     {type: 'room',
+      txt_intro: {'0':"Aucune salle",
+		  '1':"Salle",
+		  'default':"Toutes les salles"
+		 }
+     }];
+for(var l = 0 ; l < room_cm_settings.length ; l++) {
+    room_cm_settings[l].w = 45 ;
+    room_cm_settings[l].h = 18 ;
+    room_cm_settings[l].fs = 10 ;
+    room_cm_settings[l].mx = 5 ;
+    room_cm_settings[l].my = 3 ;
+    room_cm_settings[l].ncol = 3 ;
+    room_cm_settings[l].nlin = 0 ;
+}
+// level=0: the proposed rooms are available and of the same type
+//       1: the proposed rooms are available
+//       2: all rooms are proposed
+var room_cm_level = 0 ;
 
+var room_tutor_change = {
+    course: [],    // 1-cell array for d3.js
+    proposal: [],
+    old_value: "",  
+    cur_value: "",
+    cm_settings:{},
+    top: 30,
+    posv: 's',
+    posh: 'w'
+};
 
+var arrow =
+    {right: "→",
+     back: "↩"} ;

@@ -39,7 +39,7 @@ Deux scripts à ne pas oublier :
   assignation à des lignes dans l'affichage (via
   ~TrainingProgrammeDisplay~) et des groupes ~Group~ qu'elles
   contiennent, il est *nécessaire* d'appeler la fonction
-  ~generate_group_file~, qui se trouve [[../misc/group_file.py][ici]], pour regrouper toutes les
+  ~generate_group_file~, qui se trouve [[../misc/generate_static_files.py][ici]], pour regrouper toutes les
   informations.
 - après avoir créé tous les cours ~Course~ qui auront lieu pendant
   l'année, il est *possible* d'assigner automatiquement une couleur à

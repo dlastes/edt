@@ -26,22 +26,61 @@ from .base import *
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ['POSTGRES_DB'],
-        'USER': os.environ['POSTGRES_USER'],
-        'PASSWORD':  os.environ['POSTGRES_PASSWORD'],
-        'HOST': 'db',
-        'PORT': 5432,
+        'NAME': os.environ.get('POSTGRES_DB', 'postgres'),
+        'USER': os.environ.get('POSTGRES_USER', 'postgres'),
+        'HOST': os.environ.get('POSTGRES_HOST', 'localhost'),
+        'PORT': os.environ.get('POSTGRES_PORT', '5432'),
+        'PASSWORD':  os.environ.get('POSTGRES_PASSWORD'),
     }
 }
+
+REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
+REDIS_BACKEND = f'redis://{REDIS_HOST}:6379/1'
 
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("redis", 6379)],
+            "hosts": [(REDIS_HOST, 6379)],
         },
-        "ROUTING": "solve_board.routing.channel_routing",
     },
+}
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'LOCATION': f'{os.environ.get("CACHE_HOST", "localhost")}:11211',
+    }
+}
+
+LOGGING = {  
+    'version': 1,  
+    'disable_existing_loggers': False,
+    'formatters': {
+        'simple': {
+            'format': '[{asctime}] - {levelname} - {module} - {message}',
+            'style': '{',
+        },
+    },    
+    'handlers': {
+        'console': {
+            'level': os.environ.get('DJANGO_LOG_LEVEL', 'WARNING'),
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        }
+    },
+    'loggers': {
+        '': {
+            'handlers': ['console'],
+            'level': os.environ.get('DJANGO_LOG_LEVEL', 'WARNING'),
+            'propagate': True,
+        },        
+        'django.db.backends': {
+            'level':  os.environ.get('DB_LOG_LEVEL', 'WARNING'),
+            'handlers': ['console'],
+            'propagate': True,
+        }
+    }
 }
 
 # SECURITY WARNING: don't run with debug turned on in production!

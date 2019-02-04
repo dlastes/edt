@@ -24,25 +24,99 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from base.models import Group, TrainingProgramme, GroupDisplay, \
-    TrainingProgrammeDisplay
+import logging
 
 from django.core.exceptions import ObjectDoesNotExist
-from django.conf import settings
 
-import json
-import os
+from base.models import Group, TrainingProgramme, \
+                        GroupDisplay, TrainingProgrammeDisplay, \
+                        ScheduledCourse, EdtVersion, Department, Regen
+
+from base.models import Room, RoomType, RoomGroup, \
+                        RoomSort, Period, CourseType, \
+                        BreakingNews, TutorCost, GroupType
+
+from people.models import Tutor
+
+from TTapp.models import TTConstraint
 
 
-def generate_group_file():
+logger = logging.getLogger(__name__)
+
+
+def create_first_department():    
+
+    department = Department.objects.create(name="Default Department", abbrev="default")
+    
+    # Update all existing department related models
+    models = [
+        TrainingProgramme, EdtVersion, Regen, \
+        RoomType, Period, CourseType, BreakingNews, \
+        TutorCost, GroupType]
+   
+    for model in models:
+        model.objects.all().update(department=department)
+
+    # Update all ManyToMany relations with Department
+    models = [Tutor]
+    for model in models:
+        for model_class in model.objects.all():
+            model_class.departments.add(department)
+
+    # Update existing Constraint
+    types = TTConstraint.__subclasses__()
+
+    for type in types:
+        type.objects.all().update(department=department)
+    
+    return department
+
+
+def get_edt_version(department, week, year, create=False):
+
+    params = {'semaine': week, 'an': year, 'department': department}
+
+    if create:
+        try:
+            edt_version, _ = EdtVersion.objects.get_or_create(defaults={'version': 0}, **params)
+        except EdtVersion.MultipleObjectsReturned as e:
+            logger.error(f'get_edt_version: database inconsistency, multiple objects returned for {params}')
+            raise(e)
+        else:    
+            version = edt_version.version
+    else:
+        """
+        Raise model.DoesNotExist to simulate get behaviour 
+        when no item is matching filter parameters
+        """
+        try:
+            version = EdtVersion.objects.filter(**params).values_list("version", flat=True)[0]   
+        except IndexError:
+            raise(EdtVersion.DoesNotExist)
+    return version
+
+
+def get_scheduled_courses(department, week, year, num_copy):
+
+    qs = ScheduledCourse.objects \
+                    .filter(
+                        cours__module__train_prog__department=department,
+                        cours__semaine=week,
+                        cours__an=year,
+                        copie_travail=num_copy)
+    return qs    
+
+
+def get_groups(department_abbrev):
     """
-    From the data stored in the database, fill the group description file, that
-    will be used by the website
-    :return:
+    Return the groups hierachical representation from database
     """
     final_groups = []
 
-    for train_prog in TrainingProgramme.objects.all():
+    # Filter TrainingProgramme by department
+    training_program_query = TrainingProgramme.objects.filter(department__abbrev=department_abbrev)
+
+    for train_prog in training_program_query:
 
         gp_dict_children = {}
         gp_master = None
@@ -65,9 +139,7 @@ def generate_group_file():
 
         final_groups.append(get_descendant_groups(gp_master, gp_dict_children))
 
-    with open(os.path.join(settings.BASE_DIR, 'base', 'static', 'base',
-                           'groups.json'), 'w') as fp:
-        json.dump(final_groups, fp)
+    return final_groups
 
 
 def get_descendant_groups(gp, children):
@@ -111,3 +183,26 @@ def get_descendant_groups(gp, children):
             current['children'].append(gp_obj)
 
     return current
+
+
+def get_rooms(department_abbrev):
+    """
+    From the data stored in the database, fill the room description file, that
+    will be used by the website
+    :return:
+    """
+    dic_rt = {}
+    for rt in RoomType.objects.filter(department__abbrev=department_abbrev):
+        dic_rt[str(rt)] = []
+        for rg in rt.members.all():
+            if str(rg) not in dic_rt[str(rt)]:
+                dic_rt[str(rt)].append(str(rg))
+
+    dic_rg = {}
+    for rg in RoomGroup.objects.all():
+        dic_rg[str(rg)] = []
+        for r in rg.subrooms.all():
+            dic_rg[str(rg)].append(str(r))
+
+    return {'roomtypes':dic_rt,
+            'roomgroups':dic_rg}
