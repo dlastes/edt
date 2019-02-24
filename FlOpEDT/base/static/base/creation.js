@@ -773,8 +773,8 @@ function go_promo_gp_init(button_available) {
     var gp_2_click = [] ;
     var found_gp, gpk, gpc, gpa ;
 
-    if (promo_init != 0){
-	promo_init = indexOf_promo(promo_init) ;
+    promo_init = indexOf_promo(promo_init) ;
+    if (promo_init >= 0){
 	if (gp_init == "") {
 	    gp_init = root_gp[promo_init].gp.nom ;
 	}

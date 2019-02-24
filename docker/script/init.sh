@@ -30,7 +30,6 @@ $SCRIPT_PATH/wait-for-it.sh $POSTGRES_HOST:5432 -- echo "Postgres is up - contin
 
 if [ "$DJANGO_MIGRATE" = 'on' ]; then
     echo "manage.py migrate..."
-    /code/FlOpEDT/manage.py makemigrations
     /code/FlOpEDT/manage.py migrate --noinput
 fi
 
@@ -44,10 +43,11 @@ if [ "$DJANGO_COLLECTSTATIC" = 'on' ]; then
     /code/FlOpEDT/manage.py collectstatic --noinput
 fi
 
-if [ "$CONFIG" = 'production' ]; then
-    echo "run server"    
+if [ "$START_SERVER" = 'on' ]; then
+    echo "run $CONFIG server"
     cd /code/FlOpEDT
-    daphne -b 0.0.0.0 -p 8000 FlOpEDT.asgi:application
+    [ "$CONFIG" = 'production' ] && daphne -b 0.0.0.0 -p 8000 FlOpEDT.asgi:application
+    [ "$CONFIG" = 'development' ] && /code/FlOpEDT/manage.py runserver 0.0.0.0:8000
 fi
 
 exec "$@"

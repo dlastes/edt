@@ -22,9 +22,6 @@
 # a commercial license. Buying such a license is mandatory as soon as
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
-
-from import_export import resources, fields
-from import_export.widgets import ForeignKeyWidget
 import logging
 
 from core.department import get_model_department_lookup
@@ -35,14 +32,16 @@ from django.db.models.fields import related as related_fields
 from django.contrib import admin
 import django.contrib.auth as auth
 
-from FlOpEDT.filters import DropdownFilterAll, DropdownFilterRel, DropdownFilterSimple
-
 from people.models import Tutor, User
 from base.models import Day, RoomGroup, Module, Course, Group, Slot, \
     UserPreference, Time, ScheduledCourse, EdtVersion, CourseModification, \
     PlanningModification, BreakingNews, TrainingProgramme, ModuleDisplay, \
     Regen, Holiday, TrainingHalfDay, RoomPreference, RoomSort, \
     CoursePreference, Dependency, RoomType, Department, CourseType
+from import_export import resources, fields
+from import_export.widgets import ForeignKeyWidget
+
+from FlOpEDT.filters import DropdownFilterAll, DropdownFilterRel, DropdownFilterSimple
 
 logger = logging.getLogger('admin')
 
