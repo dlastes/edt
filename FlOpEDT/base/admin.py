@@ -101,7 +101,7 @@ class CoursPlaceResource(resources.ModelResource):
     color_txt = fields.Field(column_name='color_txt',
                              attribute='cours__module__display',
                              widget=ForeignKeyWidget(ModuleDisplay, 'color_txt'))
-    module_name = fields.Field(column_name='module',
+    module_name = fields.Field(column_name='module_name',
                           attribute='cours__module',
                           widget=ForeignKeyWidget(Module, 'name'))
     prof_first_name = fields.Field(column_name='prof_first_name',

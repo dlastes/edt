@@ -547,7 +547,7 @@ function translate_cours_pl_from_csv(d) {
 	color_bg: d.color_bg,
 	color_txt: d.color_txt,
     module_name: d.module_name,
-    prof_email: d.email,
+    prof_email: d.prof_email,
     };
     return co;
 }
@@ -578,7 +578,7 @@ function translate_cours_pp_from_csv(d) {
 	color_txt: d.color_txt,
     module_name: d.module_name,
     prof_full_name: d.prof_first_name + " " + d.prof_last_name,
-    prof_email: d.email,
+    prof_email: d.prof_email,
     };
     console.log(co);
     return co;
