@@ -987,7 +987,9 @@ function go_courses(quick) {
 	    select_entry_cm(d);
 	    go_cm_room_tutor_change();
 	}})
-        .call(dragListener);
+        .call(dragListener)
+        .on("dblclick",show_detailed_courses);
+
     
     incg
         .append("rect")
