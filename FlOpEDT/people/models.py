@@ -145,8 +145,8 @@ class Student(User):  # for now: representative
 
 
 class Preferences(models.Model):
-    morning_weight = models.DecimalField(default=1,blank=True,max_value=2, min_value=0, max_digits=3, decimal_places=2)
-    free_half_day_weight = models.DecimalField(default=1,blank=True,max_value=2, min_value=0, max_digits=3, decimal_places=2)
+    morning_weight = models.DecimalField(default=1,blank=True, max_digits=3, decimal_places=2)
+    free_half_day_weight = models.DecimalField(default=1,blank=True, max_digits=3, decimal_places=2)
 
     def get_morning_weight(self):
         return self.morning
@@ -168,3 +168,28 @@ class StudentPreferences(Preferences):
     student = models.OneToOneField('people.Student',
                                     related_name='studentPreferences',
                                     on_delete=models.CASCADE)
+
+
+
+class GroupPreferences(Preferences):
+    group = models.OneToOneField('base.Group',
+                                related_name='groupPreferences',
+                                on_delete=models.CASCADE)
+
+    def calculate_fields(self):
+        #To pull students from the group
+        studentsPrefs = StudentPreferences.objects.filter(student__belong_to=self.group)
+
+        #To initialise variables and getting the divider to get the average
+        morning_weight = 0
+        free_half_day_weight = 0
+        nb_studentPrefs = len(studentsPrefs)
+
+        #To range the table
+        for studentPrefs in studentsPrefs:
+            morning_weight += studentPrefs.morning_weight
+            free_half_day_weight += studentPrefs.free_half_day_weight
+
+        #To calculate the average of each attributs
+        self.morning_weight = morning_weight/nb_studentPrefs
+        self.free_half_day_weight = free_half_day_weight/nb_studentPrefs

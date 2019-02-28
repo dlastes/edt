@@ -35,7 +35,6 @@ from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
 from colorfield.fields import ColorField
-from people.models import Preferences, StudentPreferences
 
 # <editor-fold desc="GROUPS">
 # ------------
@@ -646,27 +645,3 @@ class Regen(models.Model):
         return ret
 
 # </editor-fold desc="MISC">
-
-
-class GroupPreferences(people.Preferences):
-    group = models.OneToOneField('base.Group',
-                                related_name='groupPreferences',
-                                on_delete=models.CASCADE)
-
-    def calculate_fields(self):
-        #To pull students from the group
-        studentsPrefs = people.StudentPreferences.objects.filter(student__belong_to=self.group)
-
-        #To initialise variables and getting the divider to get the average
-        morning_weight = 0
-        free_half_day_weight = 0
-        nb_studentPrefs = len(studentsPrefs)
-
-        #To range the table
-        for studentPrefs in studentsPrefs:
-            morning_weight += studentPrefs.morning_weight
-            free_half_day_weight += studentPrefs.free_half_day_weight
-
-        #To calculate the average of each attributs
-        self.morning_weight = morning_weight/nb_studentPrefs
-        self.free_half_day_weight = free_half_day_weight/nb_studentPrefs
