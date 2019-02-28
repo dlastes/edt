@@ -536,7 +536,7 @@ function translate_cours_pl_from_csv(d) {
         id_cours: +d.id_cours,
         no_cours: +d.num_cours,
         prof: d.prof_nom,
-//        prof_full_name: d.prof_first_name + " " + d.prof_last_name,
+        prof_full_name: d.prof_first_name + " " + d.prof_last_name,
         group: translate_gp_name(d.gpe_nom),
         promo: set_promos.indexOf(d.gpe_promo),
         mod: d.module,
@@ -546,6 +546,8 @@ function translate_cours_pl_from_csv(d) {
 	room_type: d.room_type,
 	color_bg: d.color_bg,
 	color_txt: d.color_txt,
+    module_name: d.module_name,
+    prof_email: d.email,
     };
     return co;
 }
@@ -574,6 +576,9 @@ function translate_cours_pp_from_csv(d) {
 	room_type: d.room_type,
 	color_bg: d.color_bg,
 	color_txt: d.color_txt,
+    module_name: d.module_name,
+    prof_full_name: d.prof_first_name + " " + d.prof_last_name,
+    prof_email: d.email,
     };
     console.log(co);
     return co;

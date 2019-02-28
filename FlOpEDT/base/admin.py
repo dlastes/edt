@@ -71,13 +71,6 @@ class CoursPlaceResource(resources.ModelResource):
     prof = fields.Field(column_name='prof_nom',
                         attribute='cours__tutor',
                         widget=ForeignKeyWidget(Tutor, 'username'))
-    # prof_first_name = fields.Field(column_name='prof_first_name',
-    #                                attribute='cours__tutor',
-    #                                widget=ForeignKeyWidget(Tutor,
-    #                                 'first_name'))
-    # prof_last_name = fields.Field(column_name='prof_last_name',
-    #                               attribute='cours__tutor',
-    #                               widget=ForeignKeyWidget(Tutor, 'last_name'))
     groupe = fields.Field(column_name='gpe_nom',
                           attribute='cours__groupe',
                           widget=ForeignKeyWidget(Group, 'nom'))
@@ -108,12 +101,24 @@ class CoursPlaceResource(resources.ModelResource):
     color_txt = fields.Field(column_name='color_txt',
                              attribute='cours__module__display',
                              widget=ForeignKeyWidget(ModuleDisplay, 'color_txt'))
+    module_name = fields.Field(column_name='module',
+                          attribute='cours__module',
+                          widget=ForeignKeyWidget(Module, 'name'))
+    prof_first_name = fields.Field(column_name='prof_first_name',
+                                    attribute='cours__tutor',
+                                    widget=ForeignKeyWidget(Tutor, 'first_name'))
+    prof_last_name = fields.Field(column_name='prof_last_name',
+                                   attribute='cours__tutor',
+                                   widget=ForeignKeyWidget(Tutor, 'last_name'))
+    prof_email = fields.Field(column_name='prof_email',
+                            attribute='cours__tutor',
+                            widget=ForeignKeyWidget(Tutor, 'email'))
 
     class Meta:
         model = ScheduledCourse
         fields = ('id', 'no', 'groupe', 'promo', 'color_bg', 'color_txt',
                   'module', 'jour', 'heure', 'semaine', 'room', 'prof',
-                  'room_type')
+                  'room_type', 'module_name', 'prof_first_name', 'prof_last_name', 'prof_email')
 
 
 class CoursResource(resources.ModelResource):
@@ -186,7 +191,6 @@ class VersionResource(resources.ModelResource):
     class Meta:
         model = EdtVersion;
         fields = ("an", "semaine", "version")
-
 
 
 # </editor-fold desc="RESOURCES">
