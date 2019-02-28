@@ -1305,6 +1305,50 @@ function compute_cm_room_tutor_direction() {
 
 function show_detailed_courses(cours){
     console.log(cours);
+    var details = fg.append("g")
+                    .attr("id", "course_details");
+
+    var width = "200";
+
+    details
+        .append("rect")
+        //.attr("x",...) à récupérer avec les méthodes de placement
+        //.attr("y",...) à récupérer avec les méthodes de placement
+        .attr("width",width)
+        .attr("height","80")
+        .attr("fill","white")
+        .attr("stroke", "black")
+        .attr("stroke-width",2);
+
+    details
+        .append("text")
+        .text(cours.prof)
+        .attr("x", width/2)
+        .attr("y", 10);
+
+    details
+        .append("text")
+        .text(cours.prof)
+        .attr("x", width/2)
+        .attr("y", 25);
+
+    details
+        .append("text")
+        .text(cours.prof)
+        .attr("x", width/2)
+        .attr("y", 40);
+
+    details
+        .append("text")
+        .text(cours.prof)
+        .attr("x", width/2)
+        .attr("y", 55);
+
+    details
+        .append("text")
+        .text(cours.prof)
+        .attr("x", width/2)
+        .attr("y", 70);
 }
 
 
