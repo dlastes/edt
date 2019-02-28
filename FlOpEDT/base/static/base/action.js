@@ -1308,14 +1308,17 @@ function show_detailed_courses(cours){
     var details = fg.append("g")
                     .attr("id", "course_details");
 
-    var width = "200";
+    var width = grid_width()/5;
+    var height = grid_height()/3;
+    //var pos_x = placement_details_x();
+    //var pos_y = placement_details_y();
 
     details
         .append("rect")
-        //.attr("x",...) à récupérer avec les méthodes de placement
+        //.attr("x",pos_x)
         //.attr("y",...) à récupérer avec les méthodes de placement
         .attr("width",width)
-        .attr("height","80")
+        .attr("height",height)
         .attr("fill","white")
         .attr("stroke", "black")
         .attr("stroke-width",2);
@@ -1324,31 +1327,31 @@ function show_detailed_courses(cours){
         .append("text")
         .text(cours.prof)
         .attr("x", width/2)
-        .attr("y", 10);
+        .attr("y", height/6);
 
     details
         .append("text")
         .text(cours.prof)
         .attr("x", width/2)
-        .attr("y", 25);
+        .attr("y", height/6*2);
 
     details
         .append("text")
         .text(cours.prof)
         .attr("x", width/2)
-        .attr("y", 40);
+        .attr("y", height/6*3);
 
     details
         .append("text")
         .text(cours.prof)
         .attr("x", width/2)
-        .attr("y", 55);
+        .attr("y", height/6*4);
 
     details
         .append("text")
         .text(cours.prof)
         .attr("x", width/2)
-        .attr("y", 70);
+        .attr("y", height/6*5);
 }
 
 
