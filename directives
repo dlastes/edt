@@ -1,19 +1,25 @@
 1- template
-    A. modifier FlOpEDT/template/base.html afin de changer le menu de l'edt
+    A.- modifier FlOpEDT/template/base.html afin de changer le menu de l'edt
      ( utiliser FlOpEDT/people/models.py pour les is_student des utilisateur)
      ajouter le nouveau menu "Preferences"
-    B. creer FlOpEDT/people/templates/people/studentPreferencesSelection.html
-      5 bouttont ou un slider a 5 cases, asociant une case a un ration , pour soir/matin et journée légére/demi-journées libéré.
+     -ajout de la route student_preferences dans people/url.py
+     -ajout de la vue student_preferences dans people/views.py
 
-2- creer le script ( python ou js ? ) qui récupére les donné selectionées et les rentre dans la base lorsqu'on clique sur "sauvegarder"
+    B.-creation de FlOpEDT/people/templates/people/studentPreferencesSelection.html
+      avec  un slider a 5 crant, asociant une case a un ratio, pour soir/matin et journée légére/demi-journées libéré.
+      -ajout de css dans people/static/people/student_preferences.css
+
+
+2- ajout du traitement danas la vue student_preferences dans people/views.py
+qui récupére les donné selectionées et les rentre dans la base lorsqu'on clique sur "sauvegarder"
 
 3- creer la DB
     Dans FlOpEDT/people/models.py creer la class studentsPreferences
     Dans FlOpEDT/base/models.py creer la class groupsPreferences
 
-    clonner la base actuel ,dump ?
+    clonner la base actuel ,./manage.py loaddata dump.json
     makemigrations
     migrate
+    
 4- ressource, cvs exportable
-   Dans FlOpEDT/people/admin.py definir l'export des prefs des étudiants
-   Dans FlOpEDT/base/admin.py definir l'export des prefs des groupes
+   Dans FlOpEDT/people/admin.py definir l'export des prefs des étudiants et  l'export des prefs des groupes
