@@ -104,7 +104,7 @@ urlpatterns = [
 	url(r'^fetch_tutors/$',
         views.fetch_tutors,
         name="fetch_tutors"),
-    url(r'^studentPreferencesSelection/$',
+    url(r'^student_preferences/$',
         views.student_preferences,
         name="student_preferences")
     ]

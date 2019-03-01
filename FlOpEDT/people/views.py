@@ -7,6 +7,8 @@ from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
 from .models import Tutor
 from .admin import TutorResource
+from django.template.response import TemplateResponse
+
 
 def redirect_add_people_kind(req, kind):
     if kind == "stud":
