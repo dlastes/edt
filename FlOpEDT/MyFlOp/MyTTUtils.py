@@ -28,10 +28,12 @@ import functools
 
 from TTapp.TTUtils import basic_reassign_rooms, basic_swap_version
 from base.models import Department
+from TTapp.forms import *
+
 
 def resolve_department(func):
-    
-    # Replace department attribute by the target 
+
+    # Replace department attribute by the target
     # department instance if needed
 
     @functools.wraps(func)
@@ -49,6 +51,22 @@ def resolve_department(func):
 def reassign_rooms(department, week, year, target_work_copy):
     basic_reassign_rooms(department, week, year, target_work_copy)
 
+
 @resolve_department
 def swap_version(department, week, year, copy_a, copy_b=0):
     basic_swap_version(department, week, year, copy_a, copy_b)
+
+funcTab = [
+    {
+        'name': 'Swap version',
+        'func': swap_version,
+        'func_name': 'swap_version',
+        'args': ['department', 'week', 'year', 'copy_a', 'copy_b']
+    },
+    {
+        'name': 'Reassign Rooms',
+        'func': reassign_rooms,
+        'func_name': 'reassign_rooms',
+        'args': ['department', 'week', 'year', 'copy_a', 'copy_b']
+    }
+]

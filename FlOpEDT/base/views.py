@@ -34,7 +34,7 @@ from django.urls import reverse
 from django.views.decorators.cache import cache_page
 
 import json
-
+import MyFlOp
 from .forms import ContactForm
 
 from .models import Course, UserPreference, ScheduledCourse, EdtVersion, \
@@ -1129,7 +1129,8 @@ def contact(req, **kwargs):
             'sender': init_mail})
     return TemplateResponse(req, 'base/contact.html',
                   {'form': form,
-                   'ack': ack
+                   'ack': ack,
+                   'funcTab': MyFlOp.MyTTUtils.funcTab
                   })
 
 
