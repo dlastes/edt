@@ -20,14 +20,11 @@ function getForm( funcname ) {
         contentType: "text/html",
         success: function(msg, ts, req) {
             console.log( msg );
+            document.getElementById('sideBarForm').innerHTML = msg;
         },
         error: function(msg) {
             console.log("error");
         }
     });
-
-}
-
-function sendForm(){
 
 }

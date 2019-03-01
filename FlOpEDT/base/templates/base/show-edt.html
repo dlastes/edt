@@ -41,9 +41,7 @@
 
 {% block script_file %}
 <div id="main">
-	<button class="openbtn" onclick="openNav()">☰ Toggle Sidebar</button>
 	<script type='text/javascript' src="{% static 'base/all.js' %}"></script>
-
 </div>
 {% endblock %}
 
@@ -53,5 +51,6 @@
     {% for task in tasks %}
         <a href="#" onclick="getForm('{{ task.func_name }}')"> {{task.name}} </a>
     {% endfor %}
+    <div id="sideBarForm" class="sideBarForm" ></div>
 </div>
 {% endblock %}
