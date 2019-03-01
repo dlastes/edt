@@ -4,7 +4,7 @@
 from django.contrib import admin
 from base.admin import DepartmentModelAdmin
 
-from people.models import FullStaff, SupplyStaff, BIATOS, Tutor
+from people.models import FullStaff, SupplyStaff, BIATOS, Tutor, StudentPreferences
 
 from import_export import resources, fields
 
@@ -25,7 +25,12 @@ class TutorResource(resources.ModelResource):
 	class Meta:
 		model = Tutor
 		fields = ( "username", "first_name", "last_name", "email" )
-		
+
+class StudentPreferences(resources.ModelResource):
+
+    class Meta:
+		model = Tutor
+		fields = ( "username", "first_name", "last_name", "email" )
 
 
 admin.site.register(FullStaff, TutorModelAdmin)
