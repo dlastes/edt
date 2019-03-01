@@ -34,7 +34,7 @@ def redirect_change_people_kind(req):
             return redirect('people:change_BIATOS')
     else:
         raise Http404("Who are you?")
-            
+
 
 def fetch_tutors(req):
 	dataset = TutorResource().export(Tutor.objects.all())
@@ -42,5 +42,5 @@ def fetch_tutors(req):
                                 content_type='text/csv')
 	return response
 
-
-
+def student_preferences(req):
+        return TemplateResponse(req, 'people/studentPreferencesSelection.html', {})
