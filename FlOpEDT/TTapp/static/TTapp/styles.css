@@ -33,7 +33,12 @@
 }
 
 .sideBarForm {
-  background-color: #ffffff;
+  background-color: #999;
+}
+
+.sideBarForm input{
+  background-color: #FFF;
+  border: 0 ;
 }
 
 .openbtn {

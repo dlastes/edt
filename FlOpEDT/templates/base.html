@@ -65,7 +65,9 @@
 
        {% block nav %}
        <ul>
+       			{% if user.is_authenticated and user.is_superuser %}
 				<li><a href="#" onclick="openNav()">☰</a></li>
+				{% endif %}
 				{% if department %}
 				<li><a href="{% url "base:edt" department %}">Consulter</a></li>
 				<li><a href="{% url "base:decale" department %}">Décaler/Annuler</a></li>
