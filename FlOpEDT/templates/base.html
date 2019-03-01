@@ -65,6 +65,7 @@
 
        {% block nav %}
        <ul>
+				<li><a href="#" onclick="openNav()">☰</a></li>
 				{% if department %}
 				<li><a href="{% url "base:edt" department %}">Consulter</a></li>
 				<li><a href="{% url "base:decale" department %}">Décaler/Annuler</a></li>
