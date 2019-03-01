@@ -1327,21 +1327,21 @@ function show_detailed_courses(cours){
 
     details
         .append("text")
-        .text(cours.mod)
+        .text(cours.module_name)
         .attr("fill", cours.color_txt)
         .attr("x", pos_x+width/2)
         .attr("y", pos_y+height/6);
 
     details
         .append("text")
-        .text(cours.module_name)
+        .text(cours.room)
         .attr("fill", cours.color_txt)
         .attr("x", pos_x+width/2)
         .attr("y", pos_y+height/6*2);
 
     details
         .append("text")
-        .text(cours.room)
+        .text(cours.course_type)
         .attr("fill", cours.color_txt)
         .attr("x", pos_x+width/2)
         .attr("y", pos_y+height/6*3);

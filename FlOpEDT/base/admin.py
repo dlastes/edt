@@ -95,6 +95,9 @@ class CoursPlaceResource(resources.ModelResource):
     room_type = fields.Field(column_name='room_type',
                              attribute='cours__room_type',
                              widget=ForeignKeyWidget(RoomType, 'name'))
+    course_type = fields.Field(column_name='course_type',
+                             attribute='cours__type',
+                             widget=ForeignKeyWidget(CourseType, 'name'))
     color_bg = fields.Field(column_name='color_bg',
                             attribute='cours__module__display',
                             widget=ForeignKeyWidget(ModuleDisplay, 'color_bg'))
