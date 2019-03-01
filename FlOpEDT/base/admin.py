@@ -116,12 +116,15 @@ class CoursPlaceResource(resources.ModelResource):
     prof_email = fields.Field(column_name='prof_email',
                             attribute='cours__tutor',
                             widget=ForeignKeyWidget(Tutor, 'email'))
+    url = fields.Field(column_name='url',
+                    attribute='cours__module',
+                    widget=ForeignKeyWidget(Module, 'url'))
 
     class Meta:
         model = ScheduledCourse
         fields = ('id', 'no', 'groupe', 'promo', 'color_bg', 'color_txt',
                   'module', 'jour', 'heure', 'semaine', 'room', 'prof',
-                  'room_type', 'module_name', 'prof_first_name', 'prof_last_name', 'prof_email')
+                  'room_type', 'module_name', 'prof_first_name', 'prof_last_name', 'prof_email','url','course_type')
 
 
 class CoursResource(resources.ModelResource):

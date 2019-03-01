@@ -83,7 +83,8 @@ function create_general_svg(light) {
         .attr("height", svg.height)
         .attr("id", "edt-main")
         .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+        .on("click",remove_details);
 
     create_layouts(svg_cont, light);
 

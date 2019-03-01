@@ -1313,6 +1313,17 @@ function show_detailed_courses(cours){
     var height = grid_height()/3;
     var pos_x = placement_details_x(cours);
     var pos_y = placement_details_y(cours);
+    var strokeColor;
+    var strokeWidth;
+
+    if(cours.course_type=="CTRL"){
+        strokeColor = "red";
+        strokeWidth = 4;
+    }
+    else{
+        strokeColor = "black";
+        strokeWidth = 2;
+    }
 
     details
         .append("rect")
@@ -1320,15 +1331,21 @@ function show_detailed_courses(cours){
         .attr("y",pos_y)
         .attr("width",width)
         .attr("height",height)
+        .attr("rx",15)
+        .attr("ry",15)
         .attr("fill", cours.color_bg)
-        .attr("stroke", "black")
-        .attr("stroke-width",2)
+        .attr("stroke", strokeColor)
+        .attr("stroke-width",strokeWidth)
         .on("click",remove_details);
 
     details
+        .append("a")
+        .attr("xlink:href", cours.url)
+        .attr("target", "_blank")
         .append("text")
         .text(cours.module_name)
         .attr("fill", cours.color_txt)
+        .attr("style", "text-decoration:underline")
         .attr("x", pos_x+width/2)
         .attr("y", pos_y+height/6);
 

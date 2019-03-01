@@ -291,6 +291,7 @@ class Module(models.Model):
     ppn = models.CharField(max_length=6, default='M')
     train_prog = models.ForeignKey('TrainingProgramme', on_delete=models.CASCADE)
     period = models.ForeignKey('Period', on_delete=models.CASCADE)
+    url = models.CharField(max_length=200, null=True, blank=True, default=None)
     # nbTD = models.PositiveSmallIntegerField(default=1)
     # nbTP = models.PositiveSmallIntegerField(default=1)
     # nbCM = models.PositiveSmallIntegerField(default=1)
