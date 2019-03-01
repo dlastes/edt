@@ -26,7 +26,6 @@
 # without disclosing the source code of your own applications.
 import functools
 
-from TTapp.TTUtils import basic_reassign_rooms, basic_swap_version
 from base.models import Department
 from TTapp.forms import *
 
@@ -49,11 +48,13 @@ def resolve_department(func):
 
 @resolve_department
 def reassign_rooms(department, week, year, target_work_copy):
+    from TTapp.TTUtils import basic_reassign_rooms
     basic_reassign_rooms(department, week, year, target_work_copy)
 
 
 @resolve_department
 def swap_version(department, week, year, copy_a, copy_b=0):
+    from TTapp.TTUtils import basic_swap_version
     basic_swap_version(department, week, year, copy_a, copy_b)
 
 funcTab = [

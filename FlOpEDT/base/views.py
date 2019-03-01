@@ -34,7 +34,8 @@ from django.urls import reverse
 from django.views.decorators.cache import cache_page
 
 import json
-import MyFlOp
+from MyFlOp.MyTTUtils import funcTab
+#from MyFlOp MyTTUtils
 from .forms import ContactForm
 
 from .models import Course, UserPreference, ScheduledCourse, EdtVersion, \
@@ -142,7 +143,8 @@ def edt(req, an=None, semaine=None, splash_id=0, **kwargs):
         name_usr = ''
         rights_usr = 0
 
-    funcTab = { 'name', 'bname' };
+    #funcTab = {funcTab}
+    print(funcTab)
 
     return TemplateResponse(req, 'base/show-edt.html',
                   {

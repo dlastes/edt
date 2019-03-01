@@ -10,7 +10,21 @@ function closeNav() {
   document.getElementById("menu-edt").style.marginLeft= "0";
 }
 
-function getForm( task ) {
+function getForm( funcname ) {
+	
+	$.ajax({
+        type: "GET",
+        dataType: 'text',
+        url: "ttapp/viewForm/" + funcname,
+        async: true,
+        contentType: "text/html",
+        success: function(msg, ts, req) {
+            console.log( msg );
+        },
+        error: function(msg) {
+            console.log("error");
+        }
+    });
 
 }
 

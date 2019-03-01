@@ -31,9 +31,9 @@
 
 {% block script_variable %}
 <script>
-    var promo_init = +"{{ promo }}";
+    var promo_init = "{{ promo }}";
     var gp_init = "{{ gp }}";
-    var num_copie = +"{{ copie }}";
+    var num_copie = "{{ copie }}";
     var logged_usr = { nom: "{{ name_usr }}", rights: "{{ rights_usr }}" };
     var splash_id = "{{ splash_id }}";
 </script>
@@ -51,7 +51,7 @@
 <div id="mySidebar" class="sidebar">
     <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
     {% for task in tasks %}
-        <a href="#"> {{task}} </a>
+        <a href="#" onclick="getForm('{{ task.func_name }}')"> {{task.name}} </a>
     {% endfor %}
 </div>
 {% endblock %}
