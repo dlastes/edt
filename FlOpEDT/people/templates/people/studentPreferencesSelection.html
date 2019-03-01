@@ -37,7 +37,7 @@
 <fieldset>
   <legend>Préférences étudiant par groupe</legend>
 </br>
-  <div class="msg-prefs">Êtes-vous plutôt :</div><br/>
+  <div class="msg-prefs">Vous préférez :</div><br/>
   </br>
   <form action="{% url 'people:student_preferences' %}" method="post" id="form_pref">
     <div class="un">
@@ -62,19 +62,19 @@
 
           switch ($set) {
             case "-2":
-              $set = 'Matin';
+              $set = 'Commencer le plus tôt possible mais finir tôt';
               break;
             case "-1":
-              $set = 'un peu Matin';
+              $set = 'Ne pas commencer trop tard et ne pas finir trop tard';
               break;
             case "0":
-              $set = 'neutre';
+              $set = 'Ni trop tôt ni trop tard';
               break;
             case "1":
-              $set = 'un peu soir';
+              $set = 'Ne pas commencer trop tôt et finir plus tard';
               break;
             case "2":
-              $set = 'soir';
+              $set = 'Commencer le plus tard possible mais finir tard';
               break;
             default:
               $set = $set;
@@ -90,19 +90,19 @@
 
           switch ($set) {
             case "-2":
-              $set = 'Matgin';
+              $set = 'Avoir toute la semaine des journées allégées';
               break;
             case "-1":
-              $set = 'un peu Mgatin';
+              $set = 'Avoir plus de journées allégées que de demi-journées libérées';
               break;
             case "0":
-              $set = 'neutgre';
+              $set = 'Avoir des semaines équilibrées';
               break;
             case "1":
-              $set = 'un peu sgoir';
+              $set = 'Avoir plus de demi-journées libérées que de journées allégées';
               break;
             case "2":
-              $set = 'sogir';
+              $set = 'Avoir des journées chargées mais aussi des demi-journées libérées';
               break;
             default:
               $set = $set;
