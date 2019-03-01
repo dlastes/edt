@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.http import Http404, HttpResponse
 from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
-from .models import Tutor
+from .models import Tutor, GroupPreferences, StudentPreferences
 from .admin import TutorResource
 from django.template.response import TemplateResponse
 
@@ -45,4 +45,22 @@ def fetch_tutors(req):
 	return response
 
 def student_preferences(req):
+    if req.method=='POST' :
+        if req.user.is_authenticated and req.user.is_student:
+            user = req.user
+            morning_weight = req.POST['morning_weight']
+            morning_weight = req.POST['free_half_day_weight']
+
+            student = Student.objects.filter(username=user.username)
+            student_preferences = StudentPreferences.objects.filter(student__username=student.username)
+            student_preferences.morning_weight = morning_weight
+            student_preferences.free_half_day_weight = free_half_day_weight
+            student_preferences.save()
+            group_preferences = GroupPreferences.objects.filter(group__nom=student.belong_to)
+            group_preferences.calculate_fields()
+            group_preferences.save()
+            return redirect('base:edt')
+        else :
+            raise Http404("Who are you?")
+    else :
         return TemplateResponse(req, 'people/studentPreferencesSelection.html', {})
