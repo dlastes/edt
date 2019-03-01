@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.http import Http404, HttpResponse
 from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
-from .models import Tutor, GroupPreferences, StudentPreferences
+from .models import Tutor, GroupPreferences, StudentPreferences, Student
 from .admin import TutorResource
 from django.template.response import TemplateResponse
 import base
@@ -50,8 +50,8 @@ def student_preferences(req):
         print(req)
         if req.user.is_authenticated and req.user.is_student:
             user = req.user
-            morning_weight = req.POST['morning_weight']
-            morning_weight = req.POST['free_half_day_weight']
+            morning_weight = req.POST['morning_evening']
+            morning_weight = req.POST['light_free']
 
             student = Student.objects.filter(username=user.username)
             student_preferences = StudentPreferences.objects.filter(student__username=student.username)
