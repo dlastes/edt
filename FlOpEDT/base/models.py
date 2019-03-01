@@ -4,21 +4,21 @@
 # This file is part of the FlOpEDT/FlOpScheduler project.
 # Copyright (c) 2017
 # Authors: Iulian Ober, Paul Renaud-Goud, Pablo Seban, et al.
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
 # published by the Free Software Foundation, either version 3 of the
 # License, or (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful, but
 # WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 # Affero General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Affero General Public
 # License along with this program. If not, see
 # <http://www.gnu.org/licenses/>.
-# 
+#
 # You can be released from the requirements of the license by purchasing
 # a commercial license. Buying such a license is mandatory as soon as
 # you develop activities involving the FlOpEDT/FlOpScheduler software
@@ -43,7 +43,7 @@ from colorfield.fields import ColorField
 
 class Department(models.Model):
     name = models.CharField(max_length=50)
-    abbrev = models.CharField(max_length=7)    
+    abbrev = models.CharField(max_length=7)
 
     def __str__(self):
         return self.abbrev
@@ -61,7 +61,7 @@ class TrainingProgramme(models.Model):
 class GroupType(models.Model):
     name = models.CharField(max_length=50)
     department =  models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
-    
+
     def __str__(self):
         return self.name
 
@@ -146,7 +146,7 @@ class Day(models.Model):
     THURSDAY = "th"
     FRIDAY = "f"
     SATURDAY = "sa"
-    SUNDAY = "su"    
+    SUNDAY = "su"
 
     CHOICES = ((MONDAY, "monday"), (TUESDAY, "tuesday"),
                (WEDNESDAY, "wednesday"), (THURSDAY, "thursday"),
@@ -218,7 +218,7 @@ class TrainingHalfDay(models.Model):
 
 
 class Period(models.Model):
-    
+
     name = models.CharField(max_length=20)
     department =  models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
     starting_week = models.PositiveSmallIntegerField(
@@ -249,12 +249,12 @@ class RoomGroup(models.Model):
 
     def __str__(self):
         return self.name
-        
+
 class Room(models.Model):
     name = models.CharField(max_length=20)
     subroom_of = models.ManyToManyField(RoomGroup,
                                         blank=True,
-                                        related_name="subrooms")                                       
+                                        related_name="subrooms")
 
     def __str__(self):
         return self.name
@@ -300,7 +300,7 @@ class Module(models.Model):
         return self.abbrev
 
     class Meta:
-       ordering = ['abbrev',]         
+       ordering = ['abbrev',]
 
 
 class CourseType(models.Model):
@@ -340,7 +340,7 @@ class Course(models.Model):
         return "%s-%s-%s" % \
                (self.module, self.tutor.username if self.tutor is not None else '-no_tut-',
                 self.groupe)
-    
+
     def full_name(self):
         return "%s-%s-%s-%s" % \
                (self.module, self.type,
@@ -595,7 +595,7 @@ class Dependency(models.Model):
 
 class Regen(models.Model):
 
-    department =  models.ForeignKey(Department, on_delete=models.CASCADE, null=True)   
+    department =  models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
     semaine = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)])
     an = models.PositiveSmallIntegerField()
