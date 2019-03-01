@@ -32,15 +32,28 @@
 {% block title %} EDT {% endblock %}
 
 {% block content %}
+
+</br></br></br>
 <fieldset>
   <legend>Préférences étudiant par groupe</legend>
+</br>
   <div class="msg-prefs">Êtes-vous plutôt :</div><br/>
-    <div class="">
-        <input type="range" class="range" name="a" min="-2" max="2" step="1" value="0"/>
+  </br>
+  <form action="{% url 'people:student_preferences' %}" method="post" id="form_pref">
+    <div class="un">
+        <input type="range" class="range" name="morning_evening" min="-2" max="2" step="1" value="0"/>
         <output name="result"></output>
     </div>
-</fieldset>
+  </br>
+    <div class="deux">
+        <input type="range" class="rangedeux" name="light_free" min="-2" max="2" step="1" value="0"/>
+        <output name="resultdeux"></output>
+    </div>
 
+  </br>
+  <button type="submit" form="form_pref" value="Submit">Valider</button>
+</form>
+</fieldset>
 <script>
   $(function() {
 	   $('.range').next().text('Veuillez sélectionner votre préférence.'); // Valeur par défaut
@@ -69,6 +82,35 @@
 		$(this).next().text($set);
 	 });
   });
+
+  $(function() {
+	   $('.rangedeux').next().text('Veuillez sélectionner votre préférence.'); // Valeur par défaut
+	    $('.rangedeux').on('input', function() {
+		      var $set = $(this).val();
+
+          switch ($set) {
+            case "-2":
+              $set = 'Matgin';
+              break;
+            case "-1":
+              $set = 'un peu Mgatin';
+              break;
+            case "0":
+              $set = 'neutgre';
+              break;
+            case "1":
+              $set = 'un peu sgoir';
+              break;
+            case "2":
+              $set = 'sogir';
+              break;
+            default:
+              $set = $set;
+          }
+		$(this).next().text($set);
+	 });
+  });
+
 </script>
 
 {% endblock %}
