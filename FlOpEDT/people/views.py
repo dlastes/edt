@@ -47,6 +47,7 @@ def fetch_tutors(req):
 
 def student_preferences(req):
     if req.method=='POST' :
+        print(req)
         if req.user.is_authenticated and req.user.is_student:
             user = req.user
             morning_weight = req.POST['morning_weight']
