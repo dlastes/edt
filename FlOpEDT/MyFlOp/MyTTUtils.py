@@ -57,6 +57,9 @@ def swap_version(department, week, year, copy_a, copy_b=0):
     from TTapp.TTUtils import basic_swap_version
     basic_swap_version(department, week, year, copy_a, copy_b)
 
+def hack_edt(machin, truc, bidule):
+    print('hacked')
+
 funcTab = [
     {
         'name': 'Swap version',
@@ -69,5 +72,11 @@ funcTab = [
         'func': reassign_rooms,
         'func_name': 'reassign_rooms',
         'args': ['department', 'week', 'year', 'copy_a', 'copy_b']
+    },
+    {
+        'name': 'Hack EDT',
+        'func': hack_edt,
+        'func_name': 'hack_edt',
+        'args': ['machin', 'truc', 'bidule']
     }
 ]
