@@ -184,12 +184,16 @@ class GroupPreferences(Preferences):
         morning_weight = 0
         free_half_day_weight = 0
         nb_studentPrefs = len(studentsPrefs)
+        if nb_studentPrefs == 0:
+            self.morning_weight = 1
+            self.free_half_day_weight = 1
 
-        #To range the table
-        for studentPrefs in studentsPrefs:
-            morning_weight += studentPrefs.morning_weight
-            free_half_day_weight += studentPrefs.free_half_day_weight
+        else :
+            #To range the table
+            for studentPrefs in studentsPrefs:
+                morning_weight += studentPrefs.morning_weight
+                free_half_day_weight += studentPrefs.free_half_day_weight
 
-        #To calculate the average of each attributs
-        self.morning_weight = morning_weight/nb_studentPrefs
-        self.free_half_day_weight = free_half_day_weight/nb_studentPrefs
+            #To calculate the average of each attributs
+            self.morning_weight = morning_weight/nb_studentPrefs
+            self.free_half_day_weight = free_half_day_weight/nb_studentPrefs
