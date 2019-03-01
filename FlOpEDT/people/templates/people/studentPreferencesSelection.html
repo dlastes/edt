@@ -27,39 +27,48 @@
 
 {% load static %}
 <link rel="stylesheet" href="{% static "people/student_preferences.css" %}" />
+<script href="https://code.jquery.com/jquery-3.3.1.js"></script>
 
 {% block title %} EDT {% endblock %}
 
 {% block content %}
-
 <fieldset>
   <legend>Préférences étudiant par groupe</legend>
   <div class="msg-prefs">Êtes-vous plutôt :</div><br/>
-    <div class="slidecontainer">
-        <input type="range" list="tickmarks" min="-2" max="2" value="5" class="slider" id="myRange">
-
-
-
-        <datalist id="tickmarks">
-            <option value="-2" label="-2">
-            <option value="-1" label="-1">
-            <option value="0" label="0">
-            <option value="1" label="+1">
-            <option value="2" label="+2">
-        </datalist>
-
+    <div class="">
+        <input type="range" class="range" name="a" min="-2" max="2" step="1" value="0"/>
+        <output name="result"></output>
     </div>
 </fieldset>
 
-<fieldset>
-  <legend>Préférences étudiant par groupe</legend>
-   <div class="msg-prefs">Êtes-vous plutôt :</div><br/>
-  <form>
-    <input type="radio" id="matin" name="when">Matin</input><br/>
-    <input type="radio" id="soir" name="when">Soir</input><br/>
-    <input type="radio" id="leger" name="when">Journée allégée</input></br>
-    <input type="radio" id="libere" name="when">Journées lourdes puis journées avec créneau libres</input></br>
-  </form>
-</fieldset>
+<script>
+  $(function() {
+	   $('.range').next().text('Veuillez sélectionner votre préférence.'); // Valeur par défaut
+	    $('.range').on('input', function() {
+		      var $set = $(this).val();
+
+          switch ($set) {
+            case "-2":
+              $set = 'Matin';
+              break;
+            case "-1":
+              $set = 'un peu Matin';
+              break;
+            case "0":
+              $set = 'neutre';
+              break;
+            case "1":
+              $set = 'un peu soir';
+              break;
+            case "2":
+              $set = 'soir';
+              break;
+            default:
+              $set = $set;
+          }
+		$(this).next().text($set);
+	 });
+  });
+</script>
 
 {% endblock %}
