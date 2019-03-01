@@ -4,7 +4,7 @@
 from django.contrib import admin
 from base.admin import DepartmentModelAdmin
 
-from people.models import FullStaff, SupplyStaff, BIATOS, Tutor
+from people.models import *
 
 from import_export import resources, fields
 
@@ -25,7 +25,19 @@ class TutorResource(resources.ModelResource):
 	class Meta:
 		model = Tutor
 		fields = ( "username", "first_name", "last_name", "email" )
-		
+
+class StudentPreferencesResource(resources.ModelResource):
+
+    class Meta:
+        model = StudentPreferences
+        fields = ( "student.username", "student.belong_to", "morning_weight", "free_half_day_weight" )
+
+
+class GroupPreferencesResource(resources.ModelResource):
+
+    class Meta:
+        model = GroupPreferences
+        fields = ( "group.name", "morning_weight", "free_half_day_weight" )
 
 
 admin.site.register(FullStaff, TutorModelAdmin)

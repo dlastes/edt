@@ -21,11 +21,35 @@
 <!-- you develop activities involving the FlOpEDT/FlOpScheduler software   -->
 <!-- without disclosing the source code of your own applications.          -->
 
+
+
 {% extends "base.html" %}
+
+{% load static %}
+<link rel="stylesheet" href="{% static "people/student_preferences.css" %}" />
 
 {% block title %} EDT {% endblock %}
 
 {% block content %}
+
+<fieldset>
+  <legend>Préférences étudiant par groupe</legend>
+  <div class="msg-prefs">Êtes-vous plutôt :</div><br/>
+    <div class="slidecontainer">
+        <input type="range" list="tickmarks" min="-2" max="2" value="5" class="slider" id="myRange">
+
+
+
+        <datalist id="tickmarks">
+            <option value="-2" label="-2">
+            <option value="-1" label="-1">
+            <option value="0" label="0">
+            <option value="1" label="+1">
+            <option value="2" label="+2">
+        </datalist>
+
+    </div>
+</fieldset>
 
 <fieldset>
   <legend>Préférences étudiant par groupe</legend>
