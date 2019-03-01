@@ -27,5 +27,10 @@
 
 
 from django.shortcuts import render
+from django.http import HttpResponse
 
 # Create your views here.
+
+def viewForm(request, funcname):
+    resp = '<h1>' + funcname + '</h1>'
+    return HttpResponse(resp)

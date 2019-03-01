@@ -39,9 +39,11 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 from django.contrib import admin
+from django.urls import path
 from django.views.generic import RedirectView
 
 import base.views
+import TTapp.views
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
@@ -51,5 +53,6 @@ urlpatterns = [
     url(r'^solve-board/(?P<department>[a-zA-Z]\w{1,7})/', include('solve_board.urls')),    
     url(r'^ical/(?P<department>[a-zA-Z]\w{1,7})/', include('synchro.urls')),
     url(r'^ics/(?P<department>[a-zA-Z]\w{1,7})/', include('ics.urls')),
+    path('ttapp/viewForm/<str:funcname>', TTapp.views.viewForm),
     url(r'$', base.views.index),
 ]
