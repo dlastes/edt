@@ -1319,37 +1319,42 @@ function show_detailed_courses(cours){
         //.attr("y",...) à récupérer avec les méthodes de placement
         .attr("width",width)
         .attr("height",height)
-        .attr("fill","white")
+        .attr("fill", cours.color_bg)
         .attr("stroke", "black")
         .attr("stroke-width",2);
 
     details
         .append("text")
         .text(cours.mod)
+        .attr("fill", cours.color_txt)
         .attr("x", width/2)
         .attr("y", height/6);
 
     details
         .append("text")
         .text(cours.module_name)
+        .attr("fill", cours.color_txt)
         .attr("x", width/2)
         .attr("y", height/6*2);
 
     details
         .append("text")
         .text(cours.room)
+        .attr("fill", cours.color_txt)
         .attr("x", width/2)
         .attr("y", height/6*3);
 
     details
         .append("text")
         .text(cours.prof_full_name)
+        .attr("fill", cours.color_txt)
         .attr("x", width/2)
         .attr("y", height/6*4);
 
     details
         .append("text")
         .text(cours.prof_email)
+        .attr("fill", cours.color_txt)
         .attr("x", width/2)
         .attr("y", height/6*5);
 }
