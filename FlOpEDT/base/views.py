@@ -142,6 +142,8 @@ def edt(req, an=None, semaine=None, splash_id=0, **kwargs):
         name_usr = ''
         rights_usr = 0
 
+    funcTab = { 'name', 'bname' };
+
     return TemplateResponse(req, 'base/show-edt.html',
                   {
                     'all_weeks': week_list(),
@@ -154,7 +156,8 @@ def edt(req, an=None, semaine=None, splash_id=0, **kwargs):
                     'gp': gp,
                     'name_usr': name_usr,
                     'rights_usr': rights_usr,
-                    'splash_id': splash_id
+                    'splash_id': splash_id,
+                    'tasks':funcTab
                   })
 
 
