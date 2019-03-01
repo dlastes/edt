@@ -40,7 +40,7 @@ def viewForm(request, funcname):
             print(i.get('func_name'))
             args = i.get('args')
             for y in args:
-                resp += '<label>' + y + '</label><input name="'+ y + '" type="text"/>'
+                resp += '<label>' + y + '</label><input name="'+ y + '" type="text"/><br>'
     
     resp += '<button>Submit</button>'
     resp += '</form>'
