@@ -776,24 +776,24 @@ function cm_chg_bg_y() {
 ///////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
-/*
+
 
 function placement_details_x(cours) {
-    if (room_tutor_change.posh == 'w') {
-    return cours_x(cours) + .5 * cours_width(cours) - cm_chg_bg_width();
-    } else {
+    if (cours_x(cours) <= grid_width()/2) {
     return cours_x(cours) + .5 * cours_width(cours);
-    }
-}
-function placement_details_y() {
-    var c = room_tutor_change.course[0] ;
-    if (room_tutor_change.posv == 's') {
-    return cours_y(c)  + .5 * cours_height(c) ;
     } else {
-    return cours_y(c)  + .5 * cours_height(c) - cm_chg_bg_height() ;
+    return cours_x(cours) + .5 * cours_width(cours)-grid_width()/5; //grid_width()/5 = taille largeur fenetre des details
     }
 }
-*/
+function placement_details_y(cours) {
+    
+    if (cours_y(cours) <= grid_height()/2) {
+    return cours_y(cours)  + .5 * cours_height(cours) ;
+    } else {
+    return cours_y(cours)  + .5 * cours_height(cours) - grid_height()/3 ; //grid_heigth()/3 = taille hauteur fenetre des details
+    }
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////

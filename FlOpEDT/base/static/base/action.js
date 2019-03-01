@@ -1305,53 +1305,58 @@ function compute_cm_room_tutor_direction() {
 
 function show_detailed_courses(cours){
     console.log(cours);
+    remove_details();
     var details = fg.append("g")
                     .attr("id", "course_details");
 
-    var width = grid_width()/5;
+    var width = grid_width()/4;
     var height = grid_height()/3;
-    //var pos_x = placement_details_x();
-    //var pos_y = placement_details_y();
+    var pos_x = placement_details_x(cours);
+    var pos_y = placement_details_y(cours);
 
     details
         .append("rect")
-        //.attr("x",pos_x)
-        //.attr("y",...) à récupérer avec les méthodes de placement
+        .attr("x",pos_x)
+        .attr("y",pos_y)
         .attr("width",width)
         .attr("height",height)
         .attr("fill","white")
         .attr("stroke", "black")
-        .attr("stroke-width",2);
+        .attr("stroke-width",2)
+        .on("click",remove_details);
 
     details
         .append("text")
         .text(cours.prof)
-        .attr("x", width/2)
-        .attr("y", height/6);
+        .attr("x", pos_x+width/2)
+        .attr("y", pos_y+height/6);
 
     details
         .append("text")
         .text(cours.prof)
-        .attr("x", width/2)
-        .attr("y", height/6*2);
+        .attr("x", pos_x+width/2)
+        .attr("y", pos_y+height/6*2);
 
     details
         .append("text")
         .text(cours.prof)
-        .attr("x", width/2)
-        .attr("y", height/6*3);
+        .attr("x", pos_x+width/2)
+        .attr("y", pos_y+height/6*3);
 
     details
         .append("text")
         .text(cours.prof)
-        .attr("x", width/2)
-        .attr("y", height/6*4);
+        .attr("x", pos_x+width/2)
+        .attr("y", pos_y+height/6*4);
 
     details
         .append("text")
         .text(cours.prof)
-        .attr("x", width/2)
-        .attr("y", height/6*5);
+        .attr("x", pos_x+width/2)
+        .attr("y", pos_y+height/6*5);
 }
 
 
+function remove_details(){
+    d3.select("#course_details").remove();
+}
