@@ -53,6 +53,6 @@ urlpatterns = [
     url(r'^solve-board/(?P<department>[a-zA-Z]\w{1,7})/', include('solve_board.urls')),    
     url(r'^ical/(?P<department>[a-zA-Z]\w{1,7})/', include('synchro.urls')),
     url(r'^ics/(?P<department>[a-zA-Z]\w{1,7})/', include('ics.urls')),
-    path('ttapp/viewForm/<str:funcname>', TTapp.views.viewForm),
+    url('ttapp/', include('TTapp.urls')),
     url(r'$', base.views.index),
 ]

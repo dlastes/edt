@@ -28,9 +28,21 @@
 
 from django.shortcuts import render
 from django.http import HttpResponse
+from MyFlOp import MyTTUtils
 
 # Create your views here.
 
 def viewForm(request, funcname):
+    
     resp = '<h1>' + funcname + '</h1>'
     return HttpResponse(resp)
+
+def submitForm(request, funcname):
+    request.POST['']
+    func = ''
+    args = ''
+    finalargs = {}
+    for i in MyTTUtils.funcTab:
+        if i.get('func_name') == funcname:
+            func = i.get('func')
+            args = i.get('args')

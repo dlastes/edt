@@ -1,7 +1,8 @@
 from django.conf.urls import url, include
+from django.urls import path
 
 import TTapp.views
 
 urlpatterns = [
-    url('viewForm/<str:funcname>', TTapp.views.viewForm)
+    path('viewForm/<str:funcname>', TTapp.views.viewForm)
 ]
