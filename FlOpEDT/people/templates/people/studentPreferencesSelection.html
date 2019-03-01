@@ -41,12 +41,12 @@
   </br>
   <form action="{% url 'people:student_preferences' %}" method="post" id="form_pref">
     <div class="un">
-        <input type="range" class="range" name="morning_evening" min="-2" max="2" step="1" value="0"/>
+        <input type="range" class="range" name="morning_evening" min="0" max="2" step="0.5" value="1"/>
         <output name="result"></output>
     </div>
   </br>
     <div class="deux">
-        <input type="range" class="rangedeux" name="light_free" min="-2" max="2" step="1" value="0"/>
+        <input type="range" class="rangedeux" name="light_free" min="0" max="2" step="0.5" value="1"/>
         <output name="resultdeux"></output>
     </div>
 
@@ -61,16 +61,16 @@
 		      var $set = $(this).val();
 
           switch ($set) {
-            case "-2":
+            case "0":
               $set = 'Commencer le plus tôt possible mais finir tôt';
               break;
-            case "-1":
+            case "0.5":
               $set = 'Ne pas commencer trop tard et ne pas finir trop tard';
               break;
-            case "0":
+            case "1":
               $set = 'Ni trop tôt ni trop tard';
               break;
-            case "1":
+            case "1.5":
               $set = 'Ne pas commencer trop tôt et finir plus tard';
               break;
             case "2":
@@ -89,16 +89,16 @@
 		      var $set = $(this).val();
 
           switch ($set) {
-            case "-2":
+            case "0":
               $set = 'Avoir toute la semaine des journées allégées';
               break;
-            case "-1":
+            case "0.5":
               $set = 'Avoir plus de journées allégées que de demi-journées libérées';
               break;
-            case "0":
+            case "1":
               $set = 'Avoir des semaines équilibrées';
               break;
-            case "1":
+            case "1.5":
               $set = 'Avoir plus de demi-journées libérées que de journées allégées';
               break;
             case "2":
