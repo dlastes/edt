@@ -104,6 +104,12 @@ urlpatterns = [
 	url(r'^fetch_tutors/$',
         views.fetch_tutors,
         name="fetch_tutors"),
+	url(r'^fetch_preferences_group/$',
+        views.fetch_preferences_group,
+        name="fetch_preferences_group"),
+	url(r'^fetch_preferences_students/$',
+        views.fetch_preferences_students,
+        name="fetch_preferences_students"),
     url(r'^student_preferences/$',
         views.student_preferences,
         name="student_preferences")
