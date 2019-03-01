@@ -7,6 +7,8 @@ from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
 from .models import Tutor
 from .admin import TutorResource
+from django.template.response import TemplateResponse
+
 
 def redirect_add_people_kind(req, kind):
     if kind == "stud":
@@ -34,7 +36,7 @@ def redirect_change_people_kind(req):
             return redirect('people:change_BIATOS')
     else:
         raise Http404("Who are you?")
-            
+
 
 def fetch_tutors(req):
 	dataset = TutorResource().export(Tutor.objects.all())
@@ -42,5 +44,5 @@ def fetch_tutors(req):
                                 content_type='text/csv')
 	return response
 
-
-
+def student_preferences(req):
+        return TemplateResponse(req, 'people/studentPreferencesSelection.html', {})

@@ -50,7 +50,7 @@
     <nav id="menu-edt">
       <a class="hide_this_link" target="_blank" href="https://framagit.org/flopedt/flopedt" id="live-logo"  style="padding: 0px 0px 0px 0px; float: left">
 			</a>
-			<div id="full_logo">     
+			<div id="full_logo">
 				<span id="acro_logo">Fl<span id=opRed >Op</span>EDT<br></span>
 				{% autoescape off %}
 				<span id="head_logo">
@@ -71,6 +71,7 @@
 				<li><a href="{% url "ics:index" department %}">iCal</a></li>
 				<li><a href="{% url "base:aide" department %}">Aide</a></li>
 				<li><a href="{% url "base:contact" department %}">Contact</a></li>
+        <li><a href="{% url "people:student_preferences" %}">Préférences</a></li>
 				{% if user.is_authenticated and user.is_superuser %}
 					<li><a href="{% url "solve_board:main_board" department %}">Générer</a></li>
 					<li><a href="{% url "base:statistics" department %}">Statistiques</a></li>
@@ -102,8 +103,8 @@
 
    <script src="{% static 'base/logo.js' %}";></script>
    <script>
-     
-   </script>  
+
+   </script>
 
 </body>
 </html>
