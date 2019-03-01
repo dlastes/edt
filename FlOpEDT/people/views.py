@@ -6,7 +6,7 @@ from django.http import Http404, HttpResponse
 from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
 from .models import Tutor, GroupPreferences, StudentPreferences, Student
-from .admin import TutorResource
+from .admin import TutorResource, GroupPreferencesResource, StudentPreferencesResource
 from django.template.response import TemplateResponse
 import base
 

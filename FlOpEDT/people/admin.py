@@ -3,6 +3,8 @@
 
 from django.contrib import admin
 from base.admin import DepartmentModelAdmin
+from import_export.widgets import ForeignKeyWidget
+
 
 from people.models import *
 
@@ -28,16 +30,34 @@ class TutorResource(resources.ModelResource):
 
 class StudentPreferencesResource(resources.ModelResource):
 
+    student_username = fields.Field(column_name='student_username',
+                          attribute='student',
+                          widget=ForeignKeyWidget('Student', 'username'))
+
+    student_group = fields.Field(column_name='student_group',
+                          attribute='student',
+                          widget=ForeignKeyWidget('Student', 'belong_to'))
+
+
     class Meta:
         model = StudentPreferences
-        fields = ( "student.username", "student.belong_to", "morning_weight", "free_half_day_weight" )
+        fields = ( "student_username", "student_group", "morning_weight", "free_half_day_weight" )
 
 
 class GroupPreferencesResource(resources.ModelResource):
 
+    train_prog = fields.Field(column_name='train_prog',
+                          attribute='group',
+                          widget=ForeignKeyWidget('Group', 'train_prog'))
+
+    group = fields.Field(column_name='group_name',
+                          attribute='group',
+                          widget=ForeignKeyWidget('Group', 'nom'))
+
+
     class Meta:
         model = GroupPreferences
-        fields = ( "group.name", "morning_weight", "free_half_day_weight" )
+        fields = ( "train_prog", "group", "morning_weight", "free_half_day_weight" )
 
 
 admin.site.register(FullStaff, TutorModelAdmin)
