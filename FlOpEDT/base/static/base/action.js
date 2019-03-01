@@ -1371,9 +1371,13 @@ function show_detailed_courses(cours){
         .attr("y", pos_y+height/6*4);
 
     details
+        .append("a")
+        .attr("xlink:href", "/edt/info/contact/"+cours.prof)
+        .attr("target", "_blank")
         .append("text")
         .text(cours.prof_email)
         .attr("fill", cours.color_txt)
+        .attr("style", "text-decoration:underline")
         .attr("x", pos_x+width/2)
         .attr("y", pos_y+height/6*5);
 }

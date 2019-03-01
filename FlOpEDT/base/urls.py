@@ -42,7 +42,7 @@ urlpatterns = [
     url(r'^semaine-type$', views.stype, name="stype"),
     url(r'^aide$', views.aide, name="aide"),
     url(r'^decale$', views.decale, name="decale"),    
-    url(r'^contact$', views.contact, name="contact"),
+    url(r'^contact/(?P<prof>\w{2,3})?$', views.contact, name="contact"),
     url(r'^((?P<an>\d{4}))?(/(?P<semaine>\d{1,2}))?$', views.edt, name="edt"),
     url(r'^tv(/(?P<semaine>\d+))?(/(?P<an>\d+))?$', views.edt_light, name="edt_light"),
 

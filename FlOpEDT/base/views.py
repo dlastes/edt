@@ -1092,7 +1092,7 @@ def decale_changes(req, **kwargs):
 # ---------
 
 
-def contact(req, **kwargs):
+def contact(req, prof, **kwargs):
     ack = ''
     if req.method == 'POST':
         form = ContactForm(req.POST)
@@ -1124,6 +1124,13 @@ def contact(req, **kwargs):
             init_mail = req.user.email
         form = ContactForm(initial={
             'sender': init_mail})
+
+    if prof != None:
+        prof_abbrev = Tutor.objects.get(username=prof)
+        form = ContactForm(initial={'recipient': prof_abbrev})
+    
+
+
     return TemplateResponse(req, 'base/contact.html',
                   {'form': form,
                    'ack': ack
