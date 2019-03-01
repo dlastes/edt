@@ -35,11 +35,15 @@ from MyFlOp import MyTTUtils
 def viewForm(request, funcname):
     resp = '<form>'
     for i in MyTTUtils.funcTab:
+        print(funcname)
         if i.get('func_name') == funcname:
+            print(i.get('func_name'))
             args = i.get('args')
             for y in args:
                 resp += '<label>' + y + '</label><input name="'+ y + '" type="text"/>'
-    resp = '<form>'
+    
+    resp += '<button>Submit</button>'
+    resp += '</form>'
     return HttpResponse(resp)
 
 def submitForm(request, funcname):
