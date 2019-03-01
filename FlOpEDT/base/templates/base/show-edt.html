@@ -25,6 +25,10 @@
 
 {% load static %}
 
+{% block extrastyle %}
+	<link rel="stylesheet" href="{% static 'TTapp/styles.css' %}" />
+{% endblock %}
+
 {% block script_variable %}
 <script>
     var promo_init = +"{{ promo }}";
@@ -36,5 +40,18 @@
 {% endblock %}
 
 {% block script_file %}
-<script type='text/javascript' src="{% static 'base/all.js' %}"></script>
+<div id="main">
+	<button class="openbtn" onclick="openNav()">☰ Toggle Sidebar</button>
+	<script type='text/javascript' src="{% static 'base/all.js' %}"></script>
+
+</div>
+{% endblock %}
+
+{% block sidebar %}
+<div id="mySidebar" class="sidebar">
+    <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
+    {% for task in tasks %}
+        <a href="#"> {{task}} </a>
+    {% endfor %}
+</div>
 {% endblock %}
