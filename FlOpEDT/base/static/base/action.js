@@ -1325,31 +1325,31 @@ function show_detailed_courses(cours){
 
     details
         .append("text")
-        .text(cours.prof)
+        .text(cours.mod)
         .attr("x", width/2)
         .attr("y", height/6);
 
     details
         .append("text")
-        .text(cours.prof)
+        .text(cours.module_name)
         .attr("x", width/2)
         .attr("y", height/6*2);
 
     details
         .append("text")
-        .text(cours.prof)
+        .text(cours.room)
         .attr("x", width/2)
         .attr("y", height/6*3);
 
     details
         .append("text")
-        .text(cours.prof)
+        .text(cours.prof_full_name)
         .attr("x", width/2)
         .attr("y", height/6*4);
 
     details
         .append("text")
-        .text(cours.prof)
+        .text(cours.prof_email)
         .attr("x", width/2)
         .attr("y", height/6*5);
 }
