@@ -45,6 +45,18 @@ def fetch_tutors(req):
                                 content_type='text/csv')
 	return response
 
+def fetch_preferences_group(req):
+	dataset = GroupPreferencesResource().export(GroupPreferences.objects.all())
+	response = HttpResponse(dataset.csv,
+                                content_type='text/csv')
+	return response
+
+def fetch_preferences_students(req):
+	dataset = StudentPreferencesResource().export(StudentPreferences.objects.all())
+	response = HttpResponse(dataset.csv,
+                                content_type='text/csv')
+	return response
+
 def student_preferences(req):
     if req.method=='POST' :
         print(req)
