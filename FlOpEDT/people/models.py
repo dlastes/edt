@@ -148,16 +148,16 @@ class Preferences(models.Model):
     free_half_day_weight = models.DecimalField(default=1, blank=True, max_digits=3, decimal_places=2)
 
     def get_morning_weight(self):
-        return self.morning
+        return float(self.morning_weight)
 
     def get_evening_weight(self):
-        return 2-self.morning
+        return float(2-self.morning_weight)
 
     def get_free_half_day_weight(self):
-        return self.free_half_day
+        return float(self.free_half_day_weight)
 
     def get_light_day_weight(self):
-        return 2-self.free_half_day
+        return float(2-self.free_half_day_weight)
 
     class Meta:
         abstract = True

@@ -69,17 +69,18 @@ def student_preferences(req):
             free_half_day_weight = req.POST['light_free']
 
             student = Student.objects.get(username=user.username)
-            student_preferences, created = StudentPreferences.objects.get_or_create(student=student)
+            student_pref, created = StudentPreferences.objects.get_or_create(student=student)
             if created:
-                student_preferences.save()
-            student_preferences.morning_weight = morning_weight
-            student_preferences.free_half_day_weight = free_half_day_weight
-            student_preferences.save()
+                student_pref.save()
+            student_pref.morning_weight = morning_weight
+            student_pref.free_half_day_weight = free_half_day_weight
+            student_pref.save()
             for group in student.belong_to.all() :
-                group_preferences = GroupPreferences.objects.get(group=group)
-                group_preferences.save()
-            group_preferences.calculate_fields()
-            group_preferences.save()
+                group_pref, created = GroupPreferences.objects.get_or_create(group=group)
+                if created:
+                    group_pref.save()
+            group_pref.calculate_fields()
+            group_pref.save()
             return redirect("base.index")
         else:
             raise Http404("Who are you?")
