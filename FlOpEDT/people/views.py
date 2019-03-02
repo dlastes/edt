@@ -40,22 +40,25 @@ def redirect_change_people_kind(req):
 
 
 def fetch_tutors(req):
-	dataset = TutorResource().export(Tutor.objects.all())
-	response = HttpResponse(dataset.csv,
+    dataset = TutorResource().export(Tutor.objects.all())
+    response = HttpResponse(dataset.csv,
                                 content_type='text/csv')
-	return response
+    return response
+
 
 def fetch_preferences_group(req):
-	dataset = GroupPreferencesResource().export(GroupPreferences.objects.all())
-	response = HttpResponse(dataset.csv,
+    dataset = GroupPreferencesResource().export(GroupPreferences.objects.all())
+    response = HttpResponse(dataset.csv,
                                 content_type='text/csv')
-	return response
+    return response
+
 
 def fetch_preferences_students(req):
-	dataset = StudentPreferencesResource().export(StudentPreferences.objects.all())
-	response = HttpResponse(dataset.csv,
+    dataset = StudentPreferencesResource().export(StudentPreferences.objects.all())
+    response = HttpResponse(dataset.csv,
                                 content_type='text/csv')
-	return response
+    return response
+
 
 def student_preferences(req):
     if req.method=='POST' :
@@ -78,7 +81,7 @@ def student_preferences(req):
             group_preferences.calculate_fields()
             group_preferences.save()
             return redirect("base.index")
-        else :
+        else:
             raise Http404("Who are you?")
-    else :
+    else:
         return TemplateResponse(req, 'people/studentPreferencesSelection.html', {})

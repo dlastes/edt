@@ -143,10 +143,9 @@ class Student(User):  # for now: representative
         return str(self.username) + '(G:' + str(self.belong_to) + ')'
 
 
-
 class Preferences(models.Model):
-    morning_weight = models.DecimalField(default=1,blank=True, max_digits=3, decimal_places=2)
-    free_half_day_weight = models.DecimalField(default=1,blank=True, max_digits=3, decimal_places=2)
+    morning_weight = models.DecimalField(default=1, blank=True, max_digits=3, decimal_places=2)
+    free_half_day_weight = models.DecimalField(default=1, blank=True, max_digits=3, decimal_places=2)
 
     def get_morning_weight(self):
         return self.morning
@@ -170,7 +169,6 @@ class StudentPreferences(Preferences):
                                     on_delete=models.CASCADE)
 
 
-
 class GroupPreferences(Preferences):
     group = models.OneToOneField('base.Group',
                                 related_name='groupPreferences',
@@ -178,22 +176,22 @@ class GroupPreferences(Preferences):
 
     def calculate_fields(self):
         #To pull students from the group
-        studentsPrefs = StudentPreferences.objects.filter(student__belong_to=self.group)
+        students_preferences = StudentPreferences.objects.filter(student__belong_to=self.group)
 
         #To initialise variables and getting the divider to get the average
-        morning_weight = 0
-        free_half_day_weight = 0
-        nb_studentPrefs = len(studentsPrefs)
-        if nb_studentPrefs == 0:
+        local_morning_weight = 0
+        local_free_half_day_weight = 0
+        nb_student_prefs = len(students_preferences)
+        if nb_student_prefs == 0:
             self.morning_weight = 1
             self.free_half_day_weight = 1
 
         else :
             #To range the table
-            for studentPrefs in studentsPrefs:
-                morning_weight += studentPrefs.morning_weight
-                free_half_day_weight += studentPrefs.free_half_day_weight
+            for student_pref in students_preferences:
+                local_morning_weight += student_pref.morning_weight
+                local_free_half_day_weight += student_pref.free_half_day_weight
 
             #To calculate the average of each attributs
-            self.morning_weight = morning_weight/nb_studentPrefs
-            self.free_half_day_weight = free_half_day_weight/nb_studentPrefs
+            self.morning_weight = local_morning_weight/nb_student_prefs
+            self.free_half_day_weight = local_free_half_day_weight/nb_student_prefs

@@ -6,7 +6,7 @@ from base.admin import DepartmentModelAdmin
 from import_export.widgets import ForeignKeyWidget
 
 
-from people.models import *
+from people.models import Tutor, FullStaff, SupplyStaff, BIATOS, StudentPreferences, GroupPreferences
 
 from import_export import resources, fields
 
@@ -24,9 +24,9 @@ class TutorModelAdmin(DepartmentModelAdmin):
 
 class TutorResource(resources.ModelResource):
 
-	class Meta:
-		model = Tutor
-		fields = ( "username", "first_name", "last_name", "email" )
+    class Meta:
+        model = Tutor
+        fields = ( "username", "first_name", "last_name", "email" )
 
 class StudentPreferencesResource(resources.ModelResource):
 
@@ -41,7 +41,7 @@ class StudentPreferencesResource(resources.ModelResource):
 
     class Meta:
         model = StudentPreferences
-        fields = ( "student_username", "student_group", "morning_weight", "free_half_day_weight" )
+        fields = ("student_username", "student_group", "morning_weight", "free_half_day_weight" )
 
 
 class GroupPreferencesResource(resources.ModelResource):
@@ -54,10 +54,9 @@ class GroupPreferencesResource(resources.ModelResource):
                           attribute='group',
                           widget=ForeignKeyWidget('Group', 'nom'))
 
-
     class Meta:
         model = GroupPreferences
-        fields = ( "train_prog", "group", "morning_weight", "free_half_day_weight" )
+        fields = ("train_prog", "group", "morning_weight", "free_half_day_weight" )
 
 
 admin.site.register(FullStaff, TutorModelAdmin)
