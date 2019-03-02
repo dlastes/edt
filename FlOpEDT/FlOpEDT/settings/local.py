@@ -38,8 +38,8 @@ DATABASES = {
     }
 }
 
-LOGGING = {
-    'version': 1,
+LOGGING = {  
+    'version': 1,  
     'disable_existing_loggers': False,
     'handlers': {
         'console': {
@@ -52,7 +52,7 @@ LOGGING = {
             'handlers': ['console'],
             'level': 'DEBUG',
             'propagate': True,
-        },
+        },        
         'django.db.backends': {
             'level': 'INFO',
             'handlers': ['console'],
