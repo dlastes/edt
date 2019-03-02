@@ -1,0 +1,116 @@
+<!-- This file is part of the FlOpEDT/FlOpScheduler project.               -->
+<!-- Copyright (c) 2017                                                    -->
+<!-- Authors: Iulian Ober, Paul Renaud-Goud, Pablo Seban, et al.           -->
+<!--                                                                       -->
+<!-- This program is free software: you can redistribute it and/or modify  -->
+<!-- it under the terms of the GNU Affero General Public License as        -->
+<!-- published by the Free Software Foundation, either version 3 of the    -->
+<!-- License, or (at your option) any later version.                       -->
+<!--                                                                       -->
+<!-- This program is distributed in the hope that it will be useful, but   -->
+<!-- WITHOUT ANY WARRANTY; without even the implied warranty of            -->
+<!-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU      -->
+<!-- Affero General Public License for more details.                       -->
+<!--                                                                       -->
+<!-- You should have received a copy of the GNU Affero General Public      -->
+<!-- License along with this program. If not, see                          -->
+<!-- <http://www.gnu.org/licenses/>.                                       -->
+<!--                                                                       -->
+<!-- You can be released from the requirements of the license by purchasing -->
+<!-- a commercial license. Buying such a license is mandatory as soon as   -->
+<!-- you develop activities involving the FlOpEDT/FlOpScheduler software   -->
+<!-- without disclosing the source code of your own applications.          -->
+
+
+
+{% extends "base.html" %}
+
+{% load static %}
+<link rel="stylesheet" href="{% static "people/student_preferences.css" %}" />
+<script href="https://code.jquery.com/jquery-3.3.1.js"></script>
+
+{% block title %} EDT {% endblock %}
+
+{% block content %}
+
+</br></br></br>
+<fieldset>
+  <legend>Préférences étudiant par groupe</legend>
+</br>
+  <div class="msg-prefs">Vous préférez :</div><br/>
+  </br>
+  <form action="{% url 'people:student_preferences' %}" method="post" id="form_pref">
+    <div class="un">
+        <input type="range" class="range" name="morning_evening" min="0" max="2" step="0.5" value="1"/>
+        <output name="result"></output>
+    </div>
+  </br>
+    <div class="deux">
+        <input type="range" class="rangedeux" name="light_free" min="0" max="2" step="0.5" value="1"/>
+        <output name="resultdeux"></output>
+    </div>
+
+  </br>
+  <button type="submit" form="form_pref" value="Submit">Valider</button>
+</form>
+</fieldset>
+<script>
+  $(function() {
+	   $('.range').next().text('Veuillez sélectionner votre préférence.'); // Valeur par défaut
+	    $('.range').on('input', function() {
+		      var $set = $(this).val();
+
+          switch ($set) {
+            case "0":
+              $set = 'Commencer le plus tôt possible mais finir tôt';
+              break;
+            case "0.5":
+              $set = 'Ne pas commencer trop tard et ne pas finir trop tard';
+              break;
+            case "1":
+              $set = 'Ni trop tôt ni trop tard';
+              break;
+            case "1.5":
+              $set = 'Ne pas commencer trop tôt et finir plus tard';
+              break;
+            case "2":
+              $set = 'Commencer le plus tard possible mais finir tard';
+              break;
+            default:
+              $set = $set;
+          }
+		$(this).next().text($set);
+	 });
+  });
+
+  $(function() {
+	   $('.rangedeux').next().text('Veuillez sélectionner votre préférence.'); // Valeur par défaut
+	    $('.rangedeux').on('input', function() {
+		      var $set = $(this).val();
+
+          switch ($set) {
+            case "0":
+              $set = 'Avoir toute la semaine des journées allégées';
+              break;
+            case "0.5":
+              $set = 'Avoir plus de journées allégées que de demi-journées libérées';
+              break;
+            case "1":
+              $set = 'Avoir des semaines équilibrées';
+              break;
+            case "1.5":
+              $set = 'Avoir plus de demi-journées libérées que de journées allégées';
+              break;
+            case "2":
+              $set = 'Avoir des journées chargées mais aussi des demi-journées libérées';
+              break;
+            default:
+              $set = $set;
+          }
+		$(this).next().text($set);
+	 });
+  });
+
+</script>
+
+{% endblock %}
