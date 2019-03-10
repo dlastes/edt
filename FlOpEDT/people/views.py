@@ -75,13 +75,15 @@ def student_preferences(req):
             student_pref.morning_weight = morning_weight
             student_pref.free_half_day_weight = free_half_day_weight
             student_pref.save()
+            group_pref = None
             for group in student.belong_to.all() :
                 group_pref, created = GroupPreferences.objects.get_or_create(group=group)
                 if created:
                     group_pref.save()
-            group_pref.calculate_fields()
-            group_pref.save()
-            return redirect("base.index")
+            if group_pref is not None:
+                group_pref.calculate_fields()
+                group_pref.save()
+            return redirect("base:edt", department=req.department)
         else:
             raise Http404("Who are you?")
     else:
