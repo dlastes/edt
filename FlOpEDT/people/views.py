@@ -8,7 +8,6 @@ from django.contrib.auth.decorators import login_required
 from .models import Tutor, GroupPreferences, StudentPreferences, Student
 from .admin import TutorResource, GroupPreferencesResource, StudentPreferencesResource
 from django.template.response import TemplateResponse
-import base
 
 
 def redirect_add_people_kind(req, kind):
