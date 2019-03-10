@@ -144,20 +144,20 @@ class Student(User):  # for now: representative
 
 
 class Preferences(models.Model):
-    morning_weight = models.DecimalField(default=1, blank=True, max_digits=3, decimal_places=2)
-    free_half_day_weight = models.DecimalField(default=1, blank=True, max_digits=3, decimal_places=2)
+    morning_weight = models.DecimalField(default=.5, blank=True, max_digits=3, decimal_places=3)
+    free_half_day_weight = models.DecimalField(default=.5, blank=True, max_digits=3, decimal_places=3)
 
     def get_morning_weight(self):
         return float(self.morning_weight)
 
     def get_evening_weight(self):
-        return float(2-self.morning_weight)
+        return float(1-self.morning_weight)
 
     def get_free_half_day_weight(self):
         return float(self.free_half_day_weight)
 
     def get_light_day_weight(self):
-        return float(2-self.free_half_day_weight)
+        return float(1-self.free_half_day_weight)
 
     class Meta:
         abstract = True
