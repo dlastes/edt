@@ -60,6 +60,7 @@ def fetch_preferences_students(req):
     return response
 
 
+@login_required
 def student_preferences(req):
     if req.method=='POST' :
         print(req)
