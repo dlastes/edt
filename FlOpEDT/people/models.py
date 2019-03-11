@@ -140,7 +140,7 @@ class Student(User):  # for now: representative
                                        blank=True)
 
     def __str__(self):
-        return str(self.username) + '(G:' + str(self.belong_to) + ')'
+        return str(self.username) + '(G:' + str(self.belong_to.all()) + ')'
 
 
 class Preferences(models.Model):
