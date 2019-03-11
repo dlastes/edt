@@ -400,6 +400,7 @@ function adapt_labgp(first) {
 	} else {
             labgp.width = labgp.wm;
 	}
+        svg.width = svg_width();
 	d3.select("#edt-main").attr("width", svg.width);
     }
 
