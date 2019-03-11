@@ -144,8 +144,8 @@ class Student(User):  # for now: representative
 
 
 class Preferences(models.Model):
-    morning_weight = models.DecimalField(default=.5, blank=True, max_digits=3, decimal_places=3)
-    free_half_day_weight = models.DecimalField(default=.5, blank=True, max_digits=3, decimal_places=3)
+    morning_weight = models.DecimalField(default=.5, blank=True, max_digits=3, decimal_places=2)
+    free_half_day_weight = models.DecimalField(default=.5, blank=True, max_digits=3, decimal_places=2)
 
     def get_morning_weight(self):
         return float(self.morning_weight)
