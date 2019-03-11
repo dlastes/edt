@@ -122,7 +122,7 @@ class AddSupplyStaffTutorForm(UserCreationForm):
             
     @transaction.atomic
     def save(self):
-        sus = super(AddFullStaffTutorForm, self).save(commit=False)
+        sus = super(AddSupplyStaffTutorForm, self).save(commit=False)
         data = self.cleaned_data
         sus.is_tutor = True
         sus.status = Tutor.SUPP_STAFF
