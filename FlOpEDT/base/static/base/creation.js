@@ -1218,6 +1218,7 @@ function def_drag() {
                 drag.x = 0;
                 drag.y = 0;
 
+                // raise the course to the drag layer
                 drag.sel = d3.select(this);
                 dg.node().appendChild(drag.sel.node());
 
@@ -1259,9 +1260,11 @@ function def_drag() {
             }
         })
 	.on("end", function(d) {
-            if (cur_over != null && ckbox["edt-mod"].cked && fetch.done) {
 
-                mg.node().appendChild(drag.sel.node());
+            // lower the course to the middleground layer
+            mg.node().appendChild(drag.sel.node());
+
+            if (cur_over != null && ckbox["edt-mod"].cked && fetch.done) {
 
                 data_slot_grid.forEach(function(s) {
                     s.display = false;
