@@ -145,9 +145,6 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
                 GROUPS = list(Group.objects.filter(nom='CE', train_prog=PROMO))
 
             N=int(N)
-            Diff = N - len(groupes) * nominal
-            if Diff != 0:
-                print("Nombre incohérent ligne %g semaine %s de %s : %s \n" % (row, semaine, feuille, module))
 
             for i in range(N):
                 GROUPE = GROUPS[i % len(GROUPS)]
