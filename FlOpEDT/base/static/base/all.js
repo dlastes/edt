@@ -193,7 +193,8 @@ def_cm_change();
 
 create_clipweek();
 create_menus();
-create_forall_prof();
+
+create_selections();
 
 fetch_dispos_type();
 

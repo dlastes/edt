@@ -935,7 +935,8 @@ function go_rooms() {
 
 function go_tutors() {
 
-    prg.selectAll(".tutor-button")
+    selg
+        .selectAll(".tutor-button")
         .data(profs, function(p) {
             return p;
         })

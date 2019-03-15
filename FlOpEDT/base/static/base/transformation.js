@@ -668,6 +668,37 @@ function butpr_txt_x(p, i) {
 function butpr_txt_y(p, i) {
     return butpr_y(p, i) + .5 * butpr.height;
 }
+
+function butpr_ok_x() {
+    return (butpr.perline - 1) * (butpr.width + butpr.mar_x) ;
+}
+function butpr_ok_y() {
+    var nb_tutors = profs.length ;
+    return butpr_y(profs[nb_tutors - 1], nb_tutors - 1)
+        + (butpr.height + 2*butpr.mar_y) ;
+}
+function butpr_ok_txt_x() {
+    return butpr_ok_x() + .5*butpr.width ;
+}
+function butpr_ok_txt_y() {
+    return butpr_ok_y() + .5*butpr.height ;
+}
+function butpr_bg_x() {
+    return -2*butpr.mar_x ;
+}
+function butpr_bg_y() {
+    return -2*butpr.mar_y ;
+}
+function butpr_bg_width() {
+    return (butpr.perline) * (butpr.width + butpr.mar_x)
+        + 3*butpr.mar_x;
+}
+function butpr_bg_height() {
+    return butpr_ok_y() + butpr.height + 2*butpr.mar_y;
+}
+
+
+
 /*
 function butpr_sw(p) {
     return p==user.nom?4:1;

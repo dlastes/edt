@@ -113,9 +113,9 @@ function create_layouts(svg_cont, light) {
     gpg = svg_cont.append("g")
         .attr("id", "lay-gpg");
 
-    // profs ground
-    prg = svg_cont.append("g")
-        .attr("id", "lay-prg");
+    // selection categories button ground
+    catg = svg_cont.append("g")
+        .attr("id", "lay-catg");
 
     // module ground
     // moved directly to the html
@@ -178,6 +178,11 @@ function create_layouts(svg_cont, light) {
     fg = edtg.append("g")
         .attr("id", "lay-fg");
 
+    // selection ground
+    selg = svg_cont.append("g")
+        .attr("id", "lay-selg");
+
+    
     // context menus ground
     var cmg = svg_cont.append("g")
         .attr("id", "lay-cmg");
@@ -1534,11 +1539,24 @@ function clean_unavailable_rooms() {
   ------- TUTORS -----
   --------------------*/
 
-function create_forall_prof() {
-    var contg = prg
+// create forall and validation buttons
+function create_static_tutor() {
+    var ssg = selg
+        .append("g")
+        .attr("class", "tutor-button-g")
+        .attr("transform", "translate(" + butpr.tlx + "," + butpr.tly + ")");
+
+    ssg
+        .append("rect")
+        .attr("x", butpr_bg_x)
+        .attr("y", butpr_bg_y)
+        .attr("width", butpr_bg_width)
+        .attr("height", butpr_bg_height)
+        .attr("fill", "white");
+
+    var contg = ssg
         .append("g")
         .attr("class", "tutor-button-all")
-        .attr("transform", "translate(" + butpr.tlx + "," + butpr.tly + ")")
         .attr("cursor", "pointer")
         .on("click", apply_tutor_display_all);
 
@@ -1558,6 +1576,60 @@ function create_forall_prof() {
         .text("\u2200")
         .attr("x", .5 * butpr.width)
         .attr("y", .5 * butpr.height);
+
+
+    var contg = selg
+        .select(".tutor-button-g")
+        .append("g")
+        .attr("class", "tutor-button-ok")
+        .attr("cursor", "pointer")
+        .on("click", validate_tutor_selection);
+
+
+    contg
+        .append("rect")
+        .attr("width", butpr.width)
+        .attr("height", butpr.height)
+        .attr("rx", 5)
+        .attr("ry", 10)
+        .attr("fill","yellow")
+        .attr("x", butpr_ok_x)
+        .attr("y", butpr_ok_y);
+
+    contg
+        .append("text")
+        .text("Ok")
+        .attr("x", butpr_ok_txt_x)
+        .attr("y", butpr_ok_txt_y);
+    
+}
+
+// button to open tutor selection view
+function create_tutor_selection() {
+
+    var contg = catg
+        .append("g")
+        .attr("class", "tutor-selection")
+        .attr("transform", "translate(" + butpr.tlx + "," + butpr.tly + ")")
+        .attr("cursor", "pointer")
+        .on("click", go_select_tutors);
+    
+    contg
+        .append("rect")
+        .attr("width", butpr.width)
+        .attr("height", butpr.height)
+        .attr("rx", 5)
+        .attr("ry", 10)
+        .attr("fill", "yellow")
+        .attr("x", 0)
+        .attr("y", 0);
+
+    contg
+        .append("text")
+        .text("Profs")
+        .attr("x", .5 * butpr.width)
+        .attr("y", .5 * butpr.height);
+
 }
 
 
@@ -1891,3 +1963,9 @@ function def_cm_change() {
 
 }
 
+
+// create all selection buttons
+function create_selections() {
+    create_group_selection() ;
+    create_tutor_selection() ;
+}

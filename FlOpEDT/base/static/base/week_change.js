@@ -269,7 +269,9 @@ function create_pr_buttons() {
     profs.sort();
 
     var cont =
-        prg.selectAll(".tutor-button")
+        selg
+        .select(".tutor-button-g")
+        .selectAll(".tutor-button")
         .data(profs, function(p) {
             return p;
         });
@@ -278,7 +280,6 @@ function create_pr_buttons() {
         .enter()
         .append("g")
         .attr("class", "tutor-button")
-        .attr("transform", "translate(" + butpr.tlx + "," + butpr.tly + ")")
         .on("click", apply_tutor_display);
 
     contg
@@ -303,6 +304,8 @@ function create_pr_buttons() {
         .attr("y", butpr_txt_y);
 
     cont.exit().remove();
+
+    go_tutors();
 }
 
 
@@ -857,7 +860,6 @@ function fetch_ended() {
 
     }
     //go_gp_buttons();
-    create_pr_buttons();
     go_tutors();
 
 

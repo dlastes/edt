@@ -262,8 +262,7 @@ function apply_tutor_display(pr) {
 		prof_displayed.push(pr);
             }
 	}
-
-            go_tutors();
+        go_tutors();
     }
 }
 
@@ -498,6 +497,15 @@ function go_cm_room_tutor_change() {
     
 }
 
+
+function validate_tutor_selection(d){
+    selg.select(".tutor-button-g").remove();
+}
+
+function go_select_tutors() {
+    create_static_tutor();
+    create_pr_buttons() ;
+}
 
 
 /*----------------------

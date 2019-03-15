@@ -81,7 +81,7 @@ var rootgp_width = 0;
 var pos_rootgp_width = 0;
 
 // different grounds where to plot
-var fg, mg, bg, dg, meg, vg, gpg, prg, stg, mog, sag, fig, log, cmpg, cmtg;
+var fg, mg, bg, dg, meg, vg, gpg, catg, stg, mog, sag, fig, log, cmpg, cmtg, selg;
 var wg = {
     upper: null,
     bg: null,
@@ -380,7 +380,7 @@ var prof_displayed = [];
 var butpr = {
     height: 30,
     width: 30,
-    perline: 12,
+    perline: 5,
     mar_x: 2,
     mar_y: 4,
     tlx: 900
