@@ -559,7 +559,7 @@ function grid_width() {
   ------- GROUPS -------
   ----------------------*/
 function butgp_x(gp) {
-    return gp.x * butgp.width;
+    return (gp.bx - root_gp[gp.promo].minx) * butgp.width;
 }
 
 function butgp_y(gp) {

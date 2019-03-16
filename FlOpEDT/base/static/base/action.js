@@ -499,7 +499,8 @@ function go_cm_room_tutor_change() {
 
 
 function validate_tutor_selection(d){
-    selg.select(".tutor-button-g").remove();
+    //    selg.select(".tutor-button-g").remove();
+    selg.select("*").remove();
 }
 
 function go_select_tutors() {

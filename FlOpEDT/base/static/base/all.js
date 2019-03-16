@@ -101,8 +101,6 @@ function on_group_rcv(dg) {
 
     create_groups(dg);
 
-    go_gp_buttons();
-
     create_edt_grid();
 
     create_alarm_dispos() ;
@@ -115,7 +113,6 @@ function on_group_rcv(dg) {
     create_bknews();
 
     go_promo_gp_init() ;
-    go_gp_buttons();
 
 
     fetch_all(true);

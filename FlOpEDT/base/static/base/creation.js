@@ -676,19 +676,20 @@ function def_drag_sca() {
 
 // Only for the current case
 function set_butgp() {
-    var topx = 615 + 4*30;
+    var topx = 0 ;//615 + 4*30;
 
     if (set_promos.length == 2) {
-	root_gp[0].buty = margin.but;
+	root_gp[0].buty = 0 ;
 	root_gp[0].butx = topx - .5*root_gp[0].gp.width * butgp.width ;
 	root_gp[1].buty = root_gp[0].buty + root_gp[0].maxby * butgp.height + margin_but.ver;
 	root_gp[1].butx = topx - .5*root_gp[1].gp.width * butgp.width - root_gp[0].gp.width * butgp.width ;//- .5 * margin_but.hor;
     } else {
-	var cur_buty = margin.but ;
+	var cur_buty = 0 ;
 	var cur_rootgp ;
 	for (var nrow=0 ; nrow<set_rows.length ; nrow++) {
 	    var cur_maxby = 0 ;
 	    var tot_row_gp = 0 ;
+	    var cur_butx = topx ;
 
 	    for (var npro=0 ; npro<row_gp[nrow].promos.length ; npro++){
 		cur_rootgp = root_gp[row_gp[nrow].promos[npro]] ;
@@ -698,14 +699,11 @@ function set_butgp() {
 		}
 		tot_row_gp += cur_rootgp.gp.width*butgp.width ;
 		tot_row_gp += (npro==0)?0:(margin_but.hor) ;
-		cur_rootgp.butx = (npro==0)?topx:(topx+npro*margin_but.hor) ;
+                console.log(cur_rootgp.gp.width, butgp.width);
+		cur_rootgp.butx = cur_butx ;
+                cur_butx += margin_but.hor + cur_rootgp.gp.width*butgp.width ;
 	    }
 	    cur_buty += margin_but.ver + cur_maxby*butgp.height ;
-	    for (var npro=0 ; npro<row_gp[nrow].promos.length ; npro++){
-		cur_rootgp = root_gp[row_gp[nrow].promos[npro]] ;
-		cur_rootgp.butx -= .5*tot_row_gp ;
-	    }
-
 	}
 //    root_gp[2].buty = root_gp[1].buty;
 //    root_gp[2].butx = root_gp[1].butx + margin_but.hor;
@@ -745,8 +743,32 @@ function go_promo_gp_init(button_available) {
 
 
 function create_groups(data_groups) {
+    var root ;
+    
     extract_all_groups_structure(data_groups);
+
+    for (var r = 0; r < set_rows.length; r++) {
+        for (var p = 0; p < row_gp[r].promos.length; p++) {
+            root = root_gp[row_gp[r].promos[p]].gp;
+            create_static_att_groups(root);
+        }
+    }
+    
     update_all_groups();
+
+    for (var r = 0; r < set_rows.length; r++) {
+        for (var p = 0; p < row_gp[r].promos.length; p++) {
+            root = root_gp[row_gp[r].promos[p]];
+            root.minx = root.gp.x ;
+        }
+    }
+    for (var p = 0 ; p < set_promos.length ; p++) {
+        var keys = Object.keys(groups[p]) ;
+        for (var g = 0 ; g < keys.length ; g++) {
+            groups[p][keys[g]].bx = groups[p][keys[g]].x ;
+        }
+    }
+    
     set_butgp();
 }
 
@@ -838,6 +860,31 @@ function extract_groups_structure(r, npro, nrow) {
     groups[npro][gr.nom] = gr;
 }
 
+
+
+function create_static_att_groups(node) {
+    var child;
+
+    if (node.parent == null) {
+        node.by = 0;
+	root_gp[node.promo].maxby = node.by + node.buth ;
+    } else {
+	if (node.by + node.buth > root_gp[node.promo].maxby) {
+	    root_gp[node.promo].maxby = node.by + node.buth ;
+	}
+    }
+    node.descendants = [];
+
+
+    if (node.children.length != 0) {
+        for (var i = 0; i < node.children.length; i++) {
+            child = groups[node.promo][node.children[i]];
+            child.by = node.by + node.buth;
+            create_static_att_groups(child);
+        }
+    }
+
+}
 
 
 // Earliest Starting Time (i.e. leftest possible position)
@@ -1051,6 +1098,35 @@ function compute_promo_leaves(node) {
         child = groups[node.promo][node.children[i]];
         compute_promo_leaves(child);
     }
+}
+
+
+// button to open group selection view
+function create_group_selection() {
+
+    var contg = catg
+        .append("g")
+        .attr("class", "group-selection")
+        .attr("transform", "translate(" + butpr.tlx + "," + (butpr.tly + butpr.height + butpr.mar_y ) + ")")
+        .attr("cursor", "pointer")
+        .on("click", create_group_buttons);
+    
+    contg
+        .append("rect")
+        .attr("width", butpr.width)
+        .attr("height", butpr.height)
+        .attr("rx", 5)
+        .attr("ry", 10)
+        .attr("fill", "yellow")
+        .attr("x", 0)
+        .attr("y", 0);
+
+    contg
+        .append("text")
+        .text("Groupes")
+        .attr("x", .5 * butpr.width)
+        .attr("y", .5 * butpr.height);
+
 }
 
 

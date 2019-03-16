@@ -758,11 +758,81 @@ function go_quote() {
   ------- GROUPS -------
   ----------------------*/
 
-function go_gp_buttons() {
+function create_group_buttons() {
+    var ssg = selg
+        .append("g")
+        .attr("class", "group-button-g")
+        .attr("transform", "translate(" + butpr.tlx + "," + (butpr.tly ) + ")")
 
+
+    
+    var minx, maxx, miny, maxy, curminx, curmaxx, curminy, curmaxy, curp ;
+    
     for (var p = 0; p < set_promos.length; p++) {
-        var cont =
-            gpg.selectAll(".gp-but-" + set_promos[p] + "P")
+        curp = root_gp[p] ;
+        curminx = curp.butx ;
+        curminy = curp.buty ;
+        if(p==0 || curminx<minx) {
+            minx = curminx ;
+        }
+        if(p==0 || curminy<miny) {
+            miny = curminy ;
+        }
+        curmaxx = curminx + curp.gp.width * butgp.width ;
+        curmaxy = curminy + curp.maxby * butgp.height ;
+        if(p==0 || curmaxx>maxx) {
+            maxx = curmaxx ;
+        }
+        if(p==0 || curmaxy>maxy) {
+            maxy = curmaxy ;
+        }
+    }
+
+
+
+
+    
+    ssg
+        .append("rect")
+        .attr("x",  - butpr.mar_x)
+        .attr("y",  - butpr.mar_y)
+        .attr("width", maxx-minx + 2*butpr.mar_x)
+        .attr("height", maxy-miny + butpr.height + 3*butpr.mar_y)
+        .attr("fill", "white");
+
+
+    var butok = ssg
+        .append("g")
+        .attr("class", "group-button-ok")
+        .attr("cursor", "pointer")
+        .on("click", validate_tutor_selection);
+
+    butok
+        .append("rect")
+        .attr("width", butpr.width)
+        .attr("height", butpr.height)
+        .attr("rx", 5)
+        .attr("ry", 10)
+        .attr("fill","yellow")
+        .attr("x", 0)
+        .attr("y", maxy-miny + butpr.mar_y);
+
+    butok
+        .append("text")
+        .text("Ok")
+        .attr("x",  .5*butpr.width)
+        .attr("y",  maxy-miny + .5*butpr.height + butpr.mar_y);
+
+
+    go_gp_buttons();
+}
+
+
+function go_gp_buttons() {
+    for (var p = 0; p < set_promos.length; p++) {
+        var cont = selg
+            .select(".group-button-g")
+            .selectAll(".gp-but-" + set_promos[p] + "P")
             .data(Object.keys(groups[p]).map(function(k) {
                 return groups[p][k];
             }));
@@ -772,7 +842,8 @@ function go_gp_buttons() {
             .append("g")
             .attr("class", "gp-but-" + set_promos[p] + "P")
             .attr("transform", function(gp) {
-                return "translate(" + root_gp[gp.promo].butx + "," + root_gp[gp.promo].buty + ")";
+                return "translate(" + (root_gp[gp.promo].butx) + ","
+                    + (root_gp[gp.promo].buty) + ")";
             })
             .attr("gpe", function(gp) {
                 return gp.nom;
@@ -801,6 +872,8 @@ function go_gp_buttons() {
             .text(butgp_txt);
 
     }
+
+
 
 }
 
