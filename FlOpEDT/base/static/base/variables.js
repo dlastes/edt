@@ -396,6 +396,7 @@ var sel_popup = {
     selmy: 10,
     mar_side: 5,
     tlx: 700,
+    available: ["tutor", "room"],
     but: []
 };
 sel_popup.but["tutor"] = {
