@@ -441,6 +441,7 @@ function fetch_cours() {
     var an_att = weeks.init_data[weeks.sel[0]].an;
 
     cours_bouge = {};
+    modules.old = modules.all ;
     
     show_loader(true);
     $.ajax({
@@ -832,18 +833,27 @@ function fetch_ended() {
         !fetch.ongoing_cours_pp) {
         cours = cours_pl.concat(cours_pp);
 
-        modules.all = [""].concat(modules.pl);
+        var module_names = [""].concat(modules.pl);
         for (var i = 0; i < modules.pp.length; i++) {
-            if (modules.all.indexOf(modules.pp[i]) == -1) {
-                modules.all.push(modules.pp[i]);
+            if (module_names.indexOf(modules.pp[i]) == -1) {
+                module_names.push(modules.pp[i]);
             }
         }
 
-        modules.all.sort();
+        module_names.sort();
 
-        if (modules.all.indexOf(modules.sel) == -1) {
-            modules.sel = "";
-        }
+        modules.all = module_names.forEach(
+            function(m) {
+                var em = {} ;
+                em.name = m ;
+                var oldi = modules.old.indexOf(m) ;
+                em.display = true ;
+                if (oldi > -1) {
+                    em.display = modules.old[oldi].display ;
+                }
+                return em ;
+            }
+        )
 
 
         salles.all = [""].concat(salles.pl);
