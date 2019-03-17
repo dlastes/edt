@@ -1221,3 +1221,84 @@ function go_edt(t) {
     go_regen(null);
     go_quote();
 }
+
+
+
+function go_selection_buttons() {
+
+    var sel_list = [] ;
+    var type = sel_popup.type ;
+
+    if (type == "") {
+        return ;
+    } else if (type == "tutor") {
+        sel_list = profs ;
+    }
+
+    
+    var nb_el = sel_list.length ;
+    sel_popup.h = but_sel_y(sel_list[nb_el - 1], nb_el - 1)
+        + sel_popup.but[type].h ;
+
+    selg
+        .select("." + type + "-button-bg")
+        .attr("x",  - sel_popup.mar_side )
+        .attr("y",  - (sel_popup.mar_side + but_exit.side + but_exit.mar_next))
+        .attr("width", sel_popup.w + 2*sel_popup.mar_side)
+        .attr("height", sel_popup.mar_side + but_exit.side + but_exit.mar_next
+              + sel_popup.h + sel_popup.mar_side);
+
+    
+    var t = d3.transition();
+    profs.sort();
+
+    var cont =
+        selg
+        .select("." + type + "-button-g")
+        .selectAll("." + type + "-button")
+        .data(sel_list, function(p) {
+            if (sel_popup.type == "tutor") {
+                return p ;
+            } else if (sel_popup.type == "module") {
+                return p.name ;
+            } else {
+                return p ;
+            }
+        });
+
+    var contg = cont
+        .enter()
+        .append("g")
+        .attr("class", type + "-button")
+        .on("click", apply_selection_display);
+
+    var concon = contg
+        .merge(cont)
+        .attr("opacity", function(p) {
+            return prof_displayed.indexOf(p) > -1 ? 1 : opac;
+        });
+
+    contg
+        .append("rect")
+        .attr("class", but_sel_class)
+        .attr("width", sel_popup.but[type].w)
+        .attr("height", sel_popup.but[type].h)
+        .attr("rx", 5)
+        .attr("ry", 10)
+        .merge(cont.select("rect"))
+        .attr("x", but_sel_x)
+        .attr("y", but_sel_y);
+
+    contg
+        .append("text")
+        .attr("class", but_sel_class)
+        .text(function(d) {
+            return d;
+        })
+        .merge(cont.select("text"))
+        .attr("x", but_sel_txt_x)
+        .attr("y", but_sel_txt_y);
+
+    cont.exit().remove();
+
+}

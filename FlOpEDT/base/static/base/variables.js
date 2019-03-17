@@ -384,7 +384,7 @@ var but_exit = {
     mar_next: 10
 };
 var sel_popup = {
-    type: 'group',
+    type: "",
     x: 600,
     y: -210,
     w: 0,
@@ -396,7 +396,7 @@ var sel_popup = {
     selmy: 10,
     mar_side: 5,
     tlx: 700,
-    available: ["tutor", "room"],
+    available: ["tutor"], //, "room"],
     but: []
 };
 sel_popup.but["tutor"] = {

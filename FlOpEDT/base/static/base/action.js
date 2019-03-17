@@ -262,7 +262,7 @@ function apply_tutor_display(pr) {
 		prof_displayed.push(pr);
             }
 	}
-        go_tutors();
+        go_selection_buttons();
     }
 }
 
@@ -501,6 +501,7 @@ function go_cm_room_tutor_change() {
 function validate_tutor_selection(d){
     //    selg.select(".tutor-button-g").remove();
     selg.select("*").remove();
+    sel_popup.type = "" ;
 }
 
 function go_select_tutors() {
@@ -1313,3 +1314,28 @@ function compute_cm_room_tutor_direction() {
 }
 
 
+function apply_selection_display(pr) {
+    if (fetch.done) {
+	if(logged_usr.dispo_all_change && ckbox["dis-mod"].cked){
+	    prof_displayed = [pr] ;
+	    user.nom = pr ;
+	    create_dispos_user_data() ;
+	    go_pref(true) ;
+	} else {
+            if (prof_displayed.indexOf(pr) > -1) {
+		if (prof_displayed.length == profs.length) {
+                    prof_displayed = [pr];
+		} else {
+                    var ind = prof_displayed.indexOf(pr);
+                    prof_displayed.splice(ind, 1);
+                    if (prof_displayed.length == 0) {
+			prof_displayed = profs.slice(0);
+                    }
+		}
+            } else {
+		prof_displayed.push(pr);
+            }
+	}
+        go_selection_buttons();
+    }
+}

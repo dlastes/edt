@@ -106,11 +106,8 @@ function svg_height() {
 
 function svg_width() {
     //    return margin.top + ack_reg_y() + 4*margin.bot ;
-    return margin.left + Math.max(
-        // max x of prof buttons
-        sel_popup.tlx + butpr_x(null, sel_popup.but["tutor"].perline - 2) + sel_popup.but["tutor"].w + sel_popup.but["tutor"].mar_x,
-        // max x of the edt
-        rootgp_width * nbPer * labgp.width + margin.right) ;
+    return margin.left + 
+        rootgp_width * nbPer * labgp.width + margin.right ;
 }
 
 
@@ -653,23 +650,27 @@ function menu_curs(dk) {
 /*--------------------
   ------ PROFS -------
   --------------------*/
-function butpr_x(p, i) {
-    return ((i + 1) % sel_popup.but["tutor"].perline) * (sel_popup.but["tutor"].w + sel_popup.but["tutor"].mar_x);
+function but_sel_x(p, i) {
+    var t = sel_popup.type ;
+    return ((i + 1) % sel_popup.but[t].perline)
+        * (sel_popup.but[t].w + sel_popup.but[t].mar_x);
 }
 
-function butpr_y(p, i) {
-    return Math.floor((i + 1) / sel_popup.but["tutor"].perline) * (sel_popup.but["tutor"].h + sel_popup.but["tutor"].mar_y);
+function but_sel_y(p, i) {
+    var t = sel_popup.type ;
+    return Math.floor((i + 1) / sel_popup.but[t].perline)
+        * (sel_popup.but[t].h + sel_popup.but[t].mar_y);
 }
 
-function butpr_txt_x(p, i) {
-    return butpr_x(p, i) + .5 * sel_popup.but["tutor"].w;
+function but_sel_txt_x(p, i) {
+    return but_sel_x(p, i) + .5 * sel_popup.but[sel_popup.type].w;
 }
 
-function butpr_txt_y(p, i) {
-    return butpr_y(p, i) + .5 * sel_popup.but["tutor"].h;
+function but_sel_txt_y(p, i) {
+    return but_sel_y(p, i) + .5 * sel_popup.but[sel_popup.type].h;
 }
 
-function butpr_class(p) {
+function but_sel_class(p) {
     return p == user.nom ? "select-highlight" : "select-standard";
 }
 
@@ -1025,3 +1026,14 @@ function classic_h(d){ return d.h ; }
 function classic_txt_x(d) { return classic_x(d) + .5*classic_w(d) ;}
 function classic_txt_y(d) { return classic_y(d) + .5*classic_h(d) ;}
 function classic_txt(d){ return d.txt ; }
+
+
+function sel_trans(d, i){
+    var ret = "translate(" ;
+    ret += sel_popup.selx ;
+    ret += ",";
+    ret += sel_popup.sely
+        + (i+1)*(sel_popup.but["tutor"].h + sel_popup.selmy);
+    ret += ")";
+    return ret;
+}

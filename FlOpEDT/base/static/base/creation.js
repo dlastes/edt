@@ -1101,7 +1101,7 @@ function create_group_selection() {
     var contg = catg
         .append("g")
         .attr("class", "group-selection")
-        .attr("transform", "translate(" + sel_popup.selx + "," + (sel_popup.sely + sel_popup.but["tutor"].h + sel_popup.selmy ) + ")")
+        .attr("transform", "translate(" + sel_popup.selx + "," + sel_popup.sely + ")")
         .attr("cursor", "pointer")
         .on("click", create_static_group_buttons);
     
@@ -1710,70 +1710,6 @@ function init_selection_popup(){
 }
 
 
-// create forall and validation buttons
-function create_static_tutor_buttons() {
-    sel_popup.type = "tutor" ;
-    sel_popup.w = (sel_popup.but["tutor"].perline) * (sel_popup.but["tutor"].w + sel_popup.but["tutor"].mar_x)
-        - sel_popup.but["tutor"].mar_x ;
-
-    init_selection_popup();
-    
-    var contg = selg
-        .select("." + sel_popup.type + "-button-g")
-        .append("g")
-        .attr("class", sel_popup.type + "-button-all")
-        .attr("cursor", "pointer")
-        .on("click", apply_tutor_display_all);
-    
-    contg
-        .append("rect")
-        .attr("width", sel_popup.but["tutor"].w)
-        .attr("height", sel_popup.but["tutor"].h)
-        .attr("class", "select-highlight")
-        .attr("rx", 5)
-        .attr("ry", 10)
-        .attr("x", 0)
-        .attr("y", 0);
-
-    contg
-        .append("text")
-        .text("\u2200")
-        .attr("x", .5 * sel_popup.but["tutor"].w)
-        .attr("y", .5 * sel_popup.but["tutor"].h);
-
-    go_tutor_buttons();
-}
-
-// button to open tutor selection view
-function create_tutor_selection() {
-
-    var contg = catg
-        .append("g")
-        .attr("class", "tutor-selection")
-        .attr("transform", "translate(" + sel_popup.selx + "," + sel_popup.sely + ")")
-        .attr("cursor", "pointer")
-        .on("click", create_static_tutor_buttons);
-    
-    contg
-        .append("rect")
-        .attr("width", sel_popup.selw)
-        .attr("height", sel_popup.selh)
-        .attr("rx", 5)
-        .attr("ry", 10)
-        .attr("fill", "yellow")
-        .attr("x", 0)
-        .attr("y", 0);
-
-    contg
-        .append("text")
-        .text("Profs")
-        .attr("x", .5 * sel_popup.selw)
-        .attr("y", .5 * sel_popup.selh);
-
-}
-
-
-
 /*---------------------
   ------- VALIDER -----
   ---------------------*/
@@ -2107,5 +2043,72 @@ function def_cm_change() {
 // create all selection buttons
 function create_selections() {
     create_group_selection() ;
-    create_tutor_selection() ;
+    create_generic_selection() ;
+}
+
+// buttons to open selection view
+function create_generic_selection() {
+
+    var avg = catg
+        .selectAll(".gen-selection")
+        .data(sel_popup.available);
+
+    var contg = avg
+        .enter()
+        .append("g")
+        .attr("class", "gen-selection")
+        .attr("transform", sel_trans)
+        .attr("cursor", "pointer")
+        .on("click", create_static_gen_buttons);
+    
+    contg
+        .append("rect")
+        .attr("width", sel_popup.selw)
+        .attr("height", sel_popup.selh)
+        .attr("rx", 5)
+        .attr("ry", 10)
+        .attr("fill", "yellow")
+        .attr("x", 0)
+        .attr("y", 0);
+
+    contg
+        .append("text")
+        .text("Profs")
+        .attr("x", .5 * sel_popup.selw)
+        .attr("y", .5 * sel_popup.selh);
+
+}
+
+function create_static_gen_buttons(d) {
+    sel_popup.type = d ;
+    sel_popup.w = (sel_popup.but["tutor"].perline) * (sel_popup.but["tutor"].w + sel_popup.but["tutor"].mar_x)
+        - sel_popup.but["tutor"].mar_x ;
+
+    init_selection_popup();
+    
+    var contg = selg
+        .select("." + sel_popup.type + "-button-g")
+        .append("g")
+        .attr("class", sel_popup.type + "-button-all")
+        .attr("cursor", "pointer")
+        .on("click", apply_tutor_display_all);
+    
+    contg
+        .append("rect")
+        .attr("width", sel_popup.but["tutor"].w)
+        .attr("height", sel_popup.but["tutor"].h)
+        .attr("class", "select-highlight")
+        .attr("rx", 5)
+        .attr("ry", 10)
+        .attr("x", 0)
+        .attr("y", 0);
+
+    contg
+        .append("text")
+        .text("\u2200")
+        .attr("x", .5 * sel_popup.but["tutor"].w)
+        .attr("y", .5 * sel_popup.but["tutor"].h);
+
+    go_selection_buttons();
+
 }
