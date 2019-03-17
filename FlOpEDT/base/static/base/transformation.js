@@ -670,7 +670,7 @@ function butpr_txt_y(p, i) {
 }
 
 function butpr_class(p) {
-    return p == user.nom ? "tutor-button-me" : "tutor-button-others";
+    return p == user.nom ? "select-highlight" : "select-standard";
 }
 
 

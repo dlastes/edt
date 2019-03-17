@@ -1729,7 +1729,7 @@ function create_static_tutor_buttons() {
         .append("rect")
         .attr("width", sel_popup.but["tut"].w)
         .attr("height", sel_popup.but["tut"].h)
-        .attr("class", "tutor-button-me")
+        .attr("class", "select-highlight")
         .attr("rx", 5)
         .attr("ry", 10)
         .attr("x", 0)

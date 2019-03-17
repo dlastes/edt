@@ -55,20 +55,20 @@ color:white;
 .tutor-button {
   cursor: pointer;
 }
-rect.tutor-button-others {
+rect.select-standard { /*tutor-button-others {*/
   stroke:black;
   stroke-width:1px;
   fill:forestgreen;
 }
-rect.tutor-button-me {
+rect.select-highlight { /*tutor-button-me { */
   stroke:#134e13;
   stroke-width:2px;
   fill:#31c831;
 }
-text.tutor-button-others {
+text.select-standard {
   fill:white;
 }
-text.tutor-button-me {
+text.select-highlight {
   fill:black;
 }
 
