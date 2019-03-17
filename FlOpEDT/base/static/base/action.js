@@ -1304,7 +1304,7 @@ function compute_cm_room_tutor_direction() {
 }
 
 function show_detailed_courses(cours){
-    console.log(cours);
+    //console.log(cours);
     remove_details();
     var details = fg.append("g")
                     .attr("id", "course_details");
