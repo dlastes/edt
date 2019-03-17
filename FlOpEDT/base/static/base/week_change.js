@@ -842,7 +842,7 @@ function fetch_ended() {
 
         module_names.sort();
 
-        modules.all = module_names.forEach(
+        modules.all = module_names.map(
             function(m) {
                 var em = {} ;
                 em.name = m ;
