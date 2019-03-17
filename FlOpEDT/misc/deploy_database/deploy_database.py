@@ -86,12 +86,14 @@ def tutors_extract(department, book):
                 
                 if status == "Permanent":
                     tutor = FullStaff(**params)
+                    tutor.status=Tutor.FULL_STAFF
                 else:
                     employer = sheet.cell(row=INTER_ID_ROW, column=9).value
                     position = sheet.cell(row=INTER_ID_ROW, column=8).value
 
                     params.update({'employer': employer, 'position': position})
                     tutor = SupplyStaff(**params)
+                    tutor.status = Tutor.SUPP_STAFF
 
 
                 tutor.set_password("passe")
