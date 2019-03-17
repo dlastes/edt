@@ -1101,14 +1101,14 @@ function create_group_selection() {
     var contg = catg
         .append("g")
         .attr("class", "group-selection")
-        .attr("transform", "translate(" + butpr.tlx + "," + (butpr.tly + butpr.height + butpr.mar_y ) + ")")
+        .attr("transform", "translate(" + sel_popup.tlx + "," + (sel_popup.tly + sel_popup.but["tut"].h + sel_popup.but["tut"].mar_y ) + ")")
         .attr("cursor", "pointer")
-        .on("click", create_group_buttons);
+        .on("click", create_static_group_buttons);
     
     contg
         .append("rect")
-        .attr("width", butpr.width)
-        .attr("height", butpr.height)
+        .attr("width", sel_popup.but["tut"].w)
+        .attr("height", sel_popup.but["tut"].h)
         .attr("rx", 5)
         .attr("ry", 10)
         .attr("fill", "yellow")
@@ -1118,10 +1118,58 @@ function create_group_selection() {
     contg
         .append("text")
         .text("Groupes")
-        .attr("x", .5 * butpr.width)
-        .attr("y", .5 * butpr.height);
+        .attr("x", .5 * sel_popup.but["tut"].w)
+        .attr("y", .5 * sel_popup.but["tut"].h);
 
 }
+
+
+
+// create static parts of group list popup:
+// - group-button-g group
+// - background rectangle
+// - validate button
+function create_static_group_buttons() {
+
+    var minx, maxx, miny, maxy, curminx, curmaxx, curminy, curmaxy, curp ;
+    
+    for (var p = 0; p < set_promos.length; p++) {
+        curp = root_gp[p] ;
+        curminx = curp.butx ;
+        curminy = curp.buty ;
+        if(p==0 || curminx<minx) {
+            minx = curminx ;
+        }
+        if(p==0 || curminy<miny) {
+            miny = curminy ;
+        }
+        curmaxx = curminx + curp.gp.bw * butgp.width ;
+        curmaxy = curminy + curp.maxby * butgp.height ;
+        if(p==0 || curmaxx>maxx) {
+            maxx = curmaxx ;
+        }
+        if(p==0 || curmaxy>maxy) {
+            maxy = curmaxy ;
+        }
+    }
+
+    sel_popup.type = "group" ;
+    sel_popup.w = maxx-minx ;
+    sel_popup.h = maxy-miny ;
+
+    init_selection_popup() ;
+
+    selg
+        .select(".group-button-bg")
+        .attr("x",  - sel_popup.mar_side )
+        .attr("y",  - (sel_popup.mar_side + but_exit.side + but_exit.mar_next))
+        .attr("width", sel_popup.w + 2*sel_popup.mar_side)
+        .attr("height", sel_popup.mar_side + but_exit.side + but_exit.mar_next
+              + sel_popup.h + sel_popup.mar_side);
+
+    go_gp_buttons();
+}
+
 
 
 /*--------------------
@@ -1609,32 +1657,78 @@ function clean_unavailable_rooms() {
   ------- TUTORS -----
   --------------------*/
 
-// create forall and validation buttons
-function create_static_tutor() {
+function init_selection_popup(){
     var ssg = selg
         .append("g")
-        .attr("class", "tutor-button-g")
-        .attr("transform", "translate(" + butpr.tlx + "," + butpr.tly + ")");
+        .attr("class", sel_popup.type + "-button-g")
+        .attr("transform",
+              "translate(" + sel_popup.x + "," + sel_popup.y + ")");
 
     ssg
         .append("rect")
-        .attr("x", butpr_bg_x)
-        .attr("y", butpr_bg_y)
-        .attr("width", butpr_bg_width)
-        .attr("height", butpr_bg_height)
+        .attr("class", sel_popup.type + "-button-bg")
         .attr("fill", "white");
+    
+    var gpbgp = ssg
+        .append("g")
+        .attr("class", sel_popup.type + "-button-exit")
+        .attr("cursor", "pointer")
+        .on("click", validate_tutor_selection);
 
-    var contg = ssg
+    var butok = gpbgp
+        .append("g")
+        .attr("transform", "translate(" + (sel_popup.w-but_exit.side) + ","
+              + (- (but_exit.side + but_exit.mar_next)) + ")");
+
+    butok
+        .append("rect")
+        .attr("stroke", "none")
+        .attr("fill", "white")
+        .attr("x", 0)
+        .attr("y", 0)
+        .attr("width", but_exit.side)
+        .attr("height", but_exit.side);
+
+    butok
+        .append("line")
+        .attr("stroke","black")
+        .attr("stroke-width", 4)
+        .attr("x1", but_exit.mar_side)
+        .attr("y1", but_exit.mar_side)
+        .attr("x2", but_exit.side-but_exit.mar_side)
+        .attr("y2", but_exit.side-but_exit.mar_side);
+
+    butok
+        .append("line")
+        .attr("stroke","black")
+        .attr("stroke-width", 4)
+        .attr("x1", but_exit.mar_side)              
+        .attr("y1", but_exit.side-but_exit.mar_side)
+        .attr("x2", but_exit.side-but_exit.mar_side)              
+        .attr("y2", but_exit.mar_side);
+
+}
+
+
+// create forall and validation buttons
+function create_static_tutor_buttons() {
+    sel_popup.type = "tutor" ;
+    sel_popup.w = (sel_popup.but["tut"].perline) * (sel_popup.but["tut"].w + sel_popup.but["tut"].mar_x)
+        - sel_popup.but["tut"].mar_x ;
+
+    init_selection_popup();
+    
+    var contg = selg
+        .select(".tutor-button-g")
         .append("g")
         .attr("class", "tutor-button-all")
         .attr("cursor", "pointer")
         .on("click", apply_tutor_display_all);
-
-
+    
     contg
         .append("rect")
-        .attr("width", butpr.width)
-        .attr("height", butpr.height)
+        .attr("width", sel_popup.but["tut"].w)
+        .attr("height", sel_popup.but["tut"].h)
         .attr("class", "tutor-button-me")
         .attr("rx", 5)
         .attr("ry", 10)
@@ -1644,34 +1738,10 @@ function create_static_tutor() {
     contg
         .append("text")
         .text("\u2200")
-        .attr("x", .5 * butpr.width)
-        .attr("y", .5 * butpr.height);
+        .attr("x", .5 * sel_popup.but["tut"].w)
+        .attr("y", .5 * sel_popup.but["tut"].h);
 
-
-    var contg = selg
-        .select(".tutor-button-g")
-        .append("g")
-        .attr("class", "tutor-button-ok")
-        .attr("cursor", "pointer")
-        .on("click", validate_tutor_selection);
-
-
-    contg
-        .append("rect")
-        .attr("width", butpr.width)
-        .attr("height", butpr.height)
-        .attr("rx", 5)
-        .attr("ry", 10)
-        .attr("fill","yellow")
-        .attr("x", butpr_ok_x)
-        .attr("y", butpr_ok_y);
-
-    contg
-        .append("text")
-        .text("Ok")
-        .attr("x", butpr_ok_txt_x)
-        .attr("y", butpr_ok_txt_y);
-    
+    go_tutor_buttons();
 }
 
 // button to open tutor selection view
@@ -1680,14 +1750,14 @@ function create_tutor_selection() {
     var contg = catg
         .append("g")
         .attr("class", "tutor-selection")
-        .attr("transform", "translate(" + butpr.tlx + "," + butpr.tly + ")")
+        .attr("transform", "translate(" + sel_popup.tlx + "," + sel_popup.tly + ")")
         .attr("cursor", "pointer")
-        .on("click", go_select_tutors);
+        .on("click", create_static_tutor_buttons);
     
     contg
         .append("rect")
-        .attr("width", butpr.width)
-        .attr("height", butpr.height)
+        .attr("width", sel_popup.but["tut"].w)
+        .attr("height", sel_popup.but["tut"].h)
         .attr("rx", 5)
         .attr("ry", 10)
         .attr("fill", "yellow")
@@ -1697,8 +1767,8 @@ function create_tutor_selection() {
     contg
         .append("text")
         .text("Profs")
-        .attr("x", .5 * butpr.width)
-        .attr("y", .5 * butpr.height);
+        .attr("x", .5 * sel_popup.but["tut"].w)
+        .attr("y", .5 * sel_popup.but["tut"].h);
 
 }
 

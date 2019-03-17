@@ -108,7 +108,7 @@ function svg_width() {
     //    return margin.top + ack_reg_y() + 4*margin.bot ;
     return margin.left + Math.max(
         // max x of prof buttons
-        butpr.tlx + butpr_x(null, butpr.perline - 2) + butpr.width + butpr.mar_x,
+        sel_popup.tlx + butpr_x(null, sel_popup.but["tut"].perline - 2) + sel_popup.but["tut"].w + sel_popup.but["tut"].mar_x,
         // max x of the edt
         rootgp_width * nbPer * labgp.width + margin.right) ;
 }
@@ -654,59 +654,21 @@ function menu_curs(dk) {
   ------ PROFS -------
   --------------------*/
 function butpr_x(p, i) {
-    return ((i + 1) % butpr.perline) * (butpr.width + butpr.mar_x);
+    return ((i + 1) % sel_popup.but["tut"].perline) * (sel_popup.but["tut"].w + sel_popup.but["tut"].mar_x);
 }
 
 function butpr_y(p, i) {
-    return Math.floor((i + 1) / butpr.perline) * (butpr.height + butpr.mar_y);
+    return Math.floor((i + 1) / sel_popup.but["tut"].perline) * (sel_popup.but["tut"].h + sel_popup.but["tut"].mar_y);
 }
 
 function butpr_txt_x(p, i) {
-    return butpr_x(p, i) + .5 * butpr.width;
+    return butpr_x(p, i) + .5 * sel_popup.but["tut"].w;
 }
 
 function butpr_txt_y(p, i) {
-    return butpr_y(p, i) + .5 * butpr.height;
+    return butpr_y(p, i) + .5 * sel_popup.but["tut"].h;
 }
 
-function butpr_ok_x() {
-    return (butpr.perline - 1) * (butpr.width + butpr.mar_x) ;
-}
-function butpr_ok_y() {
-    var nb_tutors = profs.length ;
-    return butpr_y(profs[nb_tutors - 1], nb_tutors - 1)
-        + (butpr.height + 2*butpr.mar_y) ;
-}
-function butpr_ok_txt_x() {
-    return butpr_ok_x() + .5*butpr.width ;
-}
-function butpr_ok_txt_y() {
-    return butpr_ok_y() + .5*butpr.height ;
-}
-function butpr_bg_x() {
-    return -2*butpr.mar_x ;
-}
-function butpr_bg_y() {
-    return -2*butpr.mar_y ;
-}
-function butpr_bg_width() {
-    return (butpr.perline) * (butpr.width + butpr.mar_x)
-        + 3*butpr.mar_x;
-}
-function butpr_bg_height() {
-    return butpr_ok_y() + butpr.height + 2*butpr.mar_y;
-}
-
-
-
-/*
-function butpr_sw(p) {
-    return p==user.nom?4:1;
-}
-function butpr_col(p) {
-    return p==user.nom?"darkorchid":"steelblue";
-}
-*/
 function butpr_class(p) {
     return p == user.nom ? "tutor-button-me" : "tutor-button-others";
 }

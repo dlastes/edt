@@ -377,13 +377,27 @@ var profs = [];
 var prof_displayed = [];
 
 // display parameters
-var butpr = {
-    height: 30,
-    width: 30,
+var but_exit = {
+    side: 20,
+    mar_side: 3,
+    mar_next: 10
+};
+var sel_popup = {
+    type: 'group',
+    x: 600,
+    y: -210,
+    w: 0,
+    h:0,
+    mar_side: 5,
+    tlx: 700,
+    but: []
+};
+sel_popup.but["tut"] = {
+    h: 30,
+    w: 30,
     perline: 5,
     mar_x: 2,
     mar_y: 4,
-    tlx: 900
 };
 
 // has any instructor been fetched?

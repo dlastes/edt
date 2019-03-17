@@ -264,7 +264,21 @@ function create_sal_dd() {
 /*--------------------
   ------ PROFS -------
   --------------------*/
-function create_pr_buttons() {
+function go_tutor_buttons() {
+
+    var nb_tutors = profs.length ;
+    sel_popup.h = butpr_y(profs[nb_tutors - 1], nb_tutors - 1)
+        + sel_popup.but["tut"].h ;
+
+    selg
+        .select(".tutor-button-bg")
+        .attr("x",  - sel_popup.mar_side )
+        .attr("y",  - (sel_popup.mar_side + but_exit.side + but_exit.mar_next))
+        .attr("width", sel_popup.w + 2*sel_popup.mar_side)
+        .attr("height", sel_popup.mar_side + but_exit.side + but_exit.mar_next
+              + sel_popup.h + sel_popup.mar_side);
+
+    
     var t = d3.transition();
     profs.sort();
 
@@ -285,8 +299,8 @@ function create_pr_buttons() {
     contg
         .append("rect")
         .attr("class", butpr_class)
-        .attr("width", butpr.width)
-        .attr("height", butpr.height)
+        .attr("width", sel_popup.but["tut"].w)
+        .attr("height", sel_popup.but["tut"].h)
         .attr("rx", 5)
         .attr("ry", 10)
         .merge(cont.select("rect"))
@@ -681,6 +695,12 @@ function clean_prof_displayed() {
         }
 
     }
+
+    if (!selg.select(".tutor-button-g").empty()) {
+        go_tutor_buttons() ;
+    }
+
+    
 }
 
 function translate_gp_name(gp) {

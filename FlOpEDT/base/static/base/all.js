@@ -53,7 +53,7 @@ var margin = {
     left:  50,
     right:  110,
     bot:  10,
-    but: -230
+    but: -200
 };
 
 
@@ -76,10 +76,10 @@ dim_dispo.height = 2*labgp.height ;
 
 
 butgp.tly = margin.but;//-margin_but.ver-6*butgp.height-80 ;
-butpr.tly = margin.but;
+sel_popup.tly = margin.but;
 
 
-modules.x=butpr.tlx+butpr_x(null,butpr.perline-2)+butpr.width+butpr.mar_x-60;
+modules.x=sel_popup.tlx+butpr_x(null,sel_popup.but["tut"].perline-2)+sel_popup.but["tut"].w+sel_popup.but["tut"].mar_x-60;
 modules.y=margin.top+gsckd_y(null)-40;
 modules.width = 170 ;
 modules.height = 0 ;
