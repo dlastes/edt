@@ -407,7 +407,7 @@ function fetch_cours() {
             if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
                 an_att == weeks.init_data[weeks.sel[0]].an) {
 
-                profs_pl = [];
+                tutors.pl = [];
                 modules.pl = [];
                 salles.pl = [];
 
@@ -447,7 +447,7 @@ function fetch_cours() {
             if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
                 an_att == weeks.init_data[weeks.sel[0]].an) {
 
-                profs_pp = [];
+                tutors.pp = [];
                 modules.pp = [];
                 salles.pp = [];
 
@@ -484,9 +484,9 @@ function fetch_cours() {
 
 
 function translate_cours_pl_from_csv(d) {
-    var ind = profs_pl.indexOf(d.prof_nom);
+    var ind = tutors.pl.indexOf(d.prof_nom);
     if (ind == -1) {
-        profs_pl.push(d.prof_nom);
+        tutors.pl.push(d.prof_nom);
     }
     if (modules.pl.indexOf(d.module) == -1) {
         modules.pl.push(d.module);
@@ -508,14 +508,15 @@ function translate_cours_pl_from_csv(d) {
 	room_type: d.room_type,
 	color_bg: d.color_bg,
 	color_txt: d.color_txt,
+        display: true
     };
     return co;
 }
 
 
 function translate_cours_pp_from_csv(d) {
-    if (profs_pp.indexOf(d.prof) == -1) {
-        profs_pp.push(d.prof);
+    if (tutors.pp.indexOf(d.prof) == -1) {
+        tutors.pp.push(d.prof);
     }
     if (modules.pp.indexOf(d.module) == -1) {
         modules.pp.push(d.module);
@@ -536,6 +537,7 @@ function translate_cours_pp_from_csv(d) {
 	room_type: d.room_type,
 	color_bg: d.color_bg,
 	color_txt: d.color_txt,
+        display: true
     };
     console.log(co);
     return co;
@@ -612,35 +614,33 @@ function add_exception(sem_att, an_att, sem_voulue, an_voulu, nom, l1, l2, l3){
 
 function clean_prof_displayed() {
 
-    var all = (profs.length == prof_displayed.length);
-
-    profs = profs_pl;
-    for (var i = 0; i < profs_pp.length; i++) {
-        var ind = profs.indexOf(profs_pp[i]);
+    tutors.old = tutors.all;
+    
+    var tutor_names = tutors.pl;
+    for (var i = 0; i < tutors.pp.length; i++) {
+        var ind = tutor_names.indexOf(tutors.pp[i]);
         if (ind == -1) {
-            profs.push(profs_pp[i]);
+            tutor_names.push(tutors.pp[i]);
         }
     }
-
-
-
-    if (all) {
-        prof_displayed = profs.slice(0);
-    } else {
-
-        var ndi = prof_displayed.filter(function(d) {
-            return profs.indexOf(d) > -1;
-        });
-
-        if (ndi.length == 0) {
-            prof_displayed = profs.slice(0);
-        } else {
-            prof_displayed = ndi;
+    
+    tutors.all = tutor_names.map(
+        function(t) {
+            var et = {} ;
+            et.name = t ;
+            var oldf = tutors.old.filter( function(to) {
+                return to.name == t ;
+            } );
+            et.display = true ;
+            if (oldf.length == 1) {
+                et.display = oldf[0].display ;
+            }
+            return et ;
         }
+    )
 
-    }
 
-    if (!selg.select(".tutor-button-g").empty()) {
+    if (sel_popup.type != "") {
         go_selection_buttons() ;
     }
 

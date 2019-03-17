@@ -895,19 +895,21 @@ function go_modules() {
 function relevant_modules() {
 
     // The relevant tutors
-    var tutors = new Set();
-    if (prof_displayed.length < profs.length) { // some tutors are selected
-        prof_displayed.forEach(function (p) {
-            tutors.add(p);
+    var rel_tutors = new Set();
+    var sel_tutors = tutors.all.filter(function(t){
+        return t.display; })
+    if (sel_tutors.length < tutors.all.length) { // some tutors are selected
+        sel_tutors.forEach(function (p) {
+            rel_tutors.add(p);
         });
     } else if (user.nom) {
-        tutors.add(user.nom);
+        rel_tutors.add(user.nom);
     }
 
     // The relevant modules
     var modules = new Set();
     cours.forEach(function(c) {
-        if (tutors.has(c.prof)) {
+        if (rel_tutors.has(c.prof)) {
             modules.add(c.mod);
         }
     });
@@ -936,19 +938,19 @@ function go_rooms() {
   ------ TUTORS ------
   --------------------*/
 
-function go_tutors() {
+function go_tutors() { // will be removed
 
-    selg
-        .selectAll(".tutor-button")
-        .data(profs, function(p) {
-            return p;
-        })
-        .attr("opacity", function(p) {
-            return prof_displayed.indexOf(p) > -1 ? 1 : opac;
-        });
+    // selg
+    //     .selectAll(".tutor-button")
+    //     .data(tutors.all, function(p) { // will be removed
+    //         return p;
+    //     })
+    //     .attr("opacity", function(p) {
+    //         return prof_displayed.indexOf(p) > -1 ? 1 : opac;//wbr
+    //     });
 
     create_mod_dd();
-    go_opac_cours();
+    //go_opac_cours();
 }
 
 
@@ -958,6 +960,23 @@ function go_tutors() {
 /*--------------------
    ------ COURS -------
   --------------------*/
+
+
+function update_selection() {
+    cours.forEach(function(c) {
+        c.display =
+            modules.all.filter(function(m) {
+                return m.name == c.mod ;
+            })[0].display
+            && tutors.all.filter(function(m) {
+                return m.name == c.prof ;
+            })[0].display ;
+    });
+    sel_popup.active_filter = !(cours.filter(function(c){
+        return c.display ;
+    }).length == cours.length) ;
+}
+
 
 function go_courses(quick) {
     var t;
@@ -969,6 +988,8 @@ function go_courses(quick) {
     }
 
 
+    update_selection() ;
+    
     var cg = mg.selectAll(".cours")
         .data(cours.filter(function(d) {
                 return groups[d.promo][d.group].display;
@@ -992,6 +1013,12 @@ function go_courses(quick) {
 	    go_cm_room_tutor_change();
 	}})
         .call(dragListener);
+
+    incg
+        .merge(cg)
+        .attr("opacity", cours_opac)
+        .select("rect")
+        .attr("stroke", cours_stk);
     
     incg
         .append("rect")
@@ -1091,38 +1118,39 @@ function go_courses(quick) {
 
 
 // update courses opacity
-function go_opac_cours() {
+function go_opac_cours() { // will be removed
+    return ;
+    // if (prof_displayed.length < tutors.all.length//wbr
+    //     || modules.sel != "" || salles.sel != "") {
+    //     // view with opacity filter
+    //     var coursp = mg.selectAll(".cours")
+    //         .data(cours.filter(function(d) {
+    //                 var ret = prof_displayed.indexOf(d.prof) > -1;//wbr
+    //                 ret = ret && (modules.sel == "" || modules.sel == d.mod);
+    //                 ret = ret && (salles.sel == "" || salles.sel == d.room);
+    //                 return ret;
+    //             }),
+    //             function(d) {
+    //                 return d.id_cours;
+    //             });
 
-    if (prof_displayed.length < profs.length || modules.sel != "" || salles.sel != "") {
-        // view with opacity filter
-        var coursp = mg.selectAll(".cours")
-            .data(cours.filter(function(d) {
-                    var ret = prof_displayed.indexOf(d.prof) > -1;
-                    ret = ret && (modules.sel == "" || modules.sel == d.mod);
-                    ret = ret && (salles.sel == "" || salles.sel == d.room);
-                    return ret;
-                }),
-                function(d) {
-                    return d.id_cours;
-                });
+    //     coursp
+    //         .attr("opacity", 1)
+    //         .select("rect").attr("stroke", 'black');
 
-        coursp
-            .attr("opacity", 1)
-            .select("rect").attr("stroke", 'black');
+    //     coursp
+    //         .exit()
+    //         .attr("opacity", opac)
+    //         .select("rect").attr("stroke", 'none');
 
-        coursp
-            .exit()
-            .attr("opacity", opac)
-            .select("rect").attr("stroke", 'none');
+    // } else {
+    //     // view without opacity filter
+    //     mg
+    //         .selectAll(".cours")
+    //         .attr("opacity", 1)
+    //         .select("rect").attr("stroke", 'none');
 
-    } else {
-        // view without opacity filter
-        mg
-            .selectAll(".cours")
-            .attr("opacity", 1)
-            .select("rect").attr("stroke", 'none');
-
-    }
+    // }
 
 }
 
@@ -1228,11 +1256,11 @@ function go_selection_buttons() {
 
     var sel_list = [] ;
     var type = sel_popup.type ;
-
+    
     if (type == "") {
         return ;
     } else if (type == "tutor") {
-        sel_list = profs ;
+        sel_list = tutors.all ;
     }
 
     
@@ -1250,7 +1278,9 @@ function go_selection_buttons() {
 
     
     var t = d3.transition();
-    profs.sort();
+    tutors.all.sort(function(a,b){
+        return a.name.localeCompare(b.name);
+    });
 
     var cont =
         selg
@@ -1274,9 +1304,7 @@ function go_selection_buttons() {
 
     var concon = contg
         .merge(cont)
-        .attr("opacity", function(p) {
-            return prof_displayed.indexOf(p) > -1 ? 1 : opac;
-        });
+        .attr("opacity", but_sel_opac);
 
     contg
         .append("rect")
@@ -1293,7 +1321,7 @@ function go_selection_buttons() {
         .append("text")
         .attr("class", but_sel_class)
         .text(function(d) {
-            return d;
+            return d.name;
         })
         .merge(cont.select("text"))
         .attr("x", but_sel_txt_x)

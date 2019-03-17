@@ -734,7 +734,12 @@ function cours_txt_bot_y(c) {
 function cours_txt_bot_txt(c) {
     return c.room;
 }
-
+function cours_opac(c) {
+    return (c.display || !sel_popup.active_filter) ? 1 : opac ;
+}
+function cours_stk(c) {
+    return (c.display && sel_popup.active_filter) ? "black" : "none" ;
+}
 
 /*--------------------
   ------ ROOMS -------
@@ -1036,4 +1041,8 @@ function sel_trans(d, i){
         + (i+1)*(sel_popup.but["tutor"].h + sel_popup.selmy);
     ret += ")";
     return ret;
+}
+
+function but_sel_opac(d) {
+    return d.display ? 1 : opac ;
 }

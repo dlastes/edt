@@ -365,14 +365,15 @@ for (var i = 0; i < nbPer; i++) {
    ------ TUTORS ------
    --------------------*/
 
-// instructors of unscheduled courses
-var profs_pp = [];
-
-// instructors of scheduled courses
-var profs_pl = [];
-
-// all instructors
-var profs = [];
+var tutors = {
+    // instructors of unscheduled courses
+    pp: [],
+    // instructors of scheduled courses
+    pl: [],
+    // all instructors
+    all: [],
+    old: []
+};
 
 // instructors not blurried
 var prof_displayed = [];
@@ -397,7 +398,8 @@ var sel_popup = {
     mar_side: 5,
     tlx: 700,
     available: ["tutor"], //, "room"],
-    but: []
+    but: [],
+    active_filter: false
 };
 sel_popup.but["tutor"] = {
     h: 30,

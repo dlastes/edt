@@ -2091,7 +2091,7 @@ function create_static_gen_buttons(d) {
         .append("g")
         .attr("class", sel_popup.type + "-button-all")
         .attr("cursor", "pointer")
-        .on("click", apply_tutor_display_all);
+        .on("click", apply_selection_display_all);
     
     contg
         .append("rect")
