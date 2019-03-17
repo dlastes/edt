@@ -1719,9 +1719,9 @@ function create_static_tutor_buttons() {
     init_selection_popup();
     
     var contg = selg
-        .select(".tutor-button-g")
+        .select("." + sel_popup.type + "-button-g")
         .append("g")
-        .attr("class", "tutor-button-all")
+        .attr("class", sel_popup.type + "-button-all")
         .attr("cursor", "pointer")
         .on("click", apply_tutor_display_all);
     
