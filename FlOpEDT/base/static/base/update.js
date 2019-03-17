@@ -778,7 +778,7 @@ function create_group_buttons() {
         if(p==0 || curminy<miny) {
             miny = curminy ;
         }
-        curmaxx = curminx + curp.gp.width * butgp.width ;
+        curmaxx = curminx + curp.gp.bw * butgp.width ;
         curmaxy = curminy + curp.maxby * butgp.height ;
         if(p==0 || curmaxx>maxx) {
             maxx = curmaxx ;

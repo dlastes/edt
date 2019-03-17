@@ -567,7 +567,7 @@ function butgp_y(gp) {
 }
 
 function butgp_width(gp) {
-    return gp.width * butgp.width;
+    return gp.bw * butgp.width;
 }
 
 function butgp_height(gp) {

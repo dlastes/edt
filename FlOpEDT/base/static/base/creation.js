@@ -766,6 +766,7 @@ function create_groups(data_groups) {
         var keys = Object.keys(groups[p]) ;
         for (var g = 0 ; g < keys.length ; g++) {
             groups[p][keys[g]].bx = groups[p][keys[g]].x ;
+            groups[p][keys[g]].bw = groups[p][keys[g]].width ;
         }
     }
     
@@ -895,12 +896,6 @@ function compute_promo_est_n_wh(node) {
 
     if (node.parent == null) {
         node.ancetres = [];
-        node.by = 0;
-	root_gp[node.promo].maxby = node.by + node.buth ;
-    } else {
-	if (node.by + node.buth > root_gp[node.promo].maxby) {
-	    root_gp[node.promo].maxby = node.by + node.buth ;
-	}
     }
     node.descendants = [];
 
@@ -916,7 +911,6 @@ function compute_promo_est_n_wh(node) {
         for (var i = 0; i < node.children.length; i++) {
             child = groups[node.promo][node.children[i]];
             child.est = node.est + node.width;
-            child.by = node.by + node.buth;
             if (!child.display) {
                 child.width = 0;
             } else {
