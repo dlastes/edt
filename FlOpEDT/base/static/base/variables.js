@@ -398,7 +398,7 @@ var sel_popup = {
     tlx: 700,
     but: []
 };
-sel_popup.but["tut"] = {
+sel_popup.but["tutor"] = {
     h: 30,
     w: 30,
     perline: 5,

@@ -1101,7 +1101,7 @@ function create_group_selection() {
     var contg = catg
         .append("g")
         .attr("class", "group-selection")
-        .attr("transform", "translate(" + sel_popup.selx + "," + (sel_popup.sely + sel_popup.but["tut"].h + sel_popup.selmy ) + ")")
+        .attr("transform", "translate(" + sel_popup.selx + "," + (sel_popup.sely + sel_popup.but["tutor"].h + sel_popup.selmy ) + ")")
         .attr("cursor", "pointer")
         .on("click", create_static_group_buttons);
     
@@ -1713,8 +1713,8 @@ function init_selection_popup(){
 // create forall and validation buttons
 function create_static_tutor_buttons() {
     sel_popup.type = "tutor" ;
-    sel_popup.w = (sel_popup.but["tut"].perline) * (sel_popup.but["tut"].w + sel_popup.but["tut"].mar_x)
-        - sel_popup.but["tut"].mar_x ;
+    sel_popup.w = (sel_popup.but["tutor"].perline) * (sel_popup.but["tutor"].w + sel_popup.but["tutor"].mar_x)
+        - sel_popup.but["tutor"].mar_x ;
 
     init_selection_popup();
     
@@ -1727,8 +1727,8 @@ function create_static_tutor_buttons() {
     
     contg
         .append("rect")
-        .attr("width", sel_popup.but["tut"].w)
-        .attr("height", sel_popup.but["tut"].h)
+        .attr("width", sel_popup.but["tutor"].w)
+        .attr("height", sel_popup.but["tutor"].h)
         .attr("class", "select-highlight")
         .attr("rx", 5)
         .attr("ry", 10)
@@ -1738,8 +1738,8 @@ function create_static_tutor_buttons() {
     contg
         .append("text")
         .text("\u2200")
-        .attr("x", .5 * sel_popup.but["tut"].w)
-        .attr("y", .5 * sel_popup.but["tut"].h);
+        .attr("x", .5 * sel_popup.but["tutor"].w)
+        .attr("y", .5 * sel_popup.but["tutor"].h);
 
     go_tutor_buttons();
 }

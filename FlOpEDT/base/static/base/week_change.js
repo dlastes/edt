@@ -268,7 +268,7 @@ function go_tutor_buttons() {
 
     var nb_tutors = profs.length ;
     sel_popup.h = butpr_y(profs[nb_tutors - 1], nb_tutors - 1)
-        + sel_popup.but["tut"].h ;
+        + sel_popup.but["tutor"].h ;
 
     selg
         .select(".tutor-button-bg")
@@ -299,8 +299,8 @@ function go_tutor_buttons() {
     contg
         .append("rect")
         .attr("class", butpr_class)
-        .attr("width", sel_popup.but["tut"].w)
-        .attr("height", sel_popup.but["tut"].h)
+        .attr("width", sel_popup.but["tutor"].w)
+        .attr("height", sel_popup.but["tutor"].h)
         .attr("rx", 5)
         .attr("ry", 10)
         .merge(cont.select("rect"))
