@@ -390,6 +390,9 @@ var sel_popup = {
     h:0,
     selw: 60,
     selh: 30,
+    selx: 700,
+    sely: -230,
+    selmy: 10,
     mar_side: 5,
     tlx: 700,
     but: []

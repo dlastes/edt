@@ -1101,7 +1101,7 @@ function create_group_selection() {
     var contg = catg
         .append("g")
         .attr("class", "group-selection")
-        .attr("transform", "translate(" + sel_popup.tlx + "," + (sel_popup.tly + sel_popup.but["tut"].h + sel_popup.but["tut"].mar_y ) + ")")
+        .attr("transform", "translate(" + sel_popup.selx + "," + (sel_popup.sely + sel_popup.but["tut"].h + sel_popup.selmy ) + ")")
         .attr("cursor", "pointer")
         .on("click", create_static_group_buttons);
     
@@ -1750,7 +1750,7 @@ function create_tutor_selection() {
     var contg = catg
         .append("g")
         .attr("class", "tutor-selection")
-        .attr("transform", "translate(" + sel_popup.tlx + "," + sel_popup.tly + ")")
+        .attr("transform", "translate(" + sel_popup.selx + "," + sel_popup.sely + ")")
         .attr("cursor", "pointer")
         .on("click", create_static_tutor_buttons);
     
