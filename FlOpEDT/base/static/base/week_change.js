@@ -744,24 +744,6 @@ function translate_unavailable_rooms(d) {
     unavailable_rooms[day][slot].push(d.room);
 }
 
-
-
-
-
-/*----------------
------MODULES------
-----------------*/
-
-
-
-
-
-
-
-
-
-
-
 /*--------------------
    ------ ALL -------
    --------------------*/

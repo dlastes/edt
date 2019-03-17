@@ -1128,7 +1128,7 @@ def contact(req, prof, **kwargs):
     if prof != None:
         prof_abbrev = Tutor.objects.get(username=prof)
         form = ContactForm(initial={'recipient': prof_abbrev})
-
+    
 
 
     return TemplateResponse(req, 'base/contact.html',
@@ -1231,5 +1231,4 @@ def get_key_all_tutors():
 # </editor-fold desc="HELPERS">
 
 
-def fetch_module(req):
-    return Module.objects.all()
+
