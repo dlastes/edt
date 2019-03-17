@@ -388,6 +388,8 @@ var sel_popup = {
     y: -210,
     w: 0,
     h:0,
+    selw: 60,
+    selh: 30,
     mar_side: 5,
     tlx: 700,
     but: []
@@ -396,6 +398,13 @@ sel_popup.but["tut"] = {
     h: 30,
     w: 30,
     perline: 5,
+    mar_x: 2,
+    mar_y: 4,
+};
+sel_popup.but["room"] = {
+    h: 30,
+    w: 60,
+    perline: 3,
     mar_x: 2,
     mar_y: 4,
 };

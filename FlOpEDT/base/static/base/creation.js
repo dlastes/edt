@@ -1107,8 +1107,8 @@ function create_group_selection() {
     
     contg
         .append("rect")
-        .attr("width", sel_popup.but["tut"].w)
-        .attr("height", sel_popup.but["tut"].h)
+        .attr("width", sel_popup.selw)
+        .attr("height", sel_popup.selh)
         .attr("rx", 5)
         .attr("ry", 10)
         .attr("fill", "yellow")
@@ -1118,8 +1118,8 @@ function create_group_selection() {
     contg
         .append("text")
         .text("Groupes")
-        .attr("x", .5 * sel_popup.but["tut"].w)
-        .attr("y", .5 * sel_popup.but["tut"].h);
+        .attr("x", .5 * sel_popup.selw)
+        .attr("y", .5 * sel_popup.selh);
 
 }
 
@@ -1756,8 +1756,8 @@ function create_tutor_selection() {
     
     contg
         .append("rect")
-        .attr("width", sel_popup.but["tut"].w)
-        .attr("height", sel_popup.but["tut"].h)
+        .attr("width", sel_popup.selw)
+        .attr("height", sel_popup.selh)
         .attr("rx", 5)
         .attr("ry", 10)
         .attr("fill", "yellow")
@@ -1767,8 +1767,8 @@ function create_tutor_selection() {
     contg
         .append("text")
         .text("Profs")
-        .attr("x", .5 * sel_popup.but["tut"].w)
-        .attr("y", .5 * sel_popup.but["tut"].h);
+        .attr("x", .5 * sel_popup.selw)
+        .attr("y", .5 * sel_popup.selh);
 
 }
 
