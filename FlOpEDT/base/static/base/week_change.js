@@ -631,7 +631,7 @@ function clean_prof_displayed() {
             var oldf = tutors.old.filter( function(to) {
                 return to.name == t ;
             } );
-            et.display = true ;
+            et.display = !(sel_popup.active_filter) ;
             if (oldf.length == 1) {
                 et.display = oldf[0].display ;
             }
@@ -790,7 +790,7 @@ function fetch_ended() {
                 var em = {} ;
                 em.name = m ;
                 var oldi = modules.old.indexOf(m) ;
-                em.display = true ;
+                em.display = !(sel_popup.active_filter) ;
                 if (oldi > -1) {
                     em.display = modules.old[oldi].display ;
                 }
