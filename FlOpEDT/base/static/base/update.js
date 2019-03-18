@@ -964,26 +964,31 @@ function go_tutors() { // will be removed
 
 function update_selection() {
     cours.forEach(function(c) {
-        var mod = modules.all.filter(function(m) {
-                return m.name == c.mod ;
+        var mod = modules.all.find(function(d) {
+            return d.name == c.mod ;
         });
-        var tut = tutors.all.filter(function(m) {
-                return m.name == c.prof ;
+        var tut = tutors.all.find(function(d) {
+            return d.name == c.prof ;
+        });
+        var roo = rooms_sel.all.find(function(d) {
+            return d.name == c.room ;
         });
         c.display =
-            (mod.length == 0 || mod[0].display)
-            && (tut.length == 0 || tut[0].display) ;
+            (typeof mod === 'undefined' || mod.display)
+            && (typeof tut === 'undefined' || tut.display)
+            && (typeof roo === 'undefined' || roo.display);
     });
     var tut_av = sel_popup.get_available("tutor");
     var mod_av = sel_popup.get_available("module");
-    // var room_av = sel_popup.available.filter(function(d){
-    //     return d.type == "room" ;
-    // })[0];
+    var room_av = sel_popup.get_available("room");
 
     tut_av.active = tutors.all.filter(function(d) {
         return d.display;
     }).length != tutors.all.length ;
     mod_av.active = modules.all.filter(function(d) {
+        return d.display;
+    }).length != modules.all.length ;
+    room_av.active = rooms_sel.all.filter(function(d) {
         return d.display;
     }).length != modules.all.length ;
     
@@ -1278,7 +1283,9 @@ function go_selection_buttons() {
         sel_list = tutors.all ;
     } else if (type == "module") {
         sel_list = modules.all ;
-    }
+    } else if (type == "room") {
+        sel_list = rooms_sel.all ;
+    } 
 
     
     var nb_el = sel_list.length ;

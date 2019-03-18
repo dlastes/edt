@@ -1287,6 +1287,9 @@ function apply_selection_display(pr) {
         case "module":
             sel_list = modules.all ;
             break ;
+        case "room":
+            sel_list = rooms_sel.all ;
+            break ;
         default:
             console.log("Type selection unknown");
         }
@@ -1345,6 +1348,9 @@ function apply_selection_display_all() {
         break ;
     case "module":
         sel_list = modules.all ;
+        break ;
+    case "room":
+        sel_list = rooms_sel.all ;
         break ;
     default:
         console.log("Type selection unknown");

@@ -352,7 +352,10 @@ var salles = {
 };
 
 var rooms ;
-
+var rooms_sel = {
+    all: [],
+    old: []
+};
 
 var unavailable_rooms = [] ;
 unavailable_rooms = new Array(nbPer);
@@ -402,6 +405,9 @@ var sel_popup = {
                  active: false},
                 {type:"module",
                  buttxt: "Modules",
+                 active: false},
+                {type:"room",
+                 buttxt: "Salles",
                  active: false}],
     get_available: function(t) {
         var ret = this.available.filter(function(d) {
@@ -433,7 +439,7 @@ sel_popup.but["room"] = {
 };
 sel_popup.but["module"] = {
     h: 30,
-    w: 70,
+    w: 40,
     perline: 3,
     mar_x: 2,
     mar_y: 4,
