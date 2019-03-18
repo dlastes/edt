@@ -964,17 +964,33 @@ function go_tutors() { // will be removed
 
 function update_selection() {
     cours.forEach(function(c) {
-        c.display =
-            modules.all.filter(function(m) {
+        var mod = modules.all.filter(function(m) {
                 return m.name == c.mod ;
-            })[0].display
-            && tutors.all.filter(function(m) {
+        });
+        var tut = tutors.all.filter(function(m) {
                 return m.name == c.prof ;
-            })[0].display ;
+        });
+        c.display =
+            (mod.length == 0 || mod[0].display)
+            && (tut.length == 0 || tut[0].display) ;
     });
+    var tut_av = sel_popup.get_available("tutor");
+    var mod_av = sel_popup.get_available("module");
+    // var room_av = sel_popup.available.filter(function(d){
+    //     return d.type == "room" ;
+    // })[0];
+
+    tut_av.active = tutors.all.filter(function(d) {
+        return d.display;
+    }).length != tutors.all.length ;
+    mod_av.active = modules.all.filter(function(d) {
+        return d.display;
+    }).length != modules.all.length ;
+    
     sel_popup.active_filter = !(cours.filter(function(c){
         return c.display ;
     }).length == cours.length) ;
+    
 }
 
 
@@ -1016,9 +1032,7 @@ function go_courses(quick) {
 
     incg
         .merge(cg)
-        .attr("opacity", cours_opac)
-        .select("rect")
-        .attr("stroke", cours_stk);
+        .attr("opacity", cours_opac);
     
     incg
         .append("rect")
@@ -1028,6 +1042,7 @@ function go_courses(quick) {
         .attr("width", 0)
         .merge(cg.select("rect"))
         .attr("fill", cours_fill)
+        .attr("stroke", cours_stk)
         .transition(t)
         .attr("x", cours_x)
         .attr("y", cours_y)
@@ -1261,6 +1276,8 @@ function go_selection_buttons() {
         return ;
     } else if (type == "tutor") {
         sel_list = tutors.all ;
+    } else if (type == "module") {
+        sel_list = modules.all ;
     }
 
     
@@ -1287,13 +1304,7 @@ function go_selection_buttons() {
         .select("." + type + "-button-g")
         .selectAll("." + type + "-button")
         .data(sel_list, function(p) {
-            if (sel_popup.type == "tutor") {
-                return p ;
-            } else if (sel_popup.type == "module") {
-                return p.name ;
-            } else {
-                return p ;
-            }
+            return p.name ;
         });
 
     var contg = cont

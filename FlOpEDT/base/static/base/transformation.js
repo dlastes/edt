@@ -674,6 +674,9 @@ function but_sel_class(p) {
     return p == user.nom ? "select-highlight" : "select-standard";
 }
 
+function but_open_sel_txt(d) {
+    return d.buttxt ;
+}
 
 /*--------------------
   ------ COURS -------

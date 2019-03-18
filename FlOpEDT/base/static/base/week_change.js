@@ -614,8 +614,6 @@ function add_exception(sem_att, an_att, sem_voulue, an_voulu, nom, l1, l2, l3){
 
 function clean_prof_displayed() {
 
-    tutors.old = tutors.all;
-    
     var tutor_names = tutors.pl;
     for (var i = 0; i < tutors.pp.length; i++) {
         var ind = tutor_names.indexOf(tutors.pp[i]);
@@ -623,22 +621,10 @@ function clean_prof_displayed() {
             tutor_names.push(tutors.pp[i]);
         }
     }
-    
-    tutors.all = tutor_names.map(
-        function(t) {
-            var et = {} ;
-            et.name = t ;
-            var oldf = tutors.old.filter( function(to) {
-                return to.name == t ;
-            } );
-            et.display = !(sel_popup.active_filter) ;
-            if (oldf.length == 1) {
-                et.display = oldf[0].display ;
-            }
-            return et ;
-        }
-    )
 
+    update_selection();
+
+    swap_data(tutor_names, tutors, "tutor") ;
 
     if (sel_popup.type != "") {
         go_selection_buttons() ;
@@ -776,7 +762,7 @@ function fetch_ended() {
         !fetch.ongoing_cours_pp) {
         cours = cours_pl.concat(cours_pp);
 
-        var module_names = [""].concat(modules.pl);
+        var module_names = modules.pl;
         for (var i = 0; i < modules.pp.length; i++) {
             if (module_names.indexOf(modules.pp[i]) == -1) {
                 module_names.push(modules.pp[i]);
@@ -785,19 +771,9 @@ function fetch_ended() {
 
         module_names.sort();
 
-        modules.all = module_names.map(
-            function(m) {
-                var em = {} ;
-                em.name = m ;
-                var oldi = modules.old.indexOf(m) ;
-                em.display = !(sel_popup.active_filter) ;
-                if (oldi > -1) {
-                    em.display = modules.old[oldi].display ;
-                }
-                return em ;
-            }
-        )
+        update_selection();
 
+        swap_data(module_names, modules, "module"); 
 
         salles.all = [""].concat(salles.pl);
         for (var i = 0; i < salles.pp.length; i++) {
@@ -839,7 +815,26 @@ function fetch_ended() {
 
 }
 
-
+// - store old data in old
+// - translate fetched into current (keeping display values)
+function swap_data(fetched, current, type) {
+    current.old = current.all ;
+    current.all = fetched.map(
+        function(m) {
+            var em = {} ;
+            em.name = m ;
+            var oldf = current.old.find(function(mo) {
+                return mo.name == m ;
+            });
+            em.display = !(sel_popup.get_available(type).active) ;
+            if (typeof oldf !== 'undefined') {
+                em.display = oldf.display ;
+            }
+            return em ;
+        }
+    )
+    
+}
 
 
 

@@ -397,7 +397,23 @@ var sel_popup = {
     selmy: 10,
     mar_side: 5,
     tlx: 700,
-    available: ["tutor"], //, "room"],
+    available: [{type: "tutor",
+                 buttxt: "Profs",
+                 active: false},
+                {type:"module",
+                 buttxt: "Modules",
+                 active: false}],
+    get_available: function(t) {
+        var ret = this.available.filter(function(d) {
+            return d.type == t ;
+        });
+        if (ret.length != 1) {
+            console.log("type unknown");
+            return ;
+        } else {
+            return ret[0];
+        }
+    },
     but: [],
     active_filter: false
 };
@@ -411,6 +427,13 @@ sel_popup.but["tutor"] = {
 sel_popup.but["room"] = {
     h: 30,
     w: 60,
+    perline: 3,
+    mar_x: 2,
+    mar_y: 4,
+};
+sel_popup.but["module"] = {
+    h: 30,
+    w: 70,
     perline: 3,
     mar_x: 2,
     mar_y: 4,

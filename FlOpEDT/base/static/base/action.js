@@ -1278,38 +1278,53 @@ function compute_cm_room_tutor_direction() {
 
 function apply_selection_display(pr) {
     if (fetch.done) {
-        var concerned_tutor = tutors.all.filter(function(t) {
-                return t.name == pr.name ;
-        });
-        if (concerned_tutor.length != 1) {
-            console.log("Prof inexistant...");
+
+        var sel_list = [] ;
+        switch(sel_popup.type) {
+        case "tutor":
+            sel_list = tutors.all ;
+            break ;
+        case "module":
+            sel_list = modules.all ;
+            break ;
+        default:
+            console.log("Type selection unknown");
         }
-        concerned_tutor = concerned_tutor[0];
-	if(logged_usr.dispo_all_change && ckbox["dis-mod"].cked){
+
+        var concerned = sel_list.find(function(t) {
+            return t.name == pr.name ;
+        });
+        if (typeof concerned === 'undefined') {
+            console.log("Prof, module ou salle inexistante...");
+            return ;
+        }
+
+        
+	if(sel_popup.type == "tutor"
+           && logged_usr.dispo_all_change && ckbox["dis-mod"].cked){
             tutors.all.forEach(function(t) { t.display = false ; });
-            concerned_tutor.display = true ;
+            concerned.display = true ;
 	    user.nom = pr ;
 	    create_dispos_user_data() ;
 	    go_pref(true) ;
 	} else {
-            if (concerned_tutor.display) {
-                var nb_displayed = tutors.all.filter(function(t) {
+            
+            if (concerned.display) {
+                var nb_displayed = sel_list.filter(function(t) {
                     return t.display ;
                 }).length ;
-		if (nb_displayed == tutors.all.length) {
-                    tutors.all.forEach(function(t) { t.display = false ; });
-                    concerned_tutor.display = true ;
+		if (nb_displayed == sel_list.length) {
+                    sel_list.forEach(function(t) { t.display = false ; });
+                    concerned.display = true ;
 		} else {
-                    concerned_tutor.display = false ;
+                    concerned.display = false ;
                     nb_displayed -- ;
-                    var ind = prof_displayed.indexOf(pr);
-                    prof_displayed.splice(ind, 1);
                     if (nb_displayed == 0) {
-			tutors.all.forEach(function(t) { t.display = true ; });
+			sel_list.forEach(function(t) { t.display = true ; });
                     }
 		}
             } else {
-		concerned_tutor.display = true ;
+		concerned.display = true ;
             }
 	}
         go_courses() ;
@@ -1319,9 +1334,23 @@ function apply_selection_display(pr) {
 
 
 function apply_selection_display_all() {
-    if (fetch.done
-	&& (!logged_usr.dispo_all_change || !ckbox["dis-mod"].cked)) {
-        tutors.all.forEach(function(d) {
+    var condition = true ;
+    var sel_list = [];
+    switch(sel_popup.type) {
+    case "tutor":
+        condition = fetch.done
+	    && (!logged_usr.dispo_all_change
+                || !ckbox["dis-mod"].cked);
+        sel_list = tutors.all ;
+        break ;
+    case "module":
+        sel_list = modules.all ;
+        break ;
+    default:
+        console.log("Type selection unknown");
+    }
+    if (condition) {
+        sel_list.forEach(function(d) {
             d.display = true ;
         })
         go_selection_buttons();

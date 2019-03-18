@@ -2073,16 +2073,16 @@ function create_generic_selection() {
 
     contg
         .append("text")
-        .text("Profs")
+        .text(but_open_sel_txt)
         .attr("x", .5 * sel_popup.selw)
         .attr("y", .5 * sel_popup.selh);
 
 }
 
 function create_static_gen_buttons(d) {
-    sel_popup.type = d ;
-    sel_popup.w = (sel_popup.but["tutor"].perline) * (sel_popup.but["tutor"].w + sel_popup.but["tutor"].mar_x)
-        - sel_popup.but["tutor"].mar_x ;
+    sel_popup.type = d.type ;
+    sel_popup.w = (sel_popup.but[d.type].perline) * (sel_popup.but[d.type].w + sel_popup.but[d.type].mar_x)
+        - sel_popup.but[d.type].mar_x ;
 
     init_selection_popup();
     
@@ -2095,8 +2095,8 @@ function create_static_gen_buttons(d) {
     
     contg
         .append("rect")
-        .attr("width", sel_popup.but["tutor"].w)
-        .attr("height", sel_popup.but["tutor"].h)
+        .attr("width", sel_popup.but[d.type].w)
+        .attr("height", sel_popup.but[d.type].h)
         .attr("class", "select-highlight")
         .attr("rx", 5)
         .attr("ry", 10)
@@ -2106,8 +2106,8 @@ function create_static_gen_buttons(d) {
     contg
         .append("text")
         .text("\u2200")
-        .attr("x", .5 * sel_popup.but["tutor"].w)
-        .attr("y", .5 * sel_popup.but["tutor"].h);
+        .attr("x", .5 * sel_popup.but[d.type].w)
+        .attr("y", .5 * sel_popup.but[d.type].h);
 
     go_selection_buttons();
 
