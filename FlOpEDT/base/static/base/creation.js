@@ -1111,7 +1111,7 @@ function create_group_selection() {
         .attr("height", sel_popup.selh)
         .attr("rx", 5)
         .attr("ry", 10)
-        .attr("fill", "yellow")
+        .attr("fill", "forestgreen")
         .attr("x", 0)
         .attr("y", 0);
 
@@ -2067,7 +2067,7 @@ function create_generic_selection() {
         .attr("height", sel_popup.selh)
         .attr("rx", 5)
         .attr("ry", 10)
-        .attr("fill", "yellow")
+        .attr("fill", "forestgreen")
         .attr("x", 0)
         .attr("y", 0);
 

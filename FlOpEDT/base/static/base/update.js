@@ -1309,7 +1309,7 @@ function go_selection_buttons() {
     var cont =
         selg
         .select("." + type + "-button-g")
-        .selectAll("." + type + "-button")
+        .selectAll(".sel-button")
         .data(sel_list, function(p) {
             return p.name ;
         });
@@ -1317,7 +1317,7 @@ function go_selection_buttons() {
     var contg = cont
         .enter()
         .append("g")
-        .attr("class", type + "-button")
+        .attr("class", "sel-button")
         .on("click", apply_selection_display);
 
     var concon = contg
