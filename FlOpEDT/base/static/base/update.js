@@ -990,7 +990,7 @@ function update_selection() {
     }).length != modules.all.length ;
     room_av.active = rooms_sel.all.filter(function(d) {
         return d.display;
-    }).length != modules.all.length ;
+    }).length != rooms_sel.all.length ;
     
     sel_popup.active_filter = !(cours.filter(function(c){
         return c.display ;
@@ -1301,7 +1301,6 @@ function go_selection_buttons() {
               + sel_popup.h + sel_popup.mar_side);
 
     
-    var t = d3.transition();
     tutors.all.sort(function(a,b){
         return a.name.localeCompare(b.name);
     });
