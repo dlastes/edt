@@ -1261,7 +1261,7 @@ function but_back() {
 function go_edt(t) {
     go_grid(t);
     go_courses(t);
-    go_tutors();
+    //go_tutors();
     go_pref(t);
     go_ack_msg(t);
     go_bknews(t);

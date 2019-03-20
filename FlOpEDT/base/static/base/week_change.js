@@ -788,8 +788,8 @@ function fetch_ended() {
             salles.sel = "";
         }
 
-        create_mod_dd();
-        create_sal_dd();
+        // create_mod_dd();
+        // create_sal_dd();
         clean_prof_displayed();
     }
 
@@ -809,7 +809,7 @@ function fetch_ended() {
 
     }
     //go_gp_buttons();
-    go_tutors();
+    //go_tutors();
 
 
 
