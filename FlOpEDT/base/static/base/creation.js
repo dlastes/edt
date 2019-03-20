@@ -58,21 +58,21 @@ function create_general_svg(light) {
     } else {
         tot = d3.select("body").append("div");
 
-        mog = tot
-            .append("div")
-            .attr("id", "div-mod")
-            .text("Module ")
-            .append("select")
-            .attr("id", "dd-mod")
-            .on("change", go_modules);
+        // mog = tot
+        //     .append("div")
+        //     .attr("id", "div-mod")
+        //     .text("Module ")
+        //     .append("select")
+        //     .attr("id", "dd-mod")
+        //     .on("change", go_modules);
 
-        sag = tot
-            .append("div")
-            .attr("id", "div-sal")
-            .text("Salle ")
-            .append("select")
-            .attr("id", "dd-sal")
-            .on("change", go_rooms);
+        // sag = tot
+        //     .append("div")
+        //     .attr("id", "div-sal")
+        //     .text("Salle ")
+        //     .append("select")
+        //     .attr("id", "dd-sal")
+        //     .on("change", go_rooms);
 
 
     }
