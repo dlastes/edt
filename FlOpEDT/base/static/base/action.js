@@ -1307,7 +1307,7 @@ function apply_selection_display(pr) {
            && logged_usr.dispo_all_change && ckbox["dis-mod"].cked){
             tutors.all.forEach(function(t) { t.display = false ; });
             concerned.display = true ;
-	    user.nom = pr ;
+	    user.nom = pr.name ;
 	    create_dispos_user_data() ;
 	    go_pref(true) ;
 	} else {
