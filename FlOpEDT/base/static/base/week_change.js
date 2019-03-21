@@ -140,7 +140,6 @@ function create_dispos_user_data() {
 		} else {
 		    dispos[user.nom][j][k] = par_dispos.nmax
 		}
-                //console.log(j,k,day_hour_2_1D(d2p),user.dispos_type[day_hour_2_1D(d2p)])
             }
             user.dispos.push({
                 day: j,
@@ -175,40 +174,6 @@ function create_dispos_user_data() {
 /*----------------------
   ------ SALLES -------
   ----------------------*/
-
-function create_sal_dd() {
-
-
-    var seldd = sag
-        .selectAll("option")
-        .data(salles.all, function(d, i) {
-            return d;
-        });
-
-    seldd
-        .enter()
-        .append("option")
-        .merge(seldd.select("option"))
-        .attr("value", function(d) {
-            return d;
-        })
-        .text(function(d) {
-            return d;
-        });
-
-    seldd.exit().remove();
-
-    seldd
-        .each(function(d, i) {
-            if (d == salles.sel) {
-                d3.select(this).attr("selected", "");
-            }
-        });
-
-
-}
-
-
 /*--------------------
   ------ PROFS -------
   --------------------*/
@@ -231,9 +196,7 @@ function fetch_bknews(first) {
         url: url_bknews  + an_att + "/" + semaine_att,
         async: true,
         contentType: "text/csv",
-//        contentType: "text/json",
         success: function(msg) {
-	    //            bknews.cont = JSON.parse(msg) ;
 	    bknews.cont = d3.csvParse(msg,
 				      translate_bknews_from_csv);
 
@@ -350,7 +313,6 @@ function fetch_cours() {
             for (var i = 0; i < day_arr.length; i++) {
                 data_grid_scale_day[i] = data_grid_scale_day_init[i] + " " + day_arr[i];
             }
-            //console.log(data_grid_scale_day);
             if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
                 an_att == weeks.init_data[weeks.sel[0]].an) {
 
@@ -398,7 +360,6 @@ function fetch_cours() {
                 modules.pp = [];
                 salles.pp = [];
 
-                //console.log(msg);
     		console.log(semaine_att,an_att,num_copie);
 
                 cours_pp = d3.csvParse(msg, translate_cours_pp_from_csv);
@@ -412,8 +373,6 @@ function fetch_cours() {
     		    remove_garbage();
     		    go_grid(true);
     		}
-
-                //console.log(msg);
 
                 fetch.ongoing_cours_pp = false;
                 fetch_ended();
@@ -684,9 +643,7 @@ function fetch_version() {
         url: url_week_infos  + an_att + "/" + semaine_att,
         async: true,
         contentType: "text/json",
-//        contentType: "text/json",
         success: function(msg) {
-	    //            bknews.cont = JSON.parse(msg) ;
 	    var parsed = JSON.parse(msg);
 
             if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
@@ -745,8 +702,6 @@ function fetch_ended() {
             salles.sel = "";
         }
 
-        // create_mod_dd();
-        // create_sal_dd();
         clean_prof_displayed();
     }
 
@@ -765,11 +720,6 @@ function fetch_ended() {
 	}
 
     }
-    //go_gp_buttons();
-    //go_tutors();
-
-
-
 }
 
 // - store old data in old

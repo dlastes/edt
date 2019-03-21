@@ -607,7 +607,6 @@ function def_drag_sca() {
 				  "translate(" + drag.x + "," + drag.y + ")");
                     drag.svg.attr("height", drag.svg_h + drag.y);
                 }
-//                console.log(drag.svg.attr("height"));
             }
         })
         .on("end", function(c) {
@@ -616,7 +615,6 @@ function def_drag_sca() {
                     drag.y = -(drag.init);
                 }
                 labgp.height = labgp_from_grid_height(drag.init + drag.y) ;
-		//                drag.sel.select("path").attr("d", but_sca_tri_v(drag.y));
                 drag.sel.attr("transform", "translate(0,0)");
                 drag.sel.select("rect").attr("y", grid_height());
 		drag.sel.select("path").attr("d", but_sca_tri_v(0));
@@ -627,7 +625,6 @@ function def_drag_sca() {
 		svg.height = svg_height() ;
 		d3.select("#edt-main").attr("height", svg.height);
 
-//		drag.svg.attr("height", svg_height());
             }
         });
 
@@ -931,9 +928,6 @@ function compute_promo_lmx(node) {
             node.x = lastmin;
         }
     }
-
-    //  //console.log(node.promo,node.nom,node.x,node.maxx);
-
 }
 
 
@@ -1015,9 +1009,6 @@ function update_all_groups() {
         labgp.height *= pos_nbRows / nbRows;
         pos_nbRows = nbRows;
     }
-
-
-    //    compute_promo_lmx(node)
 }
 
 

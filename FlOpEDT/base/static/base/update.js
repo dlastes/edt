@@ -893,7 +893,7 @@ function go_menus() {
    ------ COURS -------
   --------------------*/
 
-
+// update display cours attribute according to current selections
 function update_selection() {
     cours.forEach(function(c) {
         var mod = modules.all.find(function(d) {
