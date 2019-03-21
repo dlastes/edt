@@ -53,7 +53,7 @@ var margin = {
     left:  50,
     right:  110,
     bot:  10,
-    but: -230
+    but: -200
 };
 
 
@@ -76,10 +76,10 @@ var labgp = {height: 40, width: 30, tot: 8, height_init: 40, width_init: 30, hm:
 
 
 butgp.tly = margin.but;//-margin_but.ver-6*butgp.height-80 ;
-butpr.tly = margin.but;
+sel_popup.tly = margin.but;
 
 
-modules.x=butpr.tlx+butpr_x(null,butpr.perline-2)+butpr.width+butpr.mar_x-60;
+modules.x=sel_popup.selx + sel_popup.selx ;
 modules.y=margin.top+gsckd_y(null)-40;
 modules.width = 170 ;
 modules.height = 0 ;
@@ -101,8 +101,6 @@ function on_group_rcv(dg) {
 
     create_groups(dg);
 
-    go_gp_buttons();
-
     create_edt_grid();
 
     create_alarm_dispos() ;
@@ -115,7 +113,6 @@ function on_group_rcv(dg) {
     create_bknews();
 
     go_promo_gp_init() ;
-    go_gp_buttons();
 
 
     fetch_all(true);
@@ -147,6 +144,15 @@ function on_group_rcv(dg) {
 
 function on_room_rcv(room_data) {
     rooms = room_data;
+    var is_any = (Object.keys(rooms.roomtypes).indexOf("any") > -1) ;
+    var room_names ;
+    if (is_any) {
+        room_names = rooms.roomtypes["any"];
+    } else {
+        room_names = Object.keys(rooms.roomgroups) ;
+    }
+    console.log(room_names) ;
+    swap_data(room_names, rooms_sel, "room");
 }
 
 function on_constraints_rcv(cst_data) {
@@ -183,7 +189,8 @@ def_cm_change();
 
 create_clipweek();
 create_menus();
-create_forall_prof();
+
+create_selections();
 
 fetch_dispos_type();
 

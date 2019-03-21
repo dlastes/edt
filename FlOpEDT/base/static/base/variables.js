@@ -127,7 +127,7 @@ var rootgp_width = 0;
 var pos_rootgp_width = 0;
 
 // different grounds where to plot
-var fg, mg, bg, dg, meg, vg, gpg, prg, stg, mog, sag, fig, log, cmpg, cmtg;
+var fg, mg, bg, dg, meg, vg, gpg, catg, stg, mog, sag, fig, log, cmpg, cmtg, selg;
 var wg = {
     upper: null,
     bg: null,
@@ -380,7 +380,8 @@ var modules = {
     sel: "",
     pl: [],
     pp: [],
-    all: []
+    all: [],
+    old: []
 };
 
 /*--------------------
@@ -395,7 +396,10 @@ var salles = {
 };
 
 var rooms ;
-
+var rooms_sel = {
+    all: [],
+    old: []
+};
 
 var unavailable_rooms = {} ;
 
@@ -404,26 +408,81 @@ var unavailable_rooms = {} ;
    ------ TUTORS ------
    --------------------*/
 
-// instructors of unscheduled courses
-var profs_pp = [];
-
-// instructors of scheduled courses
-var profs_pl = [];
-
-// all instructors
-var profs = [];
+var tutors = {
+    // instructors of unscheduled courses
+    pp: [],
+    // instructors of scheduled courses
+    pl: [],
+    // all instructors
+    all: [],
+    old: []
+};
 
 // instructors not blurried
 var prof_displayed = [];
 
 // display parameters
-var butpr = {
-    height: 30,
-    width: 30,
-    perline: 12,
+var but_exit = {
+    side: 20,
+    mar_side: 3,
+    mar_next: 10
+};
+var sel_popup = {
+    type: "",
+    x: 600,
+    y: -210,
+    w: 0,
+    h:0,
+    selw: 60,
+    selh: 30,
+    selx: 700,
+    sely: -230,
+    selmy: 10,
+    mar_side: 5,
+    tlx: 700,
+    available: [{type: "tutor",
+                 buttxt: "Profs",
+                 active: false},
+                {type:"module",
+                 buttxt: "Modules",
+                 active: false},
+                {type:"room",
+                 buttxt: "Salles",
+                 active: false}],
+    get_available: function(t) {
+        var ret = this.available.filter(function(d) {
+            return d.type == t ;
+        });
+        if (ret.length != 1) {
+            console.log("type unknown");
+            return ;
+        } else {
+            return ret[0];
+        }
+    },
+    but: [],
+    active_filter: false
+};
+sel_popup.but["tutor"] = {
+    h: 30,
+    w: 30,
+    perline: 5,
     mar_x: 2,
     mar_y: 4,
-    tlx: 900
+};
+sel_popup.but["room"] = {
+    h: 30,
+    w: 60,
+    perline: 3,
+    mar_x: 2,
+    mar_y: 4,
+};
+sel_popup.but["module"] = {
+    h: 30,
+    w: 40,
+    perline: 3,
+    mar_x: 2,
+    mar_y: 4,
 };
 
 // has any instructor been fetched?

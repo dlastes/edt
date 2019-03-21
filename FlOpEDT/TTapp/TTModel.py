@@ -961,6 +961,8 @@ class TTModel(object):
             self.obj += self.cost_I[i]
         for g in self.wdb.basic_groups:
             self.obj += self.cost_G[g]
+        for sl in self.wdb.slots:
+            self.obj += self.cost_SL[sl]
         self.set_objective(self.obj)
 
     def add_TT_constraints(self):

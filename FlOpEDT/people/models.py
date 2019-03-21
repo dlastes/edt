@@ -3,21 +3,21 @@
 # This file is part of the FlOpEDT/FlOpScheduler project.
 # Copyright (c) 2017
 # Authors: Iulian Ober, Paul Renaud-Goud, Pablo Seban, et al.
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
 # published by the Free Software Foundation, either version 3 of the
 # License, or (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful, but
 # WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 # Affero General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Affero General Public
 # License along with this program. If not, see
 # <http://www.gnu.org/licenses/>.
-# 
+#
 # You can be released from the requirements of the license by purchasing
 # a commercial license. Buying such a license is mandatory as soon as
 # you develop activities involving the FlOpEDT/FlOpScheduler software
@@ -59,8 +59,8 @@ class User(AbstractUser):
         return ret
 
     class Meta:
-       ordering = ['username',]        
-        
+       ordering = ['username',]
+
 
 class Tutor(User):
     FULL_STAFF = 'fs'
@@ -76,7 +76,7 @@ class Tutor(User):
     pref_slots_per_day = models.PositiveSmallIntegerField(
         verbose_name="How many slots per day would you prefer ?",
         default=4)
-    departments =  models.ManyToManyField(Department, blank=True)   
+    departments =  models.ManyToManyField(Department, blank=True)
 
     def uni_extended(self):
         ret = super(Tutor,self).uni_extended()
@@ -98,7 +98,7 @@ class FullStaff(Tutor):
         return ret
 
     class Meta:
-        verbose_name = 'FullStaff' 
+        verbose_name = 'FullStaff'
 
 
 class SupplyStaff(Tutor):
@@ -143,4 +143,58 @@ class Student(User):  # for now: representative
                                        blank=True)
 
     def __str__(self):
-        return str(self.username) + '(G:' + str(self.belong_to) + ')'
+        return str(self.username) + '(G:' + str(self.belong_to.all()) + ')'
+
+
+class Preferences(models.Model):
+    morning_weight = models.DecimalField(default=.5, blank=True, max_digits=3, decimal_places=2)
+    free_half_day_weight = models.DecimalField(default=.5, blank=True, max_digits=3, decimal_places=2)
+
+    def get_morning_weight(self):
+        return float(self.morning_weight)
+
+    def get_evening_weight(self):
+        return float(1-self.morning_weight)
+
+    def get_free_half_day_weight(self):
+        return float(self.free_half_day_weight)
+
+    def get_light_day_weight(self):
+        return float(1-self.free_half_day_weight)
+
+    class Meta:
+        abstract = True
+
+
+class StudentPreferences(Preferences):
+    student = models.OneToOneField('people.Student',
+                                    related_name='studentPreferences',
+                                    on_delete=models.CASCADE)
+
+
+class GroupPreferences(Preferences):
+    group = models.OneToOneField('base.Group',
+                                related_name='groupPreferences',
+                                on_delete=models.CASCADE)
+
+    def calculate_fields(self):
+        #To pull students from the group
+        students_preferences = StudentPreferences.objects.filter(student__belong_to=self.group)
+
+        #To initialise variables and getting the divider to get the average
+        local_morning_weight = 0
+        local_free_half_day_weight = 0
+        nb_student_prefs = len(students_preferences)
+        if nb_student_prefs == 0:
+            self.morning_weight = 1
+            self.free_half_day_weight = 1
+
+        else :
+            #To range the table
+            for student_pref in students_preferences:
+                local_morning_weight += student_pref.morning_weight
+                local_free_half_day_weight += student_pref.free_half_day_weight
+
+            #To calculate the average of each attributs
+            self.morning_weight = local_morning_weight/nb_student_prefs
+            self.free_half_day_weight = local_free_half_day_weight/nb_student_prefs

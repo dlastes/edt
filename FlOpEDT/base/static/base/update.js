@@ -784,10 +784,10 @@ function go_quote() {
   ----------------------*/
 
 function go_gp_buttons() {
-
     for (var p = 0; p < set_promos.length; p++) {
-        var cont =
-            gpg.selectAll(".gp-but-" + set_promos[p] + "P")
+        var cont = selg
+            .select(".group-button-g")
+            .selectAll(".gp-but-" + set_promos[p] + "P")
             .data(Object.keys(groups[p]).map(function(k) {
                 return groups[p][k];
             }));
@@ -797,7 +797,8 @@ function go_gp_buttons() {
             .append("g")
             .attr("class", "gp-but-" + set_promos[p] + "P")
             .attr("transform", function(gp) {
-                return "translate(" + root_gp[gp.promo].butx + "," + root_gp[gp.promo].buty + ")";
+                return "translate(" + (root_gp[gp.promo].butx) + ","
+                    + (root_gp[gp.promo].buty) + ")";
             })
             .attr("gpe", function(gp) {
                 return gp.nom;
@@ -826,6 +827,8 @@ function go_gp_buttons() {
             .text(butgp_txt);
 
     }
+
+
 
 }
 
@@ -917,19 +920,21 @@ function go_modules() {
 function relevant_modules() {
 
     // The relevant tutors
-    var tutors = new Set();
-    if (prof_displayed.length < profs.length) { // some tutors are selected
-        prof_displayed.forEach(function (p) {
-            tutors.add(p);
+    var rel_tutors = new Set();
+    var sel_tutors = tutors.all.filter(function(t){
+        return t.display; })
+    if (sel_tutors.length < tutors.all.length) { // some tutors are selected
+        sel_tutors.forEach(function (p) {
+            rel_tutors.add(p);
         });
     } else if (user.nom) {
-        tutors.add(user.nom);
+        rel_tutors.add(user.nom);
     }
 
     // The relevant modules
     var modules = new Set();
     cours.forEach(function(c) {
-        if (tutors.has(c.prof)) {
+        if (rel_tutors.has(c.prof)) {
             modules.add(c.mod);
         }
     });
@@ -958,18 +963,19 @@ function go_rooms() {
   ------ TUTORS ------
   --------------------*/
 
-function go_tutors() {
+function go_tutors() { // will be removed
 
-    prg.selectAll(".tutor-button")
-        .data(profs, function(p) {
-            return p;
-        })
-        .attr("opacity", function(p) {
-            return prof_displayed.indexOf(p) > -1 ? 1 : opac;
-        });
+    // selg
+    //     .selectAll(".tutor-button")
+    //     .data(tutors.all, function(p) { // will be removed
+    //         return p;
+    //     })
+    //     .attr("opacity", function(p) {
+    //         return prof_displayed.indexOf(p) > -1 ? 1 : opac;//wbr
+    //     });
 
     create_mod_dd();
-    go_opac_cours();
+    //go_opac_cours();
 }
 
 
@@ -979,6 +985,44 @@ function go_tutors() {
 /*--------------------
    ------ COURS -------
   --------------------*/
+
+
+function update_selection() {
+    cours.forEach(function(c) {
+        var mod = modules.all.find(function(d) {
+            return d.name == c.mod ;
+        });
+        var tut = tutors.all.find(function(d) {
+            return d.name == c.prof ;
+        });
+        var roo = rooms_sel.all.find(function(d) {
+            return d.name == c.room ;
+        });
+        c.display =
+            (typeof mod === 'undefined' || mod.display)
+            && (typeof tut === 'undefined' || tut.display)
+            && (typeof roo === 'undefined' || roo.display);
+    });
+    var tut_av = sel_popup.get_available("tutor");
+    var mod_av = sel_popup.get_available("module");
+    var room_av = sel_popup.get_available("room");
+
+    tut_av.active = tutors.all.filter(function(d) {
+        return d.display;
+    }).length != tutors.all.length ;
+    mod_av.active = modules.all.filter(function(d) {
+        return d.display;
+    }).length != modules.all.length ;
+    room_av.active = rooms_sel.all.filter(function(d) {
+        return d.display;
+    }).length != rooms_sel.all.length ;
+    
+    sel_popup.active_filter = !(cours.filter(function(c){
+        return c.display ;
+    }).length == cours.length) ;
+    
+}
+
 
 function go_courses(quick) {
     var t;
@@ -990,6 +1034,8 @@ function go_courses(quick) {
     }
 
 
+    update_selection() ;
+    
     var cg = mg.selectAll(".cours")
         .data(cours.filter(function(d) {
                 return groups[d.promo][d.group].display;
@@ -1013,6 +1059,10 @@ function go_courses(quick) {
 	    go_cm_room_tutor_change();
 	}})
         .call(dragListener);
+
+    incg
+        .merge(cg)
+        .attr("opacity", cours_opac);
     
     incg
         .append("rect")
@@ -1022,6 +1072,7 @@ function go_courses(quick) {
         .attr("width", 0)
         .merge(cg.select("rect"))
         .attr("fill", cours_fill)
+        .attr("stroke", cours_stk)
         .transition(t)
         .attr("x", cours_x)
         .attr("y", cours_y)
@@ -1112,38 +1163,39 @@ function go_courses(quick) {
 
 
 // update courses opacity
-function go_opac_cours() {
+function go_opac_cours() { // will be removed
+    return ;
+    // if (prof_displayed.length < tutors.all.length//wbr
+    //     || modules.sel != "" || salles.sel != "") {
+    //     // view with opacity filter
+    //     var coursp = mg.selectAll(".cours")
+    //         .data(cours.filter(function(d) {
+    //                 var ret = prof_displayed.indexOf(d.prof) > -1;//wbr
+    //                 ret = ret && (modules.sel == "" || modules.sel == d.mod);
+    //                 ret = ret && (salles.sel == "" || salles.sel == d.room);
+    //                 return ret;
+    //             }),
+    //             function(d) {
+    //                 return d.id_cours;
+    //             });
 
-    if (prof_displayed.length < profs.length || modules.sel != "" || salles.sel != "") {
-        // view with opacity filter
-        var coursp = mg.selectAll(".cours")
-            .data(cours.filter(function(d) {
-                    var ret = prof_displayed.indexOf(d.prof) > -1;
-                    ret = ret && (modules.sel == "" || modules.sel == d.mod);
-                    ret = ret && (salles.sel == "" || salles.sel == d.room);
-                    return ret;
-                }),
-                function(d) {
-                    return d.id_cours;
-                });
+    //     coursp
+    //         .attr("opacity", 1)
+    //         .select("rect").attr("stroke", 'black');
 
-        coursp
-            .attr("opacity", 1)
-            .select("rect").attr("stroke", 'black');
+    //     coursp
+    //         .exit()
+    //         .attr("opacity", opac)
+    //         .select("rect").attr("stroke", 'none');
 
-        coursp
-            .exit()
-            .attr("opacity", opac)
-            .select("rect").attr("stroke", 'none');
+    // } else {
+    //     // view without opacity filter
+    //     mg
+    //         .selectAll(".cours")
+    //         .attr("opacity", 1)
+    //         .select("rect").attr("stroke", 'none');
 
-    } else {
-        // view without opacity filter
-        mg
-            .selectAll(".cours")
-            .attr("opacity", 1)
-            .select("rect").attr("stroke", 'none');
-
-    }
+    // }
 
 }
 
@@ -1234,11 +1286,89 @@ function but_back() {
 function go_edt(t) {
     go_grid(t);
     go_courses(t);
-    go_tutors();
+    //go_tutors();
     go_pref(t);
     go_ack_msg(t);
     go_bknews(t);
     go_alarm_pref();
     go_regen(null);
     go_quote();
+}
+
+
+
+function go_selection_buttons() {
+
+    var sel_list = [] ;
+    var type = sel_popup.type ;
+    
+    if (type == "") {
+        return ;
+    } else if (type == "tutor") {
+        sel_list = tutors.all ;
+    } else if (type == "module") {
+        sel_list = modules.all ;
+    } else if (type == "room") {
+        sel_list = rooms_sel.all ;
+    } 
+
+    
+    var nb_el = sel_list.length ;
+    sel_popup.h = but_sel_y(sel_list[nb_el - 1], nb_el - 1)
+        + sel_popup.but[type].h ;
+
+    selg
+        .select("." + type + "-button-bg")
+        .attr("x",  - sel_popup.mar_side )
+        .attr("y",  - (sel_popup.mar_side + but_exit.side + but_exit.mar_next))
+        .attr("width", sel_popup.w + 2*sel_popup.mar_side)
+        .attr("height", sel_popup.mar_side + but_exit.side + but_exit.mar_next
+              + sel_popup.h + sel_popup.mar_side);
+
+    
+    tutors.all.sort(function(a,b){
+        return a.name.localeCompare(b.name);
+    });
+
+    var cont =
+        selg
+        .select("." + type + "-button-g")
+        .selectAll(".sel-button")
+        .data(sel_list, function(p) {
+            return p.name ;
+        });
+
+    var contg = cont
+        .enter()
+        .append("g")
+        .attr("class", "sel-button")
+        .on("click", apply_selection_display);
+
+    var concon = contg
+        .merge(cont)
+        .attr("opacity", but_sel_opac);
+
+    contg
+        .append("rect")
+        .attr("class", but_sel_class)
+        .attr("width", sel_popup.but[type].w)
+        .attr("height", sel_popup.but[type].h)
+        .attr("rx", 5)
+        .attr("ry", 10)
+        .merge(cont.select("rect"))
+        .attr("x", but_sel_x)
+        .attr("y", but_sel_y);
+
+    contg
+        .append("text")
+        .attr("class", but_sel_class)
+        .text(function(d) {
+            return d.name;
+        })
+        .merge(cont.select("text"))
+        .attr("x", but_sel_txt_x)
+        .attr("y", but_sel_txt_y);
+
+    cont.exit().remove();
+
 }

@@ -38,7 +38,7 @@ class AddStudent(CreateView):
     def form_valid(self, form):
         user = form.save()
         login(self.request, user)
-        next = self.request.GET.get('next', 'base:edt')
+        next = self.request.GET.get('next', '/')
         return redirect(next)
 
 class ChangeStudent(UpdateView):

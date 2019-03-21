@@ -346,46 +346,6 @@ function create_sal_dd() {
 /*--------------------
   ------ PROFS -------
   --------------------*/
-function create_pr_buttons() {
-    var t = d3.transition();
-    profs.sort();
-
-    var cont =
-        prg.selectAll(".tutor-button")
-        .data(profs, function(p) {
-            return p;
-        });
-
-    var contg = cont
-        .enter()
-        .append("g")
-        .attr("class", "tutor-button")
-        .attr("transform", "translate(" + butpr.tlx + "," + butpr.tly + ")")
-        .on("click", apply_tutor_display);
-
-    contg
-        .append("rect")
-        .attr("class", butpr_class)
-        .attr("width", butpr.width)
-        .attr("height", butpr.height)
-        .attr("rx", 5)
-        .attr("ry", 10)
-        .merge(cont.select("rect"))
-        .attr("x", butpr_x)
-        .attr("y", butpr_y);
-
-    contg
-        .append("text")
-        .attr("class", butpr_class)
-        .text(function(d) {
-            return d;
-        })
-        .merge(cont.select("text"))
-        .attr("x", butpr_txt_x)
-        .attr("y", butpr_txt_y);
-
-    cont.exit().remove();
-}
 
 
 
@@ -483,6 +443,7 @@ function adapt_labgp(first) {
 	} else {
             labgp.width = labgp.wm;
 	}
+        svg.width = svg_width();
 	d3.select("#edt-main").attr("width", svg.width);
     }
 
@@ -506,6 +467,7 @@ function fetch_cours() {
     var an_att = weeks.init_data[weeks.sel[0]].an;
 
     cours_bouge = {};
+    modules.old = modules.all ;
     
     show_loader(true);
     $.ajax({
@@ -522,7 +484,7 @@ function fetch_cours() {
             if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
                 an_att == weeks.init_data[weeks.sel[0]].an) {
 
-                profs_pl = [];
+                tutors.pl = [];
                 modules.pl = [];
                 salles.pl = [];
 
@@ -562,7 +524,7 @@ function fetch_cours() {
             if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
                 an_att == weeks.init_data[weeks.sel[0]].an) {
 
-                profs_pp = [];
+                tutors.pp = [];
                 modules.pp = [];
                 salles.pp = [];
 
@@ -599,9 +561,9 @@ function fetch_cours() {
 
 
 function translate_cours_pl_from_csv(d) {
-    var ind = profs_pl.indexOf(d.prof_nom);
+    var ind = tutors.pl.indexOf(d.prof_nom);
     if (ind == -1) {
-        profs_pl.push(d.prof_nom);
+        tutors.pl.push(d.prof_nom);
     }
     if (modules.pl.indexOf(d.module) == -1) {
         modules.pl.push(d.module);
@@ -625,14 +587,15 @@ function translate_cours_pl_from_csv(d) {
 	room_type: d.room_type,
 	color_bg: d.color_bg,
 	color_txt: d.color_txt,
+        display: true
     };
     return co;
 }
 
 
 function translate_cours_pp_from_csv(d) {
-    if (profs_pp.indexOf(d.prof) == -1) {
-        profs_pp.push(d.prof);
+    if (tutors.pp.indexOf(d.prof) == -1) {
+        tutors.pp.push(d.prof);
     }
     if (modules.pp.indexOf(d.module) == -1) {
         modules.pp.push(d.module);
@@ -655,6 +618,7 @@ function translate_cours_pp_from_csv(d) {
 	room_type: d.room_type,
 	color_bg: d.color_bg,
 	color_txt: d.color_txt,
+        display: true
     };
     console.log(co);
     return co;
@@ -731,33 +695,23 @@ function add_exception_course(cur_week, cur_year, targ_week, targ_year,
 
 function clean_prof_displayed() {
 
-    var all = (profs.length == prof_displayed.length);
-
-    profs = profs_pl;
-    for (var i = 0; i < profs_pp.length; i++) {
-        var ind = profs.indexOf(profs_pp[i]);
+    var tutor_names = tutors.pl;
+    for (var i = 0; i < tutors.pp.length; i++) {
+        var ind = tutor_names.indexOf(tutors.pp[i]);
         if (ind == -1) {
-            profs.push(profs_pp[i]);
+            tutor_names.push(tutors.pp[i]);
         }
     }
 
+    update_selection();
 
+    swap_data(tutor_names, tutors, "tutor") ;
 
-    if (all) {
-        prof_displayed = profs.slice(0);
-    } else {
-
-        var ndi = prof_displayed.filter(function(d) {
-            return profs.indexOf(d) > -1;
-        });
-
-        if (ndi.length == 0) {
-            prof_displayed = profs.slice(0);
-        } else {
-            prof_displayed = ndi;
-        }
-
+    if (sel_popup.type != "") {
+        go_selection_buttons() ;
     }
+
+    
 }
 
 function translate_gp_name(gp) {
@@ -895,19 +849,18 @@ function fetch_ended() {
         !fetch.ongoing_cours_pp) {
         cours = cours_pl.concat(cours_pp);
 
-        modules.all = [""].concat(modules.pl);
+        var module_names = modules.pl;
         for (var i = 0; i < modules.pp.length; i++) {
-            if (modules.all.indexOf(modules.pp[i]) == -1) {
-                modules.all.push(modules.pp[i]);
+            if (module_names.indexOf(modules.pp[i]) == -1) {
+                module_names.push(modules.pp[i]);
             }
         }
 
-        modules.all.sort();
+        module_names.sort();
 
-        if (modules.all.indexOf(modules.sel) == -1) {
-            modules.sel = "";
-        }
+        update_selection();
 
+        swap_data(module_names, modules, "module"); 
 
         salles.all = [""].concat(salles.pl);
         for (var i = 0; i < salles.pp.length; i++) {
@@ -922,8 +875,8 @@ function fetch_ended() {
             salles.sel = "";
         }
 
-        create_mod_dd();
-        create_sal_dd();
+        // create_mod_dd();
+        // create_sal_dd();
         clean_prof_displayed();
     }
 
@@ -943,14 +896,32 @@ function fetch_ended() {
 
     }
     //go_gp_buttons();
-    create_pr_buttons();
-    go_tutors();
+    //go_tutors();
 
 
 
 }
 
-
+// - store old data in old
+// - translate fetched into current (keeping display values)
+function swap_data(fetched, current, type) {
+    current.old = current.all ;
+    current.all = fetched.map(
+        function(m) {
+            var em = {} ;
+            em.name = m ;
+            var oldf = current.old.find(function(mo) {
+                return mo.name == m ;
+            });
+            em.display = !(sel_popup.get_available(type).active) ;
+            if (typeof oldf !== 'undefined') {
+                em.display = oldf.display ;
+            }
+            return em ;
+        }
+    )
+    
+}
 
 
 
