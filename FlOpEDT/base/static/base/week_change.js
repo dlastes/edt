@@ -384,7 +384,6 @@ function fetch_cours() {
     var an_att = weeks.init_data[weeks.sel[0]].an;
 
     cours_bouge = {};
-    modules.old = modules.all ;
     
     show_loader(true);
     $.ajax({
