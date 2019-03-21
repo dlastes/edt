@@ -1330,6 +1330,7 @@ function apply_selection_display(pr) {
 		concerned.display = true ;
             }
 	}
+        update_active() ;
         update_relevant() ;
         go_courses() ;
         go_selection_buttons();
@@ -1360,6 +1361,7 @@ function apply_selection_display_all() {
         sel_list.forEach(function(d) {
             d.display = true ;
         })
+        update_active() ;
         update_relevant() ;
         go_selection_buttons();
         go_courses();

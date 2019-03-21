@@ -572,6 +572,8 @@ function clean_prof_displayed() {
     update_selection();
 
     swap_data(tutor_names, tutors, "tutor") ;
+    update_active() ;
+    update_relevant() ;
 
     // relevant tutors
     tutors.all.forEach(function(t) {
@@ -728,7 +730,9 @@ function fetch_ended() {
 
         update_selection();
 
-        swap_data(module_names, modules, "module"); 
+        swap_data(module_names, modules, "module");
+        update_active();
+        update_relevant();
 
         salles.all = [""].concat(salles.pl);
         for (var i = 0; i < salles.pp.length; i++) {

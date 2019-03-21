@@ -934,6 +934,10 @@ function update_selection() {
             && (typeof tut === 'undefined' || tut.display)
             && (typeof roo === 'undefined' || roo.display);
     });
+}
+
+// update active flags for selections
+function update_active() {
     var tut_av = sel_popup.get_available("tutor");
     var mod_av = sel_popup.get_available("module");
     var room_av = sel_popup.get_available("room");
@@ -948,12 +952,8 @@ function update_selection() {
         return d.display;
     }).length != rooms_sel.all.length ;
     
-    sel_popup.active_filter = !(cours.filter(function(c){
-        return c.display ;
-    }).length == cours.length) ;
-    
+    sel_popup.active_filter = tut_av.active || mod_av.active || room_av.active ;
 }
-
 
 function go_courses(quick) {
     var t;
@@ -1305,13 +1305,15 @@ function go_selection_buttons() {
 }
 
 
-// update relevant modules according to tutors
-// (every module that any selected tutor teaches)
+// update relevant modules according to selected tutors
+// ---
+// tutor(s) selected -> any taught module
+// no selected tutor -> module taught by logged user if any
 function update_relevant() {
-    console.log("re");
     modules.all.forEach(function(m){
         m.relevant = false ;
     });
+    var tut_act = sel_popup.get_available("tutor").active ;
     cours.forEach(function(c) {
         var mod = modules.all.find(function(d) {
             return d.name == c.mod ;
@@ -1319,9 +1321,13 @@ function update_relevant() {
         var tut = tutors.all.find(function(d) {
             return d.name == c.prof ;
         });
-        if (typeof mod !== 'undefined'
-            && typeof tut !== 'undefined' && tut.display) {
+        if (!tut_act) {
+            if(c.prof == user.nom) {
                 mod.relevant = true ;
+            }
+        } else if (typeof mod !== 'undefined'
+                   && typeof tut !== 'undefined' && tut.display) {
+            mod.relevant = true ;
         }
     });
 }
