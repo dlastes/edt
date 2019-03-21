@@ -626,6 +626,14 @@ function clean_prof_displayed() {
 
     swap_data(tutor_names, tutors, "tutor") ;
 
+    // relevant tutors
+    tutors.all.forEach(function(t) {
+        t.relevant = false ;
+        if (t.name == user.nom) {
+            t.relevant = true ;
+        }
+    });
+
     if (sel_popup.type != "") {
         go_selection_buttons() ;
     }

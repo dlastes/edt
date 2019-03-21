@@ -1347,3 +1347,25 @@ function go_selection_buttons() {
     cont.exit().remove();
 
 }
+
+
+// update relevant modules according to tutors
+// (every module that any selected tutor teaches)
+function update_relevant() {
+    console.log("re");
+    modules.all.forEach(function(m){
+        m.relevant = false ;
+    });
+    cours.forEach(function(c) {
+        var mod = modules.all.find(function(d) {
+            return d.name == c.mod ;
+        });
+        var tut = tutors.all.find(function(d) {
+            return d.name == c.prof ;
+        });
+        if (typeof mod !== 'undefined'
+            && typeof tut !== 'undefined' && tut.display) {
+                mod.relevant = true ;
+        }
+    });
+}

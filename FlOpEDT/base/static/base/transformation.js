@@ -671,7 +671,11 @@ function but_sel_txt_y(p, i) {
 }
 
 function but_sel_class(p) {
-    return p == user.nom ? "select-highlight" : "select-standard";
+    var ret = "select-standard" ;
+    if (typeof p.relevant !== 'undefined' && p.relevant) {
+        ret = "select-highlight" ;
+    }
+    return ret ;
 }
 
 function but_open_sel_txt(d) {
