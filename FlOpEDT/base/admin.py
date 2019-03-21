@@ -22,9 +22,6 @@
 # a commercial license. Buying such a license is mandatory as soon as
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
-
-from import_export import resources, fields
-from import_export.widgets import ForeignKeyWidget
 import logging
 
 from core.department import get_model_department_lookup
@@ -35,13 +32,16 @@ from django.db.models.fields import related as related_fields
 from django.contrib import admin
 import django.contrib.auth as auth
 
-from FlOpEDT.filters import DropdownFilterAll, DropdownFilterRel
 from people.models import Tutor, User
 from base.models import Day, RoomGroup, Module, Course, Group, Slot, \
     UserPreference, Time, ScheduledCourse, EdtVersion, CourseModification, \
     PlanningModification, BreakingNews, TrainingProgramme, ModuleDisplay, \
     Regen, Holiday, TrainingHalfDay, RoomPreference, RoomSort, \
     CoursePreference, Dependency, RoomType, Department, CourseType
+from import_export import resources, fields
+from import_export.widgets import ForeignKeyWidget
+
+from FlOpEDT.filters import DropdownFilterAll, DropdownFilterRel, DropdownFilterSimple
 
 logger = logging.getLogger('admin')
 
@@ -306,11 +306,11 @@ class BreakingNewsAdmin(DepartmentModelAdmin):
     ordering = ('-year', '-week')
 
     
-class HolidayAdmin(DepartmentModelAdmin):
+class HolidayAdmin(admin.ModelAdmin):
     list_display = ('day', 'week', 'year')
     ordering = ('-year', '-week', 'day')
     list_filter = (
-        ('day', DropdownFilterRel),
+        ('day', DropdownFilterSimple),
         ('year', DropdownFilterAll),
         ('week', DropdownFilterAll),
     )
@@ -331,7 +331,7 @@ class GroupAdmin(DepartmentModelAdmin):
 class RoomGroupAdmin(DepartmentModelAdmin):
     list_display = ('name',)
 
-    
+  
 class RoomPreferenceAdmin(DepartmentModelAdmin):
     list_display = ('room', 'semaine', 'an', 'day', 'start_time',
                     'duration', 'valeur')
@@ -393,14 +393,6 @@ class CoursPlaceAdmin(DepartmentModelAdmin):
         ('cours__tutor', DropdownFilterRel),
         ('cours__an', DropdownFilterAll),
         ('cours__semaine', DropdownFilterAll),)
-
-
-class EdtVersionAdmin(DepartmentModelAdmin):
-    list_display = ('semaine', 'version', 'an')
-    ordering = ('-an', '-semaine', 'version')
-    list_filter = (('semaine', DropdownFilterAll),
-                   ('an', DropdownFilterAll)
-                   )
 
 
 class CoursePreferenceAdmin(DepartmentModelAdmin):
@@ -498,7 +490,6 @@ admin.site.register(RoomPreference, RoomPreferenceAdmin)
 admin.site.register(RoomSort, RoomSortAdmin)
 admin.site.register(Module, ModuleAdmin)
 admin.site.register(Course, CourseAdmin)
-admin.site.register(EdtVersion, EdtVersionAdmin)
 admin.site.register(CourseModification, CourseModificationAdmin)
 admin.site.register(CoursePreference, CoursePreferenceAdmin)
 admin.site.register(Dependency, DependencyAdmin)

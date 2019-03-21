@@ -863,33 +863,41 @@ class TTModel(object):
                 courses_avail = self.wdb \
                     .courses_availabilities \
                     .filter(course_type=course_type, train_prog=promo)
-                if not courses_avail:
+                if not courses_avail.exists():
                     courses_avail = CoursePreference.objects \
                         .filter(course_type=course_type,
                                 train_prog=promo,
                                 semaine=None)
-                for sl in self.wdb.slots:
-                    try:
-                        avail = courses_avail.filter(Q(start_time__lt=sl.start_time + course_type.duration) |
-                                                     Q(start_time__gt=sl.start_time - F('duration')))
-                        if avail:
-                            if min(a.valeur for a in avail) == 0:
-                                avail_course[(course_type, promo)][sl] = 0
-                                non_prefered_slot_cost_course[(course_type,
-                                                               promo)][sl] = 5
+                if not courses_avail.exists():
+                    print("No course availability given for %s - %s"% (course_type, promo))
+                    for sl in self.wdb.slots:
+                        avail_course[(course_type, promo)][sl] = 1
+                        non_prefered_slot_cost_course[(course_type,
+                                                       promo)][sl] = 0
+                else:
+                    for sl in self.wdb.slots:
+                        try:
+                            avail = courses_avail.filter(Q(start_time__lt=sl.start_time + course_type.duration) |
+                                                         Q(start_time__gt=sl.start_time - F('duration')))
+                            if avail:
+                                if min(a.valeur for a in avail) == 0:
+                                    avail_course[(course_type, promo)][sl] = 0
+                                    non_prefered_slot_cost_course[(course_type,
+                                                                   promo)][sl] = 5
+                                else:
+                                    avail_course[(course_type, promo)][sl] = 1
+                                    value = max(a.valeur for a in avail)
+                                    non_prefered_slot_cost_course[(course_type, promo)][sl] \
+                                        = 1 - value / 8
                             else:
                                 avail_course[(course_type, promo)][sl] = 1
-                                value = max(a.valeur for a in avail)
-                                non_prefered_slot_cost_course[(course_type, promo)][sl] \
-                                    = 1 - value / 8
-                        else:
-                            avail_course[(course_type, promo)][sl] = 1
-                            non_prefered_slot_cost_course[(course_type, promo)][sl] = 0
+                                non_prefered_slot_cost_course[(course_type, promo)][sl] = 0
 
-                    except:
-                        avail_course[(course_type, promo)][sl] = 1
-                        non_prefered_slot_cost_course[(course_type,promo)][sl]= 0
-                        print("Course availability problem for %s - %s on start time %s" % (type, promo, sl))
+                        except:
+                            avail_course[(course_type, promo)][sl] = 1
+                            non_prefered_slot_cost_course[(course_type,promo)][sl] = 0
+                            print("Course availability problem for %s - %s on start time %s" % (course_type, promo, sl))
+
 
         return non_prefered_slot_cost_course, avail_course
 
@@ -1139,7 +1147,9 @@ def get_constraints(department, week=None, year=None, train_prog=None, is_active
         
     if week and train_prog:
         query &= \
+            Q(train_prog__abbrev=train_prog) & Q(week__isnull=True) & Q(year__isnull=True) | \
             Q(train_prog__abbrev=train_prog) & Q(week=week) & Q(year=year) | \
+            Q(train_prog__isnull=True) & Q(week=week) & Q(year=year) | \
             Q(train_prog__isnull=True) & Q(week__isnull=True) & Q(year__isnull=True)
     elif week:
         query &= Q(week=week) & Q(year=year) | Q(week__isnull=True) & Q(year__isnull=True)            

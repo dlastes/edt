@@ -119,7 +119,7 @@ class MinHalfDaysHelperGroup(MinHalfDaysHelperBase):
 
         expression = self.ttmodel.check_and_sum(
             self.ttmodel.GBHD,
-            ((self.group, d, apm) for d, apm in self.ttmodel.wdb.slots_by_days))
+            ((self.group, d, apm) for d, apm in self.ttmodel.wdb.slots_by_half_day))
 
         local_var = self.ttmodel.add_var("MinGBHD_var_%s" % self.group)
 
@@ -162,11 +162,11 @@ class MinHalfDaysHelperTutor(MinHalfDaysHelperBase):
         # Try to joincourses
         if self.constraint.join2courses and len(courses) in [2, 4]:
             for d in self.ttmodel.wdb.days:
-                sl8h = self.ttmodel.wdb.slots.get(jour=d, heure__no=0)
-                sl11h = self.ttmodel.wdb.slots.get(jour=d, heure__no=2)
-                sl14h = self.ttmodel.wdb.slots.get(jour=d, heure__no=3)
-                sl17h = self.ttmodel.wdb.slots.get(jour=d, heure__no=5)
                 for c in courses:
+                    sl8h = min(self.ttmodel.wdb.slots_by_half_day[d,Time.AM] & self.ttmodel.wdb.compatible_slots[c])
+                    sl11h = max(self.ttmodel.wdb.slots_by_half_day[d,Time.AM] & self.ttmodel.wdb.compatible_slots[c])
+                    sl14h = min(self.ttmodel.wdb.slots_by_half_day[d,Time.PM] & self.ttmodel.wdb.compatible_slots[c])
+                    sl17h = max(self.ttmodel.wdb.slots_by_half_day[d,Time.PM] & self.ttmodel.wdb.compatible_slots[c])
                     for c2 in courses.exclude(id=c.id):
                         if self.constraint.weight:
                             conj_var_AM = self.ttmodel.add_conjunct(self.ttmodel.TT[(sl8h, c)],

@@ -78,6 +78,7 @@ def tutors_extract(department, book):
         try:
             tutor = Tutor.objects.get(username=id)
             logger.debug(f'update tutor : [{id}]')
+
         except Tutor.DoesNotExist:
 
             try:
@@ -85,18 +86,21 @@ def tutors_extract(department, book):
                 
                 if status == "Permanent":
                     tutor = FullStaff(**params)
+                    tutor.status=Tutor.FULL_STAFF
                 else:
                     employer = sheet.cell(row=INTER_ID_ROW, column=9).value
                     position = sheet.cell(row=INTER_ID_ROW, column=8).value
 
                     params.update({'employer': employer, 'position': position})
                     tutor = SupplyStaff(**params)
+                    tutor.status = Tutor.SUPP_STAFF
 
 
                 tutor.set_password("passe")
                 tutor.is_tutor = True
                 tutor.save()
-
+                tutor.departments.add(department)
+                tutor.save()
 
             except IntegrityError as ie :
                 print("A constraint has not been respected creation the Professor : \n", ie)
@@ -248,7 +252,7 @@ def rooms_extract(department, book):
 
                 room_group.types.add(room_type)
             except RoomGroup.DoesNotExist:
-                print(f"unable to find  RoomGroup '{idroom_group_idGroup}'")
+                print(f"unable to find  RoomGroup '{room_group_id}'")
 
             col += 1
             room_group_id = sheet.cell(row=row, column=col).value
@@ -449,7 +453,7 @@ def modules_extract(department, book):
 
 
     while idMod is not None:
-
+        idMod = idMod.replace(' ','')
         tpMod = sheet.cell(row=MODULE_ROW, column=4).value
         period = sheet.cell(row=MODULE_ROW, column=6).value
         verif = Module.objects.filter(abbrev=idMod, train_prog__abbrev=tpMod, period__name=period)
@@ -458,6 +462,7 @@ def modules_extract(department, book):
         if not verif.exists():
 
             codeMod = sheet.cell(row=MODULE_ROW, column=2).value
+            codeMod = codeMod.replace(' ','')
             nameMod = sheet.cell(row=MODULE_ROW, column=3).value
             tpMod = sheet.cell(row=MODULE_ROW, column=4).value
             profMod = sheet.cell(row=MODULE_ROW, column=5).value
@@ -500,40 +505,39 @@ def coursetypes_extract(department, book):
                 course_type = CourseType(name=idType, department=department, duration=duration)
                 course_type.save()
 
+                time_col = 8
+                start_times = []
+                time = sheet.cell(row=type_row, column=time_col).value
+                while time is not None:
+                    time = time.split('h')
+                    hours = int(time[0])
+                    if time[1] != "":
+                        minutes = int(time[1])
+                    else:
+                        minutes = 0
+                    start_time = 60*hours + minutes
+                    start_times.append(start_time)
+                    time_col += 1
+                    time = sheet.cell(row=type_row, column=time_col).value
+
+                time_constraint = CourseStartTimeConstraint(course_type=course_type, allowed_start_times=start_times)
+                time_constraint.save()
+
+                grouptype_col = 3
+                idGroup = sheet.cell(row=type_row, column=grouptype_col).value
+
+                while idGroup is not None:
+                    group = GroupType.objects.get(name=idGroup, department=department)
+                    course_type.group_types.add(group)
+                    course_type.save()
+
+                    grouptype_col += 1
+                    idGroup = sheet.cell(row=type_row, column=grouptype_col).value
+
             except IntegrityError as ie:
 
                 print("A constraint has not been respected creating the CourseType %s : \n" % idType, ie)
                 pass
-
-            time_col = 8
-            start_times = []
-            time = sheet.cell(row=type_row, column=time_col).value
-            while time is not None:
-                time = time.split('h')
-                hours = int(time[0])
-                if time[1] != "":
-                    minutes = int(time[1])
-                else:
-                    minutes = 0
-                start_time = 60*hours + minutes
-                start_times.append(start_time)
-                time_col += 1
-                time = sheet.cell(row=type_row, column=time_col).value
-
-            time_constraint = CourseStartTimeConstraint(course_type=course_type, allowed_start_times=start_times)
-            time_constraint.save()
-
-            grouptype_col = 3
-            idGroup = sheet.cell(row=type_row, column=grouptype_col).value
-
-            while idGroup is not None:
-                group = GroupType.objects.get(name=idGroup, department=department)
-                course_type.group_types.add(group)
-                course_type.save()
-
-                grouptype_col += 1
-                idGroup = sheet.cell(row=type_row, column=grouptype_col).value
-
 
             type_row += 1
             idType = sheet.cell(row=type_row, column=1).value
