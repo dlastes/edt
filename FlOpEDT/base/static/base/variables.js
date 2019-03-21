@@ -465,7 +465,7 @@ var sel_popup = {
 };
 sel_popup.but["tutor"] = {
     h: 30,
-    w: 30,
+    w: 40,
     perline: 5,
     mar_x: 2,
     mar_y: 4,
@@ -473,7 +473,7 @@ sel_popup.but["tutor"] = {
 sel_popup.but["room"] = {
     h: 30,
     w: 60,
-    perline: 3,
+    perline: 6,
     mar_x: 2,
     mar_y: 4,
 };
