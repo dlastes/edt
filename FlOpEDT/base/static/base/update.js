@@ -879,34 +879,10 @@ function go_menus() {
   ------ MODULES -------
   --------------------*/
 
-// update module opacity
-function go_modules() {
-    var sel_i = mog.property('selectedIndex');
-    modules.sel = mog
-        .selectAll("option")
-        .filter(function(d, i) {
-            return i == sel_i;
-        })
-        .datum();
-    go_opac_cours();
-}
 
 /*--------------------
   ------ ROOMS -------
   --------------------*/
-
-// update room opacity
-function go_rooms() {
-    var sel_i = sag.property('selectedIndex');
-    salles.sel = sag
-        .selectAll("option")
-        .filter(function(d, i) {
-            return i == sel_i;
-        })
-        .datum();
-    go_opac_cours();
-}
-
 
 /*--------------------
   ------ TUTORS ------
@@ -1088,48 +1064,6 @@ function go_courses(quick) {
 
     go_cm_room_tutor_change();
 }
-
-
-
-
-
-// update courses opacity
-function go_opac_cours() { // will be removed
-    return ;
-    // if (prof_displayed.length < tutors.all.length//wbr
-    //     || modules.sel != "" || salles.sel != "") {
-    //     // view with opacity filter
-    //     var coursp = mg.selectAll(".cours")
-    //         .data(cours.filter(function(d) {
-    //                 var ret = prof_displayed.indexOf(d.prof) > -1;//wbr
-    //                 ret = ret && (modules.sel == "" || modules.sel == d.mod);
-    //                 ret = ret && (salles.sel == "" || salles.sel == d.room);
-    //                 return ret;
-    //             }),
-    //             function(d) {
-    //                 return d.id_cours;
-    //             });
-
-    //     coursp
-    //         .attr("opacity", 1)
-    //         .select("rect").attr("stroke", 'black');
-
-    //     coursp
-    //         .exit()
-    //         .attr("opacity", opac)
-    //         .select("rect").attr("stroke", 'none');
-
-    // } else {
-    //     // view without opacity filter
-    //     mg
-    //         .selectAll(".cours")
-    //         .attr("opacity", 1)
-    //         .select("rect").attr("stroke", 'none');
-
-    // }
-
-}
-
 
 
 /*-----------------------

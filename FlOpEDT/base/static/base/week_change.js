@@ -572,8 +572,6 @@ function clean_prof_displayed() {
     update_selection();
 
     swap_data(tutor_names, tutors, "tutor") ;
-    update_active() ;
-    update_relevant() ;
 
     // relevant tutors
     tutors.all.forEach(function(t) {
