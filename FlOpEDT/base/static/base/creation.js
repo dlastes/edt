@@ -678,35 +678,26 @@ function def_drag_sca() {
 function set_butgp() {
     var topx = 0 ;//615 + 4*30;
 
-    if (set_promos.length == 2) {
-	root_gp[0].buty = 0 ;
-	root_gp[0].butx = topx - .5*root_gp[0].gp.width * butgp.width ;
-	root_gp[1].buty = root_gp[0].buty + root_gp[0].maxby * butgp.height + margin_but.ver;
-	root_gp[1].butx = topx - .5*root_gp[1].gp.width * butgp.width - root_gp[0].gp.width * butgp.width ;//- .5 * margin_but.hor;
-    } else {
-	var cur_buty = 0 ;
-	var cur_rootgp ;
-	for (var nrow=0 ; nrow<set_rows.length ; nrow++) {
-	    var cur_maxby = 0 ;
-	    var tot_row_gp = 0 ;
-	    var cur_butx = topx ;
-
-	    for (var npro=0 ; npro<row_gp[nrow].promos.length ; npro++){
-		cur_rootgp = root_gp[row_gp[nrow].promos[npro]] ;
-		cur_rootgp.buty = cur_buty ;
-		if (cur_rootgp.maxby > cur_maxby) {
-		    cur_maxby = cur_rootgp.maxby ; 
-		}
-		tot_row_gp += cur_rootgp.gp.width*butgp.width ;
-		tot_row_gp += (npro==0)?0:(margin_but.hor) ;
-                console.log(cur_rootgp.gp.width, butgp.width);
-		cur_rootgp.butx = cur_butx ;
-                cur_butx += margin_but.hor + cur_rootgp.gp.width*butgp.width ;
+    var cur_buty = 0 ;
+    var cur_rootgp ;
+    for (var nrow=0 ; nrow<set_rows.length ; nrow++) {
+	var cur_maxby = 0 ;
+	var tot_row_gp = 0 ;
+	var cur_butx = topx ;
+        
+	for (var npro=0 ; npro<row_gp[nrow].promos.length ; npro++){
+	    cur_rootgp = root_gp[row_gp[nrow].promos[npro]] ;
+	    cur_rootgp.buty = cur_buty ;
+	    if (cur_rootgp.maxby > cur_maxby) {
+		cur_maxby = cur_rootgp.maxby ; 
 	    }
-	    cur_buty += margin_but.ver + cur_maxby*butgp.height ;
+	    tot_row_gp += cur_rootgp.gp.width*butgp.width ;
+	    tot_row_gp += (npro==0)?0:(margin_but.hor) ;
+            console.log(cur_rootgp.gp.width, butgp.width);
+	    cur_rootgp.butx = cur_butx ;
+            cur_butx += margin_but.hor + cur_rootgp.gp.width*butgp.width ;
 	}
-//    root_gp[2].buty = root_gp[1].buty;
-//    root_gp[2].butx = root_gp[1].butx + margin_but.hor;
+	cur_buty += margin_but.ver + cur_maxby*butgp.height ;
     }
 
 }
