@@ -891,32 +891,6 @@ function go_modules() {
     go_opac_cours();
 }
 
-// Tries to determine the relevant modules for the viewer.
-function relevant_modules() {
-
-    // The relevant tutors
-    var rel_tutors = new Set();
-    var sel_tutors = tutors.all.filter(function(t){
-        return t.display; })
-    if (sel_tutors.length < tutors.all.length) { // some tutors are selected
-        sel_tutors.forEach(function (p) {
-            rel_tutors.add(p);
-        });
-    } else if (user.nom) {
-        rel_tutors.add(user.nom);
-    }
-
-    // The relevant modules
-    var modules = new Set();
-    cours.forEach(function(c) {
-        if (rel_tutors.has(c.prof)) {
-            modules.add(c.mod);
-        }
-    });
-
-    return modules;
-}
-
 /*--------------------
   ------ ROOMS -------
   --------------------*/
@@ -937,24 +911,6 @@ function go_rooms() {
 /*--------------------
   ------ TUTORS ------
   --------------------*/
-
-function go_tutors() { // will be removed
-
-    // selg
-    //     .selectAll(".tutor-button")
-    //     .data(tutors.all, function(p) { // will be removed
-    //         return p;
-    //     })
-    //     .attr("opacity", function(p) {
-    //         return prof_displayed.indexOf(p) > -1 ? 1 : opac;//wbr
-    //     });
-
-    create_mod_dd();
-    //go_opac_cours();
-}
-
-
-
 
 
 /*--------------------
