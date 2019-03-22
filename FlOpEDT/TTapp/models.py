@@ -113,7 +113,7 @@ def filter(slot_set, day=None, apm=None, course_type=None, simultaneous_to=None)
     if apm is not None:
         slots = set(sl for sl in slots if sl.apm == apm)
     if simultaneous_to is not None:
-        slots = set(sl for sl in slots if sl.is_simultaneous_to(simultaneous_to) and sl != simultaneous_to)
+        slots = set(sl for sl in slots if sl.is_simultaneous_to(simultaneous_to))
     return slots
 
 class TTConstraint(models.Model):
