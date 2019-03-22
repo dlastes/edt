@@ -520,21 +520,23 @@ class TTModel(object):
 
         # constraint : only one course on simultaneous slots
         print('Simultaneous slots constraints')
-        for sl in self.wdb.slots:
+        for sl1 in self.wdb.slots:
             for i in self.wdb.instructors:
-                name = 'simul_slots' + str(i) + '_' + str(sl)
-                self.add_constraint(self.sum(self.TT[(s_sl, c)]
-                                             for s_sl in self.wdb.slots_intersecting[sl]
-                                             for c in self.wdb.courses_for_tutor[i]
-                                             & self.wdb.compatible_courses[s_sl]),
-                                    '<=', 1, name=name)
+                for sl2 in self.wdb.slots_intersecting[sl1]-{sl1}:
+                    name = 'simul_slots' + str(i) + '_' + str(sl1) + '_' + str(sl2)
+                    self.add_constraint(self.sum(self.TT[(sl1, c1)] for c1 in self.wdb.courses_for_tutor[i]
+                                                                            & self.wdb.compatible_courses[sl1]) +
+                                        self.sum(self.TT[(sl2, c2)] for c2 in self.wdb.courses_for_tutor[i]
+                                                                            & self.wdb.compatible_courses[sl2]),
+                                        '<=', 1, name=name)
             for bg in self.wdb.basic_groups:
-                name = 'simul_slots' + bg.full_name() + '_' + str(sl)
-                self.add_constraint(self.sum(self.TT[(s_sl, c1)]
-                                             for s_sl in self.wdb.slots_intersecting[sl]
-                                             for c1 in self.wdb.courses_for_basic_group[bg]
-                                             & self.wdb.compatible_courses[s_sl]),
-                                    '<=', 1, name=name)
+                for sl2 in self.wdb.slots_intersecting[sl1]-{sl1}:
+                    name = 'simul_slots' + bg.full_name() + '_' + str(sl1) + '_' + str(sl2)
+                    self.add_constraint(self.sum(self.TT[(sl1, c1)] for c1 in self.wdb.courses_for_basic_group[bg]
+                                                                            & self.wdb.compatible_courses[sl1]) +
+                                        self.sum(self.TT[(sl2, c2)] for c2 in self.wdb.courses_for_basic_group[bg]
+                                                                            & self.wdb.compatible_courses[sl2]),
+                                        '<=', 1, name=name)
 
         # a course is scheduled once and only once
         for c in self.wdb.courses:
