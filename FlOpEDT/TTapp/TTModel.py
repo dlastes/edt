@@ -248,7 +248,7 @@ class TTModel(object):
             list(zip(self.wdb.basic_groups,
                 [self.lin_expr() for _ in self.wdb.basic_groups])))
 
-        self.cost_G = dict(
+        self.cost_SL = dict(
             list(zip(self.wdb.slots,
                      [self.lin_expr() for _ in self.wdb.slots])))
         
