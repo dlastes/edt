@@ -58,17 +58,17 @@ function initiate() {
 
 
     // current user as first choice
-    while(!found && i<tutors.all.length){
-	if(tutors.all[i].name!=usna){
+    while(!found && i<profs.length){
+	if(profs[i]!=usna){
 	    found = true;
 	} else {
 	    i+=1;
 	}
     }
-    if(i<tutors.all.length && tutors.all.length>0){
-	var tmp = tutors.all[0];
-	tutors.all[0] = tutors.all[i];
-	tutors.all[i] = tmp;
+    if(i<profs.length && profs.length>0){
+	var tmp = profs[0];
+	profs[0] = profs[i];
+	profs[i] = tmp;
     }
     fill_aim_prof([]);
 
@@ -244,9 +244,9 @@ function fill_aim_prof(pm){
     if(pm.length>0){
 	liste_aim_prof.push("");
     }
-    for(i=0;i<tutors.all.length;i++){
-	if(!liste_aim_prof.includes(tutors.all[i].name)){
-	    liste_aim_prof.push(tutors.all[i].name);
+    for(i=0;i<profs.length;i++){
+	if(!liste_aim_prof.includes(profs[i])){
+	    liste_aim_prof.push(profs[i]);
 	}
     }
 }
