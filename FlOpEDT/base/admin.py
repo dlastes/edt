@@ -104,27 +104,12 @@ class CoursPlaceResource(resources.ModelResource):
     color_txt = fields.Field(column_name='color_txt',
                              attribute='cours__module__display',
                              widget=ForeignKeyWidget(ModuleDisplay, 'color_txt'))
-    module_name = fields.Field(column_name='module_name',
-                          attribute='cours__module',
-                          widget=ForeignKeyWidget(Module, 'nom'))
-    prof_first_name = fields.Field(column_name='prof_first_name',
-                                    attribute='cours__tutor',
-                                    widget=ForeignKeyWidget(Tutor, 'first_name'))
-    prof_last_name = fields.Field(column_name='prof_last_name',
-                                   attribute='cours__tutor',
-                                   widget=ForeignKeyWidget(Tutor, 'last_name'))
-    prof_email = fields.Field(column_name='prof_email',
-                            attribute='cours__tutor',
-                            widget=ForeignKeyWidget(Tutor, 'email'))
-    url = fields.Field(column_name='url',
-                    attribute='cours__module',
-                    widget=ForeignKeyWidget(Module, 'url'))
 
     class Meta:
         model = ScheduledCourse
         fields = ('id', 'no', 'groupe', 'promo', 'color_bg', 'color_txt',
                   'module', 'jour', 'heure', 'semaine', 'room', 'prof',
-                  'room_type', 'module_name', 'prof_first_name', 'prof_last_name', 'prof_email','url','course_type')
+                  'room_type', 'course_type')
 
 
 class CoursResource(resources.ModelResource):
@@ -198,6 +183,15 @@ class VersionResource(resources.ModelResource):
         model = EdtVersion;
         fields = ("an", "semaine", "version")
 
+class ModuleRessource(resources.ModelResource):
+	class Meta:
+		model = Course
+		fields = ('module__abbrev', 'module__nom', 'module__url')
+		
+class TutorRessource(resources.ModelResource):
+	class Meta:
+		model = Course
+		fields = ('tutor__username', 'tutor__first_name', 'tutor__last_name', 'tutor__email')
 
 # </editor-fold desc="RESOURCES">
 

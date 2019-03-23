@@ -1304,9 +1304,8 @@ function compute_cm_room_tutor_direction() {
 }
 
 function show_detailed_courses(cours){
-    //console.log(cours);
     remove_details();
-    var details = fg.append("g")
+    var details = dg.append("g")
                     .attr("id", "course_details");
 
     var width = grid_width()/4;
@@ -1340,10 +1339,10 @@ function show_detailed_courses(cours){
 
     details
         .append("a")
-        .attr("xlink:href", cours.url)
+        .attr("xlink:href", modules_info[cours.mod].url)
         .attr("target", "_blank")
         .append("text")
-        .text(cours.module_name)
+        .text(modules_info[cours.mod].name)
         .attr("fill", cours.color_txt)
         .attr("style", "text-decoration:underline")
         .attr("x", pos_x+width/2)
@@ -1365,17 +1364,17 @@ function show_detailed_courses(cours){
 
     details
         .append("text")
-        .text(cours.prof_full_name)
+        .text(tutors_info[cours.prof].full_name)
         .attr("fill", cours.color_txt)
         .attr("x", pos_x+width/2)
         .attr("y", pos_y+height/6*4);
 
     details
         .append("a")
-        .attr("xlink:href", "/edt/info/contact/"+cours.prof)
+        .attr("xlink:href", url_contact + cours.prof)
         .attr("target", "_blank")
         .append("text")
-        .text(cours.prof_email)
+        .text(tutors_info[cours.prof].email)
         .attr("fill", cours.color_txt)
         .attr("style", "text-decoration:underline")
         .attr("x", pos_x+width/2)

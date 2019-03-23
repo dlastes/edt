@@ -63,6 +63,8 @@ urlpatterns = [
     url(r'^fetch_all_tutors/$', views.fetch_all_tutors, name="fetch_all_tutors"),
     url(r'^fetch_all_versions/$', views.fetch_all_versions, name="fetch_all_versions"),
     url(r'^fetch_week_infos/(?P<year>\d+)/(?P<week>\d+)$', views.fetch_week_infos, name="fetch_week_infos"),
+    url(r'^fetch_module/(?P<year>\d+)/(?P<week>\d+)$', views.fetch_module, name="fetch_module"),
+    url(r'^fetch_tutors/(?P<year>\d+)/(?P<week>\d+)$', views.fetch_tutor, name="fetch_tutor"),
 
     # statistics
     # ---------------------------------

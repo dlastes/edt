@@ -45,7 +45,7 @@ from people.models import Tutor
 # Prof,
 
 from .admin import CoursResource, DispoResource, VersionResource, \
-    CoursPlaceResource, BreakingNewsResource, UnavailableRoomsResource
+    CoursPlaceResource, BreakingNewsResource, UnavailableRoomsResource, ModuleRessource, TutorRessource
 
 from .weeks import *
 
@@ -373,6 +373,29 @@ def fetch_cours_pp(req, week, year, num_copy, **kwargs):
     cache.set(cache_key, response)
     return response
 
+def fetch_module(req, year, week, **kwargs):
+	department = req.department
+	print(department)
+	module = Course.objects.filter(module__train_prog__department=department,semaine=week,an=year).distinct()
+	dataset = ModuleRessource().export(module)
+    
+                         
+	response = HttpResponse(dataset.csv, content_type='text/csv')
+	response['week'] = week
+	response['year'] = year
+	return response
+	
+def fetch_tutor(req, year, week, **kwargs):
+	department = req.department
+	print(department)
+	tutor= Course.objects.filter(module__train_prog__department=department,semaine=week,an=year).distinct()
+	dataset = TutorRessource().export(tutor)
+    
+                         
+	response = HttpResponse(dataset.csv, content_type='text/csv')
+	response['week'] = week
+	response['year'] = year
+	return response
 
 #@login_required
 def fetch_dispos(req, year, week, **kwargs):
@@ -1125,7 +1148,7 @@ def contact(req, prof, **kwargs):
         form = ContactForm(initial={
             'sender': init_mail})
 
-    if prof != None:
+    if prof is not None:
         prof_abbrev = Tutor.objects.get(username=prof)
         form = ContactForm(initial={'recipient': prof_abbrev})
     

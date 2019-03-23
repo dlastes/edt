@@ -586,3 +586,6 @@ var room_tutor_change = {
 var arrow =
     {right: "→",
      back: "↩"} ;
+     
+var modules_info = {};
+var tutors_info = {};

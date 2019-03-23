@@ -536,20 +536,16 @@ function translate_cours_pl_from_csv(d) {
         id_cours: +d.id_cours,
         no_cours: +d.num_cours,
         prof: d.prof_nom,
-        prof_full_name: d.prof_first_name + " " + d.prof_last_name,
         group: translate_gp_name(d.gpe_nom),
         promo: set_promos.indexOf(d.gpe_promo),
         mod: d.module,
         day: +d.jour,
         slot: +d.heure,
         room: d.room,
-	room_type: d.room_type,
-    course_type: d.course_type,
-	color_bg: d.color_bg,
-	color_txt: d.color_txt,
-    module_name: d.module_name,
-    prof_email: d.prof_email,
-    url: d.url,
+		room_type: d.room_type,
+		course_type: d.course_type,
+		color_bg: d.color_bg,
+		color_txt: d.color_txt,
     };
     return co;
 }
@@ -763,6 +759,8 @@ function fetch_all(first){
 
     fetch_version();
     fetch_cours();
+    fetch_module();
+    fetch_tutor();
     if (ckbox["dis-mod"].cked || ckbox["edt-mod"].cked) {
         fetch_dispos();
     }
@@ -872,10 +870,72 @@ function fetch_ended() {
 
 }
 
+/*-----------------
+  ------Module-----
+  -----------------*/
+// Get all the information of the module present in the week and stored him in a dictionary of Module_info
+function fetch_module(){
+	var semaine_att = weeks.init_data[weeks.sel[0]].semaine;
+    var an_att = weeks.init_data[weeks.sel[0]].an;
+	$.ajax({
+		type: "GET",
+        dataType: 'text',
+        url: url_module + an_att + "/" + semaine_att,
+        async: true,
+        contentType: "text/csv",
+        success: function(msg, ts, req) {
+			d3.csvParse(msg, translate_module_from_csv);
+            show_loader(false);
+        },
+        error: function(msg) {
+            console.log("error");
+            show_loader(false);
+        }
+	});
+}
+function translate_module_from_csv(d){
+	//console.log(d);
+	if(Object.keys(modules_info).indexOf(d.module__abbrev) == -1){
+		modules_info[d.module__abbrev] = {
+			name : d.module__nom,
+			url : d.module__url
+		};
+	}
+}
 
 
-
-
+/*-----------------
+  ------Tutor------
+  -----------------*/
+// Get all the information of the Tutor present in the week and stored him in a dictionary of Tutor_info
+function fetch_tutor(){
+	var semaine_att = weeks.init_data[weeks.sel[0]].semaine;
+    var an_att = weeks.init_data[weeks.sel[0]].an;
+	$.ajax({
+		type: "GET",
+        dataType: 'text',
+        url: url_tutor + an_att + "/" + semaine_att,
+        async: true,
+        contentType: "text/csv",
+        success: function(msg, ts, req) {
+			d3.csvParse(msg, translate_tutor_from_csv);
+            show_loader(false);
+        },
+        error: function(msg) {
+            console.log("error");
+            show_loader(false);
+        }
+	});
+}
+function translate_tutor_from_csv(d){
+	//console.log(d);
+	if(Object.keys(tutors_info).indexOf(d.tutor__username) == -1){
+		tutors_info[d.tutor__username] = {
+			full_name : d.tutor__first_name + " " + d.tutor__last_name,
+			email : d.tutor__email
+		};
+	}
+}
 
 
 
