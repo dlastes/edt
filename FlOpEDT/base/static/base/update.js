@@ -1167,7 +1167,7 @@ function go_selection_buttons() {
     var sel_list = [] ;
     var type = sel_popup.type ;
     
-    if (type == "") {
+    if (type == "" || type == "group") {
         return ;
     } else if (type == "tutor") {
         sel_list = tutors.all ;
