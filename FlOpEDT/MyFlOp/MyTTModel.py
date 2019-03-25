@@ -24,6 +24,7 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
+import importlib
 from TTapp.TTModel import TTModel
 
 from MyFlOp.MyTTUtils import print_differences
@@ -58,14 +59,15 @@ class MyTTModel(TTModel):
                                target_work_copy=target_work_copy,
                                solver=solver)
         if result is None:
-            from gurobipy import read
-            lp = "FlOpTT-pulp.lp"
-            m = read(lp)
-            m.optimize()
-            m.computeIIS()
-            m.write("logs/IIS_week%s.ilp" % self.semaine)
-            print("IIS written in file logs/IIS_week%s.ilp" % (self.semaine))
-
+            spec = importlib.util.find_spec('gurobipy')
+            if spec:
+                from gurobipy import read
+                lp = "FlOpTT-pulp.lp"
+                m = read(lp)
+                m.optimize()
+                m.computeIIS()
+                m.write("logs/IIS_week%s.ilp" % self.semaine)
+                print("IIS written in file logs/IIS_week%s.ilp" % (self.semaine))
         else :
             if self.stabilize_work_copy is not None:
                 print_differences(self.semaine, self.an, self.stabilize_work_copy, target_work_copy, self.wdb.instructors)
