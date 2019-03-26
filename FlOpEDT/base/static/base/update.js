@@ -894,6 +894,8 @@ function go_menus() {
   --------------------*/
 
 // update display cours attribute according to current selections
+// if its module, tutor or room does not appear in selection lists,
+// the course is not displayed
 function update_selection() {
     cours.forEach(function(c) {
         var mod = modules.all.find(function(d) {
@@ -905,10 +907,12 @@ function update_selection() {
         var roo = rooms_sel.all.find(function(d) {
             return d.name == c.room ;
         });
-        c.display =
-            (typeof mod === 'undefined' || mod.display)
-            && (typeof tut === 'undefined' || tut.display)
-            && (typeof roo === 'undefined' || roo.display);
+        if (typeof mod === 'undefined' || typeof tut === 'undefined'
+            || typeof roo === 'undefined') {
+            c.display = false ;
+        } else {
+            c.display = mod.display && tut.display && roo.display ;
+        }
     });
 }
 
