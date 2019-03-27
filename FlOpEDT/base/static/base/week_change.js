@@ -159,7 +159,7 @@ function insert_normalized_interval(pref, list) {
 function allocate_dispos(tutor) {
     dispos[tutor] = {} ;
     for (var i = 0; i < days.length; i++) {
-	dispos[d.prof][days[i].ref] = [] ;
+	dispos[tutor][days[i].ref] = [] ;
     }	
 }
 
