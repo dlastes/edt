@@ -904,89 +904,21 @@ function go_menus() {
   ------ MODULES -------
   --------------------*/
 
-// update module opacity
-function go_modules() {
-    var sel_i = mog.property('selectedIndex');
-    modules.sel = mog
-        .selectAll("option")
-        .filter(function(d, i) {
-            return i == sel_i;
-        })
-        .datum();
-    go_opac_cours();
-}
-
-// Tries to determine the relevant modules for the viewer.
-function relevant_modules() {
-
-    // The relevant tutors
-    var rel_tutors = new Set();
-    var sel_tutors = tutors.all.filter(function(t){
-        return t.display; })
-    if (sel_tutors.length < tutors.all.length) { // some tutors are selected
-        sel_tutors.forEach(function (p) {
-            rel_tutors.add(p);
-        });
-    } else if (user.nom) {
-        rel_tutors.add(user.nom);
-    }
-
-    // The relevant modules
-    var modules = new Set();
-    cours.forEach(function(c) {
-        if (rel_tutors.has(c.prof)) {
-            modules.add(c.mod);
-        }
-    });
-
-    return modules;
-}
 
 /*--------------------
   ------ ROOMS -------
   --------------------*/
 
-// update room opacity
-function go_rooms() {
-    var sel_i = sag.property('selectedIndex');
-    salles.sel = sag
-        .selectAll("option")
-        .filter(function(d, i) {
-            return i == sel_i;
-        })
-        .datum();
-    go_opac_cours();
-}
-
-
 /*--------------------
   ------ TUTORS ------
   --------------------*/
-
-function go_tutors() { // will be removed
-
-    // selg
-    //     .selectAll(".tutor-button")
-    //     .data(tutors.all, function(p) { // will be removed
-    //         return p;
-    //     })
-    //     .attr("opacity", function(p) {
-    //         return prof_displayed.indexOf(p) > -1 ? 1 : opac;//wbr
-    //     });
-
-    create_mod_dd();
-    //go_opac_cours();
-}
-
-
-
 
 
 /*--------------------
    ------ COURS -------
   --------------------*/
 
-
+// update display cours attribute according to current selections
 function update_selection() {
     cours.forEach(function(c) {
         var mod = modules.all.find(function(d) {
@@ -1003,6 +935,10 @@ function update_selection() {
             && (typeof tut === 'undefined' || tut.display)
             && (typeof roo === 'undefined' || roo.display);
     });
+}
+
+// update active flags for selections
+function update_active() {
     var tut_av = sel_popup.get_available("tutor");
     var mod_av = sel_popup.get_available("module");
     var room_av = sel_popup.get_available("room");
@@ -1017,12 +953,8 @@ function update_selection() {
         return d.display;
     }).length != rooms_sel.all.length ;
     
-    sel_popup.active_filter = !(cours.filter(function(c){
-        return c.display ;
-    }).length == cours.length) ;
-    
+    sel_popup.active_filter = tut_av.active || mod_av.active || room_av.active ;
 }
-
 
 function go_courses(quick) {
     var t;
@@ -1159,48 +1091,6 @@ function go_courses(quick) {
 }
 
 
-
-
-
-// update courses opacity
-function go_opac_cours() { // will be removed
-    return ;
-    // if (prof_displayed.length < tutors.all.length//wbr
-    //     || modules.sel != "" || salles.sel != "") {
-    //     // view with opacity filter
-    //     var coursp = mg.selectAll(".cours")
-    //         .data(cours.filter(function(d) {
-    //                 var ret = prof_displayed.indexOf(d.prof) > -1;//wbr
-    //                 ret = ret && (modules.sel == "" || modules.sel == d.mod);
-    //                 ret = ret && (salles.sel == "" || salles.sel == d.room);
-    //                 return ret;
-    //             }),
-    //             function(d) {
-    //                 return d.id_cours;
-    //             });
-
-    //     coursp
-    //         .attr("opacity", 1)
-    //         .select("rect").attr("stroke", 'black');
-
-    //     coursp
-    //         .exit()
-    //         .attr("opacity", opac)
-    //         .select("rect").attr("stroke", 'none');
-
-    // } else {
-    //     // view without opacity filter
-    //     mg
-    //         .selectAll(".cours")
-    //         .attr("opacity", 1)
-    //         .select("rect").attr("stroke", 'none');
-
-    // }
-
-}
-
-
-
 /*-----------------------
    ------ VALIDATE ------
   -----------------------*/
@@ -1302,7 +1192,7 @@ function go_selection_buttons() {
     var sel_list = [] ;
     var type = sel_popup.type ;
     
-    if (type == "") {
+    if (type == "" || type == "group") {
         return ;
     } else if (type == "tutor") {
         sel_list = tutors.all ;
@@ -1371,4 +1261,32 @@ function go_selection_buttons() {
 
     cont.exit().remove();
 
+}
+
+
+// update relevant modules according to selected tutors
+// ---
+// tutor(s) selected -> any taught module
+// no selected tutor -> module taught by logged user if any
+function update_relevant() {
+    modules.all.forEach(function(m){
+        m.relevant = false ;
+    });
+    var tut_act = sel_popup.get_available("tutor").active ;
+    cours.forEach(function(c) {
+        var mod = modules.all.find(function(d) {
+            return d.name == c.mod ;
+        });
+        var tut = tutors.all.find(function(d) {
+            return d.name == c.prof ;
+        });
+        if (!tut_act) {
+            if(c.prof == user.nom) {
+                mod.relevant = true ;
+            }
+        } else if (typeof mod !== 'undefined'
+                   && typeof tut !== 'undefined' && tut.display) {
+            mod.relevant = true ;
+        }
+    });
 }

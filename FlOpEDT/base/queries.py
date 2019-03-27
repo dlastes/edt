@@ -26,6 +26,7 @@
 
 import logging
 
+from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
 
 from base.models import Group, TrainingProgramme, \
@@ -38,13 +39,12 @@ from base.models import Room, RoomType, RoomGroup, \
                         TimeGeneralSettings, GroupType
 
 from people.models import Tutor
-
 from TTapp.models import TTConstraint
-
 
 logger = logging.getLogger(__name__)
 
 
+@transaction.atomic
 def create_first_department():    
 
     department = Department.objects.create(name="Default Department", abbrev="default")
@@ -68,8 +68,17 @@ def create_first_department():
     types = TTConstraint.__subclasses__()
 
     for type in types:
-        type.objects.all().update(department=department)
-    
+        type.objects.all().update(department=department)    
+
+    # Init TimeGeneralSettings with default values
+    TimeGeneralSettings.objects.create(
+                        department=department,
+                        day_start_time=8*60,
+                        day_finish_time=18*60+45,
+                        lunch_break_start_time=12*60+30,
+                        lunch_break_finish_time=14*60,
+                        days=["m", "tu", "w", "th", "f"])
+
     return department
 
 

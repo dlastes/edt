@@ -70,24 +70,6 @@ function create_general_svg(light) {
         tot = d3.select("body");
     } else {
         tot = d3.select("body").append("div");
-
-        // mog = tot
-        //     .append("div")
-        //     .attr("id", "div-mod")
-        //     .text("Module ")
-        //     .append("select")
-        //     .attr("id", "dd-mod")
-        //     .on("change", go_modules);
-
-        // sag = tot
-        //     .append("div")
-        //     .attr("id", "div-sal")
-        //     .text("Salle ")
-        //     .append("select")
-        //     .attr("id", "dd-sal")
-        //     .on("change", go_rooms);
-
-
     }
 
     svg_cont = tot
@@ -99,10 +81,6 @@ function create_general_svg(light) {
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
     create_layouts(svg_cont, light);
-
-    // var divtip = d3.select("body").append("div")
-    // 	.attr("class", "tooltip")
-    // 	.style("opacity", 0);
 
 }
 
@@ -129,18 +107,6 @@ function create_layouts(svg_cont, light) {
     // selection categories button ground
     catg = svg_cont.append("g")
         .attr("id", "lay-catg");
-
-    // module ground
-    // moved directly to the html
-    
-    //  mog = d3.select("body").select("select")
-    // svg_cont.append("g")
-    // 	.attr("id","lay-mog")
-    // 	.attr("transform","translate("+modules.x+","+modules.y+")")
-    // 	.append("foreignObject")
-    // 	.append("xhtml:select")
-    // 	.attr("id","dd-mod")
-    //	.on("change",go_modules);
 
     if (!light) {
 
@@ -692,7 +658,6 @@ function def_drag_sca() {
 				  "translate(" + drag.x + "," + drag.y + ")");
                     drag.svg.attr("height", drag.svg_h + drag.y);
                 }
-//                console.log(drag.svg.attr("height"));
             }
         })
         .on("end", function(c) {
@@ -701,7 +666,6 @@ function def_drag_sca() {
                     drag.y = -(drag.init);
                 }
                 scale = scale_from_grid_height(drag.init + drag.y) ;
-		//                drag.sel.select("path").attr("d", but_sca_tri_v(drag.y));
                 drag.sel.attr("transform", "translate(0,0)");
                 drag.sel.select("rect").attr("y", grid_height());
 		drag.sel.select("path").attr("d", but_sca_tri_v(0));
@@ -712,7 +676,6 @@ function def_drag_sca() {
 		svg.height = svg_height() ;
 		d3.select("#edt-main").attr("height", svg.height);
 
-//		drag.svg.attr("height", svg_height());
             }
         });
 
@@ -1016,9 +979,6 @@ function compute_promo_lmx(node) {
             node.x = lastmin;
         }
     }
-
-    //  //console.log(node.promo,node.nom,node.x,node.maxx);
-
 }
 
 
@@ -1100,9 +1060,6 @@ function update_all_groups() {
         scale *= pos_nbRows / nbRows;
         pos_nbRows = nbRows;
     }
-
-
-    //    compute_promo_lmx(node)
 }
 
 

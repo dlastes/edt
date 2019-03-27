@@ -216,7 +216,6 @@ function create_dispos_user_data() {
 		} else {
 		    pref_list[k].val = par_dispos.nmax;
 		}
-		//console.log(j,k,day_hour_2_1D(d2p),user.dispos_type[day_hour_2_1D(d2p)])
             }
 	    
 	    // different object
@@ -254,95 +253,9 @@ function create_dispos_user_data() {
 /*----------------------
   ------ MODULES -------
   ----------------------*/
-
-function mod_dd_items() {
-
-    var high_mod = relevant_modules();
-
-    var high_items = new Array();
-    var low_items = new Array();
-    modules.all.forEach(function(m) {
-        if (high_mod.has(m)) {
-            high_items.push(m);
-        } else {
-            low_items.push(m);
-        }
-    });
-
-    return high_items.concat(low_items);
-}
-
-// Create or update the filter-by-module list.
-function create_mod_dd() {
-
-    var items = mod_dd_items();
-
-    var seldd = mog
-        .selectAll("option")
-        .data(items, function(m) {
-           return m;
-        });
-
-    seldd
-        .exit()
-        .remove();
-
-    seldd
-        .order();
-
-    seldd
-        .enter()
-        .append("option")
-        .attr("value", function(d) {
-            return d;
-        })
-        .text(function(d) {
-            return d;
-        });
-
-    mog
-        .select('option[value="' + modules.sel + '"]')
-        .attr("selected", "");
-}
-
-
 /*----------------------
   ------ SALLES -------
   ----------------------*/
-
-function create_sal_dd() {
-
-
-    var seldd = sag
-        .selectAll("option")
-        .data(salles.all, function(d, i) {
-            return d;
-        });
-
-    seldd
-        .enter()
-        .append("option")
-        .merge(seldd.select("option"))
-        .attr("value", function(d) {
-            return d;
-        })
-        .text(function(d) {
-            return d;
-        });
-
-    seldd.exit().remove();
-
-    seldd
-        .each(function(d, i) {
-            if (d == salles.sel) {
-                d3.select(this).attr("selected", "");
-            }
-        });
-
-
-}
-
-
 /*--------------------
   ------ PROFS -------
   --------------------*/
@@ -365,9 +278,7 @@ function fetch_bknews(first) {
         url: url_bknews  + an_att + "/" + semaine_att,
         async: true,
         contentType: "text/csv",
-//        contentType: "text/json",
         success: function(msg) {
-	    //            bknews.cont = JSON.parse(msg) ;
 	    bknews.cont = d3.csvParse(msg,
 				      translate_bknews_from_csv);
 
@@ -467,7 +378,6 @@ function fetch_cours() {
     var an_att = weeks.init_data[weeks.sel[0]].an;
 
     cours_bouge = {};
-    modules.old = modules.all ;
     
     show_loader(true);
     $.ajax({
@@ -528,7 +438,6 @@ function fetch_cours() {
                 modules.pp = [];
                 salles.pp = [];
 
-                //console.log(msg);
     		console.log(semaine_att,an_att,num_copie);
 
                 cours_pp = d3.csvParse(msg, translate_cours_pp_from_csv);
@@ -542,8 +451,6 @@ function fetch_cours() {
     		    remove_garbage();
     		    go_grid(true);
     		}
-
-                //console.log(msg);
 
                 fetch.ongoing_cours_pp = false;
                 fetch_ended();
@@ -707,6 +614,14 @@ function clean_prof_displayed() {
 
     swap_data(tutor_names, tutors, "tutor") ;
 
+    // relevant tutors
+    tutors.all.forEach(function(t) {
+        t.relevant = false ;
+        if (t.name == user.nom) {
+            t.relevant = true ;
+        }
+    });
+
     if (sel_popup.type != "") {
         go_selection_buttons() ;
     }
@@ -816,9 +731,7 @@ function fetch_version() {
         url: url_week_infos  + an_att + "/" + semaine_att,
         async: true,
         contentType: "text/json",
-//        contentType: "text/json",
         success: function(msg) {
-	    //            bknews.cont = JSON.parse(msg) ;
 	    var parsed = JSON.parse(msg);
 
             if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
@@ -860,7 +773,9 @@ function fetch_ended() {
 
         update_selection();
 
-        swap_data(module_names, modules, "module"); 
+        swap_data(module_names, modules, "module");
+        update_active();
+        update_relevant();
 
         salles.all = [""].concat(salles.pl);
         for (var i = 0; i < salles.pp.length; i++) {
@@ -875,8 +790,6 @@ function fetch_ended() {
             salles.sel = "";
         }
 
-        // create_mod_dd();
-        // create_sal_dd();
         clean_prof_displayed();
     }
 
@@ -895,11 +808,6 @@ function fetch_ended() {
 	}
 
     }
-    //go_gp_buttons();
-    //go_tutors();
-
-
-
 }
 
 // - store old data in old
