@@ -185,7 +185,7 @@ class BreakingNewsResource(resources.ModelResource):
 class VersionResource(resources.ModelResource):
     class Meta:
         model = EdtVersion;
-        fields = ("an", "semaine", "version")
+        fields = ("an", "semaine", "version", "department")
 
 
 
