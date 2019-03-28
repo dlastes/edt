@@ -1196,13 +1196,13 @@ function go_selection_buttons() {
     
     contg
         .append("rect")
-        .attr("class", but_sel_class)
         .attr("ty", "ch")
         .attr("width", popup_choice_w)
         .attr("height", popup_choice_h)
         .attr("rx", 5)
         .attr("ry", 10)
         .merge(cont.select("rect"))
+        .attr("class", but_sel_class)
         .attr("x", but_sel_x)
         .attr("y", but_sel_y);
 
