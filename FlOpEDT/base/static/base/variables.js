@@ -426,7 +426,7 @@ var sel_popup = {
             return ret ;
         }
     },
-    pannels: [], //{type, x, y, w, h}
+    pannels: [], //{type, x, y, w, h, txt}
     but: [],
     active_filter: false
 };

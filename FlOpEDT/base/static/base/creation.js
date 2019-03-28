@@ -1961,10 +1961,16 @@ function add_pannel(d) {
     }) ;
 
     if(typeof same === 'undefined') {
+        var title = "" ;
+        var infos = sel_popup.get_available(d.type) ;
+        if (typeof infos !== 'undefined') {
+            title = infos.buttxt ;
+        }
         var pannel = {type: d.type,
                       x: sel_popup.x,
                       y: sel_popup.y,
-                      list: popup_data(d.type)};
+                      list: popup_data(d.type),
+                      txt: title};
 
         sel_popup.pannels.push(pannel);
         
@@ -2015,7 +2021,6 @@ function go_selection_popup(){
     var bg_new = g_new
         .append("rect")
         .attr("class", "sel-pop-bg")
-        .attr("fill", "white")
         .attr("x",  - sel_popup.mar_side )
         .attr("y",  - (sel_popup.mar_side + but_exit.side + but_exit.mar_next))
         .attr("width", popup_bg_w);
@@ -2037,7 +2042,6 @@ function go_selection_popup(){
     exit_new
         .append("rect")
         .attr("stroke", "none")
-        .attr("fill", "white")
         .attr("x", 0)
         .attr("y", 0)
         .attr("width", but_exit.side)
@@ -2061,6 +2065,14 @@ function go_selection_popup(){
         .attr("x2", but_exit.side-but_exit.mar_side)              
         .attr("y2", but_exit.mar_side);
 
+
+    g_new
+        .append("text")
+        .text(popup_title_txt)
+        .attr("class", "popup-title")
+        .attr("x", popup_title_x)
+        .attr("y", popup_title_y);
+    
 
     var contg = g_new
         .filter(function(p){
