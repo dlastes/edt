@@ -1051,7 +1051,10 @@ function sel_trans(d, i){
     ret += sel_popup.selx ;
     ret += ",";
     ret += sel_popup.sely
-        + (i+1)*(sel_popup.but["tutor"].h + sel_popup.selmy);
+        + i*(sel_popup.selh + sel_popup.selmy);
+    ret += ")";
+    return ret;
+}
     ret += ")";
     return ret;
 }

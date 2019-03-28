@@ -398,7 +398,7 @@ var sel_popup = {
     selw: 60,
     selh: 30,
     selx: 700,
-    sely: -270,
+    sely: -200,
     selmy: 10,
     mar_side: 5,
     tlx: 700,
