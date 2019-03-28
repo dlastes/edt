@@ -1213,6 +1213,7 @@ function go_selection_buttons() {
             return d.name;
         })
         .merge(cont.select("text"))
+        .attr("class", but_sel_class)
         .attr("x", but_sel_txt_x)
         .attr("y", but_sel_txt_y);
 
