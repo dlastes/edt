@@ -1917,6 +1917,29 @@ function create_selections() {
         .attr("x", .5 * sel_popup.selw)
         .attr("y", .5 * sel_popup.selh);
 
+    var forall = catg
+        .append("g")
+        .attr("class", "sel_forall")
+        .attr("transform", sel_forall_trans())
+        .attr("cursor", "pointer")
+        .on("click", apply_cancel_selections);
+    
+    forall
+        .append("rect")
+        .attr("width", .5*sel_popup.selw)
+        .attr("height", sel_popup.selh)
+        .attr("class", "select-highlight")
+        .attr("rx", 5)
+        .attr("ry", 10)
+        .attr("x", 0)
+        .attr("y", 0);
+
+    forall
+        .append("text")
+        .text("\u2200")
+        .attr("x", .25*sel_popup.selw)
+        .attr("y", .5*sel_popup.selh);
+
 }
 
 // add data related to a new filter pannel

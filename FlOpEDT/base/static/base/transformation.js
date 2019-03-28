@@ -1055,6 +1055,11 @@ function sel_trans(d, i){
     ret += ")";
     return ret;
 }
+function sel_forall_trans(){
+    var ret = "translate(" ;
+    ret += sel_popup.selx + .25*sel_popup.selw ;
+    ret += ",";
+    ret += sel_popup.sely - sel_popup.selh - sel_popup.selmy;
     ret += ")";
     return ret;
 }

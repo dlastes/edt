@@ -1342,3 +1342,39 @@ function apply_selection_display_all(p) {
         go_courses();
     }
 }
+
+// discards all filters
+function apply_cancel_selections() {
+
+    // classical filters
+    var display = function(d) {
+        d.display = true ;
+    };
+    for (var di = 0 ; di < sel_popup.available.length ; di ++) {
+        popup_data(sel_popup.available[di].type)
+            .forEach(display) ;
+    }
+
+
+    // group filters
+    var displayed = root_gp.reduce(function(acc, d){
+        var ret = d.gp.display ? 1 : 0 ;
+        return acc + ret ;
+    }, 0);
+    var rgi = 0 ;
+    while (displayed > 0 && rgi<root_gp.length) {
+        var gp = root_gp[rgi].gp ;
+        if (gp.display) {
+            apply_gp_display(gp, false, true);
+        }
+        displayed-- ;
+        rgi++ ;
+    }
+
+    // update flags and display
+    update_active() ;
+    update_relevant() ;
+    go_courses() ;
+    go_selection_popup();
+
+}
