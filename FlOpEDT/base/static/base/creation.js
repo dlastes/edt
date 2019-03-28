@@ -1919,7 +1919,7 @@ function create_selections() {
 
 }
 
-    
+// add data related to a new filter pannel
 function add_pannel(d) {
     var pannel = {type: d.type,
                   x: sel_popup.x,
@@ -1935,6 +1935,7 @@ function add_pannel(d) {
     }
 }
 
+// returns the data related to a given filter type
 function popup_data(type) {
     switch(type) {
     case "tutor":
@@ -1949,6 +1950,7 @@ function popup_data(type) {
 }
 
 
+// refreshes filter pannels
 function go_selection_popup(){
     
     var bound = selg
