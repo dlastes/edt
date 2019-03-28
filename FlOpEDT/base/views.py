@@ -331,6 +331,7 @@ def fetch_cours_pl(req, year, week, num_copy, **kwargs):
     response = HttpResponse(dataset.csv, content_type='text/csv')
     response['week'] = week
     response['year'] = year
+    response['days'] = str(num_all_days(year, week, req.department))
     response['num_copy'] = num_copy
     
     cached = cache.set(cache_key, response)

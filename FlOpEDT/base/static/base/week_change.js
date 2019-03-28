@@ -394,6 +394,8 @@ function fetch_cours() {
             if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
                 an_att == weeks.init_data[weeks.sel[0]].an) {
 
+                days = JSON.parse(req.getResponseHeader('days').replace(/\'/g, '"'));
+            
                 tutors.pl = [];
                 modules.pl = [];
                 salles.pl = [];
