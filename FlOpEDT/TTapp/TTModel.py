@@ -593,8 +593,8 @@ class TTModel(object):
         # Holidays
         for holiday in self.wdb.holidays:
             holislots = self.wdb.slots_by_day[holiday.day]
-            if holiday.apm is not None:
-                holislots = filter(holislots, apm=holiday.apm)
+            # if holiday.apm is not None:
+            #     holislots = filter(holislots, apm=holiday.apm)
             for sl in holislots:
                 for c in self.wdb.compatible_courses[sl]:
                     self.add_constraint(self.TT[(sl, c)], '==', 0)
