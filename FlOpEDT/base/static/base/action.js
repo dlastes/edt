@@ -461,7 +461,6 @@ function go_cm_room_tutor_change() {
 
 
 function remove_pannel(p, i){
-    console.log(i);
     sel_popup.pannels.splice(i, 1);
     go_selection_popup() ;
 }

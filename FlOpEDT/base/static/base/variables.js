@@ -476,7 +476,7 @@ var cours = [];
 
 // listener for curses drag and drop 
 var dragListener;
-
+var drag_popup ;
 
 // helper for the d&d
 var drag = {

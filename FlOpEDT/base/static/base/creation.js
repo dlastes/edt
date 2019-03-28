@@ -1371,6 +1371,16 @@ function def_drag() {
             }
         });
 
+    drag_popup = d3.drag()
+        .on("start", function(d) {
+            drag.sel = d3.select(this);
+            drag.sel.raise() ;
+        })
+        .on("drag", function(d) {
+            d.x += d3.event.dx;
+            d.y += d3.event.dy;
+            drag.sel.attr("transform", popup_trans(d));
+        });
 }
 
 
@@ -1942,19 +1952,27 @@ function create_selections() {
 
 }
 
-// add data related to a new filter pannel
+// add data related to a new filter pannel if not
+// already present
 function add_pannel(d) {
-    var pannel = {type: d.type,
-                  x: sel_popup.x,
-                  y: sel_popup.y,
-                  list: popup_data(d.type)};
-    
-    sel_popup.pannels.push(pannel);
 
-    go_selection_popup();
+    var same = sel_popup.pannels.find(function(p) {
+        return p.type == d.type ;
+    }) ;
 
-    if (pannel.type == "group") {
-        go_gp_buttons() ;
+    if(typeof same === 'undefined') {
+        var pannel = {type: d.type,
+                      x: sel_popup.x,
+                      y: sel_popup.y,
+                      list: popup_data(d.type)};
+
+        sel_popup.pannels.push(pannel);
+        
+        go_selection_popup();
+
+        if (pannel.type == "group") {
+            go_gp_buttons() ;
+        }
     }
 }
 
@@ -1987,7 +2005,8 @@ function go_selection_popup(){
         .enter()
         .append("g")
         .attr("class", "sel-pop-g")
-        .attr("id", popup_pannel_type_id);
+        .attr("id", popup_pannel_type_id)
+        .call(drag_popup);
 
     g_new
         .merge(bound)
@@ -2008,12 +2027,12 @@ function go_selection_popup(){
     var exit_new = g_new
         .append("g")
         .attr("class", "sel-pop-exit")
-        .attr("cursor", "pointer")
-        .on("click", remove_pannel);
+        .attr("cursor", "pointer");
 
     exit_new
         .merge(bound.select(".sel-pop-exit"))
-        .attr("transform", popup_exit_trans);
+        .attr("transform", popup_exit_trans)
+        .on("click", remove_pannel);
 
     exit_new
         .append("rect")
