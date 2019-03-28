@@ -528,6 +528,8 @@ function clean_prof_displayed() {
         }
     }
 
+    tutor_names.sort();
+
     update_selection();
 
     swap_data(tutor_names, tutors, "tutor") ;
@@ -540,10 +542,7 @@ function clean_prof_displayed() {
         }
     });
 
-    if (sel_popup.type != "") {
-        go_selection_buttons() ;
-    }
-
+    go_selection_popup() ;
     
 }
 
@@ -686,6 +685,7 @@ function fetch_ended() {
         update_selection();
 
         swap_data(module_names, modules, "module");
+
         update_active();
         update_relevant();
 
@@ -740,7 +740,13 @@ function swap_data(fetched, current, type) {
             return em ;
         }
     )
-    
+    var pannel = sel_popup.pannels.find(function(p) {
+        return p.type == type ;
+    })
+    if (typeof pannel !== 'undefined') {
+        pannel.list = current.all ;
+    }
+
 }
 
 

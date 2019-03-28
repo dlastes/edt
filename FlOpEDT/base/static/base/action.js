@@ -460,10 +460,10 @@ function go_cm_room_tutor_change() {
 }
 
 
-function validate_tutor_selection(d){
-    //    selg.select(".tutor-button-g").remove();
-    selg.select("*").remove();
-    sel_popup.type = "" ;
+function remove_pannel(p, i){
+    console.log(i);
+    sel_popup.pannels.splice(i, 1);
+    go_selection_popup() ;
 }
 
 function go_select_tutors() {
@@ -1276,26 +1276,13 @@ function compute_cm_room_tutor_direction() {
 }
 
 
-function apply_selection_display(pr) {
+function apply_selection_display(choice) {
     if (fetch.done) {
 
-        var sel_list = [] ;
-        switch(sel_popup.type) {
-        case "tutor":
-            sel_list = tutors.all ;
-            break ;
-        case "module":
-            sel_list = modules.all ;
-            break ;
-        case "room":
-            sel_list = rooms_sel.all ;
-            break ;
-        default:
-            console.log("Type selection unknown");
-        }
+        var sel_list = choice.pannel.list ;
 
         var concerned = sel_list.find(function(t) {
-            return t.name == pr.name ;
+            return t.name == choice.name ;
         });
         if (typeof concerned === 'undefined') {
             console.log("Prof, module ou salle inexistante...");
@@ -1303,11 +1290,11 @@ function apply_selection_display(pr) {
         }
 
         
-	if(sel_popup.type == "tutor"
+	if(choice.pannel.type == "tutor"
            && logged_usr.dispo_all_change && ckbox["dis-mod"].cked){
             tutors.all.forEach(function(t) { t.display = false ; });
             concerned.display = true ;
-	    user.nom = pr.name ;
+	    user.nom = choice.name ;
 	    create_dispos_user_data() ;
 	    go_pref(true) ;
 	} else {
@@ -1333,32 +1320,20 @@ function apply_selection_display(pr) {
         update_active() ;
         update_relevant() ;
         go_courses() ;
-        go_selection_buttons();
+        go_selection_popup();
     }
 }
 
 
-function apply_selection_display_all() {
+function apply_selection_display_all(p) {
     var condition = true ;
     var sel_list = [];
-    switch(sel_popup.type) {
-    case "tutor":
-        condition = fetch.done
+
+    if (p.type != "tutor"
+        || (fetch.done
 	    && (!logged_usr.dispo_all_change
-                || !ckbox["dis-mod"].cked);
-        sel_list = tutors.all ;
-        break ;
-    case "module":
-        sel_list = modules.all ;
-        break ;
-    case "room":
-        sel_list = rooms_sel.all ;
-        break ;
-    default:
-        console.log("Type selection unknown");
-    }
-    if (condition) {
-        sel_list.forEach(function(d) {
+                || !ckbox["dis-mod"].cked))) {
+        p.list.forEach(function(d) {
             d.display = true ;
         })
         update_active() ;

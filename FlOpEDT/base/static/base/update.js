@@ -761,7 +761,7 @@ function go_quote() {
 function go_gp_buttons() {
     for (var p = 0; p < set_promos.length; p++) {
         var cont = selg
-            .select(".group-button-g")
+            .select(".sel-pop-g#" + popup_type_id("group"))
             .selectAll(".gp-but-" + set_promos[p] + "P")
             .data(Object.keys(groups[p]).map(function(k) {
                 return groups[p][k];
@@ -1165,46 +1165,21 @@ function go_edt(t) {
 }
 
 
-
 function go_selection_buttons() {
 
-    var sel_list = [] ;
-    var type = sel_popup.type ;
-    
-    if (type == "" || type == "group") {
-        return ;
-    } else if (type == "tutor") {
-        sel_list = tutors.all ;
-    } else if (type == "module") {
-        sel_list = modules.all ;
-    } else if (type == "room") {
-        sel_list = rooms_sel.all ;
-    } 
-
-    
-    var nb_el = sel_list.length ;
-    sel_popup.h = but_sel_y(sel_list[nb_el - 1], nb_el - 1)
-        + sel_popup.but[type].h ;
-
-    selg
-        .select("." + type + "-button-bg")
-        .attr("x",  - sel_popup.mar_side )
-        .attr("y",  - (sel_popup.mar_side + but_exit.side + but_exit.mar_next))
-        .attr("width", sel_popup.w + 2*sel_popup.mar_side)
-        .attr("height", sel_popup.mar_side + but_exit.side + but_exit.mar_next
-              + sel_popup.h + sel_popup.mar_side);
-
-    
-    tutors.all.sort(function(a,b){
-        return a.name.localeCompare(b.name);
-    });
-
-    var cont =
-        selg
-        .select("." + type + "-button-g")
+    var cont = selg
+        .selectAll(".sel-pop-g")
+        .data(sel_popup.pannels, function(p) {
+            return p.type ;
+        })
         .selectAll(".sel-button")
-        .data(sel_list, function(p) {
-            return p.name ;
+        .data(function(p) {
+            p.list.forEach(function(c){
+                c.pannel = p ;
+            });
+            return p.list ;
+        }, function(c) {
+            return c.name ;
         });
 
     var contg = cont
@@ -1217,11 +1192,14 @@ function go_selection_buttons() {
         .merge(cont)
         .attr("opacity", but_sel_opac);
 
+    
+    
     contg
         .append("rect")
         .attr("class", but_sel_class)
-        .attr("width", sel_popup.but[type].w)
-        .attr("height", sel_popup.but[type].h)
+        .attr("ty", "ch")
+        .attr("width", popup_choice_w)
+        .attr("height", popup_choice_h)
         .attr("rx", 5)
         .attr("ry", 10)
         .merge(cont.select("rect"))
