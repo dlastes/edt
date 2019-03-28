@@ -1370,6 +1370,9 @@ function apply_cancel_selections() {
         rgi++ ;
     }
 
+    // remove all pannels
+    sel_popup.pannels = [] ;
+
     // update flags and display
     update_active() ;
     update_relevant() ;
