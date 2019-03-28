@@ -144,14 +144,8 @@ function on_group_rcv(dg) {
 
 function on_room_rcv(room_data) {
     rooms = room_data;
-    var is_any = (Object.keys(rooms.roomtypes).indexOf("any") > -1) ;
     var room_names ;
-    if (is_any) {
-        room_names = rooms.roomtypes["any"];
-    } else {
-        room_names = Object.keys(rooms.roomgroups) ;
-    }
-    console.log(room_names) ;
+    room_names = Object.keys(rooms.roomgroups) ;
     swap_data(room_names, rooms_sel, "room");
 }
 

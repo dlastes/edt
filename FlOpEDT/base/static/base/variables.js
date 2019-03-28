@@ -433,14 +433,19 @@ var sel_popup = {
     y: -210,
     w: 0,
     h:0,
+    groups_w: 0,
+    groups_h: 0,
     selw: 60,
     selh: 30,
     selx: 700,
-    sely: -230,
+    sely: -200,
     selmy: 10,
     mar_side: 5,
     tlx: 700,
-    available: [{type: "tutor",
+    available: [{type:"group",
+                 buttxt: "Groupes",
+                 active: false},
+                {type: "tutor",
                  buttxt: "Profs",
                  active: false},
                 {type:"module",
@@ -448,18 +453,20 @@ var sel_popup = {
                  active: false},
                 {type:"room",
                  buttxt: "Salles",
-                 active: false}],
+                 active: false}
+                ],
     get_available: function(t) {
-        var ret = this.available.filter(function(d) {
+        var ret = this.available.find(function(d) {
             return d.type == t ;
         });
-        if (ret.length != 1) {
+        if (typeof ret === 'undefined') {
             console.log("type unknown");
             return ;
         } else {
-            return ret[0];
+            return ret ;
         }
     },
+    pannels: [], //{type, x, y, w, h, txt}
     but: [],
     active_filter: false
 };
@@ -509,7 +516,7 @@ var cours = [];
 
 // listener for curses drag and drop 
 var dragListener;
-
+var drag_popup ;
 
 // helper for the d&d
 var drag = {
