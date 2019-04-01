@@ -35,21 +35,25 @@ DATABASES = {
 }
 
 REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
-REDIS_BACKEND = f'redis://{REDIS_HOST}:6379/1'
+REDIS_PORT = os.environ.get('REDIS_PORT', '6379')
+REDIS_BACKEND = f'redis://{REDIS_HOST}:{REDIS_PORT}/1'
 
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [(REDIS_HOST, 6379)],
+            "hosts": [(REDIS_HOST, REDIS_PORT)],
         },
     },
 }
 
+CACHE_HOST = os.environ.get("CACHE_HOST", "localhost")
+CACHE_PORT = os.environ.get("CACHE_PORT", "11211")
+
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-        'LOCATION': f'{os.environ.get("CACHE_HOST", "localhost")}:11211',
+        'LOCATION': f'{CACHE_HOST}:{CACHE_PORT}',
     }
 }
 
