@@ -451,6 +451,10 @@ sel_popup.but["module"] = {
     mar_x: 2,
     mar_y: 4,
 };
+sel_popup.available.forEach(function(pannel) {
+    pannel.x = sel_popup.x ;
+    pannel.y = sel_popup.y ;
+}) ;
 
 // has any instructor been fetched?
 var first_fetch_prof = true;

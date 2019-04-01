@@ -1380,6 +1380,14 @@ function def_drag() {
             d.x += d3.event.dx;
             d.y += d3.event.dy;
             drag.sel.attr("transform", popup_trans(d));
+        })
+    // save pannel position
+        .on("end", function(d) {
+            var infos = sel_popup.get_available(d.type) ;
+            if (typeof infos !== 'undefined') {
+                infos.x = d.x ;
+                infos.y = d.y ;
+            }
         });
 }
 
@@ -1962,13 +1970,17 @@ function add_pannel(d) {
 
     if(typeof same === 'undefined') {
         var title = "" ;
+        var px = sel_popup.x;
+        var py = sel_popup.y;
         var infos = sel_popup.get_available(d.type) ;
         if (typeof infos !== 'undefined') {
             title = infos.buttxt ;
+            px = infos.x ;
+            py = infos.y ;
         }
         var pannel = {type: d.type,
-                      x: sel_popup.x,
-                      y: sel_popup.y,
+                      x: px,
+                      y: py,
                       list: popup_data(d.type),
                       txt: title};
 
