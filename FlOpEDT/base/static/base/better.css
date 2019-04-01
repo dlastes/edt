@@ -71,6 +71,14 @@ text.select-standard {
 text.select-highlight {
   fill:black;
 }
+/* popup title */
+.popup-title {
+  font-size:16px;
+  font-weight:bold;
+}
+.sel-pop-bg, .sel-pop-exit {
+    fill:#dddddd;
+}
 
 g[class^="gp-but-"] {
   cursor: pointer;

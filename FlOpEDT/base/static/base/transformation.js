@@ -651,23 +651,29 @@ function menu_curs(dk) {
   ------ PROFS -------
   --------------------*/
 function but_sel_x(p, i) {
-    var t = sel_popup.type ;
+    return but_sel_type_x(i, p.pannel.type) ;
+}
+function but_sel_type_x(i, t) {
     return ((i + 1) % sel_popup.but[t].perline)
         * (sel_popup.but[t].w + sel_popup.but[t].mar_x);
 }
 
 function but_sel_y(p, i) {
-    var t = sel_popup.type ;
+    return but_sel_type_y(i, p.pannel.type) ;
+}
+function but_sel_type_y(i, t) {
     return Math.floor((i + 1) / sel_popup.but[t].perline)
         * (sel_popup.but[t].h + sel_popup.but[t].mar_y);
 }
 
 function but_sel_txt_x(p, i) {
-    return but_sel_x(p, i) + .5 * sel_popup.but[sel_popup.type].w;
+    var t = p.pannel.type ;
+    return but_sel_type_x(i, t) + .5 * sel_popup.but[t].w;
 }
 
-function but_sel_txt_y(p, i) {
-    return but_sel_y(p, i) + .5 * sel_popup.but[sel_popup.type].h;
+function but_sel_txt_y(p, i, j) {
+    var t = p.pannel.type ;
+    return but_sel_type_y(i, t) + .5 * sel_popup.but[t].h;
 }
 
 function but_sel_class(p) {
@@ -1045,11 +1051,95 @@ function sel_trans(d, i){
     ret += sel_popup.selx ;
     ret += ",";
     ret += sel_popup.sely
-        + (i+1)*(sel_popup.but["tutor"].h + sel_popup.selmy);
+        + i*(sel_popup.selh + sel_popup.selmy);
+    ret += ")";
+    return ret;
+}
+function sel_forall_trans(){
+    var ret = "translate(" ;
+    ret += sel_popup.selx + .25*sel_popup.selw ;
+    ret += ",";
+    ret += sel_popup.sely - sel_popup.selh - sel_popup.selmy;
     ret += ")";
     return ret;
 }
 
 function but_sel_opac(d) {
     return d.display ? 1 : opac ;
+}
+
+function popup_trans(d) {
+    return "translate(" + d.x + "," + d.y + ")" ;
+}
+
+function popup_exit_trans(d) {
+    return "translate(" + popup_exit_trans_x(d) + ","
+        + popup_exit_trans_y(d) + ")";
+}
+function popup_exit_trans_x(d) {
+    return popup_bg_w(d) - 2* sel_popup.mar_side-but_exit.side ;
+}
+function popup_exit_trans_y(d) {
+    return - (but_exit.side + but_exit.mar_next);
+}
+
+
+function popup_all_w(d) {
+    return sel_popup.but[d.type].w ;
+}
+function popup_all_h(d) {
+    return sel_popup.but[d.type].h ;
+}
+function popup_all_txt_x(d) {
+    return .5 * popup_all_w(d) ;
+}
+function popup_all_txt_y(d) {
+    return .5 * popup_all_h(d) ;
+}
+
+function popup_bg_h(d) {
+    var margins = sel_popup.mar_side + but_exit.side + but_exit.mar_next
+        + sel_popup.mar_side ;
+    if (d.type == "group") {
+        return sel_popup.groups_h + margins ;
+    }
+    var nb_el = d.list.length ;
+    return but_sel_type_y(nb_el - 1, d.type)
+        + sel_popup.but[d.type].h
+        + margins ;
+}
+
+function popup_bg_w(d) {
+    var t = d.type ;
+    var margins = 2*sel_popup.mar_side ;
+    if (t == "group") {
+        return sel_popup.groups_w + margins ;
+    }
+    return (sel_popup.but[t].perline) * (sel_popup.but[t].w + sel_popup.but[t].mar_x)
+        - sel_popup.but[t].mar_x + margins ;
+}
+
+function popup_type_id(t) {
+    return "popup-" + t ;
+}
+function popup_pannel_type_id(d) {
+    return popup_type_id(d.type) ;
+}
+
+function popup_choice_w(d) {
+    var t = d.pannel.type ;
+    return sel_popup.but[t].w ;
+}
+function popup_choice_h(d) {
+    var t = d.pannel.type ;
+    return sel_popup.but[t].h ;
+}
+function popup_title_txt(d) {
+    return d.txt ;
+}
+function popup_title_x(d) {
+    return .5*popup_exit_trans_x(d) ;
+}
+function popup_title_y(d) {
+    return .5*(popup_exit_trans_y(d)-sel_popup.mar_side) ;
 }

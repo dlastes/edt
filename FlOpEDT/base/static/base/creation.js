@@ -662,6 +662,34 @@ function set_butgp() {
 	cur_buty += margin_but.ver + cur_maxby*butgp.height ;
     }
 
+
+    // Compute dimensions of the group selection popup
+    
+    var minx, maxx, miny, maxy, curminx, curmaxx, curminy, curmaxy, curp ;
+    
+    for (var p = 0; p < set_promos.length; p++) {
+        curp = root_gp[p] ;
+        curminx = curp.butx ;
+        curminy = curp.buty ;
+        if(p==0 || curminx<minx) {
+            minx = curminx ;
+        }
+        if(p==0 || curminy<miny) {
+            miny = curminy ;
+        }
+        curmaxx = curminx + curp.gp.bw * butgp.width ;
+        curmaxy = curminy + curp.maxby * butgp.height ;
+        if(p==0 || curmaxx>maxx) {
+            maxx = curmaxx ;
+        }
+        if(p==0 || curmaxy>maxy) {
+            maxy = curmaxy ;
+        }
+    }
+
+    sel_popup.groups_w = maxx-minx ;
+    sel_popup.groups_h = maxy-miny ;
+
 }
 
 
@@ -1042,83 +1070,6 @@ function compute_promo_leaves(node) {
 }
 
 
-// button to open group selection view
-function create_group_selection() {
-
-    var contg = catg
-        .append("g")
-        .attr("class", "group-selection")
-        .attr("transform", "translate(" + sel_popup.selx + "," + sel_popup.sely + ")")
-        .attr("cursor", "pointer")
-        .on("click", create_static_group_buttons);
-    
-    contg
-        .append("rect")
-        .attr("width", sel_popup.selw)
-        .attr("height", sel_popup.selh)
-        .attr("rx", 5)
-        .attr("ry", 10)
-        .attr("fill", "forestgreen")
-        .attr("x", 0)
-        .attr("y", 0);
-
-    contg
-        .append("text")
-        .text("Groupes")
-        .attr("x", .5 * sel_popup.selw)
-        .attr("y", .5 * sel_popup.selh);
-
-}
-
-
-
-// create static parts of group list popup:
-// - group-button-g group
-// - background rectangle
-// - validate button
-function create_static_group_buttons() {
-
-    var minx, maxx, miny, maxy, curminx, curmaxx, curminy, curmaxy, curp ;
-    
-    for (var p = 0; p < set_promos.length; p++) {
-        curp = root_gp[p] ;
-        curminx = curp.butx ;
-        curminy = curp.buty ;
-        if(p==0 || curminx<minx) {
-            minx = curminx ;
-        }
-        if(p==0 || curminy<miny) {
-            miny = curminy ;
-        }
-        curmaxx = curminx + curp.gp.bw * butgp.width ;
-        curmaxy = curminy + curp.maxby * butgp.height ;
-        if(p==0 || curmaxx>maxx) {
-            maxx = curmaxx ;
-        }
-        if(p==0 || curmaxy>maxy) {
-            maxy = curmaxy ;
-        }
-    }
-
-    sel_popup.type = "group" ;
-    sel_popup.w = maxx-minx ;
-    sel_popup.h = maxy-miny ;
-
-    init_selection_popup() ;
-
-    selg
-        .select(".group-button-bg")
-        .attr("x",  - sel_popup.mar_side )
-        .attr("y",  - (sel_popup.mar_side + but_exit.side + but_exit.mar_next))
-        .attr("width", sel_popup.w + 2*sel_popup.mar_side)
-        .attr("height", sel_popup.mar_side + but_exit.side + but_exit.mar_next
-              + sel_popup.h + sel_popup.mar_side);
-
-    go_gp_buttons();
-}
-
-
-
 /*--------------------
   ------ MENUS -------
   --------------------*/
@@ -1420,6 +1371,16 @@ function def_drag() {
             }
         });
 
+    drag_popup = d3.drag()
+        .on("start", function(d) {
+            drag.sel = d3.select(this);
+            drag.sel.raise() ;
+        })
+        .on("drag", function(d) {
+            d.x += d3.event.dx;
+            d.y += d3.event.dy;
+            drag.sel.attr("transform", popup_trans(d));
+        });
 }
 
 
@@ -1603,58 +1564,6 @@ function clean_unavailable_rooms() {
 /*--------------------
   ------- TUTORS -----
   --------------------*/
-
-function init_selection_popup(){
-    var ssg = selg
-        .append("g")
-        .attr("class", sel_popup.type + "-button-g")
-        .attr("transform",
-              "translate(" + sel_popup.x + "," + sel_popup.y + ")");
-
-    ssg
-        .append("rect")
-        .attr("class", sel_popup.type + "-button-bg")
-        .attr("fill", "white");
-    
-    var gpbgp = ssg
-        .append("g")
-        .attr("class", sel_popup.type + "-button-exit")
-        .attr("cursor", "pointer")
-        .on("click", validate_tutor_selection);
-
-    var butok = gpbgp
-        .append("g")
-        .attr("transform", "translate(" + (sel_popup.w-but_exit.side) + ","
-              + (- (but_exit.side + but_exit.mar_next)) + ")");
-
-    butok
-        .append("rect")
-        .attr("stroke", "none")
-        .attr("fill", "white")
-        .attr("x", 0)
-        .attr("y", 0)
-        .attr("width", but_exit.side)
-        .attr("height", but_exit.side);
-
-    butok
-        .append("line")
-        .attr("stroke","black")
-        .attr("stroke-width", 4)
-        .attr("x1", but_exit.mar_side)
-        .attr("y1", but_exit.mar_side)
-        .attr("x2", but_exit.side-but_exit.mar_side)
-        .attr("y2", but_exit.side-but_exit.mar_side);
-
-    butok
-        .append("line")
-        .attr("stroke","black")
-        .attr("stroke-width", 4)
-        .attr("x1", but_exit.mar_side)              
-        .attr("y1", but_exit.side-but_exit.mar_side)
-        .attr("x2", but_exit.side-but_exit.mar_side)              
-        .attr("y2", but_exit.mar_side);
-
-}
 
 
 /*---------------------
@@ -1987,14 +1896,8 @@ function def_cm_change() {
 }
 
 
-// create all selection buttons
-function create_selections() {
-    create_group_selection() ;
-    create_generic_selection() ;
-}
-
 // buttons to open selection view
-function create_generic_selection() {
+function create_selections() {
 
     var avg = catg
         .selectAll(".gen-selection")
@@ -2006,7 +1909,7 @@ function create_generic_selection() {
         .attr("class", "gen-selection")
         .attr("transform", sel_trans)
         .attr("cursor", "pointer")
-        .on("click", create_static_gen_buttons);
+        .on("click", add_pannel);
     
     contg
         .append("rect")
@@ -2024,26 +1927,166 @@ function create_generic_selection() {
         .attr("x", .5 * sel_popup.selw)
         .attr("y", .5 * sel_popup.selh);
 
+    var forall = catg
+        .append("g")
+        .attr("class", "sel_forall")
+        .attr("transform", sel_forall_trans())
+        .attr("cursor", "pointer")
+        .on("click", apply_cancel_selections);
+    
+    forall
+        .append("rect")
+        .attr("width", .5*sel_popup.selw)
+        .attr("height", sel_popup.selh)
+        .attr("class", "select-highlight")
+        .attr("rx", 5)
+        .attr("ry", 10)
+        .attr("x", 0)
+        .attr("y", 0);
+
+    forall
+        .append("text")
+        .text("\u2200")
+        .attr("x", .25*sel_popup.selw)
+        .attr("y", .5*sel_popup.selh);
+
 }
 
-function create_static_gen_buttons(d) {
-    sel_popup.type = d.type ;
-    sel_popup.w = (sel_popup.but[d.type].perline) * (sel_popup.but[d.type].w + sel_popup.but[d.type].mar_x)
-        - sel_popup.but[d.type].mar_x ;
+// add data related to a new filter pannel if not
+// already present
+function add_pannel(d) {
 
-    init_selection_popup();
+    var same = sel_popup.pannels.find(function(p) {
+        return p.type == d.type ;
+    }) ;
+
+    if(typeof same === 'undefined') {
+        var title = "" ;
+        var infos = sel_popup.get_available(d.type) ;
+        if (typeof infos !== 'undefined') {
+            title = infos.buttxt ;
+        }
+        var pannel = {type: d.type,
+                      x: sel_popup.x,
+                      y: sel_popup.y,
+                      list: popup_data(d.type),
+                      txt: title};
+
+        sel_popup.pannels.push(pannel);
+        
+        go_selection_popup();
+
+        if (pannel.type == "group") {
+            go_gp_buttons() ;
+        }
+    }
+}
+
+// returns the data related to a given filter type
+function popup_data(type) {
+    switch(type) {
+    case "tutor":
+        return tutors.all ;
+    case "module":
+        return modules.all ;
+    case "room":
+        return rooms_sel.all ;
+    default:
+        return [] ;
+    }
+}
+
+
+// refreshes filter pannels
+function go_selection_popup(){
     
-    var contg = selg
-        .select("." + sel_popup.type + "-button-g")
+    var bound = selg
+        .selectAll(".sel-pop-g")
+        .data(sel_popup.pannels, function(p) {
+            return p.type ;
+        }) ;
+
+
+    var g_new = bound
+        .enter()
         .append("g")
-        .attr("class", sel_popup.type + "-button-all")
+        .attr("class", "sel-pop-g")
+        .attr("id", popup_pannel_type_id)
+        .call(drag_popup);
+
+    g_new
+        .merge(bound)
+        .attr("transform", popup_trans);
+
+    var bg_new = g_new
+        .append("rect")
+        .attr("class", "sel-pop-bg")
+        .attr("x",  - sel_popup.mar_side )
+        .attr("y",  - (sel_popup.mar_side + but_exit.side + but_exit.mar_next))
+        .attr("width", popup_bg_w);
+    
+    bg_new
+        .merge(bound.select(".sel-pop-bg"))
+        .attr("height", popup_bg_h);
+
+    var exit_new = g_new
+        .append("g")
+        .attr("class", "sel-pop-exit")
+        .attr("cursor", "pointer");
+
+    exit_new
+        .merge(bound.select(".sel-pop-exit"))
+        .attr("transform", popup_exit_trans)
+        .on("click", remove_pannel);
+
+    exit_new
+        .append("rect")
+        .attr("stroke", "none")
+        .attr("x", 0)
+        .attr("y", 0)
+        .attr("width", but_exit.side)
+        .attr("height", but_exit.side);
+
+    exit_new
+        .append("line")
+        .attr("stroke","black")
+        .attr("stroke-width", 4)
+        .attr("x1", but_exit.mar_side)
+        .attr("y1", but_exit.mar_side)
+        .attr("x2", but_exit.side-but_exit.mar_side)
+        .attr("y2", but_exit.side-but_exit.mar_side);
+
+    exit_new
+        .append("line")
+        .attr("stroke","black")
+        .attr("stroke-width", 4)
+        .attr("x1", but_exit.mar_side)              
+        .attr("y1", but_exit.side-but_exit.mar_side)
+        .attr("x2", but_exit.side-but_exit.mar_side)              
+        .attr("y2", but_exit.mar_side);
+
+
+    g_new
+        .append("text")
+        .text(popup_title_txt)
+        .attr("class", "popup-title")
+        .attr("x", popup_title_x)
+        .attr("y", popup_title_y);
+    
+
+    var contg = g_new
+        .filter(function(p){
+            return p.type != "group" ;
+        })
+        .append("g")
+        .attr("class", "sel-pop-all")
         .attr("cursor", "pointer")
         .on("click", apply_selection_display_all);
     
     contg
         .append("rect")
-        .attr("width", sel_popup.but[d.type].w)
-        .attr("height", sel_popup.but[d.type].h)
+        .attr("width", popup_all_w)
+        .attr("height", popup_all_h)
         .attr("class", "select-highlight")
         .attr("rx", 5)
         .attr("ry", 10)
@@ -2053,8 +2096,10 @@ function create_static_gen_buttons(d) {
     contg
         .append("text")
         .text("\u2200")
-        .attr("x", .5 * sel_popup.but[d.type].w)
-        .attr("y", .5 * sel_popup.but[d.type].h);
+        .attr("x", popup_all_txt_x)
+        .attr("y", popup_all_txt_y);
+
+    bound.exit().remove() ;
 
     go_selection_buttons();
 
