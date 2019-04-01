@@ -1361,13 +1361,14 @@ function apply_cancel_selections() {
         return acc + ret ;
     }, 0);
     var rgi = 0 ;
-    if(displayed < root_gp.length) {
+    check_hidden_groups();
+    if(!is_no_hidden_grp) {
         while (displayed > 0 && rgi<root_gp.length) {
             var gp = root_gp[rgi].gp ;
             if (gp.display) {
                 apply_gp_display(gp, false, true);
+                displayed-- ;
             }
-            displayed-- ;
             rgi++ ;
         }
     }
