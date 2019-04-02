@@ -9,7 +9,7 @@ services:
     restart: always
     image: postgres
     env_file:
-      - ./docker/env/db.prod.env
+      - ./docker/env/db.env
     deploy:
       resources:
         limits:
@@ -19,7 +19,7 @@ services:
     restart: always
     image: "nginx"
     ports:
-      - "${LOCALHOST_PORT-80}:80"
+      - "${PORT-80}:80"
     volumes:
       - ./docker/nginx/conf.d:/etc/nginx/conf.d
       - static-volume:/static
@@ -31,16 +31,15 @@ services:
  
   web:
     restart: always
-    image:  localhost:5000/flopedt_pro_web
+    image:  localhost:5000/${COMPOSE_PROJECT_NAME:-edt_pro_web}
     build: 
       context: .
       args:
         CONFIG: production    
     env_file:
+      - ./docker/env/db.env
       - ./docker/env/web.env
-      - ./docker/env/db.prod.env
       - ./docker/env/web.prod.env
-      - ./docker/env/secret.env
     environment:
       - DJANGO_SETTINGS_MODULE=FlOpEDT.settings.production
       - START_SERVER=${START_SERVER:-on}

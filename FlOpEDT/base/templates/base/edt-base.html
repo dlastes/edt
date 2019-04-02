@@ -30,7 +30,7 @@
 
 {% load static %}
 
-<link rel="stylesheet" href="{% static 'base/better.css' %}?4" />
+<link rel="stylesheet" href="{% static 'base/better.css' %}?5" />
 <script src="{% static 'base/d3.v4.min.js' %}"></script>
 <script>
     var groupes_fi = "{% url "base:fetch_groups" department %}";
@@ -68,13 +68,12 @@
 
 {% block script_variable %}{% endblock %}
 
-<script type='text/javascript' src="{% static 'base/variables.js' %}?4"></script>
-<script type='text/javascript' src="{% static 'base/intervals.js' %}?2"></script>
-<script type='text/javascript' src="{% static 'base/week_change.js' %}?4"></script>
-<script type='text/javascript' src="{% static 'base/transformation.js' %}?4"></script>
-<script type='text/javascript' src="{% static 'base/creation.js' %}?4"></script>
-<script type='text/javascript' src="{% static 'base/action.js' %}?4"></script>
-<script type='text/javascript' src="{% static 'base/update.js' %}?6"></script>
+<script type='text/javascript' src="{% static 'base/variables.js' %}?6"></script>
+<script type='text/javascript' src="{% static 'base/week_change.js' %}?5"></script>
+<script type='text/javascript' src="{% static 'base/transformation.js' %}?5"></script>
+<script type='text/javascript' src="{% static 'base/creation.js' %}?6"></script>
+<script type='text/javascript' src="{% static 'base/action.js' %}?7"></script>
+<script type='text/javascript' src="{% static 'base/update.js' %}?7"></script>
 
 {% block script_file %}{% endblock %}
 
