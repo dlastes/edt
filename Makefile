@@ -15,20 +15,20 @@ BRANCH := $(shell git branch 2>/dev/null | grep '^*' | colrm 1 2)
 COMPOSE_PROJECT_NAME := edt_$(current_project_dir)_$(shell echo $(CONFIG) | head -c 1)_$(PORT)
 export
 
-.PHONY: install clean init build start stop push deploy rm debug
+.PHONY: config install init build start stop start-db stop-db push deploy rm debug
 
 #
 #	Create config files
 #
-install:
-	envsubst < docker/env/web.prod.in  > docker/env/web.prod.env
+config:
 	printf "PORT=${PORT}\n" > global.env
 	printf "HOST=${HOST}\n" >> global.env
 	printf "CONFIG=${CONFIG}" >> global.env
 
-clean:
-	rm -f docker/env/web.prod.env
-	rm -f global.env
+install:
+ 	ifeq ($(CONFIG), production)
+		envsubst < docker/env/web.prod.in  > docker/env/web.prod.env
+    endif
 
 # Initialize database with basic datas contained 
 # in dump.json for tests purposes

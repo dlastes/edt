@@ -37,7 +37,7 @@ songez à une exécution en `sudo`.)
 
 L'application sera accessible à l'adresse http://localhost:8000.
 
-Vous pouvez importer le fichier [dump.json](./dump.json) (qui est une
+Vous pouvez importer les données d'exemple contenues dans le fichier [dump.json](./dump.json) (qui est une
 base pour jouer avec l'interface) avec la commande :
 
 `make init` 
@@ -48,14 +48,10 @@ responsables des emplois du temps. Pour la vision d'une personne
 enseignante classique, utiliser l'un des autres login (En fait, tous
 les utilisateurs ont le même mot de passe `passe` !).
 
-Les paramètres de la configuration courante se trouvent dans
-`FlOpEDT/settings`. Par défaut, on utilise la configuration
-`development`. On peut spécifier une autre configuration en modifiant
-la variable d'environnement `CONFIG` comme suit :
+Deux exemples de configuration sont disponibles pour exécuter l'application avec Docker : `development` et `production`. La configuration `development` est utilisée par défaut par les cibles du fichier Makefile. Pour utiliser la configuration `production`, les deux étapes suivantes sont nécessaires :
 
-`CONFIG=production make [build|init|start|stop]`
-
-Dans cet exemple de configuration pour un environnement de production, il est nécessaire de définir la variable `SECRET_KEY=your_very_secret_key` dans le fichier `/docker/env/secret.env`.
+- `CONFIG=production make install`
+- `CONFIG=production make [build|init|start|stop]`
 
 
 ## Contributions
