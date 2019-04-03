@@ -1282,6 +1282,9 @@ function def_drag() {
         })
 	.on("end", function(d) {
 
+            // click => end. So if real drag
+            if(drag.sel != null) {
+
             // lower the course to the middleground layer
             mg.node().appendChild(drag.sel.node());
 
@@ -1369,6 +1372,7 @@ function def_drag() {
                 go_grid(true);
                 go_courses(true);
             }
+            }
         });
 
     drag_popup = d3.drag()
@@ -1388,6 +1392,7 @@ function def_drag() {
                 infos.x = d.x ;
                 infos.y = d.y ;
             }
+            drag.sel = null ;
         });
 }
 
