@@ -10,6 +10,9 @@ services:
     image: postgres
     env_file:
       - ./docker/env/db.env
+    volumes:
+      - "db-data:/var/lib/postgresql/data"
+      - "db-backup:/backup"
     deploy:
       resources:
         limits:
@@ -55,3 +58,5 @@ services:
 
 volumes:
   static-volume:
+  db-data:
+  db-backup:
