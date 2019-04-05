@@ -389,7 +389,7 @@ var but_exit = {
 };
 var sel_popup = {
     type: "",
-    x: 600,
+    x: 640,
     y: -210,
     w: 0,
     h:0,
@@ -397,9 +397,9 @@ var sel_popup = {
     groups_h: 0,
     selw: 60,
     selh: 30,
-    selx: 700,
+    selx: 570,
     sely: -200,
-    selmy: 10,
+    selmy: 8,
     mar_side: 5,
     tlx: 700,
     available: [{type:"group",
