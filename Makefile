@@ -28,7 +28,8 @@ config:
 install:
  	ifeq ($(CONFIG), production)
 		envsubst < docker/env/web.prod.in  > docker/env/web.prod.env
-    endif
+		printf "POSTGRES_PASSWORD=$(shell dd if=/dev/urandom bs=1 count=32 2>/dev/null | base64 -w 0 | rev | cut -b 2- | rev)" > docker/env/db.prod.env
+  endif
 
 # Initialize database with basic datas contained 
 # in dump.json for tests purposes
