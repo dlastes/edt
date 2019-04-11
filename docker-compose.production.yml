@@ -10,6 +10,7 @@ services:
     image: postgres
     env_file:
       - ./docker/env/db.env
+      - ./docker/env/db.prod.env
     volumes:
       - "db-data:/var/lib/postgresql/data"
       - "db-backup:/backup"
@@ -41,6 +42,7 @@ services:
         CONFIG: production    
     env_file:
       - ./docker/env/db.env
+      - ./docker/env/db.prod.env      
       - ./docker/env/web.env
       - ./docker/env/web.prod.env
     environment:
