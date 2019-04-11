@@ -167,7 +167,8 @@ function go_filter(){
 	    filtered.mod_prof_gp[0].arr = msg.modules;
 	    filtered.mod_prof_gp[1].arr = msg.profs;
 	    filtered.mod_prof_gp[2].arr = msg.groupes;
-	    liste_cours = {};
+	    liste_cours = msg.cours;
+	    liste_jours = {};
 	    for(i = 0 ; i<msg.jours.length ; i++) {
 		cur = msg.jours[i] ;
 		liste_jours[cur.ref] = {date: cur.date, name: cur.name};
