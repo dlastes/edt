@@ -23,7 +23,11 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
+import importlib
+import sys
+
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.conf import settings
 
 from django.db import models
 
@@ -81,7 +85,7 @@ class TTConstraint(models.Model):
 
     def description(self):
         # Return a human readable constraint name
-        return self. __doc__ or str(self)
+        return self.__doc__ or str(self)
 
     def get_viewmodel(self):
         #
@@ -119,6 +123,36 @@ class TTConstraint(models.Model):
     @classmethod
     def get_viewmodel_prefetch_attributes(cls):
         return ['train_prog', 'department',]
+
+
+class CustomConstraint():
+    """
+    Call a custom constraint implementation.
+    """
+    constraint_class_name = models.CharField(max_length=200, null=True, default=None, blank=True)
+
+
+    def get_constraint(self, class_name):
+        """
+        Return python module containing custom classes
+        """
+        try:
+            module = importlib.import_module(settings.CUSTOM_CONSTRAINTS_PATH)
+            return getattr(module, class_name)()
+        except:
+            print(f"can't find the {settings.CUSTOM_CONSTRAINTS_PATH} module")
+
+
+    def enrich_model(self, ttmodel, ponderation=1):
+        """
+        Call custom constraint method
+        """ 
+        constraint = self.get_constraint(self.constraint_class_name)
+        constraint.enrich_model(ttmodel, ponderation)
+
+
+    def one_line_description(self):    
+        pass
 
 
 class LimitCourseTypePerPeriod(TTConstraint):  # , pond):
