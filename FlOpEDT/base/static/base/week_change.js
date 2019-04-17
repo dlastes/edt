@@ -122,15 +122,25 @@ function sort_preferences() {
 // list: list of pref
 function insert_interval(pref, list) {
     var ts = time_settings.time ;
+
+    // starts too early or finishes too late
+    if (pref.start_time < ts.day_start_time) {
+	pref.duration -= ts.day_start_time - pref.start_time ;
+	pref.start_time = ts.day_start_time ;
+    }
+    if (pref.start_time + pref.duration > ts.day_finish_time) {
+	pref.duration -= pref.start_time + pref.duration - ts.day_finish_time ;
+    }
+
+    // lunch break
     if (pref.start_time < ts.lunch_break_start_time) {
-	if (pref.start_time < ts.day_start_time) {
-	    pref.duration -= ts.day_start_time - pref.start_time ;
-	    pref.start_time = ts.day_start_time ;
-	}
+        // starts in the morning
 	if(pref.start_time + pref.duration > ts.lunch_break_start_time) {
 	    if(pref.start_time + pref.duration < ts.lunch_break_finish_time) {
+                // finishes during lunch break
 		pref.duration -= pref.start_time + pref.duration - ts.lunch_break_start_time ;
 	    } else {
+                // cut by lunch break
 		insert_normalized_interval(
 		    {start_time: ts.lunch_break_finish_time,
 		     duration: pref.start_time + pref.duration - ts.lunch_break_finish_time,
@@ -140,8 +150,10 @@ function insert_interval(pref, list) {
 	    }
 	}
     } else if (pref.start_time + pref.duration < ts.lunch_break_finish_time) {
+        // fully within lunch break
 	return ;
     } else if (pref.start_time < ts.lunch_break_finish_time){
+        // starts during lunch break
 	pref.duration -= ts.lunch_break_finish_time - pref.start_time ;
 	pref.start_time = ts.lunch_break_finish_time ;
     }
@@ -152,7 +164,8 @@ function insert_interval(pref, list) {
 // pref: {start_time, duration, value}
 // list: list of pref
 function insert_normalized_interval(pref, list) {
-//    list.splice(index, nbElements, item)
+    //    list.splice(index, nbElements, item)
+    list.push(pref);
 }
 
 
@@ -167,7 +180,7 @@ function allocate_dispos(tutor) {
 // --  begin  --
 // to change, maybe, if splitting intervals is not allowed
 // in the interface
-function fill_missing_preferences(tutor) {
+function fill_missing_preferences(tutor, ts) {
     for (var i = 0; i < days.length; i++) {
 	insert_interval({start_time: ts.day_start_time,
 			 duration: ts.day_finish_time-ts.day_start_time,
@@ -196,7 +209,7 @@ function create_dispos_user_data() {
 
     if (dispos[user.nom] === undefined) {
 	allocate_dispos(user.nom);
-	fill_missing_preferences(user.nom);
+	fill_missing_preferences(user.nom, ts);
     }
 
     for (var i = 0; i < days.length; i++) {
