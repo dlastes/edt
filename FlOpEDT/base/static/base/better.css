@@ -49,9 +49,13 @@
 }
 /* creneau horaire */
 .gridsckh {
-  font-size:13px;
-  font-weight:normal;
-  text-anchor:start;
+    font-size:13px;
+    font-weight:normal;
+    text-anchor:end;
+}
+.gridsckhl  {
+    stroke:black;
+    stroke-width: 2;
 }
 .cours text {
   font-size:10px;

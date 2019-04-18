@@ -62,9 +62,24 @@
   ------- TIME ------
   --------------------------*/
 
+// day indices
 var idays = {} ;
 for (var i = 0 ; i<days.length ; i++){
     idays[days[i].ref] = days[i] ;
+}
+
+// side time scale
+var side_time = [] ;
+var stime = Math.floor(time_settings.time.day_start_time/60) ;
+if (stime*60 < time_settings.time.day_start_time) {
+    stime ++ ;
+}
+while (stime*60 <= time_settings.time.day_finish_time) {
+    if(stime*60 <= time_settings.time.lunch_break_start_time
+       || stime*60 >= time_settings.time.lunch_break_finish_time) {
+        side_time.push(stime);
+    }
+    stime ++ ;
 }
 
 

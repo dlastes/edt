@@ -551,20 +551,23 @@ function grid_day_pm_width(d) {
 }
 
 
-function gsckh_x(datum) {
-    return grid_width() + 5 ;//.25 * labgp.width;
+function gsckh_x1() {
+    return 0 ;
 }
-
-function gsckh_y(datum, i) {
-    var ret = (i + .5) * dispo_h(datum);
-    if (!pref_only && i >= bknews.hour_bound) {
-	ret += bknews_h() ;
+function gsckh_x2() {
+    return -5 ;
+}
+function gsckh_y(d) {
+    var t = time_settings.time ;
+    var ret = (d*60-t.day_start_time) * nbRows * scale ;
+    if (d*60 >= t.lunch_break_finish_time) {
+	ret += bknews_h() - (t.lunch_break_finish_time - t.lunch_break_start_time)*nbRows*scale ;
     }
     return ret ;
 }
 
 function gsckh_txt(d) {
-    return d;
+    return d + "h";
 }
 
 function grid_height() {

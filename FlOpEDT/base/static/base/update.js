@@ -700,6 +700,55 @@ function go_days(quick, half_day_rect) {
         
     day_scale.exit().remove();
 
+
+    var hour_bar = fg
+        .selectAll(".gridsckhb")
+        .data([time_settings.time]);
+
+    var hour_sc_g = hour_bar
+    	.enter()
+        .append("g")
+        .attr("class", "gridsckhb");
+
+    hour_sc_g
+        .append("line")
+        .attr("class", "gridsckhl")
+        .attr("x1", 0)
+        .attr("y1", 0)
+        .attr("x2", 0)
+        .attr("y2", grid_height()) ;
+
+    hour_bar.exit().remove();
+
+    
+    var hour_scale = fg
+        .selectAll(".gridsckh")
+        .data(side_time);
+
+    var hour_sc_g = hour_scale
+    	.enter()
+        .append("g")
+        .attr("class", "gridsckh");
+
+    hour_sc_g
+        .append("line")
+        .attr("class", "gridsckhl")
+        .merge(hour_scale.select(".gridsckhl"))
+        .attr("x1", gsckh_x1)
+        .attr("y1", gsckh_y)
+        .attr("x2", gsckh_x2)
+        .attr("y2", gsckh_y) ;
+
+    hour_sc_g
+        .append("text")
+        .merge(hour_scale.select("text"))
+        .text(gsckh_txt)
+        .attr("x", gsckh_x2() - 2)
+        .attr("y", gsckh_y);
+    
+    
+    hour_scale.exit().remove();
+
 }
 
 /*----------------------
