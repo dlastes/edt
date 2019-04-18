@@ -32,8 +32,6 @@ var svg = {height: 625 - margin.top - margin.bot, width: 680 - margin.left - mar
 
 smiley.tete = 13 ;
 
-var data_grid_scale_day = ["LUNDI","MARDI","MERCREDI","JEUDI","VENDREDI"];
-
 dim_dispo.width  = 80 ;
 dim_dispo.height = 500 ;
 dim_dispo.mh = 10 ;
@@ -51,7 +49,7 @@ pref_only = true ;
 
 
 create_general_svg_pref_only();
-create_dh_keys();
+go_days(true, false);
 create_lunchbar();
 fetch_pref_only();
 
@@ -183,7 +181,10 @@ function gsckd_x(datum,i) {
 	+ dim_dispo.width * .5;
 }
 function gsckd_y(datum) {
-    return  - .25 * dim_dispo.height ;
+    return  - 20 ;
+}
+function gsckd_txt(d) {
+    return  d.name ;
 }
 function gsckh_x(datum) {
     return - dim_dispo.width ;
