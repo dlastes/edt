@@ -477,44 +477,8 @@ function create_grid_data() {
 	    }
 	}
 	
-	create_dh_keys();
     }
 }
-
-
-
-function create_dh_keys() {
-    // bg
-    //     .selectAll(".gridsckd")
-    //     .data(days)
-    //     .enter()
-    //     .append("text")
-    //     .attr("class", "gridsckd")
-    //     .attr("x", gsckd_x)
-    //     .attr("y", gsckd_y)
-    //     .attr("font-size", 13)
-    //     .attr("font-weight", "bold")
-    //     .text(gsckd_txt);
-
-    // -- no slot --
-    // --  begin  --
-
-    // bg
-    //     .selectAll(".gridsckh")
-    //     .data(data_grid_scale_hour)
-    //     .enter()
-    //     .append("text")
-    //     .attr("class", "gridsckh")
-    //     .attr("x", gsckh_x)
-    //     .attr("y", gsckh_y)
-    //     .text(gsckh_txt);
-
-    // --   end   --
-    // -- no slot --
-
-
-}
-
 
 
 /*----------------------
