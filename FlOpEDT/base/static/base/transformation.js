@@ -567,7 +567,12 @@ function gsckh_y(d) {
 }
 
 function gsckh_txt(d) {
-    return d + "h";
+    var ret = d ;
+    if(ret >= 24) {
+        ret -= 24 ;
+    }
+    ret += "h" ;
+    return ret ;
 }
 
 function grid_height() {
