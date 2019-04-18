@@ -52,15 +52,22 @@ function get_preference(day, start_time, duration, tutor) {
     var pref = dispos[tutor][day];
     var t = time_settings.time ;
     
-    var i_start = index_in_pref(pref.map(function(d){return d.start_time;}), start_time) ;
-    var i_end = index_in_pref(pref.map(function(d){return d.start_time;}), start_time+duration) ;
+    var i_start = index_in_pref(pref.map(function(d){
+        return d.start_time;
+    }), start_time) ;
+    var i_end = index_in_pref(pref.map(function(d){
+        return d.start_time;
+    }), start_time+duration) ;
 
     var i, tot_weight, start_inter, end_inter, w ;
     var average_pref = 0 ;
     var unknown = false ;
     var unavailable = false ;
 
-    if (i_start==0 || i_start==pref.length || i_end==0 || i_end==pref.length){
+    if (i_start==0
+        || (i_end == pref.length
+            && start_time + duration > pref[i_end-1].start_time + pref[i_end-1].duration))
+    {
 	return -1 ;
     }
 
