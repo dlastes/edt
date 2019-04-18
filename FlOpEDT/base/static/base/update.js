@@ -604,51 +604,9 @@ function go_grid(quick) {
     grid.exit().remove();
 
 
-
+    go_days(quick, true) ;
 
     
-
-    day_scale = fg
-        .selectAll(".gridsckd")
-        .data(days, function(d) {
-    	    return d.date;});
-
-    var day_sc_g = day_scale
-    	.enter()
-        .append("g")
-        .attr("class", "gridsckd");
-    
-    day_sc_g
-    	.append("text")
-    	.attr("class", "txt_scl")
-    	.merge(day_scale.select(".txt_scl"))
-        .transition(t)
-        .text(gsckd_txt)
-        .attr("x", gsckd_x)
-        .attr("y", gsckd_y);
-
-    day_sc_g
-    	.append("rect")
-    	.attr("class", "day_am")
-    	.merge(day_scale.select(".day_am"))
-        .transition(t)
-    	.attr("x", grid_day_am_x)
-    	.attr("y", grid_day_am_y)
-    	.attr("height", grid_day_am_height)
-    	.attr("width", grid_day_am_width);
-
-    day_sc_g
-    	.append("rect")
-    	.attr("class", "day_pm")
-    	.merge(day_scale.select(".day_pm"))
-        .transition(t)
-    	.attr("x", grid_day_pm_x)
-    	.attr("y", grid_day_pm_y)
-    	.attr("height", grid_day_pm_height)
-    	.attr("width", grid_day_pm_width);
-
-    day_scale.exit().remove();
-
 
     // -- no slot --
     // --  begin  --
@@ -687,6 +645,62 @@ function go_grid(quick) {
 
 }
 
+// display day names, and a rectangle per half day
+// if half_day_rect is true
+function go_days(quick, half_day_rect) {
+
+    var t;
+    if (quick) {
+        t = d3.transition()
+            .duration(0);
+    } else {
+        t = d3.transition();
+    }
+
+    var day_scale = fg
+        .selectAll(".gridsckd")
+        .data(days, function(d) {
+    	    return d.date;});
+
+    var day_sc_g = day_scale
+    	.enter()
+        .append("g")
+        .attr("class", "gridsckd");
+    
+    day_sc_g
+    	.append("text")
+    	.attr("class", "txt_scl")
+    	.merge(day_scale.select(".txt_scl"))
+        .transition(t)
+        .text(gsckd_txt)
+        .attr("x", gsckd_x)
+        .attr("y", gsckd_y);
+
+    if (half_day_rect) {
+        day_sc_g
+    	    .append("rect")
+    	    .attr("class", "day_am")
+    	    .merge(day_scale.select(".day_am"))
+            .transition(t)
+    	    .attr("x", grid_day_am_x)
+    	    .attr("y", grid_day_am_y)
+    	    .attr("height", grid_day_am_height)
+    	    .attr("width", grid_day_am_width);
+        
+        day_sc_g
+    	    .append("rect")
+    	    .attr("class", "day_pm")
+    	    .merge(day_scale.select(".day_pm"))
+            .transition(t)
+    	    .attr("x", grid_day_pm_x)
+    	    .attr("y", grid_day_pm_y)
+    	    .attr("height", grid_day_pm_height)
+    	    .attr("width", grid_day_pm_width);
+    }
+        
+    day_scale.exit().remove();
+
+}
 
 /*----------------------
   ------- BKNEWS -------
