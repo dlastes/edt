@@ -1516,7 +1516,9 @@ function fill_grid_slot(c2m, grid_slot) {
             grid_slot.reason = "PB GROUPE";
 	} else if (check.nok_type == 'tutor_unavailable') {
             grid_slot.reason = "PB PROF PAS DISPO";
-	}
+	} else if (check.nok_type == 'tutor_availability_unknown') {
+            grid_slot.reason = "PB DISPO NON DECLAREE";
+        }
 	return ;
     }
 
@@ -1535,6 +1537,8 @@ function warning_check(c2m, day, start_time) {
         ret = "Le groupe " + check.group + " avait déjà un cours prévu.";
     } else if (check.nok_type == 'tutor_unavailable') {
         ret = "L'enseignant·e " + check.tutor + " s'était déclaré·e indisponible.";
+    } else if (check.nok_type == 'tutor_availability_unknown') {
+        ret = "L'enseignant·e " + check.tutor + " n'a pas déclaré ses dispos.";
     }
     return ret ;
 }
@@ -1629,12 +1633,17 @@ function check_course(c2m, date) {
     }
 
     if (dispos[c2m.prof] !== undefined) {
-	if (get_preference(date.day, date.start_time, c2m.duration,
-			   c2m.prof) == 0) {
+        var pref_tut = get_preference(date.day, date.start_time, c2m.duration,
+			              c2m.prof);
+	if (pref_tut == 0) {
 	    ret.nok_type = 'tutor_unavailable' ;
 	    ret.tutor = c2m.prof ;
             return ret;
-	}
+	} else if (pref_tut == -1) {
+	    ret.nok_type = 'tutor_availability_unknown' ;
+	    ret.tutor = c2m.prof ;
+            return ret;
+        }
     }
 
     ret.constraints_ok = true ;
