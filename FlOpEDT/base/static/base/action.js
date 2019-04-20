@@ -304,18 +304,15 @@ function select_tutor_filters_change() {
 
     var c = room_tutor_change.course[0] ;
 
-    var chunk_size = tutor_cm_settings.ncol * tutor_cm_settings.nlin - 2 ;
-
-    var rest = all_tutors.length % chunk_size ;
+    var chunk_size = tutor_cm_settings.ncol * tutor_cm_settings.nlin - 1;
 
     room_tutor_change.proposal = [] ;
     
     var i = 0 ; var i_end ;
     while(i < all_tutors.length) {
 	i_end = i + chunk_size - 1 ;
-	if(rest > 0) {
-	    i_end++;
-	    rest--;
+	if(i_end >= all_tutors.length) {
+	    i_end = all_tutors.length - 1 ;
 	} 
 	room_tutor_change.proposal.push(all_tutors[i]
 					+ arrow.right
