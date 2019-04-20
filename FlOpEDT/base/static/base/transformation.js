@@ -558,16 +558,16 @@ function gsckh_x2() {
     return -5 ;
 }
 function gsckh_y(d) {
-    var t = time_settings.time ;
-    var ret = (d*60-t.day_start_time) * nbRows * scale ;
-    if (d*60 >= t.lunch_break_finish_time) {
-	ret += bknews_h() - (t.lunch_break_finish_time - t.lunch_break_start_time)*nbRows*scale ;
+    var ts = time_settings.time ;
+    var ret = (d.h*60-ts.day_start_time) * nbRows * scale ;
+    if (d.hd == 'pm') {
+	ret += bknews_h() - (ts.lunch_break_finish_time - ts.lunch_break_start_time)*nbRows*scale ;
     }
     return ret ;
 }
 
 function gsckh_txt(d) {
-    var ret = d ;
+    var ret = d.h ;
     if(ret >= 24) {
         ret -= 24 ;
     }

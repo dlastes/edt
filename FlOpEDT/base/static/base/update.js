@@ -712,14 +712,23 @@ function go_days(quick, half_day_rect) {
 
     hour_sc_g
         .append("line")
-        .attr("class", "gridsckhl")
+        .attr("class", "gridsckhlam")
+        .merge(hour_bar.select(".gridsckhlam"))
         .attr("x1", 0)
         .attr("y1", 0)
+        .attr("x2", 0)
+        .attr("y2", bknews_top_y()) ;
+
+    hour_sc_g
+        .append("line")
+        .attr("class", "gridsckhlpm")
+        .merge(hour_bar.select(".gridsckhlpm"))
+        .attr("x1", 0)
+        .attr("y1", bknews_bot_y())
         .attr("x2", 0)
         .attr("y2", grid_height()) ;
 
     hour_bar.exit().remove();
-
     
     var hour_scale = fg
         .selectAll(".gridsckh")

@@ -53,7 +53,7 @@
     font-weight:normal;
     text-anchor:end;
 }
-.gridsckhl  {
+.gridsckhl, .gridsckhlam, .gridsckhlpm  {
     stroke:black;
     stroke-width: 2;
 }
