@@ -30,13 +30,14 @@ from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
 
 from base.models import Group, TrainingProgramme, \
-                        GroupDisplay, TrainingProgrammeDisplay, \
                         ScheduledCourse, EdtVersion, Department, Regen
 
 from base.models import Room, RoomType, RoomGroup, \
                         RoomSort, Period, CourseType, \
-                        BreakingNews, TutorCost, CourseStartTimeConstraint, \
+                        TutorCost, CourseStartTimeConstraint, \
                         TimeGeneralSettings, GroupType
+
+from displayweb.models import GroupDisplay, TrainingProgrammeDisplay, BreakingNews
 
 from people.models import Tutor
 from TTapp.models import TTConstraint

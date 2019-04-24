@@ -35,9 +35,10 @@ import django.contrib.auth as auth
 from people.models import Tutor, User
 from base.models import Day, RoomGroup, Module, Course, Group, Slot, \
     UserPreference, Time, ScheduledCourse, EdtVersion, CourseModification, \
-    PlanningModification, BreakingNews, TrainingProgramme, ModuleDisplay, \
+    PlanningModification, TrainingProgramme,  \
     Regen, Holiday, TrainingHalfDay, RoomPreference, RoomSort, \
     CoursePreference, Dependency, RoomType, Department, CourseType
+from displayweb.models import ModuleDisplay, BreakingNews
 from import_export import resources, fields
 from import_export.widgets import ForeignKeyWidget
 

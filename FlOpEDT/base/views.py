@@ -49,10 +49,10 @@ from base.admin import CoursResource, DispoResource, VersionResource, \
 from base.forms import ContactForm
 from base.models import Course, UserPreference, ScheduledCourse, EdtVersion, \
     CourseModification, Slot, Day, Time, RoomGroup, PlanningModification, \
-    Regen, BreakingNews, RoomPreference, Department, TimeGeneralSettings
+    Regen, RoomPreference, Department, TimeGeneralSettings
 import base.queries as queries
 from base.weeks import *
-
+from displayweb.models import BreakingNews
 
 logger = logging.getLogger(__name__)
 

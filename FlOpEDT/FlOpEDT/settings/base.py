@@ -62,7 +62,8 @@ INSTALLED_APPS = [
     'people',
     'solve_board',
     'synchro',
-    'ics'
+    'ics',
+    'displayweb'
 ]
 
 MIDDLEWARE = [
