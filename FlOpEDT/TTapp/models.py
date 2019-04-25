@@ -24,6 +24,7 @@
 # without disclosing the source code of your own applications.
 
 import importlib
+import inspect
 import sys
 
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -125,34 +126,100 @@ class TTConstraint(models.Model):
         return ['train_prog', 'department',]
 
 
-class CustomConstraint():
+class CustomConstraint(TTConstraint):
     """
     Call a custom constraint implementation.
     """
-    constraint_class_name = models.CharField(max_length=200, null=True, default=None, blank=True)
+    constraint = None
+    
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
 
 
-    def get_constraint(self, class_name):
+    def get_constraint_list():
         """
-        Return python module containing custom classes
+        Return constraint class list by module class inspection
         """
         try:
             module = importlib.import_module(settings.CUSTOM_CONSTRAINTS_PATH)
-            return getattr(module, class_name)()
-        except:
+            classes = inspect.getmembers(module, inspect.isclass)
+
+            constraints = []
+            for class_name, _ in classes:
+                fully_qualified_name = f'{module.__name__}.{class_name}'
+                constraints.append((fully_qualified_name, fully_qualified_name))
+
+            return constraints
+        except ModuleNotFoundError:
             print(f"can't find the {settings.CUSTOM_CONSTRAINTS_PATH} module")
+
+
+    class_name = models.CharField(
+                    max_length=200,
+                    choices=get_constraint_list(),
+                    null=False, 
+                    default=None, 
+                    blank=False)
+    groups = models.ManyToManyField('base.Group', blank=True)
+    tutors = models.ManyToManyField('people.Tutor', blank=True)
+    modules = models.ManyToManyField('base.Module', blank=True)
+
+
+    def get_constraint(self, fully_qualified_name):
+        """
+        Return target custom class instance 
+        """
+        if self.constraint is None:
+            try:
+                module_name, class_name = fully_qualified_name.rsplit('.', 1)
+                module = importlib.import_module(module_name)
+                self.constraint = getattr(module, class_name)()
+            except ModuleNotFoundError:
+                print(f"can't find the <{module_name}> module")
+            except:
+                print(f"an error has occured while loading class <{fully_qualified_name}>")
+        
+        return self.constraint
 
 
     def enrich_model(self, ttmodel, ponderation=1):
         """
         Call custom constraint method
         """ 
-        constraint = self.get_constraint(self.constraint_class_name)
-        constraint.enrich_model(ttmodel, ponderation)
+        args = {}
+
+        if self.groups.count():
+            args.update({'groups': list(self.groups.all())})
+
+
+        if self.tutors.count():
+            args.update({'tutors': list(self.tutors.all())})
+
+
+        if self.modules.count():
+            args.update({'modules': list(self.modules.all())})                        
+
+        constraint = self.get_constraint(self.class_name)
+        if constraint:
+            constraint.enrich_model(ttmodel, ponderation, **args)
 
 
     def one_line_description(self):    
-        pass
+        constraint = self.get_constraint(self.class_name)
+        if constraint:
+            description = constraint.one_line_description()
+            if not description:                
+                description = constraint.__name__
+        return description
+
+
+    def get_viewmodel(self):
+        view_model = super().get_viewmodel()
+        details = view_model['details']
+        constraint = self.get_constraint(self.class_name)
+        if constraint:
+            details.update(constraint.get_viewmodel())
+        return view_model
 
 
 class LimitCourseTypePerPeriod(TTConstraint):  # , pond):

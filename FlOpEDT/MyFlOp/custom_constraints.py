@@ -23,3 +23,34 @@
 # a commercial license. Buying such a license is mandatory as soon as
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
+
+
+# class DummyConstraintTemplate():
+#     """
+#     This class is a template for writing your own custom contraint. 
+
+#     The module can contains several custom constraints.
+#     """
+
+#     def enrich_model(self, ttmodel, ponderation, **kwargs):
+#         """
+#         You can enrich ttmodel here with your specific constraints
+#         and variables
+#         """
+#         pass
+
+    
+#     def get_viewmodel(self):
+#         """
+#         You can add one or more details to be displayed in the solve board 
+#         interface about what this constraint does
+#         """
+#         return {'detail_name_sample': "detail_content_sample", }
+
+
+#     def one_line_description(self):
+#         """
+#         You can give a contextual explanation about what this constraint doesnt
+#         """
+#         return "DummyConstraint online description"
+
