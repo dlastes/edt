@@ -1,5 +1,8 @@
+from import_export import resources
+
 from django.contrib import admin
 
+from base.admin import DepartmentModelAdmin
 from displayweb.models import BreakingNews
 
 
