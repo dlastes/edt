@@ -45,7 +45,8 @@ from django.views.generic import RedirectView
 from people.models import Tutor
 
 from base.admin import CoursResource, DispoResource, VersionResource, \
-    CoursPlaceResource, BreakingNewsResource, UnavailableRoomsResource
+    CoursPlaceResource, UnavailableRoomsResource
+from displayweb.admin import BreakingNewsResource
 from base.forms import ContactForm
 from base.models import Course, UserPreference, ScheduledCourse, EdtVersion, \
     CourseModification, Slot, Day, Time, RoomGroup, PlanningModification, \

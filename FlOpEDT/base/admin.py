@@ -38,7 +38,7 @@ from base.models import Day, RoomGroup, Module, Course, Group, Slot, \
     PlanningModification, TrainingProgramme,  \
     Regen, Holiday, TrainingHalfDay, RoomPreference, RoomSort, \
     CoursePreference, Dependency, RoomType, Department, CourseType
-from displayweb.models import ModuleDisplay, BreakingNews
+from displayweb.models import ModuleDisplay
 from import_export import resources, fields
 from import_export.widgets import ForeignKeyWidget
 
@@ -170,11 +170,6 @@ class UnavailableRoomsResource(resources.ModelResource):
         fields = ("room", "day", "start_time", "duration")
 
 
-class BreakingNewsResource(resources.ModelResource):
-    class Meta:
-        model = BreakingNews
-        fields = ("id", "x_beg", "x_end", "y", "txt", "fill_color", "strk_color", "is_linked")
-
 class VersionResource(resources.ModelResource):
     class Meta:
         model = EdtVersion;
@@ -300,11 +295,6 @@ class DepartmentModelAdmin(admin.ModelAdmin):
 
         return queryset
 
-
-class BreakingNewsAdmin(DepartmentModelAdmin):
-    list_display = ('week', 'year', 'x_beg', 'x_end', 'y', 'txt',
-                    'fill_color', 'strk_color')
-    ordering = ('-year', '-week')
 
     
 class HolidayAdmin(admin.ModelAdmin):
@@ -497,5 +487,4 @@ admin.site.register(Dependency, DependencyAdmin)
 admin.site.register(PlanningModification, PlanningModificationAdmin)
 admin.site.register(ScheduledCourse, CoursPlaceAdmin)
 admin.site.register(UserPreference, DispoAdmin)
-admin.site.register(BreakingNews, BreakingNewsAdmin)
 admin.site.register(Regen,RegenAdmin)
