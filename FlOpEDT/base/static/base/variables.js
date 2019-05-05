@@ -89,6 +89,7 @@ while (stime*60 <= time_settings.time.day_finish_time) {
   - CONTEXT MENUS HELPERS -
   -------------------------*/
 
+// remove context menu if click outside
 function cancel_cm_adv_preferences(){
     if(ckbox["dis-mod"].cked) {
 	if(! context_menu.dispo_hold) {
@@ -99,6 +100,7 @@ function cancel_cm_adv_preferences(){
     }
 }
 
+// remove context menu if click outside
 function cancel_cm_room_tutor_change(){
     if(ckbox["edt-mod"].cked) {
 	if(!context_menu.room_tutor_hold) {
