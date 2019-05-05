@@ -645,8 +645,22 @@ function go_grid(quick) {
 
 }
 
+/*--------------------------
+  ------- TIME ------
+  --------------------------*/
+
 // display day names, and a rectangle per half day
 // if half_day_rect is true
+// layer: fg
+// data: days, time_settings.time, side_time
+// class: gridsckd, txt_scl, day_am,
+//        gridsckhb, gridsckhlam, gridsckhlpm
+//        gridsckh, gridsckhl
+// trans: gsckd: txt, x, y,
+//        grid_day_am: x, y, height, width
+//        grid_day_pm: x, y, height, width
+//        bknews_top_y, bknews_bot_y, grid_height
+//        gsckh: x1, y, x2, txt
 function go_days(quick, half_day_rect) {
 
     var t;
@@ -705,12 +719,12 @@ function go_days(quick, half_day_rect) {
         .selectAll(".gridsckhb")
         .data([time_settings.time]);
 
-    var hour_sc_g = hour_bar
+    var hourbar_g = hour_bar
     	.enter()
         .append("g")
         .attr("class", "gridsckhb");
 
-    hour_sc_g
+    hourbar_g
         .append("line")
         .attr("class", "gridsckhlam")
         .merge(hour_bar.select(".gridsckhlam"))
@@ -718,14 +732,14 @@ function go_days(quick, half_day_rect) {
         .attr("y1", 0)
         .attr("x2", 0)
         .attr("y2", bknews_top_y()) ;
-
-    hour_sc_g
-        .append("line")
+                                    
+    hourbar_g                       
+        .append("line")             
         .attr("class", "gridsckhlpm")
         .merge(hour_bar.select(".gridsckhlpm"))
-        .attr("x1", 0)
-        .attr("y1", bknews_bot_y())
-        .attr("x2", 0)
+        .attr("x1", 0)              
+        .attr("y1", bknews_bot_y()) 
+        .attr("x2", 0)              
         .attr("y2", grid_height()) ;
 
     hour_bar.exit().remove();
