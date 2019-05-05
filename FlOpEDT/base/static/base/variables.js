@@ -118,10 +118,6 @@ function cancel_cm_room_tutor_change(){
    ------ ALL -------
   --------------------*/
 
-// number of days in the week
-var nbPer = Object.keys(idays).length ;
-
-
 // -- no slot --
 // --  begin  --
 // TO BE REMOVED: still appears in stype.js
