@@ -190,7 +190,6 @@ function gsckh_x(datum) {
     return - dim_dispo.width ;
 }
 function gsclb_y()  {
-    //return dim_dispo.height * .5 * nbSl;
     return dispo_y({start_time:
 		    time_settings.time.lunch_break_start_time});
 }

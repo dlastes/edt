@@ -120,14 +120,6 @@ function cancel_cm_room_tutor_change(){
    ------ ALL -------
   --------------------*/
 
-// -- no slot --
-// --  begin  --
-// TO BE REMOVED: still appears in stype.js
-// number of slots within 1 day
-var nbSl = 6;
-// --   end   --
-// -- no slot --
-
 // initial number of promos
 var slot_case = false ; //true ;
 
