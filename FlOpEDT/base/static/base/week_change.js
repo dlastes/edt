@@ -361,7 +361,7 @@ function adapt_labgp(first) {
 
     if (first) {
 	expected_ext_grid_dim = svg.width - margin.left - margin.right;
-	new_gp_dim = expected_ext_grid_dim / (rootgp_width * nbPer);
+	new_gp_dim = expected_ext_grid_dim / (rootgp_width * days.length);
 	if (new_gp_dim > labgp.wm) {
             labgp.width = new_gp_dim;
 	} else {

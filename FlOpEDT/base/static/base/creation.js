@@ -579,7 +579,7 @@ function def_drag_sca() {
                 drag.sel.attr("transform", "translate(0,0)");
                 drag.sel.select("rect").attr("x", drag.init + drag.x);
                 if (rootgp_width != 0) {
-                    labgp.width = ((drag.x + drag.init) / nbPer - dim_dispo.plot * (dim_dispo.width + dim_dispo.right)) / rootgp_width;
+                    labgp.width = ((drag.x + drag.init) / days.length - dim_dispo.plot * (dim_dispo.width + dim_dispo.right)) / rootgp_width;
                 }
                 drag.sel.select("path").attr("d", but_sca_tri_h(0));
                 //(drag.x+drag.init)/(grid_width());
@@ -1061,7 +1061,7 @@ function compute_promo_leaves(node) {
     var gp;
 
     if (node.children.length == 0) {
-        for (var j = 0; j < nbPer; j++) {
+        for (var j = 0; j < days.length; j++) {
             data_grid_scale_gp.push({
                 day: j,
                 gp: node

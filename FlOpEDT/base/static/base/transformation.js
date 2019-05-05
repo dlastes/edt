@@ -109,7 +109,7 @@ function svg_height() {
 function svg_width() {
     //    return margin.top + ack_reg_y() + 4*margin.bot ;
     return margin.left + 
-        rootgp_width * nbPer * labgp.width + margin.right ;
+        rootgp_width * days.length * labgp.width + margin.right ;
 }
 
 
@@ -599,7 +599,7 @@ function scale_from_grid_height(gh) {
 
 function grid_width() {
     return (rootgp_width * labgp.width +
-        dim_dispo.plot * (dim_dispo.width + dim_dispo.right)) * nbPer;
+        dim_dispo.plot * (dim_dispo.width + dim_dispo.right)) * days.length;
 }
 
 
@@ -1034,7 +1034,7 @@ function gsclbt_x() {
 }
 
 function dispot_but_x() {
-    return did.tlx + nbPer * (did.w + did.mh) + did.mh;
+    return did.tlx + days.length * (did.w + did.mh) + did.mh;
 }
 
 function dispot_but_y(but) {

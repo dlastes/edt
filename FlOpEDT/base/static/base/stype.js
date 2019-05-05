@@ -195,7 +195,7 @@ function gsclb_y()  {
 		    time_settings.time.lunch_break_start_time});
 }
 function gsclb_x()  {
-    return (dim_dispo.width + dim_dispo.mh) * nbPer - dim_dispo.mh ;
+    return (dim_dispo.width + dim_dispo.mh) * days.length - dim_dispo.mh ;
 }
 
 
