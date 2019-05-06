@@ -238,8 +238,8 @@ var dim_dispo = {
   ------- WEEKS -------
   ---------------------*/
 var weeks = {
-    init_data: null,
-    cur_data: null,
+    data: {init: [],
+           current: []},
     width: 40,
     height: 30,
     x: 0,

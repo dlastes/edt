@@ -67,18 +67,18 @@ function apply_change_simple_pref(d) {
 function week_left() {
     if (weeks.fdisp > 0) {
         weeks.fdisp -= 1;
-        weeks.cur_data.pop();
-        weeks.cur_data.unshift(weeks.init_data[weeks.fdisp]);
+        weeks.data.current.pop();
+        weeks.data.current.unshift(weeks.data.init[weeks.fdisp]);
     }
     go_week_menu(false);
 }
 
 // move timeline to the right
 function week_right() {
-    if (weeks.fdisp + weeks.ndisp + 2 < weeks.init_data.length) {
+    if (weeks.fdisp + weeks.ndisp + 2 < weeks.data.init.length) {
         weeks.fdisp += 1;
-        weeks.cur_data.splice(0, 1);
-        weeks.cur_data.push(weeks.init_data[weeks.fdisp + weeks.ndisp + 1]);
+        weeks.data.current.splice(0, 1);
+        weeks.data.current.push(weeks.data.init[weeks.fdisp + weeks.ndisp + 1]);
     }
     go_week_menu(false);
 }
@@ -782,9 +782,9 @@ function compute_changes(changes, conc_tutors, gps) {
 			     n: null },
 		      room: {o: cb.room,
 			     n: null },
-		      week: {o: weeks.init_data[weeks.sel[0]].semaine,
+		      week: {o: weeks.data.init[weeks.sel[0]].semaine,
 			     n: null },
-		      year: {o: weeks.init_data[weeks.sel[0]].an,
+		      year: {o: weeks.data.init[weeks.sel[0]].an,
 			     n: null},
 		      tutor:{o: cb.prof,
 			     n: null}
@@ -897,8 +897,8 @@ function send_edt_change(changes) {
     show_loader(true);
     $.ajax({
         url: url_edt_changes
-	    + "?s=" + weeks.init_data[weeks.sel[0]].semaine
-	    + "&a=" + weeks.init_data[weeks.sel[0]].an
+	    + "?s=" + weeks.data.init[weeks.sel[0]].semaine
+	    + "&a=" + weeks.data.init[weeks.sel[0]].an
 	    + "&c=" + num_copie,
         type: 'POST',
 //        contentType: 'application/json; charset=utf-8',
@@ -984,8 +984,8 @@ function send_dis_change() {
         show_loader(true);
         $.ajax({
             url: url_dispos_changes
-		+ "?s=" + weeks.init_data[weeks.sel[0]].semaine
-		+ "&a=" + weeks.init_data[weeks.sel[0]].an
+		+ "?s=" + weeks.data.init[weeks.sel[0]].semaine
+		+ "&a=" + weeks.data.init[weeks.sel[0]].an
 		+ "&u=" + user.nom,
             type: 'POST',
 //            contentType: 'application/json; charset=utf-8',

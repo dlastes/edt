@@ -214,7 +214,7 @@ function create_alarm_dispos() {
 
 
 
-// PRECONDITION: semaine_init, week_init, weeks.init_data
+// PRECONDITION: semaine_init, week_init, weeks.data.init
 function find_week(week_list) {
     var i, up;
     i = 0;
@@ -240,18 +240,18 @@ function find_week(week_list) {
 
 function create_clipweek() {
 
-    weeks.init_data = semaine_an_list;
+    weeks.data.init = semaine_an_list;
 
-    var min = weeks.init_data[0];
-    var max = weeks.init_data[weeks.init_data.length - 1];
+    var min = weeks.data.init[0];
+    var max = weeks.data.init[weeks.data.init.length - 1];
 
-    weeks.ndisp = Math.min(weeks.ndisp, weeks.init_data.length);
+    weeks.ndisp = Math.min(weeks.ndisp, weeks.data.init.length);
 
-    weeks.init_data.push({
+    weeks.data.init.push({
         an: max.an,
         semaine: max.semaine + 1
     });
-    weeks.init_data.unshift({
+    weeks.data.init.unshift({
         an: min.an,
         semaine: min.semaine - 1,
     });
@@ -260,31 +260,31 @@ function create_clipweek() {
 
     if (min.an > an_init ||
 	(min.an == an_init && min.semaine > semaine_init)) {
-	weeks.cur_data = weeks.init_data.slice(1,
+	weeks.data.current = weeks.data.init.slice(1,
 					       1 + weeks.ndisp + 2);
 	weeks.fdisp = 1;
 	weeks.sel[0] = 2 ;
 	
     } else if (max.an < an_init ||
 	(max.an == an_init && max.semaine < semaine_init)) {
-	weeks.cur_data = weeks.init_data.slice(weeks.init_data.length - 1  - 2 - weeks.ndisp,
-					       weeks.init_data.length -1);
-	weeks.fdisp = weeks.init_data.length - 1  - 2 - weeks.ndisp ;
+	weeks.data.current = weeks.data.init.slice(weeks.data.init.length - 1  - 2 - weeks.ndisp,
+					       weeks.data.init.length -1);
+	weeks.fdisp = weeks.data.init.length - 1  - 2 - weeks.ndisp ;
 	weeks.sel[0] = weeks.ndisp ;
     } else {
-	var fw = find_week(weeks.init_data);
+	var fw = find_week(weeks.data.init);
 	
 	fw = Math.max(
             Math.min(fw - 2,
-		     weeks.init_data.length - 1 - (weeks.ndisp + 1)),
+		     weeks.data.init.length - 1 - (weeks.ndisp + 1)),
             0);
 	
-	weeks.cur_data = weeks.init_data.slice(fw,
+	weeks.data.current = weeks.data.init.slice(fw,
 					       fw + weeks.ndisp + 2);
 	
 	weeks.fdisp = fw;
 	
-	weeks.sel[0] = fw + find_week(weeks.cur_data) - 1 ;
+	weeks.sel[0] = fw + find_week(weeks.data.current) - 1 ;
     }
 
 
