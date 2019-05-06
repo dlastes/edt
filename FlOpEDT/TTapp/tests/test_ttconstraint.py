@@ -1,10 +1,10 @@
 
 from django.test import TestCase
-from unittest.mock import patch, Mock, call
+from unittest.mock import patch, Mock, MagicMock, call
 
 from base.models import Department, TrainingProgramme, Course, CourseType, Time
 from people.models import Tutor
-from TTapp.models import LimitCourseTypePerPeriod, MinHalfDays
+from TTapp.models import LimitCourseTypePerPeriod, MinHalfDays, CustomConstraint
 from TTapp.TTModel import TTModel
 
 
@@ -108,4 +108,22 @@ class TTConstraintTestCase(TestCase):
 
         constraint.enrich_model(ttmodel)
         enrich_model.assert_has_calls(calls)
-        
+
+
+class CustomConstraintTestCase(TestCase):
+
+    @patch('MyFlOp.custom_constraints.FirstCustomConstraint', create=True)
+    @patch('TTapp.models.CustomConstraint.class_name', 'MyFlOp.custom_constraints.FirstCustomConstraint')
+    def test_get_constraint(self, target_class):
+        custom_constraint = CustomConstraint()
+        constraint = custom_constraint.get_constraint('MyFlOp.custom_constraints.FirstCustomConstraint')
+        self.assertIs(constraint, target_class())
+
+    
+    @patch('MyFlOp.custom_constraints.FirstCustomConstraint', create=True)
+    @patch('TTapp.models.CustomConstraint.class_name', 'MyFlOp.custom_constraints.FirstCustomConstraint')
+    def test_enrich_model(self, constraint_class):
+        custom_constraint = CustomConstraint.objects.create(class_name='MyFlOp.custom_constraints.FirstCustomConstraint')
+        custom_constraint.enrich_model(None)
+        constraint_instance = constraint_class()
+        constraint_instance.enrich_model.assert_called_once_with(None, 1)

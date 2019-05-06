@@ -9,6 +9,8 @@ services:
       - "5445:5432"
   redis:
     image: redis:latest
+    ports:
+      - "${REDIS_PORT-6379}:6379"
   web:
     build:
       context: .
