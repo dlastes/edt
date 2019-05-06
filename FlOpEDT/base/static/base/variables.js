@@ -257,10 +257,6 @@ var weeks = {
   -------- GRID --------
   ----------------------*/
 
-// one element per labgroup and per slot
-// is filtered when bound
-var data_mini_slot_grid = [];
-
 // one element per slot
 var data_slot_grid = [];
 
