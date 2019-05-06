@@ -428,7 +428,7 @@ function go_week_menu(quick) {
     var sa_wk =
         weeks.cont
         .selectAll(".rec_wk")
-        .data(weeks.cur_data, function(d) {
+        .data(weeks.data.current, function(d) {
             return d.an + "" + d.semaine;
         });
 
