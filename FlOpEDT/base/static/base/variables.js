@@ -120,17 +120,17 @@ function cancel_cm_room_tutor_change(){
    ------ ALL -------
   --------------------*/
 
-// initial number of promos
+// do we have slots
 var slot_case = false ; //true ;
 
 // current number of rows
 var nbRows;
-// last positive number of rows
+// last positive number of rows (when filtering by group)
 var pos_nbRows = 0;
 
 // maximum number of lab groups among promos
 var rootgp_width = 0;
-// last positive number of lab groups
+// last positive number of lab groups (when filtering by group)
 var pos_rootgp_width = 0;
 
 // different grounds where to plot
@@ -160,7 +160,7 @@ var fetch = {
 };
 //cours_ok pas très utile
 
-
+// svg container
 var svg_cont ;
 
 
@@ -170,7 +170,7 @@ var svg_cont ;
   ------- PREFERENCES ------
   --------------------------*/
 
-// 2D array of list (username,iday,list of intervals)
+// 2D array of list [tutor_name][day_reference] -> list of intervals)
 var dispos = {};
 
 // parameters for availability
