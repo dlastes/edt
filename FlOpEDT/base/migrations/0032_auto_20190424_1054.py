@@ -7,6 +7,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('base', '0031_auto_20190117_1008'),
+        ('displayweb', '0002_auto_20190424_1055'),
     ]
 
     operations = [
