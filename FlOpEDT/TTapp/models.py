@@ -124,6 +124,7 @@ def filter(slot_set, day=None, apm=None, course_type=None, simultaneous_to=None)
         slots = set(sl for sl in slots if sl.is_simultaneous_to(simultaneous_to))
     return slots
 
+
 class TTConstraint(models.Model):
 
     department = models.ForeignKey(Department, null=True, on_delete=models.CASCADE)
@@ -234,13 +235,11 @@ class CustomConstraint(TTConstraint):
     tutors = models.ManyToManyField('people.Tutor', blank=True)
     modules = models.ManyToManyField('base.Module', blank=True)          
 
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Delay class_name field choices loading
         self._meta.get_field('class_name').choices = lazy(get_constraint_list, list)()
         self.constraint = None
-
 
     def get_constraint(self, class_name):
         """
@@ -259,7 +258,6 @@ class CustomConstraint(TTConstraint):
         
         return self.constraint
 
-
     def get_method(self, method_name):
         """
         Return the method reference by inspecting the constraint instance
@@ -269,7 +267,6 @@ class CustomConstraint(TTConstraint):
         if constraint:
             method = getattr(constraint, method_name, None)          
         return method
-
 
     def inject_method(func):
         """
@@ -283,7 +280,6 @@ class CustomConstraint(TTConstraint):
             return func(self, *args, injected_method=method, **kwargs)
 
         return _wrapper
-
 
     @inject_method
     def enrich_model(self, ttmodel, ponderation=1, injected_method=None):
@@ -306,7 +302,6 @@ class CustomConstraint(TTConstraint):
         if injected_method:
             injected_method(ttmodel, ponderation, **args)
 
-    
     @inject_method
     def one_line_description(self, injected_method=None):    
         description = ''
@@ -315,7 +310,6 @@ class CustomConstraint(TTConstraint):
             if not description:                
                 description = self.class_name
         return description
-
 
     @inject_method
     def get_viewmodel(self, injected_method=None):
@@ -330,12 +324,12 @@ class CustomConstraint(TTConstraint):
         return view_model
 
 
-class LimitCourseTypePerPeriod(TTConstraint):  # , pond):
+class LimitCourseTypeTimePerPeriod(TTConstraint):  # , pond):
     """
     Bound the number of courses of type 'type' per day/half day
     """
-    type = models.ForeignKey('base.CourseType', on_delete=models.CASCADE)
-    limit = models.PositiveSmallIntegerField()
+    course_type = models.ForeignKey('base.CourseType', on_delete=models.CASCADE)
+    max_hours = models.PositiveSmallIntegerField()
     module = models.ForeignKey('base.Module',
                                    null=True,
                                    default=None, 
@@ -349,12 +343,11 @@ class LimitCourseTypePerPeriod(TTConstraint):  # , pond):
     PERIOD_CHOICES = ((FULL_DAY, 'Full day'), (HALF_DAY, 'Half day'))
     period = models.CharField(max_length=2, choices=PERIOD_CHOICES)
 
-
     def get_courses_queryset(self, ttmodel, tutor = None):
         """
         Filter courses depending on constraints parameters
         """
-        courses_qs = ttmodel.wdb.courses
+        courses_qs = ttmodel.wdb.courses.filter(type=self.course_type)
         courses_filter = {}
 
         if tutor is not None:
@@ -363,14 +356,10 @@ class LimitCourseTypePerPeriod(TTConstraint):  # , pond):
         if self.module is not None:
             courses_filter['module'] = self.module
 
-        if self.type is not None:
-            courses_filter['type'] = self.type
-
         if self.train_prog is not None:
             courses_filter['groupe__train_prog'] = self.train_prog
 
         return courses_qs.filter(**courses_filter)
-
 
     def register_expression(self, ttmodel, period_by_day, ponderation, tutor=None):
 
@@ -385,17 +374,16 @@ class LimitCourseTypePerPeriod(TTConstraint):  # , pond):
 
             for slot in slots:
                 for course in courses & ttmodel.wdb.compatible_courses[slot]:
-                    expr += ttmodel.TT[(slot, course)]
+                    expr += ttmodel.TT[(slot, course)] * self.course_type.duration
 
             if self.weight is not None:
                 var = ttmodel.add_floor(
                                 'limit course type per period', 
                                 expr,
-                                int(self.limit) + 1, 100)
+                                int(self.max_hours * 60) + 1, 3600*24)
                 ttmodel.obj += self.local_weight() * ponderation * var
             else:
-                ttmodel.add_constraint(expr, '<=', self.limit)
-
+                ttmodel.add_constraint(expr, '<=', self.max_hours*60)
 
     def enrich_model(self, ttmodel, ponderation=1.):
         
@@ -418,10 +406,8 @@ class LimitCourseTypePerPeriod(TTConstraint):  # , pond):
         except ValueError:
             self.register_expression(ttmodel, period_by_day, ponderation)
 
-
     def full_name(self):
         return "Limit Course Type Per Period"
-
 
     @classmethod
     def get_viewmodel_prefetch_attributes(cls):
@@ -432,8 +418,8 @@ class LimitCourseTypePerPeriod(TTConstraint):  # , pond):
     def get_viewmodel(self):
         view_model = super().get_viewmodel()
 
-        if self.type:
-            type_value = self.type.name
+        if self.course_type:
+            type_value = self.course_type.name
         else:
             type_value = 'All'
 
@@ -455,7 +441,7 @@ class LimitCourseTypePerPeriod(TTConstraint):  # , pond):
         return view_model
 
     def one_line_description(self):
-        text = "Pas plus de " + str(self.limit) + ' ' + str(self.type)
+        text = "Pas plus de " + str(self.max_hours) + ' heures de ' + str(self.course_type)
         if self.module:
             text += " de " + self.module.nom
         text += " par "
@@ -471,20 +457,20 @@ class LimitCourseTypePerPeriod(TTConstraint):  # , pond):
         return text
 
 
-class ReasonableDays(TTConstraint):
+class LimitDayLength(TTConstraint):
     """
     Allow to limit long days (with the first and last slot of a day). For a
     given parameter,
     a None value builds the constraint for all possible values,
     e.g. promo = None => the constraint holds for all promos.
     """
+    max_hours = models.PositiveSmallIntegerField()
     groups = models.ManyToManyField('base.Group',
                                     blank=True,
                                     related_name="reasonable_day_constraints")
     tutors = models.ManyToManyField('people.Tutor',
                                     blank=True,
                                     related_name="reasonable_day_constraints")
-
 
     def get_courses_queryset(self, ttmodel, tutor=None, group=None):
         """
