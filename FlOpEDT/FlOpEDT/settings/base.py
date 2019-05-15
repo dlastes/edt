@@ -155,3 +155,7 @@ STATICFILES_DIRS = (
 
 ASGI_APPLICATION = 'FlOpEDT.routing.application'
 
+#
+# FLOPEDT Settings
+#
+CUSTOM_CONSTRAINTS_PATH = 'MyFlOp.custom_constraints'

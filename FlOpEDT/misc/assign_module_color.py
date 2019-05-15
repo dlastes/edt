@@ -25,7 +25,8 @@
 # without disclosing the source code of your own applications.
 
 from base.weeks import week_list
-from base.models import Course, ModuleDisplay, TrainingProgramme, Module
+from base.models import Course, TrainingProgramme, Module
+from displayweb.models import ModuleDisplay
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
