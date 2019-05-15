@@ -58,12 +58,12 @@ class CustomConstraintAdmin(DepartmentModelAdmin):
                    )   
 
 
-class LimitCourseTypePerPeriodAdmin(DepartmentModelAdmin):
+class LimitCourseTypeTimePerPeriodAdmin(DepartmentModelAdmin):
     list_display = ('week', 
                     'year', 
                     'train_prog', 
-                    'type', 
-                    'limit', 
+                    'course_type',
+                    'max_hours',
                     'period', 
                     'comment')
     ordering = ()
@@ -71,7 +71,7 @@ class LimitCourseTypePerPeriodAdmin(DepartmentModelAdmin):
                    ('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
                    ('tutors', DropdownFilterRel),
-                   ('type', DropdownFilterRel),
+                   ('course_type', DropdownFilterRel),
                    )
 
 
@@ -156,7 +156,7 @@ class SimultaneousCoursesAdmin(DepartmentModelAdmin):
 
 
 admin.site.register(CustomConstraint, CustomConstraintAdmin)
-admin.site.register(LimitCourseTypeTimePerPeriod, LimitCourseTypePerPeriodAdmin)
+admin.site.register(LimitCourseTypeTimePerPeriod, LimitCourseTypeTimePerPeriodAdmin)
 admin.site.register(ReasonableDays, ReasonableDaysAdmin)
 admin.site.register(Stabilize, StabilizeAdmin)
 admin.site.register(MinHalfDays, MinHalfDaysAdmin)
