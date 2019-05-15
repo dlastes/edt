@@ -30,7 +30,7 @@ from django.contrib import admin
 from base.admin import DepartmentModelAdmin
 
 from TTapp.models import \
-    LimitCourseTypeTimePerPeriod, LimitDayLength, Stabilize, \
+    LimitCourseTypeTimePerPeriod, ReasonableDays, Stabilize, \
     MinHalfDays, MinNonPreferedSlot, AvoidBothSlots, \
     SimultaneousCourses, CustomConstraint
 
@@ -157,7 +157,7 @@ class SimultaneousCoursesAdmin(DepartmentModelAdmin):
 
 admin.site.register(CustomConstraint, CustomConstraintAdmin)
 admin.site.register(LimitCourseTypeTimePerPeriod, LimitCourseTypePerPeriodAdmin)
-admin.site.register(LimitDayLength, ReasonableDaysAdmin)
+admin.site.register(ReasonableDays, ReasonableDaysAdmin)
 admin.site.register(Stabilize, StabilizeAdmin)
 admin.site.register(MinHalfDays, MinHalfDaysAdmin)
 admin.site.register(MinNonPreferedSlot, MinNonPreferedSlotAdmin)

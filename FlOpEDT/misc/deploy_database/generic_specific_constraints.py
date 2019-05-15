@@ -26,7 +26,7 @@
 # without disclosing the source code of your own applications.
 
 
-from TTapp.models import LimitCourseTypeTimePerPeriod, LimitDayLength, MinHalfDays, max_weight, \
+from TTapp.models import LimitCourseTypeTimePerPeriod, ReasonableDays, MinHalfDays, max_weight, \
     SimultaneousCourses, LimitedSlotChoices
 from base.models import Time, Day, TrainingProgramme, CourseType, Module, RoomGroup, Slot, Group, Course, Department
 from people.models import Tutor
@@ -109,7 +109,7 @@ def add_iut_blagnac_lp():
     lp = TrainingProgramme.objects.get(abbrev='APSIO')
     print("adding LP constraints")
     # Avoid first and last slot at the same time for train_prog 3
-    R = LimitDayLength(train_prog=lp, department=info,
+    R = ReasonableDays(train_prog=lp, department=info,
                        weight=max_weight)
     R.save()
 
@@ -129,7 +129,7 @@ def add_iut_blagnac_other():
 
     # Limit Long Days for instructors
     for i in Tutor.objects.all():
-        R = LimitDayLength(tutor=i, department=info,
+        R = ReasonableDays(tutor=i, department=info,
                            weight=max_weight)
         R.save()
 

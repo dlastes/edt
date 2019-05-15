@@ -457,14 +457,13 @@ class LimitCourseTypeTimePerPeriod(TTConstraint):  # , pond):
         return text
 
 
-class LimitDayLength(TTConstraint):
+class ReasonableDays(TTConstraint):
     """
     Allow to limit long days (with the first and last slot of a day). For a
     given parameter,
     a None value builds the constraint for all possible values,
     e.g. promo = None => the constraint holds for all promos.
     """
-    max_hours = models.PositiveSmallIntegerField()
     groups = models.ManyToManyField('base.Group',
                                     blank=True,
                                     related_name="reasonable_day_constraints")
