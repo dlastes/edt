@@ -349,7 +349,6 @@ var edt_but, edt_message;
 // parameters for each checkbox
 var ckbox = [];
 ckbox["edt-mod"] = {
-    i: 0,
     menu: "edt-mod",
     cked: false,
     txt: "Modifier",
@@ -357,7 +356,6 @@ ckbox["edt-mod"] = {
     en: true
 };
 ckbox["dis-mod"] = {
-    i: 1,
     menu: "dis-mod",
     cked: false,
     txt: "Modifier",
