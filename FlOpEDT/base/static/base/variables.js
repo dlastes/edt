@@ -284,7 +284,6 @@ var garbage = {
 
 // bknews = breaking news
 var bknews = {
-    hour_bound:3, // flash info between hour #2 and hour #3
     ratio_height: .55,        // ratio over course height 
     time_height: 60,
     time_margin: 15,

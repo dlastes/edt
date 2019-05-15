@@ -385,21 +385,6 @@ function week_sel_x(d) {
 /*----------------------
   -------- GRID --------
   ----------------------*/
-function gm_x(datum) {
-    return datum.day * (rootgp_width * labgp.width +
-            dim_dispo.plot * (dim_dispo.width + dim_dispo.right)) +
-        datum.gp.x * labgp.width;
-}
-
-function gm_y(datum) {
-    var daty = row_gp[root_gp[datum.gp.promo].row].y ;
-    var ret = (datum.slot * nbRows + daty) * (labgp.height);
-    if (datum.slot >= bknews.hour_bound) {
-	ret += bknews_h() ;
-    }
-    return ret ;
-}
-
 function gs_x(d) {
     return idays[d.day].num * (rootgp_width * labgp.width +
         dim_dispo.plot * (dim_dispo.width + dim_dispo.right));
