@@ -722,9 +722,7 @@ function compute_changes(changes, conc_tutors, gps) {
 		    
 	    // 	}
 	    // 	msg += " le " + days[cur_course.day].date
-	    // 	    + " sur le créneau "
-	    // 	    + data_grid_scale_hour[cur_course.slot]
-	    // 	    + "."
+	    // 	    + " sur le créneau."
 		
 	    // 	splash_case = {
 	    // 	    id: "unav-tp",

@@ -608,23 +608,6 @@ function go_grid(quick) {
 
     
 
-    // -- no slot --
-    // --  begin  --
-    
-    
-    // bg
-    //     .selectAll(".gridsckh")
-    //     .data(data_grid_scale_hour)
-    //     .transition(t)
-    //     .attr("x", gsckh_x)
-    //     .attr("y", gsckh_y);
-
-
-    // --   end   --
-    // -- no slot --
-
-
-    
     fg.select(".h-sca").select("rect")
         .transition(t)
         .attr("x", but_sca_h_x())
