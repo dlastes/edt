@@ -1014,11 +1014,18 @@ function edt_change_ack(msg) {
     } else {
         ack.edt = msg.getResponseHeader('reason');
         if (ack.edt != null && ack.edt.startsWith("Version")) {
-            ack.edt += "Quelqu'un a modifié entre-temps."
+            ack.edt = "Désolé, quelqu'un a modifié entre-temps."
         }
+        var splash_disclaimer = {
+	    id: "failed-edt-mod",
+	    but: {list: [{txt: "Zut. Ok.", click: function(d){} }]},
+	    com: {list: [{txt: ack.edt}]}
+	}
+	splash(splash_disclaimer);
     }
     console.log(ack.edt);
     go_ack_msg(true);
+    
 }
 
 
@@ -1028,6 +1035,12 @@ function dis_change_ack(msg, nbDispos) {
         ack.edt = "Modifications dispos : OK !"
     } else {
         ack.edt = msg.getResponseHeader('reason');
+        var splash_disclaimer = {
+	    id: "failed-pref-mod",
+	    but: {list: [{txt: "Zut. Ok.", click: function(d){} }]},
+	    com: {list: [{txt: ack.edt}]}
+	}
+	splash(splash_disclaimer);
     }
     go_ack_msg(true);
 
