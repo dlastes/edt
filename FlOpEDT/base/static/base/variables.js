@@ -205,7 +205,7 @@ var smiley = {
     rect_h: .3
 };
 
-// helper arrays for smileys
+// seed array for advanced preferences (smileys)
 var data_dispo_adv_init = [];
 for (var i = 0; i <= par_dispos.nmax; i++) {
     data_dispo_adv_init.push({
@@ -215,14 +215,14 @@ for (var i = 0; i <= par_dispos.nmax; i++) {
         off: i
     });
 }
+// current array for advanced preferences (smileys)
 var data_dispo_adv_cur = [];
-var del_dispo_adv = false;
 
 // number of required and provided availability slots
 var required_dispos = -1;
 var filled_dispos = -1;
 
-// display only preferences
+// display only preferences (for typical week)
 var pref_only ;
 
 var dim_dispo = {
@@ -243,14 +243,14 @@ var weeks = {
     width: 40,
     height: 30,
     x: 0,
-    y: -240, //margin.but,  // - TOP BANNER - //
-    ndisp: 13,
-    fdisp: 0,
+    y: -240,   // top of week banner
+    ndisp: 13, // number of weeks in the banner
+    fdisp: 0,  // index of the lowest hidden week
     sel: [1],
-    rad: 1.2,
-    hfac: 0.9,
-    wfac: 0.9,
-    cont: null
+    rad: 1.2,  // ratio for the radius of prev/next week buttons
+    hfac: 0.9, // ratio for week selection ellipse
+    wfac: 0.9, // ratio for week selection ellipse
+    cont: null // will be initiated in create_clipweek
 };
 
 /*----------------------
@@ -258,6 +258,8 @@ var weeks = {
   ----------------------*/
 
 // one element per slot
+// non-empty iff slot_case
+// filled in create_grid_data()
 var data_slot_grid = [];
 
 // keys on top or at the bottom of the grid representing the name of
@@ -284,12 +286,11 @@ var garbage = {
 
 // bknews = breaking news
 var bknews = {
-    ratio_height: .55,        // ratio over course height 
     time_height: 60,
     time_margin: 15,
     ratio_margin: .15, // ratio over course height 
-    cont: [],
-    nb_rows: 0,
+    cont: [], // array of bknews contents
+    nb_rows: 0, // maximum number of bknews in the same day
 };
 
 /*---------------------
@@ -303,7 +304,7 @@ var quote = "" ;
   ------- GROUPS -------
   ----------------------*/
 
-// 2D data about groups (id_promo, group_subname)
+// 2D data about groups [id_promo][group_subname] -> Group
 var groups = [];
 
 
@@ -333,6 +334,7 @@ var margin_but = {
 /*--------------------
   ------ MENUS -------
   --------------------*/
+// course and preference modification menus
 var menus = {
     x: weeks.x + 20,
     y: weeks.y + 25,
@@ -345,7 +347,11 @@ var menus = {
     colcb: 140
 };
 
-var edt_but, edt_message;
+// course modification validation button
+var edt_but;
+// course modification feedback message
+var edt_message;
+
 // parameters for each checkbox
 var ckbox = [];
 ckbox["edt-mod"] = {
@@ -364,7 +370,7 @@ ckbox["dis-mod"] = {
 };
 
 
-
+// for click propagation
 var context_menu = {
     dispo_hold: false,
     room_tutor_hold: false
@@ -406,6 +412,7 @@ var unavailable_rooms = {} ;
    ------ TUTORS ------
    --------------------*/
 
+// tutors (sel: selected, pl:scheduled (PLacé), pp: not scheduled (Pas Placé), all: all modules
 var tutors = {
     // instructors of unscheduled courses
     pp: [],
