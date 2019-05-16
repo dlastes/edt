@@ -161,24 +161,25 @@ def make_planif_file(department, empty_bookname=empty_bookname):
                 % (first_line, ligne_finale, cl, first_line, cl, ligne_finale, first_line, ligne_finale)
             sheet.cell(row=first_line-2, column=week_col).value = '=%s%d' % (cl, rank)
         rank += 1
-        append_row(sheet, empty_rows, 4, rank, cols)
-        rank += 1
 
         ############ Other TOTAL lines ############
+        # append_row(sheet, empty_rows, 7, rank, cols)
+        # sheet.cell(row=rank, column=7).value = "='Recap'!$B$1"
+        # prof_row = rank
+        # sheet.row_dimensions[rank].hidden = True
+        # rank += 1
         append_row(sheet, empty_rows, 6, rank, cols)
-        sheet.cell(row=rank, column=7).value = "='Recap'!$B$1"
+        sheet.cell(row=rank, column=2).value = "='Recap'!$B$1"
+        sheet.cell(row=rank, column=6).value = '="TOTAL_"&$B$%d' % rank
         prof_row = rank
-        sheet.row_dimensions[rank].hidden = True
-        rank += 1
-        append_row(sheet, empty_rows, 7, rank, cols)
         for week_col in range(FIRST_WEEK_COL, cols + 1):
             cl = column_letter(week_col)
             sheet.cell(row=rank, column=week_col).value = '=%s1' % cl
-        sheet.row_dimensions[rank].hidden = True
+        #sheet.row_dimensions[rank].hidden = True
         rank += 1
         for ct in CT:
-            append_row(sheet, empty_rows, 8, rank, cols)
-            sheet.cell(row=rank, column=2).value = '=$F%d&"_"&$G$%d' % (rank, prof_row)
+            append_row(sheet, empty_rows, 7, rank, cols)
+            sheet.cell(row=rank, column=2).value = '=$F%d&"_"&$B$%d' % (rank, prof_row)
             sheet.cell(row=rank, column=6).value = ct.name
             sheet.cell(row=rank, column=7).value = '=SUM(H%d:%s%d)' % (rank, last_column_letter[p], rank)
             for week_col in range(FIRST_WEEK_COL, cols + 1):
@@ -186,16 +187,15 @@ def make_planif_file(department, empty_bookname=empty_bookname):
                 sheet.cell(row=rank, column=week_col).value =\
                     '=SUMPRODUCT((D$%d:D$%d)*(%s$%d:%s$%d)*($B$%d:$B$%d=$B%d))/60' \
                     % (first_line, ligne_finale, cl, first_line, cl, ligne_finale, first_line, ligne_finale, rank)
-            sheet.row_dimensions[rank].hidden = True
+            #sheet.row_dimensions[rank].hidden = True
             rank += 1
-        append_row(sheet, empty_rows, 9, rank, cols)
+        append_row(sheet, empty_rows, 8, rank, cols)
         nb_ct = len(CT) #CourseType.objects.filter(department=department).count()
         for week_col in range(FIRST_WEEK_COL-1, cols + 1):
             cl = column_letter(week_col)
             sheet.cell(row=rank, column=week_col).value = \
                 '=SUM(%s%d:%s%d)' % (cl, rank - nb_ct, cl, rank - 1)
         last_row[p.name] = rank
-        sheet.row_dimensions[rank].hidden = True
         rank += 1
 
         ############ Adapting column widths ############
