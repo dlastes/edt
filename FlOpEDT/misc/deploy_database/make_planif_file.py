@@ -59,8 +59,16 @@ def append_row(work_sheet, rows_to_append, row_number, rank, until):
             new_cell.protection = copy(cell.protection)
             new_cell.alignment = copy(cell.alignment)
 
+def order_CT(department):
+    CT = []
+    CT += list(CourseType.objects.filter(department=department, name__contains='A'))
+    CT += list(CourseType.objects.filter(department=department, name__contains='TD'))
+    CT += list(CourseType.objects.filter(department=department, name__contains='TP'))
+    CT += CourseType.objects.filter(department=department).exclude(name__contains='TP')\
+        .exclude(name__contains='A').exclude(name__contains='TD')
+    return CT
 
-empty_bookname = 'misc/deploy_database/empty_planif_file_with_recap.xlsx'
+empty_bookname = 'misc/deploy_database/empty_planif_file.xlsx'
 
 
 def make_planif_file(department, empty_bookname=empty_bookname):
@@ -70,6 +78,10 @@ def make_planif_file(department, empty_bookname=empty_bookname):
     new_book.create_sheet('Recap')
     last_row = {}
     last_column_letter = {}
+    if department.abbrev in ['INFO', 'RT', 'GIM', 'CS']:
+        CT = order_CT(department)
+    else:
+        CT = CourseType.objects.filter(department=department)
     # We go through each period and create a sheet for each period
     for p in Period.objects.filter(department=department):
         new_book.create_sheet(p.name)
@@ -99,14 +111,16 @@ def make_planif_file(department, empty_bookname=empty_bookname):
                 sheet.cell(row=rank, column=week_col).value = i
                 week_col += 1
         rank += 1
-        append_row(sheet, empty_rows, 4, rank, cols)
+        append_row(sheet, empty_rows, 5, rank, cols)
+        rank += 1
         last_column_letter[p] = column_letter(cols)
-
+        append_row(sheet, empty_rows, 4, rank, cols)
+        rank += 1
+        first_line = rank
 
         ################ A line per module per CourseType ################
         for mod in Module.objects.filter(period=p):
-            for ct in CourseType.objects.filter(department=department):
-                rank += 1
+            for ct in CT:
                 append_row(sheet, empty_rows, 2, rank, cols)
                 sheet.cell(row=rank, column=1).value = mod.abbrev
                 sheet.cell(row=rank, column=2).value = '=$C%d&"_"&$E%d' % (rank, rank)
@@ -115,67 +129,74 @@ def make_planif_file(department, empty_bookname=empty_bookname):
                 sheet.cell(row=rank, column=5).value = 'Prof'
                 sheet.cell(row=rank, column=6).value = 'Type de Salle'
                 sheet.cell(row=rank, column=7).value = 'Groupes'
-
+                rank += 1
                 if Group.objects.filter(type__in=ct.group_types.all(), train_prog=mod.train_prog).count() > 0:
                     for g in Group.objects.filter(type__in=ct.group_types.all(), train_prog=mod.train_prog):
-                        rank += 1
                         append_row(sheet, empty_rows, 3, rank, cols)
                         sheet.cell(row=rank, column=1).value = mod.abbrev
                         sheet.cell(row=rank, column=2).value = '=$C%d&"_"&$E%d' % (rank, rank)
                         sheet.cell(row=rank, column=3).value = ct.name
                         sheet.cell(row=rank, column=4).value = ct.duration
                         sheet.cell(row=rank, column=7).value = g.nom
+                        rank += 1
                 else:
-                    rank += 1
                     append_row(sheet, empty_rows, 3, rank, cols)
                     sheet.cell(row=rank, column=1).value = mod.abbrev
                     sheet.cell(row=rank, column=2).value = '=$C%d&"_"&$E%d' % (rank, rank)
                     sheet.cell(row=rank, column=3).value = ct.name
                     sheet.cell(row=rank, column=4).value = ct.duration
+                    rank += 1
 
             ################ Separating each course with a black line ################
-            rank += 1
             append_row(sheet, empty_rows, 4, rank, cols)
+            rank += 1
 
         ############ TOTAL line ############
-        ligne_finale = rank - 1
-        rank += 1
+        ligne_finale = rank - 2
         append_row(sheet, empty_rows, 5, rank, cols)
         for week_col in range(FIRST_WEEK_COL, cols+1):
             cl = column_letter(week_col)
             sheet.cell(row=rank, column=week_col).value = \
-                '=SUMPRODUCT((D$3:D$%d)*(%s$3:%s$%d)*(G$3:G$%d="Groupes"))/60' \
-                % (ligne_finale, cl, cl, ligne_finale, ligne_finale)
+                '=SUMPRODUCT((D$%d:D$%d)*(%s$%d:%s$%d)*(G$%d:G$%d="Groupes"))/60' \
+                % (first_line, ligne_finale, cl, first_line, cl, ligne_finale, first_line, ligne_finale)
+            sheet.cell(row=first_line-2, column=week_col).value = '=%s%d' % (cl, rank)
         rank += 1
-        append_row(sheet, empty_rows, 4, rank, cols)
 
         ############ Other TOTAL lines ############
-        rank += 1
-        append_row(sheet, empty_rows, 7, rank, cols)
+        # append_row(sheet, empty_rows, 7, rank, cols)
+        # sheet.cell(row=rank, column=7).value = "='Recap'!$B$1"
+        # prof_row = rank
+        # sheet.row_dimensions[rank].hidden = True
+        # rank += 1
+        append_row(sheet, empty_rows, 6, rank, cols)
+        sheet.cell(row=rank, column=2).value = "='Recap'!$B$1"
+        sheet.cell(row=rank, column=6).value = '="TOTAL_"&$B$%d' % rank
+        prof_row = rank
         for week_col in range(FIRST_WEEK_COL, cols + 1):
             cl = column_letter(week_col)
             sheet.cell(row=rank, column=week_col).value = '=%s1' % cl
-
-        for ct in CourseType.objects.filter(department=department):
-            rank += 1
-            append_row(sheet, empty_rows, 8, rank, cols)
-            sheet.cell(row=rank, column=2).value = '=$F%d&"_"&$E%d' % (rank, rank)
-            sheet.cell(row=rank, column=5).value = "='Recap'!$B$1"
+        #sheet.row_dimensions[rank].hidden = True
+        rank += 1
+        for ct in CT:
+            append_row(sheet, empty_rows, 7, rank, cols)
+            sheet.cell(row=rank, column=2).value = '=$F%d&"_"&$B$%d' % (rank, prof_row)
             sheet.cell(row=rank, column=6).value = ct.name
             sheet.cell(row=rank, column=7).value = '=SUM(H%d:%s%d)' % (rank, last_column_letter[p], rank)
             for week_col in range(FIRST_WEEK_COL, cols + 1):
                 cl = column_letter(week_col)
                 sheet.cell(row=rank, column=week_col).value =\
-                    '=SUMPRODUCT((D$3:D$%d)*(%s$3:%s$%d)*($B$3:$B$%d=$B%d))/60' \
-                    % (ligne_finale, cl, cl, ligne_finale, ligne_finale, rank)
-        rank += 1
-        append_row(sheet, empty_rows, 9, rank, cols)
-        nb_ct = CourseType.objects.filter(department=department).count()
+                    '=SUMPRODUCT((D$%d:D$%d)*(%s$%d:%s$%d)*($B$%d:$B$%d=$B%d))/60' \
+                    % (first_line, ligne_finale, cl, first_line, cl, ligne_finale, first_line, ligne_finale, rank)
+            #sheet.row_dimensions[rank].hidden = True
+            rank += 1
+        append_row(sheet, empty_rows, 8, rank, cols)
+        nb_ct = len(CT) #CourseType.objects.filter(department=department).count()
         for week_col in range(FIRST_WEEK_COL-1, cols + 1):
             cl = column_letter(week_col)
             sheet.cell(row=rank, column=week_col).value = \
                 '=SUM(%s%d:%s%d)' % (cl, rank - nb_ct, cl, rank - 1)
-        last_row[p.name]=rank
+        last_row[p.name] = rank
+        rank += 1
 
         ############ Adapting column widths ############
         for col in sheet.columns:
