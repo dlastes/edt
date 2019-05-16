@@ -61,11 +61,12 @@ def append_row(work_sheet, rows_to_append, row_number, rank, until):
 
 def order_CT(department):
     CT = []
+    CT += list(CourseType.objects.filter(department=department, name__contains='CM'))
     CT += list(CourseType.objects.filter(department=department, name__contains='A'))
     CT += list(CourseType.objects.filter(department=department, name__contains='TD'))
     CT += list(CourseType.objects.filter(department=department, name__contains='TP'))
     CT += CourseType.objects.filter(department=department).exclude(name__contains='TP')\
-        .exclude(name__contains='A').exclude(name__contains='TD')
+        .exclude(name__contains='A').exclude(name__contains='TD').exclude(name__contains='CM')
     return CT
 
 empty_bookname = 'misc/deploy_database/empty_planif_file.xlsx'

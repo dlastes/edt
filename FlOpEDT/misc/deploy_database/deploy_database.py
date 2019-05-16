@@ -31,7 +31,9 @@ from openpyxl import load_workbook
 
 from random import choice
 
-from base.models import Room, RoomType, RoomGroup, TrainingProgramme, TrainingProgrammeDisplay,\
+from displayweb.models import TrainingProgrammeDisplay
+
+from base.models import Room, RoomType, RoomGroup, TrainingProgramme,\
     Group, Module, GroupType, Period, Time, Day, Slot, CourseType, Department, CourseStartTimeConstraint
 
 from base.weeks import annee_courante
