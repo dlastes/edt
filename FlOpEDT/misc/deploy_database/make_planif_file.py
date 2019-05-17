@@ -142,7 +142,7 @@ def make_planif_file(department, empty_bookname=empty_bookname):
                 sheet.cell(row=rank, column=5).value = 'Prof'
                 sheet.cell(row=rank, column=6).value = 'Type de Salle'
                 sheet.cell(row=rank, column=7).value = 'Groupes'
-                sheet.cell(row=rank, column=VERIF_COL).value = '=%d*SUM(%s%d:%s%d)' % (nb_groups,first_column_letter[p], rank,
+                sheet.cell(row=rank, column=VERIF_COL).value = '=SUM(%s%d:%s%d)' % (first_column_letter[p], rank,
                                                                                     last_column_letter[p], rank)
                 rank += 1
                 if nb_groups > 0:
@@ -155,12 +155,13 @@ def make_planif_file(department, empty_bookname=empty_bookname):
                         sheet.cell(row=rank, column=7).value = g.nom
                         rank += 1
                     sheet.cell(row=rank-nb_groups, column=VERIF_COL).value =\
-                        '=IF(SUM(%s%d:%s%d)=$%s%d,"OK","/!\\ -> "&SUM(%s%d:%s%d))' % \
+                        '=IF(SUM(%s%d:%s%d)-$%s%d*%d=0,"OK","/!\\ -> "&SUM(%s%d:%s%d)-$%s%d*%d)' % \
                         (first_column_letter[p], rank-nb_groups,
                          last_column_letter[p], rank-1,
-                         column_letter(VERIF_COL), rank-nb_groups-1,
-                         first_column_letter[p], rank-nb_groups,
-                         last_column_letter[p], rank-1)
+                         column_letter(VERIF_COL), rank-nb_groups-1, nb_groups,
+                         first_column_letter[p], rank - nb_groups,
+                         last_column_letter[p], rank - 1,
+                         column_letter(VERIF_COL), rank - nb_groups - 1, nb_groups,)
                 else:
                     append_row(sheet, empty_rows, 3, rank, cols)
                     sheet.cell(row=rank, column=1).value = mod.abbrev
