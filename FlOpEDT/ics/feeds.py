@@ -6,7 +6,7 @@ from django_ical.views import ICalFeed
 
 from django.core.exceptions import ObjectDoesNotExist
 
-from base.models import ScheduledCourse, Room, Group
+from base.models import ScheduledCourse, Room, Group, Day
 from people.models import Tutor
 
 
@@ -16,6 +16,7 @@ class EventFeed(ICalFeed):
     """
     product_id = 'flop'
     timezone = 'Europe/Paris'
+    days = [abbrev for abbrev,_ in Day.CHOICES]
 
     def item_title(self, scourse):
         course = scourse.cours
@@ -36,14 +37,13 @@ class EventFeed(ICalFeed):
         course = scourse.cours
         begin = datetime.combine(
             Week(course.an, course.semaine)\
-            .day(scourse.creneau.jour_id-1),
+            .day(self.days.index(scourse.day)),
             datetime.min.time()) \
-            + timedelta(hours=scourse.creneau.heure.hours,
-                        minutes=scourse.creneau.heure.minutes)
+            + timedelta(minutes=scourse.start_time)
         return begin
 
     def item_end_datetime(self, scourse):
-        end = self.item_start_datetime(scourse) + timedelta(minutes=scourse.creneau.duration)
+        end = self.item_start_datetime(scourse) + timedelta(minutes=scourse.cours.type.duration)
         return end
 
     def item_link(self, s):
