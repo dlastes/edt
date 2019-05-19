@@ -259,3 +259,10 @@ def get_time_settings(dept):
                       'lunch_break_finish_time': ts.lunch_break_finish_time},
                      'days': ts.days}
     return time_settings
+
+
+def get_departments():
+    """
+    :return: list of department abbreviations
+    """
+    return [d.abbrev for d in Department.objects.all()]

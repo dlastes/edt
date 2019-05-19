@@ -596,6 +596,15 @@ var stbut = {
    ------ ALL -------
   --------------------*/
 
+var departments = {
+    data: [],
+    marh:10,
+    topx:sel_popup.selx + sel_popup.selw + 50,
+    topy:sel_popup.sely - sel_popup.selh - sel_popup.selmy,
+    w:35,
+    h:sel_popup.selh
+}
+
 // version of the planning
 var version;
 

@@ -1193,3 +1193,13 @@ function popup_title_x(d) {
 function popup_title_y(d) {
     return .5*(popup_exit_trans_y(d)-sel_popup.mar_side) ;
 }
+
+
+function depts_trans(d , i){
+    return "translate("
+        + (departments.topx + i*(departments.marh + departments.h)) + ","
+        + departments.topy + ")" ;
+}
+function dept_txt(d){
+    return d;
+}
