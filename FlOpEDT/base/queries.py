@@ -199,22 +199,28 @@ def get_descendant_groups(gp, children):
 def get_rooms(department_abbrev):
     """
     From the data stored in the database, fill the room description file, that
-    will be used by the website
+    will be used by the website.
+    All room that belongs to a roomgroup that belongs to at least one room type
+    of department_abbrev
     :return: an object containing one dictionary roomtype -> (list of roomgroups),
     and one dictionary roomgroup -> (list of rooms)
     """
     dic_rt = {}
+    dept_rg = set()
+
     for rt in RoomType.objects.filter(department__abbrev=department_abbrev):
         dic_rt[str(rt)] = []
         for rg in rt.members.all():
+            dept_rg.add(str(rg))
             if str(rg) not in dic_rt[str(rt)]:
                 dic_rt[str(rt)].append(str(rg))
 
     dic_rg = {}
-    for rg in RoomGroup.objects.all():
-        dic_rg[str(rg)] = []
+    for rg_name in dept_rg:
+        rg = RoomGroup.objects.get(name=rg_name)
+        dic_rg[rg_name] = []
         for r in rg.subrooms.all():
-            dic_rg[str(rg)].append(str(r))
+            dic_rg[rg_name].append(str(r))
 
     return {'roomtypes':dic_rt,
             'roomgroups':dic_rg}
