@@ -2249,3 +2249,36 @@ function go_selection_popup(){
     go_selection_buttons();
 
 }
+
+
+// create buttons for department redirection
+function create_dept_redirection() {
+    var avg = catg
+        .selectAll(".dept-selection")
+        .data(departments.data);
+
+    var contg = avg
+        .enter()
+        .append("g")
+        .attr("class", "dept-selection")
+        .attr("transform", depts_trans)
+        .attr("cursor", "pointer")
+        .on("click", redirect_dept);
+    
+    contg
+        .append("rect")
+        .attr("class", "select-highlight")
+        .attr("width", departments.w)
+        .attr("height", departments.h)
+        .attr("rx", 5)
+        .attr("ry", 10)
+        .attr("fill", "forestgreen")
+        .attr("x", 0)
+        .attr("y", 0);
+
+    contg
+        .append("text")
+        .text(dept_txt)
+        .attr("x", .5 * departments.w)
+        .attr("y", .5 * departments.h);
+}
