@@ -59,6 +59,36 @@ function apply_change_simple_pref(d) {
     }
 }
 
+// change preference selection mode
+function apply_pref_mode(d) {
+    pref_selection.mode.forEach(function(d){
+        d.selected = false ;
+    });
+    d.selected = true ;
+    if(d.desc=="nominal") {
+        pref_selection.choice.data.forEach(function(d){
+            d.selected = false ;
+        });
+    } else {
+        var current_sel = pref_selection.choice.data.find(function(d){
+            return d.selected ;
+        });
+        if (typeof current_sel === 'undefined') {
+            pref_selection.choice.data[0].selected = true ;
+        }
+    }
+    go_pref_mode();
+}
+
+// 
+function apply_pref_mode_choice(d) {
+    pref_selection.choice.data.forEach(function(p){
+        p.selected = false ;
+    })
+    d.selected = true ;
+    go_paint_pref_mode_choices(false);
+}
+
 /*---------------------
   ------- WEEKS -------
   ---------------------*/
