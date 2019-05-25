@@ -603,7 +603,6 @@ function apply_ckbox(dk) {
                 //     }
                 //     go_edt(false);
                 // }
-                
 		fetch_dispos();
 
                 if (logged_usr.dispo_all_change) { 
@@ -626,7 +625,7 @@ function apply_ckbox(dk) {
                 }
 		create_dispos_user_data();
 		go_edt(false);
-		
+		create_pref_modes();
             } else {
                 user.dispos = [];
                 //ckbox["dis-mod"].disp = false;
@@ -636,6 +635,7 @@ function apply_ckbox(dk) {
                     labgp.width *= 1 + (dim_dispo.width + dim_dispo.right) / (rootgp_width * labgp.width);
                 }
                 go_edt(false);
+                remove_pref_modes();
             }
         } else if (dk == "edt-mod") {
             if (ckbox[dk].cked) {

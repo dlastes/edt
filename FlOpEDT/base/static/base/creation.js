@@ -92,6 +92,10 @@ function create_layouts(svg_cont, light) {
     meg = svg_cont.append("g")
         .attr("id", "lay-meg");
 
+    // preference mode ground
+    pmg = svg_cont.append("g")
+        .attr("id", "lay-pmg");    
+
     // weeks ground
     wg.upper = svg_cont.append("g")
         .attr("id", "lay-wg");
@@ -207,6 +211,33 @@ function create_alarm_dispos() {
         .text(txt_filDispos);
 }
 
+
+function create_pref_modes() {
+
+    pref_selection.choice.data.forEach(function(d){
+        d.selected = false ;
+    });
+    
+    pmg
+        .attr("transform", pmg_trans());
+    
+    var buttons = pmg
+        .append("g")
+        .attr("id", "pm-but-head")
+        .attr("transform", pref_mode_trans());
+
+    var choices_but = pmg
+        .append("g")
+        .attr("id", "pm-choices")
+        .attr("transform", pref_mode_choice_trans());
+
+    go_pref_mode();
+}
+
+
+function remove_pref_modes() {
+    pmg.selectAll("*").remove();
+}
 
 /*---------------------
   ------- WEEKS -------
