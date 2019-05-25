@@ -292,6 +292,36 @@ for (var i = 0; i <= par_dispos.nmax; i++) {
 var data_dispo_adv_cur = [];
 var del_dispo_adv = false;
 
+// preference selection mode
+var pref_selection = {
+    butw:70,
+    buth:30,
+    mary:5,
+    marx:10,
+    choice:{
+        data:[],
+        w:25,
+        h:25
+    },
+    mode:[{
+        desc:"nominal",
+        txt:"Normal",
+        selected:true,
+    },{
+        desc:"paint",
+        txt:"Sélection",
+        selected:false,
+    }]
+};
+for (var i = 0; i <= par_dispos.nmax; i++) {
+    pref_selection.choice.data.push({
+        val:i,
+        // for smile_trans
+        off:-2,
+        selected:false
+    });
+}
+
 // number of required and provided availability slots
 var required_dispos = -1;
 var filled_dispos = -1;
