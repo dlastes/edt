@@ -48,13 +48,20 @@
 // apply pref change when simple mode
 function apply_change_simple_pref(d) {
     if (pref_only || ckbox["dis-mod"].cked) {
-        if (Math.floor(d.val % (par_dispos.nmax / 2)) != 0) {
-            d.val = Math.floor(d.val / (par_dispos.nmax / 2)) * par_dispos.nmax / 2;
+        var sel = pref_selection.choice.data.find(function(d){
+            return d.selected;
+        });
+        if(typeof sel === 'undefined') {
+            if (Math.floor(d.val % (par_dispos.nmax / 2)) != 0) {
+                d.val = Math.floor(d.val / (par_dispos.nmax / 2)) * par_dispos.nmax / 2;
+            }
+            d.val = (d.val + par_dispos.nmax / 2) % (3 * par_dispos.nmax / 2);
+	    update_pref_interval(user.nom, d.day, d.start_time, d.val) ;
+            //dispos[user.nom][idays[d.day]][d.hour] = d.val;
+            //user.dispos[day_hour_2_1D(d)].val = d.val;
+        } else {
+            d.val = sel.val ;
         }
-        d.val = (d.val + par_dispos.nmax / 2) % (3 * par_dispos.nmax / 2);
-	update_pref_interval(user.nom, d.day, d.start_time, d.val) ;
-        //dispos[user.nom][idays[d.day]][d.hour] = d.val;
-        //user.dispos[day_hour_2_1D(d)].val = d.val;
         go_pref(true);
     }
 }
