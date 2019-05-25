@@ -93,7 +93,14 @@ function apply_pref_mode_choice(d) {
         p.selected = false ;
     })
     d.selected = true ;
-    go_paint_pref_mode_choices(false);
+    pref_selection.mode.forEach(function(m){
+        m.selected = false ;
+    });
+    var sel_mode = pref_selection.mode.find(function(m){
+        return m.desc == "paint" ;
+    });
+    sel_mode.selected = true ;
+    go_pref_mode(false);
 }
 
 /*---------------------
