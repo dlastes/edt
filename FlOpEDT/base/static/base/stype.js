@@ -24,9 +24,9 @@
 
 // Redefinition of some variables
 
-var margin = {top: 50,  left: 100, right: 10, bot:10};
+var margin = {top: 50,  left: 50, right: 10, bot:10};
 
-var svg = {height: 625 - margin.top - margin.bot, width: 680 - margin.left - margin.right};
+var svg = {height: 625 - margin.top - margin.bot, width: 720 - margin.left - margin.right};
 
 var mode = "tutor" ;
 
@@ -45,6 +45,8 @@ dim_dispo.mh = 10 ;
 dim_dispo.plot = 1 ;
 nbRows=1;
 scale = dim_dispo.height / nb_minutes_in_grid()  ;
+pref_selection.choice.w = 35;
+pref_selection.choice.h = 35;
 
 
 ckbox["dis-mod"].cked = true ;
@@ -58,6 +60,7 @@ pref_only = true ;
 create_general_svg_pref_only();
 go_days(true, false);
 create_lunchbar();
+create_pref_modes(pref_only);
 fetch_pref_only();
 
 
@@ -91,6 +94,9 @@ function create_general_svg_pref_only() {
 
 function create_layouts_pref_only(svg_cont){
 
+    // preference mode ground
+    pmg = svg_cont.append("g")
+        .attr("id", "lay-pmg");    
 
     // valider
     vg = svg_cont.append("g")
