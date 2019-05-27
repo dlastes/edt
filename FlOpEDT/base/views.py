@@ -205,6 +205,16 @@ def edt_light(req, an=None, semaine=None, **kwargs):
 
 
 @login_required
+def preferences(req, **kwargs):
+    if req.user.is_student:
+        return redirect("people:student_preferences")
+    elif req.user.is_tutor:
+        return redirect("base:stype", department=req.department)
+    else:
+        return HttpResponse("Contacter un administrateur.")
+
+
+@login_required
 def stype(req, **kwargs):
     err = ''
     if req.method == 'GET':

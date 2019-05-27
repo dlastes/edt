@@ -81,7 +81,7 @@ var rootgp_width = 0;
 var pos_rootgp_width = 0;
 
 // different grounds where to plot
-var fg, mg, bg, dg, meg, vg, gpg, prg, stg, mog, sag, fig, log, cmpg, cmtg;
+var fg, mg, bg, dg, meg, vg, gpg, catg, stg, mog, sag, fig, log, cmpg, cmtg, selg;
 var wg = {
     upper: null,
     bg: null,
@@ -336,7 +336,8 @@ var modules = {
     sel: "",
     pl: [],
     pp: [],
-    all: []
+    all: [],
+    old: []
 };
 
 /*--------------------
@@ -351,7 +352,10 @@ var salles = {
 };
 
 var rooms ;
-
+var rooms_sel = {
+    all: [],
+    old: []
+};
 
 var unavailable_rooms = [] ;
 unavailable_rooms = new Array(nbPer);
@@ -364,27 +368,93 @@ for (var i = 0; i < nbPer; i++) {
    ------ TUTORS ------
    --------------------*/
 
-// instructors of unscheduled courses
-var profs_pp = [];
-
-// instructors of scheduled courses
-var profs_pl = [];
-
-// all instructors
-var profs = [];
+var tutors = {
+    // instructors of unscheduled courses
+    pp: [],
+    // instructors of scheduled courses
+    pl: [],
+    // all instructors
+    all: [],
+    old: []
+};
 
 // instructors not blurried
 var prof_displayed = [];
 
 // display parameters
-var butpr = {
-    height: 30,
-    width: 30,
-    perline: 12,
+var but_exit = {
+    side: 20,
+    mar_side: 3,
+    mar_next: 10
+};
+var sel_popup = {
+    type: "",
+    x: 640,
+    y: -210,
+    w: 0,
+    h:0,
+    groups_w: 0,
+    groups_h: 0,
+    selw: 60,
+    selh: 30,
+    selx: 570,
+    sely: -200,
+    selmy: 8,
+    mar_side: 5,
+    tlx: 700,
+    available: [{type:"group",
+                 buttxt: "Groupes",
+                 active: false},
+                {type: "tutor",
+                 buttxt: "Profs",
+                 active: false},
+                {type:"module",
+                 buttxt: "Modules",
+                 active: false},
+                {type:"room",
+                 buttxt: "Salles",
+                 active: false}
+                ],
+    get_available: function(t) {
+        var ret = this.available.find(function(d) {
+            return d.type == t ;
+        });
+        if (typeof ret === 'undefined') {
+            console.log("type unknown");
+            return ;
+        } else {
+            return ret ;
+        }
+    },
+    pannels: [], //{type, x, y, w, h, txt}
+    but: [],
+    active_filter: false
+};
+sel_popup.but["tutor"] = {
+    h: 30,
+    w: 30,
+    perline: 5,
     mar_x: 2,
     mar_y: 4,
-    tlx: 900
 };
+sel_popup.but["room"] = {
+    h: 30,
+    w: 60,
+    perline: 3,
+    mar_x: 2,
+    mar_y: 4,
+};
+sel_popup.but["module"] = {
+    h: 30,
+    w: 40,
+    perline: 3,
+    mar_x: 2,
+    mar_y: 4,
+};
+sel_popup.available.forEach(function(pannel) {
+    pannel.x = sel_popup.x ;
+    pannel.y = sel_popup.y ;
+}) ;
 
 // has any instructor been fetched?
 var first_fetch_prof = true;
@@ -410,7 +480,7 @@ var cours = [];
 
 // listener for curses drag and drop 
 var dragListener;
-
+var drag_popup ;
 
 // helper for the d&d
 var drag = {

@@ -29,8 +29,10 @@
 from django.contrib import admin
 from base.admin import DepartmentModelAdmin
 
-from TTapp.models import LimitCourseTypePerPeriod, ReasonableDays, Stabilize, \
-    MinHalfDays, MinNonPreferedSlot, AvoidBothSlots, SimultaneousCourses
+from TTapp.models import \
+    LimitCourseTypePerPeriod, ReasonableDays, Stabilize, \
+    MinHalfDays, MinNonPreferedSlot, AvoidBothSlots, \
+    SimultaneousCourses, CustomConstraint
 
 # Register your models here.
 
@@ -41,6 +43,19 @@ from import_export.widgets import ForeignKeyWidget
 
 from FlOpEDT.filters import DropdownFilterAll, DropdownFilterRel, \
     DropdownFilterCho
+
+
+class CustomConstraintAdmin(DepartmentModelAdmin):
+    list_display = ('class_name', 
+                'week', 
+                'year', 
+                'train_prog',
+                'comment')
+    ordering = ()
+    list_filter = (('groups', DropdownFilterRel),
+                   ('tutors', DropdownFilterRel),
+                   ('modules', DropdownFilterRel),
+                   )   
 
 
 class LimitCourseTypePerPeriodAdmin(DepartmentModelAdmin):
@@ -140,6 +155,7 @@ class SimultaneousCoursesAdmin(DepartmentModelAdmin):
                    )
 
 
+admin.site.register(CustomConstraint, CustomConstraintAdmin)
 admin.site.register(LimitCourseTypePerPeriod, LimitCourseTypePerPeriodAdmin)
 admin.site.register(ReasonableDays, ReasonableDaysAdmin)
 admin.site.register(Stabilize, StabilizeAdmin)

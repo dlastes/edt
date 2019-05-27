@@ -21,37 +21,39 @@
 <!-- you develop activities involving the FlOpEDT/FlOpScheduler software   -->
 <!-- without disclosing the source code of your own applications.          -->
 
-{% extends "base/edt-base.html" %}
+
+
+{% extends "base.html" %}
 
 {% load static %}
+<link rel="stylesheet" href="{% static "people/student_preferences.css" %}" />
+<script href="https://code.jquery.com/jquery-3.3.1.js"></script>
 
-{% block extrastyle %}
-	<link rel="stylesheet" href="{% static 'TTapp/styles.css' %}" />
+{% block title %} EDT {% endblock %}
+
+{% block content %}
+
+</br></br></br>
+<fieldset>
+  <legend>Préférences étudiant par groupe</legend>
+</br>
+  <div class="msg-prefs">Vous préférez :</div><br/>
+  </br>
+  <form action="{% url 'people:student_preferences' %}" method="post" id="form_pref">
+    <div class="un">
+        <input type="range" class="range" name="morning_evening" min="0" max="1" step="0.25" value=".5"/>
+        <output name="result"></output>
+    </div>
+  </br>
+    <div class="deux">
+        <input type="range" class="rangedeux" name="light_free" min="0" max="1" step="0.25" value=".5"/>
+        <output name="resultdeux"></output>
+    </div>
+
+  </br>
+  <button type="submit" form="form_pref" value="Submit">Valider</button>
+</form>
+</fieldset>
+<script src="{% static 'people/student_preferences.js' %}"></script>
+
 {% endblock %}
-
-{% block script_variable %}
-<script>
-    var promo_init = "{{ promo }}";
-    var gp_init = "{{ gp }}";
-    var num_copie = "{{ copie }}";
-    var logged_usr = { nom: "{{ name_usr }}", rights: "{{ rights_usr }}" };
-    var splash_id = "{{ splash_id }}";
-</script>
-{% endblock %}
-
-{% block script_file %}
-<div id="main">
-<script type='text/javascript' src="{% static 'base/all.js' %}?2"></script>
-</div>
-{% endblock %}
-
-{% block sidebar %}
-<div id="mySidebar" class="sidebar">
-    <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
-    {% for task in tasks %}
-        <a href="#" onclick="getForm('{{ task.func_name }}')"> {{task.name}} </a>
-    {% endfor %}
-    <div id="sideBarForm" class="sideBarForm" ></div>
-</div>
-{% endblock %}
-

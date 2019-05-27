@@ -30,9 +30,9 @@ DEBUG = True
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'myflopedt_db',
-        'USER': 'myuser_edt',
-        'PASSWORD': '0000',
+        'NAME': 'flop_database_slide_panel',
+        'USER': 'flop_user',
+        'PASSWORD': 'your_password',
         'HOST': '127.0.0.1',
         'PORT': '5432',
     }

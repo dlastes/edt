@@ -10,5 +10,7 @@ FlOpEDT/*.log
 .vscode/
 node_modules
 *.lp
-docker/env/secret.env
+docker/env/web.prod.env
+docker/env/db.prod.env
+global.env
 

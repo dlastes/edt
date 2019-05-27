@@ -140,7 +140,6 @@ function create_dispos_user_data() {
 		} else {
 		    dispos[user.nom][j][k] = par_dispos.nmax
 		}
-                //console.log(j,k,day_hour_2_1D(d2p),user.dispos_type[day_hour_2_1D(d2p)])
             }
             user.dispos.push({
                 day: j,
@@ -172,138 +171,12 @@ function create_dispos_user_data() {
 /*----------------------
   ------ MODULES -------
   ----------------------*/
-
-function mod_dd_items() {
-
-    var high_mod = relevant_modules();
-
-    var high_items = new Array();
-    var low_items = new Array();
-    modules.all.forEach(function(m) {
-        if (high_mod.has(m)) {
-            high_items.push(m);
-        } else {
-            low_items.push(m);
-        }
-    });
-
-    return high_items.concat(low_items);
-}
-
-// Create or update the filter-by-module list.
-function create_mod_dd() {
-
-    var items = mod_dd_items();
-
-    var seldd = mog
-        .selectAll("option")
-        .data(items, function(m) {
-           return m;
-        });
-
-    seldd
-        .exit()
-        .remove();
-
-    seldd
-        .order();
-
-    seldd
-        .enter()
-        .append("option")
-        .attr("value", function(d) {
-            return d;
-        })
-        .text(function(d) {
-            return d;
-        });
-
-    mog
-        .select('option[value="' + modules.sel + '"]')
-        .attr("selected", "");
-}
-
-
 /*----------------------
   ------ SALLES -------
   ----------------------*/
-
-function create_sal_dd() {
-
-
-    var seldd = sag
-        .selectAll("option")
-        .data(salles.all, function(d, i) {
-            return d;
-        });
-
-    seldd
-        .enter()
-        .append("option")
-        .merge(seldd.select("option"))
-        .attr("value", function(d) {
-            return d;
-        })
-        .text(function(d) {
-            return d;
-        });
-
-    seldd.exit().remove();
-
-    seldd
-        .each(function(d, i) {
-            if (d == salles.sel) {
-                d3.select(this).attr("selected", "");
-            }
-        });
-
-
-}
-
-
 /*--------------------
   ------ PROFS -------
   --------------------*/
-function create_pr_buttons() {
-    var t = d3.transition();
-    profs.sort();
-
-    var cont =
-        prg.selectAll(".tutor-button")
-        .data(profs, function(p) {
-            return p;
-        });
-
-    var contg = cont
-        .enter()
-        .append("g")
-        .attr("class", "tutor-button")
-        .attr("transform", "translate(" + butpr.tlx + "," + butpr.tly + ")")
-        .on("click", apply_tutor_display);
-
-    contg
-        .append("rect")
-        .attr("class", butpr_class)
-        .attr("width", butpr.width)
-        .attr("height", butpr.height)
-        .attr("rx", 5)
-        .attr("ry", 10)
-        .merge(cont.select("rect"))
-        .attr("x", butpr_x)
-        .attr("y", butpr_y);
-
-    contg
-        .append("text")
-        .attr("class", butpr_class)
-        .text(function(d) {
-            return d;
-        })
-        .merge(cont.select("text"))
-        .attr("x", butpr_txt_x)
-        .attr("y", butpr_txt_y);
-
-    cont.exit().remove();
-}
 
 
 
@@ -323,9 +196,7 @@ function fetch_bknews(first) {
         url: url_bknews  + an_att + "/" + semaine_att,
         async: true,
         contentType: "text/csv",
-//        contentType: "text/json",
         success: function(msg) {
-	    //            bknews.cont = JSON.parse(msg) ;
 	    bknews.cont = d3.csvParse(msg,
 				      translate_bknews_from_csv);
 
@@ -400,6 +271,7 @@ function adapt_labgp(first) {
 	} else {
             labgp.width = labgp.wm;
 	}
+        svg.width = svg_width();
 	d3.select("#edt-main").attr("width", svg.width);
     }
 
@@ -441,11 +313,10 @@ function fetch_cours() {
             for (var i = 0; i < day_arr.length; i++) {
                 data_grid_scale_day[i] = data_grid_scale_day_init[i] + " " + day_arr[i];
             }
-            //console.log(data_grid_scale_day);
             if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
                 an_att == weeks.init_data[weeks.sel[0]].an) {
 
-                profs_pl = [];
+                tutors.pl = [];
                 modules.pl = [];
                 salles.pl = [];
 
@@ -485,11 +356,10 @@ function fetch_cours() {
             if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
                 an_att == weeks.init_data[weeks.sel[0]].an) {
 
-                profs_pp = [];
+                tutors.pp = [];
                 modules.pp = [];
                 salles.pp = [];
 
-                //console.log(msg);
     		console.log(semaine_att,an_att,num_copie);
 
                 cours_pp = d3.csvParse(msg, translate_cours_pp_from_csv);
@@ -503,8 +373,6 @@ function fetch_cours() {
     		    remove_garbage();
     		    go_grid(true);
     		}
-
-                //console.log(msg);
 
                 fetch.ongoing_cours_pp = false;
                 fetch_ended();
@@ -522,9 +390,9 @@ function fetch_cours() {
 
 
 function translate_cours_pl_from_csv(d) {
-    var ind = profs_pl.indexOf(d.prof_nom);
+    var ind = tutors.pl.indexOf(d.prof_nom);
     if (ind == -1) {
-        profs_pl.push(d.prof_nom);
+        tutors.pl.push(d.prof_nom);
     }
     if (modules.pl.indexOf(d.module) == -1) {
         modules.pl.push(d.module);
@@ -546,14 +414,15 @@ function translate_cours_pl_from_csv(d) {
 	room_type: d.room_type,
 	color_bg: d.color_bg,
 	color_txt: d.color_txt,
+        display: true
     };
     return co;
 }
 
 
 function translate_cours_pp_from_csv(d) {
-    if (profs_pp.indexOf(d.prof) == -1) {
-        profs_pp.push(d.prof);
+    if (tutors.pp.indexOf(d.prof) == -1) {
+        tutors.pp.push(d.prof);
     }
     if (modules.pp.indexOf(d.module) == -1) {
         modules.pp.push(d.module);
@@ -574,6 +443,7 @@ function translate_cours_pp_from_csv(d) {
 	room_type: d.room_type,
 	color_bg: d.color_bg,
 	color_txt: d.color_txt,
+        display: true
     };
     console.log(co);
     return co;
@@ -650,33 +520,30 @@ function add_exception(sem_att, an_att, sem_voulue, an_voulu, nom, l1, l2, l3){
 
 function clean_prof_displayed() {
 
-    var all = (profs.length == prof_displayed.length);
-
-    profs = profs_pl;
-    for (var i = 0; i < profs_pp.length; i++) {
-        var ind = profs.indexOf(profs_pp[i]);
+    var tutor_names = tutors.pl;
+    for (var i = 0; i < tutors.pp.length; i++) {
+        var ind = tutor_names.indexOf(tutors.pp[i]);
         if (ind == -1) {
-            profs.push(profs_pp[i]);
+            tutor_names.push(tutors.pp[i]);
         }
     }
 
+    tutor_names.sort();
 
+    update_selection();
 
-    if (all) {
-        prof_displayed = profs.slice(0);
-    } else {
+    swap_data(tutor_names, tutors, "tutor") ;
 
-        var ndi = prof_displayed.filter(function(d) {
-            return profs.indexOf(d) > -1;
-        });
-
-        if (ndi.length == 0) {
-            prof_displayed = profs.slice(0);
-        } else {
-            prof_displayed = ndi;
+    // relevant tutors
+    tutors.all.forEach(function(t) {
+        t.relevant = false ;
+        if (t.name == user.nom) {
+            t.relevant = true ;
         }
+    });
 
-    }
+    go_selection_popup() ;
+    
 }
 
 function translate_gp_name(gp) {
@@ -775,9 +642,7 @@ function fetch_version() {
         url: url_week_infos  + an_att + "/" + semaine_att,
         async: true,
         contentType: "text/json",
-//        contentType: "text/json",
         success: function(msg) {
-	    //            bknews.cont = JSON.parse(msg) ;
 	    var parsed = JSON.parse(msg);
 
             if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
@@ -808,19 +673,21 @@ function fetch_ended() {
         !fetch.ongoing_cours_pp) {
         cours = cours_pl.concat(cours_pp);
 
-        modules.all = [""].concat(modules.pl);
+        var module_names = modules.pl;
         for (var i = 0; i < modules.pp.length; i++) {
-            if (modules.all.indexOf(modules.pp[i]) == -1) {
-                modules.all.push(modules.pp[i]);
+            if (module_names.indexOf(modules.pp[i]) == -1) {
+                module_names.push(modules.pp[i]);
             }
         }
 
-        modules.all.sort();
+        module_names.sort();
 
-        if (modules.all.indexOf(modules.sel) == -1) {
-            modules.sel = "";
-        }
+        update_selection();
 
+        swap_data(module_names, modules, "module");
+
+        update_active();
+        update_relevant();
 
         salles.all = [""].concat(salles.pl);
         for (var i = 0; i < salles.pp.length; i++) {
@@ -835,8 +702,6 @@ function fetch_ended() {
             salles.sel = "";
         }
 
-        create_mod_dd();
-        create_sal_dd();
         clean_prof_displayed();
     }
 
@@ -855,15 +720,34 @@ function fetch_ended() {
 	}
 
     }
-    //go_gp_buttons();
-    create_pr_buttons();
-    go_tutors();
-
-
-
 }
 
+// - store old data in old
+// - translate fetched into current (keeping display values)
+function swap_data(fetched, current, type) {
+    current.old = current.all ;
+    current.all = fetched.map(
+        function(m) {
+            var em = {} ;
+            em.name = m ;
+            var oldf = current.old.find(function(mo) {
+                return mo.name == m ;
+            });
+            em.display = !(sel_popup.get_available(type).active) ;
+            if (typeof oldf !== 'undefined') {
+                em.display = oldf.display ;
+            }
+            return em ;
+        }
+    )
+    var pannel = sel_popup.pannels.find(function(p) {
+        return p.type == type ;
+    })
+    if (typeof pannel !== 'undefined') {
+        pannel.list = current.all ;
+    }
 
+}
 
 
 

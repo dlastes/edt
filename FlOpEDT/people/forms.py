@@ -30,8 +30,13 @@ from django.db import transaction
 from .models import Student, User, FullStaff, SupplyStaff, BIATOS, Tutor
 from base.models import Group
 
+
+class GroupChoiceField(forms.ModelMultipleChoiceField):
+    def label_from_instance(self, obj):
+        return obj.full_name()
+
 class AddStudentForm(UserCreationForm):
-    gps = forms.ModelMultipleChoiceField(
+    gps = GroupChoiceField(
         queryset=Group.objects.filter(basic=True),
         widget=forms.CheckboxSelectMultiple,
         required=False,
@@ -47,6 +52,7 @@ class AddStudentForm(UserCreationForm):
         student.is_student = True
         student.save()
         student.belong_to.add(*self.cleaned_data.get('gps'))
+        # save_m2m is automatically called
         return student
 
 
@@ -116,7 +122,7 @@ class AddSupplyStaffTutorForm(UserCreationForm):
             
     @transaction.atomic
     def save(self):
-        sus = super(AddFullStaffTutorForm, self).save(commit=False)
+        sus = super(AddSupplyStaffTutorForm, self).save(commit=False)
         data = self.cleaned_data
         sus.is_tutor = True
         sus.status = Tutor.SUPP_STAFF

@@ -239,45 +239,6 @@ function confirm_room_change(d){
   ------- TUTORS ------
   ---------------------*/
 
-// apply changes in the display of tutor pr
-function apply_tutor_display(pr) {
-    if (fetch.done) {
-	if(logged_usr.dispo_all_change && ckbox["dis-mod"].cked){
-	    prof_displayed = [pr] ;
-	    user.nom = pr ;
-	    create_dispos_user_data() ;
-	    go_pref(true) ;
-	} else {
-            if (prof_displayed.indexOf(pr) > -1) {
-		if (prof_displayed.length == profs.length) {
-                    prof_displayed = [pr];
-		} else {
-                    var ind = prof_displayed.indexOf(pr);
-                    prof_displayed.splice(ind, 1);
-                    if (prof_displayed.length == 0) {
-			prof_displayed = profs.slice(0);
-                    }
-		}
-            } else {
-		prof_displayed.push(pr);
-            }
-	}
-
-            go_tutors();
-    }
-}
-
-
-// display all tutors
-function apply_tutor_display_all() {
-    if (fetch.done
-	&& (!logged_usr.dispo_all_change || !ckbox["dis-mod"].cked)) {
-        prof_displayed = profs.slice(0);
-        go_tutors();
-    }
-}
-
-
 function fetch_all_tutors() {
     if(all_tutors.length == 0) {
 	show_loader(true);
@@ -499,6 +460,16 @@ function go_cm_room_tutor_change() {
 }
 
 
+function remove_pannel(p, i){
+    sel_popup.pannels.splice(i, 1);
+    go_selection_popup() ;
+}
+
+function go_select_tutors() {
+    create_static_tutor();
+    create_pr_buttons() ;
+}
+
 
 /*----------------------
   ------- GROUPS -------
@@ -707,7 +678,7 @@ function apply_ckbox(dk) {
    ------ VALIDATE ------
    ----------------------*/
 
-function compute_changes(changes, profs, gps) {
+function compute_changes(changes, conc_tutors, gps) {
     var i, id, change, prof_changed, gp_changed, gp_named;
 
     var cur_course, cb ;
@@ -781,13 +752,13 @@ function compute_changes(changes, profs, gps) {
 	    /* Change is accepted now */
 	    
 	    // add instructor if never seen
-            if (profs.indexOf(cur_course.prof) == -1
+            if (conc_tutors.indexOf(cur_course.prof) == -1
 		&& cur_course.prof != logged_usr.nom) {
-                profs.push(cur_course.prof);
+                conc_tutors.push(cur_course.prof);
             }
-            if (profs.indexOf(cb.prof) == -1
+            if (conc_tutors.indexOf(cb.prof) == -1
 		&& cur_course.prof != logged_usr.nom) {
-                profs.push(cb.prof);
+                conc_tutors.push(cb.prof);
             }
 
 	    // add group if never seen
@@ -857,11 +828,11 @@ function compute_changes(changes, profs, gps) {
 
 
 function confirm_change() {
-    var changes, profs_conc, gps, i, prof_txt, gp_txt;
+    var changes, conc_tutors, gps, i, prof_txt, gp_txt;
     changes = [];
-    profs_conc = [];
+    conc_tutors = [];
     gps = [];
-    var changesOK = compute_changes(changes, profs_conc, gps);
+    var changesOK = compute_changes(changes, conc_tutors, gps);
 
     if (!changesOK) {
 	return ;
@@ -872,9 +843,9 @@ function confirm_change() {
         go_ack_msg(true);
     } else {
 
-        if (profs_conc.length > 0) {
+        if (conc_tutors.length > 0) {
             prof_txt = "Avez-vous contacté " ;
-	    prof_txt += array_to_msg(profs_conc) ;
+	    prof_txt += array_to_msg(conc_tutors) ;
 	    prof_txt += " ?" ;
 	} else {
             prof_txt = "Tudo bem ?" ;
@@ -1304,3 +1275,111 @@ function compute_cm_room_tutor_direction() {
 }
 
 
+function apply_selection_display(choice) {
+    if (fetch.done) {
+
+        var sel_list = choice.pannel.list ;
+
+        var concerned = sel_list.find(function(t) {
+            return t.name == choice.name ;
+        });
+        if (typeof concerned === 'undefined') {
+            console.log("Prof, module ou salle inexistante...");
+            return ;
+        }
+
+        
+	if(choice.pannel.type == "tutor"
+           && logged_usr.dispo_all_change && ckbox["dis-mod"].cked){
+            tutors.all.forEach(function(t) { t.display = false ; });
+            concerned.display = true ;
+	    user.nom = choice.name ;
+	    create_dispos_user_data() ;
+	    go_pref(true) ;
+	} else {
+            
+            if (concerned.display) {
+                var nb_displayed = sel_list.filter(function(t) {
+                    return t.display ;
+                }).length ;
+		if (nb_displayed == sel_list.length) {
+                    sel_list.forEach(function(t) { t.display = false ; });
+                    concerned.display = true ;
+		} else {
+                    concerned.display = false ;
+                    nb_displayed -- ;
+                    if (nb_displayed == 0) {
+			sel_list.forEach(function(t) { t.display = true ; });
+                    }
+		}
+            } else {
+		concerned.display = true ;
+            }
+	}
+        update_active() ;
+        update_relevant() ;
+        go_courses() ;
+        go_selection_popup();
+    }
+}
+
+
+function apply_selection_display_all(p) {
+    var condition = true ;
+    var sel_list = [];
+
+    if (p.type != "tutor"
+        || (fetch.done
+	    && (!logged_usr.dispo_all_change
+                || !ckbox["dis-mod"].cked))) {
+        p.list.forEach(function(d) {
+            d.display = true ;
+        })
+        update_active() ;
+        update_relevant() ;
+        go_selection_buttons();
+        go_courses();
+    }
+}
+
+// discards all filters
+function apply_cancel_selections() {
+
+    // classical filters
+    var display = function(d) {
+        d.display = true ;
+    };
+    for (var di = 0 ; di < sel_popup.available.length ; di ++) {
+        popup_data(sel_popup.available[di].type)
+            .forEach(display) ;
+    }
+
+
+    // group filters
+    var displayed = root_gp.reduce(function(acc, d){
+        var ret = d.gp.display ? 1 : 0 ;
+        return acc + ret ;
+    }, 0);
+    var rgi = 0 ;
+    check_hidden_groups();
+    if(!is_no_hidden_grp) {
+        while (displayed > 0 && rgi<root_gp.length) {
+            var gp = root_gp[rgi].gp ;
+            if (gp.display) {
+                apply_gp_display(gp, false, true);
+                displayed-- ;
+            }
+            rgi++ ;
+        }
+    }
+
+    // remove all pannels
+    sel_popup.pannels = [] ;
+
+    // update flags and display
+    update_active() ;
+    update_relevant() ;
+    go_courses() ;
+    go_selection_popup();
+
+}

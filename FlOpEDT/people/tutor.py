@@ -39,7 +39,7 @@ class AddFullStaffTutor(CreateView):
     def form_valid(self, form):
         user = form.save()
         login(self.request, user)
-        next = self.request.GET.get('next', 'base:edt')
+        next = self.request.GET.get('next', '/')
         return redirect(next)
 
 class AddSupplyStaffTutor(CreateView):
@@ -50,7 +50,7 @@ class AddSupplyStaffTutor(CreateView):
     def form_valid(self, form):
         user = form.save()
         login(self.request, user)
-        next = self.request.GET.get('next', 'base:edt')
+        next = self.request.GET.get('next', '/')
         return redirect(next)
 
 class AddBIATOSTutor(CreateView):
@@ -61,7 +61,7 @@ class AddBIATOSTutor(CreateView):
     def form_valid(self, form):
         user = form.save()
         login(self.request, user)
-        next = self.request.GET.get('next', 'base:edt')
+        next = self.request.GET.get('next', '/')
         return redirect(next)
 
 
