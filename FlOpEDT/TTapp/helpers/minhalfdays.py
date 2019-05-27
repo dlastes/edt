@@ -25,7 +25,7 @@
 
 import logging
 
-from base.models import Time
+from base.models import Time, TimeGeneralSettings
 
 
 logger = logging.Logger(__name__)
@@ -49,7 +49,10 @@ class MinHalfDaysHelperBase():
     
     def add_constraint(self, expression, courses, local_var):
         self.ttmodel.add_constraint(local_var, '==', 1)
-        limit = (len(courses) - 1) // 3 + 1
+        course_time = sum(c.type.duration for c in courses)
+        t = TimeGeneralSettings.objects.get(department=self.ttmodel.department)
+        half_days_min_time = min(t.lunch_break_start_time-t.day_start_time, t.day_finish_time-t.lunch_break_finish_time)
+        limit = (course_time - 1) // half_days_min_time + 1
 
         if self.constraint.weight:
             cost = self.constraint.local_weight() * self.ponderation * (expression - limit * local_var)
@@ -80,7 +83,7 @@ class MinHalfDaysHelperModule(MinHalfDaysHelperBase):
             # add constraint linking MBHD to TT
             for apm in [Time.AM, Time.PM]:
                 halfdayslots = self.ttmodel.wdb.slots.filter(jour=d,
-                                                        heure__apm=apm)
+                                                             heure__apm=apm)
                 card = len(halfdayslots)
                 expr = self.ttmodel.lin_expr()
                 expr += card * mod_b_h_d[(self.module, d, apm)]

@@ -32,6 +32,7 @@ from django.conf import settings
 from django.utils.functional import lazy
 
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.contrib.postgres.fields import ArrayField
 
 from django.db import models
 
@@ -845,14 +846,14 @@ class MinNonPreferedSlot(TTConstraint):
         return text
 
 
-class AvoidBothSlots(TTConstraint):
+class AvoidBothTimes(TTConstraint):
     """
     Avoid the use of two slots
     Idéalement, on pourrait paramétrer slot1, et slot2 à partir de slot1... Genre slot1
     c'est 8h n'importe quel jour, et slot2 14h le même jour...
     """
-    slot1 = models.ForeignKey('base.Slot', related_name='slot1', on_delete=models.CASCADE)
-    slot2 = models.ForeignKey('base.Slot', related_name='slot2', on_delete=models.CASCADE)
+    time1 = models.PositiveSmallIntegerField()
+    time2 = models.PositiveSmallIntegerField()
     group = models.ForeignKey('base.Group', null=True, on_delete=models.CASCADE)
     tutor = models.ForeignKey('people.Tutor',
                               null=True,
@@ -873,21 +874,25 @@ class AvoidBothSlots(TTConstraint):
             fc = fc.filter(groupe__train_prog=self.train_prog)
         if self.group:
             fc = fc.filter(groupe=self.group)
+        slots1 = set([slot for slot in ttmodel.wdb.slots if slot.start_time <= self.time1 <= slot.end_time])
+        slots2 = set([slot for slot in ttmodel.wdb.slots if slot.start_time <= self.time2 <= slot.end_time])
         for c1 in fc:
             for c2 in fc.exclude(id__lte=c1.id):
-                if self.weight is not None:
-                    conj_var = ttmodel.add_conjunct(
-                        ttmodel.TT[(self.slot1, c1)],
-                        ttmodel.TT[(self.slot2, c2)])
-                    ttmodel.obj += self.local_weight() * ponderation * conj_var
-                else:
-                    ttmodel.add_constraint(ttmodel.TT[(self.slot1, c1)]
-                                           + ttmodel.TT[(self.slot2, c2)],
-                                           '<=',
-                                           1)
+                for sl1 in slots1:
+                    for sl2 in slots2:
+                        if self.weight is not None:
+                            conj_var = ttmodel.add_conjunct(
+                                ttmodel.TT[(sl1, c1)],
+                                ttmodel.TT[(sl2, c2)])
+                            ttmodel.obj += self.local_weight() * ponderation * conj_var
+                        else:
+                            ttmodel.add_constraint(ttmodel.TT[(sl1, c1)]
+                                                   + ttmodel.TT[(sl2, c2)],
+                                                   '<=',
+                                                   1)
 
     def one_line_description(self):
-        text = "Pas à la fois " + str(self.slot1) + " et " + str(self.slot2)
+        text = "Pas à la fois à " + str(self.time1/60) + "h et à" + str(self.time2/60) + "h."
         if self.tutor:
             text += ' pour ' + str(self.tutor)
         if self.group:
@@ -895,31 +900,6 @@ class AvoidBothSlots(TTConstraint):
         if self.train_prog:
             text += ' en ' + str(self.train_prog)
         return text
-
-# ========================================
-# The following constraints have to be checked!!!
-# ========================================
-
-# class AvoidIsolatedSlot(TTConstraint):
-#     """
-#     Avoid the use of an isolated slot
-#     RESTE A FAIRE (est-ce possible en non quadratique?)
-#     """
-#     train_prog = models.ForeignKey('base.TrainingProgramme',
-#                                    null = True,
-#                                    default = None,
-#                                    on_delete=models.CASCADE)
-#     group = models.ForeignKey('base.Groupe', null=True, on_delete=models.CASCADE)
-#     tutor = models.ForeignKey('people.Tutor', null=True, on_delete=models.CASCADE)
-#
-#     def enrich_model(self, ttmodel, ponderation=1):
-#         fc = ttmodel.wdb.courses
-#         if self.tutor is not None:
-#             fc = fc.filter(tutor = self.tutor)
-#         if self.train_prog:
-#             fc = fc.filter(groupe__train_prog = self.promo)
-#         if self.group:
-#             fc = fc.filter(groupe=self.group)
 
 
 class SimultaneousCourses(TTConstraint):
@@ -967,12 +947,14 @@ class SimultaneousCourses(TTConstraint):
                         ttmodel.change_var_coeff(var1, group_constr, 0)
 
     def one_line_description(self):
-        text = "Les cours " + str(self.course1) + " et " + str(self.course2) + " doivent être simultanés !"
+        return "Les cours " + str(self.course1) + " et " + str(self.course2) + " doivent être simultanés !"
 
-class LimitedSlotChoices(TTConstraint):
+
+class LimitedStartTimeChoices(TTConstraint):
     """
-    Limit the possible slots for the cources
+    Limit the possible slots for the courses
     """
+
     module = models.ForeignKey('base.Module',
                                null=True,
                                default=None,
@@ -989,8 +971,10 @@ class LimitedSlotChoices(TTConstraint):
                               null=True,
                               default=None,
                               on_delete=models.CASCADE)
-    possible_slots = models.ManyToManyField('base.Slot',
-                                            related_name="limited_courses")
+    possible_start_times = ArrayField(models.PositiveSmallIntegerField())
+
+
+
 
     def enrich_model(self, ttmodel, ponderation=1.):
         fc = ttmodel.wdb.courses
@@ -1004,10 +988,11 @@ class LimitedSlotChoices(TTConstraint):
             fc = fc.filter(groupe__train_prog=self.train_prog)
         if self.group is not None:
             fc = fc.filter(groupe=self.group)
-        possible_slots_ids = self.possible_slots.values_list('id', flat=True)
+        possible_slots_ids = set(slot.id for slot in ttmodel.wdb.slots
+                                 if slot.start_time in self.possible_start_times.values_list())
 
         for c in fc:
-            for sl in ttmodel.wdb.slots.exclude(id__in = possible_slots_ids):
+            for sl in ttmodel.wdb.slots.exclude(id__in=possible_slots_ids):
                 if self.weight is not None:
                     ttmodel.obj += self.local_weight() * ponderation * ttmodel.TT[(sl, c)]
                 else:
@@ -1028,8 +1013,11 @@ class LimitedSlotChoices(TTConstraint):
         if self.group:
             text += ' avec le groupe ' + str(self.group)
         text += " ne peuvent avoir lieu qu'à "
-        for sl in self.possible_slots.values_list():
-            text += str(sl) + ', '
+        for sl in self.possible_start_times.values_list():
+            if sl % 60==0:
+                text += str(sl//60) + 'h, '
+            else:
+                text += str(sl//60) + 'h' + str(sl % 60) + ', '
         return text
 
 
