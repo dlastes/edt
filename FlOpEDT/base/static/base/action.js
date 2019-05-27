@@ -1400,3 +1400,18 @@ function apply_cancel_selections() {
     go_selection_popup();
 
 }
+
+// move to another department
+function redirect_dept(d) {
+    var split_addr = url_edt.split("/");
+    // change dept
+    split_addr[split_addr.length-2] = d ;
+    // clean
+    if (split_addr[split_addr.length-1] == "") {
+        split_addr.splice(-1,1);
+    }
+    // go to the right week
+    split_addr.push(weeks.init_data[weeks.sel[0]].an);
+    split_addr.push(weeks.init_data[weeks.sel[0]].semaine);
+    window.location.href = split_addr.join("/") ;
+}

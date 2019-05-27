@@ -672,6 +672,12 @@ def fetch_constraints(req, **kwargs):
     constraints = queries.get_coursetype_constraints(req.department.abbrev)
     return JsonResponse(constraints, safe=False)    
 
+def fetch_departments(req, **kwargs):
+    """
+    Return departments
+    """
+    depts = queries.get_departments()
+    return JsonResponse(depts, safe=False)    
 # </editor-fold desc="FETCHERS">
 
 # <editor-fold desc="CHANGERS">

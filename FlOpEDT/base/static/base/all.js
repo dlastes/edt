@@ -164,7 +164,10 @@ function on_constraints_rcv(cst_data) {
     create_grid_data();
 }
 
-
+function on_departments_rcv(dept_data) {
+    departments.data = dept_data ;
+    create_dept_redirection();
+}
 
 
 
@@ -200,6 +203,8 @@ d3.json(rooms_fi,
 d3.json(constraints_fi,
  	on_constraints_rcv);
 
+d3.json(departments_fi,
+        on_departments_rcv);
     
 
 d3.select("body")
