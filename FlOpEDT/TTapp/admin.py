@@ -31,7 +31,7 @@ from base.admin import DepartmentModelAdmin
 
 from TTapp.models import \
     LimitCourseTypeTimePerPeriod, ReasonableDays, Stabilize, \
-    MinHalfDays, MinNonPreferedSlot, AvoidBothSlots, \
+    MinHalfDays, MinNonPreferedSlot, AvoidBothTimes, \
     SimultaneousCourses, CustomConstraint
 
 # Register your models here.
@@ -132,16 +132,16 @@ class MinNonPreferedSlotAdmin(DepartmentModelAdmin):
                    )
 
 
-class AvoidBothSlotsAdmin(DepartmentModelAdmin):
-    list_display = ('week', 'year', 'train_prog', 'tutor', 'group', 'slot1', 'slot2', 'comment')
+class AvoidBothTimesAdmin(DepartmentModelAdmin):
+    list_display = ('week', 'year', 'train_prog', 'tutor', 'group', 'time1', 'time2', 'comment')
     ordering = ()
     list_filter = (('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
                    ('train_prog', DropdownFilterRel),
                    ('tutor', DropdownFilterRel),
                    ('group', DropdownFilterRel),
-                   ('slot1', DropdownFilterRel),
-                   ('slot2', DropdownFilterRel),
+                   ('time1', DropdownFilterRel),
+                   ('time2', DropdownFilterRel),
                    )
 
 
@@ -161,5 +161,5 @@ admin.site.register(ReasonableDays, ReasonableDaysAdmin)
 admin.site.register(Stabilize, StabilizeAdmin)
 admin.site.register(MinHalfDays, MinHalfDaysAdmin)
 admin.site.register(MinNonPreferedSlot, MinNonPreferedSlotAdmin)
-admin.site.register(AvoidBothSlots, AvoidBothSlotsAdmin)
+admin.site.register(AvoidBothTimes, AvoidBothTimesAdmin)
 admin.site.register(SimultaneousCourses, SimultaneousCoursesAdmin)
