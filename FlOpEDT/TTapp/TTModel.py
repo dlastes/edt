@@ -65,7 +65,7 @@ class WeekDB(object):
         self.department = department
         self.week = week
         self.year = year
-        self.days = TimeGeneralSettings.objects.get(department=department).days
+        self.days = self.days_init()
         self.slots, self.slots_by_day, self.slots_intersecting, self.slots_by_half_day = self.slots_init()
         self.room_types, self.room_groups, self.rooms, self.room_prefs, self.room_groups_for_type = self.rooms_init()
         self.course_types, self.courses, self.sched_courses, self.fixed_courses, \
@@ -76,6 +76,10 @@ class WeekDB(object):
         self.holidays, self.training_half_days = self.holidays_init()
         self.instructors, self.courses_for_tutor, self.courses_for_supp_tutor, self.availabilities = self.users_init()
 
+    def days_init(self):
+        days = TimeGeneralSettings.objects.get(department=self.department).days
+        return days
+    
     def slots_init(self):
         # SLOTS
         print('Slot tools definition', end=', ')
