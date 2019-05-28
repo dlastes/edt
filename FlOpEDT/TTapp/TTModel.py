@@ -79,7 +79,7 @@ class WeekDB(object):
     def days_init(self):
         days = TimeGeneralSettings.objects.get(department=self.department).days
         return days
-    
+
     def slots_init(self):
         # SLOTS
         print('Slot tools definition', end=', ')
@@ -265,7 +265,7 @@ class TTModel(object):
         self.stabilize_work_copy = stabilize_work_copy
         self.obj = self.lin_expr()
         self.wdb = self.wdb_init()
-        self.cost_I, self.cost_G, self.cost_SL = self.costs_init()
+        self.cost_I, self.FHD_G, self.cost_G, self.cost_SL = self.costs_init()
         self.TT, self.TTrooms = self.TT_vars_init()
         self.IBD, self.IBD_GTE, self.IBHD, self.GBHD = self.busy_vars_init()
 
@@ -317,7 +317,7 @@ class TTModel(object):
         cost_SL = dict(
             list(zip(self.wdb.slots,
                      [self.lin_expr() for _ in self.wdb.slots])))
-        return cost_I, cost_G, cost_SL
+        return cost_I, FHD_G, cost_G, cost_SL
 
     def TT_vars_init(self):
         TT = {}
