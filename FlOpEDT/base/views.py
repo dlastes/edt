@@ -23,48 +23,39 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from django.http import HttpResponse, Http404, JsonResponse, HttpRequest
-from django.shortcuts import render, redirect
-
-from django.contrib.auth.decorators import login_required, user_passes_test
-
-from django.db import transaction
-from django.urls import reverse
-
-from django.views.decorators.cache import cache_page
-
 import json
-
-from .forms import ContactForm
-
-from .models import Course, UserPreference, ScheduledCourse, EdtVersion, \
-    CourseModification, Slot, Day, Time, RoomGroup, PlanningModification, \
-    Regen, BreakingNews, RoomPreference, Department
-
-from people.models import Tutor
-# Prof,
-
-from .admin import CoursResource, DispoResource, VersionResource, \
-    CoursPlaceResource, BreakingNewsResource, UnavailableRoomsResource
-
-from .weeks import *
-
 from collections import namedtuple
-
 from itertools import chain
+from random import randint
+import logging
 
-from django.core.exceptions import ObjectDoesNotExist
-
-from django.core.mail import send_mail
-from django.template.response import TemplateResponse
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.staticfiles.storage import staticfiles_storage
+from django.core.cache import cache
+from django.core.exceptions import ObjectDoesNotExist
+from django.core.mail import send_mail
+from django.db import transaction
+from django.http import HttpResponse, Http404, JsonResponse, HttpRequest
+from django.template.response import TemplateResponse
+from django.urls import reverse
+from django.views.decorators.cache import cache_page
 from django.views.generic import RedirectView
 
-from random import randint
+from people.models import Tutor
 
-from django.core.cache import cache
-
+from base.admin import CoursResource, DispoResource, VersionResource, \
+    CoursPlaceResource, UnavailableRoomsResource
+from displayweb.admin import BreakingNewsResource
+from base.forms import ContactForm
+from base.models import Course, UserPreference, ScheduledCourse, EdtVersion, \
+    CourseModification, Slot, Day, Time, RoomGroup, PlanningModification, \
+    Regen, RoomPreference, Department, TimeGeneralSettings
 import base.queries as queries
+from base.weeks import *
+from displayweb.models import BreakingNews
+
+logger = logging.getLogger(__name__)
 
 from django.db.models import Q
 
@@ -143,19 +134,20 @@ def edt(req, an=None, semaine=None, splash_id=0, **kwargs):
         rights_usr = 0
 
     return TemplateResponse(req, 'base/show-edt.html',
-                  {
-                    'all_weeks': week_list(),
-                    'semaine': semaine,
-                    'an': an,
-                    'jours': num_days(an, semaine),
-                    'promo': promo,
-                    'une_salle': une_salle,
-                    'copie': copie,
-                    'gp': gp,
-                    'name_usr': name_usr,
-                    'rights_usr': rights_usr,
-                    'splash_id': splash_id
-                  })
+            {
+                'all_weeks': week_list(),
+                'semaine': semaine,
+                'an': an,
+                'promo': promo,
+                'une_salle': une_salle,
+                'copie': copie,
+                'gp': gp,
+                'name_usr': name_usr,
+                'rights_usr': rights_usr,
+                'splash_id': splash_id,
+                'time_settings': queries.get_time_settings(req.department),
+                'days': num_all_days(an, semaine, req.department)
+            })
 
 
 def edt_light(req, an=None, semaine=None, **kwargs):
@@ -188,7 +180,6 @@ def edt_light(req, an=None, semaine=None, **kwargs):
                   {'all_weeks': week_list(),
                    'semaine': semaine,
                    'an': an,
-                   'jours': num_days(an, semaine),
                    'une_salle': une_salle,
                    'tv_svg_h': svg_h,
                    'tv_svg_w': svg_w,
@@ -197,6 +188,16 @@ def edt_light(req, an=None, semaine=None, **kwargs):
                    'promo': promo,
                    'tv_svg_top_m': svg_top_m
                   })
+
+
+@login_required
+def preferences(req, **kwargs):
+    if req.user.is_student:
+        return redirect("people:student_preferences")
+    elif req.user.is_tutor:
+        return redirect("base:stype", department=req.department)
+    else:
+        return HttpResponse("Contacter un administrateur.")
 
 
 @login_required
@@ -209,7 +210,9 @@ def stype(req, **kwargs):
                        'date_fin': current_week(),
                        'name_usr': req.user.username,
                        'err': err,
-                       'annee_courante': annee_courante
+                       'annee_courante': annee_courante,
+                       'time_settings': queries.get_time_settings(req.department),
+                       'days': num_all_days(1, 1, req.department)
                       })
     elif req.method == 'POST':
         if 'apply' in list(req.POST.keys()):
@@ -239,7 +242,9 @@ def stype(req, **kwargs):
                        'date_fin': date_fin,
                        'name_usr': req.user.username,
                        'err': err,
-                       'annee_courante': annee_courante
+                       'annee_courante': annee_courante,
+                       'time_settings': queries.get_time_settings(req.department),
+                       'days': num_all_days(1, 1, req.department)
                       })
 
 
@@ -281,7 +286,7 @@ def decale(req, **kwargs):
 
 
 def fetch_cours_pl(req, year, week, num_copy, **kwargs):
-    print(req)
+    logger.info(f'REQ: fetch sched courses: {req}')
 
     try:
         week = int(week)
@@ -291,7 +296,7 @@ def fetch_cours_pl(req, year, week, num_copy, **kwargs):
     except:
         return HttpResponse("KO")
 
-    print("D", department, "W",week, " Y",year, " N", num_copy)
+    logger.info(f"D{department} W{week} Y{year} N{num_copy}")
 
     cache_key = get_key_course_pl(department.abbrev, year, week, num_copy)
     cached = cache.get(cache_key)
@@ -312,9 +317,8 @@ def fetch_cours_pl(req, year, week, num_copy, **kwargs):
                         department=department,                         
                         week=week,
                         year=year,
-                        num_copy=num_copy) \
-                    .order_by('creneau__jour',
-                              'creneau__heure'))  # all())#
+                        num_copy=num_copy)
+            )
         ok = num_copy != 0 \
              or (version == queries \
                                 .get_edt_version(
@@ -328,7 +332,7 @@ def fetch_cours_pl(req, year, week, num_copy, **kwargs):
     response = HttpResponse(dataset.csv, content_type='text/csv')
     response['week'] = week
     response['year'] = year
-    response['jours'] = str(num_days(year, week))
+    response['days'] = str(num_all_days(year, week, req.department))
     response['num_copy'] = num_copy
     
     cached = cache.set(cache_key, response)
@@ -336,7 +340,7 @@ def fetch_cours_pl(req, year, week, num_copy, **kwargs):
 
 
 def fetch_cours_pp(req, week, year, num_copy, **kwargs):
-    print(req)
+    logger.info(f"REQ: unscheduled courses; {req}")
 
     try:
         week = int(week)
@@ -346,7 +350,7 @@ def fetch_cours_pp(req, week, year, num_copy, **kwargs):
     except ValueError:
         return HttpResponse("KO")
 
-    print("D", department ,"W",week, " Y",year, " N", num_copy)
+    logger.info(f"D{department} W{week} Y{year} N{num_copy}")
 
     cache_key = get_key_course_pp(department.abbrev, year, week, num_copy)
     cached = cache.get(cache_key)
@@ -376,10 +380,9 @@ def fetch_cours_pp(req, week, year, num_copy, **kwargs):
 
 #@login_required
 def fetch_dispos(req, year, week, **kwargs):
-    print("================")
+    logger.info(f"REQ: fetch dispos; {req}")
     if not req.user.is_authenticated:
         return HttpResponse("Pas connecte", status=401)
-    print("================")
 
     try:
         week = int(week)
@@ -500,16 +503,16 @@ def fetch_decale(req, **kwargs):
     groupe = req.GET.get('g', '')
     department = req.department
 
-    liste_cours = []
-    liste_module = []
-    liste_prof = []
-    liste_prof_module = []
-    liste_groupe = []
+    courses = []
+    modules = []
+    tutors = []
+    module_tutors = []
+    groups = []
 
     if an > 0 and semaine > 0:
-        liste_jours = num_days(an, semaine)
+        days = num_all_days(an, semaine, req.department)
     else:
-        liste_jours = []
+        days = []
 
     cours = filt_p(filt_g(filt_m(filt_sa(department, semaine, an), module), groupe), prof)
 
@@ -517,31 +520,31 @@ def fetch_decale(req, **kwargs):
         try:
             cp = ScheduledCourse.objects.get(cours=c,
                                              copie_travail=0)
-            j = cp.creneau.jour.no
-            h = cp.creneau.heure.no
+            day = cp.day
+            time = cp.start_time
         except ObjectDoesNotExist:
-            j = -1
-            h = -1
+            day = ''
+            time = -1
         if c.tutor is not None:
-            liste_cours.append({'i': c.id,
-                                'm': c.module.abbrev,
-                                'p': c.tutor.username,
-                                'g': c.groupe.nom,
-                                'j': j,
-                                'h': h})
+            courses.append({'i': c.id,
+                            'm': c.module.abbrev,
+                            'p': c.tutor.username,
+                            'g': c.groupe.nom,
+                            'd': day,
+                            't': time})
 
     cours = filt_p(filt_g(filt_sa(department, semaine, an), groupe), prof) \
         .order_by('module__abbrev') \
         .distinct('module__abbrev')
     for c in cours:
-        liste_module.append(c.module.abbrev)
+        modules.append(c.module.abbrev)
 
     cours = filt_g(filt_sa(department, semaine, an), groupe) \
         .order_by('tutor__username') \
         .distinct('tutor__username')
     for c in cours:
         if c.tutor is not None:
-            liste_prof.append(c.tutor.username)
+            tutors.append(c.tutor.username)
 
     if module != '':
         cours_queryset = Course.objects.filter(module__train_prog__department=department)        
@@ -550,19 +553,19 @@ def fetch_decale(req, **kwargs):
             .distinct('tutor__username')
         for c in cours:
             if c.tutor is not None:
-                liste_prof_module.append(c.tutor.username)
+                module_tutors.append(c.tutor.username)
 
     cours = filt_p(filt_m(filt_sa(department, semaine, an), module), prof) \
         .distinct('groupe')
     for c in cours:
-        liste_groupe.append(c.groupe.nom)
+        groups.append(c.groupe.nom)
 
-    return JsonResponse({'cours': liste_cours,
-                         'modules': liste_module,
-                         'profs': liste_prof,
-                         'profs_module': liste_prof_module,
-                         'groupes': liste_groupe,
-                         'jours': liste_jours})
+    return JsonResponse({'cours': courses,
+                         'modules': modules,
+                         'profs': tutors,
+                         'profs_module': module_tutors,
+                         'groupes': groups,
+                         'jours': days})
 
 
 def fetch_bknews(req, year, week, **kwargs):
@@ -657,11 +660,24 @@ def fetch_groups(req, **kwargs):
 #@cache_page(15 * 60)
 def fetch_rooms(req, **kwargs):
     """
-    Return groups tree for a given department
+    Return rooms for a given department
     """
     rooms = queries.get_rooms(req.department.abbrev)
     return JsonResponse(rooms, safe=False)    
 
+def fetch_constraints(req, **kwargs):
+    """
+    Return course type constraints for a given department
+    """
+    constraints = queries.get_coursetype_constraints(req.department.abbrev)
+    return JsonResponse(constraints, safe=False)    
+
+def fetch_departments(req, **kwargs):
+    """
+    Return departments
+    """
+    depts = queries.get_departments()
+    return JsonResponse(depts, safe=False)    
 # </editor-fold desc="FETCHERS">
 
 # <editor-fold desc="CHANGERS">
@@ -709,8 +725,8 @@ def edt_changes(req, **kwargs):
         return bad_response
 
 
-    print(req.body)
-    print(req.POST)
+    logger.info(f"REQ: edt change; {req.body}")
+    logger.info(req.POST)
     old_version = json.loads(req.POST.get('v',-1))
     recv_changes = json.loads(req.POST.get('tab',[]))
 
@@ -743,8 +759,8 @@ def edt_changes(req, **kwargs):
                 # old_slot = a.slot.o
                 new_day = a['day']['n']
                 old_day = a['day']['o']
-                new_slot = a['slot']['n']
-                old_slot = a['slot']['o']
+                new_start_time = a['start']['n']
+                old_start_time = a['start']['o']
                 old_room = a['room']['o']
                 new_room = a['room']['n']
                 new_week = a['week']['n']
@@ -761,26 +777,17 @@ def edt_changes(req, **kwargs):
                         new_room = old_room
 
                 if new_day is not None:
-                    try:
-                        cren_n = Slot \
-                            .objects \
-                            .get(jour=Day.objects \
-                                 .get(no=new_day),
-                                 heure \
-                                     =Time \
-                                 .objects \
-                                 .get(no=new_slot))
-                    except ObjectDoesNotExist:
-                        bad_response['reason'] \
-                            = "Problème : créneau " + new_day
-                        return bad_response
+                    # None, None means no change
+                    # same, same means not scheduled before
                     if non_place:
-                        cp.creneau = cren_n
-                    m.creneau_old = cp.creneau
-                    cp.creneau = cren_n
-                    print(cren_n)
-                    print(m)
-                    print(cp)
+                        cp.day = new_day
+                        cp.start_time = new_start_time
+                    m.day_old = cp.day
+                    m.start_time_old = cp.start_time
+                    cp.day = new_day
+                    cp.start_time = new_start_time
+                    logger.info(f"Course modification: {m}")
+                    logger.info(f"New scheduled course: {cp}")
                 if new_room is not None:
                     try:
                         sal_n = RoomGroup.objects.get(name=new_room)
@@ -791,8 +798,7 @@ def edt_changes(req, **kwargs):
                                   'pour un cours ?'
                         else:
                             bad_response['reason'] = \
-                                "Problème : salle " + new_room \
-                                + " inconnue"
+                                f"Problème : salle {new_room} inconnue"
                         return bad_response
 
                     if non_place:
@@ -821,47 +827,29 @@ def edt_changes(req, **kwargs):
                         pm.save()
                     except ObjectDoesNotExist:
                         bad_response['reason'] = \
-                            "Problème : prof " + new_room \
-                            + " inconnu"
+                            f"Problème : prof {new_tutor} inconnu"
                         return bad_response
 
                 if new_week is not None or new_year is not None \
-                   or new_day is not None or new_slot is not None \
+                   or new_day is not None or new_start_time is not None \
                    or new_tutor is not None:
                     msg += str(co) + '\n'
                     impacted_inst.add(co.tutor.username)
                     if new_tutor is not None:
                         impacted_inst.add(old_tutor)
 
-                    msg += '(' + str(old_week) + ', ' \
-                           + str(old_year) + ', ' \
-                           + str(old_day) + ', ' \
-                           + str(old_slot) + ', ' \
-                           + str(old_tutor) + ')'
+                    msg += f'({old_week}, {old_year}, ' \
+                           + f'{old_day}, {old_start_time}, {old_tutor})'
                     msg += ' -> ('
-                    if new_week:
-                        msg += str(new_week)
-                    else:
-                        msg += '-'
+                    msg += str(new_week) if new_week is not None else '-'
                     msg += ', '
-                    if new_year:
-                        msg += str(new_year)
-                    else:
-                        msg += '-'
+                    msg += str(new_year) if new_year is not None else '-'
                     msg += ', '
-                    if new_day:
-                        msg += str(new_day)
-                    else:
-                        msg += '-'
+                    msg += str(new_day) if new_day is not None else '-'
                     msg += ', '
-                    if new_slot:
-                        msg += str(new_slot)
-                    else:
-                        msg += '-'
-                    if new_slot:
-                        msg += str(new_slot)
-                    else:
-                        msg += '-'
+                    msg += str(new_start_time) if new_start_time is not None else '-'
+                    msg += ','
+                    msg += str(new_tutor) if new_tutor is not None else '-'
                     msg += ')\n\n'
 
             if work_copy == 0:
@@ -874,11 +862,11 @@ def edt_changes(req, **kwargs):
             cache.delete(get_key_course_pp(department.abbrev, old_year, old_week, work_copy))
             
 
-        subject = '[Modif sur tierce] ' + req.user.username \
-                  + ' a déplacé '
-        for inst in impacted_inst:
-            if inst is not req.user.username:
-                subject += inst + ' '
+        # subject = '[Modif sur tierce] ' + req.user.username \
+        #           + ' a déplacé '
+        # for inst in impacted_inst:
+        #     if inst is not req.user.username:
+        #         subject += inst + ' '
 
         # if len(impacted_inst) > 0 and work_copy == 0:
         #     if len(impacted_inst) > 1 \
@@ -889,13 +877,13 @@ def edt_changes(req, **kwargs):
         #             'edt@iut-blagnac',
         #             ['edt.info.iut.blagnac@gmail.com']
         #         )
+        logger.info('Envoi de mail')
+        logger.info(msg)
+        
 
         return good_response
     else:
-        bad_response['reason'] = "Version: " \
-                                 + str(version) \
-                                 + " VS " \
-                                 + str(old_version)
+        bad_response['reason'] = f"Version: {version} VS {old_version}"
         return bad_response
 
 
@@ -932,14 +920,15 @@ def dispos_changes(req, **kwargs):
         week = None
         year = None
 
-    print(req.body)
-    print(req.POST)
+    logger.info(f"REQ: dispo change; {req.body}")
+    logger.info(req.POST)
     # q = json.loads(req.body,
     #                object_hook=lambda d:
     #                namedtuple('X', list(d.keys()))(*list(d.values())))
     q = json.loads(req.POST.get('changes','{}'))
+    logger.info("List of changes")
     for a in q:
-        print(a)
+        logger.info(a)
 
     
     prof = None
@@ -955,47 +944,59 @@ def dispos_changes(req, **kwargs):
             = 'Non autorisé, réclamez plus de droits.'
         return bad_response
 
-    print(q)
+    # print(q)
 
     # if no preference was present for this week, first copy the
     # default availabilities
+
     if not UserPreference.objects.filter(user=prof,
                                          semaine=week,
                                          an=year).exists():
-        for c in Slot.objects.all():
-            def_dispo, created = UserPreference \
-                .objects \
-                .get_or_create(
-                user=prof,
-                semaine=None,
-                creneau=c,
-                defaults={'valeur':
-                              0})
-            if week is not None:
-                new_dispo = UserPreference(user=prof,
-                                           semaine=week,
-                                           an=year,
-                                           creneau=c,
-                                           valeur=def_dispo.valeur)
-                new_dispo.save()
+        for pref in UserPreference.objects.filter(user=prof,
+                                                  semaine=None):
+            new_dispo = UserPreference(user=prof,
+                                       semaine=week,
+                                       an=year,
+                                       day=pref.day,
+                                       start_time=pref.start_time,
+                                       duration=pref.duration,
+                                       valeur=pref.valeur)
+            logger.info(new_dispo)
+            new_dispo.save()
 
     for a in q:
-        print(a)
-        cr = Slot.objects \
-            .get(jour=Day.objects.get(no=a['day']),
-                 heure=Time.objects.get(no=a['hour']))
-        if cr is None:
-            bad_response['reason'] = "Creneau pas trouve"
-            return bad_response
-        di, didi = UserPreference \
-            .objects \
-            .update_or_create(user=prof,
-                              semaine=week,
-                              an=year,
-                              creneau=cr,
-                              defaults={'valeur': a['val']})
-        print(di)
-        print(didi)
+        logger.info(f"Change {a}")
+        UserPreference.objects.filter(user=prof,
+                                      semaine=week,
+                                      an=year,
+                                      day=a['day']).delete()
+        for pref in a['val_inter']:
+            new_dispo = UserPreference(user=prof,
+                                       semaine=week,
+                                       an=year,
+                                       day=a['day'],
+                                       start_time=pref['start_time'],
+                                       duration=pref['duration'],
+                                       valeur=pref['value'])
+            logger.info(new_dispo)
+            new_dispo.save()
+            
+        # cr = Slot.objects \
+        #     .get(jour=Day.objects.get(no=a['day']),
+        #          heure=Time.objects.get(no=a['hour']))
+        # if cr is None:
+        #     bad_response['reason'] = "Creneau pas trouve"
+        #     return bad_response
+        # di, didi = UserPreference \
+        #     .objects \
+        #     .update_or_create(user=prof,
+        #                       semaine=week,
+        #                       an=year,
+        #                       creneau=cr,
+        #                       defaults={'valeur': a['val']})
+        # logger.info("  Update or create")
+        # logger.info(f"  {di}")
+        # logger.info(f"  {didi}")
         
     if week is not None and year is not None:
         # invalidate merely the keys where the tutor has courses:
@@ -1038,7 +1039,7 @@ def decale_changes(req, **kwargs):
         
         with transaction.atomic():
             # was the course was scheduled before?
-            if c['j'] != -1 and c['h'] != -1:
+            if c['d'] != '' and c['t'] != -1:
                 scheduled_course = ScheduledCourse \
                     .objects \
                     .get(cours=changing_course,

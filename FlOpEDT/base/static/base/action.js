@@ -52,8 +52,9 @@ function apply_change_simple_pref(d) {
             d.val = Math.floor(d.val / (par_dispos.nmax / 2)) * par_dispos.nmax / 2;
         }
         d.val = (d.val + par_dispos.nmax / 2) % (3 * par_dispos.nmax / 2);
-        dispos[user.nom][d.day][d.hour] = d.val;
-        user.dispos[day_hour_2_1D(d)].val = d.val;
+	update_pref_interval(user.nom, d.day, d.start_time, d.val) ;
+        //dispos[user.nom][idays[d.day]][d.hour] = d.val;
+        //user.dispos[day_hour_2_1D(d)].val = d.val;
         go_pref(true);
     }
 }
@@ -89,7 +90,7 @@ function apply_wk_change(d, i) { //if(fetch.done) {
     if (i > 0 && i <= weeks.ndisp) {
         weeks.sel[0] = i + weeks.fdisp;
     }
-    dispos = [];
+    dispos = {};
     user.dispos = [];
 
     fetch_all(false);
@@ -128,21 +129,20 @@ function select_room_change() {
     room_tutor_change.old_value = c.room ;
     room_tutor_change.cur_value = c.room ;
 
-    var busy_rooms, cur_roomgroup, is_occupied, proposed_rg, initial_rg ;
-    var i, j ;
+    var busy_rooms, cur_roomgroup, cur_room, is_occupied, is_available, proposed_rg, initial_rg ;
+    var i, j, i_unav ;
 
     proposed_rg = [] ;
 
     if (level < room_cm_settings.length - 1) {
 
 	// find rooms where a course take place
-	var simultaneous_courses = cours
-	    .filter(function(d) {
-		return d.day==c.day && d.slot==c.slot && d.id_cours!=c.id_cours ;
-	    });
+	
+	var concurrent_courses = simultaneous_courses(c.day, c.start, c.duration, c.id_cours) ;
+	
 	var occupied_rooms = [] ;
-	for (i = 0 ; i < simultaneous_courses.length ; i++) {
-	    busy_rooms = rooms.roomgroups[simultaneous_courses[i].room] ;
+	for (i = 0 ; i < concurrent_courses.length ; i++) {
+	    busy_rooms = rooms.roomgroups[concurrent_courses[i].room] ;
 	    for (j = 0 ; j<busy_rooms.length ; j++) {
 		if (occupied_rooms.indexOf(busy_rooms[j])==-1) {
 		    occupied_rooms.push(busy_rooms[j]) ;
@@ -159,29 +159,30 @@ function select_room_change() {
 	    // should not go here
 	    initial_rg = [] ;
 	}
+
 	for (i = 0 ; i < initial_rg.length ; i++) {
 	    cur_roomgroup = initial_rg[i] ;
-	    if (is_garbage(c.day,c.slot)
-		|| unavailable_rooms[c.day][c.slot]
-		.indexOf(cur_roomgroup) == -1) {
+	    if (! is_garbage({day:c.day,start_time:c.start})) {
 
 		// is a room in the roomgroup occupied?
 		is_occupied = false ;
+		is_available = true ;
 		j = 0;
-		while(!is_occupied
+		while(!is_occupied && is_available
 		      && j<rooms.roomgroups[cur_roomgroup].length) {
-		    is_occupied = (occupied_rooms
-				   .indexOf(rooms.roomgroups[cur_roomgroup][j])
-				   != -1);
+		    cur_room = rooms.roomgroups[cur_roomgroup][j] ;
+		    is_occupied = (occupied_rooms.indexOf(cur_room) != -1);
+		    is_available = (Object.keys(unavailable_rooms).indexOf(cur_room) == -1
+				    || no_overlap(unavailable_rooms[cur_room][c.day],
+						  c.start, c.duration)) ;
 		    j++ ;
 		}
 
-		if(!is_occupied) {
+		if(!is_occupied && is_available) {
 		    proposed_rg.push(initial_rg[i]);
 		}
 	    }
 	}
-
     } else {
 	proposed_rg = Object.keys(rooms.roomgroups) ;
     }
@@ -215,7 +216,7 @@ function select_room_change() {
 
     if (level > 0 || c.room == une_salle ||
 	occupied_rooms.indexOf(c.room) != -1) {
-	return true;
+	return true ;
     } else {
 	return false ;
     }
@@ -239,45 +240,6 @@ function confirm_room_change(d){
   ------- TUTORS ------
   ---------------------*/
 
-// apply changes in the display of tutor pr
-function apply_tutor_display(pr) {
-    if (fetch.done) {
-	if(logged_usr.dispo_all_change && ckbox["dis-mod"].cked){
-	    prof_displayed = [pr] ;
-	    user.nom = pr ;
-	    create_dispos_user_data() ;
-	    go_pref(true) ;
-	} else {
-            if (prof_displayed.indexOf(pr) > -1) {
-		if (prof_displayed.length == profs.length) {
-                    prof_displayed = [pr];
-		} else {
-                    var ind = prof_displayed.indexOf(pr);
-                    prof_displayed.splice(ind, 1);
-                    if (prof_displayed.length == 0) {
-			prof_displayed = profs.slice(0);
-                    }
-		}
-            } else {
-		prof_displayed.push(pr);
-            }
-	}
-
-            go_tutors();
-    }
-}
-
-
-// display all tutors
-function apply_tutor_display_all() {
-    if (fetch.done
-	&& (!logged_usr.dispo_all_change || !ckbox["dis-mod"].cked)) {
-        prof_displayed = profs.slice(0);
-        go_tutors();
-    }
-}
-
-
 function fetch_all_tutors() {
     if(all_tutors.length == 0) {
 	show_loader(true);
@@ -297,9 +259,6 @@ function fetch_all_tutors() {
 	    error: function(msg) {
 		console.log("error");
 		show_loader(false);
-	    },
-	    complete: function(msg) {
-		console.log("complete");
 	    }
 	});
     }
@@ -345,18 +304,15 @@ function select_tutor_filters_change() {
 
     var c = room_tutor_change.course[0] ;
 
-    var chunk_size = tutor_cm_settings.ncol * tutor_cm_settings.nlin - 2 ;
-
-    var rest = all_tutors.length % chunk_size ;
+    var chunk_size = tutor_cm_settings.ncol * tutor_cm_settings.nlin - 1;
 
     room_tutor_change.proposal = [] ;
     
     var i = 0 ; var i_end ;
     while(i < all_tutors.length) {
 	i_end = i + chunk_size - 1 ;
-	if(rest > 0) {
-	    i_end++;
-	    rest--;
+	if(i_end >= all_tutors.length) {
+	    i_end = all_tutors.length - 1 ;
 	} 
 	room_tutor_change.proposal.push(all_tutors[i]
 					+ arrow.right
@@ -499,6 +455,16 @@ function go_cm_room_tutor_change() {
 }
 
 
+function remove_pannel(p, i){
+    sel_popup.pannels.splice(i, 1);
+    go_selection_popup() ;
+}
+
+function go_select_tutors() {
+    create_static_tutor();
+    create_pr_buttons() ;
+}
+
 
 /*----------------------
   ------- GROUPS -------
@@ -637,8 +603,11 @@ function apply_ckbox(dk) {
                 //     }
                 //     go_edt(false);
                 // }
-                if (dispos.length == 0) {
+                if (Object.keys(dispos).length == 0) {
 		    fetch_dispos();
+		} else {
+		    create_dispos_user_data();
+		    go_edt(false);
 		}
 		
             } else {
@@ -673,7 +642,7 @@ function apply_ckbox(dk) {
 		
                 edt_but.attr("visibility", "visible");
 
-		if (dispos.length == 0) {
+		if (Object.keys(dispos).length == 0) {
 		    fetch_dispos();
 		}
                 // if (!fetch.dispos_ok) {
@@ -707,8 +676,8 @@ function apply_ckbox(dk) {
    ------ VALIDATE ------
    ----------------------*/
 
-function compute_changes(changes, profs, gps) {
-    var i, id, change, prof_changed, gp_changed, gp_named;
+function compute_changes(changes, conc_tutors, gps) {
+    var i, id, change, prof_changed, gp_changed, gp_named, date;
 
     var cur_course, cb ;
 
@@ -721,50 +690,55 @@ function compute_changes(changes, profs, gps) {
 	id = Object.keys(cours_bouge)[i] ;
 	cur_course = get_course(id) ;
 	cb = cours_bouge[id] ;
+	date = {day: cur_course.day,
+		start_time: cur_course.start};
 
-	if (had_moved(cb , cur_course) || cur_course.prof != cb.prof) {
-
+	if (has_changed(cb , cur_course)) {
+	    
 	    /* Sanity checks */
 	    
 	    // No course has been moved to garbage slots
-            if (is_garbage(cur_course.day, cur_course.slot)) {
-		splash_case = {
-		    id: "garb-sched",
-		    but: butOK,
-		    com: {list: [{txt: "Vous avez déplacé, puis laissé des cours non placés."},
-				 {txt: msgRetry}]}
-		}
+            if (is_garbage(date)) {
+	    	splash_case = {
+	    	    id: "garb-sched",
+	    	    but: butOK,
+	    	    com: {list: [{txt: "Vous avez déplacé, puis laissé des cours non placés."},
+	    			 {txt: msgRetry}]}
+	    	} ;
 		
-		splash(splash_case);
-		return false ;
-            } 
-	    // Course in unavailable slots for some training programme
-	    else if (is_free(cur_course.day,
-			     cur_course.slot,
-			     cur_course.promo)) {
+	    	splash(splash_case);
+	    	return false ;
+            }
+
 		
-		msg = "Pas de cours pour les ";
-		if (set_promos[gp_changed.promo] == 3) {
-		    msg += "LP" ;
-		} else {
-		    msg += set_promos[cur_course.promo] + "A" ;
+	    // // Course in unavailable slots for some training programme
+	    // else if (is_free(date, cur_course.promo)) {
+		
+	    // 	msg = "Pas de cours pour les ";
+	    // 	if (set_promos[gp_changed.promo] == 3) {
+	    // 	    msg += "LP" ;
+	    // 	} else {
+	    // 	    msg += set_promos[cur_course.promo] + "A" ;
 		    
-		}
-		msg += " le " + data_grid_scale_day[cur_course.day]
-		    + " sur le créneau "
-		    + data_grid_scale_hour[cur_course.slot]
-		    + "."
+	    // 	}
+	    // 	msg += " le " + days[cur_course.day].date
+	    // 	    + " sur le créneau "
+	    // 	    + data_grid_scale_hour[cur_course.slot]
+	    // 	    + "."
 		
-		splash_case = {
-		    id: "unav-tp",
-		    but: butOK,
-		    com: {list: [{txt: msg},
-				 {txt: msgRetry}]}
-		}
+	    // 	splash_case = {
+	    // 	    id: "unav-tp",
+	    // 	    but: butOK,
+	    // 	    com: {list: [{txt: msg},
+	    // 			 {txt: msgRetry}]}
+	    // 	}
 		
-		splash(splash_case);
-		return false ;
-            } else if (cur_course.room == une_salle){
+	    // 	splash(splash_case);
+	    // 	return false ;
+            // } else 
+
+
+	    if (cur_course.room == une_salle){
 		splash_case = {
 		    id: "def-room",
 		    but: butOK,
@@ -779,28 +753,21 @@ function compute_changes(changes, profs, gps) {
 	    
 	    
 	    /* Change is accepted now */
+	    /* Compute who is concerned by the change */
 	    
 	    // add instructor if never seen
-            if (profs.indexOf(cur_course.prof) == -1
+            if (conc_tutors.indexOf(cur_course.prof) == -1
 		&& cur_course.prof != logged_usr.nom) {
-                profs.push(cur_course.prof);
+                conc_tutors.push(cur_course.prof);
             }
-            if (profs.indexOf(cb.prof) == -1
+            if (conc_tutors.indexOf(cb.prof) == -1
 		&& cur_course.prof != logged_usr.nom) {
-                profs.push(cb.prof);
+                conc_tutors.push(cb.prof);
             }
 
 	    // add group if never seen
 	    gp_changed = groups[cur_course.promo][cur_course.group] ;
 	    gp_named = set_promos[gp_changed.promo] + gp_changed.nom ;
-	    // if (set_promos[gp_changed.promo] == 3) {
-	    // 	gp_named = "LP" ;
-	    // } else {
-	    // 	gp_named = set_promos[gp_changed.promo] + "A";
-	    // 	if(gp_changed.nom != "P") {
-	    // 	    gp_named += gp_changed.nom ;
-	    // 	}
-	    // }
             if (gps.indexOf(gp_named) == -1) {
                 gps.push(gp_named);
             }
@@ -811,7 +778,7 @@ function compute_changes(changes, profs, gps) {
             change = {id: id,
 		      day: {o: cb.day,
 			    n: null },
-		      slot: {o: cb.slot,
+		      start: {o: cb.start,
 			     n: null },
 		      room: {o: cb.room,
 			     n: null },
@@ -826,9 +793,9 @@ function compute_changes(changes, profs, gps) {
 	    
             console.log("change", change);
 	    if (cb.day != cur_course.day ||
-                cb.slot != cur_course.slot) {
+                cb.start != cur_course.start) {
                 change.day.n = cur_course.day;
-                change.slot.n = cur_course.slot;
+                change.start.n = cur_course.start;
 	    }
 	    if (cb.room != cur_course.room) {
                 change.room.n = cur_course.room;
@@ -857,24 +824,24 @@ function compute_changes(changes, profs, gps) {
 
 
 function confirm_change() {
-    var changes, profs_conc, gps, i, prof_txt, gp_txt;
+    var changes, conc_tutors, gps, i, prof_txt, gp_txt;
     changes = [];
-    profs_conc = [];
+    conc_tutors = [];
     gps = [];
-    var changesOK = compute_changes(changes, profs_conc, gps);
+    var changesOK = compute_changes(changes, conc_tutors, gps);
 
     if (!changesOK) {
 	return ;
     }
 
     if (changes.length == 0) {
-        ack.edt = "base EdT : RAS";
+        ack.edt = "Modif EdT : RAS";
         go_ack_msg(true);
     } else {
 
-        if (profs_conc.length > 0) {
+        if (conc_tutors.length > 0) {
             prof_txt = "Avez-vous contacté " ;
-	    prof_txt += array_to_msg(profs_conc) ;
+	    prof_txt += array_to_msg(conc_tutors) ;
 	    prof_txt += " ?" ;
 	} else {
             prof_txt = "Tudo bem ?" ;
@@ -935,11 +902,7 @@ function send_edt_change(changes) {
 	    + "&c=" + num_copie,
         type: 'POST',
 //        contentType: 'application/json; charset=utf-8',
-        data: // JSON.stringify({
-        //     v: version,
-        //     tab: changes
-        // }),
-	sent_data,
+        data: sent_data,
         dataType: 'json',
         success: function(msg) {
             edt_change_ack(msg);
@@ -953,32 +916,56 @@ function send_edt_change(changes) {
 }
 
 
+//
+function compute_pref_changes(changes) {
+    var nbDispos = 0;
+    var modified_days = []
+
+    for (var i = 0; i < Object.keys(user.dispos).length; i++) {
+	if(user.dispos[i].val != user.dispos_bu[i]
+	   && modified_days.indexOf(user.dispos[i].day) == -1) {
+	    modified_days.push(user.dispos[i].day);
+	}
+    }
+
+    for(i=0 ; i<modified_days.length ; i++) {
+	changes.push({day:modified_days[i],
+		      val_inter:[]});
+    }
+	
+    
+    for (var i = 0; i < Object.keys(user.dispos).length; i++) {
+	cur_pref = user.dispos[i] ;
+	bu_pref = user.dispos_bu[i] ;
+        if (cur_pref.val > 0) {
+            nbDispos++;
+        }
+        if (modified_days.indexOf(cur_pref.day) != -1) {
+
+            changes.filter(function(d){
+		return d.day == cur_pref.day ;
+	    })[0].val_inter.push({start_time:cur_pref.start_time,
+				  duration: cur_pref.duration,
+				  value: cur_pref.val});
+        }
+    }
+    user.dispos_bu = user.dispos.slice(0);
+
+    return nbDispos ;
+}
 
 
 function send_dis_change() {
-    var changes = [];
     var nbDispos = 0;
 
     if (user.dispos_bu.length == 0) {
-        ack.edt = "base dispo : RAS";
+        ack.edt = "Modif dispo : RAS";
         go_ack_msg(true);
         return;
     }
 
-    for (var i = 0; i < Object.keys(user.dispos).length; i++) {
-        if (user.dispos[i].val > 0) {
-            nbDispos++;
-        }
-        if (user.dispos[i].val != user.dispos_bu[i].val) {
-            changes.push(user.dispos[i]);
-        }
-        user.dispos_bu[i].day = user.dispos[i].day;
-        user.dispos_bu[i].hour = user.dispos[i].hour;
-        user.dispos_bu[i].val = user.dispos[i].val;
-        user.dispos_bu[i].off = user.dispos[i].off;
-    }
-
-
+    var changes = [];
+    nbDispos = compute_pref_changes(changes) ;
 
     // console.log(nbDispos);
     // console.log(changes);
@@ -987,7 +974,7 @@ function send_dis_change() {
 
 
     if (changes.length == 0) {
-        ack.edt = "base dispo : RAS";
+        ack.edt = "Modif dispo : RAS";
         go_ack_msg(true);
     } else {
 
@@ -1250,7 +1237,7 @@ function add_bouge(d) {
         cours_bouge[d.id_cours] = {
             id: d.id_cours,
             day: d.day,
-            slot: d.slot,
+            start: d.start,
             room: d.room,
 	    prof: d.prof
         };
@@ -1258,10 +1245,11 @@ function add_bouge(d) {
     }
 }
 
-function had_moved(cb, c){
+function has_changed(cb, c){
     return cb.day != c.day
-	|| cb.slot != c.slot
-	|| cb.room != c.room ;
+	|| cb.start != c.start
+	|| cb.room != c.room
+	|| cb.prof != c.prof;
 }
 
 
@@ -1304,3 +1292,126 @@ function compute_cm_room_tutor_direction() {
 }
 
 
+function apply_selection_display(choice) {
+    if (fetch.done) {
+
+        var sel_list = choice.pannel.list ;
+
+        var concerned = sel_list.find(function(t) {
+            return t.name == choice.name ;
+        });
+        if (typeof concerned === 'undefined') {
+            console.log("Prof, module ou salle inexistante...");
+            return ;
+        }
+
+        
+	if(choice.pannel.type == "tutor"
+           && logged_usr.dispo_all_change && ckbox["dis-mod"].cked){
+            tutors.all.forEach(function(t) { t.display = false ; });
+            concerned.display = true ;
+	    user.nom = choice.name ;
+	    create_dispos_user_data() ;
+	    go_pref(true) ;
+	} else {
+            
+            if (concerned.display) {
+                var nb_displayed = sel_list.filter(function(t) {
+                    return t.display ;
+                }).length ;
+		if (nb_displayed == sel_list.length) {
+                    sel_list.forEach(function(t) { t.display = false ; });
+                    concerned.display = true ;
+		} else {
+                    concerned.display = false ;
+                    nb_displayed -- ;
+                    if (nb_displayed == 0) {
+			sel_list.forEach(function(t) { t.display = true ; });
+                    }
+		}
+            } else {
+		concerned.display = true ;
+            }
+	}
+        update_active() ;
+        update_relevant() ;
+        go_courses() ;
+        go_selection_popup();
+    }
+}
+
+
+function apply_selection_display_all(p) {
+    var condition = true ;
+    var sel_list = [];
+
+    if (p.type != "tutor"
+        || (fetch.done
+	    && (!logged_usr.dispo_all_change
+                || !ckbox["dis-mod"].cked))) {
+        p.list.forEach(function(d) {
+            d.display = true ;
+        })
+        update_active() ;
+        update_relevant() ;
+        go_selection_buttons();
+        go_courses();
+    }
+}
+
+// discards all filters
+function apply_cancel_selections() {
+
+    // classical filters
+    var display = function(d) {
+        d.display = true ;
+    };
+    for (var di = 0 ; di < sel_popup.available.length ; di ++) {
+        popup_data(sel_popup.available[di].type)
+            .forEach(display) ;
+    }
+
+
+    // group filters
+    var displayed = root_gp.reduce(function(acc, d){
+        var ret = d.gp.display ? 1 : 0 ;
+        return acc + ret ;
+    }, 0);
+    var rgi = 0 ;
+    check_hidden_groups();
+    if(!is_no_hidden_grp) {
+        while (displayed > 0 && rgi<root_gp.length) {
+            var gp = root_gp[rgi].gp ;
+            if (gp.display) {
+                apply_gp_display(gp, false, true);
+                displayed-- ;
+            }
+            rgi++ ;
+        }
+    }
+
+    // remove all pannels
+    sel_popup.pannels = [] ;
+
+    // update flags and display
+    update_active() ;
+    update_relevant() ;
+    go_courses() ;
+    go_selection_popup();
+
+}
+
+// move to another department
+function redirect_dept(d) {
+    var split_addr = url_edt.split("/");
+    // change dept
+    split_addr[split_addr.length-2] = d ;
+    // clean
+    if (split_addr[split_addr.length-1] == "") {
+        split_addr.splice(-1,1);
+    }
+    // go to the right week
+    split_addr.push(weeks.init_data[weeks.sel[0]].an);
+    split_addr.push(weeks.init_data[weeks.sel[0]].semaine);
+    window.location.href = split_addr.join("/") ;
+}

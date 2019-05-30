@@ -1,10 +1,10 @@
 
 from django.test import TestCase
-from unittest.mock import patch, Mock, call
+from unittest.mock import patch, Mock, MagicMock, call
 
 from base.models import Department, TrainingProgramme, Course, CourseType, Time
 from people.models import Tutor
-from TTapp.models import LimitCourseTypePerPeriod, MinHalfDays
+from TTapp.models import LimitCourseTypeTimePerPeriod, MinHalfDays, CustomConstraint
 from TTapp.TTModel import TTModel
 
 
@@ -25,14 +25,14 @@ class TTConstraintTestCase(TestCase):
         self.TD = CourseType.objects.get(name='TD')
         self.TP = CourseType.objects.get(name='TP')
 
-        self.c_basic = LimitCourseTypePerPeriod.objects.create(limit=1, type=self.TD, department=self.info)
+        self.c_basic = LimitCourseTypeTimePerPeriod.objects.create(limit=1, type=self.TD, department=self.info)
 
-        self.c_2018 = LimitCourseTypePerPeriod.objects.create(train_prog=self.dut1, year=2018, limit=1, type=self.TD, department=self.info)
-        self.c_2018_39 = LimitCourseTypePerPeriod.objects.create(train_prog=self.dut1, year=2018, week=39, limit=0, type=self.TD, department=self.info)
-        self.c_2018_39_without_tp = LimitCourseTypePerPeriod.objects.create(year=2018, week=39, limit=0, type=self.TD, department=self.info)
+        self.c_2018 = LimitCourseTypeTimePerPeriod.objects.create(train_prog=self.dut1, year=2018, limit=1, type=self.TD, department=self.info)
+        self.c_2018_39 = LimitCourseTypeTimePerPeriod.objects.create(train_prog=self.dut1, year=2018, week=39, limit=0, type=self.TD, department=self.info)
+        self.c_2018_39_without_tp = LimitCourseTypeTimePerPeriod.objects.create(year=2018, week=39, limit=0, type=self.TD, department=self.info)
 
-        self.c_tp2 = LimitCourseTypePerPeriod.objects.create(train_prog=self.dut2, limit=0, type=self.TD, department=self.info)
-        self.c_2019_1 = LimitCourseTypePerPeriod.objects.create(train_prog=self.dut2, year=2019, week=1, limit=0, type=self.TD, department=self.info)
+        self.c_tp2 = LimitCourseTypeTimePerPeriod.objects.create(train_prog=self.dut2, limit=0, type=self.TD, department=self.info)
+        self.c_2019_1 = LimitCourseTypeTimePerPeriod.objects.create(train_prog=self.dut2, year=2019, week=1, limit=0, type=self.TD, department=self.info)
 
 
     def test_constraint_without_training_program(self):   
@@ -57,8 +57,8 @@ class TTConstraintTestCase(TestCase):
 
         calls = [call(ttmodel, period_by_day, 1.),]
 
-        constraint = LimitCourseTypePerPeriod.objects.create(limit=1, type=self.TD, department=self.info)
-        constraint.period == LimitCourseTypePerPeriod.FULL_DAY
+        constraint = LimitCourseTypeTimePerPeriod.objects.create(limit=1, type=self.TD, department=self.info)
+        constraint.period == LimitCourseTypeTimePerPeriod.FULL_DAY
         constraint.enrich_model(ttmodel)
 
         register_expression.assert_has_calls(calls)
@@ -67,8 +67,8 @@ class TTConstraintTestCase(TestCase):
     @patch('TTapp.models.LimitCourseTypePerPeriod.register_expression')
     def test_limit_register_expression_with_tutors(self, register_expression):      
 
-        constraint = LimitCourseTypePerPeriod.objects.create(limit=1, type=self.TD, department=self.info)
-        constraint.period == LimitCourseTypePerPeriod.FULL_DAY
+        constraint = LimitCourseTypeTimePerPeriod.objects.create(limit=1, type=self.TD, department=self.info)
+        constraint.period == LimitCourseTypeTimePerPeriod.FULL_DAY
 
         calls = []
         attrs = {'wdb.days': (0,1,2,)}
@@ -108,4 +108,22 @@ class TTConstraintTestCase(TestCase):
 
         constraint.enrich_model(ttmodel)
         enrich_model.assert_has_calls(calls)
-        
+
+
+class CustomConstraintTestCase(TestCase):
+
+    @patch('MyFlOp.custom_constraints.FirstCustomConstraint', create=True)
+    @patch('TTapp.models.CustomConstraint.class_name', 'MyFlOp.custom_constraints.FirstCustomConstraint')
+    def test_get_constraint(self, target_class):
+        custom_constraint = CustomConstraint()
+        constraint = custom_constraint.get_constraint('MyFlOp.custom_constraints.FirstCustomConstraint')
+        self.assertIs(constraint, target_class())
+
+    
+    @patch('MyFlOp.custom_constraints.FirstCustomConstraint', create=True)
+    @patch('TTapp.models.CustomConstraint.class_name', 'MyFlOp.custom_constraints.FirstCustomConstraint')
+    def test_enrich_model(self, constraint_class):
+        custom_constraint = CustomConstraint.objects.create(class_name='MyFlOp.custom_constraints.FirstCustomConstraint')
+        custom_constraint.enrich_model(None)
+        constraint_instance = constraint_class()
+        constraint_instance.enrich_model.assert_called_once_with(None, 1)

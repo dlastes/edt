@@ -23,23 +23,24 @@
 
 /* INPUTS
 
-var user = {nom: string,
-	    dispos: [],
-	    dispos_bu: [],
-	    dispos_type: [],
-	   };
+// var user = {nom: string,
+// 	    dispos: [],
+// 	    dispos_bu: [],
+// 	    dispos_type: [],
+// 	   };
 
-var margin = {top: nb, left: nb, right: nb, bot: nb};
+// var margin = {top: nb, left: nb, right: nb, bot: nb};
 
-var svg = {height: nb, width: nb};
+// var svg = {height: nb, width: nb};
 
-var week = nb ;
-var year = nb;
+// var week = nb ;
+// var year = nb;
 
-var labgp = {height: nb, width: nb, tot: nb, height_init: nb, width_init: nb};
+// var labgp = {height: nb, width: nb, tot: nb, height_init: nb, width_init: nb};
 
-var dim_dispo = {height:2*labgp.height, width: 60, right: 10, plot:0,
-		 adv_v_margin: 5};
+// var dim_dispo = {height:2*labgp.height, width: 60, right: 10, plot:0,
+// 		 adv_v_margin: 5};
+
 */
            /*     \
           ----------           
@@ -57,18 +58,80 @@ var dim_dispo = {height:2*labgp.height, width: 60, right: 10, plot:0,
           ----------           
            \     */
 
+/*--------------------------
+  ------- TIME ------
+  --------------------------*/
+
+// day indices
+var idays = {} ;
+for (var i = 0 ; i<days.length ; i++){
+    idays[days[i].ref] = days[i] ;
+}
+
+// side time scale: list of {h: int, hd:('am'|'pm')}
+var side_time = [] ;
+var stime = Math.floor(time_settings.time.day_start_time/60) ;
+if (stime*60 < time_settings.time.day_start_time) {
+    stime ++ ;
+}
+while (stime*60 <= time_settings.time.day_finish_time) {
+    if(stime*60 <= time_settings.time.lunch_break_start_time) {
+        side_time.push({h:stime, hd:'am'});
+    }
+    if (stime*60 >= time_settings.time.lunch_break_finish_time) {
+        side_time.push({h:stime, hd:'pm'});
+    }
+    stime ++ ;
+}
+
+
+/*-------------------------
+  - CONTEXT MENUS HELPERS -
+  -------------------------*/
+
+function cancel_cm_adv_preferences(){
+    if(ckbox["dis-mod"].cked) {
+	if(! context_menu.dispo_hold) {
+	    data_dispo_adv_cur = [] ;
+	    go_cm_advanced_pref(true);
+	}
+	context_menu.dispo_hold = false ;
+    }
+}
+
+function cancel_cm_room_tutor_change(){
+    if(ckbox["edt-mod"].cked) {
+	if(!context_menu.room_tutor_hold) {
+	    if (room_tutor_change.course.length > 0) {
+		room_tutor_change.course = [] ;
+		room_tutor_change.proposal = [] ;
+		go_cm_room_tutor_change();
+	    }
+	}
+	context_menu.room_tutor_hold = false ;
+    }
+}
+
+
+
 /*--------------------
    ------ ALL -------
   --------------------*/
 
 // number of days in the week
-var nbPer = 5;
+var nbPer = Object.keys(idays).length ;
 
+
+// -- no slot --
+// --  begin  --
+// TO BE REMOVED: still appears in stype.js
 // number of slots within 1 day
 var nbSl = 6;
+// --   end   --
+// -- no slot --
 
 // initial number of promos
-var init_nbRows = 2;
+var slot_case = false ; //true ;
 
 // current number of rows
 var nbRows;
@@ -81,7 +144,7 @@ var rootgp_width = 0;
 var pos_rootgp_width = 0;
 
 // different grounds where to plot
-var fg, mg, bg, dg, meg, vg, gpg, prg, stg, mog, sag, fig, log, cmpg, cmtg;
+var fg, mg, bg, dg, meg, vg, gpg, catg, stg, mog, sag, fig, log, cmpg, cmtg, selg;
 var wg = {
     upper: null,
     bg: null,
@@ -101,19 +164,24 @@ var fetch = {
     ongoing_un_rooms: false,
     done: false,
     cours_ok: false,
-    dispos_ok: false
+    dispos_ok: false,
+    groups_ok: false,
+    constraints_ok: false
 };
 //cours_ok pas très utile
 
 
 var svg_cont ;
 
+
+
+
 /*--------------------------
   ------- PREFERENCES ------
   --------------------------*/
 
-// 3D array (username,id_day,id_slot)
-var dispos = [];
+// 2D array of list (username,iday,list of intervals)
+var dispos = {};
 
 // parameters for availability
 var par_dispos = {
@@ -152,7 +220,8 @@ var data_dispo_adv_init = [];
 for (var i = 0; i <= par_dispos.nmax; i++) {
     data_dispo_adv_init.push({
         day: 0,
-        hour: 0,
+        start_time: 0,
+	duration: 0,
         off: i
     });
 }
@@ -216,22 +285,12 @@ var data_grid_scale_gp = [];
 var data_grid_scale_row = [];
 var data_grid_scale_hour = ["8h-9h25", "9h30-10h55", "11h05-12h30", "14h15-15h40", "15h45-17h10", "17h15-18h40"];
 
-// Names of the days
-var data_grid_scale_day_init = ["Lun.", "Mar.", "Mer.", "Jeu.", "Ven."];
-var data_grid_scale_day = ["Lun.", "Mar.", "Mer.", "Jeu.", "Ven."];
 
 // Garbage parameters
 var garbage = {
-    // day: 3,
-    // slot: nbSl,
-    // cell: {
-        day: 3,
-        slot: nbSl,
-        display: false,
-        dispo: false,
-        pop: false,
-        reason: ""
-//    }
+    start: time_settings.time.day_finish_time,
+    duration: 90,
+    day: days[days.length-2].ref
 };
 
 
@@ -243,6 +302,8 @@ var garbage = {
 var bknews = {
     hour_bound:3, // flash info between hour #2 and hour #3
     ratio_height: .55,        // ratio over course height 
+    time_height: 60,
+    time_margin: 15,
     ratio_margin: .15, // ratio over course height 
     cont: [],
     nb_rows: 0,
@@ -336,7 +397,8 @@ var modules = {
     sel: "",
     pl: [],
     pp: [],
-    all: []
+    all: [],
+    old: []
 };
 
 /*--------------------
@@ -351,40 +413,105 @@ var salles = {
 };
 
 var rooms ;
+var rooms_sel = {
+    all: [],
+    old: []
+};
 
-
-var unavailable_rooms = [] ;
-unavailable_rooms = new Array(nbPer);
-for (var i = 0; i < nbPer; i++) {
-    unavailable_rooms[i] = new Array(nbSl);
-}
+var unavailable_rooms = {} ;
 
 
 /*---------------------
    ------ TUTORS ------
    --------------------*/
 
-// instructors of unscheduled courses
-var profs_pp = [];
-
-// instructors of scheduled courses
-var profs_pl = [];
-
-// all instructors
-var profs = [];
+var tutors = {
+    // instructors of unscheduled courses
+    pp: [],
+    // instructors of scheduled courses
+    pl: [],
+    // all instructors
+    all: [],
+    old: []
+};
 
 // instructors not blurried
 var prof_displayed = [];
 
 // display parameters
-var butpr = {
-    height: 30,
-    width: 30,
-    perline: 12,
+var but_exit = {
+    side: 20,
+    mar_side: 3,
+    mar_next: 10
+};
+var sel_popup = {
+    type: "",
+    x: 640,
+    y: -210,
+    w: 0,
+    h:0,
+    groups_w: 0,
+    groups_h: 0,
+    selw: 60,
+    selh: 30,
+    selx: 570,
+    sely: -200,
+    selmy: 8,
+    mar_side: 5,
+    tlx: 700,
+    available: [{type:"group",
+                 buttxt: "Groupes",
+                 active: false},
+                {type: "tutor",
+                 buttxt: "Profs",
+                 active: false},
+                {type:"module",
+                 buttxt: "Modules",
+                 active: false},
+                {type:"room",
+                 buttxt: "Salles",
+                 active: false}
+                ],
+    get_available: function(t) {
+        var ret = this.available.find(function(d) {
+            return d.type == t ;
+        });
+        if (typeof ret === 'undefined') {
+            console.log("type unknown");
+            return ;
+        } else {
+            return ret ;
+        }
+    },
+    pannels: [], //{type, x, y, w, h, txt}
+    but: [],
+    active_filter: false
+};
+sel_popup.but["tutor"] = {
+    h: 30,
+    w: 40,
+    perline: 5,
     mar_x: 2,
     mar_y: 4,
-    tlx: 900
 };
+sel_popup.but["room"] = {
+    h: 30,
+    w: 60,
+    perline: 6,
+    mar_x: 2,
+    mar_y: 4,
+};
+sel_popup.but["module"] = {
+    h: 30,
+    w: 40,
+    perline: 3,
+    mar_x: 2,
+    mar_y: 4,
+};
+sel_popup.available.forEach(function(pannel) {
+    pannel.x = sel_popup.x ;
+    pannel.y = sel_popup.y ;
+}) ;
 
 // has any instructor been fetched?
 var first_fetch_prof = true;
@@ -410,7 +537,7 @@ var cours = [];
 
 // listener for curses drag and drop 
 var dragListener;
-
+var drag_popup ;
 
 // helper for the d&d
 var drag = {
@@ -425,6 +552,13 @@ var drag = {
 
 // stores the courses that has been moved
 var cours_bouge = {};
+
+// stores the constraints regarding course types
+var constraints ;
+var rev_constraints = {};
+
+// scale factor for vertical display: time*factor -> y 
+var scale = 1 ;
 
 /*----------------------
   ------- VALIDATE -----
@@ -453,13 +587,18 @@ var ack = {
 
 // display parameters
 var did = {
-    h: 10,
+    h: 60,
     w: 15,
     mh: 5,
     mav: 10,
     tlx: 316,
-    tly: -180
+    tly: -180,
+    shift_s: 20
 };
+did.scale = did.h / (time_settings.time.day_finish_time
+		     - time_settings.time.lunch_break_finish_time
+		     + time_settings.time.lunch_break_start_time
+		     - time_settings.time.day_start_time) ;
 var stbut = {
     w: 104,
     h: 60
@@ -468,6 +607,15 @@ var stbut = {
 /*--------------------
    ------ ALL -------
   --------------------*/
+
+var departments = {
+    data: [],
+    marh:10,
+    topx:sel_popup.selx + sel_popup.selw + 50,
+    topy:sel_popup.sely - sel_popup.selh - sel_popup.selmy,
+    w:35,
+    h:sel_popup.selh
+}
 
 // version of the planning
 var version;

@@ -49,14 +49,6 @@ var first_when = true ;
 var commit = [];
 
 
-var hours = ["8h-9h25","9h30-10h55","11h05-12h30","14h15-15h40","15h45-17h10","17h15-18h40"];
-
-var days = ["Lun.","Mar.","Mer.","Jeu.","Ven."];
-
-
-
-
-
 initiate();
 
 function initiate() {
@@ -124,7 +116,7 @@ function initiate() {
 
 // fetch the data corresponding to the current selection
 function go_filter(){
-    var sel, di, sa, i ;
+    var sel, di, sa, i, cur ;
     var url_fd_full = url_fetch_decale+"?a="+filtered.an+"&s="+filtered.semaine;
     var prof_changed = false ;
 
@@ -176,7 +168,11 @@ function go_filter(){
 	    filtered.mod_prof_gp[1].arr = msg.profs;
 	    filtered.mod_prof_gp[2].arr = msg.groupes;
 	    liste_cours = msg.cours;
-	    liste_jours = msg.jours;
+	    liste_jours = {};
+	    for(i = 0 ; i<msg.jours.length ; i++) {
+		cur = msg.jours[i] ;
+		liste_jours[cur.ref] = {date: cur.date, name: cur.name};
+	    }
 
 	    fill_aim_prof(msg.profs_module);
 
@@ -611,8 +607,12 @@ function go_cours(){
 
 function plot_cours(d){
     var ret = d.m+"-"+d.p+"-"+d.g+" (";
+    var h, m;
     if(d.j>=0 && d.h>=0){
-	ret +=  days[d.j] + " "+ liste_jours[d.j] + " " + hours[d.h];
+	h = Math.floor(d.t/60);
+	m = d.t - h*60 ;
+	ret +=  liste_jours[d.d].name + " "+ liste_jours[d.d].date
+	    + " " + h + ":" + m;
     } else {
 	ret += "non placé"
     }

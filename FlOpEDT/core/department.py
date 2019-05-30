@@ -3,7 +3,7 @@ from base.models import Department, TrainingProgramme, \
                         Dependency, Module, Group, PlanningModification, \
                         ScheduledCourse
 
-from base.models import BreakingNews, Period, GroupType, \
+from base.models import Period, GroupType, \
                         TutorCost, UserPreference, Course, TrainingHalfDay,\
                         Room, RoomGroup, RoomPreference, RoomType, RoomSort
 

@@ -53,7 +53,7 @@ var margin = {
     left:  50,
     right:  110,
     bot:  10,
-    but: -230
+    but: -200
 };
 
 
@@ -71,15 +71,15 @@ var year = 2017;
 
 var labgp = {height: 40, width: 30, tot: 8, height_init: 40, width_init: 30, hm: 40, wm:15};
 
-dim_dispo.height = 2*labgp.height ;
+//dim_dispo.height = 2*labgp.height ;
 
 
 
 butgp.tly = margin.but;//-margin_but.ver-6*butgp.height-80 ;
-butpr.tly = margin.but;
+sel_popup.tly = margin.but;
 
 
-modules.x=butpr.tlx+butpr_x(null,butpr.perline-2)+butpr.width+butpr.mar_x-60;
+modules.x=sel_popup.selx + sel_popup.selx ;
 modules.y=margin.top+gsckd_y(null)-40;
 modules.width = 170 ;
 modules.height = 0 ;
@@ -101,8 +101,6 @@ function on_group_rcv(dg) {
 
     create_groups(dg);
 
-    go_gp_buttons();
-
     create_edt_grid();
 
     create_alarm_dispos() ;
@@ -115,7 +113,6 @@ function on_group_rcv(dg) {
     create_bknews();
 
     go_promo_gp_init() ;
-    go_gp_buttons();
 
 
     fetch_all(true);
@@ -140,44 +137,40 @@ function on_group_rcv(dg) {
 
     }
     
-    //go_edt(true);
+    fetch.groups_ok = true;
+    create_grid_data();
 }
 
 
 function on_room_rcv(room_data) {
     rooms = room_data;
+    var room_names ;
+    room_names = Object.keys(rooms.roomgroups) ;
+    swap_data(room_names, rooms_sel, "room");
 }
 
-
-
-
-
-/*-------------------------
-  - CONTEXT MENUS HELPERS -
-  -------------------------*/
-
-function cancel_cm_adv_preferences(){
-    if(ckbox["dis-mod"].cked) {
-	if(! context_menu.dispo_hold) {
-	    data_dispo_adv_cur = [] ;
-	    go_cm_advanced_pref(true);
+function on_constraints_rcv(cst_data) {
+    constraints = cst_data;
+    var i, j, keys ;
+    keys = Object.keys(constraints) ;
+    for(i=0 ; i<keys.length ; i++) {
+	for(j=0 ; j<constraints[keys[i]].allowed_st.length ; j++){
+	    rev_constraints[constraints[keys[i]].allowed_st[j].toString()]
+		= constraints[keys[i]].duration ;
 	}
-	context_menu.dispo_hold = false ;
     }
+    rev_constraints[garbage.start.toString()] = garbage.duration ;
+    fetch.constraints_ok = true;
+    create_grid_data();
 }
 
-function cancel_cm_room_tutor_change(){
-    if(ckbox["edt-mod"].cked) {
-	if(!context_menu.room_tutor_hold) {
-	    if (room_tutor_change.course.length > 0) {
-		room_tutor_change.course = [] ;
-		room_tutor_change.proposal = [] ;
-		go_cm_room_tutor_change();
-	    }
-	}
-	context_menu.room_tutor_hold = false ;
-    }
+function on_departments_rcv(dept_data) {
+    departments.data = dept_data ;
+    create_dept_redirection();
 }
+
+
+
 
 
 /*---------------------
@@ -193,7 +186,8 @@ def_cm_change();
 
 create_clipweek();
 create_menus();
-create_forall_prof();
+
+create_selections();
 
 fetch_dispos_type();
 
@@ -206,7 +200,11 @@ d3.json(groupes_fi,
 d3.json(rooms_fi,
  	on_room_rcv);
 
+d3.json(constraints_fi,
+ 	on_constraints_rcv);
 
+d3.json(departments_fi,
+        on_departments_rcv);
     
 
 d3.select("body")

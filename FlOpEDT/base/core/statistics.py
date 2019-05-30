@@ -26,7 +26,7 @@
 import datetime
 
 from django.db.models import Count
-from base.models import ScheduledCourse, RoomGroup, Holiday
+from base.models import ScheduledCourse, RoomGroup, Holiday, Day
 from base.core.period_weeks import PeriodWeeks
 
 from people.models import Tutor
@@ -34,7 +34,7 @@ from people.models import Tutor
 def get_holiday_list(period):
     for year, _ in period:
         for holiday in Holiday.objects.filter(year=year):
-            yield year, holiday.week, holiday.day.no
+            yield year, holiday.week, holiday.day
 
 def get_room_activity_by_day(department, year=None):
 
@@ -64,7 +64,7 @@ def get_room_activity_by_day(department, year=None):
                 period_filter,
                 copie_travail=0,
                 cours__module__train_prog__department=department) \
-            .values_list('room__name', 'cours__an', 'cours__semaine', 'creneau__jour') \
+            .values_list('room__name', 'cours__an', 'cours__semaine', 'day') \
             .distinct())
 
     # Holiday list
@@ -84,10 +84,14 @@ def get_room_activity_by_day(department, year=None):
 
         for current_year, weeks in period:
             for current_week in weeks:
-                for week_day in tuple(range(1,6)):
+                for week_day, _ in Day.CHOICES:
 
                     # Test if the current day is a holiday
                     if (current_year, current_week, week_day,) in holiday_list:
+                        continue
+
+                    # Check occupation only for open days
+                    if week_day == Day.SATURDAY or week_day == Day.SUNDAY:
                         continue
                     
                     # Test if a course has been realised in the 

@@ -39,6 +39,7 @@ urlpatterns = [
 
     # directly reachable by users
     # ----------------------------
+    url(r'^preferences$', views.preferences, name="preferences"),
     url(r'^semaine-type$', views.stype, name="stype"),
     url(r'^aide$', views.aide, name="aide"),
     url(r'^decale$', views.decale, name="decale"),    
@@ -59,10 +60,12 @@ urlpatterns = [
     url(r'^fetch_bknews/(?P<year>\d+)/(?P<week>\d+)$', views.fetch_bknews, name="fetch_bknews"),
     url(r'^fetch_groups$', views.fetch_groups, name="fetch_groups"),    
     url(r'^fetch_rooms$', views.fetch_rooms, name="fetch_rooms"),    
+    url(r'^fetch_constraints$', views.fetch_constraints, name="fetch_constraints"),
     url(r'^fetch_unavailable_rooms/(?P<year>\d+)/(?P<week>\d+)$', views.fetch_unavailable_rooms, name="fetch_unavailable_rooms"),
     url(r'^fetch_all_tutors/$', views.fetch_all_tutors, name="fetch_all_tutors"),
     url(r'^fetch_all_versions/$', views.fetch_all_versions, name="fetch_all_versions"),
     url(r'^fetch_week_infos/(?P<year>\d+)/(?P<week>\d+)$', views.fetch_week_infos, name="fetch_week_infos"),
+    path('fetch_departments', views.fetch_departments, name="fetch_departments"),
 
     # statistics
     # ---------------------------------

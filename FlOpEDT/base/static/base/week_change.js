@@ -59,14 +59,13 @@ function fetch_dispos() {
         contentType: "text/csv",
         success: function(msg) {
             console.log("in");
-//            console.log(msg);
 
             if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
                 an_att == weeks.init_data[weeks.sel[0]].an) {
-                dispos = [];
+                dispos = {};
                 //user.dispos = [];
                 d3.csvParse(msg, translate_dispos_from_csv);
-
+		sort_preferences();
                 fetch.ongoing_dispos = false;
                 if (ckbox["dis-mod"].cked) {
                     create_dispos_user_data();
@@ -92,23 +91,116 @@ function fetch_dispos() {
 
 
 function translate_dispos_from_csv(d) {
-    // when merge with no-slot, take no-slot version
     if(Object.keys(dispos).indexOf(d.prof)==-1){
-        dispos[d.prof] = new Array(nbPer);
-        for (var i = 0; i < nbPer; i++) {
-            dispos[d.prof][i] = new Array(nbSl);
-            dispos[d.prof][i].fill(-1);
-        }
+	dispos[d.prof] = {} ;
+        for (var i = 0; i < days.length; i++) {
+	    dispos[d.prof][days[i].ref] = [] ;
+	}	
     }
-    dispos[d.prof][+d.jour][+d.heure] = +d.valeur;
+    dispos[d.prof][d.day].push({start_time:+d.start_time,
+			       duration: +d.duration,
+			       value: +d.valeur});
+}
+
+function sort_preferences() {
+    var i, d ;
+    var tutors = Object.keys(dispos) ;
+    for(i = 0 ; i < tutors.length ; i++) {
+	for(d = 0 ; d < days.length ; d++) {
+	    dispos[tutors[i]][days[d].ref].sort(
+		function (a,b) {
+		    return a.start_time - b.start_time ;
+		}
+	    );
+	}
+    }
+}
+
+// insert a valued interval into a list of valued interval
+// (splices it and divides it if needed)
+// pref: {start_time, duration, value}
+// list: list of pref
+function insert_interval(pref, list) {
+    var ts = time_settings.time ;
+
+    // starts too early or finishes too late
+    if (pref.start_time < ts.day_start_time) {
+	pref.duration -= ts.day_start_time - pref.start_time ;
+	pref.start_time = ts.day_start_time ;
+    }
+    if (pref.start_time + pref.duration > ts.day_finish_time) {
+	pref.duration -= pref.start_time + pref.duration - ts.day_finish_time ;
+    }
+
+    // lunch break
+    if (pref.start_time < ts.lunch_break_start_time) {
+        // starts in the morning
+	if(pref.start_time + pref.duration > ts.lunch_break_start_time) {
+	    if(pref.start_time + pref.duration < ts.lunch_break_finish_time) {
+                // finishes during lunch break
+		pref.duration -= pref.start_time + pref.duration - ts.lunch_break_start_time ;
+	    } else {
+                // cut by lunch break
+		insert_normalized_interval(
+		    {start_time: ts.lunch_break_finish_time,
+		     duration: pref.start_time + pref.duration - ts.lunch_break_finish_time,
+		     value: pref.value},
+		    list) ;
+		pref.duration = ts.lunch_break_start_time - pref.start_time ;
+	    }
+	}
+    } else if (pref.start_time + pref.duration < ts.lunch_break_finish_time) {
+        // fully within lunch break
+	return ;
+    } else if (pref.start_time < ts.lunch_break_finish_time){
+        // starts during lunch break
+	pref.duration -= ts.lunch_break_finish_time - pref.start_time ;
+	pref.start_time = ts.lunch_break_finish_time ;
+    }
+    insert_normalized_interval(pref,list);
+}
+
+// PRECOND: interval fully within the working hours
+// pref: {start_time, duration, value}
+// list: list of pref
+function insert_normalized_interval(pref, list) {
+    //    list.splice(index, nbElements, item)
+    list.push(pref);
 }
 
 
+function allocate_dispos(tutor) {
+    dispos[tutor] = {} ;
+    for (var i = 0; i < days.length; i++) {
+	dispos[tutor][days[i].ref] = [] ;
+    }	
+}
 
+// -- no slot --
+// --  begin  --
+// to change, maybe, if splitting intervals is not allowed
+// in the interface
+function fill_missing_preferences(tutor, ts) {
+    for (var i = 0; i < days.length; i++) {
+	insert_interval({start_time: ts.day_start_time,
+			 duration: ts.day_finish_time-ts.day_start_time,
+			 value: -1},
+			dispos[tutor][days[i].ref]);
+    }
+
+}
+// --   end   --
+// -- no slot --
+
+
+// -- no slot --
+// --  begin  --
+// to be cleaned: user.dispos should be avoidable
 // off: offset useful for the view. Quite unclean.
 function create_dispos_user_data() {
 
-    var d, j, k, d2p;
+    var d, j, k, d2p, pref_list;
+    var ts = time_settings.time ;
 
     user.dispos = [];
     user.dispos_bu = [];
@@ -116,44 +208,46 @@ function create_dispos_user_data() {
     var current;
 
     if (dispos[user.nom] === undefined) {
-        dispos[user.nom] = new Array(nbPer);
-        for (var i = 0; i < nbPer; i++) {
-            dispos[user.nom][i] = new Array(nbSl);
-            dispos[user.nom][i].fill(-1);
-        }
+	allocate_dispos(user.nom);
+	fill_missing_preferences(user.nom, ts);
     }
 
-
-    for (var j = 0; j < nbPer; j++) {
-        for (var k = 0; k < nbSl; k++) {
-            //	    if(!is_free(j,k)) {
+    for (var i = 0; i < days.length; i++) {
+	pref_list = dispos[user.nom][days[i].ref] ;
+	for (var k = 0 ; k<pref_list.length ; k++) {
             d2p = {
-                day: j,
-                hour: k,
-                val: dispos[user.nom][j][k],
-                off: -1
+		day: days[i].ref,
+		start_time: pref_list[k].start_time,
+		duration: pref_list[k].duration,
+		val: pref_list[k].value,
+		off: -1
             };
             user.dispos_bu.push(d2p);
-            if (dispos[user.nom][j][k] < 0) {
+            if (pref_list[k].value < 0) {
 		if (!pref_only) {
-                    dispos[user.nom][j][k] = user.dispos_type[day_hour_2_1D(d2p)].val;
+                    pref_list[k].val = get_dispos_type(d2p).val;
 		} else {
-		    dispos[user.nom][j][k] = par_dispos.nmax
+		    pref_list[k].val = par_dispos.nmax;
 		}
-                //console.log(j,k,day_hour_2_1D(d2p),user.dispos_type[day_hour_2_1D(d2p)])
             }
+	    
+	    // different object
             user.dispos.push({
-                day: j,
-                hour: k,
-                val: dispos[user.nom][j][k],
-                off: -1
+		day: days[i].ref,
+		start_time: pref_list[k].start_time,
+		duration: pref_list[k].duration,
+		val: pref_list[k].value,
+		off: -1
             });
+	}
 
-            //	    }
-        }
     }
 
+    
+
 }
+// --   end   --
+// -- no slot --
 
 
 
@@ -172,138 +266,12 @@ function create_dispos_user_data() {
 /*----------------------
   ------ MODULES -------
   ----------------------*/
-
-function mod_dd_items() {
-
-    var high_mod = relevant_modules();
-
-    var high_items = new Array();
-    var low_items = new Array();
-    modules.all.forEach(function(m) {
-        if (high_mod.has(m)) {
-            high_items.push(m);
-        } else {
-            low_items.push(m);
-        }
-    });
-
-    return high_items.concat(low_items);
-}
-
-// Create or update the filter-by-module list.
-function create_mod_dd() {
-
-    var items = mod_dd_items();
-
-    var seldd = mog
-        .selectAll("option")
-        .data(items, function(m) {
-           return m;
-        });
-
-    seldd
-        .exit()
-        .remove();
-
-    seldd
-        .order();
-
-    seldd
-        .enter()
-        .append("option")
-        .attr("value", function(d) {
-            return d;
-        })
-        .text(function(d) {
-            return d;
-        });
-
-    mog
-        .select('option[value="' + modules.sel + '"]')
-        .attr("selected", "");
-}
-
-
 /*----------------------
   ------ SALLES -------
   ----------------------*/
-
-function create_sal_dd() {
-
-
-    var seldd = sag
-        .selectAll("option")
-        .data(salles.all, function(d, i) {
-            return d;
-        });
-
-    seldd
-        .enter()
-        .append("option")
-        .merge(seldd.select("option"))
-        .attr("value", function(d) {
-            return d;
-        })
-        .text(function(d) {
-            return d;
-        });
-
-    seldd.exit().remove();
-
-    seldd
-        .each(function(d, i) {
-            if (d == salles.sel) {
-                d3.select(this).attr("selected", "");
-            }
-        });
-
-
-}
-
-
 /*--------------------
   ------ PROFS -------
   --------------------*/
-function create_pr_buttons() {
-    var t = d3.transition();
-    profs.sort();
-
-    var cont =
-        prg.selectAll(".tutor-button")
-        .data(profs, function(p) {
-            return p;
-        });
-
-    var contg = cont
-        .enter()
-        .append("g")
-        .attr("class", "tutor-button")
-        .attr("transform", "translate(" + butpr.tlx + "," + butpr.tly + ")")
-        .on("click", apply_tutor_display);
-
-    contg
-        .append("rect")
-        .attr("class", butpr_class)
-        .attr("width", butpr.width)
-        .attr("height", butpr.height)
-        .attr("rx", 5)
-        .attr("ry", 10)
-        .merge(cont.select("rect"))
-        .attr("x", butpr_x)
-        .attr("y", butpr_y);
-
-    contg
-        .append("text")
-        .attr("class", butpr_class)
-        .text(function(d) {
-            return d;
-        })
-        .merge(cont.select("text"))
-        .attr("x", butpr_txt_x)
-        .attr("y", butpr_txt_y);
-
-    cont.exit().remove();
-}
 
 
 
@@ -323,9 +291,7 @@ function fetch_bknews(first) {
         url: url_bknews  + an_att + "/" + semaine_att,
         async: true,
         contentType: "text/csv",
-//        contentType: "text/json",
         success: function(msg) {
-	    //            bknews.cont = JSON.parse(msg) ;
 	    bknews.cont = d3.csvParse(msg,
 				      translate_bknews_from_csv);
 
@@ -381,12 +347,13 @@ function adapt_labgp(first) {
     var new_gp_dim;
 
     if (nbRows > 0) {
-        new_gp_dim = expected_ext_grid_dim / (nb_vert_labgp_in_grid() + nbRows) ;
-        if (new_gp_dim > labgp.hm) {
-            labgp.height = new_gp_dim;
-        } else {
-            labgp.height = labgp.hm;
-        }
+	// including bottom garbage
+        scale = expected_ext_grid_dim / (nb_minutes_in_grid() + garbage.duration*nbRows) ;
+        // if (new_gp_dim > labgp.hm) {
+        //     labgp.height = new_gp_dim;
+        // } else {
+        //     labgp.height = labgp.hm;
+        // }
     } // sinon ?
     svg.height = svg_height() ;
     console.log(svg.height);
@@ -400,6 +367,7 @@ function adapt_labgp(first) {
 	} else {
             labgp.width = labgp.wm;
 	}
+        svg.width = svg_width();
 	d3.select("#edt-main").attr("width", svg.width);
     }
 
@@ -436,16 +404,12 @@ function fetch_cours() {
             go_regen(null);
             go_alarm_pref();
 
-            var day_arr = JSON.parse(req.getResponseHeader('jours').replace(/\'/g, '"'));
-	    
-            for (var i = 0; i < day_arr.length; i++) {
-                data_grid_scale_day[i] = data_grid_scale_day_init[i] + " " + day_arr[i];
-            }
-            //console.log(data_grid_scale_day);
             if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
                 an_att == weeks.init_data[weeks.sel[0]].an) {
 
-                profs_pl = [];
+                days = JSON.parse(req.getResponseHeader('days').replace(/\'/g, '"'));
+            
+                tutors.pl = [];
                 modules.pl = [];
                 salles.pl = [];
 
@@ -485,11 +449,10 @@ function fetch_cours() {
             if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
                 an_att == weeks.init_data[weeks.sel[0]].an) {
 
-                profs_pp = [];
+                tutors.pp = [];
                 modules.pp = [];
                 salles.pp = [];
 
-                //console.log(msg);
     		console.log(semaine_att,an_att,num_copie);
 
                 cours_pp = d3.csvParse(msg, translate_cours_pp_from_csv);
@@ -503,8 +466,6 @@ function fetch_cours() {
     		    remove_garbage();
     		    go_grid(true);
     		}
-
-                //console.log(msg);
 
                 fetch.ongoing_cours_pp = false;
                 fetch_ended();
@@ -522,9 +483,9 @@ function fetch_cours() {
 
 
 function translate_cours_pl_from_csv(d) {
-    var ind = profs_pl.indexOf(d.prof_nom);
+    var ind = tutors.pl.indexOf(d.prof_nom);
     if (ind == -1) {
-        profs_pl.push(d.prof_nom);
+        tutors.pl.push(d.prof_nom);
     }
     if (modules.pl.indexOf(d.module) == -1) {
         modules.pl.push(d.module);
@@ -540,20 +501,23 @@ function translate_cours_pl_from_csv(d) {
         group: translate_gp_name(d.gpe_nom),
         promo: set_promos.indexOf(d.gpe_promo),
         mod: d.module,
-        day: +d.jour,
-        slot: +d.heure,
+	c_type: d.coursetype,
+        day: d.day,
+        start: +d.start_time,
+        duration: constraints[d.coursetype].duration,
         room: d.room,
 	room_type: d.room_type,
 	color_bg: d.color_bg,
 	color_txt: d.color_txt,
+        display: true
     };
     return co;
 }
 
 
 function translate_cours_pp_from_csv(d) {
-    if (profs_pp.indexOf(d.prof) == -1) {
-        profs_pp.push(d.prof);
+    if (tutors.pp.indexOf(d.prof) == -1) {
+        tutors.pp.push(d.prof);
     }
     if (modules.pp.indexOf(d.module) == -1) {
         modules.pp.push(d.module);
@@ -568,12 +532,15 @@ function translate_cours_pp_from_csv(d) {
         group: translate_gp_name(d.groupe),
         promo: set_promos.indexOf(d.promo),
         mod: d.module,
+	c_type: d.coursetype,
         day: garbage.day,
-        slot: garbage.slot,
+        start: garbage.start,
+        duration: constraints[d.coursetype].duration,
         room: une_salle,
 	room_type: d.room_type,
 	color_bg: d.color_bg,
 	color_txt: d.color_txt,
+        display: true
     };
     console.log(co);
     return co;
@@ -601,82 +568,79 @@ function add_exception_course(cur_week, cur_year, targ_week, targ_year,
 
 
 // Pseudo fonction pour des possibles exceptions //
-/*
-"Passeport Avenir (Bénéficiaires d'une bourse)"
-"--- 13h30 ---"
-"Amphi 1"
-"exception"
-function add_exception(sem_att, an_att, sem_voulue, an_voulu, nom, l1, l2, l3){
-    if(sem_att==sem_voulue && an_att==an_voulu){
-	var gro = dg.append("g")
-	    .attr("class",nom);
+//
+// "Passeport Avenir (Bénéficiaires d'une bourse)"
+// "--- 13h30 ---"
+// "Amphi 1"
+// "exception"
+// function add_exception(sem_att, an_att, sem_voulue, an_voulu, nom, l1, l2, l3){
+//     if(sem_att==sem_voulue && an_att==an_voulu){
+// 	var gro = dg.append("g")
+// 	    .attr("class",nom);
 
-	var tlx = 3*(rootgp_width*labgp.width
-		     + dim_dispo.plot*(dim_dispo.width+dim_dispo.right))
-	    + groups[0]["P"].x*labgp.width ;
-	var tlx2 = tlx + .5*groups[0]["P"].width*labgp.width;
+// 	var tlx = 3*(rootgp_width*labgp.width
+// 		     + dim_dispo.plot*(dim_dispo.width+dim_dispo.right))
+// 	    + groups[0]["P"].x*labgp.width ;
+// 	var tlx2 = tlx + .5*groups[0]["P"].width*labgp.width;
 
-	var tly = (3*nbPromos + row_gp[0].y)*(labgp.height) ;
+// 	var tly = (3*nbPromos + row_gp[0].y)*(labgp.height) ;
 	
-	gro
-	    .append("rect")
-	    .attr("x", tlx  )
-	    .attr("y", tly )
-	    .attr("fill","red")
-	    .attr("width",groups[0]["P"].width*labgp.width)
-	    .attr("height",labgp.height);
+// 	gro
+// 	    .append("rect")
+// 	    .attr("x", tlx  )
+// 	    .attr("y", tly )
+// 	    .attr("fill","red")
+// 	    .attr("width",groups[0]["P"].width*labgp.width)
+// 	    .attr("height",labgp.height);
 
-	gro.append("text")
-	    .text(l1)
-	    .attr("font-weight","bold")
-	    .attr("x",tlx2 )
-	    .attr("y",tly + labgp.height/4);
-	gro.append("text")
-	    .text(l2)
-	    .attr("font-weight","bold")
-	    .attr("x",tlx2 )
-	    .attr("y",tly + 2*labgp.height/4);
-	gro.append("text")
-	    .text(l3)
-	    .attr("font-weight","bold")
-	    .attr("x",tlx2 )
-	    .attr("y",tly + 3*labgp.height/4);
+// 	gro.append("text")
+// 	    .text(l1)
+// 	    .attr("font-weight","bold")
+// 	    .attr("x",tlx2 )
+// 	    .attr("y",tly + labgp.height/4);
+// 	gro.append("text")
+// 	    .text(l2)
+// 	    .attr("font-weight","bold")
+// 	    .attr("x",tlx2 )
+// 	    .attr("y",tly + 2*labgp.height/4);
+// 	gro.append("text")
+// 	    .text(l3)
+// 	    .attr("font-weight","bold")
+// 	    .attr("x",tlx2 )
+// 	    .attr("y",tly + 3*labgp.height/4);
 	
-    } else {
-	d3.select("."+nom).remove();
-    }
-}
-*/
+//     } else {
+// 	d3.select("."+nom).remove();
+//     }
+// }
+
 
 function clean_prof_displayed() {
 
-    var all = (profs.length == prof_displayed.length);
-
-    profs = profs_pl;
-    for (var i = 0; i < profs_pp.length; i++) {
-        var ind = profs.indexOf(profs_pp[i]);
+    var tutor_names = tutors.pl;
+    for (var i = 0; i < tutors.pp.length; i++) {
+        var ind = tutor_names.indexOf(tutors.pp[i]);
         if (ind == -1) {
-            profs.push(profs_pp[i]);
+            tutor_names.push(tutors.pp[i]);
         }
     }
 
+    tutor_names.sort();
 
+    update_selection();
 
-    if (all) {
-        prof_displayed = profs.slice(0);
-    } else {
+    swap_data(tutor_names, tutors, "tutor") ;
 
-        var ndi = prof_displayed.filter(function(d) {
-            return profs.indexOf(d) > -1;
-        });
-
-        if (ndi.length == 0) {
-            prof_displayed = profs.slice(0);
-        } else {
-            prof_displayed = ndi;
+    // relevant tutors
+    tutors.all.forEach(function(t) {
+        t.relevant = false ;
+        if (t.name == user.nom) {
+            t.relevant = true ;
         }
+    });
 
-    }
+    go_selection_popup() ;
+    
 }
 
 function translate_gp_name(gp) {
@@ -729,10 +693,16 @@ function fetch_unavailable_rooms() {
 }
 
 function translate_unavailable_rooms(d) {
+    var i ;
     console.log(d);
-    var slot = +d.heure ;
-    var day = +d.jour ;
-    unavailable_rooms[day][slot].push(d.room);
+    if (Object.keys(unavailable_rooms).indexOf(d.room)==-1){
+	unavailable_rooms[d.room] = {} ; 
+	for (i=0 ; i<days.length ; i++){
+	    unavailable_rooms[d.room][days[i].ref] = [] ;
+	}
+    }
+    unavailable_rooms[d.room][days[i].ref].push({start_time: +d.start_time,
+						 duration: +d.duration});
 }
 
 /*--------------------
@@ -775,9 +745,7 @@ function fetch_version() {
         url: url_week_infos  + an_att + "/" + semaine_att,
         async: true,
         contentType: "text/json",
-//        contentType: "text/json",
         success: function(msg) {
-	    //            bknews.cont = JSON.parse(msg) ;
 	    var parsed = JSON.parse(msg);
 
             if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
@@ -808,19 +776,21 @@ function fetch_ended() {
         !fetch.ongoing_cours_pp) {
         cours = cours_pl.concat(cours_pp);
 
-        modules.all = [""].concat(modules.pl);
+        var module_names = modules.pl;
         for (var i = 0; i < modules.pp.length; i++) {
-            if (modules.all.indexOf(modules.pp[i]) == -1) {
-                modules.all.push(modules.pp[i]);
+            if (module_names.indexOf(modules.pp[i]) == -1) {
+                module_names.push(modules.pp[i]);
             }
         }
 
-        modules.all.sort();
+        module_names.sort();
 
-        if (modules.all.indexOf(modules.sel) == -1) {
-            modules.sel = "";
-        }
+        update_selection();
 
+        swap_data(module_names, modules, "module");
+
+        update_active();
+        update_relevant();
 
         salles.all = [""].concat(salles.pl);
         for (var i = 0; i < salles.pp.length; i++) {
@@ -835,8 +805,6 @@ function fetch_ended() {
             salles.sel = "";
         }
 
-        create_mod_dd();
-        create_sal_dd();
         clean_prof_displayed();
     }
 
@@ -855,15 +823,34 @@ function fetch_ended() {
 	}
 
     }
-    //go_gp_buttons();
-    create_pr_buttons();
-    go_tutors();
-
-
-
 }
 
+// - store old data in old
+// - translate fetched into current (keeping display values)
+function swap_data(fetched, current, type) {
+    current.old = current.all ;
+    current.all = fetched.map(
+        function(m) {
+            var em = {} ;
+            em.name = m ;
+            var oldf = current.old.find(function(mo) {
+                return mo.name == m ;
+            });
+            em.display = !(sel_popup.get_available(type).active) ;
+            if (typeof oldf !== 'undefined') {
+                em.display = oldf.display ;
+            }
+            return em ;
+        }
+    )
+    var pannel = sel_popup.pannels.find(function(p) {
+        return p.type == type ;
+    })
+    if (typeof pannel !== 'undefined') {
+        pannel.list = current.all ;
+    }
 
+}
 
 
 

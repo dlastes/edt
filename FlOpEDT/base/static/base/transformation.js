@@ -46,7 +46,8 @@
   ------------------------*/
 
 function bknews_top_y() {
-    return nbRows * labgp.height * bknews.hour_bound ;
+    var t = time_settings.time ;
+    return nbRows * scale * (t.lunch_break_start_time - t.day_start_time);
 }
 function bknews_bot_y() {
     return bknews_top_y() +  bknews_h() ;
@@ -56,7 +57,7 @@ function bknews_h() {
 	return 0;
     } else {
 	return bknews.nb_rows * bknews_row_height()
-	    + 2 * bknews.ratio_margin * labgp.height ;
+	    + 2 * bknews.time_margin * scale ;
     }
 }
 
@@ -65,8 +66,8 @@ function bknews_row_x(d){
 		       + dim_dispo.plot * (dim_dispo.width + dim_dispo.right))) ;
 }
 function bknews_row_y(d){
-    return bknews_top_y() + bknews.ratio_margin * labgp.height
-	+ d.y * bknews.ratio_height * labgp.height ;
+    return bknews_top_y() + bknews.time_margin * scale
+	+ d.y * bknews.time_height * scale ;
 }
 function bknews_row_fill(d){
     return d.fill_color ;
@@ -76,7 +77,7 @@ function bknews_row_width(d){
 		       + dim_dispo.plot * (dim_dispo.width + dim_dispo.right))) ;
 }
 function bknews_row_height(d){
-    return bknews.ratio_height * labgp.height ;
+    return bknews.time_height * scale ;
 }
 function bknews_row_txt(d){
     return d.txt ;
@@ -101,48 +102,53 @@ function bknews_link(d){
 
 function svg_height() {
     //    return margin.top + ack_reg_y() + 4*margin.bot ;
-    return margin.top + grid_height() + labgp.height * nbRows + margin.bot ;
+    return margin.top + grid_height() + margin.bot
+     + scale * garbage.duration * nbRows;
 }
 
 function svg_width() {
     //    return margin.top + ack_reg_y() + 4*margin.bot ;
-    return margin.left + Math.max(
-        // max x of prof buttons
-        butpr.tlx + butpr_x(null, butpr.perline - 2) + butpr.width + butpr.mar_x,
-        // max x of the edt
-        rootgp_width * nbPer * labgp.width + margin.right) ;
+    return margin.left + 
+        rootgp_width * nbPer * labgp.width + margin.right ;
 }
 
 
 /*---------------------
   ------- DISPOS ------
   ---------------------*/
-function day_hour_2_1D(d) {
-    return d.day * nbSl + d.hour;
-    //d.day<4?d.day*nbSl+d.hour:d.day*nbSl+d.hour-3;
-}
-
-
 function dispo_x(d) {
-    return d.day * (rootgp_width * labgp.width +
+    return idays[d.day].num * (rootgp_width * labgp.width +
             dim_dispo.plot * (dim_dispo.width + dim_dispo.right)) +
-        rootgp_width * labgp.width;
+        rootgp_width * labgp.width ;
 }
 
+
+
+// -- no slot --
+// --  begin  --
+// TO BE IMPROVED for multi-line, and lunch break
 function dispo_y(d) {
-    var ret = d.hour * dispo_h(d) ;
-    if (!pref_only && d.hour >= bknews.hour_bound) {
-	ret += bknews_h() ;
+    var t = time_settings.time ;
+    var ret = (d.start_time-t.day_start_time) * nbRows * scale ;
+//	+ row_gp[root_gp[c.promo].row].y * rev_constraints[c.start.toString()] * scale ;
+    if (d.start_time >= t.lunch_break_finish_time) {
+	ret += bknews_h() - (t.lunch_break_finish_time - t.lunch_break_start_time)*nbRows*scale ;
     }
     return ret ;
 }
+// --   end   --
+// -- no slot --
 
 function dispo_w(d) {
     return dim_dispo.plot * dim_dispo.width;
 }
 
 function dispo_h(d) {
-    return nbRows * labgp.height;
+    return nbRows * d.duration * scale ;
+}
+
+function dispo_fill(d) {
+    return smi_fill(d.val / par_dispos.nmax);
 }
 
 function dispo_short_fill(d) {
@@ -189,7 +195,8 @@ function dispo_all_h(d) {
 }
 
 function dispo_all_y(d) {
-    if (d.hour < nbSl/2) {
+    var ts = time_settings.time ;
+    if (d.start_time < ts.lunch_break_start_time) {
 	return dispo_more_y(d) + d.off * dispo_all_h(d);
     } else {
 	return dispo_more_y(d) - d.off * dispo_all_h(d);
@@ -259,7 +266,12 @@ function txt_filDispos() {
 
 //ratio content
 function rc(d) {
-    return d.off == -1 ? dispos[user.nom][d.day][d.hour] / par_dispos.nmax : d.off / par_dispos.nmax;
+    // -- no slot --
+    // --  begin  --
+    // TO CHECK
+    return d.off == -1 ? d.val / par_dispos.nmax : d.off / par_dispos.nmax;
+    // --   end   --
+    // -- no slot --
 }
 
 
@@ -388,15 +400,16 @@ function gm_y(datum) {
     return ret ;
 }
 
-function gs_x(datum) {
-    return datum.day * (rootgp_width * labgp.width +
+function gs_x(d) {
+    return idays[d.day].num * (rootgp_width * labgp.width +
         dim_dispo.plot * (dim_dispo.width + dim_dispo.right));
 }
 
-function gs_y(datum) {
-    var ret = (datum.slot * nbRows) * (labgp.height) ;
-    if (datum.slot >= bknews.hour_bound) {
-	ret += bknews_h() ;
+function gs_y(d) {
+    var t = time_settings.time ;
+    var ret = (d.start - t.day_start_time) * nbRows * scale ;
+    if (d.start >= t.lunch_break_finish_time) {
+	ret += bknews_h() - (t.lunch_break_finish_time - t.lunch_break_start_time)*nbRows*scale ;
     }
     return ret ;
 }
@@ -406,7 +419,7 @@ function gs_width(d) {
 }
 
 function gs_height(d) {
-    return labgp.height * nbRows;
+    return d.duration * nbRows * scale ;
 }
 
 function gs_fill(d) {
@@ -436,7 +449,7 @@ function gs_sw(d) {
 
 function gs_sc(d) {
     //    return d.day==3&&d.slot==5?"red":"black";
-    return d.slot < nbSl ? "black" : "red";
+    return d.start < time_settings.time.day_finish_time ? "black" : "red";
 }
 
 
@@ -478,13 +491,14 @@ function gscp_x(datum) {
     return -.7 * labgp.width_init;
 }
 
-function gscp_y(datum) {
-    var ret = (datum.slot * nbRows + row_gp[datum.row].y) * (labgp.height) + .5 * labgp.height;
-    if (datum.slot >= bknews.hour_bound) {
-	ret += bknews_h() ;
+function gscp_y(d) {
+    var t = time_settings.time ;
+    var ret = (d.start-t.day_start_time) * nbRows * scale
+	+ row_gp[d.row].y * rev_constraints[d.start.toString()] * scale ;
+    if (d.start >= t.lunch_break_finish_time) {
+	ret += bknews_h() - (t.lunch_break_finish_time - t.lunch_break_start_time)*nbRows*scale ;
     }
-    return ret ;
-
+    return ret + .5*d.duration*scale;
 }
 
 function gscp_txt(d) {
@@ -502,45 +516,82 @@ function gsckd_y(datum) {
 }
 
 function gsckd_txt(d) {
-    return d;
+    return d.name + " " + d.date;
 }
 
-function gsckh_x(datum) {
-    return grid_width() + 5 ;//.25 * labgp.width;
+
+function grid_day_am_x(d) {
+    return d.num * (rootgp_width * labgp.width +
+            dim_dispo.plot * (dim_dispo.width + dim_dispo.right));
+}
+function grid_day_am_y(d) {
+    return 0 ;
+}
+function grid_day_am_height(d) {
+    var t = time_settings.time ;
+    return scale*nbRows*(t.lunch_break_start_time - t.day_start_time) ;
+}
+function grid_day_am_width(d) {
+    return rootgp_width * labgp.width ;
+}
+function grid_day_pm_x(d) {
+    return grid_day_am_x(d) ;
+}
+function grid_day_pm_y(d) {
+    var t = time_settings.time ;
+    return grid_day_am_y(d) + grid_day_am_height(d)
+	+ bknews_h() ;
+}
+function grid_day_pm_height(d) {
+    var t = time_settings.time ;
+    return scale*nbRows*(t.day_finish_time - t.lunch_break_finish_time) ;
+}
+function grid_day_pm_width(d) {
+    return rootgp_width * labgp.width ;
 }
 
-function gsckh_y(datum, i) {
-    var ret = (i + .5) * dispo_h(datum);
-    if (!pref_only && i >= bknews.hour_bound) {
-	ret += bknews_h() ;
+
+function gsckh_x1() {
+    return 0 ;
+}
+function gsckh_x2() {
+    return -5 ;
+}
+function gsckh_y(d) {
+    var ts = time_settings.time ;
+    var ret = (d.h*60-ts.day_start_time) * nbRows * scale ;
+    if (d.hd == 'pm') {
+	ret += bknews_h() - (ts.lunch_break_finish_time - ts.lunch_break_start_time)*nbRows*scale ;
     }
     return ret ;
 }
 
 function gsckh_txt(d) {
-    return d;
+    var ret = d.h ;
+    if(ret >= 24) {
+        ret -= 24 ;
+    }
+    ret += "h" ;
+    return ret ;
 }
-
-/*
-function gsclb_y() {
-    return nbRows * labgp.height * .5 * nbSl;
-}
-*/
 
 function grid_height() {
-    return nbSl * labgp.height * nbRows + bknews_h();
+    return scale * nb_minutes_in_grid();
 }
 
-function nb_vert_labgp_in_grid() {
-    var tot_labgp =  bknews.nb_rows * bknews.ratio_height + nbRows * nbSl;
+function nb_minutes_in_grid() {
+    var t = time_settings.time ;
+    var minutes =  bknews.nb_rows * bknews.time_height
+	+ nbRows * (t.lunch_break_start_time - t.day_start_time
+		   + t.day_finish_time - t.lunch_break_finish_time) ;
     if (bknews.nb_rows != 0) {
-	tot_labgp += 2 * bknews.ratio_margin ;
+	minutes += 2 * bknews.time_margin ;
     }
-    return tot_labgp ;
+    return minutes ;
 }
 
-function labgp_from_grid_height(gh) {
-    return gh / nb_vert_labgp_in_grid() ;
+function scale_from_grid_height(gh) {
+    return gh / nb_minutes_in_grid()  ;
 }
 
 
@@ -559,7 +610,7 @@ function grid_width() {
   ------- GROUPS -------
   ----------------------*/
 function butgp_x(gp) {
-    return gp.x * butgp.width;
+    return (gp.bx - root_gp[gp.promo].minx) * butgp.width;
 }
 
 function butgp_y(gp) {
@@ -567,7 +618,7 @@ function butgp_y(gp) {
 }
 
 function butgp_width(gp) {
-    return gp.width * butgp.width;
+    return gp.bw * butgp.width;
 }
 
 function butgp_height(gp) {
@@ -653,47 +704,59 @@ function menu_curs(dk) {
 /*--------------------
   ------ PROFS -------
   --------------------*/
-function butpr_x(p, i) {
-    return ((i + 1) % butpr.perline) * (butpr.width + butpr.mar_x);
+function but_sel_x(p, i) {
+    return but_sel_type_x(i, p.pannel.type) ;
+}
+function but_sel_type_x(i, t) {
+    return ((i + 1) % sel_popup.but[t].perline)
+        * (sel_popup.but[t].w + sel_popup.but[t].mar_x);
 }
 
-function butpr_y(p, i) {
-    return Math.floor((i + 1) / butpr.perline) * (butpr.height + butpr.mar_y);
+function but_sel_y(p, i) {
+    return but_sel_type_y(i, p.pannel.type) ;
+}
+function but_sel_type_y(i, t) {
+    return Math.floor((i + 1) / sel_popup.but[t].perline)
+        * (sel_popup.but[t].h + sel_popup.but[t].mar_y);
 }
 
-function butpr_txt_x(p, i) {
-    return butpr_x(p, i) + .5 * butpr.width;
+function but_sel_txt_x(p, i) {
+    var t = p.pannel.type ;
+    return but_sel_type_x(i, t) + .5 * sel_popup.but[t].w;
 }
 
-function butpr_txt_y(p, i) {
-    return butpr_y(p, i) + .5 * butpr.height;
-}
-/*
-function butpr_sw(p) {
-    return p==user.nom?4:1;
-}
-function butpr_col(p) {
-    return p==user.nom?"darkorchid":"steelblue";
-}
-*/
-function butpr_class(p) {
-    return p == user.nom ? "tutor-button-me" : "tutor-button-others";
+function but_sel_txt_y(p, i, j) {
+    var t = p.pannel.type ;
+    return but_sel_type_y(i, t) + .5 * sel_popup.but[t].h;
 }
 
+function but_sel_class(p) {
+    var ret = "select-standard" ;
+    if (typeof p.relevant !== 'undefined' && p.relevant) {
+        ret = "select-highlight" ;
+    }
+    return ret ;
+}
+
+function but_open_sel_txt(d) {
+    return d.buttxt ;
+}
 
 /*--------------------
   ------ COURS -------
   --------------------*/
 function cours_x(c) {
-    return c.day * (rootgp_width * labgp.width +
+    return idays[c.day].num * (rootgp_width * labgp.width +
             dim_dispo.plot * (dim_dispo.width + dim_dispo.right)) +
         groups[c.promo][c.group].x * labgp.width;
 }
 
 function cours_y(c) {
-    var ret = (c.slot * nbRows + row_gp[root_gp[c.promo].row].y) * (labgp.height);
-    if (c.slot >= bknews.hour_bound) {
-	ret += bknews_h() ;
+    var t = time_settings.time ;
+    var ret = (c.start-t.day_start_time) * nbRows * scale
+	+ row_gp[root_gp[c.promo].row].y * rev_constraints[c.start.toString()] * scale ;
+    if (c.start >= t.lunch_break_finish_time) {
+	ret += bknews_h() - (t.lunch_break_finish_time - t.lunch_break_start_time)*nbRows*scale ;
     }
     return ret ;
 }
@@ -704,7 +767,7 @@ function cours_width(c) {
 }
 
 function cours_height(c) {
-    return labgp.height;
+    return scale * constraints[c.c_type].duration ;
 }
 
 function cours_txt_x(c) {
@@ -723,24 +786,29 @@ function cours_fill(c) {
     return "red";
 }
 function cours_txt_top_y(c) {
-    return cours_y(c) + .25 * labgp.height;
+    return cours_y(c) + .25 * cours_height(c);
 }
 function cours_txt_top_txt(c) {
     return c.mod;
 }
 function cours_txt_mid_y(c) {
-    return cours_y(c) + .5 * labgp.height;
+    return cours_y(c) + .5 * cours_height(c);
 }
 function cours_txt_mid_txt(c) {
     return c.prof;
 }
 function cours_txt_bot_y(c) {
-    return cours_y(c) + .75 * labgp.height;
+    return cours_y(c) + .75 * cours_height(c);
 }
 function cours_txt_bot_txt(c) {
     return c.room;
 }
-
+function cours_opac(c) {
+    return (c.display || !sel_popup.active_filter) ? 1 : opac ;
+}
+function cours_stk(c) {
+    return (c.display && sel_popup.active_filter) ? "black" : "none" ;
+}
 
 /*--------------------
   ------ ROOMS -------
@@ -904,11 +972,19 @@ function but_sca_tri_v(add) {
    ------ STYPE ------
   --------------------*/
 function dispot_x(d) {
-    return d.day * (did.w + did.mh);
+    return idays[d.day].num * (did.w + did.mh);
 }
 
 function dispot_y(d) {
-    return valid.h * 1.25 + d.hour * did.h;
+    var ts = time_settings.time ;
+    var ret = 1.25 * valid.h
+	+ (d.start_time - ts.day_start_time) * did.scale;
+    if(d.start_time>=ts.lunch_break_finish_time) {
+	ret -= (ts.lunch_break_finish_time
+		- ts.lunch_break_start_time)
+	    * did.scale ;
+    }
+    return ret ;
 }
 
 function dispot_w(d) {
@@ -916,11 +992,11 @@ function dispot_w(d) {
 }
 
 function dispot_h(d) {
-    return did.h;
+    return d.duration * did.scale ;
 }
 
 function dispot_more_h(d) {
-    return .25 * did.h;
+    return  did.shift_s * did.scale;
 }
 
 function dispot_more_y(d) {
@@ -949,11 +1025,12 @@ function dispot_all_w(d) {
 }
 
 function gsclbt_y() {
-    return valid.h * 1.25 + did.h * .5 * nbSl;
+    return dispot_y({start_time:
+		     time_settings.time.lunch_break_start_time});
 }
 
 function gsclbt_x() {
-    return (did.w + did.mh) * nbPer - did.mh;
+    return (did.w + did.mh) * days.length - did.mh;
 }
 
 function dispot_but_x() {
@@ -1007,7 +1084,7 @@ function st_but_back() {
   ---------------------*/
 
 function ack_reg_y() {
-    return grid_height()  + 1.5 *  labgp.height;
+    return grid_height()  + 30 * scale ;
 }
 
 /*---------------------
@@ -1032,3 +1109,112 @@ function classic_h(d){ return d.h ; }
 function classic_txt_x(d) { return classic_x(d) + .5*classic_w(d) ;}
 function classic_txt_y(d) { return classic_y(d) + .5*classic_h(d) ;}
 function classic_txt(d){ return d.txt ; }
+
+
+function sel_trans(d, i){
+    var ret = "translate(" ;
+    ret += sel_popup.selx ;
+    ret += ",";
+    ret += sel_popup.sely
+        + i*(sel_popup.selh + sel_popup.selmy);
+    ret += ")";
+    return ret;
+}
+function sel_forall_trans(){
+    var ret = "translate(" ;
+    ret += sel_popup.selx + .5*sel_popup.selw ;
+    ret += ",";
+    ret += sel_popup.sely - sel_popup.selh - sel_popup.selmy;
+    ret += ")";
+    return ret;
+}
+
+function but_sel_opac(d) {
+    return d.display ? 1 : opac ;
+}
+
+function popup_trans(d) {
+    return "translate(" + d.x + "," + d.y + ")" ;
+}
+
+function popup_exit_trans(d) {
+    return "translate(" + popup_exit_trans_x(d) + ","
+        + popup_exit_trans_y(d) + ")";
+}
+function popup_exit_trans_x(d) {
+    return popup_bg_w(d) - 2* sel_popup.mar_side-but_exit.side ;
+}
+function popup_exit_trans_y(d) {
+    return - (but_exit.side + but_exit.mar_next);
+}
+
+
+function popup_all_w(d) {
+    return sel_popup.but[d.type].w ;
+}
+function popup_all_h(d) {
+    return sel_popup.but[d.type].h ;
+}
+function popup_all_txt_x(d) {
+    return .5 * popup_all_w(d) ;
+}
+function popup_all_txt_y(d) {
+    return .5 * popup_all_h(d) ;
+}
+
+function popup_bg_h(d) {
+    var margins = sel_popup.mar_side + but_exit.side + but_exit.mar_next
+        + sel_popup.mar_side ;
+    if (d.type == "group") {
+        return sel_popup.groups_h + margins ;
+    }
+    var nb_el = d.list.length ;
+    return but_sel_type_y(nb_el - 1, d.type)
+        + sel_popup.but[d.type].h
+        + margins ;
+}
+
+function popup_bg_w(d) {
+    var t = d.type ;
+    var margins = 2*sel_popup.mar_side ;
+    if (t == "group") {
+        return sel_popup.groups_w + margins ;
+    }
+    return (sel_popup.but[t].perline) * (sel_popup.but[t].w + sel_popup.but[t].mar_x)
+        - sel_popup.but[t].mar_x + margins ;
+}
+
+function popup_type_id(t) {
+    return "popup-" + t ;
+}
+function popup_pannel_type_id(d) {
+    return popup_type_id(d.type) ;
+}
+
+function popup_choice_w(d) {
+    var t = d.pannel.type ;
+    return sel_popup.but[t].w ;
+}
+function popup_choice_h(d) {
+    var t = d.pannel.type ;
+    return sel_popup.but[t].h ;
+}
+function popup_title_txt(d) {
+    return d.txt ;
+}
+function popup_title_x(d) {
+    return .5*popup_exit_trans_x(d) ;
+}
+function popup_title_y(d) {
+    return .5*(popup_exit_trans_y(d)-sel_popup.mar_side) ;
+}
+
+
+function depts_trans(d , i){
+    return "translate("
+        + (departments.topx + i*(departments.marh + departments.h)) + ","
+        + departments.topy + ")" ;
+}
+function dept_txt(d){
+    return d;
+}

@@ -26,8 +26,11 @@
 
 import datetime
 
+from base.models import TimeGeneralSettings
 annee_courante = 2018
 
+week_ref_days = ['m', 'tu', 'w', 'th', 'f', 'sa', 'su']
+week_display_days = ['Lun.', 'Mar.', 'Mer.', 'Jeu.', 'Ven.', 'Sam.', 'Dim.']
 
 # monday of Week #2
 def monday_w2(y):
@@ -61,6 +64,24 @@ def num_days(y, w):
         cur_day += datetime.timedelta(1)
     return day_list
 
+# list of days
+def num_all_days(y, w, dept):
+    if w == 0:
+        return []
+    cur_day = monday_w2(y) + datetime.timedelta(7 * (w - 2))
+    day_list = []
+    dept_day_list = TimeGeneralSettings.objects.get(department=dept).days
+    iday = 0
+    for i in range(len(week_ref_days)):
+        d_ref = week_ref_days[i]
+        if d_ref in dept_day_list:
+            day_list.append({'num':iday,
+                             'date':f"{cur_day.day:02d}/{cur_day.month:02d}",
+                             'ref':d_ref,
+                             'name':week_display_days[i]})
+            cur_day += datetime.timedelta(1)
+            iday += 1
+    return day_list
 
 # More or less working weeks
 def week_list():

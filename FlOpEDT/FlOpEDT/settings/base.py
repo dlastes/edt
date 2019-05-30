@@ -56,13 +56,15 @@ INSTALLED_APPS = [
     'django_extensions',
     'import_export',
     'colorfield',
+#    'rest_framework',
     'base',
     'TTapp',
     'quote',
     'people',
     'solve_board',
     'synchro',
-    'ics'
+    'ics',
+    'displayweb'
 ]
 
 MIDDLEWARE = [
@@ -153,3 +155,7 @@ STATICFILES_DIRS = (
 
 ASGI_APPLICATION = 'FlOpEDT.routing.application'
 
+#
+# FLOPEDT Settings
+#
+CUSTOM_CONSTRAINTS_PATH = 'MyFlOp.custom_constraints'
