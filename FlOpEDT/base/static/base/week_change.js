@@ -836,7 +836,12 @@ function swap_data(fetched, current, type) {
             var oldf = current.old.find(function(mo) {
                 return mo.name == m ;
             });
-            em.display = !(sel_popup.get_available(type).active) ;
+            var avail = sel_popup.get_available(type);
+            if (typeof avail === 'undefined') {
+                em.display = true ;
+            } else {
+                em.display = !(avail.active) ;
+            }
             if (typeof oldf !== 'undefined') {
                 em.display = oldf.display ;
             }
