@@ -34,7 +34,8 @@ from random import choice
 from displayweb.models import TrainingProgrammeDisplay
 
 from base.models import Room, RoomType, RoomGroup, TrainingProgramme,\
-    Group, Module, GroupType, Period, Time, Day, Slot, CourseType, Department, CourseStartTimeConstraint
+    Group, Module, GroupType, Period, Time, Day, Slot, CourseType, \
+    Department, CourseStartTimeConstraint, TimeGeneralSettings
 
 from base.weeks import annee_courante
 
@@ -61,6 +62,7 @@ def extract_database_file(bookname=bookname, department_name=None, department_ab
     groups_extract(department, book)
     modules_extract(department, book)
     coursetypes_extract(department, book)
+    settings_extract(department, book)
 
 
 def tutors_extract(department, book):
@@ -547,6 +549,59 @@ def coursetypes_extract(department, book):
     print("CourseType extraction done")
 
 
+def convert_time(value):
+    """
+    Return an integer value from a time (hh:mm:ss) formated value 
+    representing the number of minutes since midnight
+    """
+    time_array = value.split(':')
+    return int(time_array[0]) * 60 + int(time_array[1])
+
+
+def settings_extract(department, book):
+    """
+    Extract general settings
+    """
+
+    sheet = book['Paramètres']
+    settings = {
+        'department': department,
+        'days': [],
+        'day_start_time': None,
+        'day_finish_time': None,
+        'lunch_break_start_time': None,
+        'lunch_break_finish_time': None,
+
+    }
+
+    # Get days opened for scheduling
+    days_row = 3
+    days_col = 4
+
+    for index, day in enumerate(Day.CHOICES):
+        day_raw_value = sheet.cell(row=days_row, column=days_col + index).value
+        if day_raw_value:
+            logger.debug(f'Day {day[0]} : {day_raw_value}')
+            settings['days'].append(day[0])
+
+    # Get time settings
+    hours_row = 2
+    hours_col = 2
+
+    for index, setting in enumerate(list(settings)[2:]):
+        current_row = hours_row + index
+        hour_raw_value = sheet.cell(row=current_row, column=hours_col).value
+        try:
+            logger.debug(f'Hour {setting} : [{hour_raw_value}]')
+            hour = convert_time(str(hour_raw_value))
+            settings[setting] = hour
+        except:
+            logger.error(f'an error has occured while converting hour at Paramètres[{current_row}, {hours_col}]')
+
+
+    # Set settings
+    logger.info(f'TimeGeneralSettings : {settings}')
+    TimeGeneralSettings.objects.create(**settings)
 
 
 def displayInfo():
