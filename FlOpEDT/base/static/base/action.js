@@ -376,6 +376,45 @@ function select_tutor_filters_change() {
 
 }
 
+// quels salaries afficher 
+function select_salarie_change(f) {
+    room_tutor_change.cm_settings = salarie_cm_settings ;
+    var level = salarie_cm_level;
+
+    var tache = room_tutor_change.course[0] ;
+
+    if (level == 0) {
+        var possibles = new Set();
+        cours.forEach(function(c) {
+            if (c.group == tache.group) {
+                possibles.add(c.prof);
+            }
+        });
+        room_tutor_change.proposal = Array.from(possibles) ;
+	room_tutor_change.proposal.push("+");
+    } else {
+        room_tutor_change.proposal = tutors.all.filter(function(t){
+            return t != "";
+        })
+    }
+    
+    room_tutor_change.cm_settings.nlin
+	= Math.ceil(room_tutor_change.proposal.length
+		    / room_tutor_change.cm_settings.ncol) ;
+
+
+    var fake_id = new Date() ;
+    fake_id = fake_id.getMilliseconds() + "-" + tache.id_cours ;
+    room_tutor_change.proposal = room_tutor_change.proposal.map(function(t) {
+	return {fid: fake_id, content: t};
+    });
+
+}
+// appliquer le changement pour la tache
+function confirm_salarie_change(d){
+    confirm_tutor_change(d) ;
+}
+
 function select_tutor_change(f) {
     room_tutor_change.cm_settings = tutor_cm_settings ;
 
