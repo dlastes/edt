@@ -206,6 +206,7 @@ class TimeGeneralSettings(models.Model):
     lunch_break_finish_time = models.PositiveSmallIntegerField()
     days = ArrayField(models.CharField(max_length=2,
                                        choices=Day.CHOICES))
+    default_preference_duration = models.PositiveSmallIntegerField(default=90)
 
     def __str__(self):
         dsh, dsm = hr_min(self.day_start_time)
