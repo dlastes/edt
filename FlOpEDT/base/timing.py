@@ -31,6 +31,6 @@ def hr_min(t):
 
 def str_slot(day, start_time, duration):
     hs,ms = hr_min(start_time)
-    hd,md = hr_min(duration)
+    hd,md = hr_min(start_time + duration)
     return f"{day}. {hs:02d}:{ms:02d}" + \
-        f"-{hs+hd:02d}:{ms+md:02d}"
+        f"-{hd:02d}:{md:02d}"

@@ -64,7 +64,7 @@ class MyTTModel(TTModel):
                 from gurobipy import read
                 lp = "FlOpTT-pulp.lp"
                 m = read(lp)
-                m.optimize()
+                # m.optimize()
                 m.computeIIS()
                 m.write("logs/IIS_week%s.ilp" % self.semaine)
                 print("IIS written in file logs/IIS_week%s.ilp" % (self.semaine))
