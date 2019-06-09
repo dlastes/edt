@@ -154,14 +154,21 @@ def make_planif_file(department, empty_bookname=empty_bookname):
                         sheet.cell(row=rank, column=4).value = ct.duration
                         sheet.cell(row=rank, column=7).value = g.nom
                         rank += 1
-                    sheet.cell(row=rank-nb_groups, column=VERIF_COL).value =\
-                        '=IF(SUM(%s%d:%s%d)-$%s%d*%d=0,"OK","/!\\ -> "&SUM(%s%d:%s%d)-$%s%d*%d)' % \
-                        (first_column_letter[p], rank-nb_groups,
-                         last_column_letter[p], rank-1,
-                         column_letter(VERIF_COL), rank-nb_groups-1, nb_groups,
-                         first_column_letter[p], rank - nb_groups,
-                         last_column_letter[p], rank - 1,
-                         column_letter(VERIF_COL), rank - nb_groups - 1, nb_groups,)
+                    sheet.cell(row=rank - nb_groups, column=VERIF_COL).value = '' \
+                       '=IF(SUM(%s%d:INDIRECT(ADDRESS(MATCH(G$5,G%d:G%d,0)+ROW()-2,%d)))-$%s%d*%d=0,"OK","/!\\ -> ' \
+                       '"&SUM(%s%d:INDIRECT(ADDRESS(MATCH(G$5,G%d:G%d,0)+ROW()-2,%d)))-$%s%d*%d)' % \
+                           (
+                               first_column_letter[p], rank - nb_groups,
+                               rank - nb_groups, rank - nb_groups + 10,
+                               VERIF_COL - 1,
+                               column_letter(VERIF_COL),
+                               rank - nb_groups - 1, nb_groups,
+                               first_column_letter[p], rank - nb_groups,
+                               rank - nb_groups, rank - nb_groups + 10,
+                               VERIF_COL - 1,
+                               column_letter(VERIF_COL),
+                               rank - nb_groups - 1, nb_groups,
+                           )
                 else:
                     append_row(sheet, empty_rows, 3, rank, cols)
                     sheet.cell(row=rank, column=1).value = mod.abbrev
@@ -173,6 +180,19 @@ def make_planif_file(department, empty_bookname=empty_bookname):
             ################ Separating each course with a black line ################
             append_row(sheet, empty_rows, 4, rank, cols)
             rank += 1
+
+        if nb_groups > 0:
+            sheet.cell(row=rank - nb_groups - 1, column=VERIF_COL).value = \
+                '=IF(SUM(%s%d:INDIRECT(ADDRESS(MATCH(G$3,G%d:G%d,0)+ROW()-3,%d)))-$%s%d*%d=0,"OK","/!\\ -> ' \
+                '"&SUM(%s%d:INDIRECT(ADDRESS(MATCH(G$3,G%d:G%d,0)+ROW()-2,%d)))-$%s%d*%d)' % \
+                (first_column_letter[p], rank - nb_groups - 1,
+                 rank - nb_groups-1, rank - nb_groups + 10,
+                 VERIF_COL - 1,
+                 column_letter(VERIF_COL), rank - nb_groups - 2, nb_groups,
+                 first_column_letter[p], rank - nb_groups - 1,
+                 rank - nb_groups - 1, rank - nb_groups + 10,
+                 VERIF_COL - 1,
+                 column_letter(VERIF_COL), rank - nb_groups - 2, nb_groups,)
 
         ############ TOTAL line ############
         ligne_finale = rank - 2

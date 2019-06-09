@@ -64,10 +64,11 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
 
     row = 2
     module_COL = 1
-    nature_COL = 2
-    prof_COL = 3
-    salle_COL = 4
-    groupe_COL = 5
+    nature_COL = 3
+    duree_COL = 4
+    prof_COL = 5
+    salle_COL = 6
+    groupe_COL = 7
     sumtotal = 0
     while 1:
         row += 1
@@ -88,7 +89,7 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
             N = float(N)
             # handle dark green lines - Vert fonce
             assert isinstance(salle, str)
-            if salle == "Salle":
+            if salle == "Type de Salle":
                 nominal = int(N)
                 if N != nominal:
                     print('Valeur decimale ligne %g de %s, semaine %g : on la met a 1 !' % (row, feuille, semaine))
