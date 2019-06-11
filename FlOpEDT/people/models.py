@@ -73,14 +73,14 @@ class Tutor(User):
                               choices=TUTOR_CHOICES,
                               verbose_name="Status",
                               default=FULL_STAFF)
-    pref_slots_per_day = models.PositiveSmallIntegerField(
-        verbose_name="How many slots per day would you prefer ?",
+    pref_hours_per_day = models.PositiveSmallIntegerField(
+        verbose_name="How many hours per day would you prefer ?",
         default=4)
     departments =  models.ManyToManyField(Department, blank=True)
 
     def uni_extended(self):
         ret = super(Tutor,self).uni_extended()
-        ret += '-' + self.status + '-' + 'S' + str(self.pref_slots_per_day)
+        ret += '-' + self.status + '-' + 'S' + str(self.pref_hours_per_day)
         return ret
 
 
