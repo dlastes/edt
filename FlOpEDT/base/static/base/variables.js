@@ -225,10 +225,11 @@ var filled_dispos = -1;
 // display only preferences (for typical week)
 var pref_only ;
 
+// display parameters for preferences
 var dim_dispo = {
-    height: 0,
     width: 60,
     right: 10,
+    // are preferences plotted? 1|0
     plot:0,
     adv_v_margin: 5
 };
@@ -242,11 +243,11 @@ var weeks = {
            current: []},
     width: 40,
     height: 30,
-    x: 0,
-    y: -240,   // top of week banner
+    x: 0,      // top of week banner
+    y: -240,   // "
     ndisp: 13, // number of weeks in the banner
     fdisp: 0,  // index of the lowest hidden week
-    sel: [1],
+    sel: [1],  // index of selected week
     rad: 1.2,  // ratio for the radius of prev/next week buttons
     hfac: 0.9, // ratio for week selection ellipse
     wfac: 0.9, // ratio for week selection ellipse
