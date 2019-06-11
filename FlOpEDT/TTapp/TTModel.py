@@ -62,142 +62,170 @@ logger = logging.getLogger(__name__)
 class WeekDB(object):
     def __init__(self, department, week, year, train_prog):
         self.train_prog = train_prog
+        self.department = department
         self.week = week
         self.year = year
-        self.days = TimeGeneralSettings.objects.get(department=department).days
+        self.days = self.days_init()
+        self.slots, self.slots_by_day, self.slots_intersecting, self.slots_by_half_day = self.slots_init()
+        self.room_types, self.room_groups, self.rooms, self.room_prefs, self.room_groups_for_type = self.rooms_init()
+        self.course_types, self.courses, self.sched_courses, self.fixed_courses, \
+            self.courses_availabilities, self.modules, self.dependencies = self.courses_init()
+        self.compatible_slots, self.compatible_courses = self.compatibilities_init()
+        self.groups, self.basic_groups, self.all_groups_of, self.basic_groups_of, self.courses_for_group, \
+            self.courses_for_basic_group = self.groups_init()
+        self.holidays, self.training_half_days = self.holidays_init()
+        self.instructors, self.courses_for_tutor, self.courses_for_supp_tutor, self.availabilities = self.users_init()
 
+    def days_init(self):
+        days = TimeGeneralSettings.objects.get(department=self.department).days
+        return days
+
+    def slots_init(self):
         # SLOTS
         print('Slot tools definition', end=', ')
-        self.slots = set()
-        for cc in CourseStartTimeConstraint.objects.filter(Q(course_type__department=department)
+        slots = set()
+        for cc in CourseStartTimeConstraint.objects.filter(Q(course_type__department=self.department)
                                                            | Q(course_type=None)):
-            self.slots |= set(Slot(d, start_time, cc.course_type)
+            slots |= set(Slot(d, start_time, cc.course_type)
                               for d in self.days for start_time in cc.allowed_start_times)
 
-        self.slots_by_day = {}
+        slots_by_day = {}
         for d in self.days:
-            self.slots_by_day[d] = filter(self.slots, day=d)
+            slots_by_day[d] = filter(slots, day=d)
 
-        self.slots_intersecting = {}
-        for sl in self.slots:
-            self.slots_intersecting[sl] = filter(self.slots, simultaneous_to=sl)
+        slots_intersecting = {}
+        for sl in slots:
+            slots_intersecting[sl] = filter(slots, simultaneous_to=sl)
 
-        self.slots_by_half_day = {}
+        slots_by_half_day = {}
         for d in self.days:
             for apm in [Time.AM, Time.PM]:
-                self.slots_by_half_day[(d, apm)] = filter(self.slots, day=d, apm=apm)
+                slots_by_half_day[(d, apm)] = filter(slots, day=d, apm=apm)
         print('Ok')
+        return slots, slots_by_day, slots_intersecting, slots_by_half_day
 
+    def rooms_init(self):
         # ROOMS
-        self.room_types = RoomType.objects.filter(department=department)
-        self.room_groups = RoomGroup.objects.filter(types__department=department).distinct()
-        self.rooms = Room.objects.filter(subroom_of__types__department=department).distinct()
-        self.room_prefs = RoomSort.objects.filter(for_type__department=department)
+        room_types = RoomType.objects.filter(department=self.department)
+        room_groups = RoomGroup.objects.filter(types__department=self.department).distinct()
+        rooms = Room.objects.filter(subroom_of__types__department=self.department).distinct()
+        room_prefs = RoomSort.objects.filter(for_type__department=self.department)
+        room_groups_for_type = {t: t.members.all() for t in room_types}
+        return room_types, room_groups, rooms, room_prefs, room_groups_for_type
 
-        self.room_groups_for_type = {t: t.members.all() for t in self.room_types}
-
+    def courses_init(self):
         # COURSES
-        self.course_types = CourseType.objects.filter(department=department)
+        course_types = CourseType.objects.filter(department=self.department)
 
-        self.courses = Course.objects.filter(
-            semaine=week, an=year,
+        courses = Course.objects.filter(
+            semaine=self.week, an=self.year,
             groupe__train_prog__in=self.train_prog)
 
-        self.sched_courses = ScheduledCourse \
+        sched_courses = ScheduledCourse \
             .objects \
-            .filter(cours__semaine=week,
-                    cours__an=year,
+            .filter(cours__semaine=self.week,
+                    cours__an=self.year,
                     cours__groupe__train_prog__in=self.train_prog)
 
-        self.fixed_courses = ScheduledCourse.objects \
-            .filter(cours__groupe__train_prog__department=department,
-                    cours__semaine=week,
-                    cours__an=year,
+        fixed_courses = ScheduledCourse.objects \
+            .filter(cours__groupe__train_prog__department=self.department,
+                    cours__semaine=self.week,
+                    cours__an=self.year,
                     copie_travail=0) \
             .exclude(cours__groupe__train_prog__in=self.train_prog)
 
-        self.courses_availabilities = CoursePreference.objects \
-            .filter(train_prog__department=department,
-                    semaine=week,
-                    an=year)
+        courses_availabilities = CoursePreference.objects \
+            .filter(train_prog__department=self.department,
+                    semaine=self.week,
+                    an=self.year)
 
-        self.modules = Module.objects \
-            .filter(id__in=self.courses.values_list('module_id').distinct())
+        modules = Module.objects \
+            .filter(id__in=courses.values_list('module_id').distinct())
 
-        self.dependencies = Dependency.objects.filter(
-            cours1__semaine=week,
-            cours1__an=year,
-            cours2__semaine=week,
+        dependencies = Dependency.objects.filter(
+            cours1__semaine=self.week,
+            cours1__an=self.year,
+            cours2__semaine=self.week,
             cours1__groupe__train_prog__in=self.train_prog)
 
+        return course_types, courses, sched_courses, fixed_courses, courses_availabilities, modules, dependencies
+
+    def compatibilities_init(self):
         # COMPATIBILITY
         # Slots and courses are compatible if they have the same type
         # OR if slot type is None and they have the same duration
-        self.compatible_slots = {}
+        compatible_slots = {}
         for c in self.courses:
-            self.compatible_slots[c] = set(slot for slot in self.slots
-                                           if slot.course_type == c.type
-                                           or slot.course_type is None and c.type.duration == slot.duration)
+            compatible_slots[c] = set(slot for slot in self.slots
+                                      if slot.course_type == c.type
+                                      or slot.course_type is None and c.type.duration == slot.duration)
 
-        self.compatible_courses = {}
+        compatible_courses = {}
         for sl in self.slots:
             if sl.course_type is None:
-                self.compatible_courses[sl] = set(course for course in self.courses
-                                                  if course.type.duration == sl.duration)
+                compatible_courses[sl] = set(course for course in self.courses
+                                             if course.type.duration == sl.duration)
             else:
-                self.compatible_courses[sl] = set(course for course in self.courses
-                                                  if course.type == sl.course_type)
+                compatible_courses[sl] = set(course for course in self.courses
+                                             if course.type == sl.course_type)
+        return compatible_slots, compatible_courses
 
+    def groups_init(self):
         # GROUPS
-        self.groups = Group.objects.filter(train_prog__in=self.train_prog)
+        groups = Group.objects.filter(train_prog__in=self.train_prog)
 
-        self.basic_groups = self.groups \
-            .filter(basic=True)
+        basic_groups = groups.filter(basic=True)
         #  ,
         # id__in=self.courses.values_list('groupe_id').distinct())
 
-        self.all_groups_of = {}
-        for g in self.basic_groups:
-            self.all_groups_of[g] = [g] + list(g.ancestor_groups())
+        all_groups_of = {}
+        for g in basic_groups:
+            all_groups_of[g] = [g] + list(g.ancestor_groups())
 
-        self.basic_groups_of = {}
-        for g in self.groups:
-            self.basic_groups_of = []
-            for bg in self.basic_groups:
-                if g in self.all_groups_of[bg]:
-                    self.basic_groups_of.append(bg)
+        basic_groups_of = {}
+        for g in groups:
+            basic_groups_of = []
+            for bg in basic_groups:
+                if g in all_groups_of[bg]:
+                    basic_groups_of.append(bg)
 
-        self.courses_for_group = {}
-        for g in self.groups:
-            self.courses_for_group[g] = set(self.courses.filter(groupe=g))
+        courses_for_group = {}
+        for g in groups:
+            courses_for_group[g] = set(self.courses.filter(groupe=g))
 
-        self.courses_for_basic_group = {}
-        for bg in self.basic_groups:
-            self.courses_for_basic_group[bg] = set(self.courses.filter(groupe__in=self.all_groups_of[bg]))
+        courses_for_basic_group = {}
+        for bg in basic_groups:
+            courses_for_basic_group[bg] = set(self.courses.filter(groupe__in=all_groups_of[bg]))
 
-        self.holidays = Holiday.objects.filter(week=week, year=year)
+        return groups, basic_groups, all_groups_of, basic_groups_of, courses_for_group, courses_for_basic_group
 
-        self.training_half_days = TrainingHalfDay.objects.filter(
-            week=week,
-            year=year,
+    def holidays_init(self):
+        holidays = Holiday.objects.filter(week=self.week, year=self.year)
+
+        training_half_days = TrainingHalfDay.objects.filter(
+            week=self.week,
+            year=self.year,
             train_prog__in=self.train_prog)
+        return holidays, training_half_days
 
+    def users_init(self):
         # USERS
-        self.instructors = Tutor.objects \
+        instructors = Tutor.objects \
             .filter(id__in=self.courses.values_list('tutor_id').distinct())
 
-        self.courses_for_tutor = {}
-        for i in self.instructors:
-            self.courses_for_tutor[i] = set(self.courses.filter(tutor=i))
+        courses_for_tutor = {}
+        for i in instructors:
+            courses_for_tutor[i] = set(self.courses.filter(tutor=i))
 
-        self.courses_for_supp_tutor = {}
-        for i in self.instructors:
-            self.courses_for_supp_tutor[i] = set(i.courses_as_supp.filter(id__in=self.courses))
+        courses_for_supp_tutor = {}
+        for i in instructors:
+            courses_for_supp_tutor[i] = set(i.courses_as_supp.filter(id__in=self.courses))
 
-        self.availabilities = UserPreference.objects \
-            .filter(semaine=week,
-                    an=year)
+        availabilities = UserPreference.objects \
+            .filter(semaine=self.week,
+                    an=self.year)
 
+        return instructors, courses_for_tutor, courses_for_supp_tutor, availabilities
 
 class TTModel(object):
     def __init__(self, department_abbrev, semaine, an,
@@ -235,111 +263,11 @@ class TTModel(object):
             train_prog = [train_prog]
         self.train_prog = train_prog
         self.stabilize_work_copy = stabilize_work_copy
-        self.wdb = WeekDB(self.department, semaine, an, self.train_prog)
         self.obj = self.lin_expr()
-        self.cost_I = dict(list(zip(self.wdb.instructors,
-                                    [self.lin_expr() for _ in self.wdb.instructors])))
-        self.FHD_G = {}
-        for apm in [Time.AM, Time.PM]:
-            self.FHD_G[apm] = dict(
-                list(zip(self.wdb.basic_groups,
-                         [self.lin_expr() for _ in self.wdb.basic_groups])))
-
-        self.cost_G = dict(
-            list(zip(self.wdb.basic_groups,
-                     [self.lin_expr() for _ in self.wdb.basic_groups])))
-
-        self.cost_SL = dict(
-            list(zip(self.wdb.slots,
-                     [self.lin_expr() for _ in self.wdb.slots])))
-
-        self.TT = {}
-        self.TTrooms = {}
-        for sl in self.wdb.slots:
-            for c in self.wdb.compatible_courses[sl]:
-                # print c, c.room_type
-                self.TT[(sl, c)] = self.add_var("TT(%s,%s)" % (sl, c))
-                for rg in self.wdb.room_groups_for_type[c.room_type]:
-                    self.TTrooms[(sl, c, rg)] \
-                        = self.add_var("TTroom(%s,%s,%s)" % (sl, c, rg))
-
-        self.IBD = {}
-        for i in self.wdb.instructors:
-            for d in self.wdb.days:
-                self.IBD[(i, d)] = self.add_var("IBD(%s,%s)" % (i, d))
-                # Linking the variable to the TT
-                dayslots = self.wdb.slots_by_day[d]
-                card = 2 * len(dayslots)
-                expr = self.lin_expr()
-                expr += card * self.IBD[(i, d)]
-                for c in self.wdb.courses_for_tutor[i]:
-                    for sl in dayslots & self.wdb.compatible_slots[c]:
-                        expr -= self.TT[(sl, c)]
-                self.add_constraint(expr, '>=', 0)
-
-                if self.wdb.fixed_courses.filter(cours__tutor=i,
-                                                 day=d):
-                    self.add_constraint(self.IBD[(i, d)], '==', 1)
-                    # This next constraint impides to force IBD to be 1
-                    # (if there is a meeting, for example...)
-                    # self.add_constraint(expr, '<=', card-1)
-
-        self.IBD_GTE = []
-        max_days = 5
-        for j in range(max_days + 1):
-            self.IBD_GTE.append({})
-
-        for i in self.wdb.instructors:
-            for j in range(2, max_days + 1):
-                self.IBD_GTE[j][i] = self.add_floor(
-                    str(i) + str(j),
-                    self.sum(self.IBD[(i, d)] for d in self.wdb.days),
-                    j,
-                    max_days)
-
-        self.IBHD = {}
-        for i in self.wdb.instructors:
-            for d in self.wdb.days:
-                # add constraint linking IBHD to TT
-                for apm in [Time.AM, Time.PM]:
-                    self.IBHD[(i, d, apm)] \
-                        = self.add_var("IBHD(%s,%s,%s)" % (i, d, apm))
-                    halfdayslots = self.wdb.slots_by_half_day[(d, apm)]
-                    card = 2 * len(halfdayslots)
-                    expr = self.lin_expr()
-                    expr += card * self.IBHD[(i, d, apm)]
-                    for sl in halfdayslots:
-                        for c in self.wdb.courses_for_tutor[i] & self.wdb.compatible_courses[sl]:
-                            expr -= self.TT[(sl, c)]
-                    self.add_constraint(expr, '>=', 0)
-                    # This constraint impides to force IBHD to be 1
-                    # (if there is a meeting, for example...)
-                    if self.wdb.fixed_courses.filter(cours__tutor=i,
-                                                     day=d):
-                        # ,creneau__heure__apm=apm):
-                        self.add_constraint(self.IBHD[(i, d, apm)], '==', 1)
-                    else:
-                        self.add_constraint(expr, '<=', card - 1)
-
-        self.GBHD = {}
-        for g in self.wdb.basic_groups:
-            for d in self.wdb.days:
-                # add constraint linking IBD to EDT
-                for apm in [Time.AM, Time.PM]:
-                    self.GBHD[(g, d, apm)] \
-                        = self.add_var("GBHD(%s,%s,%s)" % (g, d, apm))
-                    halfdayslots = self.wdb.slots_by_half_day[(d, apm)]
-                    card = 2 * len(halfdayslots)
-                    expr = self.lin_expr()
-                    expr += card * self.GBHD[(g, d, apm)]
-                    for sl in halfdayslots:
-                        for c in self.wdb.courses_for_group[g] & self.wdb.compatible_courses[sl]:
-                            expr -= self.TT[(sl, c)]
-                        for sg in g.ancestor_groups():
-                            for c in self.wdb.courses_for_group[sg] & self.wdb.compatible_courses[sl]:
-                                expr -= self.TT[(sl, c)]
-                    self.add_constraint(expr, '>=', 0)
-                    self.add_constraint(expr, '<=', card - 1)
+        self.wdb = self.wdb_init()
+        self.cost_I, self.FHD_G, self.cost_G, self.cost_SL = self.costs_init()
+        self.TT, self.TTrooms = self.TT_vars_init()
+        self.IBD, self.IBD_GTE, self.IBHD, self.GBHD = self.busy_vars_init()
 
         self.avail_instr, self.unp_slot_cost \
             = self.compute_non_prefered_slot_cost()
@@ -368,6 +296,120 @@ class TTModel(object):
 
         if settings.DEBUG:
             self.model.writeLP('FlOpEDT.lp')
+
+    def wdb_init(self):
+        wdb = WeekDB(self.department, self.semaine, self.an, self.train_prog)
+        return wdb
+
+    def costs_init(self):
+        cost_I = dict(list(zip(self.wdb.instructors,
+                                    [self.lin_expr() for _ in self.wdb.instructors])))
+        FHD_G = {}
+        for apm in [Time.AM, Time.PM]:
+            FHD_G[apm] = dict(
+                list(zip(self.wdb.basic_groups,
+                         [self.lin_expr() for _ in self.wdb.basic_groups])))
+
+        cost_G = dict(
+            list(zip(self.wdb.basic_groups,
+                     [self.lin_expr() for _ in self.wdb.basic_groups])))
+
+        cost_SL = dict(
+            list(zip(self.wdb.slots,
+                     [self.lin_expr() for _ in self.wdb.slots])))
+        return cost_I, FHD_G, cost_G, cost_SL
+
+    def TT_vars_init(self):
+        TT = {}
+        TTrooms = {}
+        for sl in self.wdb.slots:
+            for c in self.wdb.compatible_courses[sl]:
+                # print c, c.room_type
+                TT[(sl, c)] = self.add_var("TT(%s,%s)" % (sl, c))
+                for rg in self.wdb.room_groups_for_type[c.room_type]:
+                    TTrooms[(sl, c, rg)] \
+                        = self.add_var("TTroom(%s,%s,%s)" % (sl, c, rg))
+        return TT, TTrooms
+
+    def busy_vars_init(self):
+        IBD = {}
+        for i in self.wdb.instructors:
+            for d in self.wdb.days:
+                IBD[(i, d)] = self.add_var("IBD(%s,%s)" % (i, d))
+                # Linking the variable to the TT
+                dayslots = self.wdb.slots_by_day[d]
+                card = 2 * len(dayslots)
+                expr = self.lin_expr()
+                expr += card * IBD[(i, d)]
+                for c in self.wdb.courses_for_tutor[i]:
+                    for sl in dayslots & self.wdb.compatible_slots[c]:
+                        expr -= self.TT[(sl, c)]
+                self.add_constraint(expr, '>=', 0)
+
+                if self.wdb.fixed_courses.filter(cours__tutor=i,
+                                                 day=d):
+                    self.add_constraint(IBD[(i, d)], '==', 1)
+                    # This next constraint impides to force IBD to be 1
+                    # (if there is a meeting, for example...)
+                    # self.add_constraint(expr, '<=', card-1)
+
+        IBD_GTE = []
+        max_days = 5
+        for j in range(max_days + 1):
+            IBD_GTE.append({})
+
+        for i in self.wdb.instructors:
+            for j in range(2, max_days + 1):
+                IBD_GTE[j][i] = self.add_floor(
+                    str(i) + str(j),
+                    self.sum(IBD[(i, d)] for d in self.wdb.days),
+                    j,
+                    max_days)
+
+        IBHD = {}
+        for i in self.wdb.instructors:
+            for d in self.wdb.days:
+                # add constraint linking IBHD to TT
+                for apm in [Time.AM, Time.PM]:
+                    IBHD[(i, d, apm)] \
+                        = self.add_var("IBHD(%s,%s,%s)" % (i, d, apm))
+                    halfdayslots = self.wdb.slots_by_half_day[(d, apm)]
+                    card = 2 * len(halfdayslots)
+                    expr = self.lin_expr()
+                    expr += card * IBHD[(i, d, apm)]
+                    for sl in halfdayslots:
+                        for c in self.wdb.courses_for_tutor[i] & self.wdb.compatible_courses[sl]:
+                            expr -= self.TT[(sl, c)]
+                    self.add_constraint(expr, '>=', 0)
+                    # This constraint impides to force IBHD to be 1
+                    # (if there is a meeting, for example...)
+                    if self.wdb.fixed_courses.filter(cours__tutor=i,
+                                                     day=d):
+                        # ,creneau__heure__apm=apm):
+                        self.add_constraint(IBHD[(i, d, apm)], '==', 1)
+                    else:
+                        self.add_constraint(expr, '<=', card - 1)
+
+        GBHD = {}
+        for g in self.wdb.basic_groups:
+            for d in self.wdb.days:
+                # add constraint linking IBD to EDT
+                for apm in [Time.AM, Time.PM]:
+                    GBHD[(g, d, apm)] \
+                        = self.add_var("GBHD(%s,%s,%s)" % (g, d, apm))
+                    halfdayslots = self.wdb.slots_by_half_day[(d, apm)]
+                    card = 2 * len(halfdayslots)
+                    expr = self.lin_expr()
+                    expr += card * GBHD[(g, d, apm)]
+                    for sl in halfdayslots:
+                        for c in self.wdb.courses_for_group[g] & self.wdb.compatible_courses[sl]:
+                            expr -= self.TT[(sl, c)]
+                        for sg in g.ancestor_groups():
+                            for c in self.wdb.courses_for_group[sg] & self.wdb.compatible_courses[sl]:
+                                expr -= self.TT[(sl, c)]
+                    self.add_constraint(expr, '>=', 0)
+                    self.add_constraint(expr, '<=', card - 1)
+        return IBD, IBD_GTE, IBHD, GBHD
 
     def add_var(self, name):
         """
