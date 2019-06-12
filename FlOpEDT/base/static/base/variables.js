@@ -270,6 +270,7 @@ var data_grid_scale_gp = [];
 
 
 // keys to the left representing the name of the row
+// non-empty iff slot_case
 //(one element per row and per hour)
 var data_grid_scale_row = [];
 
