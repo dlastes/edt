@@ -326,11 +326,9 @@ var set_rows = [];
 var butgp = {
     height: 20,
     width: 30,
-    tlx: 640
-};
-var margin_but = {
-    ver: 10,
-    hor: 10
+    tlx: 640,
+    mar_v: 10,
+    mar_h: 10
 };
 
 /*--------------------

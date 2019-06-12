@@ -75,7 +75,7 @@ var labgp = {height: 40, width: 30, tot: 8, height_init: 40, width_init: 30, hm:
 
 
 
-butgp.tly = margin.but;//-margin_but.ver-6*butgp.height-80 ;
+butgp.tly = margin.but;//-butgp.mar_v-6*butgp.height-80 ;
 sel_popup.tly = margin.but;
 
 

@@ -669,12 +669,12 @@ function set_butgp() {
 		cur_maxby = cur_rootgp.maxby ; 
 	    }
 	    tot_row_gp += cur_rootgp.gp.width*butgp.width ;
-	    tot_row_gp += (npro==0)?0:(margin_but.hor) ;
+	    tot_row_gp += (npro==0)?0:(butgp.mar_h) ;
             console.log(cur_rootgp.gp.width, butgp.width);
 	    cur_rootgp.butx = cur_butx ;
-            cur_butx += margin_but.hor + cur_rootgp.gp.width*butgp.width ;
+            cur_butx += butgp.mar_h + cur_rootgp.gp.width*butgp.width ;
 	}
-	cur_buty += margin_but.ver + cur_maxby*butgp.height ;
+	cur_buty += butgp.mar_v + cur_maxby*butgp.height ;
     }
 
 
