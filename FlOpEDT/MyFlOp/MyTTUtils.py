@@ -51,8 +51,8 @@ def print_differences(week, year, old_copy, new_copy, tutors=Tutor.objects.all()
                                              cours__an=year)
         SCb = ScheduledCourse.objects.filter(cours__tutor=tutor, copie_travail=new_copy, cours__semaine=week,
                                              cours__an=year)
-        slots_a = set([x.creneau for x in SCa])
-        slots_b = set([x.creneau for x in SCb])
+        slots_a = set([x.start_time//60 for x in SCa])
+        slots_b = set([x.start_time//60 for x in SCb])
         if slots_a ^ slots_b:
             result = "For %s old copy has :" % tutor
             for sl in slots_a - slots_b:
