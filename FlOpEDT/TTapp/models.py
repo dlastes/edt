@@ -113,7 +113,8 @@ class Slot(object):
         return str(self)
 
 
-def filter(slot_set, day=None, apm=None, course_type=None, simultaneous_to=None):
+def slots_filter(slot_set, day=None, apm=None, course_type=None, start_time=None,
+                 simultaneous_to=None, is_after=None, starts_after=None, ends_before=None):
     slots = slot_set
     if day is not None:
         slots = set(sl for sl in slots if sl.day == day)
@@ -123,6 +124,14 @@ def filter(slot_set, day=None, apm=None, course_type=None, simultaneous_to=None)
         slots = set(sl for sl in slots if sl.apm == apm)
     if simultaneous_to is not None:
         slots = set(sl for sl in slots if sl.is_simultaneous_to(simultaneous_to))
+    if is_after is not None:
+        slots = set(sl for sl in slots if sl.is_after(is_after))
+    if starts_after is not None:
+        slots = set(sl for sl in slots if sl.start_time >= starts_after)
+    if ends_before is not None:
+        slots = set(sl for sl in slots if sl.end_time <= ends_before)
+    if start_time is not None:
+        slots = set(sl for sl in slots if sl.start_time == start_time)
     return slots
 
 
@@ -569,7 +578,6 @@ class ReasonableDays(TTConstraint):
         return attributes
 
 
-
 class Stabilize(TTConstraint):
     """
     Allow to realy stabilize the courses of a category
@@ -615,7 +623,7 @@ class Stabilize(TTConstraint):
         if self.general:
             # nb_changements_I=dict(zip(ttmodel.wdb.instructors,[0 for i in ttmodel.wdb.instructors]))
             for c in ttmodel.wdb.courses:
-                for sl in ttmodel.wdb.slots:
+                for sl in ttmodel.wdb.compatible_slots[c]:
                     if not sched_courses.filter(Q(start_time__lt=sl.start_time + sl.duration) |
                                                 Q(start_time__gt=sl.start_time - F('duration')),
                                                 day=sl.day,
