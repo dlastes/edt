@@ -918,10 +918,10 @@ class SimultaneousCourses(TTConstraint):
 
     def enrich_model(self, ttmodel, ponderation=1):
         same_tutor = (self.course1.tutor == self.course2.tutor)
-        for sl in ttmodel.wdb.slots:
+        for sl in ttmodel.wdb.compatible_slots[self.course1]:
             var1 = ttmodel.TT[(sl, self.course1)]
             var2 = ttmodel.sum(ttmodel.TT[(sl2, self.course2)]
-                               for sl2 in ttmodel.wdb.slots
+                               for sl2 in ttmodel.wdb.compatible_slots[self.course2]
                                if (sl2.start_time, sl2.day, sl2.duration) == (sl.start_time, sl.day, sl.duration))
             ttmodel.add_constraint(var1 - var2, '==', 0)
             # A compléter, l'idée est que si les cours ont le même prof, ou des
