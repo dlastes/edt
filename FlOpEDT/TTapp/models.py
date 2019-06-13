@@ -631,13 +631,11 @@ class Stabilize(TTConstraint):
                         ttmodel.obj += ttmodel.TT[(sl, c)]
                         # nb_changements_I[c.tutor]+=ttmodel.TT[(sl,c)]
                     if not sched_courses.filter(cours__tutor=c.tutor,
-                                                day=sl.day,
-                                                apm=sl.apm):
+                                                day=sl.day):
                         ttmodel.obj += ponderation * ttmodel.TT[(sl, c)]
                         # nb_changements_I[i]+=ttmodel.TT[(sl,c)]
                     if not sched_courses.filter(cours__groupe=c.groupe,
-                                                day=sl.day,
-                                                apm=sl.apm):
+                                                day=sl.day):
                         ttmodel.obj += ponderation * ttmodel.TT[(sl, c)]
         else:
             fc = ttmodel.wdb.courses
