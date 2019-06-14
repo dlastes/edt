@@ -625,7 +625,7 @@ class Stabilize(TTConstraint):
             for c in ttmodel.wdb.courses:
                 for sl in ttmodel.wdb.compatible_slots[c]:
                     if not sched_courses.filter(Q(start_time__lt=sl.start_time + sl.duration) |
-                                                Q(start_time__gt=sl.start_time - F('duration')),
+                                                Q(start_time__gt=sl.start_time - F('cours__type__duration')),
                                                 day=sl.day,
                                                 cours__tutor=c.tutor):
                         ttmodel.obj += ttmodel.TT[(sl, c)]
