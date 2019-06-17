@@ -27,7 +27,7 @@
 import datetime
 
 from base.models import TimeGeneralSettings
-annee_courante = 2018
+annee_courante = 2019
 
 week_ref_days = ['m', 'tu', 'w', 'th', 'f', 'sa', 'su']
 week_display_days = ['Lun.', 'Mar.', 'Mer.', 'Jeu.', 'Ven.', 'Sam.', 'Dim.']
