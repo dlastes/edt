@@ -156,7 +156,10 @@ class Student(User):  # for now: representative
                                        blank=True)
 
     def __str__(self):
-        return str(self.username) + '(G:' + str(self.belong_to.all()) + ')'
+        return str(self.username)
+
+    def __repr__(self):
+        return str(self.username) + ' (G:' + ', '.join([group.nom for group in self.belong_to.all()]) + ')'
 
 
 class Preferences(models.Model):
