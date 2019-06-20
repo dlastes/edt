@@ -283,16 +283,18 @@ class DepartmentModelAdmin(admin.ModelAdmin):
     def get_field_queryset(self, db, db_field, request):
 
         queryset = super().get_field_queryset(db, db_field, request)
-        related_filter = get_model_department_lookup(db_field.related_model, request.department)
 
-        if related_filter:
-            if queryset:
-                return queryset.filter(**related_filter).distinct()
-            else:
-                return db_field.remote_field \
-                        .model._default_manager \
-                        .using(db) \
-                        .filter(**related_filter).distinct()
+        if hasattr(request, 'department'):
+            related_filter = get_model_department_lookup(db_field.related_model, request.department)
+
+            if related_filter:
+                if queryset:
+                    return queryset.filter(**related_filter).distinct()
+                else:
+                    return db_field.remote_field \
+                            .model._default_manager \
+                            .using(db) \
+                            .filter(**related_filter).distinct()
 
         return queryset
 
