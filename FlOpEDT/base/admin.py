@@ -210,25 +210,26 @@ class DepartmentModelAdmin(admin.ModelAdmin):
     
     def save_model(self, request, obj, form, change):
         #
-        # Set department field value if exists on the model
+        # Automaticaly associate model to department when required
         #
+        m2m_fields = []
+
         if hasattr(request, 'department'):
             for field in self.model._meta.get_fields():
-                if not field.auto_created and field.related_model == Department:
+                if (not change
+                        and not field.auto_created
+                        and field.related_model == Department):
                     if isinstance(field, related_fields.ForeignKey):
                         setattr(obj, field.name, request.department)
-        
-        super().save_model(request, obj, form, change)        
+                    elif isinstance(field, related_fields.ManyToManyField):
+                        if field.remote_field.through and field.remote_field.through._meta.auto_created:
+                            m2m_fields.append(field)
 
-    
-    def save_related(self, request, form, formsets, change):
-        super().save_related(request, form, formsets, change)
-        model = form.instance
-        if hasattr(request, 'department') and not change:
-            for field in model._meta.get_fields():
-                if field.related_model == Department:
-                    if isinstance(field, related_fields.ManyToManyField):
-                        field.save_form_data(model, [request.department,])
+        super().save_model(request, obj, form, change)
+
+        # Related values need to be set after save model
+        for field in m2m_fields:
+            getattr(obj, field.name).add(request.department)
 
 
     def get_department_lookup(self, department):

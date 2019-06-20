@@ -24,7 +24,6 @@
 # without disclosing the source code of your own applications.
 
 
-
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from base.models import Department
@@ -37,6 +36,9 @@ class User(AbstractUser):
     is_tutor = models.BooleanField(default=False)
     rights = models.PositiveSmallIntegerField(verbose_name="Droits particuliers",
                                               default=0)
+    departments = models.ManyToManyField(
+        Department, through='UserDepartmentSettings')
+
     # 0b azmyx en binaire
     # x==1 <=> quand "modifier Cours" coché, les cours sont colorés
     #          avec la dispo du prof
@@ -59,7 +61,17 @@ class User(AbstractUser):
         return ret
 
     class Meta:
-       ordering = ['username',]
+        ordering = ['username', ]
+
+
+class UserDepartmentSettings(models.Model):
+    """
+    This model allows to add additionnal settings to the 
+    relation between User and Department
+    """
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    department = models.ForeignKey(Department, on_delete=models.CASCADE)
+    is_main = models.BooleanField(default=False)
 
 
 class Tutor(User):
@@ -76,21 +88,21 @@ class Tutor(User):
     pref_hours_per_day = models.PositiveSmallIntegerField(
         verbose_name="How many hours per day would you prefer ?",
         default=4)
-    departments =  models.ManyToManyField(Department, blank=True)
 
     def uni_extended(self):
-        ret = super(Tutor,self).uni_extended()
+        ret = super(Tutor, self).uni_extended()
         ret += '-' + self.status + '-' + 'S' + str(self.pref_hours_per_day)
         return ret
 
 
 class FullStaff(Tutor):
     # deprected since multi departements insertion
-    department = models.CharField(max_length=50, default='INFO', null=True, blank=True)
+    department = models.CharField(
+        max_length=50, default='INFO', null=True, blank=True)
     is_iut = models.BooleanField(default=True)
 
     def uni_extended(self):
-        ret = super(FullStaff,self).uni_extended()
+        ret = super(FullStaff, self).uni_extended()
         ret += '-D' + self.department + '-'
         if not self.is_iut:
             ret += 'n'
@@ -110,8 +122,9 @@ class SupplyStaff(Tutor):
     field = models.CharField(max_length=50,
                              verbose_name="Domaine ?",
                              default=None, null=True, blank=True)
+
     def uni_extended(self):
-        ret = super(SupplyStaff,self).uni_extended()
+        ret = super(SupplyStaff, self).uni_extended()
         ret += '-Emp:' + self.employer + '-'
         ret += '-Pos:' + self.position + '-'
         ret += '-Dom:' + self.field
@@ -123,7 +136,7 @@ class SupplyStaff(Tutor):
 
 class BIATOS(Tutor):
     def uni_extended(self):
-        return super(BIATOS,self).uni_extended()
+        return super(BIATOS, self).uni_extended()
 
     class Meta:
         verbose_name = 'BIATOS'
@@ -147,8 +160,10 @@ class Student(User):  # for now: representative
 
 
 class Preferences(models.Model):
-    morning_weight = models.DecimalField(default=.5, blank=True, max_digits=3, decimal_places=2)
-    free_half_day_weight = models.DecimalField(default=.5, blank=True, max_digits=3, decimal_places=2)
+    morning_weight = models.DecimalField(
+        default=.5, blank=True, max_digits=3, decimal_places=2)
+    free_half_day_weight = models.DecimalField(
+        default=.5, blank=True, max_digits=3, decimal_places=2)
 
     def get_morning_weight(self):
         return float(self.morning_weight)
@@ -168,20 +183,21 @@ class Preferences(models.Model):
 
 class StudentPreferences(Preferences):
     student = models.OneToOneField('people.Student',
-                                    related_name='studentPreferences',
-                                    on_delete=models.CASCADE)
+                                   related_name='studentPreferences',
+                                   on_delete=models.CASCADE)
 
 
 class GroupPreferences(Preferences):
     group = models.OneToOneField('base.Group',
-                                related_name='groupPreferences',
-                                on_delete=models.CASCADE)
+                                 related_name='groupPreferences',
+                                 on_delete=models.CASCADE)
 
     def calculate_fields(self):
-        #To pull students from the group
-        students_preferences = StudentPreferences.objects.filter(student__belong_to=self.group)
+        # To pull students from the group
+        students_preferences = StudentPreferences.objects.filter(
+            student__belong_to=self.group)
 
-        #To initialise variables and getting the divider to get the average
+        # To initialise variables and getting the divider to get the average
         local_morning_weight = 0
         local_free_half_day_weight = 0
         nb_student_prefs = len(students_preferences)
@@ -189,12 +205,12 @@ class GroupPreferences(Preferences):
             self.morning_weight = 1
             self.free_half_day_weight = 1
 
-        else :
-            #To range the table
+        else:
+            # To range the table
             for student_pref in students_preferences:
                 local_morning_weight += student_pref.morning_weight
                 local_free_half_day_weight += student_pref.free_half_day_weight
 
-            #To calculate the average of each attributs
+            # To calculate the average of each attributs
             self.morning_weight = local_morning_weight/nb_student_prefs
             self.free_half_day_weight = local_free_half_day_weight/nb_student_prefs
