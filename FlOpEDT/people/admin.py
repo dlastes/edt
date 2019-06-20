@@ -6,14 +6,34 @@ from base.admin import DepartmentModelAdmin
 from import_export.widgets import ForeignKeyWidget
 
 
-from people.models import Tutor, FullStaff, SupplyStaff, BIATOS, Student
+from people.models import User, Tutor, FullStaff, SupplyStaff, BIATOS, Student
 from people.models import UserDepartmentSettings
 from people.models import StudentPreferences, GroupPreferences
 
 from import_export import resources, fields
 
 
+class UserDepartmentInline(admin.TabularInline):
+    model = User.departments.through
+
+
 class UserModelAdmin(DepartmentModelAdmin):
+
+    inlines = [
+        UserDepartmentInline,
+    ]
+
+    def get_inline_instances(self, request, obj=None):
+        """
+        This hooks is used to hide department edition 
+        when a department admin session is active
+        """
+        instances = super().get_inline_instances(request, obj)
+
+        if hasattr(request, 'department'):
+            instances = [i for i in instances if not isinstance(i, UserDepartmentInline)]
+                
+        return instances
 
     def get_department_lookup(self, department):
         """
@@ -30,6 +50,7 @@ class UserModelAdmin(DepartmentModelAdmin):
         if hasattr(request, 'department') and not change:
             UserDepartmentSettings.objects.create(
                 department=request.department, user=obj, is_main=True)
+
 
     class Meta:
         app_label = 'auth'
