@@ -198,14 +198,14 @@ class DepartmentModelAdmin(admin.ModelAdmin):
         # Hide department field if a department attribute exists 
         # on the related model and a department value has been set
         base = super().get_exclude(request, obj)
-        exclude = list() if base is None else base
+        exclude = list() if base is None else list(base)
 
         if hasattr(request, 'department'):
             for field in self.model._meta.get_fields():
-                if not field.auto_created and field.related_model == Department:
+                if not field.auto_created and field.related_model == Department and not field.name in exclude:
                     exclude.append(field.name)
 
-        return exclude
+        return tuple(exclude)
 
     
     def save_model(self, request, obj, form, change):
