@@ -44,6 +44,7 @@ from django.views.generic import RedirectView
 import base.views
 
 urlpatterns = [
+    url(r'^admin$', RedirectView.as_view(url='/admin/')),
     url(r'^admin/', admin.site.urls),
     url(r'^accounts/', include('people.urls')),
     url(r'^citations/', include('quote.urls')),
