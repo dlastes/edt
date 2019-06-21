@@ -50,6 +50,32 @@ class User(AbstractUser):
     # a==1 <=> je peux surpasser les contraintes lors de la modification
     #          de cours
 
+    def has_department_perm(self, department, admin=False):
+        """
+        Does the user have access to a specific department
+        
+        admin=True    Check if the user can access to the 
+                      department admin
+        """
+        perm = False
+
+        if department:
+            perm = department in self.departments.all()
+            if admin:
+                perm &= self.is_staff
+
+        return perm
+
+    def has_perm(self, perm, obj=None):
+        "Does the user have a specific permission?"
+        # Simplest possible answer: Yes, always
+        return  self.is_staff
+
+    def has_module_perms(self, app_label):
+        "Does the user have permissions to view the app `app_label`?"
+        # Simplest possible answer: Yes, always
+        return  self.is_staff
+
     def uni_extended(self):
         ret = self.username + '<'
         if self.is_student:
@@ -62,6 +88,8 @@ class User(AbstractUser):
 
     class Meta:
         ordering = ['username', ]
+
+    
 
 
 class UserDepartmentSettings(models.Model):
@@ -160,6 +188,9 @@ class Student(User):  # for now: representative
 
     def __repr__(self):
         return str(self.username) + ' (G:' + ', '.join([group.nom for group in self.belong_to.all()]) + ')'
+
+    class Meta:
+        verbose_name = 'Student'
 
 
 class Preferences(models.Model):
