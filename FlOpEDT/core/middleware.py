@@ -3,6 +3,7 @@ import logging
 from django.shortcuts import render, redirect
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.cache import cache
+from django.http import HttpResponseForbidden
 
 from base.models import Department
 
@@ -25,9 +26,7 @@ class EdtContextMiddleware:
 
         return response
 
-    def process_view(self, request, view_func, view_args, view_kwargs):
-
-        department_key = 'department'
+    def process_view(self, request, view_func, view_args, view_kwargs):     
 
         def del_request_department():
             try:
@@ -64,6 +63,9 @@ class EdtContextMiddleware:
             return department_abbrev
 
 
+        department = None
+        department_key = 'department'
+
         if request.path == '/':
             del_request_department()
         else:
@@ -85,4 +87,17 @@ class EdtContextMiddleware:
                         logger.warning(f'wrong department value : [{department_abbrev}]')
                         return redirect('/')
 
-
+        if request.path.startswith('/admin'):
+            if not department:
+                # Check if the user is a superuser in order to 
+                # access global admin mode
+                if request.user.is_authenticated and not request.user.is_superuser:
+                    return redirect('/')
+            else:
+                # Check if the user is associated with the 
+                # requested department
+                if hasattr(request.user, 'departments'):
+                    if not request.user.is_superuser and not request.user.has_department_perm(department):                        
+                        return HttpResponseForbidden()
+                else:
+                    return HttpResponseForbidden()

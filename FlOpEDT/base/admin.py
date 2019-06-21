@@ -187,7 +187,7 @@ class VersionResource(resources.ModelResource):
 # -- ADMIN MENU --
 # ----------------
 
-class DepartmentModelAdmin(admin.ModelAdmin):
+class DepartmentModelAdminMixin():
     #
     # Support filter and udpate of department specific related items
     #
@@ -299,7 +299,10 @@ class DepartmentModelAdmin(admin.ModelAdmin):
         return queryset
 
 
-    
+class DepartmentModelAdmin(DepartmentModelAdminMixin, admin.ModelAdmin):
+    pass
+
+
 class HolidayAdmin(admin.ModelAdmin):
     list_display = ('day', 'week', 'year')
     ordering = ('-year', '-week', 'day')

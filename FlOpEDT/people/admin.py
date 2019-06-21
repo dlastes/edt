@@ -2,22 +2,24 @@
 
 
 from django.contrib import admin
-from base.admin import DepartmentModelAdmin
-from import_export.widgets import ForeignKeyWidget
+from django.contrib.auth.admin import UserAdmin
 
+from import_export.widgets import ForeignKeyWidget
+from import_export import resources, fields
+
+from base.admin import DepartmentModelAdminMixin
 
 from people.models import User, Tutor, FullStaff, SupplyStaff, BIATOS, Student
 from people.models import UserDepartmentSettings
 from people.models import StudentPreferences, GroupPreferences
 
-from import_export import resources, fields
 
 
 class UserDepartmentInline(admin.TabularInline):
     model = User.departments.through
 
 
-class UserModelAdmin(DepartmentModelAdmin):
+class UserModelAdmin(DepartmentModelAdminMixin, UserAdmin):
 
     inlines = [
         UserDepartmentInline,
@@ -99,3 +101,4 @@ admin.site.register(FullStaff, UserModelAdmin)
 admin.site.register(SupplyStaff, UserModelAdmin)
 admin.site.register(BIATOS, UserModelAdmin)
 admin.site.register(Student, UserModelAdmin)
+admin.site.register(User, UserModelAdmin)
