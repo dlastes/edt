@@ -36,8 +36,10 @@ from people.models import Tutor, User
 from base.models import Day, RoomGroup, Module, Course, Group, Slot, \
     UserPreference, Time, ScheduledCourse, EdtVersion, CourseModification, \
     PlanningModification, TrainingProgramme,  \
-    Regen, Holiday, TrainingHalfDay, RoomPreference, RoomSort, \
-    CoursePreference, Dependency, RoomType, Department, CourseType
+    Regen, Holiday, TrainingHalfDay, \
+    CoursePreference, Dependency, Department, CourseType
+
+from base.models import RoomPreference, RoomSort, RoomType, Room
 from displayweb.models import ModuleDisplay
 from import_export import resources, fields
 from import_export.widgets import ForeignKeyWidget
@@ -325,8 +327,19 @@ class GroupAdmin(DepartmentModelAdmin):
     list_filter = (('train_prog', DropdownFilterRel),
                    )
 
+
+class RoomAdmin(DepartmentModelAdmin):
+    pass
+
+
+class RoomInline(admin.TabularInline):
+    model = Room.subroom_of.through
+    show_change_link = False
+
+
 class RoomGroupAdmin(DepartmentModelAdmin):
-    list_display = ('name',)
+    inlines = [RoomInline,]
+    list_display = ('name',)    
 
   
 class RoomPreferenceAdmin(DepartmentModelAdmin):
@@ -482,6 +495,7 @@ admin.site.unregister(auth.models.Group)
 admin.site.register(Holiday, HolidayAdmin)
 admin.site.register(TrainingHalfDay, TrainingHalfDayAdmin)
 admin.site.register(Group, GroupAdmin)
+admin.site.register(Room, RoomAdmin)
 admin.site.register(RoomGroup, RoomGroupAdmin)
 admin.site.register(RoomPreference, RoomPreferenceAdmin)
 admin.site.register(RoomSort, RoomSortAdmin)
