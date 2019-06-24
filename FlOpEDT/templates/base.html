@@ -73,11 +73,13 @@
       <li><a href="{% url "ics:index" department %}">iCal</a></li>
       <li><a href="{% url "base:aide" department %}">Aide</a></li>
       <li><a href="{% url "base:contact" department %}">Contact</a></li>
-      {% if user.is_staff and has_department_perm %}
+      {% if user.is_superuser or user.is_staff and has_department_perm %}
       <li><a href="{% url "solve_board:main_board" department %}">Générer</a></li>
       <li><a href="{% url "base:statistics" department %}">Statistiques</a></li>
-      <li><a href="{% url "admin:index" %}">Admin</a></li>
       {% endif %}
+      {% endif %}
+      {% if user.is_superuser or user.is_staff and has_department_perm %}
+      <li><a href="{% url "admin:index" %}">Admin</a></li>
       {% endif %}
       <li style="float:right">
 	{% if user.is_authenticated %}
