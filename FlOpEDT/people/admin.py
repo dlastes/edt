@@ -25,6 +25,8 @@ class UserModelAdmin(DepartmentModelAdminMixin, UserAdmin):
         UserDepartmentInline,
     ]
 
+    readonly_fields= ('last_login', 'date_joined',)
+
     def get_inline_instances(self, request, obj=None):
         """
         This hooks is used to hide department edition 
@@ -53,6 +55,20 @@ class UserModelAdmin(DepartmentModelAdminMixin, UserAdmin):
             UserDepartmentSettings.objects.create(
                 department=request.department, user=obj, is_main=True)
 
+    def get_fieldsets(self, request, obj=None):
+        """
+        Hook for specifying custom readonly fields.
+        """
+        fieldsets = list(super().get_fieldsets(request, obj))
+        updated_fieldsets = []
+        # Remove Permissions fieldsets for non superuser
+        if not request.user.is_superuser:
+            for fs in fieldsets:
+                if not fs[0] == 'Permissions':
+                    updated_fieldsets.append(fs)
+
+            fieldsets = list(updated_fieldsets)
+        return tuple(fieldsets)
 
     class Meta:
         app_label = 'auth'
