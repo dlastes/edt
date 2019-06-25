@@ -165,6 +165,7 @@ def rooms_extract(department, book):
             
             # Ensure that a room_group exits with the same roomid
             room.subroom_of.add(room_group)
+            room.departments.add(department)
 
 
         except IntegrityError as ie:

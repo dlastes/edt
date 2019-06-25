@@ -4,12 +4,19 @@
 {% block content %}
 
 {% if departments %}
-<div>
-    <div style="margin-top:40px; margin-left:auto; margin-right: auto; width:450px;">
-        Veuillez choisir votre département :
+<script type="text/javascript">
+function goTo(url){
+    location.href = url;
+};
+</script>
+<div class="dept_container">
+    <div class="dept_list">
+        <p>
+            Veuillez choisir votre département :
+        </p>
         <ul>
             {% for department in departments %}
-            <li><a href="{% url "base:edt" department.abbrev %}">{{ department.name }}</a></li>
+            <li onclick="goTo('{% url "base:edt" department.abbrev %}');">{{ department.name }}</li>
             {% endfor %}
         </ul>
     </div>
