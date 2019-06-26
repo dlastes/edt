@@ -590,13 +590,13 @@ class TTModel(object):
                 name=name)
 
         # no group has two courses in parallel
-        for sl in self.wdb.slots:
-            for bg in self.wdb.basic_groups:
-                expr = self.lin_expr()
-                for c in self.wdb.courses_for_basic_group[bg] & self.wdb.compatible_courses[sl]:
-                    expr += self.TT[(sl, c)]
-                name = 'core_group_' + bg.full_name() + '_' + str(sl)
-                self.add_constraint(expr, '<=', 1, name=name)
+        # for sl in self.wdb.slots:
+        #     for bg in self.wdb.basic_groups:
+        #         expr = self.lin_expr()
+        #         for c in self.wdb.courses_for_basic_group[bg] & self.wdb.compatible_courses[sl]:
+        #             expr += self.TT[(sl, c)]
+        #         name = 'core_group_' + bg.full_name() + '_' + str(sl)
+        #         self.add_constraint(expr, '<=', 1, name=name)
 
         print('Core prof constraints')
 
