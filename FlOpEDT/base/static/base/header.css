@@ -221,6 +221,18 @@ body {
 	font-size: inherit;
 }
 
+#flopGreen {
+	color: green;
+	font-family: inherit;
+	font-size: inherit;
+}
+#EDTRed {
+	color: red;
+	font-family: inherit;
+	font-size: inherit;
+}
+
+
 #flopRed {
 	color: red;
 	font-size: 18px;
