@@ -472,7 +472,10 @@ def modules_extract(department, book):
             tpMod = sheet.cell(row=MODULE_ROW, column=4).value
             profMod = sheet.cell(row=MODULE_ROW, column=5).value
             tpModule = TrainingProgramme.objects.get(abbrev=tpMod)
-            profesMod = Tutor.objects.get(username=profMod)
+            try:
+                profesMod = Tutor.objects.get(username=profMod)
+            except:
+                print(f"unable to find tutor '{profMod}'")
             periodMod = Period.objects.get(name=period, department=department)
 
             try:
