@@ -39,7 +39,7 @@ from base.models import Room, RoomType, RoomGroup, TrainingProgramme,\
 
 from base.weeks import annee_courante
 
-from people.models import FullStaff, SupplyStaff, Tutor
+from people.models import FullStaff, SupplyStaff, Tutor, UserDepartmentSettings
 
 from django.db import IntegrityError
 
@@ -103,8 +103,8 @@ def tutors_extract(department, book):
                 tutor.set_password("passe")
                 tutor.is_tutor = True
                 tutor.save()
-                tutor.departments.add(department)
-                tutor.save()
+
+                UserDepartmentSettings.objects.create(department=department, user=tutor)
 
             except IntegrityError as ie :
                 print("A constraint has not been respected creation the Professor : \n", ie)
@@ -112,7 +112,7 @@ def tutors_extract(department, book):
             else:
                 logger.debug(f'create tutor with id:{id}')
         else:
-            tutor.departments.add(department)
+            UserDepartmentSettings.objects.create(department=department, user=tutor)
 
         INTER_ID_ROW += 1
         id = sheet.cell(row=INTER_ID_ROW, column=1).value
