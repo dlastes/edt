@@ -25,6 +25,7 @@
 # without disclosing the source code of your own applications.
 
 from openpyxl import load_workbook
+from openpyxl.utils import get_column_letter
 
 from base.models import Group, Module, Period, CourseType
 
@@ -247,10 +248,10 @@ def make_planif_file(department, empty_bookname=empty_bookname):
         rank += 1
 
         ############ Adapting column widths ############
-        for col in sheet.columns:
+        for i,col in enumerate(sheet.columns):
             length = len(as_text(col[0].value))
             adjusted_length = (length + 2) * 1.2
-            sheet.column_dimensions[col[0].column].width = adjusted_length
+            sheet.column_dimensions[get_column_letter(i+1)].width = adjusted_length
         sheet.column_dimensions['B'].hidden = True
 
 
@@ -281,12 +282,12 @@ def make_planif_file(department, empty_bookname=empty_bookname):
     rank += 1
 
     ############ Adapting column widths ############
-    for col in sheet.columns:
+    for i, col in enumerate(sheet.columns):
         length = len(as_text(col[0].value))
         if length == 2:
             length = 1
         adjusted_length = (length + 2) * 1.2
-        sheet.column_dimensions[col[0].column].width = adjusted_length
+        sheet.column_dimensions[get_column_letter(i+1)].width = adjusted_length
     new_book.remove(new_book['empty_recap'])
 
     new_book.remove(new_book['empty'])
