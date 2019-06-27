@@ -282,7 +282,7 @@ class Module(models.Model):
                              default=None,
                              blank=True,
                              on_delete=models.CASCADE)
-    ppn = models.CharField(max_length=6, default='M')
+    ppn = models.CharField(max_length=8, default='M')
     train_prog = models.ForeignKey('TrainingProgramme', on_delete=models.CASCADE)
     period = models.ForeignKey('Period', on_delete=models.CASCADE)
     # nbTD = models.PositiveSmallIntegerField(default=1)
