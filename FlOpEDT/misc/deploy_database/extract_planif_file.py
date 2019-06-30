@@ -53,7 +53,7 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
 
     # lookup week column
     wc = 1
-    for wr in [1, 5]:
+    for wr in [1]:
         while wc < 50:
             wc += 1
             sem = sheet.cell(row=wr, column=wc).value
