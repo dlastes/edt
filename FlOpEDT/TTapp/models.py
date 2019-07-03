@@ -384,7 +384,9 @@ class LimitCourseTypeTimePerPeriod(TTConstraint):  # , pond):
                                 int(self.max_hours * 60) + 1, 3600*24)
                 ttmodel.obj += self.local_weight() * ponderation * var
             else:
-                ttmodel.add_constraint(expr, '<=', self.max_hours*60)
+                ttmodel.add_constraint(expr, '<=', self.max_hours*60, 'Max_%d_hours_of_%s_per_%s' % (self.max_hours,
+                                                                                                     self.course_type,
+                                                                                                     self.period))
 
     def enrich_model(self, ttmodel, ponderation=1.):
         
