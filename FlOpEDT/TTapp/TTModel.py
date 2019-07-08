@@ -639,7 +639,7 @@ class TTModel(object):
             #     holislots = filter(holislots, apm=holiday.apm)
             for sl in holislots:
                 for c in self.wdb.compatible_courses[sl]:
-                    self.add_constraint(self.TT[(sl, c)], '==', 0)
+                    self.add_constraint(self.TT[(sl, c)], '==', 0, "holislot_%s_%s" % (sl, c))
 
         # Training half day
         for training_half_day in self.wdb.training_half_days:
@@ -652,7 +652,7 @@ class TTModel(object):
             for sl in training_slots:
                 for c in self.wdb.courses.filter(group__train_prog__in=training_progs) \
                          & self.wdb.compatible_courses[sl]:
-                    self.add_constraint(self.TT[(sl, c)], '==', 0)
+                    self.add_constraint(self.TT[(sl, c)], '==', 0, "no_course_on_slot_%s_%s" % (sl, c))
 
     def add_rooms_constraints(self):
         print("adding room constraints")
@@ -691,7 +691,8 @@ class TTModel(object):
                 self.add_constraint(
                     self.sum(self.TTrooms[(sl, c, rg)] for rg in course_rg_compat[c]) - self.TT[(sl, c)],
                     '==',
-                    0)
+                    0,
+                    name=name)
 
             # constraint : fixed_courses rooms are not available
             for rg in self.wdb.room_groups:
