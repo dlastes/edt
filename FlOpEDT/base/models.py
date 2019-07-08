@@ -333,11 +333,11 @@ class Course(models.Model):
 
     def __str__(self):
         username_mod = self.tutor.username if self.tutor is not None else '-no_tut-'
-        return f"{self.module}-{username_mod}-{self.groupe}"
+        return f"{self.type}-{self.module}-{username_mod}-{self.groupe}"
     
     def full_name(self):
         username_mod = self.tutor.username if self.tutor is not None else '-no_tut-'
-        return f"{self.module}-{self.type}-{username_mod}-{self.groupe}"
+        return f"{self.type}-{self.module}-{username_mod}-{self.groupe}"
 
 
 class ScheduledCourse(models.Model):
