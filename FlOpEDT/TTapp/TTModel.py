@@ -650,7 +650,7 @@ class TTModel(object):
             if training_half_day.train_prog is not None:
                 training_progs = [training_half_day.train_prog]
             for sl in training_slots:
-                for c in self.wdb.courses.filter(group__train_prog__in=training_progs) \
+                for c in self.wdb.courses.filter(groupe__train_prog__in=training_progs) \
                          & self.wdb.compatible_courses[sl]:
                     self.add_constraint(self.TT[(sl, c)], '==', 0, "no_course_on_slot_%s_%s" % (sl, c))
 
