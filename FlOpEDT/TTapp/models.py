@@ -733,7 +733,8 @@ class MinHalfDays(TTConstraint):
         if self.tutors.exists():
             helper = MinHalfDaysHelperTutor(ttmodel, self, ponderation)
             for tutor in self.tutors.all():
-                helper.enrich_model(tutor=tutor)
+                if tutor in ttmodel.wdb.instructors:
+                    helper.enrich_model(tutor=tutor)
 
         elif self.modules.exists():
             helper = MinHalfDaysHelperModule(ttmodel, self, ponderation)
