@@ -49,6 +49,7 @@ from MyFlOp.MyTTUtils import reassign_rooms
 
 import signal
 
+from django.db import close_old_connections
 from django.db.models import Q, Max, F
 from django.conf import settings
 
@@ -1023,6 +1024,7 @@ class TTModel(object):
 
     def add_tt_to_db(self, target_work_copy):
 
+        close_old_connections()
         # remove target working copy
         ScheduledCourse.objects \
             .filter(cours__module__train_prog__department=self.department,
