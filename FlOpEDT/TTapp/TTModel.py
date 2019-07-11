@@ -726,7 +726,7 @@ class TTModel(object):
             for rp in self.wdb.room_prefs:
                 e = self.sum(
                     self.TTrooms[(sl, c, rp.unprefer)]
-                    for c in self.wdb.courses.filter(room_type=rp.for_type) & self.wdb.compatible_courses[sl])
+                    for c in set(self.wdb.courses.filter(room_type=rp.for_type)) & self.wdb.compatible_courses[sl])
                 preferred_is_unavailable = False
                 for r in rp.prefer.subrooms.all():
                     if self.avail_room[r][sl]:
