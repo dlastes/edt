@@ -26,7 +26,6 @@
 import logging
 
 from base.models import Time, TimeGeneralSettings
-from TTapp.models import slots_filter
 
 logger = logging.Logger(__name__)
 
@@ -82,7 +81,8 @@ class MinHalfDaysHelperModule(MinHalfDaysHelperBase):
             
             # add constraint linking MBHD to TT
             for apm in [Time.AM, Time.PM]:
-                halfdayslots = slots_filter(self.ttmodel.wdb.slots, day=d, apm=apm)
+                halfdayslots = set(slot for slot in self.ttmodel.wdb.slots
+                                   if slot.day == d and slot.apm == apm)
                 card = len(halfdayslots)
                 expr = self.ttmodel.lin_expr()
                 expr += card * mod_b_h_d[(self.module, d, apm)]
