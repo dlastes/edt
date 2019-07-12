@@ -87,7 +87,7 @@ class MinHalfDaysHelperModule(MinHalfDaysHelperBase):
                 expr = self.ttmodel.lin_expr()
                 expr += card * mod_b_h_d[(self.module, d, apm)]
                 for sl in halfdayslots:
-                    for c in self.ttmodel.wdb.courses.filter(module=self.module)\
+                    for c in set(self.ttmodel.wdb.courses.filter(module=self.module))\
                             & self.ttmodel.wdb.compatible_courses[sl]:
                         expr -= self.ttmodel.TT[(sl, c)]
                 self.ttmodel.add_constraint(expr, '>=', 0)
