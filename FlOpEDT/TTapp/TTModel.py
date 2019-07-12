@@ -49,6 +49,7 @@ from MyFlOp.MyTTUtils import reassign_rooms
 
 import signal
 
+from django.db import close_old_connections
 from django.db.models import Q, Max, F
 from django.conf import settings
 
@@ -639,7 +640,7 @@ class TTModel(object):
             #     holislots = filter(holislots, apm=holiday.apm)
             for sl in holislots:
                 for c in self.wdb.compatible_courses[sl]:
-                    self.add_constraint(self.TT[(sl, c)], '==', 0)
+                    self.add_constraint(self.TT[(sl, c)], '==', 0, "holislot_%s_%s" % (sl, c))
 
         # Training half day
         for training_half_day in self.wdb.training_half_days:
@@ -650,9 +651,9 @@ class TTModel(object):
             if training_half_day.train_prog is not None:
                 training_progs = [training_half_day.train_prog]
             for sl in training_slots:
-                for c in self.wdb.courses.filter(group__train_prog__in=training_progs) \
+                for c in set(self.wdb.courses.filter(groupe__train_prog__in=training_progs)) \
                          & self.wdb.compatible_courses[sl]:
-                    self.add_constraint(self.TT[(sl, c)], '==', 0)
+                    self.add_constraint(self.TT[(sl, c)], '==', 0, "no_course_on_slot_%s_%s" % (sl, c))
 
     def add_rooms_constraints(self):
         print("adding room constraints")
@@ -687,11 +688,12 @@ class TTModel(object):
         for sl in self.wdb.slots:
             # constraint : each course is assigned to a RoomGroup
             for c in self.wdb.compatible_courses[sl]:
-                name = 'core_roomtype_' + str(r) + '_' + str(sl)
+                name = 'core_roomtype_' + str(c) + '_' + str(sl)
                 self.add_constraint(
                     self.sum(self.TTrooms[(sl, c, rg)] for rg in course_rg_compat[c]) - self.TT[(sl, c)],
                     '==',
-                    0)
+                    0,
+                    name=name)
 
             # constraint : fixed_courses rooms are not available
             for rg in self.wdb.room_groups:
@@ -724,7 +726,7 @@ class TTModel(object):
             for rp in self.wdb.room_prefs:
                 e = self.sum(
                     self.TTrooms[(sl, c, rp.unprefer)]
-                    for c in self.wdb.courses.filter(room_type=rp.for_type) & self.wdb.compatible_courses[sl])
+                    for c in set(self.wdb.courses.filter(room_type=rp.for_type)) & self.wdb.compatible_courses[sl])
                 preferred_is_unavailable = False
                 for r in rp.prefer.subrooms.all():
                     if self.avail_room[r][sl]:
@@ -1022,6 +1024,7 @@ class TTModel(object):
 
     def add_tt_to_db(self, target_work_copy):
 
+        close_old_connections()
         # remove target working copy
         ScheduledCourse.objects \
             .filter(cours__module__train_prog__department=self.department,

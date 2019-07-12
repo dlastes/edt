@@ -35,7 +35,7 @@ from displayweb.models import TrainingProgrammeDisplay
 
 from base.models import Room, RoomType, RoomGroup, TrainingProgramme,\
     Group, Module, GroupType, Period, Time, Day, Slot, CourseType, \
-    Department, CourseStartTimeConstraint, TimeGeneralSettings
+    Department, CourseStartTimeConstraint, TimeGeneralSettings, UserPreference
 
 from base.weeks import annee_courante
 
@@ -105,6 +105,13 @@ def tutors_extract(department, book):
                 tutor.save()
 
                 UserDepartmentSettings.objects.create(department=department, user=tutor)
+
+                # user_preference_start_times = [480, 570, 660, 855, 945, 1035]
+                # for t in Tutor.objects.all():
+                #     for d in [day[0] for day in Day.CHOICES[:5]]:
+                #         for st in user_preference_start_times:
+                #             up = UserPreference(user=t, day=d, start_time=st, duration=90, valeur=8)
+                #             up.save()
 
             except IntegrityError as ie :
                 print("A constraint has not been respected creation the Professor : \n", ie)
