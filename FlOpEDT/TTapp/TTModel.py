@@ -261,7 +261,7 @@ class TTModel(object):
         try:
             _ = iter(train_prog)
         except TypeError:
-            train_prog = [train_prog]
+            train_prog = TrainingProgramme.objects.filter(id=train_prog.id)
         self.train_prog = train_prog
         self.stabilize_work_copy = stabilize_work_copy
         self.obj = self.lin_expr()
