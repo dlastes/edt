@@ -41,6 +41,8 @@
     var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
     var url_login = "{% url "people:login" %}";
     var annee_courante = "{{ annee_courante }}" ;
+    var time_settings = {{ time_settings | safe }} ;
+    var days = {{ days | safe }} ;
   </script>
   </script>
 <body>
@@ -83,12 +85,13 @@
       </div>
     </div>
 </body>
+  <script type='text/javascript' src="{% static 'base/intervals.js' %}"></script>
   <script type='text/javascript' src="{% static 'base/week_change.js' %}"></script>
   <script type='text/javascript' src="{% static 'base/transformation.js' %}"></script>
   <script type='text/javascript' src="{% static 'base/creation.js' %}"></script>
   <script type='text/javascript' src="{% static 'base/action.js' %}"></script>
   <script type='text/javascript' src="{% static 'base/update.js' %}"></script>
   <script type='text/javascript' src="{% static 'base/variables.js' %}?2"></script>
-<script type='text/javascript' src="{% static "base/stype.js" %}"></script>
+  <script type='text/javascript' src="{% static "base/stype.js" %}"></script>
 
 {% endblock %}

@@ -22,15 +22,25 @@
 /* without disclosing the source code of your own applications.             */
 
 /* ************ grille EdT ************ */
-.gridm {
-  stroke: powderblue;
-  stroke-width: .5;
-  fill: aliceblue;
+.rbg {
+  stroke: none;
+  fill: white;
+}
+.day_am{
+    stroke:black;
+    stroke-width: 2;
+    fill: none;
+}
+.day_pm{
+    stroke:black;
+    stroke-width: 2;
+    fill: none;
 }
 /* jours de la semaine */
-.gridsckd {
-  font-size:20px;
-  font-weight:bold;
+.txt_scl {
+    fill:darkslateblue;
+    font-size:20px;
+    font-weight:bold;
 }
 /* groupes */
 .gridscg, .gridscp {
@@ -39,9 +49,13 @@
 }
 /* creneau horaire */
 .gridsckh {
-  font-size:13px;
-  font-weight:normal;
-  text-anchor:start;
+    font-size:13px;
+    font-weight:normal;
+    text-anchor:end;
+}
+.gridsckhl, .gridsckhlam, .gridsckhlpm  {
+    stroke:black;
+    stroke-width: 2;
 }
 .cours text {
   font-size:10px;

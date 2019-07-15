@@ -32,12 +32,13 @@ var svg = {height: 625 - margin.top - margin.bot, width: 680 - margin.left - mar
 
 smiley.tete = 13 ;
 
-var data_grid_scale_day = ["LUNDI","MARDI","MERCREDI","JEUDI","VENDREDI"];
-
 dim_dispo.width  = 80 ;
-dim_dispo.height = 80 ;
+dim_dispo.height = 500 ;
 dim_dispo.mh = 10 ;
 dim_dispo.plot = 1 ;
+nbRows=1;
+scale = dim_dispo.height / nb_minutes_in_grid()  ;
+
 
 ckbox["dis-mod"].cked = true ;
 
@@ -48,7 +49,7 @@ pref_only = true ;
 
 
 create_general_svg_pref_only();
-create_dh_keys();
+go_days(true, false);
 create_lunchbar();
 fetch_pref_only();
 
@@ -132,12 +133,8 @@ function fetch_pref_only() {
 	    
 	    console.log("in");
 
-	    dispos[user.nom] = new Array(nbPer);
-	    for(var i=0 ; i<nbPer ; i++) {
-		dispos[user.nom][i] = new Array(nbSl);
-		dispos[user.nom][i].fill(-1);
-	    }
-	    d3.csvParse(msg, translate_dispos_from_csv);
+	    user.dispos_type = [] ;
+	    user.dispos_type = d3.csvParse(msg, translate_dispos_from_csv);
 	    create_dispos_user_data();
 	    fetch.dispos_ok = true ;
 	    go_pref(true);
@@ -174,23 +171,28 @@ function fetch_pref_only() {
 
 
 function dispo_x(d) {
-    return d.day * (dim_dispo.width + dim_dispo.mh) ;
+    return idays[d.day].num * (dim_dispo.width + dim_dispo.mh) ;
 }
 function dispo_h(d){
-    return dim_dispo.height;
+    return d.duration * scale ;
 }
 function gsckd_x(datum,i) {
     return  i*(dim_dispo.width + dim_dispo.mh)
 	+ dim_dispo.width * .5;
 }
 function gsckd_y(datum) {
-    return  - .25 * dim_dispo.height ;
+    return  - 20 ;
+}
+function gsckd_txt(d) {
+    return  d.name ;
 }
 function gsckh_x(datum) {
     return - dim_dispo.width ;
 }
 function gsclb_y()  {
-    return dim_dispo.height * .5 * nbSl;
+    //return dim_dispo.height * .5 * nbSl;
+    return dispo_y({start_time:
+		    time_settings.time.lunch_break_start_time});
 }
 function gsclb_x()  {
     return (dim_dispo.width + dim_dispo.mh) * nbPer - dim_dispo.mh ;
@@ -203,49 +205,17 @@ function gsclb_x()  {
 
 d3.select("body")
     .on("click", function(d) {
-	if(dispo_menu_appeared) {
-	    del_dispo_adv = true ;
-	    dispo_menu_appeared = false ;
-	    go_pref(true);
-	} else {
-	    if(del_dispo_adv) {
-		del_dispo_adv = false ;
-		data_dispo_adv_cur = [] ;
-		go_pref(true);
-	    }
-	}
+	cancel_cm_adv_preferences();
+	cancel_cm_room_tutor_change();
     })
-
-
-
-
-
-
-function rearrange_dispos(save) {
-    var changes = [] ;
-    var i =0;
-    
-    for(var j = 0 ; j<nbPer ; j++) {
-	for(var k = 0 ; k<nbSl ; k++) {
-	    if(!save ||
-	       user.dispos[i].val != user.dispos_bu[i].val) {
-		changes.push({ day: j, hour: k, val:user.dispos[i].val});
-	    }
-		i+=1;
-	}
-    }
-
-    user.dispos_bu = user.dispos.slice(0);
-    
-    return changes ;
-}
 
 
 function apply_stype_from_button(save) {
     console.log("app");
 //    console.log(document.forms['app']);
     console.log();
-    var changes = rearrange_dispos();
+    var changes = [] ;
+    compute_pref_changes(changes) ;
     var sent_data = {} ;
     sent_data['changes'] = JSON.stringify(changes) ; 
 

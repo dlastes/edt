@@ -53,7 +53,7 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
 
     # lookup week column
     wc = 1
-    for wr in [1, 5]:
+    for wr in [1]:
         while wc < 50:
             wc += 1
             sem = sheet.cell(row=wr, column=wc).value
@@ -64,11 +64,11 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
 
     row = 2
     module_COL = 1
-    nature_COL = 2
-    prof_COL = 3
-    salle_COL = 4
-    groupe_COL = 6
-    durée_COL = 5
+    nature_COL = 3
+    duree_COL = 4
+    prof_COL = 5
+    salle_COL = 6
+    groupe_COL = 7
     sumtotal = 0
     while 1:
         row += 1
@@ -89,7 +89,7 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
             N = float(N)
             # handle dark green lines - Vert fonce
             assert isinstance(salle, str)
-            if salle == "Salle":
+            if salle == "Type de Salle":
                 nominal = int(N)
                 if N != nominal:
                     print('Valeur decimale ligne %g de %s, semaine %g : on la met a 1 !' % (row, feuille, semaine))
@@ -115,7 +115,6 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
             grps = sheet.cell(row=row, column=groupe_COL).value
             COURSE_TYPE = CourseType.objects.get(name=nature, department=department)
             ROOMTYPE = RoomType.objects.get(name=salle, department=department)
-            duration = int(duration)
             if prof is None:
                 TUTOR, created = Tutor.objects.get_or_create(username='---')
                 if created:
@@ -143,16 +142,15 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
             groupes = [str(g) for g in grps]
 
             GROUPS = list(Group.objects.filter(nom__in=groupes, train_prog=PROMO))
+            if GROUPS == []:
+                GROUPS = list(Group.objects.filter(nom='CE', train_prog=PROMO))
 
             N=int(N)
-            Diff = N - len(groupes) * nominal
-            if Diff != 0:
-                print("Nombre incohérent ligne %g semaine %s de %s : %s \n" % (row, semaine, feuille, module))
 
             for i in range(N):
-                GROUPE = GROUPS[i % len(groupes)]
+                GROUPE = GROUPS[i % len(GROUPS)]
                 C = Course(tutor=TUTOR, type=COURSE_TYPE, module=MODULE, groupe=GROUPE, semaine=semaine, an=an,
-                           room_type=ROOMTYPE, duration=duration)
+                           room_type=ROOMTYPE)
                 C.save()
                 for sp in SUPP_TUTORS:
                     C.supp_tutor.add(sp)
@@ -171,11 +169,11 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
                         P = Dependency(cours1=course, cours2=C)
                         P.save()
 
-            if 'D' in comments or 'D' in local_comments  and N >= 2:
+            if 'D' in comments or 'D' in local_comments and N >= 2:
                 for GROUPE in GROUPS:
                     Cours = Course.objects.filter(type=COURSE_TYPE, module=MODULE, groupe=GROUPE, an=an,
                                                   semaine=semaine)
-                    for i in range(N//2):
+                    for i in range(N//2-1):
                         P = Dependency(cours1=Cours[2*i], cours2=Cours[2*i+1], successifs=True)
                         P.save()
             if 'ND' in comments or 'ND' in local_comments  and N >= 2:

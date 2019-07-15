@@ -24,20 +24,50 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
+import importlib
 from TTapp.TTModel import TTModel
-from TTapp.models import MinHalfDays, max_weight
+
+from MyFlOp.MyTTUtils import print_differences
+
 
 class MyTTModel(TTModel):
+    def __init__(self, department_abbrev, semaine, an,
+                 train_prog=None,
+                 stabilize_work_copy=None,
+                 min_bhd_g=0.5):
+        TTModel.__init__(self, department_abbrev, semaine, an,
+                         train_prog=train_prog,
+                         stabilize_work_copy=stabilize_work_copy,
+                         min_bhd_g=min_bhd_g)
+
     def add_specific_constraints(self):
         """
-        The specific constraints stored in the database are added by the TTModel class.
+        The speficic constraints stored in the database are added by the
+        TTModel class.
         If you shall add more specific ones, you may write it down here.
         """
         TTModel.add_specific_constraints(self)
 
-
-    def solve(self, time_limit=3600, solver='CBC', target_work_copy=None):
+    def solve(self, time_limit=3600, target_work_copy=None,
+              solver='gurobi'):
         """
-        If you shall add pre (or post) processing apps, you may write them down here.
+        If you shall add pre (or post) processing apps, you may write them down
+        here.
         """
-        TTModel.solve(self, time_limit=time_limit, solver=solver, target_work_copy=target_work_copy)
+        result = TTModel.solve(self,
+                               time_limit=time_limit,
+                               target_work_copy=target_work_copy,
+                               solver=solver)
+        if result is None:
+            spec = importlib.util.find_spec('gurobipy')
+            if spec:
+                from gurobipy import read
+                lp = "FlOpTT-pulp.lp"
+                m = read(lp)
+                # m.optimize()
+                m.computeIIS()
+                m.write("logs/IIS_week%s.ilp" % self.semaine)
+                print("IIS written in file logs/IIS_week%s.ilp" % (self.semaine))
+        else :
+            if self.stabilize_work_copy is not None:
+                print_differences(self.semaine, self.an, self.stabilize_work_copy, target_work_copy, self.wdb.instructors)

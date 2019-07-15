@@ -3,7 +3,7 @@ from base.models import Department, TrainingProgramme, \
                         Dependency, Module, Group, PlanningModification, \
                         ScheduledCourse
 
-from base.models import BreakingNews, Period, GroupType, \
+from base.models import Period, GroupType, \
                         TutorCost, UserPreference, Course, TrainingHalfDay,\
                         Room, RoomGroup, RoomPreference, RoomType, RoomSort
 
@@ -35,7 +35,7 @@ def get_model_department_lookup(model, department, field_name=None):
             Dependency: 'cours1__type__department',
             Module: 'train_prog__department',
             Group: 'train_prog__department',
-            Room: 'subroom_of__types__department',
+            Room: 'departments',
             RoomGroup: 'types__department',
             RoomPreference: 'room__subroom_of__types__department',
             RoomSort: 'for_type__department',

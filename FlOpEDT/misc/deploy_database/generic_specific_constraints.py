@@ -26,7 +26,7 @@
 # without disclosing the source code of your own applications.
 
 
-from TTapp.models import LimitCourseTypePerPeriod, ReasonableDays, MinHalfDays, max_weight, \
+from TTapp.models import LimitCourseTypeTimePerPeriod, ReasonableDays, MinHalfDays, max_weight, \
     SimultaneousCourses, LimitedSlotChoices
 from base.models import Time, Day, TrainingProgramme, CourseType, Module, RoomGroup, Slot, Group, Course, Department
 from people.models import Tutor
@@ -81,27 +81,27 @@ def add_iut_blagnac_specials():
     pas_plus_de_2_exams_par_jour = True
     if pas_plus_de_2_exams_par_jour:
         for promo in TrainingProgramme.objects.all():
-            L = LimitCourseTypePerPeriod(limit=2, department=info,
-                                         type=DS,
-                                         period=LimitCourseTypePerPeriod.FULL_DAY,
-                                         train_prog=promo)
+            L = LimitCourseTypeTimePerPeriod(limit=2, department=info,
+                                             type=DS,
+                                             period=LimitCourseTypeTimePerPeriod.FULL_DAY,
+                                             train_prog=promo)
             L.save()
 
     # Pas plus de 2 amphis par demie journée
     for semaine in range(1,52,2):
         for promo in TrainingProgramme.objects.all():
-            L = LimitCourseTypePerPeriod(limit=2, week=semaine, year=2018,
-                                         type=CM, department=info,
-                                         period=LimitCourseTypePerPeriod.HALF_DAY,
-                                         train_prog=promo)
+            L = LimitCourseTypeTimePerPeriod(limit=2, week=semaine, year=2018,
+                                             type=CM, department=info,
+                                             period=LimitCourseTypeTimePerPeriod.HALF_DAY,
+                                             train_prog=promo)
             L.save()
     # Pas plus d'un amphi par matière et par jour
     for semaine in range(1,52,3):
         for module in Module.objects.all():
-            L = LimitCourseTypePerPeriod(limit=1, week=semaine, year=2018,
-                                         type=CM, department=info,
-                                         period=LimitCourseTypePerPeriod.FULL_DAY,
-                                         module=module)
+            L = LimitCourseTypeTimePerPeriod(limit=1, week=semaine, year=2018,
+                                             type=CM, department=info,
+                                             period=LimitCourseTypeTimePerPeriod.FULL_DAY,
+                                             module=module)
             L.save()
 
 

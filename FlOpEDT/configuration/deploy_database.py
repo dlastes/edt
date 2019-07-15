@@ -29,20 +29,17 @@ import string, logging
 from django.db import transaction
 from openpyxl import load_workbook
 
-from django.db.models import Q
 from random import choice
 
-from base.models import Room, RoomType, RoomGroup, TrainingProgramme, TrainingProgrammeDisplay,\
-    Group, Module, GroupType, Period, Time, Day, Slot, CourseType, EdtVersion, UserPreference,\
-    CoursePreference, Department
+from displayweb.models import TrainingProgrammeDisplay
+
+from base.models import Room, RoomType, RoomGroup, TrainingProgramme,\
+    Group, Module, GroupType, Period, Time, Day, Slot, CourseType, \
+    Department, CourseStartTimeConstraint, TimeGeneralSettings, UserPreference
 
 from base.weeks import annee_courante
 
-from misc.check_slots import assign_day_time_numbers
-
-from misc.generate_static_files import generate_group_file
-
-from people.models import FullStaff, SupplyStaff, Tutor
+from people.models import FullStaff, SupplyStaff, Tutor, UserDepartmentSettings
 
 from django.db import IntegrityError
 
@@ -64,8 +61,8 @@ def extract_database_file(bookname=bookname, department_name=None, department_ab
     rooms_extract(department, book)
     groups_extract(department, book)
     modules_extract(department, book)
-    slots_extract(department, book)
-    courses_extract(department, book)
+    coursetypes_extract(department, book)
+    settings_extract(department, book)
 
 
 def tutors_extract(department, book):
@@ -85,6 +82,7 @@ def tutors_extract(department, book):
         try:
             tutor = Tutor.objects.get(username=id)
             logger.debug(f'update tutor : [{id}]')
+
         except Tutor.DoesNotExist:
 
             try:
@@ -92,18 +90,28 @@ def tutors_extract(department, book):
                 
                 if status == "Permanent":
                     tutor = FullStaff(**params)
+                    tutor.status=Tutor.FULL_STAFF
                 else:
                     employer = sheet.cell(row=INTER_ID_ROW, column=9).value
                     position = sheet.cell(row=INTER_ID_ROW, column=8).value
 
                     params.update({'employer': employer, 'position': position})
                     tutor = SupplyStaff(**params)
+                    tutor.status = Tutor.SUPP_STAFF
 
 
                 tutor.set_password("passe")
                 tutor.is_tutor = True
                 tutor.save()
 
+                UserDepartmentSettings.objects.create(department=department, user=tutor)
+
+                # user_preference_start_times = [480, 570, 660, 855, 945, 1035]
+                # for t in Tutor.objects.all():
+                #     for d in [day[0] for day in Day.CHOICES[:5]]:
+                #         for st in user_preference_start_times:
+                #             up = UserPreference(user=t, day=d, start_time=st, duration=90, valeur=8)
+                #             up.save()
 
             except IntegrityError as ie :
                 print("A constraint has not been respected creation the Professor : \n", ie)
@@ -111,7 +119,7 @@ def tutors_extract(department, book):
             else:
                 logger.debug(f'create tutor with id:{id}')
         else:
-            tutor.departments.add(department)
+            UserDepartmentSettings.objects.create(department=department, user=tutor)
 
         INTER_ID_ROW += 1
         id = sheet.cell(row=INTER_ID_ROW, column=1).value
@@ -164,6 +172,7 @@ def rooms_extract(department, book):
             
             # Ensure that a room_group exits with the same roomid
             room.subroom_of.add(room_group)
+            room.departments.add(department)
 
 
         except IntegrityError as ie:
@@ -255,7 +264,7 @@ def rooms_extract(department, book):
 
                 room_group.types.add(room_type)
             except RoomGroup.DoesNotExist:
-                print(f"unable to find  RoomGroup '{idroom_group_idGroup}'")
+                print(f"unable to find  RoomGroup '{room_group_id}'")
 
             col += 1
             room_group_id = sheet.cell(row=row, column=col).value
@@ -456,7 +465,7 @@ def modules_extract(department, book):
 
 
     while idMod is not None:
-
+        idMod = idMod.replace(' ','')
         tpMod = sheet.cell(row=MODULE_ROW, column=4).value
         period = sheet.cell(row=MODULE_ROW, column=6).value
         verif = Module.objects.filter(abbrev=idMod, train_prog__abbrev=tpMod, period__name=period)
@@ -465,11 +474,15 @@ def modules_extract(department, book):
         if not verif.exists():
 
             codeMod = sheet.cell(row=MODULE_ROW, column=2).value
+            codeMod = codeMod.replace(' ','')
             nameMod = sheet.cell(row=MODULE_ROW, column=3).value
             tpMod = sheet.cell(row=MODULE_ROW, column=4).value
             profMod = sheet.cell(row=MODULE_ROW, column=5).value
             tpModule = TrainingProgramme.objects.get(abbrev=tpMod)
-            profesMod = Tutor.objects.get(username=profMod)
+            try:
+                profesMod = Tutor.objects.get(username=profMod)
+            except:
+                print(f"unable to find tutor '{profMod}'")
             periodMod = Period.objects.get(name=period, department=department)
 
             try:
@@ -487,141 +500,119 @@ def modules_extract(department, book):
 
     print("Modules extraction done")
 
-def slots_extract(department, book):
-
-    sheet = book["Creneaux"]
-
-    answer = sheet.cell(row=3, column=12).value
-    for d in Day.CHOICES[:5]:
-        day, created = Day.objects.get_or_create(day=d[0])
-    if created:
-        day.save()
-
-    if answer == "Oui":
-        print("'normal' slots imported")
-        default_times=[(8,0),(9,30),(11,0),(14,15),(15,45),(17,15)]
-        for hours,minutes in default_times:
-            time, created = Time.objects.get_or_create(hours=hours, minutes=minutes)
-            if created:
-                time.save()
-            for day in Day.objects.all():
-                slot, created = Slot.objects.get_or_create(duration=90, jour=day, heure=time)
-                if created:
-                    slot.save()
-        assign_day_time_numbers()
-        return None
-
-    CRENEAU_ROW=3
-
-    dura = sheet.cell(row=CRENEAU_ROW, column=1).value
-
-    while dura is not None:
-
-        TIME_COL = 3
-
-        day = sheet.cell(row=CRENEAU_ROW, column=2).value
-        hour = sheet.cell(row=CRENEAU_ROW, column=TIME_COL).value
-
-        if day == "Tous les jours":
-            days = [d[0] for d in Day.CHOICES[:5]]
-        elif day == "Lundi":
-            days = [Day.MONDAY]
-        elif day == "Mardi":
-            days = [Day.TUESDAY]
-        elif day == "Mercredi":
-            days = [Day.WEDNESDAY]
-        elif day == "Jeudi":
-            days = [Day.THURSDAY]
-        elif day == "Vendredi":
-            days = [Day.FRIDAY]
-
-
-        while hour is not None:
-
-            try:
-
-                time = hour.split('h')
-                hours = int(time[0])
-
-                if time[1] != "":
-
-                    minutes = int(time[1])
-
-                else:
-
-                    minutes = 0
-                slotTime, created = Time.objects.get_or_create(hours=hours, minutes=minutes)
-
-                if created:
-
-                    slotTime.save()
-
-                for day in days:
-
-                    slot, created = Slot.objects.get_or_create(duration=dura,
-                                                               jour=Day.objects.get(day=day),
-                                                               heure=slotTime)
-                    if created:
-
-                        slot.save()
-
-            except IntegrityError as ie:
-
-                print("A constraint has not been respected creating the Slot %s : \n" % dura, ie)
-                pass
-
-            TIME_COL += 1
-            hour = sheet.cell(row=CRENEAU_ROW, column=TIME_COL).value
-
-        CRENEAU_ROW += 1
-        dura = sheet.cell(row=CRENEAU_ROW, column=TIME_COL).value
-
-    assign_day_time_numbers()
-
-    print("Slots extraction done")
-
-def courses_extract(department, book):
+def coursetypes_extract(department, book):
 
     sheet = book['Cours']
 
-    TYPE_ROW = 3
+    type_row = 2
 
-    idType = sheet.cell(row=TYPE_ROW, column=1).value
+    idType = sheet.cell(row=type_row, column=1).value
 
     while idType is not None:
 
-        TYPE_COL = 2
+        duration_col = 2
+        duration = sheet.cell(row=type_row, column=duration_col).value
 
-        verif = CourseType.objects.filter(name=idType, department=department)
+        verif = CourseType.objects.filter(name=idType, department=department, duration=duration)
 
         if not verif.exists():
-
             try:
+                course_type = CourseType(name=idType, department=department, duration=duration)
+                course_type.save()
 
-                course = CourseType(name=idType, department=department)
-                course.save()
+                time_col = 8
+                start_times = []
+                time = sheet.cell(row=type_row, column=time_col).value
+                while time is not None:
+                    time = time.split('h')
+                    hours = int(time[0])
+                    if time[1] != "":
+                        minutes = int(time[1])
+                    else:
+                        minutes = 0
+                    start_time = 60*hours + minutes
+                    start_times.append(start_time)
+                    time_col += 1
+                    time = sheet.cell(row=type_row, column=time_col).value
+
+                time_constraint = CourseStartTimeConstraint(course_type=course_type, allowed_start_times=start_times)
+                time_constraint.save()
+
+                grouptype_col = 3
+                idGroup = sheet.cell(row=type_row, column=grouptype_col).value
+
+                while idGroup is not None:
+                    group = GroupType.objects.get(name=idGroup, department=department)
+                    course_type.group_types.add(group)
+                    course_type.save()
+
+                    grouptype_col += 1
+                    idGroup = sheet.cell(row=type_row, column=grouptype_col).value
 
             except IntegrityError as ie:
 
                 print("A constraint has not been respected creating the CourseType %s : \n" % idType, ie)
                 pass
 
-            idGroup = sheet.cell(row=TYPE_ROW, column=TYPE_COL).value
+            type_row += 1
+            idType = sheet.cell(row=type_row, column=1).value
 
-            while idGroup is not None:
+    print("CourseType extraction done")
 
-                group = GroupType.objects.get(name=idGroup, department=department)
-                course.group_types.add(group)
-                course.save()
 
-                TYPE_COL += 1
-                idGroup = sheet.cell(row=TYPE_ROW, column=TYPE_COL).value
+def convert_time(value):
+    """
+    Return an integer value from a time (hh:mm:ss) formated value 
+    representing the number of minutes since midnight
+    """
+    time_array = value.split(':')
+    return int(time_array[0]) * 60 + int(time_array[1])
 
-        TYPE_ROW += 1
-        idType = sheet.cell(row=TYPE_ROW, column=1).value
 
-    print("Courses' types extraction done")
+def settings_extract(department, book):
+    """
+    Extract general settings
+    """
 
+    sheet = book['Paramètres']
+    settings = {
+        'department': department,
+        'days': [],
+        'day_start_time': None,
+        'day_finish_time': None,
+        'lunch_break_start_time': None,
+        'lunch_break_finish_time': None,
+
+    }
+
+    # Get days opened for scheduling
+    days_row = 3
+    days_col = 4
+
+    for index, day in enumerate(Day.CHOICES):
+        day_raw_value = sheet.cell(row=days_row, column=days_col + index).value
+        if day_raw_value:
+            logger.debug(f'Day {day[0]} : {day_raw_value}')
+            settings['days'].append(day[0])
+
+    # Get time settings
+    hours_row = 2
+    hours_col = 2
+
+    for index, setting in enumerate(list(settings)[2:]):
+        current_row = hours_row + index
+        hour_raw_value = sheet.cell(row=current_row, column=hours_col).value
+        try:
+            logger.debug(f'Hour {setting} : [{hour_raw_value}]')
+            hour = convert_time(str(hour_raw_value))
+            settings[setting] = hour
+        except:
+            logger.error(f'an error has occured while converting hour at Paramètres[{current_row}, {hours_col}]')
+
+
+    # Set settings
+    logger.info(f'TimeGeneralSettings : {settings}')
+    TimeGeneralSettings.objects.create(**settings)
 
 
 def displayInfo():
@@ -718,8 +709,8 @@ def displayInfo():
 
     print("------------------")
 
-    print("The Slots are : ")
+    print("The CourseTypes are : ")
 
-    for s in Slot.objects.all():
+    for ct in CourseType.objects.all():
 
-        print(s, " ", s.duration)
+        print(ct)

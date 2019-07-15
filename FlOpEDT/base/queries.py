@@ -26,24 +26,26 @@
 
 import logging
 
+from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
 
 from base.models import Group, TrainingProgramme, \
-                        GroupDisplay, TrainingProgrammeDisplay, \
                         ScheduledCourse, EdtVersion, Department, Regen
 
 from base.models import Room, RoomType, RoomGroup, \
                         RoomSort, Period, CourseType, \
-                        BreakingNews, TutorCost, GroupType
+                        TutorCost, CourseStartTimeConstraint, \
+                        TimeGeneralSettings, GroupType
+
+from displayweb.models import GroupDisplay, TrainingProgrammeDisplay, BreakingNews
 
 from people.models import Tutor
-
 from TTapp.models import TTConstraint
-
 
 logger = logging.getLogger(__name__)
 
 
+@transaction.atomic
 def create_first_department():    
 
     department = Department.objects.create(name="Default Department", abbrev="default")
@@ -67,8 +69,17 @@ def create_first_department():
     types = TTConstraint.__subclasses__()
 
     for type in types:
-        type.objects.all().update(department=department)
-    
+        type.objects.all().update(department=department)    
+
+    # Init TimeGeneralSettings with default values
+    TimeGeneralSettings.objects.create(
+                        department=department,
+                        day_start_time=8*60,
+                        day_finish_time=18*60+45,
+                        lunch_break_start_time=12*60+30,
+                        lunch_break_finish_time=14*60,
+                        days=["m", "tu", "w", "th", "f"])
+
     return department
 
 
@@ -188,21 +199,69 @@ def get_descendant_groups(gp, children):
 def get_rooms(department_abbrev):
     """
     From the data stored in the database, fill the room description file, that
-    will be used by the website
-    :return:
+    will be used by the website.
+    All room that belongs to a roomgroup that belongs to at least one room type
+    of department_abbrev
+    :return: an object containing one dictionary roomtype -> (list of roomgroups),
+    and one dictionary roomgroup -> (list of rooms)
     """
     dic_rt = {}
+    dept_rg = set()
+
     for rt in RoomType.objects.filter(department__abbrev=department_abbrev):
         dic_rt[str(rt)] = []
         for rg in rt.members.all():
+            dept_rg.add(rg)
             if str(rg) not in dic_rt[str(rt)]:
                 dic_rt[str(rt)].append(str(rg))
 
     dic_rg = {}
-    for rg in RoomGroup.objects.all():
-        dic_rg[str(rg)] = []
+    for rg in dept_rg:
+        dic_rg[rg.name] = []
         for r in rg.subrooms.all():
-            dic_rg[str(rg)].append(str(r))
+            dic_rg[rg.name].append(str(r))
 
     return {'roomtypes':dic_rt,
             'roomgroups':dic_rg}
+
+
+def get_coursetype_constraints(department_abbrev):
+    """
+    From the data stored in the database, fill the course type 
+    description file (duration and allowed start times), that will
+    be used by the website
+    :return: a dictionary course type -> (object containing duration
+    and list of allowed start times)
+    """
+    dic = {}
+    for ct in CourseType.objects.filter(department__abbrev=department_abbrev):
+        dic[ct.name] = {'duration':ct.duration,
+                        'allowed_st':[]}
+        for ct_constraint in \
+              CourseStartTimeConstraint.objects.filter(course_type=ct):
+            dic[ct.name]['allowed_st'] += ct_constraint.allowed_start_times
+        if len(dic[ct.name]['allowed_st']) == 0:
+            dic[ct.name]['allowed_st'] += \
+                CourseStartTimeConstraint.objects.get(course_type=None).allowed_start_times
+    return dic
+
+
+def get_time_settings(dept):
+    """
+    :return: time general settings
+    """
+    ts = TimeGeneralSettings.objects.get(department=dept)
+    time_settings = {'time':
+                     {'day_start_time': ts.day_start_time,
+                      'day_finish_time': ts.day_finish_time,
+                      'lunch_break_start_time': ts.lunch_break_start_time,
+                      'lunch_break_finish_time': ts.lunch_break_finish_time},
+                     'days': ts.days}
+    return time_settings
+
+
+def get_departments():
+    """
+    :return: list of department abbreviations
+    """
+    return [d.abbrev for d in Department.objects.all()]

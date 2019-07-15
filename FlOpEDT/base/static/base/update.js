@@ -81,18 +81,14 @@ function go_pref(quick) {
             .attr("height", 0)
             .attr("x", dispo_x)
             .attr("y", dispo_y)
-            .attr("fill", function(d) {
-                return smi_fill(d.val / par_dispos.nmax);
-            })
+            .attr("fill", dispo_fill)
             .merge(dat.select(".dispo-bg"))
             .transition(t)
             .attr("width", dispo_w)
             .attr("height", dispo_h)
             .attr("x", dispo_x)
             .attr("y", dispo_y)
-            .attr("fill", function(d) {
-                return smi_fill(d.val / par_dispos.nmax);
-            });
+            .attr("fill", dispo_fill);
 
         var datex = dat
             .exit();
@@ -124,7 +120,8 @@ function go_pref(quick) {
                         function(c) {
                             return {
                                 day: d.day,
-                                hour: d.hour,
+                                start_time: d.start_time,
+				duration: d.duration,
                                 off: c.off
                             };
                         });
@@ -350,8 +347,7 @@ function go_cm_advanced_pref(quick) {
         .attr("class", "dispo-menu")
         .attr("cursor", "pointer")
         .on("click", function(d) {
-            dispos[user.nom][d.day][d.hour] = d.off;
-            user.dispos[day_hour_2_1D(d)].val = d.off;
+	    update_pref_interval(user.nom, d.day, d.start_time, d.off) ;
 	    data_dispo_adv_cur = [] ;
 	    go_pref(true);
         });
@@ -495,35 +491,18 @@ function go_grid(quick) {
         t = d3.transition();
     }
 
-    var grid = bg.selectAll(".gridm")
-        .data(data_mini_slot_grid
-            .filter(function(d) {
-                return d.gp.display;
-            }),
-            function(d) {
-                return d.gp.promo + "," + d.gp.nom + "," + d.day + "," + d.slot;
-            });
 
-    grid
-        .enter()
-        .append("rect")
-        .attr("class", "gridm")
-        .attr("x", gm_x)
-        .attr("y", gm_y)
-        .attr("width", 0)
-        .merge(grid)
-        .transition(t)
-        .attr("x", gm_x)
-        .attr("y", gm_y)
-        .attr("width", labgp.width)
-        .attr("height", labgp.height);
 
-    grid.exit()
-        .transition(t)
-        .attr("width", 0)
-        .remove();
+    bg
+	.select("rbg")
+	.attr("x",0)
+	.attr("y",0)
+	.attr("height",grid_height())
+	.attr("width",grid_width());
+    
+    
 
-    grid = fg.selectAll(".grids")
+    var grid = fg.selectAll(".grids")
         .data(data_slot_grid);
 
     var gridg = grid
@@ -549,10 +528,6 @@ function go_grid(quick) {
         .attr("height", gs_height)
         .attr("fill", gs_fill);
 
-    grid
-	.exit()
-	.remove();
-
     gridg
         .append("text")
         .attr("stroke", "none")
@@ -573,6 +548,12 @@ function go_grid(quick) {
         })
         .text(gs_txt);
 
+    grid
+	.exit()
+	.remove();
+
+
+    
 
     grid = bg.selectAll(".gridscg")
         .data(data_grid_scale_gp
@@ -605,7 +586,7 @@ function go_grid(quick) {
                 return row_gp[d.row].display;
             }),
             function(d) {
-                return d.row + "," + d.slot;
+                return d.row + "," + d.start;
             });
 
     grid
@@ -623,25 +604,27 @@ function go_grid(quick) {
     grid.exit().remove();
 
 
+    go_days(quick, true) ;
 
-    bg
-        .selectAll(".gridsckd")
-        .data(data_grid_scale_day)
-        .transition(t)
-        .text(gsckd_txt)
-        .attr("fill", "darkslateblue")
-        .attr("font-size", 22)
-        .attr("x", gsckd_x)
-        .attr("y", gsckd_y);
-    bg
-        .selectAll(".gridsckh")
-        .data(data_grid_scale_hour)
-        .transition(t)
-        .attr("x", gsckh_x)
-        .attr("y", gsckh_y);
+    
+
+    // -- no slot --
+    // --  begin  --
+    
+    
+    // bg
+    //     .selectAll(".gridsckh")
+    //     .data(data_grid_scale_hour)
+    //     .transition(t)
+    //     .attr("x", gsckh_x)
+    //     .attr("y", gsckh_y);
 
 
+    // --   end   --
+    // -- no slot --
 
+
+    
     fg.select(".h-sca").select("rect")
         .transition(t)
         .attr("x", but_sca_h_x())
@@ -662,6 +645,120 @@ function go_grid(quick) {
 
 }
 
+// display day names, and a rectangle per half day
+// if half_day_rect is true
+function go_days(quick, half_day_rect) {
+
+    var t;
+    if (quick) {
+        t = d3.transition()
+            .duration(0);
+    } else {
+        t = d3.transition();
+    }
+
+    var day_scale = fg
+        .selectAll(".gridsckd")
+        .data(days, function(d) {
+    	    return d.date;});
+
+    var day_sc_g = day_scale
+    	.enter()
+        .append("g")
+        .attr("class", "gridsckd");
+    
+    day_sc_g
+    	.append("text")
+    	.attr("class", "txt_scl")
+    	.merge(day_scale.select(".txt_scl"))
+        .transition(t)
+        .text(gsckd_txt)
+        .attr("x", gsckd_x)
+        .attr("y", gsckd_y);
+
+    if (half_day_rect) {
+        day_sc_g
+    	    .append("rect")
+    	    .attr("class", "day_am")
+    	    .merge(day_scale.select(".day_am"))
+            .transition(t)
+    	    .attr("x", grid_day_am_x)
+    	    .attr("y", grid_day_am_y)
+    	    .attr("height", grid_day_am_height)
+    	    .attr("width", grid_day_am_width);
+        
+        day_sc_g
+    	    .append("rect")
+    	    .attr("class", "day_pm")
+    	    .merge(day_scale.select(".day_pm"))
+            .transition(t)
+    	    .attr("x", grid_day_pm_x)
+    	    .attr("y", grid_day_pm_y)
+    	    .attr("height", grid_day_pm_height)
+    	    .attr("width", grid_day_pm_width);
+    }
+        
+    day_scale.exit().remove();
+
+
+    var hour_bar = fg
+        .selectAll(".gridsckhb")
+        .data([time_settings.time]);
+
+    var hour_sc_g = hour_bar
+    	.enter()
+        .append("g")
+        .attr("class", "gridsckhb");
+
+    hour_sc_g
+        .append("line")
+        .attr("class", "gridsckhlam")
+        .merge(hour_bar.select(".gridsckhlam"))
+        .attr("x1", 0)
+        .attr("y1", 0)
+        .attr("x2", 0)
+        .attr("y2", bknews_top_y()) ;
+
+    hour_sc_g
+        .append("line")
+        .attr("class", "gridsckhlpm")
+        .merge(hour_bar.select(".gridsckhlpm"))
+        .attr("x1", 0)
+        .attr("y1", bknews_bot_y())
+        .attr("x2", 0)
+        .attr("y2", grid_height()) ;
+
+    hour_bar.exit().remove();
+    
+    var hour_scale = fg
+        .selectAll(".gridsckh")
+        .data(side_time);
+
+    var hour_sc_g = hour_scale
+    	.enter()
+        .append("g")
+        .attr("class", "gridsckh");
+
+    hour_sc_g
+        .append("line")
+        .attr("class", "gridsckhl")
+        .merge(hour_scale.select(".gridsckhl"))
+        .attr("x1", gsckh_x1)
+        .attr("y1", gsckh_y)
+        .attr("x2", gsckh_x2)
+        .attr("y2", gsckh_y) ;
+
+    hour_sc_g
+        .append("text")
+        .merge(hour_scale.select("text"))
+        .text(gsckh_txt)
+        .attr("x", gsckh_x2() - 2)
+        .attr("y", gsckh_y);
+    
+    
+    hour_scale.exit().remove();
+
+}
 
 /*----------------------
   ------- BKNEWS -------

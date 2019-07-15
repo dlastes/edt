@@ -35,6 +35,8 @@
 <script>
     var groupes_fi = "{% url "base:fetch_groups" department %}";
     var rooms_fi = "{% url "base:fetch_rooms" department %}";
+    var constraints_fi = "{% url "base:fetch_constraints" department %}";
+    var departments_fi = "{% url "base:fetch_departments" department %}";
 
     var url_cours_pl = "{% url "base:fetch_cours_pl" department 0 0 0 %}";
     url_cours_pl = url_cours_pl.slice(0, -5);
@@ -57,11 +59,11 @@
     url_week_infos = url_week_infos.slice(0, -3);
 
     var semaine_an_list = {{ all_weeks| safe }};
-    var jours_list = {{ jours| safe }};
     var semaine_init = +"{{ semaine }}";
     var an_init = +"{{ an }}";
     var une_salle = "{{ une_salle }}";
-
+    var time_settings = {{ time_settings | safe }} ;
+    var days = {{ days | safe }} ;
     var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
 </script>
 
@@ -69,6 +71,7 @@
 
 <script type='text/javascript' src="{% static 'TTapp/slide_panel.js' %}"></script>
 <script type='text/javascript' src="{% static 'base/variables.js' %}?7"></script>
+<script type='text/javascript' src="{% static 'base/intervals.js' %}?5"></script>
 <script type='text/javascript' src="{% static 'base/week_change.js' %}?5"></script>
 <script type='text/javascript' src="{% static 'base/transformation.js' %}?6"></script>
 <script type='text/javascript' src="{% static 'base/creation.js' %}?7"></script>

@@ -42,6 +42,19 @@
                  */
 
 
+/*----------------------
+  -------   TIME  -------
+  ----------------------*/
+
+function get_day(ref){
+    var nd = days.filter(function(dd) {
+	return dd.ref == ref;
+    });
+    if (nd.length != 1) {
+	return null ;
+    }
+    return nd[0];
+}
 
 
 /*----------------------
@@ -165,7 +178,9 @@ function create_layouts(svg_cont, light) {
     dg = svg_cont.append("g")
         .attr("id", "lay-dg");
 
-
+    bg
+	.append("rect")
+	.attr("class","rbg");
 }
 
 
@@ -383,7 +398,22 @@ function create_edt_grid() {
 
 
 function add_garbage(){
-    data_slot_grid.push(garbage);
+
+    if(slot_case) {
+	
+	var garbage_dsg = {
+	    day: garbage.day,
+	    start: garbage.start,
+	    duration: rev_constraints[garbage.start],
+	    display: false,
+	    dispo: false,
+	    pop: false,
+	    reason: ""
+	};
+	
+	data_slot_grid.push(garbage_dsg);
+
+    }
 }
 function remove_garbage(){
     var found = false ;
@@ -400,70 +430,55 @@ function remove_garbage(){
 
 
 function create_grid_data() {
-    for (var j = 0; j < nbPer; j++) {
-        for (var s = 0; s < nbSl; s++) {
-            var gs = {
-                day: j,
-                slot: s,
-                display: false,
-                dispo: false,
-                pop: false,
-                reason: ""
-            };
-            data_slot_grid.push(gs);
-        }
+    if(fetch.constraints_ok && fetch.groups_ok) {
+	if (slot_case) {
+	    for(var i = 0 ; i<days.length ; i++) {
+		for (var s = 0; s < Object.keys(rev_constraints).length ; s++) {
+		    var start = Object.keys(rev_constraints)[s] ;
+		    if (start < time_settings.time.day_finish_time){
+			var gs = {
+			    day: days[i].ref,
+			    start: +start,
+			    duration: rev_constraints[start],
+			    display: false,
+			    dispo: false,
+			    pop: false,
+			    reason: ""
+			};
+			data_slot_grid.push(gs);
+		    }
+		}
+	    }
+	}
+	
+	for (var p = 0; p < set_promos.length; p++) {
+            compute_promo_leaves(root_gp[p].gp);
+	}
+	
+	
+	if (slot_case) {
+	    for (var s = 0; s < Object.keys(rev_constraints).length ; s++) {
+		for (var r = 0; r < set_rows.length; r++) {
+		    var start = Object.keys(rev_constraints)[s] ;
+		    if (start < time_settings.time.day_finish_time) {
+			var gscp = {
+			    row: r,
+			    start: start,
+			    duration: rev_constraints[start],
+			    name: set_promos_txt[row_gp[r].promos[0]]
+			} ;
+			for (var p = 1; p < row_gp[r].promos.length; p++) {
+			    gscp.name += "|";
+			    gscp.name += set_promos_txt[row_gp[r].promos[p]];
+			}
+			data_grid_scale_row.push(gscp);
+		    }
+		}
+	    }
+	}
+	
     }
-
-    for (var p = 0; p < set_promos.length; p++) {
-        compute_promo_leaves(root_gp[p].gp);
-    }
-
-
-    for (var s = 0; s < nbSl; s++) {
-        for (var r = 0; r < set_rows.length; r++) {
-            var gscp = {
-                row: r,
-                slot: s,
-                name: set_promos_txt[row_gp[r].promos[0]]
-            };
-            for (var p = 1; p < row_gp[r].promos.length; p++) {
-                gscp.name += "|";
-                gscp.name += set_promos_txt[row_gp[r].promos[p]];
-            }
-            data_grid_scale_row.push(gscp);
-        }
-    }
-    create_dh_keys();
 }
-
-
-
-function create_dh_keys() {
-    bg
-        .selectAll(".gridsckd")
-        .data(data_grid_scale_day)
-        .enter()
-        .append("text")
-        .attr("class", "gridsckd")
-        .attr("x", gsckd_x)
-        .attr("y", gsckd_y)
-        .attr("font-size", 13)
-        .attr("font-weight", "bold")
-        .text(gsckd_txt);
-
-    bg
-        .selectAll(".gridsckh")
-        .data(data_grid_scale_hour)
-        .enter()
-        .append("text")
-        .attr("class", "gridsckh")
-        .attr("x", gsckh_x)
-        .attr("y", gsckh_y)
-        .text(gsckh_txt);
-
-
-}
-
 
 
 /*----------------------
@@ -614,7 +629,7 @@ function def_drag_sca() {
                 if (drag.init + drag.y < 0) {
                     drag.y = -(drag.init);
                 }
-                labgp.height = labgp_from_grid_height(drag.init + drag.y) ;
+                scale = scale_from_grid_height(drag.init + drag.y) ;
                 drag.sel.attr("transform", "translate(0,0)");
                 drag.sel.select("rect").attr("y", grid_height());
 		drag.sel.select("path").attr("d", but_sca_tri_v(0));
@@ -707,8 +722,8 @@ function go_promo_gp_init(button_available) {
     var gp_2_click = [] ;
     var found_gp, gpk, gpc, gpa ;
 
-    if (promo_init != 0){
-	promo_init = indexOf_promo(promo_init) ;
+    promo_init = indexOf_promo(promo_init) ;
+    if (promo_init >= 0){
 	if (gp_init == "") {
 	    gp_init = root_gp[promo_init].gp.nom ;
 	}
@@ -1034,7 +1049,7 @@ function update_all_groups() {
         if (pos_nbRows == 0) {
             pos_nbRows = nbRows;
         }
-        labgp.height *= pos_nbRows / nbRows;
+        scale *= pos_nbRows / nbRows;
         pos_nbRows = nbRows;
     }
 }
@@ -1051,15 +1066,6 @@ function compute_promo_leaves(node) {
                 day: j,
                 gp: node
             });
-            for (var s = 0; s < nbSl; s++) {
-                if (!is_free(j, s, node.promo)) {
-                    data_mini_slot_grid.push({
-                        day: j,
-                        slot: s,
-                        gp: node
-                    });
-                }
-            }
         }
     }
 
@@ -1232,9 +1238,12 @@ function def_drag() {
 	    cancel_cm_room_tutor_change();
             if (ckbox["edt-mod"].cked && fetch.done) {
 
+		// no data_slot_grid when uniline
                 data_slot_grid.forEach(function(sl) {
                     fill_grid_slot(c, sl);
                 });
+
+		console.log(data_slot_grid);
 
                 drag.x = 0;
                 drag.y = 0;
@@ -1253,14 +1262,15 @@ function def_drag() {
 				      drag.y +
 				      parseInt(drag.sel.select("rect")
 					       .attr("y")),
-				      cours_width(d),
-				      cours_height(d));
+				      d);
+		console.log(cur_over.day, cur_over.start_time);
 
-                if (!is_garbage(cur_over.day,cur_over.slot)) {
+                if (!is_garbage(cur_over)) {
                     sl = data_slot_grid.filter(function(c) {
-                        return c.day == cur_over.day && c.slot == cur_over.slot;
+                        return c.day == cur_over.day
+			    && c.start == cur_over.start_time;
                     });
-                    if (sl != null && sl.length > 0) {
+                    if (sl != null && sl.length == 1) {
                         if (!sl[0].display) {
                             data_slot_grid.forEach(function(s) {
                                 s.display = false;
@@ -1295,18 +1305,27 @@ function def_drag() {
                 });
 
 
-                if (!is_garbage(cur_over.day,cur_over.slot)) {
+                if (!is_garbage(cur_over)) {
 
-                    var ngs = data_slot_grid.filter(function(s) {
-                        return s.day == cur_over.day && s.slot == cur_over.slot;
-                    })[0];
-
-
-                    if (ngs.dispo) {
+		    console.log("not garbage");
+		    
+                    // var gs = data_slot_grid.filter(function(s) {
+                    //     return s.day == cur_over.day
+		    // 	    && s.start == cur_over.start_time;
+                    // });
+		    
+		    var warn_check = warning_check(d, cur_over.day, cur_over.start_time);
+		    
+		    
+		    console.log(cur_over.day, cur_over.start_time/60);
+		    console.log(warn_check);
+		    
+		    //                    if (ngs.dispo) {
+		    if (warn_check == "") {
 
 			add_bouge(d);
                         d.day = cur_over.day;
-                        d.slot = cur_over.slot;
+                        d.start = cur_over.start_time;
 			room_tutor_change.course.push(d) ;
 			compute_cm_room_tutor_direction() ;
 			room_cm_level = 0 ;
@@ -1318,48 +1337,85 @@ function def_drag() {
 			    room_tutor_change.proposal = [] ;
 			}
 
-		    } else if (!ngs.dispo && (logged_usr.rights >> 2) % 2 == 1) {
+		    } else  { //if (!ngs.dispo) {
+			// -- no slot --
+			// && (logged_usr.rights >> 2) % 2 == 1) {
 
-			var warn_check = warning_check(d, cur_over.slot, cur_over.day);
+			
+			
+			console.log(warn_check);
 
-			var splash_violate_constraint = {
-			    id: "viol_constraint",
-			    but: {
-				list: [{txt: "Confirmer",
-					click:
-					function(d){
-					    add_bouge(d.saved_data.course);
-					    d.saved_data.course.day = d.saved_data.grid_slot.day;
-					    d.saved_data.course.slot = d.saved_data.grid_slot.slot;
-					    go_grid(true);
-					    go_courses(true);
-					    return ;
-					},
-					saved_data:
-					{course: d,
-					 grid_slot: {day: cur_over.day, slot: cur_over.slot}}
-				       },
-				       {txt: "Annuler",
-					click: function(d){
-					    return ;
-					}
-				       }]
-				      },
-			    com: {list: [{txt: "Attention", ftsi: 23},
-					 {txt: ""},
-					 {txt: "Des privilèges vous ont été accordés, et vous en profitez pour outrepasser la contrainte suivante :"},
-					 {txt: warn_check},
-					 {txt: "Confirmer la modification ?"}]
-				 }
+			var splash_violate_constraint ;
+
+			if ((logged_usr.rights >> 2) % 2 == 1) {
+			
+			    splash_violate_constraint = {
+				id: "viol_constraint",
+				but: {
+				    list: [{txt: "Confirmer",
+					    click:
+					    function(d){
+						add_bouge(d.saved_data.course);
+						d.saved_data.course.day = d.saved_data.grid_slot.day;
+						d.saved_data.course.start = d.saved_data.grid_slot.start_time;
+						go_grid(true);
+						go_courses(true);
+						return ;
+					    },
+					    saved_data:
+					    {course: d,
+					     grid_slot: {day: cur_over.day, start_time: cur_over.start_time}}
+					   },
+					   {txt: "Annuler",
+					    click: function(d){
+						return ;
+					    }
+					   }]
+				},
+				com: {list: [{txt: "Attention", ftsi: 23},
+					     {txt: ""},
+					     {txt: "Des privilèges vous ont été accordés, et vous en profitez pour outrepasser la contrainte suivante :"},
+					     {txt: warn_check},
+					     {txt: "Confirmer la modification ?"}]
+				     }
+			    }
+			    splash(splash_violate_constraint);
+
+			
+			} else {
+			    if (slot_case) {
+				var gs = data_slot_grid.filter(function(s) {
+				    return s.day == cur_over.day
+		    			&& s.start == cur_over.start_time;
+				});
+				console.log(gs);
+				if (gs.length==1) {
+				    gs[0].pop = true;
+				}
+			    } else {
+				splash_violate_constraint = {
+				    id: "viol_constraint",
+				    but: {
+					list: [{txt: "Ah ok",
+						click: function(d){
+						    return ;
+						}
+					       }]
+				    },
+				    com: {list: [{txt: "Vous tentez d'outrepasser la contrainte suivante :", ftsi: 23},
+						 {txt: warn_check},
+						 {txt: "Vous n'avez pas les droits pour le faire..."}]
+					 }
+				}
+				splash(splash_violate_constraint);
+			    }
+			    
 			}
-			splash(splash_violate_constraint);
-
-		    } else {
-                        ngs.pop = true;
+			
                     }
                 } else {
-                    d.day = cur_over.day;
-                    d.slot = cur_over.slot;
+                    d.day = cur_over.day ;
+                    d.start = cur_over.start_time ;
 		}
 
                 drag.sel.attr("transform", "translate(0,0)");
@@ -1408,7 +1464,7 @@ function fill_grid_slot(c2m, grid_slot) {
     // 	return ;
     // }
 
-    var check = check_course(c2m, grid_slot.slot, grid_slot.day);
+    var check = check_course(c2m, {day:grid_slot.day, start_time:grid_slot.start});
     
     if (check.constraints_ok) {
 	return ;
@@ -1424,15 +1480,17 @@ function fill_grid_slot(c2m, grid_slot) {
             grid_slot.reason = "PB GROUPE";
 	} else if (check.nok_type == 'tutor_unavailable') {
             grid_slot.reason = "PB PROF PAS DISPO";
-	}
+	} else if (check.nok_type == 'tutor_availability_unknown') {
+            grid_slot.reason = "PB DISPO NON DECLAREE";
+        }
 	return ;
     }
 
 }
 
-function warning_check(c2m, slot, day) {
+function warning_check(c2m, day, start_time) {
     var ret = '';
-    var check = check_course(c2m, slot, day);
+    var check = check_course(c2m, {day:day, start_time:start_time});
     if (check.nok_type == 'stable') {
 	ret = "Le cours était censé être fixe.";
     } else if (check.nok_type == 'train_prog_unavailable') {
@@ -1443,10 +1501,26 @@ function warning_check(c2m, slot, day) {
         ret = "Le groupe " + check.group + " avait déjà un cours prévu.";
     } else if (check.nok_type == 'tutor_unavailable') {
         ret = "L'enseignant·e " + check.tutor + " s'était déclaré·e indisponible.";
+    } else if (check.nok_type == 'tutor_availability_unknown') {
+        ret = "L'enseignant·e " + check.tutor + " n'a pas déclaré ses dispos.";
     }
     return ret ;
 }
 
+
+
+function simultaneous_courses(day, start_time, duration, id) {
+    return cours.filter(function(c) {
+        return (c.day == day 
+		&& ((c.start < start_time+duration
+		     && c.start >= start_time)
+		    || (c.start + c.duration < start_time+duration
+			&& c.start +c.duration > start_time)
+		    || (c.start <= start_time
+			&& c.start + c.duration > start_time + duration))
+		&& c.id_cours != id);
+    });
+}
 
 /*
  check whether it is possible to schedule c2m on slot slot, day day. 
@@ -1459,13 +1533,17 @@ function warning_check(c2m, slot, day) {
  - nok_type: 'group_busy', group: gp_name -> the group has already another course
  - nok_type: 'tutor_unavailable', tutor: tutor_username -> the tutor is 
    unavailable
- */
-function check_course(c2m, slot, day) {
+*/
+// c2m element of course
+// date {day, start_time}
+function check_course(c2m, date) {
 
     var ret = {constraints_ok: false};
+    var possible_conflicts = [] ;
+    var conflicts = [] ;
 
 
-    if (is_garbage(day, slot)) {
+    if (is_garbage(date)) {
 	ret.constraints_ok = true ;
 	return ret ;
     }
@@ -1479,46 +1557,57 @@ function check_course(c2m, slot, day) {
 	return ret;
     }
 
-    if (is_free(day, slot, c2m.promo)) {
+    if (is_free(date, c2m.promo)) {
 	ret.nok_type = 'train_prog_unavailable' ;
 	ret.train_prog = set_promos[c2m.promo] ;
         return ret;
     }
 
 
-    var cs = cours.filter(function(c) {
-        return (c.day == day &&
-		c.slot == slot &&
-		c.prof == c2m.prof &&
-		c.id_cours != c2m.id_cours);
+    possible_conflicts = simultaneous_courses(date.day,
+					      date.start_time,
+					      c2m.duration,
+					      c2m.id_cours) ;
+
+    // console.log("CHECK", c2m, date);
+    // console.log(possible_conflicts.map(function(d){return {s:d.start, d:d.duration}}));
+
+    conflicts = possible_conflicts.filter(function(c) {
+        return (c.prof == c2m.prof);
     });
-    if (cs.length > 0) {
+    
+    if (conflicts.length > 0) {
 	ret.nok_type = 'tutor_busy';
 	ret.tutor = c2m.prof;
         return ret;
     }
 
 
-    cs = cours.filter(function(c) {
-        return (c.day == day &&
-		c.slot == slot &&
-		(c.group == c2m.group ||
-		 groups[c2m.promo][c2m.group].ancetres.indexOf(c.group) > -1 ||
-		 groups[c2m.promo][c2m.group].descendants.indexOf(c.group) > -1) &&
-		c.promo == c2m.promo  &&
-		c.id_cours != c2m.id_cours);
+    conflicts = possible_conflicts.filter(function(c) {
+        return ((c.group == c2m.group
+		 || groups[c2m.promo][c2m.group].ancetres.indexOf(c.group) > -1
+		 || groups[c2m.promo][c2m.group].descendants.indexOf(c.group) > -1)
+		&& c.promo == c2m.promo);
     });
-    if (cs.length > 0) {
+    
+    if (conflicts.length > 0) {
 	ret.nok_type = 'group_busy';
 	ret.group = c2m.group;
         return ret;
     }
 
-    if (dispos[c2m.prof] !== undefined &&
-        dispos[c2m.prof][day][slot] == 0) {
-	ret.nok_type = 'tutor_unavailable' ;
-	ret.tutor = c2m.prof ;
-        return ret;
+    if (dispos[c2m.prof] !== undefined) {
+        var pref_tut = get_preference(date.day, date.start_time, c2m.duration,
+			              c2m.prof);
+	if (pref_tut == 0) {
+	    ret.nok_type = 'tutor_unavailable' ;
+	    ret.tutor = c2m.prof ;
+            return ret;
+	} else if (pref_tut == -1) {
+	    ret.nok_type = 'tutor_availability_unknown' ;
+	    ret.tutor = c2m.prof ;
+            return ret;
+        }
     }
 
     ret.constraints_ok = true ;
@@ -1526,39 +1615,73 @@ function check_course(c2m, slot, day) {
 
 }
 
-function which_slot(x, y, w, h) {
+function which_slot(x, y, c) {
     var wday = (rootgp_width * labgp.width +
         dim_dispo.plot *
         (dim_dispo.width + dim_dispo.right));
-    var day = Math.floor((x + .5 * w) / wday);
-    var hslot = nbRows * labgp.height;
-    var partial_y = y + .5 * h ;
-    
-    if (partial_y > bknews_top_y()) {
-        if (partial_y < bknews_bot_y()) {
-            partial_y = nbSl * hslot ;
-        } else {
-	    partial_y -= bknews_h() ;
-        }
-    }
-    
-    var slot = Math.floor(partial_y / hslot);
-
+    var iday = Math.floor((x + .5 * cours_width(c)) / wday);
     return {
-        day: day,
-        slot: slot
+        day: days[iday].ref,
+        start_time: indexOf_constraints(c, y) // day-independent
     };
 }
 
-
-function is_garbage(day, hour) {
-    return (hour >= nbSl || hour < 0 || day < 0 || day >= nbPer);
+// date {day, start_time}
+function is_garbage(date) {
+    var t = time_settings.time ;
+    return (date.start_time < t.day_start_time
+	    || date.start_time >= t.day_finish_time) ;
 }
 
-function is_free(day, hour, promo) {
-    return (promo < 2 && (day == 3 && hour > 2));
+function is_free(date, promo) {
+    return false ;
+//    return (promo < 2 && (day == 3 && hour > 2));
 }
 
+// find the closest possible start_time in the current day,
+// in terms of distance on the screen
+function indexOf_constraints(c, y){
+    var course_duration_y = c.duration * nbRows * scale ;
+    var cst = constraints[c.c_type].allowed_st.map(
+	function(d){
+	    return {y:cours_y({
+		start:d,
+		promo:c.promo,
+	    }),
+		    start:d};
+	}
+    );
+    var t = time_settings.time ;
+    
+    var after = false ;
+    var i = 0 ;
+    while(! after && i < cst.length) {
+	if (cst[i].y > y) {
+	    after = true ;
+	} else {
+	    i ++ ;
+	}
+    }
+    if (i==cst.length) {
+	if (y < cst[cst.length-1].y + course_duration_y) {
+	    return cst[cst.length-1].start ;
+	} else {
+	    return t.day_finish_time ;
+	}
+    } else if (i==0) {
+	// if (y < 0 - course_duration_y) {
+	//     return t.day_start_time - c.duration ;
+	// } else {
+	    return t.day_start_time ;
+	// }
+    } else {
+	if (y - cst[i-1].y > cst[i].y - y) {
+	    return cst[i].start;
+	} else {
+	    return cst[i-1].start;
+	}
+    }
+}
 
 
 /*---------------------
@@ -1566,11 +1689,7 @@ function is_free(day, hour, promo) {
    ---------------------*/
 
 function clean_unavailable_rooms() {
-    for (var i = 0; i < nbPer; i++) {
-	for (var j = 0; j < nbSl; j++) {
-	    unavailable_rooms[i][j] = [] ;
-	}
-    }
+    unavailable_rooms = {} ;
 }
 
 
@@ -1653,16 +1772,17 @@ function create_val_but() {
 function create_stype() {
     var t, dat, datdi, datsmi;
 
+    // -- no slot --
+    // --  begin  --
+    // TO BE CHECKED: fill missing preferences if needed
+
     // sometimes, all preferences are not in the database
     // -> by default, not available
-    for (var i = 0; i < user.dispos_type.length; i++) {
-        if (typeof user.dispos_type[i] == 'undefined') {
-            // cf translate_dispos_type_from_csv
-            user.dispos_type[i] = create_dispo_default_from_index(i);
-        }
-    }
 
+    // --   end   --
+    // -- no slot --
 
+    
     dat = stg.selectAll(".dispot")
         .data(user.dispos_type);
 
@@ -1785,9 +1905,9 @@ function fetch_dispos_type() {
             async: true,
             contentType: "text/csv",
             success: function(msg) {
-                user.dispos_type = new Array(nbSl * nbPer);
+                user.dispos_type = [] ;
 
-                d3.csvParse(msg, translate_dispos_type_from_csv);
+                user.dispos_type = d3.csvParse(msg, translate_dispos_type_from_csv);
                 create_stype();
                 show_loader(false);
             },
@@ -1806,23 +1926,31 @@ function fetch_dispos_type() {
 
 
 function translate_dispos_type_from_csv(d) {
-    var d2p = {
-        day: +d.jour,
-        hour: +d.heure,
+    return {
+        day: d.day,
+	start_time: +d.start_time,
+	duration: +d.duration,
         val: +d.valeur,
         off: -1
     };
-    user.dispos_type[day_hour_2_1D(d2p)] = d2p;
 }
 
-function create_dispo_default_from_index(ind) {
-    return {
-        day: Math.floor(ind / nbSl),
-        hour: ind % nbSl,
-        val: 0,
-        off: -1
-    };
+// -- no slot --
+// --  begin  --
+// to be extended: intervals could be different
+// dt {day, start_time}
+function get_dispos_type(dt) {
+    var s = user.dispos_type.filter(function(d){
+	return d.day==dt.day && d.start_time==dt.start_time;
+    });
+    if (s.length!=1) {
+	return null;
+    } else {
+	return s[0];
+    }
 }
+// --   end   --
+// -- no slot --
 
 
 
@@ -2120,4 +2248,37 @@ function go_selection_popup(){
 
     go_selection_buttons();
 
+}
+
+
+// create buttons for department redirection
+function create_dept_redirection() {
+    var avg = catg
+        .selectAll(".dept-selection")
+        .data(departments.data);
+
+    var contg = avg
+        .enter()
+        .append("g")
+        .attr("class", "dept-selection")
+        .attr("transform", depts_trans)
+        .attr("cursor", "pointer")
+        .on("click", redirect_dept);
+    
+    contg
+        .append("rect")
+        .attr("class", "select-highlight")
+        .attr("width", departments.w)
+        .attr("height", departments.h)
+        .attr("rx", 5)
+        .attr("ry", 10)
+        .attr("fill", "forestgreen")
+        .attr("x", 0)
+        .attr("y", 0);
+
+    contg
+        .append("text")
+        .text(dept_txt)
+        .attr("x", .5 * departments.w)
+        .attr("y", .5 * departments.h);
 }

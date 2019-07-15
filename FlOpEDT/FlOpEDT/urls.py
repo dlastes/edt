@@ -46,6 +46,7 @@ import base.views
 import TTapp.views
 
 urlpatterns = [
+    url(r'^admin$', RedirectView.as_view(url='/admin/')),
     url(r'^admin/', admin.site.urls),
     url(r'^accounts/', include('people.urls')),
     url(r'^citations/', include('quote.urls')),
@@ -53,6 +54,9 @@ urlpatterns = [
     url(r'^solve-board/(?P<department>[a-zA-Z]\w{1,7})/', include('solve_board.urls')),    
     url(r'^ical/(?P<department>[a-zA-Z]\w{1,7})/', include('synchro.urls')),
     url(r'^ics/(?P<department>[a-zA-Z]\w{1,7})/', include('ics.urls')),
+#    url(r'^api-auth/', include('rest_framework.urls')),
+    url(r'^configuration/', include('configuration.urls')),
+#    url(r'^importation/(?P<department>[a-zA-Z]\w{1,7})/', include('importation.urls')),
     url('ttapp/', include('TTapp.urls')),
-    url(r'$', base.views.index),
+    url(r'$', base.views.index, name='index'),
 ]

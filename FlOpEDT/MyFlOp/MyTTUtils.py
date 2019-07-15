@@ -26,9 +26,11 @@
 # without disclosing the source code of your own applications.
 import functools
 
-from base.models import Department
-#from TTapp.forms import *
 
+from TTapp.TTUtils import basic_reassign_rooms, basic_swap_version
+from base.models import ScheduledCourse, Department
+from people.models import Tutor
+#from TTapp.forms import *
 
 def resolve_department(func):
 
@@ -45,6 +47,22 @@ def resolve_department(func):
 
     return _wraper_function
 
+def print_differences(week, year, old_copy, new_copy, tutors=Tutor.objects.all()):
+    for tutor in tutors:
+        SCa = ScheduledCourse.objects.filter(cours__tutor=tutor, copie_travail=old_copy, cours__semaine=week,
+                                             cours__an=year)
+        SCb = ScheduledCourse.objects.filter(cours__tutor=tutor, copie_travail=new_copy, cours__semaine=week,
+                                             cours__an=year)
+        slots_a = set([x.start_time//60 for x in SCa])
+        slots_b = set([x.start_time//60 for x in SCb])
+        if slots_a ^ slots_b:
+            result = "For %s old copy has :" % tutor
+            for sl in slots_a - slots_b:
+                result += "%s, " % sl
+            result += "and new copy has :"
+            for sl in slots_b - slots_a:
+                result += "%s, " % sl
+            print(result)
 
 @resolve_department
 def reassign_rooms(department, week, year, target_work_copy):
