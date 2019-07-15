@@ -104,3 +104,17 @@ def week_list():
         for i in list(range(2, 10)) + list(range(11, 17)) + list(range(19, 31)):
             li.append({'semaine': i, 'an': annee_courante+1})
         return li
+
+
+def current_year():
+    now = datetime.date.today()
+    if now.month < 7:
+        return now.year - 1
+    return now.year
+
+
+def year_by_week(week):
+    if week > 36:
+        return current_year()
+    else:
+        return current_year() + 1
