@@ -1485,7 +1485,7 @@ function simultaneous_courses(target_course) {
 }
 
 /*
- check whether it is possible to schedule c2m on slot slot, day day. 
+ check whether it is possible to schedule c2m on time date.start_time, day date.day. 
  returns an object containing at least contraints_ok: true iff it is, and
  - nok_type: 'stable' -> course cannot be moved
  - nok_type: 'train_prog_unavailable', train_prog: abbrev_train_prog -> students
@@ -1495,6 +1495,7 @@ function simultaneous_courses(target_course) {
  - nok_type: 'group_busy', group: gp_name -> the group has already another course
  - nok_type: 'tutor_unavailable', tutor: tutor_username -> the tutor is 
    unavailable
+ - nok_type: 'sleep', tutor: tutor_username -> the tutor needs to sleep (11h break)
 */
 // c2m element of course
 // date {day, start_time}
@@ -1525,6 +1526,8 @@ function check_course(wanted_course) {
                       more: {train_prog: set_promos[wanted_course.promo]}}) ;
         }
     }
+
+    
 
 
     possible_conflicts = simultaneous_courses(wanted_course) ;

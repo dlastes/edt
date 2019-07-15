@@ -622,12 +622,17 @@ var drag_listener_hs, drag_listener_vs;
 /*-----------------------
    ------ COURSES -------
   -----------------------*/
-// unscheduled curses
+// unscheduled courses
 var cours_pp = [];
-// scheduled curses
+// scheduled courses
 var cours_pl = [];
-// all curses
+// all courses
 var cours = [];
+
+// courses of previous and next weeks
+var ante_cours = [];
+var post_cours = [];
+
 
 // listener for curses drag and drop 
 var dragListener;
