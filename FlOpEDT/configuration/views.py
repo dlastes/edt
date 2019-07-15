@@ -10,12 +10,12 @@ from TTapp.scripts.TP_constraint import add_TP_constraints
 from TTapp.scripts.DA_constraint import add_DA_limitedSlotChoices, add_DA_constraints
 from TTapp.scripts.reasonableDays_constraint import add_reasonableDays_constraint
 
-from .flush_database import flush_department_data, flush_planif_database
-from misc.deploy_database.make_planif_file import make_planif_file
-from .file_manipulation import upload_file, check_ext_file
-from misc.deploy_database.extract_planif_file import extract_planif
-from misc.deploy_database.deploy_database import extract_database_file
 from misc.generate_static_files import generate_group_file, generate_room_file
+from configuration.make_planif_file import make_planif_file
+from configuration.extract_planif_file import extract_planif
+from configuration.deploy_database import extract_database_file
+from .file_manipulation import upload_file, check_ext_file
+from .flush_database import flush_department_data, flush_planif_database
 from .forms import ImportPlanif, ImportConfig
 from .models import UpdateConfig
 
