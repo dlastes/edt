@@ -72,7 +72,7 @@ def import_config_file(req, **kwargs):
             logger.info(req.FILES['fichier'])
             logger.info(req.FILES['fichier'].name)
             if check_ext_file(req.FILES['fichier'], ['.xlsx', '.xls']):
-                path = upload_file(req.FILES['fichier'], "configuration/database_file_.xlsx")
+                path = upload_file(req.FILES['fichier'], "/tmp/database_file_.xlsx")
                 # If one of method fail the transaction will be not commit.
                 try:
                     with transaction.atomic():
