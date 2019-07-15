@@ -691,7 +691,7 @@ class TTModel(object):
         for sl in self.wdb.slots:
             # constraint : each course is assigned to a RoomGroup
             for c in self.wdb.compatible_courses[sl]:
-                name = 'core_roomtype_' + str(c) + '_' + str(sl)
+                name = 'core_roomtype_' + str(c) + '_' + str(sl) + '_' + str(self.constraint_nb)
                 self.add_constraint(
                     self.sum(self.TTrooms[(sl, c, rg)] for rg in course_rg_compat[c]) - self.TT[(sl, c)],
                     '==',
@@ -704,7 +704,7 @@ class TTModel(object):
                                                   Q(start_time__gt=sl.start_time - F('cours__type__duration'))),
                                                  room=rg, day=sl.day).exists():
                     for r in rg.subrooms.all():
-                        name = 'fixed_room' + str(r) + '_' + str(sl)
+                        name = 'fixed_room' + str(r) + '_' + str(sl) + '_' + str(self.constraint_nb)
                         self.add_constraint(self.sum(self.TTrooms[(s_sl, c, room)]
                                                      for s_sl in self.wdb.slots_intersecting[sl]
                                                      for c in self.wdb.compatible_courses[s_sl]
@@ -721,7 +721,7 @@ class TTModel(object):
                              if c in self.wdb.compatible_courses[sl]),
                     '<=',
                     self.avail_room[r][sl],
-                    name='core_room_' + str(r) + '_' + str(sl))
+                    name='core_room_' + str(r) + '_' + str(sl) + '_' + str(self.constraint_nb))
 
             ########TO BE CHECKED################
             # constraint : respect preference order,
