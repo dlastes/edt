@@ -43,7 +43,7 @@ from people.models import Tutor
 from base.weeks import annee_courante
 
 from TTapp.models import MinNonPreferedSlot, max_weight, Stabilize, TTConstraint, \
-    Slot, slot_pause, basic_slot_duration, filter
+    Slot, slot_pause, basic_slot_duration, slots_filter
 
 from MyFlOp.MyTTUtils import reassign_rooms
 
@@ -92,16 +92,16 @@ class WeekDB(object):
 
         slots_by_day = {}
         for d in self.days:
-            slots_by_day[d] = filter(slots, day=d)
+            slots_by_day[d] = slots_filter(slots, day=d)
 
         slots_intersecting = {}
         for sl in slots:
-            slots_intersecting[sl] = filter(slots, simultaneous_to=sl)
+            slots_intersecting[sl] = slots_filter(slots, simultaneous_to=sl)
 
         slots_by_half_day = {}
         for d in self.days:
             for apm in [Time.AM, Time.PM]:
-                slots_by_half_day[(d, apm)] = filter(slots, day=d, apm=apm)
+                slots_by_half_day[(d, apm)] = slots_filter(slots, day=d, apm=apm)
         print('Ok')
         return slots, slots_by_day, slots_intersecting, slots_by_half_day
 
@@ -646,7 +646,7 @@ class TTModel(object):
         for training_half_day in self.wdb.training_half_days:
             training_slots = self.wdb.slots_by_day[training_half_day.day]
             if training_half_day.apm is not None:
-                training_slots = filter(training_slots, apm=training_half_day.apm)
+                training_slots = slots_filter(training_slots, apm=training_half_day.apm)
             training_progs = self.train_prog
             if training_half_day.train_prog is not None:
                 training_progs = [training_half_day.train_prog]
