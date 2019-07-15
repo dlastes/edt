@@ -107,7 +107,7 @@ class Slot(object):
         minuts = self.start_time % 60
         if minuts == 0:
             minuts = ''
-        return str(self.day) + '_' + str(hours) + 'h' + str(minuts) + '_' + str(self.duration) + "mn"
+        return str(self.course_type) + '_' + str(self.day) + '_' + str(hours) + 'h' + str(minuts)
 
     def __repr__(self):
         return str(self)
