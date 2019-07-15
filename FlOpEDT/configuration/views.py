@@ -112,7 +112,7 @@ def import_config_file(req, **kwargs):
                     response = {'status': 'error', 'data': str(e)}
                     return HttpResponse(json.dumps(response), content_type='application/json')
                 depart = Department.objects.get(abbrev=depart_abbrev)
-                source = f"{settings.MEDIA_ROOT}/configuration/base/empty_planif_file.xlsx"
+                source = f"{settings.MEDIA_ROOT}/configuration/empty_planif_file.xlsx"
                 target_repo = f"{settings.MEDIA_ROOT}/configuration/"
                 make_planif_file(depart, empty_bookname=source, target_repo=target_repo)
                 logger.info("make planif OK")
@@ -133,7 +133,7 @@ def get_config_file(req, **kwargs):
     :param req:
     :return:
     """
-    f = open(f"{settings.MEDIA_ROOT}/configuration/base/database_file.xlsx", "rb")
+    f = open(f"{settings.MEDIA_ROOT}/configuration/empty_database_file.xlsx", "rb")
     response = HttpResponse(f, content_type='application/vnd.ms-excel')
     response['Content-Disposition'] = 'attachment; filename="database_file.xls"'
     f.close()
