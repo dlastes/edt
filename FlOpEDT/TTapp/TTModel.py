@@ -585,7 +585,7 @@ class TTModel(object):
 
         # a course is scheduled once and only once
         for c in self.wdb.courses:
-            name = 'core_course_' + str(c)
+            name = 'core_course_' + str(c) + str(self.constraint_nb)
             self.add_constraint(
                 self.sum([self.TT[(sl, c)] for sl in self.wdb.compatible_slots[c] & self.wdb.compatible_slots[c]]),
                 '==',
