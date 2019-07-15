@@ -679,7 +679,7 @@ class TTModel(object):
         for r in self.wdb.rooms:
             for sl1 in self.wdb.slots:
                 for sl2 in self.wdb.slots_intersecting[sl1] - {sl1}:
-                    name = 'simul_slots_rooms' + str(r) + '_'
+                    name = 'simul_slots_rooms' + str(r) + '_' + str(self.constraint_nb)
                     self.add_constraint(self.sum(self.TTrooms[(sl1, c, rg)]
                                                  for (c, rg) in room_course_compat[r]
                                                  if c in self.wdb.compatible_courses[sl1]) +
