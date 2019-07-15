@@ -421,10 +421,12 @@ class TTModel(object):
         self.var_nb += 1
         return LpVariable(countedname, cat=LpBinary)
 
-    def add_constraint(self, expr, relation, value, name='C'):
+    def add_constraint(self, expr, relation, value, name=None):
         """
         Add a constraint to the model
         """
+        if name is None:
+            name = "C_%g" % self.constraint_nb
         if relation == '==':
             pulp_relation = LpConstraintEQ
         elif relation == '<=':
@@ -435,7 +437,7 @@ class TTModel(object):
             raise Exception("relation must be either '==' or '>=' or '<='")
 
         self.model += LpConstraint(e=expr, sense=pulp_relation,
-                                   rhs=value, name=name + '_' + str(self.constraint_nb))
+                                   rhs=value, name=name)  # + '_' + str(self.constraint_nb))
         self.constraint_nb += 1
 
     def lin_expr(self, expr=None):
