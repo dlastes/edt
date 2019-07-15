@@ -934,7 +934,7 @@ class SimultaneousCourses(TTConstraint):
             # A compléter, l'idée est que si les cours ont le même prof, ou des
             # groupes qui se superposent, il faut veiller à supprimer les core
             # constraints qui empêchent que les cours soient simultanés...
-            if same_tutor:
+            if same_tutor and self.course1.tutor in ttmodel.wdb.instructors:
                 for sl2 in ttmodel.wdb.slots_intersecting[sl] - {sl}:
                     name_tutor_constr_sl2 = 'simul_slots' + str(self.course1.tutor) + '_' + str(sl) + '_' + str(sl2)
                     tutor_constr = ttmodel.get_constraint(name_tutor_constr_sl2)
