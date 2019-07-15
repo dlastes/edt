@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     'ics',
     'displayweb',
     'configuration'
+#    'importation'
 ]
 
 MIDDLEWARE = [
