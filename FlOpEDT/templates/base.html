@@ -74,6 +74,7 @@
       <li><a href="{% url "base:aide" department %}">Aide</a></li>
       <li><a href="{% url "base:contact" department %}">Contact</a></li>
       {% if user.is_superuser or user.is_staff and has_department_perm %}
+      <li><a href="{% url "configuration:configuration" %}">Importer</a></li>
       <li><a href="{% url "solve_board:main_board" department %}">Générer</a></li>
       <li><a href="{% url "base:statistics" department %}">Statistiques</a></li>
       {% endif %}

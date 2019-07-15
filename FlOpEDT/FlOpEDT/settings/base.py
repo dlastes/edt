@@ -64,7 +64,9 @@ INSTALLED_APPS = [
     'solve_board',
     'synchro',
     'ics',
-    'displayweb'
+    'displayweb',
+    'configuration'
+#    'importation'
 ]
 
 MIDDLEWARE = [

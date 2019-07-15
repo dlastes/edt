@@ -73,3 +73,6 @@ CHANNEL_LAYERS = {
     #     "ROUTING": "solve_board.routing.channel_routing",
     # },
 }
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'

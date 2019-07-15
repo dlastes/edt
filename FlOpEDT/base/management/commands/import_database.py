@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
-from misc.deploy_database.deploy_database import extract_database_file
+from configuration.deploy_database import extract_database_file
 
 class Command(BaseCommand):
     help = 'Import data'

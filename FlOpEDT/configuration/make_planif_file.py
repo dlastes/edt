@@ -73,7 +73,7 @@ def order_CT(department):
 empty_bookname = 'misc/deploy_database/empty_planif_file.xlsx'
 
 
-def make_planif_file(department, empty_bookname=empty_bookname):
+def make_planif_file(department, empty_bookname=empty_bookname, target_repo="misc/deploy_database"):
     new_book = load_workbook(filename=empty_bookname)
     empty_rows = list(new_book['empty'].rows)
     recap_rows = list(new_book['empty_recap'].rows)
@@ -291,5 +291,5 @@ def make_planif_file(department, empty_bookname=empty_bookname):
     new_book.remove(new_book['empty_recap'])
 
     new_book.remove(new_book['empty'])
-    filename = 'misc/deploy_database/planif_file_' + department.abbrev + '.xlsx'
+    filename = f'{target_repo}/planif_file_' + department.abbrev + '.xlsx'
     new_book.save(filename=filename)
