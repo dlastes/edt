@@ -182,19 +182,6 @@ def make_planif_file(department, empty_bookname=empty_bookname, target_repo="mis
             append_row(sheet, empty_rows, 4, rank, cols)
             rank += 1
 
-        if nb_groups > 0:
-            sheet.cell(row=rank - nb_groups - 1, column=VERIF_COL).value = \
-                '=IF(SUM(%s%d:INDIRECT(ADDRESS(MATCH(G$3,G%d:G%d,0)+ROW()-3,%d)))-$%s%d*%d=0,"OK","/!\\ -> ' \
-                '"&SUM(%s%d:INDIRECT(ADDRESS(MATCH(G$3,G%d:G%d,0)+ROW()-2,%d)))-$%s%d*%d)' % \
-                (first_column_letter[p], rank - nb_groups - 1,
-                 rank - nb_groups-1, rank - nb_groups + 10,
-                 VERIF_COL - 1,
-                 column_letter(VERIF_COL), rank - nb_groups - 2, nb_groups,
-                 first_column_letter[p], rank - nb_groups - 1,
-                 rank - nb_groups - 1, rank - nb_groups + 10,
-                 VERIF_COL - 1,
-                 column_letter(VERIF_COL), rank - nb_groups - 2, nb_groups,)
-
         ############ TOTAL line ############
         ligne_finale = rank - 2
         sheet.cell(row=rank-1, column=VERIF_COL).value = 'TOTAL'
