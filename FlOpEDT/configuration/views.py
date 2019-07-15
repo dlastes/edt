@@ -6,9 +6,6 @@ from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
 
 from base.models import Department
-from TTapp.scripts.TP_constraint import add_TP_constraints
-from TTapp.scripts.DA_constraint import add_DA_limitedSlotChoices, add_DA_constraints
-from TTapp.scripts.reasonableDays_constraint import add_reasonableDays_constraint
 
 from misc.generate_static_files import generate_group_file, generate_room_file
 from configuration.make_planif_file import make_planif_file
@@ -202,19 +199,6 @@ def import_planif_file(req, **kwargs):
                     extract_planif(depart, bookname=path)
                     print("Extract file OK")
                     rep = ""
-                    add_DA_limitedSlotChoices()
-                    add_DA_constraints(depart)
-                    print("DA Constraint OK")
-
-                    rep = add_TP_constraints(depart)
-                    print("TP Constraint OK")
-
-                    generate_group_file(depart.abbrev)
-                    generate_room_file(depart.abbrev)
-                    print("Generation des fichiers static")
-
-                    # add_reasonableDays_constraint()
-                    # print("Add Reasonable Days Constraint OK")
 
                     os.rename(path, f"{settings.MEDIA_ROOT}/configuration/planif_file.xlsx")
                     print("Rename OK")
