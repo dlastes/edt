@@ -435,7 +435,7 @@ class TTModel(object):
             raise Exception("relation must be either '==' or '>=' or '<='")
 
         self.model += LpConstraint(e=expr, sense=pulp_relation,
-                                   rhs=value, name=name + '_' + str(self.constraint_nb))
+                                   rhs=value, name=name)  # + '_' + str(self.constraint_nb))
         self.constraint_nb += 1
 
     def lin_expr(self, expr=None):
