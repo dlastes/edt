@@ -19,7 +19,9 @@ from .models import UpdateConfig
 import os
 import datetime
 import json
+import logging
 
+logger = logging.getLogger(__name__)
 
 # Create your views here.
 
@@ -64,11 +66,11 @@ def import_config_file(req, **kwargs):
     """
     if req.method == 'POST':
         form = ImportConfig(req.POST, req.FILES)
-        print(req)
-        print(req.FILES)
+        logger.info(req)
+        logger.info(req.FILES)
         if form.is_valid():
-            print(req.FILES['fichier'])
-            print(req.FILES['fichier'].name)
+            logger.info(req.FILES['fichier'])
+            logger.info(req.FILES['fichier'].name)
             if check_ext_file(req.FILES['fichier'], ['.xlsx', '.xls']):
                 path = upload_file(req.FILES['fichier'], "configuration/database_file_.xlsx")
                 # If one of method fail the transaction will be not commit.
@@ -79,7 +81,7 @@ def import_config_file(req, **kwargs):
                             depart_name = req.POST['nom']
                         except:
                             depart_name = None
-                        print(depart_name)
+                        logger.info(depart_name)
                         try:
                             depart = Department.objects.get(abbrev=depart_abbrev)
                             if not depart_name == depart.name and depart_name is not None:
@@ -88,7 +90,7 @@ def import_config_file(req, **kwargs):
                                 return HttpResponse(json.dumps(response), content_type='application/json')
                             depart_name = depart.name
                             flush_department_data(depart)
-                            print("flush OK")
+                            logger.info("flush OK")
                         except Exception:
                             pass
 
@@ -96,24 +98,24 @@ def import_config_file(req, **kwargs):
                         extract_database_file(path, department_name=depart_name,
                                               department_abbrev=depart_abbrev,
                                               )
-                        print("extract OK")
+                        logger.info("extract OK")
 
                         update_version = UpdateConfig(date=datetime.datetime.now(), is_planif_update=False)
                         update_version.save()
-                        print("create UpdateConfig OK")
+                        logger.info("create UpdateConfig OK")
 
                         os.rename(path, f"{settings.MEDIA_ROOT}/configuration/database_file_{depart_abbrev}.xlsx")
                         response = {'status': 'ok', 'data': 'OK'}
                 except Exception as e:
                     os.remove(path)
-                    print(e)
+                    logger.info(e)
                     response = {'status': 'error', 'data': str(e)}
                     return HttpResponse(json.dumps(response), content_type='application/json')
                 depart = Department.objects.get(abbrev=depart_abbrev)
                 source = f"{settings.MEDIA_ROOT}/configuration/base/empty_planif_file.xlsx"
                 target_repo = f"{settings.MEDIA_ROOT}/configuration/"
                 make_planif_file(depart, empty_bookname=source, target_repo=target_repo)
-                print("make planif OK")
+                logger.info("make planif OK")
             else:
                 response = {'status': 'error', 'data': 'Invalid format'}
         else:
@@ -151,7 +153,7 @@ def get_planif_file(req, **kwargs):
     :param req:
     :return:
     """
-    print(req.GET['departement'])
+    logger.info(req.GET['departement'])
     up = UpdateConfig.objects.all()
     if up.count() == 0 or not os.path.exists(f"{settings.MEDIA_ROOT}/configuration/planif_file_{req.GET['departement']}.xlsx"):
         return HttpResponseNotFound("Not found")
@@ -182,7 +184,7 @@ def import_planif_file(req, **kwargs):
     form = ImportPlanif(req.POST, req.FILES)
     if form.is_valid():
         if check_ext_file(req.FILES['fichier'], ['.xlsx', '.xls']):
-            print(req.FILES['fichier'])
+            logger.info(req.FILES['fichier'])
             path = upload_file(req.FILES['fichier'], "configuration/planif_file_.xlsx")
             # If one of methods fail, the transaction will be not commit.
             try:
@@ -194,23 +196,23 @@ def import_planif_file(req, **kwargs):
                         return HttpResponse(json.dumps(response), content_type='application/json')
                     if len(up.filter(is_planif_update=True)) > 0:
                         flush_planif_database(depart)
-                    print("Flush planif database OK")
+                    logger.info("Flush planif database OK")
 
                     extract_planif(depart, bookname=path)
-                    print("Extract file OK")
+                    logger.info("Extract file OK")
                     rep = ""
 
                     os.rename(path, f"{settings.MEDIA_ROOT}/configuration/planif_file.xlsx")
-                    print("Rename OK")
+                    logger.info("Rename OK")
 
                     update_version = UpdateConfig(date=datetime.datetime.now(), is_planif_update=True)
                     update_version.save()
-                    print("Creation UpdateConfig OK")
+                    logger.info("Creation UpdateConfig OK")
 
                     response = {'status': 'ok', 'data': rep}
             except Exception as e:
                 os.remove(path)
-                print(e)
+                logger.info(e)
                 response = {'status': 'error', 'data': str(e)}
         else:
             response = {'status': 'error', 'data': 'Invalid format'}
