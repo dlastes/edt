@@ -1,7 +1,6 @@
 from django.apps import apps
 from people.models import User
-import django
-import base.models
+from base.models import Course
 
 
 def flush_department_data(departement):
@@ -13,5 +12,4 @@ def flush_department_data(departement):
 
 
 def flush_planif_database(departement):
-
-    base.models.Course.objects.filter(groupe__train_prog__department=departement).delete()
+    Course.objects.filter(groupe__train_prog__department=departement).delete()
