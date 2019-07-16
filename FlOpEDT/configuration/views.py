@@ -12,7 +12,6 @@ from configuration.make_planif_file import make_planif_file
 from configuration.extract_planif_file import extract_planif
 from configuration.deploy_database import extract_database_file
 from .file_manipulation import upload_file, check_ext_file
-from .flush_database import flush_department_data, flush_planif_database
 from .forms import ImportPlanif, ImportConfig
 from .models import UpdateConfig
 
