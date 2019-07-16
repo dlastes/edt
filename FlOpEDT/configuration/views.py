@@ -71,7 +71,7 @@ def import_config_file(req, **kwargs):
             logger.debug(req.FILES['fichier'])
             logger.debug(req.FILES['fichier'].name)
             if check_ext_file(req.FILES['fichier'], ['.xlsx', '.xls']):
-                path = upload_file(req.FILES['fichier'], "database_file_.xlsx")
+                path = upload_file(req.FILES['fichier'], "uploaded_database_file.xlsx")
                 # If one of method fail the transaction will be not commit.
                 try:
                     with transaction.atomic():
@@ -103,7 +103,9 @@ def import_config_file(req, **kwargs):
                         update_version.save()
                         logger.debug("create UpdateConfig OK")
 
-                        os.rename(path, f"{settings.MEDIA_ROOT}/configuration/database_file_{dept_abbrev}.xlsx")
+                        os.rename(path, os.path.join(settings.MEDIA_ROOT,
+                                                     'configuration',
+                                                     f'database_file_{dept_abbrev}.xlsx'))
                         response = {'status': 'ok', 'data': 'OK'}
                 except Exception as e:
                     os.remove(path)
@@ -111,8 +113,11 @@ def import_config_file(req, **kwargs):
                     response = {'status': 'error', 'data': str(e)}
                     return HttpResponse(json.dumps(response), content_type='application/json')
                 dept = Department.objects.get(abbrev=dept_abbrev)
-                source = f"{settings.MEDIA_ROOT}/configuration/empty_planif_file.xlsx"
-                target_repo = f"{settings.MEDIA_ROOT}/configuration/"
+                source = os.path.join(settings.MEDIA_ROOT,
+                                      'configuration',
+                                      'empty_planif_file.xlsx')
+                target_repo = os.path.join(settings.MEDIA_ROOT,
+                                           'configuration')
                 make_planif_file(dept, empty_bookname=source, target_repo=target_repo)
                 logger.debug("make planif OK")
             else:
