@@ -293,7 +293,7 @@ def groups_extract(department, book):
 
     while idTP is not None:
 
-        verif = TrainingProgramme.objects.filter(abbrev=idTP)
+        verif = TrainingProgramme.objects.filter(abbrev=idTP, department=department)
 
         if not verif.exists():
 
@@ -343,14 +343,14 @@ def groups_extract(department, book):
     while idGroup is not None:
 
         tpGr = sheet.cell(row=GROUP_ROW, column=2).value
-        verif = Group.objects.filter(nom=idGroup, train_prog__abbrev=tpGr)
+        verif = Group.objects.filter(nom=idGroup, train_prog__abbrev=tpGr, train_prog__department=department)
 
         if not verif.exists():
 
             try:
 
                 tpGr = sheet.cell(row=GROUP_ROW, column=2).value
-                tpGroup = TrainingProgramme.objects.get(abbrev=tpGr)
+                tpGroup = TrainingProgramme.objects.get(abbrev=tpGr, department=department)
 
                 gt = sheet.cell(row=GROUP_ROW, column=5).value
                 groupType = GroupType.objects.get(name=gt, department=department)
@@ -380,9 +380,9 @@ def groups_extract(department, book):
 
         if p_group is not None:
 
-            parent_group = Group.objects.get(nom=p_group, train_prog__abbrev=tpGr)
+            parent_group = Group.objects.get(nom=p_group, train_prog__abbrev=tpGr, train_prog__department=department)
 
-            group = Group.objects.get(nom=idGroup, train_prog__abbrev=tpGr)
+            group = Group.objects.get(nom=idGroup, train_prog__abbrev=tpGr, train_prog__department=department)
 
             group.parent_groups.add(parent_group)
 
@@ -390,9 +390,9 @@ def groups_extract(department, book):
 
             if p_group2 is not None:
 
-                parent_group = Group.objects.get(nom=p_group2, train_prog__abbrev=tpGr)
+                parent_group = Group.objects.get(nom=p_group2, train_prog__abbrev=tpGr, train_prog__department=department)
 
-                group = Group.objects.get(nom=idGroup, train_prog__abbrev=tpGr)
+                group = Group.objects.get(nom=idGroup, train_prog__abbrev=tpGr, train_prog__department=department)
 
                 group.parent_groups.add(parent_group)
 
