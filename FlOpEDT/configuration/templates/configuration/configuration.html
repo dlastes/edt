@@ -8,17 +8,17 @@
         var step = {{ step }};
         var departements = {{ departements|safe }};
     </script>
-    <h1>Etape 1 - Configuration de la base de données</h1>
+    <h1>Étape 1 - Configuration de la base de données (profs, groupes, salles, types de cours, etc.)</h1>
     <div class="step">
-        <h3>Télécharger le fichier de configuration de la base de données</h3>
+        <h3>Canevas du fichier de configuration</h3>
         <p>Téléchargez puis remplissez le fichier ci-dessous.</p>
-            Cliquer pour télécharger le fichier de config 1
+            Cliquez pour télécharger le fichier de configuration
             <a href="get_config_file/"><button id="btn_config_1">Télécharger</button></a>
     </div>
 
     <div class="step">
-        <h3>Importer un fichier pour configurer la base de données</h3>
-        <p>Importer le fichier de configuration rempli.<br>
+        <h3>Fichier de configuration complété</h3>
+        <p>Téléversez le fichier de configuration rempli.<br>
         Seul le format xlsx est accepté.</p>
         <form action="import_config_file/" method="post" enctype="multipart/form-data" id="config_1">
                 {% csrf_token %}
@@ -33,14 +33,14 @@
         </form>
 
         <div id="error_config_1">
-            Status : <p></p>
+            Verdict : <p></p>
         </div>
     </div>
-    <h1>Etape 2 - Plannifier les cours par semaine</h1>
+    <h1>Étape 2 - Planifier les cours (quel cours dans quelle semaine, quel prof donne quel cours)</h1>
     <div class="step">
-    <h3>Télécharger le fichier de plannification des cours par semaine</h3>
+    <h3>Canevas du fichier de planification à partir du fichier de configuration</h3>
         <p>Téléchargez puis remplissez le fichier ci-dessous.</p>
-            Cliquer pour télécharger le fichier de config 2
+            Cliquez pour télécharger le canevas du fichier de planification
         <form action="get_planif_file/">
         <select name="departement">
             {% for depart in departements %}
@@ -53,8 +53,8 @@
     </div>
 
     <div class="step">
-        <h3>Importer le fichier de plannification des cours</h3>
-        <p>Importer le fichier de plannification rempli.<br>
+        <h3>Fichier de planification des cours complété</h3>
+        <p>Téléversez le fichier de planification rempli.<br>
         Seul le format xlsx est accepté.</p>
 <!--        <form action="/configuration/import_planif_file/" method="post" enctype="multipart/form-data" id="config_2">-->
         <form action="import_planif_file/" method="post" enctype="multipart/form-data" id="config_2">
