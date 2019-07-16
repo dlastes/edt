@@ -90,13 +90,12 @@ def import_config_file(req, **kwargs):
                             dept_name = dept.name
                             dept.delete()
                             logger.debug("flush OK")
-                        except Exception:
-                            pass
-
+                        except Exception as e:
+                            logger.warning(f'Exception with dept {dept}')
+                            logger.warning(e)
 
                         extract_database_file(path, department_name=dept_name,
-                                              department_abbrev=dept_abbrev,
-                                              )
+                                              department_abbrev=dept_abbrev)
                         logger.debug("extract OK")
 
                         update_version = UpdateConfig(date=datetime.datetime.now(), is_planif_update=False)
