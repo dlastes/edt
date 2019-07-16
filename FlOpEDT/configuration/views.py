@@ -5,7 +5,7 @@ from django.conf import settings
 
 from django.contrib.admin.views.decorators import staff_member_required
 
-from base.models import Department
+from base.models import Department, Course
 
 from misc.generate_static_files import generate_group_file, generate_room_file
 from configuration.make_planif_file import make_planif_file
@@ -76,27 +76,27 @@ def import_config_file(req, **kwargs):
                 # If one of method fail the transaction will be not commit.
                 try:
                     with transaction.atomic():
-                        depart_abbrev = req.POST['abbrev']
+                        dept_abbrev = req.POST['abbrev']
                         try:
-                            depart_name = req.POST['nom']
+                            dept_name = req.POST['nom']
                         except:
-                            depart_name = None
-                        logger.debug(depart_name)
+                            dept_name = None
+                        logger.debug(dept_name)
                         try:
-                            depart = Department.objects.get(abbrev=depart_abbrev)
-                            if not depart_name == depart.name and depart_name is not None:
+                            dept = Department.objects.get(abbrev=dept_abbrev)
+                            if not dept_name == dept.name and dept_name is not None:
                                 response = {'status': 'error', 'data': "Le département existe déja avec cette "
                                                                        "abrevviation et le nom ne correspond pas."}
                                 return HttpResponse(json.dumps(response), content_type='application/json')
-                            depart_name = depart.name
-                            flush_department_data(depart)
+                            dept_name = dept.name
+                            dept.delete()
                             logger.debug("flush OK")
                         except Exception:
                             pass
 
 
-                        extract_database_file(path, department_name=depart_name,
-                                              department_abbrev=depart_abbrev,
+                        extract_database_file(path, department_name=dept_name,
+                                              department_abbrev=dept_abbrev,
                                               )
                         logger.debug("extract OK")
 
@@ -104,17 +104,17 @@ def import_config_file(req, **kwargs):
                         update_version.save()
                         logger.debug("create UpdateConfig OK")
 
-                        os.rename(path, f"{settings.MEDIA_ROOT}/configuration/database_file_{depart_abbrev}.xlsx")
+                        os.rename(path, f"{settings.MEDIA_ROOT}/configuration/database_file_{dept_abbrev}.xlsx")
                         response = {'status': 'ok', 'data': 'OK'}
                 except Exception as e:
                     os.remove(path)
                     logger.debug(e)
                     response = {'status': 'error', 'data': str(e)}
                     return HttpResponse(json.dumps(response), content_type='application/json')
-                depart = Department.objects.get(abbrev=depart_abbrev)
+                dept = Department.objects.get(abbrev=dept_abbrev)
                 source = f"{settings.MEDIA_ROOT}/configuration/empty_planif_file.xlsx"
                 target_repo = f"{settings.MEDIA_ROOT}/configuration/"
-                make_planif_file(depart, empty_bookname=source, target_repo=target_repo)
+                make_planif_file(dept, empty_bookname=source, target_repo=target_repo)
                 logger.debug("make planif OK")
             else:
                 response = {'status': 'error', 'data': 'Invalid format'}
@@ -195,7 +195,7 @@ def import_planif_file(req, **kwargs):
                         response = {'status': 'error', 'data': str(e)}
                         return HttpResponse(json.dumps(response), content_type='application/json')
                     if len(up.filter(is_planif_update=True)) > 0:
-                        flush_planif_database(depart)
+                        Course.objects.filter(groupe__train_prog__department=departement).delete()
                     logger.debug("Flush planif database OK")
 
                     extract_planif(depart, bookname=path)
