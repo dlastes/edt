@@ -91,7 +91,7 @@ def import_config_file(req, **kwargs):
                             dept.delete()
                             logger.debug("flush OK")
                         except Exception as e:
-                            logger.warning(f'Exception with dept {dept}')
+                            logger.warning(f'Exception with dept')
                             logger.warning(e)
 
                         extract_database_file(path, department_name=dept_name,
@@ -105,6 +105,7 @@ def import_config_file(req, **kwargs):
                         os.rename(path, os.path.join(settings.MEDIA_ROOT,
                                                      'configuration',
                                                      f'database_file_{dept_abbrev}.xlsx'))
+                        logger.warning("rename OK")
                         response = {'status': 'ok', 'data': 'OK'}
                 except Exception as e:
                     os.remove(path)
@@ -117,8 +118,9 @@ def import_config_file(req, **kwargs):
                                       'empty_planif_file.xlsx')
                 target_repo = os.path.join(settings.MEDIA_ROOT,
                                            'configuration')
+                logger.info("start planif")
                 make_planif_file(dept, empty_bookname=source, target_repo=target_repo)
-                logger.debug("make planif OK")
+                logger.info("make planif OK")
             else:
                 response = {'status': 'error', 'data': 'Invalid format'}
         else:

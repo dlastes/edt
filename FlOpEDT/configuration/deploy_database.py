@@ -53,7 +53,7 @@ def extract_database_file(bookname=bookname, department_name=None, department_ab
     # Test department existence
     department, created = Department.objects.get_or_create(name=department_name, abbrev=department_abbrev)
     if not created:
-        print(f"Department with abbrev {department_abbrev} already exists.")
+        logger.warning(f"Department with abbrev {department_abbrev} already exists.")
         return
 
     book = load_workbook(filename=bookname, data_only=True)
@@ -114,17 +114,17 @@ def tutors_extract(department, book):
                 #             up.save()
 
             except IntegrityError as ie :
-                print("A constraint has not been respected creation the Professor : \n", ie)
+                logger.warning("A constraint has not been respected creation the Professor : \n", ie)
                 pass
             else:
-                logger.debug(f'create tutor with id:{id}')
+                logger.info(f'create tutor with id:{id}')
         else:
             UserDepartmentSettings.objects.create(department=department, user=tutor)
 
         INTER_ID_ROW += 1
         id = sheet.cell(row=INTER_ID_ROW, column=1).value
 
-    print("Tutors extraction done")
+    logger.info("Tutors extraction done")
 
 
 def rooms_extract(department, book):
@@ -148,7 +148,7 @@ def rooms_extract(department, book):
         try:
             RoomType.objects.get_or_create(department=department, name=idCat)
         except IntegrityError as ie:
-            print("A constraint has not been respected creating the RoomType %s : \n" %idCat, ie)
+            logger.warning("A constraint has not been respected creating the RoomType %s : \n" %idCat, ie)
 
         row += 1
         idCat = sheet.cell(row=row, column=col).value
@@ -176,7 +176,7 @@ def rooms_extract(department, book):
 
 
         except IntegrityError as ie:
-            print("A constraint has not been respected creating the Room %s : \n" %idRoom, ie)
+            logger.warning("A constraint has not been respected creating the Room %s : \n" %idRoom, ie)
 
         row += 1
         idRoom = sheet.cell(row=row, column=col).value
@@ -197,10 +197,10 @@ def rooms_extract(department, book):
                 room_group = RoomGroup.objects.create(name=room_group_id)
                 room_group.types.add(temporay_room_type)
             else:
-                print(f"A custom group can't have the same name thant an existing Room : {room_group_id}")
+                logger.warning(f"A custom group can't have the same name thant an existing Room : {room_group_id}")
 
         except IntegrityError as ie:
-            print("A constraint has not been respected creating the RoomGroup %s : \n" %room_group_id, ie)
+            logger.warning("A constraint has not been respected creating the RoomGroup %s : \n" %room_group_id, ie)
 
         row += 1
         room_group_id = sheet.cell(row=row, column=col).value
@@ -229,10 +229,10 @@ def rooms_extract(department, book):
                 room.subroom_of.add(room_group)
 
             except Room.DoesNotExist:
-                print(f"unable to find room '{idRoom}' with correct RoomType'")
+                logger.warning(f"unable to find room '{idRoom}' with correct RoomType'")
             
             except RoomGroup.DoesNotExist:
-                print(f"unable to find  RoomGroup '{idGroup}' with correct RoomType'")                            
+                logger.warning(f"unable to find  RoomGroup '{idGroup}' with correct RoomType'")                            
 
             col += 1
             idRoom = sheet.cell(row=row, column=col).value
@@ -264,7 +264,7 @@ def rooms_extract(department, book):
 
                 room_group.types.add(room_type)
             except RoomGroup.DoesNotExist:
-                print(f"unable to find  RoomGroup '{room_group_id}'")
+                logger.warning(f"unable to find  RoomGroup '{room_group_id}'")
 
             col += 1
             room_group_id = sheet.cell(row=row, column=col).value
@@ -273,7 +273,7 @@ def rooms_extract(department, book):
         idCat = sheet.cell(row=row, column=ROOM_CATEGORY_START_COL).value
 
     temporay_room_type.delete()
-    print("Rooms extraction done")
+    logger.info("Rooms extraction done")
 
 
 # groups_extract
@@ -303,7 +303,7 @@ def groups_extract(department, book):
                 trainingProg = TrainingProgramme(department=department, name=nameTP, abbrev=idTP)
                 trainingProg.save()
             except IntegrityError as ie:
-                print("A constraint has not been respected creating the TrainingProgramme %s : \n" % idTP, ie)
+                logger.warning("A constraint has not been respected creating the TrainingProgramme %s : \n" % idTP, ie)
                 pass
 
         TP_ROW += 1
@@ -327,7 +327,7 @@ def groups_extract(department, book):
                 gt.save()
 
             except IntegrityError as ie:
-                print("A constraint has not been respected creating the GroupType %s : \n" % idGroupType, ie)
+                logger.warning("A constraint has not been respected creating the GroupType %s : \n" % idGroupType, ie)
                 pass
 
         GT_ROW += 1
@@ -359,7 +359,7 @@ def groups_extract(department, book):
                 group.save()
 
             except IntegrityError as ie:
-                print("A constraint has not been respected creating the Group %s : \n" % idGroup, ie)
+                logger.warning("A constraint has not been respected creating the Group %s : \n" % idGroup, ie)
                 pass
 
         GROUP_ROW += 1
@@ -440,7 +440,7 @@ def groups_extract(department, book):
                                             ending_week=e_week)
 
             except IntegrityError as ie:
-                print("A constraint has not been respected creating the Period %s : \n" % id_per, ie)
+                logger.warning("A constraint has not been respected creating the Period %s : \n" % id_per, ie)
                 pass
 
         PERIOD_ROW += 1
@@ -452,7 +452,7 @@ def groups_extract(department, book):
 
     #generate_group_file(department.abbrev)
 
-    print("Groups extraction done")
+    logger.info("Groups extraction done")
 
 
 def modules_extract(department, book):
@@ -482,7 +482,7 @@ def modules_extract(department, book):
             try:
                 profesMod = Tutor.objects.get(username=profMod)
             except:
-                print(f"unable to find tutor '{profMod}'")
+                logger.warning(f"unable to find tutor '{profMod}'")
             periodMod = Period.objects.get(name=period, department=department)
 
             try:
@@ -491,14 +491,14 @@ def modules_extract(department, book):
                 module.save()
 
             except IntegrityError as ie:
-                print("A constraint has not been respected creating the Module %s : \n" % idMod, ie)
+                logger.warning("A constraint has not been respected creating the Module %s : \n" % idMod, ie)
                 pass
 
         MODULE_ROW+=1
 
         idMod=sheet.cell(row=MODULE_ROW, column=1).value
 
-    print("Modules extraction done")
+    logger.info("Modules extraction done")
 
 def coursetypes_extract(department, book):
 
@@ -551,13 +551,13 @@ def coursetypes_extract(department, book):
 
             except IntegrityError as ie:
 
-                print("A constraint has not been respected creating the CourseType %s : \n" % idType, ie)
+                logger.warning("A constraint has not been respected creating the CourseType %s : \n" % idType, ie)
                 pass
 
             type_row += 1
             idType = sheet.cell(row=type_row, column=1).value
 
-    print("CourseType extraction done")
+    logger.info("CourseType extraction done")
 
 
 def convert_time(value):

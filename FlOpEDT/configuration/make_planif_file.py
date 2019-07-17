@@ -24,12 +24,17 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
+import logging
+
 from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
 
 from base.models import Group, Module, Period, CourseType
 
 from copy import copy
+
+
+logger = logging.getLogger(__name__)
 
 
 def as_text(value):
@@ -87,6 +92,7 @@ def make_planif_file(department, empty_bookname=empty_bookname, target_repo="mis
         CT = CourseType.objects.filter(department=department)
     # We go through each period and create a sheet for each period
     for p in Period.objects.filter(department=department):
+        logger.info(p)
         new_book.create_sheet(p.name)
         sheet = new_book[p.name]
         ################ Writing line 1 with weeks ################
@@ -132,7 +138,9 @@ def make_planif_file(department, empty_bookname=empty_bookname, target_repo="mis
 
         ################ A line per module per CourseType ################
         for mod in Module.objects.filter(period=p):
+            logger.info(mod)
             for ct in CT:
+                logger.info(ct)
                 groups = Group.objects.filter(type__in=ct.group_types.all(), train_prog=mod.train_prog)
                 nb_groups = groups.count()
                 append_row(sheet, empty_rows, 2, rank, cols)
@@ -146,6 +154,7 @@ def make_planif_file(department, empty_bookname=empty_bookname, target_repo="mis
                 sheet.cell(row=rank, column=VERIF_COL).value = '=SUM(%s%d:%s%d)' % (first_column_letter[p], rank,
                                                                                     last_column_letter[p], rank)
                 rank += 1
+                logger.info(f'Nb groups: {nb_groups}')
                 if nb_groups > 0:
                     for g in groups:
                         append_row(sheet, empty_rows, 3, rank, cols)
