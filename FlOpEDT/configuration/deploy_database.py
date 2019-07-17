@@ -468,7 +468,10 @@ def modules_extract(department, book):
         idMod = idMod.replace(' ','')
         tpMod = sheet.cell(row=MODULE_ROW, column=4).value
         period = sheet.cell(row=MODULE_ROW, column=6).value
-        verif = Module.objects.filter(abbrev=idMod, train_prog__abbrev=tpMod, period__name=period)
+        verif = Module.objects.filter(abbrev=idMod,
+                                      train_prog__abbrev=tpMod,
+                                      train_prog__department=department,
+                                      period__name=period)
 
 
         if not verif.exists():
@@ -478,7 +481,8 @@ def modules_extract(department, book):
             nameMod = sheet.cell(row=MODULE_ROW, column=3).value
             tpMod = sheet.cell(row=MODULE_ROW, column=4).value
             profMod = sheet.cell(row=MODULE_ROW, column=5).value
-            tpModule = TrainingProgramme.objects.get(abbrev=tpMod)
+            tpModule = TrainingProgramme.objects.get(abbrev=tpMod,
+                                                     department=department)
             try:
                 profesMod = Tutor.objects.get(username=profMod)
             except:
