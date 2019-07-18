@@ -70,12 +70,14 @@ class WeekDB(object):
         self.slots, self.slots_by_day, self.slots_intersecting, self.slots_by_half_day = self.slots_init()
         self.room_types, self.room_groups, self.rooms, self.room_prefs, self.room_groups_for_type = self.rooms_init()
         self.course_types, self.courses, self.sched_courses, self.fixed_courses, \
+            self.other_dep_courses, self.other_dep_sched_courses, \
             self.courses_availabilities, self.modules, self.dependencies = self.courses_init()
         self.compatible_slots, self.compatible_courses = self.compatibilities_init()
         self.groups, self.basic_groups, self.all_groups_of, self.basic_groups_of, self.courses_for_group, \
             self.courses_for_basic_group = self.groups_init()
         self.holidays, self.training_half_days = self.holidays_init()
-        self.instructors, self.courses_for_tutor, self.courses_for_supp_tutor, self.availabilities = self.users_init()
+        self.instructors, self.courses_for_tutor, self.courses_for_supp_tutor, self.availabilities,\
+            self.other_departments_courses_for_tutor, self.other_departments_courses_for_supp_tutor= self.users_init()
 
     def days_init(self):
         days = TimeGeneralSettings.objects.get(department=self.department).days
@@ -135,6 +137,16 @@ class WeekDB(object):
                     copie_travail=0) \
             .exclude(cours__groupe__train_prog__in=self.train_prog)
 
+        other_dep_courses = Course.objects.filter(
+            semaine=self.week, an=self.year)\
+            .exclude(groupe__train_prog__department=self.department)
+
+        other_dep_sched_courses = ScheduledCourse \
+            .objects \
+            .filter(cours__semaine=self.week,
+                    cours__an=self.year) \
+            .exclude(cours__groupe__train_prog__department=self.department)
+
         courses_availabilities = CoursePreference.objects \
             .filter(train_prog__department=self.department,
                     semaine=self.week,
@@ -149,7 +161,8 @@ class WeekDB(object):
             cours2__semaine=self.week,
             cours1__groupe__train_prog__in=self.train_prog)
 
-        return course_types, courses, sched_courses, fixed_courses, courses_availabilities, modules, dependencies
+        return course_types, courses, sched_courses, fixed_courses, other_dep_courses, other_dep_sched_courses,\
+            courses_availabilities, modules, dependencies
 
     def compatibilities_init(self):
         # COMPATIBILITY
@@ -226,7 +239,17 @@ class WeekDB(object):
             .filter(semaine=self.week,
                     an=self.year)
 
-        return instructors, courses_for_tutor, courses_for_supp_tutor, availabilities
+        other_departments_courses_for_tutor = {}
+        for i in instructors:
+            other_departments_courses_for_tutor[i] = set(self.other_dep_courses.filter(tutor=i))
+
+        other_departments_courses_for_supp_tutor = {}
+        for i in instructors:
+            other_departments_courses_for_supp_tutor[i] = set()
+
+        return instructors, courses_for_tutor, courses_for_supp_tutor, availabilities, \
+            other_departments_courses_for_tutor, other_departments_courses_for_supp_tutor
+
 
 class TTModel(object):
     def __init__(self, department_abbrev, semaine, an,
@@ -829,7 +852,9 @@ class TTModel(object):
         # unpreferred slots for an instructor costs
         # min((float(nb_avail_slots) / min(2*nb_teaching_slots,22)),1)
         for i in self.wdb.instructors:
-            teaching_duration = sum(c.type.duration for c in self.wdb.courses_for_tutor[i])
+            teaching_duration = sum(c.type.duration
+                                    for c in self.wdb.courses_for_tutor[i]
+                                    & self.wdb.other_departments_courses_for_tutor[i])
             avail_instr[i] = {}
             unp_slot_cost[i] = {}
             if self.wdb.availabilities.filter(user=i).exists():
@@ -871,6 +896,16 @@ class TTModel(object):
                                         .filter(valeur__gte=1,
                                                 valeur__lte=maximum - 1)) / non_prefered_duration
                     for sl in self.wdb.slots:
+                        other_dep_courses_on_sl = self.wdb.other_dep_sched_courses\
+                            .filter(cours__tutor=i,
+                                    start_time__lt=sl.start_time + sl.duration,
+                                    start_time__gt=sl.start_time - F('cours__type__duration'),
+                                    day=sl.day)
+                        if other_dep_courses_on_sl.exists():
+                            avail_instr[i][sl] = 0
+                            unp_slot_cost[i][sl] = 0
+                            print("Indispo autre dep:", i.username, sl, other_dep_courses_on_sl)
+                            continue
                         avail = availabilities.filter(start_time__lt=sl.start_time + sl.duration,
                                                       start_time__gt=sl.start_time - F('duration'),
                                                       day=sl.day)
