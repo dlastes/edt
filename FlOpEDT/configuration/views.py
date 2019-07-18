@@ -84,8 +84,8 @@ def import_config_file(req, **kwargs):
                         try:
                             dept = Department.objects.get(abbrev=dept_abbrev)
                             if not dept_name == dept.name and dept_name is not None:
-                                response = {'status': 'error', 'data': "Le département existe déja avec cette "
-                                                                       "abrevviation et le nom ne correspond pas."}
+                                response = {'status': 'error',
+                                            'data': "Il existe déjà un département utilisant cette abbréviation."}
                                 return HttpResponse(json.dumps(response), content_type='application/json')
                             dept_name = dept.name
                             dept.delete()
