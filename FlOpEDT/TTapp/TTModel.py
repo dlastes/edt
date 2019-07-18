@@ -739,7 +739,7 @@ class TTModel(object):
             # constraint : other_dep_sched_courses rooms are not available
             for r in self.wdb.rooms:
                 occupied = False
-                for rg in r.subroom_of.exclude(department=self.department):
+                for rg in r.subroom_of.exclude(departments=self.department):
                     if self.wdb.other_dep_sched_courses\
                             .filter((Q(start_time__lt=sl.start_time + sl.duration) |
                                      Q(start_time__gt=sl.start_time - F('cours__type__duration'))),
