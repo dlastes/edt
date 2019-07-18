@@ -998,13 +998,16 @@ function update_all_groups() {
     }
     rootgp_width = max_rw;
 
-    if (rootgp_width > 0) {
-        if (pos_rootgp_width == 0) {
-            pos_rootgp_width = rootgp_width;
-        }
-        labgp.width *= pos_rootgp_width / rootgp_width;
+    // should not occur; can occur when there is no group in the department
+    if (rootgp_width == 0)  {
+        rootgp_width = 5 ;
+    }
+
+    if (pos_rootgp_width == 0) {
         pos_rootgp_width = rootgp_width;
     }
+    labgp.width *= pos_rootgp_width / rootgp_width;
+    pos_rootgp_width = rootgp_width;
 
 
 

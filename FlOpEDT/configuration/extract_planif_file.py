@@ -26,22 +26,11 @@
 
 import os
 import sys
-
-sys.path.append("..")
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "FlOpEDT.settings.local")
-
-### Have to do this for it to work in 1.9.x!
-from django.core.wsgi import get_wsgi_application
-
-application = get_wsgi_application()
-#############
-
-
 from openpyxl import *
+
+from base.weeks import annee_courante
 from base.models import Group, Module, Course, Room, CourseType, RoomType, TrainingProgramme, Dependency, Period, Department
-
 from people.models import Tutor
-
 from misc.assign_module_color import assign_color
 
 
@@ -53,7 +42,7 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
 
     # lookup week column
     wc = 1
-    for wr in [1, 5]:
+    for wr in [1]:
         while wc < 50:
             wc += 1
             sem = sheet.cell(row=wr, column=wc).value
@@ -187,21 +176,25 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
             raise
 
 
-def extract_period(department, book, period):
+def extract_period(department, book, period, year):
     if period.starting_week < period.ending_week:
         for week in range(period.starting_week, period.ending_week + 1):
-            ReadPlanifWeek(department, book, period.name, week, 2018)
+            ReadPlanifWeek(department, book, period.name, week, year)
     else:
         for week in range(period.starting_week, 53):
-            ReadPlanifWeek(department, book, period.name, week, 2018)
+            ReadPlanifWeek(department, book, period.name, week, year)
         for week in range(1, period.ending_week + 1):
-            ReadPlanifWeek(department, book, period.name, week, 2019)
+            ReadPlanifWeek(department, book, period.name, week, year+1)
+
 
 def extract_planif(department, bookname=None):
+    '''
+    Generate the courses from bookname; the school year starts in annee_courante
+    '''
     if bookname is None:
         bookname = 'misc/deploy_database/planif_file_'+department.abbrev+'.xlsx'
     book = load_workbook(filename=bookname, data_only=True)
     for period in Period.objects.filter(department=department):
-        extract_period(department, book, period)
+        extract_period(department, book, period, annee_courante)
     assign_color(department)
 

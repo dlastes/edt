@@ -45,7 +45,7 @@ from django.views.generic import RedirectView
 from people.models import Tutor
 
 from base.admin import CoursResource, DispoResource, VersionResource, \
-    CoursPlaceResource, UnavailableRoomsResource
+    CoursPlaceResource, UnavailableRoomsResource, TutorCoursesResource
 from displayweb.admin import BreakingNewsResource
 from base.forms import ContactForm
 from base.models import Course, UserPreference, ScheduledCourse, EdtVersion, \
@@ -146,7 +146,8 @@ def edt(req, an=None, semaine=None, splash_id=0, **kwargs):
                 'rights_usr': rights_usr,
                 'splash_id': splash_id,
                 'time_settings': queries.get_time_settings(req.department),
-                'days': num_all_days(an, semaine, req.department)
+                'days': num_all_days(an, semaine, req.department),
+                'has_department_perm': req.user.is_authenticated and req.user.has_department_perm(req.department)
             })
 
 
@@ -678,6 +679,23 @@ def fetch_departments(req, **kwargs):
     """
     depts = queries.get_departments()
     return JsonResponse(depts, safe=False)    
+
+def fetch_tutor_courses(req, year, week, tutor, **kwargs):
+    """
+    Return all courses of tutor
+    """
+    logger.info(f"W{week} Y{year}")
+    logger.info(f"Fetch {tutor} courses")
+    dataset = TutorCoursesResource() \
+        .export(ScheduledCourse.objects \
+                    .filter(
+                        cours__semaine=week,
+                        cours__an=year,
+                        copie_travail=0,
+                        cours__tutor__username=tutor))
+    return HttpResponse(dataset.csv, content_type='text/csv')
+
+
 # </editor-fold desc="FETCHERS">
 
 # <editor-fold desc="CHANGERS">

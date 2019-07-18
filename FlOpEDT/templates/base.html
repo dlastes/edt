@@ -48,17 +48,17 @@
   <div id="loader" class="loader" style="visibility:hidden;"></div>
 <!--<header>Emplois du temps</header>-->
   <nav id="menu-edt">
-    <a class="hide_this_link" target="_blank" href="https://framagit.org/flopedt/flopedt" id="live-logo"  style="padding: 0px 0px 0px 0px; float: left">
+    <a class="hide_this_link" href="{% url 'index' %}" id="live-logo"  style="padding: 0px 0px 0px 0px; float: left">
     </a>
     <div id="full_logo">     
-      <span id="acro_logo">Fl<span id=opRed >Op</span>EDT<br></span>
+      <a style="text-decoration: none; font-family: inherit; color: inherit" href="{% url 'index' %}">
+          <span id="acro_logo"><span id=flopGreen >flop</span>!<span id=EDTRed >EDT</span></span>
+      </a> 
       {% autoescape off %}
-      <span id="head_logo">
-	<!--{{ image }}-->
-      </span>
+      <span id="head_logo"></span>
       {% endautoescape %}
-      <a id="agpl" href="https://www.gnu.org/licenses/agpl-3.0.en.html">
-	<img src="{% static 'base/agplv3-88x31.png'%}" height="31" width="88" alt="AGPL v.3"/>
+      <a id="agpl" target="_blank" href="https://framagit.org/flopedt/flopedt">
+	      <img src="{% static 'base/agplv3-88x31.png'%}" height="31" width="88" alt="AGPL v.3"/>
       </a>
     </div>
     
@@ -66,16 +66,21 @@
     <ul>
       {% if department %}
       <li><a href="{% url "base:edt" department %}">Consulter</a></li>
+      {% if has_department_perm %} 
       <li><a href="{% url "base:decale" department %}">Décaler/Annuler</a></li>
+      {% endif %}
       <li><a href="{% url "base:preferences" department %}">Préférences</a></li>
       <li><a href="{% url "ics:index" department %}">iCal</a></li>
       <li><a href="{% url "base:aide" department %}">Aide</a></li>
       <li><a href="{% url "base:contact" department %}">Contact</a></li>
-      {% if user.is_authenticated and user.is_superuser %}
+      {% if user.is_superuser or user.is_staff and has_department_perm %}
       <li><a href="{% url "solve_board:main_board" department %}">Générer</a></li>
       <li><a href="{% url "base:statistics" department %}">Statistiques</a></li>
-      <li><a href="{% url "admin:index" %}">Admin</a></li>
       {% endif %}
+      {% endif %}
+      {% if user.is_superuser or user.is_staff and has_department_perm %}
+      <li><a href="{% url "configuration:configuration" %}">Importer</a></li>
+      <li><a href="{% url "admin:index" %}">Admin</a></li>
       {% endif %}
       <li style="float:right">
 	{% if user.is_authenticated %}

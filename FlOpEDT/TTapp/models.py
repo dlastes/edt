@@ -107,7 +107,7 @@ class Slot(object):
         minuts = self.start_time % 60
         if minuts == 0:
             minuts = ''
-        return str(self.day) + '_' + str(hours) + 'h' + str(minuts) + '_' + str(self.duration) + "mn"
+        return str(self.course_type) + '_' + str(self.day) + '_' + str(hours) + 'h' + str(minuts)
 
     def __repr__(self):
         return str(self)
@@ -393,7 +393,13 @@ class LimitCourseTypeTimePerPeriod(TTConstraint):  # , pond):
                                 int(self.max_hours * 60) + 1, 3600*24)
                 ttmodel.obj += self.local_weight() * ponderation * var
             else:
-                ttmodel.add_constraint(expr, '<=', self.max_hours*60)
+                name = 'Max_%d_hours_of_%s_per_%s_%s_%s%g' % (self.max_hours,
+                                                              self.course_type,
+                                                              self.period,
+                                                              day,
+                                                              period if period is not None else '',
+                                                              ttmodel.constraint_nb)
+                ttmodel.add_constraint(expr, '<=', self.max_hours*60, name=name)
 
     def enrich_model(self, ttmodel, ponderation=1.):
         
@@ -737,7 +743,8 @@ class MinHalfDays(TTConstraint):
         if self.tutors.exists():
             helper = MinHalfDaysHelperTutor(ttmodel, self, ponderation)
             for tutor in self.tutors.all():
-                helper.enrich_model(tutor=tutor)
+                if tutor in ttmodel.wdb.instructors:
+                    helper.enrich_model(tutor=tutor)
 
         elif self.modules.exists():
             helper = MinHalfDaysHelperModule(ttmodel, self, ponderation)
@@ -924,33 +931,28 @@ class SimultaneousCourses(TTConstraint):
 
     def enrich_model(self, ttmodel, ponderation=1):
         same_tutor = (self.course1.tutor == self.course2.tutor)
-        for sl in ttmodel.wdb.compatible_slots[self.course1]:
+        for sl in ttmodel.wdb.compatible_slots[self.course1] & ttmodel.wdb.compatible_slots[self.course2]:
             var1 = ttmodel.TT[(sl, self.course1)]
-            var2 = ttmodel.sum(ttmodel.TT[(sl2, self.course2)]
-                               for sl2 in ttmodel.wdb.compatible_slots[self.course2]
-                               if (sl2.start_time, sl2.day, sl2.duration) == (sl.start_time, sl.day, sl.duration))
+            var2 = ttmodel.TT[(sl, self.course2)]
             ttmodel.add_constraint(var1 - var2, '==', 0)
             # A compléter, l'idée est que si les cours ont le même prof, ou des
             # groupes qui se superposent, il faut veiller à supprimer les core
             # constraints qui empêchent que les cours soient simultanés...
-            if same_tutor:
-                name_tutor_constr = str('core_tutor_'
-                                        + str(self.course1.tutor)
-                                        + '_'
-                                        + str(sl))
-                tutor_constr = ttmodel.get_constraint(name_tutor_constr)
-                print(tutor_constr)
-                # if (ttmodel.var_coeff(var1, tutor_constr), ttmodel.var_coeff(var2, tutor_constr)) == (1, 1):
-                if ttmodel.var_coeff(var1, tutor_constr) == 1:
-                    ttmodel.change_var_coeff(var1, tutor_constr, 0)
+            if same_tutor and self.course1.tutor in ttmodel.wdb.instructors:
+                for sl2 in ttmodel.wdb.slots_intersecting[sl] - {sl}:
+                    name_tutor_constr_sl2 = 'simul_slots' + str(self.course1.tutor) + '_' + str(sl) + '_' + str(sl2)
+                    tutor_constr = ttmodel.get_constraint(name_tutor_constr_sl2)
+                    print(tutor_constr)
+                    if ttmodel.var_coeff(var1, tutor_constr) == 1:
+                        ttmodel.change_var_coeff(var1, tutor_constr, 0)
             for bg in ttmodel.wdb.basic_groups:
                 bg_groups = ttmodel.wdb.all_groups_of[bg]
                 if self.course1.groupe in bg_groups and self.course2.groupe in bg_groups:
-                    name_group_constr = 'core_group_' + str(bg) + '_' + str(sl)
-                    group_constr = ttmodel.get_constraint(name_group_constr)
-                    # if (ttmodel.var_coeff(var1, group_constr), ttmodel.var_coeff(var2, group_constr)) == (1, 1):
-                    if ttmodel.var_coeff(var1, group_constr) == 1:
-                        ttmodel.change_var_coeff(var1, group_constr, 0)
+                    for sl2 in ttmodel.wdb.slots_intersecting[sl] - {sl}:
+                        name_group_constr_sl2 = 'simul_slots' + bg.full_name() + '_' + str(sl) + '_' + str(sl2)
+                        group_constr = ttmodel.get_constraint(name_group_constr_sl2)
+                        if ttmodel.var_coeff(var1, group_constr) == 1:
+                            ttmodel.change_var_coeff(var1, group_constr, 0)
 
     def one_line_description(self):
         return "Les cours " + str(self.course1) + " et " + str(self.course2) + " doivent être simultanés !"

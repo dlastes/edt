@@ -53,6 +53,11 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },        
+        'configuration': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },        
         'django.db.backends': {
             'level': 'INFO',
             'handlers': ['console'],
@@ -73,3 +78,6 @@ CHANNEL_LAYERS = {
     #     "ROUTING": "solve_board.routing.channel_routing",
     # },
 }
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
