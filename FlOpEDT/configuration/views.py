@@ -13,7 +13,6 @@ from configuration.extract_planif_file import extract_planif
 from configuration.deploy_database import extract_database_file
 from .file_manipulation import upload_file, check_ext_file
 from .forms import ImportPlanif, ImportConfig
-from .models import UpdateConfig
 
 import os
 import datetime
@@ -39,12 +38,6 @@ def configuration(req, **kwargs):
     arg_req['form_config'] = ImportConfig()
     arg_req['form_planif'] = ImportPlanif()
 
-    up = UpdateConfig.objects.all()
-    if up.count() > 0:
-        arg_req['step'] = 2
-    else:
-        arg_req['step'] = 1
-    # arg_req['departements'] = [tuple([depart.name, depart.abbrev]) for depart in Department.objects.all()]
     arg_req['departements'] = [{'name': depart.name, 'abbrev': depart.abbrev}
                                for depart in Department.objects.all() if not depart.abbrev == 'default']
     return render(req, 'configuration/configuration.html', arg_req)
@@ -97,10 +90,6 @@ def import_config_file(req, **kwargs):
                         extract_database_file(path, department_name=dept_name,
                                               department_abbrev=dept_abbrev)
                         logger.debug("extract OK")
-
-                        update_version = UpdateConfig(date=datetime.datetime.now(), is_planif_update=False)
-                        update_version.save()
-                        logger.debug("create UpdateConfig OK")
 
                         os.rename(path, os.path.join(settings.MEDIA_ROOT,
                                                      'configuration',
@@ -163,9 +152,6 @@ def get_planif_file(req, **kwargs):
     :return:
     """
     logger.debug(req.GET['departement'])
-    up = UpdateConfig.objects.all()
-    if up.count() == 0 or not os.path.exists(f"{settings.MEDIA_ROOT}/configuration/planif_file_{req.GET['departement']}.xlsx"):
-        return HttpResponseNotFound("Not found")
     f = open(f"{settings.MEDIA_ROOT}/configuration/planif_file_{req.GET['departement']}.xlsx", "rb")
     response = HttpResponse(f, content_type='application/vnd.ms-excel')
     response['Content-Disposition'] = 'attachment; filename="planif_file.xlsx"'
@@ -179,17 +165,11 @@ def import_planif_file(req, **kwargs):
     """
     Import a planification's file filled. Before data processing, it must to
     check if the first step of te configuration is done. After, it must to
-    flush data related with the planification. Extract the data of the xlsx file
-    and create constraints for the solver. (LimitedSlotChoices, SimultaneousCourse
-    for TP and DA)
-    Ajax request.
+    flush data related with the planification. Extract the data of the xlsx file.
 
     :param req:
     :return:
     """
-    up = UpdateConfig.objects.all()
-    if up.count() == 0:
-        return HttpResponse("The first step is missing")
     form = ImportPlanif(req.POST, req.FILES)
     if form.is_valid():
         if check_ext_file(req.FILES['fichier'], ['.xlsx', '.xls']):
@@ -203,8 +183,7 @@ def import_planif_file(req, **kwargs):
                     except Exception as e:
                         response = {'status': 'error', 'data': str(e)}
                         return HttpResponse(json.dumps(response), content_type='application/json')
-                    if len(up.filter(is_planif_update=True)) > 0:
-                        Course.objects.filter(groupe__train_prog__department=dept).delete()
+                    Course.objects.filter(groupe__train_prog__department=dept).delete()
                     logger.info("Flush planif database OK")
 
                     extract_planif(dept, bookname=path)
@@ -213,10 +192,6 @@ def import_planif_file(req, **kwargs):
 
                     os.rename(path, f"{settings.MEDIA_ROOT}/configuration/planif_file.xlsx")
                     logger.info("Rename OK")
-
-                    update_version = UpdateConfig(date=datetime.datetime.now(), is_planif_update=True)
-                    update_version.save()
-                    logger.info("Creation UpdateConfig OK")
 
                     response = {'status': 'ok', 'data': rep}
             except Exception as e:

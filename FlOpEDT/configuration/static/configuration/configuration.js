@@ -30,8 +30,6 @@ function send_form(form) {
                 } else {
                     $("#error_"+form+" p").text(data.data);
                 }
-                step == 2;
-                disable_form("config_2", false);
                 var option = {value:data.dept_abbrev, text:data.dept_fullname} ;
                 $('#dropdown_dpt_1').append($('<option>', option));
                 $('#dropdown_dpt_2').append($('<option>', option));
@@ -46,14 +44,6 @@ function send_form(form) {
     });
 }
 
-function disable_form(form, disable) {
-    $("#"+form+" input").prop("disabled", disable);
-}
-
-
-if (step == 1) {
-    disable_form("config_2", true)
-}
 send_form("config");
 send_form("planif");
 
