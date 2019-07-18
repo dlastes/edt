@@ -26,22 +26,10 @@
 
 import os
 import sys
-
-sys.path.append("..")
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "FlOpEDT.settings.local")
-
-### Have to do this for it to work in 1.9.x!
-from django.core.wsgi import get_wsgi_application
-
-application = get_wsgi_application()
-#############
-
-
 from openpyxl import *
+
 from base.models import Group, Module, Course, Room, CourseType, RoomType, TrainingProgramme, Dependency, Period, Department
-
 from people.models import Tutor
-
 from misc.assign_module_color import assign_color
 
 
