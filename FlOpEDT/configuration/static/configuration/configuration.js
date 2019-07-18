@@ -30,8 +30,10 @@ function send_form(form) {
                     $("#error_"+form+" p").text(data.data);
                 }
                 var option = {value:data.dept_abbrev, text:data.dept_fullname} ;
-                $('#dropdown_dpt_1').append($('<option>', option));
-                $('#dropdown_dpt_2').append($('<option>', option));
+                if (form == 'config') {
+                    $('#dropdown_dpt_1').append($('<option>', option));
+                    $('#dropdown_dpt_2').append($('<option>', option));
+                }
                 show_loader(false);
             },
             error: function (data) {
