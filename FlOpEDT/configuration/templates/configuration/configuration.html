@@ -19,19 +19,19 @@
         <h3>Fichier de configuration complété</h3>
         <p>Téléversez le fichier de configuration rempli.<br>
         Seul le format xlsx est accepté.</p>
-        <form action="{% url "configuration:ul_config" %}" method="post" enctype="multipart/form-data" id="config_1">
+        <form action="{% url "configuration:ul_config" %}" method="post" enctype="multipart/form-data" id="config">
                 {% csrf_token %}
             <fieldset>
                 <label>Département</label><br>
                 <input type="radio" name="radio_creations" value="1" required><span>Créer</span>
                 <input type="radio" name="radio_creations" value="2" required><span>Modifier</span><br>
                 <div id="depart_choice"></div>
-                {{ form_config_1 }}
+                {{ form_config }}
                 <input type="submit" value="Importer">
             </fieldset>
         </form>
 
-        <div id="error_config_1">
+        <div id="error_config">
             Verdict : <p></p>
         </div>
     </div>
@@ -46,8 +46,7 @@
                 <option value={{ depart.abbrev }} >{{ depart.name }}</option>
             {% endfor %}
         </select>
-{#            <a href="get_planif_file/"><button id="btn_config_2">Télécharger</button></a>#}
-            <input id="btn_config_2" type="submit" value="Télécharger">
+        <input id="btn_dl_planif" type="submit" value="Télécharger">
         </form>
     </div>
 

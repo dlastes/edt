@@ -6,7 +6,6 @@ function send_form(form) {
         let request_method = $(this).attr("method");
         let data = new FormData($("#"+form).get(0));
         let form_enctype = $(this).attr("enctype");
-        console.log(post_url);
         show_loader(true);
         $.ajax({
             url : post_url,
