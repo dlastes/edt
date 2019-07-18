@@ -36,8 +36,8 @@ def configuration(req, **kwargs):
     """
     arg_req = {}
 
-    arg_req['form_config_1'] = ImportConfig()
-    arg_req['form_config_2'] = ImportPlanif()
+    arg_req['form_config'] = ImportConfig()
+    arg_req['form_planif'] = ImportPlanif()
 
     up = UpdateConfig.objects.all()
     if up.count() > 0:

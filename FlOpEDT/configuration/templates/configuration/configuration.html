@@ -57,17 +57,17 @@
         <p>Téléversez le fichier de planification rempli.<br>
         Seul le format xlsx est accepté.</p>
 <!--        <form action="/configuration/import_planif_file/" method="post" enctype="multipart/form-data" id="config_2">-->
-        <form action="{% url "configuration:ul_planif" %}" method="post" enctype="multipart/form-data" id="config_2">
+        <form action="{% url "configuration:ul_planif" %}" method="post" enctype="multipart/form-data" id="planif">
             {% csrf_token %}
             <select name="departement" id="dropdown_dpt_2">
                 {% for depart in departements %}
                     <option value={{ depart.abbrev }} >{{ depart.name }}</option>
                 {% endfor %}
             </select>
-            {{ form_config_2 }}
+            {{ form_planif }}
             <input type="submit" value="Importer">
         </form>
-        <div id="error_config_2">
+        <div id="error_planif">
             Verdict : <p></p>
         </div>
     </div>
