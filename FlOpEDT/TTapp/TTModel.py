@@ -736,6 +736,26 @@ class TTModel(object):
                                             0,
                                             name=name)
 
+            # constraint : other_dep_sched_courses rooms are not available
+            for r in self.wdb.rooms:
+                occupied = False
+                for rg in r.subroom_of.exclude(department=self.department):
+                    if self.wdb.other_dep_sched_courses\
+                            .filter((Q(start_time__lt=sl.start_time + sl.duration) |
+                                     Q(start_time__gt=sl.start_time - F('cours__type__duration'))),
+                                    room=rg, day=sl.day).exists():
+                        occupied = True
+                if occupied:
+                    name = 'other_dep_room_' + str(r) + '_' + str(sl) + '_' + str(self.constraint_nb)
+                    self.add_constraint(self.sum(self.TTrooms[(s_sl, c, room)]
+                                                 for s_sl in self.wdb.slots_intersecting[sl]
+                                                 for c in self.wdb.compatible_courses[s_sl]
+                                                 for room in course_rg_compat[c] if
+                                                 r in room.subrooms.all()),
+                                        '==',
+                                        0,
+                                        name=name)
+
             # constraint : each Room is only used once and only when available
             for r in self.wdb.rooms:
                 self.add_constraint(
