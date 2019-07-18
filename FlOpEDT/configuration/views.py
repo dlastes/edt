@@ -188,7 +188,7 @@ def import_planif_file(req, **kwargs):
 
                     extract_planif(dept, bookname=path)
                     logger.info("Extract file OK")
-                    rep = ""
+                    rep = "OK !"
 
                     os.rename(path, f"{settings.MEDIA_ROOT}/configuration/planif_file.xlsx")
                     logger.info("Rename OK")
