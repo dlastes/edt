@@ -5,7 +5,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased]
 ### Added
-- Import interface
+- None
+
+### Changed
+- None
+
+
+## [0.2.1] - 2019-07-18
+### Added
+- Import process:
+  - Interface for superusers
+  - Pattern configuration file
+  - Pattern planification file generation
 - Multi-department constraints in the solver
 
 ### Changed
