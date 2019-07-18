@@ -189,38 +189,38 @@ def import_planif_file(req, **kwargs):
     form = ImportPlanif(req.POST, req.FILES)
     if form.is_valid():
         if check_ext_file(req.FILES['fichier'], ['.xlsx', '.xls']):
-            logger.debug(req.FILES['fichier'])
+            logger.info(req.FILES['fichier'])
             path = upload_file(req.FILES['fichier'], "configuration/planif_file_.xlsx")
             # If one of methods fail, the transaction will be not commit.
             try:
                 with transaction.atomic():
                     try:
-                        depart = Department.objects.get(abbrev=req.POST['departement'])
+                        dept = Department.objects.get(abbrev=req.POST['departement'])
                     except Exception as e:
                         response = {'status': 'error', 'data': str(e)}
                         return HttpResponse(json.dumps(response), content_type='application/json')
                     if len(up.filter(is_planif_update=True)) > 0:
-                        Course.objects.filter(groupe__train_prog__department=departement).delete()
-                    logger.debug("Flush planif database OK")
+                        Course.objects.filter(groupe__train_prog__department=dept).delete()
+                    logger.info("Flush planif database OK")
 
-                    extract_planif(depart, bookname=path)
-                    logger.debug("Extract file OK")
+                    extract_planif(dept, bookname=path)
+                    logger.info("Extract file OK")
                     rep = ""
 
                     os.rename(path, f"{settings.MEDIA_ROOT}/configuration/planif_file.xlsx")
-                    logger.debug("Rename OK")
+                    logger.info("Rename OK")
 
                     update_version = UpdateConfig(date=datetime.datetime.now(), is_planif_update=True)
                     update_version.save()
-                    logger.debug("Creation UpdateConfig OK")
+                    logger.info("Creation UpdateConfig OK")
 
                     response = {'status': 'ok', 'data': rep}
             except Exception as e:
                 os.remove(path)
-                logger.debug(e)
+                logger.info(e)
                 response = {'status': 'error', 'data': str(e)}
         else:
             response = {'status': 'error', 'data': 'Invalid format'}
     else:
-        response = {'status': 'error', 'data': 'Form can\'t be valid'}
+        response = {'status': 'error', 'data': "Form can't be valid"}
     return HttpResponse(json.dumps(response), content_type='application/json')
