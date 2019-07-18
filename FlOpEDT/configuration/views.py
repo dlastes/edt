@@ -143,16 +143,20 @@ def get_config_file(req, **kwargs):
 @staff_member_required
 def get_planif_file(req, **kwargs):
     """
-    Resend the empty planification's file. Only if the first step of
-    the configuration has been done. This verification is done throught
-    the existance of an object UpdateConfig in the database or the existance
-    of the file which is to send (planif_file.xlsx).
-
+    Send an empty planification's file.
+    Rely on the configuration step if it was taken.
     :param req:
     :return:
     """
     logger.debug(req.GET['departement'])
-    f = open(f"{settings.MEDIA_ROOT}/configuration/planif_file_{req.GET['departement']}.xlsx", "rb")
+    filename = os.path.join(settings.MEDIA_ROOT,
+                             'configuration',
+                             f"planif_file_{req.GET['departement']}.xlsx")
+    if not os.path.exists(filename):
+        filename = os.path.join(settings.MEDIA_ROOT,
+                                'configuration',
+                                f"empty_planif_file.xlsx")
+    f = open(filename, "rb")
     response = HttpResponse(f, content_type='application/vnd.ms-excel')
     response['Content-Disposition'] = 'attachment; filename="planif_file.xlsx"'
     f.close()
