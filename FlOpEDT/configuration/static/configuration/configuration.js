@@ -2,8 +2,7 @@
 function send_form(form) {
     $("#"+form).submit(function(event){
         event.preventDefault();
-        // let post_url = $(this).attr("action");
-        let post_url = window.location.pathname + $(this).attr("action");
+        let post_url = $(this).attr("action");
         let request_method = $(this).attr("method");
         let data = new FormData($("#"+form).get(0));
         let form_enctype = $(this).attr("enctype");

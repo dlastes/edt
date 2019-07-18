@@ -13,14 +13,14 @@
         <h3>Canevas du fichier de configuration</h3>
         <p>Téléchargez puis remplissez le fichier ci-dessous.</p>
             Cliquez pour télécharger le fichier de configuration
-            <a href="get_config_file/"><button id="btn_config_1">Télécharger</button></a>
+            <a href="{% url "configuration:dl_config" %}"><button id="btn_config_1">Télécharger</button></a>
     </div>
 
     <div class="step">
         <h3>Fichier de configuration complété</h3>
         <p>Téléversez le fichier de configuration rempli.<br>
         Seul le format xlsx est accepté.</p>
-        <form action="import_config_file/" method="post" enctype="multipart/form-data" id="config_1">
+        <form action="{% url "configuration:ul_config" %}" method="post" enctype="multipart/form-data" id="config_1">
                 {% csrf_token %}
             <fieldset>
                 <label>Département</label><br>
@@ -41,8 +41,8 @@
     <h3>Canevas du fichier de planification à partir du fichier de configuration</h3>
         <p>Téléchargez puis remplissez le fichier ci-dessous.</p>
             Cliquez pour télécharger le canevas du fichier de planification
-        <form action="get_planif_file/">
         <select name="departement">
+        <form action="{% url "configuration:dl_planif" %}">
             {% for depart in departements %}
                 <option value={{ depart.abbrev }} >{{ depart.name }}</option>
             {% endfor %}
@@ -57,7 +57,7 @@
         <p>Téléversez le fichier de planification rempli.<br>
         Seul le format xlsx est accepté.</p>
 <!--        <form action="/configuration/import_planif_file/" method="post" enctype="multipart/form-data" id="config_2">-->
-        <form action="import_planif_file/" method="post" enctype="multipart/form-data" id="config_2">
+        <form action="{% url "configuration:ul_planif" %}" method="post" enctype="multipart/form-data" id="config_2">
             {% csrf_token %}
             <select name="departement">
                 {% for depart in departements %}
