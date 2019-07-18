@@ -106,7 +106,11 @@ def import_config_file(req, **kwargs):
                                                      'configuration',
                                                      f'database_file_{dept_abbrev}.xlsx'))
                         logger.warning("rename OK")
-                        response = {'status': 'ok', 'data': 'OK'}
+                        response = {'status': 'ok',
+                                    'data': 'OK',
+                                    'dept_abbrev': dept_abbrev,
+                                    'dept_fullname': dept_name
+                        }
                 except Exception as e:
                     os.remove(path)
                     logger.debug(e)

@@ -41,8 +41,8 @@
     <h3>Canevas du fichier de planification à partir du fichier de configuration</h3>
         <p>Téléchargez puis remplissez le fichier ci-dessous.</p>
             Cliquez pour télécharger le canevas du fichier de planification
-        <select name="departement">
         <form action="{% url "configuration:dl_planif" %}">
+        <select name="departement"  id="dropdown_dpt_1">
             {% for depart in departements %}
                 <option value={{ depart.abbrev }} >{{ depart.name }}</option>
             {% endfor %}
@@ -59,7 +59,7 @@
 <!--        <form action="/configuration/import_planif_file/" method="post" enctype="multipart/form-data" id="config_2">-->
         <form action="{% url "configuration:ul_planif" %}" method="post" enctype="multipart/form-data" id="config_2">
             {% csrf_token %}
-            <select name="departement">
+            <select name="departement" id="dropdown_dpt_2">
                 {% for depart in departements %}
                     <option value={{ depart.abbrev }} >{{ depart.name }}</option>
                 {% endfor %}
