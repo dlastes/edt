@@ -45,7 +45,7 @@ from django.views.generic import RedirectView
 from people.models import Tutor
 
 from base.admin import CoursResource, DispoResource, VersionResource, \
-    CoursPlaceResource, UnavailableRoomsResource
+    CoursPlaceResource, UnavailableRoomsResource, TutorCoursesResource
 from displayweb.admin import BreakingNewsResource
 from base.forms import ContactForm
 from base.models import Course, UserPreference, ScheduledCourse, EdtVersion, \
@@ -679,6 +679,23 @@ def fetch_departments(req, **kwargs):
     """
     depts = queries.get_departments()
     return JsonResponse(depts, safe=False)    
+
+def fetch_tutor_courses(req, year, week, tutor, **kwargs):
+    """
+    Return all courses of tutor
+    """
+    logger.info(f"W{week} Y{year}")
+    logger.info(f"Fetch {tutor} courses")
+    dataset = TutorCoursesResource() \
+        .export(ScheduledCourse.objects \
+                    .filter(
+                        cours__semaine=week,
+                        cours__an=year,
+                        copie_travail=0,
+                        cours__tutor__username=tutor))
+    return HttpResponse(dataset.csv, content_type='text/csv')
+
+
 # </editor-fold desc="FETCHERS">
 
 # <editor-fold desc="CHANGERS">
