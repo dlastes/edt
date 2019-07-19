@@ -134,9 +134,6 @@ def edt(req, an=None, semaine=None, splash_id=0, **kwargs):
         name_usr = ''
         rights_usr = 0
 
-    #funcTab = {funcTab}
-    print(funcTab)
-
     return TemplateResponse(req, 'base/show-edt.html',
             {
                 'all_weeks': week_list(),
@@ -1150,8 +1147,7 @@ def contact(req, **kwargs):
             'sender': init_mail})
     return TemplateResponse(req, 'base/contact.html',
                   {'form': form,
-                   'ack': ack,
-                   'funcTab': MyFlOp.MyTTUtils.funcTab
+                   'ack': ack
                   })
 
 

@@ -49,7 +49,9 @@
 <div id="mySidebar" class="sidebar">
     <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
     {% for task in tasks %}
-        <a href="#" onclick="getForm('{{ task.func_name }}')"> {{task.name}} </a>
+    <h4>
+      <a href="#" onclick="getForm('{{ task.func_name }}')"> {{task.name}} </a>
+      </h4>
     {% endfor %}
     <div id="sideBarForm" class="sideBarForm" ></div>
 </div>
