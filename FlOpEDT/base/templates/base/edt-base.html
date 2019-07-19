@@ -87,10 +87,12 @@
 {% block script_file %}{% endblock %}
 
 <div id="side_pannel" class="sidebar">
-  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
+  <a href="javascript:void(0)" class="btn_pannel" onclick="closeNav()">×</a>
   <p>Numéro de copie :
   <select id="dd_work_copy" on>
   </select>
   </p>
+  <p onclick="swap_with_copy_0()" class="btn_pannel">Élire cette copie</p>
+  <p onclick="reassign_rooms()" class="btn_pannel">Réassigner les salles</p>
 </div>
 {% endblock %}
