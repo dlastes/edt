@@ -69,7 +69,9 @@ def available_work_copies(req, dept, year, week):
 
 def swap(req, dept, year, week, work_copy):
     MyTTUtils.swap_version(dept, week, year, work_copy)
+    return JsonResponse({'status': 'ok'})
 
 
 def reassign_rooms(req, dept, year, week, work_copy):
     MyTTUtils.reassign_rooms(dept, week, year, work_copy)
+    return JsonResponse({'status': 'ok'})

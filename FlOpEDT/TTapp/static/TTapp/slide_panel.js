@@ -66,3 +66,52 @@ function closeNav() {
     document.getElementById("menu-edt").style.marginLeft= "0";
 
 }
+
+
+// swap the current work copy with the public work copy, i.e. #0
+// display the old public copy afterwards
+function swap_with_copy_0() {
+    var cur_week = weeks.init_data[weeks.sel[0]].semaine;
+    var cur_year = weeks.init_data[weeks.sel[0]].an;
+
+    show_loader(true);
+    $.ajax({
+        type: "GET",
+        dataType: 'json',
+        url: url_swap +  cur_year + '/' + cur_week + '/' + num_copie,
+        async: true,
+        contentType: "application/json; charset=utf-8",
+        success: function(msg) {
+            fetch_all(false, false);
+            show_loader(false);
+        },
+        error: function(msg) {
+            console.log("error");
+            show_loader(false);
+        }
+    });
+}
+
+
+// reassign rooms and reload
+function reassign_rooms() {
+    var cur_week = weeks.init_data[weeks.sel[0]].semaine;
+    var cur_year = weeks.init_data[weeks.sel[0]].an;
+
+    show_loader(true);
+    $.ajax({
+        type: "GET",
+        dataType: 'json',
+        url: url_reassign_rooms +  cur_year + '/' + cur_week + '/' + num_copie,
+        async: true,
+        contentType: "application/json; charset=utf-8",
+        success: function(msg) {
+            fetch_all(false, false);
+            show_loader(false);
+        },
+        error: function(msg) {
+            console.log("error");
+            show_loader(false);
+        }
+    });
+}
