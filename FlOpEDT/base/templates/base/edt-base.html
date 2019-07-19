@@ -59,6 +59,10 @@
     url_week_infos = url_week_infos.slice(0, -3);
     var url_work_copies = "{% url "TTapp:available_work_copies" department 0 0 %}" ;
     url_work_copies = url_work_copies.slice(0, -3);
+    var url_swap = "{% url 'TTapp:swap' department 0 0 0 %}" ;
+    url_swap = url_swap.slice(0, -5) ;
+    var url_reassign_rooms = "{% url 'TTapp:reassign_rooms' department 0 0 0 %}" ;
+    url_reassign_rooms = url_reassign_rooms.slice(0, -5) ;
 
   var semaine_an_list = {{ all_weeks| safe }};
     var semaine_init = +"{{ semaine }}";
@@ -82,5 +86,10 @@
 
 {% block script_file %}{% endblock %}
 
-<div id="mySidebar" class="sidebar"></div>
+<div id="mySidebar" class="sidebar">
+  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
+  <h4>Numéro de copie</h4>
+  <select id="dd_work_copy" on>
+  </select>
+</div>
 {% endblock %}
