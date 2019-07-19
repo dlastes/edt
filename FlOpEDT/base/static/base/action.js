@@ -93,7 +93,7 @@ function apply_wk_change(d, i) { //if(fetch.done) {
     dispos = {};
     user.dispos = [];
 
-    fetch_all(false);
+    fetch_all(false, true);
 
     go_week_menu(false);
 } //}

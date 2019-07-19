@@ -734,3 +734,6 @@ var room_tutor_change = {
 var arrow =
     {right: "→",
      back: "↩"} ;
+
+
+var is_side_pannel_open = false ;

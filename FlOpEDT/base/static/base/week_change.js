@@ -709,7 +709,7 @@ function translate_unavailable_rooms(d) {
    ------ ALL -------
    --------------------*/
 
-function fetch_all(first){
+function fetch_all(first, fetch_work_copies){
     fetch.done = false;
 
     fetch.ongoing_cours_pp = true;
@@ -731,6 +731,10 @@ function fetch_all(first){
 	fetch_unavailable_rooms() ;
     }
     fetch_bknews(first);
+
+    if(is_side_pannel_open && fetch_work_copies) {
+        fetch_work_copy_numbers();
+    }
 }
 
 
