@@ -99,7 +99,8 @@ def week_list():
             li.append({'semaine': i, 'an': 2019})
         return li
     else:
-        for i in list(range(36, 44)) + list(range(45, 52)):
+        # should start 1 week before the first week
+        for i in list(range(35, 44)) + list(range(45, 52)):
             li.append({'semaine': i, 'an': annee_courante})
         for i in list(range(2, 10)) + list(range(11, 17)) + list(range(19, 31)):
             li.append({'semaine': i, 'an': annee_courante+1})

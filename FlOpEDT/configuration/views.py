@@ -5,16 +5,14 @@ from django.conf import settings
 
 from django.contrib.admin.views.decorators import staff_member_required
 
-from base.models import Department
+from base.models import Department, Course
 
 from misc.generate_static_files import generate_group_file, generate_room_file
 from configuration.make_planif_file import make_planif_file
 from configuration.extract_planif_file import extract_planif
 from configuration.deploy_database import extract_database_file
 from .file_manipulation import upload_file, check_ext_file
-from .flush_database import flush_department_data, flush_planif_database
 from .forms import ImportPlanif, ImportConfig
-from .models import UpdateConfig
 
 import os
 import datetime
@@ -37,15 +35,9 @@ def configuration(req, **kwargs):
     """
     arg_req = {}
 
-    arg_req['form_config_1'] = ImportConfig()
-    arg_req['form_config_2'] = ImportPlanif()
+    arg_req['form_config'] = ImportConfig()
+    arg_req['form_planif'] = ImportPlanif()
 
-    up = UpdateConfig.objects.all()
-    if up.count() > 0:
-        arg_req['step'] = 2
-    else:
-        arg_req['step'] = 1
-    # arg_req['departements'] = [tuple([depart.name, depart.abbrev]) for depart in Department.objects.all()]
     arg_req['departements'] = [{'name': depart.name, 'abbrev': depart.abbrev}
                                for depart in Department.objects.all() if not depart.abbrev == 'default']
     return render(req, 'configuration/configuration.html', arg_req)
@@ -66,55 +58,61 @@ def import_config_file(req, **kwargs):
     """
     if req.method == 'POST':
         form = ImportConfig(req.POST, req.FILES)
-        logger.info(req)
-        logger.info(req.FILES)
+        logger.debug(req)
+        logger.debug(req.FILES)
         if form.is_valid():
-            logger.info(req.FILES['fichier'])
-            logger.info(req.FILES['fichier'].name)
+            logger.debug(req.FILES['fichier'])
+            logger.debug(req.FILES['fichier'].name)
             if check_ext_file(req.FILES['fichier'], ['.xlsx', '.xls']):
-                path = upload_file(req.FILES['fichier'], "configuration/database_file_.xlsx")
+                path = upload_file(req.FILES['fichier'], "uploaded_database_file.xlsx")
                 # If one of method fail the transaction will be not commit.
                 try:
                     with transaction.atomic():
-                        depart_abbrev = req.POST['abbrev']
+                        dept_abbrev = req.POST['abbrev']
                         try:
-                            depart_name = req.POST['nom']
+                            dept_name = req.POST['nom']
                         except:
-                            depart_name = None
-                        logger.info(depart_name)
+                            dept_name = None
+                        logger.debug(dept_name)
                         try:
-                            depart = Department.objects.get(abbrev=depart_abbrev)
-                            if not depart_name == depart.name and depart_name is not None:
-                                response = {'status': 'error', 'data': "Le département existe déja avec cette "
-                                                                       "abrevviation et le nom ne correspond pas."}
+                            dept = Department.objects.get(abbrev=dept_abbrev)
+                            if not dept_name == dept.name and dept_name is not None:
+                                response = {'status': 'error',
+                                            'data': "Il existe déjà un département utilisant cette abbréviation."}
                                 return HttpResponse(json.dumps(response), content_type='application/json')
-                            depart_name = depart.name
-                            flush_department_data(depart)
-                            logger.info("flush OK")
-                        except Exception:
-                            pass
+                            dept_name = dept.name
+                            dept.delete()
+                            logger.debug("flush OK")
+                        except Exception as e:
+                            logger.warning(f'Exception with dept')
+                            logger.warning(e)
 
+                        extract_database_file(path, department_name=dept_name,
+                                              department_abbrev=dept_abbrev)
+                        logger.debug("extract OK")
 
-                        extract_database_file(path, department_name=depart_name,
-                                              department_abbrev=depart_abbrev,
-                                              )
-                        logger.info("extract OK")
-
-                        update_version = UpdateConfig(date=datetime.datetime.now(), is_planif_update=False)
-                        update_version.save()
-                        logger.info("create UpdateConfig OK")
-
-                        os.rename(path, f"{settings.MEDIA_ROOT}/configuration/database_file_{depart_abbrev}.xlsx")
-                        response = {'status': 'ok', 'data': 'OK'}
+                        os.rename(path, os.path.join(settings.MEDIA_ROOT,
+                                                     'configuration',
+                                                     f'database_file_{dept_abbrev}.xlsx'))
+                        logger.warning("rename OK")
+                        response = {'status': 'ok',
+                                    'data': 'OK',
+                                    'dept_abbrev': dept_abbrev,
+                                    'dept_fullname': dept_name
+                        }
                 except Exception as e:
                     os.remove(path)
-                    logger.info(e)
+                    logger.debug(e)
                     response = {'status': 'error', 'data': str(e)}
                     return HttpResponse(json.dumps(response), content_type='application/json')
-                depart = Department.objects.get(abbrev=depart_abbrev)
-                source = f"{settings.MEDIA_ROOT}/configuration/empty_planif_file.xlsx"
-                target_repo = f"{settings.MEDIA_ROOT}/configuration/"
-                make_planif_file(depart, empty_bookname=source, target_repo=target_repo)
+                dept = Department.objects.get(abbrev=dept_abbrev)
+                source = os.path.join(settings.MEDIA_ROOT,
+                                      'configuration',
+                                      'empty_planif_file.xlsx')
+                target_repo = os.path.join(settings.MEDIA_ROOT,
+                                           'configuration')
+                logger.info("start planif")
+                make_planif_file(dept, empty_bookname=source, target_repo=target_repo)
                 logger.info("make planif OK")
             else:
                 response = {'status': 'error', 'data': 'Invalid format'}
@@ -145,19 +143,20 @@ def get_config_file(req, **kwargs):
 @staff_member_required
 def get_planif_file(req, **kwargs):
     """
-    Resend the empty planification's file. Only if the first step of
-    the configuration has been done. This verification is done throught
-    the existance of an object UpdateConfig in the database or the existance
-    of the file which is to send (planif_file.xlsx).
-
+    Send an empty planification's file.
+    Rely on the configuration step if it was taken.
     :param req:
     :return:
     """
-    logger.info(req.GET['departement'])
-    up = UpdateConfig.objects.all()
-    if up.count() == 0 or not os.path.exists(f"{settings.MEDIA_ROOT}/configuration/planif_file_{req.GET['departement']}.xlsx"):
-        return HttpResponseNotFound("Not found")
-    f = open(f"{settings.MEDIA_ROOT}/configuration/planif_file_{req.GET['departement']}.xlsx", "rb")
+    logger.debug(req.GET['departement'])
+    filename = os.path.join(settings.MEDIA_ROOT,
+                             'configuration',
+                             f"planif_file_{req.GET['departement']}.xlsx")
+    if not os.path.exists(filename):
+        filename = os.path.join(settings.MEDIA_ROOT,
+                                'configuration',
+                                f"empty_planif_file.xlsx")
+    f = open(filename, "rb")
     response = HttpResponse(f, content_type='application/vnd.ms-excel')
     response['Content-Disposition'] = 'attachment; filename="planif_file.xlsx"'
     f.close()
@@ -170,17 +169,11 @@ def import_planif_file(req, **kwargs):
     """
     Import a planification's file filled. Before data processing, it must to
     check if the first step of te configuration is done. After, it must to
-    flush data related with the planification. Extract the data of the xlsx file
-    and create constraints for the solver. (LimitedSlotChoices, SimultaneousCourse
-    for TP and DA)
-    Ajax request.
+    flush data related with the planification. Extract the data of the xlsx file.
 
     :param req:
     :return:
     """
-    up = UpdateConfig.objects.all()
-    if up.count() == 0:
-        return HttpResponse("The first step is missing")
     form = ImportPlanif(req.POST, req.FILES)
     if form.is_valid():
         if check_ext_file(req.FILES['fichier'], ['.xlsx', '.xls']):
@@ -190,24 +183,19 @@ def import_planif_file(req, **kwargs):
             try:
                 with transaction.atomic():
                     try:
-                        depart = Department.objects.get(abbrev=req.POST['departement'])
+                        dept = Department.objects.get(abbrev=req.POST['departement'])
                     except Exception as e:
                         response = {'status': 'error', 'data': str(e)}
                         return HttpResponse(json.dumps(response), content_type='application/json')
-                    if len(up.filter(is_planif_update=True)) > 0:
-                        flush_planif_database(depart)
+                    Course.objects.filter(groupe__train_prog__department=dept).delete()
                     logger.info("Flush planif database OK")
 
-                    extract_planif(depart, bookname=path)
+                    extract_planif(dept, bookname=path)
                     logger.info("Extract file OK")
-                    rep = ""
+                    rep = "OK !"
 
                     os.rename(path, f"{settings.MEDIA_ROOT}/configuration/planif_file.xlsx")
                     logger.info("Rename OK")
-
-                    update_version = UpdateConfig(date=datetime.datetime.now(), is_planif_update=True)
-                    update_version.save()
-                    logger.info("Creation UpdateConfig OK")
 
                     response = {'status': 'ok', 'data': rep}
             except Exception as e:
@@ -217,5 +205,5 @@ def import_planif_file(req, **kwargs):
         else:
             response = {'status': 'error', 'data': 'Invalid format'}
     else:
-        response = {'status': 'error', 'data': 'Form can\'t be valid'}
+        response = {'status': 'error', 'data': "Form can't be valid"}
     return HttpResponse(json.dumps(response), content_type='application/json')

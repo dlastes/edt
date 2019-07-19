@@ -24,12 +24,17 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
+import logging
+
 from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
 
 from base.models import Group, Module, Period, CourseType
 
 from copy import copy
+
+
+logger = logging.getLogger(__name__)
 
 
 def as_text(value):
@@ -87,6 +92,7 @@ def make_planif_file(department, empty_bookname=empty_bookname, target_repo="mis
         CT = CourseType.objects.filter(department=department)
     # We go through each period and create a sheet for each period
     for p in Period.objects.filter(department=department):
+        logger.info(p)
         new_book.create_sheet(p.name)
         sheet = new_book[p.name]
         ################ Writing line 1 with weeks ################
@@ -132,6 +138,7 @@ def make_planif_file(department, empty_bookname=empty_bookname, target_repo="mis
 
         ################ A line per module per CourseType ################
         for mod in Module.objects.filter(period=p):
+            logger.info(f"Module {mod}")
             for ct in CT:
                 groups = Group.objects.filter(type__in=ct.group_types.all(), train_prog=mod.train_prog)
                 nb_groups = groups.count()
@@ -181,19 +188,6 @@ def make_planif_file(department, empty_bookname=empty_bookname, target_repo="mis
             ################ Separating each course with a black line ################
             append_row(sheet, empty_rows, 4, rank, cols)
             rank += 1
-
-        if nb_groups > 0:
-            sheet.cell(row=rank - nb_groups - 1, column=VERIF_COL).value = \
-                '=IF(SUM(%s%d:INDIRECT(ADDRESS(MATCH(G$3,G%d:G%d,0)+ROW()-3,%d)))-$%s%d*%d=0,"OK","/!\\ -> ' \
-                '"&SUM(%s%d:INDIRECT(ADDRESS(MATCH(G$3,G%d:G%d,0)+ROW()-2,%d)))-$%s%d*%d)' % \
-                (first_column_letter[p], rank - nb_groups - 1,
-                 rank - nb_groups-1, rank - nb_groups + 10,
-                 VERIF_COL - 1,
-                 column_letter(VERIF_COL), rank - nb_groups - 2, nb_groups,
-                 first_column_letter[p], rank - nb_groups - 1,
-                 rank - nb_groups - 1, rank - nb_groups + 10,
-                 VERIF_COL - 1,
-                 column_letter(VERIF_COL), rank - nb_groups - 2, nb_groups,)
 
         ############ TOTAL line ############
         ligne_finale = rank - 2
