@@ -926,7 +926,11 @@ class TTModel(object):
                         avail = availabilities.filter(start_time__lt=sl.start_time + sl.duration,
                                                       start_time__gt=sl.start_time - F('duration'),
                                                       day=sl.day)
-                        if min(a.valeur for a in avail) == 0:
+                        if not avail.exists():
+                            print("availability pbm for %s slot %s" % (i, sl))
+                            unp_slot_cost[i][sl] = 0
+                            avail_instr[i][sl] = 1
+                        elif min(a.valeur for a in avail) == 0:
                             avail_instr[i][sl] = 0
                             unp_slot_cost[i][sl] = 0
                         else:
