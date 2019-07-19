@@ -4,7 +4,7 @@ function openNav() {
     is_side_pannel_open = true ;
 
     // open pannel
-    document.getElementById("mySidebar").style.width = "250px";
+    document.getElementById("side_pannel").style.width = "250px";
     document.getElementById("edt-main").style.marginLeft = "250px";
     document.getElementById("menu-edt").style.marginLeft = "250px";
 
@@ -61,7 +61,7 @@ function closeNav() {
     is_side_pannel_open = false ;
 
     // close pannel
-    document.getElementById("mySidebar").style.width = "0";
+    document.getElementById("side_pannel").style.width = "0";
     document.getElementById("edt-main").style.marginLeft= "0";
     document.getElementById("menu-edt").style.marginLeft= "0";
 

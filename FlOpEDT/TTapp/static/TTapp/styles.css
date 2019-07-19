@@ -9,6 +9,7 @@
   overflow-x: hidden;
   transition: 0.5s;
   padding-top: 60px;
+  padding-left: 10px;
 }
 
 .sidebar a {
@@ -18,6 +19,15 @@
   color: #818181;
   display: block;
   transition: 0.3s;
+}
+
+.sidebar p {
+    font-size: 20px;
+    color: #FFFFFF;
+}
+
+.sidebar select {
+  margin-left: 10px;
 }
 
 .sidebar a:hover {
