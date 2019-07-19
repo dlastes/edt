@@ -167,9 +167,8 @@ class WeekDB(object):
 
         other_departments_sched_courses = ScheduledCourse \
             .objects \
-            .filter(cours__semaine=self.week,
-                    cours__an=self.year) \
-            .exclude(cours__groupe__train_prog__department=self.department)
+            .filter(cours__in=other_departments_courses,
+                    copie_travail=0)
 
         courses_availabilities = CoursePreference.objects \
             .filter(train_prog__department=self.department,
