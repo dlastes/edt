@@ -24,8 +24,7 @@
 # without disclosing the source code of your own applications.
 
 from django.shortcuts import render
-from django.http import HttpResponse
-from django.template.response import TemplateResponse
+from django.http import HttpResponse, JsonResponse
 
 from base.models import ScheduledCourse
 
@@ -58,14 +57,14 @@ def submitForm(request, funcname):
             args = i.get('args')
 
             
-def side_pannel_content(req, dept, year, week):
+def available_work_copies(req, dept, year, week):
     '''
     Send the content of the side pannel.
     '''
     copies = list(ScheduledCourse.objects.filter(cours__an=year, cours__semaine=week).distinct('cours__type__department', 'copie_travail').values_list('copie_travail'))
     copies = [n for (n,) in copies]
     copies.sort()
-    return TemplateResponse(req, 'TTapp/side_pannel_content.html', {'copies': copies})
+    return JsonResponse({'copies': copies})
 
 
 def swap(req, dept, year, week, work_copy):
