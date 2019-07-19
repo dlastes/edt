@@ -57,8 +57,10 @@
     var url_quote = "{% url "quote:fetch_quote" %}";
     var url_week_infos = "{% url "base:fetch_week_infos" department 0 0 %}";
     url_week_infos = url_week_infos.slice(0, -3);
+    var url_side_pannel = "{% url "TTapp:side_pannel_content" department 0 0 %}" ;
+    url_side_pannel = url_side_pannel.slice(0, -3);
 
-    var semaine_an_list = {{ all_weeks| safe }};
+  var semaine_an_list = {{ all_weeks| safe }};
     var semaine_init = +"{{ semaine }}";
     var an_init = +"{{ an }}";
     var une_salle = "{{ une_salle }}";
@@ -80,4 +82,5 @@
 
 {% block script_file %}{% endblock %}
 
+<div id="mySidebar" class="sidebar"></div>
 {% endblock %}
