@@ -248,7 +248,6 @@ function fetch_all_tutors() {
             dataType: 'json',
             url: url_all_tutors,
             async: false,
-            contentType: "application/json; charset=utf-8",
             success: function (msg) {
 		all_tutors = msg.tutors.filter(function(d) {
 		    return d>'A';
