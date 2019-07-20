@@ -75,7 +75,7 @@
 
 {% block script_variable %}{% endblock %}
 
-<script type='text/javascript' src="{% static 'TTapp/slide_panel.js' %}"></script>
+<script type='text/javascript' src="{% static 'TTapp/side_panel.js' %}"></script>
 <script type='text/javascript' src="{% static 'base/variables.js' %}?7"></script>
 <script type='text/javascript' src="{% static 'base/intervals.js' %}?5"></script>
 <script type='text/javascript' src="{% static 'base/week_change.js' %}?5"></script>
@@ -86,13 +86,13 @@
 
 {% block script_file %}{% endblock %}
 
-<div id="side_pannel" class="sidebar">
-  <a href="javascript:void(0)" class="btn_pannel" onclick="closeNav()">×</a>
+<div id="side_panel" class="sidebar">
+  <a href="javascript:void(0)" class="btn_panel" onclick="closeNav()">×</a>
   <p>Numéro de copie :
   <select id="dd_work_copy" on>
   </select>
   </p>
-  <p onclick="swap_with_copy_0()" class="btn_pannel">Élire cette copie</p>
-  <p onclick="reassign_rooms()" class="btn_pannel">Réassigner les salles</p>
+  <p onclick="swap_with_copy_0()" class="btn_panel">Élire cette copie</p>
+  <p onclick="reassign_rooms()" class="btn_panel">Réassigner les salles</p>
 </div>
 {% endblock %}

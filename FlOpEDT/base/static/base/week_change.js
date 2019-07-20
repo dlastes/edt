@@ -732,7 +732,7 @@ function fetch_all(first, fetch_work_copies){
     }
     fetch_bknews(first);
 
-    if(is_side_pannel_open && fetch_work_copies) {
+    if(is_side_panel_open && fetch_work_copies) {
         fetch_work_copy_numbers();
     }
 }
@@ -852,11 +852,11 @@ function swap_data(fetched, current, type) {
             return em ;
         }
     )
-    var pannel = sel_popup.pannels.find(function(p) {
+    var panel = sel_popup.panels.find(function(p) {
         return p.type == type ;
     })
-    if (typeof pannel !== 'undefined') {
-        pannel.list = current.all ;
+    if (typeof panel !== 'undefined') {
+        panel.list = current.all ;
     }
 
 }

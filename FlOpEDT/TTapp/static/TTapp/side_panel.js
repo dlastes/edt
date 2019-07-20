@@ -1,10 +1,10 @@
-// open side pannel
+// open side panel
 function openNav() {
 
-    is_side_pannel_open = true ;
+    is_side_panel_open = true ;
 
-    // open pannel
-    document.getElementById("side_pannel").style.width = "250px";
+    // open panel
+    document.getElementById("side_panel").style.width = "250px";
     document.getElementById("edt-main").style.marginLeft = "250px";
     document.getElementById("menu-edt").style.marginLeft = "250px";
 
@@ -55,13 +55,13 @@ function update_work_copy_numbers(copies) {
     }
 }
 
-// close the side pannel
+// close the side panel
 function closeNav() {
     // avoid fetching work copy numbers if closed
-    is_side_pannel_open = false ;
+    is_side_panel_open = false ;
 
-    // close pannel
-    document.getElementById("side_pannel").style.width = "0";
+    // close panel
+    document.getElementById("side_panel").style.width = "0";
     document.getElementById("edt-main").style.marginLeft= "0";
     document.getElementById("menu-edt").style.marginLeft= "0";
 

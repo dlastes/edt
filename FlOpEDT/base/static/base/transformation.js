@@ -705,7 +705,7 @@ function menu_curs(dk) {
   ------ PROFS -------
   --------------------*/
 function but_sel_x(p, i) {
-    return but_sel_type_x(i, p.pannel.type) ;
+    return but_sel_type_x(i, p.panel.type) ;
 }
 function but_sel_type_x(i, t) {
     return ((i + 1) % sel_popup.but[t].perline)
@@ -713,7 +713,7 @@ function but_sel_type_x(i, t) {
 }
 
 function but_sel_y(p, i) {
-    return but_sel_type_y(i, p.pannel.type) ;
+    return but_sel_type_y(i, p.panel.type) ;
 }
 function but_sel_type_y(i, t) {
     return Math.floor((i + 1) / sel_popup.but[t].perline)
@@ -721,12 +721,12 @@ function but_sel_type_y(i, t) {
 }
 
 function but_sel_txt_x(p, i) {
-    var t = p.pannel.type ;
+    var t = p.panel.type ;
     return but_sel_type_x(i, t) + .5 * sel_popup.but[t].w;
 }
 
 function but_sel_txt_y(p, i, j) {
-    var t = p.pannel.type ;
+    var t = p.panel.type ;
     return but_sel_type_y(i, t) + .5 * sel_popup.but[t].h;
 }
 
@@ -1187,16 +1187,16 @@ function popup_bg_w(d) {
 function popup_type_id(t) {
     return "popup-" + t ;
 }
-function popup_pannel_type_id(d) {
+function popup_panel_type_id(d) {
     return popup_type_id(d.type) ;
 }
 
 function popup_choice_w(d) {
-    var t = d.pannel.type ;
+    var t = d.panel.type ;
     return sel_popup.but[t].w ;
 }
 function popup_choice_h(d) {
-    var t = d.pannel.type ;
+    var t = d.panel.type ;
     return sel_popup.but[t].h ;
 }
 function popup_title_txt(d) {

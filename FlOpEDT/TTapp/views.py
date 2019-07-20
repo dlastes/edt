@@ -59,7 +59,7 @@ def submitForm(request, funcname):
             
 def available_work_copies(req, dept, year, week):
     '''
-    Send the content of the side pannel.
+    Send the content of the side panel.
     '''
     copies = list(ScheduledCourse.objects.filter(cours__an=year, cours__semaine=week).distinct('cours__type__department', 'copie_travail').values_list('copie_travail'))
     copies = [n for (n,) in copies]
