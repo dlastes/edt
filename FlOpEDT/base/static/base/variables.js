@@ -576,7 +576,8 @@ var valid = {
 // or about the next possible regeneration of the planning (ack.regen)
 var ack = {
     edt: "",
-    regen: ""
+    regen: "",
+    pref: ""
 };
 
 

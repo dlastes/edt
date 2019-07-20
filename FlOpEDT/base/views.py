@@ -911,16 +911,16 @@ def edt_changes(req, **kwargs):
 
 @login_required
 def dispos_changes(req, **kwargs):
-    bad_response = HttpResponse("KO")
-    good_response = HttpResponse("OK")
+    bad_response = {'status':'KO', 'more':''}
+    good_response = {'status':'OK', 'more':''}
 
     if not req.is_ajax():
-        bad_response['reason'] = "Non ajax"
-        return bad_response
+        bad_response['more'] = "Non ajax"
+        return JsonResponse(bad_response)
 
     if req.method != "POST":
-        bad_response['reason'] = "Non POST"
-        return bad_response
+        bad_response['more'] = "Non POST"
+        return JsonResponse(bad_response)
 
 
     try:
@@ -929,9 +929,9 @@ def dispos_changes(req, **kwargs):
         week = int(week)
         year = int(year)
     except ValueError:
-        bad_response['reason'] \
+        bad_response['more'] \
             = "Problème semaine ou année."
-        return bad_response
+        return JsonResponse(bad_response)
 
     usr_change = req.GET.get('u', '')
     if usr_change == '':
@@ -958,14 +958,14 @@ def dispos_changes(req, **kwargs):
     try:
         prof = Tutor.objects.get(username=usr_change)
     except ObjectDoesNotExist:
-        bad_response['reason'] \
+        bad_response['more'] \
             = "Problème d'utilisateur."
-        return bad_response
+        return JsonResponse(bad_response)
 
     if prof.username != req.user.username and req.user.rights >> 1 % 2 == 0:
-        bad_response['reason'] \
+        bad_response['more'] \
             = 'Non autorisé, réclamez plus de droits.'
-        return bad_response
+        return JsonResponse(bad_response)
 
     # print(q)
 
@@ -1009,7 +1009,7 @@ def dispos_changes(req, **kwargs):
         #          heure=Time.objects.get(no=a['hour']))
         # if cr is None:
         #     bad_response['reason'] = "Creneau pas trouve"
-        #     return bad_response
+        #     return JsonResponse(bad_response)
         # di, didi = UserPreference \
         #     .objects \
         #     .update_or_create(user=prof,
@@ -1030,7 +1030,7 @@ def dispos_changes(req, **kwargs):
             cache.delete(get_key_preferences_tutor(dep.abbrev, year, week))
 
     logger.info('Pref changed with success')
-    return good_response
+    return JsonResponse(good_response)
 
 
 @login_required
