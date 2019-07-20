@@ -95,4 +95,16 @@
   <script type='text/javascript' src="{% static 'base/variables.js' %}?2"></script>
   <script type='text/javascript' src="{% static "base/stype.js" %}"></script>
 
+{% block side_panel %}
+<div>
+  <p onclick="show_tutors()" class="btn_panel">Profs</p>
+  <p id="sp_tutor">Transformation en : 
+    <select id="dd_tutors">
+    </select>
+  </p>
+</div>
+<div>
+  <p onclick="show_course_types()" class="btn_panel">Types de cours</p>
+  <p id="sp_course_type">some qiwoehqowi </p>
+</div>
 {% endblock %}

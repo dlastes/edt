@@ -107,6 +107,10 @@
   </nav>
   <section id="content">
     {% block content %}{% endblock %}
+    <div id="side_panel" class="sidebar">
+      <a href="javascript:void(0)" class="btn_panel" onclick="closeNav()">×</a>
+      {% block side_panel %} {% endblock %}
+    </div>
   </section>
   
   <script src="{% static 'base/logo.js' %}";></script>
