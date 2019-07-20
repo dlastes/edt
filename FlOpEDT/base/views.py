@@ -147,7 +147,7 @@ def edt(req, an=None, semaine=None, splash_id=0, **kwargs):
                 'splash_id': splash_id,
                 'time_settings': queries.get_time_settings(req.department),
                 'days': num_all_days(an, semaine, req.department),
-                'has_department_perm': req.user.is_authenticated and req.user.has_department_perm(req.department),
+                'has_department_perm': req.user.is_authenticated and req.user.has_department_perm(req.department)
             })
 
 

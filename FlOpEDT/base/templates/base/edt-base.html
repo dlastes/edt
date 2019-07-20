@@ -64,7 +64,7 @@
     var url_reassign_rooms = "{% url 'TTapp:reassign_rooms' department 0 0 0 %}" ;
     url_reassign_rooms = url_reassign_rooms.slice(0, -5) ;
 
-  var semaine_an_list = {{ all_weeks| safe }};
+    var semaine_an_list = {{ all_weeks| safe }};
     var semaine_init = +"{{ semaine }}";
     var an_init = +"{{ an }}";
     var une_salle = "{{ une_salle }}";

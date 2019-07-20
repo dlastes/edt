@@ -25,10 +25,6 @@
 
 {% load static %}
 
-{% block extrastyle %}
-	<link rel="stylesheet" href="{% static 'TTapp/styles.css' %}" />
-{% endblock %}
-
 {% block script_variable %}
 <script>
   var promo_init = "{{ promo }}";
@@ -40,8 +36,6 @@
 {% endblock %}
 
 {% block script_file %}
-<div id="main">
 <script type='text/javascript' src="{% static 'base/all.js' %}?2"></script>
-</div>
 {% endblock %}
 
