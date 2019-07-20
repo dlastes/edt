@@ -483,7 +483,7 @@ var sel_popup = {
             return ret ;
         }
     },
-    pannels: [], //{type, x, y, w, h, txt}
+    panels: [], //{type, x, y, w, h, txt}
     but: [],
     active_filter: false
 };
@@ -508,9 +508,9 @@ sel_popup.but["module"] = {
     mar_x: 2,
     mar_y: 4,
 };
-sel_popup.available.forEach(function(pannel) {
-    pannel.x = sel_popup.x ;
-    pannel.y = sel_popup.y ;
+sel_popup.available.forEach(function(panel) {
+    panel.x = sel_popup.x ;
+    panel.y = sel_popup.y ;
 }) ;
 
 // has any instructor been fetched?
@@ -734,3 +734,6 @@ var room_tutor_change = {
 var arrow =
     {right: "→",
      back: "↩"} ;
+
+
+var is_side_panel_open = false ;

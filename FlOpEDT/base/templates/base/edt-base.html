@@ -57,6 +57,12 @@
     var url_quote = "{% url "quote:fetch_quote" %}";
     var url_week_infos = "{% url "base:fetch_week_infos" department 0 0 %}";
     url_week_infos = url_week_infos.slice(0, -3);
+    var url_work_copies = "{% url "TTapp:available_work_copies" department 0 0 %}" ;
+    url_work_copies = url_work_copies.slice(0, -3);
+    var url_swap = "{% url 'TTapp:swap' department 0 0 0 %}" ;
+    url_swap = url_swap.slice(0, -5) ;
+    var url_reassign_rooms = "{% url 'TTapp:reassign_rooms' department 0 0 0 %}" ;
+    url_reassign_rooms = url_reassign_rooms.slice(0, -5) ;
 
     var semaine_an_list = {{ all_weeks| safe }};
     var semaine_init = +"{{ semaine }}";
@@ -69,6 +75,7 @@
 
 {% block script_variable %}{% endblock %}
 
+<script type='text/javascript' src="{% static 'TTapp/side_panel.js' %}"></script>
 <script type='text/javascript' src="{% static 'base/variables.js' %}?7"></script>
 <script type='text/javascript' src="{% static 'base/intervals.js' %}?5"></script>
 <script type='text/javascript' src="{% static 'base/week_change.js' %}?5"></script>
@@ -79,4 +86,13 @@
 
 {% block script_file %}{% endblock %}
 
+<div id="side_panel" class="sidebar">
+  <a href="javascript:void(0)" class="btn_panel" onclick="closeNav()">×</a>
+  <p>Numéro de copie :
+  <select id="dd_work_copy" on>
+  </select>
+  </p>
+  <p onclick="swap_with_copy_0()" class="btn_panel">Élire cette copie</p>
+  <p onclick="reassign_rooms()" class="btn_panel">Réassigner les salles</p>
+</div>
 {% endblock %}

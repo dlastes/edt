@@ -93,7 +93,7 @@ function apply_wk_change(d, i) { //if(fetch.done) {
     dispos = {};
     user.dispos = [];
 
-    fetch_all(false);
+    fetch_all(false, true);
 
     go_week_menu(false);
 } //}
@@ -455,8 +455,8 @@ function go_cm_room_tutor_change() {
 }
 
 
-function remove_pannel(p, i){
-    sel_popup.pannels.splice(i, 1);
+function remove_panel(p, i){
+    sel_popup.panels.splice(i, 1);
     go_selection_popup() ;
 }
 
@@ -1295,7 +1295,7 @@ function compute_cm_room_tutor_direction() {
 function apply_selection_display(choice) {
     if (fetch.done) {
 
-        var sel_list = choice.pannel.list ;
+        var sel_list = choice.panel.list ;
 
         var concerned = sel_list.find(function(t) {
             return t.name == choice.name ;
@@ -1306,7 +1306,7 @@ function apply_selection_display(choice) {
         }
 
         
-	if(choice.pannel.type == "tutor"
+	if(choice.panel.type == "tutor"
            && logged_usr.dispo_all_change && ckbox["dis-mod"].cked){
             tutors.all.forEach(function(t) { t.display = false ; });
             concerned.display = true ;
@@ -1390,8 +1390,8 @@ function apply_cancel_selections() {
         }
     }
 
-    // remove all pannels
-    sel_popup.pannels = [] ;
+    // remove all panels
+    sel_popup.panels = [] ;
 
     // update flags and display
     update_active() ;

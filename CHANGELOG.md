@@ -5,7 +5,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased]
 ### Added
-- None
+- Side panel for superusers:
+  - Work copy selection
+  - Swap versions
+  - Reassign rooms
+  
+### TBD
+- right permissions in TTapp/views
 
 ### Changed
 - None

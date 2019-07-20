@@ -1266,13 +1266,13 @@ function go_selection_buttons() {
 
     var cont = selg
         .selectAll(".sel-pop-g")
-        .data(sel_popup.pannels, function(p) {
+        .data(sel_popup.panels, function(p) {
             return p.type ;
         })
         .selectAll(".sel-button")
         .data(function(p) {
             p.list.forEach(function(c){
-                c.pannel = p ;
+                c.panel = p ;
             });
             return p.list ;
         }, function(c) {
