@@ -56,7 +56,6 @@ urlpatterns = [
     url(r'^fetch_dispos/(?P<year>\d+)/(?P<week>\d+)$', views.fetch_dispos, name="fetch_dispos"),
     path('fetch_stype/<str:username>', views.fetch_stype, name="fetch_stype"),
     url(r'^fetch_decale$', views.fetch_decale, name="fetch_decale"),
-    url(r'^fetch_decale$', statistics.fetch_room_activity, name="fetch_room_activity"),
     url(r'^fetch_bknews/(?P<year>\d+)/(?P<week>\d+)$', views.fetch_bknews, name="fetch_bknews"),
     url(r'^fetch_groups$', views.fetch_groups, name="fetch_groups"),    
     url(r'^fetch_rooms$', views.fetch_rooms, name="fetch_rooms"),    

@@ -59,7 +59,10 @@ function go_pref(quick) {
 	// preferences: background color, and smiley
 	
         dat = mg.selectAll(".dispo")
-            .data(user.dispos)
+            .data(user.dispos,
+                  function(d) {
+                      return [d.day,d.start_time,d.duration,d.val].join('-');
+                  })
             .attr("cursor", ckbox["dis-mod"].cked ? "pointer" : "default");
 
         datdi = dat
