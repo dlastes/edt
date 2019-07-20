@@ -909,7 +909,8 @@ function send_edt_change(changes) {
             show_loader(false);
         },
         error: function(msg) {
-            edt_change_ack(msg);
+            edt_change_ack({status:'KO',
+                            more:'Pb de communication avec le serveur'});
             show_loader(false);
         }
     });
@@ -1009,12 +1010,12 @@ function send_dis_change() {
 
 
 function edt_change_ack(msg) {
-    if (msg.responseText == "OK") {
+    if (msg.status == "OK") {
         version += 1;
         ack.edt = "Modifications EDT : OK !";
         cours_bouge = [];
     } else {
-        ack.edt = msg.getResponseHeader('reason');
+        ack.edt = msg.more;
         if (ack.edt != null && ack.edt.startsWith("Version")) {
             ack.edt += "Quelqu'un a modifié entre-temps."
         }

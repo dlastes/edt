@@ -706,12 +706,12 @@ def fetch_tutor_courses(req, year, week, tutor, **kwargs):
 
 @login_required
 def edt_changes(req, **kwargs):
-    bad_response = HttpResponse("KO")
-    good_response = HttpResponse("OK")
+    bad_response = {'status':'KO', 'more':''}
+    good_response = {'status':'OK', 'more':''}
 
     if not (req.user.is_tutor and req.user.is_staff):
-        bad_response['reason'] = "Pas membre de l'équipe encadrante"
-        return bad_response
+        bad_response['more'] = "Pas membre de l'équipe encadrante"
+        return JsonResponse(bad_response)
         
 
     impacted_inst = set()
@@ -720,11 +720,11 @@ def edt_changes(req, **kwargs):
           + 'numero_jour, numero_creneau, prof)\n\n'
 
     if not req.is_ajax():
-        bad_response['reason'] = "Non ajax"
-        return bad_response
+        bad_response['more'] = "Non ajax"
+        return JsonResponse(bad_response)
 
     if req.method != "POST":
-        bad_response['reason'] = "Non POST"
+        bad_response['more'] = "Non POST"
         return bad_response
 
 
@@ -738,9 +738,9 @@ def edt_changes(req, **kwargs):
         version = None
         department = req.department
     except:
-        bad_response['reason'] \
+        bad_response['more'] \
             = "Problème semaine, année ou work_copy."
-        return bad_response
+        return JsonResponse(bad_response)
 
 
     logger.info(f"REQ: edt change; {req.body}")
@@ -811,13 +811,13 @@ def edt_changes(req, **kwargs):
                         sal_n = RoomGroup.objects.get(name=new_room)
                     except ObjectDoesNotExist:
                         if new_room == 'salle?':
-                            bad_response['reason'] \
+                            bad_response['more'] \
                                 = 'Oublié de trouver une salle ' \
                                   'pour un cours ?'
                         else:
-                            bad_response['reason'] = \
+                            bad_response['more'] = \
                                 f"Problème : salle {new_room} inconnue"
-                        return bad_response
+                        return JsonResponse(bad_response)
 
                     if non_place:
                         cp.room = sal_n
@@ -844,9 +844,9 @@ def edt_changes(req, **kwargs):
                                                   initiator=req.user.tutor)
                         pm.save()
                     except ObjectDoesNotExist:
-                        bad_response['reason'] = \
+                        bad_response['more'] = \
                             f"Problème : prof {new_tutor} inconnu"
-                        return bad_response
+                        return JsonResponse(bad_response)
 
                 if new_week is not None or new_year is not None \
                    or new_day is not None or new_start_time is not None \
@@ -899,10 +899,10 @@ def edt_changes(req, **kwargs):
         logger.info(msg)
         
 
-        return good_response
+        return JsonResponse(good_response)
     else:
-        bad_response['reason'] = f"Version: {version} VS {old_version}"
-        return bad_response
+        bad_response['more'] = f"Version: {version} VS {old_version}"
+        return JsonResponse(bad_response)
 
 
 @login_required
