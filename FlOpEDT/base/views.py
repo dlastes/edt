@@ -42,7 +42,7 @@ from django.urls import reverse
 from django.views.decorators.cache import cache_page
 from django.views.generic import RedirectView
 
-from people.models import Tutor
+from people.models import Tutor, UserDepartmentSettings, User
 
 from base.admin import CoursResource, DispoResource, VersionResource, \
     CoursPlaceResource, UnavailableRoomsResource, TutorCoursesResource
@@ -473,11 +473,16 @@ def fetch_unavailable_rooms(req, year, week, **kwargs):
    
 
 def fetch_all_tutors(req, **kwargs):
-    cache_key = get_key_all_tutors()
+    logger.info(f'Get tutors D{req.department.abbrev}')
+    cache_key = get_key_all_tutors(req.department.abbrev)
     cached = cache.get(cache_key)
     if cached is not None:
         return cached
-    tutor_list = [t.username for t in Tutor.objects.all()]
+    tutor_list = [t.user.username \
+                  for t in UserDepartmentSettings.objects\
+                  .filter(department=req.department,
+                          is_main=True,
+                          user__is_tutor=True)]
     response = JsonResponse({'tutors': tutor_list})
     cache.set(cache_key, response)
     return response
