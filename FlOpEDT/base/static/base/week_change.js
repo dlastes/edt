@@ -210,6 +210,7 @@ function create_dispos_user_data() {
     if (dispos[user.nom] === undefined) {
 	allocate_dispos(user.nom);
 	fill_missing_preferences(user.nom, ts);
+        sort_preferences();
     }
 
     for (var i = 0; i < days.length; i++) {
