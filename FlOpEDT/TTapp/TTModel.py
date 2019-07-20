@@ -710,8 +710,8 @@ class TTModel(object):
             self.add_constraint(self.sum(self.TT[(sl, c)] for sl in training_slots
                                          for c in self.wdb.compatible_courses[sl]
                                          & set(self.wdb.courses.filter(groupe__train_prog__in=training_progs))),
-                                '==', 0, "no_course_on_%s_%s" %
-                                (training_half_day.day, training_half_day.apm))
+                                '==', 0, "no_course_on_%s_%s_%g" %
+                                (training_half_day.day, training_half_day.apm, self.constraint_nb))
 
     def add_rooms_constraints(self):
         print("adding room constraints")
