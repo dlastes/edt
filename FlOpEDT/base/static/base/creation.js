@@ -1904,7 +1904,7 @@ function fetch_dispos_type() {
         $.ajax({
             type: "GET", //rest Type
             dataType: 'text',
-            url: url_fetch_stype,
+            url: url_fetch_stype + logged_usr.nom,
             async: true,
             contentType: "text/csv",
             success: function(msg) {

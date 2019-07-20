@@ -483,12 +483,16 @@ def fetch_all_tutors(req, **kwargs):
     return response
 
 
-@login_required
-def fetch_stype(req, **kwargs):
+def fetch_stype(req, username, **kwargs):
+    try:
+        user = User.objects.get(username=username)
+    except ObjectDoesNotExist:
+        return HttpResponse('Problem')
+
     dataset = DispoResource() \
         .export(UserPreference.objects \
                 .filter(semaine=None,
-                        user=req.user))  # all())#
+                        user=user))  # all())#
     response = HttpResponse(dataset.csv, content_type='text/csv')
     return response
 
