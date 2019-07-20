@@ -938,8 +938,9 @@ def dispos_changes(req, **kwargs):
         week = None
         year = None
 
-    logger.info(f"REQ: dispo change; {req.body}")
-    logger.info(req.POST)
+    logger.info(f"REQ: dispo change for {usr_change} by {req.user.username}")
+    logger.info(f"     W{week} Y{year}")
+    
     # q = json.loads(req.body,
     #                object_hook=lambda d:
     #                namedtuple('X', list(d.keys()))(*list(d.values())))
@@ -1023,7 +1024,8 @@ def dispos_changes(req, **kwargs):
         #                               an=year).distinct('module__train_prog__department'):
         for dep in Department.objects.all():
             cache.delete(get_key_preferences_tutor(dep.abbrev, year, week))
-        
+
+    logger.info('Pref changed with success')
     return good_response
 
 
@@ -1216,29 +1218,29 @@ def filt_sa(department, semaine, an):
 def get_key_course_pl(department_abbrev, year, week, num_copy):
     if year is None or week is None or num_copy is None:
         return ''
-    return 'CPL-D' + department_abbrev + '-Y' + str(year) + '-W' + str(week) + '-C' + str(num_copy) 
+    return f'CPL-D{department_abbrev}-Y{year}-W{week}-C{num_copy}'
 
 
 def get_key_course_pp(department_abbrev, year, week, num_copy):
     if year is None or week is None or num_copy is None:
         return ''
-    return 'CPP-D' + department_abbrev + '-Y' + str(year) + '-W' + str(week) + '-C' + str(num_copy) 
+    return f'CPP-D{department_abbrev}-Y{year}-W{week}-C{num_copy}'
 
 
 def get_key_preferences_tutor(department_abbrev, year, week):
     if year is None or week is None:
         return ''
-    return 'PREFT-D' + department_abbrev + '-Y' + str(year) + '-W' + str(week)
+    return f'PREFT-D{department_abbrev}-Y{year}-W{week}'
 
 
 def get_key_unavailable_rooms(department_abbrev, year, week):
     if year is None or week is None:
         return ''
-    return 'UNAVR-D' + department_abbrev + '-Y' + str(year) + '-W' + str(week)
+    return f'UNAVR-D{department_abbrev}-Y{year}-W{week}'
 
 
-def get_key_all_tutors():
-    return 'ALL-TUT'
+def get_key_all_tutors(department_abbrev):
+    return f'ALL-TUT-D{department_abbrev}'
 
 # </editor-fold desc="HELPERS">
 
