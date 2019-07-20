@@ -39,11 +39,9 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 from django.contrib import admin
-from django.urls import path
 from django.views.generic import RedirectView
 
 import base.views
-import TTapp.views
 
 urlpatterns = [
     url(r'^admin$', RedirectView.as_view(url='/admin/')),
