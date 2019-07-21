@@ -727,6 +727,22 @@ def fetch_departments(req, **kwargs):
     depts = queries.get_departments()
     return JsonResponse(depts, safe=False)    
 
+
+def fetch_course_types(req, **kwargs):
+    """
+    Return course types
+    """
+    course_types = queries.get_course_types(req.department)
+    return JsonResponse(course_types, safe=False)    
+
+def fetch_training_programmes(req, **kwargs):
+    """
+    Return training programmes
+    """
+    programmes = queries.get_training_programmes(req.department)
+    return JsonResponse(programmes, safe=False)    
+
+
 def fetch_tutor_courses(req, year, week, tutor, **kwargs):
     """
     Return all courses of tutor

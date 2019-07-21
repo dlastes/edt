@@ -41,6 +41,9 @@
     
     var url_user_pref_changes = "{% url "base:user_pref_changes" department 0 0 '.' %}";
     url_user_pref_changes = url_user_pref_changes.slice(0, -5);
+
+    var url_course_types = "{% url "base:fetch_course_types" department %}";
+    var url_training_programmes = "{% url "base:fetch_training_programmes" department %}";
     var url_all_tutors = "{% url 'base:fetch_all_tutors' department %}";
     
     var logged_usr = {nom:"{{ name_usr }}", rights: -1};
