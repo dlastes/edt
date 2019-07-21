@@ -997,7 +997,8 @@ function send_dis_change() {
             },
             error: function(msg) {
                 show_loader(false);
-                return dis_change_ack(msg, nbDispos);
+                ack.edt = 'Pb communication avec serveur'
+                go_ack_msg(true);
             }
         });
     }
@@ -1026,10 +1027,10 @@ function edt_change_ack(msg) {
 
 function dis_change_ack(msg, nbDispos) {
     console.log(msg);
-    if (msg.responseText == "OK") {
+    if (msg.status == "OK") {
         ack.edt = "Modifications dispos : OK !"
     } else {
-        ack.edt = msg.getResponseHeader('reason');
+        ack.edt = msg.more;
     }
     go_ack_msg(true);
 
