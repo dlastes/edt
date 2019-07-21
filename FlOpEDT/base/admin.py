@@ -179,14 +179,14 @@ class DispoResource(resources.ModelResource):
 
 
 class CoursePreferenceResource(resources.ModelResource):
-    name = fields.Field(attribute='course_type',
+    type_name = fields.Field(attribute='course_type',
                         widget=ForeignKeyWidget(CourseType, 'name'))
     train_prog = fields.Field(attribute='train_prog',
                               widget=ForeignKeyWidget(TrainingProgramme, 'abbrev'))
 
     class Meta:
         model = CoursePreference
-        fields = ('name', 'train_prog', 'day', 'start_time', 'duration', 'valeur')
+        fields = ('type_name', 'train_prog', 'day', 'start_time', 'duration', 'valeur')
 
 
 class UnavailableRoomsResource(resources.ModelResource):

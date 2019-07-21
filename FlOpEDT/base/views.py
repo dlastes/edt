@@ -51,7 +51,8 @@ from displayweb.admin import BreakingNewsResource
 from base.forms import ContactForm
 from base.models import Course, UserPreference, ScheduledCourse, EdtVersion, \
     CourseModification, Slot, Day, Time, RoomGroup, PlanningModification, \
-    Regen, RoomPreference, Department, TimeGeneralSettings, CoursePreference
+    Regen, RoomPreference, Department, TimeGeneralSettings, CoursePreference, \
+    TrainingProgramme, CourseType
 import base.queries as queries
 from base.weeks import *
 from displayweb.models import BreakingNews
@@ -441,7 +442,7 @@ def fetch_course_default_week(req, train_prog, course_type, **kwargs):
     tp = None
     ct = None
     try:
-        tp = TrainingProgramme.objects.get(name=train_prog, department=req.department)
+        tp = TrainingProgramme.objects.get(abbrev=train_prog, department=req.department)
         ct = CourseType.objects.get(name=course_type, department=req.department)
     except ObjectDoesNotExist:
         response = HttpResponse(content_type='text/csv')
