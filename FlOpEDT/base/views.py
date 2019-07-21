@@ -45,12 +45,13 @@ from django.views.generic import RedirectView
 from people.models import Tutor, UserDepartmentSettings, User
 
 from base.admin import CoursResource, DispoResource, VersionResource, \
-    CoursPlaceResource, UnavailableRoomsResource, TutorCoursesResource
+    CoursPlaceResource, UnavailableRoomsResource, TutorCoursesResource, \
+    CoursePreferenceResource
 from displayweb.admin import BreakingNewsResource
 from base.forms import ContactForm
 from base.models import Course, UserPreference, ScheduledCourse, EdtVersion, \
     CourseModification, Slot, Day, Time, RoomGroup, PlanningModification, \
-    Regen, RoomPreference, Department, TimeGeneralSettings
+    Regen, RoomPreference, Department, TimeGeneralSettings, CoursePreference
 import base.queries as queries
 from base.weeks import *
 from displayweb.models import BreakingNews
@@ -430,13 +431,48 @@ def fetch_dispos(req, year, week, **kwargs):
     return response
 
 
-def fetch_unavailable_rooms(req, year, week, **kwargs):
-    print(req)
-    print("================")
-    # if req.GET:
-    #     if req.user.is_authenticated:
-    print("================")
+def fetch_course_default_week(req, train_prog, course_type, **kwargs):
+    '''
+    Export course preferences of department req.department
+    for week week, year year
+    '''
+    logger.info(f"REQ: fetch course preferences; {req}")
 
+    tp = None
+    ct = None
+    try:
+        tp = TrainingProgramme.objects.get(name=train_prog, department=req.department)
+        ct = CourseType.objects.get(name=course_type, department=req.department)
+    except ObjectDoesNotExist:
+        response = HttpResponse(content_type='text/csv')
+        response['status'] = 'KO'
+        if tp is None:
+            response['more'] = 'No such training programme'
+        else:
+            response['more'] = 'No such course type'
+        return response
+            
+    dataset = CoursePreferenceResource() \
+        .export(CoursePreference.objects \
+                .filter(semaine=week,
+                        an=year,
+                        course_type=ct,
+                        train_prog=tp
+                ))
+
+    response = HttpResponse(dataset.csv,
+                            content_type='text/csv')
+
+    response['department'] = req.department.abbrev
+    response['training_programme'] = train_prog
+    response['course_type'] = course_type
+    response['status'] = 'OK'
+
+    return response
+
+
+def fetch_unavailable_rooms(req, year, week, **kwargs):
+    logger.info(req)
 
     try:
         week = int(week)

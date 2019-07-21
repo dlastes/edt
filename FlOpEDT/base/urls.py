@@ -55,6 +55,7 @@ urlpatterns = [
     url(r'^fetch_cours_pp/(?P<year>\d+)/(?P<week>\d+)/(?P<num_copy>\d+)$', views.fetch_cours_pp, name="fetch_cours_pp"),
     url(r'^fetch_dispos/(?P<year>\d+)/(?P<week>\d+)$', views.fetch_dispos, name="fetch_dispos"),
     path('fetch_user_default_week/<str:username>', views.fetch_user_default_week, name="fetch_user_dweek"),
+    path('fetch_course_default_week/<str:train_prog>/<str:course_type>', views.fetch_course_default_week, name="fetch_course_dweek"),
     url(r'^fetch_decale$', views.fetch_decale, name="fetch_decale"),
     url(r'^fetch_bknews/(?P<year>\d+)/(?P<week>\d+)$', views.fetch_bknews, name="fetch_bknews"),
     url(r'^fetch_groups$', views.fetch_groups, name="fetch_groups"),    
