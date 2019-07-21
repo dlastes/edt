@@ -454,8 +454,7 @@ def fetch_course_default_week(req, train_prog, course_type, **kwargs):
             
     dataset = CoursePreferenceResource() \
         .export(CoursePreference.objects \
-                .filter(semaine=week,
-                        an=year,
+                .filter(semaine=None,
                         course_type=ct,
                         train_prog=tp
                 ))
@@ -968,105 +967,137 @@ def edt_changes(req, **kwargs):
         return JsonResponse(bad_response)
 
 
-@login_required
-def user_preferences_changes(req, year, week, username, **kwargs):
-    bad_response = {'status':'KO', 'more':''}
-    good_resbponse = {'status':'OK', 'more':''}
 
-    if not req.is_ajax():
-        bad_response['more'] = "Non ajax"
-        return JsonResponse(bad_response)
+class HelperUserPreference():
+    def __init__(self, tutor):
+        self.tutor = tutor
 
-    if req.method != "POST":
-        bad_response['more'] = "Non POST"
-        return JsonResponse(bad_response)
+    def filter(self):
+        return UserPreference.objects.filter(user=self.tutor)
 
-    usr_change = username
+    def generate(self, week, year, day, start_time, duration, value):
+        return UserPreference(user=self.tutor,
+                              semaine=week,
+                              an=year,
+                              day=day,
+                              start_time=start_time,
+                              duration=duration,
+                              valeur=value)
 
+
+class HelperCoursePreference():
+    def __init__(self, training_programme, course_type):
+        self.training_programme = training_programme
+        self.course_type = course_type
+
+    def filter(self):
+        return CoursePreference.objects.filter(train_prog=self.training_programme,
+                                               course_type=self.course_type)
+
+    def generate(self, week, year, day, start_time, duration, value):
+        return CoursePreference(train_prog=self.training_programme,
+                                course_type=self.course_type,
+                                semaine=week,
+                                an=year,
+                                day=day,
+                                start_time=start_time,
+                                duration=duration,
+                                valeur=value)
+        
+
+def preferences_changes(req, year, week, helper_pref):
+    good_response = {'status':'OK', 'more':''}
+
+    # if no preference was present for this week, first copy the
+    # default availabilities
+
+    changes = json.loads(req.POST.get('changes','{}'))
+    logger.info("List of changes")
+    for a in changes:
+        logger.info(a)
+    
     # Default week at None
     if week == 0 or year == 0:
         week = None
         year = None
 
+    if not helper_pref.filter().filter(
+            semaine=week,
+            an=year).exists():
+        for pref in helper_pref.filter().filter(semaine=None):
+            new_dispo = helper_pref.generate(week,
+                                             year,
+                                             pref.day,
+                                             pref.start_time,
+                                             pref.duration,
+                                             pref.valeur)
+            logger.info(new_dispo)
+            new_dispo.save()
+
+    for a in changes:
+        logger.info(f"Change {a}")
+        helper_pref.filter().filter(semaine=week,
+                                    an=year,
+                                    day=a['day']).delete()
+        for pref in a['val_inter']:
+            new_dispo = helper_pref.generate(week,
+                                             year,
+                                             a['day'],
+                                             pref['start_time'],
+                                             pref['duration'],
+                                             pref['value'])
+            logger.info(new_dispo)
+            new_dispo.save()
+
+    logger.info('Pref changed with success')
+    return JsonResponse(good_response)
+
+
+def check_ajax_post(req):
+    response = {'status':'KO', 'more':''}
+
+    if not req.is_ajax():
+        response['more'] = "Non ajax"
+        return JsonResponse(response)
+
+    if req.method != "POST":
+        response['more'] = "Non POST"
+        return JsonResponse(response)
+
+    return None
+
+
+
+    
+@login_required
+def user_preferences_changes(req, year, week, username, **kwargs):
+    response = check_ajax_post(req)
+    if response is not None:
+        return response
+
+    response = {'status':'KO', 'more':''}
+    
+    usr_change = username
+
     logger.info(f"REQ: dispo change for {usr_change} by {req.user.username}")
     logger.info(f"     W{week} Y{year}")
     
-    # q = json.loads(req.body,
-    #                object_hook=lambda d:
-    #                namedtuple('X', list(d.keys()))(*list(d.values())))
-    q = json.loads(req.POST.get('changes','{}'))
-    logger.info("List of changes")
-    for a in q:
-        logger.info(a)
-
-    
-    prof = None
+    tutor = None
     try:
-        prof = Tutor.objects.get(username=usr_change)
+        tutor = Tutor.objects.get(username=usr_change)
     except ObjectDoesNotExist:
-        bad_response['more'] \
+        response['more'] \
             = "Problème d'utilisateur."
-        return JsonResponse(bad_response)
+        return JsonResponse(response)
 
-    if prof.username != req.user.username and req.user.rights >> 1 % 2 == 0:
-        bad_response['more'] \
+    if tutor.username != req.user.username and req.user.rights >> 1 % 2 == 0:
+        response['more'] \
             = 'Non autorisé, réclamez plus de droits.'
-        return JsonResponse(bad_response)
+        return JsonResponse(response)
 
     # print(q)
+    response = preferences_changes(req, year, week, HelperUserPreference(tutor))
 
-    # if no preference was present for this week, first copy the
-    # default availabilities
-
-    if not UserPreference.objects.filter(user=prof,
-                                         semaine=week,
-                                         an=year).exists():
-        for pref in UserPreference.objects.filter(user=prof,
-                                                  semaine=None):
-            new_dispo = UserPreference(user=prof,
-                                       semaine=week,
-                                       an=year,
-                                       day=pref.day,
-                                       start_time=pref.start_time,
-                                       duration=pref.duration,
-                                       valeur=pref.valeur)
-            logger.info(new_dispo)
-            new_dispo.save()
-
-    for a in q:
-        logger.info(f"Change {a}")
-        UserPreference.objects.filter(user=prof,
-                                      semaine=week,
-                                      an=year,
-                                      day=a['day']).delete()
-        for pref in a['val_inter']:
-            new_dispo = UserPreference(user=prof,
-                                       semaine=week,
-                                       an=year,
-                                       day=a['day'],
-                                       start_time=pref['start_time'],
-                                       duration=pref['duration'],
-                                       valeur=pref['value'])
-            logger.info(new_dispo)
-            new_dispo.save()
-            
-        # cr = Slot.objects \
-        #     .get(jour=Day.objects.get(no=a['day']),
-        #          heure=Time.objects.get(no=a['hour']))
-        # if cr is None:
-        #     bad_response['reason'] = "Creneau pas trouve"
-        #     return JsonResponse(bad_response)
-        # di, didi = UserPreference \
-        #     .objects \
-        #     .update_or_create(user=prof,
-        #                       semaine=week,
-        #                       an=year,
-        #                       creneau=cr,
-        #                       defaults={'valeur': a['val']})
-        # logger.info("  Update or create")
-        # logger.info(f"  {di}")
-        # logger.info(f"  {didi}")
-        
     if week is not None and year is not None:
         # invalidate merely the keys where the tutor has courses:
         # bad idea if the courses have not been generated yet
@@ -1075,8 +1106,34 @@ def user_preferences_changes(req, year, week, username, **kwargs):
         for dep in Department.objects.all():
             cache.delete(get_key_preferences_tutor(dep.abbrev, year, week))
 
-    logger.info('Pref changed with success')
-    return JsonResponse(good_response)
+    return response
+
+        
+
+
+
+def course_preferences_changes(req, year, week, train_prog, course_type, **kwargs):
+    response = check_ajax_post(req)
+    logger.info(response)
+    if response is not None:
+        return response
+
+    response = {'status':'KO', 'more':''}
+    
+    tp = None
+    ct = None
+    try:
+        tp = TrainingProgramme.objects.get(abbrev=train_prog, department=req.department)
+        ct = CourseType.objects.get(name=course_type, department=req.department)
+    except ObjectDoesNotExist:
+        if tp is None:
+            response['more'] = 'No such training programme'
+        else:
+            response['more'] = 'No such course type'
+        return JsonResponse(response)
+
+    return preferences_changes(req, year, week, HelperCoursePreference(tp, ct))
+
 
 
 @login_required
