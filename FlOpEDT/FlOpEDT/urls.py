@@ -55,5 +55,6 @@ urlpatterns = [
 #    url(r'^api-auth/', include('rest_framework.urls')),
     url(r'^configuration/', include('configuration.urls')),
 #    url(r'^importation/(?P<department>[a-zA-Z]\w{1,7})/', include('importation.urls')),
+    url('ttapp/', include('TTapp.urls')),
     url(r'$', base.views.index, name='index'),
 ]

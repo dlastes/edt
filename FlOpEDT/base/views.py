@@ -42,7 +42,7 @@ from django.urls import reverse
 from django.views.decorators.cache import cache_page
 from django.views.generic import RedirectView
 
-from people.models import Tutor
+from people.models import Tutor, UserDepartmentSettings, User
 
 from base.admin import CoursResource, DispoResource, VersionResource, \
     CoursPlaceResource, UnavailableRoomsResource, TutorCoursesResource
@@ -473,22 +473,31 @@ def fetch_unavailable_rooms(req, year, week, **kwargs):
    
 
 def fetch_all_tutors(req, **kwargs):
-    cache_key = get_key_all_tutors()
+    logger.info(f'Get tutors D{req.department.abbrev}')
+    cache_key = get_key_all_tutors(req.department.abbrev)
     cached = cache.get(cache_key)
     if cached is not None:
         return cached
-    tutor_list = [t.username for t in Tutor.objects.all()]
+    tutor_list = [t.user.username \
+                  for t in UserDepartmentSettings.objects\
+                  .filter(department=req.department,
+                          is_main=True,
+                          user__is_tutor=True)]
     response = JsonResponse({'tutors': tutor_list})
     cache.set(cache_key, response)
     return response
 
 
-@login_required
-def fetch_stype(req, **kwargs):
+def fetch_stype(req, username, **kwargs):
+    try:
+        user = User.objects.get(username=username)
+    except ObjectDoesNotExist:
+        return HttpResponse('Problem')
+
     dataset = DispoResource() \
         .export(UserPreference.objects \
                 .filter(semaine=None,
-                        user=req.user))  # all())#
+                        user=user))  # all())#
     response = HttpResponse(dataset.csv, content_type='text/csv')
     return response
 
@@ -706,12 +715,12 @@ def fetch_tutor_courses(req, year, week, tutor, **kwargs):
 
 @login_required
 def edt_changes(req, **kwargs):
-    bad_response = HttpResponse("KO")
-    good_response = HttpResponse("OK")
+    bad_response = {'status':'KO', 'more':''}
+    good_response = {'status':'OK', 'more':''}
 
     if not (req.user.is_tutor and req.user.is_staff):
-        bad_response['reason'] = "Pas membre de l'équipe encadrante"
-        return bad_response
+        bad_response['more'] = "Pas membre de l'équipe encadrante"
+        return JsonResponse(bad_response)
         
 
     impacted_inst = set()
@@ -720,11 +729,11 @@ def edt_changes(req, **kwargs):
           + 'numero_jour, numero_creneau, prof)\n\n'
 
     if not req.is_ajax():
-        bad_response['reason'] = "Non ajax"
-        return bad_response
+        bad_response['more'] = "Non ajax"
+        return JsonResponse(bad_response)
 
     if req.method != "POST":
-        bad_response['reason'] = "Non POST"
+        bad_response['more'] = "Non POST"
         return bad_response
 
 
@@ -738,9 +747,9 @@ def edt_changes(req, **kwargs):
         version = None
         department = req.department
     except:
-        bad_response['reason'] \
+        bad_response['more'] \
             = "Problème semaine, année ou work_copy."
-        return bad_response
+        return JsonResponse(bad_response)
 
 
     logger.info(f"REQ: edt change; {req.body}")
@@ -811,13 +820,13 @@ def edt_changes(req, **kwargs):
                         sal_n = RoomGroup.objects.get(name=new_room)
                     except ObjectDoesNotExist:
                         if new_room == 'salle?':
-                            bad_response['reason'] \
+                            bad_response['more'] \
                                 = 'Oublié de trouver une salle ' \
                                   'pour un cours ?'
                         else:
-                            bad_response['reason'] = \
+                            bad_response['more'] = \
                                 f"Problème : salle {new_room} inconnue"
-                        return bad_response
+                        return JsonResponse(bad_response)
 
                     if non_place:
                         cp.room = sal_n
@@ -844,9 +853,9 @@ def edt_changes(req, **kwargs):
                                                   initiator=req.user.tutor)
                         pm.save()
                     except ObjectDoesNotExist:
-                        bad_response['reason'] = \
+                        bad_response['more'] = \
                             f"Problème : prof {new_tutor} inconnu"
-                        return bad_response
+                        return JsonResponse(bad_response)
 
                 if new_week is not None or new_year is not None \
                    or new_day is not None or new_start_time is not None \
@@ -899,24 +908,24 @@ def edt_changes(req, **kwargs):
         logger.info(msg)
         
 
-        return good_response
+        return JsonResponse(good_response)
     else:
-        bad_response['reason'] = f"Version: {version} VS {old_version}"
-        return bad_response
+        bad_response['more'] = f"Version: {version} VS {old_version}"
+        return JsonResponse(bad_response)
 
 
 @login_required
 def dispos_changes(req, **kwargs):
-    bad_response = HttpResponse("KO")
-    good_response = HttpResponse("OK")
+    bad_response = {'status':'KO', 'more':''}
+    good_response = {'status':'OK', 'more':''}
 
     if not req.is_ajax():
-        bad_response['reason'] = "Non ajax"
-        return bad_response
+        bad_response['more'] = "Non ajax"
+        return JsonResponse(bad_response)
 
     if req.method != "POST":
-        bad_response['reason'] = "Non POST"
-        return bad_response
+        bad_response['more'] = "Non POST"
+        return JsonResponse(bad_response)
 
 
     try:
@@ -925,9 +934,9 @@ def dispos_changes(req, **kwargs):
         week = int(week)
         year = int(year)
     except ValueError:
-        bad_response['reason'] \
+        bad_response['more'] \
             = "Problème semaine ou année."
-        return bad_response
+        return JsonResponse(bad_response)
 
     usr_change = req.GET.get('u', '')
     if usr_change == '':
@@ -938,8 +947,9 @@ def dispos_changes(req, **kwargs):
         week = None
         year = None
 
-    logger.info(f"REQ: dispo change; {req.body}")
-    logger.info(req.POST)
+    logger.info(f"REQ: dispo change for {usr_change} by {req.user.username}")
+    logger.info(f"     W{week} Y{year}")
+    
     # q = json.loads(req.body,
     #                object_hook=lambda d:
     #                namedtuple('X', list(d.keys()))(*list(d.values())))
@@ -953,14 +963,14 @@ def dispos_changes(req, **kwargs):
     try:
         prof = Tutor.objects.get(username=usr_change)
     except ObjectDoesNotExist:
-        bad_response['reason'] \
+        bad_response['more'] \
             = "Problème d'utilisateur."
-        return bad_response
+        return JsonResponse(bad_response)
 
     if prof.username != req.user.username and req.user.rights >> 1 % 2 == 0:
-        bad_response['reason'] \
+        bad_response['more'] \
             = 'Non autorisé, réclamez plus de droits.'
-        return bad_response
+        return JsonResponse(bad_response)
 
     # print(q)
 
@@ -1004,7 +1014,7 @@ def dispos_changes(req, **kwargs):
         #          heure=Time.objects.get(no=a['hour']))
         # if cr is None:
         #     bad_response['reason'] = "Creneau pas trouve"
-        #     return bad_response
+        #     return JsonResponse(bad_response)
         # di, didi = UserPreference \
         #     .objects \
         #     .update_or_create(user=prof,
@@ -1023,8 +1033,9 @@ def dispos_changes(req, **kwargs):
         #                               an=year).distinct('module__train_prog__department'):
         for dep in Department.objects.all():
             cache.delete(get_key_preferences_tutor(dep.abbrev, year, week))
-        
-    return good_response
+
+    logger.info('Pref changed with success')
+    return JsonResponse(good_response)
 
 
 @login_required
@@ -1216,29 +1227,29 @@ def filt_sa(department, semaine, an):
 def get_key_course_pl(department_abbrev, year, week, num_copy):
     if year is None or week is None or num_copy is None:
         return ''
-    return 'CPL-D' + department_abbrev + '-Y' + str(year) + '-W' + str(week) + '-C' + str(num_copy) 
+    return f'CPL-D{department_abbrev}-Y{year}-W{week}-C{num_copy}'
 
 
 def get_key_course_pp(department_abbrev, year, week, num_copy):
     if year is None or week is None or num_copy is None:
         return ''
-    return 'CPP-D' + department_abbrev + '-Y' + str(year) + '-W' + str(week) + '-C' + str(num_copy) 
+    return f'CPP-D{department_abbrev}-Y{year}-W{week}-C{num_copy}'
 
 
 def get_key_preferences_tutor(department_abbrev, year, week):
     if year is None or week is None:
         return ''
-    return 'PREFT-D' + department_abbrev + '-Y' + str(year) + '-W' + str(week)
+    return f'PREFT-D{department_abbrev}-Y{year}-W{week}'
 
 
 def get_key_unavailable_rooms(department_abbrev, year, week):
     if year is None or week is None:
         return ''
-    return 'UNAVR-D' + department_abbrev + '-Y' + str(year) + '-W' + str(week)
+    return f'UNAVR-D{department_abbrev}-Y{year}-W{week}'
 
 
-def get_key_all_tutors():
-    return 'ALL-TUT'
+def get_key_all_tutors(department_abbrev):
+    return f'ALL-TUT-D{department_abbrev}'
 
 # </editor-fold desc="HELPERS">
 

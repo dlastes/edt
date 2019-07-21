@@ -115,7 +115,7 @@ function on_group_rcv(dg) {
     go_promo_gp_init() ;
 
 
-    fetch_all(true);
+    fetch_all(true, false);
 
     if (splash_id == 1) {
     

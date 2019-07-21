@@ -28,7 +28,6 @@ var margin = {top: 50,  left: 100, right: 10, bot:10};
 
 var svg = {height: 625 - margin.top - margin.bot, width: 680 - margin.left - margin.right};
 
-// check ack -> ack.edt ?
 
 smiley.tete = 13 ;
 
@@ -125,7 +124,7 @@ function fetch_pref_only() {
     $.ajax({
         type: "GET", //rest Type
         dataType: 'text',
-        url: url_fetch_stype ,
+        url: url_fetch_stype + user.nom ,
         async: false,
         contentType: "text/csv",
         success: function (msg) {
@@ -243,8 +242,18 @@ function apply_stype_from_button(save) {
 
 
 	if(changes.length==0) {
-    	    ack = "RAS";
+    	    ack.pref = "RAS";
+            document.getElementById("ack").textContent = ack.pref ;
 	} else {
+
+            ack.pref = "Ok ";
+	    if(save){
+		ack.pref += "semaine type";
+	    } else {
+		ack.pref += "semaine "+se_deb+" année "+an_deb
+		    +" à semaine "+se_fin+" année "+an_fin;
+	    }
+
 
 	    for (an=an_deb ; an<=an_fin ; an++){
 		if(an==an_deb){
@@ -261,6 +270,7 @@ function apply_stype_from_button(save) {
 		for (se=se_min ; se<=se_max ; se++) {
 
 		    //console.log(se,an);
+                    show_loader(true);
     		    $.ajax({
     			url: url_dispos_changes
 			    + "?s=" + se
@@ -271,27 +281,26 @@ function apply_stype_from_button(save) {
 			data: sent_data, //JSON.stringify(changes),
 			dataType: 'json',
     			success: function(msg) {
-
+                            if(msg.status != 'OK') {
+                                ack.pref = msg.more ;
+                            }
+                            document.getElementById("ack").textContent = ack.pref ;
+                            show_loader(false);
     			},
     			error: function(msg){
-
+                            ack.pref = 'Pb communication serveur';
+                            document.getElementById("ack").textContent = ack.pref ;
+                            show_loader(false);
     			}
     		    });
 		}
 	    }
-	    ack = "Ok ";
-	    if(save){
-		ack += "semaine type";
-	    } else {
-		ack += "semaine "+se_deb+" année "+an_deb
-		    +" à semaine "+se_fin+" année "+an_fin;
-	    }
 	}
 
     } else {
-	ack = "Problème : seconde semaine avant la première";
+	ack.pref = "Problème : seconde semaine avant la première";
+        document.getElementById("ack").textContent = ack.pref ;
     }
 
-    document.getElementById("ack").textContent = ack ;
      
 }

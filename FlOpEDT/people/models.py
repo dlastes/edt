@@ -101,6 +101,9 @@ class UserDepartmentSettings(models.Model):
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
     is_main = models.BooleanField(default=False)
 
+    def __str__(self):
+        return f'U:{self.user.username}, D:{self.department.abbrev}, {"main" if self.is_main else "secondary"}'
+
 
 class Tutor(User):
     FULL_STAFF = 'fs'

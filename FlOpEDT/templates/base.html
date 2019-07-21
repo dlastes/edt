@@ -29,6 +29,7 @@
 <style>
 </style>
 <link rel="stylesheet" href="{% static "base/header.css" %}" />
+<link rel="stylesheet" href="{% static 'TTapp/styles.css' %}" />
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=5AeyQYqgW7">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=5AeyQYqgW7">
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=5AeyQYqgW7">
@@ -64,6 +65,9 @@
     
     {% block nav %}
     <ul>
+      {% if user.is_authenticated and user.is_superuser %}
+      <li><a href="#" onclick="openNav()">☰</a></li>
+      {% endif %}
       {% if department %}
       <li><a href="{% url "base:edt" department %}">Consulter</a></li>
       {% if has_department_perm %} 
@@ -103,12 +107,15 @@
   </nav>
   <section id="content">
     {% block content %}{% endblock %}
+    <div id="side_panel" class="sidebar">
+      <a href="javascript:void(0)" class="btn_panel" onclick="closeNav()">×</a>
+      {% block side_panel %} {% endblock %}
+    </div>
   </section>
   
   <script src="{% static 'base/logo.js' %}";></script>
   <script>
     
   </script>  
-  
 </body>
 </html>

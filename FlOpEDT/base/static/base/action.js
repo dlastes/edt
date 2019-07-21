@@ -93,7 +93,7 @@ function apply_wk_change(d, i) { //if(fetch.done) {
     dispos = {};
     user.dispos = [];
 
-    fetch_all(false);
+    fetch_all(false, true);
 
     go_week_menu(false);
 } //}
@@ -248,7 +248,6 @@ function fetch_all_tutors() {
             dataType: 'json',
             url: url_all_tutors,
             async: false,
-            contentType: "application/json; charset=utf-8",
             success: function (msg) {
 		all_tutors = msg.tutors.filter(function(d) {
 		    return d>'A';
@@ -455,8 +454,8 @@ function go_cm_room_tutor_change() {
 }
 
 
-function remove_pannel(p, i){
-    sel_popup.pannels.splice(i, 1);
+function remove_panel(p, i){
+    sel_popup.panels.splice(i, 1);
     go_selection_popup() ;
 }
 
@@ -909,7 +908,8 @@ function send_edt_change(changes) {
             show_loader(false);
         },
         error: function(msg) {
-            edt_change_ack(msg);
+            edt_change_ack({status:'KO',
+                            more:'Pb de communication avec le serveur'});
             show_loader(false);
         }
     });
@@ -1009,12 +1009,12 @@ function send_dis_change() {
 
 
 function edt_change_ack(msg) {
-    if (msg.responseText == "OK") {
+    if (msg.status == "OK") {
         version += 1;
         ack.edt = "Modifications EDT : OK !";
         cours_bouge = [];
     } else {
-        ack.edt = msg.getResponseHeader('reason');
+        ack.edt = msg.more;
         if (ack.edt != null && ack.edt.startsWith("Version")) {
             ack.edt += "Quelqu'un a modifié entre-temps."
         }
@@ -1295,7 +1295,7 @@ function compute_cm_room_tutor_direction() {
 function apply_selection_display(choice) {
     if (fetch.done) {
 
-        var sel_list = choice.pannel.list ;
+        var sel_list = choice.panel.list ;
 
         var concerned = sel_list.find(function(t) {
             return t.name == choice.name ;
@@ -1306,7 +1306,7 @@ function apply_selection_display(choice) {
         }
 
         
-	if(choice.pannel.type == "tutor"
+	if(choice.panel.type == "tutor"
            && logged_usr.dispo_all_change && ckbox["dis-mod"].cked){
             tutors.all.forEach(function(t) { t.display = false ; });
             concerned.display = true ;
@@ -1390,8 +1390,8 @@ function apply_cancel_selections() {
         }
     }
 
-    // remove all pannels
-    sel_popup.pannels = [] ;
+    // remove all panels
+    sel_popup.panels = [] ;
 
     // update flags and display
     update_active() ;
