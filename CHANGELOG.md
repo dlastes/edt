@@ -5,13 +5,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased]
 ### Added
-- Side panel for superusers in main view:
+- Side panel in main view:
   - Work copy selection
   - Swap versions
   - Reassign rooms
-- Side panel for superusers in typical week view:
-  - Change someone else typical week
-  - Set preferences for course types
+- Side panel in default week view:
+  - Change someone else default week
+  - Set preferences for each course type, per training programme
   
   
 ### TBD
