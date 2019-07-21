@@ -248,8 +248,8 @@ function fetch_all_tutors() {
             dataType: 'json',
             url: url_all_tutors,
             async: false,
-            success: function (msg) {
-		all_tutors = msg.tutors.filter(function(d) {
+            success: function (data) {
+		all_tutors = data.filter(function(d) {
 		    return d>'A';
 		});
 		all_tutors.sort();
