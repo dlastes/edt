@@ -41,6 +41,8 @@
     
     var url_user_pref_changes = "{% url "base:user_pref_changes" department 0 0 '.' %}";
     url_user_pref_changes = url_user_pref_changes.slice(0, -5);
+    var url_course_pref_changes = "{% url 'base:course_pref_changes' department 0 0 '.' '.' %}";
+    url_course_pref_changes = url_course_pref_changes.slice(0, -7);
 
     var url_course_types = "{% url "base:fetch_course_types" department %}";
     var url_training_programmes = "{% url "base:fetch_training_programmes" department %}";
