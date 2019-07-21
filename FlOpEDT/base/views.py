@@ -481,7 +481,6 @@ def fetch_all_tutors(req, **kwargs):
     tutor_list = [t.user.username \
                   for t in UserDepartmentSettings.objects\
                   .filter(department=req.department,
-                          is_main=True,
                           user__is_tutor=True)]
     response = JsonResponse({'tutors': tutor_list})
     cache.set(cache_key, response)
