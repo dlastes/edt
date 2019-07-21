@@ -983,10 +983,10 @@ function send_dis_change() {
 
         show_loader(true);
         $.ajax({
-            url: url_dispos_changes
-		+ "?s=" + weeks.init_data[weeks.sel[0]].semaine
-		+ "&a=" + weeks.init_data[weeks.sel[0]].an
-		+ "&u=" + user.nom,
+            url: url_user_pref_changes
+		+ weeks.init_data[weeks.sel[0]].an
+		+ "/" + weeks.init_data[weeks.sel[0]].semaine
+		+ "/" + user.nom,
             type: 'POST',
 //            contentType: 'application/json; charset=utf-8',
             data: sent_data , //JSON.stringify(changes),

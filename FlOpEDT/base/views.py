@@ -487,7 +487,7 @@ def fetch_all_tutors(req, **kwargs):
     return response
 
 
-def fetch_stype(req, username, **kwargs):
+def fetch_user_default_week(req, username, **kwargs):
     try:
         user = User.objects.get(username=username)
     except ObjectDoesNotExist:
@@ -914,9 +914,9 @@ def edt_changes(req, **kwargs):
 
 
 @login_required
-def dispos_changes(req, **kwargs):
+def user_preferences_changes(req, year, week, username, **kwargs):
     bad_response = {'status':'KO', 'more':''}
-    good_response = {'status':'OK', 'more':''}
+    good_resbponse = {'status':'OK', 'more':''}
 
     if not req.is_ajax():
         bad_response['more'] = "Non ajax"
@@ -926,20 +926,7 @@ def dispos_changes(req, **kwargs):
         bad_response['more'] = "Non POST"
         return JsonResponse(bad_response)
 
-
-    try:
-        week = req.GET.get('s', '')
-        year = req.GET.get('a', '')
-        week = int(week)
-        year = int(year)
-    except ValueError:
-        bad_response['more'] \
-            = "Problème semaine ou année."
-        return JsonResponse(bad_response)
-
-    usr_change = req.GET.get('u', '')
-    if usr_change == '':
-        usr_change = req.user.username
+    usr_change = username
 
     # Default week at None
     if week == 0 or year == 0:

@@ -54,7 +54,7 @@ urlpatterns = [
     url(r'^fetch_cours_pl/(?P<year>\d+)/(?P<week>\d+)/(?P<num_copy>\d+)$', views.fetch_cours_pl, name="fetch_cours_pl"),
     url(r'^fetch_cours_pp/(?P<year>\d+)/(?P<week>\d+)/(?P<num_copy>\d+)$', views.fetch_cours_pp, name="fetch_cours_pp"),
     url(r'^fetch_dispos/(?P<year>\d+)/(?P<week>\d+)$', views.fetch_dispos, name="fetch_dispos"),
-    path('fetch_stype/<str:username>', views.fetch_stype, name="fetch_stype"),
+    path('fetch_user_default_week/<str:username>', views.fetch_user_default_week, name="fetch_user_dweek"),
     url(r'^fetch_decale$', views.fetch_decale, name="fetch_decale"),
     url(r'^fetch_bknews/(?P<year>\d+)/(?P<week>\d+)$', views.fetch_bknews, name="fetch_bknews"),
     url(r'^fetch_groups$', views.fetch_groups, name="fetch_groups"),    
@@ -76,9 +76,9 @@ urlpatterns = [
     ])),
 
     # from screen to db
-    url(r'^change_edt$', views.edt_changes, name="edt_changes"),
-    url(r'^change_dispos/$', views.dispos_changes, name="dispos_changes"),
-    url(r'^change_decale$', views.decale_changes, name="decale_changes"),
+    path('change_edt', views.edt_changes, name="edt_changes"),
+    path('change_user_pref/<int:year>/<int:week>/<str:username>', views.user_preferences_changes, name="user_pref_changes"),
+    path('change_decale', views.decale_changes, name="decale_changes"),
 
 
     # predefined
