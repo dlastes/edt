@@ -261,9 +261,9 @@ class WeekDB(object):
 
         availabilities = {}
         for i in instructors:
-            availabilities[i] = set(UserPreference.objects.filter(semaine=self.week, an=self.year))
+            availabilities[i] = set(UserPreference.objects.filter(semaine=self.week, user=i, an=self.year))
             if not availabilities[i]:
-                availabilities[i] = set(UserPreference.objects.filter(semaine=None))
+                availabilities[i] = set(UserPreference.objects.filter(semaine=None, user=i))
 
         other_departments_courses_for_tutor = {}
         for i in instructors:
@@ -888,7 +888,7 @@ class TTModel(object):
                     avail_instr[i][sl] = 1
 
             else:
-                avail_time = sum(a.duration for a in tutor_availabilities if a.valeur >=1)
+                avail_time = sum(a.duration for a in tutor_availabilities if a.valeur >= 1)
                 maximum = max([a.valeur for a in tutor_availabilities])
                 non_prefered_duration = max(1, sum(a.duration
                                                    for a in tutor_availabilities if 1 <= a.valeur <= maximum - 1))
@@ -919,7 +919,7 @@ class TTModel(object):
                                         if 1 <= a.valeur <= maximum - 1) / non_prefered_duration
                     for sl in self.wdb.slots:
                         avail = set(a for a in tutor_availabilities
-                                    if (sl.start_time - a.duration <= a.start_time <= sl.start_time + sl.duration
+                                    if (sl.start_time - a.duration < a.start_time < sl.end_time
                                         and a.day == sl.day))
                         if not avail:
                             print("availability pbm for %s slot %s" % (i, sl))
