@@ -509,6 +509,9 @@ def fetch_unavailable_rooms(req, year, week, **kwargs):
    
 
 def fetch_all_tutors(req, **kwargs):
+    '''
+    Cache and return all tutors who teach in req.department
+    '''
     logger.info(f'Get tutors D{req.department.abbrev}')
     cache_key = get_key_all_tutors(req.department.abbrev)
     cached = cache.get(cache_key)
@@ -518,7 +521,7 @@ def fetch_all_tutors(req, **kwargs):
                   for t in UserDepartmentSettings.objects\
                   .filter(department=req.department,
                           user__is_tutor=True)]
-    response = JsonResponse({'tutors': tutor_list})
+    response = JsonResponse(tutor_list, safe=False)
     cache.set(cache_key, response)
     return response
 
