@@ -261,9 +261,9 @@ class WeekDB(object):
 
         availabilities = {}
         for i in instructors:
-            availabilities[i] = set(UserPreference.objects.filter(semaine=self.week, an=self.year))
+            availabilities[i] = set(UserPreference.objects.filter(semaine=self.week, user=i, an=self.year))
             if not availabilities[i]:
-                availabilities[i] = set(UserPreference.objects.filter(semaine=None))
+                availabilities[i] = set(UserPreference.objects.filter(semaine=None, user=i))
 
         other_departments_courses_for_tutor = {}
         for i in instructors:
