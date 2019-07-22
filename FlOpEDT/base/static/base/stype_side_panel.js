@@ -61,9 +61,7 @@ function fetch_selected() {
 function dd_fetch_ended() {
     if (mode == 'tutor' && dd_selections['tutor'].filled) {
         // select logged user if present
-        var lolo = 'CD' ;
-        // logged_usr.nom
-        var me = $(dd_selections['tutor'].id + " option[value='" + lolo + "']");
+        var me = $(dd_selections['tutor'].id + " option[value='" + logged_usr.nom + "']");
         if (typeof me !== 'undefined') {
             me.prop('selected', true);
         }
