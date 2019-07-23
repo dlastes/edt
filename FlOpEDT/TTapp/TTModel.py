@@ -841,7 +841,8 @@ class TTModel(object):
                             or (p.successifs and not sl2.is_successor_of(sl1)):
                         if not weight:
                             self.add_constraint(self.TT[(sl1, c1)]
-                                                + self.TT[(sl2, c2)], '<=', 1)
+                                                + self.TT[(sl2, c2)], '<=', 1,
+                                                "Dependency %s %g"(p, self.constraint_nb))
                         else:
                             conj_var = self.add_conjunct(self.TT[(sl1, c1)],
                                                          self.TT[(sl2, c2)])
