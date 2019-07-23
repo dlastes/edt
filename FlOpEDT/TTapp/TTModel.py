@@ -141,7 +141,7 @@ class WeekDB(object):
                     copie_travail=0)
 
         courses_availabilities = CoursePreference.objects \
-            .filter(train_prog__department=self.department,
+            .filter(train_prog__in=self.train_prog,
                     semaine=self.week,
                     an=self.year)
 
@@ -961,15 +961,15 @@ class TTModel(object):
             for promo in self.train_prog:
                 avail_course[(course_type, promo)] = {}
                 non_prefered_slot_cost_course[(course_type, promo)] = {}
-                courses_avail = self.wdb \
-                    .courses_availabilities \
-                    .filter(course_type=course_type, train_prog=promo)
-                if not courses_avail.exists():
-                    courses_avail = CoursePreference.objects \
-                        .filter(course_type=course_type,
-                                train_prog=promo,
-                                semaine=None)
-                if not courses_avail.exists():
+                courses_avail = set(self.wdb.courses_availabilities
+                                    .filter(course_type=course_type,
+                                            train_prog=promo))
+                if not courses_avail:
+                    courses_avail = set(CoursePreference.objects
+                                        .filter(course_type=course_type,
+                                                train_prog=promo,
+                                                semaine=None))
+                if not courses_avail:
                     print("No course availability given for %s - %s" % (course_type, promo))
                     for sl in self.wdb.slots:
                         avail_course[(course_type, promo)][sl] = 1
@@ -978,8 +978,9 @@ class TTModel(object):
                 else:
                     for sl in self.wdb.slots:
                         try:
-                            avail = courses_avail.filter(Q(start_time__lt=sl.start_time + course_type.duration) |
-                                                         Q(start_time__gt=sl.start_time - F('duration')))
+                            avail = set(a for a in courses_avail
+                                        if sl.start_time - a.duration < a.start_time < sl.end_time
+                                        and a.day == sl.day)
                             if avail:
                                 if min(a.valeur for a in avail) == 0:
                                     avail_course[(course_type, promo)][sl] = 0
