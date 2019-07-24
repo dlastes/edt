@@ -933,7 +933,40 @@ function compute_changes(changes, conc_tutors, gps) {
 
 
 function confirm_law_constraints(changes, conc_tutors, gps) {
+    var issues ;
+    var issues_txt = [] ;
+    for (var i = 0 ; i < conc_tutors.length ; i++) {
+        issues = check_constraints_tutor(conc_tutors[i]);
+        for (var j = 0 ; j < issues.length ; j++) {
+            issues_txt.push({txt: law_issue_to_txt(conc_tutors[i], issues[j])});
+        }
+    }
+
+    if(issues.length == 0) {
+        confirm_contact_all(changes, conc_tutors, gps) ;
+    } else {
+        var splash_confirm = {
+	    id: "conf-law",
+	    but: {list: [{txt: "Je veux être hors-la-loi",
+                          width: 100,
+                          click: function(d){
+                              confirm_contact_all(changes, conc_tutors, gps);
+                          }},
+		         {txt: "Je vais trouver autre chose",
+                          click: function(d){} }]
+                 },
+	    com: {list: issues_txt}
+        }
+    
+        splash(splash_confirm);
+    }
+
 }
+
+
+
+
+
 function confirm_change() {
     var changes, conc_tutors, gps;
     changes = [];
