@@ -932,6 +932,35 @@ function compute_changes(changes, conc_tutors, gps) {
 }
 
 
+
+
+// compute latest finishing time
+// independently of the days
+function max_finish_time(courses_list) {
+    return Math.max.apply(Math, courses_list.map(function(d){
+        return d.start + d.duration ;
+    }));
+}
+
+
+// compute the earliest starting time
+// independently of the days
+function min_start_time(courses_list) {
+    return Math.min.apply(Math, courses_list.map(function(d){
+        return d.start ;
+    }));
+}
+
+
+// slack between two sets of courses
+function compute_slack(prev_day_courses, next_day_courses) {
+    console.log(prev_day_courses, next_day_courses);
+    if (prev_day_courses.length == 0 || next_day_courses == 0) {
+        return -1 ;
+    }
+    return 24*60 + min_start_time(next_day_courses) - max_finish_time(prev_day_courses);
+}
+
 /*
 Check constraints of a given tutor
   - nok_type: 'sleep',    (date1: string(%DD/MM), date2: string(%DD/MM)) 
