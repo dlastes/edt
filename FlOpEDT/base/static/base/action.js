@@ -1113,6 +1113,47 @@ function compute_weekly(tutor, service, issues) {
     }
 }
 
+
+// build description of a day
+function build_day_desc(service, iday) {
+    var day_desc = {iweek:service[iday].iweek,
+                    ref:day_refs[iday - Math.floor(iday/7)*7]};
+    fill_date(day_desc);
+    return day_desc ;
+}
+
+
+// PRECOND: ended by free days 
+function compute_tunnels(service, issues) {
+    var last_free = -1 ;
+    var consec_busy = 0 ;
+    for (var i = 0 ; i < service.length ; i ++) {
+        if (service[i].duration == 0) {
+            if (consec_busy > law_constraints.max_consec_days) {
+                if ((i-1 > 6 || last_free > 6)
+                    && (i-1 < 14 || last_free < 14)){
+                    console.log(service,i-1,last_free);
+                    var end_day = build_day_desc(service, i-1);
+                    var beg_day = build_day_desc(service, last_free + 1);
+                    issues.push({nok_type:'tunnel',
+                                 begin:beg_day.date,
+                                 end:end_day.date,
+                                 nb_consec: consec_busy})
+                }
+            }
+            last_free = i ;
+            consec_busy = 0 ;
+        } else {
+            consec_busy ++ ;
+        }
+    }
+}
+
+
+
+
+
+
 /*
 Check constraints of a given tutor
   - nok_type: 'sleep',    (date1: string(%DD/MM), date2: string(%DD/MM)) 
@@ -1161,6 +1202,18 @@ function check_constraints_tutor(tutor) {
     // weekly working time
     compute_weekly(tutor, tutor_service, issues);
     
+
+    // tunnel constraint
+    var prev_service = aggregate_hours(tutor,icur_week-1);
+    var next_service = aggregate_hours(tutor, icur_week+1);
+    tutor_service = prev_service.concat(tutor_service).concat(next_service);
+    
+    tutor_service.push({duration:0});
+    compute_tunnels(tutor_service, issues);
+    tutor_service = tutor_service.slice(0,-1);
+    
+    // weekly working time
+
 
     return issues ;
 }
