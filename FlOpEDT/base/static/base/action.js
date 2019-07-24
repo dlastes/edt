@@ -1008,6 +1008,40 @@ function get_courses(tutor, day_desc) {
     return [] ;
 }
 
+
+// in [start_day_desc, end_day_desc[
+function compute_sleep(tutor, start_day_des, end_day_desc, issues) {
+    var cur_day = start_day_des ;
+    var next_day ;
+
+    var cur_courses, next_courses;
+    var sleep_time ;
+    
+    while(cur_day.iweek != end_day_desc.iweek
+          || cur_day.ref != end_day_desc.ref) {
+
+        console.log("day IW" + cur_day.iweek + " - " + cur_day.ref);
+        
+        next_day = compute_next_day(cur_day);
+        cur_courses = get_courses(tutor, cur_day);
+        next_courses = get_courses(tutor, next_day);
+
+        sleep_time = compute_slack(cur_courses, next_courses);
+        console.log(sleep_time);
+        if (sleep_time > 0 &&
+            sleep_time <= law_constraints.sleep_time) {
+            fill_date(cur_day);
+            fill_date(next_day);
+            
+            issues.push({nok_type:'sleep',
+                         duration: sleep_time,
+                         prev: cur_day.date,
+                         next: next_day.date});
+        }
+        cur_day = next_day ;
+    }
+}
+
 /*
 Check constraints of a given tutor
   - nok_type: 'sleep',    (date1: string(%DD/MM), date2: string(%DD/MM)) 
@@ -1023,6 +1057,27 @@ function check_constraints_tutor(tutor) {
 
     var issues = [] ;
     
+    var tut_courses = cours.filter(function(d){
+        d.prof == tutor ;
+    }) ;
+
+    var icur_week = weeks.sel[0] ;
+
+
+
+    // CARE  COURS PAS PLACÉ
+    insert_side_week(weeks.init_data[icur_week].an,
+                     weeks.init_data[icur_week].semaine,
+                     days,
+                     cours);
+    
+
+    // sleep constraint
+    compute_sleep(tutor,
+                  {iweek: weeks.sel[0] - 1, ref: 'su'},
+                  {iweek: weeks.sel[0] + 1, ref: 'm'},
+                  issues) ;
+
 
     return issues ;
 }
