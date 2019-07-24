@@ -990,6 +990,24 @@ function fill_date(day_desc) {
     }).date;
 }
 
+
+// return the courses of tutor tutor on day day_desc
+function get_courses(tutor, day_desc) {
+    if (day_desc.iweek < 0 || day_desc.iweek >= weeks.init_data.length) {
+        return [] ;
+    }
+    var full_week = side_courses.find(function(d){
+        return d.year == weeks.init_data[day_desc.iweek].an &&
+            d.week == weeks.init_data[day_desc.iweek].semaine ;
+    });
+    if (typeof full_week !== 'undefined') {
+        return full_week.courses.filter(function(d) {
+            return d.day == day_desc.ref && d.prof == tutor ;
+        });
+    }
+    return [] ;
+}
+
 /*
 Check constraints of a given tutor
   - nok_type: 'sleep',    (date1: string(%DD/MM), date2: string(%DD/MM)) 
