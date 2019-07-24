@@ -961,6 +961,35 @@ function compute_slack(prev_day_courses, next_day_courses) {
     return 24*60 + min_start_time(next_day_courses) - max_finish_time(prev_day_courses);
 }
 
+
+// return next day
+// day_desc: {iweek: int, ref: string}
+function compute_next_day(day_desc) {
+    var ret = {iweek: day_desc.iweek,
+               ref: ''};
+    if (day_desc.ref == 'su') {
+        ret.iweek ++ ;
+        ret.ref = 'm'
+    } else {
+        ret.ref = day_refs[day_refs.indexOf(day_desc.ref)+1];
+    }
+    return ret ;
+}
+
+
+// fill date field of a given day
+function fill_date(day_desc) {
+
+    console.log("fill date : IW"+day_desc.iweek+" - "+day_desc.ref);
+
+    day_desc.date = side_courses.find(function(d){
+        return d.year == weeks.init_data[day_desc.iweek].an &&
+            d.week == weeks.init_data[day_desc.iweek].semaine ;
+    }).days.find(function(d){
+        return d.ref == day_desc.ref ;
+    }).date;
+}
+
 /*
 Check constraints of a given tutor
   - nok_type: 'sleep',    (date1: string(%DD/MM), date2: string(%DD/MM)) 
