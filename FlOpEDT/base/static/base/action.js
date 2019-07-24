@@ -1084,6 +1084,19 @@ function print_agg(service) {
                     + service[i].iweek);
     }
 }
+
+// check whether there is 2 free days in service
+// append problem infos in issues
+function compute_weekend(service, issues) {
+    var nb_free_days = service.filter(function(d){
+        return d.duration == 0 ;
+    }).length ;
+    if (nb_free_days < law_constraints.free_days_per_week) {
+        issues.push({nok_type:'weekend',
+                     nb_free_days: nb_free_days});
+    }
+}
+
 /*
 Check constraints of a given tutor
   - nok_type: 'sleep',    (date1: string(%DD/MM), date2: string(%DD/MM)) 
@@ -1120,6 +1133,15 @@ function check_constraints_tutor(tutor) {
                   {iweek: weeks.sel[0] + 1, ref: 'm'},
                   issues) ;
 
+    // weekend constraint
+    var tutor_service = aggregate_hours(tutor,
+                                        icur_week);
+
+    print_agg(tutor_service);
+
+    compute_weekend(tutor_service, issues) ;
+
+    
 
     return issues ;
 }
