@@ -1097,6 +1097,22 @@ function compute_weekend(service, issues) {
     }
 }
 
+
+// check whether the service is not too heavy
+// append problem infos in issues
+function compute_weekly(tutor, service, issues) {
+    var working_minutes = 0 ;
+    for (var i = 0 ; i < service.length ; i++) {
+        working_minutes += service[i].duration ;
+    }
+    if (Object.keys(working_time).includes(tutor)) {
+        if (working_minutes > working_time[tutor] + law_constraints.week) {
+            issues.push({nok_type:'weekly',
+                         duration: working_minutes})
+        }
+    }
+}
+
 /*
 Check constraints of a given tutor
   - nok_type: 'sleep',    (date1: string(%DD/MM), date2: string(%DD/MM)) 
@@ -1141,6 +1157,9 @@ function check_constraints_tutor(tutor) {
 
     compute_weekend(tutor_service, issues) ;
 
+    
+    // weekly working time
+    compute_weekly(tutor, tutor_service, issues);
     
 
     return issues ;
