@@ -832,8 +832,6 @@ function which_side_weeks() {
 
 function side_week_rcv(side_week) {
     return function(msg, ts, req) {
-        console.log(side_week) ;
-        
         var side_days = JSON.parse(req.getResponseHeader('days').replace(/\'/g, '"'));
         var side_cours_pl = d3.csvParse(msg, translate_cours_pl_from_csv);
         
@@ -848,8 +846,6 @@ function side_week_rcv(side_week) {
 function fetch_side_weeks() {
 
     var needed_weeks = which_side_weeks();
-    console.log('about to fetch weeks');
-    console.log(needed_weeks);
 
     for (var i = 0 ; i < needed_weeks.length ; i++) {
         $.ajax({

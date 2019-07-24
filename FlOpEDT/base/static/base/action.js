@@ -954,7 +954,7 @@ function min_start_time(courses_list) {
 
 // slack between two sets of courses
 function compute_slack(prev_day_courses, next_day_courses) {
-    console.log(prev_day_courses, next_day_courses);
+    //console.log(prev_day_courses, next_day_courses);
     if (prev_day_courses.length == 0 || next_day_courses == 0) {
         return -1 ;
     }
@@ -980,7 +980,7 @@ function compute_next_day(day_desc) {
 // fill date field of a given day
 function fill_date(day_desc) {
 
-    console.log("fill date : IW"+day_desc.iweek+" - "+day_desc.ref);
+    //console.log("fill date : IW"+day_desc.iweek+" - "+day_desc.ref);
 
     day_desc.date = side_courses.find(function(d){
         return d.year == weeks.init_data[day_desc.iweek].an &&
@@ -1020,14 +1020,14 @@ function compute_sleep(tutor, start_day_des, end_day_desc, issues) {
     while(cur_day.iweek != end_day_desc.iweek
           || cur_day.ref != end_day_desc.ref) {
 
-        console.log("day IW" + cur_day.iweek + " - " + cur_day.ref);
+        //console.log("day IW" + cur_day.iweek + " - " + cur_day.ref);
         
         next_day = compute_next_day(cur_day);
         cur_courses = get_courses(tutor, cur_day);
         next_courses = get_courses(tutor, next_day);
 
         sleep_time = compute_slack(cur_courses, next_courses);
-        console.log(sleep_time);
+        //console.log(sleep_time);
         if (sleep_time > 0 &&
             sleep_time <= law_constraints.sleep_time) {
             fill_date(cur_day);
@@ -1047,7 +1047,7 @@ function compute_sleep(tutor, start_day_des, end_day_desc, issues) {
 // return an array of 7 {duration, month, iweek}
 function aggregate_hours(tutor, iweek) {
 
-    console.log("Aggregate "+ tutor + "IW " + iweek);
+    //console.log("Aggregate "+ tutor + "IW " + iweek);
     
     var ret = new Array(7) ;
     for (var i = 0 ; i < ret.length ; i++) {
@@ -1132,7 +1132,7 @@ function compute_tunnels(service, issues) {
             if (consec_busy > law_constraints.max_consec_days) {
                 if ((i-1 > 6 || last_free > 6)
                     && (i-1 < 14 || last_free < 14)){
-                    console.log(service,i-1,last_free);
+                    //console.log(service,i-1,last_free);
                     var end_day = build_day_desc(service, i-1);
                     var beg_day = build_day_desc(service, last_free + 1);
                     issues.push({nok_type:'tunnel',
@@ -1194,7 +1194,7 @@ function check_constraints_tutor(tutor) {
     var tutor_service = aggregate_hours(tutor,
                                         icur_week);
 
-    print_agg(tutor_service);
+    //print_agg(tutor_service);
 
     compute_weekend(tutor_service, issues) ;
 

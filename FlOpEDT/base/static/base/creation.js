@@ -1283,7 +1283,6 @@ function def_drag() {
                     fill_grid_slot(c, sl);
                 });
 
-		console.log(data_slot_grid);
 
                 drag.x = 0;
                 drag.y = 0;
@@ -1347,7 +1346,7 @@ function def_drag() {
 
                 if (!is_garbage(cur_over)) {
 
-		    console.log("not garbage");
+		    // console.log("not garbage");
 		    
                     // var gs = data_slot_grid.filter(function(s) {
                     //     return s.day == cur_over.day
