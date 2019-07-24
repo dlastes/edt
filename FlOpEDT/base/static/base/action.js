@@ -932,8 +932,10 @@ function compute_changes(changes, conc_tutors, gps) {
 }
 
 
+function confirm_law_constraints(changes, conc_tutors, gps) {
+}
 function confirm_change() {
-    var changes, conc_tutors, gps, i, prof_txt, gp_txt;
+    var changes, conc_tutors, gps;
     changes = [];
     conc_tutors = [];
     gps = [];
@@ -949,36 +951,45 @@ function confirm_change() {
         go_ack_msg();
     } else {
 
-        if (conc_tutors.length > 0) {
-            prof_txt = "Avez-vous contacté " ;
-	    prof_txt += array_to_msg(conc_tutors) ;
-	    prof_txt += " ?" ;
-	} else {
-            prof_txt = "Tudo bem ?" ;
-	}
-
-        gp_txt = "(Par ailleurs, ce serait bien de prévenir ";
-	if (gps.length == 1) {
-	    gp_txt += "le groupe ";
-	} else {
-	    gp_txt += "les groupes ";
-	}
-	gp_txt += array_to_msg(gps) ;
-        gp_txt += ").";
-
-
-	var splash_confirm = {
-	    id: "conf-chg",
-	    but: {list: [{txt: "Oui", click: function(d){send_edt_change(changes);}},
-			 {txt: "Non", click: function(d){} }]},
-	    com: {list: [{txt: prof_txt},
-			 {txt:gp_txt}]}
-	}
-
-	splash(splash_confirm);
+        confirm_law_constraints(changes, conc_tutors, gps) ;
 
     }
 }
+
+
+
+function confirm_contact_all(changes, conc_tutors, gps) {
+    var  prof_txt, gp_txt;
+    
+    if (conc_tutors.length > 0) {
+        prof_txt = "Avez-vous contacté " ;
+	prof_txt += array_to_msg(conc_tutors) ;
+	prof_txt += " ?" ;
+    } else {
+        prof_txt = "Tudo bem ?" ;
+    }
+    
+    gp_txt = "(Par ailleurs, ce serait bien de prévenir ";
+    if (gps.length == 1) {
+	gp_txt += "le groupe ";
+    } else {
+	gp_txt += "les groupes ";
+    }
+    gp_txt += array_to_msg(gps) ;
+    gp_txt += ").";
+    
+    
+    var splash_confirm = {
+	id: "conf-cont",
+	but: {list: [{txt: "Oui", click: function(d){send_edt_change(changes);}},
+		     {txt: "Non", click: function(d){} }]},
+	com: {list: [{txt: prof_txt},
+		     {txt:gp_txt}]}
+    }
+    
+    splash(splash_confirm);
+}
+
 
 
 function array_to_msg(a) {
