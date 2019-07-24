@@ -932,6 +932,16 @@ function compute_changes(changes, conc_tutors, gps) {
 }
 
 
+function min_to_hm_txt(minutes) {
+    var h = Math.floor(minutes/60) ;
+    var m = minutes - h*60 ;
+    var mt = '' ;
+    if (m != 0) {
+        mt = m.toString().padStart(2,'0');
+    }
+    return h + "h" + mt ;
+}
+
 function confirm_law_constraints(changes, conc_tutors, gps) {
     var issues ;
     var issues_txt = [] ;
