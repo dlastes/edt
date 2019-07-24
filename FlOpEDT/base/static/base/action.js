@@ -932,6 +932,26 @@ function compute_changes(changes, conc_tutors, gps) {
 }
 
 
+/*
+Check constraints of a given tutor
+  - nok_type: 'sleep',    (date1: string(%DD/MM), date2: string(%DD/MM)) 
+                         -> the tutor needs to sleep (11h break)
+  - nok_type: 'weekend', -> the tutor needs 2 free days per week
+  - nok_type: 'tunnel',  -> the tutor should not work more than 6 days in a row
+  - nok_type: 'weekly',  -> no more than working time per week + max_variation.week hours
+  - nok_type: 'monthly', -> not excluded from working time per month ± max_variation.month hours
+*/
+// Check everything even if the constraint was violated before the change
+// side_weeks should be fille dwith the current week
+function check_constraints_tutor(tutor) {
+
+    var issues = [] ;
+    
+
+    return issues ;
+}
+
+
 function min_to_hm_txt(minutes) {
     var h = Math.floor(minutes/60) ;
     var m = minutes - h*60 ;
@@ -941,6 +961,34 @@ function min_to_hm_txt(minutes) {
     }
     return h + "h" + mt ;
 }
+
+function law_issue_to_txt(tutor, issue){
+    var ret ;
+    switch(issue.nok_type) {
+    case 'sleep': 
+        ret = "Nuit trop courte pour " + tutor + " entre le " + issue.prev + " et le " + issue.next + " : "
+            + min_to_hm_txt(issue.duration) + " (min " + min_to_hm_txt(law_constraints.sleep_time) + ")"
+        break;
+    case 'weekend':
+        ret = tutor + " a seulement " + issue.nb_free_days + " jour libre dans la semaine (min "
+            + law_constraints.free_days_per_week + ")" ;
+        break;
+    case 'tunnel':
+        ret = tutor + " a " + issue.nb_consec + " jours consécutifs sans repos (max "
+            + law_constraints.max_consec_days + ") entre le " + issue.begin
+            + " et le " + issue.end ;
+        break;
+    case 'weekly':
+        ret = tutor + " travaille " + min_to_hm_txt(issue.duration) + "  cette semaine (max "
+            + min_to_hm_txt(working_time[tutor] + law_constraints.week) + ")" 
+        break;
+    case 'monthly':
+        break;
+    }
+    return ret ;
+}
+
+
 
 function confirm_law_constraints(changes, conc_tutors, gps) {
     var issues ;
