@@ -1042,6 +1042,48 @@ function compute_sleep(tutor, start_day_des, end_day_desc, issues) {
     }
 }
 
+
+// aggregate working time of a tutor in the week described with its index
+// return an array of 7 {duration, month, iweek}
+function aggregate_hours(tutor, iweek) {
+
+    console.log("Aggregate "+ tutor + "IW " + iweek);
+    
+    var ret = new Array(7) ;
+    for (var i = 0 ; i < ret.length ; i++) {
+        ret[i] = {duration: 0, month:0,
+                  iweek: iweek} ;
+    }
+    
+    var week_desc = side_courses.find(function(d){
+        return d.year == weeks.init_data[iweek].an &&
+            d.week == weeks.init_data[iweek].semaine ;
+    });
+    if (typeof week_desc === 'undefined') {
+        return ret ;
+    }
+    
+    for (var i = 0 ; i<week_desc.days.length ; i++) {
+        ret[day_shifts[week_desc.days[i].ref]].month
+            = +week_desc.days[i].date.split('/')[1] ;
+    }
+
+    week_desc.courses.filter(function(d){
+        return d.prof == tutor ;
+    }).forEach(function(d){
+        ret[day_shifts[d.day]].duration += d.duration ;
+    });
+    return ret ;
+}
+
+
+function print_agg(service) {
+    console.log("Service");
+    for (var i = 0 ; i < service.length ; i++) {
+        console.log("D" + service[i].duration + " -M" + service[i].month + " -IW"
+                    + service[i].iweek);
+    }
+}
 /*
 Check constraints of a given tutor
   - nok_type: 'sleep',    (date1: string(%DD/MM), date2: string(%DD/MM)) 
