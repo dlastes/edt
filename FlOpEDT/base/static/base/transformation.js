@@ -401,25 +401,33 @@ function gm_y(datum) {
 }
 
 function gs_x(d) {
-    return idays[d.day].num * (rootgp_width * labgp.width +
-        dim_dispo.plot * (dim_dispo.width + dim_dispo.right));
+    if(slot_case) {
+        return idays[d.day].num * (rootgp_width * labgp.width +
+                                   dim_dispo.plot * (dim_dispo.width + dim_dispo.right));
+    } else {
+        return cours_x(d);
+    }
 }
 
 function gs_y(d) {
-    var t = time_settings.time ;
-    var ret = (d.start - t.day_start_time) * nbRows * scale ;
-    if (d.start >= t.lunch_break_finish_time) {
-	ret += bknews_h() - (t.lunch_break_finish_time - t.lunch_break_start_time)*nbRows*scale ;
+    if(slot_case) {
+        var t = time_settings.time ;
+        var ret = (d.start - t.day_start_time) * nbRows * scale ;
+        if (d.start >= t.lunch_break_finish_time) {
+	    ret += bknews_h() - (t.lunch_break_finish_time - t.lunch_break_start_time)*nbRows*scale ;
+        }
+        return ret ;
+    } else {
+        return cours_y(d);
     }
-    return ret ;
 }
 
 function gs_width(d) {
-    return rootgp_width * labgp.width;
+    return slot_case?rootgp_width * labgp.width:cours_width(d);
 }
 
 function gs_height(d) {
-    return d.duration * nbRows * scale ;
+    return slot_case?d.duration * nbRows * scale:cours_height(d);
 }
 
 function gs_fill(d) {
@@ -448,8 +456,19 @@ function gs_sw(d) {
 }
 
 function gs_sc(d) {
-    //    return d.day==3&&d.slot==5?"red":"black";
-    return d.start < time_settings.time.day_finish_time ? "black" : "red";
+    if(slot_case) {
+        return d.start < time_settings.time.day_finish_time ? "black" : "red";
+    } else {
+        return d.dispo?"green":"red";
+    }
+}
+
+function gs_sda(d) {
+    return slot_case?"" : "1,4";
+}
+
+function gs_slc(d) {
+    return slot_case? "square" : "round";
 }
 
 

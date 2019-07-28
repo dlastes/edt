@@ -522,6 +522,8 @@ function go_grid(quick) {
         .attr("y", gs_y)
         .attr("stroke", gs_sc)
         .attr("stroke-width", gs_sw)
+        .attr("stroke-dasharray", gs_sda)
+        .attr("stroke-linecap", gs_slc)
         .merge(grid.select("rect"))
         .transition(t)
         .attr("fill-opacity", gs_opacity)
