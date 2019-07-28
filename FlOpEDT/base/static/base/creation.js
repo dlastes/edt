@@ -1234,7 +1234,7 @@ function translate_quote_from_csv(d) {
 
 function def_drag() {
     var cur_over = null;
-    var sl = null;
+    var slots_over = null;
     dragListener = d3.drag()
         .on("start", function(c) {
 	    cancel_cm_adv_preferences();
@@ -1268,22 +1268,16 @@ function def_drag() {
 				      d);
 		console.log(cur_over.day, cur_over.start_time);
 
+                data_slot_grid.forEach(function(s) {
+                    s.display = false;
+                });
                 if (!is_garbage(cur_over)) {
-                    sl = data_slot_grid.filter(function(c) {
+                    slots_over = data_slot_grid.filter(function(c) {
                         return c.day == cur_over.day
 			    && c.start == cur_over.start_time;
                     });
-                    if (sl != null && sl.length == 1) {
-                        if (!sl[0].display) {
-                            data_slot_grid.forEach(function(s) {
-                                s.display = false;
-                            });
-                            sl[0].display = true;
-                        }
-                    }
-                } else {
-                    data_slot_grid.forEach(function(s) {
-                        s.display = false;
+                    slots_over.forEach(function(s){
+                        s.display = true;
                     });
                 }
                 go_grid(true);
