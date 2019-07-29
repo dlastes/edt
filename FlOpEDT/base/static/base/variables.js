@@ -238,20 +238,48 @@ var dim_dispo = {
 /*---------------------
   ------- WEEKS -------
   ---------------------*/
-var weeks = {
-    data: {init: [],
-           current: []},
+
+var dsp_weeks = {
+    visible_weeks: 13,
     width: 40,
     height: 30,
     x: 0,      // top of week banner
     y: -240,   // "
-    ndisp: 13, // number of weeks in the banner
-    fdisp: 0,  // index of the lowest hidden week
-    sel: [1],  // index of selected week
     rad: 1.2,  // ratio for the radius of prev/next week buttons
     hfac: 0.9, // ratio for week selection ellipse
     wfac: 0.9, // ratio for week selection ellipse
-    cont: null // will be initiated in create_clipweek
+    cont: null, // will be initiated in create_clipweek
+} ;
+
+
+var full_weeks = new Weeks();
+
+var wdw_weeks = new WeeksExcerpt(dsp_weeks.visible_weeks);
+
+
+
+var fun_weeks =
+    {trans: function() {
+        return "translate(" + dsp_weeks.x + "," + dsp_weeks.y + ")" ;
+    },
+     sel_x: function (d) {
+         return (d + 1 - wdw_weeks.first) * dsp_weeks.width;
+     },
+     right_sel_x: function() {
+         return (wdw_weeks.nb + 1) * dsp_weeks.width ;
+     },
+     strip_w: function() {
+         return (wdw_weeks.nb + 1) * dsp_weeks.width ;
+     },
+     txt: function(d) {
+         return d.semaine;
+     },
+     rect_x: function(d, i) {
+         return (i+1) * dsp_weeks.width - .5 * dsp_weeks.width;
+     },
+     txt_x: function(d, i) {
+         return (i+1) * dsp_weeks.width ;
+     },
 };
 
 /*----------------------
@@ -336,8 +364,8 @@ var butgp = {
   --------------------*/
 // course and preference modification menus
 var menus = {
-    x: weeks.x + 20,
-    y: weeks.y + 25,
+    x: dsp_weeks.x + 20,
+    y: dsp_weeks.y + 25,
     mx: 20,
     dx: 280,
     h: 30,
