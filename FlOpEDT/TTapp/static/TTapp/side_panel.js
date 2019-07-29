@@ -4,6 +4,7 @@ function openNav() {
     is_side_panel_open = true ;
 
     // open panel
+    $("#side_panel").show();
     document.getElementById("side_panel").style.width = "250px";
     document.getElementById("edt-main").style.marginLeft = "250px";
     document.getElementById("menu-edt").style.marginLeft = "250px";
@@ -61,6 +62,7 @@ function closeNav() {
     is_side_panel_open = false ;
 
     // close panel
+    $("#side_panel").hide();
     document.getElementById("side_panel").style.width = "0";
     document.getElementById("edt-main").style.marginLeft= "0";
     document.getElementById("menu-edt").style.marginLeft= "0";
