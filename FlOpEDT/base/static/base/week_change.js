@@ -47,21 +47,20 @@ function fetch_dispos() {
 
     fetch.ongoing_dispos = true;
 
-    var semaine_att = weeks.data.init[weeks.sel[0]].semaine;
-    var an_att = weeks.data.init[weeks.sel[0]].an;
+    var exp_week = wdw_weeks.get_selected() ;
     
     show_loader(true);
     $.ajax({
         type: "GET", //rest Type
         dataType: 'text',
-        url: url_dispos + an_att + "/" + semaine_att ,
+        url: url_dispos + exp_week.url() ,
         async: true,
         contentType: "text/csv",
         success: function(msg) {
             console.log("in");
 
-            if (semaine_att == weeks.data.init[weeks.sel[0]].semaine &&
-                an_att == weeks.data.init[weeks.sel[0]].an) {
+            var sel_week = wdw_weeks.get_selected() ;
+            if (Week.compare(exp_week, sel_week)==0) {
                 dispos = {};
                 //user.dispos = [];
                 d3.csvParse(msg, translate_dispos_from_csv);
@@ -84,7 +83,7 @@ function fetch_dispos() {
             console.log(xhr.responseText);
             show_loader(false);
             // window.location.href = url_login;
-            window.location.replace(url_login + "?next=" + url_edt + an_att + "/" + semaine_att);
+            window.location.replace(url_login + "?next=" + url_edt + exp_week.an + "/" + exp_week.semaine);
         }
     });
 }
@@ -282,22 +281,21 @@ function create_dispos_user_data() {
 function fetch_bknews(first) {
     fetch.ongoing_bknews = true;
 
-    var semaine_att = weeks.data.init[weeks.sel[0]].semaine;
-    var an_att = weeks.data.init[weeks.sel[0]].an;
+    var exp_week = wdw_weeks.get_selected() ;
 
     show_loader(true);
     $.ajax({
         type: "GET", //rest Type
         dataType: 'text',
-        url: url_bknews  + an_att + "/" + semaine_att,
+        url: url_bknews  + exp_week.url(),
         async: true,
         contentType: "text/csv",
         success: function(msg) {
 	    bknews.cont = d3.csvParse(msg,
 				      translate_bknews_from_csv);
 
-            if (semaine_att == weeks.data.init[weeks.sel[0]].semaine &&
-                an_att == weeks.data.init[weeks.sel[0]].an) {
+            var sel_week = wdw_weeks.get_selected() ;
+            if (Week.compare(exp_week, sel_week)==0) {
 		var max_y = -1 ;
 		for (var i = 0 ; i < bknews.cont.length ; i++) {
 		    if (bknews.cont[i].y > max_y) {
@@ -388,8 +386,7 @@ function fetch_cours() {
     ack.edt = "";
     go_ack_msg(true);
 
-    var semaine_att = weeks.data.init[weeks.sel[0]].semaine;
-    var an_att = weeks.data.init[weeks.sel[0]].an;
+    var exp_week = wdw_weeks.get_selected() ;
 
     cours_bouge = {};
     
@@ -397,7 +394,7 @@ function fetch_cours() {
     $.ajax({
         type: "GET", //rest Type
         dataType: 'text',
-        url: url_cours_pl + an_att + "/" + semaine_att + "/" + num_copie,
+        url: url_cours_pl + exp_week.url() + "/" + num_copie,
         async: true,
         contentType: "text/csv",
         success: function(msg, ts, req) {
@@ -405,8 +402,8 @@ function fetch_cours() {
             go_regen(null);
             go_alarm_pref();
 
-            if (semaine_att == weeks.data.init[weeks.sel[0]].semaine &&
-                an_att == weeks.data.init[weeks.sel[0]].an) {
+            var sel_week = wdw_weeks.get_selected() ;
+            if (Week.compare(exp_week, sel_week)==0) {
 
                 week_days = new WeekDays(JSON.parse(req.getResponseHeader('days').replace(/\'/g, '"')));
             
@@ -441,20 +438,20 @@ function fetch_cours() {
     $.ajax({
         type: "GET", //rest Type
         dataType: 'text',
-        url: url_cours_pp  + an_att + "/" + semaine_att + "/" + num_copie,
+        url: url_cours_pp  + exp_week.url() + "/" + num_copie,
         async: true,
         contentType: "text/csv",
         success: function(msg, ts, req) {
             //console.log(msg);
 
-            if (semaine_att == weeks.data.init[weeks.sel[0]].semaine &&
-                an_att == weeks.data.init[weeks.sel[0]].an) {
+            var sel_week = wdw_weeks.get_selected() ;
+            if (Week.compare(exp_week, sel_week)==0) {
 
                 tutors.pp = [];
                 modules.pp = [];
                 salles.pp = [];
 
-    		console.log(semaine_att,an_att,num_copie);
+    		console.log(exp_week,num_copie);
 
                 cours_pp = d3.csvParse(msg, translate_cours_pp_from_csv);
 
@@ -663,19 +660,18 @@ function translate_gp_name(gp) {
 function fetch_unavailable_rooms() {
     fetch.ongoing_un_rooms = true;
     
-    var semaine_att = weeks.data.init[weeks.sel[0]].semaine;
-    var an_att = weeks.data.init[weeks.sel[0]].an;
+    var exp_week = wdw_weeks.get_selected() ;
 
     show_loader(true);
     $.ajax({
         type: "GET", //rest Type
         dataType: 'text',
-        url: url_unavailable_rooms + an_att + "/" + semaine_att ,
+        url: url_unavailable_rooms + exp_week.url() ,
         async: true,
         contentType: "text/csv",
         success: function(msg, ts, req) {
-            if (semaine_att == weeks.data.init[weeks.sel[0]].semaine &&
-                an_att == weeks.data.init[weeks.sel[0]].an) {
+            var sel_week = wdw_weeks.get_selected() ;
+            if (Week.compare(exp_week, sel_week)==0) {
 
 		console.log(msg);
 
@@ -740,21 +736,20 @@ function fetch_all(first, fetch_work_copies){
 
 
 function fetch_version() {
-    var semaine_att = weeks.data.init[weeks.sel[0]].semaine;
-    var an_att = weeks.data.init[weeks.sel[0]].an;
+    var exp_week = wdw_weeks.get_selected() ;
 
     show_loader(true);
     $.ajax({
         type: "GET", //rest Type
         dataType: 'text',
-        url: url_week_infos  + an_att + "/" + semaine_att,
+        url: url_week_infos + exp_week.url(),
         async: true,
         contentType: "text/json",
         success: function(msg) {
 	    var parsed = JSON.parse(msg);
 
-            if (semaine_att == weeks.data.init[weeks.sel[0]].semaine &&
-                an_att == weeks.data.init[weeks.sel[0]].an) {
+            var sel_week = wdw_weeks.get_selected() ;
+            if (Week.compare(exp_week, sel_week)==0) {
 		version = parsed.version ;
 		filled_dispos = parsed.proposed_pref ;
 		required_dispos = parsed.required_pref ;
