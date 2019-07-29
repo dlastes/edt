@@ -59,6 +59,97 @@ Week.id_fun = function(week) {
 
 
 
+/**********************/
+/* class WeeksExcerpt */
+/**********************/
+// desired_nb: target size of the excerpt
+// full_weeks: list of weeks forming the full set
+// nb: actual size of the excerpt
+// first: index in the full list of the first element of the excerpt
+// selected: index in the full list of the selected element
+// data: list of weeks of the excerpt
+
+
+function WeeksExcerpt(desired_nb) {
+    this.desired_nb = desired_nb ;
+}
+
+// set the full weeks that we are excerpted from
+WeeksExcerpt.prototype.set_full_weeks = function(full_weeks) {
+    this.full_weeks = full_weeks ;
+    this.adapt_full_weeks() ;
+    this.first = 0 ;
+    this.selected = 0 ;
+}
+// the excerpt should not exceed full weeks size
+WeeksExcerpt.prototype.adapt_full_weeks = function() {
+    this.nb = Math.min(this.desired_nb, this.full_weeks.get_nb()) ;
+}
+
+// getter for the selected index
+WeeksExcerpt.prototype.get_iselected = function() {
+    return [this.selected] ;
+}
+// getter for the selected week
+WeeksExcerpt.prototype.get_selected = function() {
+    return this.full_weeks.data[this.selected] ;
+}
+
+
+// try to go at week chosen, and set the window around
+// week: Week
+WeeksExcerpt.prototype.chose = function(chosen) {
+    var min = this.full_weeks.get_min() ;
+    var max = this.full_weeks.get_max() ;
+
+    if (Week.compare(min, chosen) < 0) {
+        // pick the first week
+        this.first = 0 ;
+        this.selected = 0 ;
+    } else if (Week.compare(chosen, max) > 0) {
+        // pick the last week
+        this.first = this.full_weeks.get_nb() - this.nb ;
+        this.selected = this.full_weeks.get_nb() - 1 ;
+    } else {
+        // pick the first not greater than chosen week
+        var not_less = this.full_weeks.data.find(function(week){
+            return Week.compare(week, chosen) >= 0 ;
+        });
+        this.selected = this.full_weeks.data.indexOf(not_less);
+        this.first = Math.min(this.selected, this.full_weeks.get_nb() - this.nb);
+    }
+    // extract the data
+    this.data = this.full_weeks.data.slice(this.first,
+                                           this.first + this.nb);
+}
+
+// move the excerpt data to earlier weeks
+WeeksExcerpt.prototype.move_earlier = function() {
+    if (this.first > 0) {
+        this.first -= 1;
+        this.data.pop();
+        this.data.unshift(this.full_weeks.data[this.first]);
+    }
+}
+
+// move the excerpt data to later weeks
+WeeksExcerpt.prototype.move_later = function() {
+    if (this.first + this.nb < this.full_weeks.get_nb()) {
+        this.first += 1;
+        this.data.splice(0, 1);
+        this.data.push(this.full_weeks.data[this.first + this.nb]);
+    }
+}
+
+// new selection
+WeeksExcerpt.prototype.change_selection = function(shift) {
+    if (shift >= 0 && shift < this.nb) {
+        this.selected = this.first + shift ;
+    }
+}
+
+
+
 
 
 
