@@ -226,53 +226,11 @@ function find_week(week_list) {
 
 function create_clipweek() {
 
-    weeks.data.init = semaine_an_list;
+    full_weeks.add_all(semaine_an_list) ;
 
-    var min = weeks.data.init[0];
-    var max = weeks.data.init[weeks.data.init.length - 1];
+    wdw_weeks.set_full_weeks(full_weeks) ;
 
-    weeks.ndisp = Math.min(weeks.ndisp, weeks.data.init.length);
-
-    weeks.data.init.push({
-        an: max.an,
-        semaine: max.semaine + 1
-    });
-    weeks.data.init.unshift({
-        an: min.an,
-        semaine: min.semaine - 1,
-    });
-
-    var fw ;
-
-    if (min.an > an_init ||
-	(min.an == an_init && min.semaine > semaine_init)) {
-	weeks.data.current = weeks.data.init.slice(1,
-					       1 + weeks.ndisp + 2);
-	weeks.fdisp = 1;
-	weeks.sel[0] = 2 ;
-	
-    } else if (max.an < an_init ||
-	(max.an == an_init && max.semaine < semaine_init)) {
-	weeks.data.current = weeks.data.init.slice(weeks.data.init.length - 1  - 2 - weeks.ndisp,
-					       weeks.data.init.length -1);
-	weeks.fdisp = weeks.data.init.length - 1  - 2 - weeks.ndisp ;
-	weeks.sel[0] = weeks.ndisp ;
-    } else {
-	var fw = find_week(weeks.data.init);
-	
-	fw = Math.max(
-            Math.min(fw - 2,
-		     weeks.data.init.length - 1 - (weeks.ndisp + 1)),
-            0);
-	
-	weeks.data.current = weeks.data.init.slice(fw,
-					       fw + weeks.ndisp + 2);
-	
-	weeks.fdisp = fw;
-	
-	weeks.sel[0] = fw + find_week(weeks.data.current) - 1 ;
-    }
-
+    wdw_weeks.chose(new Week(an_init, semaine_init));
 
     wg.upper
         .attr("transform", "translate(" + weeks.x + "," + weeks.y + ")");
