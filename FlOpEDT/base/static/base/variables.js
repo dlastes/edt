@@ -62,10 +62,10 @@
   ------- TIME ------
   --------------------------*/
 
-// day indices
-var idays = {} ;
-for (var i = 0 ; i<days.length ; i++){
-    idays[days[i].ref] = days[i] ;
+// days
+var week_days = new WeekDays();
+for (var iday in days) {
+    week_days.add_day(days[iday]);
 }
 
 // side time scale: list of {h: int, hd:('am'|'pm')}
@@ -278,7 +278,7 @@ var data_grid_scale_row = [];
 var garbage = {
     start: time_settings.time.day_finish_time,
     duration: 90,
-    day: days[days.length-2].ref
+    day: week_days.day_by_num(week_days.nb_days()-2).ref
 };
 
 

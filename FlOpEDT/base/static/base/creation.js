@@ -435,12 +435,12 @@ function create_slot_grid_data(c) {
     if (slot_case) {
         // does not depend on course c
         
-	for(var i = 0 ; i<days.length ; i++) {
+        week_days.forEach(function(day){
 	    for (var s in rev_constraints) {
 		var start = +s ;
 		if (start < time_settings.time.day_finish_time){
 		    var gs = {
-			day: days[i].ref,
+			day: day.ref,
 			start: start,
 			duration: rev_constraints[s],
 			display: false,
@@ -451,14 +451,14 @@ function create_slot_grid_data(c) {
 		    data_slot_grid.push(gs);
 		}
 	    }
-	}
+	});
     } else {
         var ok_starts = constraints[c.c_type].allowed_st ;
-        days.forEach(function(d){
+        week_days.forEach(function(day){
             for(var s = 0 ; s < ok_starts.length ; s++ ) {
                 data_slot_grid.push({
                     c_type: c.c_type,
-                    day: d.ref,
+                    day: day.ref,
                     group: c.group,
                     promo: c.promo,
                     start: ok_starts[s],
@@ -604,7 +604,7 @@ function def_drag_sca() {
                 drag.sel.attr("transform", "translate(0,0)");
                 drag.sel.select("rect").attr("x", drag.init + drag.x);
                 if (rootgp_width != 0) {
-                    labgp.width = ((drag.x + drag.init) / days.length - dim_dispo.plot * (dim_dispo.width + dim_dispo.right)) / rootgp_width;
+                    labgp.width = ((drag.x + drag.init) / week_days.nb_days() - dim_dispo.plot * (dim_dispo.width + dim_dispo.right)) / rootgp_width;
                 }
                 drag.sel.select("path").attr("d", but_sca_tri_h(0));
                 //(drag.x+drag.init)/(grid_width());
@@ -1089,12 +1089,12 @@ function compute_promo_leaves(node) {
     var gp;
 
     if (node.children.length == 0) {
-        for (var j = 0; j < days.length; j++) {
+        week_days.forEach(function(day) {
             data_grid_scale_gp.push({
-                day: j,
+                day: day.num,
                 gp: node
             });
-        }
+        });
     }
 
     for (var i = 0; i < node.children.length; i++) {
@@ -1652,7 +1652,7 @@ function which_slot(x, y, c) {
         (dim_dispo.width + dim_dispo.right));
     var iday = Math.floor((x + .5 * cours_width(c)) / wday);
     return {
-        day: days[iday].ref,
+        day: week_days.day_by_num(iday).ref,
         start_time: indexOf_constraints(c, y) // day-independent
     };
 }

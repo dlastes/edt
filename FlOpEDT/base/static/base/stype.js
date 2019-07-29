@@ -147,9 +147,9 @@ function translate_course_preferences_from_csv(d) {
     var pseudo_tutor = course_type_prog_name(d.train_prog, d.type_name) ;
     if(Object.keys(dispos).indexOf(pseudo_tutor)==-1){
 	dispos[pseudo_tutor] = {} ;
-        for (var i = 0; i < days.length; i++) {
-	    dispos[pseudo_tutor][days[i].ref] = [] ;
-	}	
+        week_days.forEach(function(day) {
+	    dispos[pseudo_tutor][day.ref] = [] ;
+	});
     }
     dispos[pseudo_tutor][d.day].push({start_time:+d.start_time,
 			       duration: +d.duration,
@@ -218,7 +218,7 @@ function fetch_pref_only() {
 
 
 function dispo_x(d) {
-    return idays[d.day].num * (dim_dispo.width + dim_dispo.mh) ;
+    return week_days.day_by_ref(d.day).num * (dim_dispo.width + dim_dispo.mh) ;
 }
 function dispo_h(d){
     return d.duration * scale ;
@@ -241,7 +241,7 @@ function gsclb_y()  {
 		    time_settings.time.lunch_break_start_time});
 }
 function gsclb_x()  {
-    return (dim_dispo.width + dim_dispo.mh) * days.length - dim_dispo.mh ;
+    return (dim_dispo.width + dim_dispo.mh) * week_days.nb_days() - dim_dispo.mh ;
 }
 
 

@@ -109,7 +109,7 @@ function svg_height() {
 function svg_width() {
     //    return margin.top + ack_reg_y() + 4*margin.bot ;
     return margin.left + 
-        rootgp_width * days.length * labgp.width + margin.right ;
+        rootgp_width * week_days.nb_days() * labgp.width + margin.right ;
 }
 
 
@@ -117,7 +117,7 @@ function svg_width() {
   ------- DISPOS ------
   ---------------------*/
 function dispo_x(d) {
-    return idays[d.day].num * (rootgp_width * labgp.width +
+    return week_days.day_by_ref(d.day).num * (rootgp_width * labgp.width +
             dim_dispo.plot * (dim_dispo.width + dim_dispo.right)) +
         rootgp_width * labgp.width ;
 }
@@ -387,7 +387,7 @@ function week_sel_x(d) {
   ----------------------*/
 function gs_x(d) {
     if(slot_case) {
-        return idays[d.day].num * (rootgp_width * labgp.width +
+        return week_days.day_by_ref(d.day).num * (rootgp_width * labgp.width +
                                    dim_dispo.plot * (dim_dispo.width + dim_dispo.right));
     } else {
         return cours_x(d);
@@ -603,7 +603,7 @@ function scale_from_grid_height(gh) {
 
 function grid_width() {
     return (rootgp_width * labgp.width +
-        dim_dispo.plot * (dim_dispo.width + dim_dispo.right)) * days.length;
+            dim_dispo.plot * (dim_dispo.width + dim_dispo.right)) * week_days.nb_days();
 }
 
 
@@ -750,7 +750,7 @@ function but_open_sel_txt(d) {
   ------ COURS -------
   --------------------*/
 function cours_x(c) {
-    return idays[c.day].num * (rootgp_width * labgp.width +
+    return week_days.day_by_ref(c.day).num * (rootgp_width * labgp.width +
             dim_dispo.plot * (dim_dispo.width + dim_dispo.right)) +
         groups[c.promo][c.group].x * labgp.width;
 }
@@ -976,7 +976,7 @@ function but_sca_tri_v(add) {
    ------ STYPE ------
   --------------------*/
 function dispot_x(d) {
-    return idays[d.day].num * (did.w + did.mh);
+    return week_days.day_by_ref(d.day).num * (did.w + did.mh);
 }
 
 function dispot_y(d) {
@@ -1034,11 +1034,11 @@ function gsclbt_y() {
 }
 
 function gsclbt_x() {
-    return (did.w + did.mh) * days.length - did.mh;
+    return (did.w + did.mh) * week_days.nb_days() - did.mh;
 }
 
 function dispot_but_x() {
-    return did.tlx + days.length * (did.w + did.mh) + did.mh;
+    return did.tlx + week_days.nb_days() * (did.w + did.mh) + did.mh;
 }
 
 function dispot_but_y(but) {

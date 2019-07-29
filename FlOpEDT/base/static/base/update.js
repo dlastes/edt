@@ -661,8 +661,8 @@ function go_days(quick, half_day_rect) {
 
     var day_scale = fg
         .selectAll(".gridsckd")
-        .data(days, function(d) {
-    	    return d.date;});
+        .data(week_days.data(),
+              Day.id_fun());
 
     var day_sc_g = day_scale
     	.enter()

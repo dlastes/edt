@@ -93,9 +93,9 @@ function fetch_dispos() {
 function translate_dispos_from_csv(d) {
     if(Object.keys(dispos).indexOf(d.prof)==-1){
 	dispos[d.prof] = {} ;
-        for (var i = 0; i < days.length; i++) {
-	    dispos[d.prof][days[i].ref] = [] ;
-	}	
+        week_days.forEach(function(day) {
+	    dispos[d.prof][day.ref] = [] ;
+	});	
     }
     dispos[d.prof][d.day].push({start_time:+d.start_time,
 			       duration: +d.duration,
@@ -106,13 +106,13 @@ function sort_preferences() {
     var i, d ;
     var tutors = Object.keys(dispos) ;
     for(i = 0 ; i < tutors.length ; i++) {
-	for(d = 0 ; d < days.length ; d++) {
-	    dispos[tutors[i]][days[d].ref].sort(
+        week_days.forEach(function(day){
+	    dispos[tutors[i]][day.ref].sort(
 		function (a,b) {
 		    return a.start_time - b.start_time ;
 		}
 	    );
-	}
+	});
     }
 }
 
@@ -171,9 +171,9 @@ function insert_normalized_interval(pref, list) {
 
 function allocate_dispos(tutor) {
     dispos[tutor] = {} ;
-    for (var i = 0; i < days.length; i++) {
-	dispos[tutor][days[i].ref] = [] ;
-    }	
+    week_days.forEach(function(day) {
+	dispos[tutor][day.ref] = [] ;
+    });
 }
 
 // -- no slot --
@@ -181,12 +181,12 @@ function allocate_dispos(tutor) {
 // to change, maybe, if splitting intervals is not allowed
 // in the interface
 function fill_missing_preferences(tutor, ts) {
-    for (var i = 0; i < days.length; i++) {
+    week_days.forEach(function(day) {
 	insert_interval({start_time: ts.day_start_time,
 			 duration: ts.day_finish_time-ts.day_start_time,
 			 value: -1},
-			dispos[tutor][days[i].ref]);
-    }
+			dispos[tutor][day.ref]);
+    });
 
 }
 // --   end   --
@@ -213,11 +213,11 @@ function create_dispos_user_data() {
         sort_preferences();
     }
 
-    for (var i = 0; i < days.length; i++) {
-	pref_list = dispos[user.nom][days[i].ref] ;
+    week_days.forEach(function(day) {
+	pref_list = dispos[user.nom][day.ref] ;
 	for (var k = 0 ; k<pref_list.length ; k++) {
             d2p = {
-		day: days[i].ref,
+		day: day.ref,
 		start_time: pref_list[k].start_time,
 		duration: pref_list[k].duration,
 		val: pref_list[k].value,
@@ -234,7 +234,7 @@ function create_dispos_user_data() {
 	    
 	    // different object
             user.dispos.push({
-		day: days[i].ref,
+		day: day.ref,
 		start_time: pref_list[k].start_time,
 		duration: pref_list[k].duration,
 		val: pref_list[k].value,
@@ -242,7 +242,7 @@ function create_dispos_user_data() {
             });
 	}
 
-    }
+    });
 
     
 
@@ -362,7 +362,7 @@ function adapt_labgp(first) {
 
     if (first) {
 	expected_ext_grid_dim = svg.width - margin.left - margin.right;
-	new_gp_dim = expected_ext_grid_dim / (rootgp_width * days.length);
+	new_gp_dim = expected_ext_grid_dim / (rootgp_width * week_days.nb_days());
 	if (new_gp_dim > labgp.wm) {
             labgp.width = new_gp_dim;
 	} else {
@@ -408,7 +408,7 @@ function fetch_cours() {
             if (semaine_att == weeks.data.init[weeks.sel[0]].semaine &&
                 an_att == weeks.data.init[weeks.sel[0]].an) {
 
-                days = JSON.parse(req.getResponseHeader('days').replace(/\'/g, '"'));
+                week_days = new WeekDays(JSON.parse(req.getResponseHeader('days').replace(/\'/g, '"')));
             
                 tutors.pl = [];
                 modules.pl = [];
@@ -698,9 +698,9 @@ function translate_unavailable_rooms(d) {
     console.log(d);
     if (Object.keys(unavailable_rooms).indexOf(d.room)==-1){
 	unavailable_rooms[d.room] = {} ; 
-	for (i=0 ; i<days.length ; i++){
-	    unavailable_rooms[d.room][days[i].ref] = [] ;
-	}
+	week_days.forEach(function(day){
+	    unavailable_rooms[d.room][day.ref] = [] ;
+	});
     }
     unavailable_rooms[d.room][days[i].ref].push({start_time: +d.start_time,
 						 duration: +d.duration});
