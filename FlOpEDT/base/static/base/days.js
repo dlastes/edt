@@ -21,69 +21,64 @@
 // you develop activities involving the FlOpEDT/FlOpScheduler software
 // without disclosing the source code of your own applications.
 
-class Day {
-    constructor(day={num:iday,
-                     date:"01/01",
-                     ref:"m",
-                     name:"Lun."}) {
-        this.num = day.num ;
-        this.date = day.date ;
-        this.ref = day.ref ;
-        this.name = day.name ;
-    }
+function Day(day={num:iday,
+                  date:"01/01",
+                  ref:"m",
+                  name:"Lun."}) {
+    this.num = day.num ;
+    this.date = day.date ;
+    this.ref = day.ref ;
+    this.name = day.name ;
+}
 
-    static id_fun() {
-        return function(d) {
-    	    return d.date;
-        } ; 
-    }
+Day.prototype.id_fun = function() {
+    return function(d) {
+    	return d.date;
+    } ; 
 }
 
 
-class WeekDays {
-    // days: list of Day
-    constructor(days = []) {
-        this.day_list = [] ;
-        this.day_dict = {} ;
-        days.forEach(function(day) {
-            this.add_day(day);
-        }, this);
-    }
 
-    get nb_days() {
-        return this.day_list.length ;
-    }
-
-    day_by_ref(ref) {
-        return this.day_dict[ref] ;
-    }
-
-    day_by_num(num) {
-        return this.day_list.find(function(d) {
-            return d.num == num ;
-        });
-    }
-
-    get data() {
-        return this.day_list ;
-    }
-
-    get refs() {
-        return Object.keys(this.day_list) ;
-    }
-
-    forEach(callback, this_arg) {
-        return this.day_list.forEach(callback, this_arg) ;
-    }
-
-    add_day(day={num:iday,
-                 date:"01/01",
-                 ref:"m",
-                 name:"Lun."}) {
-        var new_day = new Day(day) ;
-        this.day_list.push(new_day);
-        this.day_dict[new_day.ref] = new_day ;
-    }
-
-    
+function WeekDays(days = []) {
+    this.day_list = [] ;
+    this.day_dict = {} ;
+    days.forEach(function(day) {
+        this.add_day(day);
+    }, this);
 }
+
+WeekDays.prototype.nb_days = function() {
+    return this.day_list.length ;
+}
+
+WeekDays.prototype.day_by_ref = function(ref) {
+    return this.day_dict[ref] ;
+}
+
+WeekDays.prototype.day_by_num = function(num) {
+    return this.day_list.find(function(d) {
+        return d.num == num ;
+    });
+}
+
+WeekDays.prototype.data = function() {
+    return this.day_list ;
+}
+
+WeekDays.prototype.refs = function() {
+    return Object.keys(this.day_list) ;
+}
+
+WeekDays.prototype.forEach = function(callback, this_arg) {
+    return this.day_list.forEach(callback, this_arg) ;
+}
+
+WeekDays.prototype.add_day = function(day={num:iday,
+                                           date:"01/01",
+                                           ref:"m",
+                                           name:"Lun."}) {
+    var new_day = new Day(day) ;
+    this.day_list.push(new_day);
+    this.day_dict[new_day.ref] = new_day ;
+}
+
