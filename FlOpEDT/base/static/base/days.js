@@ -31,10 +31,9 @@ function Day(day={num:iday,
     this.name = day.name ;
 }
 
-Day.prototype.id_fun = function() {
-    return function(d) {
-    	return d.date;
-    } ; 
+// 'static' function 
+Day.id_fun = function(d) {
+    return d.date;
 }
 
 

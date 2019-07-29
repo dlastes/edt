@@ -278,7 +278,7 @@ var data_grid_scale_row = [];
 var garbage = {
     start: time_settings.time.day_finish_time,
     duration: 90,
-    day: week_days.day_by_num(week_days.nb_days-2).ref
+    day: week_days.day_by_num(week_days.nb_days()-2).ref
 };
 
 

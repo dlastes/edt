@@ -241,7 +241,7 @@ function gsclb_y()  {
 		    time_settings.time.lunch_break_start_time});
 }
 function gsclb_x()  {
-    return (dim_dispo.width + dim_dispo.mh) * week_days.nb_days - dim_dispo.mh ;
+    return (dim_dispo.width + dim_dispo.mh) * week_days.nb_days() - dim_dispo.mh ;
 }
 
 
