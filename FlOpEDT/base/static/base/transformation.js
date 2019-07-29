@@ -109,7 +109,7 @@ function svg_height() {
 function svg_width() {
     //    return margin.top + ack_reg_y() + 4*margin.bot ;
     return margin.left + 
-        rootgp_width * week_days.nb_days() * labgp.width + margin.right ;
+        rootgp_width * week_days.nb_days * labgp.width + margin.right ;
 }
 
 
@@ -603,7 +603,7 @@ function scale_from_grid_height(gh) {
 
 function grid_width() {
     return (rootgp_width * labgp.width +
-            dim_dispo.plot * (dim_dispo.width + dim_dispo.right)) * week_days.nb_days();
+            dim_dispo.plot * (dim_dispo.width + dim_dispo.right)) * week_days.nb_days;
 }
 
 
@@ -1034,11 +1034,11 @@ function gsclbt_y() {
 }
 
 function gsclbt_x() {
-    return (did.w + did.mh) * week_days.nb_days() - did.mh;
+    return (did.w + did.mh) * week_days.nb_days - did.mh;
 }
 
 function dispot_but_x() {
-    return did.tlx + week_days.nb_days() * (did.w + did.mh) + did.mh;
+    return did.tlx + week_days.nb_days * (did.w + did.mh) + did.mh;
 }
 
 function dispot_but_y(but) {

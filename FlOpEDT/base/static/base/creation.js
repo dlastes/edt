@@ -590,7 +590,7 @@ function def_drag_sca() {
                 drag.sel.attr("transform", "translate(0,0)");
                 drag.sel.select("rect").attr("x", drag.init + drag.x);
                 if (rootgp_width != 0) {
-                    labgp.width = ((drag.x + drag.init) / week_days.nb_days() - dim_dispo.plot * (dim_dispo.width + dim_dispo.right)) / rootgp_width;
+                    labgp.width = ((drag.x + drag.init) / week_days.nb_days - dim_dispo.plot * (dim_dispo.width + dim_dispo.right)) / rootgp_width;
                 }
                 drag.sel.select("path").attr("d", but_sca_tri_h(0));
                 //(drag.x+drag.init)/(grid_width());
