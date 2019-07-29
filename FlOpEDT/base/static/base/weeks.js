@@ -57,3 +57,43 @@ Week.id_fun = function(week) {
 }
 
 
+
+
+
+
+
+/***************/
+/* class Weeks */
+/***************/
+// data: list of Week; all weeks of the school year
+
+// all_weeks: list of {semaine:,an:}
+function Weeks(all_weeks) {
+    if(typeof all_weeks === 'undefined') {
+        all_weeks = [] ;
+    }
+    this.data = [] ;
+    this.add_all(all_weeks) ;
+    this.data.sort(Week.compare) ;
+}
+
+Weeks.prototype.add_all = function(all_weeks){
+    all_weeks.forEach(function(week) {
+        this.data.push(new Week(week.an, week.semaine)) ;
+    }, this) ;
+}
+
+
+Weeks.prototype.get_min = function(){
+    return this.data[0];
+}
+
+Weeks.prototype.get_max = function(){
+    return this.data[this.data.length - 1];
+}
+
+Weeks.prototype.get_nb = function() {
+    return this.data.length ;
+}
+
+
