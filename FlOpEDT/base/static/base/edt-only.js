@@ -39,8 +39,9 @@ var week = semaine_init ;
 var year = an_init;
 
 // filter the right bknews
-weeks = {sel: [0], init_data: [{semaine: week, an: year}]};
 
+full_weeks.add_all([{semaine: week, an: year}]);
+wdw_weeks.set_full_weeks(full_weeks);
 
 var labgp = {height: tv_gp_h, width: tv_gp_w, tot: 8, height_init: 40, width_init: 30};
 
@@ -127,8 +128,7 @@ function fetch_cours_light() {
 
 function fetch_bknews_light(first) {
     fetch.ongoing_bknews = true;
-    var semaine_att = week;
-    var an_att = year;
+    var exp_week = new Week(year, week) ;
 
     $.ajax({
         type: "GET", //rest Type
@@ -141,8 +141,8 @@ function fetch_bknews_light(first) {
 
             bknews.cont = JSON.parse(msg) ;
 
-            if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
-                an_att == weeks.init_data[weeks.sel[0]].an) {
+            var sel_week = wdw_weeks.get_selected() ;
+            if (Week.compare(sel_week, exp_week)==0) {
 		var max_y = -1 ;
 		for (var i = 0 ; i < bknews.cont.length ; i++) {
 		    if (bknews.cont[i].y > max_y) {
