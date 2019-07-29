@@ -59,7 +59,10 @@ function go_pref(quick) {
 	// preferences: background color, and smiley
 	
         dat = mg.selectAll(".dispo")
-            .data(user.dispos)
+            .data(user.dispos,
+                  function(d) {
+                      return [d.day,d.start_time,d.duration,d.val].join('-');
+                  })
             .attr("cursor", ckbox["dis-mod"].cked ? "pointer" : "default");
 
         datdi = dat
@@ -519,6 +522,8 @@ function go_grid(quick) {
         .attr("y", gs_y)
         .attr("stroke", gs_sc)
         .attr("stroke-width", gs_sw)
+        .attr("stroke-dasharray", gs_sda)
+        .attr("stroke-linecap", gs_slc)
         .merge(grid.select("rect"))
         .transition(t)
         .attr("fill-opacity", gs_opacity)
@@ -1263,13 +1268,13 @@ function go_selection_buttons() {
 
     var cont = selg
         .selectAll(".sel-pop-g")
-        .data(sel_popup.pannels, function(p) {
+        .data(sel_popup.panels, function(p) {
             return p.type ;
         })
         .selectAll(".sel-button")
         .data(function(p) {
             p.list.forEach(function(c){
-                c.pannel = p ;
+                c.panel = p ;
             });
             return p.list ;
         }, function(c) {

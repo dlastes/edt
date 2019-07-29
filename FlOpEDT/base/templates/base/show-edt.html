@@ -27,14 +27,15 @@
 
 {% block script_variable %}
 <script>
-    var promo_init = +"{{ promo }}";
-    var gp_init = "{{ gp }}";
-    var num_copie = +"{{ copie }}";
-    var logged_usr = { nom: "{{ name_usr }}", rights: "{{ rights_usr }}" };
-    var splash_id = "{{ splash_id }}";
+  var promo_init = "{{ promo }}";
+  var gp_init = "{{ gp }}";
+  var num_copie = "{{ copie }}";
+  var logged_usr = { nom: "{{ name_usr }}", rights: "{{ rights_usr }}" };
+  var splash_id = "{{ splash_id }}";
 </script>
 {% endblock %}
 
 {% block script_file %}
 <script type='text/javascript' src="{% static 'base/all.js' %}?2"></script>
 {% endblock %}
+

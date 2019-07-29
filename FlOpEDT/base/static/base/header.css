@@ -221,6 +221,18 @@ body {
 	font-size: inherit;
 }
 
+#flopGreen {
+	color: green;
+	font-family: inherit;
+	font-size: inherit;
+}
+#EDTRed {
+	color: red;
+	font-family: inherit;
+	font-size: inherit;
+}
+
+
 #flopRed {
 	color: red;
 	font-size: 18px;
@@ -253,4 +265,40 @@ left : 0px;
 height : 100%;
 width : 100%;
 cursor : wait;
+}
+
+/*
+  DEPARTMENTS
+*/
+.dept_container{
+  width: auto;
+  margin: 50px auto;
+  max-width: 480px;
+}
+
+.dept_list p{
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-size: 12px;
+}
+
+.dept_list ul {
+  font: inherit;
+  list-style: none;
+  padding: 0;
+}
+
+.dept_list li{
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-size: 14px;
+  background-color: #e0e0e0;
+  border-radius: 5px;
+  border: 2pt #9e9e9e solid;
+  padding: 6px;
+  margin: 6px 0px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.dept_list li:hover{
+  border-color: #b3b3b3;
 }

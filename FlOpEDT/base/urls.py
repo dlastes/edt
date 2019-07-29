@@ -54,18 +54,21 @@ urlpatterns = [
     url(r'^fetch_cours_pl/(?P<year>\d+)/(?P<week>\d+)/(?P<num_copy>\d+)$', views.fetch_cours_pl, name="fetch_cours_pl"),
     url(r'^fetch_cours_pp/(?P<year>\d+)/(?P<week>\d+)/(?P<num_copy>\d+)$', views.fetch_cours_pp, name="fetch_cours_pp"),
     url(r'^fetch_dispos/(?P<year>\d+)/(?P<week>\d+)$', views.fetch_dispos, name="fetch_dispos"),
-    url(r'^fetch_stype$', views.fetch_stype, name="fetch_stype"),
+    path('fetch_user_default_week/<str:username>', views.fetch_user_default_week, name="fetch_user_dweek"),
+    path('fetch_course_default_week/<str:train_prog>/<str:course_type>', views.fetch_course_default_week, name="fetch_course_dweek"),
     url(r'^fetch_decale$', views.fetch_decale, name="fetch_decale"),
-    url(r'^fetch_decale$', statistics.fetch_room_activity, name="fetch_room_activity"),
     url(r'^fetch_bknews/(?P<year>\d+)/(?P<week>\d+)$', views.fetch_bknews, name="fetch_bknews"),
     url(r'^fetch_groups$', views.fetch_groups, name="fetch_groups"),    
     url(r'^fetch_rooms$', views.fetch_rooms, name="fetch_rooms"),    
     url(r'^fetch_constraints$', views.fetch_constraints, name="fetch_constraints"),
+    path('fetch_course_types', views.fetch_course_types, name="fetch_course_types"),
+    path('fetch_training_programmes', views.fetch_training_programmes, name="fetch_training_programmes"),
     url(r'^fetch_unavailable_rooms/(?P<year>\d+)/(?P<week>\d+)$', views.fetch_unavailable_rooms, name="fetch_unavailable_rooms"),
     url(r'^fetch_all_tutors/$', views.fetch_all_tutors, name="fetch_all_tutors"),
     url(r'^fetch_all_versions/$', views.fetch_all_versions, name="fetch_all_versions"),
     url(r'^fetch_week_infos/(?P<year>\d+)/(?P<week>\d+)$', views.fetch_week_infos, name="fetch_week_infos"),
     path('fetch_departments', views.fetch_departments, name="fetch_departments"),
+    path('fetch_tutor_courses/<int:year>/<int:week>/<str:tutor>', views.fetch_tutor_courses, name="fetch_tutor_courses"),
 
     # statistics
     # ---------------------------------
@@ -76,9 +79,10 @@ urlpatterns = [
     ])),
 
     # from screen to db
-    url(r'^change_edt$', views.edt_changes, name="edt_changes"),
-    url(r'^change_dispos/$', views.dispos_changes, name="dispos_changes"),
-    url(r'^change_decale$', views.decale_changes, name="decale_changes"),
+    path('change_edt', views.edt_changes, name="edt_changes"),
+    path('change_user_pref/<int:year>/<int:week>/<str:username>', views.user_preferences_changes, name="user_pref_changes"),
+    path('change_course_pref/<int:year>/<int:week>/<str:train_prog>/<str:course_type>', views.course_preferences_changes, name="course_pref_changes"),
+    path('change_decale', views.decale_changes, name="decale_changes"),
 
 
     # predefined

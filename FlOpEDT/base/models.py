@@ -197,6 +197,10 @@ class Period(models.Model):
     ending_week = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)])
 
+    def __str__(self):
+        return f"Period {self.name}: {self.department}, {self.starting_week} -> {self.ending_week}"
+    
+
 
 class TimeGeneralSettings(models.Model):
     department =  models.OneToOneField(Department, on_delete=models.CASCADE)
@@ -247,7 +251,8 @@ class Room(models.Model):
     name = models.CharField(max_length=20)
     subroom_of = models.ManyToManyField(RoomGroup,
                                         blank=True,
-                                        related_name="subrooms")                                       
+                                        related_name="subrooms")
+    departments = models.ManyToManyField(Department)
 
     def __str__(self):
         return self.name
@@ -281,7 +286,7 @@ class Module(models.Model):
                              default=None,
                              blank=True,
                              on_delete=models.CASCADE)
-    ppn = models.CharField(max_length=6, default='M')
+    ppn = models.CharField(max_length=8, default='M')
     train_prog = models.ForeignKey('TrainingProgramme', on_delete=models.CASCADE)
     period = models.ForeignKey('Period', on_delete=models.CASCADE)
     # nbTD = models.PositiveSmallIntegerField(default=1)
@@ -332,11 +337,11 @@ class Course(models.Model):
 
     def __str__(self):
         username_mod = self.tutor.username if self.tutor is not None else '-no_tut-'
-        return f"{self.module}-{username_mod}-{self.groupe}"
+        return f"{self.type}-{self.module}-{username_mod}-{self.groupe}"
     
     def full_name(self):
         username_mod = self.tutor.username if self.tutor is not None else '-no_tut-'
-        return f"{self.module}-{self.type}-{username_mod}-{self.groupe}"
+        return f"{self.type}-{self.module}-{username_mod}-{self.groupe}"
 
 
 class ScheduledCourse(models.Model):

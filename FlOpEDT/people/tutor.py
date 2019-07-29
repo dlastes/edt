@@ -123,7 +123,7 @@ def fill_default_user_preferences(user, dept=None):
         dept = Department.objects.first()
     if dept is not None:
         try:
-            settings = TimeGeneralSettings.objects.get()
+            settings = TimeGeneralSettings.objects.get(department=dept)
             dst = settings.day_start_time
             lst = settings.lunch_break_start_time
             lft = settings.lunch_break_finish_time

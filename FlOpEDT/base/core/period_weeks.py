@@ -16,7 +16,7 @@ class PeriodWeeks():
             exclude weeks from lists when no courses are planned (default is False)
         """
 
-        self .department = department
+        self.department = department
 
         # school year
         self.start_year = year if year else PeriodWeeks.get_current_school_year()
@@ -25,7 +25,7 @@ class PeriodWeeks():
         # TODO : ensure that start.year corresponds to year 
 
         # By default, we assume that a school year starts at 
-        # september, 1 and ends at juny, 30
+        # september, 1 and ends at june, 30
         self.start_day = datetime.date(self.start_year, 9, 1)
         self.end_day = datetime.date(self.end_year, 6, 30)
 
@@ -103,7 +103,7 @@ class PeriodWeeks():
     def get_current_school_year(cls):
         now = datetime.datetime.now()
         # TODO find a alternative way to test the swap month
-        if now.month <= 7:
+        if now.month <= 6:
             school_year = now.year - 1
         else:
             school_year = now.year

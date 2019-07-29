@@ -36,8 +36,10 @@ from people.models import Tutor, User
 from base.models import Day, RoomGroup, Module, Course, Group, Slot, \
     UserPreference, Time, ScheduledCourse, EdtVersion, CourseModification, \
     PlanningModification, TrainingProgramme,  \
-    Regen, Holiday, TrainingHalfDay, RoomPreference, RoomSort, \
-    CoursePreference, Dependency, RoomType, Department, CourseType
+    Regen, Holiday, TrainingHalfDay, \
+    CoursePreference, Dependency, Department, CourseType
+
+from base.models import RoomPreference, RoomSort, RoomType, Room
 from displayweb.models import ModuleDisplay
 from import_export import resources, fields
 from import_export.widgets import ForeignKeyWidget
@@ -115,6 +117,18 @@ class CoursPlaceResource(resources.ModelResource):
                   'semaine', 'room', 'prof', 'room_type')
 
 
+class TutorCoursesResource(CoursPlaceResource):
+    department =  fields.Field(column_name='dept',
+                               attribute='cours__type__department',
+                               widget=ForeignKeyWidget(Department, 'abbrev'))
+
+    class Meta:
+        model = ScheduledCourse
+        fields = ('id', 'no', 'groupe', 'promo', 'color_bg', 'color_txt',
+                  'module', 'coursetype', 'day', 'start_time',
+                  'semaine', 'room', 'prof', 'room_type', 'department')
+
+    
 class CoursResource(resources.ModelResource):
     promo = fields.Field(column_name='promo',
                          attribute='groupe__train_prog',
@@ -164,6 +178,17 @@ class DispoResource(resources.ModelResource):
         fields = ('day', 'start_time', 'duration', 'valeur', 'prof')
 
 
+class CoursePreferenceResource(resources.ModelResource):
+    type_name = fields.Field(attribute='course_type',
+                        widget=ForeignKeyWidget(CourseType, 'name'))
+    train_prog = fields.Field(attribute='train_prog',
+                              widget=ForeignKeyWidget(TrainingProgramme, 'abbrev'))
+
+    class Meta:
+        model = CoursePreference
+        fields = ('type_name', 'train_prog', 'day', 'start_time', 'duration', 'valeur')
+
+
 class UnavailableRoomsResource(resources.ModelResource):
     class Meta:
         model = RoomPreference
@@ -187,7 +212,7 @@ class VersionResource(resources.ModelResource):
 # -- ADMIN MENU --
 # ----------------
 
-class DepartmentModelAdmin(admin.ModelAdmin):
+class DepartmentModelAdminMixin():
     #
     # Support filter and udpate of department specific related items
     #
@@ -198,37 +223,38 @@ class DepartmentModelAdmin(admin.ModelAdmin):
         # Hide department field if a department attribute exists 
         # on the related model and a department value has been set
         base = super().get_exclude(request, obj)
-        exclude = list() if base is None else base
+        exclude = list() if base is None else list(base)
 
         if hasattr(request, 'department'):
             for field in self.model._meta.get_fields():
-                if not field.auto_created and field.related_model == Department:
+                if not field.auto_created and field.related_model == Department and not field.name in exclude:
                     exclude.append(field.name)
 
-        return exclude
+        return tuple(exclude)
 
     
     def save_model(self, request, obj, form, change):
         #
-        # Set department field value if exists on the model
+        # Automaticaly associate model to department when required
         #
+        m2m_fields = []
+
         if hasattr(request, 'department'):
             for field in self.model._meta.get_fields():
-                if not field.auto_created and field.related_model == Department:
+                if (not change
+                        and not field.auto_created
+                        and field.related_model == Department):
                     if isinstance(field, related_fields.ForeignKey):
                         setattr(obj, field.name, request.department)
-        
-        super().save_model(request, obj, form, change)        
+                    elif isinstance(field, related_fields.ManyToManyField):
+                        if field.remote_field.through and field.remote_field.through._meta.auto_created:
+                            m2m_fields.append(field)
 
-    
-    def save_related(self, request, form, formsets, change):
-        super().save_related(request, form, formsets, change)
-        model = form.instance
-        if hasattr(request, 'department') and not change:
-            for field in model._meta.get_fields():
-                if field.related_model == Department:
-                    if isinstance(field, related_fields.ManyToManyField):
-                        field.save_form_data(model, [request.department,])
+        super().save_model(request, obj, form, change)
+
+        # Related values need to be set after save model
+        for field in m2m_fields:
+            getattr(obj, field.name).add(request.department)
 
 
     def get_department_lookup(self, department):
@@ -282,21 +308,26 @@ class DepartmentModelAdmin(admin.ModelAdmin):
     def get_field_queryset(self, db, db_field, request):
 
         queryset = super().get_field_queryset(db, db_field, request)
-        related_filter = get_model_department_lookup(db_field.related_model, request.department)
 
-        if related_filter:
-            if queryset:
-                return queryset.filter(**related_filter).distinct()
-            else:
-                return db_field.remote_field \
-                        .model._default_manager \
-                        .using(db) \
-                        .filter(**related_filter).distinct()
+        if hasattr(request, 'department'):
+            related_filter = get_model_department_lookup(db_field.related_model, request.department)
+
+            if related_filter:
+                if queryset:
+                    return queryset.filter(**related_filter).distinct()
+                else:
+                    return db_field.remote_field \
+                            .model._default_manager \
+                            .using(db) \
+                            .filter(**related_filter).distinct()
 
         return queryset
 
 
-    
+class DepartmentModelAdmin(DepartmentModelAdminMixin, admin.ModelAdmin):
+    pass
+
+
 class HolidayAdmin(admin.ModelAdmin):
     list_display = ('day', 'week', 'year')
     ordering = ('-year', '-week', 'day')
@@ -319,8 +350,19 @@ class GroupAdmin(DepartmentModelAdmin):
     list_filter = (('train_prog', DropdownFilterRel),
                    )
 
+
+class RoomAdmin(DepartmentModelAdmin):
+    pass
+
+
+class RoomInline(admin.TabularInline):
+    model = Room.subroom_of.through
+    show_change_link = False
+
+
 class RoomGroupAdmin(DepartmentModelAdmin):
-    list_display = ('name',)
+    inlines = [RoomInline,]
+    list_display = ('name',)    
 
   
 class RoomPreferenceAdmin(DepartmentModelAdmin):
@@ -476,6 +518,7 @@ admin.site.unregister(auth.models.Group)
 admin.site.register(Holiday, HolidayAdmin)
 admin.site.register(TrainingHalfDay, TrainingHalfDayAdmin)
 admin.site.register(Group, GroupAdmin)
+admin.site.register(Room, RoomAdmin)
 admin.site.register(RoomGroup, RoomGroupAdmin)
 admin.site.register(RoomPreference, RoomPreferenceAdmin)
 admin.site.register(RoomSort, RoomSortAdmin)

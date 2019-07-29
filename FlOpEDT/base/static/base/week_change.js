@@ -210,6 +210,7 @@ function create_dispos_user_data() {
     if (dispos[user.nom] === undefined) {
 	allocate_dispos(user.nom);
 	fill_missing_preferences(user.nom, ts);
+        sort_preferences();
     }
 
     for (var i = 0; i < days.length; i++) {
@@ -709,7 +710,7 @@ function translate_unavailable_rooms(d) {
    ------ ALL -------
    --------------------*/
 
-function fetch_all(first){
+function fetch_all(first, fetch_work_copies){
     fetch.done = false;
 
     fetch.ongoing_cours_pp = true;
@@ -731,6 +732,10 @@ function fetch_all(first){
 	fetch_unavailable_rooms() ;
     }
     fetch_bknews(first);
+
+    if(is_side_panel_open && fetch_work_copies) {
+        fetch_work_copy_numbers();
+    }
 }
 
 
@@ -848,11 +853,11 @@ function swap_data(fetched, current, type) {
             return em ;
         }
     )
-    var pannel = sel_popup.pannels.find(function(p) {
+    var panel = sel_popup.panels.find(function(p) {
         return p.type == type ;
     })
-    if (typeof pannel !== 'undefined') {
-        pannel.list = current.all ;
+    if (typeof panel !== 'undefined') {
+        panel.list = current.all ;
     }
 
 }

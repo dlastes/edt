@@ -429,27 +429,52 @@ function remove_garbage(){
 }
 
 
-function create_grid_data() {
-    if(fetch.constraints_ok && fetch.groups_ok) {
-	if (slot_case) {
-	    for(var i = 0 ; i<days.length ; i++) {
-		for (var s = 0; s < Object.keys(rev_constraints).length ; s++) {
-		    var start = Object.keys(rev_constraints)[s] ;
-		    if (start < time_settings.time.day_finish_time){
-			var gs = {
-			    day: days[i].ref,
-			    start: +start,
-			    duration: rev_constraints[start],
-			    display: false,
-			    dispo: false,
-			    pop: false,
-			    reason: ""
-			};
-			data_slot_grid.push(gs);
-		    }
+// create potential slots for course c
+function create_slot_grid_data(c) {
+    data_slot_grid = [] ;
+    if (slot_case) {
+        // does not depend on course c
+        
+	for(var i = 0 ; i<days.length ; i++) {
+	    for (var s in rev_constraints) {
+		var start = +s ;
+		if (start < time_settings.time.day_finish_time){
+		    var gs = {
+			day: days[i].ref,
+			start: start,
+			duration: rev_constraints[s],
+			display: false,
+			dispo: false,
+			pop: false,
+			reason: ""
+		    };
+		    data_slot_grid.push(gs);
 		}
 	    }
 	}
+    } else {
+        var ok_starts = constraints[c.c_type].allowed_st ;
+        days.forEach(function(d){
+            for(var s = 0 ; s < ok_starts.length ; s++ ) {
+                data_slot_grid.push({
+                    c_type: c.c_type,
+                    day: d.ref,
+                    group: c.group,
+                    promo: c.promo,
+                    start: ok_starts[s],
+                    duration: c.duration
+                });
+            }
+        });
+    }
+}
+
+
+function create_grid_data() {
+    if(fetch.constraints_ok && fetch.groups_ok) {
+        if (slot_case) {
+            create_slot_grid_data();
+        }
 	
 	for (var p = 0; p < set_promos.length; p++) {
             compute_promo_leaves(root_gp[p].gp);
@@ -998,13 +1023,16 @@ function update_all_groups() {
     }
     rootgp_width = max_rw;
 
-    if (rootgp_width > 0) {
-        if (pos_rootgp_width == 0) {
-            pos_rootgp_width = rootgp_width;
-        }
-        labgp.width *= pos_rootgp_width / rootgp_width;
+    // should not occur; can occur when there is no group in the department
+    if (rootgp_width == 0)  {
+        rootgp_width = 5 ;
+    }
+
+    if (pos_rootgp_width == 0) {
         pos_rootgp_width = rootgp_width;
     }
+    labgp.width *= pos_rootgp_width / rootgp_width;
+    pos_rootgp_width = rootgp_width;
 
 
 
@@ -1231,12 +1259,16 @@ function translate_quote_from_csv(d) {
 
 function def_drag() {
     var cur_over = null;
-    var sl = null;
+    var slots_over = null;
     dragListener = d3.drag()
         .on("start", function(c) {
 	    cancel_cm_adv_preferences();
 	    cancel_cm_room_tutor_change();
             if (ckbox["edt-mod"].cked && fetch.done) {
+
+                if(!slot_case) {
+                    create_slot_grid_data(c);
+                }
 
 		// no data_slot_grid when uniline
                 data_slot_grid.forEach(function(sl) {
@@ -1263,24 +1295,18 @@ function def_drag() {
 				      parseInt(drag.sel.select("rect")
 					       .attr("y")),
 				      d);
-		console.log(cur_over.day, cur_over.start_time);
+		//console.log(cur_over.day, cur_over.start_time);
 
+                data_slot_grid.forEach(function(s) {
+                    s.display = false;
+                });
                 if (!is_garbage(cur_over)) {
-                    sl = data_slot_grid.filter(function(c) {
+                    slots_over = data_slot_grid.filter(function(c) {
                         return c.day == cur_over.day
 			    && c.start == cur_over.start_time;
                     });
-                    if (sl != null && sl.length == 1) {
-                        if (!sl[0].display) {
-                            data_slot_grid.forEach(function(s) {
-                                s.display = false;
-                            });
-                            sl[0].display = true;
-                        }
-                    }
-                } else {
-                    data_slot_grid.forEach(function(s) {
-                        s.display = false;
+                    slots_over.forEach(function(s){
+                        s.display = true;
                     });
                 }
                 go_grid(true);
@@ -1300,9 +1326,14 @@ function def_drag() {
 
             if (cur_over != null && ckbox["edt-mod"].cked && fetch.done) {
 
-                data_slot_grid.forEach(function(s) {
-                    s.display = false;
-                });
+
+                if(slot_case) {
+                    data_slot_grid.forEach(function(s) {
+                        s.display = false;
+                    });
+                } else {
+                    data_slot_grid = [] ;
+                }
 
 
                 if (!is_garbage(cur_over)) {
@@ -1441,7 +1472,7 @@ function def_drag() {
             d.y += d3.event.dy;
             drag.sel.attr("transform", popup_trans(d));
         })
-    // save pannel position
+    // save panel position
         .on("end", function(d) {
             var infos = sel_popup.get_available(d.type) ;
             if (typeof infos !== 'undefined') {
@@ -1901,7 +1932,7 @@ function fetch_dispos_type() {
         $.ajax({
             type: "GET", //rest Type
             dataType: 'text',
-            url: url_fetch_stype,
+            url: url_fetch_user_dweek + logged_usr.nom,
             async: true,
             contentType: "text/csv",
             success: function(msg) {
@@ -2050,7 +2081,7 @@ function create_selections() {
         .attr("class", "gen-selection")
         .attr("transform", sel_trans)
         .attr("cursor", "pointer")
-        .on("click", add_pannel);
+        .on("click", add_panel);
     
     contg
         .append("rect")
@@ -2093,11 +2124,11 @@ function create_selections() {
 
 }
 
-// add data related to a new filter pannel if not
+// add data related to a new filter panel if not
 // already present
-function add_pannel(d) {
+function add_panel(d) {
 
-    var same = sel_popup.pannels.find(function(p) {
+    var same = sel_popup.panels.find(function(p) {
         return p.type == d.type ;
     }) ;
 
@@ -2111,17 +2142,17 @@ function add_pannel(d) {
             px = infos.x ;
             py = infos.y ;
         }
-        var pannel = {type: d.type,
+        var panel = {type: d.type,
                       x: px,
                       y: py,
                       list: popup_data(d.type),
                       txt: title};
 
-        sel_popup.pannels.push(pannel);
+        sel_popup.panels.push(panel);
         
         go_selection_popup();
 
-        if (pannel.type == "group") {
+        if (panel.type == "group") {
             go_gp_buttons() ;
         }
     }
@@ -2142,12 +2173,12 @@ function popup_data(type) {
 }
 
 
-// refreshes filter pannels
+// refreshes filter panels
 function go_selection_popup(){
     
     var bound = selg
         .selectAll(".sel-pop-g")
-        .data(sel_popup.pannels, function(p) {
+        .data(sel_popup.panels, function(p) {
             return p.type ;
         }) ;
 
@@ -2156,7 +2187,7 @@ function go_selection_popup(){
         .enter()
         .append("g")
         .attr("class", "sel-pop-g")
-        .attr("id", popup_pannel_type_id)
+        .attr("id", popup_panel_type_id)
         .call(drag_popup);
 
     g_new
@@ -2182,7 +2213,7 @@ function go_selection_popup(){
     exit_new
         .merge(bound.select(".sel-pop-exit"))
         .attr("transform", popup_exit_trans)
-        .on("click", remove_pannel);
+        .on("click", remove_panel);
 
     exit_new
         .append("rect")

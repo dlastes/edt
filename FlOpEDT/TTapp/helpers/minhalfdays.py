@@ -27,7 +27,6 @@ import logging
 
 from base.models import Time, TimeGeneralSettings
 
-
 logger = logging.Logger(__name__)
 
 
@@ -82,13 +81,14 @@ class MinHalfDaysHelperModule(MinHalfDaysHelperBase):
             
             # add constraint linking MBHD to TT
             for apm in [Time.AM, Time.PM]:
-                halfdayslots = self.ttmodel.wdb.slots.filter(jour=d,
-                                                             heure__apm=apm)
+                halfdayslots = set(slot for slot in self.ttmodel.wdb.slots
+                                   if slot.day == d and slot.apm == apm)
                 card = len(halfdayslots)
                 expr = self.ttmodel.lin_expr()
                 expr += card * mod_b_h_d[(self.module, d, apm)]
                 for sl in halfdayslots:
-                    for c in self.ttmodel.wdb.courses.filter(module=self.module):
+                    for c in set(self.ttmodel.wdb.courses.filter(module=self.module))\
+                            & self.ttmodel.wdb.compatible_courses[sl]:
                         expr -= self.ttmodel.TT[(sl, c)]
                 self.ttmodel.add_constraint(expr, '>=', 0)
                 self.ttmodel.add_constraint(expr, '<=', card - 1)
@@ -167,17 +167,20 @@ class MinHalfDaysHelperTutor(MinHalfDaysHelperBase):
             for d in self.ttmodel.wdb.days:
                 for c in courses:
                     sl8h = min(self.ttmodel.wdb.slots_by_half_day[d,Time.AM] & self.ttmodel.wdb.compatible_slots[c])
-                    sl11h = max(self.ttmodel.wdb.slots_by_half_day[d,Time.AM] & self.ttmodel.wdb.compatible_slots[c])
                     sl14h = min(self.ttmodel.wdb.slots_by_half_day[d,Time.PM] & self.ttmodel.wdb.compatible_slots[c])
-                    sl17h = max(self.ttmodel.wdb.slots_by_half_day[d,Time.PM] & self.ttmodel.wdb.compatible_slots[c])
                     for c2 in courses.exclude(id=c.id):
+                        sl11h = max(
+                            self.ttmodel.wdb.slots_by_half_day[d, Time.AM] & self.ttmodel.wdb.compatible_slots[c2])
+                        sl17h = max(
+                            self.ttmodel.wdb.slots_by_half_day[d, Time.PM] & self.ttmodel.wdb.compatible_slots[c2])
                         if self.constraint.weight:
                             conj_var_AM = self.ttmodel.add_conjunct(self.ttmodel.TT[(sl8h, c)],
-                                                               self.ttmodel.TT[(sl11h, c2)])
+                                                                    self.ttmodel.TT[(sl11h, c2)])
                             conj_var_PM = self.ttmodel.add_conjunct(self.ttmodel.TT[(sl14h, c)],
-                                                               self.ttmodel.TT[(sl17h, c2)])
+                                                                    self.ttmodel.TT[(sl17h, c2)])
                             self.ttmodel.add_to_inst_cost(self.tutor,
-                                                     self.constraint.local_weight() * self.ponderation * (conj_var_AM + conj_var_PM)/2)
+                                                          self.constraint.local_weight() * self.ponderation *
+                                                          (conj_var_AM + conj_var_PM)/2)
                         else:
                             self.ttmodel.add_constraint(
                                 self.ttmodel.TT[(sl8h, c)] + self.ttmodel.TT[(sl11h, c2)],

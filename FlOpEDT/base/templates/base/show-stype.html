@@ -30,68 +30,93 @@
 {% block title %} EDT {% endblock %}
 {% block content %}
 {% load static %}
-<link rel="stylesheet" href="{% static "base/better.css" %}"/>
-  <script src="{% static "base/d3.v4.min.js" %}"></script>
+<link rel="stylesheet" href="{% static 'base/better.css' %}"/>
+  <script src="{% static 'base/d3.v4.min.js' %}"></script>
   <!-- script src="https://d3js.org/d3.v4.min.js"></script -->
   <script>
-    var url_fetch_stype = "{% url "base:fetch_stype" department %}"; 
-    var url_stype = "{% url "base:stype" department %}"; 
-    var url_dispos_changes = "{% url "base:dispos_changes" department %}";
+    var url_fetch_user_dweek = "{% url 'base:fetch_user_dweek' department '.' %}";
+    url_fetch_user_dweek = url_fetch_user_dweek.slice(0, -1);
+    var url_fetch_course_dweek = "{% url 'base:fetch_course_dweek' department '.' '.' %}";
+    url_fetch_course_dweek = url_fetch_course_dweek.slice(0, -3);
+    
+    var url_user_pref_changes = "{% url "base:user_pref_changes" department 0 0 '.' %}";
+    url_user_pref_changes = url_user_pref_changes.slice(0, -5);
+    var url_course_pref_changes = "{% url 'base:course_pref_changes' department 0 0 '.' '.' %}";
+    url_course_pref_changes = url_course_pref_changes.slice(0, -7);
+
+    var url_course_types = "{% url "base:fetch_course_types" department %}";
+    var url_training_programmes = "{% url "base:fetch_training_programmes" department %}";
+    var url_all_tutors = "{% url 'base:fetch_all_tutors' department %}";
+    
     var logged_usr = {nom:"{{ name_usr }}", rights: -1};
     var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
-    var url_login = "{% url "people:login" %}";
+    var url_login = "{% url 'people:login' %}";
     var annee_courante = "{{ annee_courante }}" ;
     var time_settings = {{ time_settings | safe }} ;
     var days = {{ days | safe }} ;
   </script>
   </script>
 <body>
-    <!--    <div id="option">
-      <label>
-      <input name="dispoBox" 
-             type="checkbox" />
-      Dispos
-      </label>
-      <button onclick="fetchjson()">Json</button>
-      <button onclick="fetchcsv()">CSV</button>
-      <button onclick="fetch_dispo()">Dispos</button>
-    </div>-->
-    <div  id="tools-main" style="width: 100%; overflow: hidden;">
-      <div id="svg" style="width: 680px; float: left;"></div>
-      <div style="margin-left: 700px;">
-	<form style="white-space: nowrap;" name="app" action="javascript:apply_stype_from_button(false)">
-	  <fieldset>
-	    <legend>Semaines particulières</legend>
-	    Appliquer la configuration ci-contre<br/>
-	    de la semaine
-	    <input type="number" name="se_deb" style="width: 40px" value="{{ date_deb.semaine }}" min="1" max="53">, année
-	    <input type="number" name="an_deb" style="width: 60px" value="{{ date_deb.an }}" min="{{annee_courante}}" max="{{annee_courante|add:"1"}}"></br>
-	    à la semaine
+  <div  id="tools-main" style="width: 100%; overflow: hidden;">
+    <div id="svg" style="width: 680px; float: left;"></div>
+    <div style="margin-left: 700px;">
+      <form style="white-space: nowrap;" name="app" action="javascript:apply_stype_from_button(false)" id="form-nweek">
+	<fieldset>
+	  <legend>Semaines particulières</legend>
+	  Appliquer la configuration ci-contre<br/>
+	  de la semaine
+	  <input type="number" name="se_deb" style="width: 40px" value="{{ date_deb.semaine }}" min="1" max="53">, année
+	  <input type="number" name="an_deb" style="width: 60px" value="{{ date_deb.an }}" min="{{annee_courante}}" max="{{annee_courante|add:"1"}}"></br>
+	  à la semaine
 	    <input type="number" name="se_fin" style="width: 40px" value="{{ date_fin.semaine }}" min="1" max="53">, année
 	    <input type="number" name="an_fin" style="width: 60px" value="{{ date_fin.an }}" min="{{annee_courante}}" max="{{annee_courante|add:"1"}}"></br></br>
 	    <input type="submit" name="apply" value="Appliquer">
-	  </fieldset></br></br>
-	</form>
-	<fieldset>
-	  <legend>Semaine type</legend>
-	  <form style="white-space: nowrap;" name="sav"  action="javascript:apply_stype_from_button(true)">
-	    Redéfinir ma semaine type<br/>
-</br>
-	    <input type="submit" name="save" value="Sauvegarder"></br>	  </fieldset>
-	</form></br>
-	<!--{% if err %}<p><strong>{{ err }}</strong></p>{% endif %}
-	  -->
-	<span id="ack"></span>
-      </div>
+	</fieldset></br></br>
+      </form>
+      <fieldset>
+	<legend>Semaine type</legend>
+	<form style="white-space: nowrap;" name="sav"  action="javascript:apply_stype_from_button(true)" id="form-dweek">
+	  Redéfinir ma semaine type<br/>
+          <br/>
+          <input type="submit" name="save" value="Sauvegarder"></br>	  </fieldset>
+      </form><br/>
+      <!--{% if err %}<p><strong>{{ err }}</strong></p>{% endif %}
+	-->
+      <span id="ack"></span>
     </div>
+  </div>
 </body>
-  <script type='text/javascript' src="{% static 'base/intervals.js' %}"></script>
-  <script type='text/javascript' src="{% static 'base/week_change.js' %}"></script>
-  <script type='text/javascript' src="{% static 'base/transformation.js' %}"></script>
-  <script type='text/javascript' src="{% static 'base/creation.js' %}"></script>
-  <script type='text/javascript' src="{% static 'base/action.js' %}"></script>
-  <script type='text/javascript' src="{% static 'base/update.js' %}"></script>
-  <script type='text/javascript' src="{% static 'base/variables.js' %}?2"></script>
-  <script type='text/javascript' src="{% static "base/stype.js" %}"></script>
+<script type='text/javascript' src="{% static 'base/intervals.js' %}"></script>
+<script type='text/javascript' src="{% static 'base/week_change.js' %}"></script>
+<script type='text/javascript' src="{% static 'base/transformation.js' %}"></script>
+<script type='text/javascript' src="{% static 'base/creation.js' %}"></script>
+<script type='text/javascript' src="{% static 'base/action.js' %}"></script>
+<script type='text/javascript' src="{% static 'base/update.js' %}"></script>
+<script type='text/javascript' src="{% static 'base/variables.js' %}?2"></script>
+<script type='text/javascript' src="{% static 'base/stype.js' %}"></script>
+<script type='text/javascript' src="{% static 'base/stype_side_panel.js' %}"></script>
 
+{% endblock %}
+
+{% block side_panel %}
+<div>
+  <p onclick="show_tutors()" class="btn_panel">Profs</p>
+  <p id="sp_tutor">Transformation en : 
+    <select id="dd_tutors">
+    </select>
+  </p>
+</div>
+<div>
+  <p onclick="show_course_types()" class="btn_panel">Types de cours</p>
+  <div id="sp_course_type">
+    <p> Promo :
+      <select id="dd_programmes">
+      </select>
+    </p>
+    <p> Type de cours :
+      <select id="dd_course_types">
+      </select>
+    </p>
+  </div>
+</div>
 {% endblock %}

@@ -386,25 +386,33 @@ function week_sel_x(d) {
   -------- GRID --------
   ----------------------*/
 function gs_x(d) {
-    return idays[d.day].num * (rootgp_width * labgp.width +
-        dim_dispo.plot * (dim_dispo.width + dim_dispo.right));
+    if(slot_case) {
+        return idays[d.day].num * (rootgp_width * labgp.width +
+                                   dim_dispo.plot * (dim_dispo.width + dim_dispo.right));
+    } else {
+        return cours_x(d);
+    }
 }
 
 function gs_y(d) {
-    var t = time_settings.time ;
-    var ret = (d.start - t.day_start_time) * nbRows * scale ;
-    if (d.start >= t.lunch_break_finish_time) {
-	ret += bknews_h() - (t.lunch_break_finish_time - t.lunch_break_start_time)*nbRows*scale ;
+    if(slot_case) {
+        var t = time_settings.time ;
+        var ret = (d.start - t.day_start_time) * nbRows * scale ;
+        if (d.start >= t.lunch_break_finish_time) {
+	    ret += bknews_h() - (t.lunch_break_finish_time - t.lunch_break_start_time)*nbRows*scale ;
+        }
+        return ret ;
+    } else {
+        return cours_y(d);
     }
-    return ret ;
 }
 
 function gs_width(d) {
-    return rootgp_width * labgp.width;
+    return slot_case?rootgp_width * labgp.width:cours_width(d);
 }
 
 function gs_height(d) {
-    return d.duration * nbRows * scale ;
+    return slot_case?d.duration * nbRows * scale:cours_height(d);
 }
 
 function gs_fill(d) {
@@ -433,8 +441,19 @@ function gs_sw(d) {
 }
 
 function gs_sc(d) {
-    //    return d.day==3&&d.slot==5?"red":"black";
-    return d.start < time_settings.time.day_finish_time ? "black" : "red";
+    if(slot_case) {
+        return d.start < time_settings.time.day_finish_time ? "black" : "red";
+    } else {
+        return d.dispo?"green":"red";
+    }
+}
+
+function gs_sda(d) {
+    return slot_case?"" : "1,4";
+}
+
+function gs_slc(d) {
+    return slot_case? "square" : "round";
 }
 
 
@@ -690,7 +709,7 @@ function menu_curs(dk) {
   ------ PROFS -------
   --------------------*/
 function but_sel_x(p, i) {
-    return but_sel_type_x(i, p.pannel.type) ;
+    return but_sel_type_x(i, p.panel.type) ;
 }
 function but_sel_type_x(i, t) {
     return ((i + 1) % sel_popup.but[t].perline)
@@ -698,7 +717,7 @@ function but_sel_type_x(i, t) {
 }
 
 function but_sel_y(p, i) {
-    return but_sel_type_y(i, p.pannel.type) ;
+    return but_sel_type_y(i, p.panel.type) ;
 }
 function but_sel_type_y(i, t) {
     return Math.floor((i + 1) / sel_popup.but[t].perline)
@@ -706,12 +725,12 @@ function but_sel_type_y(i, t) {
 }
 
 function but_sel_txt_x(p, i) {
-    var t = p.pannel.type ;
+    var t = p.panel.type ;
     return but_sel_type_x(i, t) + .5 * sel_popup.but[t].w;
 }
 
 function but_sel_txt_y(p, i, j) {
-    var t = p.pannel.type ;
+    var t = p.panel.type ;
     return but_sel_type_y(i, t) + .5 * sel_popup.but[t].h;
 }
 
@@ -1172,16 +1191,16 @@ function popup_bg_w(d) {
 function popup_type_id(t) {
     return "popup-" + t ;
 }
-function popup_pannel_type_id(d) {
+function popup_panel_type_id(d) {
     return popup_type_id(d.type) ;
 }
 
 function popup_choice_w(d) {
-    var t = d.pannel.type ;
+    var t = d.panel.type ;
     return sel_popup.but[t].w ;
 }
 function popup_choice_h(d) {
-    var t = d.pannel.type ;
+    var t = d.panel.type ;
     return sel_popup.but[t].h ;
 }
 function popup_title_txt(d) {

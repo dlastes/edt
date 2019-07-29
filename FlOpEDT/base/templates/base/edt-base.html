@@ -50,13 +50,21 @@
     var url_login = "{% url "people:login" %}";
     var url_edt = "{% url "base:edt" department %}";
     var url_edt_changes = "{% url "base:edt_changes" department %}";
-    var url_dispos_changes = "{% url "base:dispos_changes" department %}";
-    var url_fetch_stype = "{% url "base:fetch_stype" department %}";
+    var url_user_pref_changes = "{% url "base:user_pref_changes" department 0 0 '.' %}";
+    url_user_pref_changes = url_user_pref_changes.slice(0, -5);
+    var url_fetch_user_dweek = "{% url "base:fetch_user_dweek" department '.' %}";
+    url_fetch_user_dweek = url_fetch_user_dweek.slice(0, -1);
     var url_bknews = "{% url "base:fetch_bknews" department 0 0 %}";
     url_bknews = url_bknews.slice(0, -3);
     var url_quote = "{% url "quote:fetch_quote" %}";
     var url_week_infos = "{% url "base:fetch_week_infos" department 0 0 %}";
     url_week_infos = url_week_infos.slice(0, -3);
+    var url_work_copies = "{% url "TTapp:available_work_copies" department 0 0 %}" ;
+    url_work_copies = url_work_copies.slice(0, -3);
+    var url_swap = "{% url 'TTapp:swap' department 0 0 0 %}" ;
+    url_swap = url_swap.slice(0, -5) ;
+    var url_reassign_rooms = "{% url 'TTapp:reassign_rooms' department 0 0 0 %}" ;
+    url_reassign_rooms = url_reassign_rooms.slice(0, -5) ;
 
     var semaine_an_list = {{ all_weeks| safe }};
     var semaine_init = +"{{ semaine }}";
@@ -69,6 +77,7 @@
 
 {% block script_variable %}{% endblock %}
 
+<script type='text/javascript' src="{% static 'TTapp/side_panel.js' %}"></script>
 <script type='text/javascript' src="{% static 'base/variables.js' %}?7"></script>
 <script type='text/javascript' src="{% static 'base/intervals.js' %}?5"></script>
 <script type='text/javascript' src="{% static 'base/week_change.js' %}?5"></script>
@@ -80,3 +89,12 @@
 {% block script_file %}{% endblock %}
 
 {% endblock %}
+
+{% block side_panel %}
+<p>Numéro de copie :
+  <select id="dd_work_copy">
+  </select>
+</p>
+<p onclick="swap_with_copy_0()" class="btn_panel">Élire cette copie</p>
+<p onclick="reassign_rooms()" class="btn_panel">Réassigner les salles</p>
+{% endblock%}
