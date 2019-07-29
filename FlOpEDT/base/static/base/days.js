@@ -45,23 +45,23 @@ class WeekDays {
     constructor(days = []) {
         this.day_list = [] ;
         this.day_dict = {} ;
-        for (d in days) {
-            this.day_list.add_day(days[d]);
-        }
-    }
-
-    get day_by_ref(ref) {
-        return this.day_dict[ref] ;
-    }
-
-    get day_by_num(num) {
-        return this.day_list.find(function(d) {
-            return d.num == num ;
-        });
+        days.forEach(function(day) {
+            this.add_day(day);
+        }, this);
     }
 
     get nb_days() {
         return this.day_list.length ;
+    }
+
+    day_by_ref(ref) {
+        return this.day_dict[ref] ;
+    }
+
+    day_by_num(num) {
+        return this.day_list.find(function(d) {
+            return d.num == num ;
+        });
     }
 
     get data() {
