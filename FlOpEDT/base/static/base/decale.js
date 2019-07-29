@@ -51,6 +51,18 @@ var commit = [];
 
 initiate();
 
+
+function min_to_hm_txt(minutes) {
+    var h = Math.floor(minutes/60) ;
+    var m = minutes - h*60 ;
+    var mt = '' ;
+    if (m != 0) {
+        mt = m.toString().padStart(2,'0');
+    }
+    return h + "h" + mt ;
+}
+
+
 function initiate() {
 
     var i =0 ;
@@ -608,11 +620,9 @@ function go_cours(){
 function plot_cours(d){
     var ret = d.m+"-"+d.p+"-"+d.g+" (";
     var h, m;
-    if(d.j>=0 && d.h>=0){
-	h = Math.floor(d.t/60);
-	m = d.t - h*60 ;
-	ret +=  liste_jours[d.d].name + " "+ liste_jours[d.d].date
-	    + " " + h + ":" + m;
+    if(d.d != ''){
+	ret +=  liste_jours[d.d].name + " "+ liste_jours[d.d].date + " ";
+        ret += min_to_hm_txt(d.t);
     } else {
 	ret += "non placé"
     }
