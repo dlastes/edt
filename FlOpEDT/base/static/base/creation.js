@@ -42,20 +42,6 @@
                  */
 
 
-/*----------------------
-  -------   TIME  -------
-  ----------------------*/
-
-function get_day(ref){
-    var nd = days.filter(function(dd) {
-	return dd.ref == ref;
-    });
-    if (nd.length != 1) {
-	return null ;
-    }
-    return nd[0];
-}
-
 
 /*----------------------
   -------   SVG  -------
