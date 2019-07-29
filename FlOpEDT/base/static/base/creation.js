@@ -233,22 +233,22 @@ function create_clipweek() {
     wdw_weeks.chose(new Week(an_init, semaine_init));
 
     wg.upper
-        .attr("transform", "translate(" + weeks.x + "," + weeks.y + ")");
+        .attr("transform", fun_weeks.trans());
 
 
     wg.fg
         .selectAll(".sel_wk")
-        .data(weeks.sel)
+        .data(wdw_weeks.get_iselected())
         .enter()
         .append("g")
         .attr("class", "sel_wk")
         .attr("clip-path", "url(#clipwk)")
         .attr("pointer-events", "none")
         .append("ellipse")
-        .attr("cx", week_sel_x)
-        .attr("cy", .5 * weeks.height)
-        .attr("rx", .5 * weeks.wfac * weeks.width)
-        .attr("ry", .5 * weeks.hfac * weeks.height);
+        .attr("cx", fun_weeks.sel_x)
+        .attr("cy", .5 * dsp_weeks.height)
+        .attr("rx", .5 * dsp_weeks.wfac * dsp_weeks.width)
+        .attr("ry", .5 * dsp_weeks.hfac * dsp_weeks.height);
 
 
 
@@ -264,14 +264,14 @@ function create_clipweek() {
         .attr("stroke", "white")
         .attr("stroke-width", 1)
         .attr("cx", 0)
-        .attr("cy", .5 * weeks.height)
-        .attr("r", weeks.rad * .5 * weeks.height);
+        .attr("cy", .5 * dsp_weeks.height)
+        .attr("r", dsp_weeks.rad * .5 * dsp_weeks.height);
 
     but
         .append("text")
         .attr("fill", "white")
         .attr("x", 0)
-        .attr("y", .5 * weeks.height)
+        .attr("y", .5 * dsp_weeks.height)
         .text("<");
 
 
@@ -285,15 +285,15 @@ function create_clipweek() {
         .append("circle")
         .attr("stroke", "white")
         .attr("stroke-width", 1)
-        .attr("cx", (weeks.ndisp + 1) * weeks.width)
-        .attr("cy", .5 * weeks.height)
-        .attr("r", weeks.rad * .5 * weeks.height)
+        .attr("cx", fun_weeks.right_sel_x())
+        .attr("cy", .5 * dsp_weeks.height)
+        .attr("r", dsp_weeks.rad * .5 * dsp_weeks.height)
 
     but
         .append("text")
         .attr("fill", "white")
-        .attr("x", (weeks.ndisp + 1) * weeks.width)
-        .attr("y", .5 * weeks.height)
+        .attr("x", fun_weeks.right_sel_x())
+        .attr("y", .5 * dsp_weeks.height)
         .text(">");
 
 
@@ -302,8 +302,8 @@ function create_clipweek() {
         .attr("class", "cir_wk")
         .attr("x", 0)
         .attr("y", 0)
-        .attr("width", (weeks.ndisp + 1) * weeks.width)
-        .attr("height", weeks.height);
+        .attr("width", fun_weeks.strip_w())
+        .attr("height", dsp_weeks.height);
 
     wg.bg
         .append("g")
@@ -312,10 +312,10 @@ function create_clipweek() {
         .append("rect")
         .attr("x", 0)
         .attr("y", 0)
-        .attr("height", weeks.height)
-        .attr("width", (weeks.ndisp + 1) * weeks.width);
+        .attr("height", dsp_weeks.height)
+        .attr("width", fun_weeks.strip_w());
 
-    weeks.cont = wg.bg
+    dsp_weeks.cont = wg.bg
         .append("g")
         .attr("clip-path", "url(#clipwk)");
 

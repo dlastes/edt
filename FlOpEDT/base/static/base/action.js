@@ -79,9 +79,7 @@ function week_right() {
 // change week
 // Not sure ok even if user is quick (cf fetch_cours)
 function apply_wk_change(d, i) { //if(fetch.done) {
-    if (i > 0 && i <= weeks.ndisp) {
-        weeks.sel[0] = i + weeks.fdisp;
-    }
+    wdw_weeks.change_selection(i) ;
     dispos = {};
     user.dispos = [];
 
@@ -763,7 +761,7 @@ function compute_changes(changes, conc_tutors, gps) {
 	    
 
 	    // build the communication with django
-	    
+	    var sel_week = wdw_weeks.get_selected() ;
             change = {id: id,
 		      day: {o: cb.day,
 			    n: null },
@@ -771,9 +769,9 @@ function compute_changes(changes, conc_tutors, gps) {
 			     n: null },
 		      room: {o: cb.room,
 			     n: null },
-		      week: {o: weeks.data.init[weeks.sel[0]].semaine,
+		      week: {o: sel_week.semaine,
 			     n: null },
-		      year: {o: weeks.data.init[weeks.sel[0]].an,
+		      year: {o: sel_week.an,
 			     n: null},
 		      tutor:{o: cb.prof,
 			     n: null}
@@ -883,11 +881,13 @@ function send_edt_change(changes) {
     sent_data['v'] = JSON.stringify(version) ; 
     sent_data['tab'] = JSON.stringify(changes) ;
 
+    var sel_week = wdw_weeks.get_selected() ;
+
     show_loader(true);
     $.ajax({
         url: url_edt_changes
-	    + "?s=" + weeks.data.init[weeks.sel[0]].semaine
-	    + "&a=" + weeks.data.init[weeks.sel[0]].an
+	    + "?s=" + sel_week.semaine
+	    + "&a=" + sel_week.an
 	    + "&c=" + num_copie,
         type: 'POST',
 //        contentType: 'application/json; charset=utf-8',
@@ -971,11 +971,12 @@ function send_dis_change() {
 	var sent_data = {} ;
 	sent_data['changes'] = JSON.stringify(changes) ; 
 
+        var sel_week = wdw_weeks.get_selected() ;
+
         show_loader(true);
         $.ajax({
             url: url_user_pref_changes
-		+ weeks.init_data[weeks.sel[0]].an
-		+ "/" + weeks.init_data[weeks.sel[0]].semaine
+		+ sel_week.url()
 		+ "/" + user.nom,
             type: 'POST',
 //            contentType: 'application/json; charset=utf-8',
@@ -1409,7 +1410,8 @@ function redirect_dept(d) {
         split_addr.splice(-1,1);
     }
     // go to the right week
-    split_addr.push(weeks.init_data[weeks.sel[0]].an);
-    split_addr.push(weeks.init_data[weeks.sel[0]].semaine);
+    var sel_week = wdw_weeks.get_selected() ;
+    split_addr.push(sel_week.an);
+    split_addr.push(sel_week.semaine);
     window.location.href = split_addr.join("/") ;
 }

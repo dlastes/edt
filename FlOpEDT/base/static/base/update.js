@@ -429,11 +429,9 @@ function go_week_menu(quick) {
     }
 
     var sa_wk =
-        weeks.cont
+        dsp_weeks.cont
         .selectAll(".rec_wk")
-        .data(weeks.data.current, function(d) {
-            return d.an + "" + d.semaine;
-        });
+        .data(wdw_weeks.data, Week.id_fun);
 
     sa_wk.exit().transition(t).remove();
 
@@ -450,32 +448,30 @@ function go_week_menu(quick) {
     g_wk
         .append("rect")
         .attr("y", 0)
-        .attr("height", weeks.height)
-        .attr("width", weeks.width)
-        .attr("x", rect_wk_init_x)
+        .attr("height", dsp_weeks.height)
+        .attr("width", dsp_weeks.width)
+        .attr("x", fun_weeks.rect_x) //rect_wk_init_x)
         .merge(sa_wk.select("rect"))
         .transition(t)
-        .attr("x", rect_wk_x);
+        .attr("x", fun_weeks.rect_x);
 
     g_wk
         .append("text")
         .attr("fill", "white")
-        .text(rect_wk_txt)
-        .attr("y", .5 * weeks.height)
-        .attr("x", rect_wk_init_x)
+        .text(fun_weeks.txt)
+        .attr("y", .5 * dsp_weeks.height)
+        .attr("x", fun_weeks.rect_x)
         .merge(sa_wk.select("text"))
         .transition(t)
-        .attr("x", function(d, i) {
-            return rect_wk_x(d, i) + .5 * weeks.width;
-        });
+        .attr("x", fun_weeks.txt_x);
 
     var wk_sel =
         wg.fg
         .selectAll(".sel_wk")
-        .data(weeks.sel)
+        .data(wdw_weeks.get_iselected())
         .select("ellipse")
         .transition(t)
-        .attr("cx", week_sel_x);
+        .attr("cx", fun_weeks.sel_x);
 }
 
 
