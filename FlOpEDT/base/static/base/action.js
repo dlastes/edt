@@ -65,21 +65,13 @@ function apply_change_simple_pref(d) {
 
 // move timeline to the left
 function week_left() {
-    if (weeks.fdisp > 0) {
-        weeks.fdisp -= 1;
-        weeks.data.current.pop();
-        weeks.data.current.unshift(weeks.data.init[weeks.fdisp]);
-    }
+    wdw_weeks.move_earlier() ;
     go_week_menu(false);
 }
 
 // move timeline to the right
 function week_right() {
-    if (weeks.fdisp + weeks.ndisp + 2 < weeks.data.init.length) {
-        weeks.fdisp += 1;
-        weeks.data.current.splice(0, 1);
-        weeks.data.current.push(weeks.data.init[weeks.fdisp + weeks.ndisp + 1]);
-    }
+    wdw_weeks.move_later() ;
     go_week_menu(false);
 }
 

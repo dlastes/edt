@@ -356,31 +356,6 @@ function smile_trans(d) {
 }
 
 
-/*---------------------
-  ------- WEEKS -------
-  ---------------------*/
-function rect_wk_txt(d) {
-    return d.semaine;
-}
-
-function rect_wk_x(d, i) {
-    return i * weeks.width - .5 * weeks.width;
-}
-
-function rect_wk_init_x(d, i) {
-    if (i == 0) {
-        return rect_wk_x(0, -1);
-    } else if (i == weeks.ndisp + 1) {
-        return rect_wk_x(0, weeks.ndisp + 2);
-    } else {
-        return rect_wk_x(0, i);
-    }
-}
-
-function week_sel_x(d) {
-    return (d - weeks.fdisp) * weeks.width;
-}
-
 
 /*----------------------
   -------- GRID --------
