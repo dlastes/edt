@@ -361,7 +361,7 @@ function confirm_tutor_change(d){
 
 function go_cm_room_tutor_change() {
 
-    var tut_cm_course_dat = cmtg
+    var tut_cm_course_dat = svg.get_dom("cmtg")
         .selectAll(".cm-chg")
         .data(room_tutor_change.course,
               function(d) {
@@ -401,7 +401,7 @@ function go_cm_room_tutor_change() {
 
 
 
-    var tut_cm_room_dat = cmtg
+    var tut_cm_room_dat = svg.get_dom("cmtg")
         .selectAll(".cm-chg-rooms")
         .data(room_tutor_change.proposal,
               function(d,i) {
@@ -577,7 +577,7 @@ function apply_ckbox(dk) {
             if (ckbox[dk].cked) {
                 //create_dispos_user_data();
                 //ckbox["dis-mod"].disp = true;
-                stg.attr("visibility", "visible");
+                svg.get_dom("stg").attr("visibility", "visible");
 
                 dim_dispo.plot = 1;
                 if (rootgp_width != 0) {
@@ -602,7 +602,7 @@ function apply_ckbox(dk) {
             } else {
                 user.dispos = [];
                 //ckbox["dis-mod"].disp = false;
-                stg.attr("visibility", "hidden");
+                svg.get_dom("stg").attr("visibility", "hidden");
                 dim_dispo.plot = 0;
                 if (rootgp_width != 0) {
                     labgp.width *= 1 + (dim_dispo.width + dim_dispo.right) / (rootgp_width * labgp.width);
@@ -649,7 +649,7 @@ function apply_ckbox(dk) {
         // Fetch data, ask for login, etc.
         // ...
 
-        stg
+        svg.get_dom("stg")
             .select("[but=st-ap]")
             .attr("cursor", st_but_ptr());
 
@@ -1046,7 +1046,7 @@ function dis_change_ack(msg, nbDispos) {
 
 
 function clean_splash(class_id) {
-    dg.select("." + class_id).remove() ;
+    svg.get_dom("dg").select("." + class_id).remove() ;
 }
 
 
@@ -1066,11 +1066,11 @@ function splash(splash_ds){
 
     var class_id = "spl_" + splash_ds.id ;
 
-    dg
+    svg.get_dom("dg")
 	.select("." + class_id)
 	.remove();
     
-    dg
+    svg.get_dom("dg")
         .append("g")
         .attr("class", class_id)
         .append("rect")
@@ -1080,7 +1080,7 @@ function splash(splash_ds){
         .attr("height", wp.height)
         .attr("fill", "white");
 
-    var spg = dg.select("." + class_id) ;
+    var spg = svg.get_dom("dg").select("." + class_id) ;
 
 
     

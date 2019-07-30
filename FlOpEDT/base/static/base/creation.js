@@ -54,7 +54,7 @@
   ---------------------------*/
 
 function create_alarm_dispos() {
-    di = dig
+    di = svg.get_dom("dig")
         .append("g")
         .attr("text-anchor", "start")
         .attr("class", "disp-info");
@@ -107,11 +107,11 @@ function create_clipweek() {
 
     wdw_weeks.chose(new Week(an_init, semaine_init));
 
-    wg.upper
+    svg.get_dom("wg")
         .attr("transform", fun_weeks.trans());
 
 
-    wg.fg
+    svg.get_dom("wg-fg")
         .selectAll(".sel_wk")
         .data(wdw_weeks.get_iselected())
         .enter()
@@ -128,7 +128,7 @@ function create_clipweek() {
 
 
     var but =
-        wg.fg
+        svg.get_dom("wg-fg")
         .append("g")
         .attr("class", "cir_wk")
         .on("click", week_left);
@@ -151,7 +151,7 @@ function create_clipweek() {
 
 
     but =
-        wg.fg
+        svg.get_dom("wg-fg")
         .append("g")
         .attr("class", "cir_wk")
         .on("click", week_right);
@@ -172,7 +172,7 @@ function create_clipweek() {
         .text(">");
 
 
-    wg.bg
+    svg.get_dom("wg-bg")
         .append("rect")
         .attr("class", "cir_wk")
         .attr("x", 0)
@@ -180,7 +180,7 @@ function create_clipweek() {
         .attr("width", fun_weeks.strip_w())
         .attr("height", dsp_weeks.height);
 
-    wg.bg
+    svg.get_dom("wg-bg")
         .append("g")
         .append("clipPath")
         .attr("id", "clipwk")
@@ -190,7 +190,7 @@ function create_clipweek() {
         .attr("height", dsp_weeks.height)
         .attr("width", fun_weeks.strip_w());
 
-    dsp_weeks.cont = wg.bg
+    dsp_weeks.cont = svg.get_dom("wg-bg")
         .append("g")
         .attr("clip-path", "url(#clipwk)");
 
@@ -332,7 +332,7 @@ function create_grid_data() {
 function create_but_scale() {
     def_drag_sca();
 
-    var grp = fg
+    var grp = svg.get_dom("edt-fg")
         .append("g")
         .attr("class", "h-sca")
         .attr("cursor", "pointer")
@@ -354,7 +354,7 @@ function create_but_scale() {
 
 
 
-    grp = fg
+    grp = svg.get_dom("edt-fg")
         .append("g")
         .attr("class", "v-sca")
         .attr("cursor", "pointer")
@@ -387,7 +387,7 @@ function def_drag_sca() {
                 drag.svg = d3.select("#edt-main");
                 drag.svg_w = +drag.svg.attr("width");
                 drag.init = +drag.sel.select("rect").attr("x");
-                dg.node().appendChild(drag.sel.node());
+                svg.get_dom("dg").node().appendChild(drag.sel.node());
 
 
                 drag.sel
@@ -428,7 +428,7 @@ function def_drag_sca() {
                 drag.sel.select("path").attr("d", but_sca_tri_h(0));
                 //(drag.x+drag.init)/(grid_width());
                 go_edt(false);
-                fg.node().appendChild(drag.sel.node());
+                svg.get_dom("edt-fg").node().appendChild(drag.sel.node());
                 drag.sel.select(".h-sca-l").remove();
             }
         });
@@ -440,7 +440,7 @@ function def_drag_sca() {
                 drag.x = 0;
                 drag.y = 0;
                 drag.init = +drag.sel.select("rect").attr("y");
-                dg.node().appendChild(drag.sel.node());
+                svg.get_dom("dg").node().appendChild(drag.sel.node());
                 drag.svg = d3.select("#edt-main")
                 drag.svg_h = +drag.svg.attr("height"); //+200;
 
@@ -478,7 +478,7 @@ function def_drag_sca() {
                 drag.sel.select("rect").attr("y", grid_height());
 		drag.sel.select("path").attr("d", but_sca_tri_v(0));
                 go_edt(false);
-                fg.node().appendChild(drag.sel.node());
+                svg.get_dom("edt-fg").node().appendChild(drag.sel.node());
                 drag.sel.select(".v-sca-l").remove();
 
 		dsp_svg.h = svg_height() ;
@@ -931,12 +931,12 @@ function compute_promo_leaves(node) {
 
 function create_menus() {
 
-    meg
+    svg.get_dom("meg")
         .attr("transform", "translate(" + menus.x + "," + menus.y + ")")
         .attr("text-anchor", "start")
         .attr("font-size", 18);
 
-    meg
+    svg.get_dom("meg")
         .append("rect")
         .attr("class", "menu")
         .attr("x", 0)
@@ -946,7 +946,7 @@ function create_menus() {
         .attr("rx", 10)
         .attr("ry", 10);
 
-    meg
+    svg.get_dom("meg")
         .append("rect")
         .attr("class", "menu")
         .attr("x", menus.dx)
@@ -956,14 +956,14 @@ function create_menus() {
         .attr("rx", 10)
         .attr("ry", 10);
 
-    meg
+    svg.get_dom("meg")
         .append("text")
         .attr("x", menus.mx)
         .attr("y", menus.h - 10)
         .attr("fill", "black")
         .text("Cours :");
 
-    meg
+    svg.get_dom("meg")
         .append("text")
         .attr("x", menus.mx + menus.dx)
         .attr("y", menus.h - 10)
@@ -980,7 +980,7 @@ function create_menus() {
   ---------------------*/
 
 function create_regen() {
-    vg
+    svg.get_dom("vg")
         .append("g")
         .attr("class", "ack-reg")
         .append("text");
@@ -990,7 +990,7 @@ function create_regen() {
 
 
 function create_bknews() {
-    var flash = fig
+    var flash = svg.get_dom("edt-fig")
 	.append("g")
 	.attr("class", "flashinfo");
 
@@ -1029,7 +1029,7 @@ function create_bknews() {
   ---------------------*/
 
 function create_quote() {
-    vg
+    svg.get_dom("vg")
 	.append("g")
 	.attr("class", "quote")
 	.append("text");
@@ -1051,7 +1051,7 @@ function create_quote() {
 		quote = '' ;
 	    }
 		
-	    vg.select(".quote").select("text")
+	    svg.get_dom("vg").select(".quote").select("text")
 		.text(quote);
 
 
@@ -1101,7 +1101,7 @@ function def_drag() {
 
                 // raise the course to the drag layer
                 drag.sel = d3.select(this);
-                dg.node().appendChild(drag.sel.node());
+                svg.get_dom("dg").node().appendChild(drag.sel.node());
 
             }
         })
@@ -1141,7 +1141,7 @@ function def_drag() {
             if(drag.sel != null) {
 
             // lower the course to the middleground layer
-            mg.node().appendChild(drag.sel.node());
+            svg.get_dom("edt-mg").node().appendChild(drag.sel.node());
 
             if (cur_over != null && ckbox["edt-mod"].cked && fetch.done) {
 
@@ -1554,7 +1554,7 @@ function clean_unavailable_rooms() {
 
 function create_val_but() {
 
-    edt_but = vg
+    edt_but = svg.get_dom("vg")
         .append("g")
         .attr("but", "edt")
         .on("mouseover", but_bold)
@@ -1585,7 +1585,7 @@ function create_val_but() {
     edt_but.attr("visibility", "hidden");
 
 
-    edt_message = vg
+    edt_message = svg.get_dom("vg")
         .append("g")
         .attr("message", "edt");
 
@@ -1633,7 +1633,7 @@ function create_stype() {
     // -- no slot --
 
     
-    dat = stg.selectAll(".dispot")
+    dat = svg.get_dom("stg").selectAll(".dispot")
         .data(user.dispos_type);
 
     datdi = dat
@@ -1675,9 +1675,9 @@ function create_stype() {
         .attr("x2", gsclbt_x)
         .attr("y2", gsclbt_y);
 
-    stg.attr("visibility", "hidden");
+    svg.get_dom("stg").attr("visibility", "hidden");
 
-    var dis_but = stg
+    var dis_but = svg.get_dom("stg")
         .append("g")
         .attr("but", "dis")
         .on("mouseover", but_bold)
@@ -1705,7 +1705,7 @@ function create_stype() {
         .attr("x", did.tlx + .5 * valid.w)
         .attr("y", did.tly + .5 * valid.h);
 
-    var stap_but = stg
+    var stap_but = svg.get_dom("stg")
         .append("g")
         .attr("but", "st-ap")
         .on("mouseover", st_but_bold)
@@ -1890,7 +1890,7 @@ function def_cm_change() {
 // buttons to open selection view
 function create_selections() {
 
-    var avg = catg
+    var avg = svg.get_dom("catg")
         .selectAll(".gen-selection")
         .data(sel_popup.available);
 
@@ -1918,7 +1918,7 @@ function create_selections() {
         .attr("x", .5 * sel_popup.selw)
         .attr("y", .5 * sel_popup.selh);
 
-    var forall = catg
+    var forall = svg.get_dom("catg")
         .append("g")
         .attr("class", "sel_forall")
         .attr("transform", sel_forall_trans())
@@ -1995,7 +1995,7 @@ function popup_data(type) {
 // refreshes filter panels
 function go_selection_popup(){
     
-    var bound = selg
+    var bound = svg.get_dom("selg")
         .selectAll(".sel-pop-g")
         .data(sel_popup.panels, function(p) {
             return p.type ;
@@ -2103,7 +2103,7 @@ function go_selection_popup(){
 
 // create buttons for department redirection
 function create_dept_redirection() {
-    var avg = catg
+    var avg = svg.get_dom("catg")
         .selectAll(".dept-selection")
         .data(departments.data);
 

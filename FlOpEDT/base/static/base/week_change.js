@@ -573,7 +573,7 @@ function add_exception_course(cur_week, cur_year, targ_week, targ_year,
 // "exception"
 // function add_exception(sem_att, an_att, sem_voulue, an_voulu, nom, l1, l2, l3){
 //     if(sem_att==sem_voulue && an_att==an_voulu){
-// 	var gro = dg.append("g")
+// 	var gro = svg.get_dom("dg").append("g")
 // 	    .attr("class",nom);
 
 // 	var tlx = 3*(rootgp_width*labgp.width
@@ -817,9 +817,10 @@ function fetch_ended() {
         fetch.done = true;
         go_edt(false);
 
-	if (fig === undefined) {
-            fig = svg.add_child("svg", "final");
-	}
+        // WTF was that?
+	// if (fig === undefined) {
+        //     fig = svg.add_child("svg", "final");
+	// }
 
     }
 }

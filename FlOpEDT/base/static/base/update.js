@@ -58,7 +58,7 @@ function go_pref(quick) {
 
 	// preferences: background color, and smiley
 	
-        dat = mg.selectAll(".dispo")
+        dat = svg.get_dom("edt-mg").selectAll(".dispo")
             .data(user.dispos,
                   function(d) {
                       return [d.day,d.start_time,d.duration,d.val].join('-');
@@ -340,7 +340,7 @@ function go_cm_advanced_pref(quick) {
         t = d3.transition();
     }
     
-    var dis_men_dat = cmpg
+    var dis_men_dat = svg.get_dom("cmpg")
         .selectAll(".dispo-menu")
         .data(data_dispo_adv_cur);
     
@@ -380,6 +380,7 @@ function go_cm_advanced_pref(quick) {
 // check and inform whenever there is not enough available slots
 function go_alarm_pref() {
 
+    var dig = svg.get_dom("dig");
     dig
         .select(".disp-info").select(".disp-required")
         .text(txt_reqDispos)
@@ -466,7 +467,7 @@ function go_week_menu(quick) {
         .attr("x", fun_weeks.txt_x);
 
     var wk_sel =
-        wg.fg
+        svg.get_dom("wg-fg")
         .selectAll(".sel_wk")
         .data(wdw_weeks.get_iselected())
         .select("ellipse")
@@ -490,9 +491,9 @@ function go_grid(quick) {
         t = d3.transition();
     }
 
+    var fg = svg.get_dom("edt-fg") ;
 
-
-    bg
+    svg.get_dom("edt-bg")
 	.select("rbg")
 	.attr("x",0)
 	.attr("y",0)
@@ -556,7 +557,7 @@ function go_grid(quick) {
 
     
 
-    grid = bg.selectAll(".gridscg")
+    grid = svg.get_dom("edt-bg").selectAll(".gridscg")
         .data(data_grid_scale_gp
             .filter(function(d) {
                 return d.gp.display;
@@ -581,7 +582,7 @@ function go_grid(quick) {
     grid.exit().remove();
 
 
-    grid = bg.selectAll(".gridscp")
+    grid = svg.get_dom("edt-bg").selectAll(".gridscp")
         .data(data_grid_scale_row
             .filter(function(d) {
                 return row_gp[d.row].display;
@@ -655,7 +656,7 @@ function go_days(quick, half_day_rect) {
         t = d3.transition();
     }
 
-    var day_scale = fg
+    var day_scale = svg.get_dom("edt-fg")
         .selectAll(".gridsckd")
         .data(week_days.data(),
               Day.id_fun);
@@ -699,7 +700,7 @@ function go_days(quick, half_day_rect) {
     day_scale.exit().remove();
 
 
-    var hour_bar = fg
+    var hour_bar = svg.get_dom("edt-fg")
         .selectAll(".gridsckhb")
         .data([time_settings.time]);
 
@@ -728,7 +729,7 @@ function go_days(quick, half_day_rect) {
 
     hour_bar.exit().remove();
     
-    var hour_scale = fg
+    var hour_scale = svg.get_dom("edt-fg")
         .selectAll(".gridsckh")
         .data(side_time);
 
@@ -772,7 +773,7 @@ function go_bknews(quick) {
         t = d3.transition();
     }
 
-    fig
+    svg.get_dom("edt-fig")
 	.select(".top-bar")
         .transition(t)
         .attr("x1", 0)
@@ -780,7 +781,7 @@ function go_bknews(quick) {
         .attr("x2", grid_width())
         .attr("y2", bknews_top_y());
 
-    fig
+    svg.get_dom("edt-fig")
 	.select(".bot-bar")
         .transition(t)
         .attr("x1", 0)
@@ -788,7 +789,7 @@ function go_bknews(quick) {
         .attr("x2", grid_width())
         .attr("y2", bknews_bot_y());
     
-    var flash = fig.select(".txt-info");
+    var flash = svg.get_dom("edt-fig").select(".txt-info");
 
     var fl_all = flash
 	.selectAll(".bn-all")
@@ -840,7 +841,7 @@ function go_bknews(quick) {
 
 
 function go_quote() {
-    vg.select(".quote").select("text")
+    svg.get_dom("vg").select(".quote").select("text")
         .transition(d3.transition())
         .attr("x", quote_x())
         .attr("y", quote_y());
@@ -855,7 +856,7 @@ function go_quote() {
 
 function go_gp_buttons() {
     for (var p = 0; p < set_promos.length; p++) {
-        var cont = selg
+        var cont = svg.get_dom("selg")
             .select(".sel-pop-g#" + popup_type_id("group"))
             .selectAll(".gp-but-" + set_promos[p] + "P")
             .data(Object.keys(groups[p]).map(function(k) {
@@ -908,7 +909,7 @@ function go_gp_buttons() {
   --------------------*/
 function go_menus() {
 
-    var init = meg
+    var init = svg.get_dom("meg")
         .selectAll(".ckline")
         .data(Object.keys(ckbox));
 
@@ -962,7 +963,7 @@ function go_menus() {
         .attr("fill", menu_ckd_fill);
 
 
-    meg
+    svg.get_dom("meg")
         .selectAll(".ckline")
         .data(Object.keys(ckbox))
         .attr("cursor", menu_curs);
@@ -1042,7 +1043,7 @@ function go_courses(quick) {
 
     update_selection() ;
     
-    var cg = mg.selectAll(".cours")
+    var cg = svg.get_dom("edt-mg").selectAll(".cours")
         .data(cours.filter(function(d) {
                 return groups[d.promo][d.group].display;
             }),
@@ -1213,12 +1214,12 @@ function go_regen(s) {
 
         ack.regen = txt;
 
-        vg.select(".ack-reg").select("text")
+        svg.get_dom("vg").select(".ack-reg").select("text")
             .text(ack.regen);
 
     }
 
-    vg.select(".ack-reg").select("text")
+    svg.get_dom("vg").select(".ack-reg").select("text")
         .transition(d3.transition())
         .attr("x", grid_width())
         .attr("y", ack_reg_y());
@@ -1262,7 +1263,7 @@ function go_edt(t) {
 
 function go_selection_buttons() {
 
-    var cont = selg
+    var cont = svg.get_dom("selg")
         .selectAll(".sel-pop-g")
         .data(sel_popup.panels, function(p) {
             return p.type ;
