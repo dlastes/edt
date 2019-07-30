@@ -152,9 +152,6 @@ WeeksExcerpt.prototype.change_selection = function(shift) {
 
 
 
-
-
-
 /***************/
 /* class Weeks */
 /***************/
@@ -190,3 +187,192 @@ Weeks.prototype.get_nb = function() {
 }
 
 
+/********************/
+/* class WeekBanner */
+/********************/
+
+getMethods = (obj) => Object.getOwnPropertyNames(obj).filter(item => typeof obj[item] === 'function') ;
+
+// svg: Svg
+// layout_name: string; name of the layout in the svg
+// weeks: WeeksExcerpt
+function WeekBanner(svg, layout_name_gen, layout_name_fg, layout_name_bg, weeks, par) {
+    this.lay_g = svg.get_dom(layout_name_gen) ;
+    this.lay_fg = svg.get_dom(layout_name_fg) ;
+    this.lay_bg = svg.get_dom(layout_name_bg) ;
+    this.weeks = weeks ;
+    this.par = new ParamWeek(par) ;
+    console.log(getMethods(this.par));
+    var methods = getMethods(this.par) ; 
+    for (var i = 0 ; i < methods.length ; i++) {
+        this.par[methods[i]] = this.par[methods[i]].bind(this.par) ;
+    }
+    //this.par.txt_x = this.par.txt_x.bind(this.par) ;
+}
+
+//WeekBanner.prototype.
+
+WeekBanner.prototype.spawn = function() {
+    this.weeks.add_full_weeks(semaine_an_list) ;
+
+    this.weeks.chose(new Week(an_init, semaine_init));
+
+    // shift everything
+    this.lay_g
+        .attr("transform", fun_weeks.trans());
+
+    this.lay_fg
+        .selectAll(".sel_wk")
+        .data(this.weeks.get_iselected())
+        .enter()
+        .append("g")
+        .attr("class", "sel_wk")
+        .attr("clip-path", "url(#clipwk)")
+        .attr("pointer-events", "none")
+        .append("ellipse")
+        .attr("cx", undefined)
+        .attr("cy", .5 * dsp_weeks.height)
+        .attr("rx", .5 * dsp_weeks.wfac * dsp_weeks.width)
+        .attr("ry", .5 * dsp_weeks.hfac * dsp_weeks.height);
+
+
+
+    var btn_earlier =
+    this.lay_fg
+        .append("g")
+        .attr("class", "cir_wk")
+        .on("click", week_left);
+
+    btn_earlier
+        .append("circle")
+        .attr("stroke", "white")
+        .attr("stroke-width", 1)
+        .attr("cx", 0)
+        .attr("cy", .5 * dsp_weeks.height)
+        .attr("r", dsp_weeks.rad * .5 * dsp_weeks.height);
+
+    btn_earlier
+        .append("text")
+        .attr("fill", "white")
+        .attr("x", 0)
+        .attr("y", .5 * dsp_weeks.height)
+        .text("<");
+
+
+    var btn_later =
+        this.lay_fg
+        .append("g")
+        .attr("class", "cir_wk")
+        .on("click", week_right);
+
+    btn_later
+        .append("circle")
+        .attr("stroke", "white")
+        .attr("stroke-width", 1)
+        .attr("cx", fun_weeks.right_sel_x())
+        .attr("cy", .5 * dsp_weeks.height)
+        .attr("r", dsp_weeks.rad * .5 * dsp_weeks.height)
+
+    btn_later
+        .append("text")
+        .attr("fill", "white")
+        .attr("x", fun_weeks.right_sel_x())
+        .attr("y", .5 * dsp_weeks.height)
+        .text(">");
+
+
+    this.lay_bg
+        .append("rect")
+        .attr("class", "cir_wk")
+        .attr("x", 0)
+        .attr("y", 0)
+        .attr("width", fun_weeks.strip_w())
+        .attr("height", dsp_weeks.height);
+
+    this.lay_bg
+        .append("g")
+        .append("clipPath")
+        .attr("id", "clipwk")
+        .append("rect")
+        .attr("x", 0)
+        .attr("y", 0)
+        .attr("height", dsp_weeks.height)
+        .attr("width", fun_weeks.strip_w());
+
+    dsp_weeks.cont = this.lay_bg
+        .append("g")
+        .attr("clip-path", "url(#clipwk)");
+
+
+    this.update(true);
+};
+
+
+
+WeekBanner.prototype.update = function(quick) {
+
+    var t;
+    if (quick) {
+        t = d3.transition()
+            .duration(0);
+    } else {
+        t = d3.transition()
+            .duration(200);
+    }
+
+    var sa_wk =
+        dsp_weeks.cont
+        .selectAll(".rec_wk")
+        .data(wdw_weeks.data, Week.id_fun);
+
+    sa_wk.exit().transition(t).remove();
+
+    var g_wk = sa_wk
+        .enter()
+        .append("g")
+        .attr("class", "rec_wk");
+
+    g_wk
+        .merge(sa_wk)
+        .on("click", apply_wk_change);
+
+
+    g_wk
+        .append("rect")
+        .attr("y", 0)
+        .attr("height", dsp_weeks.height)
+        .attr("width", dsp_weeks.width)
+        .attr("x", fun_weeks.rect_x) //rect_wk_init_x)
+        .merge(sa_wk.select("rect"))
+        .transition(t)
+        .attr("x", fun_weeks.rect_x);
+
+    g_wk
+        .append("text")
+        .attr("fill", "white")
+        .text(fun_weeks.txt)
+        .attr("y", .5 * dsp_weeks.height)
+        .attr("x", fun_weeks.rect_x)
+        .merge(sa_wk.select("text"))
+        .transition(t)
+        .attr("x", this.par.txt_x);//fun_weeks.txt_x);
+
+    var wk_sel =
+        svg.get_dom("wg-fg")
+        .selectAll(".sel_wk")
+        .data(wdw_weeks.get_iselected())
+        .select("ellipse")
+        .transition(t)
+        .attr("cx", fun_weeks.sel_x);
+}
+
+
+// could be done with prototype and (Object.getPrototypeOf(parameter)
+// but simpler to write in this way + there will be a single object
+
+function ParamWeek(cst_parameters) {
+    Object.assign(this, cst_parameters);
+    this.txt_x = function(d, i) {
+        return (i+1) * this.width ;
+    };
+}
