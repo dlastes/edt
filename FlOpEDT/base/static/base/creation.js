@@ -94,27 +94,6 @@ function create_layouts(svg_cont, light) {
     catg = svg_cont.append("g")
         .attr("id", "lay-catg");
 
-    if (!light) {
-
-        $("#div-mod").css("width", modules.width);
-        $("#div-mod").css({
-            position: "relative",
-            left: modules.x,
-            top: modules.y
-        });
-        $("#div-mod").css("height", modules.height);
-
-        $("#div-sal").css("width", salles.width);
-        $("#div-sal").css({
-            position: "relative",
-            left: salles.x,
-            top: salles.y
-        });
-        $("#div-sal").css("height", salles.height);
-
-    }
-
-
 
     // semaine type ground
     stg = svg_cont.append("g")
