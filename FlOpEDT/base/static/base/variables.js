@@ -134,12 +134,12 @@ var rootgp_width = 0;
 var pos_rootgp_width = 0;
 
 // different grounds where to plot
-var fg, mg, bg, dg, meg, vg, gpg, catg, stg, mog, sag, fig, log, cmpg, cmtg, selg;
-var wg = {
-    upper: null,
-    bg: null,
-    fg: null
-};
+// var fg, mg, bg, dg, meg, vg, gpg, catg, stg, mog, sag, fig, log, cmpg, cmtg, selg;
+// var wg = {
+//     upper: null,
+//     bg: null,
+//     fg: null
+// };
 
 // opacity of disabled stuffs
 var opac = .4;

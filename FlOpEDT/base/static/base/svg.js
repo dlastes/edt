@@ -72,52 +72,52 @@ Svg.prototype.create_container = function() {
 
 Svg.prototype.create_layouts = function() {
     // menus ground
-    meg = this.add_child("svg", "meg");
+    this.add_child("svg", "meg");
 
     // weeks ground
-    wg.upper = this.add_child("svg", "wg");
-    wg.bg = this.add_child("wg", "wg-bg");
-    wg.fg = this.add_child("wg", "wg-fg");
+    this.add_child("svg", "wg");
+    this.add_child("wg", "wg-bg");
+    this.add_child("wg", "wg-fg");
 
     // groupes ground
-    gpg = this.add_child("svg", "gpg");
+    // gpg = this.add_child("svg", "gpg");
 
     // selection categories button ground
-    catg = this.add_child("svg", "catg");
+    this.add_child("svg", "catg");
 
     // semaine type ground
-    stg = this.add_child("svg", "stg");
+    this.add_child("svg", "stg");
 
     // dispos info ground
-    dig = this.add_child("svg", "dg");
+    this.add_child("svg", "dig");
 
     // valider
-    vg = this.add_child("svg", "vg");
+    this.add_child("svg", "vg");
 
     // background, middleground, foreground, dragground
-    var edtg = this.add_child("svg", "edtg");
-    bg = this.add_child("edtg", "edt-bg");
-    mg = this.add_child("edtg", "edt-mg");
-    fig = this.add_child("edtg", "edt-fig");
-    fg = this.add_child("edtg", "edt-fg");
+    this.add_child("svg", "edtg");
+    this.add_child("edtg", "edt-bg");
+    this.add_child("edtg", "edt-mg");
+    this.add_child("edtg", "edt-fig");
+    this.add_child("edtg", "edt-fg");
 
     // selection ground
-    selg = this.add_child("svg", "selg");
+    this.add_child("svg", "selg");
 
     
     // context menus ground
-    var cmg = this.add_child("svg", "cmg");
-    cmpg = this.add_child("cmg", "cmpg");
-    cmtg = this.add_child("cmg", "cmtg");
+    this.add_child("svg", "cmg");
+    this.add_child("cmg", "cmpg");
+    this.add_child("cmg", "cmtg");
     
 
     // logo ground
-    log = this.add_child("edtg", "log");
+    // log = this.add_child("edtg", "log");
 
     // drag ground
-    dg = this.add_child("svg", "dg");
+    this.add_child("svg", "dg");
 
-    bg
+    this.get_dom("edt-bg")
 	.append("rect")
 	.attr("class","rbg");
 }
