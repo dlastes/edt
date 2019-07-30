@@ -24,9 +24,10 @@
 
 // Redefinition of some variables
 
-var margin = {top: 50,  left: 100, right: 10, bot:10};
+dsp_svg.margin = {top: 50,  left: 100, right: 10, bot:10};
 
-var svg = {height: 625 - margin.top - margin.bot, width: 680 - margin.left - margin.right};
+dsp_svg.h = 625 - dsp_svg.margin.top - dsp_svg.margin.bot ;
+dsp_svg.w = 680 - dsp_svg.margin.left - dsp_svg.margin.right ;
 
 var mode = "tutor" ;
 

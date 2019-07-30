@@ -48,7 +48,11 @@ var user = {nom: logged_usr.nom,
 	    dispos_type: []
 	   };
 
-var margin = {
+
+
+dsp_svg.h = window.innerHeight - $("#menu-edt").height() - 5 ;
+dsp_svg.w = window.innerWidth - 20 ;
+dsp_svg.margin = {
     top: 250,     // - TOP BANNER - //
     left:  50,
     right:  110,
@@ -185,7 +189,9 @@ function on_departments_rcv(dept_data) {
   ---------------------*/
 
 
-create_general_svg(false);
+svg = new Svg(dsp_svg.layout_tree, false);
+svg.create_container();
+
 create_quote()
 
 def_drag();

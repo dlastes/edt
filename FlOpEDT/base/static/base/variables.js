@@ -160,12 +160,24 @@ var fetch = {
 };
 //cours_ok pas très utile
 
-// svg container
-var svg_cont ;
+// Svg 
+var svg ;
 
+var dsp_svg =
+    {w: 0,
+     h: 0,
+     margin: {
+         top: 0,     // - TOP BANNER - //
+         left: 0,
+         right: 0,
+         bot: 0},
+     trans: function() {
+         return "translate(" + this.margin.left + "," + this.margin.top + ")" ;
+     }
+    };
 
-
-
+var fun_svg = {
+}
 /*--------------------------
   ------- PREFERENCES ------
   --------------------------*/

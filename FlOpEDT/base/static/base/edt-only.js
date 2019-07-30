@@ -31,9 +31,14 @@ var user = {nom: usna,
 	    dispos_type: [],
 	   };
 
-var margin = {top: tv_svg_top_m, left: 30, right: 0, bot:0};
 
-var svg = {height: tv_svg_h - margin.top - margin.bot, width: tv_svg_w - margin.left - margin.right};
+dsp_svg.margin = {top: tv_svg_top_m,
+                  left: 30,
+                  right: 0,
+                  bot:0};
+
+dsp_svg.h = tv_svg_h - dsp_svg.margin.top - dsp_svg.margin.bot ;
+dsp_svg.w = tv_svg_w - dsp_svg.margin.left - dsp_svg.margin.right ;
 
 var week = semaine_init ;
 var year = an_init;
@@ -59,7 +64,8 @@ pref_only = false ;
 
 
 
-create_general_svg(true);
+svg = new Svg(dsp_svg.layout_tree, true);
+svg.create_container();
 
 
 d3.json(groupes_fi,
