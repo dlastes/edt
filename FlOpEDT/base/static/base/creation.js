@@ -43,12 +43,6 @@
 
 
 
-/*----------------------
-  -------   SVG  -------
-  ----------------------*/
-
-
-
 /*---------------------------
   ------- PREFERENCES -------
   ---------------------------*/
@@ -74,31 +68,6 @@ function create_alarm_dispos() {
 /*---------------------
   ------- WEEKS -------
   ---------------------*/
-
-
-
-// PRECONDITION: semaine_init, week_init, weeks.data.init
-function find_week(week_list) {
-    var i, up;
-    i = 0;
-    up = false ;
-    
-    while (i < week_list.length && !up) {
-        if (an_init < week_list[i].an ||
-            (an_init == week_list[i].an &&
-                semaine_init < week_list[i].semaine)) {
-            up = true;
-        } else {
-            i++;
-        }
-    }
-    if (!up) {
-        i = 0;
-    }
-    return i;
-}
-
-
 
 
 function create_clipweek() {
