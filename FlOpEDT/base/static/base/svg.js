@@ -67,48 +67,10 @@ Svg.prototype.create_container = function() {
         .append("g")
         .attr("transform", dsp_svg.trans());
 
-    this.create_layouts();
 }
 
-Svg.prototype.create_layouts = function() {
-    // menus ground
-    this.add_child("svg", "meg");
-
-    // weeks ground
-    this.add_child("svg", "wg");
-    this.add_child("wg", "wg-bg");
-    this.add_child("wg", "wg-fg");
-
-    // selection categories button ground
-    this.add_child("svg", "catg");
-
-    // semaine type ground
-    this.add_child("svg", "stg");
-
-    // dispos info ground
-    this.add_child("svg", "dig");
-
-    // valider
-    this.add_child("svg", "vg");
-
-    // background, middleground, foreground, dragground
-    this.add_child("svg", "edtg");
-    this.add_child("edtg", "edt-bg");
-    this.add_child("edtg", "edt-mg");
-    this.add_child("edtg", "edt-fig");
-    this.add_child("edtg", "edt-fg");
-
-    // selection ground
-    this.add_child("svg", "selg");
-
-    
-    // context menus ground
-    this.add_child("svg", "cmg");
-    this.add_child("cmg", "cmpg");
-    this.add_child("cmg", "cmtg");
-    
-
-    // drag ground
-    this.add_child("svg", "dg");
-
+Svg.prototype.create_layouts = function(build_plan_grounds) {
+    build_plan_grounds.forEach(function(parent_child){
+        this.add_child(parent_child[0], parent_child[1]);
+    }, this);
 }

@@ -60,6 +60,52 @@ dsp_svg.margin = {
     but: -200
 };
 
+dsp_svg.cadastre = [
+    // menus ground
+    ["svg","meg"],
+
+    // weeks ground
+    ["svg","wg"],
+    ["wg","wg-bg"],
+    ["wg","wg-fg"],
+
+    // selection categories button ground
+    ["svg","catg"],
+
+    // semaine type ground
+    ["svg","stg"],
+
+    // dispos info ground
+    ["svg","dig"],
+
+    // valider
+    ["svg","vg"],
+
+    // background, middleground, foreground, dragground
+    ["svg","edtg"],
+    ["edtg","edt-bg"],
+    ["edtg","edt-mg"],
+    ["edtg","edt-fig"],
+    ["edtg","edt-fg"],
+
+    // selection ground
+    ["svg","selg"],
+
+    
+    // context menus ground
+    ["svg","cmg"],
+    ["cmg","cmpg"],
+    ["cmg","cmtg"],
+    
+
+    // drag ground
+    ["svg","dg"]
+];
+
+
+
+
+
 var week = 42 ;
 var year = 2017;
 
@@ -181,6 +227,7 @@ function on_departments_rcv(dept_data) {
 
 svg = new Svg(dsp_svg.layout_tree, false);
 svg.create_container();
+svg.create_layouts(dsp_svg.cadastre) ;
 
 create_quote()
 
