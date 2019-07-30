@@ -79,9 +79,6 @@ Svg.prototype.create_layouts = function() {
     this.add_child("wg", "wg-bg");
     this.add_child("wg", "wg-fg");
 
-    // groupes ground
-    // gpg = this.add_child("svg", "gpg");
-
     // selection categories button ground
     this.add_child("svg", "catg");
 
@@ -110,9 +107,6 @@ Svg.prototype.create_layouts = function() {
     this.add_child("cmg", "cmpg");
     this.add_child("cmg", "cmtg");
     
-
-    // logo ground
-    // log = this.add_child("edtg", "log");
 
     // drag ground
     this.add_child("svg", "dg");
