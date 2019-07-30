@@ -80,11 +80,11 @@ function create_lunchbar() {
 
 function create_general_svg_pref_only() {
     svg_cont = d3.select("body").select("[id=\"svg\"]").append("svg")
-	.attr("width",svg.width)
-	.attr("height",svg.height)
+	.attr("width",dsp_svg.w)
+	.attr("height",dsp_svg.h)
 	.attr("text-anchor","middle")
 	.append("g")
-	.attr("transform","translate("+margin.left + "," + margin.top + ")");
+	.attr("transform","translate("+dsp_svg.margin.left + "," + dsp_svg.margin.top + ")");
 
     create_layouts_pref_only(svg_cont);
 }

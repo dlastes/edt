@@ -102,14 +102,14 @@ function bknews_link(d){
 
 function svg_height() {
     //    return margin.top + ack_reg_y() + 4*margin.bot ;
-    return margin.top + grid_height() + margin.bot
+    return dsp_svg.margin.top + grid_height() + dsp_svg.margin.bot
      + scale * garbage.duration * nbRows;
 }
 
 function svg_width() {
-    //    return margin.top + ack_reg_y() + 4*margin.bot ;
-    return margin.left + 
-        rootgp_width * week_days.nb_days() * labgp.width + margin.right ;
+    //    return dsp_svg.margin.top + ack_reg_y() + 4*dsp_svg.margin.bot ;
+    return dsp_svg.margin.left + 
+        rootgp_width * week_days.nb_days() * labgp.width + dsp_svg.margin.right ;
 }
 
 

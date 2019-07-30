@@ -60,16 +60,6 @@ dsp_svg.margin = {
     but: -200
 };
 
-
-var bs_margin_w = 20 ;
-var bs_margin_h = 5 ;
-
-var svg = {
-    height: window.innerHeight - $("#menu-edt").height() - bs_margin_h,
-    width: window.innerWidth - bs_margin_w,
-};
-
-
 var week = 42 ;
 var year = 2017;
 
@@ -79,12 +69,12 @@ var labgp = {height: 40, width: 30, tot: 8, height_init: 40, width_init: 30, hm:
 
 
 
-butgp.tly = margin.but;//-butgp.mar_v-6*butgp.height-80 ;
-sel_popup.tly = margin.but;
+butgp.tly = dsp_svg.margin.but;//-butgp.mar_v-6*butgp.height-80 ;
+sel_popup.tly = dsp_svg.margin.but;
 
 
 modules.x=sel_popup.selx + sel_popup.selx ;
-modules.y=margin.top+gsckd_y(null)-40;
+modules.y=dsp_svg.margin.top+gsckd_y(null)-40;
 modules.width = 170 ;
 modules.height = 0 ;
 

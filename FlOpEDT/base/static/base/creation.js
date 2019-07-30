@@ -409,8 +409,8 @@ function def_drag_sca() {
                 drag.x += d3.event.dx;
                 if (drag.x + drag.init > 0) {
                     drag.sel.attr("transform", "translate(" + drag.x + "," + drag.y + ")");
-                    if (drag.init + drag.x + margin.left + margin.right > drag.svg_w) {
-                        drag.svg.attr("width", drag.init + drag.x + margin.left + margin.right);
+                    if (drag.init + drag.x + dsp_svg.margin.left + dsp_svg.margin.right > drag.svg_w) {
+                        drag.svg.attr("width", drag.init + drag.x + dsp_svg.margin.left + dsp_svg.margin.right);
                     }
                 }
             }
@@ -481,8 +481,8 @@ function def_drag_sca() {
                 fg.node().appendChild(drag.sel.node());
                 drag.sel.select(".v-sca-l").remove();
 
-		svg.height = svg_height() ;
-		d3.select("#edt-main").attr("height", svg.height);
+		dsp_svg.h = svg_height() ;
+		d3.select("#edt-main").attr("height", dsp_svg.h);
 
             }
         });

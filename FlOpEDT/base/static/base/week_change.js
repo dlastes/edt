@@ -342,7 +342,7 @@ function translate_bknews_from_csv(d){
 
 
 function adapt_labgp(first) {
-    var expected_ext_grid_dim = svg.height - margin.top - margin.bot ;
+    var expected_ext_grid_dim = dsp_svg.h - dsp_svg.margin.top - dsp_svg.margin.bot ;
     var new_gp_dim;
 
     if (nbRows > 0) {
@@ -354,20 +354,20 @@ function adapt_labgp(first) {
         //     labgp.height = labgp.hm;
         // }
     } // sinon ?
-    svg.height = svg_height() ;
-    console.log(svg.height);
-    d3.select("#edt-main").attr("height", svg.height);
+    dsp_svg.h = svg_height() ;
+    console.log(dsp_svg.h);
+    d3.select("#edt-main").attr("height", dsp_svg.h);
 
     if (first) {
-	expected_ext_grid_dim = svg.width - margin.left - margin.right;
+	expected_ext_grid_dim = dsp_svg.w - dsp_svg.margin.left - dsp_svg.margin.right;
 	new_gp_dim = expected_ext_grid_dim / (rootgp_width * week_days.nb_days());
 	if (new_gp_dim > labgp.wm) {
             labgp.width = new_gp_dim;
 	} else {
             labgp.width = labgp.wm;
 	}
-        svg.width = svg_width();
-	d3.select("#edt-main").attr("width", svg.width);
+        dsp_svg.w = svg_width();
+	d3.select("#edt-main").attr("width", dsp_svg.w);
     }
 
 }
@@ -818,8 +818,7 @@ function fetch_ended() {
         go_edt(false);
 
 	if (fig === undefined) {
-            fig = svg_cont.append("g")
-		.attr("id", "lay-final");
+            fig = svg.add_child("svg", "final");
 	}
 
     }

@@ -199,7 +199,6 @@ function fetch_ended_light() {
 	go_bknews(true);
     }
 
-    svg_cont.append("g")
-	.attr("id","lay-final");
+    svg.add_child("svg", "final");
 
 }
