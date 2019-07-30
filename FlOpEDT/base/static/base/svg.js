@@ -47,7 +47,7 @@ Svg.prototype.add_child = function(parent_name, child_name) {
 }
 
 Svg.prototype.get_dom = function(name) {
-    return this.layout[child_name] ;
+    return this.layout[name] ;
 }
 
 Svg.prototype.create_container = function() {
