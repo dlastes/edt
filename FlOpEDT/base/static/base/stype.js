@@ -29,6 +29,24 @@ dsp_svg.margin = {top: 50,  left: 100, right: 10, bot:10};
 dsp_svg.h = 625 - dsp_svg.margin.top - dsp_svg.margin.bot ;
 dsp_svg.w = 680 - dsp_svg.margin.left - dsp_svg.margin.right ;
 
+dsp_svg.cadastre = [
+    // valider
+    ["svg","vg"],
+    // background, middleground, foreground, dragground
+    ["svg","edtg"],
+    ["edtg","edt-bg"],
+    ["edtg","edt-mg"],
+    ["edtg","edt-fg"],
+    // context menus ground
+    ["svg","cmg"],
+    ["cmg","cmpg"],
+    ["cmg","cmtg"],
+    // drag ground
+    ["svg","dg"]
+];
+
+
+
 var mode = "tutor" ;
 
 var dd_selections = {
@@ -55,8 +73,10 @@ pref_only = true ;
 
 
 
+svg = new Svg(dsp_svg.layout_tree, false);
+svg.create_container(true);
+svg.create_layouts(dsp_svg.cadastre) ;
 
-create_general_svg_pref_only();
 go_days(true, false);
 create_lunchbar();
 fetch_pref_only();
@@ -66,7 +86,7 @@ fetch_pref_only();
 
 
 function create_lunchbar() {
-    fg
+    svg.get_dom("edt-fg")
 	.append("line")
 	.attr("class","lunchbar")
 	.attr("stroke","black")
@@ -78,51 +98,6 @@ function create_lunchbar() {
 
 }
 
-function create_general_svg_pref_only() {
-    svg_cont = d3.select("body").select("[id=\"svg\"]").append("svg")
-	.attr("width",dsp_svg.w)
-	.attr("height",dsp_svg.h)
-	.attr("text-anchor","middle")
-	.append("g")
-	.attr("transform","translate("+dsp_svg.margin.left + "," + dsp_svg.margin.top + ")");
-
-    create_layouts_pref_only(svg_cont);
-}
-
-
-function create_layouts_pref_only(svg_cont){
-
-
-    // valider
-    vg = svg_cont.append("g")
-	.attr("id","lay-vg");
-    
-    // background, middleground, foreground, dragground
-    var edtg = svg_cont.append("g")
-        .attr("id", "lay-edtg");
-    bg = edtg.append("g")
-        .attr("id", "lay-bg");
-    mg = edtg.append("g")
-        .attr("id", "lay-mg");
-    // fig = edtg.append("g")
-    //     .attr("id", "lay-fig");
-    fg = edtg.append("g")
-        .attr("id", "lay-fg");
-
-    // context menus ground
-    var cmg = svg_cont.append("g")
-        .attr("id", "lay-cmg");
-    cmpg = cmg.append("g")
-	.attr("id", "lay-cmpg");
-    cmtg = cmg.append("g")
-	.attr("id", "lay-cmtg");
-    
-    // drag ground
-    dg = svg_cont.append("g")
-        .attr("id", "lay-dg");
-
-    
-}
 
 
 /*---------------------

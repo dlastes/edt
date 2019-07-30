@@ -59,6 +59,14 @@ Svg.prototype.create_container = function() {
         tot = d3.select("body").append("div");
     }
 
+    if (!d3.select("#svg").empty()) {
+        tot = d3.select("#svg") ;
+    }
+
+    // useful?
+    //.attr("text-anchor","middle")
+
+
     this.layout["svg"] = tot
         .append("svg")
         .attr("width", dsp_svg.w)
