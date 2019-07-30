@@ -111,7 +111,4 @@ Svg.prototype.create_layouts = function() {
     // drag ground
     this.add_child("svg", "dg");
 
-    this.get_dom("edt-bg")
-	.append("rect")
-	.attr("class","rbg");
 }
