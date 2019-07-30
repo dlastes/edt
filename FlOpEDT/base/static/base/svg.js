@@ -22,16 +22,14 @@
 // without disclosing the source code of your own applications.
 
 
-// "svg" will be the svg container
+// "svg" will be the name of the svg container
 function Svg(light) {
     this.layout = {} ;
     this.layout["svg"] = null ;
     this.light = light ;
 }
 
-// {parent:, name:, children: }
-// name -> 
-
+// add a layout named child_name as a child of parent_name layout
 Svg.prototype.add_child = function(parent_name, child_name) {
     if (Object.keys(this.layout).includes(child_name)) {
         console.log("Name " + child_name + " already in use");
@@ -46,10 +44,12 @@ Svg.prototype.add_child = function(parent_name, child_name) {
     return this.layout[child_name] ;
 }
 
+// get the dom element corresponding to a layout name
 Svg.prototype.get_dom = function(name) {
     return this.layout[name] ;
 }
 
+// create the svg element in the page
 Svg.prototype.create_container = function() {
     var tot;
 
@@ -59,6 +59,7 @@ Svg.prototype.create_container = function() {
         tot = d3.select("body").append("div");
     }
 
+    // for stype
     if (!d3.select("#svg").empty()) {
         tot = d3.select("#svg") ;
     }
@@ -77,6 +78,7 @@ Svg.prototype.create_container = function() {
 
 }
 
+// create layouts according to the plan
 Svg.prototype.create_layouts = function(build_plan_grounds) {
     build_plan_grounds.forEach(function(parent_child){
         this.add_child(parent_child[0], parent_child[1]);
