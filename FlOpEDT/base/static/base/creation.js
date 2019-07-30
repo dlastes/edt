@@ -205,9 +205,7 @@ function find_week(week_list) {
 
 function create_clipweek() {
 
-    full_weeks.add_all(semaine_an_list) ;
-
-    wdw_weeks.set_full_weeks(full_weeks) ;
+    wdw_weeks.add_full_weeks(semaine_an_list) ;
 
     wdw_weeks.chose(new Week(an_init, semaine_init));
 

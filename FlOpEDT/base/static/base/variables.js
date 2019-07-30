@@ -252,12 +252,10 @@ var dsp_weeks = {
 } ;
 
 
-var full_weeks = new Weeks();
-
 var wdw_weeks = new WeeksExcerpt(dsp_weeks.visible_weeks);
 
-
-
+// unfortunately cannot use "this", since these functions will
+// be passed to d3js
 var fun_weeks =
     {trans: function() {
         return "translate(" + dsp_weeks.x + "," + dsp_weeks.y + ")" ;

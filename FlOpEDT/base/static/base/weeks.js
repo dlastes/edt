@@ -72,11 +72,13 @@ Week.id_fun = function(week) {
 
 function WeeksExcerpt(desired_nb) {
     this.desired_nb = desired_nb ;
+    this.full_weeks = new Weeks() ;
+    // first and selected undefined until full_weeks is not empty
 }
 
-// set the full weeks that we are excerpted from
-WeeksExcerpt.prototype.set_full_weeks = function(full_weeks) {
-    this.full_weeks = full_weeks ;
+// add weeks to full_weeks
+WeeksExcerpt.prototype.add_full_weeks = function(weeks) {
+    this.full_weeks.add_all(weeks) ;
     this.adapt_full_weeks() ;
     this.first = 0 ;
     this.selected = 0 ;
