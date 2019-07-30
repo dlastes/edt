@@ -62,10 +62,43 @@ pref_only = false ;
   ------ BUILD ------
   -------------------*/
 
+// to be cleaned!
+dsp_svg.cadastre = [
+    // menus ground
+    ["svg","meg"],
+    // weeks ground
+    ["svg","wg"],
+    ["wg","wg-bg"],
+    ["wg","wg-fg"],
+    // selection categories button ground
+    ["svg","catg"],
+    // semaine type ground
+    ["svg","stg"],
+    // dispos info ground
+    ["svg","dig"],
+    // valider
+    ["svg","vg"],
+    // background, middleground, foreground, dragground
+    ["svg","edtg"],
+    ["edtg","edt-bg"],
+    ["edtg","edt-mg"],
+    ["edtg","edt-fig"],
+    ["edtg","edt-fg"],
+    // selection ground
+    ["svg","selg"],
+    // context menus ground
+    ["svg","cmg"],
+    ["cmg","cmpg"],
+    ["cmg","cmtg"],
+    // drag ground
+    ["svg","dg"]
+];
+
 
 
 svg = new Svg(dsp_svg.layout_tree, true);
 svg.create_container();
+svg.create_layouts(dsp_svg.cadastre);
 
 
 d3.json(groupes_fi,
