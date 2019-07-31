@@ -50,6 +50,9 @@ week_banner.spawn([{semaine: week, an: year}]) ;
 
 var days_header = new WeekDayHeader(svg, "edt-fg", week_days, true, null) ;
 
+var hours_header = new HourHeader(svg, "edt-fg", hours) ;
+
+
 var labgp = {height: tv_gp_h, width: tv_gp_w, tot: 8, height_init: 40, width_init: 30};
 
 dim_dispo.height = 2*labgp.height ;

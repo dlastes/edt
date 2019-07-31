@@ -98,6 +98,7 @@ function WeekDayMixStype() {
 Object.assign(days_header.mix, new WeekDayMixStype()) ;
 hard_bind(days_header.mix);
 
+var hours_header = new HourHeader(svg, "edt-fg", hours) ;
 
 
 

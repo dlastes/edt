@@ -596,63 +596,7 @@ function go_days(quick) {
 
     days_header.update(quick) ;
 
-    var hour_bar = svg.get_dom("edt-fg")
-        .selectAll(".gridsckhb")
-        .data([time_settings.time]);
-
-    var hourbar_g = hour_bar
-    	.enter()
-        .append("g")
-        .attr("class", "gridsckhb");
-
-    hourbar_g
-        .append("line")
-        .attr("class", "gridsckhlam")
-        .merge(hour_bar.select(".gridsckhlam"))
-        .attr("x1", 0)
-        .attr("y1", 0)
-        .attr("x2", 0)
-        .attr("y2", bknews_top_y()) ;
-                                    
-    hourbar_g                       
-        .append("line")             
-        .attr("class", "gridsckhlpm")
-        .merge(hour_bar.select(".gridsckhlpm"))
-        .attr("x1", 0)              
-        .attr("y1", bknews_bot_y()) 
-        .attr("x2", 0)              
-        .attr("y2", grid_height()) ;
-
-    hour_bar.exit().remove();
-    
-    var hour_scale = svg.get_dom("edt-fg")
-        .selectAll(".gridsckh")
-        .data(side_time);
-
-    var hour_sc_g = hour_scale
-    	.enter()
-        .append("g")
-        .attr("class", "gridsckh");
-
-    hour_sc_g
-        .append("line")
-        .attr("class", "gridsckhl")
-        .merge(hour_scale.select(".gridsckhl"))
-        .attr("x1", gsckh_x1)
-        .attr("y1", gsckh_y)
-        .attr("x2", gsckh_x2)
-        .attr("y2", gsckh_y) ;
-
-    hour_sc_g
-        .append("text")
-        .merge(hour_scale.select("text"))
-        .text(gsckh_txt)
-        .attr("x", gsckh_x2() - 2)
-        .attr("y", gsckh_y);
-    
-    
-    hour_scale.exit().remove();
-
+    hours_header.update(quick) ;
 }
 
 /*----------------------

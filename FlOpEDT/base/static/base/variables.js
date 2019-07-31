@@ -65,22 +65,7 @@
 // days
 var week_days = new WeekDays(days);
 
-
-// side time scale: list of {h: int, hd:('am'|'pm')}
-var side_time = [] ;
-var stime = Math.floor(time_settings.time.day_start_time/60) ;
-if (stime*60 < time_settings.time.day_start_time) {
-    stime ++ ;
-}
-while (stime*60 <= time_settings.time.day_finish_time) {
-    if(stime*60 <= time_settings.time.lunch_break_start_time) {
-        side_time.push({h:stime, hd:'am'});
-    }
-    if (stime*60 >= time_settings.time.lunch_break_finish_time) {
-        side_time.push({h:stime, hd:'pm'});
-    }
-    stime ++ ;
-}
+var hours = new Hours(time_settings.time) ;
 
 
 /*-------------------------

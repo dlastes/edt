@@ -486,30 +486,6 @@ function gscp_txt(d) {
 
 
 
-function gsckh_x1() {
-    return 0 ;
-}
-function gsckh_x2() {
-    return -5 ;
-}
-function gsckh_y(d) {
-    var ts = time_settings.time ;
-    var ret = (d.h*60-ts.day_start_time) * nbRows * scale ;
-    if (d.hd == 'pm') {
-	ret += bknews_h() - (ts.lunch_break_finish_time - ts.lunch_break_start_time)*nbRows*scale ;
-    }
-    return ret ;
-}
-
-function gsckh_txt(d) {
-    var ret = d.h ;
-    if(ret >= 24) {
-        ret -= 24 ;
-    }
-    ret += "h" ;
-    return ret ;
-}
-
 function grid_height() {
     return scale * nb_minutes_in_grid();
 }

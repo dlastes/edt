@@ -112,7 +112,7 @@ week_banner.spawn(semaine_an_list) ;
 
 var days_header = new WeekDayHeader(svg, "edt-fg", week_days, true, null) ;
 
-
+var hours_header = new HourHeader(svg, "edt-fg", hours) ;
 
 
 
