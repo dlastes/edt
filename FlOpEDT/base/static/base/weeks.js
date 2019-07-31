@@ -229,7 +229,7 @@ WeekBanner.prototype.spawn = function() {
         .attr("clip-path", "url(#clipwk)")
         .attr("pointer-events", "none")
         .append("ellipse")
-        .attr("cx", undefined)
+        .attr("cx", this.mix.sel_x)
         .attr("cy", .5 * this.mix.height)
         .attr("rx", .5 * this.mix.wfac * this.mix.width)
         .attr("ry", .5 * this.mix.hfac * this.mix.height);
@@ -240,7 +240,7 @@ WeekBanner.prototype.spawn = function() {
     this.lay_fg
         .append("g")
         .attr("class", "cir_wk")
-        .on("click", week_left);
+        .on("click", this.week_left.bind(this));
 
     btn_earlier
         .append("circle")
@@ -262,7 +262,7 @@ WeekBanner.prototype.spawn = function() {
         this.lay_fg
         .append("g")
         .attr("class", "cir_wk")
-        .on("click", week_right);
+        .on("click", this.week_right.bind(this));
 
     btn_later
         .append("circle")
@@ -333,7 +333,7 @@ WeekBanner.prototype.update = function(quick) {
 
     g_wk
         .merge(sa_wk)
-        .on("click", apply_wk_change);
+        .on("click", this.apply_wk_change.bind(this));
 
 
     g_wk
@@ -364,6 +364,35 @@ WeekBanner.prototype.update = function(quick) {
         .transition(t)
         .attr("cx", this.mix.sel_x);
 }
+
+
+// move timeline to the left
+WeekBanner.prototype.week_left = function () {
+    this.mix.weeks.move_earlier() ;
+    this.update(false);
+}
+
+// move timeline to the right
+WeekBanner.prototype.week_right = function () {
+    this.mix.weeks.move_later() ;
+    this.update(false);
+}
+
+
+// go to selected week
+// Not sure ok even if user is quick (cf fetch_cours)
+WeekBanner.prototype.apply_wk_change = function (d, i) { //if(fetch.done) {
+    this.mix.weeks.change_selection(i) ;
+    dispos = {};
+    user.dispos = [];
+
+    fetch_all(false, true);
+
+    this.update(false) ;
+} //}
+
+
+
 
 
 // could be done with prototype and (Object.getPrototypeOf(parameter)

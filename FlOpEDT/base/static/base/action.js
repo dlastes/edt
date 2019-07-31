@@ -59,36 +59,6 @@ function apply_change_simple_pref(d) {
     }
 }
 
-/*---------------------
-  ------- WEEKS -------
-  ---------------------*/
-
-// move timeline to the left
-function week_left() {
-    wdw_weeks.move_earlier() ;
-    go_week_menu(false);
-}
-
-// move timeline to the right
-function week_right() {
-    wdw_weeks.move_later() ;
-    go_week_menu(false);
-}
-
-
-// change week
-// Not sure ok even if user is quick (cf fetch_cours)
-function apply_wk_change(d, i) { //if(fetch.done) {
-    wdw_weeks.change_selection(i) ;
-    dispos = {};
-    user.dispos = [];
-
-    fetch_all(false, true);
-
-    week_banner.update(false) ;
-    //go_week_menu(false);
-} //}
-
 
 
 /*----------------------
