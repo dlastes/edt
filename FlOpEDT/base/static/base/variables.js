@@ -266,31 +266,6 @@ var dsp_weeks = {
 
 var wdw_weeks = new WeeksExcerpt(dsp_weeks.visible_weeks);
 
-// unfortunately cannot use "this", since these functions will
-// be passed to d3js
-var fun_weeks =
-    {trans: function() {
-        return "translate(" + dsp_weeks.x + "," + dsp_weeks.y + ")" ;
-    },
-     sel_x: function (d) {
-         return (d + 1 - wdw_weeks.first) * dsp_weeks.width;
-     },
-     right_sel_x: function() {
-         return (wdw_weeks.nb + 1) * dsp_weeks.width ;
-     },
-     strip_w: function() {
-         return (wdw_weeks.nb + 1) * dsp_weeks.width ;
-     },
-     txt: function(d) {
-         return d.semaine;
-     },
-     rect_x: function(d, i) {
-         return (i+1) * dsp_weeks.width - .5 * dsp_weeks.width;
-     },
-     txt_x: function(d, i) {
-         return (i+1) * dsp_weeks.width ;
-     },
-};
 
 /*----------------------
   -------- GRID --------

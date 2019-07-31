@@ -200,12 +200,11 @@ function WeekBanner(svg, layout_name_gen, layout_name_fg, layout_name_bg, weeks,
     this.lay_g = svg.get_dom(layout_name_gen) ;
     this.lay_fg = svg.get_dom(layout_name_fg) ;
     this.lay_bg = svg.get_dom(layout_name_bg) ;
-    this.weeks = weeks ;
-    this.par = new ParamWeek(par) ;
-    console.log(getMethods(this.par));
-    var methods = getMethods(this.par) ; 
+    this.mix = new WeekMix(par, weeks) ;
+    console.log(getMethods(this.mix));
+    var methods = getMethods(this.mix) ; 
     for (var i = 0 ; i < methods.length ; i++) {
-        this.par[methods[i]] = this.par[methods[i]].bind(this.par) ;
+        this.mix[methods[i]] = this.mix[methods[i]].bind(this.mix) ;
     }
     //this.par.txt_x = this.par.txt_x.bind(this.par) ;
 }
@@ -213,17 +212,17 @@ function WeekBanner(svg, layout_name_gen, layout_name_fg, layout_name_bg, weeks,
 //WeekBanner.prototype.
 
 WeekBanner.prototype.spawn = function() {
-    this.weeks.add_full_weeks(semaine_an_list) ;
+    this.mix.weeks.add_full_weeks(semaine_an_list) ;
 
-    this.weeks.chose(new Week(an_init, semaine_init));
+    this.mix.weeks.chose(new Week(an_init, semaine_init));
 
     // shift everything
     this.lay_g
-        .attr("transform", fun_weeks.trans());
+        .attr("transform", this.mix.trans());
 
     this.lay_fg
         .selectAll(".sel_wk")
-        .data(this.weeks.get_iselected())
+        .data(this.mix.weeks.get_iselected())
         .enter()
         .append("g")
         .attr("class", "sel_wk")
@@ -231,9 +230,9 @@ WeekBanner.prototype.spawn = function() {
         .attr("pointer-events", "none")
         .append("ellipse")
         .attr("cx", undefined)
-        .attr("cy", .5 * dsp_weeks.height)
-        .attr("rx", .5 * dsp_weeks.wfac * dsp_weeks.width)
-        .attr("ry", .5 * dsp_weeks.hfac * dsp_weeks.height);
+        .attr("cy", .5 * this.mix.height)
+        .attr("rx", .5 * this.mix.wfac * this.mix.width)
+        .attr("ry", .5 * this.mix.hfac * this.mix.height);
 
 
 
@@ -248,14 +247,14 @@ WeekBanner.prototype.spawn = function() {
         .attr("stroke", "white")
         .attr("stroke-width", 1)
         .attr("cx", 0)
-        .attr("cy", .5 * dsp_weeks.height)
-        .attr("r", dsp_weeks.rad * .5 * dsp_weeks.height);
+        .attr("cy", .5 * this.mix.height)
+        .attr("r", this.mix.rad * .5 * this.mix.height);
 
     btn_earlier
         .append("text")
         .attr("fill", "white")
         .attr("x", 0)
-        .attr("y", .5 * dsp_weeks.height)
+        .attr("y", .5 * this.mix.height)
         .text("<");
 
 
@@ -269,15 +268,15 @@ WeekBanner.prototype.spawn = function() {
         .append("circle")
         .attr("stroke", "white")
         .attr("stroke-width", 1)
-        .attr("cx", fun_weeks.right_sel_x())
-        .attr("cy", .5 * dsp_weeks.height)
-        .attr("r", dsp_weeks.rad * .5 * dsp_weeks.height)
+        .attr("cx", this.mix.right_sel_x())
+        .attr("cy", .5 * this.mix.height)
+        .attr("r", this.mix.rad * .5 * this.mix.height)
 
     btn_later
         .append("text")
         .attr("fill", "white")
-        .attr("x", fun_weeks.right_sel_x())
-        .attr("y", .5 * dsp_weeks.height)
+        .attr("x", this.mix.right_sel_x())
+        .attr("y", .5 * this.mix.height)
         .text(">");
 
 
@@ -286,8 +285,8 @@ WeekBanner.prototype.spawn = function() {
         .attr("class", "cir_wk")
         .attr("x", 0)
         .attr("y", 0)
-        .attr("width", fun_weeks.strip_w())
-        .attr("height", dsp_weeks.height);
+        .attr("width", this.mix.strip_w())
+        .attr("height", this.mix.height);
 
     this.lay_bg
         .append("g")
@@ -296,10 +295,10 @@ WeekBanner.prototype.spawn = function() {
         .append("rect")
         .attr("x", 0)
         .attr("y", 0)
-        .attr("height", dsp_weeks.height)
-        .attr("width", fun_weeks.strip_w());
+        .attr("height", this.mix.height)
+        .attr("width", this.mix.strip_w());
 
-    dsp_weeks.cont = this.lay_bg
+    this.mix.cont = this.lay_bg
         .append("g")
         .attr("clip-path", "url(#clipwk)");
 
@@ -321,9 +320,9 @@ WeekBanner.prototype.update = function(quick) {
     }
 
     var sa_wk =
-        dsp_weeks.cont
+        this.mix.cont
         .selectAll(".rec_wk")
-        .data(wdw_weeks.data, Week.id_fun);
+        .data(this.mix.weeks.data, Week.id_fun);
 
     sa_wk.exit().transition(t).remove();
 
@@ -340,39 +339,60 @@ WeekBanner.prototype.update = function(quick) {
     g_wk
         .append("rect")
         .attr("y", 0)
-        .attr("height", dsp_weeks.height)
-        .attr("width", dsp_weeks.width)
-        .attr("x", fun_weeks.rect_x) //rect_wk_init_x)
+        .attr("height", this.mix.height)
+        .attr("width", this.mix.width)
+        .attr("x", this.mix.rect_x) //rect_wk_init_x)
         .merge(sa_wk.select("rect"))
         .transition(t)
-        .attr("x", fun_weeks.rect_x);
+        .attr("x", this.mix.rect_x);
 
     g_wk
         .append("text")
         .attr("fill", "white")
-        .text(fun_weeks.txt)
-        .attr("y", .5 * dsp_weeks.height)
-        .attr("x", fun_weeks.rect_x)
+        .text(this.mix.txt)
+        .attr("y", .5 * this.mix.height)
+        .attr("x", this.mix.rect_x)
         .merge(sa_wk.select("text"))
         .transition(t)
-        .attr("x", this.par.txt_x);//fun_weeks.txt_x);
+        .attr("x", this.mix.txt_x);//this.mix.txt_x);
 
     var wk_sel =
         svg.get_dom("wg-fg")
         .selectAll(".sel_wk")
-        .data(wdw_weeks.get_iselected())
+        .data(this.mix.weeks.get_iselected())
         .select("ellipse")
         .transition(t)
-        .attr("cx", fun_weeks.sel_x);
+        .attr("cx", this.mix.sel_x);
 }
 
 
 // could be done with prototype and (Object.getPrototypeOf(parameter)
 // but simpler to write in this way + there will be a single object
 
-function ParamWeek(cst_parameters) {
+function WeekMix(cst_parameters, weeks) {
     Object.assign(this, cst_parameters);
+    this.weeks = weeks ;
+    
     this.txt_x = function(d, i) {
         return (i+1) * this.width ;
     };
+    this.sel_x = function (d) {
+         return (d + 1 - this.weeks.first) * this.width;
+    };
+    this.trans = function() {
+        return "translate(" + this.x + "," + this.y + ")" ;
+    };
+    this.right_sel_x = function() {
+        return (this.weeks.nb + 1) * this.width ;
+    };
+    this.strip_w = function() {
+        return (this.weeks.nb + 1) * this.width ;
+    };
+    this.txt = function(d) {
+        return d.semaine;
+    };
+    this.rect_x = function(d, i) {
+        return (i+1) * this.width - .5 * this.width;
+    };
 }
+
