@@ -85,7 +85,8 @@ function apply_wk_change(d, i) { //if(fetch.done) {
 
     fetch_all(false, true);
 
-    go_week_menu(false);
+    week_banner.update(false) ;
+    //go_week_menu(false);
 } //}
 
 
