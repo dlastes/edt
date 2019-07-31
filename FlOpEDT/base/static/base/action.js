@@ -732,7 +732,7 @@ function compute_changes(changes, conc_tutors, gps) {
 	    
 
 	    // build the communication with django
-	    var sel_week = week_banner.get_selected() ;
+	    var sel_week = wdw_weeks.get_selected() ;
             change = {id: id,
 		      day: {o: cb.day,
 			    n: null },
@@ -852,7 +852,7 @@ function send_edt_change(changes) {
     sent_data['v'] = JSON.stringify(version) ; 
     sent_data['tab'] = JSON.stringify(changes) ;
 
-    var sel_week = week_banner.get_selected() ;
+    var sel_week = wdw_weeks.get_selected() ;
 
     show_loader(true);
     $.ajax({
@@ -942,7 +942,7 @@ function send_dis_change() {
 	var sent_data = {} ;
 	sent_data['changes'] = JSON.stringify(changes) ; 
 
-        var sel_week = week_banner.get_selected() ;
+        var sel_week = wdw_weeks.get_selected() ;
 
         show_loader(true);
         $.ajax({
@@ -1381,7 +1381,7 @@ function redirect_dept(d) {
         split_addr.splice(-1,1);
     }
     // go to the right week
-    var sel_week = week_banner.get_selected() ;
+    var sel_week = wdw_weeks.get_selected() ;
     split_addr.push(sel_week.an);
     split_addr.push(sel_week.semaine);
     window.location.href = split_addr.join("/") ;

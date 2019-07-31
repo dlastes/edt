@@ -47,7 +47,7 @@ function fetch_dispos() {
 
     fetch.ongoing_dispos = true;
 
-    var exp_week = week_banner.get_selected() ;
+    var exp_week = wdw_weeks.get_selected() ;
     
     show_loader(true);
     $.ajax({
@@ -59,7 +59,7 @@ function fetch_dispos() {
         success: function(msg) {
             console.log("in");
 
-            var sel_week = week_banner.get_selected() ;
+            var sel_week = wdw_weeks.get_selected() ;
             if (Week.compare(exp_week, sel_week)==0) {
                 dispos = {};
                 //user.dispos = [];
@@ -281,7 +281,7 @@ function create_dispos_user_data() {
 function fetch_bknews(first) {
     fetch.ongoing_bknews = true;
 
-    var exp_week = week_banner.get_selected() ;
+    var exp_week = wdw_weeks.get_selected() ;
 
     show_loader(true);
     $.ajax({
@@ -294,7 +294,7 @@ function fetch_bknews(first) {
 	    bknews.cont = d3.csvParse(msg,
 				      translate_bknews_from_csv);
 
-            var sel_week = week_banner.get_selected() ;
+            var sel_week = wdw_weeks.get_selected() ;
             if (Week.compare(exp_week, sel_week)==0) {
 		var max_y = -1 ;
 		for (var i = 0 ; i < bknews.cont.length ; i++) {
@@ -386,7 +386,7 @@ function fetch_cours() {
     ack.edt = "";
     go_ack_msg(true);
 
-    var exp_week = week_banner.get_selected() ;
+    var exp_week = wdw_weeks.get_selected() ;
 
     cours_bouge = {};
     
@@ -402,7 +402,7 @@ function fetch_cours() {
             go_regen(null);
             go_alarm_pref();
 
-            var sel_week = week_banner.get_selected() ;
+            var sel_week = wdw_weeks.get_selected() ;
             if (Week.compare(exp_week, sel_week)==0) {
 
                 week_days = new WeekDays(JSON.parse(req.getResponseHeader('days').replace(/\'/g, '"')));
@@ -444,7 +444,7 @@ function fetch_cours() {
         success: function(msg, ts, req) {
             //console.log(msg);
 
-            var sel_week = week_banner.get_selected() ;
+            var sel_week = wdw_weeks.get_selected() ;
             if (Week.compare(exp_week, sel_week)==0) {
 
                 tutors.pp = [];
@@ -660,7 +660,7 @@ function translate_gp_name(gp) {
 function fetch_unavailable_rooms() {
     fetch.ongoing_un_rooms = true;
     
-    var exp_week = week_banner.get_selected() ;
+    var exp_week = wdw_weeks.get_selected() ;
 
     show_loader(true);
     $.ajax({
@@ -670,7 +670,7 @@ function fetch_unavailable_rooms() {
         async: true,
         contentType: "text/csv",
         success: function(msg, ts, req) {
-            var sel_week = week_banner.get_selected() ;
+            var sel_week = wdw_weeks.get_selected() ;
             if (Week.compare(exp_week, sel_week)==0) {
 
 		console.log(msg);
@@ -736,7 +736,7 @@ function fetch_all(first, fetch_work_copies){
 
 
 function fetch_version() {
-    var exp_week = week_banner.get_selected() ;
+    var exp_week = wdw_weeks.get_selected() ;
 
     show_loader(true);
     $.ajax({
@@ -748,7 +748,7 @@ function fetch_version() {
         success: function(msg) {
 	    var parsed = JSON.parse(msg);
 
-            var sel_week = week_banner.get_selected() ;
+            var sel_week = wdw_weeks.get_selected() ;
             if (Week.compare(exp_week, sel_week)==0) {
 		version = parsed.version ;
 		filled_dispos = parsed.proposed_pref ;

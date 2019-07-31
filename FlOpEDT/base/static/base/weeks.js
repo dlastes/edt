@@ -207,7 +207,6 @@ function WeekBanner(svg, layout_name_gen, layout_name_fg, layout_name_bg, weeks,
 //WeekBanner.prototype.
 
 WeekBanner.prototype.spawn = function(full_weeks) {
-    this.mix.weeks.add_full_weeks(full_weeks) ;
 
     this.mix.weeks.chose(new Week(an_init, semaine_init));
 
@@ -385,11 +384,6 @@ WeekBanner.prototype.apply_wk_change = function (d, i) { //if(fetch.done) {
 
     this.update(false) ;
 } //}
-
-
-WeekBanner.prototype.get_selected = function () {
-    return this.mix.weeks.get_selected() ;
-}
 
 
 // could be done with prototype and (Object.getPrototypeOf(parameter)

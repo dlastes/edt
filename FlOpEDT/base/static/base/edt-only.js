@@ -45,8 +45,7 @@ var year = an_init;
 
 // filter the right bknews
 
-var week_banner = new WeekBanner(svg, "wg", "wg-fg", "wg-bg", wdw_weeks, dsp_weeks);
-week_banner.spawn([{semaine: week, an: year}]) ;
+wdw_weeks.add_full_weeks([{semaine: week, an: year}]) ;
 
 var days_header = new WeekDayHeader(svg, "edt-fg", week_days, true, null) ;
 
@@ -185,7 +184,7 @@ function fetch_bknews_light(first) {
 
             bknews.cont = JSON.parse(msg) ;
 
-            var sel_week = week_banner.get_selected() ;
+            var sel_week = wdw_weeks.get_selected() ;
             if (Week.compare(sel_week, exp_week)==0) {
 		var max_y = -1 ;
 		for (var i = 0 ; i < bknews.cont.length ; i++) {
