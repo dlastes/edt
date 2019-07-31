@@ -77,6 +77,30 @@ svg = new Svg(dsp_svg.layout_tree, false);
 svg.create_container(true);
 svg.create_layouts(dsp_svg.cadastre) ;
 
+var days_header = new WeekDayHeader(svg, "edt-fg", week_days, false, null) ;
+
+// overwrite functions for headers
+function WeekDayMixStype() {
+    this.gsckd_x = function(datum,i) {
+        return  i*(dim_dispo.width + dim_dispo.mh)
+	    + dim_dispo.width * .5;
+    }
+    this.gsckd_y = function(datum) {
+        return  - 20 ;
+    }
+    this.gsckd_txt = function(d) {
+        return  d.name ;
+    }
+    this.gsckh_x = function(datum) {
+        return - dim_dispo.width ;
+    }
+}
+Object.assign(days_header.mix, new WeekDayMixStype()) ;
+hard_bind(days_header.mix);
+
+
+
+
 go_days(true, false);
 create_lunchbar();
 fetch_pref_only();
@@ -199,19 +223,9 @@ function dispo_x(d) {
 function dispo_h(d){
     return d.duration * scale ;
 }
-function gsckd_x(datum,i) {
-    return  i*(dim_dispo.width + dim_dispo.mh)
-	+ dim_dispo.width * .5;
-}
-function gsckd_y(datum) {
-    return  - 20 ;
-}
-function gsckd_txt(d) {
-    return  d.name ;
-}
-function gsckh_x(datum) {
-    return - dim_dispo.width ;
-}
+
+
+
 function gsclb_y()  {
     return dispo_y({start_time:
 		    time_settings.time.lunch_break_start_time});
