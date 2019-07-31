@@ -33,17 +33,17 @@ function Day(day={num:iday,
 
 // 'static' function 
 Day.id_fun = function(d) {
-    return d.date;
+    return d.name+ "-" + d.date;
 }
 
 
 
-function WeekDays(days = []) {
+function WeekDays(days) {
     this.day_list = [] ;
     this.day_dict = {} ;
-    days.forEach(function(day) {
-        this.add_day(day);
-    }, this);
+    if (typeof days !== 'undefined') {
+        this.add_all(days) ;
+    }
 }
 
 WeekDays.prototype.nb_days = function() {
@@ -80,4 +80,11 @@ WeekDays.prototype.add_day = function(day={num:iday,
     this.day_list.push(new_day);
     this.day_dict[new_day.ref] = new_day ;
 }
+
+WeekDays.prototype.add_all = function(days) {
+    days.forEach(function(day){
+        this.add_day(day) ;
+    }, this) ;
+}
+
 

@@ -63,10 +63,8 @@
   --------------------------*/
 
 // days
-var week_days = new WeekDays();
-for (var iday in days) {
-    week_days.add_day(days[iday]);
-}
+var week_days = new WeekDays(days);
+
 
 // side time scale: list of {h: int, hd:('am'|'pm')}
 var side_time = [] ;
@@ -739,3 +737,4 @@ var arrow =
 
 
 var is_side_panel_open = false ;
+
