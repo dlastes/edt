@@ -237,7 +237,7 @@ def_cm_change();
 //create_clipweek();
 
 var week_banner = new WeekBanner(svg, "wg", "wg-fg", "wg-bg", wdw_weeks, dsp_weeks);
-week_banner.spawn() ;
+week_banner.spawn(semaine_an_list) ;
 
 create_menus();
 

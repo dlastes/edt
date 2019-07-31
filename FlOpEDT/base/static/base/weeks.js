@@ -211,8 +211,8 @@ function WeekBanner(svg, layout_name_gen, layout_name_fg, layout_name_bg, weeks,
 
 //WeekBanner.prototype.
 
-WeekBanner.prototype.spawn = function() {
-    this.mix.weeks.add_full_weeks(semaine_an_list) ;
+WeekBanner.prototype.spawn = function(full_weeks) {
+    this.mix.weeks.add_full_weeks(full_weeks) ;
 
     this.mix.weeks.chose(new Week(an_init, semaine_init));
 

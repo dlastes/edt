@@ -45,8 +45,8 @@ var year = an_init;
 
 // filter the right bknews
 
-full_weeks.add_all([{semaine: week, an: year}]);
-wdw_weeks.set_full_weeks(full_weeks);
+var week_banner = new WeekBanner(svg, "wg", "wg-fg", "wg-bg", wdw_weeks, dsp_weeks);
+week_banner.spawn([{semaine: week, an: year}]) ;
 
 var labgp = {height: tv_gp_h, width: tv_gp_w, tot: 8, height_init: 40, width_init: 30};
 
