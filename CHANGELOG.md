@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Side panel in default week view:
   - Change someone else default week
   - Set preferences for each course type, per training programme
+- Proposals and transparency checks when course dragging
   
   
 ### TBD
