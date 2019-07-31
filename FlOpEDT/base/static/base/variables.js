@@ -65,6 +65,7 @@
 // days
 var week_days = new WeekDays(days);
 
+// for y-axis
 var hours = new Hours(time_settings.time) ;
 
 
@@ -159,8 +160,6 @@ var dsp_svg =
      }
     };
 
-var fun_svg = {
-};
 /*--------------------------
   ------- PREFERENCES ------
   --------------------------*/
@@ -246,7 +245,7 @@ var dsp_weeks = {
     cont: null, // will be initiated in create_clipweek
 } ;
 
-
+// weeks in the current sliding window
 var wdw_weeks = new WeeksExcerpt(dsp_weeks.visible_weeks);
 
 
