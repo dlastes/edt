@@ -180,7 +180,7 @@ function fetch_bknews_light(first) {
 
             bknews.cont = JSON.parse(msg) ;
 
-            var sel_week = wdw_weeks.get_selected() ;
+            var sel_week = week_banner.get_selected() ;
             if (Week.compare(sel_week, exp_week)==0) {
 		var max_y = -1 ;
 		for (var i = 0 ; i < bknews.cont.length ; i++) {

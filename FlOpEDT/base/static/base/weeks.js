@@ -392,7 +392,9 @@ WeekBanner.prototype.apply_wk_change = function (d, i) { //if(fetch.done) {
 } //}
 
 
-
+WeekBanner.prototype.get_selected = function () {
+    return this.mix.weeks.get_selected() ;
+}
 
 
 // could be done with prototype and (Object.getPrototypeOf(parameter)
