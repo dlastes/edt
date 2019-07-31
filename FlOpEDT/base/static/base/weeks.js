@@ -191,7 +191,6 @@ Weeks.prototype.get_nb = function() {
 /* class WeekBanner */
 /********************/
 
-getMethods = (obj) => Object.getOwnPropertyNames(obj).filter(item => typeof obj[item] === 'function') ;
 
 // svg: Svg
 // layout_name: string; name of the layout in the svg
@@ -201,11 +200,7 @@ function WeekBanner(svg, layout_name_gen, layout_name_fg, layout_name_bg, weeks,
     this.lay_fg = svg.get_dom(layout_name_fg) ;
     this.lay_bg = svg.get_dom(layout_name_bg) ;
     this.mix = new WeekMix(par, weeks) ;
-    console.log(getMethods(this.mix));
-    var methods = getMethods(this.mix) ; 
-    for (var i = 0 ; i < methods.length ; i++) {
-        this.mix[methods[i]] = this.mix[methods[i]].bind(this.mix) ;
-    }
+    hard_bind(this.mix) ;
     //this.par.txt_x = this.par.txt_x.bind(this.par) ;
 }
 
