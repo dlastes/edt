@@ -103,6 +103,16 @@ dsp_svg.cadastre = [
 ];
 
 
+svg = new Svg(dsp_svg.layout_tree, false);
+svg.create_container();
+svg.create_layouts(dsp_svg.cadastre) ;
+
+var week_banner = new WeekBanner(svg, "wg", "wg-fg", "wg-bg", wdw_weeks, dsp_weeks);
+week_banner.spawn(semaine_an_list) ;
+
+var days_header = new WeekDayHeader(svg, "edt-fg", week_days, true, null) ;
+
+
 
 
 
@@ -120,7 +130,7 @@ sel_popup.tly = dsp_svg.margin.but;
 
 
 modules.x=sel_popup.selx + sel_popup.selx ;
-modules.y=dsp_svg.margin.top+gsckd_y(null)-40;
+modules.y=dsp_svg.margin.top + days_header.mix.gsckd_y() - 40;
 modules.width = 170 ;
 modules.height = 0 ;
 
@@ -225,9 +235,6 @@ function on_departments_rcv(dept_data) {
   ---------------------*/
 
 
-svg = new Svg(dsp_svg.layout_tree, false);
-svg.create_container();
-svg.create_layouts(dsp_svg.cadastre) ;
 
 create_quote()
 
@@ -236,8 +243,7 @@ def_cm_change();
 
 //create_clipweek();
 
-var week_banner = new WeekBanner(svg, "wg", "wg-fg", "wg-bg", wdw_weeks, dsp_weeks);
-week_banner.spawn(semaine_an_list) ;
+
 
 create_menus();
 

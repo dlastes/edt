@@ -88,3 +88,109 @@ WeekDays.prototype.add_all = function(days) {
 }
 
 
+function WeekDayHeader (svg, layout_name, days, half_day_rect, par) {
+    this.layout = svg.get_dom(layout_name) ;
+    this.mix = new WeekDayMix(par, days) ;
+    this.half_day_rect = half_day_rect ;
+    hard_bind(this.mix) ;
+}
+
+WeekDayHeader.prototype.data = function() {
+    return this.mix.days.data() ;
+}
+
+WeekDayHeader.prototype.update = function(quick, half_day_rect) {
+    var t = get_transition(quick) ;
+
+    var day_scale = this.layout
+        .selectAll(".gridsckd")
+        .data(this.data(),
+              Day.id_fun);
+
+    var day_sc_g = day_scale
+    	.enter()
+        .append("g")
+        .attr("class", "gridsckd");
+    
+    day_sc_g
+    	.append("text")
+    	.attr("class", "txt_scl")
+    	.merge(day_scale.select(".txt_scl"))
+        .transition(t)
+        .text(this.mix.gsckd_txt)
+        .attr("x", this.mix.gsckd_x)
+        .attr("y", this.mix.gsckd_y);
+
+    if (this.half_day_rect) {
+        day_sc_g
+    	    .append("rect")
+    	    .attr("class", "day_am")
+    	    .merge(day_scale.select(".day_am"))
+            .transition(t)
+    	    .attr("x", this.mix.grid_day_am_x)
+    	    .attr("y", this.mix.grid_day_am_y)
+    	    .attr("height", this.mix.grid_day_am_height)
+    	    .attr("width", this.mix.grid_day_am_width);
+        
+        day_sc_g
+    	    .append("rect")
+    	    .attr("class", "day_pm")
+    	    .merge(day_scale.select(".day_pm"))
+            .transition(t)
+    	    .attr("x", this.mix.grid_day_pm_x)
+    	    .attr("y", this.mix.grid_day_pm_y)
+    	    .attr("height", this.mix.grid_day_pm_height)
+    	    .attr("width", this.mix.grid_day_pm_width);
+    }
+        
+    day_scale.exit().remove();
+}
+
+
+function WeekDayMix(par, days) {
+    Object.assign(this, par) ;
+    this.days = days ;
+
+    // put it here, even if it's not useful for now
+    this.gsckd_x = function(d, i) {
+        return i * (rootgp_width * labgp.width +
+                    dim_dispo.plot * (dim_dispo.width + dim_dispo.right)) +
+            rootgp_width * labgp.width * .5;
+    }
+    this.gsckd_y = function() {
+        return -.75 * labgp.height_init;
+    }
+    this.gsckd_txt = function(d) {
+        return d.name + " " + d.date;
+    }
+    this.grid_day_am_x = function(d) {
+        return d.num * (rootgp_width * labgp.width +
+                        dim_dispo.plot * (dim_dispo.width + dim_dispo.right));
+    }
+    this.grid_day_am_y = function() {
+        return 0 ;
+    }
+    this.grid_day_am_height = function() {
+        var t = time_settings.time ;
+        return scale*nbRows*(t.lunch_break_start_time - t.day_start_time) ;
+    }
+    this.grid_day_am_width = function() {
+        return rootgp_width * labgp.width ;
+    }
+    this.grid_day_pm_x = function(d) {
+        return this.grid_day_am_x(d) ;
+    }
+    this.grid_day_pm_y = function() {
+        var t = time_settings.time ;
+        return this.grid_day_am_y() + this.grid_day_am_height()
+	    + bknews_h() ;
+    }
+    this.grid_day_pm_height = function() {
+        var t = time_settings.time ;
+        return scale*nbRows*(t.day_finish_time - t.lunch_break_finish_time) ;
+    }
+    this.grid_day_pm_width = function() {
+        return rootgp_width * labgp.width ;
+    }
+    
+}

@@ -590,59 +590,11 @@ function go_grid(quick) {
 //        grid_day_pm: x, y, height, width
 //        bknews_top_y, bknews_bot_y, grid_height
 //        gsckh: x1, y, x2, txt
-function go_days(quick, half_day_rect) {
+function go_days(quick) {
 
-    var t;
-    if (quick) {
-        t = d3.transition()
-            .duration(0);
-    } else {
-        t = d3.transition();
-    }
+    var t = get_transition(quick);
 
-    var day_scale = svg.get_dom("edt-fg")
-        .selectAll(".gridsckd")
-        .data(week_days.data(),
-              Day.id_fun);
-
-    var day_sc_g = day_scale
-    	.enter()
-        .append("g")
-        .attr("class", "gridsckd");
-    
-    day_sc_g
-    	.append("text")
-    	.attr("class", "txt_scl")
-    	.merge(day_scale.select(".txt_scl"))
-        .transition(t)
-        .text(gsckd_txt)
-        .attr("x", gsckd_x)
-        .attr("y", gsckd_y);
-
-    if (half_day_rect) {
-        day_sc_g
-    	    .append("rect")
-    	    .attr("class", "day_am")
-    	    .merge(day_scale.select(".day_am"))
-            .transition(t)
-    	    .attr("x", grid_day_am_x)
-    	    .attr("y", grid_day_am_y)
-    	    .attr("height", grid_day_am_height)
-    	    .attr("width", grid_day_am_width);
-        
-        day_sc_g
-    	    .append("rect")
-    	    .attr("class", "day_pm")
-    	    .merge(day_scale.select(".day_pm"))
-            .transition(t)
-    	    .attr("x", grid_day_pm_x)
-    	    .attr("y", grid_day_pm_y)
-    	    .attr("height", grid_day_pm_height)
-    	    .attr("width", grid_day_pm_width);
-    }
-        
-    day_scale.exit().remove();
-
+    days_header.update(quick) ;
 
     var hour_bar = svg.get_dom("edt-fg")
         .selectAll(".gridsckhb")
