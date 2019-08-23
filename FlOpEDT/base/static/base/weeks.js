@@ -26,6 +26,8 @@
 /* class Week */
 /**************/
 
+// an and semaine TO BE RENAMED
+
 function Week (an, semaine) {
     this.an = an ;
     this.semaine = semaine ;

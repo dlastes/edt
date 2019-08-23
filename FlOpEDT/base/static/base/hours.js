@@ -42,6 +42,7 @@ function Hours(settings) {
 }
 
 
+// Hour labels to the left of the grid
 function HourHeader(svg, layout_name, hours) {
     this.layout = svg.get_dom(layout_name) ;
     this.hours = hours ;
@@ -117,6 +118,7 @@ HourHeader.prototype.update = function(quick) {
 }
 
 
+// Display parameters and functions
 function HourMix(settings) {
     this.settings = settings ;
     this.gsckh_x1 = function() {

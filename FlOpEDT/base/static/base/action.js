@@ -1011,7 +1011,7 @@ function dis_change_ack(msg, nbDispos) {
 
 
 /*--------------------
-   ------ SLASH ------
+   ------ SPLASH ------
   --------------------*/
 
 

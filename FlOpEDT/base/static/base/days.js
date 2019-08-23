@@ -40,6 +40,7 @@ Day.id_fun = function(d) {
 
 function WeekDays(days) {
     this.day_list = [] ;
+    // indexed by ref
     this.day_dict = {} ;
     if (typeof days !== 'undefined') {
         this.add_all(days) ;
@@ -88,6 +89,7 @@ WeekDays.prototype.add_all = function(days) {
 }
 
 
+// Name and date of the days above the grid
 function WeekDayHeader (svg, layout_name, days, half_day_rect, par) {
     this.layout = svg.get_dom(layout_name) ;
     this.mix = new WeekDayMix(par, days) ;
@@ -147,6 +149,8 @@ WeekDayHeader.prototype.update = function(quick, half_day_rect) {
 }
 
 
+// Private class
+// Display parameters and functions
 function WeekDayMix(par, days) {
     Object.assign(this, par) ;
     this.days = days ;
