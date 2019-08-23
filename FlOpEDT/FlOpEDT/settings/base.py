@@ -167,11 +167,3 @@ EMAIL_USE_SSL = True
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_SUBJECT_PREFIX = '[flop!EDT] '
 SERVER_EMAIL = 'no-reply@flop.edt'
-
-EMAIL_HOST = os.environ.get('EMAIL_HOST')
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
-EMAIL_PORT = int(os.environ.get('EMAIL_PORT'))
-
-ADMINS = [tuple(admin.split(",")) for admin in os.environ.get('ADMINS').split(" ")]
-MANAGERS = ADMINS
