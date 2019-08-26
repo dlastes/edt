@@ -182,7 +182,7 @@ class WeekDB(object):
         other_departments_sched_courses_for_room = {}
         for r in rooms:
             other_departments_sched_courses_for_room[r] = set()
-            for rg in r.subroom_of.exclude(types__department=self.department):
+            for rg in r.subroom_of.all():
                 other_departments_sched_courses_for_room[r] |= set(self.other_departments_sched_courses.filter(room=rg))
 
         return room_types, room_groups, rooms, room_prefs, room_groups_for_type, room_course_compat, course_rg_compat,\
