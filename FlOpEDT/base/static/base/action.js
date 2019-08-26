@@ -602,12 +602,29 @@ function apply_ckbox(dk) {
                 //     }
                 //     go_edt(false);
                 // }
-                if (Object.keys(dispos).length == 0) {
-		    fetch_dispos();
-		} else {
-		    create_dispos_user_data();
-		    go_edt(false);
-		}
+                
+		fetch_dispos();
+
+                if (logged_usr.dispo_all_change) { 
+
+                    // a single tutor was selected
+                    if (tutors.all.filter(function(t){
+                        return t.display ;
+                    }).length == 1) {
+                        user.nom = tutors.all.find(function(t){
+                            return t.display ;
+                        }).name ;
+                    }
+                    // otherwise cancel selection
+                    else {
+                        tutors.all.forEach(function(t) {
+                            t.display = true ;
+                        }) ;
+                        user.nom = logged_usr.nom ;
+                    }
+                }
+		create_dispos_user_data();
+		go_edt(false);
 		
             } else {
                 user.dispos = [];
