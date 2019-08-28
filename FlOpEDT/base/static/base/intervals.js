@@ -139,7 +139,7 @@ function update_pref_interval(tutor, day, start_time, value) {
 	});
 	console.log(p);
 	if (p.length == 1) {
-	    p[0].value = value ;
+	    p[0].val = value ;
 	} else {
 	    console.log("Problem with the time interval");
 	}
