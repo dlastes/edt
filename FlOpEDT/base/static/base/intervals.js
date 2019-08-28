@@ -128,7 +128,7 @@ function update_pref_interval(tutor, day, start_time, value) {
 	return d.start_time == start_time;
     });
     if (p.length == 1) {
-	p[0].val = value ;
+	p[0].value = value ;
     } else {
 	console.log("Problem with the time interval");
     }
