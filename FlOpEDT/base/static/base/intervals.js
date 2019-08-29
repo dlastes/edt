@@ -145,3 +145,19 @@ function update_pref_interval(tutor, day, start_time, value) {
     }
 }
 
+
+// PRECOND: sorted preference list
+// fill preference list with def_value so that any moment has a value
+function fill_holes(pref, def_value) {
+    var i = 0 ;
+    while (i < pref.length-1) {
+        if (pref[i].start_time + pref[i].duration < pref[i+1].start_time) {
+            pref.splice(i+1, 0,
+                        {start_time:pref[i].start_time + pref[i].duration,
+                         duration: pref[i+1].start_time - pref[i].duration,
+                         value: def_value});
+            i++;
+        }
+        i ++ ;
+    }
+}

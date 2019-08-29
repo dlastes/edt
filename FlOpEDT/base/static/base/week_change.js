@@ -99,6 +99,18 @@ function fetch_dispos() {
         success: function(msg) {
             console.log("in");
             console.log(msg);
+            if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
+                an_att == weeks.init_data[weeks.sel[0]].an) {
+                extra_pref = {};
+                d3.csvParse(msg, translate_extra_pref_from_csv);
+		sort_preferences(extra_pref);
+                var tutors = Object.keys(extra_pref) ;
+                for(i = 0 ; i < tutors.length ; i++) {
+                    var busy_days = Object.keys(extra_pref[tutors[i]]) ;
+	            for(d = 0 ; d < busy_days.length ; d++) {
+                        fill_holes(extra_pref[tutors[i]][busy_days[d]], 1);
+                    }
+                }
             }
             show_loader(false);
 
