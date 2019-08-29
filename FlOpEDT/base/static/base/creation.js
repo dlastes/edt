@@ -1534,6 +1534,8 @@ function warning_check(c2m, day, start_time) {
         ret = "L'enseignant·e " + check.tutor + " s'était déclaré·e indisponible.";
     } else if (check.nok_type == 'tutor_availability_unknown') {
         ret = "L'enseignant·e " + check.tutor + " n'a pas déclaré ses dispos.";
+    } else if (check.nok_type == 'tutor_busy_other_dept') {
+        ret = "L'enseignant·e " + check.tutor + " est occupé dans un autre département.";
     }
     return ret ;
 }
@@ -1638,6 +1640,17 @@ function check_course(c2m, date) {
 	    ret.nok_type = 'tutor_availability_unknown' ;
 	    ret.tutor = c2m.prof ;
             return ret;
+        }
+
+        if (Object.keys(extra_pref).includes(c2m.prof) &&
+            Object.keys(extra_pref[c2m.prof]).includes(date.day)) {
+            var extra_unavailable = get_preference(extra_pref[c2m.prof][date.day],
+                                                   date.start_time, c2m.duration);
+            if (extra_unavailable == 0) {
+	        ret.nok_type = 'tutor_busy_other_dept' ;
+	        ret.tutor = c2m.prof ;
+                return ret;
+            }
         }
     }
 
