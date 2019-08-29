@@ -69,6 +69,7 @@ urlpatterns = [
     url(r'^fetch_week_infos/(?P<year>\d+)/(?P<week>\d+)$', views.fetch_week_infos, name="fetch_week_infos"),
     path('fetch_departments', views.fetch_departments, name="fetch_departments"),
     path('fetch_tutor_courses/<int:year>/<int:week>/<str:tutor>', views.fetch_tutor_courses, name="fetch_tutor_courses"),
+    path('fetch_extra_sched/<int:year>/<int:week>', views.fetch_extra_sched, name="fetch_extra_sched"),
 
     # statistics
     # ---------------------------------

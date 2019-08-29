@@ -46,7 +46,7 @@ from people.models import Tutor, UserDepartmentSettings, User
 
 from base.admin import CoursResource, DispoResource, VersionResource, \
     CoursPlaceResource, UnavailableRoomsResource, TutorCoursesResource, \
-    CoursePreferenceResource
+    CoursePreferenceResource, MultiDepartmentTutorResource
 from displayweb.admin import BreakingNewsResource
 from base.forms import ContactForm
 from base.models import Course, UserPreference, ScheduledCourse, EdtVersion, \
@@ -758,6 +758,31 @@ def fetch_tutor_courses(req, year, week, tutor, **kwargs):
                         cours__tutor__username=tutor))
     return HttpResponse(dataset.csv, content_type='text/csv')
 
+
+def fetch_extra_sched(req, year, week, **kwargs):
+    """
+    Return the unavailability periods due to teaching in other departments
+    """
+    tutors = []
+    for scheduled in ScheduledCourse.objects.filter(
+            cours__semaine=week,
+            cours__an=year,
+            copie_travail=0,
+            cours__room_type__department=req.department).distinct('cours__tutor'):
+        tutor = scheduled.cours.tutor
+        if UserDepartmentSettings.objects.filter(user=tutor).count() > 1:
+            tutors.append(tutor)
+
+    dataset = MultiDepartmentTutorResource() \
+        .export(ScheduledCourse.objects \
+                .filter(
+                    cours__semaine=week,
+                    cours__an=year,
+                    copie_travail=0,
+                    cours__tutor__in=tutors,
+                )
+                .exclude(cours__room_type__department=req.department))
+    return HttpResponse(dataset.csv, content_type='text/csv')
 
 # </editor-fold desc="FETCHERS">
 
