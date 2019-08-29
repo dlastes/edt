@@ -181,7 +181,10 @@ var svg_cont ;
   --------------------------*/
 
 // 2D array of list (username,iday,list of intervals)
+  // 
 var dispos = {};
+  // unavailabilities due to other departments
+var extra_pref = {};
 
 // parameters for availability
 var par_dispos = {

@@ -87,6 +87,33 @@ function fetch_dispos() {
             window.location.replace(url_login + "?next=" + url_edt + an_att + "/" + semaine_att);
         }
     });
+
+    show_loader(true);
+    console.log(url_fetch_extra_sched + an_att + "/" + semaine_att);
+    $.ajax({
+        type: "GET", //rest Type
+        dataType: 'text',
+        url: url_fetch_extra_sched + an_att + "/" + semaine_att ,
+        async: true,
+        contentType: "text/csv",
+        success: function(msg) {
+            console.log("in");
+            console.log(msg);
+            }
+            show_loader(false);
+
+        },
+        error: function(xhr, error) {
+            console.log("error");
+            console.log(xhr);
+            console.log(error);
+            console.log(xhr.responseText);
+            show_loader(false);
+            // window.location.href = url_login;
+            window.location.replace(url_login + "?next=" + url_edt + an_att + "/" + semaine_att);
+        }
+    });
+
 }
 
 
@@ -100,6 +127,19 @@ function translate_dispos_from_csv(d) {
     dispos[d.prof][d.day].push({start_time:+d.start_time,
 			       duration: +d.duration,
 			       value: +d.valeur});
+}
+
+
+function translate_extra_pref_from_csv(d) {
+    if(Object.keys(extra_pref).indexOf(d.tutor)==-1){
+	extra_pref[d.tutor] = {} ;
+        for (var i = 0; i < days.length; i++) {
+	    extra_pref[d.tutor][days[i].ref] = [] ;
+	}	
+    }
+    extra_pref[d.tutor][d.day].push({start_time:+d.start_time,
+			             duration: +d.duration,
+			             value: 0});
 }
 
 function sort_preferences(pref) {

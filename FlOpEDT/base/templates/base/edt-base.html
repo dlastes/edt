@@ -65,6 +65,8 @@
     url_swap = url_swap.slice(0, -5) ;
     var url_reassign_rooms = "{% url 'TTapp:reassign_rooms' department 0 0 0 %}" ;
     url_reassign_rooms = url_reassign_rooms.slice(0, -5) ;
+    var url_fetch_extra_sched = "{% url 'base:fetch_extra_sched' department 0 0 %}" ;
+    url_fetch_extra_sched = url_fetch_extra_sched.slice(0, -3) ;
 
     var semaine_an_list = {{ all_weeks| safe }};
     var semaine_init = +"{{ semaine }}";
