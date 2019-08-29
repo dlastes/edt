@@ -65,7 +65,7 @@ function fetch_dispos() {
                 dispos = {};
                 //user.dispos = [];
                 d3.csvParse(msg, translate_dispos_from_csv);
-		sort_preferences();
+		sort_preferences(dispos);
                 fetch.ongoing_dispos = false;
                 if (ckbox["dis-mod"].cked) {
                     create_dispos_user_data();
@@ -102,12 +102,12 @@ function translate_dispos_from_csv(d) {
 			       value: +d.valeur});
 }
 
-function sort_preferences() {
+function sort_preferences(pref) {
     var i, d ;
-    var tutors = Object.keys(dispos) ;
+    var tutors = Object.keys(pref) ;
     for(i = 0 ; i < tutors.length ; i++) {
 	for(d = 0 ; d < days.length ; d++) {
-	    dispos[tutors[i]][days[d].ref].sort(
+	    pref[tutors[i]][days[d].ref].sort(
 		function (a,b) {
 		    return a.start_time - b.start_time ;
 		}
@@ -210,7 +210,7 @@ function create_dispos_user_data() {
     if (dispos[user.nom] === undefined) {
 	allocate_dispos(user.nom);
 	fill_missing_preferences(user.nom, ts);
-        sort_preferences();
+        sort_preferences(dispos);
     }
 
     for (var i = 0; i < days.length; i++) {

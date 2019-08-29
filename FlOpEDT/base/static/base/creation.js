@@ -1628,8 +1628,8 @@ function check_course(c2m, date) {
     }
 
     if (dispos[c2m.prof] !== undefined) {
-        var pref_tut = get_preference(date.day, date.start_time, c2m.duration,
-			              c2m.prof);
+        var pref_tut = get_preference(dispos[c2m.prof][date.day],
+                                      date.start_time, c2m.duration);
 	if (pref_tut == 0) {
 	    ret.nok_type = 'tutor_unavailable' ;
 	    ret.tutor = c2m.prof ;

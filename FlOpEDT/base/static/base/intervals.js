@@ -47,9 +47,8 @@ function index_in_pref(list, instant) {
 // get the aggregated preference score of tutor on day, on an interval
 // lasting duration, starting at start_time
 // assumes well-formed (consecutive) intervals
-function get_preference(day, start_time, duration, tutor) {
+function get_preference(pref, start_time, duration) {
     var after = false ;
-    var pref = dispos[tutor][day];
     var t = time_settings.time ;
     
     var i_start = index_in_pref(pref.map(function(d){
