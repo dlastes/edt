@@ -129,6 +129,21 @@ class TutorCoursesResource(CoursPlaceResource):
                   'semaine', 'room', 'prof', 'room_type', 'department')
 
     
+class MultiDepartmentTutorResource(resources.ModelResource):
+    tutor = fields.Field(column_name='tutor',
+                         attribute='cours__tutor',
+                         widget=ForeignKeyWidget(Tutor, 'username'))
+    department =  fields.Field(column_name='department',
+                               attribute='cours__type__department',
+                               widget=ForeignKeyWidget(Department, 'abbrev'))
+    duration = fields.Field(column_name='duration',
+                            attribute='cours__type__duration')
+
+    class Meta:
+        model = ScheduledCourse
+        fields = ('tutor', 'department', 'day', 'start_time', 'duration')
+
+    
 class CoursResource(resources.ModelResource):
     promo = fields.Field(column_name='promo',
                          attribute='groupe__train_prog',
