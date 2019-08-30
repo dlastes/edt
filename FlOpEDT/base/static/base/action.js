@@ -192,11 +192,11 @@ function select_room_change() {
     atomic_rooms = [];
     composed_rooms = [];
     var fake_id = new Date() ;
-    fake_id = fake_id.getMilliseconds() + "-" + c.id_cours ;
+    fake_id = fake_id.getMilliseconds() + "-" ;
     room_tutor_change.proposal = [] ;
 
     for (rg = 0 ; rg < proposed_rg.length ; rg++) {
-	room = {fid: fake_id, content: proposed_rg[rg]} ;
+	room = {fid: fake_id + proposed_rg[rg], content: proposed_rg[rg]} ;
 	if(rooms.roomgroups[room.content].length == 1) {
 	    atomic_rooms.push(room);
 	} else {
