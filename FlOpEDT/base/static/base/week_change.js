@@ -137,19 +137,20 @@ function fetch_dispos() {
         success: function(msg) {
             console.log("in");
             console.log(msg);
-            // if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
-            //     an_att == weeks.init_data[weeks.sel[0]].an) {
-            //     extra_pref = {};
-            //     d3.csvParse(msg, translate_extra_pref_from_csv);
-	    //     sort_preferences(extra_pref);
-            //     var tutors = Object.keys(extra_pref) ;
-            //     for(i = 0 ; i < tutors.length ; i++) {
-            //         var busy_days = Object.keys(extra_pref[tutors[i]]) ;
-	    //         for(d = 0 ; d < busy_days.length ; d++) {
-            //             fill_holes(extra_pref[tutors[i]][busy_days[d]], 1);
-            //         }
-            //     }
-            // }
+            if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
+                an_att == weeks.init_data[weeks.sel[0]].an) {
+                extra_pref.rooms = {};
+                d3.csvParse(msg, translate_extra_pref_room_from_csv);
+	        sort_preferences(extra_pref.rooms);
+                console.log(extra_pref.rooms);
+                var shared_rooms = Object.keys(extra_pref.rooms) ;
+                for(i = 0 ; i < shared_rooms.length ; i++) {
+                    var busy_days = Object.keys(extra_pref.rooms[shared_rooms[i]]) ;
+	            for(d = 0 ; d < busy_days.length ; d++) {
+                        fill_holes(extra_pref.rooms[shared_rooms[i]][busy_days[d]], 1);
+                    }
+                }
+            }
             show_loader(false);
 
         },
@@ -194,12 +195,24 @@ function translate_extra_pref_tut_from_csv(d) {
 			             value: 0});
 }
 
+function translate_extra_pref_room_from_csv(d) {
+    if(Object.keys(extra_pref.rooms).indexOf(d.room)==-1){
+	extra_pref.rooms[d.room] = {} ;
+        for (var i = 0; i < days.length; i++) {
+	    extra_pref.rooms[d.room][days[i].ref] = [] ;
+	}	
+    }
+    extra_pref.rooms[d.room][d.day].push({start_time:+d.start_time,
+			                  duration: +d.duration,
+			                  value: 0});
+}
+
 function sort_preferences(pref) {
     var i, d ;
-    var tutors = Object.keys(pref) ;
-    for(i = 0 ; i < tutors.length ; i++) {
+    var tutors_or_rooms = Object.keys(pref) ;
+    for(i = 0 ; i < tutors_or_rooms.length ; i++) {
 	for(d = 0 ; d < days.length ; d++) {
-	    pref[tutors[i]][days[d].ref].sort(
+	    pref[tutors_or_rooms[i]][days[d].ref].sort(
 		function (a,b) {
 		    return a.start_time - b.start_time ;
 		}
