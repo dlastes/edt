@@ -184,7 +184,8 @@ var svg_cont ;
   // 
 var dispos = {};
   // unavailabilities due to other departments
-var extra_pref = {};
+var extra_pref = {tutors:{},
+                  rooms:{}};
 
 // parameters for availability
 var par_dispos = {

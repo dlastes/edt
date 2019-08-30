@@ -101,14 +101,14 @@ function fetch_dispos() {
             console.log(msg);
             if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
                 an_att == weeks.init_data[weeks.sel[0]].an) {
-                extra_pref = {};
-                d3.csvParse(msg, translate_extra_pref_from_csv);
-		sort_preferences(extra_pref);
-                var tutors = Object.keys(extra_pref) ;
+                extra_pref.tutors = {};
+                d3.csvParse(msg, translate_extra_pref_tut_from_csv);
+		sort_preferences(extra_pref.tutors);
+                var tutors = Object.keys(extra_pref.tutors) ;
                 for(i = 0 ; i < tutors.length ; i++) {
-                    var busy_days = Object.keys(extra_pref[tutors[i]]) ;
+                    var busy_days = Object.keys(extra_pref.tutors[tutors[i]]) ;
 	            for(d = 0 ; d < busy_days.length ; d++) {
-                        fill_holes(extra_pref[tutors[i]][busy_days[d]], 1);
+                        fill_holes(extra_pref.tutors[tutors[i]][busy_days[d]], 1);
                     }
                 }
             }
@@ -182,14 +182,14 @@ function translate_dispos_from_csv(d) {
 }
 
 
-function translate_extra_pref_from_csv(d) {
-    if(Object.keys(extra_pref).indexOf(d.tutor)==-1){
-	extra_pref[d.tutor] = {} ;
+function translate_extra_pref_tut_from_csv(d) {
+    if(Object.keys(extra_pref.tutors).indexOf(d.tutor)==-1){
+	extra_pref.tutors[d.tutor] = {} ;
         for (var i = 0; i < days.length; i++) {
-	    extra_pref[d.tutor][days[i].ref] = [] ;
+	    extra_pref.tutors[d.tutor][days[i].ref] = [] ;
 	}	
     }
-    extra_pref[d.tutor][d.day].push({start_time:+d.start_time,
+    extra_pref.tutors[d.tutor][d.day].push({start_time:+d.start_time,
 			             duration: +d.duration,
 			             value: 0});
 }

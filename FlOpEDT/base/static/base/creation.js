@@ -1642,9 +1642,9 @@ function check_course(c2m, date) {
             return ret;
         }
 
-        if (Object.keys(extra_pref).includes(c2m.prof) &&
-            Object.keys(extra_pref[c2m.prof]).includes(date.day)) {
-            var extra_unavailable = get_preference(extra_pref[c2m.prof][date.day],
+        if (Object.keys(extra_pref.tutors).includes(c2m.prof) &&
+            Object.keys(extra_pref.tutors[c2m.prof]).includes(date.day)) {
+            var extra_unavailable = get_preference(extra_pref.tutors[c2m.prof][date.day],
                                                    date.start_time, c2m.duration);
             if (extra_unavailable == 0) {
 	        ret.nok_type = 'tutor_busy_other_dept' ;
