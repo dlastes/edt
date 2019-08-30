@@ -126,6 +126,46 @@ function fetch_dispos() {
         }
     });
 
+    show_loader(true);
+    console.log(url_fetch_shared_rooms + an_att + "/" + semaine_att);
+    $.ajax({
+        type: "GET", //rest Type
+        dataType: 'text',
+        url: url_fetch_shared_rooms + an_att + "/" + semaine_att ,
+        async: true,
+        contentType: "text/csv",
+        success: function(msg) {
+            console.log("in");
+            console.log(msg);
+            // if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
+            //     an_att == weeks.init_data[weeks.sel[0]].an) {
+            //     extra_pref = {};
+            //     d3.csvParse(msg, translate_extra_pref_from_csv);
+	    //     sort_preferences(extra_pref);
+            //     var tutors = Object.keys(extra_pref) ;
+            //     for(i = 0 ; i < tutors.length ; i++) {
+            //         var busy_days = Object.keys(extra_pref[tutors[i]]) ;
+	    //         for(d = 0 ; d < busy_days.length ; d++) {
+            //             fill_holes(extra_pref[tutors[i]][busy_days[d]], 1);
+            //         }
+            //     }
+            // }
+            show_loader(false);
+
+        },
+        error: function(xhr, error) {
+            console.log("error");
+            console.log(xhr);
+            console.log(error);
+            console.log(xhr.responseText);
+            show_loader(false);
+            // window.location.href = url_login;
+            window.location.replace(url_login + "?next=" + url_edt + an_att + "/" + semaine_att);
+        }
+    });
+
+
+    
 }
 
 
