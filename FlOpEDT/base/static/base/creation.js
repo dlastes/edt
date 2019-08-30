@@ -1536,6 +1536,8 @@ function warning_check(c2m, day, start_time) {
         ret = "L'enseignant·e " + check.tutor + " n'a pas déclaré ses dispos.";
     } else if (check.nok_type == 'tutor_busy_other_dept') {
         ret = "L'enseignant·e " + check.tutor + " est occupé dans un autre département.";
+    } else if (check.nok_type == 'room_busy_other_dept') {
+        ret = "La salle " + check.room + " est utilisée par un autre département.";
     }
     return ret ;
 }
@@ -1629,7 +1631,10 @@ function check_course(c2m, date) {
         return ret;
     }
 
+    // tutor availability
     if (dispos[c2m.prof] !== undefined) {
+
+        // in the current department
         var pref_tut = get_preference(dispos[c2m.prof][date.day],
                                       date.start_time, c2m.duration);
 	if (pref_tut == 0) {
@@ -1642,6 +1647,7 @@ function check_course(c2m, date) {
             return ret;
         }
 
+        // in other departments
         if (Object.keys(extra_pref.tutors).includes(c2m.prof) &&
             Object.keys(extra_pref.tutors[c2m.prof]).includes(date.day)) {
             var extra_unavailable = get_preference(extra_pref.tutors[c2m.prof][date.day],
@@ -1654,6 +1660,19 @@ function check_course(c2m, date) {
         }
     }
 
+    // shared rooms availability
+    if (Object.keys(extra_pref.rooms).includes(c2m.room) &&
+        Object.keys(extra_pref.rooms[c2m.room]).includes(date.day)) {
+        var extra_unavailable = get_preference(extra_pref.rooms[c2m.room][date.day],
+                                               date.start_time, c2m.duration);
+        if (extra_unavailable == 0) {
+	    ret.nok_type = 'room_busy_other_dept' ;
+	    ret.room = c2m.room ;
+            return ret;
+        }
+    }
+
+    
     ret.constraints_ok = true ;
     return ret ;
 
