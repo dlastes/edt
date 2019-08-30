@@ -1403,8 +1403,10 @@ function fill_grid_slot(c2m, grid_slot) {
     // if ((logged_usr.rights >> 2) % 2 == 1) {
     // 	return ;
     // }
+    var wanted_course = Object.assign({},c2m) ;
+    Object.assign(wanted_course, {day:grid_slot.day, start:grid_slot.start}) ;
 
-    var check = check_course(c2m, {day:grid_slot.day, start_time:grid_slot.start});
+    var check = check_course(c2m, wanted_course);
     
     if (check.constraints_ok) {
 	return ;
@@ -1428,9 +1430,9 @@ function fill_grid_slot(c2m, grid_slot) {
 
 }
 
-function warning_check(c2m, day, start_time) {
+function warning_check(wanted_course) {
     var ret = '';
-    var check = check_course(c2m, {day:day, start_time:start_time});
+    var check = check_course(wanted_course);
     if (check.nok_type == 'stable') {
 	ret = "Le cours était censé être fixe.";
     } else if (check.nok_type == 'train_prog_unavailable') {
@@ -1480,14 +1482,13 @@ function simultaneous_courses(target_course) {
 */
 // c2m element of course
 // date {day, start_time}
-function check_course(c2m, date) {
+function check_course(wanted_course) {
 
     var ret = {constraints_ok: false};
     var possible_conflicts = [] ;
     var conflicts = [] ;
 
-
-    if (is_garbage(date)) {
+    if (is_garbage(wanted_course)) {
 	ret.constraints_ok = true ;
 	return ret ;
     }
