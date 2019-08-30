@@ -225,9 +225,12 @@ function select_room_change() {
 
 function confirm_room_change(d){
     var c = room_tutor_change.course[0] ;
-    add_bouge(c);
-    c.room = d.content;
-    //room_tutor_change.cur_value = d.room;
+
+    var wanted_course = Object.assign({},c);
+    Object.assign(wanted_course, {room: d.content});
+
+    check_assign_course(c, wanted_course);
+
     room_tutor_change.course = [] ;
     room_tutor_change.proposal = [] ;
     go_courses() ;
@@ -356,9 +359,12 @@ function select_tutor_change(f) {
 
 function confirm_tutor_change(d){
     var c = room_tutor_change.course[0] ;
-    add_bouge(c);
-    c.prof = d.content;
-    //room_tutor_change.cur_value = d.room;
+
+    var wanted_course = Object.assign({},c);
+    Object.assign(wanted_course, {prof: d.content});
+
+    check_assign_course(c, wanted_course);
+
     room_tutor_change.course = [] ;
     room_tutor_change.proposal = [] ;
     go_courses() ;
