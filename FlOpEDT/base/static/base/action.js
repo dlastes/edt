@@ -137,8 +137,7 @@ function select_room_change() {
     if (level < room_cm_settings.length - 1) {
 
 	// find rooms where a course take place
-	
-	var concurrent_courses = simultaneous_courses(c.day, c.start, c.duration, c.id_cours) ;
+	var concurrent_courses = simultaneous_courses(c) ;
 	
 	var occupied_rooms = [] ;
 	for (i = 0 ; i < concurrent_courses.length ; i++) {

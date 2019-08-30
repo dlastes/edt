@@ -1543,17 +1543,17 @@ function warning_check(c2m, day, start_time) {
 }
 
 
-
-function simultaneous_courses(day, start_time, duration, id) {
+// return all simultaneous courses
+function simultaneous_courses(target_course) {
     return cours.filter(function(c) {
-        return (c.day == day 
-		&& ((c.start < start_time+duration
-		     && c.start >= start_time)
-		    || (c.start + c.duration < start_time+duration
-			&& c.start +c.duration > start_time)
-		    || (c.start <= start_time
-			&& c.start + c.duration > start_time + duration))
-		&& c.id_cours != id);
+        return (c.day == target_course.day 
+		&& ((c.start < target_course.start+target_course.duration
+		     && c.start >= target_course.start)
+		    || (c.start + c.duration < target_course.start+target_course.duration
+			&& c.start +c.duration > target_course.start)
+		    || (c.start <= target_course.start
+			&& c.start + c.duration > target_course.start + target_course.duration))
+		&& c.id_cours != target_course.id_cours);
     });
 }
 
