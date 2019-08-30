@@ -1344,106 +1344,15 @@ function def_drag() {
                     //     return s.day == cur_over.day
 		    // 	    && s.start == cur_over.start_time;
                     // });
+
+                    var pending_change = {day: cur_over.day,
+                                          start: cur_over.start_time} ;
 		    
-		    var warn_check = warning_check(d, cur_over.day, cur_over.start_time);
-		    
-		    
-		    console.log(cur_over.day, cur_over.start_time/60);
-		    console.log(warn_check);
-		    
-		    //                    if (ngs.dispo) {
-		    if (warn_check == "") {
+                    var wanted_course = Object.assign({},d) ;
+                    Object.assign(wanted_course,pending_change) ;
 
-			add_bouge(d);
-                        d.day = cur_over.day;
-                        d.start = cur_over.start_time;
-			room_tutor_change.course.push(d) ;
-			compute_cm_room_tutor_direction() ;
-			room_cm_level = 0 ;
-			var disp_cont_menu = select_room_change() ;
-			if (disp_cont_menu) {
-			    go_cm_room_tutor_change();
-			} else {
-			    room_tutor_change.course = [] ;
-			    room_tutor_change.proposal = [] ;
-			}
-
-		    } else  { //if (!ngs.dispo) {
-			// -- no slot --
-			// && (logged_usr.rights >> 2) % 2 == 1) {
-
-			
-			
-			console.log(warn_check);
-
-			var splash_violate_constraint ;
-
-			if ((logged_usr.rights >> 2) % 2 == 1) {
-			
-			    splash_violate_constraint = {
-				id: "viol_constraint",
-				but: {
-				    list: [{txt: "Confirmer",
-					    click:
-					    function(d){
-						add_bouge(d.saved_data.course);
-						d.saved_data.course.day = d.saved_data.grid_slot.day;
-						d.saved_data.course.start = d.saved_data.grid_slot.start_time;
-						go_grid(true);
-						go_courses(true);
-						return ;
-					    },
-					    saved_data:
-					    {course: d,
-					     grid_slot: {day: cur_over.day, start_time: cur_over.start_time}}
-					   },
-					   {txt: "Annuler",
-					    click: function(d){
-						return ;
-					    }
-					   }]
-				},
-				com: {list: [{txt: "Attention", ftsi: 23},
-					     {txt: ""},
-					     {txt: "Des privilèges vous ont été accordés, et vous en profitez pour outrepasser la contrainte suivante :"},
-					     {txt: warn_check},
-					     {txt: "Confirmer la modification ?"}]
-				     }
-			    }
-			    splash(splash_violate_constraint);
-
-			
-			} else {
-			    if (slot_case) {
-				var gs = data_slot_grid.filter(function(s) {
-				    return s.day == cur_over.day
-		    			&& s.start == cur_over.start_time;
-				});
-				console.log(gs);
-				if (gs.length==1) {
-				    gs[0].pop = true;
-				}
-			    } else {
-				splash_violate_constraint = {
-				    id: "viol_constraint",
-				    but: {
-					list: [{txt: "Ah ok",
-						click: function(d){
-						    return ;
-						}
-					       }]
-				    },
-				    com: {list: [{txt: "Vous tentez d'outrepasser la contrainte suivante :", ftsi: 23},
-						 {txt: warn_check},
-						 {txt: "Vous n'avez pas les droits pour le faire..."}]
-					 }
-				}
-				splash(splash_violate_constraint);
-			    }
-			    
-			}
-			
-                    }
+                    check_assign_course(d, wanted_course) ;
+                    
                 } else {
                     d.day = cur_over.day ;
                     d.start = cur_over.start_time ;
@@ -1677,6 +1586,104 @@ function check_course(c2m, date) {
     return ret ;
 
 }
+
+
+function check_assign_course(d, wanted_course) {
+    console.log(d, wanted_course) ;
+    var warn_check = warning_check(wanted_course) ;
+    console.log(warn_check);
+    
+    if (warn_check == "") {
+        
+	add_bouge(d);
+        Object.assign(d, wanted_course);
+        console.log(d);
+	room_tutor_change.course.push(d) ;
+	compute_cm_room_tutor_direction() ;
+	room_cm_level = 0 ;
+	var display_cont_menu = select_room_change() ;
+	if (display_cont_menu) {
+	    go_cm_room_tutor_change();
+	} else {
+	    room_tutor_change.course = [] ;
+	    room_tutor_change.proposal = [] ;
+	}
+        
+    } else  { //if (!ngs.dispo) {
+	// -- no slot --
+	// && (logged_usr.rights >> 2) % 2 == 1) {
+	console.log(warn_check);
+        
+	var splash_violate_constraint ;
+        
+	if ((logged_usr.rights >> 2) % 2 == 1) {
+	    
+	    splash_violate_constraint = {
+		id: "viol_constraint",
+		but: {
+		    list: [{txt: "Confirmer",
+			    click:
+			    function(btn){
+				add_bouge(btn.saved_data.course);
+                                Object.assign(btn.saved_data.course, btn.saved_data.wanted);
+				go_grid(true);
+				go_courses(true);
+				return ;
+			    },
+			    saved_data:
+			    {course: d,
+			     wanted: wanted_course}
+			   },
+			   {txt: "Annuler",
+			    click: function(d){
+				return ;
+			    }
+			   }]
+		},
+		com: {list: [{txt: "Attention", ftsi: 23},
+			     {txt: ""},
+			     {txt: "Des privilèges vous ont été accordés, et vous en profitez pour outrepasser la contrainte suivante :"},
+			     {txt: warn_check},
+			     {txt: "Confirmer la modification ?"}]
+		     }
+	    }
+	    splash(splash_violate_constraint);
+
+	    
+	} else {
+	    if (slot_case) {
+		var gs = data_slot_grid.filter(function(s) {
+		    return s.day == wanted_course.day
+		    	&& s.start == wanted_course.start;
+		});
+		console.log(gs);
+		if (gs.length==1) {
+		    gs[0].pop = true;
+		}
+	    } else {
+		splash_violate_constraint = {
+		    id: "viol_constraint",
+		    but: {
+			list: [{txt: "Ah ok",
+				click: function(d){
+				    return ;
+				}
+			       }]
+		    },
+		    com: {list: [{txt: "Vous tentez d'outrepasser la contrainte suivante :", ftsi: 23},
+				 {txt: warn_check},
+				 {txt: "Vous n'avez pas les droits pour le faire..."}]
+			 }
+		}
+		splash(splash_violate_constraint);
+	    }
+	    
+	}
+	
+    }
+
+}
+
 
 function which_slot(x, y, c) {
     var wday = (rootgp_width * labgp.width +
