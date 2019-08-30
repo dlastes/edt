@@ -1497,87 +1497,84 @@ function check_course(wanted_course) {
     // 	return ;
     // }
 
-    if (c2m.id_cours == -1) {
+    if (wanted_course.id_cours == -1) {
 	ret.nok_type = 'stable' ;
 	return ret;
     }
 
-    if (is_free(date, c2m.promo)) {
+    if (is_free(wanted_course, wanted_course.promo)) {
 	ret.nok_type = 'train_prog_unavailable' ;
-	ret.train_prog = set_promos[c2m.promo] ;
+	ret.train_prog = set_promos[wanted_course.promo] ;
         return ret;
     }
 
 
-    possible_conflicts = simultaneous_courses(date.day,
-					      date.start_time,
-					      c2m.duration,
-					      c2m.id_cours) ;
+    possible_conflicts = simultaneous_courses(wanted_course) ;
 
     // console.log("CHECK", c2m, date);
     // console.log(possible_conflicts.map(function(d){return {s:d.start, d:d.duration}}));
 
     conflicts = possible_conflicts.filter(function(c) {
-        return (c.prof == c2m.prof);
+        return (c.prof == wanted_course.prof);
     });
     
     if (conflicts.length > 0) {
 	ret.nok_type = 'tutor_busy';
-	ret.tutor = c2m.prof;
+	ret.tutor = wanted_course.prof;
         return ret;
     }
 
 
     conflicts = possible_conflicts.filter(function(c) {
-        return ((c.group == c2m.group
-		 || groups[c2m.promo][c2m.group].ancetres.indexOf(c.group) > -1
-		 || groups[c2m.promo][c2m.group].descendants.indexOf(c.group) > -1)
-		&& c.promo == c2m.promo);
+        return ((c.group == wanted_course.group
+		 || groups[wanted_course.promo][wanted_course.group].ancetres.indexOf(c.group) > -1
+		 || groups[wanted_course.promo][wanted_course.group].descendants.indexOf(c.group) > -1)
+		&& c.promo == wanted_course.promo);
     });
     
     if (conflicts.length > 0) {
 	ret.nok_type = 'group_busy';
-	ret.group = c2m.group;
+	ret.group = wanted_course.group;
         return ret;
     }
 
     // tutor availability
-    if (dispos[c2m.prof] !== undefined) {
+    if (dispos[wanted_course.prof] !== undefined) {
 
         // in the current department
-        var pref_tut = get_preference(dispos[c2m.prof][date.day],
-                                      date.start_time, c2m.duration);
+        var pref_tut = get_preference(dispos[wanted_course.prof][wanted_course.day],
+                                      wanted_course.start, wanted_course.duration);
 	if (pref_tut == 0) {
 	    ret.nok_type = 'tutor_unavailable' ;
-	    ret.tutor = c2m.prof ;
+	    ret.tutor = wanted_course.prof ;
             return ret;
 	} else if (pref_tut == -1) {
 	    ret.nok_type = 'tutor_availability_unknown' ;
-	    ret.tutor = c2m.prof ;
+	    ret.tutor = wanted_course.prof ;
             return ret;
         }
 
         // in other departments
-        if (Object.keys(extra_pref.tutors).includes(c2m.prof) &&
-            Object.keys(extra_pref.tutors[c2m.prof]).includes(date.day)) {
-            var extra_unavailable = get_preference(extra_pref.tutors[c2m.prof][date.day],
-                                                   date.start_time, c2m.duration);
+        if (Object.keys(extra_pref.tutors).includes(wanted_course.prof) &&
+            Object.keys(extra_pref.tutors[wanted_course.prof]).includes(wanted_course.day)) {
+            var extra_unavailable = get_preference(extra_pref.tutors[wanted_course.prof][wanted_course.day],
+                                                   wanted_course.start, wanted_course.duration);
             if (extra_unavailable == 0) {
 	        ret.nok_type = 'tutor_busy_other_dept' ;
-	        ret.tutor = c2m.prof ;
+	        ret.tutor = wanted_course.prof ;
                 return ret;
             }
         }
     }
 
     // shared rooms availability
-    if (Object.keys(extra_pref.rooms).includes(c2m.room) &&
-        Object.keys(extra_pref.rooms[c2m.room]).includes(date.day)) {
-        var extra_unavailable = get_preference(extra_pref.rooms[c2m.room][date.day],
-                                               date.start_time, c2m.duration);
+    if (Object.keys(extra_pref.rooms).includes(wanted_course.room) &&
+        Object.keys(extra_pref.rooms[wanted_course.room]).includes(wanted_course.day)) {
+        var extra_unavailable = get_preference(extra_pref.rooms[wanted_course.room][wanted_course.day],
+                                               wanted_course.start, wanted_course.duration);
         if (extra_unavailable == 0) {
 	    ret.nok_type = 'room_busy_other_dept' ;
-	    ret.room = c2m.room ;
+	    ret.room = wanted_course.room ;
             return ret;
         }
     }
