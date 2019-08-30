@@ -46,7 +46,8 @@ from people.models import Tutor, UserDepartmentSettings, User
 
 from base.admin import CoursResource, DispoResource, VersionResource, \
     CoursPlaceResource, UnavailableRoomsResource, TutorCoursesResource, \
-    CoursePreferenceResource, MultiDepartmentTutorResource
+    CoursePreferenceResource, MultiDepartmentTutorResource, \
+    SharedRoomGroupsResource
 from displayweb.admin import BreakingNewsResource
 from base.forms import ContactForm
 from base.models import Course, UserPreference, ScheduledCourse, EdtVersion, \
@@ -782,6 +783,29 @@ def fetch_extra_sched(req, year, week, **kwargs):
                     cours__tutor__in=tutors,
                 )
                 .exclude(cours__room_type__department=req.department))
+    return HttpResponse(dataset.csv, content_type='text/csv')
+
+
+def fetch_shared_roomgroups(req, year, week, **kwargs):
+    # which room groups are shared among departments
+    shared_roomgroups = []
+    for rg in RoomGroup.objects.all(): 
+        depts = set() 
+        for rt in rg.types.all(): 
+            depts.add(rt.department) 
+            if len(depts) > 1: 
+                shared_roomgroups.append(rg)
+
+    # courses in any shared room
+    courses = ScheduledCourse.objects \
+                .filter(
+                    cours__semaine=week,
+                    cours__an=year,
+                    copie_travail=0,
+                    room__in=shared_roomgroups,
+                ) \
+                .exclude(cours__room_type__department=req.department)
+    dataset = SharedRoomGroupsResource().export(courses)
     return HttpResponse(dataset.csv, content_type='text/csv')
 
 # </editor-fold desc="FETCHERS">
