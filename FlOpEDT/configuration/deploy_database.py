@@ -99,7 +99,6 @@ def tutors_extract(department, book):
                     tutor = SupplyStaff(**params)
                     tutor.status = Tutor.SUPP_STAFF
 
-
                 tutor.set_password("passe")
                 tutor.is_tutor = True
                 tutor.save()
@@ -119,7 +118,7 @@ def tutors_extract(department, book):
             else:
                 logger.info(f'create tutor with id:{id}')
         else:
-            UserDepartmentSettings.objects.create(department=department, user=tutor)
+            UserDepartmentSettings.objects.get_or_create(department=department, user=tutor)
 
         INTER_ID_ROW += 1
         id = sheet.cell(row=INTER_ID_ROW, column=1).value
