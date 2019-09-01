@@ -490,8 +490,7 @@ function fetch_cours() {
     
     var garbage_plot ;
     
-    ack.edt = "";
-    go_ack_msg(true);
+    ack.more = "";
 
     var semaine_att = weeks.init_data[weeks.sel[0]].semaine;
     var an_att = weeks.init_data[weeks.sel[0]].an;

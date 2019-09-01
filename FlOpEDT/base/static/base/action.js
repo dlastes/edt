@@ -856,8 +856,9 @@ function confirm_change() {
     }
 
     if (changes.length == 0) {
-        ack.edt = "Modif EdT : RAS";
-        go_ack_msg(true);
+        ack.status = 'OK' ;
+        ack.more = "Rien à signaler.";
+        go_ack_msg();
     } else {
 
         if (conc_tutors.length > 0) {
@@ -981,8 +982,9 @@ function send_dis_change() {
     var nbDispos = 0;
 
     if (user.dispos_bu.length == 0) {
-        ack.edt = "Modif dispo : RAS";
-        go_ack_msg(true);
+        ack.status = 'OK' ;
+        ack.more = "Rien à signaler.";
+        go_ack_msg();
         return;
     }
 
@@ -996,8 +998,10 @@ function send_dis_change() {
 
 
     if (changes.length == 0) {
-        ack.edt = "Modif dispo : RAS";
-        go_ack_msg(true);
+        console.log('no change here');
+        ack.status = 'OK' ;
+        ack.more = "Rien à signaler.";
+        go_ack_msg();
     } else {
 
 	var sent_data = {} ;
@@ -1015,12 +1019,17 @@ function send_dis_change() {
             dataType: 'json',
             success: function(msg) {
                 show_loader(false);
-                return dis_change_ack(msg, nbDispos);
+                ack.status = 'OK' ;
+                ack.more = "";
+                go_ack_msg();
+                filled_dispos = nbDispos ;
+                go_alarm_pref() ;
             },
             error: function(msg) {
                 show_loader(false);
-                ack.edt = 'Pb communication avec serveur'
-                go_ack_msg(true);
+                ack.status = 'KO' ;
+                ack.more = "";
+                go_ack_msg();
             }
         });
     }
@@ -1034,31 +1043,18 @@ function send_dis_change() {
 function edt_change_ack(msg) {
     if (msg.status == "OK") {
         version += 1;
-        ack.edt = "Modifications EDT : OK !";
+        ack.status = "OK";
+        ack.more = "" ;
         cours_bouge = [];
     } else {
-        ack.edt = msg.more;
-        if (ack.edt != null && ack.edt.startsWith("Version")) {
-            ack.edt += "Quelqu'un a modifié entre-temps."
+        ack.status = 'KO';
+        ack.more = msg.more;
+        if (ack.more != null && ack.more.startsWith("Version")) {
+            ack.more = "Il y a eu une modification concurrente. Rechargez et réessayez."
         }
     }
-    console.log(ack.edt);
-    go_ack_msg(true);
-}
-
-
-function dis_change_ack(msg, nbDispos) {
-    console.log(msg);
-    if (msg.status == "OK") {
-        ack.edt = "Modifications dispos : OK !"
-    } else {
-        ack.edt = msg.more;
-    }
-    go_ack_msg(true);
-
-    filled_dispos = nbDispos;
-    go_alarm_pref();
-
+    console.log(ack.more);
+    go_ack_msg();
 }
 
 

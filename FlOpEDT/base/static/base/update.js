@@ -1177,21 +1177,21 @@ function go_courses(quick) {
   -----------------------*/
 
 // update acknowledgment message
-function go_ack_msg(quick) {
-    var t;
-    if (quick) {
-        t = d3.transition()
-            .duration(0);
-    } else {
-        t = d3.transition();
+function go_ack_msg() {
+    var btn_txt = "Super" ;
+    if (ack.status == 'KO') {
+        btn_txt = "Ok" ;
     }
-
-    if (ack.edt != "") {
-        edt_message.attr("visibility", "visible");
-        edt_message.select("text").text(ack.edt);
-    } else {
-        edt_message.attr("visibility", "hidden");
+    var com_txt = ack.more ;
+    if (com_txt == '') {
+        com_txt = ack.predefined[ack.status];
     }
+    var splash_ack = {
+	id: "ack-edt-mod",
+	but: {list: [{txt: btn_txt, click: function(d){} }]},
+	com: {list: [{txt: com_txt}]}
+    }
+    splash(splash_ack);
 
 }
 
@@ -1259,7 +1259,7 @@ function go_edt(t) {
     go_courses(t);
     //go_tutors();
     go_pref(t);
-    go_ack_msg(t);
+    //go_ack_msg(t);
     go_bknews(t);
     go_alarm_pref();
     go_regen(null);
