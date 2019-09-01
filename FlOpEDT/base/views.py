@@ -41,6 +41,7 @@ from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.views.decorators.cache import cache_page
 from django.views.generic import RedirectView
+from django.db.models import Sum
 
 from people.models import Tutor, UserDepartmentSettings, User
 
@@ -649,9 +650,9 @@ def fetch_week_infos(req, year, week, **kwargs):
     proposed number of available slots
     (not cached)
     """
-    edt_v, _ = EdtVersion.objects.get_or_create(department=req.department,
-                                  semaine=week,
-                                  an=year)
+    version = 0
+    for dept in Department.objects.all():
+        version += queries.get_edt_version(dept, week, year, create=True)
 
     proposed_pref, required_pref = \
         pref_requirements(req.user, year, week) if req.user.is_authenticated \
@@ -662,7 +663,7 @@ def fetch_week_infos(req, year, week, **kwargs):
     except ObjectDoesNotExist:
         regen = 'I'
         
-    response = JsonResponse({'version': edt_v.version,
+    response = JsonResponse({'version': version,
                              'proposed_pref': proposed_pref,
                              'required_pref': required_pref,
                              'regen':regen})
@@ -858,12 +859,15 @@ def edt_changes(req, **kwargs):
 
     logger.info(f"REQ: edt change; {req.body}")
     logger.info(req.POST)
+
     old_version = json.loads(req.POST.get('v',-1))
     recv_changes = json.loads(req.POST.get('tab',[]))
 
+    
+    version = EdtVersion.objects.filter(semaine=semaine,
+                                        an=an).aggregate(Sum('version'))['version__sum']
 
-    if work_copy == 0:
-        version = queries.get_edt_version(department, semaine, an, create=True)
+    logger.info(f'Versions: incoming {old_version}, currently {version}')
 
     if work_copy != 0 or old_version == version:
         with transaction.atomic():
