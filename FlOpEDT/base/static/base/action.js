@@ -945,8 +945,8 @@ function compute_pref_changes(changes) {
     var modified_days = []
 
     for (var i = 0; i < Object.keys(user.dispos).length; i++) {
-	if(user.dispos[i].val != user.dispos_bu[i]
-	   && modified_days.indexOf(user.dispos[i].day) == -1) {
+        //user.dispos[i].val != user.dispos_bu[i].val	   &&
+	if(modified_days.indexOf(user.dispos[i].day) == -1) {
 	    modified_days.push(user.dispos[i].day);
 	}
     }
