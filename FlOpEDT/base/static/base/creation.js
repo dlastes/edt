@@ -1406,7 +1406,7 @@ function fill_grid_slot(c2m, grid_slot) {
     var wanted_course = Object.assign({},c2m) ;
     Object.assign(wanted_course, {day:grid_slot.day, start:grid_slot.start}) ;
 
-    var check = check_course(c2m, wanted_course);
+    var check = check_course(wanted_course);
     
     if (check.constraints_ok) {
 	return ;
