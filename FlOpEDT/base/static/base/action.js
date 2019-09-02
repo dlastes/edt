@@ -181,7 +181,7 @@ function select_room_change() {
                     // other depts
                     if (!Object.keys(extra_pref.rooms).includes(cur_roomgroup)
                         || !Object.keys(extra_pref.rooms[cur_roomgroup]).includes(c.day)
-                        || get_preference(extra_pref.rooms[cur_roomgroup][c.day], c.start, c.duration) > 0) {
+                        || get_preference(extra_pref.rooms[cur_roomgroup][c.day], c.start, c.duration) != 0) {
 		        proposed_rg.push(initial_rg[i]);
                     }
 		}
