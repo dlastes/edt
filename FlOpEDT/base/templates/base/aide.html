@@ -33,9 +33,12 @@
 
     <h4>Modification de salle</h4>
     <p>Click droit sur le cours en question. Ne pas oublier de valider tout changement.</p>
+
+    {% if user.is_authenticated and user.is_staff and has_department_perm %}
+    <h4>Création d'un compte</h4>
+    <p><a href="{% url "people:create_user" %}">Ici</a></p>
+    {% endif %}
     
-<!--     <h4>Création d'un compte</h4>
-    <p>Aller dans <a href="{% url "people:login" %}">Se connecter</a>, puis sélectionner le statut.</p> -->
     
     <h4>Modification d'un compte</h4>
     <p>Cliquer sur son pseudo en haut de la page.</p>

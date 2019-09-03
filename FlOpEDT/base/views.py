@@ -255,7 +255,8 @@ def stype(req, **kwargs):
 
 
 def aide(req, **kwargs):
-    return TemplateResponse(req, 'base/aide.html')
+    return TemplateResponse(req, 'base/aide.html',
+                {'has_department_perm': req.user.is_authenticated and req.user.has_department_perm(req.department)})
 
 
 @login_required
