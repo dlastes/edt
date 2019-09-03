@@ -132,7 +132,7 @@ def get_groups(department_abbrev):
 
         gp_dict_children = {}
         gp_master = None
-        for gp in Group.objects.filter(train_prog=train_prog).order_by('nom'):
+        for gp in Group.objects.filter(train_prog=train_prog):
             if gp.full_name() in gp_dict_children:
                 raise Exception('Group name should be unique')
             if gp.parent_groups.all().count() == 0:
@@ -145,7 +145,7 @@ def get_groups(department_abbrev):
                                 'handled')
             gp_dict_children[gp.full_name()] = []
 
-        for gp in Group.objects.filter(train_prog=train_prog):
+        for gp in Group.objects.filter(train_prog=train_prog).order_by('nom'):
             for new_gp in gp.parent_groups.all():
                 gp_dict_children[new_gp.full_name()].append(gp)
 
