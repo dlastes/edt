@@ -412,11 +412,12 @@ class TTModel(object):
                 IBS[(i, sl)] = self.add_var("IBS(%s,%s)" % (i, sl))
                 # Linking the variable to the TT
                 expr = self.lin_expr()
-                expr += IBS[(i, sl)]
+                expr += 100 * IBS[(i, sl)]
                 for s_sl in self.wdb.slots_intersecting[sl] | {sl}:
                     for c in self.wdb.courses_for_tutor[i] & self.wdb.compatible_courses[s_sl]:
                         expr -= self.TT[(s_sl, c)]
-                self.add_constraint(expr, '<=', 0, "IBS(%s,%s)" % (i, sl))
+                self.add_constraint(expr, '<=', 99, "IBS(%s,%s)" % (i, sl))
+                self.add_constraint(expr, '>=', 0, "IBS(%s,%s)" % (i, sl))
 
         IBD = {}
         for i in self.wdb.instructors:
