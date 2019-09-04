@@ -341,7 +341,7 @@ class TTModel(object):
         self.wdb = self.wdb_init()
         self.cost_I, self.FHD_G, self.cost_G, self.cost_SL = self.costs_init()
         self.TT, self.TTrooms = self.TT_vars_init()
-        self.IBD, self.IBD_GTE, self.IBHD, self.GBHD = self.busy_vars_init()
+        self.IBD, self.IBD_GTE, self.IBHD, self.GBHD, self.IBS = self.busy_vars_init()
 
         self.avail_instr, self.unp_slot_cost \
             = self.compute_non_prefered_slot_cost()
@@ -406,6 +406,18 @@ class TTModel(object):
         return TT, TTrooms
 
     def busy_vars_init(self):
+        IBS = {}
+        for i in self.wdb.instructors:
+            for sl in self.wdb.slots:
+                IBS[(i, sl)] = self.add_var("IBS(%s,%s)" % (i, sl))
+                # Linking the variable to the TT
+                expr = self.lin_expr()
+                expr += IBS[(i, sl)]
+                for s_sl in self.wdb.slots_intersecting[sl] | {sl}:
+                    for c in self.wdb.courses_for_tutor[i] & self.wdb.compatible_courses[s_sl]:
+                        expr -= self.TT[(sl, c)]
+                self.add_constraint(expr, '<=', 0, "IBS(%s,%s)" % (i, sl))
+
         IBD = {}
         for i in self.wdb.instructors:
             for d in self.wdb.days:
@@ -483,7 +495,7 @@ class TTModel(object):
                                 expr -= self.TT[(sl, c)]
                     self.add_constraint(expr, '>=', 0)
                     self.add_constraint(expr, '<=', card - 1)
-        return IBD, IBD_GTE, IBHD, GBHD
+        return IBD, IBD_GTE, IBHD, GBHD, IBS
 
     def add_var(self, name):
         """
@@ -692,14 +704,16 @@ class TTModel(object):
         # teachers are available on the chosen slots
         for sl in self.wdb.slots:
             for i in self.wdb.instructors:
-                test = False
-                for s_sl in self.wdb.slots_intersecting[sl]:
-                    if self.wdb.fixed_courses.filter(cours__tutor=i,
-                                                     start_time=s_sl.start_time,
-                                                     cours__type__duration=s_sl.duration,
-                                                     day=s_sl.day).exists():
-                        test = True
-                if test:
+                fci = set(fc for fc in self.wdb.fixed_courses_for_slot[sl] if fc.cours.tutor == i)
+                # test = False
+                # for s_sl in self.wdb.slots_intersecting[sl]:
+                #     if self.wdb.fixed_courses.filter(cours__tutor=i,
+                #                                      start_time=s_sl.start_time,
+                #                                      cours__type__duration=s_sl.duration,
+                #                                      day=s_sl.day).exists():
+                #         test = True
+                # if test:
+                if fci:
                     name = 'fixed_course_tutor_' + str(i) + '_' + str(sl)
                     instr_courses = self.wdb.courses_for_tutor[i]
                     self.add_constraint(self.sum(self.TT[(sl, c)] for c in instr_courses
@@ -760,9 +774,11 @@ class TTModel(object):
 
             # constraint : fixed_courses rooms are not available
             for rg in self.wdb.room_groups:
-                if self.wdb.fixed_courses.filter((Q(start_time__lt=sl.start_time + sl.duration) |
-                                                  Q(start_time__gt=sl.start_time - F('cours__type__duration'))),
-                                                 room=rg, day=sl.day).exists():
+                fcrg = set(fc for fc in self.wdb.fixed_courses_for_slot[sl] if fc.room == rg)
+                # if self.wdb.fixed_courses.filter((Q(start_time__lt=sl.start_time + sl.duration) |
+                #                                   Q(start_time__gt=sl.start_time - F('cours__type__duration'))),
+                #                                  room=rg, day=sl.day).exists():
+                if fcrg:
                     for r in rg.subrooms.all():
                         name = 'fixed_room' + str(r) + '_' + str(sl) + '_' + str(self.constraint_nb)
                         self.add_constraint(self.sum(self.TTrooms[(s_sl, c, room)]
