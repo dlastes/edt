@@ -416,8 +416,8 @@ class TTModel(object):
                 for s_sl in self.wdb.slots_intersecting[sl] | {sl}:
                     for c in self.wdb.courses_for_tutor[i] & self.wdb.compatible_courses[s_sl]:
                         expr -= self.TT[(s_sl, c)]
-                self.add_constraint(expr, '<=', 99, "IBS(%s,%s)" % (i, sl))
-                self.add_constraint(expr, '>=', 0, "IBS(%s,%s)" % (i, sl))
+                self.add_constraint(expr, '<=', 99, "IBS_sup(%s,%s)" % (i, sl))
+                self.add_constraint(expr, '>=', 0, "IBS_inf(%s,%s)" % (i, sl))
 
         IBD = {}
         for i in self.wdb.instructors:
