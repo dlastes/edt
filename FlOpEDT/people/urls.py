@@ -23,6 +23,7 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
+from django.urls import path
 from django.conf.urls import url, include
 from django.contrib.auth import views as auth_views
 from django.urls import reverse_lazy
@@ -112,5 +113,6 @@ urlpatterns = [
         name="fetch_preferences_students"),
     url(r'^student_preferences/$',
         views.student_preferences,
-        name="student_preferences")
+        name="student_preferences"),
+    path('create-user', views.create_user, name="create_user")
     ]

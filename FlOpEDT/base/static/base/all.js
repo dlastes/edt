@@ -159,7 +159,7 @@ function on_group_rcv(dg) {
     create_regen() ;
     create_quote() ;
     
-    go_ack_msg();
+//    go_ack_msg();
 
     create_bknews();
 

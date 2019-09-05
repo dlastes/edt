@@ -9,6 +9,5 @@ def index(request, **kwargs):
                                        train_prog__department=request.department)\
                                .order_by('train_prog__abbrev', 'nom')
     salle_list = [n.name.replace(' ','_') for n in Room.objects.all().order_by('name')]
-    print(salle_list)
     context = { 'enseignants': enseignant_list, 'groupes':groupe_list, 'salles':salle_list }
     return render(request, 'ics/index.html', context=context)

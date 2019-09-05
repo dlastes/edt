@@ -166,6 +166,9 @@ var dsp_svg =
 
 // 2D array of list [tutor_name][day_reference] -> list of intervals)
 var dispos = {};
+  // unavailabilities due to other departments
+var extra_pref = {tutors:{},
+                  rooms:{}};
 
 // parameters for availability
 var par_dispos = {
@@ -558,9 +561,13 @@ var valid = {
 // acknowledgements when availability or courses are changed (ack.edt) ,
 // or about the next possible regeneration of the planning (ack.regen)
 var ack = {
-    edt: "",
+    more:"",
+//    edt: "",
     regen: "",
-    pref: ""
+    pref: "",
+    status: "OK",
+    predefined: {KO: "C'est un échec cuisant. Trouvez un·e responsable d'emploi du temps et faites-lui part de vos problèmes.",
+                 OK: "La modification s'est déroulée sans accroc."}
 };
 
 

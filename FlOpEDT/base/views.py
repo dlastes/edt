@@ -41,12 +41,14 @@ from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.views.decorators.cache import cache_page
 from django.views.generic import RedirectView
+from django.db.models import Sum
 
 from people.models import Tutor, UserDepartmentSettings, User
 
 from base.admin import CoursResource, DispoResource, VersionResource, \
     CoursPlaceResource, UnavailableRoomsResource, TutorCoursesResource, \
-    CoursePreferenceResource
+    CoursePreferenceResource, MultiDepartmentTutorResource, \
+    SharedRoomGroupsResource
 from displayweb.admin import BreakingNewsResource
 from base.forms import ContactForm
 from base.models import Course, UserPreference, ScheduledCourse, EdtVersion, \
@@ -149,7 +151,8 @@ def edt(req, an=None, semaine=None, splash_id=0, **kwargs):
                 'splash_id': splash_id,
                 'time_settings': queries.get_time_settings(req.department),
                 'days': num_all_days(an, semaine, req.department),
-                'has_department_perm': req.user.is_authenticated and req.user.has_department_perm(req.department)
+                'has_department_perm': req.user.is_authenticated and req.user.has_department_perm(req.department),
+                'dept': req.department.abbrev
             })
 
 
@@ -252,7 +255,8 @@ def stype(req, **kwargs):
 
 
 def aide(req, **kwargs):
-    return TemplateResponse(req, 'base/aide.html')
+    return TemplateResponse(req, 'base/aide.html',
+                {'has_department_perm': req.user.is_authenticated and req.user.has_department_perm(req.department)})
 
 
 @login_required
@@ -647,9 +651,9 @@ def fetch_week_infos(req, year, week, **kwargs):
     proposed number of available slots
     (not cached)
     """
-    edt_v, _ = EdtVersion.objects.get_or_create(department=req.department,
-                                  semaine=week,
-                                  an=year)
+    version = 0
+    for dept in Department.objects.all():
+        version += queries.get_edt_version(dept, week, year, create=True)
 
     proposed_pref, required_pref = \
         pref_requirements(req.user, year, week) if req.user.is_authenticated \
@@ -660,7 +664,7 @@ def fetch_week_infos(req, year, week, **kwargs):
     except ObjectDoesNotExist:
         regen = 'I'
         
-    response = JsonResponse({'version': edt_v.version,
+    response = JsonResponse({'version': version,
                              'proposed_pref': proposed_pref,
                              'required_pref': required_pref,
                              'regen':regen})
@@ -759,6 +763,54 @@ def fetch_tutor_courses(req, year, week, tutor, **kwargs):
     return HttpResponse(dataset.csv, content_type='text/csv')
 
 
+def fetch_extra_sched(req, year, week, **kwargs):
+    """
+    Return the unavailability periods due to teaching in other departments
+    """
+    tutors = []
+    for scheduled in ScheduledCourse.objects.filter(
+            cours__semaine=week,
+            cours__an=year,
+            copie_travail=0,
+            cours__room_type__department=req.department).distinct('cours__tutor'):
+        tutor = scheduled.cours.tutor
+        if UserDepartmentSettings.objects.filter(user=tutor).count() > 1:
+            tutors.append(tutor)
+
+    dataset = MultiDepartmentTutorResource() \
+        .export(ScheduledCourse.objects \
+                .filter(
+                    cours__semaine=week,
+                    cours__an=year,
+                    copie_travail=0,
+                    cours__tutor__in=tutors,
+                )
+                .exclude(cours__room_type__department=req.department))
+    return HttpResponse(dataset.csv, content_type='text/csv')
+
+
+def fetch_shared_roomgroups(req, year, week, **kwargs):
+    # which room groups are shared among departments
+    shared_roomgroups = []
+    for rg in RoomGroup.objects.all(): 
+        depts = set() 
+        for rt in rg.types.all(): 
+            depts.add(rt.department) 
+            if len(depts) > 1: 
+                shared_roomgroups.append(rg)
+
+    # courses in any shared room
+    courses = ScheduledCourse.objects \
+                .filter(
+                    cours__semaine=week,
+                    cours__an=year,
+                    copie_travail=0,
+                    room__in=shared_roomgroups,
+                ) \
+                .exclude(cours__room_type__department=req.department)
+    dataset = SharedRoomGroupsResource().export(courses)
+    return HttpResponse(dataset.csv, content_type='text/csv')
+
 # </editor-fold desc="FETCHERS">
 
 # <editor-fold desc="CHANGERS">
@@ -808,12 +860,15 @@ def edt_changes(req, **kwargs):
 
     logger.info(f"REQ: edt change; {req.body}")
     logger.info(req.POST)
+
     old_version = json.loads(req.POST.get('v',-1))
     recv_changes = json.loads(req.POST.get('tab',[]))
 
+    
+    version = EdtVersion.objects.filter(semaine=semaine,
+                                        an=an).aggregate(Sum('version'))['version__sum']
 
-    if work_copy == 0:
-        version = queries.get_edt_version(department, semaine, an, create=True)
+    logger.info(f'Versions: incoming {old_version}, currently {version}')
 
     if work_copy != 0 or old_version == version:
         with transaction.atomic():

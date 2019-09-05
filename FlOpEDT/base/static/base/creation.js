@@ -1036,106 +1036,15 @@ function def_drag() {
                     //     return s.day == cur_over.day
 		    // 	    && s.start == cur_over.start_time;
                     // });
+
+                    var pending_change = {day: cur_over.day,
+                                          start: cur_over.start_time} ;
 		    
-		    var warn_check = warning_check(d, cur_over.day, cur_over.start_time);
-		    
-		    
-		    console.log(cur_over.day, cur_over.start_time/60);
-		    console.log(warn_check);
-		    
-		    //                    if (ngs.dispo) {
-		    if (warn_check == "") {
+                    var wanted_course = Object.assign({},d) ;
+                    Object.assign(wanted_course,pending_change) ;
 
-			add_bouge(d);
-                        d.day = cur_over.day;
-                        d.start = cur_over.start_time;
-			room_tutor_change.course.push(d) ;
-			compute_cm_room_tutor_direction() ;
-			room_cm_level = 0 ;
-			var disp_cont_menu = select_room_change() ;
-			if (disp_cont_menu) {
-			    go_cm_room_tutor_change();
-			} else {
-			    room_tutor_change.course = [] ;
-			    room_tutor_change.proposal = [] ;
-			}
-
-		    } else  { //if (!ngs.dispo) {
-			// -- no slot --
-			// && (logged_usr.rights >> 2) % 2 == 1) {
-
-			
-			
-			console.log(warn_check);
-
-			var splash_violate_constraint ;
-
-			if ((logged_usr.rights >> 2) % 2 == 1) {
-			
-			    splash_violate_constraint = {
-				id: "viol_constraint",
-				but: {
-				    list: [{txt: "Confirmer",
-					    click:
-					    function(d){
-						add_bouge(d.saved_data.course);
-						d.saved_data.course.day = d.saved_data.grid_slot.day;
-						d.saved_data.course.start = d.saved_data.grid_slot.start_time;
-						go_grid(true);
-						go_courses(true);
-						return ;
-					    },
-					    saved_data:
-					    {course: d,
-					     grid_slot: {day: cur_over.day, start_time: cur_over.start_time}}
-					   },
-					   {txt: "Annuler",
-					    click: function(d){
-						return ;
-					    }
-					   }]
-				},
-				com: {list: [{txt: "Attention", ftsi: 23},
-					     {txt: ""},
-					     {txt: "Des privilèges vous ont été accordés, et vous en profitez pour outrepasser la contrainte suivante :"},
-					     {txt: warn_check},
-					     {txt: "Confirmer la modification ?"}]
-				     }
-			    }
-			    splash(splash_violate_constraint);
-
-			
-			} else {
-			    if (slot_case) {
-				var gs = data_slot_grid.filter(function(s) {
-				    return s.day == cur_over.day
-		    			&& s.start == cur_over.start_time;
-				});
-				console.log(gs);
-				if (gs.length==1) {
-				    gs[0].pop = true;
-				}
-			    } else {
-				splash_violate_constraint = {
-				    id: "viol_constraint",
-				    but: {
-					list: [{txt: "Ah ok",
-						click: function(d){
-						    return ;
-						}
-					       }]
-				    },
-				    com: {list: [{txt: "Vous tentez d'outrepasser la contrainte suivante :", ftsi: 23},
-						 {txt: warn_check},
-						 {txt: "Vous n'avez pas les droits pour le faire..."}]
-					 }
-				}
-				splash(splash_violate_constraint);
-			    }
-			    
-			}
-			
-                    }
+                    check_assign_course(d, wanted_course) ;
+                    
                 } else {
                     d.day = cur_over.day ;
                     d.start = cur_over.start_time ;
@@ -1186,8 +1095,10 @@ function fill_grid_slot(c2m, grid_slot) {
     // if ((logged_usr.rights >> 2) % 2 == 1) {
     // 	return ;
     // }
+    var wanted_course = Object.assign({},c2m) ;
+    Object.assign(wanted_course, {day:grid_slot.day, start:grid_slot.start}) ;
 
-    var check = check_course(c2m, {day:grid_slot.day, start_time:grid_slot.start});
+    var check = check_course(wanted_course);
     
     if (check.constraints_ok) {
 	return ;
@@ -1211,9 +1122,9 @@ function fill_grid_slot(c2m, grid_slot) {
 
 }
 
-function warning_check(c2m, day, start_time) {
+function warning_check(wanted_course) {
     var ret = '';
-    var check = check_course(c2m, {day:day, start_time:start_time});
+    var check = check_course(wanted_course);
     if (check.nok_type == 'stable') {
 	ret = "Le cours était censé être fixe.";
     } else if (check.nok_type == 'train_prog_unavailable') {
@@ -1226,22 +1137,26 @@ function warning_check(c2m, day, start_time) {
         ret = "L'enseignant·e " + check.tutor + " s'était déclaré·e indisponible.";
     } else if (check.nok_type == 'tutor_availability_unknown') {
         ret = "L'enseignant·e " + check.tutor + " n'a pas déclaré ses dispos.";
+    } else if (check.nok_type == 'tutor_busy_other_dept') {
+        ret = "L'enseignant·e " + check.tutor + " est occupé dans un autre département.";
+    } else if (check.nok_type == 'room_busy_other_dept') {
+        ret = "La salle " + check.room + " est utilisée par un autre département.";
     }
     return ret ;
 }
 
 
-
-function simultaneous_courses(day, start_time, duration, id) {
+// return all simultaneous courses
+function simultaneous_courses(target_course) {
     return cours.filter(function(c) {
-        return (c.day == day 
-		&& ((c.start < start_time+duration
-		     && c.start >= start_time)
-		    || (c.start + c.duration < start_time+duration
-			&& c.start +c.duration > start_time)
-		    || (c.start <= start_time
-			&& c.start + c.duration > start_time + duration))
-		&& c.id_cours != id);
+        return (c.day == target_course.day 
+		&& ((c.start < target_course.start+target_course.duration
+		     && c.start >= target_course.start)
+		    || (c.start + c.duration < target_course.start+target_course.duration
+			&& c.start +c.duration > target_course.start)
+		    || (c.start <= target_course.start
+			&& c.start + c.duration > target_course.start))
+		&& c.id_cours != target_course.id_cours);
     });
 }
 
@@ -1259,14 +1174,13 @@ function simultaneous_courses(day, start_time, duration, id) {
 */
 // c2m element of course
 // date {day, start_time}
-function check_course(c2m, date) {
+function check_course(wanted_course) {
 
     var ret = {constraints_ok: false};
     var possible_conflicts = [] ;
     var conflicts = [] ;
 
-
-    if (is_garbage(date)) {
+    if (is_garbage(wanted_course)) {
 	ret.constraints_ok = true ;
 	return ret ;
     }
@@ -1275,68 +1189,191 @@ function check_course(c2m, date) {
     // 	return ;
     // }
 
-    if (c2m.id_cours == -1) {
+    if (wanted_course.id_cours == -1) {
 	ret.nok_type = 'stable' ;
 	return ret;
     }
 
-    if (is_free(date, c2m.promo)) {
+    if (is_free(wanted_course, wanted_course.promo)) {
 	ret.nok_type = 'train_prog_unavailable' ;
-	ret.train_prog = set_promos[c2m.promo] ;
+	ret.train_prog = set_promos[wanted_course.promo] ;
         return ret;
     }
 
 
-    possible_conflicts = simultaneous_courses(date.day,
-					      date.start_time,
-					      c2m.duration,
-					      c2m.id_cours) ;
+    possible_conflicts = simultaneous_courses(wanted_course) ;
 
     // console.log("CHECK", c2m, date);
     // console.log(possible_conflicts.map(function(d){return {s:d.start, d:d.duration}}));
 
     conflicts = possible_conflicts.filter(function(c) {
-        return (c.prof == c2m.prof);
+        return (c.prof == wanted_course.prof);
     });
     
     if (conflicts.length > 0) {
 	ret.nok_type = 'tutor_busy';
-	ret.tutor = c2m.prof;
+	ret.tutor = wanted_course.prof;
         return ret;
     }
 
 
     conflicts = possible_conflicts.filter(function(c) {
-        return ((c.group == c2m.group
-		 || groups[c2m.promo][c2m.group].ancetres.indexOf(c.group) > -1
-		 || groups[c2m.promo][c2m.group].descendants.indexOf(c.group) > -1)
-		&& c.promo == c2m.promo);
+        return ((c.group == wanted_course.group
+		 || groups[wanted_course.promo][wanted_course.group].ancetres.indexOf(c.group) > -1
+		 || groups[wanted_course.promo][wanted_course.group].descendants.indexOf(c.group) > -1)
+		&& c.promo == wanted_course.promo);
     });
     
     if (conflicts.length > 0) {
 	ret.nok_type = 'group_busy';
-	ret.group = c2m.group;
+	ret.group = wanted_course.group;
         return ret;
     }
 
-    if (dispos[c2m.prof] !== undefined) {
-        var pref_tut = get_preference(date.day, date.start_time, c2m.duration,
-			              c2m.prof);
+    // tutor availability
+    if (dispos[wanted_course.prof] !== undefined) {
+
+        // in the current department
+        var pref_tut = get_preference(dispos[wanted_course.prof][wanted_course.day],
+                                      wanted_course.start, wanted_course.duration);
 	if (pref_tut == 0) {
 	    ret.nok_type = 'tutor_unavailable' ;
-	    ret.tutor = c2m.prof ;
+	    ret.tutor = wanted_course.prof ;
             return ret;
 	} else if (pref_tut == -1) {
 	    ret.nok_type = 'tutor_availability_unknown' ;
-	    ret.tutor = c2m.prof ;
+	    ret.tutor = wanted_course.prof ;
+            return ret;
+        }
+
+        // in other departments
+        if (Object.keys(extra_pref.tutors).includes(wanted_course.prof) &&
+            Object.keys(extra_pref.tutors[wanted_course.prof]).includes(wanted_course.day)) {
+            var extra_unavailable = get_preference(extra_pref.tutors[wanted_course.prof][wanted_course.day],
+                                                   wanted_course.start, wanted_course.duration);
+            if (extra_unavailable == 0) {
+	        ret.nok_type = 'tutor_busy_other_dept' ;
+	        ret.tutor = wanted_course.prof ;
+                return ret;
+            }
+        }
+    }
+
+    // shared rooms availability
+    if (Object.keys(extra_pref.rooms).includes(wanted_course.room) &&
+        Object.keys(extra_pref.rooms[wanted_course.room]).includes(wanted_course.day)) {
+        var extra_unavailable = get_preference(extra_pref.rooms[wanted_course.room][wanted_course.day],
+                                               wanted_course.start, wanted_course.duration);
+        if (extra_unavailable == 0) {
+	    ret.nok_type = 'room_busy_other_dept' ;
+	    ret.room = wanted_course.room ;
             return ret;
         }
     }
 
+    
     ret.constraints_ok = true ;
     return ret ;
 
 }
+
+
+function check_assign_course(d, wanted_course) {
+    console.log(d, wanted_course) ;
+    var warn_check = warning_check(wanted_course) ;
+    console.log(warn_check);
+    
+    if (warn_check == "") {
+        
+	add_bouge(d);
+        Object.assign(d, wanted_course);
+        console.log(d);
+	room_tutor_change.course.push(d) ;
+	compute_cm_room_tutor_direction() ;
+	room_cm_level = 0 ;
+	var display_cont_menu = select_room_change() ;
+	if (display_cont_menu) {
+	    go_cm_room_tutor_change();
+	} else {
+	    room_tutor_change.course = [] ;
+	    room_tutor_change.proposal = [] ;
+	}
+        
+    } else  { //if (!ngs.dispo) {
+	// -- no slot --
+	// && (logged_usr.rights >> 2) % 2 == 1) {
+	console.log(warn_check);
+        
+	var splash_violate_constraint ;
+        
+	if ((logged_usr.rights >> 2) % 2 == 1) {
+	    
+	    splash_violate_constraint = {
+		id: "viol_constraint",
+		but: {
+		    list: [{txt: "Confirmer",
+			    click:
+			    function(btn){
+				add_bouge(btn.saved_data.course);
+                                Object.assign(btn.saved_data.course, btn.saved_data.wanted);
+				go_grid(true);
+				go_courses(true);
+				return ;
+			    },
+			    saved_data:
+			    {course: d,
+			     wanted: wanted_course}
+			   },
+			   {txt: "Annuler",
+			    click: function(d){
+				return ;
+			    }
+			   }]
+		},
+		com: {list: [{txt: "Attention", ftsi: 23},
+			     {txt: ""},
+			     {txt: "Des privilèges vous ont été accordés, et vous en profitez pour outrepasser la contrainte suivante :"},
+			     {txt: warn_check},
+			     {txt: "Confirmer la modification ?"}]
+		     }
+	    }
+	    splash(splash_violate_constraint);
+
+	    
+	} else {
+	    if (slot_case) {
+		var gs = data_slot_grid.filter(function(s) {
+		    return s.day == wanted_course.day
+		    	&& s.start == wanted_course.start;
+		});
+		console.log(gs);
+		if (gs.length==1) {
+		    gs[0].pop = true;
+		}
+	    } else {
+		splash_violate_constraint = {
+		    id: "viol_constraint",
+		    but: {
+			list: [{txt: "Ah ok",
+				click: function(d){
+				    return ;
+				}
+			       }]
+		    },
+		    com: {list: [{txt: "Vous tentez d'outrepasser la contrainte suivante :", ftsi: 23},
+				 {txt: warn_check},
+				 {txt: "Vous n'avez pas les droits pour le faire..."}]
+			 }
+		}
+		splash(splash_violate_constraint);
+	    }
+	    
+	}
+	
+    }
+
+}
+
 
 function which_slot(x, y, c) {
     var wday = (rootgp_width * labgp.width +
