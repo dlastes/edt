@@ -454,7 +454,8 @@ function go_cm_room_tutor_change() {
         .merge(tut_cm_room_dat.select(".cm-chg-bt"))
         .attr("x", cm_chg_but_txt_x)
         .attr("y", cm_chg_but_txt_y)
-        .text(cm_chg_but_txt);
+        .attr("fill", cm_chg_but_txt_fill)
+        .text(cm_chg_but_txt)
         // .attr("stroke", "darkslategrey")
         // .attr("stroke-width", 2);
 
