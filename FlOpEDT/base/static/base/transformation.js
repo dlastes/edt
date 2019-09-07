@@ -1103,7 +1103,11 @@ function st_but_back() {
   ---------------------*/
 
 function ack_reg_y() {
-    return grid_height()  + 30 * scale ;
+    var ret = grid_height()  + 20 * scale ;
+    if (row_gp.length > 1) {
+        ret += 50 * scale ;
+    }
+    return ret ;
 }
 
 /*---------------------
