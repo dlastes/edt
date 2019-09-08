@@ -125,7 +125,7 @@ function select_room_change() {
     var level = room_cm_level;
     room_tutor_change.cm_settings = room_cm_settings[level] ;
 
-    var c = room_tutor_change.course[0] ;
+    var c = pending.wanted_course ;
     room_tutor_change.old_value = c.room ;
     room_tutor_change.cur_value = c.room ;
 
@@ -229,16 +229,10 @@ function select_room_change() {
 
 
 function confirm_room_change(d){
-    var c = room_tutor_change.course[0] ;
+    Object.assign(pending.wanted_course, {room: d.content});
 
-    var wanted_course = Object.assign({},c);
-    Object.assign(wanted_course, {room: d.content});
-
-    check_assign_course(c, wanted_course);
-
-    room_tutor_change.course = [] ;
     room_tutor_change.proposal = [] ;
-    go_courses() ;
+    check_pending_course();
 }
 
 
@@ -275,7 +269,7 @@ function fetch_all_tutors() {
 function select_tutor_module_change() {
     room_tutor_change.cm_settings = tutor_module_cm_settings ;
 
-    var c = room_tutor_change.course[0] ;
+    var c = pending.wanted_course ;
     room_tutor_change.old_value = c.prof ;
     room_tutor_change.cur_value = c.prof ;
 
@@ -359,16 +353,11 @@ function select_tutor_change(f) {
 
 
 function confirm_tutor_change(d){
-    var c = room_tutor_change.course[0] ;
+    Object.assign(pending.wanted_course, {prof: d.content});
 
-    var wanted_course = Object.assign({},c);
-    Object.assign(wanted_course, {prof: d.content});
-
-    check_assign_course(c, wanted_course);
-
-    room_tutor_change.course = [] ;
     room_tutor_change.proposal = [] ;
-    go_courses() ;
+
+    check_pending_course();
 }
 
 
@@ -377,9 +366,14 @@ function confirm_tutor_change(d){
 
 function go_cm_room_tutor_change() {
 
+    var tmp_array = [] ;
+    if (pending.wanted_course != null) {
+        tmp_array.push(pending.wanted_course);
+    }
+
     var tut_cm_course_dat = cmtg
         .selectAll(".cm-chg")
-        .data(room_tutor_change.course,
+        .data(tmp_array,
               function(d) {
                   return d.id_cours;
               });
@@ -1296,7 +1290,7 @@ function get_course(id){
 
 
 function compute_cm_room_tutor_direction() {
-    var c = room_tutor_change.course[0] ;
+    var c = pending.wanted_course ;
     var cm_start_x, cm_start_y;
     cm_start_x = cours_x(c) + .5 * cours_width(c) ;
     cm_start_y = cours_y(c)  + .5 * cours_height(c) ;

@@ -1288,6 +1288,7 @@ function def_drag() {
         })
         .on("drag", function(d) {
             if (ckbox["edt-mod"].cked && fetch.done) {
+                pending.fork_course(d);
                 cur_over = which_slot(drag.x +
 				      parseInt(drag.sel.select("rect")
 					       .attr("x")),
@@ -1347,11 +1348,15 @@ function def_drag() {
 
                     var pending_change = {day: cur_over.day,
                                           start: cur_over.start_time} ;
-		    
-                    var wanted_course = Object.assign({},d) ;
-                    Object.assign(wanted_course,pending_change) ;
+		    console.log(pending.init_course.start);
 
-                    check_assign_course(d, wanted_course) ;
+                    // Object.assign(d,pending_change) ;
+		    // console.log(pending.init_course.start);
+                    // pending.wanted_course = Object.assign({},d) ;
+
+                    Object.assign(pending.wanted_course, pending_change) ;
+
+                    check_pending_course() ;
                     
                 } else {
                     d.day = cur_over.day ;
@@ -2037,11 +2042,10 @@ function get_dispos_type(dt) {
 //     }
 // }
 
-function select_entry_cm(d) {
+function select_entry_cm() {
     room_tutor_change.cm_settings = entry_cm_settings;
-    room_tutor_change.course = [d];
     var fake_id = new Date() ;
-    fake_id = fake_id.getMilliseconds() + "-" + d.id_cours ;
+    fake_id = fake_id.getMilliseconds() + "-" + pending.wanted_course.id_cours ;
     room_tutor_change.proposal = [{fid:fake_id,
 				   content:"Prof"},
 				   {fid:fake_id,

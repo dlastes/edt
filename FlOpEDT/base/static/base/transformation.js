@@ -844,7 +844,7 @@ function cm_chg_bg_height() {
 }
 
 function cm_chg_bg_x() {
-    var c = room_tutor_change.course[0] ;
+    var c = pending.wanted_course ;
     if (room_tutor_change.posh == 'w') {
 	return cours_x(c) + .5 * cours_width(c) - cm_chg_bg_width();
     } else {
@@ -852,7 +852,7 @@ function cm_chg_bg_x() {
     }
 }
 function cm_chg_bg_y() {
-    var c = room_tutor_change.course[0] ;
+    var c = pending.wanted_course ;
     if (room_tutor_change.posv == 's') {
 	return cours_y(c)  + .5 * cours_height(c) ;
     } else {
@@ -916,9 +916,9 @@ function cm_chg_but_stk(d) {
 
 function cm_chg_but_pref(d) {
     var cur_dispo;
+    var cur_course = pending.wanted_course ;
     if (room_tutor_change.cm_settings.type == 'tutor_module'
         || room_tutor_change.cm_settings.type == 'tutor') {
-        var cur_course = room_tutor_change.course[0] ;
         cur_dispo = find_in_pref(dispos,d.content,cur_course);
         if (cur_dispo == -1 || cur_dispo === undefined) {
             cur_dispo = 0 ;

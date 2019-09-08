@@ -102,10 +102,11 @@ function cancel_cm_adv_preferences(){
 function cancel_cm_room_tutor_change(){
     if(ckbox["edt-mod"].cked) {
 	if(!context_menu.room_tutor_hold) {
-	    if (room_tutor_change.course.length > 0) {
-		room_tutor_change.course = [] ;
+            if(pending.init_course!=null) {
+                pending.back_init() ;
 		room_tutor_change.proposal = [] ;
 		go_cm_room_tutor_change();
+                go_courses(false) ;
 	    }
 	}
 	context_menu.room_tutor_hold = false ;
