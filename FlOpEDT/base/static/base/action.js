@@ -280,10 +280,10 @@ function select_tutor_module_change() {
     room_tutor_change.cur_value = c.prof ;
 
     var tutor_same_module = cours
-	.filter(function(c) {
-	    return c.mod == room_tutor_change.course[0].mod;
+	.filter(function(oth_c) {
+	    return oth_c.mod == c.mod;
 	})
-	.map(function(c){ return c.prof; });
+	.map(function(oth_c){ return oth_c.prof; });
 
     // remove duplicate 
     tutor_same_module = tutor_same_module.filter(function(t,i) {
