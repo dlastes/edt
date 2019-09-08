@@ -1496,103 +1496,114 @@ function simultaneous_courses(target_course) {
 // date {day, start_time}
 function check_course(wanted_course) {
 
-    var ret = {constraints_ok: false};
+    var ret = [] ; 
     var possible_conflicts = [] ;
     var conflicts = [] ;
 
     if (is_garbage(wanted_course)) {
-	ret.constraints_ok = true ;
 	return ret ;
     }
 
-    // if ((logged_usr.rights >> 2) % 2 == 1) {
-    // 	return ;
-    // }
+    if (! pending.pass.other) {
 
-    if (wanted_course.id_cours == -1) {
-	ret.nok_type = 'stable' ;
-	return ret;
-    }
+        // course was supposed to be fix
+        if (wanted_course.id_cours == -1) {
+	    ret.push({nok:'stable'}) ;
+        }
 
-    if (is_free(wanted_course, wanted_course.promo)) {
-	ret.nok_type = 'train_prog_unavailable' ;
-	ret.train_prog = set_promos[wanted_course.promo] ;
-        return ret;
+        // training programme was supposed to be free
+        if (is_free(wanted_course, wanted_course.promo)) {
+	    ret.push({nok: 'train_prog_unavailable',
+                      more: {train_prog: set_promos[wanted_course.promo]}}) ;
+        }
     }
 
 
     possible_conflicts = simultaneous_courses(wanted_course) ;
 
-    // console.log("CHECK", c2m, date);
-    // console.log(possible_conflicts.map(function(d){return {s:d.start, d:d.duration}}));
+    if (! pending.pass.other) {
 
-    conflicts = possible_conflicts.filter(function(c) {
-        return (c.prof == wanted_course.prof);
-    });
-    
-    if (conflicts.length > 0) {
-	ret.nok_type = 'tutor_busy';
-	ret.tutor = wanted_course.prof;
-        return ret;
+        // group is busy
+        conflicts = possible_conflicts.filter(function(c) {
+            return ((c.group == wanted_course.group
+		     || groups[wanted_course.promo][wanted_course.group].ancetres.indexOf(c.group) > -1
+		     || groups[wanted_course.promo][wanted_course.group].descendants.indexOf(c.group) > -1)
+		    && c.promo == wanted_course.promo);
+        });
+        
+        if (conflicts.length > 0) {
+	    ret.push({nok: 'group_busy',
+                      more: {group: wanted_course.group}});
+        }
     }
 
 
-    conflicts = possible_conflicts.filter(function(c) {
-        return ((c.group == wanted_course.group
-		 || groups[wanted_course.promo][wanted_course.group].ancetres.indexOf(c.group) > -1
-		 || groups[wanted_course.promo][wanted_course.group].descendants.indexOf(c.group) > -1)
-		&& c.promo == wanted_course.promo);
-    });
-    
-    if (conflicts.length > 0) {
-	ret.nok_type = 'group_busy';
-	ret.group = wanted_course.group;
-        return ret;
-    }
 
     // tutor availability
-    if (dispos[wanted_course.prof] !== undefined) {
+    if (! pending.pass.tutor) {
+        conflicts = possible_conflicts.filter(function(c) {
+            return (c.prof == wanted_course.prof);
+        });
+        
 
-        // in the current department
-        var pref_tut = get_preference(dispos[wanted_course.prof][wanted_course.day],
-                                      wanted_course.start, wanted_course.duration);
-	if (pref_tut == 0) {
-	    ret.nok_type = 'tutor_unavailable' ;
-	    ret.tutor = wanted_course.prof ;
-            return ret;
-	} else if (pref_tut == -1) {
-	    ret.nok_type = 'tutor_availability_unknown' ;
-	    ret.tutor = wanted_course.prof ;
-            return ret;
+
+        if (conflicts.length > 0) {
+	    ret.push({nok: 'tutor_busy',
+                      more: {tutor: wanted_course.prof}});
         }
 
-        // in other departments
-        if (Object.keys(extra_pref.tutors).includes(wanted_course.prof) &&
-            Object.keys(extra_pref.tutors[wanted_course.prof]).includes(wanted_course.day)) {
-            var extra_unavailable = get_preference(extra_pref.tutors[wanted_course.prof][wanted_course.day],
-                                                   wanted_course.start, wanted_course.duration);
-            if (extra_unavailable == 0) {
-	        ret.nok_type = 'tutor_busy_other_dept' ;
-	        ret.tutor = wanted_course.prof ;
-                return ret;
+
+
+        // tutor availability
+        if (dispos[wanted_course.prof] !== undefined) {
+
+            // in the current department
+            var pref_tut = get_preference(dispos[wanted_course.prof][wanted_course.day],
+                                          wanted_course.start, wanted_course.duration);
+	    if (pref_tut == 0) {
+	        ret.push({nok: 'tutor_unavailable',
+                          more: {tutor: wanted_course.prof}}) ;
+	    } else if (pref_tut == -1) {
+	        ret.push({nok: 'tutor_availability_unknown',
+                          more: {tutor: wanted_course.prof}}) ;
             }
+            
+            // in other departments
+            var extra_unavailable = find_in_pref(extra_pref.tutors, wanted_course.prof, wanted_course);
+            
+            if (extra_unavailable == 0) {
+	        ret.push({nok: 'tutor_busy_other_dept',
+                          more: {tutor: wanted_course.prof}}) ;
+            }
+            
+        } else {
+            ret.push({nok: 'tutor_free_week',
+                      more: {tutor: wanted_course.prof}}) ;
         }
     }
 
     // shared rooms availability
-    if (Object.keys(extra_pref.rooms).includes(wanted_course.room) &&
-        Object.keys(extra_pref.rooms[wanted_course.room]).includes(wanted_course.day)) {
-        var extra_unavailable = get_preference(extra_pref.rooms[wanted_course.room][wanted_course.day],
-                                               wanted_course.start, wanted_course.duration);
+    // var extra_unavailable = find_in_pref(extra_pref.rooms,
+    //                                      wanted_course.room,
+    //                                      wanted_course);
+
+    if (! pending.pass.room) {
+
+        if(possible_conflicts.map(function(c){
+            return c.room ;
+        }).includes(wanted_course.room)) {
+	    ret.push({nok: 'room_busy',
+                      more: {room: wanted_course.room}}) ;
+        }
+           
+        var extra_unavailable = find_in_pref(extra_pref.rooms, wanted_course.room, wanted_course);
+        
         if (extra_unavailable == 0) {
-	    ret.nok_type = 'room_busy_other_dept' ;
-	    ret.room = wanted_course.room ;
-            return ret;
+	    ret.push({nok: 'room_busy_other_dept',
+                      more: {room: wanted_course.room}}) ;
         }
     }
 
-    
-    ret.constraints_ok = true ;
     return ret ;
 
 }
