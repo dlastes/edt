@@ -1413,7 +1413,7 @@ function fill_grid_slot(c2m, grid_slot) {
 
     var check = check_course(wanted_course);
     
-    if (check.constraints_ok) {
+    if (check.length == 0) {
 	return ;
     } else {
 	grid_slot.dispo = false;
@@ -1435,26 +1435,33 @@ function fill_grid_slot(c2m, grid_slot) {
 
 }
 
-function warning_check(wanted_course) {
-    var ret = '';
-    var check = check_course(wanted_course);
-    if (check.nok_type == 'stable') {
-	ret = "Le cours était censé être fixe.";
-    } else if (check.nok_type == 'train_prog_unavailable') {
-        ret = "La promo " + check.train_prog + " ne devait pas avoir cours à ce moment-là.";
-    } else if (check.nok_type == 'tutor_busy') {
-        ret = "L'enseignant·e " + check.tutor + " avait déjà un cours prévu.";
-    } else if (check.nok_type == 'group_busy') {
-        ret = "Le groupe " + check.group + " avait déjà un cours prévu.";
-    } else if (check.nok_type == 'tutor_unavailable') {
-        ret = "L'enseignant·e " + check.tutor + " s'était déclaré·e indisponible.";
-    } else if (check.nok_type == 'tutor_availability_unknown') {
-        ret = "L'enseignant·e " + check.tutor + " n'a pas déclaré ses dispos.";
-    } else if (check.nok_type == 'tutor_busy_other_dept') {
-        ret = "L'enseignant·e " + check.tutor + " est occupé dans un autre département.";
-    } else if (check.nok_type == 'room_busy_other_dept') {
-        ret = "La salle " + check.room + " est utilisée par un autre département.";
-    }
+function warning_check(check_tot) {
+    var ret = [];
+    ret = check_tot.map( function(check) {
+        var expand ;
+        if (check.nok == 'stable') {
+	    expand = "Le cours était censé être fixe.";
+        } else if (check.nok == 'train_prog_unavailable') {
+            expand = "La promo " + check.more.train_prog + " ne devait pas avoir cours à ce moment-là.";
+        } else if (check.nok == 'tutor_busy') {
+            expand = "L'enseignant·e " + check.more.tutor + " avait déjà un cours prévu.";
+        } else if (check.nok == 'group_busy') {
+            expand = "Le groupe " + check.more.group + " avait déjà un cours prévu.";
+        } else if (check.nok == 'tutor_unavailable') {
+            expand = "L'enseignant·e " + check.more.tutor + " s'était déclaré·e indisponible.";
+        } else if (check.nok == 'tutor_availability_unknown') {
+            expand = "L'enseignant·e " + check.more.tutor + " n'a pas déclaré ses dispos.";
+        } else if (check.nok == 'tutor_busy_other_dept') {
+            expand = "L'enseignant·e " + check.more.tutor + " est occupé dans un autre département.";
+        } else if (check.nok == 'tutor_free_week') {
+            expand = "L'enseignant·e " + check.more.tutor + " ne donne pas de cours cette semaine.";
+        } else if (check.nok == 'room_busy') {
+            expand = "La salle " + check.more.room + " est déjà prise.";
+        } else if (check.nok == 'room_busy_other_dept') {
+            expand = "La salle " + check.more.room + " est utilisée par un autre département.";
+        }
+        return expand ;
+    });
     return ret ;
 }
 
