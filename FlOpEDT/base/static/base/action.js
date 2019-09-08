@@ -308,8 +308,6 @@ function select_tutor_module_change() {
 function select_tutor_filters_change() {
     room_tutor_change.cm_settings = tutor_filters_cm_settings ;
 
-    var c = room_tutor_change.course[0] ;
-
     var chunk_size = tutor_cm_settings.ncol * tutor_cm_settings.nlin - 1;
 
     room_tutor_change.proposal = [] ;
@@ -340,8 +338,6 @@ function select_tutor_change(f) {
     room_tutor_change.cm_settings = tutor_cm_settings ;
 
     
-    var c = room_tutor_change.course[0] ;
-
     var ends = f.content.split(arrow.right);
 
     room_tutor_change.proposal = all_tutors.filter(function(t) {
@@ -351,9 +347,9 @@ function select_tutor_change(f) {
     room_tutor_change.proposal.push(arrow.back) ;
     
     var fake_id = new Date() ;
-    fake_id = fake_id.getMilliseconds() + "-" + c.id_cours ;
+    fake_id = fake_id.getMilliseconds() ;
     room_tutor_change.proposal = room_tutor_change.proposal.map(function(t) {
-	return {fid: fake_id, content: t};
+	return {fid: fake_id + t, content: t};
     });
 
 }
