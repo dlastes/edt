@@ -1678,97 +1678,86 @@ function clean_pending() {
 }
 
 
-function check_assign_course(d, wanted_course) {
-    console.log(d, wanted_course) ;
-    var warn_check = warning_check(wanted_course) ;
+
+function check_pending_course() {
+    var warn_check = check_course(pending.wanted_course) ;
     console.log(warn_check);
     
-    if (warn_check == "") {
+    if (warn_check.length == 0) {
         
-	add_bouge(d);
-        Object.assign(d, wanted_course);
-        console.log(d);
-	room_tutor_change.course.push(d) ;
-	compute_cm_room_tutor_direction() ;
-	room_cm_level = 0 ;
-	var display_cont_menu = select_room_change() ;
-	if (display_cont_menu) {
-	    go_cm_room_tutor_change();
-	} else {
-	    room_tutor_change.course = [] ;
-	    room_tutor_change.proposal = [] ;
-	}
-        
+	add_bouge(pending.init_course);
+        //pending.save_wanted() ;
+        pending.init();
+
+	go_grid(true);
+	go_courses(true);
+
     } else  { //if (!ngs.dispo) {
 	// -- no slot --
 	// && (logged_usr.rights >> 2) % 2 == 1) {
-	console.log(warn_check);
-        
-	var splash_violate_constraint ;
-        
-	if ((logged_usr.rights >> 2) % 2 == 1) {
-	    
-	    splash_violate_constraint = {
-		id: "viol_constraint",
-		but: {
-		    list: [{txt: "Confirmer",
-			    click:
-			    function(btn){
-				add_bouge(btn.saved_data.course);
-                                Object.assign(btn.saved_data.course, btn.saved_data.wanted);
-				go_grid(true);
-				go_courses(true);
-				return ;
-			    },
-			    saved_data:
-			    {course: d,
-			     wanted: wanted_course}
-			   },
-			   {txt: "Annuler",
-			    click: function(d){
-				return ;
-			    }
-			   }]
-		},
-		com: {list: [{txt: "Attention", ftsi: 23},
-			     {txt: ""},
-			     {txt: "Des privilèges vous ont été accordés, et vous en profitez pour outrepasser la contrainte suivante :"},
-			     {txt: warn_check},
-			     {txt: "Confirmer la modification ?"}]
-		     }
-	    }
-	    splash(splash_violate_constraint);
+        var tutor_constraints = warn_check.filter(function(constraint) {
+            return constraint.nok.startsWith("tutor") ;
+        });
 
-	    
-	} else {
-	    if (slot_case) {
-		var gs = data_slot_grid.filter(function(s) {
-		    return s.day == wanted_course.day
-		    	&& s.start == wanted_course.start;
-		});
-		console.log(gs);
-		if (gs.length==1) {
-		    gs[0].pop = true;
-		}
-	    } else {
-		splash_violate_constraint = {
-		    id: "viol_constraint",
-		    but: {
-			list: [{txt: "Ah ok",
-				click: function(d){
-				    return ;
-				}
-			       }]
-		    },
-		    com: {list: [{txt: "Vous tentez d'outrepasser la contrainte suivante :", ftsi: 23},
-				 {txt: warn_check},
-				 {txt: "Vous n'avez pas les droits pour le faire..."}]
-			 }
-		}
-		splash(splash_violate_constraint);
-	    }
-	    
-	}
+        var room_constraints = warn_check.filter(function(constraint) {
+            return constraint.nok.startsWith("room") ;
+        });
+        
+        var core_constraints = warn_check.filter(function(constraint) {
+            return !constraint.nok.startsWith("tutor") && !constraint.nok.startsWith("room") ;
+        });
+        
+        if(core_constraints.length > 0) {
+
+            clean_pending();
+            
+            splash_violated_constraints(warn_check, 'core');
+            
+                /* TO BE REMOVED
+	        if (slot_case) {
+		    var gs = data_slot_grid.filter(function(s) {
+		        return s.day == wanted_course.day
+		    	    && s.start == wanted_course.start;
+		    });
+		    console.log(gs);
+		    if (gs.length==1) {
+		        gs[0].pop = true;
+		    }
+	            } 
+                */
+
+        } else if (room_constraints.length > 0) {
+            if (pending.force.room) {
+                pending.force.room = false ;
+	        compute_cm_room_tutor_direction() ;
+	        room_cm_level = 0 ;
+                select_room_change() ;
+                go_cm_room_tutor_change();
+                /*
+	        var display_cont_menu = select_room_change() ;
+	        if (display_cont_menu) {
+	            go_cm_room_tutor_change();
+	        } else {
+	            //room_tutor_change.course = [] ;
+	            room_tutor_change.proposal = [] ;
+	        }
+                */
+            } else {
+                clean_pending();
+                splash_violated_constraints(warn_check, 'room');
+            }
+        } else if (tutor_constraints.length > 0) {
+            if (pending.force.tutor) {
+                pending.force.tutor = false ;
+	        compute_cm_room_tutor_direction() ;
+                select_tutor_module_change() ;
+                go_cm_room_tutor_change();
+            } else {
+                clean_pending();
+                splash_violated_constraints(warn_check, 'tutor');
+            }
+
+        }
 	
     }
 
