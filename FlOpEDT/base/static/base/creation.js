@@ -1605,7 +1605,76 @@ function check_course(wanted_course) {
     }
 
     return ret ;
+}
 
+
+function splash_violated_constraints(check_list, step) {
+    var splash_csts ;
+    var warn_check = warning_check(check_list);
+    console.log(warn_check);
+    //console.log(pending.wanted_course.id_cours);
+    if ((logged_usr.rights >> 2) % 2 == 1) {
+	splash_csts = {
+	    id: "viol_constraint",
+	    but: {
+		list: [{txt: "Confirmer",
+			click:
+			function(btn){
+                            pending.pass[btn.pass] = true ;
+                            console.log(pending.wanted_course.id_cours);
+                            check_pending_course() ;
+			    return ;
+			},
+                        pass: step
+		       },
+		       {txt: "Annuler",
+			click: function(d){
+                            pending.back_init();
+                            go_courses(false);
+			    return ;
+			}
+		       }]
+	    },
+	    com: {list: [{txt: "Attention", ftsi: 23},
+			 {txt: ""},
+			 {txt: "Des privilèges vous ont été accordés, et vous en profitez pour outrepasser la contrainte suivante :"}]
+		 }
+	};
+        splash_csts.com.list = splash_csts.com.list.concat(warn_check.map(function(el){
+            return {txt: el};
+        }));
+	splash_csts.com.list.push({txt: "Confirmer la modification ?"});
+    } else {
+        splash_csts = {
+	    id: "viol_constraint",
+	    but: {
+		list: [{txt: "Ah ok",
+			click: function(d){
+                            go_courses(false);
+			    return ;
+			}
+		       }]
+	    },
+	    com: {list: [{txt: "Vous tentez d'outrepasser la contrainte suivante :", ftsi: 23}
+			 ]
+		 }
+	}
+        splash_csts.com.list = splash_csts.com.list.concat(warn_check.map(function(el){
+            return {txt: el};
+        }));
+	splash_csts.com.list.push({txt: "Vous n'avez pas les droits pour le faire..."});
+    }
+    console.log(splash_csts);
+    splash(splash_csts);
+}
+
+
+function clean_pending() {
+    // clean pending without waiting for confirmation
+    if ((logged_usr.rights >> 2) % 2 != 1) {
+        pending.back_init();
+        go_courses(false);
+    }
 }
 
 
