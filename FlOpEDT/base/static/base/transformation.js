@@ -929,8 +929,19 @@ function cm_chg_but_pref(d) {
                 cur_dispo = 0 ;
             }
         }
-    } else {
-        return 0 ;
+    } else if (room_tutor_change.cm_settings.type == 'room') {
+        cur_dispo = par_dispos.nmax ;
+        if(simultaneous_courses(cur_course).map(function(c){
+            return c.room ;
+        }).includes(d.content)){
+            cur_dispo = 0 ;
+        }
+        if (cur_dispo > 0) {
+            var extra_dispo = find_in_pref(extra_pref.rooms, d.content, cur_course);
+            if (extra_dispo == 0) {
+                cur_dispo = 0 ;
+            }
+        }
     }
     return cur_dispo ;
 }
