@@ -25,9 +25,11 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from base.models import Slot, ScheduledCourse, RoomPreference, EdtVersion, Department
-from django.db.models import Max, Q
-from TTapp.models import LimitedRoomChoices
+
+from base.models import Slot, ScheduledCourse, RoomPreference, EdtVersion, Department, CourseStartTimeConstraint, \
+    TimeGeneralSettings
+from django.db.models import Max, Q, F
+from TTapp.models import LimitedRoomChoices, slot_pause
 from base.views import get_key_course_pl, get_key_course_pp
 from django.core.cache import cache
 
@@ -44,82 +46,97 @@ def basic_reassign_rooms(department, semaine, an, target_work_copy):
         'copie_travail': target_work_copy,
     }
 
-    slots = Slot.objects.all().order_by('jour', 'heure')
-    for sl in slots:
-        rank = list(slots.filter(jour=sl.jour, heure__apm=sl.heure.apm)).index(sl)
-        if rank == 0:
-            continue
-        slots_list = list(slots)
-        precedent_sl = slots_list[slots_list.index(sl) - 1]
-        nsl = ScheduledCourse.objects.filter(
-                                        creneau=sl,
-                                        **scheduled_courses_params)
-        # print sl
-        for CP in nsl:
-            precedent = ScheduledCourse \
-                .objects \
-                .filter(creneau=precedent_sl,
-                        cours__room_type=CP.cours.room_type,
-                        cours__tutor=CP.cours.tutor,
-                        **scheduled_courses_params)
-            if len(precedent) == 0:
+    possible_start_times = set()
+    for c in CourseStartTimeConstraint.objects.filter(course_type__department=department):
+        possible_start_times |= set(c.allowed_start_times)
+    possible_start_times = list(possible_start_times)
+    possible_start_times.sort()
+    days = TimeGeneralSettings.objects.get(department=department).days
+
+    # slots = Slot.objects.all().order_by('jour', 'heure')
+    # for sl in slots:
+    for day in days:
+        for st in possible_start_times:
+            # rank = list(slots.filter(jour=sl.jour, heure__apm=sl.heure.apm)).index(sl)
+            rank = possible_start_times.index(st)
+            if rank == 0:
+                continue
+            # precedent_sl = slots_list[slots_list.index(sl) - 1]
+            nsl = ScheduledCourse.objects.filter(
+                                            start_time=st, day=day,
+                                            **scheduled_courses_params)
+            # print sl
+            for CP in nsl:
                 precedent = ScheduledCourse \
                     .objects \
-                    .filter(
-                            creneau=precedent_sl,
+                    .filter(start_time__lte=st - F('cours__type__duration'),
+                            start_time__gt=st - F('cours__type__duration') - slot_pause,
+                            day=day,
                             cours__room_type=CP.cours.room_type,
-                            cours__groupe=CP.cours.groupe,
+                            cours__tutor=CP.cours.tutor,
                             **scheduled_courses_params)
                 if len(precedent) == 0:
+                    precedent = ScheduledCourse \
+                        .objects \
+                        .filter(start_time__lte = st - F('cours__type__duration'),
+                                start_time__gt = st - F('cours__type__duration') - slot_pause,
+                                day=day,
+                                cours__room_type=CP.cours.room_type,
+                                cours__groupe=CP.cours.groupe,
+                                **scheduled_courses_params)
+                    if len(precedent) == 0:
+                        continue
+                precedent = precedent[0]
+                # print "### has prec, trying to reassign:", precedent, "\n\t",
+                cp_using_prec = ScheduledCourse \
+                    .objects \
+                    .filter(start_time=st,
+                            day=day,
+                            room=precedent.room,
+                            **scheduled_courses_params)
+                # test if lucky
+                if cp_using_prec.count() == 1 and cp_using_prec[0] == CP:
+                    # print "lucky, no change needed"
                     continue
-            precedent = precedent[0]
-            # print "### has prec, trying to reassign:", precedent, "\n\t",
-            cp_using_prec = ScheduledCourse \
-                .objects \
-                .filter(creneau=sl,
-                        room=precedent.room,
-                        **scheduled_courses_params)
-            # test if lucky
-            if cp_using_prec.count() == 1 and cp_using_prec[0] == CP:
-                # print "lucky, no change needed"
-                continue
-            # test if precedent.room is available
-            prec_is_unavailable = False
-            for r in precedent.room.subrooms.all():
-                if RoomPreference.objects.filter(semaine=semaine, an=an, creneau=sl, room=r, valeur=0).exists():
-                    prec_is_unavailable = True
-                
-                if ScheduledCourse.objects \
-                    .filter(creneau=sl,
-                            room__in=r.subroom_of.exclude(id=precedent.room.id),
-                            **scheduled_courses_params) \
-                    .exists():
+                # test if precedent.room is available
+                prec_is_unavailable = False
+                for r in precedent.room.subrooms.all():
+                    if RoomPreference.objects.filter(semaine=semaine, an=an,  day=day,
+                                                     start_time=st, room=r, valeur=0).exists():
                         prec_is_unavailable = True
-            
-            if prec_is_unavailable:
-                # print "room is not available"
-                continue
-            
-            # test if precedent.room is used for course of the same room_type and swap
-            if not cp_using_prec.exists():
-                CP.room = precedent.room
-                CP.save()
-                # print "assigned", CP
-            elif cp_using_prec.count() == 1:
-                sib = cp_using_prec[0]
-                if sib.cours.room_type == CP.cours.room_type and sib.cours:
-                    if not LimitedRoomChoices.objects.filter(
-                                Q(week=semaine) | Q(week=None),
-                                Q(year=an) | Q(year=None),
-                                Q(train_prog=sib.cours.module.train_prog) | Q(module=sib.cours.module) | Q(group=sib.cours.groupe) |
-                                Q(tutor=sib.cours.tutor) | Q(type=sib.cours.type),
-                                possible_rooms=sib.room).exists():
-                        r = CP.room
-                        CP.room = precedent.room
-                        sib.room = r
-                        CP.save()
-                        sib.save()
-                    # print "swapped", CP, " with", sib
+
+                    if ScheduledCourse.objects \
+                        .filter(start_time=st,
+                                day=day,
+                                room__in=r.subroom_of.exclude(id=precedent.room.id),
+                                **scheduled_courses_params) \
+                        .exists():
+                            prec_is_unavailable = True
+
+                if prec_is_unavailable:
+                    # print "room is not available"
+                    continue
+
+                # test if precedent.room is used for course of the same room_type and swap
+                if not cp_using_prec.exists():
+                    CP.room = precedent.room
+                    CP.save()
+                    # print "assigned", CP
+                elif cp_using_prec.count() == 1:
+                    sib = cp_using_prec[0]
+                    if sib.cours.room_type == CP.cours.room_type and sib.cours:
+                        if not LimitedRoomChoices.objects.filter(
+                                    Q(week=semaine) | Q(week=None),
+                                    Q(year=an) | Q(year=None),
+                                    Q(train_prog=sib.cours.module.train_prog) | Q(module=sib.cours.module) | Q(group=sib.cours.groupe) |
+                                    Q(tutor=sib.cours.tutor) | Q(type=sib.cours.type),
+                                    possible_rooms=sib.room).exists():
+                            r = CP.room
+                            CP.room = precedent.room
+                            sib.room = r
+                            CP.save()
+                            sib.save()
+                        # print "swapped", CP, " with", sib
     cache.delete(get_key_course_pl(department.abbrev,
                                    an,
                                    semaine,
