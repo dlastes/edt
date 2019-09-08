@@ -950,7 +950,7 @@ function cm_chg_but_fill(d){
     var ret = "steelblue";
     if (["+", arrow.right, arrow.back].includes(d.content)) {
         ret = "steelblue" ;
-    } else if (['tutor_module', 'tutor'].includes(room_tutor_change.cm_settings.type)) {
+    } else if (['tutor_module', 'tutor', 'room'].includes(room_tutor_change.cm_settings.type)) {
         ret = smi_fill(cm_chg_but_pref(d) / par_dispos.nmax);
     }
     return ret ;
@@ -962,7 +962,7 @@ function cm_chg_but_txt_fill(d) {
 	ret = "black" ;
     } else if (["+", arrow.right, arrow.back].includes(d.content)) {
         ret = "black" ;
-    } else if (['tutor_module', 'tutor'].includes(room_tutor_change.cm_settings.type)) {
+    } else if (['tutor_module', 'tutor', 'room'].includes(room_tutor_change.cm_settings.type)) {
         var cur_dispo = cm_chg_but_pref(d) ;
         if (cur_dispo == 0) {
             ret = "white";
