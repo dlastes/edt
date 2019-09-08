@@ -327,9 +327,9 @@ function select_tutor_filters_change() {
     }
     
     var fake_id = new Date() ;
-    fake_id = fake_id.getMilliseconds() + "-" + c.id_cours ;
+    fake_id = fake_id.getMilliseconds() ;
     room_tutor_change.proposal = room_tutor_change.proposal.map(function(t) {
-	return {fid: fake_id, content: t};
+	return {fid: fake_id + t , content: t};
     });
 
     room_tutor_change.cm_settings.nlin = Math.ceil(room_tutor_change.proposal.length / room_tutor_change.cm_settings.ncol) ;
