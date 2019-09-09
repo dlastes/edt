@@ -57,9 +57,6 @@
     stroke:black;
     stroke-width: 2;
 }
-.cours text {
-  font-size:10px;
-}
 
 /* ************ Boutons ************ */
 #dd-sal, #dd-mod {
@@ -116,7 +113,7 @@ g[class^="gp-but-"] {
 .rec_wk {
   fill: darkgreen;
   cursor: pointer;
-  font-size: 1.5em;
+  font-size: 1.2em;
 }
 
 .sel_wk {
@@ -131,15 +128,39 @@ g[class^="gp-but-"] {
 }
 
 .ckstat {
-  fill: aliceblue
+    fill: aliceblue
 }
+
+#lay-meg {
+    font-size: 14px
+}
+#lay-wg {
+    font-size: 14px
+}
+#lay-catg {
+    font-size: 12px
+}
+#lay-dg {
+    font-size: 12px
+}
+
+.menu-btn {
+    font-size: 14px;
+}
+
+
+[class^=spl_] {
+    font-size:18px
+}
+
+
 /* .ckdyna { */
 /*     cursor: pointer; */
 /* } */
 
 /* Messages */
 .ack-edt, .ack-reg {
-  font-size:20px;
+  font-size:10px;
 }
 .ack-reg {
   text-anchor:end;
