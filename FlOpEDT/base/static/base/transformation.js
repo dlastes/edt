@@ -804,6 +804,17 @@ function cours_fill(c) {
     }
     return "red";
 }
+function is_exam(c) {
+    return false ;
+}
+
+function cours_txt_weight(c) {
+    return is_exam(c)?"bold":"normal";
+}
+function cours_txt_size(c) {
+    return is_exam(c)?14:10;
+}
+
 function cours_txt_top_y(c) {
     return cours_y(c) + .25 * cours_height(c);
 }
