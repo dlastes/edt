@@ -1158,7 +1158,7 @@ function splash(splash_ds){
     buts
 	.append("text")
 	.attr("style", function(d){
-	    return "text-anchor: middle; font-size: 18";
+	    return "text-anchor: middle";
 	})
         .attr("x", classic_txt_x)
         .attr("y", classic_txt_y)
@@ -1203,13 +1203,11 @@ function splash(splash_ds){
     comms
         .append("text")
         .attr("class", "comm")
-	.attr("style", function(d){
-	    return "text-anchor: "+d.anch
-		+"; font-size:" + d.ftsi;
-	})
+        .attr("font-size", function(d){ return d.ftsi; })
+        .attr("text-anchor", function(d){ return d.anch; })
         .attr("x", classic_x)
         .attr("y", classic_y)
-        .text(classic_txt);
+        .text(classic_txt)
     
 }
 

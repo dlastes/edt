@@ -1114,8 +1114,7 @@ function create_menus() {
 
     meg
         .attr("transform", "translate(" + menus.x + "," + menus.y + ")")
-        .attr("text-anchor", "start")
-        .attr("font-size", 18);
+        .attr("text-anchor", "start");
 
     meg
         .append("rect")
@@ -1875,7 +1874,7 @@ function create_val_but() {
 
     edt_but
         .append("text")
-        .attr("font-size", 18)
+        .attr("class", "menu-btn")
         .attr("fill", "white")
         .text("Valider EdT")
         .attr("x", menus.x + menus.mx + .5 * valid.w)
@@ -1998,8 +1997,8 @@ function create_stype() {
 
     dis_but
         .append("text")
-        .attr("font-size", 18)
         .attr("fill", "white")
+        .attr("class", "menu-btn")
         .text("Valider disponibilités")
         .attr("x", did.tlx + .5 * valid.w)
         .attr("y", did.tly + .5 * valid.h);
@@ -2026,7 +2025,7 @@ function create_stype() {
 
     stap_but
         .append("text")
-        .attr("font-size", 18)
+        .attr("class", "menu-btn")
         .attr("fill", "white")
         .attr("x", dispot_but_txt_x)
         .attr("y", dispot_but_txt_y("app") - 10)
@@ -2034,7 +2033,7 @@ function create_stype() {
 
     stap_but
         .append("text")
-        .attr("font-size", 18)
+        .attr("class", "menu-btn")
         .attr("fill", "white")
         .attr("x", dispot_but_txt_x)
         .attr("y", dispot_but_txt_y("app") + 10)
