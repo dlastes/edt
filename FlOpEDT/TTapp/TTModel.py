@@ -141,7 +141,7 @@ class WeekDB(object):
 
         other_departments_courses = Course.objects.filter(
             semaine=self.week, an=self.year)\
-            .exclude(groupe__train_prog__department=self.department)
+            .exclude(type__department=self.department)
 
         other_departments_sched_courses = ScheduledCourse \
             .objects \
@@ -1087,8 +1087,8 @@ class TTModel(object):
                 occupied_in_another_department = False
                 for sc in self.wdb.other_departments_sched_courses_for_room[r]:
                     if sl.day == sc.day and \
-                            (sc.start_time < sl.start_time + sl.duration
-                             or sc.start_time > sl.start_time - sc.cours.type.duration):
+                            (sl.start_time <= sc.start_time < sl.end_time
+                             or sl.start_time < sc.start_time + sc.cours.type.duration <= sl.end_time):
                         occupied_in_another_department = True
                 if occupied_in_another_department:
                     name = 'other_dep_room_' + str(r) + '_' + str(sl) + '_' + str(self.constraint_nb)
@@ -1105,8 +1105,8 @@ class TTModel(object):
                 occupied_in_another_department = False
                 for sc in self.wdb.other_departments_scheduled_courses_for_tutor[i]:
                     if sl.day == sc.day and \
-                            (sc.start_time < sl.start_time + sl.duration
-                             or sc.start_time > sl.start_time - sc.cours.type.duration):
+                            (sl.start_time <= sc.start_time < sl.end_time
+                             or sl.start_time < sc.start_time + sc.cours.type.duration <= sl.end_time):
                         occupied_in_another_department = True
                 if occupied_in_another_department:
                     name = 'other_dep_' + str(i) + '_' + str(sl) + '_' + str(self.constraint_nb)
