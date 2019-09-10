@@ -200,3 +200,21 @@ def extract_planif(department, bookname=None):
         extract_period(department, book, period, annee_courante)
     assign_color(department)
 
+
+def extract_planif_from_week(week, year, department, bookname=None):
+    '''
+    Generate the courses from bookname; the school year starts in annee_courante
+    '''
+    if bookname is None:
+        bookname = 'misc/deploy_database/Files/planif_file_'+department.abbrev+'.xlsx'
+    book = load_workbook(filename=bookname, data_only=True)
+    if year == annee_courante:
+        for period in Period.objects.filter(department=department):
+            if period.starting_week < period.ending_week:
+                for w in range(max(week, period.starting_week), period.ending_week + 1):
+                    ReadPlanifWeek(department, book, period.name, w, annee_courante)
+            else:
+                for w in range(max(week, period.starting_week), 53):
+                    ReadPlanifWeek(department, book, period.name, w, annee_courante)
+                for w in range(1, period.ending_week + 1):
+                    ReadPlanifWeek(department, book, period.name, w, annee_courante + 1)
