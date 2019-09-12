@@ -962,16 +962,18 @@ class TTModel(object):
                             print("availability pbm for %s slot %s" % (i, sl))
                             unp_slot_cost[i][sl] = 0
                             avail_instr[i][sl] = 1
-                        elif min(a.valeur for a in avail) == 0:
-                            avail_instr[i][sl] = 0
-                            unp_slot_cost[i][sl] = 0
                         else:
-                            avail_instr[i][sl] = 1
-                            value = sum(a.duration * a.valeur for a in avail) / sum(a.duration for a in avail)
-                            if value == maximum:
+                            minimum = min(a.valeur for a in avail)
+                            if minimum == 0:
+                                avail_instr[i][sl] = 0
                                 unp_slot_cost[i][sl] = 0
                             else:
-                                unp_slot_cost[i][sl] = max(0., 2 - value / average_value)
+                                avail_instr[i][sl] = 1
+                                value = minimum
+                                if value == maximum:
+                                    unp_slot_cost[i][sl] = 0
+                                else:
+                                    unp_slot_cost[i][sl] = max(0., 2 - value / average_value)
 
                     if teaching_duration / 60 < 9 and avail_time < 2 * teaching_duration \
                             and i.status == Tutor.FULL_STAFF:
@@ -1020,13 +1022,14 @@ class TTModel(object):
                                             or sl.start_time < a.start_time + a.duration <= sl.end_time)
                                             and a.day == sl.day))
                             if avail:
-                                if min(a.valeur for a in avail) == 0:
+                                minimum = min(a.valeur for a in avail)
+                                if minimum == 0:
                                     avail_course[(course_type, promo)][sl] = 0
                                     non_prefered_slot_cost_course[(course_type,
                                                                    promo)][sl] = 5
                                 else:
                                     avail_course[(course_type, promo)][sl] = 1
-                                    value = max(a.valeur for a in avail)
+                                    value = minimum
                                     non_prefered_slot_cost_course[(course_type, promo)][sl] \
                                         = 1 - value / 8
                             else:
