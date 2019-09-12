@@ -955,7 +955,8 @@ class TTModel(object):
                                         if 1 <= a.valeur <= maximum - 1) / non_prefered_duration
                     for sl in self.wdb.slots:
                         avail = set(a for a in tutor_availabilities
-                                    if (sl.start_time - a.duration < a.start_time < sl.end_time
+                                    if ((sl.start_time <= a.start_time < sl.end_time
+                                         or sl.start_time < a.start_time + a.duration <= sl.end_time)
                                         and a.day == sl.day))
                         if not avail:
                             print("availability pbm for %s slot %s" % (i, sl))
@@ -1015,8 +1016,9 @@ class TTModel(object):
                     for sl in self.wdb.slots:
                         try:
                             avail = set(a for a in courses_avail
-                                        if sl.start_time - a.duration < a.start_time < sl.end_time
-                                        and a.day == sl.day)
+                                        if ((sl.start_time <= a.start_time < sl.end_time
+                                            or sl.start_time < a.start_time + a.duration <= sl.end_time)
+                                            and a.day == sl.day))
                             if avail:
                                 if min(a.valeur for a in avail) == 0:
                                     avail_course[(course_type, promo)][sl] = 0
