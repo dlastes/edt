@@ -63,8 +63,6 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
         row += 1
         salle = sheet.cell(row=row, column=salle_COL).value
         module = sheet.cell(row=row, column=module_COL).value
-        if salle is None:
-            continue
         if salle.startswith("TOTAL"):
             # print "Sem %g de %s - TOTAL: %g"%(semaine, feuille,sumtotal)
             break
@@ -77,7 +75,7 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
         try:
             N = float(N)
             # handle dark green lines - Vert fonce
-            assert isinstance(salle, str)
+            assert isinstance(salle, str) and salle is not None
             if salle == "Type de Salle":
                 nominal = int(N)
                 if N != nominal:
