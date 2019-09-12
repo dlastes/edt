@@ -655,9 +655,11 @@ class TTModel(object):
             for i in self.wdb.instructors:
                 for sl2 in self.wdb.slots_intersecting[sl1] - {sl1}:
                     name = 'simul_slots' + str(i) + '_' + str(sl1) + '_' + str(sl2)
-                    self.add_constraint(self.sum(self.TT[(sl1, c1)] for c1 in self.wdb.courses_for_tutor[i]
+                    self.add_constraint(self.sum(self.TT[(sl1, c1)] for c1 in (self.wdb.courses_for_tutor[i]
+                                                                               | self.wdb.courses_for_supp_tutor[i])
                                                  & self.wdb.compatible_courses[sl1]) +
-                                        self.sum(self.TT[(sl2, c2)] for c2 in self.wdb.courses_for_tutor[i]
+                                        self.sum(self.TT[(sl2, c2)] for c2 in (self.wdb.courses_for_tutor[i]
+                                                                               | self.wdb.courses_for_supp_tutor[i])
                                                  & self.wdb.compatible_courses[sl2]),
                                         '<=', 1, name=name)
             for bg in self.wdb.basic_groups:
