@@ -101,6 +101,21 @@ function get_preference(pref, start_time, duration) {
 }
 
 
+// period: {day: , start:, duration: }
+function find_in_pref(pref, entity, period) {
+    if (!Object.keys(pref).includes(entity)) {
+        return undefined ;
+    }
+    if (!Object.keys(pref[entity]).includes(period.day)) {
+        return undefined ;
+    }
+    
+    return get_preference(pref[entity][period.day],
+                          period.start, period.duration);
+}
+
+
+
 function no_overlap(list, start_time, duration) {
     var i_start = index_in_pref(list.map(function(d){return d.start_time;}), start_time) ;
     var i_end = index_in_pref(list.map(function(d){return d.start_time;}), start_time+duration) ;

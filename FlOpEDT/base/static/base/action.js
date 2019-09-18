@@ -86,7 +86,7 @@ function select_room_change() {
     var level = room_cm_level;
     room_tutor_change.cm_settings = room_cm_settings[level] ;
 
-    var c = room_tutor_change.course[0] ;
+    var c = pending.wanted_course ;
     room_tutor_change.old_value = c.room ;
     room_tutor_change.cur_value = c.room ;
 
@@ -190,16 +190,10 @@ function select_room_change() {
 
 
 function confirm_room_change(d){
-    var c = room_tutor_change.course[0] ;
+    Object.assign(pending.wanted_course, {room: d.content});
 
-    var wanted_course = Object.assign({},c);
-    Object.assign(wanted_course, {room: d.content});
-
-    check_assign_course(c, wanted_course);
-
-    room_tutor_change.course = [] ;
     room_tutor_change.proposal = [] ;
-    go_courses() ;
+    check_pending_course();
 }
 
 
@@ -236,15 +230,15 @@ function fetch_all_tutors() {
 function select_tutor_module_change() {
     room_tutor_change.cm_settings = tutor_module_cm_settings ;
 
-    var c = room_tutor_change.course[0] ;
+    var c = pending.wanted_course ;
     room_tutor_change.old_value = c.prof ;
     room_tutor_change.cur_value = c.prof ;
 
     var tutor_same_module = cours
-	.filter(function(c) {
-	    return c.mod == room_tutor_change.course[0].mod;
+	.filter(function(oth_c) {
+	    return oth_c.mod == c.mod;
 	})
-	.map(function(c){ return c.prof; });
+	.map(function(oth_c){ return oth_c.prof; });
 
     // remove duplicate 
     tutor_same_module = tutor_same_module.filter(function(t,i) {
@@ -269,8 +263,6 @@ function select_tutor_module_change() {
 function select_tutor_filters_change() {
     room_tutor_change.cm_settings = tutor_filters_cm_settings ;
 
-    var c = room_tutor_change.course[0] ;
-
     var chunk_size = tutor_cm_settings.ncol * tutor_cm_settings.nlin - 1;
 
     room_tutor_change.proposal = [] ;
@@ -288,9 +280,9 @@ function select_tutor_filters_change() {
     }
     
     var fake_id = new Date() ;
-    fake_id = fake_id.getMilliseconds() + "-" + c.id_cours ;
+    fake_id = fake_id.getMilliseconds() ;
     room_tutor_change.proposal = room_tutor_change.proposal.map(function(t) {
-	return {fid: fake_id, content: t};
+	return {fid: fake_id + t , content: t};
     });
 
     room_tutor_change.cm_settings.nlin = Math.ceil(room_tutor_change.proposal.length / room_tutor_change.cm_settings.ncol) ;
@@ -301,8 +293,6 @@ function select_tutor_change(f) {
     room_tutor_change.cm_settings = tutor_cm_settings ;
 
     
-    var c = room_tutor_change.course[0] ;
-
     var ends = f.content.split(arrow.right);
 
     room_tutor_change.proposal = all_tutors.filter(function(t) {
@@ -312,9 +302,9 @@ function select_tutor_change(f) {
     room_tutor_change.proposal.push(arrow.back) ;
     
     var fake_id = new Date() ;
-    fake_id = fake_id.getMilliseconds() + "-" + c.id_cours ;
+    fake_id = fake_id.getMilliseconds() ;
     room_tutor_change.proposal = room_tutor_change.proposal.map(function(t) {
-	return {fid: fake_id, content: t};
+	return {fid: fake_id + t, content: t};
     });
 
 }
@@ -324,16 +314,11 @@ function select_tutor_change(f) {
 
 
 function confirm_tutor_change(d){
-    var c = room_tutor_change.course[0] ;
+    Object.assign(pending.wanted_course, {prof: d.content});
 
-    var wanted_course = Object.assign({},c);
-    Object.assign(wanted_course, {prof: d.content});
-
-    check_assign_course(c, wanted_course);
-
-    room_tutor_change.course = [] ;
     room_tutor_change.proposal = [] ;
-    go_courses() ;
+
+    check_pending_course();
 }
 
 
@@ -342,9 +327,14 @@ function confirm_tutor_change(d){
 
 function go_cm_room_tutor_change() {
 
+    var tmp_array = [] ;
+    if (pending.wanted_course != null) {
+        tmp_array.push(pending.wanted_course);
+    }
+
     var tut_cm_course_dat = svg.get_dom("cmtg")
         .selectAll(".cm-chg")
-        .data(room_tutor_change.course,
+        .data(tmp_array,
               function(d) {
                   return d.id_cours;
               });
@@ -415,7 +405,8 @@ function go_cm_room_tutor_change() {
         .merge(tut_cm_room_dat.select(".cm-chg-bt"))
         .attr("x", cm_chg_but_txt_x)
         .attr("y", cm_chg_but_txt_y)
-        .text(cm_chg_but_txt);
+        .attr("fill", cm_chg_but_txt_fill)
+        .text(cm_chg_but_txt)
         // .attr("stroke", "darkslategrey")
         // .attr("stroke-width", 2);
 
@@ -1135,7 +1126,7 @@ function splash(splash_ds){
     buts
 	.append("text")
 	.attr("style", function(d){
-	    return "text-anchor: middle; font-size: 18";
+	    return "text-anchor: middle";
 	})
         .attr("x", classic_txt_x)
         .attr("y", classic_txt_y)
@@ -1180,13 +1171,11 @@ function splash(splash_ds){
     comms
         .append("text")
         .attr("class", "comm")
-	.attr("style", function(d){
-	    return "text-anchor: "+d.anch
-		+"; font-size:" + d.ftsi;
-	})
+        .attr("font-size", function(d){ return d.ftsi; })
+        .attr("text-anchor", function(d){ return d.anch; })
         .attr("x", classic_x)
         .attr("y", classic_y)
-        .text(classic_txt);
+        .text(classic_txt)
     
 }
 
@@ -1267,7 +1256,7 @@ function get_course(id){
 
 
 function compute_cm_room_tutor_direction() {
-    var c = room_tutor_change.course[0] ;
+    var c = pending.wanted_course ;
     var cm_start_x, cm_start_y;
     cm_start_x = cours_x(c) + .5 * cours_width(c) ;
     cm_start_y = cours_y(c)  + .5 * cours_height(c) ;

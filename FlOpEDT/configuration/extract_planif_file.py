@@ -63,8 +63,6 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
         row += 1
         salle = sheet.cell(row=row, column=salle_COL).value
         module = sheet.cell(row=row, column=module_COL).value
-        if salle is None:
-            continue
         if salle.startswith("TOTAL"):
             # print "Sem %g de %s - TOTAL: %g"%(semaine, feuille,sumtotal)
             break
@@ -77,7 +75,7 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
         try:
             N = float(N)
             # handle dark green lines - Vert fonce
-            assert isinstance(salle, str)
+            assert isinstance(salle, str) and salle is not None
             if salle == "Type de Salle":
                 nominal = int(N)
                 if N != nominal:
@@ -200,3 +198,21 @@ def extract_planif(department, bookname=None):
         extract_period(department, book, period, annee_courante)
     assign_color(department)
 
+
+def extract_planif_from_week(week, year, department, bookname=None):
+    '''
+    Generate the courses from bookname; the school year starts in annee_courante
+    '''
+    if bookname is None:
+        bookname = 'misc/deploy_database/Files/planif_file_'+department.abbrev+'.xlsx'
+    book = load_workbook(filename=bookname, data_only=True)
+    if year == annee_courante:
+        for period in Period.objects.filter(department=department):
+            if period.starting_week < period.ending_week:
+                for w in range(max(week, period.starting_week), period.ending_week + 1):
+                    ReadPlanifWeek(department, book, period.name, w, annee_courante)
+            else:
+                for w in range(max(week, period.starting_week), 53):
+                    ReadPlanifWeek(department, book, period.name, w, annee_courante)
+                for w in range(1, period.ending_week + 1):
+                    ReadPlanifWeek(department, book, period.name, w, annee_courante + 1)

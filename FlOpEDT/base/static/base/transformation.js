@@ -696,6 +696,17 @@ function cours_fill(c) {
     }
     return "red";
 }
+function is_exam(c) {
+    return false ;
+}
+
+function cours_txt_weight(c) {
+    return is_exam(c)?"bold":"normal";
+}
+function cours_txt_size(c) {
+    return is_exam(c)?14:10;
+}
+
 function cours_txt_top_y(c) {
     return cours_y(c) + .25 * cours_height(c);
 }
@@ -736,7 +747,7 @@ function cm_chg_bg_height() {
 }
 
 function cm_chg_bg_x() {
-    var c = room_tutor_change.course[0] ;
+    var c = pending.wanted_course ;
     if (room_tutor_change.posh == 'w') {
 	return cours_x(c) + .5 * cours_width(c) - cm_chg_bg_width();
     } else {
@@ -744,7 +755,7 @@ function cm_chg_bg_x() {
     }
 }
 function cm_chg_bg_y() {
-    var c = room_tutor_change.course[0] ;
+    var c = pending.wanted_course ;
     if (room_tutor_change.posv == 's') {
 	return cours_y(c)  + .5 * cours_height(c) ;
     } else {
@@ -805,12 +816,62 @@ function cm_chg_but_stk(d) {
 	return 0 ;
     }
 }
-function cm_chg_but_fill(d){
-    if (d.content == room_tutor_change.old_value) {
-	return "darkslategrey" ;
-    } else {
-	return "steelblue" ;
+
+function cm_chg_but_pref(d) {
+    var cur_dispo;
+    var cur_course = pending.wanted_course ;
+    if (room_tutor_change.cm_settings.type == 'tutor_module'
+        || room_tutor_change.cm_settings.type == 'tutor') {
+        cur_dispo = find_in_pref(dispos,d.content,cur_course);
+        if (cur_dispo == -1 || cur_dispo === undefined) {
+            cur_dispo = 0 ;
+        }
+        if (cur_dispo > 0) {
+            var extra_dispo = find_in_pref(extra_pref.tutors, d.content, cur_course);
+            if (extra_dispo == 0) {
+                cur_dispo = 0 ;
+            }
+        }
+    } else if (room_tutor_change.cm_settings.type == 'room') {
+        cur_dispo = par_dispos.nmax ;
+        if(simultaneous_courses(cur_course).map(function(c){
+            return c.room ;
+        }).includes(d.content)){
+            cur_dispo = 0 ;
+        }
+        if (cur_dispo > 0) {
+            var extra_dispo = find_in_pref(extra_pref.rooms, d.content, cur_course);
+            if (extra_dispo == 0) {
+                cur_dispo = 0 ;
+            }
+        }
     }
+    return cur_dispo ;
+}
+
+function cm_chg_but_fill(d){
+    var ret = "steelblue";
+    if (["+", arrow.right, arrow.back].includes(d.content)) {
+        ret = "steelblue" ;
+    } else if (['tutor_module', 'tutor', 'room'].includes(room_tutor_change.cm_settings.type)) {
+        ret = smi_fill(cm_chg_but_pref(d) / par_dispos.nmax);
+    }
+    return ret ;
+}
+
+function cm_chg_but_txt_fill(d) {
+    var ret = "black";
+    if (d.content == room_tutor_change.old_value) {
+	ret = "black" ;
+    } else if (["+", arrow.right, arrow.back].includes(d.content)) {
+        ret = "black" ;
+    } else if (['tutor_module', 'tutor', 'room'].includes(room_tutor_change.cm_settings.type)) {
+        var cur_dispo = cm_chg_but_pref(d) ;
+        if (cur_dispo == 0) {
+            ret = "white";
+        }
+    }
+    return ret;
 }
 
 
@@ -995,7 +1056,11 @@ function st_but_back() {
   ---------------------*/
 
 function ack_reg_y() {
-    return grid_height()  + 30 * scale ;
+    var ret = grid_height()  + 20 * scale ;
+    if (row_gp.length > 1) {
+        ret += 50 * scale ;
+    }
+    return ret ;
 }
 
 /*---------------------

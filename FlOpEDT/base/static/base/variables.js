@@ -88,10 +88,11 @@ function cancel_cm_adv_preferences(){
 function cancel_cm_room_tutor_change(){
     if(ckbox["edt-mod"].cked) {
 	if(!context_menu.room_tutor_hold) {
-	    if (room_tutor_change.course.length > 0) {
-		room_tutor_change.course = [] ;
+            if(pending.init_course!=null) {
+                pending.back_init() ;
 		room_tutor_change.proposal = [] ;
 		go_cm_room_tutor_change();
+                go_courses(false) ;
 	    }
 	}
 	context_menu.room_tutor_hold = false ;
@@ -535,6 +536,43 @@ var drag = {
     svg_w: 0,
     svg_h: 0
 };
+
+// course being moved
+var pending = {
+    init_course: null,
+    wanted_course: null,
+    time: null,
+    pass: {tutor: false,
+           room: false,
+           core: false},
+    force: {tutor: true,
+            room: true},
+    init_force_pass: function() {
+        this.pass.tutor = false;
+        this.pass.room = false;
+        this.pass.core = false;
+        this.force.room = true ;
+        this.force.tutor = true ;
+    },
+    one_try: function() {
+        this.force.room = false ;
+        this.force.tutor = false ;
+    },
+    init: function() {
+        this.init_course = null ;
+        this.wanted_course = null ;
+        this.time = null ;
+        this.init_force_pass() ;
+    },
+    fork_course: function(d) {
+        this.wanted_course = d ;
+        this.init_course = Object.assign({}, d);
+    },
+    back_init: function(t) {
+        Object.assign(this.wanted_course, this.init_course) ;
+        this.init() ;
+    }
+} ;
 
 // stores the courses that has been moved
 var cours_bouge = {};

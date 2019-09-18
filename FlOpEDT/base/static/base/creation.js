@@ -806,8 +806,7 @@ function create_menus() {
 
     svg.get_dom("meg")
         .attr("transform", "translate(" + menus.x + "," + menus.y + ")")
-        .attr("text-anchor", "start")
-        .attr("font-size", 18);
+        .attr("text-anchor", "start");
 
     svg.get_dom("meg")
         .append("rect")
@@ -980,6 +979,7 @@ function def_drag() {
         })
         .on("drag", function(d) {
             if (ckbox["edt-mod"].cked && fetch.done) {
+                pending.fork_course(d);
                 cur_over = which_slot(drag.x +
 				      parseInt(drag.sel.select("rect")
 					       .attr("x")),
@@ -1039,11 +1039,15 @@ function def_drag() {
 
                     var pending_change = {day: cur_over.day,
                                           start: cur_over.start_time} ;
-		    
-                    var wanted_course = Object.assign({},d) ;
-                    Object.assign(wanted_course,pending_change) ;
+		    console.log(pending.init_course.start);
 
-                    check_assign_course(d, wanted_course) ;
+                    // Object.assign(d,pending_change) ;
+		    // console.log(pending.init_course.start);
+                    // pending.wanted_course = Object.assign({},d) ;
+
+                    Object.assign(pending.wanted_course, pending_change) ;
+
+                    check_pending_course() ;
                     
                 } else {
                     d.day = cur_over.day ;
@@ -1100,7 +1104,7 @@ function fill_grid_slot(c2m, grid_slot) {
 
     var check = check_course(wanted_course);
     
-    if (check.constraints_ok) {
+    if (check.length == 0) {
 	return ;
     } else {
 	grid_slot.dispo = false;
@@ -1122,26 +1126,33 @@ function fill_grid_slot(c2m, grid_slot) {
 
 }
 
-function warning_check(wanted_course) {
-    var ret = '';
-    var check = check_course(wanted_course);
-    if (check.nok_type == 'stable') {
-	ret = "Le cours était censé être fixe.";
-    } else if (check.nok_type == 'train_prog_unavailable') {
-        ret = "La promo " + check.train_prog + " ne devait pas avoir cours à ce moment-là.";
-    } else if (check.nok_type == 'tutor_busy') {
-        ret = "L'enseignant·e " + check.tutor + " avait déjà un cours prévu.";
-    } else if (check.nok_type == 'group_busy') {
-        ret = "Le groupe " + check.group + " avait déjà un cours prévu.";
-    } else if (check.nok_type == 'tutor_unavailable') {
-        ret = "L'enseignant·e " + check.tutor + " s'était déclaré·e indisponible.";
-    } else if (check.nok_type == 'tutor_availability_unknown') {
-        ret = "L'enseignant·e " + check.tutor + " n'a pas déclaré ses dispos.";
-    } else if (check.nok_type == 'tutor_busy_other_dept') {
-        ret = "L'enseignant·e " + check.tutor + " est occupé dans un autre département.";
-    } else if (check.nok_type == 'room_busy_other_dept') {
-        ret = "La salle " + check.room + " est utilisée par un autre département.";
-    }
+function warning_check(check_tot) {
+    var ret = [];
+    ret = check_tot.map( function(check) {
+        var expand ;
+        if (check.nok == 'stable') {
+	    expand = "Le cours était censé être fixe.";
+        } else if (check.nok == 'train_prog_unavailable') {
+            expand = "La promo " + check.more.train_prog + " ne devait pas avoir cours à ce moment-là.";
+        } else if (check.nok == 'tutor_busy') {
+            expand = "L'enseignant·e " + check.more.tutor + " avait déjà un cours prévu.";
+        } else if (check.nok == 'group_busy') {
+            expand = "Le groupe " + check.more.group + " avait déjà un cours prévu.";
+        } else if (check.nok == 'tutor_unavailable') {
+            expand = "L'enseignant·e " + check.more.tutor + " s'était déclaré·e indisponible.";
+        } else if (check.nok == 'tutor_availability_unknown') {
+            expand = "L'enseignant·e " + check.more.tutor + " n'a pas déclaré ses dispos.";
+        } else if (check.nok == 'tutor_busy_other_dept') {
+            expand = "L'enseignant·e " + check.more.tutor + " est occupé dans un autre département.";
+        } else if (check.nok == 'tutor_free_week') {
+            expand = "L'enseignant·e " + check.more.tutor + " ne donne pas de cours cette semaine.";
+        } else if (check.nok == 'room_busy') {
+            expand = "La salle " + check.more.room + " est déjà prise.";
+        } else if (check.nok == 'room_busy_other_dept') {
+            expand = "La salle " + check.more.room + " est utilisée par un autre département.";
+        }
+        return expand ;
+    });
     return ret ;
 }
 
@@ -1176,199 +1187,268 @@ function simultaneous_courses(target_course) {
 // date {day, start_time}
 function check_course(wanted_course) {
 
-    var ret = {constraints_ok: false};
+    var ret = [] ; 
     var possible_conflicts = [] ;
     var conflicts = [] ;
 
     if (is_garbage(wanted_course)) {
-	ret.constraints_ok = true ;
 	return ret ;
     }
 
-    // if ((logged_usr.rights >> 2) % 2 == 1) {
-    // 	return ;
-    // }
+    if (! pending.pass.other) {
 
-    if (wanted_course.id_cours == -1) {
-	ret.nok_type = 'stable' ;
-	return ret;
-    }
+        // course was supposed to be fix
+        if (wanted_course.id_cours == -1) {
+	    ret.push({nok:'stable'}) ;
+        }
 
-    if (is_free(wanted_course, wanted_course.promo)) {
-	ret.nok_type = 'train_prog_unavailable' ;
-	ret.train_prog = set_promos[wanted_course.promo] ;
-        return ret;
+        // training programme was supposed to be free
+        if (is_free(wanted_course, wanted_course.promo)) {
+	    ret.push({nok: 'train_prog_unavailable',
+                      more: {train_prog: set_promos[wanted_course.promo]}}) ;
+        }
     }
 
 
     possible_conflicts = simultaneous_courses(wanted_course) ;
 
-    // console.log("CHECK", c2m, date);
-    // console.log(possible_conflicts.map(function(d){return {s:d.start, d:d.duration}}));
+    if (! pending.pass.other) {
 
-    conflicts = possible_conflicts.filter(function(c) {
-        return (c.prof == wanted_course.prof);
-    });
-    
-    if (conflicts.length > 0) {
-	ret.nok_type = 'tutor_busy';
-	ret.tutor = wanted_course.prof;
-        return ret;
+        // group is busy
+        conflicts = possible_conflicts.filter(function(c) {
+            return ((c.group == wanted_course.group
+		     || groups[wanted_course.promo][wanted_course.group].ancetres.indexOf(c.group) > -1
+		     || groups[wanted_course.promo][wanted_course.group].descendants.indexOf(c.group) > -1)
+		    && c.promo == wanted_course.promo);
+        });
+        
+        if (conflicts.length > 0) {
+	    ret.push({nok: 'group_busy',
+                      more: {group: wanted_course.group}});
+        }
     }
 
 
-    conflicts = possible_conflicts.filter(function(c) {
-        return ((c.group == wanted_course.group
-		 || groups[wanted_course.promo][wanted_course.group].ancetres.indexOf(c.group) > -1
-		 || groups[wanted_course.promo][wanted_course.group].descendants.indexOf(c.group) > -1)
-		&& c.promo == wanted_course.promo);
-    });
-    
-    if (conflicts.length > 0) {
-	ret.nok_type = 'group_busy';
-	ret.group = wanted_course.group;
-        return ret;
-    }
 
     // tutor availability
-    if (dispos[wanted_course.prof] !== undefined) {
+    if (! pending.pass.tutor) {
+        conflicts = possible_conflicts.filter(function(c) {
+            return (c.prof == wanted_course.prof);
+        });
+        
 
-        // in the current department
-        var pref_tut = get_preference(dispos[wanted_course.prof][wanted_course.day],
-                                      wanted_course.start, wanted_course.duration);
-	if (pref_tut == 0) {
-	    ret.nok_type = 'tutor_unavailable' ;
-	    ret.tutor = wanted_course.prof ;
-            return ret;
-	} else if (pref_tut == -1) {
-	    ret.nok_type = 'tutor_availability_unknown' ;
-	    ret.tutor = wanted_course.prof ;
-            return ret;
+
+        if (conflicts.length > 0) {
+	    ret.push({nok: 'tutor_busy',
+                      more: {tutor: wanted_course.prof}});
         }
 
-        // in other departments
-        if (Object.keys(extra_pref.tutors).includes(wanted_course.prof) &&
-            Object.keys(extra_pref.tutors[wanted_course.prof]).includes(wanted_course.day)) {
-            var extra_unavailable = get_preference(extra_pref.tutors[wanted_course.prof][wanted_course.day],
-                                                   wanted_course.start, wanted_course.duration);
-            if (extra_unavailable == 0) {
-	        ret.nok_type = 'tutor_busy_other_dept' ;
-	        ret.tutor = wanted_course.prof ;
-                return ret;
+
+
+        // tutor availability
+        if (dispos[wanted_course.prof] !== undefined) {
+
+            // in the current department
+            var pref_tut = get_preference(dispos[wanted_course.prof][wanted_course.day],
+                                          wanted_course.start, wanted_course.duration);
+	    if (pref_tut == 0) {
+	        ret.push({nok: 'tutor_unavailable',
+                          more: {tutor: wanted_course.prof}}) ;
+	    } else if (pref_tut == -1) {
+	        ret.push({nok: 'tutor_availability_unknown',
+                          more: {tutor: wanted_course.prof}}) ;
             }
+            
+            // in other departments
+            var extra_unavailable = find_in_pref(extra_pref.tutors, wanted_course.prof, wanted_course);
+            
+            if (extra_unavailable == 0) {
+	        ret.push({nok: 'tutor_busy_other_dept',
+                          more: {tutor: wanted_course.prof}}) ;
+            }
+            
+        } else {
+            ret.push({nok: 'tutor_free_week',
+                      more: {tutor: wanted_course.prof}}) ;
         }
     }
 
     // shared rooms availability
-    if (Object.keys(extra_pref.rooms).includes(wanted_course.room) &&
-        Object.keys(extra_pref.rooms[wanted_course.room]).includes(wanted_course.day)) {
-        var extra_unavailable = get_preference(extra_pref.rooms[wanted_course.room][wanted_course.day],
-                                               wanted_course.start, wanted_course.duration);
+    // var extra_unavailable = find_in_pref(extra_pref.rooms,
+    //                                      wanted_course.room,
+    //                                      wanted_course);
+
+    if (! pending.pass.room) {
+
+        if(possible_conflicts.map(function(c){
+            return c.room ;
+        }).includes(wanted_course.room)) {
+	    ret.push({nok: 'room_busy',
+                      more: {room: wanted_course.room}}) ;
+        }
+           
+        var extra_unavailable = find_in_pref(extra_pref.rooms, wanted_course.room, wanted_course);
+        
         if (extra_unavailable == 0) {
-	    ret.nok_type = 'room_busy_other_dept' ;
-	    ret.room = wanted_course.room ;
-            return ret;
+	    ret.push({nok: 'room_busy_other_dept',
+                      more: {room: wanted_course.room}}) ;
         }
     }
 
-    
-    ret.constraints_ok = true ;
     return ret ;
-
 }
 
 
-function check_assign_course(d, wanted_course) {
-    console.log(d, wanted_course) ;
-    var warn_check = warning_check(wanted_course) ;
+function splash_violated_constraints(check_list, step) {
+    var splash_csts ;
+    var warn_check = warning_check(check_list);
+    console.log(warn_check);
+    //console.log(pending.wanted_course.id_cours);
+    if ((logged_usr.rights >> 2) % 2 == 1) {
+	splash_csts = {
+	    id: "viol_constraint",
+	    but: {
+		list: [{txt: "Confirmer",
+			click:
+			function(btn){
+                            pending.pass[btn.pass] = true ;
+                            console.log(pending.wanted_course.id_cours);
+                            check_pending_course() ;
+			    return ;
+			},
+                        pass: step
+		       },
+		       {txt: "Annuler",
+			click: function(d){
+                            pending.back_init();
+                            go_courses(false);
+			    return ;
+			}
+		       }]
+	    },
+	    com: {list: [{txt: "Attention", ftsi: 23},
+			 {txt: ""},
+			 {txt: "Des privilèges vous ont été accordés, et vous en profitez pour outrepasser la contrainte suivante :"}]
+		 }
+	};
+        splash_csts.com.list = splash_csts.com.list.concat(warn_check.map(function(el){
+            return {txt: el};
+        }));
+	splash_csts.com.list.push({txt: "Confirmer la modification ?"});
+    } else {
+        splash_csts = {
+	    id: "viol_constraint",
+	    but: {
+		list: [{txt: "Ah ok",
+			click: function(d){
+                            go_courses(false);
+			    return ;
+			}
+		       }]
+	    },
+	    com: {list: [{txt: "Vous tentez d'outrepasser la contrainte suivante :", ftsi: 23}
+			 ]
+		 }
+	}
+        splash_csts.com.list = splash_csts.com.list.concat(warn_check.map(function(el){
+            return {txt: el};
+        }));
+	splash_csts.com.list.push({txt: "Vous n'avez pas les droits pour le faire..."});
+    }
+    console.log(splash_csts);
+    splash(splash_csts);
+}
+
+
+function clean_pending() {
+    // clean pending without waiting for confirmation
+    if ((logged_usr.rights >> 2) % 2 != 1) {
+        pending.back_init();
+        go_courses(false);
+    }
+}
+
+
+
+function check_pending_course() {
+    var warn_check = check_course(pending.wanted_course) ;
     console.log(warn_check);
     
-    if (warn_check == "") {
+    if (warn_check.length == 0) {
         
-	add_bouge(d);
-        Object.assign(d, wanted_course);
-        console.log(d);
-	room_tutor_change.course.push(d) ;
-	compute_cm_room_tutor_direction() ;
-	room_cm_level = 0 ;
-	var display_cont_menu = select_room_change() ;
-	if (display_cont_menu) {
-	    go_cm_room_tutor_change();
-	} else {
-	    room_tutor_change.course = [] ;
-	    room_tutor_change.proposal = [] ;
-	}
-        
+	add_bouge(pending.init_course);
+        //pending.save_wanted() ;
+        pending.init();
+
+	go_grid(true);
+	go_courses(true);
+
     } else  { //if (!ngs.dispo) {
 	// -- no slot --
 	// && (logged_usr.rights >> 2) % 2 == 1) {
-	console.log(warn_check);
-        
-	var splash_violate_constraint ;
-        
-	if ((logged_usr.rights >> 2) % 2 == 1) {
-	    
-	    splash_violate_constraint = {
-		id: "viol_constraint",
-		but: {
-		    list: [{txt: "Confirmer",
-			    click:
-			    function(btn){
-				add_bouge(btn.saved_data.course);
-                                Object.assign(btn.saved_data.course, btn.saved_data.wanted);
-				go_grid(true);
-				go_courses(true);
-				return ;
-			    },
-			    saved_data:
-			    {course: d,
-			     wanted: wanted_course}
-			   },
-			   {txt: "Annuler",
-			    click: function(d){
-				return ;
-			    }
-			   }]
-		},
-		com: {list: [{txt: "Attention", ftsi: 23},
-			     {txt: ""},
-			     {txt: "Des privilèges vous ont été accordés, et vous en profitez pour outrepasser la contrainte suivante :"},
-			     {txt: warn_check},
-			     {txt: "Confirmer la modification ?"}]
-		     }
-	    }
-	    splash(splash_violate_constraint);
+        var tutor_constraints = warn_check.filter(function(constraint) {
+            return constraint.nok.startsWith("tutor") ;
+        });
 
-	    
-	} else {
-	    if (slot_case) {
-		var gs = data_slot_grid.filter(function(s) {
-		    return s.day == wanted_course.day
-		    	&& s.start == wanted_course.start;
-		});
-		console.log(gs);
-		if (gs.length==1) {
-		    gs[0].pop = true;
-		}
-	    } else {
-		splash_violate_constraint = {
-		    id: "viol_constraint",
-		    but: {
-			list: [{txt: "Ah ok",
-				click: function(d){
-				    return ;
-				}
-			       }]
-		    },
-		    com: {list: [{txt: "Vous tentez d'outrepasser la contrainte suivante :", ftsi: 23},
-				 {txt: warn_check},
-				 {txt: "Vous n'avez pas les droits pour le faire..."}]
-			 }
-		}
-		splash(splash_violate_constraint);
-	    }
-	    
-	}
+        var room_constraints = warn_check.filter(function(constraint) {
+            return constraint.nok.startsWith("room") ;
+        });
+        
+        var core_constraints = warn_check.filter(function(constraint) {
+            return !constraint.nok.startsWith("tutor") && !constraint.nok.startsWith("room") ;
+        });
+        
+        if(core_constraints.length > 0) {
+
+            clean_pending();
+            
+            splash_violated_constraints(warn_check, 'core');
+            
+                /* TO BE REMOVED
+	        if (slot_case) {
+		    var gs = data_slot_grid.filter(function(s) {
+		        return s.day == wanted_course.day
+		    	    && s.start == wanted_course.start;
+		    });
+		    console.log(gs);
+		    if (gs.length==1) {
+		        gs[0].pop = true;
+		    }
+	            } 
+                */
+
+        } else if (room_constraints.length > 0) {
+            if (pending.force.room) {
+                pending.force.room = false ;
+	        compute_cm_room_tutor_direction() ;
+	        room_cm_level = 0 ;
+                select_room_change() ;
+                go_cm_room_tutor_change();
+                /*
+	        var display_cont_menu = select_room_change() ;
+	        if (display_cont_menu) {
+	            go_cm_room_tutor_change();
+	        } else {
+	            //room_tutor_change.course = [] ;
+	            room_tutor_change.proposal = [] ;
+	        }
+                */
+            } else {
+                clean_pending();
+                splash_violated_constraints(warn_check, 'room');
+            }
+        } else if (tutor_constraints.length > 0) {
+            if (pending.force.tutor) {
+                pending.force.tutor = false ;
+	        compute_cm_room_tutor_direction() ;
+                select_tutor_module_change() ;
+                go_cm_room_tutor_change();
+            } else {
+                clean_pending();
+                splash_violated_constraints(warn_check, 'tutor');
+            }
+
+        }
 	
     }
 
@@ -1486,7 +1566,7 @@ function create_val_but() {
 
     edt_but
         .append("text")
-        .attr("font-size", 18)
+        .attr("class", "menu-btn")
         .attr("fill", "white")
         .text("Valider EdT")
         .attr("x", menus.x + menus.mx + .5 * valid.w)
@@ -1609,8 +1689,8 @@ function create_stype() {
 
     dis_but
         .append("text")
-        .attr("font-size", 18)
         .attr("fill", "white")
+        .attr("class", "menu-btn")
         .text("Valider disponibilités")
         .attr("x", did.tlx + .5 * valid.w)
         .attr("y", did.tly + .5 * valid.h);
@@ -1637,7 +1717,7 @@ function create_stype() {
 
     stap_but
         .append("text")
-        .attr("font-size", 18)
+        .attr("class", "menu-btn")
         .attr("fill", "white")
         .attr("x", dispot_but_txt_x)
         .attr("y", dispot_but_txt_y("app") - 10)
@@ -1645,7 +1725,7 @@ function create_stype() {
 
     stap_but
         .append("text")
-        .attr("font-size", 18)
+        .attr("class", "menu-btn")
         .attr("fill", "white")
         .attr("x", dispot_but_txt_x)
         .attr("y", dispot_but_txt_y("app") + 10)
@@ -1729,11 +1809,10 @@ function get_dispos_type(dt) {
 //     }
 // }
 
-function select_entry_cm(d) {
+function select_entry_cm() {
     room_tutor_change.cm_settings = entry_cm_settings;
-    room_tutor_change.course = [d];
     var fake_id = new Date() ;
-    fake_id = fake_id.getMilliseconds() + "-" + d.id_cours ;
+    fake_id = fake_id.getMilliseconds() + "-" + pending.wanted_course.id_cours ;
     room_tutor_change.proposal = [{fid:fake_id,
 				   content:"Prof"},
 				   {fid:fake_id,
