@@ -162,7 +162,7 @@ function fetch_bknews_light(first) {
 		
 		
                 fetch.ongoing_bknews = false;
-                fetch_ended_light();
+                fetch_ended(true);
             }
         },
         error: function(msg) {
@@ -175,27 +175,6 @@ function fetch_bknews_light(first) {
 }
 
 
+d3.json(groupes_fi,
+ 	function(d){ main('groups', d); } );
 
-function fetch_ended_light() {
-    if(!fetch.ongoing_cours_pl &&
-       !fetch.ongoing_cours_pp){
-	cours = cours_pl.concat(cours_pp);
-	clean_prof_displayed();
-	fetch.cours_ok=true;
-    }
-    
-    if (!fetch.ongoing_cours_pp &&
-	!fetch.ongoing_cours_pl &&
-	!fetch.ongoing_dispos &&
-        !fetch.ongoing_bknews){
-	fetch.done = true ;
-
-	go_grid(true);
-	go_courses(true);
-	go_bknews(true);
-    }
-
-    svg_cont.append("g")
-	.attr("id","lay-final");
-
-}
