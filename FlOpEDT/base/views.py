@@ -163,36 +163,46 @@ def edt_light(req, an=None, semaine=None, **kwargs):
     if req.GET:
         svg_h = req.GET.get('svg_h', '640')
         svg_w = req.GET.get('svg_w', '1370')
-        gp_h = req.GET.get('gp_h', '40')
+        gp_s = req.GET.get('gp_s', '1')
         gp_w = req.GET.get('gp_w', '30')
         svg_top_m = req.GET.get('top_m', '40')
 
         svg_h = int(svg_h)
         svg_w = int(svg_w)
-        gp_h = int(gp_h)
+        gp_s = float(gp_s)
         gp_w = int(gp_w)
         svg_top_m = int(svg_top_m)
 
     else:
-        svg_h = 640
-        svg_w = 1370
-        gp_h = 40
+        svg_h = 1000
+        svg_w = 2000
+        gp_s = .5
         gp_w = 30
         svg_top_m = 40
 
     une_salle = "salle?"  # RoomGroup.objects.all()[0].name
 
     return TemplateResponse(req, 'base/show-edt-light.html',
-                  {'all_weeks': week_list(),
-                   'semaine': semaine,
-                   'an': an,
-                   'une_salle': une_salle,
-                   'tv_svg_h': svg_h,
-                   'tv_svg_w': svg_w,
-                   'tv_gp_h': gp_h,
-                   'tv_gp_w': gp_w,
-                   'promo': promo,
-                   'tv_svg_top_m': svg_top_m
+                  {
+                      'all_weeks': week_list(),
+                      'semaine': semaine,
+                      'an': an,
+                      'promo': promo,
+                      'une_salle': une_salle,
+                      'copie': 0,
+                      'gp': '',
+                      'name_usr': '',
+                      'rights_usr': 0,
+                      'splash_id': 0,
+                      'time_settings': queries.get_time_settings(req.department),
+                      'days': num_all_days(an, semaine, req.department),
+                      'has_department_perm': False,
+                      'dept': req.department.abbrev,
+                      'tv_svg_h': svg_h,
+                      'tv_svg_w': svg_w,
+                      'tv_gp_s': gp_s,
+                      'tv_gp_w': gp_w,
+                      'tv_svg_top_m': svg_top_m
                   })
 
 

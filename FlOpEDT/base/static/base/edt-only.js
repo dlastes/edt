@@ -42,7 +42,9 @@ var year = an_init;
 weeks = {sel: [0], init_data: [{semaine: week, an: year}]};
 
 
-var labgp = {height: tv_gp_h, width: tv_gp_w, tot: 8, height_init: 40, width_init: 30};
+var labgp = {width: tv_gp_w, tot: 8, height_init: 40, width_init: 30};
+
+scale = tv_gp_s ;
 
 dim_dispo.height = 2*labgp.height ;
 
