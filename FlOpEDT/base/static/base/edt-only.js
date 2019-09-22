@@ -61,27 +61,29 @@ pref_only = false ;
 create_general_svg(true);
 
 
-d3.json(groupes_fi,
- 	on_group_rcv_light);
 
+file_fetch.groups.callback = function() {
 
-
-function on_group_rcv_light(dg) {
-
-    create_groups(dg);
-
-//    go_promo(promo_display);
-    go_promo_gp_init();
-    update_all_groups();
+    create_groups(this.data);
 
     create_edt_grid();
 
+    //    go_promo(promo_display);
+
+
+    //update_all_groups();
+
+
     create_bknews();
     
+    go_promo_gp_init();
 
     fetch_cours_light();
     fetch_bknews_light();
+    //adapt_labgp(true);
+    fetch.groups_ok = true ;
     //go_edt(true);
+    create_grid_data();
 }
 
 
