@@ -127,12 +127,8 @@ var file_fetch =
      department: {done:false, data: null, callback: null},};
 
 function main(name, data) {
-    console.log(name, data, file_fetch.groups.done, file_fetch.constraints.done
-                , file_fetch.rooms.done, file_fetch.department.done);
     file_fetch[name].data = data ;
     file_fetch[name].done = true ;
-    console.log(name, data, file_fetch.groups.done, file_fetch.constraints.done
-                , file_fetch.rooms.done, file_fetch.department.done);
     if(file_fetch.groups.done && file_fetch.constraints.done
        && file_fetch.rooms.done && file_fetch.department.done) {
         file_fetch.constraints.callback();
