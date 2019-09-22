@@ -101,23 +101,20 @@ function fetch_cours_light() {
     $.ajax({
         type: "GET", //rest Type
         dataType: 'text',
-        url: url_cours_pl+"/"+an_att+"/"+semaine_att+"/0",
+        url: url_cours_pl + an_att + "/" + semaine_att + "/0",
         async: false,
         contentType: "text/csv",
         success: function (msg, ts, req) {
-	    version = +req.getResponseHeader('version');
+            days = JSON.parse(req.getResponseHeader('days').replace(/\'/g, '"'));
+            
+            tutors.pl = [];
+            modules.pl = [];
+            salles.pl = [];
+            
+            cours_pl = d3.csvParse(msg, translate_cours_pl_from_csv);
 
-	    
-	    var day_arr = JSON.parse(req.getResponseHeader('jours').replace(/\'/g,'"'));
-	    for (var i =0 ; i<day_arr.length ; i++){
-	    	data_grid_scale_day[i] = data_grid_scale_day_init[i]+ " "+day_arr[i];
-	    }
-	    
-	    cours_pl = d3.csvParse(msg, translate_cours_pl_from_csv);
-	    
-	    
 	    fetch.ongoing_cours_pl=false;
-	    fetch_ended_light();
+	    fetch_ended(true);
         },
 	error: function(msg) {
 	    console.log("error");
@@ -139,10 +136,8 @@ function fetch_bknews_light(first) {
         async: true,
         contentType: "text/json",
         success: function(msg) {
-            //console.log(msg);
-
-            bknews.cont = JSON.parse(msg) ;
-
+	    bknews.cont = d3.csvParse(msg,
+				      translate_bknews_from_csv);
             if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
                 an_att == weeks.init_data[weeks.sel[0]].an) {
 		var max_y = -1 ;
@@ -152,18 +147,11 @@ function fetch_bknews_light(first) {
 		    }
 		}
 		bknews.nb_rows = max_y + 1 ;
-
-		//adapt_labgp(first);
-		// if (first) {
-		//     create_but_scale();
-
-		// }
-
-		
 		
                 fetch.ongoing_bknews = false;
                 fetch_ended(true);
             }
+
         },
         error: function(msg) {
             console.log("error");
