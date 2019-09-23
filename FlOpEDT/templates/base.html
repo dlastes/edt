@@ -38,7 +38,9 @@
 <link rel="shortcut icon" href="/favicon.ico?v=5AeyQYqgW7">
 <meta name="msapplication-TileColor" content="#048c04">
 <meta name="theme-color" content="#000000">
+{% block jquery %}
 <script src="{% static 'base/jquery.min.js' %}"></script>
+{% endblock %}
 <script src="{% static 'base/d3.v4.min.js' %}"></script>
 <script src="{% static 'base/loader.js' %}"></script>
 <script>var url_logo = "{% static 'base/logo-clock.svg' %}";</script>
@@ -46,8 +48,11 @@
 <title>{% block title %}Emplois du temps{% endblock %}</title>
 </head>
 <body>
+  {% block loader %}
   <div id="loader" class="loader" style="visibility:hidden;"></div>
-<!--<header>Emplois du temps</header>-->
+  {% endblock %}
+  <!--<header>Emplois du temps</header>-->
+  {% block full_nav %}
   <nav id="menu-edt">
     <a class="hide_this_link" href="{% url 'index' %}" id="live-logo"  style="padding: 0px 0px 0px 0px; float: left">
     </a>
@@ -105,6 +110,7 @@
     </ul>
     {% endblock %}
   </nav>
+  {% endblock %}
   <section id="content">
     {% block content %}{% endblock %}
     <div id="side_panel" class="sidebar">
@@ -112,8 +118,10 @@
       {% block side_panel %} {% endblock %}
     </div>
   </section>
-  
+
+  {% block logo %}
   <script src="{% static 'base/logo.js' %}";></script>
+  {% endblock %}
   <script>
     
   </script>  

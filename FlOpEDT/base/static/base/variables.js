@@ -101,6 +101,73 @@ function cancel_cm_room_tutor_change(){
 
 
 
+
+/*-----------------------------
+   ------ file fetchers -------
+  -----------------------------*/
+
+var file_fetch =
+    {groups: {done: false, data: null, callback: null},
+     constraints: {done: false, data: null, callback: null},
+     rooms: {done:false, data: null, callback: null},
+     department: {done:false, data: null, callback: null},};
+
+function main(name, data) {
+    file_fetch[name].data = data ;
+    file_fetch[name].done = true ;
+    if(file_fetch.groups.done && file_fetch.constraints.done
+       && file_fetch.rooms.done && file_fetch.department.done) {
+        file_fetch.constraints.callback();
+        file_fetch.rooms.callback();
+        file_fetch.department.callback();
+        file_fetch.groups.callback();
+    }
+}
+
+file_fetch.rooms.callback = function () {
+    rooms = this.data;
+    var room_names ;
+    room_names = Object.keys(rooms.roomgroups) ;
+    swap_data(room_names, rooms_sel, "room");
+} ;
+
+file_fetch.constraints.callback = function () {
+    constraints = this.data;
+
+    // rev_constraints only used in slot_case
+    var i, j, coursetypes, cur_start_time ;
+    coursetypes = Object.keys(constraints) ;
+    for(i=0 ; i<coursetypes.length ; i++) {
+	for(j=0 ; j<constraints[coursetypes[i]].allowed_st.length ; j++){
+            cur_start_time = constraints[coursetypes[i]].allowed_st[j].toString() ;
+            if (! Object.keys(rev_constraints).includes(cur_start_time)) {
+	        rev_constraints[cur_start_time]
+		    = constraints[coursetypes[i]].duration ;
+            }
+	}
+    }
+    rev_constraints[garbage.start.toString()] = garbage.duration ;
+
+    
+    fetch.constraints_ok = true;
+    create_grid_data();
+}
+
+file_fetch.department.callback = function () {
+    departments.data = this.data ;
+    create_dept_redirection();
+} ;
+
+d3.json(rooms_fi,
+ 	function(d){ main('rooms', d); } );
+
+d3.json(constraints_fi,
+ 	function(d){ main('constraints', d); });
+
+d3.json(departments_fi,
+ 	function(d){ main('department', d); });
+
+
 /*--------------------
    ------ ALL -------
   --------------------*/

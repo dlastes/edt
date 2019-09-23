@@ -70,7 +70,7 @@ function fetch_dispos() {
                     create_dispos_user_data();
                 }
 
-                fetch_ended();
+                fetch_ended(false);
             }
             show_loader(false);
 
@@ -418,7 +418,7 @@ function fetch_bknews(first) {
 		
 		
                 fetch.ongoing_bknews = false;
-                fetch_ended();
+                fetch_ended(false);
             }
             show_loader(false);
         },
@@ -519,7 +519,7 @@ function fetch_cours() {
 
 
                 fetch.ongoing_cours_pl = false;
-                fetch_ended();
+                fetch_ended(false);
             }
             show_loader(false);
         },
@@ -570,7 +570,7 @@ function fetch_cours() {
     		}
 
                 fetch.ongoing_cours_pp = false;
-                fetch_ended();
+                fetch_ended(false);
                 show_loader(false);
             }
         },
@@ -717,7 +717,7 @@ function add_exception_course(cur_week, cur_year, targ_week, targ_year,
 // }
 
 
-function clean_prof_displayed() {
+function clean_prof_displayed(light) {
 
     var tutor_names = tutors.pl;
     for (var i = 0; i < tutors.pp.length; i++) {
@@ -741,7 +741,9 @@ function clean_prof_displayed() {
         }
     });
 
-    go_selection_popup() ;
+    if(!light) {
+        go_selection_popup() ;
+    }
     
 }
 
@@ -875,7 +877,7 @@ function translate_version_from_csv(d){
 }
 
 
-function fetch_ended() {
+function fetch_ended(light) {
     if (!fetch.ongoing_cours_pl &&
         !fetch.ongoing_cours_pp) {
         cours = cours_pl.concat(cours_pp);
@@ -909,7 +911,7 @@ function fetch_ended() {
             salles.sel = "";
         }
 
-        clean_prof_displayed();
+        clean_prof_displayed(light);
     }
 
     if (!fetch.ongoing_cours_pp &&

@@ -52,7 +52,9 @@ var days_header = new WeekDayHeader(svg, "edt-fg", week_days, true, null) ;
 var hours_header = new HourHeader(svg, "edt-fg", hours) ;
 
 
-var labgp = {height: tv_gp_h, width: tv_gp_w, tot: 8, height_init: 40, width_init: 30};
+var labgp = {width: tv_gp_w, tot: 8, height_init: 40, width_init: 30};
+
+scale = tv_gp_s ;
 
 dim_dispo.height = 2*labgp.height ;
 
@@ -105,27 +107,29 @@ svg.create_container();
 svg.create_layouts(dsp_svg.cadastre);
 
 
-d3.json(groupes_fi,
- 	on_group_rcv_light);
 
+file_fetch.groups.callback = function() {
 
-
-function on_group_rcv_light(dg) {
-
-    create_groups(dg);
-
-//    go_promo(promo_display);
-    go_promo_gp_init();
-    update_all_groups();
+    create_groups(this.data);
 
     create_edt_grid();
 
+    //    go_promo(promo_display);
+
+
+    //update_all_groups();
+
+
     create_bknews();
     
+    go_promo_gp_init();
 
     fetch_cours_light();
     fetch_bknews_light();
+    //adapt_labgp(true);
+    fetch.groups_ok = true ;
     //go_edt(true);
+    create_grid_data();
 }
 
 
@@ -143,23 +147,20 @@ function fetch_cours_light() {
     $.ajax({
         type: "GET", //rest Type
         dataType: 'text',
-        url: url_cours_pl+"/"+an_att+"/"+semaine_att+"/0",
+        url: url_cours_pl + an_att + "/" + semaine_att + "/0",
         async: false,
         contentType: "text/csv",
         success: function (msg, ts, req) {
-	    version = +req.getResponseHeader('version');
+            days = JSON.parse(req.getResponseHeader('days').replace(/\'/g, '"'));
+            
+            tutors.pl = [];
+            modules.pl = [];
+            salles.pl = [];
+            
+            cours_pl = d3.csvParse(msg, translate_cours_pl_from_csv);
 
-	    
-	    var day_arr = JSON.parse(req.getResponseHeader('jours').replace(/\'/g,'"'));
-	    for (var i =0 ; i<day_arr.length ; i++){
-	    	data_grid_scale_day[i] = data_grid_scale_day_init[i]+ " "+day_arr[i];
-	    }
-	    
-	    cours_pl = d3.csvParse(msg, translate_cours_pl_from_csv);
-	    
-	    
 	    fetch.ongoing_cours_pl=false;
-	    fetch_ended_light();
+	    fetch_ended(true);
         },
 	error: function(msg) {
 	    console.log("error");
@@ -193,18 +194,11 @@ function fetch_bknews_light(first) {
 		    }
 		}
 		bknews.nb_rows = max_y + 1 ;
-
-		//adapt_labgp(first);
-		// if (first) {
-		//     create_but_scale();
-
-		// }
-
-		
 		
                 fetch.ongoing_bknews = false;
-                fetch_ended_light();
+                fetch_ended(true);
             }
+
         },
         error: function(msg) {
             console.log("error");
@@ -216,26 +210,6 @@ function fetch_bknews_light(first) {
 }
 
 
+d3.json(groupes_fi,
+ 	function(d){ main('groups', d); } );
 
-function fetch_ended_light() {
-    if(!fetch.ongoing_cours_pl &&
-       !fetch.ongoing_cours_pp){
-	cours = cours_pl.concat(cours_pp);
-	clean_prof_displayed();
-	fetch.cours_ok=true;
-    }
-    
-    if (!fetch.ongoing_cours_pp &&
-	!fetch.ongoing_cours_pl &&
-	!fetch.ongoing_dispos &&
-        !fetch.ongoing_bknews){
-	fetch.done = true ;
-
-	go_grid(true);
-	go_courses(true);
-	go_bknews(true);
-    }
-
-    svg.add_child("svg", "final");
-
-}
