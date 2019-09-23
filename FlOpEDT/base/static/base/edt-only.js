@@ -164,6 +164,14 @@ function fetch_bknews_light(first) {
 
 }
 
+d3.json(rooms_fi,
+ 	function(d){ main('rooms', d); } );
+
+d3.json(constraints_fi,
+ 	function(d){ main('constraints', d); });
+
+d3.json(departments_fi,
+ 	function(d){ main('department', d); });
 
 d3.json(groupes_fi,
  	function(d){ main('groups', d); } );

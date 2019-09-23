@@ -172,14 +172,6 @@ file_fetch.department.callback = function () {
     create_dept_redirection();
 } ;
 
-d3.json(rooms_fi,
- 	function(d){ main('rooms', d); } );
-
-d3.json(constraints_fi,
- 	function(d){ main('constraints', d); });
-
-d3.json(departments_fi,
- 	function(d){ main('department', d); });
 
 
 /*--------------------
