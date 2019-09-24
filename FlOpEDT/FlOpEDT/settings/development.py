@@ -39,6 +39,8 @@ REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
 REDIS_PORT = os.environ.get('REDIS_PORT', '6379')
 REDIS_BACKEND = f'redis://{REDIS_HOST}:{REDIS_PORT}/1'
 
+CACHE_MACHINE_USE_REDIS = True
+
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
@@ -83,17 +85,3 @@ SECRET_KEY = 'al0bzdna)@6&n9mfn_vlm0wl&38#xrf@h%&^^h-q783g$e&*h!'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
-ALLOWED_HOSTS = []
-
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-MEDIA_URL = '/media/'
-
-# emails
-EMAIL_HOST = os.environ.get('EMAIL_HOST')
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
-EMAIL_PORT = int(os.environ.get('EMAIL_PORT'))
-
-ADMINS = [tuple(admin.split(",")) for admin in os.environ.get('ADMINS').split(" ")]
-MANAGERS = ADMINS
