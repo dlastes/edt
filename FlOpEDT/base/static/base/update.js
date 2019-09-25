@@ -1219,10 +1219,10 @@ function go_regen(s) {
                 txt = "Regénération totale (mineure) le " + elements[1] +
                     "(" + elements[3] + ")";
             } else {
-                txt = "Regénération totale le " + elements[1];
+                txt = "Regénération totale prévue (probablement le " + elements[1] + ")";
             }
         } else if (elements[0] == 'S') {
-            txt = "Regénération mineure le " + elements[1];
+            txt = "Regénération mineure prévue (probablement le " + elements[1] + ")";
         }
 
         ack.regen = txt;
