@@ -77,7 +77,7 @@
     var une_salle = "{{ une_salle }}";
     var time_settings = {{ time_settings | safe }} ;
     var days = {{ days | safe }} ;
-  var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+  var csrftoken = '{{ csrf_token }}';
   if(!jQuery.fn.jquery.startsWith("1")){
       function csrfSafeMethod(method) {
           // these HTTP methods do not require CSRF protection
