@@ -97,9 +97,9 @@ pref_only = false ;
   -------------------*/
 
 
-function on_group_rcv(dg) {
+file_fetch.groups.callback = function () {
 
-    create_groups(dg);
+    create_groups(this.data);
 
     create_edt_grid();
 
@@ -142,39 +142,6 @@ function on_group_rcv(dg) {
 }
 
 
-function on_room_rcv(room_data) {
-    rooms = room_data;
-    var room_names ;
-    room_names = Object.keys(rooms.roomgroups) ;
-    swap_data(room_names, rooms_sel, "room");
-}
-
-function on_constraints_rcv(cst_data) {
-    constraints = cst_data;
-
-    // rev_constraints only used in slot_case
-    var i, j, coursetypes, cur_start_time ;
-    coursetypes = Object.keys(constraints) ;
-    for(i=0 ; i<coursetypes.length ; i++) {
-	for(j=0 ; j<constraints[coursetypes[i]].allowed_st.length ; j++){
-            cur_start_time = constraints[coursetypes[i]].allowed_st[j].toString() ;
-            if (! Object.keys(rev_constraints).includes(cur_start_time)) {
-	        rev_constraints[cur_start_time]
-		    = constraints[coursetypes[i]].duration ;
-            }
-	}
-    }
-    rev_constraints[garbage.start.toString()] = garbage.duration ;
-
-    
-    fetch.constraints_ok = true;
-    create_grid_data();
-}
-
-function on_departments_rcv(dept_data) {
-    departments.data = dept_data ;
-    create_dept_redirection();
-}
 
 
 
@@ -200,18 +167,18 @@ fetch_dispos_type();
 
 
 
-
-d3.json(groupes_fi,
- 	on_group_rcv);
-
 d3.json(rooms_fi,
- 	on_room_rcv);
+ 	function(d){ main('rooms', d); } );
 
 d3.json(constraints_fi,
- 	on_constraints_rcv);
+ 	function(d){ main('constraints', d); });
 
 d3.json(departments_fi,
-        on_departments_rcv);
+ 	function(d){ main('department', d); });
+
+d3.json(groupes_fi,
+ 	function(d){ main('groups', d); } );
+
     
 
 d3.select("body")

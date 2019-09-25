@@ -73,11 +73,4 @@ CHANNEL_LAYERS = {
             "hosts": [('127.0.0.1', 6379)],
         },
     },
-    # "default": {
-    #     "BACKEND": "asgiref.inmemory.ChannelLayer",
-    #     "ROUTING": "solve_board.routing.channel_routing",
-    # },
 }
-
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-MEDIA_URL = '/media/'
