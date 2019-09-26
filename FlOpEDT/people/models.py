@@ -121,7 +121,7 @@ class Tutor(User):
         default=4)
     max_hours_per_day = models.PositiveSmallIntegerField(
         verbose_name="How many hours per day can you suffer ?",
-        default=4)
+        default=9)
 
     def uni_extended(self):
         ret = super(Tutor, self).uni_extended()
