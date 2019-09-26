@@ -40,6 +40,7 @@ urlpatterns = [
     # directly reachable by users
     # ----------------------------
     url(r'^preferences$', views.preferences, name="preferences"),
+    url('get_perfect_day/', views.get_perfect_day, name='get_perfect_day'),
     url(r'^semaine-type$', views.stype, name="stype"),
     url(r'^aide$', views.aide, name="aide"),
     url(r'^decale$', views.decale, name="decale"),    
