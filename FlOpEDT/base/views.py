@@ -50,7 +50,7 @@ from base.admin import CoursResource, DispoResource, VersionResource, \
     CoursePreferenceResource, MultiDepartmentTutorResource, \
     SharedRoomGroupsResource
 from displayweb.admin import BreakingNewsResource
-from base.forms import ContactForm
+from base.forms import ContactForm, PerfectDayForm
 from base.models import Course, UserPreference, ScheduledCourse, EdtVersion, \
     CourseModification, Slot, Day, Time, RoomGroup, PlanningModification, \
     Regen, RoomPreference, Department, TimeGeneralSettings, CoursePreference, \
@@ -225,6 +225,8 @@ def stype(req, **kwargs):
                       {'date_deb': current_week(),
                        'date_fin': current_week(),
                        'name_usr': req.user.username,
+                       'usr_pref_hours': req.user.tutor.pref_hours_per_day,
+                       'usr_max_hours': req.user.tutor.max_hours_per_day,
                        'err': err,
                        'annee_courante': annee_courante,
                        'time_settings': queries.get_time_settings(req.department),
@@ -257,11 +259,31 @@ def stype(req, **kwargs):
                       {'date_deb': date_deb,
                        'date_fin': date_fin,
                        'name_usr': req.user.username,
+                       'usr_pref_hours': req.user.tutor.pref_hours_per_day,
+                       'usr_max_hours': req.user.tutor.max_hours_per_day,
                        'err': err,
                        'annee_courante': annee_courante,
                        'time_settings': queries.get_time_settings(req.department),
                        'days': num_all_days(1, 1, req.department)
                       })
+
+
+def user_perfect_day_changes(req, *args, **kwargs):
+    t = req.user.tutor
+    print(t)
+    data = req.POST
+    user_pref_hours = int(req.POST['user_pref_hours'][0])
+    user_max_hours = int(req.POST['user_max_hours'][0])
+    t.pref_hours_per_day = user_pref_hours
+    t.max_hours_per_day = user_max_hours
+    t.save()
+    context = {'usr_pref_hours': user_pref_hours, 'usr_max_hours': user_max_hours}
+    return TemplateResponse(req,
+                            'base/show-stype.html',
+                            context=context)
+
+
+
 
 
 def aide(req, **kwargs):
