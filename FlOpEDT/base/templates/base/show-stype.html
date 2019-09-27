@@ -56,7 +56,7 @@
     var time_settings = {{ time_settings | safe }} ;
     var days = {{ days | safe }} ;
     var csrftoken = '{{ csrf_token }}';
-    var perfect_day_form = 
+
   if(!jQuery.fn.jquery.startsWith("1")){
       function csrfSafeMethod(method) {
           // these HTTP methods do not require CSRF protection
@@ -70,7 +70,6 @@
           }
       });
   }
-  </script>
   </script>
 <body>
   <div  id="tools-main" style="width: 100%; overflow: hidden;">
@@ -94,14 +93,14 @@
 	<form style="white-space: nowrap;" name="sav"  action="javascript:apply_stype_from_button(true)" id="form-dweek">
 	  Redéfinir ma semaine type<br/>
           <br/>
-          <input type="submit" name="save" value="Sauvegarder"></br>	  </fieldset>
-      </form><br/><br/>
-      <!--{% if err %}<p><strong>{{ err }}</strong></p>{% endif %}
-	-->
+          <input type="submit" name="save" value="Sauvegarder"></br>
+      </form>
+      </fieldset>
+        <br/><br/>
 
   <fieldset>
     <legend>Ma journée idéale</legend>
-      <form style="white-space: nowrap;" action={% url "base:user_perfect_day_changes" department user.username %}  method='POST' id="form-perfect_day" >
+      <form style="white-space: nowrap;" action='{% url "base:user_perfect_day_changes" department user.username %}'  method='POST' id="form-perfect_day" >
         {% csrf_token %}
         Chaque jour, voici le nombre d'heures de cours que je souhaite donner:<br/>
           <br/>

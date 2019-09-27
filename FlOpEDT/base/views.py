@@ -217,7 +217,7 @@ def preferences(req, **kwargs):
 
 
 @login_required
-def stype(req, **kwargs):
+def stype(req, *args, **kwargs):
     err = ''
     if req.method == 'GET':
         return TemplateResponse(req,
@@ -270,17 +270,14 @@ def stype(req, **kwargs):
 
 def user_perfect_day_changes(req, *args, **kwargs):
     t = req.user.tutor
-    print(t)
+    print('salut', t, type(t))
     data = req.POST
-    user_pref_hours = int(req.POST['user_pref_hours'][0])
-    user_max_hours = int(req.POST['user_max_hours'][0])
+    user_pref_hours = int(data['user_pref_hours'][0])
+    user_max_hours = int(data['user_max_hours'][0])
     t.pref_hours_per_day = user_pref_hours
     t.max_hours_per_day = user_max_hours
     t.save()
-    context = {'usr_pref_hours': user_pref_hours, 'usr_max_hours': user_max_hours}
-    return TemplateResponse(req,
-                            'base/show-stype.html',
-                            context=context)
+    return redirect('base:stype', req.department)
 
 
 
