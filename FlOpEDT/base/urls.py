@@ -40,7 +40,6 @@ urlpatterns = [
     # directly reachable by users
     # ----------------------------
     url(r'^preferences$', views.preferences, name="preferences"),
-    url('get_perfect_day/', views.get_perfect_day, name='get_perfect_day'),
     url(r'^semaine-type$', views.stype, name="stype"),
     url(r'^aide$', views.aide, name="aide"),
     url(r'^decale$', views.decale, name="decale"),    
@@ -86,7 +85,7 @@ urlpatterns = [
     path('change_user_pref/<int:year>/<int:week>/<str:username>', views.user_preferences_changes, name="user_pref_changes"),
     path('change_course_pref/<int:year>/<int:week>/<str:train_prog>/<str:course_type>', views.course_preferences_changes, name="course_pref_changes"),
     path('change_decale', views.decale_changes, name="decale_changes"),
-
+    path('change_perfect_day/<str:username>', views.user_perfect_day_changes, name="user_perfect_day_changes"),
 
     # predefined
     # ------------
