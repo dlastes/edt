@@ -386,7 +386,16 @@ def fetch_cours_pp(req, week, year, num_copy, **kwargs):
                          .filter(
                              cours__module__train_prog__department=department,
                              copie_travail=num_copy)
-                         .values('cours')))
+                         .values('cours'))
+                .select_related('groupe__train_prog',
+                                'tutor',
+                                'module',
+                                'type',
+                                'groupe',
+                                'room_type',
+                                'module__display'
+                                ))
+
     response = HttpResponse(dataset.csv, content_type='text/csv')
     response['week'] = week
     response['year'] = year
