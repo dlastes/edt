@@ -63,9 +63,10 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
         row += 1
         salle = sheet.cell(row=row, column=salle_COL).value
         module = sheet.cell(row=row, column=module_COL).value
-        if salle.startswith("TOTAL"):
-            # print "Sem %g de %s - TOTAL: %g"%(semaine, feuille,sumtotal)
-            break
+        if salle is not None:
+            if salle.startswith("TOTAL"):
+                # print "Sem %g de %s - TOTAL: %g"%(semaine, feuille,sumtotal)
+                break
 
         Cell = sheet.cell(row=row, column=WEEK_COL)
         N = Cell.value
