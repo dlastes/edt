@@ -51,7 +51,7 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
                 break
     print("Semaine %s de %s : colonne %g" % (semaine, feuille, WEEK_COL))
 
-    row = 2
+    row = 4
     module_COL = 1
     nature_COL = 3
     duree_COL = 4
