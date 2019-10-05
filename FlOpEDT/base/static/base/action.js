@@ -48,8 +48,8 @@
 // apply pref change when simple mode
 function apply_change_simple_pref(d) {
     if (pref_only || ckbox["dis-mod"].cked) {
-        var sel = pref_selection.choice.data.find(function(d){
-            return d.selected;
+        var sel = pref_selection.choice.data.find(function(dd){
+            return dd.selected;
         });
         if(typeof sel === 'undefined') {
             if (Math.floor(d.val % (par_dispos.nmax / 2)) != 0) {
@@ -61,6 +61,7 @@ function apply_change_simple_pref(d) {
             //user.dispos[day_hour_2_1D(d)].val = d.val;
         } else {
             d.val = sel.val ;
+	    update_pref_interval(user.nom, d.day, d.start_time, d.val) ;
         }
         go_pref(true);
     }
