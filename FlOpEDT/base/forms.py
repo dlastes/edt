@@ -28,7 +28,8 @@ from people.models import Tutor, FullStaff
 
 
 class ContactForm(forms.Form):
-    sender = forms.EmailField(label='Votre adresse mail :')
+    sender = forms.EmailField(label='Votre adresse mail :',
+                              required=True)
     recipient = forms.CharField(
         label='Destinataire :',
         max_length=4,
