@@ -66,7 +66,7 @@ class WeekDB(object):
         self.department = department
         self.week = week
         self.year = year
-        self.days = self.days_init()
+        self.days, self.holidays, self.training_half_days = self.days_init()
         self.slots, self.slots_by_day, self.slots_intersecting, self.slots_by_half_day = self.slots_init()
         self.course_types, self.courses, self.sched_courses, self.fixed_courses, self.fixed_courses_for_slot, \
             self.other_departments_courses, self.other_departments_sched_courses, \
@@ -77,15 +77,24 @@ class WeekDB(object):
         self.compatible_slots, self.compatible_courses = self.compatibilities_init()
         self.groups, self.basic_groups, self.all_groups_of, self.basic_groups_of, self.courses_for_group, \
             self.courses_for_basic_group = self.groups_init()
-        self.holidays, self.training_half_days = self.holidays_init()
         self.instructors, self.courses_for_tutor, self.courses_for_supp_tutor, self.availabilities,\
             self.fixed_courses_for_tutor, \
             self.other_departments_courses_for_tutor, self.other_departments_courses_for_supp_tutor, \
             self.other_departments_scheduled_courses_for_tutor = self.users_init()
 
     def days_init(self):
+        holidays = Holiday.objects.filter(week=self.week, year=self.year)
+
+        training_half_days = TrainingHalfDay.objects.filter(
+            week=self.week,
+            year=self.year,
+            train_prog__in=self.train_prog)
+
         days = TimeGeneralSettings.objects.get(department=self.department).days
-        return days
+        for hd in holidays:
+            days.remove(hd.day)
+
+        return days, holidays, training_half_days
 
     def slots_init(self):
         # SLOTS
@@ -250,15 +259,6 @@ class WeekDB(object):
             courses_for_basic_group[bg] = set(self.courses.filter(groupe__in=all_groups_of[bg]))
 
         return groups, basic_groups, all_groups_of, basic_groups_of, courses_for_group, courses_for_basic_group
-
-    def holidays_init(self):
-        holidays = Holiday.objects.filter(week=self.week, year=self.year)
-
-        training_half_days = TrainingHalfDay.objects.filter(
-            week=self.week,
-            year=self.year,
-            train_prog__in=self.train_prog)
-        return holidays, training_half_days
 
     def users_init(self):
         # USERS
@@ -912,7 +912,7 @@ class TTModel(object):
         holidays = [h.day for h in self.wdb.holidays]
 
         if self.wdb.holidays:
-            self.add_warning(None, "%s are holydays" % holidays)
+            self.add_warning(None, "%s are holidays" % holidays)
 
         for i in self.wdb.instructors:
             teaching_duration = sum(c.type.duration
