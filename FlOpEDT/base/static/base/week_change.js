@@ -414,6 +414,25 @@ function fetch_bknews(first) {
 		adapt_labgp(first);
 		if (first) {
 		    create_but_scale();
+                    if (splash_id == 1) {
+                        
+	                var splash_mail = {
+	                    id: "mail-sent",
+	                    but: {list: [{txt: "Ok", click: function(d){ splash_id = 0 ;} }]},
+	                    com: {list: [{txt: "E-mail envoyé !", ftsi: 23}]}
+	                }
+	                splash(splash_mail);
+                        
+                    } else if (splash_id == 2) {
+                        
+	                var splash_quote = {
+	                    id: "quote-sent",
+	                    but: {list: [{txt: "Ok", click: function(d){ splash_id = 0 ; } }]},
+	                    com: {list: [{txt: "Citation envoyée ! (en attente de modération)", ftsi: 23}]}
+	                }
+	                splash(splash_quote);
+                        
+                    }
 
 		}
 

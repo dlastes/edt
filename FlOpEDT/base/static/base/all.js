@@ -117,25 +117,6 @@ file_fetch.groups.callback = function () {
 
     fetch_all(true, false);
 
-    if (splash_id == 1) {
-    
-	var splash_mail = {
-	    id: "mail-sent",
-	    but: {list: [{txt: "Ok", click: function(d){} }]},
-	    com: {list: [{txt: "E-mail envoyé !", ftsi: 23}]}
-	}
-	splash(splash_mail);
-
-    } else if (splash_id == 2) {
-
-	var splash_quote = {
-	    id: "quote-sent",
-	    but: {list: [{txt: "Ok", click: function(d){} }]},
-	    com: {list: [{txt: "Citation envoyée ! (en attente de modération)", ftsi: 23}]}
-	}
-	splash(splash_quote);
-
-    }
     
     fetch.groups_ok = true;
     create_grid_data();
