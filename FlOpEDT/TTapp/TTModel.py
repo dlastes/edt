@@ -725,14 +725,14 @@ class TTModel(object):
                                         0,
                                         name=name)
 
-        # Holidays
-        for holiday in self.wdb.holidays:
-            holislots = self.wdb.slots_by_day[holiday.day]
-            # if holiday.apm is not None:
-            #     holislots = filter(holislots, apm=holiday.apm)
-            for sl in holislots:
-                for c in self.wdb.compatible_courses[sl]:
-                    self.add_constraint(self.TT[(sl, c)], '==', 0, "holislot_%s_%s_%g" % (sl, c, self.constraint_nb))
+        # # Holidays
+        # for holiday in self.wdb.holidays:
+        #     holislots = self.wdb.slots_by_day[holiday.day]
+        #     # if holiday.apm is not None:
+        #     #     holislots = filter(holislots, apm=holiday.apm)
+        #     for sl in holislots:
+        #         for c in self.wdb.compatible_courses[sl]:
+        #             self.add_constraint(self.TT[(sl, c)], '==', 0, "holislot_%s_%s_%g" % (sl, c, self.constraint_nb))
 
         # Training half day
         for training_half_day in self.wdb.training_half_days:
