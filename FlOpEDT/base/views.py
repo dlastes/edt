@@ -34,7 +34,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
-from django.core.mail import send_mail
+from django.core.mail import EmailMessage, send_mail
 from django.db import transaction
 from django.http import HttpResponse, Http404, JsonResponse, HttpRequest
 from django.template.response import TemplateResponse
@@ -1326,7 +1326,7 @@ def contact(req, **kwargs):
                                             dat.get("recipient")).email,
                           dat.get("sender")]
             try:
-                send_mail(
+                email = EmailMessage(
                     '[EdT IUT Blagnac] ' + dat.get("subject"),
                     "(Cet e-mail vous a été envoyé depuis le site des emplois"
                     " du temps de l'IUT de Blagnac)\n\n"
@@ -1335,6 +1335,7 @@ def contact(req, **kwargs):
                     recip_send,
                     reply_to = [dat.get("sender")]
                 )
+                email.send()
             except:
                 ack = 'Envoi du mail impossible !'
                 return TemplateResponse(req, 'base/contact.html',
