@@ -1331,9 +1331,8 @@ def contact(req, **kwargs):
                     "(Cet e-mail vous a été envoyé depuis le site des emplois"
                     " du temps de l'IUT de Blagnac)\n\n"
                     + dat.get("message"),
-                    dat.get("sender"),
-                    recip_send,
-                    reply_to = [dat.get("sender")]
+                    from_email=dat.get("sender"),
+                    to=recip_send
                 )
                 email.send()
             except:
