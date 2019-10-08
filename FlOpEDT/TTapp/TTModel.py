@@ -909,6 +909,11 @@ class TTModel(object):
         #           for i in instructors]))
         # unpreferred slots for an instructor costs
         # min((float(nb_avail_slots) / min(2*nb_teaching_slots,22)),1)
+        holidays = [h.day for h in self.wdb.holidays]
+
+        if self.wdb.holidays:
+            self.add_warning("%s are holydays" % holidays)
+
         for i in self.wdb.instructors:
             teaching_duration = sum(c.type.duration
                                     for c in self.wdb.courses_for_tutor[i])
@@ -917,7 +922,10 @@ class TTModel(object):
             avail_instr[i] = {}
             unp_slot_cost[i] = {}
 
-            tutor_availabilities = self.wdb.availabilities[i]
+            if self.wdb.holidays:
+                tutor_availabilities = set(a for a in self.wdb.availabilities[i] if a.day not in holidays)
+            else:
+                tutor_availabilities = self.wdb.availabilities[i]
 
             if not tutor_availabilities:
                 self.add_warning(i, "no availability information given")
@@ -940,13 +948,6 @@ class TTModel(object):
                 elif avail_time < total_teaching_duration:
                     self.add_warning(i, "%g available hours < %g courses hours including other deps" % (
                         avail_time / 60, total_teaching_duration / 60))
-                    for sl in self.wdb.slots:
-                        unp_slot_cost[i][sl] = 0
-                        avail_instr[i][sl] = 1
-
-                elif all(self.wdb.holidays.filter(day=x.day).exists()
-                         for x in tutor_availabilities if x.valeur >= 1):
-                    self.add_warning(i, "availabilities only on vacation days!")
                     for sl in self.wdb.slots:
                         unp_slot_cost[i][sl] = 0
                         avail_instr[i][sl] = 1
