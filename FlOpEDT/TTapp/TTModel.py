@@ -912,7 +912,7 @@ class TTModel(object):
         holidays = [h.day for h in self.wdb.holidays]
 
         if self.wdb.holidays:
-            self.add_warning("%s are holydays" % holidays)
+            self.add_warning(None, "%s are holydays" % holidays)
 
         for i in self.wdb.instructors:
             teaching_duration = sum(c.type.duration
