@@ -1333,6 +1333,7 @@ def contact(req, **kwargs):
                     + dat.get("message"),
                     dat.get("sender"),
                     recip_send,
+                    headers = {'Reply-To': dat.get("sender")}
                 )
             except:
                 ack = 'Envoi du mail impossible !'
