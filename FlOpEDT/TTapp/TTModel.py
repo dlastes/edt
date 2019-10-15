@@ -145,7 +145,7 @@ class WeekDB(object):
         for sl in self.slots:
             fixed_courses_for_slot[sl] = set(fc for fc in fixed_courses
                                              if ((sl.start_time <= fc.start_time < sl.end_time
-                                                 or sl.start_time < fc.start_time + fc.duration <= sl.end_time)
+                                                 or sl.start_time < fc.end_time() <= sl.end_time)
                                                  and fc.day == sl.day)
                                              )
 

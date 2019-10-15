@@ -372,6 +372,9 @@ class ScheduledCourse(models.Model):
     def __str__(self):
         return f"{self.cours}{self.no}:{self.day}-t{self.start_time}-{self.room}"
 
+    def end_time(self):
+        return self.start_time + self.cours.type.duration
+
 
 # </editor-fold desc="COURSES">
 
