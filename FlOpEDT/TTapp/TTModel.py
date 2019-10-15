@@ -143,10 +143,12 @@ class WeekDB(object):
 
         fixed_courses_for_slot = {}
         for sl in self.slots:
-            fixed_courses_for_slot[sl] = set(fixed_courses.filter(
-                (Q(start_time__lt=sl.start_time + sl.duration) |
-                 Q(start_time__gt=sl.start_time - F('cours__type__duration'))),
-                day=sl.day))
+            fixed_courses_for_slot[sl] = set(fc for fc in fixed_courses
+                                             if ((sl.start_time <= fc.start_time < sl.end_time
+                                                 or sl.start_time < fc.start_time + fc.duration <= sl.end_time)
+                                                 and fc.day == sl.day)
+                                             )
+
 
         other_departments_courses = Course.objects.filter(
             semaine=self.week, an=self.year)\
