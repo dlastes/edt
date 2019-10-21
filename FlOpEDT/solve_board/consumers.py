@@ -118,6 +118,7 @@ class SolverConsumer(WebsocketConsumer):
                     'action': 'aborted'
                 }))
                 os.kill(solver_child_process, signal.SIGINT)
+                cache.delete('solver_child_process')
             else:
                 self.send(text_data=json.dumps({
                     'message': 'there is no running solver!',
