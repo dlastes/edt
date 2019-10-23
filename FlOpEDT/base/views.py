@@ -228,7 +228,7 @@ def stype(req, *args, **kwargs):
                        'usr_pref_hours': req.user.tutor.pref_hours_per_day,
                        'usr_max_hours': req.user.tutor.max_hours_per_day,
                        'err': err,
-                       'annee_courante': annee_courante,
+                       'current_year': current_year,
                        'time_settings': queries.get_time_settings(req.department),
                        'days': num_all_days(1, 1, req.department)
                       })
@@ -262,7 +262,7 @@ def stype(req, *args, **kwargs):
                        'usr_pref_hours': req.user.tutor.pref_hours_per_day,
                        'usr_max_hours': req.user.tutor.max_hours_per_day,
                        'err': err,
-                       'annee_courante': annee_courante,
+                       'current_year': current_year,
                        'time_settings': queries.get_time_settings(req.department),
                        'days': num_all_days(1, 1, req.department)
                       })

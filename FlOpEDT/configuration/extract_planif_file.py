@@ -28,7 +28,7 @@ import os
 import sys
 from openpyxl import *
 
-from base.weeks import annee_courante
+from base.weeks import current_year
 from base.models import Group, Module, Course, Room, CourseType, RoomType, TrainingProgramme, Dependency, Period, Department
 from people.models import Tutor
 from misc.assign_module_color import assign_color
@@ -190,30 +190,30 @@ def extract_period(department, book, period, year):
 
 def extract_planif(department, bookname=None):
     '''
-    Generate the courses from bookname; the school year starts in annee_courante
+    Generate the courses from bookname; the school year starts in current_year
     '''
     if bookname is None:
         bookname = 'misc/deploy_database/planif_file_'+department.abbrev+'.xlsx'
     book = load_workbook(filename=bookname, data_only=True)
     for period in Period.objects.filter(department=department):
-        extract_period(department, book, period, annee_courante)
+        extract_period(department, book, period, current_year)
     assign_color(department)
 
 
 def extract_planif_from_week(week, year, department, bookname=None):
     '''
-    Generate the courses from bookname; the school year starts in annee_courante
+    Generate the courses from bookname; the school year starts in current_year
     '''
     if bookname is None:
         bookname = 'misc/deploy_database/Files/planif_file_'+department.abbrev+'.xlsx'
     book = load_workbook(filename=bookname, data_only=True)
-    if year == annee_courante:
+    if year == current_year:
         for period in Period.objects.filter(department=department):
             if period.starting_week < period.ending_week:
                 for w in range(max(week, period.starting_week), period.ending_week + 1):
-                    ReadPlanifWeek(department, book, period.name, w, annee_courante)
+                    ReadPlanifWeek(department, book, period.name, w, current_year)
             else:
                 for w in range(max(week, period.starting_week), 53):
-                    ReadPlanifWeek(department, book, period.name, w, annee_courante)
+                    ReadPlanifWeek(department, book, period.name, w, current_year)
                 for w in range(1, period.ending_week + 1):
-                    ReadPlanifWeek(department, book, period.name, w, annee_courante + 1)
+                    ReadPlanifWeek(department, book, period.name, w, current_year + 1)

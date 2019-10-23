@@ -27,7 +27,7 @@
 import datetime
 
 from base.models import TimeGeneralSettings
-annee_courante = 2019
+actual_year = 2019
 
 week_ref_days = ['m', 'tu', 'w', 'th', 'f', 'sa', 'su']
 week_display_days = ['Lun.', 'Mar.', 'Mer.', 'Jeu.', 'Ven.', 'Sam.', 'Dim.']
@@ -86,13 +86,13 @@ def num_all_days(y, w, dept):
 # More or less working weeks
 def week_list():
     li = []
-    if annee_courante == 2017:
+    if actual_year == 2017:
         for i in list(range(36, 44)) + list(range(45, 52)):
             li.append({'semaine': i, 'an': 2017})
         for i in list(range(2, 9)) + list(range(10, 16)) + list(range(18, 31)):
             li.append({'semaine': i, 'an': 2018})
         return li
-    elif annee_courante == 2018:
+    elif actual_year == 2018:
         for i in list(range(36, 44)) + list(range(45, 52)):
             li.append({'semaine': i, 'an': 2018})
         for i in list(range(2, 10)) + list(range(11, 17)) + list(range(19, 31)):
@@ -101,9 +101,9 @@ def week_list():
     else:
         # should start 1 week before the first week
         for i in list(range(35, 44)) + list(range(45, 52)):
-            li.append({'semaine': i, 'an': annee_courante})
+            li.append({'semaine': i, 'an': actual_year})
         for i in list(range(2, 10)) + list(range(11, 17)) + list(range(19, 31)):
-            li.append({'semaine': i, 'an': annee_courante+1})
+            li.append({'semaine': i, 'an': actual_year+1})
         return li
 
 

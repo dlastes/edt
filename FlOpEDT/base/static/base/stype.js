@@ -294,8 +294,8 @@ function apply_stype_from_button(save) {
 
     if(save){
 	se_deb = 0 ;
-	console.log(annee_courante);
-	an_deb = +annee_courante ;
+	console.log(current_year);
+	an_deb = +current_year ;
 	se_fin = se_deb ;
 	an_fin = an_deb ;
     } else {

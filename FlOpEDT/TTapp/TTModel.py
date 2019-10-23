@@ -40,7 +40,7 @@ from base.models import Group, Day, Time, \
 
 from people.models import Tutor
 
-from base.weeks import annee_courante
+from base.weeks import current_year
 
 from TTapp.models import MinNonPreferedSlot, max_weight, Stabilize, TTConstraint, \
     Slot, slot_pause, basic_slot_duration, slots_filter

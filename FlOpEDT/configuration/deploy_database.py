@@ -37,7 +37,7 @@ from base.models import Room, RoomType, RoomGroup, TrainingProgramme,\
     Group, Module, GroupType, Period, Time, Day, Slot, CourseType, \
     Department, CourseStartTimeConstraint, TimeGeneralSettings, UserPreference
 
-from base.weeks import annee_courante
+from base.weeks import current_year
 
 from people.models import FullStaff, SupplyStaff, Tutor, UserDepartmentSettings
 
