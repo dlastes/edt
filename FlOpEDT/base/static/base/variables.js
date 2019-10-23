@@ -158,14 +158,6 @@ file_fetch.department.callback = function () {
     create_dept_redirection();
 } ;
 
-d3.json(rooms_fi,
- 	function(d){ main('rooms', d); } );
-
-d3.json(constraints_fi,
- 	function(d){ main('constraints', d); });
-
-d3.json(departments_fi,
- 	function(d){ main('department', d); });
 
 
 /*--------------------
@@ -186,7 +178,7 @@ var rootgp_width = 0;
 var pos_rootgp_width = 0;
 
 // different grounds where to plot
-// var fg, mg, bg, dg, meg, vg, gpg, catg, stg, mog, sag, fig, log, cmpg, cmtg, selg;
+// var fg, mg, bg, dg, meg, vg, gpg, catg, stg, mog, sag, fig, log, cmpg, cmtg, selg, pmg;
 // var wg = {
 //     upper: null,
 //     bg: null,
@@ -282,6 +274,36 @@ for (var i = 0; i <= par_dispos.nmax; i++) {
 }
 // current array for advanced preferences (smileys)
 var data_dispo_adv_cur = [];
+
+// preference selection mode
+var pref_selection = {
+    butw:70,
+    buth:30,
+    mary:5,
+    marx:10,
+    choice:{
+        data:[],
+        w:25,
+        h:25
+    },
+    mode:[{
+        desc:"nominal",
+        txt:"Normal",
+        selected:true,
+    },{
+        desc:"paint",
+        txt:"Sélection",
+        selected:false,
+    }]
+};
+for (var i = 0; i <= par_dispos.nmax; i++) {
+    pref_selection.choice.data.push({
+        val:i,
+        // for smile_trans
+        off:-2,
+        selected:false
+    });
+}
 
 // number of required and provided availability slots
 var required_dispos = -1;

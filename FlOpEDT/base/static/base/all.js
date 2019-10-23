@@ -50,8 +50,6 @@ var user = {nom: logged_usr.nom,
 
 
 
-dsp_svg.h = window.innerHeight - $("#menu-edt").height() - 5 ;
-dsp_svg.w = window.innerWidth - 20 ;
 dsp_svg.margin = {
     top: 250,     // - TOP BANNER - //
     left:  50,
@@ -59,6 +57,8 @@ dsp_svg.margin = {
     bot:  10,
     but: -200
 };
+dsp_svg.h = window.innerHeight + dsp_svg.margin.top ;
+dsp_svg.w = window.innerWidth + dsp_svg.margin.left ; //- 20 ;
 
 dsp_svg.cadastre = [
     // menus ground
@@ -77,6 +77,9 @@ dsp_svg.cadastre = [
 
     // dispos info ground
     ["svg","dig"],
+    
+    // dispos info ground
+    ["svg","pmg"],
 
     // valider
     ["svg","vg"],
@@ -114,7 +117,6 @@ week_banner.spawn() ;
 var days_header = new WeekDayHeader(svg, "edt-fg", week_days, true, null) ;
 
 var hours_header = new HourHeader(svg, "edt-fg", hours) ;
-
 
 
 var week = 42 ;
@@ -168,25 +170,6 @@ file_fetch.groups.callback = function () {
 
     fetch_all(true, false);
 
-    if (splash_id == 1) {
-    
-	var splash_mail = {
-	    id: "mail-sent",
-	    but: {list: [{txt: "Ok", click: function(d){} }]},
-	    com: {list: [{txt: "E-mail envoyé !", ftsi: 23}]}
-	}
-	splash(splash_mail);
-
-    } else if (splash_id == 2) {
-
-	var splash_quote = {
-	    id: "quote-sent",
-	    but: {list: [{txt: "Ok", click: function(d){} }]},
-	    com: {list: [{txt: "Citation envoyée ! (en attente de modération)", ftsi: 23}]}
-	}
-	splash(splash_quote);
-
-    }
     
     fetch.groups_ok = true;
     create_grid_data();
@@ -221,6 +204,14 @@ fetch_dispos_type();
 
 
 
+d3.json(rooms_fi,
+ 	function(d){ main('rooms', d); } );
+
+d3.json(constraints_fi,
+ 	function(d){ main('constraints', d); });
+
+d3.json(departments_fi,
+ 	function(d){ main('department', d); });
 
 d3.json(groupes_fi,
  	function(d){ main('groups', d); } );
@@ -232,7 +223,6 @@ d3.select("body")
 	cancel_cm_adv_preferences();
 	cancel_cm_room_tutor_change();
     })
-
 
 
 

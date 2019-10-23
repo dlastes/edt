@@ -65,6 +65,33 @@ function create_alarm_dispos() {
 }
 
 
+function create_pref_modes() {
+
+    pref_selection.choice.data.forEach(function(d){
+        d.selected = false ;
+    });
+    
+    svg.get_dom("pmg")
+        .attr("transform", pmg_trans());
+    
+    var buttons = svg.get_dom("pmg")
+        .append("g")
+        .attr("id", "pm-but-head")
+        .attr("transform", pref_mode_trans());
+
+    var choices_but = svg.get_dom("pmg")
+        .append("g")
+        .attr("id", "pm-choices")
+        .attr("transform", pref_mode_choice_trans());
+
+    go_pref_mode();
+}
+
+
+function remove_pref_modes() {
+    svg.get_dom("pmg").selectAll("*").remove();
+}
+
 /*---------------------
   ------- WEEKS -------
   ---------------------*/

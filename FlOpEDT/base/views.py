@@ -34,7 +34,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
-from django.core.mail import send_mail
+from django.core.mail import EmailMessage, send_mail
 from django.db import transaction
 from django.http import HttpResponse, Http404, JsonResponse, HttpRequest
 from django.template.response import TemplateResponse
@@ -50,7 +50,7 @@ from base.admin import CoursResource, DispoResource, VersionResource, \
     CoursePreferenceResource, MultiDepartmentTutorResource, \
     SharedRoomGroupsResource
 from displayweb.admin import BreakingNewsResource
-from base.forms import ContactForm
+from base.forms import ContactForm, PerfectDayForm
 from base.models import Course, UserPreference, ScheduledCourse, EdtVersion, \
     CourseModification, Slot, Day, Time, RoomGroup, PlanningModification, \
     Regen, RoomPreference, Department, TimeGeneralSettings, CoursePreference, \
@@ -217,7 +217,7 @@ def preferences(req, **kwargs):
 
 
 @login_required
-def stype(req, **kwargs):
+def stype(req, *args, **kwargs):
     err = ''
     if req.method == 'GET':
         return TemplateResponse(req,
@@ -225,6 +225,8 @@ def stype(req, **kwargs):
                       {'date_deb': current_week(),
                        'date_fin': current_week(),
                        'name_usr': req.user.username,
+                       'usr_pref_hours': req.user.tutor.pref_hours_per_day,
+                       'usr_max_hours': req.user.tutor.max_hours_per_day,
                        'err': err,
                        'annee_courante': annee_courante,
                        'time_settings': queries.get_time_settings(req.department),
@@ -257,11 +259,28 @@ def stype(req, **kwargs):
                       {'date_deb': date_deb,
                        'date_fin': date_fin,
                        'name_usr': req.user.username,
+                       'usr_pref_hours': req.user.tutor.pref_hours_per_day,
+                       'usr_max_hours': req.user.tutor.max_hours_per_day,
                        'err': err,
                        'annee_courante': annee_courante,
                        'time_settings': queries.get_time_settings(req.department),
                        'days': num_all_days(1, 1, req.department)
                       })
+
+
+def user_perfect_day_changes(req, *args, **kwargs):
+    t = req.user.tutor
+    print('salut', t, type(t))
+    data = req.POST
+    user_pref_hours = int(data['user_pref_hours'][0])
+    user_max_hours = int(data['user_max_hours'][0])
+    t.pref_hours_per_day = user_pref_hours
+    t.max_hours_per_day = user_max_hours
+    t.save()
+    return redirect('base:stype', req.department)
+
+
+
 
 
 def aide(req, **kwargs):
@@ -386,7 +405,16 @@ def fetch_cours_pp(req, week, year, num_copy, **kwargs):
                          .filter(
                              cours__module__train_prog__department=department,
                              copie_travail=num_copy)
-                         .values('cours')))
+                         .values('cours'))
+                .select_related('groupe__train_prog',
+                                'tutor',
+                                'module',
+                                'type',
+                                'groupe',
+                                'room_type',
+                                'module__display'
+                                ))
+
     response = HttpResponse(dataset.csv, content_type='text/csv')
     response['week'] = week
     response['year'] = year
@@ -1298,14 +1326,15 @@ def contact(req, **kwargs):
                                             dat.get("recipient")).email,
                           dat.get("sender")]
             try:
-                send_mail(
+                email = EmailMessage(
                     '[EdT IUT Blagnac] ' + dat.get("subject"),
                     "(Cet e-mail vous a été envoyé depuis le site des emplois"
                     " du temps de l'IUT de Blagnac)\n\n"
                     + dat.get("message"),
-                    dat.get("sender"),
-                    recip_send,
+                    to=recip_send,
+                    reply_to=[dat.get("sender")]
                 )
+                email.send()
             except:
                 ack = 'Envoi du mail impossible !'
                 return TemplateResponse(req, 'base/contact.html',

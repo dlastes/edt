@@ -28,7 +28,8 @@ from people.models import Tutor, FullStaff
 
 
 class ContactForm(forms.Form):
-    sender = forms.EmailField(label='Votre adresse mail :')
+    sender = forms.EmailField(label='Votre adresse mail :',
+                              required=True)
     recipient = forms.CharField(
         label='Destinataire :',
         max_length=4,
@@ -46,4 +47,13 @@ class ContactForm(forms.Form):
         if not Tutor.objects.filter(username=recipient).exists():
             raise forms.ValidationError("Cette personne n'existe pas.")
         return recipient
+
+
+class PerfectDayForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        super(PerfectDayForm, self).__init__(*args, **kwargs)
+        self.fields['pref_hours_per_day'] = forms.IntegerField(label="Idéalement", min_value=1, max_value=9,
+                                                               required=False, initial=4)
+        self.fields['max_hours_per_day'] = forms.IntegerField(label="Maximum", min_value=1, max_value=9,
+                                                              required=False, initial=6)
 

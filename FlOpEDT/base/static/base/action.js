@@ -48,16 +48,100 @@
 // apply pref change when simple mode
 function apply_change_simple_pref(d) {
     if (pref_only || ckbox["dis-mod"].cked) {
-        if (Math.floor(d.val % (par_dispos.nmax / 2)) != 0) {
-            d.val = Math.floor(d.val / (par_dispos.nmax / 2)) * par_dispos.nmax / 2;
+        var sel = pref_selection.choice.data.find(function(dd){
+            return dd.selected;
+        });
+        if(typeof sel === 'undefined') {
+            if (Math.floor(d.val % (par_dispos.nmax / 2)) != 0) {
+                d.val = Math.floor(d.val / (par_dispos.nmax / 2)) * par_dispos.nmax / 2;
+            }
+            d.val = (d.val + par_dispos.nmax / 2) % (3 * par_dispos.nmax / 2);
+	    update_pref_interval(user.nom, d.day, d.start_time, d.val) ;
+            //dispos[user.nom][idays[d.day]][d.hour] = d.val;
+            //user.dispos[day_hour_2_1D(d)].val = d.val;
+        } else {
+            d.val = sel.val ;
+	    update_pref_interval(user.nom, d.day, d.start_time, d.val) ;
         }
-        d.val = (d.val + par_dispos.nmax / 2) % (3 * par_dispos.nmax / 2);
-	update_pref_interval(user.nom, d.day, d.start_time, d.val) ;
-        //dispos[user.nom][idays[d.day]][d.hour] = d.val;
-        //user.dispos[day_hour_2_1D(d)].val = d.val;
         go_pref(true);
     }
 }
+
+// change preference selection mode
+function apply_pref_mode(d) {
+    pref_selection.mode.forEach(function(d){
+        d.selected = false ;
+    });
+    d.selected = true ;
+    if(d.desc=="nominal") {
+        pref_selection.choice.data.forEach(function(d){
+            d.selected = false ;
+        });
+    } else {
+        var current_sel = pref_selection.choice.data.find(function(d){
+            return d.selected ;
+        });
+        if (typeof current_sel === 'undefined') {
+            pref_selection.choice.data[0].selected = true ;
+        }
+    }
+    go_pref_mode();
+}
+
+// 
+function apply_pref_mode_choice(d) {
+    pref_selection.choice.data.forEach(function(p){
+        p.selected = false ;
+    })
+    d.selected = true ;
+    pref_selection.mode.forEach(function(m){
+        m.selected = false ;
+    });
+    var sel_mode = pref_selection.mode.find(function(m){
+        return m.desc == "paint" ;
+    });
+    sel_mode.selected = true ;
+    go_pref_mode(false);
+}
+
+/*---------------------
+  ------- WEEKS -------
+  ---------------------*/
+
+// move timeline to the left
+function week_left() {
+    if (weeks.fdisp > 0) {
+        weeks.fdisp -= 1;
+        weeks.cur_data.pop();
+        weeks.cur_data.unshift(weeks.init_data[weeks.fdisp]);
+    }
+    go_week_menu(false);
+}
+
+// move timeline to the right
+function week_right() {
+    if (weeks.fdisp + weeks.ndisp + 2 < weeks.init_data.length) {
+        weeks.fdisp += 1;
+        weeks.cur_data.splice(0, 1);
+        weeks.cur_data.push(weeks.init_data[weeks.fdisp + weeks.ndisp + 1]);
+    }
+    go_week_menu(false);
+}
+
+
+// change week
+// Not sure ok even if user is quick (cf fetch_cours)
+function apply_wk_change(d, i) { //if(fetch.done) {
+    if (i > 0 && i <= weeks.ndisp) {
+        weeks.sel[0] = i + weeks.fdisp;
+    }
+    dispos = {};
+    user.dispos = [];
+
+    fetch_all(false, true);
+
+    go_week_menu(false);
+} //}
 
 
 
@@ -564,7 +648,6 @@ function apply_ckbox(dk) {
                 //     }
                 //     go_edt(false);
                 // }
-                
 		fetch_dispos();
 
                 if (logged_usr.dispo_all_change) { 
@@ -587,7 +670,7 @@ function apply_ckbox(dk) {
                 }
 		create_dispos_user_data();
 		go_edt(false);
-		
+		create_pref_modes();
             } else {
                 user.dispos = [];
                 //ckbox["dis-mod"].disp = false;
@@ -597,6 +680,7 @@ function apply_ckbox(dk) {
                     labgp.width *= 1 + (dim_dispo.width + dim_dispo.right) / (rootgp_width * labgp.width);
                 }
                 go_edt(false);
+                remove_pref_modes();
             }
         } else if (dk == "edt-mod") {
             if (ckbox[dk].cked) {

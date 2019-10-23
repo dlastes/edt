@@ -41,6 +41,7 @@
     
     var url_user_pref_changes = "{% url "base:user_pref_changes" department 0 0 '.' %}";
     url_user_pref_changes = url_user_pref_changes.slice(0, -5);
+
     var url_course_pref_changes = "{% url 'base:course_pref_changes' department 0 0 '.' '.' %}";
     url_course_pref_changes = url_course_pref_changes.slice(0, -7);
 
@@ -54,7 +55,21 @@
     var annee_courante = "{{ annee_courante }}" ;
     var time_settings = {{ time_settings | safe }} ;
     var days = {{ days | safe }} ;
-  </script>
+    var csrftoken = '{{ csrf_token }}';
+
+  if(!jQuery.fn.jquery.startsWith("1")){
+      function csrfSafeMethod(method) {
+          // these HTTP methods do not require CSRF protection
+          return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+      }
+      $.ajaxSetup({
+          beforeSend: function(xhr, settings) {
+              if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+              }
+          }
+      });
+  }
   </script>
 <body>
   <div  id="tools-main" style="width: 100%; overflow: hidden;">
@@ -78,10 +93,27 @@
 	<form style="white-space: nowrap;" name="sav"  action="javascript:apply_stype_from_button(true)" id="form-dweek">
 	  Redéfinir ma semaine type<br/>
           <br/>
-          <input type="submit" name="save" value="Sauvegarder"></br>	  </fieldset>
-      </form><br/>
-      <!--{% if err %}<p><strong>{{ err }}</strong></p>{% endif %}
-	-->
+          <input type="submit" name="save" value="Sauvegarder"></br>
+      </form>
+      </fieldset>
+        <br/><br/>
+
+  <fieldset>
+    <legend>Ma journée idéale</legend>
+      <form style="white-space: nowrap;" action='{% url "base:user_perfect_day_changes" department user.username %}'  method='POST' id="form-perfect_day" >
+        {% csrf_token %}
+        Chaque jour, voici le nombre d'heures de cours que je souhaite donner:<br/>
+          <br/>
+        Idéalement <input id="user_pref_hours_per_day" type="number" name="user_pref_hours" style="width: 30px" min="1" max="9" value="{{ usr_pref_hours }}">
+        <br/>
+        Maximum <input id="user_max_hours_per_day" type="number" name="user_max_hours" style="width: 30px" min="1" max="9" value="{{ usr_max_hours }}">
+        </br>
+        </br>
+        <input type="submit" name="save_perfect_day" value="Sauvegarder">
+        </br>
+      </form>
+  </fieldset>
+
       <span id="ack"></span>
     </div>
   </div>

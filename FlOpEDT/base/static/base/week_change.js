@@ -88,18 +88,17 @@ function fetch_dispos() {
     });
 
     show_loader(true);
-    console.log(url_fetch_extra_sched + an_att + "/" + semaine_att);
     $.ajax({
         type: "GET", //rest Type
         dataType: 'text',
-        url: url_fetch_extra_sched + an_att + "/" + semaine_att ,
+        url: url_fetch_extra_sched + exp_week.url(),
         async: true,
         contentType: "text/csv",
         success: function(msg) {
             console.log("in");
             console.log(msg);
-            if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
-                an_att == weeks.init_data[weeks.sel[0]].an) {
+            var sel_week = wdw_weeks.get_selected() ;
+            if (Week.compare(exp_week, sel_week)==0) {
                 extra_pref.tutors = {};
                 d3.csvParse(msg, translate_extra_pref_tut_from_csv);
 		sort_preferences(extra_pref.tutors);
@@ -126,18 +125,17 @@ function fetch_dispos() {
     });
 
     show_loader(true);
-    console.log(url_fetch_shared_rooms + an_att + "/" + semaine_att);
     $.ajax({
         type: "GET", //rest Type
         dataType: 'text',
-        url: url_fetch_shared_rooms + an_att + "/" + semaine_att ,
+        url: url_fetch_shared_rooms + exp_week.url(),
         async: true,
         contentType: "text/csv",
         success: function(msg) {
             console.log("in");
             console.log(msg);
-            if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
-                an_att == weeks.init_data[weeks.sel[0]].an) {
+            var sel_week = wdw_weeks.get_selected() ;
+            if (Week.compare(exp_week, sel_week)==0) {
                 extra_pref.rooms = {};
                 d3.csvParse(msg, translate_extra_pref_room_from_csv);
 	        sort_preferences(extra_pref.rooms);
@@ -412,6 +410,25 @@ function fetch_bknews(first) {
 		adapt_labgp(first);
 		if (first) {
 		    create_but_scale();
+                    if (splash_id == 1) {
+                        
+	                var splash_mail = {
+	                    id: "mail-sent",
+	                    but: {list: [{txt: "Ok", click: function(d){ splash_id = 0 ;} }]},
+	                    com: {list: [{txt: "E-mail envoyé !", ftsi: 23}]}
+	                }
+	                splash(splash_mail);
+                        
+                    } else if (splash_id == 2) {
+                        
+	                var splash_quote = {
+	                    id: "quote-sent",
+	                    but: {list: [{txt: "Ok", click: function(d){ splash_id = 0 ; } }]},
+	                    com: {list: [{txt: "Citation envoyée ! (en attente de modération)", ftsi: 23}]}
+	                }
+	                splash(splash_quote);
+                        
+                    }
 
 		}
 
@@ -464,6 +481,7 @@ function adapt_labgp(first) {
     d3.select("#edt-main").attr("height", dsp_svg.h);
 
     if (first) {
+        window.scroll(0,$("#menu-edt").height() + dsp_svg.margin.top - labgp.height_init);
 	expected_ext_grid_dim = dsp_svg.w - dsp_svg.margin.left - dsp_svg.margin.right;
 	new_gp_dim = expected_ext_grid_dim / (rootgp_width * week_days.nb_days());
 	if (new_gp_dim > labgp.wm) {

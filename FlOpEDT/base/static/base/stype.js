@@ -24,7 +24,7 @@
 
 // Redefinition of some variables
 
-dsp_svg.margin = {top: 50,  left: 100, right: 10, bot:10};
+dsp_svg.margin = {top: 50,  left: 50, right: 10, bot:10};
 
 dsp_svg.h = 625 - dsp_svg.margin.top - dsp_svg.margin.bot ;
 dsp_svg.w = 680 - dsp_svg.margin.left - dsp_svg.margin.right ;
@@ -64,6 +64,8 @@ dim_dispo.mh = 10 ;
 dim_dispo.plot = 1 ;
 nbRows=1;
 scale = dim_dispo.height / nb_minutes_in_grid()  ;
+pref_selection.choice.w = 35;
+pref_selection.choice.h = 35;
 
 
 ckbox["dis-mod"].cked = true ;
@@ -104,6 +106,7 @@ var hours_header = new HourHeader(svg, "edt-fg", hours) ;
 
 go_days(true, false);
 create_lunchbar();
+create_pref_modes(pref_only);
 fetch_pref_only();
 
 

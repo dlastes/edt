@@ -382,6 +382,7 @@ function go_alarm_pref() {
 
     var dig = svg.get_dom("dig");
     dig
+
         .select(".disp-info").select(".disp-required")
         .text(txt_reqDispos)
         .attr("x", menus.x + menus.mx - 5)
@@ -410,7 +411,96 @@ function go_alarm_pref() {
 }
 
 
+function go_pref_mode() {
 
+    var selall = svg.get_dom("pmg")
+        .select("#pm-but-head")
+        .selectAll(".pm-but")
+        .data(pref_selection.mode);
+    
+    var g_new = selall
+        .enter()
+        .append("g")
+        .attr("cursor", "pointer")
+        .attr("class", "pm-but")
+        .on("click", apply_pref_mode);
+
+    var rect_new = g_new
+        .append("rect")
+        .attr("x", 0)
+        .attr("y", pref_mode_but_y)
+        .attr("rx", 5)
+        .attr("ry", 10)
+        .attr("width", pref_selection.butw)
+        .attr("height", pref_selection.buth);
+
+    g_new
+        .append("text")
+        .attr("x", pref_mode_but_txt_x)
+        .attr("y", pref_mode_but_txt_y)
+        .text(pref_mode_but_txt);
+
+    rect_new
+        .merge(selall.select("rect"))
+        .attr("class", pref_mode_but_cls);
+
+    go_paint_pref_mode_choices(false);
+}
+
+// smileys in paint preference mode
+function go_paint_pref_mode_choices(quick){
+    var t, dat, datdi, datsmi;
+    
+    if (quick) {
+        t = d3.transition()
+            .duration(0);
+    } else {
+        t = d3.transition();
+    }
+
+    var parent = svg.get_dom("pmg")
+        .select("#pm-choices");
+
+    parent
+        .attr("opacity", pref_sel_choice_opac);
+
+    // preferences: background color, and smiley
+    dat = parent
+        .selectAll(".dispo")
+        .data(pref_selection.choice.data);
+    
+    datdi = dat
+        .enter()
+        .append("g")
+        .attr("cursor", "pointer")
+        .attr("class", "dispo");
+    
+    var datdisi = datdi
+        .append("g")
+        .attr("class", "dispo-si")
+        .on("click", apply_pref_mode_choice);
+    
+    datdisi
+        .append("rect")
+        .attr("class", "dispo-bg")
+        .attr("stroke", "black")
+        .attr("width", pref_selection.choice.w)
+        .attr("height", pref_selection.choice.h)
+        .attr("x", pref_sel_choice_x)
+        .attr("y", 0)
+        .attr("fill", dispo_fill)
+        .merge(dat.select(".dispo-bg"))
+        .transition(t)
+        .attr("width", pref_selection.choice.w)
+        .attr("height", pref_selection.choice.w)
+        .attr("x", pref_sel_choice_x)
+        .attr("y", pref_sel_choice_y)
+        .attr("fill", dispo_fill)
+        .attr("stroke-width", pref_sel_choice_stkw);
+
+    go_smiley(dat, datdisi, t);
+    
+}
 
 
 /*---------------------
@@ -1053,10 +1143,10 @@ function go_regen(s) {
                 txt = "Regénération totale (mineure) le " + elements[1] +
                     "(" + elements[3] + ")";
             } else {
-                txt = "Regénération totale le " + elements[1];
+                txt = "Regénération totale prévue (probablement le " + elements[1] + ")";
             }
         } else if (elements[0] == 'S') {
-            txt = "Regénération mineure le " + elements[1];
+            txt = "Regénération mineure prévue (probablement le " + elements[1] + ")";
         }
 
         ack.regen = txt;
