@@ -437,19 +437,19 @@ class CourseAdmin(DepartmentModelAdmin):
 
 class CoursPlaceAdmin(DepartmentModelAdmin):
 
-    def cours_semaine(o):
+    def course_week(o):
         return str(o.cours.semaine)
 
-    cours_semaine.short_description = 'Semaine'
-    cours_semaine.admin_order_field = 'cours__semaine'
+    course_week.short_description = 'Semaine'
+    course_week.admin_order_field = 'cours__semaine'
 
-    def cours_an(o):
+    def course_year(o):
         return str(o.cours.an)
 
-    cours_an.short_description = 'Année'
-    cours_an.admin_order_field = 'cours__an'
+    course_year.short_description = 'Année'
+    course_year.admin_order_field = 'cours__an'
 
-    list_display = (cours_semaine, cours_an, 'cours', 'day', 'start_time', 'room')
+    list_display = (course_week, course_year, 'cours', 'day', 'start_time', 'room')
     ordering = ('day', 'start_time', 'cours', 'room')
     list_filter = (
         ('cours__tutor', DropdownFilterRel),
@@ -487,19 +487,19 @@ class DependencyAdmin(DepartmentModelAdmin):
 
     
 class CourseModificationAdmin(DepartmentModelAdmin):
-    def cours_semaine(o):
+    def course_week(o):
         return str(o.cours.semaine)
 
-    cours_semaine.short_description = 'Semaine'
-    cours_semaine.admin_order_field = 'cours__semaine'
+    course_week.short_description = 'Semaine'
+    course_week.admin_order_field = 'cours__semaine'
 
-    def cours_an(o):
+    def course_year(o):
         return str(o.cours.an)
 
-    cours_an.short_description = 'Année'
-    cours_an.admin_order_field = 'cours__an'
+    course_year.short_description = 'Année'
+    course_year.admin_order_field = 'cours__an'
 
-    list_display = ('cours', cours_semaine, cours_an,
+    list_display = ('cours', course_week, course_year,
                     'version_old', 'room_old', 'day_old',
                     'start_time_old', 'updated_at', 'initiator'
                     )
