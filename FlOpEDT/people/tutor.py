@@ -153,7 +153,7 @@ def fill_default_user_preferences(user, dept=None):
                                   start_time=current_time,
                                   duration=duration,
                                   # hardcoded
-                                  valeur=8)
+                                  value=8)
             pref.save()
             current_time += duration
         if max_time == lst:
@@ -172,5 +172,5 @@ def fill_default_user_preferences(user, dept=None):
                                       day=day,
                                       start_time=pref.start_time,
                                       duration=pref.duration,
-                                      valeur=pref.valeur)
+                                      value=pref.value)
             new_pref.save()

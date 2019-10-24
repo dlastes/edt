@@ -102,7 +102,7 @@ def basic_reassign_rooms(department, semaine, an, target_work_copy):
                 prec_is_unavailable = False
                 for r in precedent.room.subrooms.all():
                     if RoomPreference.objects.filter(semaine=semaine, an=an,  day=day,
-                                                     start_time=st, room=r, valeur=0).exists():
+                                                     start_time=st, room=r, value=0).exists():
                         prec_is_unavailable = True
 
                     if ScheduledCourse.objects \

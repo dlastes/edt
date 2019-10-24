@@ -392,14 +392,14 @@ class UserPreference(models.Model):
     day = models.CharField(max_length=2, choices=Day.CHOICES, default=Day.MONDAY)
     start_time = models.PositiveSmallIntegerField()
     duration = models.PositiveSmallIntegerField()
-    valeur = models.SmallIntegerField(
+    value = models.SmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(8)],
         default=8)
 
     def __str__(self):
         return f"{self.user.username}-Sem{self.semaine}: " + \
             f"({str_slot(self.day, self.start_time, self.duration)})" + \
-            f"={self.valeur}"
+            f"={self.value}"
 
 
 class CoursePreference(models.Model):
@@ -414,14 +414,14 @@ class CoursePreference(models.Model):
     day = models.CharField(max_length=2, choices=Day.CHOICES, default=Day.MONDAY)
     start_time = models.PositiveSmallIntegerField()
     duration = models.PositiveSmallIntegerField()
-    valeur = models.SmallIntegerField(
+    value = models.SmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(8)],
         default=8)
 
     def __str__(self):
         return f"{self.course_type}=Sem{self.semaine}:" + \
             f"({str_slot(self.day, self.start_time, self.duration)})" + \
-            f"--{self.train_prog}={self.valeur}"
+            f"--{self.train_prog}={self.value}"
     
 
 class RoomPreference(models.Model):
@@ -435,14 +435,14 @@ class RoomPreference(models.Model):
     day = models.CharField(max_length=2, choices=Day.CHOICES, default=Day.MONDAY)
     start_time = models.PositiveSmallIntegerField()
     duration = models.PositiveSmallIntegerField()
-    valeur = models.SmallIntegerField(
+    value = models.SmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(8)],
         default=8)
 
     def __str__(self):
         return f"{self.room}-Sem{self.semaine}:" + \
             f"({str_slot(self.day, self.start_time, self.duration)})" + \
-            f"={self.valeur}"
+            f"={self.value}"
 
 
 # </editor-fold desc="PREFERENCES">
@@ -524,11 +524,11 @@ class TutorCost(models.Model):
         validators=[MinValueValidator(0), MaxValueValidator(53)])
     an = models.PositiveSmallIntegerField()
     tutor = models.ForeignKey('people.Tutor', on_delete=models.CASCADE)
-    valeur = models.FloatField()
+    value = models.FloatField()
     work_copy = models.PositiveSmallIntegerField(default=0)
 
     def __str__(self):
-        return f"sem{self.semaine}-{self.tutor.username}:{self.valeur}"
+        return f"sem{self.semaine}-{self.tutor.username}:{self.value}"
 
 
 class GroupCost(models.Model):
@@ -536,12 +536,12 @@ class GroupCost(models.Model):
         validators=[MinValueValidator(0), MaxValueValidator(53)])
     an = models.PositiveSmallIntegerField()
     groupe = models.ForeignKey('Group', on_delete=models.CASCADE)
-    valeur = models.FloatField()
+    value = models.FloatField()
     work_copy = models.PositiveSmallIntegerField(default=0)
 
 
     def __str__(self):
-        return f"sem{self.semaine}-{self.groupe}:{self.valeur}"
+        return f"sem{self.semaine}-{self.groupe}:{self.value}"
 
 
 class GroupFreeHalfDay(models.Model):

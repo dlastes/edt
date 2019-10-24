@@ -204,7 +204,7 @@ class DispoResource(resources.ModelResource):
 
     class Meta:
         model = UserPreference
-        fields = ('day', 'start_time', 'duration', 'valeur', 'prof')
+        fields = ('day', 'start_time', 'duration', 'value', 'prof')
 
 
 class CoursePreferenceResource(resources.ModelResource):
@@ -215,7 +215,7 @@ class CoursePreferenceResource(resources.ModelResource):
 
     class Meta:
         model = CoursePreference
-        fields = ('type_name', 'train_prog', 'day', 'start_time', 'duration', 'valeur')
+        fields = ('type_name', 'train_prog', 'day', 'start_time', 'duration', 'value')
 
 
 class UnavailableRoomsResource(resources.ModelResource):
@@ -396,7 +396,7 @@ class RoomGroupAdmin(DepartmentModelAdmin):
   
 class RoomPreferenceAdmin(DepartmentModelAdmin):
     list_display = ('room', 'semaine', 'an', 'day', 'start_time',
-                    'duration', 'valeur')
+                    'duration', 'value')
     ordering = ('-an','-semaine', 'day', 'start_time')
     list_filter = (
         ('room', DropdownFilterRel),
@@ -459,7 +459,7 @@ class CoursPlaceAdmin(DepartmentModelAdmin):
 
 class CoursePreferenceAdmin(DepartmentModelAdmin):
     list_display = ('course_type', 'train_prog', 'day', 'start_time',
-                    'duration', 'valeur', 'semaine', 'an')
+                    'duration', 'value', 'semaine', 'an')
     ordering = ('-an', '-semaine')
     list_filter = (('semaine', DropdownFilterAll),
                    ('an', DropdownFilterAll),
@@ -522,9 +522,9 @@ class PlanningModificationAdmin(DepartmentModelAdmin):
 
 
 class DispoAdmin(DepartmentModelAdmin):
-    list_display = ('user', 'day', 'start_time', 'duration', 'valeur',
+    list_display = ('user', 'day', 'start_time', 'duration', 'value',
                     'semaine', 'an')
-    ordering = ('user', 'an', 'semaine', 'day', 'start_time', 'valeur')
+    ordering = ('user', 'an', 'semaine', 'day', 'start_time', 'value')
     list_filter = (('start_time', DropdownFilterAll),
                    ('semaine', DropdownFilterAll),
                    ('user', DropdownFilterRel),

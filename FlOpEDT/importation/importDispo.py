@@ -101,15 +101,15 @@ def csvreader(test):
           if User.objects:
               day = Day.objects.filter(day="Monday")
 
-              indicevaleur=0
-              for valeur in prof:
-                    indicevaleur+=1
-                    if indicevaleur>2 :
+              indicevalue=0
+              for value in prof:
+                    indicevalue+=1
+                    if indicevalue>2 :
                             nouvelledispo = UserPreference.objects.create(user=User.objects.filter(first_name=prof[0], last_name=prof[1]),
                               semaine=stockage[1][j],
                               an=stockage[0][indiceannee],
                               slot=slot1,
-                              valeur=valeur)
+                              value=value)
                             nouvelledispo.save()
                     indicecreneau+=2
        print(stockage[3])

@@ -936,10 +936,10 @@ class TTModel(object):
                     avail_instr[i][sl] = 1
 
             else:
-                avail_time = sum(a.duration for a in tutor_availabilities if a.valeur >= 1)
-                maximum = max([a.valeur for a in tutor_availabilities])
+                avail_time = sum(a.duration for a in tutor_availabilities if a.value >= 1)
+                maximum = max([a.value for a in tutor_availabilities])
                 non_prefered_duration = max(1, sum(a.duration
-                                                   for a in tutor_availabilities if 1 <= a.valeur <= maximum - 1))
+                                                   for a in tutor_availabilities if 1 <= a.value <= maximum - 1))
 
                 if avail_time < teaching_duration:
                     self.add_warning(i, "%g available hours < %g courses hours" % (avail_time/60, teaching_duration/60))
@@ -955,9 +955,9 @@ class TTModel(object):
                         avail_instr[i][sl] = 1
 
                 else:
-                    average_value = sum(a.duration * a.valeur
+                    average_value = sum(a.duration * a.value
                                         for a in tutor_availabilities
-                                        if 1 <= a.valeur <= maximum - 1) / non_prefered_duration
+                                        if 1 <= a.value <= maximum - 1) / non_prefered_duration
                     for sl in self.wdb.slots:
                         avail = set(a for a in tutor_availabilities
                                     if ((sl.start_time <= a.start_time < sl.end_time
@@ -968,7 +968,7 @@ class TTModel(object):
                             unp_slot_cost[i][sl] = 0
                             avail_instr[i][sl] = 1
                         else:
-                            minimum = min(a.valeur for a in avail)
+                            minimum = min(a.value for a in avail)
                             if minimum == 0:
                                 avail_instr[i][sl] = 0
                                 unp_slot_cost[i][sl] = 0
@@ -1027,7 +1027,7 @@ class TTModel(object):
                                             or sl.start_time < a.start_time + a.duration <= sl.end_time)
                                             and a.day == sl.day))
                             if avail:
-                                minimum = min(a.valeur for a in avail)
+                                minimum = min(a.value for a in avail)
                                 if minimum == 0:
                                     avail_course[(course_type, promo)][sl] = 0
                                     non_prefered_slot_cost_course[(course_type,
@@ -1059,7 +1059,7 @@ class TTModel(object):
                         day=sl.day,
                         semaine=self.semaine,
                         an=self.an,
-                        room=room, valeur=0).exists():
+                        room=room, value=0).exists():
                     avail_room[room][sl] = 0
                 else:
                     avail_room[room][sl] = 1
@@ -1223,7 +1223,7 @@ class TTModel(object):
                            tutor=i,
                            an=self.wdb.year,
                            semaine=self.wdb.week,
-                           valeur=self.get_expr_value(self.cost_I[i]),
+                           value=self.get_expr_value(self.cost_I[i]),
                            work_copy=target_work_copy)
             tc.save()
 
@@ -1240,7 +1240,7 @@ class TTModel(object):
                            an=self.wdb.year,
                            semaine=self.wdb.week,
                            work_copy=target_work_copy,
-                           valeur=self.get_expr_value(self.cost_G[g]))
+                           value=self.get_expr_value(self.cost_G[g]))
             cg.save()
 
     def optimize(self, time_limit, solver, presolve=2):

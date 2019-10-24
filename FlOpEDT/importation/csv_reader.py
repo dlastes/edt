@@ -41,14 +41,14 @@ def csv_reader(path):
             value = int(float(row['value'])) * 2
             print(f"Valeur = {value}")
             if up:
-                if up.valeur != value or up.duration != duration:
-                    up.valeur = value
+                if up.value != value or up.duration != duration:
+                    up.value = value
                     up.save()
                 user_prefs.remove(up)
             else:
                 UserPreference(user=prof, an=row['year'], semaine=row['week'],
                                day=day, start_time=start_time, duration=duration,
-                               valeur=value).save()
+                               value=value).save()
     f.close()
     end = datetime.now()
     print(end - start)

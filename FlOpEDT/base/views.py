@@ -539,7 +539,7 @@ def fetch_unavailable_rooms(req, year, week, **kwargs):
     #                                         room__departments = department, 
     #                                         semaine=week,
     #                                         an=year,
-    #                                         valeur=0))
+    #                                         value=0))
     # response = HttpResponse(dataset.csv,
     #                         content_type='text/csv')
     # cache.set(cache_key, response)
@@ -731,11 +731,11 @@ def pref_requirements(tutor, year, week):
             .objects \
             .filter(user=tutor,
                     semaine=None,
-                    valeur__gte=1) \
+                    value__gte=1) \
             .count()
     else:
         filled = week_av \
-            .filter(valeur__gte=1) \
+            .filter(value__gte=1) \
             .count()
     return filled, 2*nb_courses
 
@@ -1078,7 +1078,7 @@ class HelperUserPreference():
                               day=day,
                               start_time=start_time,
                               duration=duration,
-                              valeur=value)
+                              value=value)
 
 
 class HelperCoursePreference():
@@ -1098,7 +1098,7 @@ class HelperCoursePreference():
                                 day=day,
                                 start_time=start_time,
                                 duration=duration,
-                                valeur=value)
+                                value=value)
         
 
 def preferences_changes(req, year, week, helper_pref):
@@ -1126,7 +1126,7 @@ def preferences_changes(req, year, week, helper_pref):
                                              pref.day,
                                              pref.start_time,
                                              pref.duration,
-                                             pref.valeur)
+                                             pref.value)
             logger.info(new_dispo)
             new_dispo.save()
 
