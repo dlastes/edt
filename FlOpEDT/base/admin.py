@@ -33,7 +33,7 @@ from django.contrib import admin
 import django.contrib.auth as auth
 
 from people.models import Tutor, User
-from base.models import Day, RoomGroup, Module, Course, Group, Slot, \
+from base.models import Day, RoomGroup, Module, Course, Group, \
     UserPreference, Time, ScheduledCourse, EdtVersion, CourseModification, \
     PlanningModification, TrainingProgramme,  \
     Regen, Holiday, TrainingHalfDay, \
