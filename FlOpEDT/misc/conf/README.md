@@ -66,7 +66,7 @@ environnement virtuel.
 
 - Aller dans l'environnement virtuel
 `source venv/bin/activate`
-- /Pour une première exécution/, 
+- *Pour une première exécution*, 
  + appliquer les migrations :
 `sudo ./manage.py migrate`
  + éventuellement, remplir la base avec les données d'exemple :
