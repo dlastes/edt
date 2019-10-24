@@ -298,7 +298,7 @@ class Module(models.Model):
 
 class ModulePossibleTutors(models.Model):
     module = models.OneToOneField('Module', on_delete=models.CASCADE)
-    possible_tutors = models.ManyToManyField('Tutor', blank=True, related_name='possible_modules')
+    possible_tutors = models.ManyToManyField('people.Tutor', blank=True, related_name='possible_modules')
 
 
 class CourseType(models.Model):
@@ -346,7 +346,7 @@ class Course(models.Model):
 
 class CoursePossibleTutors(models.Model):
     course = models.OneToOneField('Course', on_delete=models.CASCADE)
-    possible_tutors = models.ManyToManyField('Tutor', blank=True, related_name='shared_possible_courses')
+    possible_tutors = models.ManyToManyField('people.Tutor', blank=True, related_name='shared_possible_courses')
 
 
 class ScheduledCourse(models.Model):

@@ -334,9 +334,11 @@ class WeekDB(object):
 
         availabilities = {}
         for i in instructors:
-            availabilities[i] = set(UserPreference.objects.filter(semaine__in=self.weeks, user=i, an=self.year))
-            if not availabilities[i]:
-                availabilities[i] = set(UserPreference.objects.filter(semaine=None, user=i))
+            availabilities[i] = {}
+            for week in self.weeks:
+                availabilities[i][week] = set(UserPreference.objects.filter(semaine=week, user=i, an=self.year))
+                if not availabilities[i][week]:
+                    availabilities[i][week] = set(UserPreference.objects.filter(semaine=None, user=i))
 
         fixed_courses_for_tutor = {}
         for i in instructors:
@@ -514,7 +516,7 @@ class TTModel(object):
                 expr += 100 * IBS[(i, sl)]
                 for s_sl in self.wdb.slots_intersecting[sl] | {sl}:
                     for c in self.wdb.possible_courses[i] & self.wdb.compatible_courses[s_sl]:
-                        expr -= self.TTinstructors[(sl, c, i)]
+                        expr -= self.TTinstructors[(s_sl, c, i)]
                 self.add_constraint(expr, '<=', 99, "IBS_sup(%s,%s)" % (i, sl))
                 self.add_constraint(expr, '>=', 0, "IBS_inf(%s,%s)" % (i, sl))
 
@@ -803,9 +805,6 @@ class TTModel(object):
                 self.add_constraint(self.sum(self.TTinstructors[(sl, c, i)]
                                              for i in self.wdb.possible_tutors[c]) - self.TT[sl, c],
                                     '==', 0, "Each_course_to_one_tutor %s-%s" % (c, sl))
-                if c.tutor is not None:
-                    self.add_constraint(self.TTinstructors[(sl, c, c.tutor)] - self.TT[sl, c],
-                                        '==', 0)
 
         for i in self.wdb.instructors:
             for sl in self.wdb.slots:
@@ -992,75 +991,80 @@ class TTModel(object):
             self.add_warning(None, "%s are holidays" % holidays)
 
         for i in self.wdb.instructors:
-            teaching_duration = sum(c.type.duration
-                                    for c in self.wdb.courses_for_tutor[i])
-            total_teaching_duration = teaching_duration + sum(c.type.duration
-                                                              for c in self.wdb.other_departments_courses_for_tutor[i])
             avail_instr[i] = {}
             unp_slot_cost[i] = {}
+            for week in self.weeks:
+                week_slots = slots_filter(self.wdb.slots, week=week)
+                teaching_duration = sum(c.type.duration
+                                        for c in self.wdb.courses_for_tutor[i])
+                total_teaching_duration = teaching_duration + sum(c.type.duration
+                                                                  for c in self.wdb.other_departments_courses_for_tutor[i])
 
-            if self.wdb.holidays:
-                tutor_availabilities = set(a for a in self.wdb.availabilities[i] if a.day not in holidays)
-            else:
-                tutor_availabilities = self.wdb.availabilities[i]
+                if days_filter(self.wdb.holidays, week=week):
+                    tutor_availabilities = set(a for a in self.wdb.availabilities[i][week] if a.day not in holidays)
+                else:
+                    tutor_availabilities = self.wdb.availabilities[i][week]
 
-            if not tutor_availabilities:
-                self.add_warning(i, "no availability information given")
-                for sl in self.wdb.slots:
-                    unp_slot_cost[i][sl] = 0
-                    avail_instr[i][sl] = 1
-
-            else:
-                avail_time = sum(a.duration for a in tutor_availabilities if a.valeur >= 1)
-                maximum = max([a.valeur for a in tutor_availabilities])
-                non_prefered_duration = max(1, sum(a.duration
-                                                   for a in tutor_availabilities if 1 <= a.valeur <= maximum - 1))
-
-                if avail_time < teaching_duration:
-                    self.add_warning(i, "%g available hours < %g courses hours" % (avail_time/60, teaching_duration/60))
-                    for sl in self.wdb.slots:
-                        unp_slot_cost[i][sl] = 0
-                        avail_instr[i][sl] = 1
-
-                elif avail_time < total_teaching_duration:
-                    self.add_warning(i, "%g available hours < %g courses hours including other deps" % (
-                        avail_time / 60, total_teaching_duration / 60))
-                    for sl in self.wdb.slots:
+                if not tutor_availabilities:
+                    self.add_warning(i, "no availability information given week %g" % week)
+                    for sl in week_slots:
                         unp_slot_cost[i][sl] = 0
                         avail_instr[i][sl] = 1
 
                 else:
-                    average_value = sum(a.duration * a.valeur
-                                        for a in tutor_availabilities
-                                        if 1 <= a.valeur <= maximum - 1) / non_prefered_duration
-                    for sl in self.wdb.slots:
-                        avail = set(a for a in tutor_availabilities
-                                    if ((sl.start_time <= a.start_time < sl.end_time
-                                         or sl.start_time < a.start_time + a.duration <= sl.end_time)
-                                        and a.day == sl.day.day and a.semaine == sl.day.week))
-                        if not avail:
-                            print("availability pbm for %s slot %s" % (i, sl))
+                    avail_time = sum(a.duration for a in tutor_availabilities if a.valeur >= 1)
+                    maximum = max([a.valeur for a in tutor_availabilities])
+                    non_prefered_duration = max(1, sum(a.duration
+                                                       for a in tutor_availabilities if 1 <= a.valeur <= maximum - 1))
+
+                    if avail_time < teaching_duration:
+                        self.add_warning(i, "%g available hours < %g courses hours week %g" %
+                                         (avail_time/60, teaching_duration/60, week))
+                        for sl in week_slots:
                             unp_slot_cost[i][sl] = 0
                             avail_instr[i][sl] = 1
-                        else:
-                            minimum = min(a.valeur for a in avail)
-                            if minimum == 0:
-                                avail_instr[i][sl] = 0
+
+                    elif avail_time < total_teaching_duration:
+                        self.add_warning(i, "%g available hours < %g courses hours including other deps week %g" % (
+                            avail_time / 60, total_teaching_duration / 60, week))
+                        for sl in week_slots:
+                            unp_slot_cost[i][sl] = 0
+                            avail_instr[i][sl] = 1
+
+                    else:
+                        average_value = sum(a.duration * a.valeur
+                                            for a in tutor_availabilities
+                                            if 1 <= a.valeur <= maximum - 1) / non_prefered_duration
+                        for sl in week_slots:
+                            avail = set(a for a in tutor_availabilities
+                                        if ((sl.start_time <= a.start_time < sl.end_time
+                                             or sl.start_time < a.start_time + a.duration <= sl.end_time)
+                                            and a.day == sl.day.day))
+                            if not avail:
+                                print("availability pbm for %s slot %s" % (i, sl))
                                 unp_slot_cost[i][sl] = 0
-                            else:
                                 avail_instr[i][sl] = 1
-                                value = minimum
-                                if value == maximum:
+                            else:
+                                minimum = min(a.valeur for a in avail)
+                                if minimum == 0:
+                                    avail_instr[i][sl] = 0
                                     unp_slot_cost[i][sl] = 0
                                 else:
-                                    unp_slot_cost[i][sl] = max(0., 2 - value / average_value)
+                                    avail_instr[i][sl] = 1
+                                    value = minimum
+                                    if value == maximum:
+                                        unp_slot_cost[i][sl] = 0
+                                    else:
+                                        unp_slot_cost[i][sl] = max(0., 2 - value / average_value)
 
-                    if teaching_duration / 60 < 9 and avail_time < 2 * teaching_duration \
-                            and i.status == Tutor.FULL_STAFF:
-                        self.add_warning(i, "only %g available hours for %g courses hours" % (avail_time / 60,
-                                                                                              teaching_duration / 60))
-                        for sl in self.wdb.slots:
-                            unp_slot_cost[i][sl] = 0
+                        if teaching_duration / 60 < 9 and avail_time < 2 * teaching_duration \
+                                and i.status == Tutor.FULL_STAFF:
+                            self.add_warning(i, "only %g available hours for %g courses hours week %g" %
+                                             (avail_time / 60,
+                                              teaching_duration / 60,
+                                              week))
+                            for sl in week_slots:
+                                unp_slot_cost[i][sl] = 0
 
         return avail_instr, unp_slot_cost
 
@@ -1211,7 +1215,7 @@ class TTModel(object):
         for promo in self.train_prog:
             for constr in get_constraints(
                     self.department,
-                    week__in=self.weeks,
+                    weeks=self.weeks,
                     year=self.an,
                     train_prog=promo,
                     is_active=True):
@@ -1365,7 +1369,7 @@ class TTModel(object):
         considered week.
         Returns the number of the work copy
         """
-        print("\nLet's solve week #%g" % self.weeks)
+        print("\nLet's solve weeks #%s" % self.weeks)
 
         if target_work_copy is None:
             local_max_wc = ScheduledCourse \
@@ -1395,7 +1399,7 @@ class TTModel(object):
             return target_work_copy
 
 
-def get_constraints(department, week=None, year=None, train_prog=None, is_active=None):
+def get_constraints(department, weeks=None, year=None, train_prog=None, is_active=None):
     #
     #  Return constraints corresponding to the specific filters
     #
@@ -1404,18 +1408,18 @@ def get_constraints(department, week=None, year=None, train_prog=None, is_active
     if is_active:
         query &= Q(is_active=is_active)
 
-    if week and not year:
-        logger.warning(f"Unable to filter constraint for week {week} without specifing year")
+    if weeks and not year:
+        logger.warning(f"Unable to filter constraint for weeks {weeks} without specifing year")
         return
 
-    if week and train_prog:
+    if weeks and train_prog:
         query &= \
             Q(train_prog__abbrev=train_prog) & Q(week__isnull=True) & Q(year__isnull=True) | \
-            Q(train_prog__abbrev=train_prog) & Q(week=week) & Q(year=year) | \
-            Q(train_prog__isnull=True) & Q(week=week) & Q(year=year) | \
+            Q(train_prog__abbrev=train_prog) & Q(week__in=weeks) & Q(year=year) | \
+            Q(train_prog__isnull=True) & Q(week__in=weeks) & Q(year=year) | \
             Q(train_prog__isnull=True) & Q(week__isnull=True) & Q(year__isnull=True)
-    elif week:
-        query &= Q(week=week) & Q(year=year) | Q(week__isnull=True) & Q(year__isnull=True)
+    elif weeks:
+        query &= Q(week__in=weeks) & Q(year=year) | Q(week__isnull=True) & Q(year__isnull=True)
     elif train_prog:
         query &= Q(train_prog__abbrev=train_prog) | Q(train_prog__isnull=True)
 

@@ -116,13 +116,15 @@ class Slot(object):
         return str(self)
 
 
-def slots_filter(slot_set, day=None, apm=None, course_type=None, start_time=None,
+def slots_filter(slot_set, day=None, apm=None, course_type=None, start_time=None, week_day=None,
                  simultaneous_to=None, week=None, is_after=None, starts_after=None, ends_before=None):
     slots = slot_set
     if week is not None:
         slots = set(sl for sl in slots if sl.day.week == week)
     if day is not None:
         slots = set(sl for sl in slots if sl.day == day)
+    if week_day is not None:
+        slots = set(sl for sl in slots if sl.day.day == week_day)
     if course_type is not None:
         slots = set(sl for sl in slots if sl.course_type == course_type)
     if apm is not None:
@@ -627,9 +629,8 @@ class Stabilize(TTConstraint):
                               on_delete=models.CASCADE)
     type = models.ForeignKey('base.CourseType', null=True, default=None, on_delete=models.CASCADE)
     work_copy = models.PositiveSmallIntegerField(default=0)
-    fixed_days = models.ManyToManyField('base.Day',
-                                        related_name='days_to_fix',
-                                        blank=True)
+    fixed_days = ArrayField(models.CharField(max_length=2,
+                                             choices=Day.CHOICES), blank=True, null=True)
 
     @classmethod
     def get_viewmodel_prefetch_attributes(cls):
