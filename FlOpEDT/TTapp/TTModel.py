@@ -399,7 +399,7 @@ class TTModel(object):
                  max_stab=5.,
                  lim_ld=1.,
                  only_fixed_scheduled_courses=False):
-        print("\nLet's start weeks #%g" % weeks)
+        print("\nLet's start weeks #%s" % weeks)
         # beg_file = os.path.join('logs',"FlOpTT")
         self.model = LpProblem("FlOpTT", LpMinimize)
         self.min_ups_i = min_nps_i

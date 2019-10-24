@@ -34,8 +34,8 @@ from random import choice
 from displayweb.models import TrainingProgrammeDisplay
 
 from base.models import Room, RoomType, RoomGroup, TrainingProgramme,\
-    Group, Module, GroupType, Period, Time, Day, Slot, CourseType, \
-    Department, CourseStartTimeConstraint, TimeGeneralSettings, UserPreference
+    Group, Module, GroupType, Period, Time, Day, CourseType, \
+    Department, CourseStartTimeConstraint, TimeGeneralSettings, UserPreference, CoursePreference
 
 from base.weeks import annee_courante
 
