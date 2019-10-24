@@ -85,20 +85,20 @@ environnement virtuel.
 `sudo apt install nginx`
 
 - Configurer nginx : un exemple de configuration nginx est disponible
-[ici](https://framagit.org/flopedt/FlOpEDT/blob/master/FlOpEDT/misc/conf/edt-info.conf).
+[ici](./edt-info.conf).
 Remplacer `adresse_du_site` par l'adresse du serveur.
 
 - Configurer un service : un exemple de configuration se trouve
-[ici](https://framagit.org/flopedt/FlOpEDT/blob/master/FlOpEDT/misc/conf/flopedt.service).
+[ici](./flopedt.service).
 Remplacer `path_to_where_manage_belongs_to` par le bon chemin.
 Par ailleurs, dans le cas d'une utilisation de Gurobi, il faut rajouter [quelques
-informations](https://framagit.org/flopedt/FlOpEDT/blob/master/FlOpEDT/misc/conf/flopedt.add)
+informations](./flopedt.add)
 à la fin de la section "[Service]" du fichier de configuration du service.
 
 - Choisir le bon fichier de settings en remplaçant
   "FlOpEDT.settings.local" par
-  "FlOpEDT.settings.dockerless-production" dans le [manage.py](https://framagit.org/flopedt/FlOpEDT/blob/master/FlOpEDT/manage.py).
-- Modifier la secret_key dans [le fichier de configuration Django](https://framagit.org/flopedt/FlOpEDT/blob/master/FlOpEDT/FlOpEDT/dockerless-production.py)
+  "FlOpEDT.settings.dockerless-production" dans le [manage.py](../../manage.py).
+- Modifier la secret_key dans [le fichier de configuration Django](../../FlOpEDT/dockerless-production.py)
 
 - Dans l'environnement virtuel python, rendre disponible les
   fichiers javascript notamment :
