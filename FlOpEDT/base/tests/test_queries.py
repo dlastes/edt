@@ -65,7 +65,7 @@ class ScheduledCourseTestCase(TestCase):
         cls.c1 = models.Course.objects.create(groupe=cls.g1, semaine=39, an=2018, type=cls.ct1, module=cls.m1)
         cls.day1 = models.Day.objects.create(day=models.Day.MONDAY)
         cls.t1 = models.Time.objects.create()
-        cls.s1 = models.Slot.objects.create(jour=cls.day1, heure=cls.t1)
+        cls.s1 = models.Slot.objects.create(day=cls.day1, heure=cls.t1)
         cls.sc1 = models.ScheduledCourse.objects.create(cours=cls.c1, creneau=cls.s1)
 
     def test_get_scheduled_courses_with_department(self):   

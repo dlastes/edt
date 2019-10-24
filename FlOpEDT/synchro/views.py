@@ -64,7 +64,7 @@ def get_course_list():
 
 
 def create_event(c):
-    begin = datetime.combine(Week(c.cours.an, c.cours.semaine).day(c.creneau.jour_id-1),
+    begin = datetime.combine(Week(c.cours.an, c.cours.semaine).day(c.creneau.day_id-1),
                              datetime.min.time()) \
                              + timedelta(hours=c.creneau.heure.hours,
                                          minutes=c.creneau.heure.minutes)

@@ -78,8 +78,8 @@ def add_iut_blagnac_specials():
     TP = CourseType.objects.get(name='TP')
 
     # Pas plus de 2 examens par jour!
-    pas_plus_de_2_exams_par_jour = True
-    if pas_plus_de_2_exams_par_jour:
+    no_more_than_2_exams_a_day = True
+    if no_more_than_2_exams_a_day:
         for promo in TrainingProgramme.objects.all():
             L = LimitCourseTypeTimePerPeriod(limit=2, department=info,
                                              type=DS,
