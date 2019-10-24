@@ -7,25 +7,25 @@ configurations sont possibles.
 ### Installations Python/Django
 
 - Récupérer le module pour gérer les environnements virtuels
-```pip install virtualenv````
+```pip install virtualenv```
 - Créer un env virtuel quelque part, par exemple :
 ```
 cd FlOpEDT
 virtualenv -p /usr/bin/python3.6 venv
 ```
-- Y aller
+- Y aller :
 ```source venv/bin/activate```
-- Mettre à jour pip
+- Mettre à jour pip :
 ```pip install --upgrade pip```
-- Installer les modules python du requirements.txt
+- Installer les modules python du requirements.txt :
 ```pip install -r requirements.txt```
-- Et
+- Et :
 ```
 pip install python-memcached
 pip install ipython
 pip install daphne
 ```
-- Sortir de l'env virtuel
+- Sortir de l'env virtuel :
 ```deactivate```
 
 
@@ -102,7 +102,7 @@ informations](./flopedt.add)
 - Choisir le bon fichier de settings en remplaçant
   "FlOpEDT.settings.local" par
   "FlOpEDT.settings.dockerless-production" dans le [manage.py](../../manage.py).
-- Modifier la secret_key dans [le fichier de configuration Django](../../FlOpEDT/dockerless-production.py)
+- Modifier la secret_key dans [le fichier de configuration Django](../../FlOpEDT/settings/dockerless-production.py)
 
 - Dans l'environnement virtuel python, rendre disponible les
   fichiers javascript notamment :
