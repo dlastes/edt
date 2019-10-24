@@ -56,12 +56,14 @@ max_weight = 8
 
 slot_pause = 30
 
+PM_start = 12*60
+
 basic_slot_duration = 90
 
 days_list = [c[0] for c in Day.CHOICES]
 days_index = {}
 for c in Day.CHOICES:
-    days_index[c[0]]=days_list.index(c[0])
+    days_index[c[0]] = days_list.index(c[0])
 
 
 class Slot(object):
@@ -73,7 +75,7 @@ class Slot(object):
         if self.course_type is not None:
             self.duration = self.course_type.duration
         self.end_time = self.start_time + self.duration
-        if self.start_time / 60 >= 12:
+        if self.start_time >= PM_start:
             self.apm = Time.PM
         else:
             self.apm = Time.AM
@@ -87,7 +89,8 @@ class Slot(object):
             return False
 
     def is_after(self, other):
-        if days_index[self.day] > days_index[other.day] \
+        if self.day.week > other.day.week \
+                or self.day.week == other.day.week and days_index[self.day.day] > days_index[other.day.day] \
                 or self.day == other.day and self.start_time >= other.end_time:
             return True
         else:
@@ -100,7 +103,7 @@ class Slot(object):
             return False
 
     def __lt__(self, other):
-        return other.is_after(self)
+        return other.is_after(self) and not self.is_after(other)
 
     def __str__(self):
         hours = self.start_time//60
@@ -114,8 +117,10 @@ class Slot(object):
 
 
 def slots_filter(slot_set, day=None, apm=None, course_type=None, start_time=None,
-                 simultaneous_to=None, is_after=None, starts_after=None, ends_before=None):
+                 simultaneous_to=None, week=None, is_after=None, starts_after=None, ends_before=None):
     slots = slot_set
+    if week is not None:
+        slots = set(sl for sl in slots if sl.day.week == week)
     if day is not None:
         slots = set(sl for sl in slots if sl.day == day)
     if course_type is not None:
@@ -133,6 +138,21 @@ def slots_filter(slot_set, day=None, apm=None, course_type=None, start_time=None
     if start_time is not None:
         slots = set(sl for sl in slots if sl.start_time == start_time)
     return slots
+
+
+def days_filter(days_set, index=None, index_in=None, week=None, week_in=None, day=None):
+    days = days_set
+    if week is not None:
+        days = set(d for d in days if d.week == week)
+    if week_in is not None:
+        days = set(d for d in days if d.week in week_in)
+    if index is not None:
+        days = set(d for d in days if days_index[d.day] == index)
+    if index_in is not None:
+        days = set(d for d in days if days_index[d.day] in index_in)
+    if day is not None:
+        days = set(d for d in days if d.day == day)
+    return days
 
 
 class TTConstraint(models.Model):
