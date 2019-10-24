@@ -254,7 +254,7 @@ class WeekDB(object):
 
         courses_for_group = {}
         for g in groups:
-            courses_for_group[g] = set(self.courses.filter(groupe=g))
+            courses_for_group[g] = set(self.courses.filter(group=g))
 
         courses_for_basic_group = {}
         for bg in basic_groups:
@@ -1180,12 +1180,12 @@ class TTModel(object):
                 if self.get_var_value(self.TT[(sl, c)]) == 1:
                     # No = len(self.wdb.sched_courses \
                     #          .filter(cours__module=c.module,
-                    #                  cours__groupe=c.groupe,
+                    #                  cours__group=c.group,
                     #                  cours__semaine__lte=self.semaine - 1,
                     #                  copie_travail=0))
                     # No += len(CoursPlace.objects \
                     #           .filter(cours__module=c.module,
-                    #                   cours__groupe=c.groupe,
+                    #                   cours__group=c.group,
                     #                   cours__semaine=self.semaine,
                     #                   copie_travail=target_work_copy))
                     cp = ScheduledCourse(cours=c,
@@ -1228,7 +1228,7 @@ class TTModel(object):
             tc.save()
 
         for g in self.wdb.basic_groups:
-            djlg = GroupFreeHalfDay(groupe=g,
+            djlg = GroupFreeHalfDay(group=g,
                                     an=self.wdb.year,
                                     semaine=self.wdb.week,
                                     work_copy=target_work_copy,
@@ -1236,7 +1236,7 @@ class TTModel(object):
                                         0.5 * self.get_expr_value(
                                         self.FHD_G['AM'][g]))
             djlg.save()
-            cg = GroupCost(groupe=g,
+            cg = GroupCost(group=g,
                            an=self.wdb.year,
                            semaine=self.wdb.week,
                            work_copy=target_work_copy,

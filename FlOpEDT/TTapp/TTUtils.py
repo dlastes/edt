@@ -82,7 +82,7 @@ def basic_reassign_rooms(department, semaine, an, target_work_copy):
                                 start_time__gt = st - F('cours__type__duration') - slot_pause,
                                 day=day,
                                 cours__room_type=CP.cours.room_type,
-                                cours__groupe=CP.cours.groupe,
+                                cours__groupe=CP.cours.group,
                                 **scheduled_courses_params)
                     if len(precedent) == 0:
                         continue
@@ -128,7 +128,7 @@ def basic_reassign_rooms(department, semaine, an, target_work_copy):
                         if not LimitedRoomChoices.objects.filter(
                                     Q(week=semaine) | Q(week=None),
                                     Q(year=an) | Q(year=None),
-                                    Q(train_prog=sib.cours.module.train_prog) | Q(module=sib.cours.module) | Q(group=sib.cours.groupe) |
+                                    Q(train_prog=sib.cours.module.train_prog) | Q(module=sib.cours.module) | Q(group=sib.cours.group) |
                                     Q(tutor=sib.cours.tutor) | Q(type=sib.cours.type),
                                     possible_rooms=sib.room).exists():
                             r = CP.room

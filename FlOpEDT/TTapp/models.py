@@ -640,7 +640,7 @@ class Stabilize(TTConstraint):
                                                 day=sl.day):
                         ttmodel.obj += ponderation * ttmodel.TT[(sl, c)]
                         # nb_changements_I[i]+=ttmodel.TT[(sl,c)]
-                    if not sched_courses.filter(cours__groupe=c.groupe,
+                    if not sched_courses.filter(cours__groupe=c.group,
                                                 day=sl.day):
                         ttmodel.obj += ponderation * ttmodel.TT[(sl, c)]
         else:
@@ -652,7 +652,7 @@ class Stabilize(TTConstraint):
             if self.train_prog is not None:
                 fc = fc.filter(groupe__train_prog=self.train_prog)
             if self.group:
-                fc = fc.filter(groupe=self.group)
+                fc = fc.filter(group=self.group)
             if self.module:
                 fc = fc.filter(module=self.module)
             for c in fc:
@@ -842,7 +842,7 @@ class MinNonPreferedSlot(TTConstraint):
                     ttmodel.add_to_inst_cost(c.tutor, cost)
                 else:
                     for g in basic_groups:
-                        if c.groupe in ttmodel.wdb.all_groups_of[g]:
+                        if c.group in ttmodel.wdb.all_groups_of[g]:
                             cost = self.local_weight() \
                                    * ponderation * ttmodel.TT[(sl, c)] \
                                    * ttmodel.unp_slot_cost_course[c.type,
@@ -886,7 +886,7 @@ class AvoidBothTimes(TTConstraint):
         if self.train_prog is not None:
             fc = fc.filter(groupe__train_prog=self.train_prog)
         if self.group:
-            fc = fc.filter(groupe=self.group)
+            fc = fc.filter(group=self.group)
         slots1 = set([slot for slot in ttmodel.wdb.slots if slot.start_time <= self.time1 < slot.end_time])
         slots2 = set([slot for slot in ttmodel.wdb.slots if slot.start_time <= self.time2 < slot.end_time])
         for c1 in fc:
@@ -947,7 +947,7 @@ class SimultaneousCourses(TTConstraint):
                         ttmodel.change_var_coeff(var1, tutor_constr, 0)
             for bg in ttmodel.wdb.basic_groups:
                 bg_groups = ttmodel.wdb.all_groups_of[bg]
-                if self.course1.groupe in bg_groups and self.course2.groupe in bg_groups:
+                if self.course1.group in bg_groups and self.course2.group in bg_groups:
                     for sl2 in ttmodel.wdb.slots_intersecting[sl] - {sl}:
                         name_group_constr_sl2 = 'simul_slots' + bg.full_name() + '_' + str(sl) + '_' + str(sl2)
                         group_constr = ttmodel.get_constraint(name_group_constr_sl2)
@@ -995,7 +995,7 @@ class LimitedStartTimeChoices(TTConstraint):
         if self.train_prog is not None:
             fc = fc.filter(groupe__train_prog=self.train_prog)
         if self.group is not None:
-            fc = fc.filter(groupe=self.group)
+            fc = fc.filter(group=self.group)
         possible_slots_ids = set(slot.id for slot in ttmodel.wdb.slots
                                  if slot.start_time in self.possible_start_times.values_list())
 
@@ -1061,7 +1061,7 @@ class LimitedRoomChoices(TTConstraint):
         if self.type is not None:
             fc = fc.filter(type=self.type)
         if self.group is not None:
-            fc = fc.filter(groupe=self.group)
+            fc = fc.filter(group=self.group)
         possible_rooms_ids = self.possible_rooms.values_list('id', flat=True)
 
         for c in fc:

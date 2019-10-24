@@ -15,11 +15,11 @@ tz='Europe/Paris'
 
 def index(request, **kwargs):
     enseignant_list = Tutor.objects.filter(is_active=True, is_tutor=True).order_by('username')
-    groupe_list = Group.objects.filter(basic=True,
+    group_list = Group.objects.filter(basic=True,
                                        train_prog__department=request.department)\
                                .order_by('train_prog__abbrev', 'nom')
     salle_list = Room.objects.order_by('name')
-    context = { 'enseignants': enseignant_list, 'groupes':groupe_list, 'salles':salle_list }
+    context = { 'enseignants': enseignant_list, 'groupes':group_list, 'salles':salle_list }
     return render(request, 'synchro/index.html', context=context)
 
 
@@ -27,15 +27,15 @@ def tutor(request, id, **kwargs):
     events=[]
     for c in get_course_list().filter(cours__tutor__username=id):
         e = create_event(c)
-        e['title'] = c.cours.module.abbrev + ' ' + c.cours.type.name + ' - ' + c.cours.groupe.train_prog.abbrev + ' ' + c.cours.groupe.name
+        e['title'] = c.cours.module.abbrev + ' ' + c.cours.type.name + ' - ' + c.cours.group.train_prog.abbrev + ' ' + c.cours.group.name
         events.append(e)
     response = render(request, 'synchro/ical.ics', context={'events':events, 'timezone':tz}, content_type='text/calendar; charset=utf8')
     response['Content-Disposition'] = f'attachment; filename={id}.ics'
     return response
 
 
-def group(request, promo_id, groupe_id, **kwargs):
-    g = Group.objects.get(name=groupe_id, train_prog__abbrev=promo_id)
+def group(request, promo_id, group_id, **kwargs):
+    g = Group.objects.get(name=group_id, train_prog__abbrev=promo_id)
     g_list = g.ancestor_groups()
     g_list.add(g)
     events=[]
@@ -45,7 +45,7 @@ def group(request, promo_id, groupe_id, **kwargs):
         e['title'] = c.cours.module.abbrev + ' ' + c.cours.type.name + ' - ' + tutor
         events.append(e)
     response = render(request, 'synchro/ical.ics', context={'events':events, 'timezone':tz}, content_type='text/calendar; charset=utf8')
-    response['Content-Disposition'] = f'attachment; filename={promo_id}{groupe_id}.ics'
+    response['Content-Disposition'] = f'attachment; filename={promo_id}{group_id}.ics'
     return response
 
 
@@ -72,12 +72,12 @@ def create_event(c):
     tutor = c.cours.tutor.username if c.cours.tutor is not None else ''
     location = c.room.name if c.room is not None else ''
     return {'id':c.id,
-         'title': c.cours.module.abbrev + ' ' + c.cours.type.name + ' - ' + c.cours.groupe.train_prog.abbrev + ' ' + c.cours.groupe.name + ' - ' + tutor,
+         'title': c.cours.module.abbrev + ' ' + c.cours.type.name + ' - ' + c.cours.group.train_prog.abbrev + ' ' + c.cours.group.name + ' - ' + tutor,
          'location': location,
          'begin': begin,
          'end': end,
          'description': 'Cours \: ' + c.cours.module.abbrev + ' ' + c.cours.type.name +'\\n'+
-           'Groupe \: ' + c.cours.groupe.train_prog.abbrev + ' ' + c.cours.groupe.name +'\\n'+
+           'Groupe \: ' + c.cours.group.train_prog.abbrev + ' ' + c.cours.group.name +'\\n'+
            'Enseignant : ' + c.cours.tutor.username +'\\n' +
            'Salle \: ' + location
     }

@@ -57,11 +57,11 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
     duree_COL = 4
     prof_COL = 5
     salle_COL = 6
-    groupe_COL = 7
+    group_COL = 7
     sumtotal = 0
     while 1:
         row += 1
-        is_total = sheet.cell(row=row, column=groupe_COL).value
+        is_total = sheet.cell(row=row, column=group_COL).value
         if is_total == "TOTAL":
             # print "Sem %g de %s - TOTAL: %g"%(semaine, feuille,sumtotal)
             break
@@ -100,7 +100,7 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
             nature = sheet.cell(row=row, column=nature_COL).value
             salle = sheet.cell(row=row, column=salle_COL).value
             prof = sheet.cell(row=row, column=prof_COL).value
-            grps = sheet.cell(row=row, column=groupe_COL).value
+            grps = sheet.cell(row=row, column=group_COL).value
             COURSE_TYPE = CourseType.objects.get(name=nature, department=department)
             ROOMTYPE = RoomType.objects.get(name=salle, department=department)
             if prof is None:
@@ -127,17 +127,17 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
                 grps = []
             else:
                 grps = grps.replace(' ', '').replace(',', ';').split(';')
-            groupes = [str(g) for g in grps]
+            groups = [str(g) for g in grps]
 
-            GROUPS = list(Group.objects.filter(nom__in=groupes, train_prog=PROMO))
+            GROUPS = list(Group.objects.filter(nom__in=groups, train_prog=PROMO))
             if GROUPS == []:
                 GROUPS = list(Group.objects.filter(name='CE', train_prog=PROMO))
 
             N=int(N)
 
             for i in range(N):
-                GROUPE = GROUPS[i % len(GROUPS)]
-                C = Course(tutor=TUTOR, type=COURSE_TYPE, module=MODULE, groupe=GROUPE, semaine=semaine, an=an,
+                GROUP = GROUPS[i % len(GROUPS)]
+                C = Course(tutor=TUTOR, type=COURSE_TYPE, module=MODULE, group=GROUP, semaine=semaine, an=an,
                            room_type=ROOMTYPE)
                 C.save()
                 for sp in SUPP_TUTORS:
@@ -152,23 +152,23 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
                         s = 1
                     course_type = after_type[s:]
                     courses = Course.objects.filter(type__name=course_type, module=MODULE, semaine=semaine, an=an,
-                                                    groupe__in = GROUPE.ancestor_groups() |
-                                                                 {GROUPE} |
-                                                                 GROUPE.descendants_groups())
+                                                    groupe__in = GROUP.ancestor_groups() |
+                                                                 {GROUP} |
+                                                                 GROUP.descendants_groups())
                     for course in courses[:n]:
                         P = Dependency(cours1=course, cours2=C)
                         P.save()
 
             if 'D' in comments or 'D' in local_comments and N >= 2:
-                for GROUPE in GROUPS:
-                    Cours = Course.objects.filter(type=COURSE_TYPE, module=MODULE, groupe=GROUPE, an=an,
+                for GROUP in GROUPS:
+                    Cours = Course.objects.filter(type=COURSE_TYPE, module=MODULE, group=GROUP, an=an,
                                                   semaine=semaine)
                     for i in range(N//2-1):
                         P = Dependency(cours1=Cours[2*i], cours2=Cours[2*i+1], successive=True)
                         P.save()
             if 'ND' in comments or 'ND' in local_comments  and N >= 2:
-                for GROUPE in GROUPS:
-                    Cours = Course.objects.filter(type=COURSE_TYPE, module=MODULE, groupe=GROUPE, an=an,
+                for GROUP in GROUPS:
+                    Cours = Course.objects.filter(type=COURSE_TYPE, module=MODULE, group=GROUP, an=an,
                                                   semaine=semaine)
                     P = Dependency(cours1=Cours[0], cours2=Cours[1], ND=True)
                     P.save()
