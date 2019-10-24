@@ -90,8 +90,8 @@ def csvreader(test):
        Day.objects.create()
        for sem in range(int(stockage[1][2].replace('\"', ''))):
            for day1 in Day.objects.all():
-               for creneau in listecreneau:
-                    slot1 = Slot.objects.create(day=day1, heure=creneau, duration="120")
+               for slot in listecreneau:
+                    slot1 = Slot.objects.create(day=day1, heure=slot, duration="120")
                     print(slot1)
                     slot.append(slot1)
        print(slot)
@@ -108,7 +108,7 @@ def csvreader(test):
                             nouvelledispo = UserPreference.objects.create(user=User.objects.filter(first_name=prof[0], last_name=prof[1]),
                               semaine=stockage[1][j],
                               an=stockage[0][indiceannee],
-                              creneau=slot1,
+                              slot=slot1,
                               valeur=valeur)
                             nouvelledispo.save()
                     indicecreneau+=2

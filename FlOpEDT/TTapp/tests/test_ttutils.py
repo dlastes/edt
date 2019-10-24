@@ -22,7 +22,7 @@ class TTutilsTestCase(TestCase):
         cls.edtv1 = models.EdtVersion.objects.create(department=cls.department1, semaine=39, an=2018, version=3)
         cls.scheduled_courses = {}
         for i in range(0,9):
-            cls.scheduled_courses[i] = models.ScheduledCourse.objects.create(cours=cls.c1, creneau=cls.s1, copie_travail=i)
+            cls.scheduled_courses[i] = models.ScheduledCourse.objects.create(cours=cls.c1, slot=cls.s1, copie_travail=i)
 
     def test_basic_swap_version(self):   
         basic_swap_version(self.department1, 39, 2018, 2, 5)

@@ -621,7 +621,7 @@ class Stabilize(TTConstraint):
         sched_courses = ttmodel.wdb.sched_courses.filter(copie_travail=self.work_copy)
         for day in self.fixed_days.all():
             for sc in sched_courses.filter(creneau__jour=day):
-                ttmodel.add_constraint(ttmodel.TT[(sc.creneau, sc.cours)], '==', 1)
+                ttmodel.add_constraint(ttmodel.TT[(sc.slot, sc.cours)], '==', 1)
             for sc in sched_courses.exclude(creneau__jour=day):
                 for sl in ttmodel.wdb.slots.filter(day=day):
                     ttmodel.add_constraint(ttmodel.TT[(sl, sc.cours)], '==', 0)

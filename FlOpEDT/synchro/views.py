@@ -64,11 +64,11 @@ def get_course_list():
 
 
 def create_event(c):
-    begin = datetime.combine(Week(c.cours.an, c.cours.semaine).day(c.creneau.day_id-1),
+    begin = datetime.combine(Week(c.cours.an, c.cours.semaine).day(c.slot.day_id-1),
                              datetime.min.time()) \
-                             + timedelta(hours=c.creneau.heure.hours,
-                                         minutes=c.creneau.heure.minutes)
-    end = begin + timedelta(minutes=c.creneau.duration)
+                             + timedelta(hours=c.slot.heure.hours,
+                                         minutes=c.slot.heure.minutes)
+    end = begin + timedelta(minutes=c.slot.duration)
     tutor = c.cours.tutor.username if c.cours.tutor is not None else ''
     location = c.room.name if c.room is not None else ''
     return {'id':c.id,
