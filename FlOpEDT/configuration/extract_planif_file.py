@@ -131,7 +131,7 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
 
             GROUPS = list(Group.objects.filter(nom__in=groupes, train_prog=PROMO))
             if GROUPS == []:
-                GROUPS = list(Group.objects.filter(nom='CE', train_prog=PROMO))
+                GROUPS = list(Group.objects.filter(name='CE', train_prog=PROMO))
 
             N=int(N)
 

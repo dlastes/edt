@@ -312,14 +312,14 @@ function create_dispos_user_data() {
 
     var current;
 
-    if (dispos[user.nom] === undefined) {
-	allocate_dispos(user.nom);
-	fill_missing_preferences(user.nom, ts);
+    if (dispos[user.name] === undefined) {
+	allocate_dispos(user.name);
+	fill_missing_preferences(user.name, ts);
         sort_preferences(dispos);
     }
 
     for (var i = 0; i < days.length; i++) {
-	pref_list = dispos[user.nom][days[i].ref] ;
+	pref_list = dispos[user.name][days[i].ref] ;
 	for (var k = 0 ; k<pref_list.length ; k++) {
             d2p = {
 		day: days[i].ref,
@@ -759,7 +759,7 @@ function clean_prof_displayed(light) {
     // relevant tutors
     tutors.all.forEach(function(t) {
         t.relevant = false ;
-        if (t.name == user.nom) {
+        if (t.name == user.name) {
             t.relevant = true ;
         }
     });

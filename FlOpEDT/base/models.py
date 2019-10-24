@@ -66,7 +66,7 @@ class GroupType(models.Model):
 
 
 class Group(models.Model):
-    nom = models.CharField(max_length=4)
+    name = models.CharField(max_length=4)
     train_prog = models.ForeignKey('TrainingProgramme', on_delete=models.CASCADE)
     type = models.ForeignKey('GroupType', on_delete=models.CASCADE)
     size = models.PositiveSmallIntegerField()
@@ -76,10 +76,10 @@ class Group(models.Model):
                                            related_name="children_groups")
 
     def full_name(self):
-        return self.train_prog.abbrev + "-" + self.nom
+        return self.train_prog.abbrev + "-" + self.name
 
     def __str__(self):
-        return self.nom
+        return self.name
 
     def ancestor_groups(self):
         """
@@ -291,7 +291,7 @@ class RoomSort(models.Model):
 
 
 class Module(models.Model):
-    nom = models.CharField(max_length=100, null=True)
+    name = models.CharField(max_length=100, null=True)
     abbrev = models.CharField(max_length=10, verbose_name='Intitulé abbrégé')
     head = models.ForeignKey('people.Tutor',
                              null=True,

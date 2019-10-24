@@ -759,13 +759,13 @@ function go_promo_gp_init(button_available) {
     promo_init = indexOf_promo(promo_init) ;
     if (promo_init >= 0){
 	if (gp_init == "") {
-	    gp_init = root_gp[promo_init].gp.nom ;
+	    gp_init = root_gp[promo_init].gp.name ;
 	}
-	if (Object.keys(groups[promo_init]).map(function(g) { return groups[promo_init][g].nom ; }).indexOf(gp_init) != -1) {
+	if (Object.keys(groups[promo_init]).map(function(g) { return groups[promo_init][g].name ; }).indexOf(gp_init) != -1) {
 	    apply_gp_display(groups[promo_init][gp_init], true, button_available);
 	}
     } else if (gp_init != "") {
-	if (Object.keys(groups[0]).map(function(g) { return groups[0][g].nom ; }).indexOf(gp_init) != -1) {
+	if (Object.keys(groups[0]).map(function(g) { return groups[0][g].name ; }).indexOf(gp_init) != -1) {
 	    apply_gp_display(groups[0][gp_init], true, button_available);
 	}
     }
@@ -818,7 +818,7 @@ function extract_all_groups_structure(r) {
 
 function extract_groups_structure(r, npro, nrow) {
     var gr = {
-        nom: r.name,
+        name: r.name,
         ancetres: null,
         descendants: null,
         display: true,
@@ -838,7 +838,7 @@ function extract_groups_structure(r, npro, nrow) {
     }
 
     if ("undefined" === typeof r.buttxt) {
-        gr.buttxt = gr.nom;
+        gr.buttxt = gr.name;
     } else {
         gr.buttxt = r.buttxt;
     }
@@ -888,7 +888,7 @@ function extract_groups_structure(r, npro, nrow) {
             extract_groups_structure(r.children[i], npro, nrow);
         }
     }
-    groups[npro][gr.nom] = gr;
+    groups[npro][gr.name] = gr;
 }
 
 
@@ -2027,12 +2027,12 @@ function create_stype() {
 
 
 function fetch_dispos_type() {
-    if (user.nom != "") {
+    if (user.name != "") {
         show_loader(true);
         $.ajax({
             type: "GET", //rest Type
             dataType: 'text',
-            url: url_fetch_user_dweek + logged_usr.nom,
+            url: url_fetch_user_dweek + logged_usr.name,
             async: true,
             contentType: "text/csv",
             success: function(msg) {

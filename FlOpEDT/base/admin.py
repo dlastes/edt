@@ -81,7 +81,7 @@ class CoursPlaceResource(resources.ModelResource):
     #                               widget=ForeignKeyWidget(Tutor, 'last_name'))
     groupe = fields.Field(column_name='gpe_nom',
                           attribute='cours__groupe',
-                          widget=ForeignKeyWidget(Group, 'nom'))
+                          widget=ForeignKeyWidget(Group, 'name'))
     promo = fields.Field(column_name='gpe_promo',
                          attribute='cours__groupe__train_prog',
                          widget=ForeignKeyWidget(TrainingProgramme, 'abbrev'))
@@ -175,7 +175,7 @@ class CoursResource(resources.ModelResource):
                           attribute='cours__type__duration')
     groupe = fields.Field(column_name='groupe',
                           attribute='groupe',
-                          widget=ForeignKeyWidget(Group, 'nom'))
+                          widget=ForeignKeyWidget(Group, 'name'))
     color_bg = fields.Field(column_name='color_bg',
                             attribute='module__display',
                             widget=ForeignKeyWidget(ModuleDisplay, 'color_bg'))
@@ -373,7 +373,7 @@ class TrainingHalfDayAdmin(DepartmentModelAdmin):
     
 
 class GroupAdmin(DepartmentModelAdmin):
-    list_display = ('nom', 'type', 'size', 'train_prog')
+    list_display = ('name', 'type', 'size', 'train_prog')
     filter_horizontal = ('parent_groups',)
     ordering = ('size',)
     list_filter = (('train_prog', DropdownFilterRel),
@@ -415,7 +415,7 @@ class RoomSortAdmin(DepartmentModelAdmin):
 
     
 class ModuleAdmin(DepartmentModelAdmin):
-    list_display = ('nom', 'ppn', 'abbrev',
+    list_display = ('name', 'ppn', 'abbrev',
                     'head',
                     'train_prog')
     ordering = ('abbrev',)

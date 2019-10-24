@@ -25,7 +25,7 @@
   ---- VARIABLES ----
   -------------------*/
 
-var user = {nom: usna,
+var user = {name: usna,
 	    dispos: [],
 	    dispos_bu: [],
 	    dispos_type: [],

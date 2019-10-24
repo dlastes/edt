@@ -621,7 +621,7 @@ def fetch_decale(req, **kwargs):
             courses.append({'i': c.id,
                             'm': c.module.abbrev,
                             'p': c.tutor.username,
-                            'g': c.groupe.nom,
+                            'g': c.groupe.name,
                             'd': day,
                             't': time})
 
@@ -650,7 +650,7 @@ def fetch_decale(req, **kwargs):
     cours = filt_p(filt_m(filt_sa(department, semaine, an), module), prof) \
         .distinct('groupe')
     for c in cours:
-        groups.append(c.groupe.nom)
+        groups.append(c.groupe.name)
 
     return JsonResponse({'cours': courses,
                          'modules': modules,

@@ -154,7 +154,7 @@ def get_groups(department_abbrev):
                                 'handled')
             gp_dict_children[gp.full_name()] = []
 
-        for gp in Group.objects.filter(train_prog=train_prog).order_by('nom'):
+        for gp in Group.objects.filter(train_prog=train_prog).order_by('name'):
             for new_gp in gp.parent_groups.all():
                 gp_dict_children[new_gp.full_name()].append(gp)
 
@@ -186,7 +186,7 @@ def get_descendant_groups(gp, children):
             raise Exception('You should indicate on which row a training '
                             'programme will be displayed '
                             '(cf TrainingProgrammeDisplay)')
-    current['name'] = gp.nom
+    current['name'] = gp.name
     try:
         gpd = GroupDisplay.objects.get(group=gp)
         if gpd.button_height is not None:
@@ -200,7 +200,7 @@ def get_descendant_groups(gp, children):
         current['children'] = []
         for gp_child in children[gp.full_name()]:
             gp_obj = get_descendant_groups(gp_child, children)
-            gp_obj['parent'] = gp.nom
+            gp_obj['parent'] = gp.name
             current['children'].append(gp_obj)
 
     return current

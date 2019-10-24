@@ -440,7 +440,7 @@ class LimitCourseTypeTimePerPeriod(TTConstraint):  # , pond):
             type_value = 'All'
 
         if self.module:
-            module_value = self.module.nom
+            module_value = self.module.name
         else:
             module_value = 'All'
 
@@ -459,7 +459,7 @@ class LimitCourseTypeTimePerPeriod(TTConstraint):  # , pond):
     def one_line_description(self):
         text = "Pas plus de " + str(self.max_hours) + ' heures de ' + str(self.course_type)
         if self.module:
-            text += " de " + self.module.nom
+            text += " de " + self.module.name
         text += " par "
         if self.period == self.FULL_DAY:
             text += 'jour'
@@ -769,10 +769,10 @@ class MinHalfDays(TTConstraint):
             details.update({'tutors': ', '.join([tutor.username for tutor in self.tutors.all()])})
 
         if self.groups.exists():
-            details.update({'groups': ', '.join([group.nom for group in self.groups.all()])})
+            details.update({'groups': ', '.join([group.name for group in self.groups.all()])})
 
         if self.modules.exists():
-            details.update({'modules': ', '.join([module.nom for module in self.modules.all()])})
+            details.update({'modules': ', '.join([module.name for module in self.modules.all()])})
 
         return view_model
         
@@ -784,7 +784,7 @@ class MinHalfDays(TTConstraint):
             text += ' de : ' + ', '.join([tutor.username for tutor in self.tutors.all()])
 
         if self.groups.exists():
-            text += ' du(des) groupe(s) : ' + ', '.join([group.nom for group in self.groups.all()])
+            text += ' du(des) groupe(s) : ' + ', '.join([group.name for group in self.groups.all()])
 
         if self.modules.exists():
             text += ' de : ' + ', '.join([str(module) for module in self.modules.all()])

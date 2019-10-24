@@ -27,7 +27,7 @@ def tutor(request, id, **kwargs):
     events=[]
     for c in get_course_list().filter(cours__tutor__username=id):
         e = create_event(c)
-        e['title'] = c.cours.module.abbrev + ' ' + c.cours.type.name + ' - ' + c.cours.groupe.train_prog.abbrev + ' ' + c.cours.groupe.nom
+        e['title'] = c.cours.module.abbrev + ' ' + c.cours.type.name + ' - ' + c.cours.groupe.train_prog.abbrev + ' ' + c.cours.groupe.name
         events.append(e)
     response = render(request, 'synchro/ical.ics', context={'events':events, 'timezone':tz}, content_type='text/calendar; charset=utf8')
     response['Content-Disposition'] = f'attachment; filename={id}.ics'
@@ -35,7 +35,7 @@ def tutor(request, id, **kwargs):
 
 
 def group(request, promo_id, groupe_id, **kwargs):
-    g = Group.objects.get(nom=groupe_id, train_prog__abbrev=promo_id)
+    g = Group.objects.get(name=groupe_id, train_prog__abbrev=promo_id)
     g_list = g.ancestor_groups()
     g_list.add(g)
     events=[]
@@ -72,12 +72,12 @@ def create_event(c):
     tutor = c.cours.tutor.username if c.cours.tutor is not None else ''
     location = c.room.name if c.room is not None else ''
     return {'id':c.id,
-         'title': c.cours.module.abbrev + ' ' + c.cours.type.name + ' - ' + c.cours.groupe.train_prog.abbrev + ' ' + c.cours.groupe.nom + ' - ' + tutor,
+         'title': c.cours.module.abbrev + ' ' + c.cours.type.name + ' - ' + c.cours.groupe.train_prog.abbrev + ' ' + c.cours.groupe.name + ' - ' + tutor,
          'location': location,
          'begin': begin,
          'end': end,
          'description': 'Cours \: ' + c.cours.module.abbrev + ' ' + c.cours.type.name +'\\n'+
-           'Groupe \: ' + c.cours.groupe.train_prog.abbrev + ' ' + c.cours.groupe.nom +'\\n'+
+           'Groupe \: ' + c.cours.groupe.train_prog.abbrev + ' ' + c.cours.groupe.name +'\\n'+
            'Enseignant : ' + c.cours.tutor.username +'\\n' +
            'Salle \: ' + location
     }

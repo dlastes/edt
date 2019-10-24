@@ -21,7 +21,7 @@ class EventFeed(ICalFeed):
     def item_title(self, scourse):
         course = scourse.cours
         return (f'{course.module.abbrev} {course.type.name} '
-                f'- {course.groupe.train_prog.abbrev} G{course.groupe.nom}'
+                f'- {course.groupe.train_prog.abbrev} G{course.groupe.name}'
         )
 
     def item_description(self, scourse):
@@ -29,7 +29,7 @@ class EventFeed(ICalFeed):
         course = scourse.cours
         tutor = course.tutor
         return (f'Cours : {course.module.abbrev} {course.type.name}\n'
-                f'Groupe : {course.groupe.train_prog.abbrev} {course.groupe.nom}\n'
+                f'Groupe : {course.groupe.train_prog.abbrev} {course.groupe.name}\n'
                 f'Enseignant : {tutor}\nSalle : {location}'
         )
 
@@ -61,7 +61,7 @@ class TutorEventFeed(EventFeed):
         course = scourse.cours
         location = scourse.room.name if scourse.room is not None else ''
         return (f'{course.module.abbrev} {course.type.name} '
-                f'- {course.groupe.train_prog.abbrev} G{course.groupe.nom} '
+                f'- {course.groupe.train_prog.abbrev} G{course.groupe.name} '
                 f'- {location}'
         )
 
@@ -82,7 +82,7 @@ class RoomEventFeed(EventFeed):
     def item_title(self, scourse):
         course = scourse.cours
         return (f'{course.module.abbrev} {course.type.name} '
-                f'- {course.groupe.train_prog.abbrev} G{course.groupe.nom}'
+                f'- {course.groupe.train_prog.abbrev} G{course.groupe.name}'
                 f'- {course.tutor.username}'
         )
 
@@ -90,7 +90,7 @@ class RoomEventFeed(EventFeed):
 class GroupEventFeed(EventFeed):
     def get_object(self, request, department, training_programme, group):
         print(department, training_programme, group)
-        gp = Group.objects.get(nom=group,
+        gp = Group.objects.get(name=group,
                                train_prog__abbrev=training_programme)
         gp_included = gp.ancestor_groups()
         gp_included.add(gp)

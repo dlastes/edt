@@ -56,12 +56,12 @@ function apply_change_simple_pref(d) {
                 d.val = Math.floor(d.val / (par_dispos.nmax / 2)) * par_dispos.nmax / 2;
             }
             d.val = (d.val + par_dispos.nmax / 2) % (3 * par_dispos.nmax / 2);
-	    update_pref_interval(user.nom, d.day, d.start_time, d.val) ;
-            //dispos[user.nom][idays[d.day]][d.hour] = d.val;
+	    update_pref_interval(user.name, d.day, d.start_time, d.val) ;
+            //dispos[user.name][idays[d.day]][d.hour] = d.val;
             //user.dispos[day_hour_2_1D(d)].val = d.val;
         } else {
             d.val = sel.val ;
-	    update_pref_interval(user.nom, d.day, d.start_time, d.val) ;
+	    update_pref_interval(user.name, d.day, d.start_time, d.val) ;
         }
         go_pref(true);
     }
@@ -656,7 +656,7 @@ function apply_ckbox(dk) {
                     if (tutors.all.filter(function(t){
                         return t.display ;
                     }).length == 1) {
-                        user.nom = tutors.all.find(function(t){
+                        user.name = tutors.all.find(function(t){
                             return t.display ;
                         }).name ;
                     }
@@ -665,7 +665,7 @@ function apply_ckbox(dk) {
                         tutors.all.forEach(function(t) {
                             t.display = true ;
                         }) ;
-                        user.nom = logged_usr.nom ;
+                        user.name = logged_usr.name ;
                     }
                 }
 		create_dispos_user_data();
@@ -819,17 +819,17 @@ function compute_changes(changes, conc_tutors, gps) {
 	    
 	    // add instructor if never seen
             if (conc_tutors.indexOf(cur_course.prof) == -1
-		&& cur_course.prof != logged_usr.nom) {
+		&& cur_course.prof != logged_usr.name) {
                 conc_tutors.push(cur_course.prof);
             }
             if (conc_tutors.indexOf(cb.prof) == -1
-		&& cur_course.prof != logged_usr.nom) {
+		&& cur_course.prof != logged_usr.name) {
                 conc_tutors.push(cb.prof);
             }
 
 	    // add group if never seen
 	    gp_changed = groups[cur_course.promo][cur_course.group] ;
-	    gp_named = set_promos[gp_changed.promo] + gp_changed.nom ;
+	    gp_named = set_promos[gp_changed.promo] + gp_changed.name ;
             if (gps.indexOf(gp_named) == -1) {
                 gps.push(gp_named);
             }
@@ -1053,7 +1053,7 @@ function send_dis_change() {
             url: url_user_pref_changes
 		+ weeks.init_data[weeks.sel[0]].an
 		+ "/" + weeks.init_data[weeks.sel[0]].semaine
-		+ "/" + user.nom,
+		+ "/" + user.name,
             type: 'POST',
 //            contentType: 'application/json; charset=utf-8',
             data: sent_data , //JSON.stringify(changes),
@@ -1274,7 +1274,7 @@ function apply_stype() {
             user.dispos[d].hour = user.dispos_type[d].hour;
             user.dispos[d].val = user.dispos_type[d].val;
             user.dispos[d].off = user.dispos_type[d].off;
-            dispos[user.nom][user.dispos[d].day][user.dispos[d].hour] = user.dispos[d].val;
+            dispos[user.name][user.dispos[d].day][user.dispos[d].hour] = user.dispos[d].val;
         }
         go_pref(true);
         send_dis_change();
@@ -1368,7 +1368,7 @@ function apply_selection_display(choice) {
            && logged_usr.dispo_all_change && ckbox["dis-mod"].cked){
             tutors.all.forEach(function(t) { t.display = false ; });
             concerned.display = true ;
-	    user.nom = choice.name ;
+	    user.name = choice.name ;
 	    create_dispos_user_data() ;
 	    go_pref(true) ;
 	} else {

@@ -31,7 +31,7 @@ var svg = {height: 625 - margin.top - margin.bot, width: 720 - margin.left - mar
 var mode = "tutor" ;
 
 var dd_selections = {
-    'tutor': {value:logged_usr.nom},
+    'tutor': {value:logged_usr.name},
     'prog': {value:''},
     'type': {value:''}};
 
@@ -135,7 +135,7 @@ function create_layouts_pref_only(svg_cont){
   ---------------------*/
 function fetch_url() {
     if (mode == 'tutor') {
-        return url_fetch_user_dweek + user.nom ;
+        return url_fetch_user_dweek + user.name ;
     } else if (mode == 'course') {
         return url_fetch_course_dweek 
             + dd_selections['prog'].value
@@ -269,7 +269,7 @@ d3.select("body")
 function send_url(year, week) {
     if (mode == 'tutor') {
         return url_user_pref_changes + year + "/" + week
-	    + "/" + user.nom ;
+	    + "/" + user.name ;
     } else if (mode == 'course') {
         return url_course_pref_changes + year + "/" + week
 	    + "/" + dd_selections['prog'].value
