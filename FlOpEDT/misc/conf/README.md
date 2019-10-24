@@ -7,22 +7,26 @@ configurations sont possibles.
 ### Installations Python/Django
 
 - Récupérer le module pour gérer les environnements virtuels
-`pip install virtualenv`
+```pip install virtualenv````
 - Créer un env virtuel quelque part, par exemple :
-`cd FlOpEDT`
-`virtualenv -p /usr/bin/python3.6 venv`
+```
+cd FlOpEDT
+virtualenv -p /usr/bin/python3.6 venv
+```
 - Y aller
-`source venv/bin/activate`
+```source venv/bin/activate```
 - Mettre à jour pip
-`pip install --upgrade pip`
+```pip install --upgrade pip```
 - Installer les modules python du requirements.txt
-`pip install -r requirements.txt`
+```pip install -r requirements.txt```
 - Et
-`pip install python-memcached`
-`pip install ipython`
-`pip install daphne`
+```
+pip install python-memcached
+pip install ipython
+pip install daphne
+```
 - Sortir de l'env virtuel
-`deactivate`
+```deactivate```
 
 
 ### Installation/configuration PostgreSQL 
