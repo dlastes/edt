@@ -54,7 +54,7 @@ Deux exemples de configuration sont disponibles pour exécuter l'application ave
 - `CONFIG=production make [build|init|start|stop]`
 
 ## Installation et lancement de l'application sans docker
-Voir [ici](https://framagit.org/flopedt/FlOpEDT/blob/master/FlOpEDT/misc/conf/README.md)
+Voir [ici](./FlOpEDT/misc/conf/README.md)
 
 ## Contributions
 - [Discuter](https://framateam.org/flopedt/)
