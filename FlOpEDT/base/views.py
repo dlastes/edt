@@ -52,7 +52,7 @@ from base.admin import CoursResource, DispoResource, VersionResource, \
 from displayweb.admin import BreakingNewsResource
 from base.forms import ContactForm, PerfectDayForm
 from base.models import Course, UserPreference, ScheduledCourse, EdtVersion, \
-    CourseModification, Slot, Day, Time, RoomGroup, PlanningModification, \
+    CourseModification, Day, Time, RoomGroup, PlanningModification, \
     Regen, RoomPreference, Department, TimeGeneralSettings, CoursePreference, \
     TrainingProgramme, CourseType
 import base.queries as queries
