@@ -11,17 +11,17 @@ configurations sont possibles.
 - Créer un env virtuel quelque part, par exemple :
 `cd FlOpEDT`
 `virtualenv -p /usr/bin/python3.6 venv`
-- y aller
+- Y aller
 `source venv/bin/activate`
 - Mettre à jour pip
 `pip install --upgrade pip`
 - Installer les modules python du requirements.txt
 `pip install -r requirements.txt`
-- Et éventuellement
+- Et
 `pip install python-memcached`
 `pip install ipython`
 `pip install daphne`
-- sortir de l'env virtuel
+- Sortir de l'env virtuel
 `deactivate`
 
 
@@ -47,7 +47,7 @@ et dans la console PSQL, octroyer à l'utilisateur les droits sur la base :
 `GRANT ALL PRIVILEGES ON DATABASE flopdb TO flopuser;`
 - Sortir de la console PSQL (par exemple Ctrl+d).
 
-### Installation d'un solveur de programmes linéaires
+### Installation d'un solveur de programme linéaire en nombres entiers
 
 #### CBC
 
@@ -94,6 +94,11 @@ Remplacer `path_to_where_manage_belongs_to` par le bon chemin.
 Par ailleurs, dans le cas d'une utilisation de Gurobi, il faut rajouter [quelques
 informations](https://framagit.org/flopedt/FlOpEDT/blob/master/FlOpEDT/misc/conf/flopedt.add)
 à la fin de la section "[Service]" du fichier de configuration du service.
+
+- Choisir le bon fichier de settings en remplaçant
+  "FlOpEDT.settings.local" par
+  "FlOpEDT.settings.dockerless-production" dans le [manage.py](https://framagit.org/flopedt/FlOpEDT/blob/master/FlOpEDT/manage.py).
+- Modifier la secret_key dans [le fichier de configuration Django](https://framagit.org/flopedt/FlOpEDT/blob/master/FlOpEDT/FlOpEDT/dockerless-production.py)
 
 - Dans l'environnement virtuel python, rendre disponible les
   fichiers javascript notamment :
