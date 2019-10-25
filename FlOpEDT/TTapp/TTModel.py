@@ -732,7 +732,8 @@ class TTModel(object):
             s = Stabilize(general=True,
                           work_copy=self.stabilize_work_copy)
             s.save()
-            s.enrich_model(self, self.max_stab)
+            for week in self.weeks:
+                s.enrich_model(self, week, self.max_stab)
             s.delete()
             print('Will stabilize from remote work copy #', \
                   self.stabilize_work_copy)
@@ -1154,17 +1155,19 @@ class TTModel(object):
         # first objective  => minimise use of unpreferred slots for teachers
         # ponderation MIN_UPS_I
         for i in self.wdb.instructors:
-            MinNonPreferedSlot(tutor=i,
-                               weight=max_weight) \
-                .enrich_model(self,
-                              ponderation=self.min_ups_i)
+            M = MinNonPreferedSlot(tutor=i,
+                                   weight=max_weight)
+            for week in self.weeks:
+                M.enrich_model(self, week,
+                               ponderation=self.min_ups_i)
 
         # second objective  => minimise use of unpreferred slots for courses
         # ponderation MIN_UPS_C
         for promo in self.train_prog:
-            MinNonPreferedSlot(train_prog=promo,
-                               weight=max_weight) \
-                .enrich_model(self,
+            M = MinNonPreferedSlot(train_prog=promo,
+                               weight=max_weight)
+            for week in self.weeks:
+                M.enrich_model(self, week,
                               ponderation=self.min_ups_c)
 
     def add_other_departments_constraints(self):
