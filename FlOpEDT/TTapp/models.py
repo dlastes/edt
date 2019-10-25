@@ -841,12 +841,12 @@ class MinNonPreferedSlot(TTConstraint):
                 'tutor': ValidationError(_('Si pas de promo alors prof.',
                                            code='invalid'))})
 
-    def enrich_model(self, ttmodel, ponderation=1):
+    def enrich_model(self, ttmodel, week, ponderation=1):
         if self.tutor is not None:
-            filtered_courses = ttmodel.wdb.courses_for_tutor[self.tutor]
+            filtered_courses = set(c for c in ttmodel.wdb.courses_for_tutor[self.tutor] if c.semaine == week)
         else:
             filtered_courses = ttmodel.wdb.courses \
-                .filter(groupe__train_prog=self.train_prog)
+                .filter(groupe__train_prog=self.train_prog, semaine=week)
             # On exclut les cours de sport!
             filtered_courses = \
                 filtered_courses.exclude(module__abbrev='SC')

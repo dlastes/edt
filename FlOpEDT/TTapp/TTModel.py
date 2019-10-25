@@ -1165,10 +1165,10 @@ class TTModel(object):
         # ponderation MIN_UPS_C
         for promo in self.train_prog:
             M = MinNonPreferedSlot(train_prog=promo,
-                               weight=max_weight)
+                                   weight=max_weight)
             for week in self.weeks:
                 M.enrich_model(self, week,
-                              ponderation=self.min_ups_c)
+                               ponderation=self.min_ups_c)
 
     def add_other_departments_constraints(self):
         """
