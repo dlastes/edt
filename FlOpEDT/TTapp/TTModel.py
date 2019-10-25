@@ -996,9 +996,10 @@ class TTModel(object):
             for week in self.weeks:
                 week_slots = slots_filter(self.wdb.slots, week=week)
                 teaching_duration = sum(c.type.duration
-                                        for c in self.wdb.courses_for_tutor[i])
+                                        for c in self.wdb.courses_for_tutor[i] if c.semaine == week)
                 total_teaching_duration = teaching_duration + sum(c.type.duration
-                                                                  for c in self.wdb.other_departments_courses_for_tutor[i])
+                                                                  for c in self.wdb.other_departments_courses_for_tutor[i]
+                                                                  if c.semaine == week)
 
                 if days_filter(self.wdb.holidays, week=week):
                     tutor_availabilities = set(a for a in self.wdb.availabilities[i][week] if a.day not in holidays)
