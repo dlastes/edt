@@ -1207,20 +1207,20 @@ class TTModel(object):
                                         0,
                                         name=name)
 
-
     def add_specific_constraints(self):
         """
         Add the active specific constraints stored in the database.
         """
         print("adding active specific constraints")
         for promo in self.train_prog:
-            for constr in get_constraints(
-                    self.department,
-                    weeks=self.weeks,
-                    year=self.an,
-                    train_prog=promo,
-                    is_active=True):
-                constr.enrich_model(self)
+            for week in self.weeks:
+                for constr in get_constraints(
+                                self.department,
+                                week=week,
+                                year=self.an,
+                                train_prog=promo,
+                                is_active=True):
+                    constr.enrich_model(self, week)
 
     def update_objective(self):
         for i in self.wdb.instructors:
@@ -1284,44 +1284,44 @@ class TTModel(object):
                                  copie_travail=target_work_copy)
             cp.save()
 
-        # On enregistre les coûts dans la BDD
-        TutorCost.objects.filter(department=self.department,
-                                 semaine=self.wdb.week,
-                                 an=self.wdb.year,
-                                 work_copy=target_work_copy).delete()
-        GroupFreeHalfDay.objects.filter(groupe__train_prog__department=self.department,
-                                        semaine=self.wdb.week,
-                                        an=self.wdb.year,
-                                        work_copy=target_work_copy).delete()
-        GroupCost.objects.filter(groupe__train_prog__department=self.department,
-                                 semaine=self.wdb.week,
-                                 an=self.wdb.year,
-                                 work_copy=target_work_copy).delete()
-
-        for i in self.wdb.instructors:
-            tc = TutorCost(department=self.department,
-                           tutor=i,
-                           an=self.wdb.year,
-                           semaine=self.wdb.week,
-                           valeur=self.get_expr_value(self.cost_I[i]),
-                           work_copy=target_work_copy)
-            tc.save()
-
-        for g in self.wdb.basic_groups:
-            djlg = GroupFreeHalfDay(groupe=g,
-                                    an=self.wdb.year,
-                                    semaine=self.wdb.week,
-                                    work_copy=target_work_copy,
-                                    DJL=self.get_expr_value(self.FHD_G[Time.PM][g]) +
-                                        0.5 * self.get_expr_value(
-                                        self.FHD_G['AM'][g]))
-            djlg.save()
-            cg = GroupCost(groupe=g,
-                           an=self.wdb.year,
-                           semaine=self.wdb.week,
-                           work_copy=target_work_copy,
-                           valeur=self.get_expr_value(self.cost_G[g]))
-            cg.save()
+        # # On enregistre les coûts dans la BDD
+        # TutorCost.objects.filter(department=self.department,
+        #                          semaine__in=self.wdb.weeks,
+        #                          an=self.wdb.year,
+        #                          work_copy=target_work_copy).delete()
+        # GroupFreeHalfDay.objects.filter(groupe__train_prog__department=self.department,
+        #                                 semaine__in=self.wdb.weeks,
+        #                                 an=self.wdb.year,
+        #                                 work_copy=target_work_copy).delete()
+        # GroupCost.objects.filter(groupe__train_prog__department=self.department,
+        #                          semaine__in=self.wdb.weeks,
+        #                          an=self.wdb.year,
+        #                          work_copy=target_work_copy).delete()
+        #
+        # for i in self.wdb.instructors:
+        #     tc = TutorCost(department=self.department,
+        #                    tutor=i,
+        #                    an=self.wdb.year,
+        #                    semaine=self.wdb.week,
+        #                    valeur=self.get_expr_value(self.cost_I[i]),
+        #                    work_copy=target_work_copy)
+        #     tc.save()
+        #
+        # for g in self.wdb.basic_groups:
+        #     djlg = GroupFreeHalfDay(groupe=g,
+        #                             an=self.wdb.year,
+        #                             semaine=self.wdb.week,
+        #                             work_copy=target_work_copy,
+        #                             DJL=self.get_expr_value(self.FHD_G[Time.PM][g]) +
+        #                                 0.5 * self.get_expr_value(
+        #                                 self.FHD_G['AM'][g]))
+        #     djlg.save()
+        #     cg = GroupCost(groupe=g,
+        #                    an=self.wdb.year,
+        #                    semaine=self.wdb.week,
+        #                    work_copy=target_work_copy,
+        #                    valeur=self.get_expr_value(self.cost_G[g]))
+        #     cg.save()
 
     def optimize(self, time_limit, solver, presolve=2):
 
@@ -1396,11 +1396,12 @@ class TTModel(object):
 
         if result is not None:
             self.add_tt_to_db(target_work_copy)
-            reassign_rooms(self.department, self.weeks, self.an, target_work_copy)
+            for week in self.weeks:
+                reassign_rooms(self.department, week, self.an, target_work_copy)
             return target_work_copy
 
 
-def get_constraints(department, weeks=None, year=None, train_prog=None, is_active=None):
+def get_constraints(department, week=None, year=None, train_prog=None, is_active=None):
     #
     #  Return constraints corresponding to the specific filters
     #
@@ -1409,18 +1410,18 @@ def get_constraints(department, weeks=None, year=None, train_prog=None, is_activ
     if is_active:
         query &= Q(is_active=is_active)
 
-    if weeks and not year:
-        logger.warning(f"Unable to filter constraint for weeks {weeks} without specifing year")
+    if week and not year:
+        logger.warning(f"Unable to filter constraint for weeks {week} without specifing year")
         return
 
-    if weeks and train_prog:
+    if week and train_prog:
         query &= \
             Q(train_prog__abbrev=train_prog) & Q(week__isnull=True) & Q(year__isnull=True) | \
-            Q(train_prog__abbrev=train_prog) & Q(week__in=weeks) & Q(year=year) | \
-            Q(train_prog__isnull=True) & Q(week__in=weeks) & Q(year=year) | \
+            Q(train_prog__abbrev=train_prog) & Q(week=week) & Q(year=year) | \
+            Q(train_prog__isnull=True) & Q(week=week) & Q(year=year) | \
             Q(train_prog__isnull=True) & Q(week__isnull=True) & Q(year__isnull=True)
-    elif weeks:
-        query &= Q(week__in=weeks) & Q(year=year) | Q(week__isnull=True) & Q(year__isnull=True)
+    elif week:
+        query &= Q(week=week) & Q(year=year) | Q(week__isnull=True) & Q(year__isnull=True)
     elif train_prog:
         query &= Q(train_prog__abbrev=train_prog) | Q(train_prog__isnull=True)
 
