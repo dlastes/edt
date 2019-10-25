@@ -32,10 +32,11 @@ logger = logging.Logger(__name__)
 
 class MinHalfDaysHelperBase():
 
-    def __init__(self, ttmodel, constraint, ponderation):
+    def __init__(self, ttmodel, constraint, week, ponderation):
         self.ttmodel = ttmodel
         self.constraint = constraint
         self.ponderation = ponderation
+        self.week = week
 
 
     def build_variables(self):
@@ -59,9 +60,7 @@ class MinHalfDaysHelperBase():
         else:
             self.ttmodel.add_constraint(expression, '<=', limit)
 
-
     def enrich_model(self, **args):
-
         expression, courses, local_var = self.build_variables()
         self.add_constraint(expression, courses, local_var)
 
@@ -69,9 +68,9 @@ class MinHalfDaysHelperBase():
 class MinHalfDaysHelperModule(MinHalfDaysHelperBase):
 
     def build_variables(self):
+        days = set(day for day in self.ttmodel.wdb.days if day.week==self.week)
         mod_b_h_d = {}
-        for d in self.ttmodel.wdb.days:
-            
+        for d in days:
             mod_b_h_d[(self.module, d, Time.AM)] \
                 = self.ttmodel.add_var("ModBHD(%s,%s,%s)"
                                     % (self.module, d, Time.AM))
@@ -81,8 +80,7 @@ class MinHalfDaysHelperModule(MinHalfDaysHelperBase):
             
             # add constraint linking MBHD to TT
             for apm in [Time.AM, Time.PM]:
-                halfdayslots = set(slot for slot in self.ttmodel.wdb.slots
-                                   if slot.day == d and slot.apm == apm)
+                halfdayslots = set(sl for sl in self.ttmodel.wdb.slots if sl.day == d and sl.apm == apm)
                 card = len(halfdayslots)
                 expr = self.ttmodel.lin_expr()
                 expr += card * mod_b_h_d[(self.module, d, apm)]
@@ -94,10 +92,10 @@ class MinHalfDaysHelperModule(MinHalfDaysHelperBase):
                 self.ttmodel.add_constraint(expr, '<=', card - 1)
         
         local_var = self.ttmodel.add_var("MinMBHD_var_%s" % self.module)
-        courses = self.ttmodel.wdb.courses.filter(module=self.module)
+        courses = self.ttmodel.wdb.courses.filter(module=self.module, semaine=self.week)
         expression = self.ttmodel.sum(
             mod_b_h_d[(self.module, d, apm)]
-            for d in self.ttmodel.wdb.days
+            for d in days
             for apm in [Time.AM, Time.PM])
 
         return expression, courses, local_var
@@ -118,11 +116,11 @@ class MinHalfDaysHelperModule(MinHalfDaysHelperBase):
 class MinHalfDaysHelperGroup(MinHalfDaysHelperBase):
 
     def build_variables(self):
-        courses = self.ttmodel.wdb.courses.filter(groupe=self.group)
+        courses = self.ttmodel.wdb.courses.filter(groupe=self.group, semaine=self.week)
 
         expression = self.ttmodel.check_and_sum(
             self.ttmodel.GBHD,
-            ((self.group, d, apm) for d, apm in self.ttmodel.wdb.slots_by_half_day))
+            ((self.group, d, apm) for d, apm in self.ttmodel.wdb.slots_by_half_day if d.week==self.week))
 
         local_var = self.ttmodel.add_var("MinGBHD_var_%s" % self.group)
 
@@ -145,10 +143,11 @@ class MinHalfDaysHelperGroup(MinHalfDaysHelperBase):
 class MinHalfDaysHelperTutor(MinHalfDaysHelperBase):
 
     def build_variables(self):
-        courses = self.ttmodel.wdb.courses.filter(tutor=self.tutor)
+        courses = self.ttmodel.wdb.courses.filter(tutor=self.tutor, semaine=self.week)
+        days = set(day for day in self.ttmodel.wdb.days if day.week == self.week)
         expression = self.ttmodel.sum(
             self.ttmodel.IBHD[(self.tutor, d, apm)]
-            for d in self.ttmodel.wdb.days
+            for d in days
             for apm in [Time.AM, Time.PM])
         local_var = self.ttmodel.add_var("MinIBHD_var_%s" % self.tutor)
 
@@ -161,10 +160,10 @@ class MinHalfDaysHelperTutor(MinHalfDaysHelperBase):
 
     def add_constraint(self, expression, courses, local_var):
         super().add_constraint(expression, courses, local_var)
-
+        days = set(day for day in self.ttmodel.wdb.days if day.week == self.week)
         # Try to joincourses
         if self.constraint.join2courses and len(courses) in [2, 4]:
-            for d in self.ttmodel.wdb.days:
+            for d in days:
                 for c in courses:
                     sl8h = min(self.ttmodel.wdb.slots_by_half_day[d,Time.AM] & self.ttmodel.wdb.compatible_slots[c])
                     sl14h = min(self.ttmodel.wdb.slots_by_half_day[d,Time.PM] & self.ttmodel.wdb.compatible_slots[c])

@@ -183,7 +183,7 @@ class TTConstraint(models.Model):
     class Meta:
         abstract = True
 
-    def enrich_model(self, ttmodel, ponderation=1):
+    def enrich_model(self, ttmodel, week, ponderation=1):
         raise NotImplementedError
 
     def full_name(self):
@@ -314,7 +314,7 @@ class CustomConstraint(TTConstraint):
         return _wrapper
 
     @inject_method
-    def enrich_model(self, ttmodel, ponderation=1, injected_method=None):
+    def enrich_model(self, ttmodel, week, ponderation=1, injected_method=None):
         """
         Call custom constraint method
         """ 
@@ -375,7 +375,7 @@ class LimitCourseTypeTimePerPeriod(TTConstraint):  # , pond):
     PERIOD_CHOICES = ((FULL_DAY, 'Full day'), (HALF_DAY, 'Half day'))
     period = models.CharField(max_length=2, choices=PERIOD_CHOICES)
 
-    def get_courses_queryset(self, ttmodel, tutor = None):
+    def get_courses_queryset(self, ttmodel, tutor=None):
         """
         Filter courses depending on constraints parameters
         """
@@ -423,7 +423,7 @@ class LimitCourseTypeTimePerPeriod(TTConstraint):  # , pond):
                                                               ttmodel.constraint_nb)
                 ttmodel.add_constraint(expr, '<=', self.max_hours*60, name=name)
 
-    def enrich_model(self, ttmodel, ponderation=1.):
+    def enrich_model(self, ttmodel, week, ponderation=1.):
         
         if self.period == self.FULL_DAY:
             periods = [None]
@@ -431,7 +431,7 @@ class LimitCourseTypeTimePerPeriod(TTConstraint):  # , pond):
             periods = [Time.AM, Time.PM]
 
         period_by_day = []
-        for day in ttmodel.wdb.days:
+        for day in days_filter(ttmodel.wdb.days, week=week):
             for period in periods:
                 period_by_day.append((day, period,))
 
@@ -556,7 +556,7 @@ class ReasonableDays(TTConstraint):
                 ttmodel.add_constraint(ttmodel.TT[first] + ttmodel.TT[last], '<=', 1)
 
 
-    def enrich_model(self, ttmodel, ponderation=1):
+    def enrich_model(self, ttmodel, week, ponderation=1):
         # Using a set type ensure that all combinations are
         # unique throw tutor and group filters
         combinations = set()
@@ -638,9 +638,9 @@ class Stabilize(TTConstraint):
         attributes.extend(['group', 'module', 'tutor', 'type'])
         return attributes
 
-    def enrich_model(self, ttmodel, ponderation=1):
-        sched_courses = ttmodel.wdb.sched_courses.filter(copie_travail=self.work_copy)
-        for day in self.fixed_days.all():
+    def enrich_model(self, ttmodel, week, ponderation=1):
+        sched_courses = ttmodel.wdb.sched_courses.filter(copie_travail=self.work_copy, cours__semaine=week)
+        for day in days_filter(self.fixed_days.all(), week=week):
             for sc in sched_courses.filter(creneau__jour=day):
                 ttmodel.add_constraint(ttmodel.TT[(sc.creneau, sc.cours)], '==', 1)
             for sc in sched_courses.exclude(creneau__jour=day):
@@ -649,8 +649,8 @@ class Stabilize(TTConstraint):
 
         if self.general:
             # nb_changements_I=dict(zip(ttmodel.wdb.instructors,[0 for i in ttmodel.wdb.instructors]))
-            for c in ttmodel.wdb.courses:
-                for sl in ttmodel.wdb.compatible_slots[c]:
+            for sl in slots_filter(ttmodel.wdb.slots, week=week):
+                for c in ttmodel.wdb.compatible_courses[sl]:
                     if not sched_courses.filter(Q(start_time__lt=sl.start_time + sl.duration) |
                                                 Q(start_time__gt=sl.start_time - F('cours__type__duration')),
                                                 day=sl.day,
@@ -665,7 +665,7 @@ class Stabilize(TTConstraint):
                                                 day=sl.day):
                         ttmodel.obj += ponderation * ttmodel.TT[(sl, c)]
         else:
-            fc = ttmodel.wdb.courses
+            fc = ttmodel.wdb.courses.filter(semaine=week)
             if self.tutor is not None:
                 fc = fc.filter(tutor=self.tutor)
             if self.type is not None:
@@ -759,21 +759,21 @@ class MinHalfDays(TTConstraint):
         default=False)
 
 
-    def enrich_model(self, ttmodel, ponderation=1):
+    def enrich_model(self, ttmodel, week, ponderation=1):
 
         if self.tutors.exists():
-            helper = MinHalfDaysHelperTutor(ttmodel, self, ponderation)
+            helper = MinHalfDaysHelperTutor(ttmodel, self, week, ponderation)
             for tutor in self.tutors.all():
                 if tutor in ttmodel.wdb.instructors:
                     helper.enrich_model(tutor=tutor)
 
         elif self.modules.exists():
-            helper = MinHalfDaysHelperModule(ttmodel, self, ponderation)
+            helper = MinHalfDaysHelperModule(ttmodel, self, week, ponderation)
             for module in self.modules.all():
                 helper.enrich_model(module=module)
 
         elif self.groups.exists():
-            helper = MinHalfDaysHelperGroup(ttmodel, self, ponderation)
+            helper = MinHalfDaysHelperGroup(ttmodel, self, week, ponderation)
             for group in self.groups.all():
                 helper.enrich_model(group=group)
 
