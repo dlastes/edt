@@ -805,7 +805,7 @@ class TTModel(object):
             for sl in self.wdb.compatible_slots[c]:
                 self.add_constraint(self.sum(self.TTinstructors[(sl, c, i)]
                                              for i in self.wdb.possible_tutors[c]) - self.TT[sl, c],
-                                    '==', 0, "Each_course_to_one_tutor %s-%s" % (c, sl))
+                                    '==', 0, "Each_course_to_one_tutor %s-%s_%g" % (c, sl, self.constraint_nb))
 
         for i in self.wdb.instructors:
             for sl in self.wdb.slots:
@@ -1241,6 +1241,8 @@ class TTModel(object):
 
         self.add_rooms_constraints()
 
+        self.add_instructors_constraints()
+
         self.add_slot_preferences()
 
         self.add_dependency_constraints()
@@ -1260,25 +1262,27 @@ class TTModel(object):
 
         for c in self.wdb.courses:
             for sl in self.wdb.compatible_slots[c]:
-                if self.get_var_value(self.TT[(sl, c)]) == 1:
-                    # No = len(self.wdb.sched_courses \
-                    #          .filter(cours__module=c.module,
-                    #                  cours__groupe=c.groupe,
-                    #                  cours__semaine__lte=self.weeks - 1,
-                    #                  copie_travail=0))
-                    # No += len(CoursPlace.objects \
-                    #           .filter(cours__module=c.module,
-                    #                   cours__groupe=c.groupe,
-                    #                   cours__semaine=self.weeks,
-                    #                   copie_travail=target_work_copy))
-                    cp = ScheduledCourse(cours=c,
-                                         start_time=sl.start_time,
-                                         day=sl.day.day,
-                                         copie_travail=target_work_copy)
-                    for rg in c.room_type.members.all():
-                        if self.get_var_value(self.TTrooms[(sl, c, rg)]) == 1:
-                            cp.room = rg
-                    cp.save()
+                for i in self.wdb.possible_tutors[c]:
+                    if self.get_var_value(self.TTinstructors[(sl, c, i)]) == 1:
+                        # No = len(self.wdb.sched_courses \
+                        #          .filter(cours__module=c.module,
+                        #                  cours__groupe=c.groupe,
+                        #                  cours__semaine__lte=self.weeks - 1,
+                        #                  copie_travail=0))
+                        # No += len(CoursPlace.objects \
+                        #           .filter(cours__module=c.module,
+                        #                   cours__groupe=c.groupe,
+                        #                   cours__semaine=self.weeks,
+                        #                   copie_travail=target_work_copy))
+                        cp = ScheduledCourse(cours=c,
+                                             tutor=i,
+                                             start_time=sl.start_time,
+                                             day=sl.day.day,
+                                             copie_travail=target_work_copy)
+                        for rg in c.room_type.members.all():
+                            if self.get_var_value(self.TTrooms[(sl, c, rg)]) == 1:
+                                cp.room = rg
+                        cp.save()
 
         for fc in self.wdb.fixed_courses:
             cp = ScheduledCourse(cours=fc.cours,
