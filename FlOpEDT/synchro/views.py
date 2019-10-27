@@ -25,9 +25,9 @@ def index(request, **kwargs):
 
 def tutor(request, id, **kwargs):
     events=[]
-    for c in get_course_list().filter(cours__tutor__username=id):
+    for c in get_course_list().filter(course__tutor__username=id):
         e = create_event(c)
-        e['title'] = c.cours.module.abbrev + ' ' + c.cours.type.name + ' - ' + c.cours.group.train_prog.abbrev + ' ' + c.cours.group.name
+        e['title'] = c.course.module.abbrev + ' ' + c.course.type.name + ' - ' + c.course.group.train_prog.abbrev + ' ' + c.course.group.name
         events.append(e)
     response = render(request, 'synchro/ical.ics', context={'events':events, 'timezone':tz}, content_type='text/calendar; charset=utf8')
     response['Content-Disposition'] = f'attachment; filename={id}.ics'
@@ -39,10 +39,10 @@ def group(request, promo_id, group_id, **kwargs):
     g_list = g.ancestor_groups()
     g_list.add(g)
     events=[]
-    for c in get_course_list().filter(cours__groupe__in=g_list):
+    for c in get_course_list().filter(course__groupe__in=g_list):
         e = create_event(c)
-        tutor = c.cours.tutor.username if c.cours.tutor is not None else ''
-        e['title'] = c.cours.module.abbrev + ' ' + c.cours.type.name + ' - ' + tutor
+        tutor = c.course.tutor.username if c.course.tutor is not None else ''
+        e['title'] = c.course.module.abbrev + ' ' + c.course.type.name + ' - ' + tutor
         events.append(e)
     response = render(request, 'synchro/ical.ics', context={'events':events, 'timezone':tz}, content_type='text/calendar; charset=utf8')
     response['Content-Disposition'] = f'attachment; filename={promo_id}{group_id}.ics'
@@ -60,24 +60,24 @@ def room(request, id, **kwargs):
 
 
 def get_course_list():
-    return ScheduledCourse.objects.filter(copie_travail=0).order_by('cours__an', 'cours__semaine', 'creneau__jour_id', 'creneau__heure')
+    return ScheduledCourse.objects.filter(copie_travail=0).order_by('course__an', 'course__semaine', 'creneau__jour_id', 'creneau__heure')
 
 
 def create_event(c):
-    begin = datetime.combine(Week(c.cours.an, c.cours.semaine).day(c.slot.day_id-1),
+    begin = datetime.combine(Week(c.course.an, c.course.semaine).day(c.slot.day_id-1),
                              datetime.min.time()) \
                              + timedelta(hours=c.slot.heure.hours,
                                          minutes=c.slot.heure.minutes)
     end = begin + timedelta(minutes=c.slot.duration)
-    tutor = c.cours.tutor.username if c.cours.tutor is not None else ''
+    tutor = c.course.tutor.username if c.course.tutor is not None else ''
     location = c.room.name if c.room is not None else ''
     return {'id':c.id,
-         'title': c.cours.module.abbrev + ' ' + c.cours.type.name + ' - ' + c.cours.group.train_prog.abbrev + ' ' + c.cours.group.name + ' - ' + tutor,
+         'title': c.course.module.abbrev + ' ' + c.course.type.name + ' - ' + c.course.group.train_prog.abbrev + ' ' + c.course.group.name + ' - ' + tutor,
          'location': location,
          'begin': begin,
          'end': end,
-         'description': 'Cours \: ' + c.cours.module.abbrev + ' ' + c.cours.type.name +'\\n'+
-           'Groupe \: ' + c.cours.group.train_prog.abbrev + ' ' + c.cours.group.name +'\\n'+
-           'Enseignant : ' + c.cours.tutor.username +'\\n' +
+         'description': 'Cours \: ' + c.course.module.abbrev + ' ' + c.course.type.name +'\\n'+
+           'Groupe \: ' + c.course.group.train_prog.abbrev + ' ' + c.course.group.name +'\\n'+
+           'Enseignant : ' + c.course.tutor.username +'\\n' +
            'Salle \: ' + location
     }

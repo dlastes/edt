@@ -112,18 +112,18 @@ def get_scheduled_courses(department, week, year, num_copy):
 
     qs = ScheduledCourse.objects \
                     .filter(
-                        cours__module__train_prog__department=department,
-                        cours__semaine=week,
-                        cours__an=year,
-                        copie_travail=num_copy).select_related('cours',
-                                                                 'cours__tutor',
-                                                                 'cours__groupe',
-                                                                 'cours__groupe__train_prog',
-                                                                 'cours__module',
-                                                                 'cours__type',
+                        course__module__train_prog__department=department,
+                        course__semaine=week,
+                        course__an=year,
+                        copie_travail=num_copy).select_related('course',
+                                                                 'course__tutor',
+                                                                 'course__groupe',
+                                                                 'course__groupe__train_prog',
+                                                                 'course__module',
+                                                                 'course__type',
                                                                  'room',
-                                                                 'cours__room_type',
-                                                                 'cours__module__display'
+                                                                 'course__room_type',
+                                                                 'course__module__display'
                                                                  )
     return qs    
 

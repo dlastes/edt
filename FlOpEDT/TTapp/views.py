@@ -35,7 +35,7 @@ def available_work_copies(req, dept, year, week):
     '''
     Send the content of the side panel.
     '''
-    copies = list(ScheduledCourse.objects.filter(cours__an=year, cours__semaine=week, cours__type__department__abbrev=dept).distinct('copie_travail').values_list('copie_travail'))
+    copies = list(ScheduledCourse.objects.filter(course__an=year, course__semaine=week, course__type__department__abbrev=dept).distinct('copie_travail').values_list('copie_travail'))
     copies = [n for (n,) in copies]
     copies.sort()
     return JsonResponse({'copies': copies})

@@ -403,9 +403,9 @@ def fetch_cours_pp(req, week, year, num_copy, **kwargs):
                 .exclude(pk__in=ScheduledCourse
                          .objects
                          .filter(
-                             cours__module__train_prog__department=department,
+                             course__module__train_prog__department=department,
                              copie_travail=num_copy)
-                         .values('cours'))
+                         .values('course'))
                 .select_related('groupe__train_prog',
                                 'tutor',
                                 'module',
@@ -606,11 +606,11 @@ def fetch_decale(req, **kwargs):
     else:
         days = []
 
-    cours = filt_p(filt_g(filt_m(filt_sa(department, semaine, an), module), groupe), prof)
+    course = filt_p(filt_g(filt_m(filt_sa(department, semaine, an), module), groupe), prof)
 
-    for c in cours:
+    for c in course:
         try:
-            cp = ScheduledCourse.objects.get(cours=c,
+            cp = ScheduledCourse.objects.get(course=c,
                                              copie_travail=0)
             day = cp.day
             time = cp.start_time
@@ -625,31 +625,31 @@ def fetch_decale(req, **kwargs):
                             'd': day,
                             't': time})
 
-    cours = filt_p(filt_g(filt_sa(department, semaine, an), groupe), prof) \
+    course = filt_p(filt_g(filt_sa(department, semaine, an), groupe), prof) \
         .order_by('module__abbrev') \
         .distinct('module__abbrev')
-    for c in cours:
+    for c in course:
         modules.append(c.module.abbrev)
 
-    cours = filt_g(filt_sa(department, semaine, an), groupe) \
+    course = filt_g(filt_sa(department, semaine, an), groupe) \
         .order_by('tutor__username') \
         .distinct('tutor__username')
-    for c in cours:
+    for c in course:
         if c.tutor is not None:
             tutors.append(c.tutor.username)
 
     if module != '':
-        cours_queryset = Course.objects.filter(module__train_prog__department=department)        
-        cours = filt_m(cours_queryset, module) \
+        course_queryset = Course.objects.filter(module__train_prog__department=department)        
+        course = filt_m(course_queryset, module) \
             .order_by('tutor__username') \
             .distinct('tutor__username')
-        for c in cours:
+        for c in course:
             if c.tutor is not None:
                 module_tutors.append(c.tutor.username)
 
-    cours = filt_p(filt_m(filt_sa(department, semaine, an), module), prof) \
+    course = filt_p(filt_m(filt_sa(department, semaine, an), module), prof) \
         .distinct('groupe')
-    for c in cours:
+    for c in course:
         groups.append(c.groupe.name)
 
     return JsonResponse({'cours': courses,
@@ -796,10 +796,10 @@ def fetch_tutor_courses(req, year, week, tutor, **kwargs):
     dataset = TutorCoursesResource() \
         .export(ScheduledCourse.objects \
                     .filter(
-                        cours__semaine=week,
-                        cours__an=year,
+                        course__semaine=week,
+                        course__an=year,
                         copie_travail=0,
-                        cours__tutor__username=tutor))
+                        course__tutor__username=tutor))
     return HttpResponse(dataset.csv, content_type='text/csv')
 
 
@@ -809,23 +809,23 @@ def fetch_extra_sched(req, year, week, **kwargs):
     """
     tutors = []
     for scheduled in ScheduledCourse.objects.filter(
-            cours__semaine=week,
-            cours__an=year,
+            course__semaine=week,
+            course__an=year,
             copie_travail=0,
-            cours__room_type__department=req.department).distinct('cours__tutor'):
-        tutor = scheduled.cours.tutor
+            course__room_type__department=req.department).distinct('course__tutor'):
+        tutor = scheduled.course.tutor
         if UserDepartmentSettings.objects.filter(user=tutor).count() > 1:
             tutors.append(tutor)
 
     dataset = MultiDepartmentTutorResource() \
         .export(ScheduledCourse.objects \
                 .filter(
-                    cours__semaine=week,
-                    cours__an=year,
+                    course__semaine=week,
+                    course__an=year,
                     copie_travail=0,
-                    cours__tutor__in=tutors,
+                    course__tutor__in=tutors,
                 )
-                .exclude(cours__room_type__department=req.department))
+                .exclude(course__room_type__department=req.department))
     return HttpResponse(dataset.csv, content_type='text/csv')
 
 
@@ -842,12 +842,12 @@ def fetch_shared_roomgroups(req, year, week, **kwargs):
     # courses in any shared room
     courses = ScheduledCourse.objects \
                 .filter(
-                    cours__semaine=week,
-                    cours__an=year,
+                    course__semaine=week,
+                    course__an=year,
                     copie_travail=0,
                     room__in=shared_roomgroups,
                 ) \
-                .exclude(cours__room_type__department=req.department)
+                .exclude(course__room_type__department=req.department)
     dataset = SharedRoomGroupsResource().export(courses)
     return HttpResponse(dataset.csv, content_type='text/csv')
 
@@ -921,14 +921,14 @@ def edt_changes(req, **kwargs):
                 non_place = False
                 co = Course.objects.get(id=a['id'])
                 try:
-                    cp = ScheduledCourse.objects.get(cours=co,
+                    cp = ScheduledCourse.objects.get(course=co,
                                                      copie_travail=work_copy)
                 except ObjectDoesNotExist:
                     non_place = True
-                    cp = ScheduledCourse(cours=co,
+                    cp = ScheduledCourse(course=co,
                                          copie_travail=work_copy)
 
-                m = CourseModification(cours=co,
+                m = CourseModification(course=co,
                                        version_old=old_version,
                                        initiator=req.user.tutor)
                 # old_day = a.day.o
@@ -984,8 +984,8 @@ def edt_changes(req, **kwargs):
                 if new_week is not None:
                     m.semaine_old = old_week
                     m.an_old = old_year
-                    cp.cours.semaine = new_week
-                    cp.cours.an = new_year
+                    cp.course.semaine = new_week
+                    cp.course.an = new_year
                 cp.save()
                 if work_copy == 0:
                     m.save()
@@ -995,7 +995,7 @@ def edt_changes(req, **kwargs):
                         prev_tut = co.tutor
                         co.tutor = Tutor.objects.get(username=new_tutor)
                         co.save()
-                        pm = PlanningModification(cours=co,
+                        pm = PlanningModification(course=co,
                                                   semaine_old=co.semaine,
                                                   an_old=co.an,
                                                   tutor_old=prev_tut,
@@ -1265,7 +1265,7 @@ def decale_changes(req, **kwargs):
             if c['d'] != '' and c['t'] != -1:
                 scheduled_course = ScheduledCourse \
                     .objects \
-                    .get(cours=changing_course,
+                    .get(course=changing_course,
                          copie_travail=0)
                 cache.delete(get_key_course_pl(req.department.abbrev,
                                                old_year,
@@ -1282,7 +1282,7 @@ def decale_changes(req, **kwargs):
                                                0))
                 # note: add copie_travail in Cours might be of interest
 
-            pm = PlanningModification(cours=changing_course,
+            pm = PlanningModification(course=changing_course,
                                       semaine_old=old_week,
                                       an_old=old_year,
                                       tutor_old=changing_course.tutor,

@@ -40,9 +40,9 @@ def basic_reassign_rooms(department, semaine, an, target_work_copy):
     print("reassigning rooms to minimize moves...")
 
     scheduled_courses_params = {
-        'cours__module__train_prog__department': department,
-        'cours__semaine': semaine,
-        'cours__an': an,
+        'course__module__train_prog__department': department,
+        'course__semaine': semaine,
+        'course__an': an,
         'copie_travail': target_work_copy,
     }
 
@@ -69,20 +69,20 @@ def basic_reassign_rooms(department, semaine, an, target_work_copy):
             for CP in nsl:
                 precedent = ScheduledCourse \
                     .objects \
-                    .filter(start_time__lte=st - F('cours__type__duration'),
-                            start_time__gt=st - F('cours__type__duration') - slot_pause,
+                    .filter(start_time__lte=st - F('course__type__duration'),
+                            start_time__gt=st - F('course__type__duration') - slot_pause,
                             day=day,
-                            cours__room_type=CP.cours.room_type,
-                            cours__tutor=CP.cours.tutor,
+                            course__room_type=CP.course.room_type,
+                            course__tutor=CP.course.tutor,
                             **scheduled_courses_params)
                 if len(precedent) == 0:
                     precedent = ScheduledCourse \
                         .objects \
-                        .filter(start_time__lte = st - F('cours__type__duration'),
-                                start_time__gt = st - F('cours__type__duration') - slot_pause,
+                        .filter(start_time__lte = st - F('course__type__duration'),
+                                start_time__gt = st - F('course__type__duration') - slot_pause,
                                 day=day,
-                                cours__room_type=CP.cours.room_type,
-                                cours__groupe=CP.cours.group,
+                                course__room_type=CP.course.room_type,
+                                course__groupe=CP.course.group,
                                 **scheduled_courses_params)
                     if len(precedent) == 0:
                         continue
@@ -124,12 +124,12 @@ def basic_reassign_rooms(department, semaine, an, target_work_copy):
                     # print "assigned", CP
                 elif cp_using_prec.count() == 1:
                     sib = cp_using_prec[0]
-                    if sib.cours.room_type == CP.cours.room_type and sib.cours:
+                    if sib.course.room_type == CP.course.room_type and sib.course:
                         if not LimitedRoomChoices.objects.filter(
                                     Q(week=semaine) | Q(week=None),
                                     Q(year=an) | Q(year=None),
-                                    Q(train_prog=sib.cours.module.train_prog) | Q(module=sib.cours.module) | Q(group=sib.cours.group) |
-                                    Q(tutor=sib.cours.tutor) | Q(type=sib.cours.type),
+                                    Q(train_prog=sib.course.module.train_prog) | Q(module=sib.course.module) | Q(group=sib.course.group) |
+                                    Q(tutor=sib.course.tutor) | Q(type=sib.course.type),
                                     possible_rooms=sib.room).exists():
                             r = CP.room
                             CP.room = precedent.room
@@ -147,9 +147,9 @@ def basic_reassign_rooms(department, semaine, an, target_work_copy):
 def basic_swap_version(department, week, year, copy_a, copy_b=0):
 
     scheduled_courses_params = {
-        'cours__module__train_prog__department': department,
-        'cours__semaine': week,
-        'cours__an': year,
+        'course__module__train_prog__department': department,
+        'course__semaine': week,
+        'course__an': year,
     }
 
     try:

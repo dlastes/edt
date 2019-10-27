@@ -66,7 +66,7 @@ def get_work_copies(department, week):
     work_copies = ScheduledCourse.objects \
                     .filter(
                         period_filter,
-                        cours__module__train_prog__department=department) \
+                        course__module__train_prog__department=department) \
                     .values_list('copie_travail', flat=True) \
                     .distinct()     
     

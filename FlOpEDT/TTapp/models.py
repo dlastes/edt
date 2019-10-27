@@ -621,26 +621,26 @@ class Stabilize(TTConstraint):
         sched_courses = ttmodel.wdb.sched_courses.filter(copie_travail=self.work_copy)
         for day in self.fixed_days.all():
             for sc in sched_courses.filter(creneau__jour=day):
-                ttmodel.add_constraint(ttmodel.TT[(sc.slot, sc.cours)], '==', 1)
+                ttmodel.add_constraint(ttmodel.TT[(sc.slot, sc.course)], '==', 1)
             for sc in sched_courses.exclude(creneau__jour=day):
                 for sl in ttmodel.wdb.slots.filter(day=day):
-                    ttmodel.add_constraint(ttmodel.TT[(sl, sc.cours)], '==', 0)
+                    ttmodel.add_constraint(ttmodel.TT[(sl, sc.course)], '==', 0)
 
         if self.general:
             # nb_changements_I=dict(zip(ttmodel.wdb.instructors,[0 for i in ttmodel.wdb.instructors]))
             for c in ttmodel.wdb.courses:
                 for sl in ttmodel.wdb.compatible_slots[c]:
                     if not sched_courses.filter(Q(start_time__lt=sl.start_time + sl.duration) |
-                                                Q(start_time__gt=sl.start_time - F('cours__type__duration')),
+                                                Q(start_time__gt=sl.start_time - F('course__type__duration')),
                                                 day=sl.day,
-                                                cours__tutor=c.tutor):
+                                                course__tutor=c.tutor):
                         ttmodel.obj += ttmodel.TT[(sl, c)]
                         # nb_changements_I[c.tutor]+=ttmodel.TT[(sl,c)]
-                    if not sched_courses.filter(cours__tutor=c.tutor,
+                    if not sched_courses.filter(course__tutor=c.tutor,
                                                 day=sl.day):
                         ttmodel.obj += ponderation * ttmodel.TT[(sl, c)]
                         # nb_changements_I[i]+=ttmodel.TT[(sl,c)]
-                    if not sched_courses.filter(cours__groupe=c.group,
+                    if not sched_courses.filter(course__groupe=c.group,
                                                 day=sl.day):
                         ttmodel.obj += ponderation * ttmodel.TT[(sl, c)]
         else:
@@ -658,9 +658,9 @@ class Stabilize(TTConstraint):
             for c in fc:
                 sched_c = ttmodel.wdb \
                     .sched_courses \
-                    .get(cours=c,
+                    .get(course=c,
                          copie_travail=self.work_copy)
-                chosen_slot = Slot(start_time=sched_c.start_time, course_type=sched_c.cours.type,
+                chosen_slot = Slot(start_time=sched_c.start_time, course_type=sched_c.course.type,
                                    day=sched_c.day)
                 chosen_roomgroup = sched_c.room
                 if self.weight is not None:

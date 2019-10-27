@@ -156,21 +156,21 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
                                                                  {GROUP} |
                                                                  GROUP.descendants_groups())
                     for course in courses[:n]:
-                        P = Dependency(cours1=course, cours2=C)
+                        P = Dependency(course1=course, course2=C)
                         P.save()
 
             if 'D' in comments or 'D' in local_comments and N >= 2:
                 for GROUP in GROUPS:
-                    Cours = Course.objects.filter(type=COURSE_TYPE, module=MODULE, group=GROUP, an=an,
+                    Course = Course.objects.filter(type=COURSE_TYPE, module=MODULE, group=GROUP, an=an,
                                                   semaine=semaine)
                     for i in range(N//2-1):
-                        P = Dependency(cours1=Cours[2*i], cours2=Cours[2*i+1], successive=True)
+                        P = Dependency(course1=Course[2*i], course2=Course[2*i+1], successiveq=True)
                         P.save()
             if 'ND' in comments or 'ND' in local_comments  and N >= 2:
                 for GROUP in GROUPS:
-                    Cours = Course.objects.filter(type=COURSE_TYPE, module=MODULE, group=GROUP, an=an,
+                    Course = Course.objects.filter(type=COURSE_TYPE, module=MODULE, group=GROUP, an=an,
                                                   semaine=semaine)
-                    P = Dependency(cours1=Cours[0], cours2=Cours[1], ND=True)
+                    P = Dependency(course1=Course[0], course2=Course[1], ND=True)
                     P.save()
         except Exception as e:
             print("Exception ligne %g semaine %s de %s : %s \n" % (row, semaine, feuille, module), e)

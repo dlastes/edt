@@ -49,10 +49,10 @@ def resolve_department(func):
 
 def print_differences(week, year, old_copy, new_copy, tutors=Tutor.objects.all()):
     for tutor in tutors:
-        SCa = ScheduledCourse.objects.filter(cours__tutor=tutor, copie_travail=old_copy, cours__semaine=week,
-                                             cours__an=year)
-        SCb = ScheduledCourse.objects.filter(cours__tutor=tutor, copie_travail=new_copy, cours__semaine=week,
-                                             cours__an=year)
+        SCa = ScheduledCourse.objects.filter(course__tutor=tutor, copie_travail=old_copy, course__semaine=week,
+                                             course__an=year)
+        SCb = ScheduledCourse.objects.filter(course__tutor=tutor, copie_travail=new_copy, course__semaine=week,
+                                             course__an=year)
         slots_a = set([x.start_time//60 for x in SCa])
         slots_b = set([x.start_time//60 for x in SCb])
         if slots_a ^ slots_b:

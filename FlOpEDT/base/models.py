@@ -357,7 +357,7 @@ class Course(models.Model):
 
 
 class ScheduledCourse(models.Model):
-    cours = models.ForeignKey('Course', on_delete=models.CASCADE)
+    course = models.ForeignKey('Course', on_delete=models.CASCADE)
     day = models.CharField(max_length=2, choices=Day.CHOICES, default=Day.MONDAY)
     # in minutes from 12AM
     start_time = models.PositiveSmallIntegerField()
@@ -370,10 +370,10 @@ class ScheduledCourse(models.Model):
     # les utilisateurs auront acces à la copie publique (0)
 
     def __str__(self):
-        return f"{self.cours}{self.no}:{self.day}-t{self.start_time}-{self.room}"
+        return f"{self.course}{self.no}:{self.day}-t{self.start_time}-{self.room}"
 
     def end_time(self):
-        return self.start_time + self.cours.type.duration
+        return self.start_time + self.course.type.duration
 
 
 # </editor-fold desc="COURSES">
@@ -467,7 +467,7 @@ class EdtVersion(models.Model):
 
 # null iff no change
 class CourseModification(models.Model):
-    cours = models.ForeignKey('Course', on_delete=models.CASCADE)
+    course = models.ForeignKey('Course', on_delete=models.CASCADE)
     semaine_old = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)], null=True)
     an_old = models.PositiveSmallIntegerField(null=True)
@@ -491,11 +491,11 @@ class CourseModification(models.Model):
         if self.version_old is not None:
             olds += f' NumV {self.version_old} ;'
         return f"by {self.initiator.username}, at {self.updated_at}\n" + \
-            f"{self.cours} <- {olds}"
+            f"{self.course} <- {olds}"
 
 
 class PlanningModification(models.Model):
-    cours = models.ForeignKey('Course', on_delete=models.CASCADE)
+    course = models.ForeignKey('Course', on_delete=models.CASCADE)
     semaine_old = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)], null=True)
     an_old = models.PositiveSmallIntegerField(null=True)
@@ -567,8 +567,8 @@ class GroupFreeHalfDay(models.Model):
 
 
 class Dependency(models.Model):
-    cours1 = models.ForeignKey('Course', related_name='cours1', on_delete=models.CASCADE)
-    cours2 = models.ForeignKey('Course', related_name='cours2', on_delete=models.CASCADE)
+    course1 = models.ForeignKey('Course', related_name='cours1', on_delete=models.CASCADE)
+    course2 = models.ForeignKey('Course', related_name='cours2', on_delete=models.CASCADE)
     successive = models.BooleanField(verbose_name='Successifs?', default=False)
     ND = models.BooleanField(verbose_name='Jours differents', default=False)
 

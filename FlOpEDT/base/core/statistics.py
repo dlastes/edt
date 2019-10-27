@@ -63,8 +63,8 @@ def get_room_activity_by_day(department, year=None):
             .filter(
                 period_filter,
                 copie_travail=0,
-                cours__module__train_prog__department=department) \
-            .values_list('room__name', 'cours__an', 'cours__semaine', 'day') \
+                course__module__train_prog__department=department) \
+            .values_list('room__name', 'course__an', 'course__semaine', 'day') \
             .distinct())
 
     # Holiday list
