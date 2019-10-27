@@ -91,7 +91,7 @@ def csvreader(test):
        for sem in range(int(stockage[1][2].replace('\"', ''))):
            for day1 in Day.objects.all():
                for slot in listecreneau:
-                    slot1 = Slot.objects.create(day=day1, heure=slot, duration="120")
+                    slot1 = Slot.objects.create(day=day1, hour=slot, duration="120")
                     print(slot1)
                     slot.append(slot1)
        print(slot)

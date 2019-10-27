@@ -176,12 +176,12 @@ def define_apm(sender, instance, *args, **kwargs):
 
 class Slot(models.Model):
     day = models.ForeignKey('Day', on_delete=models.CASCADE)
-    heure = models.ForeignKey('Time', on_delete=models.CASCADE)
+    hour = models.ForeignKey('Time', on_delete=models.CASCADE)
     duration = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(240)], default=90)
 
     def __str__(self):
-        return f"{self.day}_{self.heure}"
+        return f"{self.day}_{self.hour}"
 
     
 class Holiday(models.Model):

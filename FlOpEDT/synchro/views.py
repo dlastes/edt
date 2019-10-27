@@ -60,14 +60,14 @@ def room(request, id, **kwargs):
 
 
 def get_course_list():
-    return ScheduledCourse.objects.filter(work_copy=0).order_by('course__an', 'course__semaine', 'creneau__day_id', 'creneau__heure')
+    return ScheduledCourse.objects.filter(work_copy=0).order_by('course__an', 'course__semaine', 'creneau__day_id', 'creneau__hour')
 
 
 def create_event(c):
     begin = datetime.combine(Week(c.course.an, c.course.semaine).day(c.slot.day_id-1),
                              datetime.min.time()) \
-                             + timedelta(hours=c.slot.heure.hours,
-                                         minutes=c.slot.heure.minutes)
+                             + timedelta(hours=c.slot.hour.hours,
+                                         minutes=c.slot.hour.minutes)
     end = begin + timedelta(minutes=c.slot.duration)
     tutor = c.course.tutor.username if c.course.tutor is not None else ''
     location = c.room.name if c.room is not None else ''

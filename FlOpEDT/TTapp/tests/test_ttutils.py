@@ -18,7 +18,7 @@ class TTutilsTestCase(TestCase):
         cls.c1 = models.Course.objects.create(group=cls.g1, semaine=39, an=2018, type=cls.ct1, module=cls.m1)
         cls.day1 = models.Day.objects.create(day=models.Day.MONDAY)
         cls.t1 = models.Time.objects.create()
-        cls.s1 = models.Slot.objects.create(day=cls.day1, heure=cls.t1)
+        cls.s1 = models.Slot.objects.create(day=cls.day1, hour=cls.t1)
         cls.edtv1 = models.EdtVersion.objects.create(department=cls.department1, semaine=39, an=2018, version=3)
         cls.scheduled_courses = {}
         for i in range(0,9):
