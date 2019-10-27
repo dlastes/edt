@@ -30,7 +30,7 @@ def csv_reader(path):
                 an = row['year']
                 week = row['week']
                 user_prefs = list(
-                    UserPreference.objects.filter(user=prof, an=row['year'], semaine=row['week'])
+                    UserPreference.objects.filter(user=prof, an=row['year'], week=row['week'])
                         .order_by('day', 'start_time'))
                 print(prof, week, an)
             duration = int(row['duration'])
@@ -46,7 +46,7 @@ def csv_reader(path):
                     up.save()
                 user_prefs.remove(up)
             else:
-                UserPreference(user=prof, an=row['year'], semaine=row['week'],
+                UserPreference(user=prof, an=row['year'], week=row['week'],
                                day=day, start_time=start_time, duration=duration,
                                value=value).save()
     f.close()

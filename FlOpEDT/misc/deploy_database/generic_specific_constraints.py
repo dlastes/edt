@@ -88,17 +88,17 @@ def add_iut_blagnac_specials():
             L.save()
 
     # Pas plus de 2 amphis par demie journée
-    for semaine in range(1,52,2):
+    for week in range(1,52,2):
         for promo in TrainingProgramme.objects.all():
-            L = LimitCourseTypeTimePerPeriod(limit=2, week=semaine, year=2018,
+            L = LimitCourseTypeTimePerPeriod(limit=2, week=week, year=2018,
                                              type=CM, department=info,
                                              period=LimitCourseTypeTimePerPeriod.HALF_DAY,
                                              train_prog=promo)
             L.save()
     # Pas plus d'un amphi par matière et par jour
-    for semaine in range(1,52,3):
+    for week in range(1,52,3):
         for module in Module.objects.all():
-            L = LimitCourseTypeTimePerPeriod(limit=1, week=semaine, year=2018,
+            L = LimitCourseTypeTimePerPeriod(limit=1, week=week, year=2018,
                                              type=CM, department=info,
                                              period=LimitCourseTypeTimePerPeriod.FULL_DAY,
                                              module=module)

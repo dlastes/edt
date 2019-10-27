@@ -34,7 +34,7 @@ from people.models import Tutor
 from misc.assign_module_color import assign_color
 
 
-def ReadPlanifWeek(department, book, feuille, semaine, an):
+def ReadPlanifWeek(department, book, feuille, week, an):
     sheet = book[feuille]
     period=Period.objects.get(name=feuille, department=department)
 
@@ -46,10 +46,10 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
         while wc < 50:
             wc += 1
             sem = sheet.cell(row=wr, column=wc).value
-            if sem == float(semaine):
+            if sem == float(week):
                 WEEK_COL = wc
                 break
-    print("Semaine %s de %s : colonne %g" % (semaine, feuille, WEEK_COL))
+    print("Semaine %s de %s : colonne %g" % (week, feuille, WEEK_COL))
 
     row = 4
     module_COL = 1
@@ -80,7 +80,7 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
             if salle == "Type de Salle":
                 nominal = int(N)
                 if N != nominal:
-                    print('Valeur decimale ligne %g de %s, semaine %g : on la met a 1 !' % (row, feuille, semaine))
+                    print('Valeur decimale ligne %g de %s, semaine %g : on la met a 1 !' % (row, feuille, week))
                     nominal = 1
                     # le nominal est le nombre de cours par groupe (de TP ou TD)
                 if Cell.comment:
@@ -137,7 +137,7 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
 
             for i in range(N):
                 GROUP = GROUPS[i % len(GROUPS)]
-                C = Course(tutor=TUTOR, type=COURSE_TYPE, module=MODULE, group=GROUP, semaine=semaine, an=an,
+                C = Course(tutor=TUTOR, type=COURSE_TYPE, module=MODULE, group=GROUP, week=week, an=an,
                            room_type=ROOMTYPE)
                 C.save()
                 for sp in SUPP_TUTORS:
@@ -151,7 +151,7 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
                         n = 1
                         s = 1
                     course_type = after_type[s:]
-                    courses = Course.objects.filter(type__name=course_type, module=MODULE, semaine=semaine, an=an,
+                    courses = Course.objects.filter(type__name=course_type, module=MODULE, week=week, an=an,
                                                     group__in = GROUP.ancestor_groups() |
                                                                  {GROUP} |
                                                                  GROUP.descendants_groups())
@@ -162,18 +162,18 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
             if 'D' in comments or 'D' in local_comments and N >= 2:
                 for GROUP in GROUPS:
                     Course = Course.objects.filter(type=COURSE_TYPE, module=MODULE, group=GROUP, an=an,
-                                                  semaine=semaine)
+                                                  week=week)
                     for i in range(N//2-1):
                         P = Dependency(course1=Course[2*i], course2=Course[2*i+1], successiveq=True)
                         P.save()
             if 'ND' in comments or 'ND' in local_comments  and N >= 2:
                 for GROUP in GROUPS:
                     Course = Course.objects.filter(type=COURSE_TYPE, module=MODULE, group=GROUP, an=an,
-                                                  semaine=semaine)
+                                                  week=week)
                     P = Dependency(course1=Course[0], course2=Course[1], ND=True)
                     P.save()
         except Exception as e:
-            print("Exception ligne %g semaine %s de %s : %s \n" % (row, semaine, feuille, module), e)
+            print("Exception ligne %g semaine %s de %s : %s \n" % (row, week, feuille, module), e)
             raise
 
 

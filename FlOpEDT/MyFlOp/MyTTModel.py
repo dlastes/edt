@@ -31,11 +31,11 @@ from MyFlOp.MyTTUtils import print_differences
 
 
 class MyTTModel(TTModel):
-    def __init__(self, department_abbrev, semaine, an,
+    def __init__(self, department_abbrev, week, an,
                  train_prog=None,
                  stabilize_work_copy=None,
                  min_bhd_g=0.5):
-        TTModel.__init__(self, department_abbrev, semaine, an,
+        TTModel.__init__(self, department_abbrev, week, an,
                          train_prog=train_prog,
                          stabilize_work_copy=stabilize_work_copy,
                          min_bhd_g=min_bhd_g)
@@ -66,8 +66,8 @@ class MyTTModel(TTModel):
                 m = read(lp)
                 # m.optimize()
                 m.computeIIS()
-                m.write("logs/IIS_week%s.ilp" % self.semaine)
-                print("IIS written in file logs/IIS_week%s.ilp" % (self.semaine))
+                m.write("logs/IIS_week%s.ilp" % self.week)
+                print("IIS written in file logs/IIS_week%s.ilp" % (self.week))
         else :
             if self.stabilize_work_copy is not None:
-                print_differences(self.semaine, self.an, self.stabilize_work_copy, target_work_copy, self.wdb.instructors)
+                print_differences(self.week, self.an, self.stabilize_work_copy, target_work_copy, self.wdb.instructors)
