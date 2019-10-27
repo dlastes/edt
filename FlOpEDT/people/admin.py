@@ -105,7 +105,7 @@ class GroupPreferencesResource(resources.ModelResource):
 
     group = fields.Field(column_name='group_name',
                          attribute='group',
-                         widget=ForeignKeyWidget('Group', 'nom'))
+                         widget=ForeignKeyWidget('Group', 'name'))
 
     class Meta:
         model = GroupPreferences

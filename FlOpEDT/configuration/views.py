@@ -70,7 +70,7 @@ def import_config_file(req, **kwargs):
                     with transaction.atomic():
                         dept_abbrev = req.POST['abbrev']
                         try:
-                            dept_name = req.POST['nom']
+                            dept_name = req.POST['name']
                         except:
                             dept_name = None
                         logger.debug(dept_name)

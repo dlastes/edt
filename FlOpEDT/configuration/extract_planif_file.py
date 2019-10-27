@@ -129,7 +129,7 @@ def ReadPlanifWeek(department, book, feuille, week, year):
                 grps = grps.replace(' ', '').replace(',', ';').split(';')
             groups = [str(g) for g in grps]
 
-            GROUPS = list(Group.objects.filter(nom__in=groups, train_prog=PROMO))
+            GROUPS = list(Group.objects.filter(name__in=groups, train_prog=PROMO))
             if GROUPS == []:
                 GROUPS = list(Group.objects.filter(name='CE', train_prog=PROMO))
 

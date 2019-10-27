@@ -17,7 +17,7 @@ def index(request, **kwargs):
     enseignant_list = Tutor.objects.filter(is_active=True, is_tutor=True).order_by('username')
     group_list = Group.objects.filter(basic=True,
                                        train_prog__department=request.department)\
-                               .order_by('train_prog__abbrev', 'nom')
+                               .order_by('train_prog__abbrev', 'name')
     salle_list = Room.objects.order_by('name')
     context = { 'enseignants': enseignant_list, 'groupes':group_list, 'salles':salle_list }
     return render(request, 'synchro/index.html', context=context)
