@@ -620,9 +620,9 @@ class Stabilize(TTConstraint):
     def enrich_model(self, ttmodel, ponderation=1):
         sched_courses = ttmodel.wdb.sched_courses.filter(work_copy=self.work_copy)
         for day in self.fixed_days.all():
-            for sc in sched_courses.filter(creneau__jour=day):
+            for sc in sched_courses.filter(creneau__day=day):
                 ttmodel.add_constraint(ttmodel.TT[(sc.slot, sc.course)], '==', 1)
-            for sc in sched_courses.exclude(creneau__jour=day):
+            for sc in sched_courses.exclude(creneau__day=day):
                 for sl in ttmodel.wdb.slots.filter(day=day):
                     ttmodel.add_constraint(ttmodel.TT[(sl, sc.course)], '==', 0)
 

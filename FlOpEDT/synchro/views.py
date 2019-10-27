@@ -60,7 +60,7 @@ def room(request, id, **kwargs):
 
 
 def get_course_list():
-    return ScheduledCourse.objects.filter(work_copy=0).order_by('course__an', 'course__semaine', 'creneau__jour_id', 'creneau__heure')
+    return ScheduledCourse.objects.filter(work_copy=0).order_by('course__an', 'course__semaine', 'creneau__day_id', 'creneau__heure')
 
 
 def create_event(c):
