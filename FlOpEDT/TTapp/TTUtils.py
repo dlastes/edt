@@ -33,7 +33,7 @@ from TTapp.models import LimitedRoomChoices, slot_pause
 from base.views import get_key_course_pl, get_key_course_pp
 from django.core.cache import cache
 
-def basic_reassign_rooms(department, week, an, target_work_copy):
+def basic_reassign_rooms(department, week, year, target_work_copy):
     """
     Reassign the rooms to minimize moves...
     """
@@ -42,7 +42,7 @@ def basic_reassign_rooms(department, week, an, target_work_copy):
     scheduled_courses_params = {
         'course__module__train_prog__department': department,
         'course__week': week,
-        'course__an': an,
+        'course__year': year,
         'work_copy': target_work_copy,
     }
 
@@ -101,7 +101,7 @@ def basic_reassign_rooms(department, week, an, target_work_copy):
                 # test if precedent.room is available
                 prec_is_unavailable = False
                 for r in precedent.room.subrooms.all():
-                    if RoomPreference.objects.filter(week=week, an=an,  day=day,
+                    if RoomPreference.objects.filter(week=week, year=year,  day=day,
                                                      start_time=st, room=r, value=0).exists():
                         prec_is_unavailable = True
 
@@ -127,7 +127,7 @@ def basic_reassign_rooms(department, week, an, target_work_copy):
                     if sib.course.room_type == CP.course.room_type and sib.course:
                         if not LimitedRoomChoices.objects.filter(
                                     Q(week=week) | Q(week=None),
-                                    Q(year=an) | Q(year=None),
+                                    Q(year=year) | Q(year=None),
                                     Q(train_prog=sib.course.module.train_prog) | Q(module=sib.course.module) | Q(group=sib.course.group) |
                                     Q(tutor=sib.course.tutor) | Q(type=sib.course.type),
                                     possible_rooms=sib.room).exists():
@@ -138,7 +138,7 @@ def basic_reassign_rooms(department, week, an, target_work_copy):
                             sib.save()
                         # print "swapped", CP, " with", sib
     cache.delete(get_key_course_pl(department.abbrev,
-                                   an,
+                                   year,
                                    week,
                                    target_work_copy))
     print("done")
@@ -149,7 +149,7 @@ def basic_swap_version(department, week, year, copy_a, copy_b=0):
     scheduled_courses_params = {
         'course__module__train_prog__department': department,
         'course__week': week,
-        'course__an': year,
+        'course__year': year,
     }
 
     try:
@@ -161,7 +161,7 @@ def basic_swap_version(department, week, year, copy_a, copy_b=0):
         print('No scheduled courses')
         return
 
-    version_copy = EdtVersion.objects.get(department=department, week=week, an=year)
+    version_copy = EdtVersion.objects.get(department=department, week=week, year=year)
 
     for cp in ScheduledCourse.objects.filter(work_copy=copy_a, **scheduled_courses_params):
         cp.work_copy = tmp_wc

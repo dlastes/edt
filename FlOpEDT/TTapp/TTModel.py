@@ -125,19 +125,19 @@ class WeekDB(object):
         course_types = CourseType.objects.filter(department=self.department)
 
         courses = Course.objects.filter(
-            week=self.week, an=self.year,
+            week=self.week, year=self.year,
             group__train_prog__in=self.train_prog)
 
         sched_courses = ScheduledCourse \
             .objects \
             .filter(course__week=self.week,
-                    course__an=self.year,
+                    course__year=self.year,
                     course__group__train_prog__in=self.train_prog)
 
         fixed_courses = ScheduledCourse.objects \
             .filter(course__group__train_prog__department=self.department,
                     course__week=self.week,
-                    course__an=self.year,
+                    course__year=self.year,
                     work_copy=0) \
             .exclude(course__group__train_prog__in=self.train_prog)
 
@@ -151,7 +151,7 @@ class WeekDB(object):
 
 
         other_departments_courses = Course.objects.filter(
-            week=self.week, an=self.year)\
+            week=self.week, year=self.year)\
             .exclude(type__department=self.department)
 
         other_departments_sched_courses = ScheduledCourse \
@@ -162,14 +162,14 @@ class WeekDB(object):
         courses_availabilities = CoursePreference.objects \
             .filter(train_prog__in=self.train_prog,
                     week=self.week,
-                    an=self.year)
+                    year=self.year)
 
         modules = Module.objects \
             .filter(id__in=courses.values_list('module_id').distinct())
 
         dependencies = Dependency.objects.filter(
             course1__week=self.week,
-            course1__an=self.year,
+            course1__year=self.year,
             course2__week=self.week,
             course1__group__train_prog__in=self.train_prog)
 
@@ -277,7 +277,7 @@ class WeekDB(object):
 
         availabilities = {}
         for i in instructors:
-            availabilities[i] = set(UserPreference.objects.filter(week=self.week, user=i, an=self.year))
+            availabilities[i] = set(UserPreference.objects.filter(week=self.week, user=i, year=self.year))
             if not availabilities[i]:
                 availabilities[i] = set(UserPreference.objects.filter(week=None, user=i))
 
@@ -304,7 +304,7 @@ class WeekDB(object):
 
 
 class TTModel(object):
-    def __init__(self, department_abbrev, week, an,
+    def __init__(self, department_abbrev, week, year,
                  train_prog=None,
                  stabilize_work_copy=None,
                  min_nps_i=1.,
@@ -327,7 +327,7 @@ class TTModel(object):
         self.var_nb = 0
         self.constraint_nb = 0
         self.week = week
-        self.an = an
+        self.year = an
         self.warnings = {}
 
         self.department = Department.objects.get(abbrev=department_abbrev)
@@ -374,7 +374,7 @@ class TTModel(object):
             self.model.writeLP('FlOpEDT.lp')
 
     def wdb_init(self):
-        wdb = WeekDB(self.department, self.week, self.an, self.train_prog)
+        wdb = WeekDB(self.department, self.week, self.year, self.train_prog)
         return wdb
 
     def costs_init(self):
@@ -1058,7 +1058,7 @@ class TTModel(object):
                         Q(start_time__gt=sl.start_time - F('duration')),
                         day=sl.day,
                         week=self.week,
-                        an=self.an,
+                        year=self.year,
                         room=room, value=0).exists():
                     avail_room[room][sl] = 0
                 else:
@@ -1137,7 +1137,7 @@ class TTModel(object):
             for constr in get_constraints(
                     self.department,
                     week=self.week,
-                    year=self.an,
+                    year=self.year,
                     train_prog=promo,
                     is_active=True):
                 constr.enrich_model(self)
@@ -1171,7 +1171,7 @@ class TTModel(object):
         ScheduledCourse.objects \
             .filter(course__module__train_prog__department=self.department,
                     course__week=self.week,
-                    course__an=self.an,
+                    course__year=self.year,
                     work_copy=target_work_copy) \
             .delete()
 
@@ -1207,21 +1207,21 @@ class TTModel(object):
         # On enregistre les coûts dans la BDD
         TutorCost.objects.filter(department=self.department,
                                  week=self.wdb.week,
-                                 an=self.wdb.year,
+                                 year=self.wdb.year,
                                  work_copy=target_work_copy).delete()
         GroupFreeHalfDay.objects.filter(group__train_prog__department=self.department,
                                         week=self.wdb.week,
-                                        an=self.wdb.year,
+                                        year=self.wdb.year,
                                         work_copy=target_work_copy).delete()
         GroupCost.objects.filter(group__train_prog__department=self.department,
                                  week=self.wdb.week,
-                                 an=self.wdb.year,
+                                 year=self.wdb.year,
                                  work_copy=target_work_copy).delete()
 
         for i in self.wdb.instructors:
             tc = TutorCost(department=self.department,
                            tutor=i,
-                           an=self.wdb.year,
+                           year=self.wdb.year,
                            week=self.wdb.week,
                            value=self.get_expr_value(self.cost_I[i]),
                            work_copy=target_work_copy)
@@ -1229,7 +1229,7 @@ class TTModel(object):
 
         for g in self.wdb.basic_groups:
             djlg = GroupFreeHalfDay(group=g,
-                                    an=self.wdb.year,
+                                    year=self.wdb.year,
                                     week=self.wdb.week,
                                     work_copy=target_work_copy,
                                     DJL=self.get_expr_value(self.FHD_G[Time.PM][g]) +
@@ -1237,7 +1237,7 @@ class TTModel(object):
                                         self.FHD_G['AM'][g]))
             djlg.save()
             cg = GroupCost(group=g,
-                           an=self.wdb.year,
+                           year=self.wdb.year,
                            week=self.wdb.week,
                            work_copy=target_work_copy,
                            value=self.get_expr_value(self.cost_G[g]))
@@ -1298,7 +1298,7 @@ class TTModel(object):
                 .filter(
                 course__module__train_prog__department=self.department,
                 course__week=self.week,
-                course__an=self.an) \
+                course__year=self.year) \
                 .aggregate(Max('work_copy'))['work_copy__max']
 
             if local_max_wc is None:
@@ -1316,7 +1316,7 @@ class TTModel(object):
 
         if result is not None:
             self.add_tt_to_db(target_work_copy)
-            reassign_rooms(self.department, self.week, self.an, target_work_copy)
+            reassign_rooms(self.department, self.week, self.year, target_work_copy)
             return target_work_copy
 
 

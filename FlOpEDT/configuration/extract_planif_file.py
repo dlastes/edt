@@ -34,7 +34,7 @@ from people.models import Tutor
 from misc.assign_module_color import assign_color
 
 
-def ReadPlanifWeek(department, book, feuille, week, an):
+def ReadPlanifWeek(department, book, feuille, week, year):
     sheet = book[feuille]
     period=Period.objects.get(name=feuille, department=department)
 
@@ -137,7 +137,7 @@ def ReadPlanifWeek(department, book, feuille, week, an):
 
             for i in range(N):
                 GROUP = GROUPS[i % len(GROUPS)]
-                C = Course(tutor=TUTOR, type=COURSE_TYPE, module=MODULE, group=GROUP, week=week, an=an,
+                C = Course(tutor=TUTOR, type=COURSE_TYPE, module=MODULE, group=GROUP, week=week, year=year,
                            room_type=ROOMTYPE)
                 C.save()
                 for sp in SUPP_TUTORS:
@@ -151,7 +151,7 @@ def ReadPlanifWeek(department, book, feuille, week, an):
                         n = 1
                         s = 1
                     course_type = after_type[s:]
-                    courses = Course.objects.filter(type__name=course_type, module=MODULE, week=week, an=an,
+                    courses = Course.objects.filter(type__name=course_type, module=MODULE, week=week, year=year,
                                                     group__in = GROUP.ancestor_groups() |
                                                                  {GROUP} |
                                                                  GROUP.descendants_groups())
@@ -161,14 +161,14 @@ def ReadPlanifWeek(department, book, feuille, week, an):
 
             if 'D' in comments or 'D' in local_comments and N >= 2:
                 for GROUP in GROUPS:
-                    Course = Course.objects.filter(type=COURSE_TYPE, module=MODULE, group=GROUP, an=an,
+                    Course = Course.objects.filter(type=COURSE_TYPE, module=MODULE, group=GROUP, year=year,
                                                   week=week)
                     for i in range(N//2-1):
                         P = Dependency(course1=Course[2*i], course2=Course[2*i+1], successiveq=True)
                         P.save()
             if 'ND' in comments or 'ND' in local_comments  and N >= 2:
                 for GROUP in GROUPS:
-                    Course = Course.objects.filter(type=COURSE_TYPE, module=MODULE, group=GROUP, an=an,
+                    Course = Course.objects.filter(type=COURSE_TYPE, module=MODULE, group=GROUP, year=year,
                                                   week=week)
                     P = Dependency(course1=Course[0], course2=Course[1], ND=True)
                     P.save()

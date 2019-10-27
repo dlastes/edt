@@ -21,18 +21,18 @@ def csv_reader(path):
     with open(path, newline='') as f:
         file = DictReader(f)
         prof = User.objects.first()
-        an = None
+        year = None
         week = None
         user_prefs = None
         for row in file:
-            if an != row['year'] or week != row['week'] or prof.username != row['prof']:
+            if year != row['year'] or week != row['week'] or prof.username != row['prof']:
                 prof = Tutor.objects.get(username=row['prof'])
-                an = row['year']
+                year = row['year']
                 week = row['week']
                 user_prefs = list(
-                    UserPreference.objects.filter(user=prof, an=row['year'], week=row['week'])
+                    UserPreference.objects.filter(user=prof, year=row['year'], week=row['week'])
                         .order_by('day', 'start_time'))
-                print(prof, week, an)
+                print(prof, week, year)
             duration = int(row['duration'])
             day = translate_day_label(row['day'])
             start_time = int(row['start_time'])
@@ -46,7 +46,7 @@ def csv_reader(path):
                     up.save()
                 user_prefs.remove(up)
             else:
-                UserPreference(user=prof, an=row['year'], week=row['week'],
+                UserPreference(user=prof, year=row['year'], week=row['week'],
                                day=day, start_time=start_time, duration=duration,
                                value=value).save()
     f.close()

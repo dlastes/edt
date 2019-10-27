@@ -107,7 +107,7 @@ def csvreader(test):
                     if indicevalue>2 :
                             nouvelledispo = UserPreference.objects.create(user=User.objects.filter(first_name=prof[0], last_name=prof[1]),
                               week=stockage[1][j],
-                              an=stockage[0][indiceannee],
+                              year=stockage[0][indiceannee],
                               slot=slot1,
                               value=value)
                             nouvelledispo.save()

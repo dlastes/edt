@@ -103,7 +103,7 @@ def build_graph_matrices(train_prog, department=None):
         for mj in range(mi + 1, len(keys)):
             for wy in wl:
                 if Course.objects.filter(week=wy['week'],
-                                         an=wy['an'],
+                                         year=wy['year'],
                                          module__in=[keys[mi], keys[mj]]) \
                         .distinct('module').count() == 2:
                     mat[(mi, mj)] = 1
