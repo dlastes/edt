@@ -152,7 +152,7 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
                         s = 1
                     course_type = after_type[s:]
                     courses = Course.objects.filter(type__name=course_type, module=MODULE, semaine=semaine, an=an,
-                                                    groupe__in = GROUP.ancestor_groups() |
+                                                    group__in = GROUP.ancestor_groups() |
                                                                  {GROUP} |
                                                                  GROUP.descendants_groups())
                     for course in courses[:n]:

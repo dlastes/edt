@@ -39,7 +39,7 @@ def group(request, promo_id, group_id, **kwargs):
     g_list = g.ancestor_groups()
     g_list.add(g)
     events=[]
-    for c in get_course_list().filter(course__groupe__in=g_list):
+    for c in get_course_list().filter(course__group__in=g_list):
         e = create_event(c)
         tutor = c.course.tutor.username if c.course.tutor is not None else ''
         e['title'] = c.course.module.abbrev + ' ' + c.course.type.name + ' - ' + tutor

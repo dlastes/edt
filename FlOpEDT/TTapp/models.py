@@ -367,7 +367,7 @@ class LimitCourseTypeTimePerPeriod(TTConstraint):  # , pond):
             courses_filter['module'] = self.module
 
         if self.train_prog is not None:
-            courses_filter['groupe__train_prog'] = self.train_prog
+            courses_filter['group__train_prog'] = self.train_prog
 
         return courses_qs.filter(**courses_filter)
 
@@ -498,10 +498,10 @@ class ReasonableDays(TTConstraint):
             courses_filter['tutor'] = tutor
 
         if group is not None:
-            courses_filter['groupe'] = group
+            courses_filter['group'] = group
 
         if self.train_prog is not None:
-            courses_filter['groupe__train_prog'] = self.train_prog
+            courses_filter['group__train_prog'] = self.train_prog
 
         return courses_qs.filter(**courses_filter)
 
@@ -640,7 +640,7 @@ class Stabilize(TTConstraint):
                                                 day=sl.day):
                         ttmodel.obj += ponderation * ttmodel.TT[(sl, c)]
                         # nb_changements_I[i]+=ttmodel.TT[(sl,c)]
-                    if not sched_courses.filter(course__groupe=c.group,
+                    if not sched_courses.filter(course__group=c.group,
                                                 day=sl.day):
                         ttmodel.obj += ponderation * ttmodel.TT[(sl, c)]
         else:
@@ -650,7 +650,7 @@ class Stabilize(TTConstraint):
             if self.type is not None:
                 fc = fc.filter(type=self.type)
             if self.train_prog is not None:
-                fc = fc.filter(groupe__train_prog=self.train_prog)
+                fc = fc.filter(group__train_prog=self.train_prog)
             if self.group:
                 fc = fc.filter(group=self.group)
             if self.module:
@@ -681,9 +681,9 @@ class Stabilize(TTConstraint):
         #     if self.type is not None:
         #         fc = fc.filter(type=self.type)
         #     if self.train_prog is not None:
-        #         fc = fc.filter(groupe__train_prog=self.train_prog)
+        #         fc = fc.filter(group__train_prog=self.train_prog)
         #     if self.group:
-        #         fc = fc.filter(groupe=self.group)
+        #         fc = fc.filter(group=self.group)
         #     if self.module:
         #         fc = fc.filter(module=self.module)
         #     for c in fc:
@@ -825,7 +825,7 @@ class MinNonPreferedSlot(TTConstraint):
             filtered_courses = ttmodel.wdb.courses_for_tutor[self.tutor]
         else:
             filtered_courses = ttmodel.wdb.courses \
-                .filter(groupe__train_prog=self.train_prog)
+                .filter(group__train_prog=self.train_prog)
             # On exclut les cours de sport!
             filtered_courses = \
                 filtered_courses.exclude(module__abbrev='SC')
@@ -884,7 +884,7 @@ class AvoidBothTimes(TTConstraint):
         if self.tutor is not None:
             fc = fc.filter(tutor=self.tutor)
         if self.train_prog is not None:
-            fc = fc.filter(groupe__train_prog=self.train_prog)
+            fc = fc.filter(group__train_prog=self.train_prog)
         if self.group:
             fc = fc.filter(group=self.group)
         slots1 = set([slot for slot in ttmodel.wdb.slots if slot.start_time <= self.time1 < slot.end_time])
@@ -993,7 +993,7 @@ class LimitedStartTimeChoices(TTConstraint):
         if self.type is not None:
             fc = fc.filter(type=self.type)
         if self.train_prog is not None:
-            fc = fc.filter(groupe__train_prog=self.train_prog)
+            fc = fc.filter(group__train_prog=self.train_prog)
         if self.group is not None:
             fc = fc.filter(group=self.group)
         possible_slots_ids = set(slot.id for slot in ttmodel.wdb.slots

@@ -10,7 +10,7 @@ class TTutilsTestCase(TestCase):
         cls.department2 = models.Department.objects.create(name="departement2", abbrev="dept2")
         cls.tp1 = models.TrainingProgramme.objects.create(name="TrainingProgramme1", abbrev="tp1", department=cls.department1)
         cls.tp2 = models.TrainingProgramme.objects.create(name="TrainingProgramme2", abbrev="tp2", department=cls.department2)
-        cls.gt1 = models.GroupType.objects.create(name="groupe_type_1", department=cls.department1)
+        cls.gt1 = models.GroupType.objects.create(name="group_type_1", department=cls.department1)
         cls.g1 = models.Group.objects.create(name="gp1", train_prog=cls.tp1, type=cls.gt1, size=0)
         cls.ct1 = models.CourseType.objects.create(name="CourseType1")
         cls.p1 = models.Period.objects.create(name="annee_complete", starting_week=0, ending_week=53)

@@ -126,20 +126,20 @@ class WeekDB(object):
 
         courses = Course.objects.filter(
             semaine=self.week, an=self.year,
-            groupe__train_prog__in=self.train_prog)
+            group__train_prog__in=self.train_prog)
 
         sched_courses = ScheduledCourse \
             .objects \
             .filter(course__semaine=self.week,
                     course__an=self.year,
-                    course__groupe__train_prog__in=self.train_prog)
+                    course__group__train_prog__in=self.train_prog)
 
         fixed_courses = ScheduledCourse.objects \
-            .filter(course__groupe__train_prog__department=self.department,
+            .filter(course__group__train_prog__department=self.department,
                     course__semaine=self.week,
                     course__an=self.year,
                     work_copy=0) \
-            .exclude(course__groupe__train_prog__in=self.train_prog)
+            .exclude(course__group__train_prog__in=self.train_prog)
 
         fixed_courses_for_slot = {}
         for sl in self.slots:
@@ -171,7 +171,7 @@ class WeekDB(object):
             course1__semaine=self.week,
             course1__an=self.year,
             course2__semaine=self.week,
-            course1__groupe__train_prog__in=self.train_prog)
+            course1__group__train_prog__in=self.train_prog)
 
         return course_types, courses, sched_courses, fixed_courses, fixed_courses_for_slot,\
             other_departments_courses, other_departments_sched_courses,\
@@ -258,7 +258,7 @@ class WeekDB(object):
 
         courses_for_basic_group = {}
         for bg in basic_groups:
-            courses_for_basic_group[bg] = set(self.courses.filter(groupe__in=all_groups_of[bg]))
+            courses_for_basic_group[bg] = set(self.courses.filter(group__in=all_groups_of[bg]))
 
         return groups, basic_groups, all_groups_of, basic_groups_of, courses_for_group, courses_for_basic_group
 
@@ -746,7 +746,7 @@ class TTModel(object):
                 training_progs = [training_half_day.train_prog]
             self.add_constraint(self.sum(self.TT[(sl, c)] for sl in training_slots
                                          for c in self.wdb.compatible_courses[sl]
-                                         & set(self.wdb.courses.filter(groupe__train_prog__in=training_progs))),
+                                         & set(self.wdb.courses.filter(group__train_prog__in=training_progs))),
                                 '==', 0, "no_course_on_%s_%s_%g" %
                                 (training_half_day.day, training_half_day.apm, self.constraint_nb))
 
@@ -1209,11 +1209,11 @@ class TTModel(object):
                                  semaine=self.wdb.week,
                                  an=self.wdb.year,
                                  work_copy=target_work_copy).delete()
-        GroupFreeHalfDay.objects.filter(groupe__train_prog__department=self.department,
+        GroupFreeHalfDay.objects.filter(group__train_prog__department=self.department,
                                         semaine=self.wdb.week,
                                         an=self.wdb.year,
                                         work_copy=target_work_copy).delete()
-        GroupCost.objects.filter(groupe__train_prog__department=self.department,
+        GroupCost.objects.filter(group__train_prog__department=self.department,
                                  semaine=self.wdb.week,
                                  an=self.wdb.year,
                                  work_copy=target_work_copy).delete()

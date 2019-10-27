@@ -406,11 +406,11 @@ def fetch_cours_pp(req, week, year, num_copy, **kwargs):
                              course__module__train_prog__department=department,
                              work_copy=num_copy)
                          .values('course'))
-                .select_related('groupe__train_prog',
+                .select_related('group__train_prog',
                                 'tutor',
                                 'module',
                                 'type',
-                                'groupe',
+                                'group',
                                 'room_type',
                                 'module__display'
                                 ))
@@ -592,7 +592,7 @@ def fetch_decale(req, **kwargs):
     an = int(req.GET.get('a', '0'))
     module = req.GET.get('m', '')
     prof = req.GET.get('p', '')
-    groupe = req.GET.get('g', '')
+    group = req.GET.get('g', '')
     department = req.department
 
     courses = []
@@ -606,7 +606,7 @@ def fetch_decale(req, **kwargs):
     else:
         days = []
 
-    course = filt_p(filt_g(filt_m(filt_sa(department, semaine, an), module), groupe), prof)
+    course = filt_p(filt_g(filt_m(filt_sa(department, semaine, an), module), group), prof)
 
     for c in course:
         try:
@@ -621,17 +621,17 @@ def fetch_decale(req, **kwargs):
             courses.append({'i': c.id,
                             'm': c.module.abbrev,
                             'p': c.tutor.username,
-                            'g': c.groupe.name,
+                            'g': c.group.name,
                             'd': day,
                             't': time})
 
-    course = filt_p(filt_g(filt_sa(department, semaine, an), groupe), prof) \
+    course = filt_p(filt_g(filt_sa(department, semaine, an), group), prof) \
         .order_by('module__abbrev') \
         .distinct('module__abbrev')
     for c in course:
         modules.append(c.module.abbrev)
 
-    course = filt_g(filt_sa(department, semaine, an), groupe) \
+    course = filt_g(filt_sa(department, semaine, an), group) \
         .order_by('tutor__username') \
         .distinct('tutor__username')
     for c in course:
@@ -648,15 +648,15 @@ def fetch_decale(req, **kwargs):
                 module_tutors.append(c.tutor.username)
 
     course = filt_p(filt_m(filt_sa(department, semaine, an), module), prof) \
-        .distinct('groupe')
+        .distinct('group')
     for c in course:
-        groups.append(c.groupe.name)
+        groups.append(c.group.name)
 
     return JsonResponse({'cours': courses,
                          'modules': modules,
                          'profs': tutors,
                          'profs_module': module_tutors,
-                         'groupes': groups,
+                         'groups': groups,
                          'jours': days})
 
 
@@ -1407,9 +1407,9 @@ def filt_p(r, prof):
     return r
 
 
-def filt_g(r, groupe):
-    if groupe != '':
-        r = r.filter(groupe__nom=groupe)
+def filt_g(r, group):
+    if group != '':
+        r = r.filter(group__nom=group)
     return r
 
 

@@ -337,7 +337,7 @@ class Course(models.Model):
     supp_tutor = models.ManyToManyField('people.Tutor',
                                         related_name='courses_as_supp',
                                         blank=True)
-    groupe = models.ForeignKey('Group', on_delete=models.CASCADE)
+    group = models.ForeignKey('Group', on_delete=models.CASCADE)
     module = models.ForeignKey('Module', related_name='module', on_delete=models.CASCADE)
     modulesupp = models.ForeignKey('Module', related_name='modulesupp',
                                    null=True, blank=True, on_delete=models.CASCADE)
@@ -349,11 +349,11 @@ class Course(models.Model):
 
     def __str__(self):
         username_mod = self.tutor.username if self.tutor is not None else '-no_tut-'
-        return f"{self.type}-{self.module}-{username_mod}-{self.groupe}"
+        return f"{self.type}-{self.module}-{username_mod}-{self.group}"
     
     def full_name(self):
         username_mod = self.tutor.username if self.tutor is not None else '-no_tut-'
-        return f"{self.type}-{self.module}-{username_mod}-{self.groupe}"
+        return f"{self.type}-{self.module}-{username_mod}-{self.group}"
 
 
 class ScheduledCourse(models.Model):
@@ -535,26 +535,26 @@ class GroupCost(models.Model):
     semaine = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)])
     an = models.PositiveSmallIntegerField()
-    groupe = models.ForeignKey('Group', on_delete=models.CASCADE)
+    group = models.ForeignKey('Group', on_delete=models.CASCADE)
     value = models.FloatField()
     work_copy = models.PositiveSmallIntegerField(default=0)
 
 
     def __str__(self):
-        return f"sem{self.semaine}-{self.groupe}:{self.value}"
+        return f"sem{self.semaine}-{self.group}:{self.value}"
 
 
 class GroupFreeHalfDay(models.Model):
     semaine = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)])
     an = models.PositiveSmallIntegerField()
-    groupe = models.ForeignKey('Group', on_delete=models.CASCADE)
+    group = models.ForeignKey('Group', on_delete=models.CASCADE)
     DJL = models.PositiveSmallIntegerField()
     work_copy = models.PositiveSmallIntegerField(default=0)
 
 
     def __str__(self):
-        return f"sem{self.semaine}-{self.groupe}:{self.DJL}"
+        return f"sem{self.semaine}-{self.group}:{self.DJL}"
 
 
 # </editor-fold desc="COSTS">

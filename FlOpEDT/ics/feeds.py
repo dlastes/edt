@@ -97,7 +97,7 @@ class GroupEventFeed(EventFeed):
         return gp_included
 
     def items(self, groups):
-        return ScheduledCourse.objects.filter(course__groupe__in=groups, work_copy=0).order_by('-course__an','-course__semaine')
+        return ScheduledCourse.objects.filter(course__group__in=groups, work_copy=0).order_by('-course__an','-course__semaine')
 
     def item_title(self, scourse):
         course = scourse.cours

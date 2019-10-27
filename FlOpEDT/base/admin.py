@@ -79,11 +79,11 @@ class CoursPlaceResource(resources.ModelResource):
     # prof_last_name = fields.Field(column_name='prof_last_name',
     #                               attribute='cours__tutor',
     #                               widget=ForeignKeyWidget(Tutor, 'last_name'))
-    groupe = fields.Field(column_name='gpe_nom',
-                          attribute='course__groupe',
+    group = fields.Field(column_name='gpe_nom',
+                          attribute='course__group',
                           widget=ForeignKeyWidget(Group, 'name'))
     promo = fields.Field(column_name='gpe_promo',
-                         attribute='course__groupe__train_prog',
+                         attribute='course__group__train_prog',
                          widget=ForeignKeyWidget(TrainingProgramme, 'abbrev'))
     module = fields.Field(column_name='module',
                           attribute='course__module',
@@ -112,7 +112,7 @@ class CoursPlaceResource(resources.ModelResource):
 
     class Meta:
         model = ScheduledCourse
-        fields = ('id', 'no', 'groupe', 'promo', 'color_bg', 'color_txt',
+        fields = ('id', 'no', 'group', 'promo', 'color_bg', 'color_txt',
                   'module', 'coursetype', 'day', 'start_time',
                   'semaine', 'room', 'prof', 'room_type')
 
@@ -124,7 +124,7 @@ class TutorCoursesResource(CoursPlaceResource):
 
     class Meta:
         model = ScheduledCourse
-        fields = ('id', 'no', 'groupe', 'promo', 'color_bg', 'color_txt',
+        fields = ('id', 'no', 'group', 'promo', 'color_bg', 'color_txt',
                   'module', 'coursetype', 'day', 'start_time',
                   'semaine', 'room', 'prof', 'room_type', 'department')
 
@@ -160,7 +160,7 @@ class SharedRoomGroupsResource(resources.ModelResource):
     
 class CoursResource(resources.ModelResource):
     promo = fields.Field(column_name='promo',
-                         attribute='groupe__train_prog',
+                         attribute='group__train_prog',
                          widget=ForeignKeyWidget(TrainingProgramme, 'abbrev'))
     prof = fields.Field(column_name='prof',
                         attribute='tutor',
@@ -173,8 +173,8 @@ class CoursResource(resources.ModelResource):
                           widget=ForeignKeyWidget(CourseType, 'name'))
     duration = fields.Field(column_name='duration',
                           attribute='course__type__duration')
-    groupe = fields.Field(column_name='groupe',
-                          attribute='groupe',
+    group = fields.Field(column_name='group',
+                          attribute='group',
                           widget=ForeignKeyWidget(Group, 'name'))
     color_bg = fields.Field(column_name='color_bg',
                             attribute='module__display',
@@ -188,7 +188,7 @@ class CoursResource(resources.ModelResource):
 
     class Meta:
         model = Course
-        fields = ('id', 'no', 'tutor_name', 'groupe', 'promo', 'module',
+        fields = ('id', 'no', 'tutor_name', 'group', 'promo', 'module',
                   'coursetype', 'color_bg', 'color_txt', 'prof', 'room_type')
 
 
@@ -424,14 +424,14 @@ class ModuleAdmin(DepartmentModelAdmin):
         ('train_prog', DropdownFilterRel),)
 
 class CourseAdmin(DepartmentModelAdmin):
-    list_display = ('module', 'type', 'groupe', 'tutor', 'semaine', 'an')
-    ordering = ('an', 'semaine', 'module', 'type', 'no', 'groupe', 'tutor')
+    list_display = ('module', 'type', 'group', 'tutor', 'semaine', 'an')
+    ordering = ('an', 'semaine', 'module', 'type', 'no', 'group', 'tutor')
     list_filter = (
         ('tutor', DropdownFilterRel),
         ('an', DropdownFilterAll),
         ('semaine', DropdownFilterAll),
         ('type', DropdownFilterRel),
-        ('groupe', DropdownFilterRel),
+        ('group', DropdownFilterRel),
     )
 
 
