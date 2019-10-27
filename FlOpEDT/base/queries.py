@@ -115,7 +115,7 @@ def get_scheduled_courses(department, week, year, num_copy):
                         course__module__train_prog__department=department,
                         course__semaine=week,
                         course__an=year,
-                        copie_travail=num_copy).select_related('course',
+                        work_copy=num_copy).select_related('course',
                                                                  'course__tutor',
                                                                  'course__groupe',
                                                                  'course__groupe__train_prog',

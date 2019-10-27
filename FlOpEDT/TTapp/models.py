@@ -618,7 +618,7 @@ class Stabilize(TTConstraint):
         return attributes
 
     def enrich_model(self, ttmodel, ponderation=1):
-        sched_courses = ttmodel.wdb.sched_courses.filter(copie_travail=self.work_copy)
+        sched_courses = ttmodel.wdb.sched_courses.filter(work_copy=self.work_copy)
         for day in self.fixed_days.all():
             for sc in sched_courses.filter(creneau__jour=day):
                 ttmodel.add_constraint(ttmodel.TT[(sc.slot, sc.course)], '==', 1)
@@ -659,7 +659,7 @@ class Stabilize(TTConstraint):
                 sched_c = ttmodel.wdb \
                     .sched_courses \
                     .get(course=c,
-                         copie_travail=self.work_copy)
+                         work_copy=self.work_copy)
                 chosen_slot = Slot(start_time=sched_c.start_time, course_type=sched_c.course.type,
                                    day=sched_c.day)
                 chosen_roomgroup = sched_c.room
@@ -690,7 +690,7 @@ class Stabilize(TTConstraint):
         #         sched_c = ttmodel.wdb \
         #             .sched_courses \
         #             .get(cours=c,
-        #                  copie_travail=self.work_copy)
+        #                  work_copy=self.work_copy)
         #         chosen_slot = sched_c.creneau
         #         chosen_roomgroup = sched_c.room
         #         if self.weight is not None:

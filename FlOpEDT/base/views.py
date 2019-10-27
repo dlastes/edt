@@ -404,7 +404,7 @@ def fetch_cours_pp(req, week, year, num_copy, **kwargs):
                          .objects
                          .filter(
                              course__module__train_prog__department=department,
-                             copie_travail=num_copy)
+                             work_copy=num_copy)
                          .values('course'))
                 .select_related('groupe__train_prog',
                                 'tutor',
@@ -611,7 +611,7 @@ def fetch_decale(req, **kwargs):
     for c in course:
         try:
             cp = ScheduledCourse.objects.get(course=c,
-                                             copie_travail=0)
+                                             work_copy=0)
             day = cp.day
             time = cp.start_time
         except ObjectDoesNotExist:
@@ -798,7 +798,7 @@ def fetch_tutor_courses(req, year, week, tutor, **kwargs):
                     .filter(
                         course__semaine=week,
                         course__an=year,
-                        copie_travail=0,
+                        work_copy=0,
                         course__tutor__username=tutor))
     return HttpResponse(dataset.csv, content_type='text/csv')
 
@@ -811,7 +811,7 @@ def fetch_extra_sched(req, year, week, **kwargs):
     for scheduled in ScheduledCourse.objects.filter(
             course__semaine=week,
             course__an=year,
-            copie_travail=0,
+            work_copy=0,
             course__room_type__department=req.department).distinct('course__tutor'):
         tutor = scheduled.course.tutor
         if UserDepartmentSettings.objects.filter(user=tutor).count() > 1:
@@ -822,7 +822,7 @@ def fetch_extra_sched(req, year, week, **kwargs):
                 .filter(
                     course__semaine=week,
                     course__an=year,
-                    copie_travail=0,
+                    work_copy=0,
                     course__tutor__in=tutors,
                 )
                 .exclude(course__room_type__department=req.department))
@@ -844,7 +844,7 @@ def fetch_shared_roomgroups(req, year, week, **kwargs):
                 .filter(
                     course__semaine=week,
                     course__an=year,
-                    copie_travail=0,
+                    work_copy=0,
                     room__in=shared_roomgroups,
                 ) \
                 .exclude(course__room_type__department=req.department)
@@ -922,11 +922,11 @@ def edt_changes(req, **kwargs):
                 co = Course.objects.get(id=a['id'])
                 try:
                     cp = ScheduledCourse.objects.get(course=co,
-                                                     copie_travail=work_copy)
+                                                     work_copy=work_copy)
                 except ObjectDoesNotExist:
                     non_place = True
                     cp = ScheduledCourse(course=co,
-                                         copie_travail=work_copy)
+                                         work_copy=work_copy)
 
                 m = CourseModification(course=co,
                                        version_old=old_version,
@@ -1266,11 +1266,11 @@ def decale_changes(req, **kwargs):
                 scheduled_course = ScheduledCourse \
                     .objects \
                     .get(course=changing_course,
-                         copie_travail=0)
+                         work_copy=0)
                 cache.delete(get_key_course_pl(req.department.abbrev,
                                                old_year,
                                                old_week,
-                                               scheduled_course.copie_travail))
+                                               scheduled_course.work_copy))
                 scheduled_course.delete()
                 ev = EdtVersion.objects.get(an=old_year, semaine=old_week, department=req.department)
                 ev.version += 1
@@ -1280,7 +1280,7 @@ def decale_changes(req, **kwargs):
                                                old_year,
                                                old_week,
                                                0))
-                # note: add copie_travail in Cours might be of interest
+                # note: add work_copy in Cours might be of interest
 
             pm = PlanningModification(course=changing_course,
                                       semaine_old=old_week,

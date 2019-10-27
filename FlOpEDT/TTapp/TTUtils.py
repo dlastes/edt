@@ -43,7 +43,7 @@ def basic_reassign_rooms(department, semaine, an, target_work_copy):
         'course__module__train_prog__department': department,
         'course__semaine': semaine,
         'course__an': an,
-        'copie_travail': target_work_copy,
+        'work_copy': target_work_copy,
     }
 
     possible_start_times = set()
@@ -156,23 +156,23 @@ def basic_swap_version(department, week, year, copy_a, copy_b=0):
         tmp_wc = ScheduledCourse \
                      .objects \
                      .filter(**scheduled_courses_params) \
-                     .aggregate(Max('copie_travail'))['copie_travail__max'] + 1
+                     .aggregate(Max('work_copy'))['work_copy__max'] + 1
     except KeyError:
         print('No scheduled courses')
         return
 
     version_copy = EdtVersion.objects.get(department=department, semaine=week, an=year)
 
-    for cp in ScheduledCourse.objects.filter(copie_travail=copy_a, **scheduled_courses_params):
-        cp.copie_travail = tmp_wc
+    for cp in ScheduledCourse.objects.filter(work_copy=copy_a, **scheduled_courses_params):
+        cp.work_copy = tmp_wc
         cp.save()
 
-    for cp in ScheduledCourse.objects.filter(copie_travail=copy_b, **scheduled_courses_params):
-        cp.copie_travail = copy_a
+    for cp in ScheduledCourse.objects.filter(work_copy=copy_b, **scheduled_courses_params):
+        cp.work_copy = copy_a
         cp.save()
 
-    for cp in ScheduledCourse.objects.filter(copie_travail=tmp_wc, **scheduled_courses_params):
-        cp.copie_travail = copy_b
+    for cp in ScheduledCourse.objects.filter(work_copy=tmp_wc, **scheduled_courses_params):
+        cp.work_copy = copy_b
         cp.save()
 
     if copy_a ==0 or copy_b == 0:

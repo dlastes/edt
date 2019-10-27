@@ -55,7 +55,7 @@ class TutorEventFeed(EventFeed):
         return Tutor.objects.get(username=tutor)
 
     def items(self, tutor):
-        return ScheduledCourse.objects.filter(course__tutor=tutor, copie_travail=0).order_by('-course__an','-course__semaine')
+        return ScheduledCourse.objects.filter(course__tutor=tutor, work_copy=0).order_by('-course__an','-course__semaine')
 
     def item_title(self, scourse):
         course = scourse.cours
@@ -77,7 +77,7 @@ class RoomEventFeed(EventFeed):
         return room_o.subroom_of.all()
 
     def items(self, room_groups):
-        return ScheduledCourse.objects.filter(room__in=room_groups, copie_travail=0).order_by('-course__an','-course__semaine')
+        return ScheduledCourse.objects.filter(room__in=room_groups, work_copy=0).order_by('-course__an','-course__semaine')
 
     def item_title(self, scourse):
         course = scourse.cours
@@ -97,7 +97,7 @@ class GroupEventFeed(EventFeed):
         return gp_included
 
     def items(self, groups):
-        return ScheduledCourse.objects.filter(course__groupe__in=groups, copie_travail=0).order_by('-course__an','-course__semaine')
+        return ScheduledCourse.objects.filter(course__groupe__in=groups, work_copy=0).order_by('-course__an','-course__semaine')
 
     def item_title(self, scourse):
         course = scourse.cours

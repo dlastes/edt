@@ -62,7 +62,7 @@ def get_room_activity_by_day(department, year=None):
         scheduled.update(ScheduledCourse.objects \
             .filter(
                 period_filter,
-                copie_travail=0,
+                work_copy=0,
                 course__module__train_prog__department=department) \
             .values_list('room__name', 'course__an', 'course__semaine', 'day') \
             .distinct())
@@ -119,7 +119,7 @@ def get_tutor_hours(department, year=None):
         .filter(
             period_filter,
             departments=department,
-            taught_courses__scheduledcourse__copie_travail=0,
+            taught_courses__scheduledcourse__work_copy=0,
             ) \
         .values_list('pk', 'username', 'first_name', 'last_name') \
         .annotate(slots=Count('taught_courses__scheduledcourse'))

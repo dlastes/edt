@@ -365,7 +365,7 @@ class ScheduledCourse(models.Model):
     no = models.PositiveSmallIntegerField(null=True, blank=True)
     noprec = models.BooleanField(
         verbose_name='vrai si on ne veut pas garder la salle', default=True)
-    copie_travail = models.PositiveSmallIntegerField(default=0)
+    work_copy = models.PositiveSmallIntegerField(default=0)
 
     # les utilisateurs auront acces à la copie publique (0)
 

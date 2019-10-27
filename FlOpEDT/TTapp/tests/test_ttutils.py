@@ -22,7 +22,7 @@ class TTutilsTestCase(TestCase):
         cls.edtv1 = models.EdtVersion.objects.create(department=cls.department1, semaine=39, an=2018, version=3)
         cls.scheduled_courses = {}
         for i in range(0,9):
-            cls.scheduled_courses[i] = models.ScheduledCourse.objects.create(course=cls.c1, slot=cls.s1, copie_travail=i)
+            cls.scheduled_courses[i] = models.ScheduledCourse.objects.create(course=cls.c1, slot=cls.s1, work_copy=i)
 
     def test_basic_swap_version(self):   
         basic_swap_version(self.department1, 39, 2018, 2, 5)
@@ -32,8 +32,8 @@ class TTutilsTestCase(TestCase):
         for sc in self.scheduled_courses.values():
             sc.refresh_from_db()
 
-        self.assertEqual(self.scheduled_courses[2].copie_travail, 5)
-        self.assertEqual(self.scheduled_courses[5].copie_travail, 2)
+        self.assertEqual(self.scheduled_courses[2].work_copy, 5)
+        self.assertEqual(self.scheduled_courses[5].work_copy, 2)
 
     def test_basic_reassign_rooms(self):
         basic_reassign_rooms(self.department1, 39, 2018, 0)

@@ -138,7 +138,7 @@ class WeekDB(object):
             .filter(course__groupe__train_prog__department=self.department,
                     course__semaine=self.week,
                     course__an=self.year,
-                    copie_travail=0) \
+                    work_copy=0) \
             .exclude(course__groupe__train_prog__in=self.train_prog)
 
         fixed_courses_for_slot = {}
@@ -157,7 +157,7 @@ class WeekDB(object):
         other_departments_sched_courses = ScheduledCourse \
             .objects \
             .filter(course__in=other_departments_courses,
-                    copie_travail=0)
+                    work_copy=0)
 
         courses_availabilities = CoursePreference.objects \
             .filter(train_prog__in=self.train_prog,
@@ -1172,7 +1172,7 @@ class TTModel(object):
             .filter(course__module__train_prog__department=self.department,
                     course__semaine=self.semaine,
                     course__an=self.an,
-                    copie_travail=target_work_copy) \
+                    work_copy=target_work_copy) \
             .delete()
 
         for c in self.wdb.courses:
@@ -1182,16 +1182,16 @@ class TTModel(object):
                     #          .filter(cours__module=c.module,
                     #                  cours__group=c.group,
                     #                  cours__semaine__lte=self.semaine - 1,
-                    #                  copie_travail=0))
+                    #                  work_copy=0))
                     # No += len(CoursPlace.objects \
                     #           .filter(cours__module=c.module,
                     #                   cours__group=c.group,
                     #                   cours__semaine=self.semaine,
-                    #                   copie_travail=target_work_copy))
+                    #                   work_copy=target_work_copy))
                     cp = ScheduledCourse(course=c,
                                          start_time=sl.start_time,
                                          day=sl.day,
-                                         copie_travail=target_work_copy)
+                                         work_copy=target_work_copy)
                     for rg in c.room_type.members.all():
                         if self.get_var_value(self.TTrooms[(sl, c, rg)]) == 1:
                             cp.room = rg
@@ -1201,7 +1201,7 @@ class TTModel(object):
             cp = ScheduledCourse(course=fc.course,
                                  start_time=fc.start_time,
                                  room=fc.room,
-                                 copie_travail=target_work_copy)
+                                 work_copy=target_work_copy)
             cp.save()
 
         # On enregistre les coûts dans la BDD
@@ -1299,7 +1299,7 @@ class TTModel(object):
                 course__module__train_prog__department=self.department,
                 course__semaine=self.semaine,
                 course__an=self.an) \
-                .aggregate(Max('copie_travail'))['copie_travail__max']
+                .aggregate(Max('work_copy'))['work_copy__max']
 
             if local_max_wc is None:
                 local_max_wc = -1
