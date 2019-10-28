@@ -34,12 +34,12 @@ from random import choice
 from displayweb.models import TrainingProgrammeDisplay
 
 from base.models import Room, RoomType, RoomGroup, TrainingProgramme,\
-    Group, Module, GroupType, Period, Time, Day, Slot, CourseType, \
+    Group, Module, GroupType, Period, Time, Day, CourseType, \
     Department, CourseStartTimeConstraint, TimeGeneralSettings
 
 from base.weeks import annee_courante
 
-from people.models import FullStaff, SupplyStaff, Tutor
+from people.models import FullStaff, SupplyStaff, Tutor, UserDepartmentSettings
 
 from django.db import IntegrityError
 
@@ -110,7 +110,7 @@ def tutors_extract(department, book):
                 tutor.set_password("passe")
                 tutor.is_tutor = True
                 tutor.save()
-                tutor.departments.add(department)
+                UserDepartmentSettings(user=tutor, department=department).save()
                 tutor.save()
 
             except IntegrityError as ie :
@@ -119,8 +119,7 @@ def tutors_extract(department, book):
             else:
                 logger.debug(f'create tutor with id:{id}')
         else:
-            tutor.departments.add(department)
-
+            UserDepartmentSettings(user=tutor, department=department).save()
         INTER_ID_ROW += 1
         id = sheet.cell(row=INTER_ID_ROW, column=1).value
 

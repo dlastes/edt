@@ -47,8 +47,9 @@ class MyTTModel(TTModel):
         TTModel.__init__(self, department_abbrev, weeks, an,
                          train_prog=train_prog,
                          stabilize_work_copy=stabilize_work_copy,
-                         min_bhd_i=min_bhd_i)
+                         min_bhd_i=min_bhd_i, only_fixed_scheduled_courses=True)
         self.WE, self.WE_3jours, self.quasiWE = self.week_ends_init()
+        add_cosmo_specific_constraints(self)
 
     def week_ends_init(self):
         # Gestion des WE
@@ -131,7 +132,6 @@ class MyTTModel(TTModel):
         If you shall add more specific ones, you may write it down here.
         """
         TTModel.add_specific_constraints(self)
-        add_cosmo_specific_constraints(self)
 
     def compute_non_prefered_slot_cost(self):
         avail_instr, unp_slot_cost = TTModel.compute_non_prefered_slot_cost(self)

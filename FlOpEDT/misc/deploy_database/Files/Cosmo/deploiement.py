@@ -39,6 +39,7 @@ from TTapp.models import days_index
 def affect_tutors():
     for m in Module.objects.all():
         mpt = ModulePossibleTutors(module=m)
+        mpt.save()
         if m.abbrev == "Ct_Men":
             for t in possible_tutors['Autre']:
                 mpt.possible_tutors.add(Tutor.objects.get(username=t))
@@ -49,13 +50,9 @@ def affect_tutors():
     print("Possible tutors affected")
 
 
-def TGS_deploiement(department):
-    T_C = TimeGeneralSettings(department=department,
-                              day_start_time=60*7+30,
-                              day_finish_time=25*60,
-                              lunch_break_start_time=14*60,
-                              lunch_break_finish_time=14*60,
-                              days=[c[0] for c in Day.CHOICES])
+def TGS_precision():
+    T_C = TimeGeneralSettings.objects.all()[0]
+    T_C.day_finish_time = 25*60
     T_C.save()
     print("Time general settings defined")
 
@@ -63,7 +60,7 @@ def TGS_deploiement(department):
 def global_deploiement():
     extract_database_file("misc/deploy_database/Files/Cosmo/database_file_Cosmo.xlsx", 'American Cosmograph', "Cosmo")
     affect_tutors()
-    TGS_deploiement(Department.objects.all()[0])
+    TGS_precision()
     assign_tutor_color()
     print("Tutor color assigned")
     A = Tutor(username='CHEF')

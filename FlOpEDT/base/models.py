@@ -66,7 +66,7 @@ class GroupType(models.Model):
 
 
 class Group(models.Model):
-    nom = models.CharField(max_length=4)
+    nom = models.CharField(max_length=10)
     train_prog = models.ForeignKey('TrainingProgramme', on_delete=models.CASCADE)
     type = models.ForeignKey('GroupType', on_delete=models.CASCADE)
     size = models.PositiveSmallIntegerField()

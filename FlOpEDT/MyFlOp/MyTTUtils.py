@@ -66,11 +66,9 @@ def print_differences(week, year, old_copy, new_copy, tutors=Tutor.objects.all()
 
 @resolve_department
 def reassign_rooms(department, week, year, target_work_copy):
-    from TTapp.TTUtils import basic_reassign_rooms
     basic_reassign_rooms(department, week, year, target_work_copy)
 
 
 @resolve_department
 def swap_version(department, week, year, copy_a, copy_b=0):
-    from TTapp.TTUtils import basic_swap_version
     basic_swap_version(department, week, year, copy_a, copy_b)

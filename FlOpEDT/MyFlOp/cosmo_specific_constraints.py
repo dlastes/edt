@@ -121,11 +121,11 @@ def add_cosmo_specific_constraints(ttmodel):
             heures_periode = sum(salaries[i.username].values())
             ttmodel.add_constraint(ttmodel.nb_heures[i]['total'],
                                    '<=',
-                                   heures_periode + 10 * prorata[username],
+                                   heures_periode + 10 * prorata[i.username],
                                    "Globalement, %s travaille pas trop" % i.username)
             ttmodel.add_constraint(ttmodel.nb_heures[i]['total'],
                                    '>=',
-                                   heures_periode - 10 * prorata[username],
+                                   heures_periode - 10 * prorata[i.username],
                                    "Globalement, %s travaille assez" % i.username)
         # Respecte les limites par jour
         for day in ttmodel.wdb.days:
@@ -158,7 +158,7 @@ def add_cosmo_specific_constraints(ttmodel):
                 card = 2 * len(dayslots)
                 expr = ttmodel.lin_expr()
                 expr += card * ttmodel.Module_per_day[(i, m)][d]
-                for c in ttmodel.wdb.courses.filter(module=m):
+                for c in set(ttmodel.wdb.courses.filter(module=m)) & ttmodel.wdb.possible_courses[i]:
                     for sl in dayslots & ttmodel.wdb.compatible_slots[c]:
                         expr -= ttmodel.TTinstructors[(sl, c, i)]
                 ttmodel.add_constraint(expr, '>=', 0, "Mod_per_day(%s,%s,%s)" % (i, m, d))
@@ -200,7 +200,7 @@ def add_cosmo_specific_constraints(ttmodel):
             if m.abbrev == 'Ct_Men':
                 limit += 1
             cost = ttmodel.sum(ttmodel.Module_per_day[(i, m)][d] for i in
-                               ttmodel.wdb.possible_tutors[m].exclude(username__in=patrons)) \
+                               ttmodel.wdb.possible_tutors[m] if i.username not in patrons) \
                 - limit * local_var
             ttmodel.add_to_group_cost(g, cost)
             ttmodel.add_constraint(cost, '<=', 0, '%g max tutor per day %s-%s' % (limit, m, d))
@@ -265,7 +265,7 @@ def add_cosmo_specific_constraints(ttmodel):
                     ttmodel.sum(ttmodel.IBS[i, sl_suivant]
                                 for sl_suivant in ttmodel.wdb.slots if sl_suivant.is_successor_of(sl))
                     + 10 * dernier_creneau[i, sl]
-                    , '<=', 10, "last_%s_%s" % (sl, i.username)
+                    , '<=', 10, "last_%s_%s_A" % (sl, i.username)
                     )
                 # si c'est pas le dernier créneau, y'en a après OU il est pas busy
                 ttmodel.add_constraint(
@@ -273,46 +273,46 @@ def add_cosmo_specific_constraints(ttmodel):
                                 for sl_suivant in ttmodel.wdb.slots if sl_suivant.is_successor_of(sl))
                     + (local_var - ttmodel.IBS[i, sl])
                     + dernier_creneau[i, sl]
-                    , '>=', 1, "last_%s_%s" % (sl, i.username)
+                    , '>=', 1, "last_%s_%s_B" % (sl, i.username)
                     )
 
             nb_trous[i, d] = ttmodel.sum(dernier_creneau[i, sl] for sl in ttmodel.wdb.slots_by_day[d]) \
                              - ttmodel.IBD[(i, d)]
 
     for d in ttmodel.wdb.days:
-        diff_proj = amplitude[projection, d] - heures_par_jour[projection, d]
-        diff_autre = amplitude[autre, d] - heures_par_jour[autre, d]
-        diff_controle = amplitude[controle, d] - heures_par_jour[controle, d]
-        trouEs_autre = set()
-        trouEs_controle = set()
-        trouEs_proj = set()
-        if diff_proj >= 1:
-            pas_de_chance = ttmodel.wdb.instructors.get(username=random.choice(list(possible_tutors['Proj']-patrons)))
-            trouEs_proj.add(pas_de_chance)
-            print("%s: trou imposé en proj à %s (pas de chance)..." % (d, pas_de_chance.username))
-        if diff_autre >= 1:
-            for c in ttmodel.wdb.sched_courses.filter(day=d.day, cours__semaine=d.week, cours__module=autre)\
-                    .exclude(cours__tutor=None).exclude(cours__tutor__username__in=menage):
-                trouEs_autre.add(c.tutor)
-            if len(trouEs_autre) > 1:
-                trouEs_autre = set()
-            if trouEs_autre:
-                print(d, ": trou imposé en Autre...", trouEs_autre)
-        if diff_controle >= 1:
-            for c in ttmodel.wdb.sched_courses.filter(day=d.day, cours__semaine=d.week, cours__module=controle)\
-                    .exclude(cours__tutor=None).exclude(cours__tutor__username__in=menage):
-                trouEs_controle.add(c.tutor)
-            if len(trouEs_controle) > 1:
-                trouEs_controle = set()
-            if trouEs_controle:
-                print(d, ": trou imposé en Controle...", trouEs_controle)
+        # diff_proj = amplitude[projection, d] - heures_par_jour[projection, d]
+        # diff_autre = amplitude[autre, d] - heures_par_jour[autre, d]
+        # diff_controle = amplitude[controle, d] - heures_par_jour[controle, d]
+        # trouEs_autre = set()
+        # trouEs_controle = set()
+        # trouEs_proj = set()
+        # if diff_proj >= 1:
+        #     pas_de_chance = ttmodel.wdb.instructors.get(username=random.choice(list(possible_tutors['Proj']-patrons)))
+        #     trouEs_proj.add(pas_de_chance)
+        #     print("%s: trou imposé en proj à %s (pas de chance)..." % (d, pas_de_chance.username))
+        # if diff_autre >= 1:
+        #     for c in ttmodel.wdb.sched_courses.filter(day=d.day, cours__semaine=d.week, cours__module=autre)\
+        #             .exclude(cours__tutor=None).exclude(cours__tutor__username__in=menage):
+        #         trouEs_autre.add(c.tutor)
+        #     if len(trouEs_autre) > 1:
+        #         trouEs_autre = set()
+        #     if trouEs_autre:
+        #         print(d, ": trou imposé en Autre...", trouEs_autre)
+        # if diff_controle >= 1:
+        #     for c in ttmodel.wdb.sched_courses.filter(day=d.day, cours__semaine=d.week, cours__module=controle)\
+        #             .exclude(cours__tutor=None).exclude(cours__tutor__username__in=menage):
+        #         trouEs_controle.add(c.tutor)
+        #     if len(trouEs_controle) > 1:
+        #         trouEs_controle = set()
+        #     if trouEs_controle:
+        #         print(d, ": trou imposé en Controle...", trouEs_controle)
         for i in ttmodel.wdb.instructors:
-            if i.username in menage | patrons:
-                continue
-            if i in trouEs_controle | trouEs_autre | trouEs_proj:
-                trous_max = 1
-            else:
-                trous_max = 0
+        #     if i.username in menage | patrons:
+        #         continue
+        #     if i in trouEs_controle | trouEs_autre | trouEs_proj:
+        #         trous_max = 1
+        #     else:
+        #         trous_max = 0
             # ttmodel.add_constraint(nb_trous[i, d], '<=', trous_max, "%g trous max %s %s" % (trous_max, i.username, d))
             if (d.week, d.day) not in reus_d_equipe:
                 ttmodel.add_to_inst_cost(i, nb_trous[i, d]*1000)
@@ -366,7 +366,7 @@ def add_cosmo_specific_constraints(ttmodel):
     # Inutile vu l'affectation - Plutôt :
     ttmodel.add_constraint(
         ttmodel.sum(ttmodel.TTinstructors[sl, c, i]
-                    for i in ttmodel.wdb.instructors.filter(username__in=menage)
+                    for i in ttmodel.wdb.instructors if i.username in menage
                     for c in ttmodel.wdb.possible_courses[i] if c.tutor is None
                     for sl in ttmodel.wdb.compatible_slots[c]),
         '==',
@@ -498,11 +498,12 @@ def add_cosmo_specific_constraints(ttmodel):
                     '<=',
                     7,
                     "Au moins 3 jours de WE %s" % salarie.username)
-                if salarie.username not in patrons:
+                if salarie.username in temps_plein:
                     ttmodel.add_constraint(ttmodel.sum(ttmodel.WE[salarie, week] for week in ttmodel.wdb.weeks),
                                            '<=',
                                            2,
                                            "Pas plus de 2 WE pour %s" % salarie.username)
+                if salarie.username not in patrons:
                     ttmodel.add_constraint(ttmodel.sum(ttmodel.quasiWE[salarie, week] for week in ttmodel.wdb.weeks),
                                            '<=',
                                            3,
@@ -604,18 +605,20 @@ def add_cosmo_specific_constraints(ttmodel):
                                                               start_time=last_start_time)
             last_course = last_sched_course.cours
             slots = ttmodel.wdb.compatible_slots[last_course]
-            if len(slots)>1:
+            if len(slots) > 1:
                 print("Plusieurs slots pour %s" % last_sched_course)
                 continue
             last_slot = list(slots)[0]
-            for i in ttmodel.wdb.possible_tutors[poste]:
+            for i in ttmodel.wdb.possible_tutors[poste] & ttmodel.wdb.possible_tutors[last_course]:
                 # last_i = ttmodel.add_var("%s %s ferme en %s" % (day, i, poste.abbrev))
                 # ttmodel.add_constraint(last_i - ttmodel.IBS[(i, last_slot)], '==', 0,
                 #                        "Fermeture %s par %s en %s" % (day, i, poste.abbrev))
                 heures_de_soiree = ttmodel.sum(ttmodel.TTinstructors[(sl, c, i)] * sl.duration / 60
                                                for sl in slots_filter(ttmodel.wdb.slots, day=day)
                                                if sl.start_time >= last_start_time - 4*60
-                                               for c in ttmodel.wdb.compatible_courses[sl] if c.module == poste)
+                                               for c in ttmodel.wdb.compatible_courses[sl]
+                                               & ttmodel.wdb.possible_courses[i] if c.module == poste
+                                               )
                                                # & ttmodel.wdb.courses.filter(module=poste))
                 card = 20
                 expr = card * ttmodel.TTinstructors[(last_slot, last_course, i)] - heures_de_soiree
@@ -624,8 +627,9 @@ def add_cosmo_specific_constraints(ttmodel):
     ttmodel.add_warning(None, "Fred et Adelaïde sont principalement en proj")
     projectionnistes = {"Frederic", "Adelaide"}
     cout_si_les_projectionnistes_font_autre_chose = 0.5
-    for username in projectionnistes:
-        projectionniste = ttmodel.wdb.instructors.get(username=username)
+    for projectionniste in ttmodel.wdb.instructors:
+        if projectionniste.username not in projectionnistes:
+            continue
         heures_hors_projection = ttmodel.sum(ttmodel.TTinstructors[(sl, c, projectionniste)] * c.type.duration / 60
                                              for c in set(ttmodel.wdb.courses.exclude(module=projection))
                                              & ttmodel.wdb.possible_courses[projectionniste]
@@ -638,7 +642,7 @@ def add_cosmo_specific_constraints(ttmodel):
         semaine_4 = ttmodel.wdb.weeks[3]
         ttmodel.add_constraint(ttmodel.sum(ttmodel.TTinstructors[sl, c, i]
                                            for sl in slots_filter(ttmodel.wdb.slots, week=semaine_4)
-                                           for i in ttmodel.wdb.instructors.filter(username__in=patrons)
+                                           for i in ttmodel.wdb.instructors if i.username in patrons
                                            for c in ttmodel.wdb.compatible_courses[sl] & ttmodel.wdb.possible_courses[i]
                                            if c.module != projection),
                                '==', 0, "Patrons en proj en semaine 4 ")
@@ -646,8 +650,9 @@ def add_cosmo_specific_constraints(ttmodel):
     # Compteur des heures réellement effectuées par semaine et par jour
     heures_reelles_hebdo = {semaine: {} for semaine in ttmodel.wdb.weeks}
     heures_reelles_quotidiennes = {jour: {} for jour in ttmodel.wdb.days}
-    for username in salaries:
-        salarie = ttmodel.wdb.instructors.get(username=username)
+    for salarie in ttmodel.wdb.instructors:
+        if salarie.username not in salaries:
+            continue
         for semaine in ttmodel.wdb.weeks:
             heures = ttmodel.sum(ttmodel.TTinstructors[sl, c, salarie] * c.type.duration / 60
                                  for c in ttmodel.wdb.possible_courses[salarie]
@@ -663,8 +668,12 @@ def add_cosmo_specific_constraints(ttmodel):
     diff_max_entre_patrons_par_semaine = 5
     ttmodel.add_warning(None, "Max %d heures par semaine de différence entre les patrons"
                         % diff_max_entre_patrons_par_semaine)
-    Annie = ttmodel.wdb.instructors.get(username='Annie')
-    Jeremy = ttmodel.wdb.instructors.get(username='Jeremy')
+    Annie = Jeremy = None
+    for i in ttmodel.wdb.instructors:
+        if i.username == 'Annie':
+            Annie = i
+        elif i.username == 'Jeremy':
+            Jeremy = i
     for semaine in ttmodel.wdb.weeks:
         ttmodel.add_constraint(heures_reelles_hebdo[semaine][Annie] - heures_reelles_hebdo[semaine][Jeremy],
                                '<=', diff_max_entre_patrons_par_semaine,
@@ -690,7 +699,9 @@ def add_cosmo_specific_constraints(ttmodel):
 
     ttmodel.add_warning(None, "Minimiser le nombre de jours de travail pour chaque salarié⋅e")
     # (Si ça ne dépasse pas la borne posée dans pref_slots_per_day)
-    for salarie in ttmodel.wdb.instructors.filter(username__in=salaries):
+    for salarie in ttmodel.wdb.instructors:
+        if salarie.username not in salaries:
+            continue
         for rang, semaine in enumerate(ttmodel.wdb.weeks):
             cout_jours_de_trop = 0
             # need to be sorted
