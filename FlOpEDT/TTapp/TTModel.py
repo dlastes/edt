@@ -366,14 +366,14 @@ class WeekDB(object):
         possible_tutors = {}
         for m in self.modules:
             if ModulePossibleTutors.objects.filter(module=m).exists():
-                possible_tutors[m] = ModulePossibleTutors.objects.get(module=m).possible_tutors.all()
+                possible_tutors[m] = set(ModulePossibleTutors.objects.get(module=m).possible_tutors.all())
             else:
                 possible_tutors[m] = self.instructors
         for c in self.courses:
             if c.tutor is not None:
                 possible_tutors[c] = {c.tutor}
             elif CoursePossibleTutors.objects.filter(course=c).exists():
-                possible_tutors[c] = ModulePossibleTutors.objects.get(course=c).possible_tutors.all()
+                possible_tutors[c] = set(ModulePossibleTutors.objects.get(course=c).possible_tutors.all())
             else:
                 possible_tutors[c] = possible_tutors[c.module]
 
@@ -553,7 +553,7 @@ class TTModel(object):
                     forced_IBD[(i, d)] = 0
 
         IBD_GTE = {week : [] for week in self.weeks}
-        max_days = 5
+        max_days = len(TimeGeneralSettings.objects.get(department=self.department).days)
         for week in self.weeks:
             for j in range(max_days + 1):
                 IBD_GTE[week].append({})
@@ -1039,9 +1039,9 @@ class TTModel(object):
                                             if 1 <= a.valeur <= maximum - 1) / non_prefered_duration
                         for sl in week_slots:
                             avail = set(a for a in tutor_availabilities
-                                        if ((sl.start_time <= a.start_time < sl.end_time
-                                             or sl.start_time < a.start_time + a.duration <= sl.end_time)
-                                            and a.day == sl.day.day))
+                                        if (a.start_time < sl.end_time
+                                            and sl.start_time < a.start_time + a.duration)
+                                            and a.day == sl.day.day)
                             if not avail:
                                 print("availability pbm for %s slot %s" % (i, sl))
                                 unp_slot_cost[i][sl] = 0
