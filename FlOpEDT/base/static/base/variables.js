@@ -768,7 +768,7 @@ if ((logged_usr.rights >> 1) % 2 == 1) {
     logged_usr.dispo_all_change = true ;
 }
     
-var user = {nom: logged_usr.nom,
+var user = {name: logged_usr.name,
 	    dispos: [],
 	    dispos_bu: [],
 	    dispos_type: [],

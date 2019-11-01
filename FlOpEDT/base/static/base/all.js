@@ -42,7 +42,7 @@
 
 
 
-var user = {nom: logged_usr.nom,
+var user = {name: logged_usr.name,
 	    dispos: [],
 	    dispos_bu: [],
 	    dispos_type: []
