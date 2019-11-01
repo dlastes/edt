@@ -46,6 +46,11 @@ class Migration(migrations.Migration):
             new_name='course2',
         ),
         migrations.RenameField(
+            model_name='dependency',
+            old_name='successifs',
+            new_name='successive',
+        ),
+        migrations.RenameField(
             model_name='planningmodification',
             old_name='cours',
             new_name='course',
