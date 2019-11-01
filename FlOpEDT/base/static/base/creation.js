@@ -112,28 +112,6 @@ function create_layouts(svg_cont, light) {
     catg = svg_cont.append("g")
         .attr("id", "lay-catg");
 
-    if (!light) {
-
-        $("#div-mod").css("width", modules.width);
-        $("#div-mod").css({
-            position: "relative",
-            left: modules.x,
-            top: modules.y
-        });
-        $("#div-mod").css("height", modules.height);
-
-        $("#div-sal").css("width", salles.width);
-        $("#div-sal").css({
-            position: "relative",
-            left: salles.x,
-            top: salles.y
-        });
-        $("#div-sal").css("height", salles.height);
-
-    }
-
-
-
     // semaine type ground
     stg = svg_cont.append("g")
         .attr("id", "lay-stg");
@@ -1912,32 +1890,6 @@ function create_val_but() {
         .attr("y", did.tly + .5 * valid.h);
 
     edt_but.attr("visibility", "hidden");
-
-
-    edt_message = vg
-        .append("g")
-        .attr("message", "edt");
-
-    edt_message
-        .append("rect")
-        .attr("width", menus.coled + menus.colcb)
-        .attr("height", 30)
-        .attr("fill", "white")
-        .attr("stroke", "steelblue")
-        .attr("stroke-width", 1)
-        .attr("rx", 10)
-        .attr("ry", 10)
-        .attr("x", menus.x)
-        .attr("y", did.tly + 94);
-
-    edt_message
-        .append("g")
-        .attr("class", "ack-edt")
-        .append("text")
-        .attr("x", menus.x + (menus.coled + menus.colcb) * 0.5)
-        .attr("y", did.tly + 94 + 15);
-
-    edt_message.attr("visibility", "hidden");
 
 }
 

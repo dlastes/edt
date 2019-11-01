@@ -485,6 +485,7 @@ function adapt_labgp(first) {
     d3.select("#edt-main").attr("height", svg.height);
 
     if (first) {
+        window.scroll(0,$("#menu-edt").height() + margin.top - labgp.height_init);
 	expected_ext_grid_dim = svg.width - margin.left - margin.right;
 	new_gp_dim = expected_ext_grid_dim / (rootgp_width * nbPer);
 	if (new_gp_dim > labgp.wm) {

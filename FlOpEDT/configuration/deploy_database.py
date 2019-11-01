@@ -44,7 +44,7 @@ from people.models import FullStaff, SupplyStaff, Tutor, UserDepartmentSettings
 from django.db import IntegrityError
 
 
-bookname='misc/deploy_database/database_file.xlsx'
+bookname='media/configuration/empty_database_file.xlsx'
 logger = logging.getLogger('base')
 
 @transaction.atomic
