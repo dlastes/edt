@@ -164,7 +164,7 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
                     Cours = Course.objects.filter(type=COURSE_TYPE, module=MODULE, groupe=GROUPE, an=an,
                                                   semaine=semaine)
                     for i in range(N//2-1):
-                        P = Dependency(cours1=Cours[2*i], cours2=Cours[2*i+1], successifs=True)
+                        P = Dependency(cours1=Cours[2*i], cours2=Cours[2*i+1], successive=True)
                         P.save()
             if 'ND' in comments or 'ND' in local_comments  and N >= 2:
                 for GROUPE in GROUPS:

@@ -877,7 +877,7 @@ class TTModel(object):
                 for sl2 in self.wdb.compatible_slots[c2]:
                     if not sl2.is_after(sl1) \
                             or (p.ND and (sl2.day == sl1.day)) \
-                            or (p.successifs and not sl2.is_successor_of(sl1)):
+                            or (p.successive and not sl2.is_successor_of(sl1)):
                         if not weight:
                             self.add_constraint(self.TT[(sl1, c1)]
                                                 + self.TT[(sl2, c2)], '<=', 1,
@@ -886,7 +886,7 @@ class TTModel(object):
                             conj_var = self.add_conjunct(self.TT[(sl1, c1)],
                                                          self.TT[(sl2, c2)])
                             self.obj += conj_var * weight
-                    if p.successifs and sl2.is_successor_of(sl1):
+                    if p.successive and sl2.is_successor_of(sl1):
                         for rg1 in self.wdb.room_groups_for_type[c1.room_type]:
                             for rg2 in self.wdb.room_groups_for_type[c2.room_type].exclude(id=rg1.id):
                                 self.add_constraint(self.TTrooms[(sl1, c1, rg1)]

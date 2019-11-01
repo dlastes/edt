@@ -480,7 +480,7 @@ class DependencyAdmin(DepartmentModelAdmin):
     cours1_an.short_description = 'Année'
     cours1_an.admin_order_field = 'cours1__an'
 
-    list_display = ('cours1', 'cours2', 'successifs', 'ND')
+    list_display = ('cours1', 'cours2', 'successive', 'ND')
     list_filter = (('cours1__an', DropdownFilterAll),
                    ('cours1__semaine', DropdownFilterAll),
                    )

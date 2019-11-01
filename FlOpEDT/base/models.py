@@ -569,7 +569,7 @@ class GroupFreeHalfDay(models.Model):
 class Dependency(models.Model):
     cours1 = models.ForeignKey('Course', related_name='cours1', on_delete=models.CASCADE)
     cours2 = models.ForeignKey('Course', related_name='cours2', on_delete=models.CASCADE)
-    successifs = models.BooleanField(verbose_name='Successifs?', default=False)
+    successive = models.BooleanField(verbose_name='Successifs?', default=False)
     ND = models.BooleanField(verbose_name='Jours differents', default=False)
 
     def __str__(self):
