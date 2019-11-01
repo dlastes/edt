@@ -95,4 +95,9 @@ class Migration(migrations.Migration):
             old_name='jour',
             new_name='day',
         ),
+        migrations.RenameField(
+            model_name='slot',
+            old_name='heure',
+            new_name='hour',
+        ),
     ]
