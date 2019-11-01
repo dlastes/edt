@@ -179,7 +179,7 @@ function translate_dispos_from_csv(d) {
     }
     dispos[d.prof][d.day].push({start_time:+d.start_time,
 			       duration: +d.duration,
-			       value: +d.valeur});
+			       value: +d.value});
 }
 
 

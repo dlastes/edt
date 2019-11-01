@@ -2061,7 +2061,7 @@ function translate_dispos_type_from_csv(d) {
         day: d.day,
 	start_time: +d.start_time,
 	duration: +d.duration,
-        val: +d.valeur,
+        val: +d.value,
         off: -1
     };
 }
