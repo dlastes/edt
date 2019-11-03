@@ -456,8 +456,6 @@ class TTModel(object):
 
         self.add_TT_constraints()
 
-        self.update_objective()
-
         if self.warnings:
             print("Relevant warnings :")
             for key, key_warnings in self.warnings.items():
@@ -1378,6 +1376,8 @@ class TTModel(object):
         Returns the number of the work copy
         """
         print("\nLet's solve weeks #%s" % self.weeks)
+
+        self.update_objective()
 
         if target_work_copy is None:
             local_max_wc = ScheduledCourse \
