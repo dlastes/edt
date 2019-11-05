@@ -1478,12 +1478,8 @@ function warning_check(check_tot) {
 function simultaneous_courses(target_course) {
     return cours.filter(function(c) {
         return (c.day == target_course.day 
-		&& ((c.start < target_course.start+target_course.duration
-		     && c.start >= target_course.start)
-		    || (c.start + c.duration < target_course.start+target_course.duration
-			&& c.start +c.duration > target_course.start)
-		    || (c.start <= target_course.start
-			&& c.start + c.duration > target_course.start))
+		&& !(c.start + c.duration <= target_course.start
+                     || c.start >= target_course.start + target_course.duration)
 		&& c.id_cours != target_course.id_cours);
     });
 }
