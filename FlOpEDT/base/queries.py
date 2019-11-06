@@ -86,7 +86,7 @@ def create_first_department():
 
 def get_edt_version(department, week, year, create=False):
 
-    params = {'semaine': week, 'an': year, 'department': department}
+    params = {'week': week, 'an': year, 'department': department}
 
     if create:
         try:
@@ -113,7 +113,7 @@ def get_scheduled_courses(department, week, year, num_copy):
     qs = ScheduledCourse.objects \
                     .filter(
                         course__module__train_prog__department=department,
-                        course__semaine=week,
+                        course__week=week,
                         course__an=year,
                         work_copy=num_copy).select_related('course',
                                                                  'course__tutor',
