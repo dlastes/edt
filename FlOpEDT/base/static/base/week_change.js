@@ -569,7 +569,7 @@ function fetch_cours() {
         async: true,
         contentType: "text/csv",
         success: function(msg, ts, req) {
-            //console.log(msg);
+            console.log(msg);
 
             if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
                 an_att == weeks.init_data[weeks.sel[0]].an) {
@@ -608,9 +608,9 @@ function fetch_cours() {
 
 
 function translate_cours_pl_from_csv(d) {
-    var ind = tutors.pl.indexOf(d.prof_nom);
+    var ind = tutors.pl.indexOf(d.prof_name);
     if (ind == -1) {
-        tutors.pl.push(d.prof_nom);
+        tutors.pl.push(d.prof_name);
     }
     if (modules.pl.indexOf(d.module) == -1) {
         modules.pl.push(d.module);
@@ -621,9 +621,9 @@ function translate_cours_pl_from_csv(d) {
     var co = {
         id_cours: +d.id_cours,
         no_cours: +d.num_cours,
-        prof: d.prof_nom,
+        prof: d.prof_name,
 //        prof_full_name: d.prof_first_name + " " + d.prof_last_name,
-        group: translate_gp_name(d.gpe_nom),
+        group: translate_gp_name(d.gpe_name),
         promo: set_promos.indexOf(d.gpe_promo),
         mod: d.module,
 	c_type: d.coursetype,
@@ -654,7 +654,7 @@ function translate_cours_pp_from_csv(d) {
         id_cours: +d.id,
         no_cours: +d.no,
         prof: d.prof,
-        group: translate_gp_name(d.groupe),
+        group: translate_gp_name(d.group),
         promo: set_promos.indexOf(d.promo),
         mod: d.module,
 	c_type: d.coursetype,

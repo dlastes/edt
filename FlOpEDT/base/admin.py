@@ -69,7 +69,7 @@ class CoursPlaceResource(resources.ModelResource):
     no = fields.Field(column_name='num_course',
                       attribute='course',
                       widget=ForeignKeyWidget(Course, 'no'))
-    prof = fields.Field(column_name='prof_nom',
+    prof = fields.Field(column_name='prof_name',
                         attribute='course__tutor',
                         widget=ForeignKeyWidget(Tutor, 'username'))
     # prof_first_name = fields.Field(column_name='prof_first_name',
@@ -79,7 +79,7 @@ class CoursPlaceResource(resources.ModelResource):
     # prof_last_name = fields.Field(column_name='prof_last_name',
     #                               attribute='cours__tutor',
     #                               widget=ForeignKeyWidget(Tutor, 'last_name'))
-    group = fields.Field(column_name='gpe_nom',
+    group = fields.Field(column_name='gpe_name',
                           attribute='course__group',
                           widget=ForeignKeyWidget(Group, 'name'))
     promo = fields.Field(column_name='gpe_promo',

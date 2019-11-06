@@ -1409,7 +1409,7 @@ def filt_p(r, prof):
 
 def filt_g(r, group):
     if group != '':
-        r = r.filter(group__nom=group)
+        r = r.filter(group__name=group)
     return r
 
 
