@@ -4,7 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased]
+### TBD
+- right permissions in TTapp/views
+
+## [0.3] - 2019-11-07
 ### Added
+- Holidays in solver
+- New preferences mode
+- More preferences for tutors
 - Side panel in main view:
   - Work copy selection
   - Swap versions
@@ -13,13 +20,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
   - Change someone else default week
   - Set preferences for each course type, per training programme
 - Proposals and transparency checks when course dragging
-  
-  
-### TBD
-- right permissions in TTapp/views
 
 ### Changed
-- None
+- Bug fixes (slots, rights)
+- Import improved
 
 
 ## [0.2.1] - 2019-07-18
