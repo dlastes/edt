@@ -61,12 +61,12 @@ logger = logging.getLogger(__name__)
 
 
 class WeekDB(object):
-    def __init__(self, department, weeks, year, train_prog, only_fixed_scheduled_courses=False):
+    def __init__(self, department, weeks, year, train_prog, cosmo_mode=False):
         self.train_prog = train_prog
         self.department = department
         self.weeks = weeks
         self.year = year
-        self.only_fixed_scheduled_courses = only_fixed_scheduled_courses
+        self.cosmo_mode = cosmo_mode
         self.days, self.day_after, self.holidays, self.training_half_days = self.days_init()
         self.slots, self.slots_by_day, self.slots_intersecting, self.slots_by_half_day, self.slots_by_week = self.slots_init()
         self.course_types, self.courses, self.sched_courses, self.fixed_courses, self.fixed_courses_for_slot, \
@@ -238,7 +238,7 @@ class WeekDB(object):
         # COMPATIBILITY
         # Slots and courses are compatible if they have the same type
         # OR if slot type is None and they have the same duration
-        if not self.only_fixed_scheduled_courses:
+        if not self.cosmo_mode:
             compatible_slots = {}
             for c in self.courses:
                 compatible_slots[c] = set(slot for slot in self.slots
@@ -400,7 +400,7 @@ class TTModel(object):
                  min_nps_c=1.,
                  max_stab=5.,
                  lim_ld=1.,
-                 only_fixed_scheduled_courses=False):
+                 cosmo_mode=False):
         print("\nLet's start weeks #%s" % weeks)
         # beg_file = os.path.join('logs',"FlOpTT")
         self.model = LpProblem("FlOpTT", LpMinimize)
@@ -433,7 +433,7 @@ class TTModel(object):
         self.train_prog = train_prog
         self.stabilize_work_copy = stabilize_work_copy
         self.obj = self.lin_expr()
-        self.wdb = self.wdb_init(only_fixed_scheduled_courses=only_fixed_scheduled_courses)
+        self.wdb = self.wdb_init(cosmo_mode=cosmo_mode)
         self.cost_I, self.FHD_G, self.cost_G, self.cost_SL = self.costs_init()
         self.TT, self.TTrooms , self.TTinstructors = self.TT_vars_init()
         self.IBD, self.IBD_GTE, self.IBHD, self.GBHD, self.IBS, self.forced_IBD = self.busy_vars_init()
@@ -464,9 +464,9 @@ class TTModel(object):
         if settings.DEBUG:
             self.model.writeLP('FlOpEDT.lp')
 
-    def wdb_init(self, only_fixed_scheduled_courses):
+    def wdb_init(self, cosmo_mode):
         wdb = WeekDB(self.department, self.weeks, self.an, self.train_prog,
-                     only_fixed_scheduled_courses=only_fixed_scheduled_courses)
+                     cosmo_mode=cosmo_mode)
         return wdb
 
     def costs_init(self):
