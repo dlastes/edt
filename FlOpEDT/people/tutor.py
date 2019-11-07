@@ -46,6 +46,8 @@ class AddFullStaffTutor(CreateView):
     def form_valid(self, form):
         user = form.save()
         fill_default_user_preferences(user)
+        user.is_tutor = True
+        user.save()
         login(self.request, user)
         next = self.request.GET.get('next', '/')
         return redirect(next)

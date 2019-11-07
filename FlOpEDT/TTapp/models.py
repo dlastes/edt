@@ -887,8 +887,8 @@ class AvoidBothTimes(TTConstraint):
             fc = fc.filter(groupe__train_prog=self.train_prog)
         if self.group:
             fc = fc.filter(groupe=self.group)
-        slots1 = set([slot for slot in ttmodel.wdb.slots if slot.start_time <= self.time1 <= slot.end_time])
-        slots2 = set([slot for slot in ttmodel.wdb.slots if slot.start_time <= self.time2 <= slot.end_time])
+        slots1 = set([slot for slot in ttmodel.wdb.slots if slot.start_time <= self.time1 < slot.end_time])
+        slots2 = set([slot for slot in ttmodel.wdb.slots if slot.start_time <= self.time2 < slot.end_time])
         for c1 in fc:
             for c2 in fc.exclude(id__lte=c1.id):
                 for sl1 in slots1:

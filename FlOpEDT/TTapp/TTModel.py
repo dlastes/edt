@@ -66,25 +66,35 @@ class WeekDB(object):
         self.department = department
         self.week = week
         self.year = year
-        self.days = self.days_init()
+        self.days, self.holidays, self.training_half_days = self.days_init()
         self.slots, self.slots_by_day, self.slots_intersecting, self.slots_by_half_day = self.slots_init()
-        self.course_types, self.courses, self.sched_courses, self.fixed_courses, \
+        self.course_types, self.courses, self.sched_courses, self.fixed_courses, self.fixed_courses_for_slot, \
             self.other_departments_courses, self.other_departments_sched_courses, \
             self.courses_availabilities, self.modules, self.dependencies = self.courses_init()
         self.room_types, self.room_groups, self.rooms, self.room_prefs, self.room_groups_for_type,\
-            self.room_course_compat, self.course_rg_compat, \
+            self.room_course_compat, self.course_rg_compat, self.fixed_courses_for_room, \
             self.other_departments_sched_courses_for_room = self.rooms_init()
         self.compatible_slots, self.compatible_courses = self.compatibilities_init()
         self.groups, self.basic_groups, self.all_groups_of, self.basic_groups_of, self.courses_for_group, \
             self.courses_for_basic_group = self.groups_init()
-        self.holidays, self.training_half_days = self.holidays_init()
         self.instructors, self.courses_for_tutor, self.courses_for_supp_tutor, self.availabilities,\
+            self.fixed_courses_for_tutor, \
             self.other_departments_courses_for_tutor, self.other_departments_courses_for_supp_tutor, \
             self.other_departments_scheduled_courses_for_tutor = self.users_init()
 
     def days_init(self):
+        holidays = Holiday.objects.filter(week=self.week, year=self.year)
+
+        training_half_days = TrainingHalfDay.objects.filter(
+            week=self.week,
+            year=self.year,
+            train_prog__in=self.train_prog)
+
         days = TimeGeneralSettings.objects.get(department=self.department).days
-        return days
+        for hd in holidays:
+            days.remove(hd.day)
+
+        return days, holidays, training_half_days
 
     def slots_init(self):
         # SLOTS
@@ -110,36 +120,6 @@ class WeekDB(object):
         print('Ok')
         return slots, slots_by_day, slots_intersecting, slots_by_half_day
 
-    def rooms_init(self):
-        # ROOMS
-        room_types = RoomType.objects.filter(department=self.department)
-        room_groups = RoomGroup.objects.filter(types__department=self.department).distinct()
-        rooms = Room.objects.filter(subroom_of__types__department=self.department).distinct()
-        room_prefs = RoomSort.objects.filter(for_type__department=self.department)
-        room_groups_for_type = {t: t.members.all() for t in room_types}
-        # for each Room, first build the list of courses that may use it
-        room_course_compat = {}
-        for r in rooms:
-            # print "compat for ", r
-            room_course_compat[r] = []
-            for rg in r.subroom_of.all():
-                room_course_compat[r].extend(
-                    [(c, rg) for c in
-                     self.courses.filter(room_type__in=rg.types.all())])
-
-        course_rg_compat = {}
-        for c in self.courses:
-            course_rg_compat[c] = c.room_type.members.all()
-
-        other_departments_sched_courses_for_room = {}
-        for r in rooms:
-            other_departments_sched_courses_for_room[r] = set()
-            for rg in r.subroom_of.exclude(types__department=self.department):
-                other_departments_sched_courses_for_room[r] |= set(self.other_departments_sched_courses.filter(room=rg))
-
-        return room_types, room_groups, rooms, room_prefs, room_groups_for_type, room_course_compat, course_rg_compat,\
-            other_departments_sched_courses_for_room
-
     def courses_init(self):
         # COURSES
         course_types = CourseType.objects.filter(department=self.department)
@@ -161,18 +141,26 @@ class WeekDB(object):
                     copie_travail=0) \
             .exclude(cours__groupe__train_prog__in=self.train_prog)
 
+        fixed_courses_for_slot = {}
+        for sl in self.slots:
+            fixed_courses_for_slot[sl] = set(fc for fc in fixed_courses
+                                             if ((sl.start_time <= fc.start_time < sl.end_time
+                                                 or sl.start_time < fc.end_time() <= sl.end_time)
+                                                 and fc.day == sl.day)
+                                             )
+
+
         other_departments_courses = Course.objects.filter(
             semaine=self.week, an=self.year)\
-            .exclude(groupe__train_prog__department=self.department)
+            .exclude(type__department=self.department)
 
         other_departments_sched_courses = ScheduledCourse \
             .objects \
-            .filter(cours__semaine=self.week,
-                    cours__an=self.year) \
-            .exclude(cours__groupe__train_prog__department=self.department)
+            .filter(cours__in=other_departments_courses,
+                    copie_travail=0)
 
         courses_availabilities = CoursePreference.objects \
-            .filter(train_prog__department=self.department,
+            .filter(train_prog__in=self.train_prog,
                     semaine=self.week,
                     an=self.year)
 
@@ -185,9 +173,45 @@ class WeekDB(object):
             cours2__semaine=self.week,
             cours1__groupe__train_prog__in=self.train_prog)
 
-        return course_types, courses, sched_courses, fixed_courses, \
+        return course_types, courses, sched_courses, fixed_courses, fixed_courses_for_slot,\
             other_departments_courses, other_departments_sched_courses,\
             courses_availabilities, modules, dependencies
+
+    def rooms_init(self):
+        # ROOMS
+        room_types = RoomType.objects.filter(department=self.department)
+        room_groups = RoomGroup.objects.filter(types__department=self.department).distinct()
+        rooms = Room.objects.filter(subroom_of__types__department=self.department).distinct()
+        room_prefs = RoomSort.objects.filter(for_type__department=self.department)
+        room_groups_for_type = {t: t.members.all() for t in room_types}
+        # for each Room, first build the list of courses that may use it
+        room_course_compat = {}
+        for r in rooms:
+            # print "compat for ", r
+            room_course_compat[r] = []
+            for rg in r.subroom_of.all():
+                room_course_compat[r].extend(
+                    [(c, rg) for c in
+                     self.courses.filter(room_type__in=rg.types.all())])
+
+        course_rg_compat = {}
+        for c in self.courses:
+            course_rg_compat[c] = c.room_type.members.all()
+
+        fixed_courses_for_room = {}
+        for r in rooms:
+            fixed_courses_for_room[r] = set()
+            for rg in r.subroom_of.all():
+                fixed_courses_for_room[r] |= set(self.fixed_courses.filter(room=rg))
+
+        other_departments_sched_courses_for_room = {}
+        for r in rooms:
+            other_departments_sched_courses_for_room[r] = set()
+            for rg in r.subroom_of.all():
+                other_departments_sched_courses_for_room[r] |= set(self.other_departments_sched_courses.filter(room=rg))
+
+        return room_types, room_groups, rooms, room_prefs, room_groups_for_type, room_course_compat, course_rg_compat,\
+            fixed_courses_for_room, other_departments_sched_courses_for_room
 
     def compatibilities_init(self):
         # COMPATIBILITY
@@ -238,15 +262,6 @@ class WeekDB(object):
 
         return groups, basic_groups, all_groups_of, basic_groups_of, courses_for_group, courses_for_basic_group
 
-    def holidays_init(self):
-        holidays = Holiday.objects.filter(week=self.week, year=self.year)
-
-        training_half_days = TrainingHalfDay.objects.filter(
-            week=self.week,
-            year=self.year,
-            train_prog__in=self.train_prog)
-        return holidays, training_half_days
-
     def users_init(self):
         # USERS
         instructors = Tutor.objects \
@@ -260,9 +275,15 @@ class WeekDB(object):
         for i in instructors:
             courses_for_supp_tutor[i] = set(i.courses_as_supp.filter(id__in=self.courses))
 
-        availabilities = UserPreference.objects \
-            .filter(semaine=self.week,
-                    an=self.year)
+        availabilities = {}
+        for i in instructors:
+            availabilities[i] = set(UserPreference.objects.filter(semaine=self.week, user=i, an=self.year))
+            if not availabilities[i]:
+                availabilities[i] = set(UserPreference.objects.filter(semaine=None, user=i))
+
+        fixed_courses_for_tutor = {}
+        for i in instructors:
+            fixed_courses_for_tutor[i] = set(self.fixed_courses.filter(cours__tutor=i))
 
         other_departments_courses_for_tutor = {}
         for i in instructors:
@@ -278,7 +299,7 @@ class WeekDB(object):
                                                                    .filter(cours__tutor=i))
 
         return instructors, courses_for_tutor, courses_for_supp_tutor, availabilities, \
-            other_departments_courses_for_tutor, other_departments_courses_for_supp_tutor, \
+            fixed_courses_for_tutor, other_departments_courses_for_tutor, other_departments_courses_for_supp_tutor, \
             other_departments_scheduled_courses_for_tutor
 
 
@@ -322,7 +343,7 @@ class TTModel(object):
         self.wdb = self.wdb_init()
         self.cost_I, self.FHD_G, self.cost_G, self.cost_SL = self.costs_init()
         self.TT, self.TTrooms = self.TT_vars_init()
-        self.IBD, self.IBD_GTE, self.IBHD, self.GBHD = self.busy_vars_init()
+        self.IBD, self.IBD_GTE, self.IBHD, self.GBHD, self.IBS = self.busy_vars_init()
 
         self.avail_instr, self.unp_slot_cost \
             = self.compute_non_prefered_slot_cost()
@@ -341,8 +362,6 @@ class TTModel(object):
                     self.unp_slot_cost[i][sl] = 0
 
         self.add_TT_constraints()
-
-        self.update_objective()
 
         if self.warnings:
             print("Relevant warnings :")
@@ -387,6 +406,19 @@ class TTModel(object):
         return TT, TTrooms
 
     def busy_vars_init(self):
+        IBS = {}
+        for i in self.wdb.instructors:
+            for sl in self.wdb.slots:
+                IBS[(i, sl)] = self.add_var("IBS(%s,%s)" % (i, sl))
+                # Linking the variable to the TT
+                expr = self.lin_expr()
+                expr += 100 * IBS[(i, sl)]
+                for s_sl in self.wdb.slots_intersecting[sl] | {sl}:
+                    for c in self.wdb.courses_for_tutor[i] & self.wdb.compatible_courses[s_sl]:
+                        expr -= self.TT[(s_sl, c)]
+                self.add_constraint(expr, '<=', 99, "IBS_sup(%s,%s)" % (i, sl))
+                self.add_constraint(expr, '>=', 0, "IBS_inf(%s,%s)" % (i, sl))
+
         IBD = {}
         for i in self.wdb.instructors:
             for d in self.wdb.days:
@@ -464,7 +496,7 @@ class TTModel(object):
                                 expr -= self.TT[(sl, c)]
                     self.add_constraint(expr, '>=', 0)
                     self.add_constraint(expr, '<=', card - 1)
-        return IBD, IBD_GTE, IBHD, GBHD
+        return IBD, IBD_GTE, IBHD, GBHD, IBS
 
     def add_var(self, name):
         """
@@ -623,9 +655,11 @@ class TTModel(object):
             for i in self.wdb.instructors:
                 for sl2 in self.wdb.slots_intersecting[sl1] - {sl1}:
                     name = 'simul_slots' + str(i) + '_' + str(sl1) + '_' + str(sl2)
-                    self.add_constraint(self.sum(self.TT[(sl1, c1)] for c1 in self.wdb.courses_for_tutor[i]
+                    self.add_constraint(self.sum(self.TT[(sl1, c1)] for c1 in (self.wdb.courses_for_tutor[i]
+                                                                               | self.wdb.courses_for_supp_tutor[i])
                                                  & self.wdb.compatible_courses[sl1]) +
-                                        self.sum(self.TT[(sl2, c2)] for c2 in self.wdb.courses_for_tutor[i]
+                                        self.sum(self.TT[(sl2, c2)] for c2 in (self.wdb.courses_for_tutor[i]
+                                                                               | self.wdb.courses_for_supp_tutor[i])
                                                  & self.wdb.compatible_courses[sl2]),
                                         '<=', 1, name=name)
             for bg in self.wdb.basic_groups:
@@ -673,14 +707,16 @@ class TTModel(object):
         # teachers are available on the chosen slots
         for sl in self.wdb.slots:
             for i in self.wdb.instructors:
-                test = False
-                for s_sl in self.wdb.slots_intersecting[sl]:
-                    if self.wdb.fixed_courses.filter(cours__tutor=i,
-                                                     start_time=s_sl.start_time,
-                                                     cours__type__duration=s_sl.duration,
-                                                     day=s_sl.day).exists():
-                        test = True
-                if test:
+                fci = set(fc for fc in self.wdb.fixed_courses_for_slot[sl] if fc.cours.tutor == i)
+                # test = False
+                # for s_sl in self.wdb.slots_intersecting[sl]:
+                #     if self.wdb.fixed_courses.filter(cours__tutor=i,
+                #                                      start_time=s_sl.start_time,
+                #                                      cours__type__duration=s_sl.duration,
+                #                                      day=s_sl.day).exists():
+                #         test = True
+                # if test:
+                if fci:
                     name = 'fixed_course_tutor_' + str(i) + '_' + str(sl)
                     instr_courses = self.wdb.courses_for_tutor[i]
                     self.add_constraint(self.sum(self.TT[(sl, c)] for c in instr_courses
@@ -689,14 +725,14 @@ class TTModel(object):
                                         0,
                                         name=name)
 
-        # Holidays
-        for holiday in self.wdb.holidays:
-            holislots = self.wdb.slots_by_day[holiday.day]
-            # if holiday.apm is not None:
-            #     holislots = filter(holislots, apm=holiday.apm)
-            for sl in holislots:
-                for c in self.wdb.compatible_courses[sl]:
-                    self.add_constraint(self.TT[(sl, c)], '==', 0, "holislot_%s_%s" % (sl, c))
+        # # Holidays
+        # for holiday in self.wdb.holidays:
+        #     holislots = self.wdb.slots_by_day[holiday.day]
+        #     # if holiday.apm is not None:
+        #     #     holislots = filter(holislots, apm=holiday.apm)
+        #     for sl in holislots:
+        #         for c in self.wdb.compatible_courses[sl]:
+        #             self.add_constraint(self.TT[(sl, c)], '==', 0, "holislot_%s_%s_%g" % (sl, c, self.constraint_nb))
 
         # Training half day
         for training_half_day in self.wdb.training_half_days:
@@ -709,8 +745,8 @@ class TTModel(object):
             self.add_constraint(self.sum(self.TT[(sl, c)] for sl in training_slots
                                          for c in self.wdb.compatible_courses[sl]
                                          & set(self.wdb.courses.filter(groupe__train_prog__in=training_progs))),
-                                '==', 0, "no_course_on_%s_%s" %
-                                (training_half_day.day, training_half_day.apm))
+                                '==', 0, "no_course_on_%s_%s_%g" %
+                                (training_half_day.day, training_half_day.apm, self.constraint_nb))
 
     def add_rooms_constraints(self):
         print("adding room constraints")
@@ -741,9 +777,11 @@ class TTModel(object):
 
             # constraint : fixed_courses rooms are not available
             for rg in self.wdb.room_groups:
-                if self.wdb.fixed_courses.filter((Q(start_time__lt=sl.start_time + sl.duration) |
-                                                  Q(start_time__gt=sl.start_time - F('cours__type__duration'))),
-                                                 room=rg, day=sl.day).exists():
+                fcrg = set(fc for fc in self.wdb.fixed_courses_for_slot[sl] if fc.room == rg)
+                # if self.wdb.fixed_courses.filter((Q(start_time__lt=sl.start_time + sl.duration) |
+                #                                   Q(start_time__gt=sl.start_time - F('cours__type__duration'))),
+                #                                  room=rg, day=sl.day).exists():
+                if fcrg:
                     for r in rg.subrooms.all():
                         name = 'fixed_room' + str(r) + '_' + str(sl) + '_' + str(self.constraint_nb)
                         self.add_constraint(self.sum(self.TTrooms[(s_sl, c, room)]
@@ -840,7 +878,8 @@ class TTModel(object):
                             or (p.successifs and not sl2.is_successor_of(sl1)):
                         if not weight:
                             self.add_constraint(self.TT[(sl1, c1)]
-                                                + self.TT[(sl2, c2)], '<=', 1)
+                                                + self.TT[(sl2, c2)], '<=', 1,
+                                                "Dependency %s %g" % (p, self.constraint_nb))
                         else:
                             conj_var = self.add_conjunct(self.TT[(sl1, c1)],
                                                          self.TT[(sl2, c2)])
@@ -870,6 +909,11 @@ class TTModel(object):
         #           for i in instructors]))
         # unpreferred slots for an instructor costs
         # min((float(nb_avail_slots) / min(2*nb_teaching_slots,22)),1)
+        holidays = [h.day for h in self.wdb.holidays]
+
+        if self.wdb.holidays:
+            self.add_warning(None, "%s are holidays" % holidays)
+
         for i in self.wdb.instructors:
             teaching_duration = sum(c.type.duration
                                     for c in self.wdb.courses_for_tutor[i])
@@ -877,26 +921,23 @@ class TTModel(object):
                                                               for c in self.wdb.other_departments_courses_for_tutor[i])
             avail_instr[i] = {}
             unp_slot_cost[i] = {}
-            if self.wdb.availabilities.filter(user=i).exists():
-                availabilities = self.wdb.availabilities.filter(user=i)
-            else:
-                availabilities = UserPreference \
-                    .objects \
-                    .filter(user=i,
-                            semaine=None)
 
-            if not availabilities.exists():
+            if self.wdb.holidays:
+                tutor_availabilities = set(a for a in self.wdb.availabilities[i] if a.day not in holidays)
+            else:
+                tutor_availabilities = self.wdb.availabilities[i]
+
+            if not tutor_availabilities:
                 self.add_warning(i, "no availability information given")
                 for sl in self.wdb.slots:
                     unp_slot_cost[i][sl] = 0
                     avail_instr[i][sl] = 1
 
             else:
-                avail_time = sum(a.duration for a in availabilities.filter(valeur__gte=1))
-                maximum = max([a.valeur for a in availabilities])
+                avail_time = sum(a.duration for a in tutor_availabilities if a.valeur >= 1)
+                maximum = max([a.valeur for a in tutor_availabilities])
                 non_prefered_duration = max(1, sum(a.duration
-                                                   for a in availabilities.filter(valeur__gte=1,
-                                                                                  valeur__lte=maximum - 1)))
+                                                   for a in tutor_availabilities if 1 <= a.valeur <= maximum - 1))
 
                 if avail_time < teaching_duration:
                     self.add_warning(i, "%g available hours < %g courses hours" % (avail_time/60, teaching_duration/60))
@@ -906,36 +947,36 @@ class TTModel(object):
 
                 elif avail_time < total_teaching_duration:
                     self.add_warning(i, "%g available hours < %g courses hours including other deps" % (
-                        avail_time / 60, teaching_duration / 60))
-                    for sl in self.wdb.slots:
-                        unp_slot_cost[i][sl] = 0
-                        avail_instr[i][sl] = 1
-
-                elif all(self.wdb.holidays.filter(day=x.day).exists()
-                         for x in availabilities.filter(valeur__gte=1)):
-                    self.add_warning(i, "availabilities only on vacation days!")
+                        avail_time / 60, total_teaching_duration / 60))
                     for sl in self.wdb.slots:
                         unp_slot_cost[i][sl] = 0
                         avail_instr[i][sl] = 1
 
                 else:
-                    average_value = sum(a.duration * a.valeur for a in availabilities
-                                        .filter(valeur__gte=1,
-                                                valeur__lte=maximum - 1)) / non_prefered_duration
+                    average_value = sum(a.duration * a.valeur
+                                        for a in tutor_availabilities
+                                        if 1 <= a.valeur <= maximum - 1) / non_prefered_duration
                     for sl in self.wdb.slots:
-                        avail = availabilities.filter(start_time__lt=sl.start_time + sl.duration,
-                                                      start_time__gt=sl.start_time - F('duration'),
-                                                      day=sl.day)
-                        if min(a.valeur for a in avail) == 0:
-                            avail_instr[i][sl] = 0
+                        avail = set(a for a in tutor_availabilities
+                                    if ((sl.start_time <= a.start_time < sl.end_time
+                                         or sl.start_time < a.start_time + a.duration <= sl.end_time)
+                                        and a.day == sl.day))
+                        if not avail:
+                            print("availability pbm for %s slot %s" % (i, sl))
                             unp_slot_cost[i][sl] = 0
-                        else:
                             avail_instr[i][sl] = 1
-                            value = sum(a.duration * a.valeur for a in avail) / sum(a.duration for a in avail)
-                            if value == maximum:
+                        else:
+                            minimum = min(a.valeur for a in avail)
+                            if minimum == 0:
+                                avail_instr[i][sl] = 0
                                 unp_slot_cost[i][sl] = 0
                             else:
-                                unp_slot_cost[i][sl] = max(0., 2 - value / average_value)
+                                avail_instr[i][sl] = 1
+                                value = minimum
+                                if value == maximum:
+                                    unp_slot_cost[i][sl] = 0
+                                else:
+                                    unp_slot_cost[i][sl] = max(0., 2 - value / average_value)
 
                     if teaching_duration / 60 < 9 and avail_time < 2 * teaching_duration \
                             and i.status == Tutor.FULL_STAFF:
@@ -962,15 +1003,15 @@ class TTModel(object):
             for promo in self.train_prog:
                 avail_course[(course_type, promo)] = {}
                 non_prefered_slot_cost_course[(course_type, promo)] = {}
-                courses_avail = self.wdb \
-                    .courses_availabilities \
-                    .filter(course_type=course_type, train_prog=promo)
-                if not courses_avail.exists():
-                    courses_avail = CoursePreference.objects \
-                        .filter(course_type=course_type,
-                                train_prog=promo,
-                                semaine=None)
-                if not courses_avail.exists():
+                courses_avail = set(self.wdb.courses_availabilities
+                                    .filter(course_type=course_type,
+                                            train_prog=promo))
+                if not courses_avail:
+                    courses_avail = set(CoursePreference.objects
+                                        .filter(course_type=course_type,
+                                                train_prog=promo,
+                                                semaine=None))
+                if not courses_avail:
                     print("No course availability given for %s - %s" % (course_type, promo))
                     for sl in self.wdb.slots:
                         avail_course[(course_type, promo)][sl] = 1
@@ -979,16 +1020,19 @@ class TTModel(object):
                 else:
                     for sl in self.wdb.slots:
                         try:
-                            avail = courses_avail.filter(Q(start_time__lt=sl.start_time + course_type.duration) |
-                                                         Q(start_time__gt=sl.start_time - F('duration')))
+                            avail = set(a for a in courses_avail
+                                        if ((sl.start_time <= a.start_time < sl.end_time
+                                            or sl.start_time < a.start_time + a.duration <= sl.end_time)
+                                            and a.day == sl.day))
                             if avail:
-                                if min(a.valeur for a in avail) == 0:
+                                minimum = min(a.valeur for a in avail)
+                                if minimum == 0:
                                     avail_course[(course_type, promo)][sl] = 0
                                     non_prefered_slot_cost_course[(course_type,
                                                                    promo)][sl] = 5
                                 else:
                                     avail_course[(course_type, promo)][sl] = 1
-                                    value = max(a.valeur for a in avail)
+                                    value = minimum
                                     non_prefered_slot_cost_course[(course_type, promo)][sl] \
                                         = 1 - value / 8
                             else:
@@ -1051,8 +1095,8 @@ class TTModel(object):
                 occupied_in_another_department = False
                 for sc in self.wdb.other_departments_sched_courses_for_room[r]:
                     if sl.day == sc.day and \
-                            (sc.start_time < sl.start_time + sl.duration
-                             or sc.start_time > sl.start_time - sc.cours.type.duration):
+                            (sl.start_time <= sc.start_time < sl.end_time
+                             or sl.start_time < sc.start_time + sc.cours.type.duration <= sl.end_time):
                         occupied_in_another_department = True
                 if occupied_in_another_department:
                     name = 'other_dep_room_' + str(r) + '_' + str(sl) + '_' + str(self.constraint_nb)
@@ -1069,8 +1113,8 @@ class TTModel(object):
                 occupied_in_another_department = False
                 for sc in self.wdb.other_departments_scheduled_courses_for_tutor[i]:
                     if sl.day == sc.day and \
-                            (sc.start_time < sl.start_time + sl.duration
-                             or sc.start_time > sl.start_time - sc.cours.type.duration):
+                            (sl.start_time <= sc.start_time < sl.end_time
+                             or sl.start_time < sc.start_time + sc.cours.type.duration <= sl.end_time):
                         occupied_in_another_department = True
                 if occupied_in_another_department:
                     name = 'other_dep_' + str(i) + '_' + str(sl) + '_' + str(self.constraint_nb)
@@ -1245,6 +1289,8 @@ class TTModel(object):
         Returns the number of the work copy
         """
         print("\nLet's solve week #%g" % self.semaine)
+
+        self.update_objective()
 
         if target_work_copy is None:
             local_max_wc = ScheduledCourse \

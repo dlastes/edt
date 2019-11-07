@@ -102,15 +102,75 @@ function cancel_cm_adv_preferences(){
 function cancel_cm_room_tutor_change(){
     if(ckbox["edt-mod"].cked) {
 	if(!context_menu.room_tutor_hold) {
-	    if (room_tutor_change.course.length > 0) {
-		room_tutor_change.course = [] ;
+            if(pending.init_course!=null) {
+                pending.back_init() ;
 		room_tutor_change.proposal = [] ;
 		go_cm_room_tutor_change();
+                go_courses(false) ;
 	    }
 	}
 	context_menu.room_tutor_hold = false ;
     }
 }
+
+
+
+
+/*-----------------------------
+   ------ file fetchers -------
+  -----------------------------*/
+
+var file_fetch =
+    {groups: {done: false, data: null, callback: null},
+     constraints: {done: false, data: null, callback: null},
+     rooms: {done:false, data: null, callback: null},
+     department: {done:false, data: null, callback: null},};
+
+function main(name, data) {
+    file_fetch[name].data = data ;
+    file_fetch[name].done = true ;
+    if(file_fetch.groups.done && file_fetch.constraints.done
+       && file_fetch.rooms.done && file_fetch.department.done) {
+        file_fetch.constraints.callback();
+        file_fetch.rooms.callback();
+        file_fetch.department.callback();
+        file_fetch.groups.callback();
+    }
+}
+
+file_fetch.rooms.callback = function () {
+    rooms = this.data;
+    var room_names ;
+    room_names = Object.keys(rooms.roomgroups) ;
+    swap_data(room_names, rooms_sel, "room");
+} ;
+
+file_fetch.constraints.callback = function () {
+    constraints = this.data;
+
+    // rev_constraints only used in slot_case
+    var i, j, coursetypes, cur_start_time ;
+    coursetypes = Object.keys(constraints) ;
+    for(i=0 ; i<coursetypes.length ; i++) {
+	for(j=0 ; j<constraints[coursetypes[i]].allowed_st.length ; j++){
+            cur_start_time = constraints[coursetypes[i]].allowed_st[j].toString() ;
+            if (! Object.keys(rev_constraints).includes(cur_start_time)) {
+	        rev_constraints[cur_start_time]
+		    = constraints[coursetypes[i]].duration ;
+            }
+	}
+    }
+    rev_constraints[garbage.start.toString()] = garbage.duration ;
+
+    
+    fetch.constraints_ok = true;
+    create_grid_data();
+}
+
+file_fetch.department.callback = function () {
+    departments.data = this.data ;
+    create_dept_redirection();
+} ;
 
 
 
@@ -144,7 +204,7 @@ var rootgp_width = 0;
 var pos_rootgp_width = 0;
 
 // different grounds where to plot
-var fg, mg, bg, dg, meg, vg, gpg, catg, stg, mog, sag, fig, log, cmpg, cmtg, selg;
+var fg, mg, bg, dg, meg, vg, gpg, catg, stg, mog, sag, fig, log, cmpg, cmtg, selg, pmg;
 var wg = {
     upper: null,
     bg: null,
@@ -181,7 +241,11 @@ var svg_cont ;
   --------------------------*/
 
 // 2D array of list (username,iday,list of intervals)
+  // 
 var dispos = {};
+  // unavailabilities due to other departments
+var extra_pref = {tutors:{},
+                  rooms:{}};
 
 // parameters for availability
 var par_dispos = {
@@ -227,6 +291,36 @@ for (var i = 0; i <= par_dispos.nmax; i++) {
 }
 var data_dispo_adv_cur = [];
 var del_dispo_adv = false;
+
+// preference selection mode
+var pref_selection = {
+    butw:70,
+    buth:30,
+    mary:5,
+    marx:10,
+    choice:{
+        data:[],
+        w:25,
+        h:25
+    },
+    mode:[{
+        desc:"nominal",
+        txt:"Normal",
+        selected:true,
+    },{
+        desc:"paint",
+        txt:"Sélection",
+        selected:false,
+    }]
+};
+for (var i = 0; i <= par_dispos.nmax; i++) {
+    pref_selection.choice.data.push({
+        val:i,
+        // for smile_trans
+        off:-2,
+        selected:false
+    });
+}
 
 // number of required and provided availability slots
 var required_dispos = -1;
@@ -483,7 +577,7 @@ var sel_popup = {
             return ret ;
         }
     },
-    pannels: [], //{type, x, y, w, h, txt}
+    panels: [], //{type, x, y, w, h, txt}
     but: [],
     active_filter: false
 };
@@ -508,9 +602,9 @@ sel_popup.but["module"] = {
     mar_x: 2,
     mar_y: 4,
 };
-sel_popup.available.forEach(function(pannel) {
-    pannel.x = sel_popup.x ;
-    pannel.y = sel_popup.y ;
+sel_popup.available.forEach(function(panel) {
+    panel.x = sel_popup.x ;
+    panel.y = sel_popup.y ;
 }) ;
 
 // has any instructor been fetched?
@@ -550,6 +644,43 @@ var drag = {
     svg_h: 0
 };
 
+// course being moved
+var pending = {
+    init_course: null,
+    wanted_course: null,
+    time: null,
+    pass: {tutor: false,
+           room: false,
+           core: false},
+    force: {tutor: true,
+            room: true},
+    init_force_pass: function() {
+        this.pass.tutor = false;
+        this.pass.room = false;
+        this.pass.core = false;
+        this.force.room = true ;
+        this.force.tutor = true ;
+    },
+    one_try: function() {
+        this.force.room = false ;
+        this.force.tutor = false ;
+    },
+    init: function() {
+        this.init_course = null ;
+        this.wanted_course = null ;
+        this.time = null ;
+        this.init_force_pass() ;
+    },
+    fork_course: function(d) {
+        this.wanted_course = d ;
+        this.init_course = Object.assign({}, d);
+    },
+    back_init: function(t) {
+        Object.assign(this.wanted_course, this.init_course) ;
+        this.init() ;
+    }
+} ;
+
 // stores the courses that has been moved
 var cours_bouge = {};
 
@@ -575,8 +706,14 @@ var valid = {
 // acknowledgements when availability or courses are changed (ack.edt) ,
 // or about the next possible regeneration of the planning (ack.regen)
 var ack = {
-    edt: "",
-    regen: ""
+    more:"",
+    // regen infos
+    regen: "",
+    // for stype
+    pref: "",
+    status: "OK",
+    predefined: {KO: "C'est un échec cuisant. Trouvez un·e responsable d'emploi du temps et faites-lui part de vos problèmes.",
+                 OK: "La modification s'est déroulée sans accroc."}
 };
 
 
@@ -734,3 +871,6 @@ var room_tutor_change = {
 var arrow =
     {right: "→",
      back: "↩"} ;
+
+
+var is_side_panel_open = false ;

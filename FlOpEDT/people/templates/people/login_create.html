@@ -21,29 +21,42 @@
 <!-- you develop activities involving the FlOpEDT/FlOpScheduler software   -->
 <!-- without disclosing the source code of your own applications.          -->
 
-{% extends "base/edt-base.html" %}
+{% extends "base.html" %}
 
+{% block content %}
 {% load static %}
-
-{% block script_variable %}
+<link rel="stylesheet" href="{% static "base/better.css" %}"/>
 <script>
-  var promo_init = "{{ promo }}";
-  var gp_init = "{{ gp }}";
-  var num_copie = "{{ copie }}";
-  var logged_usr = { nom: "{{ name_usr }}", rights: +"{{ rights_usr }}" };
-  var splash_id = "{{ splash_id }}";
+  var url_add = "{% url 'people:add_redirect' '' %}" ;
 </script>
-{% endblock %}
+  
+  
+<div id="tools-main" style="padding:10px;">
 
-{% block script_file %}
-<script type='text/javascript' src="{% static 'base/all.js' %}?2"></script>
-{% endblock %}
+  
+  <fieldset style="width:300px">
+    <legend>Nouveau compte</legend>
+    <form name="add">
+      <input type="radio" id="stud" name="create" checked="checked">Étudiant&middot;e</input><br/>
+      <input type="radio" id="full" name="create">Enseignant&middot;e permanent&middot;e</input><br/>
+      <input type="radio" id="supp" name="create">Vacataire</input><br/>
+      <input type="radio" id="BIAT" name="create">BIATOS</input><br/>
+      <input style="float:right" type="button" value="Créer" onClick="create_user()"/>
+    </form>
+    <!--<p><a href="{ % url 'add_user' % }">Créer un nouveau compte</a></p>-->
+  </fieldset>
 
-{% block side_panel %}
-<p>Numéro de copie :
-  <select id="dd_work_copy">
-  </select>
-</p>
-<p onclick="swap_with_copy_0()" class="btn_panel">Élire cette copie</p>
-<p onclick="reassign_rooms()" class="btn_panel">Réassigner les salles</p>
-{% endblock%}
+  <script>
+    function create_user() {
+	var iam = document.forms['add'];
+	var i = 0;
+	while (!iam[i].checked) {
+	    i++ ;
+	}
+	var url_go_add = url_add + iam[i].id ;
+	console.log(url_go_add);
+	window.location.href = url_go_add ;
+    }
+  </script>
+  
+{% endblock %}

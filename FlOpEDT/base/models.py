@@ -85,14 +85,26 @@ class Group(models.Model):
         """
         :return: the set of all Groupe containing self (self not included)
         """
-        all = set(self.parent_groups.all())
+        ancestors = set(self.parent_groups.all())
 
         for gp in self.parent_groups.all():
 
             for new_gp in gp.ancestor_groups():
-                all.add(new_gp)
+                ancestors.add(new_gp)
 
-        return all
+        return ancestors
+
+    def descendants_groups(self):
+        """
+        :return: the set of all Groupe contained by self (self not included)
+        """
+        descendants = set()
+
+        for gp in Group.objects.filter(train_prog=self.train_prog):
+            if self in gp.ancestor_groups():
+                descendants.add(gp)
+
+        return descendants
 
 
 # </editor-fold desc="GROUPS">
@@ -359,6 +371,9 @@ class ScheduledCourse(models.Model):
 
     def __str__(self):
         return f"{self.cours}{self.no}:{self.day}-t{self.start_time}-{self.room}"
+
+    def end_time(self):
+        return self.start_time + self.cours.type.duration
 
 
 # </editor-fold desc="COURSES">

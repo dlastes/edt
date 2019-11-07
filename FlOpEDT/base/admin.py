@@ -129,6 +129,35 @@ class TutorCoursesResource(CoursPlaceResource):
                   'semaine', 'room', 'prof', 'room_type', 'department')
 
     
+class MultiDepartmentTutorResource(resources.ModelResource):
+    tutor = fields.Field(column_name='tutor',
+                         attribute='cours__tutor',
+                         widget=ForeignKeyWidget(Tutor, 'username'))
+    department =  fields.Field(column_name='department',
+                               attribute='cours__type__department',
+                               widget=ForeignKeyWidget(Department, 'abbrev'))
+    duration = fields.Field(column_name='duration',
+                            attribute='cours__type__duration')
+
+    class Meta:
+        model = ScheduledCourse
+        fields = ('tutor', 'department', 'day', 'start_time', 'duration')
+
+class SharedRoomGroupsResource(resources.ModelResource):
+    room = fields.Field(column_name='room',
+                        attribute='room',
+                        widget=ForeignKeyWidget(RoomGroup, 'name'))
+    department =  fields.Field(column_name='department',
+                               attribute='cours__type__department',
+                               widget=ForeignKeyWidget(Department, 'abbrev'))
+    duration = fields.Field(column_name='duration',
+                            attribute='cours__type__duration')
+
+    class Meta:
+        model = ScheduledCourse
+        fields = ('room', 'department', 'day', 'start_time', 'duration')
+
+    
 class CoursResource(resources.ModelResource):
     promo = fields.Field(column_name='promo',
                          attribute='groupe__train_prog',
@@ -176,6 +205,17 @@ class DispoResource(resources.ModelResource):
     class Meta:
         model = UserPreference
         fields = ('day', 'start_time', 'duration', 'valeur', 'prof')
+
+
+class CoursePreferenceResource(resources.ModelResource):
+    type_name = fields.Field(attribute='course_type',
+                        widget=ForeignKeyWidget(CourseType, 'name'))
+    train_prog = fields.Field(attribute='train_prog',
+                              widget=ForeignKeyWidget(TrainingProgramme, 'abbrev'))
+
+    class Meta:
+        model = CoursePreference
+        fields = ('type_name', 'train_prog', 'day', 'start_time', 'duration', 'valeur')
 
 
 class UnavailableRoomsResource(resources.ModelResource):

@@ -48,15 +48,60 @@
 // apply pref change when simple mode
 function apply_change_simple_pref(d) {
     if (pref_only || ckbox["dis-mod"].cked) {
-        if (Math.floor(d.val % (par_dispos.nmax / 2)) != 0) {
-            d.val = Math.floor(d.val / (par_dispos.nmax / 2)) * par_dispos.nmax / 2;
+        var sel = pref_selection.choice.data.find(function(dd){
+            return dd.selected;
+        });
+        if(typeof sel === 'undefined') {
+            if (Math.floor(d.val % (par_dispos.nmax / 2)) != 0) {
+                d.val = Math.floor(d.val / (par_dispos.nmax / 2)) * par_dispos.nmax / 2;
+            }
+            d.val = (d.val + par_dispos.nmax / 2) % (3 * par_dispos.nmax / 2);
+	    update_pref_interval(user.nom, d.day, d.start_time, d.val) ;
+            //dispos[user.nom][idays[d.day]][d.hour] = d.val;
+            //user.dispos[day_hour_2_1D(d)].val = d.val;
+        } else {
+            d.val = sel.val ;
+	    update_pref_interval(user.nom, d.day, d.start_time, d.val) ;
         }
-        d.val = (d.val + par_dispos.nmax / 2) % (3 * par_dispos.nmax / 2);
-	update_pref_interval(user.nom, d.day, d.start_time, d.val) ;
-        //dispos[user.nom][idays[d.day]][d.hour] = d.val;
-        //user.dispos[day_hour_2_1D(d)].val = d.val;
         go_pref(true);
     }
+}
+
+// change preference selection mode
+function apply_pref_mode(d) {
+    pref_selection.mode.forEach(function(d){
+        d.selected = false ;
+    });
+    d.selected = true ;
+    if(d.desc=="nominal") {
+        pref_selection.choice.data.forEach(function(d){
+            d.selected = false ;
+        });
+    } else {
+        var current_sel = pref_selection.choice.data.find(function(d){
+            return d.selected ;
+        });
+        if (typeof current_sel === 'undefined') {
+            pref_selection.choice.data[0].selected = true ;
+        }
+    }
+    go_pref_mode();
+}
+
+// 
+function apply_pref_mode_choice(d) {
+    pref_selection.choice.data.forEach(function(p){
+        p.selected = false ;
+    })
+    d.selected = true ;
+    pref_selection.mode.forEach(function(m){
+        m.selected = false ;
+    });
+    var sel_mode = pref_selection.mode.find(function(m){
+        return m.desc == "paint" ;
+    });
+    sel_mode.selected = true ;
+    go_pref_mode(false);
 }
 
 /*---------------------
@@ -93,7 +138,7 @@ function apply_wk_change(d, i) { //if(fetch.done) {
     dispos = {};
     user.dispos = [];
 
-    fetch_all(false);
+    fetch_all(false, true);
 
     go_week_menu(false);
 } //}
@@ -125,7 +170,7 @@ function select_room_change() {
     var level = room_cm_level;
     room_tutor_change.cm_settings = room_cm_settings[level] ;
 
-    var c = room_tutor_change.course[0] ;
+    var c = pending.wanted_course ;
     room_tutor_change.old_value = c.room ;
     room_tutor_change.cur_value = c.room ;
 
@@ -137,8 +182,7 @@ function select_room_change() {
     if (level < room_cm_settings.length - 1) {
 
 	// find rooms where a course take place
-	
-	var concurrent_courses = simultaneous_courses(c.day, c.start, c.duration, c.id_cours) ;
+	var concurrent_courses = simultaneous_courses(c) ;
 	
 	var occupied_rooms = [] ;
 	for (i = 0 ; i < concurrent_courses.length ; i++) {
@@ -179,7 +223,12 @@ function select_room_change() {
 		}
 
 		if(!is_occupied && is_available) {
-		    proposed_rg.push(initial_rg[i]);
+                    // other depts
+                    if (!Object.keys(extra_pref.rooms).includes(cur_roomgroup)
+                        || !Object.keys(extra_pref.rooms[cur_roomgroup]).includes(c.day)
+                        || get_preference(extra_pref.rooms[cur_roomgroup][c.day], c.start, c.duration) != 0) {
+		        proposed_rg.push(initial_rg[i]);
+                    }
 		}
 	    }
 	}
@@ -193,11 +242,11 @@ function select_room_change() {
     atomic_rooms = [];
     composed_rooms = [];
     var fake_id = new Date() ;
-    fake_id = fake_id.getMilliseconds() + "-" + c.id_cours ;
+    fake_id = fake_id.getMilliseconds() + "-" ;
     room_tutor_change.proposal = [] ;
 
     for (rg = 0 ; rg < proposed_rg.length ; rg++) {
-	room = {fid: fake_id, content: proposed_rg[rg]} ;
+	room = {fid: fake_id + proposed_rg[rg], content: proposed_rg[rg]} ;
 	if(rooms.roomgroups[room.content].length == 1) {
 	    atomic_rooms.push(room);
 	} else {
@@ -225,13 +274,10 @@ function select_room_change() {
 
 
 function confirm_room_change(d){
-    var c = room_tutor_change.course[0] ;
-    add_bouge(c);
-    c.room = d.content;
-    //room_tutor_change.cur_value = d.room;
-    room_tutor_change.course = [] ;
+    Object.assign(pending.wanted_course, {room: d.content});
+
     room_tutor_change.proposal = [] ;
-    go_courses() ;
+    check_pending_course();
 }
 
 
@@ -248,9 +294,8 @@ function fetch_all_tutors() {
             dataType: 'json',
             url: url_all_tutors,
             async: false,
-            contentType: "application/json; charset=utf-8",
-            success: function (msg) {
-		all_tutors = msg.tutors.filter(function(d) {
+            success: function (data) {
+		all_tutors = data.filter(function(d) {
 		    return d>'A';
 		});
 		all_tutors.sort();
@@ -269,15 +314,15 @@ function fetch_all_tutors() {
 function select_tutor_module_change() {
     room_tutor_change.cm_settings = tutor_module_cm_settings ;
 
-    var c = room_tutor_change.course[0] ;
+    var c = pending.wanted_course ;
     room_tutor_change.old_value = c.prof ;
     room_tutor_change.cur_value = c.prof ;
 
     var tutor_same_module = cours
-	.filter(function(c) {
-	    return c.mod == room_tutor_change.course[0].mod;
+	.filter(function(oth_c) {
+	    return oth_c.mod == c.mod;
 	})
-	.map(function(c){ return c.prof; });
+	.map(function(oth_c){ return oth_c.prof; });
 
     // remove duplicate 
     tutor_same_module = tutor_same_module.filter(function(t,i) {
@@ -302,8 +347,6 @@ function select_tutor_module_change() {
 function select_tutor_filters_change() {
     room_tutor_change.cm_settings = tutor_filters_cm_settings ;
 
-    var c = room_tutor_change.course[0] ;
-
     var chunk_size = tutor_cm_settings.ncol * tutor_cm_settings.nlin - 1;
 
     room_tutor_change.proposal = [] ;
@@ -321,9 +364,9 @@ function select_tutor_filters_change() {
     }
     
     var fake_id = new Date() ;
-    fake_id = fake_id.getMilliseconds() + "-" + c.id_cours ;
+    fake_id = fake_id.getMilliseconds() ;
     room_tutor_change.proposal = room_tutor_change.proposal.map(function(t) {
-	return {fid: fake_id, content: t};
+	return {fid: fake_id + t , content: t};
     });
 
     room_tutor_change.cm_settings.nlin = Math.ceil(room_tutor_change.proposal.length / room_tutor_change.cm_settings.ncol) ;
@@ -334,8 +377,6 @@ function select_tutor_change(f) {
     room_tutor_change.cm_settings = tutor_cm_settings ;
 
     
-    var c = room_tutor_change.course[0] ;
-
     var ends = f.content.split(arrow.right);
 
     room_tutor_change.proposal = all_tutors.filter(function(t) {
@@ -345,9 +386,9 @@ function select_tutor_change(f) {
     room_tutor_change.proposal.push(arrow.back) ;
     
     var fake_id = new Date() ;
-    fake_id = fake_id.getMilliseconds() + "-" + c.id_cours ;
+    fake_id = fake_id.getMilliseconds() ;
     room_tutor_change.proposal = room_tutor_change.proposal.map(function(t) {
-	return {fid: fake_id, content: t};
+	return {fid: fake_id + t, content: t};
     });
 
 }
@@ -357,13 +398,11 @@ function select_tutor_change(f) {
 
 
 function confirm_tutor_change(d){
-    var c = room_tutor_change.course[0] ;
-    add_bouge(c);
-    c.prof = d.content;
-    //room_tutor_change.cur_value = d.room;
-    room_tutor_change.course = [] ;
+    Object.assign(pending.wanted_course, {prof: d.content});
+
     room_tutor_change.proposal = [] ;
-    go_courses() ;
+
+    check_pending_course();
 }
 
 
@@ -372,9 +411,14 @@ function confirm_tutor_change(d){
 
 function go_cm_room_tutor_change() {
 
+    var tmp_array = [] ;
+    if (pending.wanted_course != null) {
+        tmp_array.push(pending.wanted_course);
+    }
+
     var tut_cm_course_dat = cmtg
         .selectAll(".cm-chg")
-        .data(room_tutor_change.course,
+        .data(tmp_array,
               function(d) {
                   return d.id_cours;
               });
@@ -445,7 +489,8 @@ function go_cm_room_tutor_change() {
         .merge(tut_cm_room_dat.select(".cm-chg-bt"))
         .attr("x", cm_chg_but_txt_x)
         .attr("y", cm_chg_but_txt_y)
-        .text(cm_chg_but_txt);
+        .attr("fill", cm_chg_but_txt_fill)
+        .text(cm_chg_but_txt)
         // .attr("stroke", "darkslategrey")
         // .attr("stroke-width", 2);
 
@@ -455,8 +500,8 @@ function go_cm_room_tutor_change() {
 }
 
 
-function remove_pannel(p, i){
-    sel_popup.pannels.splice(i, 1);
+function remove_panel(p, i){
+    sel_popup.panels.splice(i, 1);
     go_selection_popup() ;
 }
 
@@ -603,13 +648,29 @@ function apply_ckbox(dk) {
                 //     }
                 //     go_edt(false);
                 // }
-                if (Object.keys(dispos).length == 0) {
-		    fetch_dispos();
-		} else {
-		    create_dispos_user_data();
-		    go_edt(false);
-		}
-		
+		fetch_dispos();
+
+                if (logged_usr.dispo_all_change) { 
+
+                    // a single tutor was selected
+                    if (tutors.all.filter(function(t){
+                        return t.display ;
+                    }).length == 1) {
+                        user.nom = tutors.all.find(function(t){
+                            return t.display ;
+                        }).name ;
+                    }
+                    // otherwise cancel selection
+                    else {
+                        tutors.all.forEach(function(t) {
+                            t.display = true ;
+                        }) ;
+                        user.nom = logged_usr.nom ;
+                    }
+                }
+		create_dispos_user_data();
+		go_edt(false);
+		create_pref_modes();
             } else {
                 user.dispos = [];
                 //ckbox["dis-mod"].disp = false;
@@ -619,6 +680,7 @@ function apply_ckbox(dk) {
                     labgp.width *= 1 + (dim_dispo.width + dim_dispo.right) / (rootgp_width * labgp.width);
                 }
                 go_edt(false);
+                remove_pref_modes();
             }
         } else if (dk == "edt-mod") {
             if (ckbox[dk].cked) {
@@ -835,8 +897,9 @@ function confirm_change() {
     }
 
     if (changes.length == 0) {
-        ack.edt = "Modif EdT : RAS";
-        go_ack_msg(true);
+        ack.status = 'OK' ;
+        ack.more = "Rien à signaler.";
+        go_ack_msg();
     } else {
 
         if (conc_tutors.length > 0) {
@@ -909,7 +972,8 @@ function send_edt_change(changes) {
             show_loader(false);
         },
         error: function(msg) {
-            edt_change_ack(msg);
+            edt_change_ack({status:'KO',
+                            more:'Pb de communication avec le serveur'});
             show_loader(false);
         }
     });
@@ -922,8 +986,8 @@ function compute_pref_changes(changes) {
     var modified_days = []
 
     for (var i = 0; i < Object.keys(user.dispos).length; i++) {
-	if(user.dispos[i].val != user.dispos_bu[i]
-	   && modified_days.indexOf(user.dispos[i].day) == -1) {
+        //user.dispos[i].val != user.dispos_bu[i].val	   &&
+	if(modified_days.indexOf(user.dispos[i].day) == -1) {
 	    modified_days.push(user.dispos[i].day);
 	}
     }
@@ -959,8 +1023,9 @@ function send_dis_change() {
     var nbDispos = 0;
 
     if (user.dispos_bu.length == 0) {
-        ack.edt = "Modif dispo : RAS";
-        go_ack_msg(true);
+        ack.status = 'OK' ;
+        ack.more = "Rien à signaler.";
+        go_ack_msg();
         return;
     }
 
@@ -974,8 +1039,10 @@ function send_dis_change() {
 
 
     if (changes.length == 0) {
-        ack.edt = "Modif dispo : RAS";
-        go_ack_msg(true);
+        console.log('no change here');
+        ack.status = 'OK' ;
+        ack.more = "Rien à signaler.";
+        go_ack_msg();
     } else {
 
 	var sent_data = {} ;
@@ -983,21 +1050,27 @@ function send_dis_change() {
 
         show_loader(true);
         $.ajax({
-            url: url_dispos_changes
-		+ "?s=" + weeks.init_data[weeks.sel[0]].semaine
-		+ "&a=" + weeks.init_data[weeks.sel[0]].an
-		+ "&u=" + user.nom,
+            url: url_user_pref_changes
+		+ weeks.init_data[weeks.sel[0]].an
+		+ "/" + weeks.init_data[weeks.sel[0]].semaine
+		+ "/" + user.nom,
             type: 'POST',
 //            contentType: 'application/json; charset=utf-8',
             data: sent_data , //JSON.stringify(changes),
             dataType: 'json',
             success: function(msg) {
                 show_loader(false);
-                return dis_change_ack(msg, nbDispos);
+                ack.status = 'OK' ;
+                ack.more = "";
+                go_ack_msg();
+                filled_dispos = nbDispos ;
+                go_alarm_pref() ;
             },
             error: function(msg) {
                 show_loader(false);
-                return dis_change_ack(msg, nbDispos);
+                ack.status = 'KO' ;
+                ack.more = "";
+                go_ack_msg();
             }
         });
     }
@@ -1009,33 +1082,20 @@ function send_dis_change() {
 
 
 function edt_change_ack(msg) {
-    if (msg.responseText == "OK") {
+    if (msg.status == "OK") {
         version += 1;
-        ack.edt = "Modifications EDT : OK !";
+        ack.status = "OK";
+        ack.more = "" ;
         cours_bouge = [];
     } else {
-        ack.edt = msg.getResponseHeader('reason');
-        if (ack.edt != null && ack.edt.startsWith("Version")) {
-            ack.edt += "Quelqu'un a modifié entre-temps."
+        ack.status = 'KO';
+        ack.more = msg.more;
+        if (ack.more != null && ack.more.startsWith("Version")) {
+            ack.more = "Il y a eu une modification concurrente. Rechargez et réessayez."
         }
     }
-    console.log(ack.edt);
-    go_ack_msg(true);
-}
-
-
-function dis_change_ack(msg, nbDispos) {
-    console.log(msg);
-    if (msg.responseText == "OK") {
-        ack.edt = "Modifications dispos : OK !"
-    } else {
-        ack.edt = msg.getResponseHeader('reason');
-    }
-    go_ack_msg(true);
-
-    filled_dispos = nbDispos;
-    go_alarm_pref();
-
+    console.log(ack.more);
+    go_ack_msg();
 }
 
 
@@ -1143,7 +1203,7 @@ function splash(splash_ds){
     buts
 	.append("text")
 	.attr("style", function(d){
-	    return "text-anchor: middle; font-size: 18";
+	    return "text-anchor: middle";
 	})
         .attr("x", classic_txt_x)
         .attr("y", classic_txt_y)
@@ -1188,13 +1248,11 @@ function splash(splash_ds){
     comms
         .append("text")
         .attr("class", "comm")
-	.attr("style", function(d){
-	    return "text-anchor: "+d.anch
-		+"; font-size:" + d.ftsi;
-	})
+        .attr("font-size", function(d){ return d.ftsi; })
+        .attr("text-anchor", function(d){ return d.anch; })
         .attr("x", classic_x)
         .attr("y", classic_y)
-        .text(classic_txt);
+        .text(classic_txt)
     
 }
 
@@ -1275,7 +1333,7 @@ function get_course(id){
 
 
 function compute_cm_room_tutor_direction() {
-    var c = room_tutor_change.course[0] ;
+    var c = pending.wanted_course ;
     var cm_start_x, cm_start_y;
     cm_start_x = cours_x(c) + .5 * cours_width(c) ;
     cm_start_y = cours_y(c)  + .5 * cours_height(c) ;
@@ -1295,7 +1353,7 @@ function compute_cm_room_tutor_direction() {
 function apply_selection_display(choice) {
     if (fetch.done) {
 
-        var sel_list = choice.pannel.list ;
+        var sel_list = choice.panel.list ;
 
         var concerned = sel_list.find(function(t) {
             return t.name == choice.name ;
@@ -1306,7 +1364,7 @@ function apply_selection_display(choice) {
         }
 
         
-	if(choice.pannel.type == "tutor"
+	if(choice.panel.type == "tutor"
            && logged_usr.dispo_all_change && ckbox["dis-mod"].cked){
             tutors.all.forEach(function(t) { t.display = false ; });
             concerned.display = true ;
@@ -1390,8 +1448,8 @@ function apply_cancel_selections() {
         }
     }
 
-    // remove all pannels
-    sel_popup.pannels = [] ;
+    // remove all panels
+    sel_popup.panels = [] ;
 
     // update flags and display
     update_active() ;

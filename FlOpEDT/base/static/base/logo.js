@@ -64,10 +64,10 @@ var logo = {scale: .12,
 
 
 var headlines =
-    [ "Gestionnaire d'emploi du temps <span id=\"flopPasRed\">Fl"
-        + "</span>exible et <span id=\"flopRed\">Op</span>enSource",
-      "\"Qui veut faire les EDT cette année ?\" ... Fl"
-      + "<span id=\"flopRed\">Op</span> !",
+    [ "Gestionnaire d'emploi du temps <span id=\"flopGreen\">fl"
+        + "</span>exible et <span id=\"flopGreen\">op</span>enSource",
+      "\"Qui veut faire les <span id=\"flopRed\">EDT</span> cette année ?\" ... "
+      + "<span id=\"flopGreen\">flop</span> !",
       "Et votre emploi du temps fera un "
       + "<span id=\"flopRedDel\">flop</span> carton !",
       "Et même votre logo sera à l'heure..." 

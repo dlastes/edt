@@ -23,9 +23,36 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-
-
-
 from django.shortcuts import render
+from django.http import HttpResponse, JsonResponse
 
-# Create your views here.
+from base.models import ScheduledCourse
+
+from MyFlOp import MyTTUtils
+
+            
+def available_work_copies(req, dept, year, week):
+    '''
+    Send the content of the side panel.
+    '''
+    copies = list(ScheduledCourse.objects.filter(cours__an=year, cours__semaine=week, cours__type__department__abbrev=dept).distinct('copie_travail').values_list('copie_travail'))
+    copies = [n for (n,) in copies]
+    copies.sort()
+    return JsonResponse({'copies': copies})
+
+
+def swap(req, dept, year, week, work_copy):
+    '''
+    Swap scheduled courses with work copy work_copy
+    against scheduled courses with work copy 0
+    '''
+    MyTTUtils.swap_version(dept, week, year, work_copy)
+    return JsonResponse({'status': 'ok'})
+
+
+def reassign_rooms(req, dept, year, week, work_copy):
+    '''
+    Reassign rooms of scheduled courses with work copy work_copy
+    '''
+    MyTTUtils.reassign_rooms(dept, week, year, work_copy)
+    return JsonResponse({'status': 'ok'})

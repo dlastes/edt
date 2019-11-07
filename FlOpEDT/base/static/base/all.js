@@ -61,10 +61,9 @@ var bs_margin_w = 20 ;
 var bs_margin_h = 5 ;
 
 var svg = {
-    height: window.innerHeight - $("#menu-edt").height() - bs_margin_h,
-    width: window.innerWidth - bs_margin_w,
+    height: window.innerHeight + margin.top,//- $("#menu-edt").height() - bs_margin_h,
+    width: window.innerWidth + margin.left // - bs_margin_w,
 };
-
 
 var week = 42 ;
 var year = 2017;
@@ -97,9 +96,9 @@ pref_only = false ;
   -------------------*/
 
 
-function on_group_rcv(dg) {
+file_fetch.groups.callback = function () {
 
-    create_groups(dg);
+    create_groups(this.data);
 
     create_edt_grid();
 
@@ -108,66 +107,21 @@ function on_group_rcv(dg) {
     create_regen() ;
     create_quote() ;
     
-    go_ack_msg();
+//    go_ack_msg();
 
     create_bknews();
 
     go_promo_gp_init() ;
 
 
-    fetch_all(true);
+    fetch_all(true, false);
 
-    if (splash_id == 1) {
-    
-	var splash_mail = {
-	    id: "mail-sent",
-	    but: {list: [{txt: "Ok", click: function(d){} }]},
-	    com: {list: [{txt: "E-mail envoyé !", ftsi: 23}]}
-	}
-	splash(splash_mail);
-
-    } else if (splash_id == 2) {
-
-	var splash_quote = {
-	    id: "quote-sent",
-	    but: {list: [{txt: "Ok", click: function(d){} }]},
-	    com: {list: [{txt: "Citation envoyée ! (en attente de modération)", ftsi: 23}]}
-	}
-	splash(splash_quote);
-
-    }
     
     fetch.groups_ok = true;
     create_grid_data();
 }
 
 
-function on_room_rcv(room_data) {
-    rooms = room_data;
-    var room_names ;
-    room_names = Object.keys(rooms.roomgroups) ;
-    swap_data(room_names, rooms_sel, "room");
-}
-
-function on_constraints_rcv(cst_data) {
-    constraints = cst_data;
-    var i, j, keys ;
-    keys = Object.keys(constraints) ;
-    for(i=0 ; i<keys.length ; i++) {
-	for(j=0 ; j<constraints[keys[i]].allowed_st.length ; j++){
-	    rev_constraints[constraints[keys[i]].allowed_st[j].toString()]
-		= constraints[keys[i]].duration ;
-	}
-    }
-    rev_constraints[garbage.start.toString()] = garbage.duration ;
-    fetch.constraints_ok = true;
-    create_grid_data();
-}
-
-function on_departments_rcv(dept_data) {
-    departments.data = dept_data ;
-    create_dept_redirection();
-}
 
 
 
@@ -193,18 +147,18 @@ fetch_dispos_type();
 
 
 
-
-d3.json(groupes_fi,
- 	on_group_rcv);
-
 d3.json(rooms_fi,
- 	on_room_rcv);
+ 	function(d){ main('rooms', d); } );
 
 d3.json(constraints_fi,
- 	on_constraints_rcv);
+ 	function(d){ main('constraints', d); });
 
 d3.json(departments_fi,
-        on_departments_rcv);
+ 	function(d){ main('department', d); });
+
+d3.json(groupes_fi,
+ 	function(d){ main('groups', d); } );
+
     
 
 d3.select("body")
@@ -212,7 +166,6 @@ d3.select("body")
 	cancel_cm_adv_preferences();
 	cancel_cm_room_tutor_change();
     })
-
 
 
 

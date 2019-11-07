@@ -101,6 +101,9 @@ class UserDepartmentSettings(models.Model):
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
     is_main = models.BooleanField(default=False)
 
+    def __str__(self):
+        return f'U:{self.user.username}, D:{self.department.abbrev}, {"main" if self.is_main else "secondary"}'
+
 
 class Tutor(User):
     FULL_STAFF = 'fs'
@@ -116,10 +119,13 @@ class Tutor(User):
     pref_hours_per_day = models.PositiveSmallIntegerField(
         verbose_name="How many hours per day would you prefer ?",
         default=4)
+    max_hours_per_day = models.PositiveSmallIntegerField(
+        verbose_name="How many hours per day can you suffer ?",
+        default=9)
 
     def uni_extended(self):
         ret = super(Tutor, self).uni_extended()
-        ret += '-' + self.status + '-' + 'S' + str(self.pref_hours_per_day)
+        ret += '-' + self.status + '-' + 'P' + str(self.pref_hours_per_day) + 'M' + str(self.max_hours_per_day)
         return ret
 
 

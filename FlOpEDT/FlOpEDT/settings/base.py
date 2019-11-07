@@ -40,10 +40,9 @@ import sys
 BASE_DIR = os.path.dirname(os.path.dirname(
     os.path.dirname(os.path.abspath(__file__))))
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/1.10/howto/deployment/checklist/
-
+# 
 # Application definition
+#
 
 INSTALLED_APPS = [
     'channels',
@@ -73,7 +72,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    #    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -100,6 +99,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'FlOpEDT.wsgi.application'
+ASGI_APPLICATION = 'FlOpEDT.routing.application'
 
 CACHES = {
    'default': {
@@ -128,36 +128,49 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-STATIC_URL = '/static/'
-
-# AUTH_USER_MODEL = 'base.User'
-
 # Internationalization
 # https://docs.djangoproject.com/en/1.10/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_L10N = True
-
 USE_TZ = True
-
 CSRF_USE_SESSION = True
-
 AUTH_USER_MODEL = 'people.User'
 
+#
+# ASSETS Settings
+#
 
-STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, 'static'),
-    )
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
+   
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
 
+# 
+# EMAIL SETTINGS
+#
 
-ASGI_APPLICATION = 'FlOpEDT.routing.application'
+EMAIL_USE_SSL = True
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_SUBJECT_PREFIX = '[flop!EDT] '
+SERVER_EMAIL = 'no-reply@flop.edt'
+
+EMAIL_HOST = os.environ.get('EMAIL_HOST')
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+
+if 'EMAIL_PORT' in os.environ:
+    EMAIL_PORT = int(os.environ.get('EMAIL_PORT'))
 
 #
 # FLOPEDT Settings
 #
+
 CUSTOM_CONSTRAINTS_PATH = 'MyFlOp.custom_constraints'
+
+if 'ADMINS' in os.environ:
+    ADMINS = [tuple(admin.split(",")) for admin in os.environ.get('ADMINS').split(" ")]
+    MANAGERS = ADMINS

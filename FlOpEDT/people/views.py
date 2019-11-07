@@ -88,3 +88,9 @@ def student_preferences(req):
             raise Http404("Who are you?")
     else:
         return TemplateResponse(req, 'people/studentPreferencesSelection.html', {})
+
+
+def create_user(req):
+    print(req.user)
+    print(req.user.is_authenticated and req.user.has_department_perm(req.department))
+    return TemplateResponse(req, 'people/login_create.html')

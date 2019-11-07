@@ -35,7 +35,8 @@ from base.models import Group, TrainingProgramme, \
 from base.models import Room, RoomType, RoomGroup, \
                         RoomSort, Period, CourseType, \
                         TutorCost, CourseStartTimeConstraint, \
-                        TimeGeneralSettings, GroupType
+                        TimeGeneralSettings, GroupType, CourseType, \
+                        TrainingProgramme
 
 from displayweb.models import GroupDisplay, TrainingProgrammeDisplay, BreakingNews
 
@@ -114,7 +115,16 @@ def get_scheduled_courses(department, week, year, num_copy):
                         cours__module__train_prog__department=department,
                         cours__semaine=week,
                         cours__an=year,
-                        copie_travail=num_copy)
+                        copie_travail=num_copy).select_related('cours',
+                                                                 'cours__tutor',
+                                                                 'cours__groupe',
+                                                                 'cours__groupe__train_prog',
+                                                                 'cours__module',
+                                                                 'cours__type',
+                                                                 'room',
+                                                                 'cours__room_type',
+                                                                 'cours__module__display'
+                                                                 )
     return qs    
 
 
@@ -144,7 +154,7 @@ def get_groups(department_abbrev):
                                 'handled')
             gp_dict_children[gp.full_name()] = []
 
-        for gp in Group.objects.filter(train_prog=train_prog):
+        for gp in Group.objects.filter(train_prog=train_prog).order_by('nom'):
             for new_gp in gp.parent_groups.all():
                 gp_dict_children[new_gp.full_name()].append(gp)
 
@@ -265,3 +275,15 @@ def get_departments():
     :return: list of department abbreviations
     """
     return [d.abbrev for d in Department.objects.all()]
+
+def get_course_types(dept):
+    """
+    :return: list of course type names
+    """
+    return [d.name for d in CourseType.objects.filter(department=dept)]
+
+def get_training_programmes(dept):
+    """
+    :return: list of training programme names
+    """
+    return [d.abbrev for d in TrainingProgramme.objects.filter(department=dept)]

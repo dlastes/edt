@@ -59,7 +59,10 @@ function go_pref(quick) {
 	// preferences: background color, and smiley
 	
         dat = mg.selectAll(".dispo")
-            .data(user.dispos)
+            .data(user.dispos,
+                  function(d) {
+                      return [d.day,d.start_time,d.duration,d.val].join('-');
+                  })
             .attr("cursor", ckbox["dis-mod"].cked ? "pointer" : "default");
 
         datdi = dat
@@ -406,7 +409,96 @@ function go_alarm_pref() {
 }
 
 
+function go_pref_mode() {
 
+    var selall = pmg
+        .select("#pm-but-head")
+        .selectAll(".pm-but")
+        .data(pref_selection.mode);
+    
+    var g_new = selall
+        .enter()
+        .append("g")
+        .attr("cursor", "pointer")
+        .attr("class", "pm-but")
+        .on("click", apply_pref_mode);
+
+    var rect_new = g_new
+        .append("rect")
+        .attr("x", 0)
+        .attr("y", pref_mode_but_y)
+        .attr("rx", 5)
+        .attr("ry", 10)
+        .attr("width", pref_selection.butw)
+        .attr("height", pref_selection.buth);
+
+    g_new
+        .append("text")
+        .attr("x", pref_mode_but_txt_x)
+        .attr("y", pref_mode_but_txt_y)
+        .text(pref_mode_but_txt);
+
+    rect_new
+        .merge(selall.select("rect"))
+        .attr("class", pref_mode_but_cls);
+
+    go_paint_pref_mode_choices(false);
+}
+
+// smileys in paint preference mode
+function go_paint_pref_mode_choices(quick){
+    var t, dat, datdi, datsmi;
+    
+    if (quick) {
+        t = d3.transition()
+            .duration(0);
+    } else {
+        t = d3.transition();
+    }
+
+    var parent = pmg
+        .select("#pm-choices");
+
+    parent
+        .attr("opacity", pref_sel_choice_opac);
+
+    // preferences: background color, and smiley
+    dat = parent
+        .selectAll(".dispo")
+        .data(pref_selection.choice.data);
+    
+    datdi = dat
+        .enter()
+        .append("g")
+        .attr("cursor", "pointer")
+        .attr("class", "dispo");
+    
+    var datdisi = datdi
+        .append("g")
+        .attr("class", "dispo-si")
+        .on("click", apply_pref_mode_choice);
+    
+    datdisi
+        .append("rect")
+        .attr("class", "dispo-bg")
+        .attr("stroke", "black")
+        .attr("width", pref_selection.choice.w)
+        .attr("height", pref_selection.choice.h)
+        .attr("x", pref_sel_choice_x)
+        .attr("y", 0)
+        .attr("fill", dispo_fill)
+        .merge(dat.select(".dispo-bg"))
+        .transition(t)
+        .attr("width", pref_selection.choice.w)
+        .attr("height", pref_selection.choice.w)
+        .attr("x", pref_sel_choice_x)
+        .attr("y", pref_sel_choice_y)
+        .attr("fill", dispo_fill)
+        .attr("stroke-width", pref_sel_choice_stkw);
+
+    go_smiley(dat, datdisi, t);
+    
+}
 
 
 /*---------------------
@@ -519,6 +611,8 @@ function go_grid(quick) {
         .attr("y", gs_y)
         .attr("stroke", gs_sc)
         .attr("stroke-width", gs_sw)
+        .attr("stroke-dasharray", gs_sda)
+        .attr("stroke-linecap", gs_slc)
         .merge(grid.select("rect"))
         .transition(t)
         .attr("fill-opacity", gs_opacity)
@@ -1060,10 +1154,11 @@ function go_courses(quick) {
         .on("contextmenu", function(d) { if (ckbox["edt-mod"].cked) {
 	    d3.event.preventDefault();
 	    room_tutor_change.cm_settings = entry_cm_settings ;
-	    room_tutor_change.course = [d] ;
+            pending.fork_course(d) ;
+            pending.one_try() ;
 	    compute_cm_room_tutor_direction();
 	    //select_room_change(d);
-	    select_entry_cm(d);
+	    select_entry_cm();
 	    go_cm_room_tutor_change();
 	}})
         .call(dragListener);
@@ -1131,6 +1226,8 @@ function go_courses(quick) {
         .attr("y", cours_txt_top_y)
         .text(cours_txt_top_txt)
         .attr("fill", cours_txt_fill)
+        .attr("font-weight", cours_txt_weight)
+        .attr("font-size", cours_txt_size)
         .merge(cg.select("[st=m]"))
         .transition(t)
         .attr("x", cours_txt_x)
@@ -1140,6 +1237,8 @@ function go_courses(quick) {
         .append("text")
         .attr("st", "p")
         .attr("fill", cours_txt_fill)
+        .attr("font-weight", cours_txt_weight)
+        .attr("font-size", cours_txt_size)
         .merge(cg.select("[st=p]"))
         .transition(t)
         .attr("x", cours_txt_x)
@@ -1156,6 +1255,8 @@ function go_courses(quick) {
         .merge(cg.select("[st=r]"))
         .text(cours_txt_bot_txt)
         .attr("fill", cours_txt_fill)
+        .attr("font-weight", cours_txt_weight)
+        .attr("font-size", cours_txt_size)
         .transition(t)
         .attr("x", cours_txt_x)
         .attr("y", cours_txt_bot_y);
@@ -1172,21 +1273,21 @@ function go_courses(quick) {
   -----------------------*/
 
 // update acknowledgment message
-function go_ack_msg(quick) {
-    var t;
-    if (quick) {
-        t = d3.transition()
-            .duration(0);
-    } else {
-        t = d3.transition();
+function go_ack_msg() {
+    var btn_txt = "Super" ;
+    if (ack.status == 'KO') {
+        btn_txt = "Ok" ;
     }
-
-    if (ack.edt != "") {
-        edt_message.attr("visibility", "visible");
-        edt_message.select("text").text(ack.edt);
-    } else {
-        edt_message.attr("visibility", "hidden");
+    var com_txt = ack.more ;
+    if (com_txt == '') {
+        com_txt = ack.predefined[ack.status];
     }
+    var splash_ack = {
+	id: "ack-edt-mod",
+	but: {list: [{txt: btn_txt, click: function(d){} }]},
+	com: {list: [{txt: com_txt}]}
+    }
+    splash(splash_ack);
 
 }
 
@@ -1207,10 +1308,10 @@ function go_regen(s) {
                 txt = "Regénération totale (mineure) le " + elements[1] +
                     "(" + elements[3] + ")";
             } else {
-                txt = "Regénération totale le " + elements[1];
+                txt = "Regénération totale prévue (probablement le " + elements[1] + ")";
             }
         } else if (elements[0] == 'S') {
-            txt = "Regénération mineure le " + elements[1];
+            txt = "Regénération mineure prévue (probablement le " + elements[1] + ")";
         }
 
         ack.regen = txt;
@@ -1254,7 +1355,7 @@ function go_edt(t) {
     go_courses(t);
     //go_tutors();
     go_pref(t);
-    go_ack_msg(t);
+    //go_ack_msg(t);
     go_bknews(t);
     go_alarm_pref();
     go_regen(null);
@@ -1266,13 +1367,13 @@ function go_selection_buttons() {
 
     var cont = selg
         .selectAll(".sel-pop-g")
-        .data(sel_popup.pannels, function(p) {
+        .data(sel_popup.panels, function(p) {
             return p.type ;
         })
         .selectAll(".sel-button")
         .data(function(p) {
             p.list.forEach(function(c){
-                c.pannel = p ;
+                c.panel = p ;
             });
             return p.list ;
         }, function(c) {

@@ -51,7 +51,7 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
                 break
     print("Semaine %s de %s : colonne %g" % (semaine, feuille, WEEK_COL))
 
-    row = 2
+    row = 4
     module_COL = 1
     nature_COL = 3
     duree_COL = 4
@@ -61,11 +61,8 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
     sumtotal = 0
     while 1:
         row += 1
-        salle = sheet.cell(row=row, column=salle_COL).value
-        module = sheet.cell(row=row, column=module_COL).value
-        if salle is None:
-            continue
-        if salle.startswith("TOTAL"):
+        is_total = sheet.cell(row=row, column=groupe_COL).value
+        if is_total == "TOTAL":
             # print "Sem %g de %s - TOTAL: %g"%(semaine, feuille,sumtotal)
             break
 
@@ -75,9 +72,11 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
             continue
 
         try:
+            salle = sheet.cell(row=row, column=salle_COL).value
+            module = sheet.cell(row=row, column=module_COL).value
             N = float(N)
             # handle dark green lines - Vert fonce
-            assert isinstance(salle, str)
+            assert isinstance(salle, str) and salle is not None
             if salle == "Type de Salle":
                 nominal = int(N)
                 if N != nominal:
@@ -153,7 +152,9 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
                         s = 1
                     course_type = after_type[s:]
                     courses = Course.objects.filter(type__name=course_type, module=MODULE, semaine=semaine, an=an,
-                                                   groupe__in = list(GROUPE.ancestor_groups()) + [GROUPE])
+                                                    groupe__in = GROUPE.ancestor_groups() |
+                                                                 {GROUPE} |
+                                                                 GROUPE.descendants_groups())
                     for course in courses[:n]:
                         P = Dependency(cours1=course, cours2=C)
                         P.save()
@@ -198,3 +199,21 @@ def extract_planif(department, bookname=None):
         extract_period(department, book, period, annee_courante)
     assign_color(department)
 
+
+def extract_planif_from_week(week, year, department, bookname=None):
+    '''
+    Generate the courses from bookname; the school year starts in annee_courante
+    '''
+    if bookname is None:
+        bookname = 'misc/deploy_database/Files/planif_file_'+department.abbrev+'.xlsx'
+    book = load_workbook(filename=bookname, data_only=True)
+    if year == annee_courante:
+        for period in Period.objects.filter(department=department):
+            if period.starting_week < period.ending_week:
+                for w in range(max(week, period.starting_week), period.ending_week + 1):
+                    ReadPlanifWeek(department, book, period.name, w, annee_courante)
+            else:
+                for w in range(max(week, period.starting_week), 53):
+                    ReadPlanifWeek(department, book, period.name, w, annee_courante)
+                for w in range(1, period.ending_week + 1):
+                    ReadPlanifWeek(department, book, period.name, w, annee_courante + 1)

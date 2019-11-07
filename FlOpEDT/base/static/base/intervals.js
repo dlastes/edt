@@ -47,9 +47,8 @@ function index_in_pref(list, instant) {
 // get the aggregated preference score of tutor on day, on an interval
 // lasting duration, starting at start_time
 // assumes well-formed (consecutive) intervals
-function get_preference(day, start_time, duration, tutor) {
+function get_preference(pref, start_time, duration) {
     var after = false ;
-    var pref = dispos[tutor][day];
     var t = time_settings.time ;
     
     var i_start = index_in_pref(pref.map(function(d){
@@ -102,6 +101,21 @@ function get_preference(day, start_time, duration, tutor) {
 }
 
 
+// period: {day: , start:, duration: }
+function find_in_pref(pref, entity, period) {
+    if (!Object.keys(pref).includes(entity)) {
+        return undefined ;
+    }
+    if (!Object.keys(pref[entity]).includes(period.day)) {
+        return undefined ;
+    }
+    
+    return get_preference(pref[entity][period.day],
+                          period.start, period.duration);
+}
+
+
+
 function no_overlap(list, start_time, duration) {
     var i_start = index_in_pref(list.map(function(d){return d.start_time;}), start_time) ;
     var i_end = index_in_pref(list.map(function(d){return d.start_time;}), start_time+duration) ;
@@ -128,7 +142,7 @@ function update_pref_interval(tutor, day, start_time, value) {
 	return d.start_time == start_time;
     });
     if (p.length == 1) {
-	p[0].val = value ;
+	p[0].value = value ;
     } else {
 	console.log("Problem with the time interval");
     }
@@ -146,3 +160,19 @@ function update_pref_interval(tutor, day, start_time, value) {
     }
 }
 
+
+// PRECOND: sorted preference list
+// fill preference list with def_value so that any moment has a value
+function fill_holes(pref, def_value) {
+    var i = 0 ;
+    while (i < pref.length-1) {
+        if (pref[i].start_time + pref[i].duration < pref[i+1].start_time) {
+            pref.splice(i+1, 0,
+                        {start_time:pref[i].start_time + pref[i].duration,
+                         duration: pref[i+1].start_time - pref[i].duration,
+                         value: def_value});
+            i++;
+        }
+        i ++ ;
+    }
+}

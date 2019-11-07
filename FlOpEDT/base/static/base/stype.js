@@ -24,11 +24,18 @@
 
 // Redefinition of some variables
 
-var margin = {top: 50,  left: 100, right: 10, bot:10};
+var margin = {top: 50,  left: 50, right: 10, bot:10};
 
-var svg = {height: 625 - margin.top - margin.bot, width: 680 - margin.left - margin.right};
+var svg = {height: 625 - margin.top - margin.bot, width: 720 - margin.left - margin.right};
 
-// check ack -> ack.edt ?
+var mode = "tutor" ;
+
+var dd_selections = {
+    'tutor': {value:logged_usr.nom},
+    'prog': {value:''},
+    'type': {value:''}};
+
+
 
 smiley.tete = 13 ;
 
@@ -38,6 +45,8 @@ dim_dispo.mh = 10 ;
 dim_dispo.plot = 1 ;
 nbRows=1;
 scale = dim_dispo.height / nb_minutes_in_grid()  ;
+pref_selection.choice.w = 35;
+pref_selection.choice.h = 35;
 
 
 ckbox["dis-mod"].cked = true ;
@@ -51,6 +60,7 @@ pref_only = true ;
 create_general_svg_pref_only();
 go_days(true, false);
 create_lunchbar();
+create_pref_modes(pref_only);
 fetch_pref_only();
 
 
@@ -84,6 +94,9 @@ function create_general_svg_pref_only() {
 
 function create_layouts_pref_only(svg_cont){
 
+    // preference mode ground
+    pmg = svg_cont.append("g")
+        .attr("id", "lay-pmg");    
 
     // valider
     vg = svg_cont.append("g")
@@ -120,21 +133,61 @@ function create_layouts_pref_only(svg_cont){
 /*---------------------
   ------- DISPOS ------
   ---------------------*/
+function fetch_url() {
+    if (mode == 'tutor') {
+        return url_fetch_user_dweek + user.nom ;
+    } else if (mode == 'course') {
+        return url_fetch_course_dweek 
+            + dd_selections['prog'].value
+            + '/' + dd_selections['type'].value ;
+    }
+}
+
+
+function course_type_prog_name(prog, ctype){
+    return prog + '--' + ctype ;
+}
+
+
+function translate_course_preferences_from_csv(d) {
+    var pseudo_tutor = course_type_prog_name(d.train_prog, d.type_name) ;
+    if(Object.keys(dispos).indexOf(pseudo_tutor)==-1){
+	dispos[pseudo_tutor] = {} ;
+        for (var i = 0; i < days.length; i++) {
+	    dispos[pseudo_tutor][days[i].ref] = [] ;
+	}	
+    }
+    dispos[pseudo_tutor][d.day].push({start_time:+d.start_time,
+			       duration: +d.duration,
+			       value: +d.valeur});
+}
+
+
+function translate_pref_from_csv(d) {
+    if (mode == 'tutor') {
+        return translate_dispos_from_csv(d);
+    } else if (mode == 'course') {
+        return translate_course_preferences_from_csv(d);
+    }
+}
+
+
+
 function fetch_pref_only() {
     show_loader(true);
     $.ajax({
         type: "GET", //rest Type
         dataType: 'text',
-        url: url_fetch_stype ,
+        url: fetch_url() ,
         async: false,
         contentType: "text/csv",
         success: function (msg) {
 	    console.log(msg);
 	    
 	    console.log("in");
-
+            dispos = {} ;
 	    user.dispos_type = [] ;
-	    user.dispos_type = d3.csvParse(msg, translate_dispos_from_csv);
+	    user.dispos_type = d3.csvParse(msg, translate_pref_from_csv);
 	    create_dispos_user_data();
 	    fetch.dispos_ok = true ;
 	    go_pref(true);
@@ -210,6 +263,21 @@ d3.select("body")
     })
 
 
+
+// compute url to send preference changes to
+// according to mode
+function send_url(year, week) {
+    if (mode == 'tutor') {
+        return url_user_pref_changes + year + "/" + week
+	    + "/" + user.nom ;
+    } else if (mode == 'course') {
+        return url_course_pref_changes + year + "/" + week
+	    + "/" + dd_selections['prog'].value
+            + "/" + dd_selections['type'].value ;
+    }
+}
+
+
 function apply_stype_from_button(save) {
     console.log("app");
 //    console.log(document.forms['app']);
@@ -243,8 +311,18 @@ function apply_stype_from_button(save) {
 
 
 	if(changes.length==0) {
-    	    ack = "RAS";
+    	    ack.pref = "RAS";
+            document.getElementById("ack").textContent = ack.pref ;
 	} else {
+
+            ack.pref = "Ok ";
+	    if(save){
+		ack.pref += "semaine type";
+	    } else {
+		ack.pref += "semaine "+se_deb+" année "+an_deb
+		    +" à semaine "+se_fin+" année "+an_fin;
+	    }
+
 
 	    for (an=an_deb ; an<=an_fin ; an++){
 		if(an==an_deb){
@@ -261,37 +339,34 @@ function apply_stype_from_button(save) {
 		for (se=se_min ; se<=se_max ; se++) {
 
 		    //console.log(se,an);
+                    show_loader(true);
     		    $.ajax({
-    			url: url_dispos_changes
-			    + "?s=" + se
-			    + "&a=" + an
-			    + "&u=" + user.nom,
+    			url: send_url(an, se),
 			type: 'POST',
 //			contentType: 'application/json; charset=utf-8',
 			data: sent_data, //JSON.stringify(changes),
 			dataType: 'json',
     			success: function(msg) {
-
+                            if(msg.status != 'OK') {
+                                ack.pref = msg.more ;
+                            }
+                            document.getElementById("ack").textContent = ack.pref ;
+                            show_loader(false);
     			},
     			error: function(msg){
-
+                            ack.pref = 'Pb communication serveur';
+                            document.getElementById("ack").textContent = ack.pref ;
+                            show_loader(false);
     			}
     		    });
 		}
 	    }
-	    ack = "Ok ";
-	    if(save){
-		ack += "semaine type";
-	    } else {
-		ack += "semaine "+se_deb+" année "+an_deb
-		    +" à semaine "+se_fin+" année "+an_fin;
-	    }
 	}
 
     } else {
-	ack = "Problème : seconde semaine avant la première";
+	ack.pref = "Problème : seconde semaine avant la première";
+        document.getElementById("ack").textContent = ack.pref ;
     }
 
-    document.getElementById("ack").textContent = ack ;
      
 }

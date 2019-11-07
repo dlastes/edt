@@ -44,7 +44,7 @@ from people.models import FullStaff, SupplyStaff, Tutor, UserDepartmentSettings
 from django.db import IntegrityError
 
 
-bookname='misc/deploy_database/database_file.xlsx'
+bookname='media/configuration/empty_database_file.xlsx'
 logger = logging.getLogger('base')
 
 @transaction.atomic
@@ -99,7 +99,6 @@ def tutors_extract(department, book):
                     tutor = SupplyStaff(**params)
                     tutor.status = Tutor.SUPP_STAFF
 
-
                 tutor.set_password("passe")
                 tutor.is_tutor = True
                 tutor.save()
@@ -119,7 +118,7 @@ def tutors_extract(department, book):
             else:
                 logger.info(f'create tutor with id:{id}')
         else:
-            UserDepartmentSettings.objects.create(department=department, user=tutor)
+            UserDepartmentSettings.objects.get_or_create(department=department, user=tutor)
 
         INTER_ID_ROW += 1
         id = sheet.cell(row=INTER_ID_ROW, column=1).value
