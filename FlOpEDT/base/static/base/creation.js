@@ -257,25 +257,25 @@ function create_clipweek() {
     weeks.ndisp = Math.min(weeks.ndisp, weeks.init_data.length);
 
     weeks.init_data.push({
-        an: max.an,
-        semaine: max.semaine + 1
+        year: max.year,
+        week: max.week + 1
     });
     weeks.init_data.unshift({
-        an: min.an,
-        semaine: min.semaine - 1,
+        year: min.year,
+        week: min.week - 1,
     });
 
     var fw ;
 
-    if (min.an > an_init ||
-	(min.an == an_init && min.semaine > semaine_init)) {
+    if (min.year > an_init ||
+	(min.year == an_init && min.week > semaine_init)) {
 	weeks.cur_data = weeks.init_data.slice(1,
 					       1 + weeks.ndisp + 2);
 	weeks.fdisp = 1;
 	weeks.sel[0] = 2 ;
 	
-    } else if (max.an < an_init ||
-	(max.an == an_init && max.semaine < semaine_init)) {
+    } else if (max.year < an_init ||
+	(max.year == an_init && max.week < semaine_init)) {
 	weeks.cur_data = weeks.init_data.slice(weeks.init_data.length - 1  - 2 - weeks.ndisp,
 					       weeks.init_data.length -1);
 	weeks.fdisp = weeks.init_data.length - 1  - 2 - weeks.ndisp ;

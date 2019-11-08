@@ -47,8 +47,8 @@ function fetch_dispos() {
 
     fetch.ongoing_dispos = true;
 
-    var semaine_att = weeks.init_data[weeks.sel[0]].semaine;
-    var an_att = weeks.init_data[weeks.sel[0]].an;
+    var semaine_att = weeks.init_data[weeks.sel[0]].week;
+    var an_att = weeks.init_data[weeks.sel[0]].year;
     
     show_loader(true);
     $.ajax({
@@ -60,8 +60,8 @@ function fetch_dispos() {
         success: function(msg) {
             console.log("in");
 
-            if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
-                an_att == weeks.init_data[weeks.sel[0]].an) {
+            if (semaine_att == weeks.init_data[weeks.sel[0]].week &&
+                an_att == weeks.init_data[weeks.sel[0]].year) {
                 dispos = {};
                 //user.dispos = [];
                 d3.csvParse(msg, translate_dispos_from_csv);
@@ -99,8 +99,8 @@ function fetch_dispos() {
         success: function(msg) {
             console.log("in");
             console.log(msg);
-            if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
-                an_att == weeks.init_data[weeks.sel[0]].an) {
+            if (semaine_att == weeks.init_data[weeks.sel[0]].week &&
+                an_att == weeks.init_data[weeks.sel[0]].year) {
                 extra_pref.tutors = {};
                 d3.csvParse(msg, translate_extra_pref_tut_from_csv);
 		sort_preferences(extra_pref.tutors);
@@ -137,8 +137,8 @@ function fetch_dispos() {
         success: function(msg) {
             console.log("in");
             console.log(msg);
-            if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
-                an_att == weeks.init_data[weeks.sel[0]].an) {
+            if (semaine_att == weeks.init_data[weeks.sel[0]].week &&
+                an_att == weeks.init_data[weeks.sel[0]].year) {
                 extra_pref.rooms = {};
                 d3.csvParse(msg, translate_extra_pref_room_from_csv);
 	        sort_preferences(extra_pref.rooms);
@@ -387,8 +387,8 @@ function create_dispos_user_data() {
 function fetch_bknews(first) {
     fetch.ongoing_bknews = true;
 
-    var semaine_att = weeks.init_data[weeks.sel[0]].semaine;
-    var an_att = weeks.init_data[weeks.sel[0]].an;
+    var semaine_att = weeks.init_data[weeks.sel[0]].week;
+    var an_att = weeks.init_data[weeks.sel[0]].year;
 
     show_loader(true);
     $.ajax({
@@ -401,8 +401,8 @@ function fetch_bknews(first) {
 	    bknews.cont = d3.csvParse(msg,
 				      translate_bknews_from_csv);
 
-            if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
-                an_att == weeks.init_data[weeks.sel[0]].an) {
+            if (semaine_att == weeks.init_data[weeks.sel[0]].week &&
+                an_att == weeks.init_data[weeks.sel[0]].year) {
 		var max_y = -1 ;
 		for (var i = 0 ; i < bknews.cont.length ; i++) {
 		    if (bknews.cont[i].y > max_y) {
@@ -512,8 +512,8 @@ function fetch_cours() {
     
     ack.more = "";
 
-    var semaine_att = weeks.init_data[weeks.sel[0]].semaine;
-    var an_att = weeks.init_data[weeks.sel[0]].an;
+    var semaine_att = weeks.init_data[weeks.sel[0]].week;
+    var an_att = weeks.init_data[weeks.sel[0]].year;
 
     cours_bouge = {};
     
@@ -529,8 +529,8 @@ function fetch_cours() {
             go_regen(null);
             go_alarm_pref();
 
-            if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
-                an_att == weeks.init_data[weeks.sel[0]].an) {
+            if (semaine_att == weeks.init_data[weeks.sel[0]].week &&
+                an_att == weeks.init_data[weeks.sel[0]].year) {
 
                 days = JSON.parse(req.getResponseHeader('days').replace(/\'/g, '"'));
             
@@ -571,8 +571,8 @@ function fetch_cours() {
         success: function(msg, ts, req) {
             console.log(msg);
 
-            if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
-                an_att == weeks.init_data[weeks.sel[0]].an) {
+            if (semaine_att == weeks.init_data[weeks.sel[0]].week &&
+                an_att == weeks.init_data[weeks.sel[0]].year) {
 
                 tutors.pp = [];
                 modules.pp = [];
@@ -789,8 +789,8 @@ function translate_gp_name(gp) {
 function fetch_unavailable_rooms() {
     fetch.ongoing_un_rooms = true;
     
-    var semaine_att = weeks.init_data[weeks.sel[0]].semaine;
-    var an_att = weeks.init_data[weeks.sel[0]].an;
+    var semaine_att = weeks.init_data[weeks.sel[0]].week;
+    var an_att = weeks.init_data[weeks.sel[0]].year;
 
     show_loader(true);
     $.ajax({
@@ -800,8 +800,8 @@ function fetch_unavailable_rooms() {
         async: true,
         contentType: "text/csv",
         success: function(msg, ts, req) {
-            if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
-                an_att == weeks.init_data[weeks.sel[0]].an) {
+            if (semaine_att == weeks.init_data[weeks.sel[0]].week &&
+                an_att == weeks.init_data[weeks.sel[0]].year) {
 
 		console.log(msg);
 
@@ -866,8 +866,8 @@ function fetch_all(first, fetch_work_copies){
 
 
 function fetch_version() {
-    var semaine_att = weeks.init_data[weeks.sel[0]].semaine;
-    var an_att = weeks.init_data[weeks.sel[0]].an;
+    var semaine_att = weeks.init_data[weeks.sel[0]].week;
+    var an_att = weeks.init_data[weeks.sel[0]].year;
 
     show_loader(true);
     $.ajax({
@@ -879,8 +879,8 @@ function fetch_version() {
         success: function(msg) {
 	    var parsed = JSON.parse(msg);
 
-            if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
-                an_att == weeks.init_data[weeks.sel[0]].an) {
+            if (semaine_att == weeks.init_data[weeks.sel[0]].week &&
+                an_att == weeks.init_data[weeks.sel[0]].year) {
 		version = parsed.version ;
 		filled_dispos = parsed.proposed_pref ;
 		required_dispos = parsed.required_pref ;

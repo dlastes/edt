@@ -140,8 +140,8 @@ function fetch_bknews_light(first) {
         success: function(msg) {
 	    bknews.cont = d3.csvParse(msg,
 				      translate_bknews_from_csv);
-            if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
-                an_att == weeks.init_data[weeks.sel[0]].an) {
+            if (semaine_att == weeks.init_data[weeks.sel[0]].week &&
+                an_att == weeks.init_data[weeks.sel[0]].year) {
 		var max_y = -1 ;
 		for (var i = 0 ; i < bknews.cont.length ; i++) {
 		    if (bknews.cont[i].y > max_y) {

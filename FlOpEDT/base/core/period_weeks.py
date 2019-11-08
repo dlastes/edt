@@ -91,7 +91,7 @@ class PeriodWeeks():
         """        
         return Course.objects \
                 .filter(
-                    an=year,
+                    year=year,
                     week__in=list(range(start, end + 1)),
                     module__train_prog__department=department) \
                 .distinct() \
@@ -164,7 +164,7 @@ class PeriodWeeks():
                 week_list = weeks
 
             if week_list:
-                kwargs = { f"{related_path}__an": year, f"{related_path}__week__in": week_list}
+                kwargs = { f"{related_path}__year": year, f"{related_path}__week__in": week_list}
 
                 if filter:
                     filter |= Q(**kwargs)

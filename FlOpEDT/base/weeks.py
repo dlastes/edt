@@ -50,7 +50,7 @@ def current_week():
     if now.weekday() > 4:
         now = now + datetime.timedelta(2)
     delta = now - mond
-    return {'semaine': 2 + (delta.days // 7), 'an': now.year}
+    return {'week': 2 + (delta.days // 7), 'year': now.year}
 
 
 # list of days
@@ -88,22 +88,22 @@ def week_list():
     li = []
     if actual_year == 2017:
         for i in list(range(36, 44)) + list(range(45, 52)):
-            li.append({'semaine': i, 'an': 2017})
+            li.append({'week': i, 'year': 2017})
         for i in list(range(2, 9)) + list(range(10, 16)) + list(range(18, 31)):
-            li.append({'semaine': i, 'an': 2018})
+            li.append({'week': i, 'year': 2018})
         return li
     elif actual_year == 2018:
         for i in list(range(36, 44)) + list(range(45, 52)):
-            li.append({'semaine': i, 'an': 2018})
+            li.append({'week': i, 'year': 2018})
         for i in list(range(2, 10)) + list(range(11, 17)) + list(range(19, 31)):
-            li.append({'semaine': i, 'an': 2019})
+            li.append({'week': i, 'year': 2019})
         return li
     else:
         # should start 1 week before the first week
         for i in list(range(35, 44)) + list(range(45, 52)):
-            li.append({'semaine': i, 'an': actual_year})
+            li.append({'week': i, 'year': actual_year})
         for i in list(range(2, 10)) + list(range(11, 17)) + list(range(19, 31)):
-            li.append({'semaine': i, 'an': actual_year+1})
+            li.append({'week': i, 'year': actual_year+1})
         return li
 
 

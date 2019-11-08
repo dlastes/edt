@@ -385,7 +385,7 @@ function smile_trans(d, i) {
   ------- WEEKS -------
   ---------------------*/
 function rect_wk_txt(d) {
-    return d.semaine;
+    return d.week;
 }
 
 function rect_wk_x(d, i) {
