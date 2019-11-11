@@ -64,4 +64,6 @@ urlpatterns = [
 #    url(r'^importation/(?P<department>[a-zA-Z]\w{1,7})/', include('importation.urls')),
     url('ttapp/', include('TTapp.urls')),
     url(r'^$', base.views.index, name='index'),
+
+    url('api/', include('api.urls')),
 ]
