@@ -2,10 +2,21 @@ from rest_framework import routers
 from api import views
 
 router = routers.SimpleRouter()
+
+router.register(r'users', views.UsersViewSet)
+router.register(r'userdepartmentsettings', views.UserDepartmentSettingsViewSet)
+router.register(r'tutors', views.TutorsViewSet)
+router.register(r'supplystaff', views.SupplyStaffsViewSet)
+router.register(r'students', views.StudentsViewSet)
+#router.register(r'preferences', views.PreferencesViewSet)
+#router.register(r'studentspreferences', views.StudentPreferencesViewSet)
+#router.register(r'groupspreferences', views.GroupPreferencesViewSet)
+
+
 router.register(r'departments', views.DepartmentViewSet)
 router.register(r'trainingprograms', views.TrainingProgramsViewSet)
 router.register(r'grouptypes', views.GroupTypesViewSet)
-router.register(r'groups', views.GroupsViewSet)
+router.register(r'grouptypes', views.GroupsViewSet)
 
 router.register(r'days', views.DaysViewSet)
 router.register(r'slots', views.SlotsViewSet)
