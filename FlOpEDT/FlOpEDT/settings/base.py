@@ -55,7 +55,7 @@ INSTALLED_APPS = [
     'django_extensions',
     'import_export',
     'colorfield',
-#    'rest_framework',
+    'rest_framework',
     'base',
     'TTapp',
     'quote',
@@ -64,8 +64,9 @@ INSTALLED_APPS = [
     'synchro',
     'ics',
     'displayweb',
-    'configuration'
-#    'importation'
+    'configuration',
+#    'importation',
+    'api',
 ]
 
 MIDDLEWARE = [
