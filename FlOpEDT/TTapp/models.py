@@ -634,7 +634,7 @@ class Stabilize(TTConstraint):
                                                 Q(start_time__gt=sl.start_time - F('cours__type__duration')),
                                                 day=sl.day,
                                                 cours__tutor=c.tutor):
-                        ttmodel.obj += ttmodel.TT[(sl, c)]
+                        ttmodel.obj += ponderation * ttmodel.TT[(sl, c)]
                         # nb_changements_I[c.tutor]+=ttmodel.TT[(sl,c)]
                     if not sched_courses.filter(cours__tutor=c.tutor,
                                                 day=sl.day):
