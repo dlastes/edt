@@ -630,10 +630,13 @@ class Stabilize(TTConstraint):
             # nb_changements_I=dict(zip(ttmodel.wdb.instructors,[0 for i in ttmodel.wdb.instructors]))
             for c in ttmodel.wdb.courses:
                 for sl in ttmodel.wdb.compatible_slots[c]:
-                    if not sched_courses.filter(Q(start_time__lt=sl.start_time + sl.duration) |
-                                                Q(start_time__gt=sl.start_time - F('cours__type__duration')),
+                    if not sched_courses.filter(Q(start_time__gte=sl.start_time,
+                                                  start_time__lt=sl.end_time) |
+                                                Q(start_time__lte=sl.start_time,
+                                                  start_time__gt=sl.start_time - F('cours__type__duration')),
                                                 day=sl.day,
                                                 cours__tutor=c.tutor):
+
                         ttmodel.obj += ponderation * ttmodel.TT[(sl, c)]
                         # nb_changements_I[c.tutor]+=ttmodel.TT[(sl,c)]
                     if not sched_courses.filter(cours__tutor=c.tutor,
