@@ -61,7 +61,7 @@ var bs_margin_w = 20 ;
 var bs_margin_h = 5 ;
 
 var svg = {
-    height: window.innerHeight - $("#menu-edt").height() - bs_margin_h,
+    height: window.innerHeight, // - $("#menu-edt").height() - bs_margin_h,
     width: window.innerWidth - bs_margin_w,
 };
 
