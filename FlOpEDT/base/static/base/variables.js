@@ -169,7 +169,7 @@ file_fetch.constraints.callback = function () {
 
 file_fetch.department.callback = function () {
     departments.data = this.data ;
-    create_dept_redirection();
+    //create_dept_redirection();
 } ;
 
 
