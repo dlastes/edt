@@ -144,7 +144,7 @@ class PeriodWeeks():
         return self.__period_raw
 
     
-    def get_filter(self, related_path='cours', week=None):
+    def get_filter(self, related_path='course', week=None):
         """
         Return a Q filter to restrict records returned 
         by course query to a given period

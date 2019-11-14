@@ -2036,6 +2036,7 @@ function fetch_dispos_type() {
             async: true,
             contentType: "text/csv",
             success: function(msg) {
+                console.log(msg);
                 user.dispos_type = [] ;
 
                 user.dispos_type = d3.csvParse(msg, translate_dispos_type_from_csv);

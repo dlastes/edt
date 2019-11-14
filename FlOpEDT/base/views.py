@@ -797,7 +797,7 @@ def fetch_tutor_courses(req, year, week, tutor, **kwargs):
         .export(ScheduledCourse.objects \
                     .filter(
                         course__week=week,
-                        course__an=year,
+                        course__year=year,
                         work_copy=0,
                         course__tutor__username=tutor))
     return HttpResponse(dataset.csv, content_type='text/csv')
@@ -810,7 +810,7 @@ def fetch_extra_sched(req, year, week, **kwargs):
     tutors = []
     for scheduled in ScheduledCourse.objects.filter(
             course__week=week,
-            course__an=year,
+            course__year=year,
             work_copy=0,
             course__room_type__department=req.department).distinct('course__tutor'):
         tutor = scheduled.course.tutor
@@ -821,7 +821,7 @@ def fetch_extra_sched(req, year, week, **kwargs):
         .export(ScheduledCourse.objects \
                 .filter(
                     course__week=week,
-                    course__an=year,
+                    course__year=year,
                     work_copy=0,
                     course__tutor__in=tutors,
                 )
@@ -843,7 +843,7 @@ def fetch_shared_roomgroups(req, year, week, **kwargs):
     courses = ScheduledCourse.objects \
                 .filter(
                     course__week=week,
-                    course__an=year,
+                    course__year=year,
                     work_copy=0,
                     room__in=shared_roomgroups,
                 ) \
