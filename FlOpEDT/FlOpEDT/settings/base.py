@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'import_export',
     'colorfield',
     'rest_framework',
+    'django_filters',
     'base',
     'TTapp',
     'quote',
@@ -175,3 +176,11 @@ CUSTOM_CONSTRAINTS_PATH = 'MyFlOp.custom_constraints'
 if 'ADMINS' in os.environ:
     ADMINS = [tuple(admin.split(",")) for admin in os.environ.get('ADMINS').split(" ")]
     MANAGERS = ADMINS
+
+#
+# REST FRAMEWORK Settings
+#
+
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
+}

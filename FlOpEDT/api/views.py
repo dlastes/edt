@@ -1,4 +1,5 @@
 from rest_framework import viewsets
+import django_filters.rest_framework
 from api import serializers
 import people.models as pm
 import base.models as bm
@@ -6,56 +7,61 @@ import base.models as bm
 # ------------
 # -- PEOPLE --
 # ------------
-class UsersViewSet(viewsets.ReadOnlyModelViewSet):
+class UsersViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the users
     """
     queryset = pm.User.objects.all()
     serializer_class = serializers.UsersSerializer
+    
 
-class UserDepartmentSettingsViewSet(viewsets.ReadOnlyModelViewSet):
+class UserDepartmentSettingsViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the user department settings
     """
     queryset = pm.UserDepartmentSettings.objects.all()
     serializer_class = serializers.UserDepartmentSettingsSerializer
+    
 
-class TutorsViewSet(viewsets.ReadOnlyModelViewSet):
+class TutorsViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the tutors
     """
     queryset = pm.Tutor.objects.all()
     serializer_class = serializers.TutorsSerializer
+    
 
-class SupplyStaffsViewSet(viewsets.ReadOnlyModelViewSet):
+class SupplyStaffsViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the supply staff
     """
     queryset = pm.SupplyStaff.objects.all()
     serializer_class = serializers.SupplyStaffsSerializer
+    
 
-class StudentsViewSet(viewsets.ReadOnlyModelViewSet):
+class StudentsViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the students
     """
     queryset = pm.Student.objects.all()
     serializer_class = serializers.StudentsSerializer
+    
 
-#class PreferencesViewSet(viewsets.ReadOnlyModelViewSet):
+#class PreferencesViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the users' preferences
     """
     #queryset = pm.Preferences.objects.all()
     #serializer_class = serializers.PreferencesSerializer
 
-#class StudentPreferencesViewSet(viewsets.ReadOnlyModelViewSet):
+#class StudentPreferencesViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the students' preferences
     """
     #queryset = pm.StudentPreferences.objects.all()
     #serializer_class = serializers.StudentPreferencesSerializer
 
-#class GroupPreferencesViewSet(viewsets.ReadOnlyModelViewSet):
+#class GroupPreferencesViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the groups' preferences
     """
@@ -66,242 +72,297 @@ class StudentsViewSet(viewsets.ReadOnlyModelViewSet):
 # -- GROUPS --
 # ------------
 
-class DepartmentViewSet(viewsets.ReadOnlyModelViewSet):
+class DepartmentViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the departments
     """
     queryset = bm.Department.objects.all()
     serializer_class = serializers.DepartmentSerializer
+    
 
-class TrainingProgramsViewSet(viewsets.ReadOnlyModelViewSet):
+class TrainingProgramsViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the training programs
     """
     queryset = bm.TrainingProgramme.objects.all()
     serializer_class = serializers.TrainingProgramsSerializer
+    
 
-class GroupTypesViewSet(viewsets.ReadOnlyModelViewSet):
+class GroupTypesViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the group types
     """
     queryset = bm.GroupType.objects.all()
     serializer_class = serializers.GroupTypesSerializer
+    
 
-class GroupsViewSet(viewsets.ReadOnlyModelViewSet):
+class GroupsViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the groups
     """
     queryset = bm.Group.objects.all()
     serializer_class = serializers.GroupsSerializer
+    
 
 # ------------
 # -- TIMING --
 # ------------
-class DaysViewSet(viewsets.ReadOnlyModelViewSet):
+class DaysViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the days
     """
     queryset = bm.Day.objects.all()
     serializer_class = serializers.DaysSerializer
+    
 
-class SlotsViewSet(viewsets.ReadOnlyModelViewSet):
+class SlotsViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the slots
     """
     queryset = bm.Slot.objects.all()
     serializer_class = serializers.SlotsSerializer
+    
+    filterset_fields = '__all__'
+    
 
-class HolidaysViewSet(viewsets.ReadOnlyModelViewSet):
+class HolidaysViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the holidays
     """
     queryset = bm.Holiday.objects.all()
     serializer_class = serializers.HolidaysSerializer
+    
+    filterset_fields = '__all__'
 
-class TrainingHalfDaysViewSet(viewsets.ReadOnlyModelViewSet):
+class TrainingHalfDaysViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the half-day trainings
     """
     queryset = bm.TrainingHalfDay.objects.all()
     serializer_class = serializers.TrainingHalfDaysSerializer
+    
+    filterset_fields = '__all__'
 
-class PeriodsViewSet(viewsets.ReadOnlyModelViewSet):
+class PeriodsViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the periods
     """
     queryset = bm.Period.objects.all()
     serializer_class = serializers.PeriodsSerializer
+    
+    filterset_fields = '__all__'
 
-class TimeGeneralSettingsViewSet(viewsets.ReadOnlyModelViewSet):
+class TimeGeneralSettingsViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the settings of time
     """
     queryset = bm.TimeGeneralSettings.objects.all()
     serializer_class = serializers.TimeGeneralSettingsSerializer
+    
+    filterset_fields = '__all__'
 
 
 # -----------
 # -- ROOMS --
 # -----------
 
-class RoomTypesViewSet(viewsets.ReadOnlyModelViewSet):
+class RoomTypesViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the room types
     """
     queryset = bm.RoomType.objects.all()
     serializer_class = serializers.RoomTypesSerializer
+    
+    filterset_fields = '__all__'
 
-class RoomGroupsViewSet(viewsets.ReadOnlyModelViewSet):
+class RoomGroupsViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the room groups
     """
     queryset = bm.RoomGroup.objects.all()
     serializer_class = serializers.RoomGroupsSerializer
+    
+    filterset_fields = '__all__'
 
-class RoomsViewSet(viewsets.ReadOnlyModelViewSet):
+class RoomsViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the rooms
     """
     queryset = bm.Room.objects.all()
     serializer_class = serializers.RoomsSerializer
+    
+    filterset_fields = '__all__'
 
-class RoomSortsViewSet(viewsets.ReadOnlyModelViewSet):
+class RoomSortsViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the room sorts
     """
     queryset = bm.RoomSort.objects.all()
     serializer_class = serializers.RoomSortsSerializer
+    
+    filterset_fields = '__all__'
 
 # -------------
 # -- COURSES --
 # -------------
 
-class ModulesViewSet(viewsets.ReadOnlyModelViewSet):
+class ModulesViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the modules
     """
     queryset = bm.Module.objects.all()
     serializer_class = serializers.ModulesSerializer
+    
+    filterset_fields = '__all__'
 
-class CourseTypesViewSet(viewsets.ReadOnlyModelViewSet):
+class CourseTypesViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the course types
     """
     queryset = bm.CourseType.objects.all()
     serializer_class = serializers.CourseTypesSerializer
+    
+    filterset_fields = '__all__'
 
-class CoursesViewSet(viewsets.ReadOnlyModelViewSet):
+class CoursesViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the courses
     """
     queryset = bm.Course.objects.all()
     serializer_class = serializers.CoursesSerializer
+    
+    filterset_fields = '__all__'
 
-class ScheduledCoursesViewSet(viewsets.ReadOnlyModelViewSet):
+class ScheduledCoursesViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the scheduled courses
     """
     queryset = bm.ScheduledCourse.objects.all()
     serializer_class = serializers.ScheduledCoursesSerializer
+    
+    filterset_fields = '__all__'
 
 # -----------------
 # -- PREFERENCES --
 # -----------------
 
-class UsersPreferencesViewSet(viewsets.ReadOnlyModelViewSet):
+class UsersPreferencesViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the users' preferences
     """
     queryset = bm.UserPreference.objects.all()
     serializer_class = serializers.UsersPreferencesSerializer
+    filterset_fields = '__all__'
 
-class CoursePreferencesViewSet(viewsets.ReadOnlyModelViewSet):
+class CoursePreferencesViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the course preferences
     """
     queryset = bm.CoursePreference.objects.all()
     serializer_class = serializers.CoursePreferencesSerializer
+    
+    filterset_fields = '__all__'
 
-class RoomPreferencesViewSet(viewsets.ReadOnlyModelViewSet):
+class RoomPreferencesViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the room preferences
     """
     queryset = bm.RoomPreference.objects.all()
     serializer_class = serializers.RoomPreferencesSerializer
+    
+    filterset_fields = '__all__'
 
 # -----------------
 # - MODIFICATIONS -
 # -----------------
 
-class EdtVersionsViewSet(viewsets.ReadOnlyModelViewSet):
+class EdtVersionsViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the scheduler version
     """
     queryset = bm.EdtVersion.objects.all()
     serializer_class = serializers.EdtVersionSerializer
+    
+    filterset_fields = '__all__'
 
-class CourseModificationsViewSet(viewsets.ReadOnlyModelViewSet):
+class CourseModificationsViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the course modifications
     """
     queryset = bm.CourseModification.objects.all()
     serializer_class = serializers.CourseModificationsSerializer
+    
+    filterset_fields = '__all__'
 
-class PlanningModificationsViewSet(viewsets.ReadOnlyModelViewSet):
+class PlanningModificationsViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the planning modifications
     """
     queryset = bm.PlanningModification.objects.all()
     serializer_class = serializers.PlanningModificationsSerializer
+    
+    filterset_fields = '__all__'
 
 
 # -----------
 # -- COSTS --
 # -----------
 
-class TutorCostsViewSet(viewsets.ReadOnlyModelViewSet):
+class TutorCostsViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the tutor costs
     """
     queryset = bm.TutorCost.objects.all()
     serializer_class = serializers.TutorCostsSerializer
+    
+    filterset_fields = '__all__'
 
-class GroupCostsViewSet(viewsets.ReadOnlyModelViewSet):
+class GroupCostsViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the group costs
     """
     queryset = bm.GroupCost.objects.all()
     serializer_class = serializers.GroupCostsSerializer
+    
+    filterset_fields = '__all__'
 
-class GroupFreeHalfDaysViewSet(viewsets.ReadOnlyModelViewSet):
+class GroupFreeHalfDaysViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the group's free half days
     """
     queryset = bm.GroupFreeHalfDay.objects.all()
     serializer_class = serializers.GroupFreeHalfDaysSerializer
+    
+    filterset_fields = '__all__'
 
 
 # ----------
 # -- MISC --
 # ----------
 
-class DependenciesViewSet(viewsets.ReadOnlyModelViewSet):
+class DependenciesViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the dependencies between courses
     """
     queryset = bm.Dependency.objects.all()
     serializer_class = serializers.DependenciesSerializer
+    
+    filterset_fields = '__all__'
 
-class CourseStartTimeConstraintsViewSet(viewsets.ReadOnlyModelViewSet):
+class CourseStartTimeConstraintsViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the courses start time constraints
     """
     queryset = bm.CourseStartTimeConstraint.objects.all()
     serializer_class = serializers.CourseStartTimeConstraintsSerializer
+    
+    filterset_fields = '__all__'
 
-class RegensViewSet(viewsets.ReadOnlyModelViewSet):
+class RegensViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the regenerations
     """
     queryset = bm.Regen.objects.all()
     serializer_class = serializers.RegensSerializer
+    
+    filterset_fields = '__all__'
