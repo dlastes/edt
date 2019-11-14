@@ -961,7 +961,7 @@ function send_edt_change(changes) {
     $.ajax({
         url: url_edt_changes
 	    + "?s=" + weeks.init_data[weeks.sel[0]].week
-	    + "&a=" + weeks.init_data[weeks.sel[0]].an
+	    + "&a=" + weeks.init_data[weeks.sel[0]].year
 	    + "&c=" + num_copie,
         type: 'POST',
 //        contentType: 'application/json; charset=utf-8',

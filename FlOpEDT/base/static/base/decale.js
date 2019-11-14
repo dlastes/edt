@@ -175,10 +175,10 @@ function go_filter(){
         success: function (msg) {
             // console.log(msg);
             // console.log("success");
-	    // console.log(msg.modules);
+	    console.log(msg.modules);
 	    filtered.mod_prof_gp[0].arr = msg.modules;
 	    filtered.mod_prof_gp[1].arr = msg.profs;
-	    filtered.mod_prof_gp[2].arr = msg.groupes;
+	    filtered.mod_prof_gp[2].arr = msg.groups;
 	    liste_cours = msg.cours;
 	    liste_jours = {};
 	    for(i = 0 ; i<msg.jours.length ; i++) {
@@ -190,7 +190,9 @@ function go_filter(){
 
 	    
 	    for(i = 0 ; i<3 ; i++){
-		filtered.mod_prof_gp[i].arr.unshift(default_dd);
+			console.log(i);
+			console.log(filtered.mod_prof_gp[i].arr);
+			filtered.mod_prof_gp[i].arr.unshift(default_dd);
 	    }
 	    
 	    go_dd();

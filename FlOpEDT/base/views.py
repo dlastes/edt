@@ -236,9 +236,9 @@ def stype(req, *args, **kwargs):
         if 'apply' in list(req.POST.keys()):
             print(req.POST['se_deb'])
             date_deb = {'week': req.POST['se_deb'],
-                        'year': req.POST['an_deb']}
+                        'year': req.POST['year_deb']}
             date_fin = {'week': req.POST['se_fin'],
-                        'year': req.POST['an_fin']}
+                        'year': req.POST['year_fin']}
             if date_deb['year'] < date_fin['year'] or \
                     (date_deb['year'] == date_fin['year']
                      and date_deb['week'] <= date_fin['week']):
@@ -871,7 +871,7 @@ def edt_changes(req, **kwargs):
 
     impacted_inst = set()
 
-    msg = 'Notation : (numero_week, numero_annee, ' \
+    msg = 'Notation : (numero_week, numer_year, ' \
           + 'numero_jour, numero_creneau, prof)\n\n'
 
     if not req.is_ajax():
@@ -1253,8 +1253,8 @@ def decale_changes(req, **kwargs):
 
     for c in change_list:
         changing_course = Course.objects.get(id=c['i'])
-        old_week = changing_course.semaine
-        old_year = changing_course.an
+        old_week = changing_course.week
+        old_year = changing_course.year
 
         edt_versions = EdtVersion.objects.select_for_update().filter(
             (Q(week=old_week) & Q(year=old_year))
