@@ -1051,7 +1051,7 @@ function send_dis_change() {
         show_loader(true);
         $.ajax({
             url: url_user_pref_changes
-		+ weeks.init_data[weeks.sel[0]].an
+		+ weeks.init_data[weeks.sel[0]].year
 		+ "/" + weeks.init_data[weeks.sel[0]].week
 		+ "/" + user.name,
             type: 'POST',
