@@ -56,6 +56,9 @@ function apply_change_simple_pref(d) {
                 d.val = Math.floor(d.val / (par_dispos.nmax / 2)) * par_dispos.nmax / 2;
             }
             d.val = (d.val + par_dispos.nmax / 2) % (3 * par_dispos.nmax / 2);
+            if (cosmo && d.val == 0) {
+                d.val ++ ;
+            }
 	    update_pref_interval(user.nom, d.day, d.start_time, d.val) ;
             //dispos[user.nom][idays[d.day]][d.hour] = d.val;
             //user.dispos[day_hour_2_1D(d)].val = d.val;
