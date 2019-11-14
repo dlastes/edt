@@ -521,7 +521,7 @@ function go_week_menu(quick) {
         weeks.cont
         .selectAll(".rec_wk")
         .data(weeks.cur_data, function(d) {
-            return d.an + "" + d.semaine;
+            return d.year + "" + d.week;
         });
 
     sa_wk.exit().transition(t).remove();
@@ -1143,7 +1143,7 @@ function go_courses(quick) {
                 return groups[d.promo][d.group].display;
             }),
             function(d) {
-                return d.id_cours;
+                return d.id_course;
             })
         .attr("cursor", ckbox["edt-mod"].cked ? "pointer" : "default");
 

@@ -112,7 +112,7 @@ function create_layouts(svg_cont, light) {
     catg = svg_cont.append("g")
         .attr("id", "lay-catg");
 
-    // semaine type ground
+    // week type ground
     stg = svg_cont.append("g")
         .attr("id", "lay-stg");
 
@@ -223,16 +223,16 @@ function remove_pref_modes() {
 
 
 
-// PRECONDITION: semaine_init, week_init, weeks.init_data
+// PRECONDITION: week_init, week_init, weeks.init_data
 function find_week(week_list) {
     var i, up;
     i = 0;
     up = false ;
     
     while (i < week_list.length && !up) {
-        if (an_init < week_list[i].an ||
-            (an_init == week_list[i].an &&
-                semaine_init < week_list[i].semaine)) {
+        if (year_init < week_list[i].year ||
+            (year_init == week_list[i].year &&
+                week_init < week_list[i].week)) {
             up = true;
         } else {
             i++;
@@ -249,7 +249,7 @@ function find_week(week_list) {
 
 function create_clipweek() {
 
-    weeks.init_data = semaine_an_list;
+    weeks.init_data = week_year_list;
 
     var min = weeks.init_data[0];
     var max = weeks.init_data[weeks.init_data.length - 1];
@@ -267,15 +267,15 @@ function create_clipweek() {
 
     var fw ;
 
-    if (min.year > an_init ||
-	(min.year == an_init && min.week > semaine_init)) {
+    if (min.year > year_init ||
+	(min.year == year_init && min.week > week_init)) {
 	weeks.cur_data = weeks.init_data.slice(1,
 					       1 + weeks.ndisp + 2);
 	weeks.fdisp = 1;
 	weeks.sel[0] = 2 ;
 	
-    } else if (max.year < an_init ||
-	(max.year == an_init && max.week < semaine_init)) {
+    } else if (max.year < year_init ||
+	(max.year == year_init && max.week < week_init)) {
 	weeks.cur_data = weeks.init_data.slice(weeks.init_data.length - 1  - 2 - weeks.ndisp,
 					       weeks.init_data.length -1);
 	weeks.fdisp = weeks.init_data.length - 1  - 2 - weeks.ndisp ;
@@ -1462,7 +1462,7 @@ function warning_check(check_tot) {
         } else if (check.nok == 'tutor_busy_other_dept') {
             expand = "L'enseignant·e " + check.more.tutor + " est occupé dans un autre département.";
         } else if (check.nok == 'tutor_free_week') {
-            expand = "L'enseignant·e " + check.more.tutor + " ne donne pas de cours cette semaine.";
+            expand = "L'enseignant·e " + check.more.tutor + " ne donne pas de cours cette week.";
         } else if (check.nok == 'room_busy') {
             expand = "La salle " + check.more.room + " est déjà prise.";
         } else if (check.nok == 'room_busy_other_dept') {
@@ -1484,7 +1484,7 @@ function simultaneous_courses(target_course) {
 			&& c.start +c.duration > target_course.start)
 		    || (c.start <= target_course.start
 			&& c.start + c.duration > target_course.start))
-		&& c.id_cours != target_course.id_cours);
+		&& c.id_course != target_course.id_course);
     });
 }
 
@@ -1515,7 +1515,7 @@ function check_course(wanted_course) {
     if (! pending.pass.other) {
 
         // course was supposed to be fix
-        if (wanted_course.id_cours == -1) {
+        if (wanted_course.id_course == -1) {
 	    ret.push({nok:'stable'}) ;
         }
 
@@ -1620,7 +1620,7 @@ function splash_violated_constraints(check_list, step) {
     var splash_csts ;
     var warn_check = warning_check(check_list);
     console.log(warn_check);
-    //console.log(pending.wanted_course.id_cours);
+    //console.log(pending.wanted_course.id_course);
     if ((logged_usr.rights >> 2) % 2 == 1) {
 	splash_csts = {
 	    id: "viol_constraint",
@@ -1629,7 +1629,7 @@ function splash_violated_constraints(check_list, step) {
 			click:
 			function(btn){
                             pending.pass[btn.pass] = true ;
-                            console.log(pending.wanted_course.id_cours);
+                            console.log(pending.wanted_course.id_course);
                             check_pending_course() ;
 			    return ;
 			},
@@ -2020,7 +2020,7 @@ function create_stype() {
         .attr("fill", "white")
         .attr("x", dispot_but_txt_x)
         .attr("y", dispot_but_txt_y("app") + 10)
-        .text("Semaine type");
+        .text("week type");
 
 }
 
@@ -2104,7 +2104,7 @@ function get_dispos_type(dt) {
 function select_entry_cm() {
     room_tutor_change.cm_settings = entry_cm_settings;
     var fake_id = new Date() ;
-    fake_id = fake_id.getMilliseconds() + "-" + pending.wanted_course.id_cours ;
+    fake_id = fake_id.getMilliseconds() + "-" + pending.wanted_course.id_course ;
     room_tutor_change.proposal = [{fid:fake_id,
 				   content:"Prof"},
 				   {fid:fake_id,

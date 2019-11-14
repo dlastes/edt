@@ -287,27 +287,27 @@ function apply_stype_from_button(save) {
     var sent_data = {} ;
     sent_data['changes'] = JSON.stringify(changes) ; 
 
-    var se_deb,an_deb,se_fin,an_fin;
-    var an, se;
+    var se_deb,year_deb,se_fin,year_fin;
+    var year, se;
     var se_abs_max = 53;
     var se_min, se_max;
 
     if(save){
 	se_deb = 0 ;
 	console.log(current_year);
-	an_deb = +current_year ;
+	year_deb = +current_year ;
 	se_fin = se_deb ;
-	an_fin = an_deb ;
+	year_fin = year_deb ;
     } else {
 	se_deb = +document.forms['app'].elements['se_deb'].value ;
-	an_deb = +document.forms['app'].elements['an_deb'].value ;
+	year_deb = +document.forms['app'].elements['year_deb'].value ;
 	se_fin = +document.forms['app'].elements['se_fin'].value ;
-	an_fin = +document.forms['app'].elements['an_fin'].value ;
+	year_fin = +document.forms['app'].elements['year_fin'].value ;
     }
 
 
-    if (an_deb<an_fin ||
-        (an_deb==an_fin && se_deb<=se_fin)){
+    if (year_deb<year_fin ||
+        (year_deb==year_fin && se_deb<=se_fin)){
 
 
 	if(changes.length==0) {
@@ -317,20 +317,20 @@ function apply_stype_from_button(save) {
 
             ack.pref = "Ok ";
 	    if(save){
-		ack.pref += "semaine type";
+		ack.pref += "week type";
 	    } else {
-		ack.pref += "semaine "+se_deb+" année "+an_deb
-		    +" à semaine "+se_fin+" année "+an_fin;
+		ack.pref += "week "+se_deb+" année "+year_deb
+		    +" à week "+se_fin+" année "+year_fin;
 	    }
 
 
-	    for (an=an_deb ; an<=an_fin ; an++){
-		if(an==an_deb){
+	    for (year=year_deb ; year<=year_fin ; year++){
+		if(year==year_deb){
 		    se_min = se_deb;
 		} else {
 		    se_min = 1;
 		}
-		if(an==an_fin){
+		if(year==year_fin){
 		    se_max = se_fin;
 		} else {
 		    se_max = se_abs_max;
@@ -338,10 +338,10 @@ function apply_stype_from_button(save) {
 		
 		for (se=se_min ; se<=se_max ; se++) {
 
-		    //console.log(se,an);
+		    //console.log(se,year);
                     show_loader(true);
     		    $.ajax({
-    			url: send_url(an, se),
+    			url: send_url(year, se),
 			type: 'POST',
 //			contentType: 'application/json; charset=utf-8',
 			data: sent_data, //JSON.stringify(changes),
@@ -364,7 +364,7 @@ function apply_stype_from_button(save) {
 	}
 
     } else {
-	ack.pref = "Problème : seconde semaine avant la première";
+	ack.pref = "Problème : seconde week avant la première";
         document.getElementById("ack").textContent = ack.pref ;
     }
 

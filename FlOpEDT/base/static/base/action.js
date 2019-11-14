@@ -330,7 +330,7 @@ function select_tutor_module_change() {
     }) ;
 
     var fake_id = new Date() ;
-    fake_id = fake_id.getMilliseconds() + "-" + c.id_cours ;
+    fake_id = fake_id.getMilliseconds() + "-" + c.id_course ;
     room_tutor_change.proposal = [] ;
 
     room_tutor_change.proposal = tutor_same_module.map(function(t) {
@@ -420,7 +420,7 @@ function go_cm_room_tutor_change() {
         .selectAll(".cm-chg")
         .data(tmp_array,
               function(d) {
-                  return d.id_cours;
+                  return d.id_course;
               });
     
     var tut_cm_course_g = tut_cm_course_dat
@@ -844,9 +844,9 @@ function compute_changes(changes, conc_tutors, gps) {
 			     n: null },
 		      room: {o: cb.room,
 			     n: null },
-		      week: {o: weeks.init_data[weeks.sel[0]].semaine,
+		      week: {o: weeks.init_data[weeks.sel[0]].week,
 			     n: null },
-		      year: {o: weeks.init_data[weeks.sel[0]].an,
+		      year: {o: weeks.init_data[weeks.sel[0]].year,
 			     n: null},
 		      tutor:{o: cb.prof,
 			     n: null}
@@ -960,7 +960,7 @@ function send_edt_change(changes) {
     show_loader(true);
     $.ajax({
         url: url_edt_changes
-	    + "?s=" + weeks.init_data[weeks.sel[0]].semaine
+	    + "?s=" + weeks.init_data[weeks.sel[0]].week
 	    + "&a=" + weeks.init_data[weeks.sel[0]].an
 	    + "&c=" + num_copie,
         type: 'POST',
@@ -1052,7 +1052,7 @@ function send_dis_change() {
         $.ajax({
             url: url_user_pref_changes
 		+ weeks.init_data[weeks.sel[0]].an
-		+ "/" + weeks.init_data[weeks.sel[0]].semaine
+		+ "/" + weeks.init_data[weeks.sel[0]].week
 		+ "/" + user.name,
             type: 'POST',
 //            contentType: 'application/json; charset=utf-8',
@@ -1291,15 +1291,15 @@ function apply_stype() {
 // it has not been moved until now
 function add_bouge(d) {
     console.log("new");
-    if (Object.keys(cours_bouge).indexOf(d.id_cours.toString()) == -1) {
-        cours_bouge[d.id_cours] = {
-            id: d.id_cours,
+    if (Object.keys(cours_bouge).indexOf(d.id_course.toString()) == -1) {
+        cours_bouge[d.id_course] = {
+            id: d.id_course,
             day: d.day,
             start: d.start,
             room: d.room,
 	    prof: d.prof
         };
-        console.log(cours_bouge[d.id_cours]);
+        console.log(cours_bouge[d.id_course]);
     }
 }
 
@@ -1316,7 +1316,7 @@ function get_course(id){
     var i = 0 ;
     
     while (i < Object.keys(cours).length && !found) {
-	if (cours[i].id_cours == id){
+	if (cours[i].id_course == id){
 	    found = true ;
 	} else {
 	    i ++ ;
@@ -1469,7 +1469,7 @@ function redirect_dept(d) {
         split_addr.splice(-1,1);
     }
     // go to the right week
-    split_addr.push(weeks.init_data[weeks.sel[0]].an);
-    split_addr.push(weeks.init_data[weeks.sel[0]].semaine);
+    split_addr.push(weeks.init_data[weeks.sel[0]].year);
+    split_addr.push(weeks.init_data[weeks.sel[0]].week);
     window.location.href = split_addr.join("/") ;
 }

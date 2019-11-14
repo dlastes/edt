@@ -264,7 +264,7 @@ function txt_reqDispos() {
     if (required_dispos > 0) {
         ret += "Dispos souhaitées : " + required_dispos + " créneaux."
     } else if (required_dispos == 0) {
-        ret += "Vous n'intervenez pas cette semaine.";
+        ret += "Vous n'intervenez pas cette week.";
     }
     return ret;
 }
@@ -818,13 +818,13 @@ function cours_txt_x(c) {
     return cours_x(c) + .5 * cours_width(c);
 }
 function cours_txt_fill(c) {
-    if (c.id_cours != -1) {
+    if (c.id_course != -1) {
 	return c.color_txt;
     }
     return "black";
 }
 function cours_fill(c) {
-    if (c.id_cours != -1) {
+    if (c.id_course != -1) {
 	return c.color_bg;
     }
     return "red";
