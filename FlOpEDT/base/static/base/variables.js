@@ -169,7 +169,7 @@ file_fetch.constraints.callback = function () {
 
 file_fetch.department.callback = function () {
     departments.data = this.data ;
-    create_dept_redirection();
+    //create_dept_redirection();
 } ;
 
 
@@ -707,8 +707,9 @@ var valid = {
 // or about the next possible regeneration of the planning (ack.regen)
 var ack = {
     more:"",
-//    edt: "",
+    // regen infos
     regen: "",
+    // for stype
     pref: "",
     status: "OK",
     predefined: {KO: "C'est un échec cuisant. Trouvez un·e responsable d'emploi du temps et faites-lui part de vos problèmes.",
