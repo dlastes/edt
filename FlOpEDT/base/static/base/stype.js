@@ -59,26 +59,11 @@ var svg = {height: dim_dispo.height + 145 - margin.top - margin.bot,
 
 create_general_svg_pref_only();
 go_days(true, false);
-create_lunchbar();
 create_pref_modes(pref_only);
 fetch_pref_only();
 
 
 
-
-
-function create_lunchbar() {
-    fg
-	.append("line")
-	.attr("class","lunchbar")
-	.attr("stroke","black")
-	.attr("stroke-width",6)
-	.attr("x1",0)
-	.attr("y1",gsclb_y)
-	.attr("x2",gsclb_x)
-	.attr("y2",gsclb_y);
-
-}
 
 function create_general_svg_pref_only() {
     svg_cont = d3.select("body").select("[id=\"svg\"]").append("svg")
