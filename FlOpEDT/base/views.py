@@ -43,12 +43,16 @@ from django.views.decorators.cache import cache_page
 from django.views.generic import RedirectView
 from django.db.models import Sum
 
+from FlOpEDT.settings.base import COSMO_MODE
+
 from people.models import Tutor, UserDepartmentSettings, User
 
 from base.admin import CoursResource, DispoResource, VersionResource, \
     CoursPlaceResource, UnavailableRoomsResource, TutorCoursesResource, \
     CoursePreferenceResource, MultiDepartmentTutorResource, \
     SharedRoomGroupsResource
+if COSMO_MODE:
+    from base.admin import CoursPlaceResourceCosmo
 from displayweb.admin import BreakingNewsResource
 from base.forms import ContactForm, PerfectDayForm
 from base.models import Course, UserPreference, ScheduledCourse, EdtVersion, \
@@ -152,7 +156,8 @@ def edt(req, an=None, semaine=None, splash_id=0, **kwargs):
                 'time_settings': queries.get_time_settings(req.department),
                 'days': num_all_days(an, semaine, req.department),
                 'has_department_perm': req.user.is_authenticated and req.user.has_department_perm(req.department),
-                'dept': req.department.abbrev
+                'dept': req.department.abbrev,
+                'cosmo': COSMO_MODE,
             })
 
 
@@ -202,7 +207,8 @@ def edt_light(req, an=None, semaine=None, **kwargs):
                       'tv_svg_w': svg_w,
                       'tv_gp_s': gp_s,
                       'tv_gp_w': gp_w,
-                      'tv_svg_top_m': svg_top_m
+                      'tv_svg_top_m': svg_top_m,
+                      'cosmo': COSMO_MODE,
                   })
 
 
