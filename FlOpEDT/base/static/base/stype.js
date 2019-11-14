@@ -26,8 +26,6 @@
 
 var margin = {top: 50,  left: 50, right: 10, bot:10};
 
-var svg = {height: 625 - margin.top - margin.bot, width: 720 - margin.left - margin.right};
-
 var mode = "tutor" ;
 
 var dd_selections = {
@@ -53,6 +51,8 @@ ckbox["dis-mod"].cked = true ;
 
 pref_only = true ;
 
+var svg = {height: dim_dispo.height + 145 - margin.top - margin.bot,
+	   width: nbPer * (dim_dispo.width + dim_dispo.mh) + 250 - margin.left - margin.right};
 
 
 
