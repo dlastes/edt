@@ -174,3 +174,5 @@ CUSTOM_CONSTRAINTS_PATH = 'MyFlOp.custom_constraints'
 if 'ADMINS' in os.environ:
     ADMINS = [tuple(admin.split(",")) for admin in os.environ.get('ADMINS').split(" ")]
     MANAGERS = ADMINS
+
+COSMO_MODE = True
