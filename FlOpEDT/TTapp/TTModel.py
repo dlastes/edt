@@ -1198,6 +1198,7 @@ class TTModel(object):
         for fc in self.wdb.fixed_courses:
             cp = ScheduledCourse(cours=fc.cours,
                                  start_time=fc.start_time,
+                                 day=fc.day,
                                  room=fc.room,
                                  copie_travail=target_work_copy)
             cp.save()
