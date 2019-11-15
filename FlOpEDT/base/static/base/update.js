@@ -1111,7 +1111,6 @@ function update_selection() {
 function update_active() {
     var tut_av = sel_popup.get_available("tutor");
     var mod_av = sel_popup.get_available("module");
-    var room_av = sel_popup.get_available("room");
 
     tut_av.active = tutors.all.filter(function(d) {
         return d.display;
@@ -1119,11 +1118,17 @@ function update_active() {
     mod_av.active = modules.all.filter(function(d) {
         return d.display;
     }).length != modules.all.length ;
-    room_av.active = rooms_sel.all.filter(function(d) {
-        return d.display;
-    }).length != rooms_sel.all.length ;
-    
-    sel_popup.active_filter = tut_av.active || mod_av.active || room_av.active ;
+
+    sel_popup.active_filter = tut_av.active || mod_av.active ;
+
+    if(!cosmo) {
+        var room_av = sel_popup.get_available("room");
+        room_av.active = rooms_sel.all.filter(function(d) {
+            return d.display;
+        }).length != rooms_sel.all.length ;
+        sel_popup.active_filter = sel_popup.active_filter || room_av.active ;
+    }
+
 }
 
 function go_courses(quick) {

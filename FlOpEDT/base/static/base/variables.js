@@ -561,9 +561,6 @@ var sel_popup = {
                  active: false},
                 {type:"module",
                  buttxt: "Modules",
-                 active: false},
-                {type:"room",
-                 buttxt: "Salles",
                  active: false}
                 ],
     get_available: function(t) {
@@ -581,6 +578,11 @@ var sel_popup = {
     but: [],
     active_filter: false
 };
+if (!cosmo) {
+    sel_popup.available.push({type:"room",
+                              buttxt: "Salles",
+                              active: false});
+}
 sel_popup.but["tutor"] = {
     h: 30,
     w: 40,
