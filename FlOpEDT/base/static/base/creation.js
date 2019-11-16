@@ -1508,6 +1508,10 @@ function check_course(wanted_course) {
 	return ret ;
     }
 
+    if (cosmo) {
+        pending.pass.room = true ;
+    }
+
     if (! pending.pass.other) {
 
         // course was supposed to be fix
