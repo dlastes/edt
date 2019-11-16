@@ -1267,7 +1267,7 @@ function confirm_law_constraints(changes, conc_tutors, gps) {
         }
     }
 
-    if(issues.length == 0) {
+    if(issues_txt.length == 0) {
         confirm_contact_all(changes, conc_tutors, gps) ;
     } else {
         var splash_confirm = {
