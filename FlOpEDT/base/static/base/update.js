@@ -1158,12 +1158,19 @@ function go_courses(quick) {
         .attr("cursor", ckbox["edt-mod"].cked ? "pointer" : "default")
         .on("contextmenu", function(d) { if (ckbox["edt-mod"].cked) {
 	    d3.event.preventDefault();
-	    room_tutor_change.cm_settings = entry_cm_settings ;
+            if(!cosmo) {
+	        room_tutor_change.cm_settings = entry_cm_settings ;
+            }
             pending.fork_course(d) ;
             pending.one_try() ;
 	    compute_cm_room_tutor_direction();
 	    //select_room_change(d);
-	    select_entry_cm();
+            if (!cosmo) {
+	        select_entry_cm();
+            } else {
+                salarie_cm_level = 0 ;
+	        select_salarie_change();
+            }
 	    go_cm_room_tutor_change();
 	}})
         .call(dragListener);

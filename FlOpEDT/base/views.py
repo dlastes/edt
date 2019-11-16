@@ -449,18 +449,23 @@ def fetch_dispos(req, year, week, **kwargs):
     if cached is not None:
         return cached
 
+    busy_inst_init = Course.objects.filter(semaine=week,
+                                           an=year,
+                                           module__train_prog__department=department) \
+                                   .distinct('tutor') \
+                                   .values_list('tutor')
+                                           
     if COSMO_MODE:
-        busy_inst = ScheduledCourse.objects.filter(cours__semaine=semaine,
-                                                   cours__an=an,
-                                                   module__train_prog__department=department)
+        busy_inst_after = ScheduledCourse.objects.filter(cours__semaine=semaine,
+                                                         cours__an=an,
+                                                         module__train_prog__department=department)\
+                                                 .distinct('tutor') \
+                                                 .values_list('tutor')
     else:
-        busy_inst = Course.objects.filter(semaine=week,
-                                      an=year,
-                                      module__train_prog__department=department)
+        busy_inst_after = []
 
-    busy_inst = list(chain(busy_inst \
-                           .distinct('tutor') \
-                           .values_list('tutor'),
+    busy_inst = chain(busy_inst_init, busy_inst_after)
+    busy_inst = list(chain(busy_instx,
                            [req.user]))
 
     week_avail = UserPreference.objects \

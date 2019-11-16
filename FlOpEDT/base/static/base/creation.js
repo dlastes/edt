@@ -2160,6 +2160,17 @@ function def_cm_change() {
 	}
     }
 
+    salarie_cm_settings.click = function(d) {
+	    context_menu.room_tutor_hold = true ;
+	    if(d.content == '+') {
+		salarie_cm_level += 1 ;
+		select_salarie_change();
+	    } else {
+		confirm_salarie_change(d) ;
+	    }
+	    go_cm_room_tutor_change();
+	}
+    
 }
 
 

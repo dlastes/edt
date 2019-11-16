@@ -859,6 +859,23 @@ for(var l = 0 ; l < room_cm_settings.length ; l++) {
 //       2: all rooms are proposed
 var room_cm_level = 0 ;
 
+
+var salarie_cm_settings =
+    {type: 'entry',
+     w: 100,
+     h: 18,
+     fs: 10,
+     mx: 5,
+     my: 3,
+     ncol: 3,
+     nlin: 0,
+     txt_intro: {'default':"Qui s'y colle ?"}
+    };
+
+// level=0: salaries qui ont le même poste dans la semaine
+//       1: tous les salaries
+var salarie_cm_level = 0 ;
+
 var room_tutor_change = {
     course: [],    // 1-cell array for d3.js
     proposal: [],
