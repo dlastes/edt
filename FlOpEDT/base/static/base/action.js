@@ -395,7 +395,9 @@ function select_salarie_change() {
     } else {
         room_tutor_change.proposal = tutors.all.filter(function(t){
             return t != "";
-        })
+        }).map(function(t){
+            return t.name ;
+        });
     }
     
     room_tutor_change.cm_settings.nlin
