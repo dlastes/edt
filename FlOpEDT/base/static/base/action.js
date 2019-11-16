@@ -377,11 +377,11 @@ function select_tutor_filters_change() {
 }
 
 // quels salaries afficher 
-function select_salarie_change(f) {
+function select_salarie_change() {
     room_tutor_change.cm_settings = salarie_cm_settings ;
     var level = salarie_cm_level;
 
-    var tache = room_tutor_change.course[0] ;
+    var tache = pending.wanted_course ;
 
     if (level == 0) {
         var possibles = new Set();
