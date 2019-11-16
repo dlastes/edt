@@ -1,54 +1,60 @@
 from rest_framework import routers
 from api import views
+from django.urls import path
+from django.conf.urls import include
 
-router = routers.SimpleRouter()
+routerBase = routers.SimpleRouter()
+routerPeople = routers.SimpleRouter()
 
-router.register(r'users', views.UsersViewSet)
-router.register(r'userdepartmentsettings', views.UserDepartmentSettingsViewSet)
-router.register(r'tutors', views.TutorsViewSet)
-router.register(r'supplystaff', views.SupplyStaffsViewSet)
-router.register(r'students', views.StudentsViewSet)
-#router.register(r'preferences', views.PreferencesViewSet)
-#router.register(r'studentspreferences', views.StudentPreferencesViewSet)
-#router.register(r'groupspreferences', views.GroupPreferencesViewSet)
+routerPeople.register(r'users', views.UsersViewSet)
+routerPeople.register(r'userdepartmentsettings', views.UserDepartmentSettingsViewSet)
+routerPeople.register(r'tutors', views.TutorsViewSet)
+routerPeople.register(r'supplystaff', views.SupplyStaffsViewSet)
+routerPeople.register(r'students', views.StudentsViewSet)
+#routerPeople.register(r'preferences', views.PreferencesViewSet)
+#routerPeople.register(r'studentspreferences', views.StudentPreferencesViewSet)
+#routerPeople.register(r'groupspreferences', views.GroupPreferencesViewSet)
 
 
-router.register(r'departments', views.DepartmentViewSet)
-router.register(r'trainingprograms', views.TrainingProgramsViewSet)
-router.register(r'grouptypes', views.GroupTypesViewSet)
-router.register(r'grouptypes', views.GroupsViewSet)
+routerBase.register(r'departments', views.DepartmentViewSet)
+routerBase.register(r'trainingprograms', views.TrainingProgramsViewSet)
+routerBase.register(r'grouptypes', views.GroupTypesViewSet)
+routerBase.register(r'grouptypes', views.GroupsViewSet)
 
-router.register(r'days', views.DaysViewSet)
-router.register(r'slots', views.SlotsViewSet)
-router.register(r'holidays', views.HolidaysViewSet)
-router.register(r'traininghalfdays', views.TrainingHalfDaysViewSet)
-router.register(r'periods', views.PeriodsViewSet)
-router.register(r'timesettings', views.TimeGeneralSettingsViewSet)
+routerBase.register(r'days', views.DaysViewSet)
+routerBase.register(r'slots', views.SlotsViewSet)
+routerBase.register(r'holidays', views.HolidaysViewSet)
+routerBase.register(r'traininghalfdays', views.TrainingHalfDaysViewSet)
+routerBase.register(r'periods', views.PeriodsViewSet)
+routerBase.register(r'timesettings', views.TimeGeneralSettingsViewSet)
 
-router.register(r'roomtypes', views.RoomTypesViewSet)
-router.register(r'roomgroups', views.RoomGroupsViewSet)
-router.register(r'rooms', views.RoomGroupsViewSet)
-router.register(r'roomsorts', views.RoomSortsViewSet)
+routerBase.register(r'roomtypes', views.RoomTypesViewSet)
+routerBase.register(r'roomgroups', views.RoomGroupsViewSet)
+routerBase.register(r'rooms', views.RoomGroupsViewSet)
+routerBase.register(r'roomsorts', views.RoomSortsViewSet)
 
-router.register(r'modules', views.ModulesViewSet)
-router.register(r'coursetypes', views.CourseTypesViewSet)
-router.register(r'courses', views.CoursesViewSet)
-router.register(r'scheduledcourses', views.ScheduledCoursesViewSet)
+routerBase.register(r'modules', views.ModulesViewSet)
+routerBase.register(r'coursetypes', views.CourseTypesViewSet)
+routerBase.register(r'courses', views.CoursesViewSet)
+routerBase.register(r'scheduledcourses', views.ScheduledCoursesViewSet)
 
-router.register(r'userspreferences', views.UsersPreferencesViewSet)
-router.register(r'coursepreferences', views.CoursePreferencesViewSet)
-router.register(r'roompreferences', views.RoomPreferencesViewSet)
+routerBase.register(r'userspreferences', views.UsersPreferencesViewSet)
+routerBase.register(r'coursepreferences', views.CoursePreferencesViewSet)
+routerBase.register(r'roompreferences', views.RoomPreferencesViewSet)
 
-router.register(r'edtversions', views.EdtVersionsViewSet)
-router.register(r'coursemodifications', views.CourseModificationsViewSet)
-router.register(r'planningmodifications', views.PlanningModificationsViewSet)
+routerBase.register(r'edtversions', views.EdtVersionsViewSet)
+routerBase.register(r'coursemodifications', views.CourseModificationsViewSet)
+routerBase.register(r'planningmodifications', views.PlanningModificationsViewSet)
 
-router.register(r'tutorcosts', views.TutorCostsViewSet)
-router.register(r'groupcosts', views.GroupCostsViewSet)
-router.register(r'groupfreehalfdays', views.GroupFreeHalfDaysViewSet)
+routerBase.register(r'tutorcosts', views.TutorCostsViewSet)
+routerBase.register(r'groupcosts', views.GroupCostsViewSet)
+routerBase.register(r'groupfreehalfdays', views.GroupFreeHalfDaysViewSet)
 
-router.register(r'dependencies', views.DependenciesViewSet)
-router.register(r'coursesstarttimeconstraints', views.CourseStartTimeConstraintsViewSet)
-router.register(r'regens', views.RegensViewSet)
+routerBase.register(r'dependencies', views.DependenciesViewSet)
+routerBase.register(r'coursesstarttimeconstraints', views.CourseStartTimeConstraintsViewSet)
+routerBase.register(r'regens', views.RegensViewSet)
 
-urlpatterns = router.urls
+urlpatterns = [
+    path('base/', include(routerBase.urls)),
+    path('user/', include(routerPeople.urls))
+]

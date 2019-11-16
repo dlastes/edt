@@ -8,7 +8,7 @@ import people.models as pm
 class UsersSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = pm.User
-        fields = ['is_student', 'is_tutor', 'rights', 'departments']
+        fields = ['username', 'is_student', 'is_tutor', 'rights', 'departments']
 
 class UserDepartmentSettingsSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
