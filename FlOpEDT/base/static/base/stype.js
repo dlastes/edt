@@ -287,27 +287,27 @@ function apply_stype_from_button(save) {
     var sent_data = {} ;
     sent_data['changes'] = JSON.stringify(changes) ; 
 
-    var se_deb,year_deb,se_fin,year_fin;
+    var week_st,year_st,week_end,year_end;
     var year, se;
     var se_abs_max = 53;
     var se_min, se_max;
 
     if(save){
-	se_deb = 0 ;
+	week_st = 0 ;
 	console.log(current_year);
-	year_deb = +current_year ;
-	se_fin = se_deb ;
-	year_fin = year_deb ;
+	year_st = +current_year ;
+	week_end = week_st ;
+	year_end = year_st ;
     } else {
-	se_deb = +document.forms['app'].elements['se_deb'].value ;
-	year_deb = +document.forms['app'].elements['year_deb'].value ;
-	se_fin = +document.forms['app'].elements['se_fin'].value ;
-	year_fin = +document.forms['app'].elements['year_fin'].value ;
+	week_st = +document.forms['app'].elements['week_st'].value ;
+	year_st = +document.forms['app'].elements['year_st'].value ;
+	week_end = +document.forms['app'].elements['week_end'].value ;
+	year_end = +document.forms['app'].elements['year_end'].value ;
     }
 
 
-    if (year_deb<year_fin ||
-        (year_deb==year_fin && se_deb<=se_fin)){
+    if (year_st<year_end ||
+        (year_st==year_end && week_st<=week_end)){
 
 
 	if(changes.length==0) {
@@ -319,19 +319,19 @@ function apply_stype_from_button(save) {
 	    if(save){
 		ack.pref += "week type";
 	    } else {
-		ack.pref += "week "+se_deb+" année "+year_deb
-		    +" à week "+se_fin+" année "+year_fin;
+		ack.pref += "week "+week_st+" année "+year_st
+		    +" à week "+week_end+" année "+year_end;
 	    }
 
 
-	    for (year=year_deb ; year<=year_fin ; year++){
-		if(year==year_deb){
-		    se_min = se_deb;
+	    for (year=year_st ; year<=year_end ; year++){
+		if(year==year_st){
+		    se_min = week_st;
 		} else {
 		    se_min = 1;
 		}
-		if(year==year_fin){
-		    se_max = se_fin;
+		if(year==year_end){
+		    se_max = week_end;
 		} else {
 		    se_max = se_abs_max;
 		}

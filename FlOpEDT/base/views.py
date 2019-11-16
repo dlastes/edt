@@ -234,11 +234,11 @@ def stype(req, *args, **kwargs):
                       })
     elif req.method == 'POST':
         if 'apply' in list(req.POST.keys()):
-            print(req.POST['se_deb'])
-            date_deb = {'week': req.POST['se_deb'],
-                        'year': req.POST['year_deb']}
-            date_fin = {'week': req.POST['se_fin'],
-                        'year': req.POST['year_fin']}
+            print(req.POST['week_st'])
+            date_deb = {'week': req.POST['week_st'],
+                        'year': req.POST['year_st']}
+            date_fin = {'week': req.POST['week_end'],
+                        'year': req.POST['year_end']}
             if date_deb['year'] < date_fin['year'] or \
                     (date_deb['year'] == date_fin['year']
                      and date_deb['week'] <= date_fin['week']):
