@@ -786,12 +786,6 @@ function max_days_in_month(month) {
 }
 
 
-function diff_days(day1, day2) {
-    var refs = ['m','tu','w','th','f','sa','su'] ;
-    return refs.indexOf(day2.ref) - refs.indexOf(day1.ref);
-}
-
-
 // compute which weeks are needed to check the constraints
 function which_side_weeks() {
 
@@ -821,7 +815,7 @@ function which_side_weeks() {
     date = last_day.date.split('/');
     console.log(last_day);
     console.log(max_days_in_month(+last_day[1]));
-    cur_extremum = +date[0] - diff_days(first_day, last_day) + 7 ;
+    cur_extremum = +date[0] + week_jump ;
     iextrem = cur_week_index + 1 ;
     while (cur_extremum < max_days_in_month(+last_day[1])) {
         console.log(iextrem);
