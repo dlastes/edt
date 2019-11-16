@@ -1233,32 +1233,33 @@ function go_courses(quick) {
 
     incg
         .append("text")
-        .attr("st", "m")
-        .attr("x", cours_txt_x)
-        .attr("y", cours_txt_top_y)
-        .text(cours_txt_top_txt)
+        .attr("st", "p")
         .attr("fill", cours_txt_fill)
         .attr("font-weight", cours_txt_weight)
         .attr("font-size", cours_txt_size)
-        .merge(cg.select("[st=m]"))
+        .merge(cg.select("[st=p]"))
         .transition(t)
         .attr("x", cours_txt_x)
-        .attr("y", cours_txt_top_y);
-
+        .attr("y", cours_txt_mid_y)
+        .attr("x", cours_txt_x)
+        .attr("y", cours_txt_mid_y)
+        .text(cours_txt_mid_txt);
+        
+    
     if (!cosmo) {
         incg
             .append("text")
-            .attr("st", "p")
+            .attr("st", "m")
+            .attr("x", cours_txt_x)
+            .attr("y", cours_txt_top_y)
+            .text(cours_txt_top_txt)
             .attr("fill", cours_txt_fill)
             .attr("font-weight", cours_txt_weight)
             .attr("font-size", cours_txt_size)
-            .merge(cg.select("[st=p]"))
+            .merge(cg.select("[st=m]"))
             .transition(t)
             .attr("x", cours_txt_x)
-            .attr("y", cours_txt_mid_y)
-            .attr("x", cours_txt_x)
-            .attr("y", cours_txt_mid_y)
-            .text(cours_txt_mid_txt);
+            .attr("y", cours_txt_top_y);
         
         incg
             .append("text")
