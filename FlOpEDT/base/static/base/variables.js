@@ -629,9 +629,11 @@ var cours_pl = [];
 // all courses
 var cours = [];
 
-// courses of previous and next weeks
-var ante_cours = [];
-var post_cours = [];
+// courses of side weeks
+// list of {year:int, week:int, days: list of days, courses: list of courses}
+// note: main week is always taken from the server, any other may not and may
+//       be outdated
+var side_courses = [];
 
 
 // listener for curses drag and drop 
