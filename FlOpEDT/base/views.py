@@ -456,16 +456,16 @@ def fetch_dispos(req, year, week, **kwargs):
                                    .values_list('tutor')
                                            
     if COSMO_MODE:
-        busy_inst_after = ScheduledCourse.objects.filter(cours__semaine=semaine,
-                                                         cours__an=an,
-                                                         module__train_prog__department=department)\
+        busy_inst_after = ScheduledCourse.objects.filter(cours__semaine=week,
+                                                         cours__an=year,
+                                                         cours__module__train_prog__department=department)\
                                                  .distinct('tutor') \
                                                  .values_list('tutor')
     else:
         busy_inst_after = []
 
     busy_inst = chain(busy_inst_init, busy_inst_after)
-    busy_inst = list(chain(busy_instx,
+    busy_inst = list(chain(busy_inst,
                            [req.user]))
 
     week_avail = UserPreference.objects \
