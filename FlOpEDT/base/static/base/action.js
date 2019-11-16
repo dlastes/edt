@@ -730,6 +730,9 @@ function apply_ckbox(dk) {
             if (ckbox[dk].cked) {
 		fetch_unavailable_rooms();
 		fetch_all_tutors();
+                if (cosmo) {
+                    fetch_side_weeks();
+                }
 		if (total_regen && (logged_usr.rights >> 2) % 2 == 0) {
 
 		    ckbox[dk].cked = false ;
@@ -929,8 +932,368 @@ function compute_changes(changes, conc_tutors, gps) {
 }
 
 
+
+
+// compute latest finishing time
+// independently of the days
+function max_finish_time(courses_list) {
+    return Math.max.apply(Math, courses_list.map(function(d){
+        return d.start + d.duration ;
+    }));
+}
+
+
+// compute the earliest starting time
+// independently of the days
+function min_start_time(courses_list) {
+    return Math.min.apply(Math, courses_list.map(function(d){
+        return d.start ;
+    }));
+}
+
+
+// slack between two sets of courses
+function compute_slack(prev_day_courses, next_day_courses) {
+    //console.log(prev_day_courses, next_day_courses);
+    if (prev_day_courses.length == 0 || next_day_courses == 0) {
+        return -1 ;
+    }
+    return 24*60 + min_start_time(next_day_courses) - max_finish_time(prev_day_courses);
+}
+
+
+// return next day
+// day_desc: {iweek: int, ref: string}
+function compute_next_day(day_desc) {
+    var ret = {iweek: day_desc.iweek,
+               ref: ''};
+    if (day_desc.ref == 'su') {
+        ret.iweek ++ ;
+        ret.ref = 'm'
+    } else {
+        ret.ref = day_refs[day_refs.indexOf(day_desc.ref)+1];
+    }
+    return ret ;
+}
+
+
+// fill date field of a given day
+function fill_date(day_desc) {
+
+    //console.log("fill date : IW"+day_desc.iweek+" - "+day_desc.ref);
+
+    day_desc.date = side_courses.find(function(d){
+        return d.year == weeks.init_data[day_desc.iweek].an &&
+            d.week == weeks.init_data[day_desc.iweek].semaine ;
+    }).days.find(function(d){
+        return d.ref == day_desc.ref ;
+    }).date;
+}
+
+
+// return the courses of tutor tutor on day day_desc
+function get_courses(tutor, day_desc) {
+    if (day_desc.iweek < 0 || day_desc.iweek >= weeks.init_data.length) {
+        return [] ;
+    }
+    var full_week = side_courses.find(function(d){
+        return d.year == weeks.init_data[day_desc.iweek].an &&
+            d.week == weeks.init_data[day_desc.iweek].semaine ;
+    });
+    if (typeof full_week !== 'undefined') {
+        return full_week.courses.filter(function(d) {
+            return d.day == day_desc.ref && d.prof == tutor ;
+        });
+    }
+    return [] ;
+}
+
+
+// in [start_day_desc, end_day_desc[
+function compute_sleep(tutor, start_day_des, end_day_desc, issues) {
+    var cur_day = start_day_des ;
+    var next_day ;
+
+    var cur_courses, next_courses;
+    var sleep_time ;
+    
+    while(cur_day.iweek != end_day_desc.iweek
+          || cur_day.ref != end_day_desc.ref) {
+
+        //console.log("day IW" + cur_day.iweek + " - " + cur_day.ref);
+        
+        next_day = compute_next_day(cur_day);
+        cur_courses = get_courses(tutor, cur_day);
+        next_courses = get_courses(tutor, next_day);
+
+        sleep_time = compute_slack(cur_courses, next_courses);
+        //console.log(sleep_time);
+        if (sleep_time > 0 &&
+            sleep_time <= law_constraints.sleep_time) {
+            fill_date(cur_day);
+            fill_date(next_day);
+            
+            issues.push({nok_type:'sleep',
+                         duration: sleep_time,
+                         prev: cur_day.date,
+                         next: next_day.date});
+        }
+        cur_day = next_day ;
+    }
+}
+
+
+// aggregate working time of a tutor in the week described with its index
+// return an array of 7 {duration, month, iweek}
+function aggregate_hours(tutor, iweek) {
+
+    //console.log("Aggregate "+ tutor + "IW " + iweek);
+    
+    var ret = new Array(7) ;
+    for (var i = 0 ; i < ret.length ; i++) {
+        ret[i] = {duration: 0, month:0,
+                  iweek: iweek} ;
+    }
+    
+    var week_desc = side_courses.find(function(d){
+        return d.year == weeks.init_data[iweek].an &&
+            d.week == weeks.init_data[iweek].semaine ;
+    });
+    if (typeof week_desc === 'undefined') {
+        return ret ;
+    }
+    
+    for (var i = 0 ; i<week_desc.days.length ; i++) {
+        ret[day_shifts[week_desc.days[i].ref]].month
+            = +week_desc.days[i].date.split('/')[1] ;
+    }
+
+    week_desc.courses.filter(function(d){
+        return d.prof == tutor ;
+    }).forEach(function(d){
+        ret[day_shifts[d.day]].duration += d.duration ;
+    });
+    return ret ;
+}
+
+
+function print_agg(service) {
+    console.log("Service");
+    for (var i = 0 ; i < service.length ; i++) {
+        console.log("D" + service[i].duration + " -M" + service[i].month + " -IW"
+                    + service[i].iweek);
+    }
+}
+
+// check whether there is 2 free days in service
+// append problem infos in issues
+function compute_weekend(service, issues) {
+    var nb_free_days = service.filter(function(d){
+        return d.duration == 0 ;
+    }).length ;
+    if (nb_free_days < law_constraints.free_days_per_week) {
+        issues.push({nok_type:'weekend',
+                     nb_free_days: nb_free_days});
+    }
+}
+
+
+// check whether the service is not too heavy
+// append problem infos in issues
+function compute_weekly(tutor, service, issues) {
+    var working_minutes = 0 ;
+    for (var i = 0 ; i < service.length ; i++) {
+        working_minutes += service[i].duration ;
+    }
+    if (Object.keys(working_time).includes(tutor)) {
+        if (working_minutes > working_time[tutor] + law_constraints.week) {
+            issues.push({nok_type:'weekly',
+                         duration: working_minutes})
+        }
+    }
+}
+
+
+// build description of a day
+function build_day_desc(service, iday) {
+    var day_desc = {iweek:service[iday].iweek,
+                    ref:day_refs[iday - Math.floor(iday/7)*7]};
+    fill_date(day_desc);
+    return day_desc ;
+}
+
+
+// PRECOND: ended by free days 
+function compute_tunnels(service, issues) {
+    var last_free = -1 ;
+    var consec_busy = 0 ;
+    for (var i = 0 ; i < service.length ; i ++) {
+        if (service[i].duration == 0) {
+            if (consec_busy > law_constraints.max_consec_days) {
+                if ((i-1 > 6 || last_free > 6)
+                    && (i-1 < 14 || last_free < 14)){
+                    //console.log(service,i-1,last_free);
+                    var end_day = build_day_desc(service, i-1);
+                    var beg_day = build_day_desc(service, last_free + 1);
+                    issues.push({nok_type:'tunnel',
+                                 begin:beg_day.date,
+                                 end:end_day.date,
+                                 nb_consec: consec_busy})
+                }
+            }
+            last_free = i ;
+            consec_busy = 0 ;
+        } else {
+            consec_busy ++ ;
+        }
+    }
+}
+
+
+
+
+
+
+/*
+Check constraints of a given tutor
+  - nok_type: 'sleep',    (date1: string(%DD/MM), date2: string(%DD/MM)) 
+                         -> the tutor needs to sleep (11h break)
+  - nok_type: 'weekend', -> the tutor needs 2 free days per week
+  - nok_type: 'tunnel',  -> the tutor should not work more than 6 days in a row
+  - nok_type: 'weekly',  -> no more than working time per week + max_variation.week hours
+  - nok_type: 'monthly', -> not excluded from working time per month ± max_variation.month hours
+*/
+// Check everything even if the constraint was violated before the change
+// side_weeks should be fille dwith the current week
+function check_constraints_tutor(tutor) {
+
+    var issues = [] ;
+    
+    var tut_courses = cours.filter(function(d){
+        d.prof == tutor ;
+    }) ;
+
+    var icur_week = weeks.sel[0] ;
+
+
+
+    // CARE  COURS PAS PLACÉ
+    insert_side_week(weeks.init_data[icur_week].an,
+                     weeks.init_data[icur_week].semaine,
+                     days,
+                     cours);
+    
+
+    // sleep constraint
+    compute_sleep(tutor,
+                  {iweek: weeks.sel[0] - 1, ref: 'su'},
+                  {iweek: weeks.sel[0] + 1, ref: 'm'},
+                  issues) ;
+
+    // weekend constraint
+    var tutor_service = aggregate_hours(tutor,
+                                        icur_week);
+
+    //print_agg(tutor_service);
+
+    compute_weekend(tutor_service, issues) ;
+
+    
+    // weekly working time
+    compute_weekly(tutor, tutor_service, issues);
+    
+
+    // tunnel constraint
+    var prev_service = aggregate_hours(tutor,icur_week-1);
+    var next_service = aggregate_hours(tutor, icur_week+1);
+    tutor_service = prev_service.concat(tutor_service).concat(next_service);
+    
+    tutor_service.push({duration:0});
+    compute_tunnels(tutor_service, issues);
+    tutor_service = tutor_service.slice(0,-1);
+    
+    // weekly working time
+
+
+    return issues ;
+}
+
+
+function min_to_hm_txt(minutes) {
+    var h = Math.floor(minutes/60) ;
+    var m = minutes - h*60 ;
+    var mt = '' ;
+    if (m != 0) {
+        mt = m.toString().padStart(2,'0');
+    }
+    return h + "h" + mt ;
+}
+
+function law_issue_to_txt(tutor, issue){
+    var ret ;
+    switch(issue.nok_type) {
+    case 'sleep': 
+        ret = "Nuit trop courte pour " + tutor + " entre le " + issue.prev + " et le " + issue.next + " : "
+            + min_to_hm_txt(issue.duration) + " (min " + min_to_hm_txt(law_constraints.sleep_time) + ")"
+        break;
+    case 'weekend':
+        ret = tutor + " a seulement " + issue.nb_free_days + " jour libre dans la semaine (min "
+            + law_constraints.free_days_per_week + ")" ;
+        break;
+    case 'tunnel':
+        ret = tutor + " a " + issue.nb_consec + " jours consécutifs sans repos (max "
+            + law_constraints.max_consec_days + ") entre le " + issue.begin
+            + " et le " + issue.end ;
+        break;
+    case 'weekly':
+        ret = tutor + " travaille " + min_to_hm_txt(issue.duration) + "  cette semaine (max "
+            + min_to_hm_txt(working_time[tutor] + law_constraints.week) + ")" 
+        break;
+    case 'monthly':
+        break;
+    }
+    return ret ;
+}
+
+
+
+function confirm_law_constraints(changes, conc_tutors, gps) {
+    var issues ;
+    var issues_txt = [] ;
+    for (var i = 0 ; i < conc_tutors.length ; i++) {
+        issues = check_constraints_tutor(conc_tutors[i]);
+        for (var j = 0 ; j < issues.length ; j++) {
+            issues_txt.push({txt: law_issue_to_txt(conc_tutors[i], issues[j])});
+        }
+    }
+
+    if(issues.length == 0) {
+        confirm_contact_all(changes, conc_tutors, gps) ;
+    } else {
+        var splash_confirm = {
+	    id: "conf-law",
+	    but: {list: [{txt: "Je veux être hors-la-loi",
+                          width: 100,
+                          click: function(d){
+                              confirm_contact_all(changes, conc_tutors, gps);
+                          }},
+		         {txt: "Je vais trouver autre chose",
+                          click: function(d){} }]
+                 },
+	    com: {list: issues_txt}
+        }
+    
+        splash(splash_confirm);
+    }
+
+}
+
+
+
+
+
 function confirm_change() {
-    var changes, conc_tutors, gps, i, prof_txt, gp_txt;
+    var changes, conc_tutors, gps;
     changes = [];
     conc_tutors = [];
     gps = [];
@@ -946,36 +1309,45 @@ function confirm_change() {
         go_ack_msg();
     } else {
 
-        if (conc_tutors.length > 0) {
-            prof_txt = "Avez-vous contacté " ;
-	    prof_txt += array_to_msg(conc_tutors) ;
-	    prof_txt += " ?" ;
-	} else {
-            prof_txt = "Tudo bem ?" ;
-	}
-
-        gp_txt = "(Par ailleurs, ce serait bien de prévenir ";
-	if (gps.length == 1) {
-	    gp_txt += "le groupe ";
-	} else {
-	    gp_txt += "les groupes ";
-	}
-	gp_txt += array_to_msg(gps) ;
-        gp_txt += ").";
-
-
-	var splash_confirm = {
-	    id: "conf-chg",
-	    but: {list: [{txt: "Oui", click: function(d){send_edt_change(changes);}},
-			 {txt: "Non", click: function(d){} }]},
-	    com: {list: [{txt: prof_txt},
-			 {txt:gp_txt}]}
-	}
-
-	splash(splash_confirm);
+        confirm_law_constraints(changes, conc_tutors, gps) ;
 
     }
 }
+
+
+
+function confirm_contact_all(changes, conc_tutors, gps) {
+    var  prof_txt, gp_txt;
+    
+    if (conc_tutors.length > 0) {
+        prof_txt = "Avez-vous contacté " ;
+	prof_txt += array_to_msg(conc_tutors) ;
+	prof_txt += " ?" ;
+    } else {
+        prof_txt = "Tudo bem ?" ;
+    }
+    
+    gp_txt = "(Par ailleurs, ce serait bien de prévenir ";
+    if (gps.length == 1) {
+	gp_txt += "le groupe ";
+    } else {
+	gp_txt += "les groupes ";
+    }
+    gp_txt += array_to_msg(gps) ;
+    gp_txt += ").";
+    
+    
+    var splash_confirm = {
+	id: "conf-cont",
+	but: {list: [{txt: "Oui", click: function(d){send_edt_change(changes);}},
+		     {txt: "Non", click: function(d){} }]},
+	com: {list: [{txt: prof_txt},
+		     {txt:gp_txt}]}
+    }
+    
+    splash(splash_confirm);
+}
+
 
 
 function array_to_msg(a) {

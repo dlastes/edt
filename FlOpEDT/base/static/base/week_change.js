@@ -603,9 +603,71 @@ function fetch_cours() {
         }
     });
 
+    if (cosmo) {
+        fetch_courses_around();
+    }
 
 }
 
+
+// fetches courses of the weeks before and after the current week
+function fetch_courses_around() {
+
+    var semaine_att, an_att ;
+
+    var week_index = weeks.sel[0] - 1 ;
+
+    if (week_index < 0) {
+        ante_cours = [] ;
+    } else {
+        semaine_att = weeks.init_data[week_index].semaine;
+        an_att = weeks.init_data[week_index].an;
+        
+        show_loader(true);
+        $.ajax({
+            type: "GET", //rest Type
+            dataType: 'text',
+            url: url_cours_pl + an_att + "/" + semaine_att + "/" + num_copie,
+            async: true,
+            contentType: "text/csv",
+            success: function(msg, ts, req) {
+                ante_cours = d3.csvParse(msg, translate_cours_pl_from_csv);
+                show_loader(false);
+            },
+            error: function(msg) {
+                console.log("error");
+                show_loader(false);
+            }
+        });
+    }
+
+    var week_index = weeks.sel[0] + 1 ;
+
+    if (week_index >= weeks.init_data.length) {
+        post_cours = [] ;
+    } else {
+        semaine_att = weeks.init_data[week_index].semaine;
+        an_att = weeks.init_data[week_index].an;
+        
+        show_loader(true);
+        $.ajax({
+            type: "GET", //rest Type
+            dataType: 'text',
+            url: url_cours_pl + an_att + "/" + semaine_att + "/" + num_copie,
+            async: true,
+            contentType: "text/csv",
+            success: function(msg, ts, req) {
+                post_cours = d3.csvParse(msg, translate_cours_pl_from_csv);
+                show_loader(false);
+            },
+            error: function(msg) {
+                console.log("error");
+                show_loader(false);
+            }
+        });
+    }
+
+}
 
 function translate_cours_pl_from_csv(d) {
     var ind = tutors.pl.indexOf(d.prof_nom);
@@ -670,6 +732,140 @@ function translate_cours_pp_from_csv(d) {
     console.log(co);
     return co;
 }
+
+
+
+// insert the given week in the side weeks
+function insert_side_week(year, week, days_, courses_) {
+    var found = side_courses.find(function(d){
+        return d.year == year && d.week == week;
+    });
+    if (typeof found === 'undefined') {
+        side_courses.push({
+            year: year,
+            week: week,
+            days: days_,
+            courses: courses_
+        });
+    } else {
+        found.courses = courses_ ;
+    }
+}
+
+// insert in week_set the week of index iweek in weeks.init_data if possible
+// return true if it hase been inserted
+function insert_in_week_set(week_set, iweek) {
+    if (iweek < 0 || iweek >= weeks.init_data.length)  {
+        return false ;
+    }
+    var week = weeks.init_data[iweek].semaine ;
+    var year = weeks.init_data[iweek].an ;
+    var found = week_set.find(function(d){
+        return d.year == year && d.week == week;
+    });
+    if (typeof found === 'undefined') {
+        week_set.push({
+            year: year,
+            week: week,
+        });
+        return true ;
+    }
+    return false ;
+}
+
+
+// maximum number of days in a month
+function max_days_in_month(month) {
+    if (month==2) {
+        return 29 ;
+    } else if ([1,3,5,7,8,10,12].includes(month)) {
+        return 31;
+    } else {
+        return 30;
+    }
+}
+
+
+// compute which weeks are needed to check the constraints
+function which_side_weeks() {
+
+    var week_set = [] ;
+
+    var cur_week_index = weeks.sel[0] ;
+
+    // constraint: 'sleep'
+    insert_in_week_set(week_set, cur_week_index-1) ;
+    insert_in_week_set(week_set, cur_week_index+1) ;
+
+    // constraint: 'monthly'
+    // note: heavy if the week goes through 2 months
+    // until day 1 of the month of the first day of the week
+    var first_day = days.find(function(d){ return d.num == 0 ; });
+    var date = first_day.date.split('/') ;
+    var cur_extremum = +date[0] - 7 ;
+    var iextrem = cur_week_index - 1 ;
+    while (cur_extremum > 1) {
+        insert_in_week_set(week_set, iextrem) ;
+        cur_extremum -= 7 ;
+        iextrem -= 1 ;
+    }
+
+    // until final day of the month of the last day of the week
+    var last_day = days.find(function(d){ return d.num == days.length-1 ; });
+    date = last_day.date.split('/');
+    console.log(last_day);
+    console.log(max_days_in_month(+last_day[1]));
+    cur_extremum = +date[0] + week_jump ;
+    iextrem = cur_week_index + 1 ;
+    while (cur_extremum < max_days_in_month(+last_day[1])) {
+        console.log(iextrem);
+        insert_in_week_set(week_set, iextrem) ;
+        cur_extremum += 7 ;
+        iextrem += 1 ;
+    }
+
+    return week_set ;
+    
+}
+
+
+
+function side_week_rcv(side_week) {
+    return function(msg, ts, req) {
+        var side_days = JSON.parse(req.getResponseHeader('days').replace(/\'/g, '"'));
+        var side_cours_pl = d3.csvParse(msg, translate_cours_pl_from_csv);
+        
+        insert_side_week(side_week.year, side_week.week,
+                         side_days, side_cours_pl);
+        
+    }
+}
+
+
+// fetches courses of the weeks before and after the current week
+function fetch_side_weeks() {
+
+    var needed_weeks = which_side_weeks();
+
+    for (var i = 0 ; i < needed_weeks.length ; i++) {
+        $.ajax({
+            type: "GET", //rest Type
+            dataType: 'text',
+            url: url_cours_pl + needed_weeks[i].year + "/" + needed_weeks[i].week + "/" + 0,
+            async: true,
+            contentType: "text/csv",
+            success: side_week_rcv(needed_weeks[i]),
+            error: function(msg) {
+                console.log("error");
+            }
+        });
+        
+    }
+
+    
+}
+
+
 
 
 

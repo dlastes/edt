@@ -624,12 +624,17 @@ var drag_listener_hs, drag_listener_vs;
 /*-----------------------
    ------ COURSES -------
   -----------------------*/
-// unscheduled curses
+// unscheduled courses
 var cours_pp = [];
-// scheduled curses
+// scheduled courses
 var cours_pl = [];
-// all curses
+// all courses
 var cours = [];
+
+// courses of previous and next weeks
+var ante_cours = [];
+var post_cours = [];
+
 
 // listener for curses drag and drop 
 var dragListener;
@@ -893,3 +898,38 @@ var arrow =
 
 
 var is_side_panel_open = false ;
+
+// for tutor contraints
+var law_constraints = {
+    max_variation: {
+        week: 5*60,
+        month: 5*60
+    },
+    sleep_time: 11*60,
+    max_consec_days: 6,
+    free_days_per_week: 2
+};
+
+
+// week transitions
+var day_refs = ['m','tu','w','th','f','sa','su'] ;
+var week_jump = 7 - (
+    day_refs.indexOf(
+        days.find(
+            function(d){return d.num==days.length-1 ;}
+        ).ref)
+        - day_refs.indexOf(
+            days.find(
+                function(d){return d.num==0 ;}
+            ).ref
+        )
+);
+var day_shifts = [] ;
+for (var i = 0 ; i<day_refs.length ; i++) {
+    day_shifts[day_refs[i]] = i ;
+}
+
+
+// tutor working time in minutes
+// dictionary tutor_username -> {week: int , month: int}
+var working_time = {} ;
