@@ -1,4 +1,4 @@
-Fonctionnalités testées et approuvées:
+Fonctionnalités testées et approuvées (Vérification du contenu de la BD et/ou Refresh de la page pour s'assurer du fonctionnement de la modification):
 
     Consulter:
         - Changement de créneau pour un cours unique: OK
@@ -10,6 +10,8 @@ Fonctionnalités testées et approuvées:
         - Changement des disponibilités d'un enseignant: OK
         - Changement des disponibilités de plusieurs enseignants: OK
         - Application semaine type à un enseignant: OK
+        - Changement d'horaire ne correspondant pas aux disponibilités de l'enseignant: OK (Affiche bien le bon message d'erreur)
+        - Cumul de salle: OK (Empêche de cumuler les cours dans une seule et même salle)
 
     Décaler/Annuler:
         - Mettre un cours en attente: OK
