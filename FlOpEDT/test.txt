@@ -12,6 +12,7 @@ Fonctionnalités testées et approuvées (Vérification du contenu de la BD et/o
         - Application semaine type à un enseignant: OK
         - Changement d'horaire ne correspondant pas aux disponibilités de l'enseignant: OK (Affiche bien le bon message d'erreur)
         - Cumul de salle: OK (Empêche de cumuler les cours dans une seule et même salle)
+        - Cumul de créneaux identiques pour un enseignant: OK (Affichage du bon msg d'erreur)
 
     Décaler/Annuler:
         - Mettre un cours en attente: OK
