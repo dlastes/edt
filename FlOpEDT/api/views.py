@@ -3,6 +3,8 @@ import django_filters.rest_framework
 from api import serializers
 import people.models as pm
 import base.models as bm
+import quote.models as p
+import displayweb.models as dwm
 
 # ------------
 # -- PEOPLE --
@@ -364,5 +366,67 @@ class RegensViewSet(viewsets.ModelViewSet):
     """
     queryset = bm.Regen.objects.all()
     serializer_class = serializers.RegensSerializer
+    
+    filterset_fields = '__all__'
+
+# ----------
+# -- QUOTE -
+# ----------
+
+class QuoteTypesViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet to see all the quote types
+    """
+    queryset = p.QuoteType.objects.all()
+    serializer_class = serializers.QuoteTypesSerializer
+    
+    filterset_fields = '__all__'
+
+class QuotesViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet to see all the quotes
+    """
+    queryset = p.Quote.objects.all()
+    serializer_class = serializers.QuotesSerializer
+    
+    filterset_fields = '__all__'
+
+# ---------------
+# -- DISPLAYWEB -
+# ---------------
+
+class BreakingNewsViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet to see all the breaking news
+    """
+    queryset = dwm.BreakingNews.objects.all()
+    serializer_class = serializers.BreakingNewsSerializer
+    
+    filterset_fields = '__all__'
+
+class ModuleDisplaysViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet to see all the module displays
+    """
+    queryset = dwm.ModuleDisplay.objects.all()
+    serializer_class = serializers.ModuleDisplaysSerializer
+    
+    filterset_fields = '__all__'
+
+class TrainingProgrammeDisplaysViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet to see all the training programme displays
+    """
+    queryset = dwm.TrainingProgrammeDisplay.objects.all()
+    serializer_class = serializers.TrainingProgrammeDisplaysSerializer
+    
+    filterset_fields = '__all__'
+
+class GroupDisplaysViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet to see all the group displays
+    """
+    queryset = dwm.GroupDisplay.objects.all()
+    serializer_class = serializers.GroupDisplaysSerializer
     
     filterset_fields = '__all__'

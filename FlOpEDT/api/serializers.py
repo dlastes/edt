@@ -1,6 +1,8 @@
 from rest_framework import serializers
 import base.models as bm
 import people.models as pm
+import quote.models as q
+import displayweb.models as dwm
 
 # ------------
 # -- PEOPLE --
@@ -229,4 +231,42 @@ class CourseStartTimeConstraintsSerializer(serializers.HyperlinkedModelSerialize
 class RegensSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = bm.Regen
+        fields = '__all__'
+
+# ----------
+# -- QUOTE -
+# ----------
+
+class QuoteTypesSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = q.QuoteType
+        fields = '__all__'
+
+class QuotesSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = q.Quote
+        fields = '__all__'
+
+# ---------------
+# -- DISPLAYWEB -
+# ---------------
+
+class BreakingNewsSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = dwm.BreakingNews
+        fields = '__all__'
+
+class ModuleDisplaysSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = dwm.ModuleDisplay
+        fields = '__all__'
+
+class TrainingProgrammeDisplaysSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = dwm.TrainingProgrammeDisplay
+        fields = '__all__'
+
+class GroupDisplaysSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = dwm.GroupDisplay
         fields = '__all__'
