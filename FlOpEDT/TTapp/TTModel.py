@@ -1127,24 +1127,14 @@ class TTModel(object):
                         occupied_in_another_department = True
                 if occupied_in_another_department:
                     name = 'other_dep_' + str(i) + '_' + str(sl) + '_' + str(self.constraint_nb)
-                    # self.add_constraint(self.sum(self.TT[(sl, c)]
-                    #                              for c in (self.wdb.courses_for_tutor[i]
-                    #                                        | self.wdb.courses_for_supp_tutor[i])),
-                    #                     '==',
-                    #                     0,
-                    #                     name=name)
-                    # self.add_constraint(self.IBS[(i, sl)], '==', 1)
-                    # self.add_constraint(self.IBD[(i, sl.day)], '==', 1)
                     self.add_constraint(self.sum(self.TT[(sl, c)]
-                                                 for c in ((self.wdb.courses_for_tutor[i]
-                                                            | self.wdb.courses_for_supp_tutor[i])
-                                                           & self.wdb.compatible_courses[sl])
-                                                 )
-                                        - self.IBS[i, sl]
-                                        - self.IBD[i, sl.day],
+                                                 for c in (self.wdb.courses_for_tutor[i]
+                                                           | self.wdb.courses_for_supp_tutor[i])),
                                         '==',
-                                        -2,
+                                        0,
                                         name=name)
+                    self.add_constraint(self.IBS[(i, sl)], '==', 1)
+                    self.add_constraint(self.IBD[(i, sl.day)], '==', 1)
 
     def add_specific_constraints(self):
         """
