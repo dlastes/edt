@@ -1134,7 +1134,6 @@ class TTModel(object):
                                         '==',
                                         0,
                                         name=name)
-                    self.add_constraint(self.IBS[(i, sl)], '==', 1)
                     self.add_constraint(self.IBD[(i, sl.day)], '==', 1)
 
     def add_specific_constraints(self):
