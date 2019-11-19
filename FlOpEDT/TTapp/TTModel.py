@@ -70,6 +70,7 @@ class WeekDB(object):
         self.slots, self.slots_by_day, self.slots_intersecting, self.slots_by_half_day = self.slots_init()
         self.course_types, self.courses, self.sched_courses, self.fixed_courses, self.fixed_courses_for_slot, \
             self.other_departments_courses, self.other_departments_sched_courses, \
+            self.other_departments_sched_courses_for_slot, \
             self.courses_availabilities, self.modules, self.dependencies = self.courses_init()
         self.room_types, self.room_groups, self.rooms, self.room_prefs, self.room_groups_for_type,\
             self.room_course_compat, self.course_rg_compat, self.fixed_courses_for_room, \
@@ -159,6 +160,13 @@ class WeekDB(object):
             .filter(cours__in=other_departments_courses,
                     copie_travail=0)
 
+        other_departments_sched_courses_for_slot = {}
+        for sl in self.slots:
+            other_departments_sched_courses_for_slot[sl] = set(fc for fc in other_departments_sched_courses
+                                             if ((sl.start_time <= fc.start_time < sl.end_time
+                                                  or sl.start_time < fc.end_time() <= sl.end_time)
+                                                 and fc.day == sl.day))
+
         courses_availabilities = CoursePreference.objects \
             .filter(train_prog__in=self.train_prog,
                     semaine=self.week,
@@ -174,7 +182,7 @@ class WeekDB(object):
             cours1__groupe__train_prog__in=self.train_prog)
 
         return course_types, courses, sched_courses, fixed_courses, fixed_courses_for_slot,\
-            other_departments_courses, other_departments_sched_courses,\
+            other_departments_courses, other_departments_sched_courses, other_departments_sched_courses_for_slot,\
             courses_availabilities, modules, dependencies
 
     def rooms_init(self):
@@ -434,7 +442,8 @@ class TTModel(object):
                 self.add_constraint(expr, '>=', 0)
 
                 if self.wdb.fixed_courses.filter(cours__tutor=i,
-                                                 day=d):
+                                                 day=d)\
+                        or self.wdb.other_departments_sched_courses.filter(cours__tutor=i, day=d):
                     self.add_constraint(IBD[(i, d)], '==', 1)
                     # This next constraint impides to force IBD to be 1
                     # (if there is a meeting, for example...)
