@@ -68,7 +68,7 @@ class GroupTypesSerializer(serializers.HyperlinkedModelSerializer):
 class GroupsSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = bm.Group
-        fields = ['nom', 'train_prog', 'type', 'size', 'basic', 'parent_groups']
+        fields = ['name', 'train_prog', 'type', 'size', 'basic', 'parent_groups']
 
 
 # ------------
@@ -83,7 +83,7 @@ class DaysSerializer(serializers.HyperlinkedModelSerializer):
 class SlotsSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = bm.Slot
-        fields = ['jour', 'heure', 'duration']
+        fields = ['day', 'hour', 'duration']
 
 class HolidaysSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
@@ -137,7 +137,7 @@ class RoomSortsSerializer(serializers.HyperlinkedModelSerializer):
 class ModulesSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = bm.Module
-        fields = ['nom', 'abbrev', 'head', 'ppn', 'train_prog', 'period']
+        fields = ['name', 'abbrev', 'head', 'ppn', 'train_prog', 'period']
 
 class CourseTypesSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
@@ -147,12 +147,12 @@ class CourseTypesSerializer(serializers.HyperlinkedModelSerializer):
 class CoursesSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = bm.Course
-        fields = ['type', 'room_type', 'no', 'tutor', 'supp_tutor', 'groupe', 'module', 'modulesupp', 'semaine', 'an', 'suspens']
+        fields = ['type', 'room_type', 'no', 'tutor', 'supp_tutor', 'group', 'module', 'modulesupp', 'week', 'an', 'suspens']
 
 class ScheduledCoursesSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = bm.ScheduledCourse
-        fields = ['cours', 'day', 'start_time', 'room', 'no', 'noprec', 'copie_travail']
+        fields = ['course', 'day', 'start_time', 'room', 'no', 'noprec', 'work_copy']
 
 # -----------------
 # -- PREFERENCES --
@@ -161,17 +161,17 @@ class ScheduledCoursesSerializer(serializers.HyperlinkedModelSerializer):
 class UsersPreferencesSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = bm.UserPreference
-        fields = ['user', 'semaine', 'an', 'day', 'start_time', 'duration', 'valeur']
+        fields = ['user', 'week', 'year', 'day', 'start_time', 'duration', 'value']
 
 class CoursePreferencesSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = bm.CoursePreference
-        fields = ['course_type', 'train_prog', 'semaine', 'an', 'day', 'start_time', 'duration', 'valeur']
+        fields = ['course_type', 'train_prog', 'week', 'year', 'day', 'start_time', 'duration', 'value']
 
 class RoomPreferencesSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = bm.RoomPreference
-        fields = ['room', 'semaine', 'an', 'day', 'start_time', 'duration', 'valeur']
+        fields = ['room', 'week', 'year', 'day', 'start_time', 'duration', 'value']
 
 # -----------------
 # - MODIFICATIONS -
@@ -180,17 +180,17 @@ class RoomPreferencesSerializer(serializers.HyperlinkedModelSerializer):
 class EdtVersionSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = bm.EdtVersion
-        fields = ['department', 'semaine', 'an', 'version']
+        fields = ['department', 'week', 'year', 'version']
 
 class CourseModificationsSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = bm.CourseModification
-        fields = ['cours', 'semaine_old', 'an_old', 'room_old', 'day_old', 'start_time_old', 'version_old', 'updated_at', 'initiator']
+        fields = ['course', 'week_old', 'old_year', 'room_old', 'day_old', 'start_time_old', 'version_old', 'updated_at', 'initiator']
 
 class PlanningModificationsSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = bm.PlanningModification
-        fields = ['cours', 'semaine_old', 'an_old', 'tutor_old', 'updated_at', 'initiator']
+        fields = ['course', 'week_old', 'old_year', 'tutor_old', 'updated_at', 'initiator']
 
 
 # -----------
@@ -200,17 +200,17 @@ class PlanningModificationsSerializer(serializers.HyperlinkedModelSerializer):
 class TutorCostsSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = bm.TutorCost
-        fields = ['department', 'semaine', 'an', 'tutor', 'valeur', 'work_copy']
+        fields = ['department', 'week', 'year', 'tutor', 'value', 'work_copy']
 
 class GroupCostsSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = bm.GroupCost
-        fields = ['semaine', 'an', 'groupe', 'valeur', 'work_copy']
+        fields = ['week', 'year', 'group', 'value', 'work_copy']
 
 class GroupFreeHalfDaysSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = bm.GroupFreeHalfDay
-        fields = ['semaine', 'an', 'groupe', 'DJL', 'work_copy']
+        fields = ['week', 'year', 'group', 'DJL', 'work_copy']
 
 # ----------
 # -- MISC --
@@ -219,7 +219,7 @@ class GroupFreeHalfDaysSerializer(serializers.HyperlinkedModelSerializer):
 class DependenciesSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = bm.Dependency
-        fields = ['cours1', 'cours2', 'successifs', 'ND']
+        fields = ['course1', 'course2', 'successifs', 'ND']
 
 class CourseStartTimeConstraintsSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
@@ -229,4 +229,4 @@ class CourseStartTimeConstraintsSerializer(serializers.HyperlinkedModelSerialize
 class RegensSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = bm.Regen
-        fields = ['department', 'semaine', 'an', 'full', 'fday', 'fmonth', 'fyear', 'stabalise', 'sday', 'smonth', 'syear']
+        fields = ['department', 'week', 'year', 'full', 'fday', 'fmonth', 'fyear', 'stabalise', 'sday', 'smonth', 'syear']
