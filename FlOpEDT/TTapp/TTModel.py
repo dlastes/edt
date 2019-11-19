@@ -1129,7 +1129,8 @@ class TTModel(object):
                     name = 'other_dep_' + str(i) + '_' + str(sl) + '_' + str(self.constraint_nb)
                     self.add_constraint(self.sum(self.TT[(sl, c)]
                                                  for c in (self.wdb.courses_for_tutor[i]
-                                                           | self.wdb.courses_for_supp_tutor[i])),
+                                                           | self.wdb.courses_for_supp_tutor[i]) &
+                                                 self.wdb.compatible_courses[sl]),
                                         '==',
                                         0,
                                         name=name)
