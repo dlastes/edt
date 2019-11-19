@@ -707,8 +707,9 @@ var valid = {
 // or about the next possible regeneration of the planning (ack.regen)
 var ack = {
     more:"",
-//    edt: "",
+    // regen infos
     regen: "",
+    // for stype
     pref: "",
     status: "OK",
     predefined: {KO: "C'est un échec cuisant. Trouvez un·e responsable d'emploi du temps et faites-lui part de vos problèmes.",
@@ -767,7 +768,7 @@ if ((logged_usr.rights >> 1) % 2 == 1) {
     logged_usr.dispo_all_change = true ;
 }
     
-var user = {nom: logged_usr.nom,
+var user = {name: logged_usr.name,
 	    dispos: [],
 	    dispos_bu: [],
 	    dispos_type: [],

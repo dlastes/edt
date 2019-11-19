@@ -137,7 +137,7 @@ function no_overlap(list, start_time, duration) {
 
 
 function update_pref_interval(tutor, day, start_time, value) {
-    var pref = dispos[user.nom][day];
+    var pref = dispos[user.name][day];
     var p = pref.filter(function(d) {
 	return d.start_time == start_time;
     });
@@ -146,7 +146,7 @@ function update_pref_interval(tutor, day, start_time, value) {
     } else {
 	console.log("Problem with the time interval");
     }
-    if (user.nom == tutor) {
+    if (user.name == tutor) {
 	pref = user.dispos ;
 	p = pref.filter(function(d) {
 	    return d.day == day && d.start_time == start_time;

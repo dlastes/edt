@@ -47,21 +47,21 @@ function fetch_dispos() {
 
     fetch.ongoing_dispos = true;
 
-    var semaine_att = weeks.init_data[weeks.sel[0]].semaine;
-    var an_att = weeks.init_data[weeks.sel[0]].an;
+    var week_att = weeks.init_data[weeks.sel[0]].week;
+    var year_att = weeks.init_data[weeks.sel[0]].year;
     
     show_loader(true);
     $.ajax({
         type: "GET", //rest Type
         dataType: 'text',
-        url: url_dispos + an_att + "/" + semaine_att ,
+        url: url_dispos + year_att + "/" + week_att ,
         async: true,
         contentType: "text/csv",
         success: function(msg) {
             console.log("in");
 
-            if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
-                an_att == weeks.init_data[weeks.sel[0]].an) {
+            if (week_att == weeks.init_data[weeks.sel[0]].week &&
+                year_att == weeks.init_data[weeks.sel[0]].year) {
                 dispos = {};
                 //user.dispos = [];
                 d3.csvParse(msg, translate_dispos_from_csv);
@@ -84,23 +84,23 @@ function fetch_dispos() {
             console.log(xhr.responseText);
             show_loader(false);
             // window.location.href = url_login;
-            window.location.replace(url_login + "?next=" + url_edt + an_att + "/" + semaine_att);
+            window.location.replace(url_login + "?next=" + url_edt + year_att + "/" + week_att);
         }
     });
 
     show_loader(true);
-    console.log(url_fetch_extra_sched + an_att + "/" + semaine_att);
+    console.log(url_fetch_extra_sched + year_att + "/" + week_att);
     $.ajax({
         type: "GET", //rest Type
         dataType: 'text',
-        url: url_fetch_extra_sched + an_att + "/" + semaine_att ,
+        url: url_fetch_extra_sched + year_att + "/" + week_att ,
         async: true,
         contentType: "text/csv",
         success: function(msg) {
             console.log("in");
             console.log(msg);
-            if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
-                an_att == weeks.init_data[weeks.sel[0]].an) {
+            if (week_att == weeks.init_data[weeks.sel[0]].week &&
+                year_att == weeks.init_data[weeks.sel[0]].year) {
                 extra_pref.tutors = {};
                 d3.csvParse(msg, translate_extra_pref_tut_from_csv);
 		sort_preferences(extra_pref.tutors);
@@ -122,23 +122,23 @@ function fetch_dispos() {
             console.log(xhr.responseText);
             show_loader(false);
             // window.location.href = url_login;
-            window.location.replace(url_login + "?next=" + url_edt + an_att + "/" + semaine_att);
+            window.location.replace(url_login + "?next=" + url_edt + year_att + "/" + week_att);
         }
     });
 
     show_loader(true);
-    console.log(url_fetch_shared_rooms + an_att + "/" + semaine_att);
+    console.log(url_fetch_shared_rooms + year_att + "/" + week_att);
     $.ajax({
         type: "GET", //rest Type
         dataType: 'text',
-        url: url_fetch_shared_rooms + an_att + "/" + semaine_att ,
+        url: url_fetch_shared_rooms + year_att + "/" + week_att ,
         async: true,
         contentType: "text/csv",
         success: function(msg) {
             console.log("in");
             console.log(msg);
-            if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
-                an_att == weeks.init_data[weeks.sel[0]].an) {
+            if (week_att == weeks.init_data[weeks.sel[0]].week &&
+                year_att == weeks.init_data[weeks.sel[0]].year) {
                 extra_pref.rooms = {};
                 d3.csvParse(msg, translate_extra_pref_room_from_csv);
 	        sort_preferences(extra_pref.rooms);
@@ -161,7 +161,7 @@ function fetch_dispos() {
             console.log(xhr.responseText);
             show_loader(false);
             // window.location.href = url_login;
-            window.location.replace(url_login + "?next=" + url_edt + an_att + "/" + semaine_att);
+            window.location.replace(url_login + "?next=" + url_edt + year_att + "/" + week_att);
         }
     });
 
@@ -179,7 +179,7 @@ function translate_dispos_from_csv(d) {
     }
     dispos[d.prof][d.day].push({start_time:+d.start_time,
 			       duration: +d.duration,
-			       value: +d.valeur});
+			       value: +d.value});
 }
 
 
@@ -312,14 +312,14 @@ function create_dispos_user_data() {
 
     var current;
 
-    if (dispos[user.nom] === undefined) {
-	allocate_dispos(user.nom);
-	fill_missing_preferences(user.nom, ts);
+    if (dispos[user.name] === undefined) {
+	allocate_dispos(user.name);
+	fill_missing_preferences(user.name, ts);
         sort_preferences(dispos);
     }
 
     for (var i = 0; i < days.length; i++) {
-	pref_list = dispos[user.nom][days[i].ref] ;
+	pref_list = dispos[user.name][days[i].ref] ;
 	for (var k = 0 ; k<pref_list.length ; k++) {
             d2p = {
 		day: days[i].ref,
@@ -387,22 +387,22 @@ function create_dispos_user_data() {
 function fetch_bknews(first) {
     fetch.ongoing_bknews = true;
 
-    var semaine_att = weeks.init_data[weeks.sel[0]].semaine;
-    var an_att = weeks.init_data[weeks.sel[0]].an;
+    var week_att = weeks.init_data[weeks.sel[0]].week;
+    var year_att = weeks.init_data[weeks.sel[0]].year;
 
     show_loader(true);
     $.ajax({
         type: "GET", //rest Type
         dataType: 'text',
-        url: url_bknews  + an_att + "/" + semaine_att,
+        url: url_bknews  + year_att + "/" + week_att,
         async: true,
         contentType: "text/csv",
         success: function(msg) {
 	    bknews.cont = d3.csvParse(msg,
 				      translate_bknews_from_csv);
 
-            if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
-                an_att == weeks.init_data[weeks.sel[0]].an) {
+            if (week_att == weeks.init_data[weeks.sel[0]].week &&
+                year_att == weeks.init_data[weeks.sel[0]].year) {
 		var max_y = -1 ;
 		for (var i = 0 ; i < bknews.cont.length ; i++) {
 		    if (bknews.cont[i].y > max_y) {
@@ -485,6 +485,7 @@ function adapt_labgp(first) {
     d3.select("#edt-main").attr("height", svg.height);
 
     if (first) {
+        window.scroll(0,$("#menu-edt").height() + margin.top - labgp.height_init);
 	expected_ext_grid_dim = svg.width - margin.left - margin.right;
 	new_gp_dim = expected_ext_grid_dim / (rootgp_width * nbPer);
 	if (new_gp_dim > labgp.wm) {
@@ -511,8 +512,8 @@ function fetch_cours() {
     
     ack.more = "";
 
-    var semaine_att = weeks.init_data[weeks.sel[0]].semaine;
-    var an_att = weeks.init_data[weeks.sel[0]].an;
+    var week_att = weeks.init_data[weeks.sel[0]].week;
+    var year_att = weeks.init_data[weeks.sel[0]].year;
 
     cours_bouge = {};
     
@@ -520,7 +521,7 @@ function fetch_cours() {
     $.ajax({
         type: "GET", //rest Type
         dataType: 'text',
-        url: url_cours_pl + an_att + "/" + semaine_att + "/" + num_copie,
+        url: url_cours_pl + year_att + "/" + week_att + "/" + num_copie,
         async: true,
         contentType: "text/csv",
         success: function(msg, ts, req) {
@@ -528,8 +529,8 @@ function fetch_cours() {
             go_regen(null);
             go_alarm_pref();
 
-            if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
-                an_att == weeks.init_data[weeks.sel[0]].an) {
+            if (week_att == weeks.init_data[weeks.sel[0]].week &&
+                year_att == weeks.init_data[weeks.sel[0]].year) {
 
                 days = JSON.parse(req.getResponseHeader('days').replace(/\'/g, '"'));
             
@@ -564,20 +565,20 @@ function fetch_cours() {
     $.ajax({
         type: "GET", //rest Type
         dataType: 'text',
-        url: url_cours_pp  + an_att + "/" + semaine_att + "/" + num_copie,
+        url: url_cours_pp  + year_att + "/" + week_att + "/" + num_copie,
         async: true,
         contentType: "text/csv",
         success: function(msg, ts, req) {
-            //console.log(msg);
+            console.log(msg);
 
-            if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
-                an_att == weeks.init_data[weeks.sel[0]].an) {
+            if (week_att == weeks.init_data[weeks.sel[0]].week &&
+                year_att == weeks.init_data[weeks.sel[0]].year) {
 
                 tutors.pp = [];
                 modules.pp = [];
                 salles.pp = [];
 
-    		console.log(semaine_att,an_att,num_copie);
+    		console.log(week_att,year_att,num_copie);
 
                 cours_pp = d3.csvParse(msg, translate_cours_pp_from_csv);
 
@@ -607,9 +608,9 @@ function fetch_cours() {
 
 
 function translate_cours_pl_from_csv(d) {
-    var ind = tutors.pl.indexOf(d.prof_nom);
+    var ind = tutors.pl.indexOf(d.prof_name);
     if (ind == -1) {
-        tutors.pl.push(d.prof_nom);
+        tutors.pl.push(d.prof_name);
     }
     if (modules.pl.indexOf(d.module) == -1) {
         modules.pl.push(d.module);
@@ -618,11 +619,11 @@ function translate_cours_pl_from_csv(d) {
         salles.pl.push(d.room);
     }
     var co = {
-        id_cours: +d.id_cours,
-        no_cours: +d.num_cours,
-        prof: d.prof_nom,
+        id_course: +d.id_course,
+        no_course: +d.num_course,
+        prof: d.prof_name,
 //        prof_full_name: d.prof_first_name + " " + d.prof_last_name,
-        group: translate_gp_name(d.gpe_nom),
+        group: translate_gp_name(d.gpe_name),
         promo: set_promos.indexOf(d.gpe_promo),
         mod: d.module,
 	c_type: d.coursetype,
@@ -650,10 +651,10 @@ function translate_cours_pp_from_csv(d) {
         salles.pp.push(d.room);
     }
     var co = {
-        id_cours: +d.id,
-        no_cours: +d.no,
+        id_course: +d.id,
+        no_course: +d.no,
         prof: d.prof,
-        group: translate_gp_name(d.groupe),
+        group: translate_gp_name(d.group),
         promo: set_promos.indexOf(d.promo),
         mod: d.module,
 	c_type: d.coursetype,
@@ -680,8 +681,8 @@ function add_exception_course(cur_week, cur_year, targ_week, targ_year,
 		    slot: slot,
 		    group: group,
 		    promo: set_promos.indexOf(promo),
-		    id_cours: -1,
-		    no_cours: -1,
+		    id_course: -1,
+		    no_course: -1,
 		    mod: l1,
 		    prof: l2,
 		    room: l3
@@ -758,7 +759,7 @@ function clean_prof_displayed(light) {
     // relevant tutors
     tutors.all.forEach(function(t) {
         t.relevant = false ;
-        if (t.name == user.nom) {
+        if (t.name == user.name) {
             t.relevant = true ;
         }
     });
@@ -788,19 +789,19 @@ function translate_gp_name(gp) {
 function fetch_unavailable_rooms() {
     fetch.ongoing_un_rooms = true;
     
-    var semaine_att = weeks.init_data[weeks.sel[0]].semaine;
-    var an_att = weeks.init_data[weeks.sel[0]].an;
+    var week_att = weeks.init_data[weeks.sel[0]].week;
+    var year_att = weeks.init_data[weeks.sel[0]].year;
 
     show_loader(true);
     $.ajax({
         type: "GET", //rest Type
         dataType: 'text',
-        url: url_unavailable_rooms + an_att + "/" + semaine_att ,
+        url: url_unavailable_rooms + year_att + "/" + week_att ,
         async: true,
         contentType: "text/csv",
         success: function(msg, ts, req) {
-            if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
-                an_att == weeks.init_data[weeks.sel[0]].an) {
+            if (week_att == weeks.init_data[weeks.sel[0]].week &&
+                year_att == weeks.init_data[weeks.sel[0]].year) {
 
 		console.log(msg);
 
@@ -865,21 +866,21 @@ function fetch_all(first, fetch_work_copies){
 
 
 function fetch_version() {
-    var semaine_att = weeks.init_data[weeks.sel[0]].semaine;
-    var an_att = weeks.init_data[weeks.sel[0]].an;
+    var week_att = weeks.init_data[weeks.sel[0]].week;
+    var year_att = weeks.init_data[weeks.sel[0]].year;
 
     show_loader(true);
     $.ajax({
         type: "GET", //rest Type
         dataType: 'text',
-        url: url_week_infos  + an_att + "/" + semaine_att,
+        url: url_week_infos  + year_att + "/" + week_att,
         async: true,
         contentType: "text/json",
         success: function(msg) {
 	    var parsed = JSON.parse(msg);
 
-            if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
-                an_att == weeks.init_data[weeks.sel[0]].an) {
+            if (week_att == weeks.init_data[weeks.sel[0]].week &&
+                year_att == weeks.init_data[weeks.sel[0]].year) {
 		version = parsed.version ;
 		filled_dispos = parsed.proposed_pref ;
 		required_dispos = parsed.required_pref ;
@@ -997,9 +998,9 @@ function swap_data(fetched, current, type) {
 Reste :
   x couleur modules
   x display filtre prof
-  x semaines (fetch, go_course, go_dispo)
-  x base edt (d&d, struct edt, check, display conflits, semaine pro)
-  o base dispos (simple, 0-9, semaine type)
+  x weeks (fetch, go_course, go_dispo)
+  x base edt (d&d, struct edt, check, display conflits, week pro)
+  o base dispos (simple, 0-9, week type)
   o plot par défaut
   x move next week
 */

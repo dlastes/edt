@@ -91,12 +91,12 @@ class PeriodWeeks():
         """        
         return Course.objects \
                 .filter(
-                    an=year,
-                    semaine__in=list(range(start, end + 1)),
+                    year=year,
+                    week__in=list(range(start, end + 1)),
                     module__train_prog__department=department) \
                 .distinct() \
-                .order_by('semaine') \
-                .values_list('semaine', flat=True)
+                .order_by('week') \
+                .values_list('week', flat=True)
 
 
     @classmethod
@@ -144,7 +144,7 @@ class PeriodWeeks():
         return self.__period_raw
 
     
-    def get_filter(self, related_path='cours', week=None):
+    def get_filter(self, related_path='course', week=None):
         """
         Return a Q filter to restrict records returned 
         by course query to a given period
@@ -164,7 +164,7 @@ class PeriodWeeks():
                 week_list = weeks
 
             if week_list:
-                kwargs = { f"{related_path}__an": year, f"{related_path}__semaine__in": week_list}
+                kwargs = { f"{related_path}__year": year, f"{related_path}__week__in": week_list}
 
                 if filter:
                     filter |= Q(**kwargs)

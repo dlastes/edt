@@ -63,7 +63,7 @@ def make_dispo_file(periode, empty_bookname=empty_bookname, target_bookname=targ
         sheet.add_data_validation(dv)
 
         # Nb de cours par tutor
-        tutors_courses = Course.objects.filter(semaine=week).values('tutor_id').annotate(Count('id'))
+        tutors_courses = Course.objects.filter(week=week).values('tutor_id').annotate(Count('id'))
         print(tutors_courses)
         color = 0
         rank = 5

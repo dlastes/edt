@@ -37,7 +37,7 @@
     <h4>Groupes</h4>
     <ul>
 		{% for g in groupes %}
-		<li><a href="{% url "ics:group" department g.train_prog.abbrev g.nom %}">{{ g.train_prog.abbrev }}/{{ g.nom }}</a></li>
+		<li><a href="{% url "ics:group" department g.train_prog.abbrev g.name %}">{{ g.train_prog.abbrev }}/{{ g.name }}</a></li>
 		{% endfor %}
 	</ul>
     
