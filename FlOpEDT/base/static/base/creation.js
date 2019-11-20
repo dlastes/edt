@@ -1539,6 +1539,12 @@ function check_course(wanted_course) {
 	    ret.push({nok: 'group_busy',
                       more: {group: wanted_course.group}});
         }
+
+        // we will ask later about other constraints
+        if (ret.length > 0 && (pending.force.tutor || pending.force.room)) {
+            return ret ;
+        }
+
     }
 
 
@@ -1584,6 +1590,13 @@ function check_course(wanted_course) {
             ret.push({nok: 'tutor_free_week',
                       more: {tutor: wanted_course.prof}}) ;
         }
+
+        // we will ask later about room constraints
+        if (ret.length > 0 && pending.force.room) {
+            return ret ;
+        }
+        
+        
     }
 
     // shared rooms availability
@@ -1657,6 +1670,8 @@ function splash_violated_constraints(check_list, step) {
         }));
 	splash_csts.com.list.push({txt: "Confirmer la modification ?"});
     } else {
+        /*-- not enough rights, or strong constraints --*/
+        
         var warning_sentence = "Vous tentez d'outrepasser " ;
         if (warn_check.length > 1) {
             warning_sentence += "les contraintes suivantes :";
@@ -1668,6 +1683,7 @@ function splash_violated_constraints(check_list, step) {
 	    but: {
 		list: [{txt: "Ah ok",
 			click: function(d){
+                            pending.rollback();
                             go_courses(false);
 			    return ;
 			}
@@ -1727,8 +1743,6 @@ function check_pending_course() {
         
         if(core_constraints.length > 0) {
 
-            clean_pending();
-            
             splash_violated_constraints(warn_check, 'core');
             
                 /* TO BE REMOVED
@@ -1744,6 +1758,17 @@ function check_pending_course() {
 	            } 
                 */
 
+        } else if (tutor_constraints.length > 0) {
+            if (pending.force.tutor) {
+                console.log("tt constraints");
+                pending.force.tutor = false ;
+	        compute_cm_room_tutor_direction() ;
+                select_tutor_module_change() ;
+                go_cm_room_tutor_change();
+            } else {
+                splash_violated_constraints(warn_check, 'tutor');
+            }
+            
         } else if (room_constraints.length > 0) {
             if (pending.force.room) {
                 pending.force.room = false ;
@@ -1751,30 +1776,9 @@ function check_pending_course() {
 	        room_cm_level = 0 ;
                 select_room_change() ;
                 go_cm_room_tutor_change();
-                /*
-	        var display_cont_menu = select_room_change() ;
-	        if (display_cont_menu) {
-	            go_cm_room_tutor_change();
-	        } else {
-	            //room_tutor_change.course = [] ;
-	            room_tutor_change.proposal = [] ;
-	        }
-                */
             } else {
-                clean_pending();
                 splash_violated_constraints(warn_check, 'room');
             }
-        } else if (tutor_constraints.length > 0) {
-            if (pending.force.tutor) {
-                pending.force.tutor = false ;
-	        compute_cm_room_tutor_direction() ;
-                select_tutor_module_change() ;
-                go_cm_room_tutor_change();
-            } else {
-                clean_pending();
-                splash_violated_constraints(warn_check, 'tutor');
-            }
-
         }
 	
     }
