@@ -164,6 +164,10 @@ d3.json(groupes_fi,
 
 d3.select("body")
     .on("click", function(d) {
+        if(splash_hold) {
+            splash_hold = false ;
+            return ;
+        }
 	cancel_cm_adv_preferences();
 	cancel_cm_room_tutor_change();
     })

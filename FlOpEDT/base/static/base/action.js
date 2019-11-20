@@ -1108,6 +1108,7 @@ function edt_change_ack(msg) {
 
 function clean_splash(class_id) {
     dg.select("." + class_id).remove() ;
+    splash_hold = true ;
 }
 
 

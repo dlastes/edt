@@ -874,3 +874,5 @@ var arrow =
 
 
 var is_side_panel_open = false ;
+
+var splash_hold = false ;
