@@ -1508,7 +1508,7 @@ function check_course(wanted_course) {
 	return ret ;
     }
 
-    if (! pending.pass.other) {
+    if (! pending.pass.core) {
 
         // course was supposed to be fix
         if (wanted_course.id_cours == -1) {
@@ -1525,7 +1525,7 @@ function check_course(wanted_course) {
 
     possible_conflicts = simultaneous_courses(wanted_course) ;
 
-    if (! pending.pass.other) {
+    if (! pending.pass.core) {
 
         // group is busy
         conflicts = possible_conflicts.filter(function(c) {
