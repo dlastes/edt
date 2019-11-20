@@ -1618,7 +1618,15 @@ function splash_violated_constraints(check_list, step) {
     console.log(warn_check);
     //console.log(pending.wanted_course.id_cours);
     if ((logged_usr.rights >> 2) % 2 == 1) {
-	splash_csts = {
+        var privilege_warning = "Des privilèges vous ont été accordés, et vous en profitez pour outrepasser ";
+        if (warn_check.length>1) {
+            privilege_warning += "les contraintes suivantes :";
+        } else {
+            privilege_warning += "la contrainte suivante :";
+        }
+
+
+        splash_csts = {
 	    id: "viol_constraint",
 	    but: {
 		list: [{txt: "Confirmer",
@@ -1641,7 +1649,7 @@ function splash_violated_constraints(check_list, step) {
 	    },
 	    com: {list: [{txt: "Attention", ftsi: 23},
 			 {txt: ""},
-			 {txt: "Des privilèges vous ont été accordés, et vous en profitez pour outrepasser la contrainte suivante :"}]
+			 {txt: privilege_warning}]
 		 }
 	};
         splash_csts.com.list = splash_csts.com.list.concat(warn_check.map(function(el){
@@ -1649,6 +1657,12 @@ function splash_violated_constraints(check_list, step) {
         }));
 	splash_csts.com.list.push({txt: "Confirmer la modification ?"});
     } else {
+        var warning_sentence = "Vous tentez d'outrepasser " ;
+        if (warn_check.length > 1) {
+            warning_sentence += "les contraintes suivantes :";
+        } else {
+            warning_sentence += "la contrainte suivante :";
+        }
         splash_csts = {
 	    id: "viol_constraint",
 	    but: {
@@ -1659,7 +1673,7 @@ function splash_violated_constraints(check_list, step) {
 			}
 		       }]
 	    },
-	    com: {list: [{txt: "Vous tentez d'outrepasser la contrainte suivante :", ftsi: 23}
+	    com: {list: [{txt: warning_sentence, ftsi: 23}
 			 ]
 		 }
 	}
