@@ -114,7 +114,7 @@ class Slot(object):
 
 
 def slots_filter(slot_set, day=None, apm=None, course_type=None, start_time=None,
-                 simultaneous_to=None, is_after=None, starts_after=None, ends_before=None):
+                 simultaneous_to=None, is_after=None, starts_after=None, starts_before=None, ends_before=None):
     slots = slot_set
     if day is not None:
         slots = set(sl for sl in slots if sl.day == day)
@@ -128,6 +128,8 @@ def slots_filter(slot_set, day=None, apm=None, course_type=None, start_time=None
         slots = set(sl for sl in slots if sl.is_after(is_after))
     if starts_after is not None:
         slots = set(sl for sl in slots if sl.start_time >= starts_after)
+    if starts_before is not None:
+        slots = set(sl for sl in slots if sl.start_time <= starts_before)
     if ends_before is not None:
         slots = set(sl for sl in slots if sl.end_time <= ends_before)
     if start_time is not None:
