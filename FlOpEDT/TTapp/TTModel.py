@@ -441,9 +441,9 @@ class TTModel(object):
                         expr -= self.TT[(sl, c)]
                 self.add_constraint(expr, '>=', 0)
 
-                if self.wdb.fixed_courses.filter(cours__tutor=i,
+                if self.wdb.fixed_courses.filter(Q(cours__tutor=i) | Q(tutor=i),
                                                  day=d)\
-                        or self.wdb.other_departments_sched_courses.filter(cours__tutor=i, day=d):
+                        or self.wdb.other_departments_sched_courses.filter(Q(cours__tutor=i) | Q(tutor=i), day=d):
                     self.add_constraint(IBD[(i, d)], '==', 1)
                     # This next constraint impides to force IBD to be 1
                     # (if there is a meeting, for example...)
