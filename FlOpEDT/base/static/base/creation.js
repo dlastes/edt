@@ -1296,7 +1296,7 @@ function def_drag() {
         })
         .on("drag", function(d) {
             if (ckbox["edt-mod"].cked && fetch.done) {
-                pending.fork_course(d);
+                pending.prepare_dragndrop(d);
                 cur_over = which_slot(drag.x +
 				      parseInt(drag.sel.select("rect")
 					       .attr("x")),
@@ -1633,7 +1633,7 @@ function splash_violated_constraints(check_list, step) {
 		       },
 		       {txt: "Annuler",
 			click: function(d){
-                            pending.back_init();
+                            pending.rollback();
                             go_courses(false);
 			    return ;
 			}
@@ -1691,7 +1691,7 @@ function check_pending_course() {
         
 	add_bouge(pending.init_course);
         //pending.save_wanted() ;
-        pending.init();
+        pending.clean();
 
 	go_grid(true);
 	go_courses(true);
