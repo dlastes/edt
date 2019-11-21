@@ -61,9 +61,10 @@ var bs_margin_w = 20 ;
 var bs_margin_h = 5 ;
 
 var svg = {
-    height: window.innerHeight + margin.top,//- $("#menu-edt").height() - bs_margin_h,
-    width: window.innerWidth + margin.left // - bs_margin_w,
+    height: window.innerHeight, // - $("#menu-edt").height() - bs_margin_h,
+    width: window.innerWidth - bs_margin_w,
 };
+
 
 var week = 42 ;
 var year = 2017;
@@ -163,9 +164,14 @@ d3.json(groupes_fi,
 
 d3.select("body")
     .on("click", function(d) {
+        if(splash_hold) {
+            splash_hold = false ;
+            return ;
+        }
 	cancel_cm_adv_preferences();
 	cancel_cm_room_tutor_change();
     })
+
 
 
 
