@@ -481,7 +481,7 @@ function adapt_labgp(first) {
     d3.select("#edt-main").attr("height", dsp_svg.h);
 
     if (first) {
-        window.scroll(0,$("#menu-edt").height() + dsp_svg.margin.top - labgp.height_init);
+        window.scroll(0,$("#menu-edt").height());
 	expected_ext_grid_dim = dsp_svg.w - dsp_svg.margin.left - dsp_svg.margin.right;
 	new_gp_dim = expected_ext_grid_dim / (rootgp_width * week_days.nb_days());
 	if (new_gp_dim > labgp.wm) {

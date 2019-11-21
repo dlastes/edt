@@ -57,7 +57,7 @@ dsp_svg.margin = {
     bot:  10,
     but: -200
 };
-dsp_svg.h = window.innerHeight + dsp_svg.margin.top ;
+dsp_svg.h = window.innerHeight ;
 dsp_svg.w = window.innerWidth + dsp_svg.margin.left ; //- 20 ;
 
 dsp_svg.cadastre = [
@@ -117,6 +117,7 @@ week_banner.spawn() ;
 var days_header = new WeekDayHeader(svg, "edt-fg", week_days, true, null) ;
 
 var hours_header = new HourHeader(svg, "edt-fg", hours) ;
+
 
 
 var week = 42 ;
@@ -220,9 +221,14 @@ d3.json(groupes_fi,
 
 d3.select("body")
     .on("click", function(d) {
+        if(splash_hold) {
+            splash_hold = false ;
+            return ;
+        }
 	cancel_cm_adv_preferences();
 	cancel_cm_room_tutor_change();
     })
+
 
 
 

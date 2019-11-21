@@ -1006,7 +1006,7 @@ function def_drag() {
         })
         .on("drag", function(d) {
             if (ckbox["edt-mod"].cked && fetch.done) {
-                pending.fork_course(d);
+                pending.prepare_dragndrop(d);
                 cur_over = which_slot(drag.x +
 				      parseInt(drag.sel.select("rect")
 					       .attr("x")),
@@ -1188,12 +1188,8 @@ function warning_check(check_tot) {
 function simultaneous_courses(target_course) {
     return cours.filter(function(c) {
         return (c.day == target_course.day 
-		&& ((c.start < target_course.start+target_course.duration
-		     && c.start >= target_course.start)
-		    || (c.start + c.duration < target_course.start+target_course.duration
-			&& c.start +c.duration > target_course.start)
-		    || (c.start <= target_course.start
-			&& c.start + c.duration > target_course.start))
+		&& !(c.start + c.duration <= target_course.start
+                     || c.start >= target_course.start + target_course.duration)
 		&& c.id_cours != target_course.id_cours);
     });
 }
@@ -1222,7 +1218,7 @@ function check_course(wanted_course) {
 	return ret ;
     }
 
-    if (! pending.pass.other) {
+    if (! pending.pass.core) {
 
         // course was supposed to be fix
         if (wanted_course.id_cours == -1) {
@@ -1239,7 +1235,7 @@ function check_course(wanted_course) {
 
     possible_conflicts = simultaneous_courses(wanted_course) ;
 
-    if (! pending.pass.other) {
+    if (! pending.pass.core) {
 
         // group is busy
         conflicts = possible_conflicts.filter(function(c) {
@@ -1253,6 +1249,12 @@ function check_course(wanted_course) {
 	    ret.push({nok: 'group_busy',
                       more: {group: wanted_course.group}});
         }
+
+        // we will ask later about other constraints
+        if (ret.length > 0 && (pending.force.tutor || pending.force.room)) {
+            return ret ;
+        }
+
     }
 
 
@@ -1298,6 +1300,13 @@ function check_course(wanted_course) {
             ret.push({nok: 'tutor_free_week',
                       more: {tutor: wanted_course.prof}}) ;
         }
+
+        // we will ask later about room constraints
+        if (ret.length > 0 && pending.force.room) {
+            return ret ;
+        }
+        
+        
     }
 
     // shared rooms availability
@@ -1332,7 +1341,15 @@ function splash_violated_constraints(check_list, step) {
     console.log(warn_check);
     //console.log(pending.wanted_course.id_cours);
     if ((logged_usr.rights >> 2) % 2 == 1) {
-	splash_csts = {
+        var privilege_warning = "Des privilèges vous ont été accordés, et vous en profitez pour outrepasser ";
+        if (warn_check.length>1) {
+            privilege_warning += "les contraintes suivantes :";
+        } else {
+            privilege_warning += "la contrainte suivante :";
+        }
+
+
+        splash_csts = {
 	    id: "viol_constraint",
 	    but: {
 		list: [{txt: "Confirmer",
@@ -1347,7 +1364,7 @@ function splash_violated_constraints(check_list, step) {
 		       },
 		       {txt: "Annuler",
 			click: function(d){
-                            pending.back_init();
+                            pending.rollback();
                             go_courses(false);
 			    return ;
 			}
@@ -1355,7 +1372,7 @@ function splash_violated_constraints(check_list, step) {
 	    },
 	    com: {list: [{txt: "Attention", ftsi: 23},
 			 {txt: ""},
-			 {txt: "Des privilèges vous ont été accordés, et vous en profitez pour outrepasser la contrainte suivante :"}]
+			 {txt: privilege_warning}]
 		 }
 	};
         splash_csts.com.list = splash_csts.com.list.concat(warn_check.map(function(el){
@@ -1363,17 +1380,26 @@ function splash_violated_constraints(check_list, step) {
         }));
 	splash_csts.com.list.push({txt: "Confirmer la modification ?"});
     } else {
+        /*-- not enough rights, or strong constraints --*/
+        
+        var warning_sentence = "Vous tentez d'outrepasser " ;
+        if (warn_check.length > 1) {
+            warning_sentence += "les contraintes suivantes :";
+        } else {
+            warning_sentence += "la contrainte suivante :";
+        }
         splash_csts = {
 	    id: "viol_constraint",
 	    but: {
 		list: [{txt: "Ah ok",
 			click: function(d){
+                            pending.rollback();
                             go_courses(false);
 			    return ;
 			}
 		       }]
 	    },
-	    com: {list: [{txt: "Vous tentez d'outrepasser la contrainte suivante :", ftsi: 23}
+	    com: {list: [{txt: warning_sentence, ftsi: 23}
 			 ]
 		 }
 	}
@@ -1405,7 +1431,7 @@ function check_pending_course() {
         
 	add_bouge(pending.init_course);
         //pending.save_wanted() ;
-        pending.init();
+        pending.clean();
 
 	go_grid(true);
 	go_courses(true);
@@ -1427,8 +1453,6 @@ function check_pending_course() {
         
         if(core_constraints.length > 0) {
 
-            clean_pending();
-            
             splash_violated_constraints(warn_check, 'core');
             
                 /* TO BE REMOVED
@@ -1444,6 +1468,17 @@ function check_pending_course() {
 	            } 
                 */
 
+        } else if (tutor_constraints.length > 0) {
+            if (pending.force.tutor) {
+                console.log("tt constraints");
+                pending.force.tutor = false ;
+	        compute_cm_room_tutor_direction() ;
+                select_tutor_module_change() ;
+                go_cm_room_tutor_change();
+            } else {
+                splash_violated_constraints(warn_check, 'tutor');
+            }
+            
         } else if (room_constraints.length > 0) {
             if (pending.force.room) {
                 pending.force.room = false ;
@@ -1451,30 +1486,9 @@ function check_pending_course() {
 	        room_cm_level = 0 ;
                 select_room_change() ;
                 go_cm_room_tutor_change();
-                /*
-	        var display_cont_menu = select_room_change() ;
-	        if (display_cont_menu) {
-	            go_cm_room_tutor_change();
-	        } else {
-	            //room_tutor_change.course = [] ;
-	            room_tutor_change.proposal = [] ;
-	        }
-                */
             } else {
-                clean_pending();
                 splash_violated_constraints(warn_check, 'room');
             }
-        } else if (tutor_constraints.length > 0) {
-            if (pending.force.tutor) {
-                pending.force.tutor = false ;
-	        compute_cm_room_tutor_direction() ;
-                select_tutor_module_change() ;
-                go_cm_room_tutor_change();
-            } else {
-                clean_pending();
-                splash_violated_constraints(warn_check, 'tutor');
-            }
-
         }
 	
     }
@@ -1853,9 +1867,15 @@ function def_cm_change() {
     entry_cm_settings.click = function(d) {
 	context_menu.room_tutor_hold = true ;
 	if(d.content == 'Salle') {
+            // don't consider other constraints than room's
+            pending.pass.tutor = true ;
+            pending.pass.core = true ;
 	    room_cm_level = 0 ;
 	    select_room_change();
 	} else {
+            // don't consider other constraints than tutor's
+            pending.pass.room = true ;
+            pending.pass.core = true ;
 	    select_tutor_module_change();
 	}
 	go_cm_room_tutor_change();

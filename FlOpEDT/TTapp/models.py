@@ -114,7 +114,7 @@ class Slot(object):
 
 
 def slots_filter(slot_set, day=None, apm=None, course_type=None, start_time=None,
-                 simultaneous_to=None, is_after=None, starts_after=None, ends_before=None):
+                 simultaneous_to=None, is_after=None, starts_after=None, starts_before=None, ends_before=None):
     slots = slot_set
     if day is not None:
         slots = set(sl for sl in slots if sl.day == day)
@@ -128,6 +128,8 @@ def slots_filter(slot_set, day=None, apm=None, course_type=None, start_time=None
         slots = set(sl for sl in slots if sl.is_after(is_after))
     if starts_after is not None:
         slots = set(sl for sl in slots if sl.start_time >= starts_after)
+    if starts_before is not None:
+        slots = set(sl for sl in slots if sl.start_time <= starts_before)
     if ends_before is not None:
         slots = set(sl for sl in slots if sl.end_time <= ends_before)
     if start_time is not None:
@@ -630,11 +632,14 @@ class Stabilize(TTConstraint):
             # nb_changements_I=dict(zip(ttmodel.wdb.instructors,[0 for i in ttmodel.wdb.instructors]))
             for c in ttmodel.wdb.courses:
                 for sl in ttmodel.wdb.compatible_slots[c]:
-                    if not sched_courses.filter(Q(start_time__lt=sl.start_time + sl.duration) |
-                                                Q(start_time__gt=sl.start_time - F('cours__type__duration')),
+                    if not sched_courses.filter(Q(start_time__gte=sl.start_time,
+                                                  start_time__lt=sl.end_time) |
+                                                Q(start_time__lte=sl.start_time,
+                                                  start_time__gt=sl.start_time - F('cours__type__duration')),
                                                 day=sl.day,
                                                 cours__tutor=c.tutor):
-                        ttmodel.obj += ttmodel.TT[(sl, c)]
+
+                        ttmodel.obj += ponderation * ttmodel.TT[(sl, c)]
                         # nb_changements_I[c.tutor]+=ttmodel.TT[(sl,c)]
                     if not sched_courses.filter(cours__tutor=c.tutor,
                                                 day=sl.day):
