@@ -26,27 +26,25 @@
 /* class Week */
 /**************/
 
-// an and semaine TO BE RENAMED
-
-function Week (an, semaine) {
-    this.an = an ;
-    this.semaine = semaine ;
+function Week (year, week) {
+    this.year = year ;
+    this.week = week ;
 }
 
 // useful for url generation
 Week.prototype.url = function() {
-    return this.an + "/" + this.semaine ;
+    return this.year + "/" + this.week ;
 }
 
 // comparison function
 Week.compare = function(week_a, week_b){
-    if(week_a.an < week_b.an) {
+    if(week_a.year < week_b.year) {
         return -1 ;
     }
-    if (week_a.an == week_b.an) {
-        if (week_a.semaine < week_b.semaine) {
+    if (week_a.year == week_b.year) {
+        if (week_a.week < week_b.week) {
             return -1 ;
-        } else if (week_a.semaine == week_b.semaine) {
+        } else if (week_a.week == week_b.week) {
             return 0 ;
         }
     }
@@ -55,7 +53,7 @@ Week.compare = function(week_a, week_b){
 
 // id function
 Week.id_fun = function(week) {
-    return "Y" + week.an + "-W" + week.semaine ;
+    return "Y" + week.year + "-W" + week.week ;
 }
 
 
@@ -159,7 +157,7 @@ WeeksExcerpt.prototype.change_selection = function(shift) {
 /***************/
 // data: list of Week; all weeks of the school year
 
-// all_weeks: list of {semaine:,an:}
+// all_weeks: list of {week:,year:}
 function Weeks(all_weeks) {
     if(typeof all_weeks === 'undefined') {
         all_weeks = [] ;
@@ -171,7 +169,7 @@ function Weeks(all_weeks) {
 
 Weeks.prototype.add_all = function(all_weeks){
     all_weeks.forEach(function(week) {
-        this.data.push(new Week(week.an, week.semaine)) ;
+        this.data.push(new Week(week.year, week.week)) ;
     }, this) ;
 }
 
@@ -210,7 +208,7 @@ function WeekBanner(svg, layout_name_gen, layout_name_fg, layout_name_bg, weeks,
 
 WeekBanner.prototype.spawn = function(full_weeks) {
 
-    this.mix.weeks.chose(new Week(an_init, semaine_init));
+    this.mix.weeks.chose(new Week(year_init, week_init));
 
     // shift everything
     this.lay_g
@@ -411,7 +409,7 @@ function WeekMix(cst_parameters, weeks) {
         return (this.weeks.nb + 1) * this.width ;
     };
     this.txt = function(d) {
-        return d.semaine;
+        return d.week;
     };
     this.rect_x = function(d, i) {
         return (i+1) * this.width - .5 * this.width;

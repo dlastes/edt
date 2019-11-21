@@ -110,7 +110,7 @@ svg = new Svg(dsp_svg.layout_tree, false);
 svg.create_container();
 svg.create_layouts(dsp_svg.cadastre) ;
 
-wdw_weeks.add_full_weeks(semaine_an_list) ;
+wdw_weeks.add_full_weeks(week_year_list) ;
 var week_banner = new WeekBanner(svg, "wg", "wg-fg", "wg-bg", wdw_weeks, dsp_weeks);
 week_banner.spawn() ;
 
