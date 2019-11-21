@@ -2131,9 +2131,15 @@ function def_cm_change() {
     entry_cm_settings.click = function(d) {
 	context_menu.room_tutor_hold = true ;
 	if(d.content == 'Salle') {
+            // don't consider other constraints than room's
+            pending.pass.tutor = true ;
+            pending.pass.core = true ;
 	    room_cm_level = 0 ;
 	    select_room_change();
 	} else {
+            // don't consider other constraints than tutor's
+            pending.pass.room = true ;
+            pending.pass.core = true ;
 	    select_tutor_module_change();
 	}
 	go_cm_room_tutor_change();
