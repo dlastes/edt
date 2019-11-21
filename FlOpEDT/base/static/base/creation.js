@@ -1480,7 +1480,7 @@ function simultaneous_courses(target_course) {
         return (c.day == target_course.day 
 		&& !(c.start + c.duration <= target_course.start
                      || c.start >= target_course.start + target_course.duration)
-		&& c.id_cours != target_course.id_cours);
+		&& c.id_course != target_course.id_course);
     });
 }
 
