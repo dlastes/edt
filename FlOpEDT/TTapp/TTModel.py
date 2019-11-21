@@ -70,6 +70,7 @@ class WeekDB(object):
         self.slots, self.slots_by_day, self.slots_intersecting, self.slots_by_half_day = self.slots_init()
         self.course_types, self.courses, self.sched_courses, self.fixed_courses, self.fixed_courses_for_slot, \
             self.other_departments_courses, self.other_departments_sched_courses, \
+            self.other_departments_sched_courses_for_slot, \
             self.courses_availabilities, self.modules, self.dependencies = self.courses_init()
         self.room_types, self.room_groups, self.rooms, self.room_prefs, self.room_groups_for_type,\
             self.room_course_compat, self.course_rg_compat, self.fixed_courses_for_room, \
@@ -159,6 +160,13 @@ class WeekDB(object):
             .filter(course__in=other_departments_courses,
                     work_copy=0)
 
+        other_departments_sched_courses_for_slot = {}
+        for sl in self.slots:
+            other_departments_sched_courses_for_slot[sl] = set(fc for fc in other_departments_sched_courses
+                                             if ((sl.start_time <= fc.start_time < sl.end_time
+                                                  or sl.start_time < fc.end_time() <= sl.end_time)
+                                                 and fc.day == sl.day))
+
         courses_availabilities = CoursePreference.objects \
             .filter(train_prog__in=self.train_prog,
                     week=self.week,
@@ -174,7 +182,7 @@ class WeekDB(object):
             course1__group__train_prog__in=self.train_prog)
 
         return course_types, courses, sched_courses, fixed_courses, fixed_courses_for_slot,\
-            other_departments_courses, other_departments_sched_courses,\
+            other_departments_courses, other_departments_sched_courses, other_departments_sched_courses_for_slot,\
             courses_availabilities, modules, dependencies
 
     def rooms_init(self):
@@ -363,8 +371,6 @@ class TTModel(object):
 
         self.add_TT_constraints()
 
-        self.update_objective()
-
         if self.warnings:
             print("Relevant warnings :")
             for key, key_warnings in self.warnings.items():
@@ -435,8 +441,9 @@ class TTModel(object):
                         expr -= self.TT[(sl, c)]
                 self.add_constraint(expr, '>=', 0)
 
-                if self.wdb.fixed_courses.filter(course__tutor=i,
-                                                 day=d):
+                if self.wdb.fixed_courses.filter(Q(course__tutor=i) | Q(tutor=i),
+                                                 day=d)\
+                        or self.wdb.other_departments_sched_courses.filter(Q(course__tutor=i) | Q(tutor=i), day=d):
                     self.add_constraint(IBD[(i, d)], '==', 1)
                     # This next constraint impides to force IBD to be 1
                     # (if there is a meeting, for example...)
@@ -1122,11 +1129,12 @@ class TTModel(object):
                     name = 'other_dep_' + str(i) + '_' + str(sl) + '_' + str(self.constraint_nb)
                     self.add_constraint(self.sum(self.TT[(sl, c)]
                                                  for c in (self.wdb.courses_for_tutor[i]
-                                                           | self.wdb.courses_for_supp_tutor[i])),
+                                                           | self.wdb.courses_for_supp_tutor[i]) &
+                                                 self.wdb.compatible_courses[sl]),
                                         '==',
                                         0,
                                         name=name)
-
+                    self.add_constraint(self.IBD[(i, sl.day)], '==', 1)
 
     def add_specific_constraints(self):
         """
@@ -1200,6 +1208,7 @@ class TTModel(object):
         for fc in self.wdb.fixed_courses:
             cp = ScheduledCourse(course=fc.course,
                                  start_time=fc.start_time,
+                                 day=fc.day,
                                  room=fc.room,
                                  work_copy=target_work_copy)
             cp.save()
@@ -1291,6 +1300,8 @@ class TTModel(object):
         Returns the number of the work copy
         """
         print("\nLet's solve week #%g" % self.week)
+
+        self.update_objective()
 
         if target_work_copy is None:
             local_max_wc = ScheduledCourse \
