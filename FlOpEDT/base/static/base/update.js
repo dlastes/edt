@@ -350,7 +350,7 @@ function go_cm_advanced_pref(quick) {
         .attr("class", "dispo-menu")
         .attr("cursor", "pointer")
         .on("click", function(d) {
-	    update_pref_interval(user.nom, d.day, d.start_time, d.off) ;
+	    update_pref_interval(user.name, d.day, d.start_time, d.off) ;
 	    data_dispo_adv_cur = [] ;
 	    go_pref(true);
         });
@@ -598,7 +598,7 @@ function go_grid(quick) {
             }),
             function(d) {
                 return d.gp.promo + "," + d.day + "," +
-                    d.gp.nom;
+                    d.gp.name;
             });
 
     grid
@@ -802,7 +802,7 @@ function go_gp_buttons() {
                     + (root_gp[gp.promo].buty) + ")";
             })
             .attr("gpe", function(gp) {
-                return gp.nom;
+                return gp.name;
             })
             .attr("promo", function(gp) {
                 return gp.promo;
@@ -978,7 +978,7 @@ function go_courses(quick) {
                 return groups[d.promo][d.group].display;
             }),
             function(d) {
-                return d.id_cours;
+                return d.id_course;
             })
         .attr("cursor", ckbox["edt-mod"].cked ? "pointer" : "default");
 
@@ -1271,7 +1271,7 @@ function update_relevant() {
             return d.name == c.prof ;
         });
         if (!tut_act) {
-            if(c.prof == user.nom) {
+            if(c.prof == user.name) {
                 mod.relevant = true ;
             }
         } else if (typeof mod !== 'undefined'

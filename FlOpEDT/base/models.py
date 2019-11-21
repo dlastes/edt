@@ -66,7 +66,7 @@ class GroupType(models.Model):
 
 
 class Group(models.Model):
-    nom = models.CharField(max_length=4)
+    name = models.CharField(max_length=4)
     train_prog = models.ForeignKey('TrainingProgramme', on_delete=models.CASCADE)
     type = models.ForeignKey('GroupType', on_delete=models.CASCADE)
     size = models.PositiveSmallIntegerField()
@@ -76,10 +76,10 @@ class Group(models.Model):
                                            related_name="children_groups")
 
     def full_name(self):
-        return self.train_prog.abbrev + "-" + self.nom
+        return self.train_prog.abbrev + "-" + self.name
 
     def __str__(self):
-        return self.nom
+        return self.name
 
     def ancestor_groups(self):
         """
@@ -175,13 +175,13 @@ def define_apm(sender, instance, *args, **kwargs):
 
 
 class Slot(models.Model):
-    jour = models.ForeignKey('Day', on_delete=models.CASCADE)
-    heure = models.ForeignKey('Time', on_delete=models.CASCADE)
+    day = models.ForeignKey('Day', on_delete=models.CASCADE)
+    hour = models.ForeignKey('Time', on_delete=models.CASCADE)
     duration = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(240)], default=90)
 
     def __str__(self):
-        return f"{self.jour}_{self.heure}"
+        return f"{self.day}_{self.hour}"
 
     
 class Holiday(models.Model):
@@ -291,7 +291,7 @@ class RoomSort(models.Model):
 
 
 class Module(models.Model):
-    nom = models.CharField(max_length=100, null=True)
+    name = models.CharField(max_length=100, null=True)
     abbrev = models.CharField(max_length=10, verbose_name='Intitulé abbrégé')
     head = models.ForeignKey('people.Tutor',
                              null=True,
@@ -337,27 +337,27 @@ class Course(models.Model):
     supp_tutor = models.ManyToManyField('people.Tutor',
                                         related_name='courses_as_supp',
                                         blank=True)
-    groupe = models.ForeignKey('Group', on_delete=models.CASCADE)
+    group = models.ForeignKey('Group', on_delete=models.CASCADE)
     module = models.ForeignKey('Module', related_name='module', on_delete=models.CASCADE)
     modulesupp = models.ForeignKey('Module', related_name='modulesupp',
                                    null=True, blank=True, on_delete=models.CASCADE)
-    semaine = models.PositiveSmallIntegerField(
+    week = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)],
         null=True, blank=True)
-    an = models.PositiveSmallIntegerField()
+    year = models.PositiveSmallIntegerField()
     suspens = models.BooleanField(verbose_name='En suspens?', default=False)
 
     def __str__(self):
         username_mod = self.tutor.username if self.tutor is not None else '-no_tut-'
-        return f"{self.type}-{self.module}-{username_mod}-{self.groupe}"
+        return f"{self.type}-{self.module}-{username_mod}-{self.group}"
     
     def full_name(self):
         username_mod = self.tutor.username if self.tutor is not None else '-no_tut-'
-        return f"{self.type}-{self.module}-{username_mod}-{self.groupe}"
+        return f"{self.type}-{self.module}-{username_mod}-{self.group}"
 
 
 class ScheduledCourse(models.Model):
-    cours = models.ForeignKey('Course', on_delete=models.CASCADE)
+    course = models.ForeignKey('Course', on_delete=models.CASCADE)
     day = models.CharField(max_length=2, choices=Day.CHOICES, default=Day.MONDAY)
     # in minutes from 12AM
     start_time = models.PositiveSmallIntegerField()
@@ -365,15 +365,15 @@ class ScheduledCourse(models.Model):
     no = models.PositiveSmallIntegerField(null=True, blank=True)
     noprec = models.BooleanField(
         verbose_name='vrai si on ne veut pas garder la salle', default=True)
-    copie_travail = models.PositiveSmallIntegerField(default=0)
+    work_copy = models.PositiveSmallIntegerField(default=0)
 
     # les utilisateurs auront acces à la copie publique (0)
 
     def __str__(self):
-        return f"{self.cours}{self.no}:{self.day}-t{self.start_time}-{self.room}"
+        return f"{self.course}{self.no}:{self.day}-t{self.start_time}-{self.room}"
 
     def end_time(self):
-        return self.start_time + self.cours.type.duration
+        return self.start_time + self.course.type.duration
 
 
 # </editor-fold desc="COURSES">
@@ -386,63 +386,63 @@ class ScheduledCourse(models.Model):
 
 class UserPreference(models.Model):
     user = models.ForeignKey('people.Tutor', on_delete=models.CASCADE)
-    semaine = models.PositiveSmallIntegerField(
+    week = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)], null=True)
-    an = models.PositiveSmallIntegerField(null=True)
+    year = models.PositiveSmallIntegerField(null=True)
     day = models.CharField(max_length=2, choices=Day.CHOICES, default=Day.MONDAY)
     start_time = models.PositiveSmallIntegerField()
     duration = models.PositiveSmallIntegerField()
-    valeur = models.SmallIntegerField(
+    value = models.SmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(8)],
         default=8)
 
     def __str__(self):
-        return f"{self.user.username}-Sem{self.semaine}: " + \
+        return f"{self.user.username}-Sem{self.week}: " + \
             f"({str_slot(self.day, self.start_time, self.duration)})" + \
-            f"={self.valeur}"
+            f"={self.value}"
 
 
 class CoursePreference(models.Model):
     course_type = models.ForeignKey('CourseType', on_delete=models.CASCADE)
     train_prog = models.ForeignKey('TrainingProgramme', on_delete=models.CASCADE)
-    semaine = models.PositiveSmallIntegerField(
+    week = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)],
         null=True,
         blank=True)
-    an = models.PositiveSmallIntegerField(null=True,
+    year = models.PositiveSmallIntegerField(null=True,
                                           blank=True)
     day = models.CharField(max_length=2, choices=Day.CHOICES, default=Day.MONDAY)
     start_time = models.PositiveSmallIntegerField()
     duration = models.PositiveSmallIntegerField()
-    valeur = models.SmallIntegerField(
+    value = models.SmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(8)],
         default=8)
 
     def __str__(self):
-        return f"{self.course_type}=Sem{self.semaine}:" + \
+        return f"{self.course_type}=Sem{self.week}:" + \
             f"({str_slot(self.day, self.start_time, self.duration)})" + \
-            f"--{self.train_prog}={self.valeur}"
+            f"--{self.train_prog}={self.value}"
     
 
 class RoomPreference(models.Model):
     room = models.ForeignKey('Room', on_delete=models.CASCADE)
-    semaine = models.PositiveSmallIntegerField(
+    week = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)],
         null=True,
         blank=True)
-    an = models.PositiveSmallIntegerField(null=True,
+    year = models.PositiveSmallIntegerField(null=True,
                                           blank=True)
     day = models.CharField(max_length=2, choices=Day.CHOICES, default=Day.MONDAY)
     start_time = models.PositiveSmallIntegerField()
     duration = models.PositiveSmallIntegerField()
-    valeur = models.SmallIntegerField(
+    value = models.SmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(8)],
         default=8)
 
     def __str__(self):
-        return f"{self.room}-Sem{self.semaine}:" + \
+        return f"{self.room}-Sem{self.week}:" + \
             f"({str_slot(self.day, self.start_time, self.duration)})" + \
-            f"={self.valeur}"
+            f"={self.value}"
 
 
 # </editor-fold desc="PREFERENCES">
@@ -455,22 +455,22 @@ class RoomPreference(models.Model):
 
 class EdtVersion(models.Model):
     department =  models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
-    semaine = models.PositiveSmallIntegerField(
+    week = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)])
-    an = models.PositiveSmallIntegerField()
+    year = models.PositiveSmallIntegerField()
     version = models.PositiveIntegerField(default=0)
 
     class Meta:
-        unique_together = (("department","semaine","an"),)
+        unique_together = (("department","week","year"),)
 #    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
 
 # null iff no change
 class CourseModification(models.Model):
-    cours = models.ForeignKey('Course', on_delete=models.CASCADE)
-    semaine_old = models.PositiveSmallIntegerField(
+    course = models.ForeignKey('Course', on_delete=models.CASCADE)
+    old_week = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)], null=True)
-    an_old = models.PositiveSmallIntegerField(null=True)
+    old_year = models.PositiveSmallIntegerField(null=True)
     room_old = models.ForeignKey('RoomGroup', blank=True, null=True, on_delete=models.CASCADE)
     day_old = models.CharField(max_length=2, choices=Day.CHOICES, default=None, null=True)
     start_time_old = models.PositiveSmallIntegerField(default=None, null=True)
@@ -480,10 +480,10 @@ class CourseModification(models.Model):
 
     def __str__(self):
         olds = 'OLD:'
-        if self.semaine_old is not None:
-            olds += f' Sem {self.semaine_old} ;'
-        if self.an_old is not None:
-            olds += f' An {self.an_old} ;'
+        if self.old_week is not None:
+            olds += f' Sem {self.old_week} ;'
+        if self.old_year is not None:
+            olds += f' An {self.old_year} ;'
         if self.room_old is not None:
             olds += f' Salle {self.room_old} ;'
         if self.day_old is not None:
@@ -491,14 +491,14 @@ class CourseModification(models.Model):
         if self.version_old is not None:
             olds += f' NumV {self.version_old} ;'
         return f"by {self.initiator.username}, at {self.updated_at}\n" + \
-            f"{self.cours} <- {olds}"
+            f"{self.course} <- {olds}"
 
 
 class PlanningModification(models.Model):
-    cours = models.ForeignKey('Course', on_delete=models.CASCADE)
-    semaine_old = models.PositiveSmallIntegerField(
+    course = models.ForeignKey('Course', on_delete=models.CASCADE)
+    old_week = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)], null=True)
-    an_old = models.PositiveSmallIntegerField(null=True)
+    old_year = models.PositiveSmallIntegerField(null=True)
     tutor_old = models.ForeignKey('people.Tutor',
                                   related_name='impacted_by_planif_modif',
                                   null=True,
@@ -520,41 +520,41 @@ class PlanningModification(models.Model):
 
 class TutorCost(models.Model):
     department =  models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
-    semaine = models.PositiveSmallIntegerField(
+    week = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)])
-    an = models.PositiveSmallIntegerField()
+    year = models.PositiveSmallIntegerField()
     tutor = models.ForeignKey('people.Tutor', on_delete=models.CASCADE)
-    valeur = models.FloatField()
+    value = models.FloatField()
     work_copy = models.PositiveSmallIntegerField(default=0)
 
     def __str__(self):
-        return f"sem{self.semaine}-{self.tutor.username}:{self.valeur}"
+        return f"sem{self.week}-{self.tutor.username}:{self.value}"
 
 
 class GroupCost(models.Model):
-    semaine = models.PositiveSmallIntegerField(
+    week = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)])
-    an = models.PositiveSmallIntegerField()
-    groupe = models.ForeignKey('Group', on_delete=models.CASCADE)
-    valeur = models.FloatField()
+    year = models.PositiveSmallIntegerField()
+    group = models.ForeignKey('Group', on_delete=models.CASCADE)
+    value = models.FloatField()
     work_copy = models.PositiveSmallIntegerField(default=0)
 
 
     def __str__(self):
-        return f"sem{self.semaine}-{self.groupe}:{self.valeur}"
+        return f"sem{self.week}-{self.group}:{self.value}"
 
 
 class GroupFreeHalfDay(models.Model):
-    semaine = models.PositiveSmallIntegerField(
+    week = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)])
-    an = models.PositiveSmallIntegerField()
-    groupe = models.ForeignKey('Group', on_delete=models.CASCADE)
+    year = models.PositiveSmallIntegerField()
+    group = models.ForeignKey('Group', on_delete=models.CASCADE)
     DJL = models.PositiveSmallIntegerField()
     work_copy = models.PositiveSmallIntegerField(default=0)
 
 
     def __str__(self):
-        return f"sem{self.semaine}-{self.groupe}:{self.DJL}"
+        return f"sem{self.week}-{self.group}:{self.DJL}"
 
 
 # </editor-fold desc="COSTS">
@@ -567,9 +567,9 @@ class GroupFreeHalfDay(models.Model):
 
 
 class Dependency(models.Model):
-    cours1 = models.ForeignKey('Course', related_name='cours1', on_delete=models.CASCADE)
-    cours2 = models.ForeignKey('Course', related_name='cours2', on_delete=models.CASCADE)
-    successifs = models.BooleanField(verbose_name='Successifs?', default=False)
+    course1 = models.ForeignKey('Course', related_name='cours1', on_delete=models.CASCADE)
+    course2 = models.ForeignKey('Course', related_name='cours2', on_delete=models.CASCADE)
+    successive = models.BooleanField(verbose_name='Successifs?', default=False)
     ND = models.BooleanField(verbose_name='Jours differents', default=False)
 
     def __str__(self):
@@ -586,9 +586,9 @@ class CourseStartTimeConstraint(models.Model):
 class Regen(models.Model):
 
     department =  models.ForeignKey(Department, on_delete=models.CASCADE, null=True)   
-    semaine = models.PositiveSmallIntegerField(
+    week = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)])
-    an = models.PositiveSmallIntegerField()
+    year = models.PositiveSmallIntegerField()
     full = models.BooleanField(verbose_name='Complète',
                                default=True)
     fday = models.PositiveSmallIntegerField(verbose_name='Jour',
@@ -617,7 +617,7 @@ class Regen(models.Model):
         return pre
 
     def strplus(self):
-        ret = f"Semaine {self.semaine} ({self.an}) : "
+        ret = f"Semaine {self.week} ({self.year}) : "
 
         if self.full:
             ret += f'Génération complète le ' + \

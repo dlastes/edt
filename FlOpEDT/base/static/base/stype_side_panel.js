@@ -47,9 +47,9 @@ function fetch_selected() {
         dd_selections[key].value = $(dd_selections[key].id).find(':selected').val() ;
     }
     if (mode == 'tutor') {
-        user.nom = dd_selections['tutor'].value;
+        user.name = dd_selections['tutor'].value;
     } else {
-        user.nom = course_type_prog_name(
+        user.name = course_type_prog_name(
             dd_selections['prog'].value,
             dd_selections['type'].value) ;
     }
@@ -61,7 +61,7 @@ function fetch_selected() {
 function dd_fetch_ended() {
     if (mode == 'tutor' && dd_selections['tutor'].filled) {
         // select logged user if present
-        var me = $(dd_selections['tutor'].id + " option[value='" + logged_usr.nom + "']");
+        var me = $(dd_selections['tutor'].id + " option[value='" + logged_usr.name + "']");
         if (typeof me !== 'undefined') {
             me.prop('selected', true);
         }

@@ -44,8 +44,8 @@ urlpatterns = [
     url(r'^aide$', views.aide, name="aide"),
     url(r'^decale$', views.decale, name="decale"),    
     url(r'^contact$', views.contact, name="contact"),
-    url(r'^((?P<an>\d{4}))?(/(?P<semaine>\d{1,2}))?$', views.edt, name="edt"),
-    url(r'^tv(/(?P<an>\d+))?(/(?P<semaine>\d+))?$', views.edt_light, name="edt_light"),
+    url(r'^((?P<year>\d{4}))?(/(?P<week>\d{1,2}))?$', views.edt, name="edt"),
+    url(r'^tv(/(?P<year>\d+))?(/(?P<week>\d+))?$', views.edt_light, name="edt_light"),
 
     # exchanges with the db via django
     # ---------------------------------

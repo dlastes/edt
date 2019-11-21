@@ -469,13 +469,13 @@ function go_promo_gp_init(button_available) {
     promo_init = indexOf_promo(promo_init) ;
     if (promo_init >= 0){
 	if (gp_init == "") {
-	    gp_init = root_gp[promo_init].gp.nom ;
+	    gp_init = root_gp[promo_init].gp.name ;
 	}
-	if (Object.keys(groups[promo_init]).map(function(g) { return groups[promo_init][g].nom ; }).indexOf(gp_init) != -1) {
+	if (Object.keys(groups[promo_init]).map(function(g) { return groups[promo_init][g].name ; }).indexOf(gp_init) != -1) {
 	    apply_gp_display(groups[promo_init][gp_init], true, button_available);
 	}
     } else if (gp_init != "") {
-	if (Object.keys(groups[0]).map(function(g) { return groups[0][g].nom ; }).indexOf(gp_init) != -1) {
+	if (Object.keys(groups[0]).map(function(g) { return groups[0][g].name ; }).indexOf(gp_init) != -1) {
 	    apply_gp_display(groups[0][gp_init], true, button_available);
 	}
     }
@@ -528,7 +528,7 @@ function extract_all_groups_structure(r) {
 
 function extract_groups_structure(r, npro, nrow) {
     var gr = {
-        nom: r.name,
+        name: r.name,
         ancetres: null,
         descendants: null,
         display: true,
@@ -548,7 +548,7 @@ function extract_groups_structure(r, npro, nrow) {
     }
 
     if ("undefined" === typeof r.buttxt) {
-        gr.buttxt = gr.nom;
+        gr.buttxt = gr.name;
     } else {
         gr.buttxt = r.buttxt;
     }
@@ -598,7 +598,7 @@ function extract_groups_structure(r, npro, nrow) {
             extract_groups_structure(r.children[i], npro, nrow);
         }
     }
-    groups[npro][gr.nom] = gr;
+    groups[npro][gr.name] = gr;
 }
 
 
@@ -1172,7 +1172,7 @@ function warning_check(check_tot) {
         } else if (check.nok == 'tutor_busy_other_dept') {
             expand = "L'enseignant·e " + check.more.tutor + " est occupé dans un autre département.";
         } else if (check.nok == 'tutor_free_week') {
-            expand = "L'enseignant·e " + check.more.tutor + " ne donne pas de cours cette semaine.";
+            expand = "L'enseignant·e " + check.more.tutor + " ne donne pas de cours cette week.";
         } else if (check.nok == 'room_busy') {
             expand = "La salle " + check.more.room + " est déjà prise.";
         } else if (check.nok == 'room_busy_other_dept') {
@@ -1190,7 +1190,7 @@ function simultaneous_courses(target_course) {
         return (c.day == target_course.day 
 		&& !(c.start + c.duration <= target_course.start
                      || c.start >= target_course.start + target_course.duration)
-		&& c.id_cours != target_course.id_cours);
+		&& c.id_course != target_course.id_course);
     });
 }
 
@@ -1221,7 +1221,7 @@ function check_course(wanted_course) {
     if (! pending.pass.core) {
 
         // course was supposed to be fix
-        if (wanted_course.id_cours == -1) {
+        if (wanted_course.id_course == -1) {
 	    ret.push({nok:'stable'}) ;
         }
 
@@ -1339,7 +1339,7 @@ function splash_violated_constraints(check_list, step) {
     var splash_csts ;
     var warn_check = warning_check(check_list);
     console.log(warn_check);
-    //console.log(pending.wanted_course.id_cours);
+    //console.log(pending.wanted_course.id_course);
     if ((logged_usr.rights >> 2) % 2 == 1) {
         var privilege_warning = "Des privilèges vous ont été accordés, et vous en profitez pour outrepasser ";
         if (warn_check.length>1) {
@@ -1356,7 +1356,7 @@ function splash_violated_constraints(check_list, step) {
 			click:
 			function(btn){
                             pending.pass[btn.pass] = true ;
-                            console.log(pending.wanted_course.id_cours);
+                            console.log(pending.wanted_course.id_course);
                             check_pending_course() ;
 			    return ;
 			},
@@ -1770,22 +1770,23 @@ function create_stype() {
         .attr("fill", "white")
         .attr("x", dispot_but_txt_x)
         .attr("y", dispot_but_txt_y("app") + 10)
-        .text("Semaine type");
+        .text("week type");
 
 }
 
 
 
 function fetch_dispos_type() {
-    if (user.nom != "") {
+    if (user.name != "") {
         show_loader(true);
         $.ajax({
             type: "GET", //rest Type
             dataType: 'text',
-            url: url_fetch_user_dweek + logged_usr.nom,
+            url: url_fetch_user_dweek + logged_usr.name,
             async: true,
             contentType: "text/csv",
             success: function(msg) {
+                console.log(msg);
                 user.dispos_type = [] ;
 
                 user.dispos_type = d3.csvParse(msg, translate_dispos_type_from_csv);
@@ -1811,7 +1812,7 @@ function translate_dispos_type_from_csv(d) {
         day: d.day,
 	start_time: +d.start_time,
 	duration: +d.duration,
-        val: +d.valeur,
+        val: +d.value,
         off: -1
     };
 }
@@ -1853,7 +1854,7 @@ function get_dispos_type(dt) {
 function select_entry_cm() {
     room_tutor_change.cm_settings = entry_cm_settings;
     var fake_id = new Date() ;
-    fake_id = fake_id.getMilliseconds() + "-" + pending.wanted_course.id_cours ;
+    fake_id = fake_id.getMilliseconds() + "-" + pending.wanted_course.id_course ;
     room_tutor_change.proposal = [{fid:fake_id,
 				   content:"Prof"},
 				   {fid:fake_id,

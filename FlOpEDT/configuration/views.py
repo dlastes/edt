@@ -70,7 +70,7 @@ def import_config_file(req, **kwargs):
                     with transaction.atomic():
                         dept_abbrev = req.POST['abbrev']
                         try:
-                            dept_name = req.POST['nom']
+                            dept_name = req.POST['name']
                         except:
                             dept_name = None
                         logger.debug(dept_name)
@@ -187,7 +187,7 @@ def import_planif_file(req, **kwargs):
                     except Exception as e:
                         response = {'status': 'error', 'data': str(e)}
                         return HttpResponse(json.dumps(response), content_type='application/json')
-                    Course.objects.filter(groupe__train_prog__department=dept).delete()
+                    Course.objects.filter(group__train_prog__department=dept).delete()
                     logger.info("Flush planif database OK")
 
                     extract_planif(dept, bookname=path)

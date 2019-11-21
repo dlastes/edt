@@ -25,7 +25,7 @@
   ---- VARIABLES ----
   -------------------*/
 
-var user = {nom: usna,
+var user = {name: usna,
 	    dispos: [],
 	    dispos_bu: [],
 	    dispos_type: [],
@@ -40,12 +40,12 @@ dsp_svg.margin = {top: tv_svg_top_m,
 dsp_svg.h = tv_svg_h - dsp_svg.margin.top - dsp_svg.margin.bot ;
 dsp_svg.w = tv_svg_w - dsp_svg.margin.left - dsp_svg.margin.right ;
 
-var week = semaine_init ;
-var year = an_init;
+var week = week_init ;
+var year = year_init;
 
 // filter the right bknews
 
-wdw_weeks.add_full_weeks([{semaine: week, an: year}]) ;
+wdw_weeks.add_full_weeks([{week: week, year: year}]) ;
 
 var days_header = new WeekDayHeader(svg, "edt-fg", week_days, true, null) ;
 
@@ -141,13 +141,13 @@ function fetch_cours_light() {
     fetch.done = false ;
     ack.edt="";
     
-    var semaine_att = week;
-    var an_att = year;
+    var week_att = week;
+    var year_att = year;
 
     $.ajax({
         type: "GET", //rest Type
         dataType: 'text',
-        url: url_cours_pl + an_att + "/" + semaine_att + "/0",
+        url: url_cours_pl + year_att + "/" + week_att + "/0",
         async: false,
         contentType: "text/csv",
         success: function (msg, ts, req) {
@@ -177,7 +177,7 @@ function fetch_bknews_light(first) {
     $.ajax({
         type: "GET", //rest Type
         dataType: 'text',
-        url: url_bknews + an_att + "/" + semaine_att,
+        url: url_bknews + year_att + "/" + week_att,
         async: true,
         contentType: "text/json",
         success: function(msg) {

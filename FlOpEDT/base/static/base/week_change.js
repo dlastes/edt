@@ -83,7 +83,7 @@ function fetch_dispos() {
             console.log(xhr.responseText);
             show_loader(false);
             // window.location.href = url_login;
-            window.location.replace(url_login + "?next=" + url_edt + exp_week.an + "/" + exp_week.semaine);
+            window.location.replace(url_login + "?next=" + url_edt + exp_week.year + "/" + exp_week.week);
         }
     });
 
@@ -120,7 +120,7 @@ function fetch_dispos() {
             console.log(xhr.responseText);
             show_loader(false);
             // window.location.href = url_login;
-            window.location.replace(url_login + "?next=" + url_edt + an_att + "/" + semaine_att);
+            window.location.replace(url_login + "?next=" + url_edt + year_att + "/" + week_att);
         }
     });
 
@@ -158,7 +158,7 @@ function fetch_dispos() {
             console.log(xhr.responseText);
             show_loader(false);
             // window.location.href = url_login;
-            window.location.replace(url_login + "?next=" + url_edt + an_att + "/" + semaine_att);
+            window.location.replace(url_login + "?next=" + url_edt + year_att + "/" + week_att);
         }
     });
 
@@ -176,7 +176,7 @@ function translate_dispos_from_csv(d) {
     }
     dispos[d.prof][d.day].push({start_time:+d.start_time,
 			       duration: +d.duration,
-			       value: +d.valeur});
+			       value: +d.value});
 }
 
 
@@ -309,14 +309,14 @@ function create_dispos_user_data() {
 
     var current;
 
-    if (dispos[user.nom] === undefined) {
-	allocate_dispos(user.nom);
-	fill_missing_preferences(user.nom, ts);
+    if (dispos[user.name] === undefined) {
+	allocate_dispos(user.name);
+	fill_missing_preferences(user.name, ts);
         sort_preferences(dispos);
     }
 
     week_days.forEach(function(day) {
-	pref_list = dispos[user.nom][day.ref] ;
+	pref_list = dispos[user.name][day.ref] ;
 	for (var k = 0 ; k<pref_list.length ; k++) {
             d2p = {
 		day: day.ref,
@@ -564,7 +564,7 @@ function fetch_cours() {
         async: true,
         contentType: "text/csv",
         success: function(msg, ts, req) {
-            //console.log(msg);
+            console.log(msg);
 
             var sel_week = wdw_weeks.get_selected() ;
             if (Week.compare(exp_week, sel_week)==0) {
@@ -603,9 +603,9 @@ function fetch_cours() {
 
 
 function translate_cours_pl_from_csv(d) {
-    var ind = tutors.pl.indexOf(d.prof_nom);
+    var ind = tutors.pl.indexOf(d.prof_name);
     if (ind == -1) {
-        tutors.pl.push(d.prof_nom);
+        tutors.pl.push(d.prof_name);
     }
     if (modules.pl.indexOf(d.module) == -1) {
         modules.pl.push(d.module);
@@ -614,11 +614,11 @@ function translate_cours_pl_from_csv(d) {
         salles.pl.push(d.room);
     }
     var co = {
-        id_cours: +d.id_cours,
-        no_cours: +d.num_cours,
-        prof: d.prof_nom,
+        id_course: +d.id_course,
+        no_course: +d.num_course,
+        prof: d.prof_name,
 //        prof_full_name: d.prof_first_name + " " + d.prof_last_name,
-        group: translate_gp_name(d.gpe_nom),
+        group: translate_gp_name(d.gpe_name),
         promo: set_promos.indexOf(d.gpe_promo),
         mod: d.module,
 	c_type: d.coursetype,
@@ -646,10 +646,10 @@ function translate_cours_pp_from_csv(d) {
         salles.pp.push(d.room);
     }
     var co = {
-        id_cours: +d.id,
-        no_cours: +d.no,
+        id_course: +d.id,
+        no_course: +d.no,
         prof: d.prof,
-        group: translate_gp_name(d.groupe),
+        group: translate_gp_name(d.group),
         promo: set_promos.indexOf(d.promo),
         mod: d.module,
 	c_type: d.coursetype,
@@ -676,8 +676,8 @@ function add_exception_course(cur_week, cur_year, targ_week, targ_year,
 		    slot: slot,
 		    group: group,
 		    promo: set_promos.indexOf(promo),
-		    id_cours: -1,
-		    no_cours: -1,
+		    id_course: -1,
+		    no_course: -1,
 		    mod: l1,
 		    prof: l2,
 		    room: l3
@@ -754,7 +754,7 @@ function clean_prof_displayed(light) {
     // relevant tutors
     tutors.all.forEach(function(t) {
         t.relevant = false ;
-        if (t.name == user.nom) {
+        if (t.name == user.name) {
             t.relevant = true ;
         }
     });
@@ -991,9 +991,9 @@ function swap_data(fetched, current, type) {
 Reste :
   x couleur modules
   x display filtre prof
-  x semaines (fetch, go_course, go_dispo)
-  x base edt (d&d, struct edt, check, display conflits, semaine pro)
-  o base dispos (simple, 0-9, semaine type)
+  x weeks (fetch, go_course, go_dispo)
+  x base edt (d&d, struct edt, check, display conflits, week pro)
+  o base dispos (simple, 0-9, week type)
   o plot par défaut
   x move next week
 */

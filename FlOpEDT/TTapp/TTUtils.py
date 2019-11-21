@@ -33,17 +33,17 @@ from TTapp.models import LimitedRoomChoices, slot_pause
 from base.views import get_key_course_pl, get_key_course_pp
 from django.core.cache import cache
 
-def basic_reassign_rooms(department, semaine, an, target_work_copy):
+def basic_reassign_rooms(department, week, year, target_work_copy):
     """
     Reassign the rooms to minimize moves...
     """
     print("reassigning rooms to minimize moves...")
 
     scheduled_courses_params = {
-        'cours__module__train_prog__department': department,
-        'cours__semaine': semaine,
-        'cours__an': an,
-        'copie_travail': target_work_copy,
+        'course__module__train_prog__department': department,
+        'course__week': week,
+        'course__year': year,
+        'work_copy': target_work_copy,
     }
 
     possible_start_times = set()
@@ -69,20 +69,20 @@ def basic_reassign_rooms(department, semaine, an, target_work_copy):
             for CP in nsl:
                 precedent = ScheduledCourse \
                     .objects \
-                    .filter(start_time__lte=st - F('cours__type__duration'),
-                            start_time__gt=st - F('cours__type__duration') - slot_pause,
+                    .filter(start_time__lte=st - F('course__type__duration'),
+                            start_time__gt=st - F('course__type__duration') - slot_pause,
                             day=day,
-                            cours__room_type=CP.cours.room_type,
-                            cours__tutor=CP.cours.tutor,
+                            course__room_type=CP.course.room_type,
+                            course__tutor=CP.course.tutor,
                             **scheduled_courses_params)
                 if len(precedent) == 0:
                     precedent = ScheduledCourse \
                         .objects \
-                        .filter(start_time__lte = st - F('cours__type__duration'),
-                                start_time__gt = st - F('cours__type__duration') - slot_pause,
+                        .filter(start_time__lte = st - F('course__type__duration'),
+                                start_time__gt = st - F('course__type__duration') - slot_pause,
                                 day=day,
-                                cours__room_type=CP.cours.room_type,
-                                cours__groupe=CP.cours.groupe,
+                                course__room_type=CP.course.room_type,
+                                course__group=CP.course.group,
                                 **scheduled_courses_params)
                     if len(precedent) == 0:
                         continue
@@ -101,8 +101,8 @@ def basic_reassign_rooms(department, semaine, an, target_work_copy):
                 # test if precedent.room is available
                 prec_is_unavailable = False
                 for r in precedent.room.subrooms.all():
-                    if RoomPreference.objects.filter(semaine=semaine, an=an,  day=day,
-                                                     start_time=st, room=r, valeur=0).exists():
+                    if RoomPreference.objects.filter(week=week, year=year,  day=day,
+                                                     start_time=st, room=r, value=0).exists():
                         prec_is_unavailable = True
 
                     if ScheduledCourse.objects \
@@ -124,12 +124,12 @@ def basic_reassign_rooms(department, semaine, an, target_work_copy):
                     # print "assigned", CP
                 elif cp_using_prec.count() == 1:
                     sib = cp_using_prec[0]
-                    if sib.cours.room_type == CP.cours.room_type and sib.cours:
+                    if sib.course.room_type == CP.course.room_type and sib.course:
                         if not LimitedRoomChoices.objects.filter(
-                                    Q(week=semaine) | Q(week=None),
-                                    Q(year=an) | Q(year=None),
-                                    Q(train_prog=sib.cours.module.train_prog) | Q(module=sib.cours.module) | Q(group=sib.cours.groupe) |
-                                    Q(tutor=sib.cours.tutor) | Q(type=sib.cours.type),
+                                    Q(week=week) | Q(week=None),
+                                    Q(year=year) | Q(year=None),
+                                    Q(train_prog=sib.course.module.train_prog) | Q(module=sib.course.module) | Q(group=sib.course.group) |
+                                    Q(tutor=sib.course.tutor) | Q(type=sib.course.type),
                                     possible_rooms=sib.room).exists():
                             r = CP.room
                             CP.room = precedent.room
@@ -138,8 +138,8 @@ def basic_reassign_rooms(department, semaine, an, target_work_copy):
                             sib.save()
                         # print "swapped", CP, " with", sib
     cache.delete(get_key_course_pl(department.abbrev,
-                                   an,
-                                   semaine,
+                                   year,
+                                   week,
                                    target_work_copy))
     print("done")
 
@@ -147,32 +147,32 @@ def basic_reassign_rooms(department, semaine, an, target_work_copy):
 def basic_swap_version(department, week, year, copy_a, copy_b=0):
 
     scheduled_courses_params = {
-        'cours__module__train_prog__department': department,
-        'cours__semaine': week,
-        'cours__an': year,
+        'course__module__train_prog__department': department,
+        'course__week': week,
+        'course__year': year,
     }
 
     try:
         tmp_wc = ScheduledCourse \
                      .objects \
                      .filter(**scheduled_courses_params) \
-                     .aggregate(Max('copie_travail'))['copie_travail__max'] + 1
+                     .aggregate(Max('work_copy'))['work_copy__max'] + 1
     except KeyError:
         print('No scheduled courses')
         return
 
-    version_copy = EdtVersion.objects.get(department=department, semaine=week, an=year)
+    version_copy = EdtVersion.objects.get(department=department, week=week, year=year)
 
-    for cp in ScheduledCourse.objects.filter(copie_travail=copy_a, **scheduled_courses_params):
-        cp.copie_travail = tmp_wc
+    for cp in ScheduledCourse.objects.filter(work_copy=copy_a, **scheduled_courses_params):
+        cp.work_copy = tmp_wc
         cp.save()
 
-    for cp in ScheduledCourse.objects.filter(copie_travail=copy_b, **scheduled_courses_params):
-        cp.copie_travail = copy_a
+    for cp in ScheduledCourse.objects.filter(work_copy=copy_b, **scheduled_courses_params):
+        cp.work_copy = copy_a
         cp.save()
 
-    for cp in ScheduledCourse.objects.filter(copie_travail=tmp_wc, **scheduled_courses_params):
-        cp.copie_travail = copy_b
+    for cp in ScheduledCourse.objects.filter(work_copy=tmp_wc, **scheduled_courses_params):
+        cp.work_copy = copy_b
         cp.save()
 
     if copy_a ==0 or copy_b == 0:

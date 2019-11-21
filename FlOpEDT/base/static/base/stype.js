@@ -50,7 +50,7 @@ dsp_svg.cadastre = [
 var mode = "tutor" ;
 
 var dd_selections = {
-    'tutor': {value:logged_usr.nom},
+    'tutor': {value:logged_usr.name},
     'prog': {value:''},
     'type': {value:''}};
 
@@ -133,7 +133,7 @@ function create_lunchbar() {
   ---------------------*/
 function fetch_url() {
     if (mode == 'tutor') {
-        return url_fetch_user_dweek + user.nom ;
+        return url_fetch_user_dweek + user.name ;
     } else if (mode == 'course') {
         return url_fetch_course_dweek 
             + dd_selections['prog'].value
@@ -256,7 +256,7 @@ d3.select("body")
 function send_url(year, week) {
     if (mode == 'tutor') {
         return url_user_pref_changes + year + "/" + week
-	    + "/" + user.nom ;
+	    + "/" + user.name ;
     } else if (mode == 'course') {
         return url_course_pref_changes + year + "/" + week
 	    + "/" + dd_selections['prog'].value
@@ -274,27 +274,27 @@ function apply_stype_from_button(save) {
     var sent_data = {} ;
     sent_data['changes'] = JSON.stringify(changes) ; 
 
-    var se_deb,an_deb,se_fin,an_fin;
-    var an, se;
+    var week_st,year_st,week_end,year_end;
+    var year, se;
     var se_abs_max = 53;
     var se_min, se_max;
 
     if(save){
-	se_deb = 0 ;
-	console.log(annee_courante);
-	an_deb = +annee_courante ;
-	se_fin = se_deb ;
-	an_fin = an_deb ;
+	week_st = 0 ;
+	console.log(current_year);
+	year_st = +current_year ;
+	week_end = week_st ;
+	year_end = year_st ;
     } else {
-	se_deb = +document.forms['app'].elements['se_deb'].value ;
-	an_deb = +document.forms['app'].elements['an_deb'].value ;
-	se_fin = +document.forms['app'].elements['se_fin'].value ;
-	an_fin = +document.forms['app'].elements['an_fin'].value ;
+	week_st = +document.forms['app'].elements['week_st'].value ;
+	year_st = +document.forms['app'].elements['year_st'].value ;
+	week_end = +document.forms['app'].elements['week_end'].value ;
+	year_end = +document.forms['app'].elements['year_end'].value ;
     }
 
 
-    if (an_deb<an_fin ||
-        (an_deb==an_fin && se_deb<=se_fin)){
+    if (year_st<year_end ||
+        (year_st==year_end && week_st<=week_end)){
 
 
 	if(changes.length==0) {
@@ -304,31 +304,31 @@ function apply_stype_from_button(save) {
 
             ack.pref = "Ok ";
 	    if(save){
-		ack.pref += "semaine type";
+		ack.pref += "week type";
 	    } else {
-		ack.pref += "semaine "+se_deb+" année "+an_deb
-		    +" à semaine "+se_fin+" année "+an_fin;
+		ack.pref += "week "+week_st+" année "+year_st
+		    +" à week "+week_end+" année "+year_end;
 	    }
 
 
-	    for (an=an_deb ; an<=an_fin ; an++){
-		if(an==an_deb){
-		    se_min = se_deb;
+	    for (year=year_st ; year<=year_end ; year++){
+		if(year==year_st){
+		    se_min = week_st;
 		} else {
 		    se_min = 1;
 		}
-		if(an==an_fin){
-		    se_max = se_fin;
+		if(year==year_end){
+		    se_max = week_end;
 		} else {
 		    se_max = se_abs_max;
 		}
 		
 		for (se=se_min ; se<=se_max ; se++) {
 
-		    //console.log(se,an);
+		    //console.log(se,year);
                     show_loader(true);
     		    $.ajax({
-    			url: send_url(an, se),
+    			url: send_url(year, se),
 			type: 'POST',
 //			contentType: 'application/json; charset=utf-8',
 			data: sent_data, //JSON.stringify(changes),
@@ -351,7 +351,7 @@ function apply_stype_from_button(save) {
 	}
 
     } else {
-	ack.pref = "Problème : seconde semaine avant la première";
+	ack.pref = "Problème : seconde week avant la première";
         document.getElementById("ack").textContent = ack.pref ;
     }
 

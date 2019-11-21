@@ -179,9 +179,9 @@ function pref_sel_choice_stkw(d) {
 
 function dispo_short_fill(d) {
     var col = "green";
-    if (dispos[user.nom][d.day][d.hour] == 4) {
+    if (dispos[user.name][d.day][d.hour] == 4) {
         col = "orange";
-    } else if (dispos[user.nom][d.day][d.hour] == 0) {
+    } else if (dispos[user.name][d.day][d.hour] == 0) {
         col = "red";
     }
     return col;
@@ -264,7 +264,7 @@ function txt_reqDispos() {
     if (required_dispos > 0) {
         ret += "Dispos souhaitées : " + required_dispos + " créneaux."
     } else if (required_dispos == 0) {
-        ret += "Vous n'intervenez pas cette semaine.";
+        ret += "Vous n'intervenez pas cette week.";
     }
     return ret;
 }
@@ -460,7 +460,7 @@ function gs_slc(d) {
 function gscg_x(datum) {
     // hack for LP
     var hack = 0;
-    if (datum.gp.nom == "fLP1") {
+    if (datum.gp.name == "fLP1") {
         hack = .5 * labgp.width;
     }
     return datum.day * (rootgp_width * labgp.width +
@@ -482,12 +482,12 @@ function gscg_y(datum) {
 }
 
 function gscg_txt(datum) {
-    if (datum.gp.nom == "fLP1") {
+    if (datum.gp.name == "fLP1") {
         return "LP";
-    } else if (datum.gp.nom == "fLP2") {
+    } else if (datum.gp.name == "fLP2") {
         return "";
     } else {
-        return datum.gp.nom;
+        return datum.gp.name;
     }
 }
 
@@ -710,13 +710,13 @@ function cours_txt_x(c) {
     return cours_x(c) + .5 * cours_width(c);
 }
 function cours_txt_fill(c) {
-    if (c.id_cours != -1) {
+    if (c.id_course != -1) {
 	return c.color_txt;
     }
     return "black";
 }
 function cours_fill(c) {
-    if (c.id_cours != -1) {
+    if (c.id_course != -1) {
 	return c.color_bg;
     }
     return "red";

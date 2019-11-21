@@ -40,12 +40,12 @@
     var usna = "{{ user.username }}" ;
     var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
     var url_login = "{% url "people:login" %}";
-    var annee_courante = "{{ annee_courante }}" ;
-    var semaine_an_list = {{ all_weeks|safe }};
+    var current_year = "{{ current_year }}" ;
+    var week_year_list = {{ all_weeks|safe }};
     var profs = {{ profs|safe }};
 
-    var semaine_init = +"{{ semaine_init }}";
-    var an_init = +"{{ an_init }}";
+    var week_init = +"{{ week_init }}";
+    var year_init = +"{{ year_init }}";
     
   var csrftoken = '{{ csrf_token }}';
   if(!jQuery.fn.jquery.startsWith("1")){
