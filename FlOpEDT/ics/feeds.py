@@ -19,14 +19,14 @@ class EventFeed(ICalFeed):
     days = [abbrev for abbrev,_ in Day.CHOICES]
 
     def item_title(self, scourse):
-        course = scourse.cours
+        course = scourse.course
         return (f'{course.module.abbrev} {course.type.name} '
                 f'- {course.group.train_prog.abbrev} G{course.group.name}'
         )
 
     def item_description(self, scourse):
         location = scourse.room.name if scourse.room is not None else ''
-        course = scourse.cours
+        course = scourse.course
         tutor = course.tutor
         return (f'Cours : {course.module.abbrev} {course.type.name}\n'
                 f'Groupe : {course.group.train_prog.abbrev} {course.group.name}\n'
@@ -34,7 +34,7 @@ class EventFeed(ICalFeed):
         )
 
     def item_start_datetime(self, scourse):
-        course = scourse.cours
+        course = scourse.course
         begin = datetime.combine(
             Week(course.year, course.week)\
             .day(self.days.index(scourse.day)),
@@ -58,7 +58,7 @@ class TutorEventFeed(EventFeed):
         return ScheduledCourse.objects.filter(course__tutor=tutor, work_copy=0).order_by('-course__year','-course__week')
 
     def item_title(self, scourse):
-        course = scourse.cours
+        course = scourse.course
         location = scourse.room.name if scourse.room is not None else ''
         return (f'{course.module.abbrev} {course.type.name} '
                 f'- {course.group.train_prog.abbrev} G{course.group.name} '
@@ -80,7 +80,7 @@ class RoomEventFeed(EventFeed):
         return ScheduledCourse.objects.filter(room__in=room_groups, work_copy=0).order_by('-course__year','-course__week')
 
     def item_title(self, scourse):
-        course = scourse.cours
+        course = scourse.course
         return (f'{course.module.abbrev} {course.type.name} '
                 f'- {course.group.train_prog.abbrev} G{course.group.name}'
                 f'- {course.tutor.username}'
@@ -100,7 +100,7 @@ class GroupEventFeed(EventFeed):
         return ScheduledCourse.objects.filter(course__group__in=groups, work_copy=0).order_by('-course__year','-course__week')
 
     def item_title(self, scourse):
-        course = scourse.cours
+        course = scourse.course
         location = scourse.room.name if scourse.room is not None else ''
         return (f'{course.module.abbrev} {course.type.name} '
                 f'- {course.tutor.username} '
