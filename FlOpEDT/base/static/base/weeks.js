@@ -105,8 +105,8 @@ WeeksExcerpt.prototype.get_selected = function() {
 WeeksExcerpt.prototype.chose = function(chosen) {
     var min = this.full_weeks.get_min() ;
     var max = this.full_weeks.get_max() ;
-
-    if (Week.compare(min, chosen) < 0) {
+    
+    if (Week.compare(min, chosen) > 0) {
         // pick the first week
         this.first = 0 ;
         this.selected = 0 ;

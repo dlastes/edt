@@ -119,10 +119,6 @@ var days_header = new WeekDayHeader(svg, "edt-fg", week_days, true, null) ;
 var hours_header = new HourHeader(svg, "edt-fg", hours) ;
 
 
-
-var week = 42 ;
-var year = 2017;
-
 var labgp = {height: 40, width: 30, tot: 8, height_init: 40, width_init: 30, hm: 40, wm:15};
 
 //dim_dispo.height = 2*labgp.height ;
