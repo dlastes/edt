@@ -115,9 +115,9 @@ def index(req):
     else:
         return TemplateResponse(req, 'base/departments.html', {'departments': departments})
 
-def edt(req, an=None, semaine=None, splash_id=0, **kwargs):
+def edt(req, year=None, week=None, splash_id=0, **kwargs):
 
-    semaine, an = clean_edt_view_params(semaine, an)
+    week, year = clean_edt_view_params(week, year)
     promo = clean_train_prog(req)
 
     if req.GET:
@@ -144,8 +144,8 @@ def edt(req, an=None, semaine=None, splash_id=0, **kwargs):
     return TemplateResponse(req, 'base/show-edt.html',
             {
                 'all_weeks': week_list(),
-                'semaine': semaine,
-                'an': an,
+                'week': week,
+                'year': year,
                 'promo': promo,
                 'une_salle': une_salle,
                 'copie': copie,
@@ -154,15 +154,15 @@ def edt(req, an=None, semaine=None, splash_id=0, **kwargs):
                 'rights_usr': rights_usr,
                 'splash_id': splash_id,
                 'time_settings': queries.get_time_settings(req.department),
-                'days': num_all_days(an, semaine, req.department),
+                'days': num_all_days(year, week, req.department),
                 'has_department_perm': req.user.is_authenticated and req.user.has_department_perm(req.department),
                 'dept': req.department.abbrev,
                 'cosmo': COSMO_MODE,
             })
 
 
-def edt_light(req, an=None, semaine=None, **kwargs):
-    semaine, an = clean_edt_view_params(semaine, an)
+def edt_light(req, year=None, week=None, **kwargs):
+    week, year = clean_edt_view_params(week, year)
     promo = clean_train_prog(req)
 
     if req.GET:
@@ -190,8 +190,8 @@ def edt_light(req, an=None, semaine=None, **kwargs):
     return TemplateResponse(req, 'base/show-edt-light.html',
                   {
                       'all_weeks': week_list(),
-                      'semaine': semaine,
-                      'an': an,
+                      'week': week,
+                      'year': year,
                       'promo': promo,
                       'une_salle': une_salle,
                       'copie': 0,
@@ -200,7 +200,7 @@ def edt_light(req, an=None, semaine=None, **kwargs):
                       'rights_usr': 0,
                       'splash_id': 0,
                       'time_settings': queries.get_time_settings(req.department),
-                      'days': num_all_days(an, semaine, req.department),
+                      'days': num_all_days(year, week, req.department),
                       'has_department_perm': False,
                       'dept': req.department.abbrev,
                       'tv_svg_h': svg_h,
@@ -234,20 +234,20 @@ def stype(req, *args, **kwargs):
                        'usr_pref_hours': req.user.tutor.pref_hours_per_day,
                        'usr_max_hours': req.user.tutor.max_hours_per_day,
                        'err': err,
-                       'annee_courante': annee_courante,
+                       'current_year': current_year,
                        'time_settings': queries.get_time_settings(req.department),
                        'days': num_all_days(1, 1, req.department)
                       })
     elif req.method == 'POST':
         if 'apply' in list(req.POST.keys()):
-            print(req.POST['se_deb'])
-            date_deb = {'semaine': req.POST['se_deb'],
-                        'an': req.POST['an_deb']}
-            date_fin = {'semaine': req.POST['se_fin'],
-                        'an': req.POST['an_fin']}
-            if date_deb['an'] < date_fin['an'] or \
-                    (date_deb['an'] == date_fin['an']
-                     and date_deb['semaine'] <= date_fin['semaine']):
+            print(req.POST['week_st'])
+            date_deb = {'week': req.POST['week_st'],
+                        'year': req.POST['year_st']}
+            date_fin = {'week': req.POST['week_end'],
+                        'year': req.POST['year_end']}
+            if date_deb['year'] < date_fin['year'] or \
+                    (date_deb['year'] == date_fin['year']
+                     and date_deb['week'] <= date_fin['week']):
                 print(req.POST['apply'])
             else:
                 date_deb = current_week()
@@ -268,7 +268,7 @@ def stype(req, *args, **kwargs):
                        'usr_pref_hours': req.user.tutor.pref_hours_per_day,
                        'usr_max_hours': req.user.tutor.max_hours_per_day,
                        'err': err,
-                       'annee_courante': annee_courante,
+                       'current_year': current_year,
                        'time_settings': queries.get_time_settings(req.department),
                        'days': num_all_days(1, 1, req.department)
                       })
@@ -299,8 +299,8 @@ def decale(req, **kwargs):
     if req.method != 'GET':
         return TemplateResponse(req, 'base/aide.html', {})
 
-    semaine_init = req.GET.get('s', '-1')
-    an_init = req.GET.get('a', '-1')
+    week_init = req.GET.get('s', '-1')
+    year_init = req.GET.get('a', '-1')
     department = req.department
 
     liste_profs = []
@@ -312,8 +312,8 @@ def decale(req, **kwargs):
 
     return TemplateResponse(req, 'base/show-decale.html',
                   {'all_weeks': week_list(),
-                   'semaine_init': semaine_init,
-                   'an_init': an_init,
+                   'week_init': week_init,
+                   'year_init': year_init,
                    'profs': liste_profs
                   })
 
@@ -406,19 +406,19 @@ def fetch_cours_pp(req, week, year, num_copy, **kwargs):
                 .objects
                 .filter(
                         module__train_prog__department=department,
-                        semaine=week,
-                        an=year)
+                        week=week,
+                        year=year)
                 .exclude(pk__in=ScheduledCourse
                          .objects
                          .filter(
-                             cours__module__train_prog__department=department,
-                             copie_travail=num_copy)
-                         .values('cours'))
-                .select_related('groupe__train_prog',
+                             course__module__train_prog__department=department,
+                             work_copy=num_copy)
+                         .values('course'))
+                .select_related('group__train_prog',
                                 'tutor',
                                 'module',
                                 'type',
-                                'groupe',
+                                'group',
                                 'room_type',
                                 'module__display'
                                 ))
@@ -449,16 +449,16 @@ def fetch_dispos(req, year, week, **kwargs):
     if cached is not None:
         return cached
 
-    busy_inst_init = Course.objects.filter(semaine=week,
-                                           an=year,
+    busy_inst_init = Course.objects.filter(week=week,
+                                           year=year,
                                            module__train_prog__department=department) \
                                    .distinct('tutor') \
                                    .values_list('tutor')
                                            
     if COSMO_MODE:
-        busy_inst_after = ScheduledCourse.objects.filter(cours__semaine=week,
-                                                         cours__an=year,
-                                                         cours__module__train_prog__department=department)\
+        busy_inst_after = ScheduledCourse.objects.filter(course__week=week,
+                                                         course__year=year,
+                                                         course__module__train_prog__department=department)\
                                                  .distinct('tutor') \
                                                  .values_list('tutor')
     else:
@@ -469,8 +469,8 @@ def fetch_dispos(req, year, week, **kwargs):
                            [req.user]))
 
     week_avail = UserPreference.objects \
-        .filter(semaine=week,
-                an=year,
+        .filter(week=week,
+                year=year,
                 user__in=busy_inst) \
         .select_related('user')
 
@@ -479,7 +479,7 @@ def fetch_dispos(req, year, week, **kwargs):
                      =week_avail \
                  .distinct('user') \
                  .values_list('user')) \
-        .filter(semaine=None,
+        .filter(week=None,
                 user__in=busy_inst) \
         .select_related('user')
 
@@ -518,7 +518,7 @@ def fetch_course_default_week(req, train_prog, course_type, **kwargs):
             
     dataset = CoursePreferenceResource() \
         .export(CoursePreference.objects \
-                .filter(semaine=None,
+                .filter(week=None,
                         course_type=ct,
                         train_prog=tp
                 ))
@@ -558,7 +558,7 @@ def fetch_unavailable_rooms(req, year, week, **kwargs):
     #                                         room__departments = department, 
     #                                         semaine=week,
     #                                         an=year,
-    #                                         valeur=0))
+    #                                         value=0))
     # response = HttpResponse(dataset.csv,
     #                         content_type='text/csv')
     # cache.set(cache_key, response)
@@ -597,7 +597,7 @@ def fetch_user_default_week(req, username, **kwargs):
 
     dataset = DispoResource() \
         .export(UserPreference.objects \
-                .filter(semaine=None,
+                .filter(week=None,
                         user=user))  # all())#
     response = HttpResponse(dataset.csv, content_type='text/csv')
     return response
@@ -607,11 +607,11 @@ def fetch_decale(req, **kwargs):
     if not req.is_ajax() or req.method != "GET":
         return HttpResponse("KO")
 
-    semaine = int(req.GET.get('s', '0'))
-    an = int(req.GET.get('a', '0'))
+    week = int(req.GET.get('s', '0'))
+    year = int(req.GET.get('a', '0'))
     module = req.GET.get('m', '')
     prof = req.GET.get('p', '')
-    groupe = req.GET.get('g', '')
+    group = req.GET.get('g', '')
     department = req.department
 
     courses = []
@@ -620,17 +620,17 @@ def fetch_decale(req, **kwargs):
     module_tutors = []
     groups = []
 
-    if an > 0 and semaine > 0:
-        days = num_all_days(an, semaine, req.department)
+    if year > 0 and week > 0:
+        days = num_all_days(year, week, req.department)
     else:
         days = []
 
-    cours = filt_p(filt_g(filt_m(filt_sa(department, semaine, an), module), groupe), prof)
+    course = filt_p(filt_g(filt_m(filt_sa(department, week, year), module), group), prof)
 
-    for c in cours:
+    for c in course:
         try:
-            cp = ScheduledCourse.objects.get(cours=c,
-                                             copie_travail=0)
+            cp = ScheduledCourse.objects.get(course=c,
+                                             work_copy=0)
             day = cp.day
             time = cp.start_time
         except ObjectDoesNotExist:
@@ -640,42 +640,42 @@ def fetch_decale(req, **kwargs):
             courses.append({'i': c.id,
                             'm': c.module.abbrev,
                             'p': c.tutor.username,
-                            'g': c.groupe.nom,
+                            'g': c.group.name,
                             'd': day,
                             't': time})
 
-    cours = filt_p(filt_g(filt_sa(department, semaine, an), groupe), prof) \
+    course = filt_p(filt_g(filt_sa(department, week, year), group), prof) \
         .order_by('module__abbrev') \
         .distinct('module__abbrev')
-    for c in cours:
+    for c in course:
         modules.append(c.module.abbrev)
 
-    cours = filt_g(filt_sa(department, semaine, an), groupe) \
+    course = filt_g(filt_sa(department, week, year), group) \
         .order_by('tutor__username') \
         .distinct('tutor__username')
-    for c in cours:
+    for c in course:
         if c.tutor is not None:
             tutors.append(c.tutor.username)
 
     if module != '':
-        cours_queryset = Course.objects.filter(module__train_prog__department=department)        
-        cours = filt_m(cours_queryset, module) \
+        course_queryset = Course.objects.filter(module__train_prog__department=department)        
+        course = filt_m(course_queryset, module) \
             .order_by('tutor__username') \
             .distinct('tutor__username')
-        for c in cours:
+        for c in course:
             if c.tutor is not None:
                 module_tutors.append(c.tutor.username)
 
-    cours = filt_p(filt_m(filt_sa(department, semaine, an), module), prof) \
-        .distinct('groupe')
-    for c in cours:
-        groups.append(c.groupe.nom)
+    course = filt_p(filt_m(filt_sa(department, week, year), module), prof) \
+        .distinct('group')
+    for c in course:
+        groups.append(c.group.name)
 
     return JsonResponse({'cours': courses,
                          'modules': modules,
                          'profs': tutors,
                          'profs_module': module_tutors,
-                         'groupes': groups,
+                         'groups': groups,
                          'jours': days})
 
 
@@ -687,8 +687,8 @@ def fetch_bknews(req, year, week, **kwargs):
                                         week=week))
     response = HttpResponse(dataset.csv,
                             content_type='text/csv')
-    response['semaine'] = week
-    response['an'] = year
+    response['week'] = week
+    response['year'] = year
     return response
 
 
@@ -719,7 +719,7 @@ def fetch_week_infos(req, year, week, **kwargs):
         else (-1, -1)
 
     try:
-        regen = str(Regen.objects.get(department=req.department, semaine=week, an=year))
+        regen = str(Regen.objects.get(department=req.department, week=week, year=year))
     except ObjectDoesNotExist:
         regen = 'I'
         
@@ -737,24 +737,24 @@ def pref_requirements(tutor, year, week):
     to local policy
     """
     nb_courses = Course.objects.filter(tutor=tutor,
-                                       semaine=week,
-                                       an=year) \
+                                       week=week,
+                                       year=year) \
                                .count()
     week_av = UserPreference \
         .objects \
         .filter(user=tutor,
-                semaine=week,
-                an=year)
+                week=week,
+                year=year)
     if not week_av.exists():
         filled = UserPreference \
             .objects \
             .filter(user=tutor,
-                    semaine=None,
-                    valeur__gte=1) \
+                    week=None,
+                    value__gte=1) \
             .count()
     else:
         filled = week_av \
-            .filter(valeur__gte=1) \
+            .filter(value__gte=1) \
             .count()
     return filled, 2*nb_courses
 
@@ -815,10 +815,10 @@ def fetch_tutor_courses(req, year, week, tutor, **kwargs):
     dataset = TutorCoursesResource() \
         .export(ScheduledCourse.objects \
                     .filter(
-                        cours__semaine=week,
-                        cours__an=year,
-                        copie_travail=0,
-                        cours__tutor__username=tutor))
+                        course__week=week,
+                        course__year=year,
+                        work_copy=0,
+                        course__tutor__username=tutor))
     return HttpResponse(dataset.csv, content_type='text/csv')
 
 
@@ -828,23 +828,23 @@ def fetch_extra_sched(req, year, week, **kwargs):
     """
     tutors = []
     for scheduled in ScheduledCourse.objects.filter(
-            cours__semaine=week,
-            cours__an=year,
-            copie_travail=0,
-            cours__room_type__department=req.department).distinct('cours__tutor'):
-        tutor = scheduled.cours.tutor
+            course__week=week,
+            course__year=year,
+            work_copy=0,
+            course__room_type__department=req.department).distinct('course__tutor'):
+        tutor = scheduled.course.tutor
         if UserDepartmentSettings.objects.filter(user=tutor).count() > 1:
             tutors.append(tutor)
 
     dataset = MultiDepartmentTutorResource() \
         .export(ScheduledCourse.objects \
                 .filter(
-                    cours__semaine=week,
-                    cours__an=year,
-                    copie_travail=0,
-                    cours__tutor__in=tutors,
+                    course__week=week,
+                    course__year=year,
+                    work_copy=0,
+                    course__tutor__in=tutors,
                 )
-                .exclude(cours__room_type__department=req.department))
+                .exclude(course__room_type__department=req.department))
     return HttpResponse(dataset.csv, content_type='text/csv')
 
 
@@ -861,12 +861,12 @@ def fetch_shared_roomgroups(req, year, week, **kwargs):
     # courses in any shared room
     courses = ScheduledCourse.objects \
                 .filter(
-                    cours__semaine=week,
-                    cours__an=year,
-                    copie_travail=0,
+                    course__week=week,
+                    course__year=year,
+                    work_copy=0,
                     room__in=shared_roomgroups,
                 ) \
-                .exclude(cours__room_type__department=req.department)
+                .exclude(course__room_type__department=req.department)
     dataset = SharedRoomGroupsResource().export(courses)
     return HttpResponse(dataset.csv, content_type='text/csv')
 
@@ -890,7 +890,7 @@ def edt_changes(req, **kwargs):
 
     impacted_inst = set()
 
-    msg = 'Notation : (numero_semaine, numero_annee, ' \
+    msg = 'Notation : (numero_week, numer_year, ' \
           + 'numero_jour, numero_creneau, prof)\n\n'
 
     if not req.is_ajax():
@@ -903,11 +903,11 @@ def edt_changes(req, **kwargs):
 
 
     try:
-        semaine = req.GET.get('s', '')
-        an = req.GET.get('a', '')
+        week = req.GET.get('s', '')
+        year = req.GET.get('a', '')
         work_copy = req.GET.get('c', '')
-        semaine = int(semaine)
-        an = int(an)
+        week = int(week)
+        year = int(year)
         work_copy = int(work_copy)
         version = None
         department = req.department
@@ -924,8 +924,8 @@ def edt_changes(req, **kwargs):
     recv_changes = json.loads(req.POST.get('tab',[]))
 
     
-    version = EdtVersion.objects.filter(semaine=semaine,
-                                        an=an).aggregate(Sum('version'))['version__sum']
+    version = EdtVersion.objects.filter(week=week,
+                                        year=year).aggregate(Sum('version'))['version__sum']
 
     logger.info(f'Versions: incoming {old_version}, currently {version}')
 
@@ -935,19 +935,19 @@ def edt_changes(req, **kwargs):
                 edt_version = EdtVersion \
                     .objects \
                     .select_for_update() \
-                    .get(department=department, semaine=semaine, an=an)
+                    .get(department=department, week=week, year=year)
             for a in recv_changes:
                 non_place = False
                 co = Course.objects.get(id=a['id'])
                 try:
-                    cp = ScheduledCourse.objects.get(cours=co,
-                                                     copie_travail=work_copy)
+                    cp = ScheduledCourse.objects.get(course=co,
+                                                     work_copy=work_copy)
                 except ObjectDoesNotExist:
                     non_place = True
-                    cp = ScheduledCourse(cours=co,
-                                         copie_travail=work_copy)
+                    cp = ScheduledCourse(course=co,
+                                         work_copy=work_copy)
 
-                m = CourseModification(cours=co,
+                m = CourseModification(course=co,
                                        version_old=old_version,
                                        initiator=req.user.tutor)
                 # old_day = a.day.o
@@ -1001,10 +1001,10 @@ def edt_changes(req, **kwargs):
                     m.room_old = cp.room
                     cp.room = sal_n
                 if new_week is not None:
-                    m.semaine_old = old_week
-                    m.an_old = old_year
-                    cp.cours.semaine = new_week
-                    cp.cours.an = new_year
+                    m.old_week = old_week
+                    m.old_year = old_year
+                    cp.course.week = new_week
+                    cp.course.year = new_year
                 cp.save()
                 if work_copy == 0:
                     m.save()
@@ -1014,9 +1014,9 @@ def edt_changes(req, **kwargs):
                         prev_tut = co.tutor
                         co.tutor = Tutor.objects.get(username=new_tutor)
                         co.save()
-                        pm = PlanningModification(cours=co,
-                                                  semaine_old=co.semaine,
-                                                  an_old=co.an,
+                        pm = PlanningModification(course=co,
+                                                  old_week=co.week,
+                                                  old_year=co.year,
                                                   tutor_old=prev_tut,
                                                   initiator=req.user.tutor)
                         pm.save()
@@ -1092,12 +1092,12 @@ class HelperUserPreference():
 
     def generate(self, week, year, day, start_time, duration, value):
         return UserPreference(user=self.tutor,
-                              semaine=week,
-                              an=year,
+                              week=week,
+                              year=year,
                               day=day,
                               start_time=start_time,
                               duration=duration,
-                              valeur=value)
+                              value=value)
 
 
 class HelperCoursePreference():
@@ -1112,12 +1112,12 @@ class HelperCoursePreference():
     def generate(self, week, year, day, start_time, duration, value):
         return CoursePreference(train_prog=self.training_programme,
                                 course_type=self.course_type,
-                                semaine=week,
-                                an=year,
+                                week=week,
+                                year=year,
                                 day=day,
                                 start_time=start_time,
                                 duration=duration,
-                                valeur=value)
+                                value=value)
         
 
 def preferences_changes(req, year, week, helper_pref):
@@ -1137,22 +1137,22 @@ def preferences_changes(req, year, week, helper_pref):
         year = None
 
     if not helper_pref.filter().filter(
-            semaine=week,
-            an=year).exists():
-        for pref in helper_pref.filter().filter(semaine=None):
+            week=week,
+            year=year).exists():
+        for pref in helper_pref.filter().filter(week=None):
             new_dispo = helper_pref.generate(week,
                                              year,
                                              pref.day,
                                              pref.start_time,
                                              pref.duration,
-                                             pref.valeur)
+                                             pref.value)
             logger.info(new_dispo)
             new_dispo.save()
 
     for a in changes:
         logger.info(f"Change {a}")
-        helper_pref.filter().filter(semaine=week,
-                                    an=year,
+        helper_pref.filter().filter(week=week,
+                                    year=year,
                                     day=a['day']).delete()
         for pref in a['val_inter']:
             new_dispo = helper_pref.generate(week,
@@ -1272,26 +1272,26 @@ def decale_changes(req, **kwargs):
 
     for c in change_list:
         changing_course = Course.objects.get(id=c['i'])
-        old_week = changing_course.semaine
-        old_year = changing_course.an
+        old_week = changing_course.week
+        old_year = changing_course.year
 
         edt_versions = EdtVersion.objects.select_for_update().filter(
-            (Q(semaine=old_week) & Q(an=old_year))
-             |(Q(semaine=new_week) & Q(an=new_year)), department=req.department)
+            (Q(week=old_week) & Q(year=old_year))
+             |(Q(week=new_week) & Q(year=new_year)), department=req.department)
         
         with transaction.atomic():
             # was the course was scheduled before?
             if c['d'] != '' and c['t'] != -1:
                 scheduled_course = ScheduledCourse \
                     .objects \
-                    .get(cours=changing_course,
-                         copie_travail=0)
+                    .get(course=changing_course,
+                         work_copy=0)
                 cache.delete(get_key_course_pl(req.department.abbrev,
                                                old_year,
                                                old_week,
-                                               scheduled_course.copie_travail))
+                                               scheduled_course.work_copy))
                 scheduled_course.delete()
-                ev = EdtVersion.objects.get(an=old_year, semaine=old_week, department=req.department)
+                ev = EdtVersion.objects.get(year=old_year, week=old_week, department=req.department)
                 ev.version += 1
                 ev.save()
             else:
@@ -1299,17 +1299,17 @@ def decale_changes(req, **kwargs):
                                                old_year,
                                                old_week,
                                                0))
-                # note: add copie_travail in Cours might be of interest
+                # note: add work_copy in Cours might be of interest
 
-            pm = PlanningModification(cours=changing_course,
-                                      semaine_old=old_week,
-                                      an_old=old_year,
+            pm = PlanningModification(course=changing_course,
+                                      old_week=old_week,
+                                      old_year=old_year,
                                       tutor_old=changing_course.tutor,
                                       initiator=req.user.tutor)
             pm.save()
 
-            changing_course.semaine = new_week
-            changing_course.an = new_year
+            changing_course.week = new_week
+            changing_course.year = new_year
             if new_year != 0:
                 changing_course.tutor = Tutor.objects.get(username=new_assignment['np'])
             cache.delete(get_key_course_pp(req.department.abbrev,
@@ -1318,8 +1318,8 @@ def decale_changes(req, **kwargs):
                                            0))
             changing_course.save()
             ev, _ = EdtVersion.objects.update_or_create(
-                an=new_year,
-                semaine=new_week, 
+                year=new_year,
+                week=new_week, 
                 department=req.department)
             ev.version += 1
             ev.save()
@@ -1400,16 +1400,16 @@ def clean_edt_view_params(week, year):
 
     if week is None or year is None:
         today = current_week()
-        week = today['semaine']
-        year = today['an']
+        week = today['week']
+        year = today['year']
     else:
         try:
             week = int(week)
             year = int(year)
         except ValueError:
             today = current_week()
-            week = today['semaine']
-            year = today['an']
+            week = today['week']
+            year = today['year']
 
     return week, year
 
@@ -1426,16 +1426,16 @@ def filt_p(r, prof):
     return r
 
 
-def filt_g(r, groupe):
-    if groupe != '':
-        r = r.filter(groupe__nom=groupe)
+def filt_g(r, group):
+    if group != '':
+        r = r.filter(group__name=group)
     return r
 
 
-def filt_sa(department, semaine, an):
+def filt_sa(department, week, year):
     return Course.objects.filter(module__train_prog__department=department,
-                                 semaine=semaine,
-                                 an=an)
+                                 week=week,
+                                 year=year)
 
 
 def get_key_course_pl(department_abbrev, year, week, num_copy):

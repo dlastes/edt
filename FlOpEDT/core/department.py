@@ -29,9 +29,9 @@ def get_model_department_lookup(model, department, field_name=None):
         # Look for a predefined lookup path
         lookups_by_model = {
             Course:'type__department',
-            CourseModification: 'cours__type__department',
+            CourseModification: 'course__type__department',
             CoursePreference: 'train_prog__department',
-            ScheduledCourse: 'cours__type__department',
+            ScheduledCourse: 'course__type__department',
             Dependency: 'cours1__type__department',
             Module: 'train_prog__department',
             Group: 'train_prog__department',
@@ -41,7 +41,7 @@ def get_model_department_lookup(model, department, field_name=None):
             RoomSort: 'for_type__department',
             TrainingHalfDay: 'train_prog__department',
             Tutor: 'departments',
-            PlanningModification: 'cours__type__department',
+            PlanningModification: 'course__type__department',
             UserPreference: 'user__departments',
         }
         

@@ -193,7 +193,7 @@ class Student(User):  # for now: representative
         return str(self.username)
 
     def __repr__(self):
-        return str(self.username) + ' (G:' + ', '.join([group.nom for group in self.belong_to.all()]) + ')'
+        return str(self.username) + ' (G:' + ', '.join([group.name for group in self.belong_to.all()]) + ')'
 
     class Meta:
         verbose_name = 'Student'

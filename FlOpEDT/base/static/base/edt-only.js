@@ -25,7 +25,7 @@
   ---- VARIABLES ----
   -------------------*/
 
-var user = {nom: usna,
+var user = {name: usna,
 	    dispos: [],
 	    dispos_bu: [],
 	    dispos_type: [],
@@ -35,11 +35,11 @@ var margin = {top: tv_svg_top_m, left: 30, right: 0, bot:0};
 
 var svg = {height: tv_svg_h - margin.top - margin.bot, width: tv_svg_w - margin.left - margin.right};
 
-var week = semaine_init ;
-var year = an_init;
+var week = week_init ;
+var year = year_init;
 
 // filter the right bknews
-weeks = {sel: [0], init_data: [{semaine: week, an: year}]};
+weeks = {sel: [0], init_data: [{week: week, year: year}]};
 
 
 var labgp = {width: tv_gp_w, tot: 8, height_init: 40, width_init: 30};
@@ -97,13 +97,13 @@ function fetch_cours_light() {
     fetch.done = false ;
     ack.edt="";
     
-    var semaine_att = week;
-    var an_att = year;
+    var week_att = week;
+    var year_att = year;
 
     $.ajax({
         type: "GET", //rest Type
         dataType: 'text',
-        url: url_cours_pl + an_att + "/" + semaine_att + "/0",
+        url: url_cours_pl + year_att + "/" + week_att + "/0",
         async: false,
         contentType: "text/csv",
         success: function (msg, ts, req) {
@@ -128,20 +128,20 @@ function fetch_cours_light() {
 
 function fetch_bknews_light(first) {
     fetch.ongoing_bknews = true;
-    var semaine_att = week;
-    var an_att = year;
+    var week_att = week;
+    var year_att = year;
 
     $.ajax({
         type: "GET", //rest Type
         dataType: 'text',
-        url: url_bknews + an_att + "/" + semaine_att,
+        url: url_bknews + year_att + "/" + week_att,
         async: true,
         contentType: "text/json",
         success: function(msg) {
 	    bknews.cont = d3.csvParse(msg,
 				      translate_bknews_from_csv);
-            if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
-                an_att == weeks.init_data[weeks.sel[0]].an) {
+            if (week_att == weeks.init_data[weeks.sel[0]].week &&
+                year_att == weeks.init_data[weeks.sel[0]].year) {
 		var max_y = -1 ;
 		for (var i = 0 ; i < bknews.cont.length ; i++) {
 		    if (bknews.cont[i].y > max_y) {

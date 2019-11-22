@@ -33,7 +33,7 @@ from base.models import RoomGroup
 
 
 class MyTTModel(TTModel):
-    def __init__(self, department_abbrev, weeks, an,
+    def __init__(self, department_abbrev, weeks, year,
                  train_prog=None,
                  stabilize_work_copy=None,
                  min_bhd_i=1.,
@@ -44,7 +44,7 @@ class MyTTModel(TTModel):
         self.cout_patron_semaine = cout_patron_semaine
         self.cout_patron_we = cout_patron_we
 
-        TTModel.__init__(self, department_abbrev, weeks, an,
+        TTModel.__init__(self, department_abbrev, weeks, year,
                          train_prog=train_prog,
                          stabilize_work_copy=stabilize_work_copy,
                          min_bhd_i=min_bhd_i, only_fixed_scheduled_courses=True)

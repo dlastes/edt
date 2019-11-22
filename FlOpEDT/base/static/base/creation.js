@@ -112,7 +112,7 @@ function create_layouts(svg_cont, light) {
     catg = svg_cont.append("g")
         .attr("id", "lay-catg");
 
-    // semaine type ground
+    // week type ground
     stg = svg_cont.append("g")
         .attr("id", "lay-stg");
 
@@ -223,16 +223,16 @@ function remove_pref_modes() {
 
 
 
-// PRECONDITION: semaine_init, week_init, weeks.init_data
+// PRECONDITION: week_init, week_init, weeks.init_data
 function find_week(week_list) {
     var i, up;
     i = 0;
     up = false ;
     
     while (i < week_list.length && !up) {
-        if (an_init < week_list[i].an ||
-            (an_init == week_list[i].an &&
-                semaine_init < week_list[i].semaine)) {
+        if (year_init < week_list[i].year ||
+            (year_init == week_list[i].year &&
+                week_init < week_list[i].week)) {
             up = true;
         } else {
             i++;
@@ -249,7 +249,7 @@ function find_week(week_list) {
 
 function create_clipweek() {
 
-    weeks.init_data = semaine_an_list;
+    weeks.init_data = week_year_list;
 
     var min = weeks.init_data[0];
     var max = weeks.init_data[weeks.init_data.length - 1];
@@ -257,25 +257,25 @@ function create_clipweek() {
     weeks.ndisp = Math.min(weeks.ndisp, weeks.init_data.length);
 
     weeks.init_data.push({
-        an: max.an,
-        semaine: max.semaine + 1
+        year: max.year,
+        week: max.week + 1
     });
     weeks.init_data.unshift({
-        an: min.an,
-        semaine: min.semaine - 1,
+        year: min.year,
+        week: min.week - 1,
     });
 
     var fw ;
 
-    if (min.an > an_init ||
-	(min.an == an_init && min.semaine > semaine_init)) {
+    if (min.year > year_init ||
+	(min.year == year_init && min.week > week_init)) {
 	weeks.cur_data = weeks.init_data.slice(1,
 					       1 + weeks.ndisp + 2);
 	weeks.fdisp = 1;
 	weeks.sel[0] = 2 ;
 	
-    } else if (max.an < an_init ||
-	(max.an == an_init && max.semaine < semaine_init)) {
+    } else if (max.year < year_init ||
+	(max.year == year_init && max.week < week_init)) {
 	weeks.cur_data = weeks.init_data.slice(weeks.init_data.length - 1  - 2 - weeks.ndisp,
 					       weeks.init_data.length -1);
 	weeks.fdisp = weeks.init_data.length - 1  - 2 - weeks.ndisp ;
@@ -759,13 +759,13 @@ function go_promo_gp_init(button_available) {
     promo_init = indexOf_promo(promo_init) ;
     if (promo_init >= 0){
 	if (gp_init == "") {
-	    gp_init = root_gp[promo_init].gp.nom ;
+	    gp_init = root_gp[promo_init].gp.name ;
 	}
-	if (Object.keys(groups[promo_init]).map(function(g) { return groups[promo_init][g].nom ; }).indexOf(gp_init) != -1) {
+	if (Object.keys(groups[promo_init]).map(function(g) { return groups[promo_init][g].name ; }).indexOf(gp_init) != -1) {
 	    apply_gp_display(groups[promo_init][gp_init], true, button_available);
 	}
     } else if (gp_init != "") {
-	if (Object.keys(groups[0]).map(function(g) { return groups[0][g].nom ; }).indexOf(gp_init) != -1) {
+	if (Object.keys(groups[0]).map(function(g) { return groups[0][g].name ; }).indexOf(gp_init) != -1) {
 	    apply_gp_display(groups[0][gp_init], true, button_available);
 	}
     }
@@ -818,7 +818,7 @@ function extract_all_groups_structure(r) {
 
 function extract_groups_structure(r, npro, nrow) {
     var gr = {
-        nom: r.name,
+        name: r.name,
         ancetres: null,
         descendants: null,
         display: true,
@@ -838,7 +838,7 @@ function extract_groups_structure(r, npro, nrow) {
     }
 
     if ("undefined" === typeof r.buttxt) {
-        gr.buttxt = gr.nom;
+        gr.buttxt = gr.name;
     } else {
         gr.buttxt = r.buttxt;
     }
@@ -888,7 +888,7 @@ function extract_groups_structure(r, npro, nrow) {
             extract_groups_structure(r.children[i], npro, nrow);
         }
     }
-    groups[npro][gr.nom] = gr;
+    groups[npro][gr.name] = gr;
 }
 
 
@@ -1295,7 +1295,7 @@ function def_drag() {
         })
         .on("drag", function(d) {
             if (ckbox["edt-mod"].cked && fetch.done) {
-                pending.fork_course(d);
+                pending.prepare_dragndrop(d);
                 cur_over = which_slot(drag.x +
 				      parseInt(drag.sel.select("rect")
 					       .attr("x")),
@@ -1461,7 +1461,7 @@ function warning_check(check_tot) {
         } else if (check.nok == 'tutor_busy_other_dept') {
             expand = "L'enseignant·e " + check.more.tutor + " est occupé dans un autre département.";
         } else if (check.nok == 'tutor_free_week') {
-            expand = "L'enseignant·e " + check.more.tutor + " ne donne pas de cours cette semaine.";
+            expand = "L'enseignant·e " + check.more.tutor + " ne donne pas de cours cette week.";
         } else if (check.nok == 'room_busy') {
             expand = "La salle " + check.more.room + " est déjà prise.";
         } else if (check.nok == 'room_busy_other_dept') {
@@ -1479,7 +1479,7 @@ function simultaneous_courses(target_course) {
         return (c.day == target_course.day 
 		&& !(c.start + c.duration <= target_course.start
                      || c.start >= target_course.start + target_course.duration)
-		&& c.id_cours != target_course.id_cours);
+		&& c.id_course != target_course.id_course);
     });
 }
 
@@ -1512,10 +1512,10 @@ function check_course(wanted_course) {
         pending.pass.room = true ;
     }
 
-    if (! pending.pass.other) {
+    if (! pending.pass.core) {
 
         // course was supposed to be fix
-        if (wanted_course.id_cours == -1) {
+        if (wanted_course.id_course == -1) {
 	    ret.push({nok:'stable'}) ;
         }
 
@@ -1531,7 +1531,7 @@ function check_course(wanted_course) {
 
     possible_conflicts = simultaneous_courses(wanted_course) ;
 
-    if (! pending.pass.other) {
+    if (! pending.pass.core) {
 
         // group is busy
         conflicts = possible_conflicts.filter(function(c) {
@@ -1545,6 +1545,12 @@ function check_course(wanted_course) {
 	    ret.push({nok: 'group_busy',
                       more: {group: wanted_course.group}});
         }
+
+        // we will ask later about other constraints
+        if (ret.length > 0 && (pending.force.tutor || pending.force.room)) {
+            return ret ;
+        }
+
     }
 
 
@@ -1590,6 +1596,13 @@ function check_course(wanted_course) {
             ret.push({nok: 'tutor_free_week',
                       more: {tutor: wanted_course.prof}}) ;
         }
+
+        // we will ask later about room constraints
+        if (ret.length > 0 && pending.force.room) {
+            return ret ;
+        }
+        
+        
     }
 
     // shared rooms availability
@@ -1622,16 +1635,24 @@ function splash_violated_constraints(check_list, step) {
     var splash_csts ;
     var warn_check = warning_check(check_list);
     console.log(warn_check);
-    //console.log(pending.wanted_course.id_cours);
+    //console.log(pending.wanted_course.id_course);
     if ((logged_usr.rights >> 2) % 2 == 1) {
-	splash_csts = {
+        var privilege_warning = "Des privilèges vous ont été accordés, et vous en profitez pour outrepasser ";
+        if (warn_check.length>1) {
+            privilege_warning += "les contraintes suivantes :";
+        } else {
+            privilege_warning += "la contrainte suivante :";
+        }
+
+
+        splash_csts = {
 	    id: "viol_constraint",
 	    but: {
 		list: [{txt: "Confirmer",
 			click:
 			function(btn){
                             pending.pass[btn.pass] = true ;
-                            console.log(pending.wanted_course.id_cours);
+                            console.log(pending.wanted_course.id_course);
                             check_pending_course() ;
 			    return ;
 			},
@@ -1639,7 +1660,7 @@ function splash_violated_constraints(check_list, step) {
 		       },
 		       {txt: "Annuler",
 			click: function(d){
-                            pending.back_init();
+                            pending.rollback();
                             go_courses(false);
 			    return ;
 			}
@@ -1647,7 +1668,7 @@ function splash_violated_constraints(check_list, step) {
 	    },
 	    com: {list: [{txt: "Attention", ftsi: 23},
 			 {txt: ""},
-			 {txt: "Des privilèges vous ont été accordés, et vous en profitez pour outrepasser la contrainte suivante :"}]
+			 {txt: privilege_warning}]
 		 }
 	};
         splash_csts.com.list = splash_csts.com.list.concat(warn_check.map(function(el){
@@ -1655,17 +1676,26 @@ function splash_violated_constraints(check_list, step) {
         }));
 	splash_csts.com.list.push({txt: "Confirmer la modification ?"});
     } else {
+        /*-- not enough rights, or strong constraints --*/
+        
+        var warning_sentence = "Vous tentez d'outrepasser " ;
+        if (warn_check.length > 1) {
+            warning_sentence += "les contraintes suivantes :";
+        } else {
+            warning_sentence += "la contrainte suivante :";
+        }
         splash_csts = {
 	    id: "viol_constraint",
 	    but: {
 		list: [{txt: "Ah ok",
 			click: function(d){
+                            pending.rollback();
                             go_courses(false);
 			    return ;
 			}
 		       }]
 	    },
-	    com: {list: [{txt: "Vous tentez d'outrepasser la contrainte suivante :", ftsi: 23}
+	    com: {list: [{txt: warning_sentence, ftsi: 23}
 			 ]
 		 }
 	}
@@ -1697,7 +1727,7 @@ function check_pending_course() {
         
 	add_bouge(pending.init_course);
         //pending.save_wanted() ;
-        pending.init();
+        pending.clean();
 
 	go_grid(true);
 	go_courses(true);
@@ -1719,8 +1749,6 @@ function check_pending_course() {
         
         if(core_constraints.length > 0) {
 
-            clean_pending();
-            
             splash_violated_constraints(warn_check, 'core');
             
                 /* TO BE REMOVED
@@ -1736,6 +1764,17 @@ function check_pending_course() {
 	            } 
                 */
 
+        } else if (tutor_constraints.length > 0) {
+            if (pending.force.tutor) {
+                console.log("tt constraints");
+                pending.force.tutor = false ;
+	        compute_cm_room_tutor_direction() ;
+                select_tutor_module_change() ;
+                go_cm_room_tutor_change();
+            } else {
+                splash_violated_constraints(warn_check, 'tutor');
+            }
+            
         } else if (room_constraints.length > 0) {
             if (pending.force.room) {
                 pending.force.room = false ;
@@ -1743,30 +1782,9 @@ function check_pending_course() {
 	        room_cm_level = 0 ;
                 select_room_change() ;
                 go_cm_room_tutor_change();
-                /*
-	        var display_cont_menu = select_room_change() ;
-	        if (display_cont_menu) {
-	            go_cm_room_tutor_change();
-	        } else {
-	            //room_tutor_change.course = [] ;
-	            room_tutor_change.proposal = [] ;
-	        }
-                */
             } else {
-                clean_pending();
                 splash_violated_constraints(warn_check, 'room');
             }
-        } else if (tutor_constraints.length > 0) {
-            if (pending.force.tutor) {
-                pending.force.tutor = false ;
-	        compute_cm_room_tutor_direction() ;
-                select_tutor_module_change() ;
-                go_cm_room_tutor_change();
-            } else {
-                clean_pending();
-                splash_violated_constraints(warn_check, 'tutor');
-            }
-
         }
 	
     }
@@ -2022,22 +2040,23 @@ function create_stype() {
         .attr("fill", "white")
         .attr("x", dispot_but_txt_x)
         .attr("y", dispot_but_txt_y("app") + 10)
-        .text("Semaine type");
+        .text("week type");
 
 }
 
 
 
 function fetch_dispos_type() {
-    if (user.nom != "") {
+    if (user.name != "") {
         show_loader(true);
         $.ajax({
             type: "GET", //rest Type
             dataType: 'text',
-            url: url_fetch_user_dweek + logged_usr.nom,
+            url: url_fetch_user_dweek + logged_usr.name,
             async: true,
             contentType: "text/csv",
             success: function(msg) {
+                console.log(msg);
                 user.dispos_type = [] ;
 
                 user.dispos_type = d3.csvParse(msg, translate_dispos_type_from_csv);
@@ -2063,7 +2082,7 @@ function translate_dispos_type_from_csv(d) {
         day: d.day,
 	start_time: +d.start_time,
 	duration: +d.duration,
-        val: +d.valeur,
+        val: +d.value,
         off: -1
     };
 }
@@ -2105,7 +2124,7 @@ function get_dispos_type(dt) {
 function select_entry_cm() {
     room_tutor_change.cm_settings = entry_cm_settings;
     var fake_id = new Date() ;
-    fake_id = fake_id.getMilliseconds() + "-" + pending.wanted_course.id_cours ;
+    fake_id = fake_id.getMilliseconds() + "-" + pending.wanted_course.id_course ;
     room_tutor_change.proposal = [{fid:fake_id,
 				   content:"Prof"},
 				   {fid:fake_id,
@@ -2119,9 +2138,15 @@ function def_cm_change() {
     entry_cm_settings.click = function(d) {
 	context_menu.room_tutor_hold = true ;
 	if(d.content == 'Salle') {
+            // don't consider other constraints than room's
+            pending.pass.tutor = true ;
+            pending.pass.core = true ;
 	    room_cm_level = 0 ;
 	    select_room_change();
 	} else {
+            // don't consider other constraints than tutor's
+            pending.pass.room = true ;
+            pending.pass.core = true ;
 	    select_tutor_module_change();
 	}
 	go_cm_room_tutor_change();
