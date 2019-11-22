@@ -540,9 +540,9 @@ class TTModel(object):
                 self.add_constraint(expr, '>=', 0)
 
                 if self.wdb.fixed_courses.filter(Q(course__tutor=i) | Q(tutor=i),
-                                                 course__week=d.week,
-                                                 day=d.day):
-                    self.add_constraint(IBD[(i, d)], '==', 1)
+                                                 day=d) \
+                        or self.wdb.other_departments_sched_courses.filter(Q(course__tutor=i) | Q(tutor=i), day=d):
+                        self.add_constraint(IBD[(i, d)], '==', 1)
                     # This next constraint impides to force IBD to be 1
                     # (if there is a meeting, for example...)
                     # self.add_constraint(expr, '<=', card-1)
@@ -1215,6 +1215,7 @@ class TTModel(object):
                                         '==',
                                         0,
                                         name=name)
+                    self.add_constraint(self.IBD[(i, sl.day)], '==', 1)
 
     def add_specific_constraints(self):
         """

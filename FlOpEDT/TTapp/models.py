@@ -117,7 +117,7 @@ class Slot(object):
 
 
 def slots_filter(slot_set, day=None, apm=None, course_type=None, start_time=None, week_day=None,
-                 simultaneous_to=None, week=None, is_after=None, starts_after=None, ends_before=None):
+                 simultaneous_to=None, week=None, is_after=None, starts_after=None, starts_before=None, ends_before=None):
     slots = slot_set
     if week is not None:
         slots = set(sl for sl in slots if sl.day.week == week)
@@ -653,11 +653,12 @@ class Stabilize(TTConstraint):
             # nb_changements_I=dict(zip(ttmodel.wdb.instructors,[0 for i in ttmodel.wdb.instructors]))
             for sl in slots_filter(ttmodel.wdb.slots, week=week):
                 for c in ttmodel.wdb.compatible_courses[sl]:
-                    if not sched_courses.filter(Q(start_time__lt=sl.start_time + sl.duration) |
-                                                Q(start_time__gt=sl.start_time - F('course__type__duration')),
+                    if not sched_courses.filter(Q(start_time__gte=sl.start_time,
+                                                      start_time__lt=sl.end_time) |
+                                                    Q(start_time__lte=sl.start_time,
+                                                      start_time__gt=sl.start_time - F('course__type__duration')),
                                                 day=sl.day,
                                                 course__tutor=c.tutor):
-
                         ttmodel.obj += ponderation * ttmodel.TT[(sl, c)]
                         # nb_changements_I[c.tutor]+=ttmodel.TT[(sl,c)]
                     if not sched_courses.filter(course__tutor=c.tutor,
