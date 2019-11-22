@@ -287,10 +287,12 @@ var pref_selection = {
         h:25
     },
     mode:[{
+        // click on pref => round robin over default values
         desc:"nominal",
         txt:"Normal",
         selected:true,
     },{
+        // select color, then paint any preference with a click
         desc:"paint",
         txt:"Sélection",
         selected:false,
@@ -410,7 +412,7 @@ var set_promos_txt = [];
 // set of row numbers
 var set_rows = [];
 
-// display parameters
+// display parameters for buttons about groups
 var butgp = {
     height: 20,
     width: 30,
@@ -442,6 +444,7 @@ var edt_message;
 
 // parameters for each checkbox
 var ckbox = [];
+// schedule modification
 ckbox["edt-mod"] = {
     menu: "edt-mod",
     cked: false,
@@ -449,6 +452,7 @@ ckbox["edt-mod"] = {
     disp: true,
     en: true
 };
+// preference modification
 ckbox["dis-mod"] = {
     menu: "dis-mod",
     cked: false,
@@ -463,6 +467,8 @@ var context_menu = {
     dispo_hold: false,
     room_tutor_hold: false
 };
+
+var splash_hold = false ;
 
 /*--------------------
    ------ MODULES ------
@@ -502,11 +508,8 @@ var unavailable_rooms = {} ;
 
 // tutors (sel: selected, pl:scheduled (PLacé), pp: not scheduled (Pas Placé), all: all modules
 var tutors = {
-    // instructors of unscheduled courses
     pp: [],
-    // instructors of scheduled courses
     pl: [],
-    // all instructors
     all: [],
     old: []
 };
@@ -515,11 +518,14 @@ var tutors = {
 var prof_displayed = [];
 
 // display parameters
+
+// exit button in filter selection panel
 var but_exit = {
     side: 20,
     mar_side: 3,
     mar_next: 10
 };
+// filter selection panel
 var sel_popup = {
     type: "",
     x: 640,
@@ -564,9 +570,12 @@ var sel_popup = {
     active_filter: false
 };
 sel_popup.but["tutor"] = {
+    // selector dimensions
     h: 30,
     w: 40,
+    // number of items per line
     perline: 5,
+    // margins between selectors
     mar_x: 2,
     mar_y: 4,
 };
@@ -611,7 +620,7 @@ var cours_pl = [];
 // all curses
 var cours = [];
 
-// listener for curses drag and drop 
+// listener for courses drag and drop 
 var dragListener;
 var drag_popup ;
 
@@ -737,7 +746,7 @@ var departments = {
     h:sel_popup.selh
 }
 
-// version of the planning
+// version number of the schedule
 var version;
 
 logged_usr.dispo_all_see = false ;
@@ -759,10 +768,11 @@ var user = {name: logged_usr.name,
 	    dispo_all_change: false
 	   };
 
+// will the week schedule be fully regenerated?
 var total_regen = false ;
 
 
-// 
+// First context menu when right click on a course
 var entry_cm_settings =
     {type: 'entry',
      w: 100,
@@ -774,6 +784,7 @@ var entry_cm_settings =
      nlin: 2,
      txt_intro: {'default':"Quoi changer ?"}
     };
+// list of tutors in the module of the selected course
 var tutor_module_cm_settings =
     {type: 'tutor_module',
      w: 45,
@@ -785,6 +796,7 @@ var tutor_module_cm_settings =
      nlin: 0,
      txt_intro: {'default':"Profs du module ?"}
     };
+// all tutors in batches
 var tutor_filters_cm_settings =
     {type: 'tutor_filters',
      w: 120,
@@ -796,6 +808,7 @@ var tutor_filters_cm_settings =
      nlin: 0,
      txt_intro: {'default':"Ordre alphabétique :"}
     };
+// some tutors
 var tutor_cm_settings =
     {type: 'tutor',
      w: 45,
@@ -807,6 +820,11 @@ var tutor_cm_settings =
      nlin: 4,
      txt_intro: {'default':"Ordre alphabétique :"}
     };
+// rooms
+// level=0: the proposed rooms are available and of the same type
+//       1: the proposed rooms are available
+//       2: all rooms are proposed
+var room_cm_level = 0 ;
 var room_cm_settings =
     [{type: 'room_available',
       txt_intro: {'0':"Aucune salle disponible",
@@ -835,10 +853,6 @@ for(var l = 0 ; l < room_cm_settings.length ; l++) {
     room_cm_settings[l].ncol = 3 ;
     room_cm_settings[l].nlin = 0 ;
 }
-// level=0: the proposed rooms are available and of the same type
-//       1: the proposed rooms are available
-//       2: all rooms are proposed
-var room_cm_level = 0 ;
 
 var room_tutor_change = {
     course: [],    // 1-cell array for d3.js
@@ -857,5 +871,3 @@ var arrow =
 
 
 var is_side_panel_open = false ;
-
-var splash_hold = false ;
