@@ -30,7 +30,7 @@ DEBUG = True
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'flop_database_new_cosmo',
+        'NAME': 'flop_database_cosmo_dev',
         'USER': 'flop_user',
         'PASSWORD': 'your_password',
         'HOST': '127.0.0.1',
