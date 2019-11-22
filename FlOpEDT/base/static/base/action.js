@@ -983,8 +983,8 @@ function fill_date(day_desc) {
     //console.log("fill date : IW"+day_desc.iweek+" - "+day_desc.ref);
 
     day_desc.date = side_courses.find(function(d){
-        return d.year == weeks.init_data[day_desc.iweek].an &&
-            d.week == weeks.init_data[day_desc.iweek].semaine ;
+        return d.year == weeks.init_data[day_desc.iweek].year &&
+            d.week == weeks.init_data[day_desc.iweek].week ;
     }).days.find(function(d){
         return d.ref == day_desc.ref ;
     }).date;
@@ -997,8 +997,8 @@ function get_courses(tutor, day_desc) {
         return [] ;
     }
     var full_week = side_courses.find(function(d){
-        return d.year == weeks.init_data[day_desc.iweek].an &&
-            d.week == weeks.init_data[day_desc.iweek].semaine ;
+        return d.year == weeks.init_data[day_desc.iweek].year &&
+            d.week == weeks.init_data[day_desc.iweek].week ;
     });
     if (typeof full_week !== 'undefined') {
         return full_week.courses.filter(function(d) {
@@ -1056,8 +1056,8 @@ function aggregate_hours(tutor, iweek) {
     }
     
     var week_desc = side_courses.find(function(d){
-        return d.year == weeks.init_data[iweek].an &&
-            d.week == weeks.init_data[iweek].semaine ;
+        return d.year == weeks.init_data[iweek].year &&
+            d.week == weeks.init_data[iweek].week ;
     });
     if (typeof week_desc === 'undefined') {
         return ret ;
@@ -1178,8 +1178,8 @@ function check_constraints_tutor(tutor) {
 
 
     // CARE  COURS PAS PLACÉ
-    insert_side_week(weeks.init_data[icur_week].an,
-                     weeks.init_data[icur_week].semaine,
+    insert_side_week(weeks.init_data[icur_week].year,
+                     weeks.init_data[icur_week].week,
                      days,
                      cours);
     

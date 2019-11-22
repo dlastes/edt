@@ -695,7 +695,7 @@ function insert_in_week_set(week_set, iweek) {
     if (iweek < 0 || iweek >= weeks.init_data.length)  {
         return false ;
     }
-    var week = weeks.init_data[iweek].semaine ;
+    var week = weeks.init_data[iweek].week ;
     var year = weeks.init_data[iweek].an ;
     var found = week_set.find(function(d){
         return d.year == year && d.week == week;
