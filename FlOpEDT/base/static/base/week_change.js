@@ -603,71 +603,8 @@ function fetch_cours() {
         }
     });
 
-    if (cosmo) {
-        fetch_courses_around();
-    }
-
 }
 
-
-// fetches courses of the weeks before and after the current week
-function fetch_courses_around() {
-
-    var semaine_att, an_att ;
-
-    var week_index = weeks.sel[0] - 1 ;
-
-    if (week_index < 0) {
-        ante_cours = [] ;
-    } else {
-        semaine_att = weeks.init_data[week_index].semaine;
-        an_att = weeks.init_data[week_index].an;
-        
-        show_loader(true);
-        $.ajax({
-            type: "GET", //rest Type
-            dataType: 'text',
-            url: url_cours_pl + an_att + "/" + semaine_att + "/" + num_copie,
-            async: true,
-            contentType: "text/csv",
-            success: function(msg, ts, req) {
-                ante_cours = d3.csvParse(msg, translate_cours_pl_from_csv);
-                show_loader(false);
-            },
-            error: function(msg) {
-                console.log("error");
-                show_loader(false);
-            }
-        });
-    }
-
-    var week_index = weeks.sel[0] + 1 ;
-
-    if (week_index >= weeks.init_data.length) {
-        post_cours = [] ;
-    } else {
-        semaine_att = weeks.init_data[week_index].semaine;
-        an_att = weeks.init_data[week_index].an;
-        
-        show_loader(true);
-        $.ajax({
-            type: "GET", //rest Type
-            dataType: 'text',
-            url: url_cours_pl + an_att + "/" + semaine_att + "/" + num_copie,
-            async: true,
-            contentType: "text/csv",
-            success: function(msg, ts, req) {
-                post_cours = d3.csvParse(msg, translate_cours_pl_from_csv);
-                show_loader(false);
-            },
-            error: function(msg) {
-                console.log("error");
-                show_loader(false);
-            }
-        });
-    }
-
-}
 
 function translate_cours_pl_from_csv(d) {
     var ind = tutors.pl.indexOf(d.prof_name);
