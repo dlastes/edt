@@ -1268,12 +1268,12 @@ function confirm_law_constraints(changes, conc_tutors, gps) {
         var splash_confirm = {
 	    id: "conf-law",
 	    but: {list: [{txt: "Je veux être hors-la-loi",
-                          width: 100,
-                          click: function(d){
+                         click: function(d){
                               confirm_contact_all(changes, conc_tutors, gps);
                           }},
 		         {txt: "Je vais trouver autre chose",
-                          click: function(d){} }]
+                          click: function(d){} }],
+                  width: 250
                  },
 	    com: {list: issues_txt}
         }
