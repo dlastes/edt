@@ -131,16 +131,22 @@ g[class^="gp-but-"] {
     fill: aliceblue
 }
 
-#lay-meg {
+#layout-meg {
     font-size: 14px
 }
-#lay-wg {
+#layout-wg {
     font-size: 14px
 }
-#lay-catg {
+#layout-catg {
     font-size: 12px
 }
-#lay-dg {
+#layout-dg {
+    font-size: 12px
+}
+#layout-cmtg {
+    font-size: 12px
+}
+#layout-dig {
     font-size: 12px
 }
 
