@@ -118,7 +118,7 @@ class MinHalfDaysHelperModule(MinHalfDaysHelperBase):
 class MinHalfDaysHelperGroup(MinHalfDaysHelperBase):
 
     def build_variables(self):
-        courses = self.ttmodel.wdb.courses.filter(groupe=self.group)
+        courses = self.ttmodel.wdb.courses.filter(group=self.group)
 
         expression = self.ttmodel.check_and_sum(
             self.ttmodel.GBHD,

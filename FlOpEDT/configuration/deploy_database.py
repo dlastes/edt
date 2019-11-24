@@ -37,14 +37,14 @@ from base.models import Room, RoomType, RoomGroup, TrainingProgramme,\
     Group, Module, GroupType, Period, Time, Day, Slot, CourseType, \
     Department, CourseStartTimeConstraint, TimeGeneralSettings, UserPreference
 
-from base.weeks import annee_courante
+from base.weeks import current_year
 
 from people.models import FullStaff, SupplyStaff, Tutor, UserDepartmentSettings
 
 from django.db import IntegrityError
 
 
-bookname='misc/deploy_database/database_file.xlsx'
+bookname='media/configuration/empty_database_file.xlsx'
 logger = logging.getLogger('base')
 
 @transaction.atomic
@@ -342,7 +342,7 @@ def groups_extract(department, book):
     while idGroup is not None:
 
         tpGr = sheet.cell(row=GROUP_ROW, column=2).value
-        verif = Group.objects.filter(nom=idGroup, train_prog__abbrev=tpGr, train_prog__department=department)
+        verif = Group.objects.filter(name=idGroup, train_prog__abbrev=tpGr, train_prog__department=department)
 
         if not verif.exists():
 
@@ -354,7 +354,7 @@ def groups_extract(department, book):
                 gt = sheet.cell(row=GROUP_ROW, column=5).value
                 groupType = GroupType.objects.get(name=gt, department=department)
 
-                group = Group(nom=idGroup, size=0, train_prog=tpGroup, type=groupType)
+                group = Group(name=idGroup, size=0, train_prog=tpGroup, type=groupType)
                 group.save()
 
             except IntegrityError as ie:
@@ -379,9 +379,9 @@ def groups_extract(department, book):
 
         if p_group is not None:
 
-            parent_group = Group.objects.get(nom=p_group, train_prog__abbrev=tpGr, train_prog__department=department)
+            parent_group = Group.objects.get(name=p_group, train_prog__abbrev=tpGr, train_prog__department=department)
 
-            group = Group.objects.get(nom=idGroup, train_prog__abbrev=tpGr, train_prog__department=department)
+            group = Group.objects.get(name=idGroup, train_prog__abbrev=tpGr, train_prog__department=department)
 
             group.parent_groups.add(parent_group)
 
@@ -389,9 +389,9 @@ def groups_extract(department, book):
 
             if p_group2 is not None:
 
-                parent_group = Group.objects.get(nom=p_group2, train_prog__abbrev=tpGr, train_prog__department=department)
+                parent_group = Group.objects.get(name=p_group2, train_prog__abbrev=tpGr, train_prog__department=department)
 
-                group = Group.objects.get(nom=idGroup, train_prog__abbrev=tpGr, train_prog__department=department)
+                group = Group.objects.get(name=idGroup, train_prog__abbrev=tpGr, train_prog__department=department)
 
                 group.parent_groups.add(parent_group)
 
@@ -490,7 +490,7 @@ def modules_extract(department, book):
 
             try:
 
-                module = Module(nom=nameMod, abbrev=idMod, ppn=codeMod, train_prog=tpModule, head=profesMod, period=periodMod)
+                module = Module(name=nameMod, abbrev=idMod, ppn=codeMod, train_prog=tpModule, head=profesMod, period=periodMod)
                 module.save()
 
             except IntegrityError as ie:
@@ -704,7 +704,7 @@ def displayInfo():
 
     for m in Module.objects.all():
 
-        print(m, " : ", m.nom, " - ", m.ppn)
+        print(m, " : ", m.name, " - ", m.ppn)
         print("- head : ", m.head)
         print("- training program : ", m.train_prog)
         print("- starting week : ", m.period.starting_week)

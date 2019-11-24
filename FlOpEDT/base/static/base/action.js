@@ -56,12 +56,12 @@ function apply_change_simple_pref(d) {
                 d.val = Math.floor(d.val / (par_dispos.nmax / 2)) * par_dispos.nmax / 2;
             }
             d.val = (d.val + par_dispos.nmax / 2) % (3 * par_dispos.nmax / 2);
-	    update_pref_interval(user.nom, d.day, d.start_time, d.val) ;
-            //dispos[user.nom][idays[d.day]][d.hour] = d.val;
+	    update_pref_interval(user.name, d.day, d.start_time, d.val) ;
+            //dispos[user.name][idays[d.day]][d.hour] = d.val;
             //user.dispos[day_hour_2_1D(d)].val = d.val;
         } else {
             d.val = sel.val ;
-	    update_pref_interval(user.nom, d.day, d.start_time, d.val) ;
+	    update_pref_interval(user.name, d.day, d.start_time, d.val) ;
         }
         go_pref(true);
     }
@@ -330,7 +330,7 @@ function select_tutor_module_change() {
     }) ;
 
     var fake_id = new Date() ;
-    fake_id = fake_id.getMilliseconds() + "-" + c.id_cours ;
+    fake_id = fake_id.getMilliseconds() + "-" + c.id_course ;
     room_tutor_change.proposal = [] ;
 
     room_tutor_change.proposal = tutor_same_module.map(function(t) {
@@ -420,7 +420,7 @@ function go_cm_room_tutor_change() {
         .selectAll(".cm-chg")
         .data(tmp_array,
               function(d) {
-                  return d.id_cours;
+                  return d.id_course;
               });
     
     var tut_cm_course_g = tut_cm_course_dat
@@ -656,7 +656,7 @@ function apply_ckbox(dk) {
                     if (tutors.all.filter(function(t){
                         return t.display ;
                     }).length == 1) {
-                        user.nom = tutors.all.find(function(t){
+                        user.name = tutors.all.find(function(t){
                             return t.display ;
                         }).name ;
                     }
@@ -665,7 +665,7 @@ function apply_ckbox(dk) {
                         tutors.all.forEach(function(t) {
                             t.display = true ;
                         }) ;
-                        user.nom = logged_usr.nom ;
+                        user.name = logged_usr.name ;
                     }
                 }
 		create_dispos_user_data();
@@ -819,17 +819,17 @@ function compute_changes(changes, conc_tutors, gps) {
 	    
 	    // add instructor if never seen
             if (conc_tutors.indexOf(cur_course.prof) == -1
-		&& cur_course.prof != logged_usr.nom) {
+		&& cur_course.prof != logged_usr.name) {
                 conc_tutors.push(cur_course.prof);
             }
             if (conc_tutors.indexOf(cb.prof) == -1
-		&& cur_course.prof != logged_usr.nom) {
+		&& cur_course.prof != logged_usr.name) {
                 conc_tutors.push(cb.prof);
             }
 
 	    // add group if never seen
 	    gp_changed = groups[cur_course.promo][cur_course.group] ;
-	    gp_named = set_promos[gp_changed.promo] + gp_changed.nom ;
+	    gp_named = set_promos[gp_changed.promo] + gp_changed.name ;
             if (gps.indexOf(gp_named) == -1) {
                 gps.push(gp_named);
             }
@@ -844,9 +844,9 @@ function compute_changes(changes, conc_tutors, gps) {
 			     n: null },
 		      room: {o: cb.room,
 			     n: null },
-		      week: {o: weeks.init_data[weeks.sel[0]].semaine,
+		      week: {o: weeks.init_data[weeks.sel[0]].week,
 			     n: null },
-		      year: {o: weeks.init_data[weeks.sel[0]].an,
+		      year: {o: weeks.init_data[weeks.sel[0]].year,
 			     n: null},
 		      tutor:{o: cb.prof,
 			     n: null}
@@ -960,8 +960,8 @@ function send_edt_change(changes) {
     show_loader(true);
     $.ajax({
         url: url_edt_changes
-	    + "?s=" + weeks.init_data[weeks.sel[0]].semaine
-	    + "&a=" + weeks.init_data[weeks.sel[0]].an
+	    + "?s=" + weeks.init_data[weeks.sel[0]].week
+	    + "&a=" + weeks.init_data[weeks.sel[0]].year
 	    + "&c=" + num_copie,
         type: 'POST',
 //        contentType: 'application/json; charset=utf-8',
@@ -1051,9 +1051,9 @@ function send_dis_change() {
         show_loader(true);
         $.ajax({
             url: url_user_pref_changes
-		+ weeks.init_data[weeks.sel[0]].an
-		+ "/" + weeks.init_data[weeks.sel[0]].semaine
-		+ "/" + user.nom,
+		+ weeks.init_data[weeks.sel[0]].year
+		+ "/" + weeks.init_data[weeks.sel[0]].week
+		+ "/" + user.name,
             type: 'POST',
 //            contentType: 'application/json; charset=utf-8',
             data: sent_data , //JSON.stringify(changes),
@@ -1108,6 +1108,7 @@ function edt_change_ack(msg) {
 
 function clean_splash(class_id) {
     dg.select("." + class_id).remove() ;
+    splash_hold = true ;
 }
 
 
@@ -1274,7 +1275,7 @@ function apply_stype() {
             user.dispos[d].hour = user.dispos_type[d].hour;
             user.dispos[d].val = user.dispos_type[d].val;
             user.dispos[d].off = user.dispos_type[d].off;
-            dispos[user.nom][user.dispos[d].day][user.dispos[d].hour] = user.dispos[d].val;
+            dispos[user.name][user.dispos[d].day][user.dispos[d].hour] = user.dispos[d].val;
         }
         go_pref(true);
         send_dis_change();
@@ -1291,15 +1292,15 @@ function apply_stype() {
 // it has not been moved until now
 function add_bouge(d) {
     console.log("new");
-    if (Object.keys(cours_bouge).indexOf(d.id_cours.toString()) == -1) {
-        cours_bouge[d.id_cours] = {
-            id: d.id_cours,
+    if (Object.keys(cours_bouge).indexOf(d.id_course.toString()) == -1) {
+        cours_bouge[d.id_course] = {
+            id: d.id_course,
             day: d.day,
             start: d.start,
             room: d.room,
 	    prof: d.prof
         };
-        console.log(cours_bouge[d.id_cours]);
+        console.log(cours_bouge[d.id_course]);
     }
 }
 
@@ -1316,7 +1317,7 @@ function get_course(id){
     var i = 0 ;
     
     while (i < Object.keys(cours).length && !found) {
-	if (cours[i].id_cours == id){
+	if (cours[i].id_course == id){
 	    found = true ;
 	} else {
 	    i ++ ;
@@ -1368,7 +1369,7 @@ function apply_selection_display(choice) {
            && logged_usr.dispo_all_change && ckbox["dis-mod"].cked){
             tutors.all.forEach(function(t) { t.display = false ; });
             concerned.display = true ;
-	    user.nom = choice.name ;
+	    user.name = choice.name ;
 	    create_dispos_user_data() ;
 	    go_pref(true) ;
 	} else {
@@ -1469,7 +1470,7 @@ function redirect_dept(d) {
         split_addr.splice(-1,1);
     }
     // go to the right week
-    split_addr.push(weeks.init_data[weeks.sel[0]].an);
-    split_addr.push(weeks.init_data[weeks.sel[0]].semaine);
+    split_addr.push(weeks.init_data[weeks.sel[0]].year);
+    split_addr.push(weeks.init_data[weeks.sel[0]].week);
     window.location.href = split_addr.join("/") ;
 }

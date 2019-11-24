@@ -103,7 +103,7 @@ function cancel_cm_room_tutor_change(){
     if(ckbox["edt-mod"].cked) {
 	if(!context_menu.room_tutor_hold) {
             if(pending.init_course!=null) {
-                pending.back_init() ;
+                pending.rollback() ;
 		room_tutor_change.proposal = [] ;
 		go_cm_room_tutor_change();
                 go_courses(false) ;
@@ -169,7 +169,7 @@ file_fetch.constraints.callback = function () {
 
 file_fetch.department.callback = function () {
     departments.data = this.data ;
-    create_dept_redirection();
+    //create_dept_redirection();
 } ;
 
 
@@ -654,30 +654,31 @@ var pending = {
            core: false},
     force: {tutor: true,
             room: true},
-    init_force_pass: function() {
+    clean: function() {
+        this.init_course = null ;
+        this.wanted_course = null ;
+        this.time = null ;
+    },
+    fork_course: function(d) {
+        this.wanted_course = d ;
+        this.init_course = Object.assign({}, d);
+    },
+    prepare_dragndrop: function(d) {
+        this.fork_course(d) ;
         this.pass.tutor = false;
         this.pass.room = false;
         this.pass.core = false;
         this.force.room = true ;
         this.force.tutor = true ;
     },
-    one_try: function() {
+    prepare_modif: function(d) {
+        this.fork_course(d) ;
         this.force.room = false ;
         this.force.tutor = false ;
     },
-    init: function() {
-        this.init_course = null ;
-        this.wanted_course = null ;
-        this.time = null ;
-        this.init_force_pass() ;
-    },
-    fork_course: function(d) {
-        this.wanted_course = d ;
-        this.init_course = Object.assign({}, d);
-    },
-    back_init: function(t) {
+    rollback: function(t) {
         Object.assign(this.wanted_course, this.init_course) ;
-        this.init() ;
+        this.clean() ;
     }
 } ;
 
@@ -707,8 +708,9 @@ var valid = {
 // or about the next possible regeneration of the planning (ack.regen)
 var ack = {
     more:"",
-//    edt: "",
+    // regen infos
     regen: "",
+    // for stype
     pref: "",
     status: "OK",
     predefined: {KO: "C'est un échec cuisant. Trouvez un·e responsable d'emploi du temps et faites-lui part de vos problèmes.",
@@ -767,7 +769,7 @@ if ((logged_usr.rights >> 1) % 2 == 1) {
     logged_usr.dispo_all_change = true ;
 }
     
-var user = {nom: logged_usr.nom,
+var user = {name: logged_usr.name,
 	    dispos: [],
 	    dispos_bu: [],
 	    dispos_type: [],
@@ -873,3 +875,5 @@ var arrow =
 
 
 var is_side_panel_open = false ;
+
+var splash_hold = false ;

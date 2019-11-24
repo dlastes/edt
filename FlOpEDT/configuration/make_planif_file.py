@@ -28,8 +28,10 @@ import logging
 
 from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
+from openpyxl.worksheet.datavalidation import DataValidation
 
-from base.models import Group, Module, Period, CourseType
+from base.models import Group, Module, Period, CourseType, RoomType
+from people.models import Tutor
 
 from copy import copy
 
@@ -75,11 +77,51 @@ def order_CT(department):
         .exclude(name__contains='A').exclude(name__contains='TD').exclude(name__contains='CM')
     return CT
 
-empty_bookname = 'misc/deploy_database/empty_planif_file.xlsx'
+
+default_empty_bookname = 'media/configuration/empty_planif_file.xlsx'
+
+def adjust_column_length(sheet):
+    for i, col in enumerate(sheet.columns):
+        length = len(as_text(col[0].value))
+        if length == 2:
+            length = 1
+        adjusted_length = (length + 2) * 1.2
+        sheet.column_dimensions[get_column_letter(i + 1)].width = adjusted_length
 
 
-def make_planif_file(department, empty_bookname=empty_bookname, target_repo="misc/deploy_database"):
+def make_planif_file(department, empty_bookname=default_empty_bookname, target_repo="media/configuration"):
     new_book = load_workbook(filename=empty_bookname)
+
+    # Define the list of possible tutors and possible room_types
+    rules = new_book['Rules']
+    tutor_row = 7
+    tutor_col = 2
+    tutor_list = list(t.username for t in Tutor.objects.filter(departments=department))
+    tutor_list.sort()
+    for tutor in tutor_list:
+        rules.cell(row=tutor_row, column=tutor_col).value = tutor
+        tutor_col += 1
+
+    tutor_validator = DataValidation(type="list", formula1="Rules!$B$7:$EE$7", allow_blank=True)
+    tutor_validator.error = "Ce prof n'est pas dans la liste de l'onglet Rules"
+    tutor_validator.errorTitle = 'Erreur de prof'
+    tutor_validator.prompt = 'Choisir un prof dans la liste'
+    tutor_validator.promptTitle = 'Prof possibles'
+
+    room_type_row = 12
+    room_type_col = 2
+    room_type_list = list(rt.name for rt in RoomType.objects.filter(department=department))
+    room_type_list.sort()
+    for rt in room_type_list:
+        rules.cell(row=room_type_row, column=room_type_col).value = rt
+        room_type_col += 1
+    room_type_validator = DataValidation(type="list", formula1="Rules!$B$12:$EE$12", allow_blank=True)
+    room_type_validator.error = "Ce type de salle n'est pas dans la liste de l'onglet Rules"
+    room_type_validator.errorTitle = 'Erreur de type de salle'
+    room_type_validator.prompt = 'Choisir un type de salle dans la liste'
+    room_type_validator.promptTitle = 'Type de salles possibles'
+
+
     empty_rows = list(new_book['empty'].rows)
     recap_rows = list(new_book['empty_recap'].rows)
     new_book.create_sheet('Recap')
@@ -95,6 +137,8 @@ def make_planif_file(department, empty_bookname=empty_bookname, target_repo="mis
         logger.info(p)
         new_book.create_sheet(p.name)
         sheet = new_book[p.name]
+        sheet.add_data_validation(tutor_validator)
+        sheet.add_data_validation(room_type_validator)
         ################ Writing line 1 with weeks ################
         rank = 1
         FIRST_WEEK_COL = 8
@@ -160,7 +204,9 @@ def make_planif_file(department, empty_bookname=empty_bookname, target_repo="mis
                         sheet.cell(row=rank, column=2).value = '=$C%d&"_"&$E%d' % (rank, rank)
                         sheet.cell(row=rank, column=3).value = ct.name
                         sheet.cell(row=rank, column=4).value = ct.duration
-                        sheet.cell(row=rank, column=7).value = g.nom
+                        tutor_validator.add(sheet.cell(row=rank, column=5))
+                        room_type_validator.add(sheet.cell(row=rank, column=6))
+                        sheet.cell(row=rank, column=7).value = g.name
                         rank += 1
                     sheet.cell(row=rank - nb_groups, column=VERIF_COL).value = '' \
                        '=IF(SUM(%s%d:INDIRECT(ADDRESS(MATCH(G$5,G%d:G%d,0)+ROW()-2,%d)))-$%s%d*%d=0,"OK","/!\\ -> ' \
@@ -183,6 +229,8 @@ def make_planif_file(department, empty_bookname=empty_bookname, target_repo="mis
                     sheet.cell(row=rank, column=2).value = '=$C%d&"_"&$E%d' % (rank, rank)
                     sheet.cell(row=rank, column=3).value = ct.name
                     sheet.cell(row=rank, column=4).value = ct.duration
+                    tutor_validator.add(sheet.cell(row=rank, column=5))
+                    room_type_validator.add(sheet.cell(row=rank, column=6))
                     rank += 1
 
             ################ Separating each course with a black line ################
@@ -242,10 +290,7 @@ def make_planif_file(department, empty_bookname=empty_bookname, target_repo="mis
         rank += 1
 
         ############ Adapting column widths ############
-        for i,col in enumerate(sheet.columns):
-            length = len(as_text(col[0].value))
-            adjusted_length = (length + 2) * 1.2
-            sheet.column_dimensions[get_column_letter(i+1)].width = adjusted_length
+        adjust_column_length(sheet)
         sheet.column_dimensions['B'].hidden = True
 
 
@@ -276,12 +321,7 @@ def make_planif_file(department, empty_bookname=empty_bookname, target_repo="mis
     rank += 1
 
     ############ Adapting column widths ############
-    for i, col in enumerate(sheet.columns):
-        length = len(as_text(col[0].value))
-        if length == 2:
-            length = 1
-        adjusted_length = (length + 2) * 1.2
-        sheet.column_dimensions[get_column_letter(i+1)].width = adjusted_length
+    adjust_column_length(sheet)
     new_book.remove(new_book['empty_recap'])
 
     new_book.remove(new_book['empty'])
