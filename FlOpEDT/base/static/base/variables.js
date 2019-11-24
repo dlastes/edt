@@ -591,21 +591,21 @@ sel_popup.available.forEach(function(f) {
 })
 sel_popup.but["tutor"] = {
     h: 30,
-    w: 40,
+    w: 70,
     perline: 5,
     mar_x: 2,
     mar_y: 4,
 };
 sel_popup.but["room"] = {
     h: 30,
-    w: 60,
+    w: 80,
     perline: 6,
     mar_x: 2,
     mar_y: 4,
 };
 sel_popup.but["module"] = {
     h: 30,
-    w: 40,
+    w: 50,
     perline: 3,
     mar_x: 2,
     mar_y: 4,
