@@ -335,7 +335,7 @@ class TTModel(object):
         self.var_nb = 0
         self.constraint_nb = 0
         self.week = week
-        self.year = an
+        self.year = year
         self.warnings = {}
 
         self.department = Department.objects.get(abbrev=department_abbrev)
