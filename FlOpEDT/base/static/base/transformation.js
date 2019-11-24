@@ -1222,8 +1222,7 @@ function dept_txt(d){
 
 
 function pmg_x() {
-    var wid = pref_only ? svg.width - margin.left - 10 : grid_width();
-    console.log(svg.width);
+    var wid = pref_only ? dsp_svg.w - dsp_svg.margin.left - 10 : grid_width();
     return wid
             - 2*pref_selection.marx
             - pref_selection.choice.w

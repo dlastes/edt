@@ -30,6 +30,8 @@ dsp_svg.h = 625 - dsp_svg.margin.top - dsp_svg.margin.bot ;
 dsp_svg.w = 680 - dsp_svg.margin.left - dsp_svg.margin.right ;
 
 dsp_svg.cadastre = [
+    // dispos info ground
+    ["svg","pmg"],
     // valider
     ["svg","vg"],
     // background, middleground, foreground, dragground
