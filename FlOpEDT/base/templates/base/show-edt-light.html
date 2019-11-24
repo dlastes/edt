@@ -39,7 +39,7 @@
   var tv_gp_w = +"{{ tv_gp_w }}" ;
   var tv_svg_top_m = +"{{ tv_svg_top_m }}" ;
 
-  var cosmo = new Boolean("{{ cosmo }}");
+  var cosmo = JSON.parse("{{ cosmo | lower }}") ;
 </script>
 {% endblock %}
 
