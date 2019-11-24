@@ -157,7 +157,7 @@ function translate_course_preferences_from_csv(d) {
     }
     dispos[pseudo_tutor][d.day].push({start_time:+d.start_time,
 			       duration: +d.duration,
-			       value: +d.valeur});
+			       value: +d.value});
 }
 
 
