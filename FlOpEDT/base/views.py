@@ -43,16 +43,20 @@ from django.views.decorators.cache import cache_page
 from django.views.generic import RedirectView
 from django.db.models import Sum
 
+from FlOpEDT.settings.base import COSMO_MODE
+
 from people.models import Tutor, UserDepartmentSettings, User
 
 from base.admin import CoursResource, DispoResource, VersionResource, \
     CoursPlaceResource, UnavailableRoomsResource, TutorCoursesResource, \
     CoursePreferenceResource, MultiDepartmentTutorResource, \
     SharedRoomGroupsResource
+if COSMO_MODE:
+    from base.admin import CoursPlaceResourceCosmo
 from displayweb.admin import BreakingNewsResource
 from base.forms import ContactForm, PerfectDayForm
 from base.models import Course, UserPreference, ScheduledCourse, EdtVersion, \
-    CourseModification, Slot, Day, Time, RoomGroup, PlanningModification, \
+    CourseModification, Day, Time, RoomGroup, PlanningModification, \
     Regen, RoomPreference, Department, TimeGeneralSettings, CoursePreference, \
     TrainingProgramme, CourseType
 import base.queries as queries
@@ -152,7 +156,8 @@ def edt(req, year=None, week=None, splash_id=0, **kwargs):
                 'time_settings': queries.get_time_settings(req.department),
                 'days': num_all_days(year, week, req.department),
                 'has_department_perm': req.user.is_authenticated and req.user.has_department_perm(req.department),
-                'dept': req.department.abbrev
+                'dept': req.department.abbrev,
+                'cosmo': COSMO_MODE,
             })
 
 
@@ -202,7 +207,8 @@ def edt_light(req, year=None, week=None, **kwargs):
                       'tv_svg_w': svg_w,
                       'tv_gp_s': gp_s,
                       'tv_gp_w': gp_w,
-                      'tv_svg_top_m': svg_top_m
+                      'tv_svg_top_m': svg_top_m,
+                      'cosmo': COSMO_MODE,
                   })
 
 
@@ -230,7 +236,8 @@ def stype(req, *args, **kwargs):
                        'err': err,
                        'current_year': current_year,
                        'time_settings': queries.get_time_settings(req.department),
-                       'days': num_all_days(1, 1, req.department)
+                       'days': num_all_days(1, 1, req.department),
+                       'cosmo': COSMO_MODE,
                       })
     elif req.method == 'POST':
         if 'apply' in list(req.POST.keys()):
@@ -347,9 +354,11 @@ def fetch_cours_pl(req, year, week, num_copy, **kwargs):
             version = queries.get_edt_version(department=department,
                     week=week,
                     year=year, create=True)
-        
-        dataset = CoursPlaceResource() \
-            .export(queries.get_scheduled_courses(
+        if COSMO_MODE:
+            dataset = CoursPlaceResourceCosmo()
+        else:
+            dataset = CoursPlaceResource()
+        dataset = dataset.export(queries.get_scheduled_courses(
                         department=department,                         
                         week=week,
                         year=year,
@@ -441,13 +450,24 @@ def fetch_dispos(req, year, week, **kwargs):
     if cached is not None:
         return cached
 
-    busy_inst = Course.objects.filter(week=week,
-                                      year=year,
-                                      module__train_prog__department=department) \
-        .distinct('tutor') \
-        .values_list('tutor')
-    
-    busy_inst = list(chain(busy_inst, [req.user]))
+    busy_inst_init = Course.objects.filter(week=week,
+                                           year=year,
+                                           module__train_prog__department=department) \
+                                   .distinct('tutor') \
+                                   .values_list('tutor')
+                                           
+    if COSMO_MODE:
+        busy_inst_after = ScheduledCourse.objects.filter(course__week=week,
+                                                         course__year=year,
+                                                         course__module__train_prog__department=department)\
+                                                 .distinct('tutor') \
+                                                 .values_list('tutor')
+    else:
+        busy_inst_after = []
+
+    busy_inst = chain(busy_inst_init, busy_inst_after)
+    busy_inst = list(chain(busy_inst,
+                           [req.user]))
 
     week_avail = UserPreference.objects \
         .filter(week=week,

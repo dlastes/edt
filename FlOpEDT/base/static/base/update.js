@@ -946,7 +946,6 @@ function update_selection() {
 function update_active() {
     var tut_av = sel_popup.get_available("tutor");
     var mod_av = sel_popup.get_available("module");
-    var room_av = sel_popup.get_available("room");
 
     tut_av.active = tutors.all.filter(function(d) {
         return d.display;
@@ -954,11 +953,17 @@ function update_active() {
     mod_av.active = modules.all.filter(function(d) {
         return d.display;
     }).length != modules.all.length ;
-    room_av.active = rooms_sel.all.filter(function(d) {
-        return d.display;
-    }).length != rooms_sel.all.length ;
-    
-    sel_popup.active_filter = tut_av.active || mod_av.active || room_av.active ;
+
+    sel_popup.active_filter = tut_av.active || mod_av.active ;
+
+    if(!cosmo) {
+        var room_av = sel_popup.get_available("room");
+        room_av.active = rooms_sel.all.filter(function(d) {
+            return d.display;
+        }).length != rooms_sel.all.length ;
+        sel_popup.active_filter = sel_popup.active_filter || room_av.active ;
+    }
+
 }
 
 function go_courses(quick) {
@@ -988,11 +993,18 @@ function go_courses(quick) {
         .attr("cursor", ckbox["edt-mod"].cked ? "pointer" : "default")
         .on("contextmenu", function(d) { if (ckbox["edt-mod"].cked) {
 	    d3.event.preventDefault();
-	    room_tutor_change.cm_settings = entry_cm_settings ;
+            if(!cosmo) {
+	        room_tutor_change.cm_settings = entry_cm_settings ;
+            }
             pending.prepare_modif(d) ;
 	    compute_cm_room_tutor_direction();
 	    //select_room_change(d);
-	    select_entry_cm();
+            if (!cosmo) {
+	        select_entry_cm();
+            } else {
+                salarie_cm_level = 0 ;
+	        select_salarie_change();
+            }
 	    go_cm_room_tutor_change();
 	}})
         .call(dragListener);
@@ -1055,20 +1067,6 @@ function go_courses(quick) {
 
     incg
         .append("text")
-        .attr("st", "m")
-        .attr("x", cours_txt_x)
-        .attr("y", cours_txt_top_y)
-        .text(cours_txt_top_txt)
-        .attr("fill", cours_txt_fill)
-        .attr("font-weight", cours_txt_weight)
-        .attr("font-size", cours_txt_size)
-        .merge(cg.select("[st=m]"))
-        .transition(t)
-        .attr("x", cours_txt_x)
-        .attr("y", cours_txt_top_y);
-
-    incg
-        .append("text")
         .attr("st", "p")
         .attr("fill", cours_txt_fill)
         .attr("font-weight", cours_txt_weight)
@@ -1080,20 +1078,37 @@ function go_courses(quick) {
         .attr("x", cours_txt_x)
         .attr("y", cours_txt_mid_y)
         .text(cours_txt_mid_txt);
-
-    incg
-        .append("text")
-        .attr("st", "r")
-        .attr("x", cours_txt_x)
-        .attr("y", cours_txt_bot_y)
-        .merge(cg.select("[st=r]"))
-        .text(cours_txt_bot_txt)
-        .attr("fill", cours_txt_fill)
-        .attr("font-weight", cours_txt_weight)
-        .attr("font-size", cours_txt_size)
-        .transition(t)
-        .attr("x", cours_txt_x)
-        .attr("y", cours_txt_bot_y);
+        
+    
+    if (!cosmo) {
+        incg
+            .append("text")
+            .attr("st", "m")
+            .attr("x", cours_txt_x)
+            .attr("y", cours_txt_top_y)
+            .text(cours_txt_top_txt)
+            .attr("fill", cours_txt_fill)
+            .attr("font-weight", cours_txt_weight)
+            .attr("font-size", cours_txt_size)
+            .merge(cg.select("[st=m]"))
+            .transition(t)
+            .attr("x", cours_txt_x)
+            .attr("y", cours_txt_top_y);
+        
+        incg
+            .append("text")
+            .attr("st", "r")
+            .attr("x", cours_txt_x)
+            .attr("y", cours_txt_bot_y)
+            .merge(cg.select("[st=r]"))
+            .text(cours_txt_bot_txt)
+            .attr("fill", cours_txt_fill)
+            .attr("font-weight", cours_txt_weight)
+            .attr("font-size", cours_txt_size)
+            .transition(t)
+            .attr("x", cours_txt_x)
+            .attr("y", cours_txt_bot_y);
+    }
 
     cg.exit()
         .remove();

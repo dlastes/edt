@@ -25,8 +25,7 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-
-from base.models import Slot, ScheduledCourse, RoomPreference, EdtVersion, Department, CourseStartTimeConstraint, \
+from base.models import ScheduledCourse, RoomPreference, EdtVersion, Department, CourseStartTimeConstraint,\
     TimeGeneralSettings
 from django.db.models import Max, Q, F
 from TTapp.models import LimitedRoomChoices, slot_pause
@@ -53,15 +52,11 @@ def basic_reassign_rooms(department, week, year, target_work_copy):
     possible_start_times.sort()
     days = TimeGeneralSettings.objects.get(department=department).days
 
-    # slots = Slot.objects.all().order_by('jour', 'heure')
-    # for sl in slots:
     for day in days:
         for st in possible_start_times:
-            # rank = list(slots.filter(jour=sl.jour, heure__apm=sl.heure.apm)).index(sl)
             rank = possible_start_times.index(st)
             if rank == 0:
                 continue
-            # precedent_sl = slots_list[slots_list.index(sl) - 1]
             nsl = ScheduledCourse.objects.filter(
                                             start_time=st, day=day,
                                             **scheduled_courses_params)

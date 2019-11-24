@@ -27,7 +27,7 @@
 dsp_svg.margin = {top: 50,  left: 50, right: 10, bot:10};
 
 dsp_svg.h = 625 - dsp_svg.margin.top - dsp_svg.margin.bot ;
-dsp_svg.w = 700 - dsp_svg.margin.left - dsp_svg.margin.right ;
+dsp_svg.w = 900 - dsp_svg.margin.left - dsp_svg.margin.right ;
 
 dsp_svg.cadastre = [
     // dispos info ground
@@ -46,7 +46,6 @@ dsp_svg.cadastre = [
     // drag ground
     ["svg","dg"]
 ];
-
 
 
 var mode = "tutor" ;
@@ -73,9 +72,6 @@ pref_selection.choice.h = 35;
 ckbox["dis-mod"].cked = true ;
 
 pref_only = true ;
-
-
-
 
 svg = new Svg(dsp_svg.layout_tree, false);
 svg.create_container(true);
@@ -107,7 +103,6 @@ var hours_header = new HourHeader(svg, "edt-fg", hours) ;
 
 
 go_days(true, false);
-create_lunchbar();
 create_pref_modes(pref_only);
 fetch_pref_only();
 
@@ -127,7 +122,6 @@ function create_lunchbar() {
 	.attr("y2",gsclb_y);
 
 }
-
 
 
 /*---------------------

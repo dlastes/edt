@@ -541,19 +541,7 @@ var sel_popup = {
     selmy: 8,
     mar_side: 5,
     tlx: 700,
-    available: [{type:"group",
-                 buttxt: "Groupes",
-                 active: false},
-                {type: "tutor",
-                 buttxt: "Profs",
-                 active: false},
-                {type:"module",
-                 buttxt: "Modules",
-                 active: false},
-                {type:"room",
-                 buttxt: "Salles",
-                 active: false}
-                ],
+    available: [],
     get_available: function(t) {
         var ret = this.available.find(function(d) {
             return d.type == t ;
@@ -569,10 +557,30 @@ var sel_popup = {
     but: [],
     active_filter: false
 };
+if (cosmo) {
+    sel_popup.available = [{type:"group",
+                            buttxt: "Filtre"},
+                           {type: "tutor",
+                            buttxt: "Salarié·e·s"},
+                           {type:"module",
+                            buttxt: "Postes"}];
+} else {
+    sel_popup.available = [{type:"group",
+                            buttxt: "Groupes"},
+                           {type: "tutor",
+                            buttxt: "Profs"},
+                           {type:"module",
+                            buttxt: "Modules"},
+                           {type:"room",
+                            buttxt: "Salles"}];
+}
+sel_popup.available.forEach(function(f) {
+    f.active = false ;
+})
 sel_popup.but["tutor"] = {
     // selector dimensions
     h: 30,
-    w: 40,
+    w: 70,
     // number of items per line
     perline: 5,
     // margins between selectors
@@ -581,14 +589,14 @@ sel_popup.but["tutor"] = {
 };
 sel_popup.but["room"] = {
     h: 30,
-    w: 60,
+    w: 80,
     perline: 6,
     mar_x: 2,
     mar_y: 4,
 };
 sel_popup.but["module"] = {
     h: 30,
-    w: 40,
+    w: 50,
     perline: 3,
     mar_x: 2,
     mar_y: 4,
@@ -613,14 +621,21 @@ var drag_listener_hs, drag_listener_vs;
 /*-----------------------
    ------ COURSES -------
   -----------------------*/
-// unscheduled curses
+// unscheduled courses
 var cours_pp = [];
-// scheduled curses
+// scheduled courses
 var cours_pl = [];
-// all curses
+// all courses
 var cours = [];
 
-// listener for courses drag and drop 
+// courses of side weeks
+// list of {year:int, week:int, days: list of days, courses: list of courses}
+// note: main week is always taken from the server, any other may not and may
+//       be outdated
+var side_courses = [];
+
+
+// listener for curses drag and drop 
 var dragListener;
 var drag_popup ;
 
@@ -854,6 +869,23 @@ for(var l = 0 ; l < room_cm_settings.length ; l++) {
     room_cm_settings[l].nlin = 0 ;
 }
 
+
+var salarie_cm_settings =
+    {type: 'entry',
+     w: 100,
+     h: 18,
+     fs: 10,
+     mx: 5,
+     my: 3,
+     ncol: 3,
+     nlin: 0,
+     txt_intro: {'default':"Qui s'y colle ?"}
+    };
+
+// level=0: salaries qui ont le même poste dans la semaine
+//       1: tous les salaries
+var salarie_cm_level = 0 ;
+
 var room_tutor_change = {
     course: [],    // 1-cell array for d3.js
     proposal: [],
@@ -871,3 +903,40 @@ var arrow =
 
 
 var is_side_panel_open = false ;
+
+// for tutor contraints
+var law_constraints = {
+    max_variation: {
+        week: 5*60,
+        month: 5*60
+    },
+    sleep_time: 11*60,
+    max_consec_days: 6,
+    free_days_per_week: 2
+};
+
+
+// week transitions
+var day_refs = ['m','tu','w','th','f','sa','su'] ;
+var week_jump = 7 - (
+    day_refs.indexOf(
+        days.find(
+            function(d){return d.num==days.length-1 ;}
+        ).ref)
+        - day_refs.indexOf(
+            days.find(
+                function(d){return d.num==0 ;}
+            ).ref
+        )
+);
+var day_shifts = [] ;
+for (var i = 0 ; i<day_refs.length ; i++) {
+    day_shifts[day_refs[i]] = i ;
+}
+
+
+// tutor working time in minutes
+// dictionary tutor_username -> {week: int , month: int}
+var working_time = {} ;
+
+var splash_hold = false ;
