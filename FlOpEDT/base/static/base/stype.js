@@ -27,7 +27,7 @@
 dsp_svg.margin = {top: 50,  left: 50, right: 10, bot:10};
 
 dsp_svg.h = 625 - dsp_svg.margin.top - dsp_svg.margin.bot ;
-dsp_svg.w = 700 - dsp_svg.margin.left - dsp_svg.margin.right ;
+dsp_svg.w = 900 - dsp_svg.margin.left - dsp_svg.margin.right ;
 
 dsp_svg.cadastre = [
     // dispos info ground
