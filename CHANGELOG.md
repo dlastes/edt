@@ -5,7 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased]
 ### Changed
-- week/day management in the front-end
+- front-end: dispatch week/day management in js files
+- back-end refactoring: all model attributes in english
 
 ### TBD
 - right permissions in TTapp/views
