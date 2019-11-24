@@ -62,33 +62,18 @@
   ------- TIME ------
   --------------------------*/
 
-// day indices
-var idays = {} ;
-for (var i = 0 ; i<days.length ; i++){
-    idays[days[i].ref] = days[i] ;
-}
+// days
+var week_days = new WeekDays(days);
 
-// side time scale: list of {h: int, hd:('am'|'pm')}
-var side_time = [] ;
-var stime = Math.floor(time_settings.time.day_start_time/60) ;
-if (stime*60 < time_settings.time.day_start_time) {
-    stime ++ ;
-}
-while (stime*60 <= time_settings.time.day_finish_time) {
-    if(stime*60 <= time_settings.time.lunch_break_start_time) {
-        side_time.push({h:stime, hd:'am'});
-    }
-    if (stime*60 >= time_settings.time.lunch_break_finish_time) {
-        side_time.push({h:stime, hd:'pm'});
-    }
-    stime ++ ;
-}
+// for y-axis
+var hours = new Hours(time_settings.time) ;
 
 
 /*-------------------------
   - CONTEXT MENUS HELPERS -
   -------------------------*/
 
+// remove context menu if click outside
 function cancel_cm_adv_preferences(){
     if(ckbox["dis-mod"].cked) {
 	if(! context_menu.dispo_hold) {
@@ -99,6 +84,7 @@ function cancel_cm_adv_preferences(){
     }
 }
 
+// remove context menu if click outside
 function cancel_cm_room_tutor_change(){
     if(ckbox["edt-mod"].cked) {
 	if(!context_menu.room_tutor_hold) {
@@ -178,38 +164,26 @@ file_fetch.department.callback = function () {
    ------ ALL -------
   --------------------*/
 
-// number of days in the week
-var nbPer = Object.keys(idays).length ;
-
-
-// -- no slot --
-// --  begin  --
-// TO BE REMOVED: still appears in stype.js
-// number of slots within 1 day
-var nbSl = 6;
-// --   end   --
-// -- no slot --
-
-// initial number of promos
+// do we have slots
 var slot_case = false ; //true ;
 
 // current number of rows
 var nbRows;
-// last positive number of rows
+// last positive number of rows (when filtering by group)
 var pos_nbRows = 0;
 
 // maximum number of lab groups among promos
 var rootgp_width = 0;
-// last positive number of lab groups
+// last positive number of lab groups (when filtering by group)
 var pos_rootgp_width = 0;
 
 // different grounds where to plot
-var fg, mg, bg, dg, meg, vg, gpg, catg, stg, mog, sag, fig, log, cmpg, cmtg, selg, pmg;
-var wg = {
-    upper: null,
-    bg: null,
-    fg: null
-};
+// var fg, mg, bg, dg, meg, vg, gpg, catg, stg, mog, sag, fig, log, cmpg, cmtg, selg, pmg;
+// var wg = {
+//     upper: null,
+//     bg: null,
+//     fg: null
+// };
 
 // opacity of disabled stuffs
 var opac = .4;
@@ -230,18 +204,27 @@ var fetch = {
 };
 //cours_ok pas très utile
 
+// Svg 
+var svg ;
 
-var svg_cont ;
-
-
-
+var dsp_svg =
+    {w: 0,
+     h: 0,
+     margin: {
+         top: 0,     // - TOP BANNER - //
+         left: 0,
+         right: 0,
+         bot: 0},
+     trans: function() {
+         return "translate(" + this.margin.left + "," + this.margin.top + ")" ;
+     }
+    };
 
 /*--------------------------
   ------- PREFERENCES ------
   --------------------------*/
 
-// 2D array of list (username,iday,list of intervals)
-  // 
+// 2D array of list [tutor_name][day_reference] -> list of intervals)
 var dispos = {};
   // unavailabilities due to other departments
 var extra_pref = {tutors:{},
@@ -279,7 +262,7 @@ var smiley = {
     rect_h: .3
 };
 
-// helper arrays for smileys
+// seed array for advanced preferences (smileys)
 var data_dispo_adv_init = [];
 for (var i = 0; i <= par_dispos.nmax; i++) {
     data_dispo_adv_init.push({
@@ -289,8 +272,8 @@ for (var i = 0; i <= par_dispos.nmax; i++) {
         off: i
     });
 }
+// current array for advanced preferences (smileys)
 var data_dispo_adv_cur = [];
-var del_dispo_adv = false;
 
 // preference selection mode
 var pref_selection = {
@@ -304,10 +287,12 @@ var pref_selection = {
         h:25
     },
     mode:[{
+        // click on pref => round robin over default values
         desc:"nominal",
         txt:"Normal",
         selected:true,
     },{
+        // select color, then paint any preference with a click
         desc:"paint",
         txt:"Sélection",
         selected:false,
@@ -326,13 +311,14 @@ for (var i = 0; i <= par_dispos.nmax; i++) {
 var required_dispos = -1;
 var filled_dispos = -1;
 
-// display only preferences
+// display only preferences (for typical week)
 var pref_only ;
 
+// display parameters for preferences
 var dim_dispo = {
-    height: 0,
     width: 60,
     right: 10,
+    // are preferences plotted? 1|0
     plot:0,
     adv_v_margin: 5
 };
@@ -341,31 +327,30 @@ var dim_dispo = {
 /*---------------------
   ------- WEEKS -------
   ---------------------*/
-var weeks = {
-    init_data: null,
-    cur_data: null,
+
+var dsp_weeks = {
+    visible_weeks: 13,
     width: 40,
     height: 30,
-    x: 0,
-    y: -240, //margin.but,  // - TOP BANNER - //
-    ndisp: 13,
-    fdisp: 0,
-    sel: [1],
-    rad: 1.2,
-    hfac: 0.9,
-    wfac: 0.9,
-    cont: null
-};
+    x: 0,      // top of week banner
+    y: -240,   // "
+    rad: 1.2,  // ratio for the radius of prev/next week buttons
+    hfac: 0.9, // ratio for week selection ellipse
+    wfac: 0.9, // ratio for week selection ellipse
+    cont: null, // will be initiated in create_clipweek
+} ;
+
+// weeks in the current sliding window
+var wdw_weeks = new WeeksExcerpt(dsp_weeks.visible_weeks);
+
 
 /*----------------------
   -------- GRID --------
   ----------------------*/
 
-// one element per labgroup and per slot
-// is filtered when bound
-var data_mini_slot_grid = [];
-
 // one element per slot
+// non-empty iff slot_case
+// filled in create_grid_data()
 var data_slot_grid = [];
 
 // keys on top or at the bottom of the grid representing the name of
@@ -375,16 +360,15 @@ var data_grid_scale_gp = [];
 
 
 // keys to the left representing the name of the row
+// non-empty iff slot_case
 //(one element per row and per hour)
 var data_grid_scale_row = [];
-var data_grid_scale_hour = ["8h-9h25", "9h30-10h55", "11h05-12h30", "14h15-15h40", "15h45-17h10", "17h15-18h40"];
-
 
 // Garbage parameters
 var garbage = {
     start: time_settings.time.day_finish_time,
     duration: 90,
-    day: days[days.length-2].ref
+    day: week_days.day_by_num(week_days.nb_days()-2).ref
 };
 
 
@@ -394,13 +378,11 @@ var garbage = {
 
 // bknews = breaking news
 var bknews = {
-    hour_bound:3, // flash info between hour #2 and hour #3
-    ratio_height: .55,        // ratio over course height 
     time_height: 60,
     time_margin: 15,
     ratio_margin: .15, // ratio over course height 
-    cont: [],
-    nb_rows: 0,
+    cont: [], // array of bknews contents
+    nb_rows: 0, // maximum number of bknews in the same day
 };
 
 /*---------------------
@@ -414,7 +396,7 @@ var quote = "" ;
   ------- GROUPS -------
   ----------------------*/
 
-// 2D data about groups (id_promo, group_subname)
+// 2D data about groups [id_promo][group_subname] -> Group
 var groups = [];
 
 
@@ -430,23 +412,22 @@ var set_promos_txt = [];
 // set of row numbers
 var set_rows = [];
 
-// display parameters
+// display parameters for buttons about groups
 var butgp = {
     height: 20,
     width: 30,
-    tlx: 640
-};
-var margin_but = {
-    ver: 10,
-    hor: 10
+    tlx: 640,
+    mar_v: 10,
+    mar_h: 10
 };
 
 /*--------------------
   ------ MENUS -------
   --------------------*/
+// course and preference modification menus
 var menus = {
-    x: weeks.x + 20,
-    y: weeks.y + 25,
+    x: dsp_weeks.x + 20,
+    y: dsp_weeks.y + 25,
     mx: 20,
     dx: 280,
     h: 30,
@@ -456,19 +437,23 @@ var menus = {
     colcb: 140
 };
 
-var edt_but, edt_message;
+// course modification validation button
+var edt_but;
+// course modification feedback message
+var edt_message;
+
 // parameters for each checkbox
 var ckbox = [];
+// schedule modification
 ckbox["edt-mod"] = {
-    i: 0,
     menu: "edt-mod",
     cked: false,
     txt: "Modifier",
     disp: true,
     en: true
 };
+// preference modification
 ckbox["dis-mod"] = {
-    i: 1,
     menu: "dis-mod",
     cked: false,
     txt: "Modifier",
@@ -477,11 +462,13 @@ ckbox["dis-mod"] = {
 };
 
 
-
+// for click propagation
 var context_menu = {
     dispo_hold: false,
     room_tutor_hold: false
 };
+
+var splash_hold = false ;
 
 /*--------------------
    ------ MODULES ------
@@ -519,12 +506,10 @@ var unavailable_rooms = {} ;
    ------ TUTORS ------
    --------------------*/
 
+// tutors (sel: selected, pl:scheduled (PLacé), pp: not scheduled (Pas Placé), all: all modules
 var tutors = {
-    // instructors of unscheduled courses
     pp: [],
-    // instructors of scheduled courses
     pl: [],
-    // all instructors
     all: [],
     old: []
 };
@@ -533,11 +518,14 @@ var tutors = {
 var prof_displayed = [];
 
 // display parameters
+
+// exit button in filter selection panel
 var but_exit = {
     side: 20,
     mar_side: 3,
     mar_next: 10
 };
+// filter selection panel
 var sel_popup = {
     type: "",
     x: 640,
@@ -590,9 +578,12 @@ sel_popup.available.forEach(function(f) {
     f.active = false ;
 })
 sel_popup.but["tutor"] = {
+    // selector dimensions
     h: 30,
     w: 70,
+    // number of items per line
     perline: 5,
+    // margins between selectors
     mar_x: 2,
     mar_y: 4,
 };
@@ -770,7 +761,7 @@ var departments = {
     h:sel_popup.selh
 }
 
-// version of the planning
+// version number of the schedule
 var version;
 
 logged_usr.dispo_all_see = false ;
@@ -792,10 +783,11 @@ var user = {name: logged_usr.name,
 	    dispo_all_change: false
 	   };
 
+// will the week schedule be fully regenerated?
 var total_regen = false ;
 
 
-// 
+// First context menu when right click on a course
 var entry_cm_settings =
     {type: 'entry',
      w: 100,
@@ -807,6 +799,7 @@ var entry_cm_settings =
      nlin: 2,
      txt_intro: {'default':"Quoi changer ?"}
     };
+// list of tutors in the module of the selected course
 var tutor_module_cm_settings =
     {type: 'tutor_module',
      w: 45,
@@ -818,6 +811,7 @@ var tutor_module_cm_settings =
      nlin: 0,
      txt_intro: {'default':"Profs du module ?"}
     };
+// all tutors in batches
 var tutor_filters_cm_settings =
     {type: 'tutor_filters',
      w: 120,
@@ -829,6 +823,7 @@ var tutor_filters_cm_settings =
      nlin: 0,
      txt_intro: {'default':"Ordre alphabétique :"}
     };
+// some tutors
 var tutor_cm_settings =
     {type: 'tutor',
      w: 45,
@@ -840,6 +835,11 @@ var tutor_cm_settings =
      nlin: 4,
      txt_intro: {'default':"Ordre alphabétique :"}
     };
+// rooms
+// level=0: the proposed rooms are available and of the same type
+//       1: the proposed rooms are available
+//       2: all rooms are proposed
+var room_cm_level = 0 ;
 var room_cm_settings =
     [{type: 'room_available',
       txt_intro: {'0':"Aucune salle disponible",
@@ -868,10 +868,6 @@ for(var l = 0 ; l < room_cm_settings.length ; l++) {
     room_cm_settings[l].ncol = 3 ;
     room_cm_settings[l].nlin = 0 ;
 }
-// level=0: the proposed rooms are available and of the same type
-//       1: the proposed rooms are available
-//       2: all rooms are proposed
-var room_cm_level = 0 ;
 
 
 var salarie_cm_settings =

@@ -460,7 +460,7 @@ function go_cm_room_tutor_change() {
         tmp_array.push(pending.wanted_course);
     }
 
-    var tut_cm_course_dat = cmtg
+    var tut_cm_course_dat = svg.get_dom("cmtg")
         .selectAll(".cm-chg")
         .data(tmp_array,
               function(d) {
@@ -500,7 +500,7 @@ function go_cm_room_tutor_change() {
 
 
 
-    var tut_cm_room_dat = cmtg
+    var tut_cm_room_dat = svg.get_dom("cmtg")
         .selectAll(".cm-chg-rooms")
         .data(room_tutor_change.proposal,
               function(d,i) {
@@ -677,7 +677,7 @@ function apply_ckbox(dk) {
             if (ckbox[dk].cked) {
                 //create_dispos_user_data();
                 //ckbox["dis-mod"].disp = true;
-                stg.attr("visibility", "visible");
+                svg.get_dom("stg").attr("visibility", "visible");
 
                 dim_dispo.plot = 1;
                 if (rootgp_width != 0) {
@@ -718,7 +718,7 @@ function apply_ckbox(dk) {
             } else {
                 user.dispos = [];
                 //ckbox["dis-mod"].disp = false;
-                stg.attr("visibility", "hidden");
+                svg.get_dom("stg").attr("visibility", "hidden");
                 dim_dispo.plot = 0;
                 if (rootgp_width != 0) {
                     labgp.width *= 1 + (dim_dispo.width + dim_dispo.right) / (rootgp_width * labgp.width);
@@ -769,7 +769,7 @@ function apply_ckbox(dk) {
         // Fetch data, ask for login, etc.
         // ...
 
-        stg
+        svg.get_dom("stg")
             .select("[but=st-ap]")
             .attr("cursor", st_but_ptr());
 
@@ -831,9 +831,7 @@ function compute_changes(changes, conc_tutors, gps) {
 		    
 	    // 	}
 	    // 	msg += " le " + days[cur_course.day].date
-	    // 	    + " sur le créneau "
-	    // 	    + data_grid_scale_hour[cur_course.slot]
-	    // 	    + "."
+	    // 	    + " sur le créneau."
 		
 	    // 	splash_case = {
 	    // 	    id: "unav-tp",
@@ -883,7 +881,7 @@ function compute_changes(changes, conc_tutors, gps) {
 	    
 
 	    // build the communication with django
-	    
+	    var sel_week = wdw_weeks.get_selected() ;
             change = {id: id,
 		      day: {o: cb.day,
 			    n: null },
@@ -891,9 +889,9 @@ function compute_changes(changes, conc_tutors, gps) {
 			     n: null },
 		      room: {o: cb.room,
 			     n: null },
-		      week: {o: weeks.init_data[weeks.sel[0]].week,
+		      week: {o: sel_week.week,
 			     n: null },
-		      year: {o: weeks.init_data[weeks.sel[0]].year,
+		      year: {o: sel_week.year,
 			     n: null},
 		      tutor:{o: cb.prof,
 			     n: null}
@@ -983,23 +981,21 @@ function fill_date(day_desc) {
     //console.log("fill date : IW"+day_desc.iweek+" - "+day_desc.ref);
 
     day_desc.date = side_courses.find(function(d){
-        return d.year == weeks.init_data[day_desc.iweek].year &&
-            d.week == weeks.init_data[day_desc.iweek].week ;
-    }).days.find(function(d){
-        return d.ref == day_desc.ref ;
-    }).date;
+        return Week.compare(d.week,
+                            wdw_weeks.full_weeks.data[day_desc.iweek]) == 0 ;
+    }).days.day_by_ref(day_desc.ref).date;
 }
 
 
 // return the courses of tutor tutor on day day_desc
 function get_courses(tutor, day_desc) {
-    if (day_desc.iweek < 0 || day_desc.iweek >= weeks.init_data.length) {
+    if (day_desc.iweek < 0 || day_desc.iweek >= wdw_weeks.full_weeks.data.length) {
         return [] ;
     }
     var full_week = side_courses.find(function(d){
-        return d.year == weeks.init_data[day_desc.iweek].year &&
-            d.week == weeks.init_data[day_desc.iweek].week ;
-    });
+        return Week.compare(d.week,
+                            wdw_weeks.full_weeks.data[day_desc.iweek]) == 0 ;
+    }) ;
     if (typeof full_week !== 'undefined') {
         return full_week.courses.filter(function(d) {
             return d.day == day_desc.ref && d.prof == tutor ;
@@ -1056,16 +1052,16 @@ function aggregate_hours(tutor, iweek) {
     }
     
     var week_desc = side_courses.find(function(d){
-        return d.year == weeks.init_data[iweek].year &&
-            d.week == weeks.init_data[iweek].week ;
+        return Week.compare(d.week,
+                            wdw_weeks.full_weeks.data[iweek]) == 0 ;
     });
     if (typeof week_desc === 'undefined') {
         return ret ;
     }
     
-    for (var i = 0 ; i<week_desc.days.length ; i++) {
-        ret[day_shifts[week_desc.days[i].ref]].month
-            = +week_desc.days[i].date.split('/')[1] ;
+    for (var i = 0 ; i<week_desc.days.day_list.length ; i++) {
+        var dday = week_desc.days.day_list[i] ;
+        ret[day_shifts[dday.ref]].month = dday.month ;
     }
 
     week_desc.courses.filter(function(d){
@@ -1173,21 +1169,20 @@ function check_constraints_tutor(tutor) {
         d.prof == tutor ;
     }) ;
 
-    var icur_week = weeks.sel[0] ;
+    var icur_week = wdw_weeks.get_iselected_pure() ;
 
 
 
     // CARE  COURS PAS PLACÉ
-    insert_side_week(weeks.init_data[icur_week].year,
-                     weeks.init_data[icur_week].week,
-                     days,
+    insert_side_week(wdw_weeks.full_weeks.data[icur_week],
+                     week_days,
                      cours);
     
 
     // sleep constraint
     compute_sleep(tutor,
-                  {iweek: weeks.sel[0] - 1, ref: 'su'},
-                  {iweek: weeks.sel[0] + 1, ref: 'm'},
+                  {iweek: icur_week - 1, ref: 'su'},
+                  {iweek: icur_week + 1, ref: 'm'},
                   issues) ;
 
     // weekend constraint
@@ -1273,12 +1268,12 @@ function confirm_law_constraints(changes, conc_tutors, gps) {
         var splash_confirm = {
 	    id: "conf-law",
 	    but: {list: [{txt: "Je veux être hors-la-loi",
-                          width: 100,
-                          click: function(d){
+                         click: function(d){
                               confirm_contact_all(changes, conc_tutors, gps);
                           }},
 		         {txt: "Je vais trouver autre chose",
-                          click: function(d){} }]
+                          click: function(d){} }],
+                  width: 250
                  },
 	    com: {list: issues_txt}
         }
@@ -1308,9 +1303,11 @@ function confirm_change() {
         ack.more = "Rien à signaler.";
         go_ack_msg();
     } else {
-
-        confirm_law_constraints(changes, conc_tutors, gps) ;
-
+        if (!cosmo) {
+            confirm_contact_all(changes, conc_tutors, gps) ;
+        } else {
+            confirm_law_constraints(changes, conc_tutors, gps) ;
+        }
     }
 }
 
@@ -1373,11 +1370,13 @@ function send_edt_change(changes) {
     sent_data['v'] = JSON.stringify(version) ; 
     sent_data['tab'] = JSON.stringify(changes) ;
 
+    var sel_week = wdw_weeks.get_selected() ;
+
     show_loader(true);
     $.ajax({
         url: url_edt_changes
-	    + "?s=" + weeks.init_data[weeks.sel[0]].week
-	    + "&a=" + weeks.init_data[weeks.sel[0]].year
+	    + "?s=" + sel_week.week
+	    + "&a=" + sel_week.year
 	    + "&c=" + num_copie,
         type: 'POST',
 //        contentType: 'application/json; charset=utf-8',
@@ -1464,11 +1463,12 @@ function send_dis_change() {
 	var sent_data = {} ;
 	sent_data['changes'] = JSON.stringify(changes) ; 
 
+        var sel_week = wdw_weeks.get_selected() ;
+
         show_loader(true);
         $.ajax({
             url: url_user_pref_changes
-		+ weeks.init_data[weeks.sel[0]].year
-		+ "/" + weeks.init_data[weeks.sel[0]].week
+		+ sel_week.url()
 		+ "/" + user.name,
             type: 'POST',
 //            contentType: 'application/json; charset=utf-8',
@@ -1509,6 +1509,12 @@ function edt_change_ack(msg) {
         if (ack.more != null && ack.more.startsWith("Version")) {
             ack.more = "Il y a eu une modification concurrente. Rechargez et réessayez."
         }
+        var splash_disclaimer = {
+	    id: "failed-edt-mod",
+	    but: {list: [{txt: "Zut. Ok.", click: function(d){} }]},
+	    com: {list: [{txt: ack.edt}]}
+	}
+	splash(splash_disclaimer);
     }
     console.log(ack.more);
     go_ack_msg();
@@ -1517,13 +1523,13 @@ function edt_change_ack(msg) {
 
 
 /*--------------------
-   ------ SLASH ------
+   ------ SPLASH ------
   --------------------*/
 
 
 
 function clean_splash(class_id) {
-    dg.select("." + class_id).remove() ;
+    svg.get_dom("dg").select("." + class_id).remove() ;
     splash_hold = true ;
 }
 
@@ -1544,11 +1550,11 @@ function splash(splash_ds){
 
     var class_id = "spl_" + splash_ds.id ;
 
-    dg
+    svg.get_dom("dg")
 	.select("." + class_id)
 	.remove();
     
-    dg
+    svg.get_dom("dg")
         .append("g")
         .attr("class", class_id)
         .append("rect")
@@ -1558,7 +1564,7 @@ function splash(splash_ds){
         .attr("height", wp.height)
         .attr("fill", "white");
 
-    var spg = dg.select("." + class_id) ;
+    var spg = svg.get_dom("dg").select("." + class_id) ;
 
 
     
@@ -1886,7 +1892,8 @@ function redirect_dept(d) {
         split_addr.splice(-1,1);
     }
     // go to the right week
-    split_addr.push(weeks.init_data[weeks.sel[0]].year);
-    split_addr.push(weeks.init_data[weeks.sel[0]].week);
+    var sel_week = wdw_weeks.get_selected() ;
+    split_addr.push(sel_week.year);
+    split_addr.push(sel_week.week);
     window.location.href = split_addr.join("/") ;
 }

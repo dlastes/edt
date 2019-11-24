@@ -34,7 +34,7 @@
   <script src="{% static 'base/d3.v4.min.js' %}"></script>
   <!-- script src="https://d3js.org/d3.v4.min.js"></script -->
   <script>
-    var cosmo = new Boolean("{{ cosmo }}");
+    var cosmo = JSON.parse("{{ cosmo | lower }}") ;
 
     var url_fetch_user_dweek = "{% url 'base:fetch_user_dweek' department '.' %}";
     url_fetch_user_dweek = url_fetch_user_dweek.slice(0, -1);
@@ -75,7 +75,7 @@
   </script>
 <body>
   <div  id="tools-main" style="width: 100%; overflow: hidden;">
-    <div id="svg" style="width: 820px; float: left;"></div>
+    <div id="svg" style="width: 900px; float: left;"></div>
     <div style="margin-left: 700px;">
       <form style="white-space: nowrap;" name="app" action="javascript:apply_stype_from_button(false)" id="form-nweek">
 	<fieldset>
@@ -119,6 +119,11 @@
     </div>
   </div>
 </body>
+<script type='text/javascript' src="{% static 'base/helpers.js' %}"></script>
+<script type='text/javascript' src="{% static 'base/days.js' %}"></script>
+<script type='text/javascript' src="{% static 'base/weeks.js' %}"></script>
+<script type='text/javascript' src="{% static 'base/hours.js' %}"></script>
+<script type='text/javascript' src="{% static 'base/svg.js' %}"></script>
 <script type='text/javascript' src="{% static 'base/intervals.js' %}"></script>
 <script type='text/javascript' src="{% static 'base/week_change.js' %}"></script>
 <script type='text/javascript' src="{% static 'base/transformation.js' %}"></script>
