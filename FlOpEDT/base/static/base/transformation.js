@@ -264,7 +264,7 @@ function txt_reqDispos() {
     if (required_dispos > 0) {
         ret += "Dispos souhaitées : " + required_dispos + " créneaux."
     } else if (required_dispos == 0) {
-        ret += "Vous n'intervenez pas cette week.";
+        ret += "Vous n'intervenez pas cette semaine.";
     }
     return ret;
 }
