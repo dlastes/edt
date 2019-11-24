@@ -669,7 +669,7 @@ class Stabilize(TTConstraint):
                                                 day=sl.day):
                         ttmodel.obj += ponderation * ttmodel.TT[(sl, c)]
         else:
-            fc = ttmodel.wdb.courses.filter(semaine=week)
+            fc = ttmodel.wdb.courses.filter(week=week)
             if self.tutor is not None:
                 fc = fc.filter(tutor=self.tutor)
             if self.type is not None:
@@ -714,7 +714,7 @@ class Stabilize(TTConstraint):
         #     for c in fc:
         #         sched_c = ttmodel.wdb \
         #             .sched_courses \
-        #             .get(cours=c,
+        #             .get(course=c,
         #                  work_copy=self.work_copy)
         #         chosen_slot = sched_c.creneau
         #         chosen_roomgroup = sched_c.room
@@ -847,7 +847,7 @@ class MinNonPreferedSlot(TTConstraint):
 
     def enrich_model(self, ttmodel, week, ponderation=1):
         if self.tutor is not None:
-            filtered_courses = set(c for c in ttmodel.wdb.courses_for_tutor[self.tutor] if c.semaine == week)
+            filtered_courses = set(c for c in ttmodel.wdb.courses_for_tutor[self.tutor] if c.week == week)
         else:
             filtered_courses = ttmodel.wdb.courses \
                 .filter(group__train_prog=self.train_prog, week=week)
