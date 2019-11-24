@@ -5,6 +5,7 @@ import people.models as pm
 import base.models as bm
 import quote.models as p
 import displayweb.models as dwm
+import TTapp.models as ttm
 
 # ------------
 # -- PEOPLE --
@@ -428,5 +429,118 @@ class GroupDisplaysViewSet(viewsets.ModelViewSet):
     """
     queryset = dwm.GroupDisplay.objects.all()
     serializer_class = serializers.GroupDisplaysSerializer
+    
+    filterset_fields = '__all__'
+
+
+# ---------------
+# ---- TTAPP ----
+# ---------------
+
+# class TTSlotsViewSet(viewsets.ModelViewSet):
+#     """
+#     ViewSet to see all the TTapp slots
+#     """
+#     queryset = ttm.Slot.objects.all()
+#     serializer_class = serializers.TTSlotsSerializer
+    
+#     filterset_fields = '__all__'
+
+# class TTConstraintsViewSet(viewsets.ModelViewSet):
+#     """
+#     ViewSet to see all the TTContraints
+#     """
+#     queryset = ttm.TTConstraint.objects.all()
+#     serializer_class = serializers.TTConstraintsSerializer
+    
+#     filterset_fields = '__all__'
+
+class TTCustomConstraintsViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet to see all the TTCustomConstraints
+    """
+    queryset = ttm.CustomConstraint.objects.all()
+    serializer_class = serializers.TTCustomConstraintsSerializer
+    
+    filterset_fields = '__all__'
+
+class TTLimitCourseTypeTimePerPeriodsViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet to see all the LimitCourseTypeTimePerPeriods
+    """
+    queryset = ttm.LimitCourseTypeTimePerPeriod.objects.all()
+    serializer_class = serializers.TTLimitCourseTypeTimePerPeriodsSerializer
+    
+    filterset_fields = '__all__'
+
+class TTReasonableDaysViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet to see all the ReasonableDays
+    """
+    queryset = ttm.ReasonableDays.objects.all()
+    serializer_class = serializers.TTReasonableDayssSerializer
+    
+    filterset_fields = '__all__'
+
+class TTStabilizeViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet to see all the Stabilize objects from TTapp
+    """
+    queryset = ttm.Stabilize.objects.all()
+    serializer_class = serializers.TTStabilizeSerializer
+    
+    filterset_fields = '__all__'
+
+class TTMinHalfDaysViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet to see all the MinHalfDays
+    """
+    queryset = ttm.MinHalfDays.objects.all()
+    serializer_class = serializers.TTMinHalfDaysSerializer
+    
+    filterset_fields = '__all__'
+
+class TTMinNonPreferedSlotsViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet to see all the MinNonPreferedSlots
+    """
+    queryset = ttm.MinNonPreferedSlot.objects.all()
+    serializer_class = serializers.TTMinNonPreferedSlotsSerializer
+    
+    filterset_fields = '__all__'
+
+class TTAvoidBothTimesViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet to see all the AvoidBothTimes
+    """
+    queryset = ttm.AvoidBothTimes.objects.all()
+    serializer_class = serializers.TTAvoidBothTimesSerializer
+    
+    filterset_fields = '__all__'
+
+class TTSimultaneousCoursesViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet to see all the SimultaneousCourses
+    """
+    queryset = ttm.SimultaneousCourses.objects.all()
+    serializer_class = serializers.TTSimultaneousCoursesSerializer
+    
+    filterset_fields = '__all__'
+
+class TTLimitedStartTimeChoicesViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet to see all the LimitedStartTimeChoices
+    """
+    queryset = ttm.LimitedStartTimeChoices.objects.all()
+    serializer_class = serializers.TTLimitedStartTimeChoicesSerializer
+    
+    filterset_fields = '__all__'
+
+class TTLimitedRoomChoicesViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet to see all the LimitedRoomChoices
+    """
+    queryset = ttm.LimitedRoomChoices.objects.all()
+    serializer_class = serializers.TTLimitedRoomChoicesSerializer
     
     filterset_fields = '__all__'

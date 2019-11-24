@@ -3,6 +3,7 @@ import base.models as bm
 import people.models as pm
 import quote.models as q
 import displayweb.models as dwm
+import TTapp.models as ttm
 
 # ------------
 # -- PEOPLE --
@@ -269,4 +270,69 @@ class TrainingProgrammeDisplaysSerializer(serializers.HyperlinkedModelSerializer
 class GroupDisplaysSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = dwm.GroupDisplay
+        fields = '__all__'
+
+
+# ---------------
+# ---- TTAPP ----
+# ---------------
+
+# class TTSlotsSerializer(serializers.HyperlinkedModelSerializer):
+#     class Meta:
+#         model = ttm.Slot
+#         fields = '__all__'
+
+# class TTConstraintsSerializer(serializers.HyperlinkedModelSerializer):
+#     class Meta:
+#         model = ttm.TTConstraint
+#         fields = '__all__'
+
+class TTCustomConstraintsSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = ttm.CustomConstraint
+        fields = '__all__'
+
+class TTLimitCourseTypeTimePerPeriodsSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = ttm.LimitCourseTypeTimePerPeriod
+        fields = '__all__'
+
+class TTReasonableDayssSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = ttm.ReasonableDays
+        fields = '__all__'
+
+class TTStabilizeSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = ttm.Stabilize
+        fields = '__all__'
+
+class TTMinHalfDaysSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = ttm.MinHalfDays
+        fields = '__all__'
+
+class TTMinNonPreferedSlotsSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = ttm.MinNonPreferedSlot
+        fields = '__all__'
+
+class TTAvoidBothTimesSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = ttm.AvoidBothTimes
+        fields = '__all__'
+
+class TTSimultaneousCoursesSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = ttm.SimultaneousCourses
+        fields = '__all__'
+
+class TTLimitedStartTimeChoicesSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = ttm.LimitedStartTimeChoices
+        fields = '__all__'
+
+class TTLimitedRoomChoicesSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = ttm.LimitedRoomChoices
         fields = '__all__'

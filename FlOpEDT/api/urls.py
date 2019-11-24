@@ -6,6 +6,7 @@ from django.conf.urls import include
 routerBase = routers.SimpleRouter()
 routerPeople = routers.SimpleRouter()
 routerDisplayweb = routers.SimpleRouter()
+routerTTapp = routers.SimpleRouter()
 
 routerBase.register(r'users', views.UsersViewSet)
 routerBase.register(r'userdepartmentsettings', views.UserDepartmentSettingsViewSet)
@@ -52,8 +53,24 @@ routerDisplayweb.register(r'moduledisplays', views.ModuleDisplaysViewSet)
 routerDisplayweb.register(r'trainingprogrammedisplays', views.TrainingProgrammeDisplaysViewSet)
 routerDisplayweb.register(r'groupdisplays', views.GroupDisplaysViewSet)
 
+
+#routerTTapp.register(r'slots', views.TTSlotsViewSet)
+# routerTTapp.register(r'constraints', views.TTConstraintsViewSet)
+routerTTapp.register(r'customconstrains', views.TTCustomConstraintsViewSet)
+routerTTapp.register(r'limitcoursetypetimeperperiods', views.TTLimitCourseTypeTimePerPeriodsViewSet)
+routerTTapp.register(r'reasonabledays', views.TTReasonableDaysViewSet)
+routerTTapp.register(r'stabilize', views.TTStabilizeViewSet)
+routerTTapp.register(r'minhalfdays', views.TTMinHalfDaysViewSet)
+routerTTapp.register(r'minnonpreferedslots', views.TTMinNonPreferedSlotsViewSet)
+routerTTapp.register(r'avoidbothtimes', views.TTAvoidBothTimesViewSet)
+routerTTapp.register(r'simultaneouscourses', views.TTSimultaneousCoursesViewSet)
+routerTTapp.register(r'limitedstarttimechoices', views.TTLimitedStartTimeChoicesViewSet) # TODO: Fix
+routerTTapp.register(r'limitiedroomchoices', views.TTLimitedRoomChoicesViewSet)
+
+
 urlpatterns = [
     path('base/', include(routerBase.urls)),
     path('user/', include(routerPeople.urls)),
-    path('displayweb/', include(routerBase.urls))
+    path('displayweb/', include(routerDisplayweb.urls)),
+    path('ttapp/', include(routerTTapp.urls))
 ]
