@@ -49,10 +49,10 @@
     var url_training_programmes = "{% url "base:fetch_training_programmes" department %}";
     var url_all_tutors = "{% url 'base:fetch_all_tutors' department %}";
     
-    var logged_usr = {nom:"{{ name_usr }}", rights: -1};
+    var logged_usr = {name:"{{ name_usr }}", rights: -1};
     var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
     var url_login = "{% url 'people:login' %}";
-    var annee_courante = "{{ annee_courante }}" ;
+    var current_year = "{{ current_year }}" ;
     var time_settings = {{ time_settings | safe }} ;
     var days = {{ days | safe }} ;
     var csrftoken = '{{ csrf_token }}';
@@ -80,11 +80,11 @@
 	  <legend>Semaines particulières</legend>
 	  Appliquer la configuration ci-contre<br/>
 	  de la semaine
-	  <input type="number" name="se_deb" style="width: 40px" value="{{ date_deb.semaine }}" min="1" max="53">, année
-	  <input type="number" name="an_deb" style="width: 60px" value="{{ date_deb.an }}" min="{{annee_courante}}" max="{{annee_courante|add:"1"}}"></br>
+	  <input type="number" name="week_st" style="width: 40px" value="{{ date_deb.semaine }}" min="1" max="53">, année
+	  <input type="number" name="year_st" style="width: 60px" value="{{ date_deb.an }}" min="{{current_year}}" max="{{current_year|add:"1"}}"></br>
 	  à la semaine
-	    <input type="number" name="se_fin" style="width: 40px" value="{{ date_fin.semaine }}" min="1" max="53">, année
-	    <input type="number" name="an_fin" style="width: 60px" value="{{ date_fin.an }}" min="{{annee_courante}}" max="{{annee_courante|add:"1"}}"></br></br>
+	    <input type="number" name="week_end" style="width: 40px" value="{{ date_fin.semaine }}" min="1" max="53">, année
+	    <input type="number" name="year_end" style="width: 60px" value="{{ date_fin.an }}" min="{{current_year}}" max="{{current_year|add:"1"}}"></br></br>
 	    <input type="submit" name="apply" value="Appliquer">
 	</fieldset></br></br>
       </form>
@@ -94,30 +94,34 @@
 	  Redéfinir ma semaine type<br/>
           <br/>
           <input type="submit" name="save" value="Sauvegarder"></br>
-      </form>
+        </form>
       </fieldset>
-        <br/><br/>
-
-  <fieldset>
-    <legend>Ma journée idéale</legend>
-      <form style="white-space: nowrap;" action='{% url "base:user_perfect_day_changes" department user.username %}'  method='POST' id="form-perfect_day" >
-        {% csrf_token %}
-        Chaque jour, voici le nombre d'heures de cours que je souhaite donner:<br/>
+      <br/><br/>
+      <fieldset>
+        <legend>Ma journée idéale</legend>
+        <form action='{% url "base:user_perfect_day_changes" department user.username %}'  method='POST' id="form-perfect_day" >
+          {% csrf_token %}
+          Chaque jour, voici le nombre d'heures de cours que je souhaite donner:<br/>
           <br/>
-        Idéalement <input id="user_pref_hours_per_day" type="number" name="user_pref_hours" style="width: 30px" min="1" max="9" value="{{ usr_pref_hours }}">
-        <br/>
-        Maximum <input id="user_max_hours_per_day" type="number" name="user_max_hours" style="width: 30px" min="1" max="9" value="{{ usr_max_hours }}">
+          Idéalement <input id="user_pref_hours_per_day" type="number" name="user_pref_hours" style="width: 30px" min="1" max="9" value="{{ usr_pref_hours }}">
+          <br/>
+          Maximum <input id="user_max_hours_per_day" type="number" name="user_max_hours" style="width: 30px" min="1" max="9" value="{{ usr_max_hours }}">
         </br>
         </br>
         <input type="submit" name="save_perfect_day" value="Sauvegarder">
         </br>
-      </form>
-  </fieldset>
+        </form>
+      </fieldset>
 
       <span id="ack"></span>
     </div>
   </div>
 </body>
+<script type='text/javascript' src="{% static 'base/helpers.js' %}"></script>
+<script type='text/javascript' src="{% static 'base/days.js' %}"></script>
+<script type='text/javascript' src="{% static 'base/weeks.js' %}"></script>
+<script type='text/javascript' src="{% static 'base/hours.js' %}"></script>
+<script type='text/javascript' src="{% static 'base/svg.js' %}"></script>
 <script type='text/javascript' src="{% static 'base/intervals.js' %}"></script>
 <script type='text/javascript' src="{% static 'base/week_change.js' %}"></script>
 <script type='text/javascript' src="{% static 'base/transformation.js' %}"></script>

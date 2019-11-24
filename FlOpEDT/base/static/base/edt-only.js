@@ -25,21 +25,31 @@
   ---- VARIABLES ----
   -------------------*/
 
-var user = {nom: usna,
+var user = {name: usna,
 	    dispos: [],
 	    dispos_bu: [],
 	    dispos_type: [],
 	   };
 
-var margin = {top: tv_svg_top_m, left: 30, right: 0, bot:0};
 
-var svg = {height: tv_svg_h - margin.top - margin.bot, width: tv_svg_w - margin.left - margin.right};
+dsp_svg.margin = {top: tv_svg_top_m,
+                  left: 30,
+                  right: 0,
+                  bot:0};
 
-var week = semaine_init ;
-var year = an_init;
+dsp_svg.h = tv_svg_h - dsp_svg.margin.top - dsp_svg.margin.bot ;
+dsp_svg.w = tv_svg_w - dsp_svg.margin.left - dsp_svg.margin.right ;
+
+var week = week_init ;
+var year = year_init;
 
 // filter the right bknews
-weeks = {sel: [0], init_data: [{semaine: week, an: year}]};
+
+wdw_weeks.add_full_weeks([{week: week, year: year}]) ;
+
+var days_header = new WeekDayHeader(svg, "edt-fg", week_days, true, null) ;
+
+var hours_header = new HourHeader(svg, "edt-fg", hours) ;
 
 
 var labgp = {width: tv_gp_w, tot: 8, height_init: 40, width_init: 30};
@@ -58,9 +68,43 @@ pref_only = false ;
   ------ BUILD ------
   -------------------*/
 
+// to be cleaned!
+dsp_svg.cadastre = [
+    // menus ground
+    ["svg","meg"],
+    // weeks ground
+    ["svg","wg"],
+    ["wg","wg-bg"],
+    ["wg","wg-fg"],
+    // selection categories button ground
+    ["svg","catg"],
+    // semaine type ground
+    ["svg","stg"],
+    // dispos info ground
+    ["svg","dig"],
+    // valider
+    ["svg","vg"],
+    // background, middleground, foreground, dragground
+    ["svg","edtg"],
+    ["edtg","edt-bg"],
+    ["edtg","edt-mg"],
+    ["edtg","edt-fig"],
+    ["edtg","edt-fg"],
+    // selection ground
+    ["svg","selg"],
+    // context menus ground
+    ["svg","cmg"],
+    ["cmg","cmpg"],
+    ["cmg","cmtg"],
+    // drag ground
+    ["svg","dg"]
+];
 
 
-create_general_svg(true);
+
+svg = new Svg(dsp_svg.layout_tree, true);
+svg.create_container();
+svg.create_layouts(dsp_svg.cadastre);
 
 
 
@@ -97,13 +141,13 @@ function fetch_cours_light() {
     fetch.done = false ;
     ack.edt="";
     
-    var semaine_att = week;
-    var an_att = year;
+    var week_att = week;
+    var year_att = year;
 
     $.ajax({
         type: "GET", //rest Type
         dataType: 'text',
-        url: url_cours_pl + an_att + "/" + semaine_att + "/0",
+        url: url_cours_pl + year_att + "/" + week_att + "/0",
         async: false,
         contentType: "text/csv",
         success: function (msg, ts, req) {
@@ -128,20 +172,21 @@ function fetch_cours_light() {
 
 function fetch_bknews_light(first) {
     fetch.ongoing_bknews = true;
-    var semaine_att = week;
-    var an_att = year;
+    var exp_week = new Week(year, week) ;
 
     $.ajax({
         type: "GET", //rest Type
         dataType: 'text',
-        url: url_bknews + an_att + "/" + semaine_att,
+        url: url_bknews + year_att + "/" + week_att,
         async: true,
         contentType: "text/json",
         success: function(msg) {
-	    bknews.cont = d3.csvParse(msg,
-				      translate_bknews_from_csv);
-            if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
-                an_att == weeks.init_data[weeks.sel[0]].an) {
+            //console.log(msg);
+
+            bknews.cont = JSON.parse(msg) ;
+
+            var sel_week = wdw_weeks.get_selected() ;
+            if (Week.compare(sel_week, exp_week)==0) {
 		var max_y = -1 ;
 		for (var i = 0 ; i < bknews.cont.length ; i++) {
 		    if (bknews.cont[i].y > max_y) {

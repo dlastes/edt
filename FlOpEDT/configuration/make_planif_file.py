@@ -206,7 +206,7 @@ def make_planif_file(department, empty_bookname=default_empty_bookname, target_r
                         sheet.cell(row=rank, column=4).value = ct.duration
                         tutor_validator.add(sheet.cell(row=rank, column=5))
                         room_type_validator.add(sheet.cell(row=rank, column=6))
-                        sheet.cell(row=rank, column=7).value = g.nom
+                        sheet.cell(row=rank, column=7).value = g.name
                         rank += 1
                     sheet.cell(row=rank - nb_groups, column=VERIF_COL).value = '' \
                        '=IF(SUM(%s%d:INDIRECT(ADDRESS(MATCH(G$5,G%d:G%d,0)+ROW()-2,%d)))-$%s%d*%d=0,"OK","/!\\ -> ' \

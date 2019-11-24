@@ -28,13 +28,13 @@ import os
 import sys
 from openpyxl import *
 
-from base.weeks import annee_courante
+from base.weeks import current_year
 from base.models import Group, Module, Course, Room, CourseType, RoomType, TrainingProgramme, Dependency, Period, Department
 from people.models import Tutor
 from misc.assign_module_color import assign_color
 
 
-def ReadPlanifWeek(department, book, feuille, semaine, an):
+def ReadPlanifWeek(department, book, feuille, week, year):
     sheet = book[feuille]
     period=Period.objects.get(name=feuille, department=department)
 
@@ -46,10 +46,10 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
         while wc < 50:
             wc += 1
             sem = sheet.cell(row=wr, column=wc).value
-            if sem == float(semaine):
+            if sem == float(week):
                 WEEK_COL = wc
                 break
-    print("Semaine %s de %s : colonne %g" % (semaine, feuille, WEEK_COL))
+    print("Semaine %s de %s : colonne %g" % (week, feuille, WEEK_COL))
 
     row = 4
     module_COL = 1
@@ -57,11 +57,11 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
     duree_COL = 4
     prof_COL = 5
     salle_COL = 6
-    groupe_COL = 7
+    group_COL = 7
     sumtotal = 0
     while 1:
         row += 1
-        is_total = sheet.cell(row=row, column=groupe_COL).value
+        is_total = sheet.cell(row=row, column=group_COL).value
         if is_total == "TOTAL":
             # print "Sem %g de %s - TOTAL: %g"%(semaine, feuille,sumtotal)
             break
@@ -80,7 +80,7 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
             if salle == "Type de Salle":
                 nominal = int(N)
                 if N != nominal:
-                    print('Valeur decimale ligne %g de %s, semaine %g : on la met a 1 !' % (row, feuille, semaine))
+                    print('Valeur decimale ligne %g de %s, semaine %g : on la met a 1 !' % (row, feuille, week))
                     nominal = 1
                     # le nominal est le nombre de cours par groupe (de TP ou TD)
                 if Cell.comment:
@@ -100,7 +100,7 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
             nature = sheet.cell(row=row, column=nature_COL).value
             salle = sheet.cell(row=row, column=salle_COL).value
             prof = sheet.cell(row=row, column=prof_COL).value
-            grps = sheet.cell(row=row, column=groupe_COL).value
+            grps = sheet.cell(row=row, column=group_COL).value
             COURSE_TYPE = CourseType.objects.get(name=nature, department=department)
             ROOMTYPE = RoomType.objects.get(name=salle, department=department)
             if prof is None:
@@ -127,17 +127,17 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
                 grps = []
             else:
                 grps = grps.replace(' ', '').replace(',', ';').split(';')
-            groupes = [str(g) for g in grps]
+            groups = [str(g) for g in grps]
 
-            GROUPS = list(Group.objects.filter(nom__in=groupes, train_prog=PROMO))
+            GROUPS = list(Group.objects.filter(name__in=groups, train_prog=PROMO))
             if GROUPS == []:
-                GROUPS = list(Group.objects.filter(nom='CE', train_prog=PROMO))
+                GROUPS = list(Group.objects.filter(name='CE', train_prog=PROMO))
 
             N=int(N)
 
             for i in range(N):
-                GROUPE = GROUPS[i % len(GROUPS)]
-                C = Course(tutor=TUTOR, type=COURSE_TYPE, module=MODULE, groupe=GROUPE, semaine=semaine, an=an,
+                GROUP = GROUPS[i % len(GROUPS)]
+                C = Course(tutor=TUTOR, type=COURSE_TYPE, module=MODULE, group=GROUP, week=week, year=year,
                            room_type=ROOMTYPE)
                 C.save()
                 for sp in SUPP_TUTORS:
@@ -151,29 +151,29 @@ def ReadPlanifWeek(department, book, feuille, semaine, an):
                         n = 1
                         s = 1
                     course_type = after_type[s:]
-                    courses = Course.objects.filter(type__name=course_type, module=MODULE, semaine=semaine, an=an,
-                                                    groupe__in = GROUPE.ancestor_groups() |
-                                                                 {GROUPE} |
-                                                                 GROUPE.descendants_groups())
+                    courses = Course.objects.filter(type__name=course_type, module=MODULE, week=week, year=year,
+                                                    group__in = GROUP.ancestor_groups() |
+                                                                 {GROUP} |
+                                                                 GROUP.descendants_groups())
                     for course in courses[:n]:
-                        P = Dependency(cours1=course, cours2=C)
+                        P = Dependency(course1=course, course2=C)
                         P.save()
 
             if 'D' in comments or 'D' in local_comments and N >= 2:
-                for GROUPE in GROUPS:
-                    Cours = Course.objects.filter(type=COURSE_TYPE, module=MODULE, groupe=GROUPE, an=an,
-                                                  semaine=semaine)
+                for GROUP in GROUPS:
+                    Course = Course.objects.filter(type=COURSE_TYPE, module=MODULE, group=GROUP, year=year,
+                                                  week=week)
                     for i in range(N//2-1):
-                        P = Dependency(cours1=Cours[2*i], cours2=Cours[2*i+1], successifs=True)
+                        P = Dependency(course1=Course[2*i], course2=Course[2*i+1], successiveq=True)
                         P.save()
             if 'ND' in comments or 'ND' in local_comments  and N >= 2:
-                for GROUPE in GROUPS:
-                    Cours = Course.objects.filter(type=COURSE_TYPE, module=MODULE, groupe=GROUPE, an=an,
-                                                  semaine=semaine)
-                    P = Dependency(cours1=Cours[0], cours2=Cours[1], ND=True)
+                for GROUP in GROUPS:
+                    Course = Course.objects.filter(type=COURSE_TYPE, module=MODULE, group=GROUP, year=year,
+                                                  week=week)
+                    P = Dependency(course1=Course[0], course2=Course[1], ND=True)
                     P.save()
         except Exception as e:
-            print("Exception ligne %g semaine %s de %s : %s \n" % (row, semaine, feuille, module), e)
+            print("Exception ligne %g semaine %s de %s : %s \n" % (row, week, feuille, module), e)
             raise
 
 
@@ -190,30 +190,30 @@ def extract_period(department, book, period, year):
 
 def extract_planif(department, bookname=None):
     '''
-    Generate the courses from bookname; the school year starts in annee_courante
+    Generate the courses from bookname; the school year starts in current_year
     '''
     if bookname is None:
         bookname = 'misc/deploy_database/planif_file_'+department.abbrev+'.xlsx'
     book = load_workbook(filename=bookname, data_only=True)
     for period in Period.objects.filter(department=department):
-        extract_period(department, book, period, annee_courante)
+        extract_period(department, book, period, current_year)
     assign_color(department)
 
 
 def extract_planif_from_week(week, year, department, bookname=None):
     '''
-    Generate the courses from bookname; the school year starts in annee_courante
+    Generate the courses from bookname; the school year starts in current_year
     '''
     if bookname is None:
         bookname = 'misc/deploy_database/Files/planif_file_'+department.abbrev+'.xlsx'
     book = load_workbook(filename=bookname, data_only=True)
-    if year == annee_courante:
+    if year == current_year:
         for period in Period.objects.filter(department=department):
             if period.starting_week < period.ending_week:
                 for w in range(max(week, period.starting_week), period.ending_week + 1):
-                    ReadPlanifWeek(department, book, period.name, w, annee_courante)
+                    ReadPlanifWeek(department, book, period.name, w, current_year)
             else:
                 for w in range(max(week, period.starting_week), 53):
-                    ReadPlanifWeek(department, book, period.name, w, annee_courante)
+                    ReadPlanifWeek(department, book, period.name, w, current_year)
                 for w in range(1, period.ending_week + 1):
-                    ReadPlanifWeek(department, book, period.name, w, annee_courante + 1)
+                    ReadPlanifWeek(department, book, period.name, w, current_year + 1)

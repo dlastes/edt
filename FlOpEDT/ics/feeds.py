@@ -19,31 +19,31 @@ class EventFeed(ICalFeed):
     days = [abbrev for abbrev,_ in Day.CHOICES]
 
     def item_title(self, scourse):
-        course = scourse.cours
+        course = scourse.course
         return (f'{course.module.abbrev} {course.type.name} '
-                f'- {course.groupe.train_prog.abbrev} G{course.groupe.nom}'
+                f'- {course.group.train_prog.abbrev} G{course.group.name}'
         )
 
     def item_description(self, scourse):
         location = scourse.room.name if scourse.room is not None else ''
-        course = scourse.cours
+        course = scourse.course
         tutor = course.tutor
         return (f'Cours : {course.module.abbrev} {course.type.name}\n'
-                f'Groupe : {course.groupe.train_prog.abbrev} {course.groupe.nom}\n'
+                f'Groupe : {course.group.train_prog.abbrev} {course.group.name}\n'
                 f'Enseignant : {tutor}\nSalle : {location}'
         )
 
     def item_start_datetime(self, scourse):
-        course = scourse.cours
+        course = scourse.course
         begin = datetime.combine(
-            Week(course.an, course.semaine)\
+            Week(course.year, course.week)\
             .day(self.days.index(scourse.day)),
             datetime.min.time()) \
             + timedelta(minutes=scourse.start_time)
         return begin
 
     def item_end_datetime(self, scourse):
-        end = self.item_start_datetime(scourse) + timedelta(minutes=scourse.cours.type.duration)
+        end = self.item_start_datetime(scourse) + timedelta(minutes=scourse.course.type.duration)
         return end
 
     def item_link(self, s):
@@ -55,13 +55,13 @@ class TutorEventFeed(EventFeed):
         return Tutor.objects.get(username=tutor)
 
     def items(self, tutor):
-        return ScheduledCourse.objects.filter(cours__tutor=tutor, copie_travail=0).order_by('-cours__an','-cours__semaine')
+        return ScheduledCourse.objects.filter(course__tutor=tutor, work_copy=0).order_by('-course__year','-course__week')
 
     def item_title(self, scourse):
-        course = scourse.cours
+        course = scourse.course
         location = scourse.room.name if scourse.room is not None else ''
         return (f'{course.module.abbrev} {course.type.name} '
-                f'- {course.groupe.train_prog.abbrev} G{course.groupe.nom} '
+                f'- {course.group.train_prog.abbrev} G{course.group.name} '
                 f'- {location}'
         )
 
@@ -77,12 +77,12 @@ class RoomEventFeed(EventFeed):
         return room_o.subroom_of.all()
 
     def items(self, room_groups):
-        return ScheduledCourse.objects.filter(room__in=room_groups, copie_travail=0).order_by('-cours__an','-cours__semaine')
+        return ScheduledCourse.objects.filter(room__in=room_groups, work_copy=0).order_by('-course__year','-course__week')
 
     def item_title(self, scourse):
-        course = scourse.cours
+        course = scourse.course
         return (f'{course.module.abbrev} {course.type.name} '
-                f'- {course.groupe.train_prog.abbrev} G{course.groupe.nom}'
+                f'- {course.group.train_prog.abbrev} G{course.group.name}'
                 f'- {course.tutor.username}'
         )
 
@@ -90,17 +90,17 @@ class RoomEventFeed(EventFeed):
 class GroupEventFeed(EventFeed):
     def get_object(self, request, department, training_programme, group):
         print(department, training_programme, group)
-        gp = Group.objects.get(nom=group,
+        gp = Group.objects.get(name=group,
                                train_prog__abbrev=training_programme)
         gp_included = gp.ancestor_groups()
         gp_included.add(gp)
         return gp_included
 
     def items(self, groups):
-        return ScheduledCourse.objects.filter(cours__groupe__in=groups, copie_travail=0).order_by('-cours__an','-cours__semaine')
+        return ScheduledCourse.objects.filter(course__group__in=groups, work_copy=0).order_by('-course__year','-course__week')
 
     def item_title(self, scourse):
-        course = scourse.cours
+        course = scourse.course
         location = scourse.room.name if scourse.room is not None else ''
         return (f'{course.module.abbrev} {course.type.name} '
                 f'- {course.tutor.username} '

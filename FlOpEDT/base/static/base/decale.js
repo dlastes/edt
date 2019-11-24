@@ -28,8 +28,8 @@ var select_gp =  d3.select("[id=gp]");
 
 var default_dd = " * ";
 
-var filtered = {semaine:semaine_init,
-		an:an_init,
+var filtered = {week:week_init,
+		year:year_init,
 		mod_prof_gp:[
 		    {title:'Module    ',id:'fil-mod',get:'m',arr:[default_dd],val:default_dd},
 		   {title:'Enseignant·e    ',id:'fil-prof',get:'p',arr:[default_dd],val:default_dd},
@@ -38,7 +38,7 @@ var filtered = {semaine:semaine_init,
 		chosen:[0,0,0]
 	       };
 
-var aim = {semaine: 0, an:0, prof:''};
+var aim = {week: 0, year:0, prof:''};
 
 var liste_cours=[];
 
@@ -90,20 +90,20 @@ function initiate() {
     select_orig_date.on("change",function(){ choose_week(true); });
     select_orig_date
 	.selectAll("option")
-	.data(semaine_an_list)
+	.data(week_year_list)
 	.enter()
 	.append("option")
-	.text(function(d){return d['semaine'];});
+	.text(function(d){return d['week'];});
 
     
     // data selection
     aim.prof=usna;
-    aim.semaine=semaine_an_list[0].semaine;
-    aim.an=semaine_an_list[0].an;
+    aim.week=week_year_list[0].week;
+    aim.year=week_year_list[0].year;
     
 
     // called with get parameters
-    if(filtered.semaine!=-1 || filtered.an!=-1){
+    if(filtered.week!=-1 || filtered.year!=-1){
 
 	update_after_first();
 	
@@ -114,7 +114,7 @@ function initiate() {
 	select_orig_date
 	    .selectAll("option")
 	    .each(function(d,i) {
-		if (d.semaine==semaine_init && d.an==an_init){
+		if (d.week==week_init && d.year==year_init){
 		    d3.select(this).attr("selected","");
 		}
 	    });
@@ -129,7 +129,7 @@ function initiate() {
 // fetch the data corresponding to the current selection
 function go_filter(){
     var sel, di, sa, i, cur ;
-    var url_fd_full = url_fetch_decale+"?a="+filtered.an+"&s="+filtered.semaine;
+    var url_fd_full = url_fetch_decale+"?a="+filtered.year+"&s="+filtered.week;
     var prof_changed = false ;
 
     // remember the current selections (module, prof, group)
@@ -175,10 +175,10 @@ function go_filter(){
         success: function (msg) {
             // console.log(msg);
             // console.log("success");
-	    // console.log(msg.modules);
+	    console.log(msg.modules);
 	    filtered.mod_prof_gp[0].arr = msg.modules;
 	    filtered.mod_prof_gp[1].arr = msg.profs;
-	    filtered.mod_prof_gp[2].arr = msg.groupes;
+	    filtered.mod_prof_gp[2].arr = msg.groups;
 	    liste_cours = msg.cours;
 	    liste_jours = {};
 	    for(i = 0 ; i<msg.jours.length ; i++) {
@@ -190,7 +190,9 @@ function go_filter(){
 
 	    
 	    for(i = 0 ; i<3 ; i++){
-		filtered.mod_prof_gp[i].arr.unshift(default_dd);
+			console.log(i);
+			console.log(filtered.mod_prof_gp[i].arr);
+			filtered.mod_prof_gp[i].arr.unshift(default_dd);
 	    }
 	    
 	    go_dd();
@@ -272,12 +274,12 @@ function is_orph() {
     }
     
     if(document.getElementById("canceled").checked){
-	filtered.semaine = 0;
-	filtered.an = 0;
+	filtered.week = 0;
+	filtered.year = 0;
 	go_filter();
     } else if(document.getElementById("pending").checked){
-	filtered.semaine = 1;
-	filtered.an = 0;
+	filtered.week = 1;
+	filtered.year = 0;
 	go_filter();
     } else {
 	choose_week(false);
@@ -337,7 +339,7 @@ function create_dd() {
 
     rad
 	.append("span")
-	.text("À opérer en semaine  ")
+	.text("À opérer en week  ")
 //
 //    rad
 	.append("select")
@@ -354,11 +356,11 @@ function create_dd() {
     
     d3.select("[id=aim_date]")
 	.selectAll("option")
-	.data(semaine_an_list)
+	.data(week_year_list)
 	.enter()
 	.append("option")
-    	.attr("value", function(d){ return d['semaine']; })
-	.text(function(d){return d['semaine'];});
+    	.attr("value", function(d){ return d['week']; })
+	.text(function(d){return d['week'];});
 
     go_dd_aim();
     
@@ -410,8 +412,8 @@ function choose_aim(dop){
 	    .filter(function(d,i){return i==di;})
 	    .datum();
     
-	aim.semaine = sa.semaine;
-	aim.an = sa.an;
+	aim.week = sa.week;
+	aim.year = sa.year;
     } else {
 	var select_aim_prof =  d3.select("[id=aim_prof]");
 	
@@ -509,10 +511,10 @@ function send_cours(){
     if(cked != "cancel" && cked != "move" && cked != "pend"){
 	change_ack("Choisir l'action à effectuer");
     } else {
-	var tot = {os: filtered.semaine,
-		   oa: filtered.an,
-		   ns: aim.semaine,
-		   na: aim.an,
+	var tot = {os: filtered.week,
+		   oa: filtered.year,
+		   ns: aim.week,
+		   na: aim.year,
 		   np: aim.prof
 		  };
 
@@ -648,13 +650,13 @@ function choose_week(check) {
 	.filter(function(d,i){return i==di;})
 	.datum();
     
-    filtered.semaine = sa.semaine;
-    filtered.an = sa.an;
+    filtered.week = sa.week;
+    filtered.year = sa.year;
 
     // and change targeted week
     document.getElementById("aim_date").selectedIndex = select_orig_date.property('selectedIndex');
-    aim.semaine = filtered.semaine ;
-    aim.an = filtered.an ;
+    aim.week = filtered.week ;
+    aim.year = filtered.year ;
 
 
     // does not work properly
@@ -663,7 +665,7 @@ function choose_week(check) {
     // d3.select("[id=aim_date]")
     // 	.selectAll("option")
     // 	.each(function(d,i) {
-    // 	    if (d.semaine==sa.semaine && d.an==sa.an){
+    // 	    if (d.week==sa.week && d.year==sa.year){
     // 		d3.select(this).attr("selected","");
     // 		console.log(d);
     // 	    }

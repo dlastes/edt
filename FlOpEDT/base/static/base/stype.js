@@ -24,14 +24,35 @@
 
 // Redefinition of some variables
 
-var margin = {top: 50,  left: 50, right: 10, bot:10};
+dsp_svg.margin = {top: 50,  left: 50, right: 10, bot:10};
 
-var svg = {height: 625 - margin.top - margin.bot, width: 720 - margin.left - margin.right};
+dsp_svg.h = 625 - dsp_svg.margin.top - dsp_svg.margin.bot ;
+dsp_svg.w = 700 - dsp_svg.margin.left - dsp_svg.margin.right ;
+
+dsp_svg.cadastre = [
+    // dispos info ground
+    ["svg","pmg"],
+    // valider
+    ["svg","vg"],
+    // background, middleground, foreground, dragground
+    ["svg","edtg"],
+    ["edtg","edt-bg"],
+    ["edtg","edt-mg"],
+    ["edtg","edt-fg"],
+    // context menus ground
+    ["svg","cmg"],
+    ["cmg","cmpg"],
+    ["cmg","cmtg"],
+    // drag ground
+    ["svg","dg"]
+];
+
+
 
 var mode = "tutor" ;
 
 var dd_selections = {
-    'tutor': {value:logged_usr.nom},
+    'tutor': {value:logged_usr.name},
     'prog': {value:''},
     'type': {value:''}};
 
@@ -56,8 +77,35 @@ pref_only = true ;
 
 
 
+svg = new Svg(dsp_svg.layout_tree, false);
+svg.create_container(true);
+svg.create_layouts(dsp_svg.cadastre) ;
 
-create_general_svg_pref_only();
+var days_header = new WeekDayHeader(svg, "edt-fg", week_days, false, null) ;
+
+// overwrite functions for headers
+function WeekDayMixStype() {
+    this.gsckd_x = function(datum,i) {
+        return  i*(dim_dispo.width + dim_dispo.mh)
+	    + dim_dispo.width * .5;
+    }
+    this.gsckd_y = function(datum) {
+        return  - 20 ;
+    }
+    this.gsckd_txt = function(d) {
+        return  d.name ;
+    }
+    this.gsckh_x = function(datum) {
+        return - dim_dispo.width ;
+    }
+}
+Object.assign(days_header.mix, new WeekDayMixStype()) ;
+hard_bind(days_header.mix);
+
+var hours_header = new HourHeader(svg, "edt-fg", hours) ;
+
+
+
 go_days(true, false);
 create_lunchbar();
 create_pref_modes(pref_only);
@@ -68,7 +116,7 @@ fetch_pref_only();
 
 
 function create_lunchbar() {
-    fg
+    svg.get_dom("edt-fg")
 	.append("line")
 	.attr("class","lunchbar")
 	.attr("stroke","black")
@@ -80,54 +128,6 @@ function create_lunchbar() {
 
 }
 
-function create_general_svg_pref_only() {
-    svg_cont = d3.select("body").select("[id=\"svg\"]").append("svg")
-	.attr("width",svg.width)
-	.attr("height",svg.height)
-	.attr("text-anchor","middle")
-	.append("g")
-	.attr("transform","translate("+margin.left + "," + margin.top + ")");
-
-    create_layouts_pref_only(svg_cont);
-}
-
-
-function create_layouts_pref_only(svg_cont){
-
-    // preference mode ground
-    pmg = svg_cont.append("g")
-        .attr("id", "lay-pmg");    
-
-    // valider
-    vg = svg_cont.append("g")
-	.attr("id","lay-vg");
-    
-    // background, middleground, foreground, dragground
-    var edtg = svg_cont.append("g")
-        .attr("id", "lay-edtg");
-    bg = edtg.append("g")
-        .attr("id", "lay-bg");
-    mg = edtg.append("g")
-        .attr("id", "lay-mg");
-    // fig = edtg.append("g")
-    //     .attr("id", "lay-fig");
-    fg = edtg.append("g")
-        .attr("id", "lay-fg");
-
-    // context menus ground
-    var cmg = svg_cont.append("g")
-        .attr("id", "lay-cmg");
-    cmpg = cmg.append("g")
-	.attr("id", "lay-cmpg");
-    cmtg = cmg.append("g")
-	.attr("id", "lay-cmtg");
-    
-    // drag ground
-    dg = svg_cont.append("g")
-        .attr("id", "lay-dg");
-
-    
-}
 
 
 /*---------------------
@@ -135,7 +135,7 @@ function create_layouts_pref_only(svg_cont){
   ---------------------*/
 function fetch_url() {
     if (mode == 'tutor') {
-        return url_fetch_user_dweek + user.nom ;
+        return url_fetch_user_dweek + user.name ;
     } else if (mode == 'course') {
         return url_fetch_course_dweek 
             + dd_selections['prog'].value
@@ -153,13 +153,13 @@ function translate_course_preferences_from_csv(d) {
     var pseudo_tutor = course_type_prog_name(d.train_prog, d.type_name) ;
     if(Object.keys(dispos).indexOf(pseudo_tutor)==-1){
 	dispos[pseudo_tutor] = {} ;
-        for (var i = 0; i < days.length; i++) {
-	    dispos[pseudo_tutor][days[i].ref] = [] ;
-	}	
+        week_days.forEach(function(day) {
+	    dispos[pseudo_tutor][day.ref] = [] ;
+	});
     }
     dispos[pseudo_tutor][d.day].push({start_time:+d.start_time,
 			       duration: +d.duration,
-			       value: +d.valeur});
+			       value: +d.value});
 }
 
 
@@ -224,31 +224,20 @@ function fetch_pref_only() {
 
 
 function dispo_x(d) {
-    return idays[d.day].num * (dim_dispo.width + dim_dispo.mh) ;
+    return week_days.day_by_ref(d.day).num * (dim_dispo.width + dim_dispo.mh) ;
 }
 function dispo_h(d){
     return d.duration * scale ;
 }
-function gsckd_x(datum,i) {
-    return  i*(dim_dispo.width + dim_dispo.mh)
-	+ dim_dispo.width * .5;
-}
-function gsckd_y(datum) {
-    return  - 20 ;
-}
-function gsckd_txt(d) {
-    return  d.name ;
-}
-function gsckh_x(datum) {
-    return - dim_dispo.width ;
-}
+
+
+
 function gsclb_y()  {
-    //return dim_dispo.height * .5 * nbSl;
     return dispo_y({start_time:
 		    time_settings.time.lunch_break_start_time});
 }
 function gsclb_x()  {
-    return (dim_dispo.width + dim_dispo.mh) * nbPer - dim_dispo.mh ;
+    return (dim_dispo.width + dim_dispo.mh) * week_days.nb_days() - dim_dispo.mh ;
 }
 
 
@@ -269,7 +258,7 @@ d3.select("body")
 function send_url(year, week) {
     if (mode == 'tutor') {
         return url_user_pref_changes + year + "/" + week
-	    + "/" + user.nom ;
+	    + "/" + user.name ;
     } else if (mode == 'course') {
         return url_course_pref_changes + year + "/" + week
 	    + "/" + dd_selections['prog'].value
@@ -287,27 +276,27 @@ function apply_stype_from_button(save) {
     var sent_data = {} ;
     sent_data['changes'] = JSON.stringify(changes) ; 
 
-    var se_deb,an_deb,se_fin,an_fin;
-    var an, se;
+    var week_st,year_st,week_end,year_end;
+    var year, se;
     var se_abs_max = 53;
     var se_min, se_max;
 
     if(save){
-	se_deb = 0 ;
-	console.log(annee_courante);
-	an_deb = +annee_courante ;
-	se_fin = se_deb ;
-	an_fin = an_deb ;
+	week_st = 0 ;
+	console.log(current_year);
+	year_st = +current_year ;
+	week_end = week_st ;
+	year_end = year_st ;
     } else {
-	se_deb = +document.forms['app'].elements['se_deb'].value ;
-	an_deb = +document.forms['app'].elements['an_deb'].value ;
-	se_fin = +document.forms['app'].elements['se_fin'].value ;
-	an_fin = +document.forms['app'].elements['an_fin'].value ;
+	week_st = +document.forms['app'].elements['week_st'].value ;
+	year_st = +document.forms['app'].elements['year_st'].value ;
+	week_end = +document.forms['app'].elements['week_end'].value ;
+	year_end = +document.forms['app'].elements['year_end'].value ;
     }
 
 
-    if (an_deb<an_fin ||
-        (an_deb==an_fin && se_deb<=se_fin)){
+    if (year_st<year_end ||
+        (year_st==year_end && week_st<=week_end)){
 
 
 	if(changes.length==0) {
@@ -317,31 +306,31 @@ function apply_stype_from_button(save) {
 
             ack.pref = "Ok ";
 	    if(save){
-		ack.pref += "semaine type";
+		ack.pref += "week type";
 	    } else {
-		ack.pref += "semaine "+se_deb+" année "+an_deb
-		    +" à semaine "+se_fin+" année "+an_fin;
+		ack.pref += "week "+week_st+" année "+year_st
+		    +" à week "+week_end+" année "+year_end;
 	    }
 
 
-	    for (an=an_deb ; an<=an_fin ; an++){
-		if(an==an_deb){
-		    se_min = se_deb;
+	    for (year=year_st ; year<=year_end ; year++){
+		if(year==year_st){
+		    se_min = week_st;
 		} else {
 		    se_min = 1;
 		}
-		if(an==an_fin){
-		    se_max = se_fin;
+		if(year==year_end){
+		    se_max = week_end;
 		} else {
 		    se_max = se_abs_max;
 		}
 		
 		for (se=se_min ; se<=se_max ; se++) {
 
-		    //console.log(se,an);
+		    //console.log(se,year);
                     show_loader(true);
     		    $.ajax({
-    			url: send_url(an, se),
+    			url: send_url(year, se),
 			type: 'POST',
 //			contentType: 'application/json; charset=utf-8',
 			data: sent_data, //JSON.stringify(changes),
@@ -364,7 +353,7 @@ function apply_stype_from_button(save) {
 	}
 
     } else {
-	ack.pref = "Problème : seconde semaine avant la première";
+	ack.pref = "Problème : seconde week avant la première";
         document.getElementById("ack").textContent = ack.pref ;
     }
 

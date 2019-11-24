@@ -42,138 +42,13 @@
                  */
 
 
-/*----------------------
-  -------   TIME  -------
-  ----------------------*/
-
-function get_day(ref){
-    var nd = days.filter(function(dd) {
-	return dd.ref == ref;
-    });
-    if (nd.length != 1) {
-	return null ;
-    }
-    return nd[0];
-}
-
-
-/*----------------------
-  -------   SVG  -------
-  ----------------------*/
-
-
-
-function create_general_svg(light) {
-    var tot;
-
-    if (light) {
-        tot = d3.select("body");
-    } else {
-        tot = d3.select("body").append("div");
-    }
-
-    svg_cont = tot
-        .append("svg")
-        .attr("width", svg.width)
-        .attr("height", svg.height)
-        .attr("id", "edt-main")
-        .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-    create_layouts(svg_cont, light);
-
-}
-
-
-
-
-function create_layouts(svg_cont, light) {
-    // menus ground
-    meg = svg_cont.append("g")
-        .attr("id", "lay-meg");
-
-    // preference mode ground
-    pmg = svg_cont.append("g")
-        .attr("id", "lay-pmg");    
-
-    // weeks ground
-    wg.upper = svg_cont.append("g")
-        .attr("id", "lay-wg");
-    wg.bg = wg.upper.append("g")
-        .attr("id", "wg-bg");
-    wg.fg = wg.upper.append("g")
-        .attr("id", "wg-fg");
-
-    // groupes ground
-    gpg = svg_cont.append("g")
-        .attr("id", "lay-gpg");
-
-    // selection categories button ground
-    catg = svg_cont.append("g")
-        .attr("id", "lay-catg");
-
-    // semaine type ground
-    stg = svg_cont.append("g")
-        .attr("id", "lay-stg");
-
-
-    // dispos info ground
-    dig = svg_cont.append("g")
-        .attr("id", "lay-dg");
-
-
-    // valider
-    vg = svg_cont.append("g")
-        .attr("id", "lay-vg");
-
-    // background, middleground, foreground, dragground
-    var edtg = svg_cont.append("g")
-        .attr("id", "lay-edtg");
-    bg = edtg.append("g")
-        .attr("id", "lay-bg");
-    mg = edtg.append("g")
-        .attr("id", "lay-mg");
-    fig = edtg.append("g")
-        .attr("id", "lay-fig");
-    fg = edtg.append("g")
-        .attr("id", "lay-fg");
-
-    // selection ground
-    selg = svg_cont.append("g")
-        .attr("id", "lay-selg");
-
-    
-    // context menus ground
-    var cmg = svg_cont.append("g")
-        .attr("id", "lay-cmg");
-    cmpg = cmg.append("g")
-	.attr("id", "lay-cmpg");
-    cmtg = cmg.append("g")
-	.attr("id", "lay-cmtg");
-    
-
-    // logo ground
-    log = edtg.append("g")
-        .attr("id", "lay-log");
-
-    // drag ground
-    dg = svg_cont.append("g")
-        .attr("id", "lay-dg");
-
-    bg
-	.append("rect")
-	.attr("class","rbg");
-}
-
-
-
 
 /*---------------------------
   ------- PREFERENCES -------
   ---------------------------*/
 
 function create_alarm_dispos() {
-    di = dig
+    di = svg.get_dom("dig")
         .append("g")
         .attr("text-anchor", "start")
         .attr("class", "disp-info");
@@ -196,15 +71,15 @@ function create_pref_modes() {
         d.selected = false ;
     });
     
-    pmg
+    svg.get_dom("pmg")
         .attr("transform", pmg_trans());
     
-    var buttons = pmg
+    var buttons = svg.get_dom("pmg")
         .append("g")
         .attr("id", "pm-but-head")
         .attr("transform", pref_mode_trans());
 
-    var choices_but = pmg
+    var choices_but = svg.get_dom("pmg")
         .append("g")
         .attr("id", "pm-choices")
         .attr("transform", pref_mode_choice_trans());
@@ -214,7 +89,7 @@ function create_pref_modes() {
 
 
 function remove_pref_modes() {
-    pmg.selectAll("*").remove();
+    svg.get_dom("pmg").selectAll("*").remove();
 }
 
 /*---------------------
@@ -222,171 +97,6 @@ function remove_pref_modes() {
   ---------------------*/
 
 
-
-// PRECONDITION: semaine_init, week_init, weeks.init_data
-function find_week(week_list) {
-    var i, up;
-    i = 0;
-    up = false ;
-    
-    while (i < week_list.length && !up) {
-        if (an_init < week_list[i].an ||
-            (an_init == week_list[i].an &&
-                semaine_init < week_list[i].semaine)) {
-            up = true;
-        } else {
-            i++;
-        }
-    }
-    if (!up) {
-        i = 0;
-    }
-    return i;
-}
-
-
-
-
-function create_clipweek() {
-
-    weeks.init_data = semaine_an_list;
-
-    var min = weeks.init_data[0];
-    var max = weeks.init_data[weeks.init_data.length - 1];
-
-    weeks.ndisp = Math.min(weeks.ndisp, weeks.init_data.length);
-
-    weeks.init_data.push({
-        an: max.an,
-        semaine: max.semaine + 1
-    });
-    weeks.init_data.unshift({
-        an: min.an,
-        semaine: min.semaine - 1,
-    });
-
-    var fw ;
-
-    if (min.an > an_init ||
-	(min.an == an_init && min.semaine > semaine_init)) {
-	weeks.cur_data = weeks.init_data.slice(1,
-					       1 + weeks.ndisp + 2);
-	weeks.fdisp = 1;
-	weeks.sel[0] = 2 ;
-	
-    } else if (max.an < an_init ||
-	(max.an == an_init && max.semaine < semaine_init)) {
-	weeks.cur_data = weeks.init_data.slice(weeks.init_data.length - 1  - 2 - weeks.ndisp,
-					       weeks.init_data.length -1);
-	weeks.fdisp = weeks.init_data.length - 1  - 2 - weeks.ndisp ;
-	weeks.sel[0] = weeks.ndisp ;
-    } else {
-	var fw = find_week(weeks.init_data);
-	
-	fw = Math.max(
-            Math.min(fw - 2,
-		     weeks.init_data.length - 1 - (weeks.ndisp + 1)),
-            0);
-	
-	weeks.cur_data = weeks.init_data.slice(fw,
-					       fw + weeks.ndisp + 2);
-	
-	weeks.fdisp = fw;
-	
-	weeks.sel[0] = fw + find_week(weeks.cur_data) - 1 ;
-    }
-
-
-    wg.upper
-        .attr("transform", "translate(" + weeks.x + "," + weeks.y + ")");
-
-
-    wg.fg
-        .selectAll(".sel_wk")
-        .data(weeks.sel)
-        .enter()
-        .append("g")
-        .attr("class", "sel_wk")
-        .attr("clip-path", "url(#clipwk)")
-        .attr("pointer-events", "none")
-        .append("ellipse")
-        .attr("cx", week_sel_x)
-        .attr("cy", .5 * weeks.height)
-        .attr("rx", .5 * weeks.wfac * weeks.width)
-        .attr("ry", .5 * weeks.hfac * weeks.height);
-
-
-
-    var but =
-        wg.fg
-        .append("g")
-        .attr("class", "cir_wk")
-        .on("click", week_left);
-
-
-    but
-        .append("circle")
-        .attr("stroke", "white")
-        .attr("stroke-width", 1)
-        .attr("cx", 0)
-        .attr("cy", .5 * weeks.height)
-        .attr("r", weeks.rad * .5 * weeks.height);
-
-    but
-        .append("text")
-        .attr("fill", "white")
-        .attr("x", 0)
-        .attr("y", .5 * weeks.height)
-        .text("<");
-
-
-    but =
-        wg.fg
-        .append("g")
-        .attr("class", "cir_wk")
-        .on("click", week_right);
-
-    but
-        .append("circle")
-        .attr("stroke", "white")
-        .attr("stroke-width", 1)
-        .attr("cx", (weeks.ndisp + 1) * weeks.width)
-        .attr("cy", .5 * weeks.height)
-        .attr("r", weeks.rad * .5 * weeks.height)
-
-    but
-        .append("text")
-        .attr("fill", "white")
-        .attr("x", (weeks.ndisp + 1) * weeks.width)
-        .attr("y", .5 * weeks.height)
-        .text(">");
-
-
-    wg.bg
-        .append("rect")
-        .attr("class", "cir_wk")
-        .attr("x", 0)
-        .attr("y", 0)
-        .attr("width", (weeks.ndisp + 1) * weeks.width)
-        .attr("height", weeks.height);
-
-    wg.bg
-        .append("g")
-        .append("clipPath")
-        .attr("id", "clipwk")
-        .append("rect")
-        .attr("x", 0)
-        .attr("y", 0)
-        .attr("height", weeks.height)
-        .attr("width", (weeks.ndisp + 1) * weeks.width);
-
-    weeks.cont = wg.bg
-        .append("g")
-        .attr("clip-path", "url(#clipwk)");
-
-
-    go_week_menu(true);
-}
 
 
 
@@ -444,12 +154,12 @@ function create_slot_grid_data(c) {
     if (slot_case) {
         // does not depend on course c
         
-	for(var i = 0 ; i<days.length ; i++) {
+        week_days.forEach(function(day){
 	    for (var s in rev_constraints) {
 		var start = +s ;
 		if (start < time_settings.time.day_finish_time){
 		    var gs = {
-			day: days[i].ref,
+			day: day.ref,
 			start: start,
 			duration: rev_constraints[s],
 			display: false,
@@ -460,14 +170,14 @@ function create_slot_grid_data(c) {
 		    data_slot_grid.push(gs);
 		}
 	    }
-	}
+	});
     } else {
         var ok_starts = constraints[c.c_type].allowed_st ;
-        days.forEach(function(d){
+        week_days.forEach(function(day){
             for(var s = 0 ; s < ok_starts.length ; s++ ) {
                 data_slot_grid.push({
                     c_type: c.c_type,
-                    day: d.ref,
+                    day: day.ref,
                     group: c.group,
                     promo: c.promo,
                     start: ok_starts[s],
@@ -522,7 +232,7 @@ function create_grid_data() {
 function create_but_scale() {
     def_drag_sca();
 
-    var grp = fg
+    var grp = svg.get_dom("edt-fg")
         .append("g")
         .attr("class", "h-sca")
         .attr("cursor", "pointer")
@@ -544,7 +254,7 @@ function create_but_scale() {
 
 
 
-    grp = fg
+    grp = svg.get_dom("edt-fg")
         .append("g")
         .attr("class", "v-sca")
         .attr("cursor", "pointer")
@@ -577,7 +287,7 @@ function def_drag_sca() {
                 drag.svg = d3.select("#edt-main");
                 drag.svg_w = +drag.svg.attr("width");
                 drag.init = +drag.sel.select("rect").attr("x");
-                dg.node().appendChild(drag.sel.node());
+                svg.get_dom("dg").node().appendChild(drag.sel.node());
 
 
                 drag.sel
@@ -599,8 +309,8 @@ function def_drag_sca() {
                 drag.x += d3.event.dx;
                 if (drag.x + drag.init > 0) {
                     drag.sel.attr("transform", "translate(" + drag.x + "," + drag.y + ")");
-                    if (drag.init + drag.x + margin.left + margin.right > drag.svg_w) {
-                        drag.svg.attr("width", drag.init + drag.x + margin.left + margin.right);
+                    if (drag.init + drag.x + dsp_svg.margin.left + dsp_svg.margin.right > drag.svg_w) {
+                        drag.svg.attr("width", drag.init + drag.x + dsp_svg.margin.left + dsp_svg.margin.right);
                     }
                 }
             }
@@ -613,12 +323,12 @@ function def_drag_sca() {
                 drag.sel.attr("transform", "translate(0,0)");
                 drag.sel.select("rect").attr("x", drag.init + drag.x);
                 if (rootgp_width != 0) {
-                    labgp.width = ((drag.x + drag.init) / nbPer - dim_dispo.plot * (dim_dispo.width + dim_dispo.right)) / rootgp_width;
+                    labgp.width = ((drag.x + drag.init) / week_days.nb_days() - dim_dispo.plot * (dim_dispo.width + dim_dispo.right)) / rootgp_width;
                 }
                 drag.sel.select("path").attr("d", but_sca_tri_h(0));
                 //(drag.x+drag.init)/(grid_width());
                 go_edt(false);
-                fg.node().appendChild(drag.sel.node());
+                svg.get_dom("edt-fg").node().appendChild(drag.sel.node());
                 drag.sel.select(".h-sca-l").remove();
             }
         });
@@ -630,7 +340,7 @@ function def_drag_sca() {
                 drag.x = 0;
                 drag.y = 0;
                 drag.init = +drag.sel.select("rect").attr("y");
-                dg.node().appendChild(drag.sel.node());
+                svg.get_dom("dg").node().appendChild(drag.sel.node());
                 drag.svg = d3.select("#edt-main")
                 drag.svg_h = +drag.svg.attr("height"); //+200;
 
@@ -668,11 +378,11 @@ function def_drag_sca() {
                 drag.sel.select("rect").attr("y", grid_height());
 		drag.sel.select("path").attr("d", but_sca_tri_v(0));
                 go_edt(false);
-                fg.node().appendChild(drag.sel.node());
+                svg.get_dom("edt-fg").node().appendChild(drag.sel.node());
                 drag.sel.select(".v-sca-l").remove();
 
-		svg.height = svg_height() ;
-		d3.select("#edt-main").attr("height", svg.height);
+		dsp_svg.h = svg_height() ;
+		d3.select("#edt-main").attr("height", dsp_svg.h);
 
             }
         });
@@ -703,12 +413,12 @@ function set_butgp() {
 		cur_maxby = cur_rootgp.maxby ; 
 	    }
 	    tot_row_gp += cur_rootgp.gp.width*butgp.width ;
-	    tot_row_gp += (npro==0)?0:(margin_but.hor) ;
+	    tot_row_gp += (npro==0)?0:(butgp.mar_h) ;
             console.log(cur_rootgp.gp.width, butgp.width);
 	    cur_rootgp.butx = cur_butx ;
-            cur_butx += margin_but.hor + cur_rootgp.gp.width*butgp.width ;
+            cur_butx += butgp.mar_h + cur_rootgp.gp.width*butgp.width ;
 	}
-	cur_buty += margin_but.ver + cur_maxby*butgp.height ;
+	cur_buty += butgp.mar_v + cur_maxby*butgp.height ;
     }
 
 
@@ -759,13 +469,13 @@ function go_promo_gp_init(button_available) {
     promo_init = indexOf_promo(promo_init) ;
     if (promo_init >= 0){
 	if (gp_init == "") {
-	    gp_init = root_gp[promo_init].gp.nom ;
+	    gp_init = root_gp[promo_init].gp.name ;
 	}
-	if (Object.keys(groups[promo_init]).map(function(g) { return groups[promo_init][g].nom ; }).indexOf(gp_init) != -1) {
+	if (Object.keys(groups[promo_init]).map(function(g) { return groups[promo_init][g].name ; }).indexOf(gp_init) != -1) {
 	    apply_gp_display(groups[promo_init][gp_init], true, button_available);
 	}
     } else if (gp_init != "") {
-	if (Object.keys(groups[0]).map(function(g) { return groups[0][g].nom ; }).indexOf(gp_init) != -1) {
+	if (Object.keys(groups[0]).map(function(g) { return groups[0][g].name ; }).indexOf(gp_init) != -1) {
 	    apply_gp_display(groups[0][gp_init], true, button_available);
 	}
     }
@@ -818,7 +528,7 @@ function extract_all_groups_structure(r) {
 
 function extract_groups_structure(r, npro, nrow) {
     var gr = {
-        nom: r.name,
+        name: r.name,
         ancetres: null,
         descendants: null,
         display: true,
@@ -838,7 +548,7 @@ function extract_groups_structure(r, npro, nrow) {
     }
 
     if ("undefined" === typeof r.buttxt) {
-        gr.buttxt = gr.nom;
+        gr.buttxt = gr.name;
     } else {
         gr.buttxt = r.buttxt;
     }
@@ -888,7 +598,7 @@ function extract_groups_structure(r, npro, nrow) {
             extract_groups_structure(r.children[i], npro, nrow);
         }
     }
-    groups[npro][gr.nom] = gr;
+    groups[npro][gr.name] = gr;
 }
 
 
@@ -1098,12 +808,12 @@ function compute_promo_leaves(node) {
     var gp;
 
     if (node.children.length == 0) {
-        for (var j = 0; j < nbPer; j++) {
+        week_days.forEach(function(day) {
             data_grid_scale_gp.push({
-                day: j,
+                day: day.num,
                 gp: node
             });
-        }
+        });
     }
 
     for (var i = 0; i < node.children.length; i++) {
@@ -1121,11 +831,11 @@ function compute_promo_leaves(node) {
 
 function create_menus() {
 
-    meg
+    svg.get_dom("meg")
         .attr("transform", "translate(" + menus.x + "," + menus.y + ")")
         .attr("text-anchor", "start");
 
-    meg
+    svg.get_dom("meg")
         .append("rect")
         .attr("class", "menu")
         .attr("x", 0)
@@ -1135,7 +845,7 @@ function create_menus() {
         .attr("rx", 10)
         .attr("ry", 10);
 
-    meg
+    svg.get_dom("meg")
         .append("rect")
         .attr("class", "menu")
         .attr("x", menus.dx)
@@ -1145,14 +855,14 @@ function create_menus() {
         .attr("rx", 10)
         .attr("ry", 10);
 
-    meg
+    svg.get_dom("meg")
         .append("text")
         .attr("x", menus.mx)
         .attr("y", menus.h - 10)
         .attr("fill", "black")
         .text("Cours :");
 
-    meg
+    svg.get_dom("meg")
         .append("text")
         .attr("x", menus.mx + menus.dx)
         .attr("y", menus.h - 10)
@@ -1169,7 +879,7 @@ function create_menus() {
   ---------------------*/
 
 function create_regen() {
-    vg
+    svg.get_dom("vg")
         .append("g")
         .attr("class", "ack-reg")
         .append("text");
@@ -1179,7 +889,7 @@ function create_regen() {
 
 
 function create_bknews() {
-    var flash = fig
+    var flash = svg.get_dom("edt-fig")
 	.append("g")
 	.attr("class", "flashinfo");
 
@@ -1218,7 +928,7 @@ function create_bknews() {
   ---------------------*/
 
 function create_quote() {
-    vg
+    svg.get_dom("vg")
 	.append("g")
 	.attr("class", "quote")
 	.append("text");
@@ -1240,7 +950,7 @@ function create_quote() {
 		quote = '' ;
 	    }
 		
-	    vg.select(".quote").select("text")
+	    svg.get_dom("vg").select(".quote").select("text")
 		.text(quote);
 
 
@@ -1290,13 +1000,13 @@ function def_drag() {
 
                 // raise the course to the drag layer
                 drag.sel = d3.select(this);
-                dg.node().appendChild(drag.sel.node());
+                svg.get_dom("dg").node().appendChild(drag.sel.node());
 
             }
         })
         .on("drag", function(d) {
             if (ckbox["edt-mod"].cked && fetch.done) {
-                pending.fork_course(d);
+                pending.prepare_dragndrop(d);
                 cur_over = which_slot(drag.x +
 				      parseInt(drag.sel.select("rect")
 					       .attr("x")),
@@ -1331,7 +1041,7 @@ function def_drag() {
             if(drag.sel != null) {
 
             // lower the course to the middleground layer
-            mg.node().appendChild(drag.sel.node());
+            svg.get_dom("edt-mg").node().appendChild(drag.sel.node());
 
             if (cur_over != null && ckbox["edt-mod"].cked && fetch.done) {
 
@@ -1462,7 +1172,7 @@ function warning_check(check_tot) {
         } else if (check.nok == 'tutor_busy_other_dept') {
             expand = "L'enseignant·e " + check.more.tutor + " est occupé dans un autre département.";
         } else if (check.nok == 'tutor_free_week') {
-            expand = "L'enseignant·e " + check.more.tutor + " ne donne pas de cours cette semaine.";
+            expand = "L'enseignant·e " + check.more.tutor + " ne donne pas de cours cette week.";
         } else if (check.nok == 'room_busy') {
             expand = "La salle " + check.more.room + " est déjà prise.";
         } else if (check.nok == 'room_busy_other_dept') {
@@ -1480,7 +1190,7 @@ function simultaneous_courses(target_course) {
         return (c.day == target_course.day 
 		&& !(c.start + c.duration <= target_course.start
                      || c.start >= target_course.start + target_course.duration)
-		&& c.id_cours != target_course.id_cours);
+		&& c.id_course != target_course.id_course);
     });
 }
 
@@ -1508,10 +1218,10 @@ function check_course(wanted_course) {
 	return ret ;
     }
 
-    if (! pending.pass.other) {
+    if (! pending.pass.core) {
 
         // course was supposed to be fix
-        if (wanted_course.id_cours == -1) {
+        if (wanted_course.id_course == -1) {
 	    ret.push({nok:'stable'}) ;
         }
 
@@ -1525,7 +1235,7 @@ function check_course(wanted_course) {
 
     possible_conflicts = simultaneous_courses(wanted_course) ;
 
-    if (! pending.pass.other) {
+    if (! pending.pass.core) {
 
         // group is busy
         conflicts = possible_conflicts.filter(function(c) {
@@ -1539,6 +1249,12 @@ function check_course(wanted_course) {
 	    ret.push({nok: 'group_busy',
                       more: {group: wanted_course.group}});
         }
+
+        // we will ask later about other constraints
+        if (ret.length > 0 && (pending.force.tutor || pending.force.room)) {
+            return ret ;
+        }
+
     }
 
 
@@ -1584,6 +1300,13 @@ function check_course(wanted_course) {
             ret.push({nok: 'tutor_free_week',
                       more: {tutor: wanted_course.prof}}) ;
         }
+
+        // we will ask later about room constraints
+        if (ret.length > 0 && pending.force.room) {
+            return ret ;
+        }
+        
+        
     }
 
     // shared rooms availability
@@ -1616,16 +1339,24 @@ function splash_violated_constraints(check_list, step) {
     var splash_csts ;
     var warn_check = warning_check(check_list);
     console.log(warn_check);
-    //console.log(pending.wanted_course.id_cours);
+    //console.log(pending.wanted_course.id_course);
     if ((logged_usr.rights >> 2) % 2 == 1) {
-	splash_csts = {
+        var privilege_warning = "Des privilèges vous ont été accordés, et vous en profitez pour outrepasser ";
+        if (warn_check.length>1) {
+            privilege_warning += "les contraintes suivantes :";
+        } else {
+            privilege_warning += "la contrainte suivante :";
+        }
+
+
+        splash_csts = {
 	    id: "viol_constraint",
 	    but: {
 		list: [{txt: "Confirmer",
 			click:
 			function(btn){
                             pending.pass[btn.pass] = true ;
-                            console.log(pending.wanted_course.id_cours);
+                            console.log(pending.wanted_course.id_course);
                             check_pending_course() ;
 			    return ;
 			},
@@ -1633,7 +1364,7 @@ function splash_violated_constraints(check_list, step) {
 		       },
 		       {txt: "Annuler",
 			click: function(d){
-                            pending.back_init();
+                            pending.rollback();
                             go_courses(false);
 			    return ;
 			}
@@ -1641,7 +1372,7 @@ function splash_violated_constraints(check_list, step) {
 	    },
 	    com: {list: [{txt: "Attention", ftsi: 23},
 			 {txt: ""},
-			 {txt: "Des privilèges vous ont été accordés, et vous en profitez pour outrepasser la contrainte suivante :"}]
+			 {txt: privilege_warning}]
 		 }
 	};
         splash_csts.com.list = splash_csts.com.list.concat(warn_check.map(function(el){
@@ -1649,17 +1380,26 @@ function splash_violated_constraints(check_list, step) {
         }));
 	splash_csts.com.list.push({txt: "Confirmer la modification ?"});
     } else {
+        /*-- not enough rights, or strong constraints --*/
+        
+        var warning_sentence = "Vous tentez d'outrepasser " ;
+        if (warn_check.length > 1) {
+            warning_sentence += "les contraintes suivantes :";
+        } else {
+            warning_sentence += "la contrainte suivante :";
+        }
         splash_csts = {
 	    id: "viol_constraint",
 	    but: {
 		list: [{txt: "Ah ok",
 			click: function(d){
+                            pending.rollback();
                             go_courses(false);
 			    return ;
 			}
 		       }]
 	    },
-	    com: {list: [{txt: "Vous tentez d'outrepasser la contrainte suivante :", ftsi: 23}
+	    com: {list: [{txt: warning_sentence, ftsi: 23}
 			 ]
 		 }
 	}
@@ -1691,7 +1431,7 @@ function check_pending_course() {
         
 	add_bouge(pending.init_course);
         //pending.save_wanted() ;
-        pending.init();
+        pending.clean();
 
 	go_grid(true);
 	go_courses(true);
@@ -1713,8 +1453,6 @@ function check_pending_course() {
         
         if(core_constraints.length > 0) {
 
-            clean_pending();
-            
             splash_violated_constraints(warn_check, 'core');
             
                 /* TO BE REMOVED
@@ -1730,6 +1468,17 @@ function check_pending_course() {
 	            } 
                 */
 
+        } else if (tutor_constraints.length > 0) {
+            if (pending.force.tutor) {
+                console.log("tt constraints");
+                pending.force.tutor = false ;
+	        compute_cm_room_tutor_direction() ;
+                select_tutor_module_change() ;
+                go_cm_room_tutor_change();
+            } else {
+                splash_violated_constraints(warn_check, 'tutor');
+            }
+            
         } else if (room_constraints.length > 0) {
             if (pending.force.room) {
                 pending.force.room = false ;
@@ -1737,30 +1486,9 @@ function check_pending_course() {
 	        room_cm_level = 0 ;
                 select_room_change() ;
                 go_cm_room_tutor_change();
-                /*
-	        var display_cont_menu = select_room_change() ;
-	        if (display_cont_menu) {
-	            go_cm_room_tutor_change();
-	        } else {
-	            //room_tutor_change.course = [] ;
-	            room_tutor_change.proposal = [] ;
-	        }
-                */
             } else {
-                clean_pending();
                 splash_violated_constraints(warn_check, 'room');
             }
-        } else if (tutor_constraints.length > 0) {
-            if (pending.force.tutor) {
-                pending.force.tutor = false ;
-	        compute_cm_room_tutor_direction() ;
-                select_tutor_module_change() ;
-                go_cm_room_tutor_change();
-            } else {
-                clean_pending();
-                splash_violated_constraints(warn_check, 'tutor');
-            }
-
         }
 	
     }
@@ -1774,7 +1502,7 @@ function which_slot(x, y, c) {
         (dim_dispo.width + dim_dispo.right));
     var iday = Math.floor((x + .5 * cours_width(c)) / wday);
     return {
-        day: days[iday].ref,
+        day: week_days.day_by_num(iday).ref,
         start_time: indexOf_constraints(c, y) // day-independent
     };
 }
@@ -1857,7 +1585,7 @@ function clean_unavailable_rooms() {
 
 function create_val_but() {
 
-    edt_but = vg
+    edt_but = svg.get_dom("vg")
         .append("g")
         .attr("but", "edt")
         .on("mouseover", but_bold)
@@ -1887,6 +1615,32 @@ function create_val_but() {
 
     edt_but.attr("visibility", "hidden");
 
+
+    edt_message = svg.get_dom("vg")
+        .append("g")
+        .attr("message", "edt");
+
+    edt_message
+        .append("rect")
+        .attr("width", menus.coled + menus.colcb)
+        .attr("height", 30)
+        .attr("fill", "white")
+        .attr("stroke", "steelblue")
+        .attr("stroke-width", 1)
+        .attr("rx", 10)
+        .attr("ry", 10)
+        .attr("x", menus.x)
+        .attr("y", did.tly + 94);
+
+    edt_message
+        .append("g")
+        .attr("class", "ack-edt")
+        .append("text")
+        .attr("x", menus.x + (menus.coled + menus.colcb) * 0.5)
+        .attr("y", did.tly + 94 + 15);
+
+    edt_message.attr("visibility", "hidden");
+
 }
 
 
@@ -1910,7 +1664,7 @@ function create_stype() {
     // -- no slot --
 
     
-    dat = stg.selectAll(".dispot")
+    dat = svg.get_dom("stg").selectAll(".dispot")
         .data(user.dispos_type);
 
     datdi = dat
@@ -1952,9 +1706,9 @@ function create_stype() {
         .attr("x2", gsclbt_x)
         .attr("y2", gsclbt_y);
 
-    stg.attr("visibility", "hidden");
+    svg.get_dom("stg").attr("visibility", "hidden");
 
-    var dis_but = stg
+    var dis_but = svg.get_dom("stg")
         .append("g")
         .attr("but", "dis")
         .on("mouseover", but_bold)
@@ -1982,7 +1736,7 @@ function create_stype() {
         .attr("x", did.tlx + .5 * valid.w)
         .attr("y", did.tly + .5 * valid.h);
 
-    var stap_but = stg
+    var stap_but = svg.get_dom("stg")
         .append("g")
         .attr("but", "st-ap")
         .on("mouseover", st_but_bold)
@@ -2016,22 +1770,23 @@ function create_stype() {
         .attr("fill", "white")
         .attr("x", dispot_but_txt_x)
         .attr("y", dispot_but_txt_y("app") + 10)
-        .text("Semaine type");
+        .text("week type");
 
 }
 
 
 
 function fetch_dispos_type() {
-    if (user.nom != "") {
+    if (user.name != "") {
         show_loader(true);
         $.ajax({
             type: "GET", //rest Type
             dataType: 'text',
-            url: url_fetch_user_dweek + logged_usr.nom,
+            url: url_fetch_user_dweek + logged_usr.name,
             async: true,
             contentType: "text/csv",
             success: function(msg) {
+                console.log(msg);
                 user.dispos_type = [] ;
 
                 user.dispos_type = d3.csvParse(msg, translate_dispos_type_from_csv);
@@ -2057,7 +1812,7 @@ function translate_dispos_type_from_csv(d) {
         day: d.day,
 	start_time: +d.start_time,
 	duration: +d.duration,
-        val: +d.valeur,
+        val: +d.value,
         off: -1
     };
 }
@@ -2099,7 +1854,7 @@ function get_dispos_type(dt) {
 function select_entry_cm() {
     room_tutor_change.cm_settings = entry_cm_settings;
     var fake_id = new Date() ;
-    fake_id = fake_id.getMilliseconds() + "-" + pending.wanted_course.id_cours ;
+    fake_id = fake_id.getMilliseconds() + "-" + pending.wanted_course.id_course ;
     room_tutor_change.proposal = [{fid:fake_id,
 				   content:"Prof"},
 				   {fid:fake_id,
@@ -2113,9 +1868,15 @@ function def_cm_change() {
     entry_cm_settings.click = function(d) {
 	context_menu.room_tutor_hold = true ;
 	if(d.content == 'Salle') {
+            // don't consider other constraints than room's
+            pending.pass.tutor = true ;
+            pending.pass.core = true ;
 	    room_cm_level = 0 ;
 	    select_room_change();
 	} else {
+            // don't consider other constraints than tutor's
+            pending.pass.room = true ;
+            pending.pass.core = true ;
 	    select_tutor_module_change();
 	}
 	go_cm_room_tutor_change();
@@ -2166,7 +1927,7 @@ function def_cm_change() {
 // buttons to open selection view
 function create_selections() {
 
-    var avg = catg
+    var avg = svg.get_dom("catg")
         .selectAll(".gen-selection")
         .data(sel_popup.available);
 
@@ -2194,7 +1955,7 @@ function create_selections() {
         .attr("x", .5 * sel_popup.selw)
         .attr("y", .5 * sel_popup.selh);
 
-    var forall = catg
+    var forall = svg.get_dom("catg")
         .append("g")
         .attr("class", "sel_forall")
         .attr("transform", sel_forall_trans())
@@ -2271,7 +2032,7 @@ function popup_data(type) {
 // refreshes filter panels
 function go_selection_popup(){
     
-    var bound = selg
+    var bound = svg.get_dom("selg")
         .selectAll(".sel-pop-g")
         .data(sel_popup.panels, function(p) {
             return p.type ;
@@ -2379,7 +2140,7 @@ function go_selection_popup(){
 
 // create buttons for department redirection
 function create_dept_redirection() {
-    var avg = catg
+    var avg = svg.get_dom("catg")
         .selectAll(".dept-selection")
         .data(departments.data);
 

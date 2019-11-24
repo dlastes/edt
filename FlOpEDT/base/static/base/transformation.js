@@ -102,14 +102,14 @@ function bknews_link(d){
 
 function svg_height() {
     //    return margin.top + ack_reg_y() + 4*margin.bot ;
-    return margin.top + grid_height() + margin.bot
+    return dsp_svg.margin.top + grid_height() + dsp_svg.margin.bot
      + scale * garbage.duration * nbRows;
 }
 
 function svg_width() {
-    //    return margin.top + ack_reg_y() + 4*margin.bot ;
-    return margin.left + 
-        rootgp_width * nbPer * labgp.width + margin.right ;
+    //    return dsp_svg.margin.top + ack_reg_y() + 4*dsp_svg.margin.bot ;
+    return dsp_svg.margin.left + 
+        rootgp_width * week_days.nb_days() * labgp.width + dsp_svg.margin.right ;
 }
 
 
@@ -117,7 +117,7 @@ function svg_width() {
   ------- DISPOS ------
   ---------------------*/
 function dispo_x(d) {
-    return idays[d.day].num * (rootgp_width * labgp.width +
+    return week_days.day_by_ref(d.day).num * (rootgp_width * labgp.width +
             dim_dispo.plot * (dim_dispo.width + dim_dispo.right)) +
         rootgp_width * labgp.width ;
 }
@@ -179,9 +179,9 @@ function pref_sel_choice_stkw(d) {
 
 function dispo_short_fill(d) {
     var col = "green";
-    if (dispos[user.nom][d.day][d.hour] == 4) {
+    if (dispos[user.name][d.day][d.hour] == 4) {
         col = "orange";
-    } else if (dispos[user.nom][d.day][d.hour] == 0) {
+    } else if (dispos[user.name][d.day][d.hour] == 0) {
         col = "red";
     }
     return col;
@@ -381,53 +381,13 @@ function smile_trans(d, i) {
 }
 
 
-/*---------------------
-  ------- WEEKS -------
-  ---------------------*/
-function rect_wk_txt(d) {
-    return d.semaine;
-}
-
-function rect_wk_x(d, i) {
-    return i * weeks.width - .5 * weeks.width;
-}
-
-function rect_wk_init_x(d, i) {
-    if (i == 0) {
-        return rect_wk_x(0, -1);
-    } else if (i == weeks.ndisp + 1) {
-        return rect_wk_x(0, weeks.ndisp + 2);
-    } else {
-        return rect_wk_x(0, i);
-    }
-}
-
-function week_sel_x(d) {
-    return (d - weeks.fdisp) * weeks.width;
-}
-
 
 /*----------------------
   -------- GRID --------
   ----------------------*/
-function gm_x(datum) {
-    return datum.day * (rootgp_width * labgp.width +
-            dim_dispo.plot * (dim_dispo.width + dim_dispo.right)) +
-        datum.gp.x * labgp.width;
-}
-
-function gm_y(datum) {
-    var daty = row_gp[root_gp[datum.gp.promo].row].y ;
-    var ret = (datum.slot * nbRows + daty) * (labgp.height);
-    if (datum.slot >= bknews.hour_bound) {
-	ret += bknews_h() ;
-    }
-    return ret ;
-}
-
 function gs_x(d) {
     if(slot_case) {
-        return idays[d.day].num * (rootgp_width * labgp.width +
+        return week_days.day_by_ref(d.day).num * (rootgp_width * labgp.width +
                                    dim_dispo.plot * (dim_dispo.width + dim_dispo.right));
     } else {
         return cours_x(d);
@@ -500,7 +460,7 @@ function gs_slc(d) {
 function gscg_x(datum) {
     // hack for LP
     var hack = 0;
-    if (datum.gp.nom == "fLP1") {
+    if (datum.gp.name == "fLP1") {
         hack = .5 * labgp.width;
     }
     return datum.day * (rootgp_width * labgp.width +
@@ -522,12 +482,12 @@ function gscg_y(datum) {
 }
 
 function gscg_txt(datum) {
-    if (datum.gp.nom == "fLP1") {
+    if (datum.gp.name == "fLP1") {
         return "LP";
-    } else if (datum.gp.nom == "fLP2") {
+    } else if (datum.gp.name == "fLP2") {
         return "";
     } else {
-        return datum.gp.nom;
+        return datum.gp.name;
     }
 }
 
@@ -549,75 +509,7 @@ function gscp_txt(d) {
     return d.name;
 }
 
-function gsckd_x(datum, i) {
-    return i * (rootgp_width * labgp.width +
-            dim_dispo.plot * (dim_dispo.width + dim_dispo.right)) +
-        rootgp_width * labgp.width * .5;
-}
 
-function gsckd_y(datum) {
-    return -.75 * labgp.height_init;
-}
-
-function gsckd_txt(d) {
-    return d.name + " " + d.date;
-}
-
-
-function grid_day_am_x(d) {
-    return d.num * (rootgp_width * labgp.width +
-            dim_dispo.plot * (dim_dispo.width + dim_dispo.right));
-}
-function grid_day_am_y(d) {
-    return 0 ;
-}
-function grid_day_am_height(d) {
-    var t = time_settings.time ;
-    return scale*nbRows*(t.lunch_break_start_time - t.day_start_time) ;
-}
-function grid_day_am_width(d) {
-    return rootgp_width * labgp.width ;
-}
-function grid_day_pm_x(d) {
-    return grid_day_am_x(d) ;
-}
-function grid_day_pm_y(d) {
-    var t = time_settings.time ;
-    return grid_day_am_y(d) + grid_day_am_height(d)
-	+ bknews_h() ;
-}
-function grid_day_pm_height(d) {
-    var t = time_settings.time ;
-    return scale*nbRows*(t.day_finish_time - t.lunch_break_finish_time) ;
-}
-function grid_day_pm_width(d) {
-    return rootgp_width * labgp.width ;
-}
-
-
-function gsckh_x1() {
-    return 0 ;
-}
-function gsckh_x2() {
-    return -5 ;
-}
-function gsckh_y(d) {
-    var ts = time_settings.time ;
-    var ret = (d.h*60-ts.day_start_time) * nbRows * scale ;
-    if (d.hd == 'pm') {
-	ret += bknews_h() - (ts.lunch_break_finish_time - ts.lunch_break_start_time)*nbRows*scale ;
-    }
-    return ret ;
-}
-
-function gsckh_txt(d) {
-    var ret = d.h ;
-    if(ret >= 24) {
-        ret -= 24 ;
-    }
-    ret += "h" ;
-    return ret ;
-}
 
 function grid_height() {
     return scale * nb_minutes_in_grid();
@@ -643,7 +535,7 @@ function scale_from_grid_height(gh) {
 
 function grid_width() {
     return (rootgp_width * labgp.width +
-        dim_dispo.plot * (dim_dispo.width + dim_dispo.right)) * nbPer;
+            dim_dispo.plot * (dim_dispo.width + dim_dispo.right)) * week_days.nb_days();
 }
 
 
@@ -790,7 +682,7 @@ function but_open_sel_txt(d) {
   ------ COURS -------
   --------------------*/
 function cours_x(c) {
-    return idays[c.day].num * (rootgp_width * labgp.width +
+    return week_days.day_by_ref(c.day).num * (rootgp_width * labgp.width +
             dim_dispo.plot * (dim_dispo.width + dim_dispo.right)) +
         groups[c.promo][c.group].x * labgp.width;
 }
@@ -818,13 +710,13 @@ function cours_txt_x(c) {
     return cours_x(c) + .5 * cours_width(c);
 }
 function cours_txt_fill(c) {
-    if (c.id_cours != -1) {
+    if (c.id_course != -1) {
 	return c.color_txt;
     }
     return "black";
 }
 function cours_fill(c) {
-    if (c.id_cours != -1) {
+    if (c.id_course != -1) {
 	return c.color_bg;
     }
     return "red";
@@ -1077,7 +969,7 @@ function but_sca_tri_v(add) {
    ------ STYPE ------
   --------------------*/
 function dispot_x(d) {
-    return idays[d.day].num * (did.w + did.mh);
+    return week_days.day_by_ref(d.day).num * (did.w + did.mh);
 }
 
 function dispot_y(d) {
@@ -1135,11 +1027,11 @@ function gsclbt_y() {
 }
 
 function gsclbt_x() {
-    return (did.w + did.mh) * days.length - did.mh;
+    return (did.w + did.mh) * week_days.nb_days() - did.mh;
 }
 
 function dispot_but_x() {
-    return did.tlx + nbPer * (did.w + did.mh) + did.mh;
+    return did.tlx + week_days.nb_days() * (did.w + did.mh) + did.mh;
 }
 
 function dispot_but_y(but) {
@@ -1330,8 +1222,7 @@ function dept_txt(d){
 
 
 function pmg_x() {
-    var wid = pref_only ? svg.width - margin.left - 10 : grid_width();
-    console.log(svg.width);
+    var wid = pref_only ? dsp_svg.w - dsp_svg.margin.left - 10 : grid_width();
     return wid
             - 2*pref_selection.marx
             - pref_selection.choice.w
@@ -1341,7 +1232,7 @@ function pmg_y() {
     if(pref_only) {
         return 0 ;
     } else {
-        return weeks.y;
+        return dsp_weeks.y;
     }
 }
 function pmg_trans() {
@@ -1349,7 +1240,7 @@ function pmg_trans() {
 }
 function pref_mode_trans() {
     return "translate(0,"
-        + (-.5*weeks.y -
+        + (-.5*dsp_weeks.y -
            (pref_selection.mode.length*(pref_selection.mary + pref_selection.buth)
             - pref_selection.mary))
         + ")";
