@@ -43,8 +43,7 @@ from base.models import Day, RoomGroup, Module, Course, Group, \
 
 from base.models import RoomPreference, RoomSort, RoomType, Room
 from displayweb.models import ModuleDisplay
-if COSMO_MODE:
-    from displayweb.models import TutorDisplay
+from displayweb.models import TutorDisplay
 from import_export import resources, fields
 from import_export.widgets import ForeignKeyWidget
 
