@@ -29,7 +29,23 @@ function Day(day={num:iday,
     this.date = day.date ;
     this.ref = day.ref ;
     this.name = day.name ;
+    var sp = day.date.split('/') ;
+    this.day = +sp[0] ;
+    this.month = +sp[1] ;
 }
+
+// maximum number of days in a month
+Day.prototype.max_days_in_month = function() {
+    if (this.month==2) {
+        return 29 ;
+    } else if ([1,3,5,7,8,10,12].includes(this.month)) {
+        return 31;
+    } else {
+        return 30;
+    }
+}
+
+
 
 // 'static' function 
 Day.id_fun = function(d) {
