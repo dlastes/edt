@@ -92,6 +92,10 @@ WeeksExcerpt.prototype.adapt_full_weeks = function() {
 WeeksExcerpt.prototype.get_iselected = function() {
     return [this.selected] ;
 }
+WeeksExcerpt.prototype.get_iselected_pure = function() {
+    return this.selected ;
+}
+
 // getter for the selected week
 WeeksExcerpt.prototype.get_selected = function() {
     return this.full_weeks.data[this.selected] ;
@@ -186,6 +190,21 @@ Weeks.prototype.get_nb = function() {
     return this.data.length ;
 }
 
+// add a week indexed by iweek in full_weeks
+Weeks.prototype.add_by_index = function(full_weeks, iweek) {
+    if (iweek < 0 || iweek >= full_weeks.data.length)  {
+        return false ;
+    }
+    var week = full_weeks.data[iweek] ;
+    var found = this.data.find(function(d){
+        return Week.compare(d, week) == 0;
+    });
+    if (typeof found === 'undefined') {
+        this.data.push(week);
+        return true ;
+    }
+    return false ;
+}
 
 /********************/
 /* class WeekBanner */
