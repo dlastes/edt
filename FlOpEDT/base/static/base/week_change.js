@@ -668,19 +668,16 @@ function translate_cours_pp_from_csv(d) {
 
 
 // insert the given week in the side weeks
-function insert_side_week(year, week, days_, courses_) {
+function insert_side_week(week, days_, courses_) {
     var found = side_courses.find(function(d){
-        return d.year == year && d.week == week;
+        return Week.compare(d, week) == 0;
     });
     if (typeof found === 'undefined') {
         side_courses.push({
-            year: year,
             week: week,
             days: days_,
             courses: courses_
         });
-    } else {
-        found.courses = courses_ ;
     }
 }
 
@@ -706,69 +703,53 @@ function insert_in_week_set(week_set, iweek) {
 }
 
 
-// maximum number of days in a month
-function max_days_in_month(month) {
-    if (month==2) {
-        return 29 ;
-    } else if ([1,3,5,7,8,10,12].includes(month)) {
-        return 31;
-    } else {
-        return 30;
-    }
-}
-
-
 // compute which weeks are needed to check the constraints
 function which_side_weeks() {
+    var week_set = new Weeks() ;
+    var fweeks = wdw_weeks.full_weeks ;
 
-    var week_set = [] ;
-
-    var cur_week_index = weeks.sel[0] ;
+    var cur_week_index = wdw_weeks.get_iselected_pure() ;
 
     // constraint: 'sleep'
-    insert_in_week_set(week_set, cur_week_index-1) ;
-    insert_in_week_set(week_set, cur_week_index+1) ;
+    week_set.add_by_index(fweeks, cur_week_index-1) ;
+    week_set.add_by_index(fweeks, cur_week_index+1) ;
 
     // constraint: 'monthly'
-    // note: heavy if the week goes through 2 months
+    // note: load too much if empty weeks (not in weak_year_init)
     // until day 1 of the month of the first day of the week
-    var first_day = days.find(function(d){ return d.num == 0 ; });
-    var date = first_day.date.split('/') ;
-    var cur_extremum = +date[0] - 7 ;
+    var first_day = week_days.day_by_num(0) ;
+    var cur_extremum = first_day.day - 1 ;
     var iextrem = cur_week_index - 1 ;
-    while (cur_extremum > 1) {
-        insert_in_week_set(week_set, iextrem) ;
+    while (cur_extremum >= 1) {
+        week_set.add_by_index(fweeks, iextrem) ;
         cur_extremum -= 7 ;
         iextrem -= 1 ;
     }
 
     // until final day of the month of the last day of the week
-    var last_day = days.find(function(d){ return d.num == days.length-1 ; });
-    date = last_day.date.split('/');
-    console.log(last_day);
-    console.log(max_days_in_month(+last_day[1]));
-    cur_extremum = +date[0] + week_jump ;
+    var last_day = week_days.day_by_num(week_days.day_list.length -1) ;
+    cur_extremum = last_day.day + week_jump ;
     iextrem = cur_week_index + 1 ;
-    while (cur_extremum < max_days_in_month(+last_day[1])) {
+    while (cur_extremum <= last_day.max_days_in_month()) {
         console.log(iextrem);
-        insert_in_week_set(week_set, iextrem) ;
+        week_set.add_by_index(fweeks, iextrem) ;
         cur_extremum += 7 ;
         iextrem += 1 ;
     }
 
     return week_set ;
-    
 }
 
 
 
 function side_week_rcv(side_week) {
     return function(msg, ts, req) {
-        var side_days = JSON.parse(req.getResponseHeader('days').replace(/\'/g, '"'));
-        var side_cours_pl = d3.csvParse(msg, translate_cours_pl_from_csv);
+
         
-        insert_side_week(side_week.year, side_week.week,
-                         side_days, side_cours_pl);
+        var side_days = new WeekDays(JSON.parse(req.getResponseHeader('days').replace(/\'/g, '"')));
+        var side_cours_pl = d3.csvParse(msg, translate_cours_pl_from_csv);
+
+        insert_side_week(side_week, side_days, side_cours_pl);
         
     }
 }
@@ -779,14 +760,15 @@ function fetch_side_weeks() {
 
     var needed_weeks = which_side_weeks();
 
-    for (var i = 0 ; i < needed_weeks.length ; i++) {
+    for (var i = 0 ; i < needed_weeks.data.length ; i++) {
+        console.log(url_cours_pl + needed_weeks.data[i].url() + "/" + 0);
         $.ajax({
             type: "GET", //rest Type
             dataType: 'text',
-            url: url_cours_pl + needed_weeks[i].year + "/" + needed_weeks[i].week + "/" + 0,
+            url: url_cours_pl + needed_weeks.data[i].url() + "/" + 0,
             async: true,
             contentType: "text/csv",
-            success: side_week_rcv(needed_weeks[i]),
+            success: side_week_rcv(needed_weeks.data[i]),
             error: function(msg) {
                 console.log("error");
             }

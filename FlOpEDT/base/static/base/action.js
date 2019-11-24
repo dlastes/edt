@@ -981,23 +981,21 @@ function fill_date(day_desc) {
     //console.log("fill date : IW"+day_desc.iweek+" - "+day_desc.ref);
 
     day_desc.date = side_courses.find(function(d){
-        return d.year == weeks.init_data[day_desc.iweek].year &&
-            d.week == weeks.init_data[day_desc.iweek].week ;
-    }).days.find(function(d){
-        return d.ref == day_desc.ref ;
-    }).date;
+        return Week.compare(d.week,
+                            wdw_weeks.full_weeks.data[day_desc.iweek]) == 0 ;
+    }).days.day_by_ref(day_desc.ref).date;
 }
 
 
 // return the courses of tutor tutor on day day_desc
 function get_courses(tutor, day_desc) {
-    if (day_desc.iweek < 0 || day_desc.iweek >= weeks.init_data.length) {
+    if (day_desc.iweek < 0 || day_desc.iweek >= wdw_weeks.full_weeks.data.length) {
         return [] ;
     }
     var full_week = side_courses.find(function(d){
-        return d.year == weeks.init_data[day_desc.iweek].year &&
-            d.week == weeks.init_data[day_desc.iweek].week ;
-    });
+        return Week.compare(d.week,
+                            wdw_weeks.full_weeks.data[day_desc.iweek]) == 0 ;
+    }) ;
     if (typeof full_week !== 'undefined') {
         return full_week.courses.filter(function(d) {
             return d.day == day_desc.ref && d.prof == tutor ;
@@ -1054,16 +1052,16 @@ function aggregate_hours(tutor, iweek) {
     }
     
     var week_desc = side_courses.find(function(d){
-        return d.year == weeks.init_data[iweek].year &&
-            d.week == weeks.init_data[iweek].week ;
+        return Week.compare(d.week,
+                            wdw_weeks.full_weeks.data[iweek]) == 0 ;
     });
     if (typeof week_desc === 'undefined') {
         return ret ;
     }
     
-    for (var i = 0 ; i<week_desc.days.length ; i++) {
-        ret[day_shifts[week_desc.days[i].ref]].month
-            = +week_desc.days[i].date.split('/')[1] ;
+    for (var i = 0 ; i<week_desc.days.day_list.length ; i++) {
+        var dday = week_desc.days.day_list[i] ;
+        ret[day_shifts[dday.ref]].month = dday.month ;
     }
 
     week_desc.courses.filter(function(d){
@@ -1171,21 +1169,20 @@ function check_constraints_tutor(tutor) {
         d.prof == tutor ;
     }) ;
 
-    var icur_week = weeks.sel[0] ;
+    var icur_week = wdw_weeks.get_iselected_pure() ;
 
 
 
     // CARE  COURS PAS PLACÉ
-    insert_side_week(weeks.init_data[icur_week].year,
-                     weeks.init_data[icur_week].week,
-                     days,
+    insert_side_week(wdw_weeks.full_weeks.data[icur_week],
+                     week_days,
                      cours);
     
 
     // sleep constraint
     compute_sleep(tutor,
-                  {iweek: weeks.sel[0] - 1, ref: 'su'},
-                  {iweek: weeks.sel[0] + 1, ref: 'm'},
+                  {iweek: icur_week - 1, ref: 'su'},
+                  {iweek: icur_week + 1, ref: 'm'},
                   issues) ;
 
     // weekend constraint
