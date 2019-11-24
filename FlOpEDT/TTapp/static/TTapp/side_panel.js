@@ -21,13 +21,12 @@ function openNav() {
 
 // Fetch the available work copy numbers for the current week
 function fetch_work_copy_numbers() {
-    var cur_week = weeks.init_data[weeks.sel[0]].week;
-    var cur_year = weeks.init_data[weeks.sel[0]].year;
+    var cur_week = week_banner.get_selected();
 
     $.ajax({
         type: "GET",
         dataType: 'json',
-        url: url_work_copies +  cur_year + '/' + cur_week,
+        url: url_work_copies + cur_week.url(),
         async: true,
         contentType: "application/json; charset=utf-8",
         success: function(msg) {
@@ -73,14 +72,13 @@ function closeNav() {
 // swap the current work copy with the public work copy, i.e. #0
 // display the old public copy afterwards
 function swap_with_copy_0() {
-    var cur_week = weeks.init_data[weeks.sel[0]].week;
-    var cur_year = weeks.init_data[weeks.sel[0]].year;
+    var cur_week = week_banner.get_selected();
 
     show_loader(true);
     $.ajax({
         type: "GET",
         dataType: 'json',
-        url: url_swap +  cur_year + '/' + cur_week + '/' + num_copie,
+        url: url_swap +  cur_week.url() + '/' + num_copie,
         async: true,
         contentType: "application/json; charset=utf-8",
         success: function(msg) {
@@ -97,14 +95,13 @@ function swap_with_copy_0() {
 
 // reassign rooms and reload
 function reassign_rooms() {
-    var cur_week = weeks.init_data[weeks.sel[0]].week;
-    var cur_year = weeks.init_data[weeks.sel[0]].year;
+    var cur_week = week_banner.get_selected();
 
     show_loader(true);
     $.ajax({
         type: "GET",
         dataType: 'json',
-        url: url_reassign_rooms +  cur_year + '/' + cur_week + '/' + num_copie,
+        url: url_reassign_rooms +  cur_week.url() + '/' + num_copie,
         async: true,
         contentType: "application/json; charset=utf-8",
         success: function(msg) {

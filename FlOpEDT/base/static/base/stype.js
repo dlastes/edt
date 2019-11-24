@@ -24,7 +24,27 @@
 
 // Redefinition of some variables
 
-var margin = {top: 50,  left: 50, right: 10, bot:10};
+dsp_svg.margin = {top: 50,  left: 50, right: 10, bot:10};
+
+dsp_svg.h = 625 - dsp_svg.margin.top - dsp_svg.margin.bot ;
+dsp_svg.w = 680 - dsp_svg.margin.left - dsp_svg.margin.right ;
+
+dsp_svg.cadastre = [
+    // valider
+    ["svg","vg"],
+    // background, middleground, foreground, dragground
+    ["svg","edtg"],
+    ["edtg","edt-bg"],
+    ["edtg","edt-mg"],
+    ["edtg","edt-fg"],
+    // context menus ground
+    ["svg","cmg"],
+    ["cmg","cmpg"],
+    ["cmg","cmtg"],
+    // drag ground
+    ["svg","dg"]
+];
+
 
 var mode = "tutor" ;
 
@@ -56,8 +76,35 @@ var svg = {height: dim_dispo.height + 145 - margin.top - margin.bot,
 
 
 
+svg = new Svg(dsp_svg.layout_tree, false);
+svg.create_container(true);
+svg.create_layouts(dsp_svg.cadastre) ;
 
-create_general_svg_pref_only();
+var days_header = new WeekDayHeader(svg, "edt-fg", week_days, false, null) ;
+
+// overwrite functions for headers
+function WeekDayMixStype() {
+    this.gsckd_x = function(datum,i) {
+        return  i*(dim_dispo.width + dim_dispo.mh)
+	    + dim_dispo.width * .5;
+    }
+    this.gsckd_y = function(datum) {
+        return  - 20 ;
+    }
+    this.gsckd_txt = function(d) {
+        return  d.name ;
+    }
+    this.gsckh_x = function(datum) {
+        return - dim_dispo.width ;
+    }
+}
+Object.assign(days_header.mix, new WeekDayMixStype()) ;
+hard_bind(days_header.mix);
+
+var hours_header = new HourHeader(svg, "edt-fg", hours) ;
+
+
+
 go_days(true, false);
 create_pref_modes(pref_only);
 fetch_pref_only();
@@ -65,53 +112,18 @@ fetch_pref_only();
 
 
 
-function create_general_svg_pref_only() {
-    svg_cont = d3.select("body").select("[id=\"svg\"]").append("svg")
-	.attr("width",svg.width)
-	.attr("height",svg.height)
-	.attr("text-anchor","middle")
-	.append("g")
-	.attr("transform","translate("+margin.left + "," + margin.top + ")");
 
-    create_layouts_pref_only(svg_cont);
-}
+function create_lunchbar() {
+    svg.get_dom("edt-fg")
+	.append("line")
+	.attr("class","lunchbar")
+	.attr("stroke","black")
+	.attr("stroke-width",6)
+	.attr("x1",0)
+	.attr("y1",gsclb_y)
+	.attr("x2",gsclb_x)
+	.attr("y2",gsclb_y);
 
-
-function create_layouts_pref_only(svg_cont){
-
-    // preference mode ground
-    pmg = svg_cont.append("g")
-        .attr("id", "lay-pmg");    
-
-    // valider
-    vg = svg_cont.append("g")
-	.attr("id","lay-vg");
-    
-    // background, middleground, foreground, dragground
-    var edtg = svg_cont.append("g")
-        .attr("id", "lay-edtg");
-    bg = edtg.append("g")
-        .attr("id", "lay-bg");
-    mg = edtg.append("g")
-        .attr("id", "lay-mg");
-    // fig = edtg.append("g")
-    //     .attr("id", "lay-fig");
-    fg = edtg.append("g")
-        .attr("id", "lay-fg");
-
-    // context menus ground
-    var cmg = svg_cont.append("g")
-        .attr("id", "lay-cmg");
-    cmpg = cmg.append("g")
-	.attr("id", "lay-cmpg");
-    cmtg = cmg.append("g")
-	.attr("id", "lay-cmtg");
-    
-    // drag ground
-    dg = svg_cont.append("g")
-        .attr("id", "lay-dg");
-
-    
 }
 
 
@@ -138,9 +150,9 @@ function translate_course_preferences_from_csv(d) {
     var pseudo_tutor = course_type_prog_name(d.train_prog, d.type_name) ;
     if(Object.keys(dispos).indexOf(pseudo_tutor)==-1){
 	dispos[pseudo_tutor] = {} ;
-        for (var i = 0; i < days.length; i++) {
-	    dispos[pseudo_tutor][days[i].ref] = [] ;
-	}	
+        week_days.forEach(function(day) {
+	    dispos[pseudo_tutor][day.ref] = [] ;
+	});
     }
     dispos[pseudo_tutor][d.day].push({start_time:+d.start_time,
 			       duration: +d.duration,
@@ -209,31 +221,20 @@ function fetch_pref_only() {
 
 
 function dispo_x(d) {
-    return idays[d.day].num * (dim_dispo.width + dim_dispo.mh) ;
+    return week_days.day_by_ref(d.day).num * (dim_dispo.width + dim_dispo.mh) ;
 }
 function dispo_h(d){
     return d.duration * scale ;
 }
-function gsckd_x(datum,i) {
-    return  i*(dim_dispo.width + dim_dispo.mh)
-	+ dim_dispo.width * .5;
-}
-function gsckd_y(datum) {
-    return  - 20 ;
-}
-function gsckd_txt(d) {
-    return  d.name ;
-}
-function gsckh_x(datum) {
-    return - dim_dispo.width ;
-}
+
+
+
 function gsclb_y()  {
-    //return dim_dispo.height * .5 * nbSl;
     return dispo_y({start_time:
 		    time_settings.time.lunch_break_start_time});
 }
 function gsclb_x()  {
-    return (dim_dispo.width + dim_dispo.mh) * nbPer - dim_dispo.mh ;
+    return (dim_dispo.width + dim_dispo.mh) * week_days.nb_days() - dim_dispo.mh ;
 }
 
 
