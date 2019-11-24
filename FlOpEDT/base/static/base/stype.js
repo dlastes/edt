@@ -71,11 +71,6 @@ ckbox["dis-mod"].cked = true ;
 
 pref_only = true ;
 
-var svg = {height: dim_dispo.height + 145 - margin.top - margin.bot,
-	   width: nbPer * (dim_dispo.width + dim_dispo.mh) + 250 - margin.left - margin.right};
-
-
-
 svg = new Svg(dsp_svg.layout_tree, false);
 svg.create_container(true);
 svg.create_layouts(dsp_svg.cadastre) ;
