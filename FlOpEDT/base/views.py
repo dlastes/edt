@@ -236,7 +236,8 @@ def stype(req, *args, **kwargs):
                        'err': err,
                        'current_year': current_year,
                        'time_settings': queries.get_time_settings(req.department),
-                       'days': num_all_days(1, 1, req.department)
+                       'days': num_all_days(1, 1, req.department),
+                       'cosmo': COSMO_MODE,
                       })
     elif req.method == 'POST':
         if 'apply' in list(req.POST.keys()):
