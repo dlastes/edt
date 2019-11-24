@@ -696,7 +696,7 @@ function insert_in_week_set(week_set, iweek) {
         return false ;
     }
     var week = weeks.init_data[iweek].week ;
-    var year = weeks.init_data[iweek].an ;
+    var year = weeks.init_data[iweek].year ;
     var found = week_set.find(function(d){
         return d.year == year && d.week == week;
     });
