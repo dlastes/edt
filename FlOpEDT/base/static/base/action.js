@@ -1303,9 +1303,11 @@ function confirm_change() {
         ack.more = "Rien à signaler.";
         go_ack_msg();
     } else {
-
-        confirm_law_constraints(changes, conc_tutors, gps) ;
-
+        if (!cosmo) {
+            confirm_contact_all(changes, conc_tutors, gps) ;
+        } else {
+            confirm_law_constraints(changes, conc_tutors, gps) ;
+        }
     }
 }
 
