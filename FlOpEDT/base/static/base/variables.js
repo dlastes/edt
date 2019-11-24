@@ -553,16 +553,7 @@ var sel_popup = {
     selmy: 8,
     mar_side: 5,
     tlx: 700,
-    available: [{type:"group",
-                 buttxt: "Groupes",
-                 active: false},
-                {type: "tutor",
-                 buttxt: "Profs",
-                 active: false},
-                {type:"module",
-                 buttxt: "Modules",
-                 active: false}
-                ],
+    available: [],
     get_available: function(t) {
         var ret = this.available.find(function(d) {
             return d.type == t ;
@@ -578,11 +569,26 @@ var sel_popup = {
     but: [],
     active_filter: false
 };
-if (!cosmo) {
-    sel_popup.available.push({type:"room",
-                              buttxt: "Salles",
-                              active: false});
+if (cosmo) {
+    sel_popup.available = [{type:"group",
+                            buttxt: "Filtre"},
+                           {type: "tutor",
+                            buttxt: "Salarié·e·s"},
+                           {type:"module",
+                            buttxt: "Postes"}];
+} else {
+    sel_popup.available = [{type:"group",
+                            buttxt: "Groupes"},
+                           {type: "tutor",
+                            buttxt: "Profs"},
+                           {type:"module",
+                            buttxt: "Modules"},
+                           {type:"room",
+                            buttxt: "Salles"}];
 }
+sel_popup.available.forEach(function(f) {
+    f.active = false ;
+})
 sel_popup.but["tutor"] = {
     h: 30,
     w: 40,
