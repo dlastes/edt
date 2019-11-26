@@ -642,12 +642,15 @@ class Stabilize(TTConstraint):
 
     def enrich_model(self, ttmodel, week, ponderation=1):
         sched_courses = ttmodel.wdb.sched_courses.filter(work_copy=self.work_copy, course__week=week)
-        for day in days_filter(self.fixed_days.all(), week=week):
-            for sc in sched_courses.filter(slot__jour=day):
-                ttmodel.add_constraint(ttmodel.TT[(sc.slot, sc.course)], '==', 1)
-            for sc in sched_courses.exclude(slot__day=day):
-                for sl in ttmodel.wdb.slots.filter(day=day):
-                    ttmodel.add_constraint(ttmodel.TT[(sl, sc.course)], '==', 0)
+        if self.fixed_days:
+            pass
+            # Attention, les fixed_days doivent être des couples jour-semaine!!!!
+            # for day in days_filter(self.fixed_days.all(), week=week):
+            #     for sc in sched_courses.filter(slot__jour=day):
+            #         ttmodel.add_constraint(ttmodel.TT[(sc.slot, sc.course)], '==', 1)
+            #     for sc in sched_courses.exclude(slot__day=day):
+            #         for sl in ttmodel.wdb.slots.filter(day=day):
+            #             ttmodel.add_constraint(ttmodel.TT[(sl, sc.course)], '==', 0)
 
         if self.general:
             # nb_changements_I=dict(zip(ttmodel.wdb.instructors,[0 for i in ttmodel.wdb.instructors]))
