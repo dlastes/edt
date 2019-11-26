@@ -1,3 +1,10 @@
-from django.test import TestCase
+from django.test import TestCase, Client
 
-# Create your tests here.
+import unittest
+
+class APITestCase(TestCase):
+
+    # fixtures = ['dump_post_refactor.json']
+
+    def setUp(self):
+        self.client = Client()
