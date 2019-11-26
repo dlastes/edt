@@ -92,7 +92,8 @@ class MinHalfDaysHelperModule(MinHalfDaysHelperBase):
                 self.ttmodel.add_constraint(expr, '<=', card - 1)
         
         local_var = self.ttmodel.add_var("MinMBHD_var_%s" % self.module)
-        courses = self.ttmodel.wdb.courses.filter(module=self.module, semaine=self.week)
+        # no year?
+        courses = self.ttmodel.wdb.courses.filter(module=self.module, week=self.week)
         expression = self.ttmodel.sum(
             mod_b_h_d[(self.module, d, apm)]
             for d in days
@@ -143,7 +144,8 @@ class MinHalfDaysHelperGroup(MinHalfDaysHelperBase):
 class MinHalfDaysHelperTutor(MinHalfDaysHelperBase):
 
     def build_variables(self):
-        courses = self.ttmodel.wdb.courses.filter(tutor=self.tutor, semaine=self.week)
+        # no year?
+        courses = self.ttmodel.wdb.courses.filter(tutor=self.tutor, week=self.week)
         days = set(day for day in self.ttmodel.wdb.days if day.week == self.week)
         expression = self.ttmodel.sum(
             self.ttmodel.IBHD[(self.tutor, d, apm)]

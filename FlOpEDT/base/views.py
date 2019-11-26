@@ -557,8 +557,8 @@ def fetch_unavailable_rooms(req, year, week, **kwargs):
     # dataset = DispoResource() \
     #     .export(RoomPreference.objects.filter(
     #                                         room__departments = department, 
-    #                                         semaine=week,
-    #                                         an=year,
+    #                                         week=week,
+    #                                         year=year,
     #                                         value=0))
     # response = HttpResponse(dataset.csv,
     #                         content_type='text/csv')
@@ -1217,8 +1217,8 @@ def user_preferences_changes(req, year, week, username, **kwargs):
     if week is not None and year is not None:
         # invalidate merely the keys where the tutor has courses:
         # bad idea if the courses have not been generated yet
-        # for c in Course.objects.filter(semaine=week,
-        #                               an=year).distinct('module__train_prog__department'):
+        # for c in Course.objects.filter(week=week,
+        #                               year=year).distinct('module__train_prog__department'):
         for dep in Department.objects.all():
             cache.delete(get_key_preferences_tutor(dep.abbrev, year, week))
 

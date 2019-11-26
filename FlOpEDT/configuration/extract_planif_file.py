@@ -63,7 +63,7 @@ def ReadPlanifWeek(department, book, feuille, week, year):
         row += 1
         is_total = sheet.cell(row=row, column=group_COL).value
         if is_total == "TOTAL":
-            # print "Sem %g de %s - TOTAL: %g"%(semaine, feuille,sumtotal)
+            # print "Sem %g de %s - TOTAL: %g"%(week, feuille,sumtotal)
             break
 
         Cell = sheet.cell(row=row, column=WEEK_COL)
