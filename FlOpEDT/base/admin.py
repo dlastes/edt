@@ -32,8 +32,10 @@ from django.db.models.fields import related as related_fields
 from django.contrib import admin
 import django.contrib.auth as auth
 
+from FlOpEDT.settings.base import COSMO_MODE
+
 from people.models import Tutor, User
-from base.models import Day, RoomGroup, Module, Course, Group, Slot, \
+from base.models import Day, RoomGroup, Module, Course, Group, \
     UserPreference, Time, ScheduledCourse, EdtVersion, CourseModification, \
     PlanningModification, TrainingProgramme,  \
     Regen, Holiday, TrainingHalfDay, \
@@ -41,6 +43,7 @@ from base.models import Day, RoomGroup, Module, Course, Group, Slot, \
 
 from base.models import RoomPreference, RoomSort, RoomType, Room
 from displayweb.models import ModuleDisplay
+from displayweb.models import TutorDisplay
 from import_export import resources, fields
 from import_export.widgets import ForeignKeyWidget
 
@@ -117,6 +120,54 @@ class CoursPlaceResource(resources.ModelResource):
                   'week', 'room', 'prof', 'room_type')
 
 
+class CoursPlaceResourceCosmo(resources.ModelResource):
+    id = fields.Field(column_name='id_course',
+                      attribute='course',
+                      widget=ForeignKeyWidget(Course, 'id'))
+    no = fields.Field(column_name='num_course',
+                      attribute='course',
+                      widget=ForeignKeyWidget(Course, 'no'))
+    prof = fields.Field(column_name='prof_name',
+                        attribute='tutor',
+                        widget=ForeignKeyWidget(Tutor, 'username'))
+    # prof_first_name = fields.Field(column_name='prof_first_name',
+    #                                attribute='cours__tutor',
+    #                                widget=ForeignKeyWidget(Tutor,
+    #                                 'first_name'))
+    # prof_last_name = fields.Field(column_name='prof_last_name',
+    #                               attribute='cours__tutor',
+    #                               widget=ForeignKeyWidget(Tutor, 'last_name'))
+    groupe = fields.Field(column_name='gpe_name',
+                          attribute='course__group',
+                          widget=ForeignKeyWidget(Group, 'name'))
+    promo = fields.Field(column_name='gpe_promo',
+                         attribute='course__group__train_prog',
+                         widget=ForeignKeyWidget(TrainingProgramme, 'abbrev'))
+    module = fields.Field(column_name='module',
+                          attribute='course__module',
+                          widget=ForeignKeyWidget(Module, 'abbrev'))
+    coursetype = fields.Field(column_name='coursetype',
+                          attribute='course__type',
+                          widget=ForeignKeyWidget(CourseType, 'name'))
+    # salle = fields.Field(column_name = 'salle',
+    #                      attribute = 'salle',
+    #                      widget = ForeignKeyWidget(Salle,'nom'))
+    room = fields.Field(column_name='room',
+                        attribute='room',
+                        widget=ForeignKeyWidget(RoomGroup, 'name'))
+    color_bg = fields.Field(column_name='color_bg',
+                            attribute='tutor__display',
+                            widget=ForeignKeyWidget(TutorDisplay, 'color_bg'))
+    color_txt = fields.Field(column_name='color_txt',
+                             attribute='tutor__display',
+                             widget=ForeignKeyWidget(TutorDisplay, 'color_txt'))
+
+    class Meta:
+        model = ScheduledCourse
+        fields = ('id', 'no', 'group', 'promo', 'color_bg', 'color_txt',
+                  'module', 'day', 'start_time', 'week', 'room', 'prof')
+
+        
 class TutorCoursesResource(CoursPlaceResource):
     department =  fields.Field(column_name='dept',
                                attribute='course__type__department',

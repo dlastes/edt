@@ -56,8 +56,11 @@ function apply_change_simple_pref(d) {
                 d.val = Math.floor(d.val / (par_dispos.nmax / 2)) * par_dispos.nmax / 2;
             }
             d.val = (d.val + par_dispos.nmax / 2) % (3 * par_dispos.nmax / 2);
+            if (cosmo && d.val == 0) {
+                d.val ++ ;
+            }
 	    update_pref_interval(user.name, d.day, d.start_time, d.val) ;
-            //dispos[user.name][idays[d.day]][d.hour] = d.val;
+            //dispos[user.nom][idays[d.day]][d.hour] = d.val;
             //user.dispos[day_hour_2_1D(d)].val = d.val;
         } else {
             d.val = sel.val ;
@@ -373,6 +376,47 @@ function select_tutor_filters_change() {
 
 }
 
+// quels salaries afficher 
+function select_salarie_change() {
+    room_tutor_change.cm_settings = salarie_cm_settings ;
+    var level = salarie_cm_level;
+
+    var tache = pending.wanted_course ;
+
+    if (level == 0) {
+        var possibles = new Set();
+        cours.forEach(function(c) {
+            if (c.group == tache.group) {
+                possibles.add(c.prof);
+            }
+        });
+        room_tutor_change.proposal = Array.from(possibles) ;
+	room_tutor_change.proposal.push("+");
+    } else {
+        room_tutor_change.proposal = tutors.all.filter(function(t){
+            return t != "";
+        }).map(function(t){
+            return t.name ;
+        });
+    }
+    
+    room_tutor_change.cm_settings.nlin
+	= Math.ceil(room_tutor_change.proposal.length
+		    / room_tutor_change.cm_settings.ncol) ;
+
+
+    var fake_id = new Date() ;
+    fake_id = fake_id.getMilliseconds() + "-" + tache.id_cours ;
+    room_tutor_change.proposal = room_tutor_change.proposal.map(function(t) {
+	return {fid: fake_id, content: t};
+    });
+
+}
+// appliquer le changement pour la tache
+function confirm_salarie_change(d){
+    confirm_tutor_change(d) ;
+}
+
 function select_tutor_change(f) {
     room_tutor_change.cm_settings = tutor_cm_settings ;
 
@@ -416,7 +460,7 @@ function go_cm_room_tutor_change() {
         tmp_array.push(pending.wanted_course);
     }
 
-    var tut_cm_course_dat = cmtg
+    var tut_cm_course_dat = svg.get_dom("cmtg")
         .selectAll(".cm-chg")
         .data(tmp_array,
               function(d) {
@@ -456,7 +500,7 @@ function go_cm_room_tutor_change() {
 
 
 
-    var tut_cm_room_dat = cmtg
+    var tut_cm_room_dat = svg.get_dom("cmtg")
         .selectAll(".cm-chg-rooms")
         .data(room_tutor_change.proposal,
               function(d,i) {
@@ -633,7 +677,7 @@ function apply_ckbox(dk) {
             if (ckbox[dk].cked) {
                 //create_dispos_user_data();
                 //ckbox["dis-mod"].disp = true;
-                stg.attr("visibility", "visible");
+                svg.get_dom("stg").attr("visibility", "visible");
 
                 dim_dispo.plot = 1;
                 if (rootgp_width != 0) {
@@ -674,7 +718,7 @@ function apply_ckbox(dk) {
             } else {
                 user.dispos = [];
                 //ckbox["dis-mod"].disp = false;
-                stg.attr("visibility", "hidden");
+                svg.get_dom("stg").attr("visibility", "hidden");
                 dim_dispo.plot = 0;
                 if (rootgp_width != 0) {
                     labgp.width *= 1 + (dim_dispo.width + dim_dispo.right) / (rootgp_width * labgp.width);
@@ -686,6 +730,9 @@ function apply_ckbox(dk) {
             if (ckbox[dk].cked) {
 		fetch_unavailable_rooms();
 		fetch_all_tutors();
+                if (cosmo) {
+                    fetch_side_weeks();
+                }
 		if (total_regen && (logged_usr.rights >> 2) % 2 == 0) {
 
 		    ckbox[dk].cked = false ;
@@ -722,7 +769,7 @@ function apply_ckbox(dk) {
         // Fetch data, ask for login, etc.
         // ...
 
-        stg
+        svg.get_dom("stg")
             .select("[but=st-ap]")
             .attr("cursor", st_but_ptr());
 
@@ -784,9 +831,7 @@ function compute_changes(changes, conc_tutors, gps) {
 		    
 	    // 	}
 	    // 	msg += " le " + days[cur_course.day].date
-	    // 	    + " sur le créneau "
-	    // 	    + data_grid_scale_hour[cur_course.slot]
-	    // 	    + "."
+	    // 	    + " sur le créneau."
 		
 	    // 	splash_case = {
 	    // 	    id: "unav-tp",
@@ -836,7 +881,7 @@ function compute_changes(changes, conc_tutors, gps) {
 	    
 
 	    // build the communication with django
-	    
+	    var sel_week = wdw_weeks.get_selected() ;
             change = {id: id,
 		      day: {o: cb.day,
 			    n: null },
@@ -844,9 +889,9 @@ function compute_changes(changes, conc_tutors, gps) {
 			     n: null },
 		      room: {o: cb.room,
 			     n: null },
-		      week: {o: weeks.init_data[weeks.sel[0]].week,
+		      week: {o: sel_week.week,
 			     n: null },
-		      year: {o: weeks.init_data[weeks.sel[0]].year,
+		      year: {o: sel_week.year,
 			     n: null},
 		      tutor:{o: cb.prof,
 			     n: null}
@@ -885,8 +930,365 @@ function compute_changes(changes, conc_tutors, gps) {
 }
 
 
+
+
+// compute latest finishing time
+// independently of the days
+function max_finish_time(courses_list) {
+    return Math.max.apply(Math, courses_list.map(function(d){
+        return d.start + d.duration ;
+    }));
+}
+
+
+// compute the earliest starting time
+// independently of the days
+function min_start_time(courses_list) {
+    return Math.min.apply(Math, courses_list.map(function(d){
+        return d.start ;
+    }));
+}
+
+
+// slack between two sets of courses
+function compute_slack(prev_day_courses, next_day_courses) {
+    //console.log(prev_day_courses, next_day_courses);
+    if (prev_day_courses.length == 0 || next_day_courses == 0) {
+        return -1 ;
+    }
+    return 24*60 + min_start_time(next_day_courses) - max_finish_time(prev_day_courses);
+}
+
+
+// return next day
+// day_desc: {iweek: int, ref: string}
+function compute_next_day(day_desc) {
+    var ret = {iweek: day_desc.iweek,
+               ref: ''};
+    if (day_desc.ref == 'su') {
+        ret.iweek ++ ;
+        ret.ref = 'm'
+    } else {
+        ret.ref = day_refs[day_refs.indexOf(day_desc.ref)+1];
+    }
+    return ret ;
+}
+
+
+// fill date field of a given day
+function fill_date(day_desc) {
+
+    //console.log("fill date : IW"+day_desc.iweek+" - "+day_desc.ref);
+
+    day_desc.date = side_courses.find(function(d){
+        return Week.compare(d.week,
+                            wdw_weeks.full_weeks.data[day_desc.iweek]) == 0 ;
+    }).days.day_by_ref(day_desc.ref).date;
+}
+
+
+// return the courses of tutor tutor on day day_desc
+function get_courses(tutor, day_desc) {
+    if (day_desc.iweek < 0 || day_desc.iweek >= wdw_weeks.full_weeks.data.length) {
+        return [] ;
+    }
+    var full_week = side_courses.find(function(d){
+        return Week.compare(d.week,
+                            wdw_weeks.full_weeks.data[day_desc.iweek]) == 0 ;
+    }) ;
+    if (typeof full_week !== 'undefined') {
+        return full_week.courses.filter(function(d) {
+            return d.day == day_desc.ref && d.prof == tutor ;
+        });
+    }
+    return [] ;
+}
+
+
+// in [start_day_desc, end_day_desc[
+function compute_sleep(tutor, start_day_des, end_day_desc, issues) {
+    var cur_day = start_day_des ;
+    var next_day ;
+
+    var cur_courses, next_courses;
+    var sleep_time ;
+    
+    while(cur_day.iweek != end_day_desc.iweek
+          || cur_day.ref != end_day_desc.ref) {
+
+        //console.log("day IW" + cur_day.iweek + " - " + cur_day.ref);
+        
+        next_day = compute_next_day(cur_day);
+        cur_courses = get_courses(tutor, cur_day);
+        next_courses = get_courses(tutor, next_day);
+
+        sleep_time = compute_slack(cur_courses, next_courses);
+        //console.log(sleep_time);
+        if (sleep_time > 0 &&
+            sleep_time <= law_constraints.sleep_time) {
+            fill_date(cur_day);
+            fill_date(next_day);
+            
+            issues.push({nok_type:'sleep',
+                         duration: sleep_time,
+                         prev: cur_day.date,
+                         next: next_day.date});
+        }
+        cur_day = next_day ;
+    }
+}
+
+
+// aggregate working time of a tutor in the week described with its index
+// return an array of 7 {duration, month, iweek}
+function aggregate_hours(tutor, iweek) {
+
+    //console.log("Aggregate "+ tutor + "IW " + iweek);
+    
+    var ret = new Array(7) ;
+    for (var i = 0 ; i < ret.length ; i++) {
+        ret[i] = {duration: 0, month:0,
+                  iweek: iweek} ;
+    }
+    
+    var week_desc = side_courses.find(function(d){
+        return Week.compare(d.week,
+                            wdw_weeks.full_weeks.data[iweek]) == 0 ;
+    });
+    if (typeof week_desc === 'undefined') {
+        return ret ;
+    }
+    
+    for (var i = 0 ; i<week_desc.days.day_list.length ; i++) {
+        var dday = week_desc.days.day_list[i] ;
+        ret[day_shifts[dday.ref]].month = dday.month ;
+    }
+
+    week_desc.courses.filter(function(d){
+        return d.prof == tutor ;
+    }).forEach(function(d){
+        ret[day_shifts[d.day]].duration += d.duration ;
+    });
+    return ret ;
+}
+
+
+function print_agg(service) {
+    console.log("Service");
+    for (var i = 0 ; i < service.length ; i++) {
+        console.log("D" + service[i].duration + " -M" + service[i].month + " -IW"
+                    + service[i].iweek);
+    }
+}
+
+// check whether there is 2 free days in service
+// append problem infos in issues
+function compute_weekend(service, issues) {
+    var nb_free_days = service.filter(function(d){
+        return d.duration == 0 ;
+    }).length ;
+    if (nb_free_days < law_constraints.free_days_per_week) {
+        issues.push({nok_type:'weekend',
+                     nb_free_days: nb_free_days});
+    }
+}
+
+
+// check whether the service is not too heavy
+// append problem infos in issues
+function compute_weekly(tutor, service, issues) {
+    var working_minutes = 0 ;
+    for (var i = 0 ; i < service.length ; i++) {
+        working_minutes += service[i].duration ;
+    }
+    if (Object.keys(working_time).includes(tutor)) {
+        if (working_minutes > working_time[tutor] + law_constraints.week) {
+            issues.push({nok_type:'weekly',
+                         duration: working_minutes})
+        }
+    }
+}
+
+
+// build description of a day
+function build_day_desc(service, iday) {
+    var day_desc = {iweek:service[iday].iweek,
+                    ref:day_refs[iday - Math.floor(iday/7)*7]};
+    fill_date(day_desc);
+    return day_desc ;
+}
+
+
+// PRECOND: ended by free days 
+function compute_tunnels(service, issues) {
+    var last_free = -1 ;
+    var consec_busy = 0 ;
+    for (var i = 0 ; i < service.length ; i ++) {
+        if (service[i].duration == 0) {
+            if (consec_busy > law_constraints.max_consec_days) {
+                if ((i-1 > 6 || last_free > 6)
+                    && (i-1 < 14 || last_free < 14)){
+                    //console.log(service,i-1,last_free);
+                    var end_day = build_day_desc(service, i-1);
+                    var beg_day = build_day_desc(service, last_free + 1);
+                    issues.push({nok_type:'tunnel',
+                                 begin:beg_day.date,
+                                 end:end_day.date,
+                                 nb_consec: consec_busy})
+                }
+            }
+            last_free = i ;
+            consec_busy = 0 ;
+        } else {
+            consec_busy ++ ;
+        }
+    }
+}
+
+
+
+
+
+
+/*
+Check constraints of a given tutor
+  - nok_type: 'sleep',    (date1: string(%DD/MM), date2: string(%DD/MM)) 
+                         -> the tutor needs to sleep (11h break)
+  - nok_type: 'weekend', -> the tutor needs 2 free days per week
+  - nok_type: 'tunnel',  -> the tutor should not work more than 6 days in a row
+  - nok_type: 'weekly',  -> no more than working time per week + max_variation.week hours
+  - nok_type: 'monthly', -> not excluded from working time per month ± max_variation.month hours
+*/
+// Check everything even if the constraint was violated before the change
+// side_weeks should be fille dwith the current week
+function check_constraints_tutor(tutor) {
+
+    var issues = [] ;
+    
+    var tut_courses = cours.filter(function(d){
+        d.prof == tutor ;
+    }) ;
+
+    var icur_week = wdw_weeks.get_iselected_pure() ;
+
+
+
+    // CARE  COURS PAS PLACÉ
+    insert_side_week(wdw_weeks.full_weeks.data[icur_week],
+                     week_days,
+                     cours);
+    
+
+    // sleep constraint
+    compute_sleep(tutor,
+                  {iweek: icur_week - 1, ref: 'su'},
+                  {iweek: icur_week + 1, ref: 'm'},
+                  issues) ;
+
+    // weekend constraint
+    var tutor_service = aggregate_hours(tutor,
+                                        icur_week);
+
+    //print_agg(tutor_service);
+
+    compute_weekend(tutor_service, issues) ;
+
+    
+    // weekly working time
+    compute_weekly(tutor, tutor_service, issues);
+    
+
+    // tunnel constraint
+    var prev_service = aggregate_hours(tutor,icur_week-1);
+    var next_service = aggregate_hours(tutor, icur_week+1);
+    tutor_service = prev_service.concat(tutor_service).concat(next_service);
+    
+    tutor_service.push({duration:0});
+    compute_tunnels(tutor_service, issues);
+    tutor_service = tutor_service.slice(0,-1);
+    
+    // weekly working time
+
+
+    return issues ;
+}
+
+
+function min_to_hm_txt(minutes) {
+    var h = Math.floor(minutes/60) ;
+    var m = minutes - h*60 ;
+    var mt = '' ;
+    if (m != 0) {
+        mt = m.toString().padStart(2,'0');
+    }
+    return h + "h" + mt ;
+}
+
+function law_issue_to_txt(tutor, issue){
+    var ret ;
+    switch(issue.nok_type) {
+    case 'sleep': 
+        ret = "Nuit trop courte pour " + tutor + " entre le " + issue.prev + " et le " + issue.next + " : "
+            + min_to_hm_txt(issue.duration) + " (min " + min_to_hm_txt(law_constraints.sleep_time) + ")"
+        break;
+    case 'weekend':
+        ret = tutor + " a seulement " + issue.nb_free_days + " jour libre dans la semaine (min "
+            + law_constraints.free_days_per_week + ")" ;
+        break;
+    case 'tunnel':
+        ret = tutor + " a " + issue.nb_consec + " jours consécutifs sans repos (max "
+            + law_constraints.max_consec_days + ") entre le " + issue.begin
+            + " et le " + issue.end ;
+        break;
+    case 'weekly':
+        ret = tutor + " travaille " + min_to_hm_txt(issue.duration) + "  cette semaine (max "
+            + min_to_hm_txt(working_time[tutor] + law_constraints.week) + ")" 
+        break;
+    case 'monthly':
+        break;
+    }
+    return ret ;
+}
+
+
+
+function confirm_law_constraints(changes, conc_tutors, gps) {
+    var issues ;
+    var issues_txt = [] ;
+    for (var i = 0 ; i < conc_tutors.length ; i++) {
+        issues = check_constraints_tutor(conc_tutors[i]);
+        for (var j = 0 ; j < issues.length ; j++) {
+            issues_txt.push({txt: law_issue_to_txt(conc_tutors[i], issues[j])});
+        }
+    }
+
+    if(issues_txt.length == 0) {
+        confirm_contact_all(changes, conc_tutors, gps) ;
+    } else {
+        var splash_confirm = {
+	    id: "conf-law",
+	    but: {list: [{txt: "Je veux être hors-la-loi",
+                         click: function(d){
+                              confirm_contact_all(changes, conc_tutors, gps);
+                          }},
+		         {txt: "Je vais trouver autre chose",
+                          click: function(d){} }],
+                  width: 250
+                 },
+	    com: {list: issues_txt}
+        }
+    
+        splash(splash_confirm);
+    }
+
+}
+
+
+
+
+
 function confirm_change() {
-    var changes, conc_tutors, gps, i, prof_txt, gp_txt;
+    var changes, conc_tutors, gps;
     changes = [];
     conc_tutors = [];
     gps = [];
@@ -901,37 +1303,48 @@ function confirm_change() {
         ack.more = "Rien à signaler.";
         go_ack_msg();
     } else {
-
-        if (conc_tutors.length > 0) {
-            prof_txt = "Avez-vous contacté " ;
-	    prof_txt += array_to_msg(conc_tutors) ;
-	    prof_txt += " ?" ;
-	} else {
-            prof_txt = "Tudo bem ?" ;
-	}
-
-        gp_txt = "(Par ailleurs, ce serait bien de prévenir ";
-	if (gps.length == 1) {
-	    gp_txt += "le groupe ";
-	} else {
-	    gp_txt += "les groupes ";
-	}
-	gp_txt += array_to_msg(gps) ;
-        gp_txt += ").";
-
-
-	var splash_confirm = {
-	    id: "conf-chg",
-	    but: {list: [{txt: "Oui", click: function(d){send_edt_change(changes);}},
-			 {txt: "Non", click: function(d){} }]},
-	    com: {list: [{txt: prof_txt},
-			 {txt:gp_txt}]}
-	}
-
-	splash(splash_confirm);
-
+        if (!cosmo) {
+            confirm_contact_all(changes, conc_tutors, gps) ;
+        } else {
+            confirm_law_constraints(changes, conc_tutors, gps) ;
+        }
     }
 }
+
+
+
+function confirm_contact_all(changes, conc_tutors, gps) {
+    var  prof_txt, gp_txt;
+    
+    if (conc_tutors.length > 0) {
+        prof_txt = "Avez-vous contacté " ;
+	prof_txt += array_to_msg(conc_tutors) ;
+	prof_txt += " ?" ;
+    } else {
+        prof_txt = "Tudo bem ?" ;
+    }
+    
+    gp_txt = "(Par ailleurs, ce serait bien de prévenir ";
+    if (gps.length == 1) {
+	gp_txt += "le groupe ";
+    } else {
+	gp_txt += "les groupes ";
+    }
+    gp_txt += array_to_msg(gps) ;
+    gp_txt += ").";
+    
+    
+    var splash_confirm = {
+	id: "conf-cont",
+	but: {list: [{txt: "Oui", click: function(d){send_edt_change(changes);}},
+		     {txt: "Non", click: function(d){} }]},
+	com: {list: [{txt: prof_txt},
+		     {txt:gp_txt}]}
+    }
+    
+    splash(splash_confirm);
+}
+
 
 
 function array_to_msg(a) {
@@ -957,11 +1370,13 @@ function send_edt_change(changes) {
     sent_data['v'] = JSON.stringify(version) ; 
     sent_data['tab'] = JSON.stringify(changes) ;
 
+    var sel_week = wdw_weeks.get_selected() ;
+
     show_loader(true);
     $.ajax({
         url: url_edt_changes
-	    + "?s=" + weeks.init_data[weeks.sel[0]].week
-	    + "&a=" + weeks.init_data[weeks.sel[0]].year
+	    + "?s=" + sel_week.week
+	    + "&a=" + sel_week.year
 	    + "&c=" + num_copie,
         type: 'POST',
 //        contentType: 'application/json; charset=utf-8',
@@ -1048,11 +1463,12 @@ function send_dis_change() {
 	var sent_data = {} ;
 	sent_data['changes'] = JSON.stringify(changes) ; 
 
+        var sel_week = wdw_weeks.get_selected() ;
+
         show_loader(true);
         $.ajax({
             url: url_user_pref_changes
-		+ weeks.init_data[weeks.sel[0]].year
-		+ "/" + weeks.init_data[weeks.sel[0]].week
+		+ sel_week.url()
 		+ "/" + user.name,
             type: 'POST',
 //            contentType: 'application/json; charset=utf-8',
@@ -1093,6 +1509,12 @@ function edt_change_ack(msg) {
         if (ack.more != null && ack.more.startsWith("Version")) {
             ack.more = "Il y a eu une modification concurrente. Rechargez et réessayez."
         }
+        var splash_disclaimer = {
+	    id: "failed-edt-mod",
+	    but: {list: [{txt: "Zut. Ok.", click: function(d){} }]},
+	    com: {list: [{txt: ack.edt}]}
+	}
+	splash(splash_disclaimer);
     }
     console.log(ack.more);
     go_ack_msg();
@@ -1101,13 +1523,13 @@ function edt_change_ack(msg) {
 
 
 /*--------------------
-   ------ SLASH ------
+   ------ SPLASH ------
   --------------------*/
 
 
 
 function clean_splash(class_id) {
-    dg.select("." + class_id).remove() ;
+    svg.get_dom("dg").select("." + class_id).remove() ;
     splash_hold = true ;
 }
 
@@ -1128,11 +1550,11 @@ function splash(splash_ds){
 
     var class_id = "spl_" + splash_ds.id ;
 
-    dg
+    svg.get_dom("dg")
 	.select("." + class_id)
 	.remove();
     
-    dg
+    svg.get_dom("dg")
         .append("g")
         .attr("class", class_id)
         .append("rect")
@@ -1142,7 +1564,7 @@ function splash(splash_ds){
         .attr("height", wp.height)
         .attr("fill", "white");
 
-    var spg = dg.select("." + class_id) ;
+    var spg = svg.get_dom("dg").select("." + class_id) ;
 
 
     
@@ -1470,7 +1892,8 @@ function redirect_dept(d) {
         split_addr.splice(-1,1);
     }
     // go to the right week
-    split_addr.push(weeks.init_data[weeks.sel[0]].year);
-    split_addr.push(weeks.init_data[weeks.sel[0]].week);
+    var sel_week = wdw_weeks.get_selected() ;
+    split_addr.push(sel_week.year);
+    split_addr.push(sel_week.week);
     window.location.href = split_addr.join("/") ;
 }

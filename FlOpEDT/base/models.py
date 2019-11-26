@@ -66,7 +66,7 @@ class GroupType(models.Model):
 
 
 class Group(models.Model):
-    name = models.CharField(max_length=4)
+    name = models.CharField(max_length=10)
     train_prog = models.ForeignKey('TrainingProgramme', on_delete=models.CASCADE)
     type = models.ForeignKey('GroupType', on_delete=models.CASCADE)
     size = models.PositiveSmallIntegerField()
@@ -115,30 +115,27 @@ class Group(models.Model):
 # -- TIMING --
 # ------------
 
-# will be used only for constants
-# TO BE CLEANED at the end (fields and ForeignKeys)
-class Day(models.Model):
-    no = models.PositiveSmallIntegerField(default=0)
-    #nom = models.CharField(max_length=10, verbose_name="Name")
-
+class Day(object):
     MONDAY = "m"
     TUESDAY = "tu"
     WEDNESDAY = "w"
     THURSDAY = "th"
     FRIDAY = "f"
     SATURDAY = "sa"
-    SUNDAY = "su"    
+    SUNDAY = "su"
 
     CHOICES = ((MONDAY, "monday"), (TUESDAY, "tuesday"),
                (WEDNESDAY, "wednesday"), (THURSDAY, "thursday"),
                (FRIDAY, "friday"),(SATURDAY, "saturday"),
                (SUNDAY,"sunday"))
 
-    day = models.CharField(max_length=2, choices=CHOICES, default=MONDAY)
+    def __init__(self, day, week):
+        self.day = day
+        self.week = week
 
     def __str__(self):
         # return self.nom[:3]
-        return self.day
+        return self.day + '_s' + str(self.week)
 
 
 # will not be used
@@ -154,7 +151,7 @@ class Time(models.Model):
     no = models.PositiveSmallIntegerField(default=0)
     #nom = models.CharField(max_length=20)
     hours = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(0), MaxValueValidator(23)], default=8)
+        validators=[MinValueValidator(0), MaxValueValidator(25)], default=8)
     minutes = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(59)], default=0)
 
@@ -172,16 +169,6 @@ class Time(models.Model):
 def define_apm(sender, instance, *args, **kwargs):
     if instance.hours >= 12:
         instance.apm = Time.PM
-
-
-class Slot(models.Model):
-    day = models.ForeignKey('Day', on_delete=models.CASCADE)
-    hour = models.ForeignKey('Time', on_delete=models.CASCADE)
-    duration = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(0), MaxValueValidator(240)], default=90)
-
-    def __str__(self):
-        return f"{self.day}_{self.hour}"
 
     
 class Holiday(models.Model):
@@ -211,7 +198,6 @@ class Period(models.Model):
 
     def __str__(self):
         return f"Period {self.name}: {self.department}, {self.starting_week} -> {self.ending_week}"
-    
 
 
 class TimeGeneralSettings(models.Model):
@@ -258,7 +244,8 @@ class RoomGroup(models.Model):
 
     def __str__(self):
         return self.name
-        
+
+
 class Room(models.Model):
     name = models.CharField(max_length=20)
     subroom_of = models.ManyToManyField(RoomGroup,
@@ -301,16 +288,17 @@ class Module(models.Model):
     ppn = models.CharField(max_length=8, default='M')
     train_prog = models.ForeignKey('TrainingProgramme', on_delete=models.CASCADE)
     period = models.ForeignKey('Period', on_delete=models.CASCADE)
-    # nbTD = models.PositiveSmallIntegerField(default=1)
-    # nbTP = models.PositiveSmallIntegerField(default=1)
-    # nbCM = models.PositiveSmallIntegerField(default=1)
-    # nbDS = models.PositiveSmallIntegerField(default=1)
 
     def __str__(self):
         return self.abbrev
 
     class Meta:
-       ordering = ['abbrev',]         
+       ordering = ['abbrev',]
+
+
+class ModulePossibleTutors(models.Model):
+    module = models.OneToOneField('Module', on_delete=models.CASCADE)
+    possible_tutors = models.ManyToManyField('people.Tutor', blank=True, related_name='possible_modules')
 
 
 class CourseType(models.Model):
@@ -356,6 +344,11 @@ class Course(models.Model):
         return f"{self.type}-{self.module}-{username_mod}-{self.group}"
 
 
+class CoursePossibleTutors(models.Model):
+    course = models.OneToOneField('Course', on_delete=models.CASCADE)
+    possible_tutors = models.ManyToManyField('people.Tutor', blank=True, related_name='shared_possible_courses')
+
+
 class ScheduledCourse(models.Model):
     course = models.ForeignKey('Course', on_delete=models.CASCADE)
     day = models.CharField(max_length=2, choices=Day.CHOICES, default=Day.MONDAY)
@@ -366,6 +359,11 @@ class ScheduledCourse(models.Model):
     noprec = models.BooleanField(
         verbose_name='vrai si on ne veut pas garder la salle', default=True)
     work_copy = models.PositiveSmallIntegerField(default=0)
+    tutor = models.ForeignKey('people.Tutor',
+                              related_name='taught_scheduled_courses',
+                              null=True,
+                              default=None,
+                              on_delete=models.CASCADE)
 
     # les utilisateurs auront acces à la copie publique (0)
 

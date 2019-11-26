@@ -33,6 +33,16 @@ class BreakingNews(models.Model):
                + str(self.year) + ': ' + str(self.txt)
 
 
+class TutorDisplay(models.Model):
+    tutor = models.OneToOneField('people.Tutor', related_name='display', on_delete=models.CASCADE)
+    color_bg = models.CharField(max_length=20, default="red")
+    color_txt = models.CharField(max_length=20, default="black")
+
+    def __str__(self):
+        return str(self.tutor) + ' -> BG: ' + str(self.color_bg) \
+               + ' ; TXT: ' + str(self.color_txt)
+
+
 class ModuleDisplay(models.Model):
     module = models.OneToOneField('base.Module',
                                   related_name='display',

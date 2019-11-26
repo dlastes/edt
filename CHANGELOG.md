@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased]
+### Added
+- New mode for employees planning
+  - new constraints (week-ends, consecutive working hours/days, etc.)
+  - batch of weeks
+
+### Changed
+- front-end: dispatch week/day management in js files
+- back-end refactoring: all model attributes in english
+
 ### TBD
 - right permissions in TTapp/views
 

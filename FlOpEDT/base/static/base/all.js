@@ -48,26 +48,76 @@ var user = {name: logged_usr.name,
 	    dispos_type: []
 	   };
 
-var margin = {
+
+
+dsp_svg.margin = {
     top: 250,     // - TOP BANNER - //
     left:  50,
     right:  110,
     bot:  10,
     but: -200
 };
+dsp_svg.h = window.innerHeight ;
+dsp_svg.w = window.innerWidth + dsp_svg.margin.left ; //- 20 ;
+
+dsp_svg.cadastre = [
+    // menus ground
+    ["svg","meg"],
+
+    // weeks ground
+    ["svg","wg"],
+    ["wg","wg-bg"],
+    ["wg","wg-fg"],
+
+    // selection categories button ground
+    ["svg","catg"],
+
+    // semaine type ground
+    ["svg","stg"],
+
+    // dispos info ground
+    ["svg","dig"],
+    
+    // dispos info ground
+    ["svg","pmg"],
+
+    // valider
+    ["svg","vg"],
+
+    // background, middleground, foreground, dragground
+    ["svg","edtg"],
+    ["edtg","edt-bg"],
+    ["edtg","edt-mg"],
+    ["edtg","edt-fig"],
+    ["edtg","edt-fg"],
+
+    // selection ground
+    ["svg","selg"],
+
+    
+    // context menus ground
+    ["svg","cmg"],
+    ["cmg","cmpg"],
+    ["cmg","cmtg"],
+    
+
+    // drag ground
+    ["svg","dg"]
+];
 
 
-var bs_margin_w = 20 ;
-var bs_margin_h = 5 ;
+svg = new Svg(dsp_svg.layout_tree, false);
+svg.create_container();
+svg.create_layouts(dsp_svg.cadastre) ;
 
-var svg = {
-    height: window.innerHeight, // - $("#menu-edt").height() - bs_margin_h,
-    width: window.innerWidth - bs_margin_w,
-};
+wdw_weeks.add_full_weeks(week_year_list) ;
+var week_banner = new WeekBanner(svg, "wg", "wg-fg", "wg-bg", wdw_weeks, dsp_weeks);
+week_banner.spawn() ;
 
+var days_header = new WeekDayHeader(svg, "edt-fg", week_days, true, null) ;
 
-var week = 42 ;
-var year = 2017;
+var hours_header = new HourHeader(svg, "edt-fg", hours) ;
+
 
 var labgp = {height: 40, width: 30, tot: 8, height_init: 40, width_init: 30, hm: 40, wm:15};
 
@@ -75,12 +125,12 @@ var labgp = {height: 40, width: 30, tot: 8, height_init: 40, width_init: 30, hm:
 
 
 
-butgp.tly = margin.but;//-margin_but.ver-6*butgp.height-80 ;
-sel_popup.tly = margin.but;
+butgp.tly = dsp_svg.margin.but;//-butgp.mar_v-6*butgp.height-80 ;
+sel_popup.tly = dsp_svg.margin.but;
 
 
 modules.x=sel_popup.selx + sel_popup.selx ;
-modules.y=margin.top+gsckd_y(null)-40;
+modules.y=dsp_svg.margin.top + days_header.mix.gsckd_y() - 40;
 modules.width = 170 ;
 modules.height = 0 ;
 
@@ -133,13 +183,16 @@ file_fetch.groups.callback = function () {
   ---------------------*/
 
 
-create_general_svg(false);
+
 create_quote()
 
 def_drag();
 def_cm_change();
 
-create_clipweek();
+//create_clipweek();
+
+
+
 create_menus();
 
 create_selections();

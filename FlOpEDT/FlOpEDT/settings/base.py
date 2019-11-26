@@ -184,3 +184,5 @@ if 'ADMINS' in os.environ:
 REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
 }
+
+COSMO_MODE = False

@@ -34,6 +34,8 @@
   <script src="{% static 'base/d3.v4.min.js' %}"></script>
   <!-- script src="https://d3js.org/d3.v4.min.js"></script -->
   <script>
+    var cosmo = JSON.parse("{{ cosmo | lower }}") ;
+
     var url_fetch_user_dweek = "{% url 'base:fetch_user_dweek' department '.' %}";
     url_fetch_user_dweek = url_fetch_user_dweek.slice(0, -1);
     var url_fetch_course_dweek = "{% url 'base:fetch_course_dweek' department '.' '.' %}";
@@ -73,7 +75,7 @@
   </script>
 <body>
   <div  id="tools-main" style="width: 100%; overflow: hidden;">
-    <div id="svg" style="width: 680px; float: left;"></div>
+    <div id="svg" style="width: 900px; float: left;"></div>
     <div style="margin-left: 700px;">
       <form style="white-space: nowrap;" name="app" action="javascript:apply_stype_from_button(false)" id="form-nweek">
 	<fieldset>
@@ -94,30 +96,34 @@
 	  Redéfinir ma semaine type<br/>
           <br/>
           <input type="submit" name="save" value="Sauvegarder"></br>
-      </form>
+        </form>
       </fieldset>
-        <br/><br/>
-
-  <fieldset>
-    <legend>Ma journée idéale</legend>
-      <form style="white-space: nowrap;" action='{% url "base:user_perfect_day_changes" department user.username %}'  method='POST' id="form-perfect_day" >
-        {% csrf_token %}
-        Chaque jour, voici le nombre d'heures de cours que je souhaite donner:<br/>
+      <br/><br/>
+      <fieldset>
+        <legend>Ma journée idéale</legend>
+        <form action='{% url "base:user_perfect_day_changes" department user.username %}'  method='POST' id="form-perfect_day" >
+          {% csrf_token %}
+          Chaque jour, voici le nombre d'heures de cours que je souhaite donner:<br/>
           <br/>
-        Idéalement <input id="user_pref_hours_per_day" type="number" name="user_pref_hours" style="width: 30px" min="1" max="9" value="{{ usr_pref_hours }}">
-        <br/>
-        Maximum <input id="user_max_hours_per_day" type="number" name="user_max_hours" style="width: 30px" min="1" max="9" value="{{ usr_max_hours }}">
+          Idéalement <input id="user_pref_hours_per_day" type="number" name="user_pref_hours" style="width: 30px" min="1" max="9" value="{{ usr_pref_hours }}">
+          <br/>
+          Maximum <input id="user_max_hours_per_day" type="number" name="user_max_hours" style="width: 30px" min="1" max="9" value="{{ usr_max_hours }}">
         </br>
         </br>
         <input type="submit" name="save_perfect_day" value="Sauvegarder">
         </br>
-      </form>
-  </fieldset>
+        </form>
+      </fieldset>
 
       <span id="ack"></span>
     </div>
   </div>
 </body>
+<script type='text/javascript' src="{% static 'base/helpers.js' %}"></script>
+<script type='text/javascript' src="{% static 'base/days.js' %}"></script>
+<script type='text/javascript' src="{% static 'base/weeks.js' %}"></script>
+<script type='text/javascript' src="{% static 'base/hours.js' %}"></script>
+<script type='text/javascript' src="{% static 'base/svg.js' %}"></script>
 <script type='text/javascript' src="{% static 'base/intervals.js' %}"></script>
 <script type='text/javascript' src="{% static 'base/week_change.js' %}"></script>
 <script type='text/javascript' src="{% static 'base/transformation.js' %}"></script>

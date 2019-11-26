@@ -58,7 +58,7 @@ function go_pref(quick) {
 
 	// preferences: background color, and smiley
 	
-        dat = mg.selectAll(".dispo")
+        dat = svg.get_dom("edt-mg").selectAll(".dispo")
             .data(user.dispos,
                   function(d) {
                       return [d.day,d.start_time,d.duration,d.val].join('-');
@@ -340,7 +340,7 @@ function go_cm_advanced_pref(quick) {
         t = d3.transition();
     }
     
-    var dis_men_dat = cmpg
+    var dis_men_dat = svg.get_dom("cmpg")
         .selectAll(".dispo-menu")
         .data(data_dispo_adv_cur);
     
@@ -380,7 +380,9 @@ function go_cm_advanced_pref(quick) {
 // check and inform whenever there is not enough available slots
 function go_alarm_pref() {
 
+    var dig = svg.get_dom("dig");
     dig
+
         .select(".disp-info").select(".disp-required")
         .text(txt_reqDispos)
         .attr("x", menus.x + menus.mx - 5)
@@ -411,7 +413,7 @@ function go_alarm_pref() {
 
 function go_pref_mode() {
 
-    var selall = pmg
+    var selall = svg.get_dom("pmg")
         .select("#pm-but-head")
         .selectAll(".pm-but")
         .data(pref_selection.mode);
@@ -456,7 +458,7 @@ function go_paint_pref_mode_choices(quick){
         t = d3.transition();
     }
 
-    var parent = pmg
+    var parent = svg.get_dom("pmg")
         .select("#pm-choices");
 
     parent
@@ -506,66 +508,6 @@ function go_paint_pref_mode_choices(quick){
   ---------------------*/
 
 
-function go_week_menu(quick) {
-
-    var t;
-    if (quick) {
-        t = d3.transition()
-            .duration(0);
-    } else {
-        t = d3.transition()
-            .duration(200);
-    }
-
-    var sa_wk =
-        weeks.cont
-        .selectAll(".rec_wk")
-        .data(weeks.cur_data, function(d) {
-            return d.year + "" + d.week;
-        });
-
-    sa_wk.exit().transition(t).remove();
-
-    var g_wk = sa_wk
-        .enter()
-        .append("g")
-        .attr("class", "rec_wk");
-
-    g_wk
-        .merge(sa_wk)
-        .on("click", apply_wk_change);
-
-
-    g_wk
-        .append("rect")
-        .attr("y", 0)
-        .attr("height", weeks.height)
-        .attr("width", weeks.width)
-        .attr("x", rect_wk_init_x)
-        .merge(sa_wk.select("rect"))
-        .transition(t)
-        .attr("x", rect_wk_x);
-
-    g_wk
-        .append("text")
-        .attr("fill", "white")
-        .text(rect_wk_txt)
-        .attr("y", .5 * weeks.height)
-        .attr("x", rect_wk_init_x)
-        .merge(sa_wk.select("text"))
-        .transition(t)
-        .attr("x", function(d, i) {
-            return rect_wk_x(d, i) + .5 * weeks.width;
-        });
-
-    var wk_sel =
-        wg.fg
-        .selectAll(".sel_wk")
-        .data(weeks.sel)
-        .select("ellipse")
-        .transition(t)
-        .attr("cx", week_sel_x);
-}
 
 
 
@@ -583,9 +525,9 @@ function go_grid(quick) {
         t = d3.transition();
     }
 
+    var fg = svg.get_dom("edt-fg") ;
 
-
-    bg
+    svg.get_dom("edt-bg")
 	.select("rbg")
 	.attr("x",0)
 	.attr("y",0)
@@ -649,7 +591,7 @@ function go_grid(quick) {
 
     
 
-    grid = bg.selectAll(".gridscg")
+    grid = svg.get_dom("edt-bg").selectAll(".gridscg")
         .data(data_grid_scale_gp
             .filter(function(d) {
                 return d.gp.display;
@@ -674,7 +616,7 @@ function go_grid(quick) {
     grid.exit().remove();
 
 
-    grid = bg.selectAll(".gridscp")
+    grid = svg.get_dom("edt-bg").selectAll(".gridscp")
         .data(data_grid_scale_row
             .filter(function(d) {
                 return row_gp[d.row].display;
@@ -702,23 +644,6 @@ function go_grid(quick) {
 
     
 
-    // -- no slot --
-    // --  begin  --
-    
-    
-    // bg
-    //     .selectAll(".gridsckh")
-    //     .data(data_grid_scale_hour)
-    //     .transition(t)
-    //     .attr("x", gsckh_x)
-    //     .attr("y", gsckh_y);
-
-
-    // --   end   --
-    // -- no slot --
-
-
-    
     fg.select(".h-sca").select("rect")
         .transition(t)
         .attr("x", but_sca_h_x())
@@ -739,119 +664,29 @@ function go_grid(quick) {
 
 }
 
+/*--------------------------
+  ------- TIME ------
+  --------------------------*/
+
 // display day names, and a rectangle per half day
 // if half_day_rect is true
-function go_days(quick, half_day_rect) {
+// layer: fg
+// data: days, time_settings.time, side_time
+// class: gridsckd, txt_scl, day_am,
+//        gridsckhb, gridsckhlam, gridsckhlpm
+//        gridsckh, gridsckhl
+// trans: gsckd: txt, x, y,
+//        grid_day_am: x, y, height, width
+//        grid_day_pm: x, y, height, width
+//        bknews_top_y, bknews_bot_y, grid_height
+//        gsckh: x1, y, x2, txt
+function go_days(quick) {
 
-    var t;
-    if (quick) {
-        t = d3.transition()
-            .duration(0);
-    } else {
-        t = d3.transition();
-    }
+    var t = get_transition(quick);
 
-    var day_scale = fg
-        .selectAll(".gridsckd")
-        .data(days, function(d) {
-    	    return d.date;});
+    days_header.update(quick) ;
 
-    var day_sc_g = day_scale
-    	.enter()
-        .append("g")
-        .attr("class", "gridsckd");
-    
-    day_sc_g
-    	.append("text")
-    	.attr("class", "txt_scl")
-    	.merge(day_scale.select(".txt_scl"))
-        .transition(t)
-        .text(gsckd_txt)
-        .attr("x", gsckd_x)
-        .attr("y", gsckd_y);
-
-    if (half_day_rect) {
-        day_sc_g
-    	    .append("rect")
-    	    .attr("class", "day_am")
-    	    .merge(day_scale.select(".day_am"))
-            .transition(t)
-    	    .attr("x", grid_day_am_x)
-    	    .attr("y", grid_day_am_y)
-    	    .attr("height", grid_day_am_height)
-    	    .attr("width", grid_day_am_width);
-        
-        day_sc_g
-    	    .append("rect")
-    	    .attr("class", "day_pm")
-    	    .merge(day_scale.select(".day_pm"))
-            .transition(t)
-    	    .attr("x", grid_day_pm_x)
-    	    .attr("y", grid_day_pm_y)
-    	    .attr("height", grid_day_pm_height)
-    	    .attr("width", grid_day_pm_width);
-    }
-        
-    day_scale.exit().remove();
-
-
-    var hour_bar = fg
-        .selectAll(".gridsckhb")
-        .data([time_settings.time]);
-
-    var hour_sc_g = hour_bar
-    	.enter()
-        .append("g")
-        .attr("class", "gridsckhb");
-
-    hour_sc_g
-        .append("line")
-        .attr("class", "gridsckhlam")
-        .merge(hour_bar.select(".gridsckhlam"))
-        .attr("x1", 0)
-        .attr("y1", 0)
-        .attr("x2", 0)
-        .attr("y2", bknews_top_y()) ;
-
-    hour_sc_g
-        .append("line")
-        .attr("class", "gridsckhlpm")
-        .merge(hour_bar.select(".gridsckhlpm"))
-        .attr("x1", 0)
-        .attr("y1", bknews_bot_y())
-        .attr("x2", 0)
-        .attr("y2", grid_height()) ;
-
-    hour_bar.exit().remove();
-    
-    var hour_scale = fg
-        .selectAll(".gridsckh")
-        .data(side_time);
-
-    var hour_sc_g = hour_scale
-    	.enter()
-        .append("g")
-        .attr("class", "gridsckh");
-
-    hour_sc_g
-        .append("line")
-        .attr("class", "gridsckhl")
-        .merge(hour_scale.select(".gridsckhl"))
-        .attr("x1", gsckh_x1)
-        .attr("y1", gsckh_y)
-        .attr("x2", gsckh_x2)
-        .attr("y2", gsckh_y) ;
-
-    hour_sc_g
-        .append("text")
-        .merge(hour_scale.select("text"))
-        .text(gsckh_txt)
-        .attr("x", gsckh_x2() - 2)
-        .attr("y", gsckh_y);
-    
-    
-    hour_scale.exit().remove();
-
+    hours_header.update(quick) ;
 }
 
 /*----------------------
@@ -868,7 +703,7 @@ function go_bknews(quick) {
         t = d3.transition();
     }
 
-    fig
+    svg.get_dom("edt-fig")
 	.select(".top-bar")
         .transition(t)
         .attr("x1", 0)
@@ -876,7 +711,7 @@ function go_bknews(quick) {
         .attr("x2", grid_width())
         .attr("y2", bknews_top_y());
 
-    fig
+    svg.get_dom("edt-fig")
 	.select(".bot-bar")
         .transition(t)
         .attr("x1", 0)
@@ -884,7 +719,7 @@ function go_bknews(quick) {
         .attr("x2", grid_width())
         .attr("y2", bknews_bot_y());
     
-    var flash = fig.select(".txt-info");
+    var flash = svg.get_dom("edt-fig").select(".txt-info");
 
     var fl_all = flash
 	.selectAll(".bn-all")
@@ -936,7 +771,7 @@ function go_bknews(quick) {
 
 
 function go_quote() {
-    vg.select(".quote").select("text")
+    svg.get_dom("vg").select(".quote").select("text")
         .transition(d3.transition())
         .attr("x", quote_x())
         .attr("y", quote_y());
@@ -951,7 +786,7 @@ function go_quote() {
 
 function go_gp_buttons() {
     for (var p = 0; p < set_promos.length; p++) {
-        var cont = selg
+        var cont = svg.get_dom("selg")
             .select(".sel-pop-g#" + popup_type_id("group"))
             .selectAll(".gp-but-" + set_promos[p] + "P")
             .data(Object.keys(groups[p]).map(function(k) {
@@ -1004,7 +839,7 @@ function go_gp_buttons() {
   --------------------*/
 function go_menus() {
 
-    var init = meg
+    var init = svg.get_dom("meg")
         .selectAll(".ckline")
         .data(Object.keys(ckbox));
 
@@ -1058,7 +893,7 @@ function go_menus() {
         .attr("fill", menu_ckd_fill);
 
 
-    meg
+    svg.get_dom("meg")
         .selectAll(".ckline")
         .data(Object.keys(ckbox))
         .attr("cursor", menu_curs);
@@ -1111,7 +946,6 @@ function update_selection() {
 function update_active() {
     var tut_av = sel_popup.get_available("tutor");
     var mod_av = sel_popup.get_available("module");
-    var room_av = sel_popup.get_available("room");
 
     tut_av.active = tutors.all.filter(function(d) {
         return d.display;
@@ -1119,11 +953,17 @@ function update_active() {
     mod_av.active = modules.all.filter(function(d) {
         return d.display;
     }).length != modules.all.length ;
-    room_av.active = rooms_sel.all.filter(function(d) {
-        return d.display;
-    }).length != rooms_sel.all.length ;
-    
-    sel_popup.active_filter = tut_av.active || mod_av.active || room_av.active ;
+
+    sel_popup.active_filter = tut_av.active || mod_av.active ;
+
+    if(!cosmo) {
+        var room_av = sel_popup.get_available("room");
+        room_av.active = rooms_sel.all.filter(function(d) {
+            return d.display;
+        }).length != rooms_sel.all.length ;
+        sel_popup.active_filter = sel_popup.active_filter || room_av.active ;
+    }
+
 }
 
 function go_courses(quick) {
@@ -1138,7 +978,7 @@ function go_courses(quick) {
 
     update_selection() ;
     
-    var cg = mg.selectAll(".cours")
+    var cg = svg.get_dom("edt-mg").selectAll(".cours")
         .data(cours.filter(function(d) {
                 return groups[d.promo][d.group].display;
             }),
@@ -1153,11 +993,18 @@ function go_courses(quick) {
         .attr("cursor", ckbox["edt-mod"].cked ? "pointer" : "default")
         .on("contextmenu", function(d) { if (ckbox["edt-mod"].cked) {
 	    d3.event.preventDefault();
-	    room_tutor_change.cm_settings = entry_cm_settings ;
+            if(!cosmo) {
+	        room_tutor_change.cm_settings = entry_cm_settings ;
+            }
             pending.prepare_modif(d) ;
 	    compute_cm_room_tutor_direction();
 	    //select_room_change(d);
-	    select_entry_cm();
+            if (!cosmo) {
+	        select_entry_cm();
+            } else {
+                salarie_cm_level = 0 ;
+	        select_salarie_change();
+            }
 	    go_cm_room_tutor_change();
 	}})
         .call(dragListener);
@@ -1220,20 +1067,6 @@ function go_courses(quick) {
 
     incg
         .append("text")
-        .attr("st", "m")
-        .attr("x", cours_txt_x)
-        .attr("y", cours_txt_top_y)
-        .text(cours_txt_top_txt)
-        .attr("fill", cours_txt_fill)
-        .attr("font-weight", cours_txt_weight)
-        .attr("font-size", cours_txt_size)
-        .merge(cg.select("[st=m]"))
-        .transition(t)
-        .attr("x", cours_txt_x)
-        .attr("y", cours_txt_top_y);
-
-    incg
-        .append("text")
         .attr("st", "p")
         .attr("fill", cours_txt_fill)
         .attr("font-weight", cours_txt_weight)
@@ -1245,20 +1078,37 @@ function go_courses(quick) {
         .attr("x", cours_txt_x)
         .attr("y", cours_txt_mid_y)
         .text(cours_txt_mid_txt);
-
-    incg
-        .append("text")
-        .attr("st", "r")
-        .attr("x", cours_txt_x)
-        .attr("y", cours_txt_bot_y)
-        .merge(cg.select("[st=r]"))
-        .text(cours_txt_bot_txt)
-        .attr("fill", cours_txt_fill)
-        .attr("font-weight", cours_txt_weight)
-        .attr("font-size", cours_txt_size)
-        .transition(t)
-        .attr("x", cours_txt_x)
-        .attr("y", cours_txt_bot_y);
+        
+    
+    if (!cosmo) {
+        incg
+            .append("text")
+            .attr("st", "m")
+            .attr("x", cours_txt_x)
+            .attr("y", cours_txt_top_y)
+            .text(cours_txt_top_txt)
+            .attr("fill", cours_txt_fill)
+            .attr("font-weight", cours_txt_weight)
+            .attr("font-size", cours_txt_size)
+            .merge(cg.select("[st=m]"))
+            .transition(t)
+            .attr("x", cours_txt_x)
+            .attr("y", cours_txt_top_y);
+        
+        incg
+            .append("text")
+            .attr("st", "r")
+            .attr("x", cours_txt_x)
+            .attr("y", cours_txt_bot_y)
+            .merge(cg.select("[st=r]"))
+            .text(cours_txt_bot_txt)
+            .attr("fill", cours_txt_fill)
+            .attr("font-weight", cours_txt_weight)
+            .attr("font-size", cours_txt_size)
+            .transition(t)
+            .attr("x", cours_txt_x)
+            .attr("y", cours_txt_bot_y);
+    }
 
     cg.exit()
         .remove();
@@ -1315,12 +1165,12 @@ function go_regen(s) {
 
         ack.regen = txt;
 
-        vg.select(".ack-reg").select("text")
+        svg.get_dom("vg").select(".ack-reg").select("text")
             .text(ack.regen);
 
     }
 
-    vg.select(".ack-reg").select("text")
+    svg.get_dom("vg").select(".ack-reg").select("text")
         .transition(d3.transition())
         .attr("x", grid_width())
         .attr("y", ack_reg_y());
@@ -1364,7 +1214,7 @@ function go_edt(t) {
 
 function go_selection_buttons() {
 
-    var cont = selg
+    var cont = svg.get_dom("selg")
         .selectAll(".sel-pop-g")
         .data(sel_popup.panels, function(p) {
             return p.type ;
