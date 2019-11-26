@@ -528,6 +528,7 @@ function fetch_cours() {
             if (Week.compare(exp_week, sel_week)==0) {
 
                 week_days = new WeekDays(JSON.parse(req.getResponseHeader('days').replace(/\'/g, '"')));
+                days_header.mix.days = week_days ;
             
                 tutors.pl = [];
                 modules.pl = [];
