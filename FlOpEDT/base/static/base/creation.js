@@ -1776,7 +1776,7 @@ function create_stype() {
         .attr("fill", "white")
         .attr("x", dispot_but_txt_x)
         .attr("y", dispot_but_txt_y("app") + 10)
-        .text("week type");
+        .text("semaine type");
 
 }
 
@@ -1792,7 +1792,7 @@ function fetch_dispos_type() {
             async: true,
             contentType: "text/csv",
             success: function(msg) {
-                console.log(msg);
+                //console.log(msg);
                 user.dispos_type = [] ;
 
                 user.dispos_type = d3.csvParse(msg, translate_dispos_type_from_csv);

@@ -300,7 +300,7 @@ function apply_stype_from_button(save) {
 
             ack.pref = "Ok ";
 	    if(save){
-		ack.pref += "week type";
+		ack.pref += "semaine type";
 	    } else {
 		ack.pref += "week "+week_st+" année "+year_st
 		    +" à week "+week_end+" année "+year_end;

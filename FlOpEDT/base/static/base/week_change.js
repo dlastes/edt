@@ -95,8 +95,7 @@ function fetch_dispos() {
         async: true,
         contentType: "text/csv",
         success: function(msg) {
-            console.log("in");
-            console.log(msg);
+            //console.log(msg);
             var sel_week = wdw_weeks.get_selected() ;
             if (Week.compare(exp_week, sel_week)==0) {
                 extra_pref.tutors = {};
@@ -368,9 +367,6 @@ function create_dispos_user_data() {
   --------------------*/
 /*----------------------
   ------ MODULES -------
-  ----------------------*/
-/*----------------------
-  ------ SALLES -------
   ----------------------*/
 /*--------------------
   ------ PROFS -------
@@ -1055,11 +1051,6 @@ function fetch_ended(light) {
 
         fetch.done = true;
         go_edt(false);
-
-        // WTF was that?
-	// if (fig === undefined) {
-        //     fig = svg.add_child("svg", "final");
-	// }
 
     }
 }
