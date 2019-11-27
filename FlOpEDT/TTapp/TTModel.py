@@ -713,6 +713,18 @@ class TTModel(object):
         self.add_constraint(l_floor * bound - expr, '>=', 1 - floor)
         return l_floor
 
+    def add_if_var_a_then_not_vars_b_constraint(self, var_a, vars_b_list, name_of_b_list=None):
+        bound = len(vars_b_list) + 1
+        if name_of_b_list is None:
+            name_of_b_list = "anonymous list"
+        self.add_constraint(
+            bound * var_a
+            +
+            self.sum(var for var in vars_b_list),
+            '<=',
+            bound,
+            'If %s then not any of %s_%g' % (var_a, name_of_b_list, self.constraint_nb))
+
     def add_to_slot_cost(self, slot, cost):
         self.cost_SL[slot] += cost
 
@@ -773,13 +785,13 @@ class TTModel(object):
         print('Simultaneous slots constraints for groups')
         for sl1 in self.wdb.slots:
             for bg in self.wdb.basic_groups:
-                for sl2 in self.wdb.slots_intersecting[sl1] - {sl1}:
-                    name = 'simul_slots' + bg.full_name() + '_' + str(sl1) + '_' + str(sl2)
-                    self.add_constraint(self.sum(self.TT[(sl1, c1)] for c1 in self.wdb.courses_for_basic_group[bg]
-                                                 & self.wdb.compatible_courses[sl1]) +
-                                        self.sum(self.TT[(sl2, c2)] for c2 in self.wdb.courses_for_basic_group[bg]
-                                                 & self.wdb.compatible_courses[sl2]),
-                                        '<=', 1, name=name)
+                name = 'simul_slots' + bg.full_name() + '_' + str(sl1)
+                self.add_constraint(1000 * self.sum(self.TT[(sl1, c1)] for c1 in self.wdb.courses_for_basic_group[bg]
+                                                    & self.wdb.compatible_courses[sl1]) +
+                                    self.sum(self.TT[(sl2, c2)] for sl2 in self.wdb.slots_intersecting[sl1] - {sl1}
+                                             for c2 in self.wdb.courses_for_basic_group[bg]
+                                             & self.wdb.compatible_courses[sl2]),
+                                    '<=', 1000, name=name)
 
         # a course is scheduled once and only once
         for c in self.wdb.courses:
@@ -821,14 +833,15 @@ class TTModel(object):
                                     '<=',
                                     self.avail_instr[i][sl],
                                     name=name)
-                for sl2 in self.wdb.slots_intersecting[sl] - {sl}:
-                    name = 'simul_slots' + str(i) + '_' + str(sl) + '_' + str(sl2)
-                    self.add_constraint(self.sum(self.TTinstructors[(sl, c1, i)]
-                                                 for c1 in self.wdb.possible_courses[i] & self.wdb.compatible_courses[sl])
-                                        +
-                                        self.sum(self.TTinstructors[(sl2, c2, i)]
-                                                 for c2 in self.wdb.possible_courses[i] & self.wdb.compatible_courses[sl2]),
-                                        '<=', 1, name=name)
+
+                name = 'simul_slots' + str(i) + '_' + str(sl)
+                self.add_constraint(1000 * self.sum(self.TTinstructors[(sl, c1, i)]
+                                             for c1 in self.wdb.possible_courses[i] & self.wdb.compatible_courses[sl])
+                                    +
+                                    self.sum(self.TTinstructors[(sl2, c2, i)]
+                                             for sl2 in self.wdb.slots_intersecting[sl] - {sl}
+                                             for c2 in self.wdb.possible_courses[i] & self.wdb.compatible_courses[sl2]),
+                                    '<=', 1000, name=name)
 
     def add_rooms_constraints(self):
         print("adding room constraints")
@@ -837,15 +850,15 @@ class TTModel(object):
         # constraint : each Room is only used once on simultaneous slots
         for r in self.wdb.rooms:
             for sl1 in self.wdb.slots:
-                for sl2 in self.wdb.slots_intersecting[sl1] - {sl1}:
-                    name = 'simul_slots_rooms' + str(r) + '_' + str(self.constraint_nb)
-                    self.add_constraint(self.sum(self.TTrooms[(sl1, c, rg)]
-                                                 for (c, rg) in self.wdb.room_course_compat[r]
-                                                 if c in self.wdb.compatible_courses[sl1]) +
-                                        self.sum(self.TTrooms[(sl2, c, rg)]
-                                                 for (c, rg) in self.wdb.room_course_compat[r]
-                                                 if c in self.wdb.compatible_courses[sl2]),
-                                        '<=', 1, name=name)
+                name = 'simul_slots_rooms' + str(r) + '_' + str(self.constraint_nb)
+                self.add_constraint(1000 * self.sum(self.TTrooms[(sl1, c, rg)]
+                                             for (c, rg) in self.wdb.room_course_compat[r]
+                                             if c in self.wdb.compatible_courses[sl1]) +
+                                    self.sum(self.TTrooms[(sl2, c, rg)]
+                                             for sl2 in self.wdb.slots_intersecting[sl1] - {sl1}
+                                             for (c, rg) in self.wdb.room_course_compat[r]
+                                             if c in self.wdb.compatible_courses[sl2]),
+                                    '<=', 1000, name=name)
 
         for sl in self.wdb.slots:
             # constraint : each course is assigned to a RoomGroup
