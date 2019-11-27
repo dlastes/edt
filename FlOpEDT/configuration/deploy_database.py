@@ -37,8 +37,6 @@ from base.models import Room, RoomType, RoomGroup, TrainingProgramme,\
     Group, Module, GroupType, Period, Time, Day, CourseType, \
     Department, CourseStartTimeConstraint, TimeGeneralSettings, UserPreference, CoursePreference
 
-from base.weeks import current_year
-
 from people.models import FullStaff, SupplyStaff, Tutor, UserDepartmentSettings
 
 from django.db import IntegrityError
@@ -109,8 +107,9 @@ def tutors_extract(department, book):
                 # for t in Tutor.objects.all():
                 #     for d in [day[0] for day in Day.CHOICES[:5]]:
                 #         for st in user_preference_start_times:
-                #             up = UserPreference(user=t, day=d, start_time=st, duration=90, valeur=8)
+                #             up = UserPreference(user=t, day=d, start_time=st, duration=90, value=8)
                 #             up.save()
+
 
             except IntegrityError as ie :
                 logger.warning("A constraint has not been respected creation the Professor : \n", ie)

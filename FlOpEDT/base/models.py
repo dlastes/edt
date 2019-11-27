@@ -565,13 +565,13 @@ class GroupFreeHalfDay(models.Model):
 
 
 class Dependency(models.Model):
-    course1 = models.ForeignKey('Course', related_name='cours1', on_delete=models.CASCADE)
-    course2 = models.ForeignKey('Course', related_name='cours2', on_delete=models.CASCADE)
+    course1 = models.ForeignKey('Course', related_name='first_course', on_delete=models.CASCADE)
+    course2 = models.ForeignKey('Course', related_name='second_course', on_delete=models.CASCADE)
     successive = models.BooleanField(verbose_name='Successifs?', default=False)
     ND = models.BooleanField(verbose_name='Jours differents', default=False)
 
     def __str__(self):
-        return f"{self.cours1} avant {self.cours2}"
+        return f"{self.course1} avant {self.course2}"
 
 
 class CourseStartTimeConstraint(models.Model):
