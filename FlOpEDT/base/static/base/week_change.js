@@ -206,7 +206,7 @@ function translate_extra_pref_room_from_csv(d) {
 function sort_preferences(pref) {
     var i, d ;
     var tutors_or_rooms = Object.keys(pref) ;
-    for(i = 0 ; i < tutors.length ; i++) {
+    for(i = 0 ; i < tutors_or_rooms.length ; i++) {
         week_days.forEach(function(day){
 	    pref[tutors_or_rooms[i]][day.ref].sort(
 		function (a,b) {
