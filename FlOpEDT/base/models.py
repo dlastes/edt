@@ -565,8 +565,8 @@ class GroupFreeHalfDay(models.Model):
 
 
 class Dependency(models.Model):
-    course1 = models.ForeignKey('Course', related_name='course1', on_delete=models.CASCADE)
-    course2 = models.ForeignKey('Course', related_name='course2', on_delete=models.CASCADE)
+    course1 = models.ForeignKey('Course', related_name='first_course', on_delete=models.CASCADE)
+    course2 = models.ForeignKey('Course', related_name='second_course', on_delete=models.CASCADE)
     successive = models.BooleanField(verbose_name='Successifs?', default=False)
     ND = models.BooleanField(verbose_name='Jours differents', default=False)
 
