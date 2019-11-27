@@ -189,8 +189,8 @@ var fetch = {
     ongoing_bknews: false,
     ongoing_un_rooms: false,
     done: false,
-    cours_ok: false,
-    dispos_ok: false,
+    course_saved: false,
+    pref_saved: false,
     groups_ok: false,
     constraints_ok: false
 };

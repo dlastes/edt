@@ -668,7 +668,7 @@ function apply_ckbox(dk) {
                     labgp.width *= 1 - (dim_dispo.width + dim_dispo.right) / (rootgp_width * labgp.width);
                 }
 		
-		fetch_dispos();
+		fetch_tutor_preferences();
 
                 if (logged_usr.dispo_all_change) { 
 
@@ -704,11 +704,7 @@ function apply_ckbox(dk) {
             }
         } else if (dk == "edt-mod") {
             if (ckbox[dk].cked) {
-		fetch_unavailable_rooms();
 		fetch_all_tutors();
-                if (cosmo) {
-                    fetch_side_weeks();
-                }
 		if (total_regen && (logged_usr.rights >> 2) % 2 == 0) {
 
 		    ckbox[dk].cked = false ;
@@ -724,12 +720,10 @@ function apply_ckbox(dk) {
 		    
 		    return ;
 		}
-		
                 edt_but.attr("visibility", "visible");
 
-		if (Object.keys(dispos).length == 0) {
-		    fetch_dispos();
-		}
+                fetch_all() ;
+                
             } else {
                 edt_but.attr("visibility", "hidden");
                 go_edt(true);

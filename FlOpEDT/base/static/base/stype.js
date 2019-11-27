@@ -183,10 +183,8 @@ function fetch_pref_only() {
 	    user.dispos_type = [] ;
 	    user.dispos_type = d3.csvParse(msg, translate_pref_from_csv);
 	    create_dispos_user_data();
-	    fetch.dispos_ok = true ;
 	    go_pref(true);
             show_loader(false);
-	    
         },
 	error: function(xhr, error) {
 	    console.log("error");
