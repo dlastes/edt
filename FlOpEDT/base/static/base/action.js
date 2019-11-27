@@ -132,22 +132,6 @@ function week_right() {
 }
 
 
-// change week
-// Not sure ok even if user is quick (cf fetch_cours)
-function apply_wk_change(d, i) { //if(fetch.done) {
-    if (i > 0 && i <= weeks.ndisp) {
-        weeks.sel[0] = i + weeks.fdisp;
-    }
-    dispos = {};
-    user.dispos = [];
-
-    fetch_all(false, true);
-
-    go_week_menu(false);
-} //}
-
-
-
 /*----------------------
   -------- GRID --------
   ----------------------*/
@@ -684,15 +668,7 @@ function apply_ckbox(dk) {
                     labgp.width *= 1 - (dim_dispo.width + dim_dispo.right) / (rootgp_width * labgp.width);
                 }
 		
-                // if (!fetch.dispos_ok) {
-                //     fetch_dispos();
-                // } else {
-                //     if (user.dispos.length == 0) {
-                //         create_dispos_user_data();
-                //     }
-                //     go_edt(false);
-                // }
-		fetch_dispos();
+		fetch_tutor_preferences();
 
                 if (logged_usr.dispo_all_change) { 
 
@@ -728,11 +704,7 @@ function apply_ckbox(dk) {
             }
         } else if (dk == "edt-mod") {
             if (ckbox[dk].cked) {
-		fetch_unavailable_rooms();
 		fetch_all_tutors();
-                if (cosmo) {
-                    fetch_side_weeks();
-                }
 		if (total_regen && (logged_usr.rights >> 2) % 2 == 0) {
 
 		    ckbox[dk].cked = false ;
@@ -748,17 +720,10 @@ function apply_ckbox(dk) {
 		    
 		    return ;
 		}
-		
                 edt_but.attr("visibility", "visible");
 
-		if (Object.keys(dispos).length == 0) {
-		    fetch_dispos();
-		}
-                // if (!fetch.dispos_ok) {
-                //     fetch_dispos();
-                // } else {
-                //     go_edt(true);
-                // }
+                fetch_all() ;
+                
             } else {
                 edt_but.attr("visibility", "hidden");
                 go_edt(true);
