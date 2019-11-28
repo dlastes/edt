@@ -41,6 +41,8 @@ from people.models import FullStaff, SupplyStaff, Tutor, UserDepartmentSettings
 
 from django.db import IntegrityError
 
+from misc.assign_colors import assign_module_color
+
 
 bookname='media/configuration/empty_database_file.xlsx'
 logger = logging.getLogger('base')
@@ -499,6 +501,8 @@ def modules_extract(department, book):
         MODULE_ROW+=1
 
         idMod=sheet.cell(row=MODULE_ROW, column=1).value
+
+    assign_module_color(department)
 
     logger.info("Modules extraction done")
 
