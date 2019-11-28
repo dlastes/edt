@@ -78,16 +78,6 @@ class GroupsSerializer(serializers.HyperlinkedModelSerializer):
 # -- TIMING --
 # ------------
 
-class DaysSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = bm.Day
-        fields = '__all__'
-
-class SlotsSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = bm.Slot
-        fields = '__all__'
-
 class HolidaysSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = bm.Holiday

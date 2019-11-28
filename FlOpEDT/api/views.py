@@ -110,23 +110,6 @@ class GroupsViewSet(viewsets.ModelViewSet):
 # ------------
 # -- TIMING --
 # ------------
-class DaysViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet to see all the days
-    """
-    queryset = bm.Day.objects.all()
-    serializer_class = serializers.DaysSerializer
-    
-
-class SlotsViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet to see all the slots
-    """
-    queryset = bm.Slot.objects.all()
-    serializer_class = serializers.SlotsSerializer
-    
-    filterset_fields = '__all__'
-    
 
 class HolidaysViewSet(viewsets.ModelViewSet):
     """
