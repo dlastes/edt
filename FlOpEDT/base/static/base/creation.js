@@ -1078,6 +1078,9 @@ function def_drag() {
                 } else {
                     d.day = cur_over.day ;
                     d.start = cur_over.start_time ;
+
+	            add_bouge(pending.init_course);
+                    pending.clean();
 		}
 
                 drag.sel.attr("transform", "translate(0,0)");
