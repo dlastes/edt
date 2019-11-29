@@ -12,6 +12,7 @@ function openNav() {
     // add event listener
     $('#dd_work_copy').on('change', function (e) {
         num_copie = this.value;
+        fetch.course_saved = false ;
         fetch_all(false, false);
     });
 
