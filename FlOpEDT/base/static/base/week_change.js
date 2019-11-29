@@ -43,7 +43,10 @@
 /*---------------------
   ------- DISPOS ------
   ---------------------*/
-function fetch_dispos() {
+
+// fetch all tutor preferences
+function fetch_tutor_preferences() {
+
 
     fetch.ongoing_dispos = true;
 
@@ -66,6 +69,7 @@ function fetch_dispos() {
                 d3.csvParse(msg, translate_dispos_from_csv);
 		sort_preferences(dispos);
                 fetch.ongoing_dispos = false;
+                fetch.pref_saved = true ;
                 if (ckbox["dis-mod"].cked) {
                     create_dispos_user_data();
                 }
@@ -86,6 +90,28 @@ function fetch_dispos() {
             window.location.replace(url_login + "?next=" + url_edt + exp_week.year + "/" + exp_week.week);
         }
     });
+}
+
+
+function translate_dispos_from_csv(d) {
+    if(Object.keys(dispos).indexOf(d.prof)==-1){
+	dispos[d.prof] = {} ;
+        week_days.forEach(function(day) {
+	    dispos[d.prof][day.ref] = [] ;
+	});	
+    }
+    dispos[d.prof][d.day].push({start_time:+d.start_time,
+			       duration: +d.duration,
+			       value: +d.value});
+}
+
+
+
+
+// fetch the moments where a tutor teaches in another departement
+function fetch_tutor_extra_unavailability() {
+
+    var exp_week = wdw_weeks.get_selected() ;
 
     show_loader(true);
     $.ajax({
@@ -95,8 +121,7 @@ function fetch_dispos() {
         async: true,
         contentType: "text/csv",
         success: function(msg) {
-            console.log("in");
-            console.log(msg);
+            //console.log(msg);
             var sel_week = wdw_weeks.get_selected() ;
             if (Week.compare(exp_week, sel_week)==0) {
                 extra_pref.tutors = {};
@@ -120,64 +145,12 @@ function fetch_dispos() {
             console.log(xhr.responseText);
             show_loader(false);
             // window.location.href = url_login;
-            window.location.replace(url_login + "?next=" + url_edt + year_att + "/" + week_att);
+            window.location.replace(url_login + "?next=" + url_edt + exp_week.url());
         }
     });
-
-    show_loader(true);
-    $.ajax({
-        type: "GET", //rest Type
-        dataType: 'text',
-        url: url_fetch_shared_rooms + exp_week.url(),
-        async: true,
-        contentType: "text/csv",
-        success: function(msg) {
-            console.log("in");
-            console.log(msg);
-            var sel_week = wdw_weeks.get_selected() ;
-            if (Week.compare(exp_week, sel_week)==0) {
-                extra_pref.rooms = {};
-                d3.csvParse(msg, translate_extra_pref_room_from_csv);
-	        sort_preferences(extra_pref.rooms);
-                console.log(extra_pref.rooms);
-                var shared_rooms = Object.keys(extra_pref.rooms) ;
-                for(i = 0 ; i < shared_rooms.length ; i++) {
-                    var busy_days = Object.keys(extra_pref.rooms[shared_rooms[i]]) ;
-	            for(d = 0 ; d < busy_days.length ; d++) {
-                        fill_holes(extra_pref.rooms[shared_rooms[i]][busy_days[d]], 1);
-                    }
-                }
-            }
-            show_loader(false);
-
-        },
-        error: function(xhr, error) {
-            console.log("error");
-            console.log(xhr);
-            console.log(error);
-            console.log(xhr.responseText);
-            show_loader(false);
-            // window.location.href = url_login;
-            window.location.replace(url_login + "?next=" + url_edt + year_att + "/" + week_att);
-        }
-    });
-
-
-    
 }
 
 
-function translate_dispos_from_csv(d) {
-    if(Object.keys(dispos).indexOf(d.prof)==-1){
-	dispos[d.prof] = {} ;
-        week_days.forEach(function(day) {
-	    dispos[d.prof][day.ref] = [] ;
-	});	
-    }
-    dispos[d.prof][d.day].push({start_time:+d.start_time,
-			       duration: +d.duration,
-			       value: +d.value});
-}
 
 
 function translate_extra_pref_tut_from_csv(d) {
@@ -192,22 +165,11 @@ function translate_extra_pref_tut_from_csv(d) {
 			             value: 0});
 }
 
-function translate_extra_pref_room_from_csv(d) {
-    if(Object.keys(extra_pref.rooms).indexOf(d.room)==-1){
-	extra_pref.rooms[d.room] = {} ;
-        for (var i = 0; i < days.length; i++) {
-	    extra_pref.rooms[d.room][days[i].ref] = [] ;
-	}	
-    }
-    extra_pref.rooms[d.room][d.day].push({start_time:+d.start_time,
-			                  duration: +d.duration,
-			                  value: 0});
-}
 
 function sort_preferences(pref) {
     var i, d ;
     var tutors_or_rooms = Object.keys(pref) ;
-    for(i = 0 ; i < tutors.length ; i++) {
+    for(i = 0 ; i < tutors_or_rooms.length ; i++) {
         week_days.forEach(function(day){
 	    pref[tutors_or_rooms[i]][day.ref].sort(
 		function (a,b) {
@@ -369,9 +331,6 @@ function create_dispos_user_data() {
 /*----------------------
   ------ MODULES -------
   ----------------------*/
-/*----------------------
-  ------ SALLES -------
-  ----------------------*/
 /*--------------------
   ------ PROFS -------
   --------------------*/
@@ -503,6 +462,8 @@ function adapt_labgp(first) {
 function fetch_cours() {
     fetch.ongoing_cours_pp = true;
     fetch.ongoing_cours_pl = true;
+
+    fetch.course_saved = false ;
     
     var garbage_plot ;
     
@@ -528,6 +489,7 @@ function fetch_cours() {
             if (Week.compare(exp_week, sel_week)==0) {
 
                 week_days = new WeekDays(JSON.parse(req.getResponseHeader('days').replace(/\'/g, '"')));
+                days_header.mix.days = week_days ;
             
                 tutors.pl = [];
                 modules.pl = [];
@@ -895,8 +857,15 @@ function translate_gp_name(gp) {
 
 /*--------------------
    ------ ROOMS ------
-  --------------------*/
-function fetch_unavailable_rooms() {
+   --------------------*/
+
+function fetch_room_preferences_unavailability() {
+    fetch_room_preferences() ;
+    fetch_room_extra_unavailability() ;
+}
+
+// fetch room preferences
+function fetch_room_preferences() {
     fetch.ongoing_un_rooms = true;
     
     var exp_week = wdw_weeks.get_selected() ;
@@ -941,6 +910,64 @@ function translate_unavailable_rooms(d) {
 					   duration: +d.duration});
 }
 
+// fetch the moments where a room is occupied in another departement
+function fetch_room_extra_unavailability() {
+
+    var exp_week = wdw_weeks.get_selected() ;
+
+    show_loader(true);
+    $.ajax({
+        type: "GET", //rest Type
+        dataType: 'text',
+        url: url_fetch_shared_rooms + exp_week.url(),
+        async: true,
+        contentType: "text/csv",
+        success: function(msg) {
+            // console.log(msg);
+            var sel_week = wdw_weeks.get_selected() ;
+            if (Week.compare(exp_week, sel_week)==0) {
+                extra_pref.rooms = {};
+                d3.csvParse(msg, translate_extra_pref_room_from_csv);
+	        sort_preferences(extra_pref.rooms);
+                console.log(extra_pref.rooms);
+                var shared_rooms = Object.keys(extra_pref.rooms) ;
+                for(i = 0 ; i < shared_rooms.length ; i++) {
+                    var busy_days = Object.keys(extra_pref.rooms[shared_rooms[i]]) ;
+	            for(d = 0 ; d < busy_days.length ; d++) {
+                        fill_holes(extra_pref.rooms[shared_rooms[i]][busy_days[d]], 1);
+                    }
+                }
+            }
+            show_loader(false);
+
+        },
+        error: function(xhr, error) {
+            console.log("error");
+            console.log(xhr);
+            console.log(error);
+            console.log(xhr.responseText);
+            show_loader(false);
+            // window.location.href = url_login;
+            window.location.replace(url_login + "?next=" + url_edt + exp_week.url());
+        }
+    });
+}
+
+function translate_extra_pref_room_from_csv(d) {
+    if(Object.keys(extra_pref.rooms).indexOf(d.room)==-1){
+	extra_pref.rooms[d.room] = {} ;
+        for (var i = 0; i < days.length; i++) {
+	    extra_pref.rooms[d.room][days[i].ref] = [] ;
+	}	
+    }
+    extra_pref.rooms[d.room][d.day].push({start_time:+d.start_time,
+			                  duration: +d.duration,
+			                  value: 0});
+}
+
+
+
+
 /*--------------------
    ------ ALL -------
    --------------------*/
@@ -948,9 +975,13 @@ function translate_unavailable_rooms(d) {
 function fetch_all(first, fetch_work_copies){
     fetch.done = false;
 
-    fetch.ongoing_cours_pp = true;
-    fetch.ongoing_cours_pl = true;
-    if (ckbox["dis-mod"].cked || ckbox["edt-mod"].cked) {
+    if (!fetch.course_saved) {
+        fetch.ongoing_cours_pp = true;
+        fetch.ongoing_cours_pl = true;
+    }
+    if (!fetch.pref_saved &&
+        (ckbox["dis-mod"].cked
+         || ckbox["edt-mod"].cked)) {
 	fetch.ongoing_dispos = true;
     }
     if (ckbox["edt-mod"].cked) {
@@ -959,12 +990,21 @@ function fetch_all(first, fetch_work_copies){
     fetch.ongoing_bknews = true;
 
     fetch_version();
-    fetch_cours();
-    if (ckbox["dis-mod"].cked || ckbox["edt-mod"].cked) {
-        fetch_dispos();
+    
+    if (!fetch.course_saved) {
+        fetch_cours();
+    }
+    if (!fetch.pref_saved &&
+        (ckbox["dis-mod"].cked
+         || ckbox["edt-mod"].cked)) {
+        fetch_tutor_preferences();
     }
     if (ckbox["edt-mod"].cked) {
-	fetch_unavailable_rooms() ;
+        fetch_tutor_extra_unavailability() ;
+	fetch_room_preferences_unavailability() ;
+        if (cosmo) {
+            fetch_side_weeks() ;
+        }
     }
     fetch_bknews(first);
 
@@ -1012,7 +1052,11 @@ function translate_version_from_csv(d){
 
 function fetch_ended(light) {
     if (!fetch.ongoing_cours_pl &&
-        !fetch.ongoing_cours_pp) {
+        !fetch.ongoing_cours_pp &&
+        !fetch.course_saved) {
+
+        fetch.course_saved = true ;
+        
         cours = cours_pl.concat(cours_pp);
 
         var module_names = modules.pl;
@@ -1047,19 +1091,13 @@ function fetch_ended(light) {
         clean_prof_displayed(light);
     }
 
-    if (!fetch.ongoing_cours_pp &&
-        !fetch.ongoing_cours_pl &&
-        !fetch.ongoing_dispos   &&
+    if (fetch.course_saved &&
+        !fetch.ongoing_dispos &&
         !fetch.ongoing_un_rooms &&
         !fetch.ongoing_bknews) {
 
         fetch.done = true;
         go_edt(false);
-
-        // WTF was that?
-	// if (fig === undefined) {
-        //     fig = svg.add_child("svg", "final");
-	// }
 
     }
 }

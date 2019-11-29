@@ -399,6 +399,8 @@ WeekBanner.prototype.apply_wk_change = function (d, i) { //if(fetch.done) {
     dispos = {};
     user.dispos = [];
 
+    fetch.course_saved = false ;
+    fetch.pref_saved = false ;
     fetch_all(false, true);
 
     this.update(false) ;

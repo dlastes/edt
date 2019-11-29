@@ -177,14 +177,6 @@ var rootgp_width = 0;
 // last positive number of lab groups (when filtering by group)
 var pos_rootgp_width = 0;
 
-// different grounds where to plot
-// var fg, mg, bg, dg, meg, vg, gpg, catg, stg, mog, sag, fig, log, cmpg, cmtg, selg, pmg;
-// var wg = {
-//     upper: null,
-//     bg: null,
-//     fg: null
-// };
-
 // opacity of disabled stuffs
 var opac = .4;
 
@@ -197,8 +189,8 @@ var fetch = {
     ongoing_bknews: false,
     ongoing_un_rooms: false,
     done: false,
-    cours_ok: false,
-    dispos_ok: false,
+    course_saved: false,
+    pref_saved: false,
     groups_ok: false,
     constraints_ok: false
 };

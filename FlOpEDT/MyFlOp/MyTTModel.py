@@ -34,11 +34,23 @@ class MyTTModel(TTModel):
     def __init__(self, department_abbrev, weeks, year,
                  train_prog=None,
                  stabilize_work_copy=None,
-                 min_bhd_g=0.5):
+                 min_nps_i=1.,
+                 min_bhd_g=1.,
+                 min_bd_i=1.,
+                 min_bhd_i=1.,
+                 min_nps_c=1.,
+                 max_stab=5.,
+                 lim_ld=1.):
         TTModel.__init__(self, department_abbrev, weeks, year,
                          train_prog=train_prog,
                          stabilize_work_copy=stabilize_work_copy,
-                         min_bhd_g=min_bhd_g)
+                         min_nps_i=min_nps_i,
+                         min_bhd_g=min_bhd_g,
+                         min_bd_i=min_bd_i,
+                         min_bhd_i=min_bhd_i,
+                         min_nps_c=min_nps_c,
+                         max_stab=max_stab,
+                         lim_ld=lim_ld)
 
     def add_specific_constraints(self):
         """

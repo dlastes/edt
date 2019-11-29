@@ -28,8 +28,9 @@ import os
 import sys
 from openpyxl import *
 
-from base.weeks import current_year
-from base.models import Group, Module, Course, Room, CourseType, RoomType, TrainingProgramme, Dependency, Period, Department
+from base.weeks import actual_year
+from base.models import Group, Module, Course, Room, CourseType, RoomType,\
+    TrainingProgramme, Dependency, Period, Department
 from people.models import Tutor
 from misc.assign_module_color import assign_color
 
@@ -49,6 +50,11 @@ def ReadPlanifWeek(department, book, feuille, week, year):
             if sem == float(week):
                 WEEK_COL = wc
                 break
+    try:
+        WEEK_COL += 0
+    except UnboundLocalError:
+        print('Pas de semaine %s en %s' % (week, feuille))
+        return
     print("Semaine %s de %s : colonne %g" % (week, feuille, WEEK_COL))
 
     row = 4
@@ -63,7 +69,7 @@ def ReadPlanifWeek(department, book, feuille, week, year):
         row += 1
         is_total = sheet.cell(row=row, column=group_COL).value
         if is_total == "TOTAL":
-            # print "Sem %g de %s - TOTAL: %g"%(semaine, feuille,sumtotal)
+            # print "Sem %g de %s - TOTAL: %g"%(week, feuille,sumtotal)
             break
 
         Cell = sheet.cell(row=row, column=WEEK_COL)
@@ -161,16 +167,16 @@ def ReadPlanifWeek(department, book, feuille, week, year):
 
             if 'D' in comments or 'D' in local_comments and N >= 2:
                 for GROUP in GROUPS:
-                    Course = Course.objects.filter(type=COURSE_TYPE, module=MODULE, group=GROUP, year=year,
+                    relevant_courses = Course.objects.filter(type=COURSE_TYPE, module=MODULE, group=GROUP, year=year,
                                                   week=week)
                     for i in range(N//2-1):
-                        P = Dependency(course1=Course[2*i], course2=Course[2*i+1], successiveq=True)
+                        P = Dependency(course1=relevant_courses[2*i], course2=relevant_courses[2*i+1], successive=True)
                         P.save()
             if 'ND' in comments or 'ND' in local_comments  and N >= 2:
                 for GROUP in GROUPS:
-                    Course = Course.objects.filter(type=COURSE_TYPE, module=MODULE, group=GROUP, year=year,
+                    relevant_courses = Course.objects.filter(type=COURSE_TYPE, module=MODULE, group=GROUP, year=year,
                                                   week=week)
-                    P = Dependency(course1=Course[0], course2=Course[1], ND=True)
+                    P = Dependency(course1=relevant_courses[0], course2=relevant_courses[1], ND=True)
                     P.save()
         except Exception as e:
             print("Exception ligne %g semaine %s de %s : %s \n" % (row, week, feuille, module), e)
@@ -190,30 +196,41 @@ def extract_period(department, book, period, year):
 
 def extract_planif(department, bookname=None):
     '''
-    Generate the courses from bookname; the school year starts in current_year
+    Generate the courses from bookname; the school year starts in actual_year
     '''
     if bookname is None:
         bookname = 'misc/deploy_database/planif_file_'+department.abbrev+'.xlsx'
     book = load_workbook(filename=bookname, data_only=True)
     for period in Period.objects.filter(department=department):
-        extract_period(department, book, period, current_year)
+        extract_period(department, book, period, actual_year)
     assign_color(department)
 
 
 def extract_planif_from_week(week, year, department, bookname=None):
     '''
-    Generate the courses from bookname; the school year starts in current_year
+    Generate the courses from bookname; the school year starts in actual_year
     '''
     if bookname is None:
         bookname = 'misc/deploy_database/Files/planif_file_'+department.abbrev+'.xlsx'
     book = load_workbook(filename=bookname, data_only=True)
-    if year == current_year:
+    if year == actual_year:
         for period in Period.objects.filter(department=department):
             if period.starting_week < period.ending_week:
                 for w in range(max(week, period.starting_week), period.ending_week + 1):
-                    ReadPlanifWeek(department, book, period.name, w, current_year)
+                    ReadPlanifWeek(department, book, period.name, w, actual_year)
             else:
                 for w in range(max(week, period.starting_week), 53):
-                    ReadPlanifWeek(department, book, period.name, w, current_year)
+                    ReadPlanifWeek(department, book, period.name, w, actual_year)
                 for w in range(1, period.ending_week + 1):
-                    ReadPlanifWeek(department, book, period.name, w, current_year + 1)
+                    ReadPlanifWeek(department, book, period.name, w, actual_year + 1)
+    elif year == actual_year + 1:
+        for period in Period.objects.filter(department=department):
+            if period.starting_week < period.ending_week:
+                for w in range(max(week, period.starting_week), period.ending_week + 1):
+                    ReadPlanifWeek(department, book, period.name, w, year)
+            else:
+                for w in range(week, period.ending_week + 1):
+                    ReadPlanifWeek(department, book, period.name, w, year)
+
+    else:
+        print("Are you sure of year value?")
