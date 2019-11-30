@@ -1012,9 +1012,12 @@ def edt_changes(req, **kwargs):
 
                 if new_tutor is not None:
                     try:
-                        prev_tut = co.tutor
-                        co.tutor = Tutor.objects.get(username=new_tutor)
-                        co.save()
+                        prev_tut = cp.tutor
+                        cp.tutor = Tutor.objects.get(username=new_tutor)
+                        cp.save()
+                        if co.tutor is not None:
+                            co.tutor = new_tutor
+                            co.save()
                         pm = PlanningModification(course=co,
                                                   old_week=co.week,
                                                   old_year=co.year,
