@@ -142,11 +142,6 @@ class CoursesSerializer(serializers.ModelSerializer):
         model = bm.Course
         fields = '__all__'
 
-class ScheduledCoursesSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = bm.ScheduledCourse
-        fields = '__all__'
-
 # -----------------
 # -- PREFERENCES --
 # -----------------
@@ -326,3 +321,22 @@ class TTLimitedRoomChoicesSerializer(serializers.ModelSerializer):
     class Meta:
         model = ttm.LimitedRoomChoices
         fields = '__all__'
+
+
+# ----------------------
+# -- ScheduledCourses --
+# ----------------------
+
+
+class TestCoursesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = bm.Course
+        fields = ['tutor', 'group', 'module']
+
+class ScheduledCoursesSerializer(serializers.Serializer):
+    course = TestCoursesSerializer()
+    room = serializers.CharField()
+
+    class Meta:
+        model = bm.ScheduledCourse
+        fields = ('end_time', 'room', 'course')
