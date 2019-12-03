@@ -27,6 +27,7 @@ from django.urls import path
 from django.conf.urls import url, include
 from django.contrib.auth import views as auth_views
 from django.urls import reverse_lazy
+from django.views.generic.base import RedirectView
 from people.student import AddStudent, ChangeStudent
 from people.tutor import AddFullStaffTutor, AddSupplyStaffTutor, AddBIATOSTutor
 from people.tutor import ChangeFullStaffTutor, ChangeSupplyStaffTutor, ChangeBIATOSTutor
@@ -114,5 +115,6 @@ urlpatterns = [
     url(r'^student_preferences/$',
         views.student_preferences,
         name="student_preferences"),
-    path('create-user', views.create_user, name="create_user")
+    path('create-user', views.create_user, name="create_user"),
+    path('profile', RedirectView.as_view(pattern_name="base:preferences", permanent=False)),
     ]
