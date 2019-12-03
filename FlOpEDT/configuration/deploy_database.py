@@ -514,8 +514,6 @@ def modules_extract(department, book):
 
         idMod=sheet.cell(row=MODULE_ROW, column=1).value
 
-    assign_module_color(department)
-
     logger.info("Modules extraction done")
 
 def coursetypes_extract(department, book):
