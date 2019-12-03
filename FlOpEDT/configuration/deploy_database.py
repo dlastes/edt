@@ -457,8 +457,11 @@ def groups_extract(department, book):
         PERIOD_ROW += 1
         id_per = sheet.cell(row=PERIOD_ROW, column=7).value
 
-    for index, tp in enumerate(TrainingProgramme.objects.filter(department=department)):        
-        TrainingProgrammeDisplay.objects.get_or_create(training_programme=tp, row=index)
+    for index, tp in enumerate(TrainingProgramme.objects.filter(department=department)):
+        TPD, created = TrainingProgrammeDisplay.objects.get_or_create(training_programme=tp)
+        if created:
+            TPD.row = index
+            TPD.save()
         
 
     #generate_group_file(department.abbrev)
