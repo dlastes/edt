@@ -10,6 +10,7 @@ routerBase = routers.SimpleRouter()
 routerPeople = routers.SimpleRouter()
 routerDisplayweb = routers.SimpleRouter()
 routerTTapp = routers.SimpleRouter()
+routerFetch = routers.SimpleRouter()
 
 routerBase.register(r'users', views.UsersViewSet)
 routerBase.register(r'userdepartmentsettings', views.UserDepartmentSettingsViewSet)
@@ -68,17 +69,13 @@ routerTTapp.register(r'simultaneouscourses', views.TTSimultaneousCoursesViewSet)
 routerTTapp.register(r'limitedstarttimechoices', views.TTLimitedStartTimeChoicesViewSet) # TODO: Fix
 routerTTapp.register(r'limitiedroomchoices', views.TTLimitedRoomChoicesViewSet)
 
-
-# schema_view = get_schema_view(title='Test API', renderer_classes=[OpenAPIRenderer, SwaggerUIRenderer])
+routerFetch.register(r'scheduledcourses', views.ScheduledCoursesViewSet)
+routerFetch.register(r'tutorcourses', views.TutorCoursesViewSet)
 
 urlpatterns = [
-<<<<<<< HEAD
-    # url(r'^', schema_view, name="docs"),
-=======
-
->>>>>>> 098b15361a6706faad47f20dd88f1d91606d6c23
     path('base/', include(routerBase.urls)),
     path('user/', include(routerPeople.urls)),
     path('displayweb/', include(routerDisplayweb.urls)),
-    path('ttapp/', include(routerTTapp.urls))
+    path('ttapp/', include(routerTTapp.urls)),
+    path('fetch/', include(routerFetch.urls)),
 ]

@@ -226,14 +226,14 @@ class ScheduledCoursesViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the scheduled courses
     """
-    # queryset = bm.ScheduledCourse.objects.all()
-    # serializer_class = serializers.ScheduledCoursesSerializer
-    # filterset_fields = '__all__'
-    def get(self, request, *args, **kwargs):
-        queryset = bm.ScheduledCourse.obects.filter()
-        serializer_class = serializers.ScheduledCoursesSerializer
+    queryset = bm.ScheduledCourse.objects.all()
+    serializer_class = serializers.ScheduledCoursesSerializer
+    filterset_fields = '__all__'
+    # def get(self, request, *args, **kwargs):
+    #     queryset = bm.ScheduledCourse.objects.filter()
+    #     serializer_class = serializers.ScheduledCoursesSerializer
 
-        filterset_fields = '__all__'
+    #     filterset_fields = '__all__'
 
 # -----------------
 # -- PREFERENCES --
@@ -533,4 +533,17 @@ class TTLimitedRoomChoicesViewSet(viewsets.ModelViewSet):
     queryset = ttm.LimitedRoomChoices.objects.all()
     serializer_class = serializers.TTLimitedRoomChoicesSerializer
     
+    filterset_fields = '__all__'
+
+
+# ---------------
+# --- OTHERS ----
+# ---------------
+
+class TutorCoursesViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet to see all the courses of a tutor
+    """
+    queryset = bm.ScheduledCourse.objects.all()
+    serializer_class = serializers.TutorCourses_Serializer
     filterset_fields = '__all__'

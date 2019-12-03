@@ -324,10 +324,12 @@ class TTLimitedRoomChoicesSerializer(serializers.ModelSerializer):
 
 
 # ----------------------
-# -- ScheduledCourses --
+# ------- FETCHS -------
 # ----------------------
 
-class ModuleDisplaySCSerializer(serializers.Serializer):
+# Scheduled Courses SC
+
+class ModuleDisplay_SC_Serializer(serializers.Serializer):
     color_bg = serializers.CharField()
     color_txt = serializers.CharField()
 
@@ -335,15 +337,15 @@ class ModuleDisplaySCSerializer(serializers.Serializer):
         model = dwm.ModuleDisplay
         fields = ['color_bg', 'color_txt']
 
-class ModuleSCSerializer(serializers.Serializer):
+class Module_SC_Serializer(serializers.Serializer):
     name = serializers.CharField()
-    display = ModuleDisplaySCSerializer()
+    display = ModuleDisplay_SC_Serializer()
 
     class Meta:
         model = bm.Module
         fields = ['name', 'display']
 
-class GroupSCSerializer(serializers.Serializer):
+class Group_SC_Serializer(serializers.Serializer):
     train_prog = serializers.CharField()
     name = serializers.CharField()
 
@@ -351,15 +353,15 @@ class GroupSCSerializer(serializers.Serializer):
         model = bm.Group
         fields = ['name', 'train_prog']
 
-class CourseSCSerializer(serializers.Serializer):
+class Course_SC_Serializer(serializers.Serializer):
     id = serializers.IntegerField()
     type = serializers.CharField()
     tutor = serializers.CharField()
     room_type = serializers.CharField()
     week = serializers.IntegerField()
     year = serializers.IntegerField()
-    group = GroupSCSerializer()
-    module = ModuleSCSerializer()
+    group = Group_SC_Serializer()
+    module = Module_SC_Serializer()
 
     class Meta:
         model = bm.Course
@@ -369,8 +371,65 @@ class ScheduledCoursesSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     room = serializers.CharField()
     start_time = serializers.IntegerField()
-    course = CourseSCSerializer()
+    course = Course_SC_Serializer()
 
     class Meta:
         model = bm.ScheduledCourse
         fields = ['id', 'room', 'start_time', 'course']
+
+# TODO: Cours pp ?
+
+# TODO: Availabilities
+
+# TODO: User_dweek
+
+# TODO: Course_dweek
+
+# TODO: Training_programs
+
+# TODO: Unavailable_rooms
+
+# TODO: Tutors
+
+# TODO: All_versions
+
+# TODO: Departments
+
+# Tutor_courses TC
+class Department_TC_Serializer(serializers.Serializer):
+    name = serializers.CharField()
+    abbrev = serializers.CharField()
+
+    class Meta:
+        model = bm.Department
+        fields = ['name', 'abbrev']
+
+class TutorCourses_Serializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    room = serializers.CharField()
+    start_time = serializers.IntegerField()
+
+    course = Course_SC_Serializer()
+    department = Department_TC_Serializer() # TODO: Fix
+
+    class Meta:
+        model = bm.ScheduledCourse
+        fields = ['id', 'no', 'room', 'start_time', 'course', 'department']
+
+# TODO: Extra_sched
+
+# TODO: Shared_rooms
+
+# TODO: BKnews
+
+# TODO: Decale
+
+# TODO: Course_types
+
+# TODO: Groups
+
+# TODO: Rooms
+
+# TODO: Constraints
+
+# TODO: Week_infos
