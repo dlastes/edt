@@ -410,11 +410,12 @@ class TutorCourses_Serializer(serializers.Serializer):
     start_time = serializers.IntegerField()
 
     course = Course_SC_Serializer()
-    department = Department_TC_Serializer() # TODO: Fix
+    #department = Department_TC_Serializer() # TODO: Fix
 
     class Meta:
         model = bm.ScheduledCourse
-        fields = ['id', 'no', 'room', 'start_time', 'course', 'department']
+        # fields = ['id', 'no', 'room', 'start_time', 'course', 'department']
+        fields = ['id', 'no', 'room', 'start_time', 'course']
 
 # TODO: Extra_sched
 
