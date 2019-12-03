@@ -44,19 +44,25 @@ from people.models import FullStaff, SupplyStaff, Tutor, UserDepartmentSettings
 from django.db import IntegrityError
 
 
-bookname='media/configuration/empty_database_file.xlsx'
+media_dir = 'media/configuration'
 logger = logging.getLogger('base')
 
 @transaction.atomic
-def extract_database_file(bookname=bookname, department_name=None, department_abbrev=None):
+def extract_database_file(department_name=None, department_abbrev=None, bookname=None):
 
     # Test department existence
     department, created = Department.objects.get_or_create(name=department_name, abbrev=department_abbrev)
     if not created:
-        logger.warning(f"Department with abbrev {department_abbrev} already exists.")
+        logger.info(f"Department with abbrev {department_abbrev} and name {department_name} already exists. "
+                    f"It will be updated")
+    if bookname is None:
+        bookname = f"{media_dir}/database_file_{department_abbrev}.xlsx"
+    try:
+        book = load_workbook(filename=bookname, data_only=True)
+    except FileNotFoundError as ie:
+        logger.warning("Database file could not be loaded : \n", ie)
         return
 
-    book = load_workbook(filename=bookname, data_only=True)
     tutors_extract(department, book)
     rooms_extract(department, book)
     groups_extract(department, book)
@@ -424,19 +430,25 @@ def groups_extract(department, book):
     while id_per is not None:
 
         verif = Period.objects.filter(department=department, name = id_per)
+        s_week = int(sheet.cell(row=PERIOD_ROW, column=8).value)
+        e_week = int(sheet.cell(row=PERIOD_ROW, column=9).value)
 
-        if not verif.exists():
+        if verif.exists():
+            period = verif[0]
+            if (period.starting_week, period.ending_week) != (s_week, e_week):
+                period.starting_week = s_week
+                period.ending_week = e_week
+                period.save()
+                logger.info(f" Period {id_per}' extreme weeks have been updated")
 
-            s_week = int(sheet.cell(row=PERIOD_ROW, column=8).value)
-            e_week = int(sheet.cell(row=PERIOD_ROW, column=9).value)
+        else:
 
             try:
 
-                period = Period.objects.create(
-                                            name=id_per,
-                                            department=department,
-                                            starting_week=s_week,
-                                            ending_week=e_week)
+                Period.objects.create(name=id_per,
+                                      department=department,
+                                      starting_week=s_week,
+                                      ending_week=e_week)
 
             except IntegrityError as ie:
                 logger.warning("A constraint has not been respected creating the Period %s : \n" % id_per, ie)
@@ -557,8 +569,8 @@ def coursetypes_extract(department, book):
                 logger.warning("A constraint has not been respected creating the CourseType %s : \n" % idType, ie)
                 pass
 
-            type_row += 1
-            idType = sheet.cell(row=type_row, column=1).value
+        type_row += 1
+        idType = sheet.cell(row=type_row, column=1).value
 
     logger.info("CourseType extraction done")
 
@@ -615,7 +627,7 @@ def settings_extract(department, book):
 
     # Set settings
     logger.info(f'TimeGeneralSettings : {settings}')
-    TimeGeneralSettings.objects.create(**settings)
+    TimeGeneralSettings.objects.get_or_create(**settings)
 
 
 def displayInfo():
