@@ -1,7 +1,10 @@
 from rest_framework import routers
 from api import views
 from django.urls import path
-from django.conf.urls import include
+from django.conf.urls import include, url
+from rest_framework.schemas import get_schema_view
+from rest_framework_swagger.renderers import SwaggerUIRenderer, OpenAPIRenderer
+
 
 routerBase = routers.SimpleRouter()
 routerPeople = routers.SimpleRouter()
@@ -19,7 +22,7 @@ routerBase.register(r'students', views.StudentsViewSet)
 routerBase.register(r'departments', views.DepartmentViewSet)
 routerBase.register(r'trainingprograms', views.TrainingProgramsViewSet)
 routerBase.register(r'grouptypes', views.GroupTypesViewSet)
-routerBase.register(r'grouptypes', views.GroupsViewSet)
+routerBase.register(r'groups', views.GroupsViewSet)
 routerBase.register(r'holidays', views.HolidaysViewSet)
 routerBase.register(r'traininghalfdays', views.TrainingHalfDaysViewSet)
 routerBase.register(r'periods', views.PeriodsViewSet)
@@ -66,7 +69,10 @@ routerTTapp.register(r'limitedstarttimechoices', views.TTLimitedStartTimeChoices
 routerTTapp.register(r'limitiedroomchoices', views.TTLimitedRoomChoicesViewSet)
 
 
+# schema_view = get_schema_view(title='Test API', renderer_classes=[OpenAPIRenderer, SwaggerUIRenderer])
+
 urlpatterns = [
+    # url(r'^', schema_view, name="docs"),
     path('base/', include(routerBase.urls)),
     path('user/', include(routerPeople.urls)),
     path('displayweb/', include(routerDisplayweb.urls)),
