@@ -40,6 +40,7 @@
   <div class="msg-prefs">Vous préférez :</div><br/>
   </br>
   <form action="{% url 'people:student_preferences' %}" method="post" id="form_pref">
+  {% csrf_token %}
     <div class="un">
         <input type="range" class="range" name="morning_evening" min="0" max="1" step="0.25" value=".5"/>
         <output name="result"></output>
