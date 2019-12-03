@@ -116,5 +116,5 @@ urlpatterns = [
         views.student_preferences,
         name="student_preferences"),
     path('create-user', views.create_user, name="create_user"),
-    path('profile', RedirectView.as_view(pattern_name="index", permanent=False)),
+    path('profile/', RedirectView.as_view(pattern_name="index", permanent=False)),
     ]
