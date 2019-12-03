@@ -1,4 +1,5 @@
 from rest_framework import viewsets
+from rest_framework.views import APIView
 import django_filters.rest_framework
 from api import serializers
 import people.models as pm
@@ -6,6 +7,8 @@ import base.models as bm
 import quote.models as p
 import displayweb.models as dwm
 import TTapp.models as ttm
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
 
 # ------------
 # -- PEOPLE --
@@ -223,10 +226,14 @@ class ScheduledCoursesViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the scheduled courses
     """
-    queryset = bm.ScheduledCourse.objects.all()
-    serializer_class = serializers.ScheduledCoursesSerializer
-    
-    filterset_fields = '__all__'
+    # queryset = bm.ScheduledCourse.objects.all()
+    # serializer_class = serializers.ScheduledCoursesSerializer
+    # filterset_fields = '__all__'
+    def get(self, request, *args, **kwargs):
+        queryset = bm.ScheduledCourse.obects.filter()
+        serializer_class = serializers.ScheduledCoursesSerializer
+
+        filterset_fields = '__all__'
 
 # -----------------
 # -- PREFERENCES --

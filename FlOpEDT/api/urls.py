@@ -67,6 +67,7 @@ routerTTapp.register(r'limitiedroomchoices', views.TTLimitedRoomChoicesViewSet)
 
 
 urlpatterns = [
+
     path('base/', include(routerBase.urls)),
     path('user/', include(routerPeople.urls)),
     path('displayweb/', include(routerDisplayweb.urls)),

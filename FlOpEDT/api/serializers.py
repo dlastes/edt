@@ -327,16 +327,50 @@ class TTLimitedRoomChoicesSerializer(serializers.ModelSerializer):
 # -- ScheduledCourses --
 # ----------------------
 
+class ModuleDisplaySCSerializer(serializers.Serializer):
+    color_bg = serializers.CharField()
+    color_txt = serializers.CharField()
 
-class TestCoursesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = dwm.ModuleDisplay
+        fields = ['color_bg', 'color_txt']
+
+class ModuleSCSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    display = ModuleDisplaySCSerializer()
+
+    class Meta:
+        model = bm.Module
+        fields = ['name', 'display']
+
+class GroupSCSerializer(serializers.Serializer):
+    train_prog = serializers.CharField()
+    name = serializers.CharField()
+
+    class Meta:
+        model = bm.Group
+        fields = ['name', 'train_prog']
+
+class CourseSCSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    type = serializers.CharField()
+    tutor = serializers.CharField()
+    room_type = serializers.CharField()
+    week = serializers.IntegerField()
+    year = serializers.IntegerField()
+    group = GroupSCSerializer()
+    module = ModuleSCSerializer()
+
     class Meta:
         model = bm.Course
-        fields = ['tutor', 'group', 'module']
+        fields = ['id', 'type', 'tutor', 'room_type', 'week', 'year', 'module', 'group',]
 
 class ScheduledCoursesSerializer(serializers.Serializer):
-    course = TestCoursesSerializer()
+    id = serializers.IntegerField()
     room = serializers.CharField()
+    start_time = serializers.IntegerField()
+    course = CourseSCSerializer()
 
     class Meta:
         model = bm.ScheduledCourse
-        fields = ('end_time', 'room', 'course')
+        fields = ['id', 'room', 'start_time', 'course']
