@@ -72,7 +72,11 @@ routerTTapp.register(r'limitiedroomchoices', views.TTLimitedRoomChoicesViewSet)
 # schema_view = get_schema_view(title='Test API', renderer_classes=[OpenAPIRenderer, SwaggerUIRenderer])
 
 urlpatterns = [
+<<<<<<< HEAD
     # url(r'^', schema_view, name="docs"),
+=======
+
+>>>>>>> 098b15361a6706faad47f20dd88f1d91606d6c23
     path('base/', include(routerBase.urls)),
     path('user/', include(routerPeople.urls)),
     path('displayweb/', include(routerDisplayweb.urls)),

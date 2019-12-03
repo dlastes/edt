@@ -374,6 +374,8 @@ def fetch_cours_pl(req, year, week, num_copy, **kwargs):
     if dataset is None:
         raise Http404("What are you trying to do?")
 
+    print(dataset)
+
     response = HttpResponse(dataset.csv, content_type='text/csv')
     response['week'] = week
     response['year'] = year
