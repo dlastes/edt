@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from .models import Tutor, GroupPreferences, StudentPreferences, Student
 from .admin import TutorResource, GroupPreferencesResource, StudentPreferencesResource
 from django.template.response import TemplateResponse
+from django.core.exceptions import ObjectDoesNotExist
 
 
 def redirect_add_people_kind(req, kind):
@@ -87,7 +88,22 @@ def student_preferences(req):
         else:
             raise Http404("Who are you?")
     else:
-        return TemplateResponse(req, 'people/studentPreferencesSelection.html', {})
+        if req.user.is_authenticated and req.user.is_student:
+            student = Student.objects.get(username=req.user.username)
+            try:
+                student_pref = StudentPreferences.objects.get(student=student)
+            except ObjectDoesNotExist:
+                student_pref = StudentPreferences(student=student)
+                student_pref.save()
+            morning = student_pref.morning_weight
+            free_half_day = student_pref.free_half_day_weight
+            return TemplateResponse(req, 'people/studentPreferencesSelection.html',
+                                    {'morning': morning,
+                                     'free_half_day': free_half_day})
+        else:
+            # Make a decorator instead
+            raise Http404("Who are you?")
+        
 
 
 def create_user(req):
