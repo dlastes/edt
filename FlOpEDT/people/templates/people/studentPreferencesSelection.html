@@ -41,13 +41,13 @@
   </br>
   <form action="{% url 'people:student_preferences' %}" method="post" id="form_pref">
   {% csrf_token %}
-    <div class="un">
-        <input type="range" class="range" name="morning_evening" min="0" max="1" step="0.25" value="{{ morning}}"/>
+    <div>
+        <input type="range" id="morning" name="morning_evening" min="0" max="1" step="0.25" value="{{ morning}}"/>
         <output name="result"></output>
     </div>
   </br>
-    <div class="deux">
-        <input type="range" class="rangedeux" name="light_free" min="0" max="1" step="0.25" value="{{free_half_day}}"/>
+    <div>
+        <input type="range" id="free_half_day" name="light_free" min="0" max="1" step="0.25" value="{{free_half_day}}"/>
         <output name="resultdeux"></output>
     </div>
 

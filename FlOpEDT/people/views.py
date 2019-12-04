@@ -5,10 +5,11 @@ from django.shortcuts import render
 from django.http import Http404, HttpResponse
 from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
-from .models import Tutor, GroupPreferences, StudentPreferences, Student
-from .admin import TutorResource, GroupPreferencesResource, StudentPreferencesResource
 from django.template.response import TemplateResponse
 from django.core.exceptions import ObjectDoesNotExist
+
+from people.models import Tutor, GroupPreferences, StudentPreferences, Student
+from people.admin import TutorResource, GroupPreferencesResource, StudentPreferencesResource
 
 
 def redirect_add_people_kind(req, kind):
