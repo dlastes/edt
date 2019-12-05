@@ -2,8 +2,9 @@ from rest_framework import routers
 from api import views
 from django.urls import path
 from django.conf.urls import include, url
+from django.views.generic import RedirectView
 from rest_framework.schemas import get_schema_view
-from rest_framework_swagger.renderers import SwaggerUIRenderer, OpenAPIRenderer
+# from rest_framework_swagger.renderers import SwaggerUIRenderer, OpenAPIRenderer
 
 
 routerBase = routers.SimpleRouter()
@@ -35,7 +36,6 @@ routerBase.register(r'roomsorts', views.RoomSortsViewSet)
 routerBase.register(r'modules', views.ModulesViewSet)
 routerBase.register(r'coursetypes', views.CourseTypesViewSet)
 routerBase.register(r'courses', views.CoursesViewSet)
-routerBase.register(r'scheduledcourses', views.ScheduledCoursesViewSet)
 
 routerPeople.register(r'userspreferences', views.UsersPreferencesViewSet)
 routerPeople.register(r'coursepreferences', views.CoursePreferencesViewSet)
@@ -69,7 +69,8 @@ routerTTapp.register(r'simultaneouscourses', views.TTSimultaneousCoursesViewSet)
 routerTTapp.register(r'limitedstarttimechoices', views.TTLimitedStartTimeChoicesViewSet) # TODO: Fix
 routerTTapp.register(r'limitiedroomchoices', views.TTLimitedRoomChoicesViewSet)
 
-routerFetch.register(r'scheduledcourses', views.ScheduledCoursesViewSet)
+routerFetch.register(r'scheduledcourses', views.ScheduledCoursesViewSet, basename='scheduledcourses')
+# routerFetch.register(r'scheduledcourses', views.ScheduledCoursesViewSet)
 routerFetch.register(r'tutorcourses', views.TutorCoursesViewSet)
 
 urlpatterns = [

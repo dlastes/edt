@@ -222,18 +222,7 @@ class CoursesViewSet(viewsets.ModelViewSet):
     
     filterset_fields = '__all__'
 
-class ScheduledCoursesViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet to see all the scheduled courses
-    """
-    queryset = bm.ScheduledCourse.objects.all()
-    serializer_class = serializers.ScheduledCoursesSerializer
-    filterset_fields = '__all__'
-    # def get(self, request, *args, **kwargs):
-    #     queryset = bm.ScheduledCourse.objects.filter()
-    #     serializer_class = serializers.ScheduledCoursesSerializer
 
-    #     filterset_fields = '__all__'
 
 # -----------------
 # -- PREFERENCES --
@@ -539,11 +528,44 @@ class TTLimitedRoomChoicesViewSet(viewsets.ModelViewSet):
 # ---------------
 # --- OTHERS ----
 # ---------------
+class ScheduledCoursesViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet to see all the scheduled courses
+    """
+    # queryset = bm.ScheduledCourse.objects.all()
+    serializer_class = serializers.ScheduledCoursesSerializer
+    filterset_fields = '__all__'
+    def get_queryset(self):
+        # Creating a default queryset
+        queryset = bm.ScheduledCourse.objects.all()
+
+        # Getting filters from the URL params (?param1=...&param2=...&...)
+        year = self.request.query_params.get('year', None)
+        week = self.request.query_params.get('week', None)
+        work_copy = self.request.query_params.get('work_copy', None)
+        department = self.request.query_params.get('department', None)
+
+        # Filtering
+        if year is not None:
+            queryset = queryset.filter(course__year=year)
+        if week is not None:
+            queryset=queryset.filter(course__week=week)
+        if work_copy is not None:
+            queryset = queryset.filter(work_copy=work_copy)
+        if department is not None:
+            queryset = queryset.filter(course__module__train_prog__department__abbrev=department)
+
+        return queryset
+        
+
+
+
+
 
 class TutorCoursesViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the courses of a tutor
     """
-    queryset = bm.ScheduledCourse.objects.all()
+    queryset = bm.ScheduledCourse.objects.filter(course__week=50)
     serializer_class = serializers.TutorCourses_Serializer
     filterset_fields = '__all__'

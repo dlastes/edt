@@ -404,18 +404,38 @@ class Department_TC_Serializer(serializers.Serializer):
         model = bm.Department
         fields = ['name', 'abbrev']
 
+class CourseType_TC_Serializer(serializers.Serializer):
+    department = Department_TC_Serializer()
+
+    class Meta:
+        model = bm.Course
+        fields = ['department']
+
+
+class Course_TC_Serializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    type = CourseType_TC_Serializer()
+    tutor = serializers.CharField()
+    room_type = serializers.CharField()
+    week = serializers.IntegerField()
+    year = serializers.IntegerField()
+    group = Group_SC_Serializer()
+    module = Module_SC_Serializer()
+
+    class Meta:
+        model = bm.Course
+        fields = ['id', 'type', 'tutor', 'room_type', 'week', 'year', 'module', 'group']
+
+
 class TutorCourses_Serializer(serializers.Serializer):
     id = serializers.IntegerField()
     room = serializers.CharField()
     start_time = serializers.IntegerField()
-
-    course = Course_SC_Serializer()
-    #department = Department_TC_Serializer() # TODO: Fix
+    course = Course_TC_Serializer()
 
     class Meta:
         model = bm.ScheduledCourse
-        # fields = ['id', 'no', 'room', 'start_time', 'course', 'department']
-        fields = ['id', 'no', 'room', 'start_time', 'course']
+        fields = [ 'no', 'room', 'start_time', 'course']
 
 # TODO: Extra_sched
 
