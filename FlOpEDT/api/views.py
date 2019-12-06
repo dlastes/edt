@@ -558,8 +558,71 @@ class ScheduledCoursesViewSet(viewsets.ModelViewSet):
         return queryset
         
 
+class UnscheduledCoursesViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet to see all the scheduled courses
+    """
+    queryset = bm.Course.objects.filter(week=50).exclude(
+        pk__in=bm.ScheduledCourse.objects.filter(course__week=50)
+    )
+    serializer_class = serializers.UnscheduledCoursesSerializer
+    filterset_fields = '__all__'
 
 
+class DefaultWeekViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet to see all the scheduled courses
+    """
+    queryset = bm.UserPreference.objects.filter(user__username="AB")
+    serializer_class = serializers.DefaultWeekSerializer
+    filterset_fields = '__all__'
+
+
+class CourseDefaultWeekViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet to see all the scheduled courses
+    """
+    queryset = bm.CoursePreference.objects.all()
+    serializer_class = serializers.CourseDefaultWeekSerializer
+    filterset_fields = '__all__'
+
+
+class TrainingProgrammesViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet to see all the training programs 
+    """
+    queryset = bm.TrainingProgramme.objects.all()
+    serializer_class = serializers.TrainingProgramsSerializer
+    filterset_fields = '__all__'
+
+
+class AllTutorsViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet to see all the training programs 
+    """
+    queryset = pm.UserDepartmentSettings.objects.all()
+    serializer_class = serializers.AllTutorsSerializer
+    filterset_fields = '__all__'
+
+
+class AllVersionsViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet to see all the scheduler version
+    """
+    queryset = bm.EdtVersion.objects.all()
+    serializer_class = serializers.AllVersionsSerializer
+    
+    filterset_fields = '__all__'
+
+
+class DepartmentsViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet to see all the scheduler version
+    """
+    queryset = bm.Department.objects.all()
+    serializer_class = serializers.DepartmentAbbrevSerializer
+    
+    filterset_fields = '__all__'   
 
 
 class TutorCoursesViewSet(viewsets.ModelViewSet):

@@ -323,11 +323,19 @@ class TTLimitedRoomChoicesSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-# ----------------------
-# ------- FETCHS -------
-# ----------------------
+#    --------------------------------------------------------------------------------
+#   |                                                                                |
+#   | ////////////////////////////////////////////////////////////////////////////// |
+#   |                                                                                |
+#   |                                     FETCHS                                     |
+#   |                                                                                |
+#   | ////////////////////////////////////////////////////////////////////////////// |
+#   |                                                                                |
+#    --------------------------------------------------------------------------------
 
-# Scheduled Courses SC
+#                             ------------------------------                            #
+#                             ----Scheduled Courses (SC)----                            #
+#                             ------------------------------                            #
 
 class ModuleDisplay_SC_Serializer(serializers.Serializer):
     color_bg = serializers.CharField()
@@ -377,25 +385,152 @@ class ScheduledCoursesSerializer(serializers.Serializer):
         model = bm.ScheduledCourse
         fields = ['id', 'room', 'start_time', 'course']
 
-# TODO: Cours pp ?
+#                             -------------------------------                            #
+#                             ----UnscheduledCourses (PP)----                            #
+#                             -------------------------------                            #
 
-# TODO: Availabilities
+class ModuleDisplay_PP_Serializer(serializers.Serializer):
+    color_bg = serializers.CharField()
+    color_txt = serializers.CharField()
 
-# TODO: User_dweek
+    class Meta:
+        model = dwm.ModuleDisplay
+        fields = ['color_bg', 'color_txt']
 
-# TODO: Course_dweek
+class Group_PP_Serializer(serializers.Serializer):
+    name = serializers.CharField()
+    train_prog = serializers.CharField()
 
-# TODO: Training_programs
+    class Meta:
+        model = bm.Group
+        fields = ['name', 'train_prog']
 
-# TODO: Unavailable_rooms
+class ModuleCours_PP_Serializer(serializers.Serializer):
+    abbrev = serializers.CharField()
+    display = ModuleDisplay_PP_Serializer()
 
-# TODO: Tutors
+    class Meta:
+        model = bm.Module
+        fields = ['abbrev', 'display']
 
-# TODO: All_versions
+class CourseType_PP_Serializer(serializers.Serializer):
+    name = serializers.CharField()
+    duration = serializers.IntegerField()
 
-# TODO: Departments
+    class Meta:
+        model = bm.CourseType
+        fields = ['name', 'duration']
 
-# Tutor_courses TC
+class UnscheduledCoursesSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    tutor = serializers.CharField()
+    room_type = serializers.CharField()
+    module = ModuleCours_PP_Serializer()
+    group = Group_PP_Serializer()
+    type = CourseType_PP_Serializer()
+
+    class Meta:
+        model = bm.Course
+        fields = ['id', 'tutor', 'room_type', 'module', 'group', ]
+
+#                             ----------------------                           #
+#                             ----Availabilities----                           #
+#                             ----------------------                           #
+
+#                             --------------------                            #
+#                             ----Default Week----                            #
+#                             --------------------                            #
+
+class DefaultWeekSerializer(serializers.Serializer):
+    user = serializers.CharField()
+    day = serializers.CharField()
+    start_time = serializers.IntegerField()
+    duration = serializers.IntegerField()
+    value = serializers.IntegerField()
+
+    class Meta:
+        model = bm.UserPreference
+        fields = ['user', 'day', 'start_time', 'duration', 'value']
+
+#                             ---------------------------                            #
+#                             ----Course Default Week----                            #
+#                             ---------------------------                            #
+#   No data to display
+
+class CourseDefaultWeekSerializer(serializers.Serializer):
+    course_type = serializers.CharField()
+    train_prog = serializers.CharField()
+    day = serializers.CharField()
+    start_time = serializers.IntegerField()
+    duration = serializers.IntegerField()
+    value = serializers.IntegerField()
+
+    class Meta:
+        model = bm.CoursePreference
+        fields = ['course_type', 'train_prog', 'day', 'start_time', 'duration', 'value']
+
+#                             -------------------------                            #
+#                             ----Training Programs----                            #
+#                             -------------------------                            #
+
+class TrainingProgramsSerializer(serializers.Serializer):
+    abbrev = serializers.CharField()
+
+    class Meta:
+        model = bm.TrainingProgramme
+        fields = ['abbrev']
+
+#                             -------------------------                            #
+#                             ----Unavailable rooms----                            #
+#                             -------------------------                            #
+# Has to be done in the views of base folder. Need to be clarified
+
+#                             -----------------------                            #
+#                             ----All Tutors (AT)----                            #
+#                             -----------------------                            #
+
+class User_AT_Serializer(serializers.Serializer):
+    username = serializers.CharField()
+    class Meta:
+        model = pm.User
+        fields = ['username']
+
+class AllTutorsSerializer(serializers.Serializer):
+    user = User_AT_Serializer()
+    class Meta:
+        model = pm.UserDepartmentSettings
+        fields = ['user']
+
+#                             -------------------                            #
+#                             ----Departments----                            #
+#                             -------------------                            #
+
+class DepartmentAbbrevSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    abbrev = serializers.CharField()
+
+    class Meta:
+        model = bm.Department
+        fields = ['id', 'abbrev']
+
+#                             --------------------                            #
+#                             ----All Versions----                            #
+#                             --------------------                            #
+
+class AllVersionsSerializer(serializers.ModelSerializer):
+    year = serializers.IntegerField()
+    week = serializers.IntegerField()
+    version = serializers.IntegerField()
+    department = DepartmentAbbrevSerializer()
+
+    class Meta:
+        model = bm.EdtVersion
+        fields = ['year', 'week', 'version', 'department']
+
+#                             --------------------------                            #
+#                             ----Tutor Courses (TC)----                            #
+#                             --------------------------                            #
+
 class Department_TC_Serializer(serializers.Serializer):
     name = serializers.CharField()
     abbrev = serializers.CharField()
@@ -437,20 +572,38 @@ class TutorCourses_Serializer(serializers.Serializer):
         model = bm.ScheduledCourse
         fields = [ 'no', 'room', 'start_time', 'course']
 
-# TODO: Extra_sched
+#                             -------------------------------                            #
+#                             ----Extra Scheduled Courses----                            #
+#                             -------------------------------                            #
 
-# TODO: Shared_rooms
+#                             --------------------                            #
+#                             ----Shared Rooms----                            #
+#                             --------------------                            #
 
-# TODO: BKnews
+#                             ---------------------                            #
+#                             ----breaking News----                            #
+#                             ---------------------                            #
 
-# TODO: Decale
+#                             --------------                            #
+#                             ----Decale----                            #
+#                             --------------                            #
 
-# TODO: Course_types
+#                             --------------------                            #
+#                             ----Course Types----                            #
+#                             --------------------                            #
 
-# TODO: Groups
+#                             --------------                            #
+#                             ----Groups----                            #
+#                             --------------                            #
 
-# TODO: Rooms
+#                             -------------                            #
+#                             ----Rooms----                            #
+#                             -------------                            #
 
-# TODO: Constraints
+#                             -------------------                            #
+#                             ----Constraints----                            #
+#                             -------------------                            #
 
-# TODO: Week_infos
+#                             ------------------                            #
+#                             ----Week infos----                            #
+#                             ------------------                            #
