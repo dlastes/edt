@@ -71,13 +71,17 @@ routerTTapp.register(r'limitiedroomchoices', views.TTLimitedRoomChoicesViewSet)
 
 routerFetch.register(r'scheduledcourses', views.ScheduledCoursesViewSet, basename='scheduledcourses')
 routerFetch.register(r'unscheduledcourses', views.UnscheduledCoursesViewSet)
-routerFetch.register(r'availabilities', views.DefaultWeekViewSet)
-routerFetch.register(r'tutorcourses', views.TutorCoursesViewSet)
+routerFetch.register(r'availabilities', views.AvailabilitiesViewSet)
+routerFetch.register(r'dweek', views.DefaultWeekViewSet)
 routerFetch.register(r'coursedefweek', views.CourseDefaultWeekViewSet)
 routerFetch.register(r'trainprogs', views.TrainingProgramsViewSet)
 routerFetch.register(r'allversions', views.AllVersionsViewSet)
 routerFetch.register(r'alltutors', views.AllTutorsViewSet)
 routerFetch.register(r'alldepts', views.DepartmentsViewSet)
+routerFetch.register(r'tutorcourses', views.TutorCoursesViewSet)
+routerFetch.register(r'extrasched', views.ExtraSchedCoursesViewSet)
+
+routerFetch.register(r'coursetypes', views.AllCourseTypesViewSet)
 
 urlpatterns = [
     path('base/', include(routerBase.urls)),

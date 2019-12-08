@@ -569,6 +569,15 @@ class UnscheduledCoursesViewSet(viewsets.ModelViewSet):
     filterset_fields = '__all__'
 
 
+class AvailabilitiesViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet to see all the scheduled courses
+    """
+    queryset = bm.UserPreference.objects.filter(week=50)
+    serializer_class = serializers.AvailabilitiesSerializer
+    filterset_fields = '__all__'
+
+
 class DefaultWeekViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the scheduled courses
@@ -631,4 +640,22 @@ class TutorCoursesViewSet(viewsets.ModelViewSet):
     """
     queryset = bm.ScheduledCourse.objects.filter(course__week=50)
     serializer_class = serializers.TutorCourses_Serializer
+    filterset_fields = '__all__'
+
+class ExtraSchedCoursesViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet to see all the courses of a tutor
+    """
+    queryset = bm.ScheduledCourse.objects.filter(course__week=36)
+    serializer_class = serializers.ExtraScheduledCoursesSerializer
+    filterset_fields = '__all__'
+    #get_queryset method needs to filter as the view does
+
+class AllCourseTypesViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet to see all the scheduler version
+    """
+    queryset = bm.CourseType.objects.all()
+    serializer_class = serializers.CourseTypesSerializer
+    
     filterset_fields = '__all__'
