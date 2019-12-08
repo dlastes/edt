@@ -1,3 +1,26 @@
+# This file is part of the FlOpEDT/FlOpScheduler project.
+# Copyright (c) 2017
+# Authors: Iulian Ober, Paul Renaud-Goud, Pablo Seban, et al.
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# Affero General Public License for more details.
+# 
+# You should have received a copy of the GNU Affero General Public
+# License along with this program. If not, see
+# <http://www.gnu.org/licenses/>.
+# 
+# You can be released from the requirements of the license by purchasing
+# a commercial license. Buying such a license is mandatory as soon as
+# you develop activities involving the FlOpEDT/FlOpScheduler software
+# without disclosing the source code of your own applications.
+
 from rest_framework import routers
 from api import views
 from django.urls import path
@@ -70,8 +93,8 @@ routerTTapp.register(r'limitedstarttimechoices', views.TTLimitedStartTimeChoices
 routerTTapp.register(r'limitiedroomchoices', views.TTLimitedRoomChoicesViewSet)
 
 routerFetch.register(r'scheduledcourses', views.ScheduledCoursesViewSet, basename='scheduledcourses')
-routerFetch.register(r'unscheduledcourses', views.UnscheduledCoursesViewSet)
-routerFetch.register(r'availabilities', views.AvailabilitiesViewSet)
+routerFetch.register(r'unscheduledcourses', views.UnscheduledCoursesViewSet, basename='unscheduledcourses')
+routerFetch.register(r'availabilities', views.AvailabilitiesViewSet, basename='availabilities')
 routerFetch.register(r'dweek', views.DefaultWeekViewSet)
 routerFetch.register(r'coursedefweek', views.CourseDefaultWeekViewSet)
 routerFetch.register(r'trainprogs', views.TrainingProgramsViewSet)
@@ -80,7 +103,7 @@ routerFetch.register(r'alltutors', views.AllTutorsViewSet)
 routerFetch.register(r'alldepts', views.DepartmentsViewSet)
 routerFetch.register(r'tutorcourses', views.TutorCoursesViewSet)
 routerFetch.register(r'extrasched', views.ExtraSchedCoursesViewSet)
-
+routerFetch.register(r'bknews', views.BKNewsViewSet)
 routerFetch.register(r'coursetypes', views.AllCourseTypesViewSet)
 
 urlpatterns = [

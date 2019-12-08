@@ -1,5 +1,27 @@
+# This file is part of the FlOpEDT/FlOpScheduler project.
+# Copyright (c) 2017
+# Authors: Iulian Ober, Paul Renaud-Goud, Pablo Seban, et al.
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# Affero General Public License for more details.
+# 
+# You should have received a copy of the GNU Affero General Public
+# License along with this program. If not, see
+# <http://www.gnu.org/licenses/>.
+# 
+# You can be released from the requirements of the license by purchasing
+# a commercial license. Buying such a license is mandatory as soon as
+# you develop activities involving the FlOpEDT/FlOpScheduler software
+# without disclosing the source code of your own applications.
+
 from rest_framework import viewsets
-from rest_framework.views import APIView
 import django_filters.rest_framework
 from api import serializers
 import people.models as pm
@@ -8,7 +30,6 @@ import quote.models as p
 import displayweb.models as dwm
 import TTapp.models as ttm
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
 
 # ------------
 # -- PEOPLE --
@@ -531,10 +552,11 @@ class TTLimitedRoomChoicesViewSet(viewsets.ModelViewSet):
 class ScheduledCoursesViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the scheduled courses
+
+    Result can be filtered as wanted with week, year, work_copy and department fields.
     """
-    # queryset = bm.ScheduledCourse.objects.all()
     serializer_class = serializers.ScheduledCoursesSerializer
-    filterset_fields = '__all__'
+
     def get_queryset(self):
         # Creating a default queryset
         queryset = bm.ScheduledCourse.objects.all()
@@ -560,22 +582,52 @@ class ScheduledCoursesViewSet(viewsets.ModelViewSet):
 
 class UnscheduledCoursesViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the scheduled courses
-    """
-    queryset = bm.Course.objects.filter(week=50).exclude(
-        pk__in=bm.ScheduledCourse.objects.filter(course__week=50)
-    )
-    serializer_class = serializers.UnscheduledCoursesSerializer
-    filterset_fields = '__all__'
+    ViewSet to see all the unscheduled courses
 
+    Result can be filtered as wanted with week, year, work_copy and department fields.
+    """
+    serializer_class = serializers.UnscheduledCoursesSerializer
+
+    def get_queryset(self):
+        # Creating querysets of all courses and all scheduled courses
+        queryset_course = bm.Course.objects.all()
+        queryset_sc = bm.ScheduledCourse.objects.all()
+
+        # Getting filters from the URL params (?param1=...&param2=...&...)
+        year = self.request.query_params.get('year', None)
+        week = self.request.query_params.get('week', None)
+        work_copy = self.request.query_params.get('work_copy', None)
+        department = self.request.query_params.get('department', None)
+
+        # Filtering different querysets
+        if year is not None:
+            queryset_course = queryset_course.filter(year=year)
+        if week is not None:
+            queryset_course=queryset_course.filter(week=week)
+        if work_copy is not None:
+            queryset_sc = queryset_sc.filter(work_copy=work_copy)
+        if department is not None:
+            queryset_course = queryset_course.filter(module__train_prog__department__abbrev=department)
+            queryset_sc = queryset_sc.filter(course__module__train_prog__department__abrrev=department)
+
+        # Getting courses values of ScheduledCourse objects
+        queryset_sc = queryset_sc.values('course')
+
+        # Finding unscheduled courses
+        queryset = queryset_course.exclude(pk__in=queryset_sc)
+
+        return queryset
 
 class AvailabilitiesViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the scheduled courses
+    ViewSet to see all the availabilities of the tutors.
+
+    Result can be filtered as wanted with week, year and department fields.
     """
-    queryset = bm.UserPreference.objects.filter(week=50)
     serializer_class = serializers.AvailabilitiesSerializer
-    filterset_fields = '__all__'
+
+    def get_queryset(self):
+        ...
 
 
 class DefaultWeekViewSet(viewsets.ModelViewSet):
@@ -651,11 +703,22 @@ class ExtraSchedCoursesViewSet(viewsets.ModelViewSet):
     filterset_fields = '__all__'
     #get_queryset method needs to filter as the view does
 
+
+class BKNewsViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet to see all the courses of a tutor
+    """
+    queryset = dwm.BreakingNews.objects.all()
+    serializer_class = serializers.BKNewsSerializer
+
+    filterset_fields = '__all__'
+
+
 class AllCourseTypesViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the scheduler version
     """
     queryset = bm.CourseType.objects.all()
-    serializer_class = serializers.CourseTypesSerializer
+    serializer_class = serializers.AllCourseTypesSerializer
     
     filterset_fields = '__all__'
