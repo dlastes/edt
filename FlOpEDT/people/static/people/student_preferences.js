@@ -1,55 +1,62 @@
-  $(function() {
-	   $('.range').next().text('Veuillez sélectionner votre préférence.'); // Valeur par défaut
-	    $('.range').on('input', function() {
-		      var $set = $(this).val();
+// Text for morning preferences
+function txt_morning(val) {
+    switch (val) {
+    case "0":
+        return 'Commencer le plus tôt possible mais finir tôt';
+    case "0.25":
+        return 'Ne pas commencer trop tard et ne pas finir trop tard';
+        break;
+    case "0.5":
+        return 'Ni trop tôt ni trop tard';
+        break;
+    case "0.75":
+        return 'Ne pas commencer trop tôt et finir plus tard';
+        break;
+    case "1":
+        return 'Commencer le plus tard possible mais finir tard';
+        break;
+    default:
+        return val;
+    }
+}
 
-          switch ($set) {
-            case "0":
-              $set = 'Commencer le plus tôt possible mais finir tôt';
-              break;
-            case "0.25":
-              $set = 'Ne pas commencer trop tard et ne pas finir trop tard';
-              break;
-            case "0.5":
-              $set = 'Ni trop tôt ni trop tard';
-              break;
-            case "0.75":
-              $set = 'Ne pas commencer trop tôt et finir plus tard';
-              break;
-            case "1":
-              $set = 'Commencer le plus tard possible mais finir tard';
-              break;
-            default:
-              $set = $set;
-          }
-		$(this).next().text($set);
-	 });
-  });
 
-  $(function() {
-	   $('.rangedeux').next().text('Veuillez sélectionner votre préférence.'); // Valeur par défaut
-	    $('.rangedeux').on('input', function() {
-		      var $set = $(this).val();
+// Text for preferences concerning day length
+function txt_free_half_day(val) {
+    switch (val) {
+    case "0":
+        return 'Avoir toute la semaine des journées allégées';
+        break;
+    case "0.25":
+        return 'Avoir plus de journées allégées que de demi-journées libérées';
+        break;
+    case "0.5":
+        return 'Avoir des semaines équilibrées';
+        break;
+    case "0.75":
+        return 'Avoir plus de demi-journées libérées que de journées allégées';
+        break;
+    case "1":
+        return 'Avoir des journées chargées mais aussi des demi-journées libérées';
+        break;
+    default:
+        return val;
+    }
+}
 
-          switch ($set) {
-            case "0":
-              $set = 'Avoir toute la semaine des journées allégées';
-              break;
-            case "0.25":
-              $set = 'Avoir plus de journées allégées que de demi-journées libérées';
-              break;
-            case "0.5":
-              $set = 'Avoir des semaines équilibrées';
-              break;
-            case "0.75":
-              $set = 'Avoir plus de demi-journées libérées que de journées allégées';
-              break;
-            case "1":
-              $set = 'Avoir des journées chargées mais aussi des demi-journées libérées';
-              break;
-            default:
-              $set = $set;
-          }
-		$(this).next().text($set);
-	 });
-  });
+// update comments associated with range value
+function update_comment(id) {
+    return function () {
+        var txt = txt_morning($('#'+id).val());
+        $('#'+id).next().text(txt);
+    } ;
+}
+
+// main
+$(function() {
+    var ids = ['morning', 'free_half_day'] ;
+    ids.forEach(function(id) {
+        $('#'+id).on('input', update_comment(id));
+        $(document).ready(update_comment(id));
+    });
+});
