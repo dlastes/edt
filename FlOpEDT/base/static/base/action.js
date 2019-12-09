@@ -451,35 +451,38 @@ function go_cm_room_tutor_change() {
                   return d.id_course;
               });
     
-    var tut_cm_course_g = tut_cm_course_dat
-        .enter()
-        .append("g")
-        .attr("class", "cm-chg")
-        .attr("cursor", "pointer");
+    if (room_tutor_change.cm_settings.type !== undefined) {
+
+        var tut_cm_course_g = tut_cm_course_dat
+            .enter()
+            .append("g")
+            .attr("class", "cm-chg")
+            .attr("cursor", "pointer");
+        
+        
+        tut_cm_course_g
+            .append("rect")
+            .attr("class", "cm-chg-bg")
+            .merge(tut_cm_course_dat.select(".cm-chg-bg"))
+            .attr("x", cm_chg_bg_x)
+            .attr("y", cm_chg_bg_y)
+            .attr("width", cm_chg_bg_width)
+            .attr("height", cm_chg_bg_height)
+            .attr("fill", "white");
+        // .attr("stroke", "darkslategrey")
+        // .attr("stroke-width", 2);
+        
+        tut_cm_course_g
+            .append("text")
+            .attr("class", "cm-chg-comm")
+            .merge(tut_cm_course_dat.select(".cm-chg-comm"))
+            .attr("x", cm_chg_txt_x)
+            .attr("y", cm_chg_txt_y)
+            .text(cm_chg_txt);
+        // .attr("stroke", "darkslategrey")
+        // .attr("stroke-width", 2);
+    }
     
-
-    tut_cm_course_g
-        .append("rect")
-        .attr("class", "cm-chg-bg")
-        .merge(tut_cm_course_dat.select(".cm-chg-bg"))
-        .attr("x", cm_chg_bg_x)
-        .attr("y", cm_chg_bg_y)
-        .attr("width", cm_chg_bg_width)
-        .attr("height", cm_chg_bg_height)
-        .attr("fill", "white");
-        // .attr("stroke", "darkslategrey")
-        // .attr("stroke-width", 2);
-
-    tut_cm_course_g
-        .append("text")
-        .attr("class", "cm-chg-comm")
-        .merge(tut_cm_course_dat.select(".cm-chg-comm"))
-        .attr("x", cm_chg_txt_x)
-        .attr("y", cm_chg_txt_y)
-        .text(cm_chg_txt);
-        // .attr("stroke", "darkslategrey")
-        // .attr("stroke-width", 2);
-
     tut_cm_course_dat.exit().remove();
 
 
@@ -491,40 +494,42 @@ function go_cm_room_tutor_change() {
                   return d.fid + "-" + i;
               });
     
-    var tut_cm_room_g = tut_cm_room_dat
-        .enter()
-        .append("g")
-        .attr("class", "cm-chg-rooms")
-        .attr("cursor", "pointer")
-	.on("click", room_tutor_change.cm_settings.click);
-    
-
-    tut_cm_room_g
-        .append("rect")
-        .attr("class", "cm-chg-rec")
-        .merge(tut_cm_room_dat.select(".cm-chg-rec"))
-        .attr("x", cm_chg_but_x)
-        .attr("y", cm_chg_but_y)
-        .attr("width", cm_chg_but_width)
-        .attr("height", cm_chg_but_height)
-        .attr("fill", cm_chg_but_fill)
-        .attr("stroke", "black")
-        .attr("stroke-width", cm_chg_but_stk);
-
-    tut_cm_room_g
-        .append("text")
-        .attr("class", "cm-chg-bt")
-        .merge(tut_cm_room_dat.select(".cm-chg-bt"))
-        .attr("x", cm_chg_but_txt_x)
-        .attr("y", cm_chg_but_txt_y)
-        .attr("fill", cm_chg_but_txt_fill)
-        .text(cm_chg_but_txt)
+    if (room_tutor_change.cm_settings.type !== undefined) {
+        
+        var tut_cm_room_g = tut_cm_room_dat
+            .enter()
+            .append("g")
+            .attr("class", "cm-chg-rooms")
+            .attr("cursor", "pointer")
+	    .on("click", room_tutor_change.cm_settings.click);
+        
+        
+        tut_cm_room_g
+            .append("rect")
+            .attr("class", "cm-chg-rec")
+            .merge(tut_cm_room_dat.select(".cm-chg-rec"))
+            .attr("x", cm_chg_but_x)
+            .attr("y", cm_chg_but_y)
+            .attr("width", cm_chg_but_width)
+            .attr("height", cm_chg_but_height)
+            .attr("fill", cm_chg_but_fill)
+            .attr("stroke", "black")
+            .attr("stroke-width", cm_chg_but_stk);
+        
+        tut_cm_room_g
+            .append("text")
+            .attr("class", "cm-chg-bt")
+            .merge(tut_cm_room_dat.select(".cm-chg-bt"))
+            .attr("x", cm_chg_but_txt_x)
+            .attr("y", cm_chg_but_txt_y)
+            .attr("fill", cm_chg_but_txt_fill)
+            .text(cm_chg_but_txt)
         // .attr("stroke", "darkslategrey")
         // .attr("stroke-width", 2);
 
-    tut_cm_room_dat.exit().remove();
-
+    }
     
+    tut_cm_room_dat.exit().remove();
 }
 
 
