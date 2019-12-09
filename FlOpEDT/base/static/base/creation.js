@@ -655,10 +655,10 @@ function compute_promo_est_n_wh(node) {
                 child.width = 0;
             } else {
                 child.ancetres = node.ancetres.slice(0);
-                child.ancetres.push(node.nom);
+                child.ancetres.push(node.name);
                 compute_promo_est_n_wh(child);
                 node.descendants = node.descendants.concat(child.descendants);
-                node.descendants.push(child.nom);
+                node.descendants.push(child.name);
             }
             node.width += child.width;
         }
@@ -683,7 +683,7 @@ function compute_promo_lft(node) {
 function compute_promo_lmx(node) {
     var child;
 
-    //    console.log(node.promo,node.nom,node.x,node.maxx);
+    //    console.log(node.promo,node.name,node.x,node.maxx);
 
     if (node.x < node.est) {
         node.x = node.est;

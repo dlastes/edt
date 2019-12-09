@@ -60,7 +60,7 @@ function apply_change_simple_pref(d) {
                 d.val ++ ;
             }
 	    update_pref_interval(user.name, d.day, d.start_time, d.val) ;
-            //dispos[user.nom][idays[d.day]][d.hour] = d.val;
+            //dispos[user.name][idays[d.day]][d.hour] = d.val;
             //user.dispos[day_hour_2_1D(d)].val = d.val;
         } else {
             d.val = sel.val ;
