@@ -50,54 +50,62 @@ function index_in_pref(list, instant) {
 function get_preference(pref, start_time, duration) {
     var after = false ;
     var t = time_settings.time ;
+
     
-    var i_start = index_in_pref(pref.map(function(d){
-        return d.start_time;
-    }), start_time) ;
-    var i_end = index_in_pref(pref.map(function(d){
-        return d.start_time;
-    }), start_time+duration) ;
-
-    var i, tot_weight, start_inter, end_inter, w ;
-    var average_pref = 0 ;
-    var unknown = false ;
-    var unavailable = false ;
-
-    if (i_start==0
-        || (i_end == pref.length
-            && start_time + duration > pref[i_end-1].start_time + pref[i_end-1].duration))
-    {
-	return -1 ;
+    if (pref.length == 0) {
+        return -1 ;
     }
 
-    i = i_start - 1 ;
-    tot_weight = 0 ;
-    while (!unknown && !unavailable && i < i_end) {
-	if(i==i_start - 1) {
-	    start_inter = start_time ;
-	} else {
-	    start_inter = pref[i].start_time ;
-	}
-	if(i==i_end - 1) {
-	    end_inter = start_time + duration ;
-	} else {
-	    end_inter = pref[i].start_time + pref[i].duration ;
-	}
-	w = (end_inter-start_inter) ;
-	average_pref += w * pref[i].value ;
-	tot_weight += w ;
-	unknown = (pref[i].value == -1 && w>0) ;
-	unavailable = (pref[i].value == 0 && w>0) ;
-	i++;
+    var instants = pref.map(function(d){
+        return d.start_time;
+    });
+    instants.push(pref[pref.length-1].start_time);
+
+    var i_start = index_in_pref(instants, start_time);
+    var i_end = index_in_pref(instants, start_time + duration);
+    
+    var unavailable, unknown ;
+
+    if  (i_start == 0 || i_end == instants.length) {
+        if (i_start == i_end) {
+            return -1 ;
+        } else {
+            unknown = true ;
+        }
     }
+
+    i_start = Math.max(0, i_start) ;
+    i_end = Math.min(pref.length - 1, i_end) ; //
+    var i, tot_weight, weighted_pref, w ;
+    var weighted_pref = 0 ;
+    var tot_weight = 0 ;
+
+    unavailable = false ;
+    i = i_start ;
+    while (i <= i_end && !unavailable) {
+        if (pref[i].value == 0) {
+            unavailable = true ;
+        } else {
+            w = pref[i].duration
+                - Math.max(0, start_time-pref[i].start_time)
+                - Math.max(0, start_time + duration -
+                           (pref[i].start_time + pref[i].duration));
+            tot_weight += w ;
+            weighted_pref += w * pref[i].value ;
+        }
+        i += 1 ;
+    }
+
     if (unavailable) {
 	return 0 ;
     }
     if (unknown) {
 	return -1 ;
     }
+
     
-    return average_pref/tot_weight ;
+    
+    return weighted_pref/tot_weight ;
 }
 
 
