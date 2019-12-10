@@ -26,7 +26,7 @@
 // instant: moment in time
 // return the index i such that list[i-1]<=instant<list[i] if exists
 //        0 if instant<list[0]
-//        list.length if instant>list[j]
+//        list.length if instant>=list[j]
 function index_in_pref(list, instant) {
     var after = false ;
     var i = 0 ;
@@ -63,9 +63,13 @@ function get_preference(pref, start_time, duration) {
 
     var i_start = index_in_pref(instants, start_time);
     var i_end = index_in_pref(instants, start_time + duration);
+    if(i_end > 0 && instants[i_end-1] == start_time + duration) {
+        i_end -= 1 ;
+    }
     
     var unavailable, unknown ;
 
+    unknown = false ;
     if  (i_start == 0 || i_end == instants.length) {
         if (i_start == i_end) {
             return -1 ;
