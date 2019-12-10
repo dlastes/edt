@@ -59,9 +59,10 @@ function get_preference(pref, start_time, duration) {
     var instants = pref.map(function(d){
         return d.start_time;
     });
-    instants.push(pref[pref.length-1].start_time);
+    instants.push(pref[pref.length-1].start_time + pref[pref.length-1].duration);
 
     var i_start = index_in_pref(instants, start_time);
+    
     var i_end = index_in_pref(instants, start_time + duration);
     if(i_end > 0 && instants[i_end-1] == start_time + duration) {
         i_end -= 1 ;
