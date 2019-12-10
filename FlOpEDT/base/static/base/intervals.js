@@ -62,14 +62,15 @@ function get_preference(pref, start_time, duration) {
     instants.push(pref[pref.length-1].start_time + pref[pref.length-1].duration);
 
     var i_start = index_in_pref(instants, start_time);
-    
     var i_end = index_in_pref(instants, start_time + duration);
+    // correct border case
     if(i_end > 0 && instants[i_end-1] == start_time + duration) {
         i_end -= 1 ;
     }
     
     var unavailable, unknown ;
 
+    // unknown value due to too short interval
     unknown = false ;
     if  (i_start == 0 || i_end == instants.length) {
         if (i_start == i_end) {
@@ -79,8 +80,10 @@ function get_preference(pref, start_time, duration) {
         }
     }
 
-    i_start = Math.max(0, i_start) ;
-    i_end = Math.min(pref.length - 1, i_end) ; //
+    // cut outside
+    i_start = Math.max(0, i_start - 1) ;
+    i_end = Math.min(pref.length - 1, i_end) ;
+    
     var i, tot_weight, weighted_pref, w ;
     var weighted_pref = 0 ;
     var tot_weight = 0 ;
@@ -90,6 +93,8 @@ function get_preference(pref, start_time, duration) {
     while (i <= i_end && !unavailable) {
         if (pref[i].value == 0) {
             unavailable = true ;
+        } else if (pref[i].value == -1) {
+            unknown = true ;
         } else {
             w = pref[i].duration
                 - Math.max(0, start_time-pref[i].start_time)
@@ -107,8 +112,6 @@ function get_preference(pref, start_time, duration) {
     if (unknown) {
 	return -1 ;
     }
-
-    
     
     return weighted_pref/tot_weight ;
 }
