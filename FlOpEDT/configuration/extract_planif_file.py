@@ -193,7 +193,7 @@ def extract_planif(department, bookname=None):
     Generate the courses from bookname; the school year starts in current_year
     '''
     if bookname is None:
-        bookname = 'misc/deploy_database/planif_file_'+department.abbrev+'.xlsx'
+        bookname = 'media/configuration/planif_file_'+department.abbrev+'.xlsx'
     book = load_workbook(filename=bookname, data_only=True)
     for period in Period.objects.filter(department=department):
         extract_period(department, book, period, current_year)
@@ -205,7 +205,7 @@ def extract_planif_from_week(week, year, department, bookname=None):
     Generate the courses from bookname; the school year starts in current_year
     '''
     if bookname is None:
-        bookname = 'misc/deploy_database/Files/planif_file_'+department.abbrev+'.xlsx'
+        bookname = 'media/configuration/planif_file_'+department.abbrev+'.xlsx'
     book = load_workbook(filename=bookname, data_only=True)
     if year == current_year:
         for period in Period.objects.filter(department=department):
