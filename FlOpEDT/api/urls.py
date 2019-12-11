@@ -27,6 +27,8 @@ from django.urls import path
 from django.conf.urls import include, url
 from django.views.generic import RedirectView
 from rest_framework.schemas import get_schema_view
+from django.contrib.auth.decorators import login_required
+from rest_framework.authtoken.views import obtain_auth_token 
 # from rest_framework_swagger.renderers import SwaggerUIRenderer, OpenAPIRenderer
 
 
@@ -59,6 +61,8 @@ routerBase.register(r'roomsorts', views.RoomSortsViewSet)
 routerBase.register(r'modules', views.ModulesViewSet)
 routerBase.register(r'coursetypes', views.CourseTypesViewSet)
 routerBase.register(r'courses', views.CoursesViewSet)
+routerBase.register(r'login', views.LoginView, basename="login")
+routerBase.register(r'logout', views.LogoutView, basename="logout")
 
 routerPeople.register(r'userspreferences', views.UsersPreferencesViewSet)
 routerPeople.register(r'coursepreferences', views.CoursePreferencesViewSet)
@@ -107,9 +111,15 @@ routerFetch.register(r'bknews', views.BKNewsViewSet)
 routerFetch.register(r'coursetypes', views.AllCourseTypesViewSet)
 
 urlpatterns = [
+    url(r'^$', views.LoginView.as_view()),
+    url(r'^logout/$', views.LogoutView.as_view()),
+    url(r'^backoffice/$', login_required(views.TemplateView.as_view(template_name='logout.html'))),
     path('base/', include(routerBase.urls)),
     path('user/', include(routerPeople.urls)),
     path('displayweb/', include(routerDisplayweb.urls)),
     path('ttapp/', include(routerTTapp.urls)),
     path('fetch/', include(routerFetch.urls)),
+    path('rest-auth/', include('rest_auth.urls')),
+    path('api-token-auth/', obtain_auth_token, name='api_token_auth'),
+    
 ]

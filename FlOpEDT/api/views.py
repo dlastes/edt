@@ -30,6 +30,14 @@ import quote.models as p
 import displayweb.models as dwm
 import TTapp.models as ttm
 from rest_framework.response import Response
+from django.views.generic import TemplateView
+from django.shortcuts import render
+from django.contrib.auth import authenticate, login, logout
+from django.http import *
+from django.views.generic import TemplateView
+from django.conf import settings
+from rest_framework.permissions import IsAuthenticated 
+
 
 # ------------
 # -- PEOPLE --
@@ -38,6 +46,8 @@ class UsersViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the users
     """
+    permission_classes = (IsAuthenticated,)    
+    
     queryset = pm.User.objects.all()
     serializer_class = serializers.UsersSerializer
     
@@ -722,3 +732,46 @@ class AllCourseTypesViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.AllCourseTypesSerializer
     
     filterset_fields = '__all__'
+
+
+
+
+class LoginView(TemplateView):
+
+  template_name = 'login.html'
+  queryset = ''
+  serializer_class = serializers.LoginSerializer
+  
+  
+
+  def post(self, request, **kwargs):
+
+    username = request.POST.get('username', False)
+    password = request.POST.get('password', False)
+    user = authenticate(username=username, password=password)
+    if user is not None and user.is_active:
+        login(request, user)
+        return HttpResponseRedirect( settings.LOGIN_REDIRECT_URL ) #Bon URL à mettre
+
+    return render(request, self.template_name)
+    
+  def get_extra_actions():
+      return []
+
+
+class LogoutView(TemplateView):
+
+  template_name = 'login.html'
+  queryset = ''
+  serializer_class = serializers.LogoutSerializer
+
+
+  def get(self, request, **kwargs):
+
+    logout(request)
+
+    return render(request, self.template_name)
+
+  def get_extra_actions():
+      return []
+
