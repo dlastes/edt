@@ -832,6 +832,7 @@ class TTModel(object):
                     self.add_constraint(1000 * self.TT[(sl, c)]
                                         + self.sum(self.TTinstructors[(sl2, c2, supp_tutor)]
                                                    for supp_tutor in c.supp_tutor.all()
+                                                        if supp_tutor in self.wdb.instructors
                                                    for sl2 in self.wdb.slots_intersecting[sl] - {sl}
                                                    for c2 in self.wdb.possible_courses[supp_tutor] &
                                                    self.wdb.compatible_courses[sl2]),
