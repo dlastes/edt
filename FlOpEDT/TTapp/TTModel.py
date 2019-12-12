@@ -828,7 +828,7 @@ class TTModel(object):
                                              for i in self.wdb.possible_tutors[c]) - self.TT[sl, c],
                                     '==', 0, "Each_course_to_one_tutor %s-%s_%g" % (c, sl, self.constraint_nb))
             if c.supp_tutor.exists():
-                supp_tutors = set(c.supp_tutors.all()) & self.wdb.instructors
+                supp_tutors = set(c.supp_tutor.all()) & self.wdb.instructors
                 if supp_tutors:
                     for sl in self.wdb.compatible_slots[c]:
                         self.add_constraint(1000 * self.TT[(sl, c)]
