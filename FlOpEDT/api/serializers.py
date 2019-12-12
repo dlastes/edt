@@ -399,11 +399,13 @@ class Course_SC_Serializer(serializers.Serializer):
         fields = ['id', 'type', 'tutor', 'room_type', 'week', 'year', 'module', 'group',]
 
 class ScheduledCoursesSerializer(serializers.Serializer):
+    # Spécification des champs voulus
     id = serializers.IntegerField()
     room = serializers.CharField()
     start_time = serializers.IntegerField()
     course = Course_SC_Serializer()
 
+    # Mise en forme des données
     class Meta:
         model = bm.ScheduledCourse
         fields = ['id', 'room', 'start_time', 'course']
@@ -559,11 +561,13 @@ class DepartmentAbbrevSerializer(serializers.Serializer):
 #                                  --------------------                                 #
 
 class AllVersionsSerializer(serializers.ModelSerializer):
+    # Spécification des champs voulus
     year = serializers.IntegerField()
     week = serializers.IntegerField()
     version = serializers.IntegerField()
     department = DepartmentAbbrevSerializer()
 
+    # Mise en forme des données
     class Meta:
         model = bm.EdtVersion
         fields = ['year', 'week', 'version', 'department']

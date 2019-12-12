@@ -668,7 +668,7 @@ class AllTutorsViewSet(viewsets.ModelViewSet):
 
 class AllVersionsViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the scheduler version
+    ViewSet to see all the versions of the Scheduler
     """
     queryset = bm.EdtVersion.objects.all()
     serializer_class = serializers.AllVersionsSerializer
