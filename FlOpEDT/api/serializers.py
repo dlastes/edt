@@ -281,6 +281,22 @@ class GroupDisplaysSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+#
+#   Log-in-and-out
+#
+
+class LoginSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = pm.User
+        fields = '__all__'
+
+class LogoutSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = pm.User
+        fields = '__all__'
+
+
+
 # ---------------
 # ---- TTAPP ----
 # ---------------

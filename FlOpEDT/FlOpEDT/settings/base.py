@@ -68,6 +68,8 @@ INSTALLED_APPS = [
     'configuration',
 #    'importation',
     'api',
+    'rest_framework.authtoken',
+    'rest_auth',
 ]
 
 MIDDLEWARE = [
@@ -187,7 +189,29 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.BrowsableAPIRenderer',
         'rest_framework_csv.renderers.CSVRenderer',
     ],
-    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',  # <-- And here
+    ],
+
 }
+
+
+
+# LOG IN-AND-OUT
+
+
+LOGIN_REDIRECT_URL = '/backoffice/'
+LOGIN_URL = '/'
+TEMPLATE_DIRS = (
+    BASE_DIR + '/templates/',
+)
+
+
+
+
+
+
 
 COSMO_MODE = False
