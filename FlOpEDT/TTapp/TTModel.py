@@ -811,6 +811,16 @@ class TTModel(object):
                 self.add_constraint(self.sum(self.TTinstructors[(sl, c, i)]
                                              for i in self.wdb.possible_tutors[c]) - self.TT[sl, c],
                                     '==', 0, "Each_course_to_one_tutor %s-%s_%g" % (c, sl, self.constraint_nb))
+            if c.supp_tutor.exists():
+                for sl in self.wdb.compatible_slots[c]:
+                    self.add_constraint(1000 * self.TT[(sl, c)]
+                                        + self.sum(self.TTinstructors[(sl2, c2, supp_tutor)]
+                                                   for supp_tutor in c.supp_tutor.all()
+                                                   for sl2 in self.wdb.slots_intersecting[sl] - {sl}
+                                                   for c2 in self.wdb.possible_courses[supp_tutor] &
+                                                   self.wdb.compatible_courses[sl2]),
+                                        '<=', 1000,
+                                        f"No course simultaneous to {sl} for {c}'s supp_tutors")
 
         for i in self.wdb.instructors:
             for sl in self.wdb.slots:
