@@ -1335,43 +1335,43 @@ class TTModel(object):
             cp.save()
 
         # # On enregistre les coûts dans la BDD
-        # TutorCost.objects.filter(department=self.department,
-        #                          week__in=self.wdb.weeks,
-        #                          year=self.wdb.year,
-        #                          work_copy=target_work_copy).delete()
-        # GroupFreeHalfDay.objects.filter(group__train_prog__department=self.department,
-        #                                 week__in=self.wdb.weeks,
-        #                                 year=self.wdb.year,
-        #                                 work_copy=target_work_copy).delete()
-        # GroupCost.objects.filter(group__train_prog__department=self.department,
-        #                          week__in=self.wdb.weeks,
-        #                          year=self.wdb.year,
-        #                          work_copy=target_work_copy).delete()
-        #
-        # for i in self.wdb.instructors:
-        #     tc = TutorCost(department=self.department,
-        #                    tutor=i,
-        #                    year=self.wdb.year,
-        #                    week__in=self.wdb.weeks,
-        #                    value=self.get_expr_value(self.cost_I[i]),
-        #                    work_copy=target_work_copy)
-        #     tc.save()
-        #
-        # for g in self.wdb.basic_groups:
-        #     djlg = GroupFreeHalfDay(group=g,
-        #                             year=self.wdb.year,
-        #                             week__in=self.wdb.weeks,
-        #                             work_copy=target_work_copy,
-        #                             DJL=self.get_expr_value(self.FHD_G[Time.PM][g]) +
-        #                                 0.5 * self.get_expr_value(
-        #                                 self.FHD_G['AM'][g]))
-        #     djlg.save()
-        #     cg = GroupCost(group=g,
-        #                    year=self.wdb.year,
-        #                    week__in=self.wdb.weeks,
-        #                    work_copy=target_work_copy,
-        #                    value=self.get_expr_value(self.cost_G[g]))
-        #     cg.save()
+        TutorCost.objects.filter(department=self.department,
+                                 week__in=self.wdb.weeks,
+                                 year=self.wdb.year,
+                                 work_copy=target_work_copy).delete()
+        GroupFreeHalfDay.objects.filter(group__train_prog__department=self.department,
+                                        week__in=self.wdb.weeks,
+                                        year=self.wdb.year,
+                                        work_copy=target_work_copy).delete()
+        GroupCost.objects.filter(group__train_prog__department=self.department,
+                                 week__in=self.wdb.weeks,
+                                 year=self.wdb.year,
+                                 work_copy=target_work_copy).delete()
+        for week in self.weeks:
+            for i in self.wdb.instructors:
+                tc = TutorCost(department=self.department,
+                               tutor=i,
+                               year=self.wdb.year,
+                               week=week,
+                               value=self.get_expr_value(self.cost_I[i]),
+                               work_copy=target_work_copy)
+                tc.save()
+
+            for g in self.wdb.basic_groups:
+                djlg = GroupFreeHalfDay(group=g,
+                                        year=self.wdb.year,
+                                        week=week,
+                                        work_copy=target_work_copy,
+                                        DJL=self.get_expr_value(self.FHD_G[Time.PM][g]) +
+                                            0.51 * self.get_expr_value(
+                                            self.FHD_G['AM'][g]))
+                djlg.save()
+                cg = GroupCost(group=g,
+                               year=self.wdb.year,
+                               week=week,
+                               work_copy=target_work_copy,
+                               value=self.get_expr_value(self.cost_G[g]))
+                cg.save()
 
     def optimize(self, time_limit, solver, presolve=2):
 
