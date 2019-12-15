@@ -128,8 +128,8 @@ class MinHalfDaysHelperGroup(MinHalfDaysHelperBase):
         return expression, courses, local_var
 
 
-    def add_cost(self, cost):        
-        self.ttmodel.add_to_group_cost(self.group, cost)
+    def add_cost(self, cost):
+        self.ttmodel.add_to_group_cost(self.group, cost, self.week)
 
 
     def enrich_model(self, group=None):
@@ -155,10 +155,8 @@ class MinHalfDaysHelperTutor(MinHalfDaysHelperBase):
 
         return expression, courses, local_var
 
-
     def add_cost(self, cost):        
-        self.ttmodel.add_to_inst_cost(self.tutor, cost)
-
+        self.ttmodel.add_to_inst_cost(self.tutor, cost, self.week)
 
     def add_constraint(self, expression, courses, local_var):
         super().add_constraint(expression, courses, local_var)
@@ -181,7 +179,8 @@ class MinHalfDaysHelperTutor(MinHalfDaysHelperBase):
                                                                     self.ttmodel.TT[(sl17h, c2)])
                             self.ttmodel.add_to_inst_cost(self.tutor,
                                                           self.constraint.local_weight() * self.ponderation *
-                                                          (conj_var_AM + conj_var_PM)/2)
+                                                          (conj_var_AM + conj_var_PM)/2,
+                                                          week=self.week)
                         else:
                             self.ttmodel.add_constraint(
                                 self.ttmodel.TT[(sl8h, c)] + self.ttmodel.TT[(sl11h, c2)],

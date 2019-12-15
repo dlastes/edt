@@ -478,16 +478,16 @@ class TTModel(object):
 
     def costs_init(self):
         cost_I = dict(list(zip(self.wdb.instructors,
-                                    [self.lin_expr() for _ in self.wdb.instructors])))
+                               [{week: self.lin_expr() for week in self.weeks + [None]} for _ in self.wdb.instructors])))
         FHD_G = {}
         for apm in [Time.AM, Time.PM]:
             FHD_G[apm] = dict(
                 list(zip(self.wdb.basic_groups,
-                         [self.lin_expr() for _ in self.wdb.basic_groups])))
+                         [{week: self.lin_expr() for week in self.weeks} for _ in self.wdb.basic_groups])))
 
         cost_G = dict(
             list(zip(self.wdb.basic_groups,
-                     [self.lin_expr() for _ in self.wdb.basic_groups])))
+                     [{week: self.lin_expr() for week in self.weeks + [None]} for _ in self.wdb.basic_groups])))
 
         cost_SL = dict(
             list(zip(self.wdb.slots,
@@ -716,11 +716,11 @@ class TTModel(object):
     def add_to_slot_cost(self, slot, cost):
         self.cost_SL[slot] += cost
 
-    def add_to_inst_cost(self, instructor, cost):
-        self.cost_I[instructor] += cost
+    def add_to_inst_cost(self, instructor, cost, week=None):
+        self.cost_I[instructor][week] += cost
 
-    def add_to_group_cost(self, group, cost):
-        self.cost_G[group] += cost
+    def add_to_group_cost(self, group, cost, week=None):
+        self.cost_G[group][week] += cost
 
     def add_warning(self, key, warning):
         if key in self.warnings:
@@ -1246,10 +1246,11 @@ class TTModel(object):
                     constr.enrich_model(self, week)
 
     def update_objective(self):
-        for i in self.wdb.instructors:
-            self.obj += self.cost_I[i]
-        for g in self.wdb.basic_groups:
-            self.obj += self.cost_G[g]
+        for week in self.weeks + [None]:
+            for i in self.wdb.instructors:
+                self.obj += self.cost_I[i][week]
+            for g in self.wdb.basic_groups:
+                self.obj += self.cost_G[g][week]
         for sl in self.wdb.slots:
             self.obj += self.cost_SL[sl]
         self.set_objective(self.obj)
@@ -1331,7 +1332,7 @@ class TTModel(object):
                                tutor=i,
                                year=self.wdb.year,
                                week=week,
-                               value=self.get_expr_value(self.cost_I[i]),
+                               value=self.get_expr_value(self.cost_I[i][week]),
                                work_copy=target_work_copy)
                 tc.save()
 
@@ -1340,15 +1341,14 @@ class TTModel(object):
                                         year=self.wdb.year,
                                         week=week,
                                         work_copy=target_work_copy,
-                                        DJL=self.get_expr_value(self.FHD_G[Time.PM][g]) +
-                                            0.51 * self.get_expr_value(
-                                            self.FHD_G['AM'][g]))
+                                        DJL=self.get_expr_value(self.FHD_G[Time.PM][g][week]) +
+                                            0.01 * self.get_expr_value(self.FHD_G['AM'][g][week]))
                 djlg.save()
                 cg = GroupCost(group=g,
                                year=self.wdb.year,
                                week=week,
                                work_copy=target_work_copy,
-                               value=self.get_expr_value(self.cost_G[g]))
+                               value=self.get_expr_value(self.cost_G[g][week]))
                 cg.save()
 
     def optimize(self, time_limit, solver, presolve=2):

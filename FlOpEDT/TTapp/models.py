@@ -867,7 +867,7 @@ class MinNonPreferedSlot(TTConstraint):
                            * ponderation * ttmodel.TT[(sl, c)] \
                            * ttmodel.unp_slot_cost[c.tutor][sl]
                     #ttmodel.add_to_slot_cost(sl, cost)
-                    ttmodel.add_to_inst_cost(c.tutor, cost)
+                    ttmodel.add_to_inst_cost(c.tutor, cost, week=week)
                 else:
                     for g in basic_groups:
                         if c.group in ttmodel.wdb.all_groups_of[g]:
@@ -875,7 +875,7 @@ class MinNonPreferedSlot(TTConstraint):
                                    * ponderation * ttmodel.TT[(sl, c)] \
                                    * ttmodel.unp_slot_cost_course[c.type,
                                                                   self.train_prog][sl]
-                            ttmodel.add_to_group_cost(g, cost)
+                            ttmodel.add_to_group_cost(g, cost, week=week)
                             #ttmodel.add_to_slot_cost(sl, cost)
 
     def one_line_description(self):
