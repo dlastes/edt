@@ -55,6 +55,9 @@ function get_preference(pref, start_time, duration) {
     if (pref.length == 0) {
         return -1 ;
     }
+    if (duration == 0) {
+        return 1 ;
+    }
 
     var instants = pref.map(function(d){
         return d.start_time;
@@ -72,17 +75,18 @@ function get_preference(pref, start_time, duration) {
 
     // unknown value due to too short interval
     unknown = false ;
-    if  (i_start == 0 || i_end == instants.length) {
-        if (i_start == i_end) {
-            return -1 ;
-        } else {
-            unknown = true ;
-        }
+    // all outside
+    if (i_end == 0 || i_start == instants.length) {
+        return -1 ;
+    }
+    // partly outside
+    if (i_start == 0 || i_end == instants.length) {
+        unknown = true ;
     }
 
     // cut outside
     i_start = Math.max(0, i_start - 1) ;
-    i_end = Math.min(pref.length - 1, i_end) ;
+    i_end = Math.min(pref.length - 1, i_end - 1) ;
     
     var i, tot_weight, weighted_pref, w ;
     var weighted_pref = 0 ;
