@@ -172,11 +172,10 @@ class WeekDB(object):
         fixed_courses_for_slot = {}
         for sl in self.slots:
             fixed_courses_for_slot[sl] = set(fc for fc in fixed_courses
-                                             if ((sl.start_time <= fc.start_time < sl.end_time
-                                                 or sl.start_time < fc.end_time() <= sl.end_time)
-                                                 and fc.day == sl.day.day
-                                                 and fc.course.week == sl.day.week)
-                                             )
+                                             if fc.start_time < sl.end_time
+                                                and sl.start_time < fc.end_time()
+                                                and fc.day == sl.day.day
+                                                and fc.course.week == sl.day.week)
 
         other_departments_courses = Course.objects.filter(
             week__in=self.weeks, year=self.year)\
@@ -190,9 +189,8 @@ class WeekDB(object):
         other_departments_sched_courses_for_slot = {}
         for sl in self.slots:
             other_departments_sched_courses_for_slot[sl] = set(fc for fc in other_departments_sched_courses
-                                             if ((sl.start_time <= fc.start_time < sl.end_time
-                                                  or sl.start_time < fc.end_time() <= sl.end_time)
-                                                 and fc.day == sl.day))
+                                             if fc.start_time < sl.end_time and sl.start_time < fc.end_time()
+                                                               and fc.day == sl.day)
 
         courses_availabilities = CoursePreference.objects \
             .filter(Q(week__in=self.weeks, year=self.year) | Q(week=None),
@@ -1052,8 +1050,7 @@ class TTModel(object):
                     avail_time = sum(a.duration for a in week_tutor_availabilities if a.value >= 1)
                     maximum = max([a.value for a in week_tutor_availabilities])
                     non_prefered_duration = max(1, sum(a.duration
-                                                       for a in week_tutor_availabilities
-                                                       if 1 <= a.value <= maximum - 1))
+                                                       for a in week_tutor_availabilities if 1 <= a.value <= maximum - 1))
 
                     if avail_time < teaching_duration:
                         self.add_warning(i, "%g available hours < %g courses hours week %g" %
@@ -1073,11 +1070,15 @@ class TTModel(object):
                         average_value = sum(a.duration * a.value
                                             for a in week_tutor_availabilities
                                             if 1 <= a.value <= maximum - 1) / non_prefered_duration
+                        if average_value == maximum:
+                            for sl in week_slots:
+                                unp_slot_cost[i][sl] = 0
+                                avail_instr[i][sl] = 1
+                            continue
                         for sl in week_slots:
                             avail = set(a for a in week_tutor_availabilities
-                                        if (a.start_time < sl.end_time
-                                            and sl.start_time < a.start_time + a.duration)
-                                            and a.day == sl.day.day)
+                                        if a.start_time < sl.end_time and sl.start_time < a.start_time + a.duration
+                                        and a.day == sl.day.day)
                             if not avail:
                                 print("availability pbm for %s slot %s" % (i, sl))
                                 unp_slot_cost[i][sl] = 0
@@ -1093,7 +1094,7 @@ class TTModel(object):
                                     if value == maximum:
                                         unp_slot_cost[i][sl] = 0
                                     else:
-                                        unp_slot_cost[i][sl] = max(0., 2 - value / average_value)
+                                        unp_slot_cost[i][sl] = (value - maximum) / (average_value - maximum)
 
                         if teaching_duration / 60 < 9 and avail_time < 2 * teaching_duration \
                                 and i.status == Tutor.FULL_STAFF:
@@ -1128,7 +1129,7 @@ class TTModel(object):
                                                 train_prog=promo,
                                                 week=week))
                     if not courses_avail:
-                        courses_avail = set(CoursePreference.objects
+                        courses_avail = set(self.wdb.courses_availabilities
                                             .filter(course_type=course_type,
                                                     train_prog=promo,
                                                     week=None))
@@ -1142,9 +1143,8 @@ class TTModel(object):
                         for sl in self.wdb.slots:
                             try:
                                 avail = set(a for a in courses_avail
-                                            if ((sl.start_time <= a.start_time < sl.end_time
-                                                or sl.start_time < a.start_time + a.duration <= sl.end_time)
-                                                and a.day == sl.day.day and a.week == sl.day.week))
+                                            if a.start_time < sl.end_time and sl.start_time < a.start_time + a.duration
+                                                and a.day == sl.day.day and a.week == sl.day.week)
                                 if avail:
                                     minimum = min(a.value for a in avail)
                                     if minimum == 0:
@@ -1156,6 +1156,7 @@ class TTModel(object):
                                         value = minimum
                                         non_prefered_slot_cost_course[(course_type, promo)][sl] \
                                             = 1 - value / 8
+
                                 else:
                                     avail_course[(course_type, promo)][sl] = 1
                                     non_prefered_slot_cost_course[(course_type, promo)][sl] = 0
@@ -1173,8 +1174,8 @@ class TTModel(object):
             avail_room[room] = {}
             for sl in self.wdb.slots:
                 if RoomPreference.objects.filter(
-                        Q(start_time__lt=sl.start_time + sl.duration) |
-                        Q(start_time__gt=sl.start_time - F('duration')),
+                        start_time__lt=sl.start_time + sl.duration,
+                        start_time__gt=sl.start_time - F('duration'),
                         day=sl.day.day,
                         week=sl.day.week,
                         year=self.year,
@@ -1218,8 +1219,8 @@ class TTModel(object):
                 occupied_in_another_department = False
                 for sc in self.wdb.other_departments_sched_courses_for_room[r]:
                     if sl.day.day == sc.day and sl.day.week == sc.course.week and \
-                            (sl.start_time <= sc.start_time < sl.end_time
-                             or sl.start_time < sc.start_time + sc.course.type.duration <= sl.end_time):
+                            (sc.start_time < sl.end_time
+                             and sl.start_time < sc.start_time + sc.course.type.duration):
                         occupied_in_another_department = True
                 if occupied_in_another_department:
                     name = 'other_dep_room_' + str(r) + '_' + str(sl) + '_' + str(self.constraint_nb)
@@ -1236,8 +1237,8 @@ class TTModel(object):
                 occupied_in_another_department = False
                 for sc in self.wdb.other_departments_scheduled_courses_for_tutor[i]:
                     if sl.day.day == sc.day and sl.day.week == sc.course.week and \
-                            (sl.start_time <= sc.start_time < sl.end_time
-                             or sl.start_time < sc.start_time + sc.course.type.duration <= sl.end_time):
+                            (sc.start_time < sl.end_time
+                             and sl.start_time < sc.start_time + sc.course.type.duration):
                         occupied_in_another_department = True
                 if occupied_in_another_department:
                     name = 'other_dep_' + str(i) + '_' + str(sl) + '_' + str(self.constraint_nb)
