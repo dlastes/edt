@@ -81,9 +81,7 @@ class Slot(object):
             self.apm = Time.AM
 
     def is_simultaneous_to(self, other):
-        if self.day == other.day and \
-                (other.start_time <= self.start_time < other.end_time
-                 or self.start_time <= other.start_time < self.end_time):
+        if self.day == other.day and self.start_time < other.end_time and other.start_time < self.end_time:
             return True
         else:
             return False
@@ -656,10 +654,8 @@ class Stabilize(TTConstraint):
             # nb_changements_I=dict(zip(ttmodel.wdb.instructors,[0 for i in ttmodel.wdb.instructors]))
             for sl in slots_filter(ttmodel.wdb.slots, week=week):
                 for c in ttmodel.wdb.compatible_courses[sl]:
-                    if not sched_courses.filter(Q(start_time__gte=sl.start_time,
-                                                      start_time__lt=sl.end_time) |
-                                                    Q(start_time__lte=sl.start_time,
-                                                      start_time__gt=sl.start_time - F('course__type__duration')),
+                    if not sched_courses.filter(start_time__lt=sl.end_time,
+                                                start_time__gt=sl.start_time - F('course__type__duration'),
                                                 day=sl.day,
                                                 course__tutor=c.tutor):
                         ttmodel.obj += ponderation * ttmodel.TT[(sl, c)]
@@ -850,7 +846,7 @@ class MinNonPreferedSlot(TTConstraint):
 
     def enrich_model(self, ttmodel, week, ponderation=1):
         if self.tutor is not None:
-            filtered_courses = set(c for c in ttmodel.wdb.courses_for_tutor[self.tutor] if c.week == week)
+            filtered_courses = set(c for c in ttmodel.wdb.possible_courses[self.tutor] if c.week == week)
         else:
             filtered_courses = ttmodel.wdb.courses \
                 .filter(group__train_prog=self.train_prog, week=week)
@@ -864,10 +860,10 @@ class MinNonPreferedSlot(TTConstraint):
             for c in filtered_courses & ttmodel.wdb.compatible_courses[sl]:
                 if self.tutor is not None:
                     cost = (float(self.weight) / max_weight) \
-                           * ponderation * ttmodel.TT[(sl, c)] \
-                           * ttmodel.unp_slot_cost[c.tutor][sl]
+                           * ponderation * ttmodel.TTinstructors[(sl, c, self.tutor)] \
+                           * ttmodel.unp_slot_cost[self.tutor][sl]
                     #ttmodel.add_to_slot_cost(sl, cost)
-                    ttmodel.add_to_inst_cost(c.tutor, cost, week=week)
+                    ttmodel.add_to_inst_cost(self.tutor, cost, week=week)
                 else:
                     for g in basic_groups:
                         if c.group in ttmodel.wdb.all_groups_of[g]:
