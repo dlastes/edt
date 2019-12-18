@@ -1109,14 +1109,10 @@ class TTModel(object):
                     non_prefered_slot_cost_course[(course_type, promo)] = {}
                     courses_avail = set(self.wdb.courses_availabilities
                                         .filter(course_type=course_type,
-                                                train_prog=promo))
+                                                train_prog=promo,
+                                                week=week))
                     if not courses_avail:
-                        courses_avail = set(CoursePreference.objects
-                                            .filter(course_type=course_type,
-                                                    train_prog=promo,
-                                                    week=week))
-                    if not courses_avail:
-                        courses_avail = set(CoursePreference.objects
+                        courses_avail = set(self.wdb.courses_availabilities
                                             .filter(course_type=course_type,
                                                     train_prog=promo,
                                                     week=None))
