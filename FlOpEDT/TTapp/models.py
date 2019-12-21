@@ -850,12 +850,8 @@ class MinNonPreferedSlot(TTConstraint):
         else:
             filtered_courses = ttmodel.wdb.courses \
                 .filter(group__train_prog=self.train_prog, week=week)
-            # On exclut les cours de sport!
-            filtered_courses = \
-                filtered_courses.exclude(module__abbrev='SC')
             filtered_courses = set(filtered_courses)
-        basic_groups = ttmodel.wdb.basic_groups \
-            .filter(train_prog=self.train_prog)
+        basic_groups = ttmodel.wdb.basic_groups.filter(train_prog=self.train_prog)
         for sl in ttmodel.wdb.slots:
             for c in filtered_courses & ttmodel.wdb.compatible_courses[sl]:
                 if self.tutor is not None:
