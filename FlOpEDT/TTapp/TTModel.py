@@ -1144,7 +1144,7 @@ class TTModel(object):
                             try:
                                 avail = set(a for a in courses_avail
                                             if a.start_time < sl.end_time and sl.start_time < a.start_time + a.duration
-                                                and a.day == sl.day.day and a.week == sl.day.week)
+                                                and a.day == sl.day.day)
                                 if avail:
                                     minimum = min(a.value for a in avail)
                                     if minimum == 0:
