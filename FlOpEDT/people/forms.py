@@ -97,7 +97,6 @@ class AddFullStaffTutorForm(UserCreationForm):
         fs.is_tutor = True
         fs.status = Tutor.FULL_STAFF
         fs.pref_slots_per_day = data.get('pref_slots_per_day')
-        fs.department = data.get('dept')
         fs.is_iut = data.get('is_iut')
         fs.save()
         return fs
