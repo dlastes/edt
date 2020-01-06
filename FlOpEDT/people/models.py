@@ -130,9 +130,6 @@ class Tutor(User):
 
 
 class FullStaff(Tutor):
-    # deprected since multi departements insertion
-    department = models.CharField(
-        max_length=50, default='INFO', null=True, blank=True)
     is_iut = models.BooleanField(default=True)
 
     def uni_extended(self):
