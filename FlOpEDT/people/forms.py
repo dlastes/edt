@@ -77,7 +77,6 @@ class ChangeBIATOSTutorForm(UserChangeForm):
 
 
 class AddFullStaffTutorForm(UserCreationForm):
-    dept = forms.CharField(max_length=50, help_text='Département')
     pref_slots_per_day = forms.IntegerField(required=False,
                                             help_text='Nombre de créneaux préférés par jour')
     is_iut = forms.BooleanField()
