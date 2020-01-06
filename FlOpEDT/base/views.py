@@ -277,7 +277,6 @@ def stype(req, *args, **kwargs):
 
 def user_perfect_day_changes(req, *args, **kwargs):
     t = req.user.tutor
-    print('salut', t, type(t))
     data = req.POST
     user_pref_hours = int(data['user_pref_hours'][0])
     user_max_hours = int(data['user_max_hours'][0])

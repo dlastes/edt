@@ -260,9 +260,7 @@ function send_url(year, week) {
 
 
 function apply_stype_from_button(save) {
-    console.log("app");
-//    console.log(document.forms['app']);
-    console.log();
+
     var changes = [] ;
     compute_pref_changes(changes) ;
     var sent_data = {} ;
