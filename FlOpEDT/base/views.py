@@ -286,7 +286,14 @@ def user_perfect_day_changes(req, *args, **kwargs):
     return redirect('base:stype', req.department)
 
 
-
+@login_required
+def fetch_perfect_day(req, username=None, *args, **kwargs):
+    perfect_day = {'pref': 4, 'max': 9}
+    if username is not None:
+        t = Tutor.objects.get(username=username)
+        perfect_day['pref'] = t.pref_hours_per_day
+        perfect_day['max'] = t.max_hours_per_day
+    return JsonResponse(perfect_day, safe=False)
 
 
 def aide(req, **kwargs):

@@ -50,6 +50,9 @@
     var url_course_types = "{% url "base:fetch_course_types" department %}";
     var url_training_programmes = "{% url "base:fetch_training_programmes" department %}";
     var url_all_tutors = "{% url 'base:fetch_all_tutors' department %}";
+
+    var url_fetch_perfect_day = "{% url 'base:fetch_perfect_day' department '.' %}";
+    url_fetch_perfect_day = url_fetch_perfect_day.slice(0, -1);
     
     var logged_usr = {name:"{{ name_usr }}", rights: -1};
     var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();

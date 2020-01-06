@@ -71,6 +71,7 @@ urlpatterns = [
     path('fetch_tutor_courses/<int:year>/<int:week>/<str:tutor>', views.fetch_tutor_courses, name="fetch_tutor_courses"),
     path('fetch_extra_sched/<int:year>/<int:week>', views.fetch_extra_sched, name="fetch_extra_sched"),
     path('fetch_shared_rooms/<int:year>/<int:week>', views.fetch_shared_roomgroups, name="fetch_shared_rooms"),
+    path('fetch_perfect_day/<str:username>', views.fetch_perfect_day, name="fetch_perfect_day"),
 
     # statistics
     # ---------------------------------
