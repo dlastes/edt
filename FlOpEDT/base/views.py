@@ -275,14 +275,16 @@ def stype(req, *args, **kwargs):
                       })
 
 
-def user_perfect_day_changes(req, *args, **kwargs):
-    t = req.user.tutor
-    data = req.POST
-    user_pref_hours = int(data['user_pref_hours'][0])
-    user_max_hours = int(data['user_max_hours'][0])
-    t.pref_hours_per_day = user_pref_hours
-    t.max_hours_per_day = user_max_hours
-    t.save()
+@login_required
+def user_perfect_day_changes(req, username=None, *args, **kwargs):
+    if username is not None:
+        t = Tutor.objects.get(username=username)
+        data = req.POST
+        user_pref_hours = int(data['user_pref_hours'][0])
+        user_max_hours = int(data['user_max_hours'][0])
+        t.pref_hours_per_day = user_pref_hours
+        t.max_hours_per_day = user_max_hours
+        t.save()
     return redirect('base:stype', req.department)
 
 

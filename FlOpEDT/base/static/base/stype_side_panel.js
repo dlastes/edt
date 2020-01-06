@@ -53,7 +53,33 @@ function fetch_selected() {
             dd_selections['prog'].value,
             dd_selections['type'].value) ;
     }
-    fetch_pref_only();
+    fetch_pref_only() ;
+    set_perfect_day() ;
+}
+
+
+function set_perfect_day() {
+
+    $.ajax({
+        type: "GET",
+        dataType: 'json',
+        url: url_fetch_perfect_day + user.name,
+        async: true,
+        contentType: "application/json; charset=utf-8",
+        success: function(data) {
+            $('#user_pref_hours_per_day').attr('value', data.pref);
+            $('#user_max_hours_per_day').attr('value', data.max);
+        },
+        error: function(msg) {
+            console.log("error");
+        }
+    });
+
+    // change url for perfect day parameters
+    var split_args = $('#form-perfect_day').attr('action').split('/') ;
+    split_args[split_args.length - 1] = user.name ;
+    $('#form-perfect_day').attr('action', split_args.join('/')) ;
+
 }
 
 
@@ -105,11 +131,17 @@ function closeNav() {
     // avoid fetching work copy numbers if closed
     is_side_panel_open = false ;
 
+    // back to default user
+    user.name = logged_usr.name ;
+    fetch_pref_only() ;
+    set_perfect_day() ;
+    
     // close panel
     $("#side_panel").hide();
     document.getElementById("side_panel").style.width = "0";
     document.getElementById("content").style.marginLeft= "0";
     document.getElementById("menu-edt").style.marginLeft= "0";
+
 }
 
 
