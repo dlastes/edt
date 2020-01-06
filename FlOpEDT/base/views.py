@@ -1217,7 +1217,7 @@ def user_preferences_changes(req, year, week, username, **kwargs):
             = "Problème d'utilisateur."
         return JsonResponse(response)
 
-    if tutor.username != req.user.username and req.user.rights >> 1 % 2 == 0:
+    if tutor.username != req.user.username and (req.user.rights >> 1) % 2 == 0:
         response['more'] \
             = 'Non autorisé, réclamez plus de droits.'
         return JsonResponse(response)
