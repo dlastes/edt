@@ -30,6 +30,7 @@ from pulp import LpVariable, LpConstraint, LpBinary, LpConstraintEQ, \
     LpMinimize, lpSum, LpStatusOptimal, LpStatusNotSolved
 
 from pulp import GUROBI_CMD, PULP_CBC_CMD
+from pulp.solvers import GUROBI
 
 from FlOpEDT.settings.base import COSMO_MODE
 
@@ -1379,7 +1380,7 @@ class TTModel(object):
         # The solver value shall one of the available
         # solver corresponding pulp command
 
-        if 'gurobi' in solver.lower():
+        if solver == GUROBI:
             # ignore SIGINT while solver is running
             # => SIGINT is still delivered to the solver, which is what we want
             signal.signal(signal.SIGINT, signal.SIG_IGN)
@@ -1397,14 +1398,14 @@ class TTModel(object):
                                           maxSeconds=time_limit))
         status = self.model.status
         print(LpStatus[status])
-        if status == LpStatusOptimal or (not (solver.lower() == 'gurobi') and status == LpStatusNotSolved):
+        if status == LpStatusOptimal or (solver != GUROBI and status == LpStatusNotSolved):
             return self.get_obj_coeffs()
 
         else:
             print('lpfile has been saved in FlOpTT-pulp.lp')
             return None
 
-    def solve(self, time_limit=3600, target_work_copy=None, solver='gurobi'):
+    def solve(self, time_limit=3600, target_work_copy=None, solver=GUROBI):
         """
         Generates a schedule from the TTModel
         The solver stops either when the best schedule is obtained or timeLimit
