@@ -137,8 +137,17 @@ class GroupsViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the groups
     """
-    queryset = bm.Group.objects.all()
     serializer_class = serializers.GroupsSerializer
+
+    def get_queryset(self):
+        queryset = bm.Group.objects.all()
+
+        department = self.request.query_params.get('dept', None)
+
+        if department is None:
+            return None
+        else:
+            return queryset.filter(train_prog__department__abbrev=department)
     
 
 # ------------
@@ -212,6 +221,7 @@ class RoomsViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.RoomsSerializer
     
     filterset_fields = '__all__'
+    
 
 class RoomSortsViewSet(viewsets.ModelViewSet):
     """
@@ -578,14 +588,17 @@ class ScheduledCoursesViewSet(viewsets.ModelViewSet):
         department = self.request.query_params.get('department', None)
 
         # Filtering
+        if department is not None:
+            queryset = queryset.filter(course__module__train_prog__department__abbrev=department)
+        else:
+            return None
         if year is not None:
             queryset = queryset.filter(course__year=year)
         if week is not None:
             queryset=queryset.filter(course__week=week)
         if work_copy is not None:
             queryset = queryset.filter(work_copy=work_copy)
-        if department is not None:
-            queryset = queryset.filter(course__module__train_prog__department__abbrev=department)
+        
 
         return queryset
         

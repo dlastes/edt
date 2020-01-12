@@ -139,7 +139,7 @@ class RoomGroupsSerializer(serializers.ModelSerializer):
 class RoomsSerializer(serializers.ModelSerializer):
     class Meta:
         model = bm.Room
-        fields = '__all__'
+        fields = ['id', 'name', 'subroom_of', 'departments'] 
 
 class RoomSortsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -149,11 +149,32 @@ class RoomSortsSerializer(serializers.ModelSerializer):
 # -------------
 # -- COURSES --
 # -------------
+class TrainingPrograms_M_Serializer(serializers.Serializer):
+    abbrev= serializers.CharField()
 
-class ModulesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = bm.TrainingProgramme
+        fields = ['abbrev', ]
+
+class Period_M_Serializer(serializers.Serializer):
+    starting_week = serializers.IntegerField()
+    ending_week = serializers.IntegerField()
+
+    class Meta:
+        model = bm.Period
+        fields = ['starting_week', 'ending_week']
+
+class ModulesSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    abbrev= serializers.CharField()
+    head = serializers.CharField()
+    ppn = serializers.CharField()
+    train_prog = TrainingPrograms_M_Serializer()
+    period = Period_M_Serializer()
+
     class Meta:
         model = bm.Module
-        fields = '__all__'
+        fields = ['name', 'abbrev', 'head', 'ppn', 'train_prog', 'period']
 
 class CourseTypesSerializer(serializers.ModelSerializer):
     class Meta:
@@ -419,12 +440,13 @@ class ScheduledCoursesSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     room = serializers.CharField()
     start_time = serializers.IntegerField()
+    day = serializers.CharField()
     course = Course_SC_Serializer()
 
     # Mise en forme des données
     class Meta:
         model = bm.ScheduledCourse
-        fields = ['id', 'room', 'start_time', 'course']
+        fields = ['id', 'room', 'start_time', 'day', 'course']
 
 #                             -------------------------------                           #
 #                             ----UnscheduledCourses (PP)----                           #
