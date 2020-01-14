@@ -134,10 +134,9 @@ class FullStaff(Tutor):
 
     def uni_extended(self):
         ret = super(FullStaff, self).uni_extended()
-        ret += '-D' + self.department + '-'
         if not self.is_iut:
-            ret += 'n'
-        ret += 'IUT'
+            ret += '-n'
+        ret += '-IUT'
         return ret
 
     class Meta:
