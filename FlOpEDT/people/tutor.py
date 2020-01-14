@@ -82,7 +82,7 @@ class ChangeFullStaffTutor(UpdateView):
     model = FullStaff
     from_class = ChangeFullStaffTutorForm
     template_name = 'people/changeuser.html'
-    fields = ('username', 'email', 'department', 'is_iut', )
+    fields = ('username', 'email', 'is_iut', )
     success_url = '/'
     
     def get_object(self, queryset=None):
