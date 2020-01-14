@@ -31,29 +31,50 @@
 
 <div id="tools-main" style="padding:10px;">
 
-    <h4>Abonnement iCal</h4>
+    <h2>Abonnement iCal</h2>
     <p>Copiez le lien correspondant au calendrier auquel vous souhaitez vous abonner pour l'ajouter dans votre gestionnaire d'agenda.</p>
     
-    <h4>Groupes</h4>
+    <h2>Groupes</h2>
     <ul>
-		{% for g in groupes %}
-		<li><a href="{% url "ics:group" department g.train_prog.abbrev g.name %}">{{ g.train_prog.abbrev }}/{{ g.name }}</a></li>
-		{% endfor %}
-	</ul>
+      <table>
+        <th>Promo</th><th>Groupe</th>
+        {% for g in groupes %}
+        <tr>
+          <td>{{ g.train_prog.abbrev }}</td>
+          <td>{{ g.name }}</td>
+          <td><a href="{% url "ics:group" department g.train_prog.abbrev g.name %}">{{ requi }}{% url "ics:group" department g.train_prog.abbrev g.name %}</a></td>
+        </tr>
+      {% endfor %}
+      </table>
+    </ul>
     
-    <h4>Enseignants</h4>
+    <h2>Enseignants</h2>
     <ul>
-		{% for e in enseignants %}
-			<li><a href="{% url "ics:tutor" department e.username %}">{{ e.username }}</a></li>
-		{% endfor %}
-	</ul>
+      <table>
+        <tr><th>Pseudo</th><th>Prénom</th><th>Nom</th><th>Adresse</th></tr>
+	{% for e in enseignants %}
+	<tr>
+          <td>{{ e.username }}</td>
+          <td>{{ e.last_name }}</td>
+          <td>{{ e.first_name }}</td>
+          <td><a href="{% url "ics:tutor" department e.username %}">{{ requi }}{% url "ics:tutor" department e.username %}</a></td>
+        </tr>
+	{% endfor %}
+      </table>
+    </ul>
 	
-	<h4>Salles</h4>
+    <h2>Salles</h2>
     <ul>
-		{% for s in salles %}
-			<li><a href="{% url "ics:room" department s %}">{{ s }}</a></li>
-		{% endfor %}
-	</ul>
+      <table>
+        <tr><th>Nom</th><th>Adresse</th></tr>
+        {% for s in salles %}
+        <tr>
+          <td>{{ s }}</td>
+          <td><a href="{% url "ics:room" department s %}">{{ requi }}{% url "ics:room" department s %}</a></td>
+        </tr>
+        {% endfor %}
+      </table>
+    </ul>
 
 </div>
 {% endblock %}
