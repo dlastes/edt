@@ -51,12 +51,13 @@
     <h2>Enseignants</h2>
     <ul>
       <table>
-        <tr><th>Pseudo</th><th>Prénom</th><th>Nom</th><th>Adresse</th></tr>
+        <tr><th>Pseudo</th><th>Prénom</th><th>Nom</th><th>Département(s)</th><th>Adresse</th></tr>
 	{% for e in enseignants %}
 	<tr>
           <td>{{ e.username }}</td>
           <td>{{ e.last_name }}</td>
           <td>{{ e.first_name }}</td>
+          <td>{{ e.departments.all | join:", " }}</td>
           <td><a href="{% url "ics:tutor" department e.username %}">{{ requi }}{% url "ics:tutor" department e.username %}</a></td>
         </tr>
 	{% endfor %}
