@@ -54,7 +54,9 @@ function fetch_selected() {
             dd_selections['type'].value) ;
     }
     fetch_pref_only() ;
-    set_perfect_day() ;
+    if (mode == 'tutor') {
+        set_perfect_day() ;
+    }
 }
 
 
