@@ -30,7 +30,7 @@ from pulp import LpVariable, LpConstraint, LpBinary, LpConstraintEQ, \
     LpMinimize, lpSum, LpStatusOptimal, LpStatusNotSolved
 
 from pulp import GUROBI_CMD, PULP_CBC_CMD
-from pulp.solvers import GUROBI
+from pulp.solvers import GUROBI_CMD as GUROBI
 
 from FlOpEDT.settings.base import COSMO_MODE
 
@@ -807,7 +807,7 @@ class TTModel(object):
 
         # Training half day
         for training_half_day in self.wdb.training_half_days:
-            training_slots = self.wdb.slots_by_day[training_half_day.day]
+            training_slots = slots_filter(self.wdb.slots, week_day=training_half_day.day, week=training_half_day.week)
             if training_half_day.apm is not None:
                 training_slots = slots_filter(training_slots, apm=training_half_day.apm)
             training_progs = self.train_prog
