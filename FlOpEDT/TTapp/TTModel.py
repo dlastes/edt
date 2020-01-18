@@ -30,7 +30,7 @@ from pulp import LpVariable, LpConstraint, LpBinary, LpConstraintEQ, \
     LpMinimize, lpSum, LpStatusOptimal, LpStatusNotSolved
 
 from pulp import GUROBI_CMD, PULP_CBC_CMD
-from pulp.solvers import GUROBI_CMD as GUROBI
+#from pulp.solvers import GUROBI_CMD as GUROBI
 
 from FlOpEDT.settings.base import COSMO_MODE
 
@@ -61,7 +61,7 @@ import datetime
 import logging
 
 logger = logging.getLogger(__name__)
-
+GUROBI = 'GUROBI_CMD'
 
 class WeekDB(object):
     def __init__(self, department, weeks, year, train_prog):
