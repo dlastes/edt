@@ -280,7 +280,7 @@ def get_conflicts(department, week, year, copy_a):
     if len(conflicts['tutor']) + len(conflicts['room']) == 0:
         return result
     
-    if 'tutor' in conflicts:
+    if len(conflicts['tutor']) > 0:
         more += 'Prof déjà occupé·e : '
         for conflict in conflicts['tutor']:
             sched = []
@@ -293,7 +293,7 @@ def get_conflicts(department, week, year, copy_a):
                 sched))
             more += ' VS '.join(str_sched) + ' ; '
 
-    if 'room' in conflicts:
+    if len(conflicts['room']) > 0:
         more += 'Salle déjà prise : '
         for conflict in conflicts['room']:
             sched = []
