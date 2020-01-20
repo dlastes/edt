@@ -277,7 +277,7 @@ def get_conflicts(department, week, year, copy_a):
     
     conflicts = compute_conflicts(department, week, year, copy_a)
 
-    if len(conflicts) == 0:
+    if len(conflicts['tutor']) + len(conflicts['room']) == 0:
         return result
     
     if 'tutor' in conflicts:
