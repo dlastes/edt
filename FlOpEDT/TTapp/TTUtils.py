@@ -149,7 +149,7 @@ def get_shared_tutors(department, week, year, copy_a):
                       .objects\
                       .select_related('course__module__train_prog__department',
                                       'tutor')\
-                      .filter(course__module__train_prog__department=department,
+                      .filter(course__module__train_prog__department__abbrev=department,
                               course__week=week,
                               course__year=year,
                               work_copy=copy_a)\
@@ -157,7 +157,7 @@ def get_shared_tutors(department, week, year, copy_a):
     return [s.tutor.username for s in ScheduledCourse\
             .objects\
             .select_related('course__module__train_prog__department')\
-            .exclude(course__module__train_prog__department=department)\
+            .exclude(course__module__train_prog__department__abbrev=department)\
             .filter(course__week=week,
                     course__year=year,
                     tutor__in=busy_tutors_in_dept,
@@ -209,8 +209,8 @@ def compute_conflicts(department, week, year, copy_a):
     courses_list = ScheduledCourse.objects.select_related('course__module__train_prog__department',
                                                           'course__type__duration',
                                                           'tutor')\
-                                          .filter(Q(work_copy=copy_a) & Q(course__module__train_prog__department=department) \
-                                                  | Q(work_copy=0)&~Q(course__module__train_prog__department=department),
+                                          .filter(Q(work_copy=copy_a) & Q(course__module__train_prog__department__abbrev=department) \
+                                                  | Q(work_copy=0)&~Q(course__module__train_prog__department__abbrev=department),
                                                   course__week=week,
                                                   course__year=year,
                                                   tutor__username__in=tutors_username_list,
@@ -237,8 +237,8 @@ def compute_conflicts(department, week, year, copy_a):
         dic_rooms[str(rg.id)] = [r.name for r in rg.subrooms.all()]
     print(dic_rooms)
     courses_list = ScheduledCourse.objects.select_related('course__type__duration')\
-                                          .filter(Q(work_copy=copy_a) & Q(course__module__train_prog__department=department) \
-                                                  | Q(work_copy=0)&~Q(course__module__train_prog__department=department),
+                                          .filter(Q(work_copy=copy_a) & Q(course__module__train_prog__department__abbrev=department) \
+                                                  | Q(work_copy=0)&~Q(course__module__train_prog__department__abbrev=department),
                                                   course__week=week,
                                                   course__year=year,
                                                   work_copy=copy_a,
