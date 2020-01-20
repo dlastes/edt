@@ -28,6 +28,8 @@ from django.http import HttpResponse, JsonResponse
 
 from base.models import ScheduledCourse
 
+from TTapp.TTUtils import get_conflicts
+
 from MyFlOp import MyTTUtils
 
             
@@ -39,6 +41,16 @@ def available_work_copies(req, dept, year, week):
     copies = [n for (n,) in copies]
     copies.sort()
     return JsonResponse({'copies': copies})
+
+
+def check_swap(req, dept, year, week, work_copy):
+    '''
+    Check whether the swap between scheduled courses with work copy
+    work_copy and scheduled courses with work copy 0 is feasible
+    against the scheduled courses in other departments
+    '''
+    print(dept, week, year, work_copy)
+    return JsonResponse(get_conflicts(dept, week, year, work_copy))
 
 
 def swap(req, dept, year, week, work_copy):
