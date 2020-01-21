@@ -181,19 +181,82 @@ class CourseTypesSerializer(serializers.ModelSerializer):
         model = bm.CourseType
         fields = '__all__'
 
-class CoursesSerializer(serializers.ModelSerializer):
+
+class Department_Name_Serializer(serializers.Serializer):
+    name = serializers.CharField()
+
+    class Meta:
+        model = bm.Department
+        fields = ['name']
+
+class CourseType_C_Serializer(serializers.Serializer):
+    department = Department_Name_Serializer()
+    name = serializers.CharField()
+
+    class Meta:
+        model = bm.CourseType
+        fields = ['name', 'department']
+
+
+class RoomType_C_Serializer(serializers.Serializer):
+    name = serializers.CharField()
+
+    class Meta:
+        model = bm.RoomType
+        fields = ['name']
+
+
+class Group_C_Serializer(serializers.Serializer):
+    name = serializers.CharField()
+
+    class Meta:
+        model = bm.Group
+        fields = ['name']
+
+
+class Module_C_Serializer(serializers.Serializer):
+    abbrev = serializers.CharField()
+
+    class Meta:
+        model = bm.Module
+        fields = ['abbrev']
+
+
+class CoursesSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    week = serializers.IntegerField()
+    year = serializers.IntegerField()
+    no = serializers.IntegerField()
+    type = CourseType_C_Serializer()
+    room_type = RoomType_C_Serializer()
+    tutor = serializers.CharField()
+    supp_tutor = serializers.CharField()
+    group = Group_C_Serializer()
+    module = Module_C_Serializer()
+    modulesupp = Module_C_Serializer()
+
+
     class Meta:
         model = bm.Course
-        fields = '__all__'
+        fields = ['id', 'week', 'year', 'no', 'department', 'type',
+                'room_type', 'tutor', 'supp_tutor', 'group', 'module', 'modulesupp']
 
 # -----------------
 # -- PREFERENCES --
 # -----------------
 
-class UsersPreferencesSerializer(serializers.ModelSerializer):
+class UsersPreferencesSerializer(serializers.Serializer):
+    user = serializers.CharField()
+    week = serializers.IntegerField()
+    year = serializers.IntegerField()
+    day = serializers.CharField()
+    start_time = serializers.IntegerField()
+    duration = serializers.IntegerField()
+    value = serializers.IntegerField()
+
     class Meta:
         model = bm.UserPreference
-        fields = '__all__'
+        fields = ['user']
 
 class CoursePreferencesSerializer(serializers.ModelSerializer):
     class Meta:

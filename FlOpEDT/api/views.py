@@ -269,13 +269,51 @@ class CoursesViewSet(viewsets.ModelViewSet):
 # -- PREFERENCES --
 # -----------------
 
-class UsersPreferencesViewSet(viewsets.ModelViewSet):
+class UsersPreferences_Default_ViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the users' preferences
     """
-    queryset = bm.UserPreference.objects.all()
     serializer_class = serializers.UsersPreferencesSerializer
     filterset_fields = '__all__'
+
+    def get_queryset(self):
+        qs = bm.UserPreference.objects.filter(week=None)
+
+        return qs
+
+
+class UsersPreferences_Single_ViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet to see all the users' preferences
+    """
+    serializer_class = serializers.UsersPreferencesSerializer
+    filterset_fields = '__all__'
+
+    def get_queryset(self):
+        week = self.request.query_params.get('week', None)
+
+        if week is None:
+            return None
+        else:
+            qs = bm.UserPreference.objects.filter(week=week)
+
+        return qs
+
+
+class UsersPreferences_SingleODefault_ViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet to see all the users' preferences
+    """
+    serializer_class = serializers.UsersPreferencesSerializer
+    filterset_fields = '__all__'
+
+    def get_queryset(self):
+        week = self.request.query_params.get('week', None)
+
+        qs = bm.UserPreference.objects.filter(week=week)
+
+        return qs
+        
 
 class CoursePreferencesViewSet(viewsets.ModelViewSet):
     """
