@@ -30,7 +30,7 @@ from rest_framework.schemas import get_schema_view
 from django.contrib.auth.decorators import login_required
 from rest_framework.authtoken.views import obtain_auth_token 
 # from rest_framework_swagger.renderers import SwaggerUIRenderer, OpenAPIRenderer
-
+from rest_framework_swagger.views import get_swagger_view
 
 routerBase = routers.SimpleRouter()
 routerPeople = routers.SimpleRouter()
@@ -110,6 +110,13 @@ routerFetch.register(r'extrasched', views.ExtraSchedCoursesViewSet)
 routerFetch.register(r'bknews', views.BKNewsViewSet)
 routerFetch.register(r'coursetypes', views.AllCourseTypesViewSet)
 
+
+################
+# SWAGGER VIEW #
+################
+swagger_view = get_swagger_view(title='FlOpREST API')
+
+
 urlpatterns = [
     url(r'^$', views.LoginView.as_view()),
     url(r'^logout/$', views.LogoutView.as_view()),
@@ -121,5 +128,6 @@ urlpatterns = [
     path('fetch/', include(routerFetch.urls)),
     path('rest-auth/', include('rest_auth.urls')),
     path('api-token-auth/', obtain_auth_token, name='api_token_auth'),
+    url('doc', swagger_view),
     
 ]

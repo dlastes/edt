@@ -70,6 +70,7 @@ INSTALLED_APPS = [
     'api',
     'rest_framework.authtoken',
     'rest_auth',
+    'rest_framework_swagger',
 ]
 
 MIDDLEWARE = [
@@ -194,7 +195,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',  # <-- And here
     ],
-
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
 }
 
 
