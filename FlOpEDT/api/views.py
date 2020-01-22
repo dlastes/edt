@@ -22,7 +22,7 @@
 # without disclosing the source code of your own applications.
 
 from rest_framework import viewsets
-import django_filters.rest_framework
+import django_filters.rest_framework as filters
 from api import serializers
 import people.models as pm
 import base.models as bm
@@ -91,12 +91,22 @@ class StudentsViewSet(viewsets.ModelViewSet):
     #queryset = pm.Preferences.objects.all()
     #serializer_class = serializers.PreferencesSerializer
 
-#class StudentPreferencesViewSet(viewsets.ModelViewSet):
+class StudentPreferencesViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the students' preferences
     """
-    #queryset = pm.StudentPreferences.objects.all()
-    #serializer_class = serializers.StudentPreferencesSerializer
+    serializer_class = serializers.StudentPreferencesSerializer
+    filterset_fields = '__all__'
+
+    def get_queryset(self):
+        qs = pm.StudentPreferences.objects.all()
+
+        username = self.request.query_params.get('username', None)
+
+        if username == None:
+            return None
+        return qs.filter(username=username)
+        
 
 #class GroupPreferencesViewSet(viewsets.ModelViewSet):
     """
@@ -181,6 +191,13 @@ class PeriodsViewSet(viewsets.ModelViewSet):
     
     filterset_fields = '__all__'
 
+class TimeGeneralFilter(filters.FilterSet):
+    days = filters.CharFilter(lookup_expr='icontains')
+
+    class Meta:
+        model = bm.TimeGeneralSettings
+        fields = ('department', 'days')
+
 class TimeGeneralSettingsViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the settings of time
@@ -188,7 +205,9 @@ class TimeGeneralSettingsViewSet(viewsets.ModelViewSet):
     queryset = bm.TimeGeneralSettings.objects.all()
     serializer_class = serializers.TimeGeneralSettingsSerializer
     
-    filterset_fields = '__all__'
+    filterset_class = TimeGeneralFilter
+
+
 
 
 # -----------
@@ -244,6 +263,22 @@ class ModulesViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.ModulesSerializer
     
     filterset_fields = '__all__'
+
+
+class Modules_Course_ViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet to see all the modules
+    """
+    queryset = bm.Module.objects.all()
+    serializer_class = serializers.ModulesSerializer
+    
+    filterset_fields ='__all__'
+    # def get_queryset(self):
+    #     week = self.queryset.query_params.get('week', None)
+    #     department = self.queryset.query_params.get('department', None)
+    #     year = self.queryset.query_params.get('year', None)
+
+
 
 class CourseTypesViewSet(viewsets.ModelViewSet):
     """
@@ -410,6 +445,15 @@ class DependenciesViewSet(viewsets.ModelViewSet):
     
     filterset_fields = '__all__'
 
+
+class CoureStartTimeFilter(filters.FilterSet):
+    allowed_start_times = filters.CharFilter(lookup_expr='icontains')
+
+    class Meta:
+        model = bm.CourseStartTimeConstraint
+        fields = ('course_type', 'allowed_start_times')
+
+
 class CourseStartTimeConstraintsViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the courses start time constraints
@@ -417,7 +461,7 @@ class CourseStartTimeConstraintsViewSet(viewsets.ModelViewSet):
     queryset = bm.CourseStartTimeConstraint.objects.all()
     serializer_class = serializers.CourseStartTimeConstraintsSerializer
     
-    filterset_fields = '__all__'
+    filterset_class = CoureStartTimeFilter
 
 class RegensViewSet(viewsets.ModelViewSet):
     """
@@ -540,6 +584,15 @@ class TTReasonableDaysViewSet(viewsets.ModelViewSet):
     
     filterset_fields = '__all__'
 
+
+class TTStabilizeFilter(filters.FilterSet):
+    fixed_days = filters.CharFilter(lookup_expr='icontains')
+
+    class Meta:
+        model = ttm.Stabilize
+        fields = ('group', 'module', 'tutor', 'fixed_days')
+
+
 class TTStabilizeViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the Stabilize objects from TTapp
@@ -547,7 +600,7 @@ class TTStabilizeViewSet(viewsets.ModelViewSet):
     queryset = ttm.Stabilize.objects.all()
     serializer_class = serializers.TTStabilizeSerializer
     
-    filterset_fields = '__all__'
+    filterset_class = TTStabilizeFilter
 
 class TTMinHalfDaysViewSet(viewsets.ModelViewSet):
     """
@@ -585,6 +638,15 @@ class TTSimultaneousCoursesViewSet(viewsets.ModelViewSet):
     
     filterset_fields = '__all__'
 
+
+class TTLimitedFilter(filters.FilterSet):
+    possible_start_times = filters.CharFilter(lookup_expr='icontains')
+
+    class Meta:
+        model = ttm.LimitedStartTimeChoices
+        fields = ('module', 'tutor', 'group', 'type', 'possible_start_times')
+
+
 class TTLimitedStartTimeChoicesViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the LimitedStartTimeChoices
@@ -592,7 +654,7 @@ class TTLimitedStartTimeChoicesViewSet(viewsets.ModelViewSet):
     queryset = ttm.LimitedStartTimeChoices.objects.all()
     serializer_class = serializers.TTLimitedStartTimeChoicesSerializer
     
-    filterset_fields = '__all__'
+    filterset_class = TTLimitedFilter
 
 class TTLimitedRoomChoicesViewSet(viewsets.ModelViewSet):
     """
@@ -824,5 +886,5 @@ class LogoutView(TemplateView):
     return render(request, self.template_name)
 
   def get_extra_actions():
-      return []
+    return []
 

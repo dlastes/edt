@@ -55,22 +55,26 @@ class StudentsSerializer(serializers.ModelSerializer):
     class Meta:
         model = pm.Student
         fields = '__all__'
-"""
-class PreferencesSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = pm.Preferences
-        fields = ['morning_weight', 'free_half_day_weight']
 
-class StudentPreferencesSerializer(serializers.ModelSerializer):
+# class PreferencesSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = pm.Preferences
+#         fields = ['morning_weight', 'free_half_day_weight']
+
+class StudentPreferencesSerializer(serializers.Serializer):
+    student = serializers.CharField()
+    morning_weight = serializers.IntegerField()
+    free_half_day_weight = serializers.IntegerField()
+
     class Meta:
         model = pm.Preferences
         fields = ['student', 'morning_weight', 'free_half_day_weight']
 
-class GroupPreferencesSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = pm.Preferences
-        fields = ['group', 'morning_weight', 'free_half_day_weight']
-"""
+# class GroupPreferencesSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = pm.Preferences
+#         fields = ['group', 'morning_weight', 'free_half_day_weight']
+
 # ------------
 # -- GROUPS --
 # ------------
