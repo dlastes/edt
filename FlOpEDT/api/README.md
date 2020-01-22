@@ -170,7 +170,9 @@ Les données n'étant actuellement accessibles qu'en lecture, on peut imaginer �
 ## Liens utiles
 
 [Django REST framework](https://www.django-rest-framework.org/)
+
 [Faire des requêtes avec la base de données](https://docs.djangoproject.com/fr/2.2/topics/db/queries/)
+
 [Configurer l'authentification à l'API](https://www.django-rest-framework.org/api-guide/authentication/)
 
 
