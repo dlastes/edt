@@ -766,6 +766,8 @@ class AvailabilitiesViewSet(viewsets.ModelViewSet):
 class DefaultWeekViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the scheduled courses
+
+    Result needs to be filtered with the username of the wanted tutor
     """
     serializer_class = serializers.DefaultWeekSerializer
 
@@ -776,12 +778,16 @@ class DefaultWeekViewSet(viewsets.ModelViewSet):
 
         if username is not None:
             queryset = queryset.objects.filter(user__username=username)
-        return queryset
+            return queryset
+        else:
+            return None
 
 
 class CourseDefaultWeekViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the scheduled courses
+
+    Result can be filtered as wanted with the training program and the course type
     """
     serializer_class = serializers.CourseDefaultWeekSerializer
 
@@ -839,6 +845,9 @@ class DepartmentsViewSet(viewsets.ModelViewSet):
 class TutorCoursesViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the courses of a tutor
+
+    Result needs to be filtered by the username of a tutor.
+    Filtering is also possible with week and year.
     """
     serializer_class = serializers.TutorCourses_Serializer
 
@@ -864,6 +873,8 @@ class TutorCoursesViewSet(viewsets.ModelViewSet):
 class ExtraSchedCoursesViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the Scheduled courses of a tutor in an other department
+
+    Result can be filtered with year and week
     """
     serializer_class = serializers.ExtraScheduledCoursesSerializer
     
@@ -883,6 +894,8 @@ class ExtraSchedCoursesViewSet(viewsets.ModelViewSet):
 class BKNewsViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the BKNews
+
+    Result can be filtered with week and year
     """
     serializer_class = serializers.BKNewsSerializer
 
