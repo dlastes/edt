@@ -750,25 +750,52 @@ class AvailabilitiesViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.AvailabilitiesSerializer
 
     def get_queryset(self):
-        ...
+        qs = bm.UserPreference.objects.all()
+
+        week = self.queryset.query_params.get('week', None)
+        year = self.queryset.query_params.get('year', None)
+
+        if week is not None:
+            qs = qs.filter(week=week)
+        if year is not None:
+            qs = qs.filter(year=year)
+        
+        return qs
 
 
 class DefaultWeekViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the scheduled courses
     """
-    queryset = bm.UserPreference.objects.filter(user__username="AB")
     serializer_class = serializers.DefaultWeekSerializer
-    filterset_fields = '__all__'
+
+    def get_queryset(self):
+        queryset = bm.UserPreference.objects.all()
+
+        username = self.queryset.query_params.get('username', None)
+
+        if username is not None:
+            queryset = queryset.objects.filter(user__username=username)
+        return queryset
 
 
 class CourseDefaultWeekViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the scheduled courses
     """
-    queryset = bm.CoursePreference.objects.all()
     serializer_class = serializers.CourseDefaultWeekSerializer
-    filterset_fields = '__all__'
+
+    def get_queryset(self):
+        qs = bm.CoursePreference.objects.all()
+
+        train_prog = self.queryset.query_params.get('train_prog', None)
+        course_type = self.queryset.query_params.get('course_type', None)
+
+        if train_prog is not None:
+            qs = qs.filter(course_type__name=course_type)
+        if course_type is not None:
+            qs = qs.filter(train_prog__abbrev=train_prog)
+        return qs
 
 
 class TrainingProgrammesViewSet(viewsets.ModelViewSet):
@@ -801,7 +828,7 @@ class AllVersionsViewSet(viewsets.ModelViewSet):
 
 class DepartmentsViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the scheduler version
+    ViewSet to see all the departments
     """
     queryset = bm.Department.objects.all()
     serializer_class = serializers.DepartmentAbbrevSerializer
@@ -813,33 +840,68 @@ class TutorCoursesViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the courses of a tutor
     """
-    queryset = bm.ScheduledCourse.objects.filter(course__week=50)
     serializer_class = serializers.TutorCourses_Serializer
-    filterset_fields = '__all__'
+
+    def get_queryset(self):
+        qs = bm.ScheduledCourse.objects.all()
+
+        tutor = self.queryset.query_params.get('tutor', None)
+        week = self.queryset.query_params.get('week', None)
+        year = self.queryset.query_params.get('year', None)
+
+        if tutor is None:
+            return None
+        else:
+            qs = qs.filter(tutor__username=tutor)
+        if week is not None:
+            qs = qs.filter(course__week=week)
+        if year is not None:
+            qs = qs.filter(course__year=year)
+
+        return qs
+
 
 class ExtraSchedCoursesViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the courses of a tutor
+    ViewSet to see all the Scheduled courses of a tutor in an other department
     """
-    queryset = bm.ScheduledCourse.objects.filter(course__week=36)
     serializer_class = serializers.ExtraScheduledCoursesSerializer
-    filterset_fields = '__all__'
-    #get_queryset method needs to filter as the view does
+    
+    def get_queryset(self):
+        qs = bm.ScheduledCourse.objects.all()
 
+        week = self.queryset.query_params.get('week', None)
+        year = self.queryset.query_params.get('year', None)
+
+        if week is not None:
+            qs = qs.filter(course__week=week)
+        if year is not None:
+            qs = qs.filter(course__year=year)
+
+        return qs
 
 class BKNewsViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the courses of a tutor
+    ViewSet to see all the BKNews
     """
-    queryset = dwm.BreakingNews.objects.all()
     serializer_class = serializers.BKNewsSerializer
 
-    filterset_fields = '__all__'
+    def get_queryset(self):
+        qs = dwm.BreakingNews.objects.all()
+
+        week = self.queryset.query_params.get('week', None)
+        year = self.queryset.query_params.get('year', None)
+
+        if year is not None:
+            qs = qs.filter(week=week)
+        if week is not None:
+            qs = qs.filter(year=year)
+        return qs
 
 
 class AllCourseTypesViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the scheduler version
+    ViewSet to see all the course types
     """
     queryset = bm.CourseType.objects.all()
     serializer_class = serializers.AllCourseTypesSerializer
