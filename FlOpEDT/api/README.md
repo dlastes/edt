@@ -163,7 +163,38 @@ routeur.register(r'a', views.AViewSet, basename="A")
 
 ### L'authentification
 Les données qui ne sont pas accessibles lors de la consultation publique du client web FlOpEDT ne le sont pas non plus par l'API. Pour protéger ces données, nous avons utilisé le module ```django-rest-auth```
-// TODO
+
+Pour accéder aux données protégées, l'utilisateur doit faire une requête afin d'obtenir un token d'authentification.
+Ce token doit être ajouter à la requête pour que les données soient accessibles.
+
+Exemple de l’utilisateur ```admin``` :
+
+Récupération d’un token (dans un shell) :
+
+```
+http post http://127.0.0.1:8000/api/api-token-auth/ username=admin password=admin
+```
+
+L’API fournit un token, exemple ```39005e0129fcddf93f7aaf054300403dfd8c```
+
+
+Requête Python :
+```
+#Le token est ajouté à la requête
+url = 'http://127.0.0.1:8000/api/base/users/ 
+headers = {'Authorization': 'Token 39005e0129fcddf93f7aaf054300403dfd8c'} 
+r = requests.get(url, headers=headers) 
+```
+
+
+Ou dans un shell :
+```
+http http://127.0.0.1:8000/hello/ 'Authorization: Token 39005e0129fcddf93f7aaf054300403dfd8c ' 
+```
+
+Grâce au token les données sont maintenant accessibles.
+
+
 
 
 ## Améliorations envisageables
