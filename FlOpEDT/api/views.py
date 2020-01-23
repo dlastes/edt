@@ -47,6 +47,8 @@ from rest_framework import authentication, exceptions
 class UsersViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the users
+
+    Can be filtered as wanted with every field of a User object.
     """
     permission_classes = (IsAuthenticated,)    
     
@@ -57,6 +59,8 @@ class UsersViewSet(viewsets.ModelViewSet):
 class UserDepartmentSettingsViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the user department settings
+
+    Can be filtered as wanted with every field of a User Department object.
     """
     queryset = pm.UserDepartmentSettings.objects.all()
     serializer_class = serializers.UserDepartmentSettingsSerializer
@@ -65,6 +69,8 @@ class UserDepartmentSettingsViewSet(viewsets.ModelViewSet):
 class TutorsViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the tutors
+
+    Can be filtered as wanted with every field of a Tutor object.
     """
     queryset = pm.Tutor.objects.all()
     serializer_class = serializers.TutorsSerializer
@@ -72,7 +78,9 @@ class TutorsViewSet(viewsets.ModelViewSet):
 
 class SupplyStaffsViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the supply staff
+    ViewSet to see all the supply staff.
+
+    Can be filtered as wanted with every field of a Supply Staff object.
     """
     queryset = pm.SupplyStaff.objects.all()
     serializer_class = serializers.SupplyStaffsSerializer
@@ -80,7 +88,9 @@ class SupplyStaffsViewSet(viewsets.ModelViewSet):
 
 class StudentsViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the students
+    ViewSet to see all the students.
+
+    Can be filtered as wanted with every field of a Student object.
     """
     queryset = pm.Student.objects.all()
     serializer_class = serializers.StudentsSerializer
@@ -89,7 +99,9 @@ class StudentsViewSet(viewsets.ModelViewSet):
 
 class StudentPreferencesViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the students' preferences
+    ViewSet to see all the students' preferences.
+
+    Can be filtered as wanted with every field of a StudentPreference object.
     """
     serializer_class = serializers.StudentPreferencesSerializer
     filterset_fields = '__all__'
@@ -106,7 +118,9 @@ class StudentPreferencesViewSet(viewsets.ModelViewSet):
 
 class GroupPreferencesViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the groups' preferences
+    ViewSet to see all the groups' preferences.
+
+    Can be filtered as wanted with every field of a GroupPreference object.
     """
     queryset = pm.GroupPreferences.objects.all()
     serializer_class = serializers.GroupPreferencesSerializer
@@ -117,7 +131,9 @@ class GroupPreferencesViewSet(viewsets.ModelViewSet):
 
 class DepartmentViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the departments
+    ViewSet to see all the departments.
+
+    Can be filtered as wanted with every field of a Department object.
     """
     queryset = bm.Department.objects.all()
     serializer_class = serializers.DepartmentSerializer
@@ -125,7 +141,9 @@ class DepartmentViewSet(viewsets.ModelViewSet):
 
 class TrainingProgramsViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the training programs
+    ViewSet to see all the training programs.
+
+    Can be filtered as wanted with every field of a TrainingProgram object.
     """
     queryset = bm.TrainingProgramme.objects.all()
     serializer_class = serializers.TrainingProgramsSerializer
@@ -133,7 +151,9 @@ class TrainingProgramsViewSet(viewsets.ModelViewSet):
 
 class GroupTypesViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the group types
+    ViewSet to see all the group types.
+
+    Can be filtered as wanted with every field of a GroupType object.
     """
     queryset = bm.GroupType.objects.all()
     serializer_class = serializers.GroupTypesSerializer
@@ -141,7 +161,9 @@ class GroupTypesViewSet(viewsets.ModelViewSet):
 
 class GroupsViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the groups
+    ViewSet to see all the groups.
+
+    Can be filtered as wanted with every field of a Group object.
     """
     serializer_class = serializers.GroupsSerializer
 
@@ -162,7 +184,9 @@ class GroupsViewSet(viewsets.ModelViewSet):
 
 class HolidaysViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the holidays
+    ViewSet to see all the holidays.
+
+    Can be filtered as wanted with every field of a Holidays object.
     """
     queryset = bm.Holiday.objects.all()
     serializer_class = serializers.HolidaysSerializer
@@ -171,7 +195,9 @@ class HolidaysViewSet(viewsets.ModelViewSet):
 
 class TrainingHalfDaysViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the half-day trainings
+    ViewSet to see all the half-day trainings.
+
+    Can be filtered as wanted with every field of a TrainingHalfDay object.
     """
     queryset = bm.TrainingHalfDay.objects.all()
     serializer_class = serializers.TrainingHalfDaysSerializer
@@ -180,7 +206,9 @@ class TrainingHalfDaysViewSet(viewsets.ModelViewSet):
 
 class PeriodsViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the periods
+    ViewSet to see all the periods.
+
+    Can be filtered as wanted with every field of a Period object.
     """
     queryset = bm.Period.objects.all()
     serializer_class = serializers.PeriodsSerializer
@@ -196,7 +224,9 @@ class TimeGeneralFilter(filters.FilterSet):
 
 class TimeGeneralSettingsViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the settings of time
+    ViewSet to see all the settings of time.
+
+    Can be filtered as wanted with every field of a TimeGeneralSetting object.
     """
     queryset = bm.TimeGeneralSettings.objects.all()
     serializer_class = serializers.TimeGeneralSettingsSerializer
@@ -212,7 +242,9 @@ class TimeGeneralSettingsViewSet(viewsets.ModelViewSet):
 
 class RoomTypesViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the room types
+    ViewSet to see all the room types.
+
+    Can be filtered as wanted with every field of a RoomTypes object.
     """
     queryset = bm.RoomType.objects.all()
     serializer_class = serializers.RoomTypesSerializer
@@ -221,7 +253,9 @@ class RoomTypesViewSet(viewsets.ModelViewSet):
 
 class RoomGroupsViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the room groups
+    ViewSet to see all the room groups.
+
+    Can be filtered as wanted with every field of a RoomGroup object.
     """
     queryset = bm.RoomGroup.objects.all()
     serializer_class = serializers.RoomGroupsSerializer
@@ -230,7 +264,9 @@ class RoomGroupsViewSet(viewsets.ModelViewSet):
 
 class RoomsViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the rooms
+    ViewSet to see all the rooms.
+
+    Can be filtered as wanted with every field of a Room object.
     """
     queryset = bm.Room.objects.all()
     serializer_class = serializers.RoomsSerializer
@@ -240,7 +276,9 @@ class RoomsViewSet(viewsets.ModelViewSet):
 
 class RoomSortsViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the room sorts
+    ViewSet to see all the room sorts.
+
+    Can be filtered as wanted with every field of a RoomSort object.
     """
     queryset = bm.RoomSort.objects.all()
     serializer_class = serializers.RoomSortsSerializer
@@ -253,7 +291,9 @@ class RoomSortsViewSet(viewsets.ModelViewSet):
 
 class ModulesViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the modules
+    ViewSet to see all the modules.
+
+    Can be filtered as wanted with every field of a Module object.
     """
     queryset = bm.Module.objects.all()
     serializer_class = serializers.ModulesSerializer
@@ -263,7 +303,9 @@ class ModulesViewSet(viewsets.ModelViewSet):
 
 class Modules_Course_ViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the modules
+    ViewSet to see all the modules that have a Scheduled course in a given week/year couple.
+
+    can also be filtered with a department.
     """
     queryset = bm.Module.objects.all()
     serializer_class = serializers.ModulesSerializer
@@ -290,7 +332,9 @@ class Modules_Course_ViewSet(viewsets.ModelViewSet):
 
 class CourseTypesViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the course types
+    ViewSet to see all the course types.
+
+    Can be filtered as wanted with every field of a CourseType object.
     """
     queryset = bm.CourseType.objects.all()
     serializer_class = serializers.CourseTypesSerializer
@@ -314,7 +358,9 @@ class CoursesViewSet(viewsets.ModelViewSet):
 
 class UsersPreferences_Default_ViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the users' preferences
+    ViewSet to see all the users' preferences for the default week.
+
+    Can be filtered as wanted with every field of a UserPreference object except week.
     """
     serializer_class = serializers.UsersPreferencesSerializer
     filterset_fields = '__all__'
@@ -327,7 +373,10 @@ class UsersPreferences_Default_ViewSet(viewsets.ModelViewSet):
 
 class UsersPreferences_Single_ViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the users' preferences
+    ViewSet to see all the users' preferences for a single week.
+
+    Can be filtered as wanted with every field of a UserPreference object.
+    Must be filtered by a week.
     """
     serializer_class = serializers.UsersPreferencesSerializer
     filterset_fields = '__all__'
@@ -345,7 +394,9 @@ class UsersPreferences_Single_ViewSet(viewsets.ModelViewSet):
 
 class UsersPreferences_SingleODefault_ViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the users' preferences
+    ViewSet to see all the users' preferences for a single week, ut, if no week wqs given, return the default one.
+
+    Can be filtered as wanted with every field of a UserPreference object.
     """
     serializer_class = serializers.UsersPreferencesSerializer
     filterset_fields = '__all__'
@@ -360,7 +411,9 @@ class UsersPreferences_SingleODefault_ViewSet(viewsets.ModelViewSet):
 
 class CoursePreferencesViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the course preferences
+    ViewSet to see all the course preferences.
+
+    Can be filtered as wanted with every field of a CoursePreference object.
     """
     queryset = bm.CoursePreference.objects.all()
     serializer_class = serializers.CoursePreferencesSerializer
@@ -382,7 +435,9 @@ class RoomPreferencesViewSet(viewsets.ModelViewSet):
 
 class EdtVersionsViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the scheduler version
+    ViewSet to see all the scheduler version.
+
+    Can be filtered as wanted with every field of a EDTVersion object.
     """
     queryset = bm.EdtVersion.objects.all()
     serializer_class = serializers.EdtVersionSerializer
@@ -391,7 +446,9 @@ class EdtVersionsViewSet(viewsets.ModelViewSet):
 
 class CourseModificationsViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the course modifications
+    ViewSet to see all the course modifications.
+
+    Can be filtered as wanted with every field of a CourseModification object.
     """
     queryset = bm.CourseModification.objects.all()
     serializer_class = serializers.CourseModificationsSerializer
@@ -400,7 +457,9 @@ class CourseModificationsViewSet(viewsets.ModelViewSet):
 
 class PlanningModificationsViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the planning modifications
+    ViewSet to see all the planning modifications.
+
+    Can be filtered as wanted with every field of a PlanningModification object.
     """
     queryset = bm.PlanningModification.objects.all()
     serializer_class = serializers.PlanningModificationsSerializer
@@ -414,7 +473,9 @@ class PlanningModificationsViewSet(viewsets.ModelViewSet):
 
 class TutorCostsViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the tutor costs
+    ViewSet to see all the tutor costs.
+
+    Can be filtered as wanted with every field of a TutorCost object.
     """
     queryset = bm.TutorCost.objects.all()
     serializer_class = serializers.TutorCostsSerializer
@@ -423,7 +484,9 @@ class TutorCostsViewSet(viewsets.ModelViewSet):
 
 class GroupCostsViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the group costs
+    ViewSet to see all the group costs.
+
+    Can be filtered as wanted with every field of a GroupCost object.
     """
     queryset = bm.GroupCost.objects.all()
     serializer_class = serializers.GroupCostsSerializer
@@ -432,7 +495,9 @@ class GroupCostsViewSet(viewsets.ModelViewSet):
 
 class GroupFreeHalfDaysViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the group's free half days
+    ViewSet to see all the group's free half days.
+
+    Can be filtered as wanted with every field of a GroupFreeHalfDay object.
     """
     queryset = bm.GroupFreeHalfDay.objects.all()
     serializer_class = serializers.GroupFreeHalfDaysSerializer
@@ -446,7 +511,9 @@ class GroupFreeHalfDaysViewSet(viewsets.ModelViewSet):
 
 class DependenciesViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the dependencies between courses
+    ViewSet to see all the dependencies between courses.
+
+    Can be filtered as wanted with every field of a Dependency object.
     """
     queryset = bm.Dependency.objects.all()
     serializer_class = serializers.DependenciesSerializer
@@ -455,6 +522,9 @@ class DependenciesViewSet(viewsets.ModelViewSet):
 
 
 class CoureStartTimeFilter(filters.FilterSet):
+    """
+    Custom filter for ArrayField allowed_start_times
+    """
     allowed_start_times = filters.CharFilter(lookup_expr='icontains')
 
     class Meta:
@@ -464,7 +534,9 @@ class CoureStartTimeFilter(filters.FilterSet):
 
 class CourseStartTimeConstraintsViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the courses start time constraints
+    ViewSet to see all the courses start time constraints.
+
+    Can be filtered as wanted with every field of a CourseStartTime object.
     """
     queryset = bm.CourseStartTimeConstraint.objects.all()
     serializer_class = serializers.CourseStartTimeConstraintsSerializer
@@ -473,7 +545,9 @@ class CourseStartTimeConstraintsViewSet(viewsets.ModelViewSet):
 
 class RegensViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the regenerations
+    ViewSet to see all the regenerations.
+
+    Can be filtered as wanted with every field of a Regen object.
     """
     queryset = bm.Regen.objects.all()
     serializer_class = serializers.RegensSerializer
@@ -486,7 +560,9 @@ class RegensViewSet(viewsets.ModelViewSet):
 
 class QuoteTypesViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the quote types
+    ViewSet to see all the quote types.
+
+    Can be filtered as wanted with every field of a QuoteType object.
     """
     queryset = p.QuoteType.objects.all()
     serializer_class = serializers.QuoteTypesSerializer
@@ -495,7 +571,9 @@ class QuoteTypesViewSet(viewsets.ModelViewSet):
 
 class QuotesViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the quotes
+    ViewSet to see all the quotes.
+
+    Can be filtered as wanted with every field of a Quote object.
     """
     queryset = p.Quote.objects.all()
     serializer_class = serializers.QuotesSerializer
@@ -508,7 +586,9 @@ class QuotesViewSet(viewsets.ModelViewSet):
 
 class BreakingNewsViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the breaking news
+    ViewSet to see all the breaking news.
+
+    Can be filtered as wanted with every field of a BreakingNews object.
     """
     queryset = dwm.BreakingNews.objects.all()
     serializer_class = serializers.BreakingNewsSerializer
@@ -517,7 +597,9 @@ class BreakingNewsViewSet(viewsets.ModelViewSet):
 
 class ModuleDisplaysViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the module displays
+    ViewSet to see all the module displays.
+
+    Can be filtered as wanted with every field of a ModuleDisplay object.
     """
     queryset = dwm.ModuleDisplay.objects.all()
     serializer_class = serializers.ModuleDisplaysSerializer
@@ -526,7 +608,9 @@ class ModuleDisplaysViewSet(viewsets.ModelViewSet):
 
 class TrainingProgrammeDisplaysViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the training programme displays
+    ViewSet to see all the training programme displays.
+
+    Can be filtered as wanted with every field of a TrainingProgrammeDisplay object.
     """
     queryset = dwm.TrainingProgrammeDisplay.objects.all()
     serializer_class = serializers.TrainingProgrammeDisplaysSerializer
@@ -535,7 +619,9 @@ class TrainingProgrammeDisplaysViewSet(viewsets.ModelViewSet):
 
 class GroupDisplaysViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the group displays
+    ViewSet to see all the group displays.
+
+    Can be filtered as wanted with every field of a GroupDisplay object.
     """
     queryset = dwm.GroupDisplay.objects.all()
     serializer_class = serializers.GroupDisplaysSerializer
@@ -551,7 +637,9 @@ class GroupDisplaysViewSet(viewsets.ModelViewSet):
 
 class TTCustomConstraintsViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the TTCustomConstraints
+    ViewSet to see all the TTCustomConstraints.
+
+    Can be filtered as wanted with every field of a CustomContraint object.
     """
     queryset = ttm.CustomConstraint.objects.all()
     serializer_class = serializers.TTCustomConstraintsSerializer
@@ -560,7 +648,9 @@ class TTCustomConstraintsViewSet(viewsets.ModelViewSet):
 
 class TTLimitCourseTypeTimePerPeriodsViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the LimitCourseTypeTimePerPeriods
+    ViewSet to see all the LimitCourseTypeTimePerPeriods.
+
+    Can be filtered as wanted with every field of a LimitCourseTypeTimePerPeriods object.
     """
     queryset = ttm.LimitCourseTypeTimePerPeriod.objects.all()
     serializer_class = serializers.TTLimitCourseTypeTimePerPeriodsSerializer
@@ -569,7 +659,9 @@ class TTLimitCourseTypeTimePerPeriodsViewSet(viewsets.ModelViewSet):
 
 class TTReasonableDaysViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the ReasonableDays
+    ViewSet to see all the ReasonableDays.
+
+    Can be filtered as wanted with every field of a ReasonableDay object.
     """
     queryset = ttm.ReasonableDays.objects.all()
     serializer_class = serializers.TTReasonableDayssSerializer
@@ -578,6 +670,9 @@ class TTReasonableDaysViewSet(viewsets.ModelViewSet):
 
 
 class TTStabilizeFilter(filters.FilterSet):
+    """
+    Custom filter for ArrayField fixed_days
+    """
     fixed_days = filters.CharFilter(lookup_expr='icontains')
 
     class Meta:
@@ -587,7 +682,9 @@ class TTStabilizeFilter(filters.FilterSet):
 
 class TTStabilizeViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the Stabilize objects from TTapp
+    ViewSet to see all the Stabilize objects from TTapp.
+
+    Can be filtered as wanted with every field of a Stabilize object.
     """
     queryset = ttm.Stabilize.objects.all()
     serializer_class = serializers.TTStabilizeSerializer
@@ -596,7 +693,9 @@ class TTStabilizeViewSet(viewsets.ModelViewSet):
 
 class TTMinHalfDaysViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the MinHalfDays
+    ViewSet to see all the MinHalfDays.
+
+    Can be filtered as wanted with every field of a MinHalfDay object.
     """
     queryset = ttm.MinHalfDays.objects.all()
     serializer_class = serializers.TTMinHalfDaysSerializer
@@ -605,7 +704,9 @@ class TTMinHalfDaysViewSet(viewsets.ModelViewSet):
 
 class TTMinNonPreferedSlotsViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the MinNonPreferedSlots
+    ViewSet to see all the MinNonPreferedSlots.
+
+    Can be filtered as wanted with every field of a MinNonPreferedSlots object.
     """
     queryset = ttm.MinNonPreferedSlot.objects.all()
     serializer_class = serializers.TTMinNonPreferedSlotsSerializer
@@ -614,7 +715,9 @@ class TTMinNonPreferedSlotsViewSet(viewsets.ModelViewSet):
 
 class TTAvoidBothTimesViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the AvoidBothTimes
+    ViewSet to see all the AvoidBothTimes.
+
+    Can be filtered as wanted with every field of a AvoidBothTime object.
     """
     queryset = ttm.AvoidBothTimes.objects.all()
     serializer_class = serializers.TTAvoidBothTimesSerializer
@@ -623,7 +726,9 @@ class TTAvoidBothTimesViewSet(viewsets.ModelViewSet):
 
 class TTSimultaneousCoursesViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the SimultaneousCourses
+    ViewSet to see all the SimultaneousCourses.
+
+    Can be filtered as wanted with every field of a SimultaneousCourse object.
     """
     queryset = ttm.SimultaneousCourses.objects.all()
     serializer_class = serializers.TTSimultaneousCoursesSerializer
@@ -632,6 +737,9 @@ class TTSimultaneousCoursesViewSet(viewsets.ModelViewSet):
 
 
 class TTLimitedFilter(filters.FilterSet):
+    """
+    Custom filter for ArrayField possible_start_times
+    """
     possible_start_times = filters.CharFilter(lookup_expr='icontains')
 
     class Meta:
@@ -641,7 +749,9 @@ class TTLimitedFilter(filters.FilterSet):
 
 class TTLimitedStartTimeChoicesViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the LimitedStartTimeChoices
+    ViewSet to see all the LimitedStartTimeChoices.
+
+    Can be filtered as wanted with every field of a LimitedStartChoices object.
     """
     queryset = ttm.LimitedStartTimeChoices.objects.all()
     serializer_class = serializers.TTLimitedStartTimeChoicesSerializer
@@ -650,7 +760,9 @@ class TTLimitedStartTimeChoicesViewSet(viewsets.ModelViewSet):
 
 class TTLimitedRoomChoicesViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the LimitedRoomChoices
+    ViewSet to see all the LimitedRoomChoices.
+
+    Can be filtered as wanted with every field of a LimitedRoomChoice object.
     """
     queryset = ttm.LimitedRoomChoices.objects.all()
     serializer_class = serializers.TTLimitedRoomChoicesSerializer
