@@ -107,10 +107,13 @@ class StudentPreferencesViewSet(viewsets.ModelViewSet):
     filterset_fields = '__all__'
 
     def get_queryset(self):
+        # Creating a queryset containing every StudentPreference
         qs = pm.StudentPreferences.objects.all()
 
+        # Getting the filters
         username = self.request.query_params.get('username', None)
 
+        # Applying filters
         if username == None:
             return None
         return qs.filter(username=username)
@@ -168,10 +171,13 @@ class GroupsViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.GroupsSerializer
 
     def get_queryset(self):
+        # Creating a queryset containing all Groups
         queryset = bm.Group.objects.all()
 
+        # Getting filters from the request
         department = self.request.query_params.get('dept', None)
 
+        # Applying filters
         if department is None:
             return None
         else:
@@ -312,18 +318,25 @@ class Modules_Course_ViewSet(viewsets.ModelViewSet):
 
     filterset_fields ='__all__'
     def get_queryset(self):
+        # Get the filters from the request
         week = self.request.query_params.get('week', None)
         department = self.request.query_params.get('department', None)
         year = self.request.query_params.get('year', None)
 
+        # Applying filters
         if week is not None and year is not None:
+            # Those 2 filters are needed to have returned data
+            # distinct method allows us to get each module only once
             qs = bm.ScheduledCourse.objects.distinct('course__module').filter(course__week=week, course__year=year)
         else:
             return None
         if department is not None:
+            # Filtering with department
             qs = qs.filter(course__module__train_prog__department__abbrev=department)
 
+        # Getting every module that appears
         qs_module = qs.values('course__module')
+        # Get all the modules that appears in the scheduled courses. Those primary keys come from the previous line
         res = bm.Module.objects.filter(pk__in=qs_module)
 
         return res
@@ -366,6 +379,7 @@ class UsersPreferences_Default_ViewSet(viewsets.ModelViewSet):
     filterset_fields = '__all__'
 
     def get_queryset(self):
+        # Getting the default week UserPreference
         qs = bm.UserPreference.objects.filter(week=None)
 
         return qs
@@ -382,8 +396,10 @@ class UsersPreferences_Single_ViewSet(viewsets.ModelViewSet):
     filterset_fields = '__all__'
 
     def get_queryset(self):
+        # Getting the filters from the request
         week = self.request.query_params.get('week', None)
 
+        # Filtering with week (needed filter)
         if week is None:
             return None
         else:
@@ -402,6 +418,7 @@ class UsersPreferences_SingleODefault_ViewSet(viewsets.ModelViewSet):
     filterset_fields = '__all__'
 
     def get_queryset(self):
+        # Getting the filters
         week = self.request.query_params.get('week', None)
 
         qs = bm.UserPreference.objects.filter(week=week)
@@ -576,6 +593,7 @@ class QuotesViewSet(viewsets.ModelViewSet):
     Can be filtered as wanted with every field of a Quote object.
     """
     queryset = p.Quote.objects.all()
+    
     serializer_class = serializers.QuotesSerializer
     
     filterset_fields = '__all__'
@@ -855,11 +873,14 @@ class AvailabilitiesViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.AvailabilitiesSerializer
 
     def get_queryset(self):
+        # Getting all the wanted data
         qs = bm.UserPreference.objects.all()
 
+        # Getting all the filters
         week = self.request.query_params.get('week', None)
         year = self.request.query_params.get('year', None)
 
+        # Filtering
         if week is not None:
             qs = qs.filter(week=week)
         if year is not None:
@@ -877,10 +898,13 @@ class DefaultWeekViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.DefaultWeekSerializer
 
     def get_queryset(self):
+        # Getting all the wanted data
         queryset = bm.UserPreference.objects.all()
 
+        # Getting filters from the request
         username = self.request.query_params.get('username', None)
 
+        # Filtering
         if username is not None:
             queryset = queryset.objects.filter(user__username=username)
             return queryset
@@ -897,11 +921,14 @@ class CourseDefaultWeekViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.CourseDefaultWeekSerializer
 
     def get_queryset(self):
+        # Getting the wanted data
         qs = bm.CoursePreference.objects.all()
 
+        # Getting all the filters
         train_prog = self.request.query_params.get('train_prog', None)
         course_type = self.request.query_params.get('course_type', None)
 
+        # Filtering
         if train_prog is not None:
             qs = qs.filter(course_type__name=course_type)
         if course_type is not None:
@@ -957,12 +984,15 @@ class TutorCoursesViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.TutorCourses_Serializer
 
     def get_queryset(self):
+        # Getting all the needed data
         qs = bm.ScheduledCourse.objects.all()
 
+        # Getting the filters
         tutor = self.request.query_params.get('tutor', None)
         week = self.request.query_params.get('week', None)
         year = self.request.query_params.get('year', None)
 
+        # Filtering
         if tutor is None:
             return None
         else:
@@ -984,11 +1014,14 @@ class ExtraSchedCoursesViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.ExtraScheduledCoursesSerializer
     
     def get_queryset(self):
+        # Getting all the needed data
         qs = bm.ScheduledCourse.objects.all()
 
+        # Getting all the filters
         week = self.request.query_params.get('week', None)
         year = self.request.query_params.get('year', None)
 
+        # Filtering
         if week is not None:
             qs = qs.filter(course__week=week)
         if year is not None:
@@ -1005,11 +1038,14 @@ class BKNewsViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.BKNewsSerializer
 
     def get_queryset(self):
+        # Getting all the needed data
         qs = dwm.BreakingNews.objects.all()
 
+        #getting all the filters
         week = self.request.query_params.get('week', None)
         year = self.request.query_params.get('year', None)
 
+        # Filtering
         if year is not None:
             qs = qs.filter(week=week)
         if week is not None:
