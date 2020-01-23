@@ -18,8 +18,7 @@ Les modules utilisés sont les suivants :
 Les vues représentent ce que l'utilisateur va voir apparaître sur son écran lorsqu'il demandera une ressource à l'API. Elles permettent de traiter et trier les données contenues dans la base de données, et c'est ainsi que nous allons définir nos filtres sur les données à rechercher dans la base.
 
 #### Structure d'une vue
-Une vue hérite de la classe ``viewsets.ModelViewSet`` et doit avoir au minimum une classe *serializer* de renseignée
-// TODO
+Une vue hérite de la classe ``viewsets.ModelViewSet`` et doit avoir au minimum une classe *serializer* de renseignée en tant qu'attribut ```serializer_class``` ainsi qu'une source de donnée dont elle se servira pour l'affichage. Pour cela, vous pouvez soit ajouter un attribut queryset ou bien redéfinir la méthode ```get_queryset(self)```. Si vous choisissez la dernière de ces options, il vous faudra rajouter un paramètre basename lors de la création d'une URL d'accès à la vue. 
 
 
 #### Les filtres
@@ -29,12 +28,12 @@ Il existe actuellement deux types de filtrage des données :
 
 ```
 class AViewSet(viewsets.ModelViewSet):
-"""
-ViewSet to see all the A.
+    """
+    ViewSet to see all the A.
 
-Result can be filtered as wanted with attributes b, c and d.
-"""
-serializer_class = serializers.ASerializer
+    Result can be filtered as wanted with attributes b, c and d.
+    """
+    serializer_class = serializers.ASerializer
 
     def get_queryset(self):
         # Creating queryset
@@ -143,8 +142,8 @@ Ainsi, pour accéder aux vues, nous avons besoin de définir le lien par lequel 
 ```
 routeur = routers.SimpleRouter()
 
-routeur .register(r'a', views.AViewSet)
-routeur .register(r'b', views.BViewSet)
+routeur.register(r'a', views.AViewSet)
+routeur.register(r'b', views.BViewSet)
 
 urlpatterns = [
     path('aetb/', include(routeur.urls)),
@@ -155,6 +154,12 @@ rendra les vues des modèles ``A``, ``B``, et ``C`` respectivement accessibles p
 * ``@FlOpEDT/api/aetb/a``
 * ``@FlOpEDT/api/aetb/b``
 * ``@FlOpEDT/api/c``
+
+Comme dit précédemment, il pourra être utile de passer un paramètre basename lors de la génération d'une URL. Pour cela, il vous suffit de procéder comme ceci:
+
+```
+routeur.register(r'a', views.AViewSet, basename="A")
+```
 
 ### L'authentification
 Les données qui ne sont pas accessibles lors de la consultation publique du client web FlOpEDT ne le sont pas non plus par l'API. Pour protéger ces données, nous avons utilisé le module ```django-rest-auth```
