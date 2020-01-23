@@ -123,31 +123,31 @@ routerFetch.register(r'coursetypes', views.AllCourseTypesViewSet)
 
 routerPreferences= routers.SimpleRouter()
 
-routerPreferences.register(r'studentspreferences', views.StudentPreferencesViewSet, basename="students")
-routerPreferences.register(r'groupspreferences', views.GroupPreferencesViewSet)
+routerPreferences.register(r'students', views.StudentPreferencesViewSet, basename="students")
+routerPreferences.register(r'groups', views.GroupPreferencesViewSet)
 routerPreferences.register(r'default', views.UsersPreferences_Default_ViewSet, basename="default")
 routerPreferences.register(r'single-week', views.UsersPreferences_Single_ViewSet, basename="single-week")
 routerPreferences.register(r'single-week-or-default', views.UsersPreferences_SingleODefault_ViewSet, basename="single-week-or-default")
-routerPreferences.register(r'coursepreferences', views.CoursePreferencesViewSet)
-routerPreferences.register(r'roompreferences', views.RoomPreferencesViewSet)
+routerPreferences.register(r'course', views.CoursePreferencesViewSet)
+routerPreferences.register(r'room', views.RoomPreferencesViewSet)
 
 routerRooms = routers.SimpleRouter()
 
-routerRooms.register(r'roomtypes', views.RoomTypesViewSet)
-routerRooms.register(r'roomgroups', views.RoomGroupsViewSet)
+routerRooms.register(r'types', views.RoomTypesViewSet)
+routerRooms.register(r'groups', views.RoomGroupsViewSet)
 routerRooms.register(r'rooms', views.RoomsViewSet)
-routerRooms.register(r'roomsorts', views.RoomSortsViewSet)
+routerRooms.register(r'sorts', views.RoomSortsViewSet)
 
 routerCourses = routers.SimpleRouter()
 
 routerCourses.register(r'modules', views.ModulesViewSet)
 routerCourses.register(r'modules-course', views.Modules_Course_ViewSet)
-routerCourses.register(r'coursetypes', views.CourseTypesViewSet)
+routerCourses.register(r'types', views.CourseTypesViewSet)
 routerCourses.register(r'courses', views.CoursesViewSet)
 
 routerGroups = routers.SimpleRouter()
 
-routerGroups.register(r'grouptypes', views.GroupTypesViewSet)
+routerGroups.register(r'types', views.GroupTypesViewSet)
 routerGroups.register(r'groups', views.GroupsViewSet, basename="groups")
 
 ################
