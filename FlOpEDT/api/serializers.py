@@ -56,10 +56,6 @@ class StudentsSerializer(serializers.ModelSerializer):
         model = pm.Student
         fields = '__all__'
 
-# class PreferencesSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = pm.Preferences
-#         fields = ['morning_weight', 'free_half_day_weight']
 
 class StudentPreferencesSerializer(serializers.Serializer):
     student = serializers.CharField()
@@ -70,10 +66,10 @@ class StudentPreferencesSerializer(serializers.Serializer):
         model = pm.Preferences
         fields = ['student', 'morning_weight', 'free_half_day_weight']
 
-# class GroupPreferencesSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = pm.Preferences
-#         fields = ['group', 'morning_weight', 'free_half_day_weight']
+class GroupPreferencesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = pm.Preferences
+        fields = ['group', 'morning_weight', 'free_half_day_weight']
 
 # ------------
 # -- GROUPS --
@@ -389,15 +385,6 @@ class LogoutSerializer(serializers.ModelSerializer):
 # ---- TTAPP ----
 # ---------------
 
-# class TTSlotsSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = ttm.Slot
-#         fields = '__all__'
-
-# class TTConstraintsSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = ttm.TTConstraint
-#         fields = '__all__'
 
 class TTCustomConstraintsSerializer(serializers.ModelSerializer):
     class Meta:

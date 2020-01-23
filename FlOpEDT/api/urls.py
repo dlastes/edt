@@ -32,20 +32,19 @@ from rest_framework.authtoken.views import obtain_auth_token
 # from rest_framework_swagger.renderers import SwaggerUIRenderer, OpenAPIRenderer
 from rest_framework_swagger.views import get_swagger_view
 
+#####################################
+# URLS based on django applications #
+#####################################
+
 routerBase = routers.SimpleRouter()
 routerPeople = routers.SimpleRouter()
 routerDisplayweb = routers.SimpleRouter()
 routerTTapp = routers.SimpleRouter()
 routerFetch = routers.SimpleRouter()
 
-routerBase.register(r'users', views.UsersViewSet)
-routerBase.register(r'userdepartmentsettings', views.UserDepartmentSettingsViewSet)
-routerBase.register(r'tutors', views.TutorsViewSet)
-routerBase.register(r'supplystaff', views.SupplyStaffsViewSet)
-routerBase.register(r'students', views.StudentsViewSet)
-#routerBase.register(r'preferences', views.PreferencesViewSet)
-#routerBase.register(r'studentspreferences', views.StudentPreferencesViewSet, basename="students")
-#routerBase.register(r'groupspreferences', views.GroupPreferencesViewSet)
+
+routerBase.register(r'studentspreferences', views.StudentPreferencesViewSet, basename="students")
+routerBase.register(r'groupspreferences', views.GroupPreferencesViewSet)
 routerBase.register(r'departments', views.DepartmentViewSet)
 routerBase.register(r'trainingprograms', views.TrainingProgramsViewSet)
 routerBase.register(r'grouptypes', views.GroupTypesViewSet)
@@ -62,23 +61,29 @@ routerBase.register(r'modules', views.ModulesViewSet)
 routerBase.register(r'modules-course', views.Modules_Course_ViewSet)
 routerBase.register(r'coursetypes', views.CourseTypesViewSet)
 routerBase.register(r'courses', views.CoursesViewSet)
+routerBase.register(r'edtversions', views.EdtVersionsViewSet)
+routerBase.register(r'coursemodifications', views.CourseModificationsViewSet)
+routerBase.register(r'planningmodifications', views.PlanningModificationsViewSet)
+routerBase.register(r'tutorcosts', views.TutorCostsViewSet)
+routerBase.register(r'groupcosts', views.GroupCostsViewSet)
+routerBase.register(r'groupfreehalfdays', views.GroupFreeHalfDaysViewSet)
+routerBase.register(r'dependencies', views.DependenciesViewSet)
+routerBase.register(r'coursesstarttimeconstraints', views.CourseStartTimeConstraintsViewSet)
+routerBase.register(r'regens', views.RegensViewSet)
 routerBase.register(r'login', views.LoginView, basename="login")
 routerBase.register(r'logout', views.LogoutView, basename="logout")
 
+routerPeople.register(r'users', views.UsersViewSet)
+routerPeople.register(r'userdepartmentsettings', views.UserDepartmentSettingsViewSet)
+routerPeople.register(r'tutors', views.TutorsViewSet)
+routerPeople.register(r'supplystaff', views.SupplyStaffsViewSet)
+routerPeople.register(r'students', views.StudentsViewSet)
 routerPeople.register(r'default', views.UsersPreferences_Default_ViewSet, basename="default")
 routerPeople.register(r'single-week', views.UsersPreferences_Single_ViewSet, basename="single-week")
 routerPeople.register(r'single-week-or-default', views.UsersPreferences_SingleODefault_ViewSet, basename="single-week-or-default")
 routerPeople.register(r'coursepreferences', views.CoursePreferencesViewSet)
 routerPeople.register(r'roompreferences', views.RoomPreferencesViewSet)
-routerPeople.register(r'edtversions', views.EdtVersionsViewSet)
-routerPeople.register(r'coursemodifications', views.CourseModificationsViewSet)
-routerPeople.register(r'planningmodifications', views.PlanningModificationsViewSet)
-routerPeople.register(r'tutorcosts', views.TutorCostsViewSet)
-routerPeople.register(r'groupcosts', views.GroupCostsViewSet)
-routerPeople.register(r'groupfreehalfdays', views.GroupFreeHalfDaysViewSet)
-routerPeople.register(r'dependencies', views.DependenciesViewSet)
-routerPeople.register(r'coursesstarttimeconstraints', views.CourseStartTimeConstraintsViewSet)
-routerPeople.register(r'regens', views.RegensViewSet)
+
 
 routerDisplayweb.register(r'breakingnews', views.BreakingNewsViewSet)
 routerDisplayweb.register(r'moduledisplays', views.ModuleDisplaysViewSet)
@@ -86,8 +91,6 @@ routerDisplayweb.register(r'trainingprogrammedisplays', views.TrainingProgrammeD
 routerDisplayweb.register(r'groupdisplays', views.GroupDisplaysViewSet)
 
 
-#routerTTapp.register(r'slots', views.TTSlotsViewSet)
-# routerTTapp.register(r'constraints', views.TTConstraintsViewSet)
 routerTTapp.register(r'customconstrains', views.TTCustomConstraintsViewSet)
 routerTTapp.register(r'limitcoursetypetimeperperiods', views.TTLimitCourseTypeTimePerPeriodsViewSet)
 routerTTapp.register(r'reasonabledays', views.TTReasonableDaysViewSet)
@@ -102,17 +105,50 @@ routerTTapp.register(r'limitiedroomchoices', views.TTLimitedRoomChoicesViewSet)
 routerFetch.register(r'scheduledcourses', views.ScheduledCoursesViewSet, basename='scheduledcourses')
 routerFetch.register(r'unscheduledcourses', views.UnscheduledCoursesViewSet, basename='unscheduledcourses')
 routerFetch.register(r'availabilities', views.AvailabilitiesViewSet, basename='availabilities')
-routerFetch.register(r'dweek', views.DefaultWeekViewSet)
-routerFetch.register(r'coursedefweek', views.CourseDefaultWeekViewSet)
+routerFetch.register(r'dweek', views.DefaultWeekViewSet, basename='dweek')
+routerFetch.register(r'coursedefweek', views.CourseDefaultWeekViewSet, basename='coursedefweek')
 routerFetch.register(r'trainprogs', views.TrainingProgramsViewSet)
 routerFetch.register(r'allversions', views.AllVersionsViewSet)
 routerFetch.register(r'alltutors', views.AllTutorsViewSet)
 routerFetch.register(r'alldepts', views.DepartmentsViewSet)
-routerFetch.register(r'tutorcourses', views.TutorCoursesViewSet)
-routerFetch.register(r'extrasched', views.ExtraSchedCoursesViewSet)
-routerFetch.register(r'bknews', views.BKNewsViewSet)
+routerFetch.register(r'tutorcourses', views.TutorCoursesViewSet, basename='tutorcourses')
+routerFetch.register(r'extrasched', views.ExtraSchedCoursesViewSet, basename='extrasched')
+routerFetch.register(r'bknews', views.BKNewsViewSet, basename='BKNews')
 routerFetch.register(r'coursetypes', views.AllCourseTypesViewSet)
 
+
+######################
+# User friendly URLS #
+######################
+
+routerPreferences= routers.SimpleRouter()
+
+routerPreferences.register(r'studentspreferences', views.StudentPreferencesViewSet, basename="students")
+routerPreferences.register(r'groupspreferences', views.GroupPreferencesViewSet)
+routerPreferences.register(r'default', views.UsersPreferences_Default_ViewSet, basename="default")
+routerPreferences.register(r'single-week', views.UsersPreferences_Single_ViewSet, basename="single-week")
+routerPreferences.register(r'single-week-or-default', views.UsersPreferences_SingleODefault_ViewSet, basename="single-week-or-default")
+routerPreferences.register(r'coursepreferences', views.CoursePreferencesViewSet)
+routerPreferences.register(r'roompreferences', views.RoomPreferencesViewSet)
+
+routerRooms = routers.SimpleRouter()
+
+routerRooms.register(r'roomtypes', views.RoomTypesViewSet)
+routerRooms.register(r'roomgroups', views.RoomGroupsViewSet)
+routerRooms.register(r'rooms', views.RoomsViewSet)
+routerRooms.register(r'roomsorts', views.RoomSortsViewSet)
+
+routerCourses = routers.SimpleRouter()
+
+routerCourses.register(r'modules', views.ModulesViewSet)
+routerCourses.register(r'modules-course', views.Modules_Course_ViewSet)
+routerCourses.register(r'coursetypes', views.CourseTypesViewSet)
+routerCourses.register(r'courses', views.CoursesViewSet)
+
+routerGroups = routers.SimpleRouter()
+
+routerGroups.register(r'grouptypes', views.GroupTypesViewSet)
+routerGroups.register(r'groups', views.GroupsViewSet, basename="groups")
 
 ################
 # SWAGGER VIEW #
@@ -126,11 +162,14 @@ urlpatterns = [
     url(r'^backoffice/$', login_required(views.TemplateView.as_view(template_name='logout.html'))),
     path('base/', include(routerBase.urls)),
     path('user/', include(routerPeople.urls)),
-    path('displayweb/', include(routerDisplayweb.urls)),
+    path('display/', include(routerDisplayweb.urls)),
     path('ttapp/', include(routerTTapp.urls)),
     path('fetch/', include(routerFetch.urls)),
     path('rest-auth/', include('rest_auth.urls')),
     path('api-token-auth/', obtain_auth_token, name='api_token_auth'),
     url('doc', swagger_view),
-    
+    path('preferences/', include(routerPreferences.urls)),
+    path('rooms/', include(routerRooms.urls)),
+    path('courses/', include(routerCourses.urls)),
+    path('groups/', include(routerGroups.urls)),
 ]
