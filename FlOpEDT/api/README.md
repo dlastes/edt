@@ -169,8 +169,7 @@ Ce token doit être ajouter à la requête pour que les données soient accessib
 
 Exemple de l’utilisateur ```admin``` :
 
-Récupération d’un token (dans un shell) :
-
+Récupération d’un token (dans un shell)
 ```
 http post http://127.0.0.1:8000/api/api-token-auth/ username=admin password=admin
 ```
@@ -178,7 +177,7 @@ http post http://127.0.0.1:8000/api/api-token-auth/ username=admin password=admi
 L’API fournit un token, exemple ```39005e0129fcddf93f7aaf054300403dfd8c```
 
 
-Requête Python :
+* Requête Python :
 ```
 #Le token est ajouté à la requête
 url = 'http://127.0.0.1:8000/api/base/users/ 
@@ -187,10 +186,11 @@ r = requests.get(url, headers=headers)
 ```
 
 
-Ou dans un shell :
+* Ou dans un shell :
 ```
 http http://127.0.0.1:8000/hello/ 'Authorization: Token 39005e0129fcddf93f7aaf054300403dfd8c ' 
 ```
+
 
 Grâce au token les données sont maintenant accessibles.
 
