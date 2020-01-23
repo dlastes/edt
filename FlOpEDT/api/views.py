@@ -103,6 +103,7 @@ class StudentPreferencesViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with every field of a StudentPreference object.
     """
+    permission_classes = (IsAuthenticated,)  
     serializer_class = serializers.StudentPreferencesSerializer
     filterset_fields = '__all__'
 
@@ -125,6 +126,7 @@ class GroupPreferencesViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with every field of a GroupPreference object.
     """
+    permission_classes = (IsAuthenticated,)  
     queryset = pm.GroupPreferences.objects.all()
     serializer_class = serializers.GroupPreferencesSerializer
 
@@ -375,6 +377,7 @@ class UsersPreferences_Default_ViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with every field of a UserPreference object except week.
     """
+    permission_classes = (IsAuthenticated,)  
     serializer_class = serializers.UsersPreferencesSerializer
     filterset_fields = '__all__'
 
@@ -392,6 +395,7 @@ class UsersPreferences_Single_ViewSet(viewsets.ModelViewSet):
     Can be filtered as wanted with every field of a UserPreference object.
     Must be filtered by a week.
     """
+    permission_classes = (IsAuthenticated,)  
     serializer_class = serializers.UsersPreferencesSerializer
     filterset_fields = '__all__'
 
@@ -414,6 +418,7 @@ class UsersPreferences_SingleODefault_ViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with every field of a UserPreference object.
     """
+    permission_classes = (IsAuthenticated,)  
     serializer_class = serializers.UsersPreferencesSerializer
     filterset_fields = '__all__'
 
@@ -432,6 +437,7 @@ class CoursePreferencesViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with every field of a CoursePreference object.
     """
+    permission_classes = (IsAuthenticated,)  
     queryset = bm.CoursePreference.objects.all()
     serializer_class = serializers.CoursePreferencesSerializer
     
@@ -441,6 +447,7 @@ class RoomPreferencesViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the room preferences
     """
+    permission_classes = (IsAuthenticated,)  
     queryset = bm.RoomPreference.objects.all()
     serializer_class = serializers.RoomPreferencesSerializer
     
@@ -895,6 +902,7 @@ class DefaultWeekViewSet(viewsets.ModelViewSet):
 
     Result needs to be filtered with the username of the wanted tutor
     """
+    permission_classes = (IsAuthenticated,)  
     serializer_class = serializers.DefaultWeekSerializer
 
     def get_queryset(self):
