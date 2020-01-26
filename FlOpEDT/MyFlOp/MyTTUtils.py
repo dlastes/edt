@@ -43,7 +43,7 @@ def resolve_department(func):
         if type(department) is str:
             department = Department.objects.get(abbrev=department)
 
-        func(department, *args, **kwargs)
+        return func(department, *args, **kwargs)
 
     return _wraper_function
 
