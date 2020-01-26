@@ -97,7 +97,7 @@ class EdtContextMiddleware:
                 # Check if the user is associated with the 
                 # requested department
                 if hasattr(request.user, 'departments'):
-                    if not request.user.is_superuser and not request.user.has_department_perm(department):                        
+                    if not request.user.has_department_perm(department, admin=True):
                         return HttpResponseForbidden()
                 else:
                     return HttpResponseForbidden()
