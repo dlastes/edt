@@ -57,12 +57,18 @@ class User(AbstractUser):
         admin=True    Check if the user can access to the 
                       department admin
         """
-        perm = False
+        if self.is_superuser:
+            return True
+        
+        perm = self.is_tutor
 
         if department:
             perm = department in self.departments.all()
             if admin:
-                perm &= self.is_staff
+                if perm:
+                    user_dept = UserDepartmentSettings.objects.get(user=self,
+                                                                   department=department)
+                    perm &= user_dept.is_admin
 
         return perm
 
