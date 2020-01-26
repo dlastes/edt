@@ -100,9 +100,11 @@ class UserDepartmentSettings(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
     is_main = models.BooleanField(default=False)
+    is_admin = models.BooleanField(default=False)
 
     def __str__(self):
-        return f'U:{self.user.username}, D:{self.department.abbrev}, {"main" if self.is_main else "secondary"}'
+        return (f'U:{self.user.username}, D:{self.department.abbrev}, {"main" if self.is_main else "secondary"}, '
+                f'{"admin" if self.is_admin else "regular"}')
 
 
 class Tutor(User):
