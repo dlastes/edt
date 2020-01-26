@@ -112,6 +112,9 @@ function swap_with_copy_0() {
         contentType: "application/json; charset=utf-8",
         success: function(msg) {
             format_acks(msg, 'swap');
+            if (msg.status == 'OK') {
+                $('#dd_work_copy option[value="0"]').prop('selected', true) ;
+            }
             fetch_all(false, false);
             show_loader(false);
         },
