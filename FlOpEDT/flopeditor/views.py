@@ -2,12 +2,15 @@ from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseForbidden
 from django.contrib.auth.decorators import user_passes_test
 from base.models import Department
+from people.models import Tutor
 from flopeditor.check_tutor import check_tutor
 
 @user_passes_test(check_tutor)
 def home(request):
     return render(request, "flopeditor/home.html", {
         'departements': Department.objects.all(),
+        'title': 'Choix du département',
+        'admins': Tutor.objects.all()
     })
 
 @user_passes_test(check_tutor)
