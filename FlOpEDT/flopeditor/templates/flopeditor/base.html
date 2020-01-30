@@ -1,0 +1,61 @@
+{% load static %}
+<!DOCTYPE html>
+{% block html %}
+<html lang="fr-fr" dir="ltr">
+    <head>
+        {% block meta %}
+        <meta charset="utf-8">
+        <title>{% block title %}FlopEditor {{ title }}{% endblock %}</title>
+        {% block link %}
+        <link rel="stylesheet" href="{% static 'flopeditor/lib/bootstrap-material-design/css/bootstrap-material-design.min.css' %}">
+        {% endblock %}
+        <style media="screen">
+            html {
+                height: 100%;
+            }
+            body {
+                height: 100%;
+            }
+            .nonfluid {
+               width: auto !important;
+            }
+            .bmd-btn-fab-sm {
+                font-size: 0.7em !important;
+            }
+            .bg-dark {
+                background-color: #343a40 !important;
+            }
+            #main .btn-secondary:hover {
+                background-color: white !important;
+                color: grey !important;
+            }
+            .modal-content .modal-body {
+                padding-bottom: 0;
+            }
+        </style>
+        {% endblock %}
+    </head>
+    <body class="bg-dark">
+        {% block navbar %}
+        {% endblock %}
+        <div id="main" class="container h-100">
+            {% block content %}
+            {% endblock %}
+        </div>
+        {% block footer %}
+        {% endblock %}
+
+        {% block modal %}
+        {% endblock %}
+
+        {% block script %}
+          <script src="{% static 'flopeditor/lib/jquery/jquery-3.2.1.slim.min.js' %}" charset="utf-8"></script>
+          <script src="{% static 'flopeditor/lib/popper/popper.js' %}" charset="utf-8"></script>
+          <script src="{% static 'flopeditor/lib/bootstrap-material-design/js/bootstrap-material-design.min.js' %}" charset="utf-8"></script>
+          <script>
+            $(document).ready(function() { $('body').bootstrapMaterialDesign(); });
+          </script>
+        {% endblock %}
+    </body>
+</html>
+{% endblock %}
