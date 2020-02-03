@@ -68,7 +68,7 @@ Les *serializers* permettent de mettre en forme des données récupérées dans 
 
 
 #### Créer un *serializer* simple
-Un *serializer* est une classe qui hérite de ``serializers.Serializer``, qui défini des champs avec un type prédéfini et qui redéfini obligatoirement la classe interne ``Meta`` avec le modèle ainsi que ses attributs à sérialiser.
+Un *serializer* est une classe qui hérite de ``serializers.Serializer``, qui définit des champs avec un type prédéfini et qui redéfinit obligatoirement la classe interne ``Meta`` avec le modèle ainsi que ses attributs à sérialiser.
 
 Si l'on souhaite créer un *serializer* pour un modèle ``A``, on obtient une classe de cette forme :
 
@@ -129,7 +129,7 @@ D'après l'exemple précédent, si le format des données demandé est JSON et q
 
 
 ### Les URLs (```urls.py```)
-Avant tout, afin de maintenir une bonne séparation du code source, nous avons insérer une redirection des liens ``@FlOpEDT/api`` vers le fichier ``urls.py`` de l'application Django ``api``.
+Avant tout, afin de maintenir une bonne séparation du code source, nous avons inséré une redirection des liens ``@FlOpEDT/api`` vers le fichier ``urls.py`` de l'application Django ``api``.
 Dans ``FlOpEDT/FlOpEDT/urls.py`` :
 ```
 urlpatterns = [
@@ -138,7 +138,7 @@ urlpatterns = [
 ]
 ```
 
-Ainsi, pour accéder aux vues, nous avons besoin de définir le lien par lequel elles seront appelées. Pour cela, nous allons utiliser des objets ``SimpleRouter`` et créer une arborescence de liens. L'exemple suivant, dans ``api/urls.py`` :
+Ainsi, pour accéder aux vues, nous avons besoin de définir le lien par lequel elles seront appelées. Pour cela, nous allons utilisé des objets ``SimpleRouter`` et créer une arborescence de liens. L'exemple suivant, dans ``api/urls.py`` :
 ```
 routeur = routers.SimpleRouter()
 
