@@ -903,7 +903,7 @@ def edt_changes(req, **kwargs):
     bad_response = {'status':'KO', 'more':''}
     good_response = {'status':'OK', 'more':''}
 
-    if not (req.user.is_tutor and req.user.is_staff):
+    if not req.user.is_tutor:
         bad_response['more'] = "Pas membre de l'équipe encadrante"
         return JsonResponse(bad_response)
         
