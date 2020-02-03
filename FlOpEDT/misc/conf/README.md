@@ -68,16 +68,16 @@ environnement virtuel.
 `source venv/bin/activate`
 - *Pour une première exécution*, 
  + appliquer les migrations :
-`sudo ./manage.py migrate`
+`python manage.py migrate`
  + éventuellement, remplir la base avec les données d'exemple :
-`sudo ./manage.py loaddata ../dump.json`
+`python manage.py loaddata ../dump.json`
  + pour supprimer ces données :
- `sudo ./manage.py flush`
+ `python manage.py flush`
 
 ### Exécution en local
 
 - Lancer django
-`sudo ./manage.py runserver`
+`python manage.py runserver`
 - Accéder au site depuis un navigateur en tapant l'adresse :
 `localhost:8000`
 (dans les données d'exemple, la semaine 36 contient des cours. Pour y accéder :

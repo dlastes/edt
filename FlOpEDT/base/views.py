@@ -36,16 +36,20 @@ from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import EmailMessage, send_mail
 from django.db import transaction
+from django.db.models import Sum
 from django.http import HttpResponse, Http404, JsonResponse, HttpRequest
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.views.decorators.cache import cache_page
 from django.views.generic import RedirectView
-from django.db.models import Sum
 
+from FlOpEDT.decorators import dept_admin_required
 from FlOpEDT.settings.base import COSMO_MODE
 
 from people.models import Tutor, UserDepartmentSettings, User
+
+from displayweb.admin import BreakingNewsResource
+from displayweb.models import BreakingNews
 
 from base.admin import CoursResource, DispoResource, VersionResource, \
     CoursPlaceResource, UnavailableRoomsResource, TutorCoursesResource, \
@@ -53,7 +57,6 @@ from base.admin import CoursResource, DispoResource, VersionResource, \
     SharedRoomGroupsResource
 if COSMO_MODE:
     from base.admin import CoursPlaceResourceCosmo
-from displayweb.admin import BreakingNewsResource
 from base.forms import ContactForm, PerfectDayForm
 from base.models import Course, UserPreference, ScheduledCourse, EdtVersion, \
     CourseModification, Day, Time, RoomGroup, PlanningModification, \
@@ -61,7 +64,6 @@ from base.models import Course, UserPreference, ScheduledCourse, EdtVersion, \
     TrainingProgramme, CourseType
 import base.queries as queries
 from base.weeks import *
-from displayweb.models import BreakingNews
 
 logger = logging.getLogger(__name__)
 
@@ -302,6 +304,7 @@ def fetch_perfect_day(req, username=None, *args, **kwargs):
     return JsonResponse(perfect_day, safe=False)
 
 
+@dept_admin_required
 def aide(req, **kwargs):
     return TemplateResponse(req, 'base/aide.html',
                 {'has_department_perm': req.user.is_authenticated \
@@ -900,7 +903,7 @@ def edt_changes(req, **kwargs):
     bad_response = {'status':'KO', 'more':''}
     good_response = {'status':'OK', 'more':''}
 
-    if not (req.user.is_tutor and req.user.is_staff):
+    if not req.user.is_tutor:
         bad_response['more'] = "Pas membre de l'équipe encadrante"
         return JsonResponse(bad_response)
         
