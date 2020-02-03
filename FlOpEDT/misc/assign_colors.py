@@ -123,6 +123,8 @@ def build_graph_matrices(train_prog, department=None):
                     mat[(mi, mj)] = 1
                     break
     mat += mat.T - diag(mat.diagonal())
+    print('Conflict matrix:')
+    print(mat)
     return keys, mat
 
 
