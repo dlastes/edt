@@ -38,6 +38,7 @@ from django.db.models import Q
 # from channels import Group
 from django.template.response import TemplateResponse
 
+from FlOpEDT.decorators import dept_admin_required
 
 from base import weeks
 from base.models import TrainingProgramme, ScheduledCourse
@@ -131,14 +132,14 @@ def get_context(department, year, week, train_prog=None):
     return context
 
 
-@staff_member_required
+@dept_admin_required
 def fetch_context(req, train_prog, year, week, **kwargs):
 
     context = get_context(req.department, year, week, train_prog)
     return HttpResponse(json.dumps(context), content_type='text/json')
 
 
-@staff_member_required
+@dept_admin_required
 def main_board(req, **kwargs):
 
     department = req.department

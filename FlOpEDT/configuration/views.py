@@ -36,6 +36,7 @@ from django.conf import settings
 
 from misc.generate_static_files import generate_group_file, generate_room_file
 
+from FlOpEDT.decorators import dept_admin_required
 
 from base.models import Department, Course
 
@@ -48,12 +49,7 @@ from configuration.forms import ImportPlanif, ImportConfig
 
 logger = logging.getLogger(__name__)
 
-# Create your views here.
-
-
-# @user_passes_test(check_admin)
-# @login_required
-@staff_member_required
+@dept_admin_required
 def configuration(req, **kwargs):
     """
     Main view of Configuration
@@ -70,8 +66,7 @@ def configuration(req, **kwargs):
     return render(req, 'configuration/configuration.html', arg_req)
 
 
-# @ajax(login_required=True, is_superuser=True, require_POST=True)
-@staff_member_required
+@dept_admin_required
 def import_config_file(req, **kwargs):
     """
     View for the first step of the configuration. It imports the file
@@ -148,9 +143,7 @@ def import_config_file(req, **kwargs):
     return HttpResponse(json.dumps(response), content_type='application/json')
 
 
-# @user_passes_test(check_admin)
-# @login_required
-@staff_member_required
+@dept_admin_required
 def get_config_file(req, **kwargs):
     """
     Resend the empty configuration's file.
@@ -165,9 +158,7 @@ def get_config_file(req, **kwargs):
     return response
 
 
-# @user_passes_test(check_admin)
-# @login_required
-@staff_member_required
+@dept_admin_required
 def get_planif_file(req, **kwargs):
     """
     Send an empty planification's file.
@@ -190,8 +181,7 @@ def get_planif_file(req, **kwargs):
     return response
 
 
-# @ajax(login_required=True, require_POST=True, is_superuser=True)
-@staff_member_required
+@dept_admin_required
 def import_planif_file(req, **kwargs):
     """
     Import a planification's file filled. Before data processing, it must to
