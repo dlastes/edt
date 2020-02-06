@@ -4,25 +4,31 @@
 <html lang="fr-fr" dir="ltr">
     <head>
         {% block head %}
+
         {% block meta %}
         <meta charset="utf-8">
         <title>{% block title %}FlopEditor - {{ title }}{% endblock %}</title>
+
         {% block link %}
         <link rel="stylesheet" href="{% static 'flopeditor/lib/bootstrap-material-design/css/bootstrap-material-design.min.css' %}">
         <link rel="stylesheet" href="{% static 'flopeditor/flopeditor.css' %}">
         {% endblock %}
+
         {% endblock %}
 
         {% endblock %}
     </head>
-    <body class="bg-dark">
+    <body class="{% block body-class %}{% endblock %}">
         {% block body %}
+
         {% block navbar %}
         {% endblock %}
-        <div id="main" class="container h-100">
+
+        <div id="main" class="{% block main-class %}container h-100{% endblock %}">
             {% block content %}
             {% endblock %}
         </div>
+
         {% block footer %}
         {% endblock %}
 
@@ -30,12 +36,12 @@
         {% endblock %}
 
         {% block script %}
-          <script src="{% static 'flopeditor/lib/jquery/jquery-3.2.1.slim.min.js' %}" charset="utf-8"></script>
-          <script src="{% static 'flopeditor/lib/popper/popper.js' %}" charset="utf-8"></script>
-          <script src="{% static 'flopeditor/lib/bootstrap-material-design/js/bootstrap-material-design.min.js' %}" charset="utf-8"></script>
-          <script>
+        <script src="{% static 'flopeditor/lib/jquery/jquery-3.2.1.slim.min.js' %}" charset="utf-8"></script>
+        <script src="{% static 'flopeditor/lib/popper/popper.js' %}" charset="utf-8"></script>
+        <script src="{% static 'flopeditor/lib/bootstrap-material-design/js/bootstrap-material-design.min.js' %}" charset="utf-8"></script>
+        <script>
             $(document).ready(function() { $('body').bootstrapMaterialDesign(); });
-          </script>
+        </script>
         {% endblock %}
 
         {% endblock %}
