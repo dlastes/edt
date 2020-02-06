@@ -32,9 +32,11 @@ to manage a department statistics for FlOpEDT.
 
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import user_passes_test
-from base.models import Department
+from base.models import Department, TimeGeneralSettings
 from people.models import Tutor
 from flopeditor.check_tutor import check_tutor
+from django.shortcuts import get_object_or_404
+
 
 
 @user_passes_test(check_tutor)
@@ -84,9 +86,17 @@ def department_parameters(request, department_abbrev):
     :rtype:  django.http.HttpResponse
 
     """
+    department = get_object_or_404(Department, abbrev=department_abbrev)
+    parameters = get_object_or_404(TimeGeneralSettings, department=department)
     return render(request, "flopeditor/parameters.html", {
         'title': 'Parametres',
-        'department_abbrev': department_abbrev
+        'department_abbrev': department_abbrev,
+        'day_start_time': parameters.day_start_time,
+        'day_finish_time': parameters.day_finish_time ,
+        'lunch_break_start_time':parameters.lunch_break_start_time ,
+        'lunch_break_finish_time': parameters.lunch_break_finish_time ,
+        'days': parameters.days
+
     })
 
 
