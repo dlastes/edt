@@ -30,12 +30,12 @@ This module is used to declare the views related to FlopEditor, an app used
 to manage a department statistics for FlOpEDT.
 """
 
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import user_passes_test
-from base.models import Department
+from base.models import Department, TimeGeneralSettings, Day
+from base.timing import min_to_str
 from people.models import Tutor
 from flopeditor.check_tutor import check_tutor
-
 
 @user_passes_test(check_tutor)
 def home(request):
@@ -64,7 +64,7 @@ def department_default(request, department_abbrev):
     :param department_abbrev: Department abbreviation.
     :type request:            django.http.HttpRequest
     :type department_abbrev:  str
-    :return: Parameters page rendered from the parameters template of FlopEditor.
+    :return: Parameters page rendered from the default template of FlopEditor.
     :rtype:  django.http.HttpResponse
 
     """
@@ -84,9 +84,19 @@ def department_parameters(request, department_abbrev):
     :rtype:  django.http.HttpResponse
 
     """
+    department = get_object_or_404(Department, abbrev=department_abbrev)
+    parameters = get_object_or_404(TimeGeneralSettings, department=department)
     return render(request, "flopeditor/parameters.html", {
-        'title': 'Parametres',
-        'department_abbrev': department_abbrev
+        'title': 'Paramètres',
+        'department_abbrev': department_abbrev,
+        'day_start_time': min_to_str(parameters.day_start_time),
+        'day_finish_time': min_to_str(parameters.day_finish_time),
+        'lunch_break_start_time': min_to_str(parameters.lunch_break_start_time),
+        'lunch_break_finish_time': min_to_str(parameters.lunch_break_finish_time),
+        'days': parameters.days,
+        'day_choices': Day.CHOICES,
+        'default_preference_duration': min_to_str(parameters.default_preference_duration)
+
     })
 
 
@@ -98,7 +108,7 @@ def department_rooms(request, department_abbrev):
     :param department_abbrev: Department abbreviation.
     :type request:            django.http.HttpRequest
     :type department_abbrev:  str
-    :return: Parameters page rendered from the parameters template of FlopEditor.
+    :return: Parameters page rendered from the rooms template of FlopEditor.
     :rtype:  django.http.HttpResponse
 
     """
@@ -116,7 +126,7 @@ def department_groups(request, department_abbrev):
     :param department_abbrev: Department abbreviation.
     :type request:            django.http.HttpRequest
     :type department_abbrev:  str
-    :return: Parameters page rendered from the parameters template of FlopEditor.
+    :return: Parameters page rendered from the groups template of FlopEditor.
     :rtype:  django.http.HttpResponse
 
     """
@@ -134,7 +144,7 @@ def department_modules(request, department_abbrev):
     :param department_abbrev: Department abbreviation.
     :type request:            django.http.HttpRequest
     :type department_abbrev:  str
-    :return: Parameters page rendered from the parameters template of FlopEditor.
+    :return: Parameters page rendered from the modules template of FlopEditor.
     :rtype:  django.http.HttpResponse
 
     """
@@ -152,7 +162,7 @@ def department_classes(request, department_abbrev):
     :param department_abbrev: Department abbreviation.
     :type request:            django.http.HttpRequest
     :type department_abbrev:  str
-    :return: Parameters page rendered from the parameters template of FlopEditor.
+    :return: Parameters page rendered from the classes template of FlopEditor.
     :rtype:  django.http.HttpResponse
 
     """
