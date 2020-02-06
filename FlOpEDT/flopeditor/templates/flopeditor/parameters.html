@@ -15,39 +15,38 @@
                                     <p class="h6"><u><strong>Jours ouvrables</strong></u></p>
                                 </div>
                                 {% if day_choices.0.0 in days%}
-                                <div class="form-group form-check">
-                                    <label class="form-check-label">Lundi</label>
+                                <div class="form-group">
+                                    <label>Lundi</label>
                                 </div>
                                 {% endif %}
-
                                 {% if day_choices.1.0 in days%}
-                                <div class="form-group form-check">
-                                    <label class="form-check-label">Mardi</label>
+                                <div class="form-group">
+                                    <label>Mardi</label>
                                 </div>
                                 {% endif %}
                                 {% if day_choices.2.0 in days%}
-                                <div class="form-group form-check">
-                                    <label class="form-check-label">Mercredi</label>
+                                <div class="form-group">
+                                    <label>Mercredi</label>
                                 </div>
                                 {% endif %}
                                 {% if  day_choices.3.0 in days%}
-                                <div class="form-group form-check">
-                                    <label class="form-check-label">Jeudi</label>
+                                <div class="form-group">
+                                    <label>Jeudi</label>
                                 </div>
                                 {% endif %}
                                 {% if  day_choices.4.0 in days%}
-                                <div class="form-group form-check">
-                                    <label class="form-check-label">Vendredi</label>
+                                <div class="form-group">
+                                    <label>Vendredi</label>
                                 </div>
                                 {% endif %}
                                 {% if  day_choices.5.0 in days%}
-                                <div class="form-group form-check">
-                                    <label class="form-check-label">Samedi</label>
+                                <div class="form-group">
+                                    <label>Samedi</label>
                                 </div>
                                 {% endif %}
                                 {% if day_choices.6.0 in days%}
-                                <div class="form-group form-check">
-                                    <label class="form-check-label">Dimanche</label>
+                                <div class="form-group">
+                                    <label>Dimanche</label>
                                 </div>
                                 {% endif %}
                             </div>
@@ -58,35 +57,35 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="input1" class="col-sm-8 col-form-label">Début des cours</label>
-                                    <div class="col-auto">
+                                    <label class="col-sm-8 col-form-label">Début des cours</label>
+                                    <div class="col-auto col-form-label">
                                         {{ day_start_time }}
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="input2" class="col-sm-8 col-form-label">Fin des cours</label>
-                                    <div class="col-auto">
+                                    <label class="col-sm-8 col-form-label">Fin des cours</label>
+                                    <div class="col-auto col-form-label">
                                         {{ day_finish_time }}
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="input3" class="col-sm-8 col-form-label">Début de la pause
+                                    <label class="col-sm-8 col-form-label">Début de la pause
                                         déjeuner</label>
-                                    <div class="col-auto">
+                                    <div class="col-auto col-form-label">
                                         {{ lunch_break_start_time }}
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="input4" class="col-sm-8 col-form-label">Fin de la pause déjeuner</label>
-                                    <div class="col-auto">
+                                    <label class="col-sm-8 col-form-label">Fin de la pause déjeuner</label>
+                                    <div class="col-auto col-form-label">
                                         {{ lunch_break_finish_time }}
                                     </div>
                                 </div>
 
                                 <div class="form-group row">
-                                    <label for="input4" class="col-sm-8 col-form-label">Intervalle par défaut entre deux
+                                    <label  class="col-sm-8 col-form-label">Intervalle par défaut entre deux
                                         cours</label>
-                                    <div class="col-auto">
+                                    <div class="col-auto col-form-label">
                                         {{ default_preference_duration }}
                                     </div>
                                 </div>
