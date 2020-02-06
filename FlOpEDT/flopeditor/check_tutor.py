@@ -38,4 +38,6 @@ def check_tutor(user):
     :rtype:  bool
 
     """
-    return user.is_tutor
+    if hasattr(user, "is_tutor"):
+        return user.is_tutor
+    return False
