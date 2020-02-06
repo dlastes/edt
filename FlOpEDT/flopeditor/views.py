@@ -31,9 +31,10 @@ to manage a department statistics for FlOpEDT.
 """
 
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseForbidden
 from django.contrib.auth.decorators import user_passes_test
 from base.models import Department
+from base.check_admin import check_admin
 from people.models import Tutor
 from flopeditor.check_tutor import check_tutor
 
@@ -86,3 +87,18 @@ def department_parameters(request, department_abbrev):
 
     """
     return HttpResponse(department_abbrev)
+
+
+@user_passes_test(check_admin)
+def ajax_create_department(request):
+    """Ajax url for department creation
+
+    :param request: Client request.
+    :type request:  django.http.HttpRequest
+    :return: Server response for the creation request.
+    :rtype:  django.http.JsonResponse
+
+    """
+    if request.is_ajax() and request.method == "POST":
+        return JsonResponse({'status': 'OK'})
+    return HttpResponseForbidden()
