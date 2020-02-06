@@ -13,6 +13,11 @@ body {
 .bg-dark {
     background-color: #343a40 !important;
 }
+
+.bg-grey {
+    background-color: #d2d2d2 !important;
+}
+
 #main .btn-secondary:hover {
     background-color: white !important;
     color: grey !important;
