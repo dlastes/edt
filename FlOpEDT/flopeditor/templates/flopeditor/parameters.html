@@ -1,16 +1,102 @@
 {% extends "flopeditor/base.html" %}
 {% block nav-classes-parameters %} active {% endblock %}
+
 {% block content %}
+<div class="container">
+    <div class="row align-middle justify-content-center">
+        <div class="col-sm-auto">
+            <div class="card">
+                <h5 class="card-header">{{ title }}</h5>
+                <div class="card-body">
+                    <form>
+                        <div class="form-group row">
+                            <div class="col-sm-4  mt-3" style="border-right: solid 1px grey;">
+                                <div class="form-group">
+                                    <p class="h6"><u><strong>Jours ouvrables</strong></u></p>
+                                </div>
+                                {% if day_choices.0.0 in days%}
+                                <div class="form-group form-check">
+                                    <label class="form-check-label">Lundi</label>
+                                </div>
+                                {% endif %}
 
+                                {% if day_choices.1.0 in days%}
+                                <div class="form-group form-check">
+                                    <label class="form-check-label">Mardi</label>
+                                </div>
+                                {% endif %}
+                                {% if day_choices.2.0 in days%}
+                                <div class="form-group form-check">
+                                    <label class="form-check-label">Mercredi</label>
+                                </div>
+                                {% endif %}
+                                {% if  day_choices.3.0 in days%}
+                                <div class="form-group form-check">
+                                    <label class="form-check-label">Jeudi</label>
+                                </div>
+                                {% endif %}
+                                {% if  day_choices.4.0 in days%}
+                                <div class="form-group form-check">
+                                    <label class="form-check-label">Vendredi</label>
+                                </div>
+                                {% endif %}
+                                {% if  day_choices.5.0 in days%}
+                                <div class="form-group form-check">
+                                    <label class="form-check-label">Samedi</label>
+                                </div>
+                                {% endif %}
+                                {% if day_choices.6.0 in days%}
+                                <div class="form-group form-check">
+                                    <label class="form-check-label">Dimanche</label>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-sm-8 mt-3">
+                                <div class="form-group row">
+                                    <div class="col-sm-12 h6">
+                                        <u><strong>Horaires de fonctionnement</strong></u>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="input1" class="col-sm-8 col-form-label">Début des cours</label>
+                                    <div class="col-auto">
+                                        {{ day_start_time }}
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="input2" class="col-sm-8 col-form-label">Fin des cours</label>
+                                    <div class="col-auto">
+                                        {{ day_finish_time }}
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="input3" class="col-sm-8 col-form-label">Début de la pause
+                                        déjeuner</label>
+                                    <div class="col-auto">
+                                        {{ lunch_break_start_time }}
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="input4" class="col-sm-8 col-form-label">Fin de la pause déjeuner</label>
+                                    <div class="col-auto">
+                                        {{ lunch_break_finish_time }}
+                                    </div>
+                                </div>
 
-{{ day_start_time }}
+                                <div class="form-group row">
+                                    <label for="input4" class="col-sm-8 col-form-label">Intervalle par défaut entre deux
+                                        cours</label>
+                                    <div class="col-auto">
+                                        {{ default_preference_duration }}
+                                    </div>
+                                </div>
 
-{{ day_finish_time }}
+                            </div>
 
-{{ lunch_break_start_time }}
-
-{{ lunch_break_finish_time }}
-
-{{ days }}
-
-{% endblock %}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endblock %}
