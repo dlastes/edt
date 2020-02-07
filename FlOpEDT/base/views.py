@@ -1285,6 +1285,34 @@ def user_preferences_changes(req, year, week, username, **kwargs):
     return response
 
         
+@login_required
+def room_preferences_changes(req, year, week, room, **kwargs):
+    response = check_ajax_post(req)
+    if response is not None:
+        return response
+
+    response = {'status':'KO', 'more':''}
+    
+    logger.info(f"REQ: dispo change for {room} by {req.user.username}")
+    logger.info(f"     W{week} Y{year}")
+    
+    try:
+        room = Room.objects.get(name=room)
+    except ObjectDoesNotExist:
+        response['more'] \
+            = "Problème d'utilisateur."
+        return JsonResponse(response)
+
+    if len(set(req.user.departments.all()).intersection(
+            set(room.departments.all()))) == 0:
+        response['more'] \
+            = 'Non autorisé, réclamez plus de droits.'
+        return JsonResponse(response)
+
+    # print(q)
+    response = preferences_changes(req, year, week, HelperRoomPreference(room))
+
+    return response
 
 
 
