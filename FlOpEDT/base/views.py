@@ -47,6 +47,7 @@ from FlOpEDT.decorators import dept_admin_required
 from FlOpEDT.settings.base import COSMO_MODE
 
 from people.models import Tutor, UserDepartmentSettings, User
+from people.tutor import tutor_required
 
 from displayweb.admin import BreakingNewsResource
 from displayweb.models import BreakingNews
@@ -1285,7 +1286,7 @@ def user_preferences_changes(req, year, week, username, **kwargs):
     return response
 
         
-@login_required
+@dept_admin_required
 def room_preferences_changes(req, year, week, room, **kwargs):
     response = check_ajax_post(req)
     if response is not None:
@@ -1316,6 +1317,7 @@ def room_preferences_changes(req, year, week, room, **kwargs):
 
 
 
+@dept_admin_required
 def course_preferences_changes(req, year, week, train_prog, course_type, **kwargs):
     response = check_ajax_post(req)
     logger.info(response)
@@ -1340,7 +1342,7 @@ def course_preferences_changes(req, year, week, train_prog, course_type, **kwarg
 
 
 
-@login_required
+@tutor_required
 def decale_changes(req, **kwargs):
     bad_response = HttpResponse("KO")
     good_response = HttpResponse("OK")
