@@ -112,6 +112,7 @@ function openNav() {
 
 //    $('#sp_tutor').hide();
     $('#sp_course_type').hide();
+    $('#sp_room').hide();
 
     // add event listeners
     for (var key in dd_selections) {
@@ -150,8 +151,9 @@ function closeNav() {
 // show tutor selection in the side panel
 function show_tutors() {
     // refresh side panel
-    $('#sp_course_type').hide();
     $('#sp_tutor').show();
+    $('#sp_course_type').hide();
+    $('#sp_room').hide();
 
     // change button behaviors
     mode = "tutor" ;
@@ -165,9 +167,22 @@ function show_tutors() {
 function show_course_types(){
     $('#sp_tutor').hide();
     $('#sp_course_type').show();
+    $('#sp_room').hide();
 
     // change button behaviors
     mode = "course" ;
+
+    fetch_selected();
+}
+
+// show course type selection in the side panel
+function show_rooms(){
+    $('#sp_tutor').hide();
+    $('#sp_course_type').hide();
+    $('#sp_room').show();
+
+    // change button behaviors
+    mode = "room" ;
 
     fetch_selected();
 }
