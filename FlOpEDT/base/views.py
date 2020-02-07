@@ -240,6 +240,7 @@ def stype(req, *args, **kwargs):
                        'usr_pref_hours': req.user.tutor.pref_hours_per_day,
                        'usr_max_hours': req.user.tutor.max_hours_per_day,
                        'err': err,
+                       'is_department_admin': req.user.has_department_perm(req.department, admin=True),
                        'current_year': current_year,
                        'time_settings': queries.get_time_settings(req.department),
                        'days': num_all_days(1, 1, req.department),
