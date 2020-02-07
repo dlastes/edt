@@ -537,7 +537,7 @@ class TTModel(object):
                 card = 2 * len(dayslots)
                 expr = self.lin_expr()
                 expr += card * IBD[(i, d)]
-                for c in self.wdb.possible_courses[i]:
+                for c in self.wdb.possible_courses[i] & self.wdb.courses_for_supp_tutor[i]:
                     for sl in dayslots & self.wdb.compatible_slots[c]:
                         expr -= self.TTinstructors[(sl, c, i)]
                 self.add_constraint(expr, '>=', 0)
