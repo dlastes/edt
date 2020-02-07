@@ -4,6 +4,28 @@ function is_slug(string) {
     return /^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*$/.test(string);
 }
 
+function message_reset() {
+  const message_div = $("#form-message");
+  message_div.removeClass(function(index, className) {
+    return (className.match(/(^|\s)alert-\S+/g) || []).join(' ');
+  });
+  message_div.text("");
+}
+
+function message_hide() {
+  const message_div = $("#form-message");
+  message_div.hide();
+  message_reset();
+}
+
+function message_display(msg_type, content) {
+  message_reset();
+  const message_div = $("#form-message");
+  message_div.addClass("alert-"+msg_type);
+  message_div.text(content);
+  message_div.show();
+}
+
 $("#form-create-department").submit(function(event) {
     event.preventDefault();
 
@@ -16,13 +38,23 @@ $("#form-create-department").submit(function(event) {
         type: "POST",
         url: url,
         data: form.serialize(),
-        success: function(response) {
-            console.log(response);
+        success: function(response) {            
             $("#button-create-department").html(button_html);
+            switch(response.status) {
+              case 'OK':
+                window.location.href = "";
+                break;
+              case 'ERROR':
+                message_display("warning", response.message);
+                break;
+              case 'UNKNOWN':
+                message_display("warning", response.message);
+            }
+
         },
         error: function(error) {
-            console.log(error);
             $("#button-create-department").html(button_html);
+            message_display("warning", "Une erreur est survenue. Veuillez réessayer.");
         },
     });
 });
@@ -35,18 +67,15 @@ $("#button-create-department").click(function(){
     if(inputNomDep.val().length > 0 && inputNomDep.val().length <= 50) {
         if(is_slug(inputAbbrev.val()) && inputAbbrev.val().length <= 7) {
             if(inputResp[0].selectedIndex !== 0) {
-                error_div.hide();
+                message_hide();
                 $("#form-create-department").submit();
             } else {
-                error_div.text("Vous devez séléctionner un responsable.");
-                error_div.show();
+                message_display("warning", "Vous devez sélectionner un responsable.");
             }
         } else {
-            error_div.text("L'abréviation du département est invalide. Elle peut comporter des lettres et des chiffres. Elle ne doit pas comporter d'espace, utilisez des '-' pour les séparations.");
-            error_div.show();
+            message_display("warning", "L'abréviation du département est invalide. Elle peut comporter des lettres et des chiffres. Elle ne doit pas comporter d'espace, utilisez des '-' pour les séparations.");
         }
     } else {
-        error_div.text("Le nom du département est invalide. Il doit comporter entre 1 et 50 caractères.");
-        error_div.show();
+        message_display("warning", "Le nom du département est invalide. Il doit comporter entre 1 et 50 caractères.");
     }
 });

@@ -57,7 +57,7 @@
                     <div class="form-inline mt-4">
                         <label for="inputResp" class="col-form-label col-sm-4">Responsable</label>
                         <div class="col-sm-8">
-                            <select class="form-control w-100" id="inputResp">
+                            <select name="respDep" class="form-control w-100" id="inputResp">
                                 <option disabled selected>Sélectionner...</option>
                                 {% for admin in admins %}
                                 <option value="{{ admin.id }}">{{ admin.last_name }} {{ admin.first_name }}</option>
@@ -65,7 +65,7 @@
                             </select>
                         </div>
                     </div>
-                    <div id="form-error-message" class="alert alert-warning mt-4 mr-2 ml-2 mb-0" role="alert" style="display:none;border-radius:5px;"></div>
+                    <div id="form-message" class="alert mt-4 mr-2 ml-2 mb-0" role="alert" style="display:none;border-radius:5px;"></div>
                 </form>
             </div>
             <div class="modal-footer">
