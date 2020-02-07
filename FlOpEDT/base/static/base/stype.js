@@ -176,10 +176,13 @@ function translate_room_preferences_from_csv(d) {
 
 
 function translate_pref_from_csv(d) {
-    if (mode == 'tutor') {
+    switch(mode) {
+    case 'tutor':
         return translate_dispos_from_csv(d);
-    } else if (mode == 'course') {
+    case 'course':
         return translate_course_preferences_from_csv(d);
+    case 'room':
+        return translate_room_preferences_from_csv(d);
     }
 }
 

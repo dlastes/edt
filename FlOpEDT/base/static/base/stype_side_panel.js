@@ -107,6 +107,8 @@ function dd_fetch_ended() {
         fetch_selected();
     } else if (mode == 'course' && dd_selections['type'].filled && dd_selections['prog'].filled) {
         fetch_selected();
+    } else if (mode == 'room' && dd_selections['room'].filled) {
+        fetch_selected();
     }
 }
 
