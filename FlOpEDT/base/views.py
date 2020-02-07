@@ -574,18 +574,17 @@ def fetch_unavailable_rooms(req, year, week, **kwargs):
     # if cached is not None:
     #     return cached
 
-    # dataset = DispoResource() \
-    #     .export(RoomPreference.objects.filter(
-    #                                         room__departments = department, 
-    #                                         week=week,
-    #                                         year=year,
-    #                                         value=0))
-    # response = HttpResponse(dataset.csv,
-    #                         content_type='text/csv')
+    dataset = RoomPreferenceResource() \
+        .export(RoomPreference.objects\
+                .select_for_update('room__departments')\
+                .filter(room__departments = department, 
+                        week=week,
+                        year=year,
+                        value=0))
+    response = HttpResponse(dataset.csv,
+                            content_type='text/csv')
     # cache.set(cache_key, response)
 
-
-    response = HttpResponse(content_type='text/csv')
     response['week'] = week
     response['year'] = year
 
