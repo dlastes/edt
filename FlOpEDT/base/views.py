@@ -54,12 +54,12 @@ from displayweb.models import BreakingNews
 from base.admin import CoursResource, DispoResource, VersionResource, \
     CoursPlaceResource, UnavailableRoomsResource, TutorCoursesResource, \
     CoursePreferenceResource, MultiDepartmentTutorResource, \
-    SharedRoomGroupsResource
+    SharedRoomGroupsResource, RoomPreferenceResource
 if COSMO_MODE:
     from base.admin import CoursPlaceResourceCosmo
 from base.forms import ContactForm, PerfectDayForm
 from base.models import Course, UserPreference, ScheduledCourse, EdtVersion, \
-    CourseModification, Day, Time, RoomGroup, PlanningModification, \
+    CourseModification, Day, Time, RoomGroup, Room, PlanningModification, \
     Regen, RoomPreference, Department, TimeGeneralSettings, CoursePreference, \
     TrainingProgramme, CourseType
 import base.queries as queries
@@ -624,6 +624,20 @@ def fetch_user_default_week(req, username, **kwargs):
     return response
 
 
+def fetch_room_default_week(req, room, **kwargs):
+    try:
+        room = Room.objects.get(name=room)
+    except ObjectDoesNotExist:
+        return HttpResponse('Problem')
+
+    dataset = RoomPreferenceResource() \
+        .export(RoomPreference.objects \
+                .filter(week=None,
+                        room=room))  # all())#
+    response = HttpResponse(dataset.csv, content_type='text/csv')
+    return response
+
+
 def fetch_decale(req, **kwargs):
     if not req.is_ajax() or req.method != "GET":
         return HttpResponse("KO")
@@ -796,6 +810,13 @@ def fetch_rooms(req, **kwargs):
     """
     rooms = queries.get_rooms(req.department.abbrev)
     return JsonResponse(rooms, safe=False)    
+
+def fetch_flat_rooms(req, **kwargs):
+    """
+    Return rooms for a given department
+    """
+    return JsonResponse([room.name for room in Room.objects.filter(departments=req.department)],
+                         safe=False)    
 
 def fetch_constraints(req, **kwargs):
     """
@@ -1143,6 +1164,22 @@ class HelperCoursePreference():
                                 duration=duration,
                                 value=value)
         
+class HelperRoomPreference():
+    def __init__(self, room):
+        self.room = room
+
+    def filter(self):
+        return RoomPreference.objects.filter(room=self.room)
+
+    def generate(self, week, year, day, start_time, duration, value):
+        return RoomPreference(room=self.room,
+                              week=week,
+                              year=year,
+                              day=day,
+                              start_time=start_time,
+                              duration=duration,
+                              value=value)
+
 
 def preferences_changes(req, year, week, helper_pref):
     good_response = {'status':'OK', 'more':''}

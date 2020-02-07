@@ -274,7 +274,16 @@ class UnavailableRoomsResource(resources.ModelResource):
         model = RoomPreference
         fields = ("room", "day", "start_time", "duration")
 
+        
+class RoomPreferenceResource(resources.ModelResource):
+    room = fields.Field(attribute='room',
+                        widget=ForeignKeyWidget(Room, 'name'))
+    
+    class Meta:
+        model = RoomPreference
+        fields = ("room", "day", "start_time", "duration", "value")
 
+        
 class VersionResource(resources.ModelResource):
     class Meta:
         model = EdtVersion;
