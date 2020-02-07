@@ -53,7 +53,8 @@ var mode = "tutor" ;
 var dd_selections = {
     'tutor': {value:logged_usr.name},
     'prog': {value:''},
-    'type': {value:''}};
+    'type': {value:''},
+    'room': {value:''}};
 
 
 

@@ -46,12 +46,21 @@ function fetch_selected() {
     for(var key in dd_selections) {
         dd_selections[key].value = $(dd_selections[key].id).find(':selected').val() ;
     }
-    if (mode == 'tutor') {
+    switch(mode){
+    case 'tutor':
         user.name = dd_selections['tutor'].value;
-    } else {
+        break;
+    case 'course':
         user.name = course_type_prog_name(
             dd_selections['prog'].value,
             dd_selections['type'].value) ;
+        break;
+    case 'room':
+        user.name = dd_selections['room'].value;
+        break;
+    default:
+        console.log("What's this mode?");
+        return ;
     }
     fetch_pref_only() ;
     if (mode == 'tutor') {
