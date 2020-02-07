@@ -5,6 +5,8 @@ dd_selections['type'].url = url_course_types ;
 dd_selections['type'].id ="#dd_course_types";
 dd_selections['prog'].url = url_training_programmes;
 dd_selections['prog'].id = "#dd_programmes" ;
+dd_selections['room'].url = url_rooms;
+dd_selections['room'].id = "#dd_rooms" ;
 
 for (var key in dd_selections){
     dd_selections[key].filled = false ;

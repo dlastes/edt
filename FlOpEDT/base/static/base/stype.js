@@ -129,12 +129,15 @@ function create_lunchbar() {
   ------- DISPOS ------
   ---------------------*/
 function fetch_url() {
-    if (mode == 'tutor') {
+    switch(mode) {
+    case 'tutor':
         return url_fetch_user_dweek + user.name ;
-    } else if (mode == 'course') {
+    case 'course':
         return url_fetch_course_dweek 
             + dd_selections['prog'].value
             + '/' + dd_selections['type'].value ;
+    case 'room':
+        return url_fetch_room_dweek + user.name ;
     }
 }
 
@@ -263,13 +266,17 @@ d3.select("body")
 // compute url to send preference changes to
 // according to mode
 function send_url(year, week) {
-    if (mode == 'tutor') {
+    switch(mode){
+    case 'tutor':
         return url_user_pref_changes + year + "/" + week
 	    + "/" + user.name ;
-    } else if (mode == 'course') {
+    case 'course':
         return url_course_pref_changes + year + "/" + week
 	    + "/" + dd_selections['prog'].value
             + "/" + dd_selections['type'].value ;
+    case 'room':
+        return url_room_pref_changes + year + "/" + week
+	    + "/" + user.name ;
     }
 }
 
