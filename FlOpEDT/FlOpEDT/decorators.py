@@ -74,3 +74,20 @@ def dept_admin_required(view_func=None, redirect_field_name=REDIRECT_FIELD_NAME,
     if view_func:
         return actual_decorator(view_func)
     return actual_decorator
+
+
+def tutor_required(view_func=None, redirect_field_name=REDIRECT_FIELD_NAME,
+                   login_url='people:login'):
+    """
+    Decorator for views that checks that the user is a tutor, 
+    redirecting to the login page if necessary.
+    """
+    actual_decorator = user_passes_test(
+        lambda u: u.is_tutor,
+        login_url=login_url,
+        redirect_field_name=redirect_field_name
+    )
+    if view_func:
+        return actual_decorator(view_func)
+    return actual_decorator
+

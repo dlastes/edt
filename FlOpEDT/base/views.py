@@ -43,11 +43,10 @@ from django.urls import reverse
 from django.views.decorators.cache import cache_page
 from django.views.generic import RedirectView
 
-from FlOpEDT.decorators import dept_admin_required
+from FlOpEDT.decorators import dept_admin_required, tutor_required
 from FlOpEDT.settings.base import COSMO_MODE
 
 from people.models import Tutor, UserDepartmentSettings, User
-from people.tutor import tutor_required
 
 from displayweb.admin import BreakingNewsResource
 from displayweb.models import BreakingNews
