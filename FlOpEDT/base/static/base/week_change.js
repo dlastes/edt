@@ -246,10 +246,25 @@ function allocate_dispos(tutor) {
 // in the interface
 function fill_missing_preferences(tutor, ts) {
     week_days.forEach(function(day) {
-	insert_interval({start_time: ts.day_start_time,
-			 duration: ts.day_finish_time-ts.day_start_time,
-			 value: -1},
-			dispos[tutor][day.ref]);
+        var current = ts.day_start_time ;
+        var next ;
+        while(current < ts.day_finish_time) {
+            if (current < ts.lunch_break_start_time) {
+                next = Math.min(current + ts.def_pref_duration,
+                                ts.lunch_break_start_time);
+            } else {
+                next = Math.min(current + ts.def_pref_duration,
+                                ts.day_finish_time);
+            }
+	    insert_interval({start_time: current,
+			     duration: next - current,
+			     value: -1},
+			    dispos[tutor][day.ref]);
+            if (next == ts.lunch_break_start_time) {
+                next = ts.lunch_break_finish_time ;
+            }
+            current = next ;
+        }
     });
 
 }

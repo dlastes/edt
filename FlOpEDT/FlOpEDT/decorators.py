@@ -28,6 +28,7 @@ from functools import wraps
 from urllib.parse import urlparse
 
 from django.contrib.auth import REDIRECT_FIELD_NAME
+from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import resolve_url
 
 def request_passes_test(test_func, login_url=None, redirect_field_name=REDIRECT_FIELD_NAME):
@@ -74,3 +75,20 @@ def dept_admin_required(view_func=None, redirect_field_name=REDIRECT_FIELD_NAME,
     if view_func:
         return actual_decorator(view_func)
     return actual_decorator
+
+
+def tutor_required(view_func=None, redirect_field_name=REDIRECT_FIELD_NAME,
+                   login_url='people:login'):
+    """
+    Decorator for views that checks that the user is a tutor, 
+    redirecting to the login page if necessary.
+    """
+    actual_decorator = user_passes_test(
+        lambda u: u.is_tutor,
+        login_url=login_url,
+        redirect_field_name=redirect_field_name
+    )
+    if view_func:
+        return actual_decorator(view_func)
+    return actual_decorator
+
