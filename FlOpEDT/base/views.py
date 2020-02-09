@@ -576,7 +576,7 @@ def fetch_unavailable_rooms(req, year, week, **kwargs):
 
     dataset = RoomPreferenceResource() \
         .export(RoomPreference.objects\
-                .select_related('room__departments')\
+                .prefetch_related('room__departments')\
                 .filter(room__departments = department, 
                         week=week,
                         year=year,
