@@ -959,7 +959,7 @@ def edt_changes(req, **kwargs):
 
 
     logger.info(f"REQ: edt change; {req.body}")
-    logger.info(req.POST)
+    # logger.info(req.POST)
 
     old_version = json.loads(req.POST.get('v',-1))
     recv_changes = json.loads(req.POST.get('tab',[]))
