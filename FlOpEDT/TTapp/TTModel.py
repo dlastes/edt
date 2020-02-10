@@ -1520,7 +1520,7 @@ class Constraint:
     #type = type de contrainte, par exemple "room constraint"
     def __init__(self, id, constraint_type=None, instructor=None, slot=None, course=None, week=None, room=None, group=None, days=None):
         self.id = id
-        self.type = type
+        self.constraint_type = constraint_type
         self.instructor = instructor
         self.slot = slot
         self.course = course
@@ -1535,22 +1535,22 @@ class Constraint:
     # à utiliser après le parser pour afficher une contrainte insatisfiable
     def getIntelligibleForm(self):
         res = "La contrainte de type "
-        if (type is not None):
-            res += constraint_type, " ; "
-        if (instructor is not None):
-            res += "concernant le professeur ", instructor, " ; "
-        if (course is not None):
-            res += "pour le cours de ", course, " ; "
-        if (slot is not None):
-            res += " ", slot, " ; "
-        if (room is not None):
-            res += "dans la salle ", room, " ; "
-        if (week is not None):
-            res += "pour la semaine ", week, " ; "
-        if (days is not None):
-            res += "pour le jour ", days, " ; "
-        if (group is not None):
-            res += "pour le groupe ", group, " ; "
+        if (self.constraint_type is not None):
+            res += self.constraint_type, " ; "
+        if (self.instructor is not None):
+            res += "concernant le professeur ", self.instructor, " ; "
+        if (self.course is not None):
+            res += "pour le cours de ", self.course, " ; "
+        if (self.slot is not None):
+            res += self.slot, " ; "
+        if (self.room is not None):
+            res += "dans la salle ", self.room, " ; "
+        if (self.week is not None):
+            res += "pour la semaine ", self.week, " ; "
+        if (self.days is not None):
+            res += "pour le jour ", self.days, " ; "
+        if (self.group is not None):
+            res += "pour le groupe ", self.group, " ; "
         res += "ne peut pas être satisfaite"
         return res
 
