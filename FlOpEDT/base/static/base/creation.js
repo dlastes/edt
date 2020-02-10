@@ -414,7 +414,7 @@ function set_butgp() {
 	    }
 	    tot_row_gp += cur_rootgp.gp.width*butgp.width ;
 	    tot_row_gp += (npro==0)?0:(butgp.mar_h) ;
-            console.log(cur_rootgp.gp.width, butgp.width);
+            // console.log(cur_rootgp.gp.width, butgp.width);
 	    cur_rootgp.butx = cur_butx ;
             cur_butx += butgp.mar_h + cur_rootgp.gp.width*butgp.width ;
 	}
@@ -941,7 +941,7 @@ function create_quote() {
         async: true,
         contentType: "text/csv",
         success: function(msg) {
-            console.log(msg);
+            // console.log(msg);
 
             var quotes = d3.csvParse(msg, translate_quote_from_csv);
 	    if(quotes.length > 0){
