@@ -28,6 +28,7 @@ import importlib
 from TTapp.TTModel import TTModel
 
 from MyFlOp.MyTTUtils import print_differences
+#from MyFlOp.iut_specific_constraints import add_iut_specific_constraints
 
 
 class MyTTModel(TTModel):
@@ -59,6 +60,7 @@ class MyTTModel(TTModel):
         If you shall add more specific ones, you may write it down here.
         """
         TTModel.add_specific_constraints(self)
+        #add_iut_specific_constraints(self)
 
     def solve(self, time_limit=3600, target_work_copy=None,
               solver='gurobi'):
