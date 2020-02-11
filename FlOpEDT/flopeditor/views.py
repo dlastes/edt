@@ -100,7 +100,8 @@ def department_parameters(request, department_abbrev):
         'lunch_break_finish_time': min_to_str(parameters.lunch_break_finish_time),
         'days': parameters.days,
         'day_choices': Day.CHOICES,
-        'default_preference_duration': min_to_str(parameters.default_preference_duration)
+        'default_preference_duration': min_to_str(parameters.default_preference_duration),
+        'has_department_perm': request.user.has_department_perm(department=department, admin=True)
 
     })
 

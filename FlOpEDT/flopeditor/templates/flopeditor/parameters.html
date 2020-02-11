@@ -7,8 +7,9 @@
         <div class="col-sm-auto">
             <div class="card">
                 <h5 class="card-header">{{ title }}</h5>
-                <div class="card-body">
+                <div class="card-body pb-0">
                     <div class="form-group row">
+                        {% if not has_department_perm %}
                         <div class="col-sm-4  mt-3" style="border-right: solid 1px grey;">
                             <div class="form-group">
                                 <p class="h6"><u><strong>Jours ouvrables</strong></u></p>
@@ -90,7 +91,85 @@
                             </div>
 
                         </div>
+                        {% else %}
+                        <form class="mb-0">
+                            <div class="form-group row mb-0">
+                                <div class="col-sm-6  mt-3 pl-4" style="border-right: solid 1px grey;">
+                                    <div class="form-group">
+                                        <p class="h6"><u><strong>Jours ouvrables</strong></u></p>
+                                    </div>
+                                    <div class="form-group form-check mt-4">
+                                        <input type="checkbox" class="form-check-input" id="check1" checked>
+                                        <label class="form-check-label" for="check1">Lundi</label>
+                                    </div>
+                                    <div class="form-group form-check">
+                                        <input type="checkbox" class="form-check-input" id="check2" checked>
+                                        <label class="form-check-label" for="check2">Mardi</label>
+                                    </div>
+                                    <div class="form-group form-check">
+                                        <input type="checkbox" class="form-check-input" id="check3" checked>
+                                        <label class="form-check-label" for="check3">Mercredi</label>
+                                    </div>
+                                    <div class="form-group form-check">
+                                        <input type="checkbox" class="form-check-input" id="check4" checked>
+                                        <label class="form-check-label" for="check4">Jeudi</label>
+                                    </div>
+                                    <div class="form-group form-check">
+                                        <input type="checkbox" class="form-check-input" id="check5" checked>
+                                        <label class="form-check-label" for="check5">Vendredi</label>
+                                    </div>
+                                    <div class="form-group form-check">
+                                        <input type="checkbox" class="form-check-input" id="check6">
+                                        <label class="form-check-label" for="check6">Samedi</label>
+                                    </div>
+                                    <div class="form-group form-check">
+                                        <input type="checkbox" class="form-check-input" id="check7">
+                                        <label class="form-check-label" for="check7">Dimanche</label>
+                                    </div>
 
+                                </div>
+                                <div class="col-sm-6 mt-3">
+                                    <div class="form-group ">
+                                        <p class="h6"><u><strong>Horaires de fonctionnement</strong></u></p>
+                                    </div>
+                                    <label for="input1" class="col-auto pl-0 mb-0 text-muted">Début des cours</label>
+                                    <div class="form-group row pt-0">
+                                        <div class="col-auto">
+                                          <input type="time" class="form-control pt-0" id="input1" value="08:00">
+                                        </div>
+                                    </div>
+
+                                    <label for="input2" class="col-auto pl-0 mb-0 text-muted">Fin des cours</label>
+                                    <div class="form-group row pt-0">
+                                        <div class="col-auto">
+                                          <input type="time" class="form-control pt-0" id="input2" value="18:45">
+                                        </div>
+                                    </div>
+
+                                    <label for="input3" class="col-auto pl-0 mb-0 text-muted">Début de la pause déjeuner</label>
+                                    <div class="form-group row pt-0">
+                                        <div class="col-auto">
+                                          <input type="time" class="form-control pt-0" value="12:30" id="input3">
+                                        </div>
+                                    </div>
+
+                                    <label for="input4" class="col-auto pl-0 mb-0 text-muted">Fin de la pause déjeuner</label>
+                                    <div class="form-group row pt-0">
+                                        <div class="col-auto">
+                                          <input type="time" class="form-control pt-0" value="14:15" id="input4">
+                                        </div>
+                                    </div>
+            
+                                </div>
+                                <div class="col-sm-12 mt-4 text-center">
+                                    <a href="" type="button" class="btn btn-success">Valider <i class="fa fa-check"></i></a>
+                                    <a href="" type="button" class="btn btn-danger">Annuler <i class="fa fa-times"></i></a>
+                                </div>
+                              </div>
+            
+                        </form>
+
+                        {% endif %}
                     </div>
                 </div>
             </div>
