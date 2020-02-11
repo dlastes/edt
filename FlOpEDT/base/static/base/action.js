@@ -1486,7 +1486,7 @@ function edt_change_ack(msg) {
 	}
 	splash(splash_disclaimer);
     }
-    console.log(ack.more);
+    // console.log(ack.more);
     go_ack_msg();
 }
 
@@ -1629,7 +1629,7 @@ function splash(splash_ds){
 	}
     }
 
-    console.log(com_dat);
+    // console.log(com_dat);
 
 
     var comms = spg

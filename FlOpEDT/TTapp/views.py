@@ -28,6 +28,8 @@ from django.http import HttpResponse, JsonResponse
 
 from base.models import ScheduledCourse
 
+from TTapp.TTUtils import get_conflicts
+
 from MyFlOp import MyTTUtils
 
             
@@ -41,18 +43,26 @@ def available_work_copies(req, dept, year, week):
     return JsonResponse({'copies': copies})
 
 
+def check_swap(req, dept, year, week, work_copy):
+    '''
+    Check whether the swap between scheduled courses with work copy
+    work_copy and scheduled courses with work copy 0 is feasible
+    against the scheduled courses in other departments
+    '''
+    print(dept, week, year, work_copy)
+    return JsonResponse(get_conflicts(dept, week, year, work_copy))
+
+
 def swap(req, dept, year, week, work_copy):
     '''
     Swap scheduled courses with work copy work_copy
     against scheduled courses with work copy 0
     '''
-    MyTTUtils.swap_version(dept, week, year, work_copy)
-    return JsonResponse({'status': 'ok'})
+    return JsonResponse(MyTTUtils.swap_version(dept, week, year, work_copy))
 
 
 def reassign_rooms(req, dept, year, week, work_copy):
     '''
     Reassign rooms of scheduled courses with work copy work_copy
     '''
-    MyTTUtils.reassign_rooms(dept, week, year, work_copy)
-    return JsonResponse({'status': 'ok'})
+    return JsonResponse(MyTTUtils.reassign_rooms(dept, week, year, work_copy))

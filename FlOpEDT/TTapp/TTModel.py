@@ -30,7 +30,7 @@ from pulp import LpVariable, LpConstraint, LpBinary, LpConstraintEQ, \
     LpMinimize, lpSum, LpStatusOptimal, LpStatusNotSolved
 
 from pulp import GUROBI_CMD, PULP_CBC_CMD
-from pulp.solvers import GUROBI
+#from pulp.solvers import GUROBI_CMD as GUROBI
 
 from FlOpEDT.settings.base import COSMO_MODE
 
@@ -63,6 +63,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 pattern = r".+: (.|\s)+ (=|>=|<=) \d*"
+GUROBI = 'GUROBI_CMD'
 
 class WeekDB(object):
     def __init__(self, department, weeks, year, train_prog):
@@ -543,7 +544,7 @@ class TTModel(object):
                 card = 2 * len(dayslots)
                 expr = self.lin_expr()
                 expr += card * IBD[(i, d)]
-                for c in self.wdb.possible_courses[i]:
+                for c in self.wdb.possible_courses[i] & self.wdb.courses_for_supp_tutor[i]:
                     for sl in dayslots & self.wdb.compatible_slots[c]:
                         expr -= self.TTinstructors[(sl, c, i)]
                 self.add_constraint(expr, '>=', 0, constraint_type="IBD inf", instructor=i, days=d)
@@ -817,7 +818,7 @@ class TTModel(object):
 
         # Training half day
         for training_half_day in self.wdb.training_half_days:
-            training_slots = self.wdb.slots_by_day[training_half_day.day]
+            training_slots = slots_filter(self.wdb.slots, week_day=training_half_day.day, week=training_half_day.week)
             if training_half_day.apm is not None:
                 training_slots = slots_filter(training_slots, apm=training_half_day.apm)
             training_progs = self.train_prog

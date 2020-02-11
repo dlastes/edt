@@ -36,32 +36,34 @@ from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import EmailMessage, send_mail
 from django.db import transaction
+from django.db.models import Sum
 from django.http import HttpResponse, Http404, JsonResponse, HttpRequest
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.views.decorators.cache import cache_page
 from django.views.generic import RedirectView
-from django.db.models import Sum
 
+from FlOpEDT.decorators import dept_admin_required, tutor_required
 from FlOpEDT.settings.base import COSMO_MODE
 
 from people.models import Tutor, UserDepartmentSettings, User
 
+from displayweb.admin import BreakingNewsResource
+from displayweb.models import BreakingNews
+
 from base.admin import CoursResource, DispoResource, VersionResource, \
     CoursPlaceResource, UnavailableRoomsResource, TutorCoursesResource, \
     CoursePreferenceResource, MultiDepartmentTutorResource, \
-    SharedRoomGroupsResource
+    SharedRoomGroupsResource, RoomPreferenceResource
 if COSMO_MODE:
     from base.admin import CoursPlaceResourceCosmo
-from displayweb.admin import BreakingNewsResource
 from base.forms import ContactForm, PerfectDayForm
 from base.models import Course, UserPreference, ScheduledCourse, EdtVersion, \
-    CourseModification, Day, Time, RoomGroup, PlanningModification, \
+    CourseModification, Day, Time, RoomGroup, Room, PlanningModification, \
     Regen, RoomPreference, Department, TimeGeneralSettings, CoursePreference, \
     TrainingProgramme, CourseType
 import base.queries as queries
 from base.weeks import *
-from displayweb.models import BreakingNews
 
 logger = logging.getLogger(__name__)
 
@@ -155,7 +157,10 @@ def edt(req, year=None, week=None, splash_id=0, **kwargs):
                 'splash_id': splash_id,
                 'time_settings': queries.get_time_settings(req.department),
                 'days': num_all_days(year, week, req.department),
-                'has_department_perm': req.user.is_authenticated and req.user.has_department_perm(req.department),
+                'has_department_perm': req.user.is_authenticated \
+                and req.user.has_department_perm(req.department),
+                'is_department_admin': req.user.is_authenticated\
+                and req.user.has_department_perm(req.department, admin=True),
                 'dept': req.department.abbrev,
                 'cosmo': COSMO_MODE,
             })
@@ -202,6 +207,7 @@ def edt_light(req, year=None, week=None, **kwargs):
                       'time_settings': queries.get_time_settings(req.department),
                       'days': num_all_days(year, week, req.department),
                       'has_department_perm': False,
+                      'is_department_admin': False,
                       'dept': req.department.abbrev,
                       'tv_svg_h': svg_h,
                       'tv_svg_w': svg_w,
@@ -234,6 +240,7 @@ def stype(req, *args, **kwargs):
                        'usr_pref_hours': req.user.tutor.pref_hours_per_day,
                        'usr_max_hours': req.user.tutor.max_hours_per_day,
                        'err': err,
+                       'is_department_admin': req.user.has_department_perm(req.department, admin=True),
                        'current_year': current_year,
                        'time_settings': queries.get_time_settings(req.department),
                        'days': num_all_days(1, 1, req.department),
@@ -298,9 +305,14 @@ def fetch_perfect_day(req, username=None, *args, **kwargs):
     return JsonResponse(perfect_day, safe=False)
 
 
+@dept_admin_required
 def aide(req, **kwargs):
     return TemplateResponse(req, 'base/aide.html',
-                {'has_department_perm': req.user.is_authenticated and req.user.has_department_perm(req.department)})
+                {'has_department_perm': req.user.is_authenticated \
+                 and req.user.has_department_perm(req.department),
+                 'is_department_admin': req.user.is_authenticated\
+                 and req.user.has_department_perm(req.department, admin=True)
+                })
 
 
 @login_required
@@ -562,18 +574,17 @@ def fetch_unavailable_rooms(req, year, week, **kwargs):
     # if cached is not None:
     #     return cached
 
-    # dataset = DispoResource() \
-    #     .export(RoomPreference.objects.filter(
-    #                                         room__departments = department, 
-    #                                         week=week,
-    #                                         year=year,
-    #                                         value=0))
-    # response = HttpResponse(dataset.csv,
-    #                         content_type='text/csv')
+    dataset = RoomPreferenceResource() \
+        .export(RoomPreference.objects\
+                .prefetch_related('room__departments')\
+                .filter(room__departments = department, 
+                        week=week,
+                        year=year,
+                        value=0))
+    response = HttpResponse(dataset.csv,
+                            content_type='text/csv')
     # cache.set(cache_key, response)
 
-
-    response = HttpResponse(content_type='text/csv')
     response['week'] = week
     response['year'] = year
 
@@ -608,6 +619,20 @@ def fetch_user_default_week(req, username, **kwargs):
         .export(UserPreference.objects \
                 .filter(week=None,
                         user=user))  # all())#
+    response = HttpResponse(dataset.csv, content_type='text/csv')
+    return response
+
+
+def fetch_room_default_week(req, room, **kwargs):
+    try:
+        room = Room.objects.get(name=room)
+    except ObjectDoesNotExist:
+        return HttpResponse('Problem')
+
+    dataset = RoomPreferenceResource() \
+        .export(RoomPreference.objects \
+                .filter(week=None,
+                        room=room))  # all())#
     response = HttpResponse(dataset.csv, content_type='text/csv')
     return response
 
@@ -785,6 +810,13 @@ def fetch_rooms(req, **kwargs):
     rooms = queries.get_rooms(req.department.abbrev)
     return JsonResponse(rooms, safe=False)    
 
+def fetch_flat_rooms(req, **kwargs):
+    """
+    Return rooms for a given department
+    """
+    return JsonResponse([room.name for room in Room.objects.filter(departments=req.department)],
+                         safe=False)    
+
 def fetch_constraints(req, **kwargs):
     """
     Return course type constraints for a given department
@@ -892,7 +924,7 @@ def edt_changes(req, **kwargs):
     bad_response = {'status':'KO', 'more':''}
     good_response = {'status':'OK', 'more':''}
 
-    if not (req.user.is_tutor and req.user.is_staff):
+    if not req.user.is_tutor:
         bad_response['more'] = "Pas membre de l'équipe encadrante"
         return JsonResponse(bad_response)
         
@@ -927,7 +959,7 @@ def edt_changes(req, **kwargs):
 
 
     logger.info(f"REQ: edt change; {req.body}")
-    logger.info(req.POST)
+    # logger.info(req.POST)
 
     old_version = json.loads(req.POST.get('v',-1))
     recv_changes = json.loads(req.POST.get('tab',[]))
@@ -1131,6 +1163,22 @@ class HelperCoursePreference():
                                 duration=duration,
                                 value=value)
         
+class HelperRoomPreference():
+    def __init__(self, room):
+        self.room = room
+
+    def filter(self):
+        return RoomPreference.objects.filter(room=self.room)
+
+    def generate(self, week, year, day, start_time, duration, value):
+        return RoomPreference(room=self.room,
+                              week=week,
+                              year=year,
+                              day=day,
+                              start_time=start_time,
+                              duration=duration,
+                              value=value)
+
 
 def preferences_changes(req, year, week, helper_pref):
     good_response = {'status':'OK', 'more':''}
@@ -1236,9 +1284,38 @@ def user_preferences_changes(req, year, week, username, **kwargs):
     return response
 
         
+@dept_admin_required
+def room_preferences_changes(req, year, week, room, **kwargs):
+    response = check_ajax_post(req)
+    if response is not None:
+        return response
+
+    response = {'status':'KO', 'more':''}
+    
+    logger.info(f"REQ: dispo change for {room} by {req.user.username}")
+    logger.info(f"     W{week} Y{year}")
+    
+    try:
+        room = Room.objects.get(name=room)
+    except ObjectDoesNotExist:
+        response['more'] \
+            = "Problème d'utilisateur."
+        return JsonResponse(response)
+
+    if len(set(req.user.departments.all()).intersection(
+            set(room.departments.all()))) == 0:
+        response['more'] \
+            = 'Non autorisé, réclamez plus de droits.'
+        return JsonResponse(response)
+
+    # print(q)
+    response = preferences_changes(req, year, week, HelperRoomPreference(room))
+
+    return response
 
 
 
+@dept_admin_required
 def course_preferences_changes(req, year, week, train_prog, course_type, **kwargs):
     response = check_ajax_post(req)
     logger.info(response)
@@ -1263,7 +1340,7 @@ def course_preferences_changes(req, year, week, train_prog, course_type, **kwarg
 
 
 
-@login_required
+@tutor_required
 def decale_changes(req, **kwargs):
     bad_response = HttpResponse("KO")
     good_response = HttpResponse("OK")

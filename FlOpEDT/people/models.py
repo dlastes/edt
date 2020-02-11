@@ -57,12 +57,18 @@ class User(AbstractUser):
         admin=True    Check if the user can access to the 
                       department admin
         """
-        perm = False
+        if self.is_superuser:
+            return True
+        
+        perm = self.is_tutor
 
         if department:
             perm = department in self.departments.all()
             if admin:
-                perm &= self.is_staff
+                if perm:
+                    user_dept = UserDepartmentSettings.objects.get(user=self,
+                                                                   department=department)
+                    perm &= user_dept.is_admin
 
         return perm
 
@@ -100,9 +106,11 @@ class UserDepartmentSettings(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
     is_main = models.BooleanField(default=False)
+    is_admin = models.BooleanField(default=False)
 
     def __str__(self):
-        return f'U:{self.user.username}, D:{self.department.abbrev}, {"main" if self.is_main else "secondary"}'
+        return (f'U:{self.user.username}, D:{self.department.abbrev}, {"main" if self.is_main else "secondary"}, '
+                f'{"admin" if self.is_admin else "regular"}')
 
 
 class Tutor(User):

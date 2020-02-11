@@ -38,6 +38,8 @@ from .models import User, FullStaff, SupplyStaff, BIATOS
 
 logger = logging.getLogger(__name__)
 
+
+
 class AddFullStaffTutor(CreateView):
     model = FullStaff
     form_class = AddFullStaffTutorForm
