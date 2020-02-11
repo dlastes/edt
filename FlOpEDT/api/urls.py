@@ -130,6 +130,10 @@ routerPreferences.register(r'single-week', views.UsersPreferences_Single_ViewSet
 routerPreferences.register(r'single-week-or-default', views.UsersPreferences_SingleODefault_ViewSet, basename="single-week-or-default")
 routerPreferences.register(r'course', views.CoursePreferencesViewSet)
 routerPreferences.register(r'room', views.RoomPreferencesViewSet)
+routerPreferences.register(r'test-user-def', views.UserPreferenceDefaultViewSet, basename="plop")
+routerPreferences.register(r'test-user-single', views.UserPreferenceSingleViewSet, basename="plop")
+routerPreferences.register(r'test-user-sowdef', views.UserPreferenceSingleOwDefaultViewSet, basename="plop")
+
 
 routerRooms = routers.SimpleRouter()
 

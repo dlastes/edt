@@ -444,6 +444,65 @@ class CoursePreferencesViewSet(viewsets.ModelViewSet):
     
     filterset_fields = '__all__'
 
+
+
+class UserPreferenceGenViewSet(viewsets.ModelViewSet):
+    serializer_class = serializers.UsersPreferencesSerializer
+
+class UserPreferenceDefaultFilterSet(filters.FilterSet):
+    user = filters.CharFilter(field_name='user__username')
+    dept = filters.CharFilter(field_name='user__departments__abbrev')
+
+    class Meta:
+        model = bm.UserPreference
+        fields = ['user', 'dept']
+
+class UserPreferenceDefaultViewSet(UserPreferenceGenViewSet):
+    filter_class = UserPreferenceDefaultFilterSet
+    queryset = bm.UserPreference.objects.filter(week=None)
+
+
+class UserPreferenceSingleFilterSet(filters.FilterSet):
+    user = filters.CharFilter(field_name='user__username')
+    dept = filters.CharFilter(field_name='user__departments__abbrev')
+    # makes the fields required
+    week = filters.NumberFilter(field_name='week', required=True)
+    year = filters.NumberFilter(field_name='year', required=True)
+
+    class Meta:
+        model = bm.UserPreference
+        fields = ['user', 'dept', 'week', 'year']
+
+class UserPreferenceSingleViewSet(UserPreferenceGenViewSet):
+    filter_class = UserPreferenceSingleFilterSet
+    queryset = bm.UserPreference.objects.all()
+
+class UserPreferenceSingleOwDefaultViewSet(UserPreferenceGenViewSet):
+    filter_class = UserPreferenceSingleFilterSet
+
+    def get_query_params(self, req):
+        # Getting the filters
+        dict_params = {}
+        week = req.query_params.get('week', None)
+        if week is not None:
+            dict_params['week'] = week
+        year = self.request.query_params.get('year', None)
+        if year is not None:
+            dict_params['year'] = year
+        
+        return dict_params
+
+    def get_queryset(self):
+        params = self.get_query_params(self.request)
+        print(params)
+        qs = bm.UserPreference.objects.filter(**params)
+        if len(qs) == 0:
+            print(self.filter_class.week)
+            print(self.request.query_params.get('week', None))
+            qs = bm.UserPreference.objects.filter(week=None)
+        return qs
+
+
 class RoomPreferencesViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the room preferences
