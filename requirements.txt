@@ -17,5 +17,7 @@ django-ical
 ipython
 djangorestframework
 djangorestframework-csv
-#markdown
+django-rest-auth
+django-rest-swagger
+Markdown~=3.1.1
 #django-filter
