@@ -63,7 +63,6 @@ $("#button-create-department").click(function(){
     const inputNomDep = $("#inputNomDep");
     const inputAbbrev = $("#inputAbbrev");
     const inputResp = $("#inputResp");
-    const error_div = $("#form-error-message");
     if(inputNomDep.val().length > 0 && inputNomDep.val().length <= 50) {
         if(is_slug(inputAbbrev.val()) && inputAbbrev.val().length <= 7) {
             if(inputResp[0].selectedIndex !== 0) {
