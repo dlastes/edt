@@ -23,7 +23,7 @@
 # a commercial license. Buying such a license is mandatory as soon as
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
-
+import importlib
 
 from pulp import LpVariable, LpConstraint, LpBinary, LpConstraintEQ, \
     LpConstraintGE, LpConstraintLE, LpAffineExpression, LpProblem, LpStatus, \
@@ -887,11 +887,7 @@ class TTModel(object):
                                              for (c, rg) in self.wdb.room_course_compat[r]
                                              if c in self.wdb.compatible_courses[sl2]),
                                     '<=', 1000, constraint_type="Une salle ne peut pas être disponible pour 2 cours à un même moment", room=r, slot=sl1)
-                #test constraint manager
-                #self.constraintManager.add_to_ConstraintManager(new Constraint(id=name, type="Pas assez de salle simultanément", slot=sl1, room=r))
 
-        #récupère la contrainte avec le nom donné en paramètre
-        #print(constraintManager.get_constraint_with_name_is())
         for sl in self.wdb.slots:
             # constraint : each course is assigned to a RoomGroup
             for c in self.wdb.compatible_courses[sl]:
@@ -1411,7 +1407,7 @@ class TTModel(object):
                 m.write(ilp_file_name)
                 print("IIS written in file ", ilp_file_name)
                 for id_constraint in parseIIS(ilp_file_name):
-                    print(constraintManager.get_constraint_by_id(id_constraint).getIntelligibleForm())
+                    print(self.constraintManager.get_constraint_by_id(id_constraint).getIntelligibleForm())
         """
         else:
             # TODO Use the solver parameter to get
@@ -1560,7 +1556,7 @@ def parseIIS(IIS_filename):
     datas = f.read().split("Subject To\n")[1]
     constraints_declarations = datas.split("Bounds")
     constraints_text = constraints_declarations[0]
-    declarations_text = constraints_declarations[1]
+    #declarations_text = constraints_declarations[1]
 
     constraints_text = constraints_text.split(":")
     constraints = []
@@ -1570,7 +1566,7 @@ def parseIIS(IIS_filename):
     constraints = list(map(lambda constraint : constraint[1:], constraints))
     return constraints
 
-class ConstraintManager: #classe unique
+class ConstraintManager:
     def __init__(self):
         self.constraints = []
 
