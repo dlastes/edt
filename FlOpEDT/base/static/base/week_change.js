@@ -60,8 +60,6 @@ function fetch_tutor_preferences() {
         async: true,
         contentType: "text/csv",
         success: function(msg) {
-            console.log("in");
-
             var sel_week = wdw_weeks.get_selected() ;
             if (Week.compare(exp_week, sel_week)==0) {
                 dispos = {};
@@ -246,10 +244,25 @@ function allocate_dispos(tutor) {
 // in the interface
 function fill_missing_preferences(tutor, ts) {
     week_days.forEach(function(day) {
-	insert_interval({start_time: ts.day_start_time,
-			 duration: ts.day_finish_time-ts.day_start_time,
-			 value: -1},
-			dispos[tutor][day.ref]);
+        var current = ts.day_start_time ;
+        var next ;
+        while(current < ts.day_finish_time) {
+            if (current < ts.lunch_break_start_time) {
+                next = Math.min(current + ts.def_pref_duration,
+                                ts.lunch_break_start_time);
+            } else {
+                next = Math.min(current + ts.def_pref_duration,
+                                ts.day_finish_time);
+            }
+	    insert_interval({start_time: current,
+			     duration: next - current,
+			     value: -1},
+			    dispos[tutor][day.ref]);
+            if (next == ts.lunch_break_start_time) {
+                next = ts.lunch_break_finish_time ;
+            }
+            current = next ;
+        }
     });
 
 }
@@ -436,7 +449,7 @@ function adapt_labgp(first) {
         // }
     } // sinon ?
     dsp_svg.h = svg_height() ;
-    console.log(dsp_svg.h);
+    // console.log(dsp_svg.h);
     d3.select("#edt-main").attr("height", dsp_svg.h);
 
     if (first) {
@@ -535,7 +548,7 @@ function fetch_cours() {
                 modules.pp = [];
                 salles.pp = [];
 
-    		console.log(exp_week,num_copie);
+    		// console.log(exp_week,num_copie);
 
                 cours_pp = d3.csvParse(msg, translate_cours_pp_from_csv);
 
@@ -880,12 +893,8 @@ function fetch_room_preferences() {
         success: function(msg, ts, req) {
             var sel_week = wdw_weeks.get_selected() ;
             if (Week.compare(exp_week, sel_week)==0) {
-
-		console.log(msg);
-
 		clean_unavailable_rooms();
                 d3.csvParse(msg, translate_unavailable_rooms);
-
             }
             show_loader(false);
 	    fetch.ongoing_un_rooms = false;
@@ -899,7 +908,7 @@ function fetch_room_preferences() {
 
 function translate_unavailable_rooms(d) {
     var i ;
-    console.log(d);
+    //console.log(d);
     if (Object.keys(unavailable_rooms).indexOf(d.room)==-1){
 	unavailable_rooms[d.room] = {} ; 
 	week_days.forEach(function(day){
@@ -923,13 +932,11 @@ function fetch_room_extra_unavailability() {
         async: true,
         contentType: "text/csv",
         success: function(msg) {
-            // console.log(msg);
             var sel_week = wdw_weeks.get_selected() ;
             if (Week.compare(exp_week, sel_week)==0) {
                 extra_pref.rooms = {};
                 d3.csvParse(msg, translate_extra_pref_room_from_csv);
 	        sort_preferences(extra_pref.rooms);
-                console.log(extra_pref.rooms);
                 var shared_rooms = Object.keys(extra_pref.rooms) ;
                 for(i = 0 ; i < shared_rooms.length ; i++) {
                     var busy_days = Object.keys(extra_pref.rooms[shared_rooms[i]]) ;

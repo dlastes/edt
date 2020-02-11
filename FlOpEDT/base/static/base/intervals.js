@@ -137,14 +137,25 @@ function find_in_pref(pref, entity, period) {
 
 
 function no_overlap(list, start_time, duration) {
+    if (list.length == 0) {
+        return true ;
+    }
+    
     var i_start = index_in_pref(list.map(function(d){return d.start_time;}), start_time) ;
     var i_end = index_in_pref(list.map(function(d){return d.start_time;}), start_time+duration) ;
 
     if (i_start != i_end) {
 	return false ;
     }
-    if (i_start==0 || i_start==list.length) {
+    if (i_end==0) {
 	return true ;
+    }
+    if (i_start==list.length) {
+        if (start_time >= list[list.length-1].start_time + list[list.length-1].duration) {
+            return true ;
+        } else {
+            return false ;
+        }
     }
     if (list[i_start-1].start_time + list[i_start-1].duration
 	<= start_time

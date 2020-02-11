@@ -1,32 +1,55 @@
-from django.http import HttpResponse, HttpResponseNotFound
-from django.shortcuts import render
-from django.db import transaction
-from django.conf import settings
+# coding: utf8
+# -*- coding: utf-8 -*-
 
-from django.contrib.admin.views.decorators import staff_member_required
-
-from base.models import Department, Course
-
-from misc.generate_static_files import generate_group_file, generate_room_file
-from configuration.make_planif_file import make_planif_file
-from configuration.extract_planif_file import extract_planif
-from configuration.deploy_database import extract_database_file
-from .file_manipulation import upload_file, check_ext_file
-from .forms import ImportPlanif, ImportConfig
+# This file is part of the FlOpEDT/FlOpScheduler project.
+# Copyright (c) 2017
+# Authors: Iulian Ober, Paul Renaud-Goud, Pablo Seban, et al.
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# Affero General Public License for more details.
+# 
+# You should have received a copy of the GNU Affero General Public
+# License along with this program. If not, see
+# <http://www.gnu.org/licenses/>.
+# 
+# You can be released from the requirements of the license by purchasing
+# a commercial license. Buying such a license is mandatory as soon as
+# you develop activities involving the FlOpEDT/FlOpScheduler software
+# without disclosing the source code of your own applications.
 
 import os
 import datetime
 import json
 import logging
 
+from django.http import HttpResponse, HttpResponseNotFound
+from django.shortcuts import render
+from django.db import transaction
+from django.conf import settings
+
+from misc.generate_static_files import generate_group_file, generate_room_file
+
+from FlOpEDT.decorators import dept_admin_required
+
+from base.models import Department, Course
+
+from configuration.make_planif_file import make_planif_file
+from configuration.extract_planif_file import extract_planif
+from configuration.deploy_database import extract_database_file
+from configuration.file_manipulation import upload_file, check_ext_file
+from configuration.forms import ImportPlanif, ImportConfig
+
+
 logger = logging.getLogger(__name__)
 
-# Create your views here.
-
-
-# @user_passes_test(check_admin)
-# @login_required
-@staff_member_required
+@dept_admin_required
 def configuration(req, **kwargs):
     """
     Main view of Configuration
@@ -43,8 +66,7 @@ def configuration(req, **kwargs):
     return render(req, 'configuration/configuration.html', arg_req)
 
 
-# @ajax(login_required=True, is_superuser=True, require_POST=True)
-@staff_member_required
+@dept_admin_required
 def import_config_file(req, **kwargs):
     """
     View for the first step of the configuration. It imports the file
@@ -121,9 +143,7 @@ def import_config_file(req, **kwargs):
     return HttpResponse(json.dumps(response), content_type='application/json')
 
 
-# @user_passes_test(check_admin)
-# @login_required
-@staff_member_required
+@dept_admin_required
 def get_config_file(req, **kwargs):
     """
     Resend the empty configuration's file.
@@ -138,9 +158,7 @@ def get_config_file(req, **kwargs):
     return response
 
 
-# @user_passes_test(check_admin)
-# @login_required
-@staff_member_required
+@dept_admin_required
 def get_planif_file(req, **kwargs):
     """
     Send an empty planification's file.
@@ -163,8 +181,7 @@ def get_planif_file(req, **kwargs):
     return response
 
 
-# @ajax(login_required=True, require_POST=True, is_superuser=True)
-@staff_member_required
+@dept_admin_required
 def import_planif_file(req, **kwargs):
     """
     Import a planification's file filled. Before data processing, it must to

@@ -1,3 +1,31 @@
+// update acks
+function update_acks() {
+    for (key in ack_side_panel) {
+        $(ack_side_panel[key].id).text(ack_side_panel[key].txt) ;
+    }
+}
+
+// empty the ack sections of the side panel
+function empty_acks() {
+    for (key in ack_side_panel) {
+        ack_side_panel[key].txt = '' ;
+    }
+    update_acks();
+}
+
+
+// receive results and display in ack sections
+function format_acks(msg, key_ack) {
+    if (msg.status == 'OK') {
+        ack_side_panel[key_ack].txt = 'OK';
+    } else {
+        ack_side_panel[key_ack].txt = 'KO ! ' + msg.more;
+    }
+    update_acks();
+}
+
+
+
 // open side panel
 function openNav() {
 
@@ -83,11 +111,41 @@ function swap_with_copy_0() {
         async: true,
         contentType: "application/json; charset=utf-8",
         success: function(msg) {
+            format_acks(msg, 'swap');
+            if (msg.status == 'OK') {
+                num_copie = 0 ;
+                $('#dd_work_copy option[value="0"]').prop('selected', true) ;
+            }
             fetch_all(false, false);
             show_loader(false);
         },
         error: function(msg) {
-            console.log("error");
+            ack_side_panel['swap'].txt = 'Problème côté serveur';
+            update_acks();
+            show_loader(false);
+        }
+    });
+}
+
+
+// check chether the swap is feasible
+function check_swap_with_copy_0() {
+    var cur_week = wdw_weeks.get_selected();
+
+    show_loader(true);
+    $.ajax({
+        type: "GET",
+        dataType: 'json',
+        url: url_check_swap +  cur_week.url() + '/' + num_copie,
+        async: true,
+        contentType: "application/json; charset=utf-8",
+        success: function(msg) {
+            format_acks(msg, 'check-swap');
+            show_loader(false);
+        },
+        error: function(msg) {
+            ack_side_panel['check-swap'].txt = 'Problème côté serveur';
+            update_acks();
             show_loader(false);
         }
     });
@@ -115,3 +173,12 @@ function reassign_rooms() {
         }
     });
 }
+
+
+
+var ack_side_panel = {'swap': {id:'swap'},
+                     'check-swap': {id:'check-swap'}};
+for (key in ack_side_panel) {
+    ack_side_panel[key].id = '#ack-' + ack_side_panel[key].id ;
+}
+empty_acks();

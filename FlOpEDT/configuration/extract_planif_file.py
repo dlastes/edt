@@ -32,7 +32,7 @@ from base.weeks import actual_year
 from base.models import Group, Module, Course, Room, CourseType, RoomType,\
     TrainingProgramme, Dependency, Period, Department
 from people.models import Tutor
-from misc.assign_module_color import assign_color
+from misc.assign_colors import assign_module_color
 
 
 def ReadPlanifWeek(department, book, feuille, week, year):
@@ -203,7 +203,7 @@ def extract_planif(department, bookname=None):
     book = load_workbook(filename=bookname, data_only=True)
     for period in Period.objects.filter(department=department):
         extract_period(department, book, period, actual_year)
-    assign_color(department)
+    assign_module_color(department)
 
 
 def extract_planif_from_week(week, year, department, bookname=None):
