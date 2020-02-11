@@ -63,7 +63,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 pattern = r".+: (.|\s)+ (=|>=|<=) \d*"
-GUROBI = 'GUROBI_CMD'
+GUROBI = 'GUROBI'
 
 class WeekDB(object):
     def __init__(self, department, weeks, year, train_prog):
