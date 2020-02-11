@@ -10,8 +10,9 @@
         <title>{% block title %}FlopEditor - {{ title }}{% endblock %}</title>
 
         {% block link %}
+        <link rel="stylesheet" href="{% static 'flopeditor/lib/fontawesome/css/all.min.css' %}">
         <link rel="stylesheet" href="{% static 'flopeditor/lib/bootstrap-material-design/css/bootstrap-material-design.min.css' %}">
-        <link rel="stylesheet" href="{% static 'flopeditor/flopeditor.css' %}">
+        <link rel="stylesheet" href="{% static 'flopeditor/css/flopeditor.css' %}">
         {% endblock %}
 
         {% endblock %}
@@ -71,7 +72,7 @@
         {% endblock %}
 
         {% block script %}
-        <script src="{% static 'flopeditor/lib/jquery/jquery-3.2.1.slim.min.js' %}" charset="utf-8"></script>
+        <script src="{% static 'flopeditor/lib/jquery/jquery-3.2.1.min.js' %}" charset="utf-8"></script>
         <script src="{% static 'flopeditor/lib/popper/popper.js' %}" charset="utf-8"></script>
         <script src="{% static 'flopeditor/lib/bootstrap-material-design/js/bootstrap-material-design.min.js' %}" charset="utf-8"></script>
         <script>

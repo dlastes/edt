@@ -31,11 +31,16 @@ to manage a department statistics for FlOpEDT.
 """
 
 from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse, HttpResponseForbidden
 from django.contrib.auth.decorators import user_passes_test
 from base.models import Department, TimeGeneralSettings, Day
 from base.timing import min_to_str
+from base.check_admin import check_admin
 from people.models import Tutor
 from flopeditor.check_tutor import check_tutor
+from flopeditor.db_requests import create_departments_in_database
+from flopeditor.validator import validate_department_creation, OK_RESPONSE
+
 
 @user_passes_test(check_tutor)
 def home(request):
@@ -98,6 +103,27 @@ def department_parameters(request, department_abbrev):
         'default_preference_duration': min_to_str(parameters.default_preference_duration)
 
     })
+
+
+@user_passes_test(check_admin)
+def ajax_create_department(request):
+    """Ajax url for department creation
+
+    :param request: Client request.
+    :type request:  django.http.HttpRequest
+    :return: Server response for the creation request.
+    :rtype:  django.http.JsonResponse
+
+    """
+    if request.is_ajax() and request.method == "POST":
+        name = request.POST['nomDep']
+        abbrev = request.POST['abbrevDep']
+        tutor_id = request.POST['respDep']
+        response = validate_department_creation(name, abbrev, tutor_id)
+        if response['status'] == OK_RESPONSE:
+            create_departments_in_database(name, abbrev, tutor_id)
+        return JsonResponse(response)
+    return HttpResponseForbidden()
 
 
 @user_passes_test(check_tutor)
