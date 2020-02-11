@@ -21,25 +21,26 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from rest_framework import viewsets
-import django_filters.rest_framework as filters
 from api import serializers
+
+from rest_framework import authentication, exceptions, viewsets
+from rest_framework.permissions import IsAuthenticated 
+from rest_framework.exceptions import ValidationError
+from rest_framework.response import Response
+
+import django_filters.rest_framework as filters
+from django.shortcuts import render
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
+from django.http import *
+from django.views.generic import TemplateView
+from django.conf import settings
+
 import people.models as pm
 import base.models as bm
 import quote.models as p
 import displayweb.models as dwm
 import TTapp.models as ttm
-from rest_framework.response import Response
-from django.views.generic import TemplateView
-from django.shortcuts import render
-from django.contrib.auth import authenticate, login, logout
-from django.http import *
-from django.views.generic import TemplateView
-from django.conf import settings
-from rest_framework.permissions import IsAuthenticated 
-from django.contrib.auth.models import User
-from rest_framework import authentication, exceptions
-
 
 # ------------
 # -- PEOPLE --
