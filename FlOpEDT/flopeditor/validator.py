@@ -47,7 +47,7 @@ def validate_department_creation(name, abbrev, tutor_id):
     :return: (boolean,json) (are the paramaters valid , status and errors)
     """
     response = {'status': 'UNKNOWN'}
-    slug_re = re.compile("^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*$")
+    slug_re = re.compile("^[a-zA-Z]\w{1,7}$")
     if not name or len(name) > 50:
         response = {
             'status': 'ERROR',

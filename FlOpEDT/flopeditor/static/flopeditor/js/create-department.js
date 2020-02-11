@@ -1,7 +1,7 @@
 /* jshint esversion: 6 */
 
 function is_slug(string) {
-    return /^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*$/.test(string);
+    return /^[a-zA-Z]\w{1,7}$/.test(string);
 }
 
 function message_reset() {
