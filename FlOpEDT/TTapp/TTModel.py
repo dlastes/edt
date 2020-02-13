@@ -1288,12 +1288,12 @@ class TTModel(object):
 
         self.add_rooms_constraints()
 
+        self.add_instructors_constraints()
+
         if self.core_only:
             return
 
         self.add_other_departments_constraints()
-
-        self.add_instructors_constraints()
 
         self.add_slot_preferences()
 
