@@ -34,12 +34,12 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponseForbidden
 from django.contrib.auth.decorators import user_passes_test
 from base.models import Department, TimeGeneralSettings, Day
-from base.timing import min_to_str
+from base.timing import min_to_str, str_to_min
 from base.check_admin import check_admin
 from people.models import Tutor
 from flopeditor.check_tutor import check_tutor
 from flopeditor.db_requests import create_departments_in_database
-from flopeditor.validator import validate_department_creation, OK_RESPONSE
+from flopeditor.validator import validate_department_creation, validate_parameters_edit, OK_RESPONSE
 
 
 @user_passes_test(check_tutor)
@@ -100,31 +100,39 @@ def department_parameters(request, department_abbrev):
         'lunch_break_finish_time': min_to_str(parameters.lunch_break_finish_time),
         'days': parameters.days,
         'day_choices': Day.CHOICES,
-        'default_preference_duration': min_to_str(parameters.default_preference_duration)
+        'default_preference_duration': min_to_str(parameters.default_preference_duration),
+        'has_department_perm': request.user.has_department_perm(department=department, admin=True),
+        'edit': False
 
     })
 
+@user_passes_test(check_tutor)
+def department_parameters_edit(request, department_abbrev):
+    """Parameters edit view of FlopEditor.
 
-@user_passes_test(check_admin)
-def ajax_create_department(request):
-    """Ajax url for department creation
-
-    :param request: Client request.
-    :type request:  django.http.HttpRequest
-    :return: Server response for the creation request.
-    :rtype:  django.http.JsonResponse
+    :param request:           Client request.
+    :param department_abbrev: Department abbreviation.
+    :type request:            django.http.HttpRequest
+    :type department_abbrev:  str
+    :return: Parameters page rendered from the parameters template of FlopEditor.
+    :rtype:  django.http.HttpResponse
 
     """
-    if request.is_ajax() and request.method == "POST":
-        name = request.POST['nomDep']
-        abbrev = request.POST['abbrevDep']
-        tutor_id = request.POST['respDep']
-        response = validate_department_creation(name, abbrev, tutor_id)
-        if response['status'] == OK_RESPONSE:
-            create_departments_in_database(name, abbrev, tutor_id)
-        return JsonResponse(response)
-    return HttpResponseForbidden()
-
+    department = get_object_or_404(Department, abbrev=department_abbrev)
+    parameters = get_object_or_404(TimeGeneralSettings, department=department)
+    return render(request, "flopeditor/parameters.html", {
+        'title': 'Paramètres',
+        'department_abbrev': department_abbrev,
+        'day_start_time': min_to_str(parameters.day_start_time),
+        'day_finish_time': min_to_str(parameters.day_finish_time),
+        'lunch_break_start_time': min_to_str(parameters.lunch_break_start_time),
+        'lunch_break_finish_time': min_to_str(parameters.lunch_break_finish_time),
+        'days': parameters.days,
+        'day_choices': Day.CHOICES,
+        'default_preference_duration': min_to_str(parameters.default_preference_duration),
+        'has_department_perm': request.user.has_department_perm(department=department, admin=True),
+        'edit': True
+    })
 
 @user_passes_test(check_tutor)
 def department_rooms(request, department_abbrev):
@@ -196,3 +204,64 @@ def department_classes(request, department_abbrev):
         'title': 'Classes',
         'department_abbrev': department_abbrev
     })
+
+
+@user_passes_test(check_admin)
+def ajax_create_department(request):
+    """Ajax url for department creation
+
+    :param request: Client request.
+    :type request:  django.http.HttpRequest
+    :return: Server response for the creation request.
+    :rtype:  django.http.JsonResponse
+
+    """
+    if request.is_ajax() and request.method == "POST":
+        name = request.POST['nomDep']
+        abbrev = request.POST['abbrevDep']
+        tutor_id = request.POST['respDep']
+        response = validate_department_creation(name, abbrev, tutor_id)
+        if response['status'] == OK_RESPONSE:
+            create_departments_in_database(name, abbrev, tutor_id)
+        return JsonResponse(response)
+    return HttpResponseForbidden()
+
+@user_passes_test(check_admin)
+def ajax_edit_parameters(request, department_abbrev):
+    """Ajax url for parameters edition
+
+    :param request: Client request.
+    :type request:  django.http.HttpRequest
+    :return: Server response for the request.
+    :rtype:  django.http.JsonResponse
+
+    """
+    department = get_object_or_404(Department, abbrev=department_abbrev)
+    if not request.user.has_department_perm(department=department, admin=True):
+        return HttpResponseForbidden()
+    if request.is_ajax() and request.method == "POST":
+        days = request.POST.getlist('days')
+        day_start_time = request.POST['day_start_time']
+        day_finish_time = request.POST['day_finish_time']
+        lunch_break_start_time = request.POST['lunch_break_start_time']
+        lunch_break_finish_time = request.POST['lunch_break_finish_time']
+        default_preference_duration = request.POST['default_preference_duration']
+        response = validate_parameters_edit(
+            days,
+            day_start_time,
+            day_finish_time,
+            lunch_break_start_time,
+            lunch_break_finish_time,
+            default_preference_duration)
+        if response['status'] == OK_RESPONSE:
+            parameters = get_object_or_404(TimeGeneralSettings, department=department)
+            parameters.days = days
+            parameters.day_start_time = str_to_min(day_start_time)
+            parameters.day_finish_time = str_to_min(day_finish_time)
+            parameters.lunch_break_start_time = str_to_min(lunch_break_start_time)
+            parameters.lunch_break_finish_time = str_to_min(lunch_break_finish_time)
+            parameters.default_preference_duration = str_to_min(default_preference_duration)
+            parameters.save()
+            response['message'] = "Les modifications ont bien été enregistrées."
+        return JsonResponse(response)
+    return HttpResponseForbidden()
