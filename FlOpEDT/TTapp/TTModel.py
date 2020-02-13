@@ -642,7 +642,7 @@ class TTModel(object):
         Add a constraint to the model
         """
         #id of the constraint
-        name = str(self.constraint_nb)
+        name = self.constraint_nb
 
         if relation == '==':
             pulp_relation = LpConstraintEQ
@@ -654,7 +654,7 @@ class TTModel(object):
             raise Exception("relation must be either '==' or '>=' or '<='")
 
         self.model += LpConstraint(e=expr, sense=pulp_relation,
-                                   rhs=value, name=name)  # + '_' + str(self.constraint_nb))
+                                   rhs=value, name=str(name))  # + '_' + str(self.constraint_nb))
 
         self.constraintManager.add_constraint(Constraint(id=name, constraint_type=constraint_type,
                                 instructor=instructor, slot=slot, course=course, week=week, room=room, group=group, days=days))
@@ -1395,19 +1395,19 @@ class TTModel(object):
                                     options=[("TimeLimit", time_limit),
                                              ("Presolve", presolve),
                                              ("MIPGapAbs", 0.2)]))
-        #test retour + parser
-        if result is None:
+        if result is None or result == 0:
             spec = importlib.util.find_spec('gurobipy')
-            if spec:
-                from gurobipy import read
-                lp = "FlOpTT-pulp.lp"
-                m = read(lp)
-                m.computeIIS()
-                ilp_file_name = "logs/IIS_weeks%s.ilp" % self.weeks
-                m.write(ilp_file_name)
-                print("IIS written in file ", ilp_file_name)
-                for id_constraint in parseIIS(ilp_file_name):
-                    print(self.constraintManager.get_constraint_by_id(id_constraint).getIntelligibleForm())
+            #if spec is None:
+            from gurobipy import read
+            lp = "FlOpTT-pulp.lp"
+            #m = read(lp)
+            #m.computeIIS()
+            #ilp_file_name = "logs/IIS_weeks%s.ilp" % self.weeks
+            ilp_file_name = "IIS_weeksDream.ilp"
+            #m.write(ilp_file_name)
+            print("IIS written in file ", ilp_file_name)
+            for id_constraint in parseIIS(ilp_file_name):
+                print(self.constraintManager.get_constraint_by_id(int(id_constraint)).getIntelligibleForm())
         """
         else:
             # TODO Use the solver parameter to get
@@ -1531,23 +1531,23 @@ class Constraint:
 
     # à utiliser après le parser pour afficher une contrainte insatisfiable
     def getIntelligibleForm(self):
-        res = "La contrainte de type "
-        if (self.constraint_type is not None):
-            res += self.constraint_type, " ; "
-        if (self.instructor is not None):
-            res += "concernant le professeur ", self.instructor, " ; "
-        if (self.course is not None):
-            res += "pour le cours de ", self.course, " ; "
-        if (self.slot is not None):
-            res += self.slot, " ; "
-        if (self.room is not None):
-            res += "dans la salle ", self.room, " ; "
-        if (self.week is not None):
-            res += "pour la semaine ", self.week, " ; "
-        if (self.days is not None):
-            res += "pour le jour ", self.days, " ; "
-        if (self.group is not None):
-            res += "pour le groupe ", self.group, " ; "
+        res = "La contrainte %s " % self.id
+        if self.constraint_type is not None:
+            res += 'de type "%s" ; ' % str(self.constraint_type)
+        if self.instructor is not None:
+            res += "concernant le professeur %s ; " % str(self.instructor)
+        if self.course is not None:
+            res += "pour le cours de %s ; " % str(self.course)
+        if self.slot is not None:
+            res += "pour le slot %s ; " % str(self.slot)
+        if self.room is not None:
+            res += "dans la salle %s ; " % str(self.room)
+        if self.week is not None:
+            res += "pour la semaine %s ; " % str(self.week)
+        if self.days is not None:
+            res += "pour le jour %s ; " % str(self.days)
+        if self.group is not None:
+            res += "pour le groupe %s ; " % str(self.group)
         res += "ne peut pas être satisfaite"
         return res
 

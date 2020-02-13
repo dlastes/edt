@@ -28,7 +28,7 @@ import importlib
 from TTapp.TTModel import TTModel
 
 from MyFlOp.MyTTUtils import print_differences
-#from MyFlOp.iut_specific_constraints import add_iut_specific_constraints
+from MyFlOp.iut_specific_constraints import add_iut_specific_constraints
 
 
 class MyTTModel(TTModel):
@@ -60,7 +60,7 @@ class MyTTModel(TTModel):
         If you shall add more specific ones, you may write it down here.
         """
         TTModel.add_specific_constraints(self)
-        #add_iut_specific_constraints(self)
+        add_iut_specific_constraints(self)
 
     def solve(self, time_limit=3600, target_work_copy=None,
               solver='gurobi'):
@@ -72,6 +72,7 @@ class MyTTModel(TTModel):
                                time_limit=time_limit,
                                target_work_copy=target_work_copy,
                                solver=solver)
+        """
         if result is None:
             spec = importlib.util.find_spec('gurobipy')
             if spec:
@@ -85,3 +86,4 @@ class MyTTModel(TTModel):
         else :
             if self.stabilize_work_copy is not None:
                 print_differences(self.weeks, self.year, self.stabilize_work_copy, target_work_copy, self.wdb.instructors)
+        """
