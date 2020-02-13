@@ -86,22 +86,3 @@ $("#form-parameters").submit(function (event) {
     }
 });
 
-$("#button-create-depdddddartment").click(function () {
-    const inputNomDep = $("#inputNomDep");
-    const inputAbbrev = $("#inputAbbrev");
-    const inputResp = $("#inputResp");
-    if (inputNomDep.val().length > 0 && inputNomDep.val().length <= 50) {
-        if (is_slug(inputAbbrev.val()) && inputAbbrev.val().length <= 7) {
-            if (inputResp[0].selectedIndex !== 0) {
-                message_hide();
-                $("#form-create-department").submit();
-            } else {
-                message_display("warning", "Vous devez sélectionner un responsable.");
-            }
-        } else {
-            message_display("warning", "L'abréviation du département est invalide. Elle peut comporter des lettres et des chiffres. Elle ne doit pas comporter d'espace, utilisez des '-' pour les séparations.");
-        }
-    } else {
-        message_display("warning", "Le nom du département est invalide. Il doit comporter entre 1 et 50 caractères.");
-    }
-});
