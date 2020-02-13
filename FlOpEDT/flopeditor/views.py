@@ -101,8 +101,37 @@ def department_parameters(request, department_abbrev):
         'days': parameters.days,
         'day_choices': Day.CHOICES,
         'default_preference_duration': min_to_str(parameters.default_preference_duration),
-        'has_department_perm': request.user.has_department_perm(department=department, admin=True)
+        'has_department_perm': request.user.has_department_perm(department=department, admin=True),
+        'edit': False
 
+    })
+
+@user_passes_test(check_tutor)
+def department_parameters_edit(request, department_abbrev):
+    """Parameters edit view of FlopEditor.
+
+    :param request:           Client request.
+    :param department_abbrev: Department abbreviation.
+    :type request:            django.http.HttpRequest
+    :type department_abbrev:  str
+    :return: Parameters page rendered from the parameters template of FlopEditor.
+    :rtype:  django.http.HttpResponse
+
+    """
+    department = get_object_or_404(Department, abbrev=department_abbrev)
+    parameters = get_object_or_404(TimeGeneralSettings, department=department)
+    return render(request, "flopeditor/parameters.html", {
+        'title': 'Paramètres',
+        'department_abbrev': department_abbrev,
+        'day_start_time': min_to_str(parameters.day_start_time),
+        'day_finish_time': min_to_str(parameters.day_finish_time),
+        'lunch_break_start_time': min_to_str(parameters.lunch_break_start_time),
+        'lunch_break_finish_time': min_to_str(parameters.lunch_break_finish_time),
+        'days': parameters.days,
+        'day_choices': Day.CHOICES,
+        'default_preference_duration': min_to_str(parameters.default_preference_duration),
+        'has_department_perm': request.user.has_department_perm(department=department, admin=True),
+        'edit': True
     })
 
 @user_passes_test(check_tutor)

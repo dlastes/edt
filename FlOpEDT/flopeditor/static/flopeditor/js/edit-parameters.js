@@ -68,7 +68,7 @@ $("#form-parameters").submit(function (event) {
                 $("#button-submit").html(button_html);
                 switch (response.status) {
                     case 'OK':
-                        message_display("success", response.message)
+                        window.location.href = parametersUrl;
                         break;
                     case 'ERROR':
                         message_display("warning", response.message);
