@@ -56,4 +56,6 @@ urlpatterns = [
     # --------------------------------
     path('ajax/create-department', views.ajax_create_department,
          name="flopeditor-ajax-create-department"),
+    path('ajax/parameters-edit/<slug:department_abbrev>', views.ajax_edit_parameters,
+        name='flopeditor-ajax-edit-department-parameters'),
 ]
