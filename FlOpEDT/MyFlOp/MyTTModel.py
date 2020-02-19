@@ -25,6 +25,9 @@
 # without disclosing the source code of your own applications.
 
 import importlib
+
+import pulp.solvers as pulp_solvers
+
 from TTapp.TTModel import TTModel, GUROBI_NAME
 
 from MyFlOp.MyTTUtils import print_differences
