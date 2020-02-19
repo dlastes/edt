@@ -25,7 +25,7 @@
 # without disclosing the source code of your own applications.
 
 import importlib
-from TTapp.TTModel import TTModel
+from TTapp.TTModel import TTModel, GUROBI_NAME
 
 from MyFlOp.MyTTUtils import print_differences
 
@@ -63,7 +63,7 @@ class MyTTModel(TTModel):
         TTModel.add_specific_constraints(self)
 
     def solve(self, time_limit=3600, target_work_copy=None,
-              solver='gurobi'):
+              solver=GUROBI_NAME):
         """
         If you shall add pre (or post) processing apps, you may write them down
         here.
