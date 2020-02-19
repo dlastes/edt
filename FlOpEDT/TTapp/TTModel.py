@@ -411,7 +411,8 @@ class TTModel(object):
                  min_bhd_i=1.,
                  min_nps_c=1.,
                  max_stab=5.,
-                 lim_ld=1.):
+                 lim_ld=1.,
+                 core_only=False):
         print("\nLet's start weeks #%s" % weeks)
         # beg_file = os.path.join('logs',"FlOpTT")
         self.model = LpProblem("FlOpTT", LpMinimize)
@@ -422,6 +423,7 @@ class TTModel(object):
         self.min_ups_c = min_nps_c
         self.max_stab = max_stab
         self.lim_ld = lim_ld
+        self.core_only = core_only
         self.var_nb = 0
         self.constraint_nb = 0
         if type(weeks) is int:
@@ -1282,13 +1284,18 @@ class TTModel(object):
 
         self.add_core_constraints()
 
+        self.add_dependency_constraints()
+
         self.add_rooms_constraints()
 
         self.add_instructors_constraints()
 
-        self.add_slot_preferences()
+        if self.core_only:
+            return
 
-        self.add_dependency_constraints()
+        self.add_other_departments_constraints()
+
+        self.add_slot_preferences()
 
         self.add_specific_constraints()
 
