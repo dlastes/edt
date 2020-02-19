@@ -30,6 +30,7 @@ from pulp import LpVariable, LpConstraint, LpBinary, LpConstraintEQ, \
     LpMinimize, lpSum, LpStatusOptimal, LpStatusNotSolved
 
 from pulp import GUROBI_CMD, PULP_CBC_CMD
+import pulp.solvers as pulp_solvers
 #from pulp.solvers import GUROBI_CMD as GUROBI
 
 from FlOpEDT.settings.base import COSMO_MODE
