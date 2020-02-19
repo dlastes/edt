@@ -473,6 +473,7 @@ def fetch_dispos(req, year, week, **kwargs):
     busy_inst_init = Course.objects.filter(week=week,
                                            year=year,
                                            module__train_prog__department=department) \
+                                   .select_related('module__train_prog__department')\
                                    .distinct('tutor') \
                                    .values_list('tutor')
                                            
