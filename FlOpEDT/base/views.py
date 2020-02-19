@@ -473,6 +473,7 @@ def fetch_dispos(req, year, week, **kwargs):
     busy_inst_init = Course.objects.filter(week=week,
                                            year=year,
                                            module__train_prog__department=department) \
+                                   .select_related('module__train_prog__department')\
                                    .distinct('tutor') \
                                    .values_list('tutor')
                                            
@@ -489,10 +490,13 @@ def fetch_dispos(req, year, week, **kwargs):
     busy_inst = list(chain(busy_inst,
                            [req.user]))
 
+    working_days = queries.get_working_days(department)
+
     week_avail = UserPreference.objects \
         .filter(week=week,
                 year=year,
-                user__in=busy_inst) \
+                user__in=busy_inst,
+                day__in=working_days) \
         .select_related('user')
 
     default_avail = UserPreference.objects \
@@ -501,7 +505,8 @@ def fetch_dispos(req, year, week, **kwargs):
                  .distinct('user') \
                  .values_list('user')) \
         .filter(week=None,
-                user__in=busy_inst) \
+                user__in=busy_inst,
+                day__in=working_days) \
         .select_related('user')
 
     dataset = DispoResource() \
@@ -541,7 +546,8 @@ def fetch_course_default_week(req, train_prog, course_type, **kwargs):
         .export(CoursePreference.objects \
                 .filter(week=None,
                         course_type=ct,
-                        train_prog=tp
+                        train_prog=tp,
+                        day__in=queries.get_working_days(req.department)
                 ))
 
     response = HttpResponse(dataset.csv,
@@ -618,7 +624,8 @@ def fetch_user_default_week(req, username, **kwargs):
     dataset = DispoResource() \
         .export(UserPreference.objects \
                 .filter(week=None,
-                        user=user))  # all())#
+                        user=user,
+                        day__in=queries.get_working_days(req.department)))  # all())#
     response = HttpResponse(dataset.csv, content_type='text/csv')
     return response
 
@@ -632,7 +639,8 @@ def fetch_room_default_week(req, room, **kwargs):
     dataset = RoomPreferenceResource() \
         .export(RoomPreference.objects \
                 .filter(week=None,
-                        room=room))  # all())#
+                        room=room,
+                        day__in=queries.get_working_days(req.department)))  # all())#
     response = HttpResponse(dataset.csv, content_type='text/csv')
     return response
 
@@ -749,7 +757,7 @@ def fetch_week_infos(req, year, week, **kwargs):
         version += queries.get_edt_version(dept, week, year, create=True)
 
     proposed_pref, required_pref = \
-        pref_requirements(req.user, year, week) if req.user.is_authenticated \
+        pref_requirements(req.department, req.user, year, week) if req.user.is_authenticated \
         else (-1, -1)
 
     try:
@@ -764,7 +772,7 @@ def fetch_week_infos(req, year, week, **kwargs):
     return response
 
 
-def pref_requirements(tutor, year, week):
+def pref_requirements(department, tutor, year, week):
     """
     Return a pair (filled, required): number of preferences
     that have been proposed VS required number of prefs, according
@@ -778,17 +786,20 @@ def pref_requirements(tutor, year, week):
         .objects \
         .filter(user=tutor,
                 week=week,
-                year=year)
+                year=year,
+                day__in=queries.get_working_days(department))
     if not week_av.exists():
         filled = UserPreference \
             .objects \
             .filter(user=tutor,
                     week=None,
-                    value__gte=1) \
+                    value__gte=1,
+                    day__in=queries.get_working_days(department)) \
             .count()
     else:
         filled = week_av \
-            .filter(value__gte=1) \
+            .filter(value__gte=1,
+                    day__in=queries.get_working_days(department)) \
             .count()
     return filled, 2*nb_courses
 
@@ -849,7 +860,7 @@ def fetch_training_programmes(req, **kwargs):
 
 def fetch_tutor_courses(req, year, week, tutor, **kwargs):
     """
-    Return all courses of tutor
+    Return all courses of tutor, accross departments
     """
     logger.info(f"W{week} Y{year}")
     logger.info(f"Fetch {tutor} courses")
