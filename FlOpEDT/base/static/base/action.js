@@ -1744,8 +1744,8 @@ function compute_cm_room_tutor_direction() {
 
 function show_detailed_courses(cours){
     remove_details();
-    var details = dg.append("g")
-                    .attr("id", "course_details");
+    var details = svg.get_dom("dg").append("g")
+        .attr("id", "course_details");
 
     var width = grid_width()/4;
     var height = grid_height()/3;

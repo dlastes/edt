@@ -295,7 +295,7 @@ class VersionResource(resources.ModelResource):
 class ModuleRessource(resources.ModelResource):
 	class Meta:
 		model = Course
-		fields = ('module__abbrev', 'module__nom', 'module__url')
+		fields = ('module__abbrev', 'module__name', 'module__url')
 		
 class TutorRessource(resources.ModelResource):
 	class Meta:

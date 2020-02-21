@@ -455,7 +455,9 @@ def fetch_cours_pp(req, week, year, num_copy, **kwargs):
 def fetch_module(req, year, week, **kwargs):
 	department = req.department
 	print(department)
-	module = Course.objects.filter(module__train_prog__department=department,semaine=week,an=year).distinct()
+	module = Course.objects.filter(module__train_prog__department=department,
+                                       week=week,
+                                       year=year).distinct()
 	dataset = ModuleRessource().export(module)
     
                          
@@ -467,7 +469,9 @@ def fetch_module(req, year, week, **kwargs):
 def fetch_tutor(req, year, week, **kwargs):
 	department = req.department
 	print(department)
-	tutor= Course.objects.filter(module__train_prog__department=department,semaine=week,an=year).distinct()
+	tutor= Course.objects.filter(module__train_prog__department=department,
+                                     week=week,
+                                     year=year).distinct()
 	dataset = TutorRessource().export(tutor)
     
                          
@@ -1459,7 +1463,7 @@ def decale_changes(req, **kwargs):
 # ---------
 
 
-def contact(req, prof, **kwargs):
+def contact(req, tutor, **kwargs):
     ack = ''
     if req.method == 'POST':
         form = ContactForm(req.POST)
@@ -1493,9 +1497,9 @@ def contact(req, prof, **kwargs):
         form = ContactForm(initial={
             'sender': init_mail})
 
-    if prof is not None:
-        prof_abbrev = Tutor.objects.get(username=prof)
-        form = ContactForm(initial={'recipient': prof_abbrev})
+    if tutor is not None:
+        tutor_abbrev = Tutor.objects.get(username=tutor)
+        form = ContactForm(initial={'recipient': tutor_abbrev})
     
 
 
