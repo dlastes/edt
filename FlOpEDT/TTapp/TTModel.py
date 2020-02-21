@@ -1420,14 +1420,11 @@ class TTModel(object):
             lp = "FlOpTT-pulp.lp"
             #m = read(lp)
             #m.computeIIS()
-            ilp_file_name = "logs/IIS_weeks%s.ilp" % self.weeks
+            #ilp_file_name = "logs/IIS_weeks%s.ilp" % self.weeks
+            ilp_file_name = "IIS_weeksDream.ilp"
             #m.write(ilp_file_name)
             print("IIS written in file ", ilp_file_name)
-            tabIdents = []
-            for id_constraint in parseIIS(ilp_file_name):
-                tabIdents.append(int(id_constraint))
-                print(self.constraintManager.get_constraint_by_id(int(id_constraint)).getIntelligibleForm())
-            self.constraintManager.showReducedResult(tabIdents)
+            self.constraintManager.handleReducedResult(ilp_file_name)
         """
         else:
             # TODO Use the solver parameter to get
@@ -1573,23 +1570,6 @@ class Constraint:
         res += "ne peut pas être satisfaite"
         return res
 
-
-def parseIIS(IIS_filename):
-    f = open(IIS_filename, "r")
-    datas = f.read().split("Subject To\n")[1]
-    constraints_declarations = datas.split("Bounds")
-    constraints_text = constraints_declarations[0]
-    # declarations_text = constraints_declarations[1]
-
-    constraints_text = constraints_text.split(":")
-    constraints = []
-    constraints.append(constraints_text[0])
-    for i in range(1, len(constraints_text) - 1):
-        constraints.append(constraints_text[i].split("=")[1].split("\n")[1])
-    constraints = list(map(lambda constraint: constraint[1:], constraints))
-    return constraints
-
-
 class ConstraintManager:
     def __init__(self):
         self.constraints = []
@@ -1667,3 +1647,25 @@ class ConstraintManager:
 
     def get_constraint_by_id(self, id):
         return self.constraints[id]
+
+    def parseIIS(self, IIS_filename):
+        f = open(IIS_filename, "r")
+        datas = f.read().split("Subject To\n")[1]
+        constraints_declarations = datas.split("Bounds")
+        constraints_text = constraints_declarations[0]
+        # declarations_text = constraints_declarations[1]
+
+        constraints_text = constraints_text.split(":")
+        constraints = []
+        constraints.append(constraints_text[0])
+        for i in range(1, len(constraints_text) - 1):
+            constraints.append(constraints_text[i].split("=")[1].split("\n")[1])
+        constraints = list(map(lambda constraint: constraint[1:], constraints))
+        return constraints
+
+    def handleReducedResult(self, ilp_file_name):
+        tabIdents = []
+        for id_constraint in self.parseIIS(ilp_file_name):
+            tabIdents.append(int(id_constraint))
+            print(self.get_constraint_by_id(int(id_constraint)).getIntelligibleForm())
+        self.showReducedResult(tabIdents)
