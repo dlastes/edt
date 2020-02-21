@@ -1665,7 +1665,11 @@ class ConstraintManager:
 
     def handleReducedResult(self, ilp_file_name):
         tabIdents = []
+        output = ""
         for id_constraint in self.parseIIS(ilp_file_name):
             tabIdents.append(int(id_constraint))
-            print(self.get_constraint_by_id(int(id_constraint)).getIntelligibleForm())
+            output += self.get_constraint_by_id(int(id_constraint)).getIntelligibleForm() + "\n"
+        with open("reduced ilp constraints brut.txt", "w+") as file:
+            file.write(output)
+        print(output)
         self.showReducedResult(tabIdents)
