@@ -719,8 +719,8 @@ class TTModel(object):
         et l'ajoute au modèle
         """
         l_conj_var = self.add_var("%s AND %s" % (str(v1), str(v2)))
-        self.add_constraint(l_conj_var - (v1 + v2), '>=', -1)
-        self.add_constraint(2 * l_conj_var - (v1 + v2), '<=', 0)
+        self.add_constraint(l_conj_var - (v1 + v2), '>=', -1, constraint_type="conjonction")
+        self.add_constraint(2 * l_conj_var - (v1 + v2), '<=', 0, constraint_type="conjonction")
         return l_conj_var
 
     def add_floor(self, name, expr, floor, bound):
@@ -729,8 +729,8 @@ class TTModel(object):
         known to be within [0, bound]
         """
         l_floor = self.add_var("FLOOR %s %d" % (name, floor))
-        self.add_constraint(expr - l_floor * floor, '>=', 0)
-        self.add_constraint(l_floor * bound - expr, '>=', 1 - floor)
+        self.add_constraint(expr - l_floor * floor, '>=', 0, constraint_type="seuil")
+        self.add_constraint(l_floor * bound - expr, '>=', 1 - floor, constraint_type="seuil")
         return l_floor
 
     def add_if_var_a_then_not_vars_b_constraint(self, var_a, vars_b_list, name_of_b_list=None):
@@ -743,7 +743,7 @@ class TTModel(object):
             +
             self.sum(var for var in vars_b_list),
             '<=',
-            bound)
+            bound, constraint_type="si a alors non b")
 
     def add_to_slot_cost(self, slot, cost):
         self.cost_SL[slot] += cost
@@ -856,7 +856,7 @@ class TTModel(object):
                                                        self.wdb.compatible_courses[sl2]),
                                             '<=',
                                             1000 * min(self.avail_instr[s_t][sl] for s_t in supp_tutors),
-                                            constraint_type="Un prof ne peut pas donner 2 cours en même temps", slot=sl,
+                                            constraint_type="Un professeur ne peut pas donner 2 cours en même temps", slot=sl,
                                             course=c)
 
         for i in self.wdb.instructors:
@@ -866,7 +866,7 @@ class TTModel(object):
                                              for c in (self.wdb.compatible_courses[sl]
                                                        & self.wdb.possible_courses[i])),
                                     '<=',
-                                    self.avail_instr[i][sl])
+                                    self.avail_instr[i][sl], constraint_type="Pas de professeur disponible", slot=sl, instructor=i)
                 name = 'simul_slots' + str(i) + '_' + str(sl)
                 self.add_constraint(1000 * self.sum(self.TTinstructors[(sl, c1, i)]
                                                     for c1 in self.wdb.possible_courses[i]
@@ -875,7 +875,7 @@ class TTModel(object):
                                     self.sum(self.TTinstructors[(sl2, c2, i)]
                                              for sl2 in self.wdb.slots_intersecting[sl] - {sl}
                                              for c2 in self.wdb.possible_courses[i] & self.wdb.compatible_courses[sl2]),
-                                    '<=', 1000)
+                                    '<=', 1000, constraint_type=name, slot=sl, instructor=i)
 
     def add_rooms_constraints(self):
         print("adding room constraints")
@@ -1007,8 +1007,7 @@ class TTModel(object):
                             # , "Dependency %s %g" % (p, self.constraint_nb)
                             self.add_constraint(self.TT[(sl1, c1)]
                                                 + self.TT[(sl2, c2)], '<=', 1,
-                                                constraint_type="Problème de dépendance %s entre %s et %s" % (
-                                                p, sl1, sl2))
+                                                constraint_type="Problème de dépendance", course = p, slot = str(sl1) + str(sl2))
                         else:
                             conj_var = self.add_conjunct(self.TT[(sl1, c1)],
                                                          self.TT[(sl2, c2)])
@@ -1018,8 +1017,8 @@ class TTModel(object):
                             for rg2 in self.wdb.room_groups_for_type[c2.room_type].exclude(id=rg1.id):
                                 self.add_constraint(self.TTrooms[(sl1, c1, rg1)]
                                                     + self.TTrooms[(sl2, c2, rg2)], '<=', 1,
-                                                    constraint_type="Problème de dépendance %s entre %s et %s pour les salles %s et %s" % (
-                                                    p, sl1, sl2, rg1, rg2))
+                                                    constraint_type="Problème de dépendance entre les salles", course = p, slot = str(sl1) + str(sl2),
+                                                            room = str(sl1) + str(sl2))
 
     def compute_non_prefered_slot_cost(self):
         """
@@ -1419,14 +1418,16 @@ class TTModel(object):
             # if spec is None:
             from gurobipy import read
             lp = "FlOpTT-pulp.lp"
-            # m = read(lp)
-            # m.computeIIS()
-            # ilp_file_name = "logs/IIS_weeks%s.ilp" % self.weeks
-            ilp_file_name = "IIS_weeksDream.ilp"
-            # m.write(ilp_file_name)
+            #m = read(lp)
+            #m.computeIIS()
+            ilp_file_name = "logs/IIS_weeks%s.ilp" % self.weeks
+            #m.write(ilp_file_name)
             print("IIS written in file ", ilp_file_name)
+            tabIdents = []
             for id_constraint in parseIIS(ilp_file_name):
+                tabIdents.append(int(id_constraint))
                 print(self.constraintManager.get_constraint_by_id(int(id_constraint)).getIntelligibleForm())
+            self.constraintManager.showReducedResult(tabIdents)
         """
         else:
             # TODO Use the solver parameter to get
@@ -1655,16 +1656,10 @@ class ConstraintManager:
         for x in occurDays:
             bufDays += "[" + str(x) + "->" + str(occurDays.get(x)) + "] \n"
 
-        print("Sommaire des contraintes : ")
-        print("Parametre Type : " + bufType)
-        print("Parametre Instructor : " + bufInstructor)
-        print("Parametre Slot : " + bufSlot)
-        print("Parametre Course : " + bufCourse)
-        print("Parametre Week : " + bufWeek)
-        print("Parametre Room : " + bufRoom)
-        print("Parametre Group : " + bufGroup)
-        print("Parametre Days : " + bufDays)
-       
+        constraints_intelligible = "Sommaire des contraintes : \n" + "\nParametre Type : \n" + bufType + "\nParametre Instructor : \n" + bufInstructor + "\nParametre Slot : \n" + bufSlot + "\nParametre Course : \n" + bufCourse + "\nParametre Week : \n" + bufWeek + "\nParametre Room : \n" + bufRoom + "\nParametre Group : \n" + bufGroup + "\nParametre Days : \n" + bufDays
+        print(constraints_intelligible)
+        with open("reduced ilp constraints.txt", "w+") as file:
+            file.write(constraints_intelligible)
 
 
     def get_ManagerConstraints(self):
@@ -1672,16 +1667,3 @@ class ConstraintManager:
 
     def get_constraint_by_id(self, id):
         return self.constraints[id]
-
-
-def showReducedTest():
-    c1 = Constraint(0, "T1");
-    c2 = Constraint(1, "T1");
-    c3 = Constraint(2, instructor="I1")
-    c4 = Constraint(3, instructor="I1")
-    c5 = Constraint(4, week="W1")
-    c6 = Constraint(5, week="W1")
-    cm = ConstraintManager()
-    cm.add_allConstraint([c1, c2, c3, c4, c5, c6])
-    tabids = [0,1,2,3,4,5]
-    cm.showReducedResult(tabids)
