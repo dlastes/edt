@@ -43,7 +43,7 @@ urlpatterns = [
     url(r'^semaine-type$', views.stype, name="stype"),
     url(r'^aide$', views.aide, name="aide"),
     url(r'^decale$', views.decale, name="decale"),    
-    url(r'^contact$', views.contact, name="contact"),
+    url(r'^contact/(?P<tutor>\w{2,8})?$', views.contact, name="contact"),
     url(r'^((?P<year>\d{4}))?(/(?P<week>\d{1,2}))?$', views.edt, name="edt"),
     url(r'^tv(/(?P<year>\d+))?(/(?P<week>\d+))?$', views.edt_light, name="edt_light"),
 
@@ -74,6 +74,8 @@ urlpatterns = [
     path('fetch_extra_sched/<int:year>/<int:week>', views.fetch_extra_sched, name="fetch_extra_sched"),
     path('fetch_shared_rooms/<int:year>/<int:week>', views.fetch_shared_roomgroups, name="fetch_shared_rooms"),
     path('fetch_perfect_day/<str:username>', views.fetch_perfect_day, name="fetch_perfect_day"),
+    url(r'^fetch_module/(?P<year>\d+)/(?P<week>\d+)$', views.fetch_module, name="fetch_module"),
+    url(r'^fetch_tutors/(?P<year>\d+)/(?P<week>\d+)$', views.fetch_tutor, name="fetch_tutor"),
 
     # statistics
     # ---------------------------------

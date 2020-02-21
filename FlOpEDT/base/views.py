@@ -54,7 +54,8 @@ from displayweb.models import BreakingNews
 from base.admin import CoursResource, DispoResource, VersionResource, \
     CoursPlaceResource, UnavailableRoomsResource, TutorCoursesResource, \
     CoursePreferenceResource, MultiDepartmentTutorResource, \
-    SharedRoomGroupsResource, RoomPreferenceResource
+    SharedRoomGroupsResource, RoomPreferenceResource, ModuleRessource, \
+    TutorRessource
 if COSMO_MODE:
     from base.admin import CoursPlaceResourceCosmo
 from base.forms import ContactForm, PerfectDayForm
@@ -451,6 +452,29 @@ def fetch_cours_pp(req, week, year, num_copy, **kwargs):
     cache.set(cache_key, response)
     return response
 
+def fetch_module(req, year, week, **kwargs):
+	department = req.department
+	print(department)
+	module = Course.objects.filter(module__train_prog__department=department,semaine=week,an=year).distinct()
+	dataset = ModuleRessource().export(module)
+    
+                         
+	response = HttpResponse(dataset.csv, content_type='text/csv')
+	response['week'] = week
+	response['year'] = year
+	return response
+	
+def fetch_tutor(req, year, week, **kwargs):
+	department = req.department
+	print(department)
+	tutor= Course.objects.filter(module__train_prog__department=department,semaine=week,an=year).distinct()
+	dataset = TutorRessource().export(tutor)
+    
+                         
+	response = HttpResponse(dataset.csv, content_type='text/csv')
+	response['week'] = week
+	response['year'] = year
+	return response
 
 #@login_required
 def fetch_dispos(req, year, week, **kwargs):
@@ -1435,7 +1459,7 @@ def decale_changes(req, **kwargs):
 # ---------
 
 
-def contact(req, **kwargs):
+def contact(req, prof, **kwargs):
     ack = ''
     if req.method == 'POST':
         form = ContactForm(req.POST)
@@ -1468,6 +1492,13 @@ def contact(req, **kwargs):
             init_mail = req.user.email
         form = ContactForm(initial={
             'sender': init_mail})
+
+    if prof is not None:
+        prof_abbrev = Tutor.objects.get(username=prof)
+        form = ContactForm(initial={'recipient': prof_abbrev})
+    
+
+
     return TemplateResponse(req, 'base/contact.html',
                   {'form': form,
                    'ack': ack

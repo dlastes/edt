@@ -106,6 +106,9 @@ class CoursPlaceResource(resources.ModelResource):
     room_type = fields.Field(column_name='room_type',
                              attribute='course__room_type',
                              widget=ForeignKeyWidget(RoomType, 'name'))
+    course_type = fields.Field(column_name='course_type',
+                             attribute='cours__type',
+                             widget=ForeignKeyWidget(CourseType, 'name'))
     color_bg = fields.Field(column_name='color_bg',
                             attribute='course__module__display',
                             widget=ForeignKeyWidget(ModuleDisplay, 'color_bg'))
@@ -289,7 +292,15 @@ class VersionResource(resources.ModelResource):
         model = EdtVersion;
         fields = ("year", "week", "version", "department")
 
-
+class ModuleRessource(resources.ModelResource):
+	class Meta:
+		model = Course
+		fields = ('module__abbrev', 'module__nom', 'module__url')
+		
+class TutorRessource(resources.ModelResource):
+	class Meta:
+		model = Course
+		fields = ('tutor__username', 'tutor__first_name', 'tutor__last_name', 'tutor__email')
 
 # </editor-fold desc="RESOURCES">
 

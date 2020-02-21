@@ -999,6 +999,8 @@ function fetch_all(first, fetch_work_copies){
     fetch_version();
     
     if (!fetch.course_saved) {
+        fetch_module();
+        fetch_tutor();
         fetch_cours();
     }
     if (!fetch.pref_saved &&
@@ -1138,11 +1140,77 @@ function swap_data(fetched, current, type) {
     if (typeof panel !== 'undefined') {
         panel.list = current.all ;
     }
-
 }
 
 
+/*-----------------
+  ------Module-----
+  -----------------*/
+// Get all the information of the module present in the week and stored him in a dictionary of Module_info
+function fetch_module(){
+    var exp_week = wdw_weeks.get_selected() ;
+    
+    show_loader(true);
+    $.ajax({
+	type: "GET",
+        dataType: 'text',
+        url: url_module + exp_week.url(),
+        async: true,
+        contentType: "text/csv",
+        success: function(msg, ts, req) {
+            var sel_week = wdw_weeks.get_selected() ;
+            if (Week.compare(exp_week, sel_week)==0) {
+		d3.csvParse(msg, translate_module_from_csv);
+            }
+            show_loader(false);
+        },
+        error: function(msg) {
+            console.log("error");
+            show_loader(false);
+	});
+}
+function translate_module_from_csv(d){
+	//console.log(d);
+	if(Object.keys(modules_info).indexOf(d.module__abbrev) == -1){
+		modules_info[d.module__abbrev] = {
+			name : d.module__name,
+			url : d.module__url
+		};
+	}
+}
 
+/*-----------------
+  ------Tutor------
+  -----------------*/
+// Get all the information of the Tutor present in the week and stored him in a dictionary of Tutor_info
+function fetch_tutor(){
+	var semaine_att = weeks.init_data[weeks.sel[0]].semaine;
+    var an_att = weeks.init_data[weeks.sel[0]].an;
+	$.ajax({
+		type: "GET",
+        dataType: 'text',
+        url: url_tutor + an_att + "/" + semaine_att,
+        async: true,
+        contentType: "text/csv",
+        success: function(msg, ts, req) {
+			d3.csvParse(msg, translate_tutor_from_csv);
+            show_loader(false);
+        },
+        error: function(msg) {
+            console.log("error");
+            show_loader(false);
+        }
+	});
+}
+function translate_tutor_from_csv(d){
+	//console.log(d);
+	if(Object.keys(tutors_info).indexOf(d.tutor__username) == -1){
+		tutors_info[d.tutor__username] = {
+			full_name : d.tutor__first_name + " " + d.tutor__last_name,
+			email : d.tutor__email
+		};
+	}
+}
 
 
 
