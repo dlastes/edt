@@ -1632,34 +1632,39 @@ class ConstraintManager:
         bufType, bufInstructor, bufSlot, bufCourse, bufWeek, bufRoom, bufGroup, bufDays = "","","","","","","",""
 
         for x in occurType:
-            bufType += "[" + str(x) + "->" + str(occurType.get(x)) + "] "
+            bufType += "[" + str(x) + "->" + str(occurType.get(x)) + "] \n"
 
         for x in occurInstructor:
-            bufInstructor += "[" + str(x) + "->" + str(occurInstructor.get(x)) + "] "
+            bufInstructor += "[" + str(x) + "->" + str(occurInstructor.get(x)) + "] \n"
 
         for x in occurSlot:
-            bufSlot += "[" + str(x) + "->" + str(occurSlot.get(x))+ "] "
+            bufSlot += "[" + str(x) + "->" + str(occurSlot.get(x))+ "] \n"
 
         for x in occurCourse:
-            bufCourse += "[" + str(x) + "->" + str(occurCourse.get(x)) + "] "
+            bufCourse += "[" + str(x) + "->" + str(occurCourse.get(x)) + "] \n"
 
         for x in occurWeek:
-            bufWeek += "[" + str(x) + "->" + str(occurWeek.get(x)) + "] "
+            bufWeek += "[" + str(x) + "->" + str(occurWeek.get(x)) + "] \n"
 
         for x in occurRoom:
-            bufRoom += "[" + str(x) + "->" + str(occurRoom.get(x)) + "] "
+            bufRoom += "[" + str(x) + "->" + str(occurRoom.get(x)) + "] \n"
 
         for x in occurGroup:
-            bufGroup += "[" + str(x) + "->" + str(occurGroup.get(x)) + "] "
+            bufGroup += "[" + str(x) + "->" + str(occurGroup.get(x)) + "] \n"
 
         for x in occurDays:
-            bufDays += "[" + str(x) + "->" + str(occurDays.get(x)) + "] "
+            bufDays += "[" + str(x) + "->" + str(occurDays.get(x)) + "] \n"
 
-        bufs = [bufType, bufInstructor, bufSlot, bufCourse, bufWeek, bufRoom, bufGroup, bufDays]
         print("Sommaire des contraintes : ")
-        for buf in bufs:
-            if buf != "":
-                print(buf)
+        print("Parametre Type : " + bufType)
+        print("Parametre Instructor : " + bufInstructor)
+        print("Parametre Slot : " + bufSlot)
+        print("Parametre Course : " + bufCourse)
+        print("Parametre Week : " + bufWeek)
+        print("Parametre Room : " + bufRoom)
+        print("Parametre Group : " + bufGroup)
+        print("Parametre Days : " + bufDays)
+       
 
 
     def get_ManagerConstraints(self):
