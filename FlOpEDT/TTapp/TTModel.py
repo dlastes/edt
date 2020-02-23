@@ -70,6 +70,7 @@ logger = logging.getLogger(__name__)
 pattern = r".+: (.|\s)+ (=|>=|<=) \d*"
 GUROBI = 'GUROBI'
 
+
 class WeekDB(object):
     def __init__(self, department, weeks, year, train_prog):
         self.train_prog = train_prog
@@ -1427,7 +1428,7 @@ class TTModel(object):
             # m.computeIIS()
             # ilp_file_name = "logs/IIS_weeks%s.ilp" % self.weeks
             ilp_file_name = "IIS_weeksDream.ilp"
-            #m.write(ilp_file_name)
+            # m.write(ilp_file_name)
             print("IIS written in file %s" % ilp_file_name)
             self.constraintManager.handle_reduced_result(ilp_file_name)
         """
@@ -1557,8 +1558,8 @@ class Constraint:
         self.id = id
         self.constraint_type = constraint_type
         self.instructor = instructor
-        self.slot = slot #a enlever
-        self.course = course #a enlever
+        self.slot = slot  # a enlever
+        self.course = course  # a enlever
         self.week = week
         self.room = room
         self.group = group
@@ -1602,40 +1603,39 @@ class ConstraintManager:
     def get_constraints_by_ids(self, id_constraints):
         return [self.constraints[id] for id in id_constraints]
 
-    def parse_iis(self, IIS_filename):
-        f = open(IIS_filename, "r")
-        datas = f.read().split("Subject To\n")[1]
-        constraints_declarations = datas.split("Bounds")
+    def parse_iis(self, iis_filename):
+        f = open(iis_filename, "r")
+        data = f.read().split("Subject To\n")[1]
+        constraints_declarations = data.split("Bounds")
         constraints_text = constraints_declarations[0]
         # declarations_text = constraints_declarations[1]
 
         constraints_text = constraints_text.split(":")
-        id_constraints = []
-        id_constraints.append(constraints_text[0])
+        id_constraints = [constraints_text[0]]
         for i in range(1, len(constraints_text) - 1):
             id_constraints.append(constraints_text[i].split("=")[1].split("\n")[1])
         id_constraints = list(map(lambda constraint: int(constraint[1:]), id_constraints))
         return id_constraints
 
     def inc(self, dic, key):
-        if (key != None):
+        if key is not None:
             if key in dic.keys():
                 dic[key] += 1
             else:
                 dic[key] = 1
 
     # To link the type of the constraint to the parameter occurence
-    def incWithType(self, dic, key, cType):
-        if key != None:
+    def inc_with_type(self, dic, key, c_type):
+        if key is not None:
             if key in dic.keys():
                 dic[key][0] += 1
-                if dic[key][1].count(cType) == 0:
-                    dic[key][1].append(cType)
+                if dic[key][1].count(c_type) == 0:
+                    dic[key][1].append(c_type)
             else:
-                dic[key] = [1, [str(cType)]]
+                dic[key] = [1, [str(c_type)]]
 
     # Create result string to print
-    def makeOccurBuf(self, dic):
+    def make_occur_buf(self, dic):
         buf = ""
         types = ""
         for x in dic:
@@ -1661,21 +1661,28 @@ class ConstraintManager:
 
         # Initiate all occurences
         for i in id_constraints:
-            cType = self.get_constraint_by_id(i).constraint_type
+            c_type = self.get_constraint_by_id(i).constraint_type
             self.inc(occur_type, self.get_constraint_by_id(i).constraint_type)
-            self.incWithType(occur_instructor, self.get_constraint_by_id(i).instructor, cType)
-            self.incWithType(occur_slot, self.get_constraint_by_id(i).slot, cType)
-            self.incWithType(occur_course, self.get_constraint_by_id(i).course, cType)
-            self.incWithType(occur_week, self.get_constraint_by_id(i).week, cType)
-            self.incWithType(occur_room, self.get_constraint_by_id(i).room, cType)
-            self.incWithType(occur_group, self.get_constraint_by_id(i).group, cType)
-            self.incWithType(occur_days, self.get_constraint_by_id(i).days, cType)
+            self.inc_with_type(occur_instructor, self.get_constraint_by_id(i).instructor, c_type)
+            self.inc_with_type(occur_slot, self.get_constraint_by_id(i).slot, c_type)
+            self.inc_with_type(occur_course, self.get_constraint_by_id(i).course, c_type)
+            self.inc_with_type(occur_week, self.get_constraint_by_id(i).week, c_type)
+            self.inc_with_type(occur_room, self.get_constraint_by_id(i).room, c_type)
+            self.inc_with_type(occur_group, self.get_constraint_by_id(i).group, c_type)
+            self.inc_with_type(occur_days, self.get_constraint_by_id(i).days, c_type)
 
-        if "Le cours doit être placé" in occur_type:
-            occur_type["Le cours doit être placé"] = np.inf if decreasing else 0
+        priority_types = ["Le cours doit être placé"]
+        for priority_type in priority_types:
+            if priority_type in occur_type:
+                occ = occur_type[priority_type]
+                occur_type[priority_type] = np.inf if decreasing else 0
+                occur_type = {k: v for k, v in sorted(occur_type.items(), key=lambda item: item[1], reverse=decreasing)}
+                occur_type[priority_type] = occ
+            else:
+                occur_type = {k: v for k, v in sorted(occur_type.items(), key=lambda item: item[1], reverse=decreasing)}
 
-        occur_type = {k: v for k, v in sorted(occur_type.items(), key=lambda item: item[1], reverse=decreasing)}
-        occur_instructor = {k: v for k, v in sorted(occur_instructor.items(), key=lambda item: item[1][0], reverse=decreasing)}
+        occur_instructor = {k: v for k, v in
+                            sorted(occur_instructor.items(), key=lambda item: item[1][0], reverse=decreasing)}
         occur_slot = {k: v for k, v in sorted(occur_slot.items(), key=lambda item: item[1][0], reverse=decreasing)}
         occur_course = {k: v for k, v in sorted(occur_course.items(), key=lambda item: item[1][0], reverse=decreasing)}
         occur_week = {k: v for k, v in sorted(occur_week.items(), key=lambda item: item[1][0], reverse=decreasing)}
@@ -1695,6 +1702,7 @@ class ConstraintManager:
         output = ""
         for constraint in constraints:
             output += constraint.get_intelligible_form() + "\n"
+        #print(output)
         with open("reduced ilp constraints brut.txt", "w+") as file:
             file.write(output)
 
@@ -1703,19 +1711,17 @@ class ConstraintManager:
         occur_type, occur_instructor, occur_slot, occur_course, occur_week, occur_room, occur_group, occur_days = \
             self.get_occurs(id_constraints)
 
-        # Print global result
-        buf_type, buf_instructor, buf_slot, buf_course, buf_week, buf_room, buf_group, buf_days = "","","","","","","",""
-
+        buf_type = ""
         for x in occur_type:
             buf_type += "[" + str(x) + " -> " + str(occur_type.get(x)) + "] \n"
 
-        buf_instructor = self.makeOccurBuf(occur_instructor)
-        buf_slot = self.makeOccurBuf(occur_slot)
-        buf_course = self.makeOccurBuf(occur_course)
-        buf_week = self.makeOccurBuf(occur_week)
-        buf_room = self.makeOccurBuf(occur_room)
-        buf_group = self.makeOccurBuf(occur_group)
-        buf_days = self.makeOccurBuf(occur_days)
+        buf_instructor = self.make_occur_buf(occur_instructor)
+        buf_slot = self.make_occur_buf(occur_slot)
+        buf_course = self.make_occur_buf(occur_course)
+        buf_week = self.make_occur_buf(occur_week)
+        buf_room = self.make_occur_buf(occur_room)
+        buf_group = self.make_occur_buf(occur_group)
+        buf_days = self.make_occur_buf(occur_days)
 
         output = "Sommaire des contraintes : \n"
         if buf_type != "":
@@ -1734,7 +1740,7 @@ class ConstraintManager:
             output += "\nParametre Days : \n" + buf_days
         if buf_slot != "":
             output += "\nParametre Slot :\n" + buf_slot
-        print(output)
+        #print(output)
         with open("reduced ilp constraints.txt", "w+") as file:
             file.write(output)
 
