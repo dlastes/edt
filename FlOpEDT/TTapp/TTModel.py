@@ -24,6 +24,7 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 import importlib
+from distutils.command.config import config
 
 from pulp import LpVariable, LpConstraint, LpBinary, LpConstraintEQ, \
     LpConstraintGE, LpConstraintLE, LpAffineExpression, LpProblem, LpStatus, \
@@ -31,6 +32,8 @@ from pulp import LpVariable, LpConstraint, LpBinary, LpConstraintEQ, \
 
 from pulp import GUROBI_CMD, PULP_CBC_CMD
 # from pulp.solvers import GUROBI_CMD as GUROBI
+
+from gurobipy import read
 
 from FlOpEDT.settings.base import COSMO_MODE
 
@@ -52,6 +55,8 @@ from MyFlOp.MyTTUtils import reassign_rooms
 
 import re
 import signal
+
+import numpy as np
 
 from django.db import close_old_connections
 from django.db.models import Q, Max, F
@@ -856,7 +861,8 @@ class TTModel(object):
                                                        self.wdb.compatible_courses[sl2]),
                                             '<=',
                                             1000 * min(self.avail_instr[s_t][sl] for s_t in supp_tutors),
-                                            constraint_type="Un professeur ne peut pas donner 2 cours en même temps", slot=sl,
+                                            constraint_type="Un professeur ne peut pas donner 2 cours en même temps",
+                                            slot=sl,
                                             course=c)
 
         for i in self.wdb.instructors:
@@ -866,7 +872,8 @@ class TTModel(object):
                                              for c in (self.wdb.compatible_courses[sl]
                                                        & self.wdb.possible_courses[i])),
                                     '<=',
-                                    self.avail_instr[i][sl], constraint_type="Pas de professeur disponible", slot=sl, instructor=i)
+                                    self.avail_instr[i][sl], constraint_type="Pas de professeur disponible", slot=sl,
+                                    instructor=i)
                 name = 'simul_slots' + str(i) + '_' + str(sl)
                 self.add_constraint(1000 * self.sum(self.TTinstructors[(sl, c1, i)]
                                                     for c1 in self.wdb.possible_courses[i]
@@ -1007,7 +1014,8 @@ class TTModel(object):
                             # , "Dependency %s %g" % (p, self.constraint_nb)
                             self.add_constraint(self.TT[(sl1, c1)]
                                                 + self.TT[(sl2, c2)], '<=', 1,
-                                                constraint_type="Problème de dépendance", course=p, slot=str(sl1) + " / " + str(sl2))
+                                                constraint_type="Problème de dépendance", course=p,
+                                                slot=str(sl1) + " / " + str(sl2))
                         else:
                             conj_var = self.add_conjunct(self.TT[(sl1, c1)],
                                                          self.TT[(sl2, c2)])
@@ -1019,7 +1027,7 @@ class TTModel(object):
                                                     + self.TTrooms[(sl2, c2, rg2)], '<=', 1,
                                                     constraint_type="Problème de dépendance entre les salles", course=p,
                                                     slot=str(sl1) + " / " + str(sl2),
-                                                    room=str(rg1) + " / " +  str(rg2))
+                                                    room=str(rg1) + " / " + str(rg2))
 
     def compute_non_prefered_slot_cost(self):
         """
@@ -1189,7 +1197,7 @@ class TTModel(object):
                                 avail_course[(course_type, promo)][sl] = 1
                                 non_prefered_slot_cost_course[(course_type, promo)][sl] = 0
                                 print("Course availability problem for %s - %s on start time %s" % (
-                                course_type, promo, sl))
+                                    course_type, promo, sl))
 
         return non_prefered_slot_cost_course, avail_course
 
@@ -1415,16 +1423,13 @@ class TTModel(object):
                                                       ("Presolve", presolve),
                                                       ("MIPGapAbs", 0.2)]))
         if result is None or result == 0:
-            spec = importlib.util.find_spec('gurobipy')
-            # if spec is None:
-            from gurobipy import read
-            lp = "FlOpTT-pulp.lp"
-            #m = read(lp)
-            #m.computeIIS()
-            #ilp_file_name = "logs/IIS_weeks%s.ilp" % self.weeks
+            # lp = "FlOpTT-pulp.lp"
+            # m = read(lp)
+            # m.computeIIS()
+            # ilp_file_name = "logs/IIS_weeks%s.ilp" % self.weeks
             ilp_file_name = "IIS_weeksDream.ilp"
-            #m.write(ilp_file_name)
-            print("IIS written in file %s" % ilp_file_name)
+            # m.write(ilp_file_name)
+            print("IIS written in file ", ilp_file_name)
             self.constraintManager.handleReducedResult(ilp_file_name)
         """
         else:
@@ -1539,7 +1544,7 @@ class Constraint:
         self.id = id
         self.constraint_type = constraint_type
         self.instructor = instructor
-        self.slot = slot #a enlever
+        self.slot = slot  # a enlever
         self.course = course
         self.week = week
         self.room = room
@@ -1556,7 +1561,6 @@ class Constraint:
         if course is not None:
             #...
         """
-
 
     def get_id(self):
         return self.id
@@ -1582,6 +1586,7 @@ class Constraint:
             res += "pour le groupe %s ; " % str(self.group)
         res += "ne peut pas être satisfaite"
         return res
+
 
 class ConstraintManager:
     def __init__(self):
@@ -1611,6 +1616,38 @@ class ConstraintManager:
         id_constraints = list(map(lambda constraint: int(constraint[1:]), id_constraints))
         return id_constraints
 
+    def inc(self, dic, key):
+        if (key != None):
+            if key in dic.keys():
+                dic[key] += 1
+            else:
+                dic[key] = 1
+
+    # To link the type of the constraint to the parameter occurence
+    def incWithType(self, dic, key, cType):
+        if key != None:
+            if key in dic.keys():
+                dic[key][0] += 1
+                if dic[key][1].count(cType) == 0:
+                    dic[key][1].append(cType)
+            else:
+                dic[key] = [1, [str(cType)]]
+
+    # Create result string to print
+    def makeOccurBuf(self, dic):
+        buf = ""
+        types = ""
+        for x in dic:
+            param = dic.get(x)
+            n = len(param[1])
+            if n > 0:
+                types = "("
+                for t in range(n - 1):
+                    types += param[1][t] + ", "
+                types += param[1][n - 1] + ")"
+            buf += "[" + str(x) + " -> " + str(param[0]) + "] types : " + types + "\n"
+        return buf
+
     def get_occurs(self, id_constraints, decreasing=True):
         occurType = {}
         occurInstructor = {}
@@ -1621,36 +1658,29 @@ class ConstraintManager:
         occurGroup = {}
         occurDays = {}
 
-        def inc(dic, key):
-            if (key != None):
-                if key in dic.keys():
-                    dic[key] += 1
-                else:
-                    dic[key] = 1
-
         # Initiate all occurences
         for i in id_constraints:
-            inc(occurType, self.get_constraint_by_id(i).constraint_type)
-            inc(occurInstructor, self.get_constraint_by_id(i).instructor)
-            inc(occurSlot, self.get_constraint_by_id(i).slot)
-            inc(occurCourse, self.get_constraint_by_id(i).course)
-            inc(occurWeek, self.get_constraint_by_id(i).week)
-            inc(occurRoom, self.get_constraint_by_id(i).room)
-            inc(occurGroup, self.get_constraint_by_id(i).group)
-            inc(occurDays, self.get_constraint_by_id(i).days)
+            cType = self.get_constraint_by_id(i).constraint_type
+            self.inc(occurType, cType)
+            self.incWithType(occurInstructor, self.get_constraint_by_id(i).instructor, cType)
+            self.incWithType(occurSlot, self.get_constraint_by_id(i).slot, cType)
+            self.incWithType(occurCourse, self.get_constraint_by_id(i).course, cType)
+            self.incWithType(occurWeek, self.get_constraint_by_id(i).week, cType)
+            self.incWithType(occurRoom, self.get_constraint_by_id(i).room, cType)
+            self.incWithType(occurGroup, self.get_constraint_by_id(i).group, cType)
+            self.incWithType(occurDays, self.get_constraint_by_id(i).days, cType)
 
-        import numpy as np
         if "Le cours doit être placé" in occurType:
             occurType["Le cours doit être placé"] = np.inf if decreasing else 0
 
         occurType = {k: v for k, v in sorted(occurType.items(), key=lambda item: item[1], reverse=decreasing)}
-        occurInstructor = {k: v for k, v in sorted(occurInstructor.items(), key=lambda item: item[1], reverse=decreasing)}
-        occurSlot = {k: v for k, v in sorted(occurSlot.items(), key=lambda item: item[1], reverse=decreasing)}
-        occurCourse = {k: v for k, v in sorted(occurCourse.items(), key=lambda item: item[1], reverse=decreasing)}
-        occurWeek = {k: v for k, v in sorted(occurWeek.items(), key=lambda item: item[1], reverse=decreasing)}
-        occurRoom = {k: v for k, v in sorted(occurRoom.items(), key=lambda item: item[1], reverse=decreasing)}
-        occurGroup = {k: v for k, v in sorted(occurGroup.items(), key=lambda item: item[1], reverse=decreasing)}
-        occurDays = {k: v for k, v in sorted(occurDays.items(), key=lambda item: item[1], reverse=decreasing)}
+        occurInstructor = {k: v for k, v in sorted(occurInstructor.items(), key=lambda item: item[1][0], reverse=decreasing)}
+        occurSlot = {k: v for k, v in sorted(occurSlot.items(), key=lambda item: item[1][0], reverse=decreasing)}
+        occurCourse = {k: v for k, v in sorted(occurCourse.items(), key=lambda item: item[1][0], reverse=decreasing)}
+        occurWeek = {k: v for k, v in sorted(occurWeek.items(), key=lambda item: item[1][0], reverse=decreasing)}
+        occurRoom = {k: v for k, v in sorted(occurRoom.items(), key=lambda item: item[1][0], reverse=decreasing)}
+        occurGroup = {k: v for k, v in sorted(occurGroup.items(), key=lambda item: item[1][0], reverse=decreasing)}
+        occurDays = {k: v for k, v in sorted(occurDays.items(), key=lambda item: item[1][0], reverse=decreasing)}
 
         return occurType, occurInstructor, occurSlot, occurCourse, occurWeek, occurRoom, occurGroup, occurDays
 
@@ -1673,38 +1703,37 @@ class ConstraintManager:
             self.get_occurs(id_constraints)
 
         # Print global result
-        bufType, bufInstructor, bufSlot, bufCourse, bufWeek, bufRoom, bufGroup, bufDays = "","","","","","","",""
+        bufType, bufInstructor, bufSlot, bufCourse, bufWeek, bufRoom, bufGroup, bufDays = "", "", "", "", "", "", "", ""
 
-
-        for x in occurInstructor:
-            bufInstructor += "[" + str(x) + "->" + str(occurInstructor.get(x)) + "] \n"
-
-        """
         for x in occurType:
-            bufType += "[%s -> %s]\n" % (str(x), str(occurType.get(x)))
+            bufType += "[" + str(x) + " -> " + str(occurType.get(x)) + "] \n"
 
-        for x in occurSlot:
-            bufSlot += "[" + str(x) + "->" + str(occurSlot.get(x))+ "] \n"        
+        bufInstructor = self.makeOccurBuf(occurInstructor)
+        bufSlot = self.makeOccurBuf(occurSlot)
+        bufCourse = self.makeOccurBuf(occurCourse)
+        bufWeek = self.makeOccurBuf(occurWeek)
+        bufRoom = self.makeOccurBuf(occurRoom)
+        bufGroup = self.makeOccurBuf(occurGroup)
+        bufDays = self.makeOccurBuf(occurDays)
 
-        for x in occurWeek:
-            bufWeek += "[" + str(x) + "->" + str(occurWeek.get(x)) + "] \n"
-
-        for x in occurDays:
-            bufDays += "[" + str(x) + "->" + str(occurDays.get(x)) + "] \n"
-        """
-
-        for x in occurCourse:
-            bufCourse += "[" + str(x) + "->" + str(occurCourse.get(x)) + "] \n"
-
-
-        for x in occurRoom:
-            bufRoom += "[" + str(x) + "->" + str(occurRoom.get(x)) + "] \n"
-
-        for x in occurGroup:
-            bufGroup += "[" + str(x) + "->" + str(occurGroup.get(x)) + "] \n"
-
-        constraints_intelligible = "Sommaire des contraintes : \n" + "\nParametre Type : \n" + bufType + "\nParametre Instructor : \n" + bufInstructor + "\nParametre Slot : \n" + bufSlot + "\nParametre Course : \n" + bufCourse + "\nParametre Week : \n" + bufWeek + "\nParametre Room : \n" + bufRoom + "\nParametre Group : \n" + bufGroup + "\nParametre Days : \n" + bufDays
-        #print(constraints_intelligible)
+        constraints_intelligible = "Sommaire des contraintes : \n"
+        if bufType != "":
+            constraints_intelligible += "\nParametre Type :\n" + bufType
+        if bufInstructor != "":
+            constraints_intelligible += "\nParametre Instructor :\n" + bufInstructor
+        if bufCourse != "":
+            constraints_intelligible += "\nParametre Course : \n" + bufCourse
+        if bufWeek != "":
+            constraints_intelligible += "\nParametre Week : \n" + bufWeek
+        if bufRoom != "":
+            constraints_intelligible += "\nParametre Room : \n" + bufRoom
+        if bufGroup != "":
+            constraints_intelligible += "\nParametre Group : \n" + bufGroup
+        if bufDays != "":
+            constraints_intelligible += "\nParametre Days : \n" + bufDays
+        if bufSlot != "":
+            constraints_intelligible += "\nParametre Slot :\n" + bufSlot
+        print(constraints_intelligible)
         with open("reduced ilp constraints.txt", "w+") as file:
             file.write(constraints_intelligible)
 
