@@ -1662,14 +1662,14 @@ class ConstraintManager:
         # Initiate all occurences
         for i in id_constraints:
             cType = self.get_constraint_by_id(i).constraint_type
-            inc(occur_type, self.get_constraint_by_id(i).constraint_type)
-            incWithType(occur_instructor, self.get_constraint_by_id(i).instructor, cType)
-            incWithType(occur_slot, self.get_constraint_by_id(i).slot, cType)
-            incWithType(occur_course, self.get_constraint_by_id(i).course, cType)
-            incWithType(occur_week, self.get_constraint_by_id(i).week, cType)
-            incWithType(occur_room, self.get_constraint_by_id(i).room, cType)
-            incWithType(occur_group, self.get_constraint_by_id(i).group, cType)
-            incWithType(occur_days, self.get_constraint_by_id(i).days, cType)
+            self.inc(occur_type, self.get_constraint_by_id(i).constraint_type)
+            self.incWithType(occur_instructor, self.get_constraint_by_id(i).instructor, cType)
+            self.incWithType(occur_slot, self.get_constraint_by_id(i).slot, cType)
+            self.incWithType(occur_course, self.get_constraint_by_id(i).course, cType)
+            self.incWithType(occur_week, self.get_constraint_by_id(i).week, cType)
+            self.incWithType(occur_room, self.get_constraint_by_id(i).room, cType)
+            self.incWithType(occur_group, self.get_constraint_by_id(i).group, cType)
+            self.incWithType(occur_days, self.get_constraint_by_id(i).days, cType)
 
         if "Le cours doit être placé" in occur_type:
             occur_type["Le cours doit être placé"] = np.inf if decreasing else 0
