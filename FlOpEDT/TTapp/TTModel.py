@@ -819,7 +819,7 @@ class TTModel(object):
             self.add_constraint(
                 self.sum([self.TT[(sl, c)] for sl in self.wdb.compatible_slots[c]]),
                 '==',
-                1, constraint_type="Un cours doit être planifié", course=c)
+                1, constraint_type="Le cours doit être placé", course=c)
 
         # Training half day
         for training_half_day in self.wdb.training_half_days:
@@ -1007,7 +1007,7 @@ class TTModel(object):
                             # , "Dependency %s %g" % (p, self.constraint_nb)
                             self.add_constraint(self.TT[(sl1, c1)]
                                                 + self.TT[(sl2, c2)], '<=', 1,
-                                                constraint_type="Problème de dépendance", course = p, slot = str(sl1) + str(sl2))
+                                                constraint_type="Problème de dépendance", course=p, slot=str(sl1) + " / " + str(sl2))
                         else:
                             conj_var = self.add_conjunct(self.TT[(sl1, c1)],
                                                          self.TT[(sl2, c2)])
@@ -1017,8 +1017,9 @@ class TTModel(object):
                             for rg2 in self.wdb.room_groups_for_type[c2.room_type].exclude(id=rg1.id):
                                 self.add_constraint(self.TTrooms[(sl1, c1, rg1)]
                                                     + self.TTrooms[(sl2, c2, rg2)], '<=', 1,
-                                                    constraint_type="Problème de dépendance entre les salles", course = p, slot = str(sl1) + str(sl2),
-                                                            room = str(sl1) + str(sl2))
+                                                    constraint_type="Problème de dépendance entre les salles", course=p,
+                                                    slot=str(sl1) + " / " + str(sl2),
+                                                    room=str(rg1) + " / " +  str(rg2))
 
     def compute_non_prefered_slot_cost(self):
         """
@@ -1538,12 +1539,24 @@ class Constraint:
         self.id = id
         self.constraint_type = constraint_type
         self.instructor = instructor
-        self.slot = slot
+        self.slot = slot #a enlever
         self.course = course
         self.week = week
         self.room = room
         self.group = group
         self.days = days
+        """
+        if slot is not None:
+            elts = slot.split("_"):
+            self.courseType = elts[0]
+            self.days = elts[1]
+            self.week = elts[2]
+            self.hour = elts[3]
+        
+        if course is not None:
+            #...
+        """
+
 
     def get_id(self):
         return self.id
@@ -1577,74 +1590,6 @@ class ConstraintManager:
     def add_constraint(self, constraint):
         self.constraints.append(constraint)
 
-    def add_allConstraint(self, cm):
-        self.constraints = cm
-
-    def inc(self, dic, key):
-        if(key != None):
-            if key in dic.keys():
-                dic[key] += 1
-            else:
-                dic[key] = 1
-
-    # Affichage "intelligent" des contraintes incompatibles
-    def showReducedResult(self, tabIds):
-        occurType = {}
-        occurInstructor = {}
-        occurSlot = {}
-        occurCourse = {}
-        occurWeek = {}
-        occurRoom = {}
-        occurGroup = {}
-        occurDays = {}
-
-        # Initiate all occurences
-        for i in tabIds:
-            self.inc(occurType, self.get_constraint_by_id(i).constraint_type)
-            self.inc(occurInstructor, self.get_constraint_by_id(i).instructor)
-            self.inc(occurSlot, self.get_constraint_by_id(i).slot)
-            self.inc(occurCourse, self.get_constraint_by_id(i).course)
-            self.inc(occurWeek, self.get_constraint_by_id(i).week)
-            self.inc(occurRoom, self.get_constraint_by_id(i).room)
-            self.inc(occurGroup, self.get_constraint_by_id(i).group)
-            self.inc(occurDays, self.get_constraint_by_id(i).days)
-
-        # Print global result
-        bufType, bufInstructor, bufSlot, bufCourse, bufWeek, bufRoom, bufGroup, bufDays = "","","","","","","",""
-
-        for x in occurType:
-            bufType += "[" + str(x) + "->" + str(occurType.get(x)) + "] \n"
-
-        for x in occurInstructor:
-            bufInstructor += "[" + str(x) + "->" + str(occurInstructor.get(x)) + "] \n"
-
-        for x in occurSlot:
-            bufSlot += "[" + str(x) + "->" + str(occurSlot.get(x))+ "] \n"
-
-        for x in occurCourse:
-            bufCourse += "[" + str(x) + "->" + str(occurCourse.get(x)) + "] \n"
-
-        for x in occurWeek:
-            bufWeek += "[" + str(x) + "->" + str(occurWeek.get(x)) + "] \n"
-
-        for x in occurRoom:
-            bufRoom += "[" + str(x) + "->" + str(occurRoom.get(x)) + "] \n"
-
-        for x in occurGroup:
-            bufGroup += "[" + str(x) + "->" + str(occurGroup.get(x)) + "] \n"
-
-        for x in occurDays:
-            bufDays += "[" + str(x) + "->" + str(occurDays.get(x)) + "] \n"
-
-        constraints_intelligible = "Sommaire des contraintes : \n" + "\nParametre Type : \n" + bufType + "\nParametre Instructor : \n" + bufInstructor + "\nParametre Slot : \n" + bufSlot + "\nParametre Course : \n" + bufCourse + "\nParametre Week : \n" + bufWeek + "\nParametre Room : \n" + bufRoom + "\nParametre Group : \n" + bufGroup + "\nParametre Days : \n" + bufDays
-        print(constraints_intelligible)
-        with open("reduced ilp constraints.txt", "w+") as file:
-            file.write(constraints_intelligible)
-
-
-    def get_ManagerConstraints(self):
-        return self.constraints
-
     def get_constraint_by_id(self, id):
         return self.constraints[id]
 
@@ -1656,20 +1601,106 @@ class ConstraintManager:
         # declarations_text = constraints_declarations[1]
 
         constraints_text = constraints_text.split(":")
-        constraints = []
-        constraints.append(constraints_text[0])
+        id_constraints = []
+        id_constraints.append(constraints_text[0])
         for i in range(1, len(constraints_text) - 1):
-            constraints.append(constraints_text[i].split("=")[1].split("\n")[1])
-        constraints = list(map(lambda constraint: constraint[1:], constraints))
-        return constraints
+            id_constraints.append(constraints_text[i].split("=")[1].split("\n")[1])
+        id_constraints = list(map(lambda constraint: int(constraint[1:]), id_constraints))
+        return id_constraints
 
-    def handleReducedResult(self, ilp_file_name):
-        tabIdents = []
+    def get_occurs(self, id_constraints):
+        occurType = {}
+        occurInstructor = {}
+        occurSlot = {}
+        occurCourse = {}
+        occurWeek = {}
+        occurRoom = {}
+        occurGroup = {}
+        occurDays = {}
+
+        def inc(dic, key):
+            if (key != None):
+                if key in dic.keys():
+                    dic[key] += 1
+                else:
+                    dic[key] = 1
+
+        # Initiate all occurences
+        for i in id_constraints:
+            inc(occurType, self.get_constraint_by_id(i).constraint_type)
+            inc(occurInstructor, self.get_constraint_by_id(i).instructor)
+            inc(occurSlot, self.get_constraint_by_id(i).slot)
+            inc(occurCourse, self.get_constraint_by_id(i).course)
+            inc(occurWeek, self.get_constraint_by_id(i).week)
+            inc(occurRoom, self.get_constraint_by_id(i).room)
+            inc(occurGroup, self.get_constraint_by_id(i).group)
+            inc(occurDays, self.get_constraint_by_id(i).days)
+
+        occurType = {k: v for k, v in sorted(occurType.items(), key=lambda item: item[1], reverse=True)}
+        occurInstructor = {k: v for k, v in sorted(occurInstructor.items(), key=lambda item: item[1], reverse=True)}
+        occurSlot = {k: v for k, v in sorted(occurSlot.items(), key=lambda item: item[1], reverse=True)}
+        occurCourse = {k: v for k, v in sorted(occurCourse.items(), key=lambda item: item[1], reverse=True)}
+        occurWeek = {k: v for k, v in sorted(occurWeek.items(), key=lambda item: item[1], reverse=True)}
+        occurRoom = {k: v for k, v in sorted(occurRoom.items(), key=lambda item: item[1], reverse=True)}
+        occurGroup = {k: v for k, v in sorted(occurGroup.items(), key=lambda item: item[1], reverse=True)}
+        occurDays = {k: v for k, v in sorted(occurDays.items(), key=lambda item: item[1], reverse=True)}
+
+        return occurType, occurInstructor, occurSlot, occurCourse, occurWeek, occurRoom, occurGroup, occurDays
+
+    def showReducesResultBrut(self, id_constraints):
+        occurType, occurInstructor, occurSlot, occurCourse, occurWeek, occurRoom, occurGroup, occurDays = self.get_occurs(id_constraints)
+
+        order = list(occurType.keys())
+        constraints = [self.get_constraint_by_id(id_constraint) for id_constraint in id_constraints]
+        #constraints = sorted(constraints, key=lambda x: order.index(x))
         output = ""
-        for id_constraint in self.parseIIS(ilp_file_name):
-            tabIdents.append(int(id_constraint))
-            output += self.get_constraint_by_id(int(id_constraint)).getIntelligibleForm() + "\n"
+        for constraint in constraints:
+            output += constraint.getIntelligibleForm() + "\n"
         with open("reduced ilp constraints brut.txt", "w+") as file:
             file.write(output)
-        print(output)
-        self.showReducedResult(tabIdents)
+
+    # Affichage "intelligent" des contraintes incompatibles
+    def showReducedResult(self, id_constraints):
+        occurType, occurInstructor, occurSlot, occurCourse, occurWeek, occurRoom, occurGroup, occurDays = self.get_occurs(id_constraints)
+
+        # Print global result
+        bufType, bufInstructor, bufSlot, bufCourse, bufWeek, bufRoom, bufGroup, bufDays = "","","","","","","",""
+
+
+        for x in occurInstructor:
+            bufInstructor += "[" + str(x) + "->" + str(occurInstructor.get(x)) + "] \n"
+
+        """
+        for x in occurType:
+            bufType += "[%s -> %s]\n" % (str(x), str(occurType.get(x)))
+
+        for x in occurSlot:
+            bufSlot += "[" + str(x) + "->" + str(occurSlot.get(x))+ "] \n"        
+
+        for x in occurWeek:
+            bufWeek += "[" + str(x) + "->" + str(occurWeek.get(x)) + "] \n"
+
+        for x in occurDays:
+            bufDays += "[" + str(x) + "->" + str(occurDays.get(x)) + "] \n"
+        """
+
+        for x in occurCourse:
+            bufCourse += "[" + str(x) + "->" + str(occurCourse.get(x)) + "] \n"
+
+
+        for x in occurRoom:
+            bufRoom += "[" + str(x) + "->" + str(occurRoom.get(x)) + "] \n"
+
+        for x in occurGroup:
+            bufGroup += "[" + str(x) + "->" + str(occurGroup.get(x)) + "] \n"
+
+
+        constraints_intelligible = "Sommaire des contraintes : \n" + "\nParametre Type : \n" + bufType + "\nParametre Instructor : \n" + bufInstructor + "\nParametre Slot : \n" + bufSlot + "\nParametre Course : \n" + bufCourse + "\nParametre Week : \n" + bufWeek + "\nParametre Room : \n" + bufRoom + "\nParametre Group : \n" + bufGroup + "\nParametre Days : \n" + bufDays
+        #print(constraints_intelligible)
+        with open("reduced ilp constraints.txt", "w+") as file:
+            file.write(constraints_intelligible)
+
+    def handleReducedResult(self, ilp_file_name):
+        id_constraints = self.parseIIS(ilp_file_name)
+        self.showReducesResultBrut(id_constraints)
+        self.showReducedResult(id_constraints)
