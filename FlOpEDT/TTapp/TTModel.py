@@ -1424,7 +1424,7 @@ class TTModel(object):
             #ilp_file_name = "logs/IIS_weeks%s.ilp" % self.weeks
             ilp_file_name = "IIS_weeksDream.ilp"
             #m.write(ilp_file_name)
-            print("IIS written in file ", ilp_file_name)
+            print("IIS written in file %s" % ilp_file_name)
             self.constraintManager.handleReducedResult(ilp_file_name)
         """
         else:
@@ -1590,8 +1590,11 @@ class ConstraintManager:
     def add_constraint(self, constraint):
         self.constraints.append(constraint)
 
-    def get_constraint_by_id(self, id):
-        return self.constraints[id]
+    def get_constraint_by_id(self, id_constraint):
+        return self.constraints[id_constraint]
+
+    def get_constraints_by_ids(self, id_constraints):
+        return [self.constraints[id] for id in id_constraints]
 
     def parseIIS(self, IIS_filename):
         f = open(IIS_filename, "r")
@@ -1608,7 +1611,7 @@ class ConstraintManager:
         id_constraints = list(map(lambda constraint: int(constraint[1:]), id_constraints))
         return id_constraints
 
-    def get_occurs(self, id_constraints):
+    def get_occurs(self, id_constraints, decreasing=True):
         occurType = {}
         occurInstructor = {}
         occurSlot = {}
@@ -1636,23 +1639,28 @@ class ConstraintManager:
             inc(occurGroup, self.get_constraint_by_id(i).group)
             inc(occurDays, self.get_constraint_by_id(i).days)
 
-        occurType = {k: v for k, v in sorted(occurType.items(), key=lambda item: item[1], reverse=True)}
-        occurInstructor = {k: v for k, v in sorted(occurInstructor.items(), key=lambda item: item[1], reverse=True)}
-        occurSlot = {k: v for k, v in sorted(occurSlot.items(), key=lambda item: item[1], reverse=True)}
-        occurCourse = {k: v for k, v in sorted(occurCourse.items(), key=lambda item: item[1], reverse=True)}
-        occurWeek = {k: v for k, v in sorted(occurWeek.items(), key=lambda item: item[1], reverse=True)}
-        occurRoom = {k: v for k, v in sorted(occurRoom.items(), key=lambda item: item[1], reverse=True)}
-        occurGroup = {k: v for k, v in sorted(occurGroup.items(), key=lambda item: item[1], reverse=True)}
-        occurDays = {k: v for k, v in sorted(occurDays.items(), key=lambda item: item[1], reverse=True)}
+        import numpy as np
+        if "Le cours doit être placé" in occurType:
+            occurType["Le cours doit être placé"] = np.inf if decreasing else 0
+
+        occurType = {k: v for k, v in sorted(occurType.items(), key=lambda item: item[1], reverse=decreasing)}
+        occurInstructor = {k: v for k, v in sorted(occurInstructor.items(), key=lambda item: item[1], reverse=decreasing)}
+        occurSlot = {k: v for k, v in sorted(occurSlot.items(), key=lambda item: item[1], reverse=decreasing)}
+        occurCourse = {k: v for k, v in sorted(occurCourse.items(), key=lambda item: item[1], reverse=decreasing)}
+        occurWeek = {k: v for k, v in sorted(occurWeek.items(), key=lambda item: item[1], reverse=decreasing)}
+        occurRoom = {k: v for k, v in sorted(occurRoom.items(), key=lambda item: item[1], reverse=decreasing)}
+        occurGroup = {k: v for k, v in sorted(occurGroup.items(), key=lambda item: item[1], reverse=decreasing)}
+        occurDays = {k: v for k, v in sorted(occurDays.items(), key=lambda item: item[1], reverse=decreasing)}
 
         return occurType, occurInstructor, occurSlot, occurCourse, occurWeek, occurRoom, occurGroup, occurDays
 
-    def showReducesResultBrut(self, id_constraints):
-        occurType, occurInstructor, occurSlot, occurCourse, occurWeek, occurRoom, occurGroup, occurDays = self.get_occurs(id_constraints)
+    def showReducesResultBrut(self, id_constraints, decreasing=True):
+        occurType, occurInstructor, occurSlot, occurCourse, occurWeek, occurRoom, occurGroup, occurDays = \
+            self.get_occurs(id_constraints, decreasing)
 
         order = list(occurType.keys())
-        constraints = [self.get_constraint_by_id(id_constraint) for id_constraint in id_constraints]
-        #constraints = sorted(constraints, key=lambda x: order.index(x))
+        constraints = self.get_constraints_by_ids(id_constraints)
+        constraints = sorted(constraints, key=lambda constraint: order.index(constraint.constraint_type))
         output = ""
         for constraint in constraints:
             output += constraint.getIntelligibleForm() + "\n"
@@ -1661,7 +1669,8 @@ class ConstraintManager:
 
     # Affichage "intelligent" des contraintes incompatibles
     def showReducedResult(self, id_constraints):
-        occurType, occurInstructor, occurSlot, occurCourse, occurWeek, occurRoom, occurGroup, occurDays = self.get_occurs(id_constraints)
+        occurType, occurInstructor, occurSlot, occurCourse, occurWeek, occurRoom, occurGroup, occurDays = \
+            self.get_occurs(id_constraints)
 
         # Print global result
         bufType, bufInstructor, bufSlot, bufCourse, bufWeek, bufRoom, bufGroup, bufDays = "","","","","","","",""
@@ -1694,7 +1703,6 @@ class ConstraintManager:
         for x in occurGroup:
             bufGroup += "[" + str(x) + "->" + str(occurGroup.get(x)) + "] \n"
 
-
         constraints_intelligible = "Sommaire des contraintes : \n" + "\nParametre Type : \n" + bufType + "\nParametre Instructor : \n" + bufInstructor + "\nParametre Slot : \n" + bufSlot + "\nParametre Course : \n" + bufCourse + "\nParametre Week : \n" + bufWeek + "\nParametre Room : \n" + bufRoom + "\nParametre Group : \n" + bufGroup + "\nParametre Days : \n" + bufDays
         #print(constraints_intelligible)
         with open("reduced ilp constraints.txt", "w+") as file:
@@ -1702,5 +1710,5 @@ class ConstraintManager:
 
     def handleReducedResult(self, ilp_file_name):
         id_constraints = self.parseIIS(ilp_file_name)
-        self.showReducesResultBrut(id_constraints)
+        self.showReducesResultBrut(id_constraints, decreasing=True)
         self.showReducedResult(id_constraints)
