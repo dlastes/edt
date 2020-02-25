@@ -40,7 +40,7 @@ import sys
 BASE_DIR = os.path.dirname(os.path.dirname(
     os.path.dirname(os.path.abspath(__file__))))
 
-# 
+#
 # Application definition
 #
 
@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'django_extensions',
     'import_export',
     'colorfield',
+    'flopeditor',
 #    'rest_framework',
     'base',
     'TTapp',
@@ -145,11 +146,11 @@ AUTH_USER_MODEL = 'people.User'
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
-   
+
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
-# 
+#
 # EMAIL SETTINGS
 #
 
