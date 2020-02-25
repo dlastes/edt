@@ -136,6 +136,9 @@ class Tutor(User):
         ret += '-' + self.status + '-' + 'P' + str(self.pref_hours_per_day) + 'M' + str(self.max_hours_per_day)
         return ret
 
+    class Meta:
+        verbose_name = 'Tutor'
+
 
 class FullStaff(Tutor):
     is_iut = models.BooleanField(default=True)
