@@ -288,6 +288,7 @@ class Module(models.Model):
     ppn = models.CharField(max_length=8, default='M')
     train_prog = models.ForeignKey('TrainingProgramme', on_delete=models.CASCADE)
     period = models.ForeignKey('Period', on_delete=models.CASCADE)
+    url = models.CharField(max_length=200, null=True, blank=True, default=None)
 
     def __str__(self):
         return self.abbrev

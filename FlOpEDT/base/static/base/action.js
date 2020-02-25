@@ -1742,6 +1742,87 @@ function compute_cm_room_tutor_direction() {
     }
 }
 
+function show_detailed_courses(cours){
+    remove_details();
+    var details = svg.get_dom("dg").append("g")
+        .attr("id", "course_details");
+
+    var width = grid_width()/4;
+    var height = grid_height()/3;
+    var pos_x = placement_details_x(cours);
+    var pos_y = placement_details_y(cours);
+    var strokeColor;
+    var strokeWidth;
+
+    if(cours.course_type=="CTRL"){
+        strokeColor = "red";
+        strokeWidth = 4;
+    }
+    else{
+        strokeColor = "black";
+        strokeWidth = 2;
+    }
+
+    details
+        .append("rect")
+        .attr("x",pos_x)
+        .attr("y",pos_y)
+        .attr("width",width)
+        .attr("height",height)
+        .attr("rx",15)
+        .attr("ry",15)
+        .attr("fill", cours.color_bg)
+        .attr("stroke", strokeColor)
+        .attr("stroke-width",strokeWidth)
+        .on("click",remove_details);
+
+    details
+        .append("a")
+        .attr("xlink:href", modules_info[cours.mod].url)
+        .attr("target", "_blank")
+        .append("text")
+        .text(modules_info[cours.mod].name)
+        .attr("fill", cours.color_txt)
+        .attr("style", "text-decoration:underline")
+        .attr("x", pos_x+width/2)
+        .attr("y", pos_y+height/6);
+
+    details
+        .append("text")
+        .text(cours.room)
+        .attr("fill", cours.color_txt)
+        .attr("x", pos_x+width/2)
+        .attr("y", pos_y+height/6*2);
+
+    details
+        .append("text")
+        .text(cours.course_type)
+        .attr("fill", cours.color_txt)
+        .attr("x", pos_x+width/2)
+        .attr("y", pos_y+height/6*3);
+
+    details
+        .append("text")
+        .text(tutors_info[cours.prof].full_name)
+        .attr("fill", cours.color_txt)
+        .attr("x", pos_x+width/2)
+        .attr("y", pos_y+height/6*4);
+
+    details
+        .append("a")
+        .attr("xlink:href", url_contact + cours.prof)
+        .attr("target", "_blank")
+        .append("text")
+        .text(tutors_info[cours.prof].email)
+        .attr("fill", cours.color_txt)
+        .attr("style", "text-decoration:underline")
+        .attr("x", pos_x+width/2)
+        .attr("y", pos_y+height/6*5);
+}
+
+function remove_details(){
+    d3.select("#course_details").remove();
+}
 
 function apply_selection_display(choice) {
     if (fetch.done) {
@@ -1867,3 +1948,4 @@ function redirect_dept(d) {
     split_addr.push(sel_week.week);
     window.location.href = split_addr.join("/") ;
 }
+
