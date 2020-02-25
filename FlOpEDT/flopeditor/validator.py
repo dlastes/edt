@@ -47,7 +47,7 @@ def validate_department_creation(name, abbrev, tutor_id):
     :return: (boolean,json) (are the paramaters valid , status and errors)
     """
     response = {'status': 'UNKNOWN'}
-    slug_re = re.compile("^[a-zA-Z]\w{1,6}$")
+    slug_re = re.compile("^[a-zA-Z]\w{0,6}$")
     if not name or len(name) > 50:
         response = {
             'status': 'ERROR',
@@ -62,9 +62,9 @@ def validate_department_creation(name, abbrev, tutor_id):
     elif not slug_re.match(abbrev):
         response = {
             'status': 'ERROR',
-            'message': "L'abréviation du département est invalide. Elle peut \
-            comporter des lettres et des chiffres. Elle ne doit pas comporter \
-            d'espace, utilisez des '-' pour les séparations."
+            'message': "L'abréviation du département est invalide. Elle doit être entre 1 et 7 caractères. \
+		Elle peut comporter des lettres et des chiffres et doit commencer par une lettre. Elle ne \
+		doit pas comporter d'espace, utilisez des '_' pour les séparations."
         }
     elif Department.objects.filter(abbrev=abbrev):
         response = {
