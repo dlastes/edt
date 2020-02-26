@@ -344,6 +344,9 @@ class Course(models.Model):
         username_mod = self.tutor.username if self.tutor is not None else '-no_tut-'
         return f"{self.type}-{self.module}-{username_mod}-{self.group}"
 
+    def get_week(self):
+        return self.week
+
 
 class CoursePossibleTutors(models.Model):
     course = models.OneToOneField('Course', on_delete=models.CASCADE)

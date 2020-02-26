@@ -445,6 +445,7 @@ def fetch_cours_pp(req, week, year, num_copy, **kwargs):
                                 'module__display'
                                 ))
 
+
     response = HttpResponse(dataset.csv, content_type='text/csv')
     response['week'] = week
     response['year'] = year

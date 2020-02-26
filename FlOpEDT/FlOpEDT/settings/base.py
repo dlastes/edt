@@ -55,7 +55,8 @@ INSTALLED_APPS = [
     'django_extensions',
     'import_export',
     'colorfield',
-#    'rest_framework',
+    'rest_framework',
+    'django_filters',
     'base',
     'TTapp',
     'quote',
@@ -64,8 +65,12 @@ INSTALLED_APPS = [
     'synchro',
     'ics',
     'displayweb',
-    'configuration'
-#    'importation'
+    'configuration',
+#    'importation',
+    'api',
+    'rest_framework.authtoken',
+    'rest_auth',
+    'rest_framework_swagger',
 ]
 
 MIDDLEWARE = [
@@ -174,5 +179,40 @@ CUSTOM_CONSTRAINTS_PATH = 'MyFlOp.custom_constraints'
 if 'ADMINS' in os.environ:
     ADMINS = [tuple(admin.split(",")) for admin in os.environ.get('ADMINS').split(" ")]
     MANAGERS = ADMINS
+
+#
+# REST FRAMEWORK Settings
+#
+
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+        'rest_framework_csv.renderers.CSVRenderer',
+    ],
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',  # <-- And here
+    ],
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
+}
+
+
+
+# LOG IN-AND-OUT
+
+
+LOGIN_REDIRECT_URL = '/backoffice/'
+LOGIN_URL = '/'
+TEMPLATE_DIRS = (
+    BASE_DIR + '/templates/',
+)
+
+
+
+
+
+
 
 COSMO_MODE = False
