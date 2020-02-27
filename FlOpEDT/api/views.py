@@ -98,38 +98,38 @@ class StudentsViewSet(viewsets.ModelViewSet):
     
 
 
-class StudentPreferencesViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet to see all the students' preferences.
+# class StudentPreferencesViewSet(viewsets.ModelViewSet):
+#     """
+#     ViewSet to see all the students' preferences.
 
-    Can be filtered as wanted with every field of a StudentPreference object.
-    """
-    permission_classes = (IsAuthenticated,)  
-    serializer_class = serializers.StudentPreferencesSerializer
-    filterset_fields = '__all__'
+#     Can be filtered as wanted with every field of a StudentPreference object.
+#     """
+#     permission_classes = (IsAuthenticated,)  
+#     serializer_class = serializers.StudentPreferencesSerializer
+#     filterset_fields = '__all__'
 
-    def get_queryset(self):
-        # Creating a queryset containing every StudentPreference
-        qs = pm.StudentPreferences.objects.all()
+#     def get_queryset(self):
+#         # Creating a queryset containing every StudentPreference
+#         qs = pm.StudentPreferences.objects.all()
 
-        # Getting the filters
-        username = self.request.query_params.get('username', None)
+#         # Getting the filters
+#         username = self.request.query_params.get('username', None)
 
-        # Applying filters
-        if username == None:
-            return None
-        return qs.filter(username=username)
+#         # Applying filters
+#         if username == None:
+#             return None
+#         return qs.filter(username=username)
         
 
-class GroupPreferencesViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet to see all the groups' preferences.
+# class GroupPreferencesViewSet(viewsets.ModelViewSet):
+#     """
+#     ViewSet to see all the groups' preferences.
 
-    Can be filtered as wanted with every field of a GroupPreference object.
-    """
-    permission_classes = (IsAuthenticated,)  
-    queryset = pm.GroupPreferences.objects.all()
-    serializer_class = serializers.GroupPreferencesSerializer
+#     Can be filtered as wanted with every field of a GroupPreference object.
+#     """
+#     permission_classes = (IsAuthenticated,)  
+#     queryset = pm.GroupPreferences.objects.all()
+#     serializer_class = serializers.GroupPreferencesSerializer
 
 # ------------
 # -- GROUPS --
