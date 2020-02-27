@@ -308,9 +308,12 @@ class TutorRessource(resources.ModelResource):
 
 
 class ModuleDescriptionResource(resources.ModelResource):
-    desc = fields.Field(column_name='description',
-                        attribute='desc',
+    desc = fields.Field(column_name='desc',
+                        attribute='description',
                         widget=ForeignKeyWidget(ModuleDescription, 'desc'))
+    head = fields.Field(column_name='resp',
+                        attribute='head',
+                        widget=ForeignKeyWidget(Tutor, 'username'))
 
     class Meta:
         model = Module
