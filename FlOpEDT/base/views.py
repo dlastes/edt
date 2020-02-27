@@ -34,7 +34,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
-from django.core.mail import EmailMessage, send_mailModuleRessource
+from django.core.mail import EmailMessage, send_mail
 from django.db import transaction
 from django.db.models import Sum
 from django.http import HttpResponse, Http404, JsonResponse, HttpRequest
@@ -57,15 +57,13 @@ from base.admin import CoursResource, DispoResource, VersionResource, \
     SharedRoomGroupsResource, RoomPreferenceResource, ModuleRessource, \
     TutorRessource, ModuleDescriptionResource
 
-from FlOpEDT.base.models import Module
-
 if COSMO_MODE:
     from base.admin import CoursPlaceResourceCosmo
 from base.forms import ContactForm, PerfectDayForm
 from base.models import Course, UserPreference, ScheduledCourse, EdtVersion, \
     CourseModification, Day, Time, RoomGroup, Room, PlanningModification, \
     Regen, RoomPreference, Department, TimeGeneralSettings, CoursePreference, \
-    TrainingProgramme, CourseType
+    TrainingProgramme, CourseType, Module
 import base.queries as queries
 from base.weeks import *
 
