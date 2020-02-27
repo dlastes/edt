@@ -342,7 +342,7 @@ def decale(req, **kwargs):
 
 
 def all_modules_with_desc(req, **kwargs):
-    return HttpResponse('OK!')
+    return TemplateResponse(req, 'base/modules.html')
 
 # </editor-fold desc="VIEWERS">
 
