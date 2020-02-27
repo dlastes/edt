@@ -219,23 +219,6 @@ function fetch_pref_only() {
     });
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 function dispo_x(d) {
     return week_days.day_by_ref(d.day).num * (dim_dispo.width + dim_dispo.mh) ;
 }
@@ -252,11 +235,6 @@ function gsclb_y()  {
 function gsclb_x()  {
     return (dim_dispo.width + dim_dispo.mh) * week_days.nb_days() - dim_dispo.mh ;
 }
-
-
-
-
-
 
 d3.select("body")
     .on("click", function(d) {
