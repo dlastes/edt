@@ -298,6 +298,17 @@ class RoomSortsViewSet(viewsets.ModelViewSet):
 # -- COURSES --
 # -------------
 
+class ModulesFilterSet(filters.FilterSet):
+
+    dept = filters.CharFilter(field_name='train_prog__department__abbrev', required=True)
+    # makes the fields required
+    week = filters.NumberFilter(field_name='week')
+    year = filters.NumberFilter(field_name='year')
+
+    class Meta:
+        model = bm.Module
+        fields = ['dept', 'week', 'year']
+
 class ModulesViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the modules.
@@ -306,6 +317,7 @@ class ModulesViewSet(viewsets.ModelViewSet):
     """
     queryset = bm.Module.objects.all()
     serializer_class = serializers.ModulesSerializer
+    filter_class = ModulesFilterSet
     
     filterset_fields = '__all__'
 
@@ -858,6 +870,17 @@ class TTLimitedRoomChoicesViewSet(viewsets.ModelViewSet):
 # ---------------
 # --- OTHERS ----
 # ---------------
+class ScheduledCourseFilterSet(filters.FilterSet):
+
+    dept = filters.CharFilter(field_name='course__module__train_prog__department__abbrev', required=True)
+    # makes the fields required
+    week = filters.NumberFilter(field_name='course__week', required=True)
+    year = filters.NumberFilter(field_name='course__year', required=True)
+
+    class Meta:
+        model = bm.ScheduledCourse
+        fields = ['dept', 'week', 'year']
+
 class ScheduledCoursesViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the scheduled courses
@@ -865,8 +888,10 @@ class ScheduledCoursesViewSet(viewsets.ModelViewSet):
     Result can be filtered as wanted with week, year and work_copy (0 by default).
     Request needs a department filter.
     """
+    queryset = bm.ScheduledCourse.objects.all()
     serializer_class = serializers.ScheduledCoursesSerializer
-
+    filter_class = ScheduledCourseFilterSet
+    """
     def get_queryset(self):
         # Creating a default queryset
         queryset = bm.ScheduledCourse.objects.select_related('course__module__train_prog__department').all()
@@ -896,7 +921,7 @@ class ScheduledCoursesViewSet(viewsets.ModelViewSet):
         
 
         return queryset
-        
+     """
 
 class UnscheduledCoursesViewSet(viewsets.ModelViewSet):
     """
@@ -904,7 +929,9 @@ class UnscheduledCoursesViewSet(viewsets.ModelViewSet):
 
     Result can be filtered as wanted with week, year, work_copy and department fields.
     """
+
     serializer_class = serializers.UnscheduledCoursesSerializer
+
 
     def get_queryset(self):
         # Creating querysets of all courses and all scheduled courses
@@ -936,6 +963,7 @@ class UnscheduledCoursesViewSet(viewsets.ModelViewSet):
         queryset = queryset_course.exclude(pk__in=queryset_sc)
 
         return queryset
+    
 
 class AvailabilitiesViewSet(viewsets.ModelViewSet):
     """
@@ -1125,14 +1153,27 @@ class ExtraSchedCoursesViewSet(viewsets.ModelViewSet):
 
         return qs
 
+class BKNewsFilterSet(filters.FilterSet):
+
+    dept = filters.CharFilter(field_name='department__abbrev', required=True)
+    # makes the fields required
+    week = filters.NumberFilter(field_name='week', required=True)
+    year = filters.NumberFilter(field_name='year', required=True)
+
+    class Meta:
+        model = dwm.BreakingNews
+        fields = ['dept', 'week', 'year']
+
 class BKNewsViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the BKNews
 
     Result can be filtered with week and year
     """
+    queryset = dwm.BreakingNews.objects.all()
     serializer_class = serializers.BKNewsSerializer
-
+    filter_class = BKNewsFilterSet
+    """
     def get_queryset(self):
         # Getting all the needed data
         qs = dwm.BreakingNews.objects.all()
@@ -1147,7 +1188,7 @@ class BKNewsViewSet(viewsets.ModelViewSet):
         if week is not None:
             qs = qs.filter(year=year)
         return qs
-
+    """
 
 class AllCourseTypesViewSet(viewsets.ModelViewSet):
     """
