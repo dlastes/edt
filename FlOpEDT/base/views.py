@@ -340,6 +340,9 @@ def decale(req, **kwargs):
                   })
 
 
+def all_modules_with_desc(req, **kwargs):
+    return HttpResponse('OK!')
+
 # </editor-fold desc="VIEWERS">
 
 
@@ -949,6 +952,10 @@ def fetch_shared_roomgroups(req, year, week, **kwargs):
                 .exclude(course__room_type__department=req.department)
     dataset = SharedRoomGroupsResource().export(courses)
     return HttpResponse(dataset.csv, content_type='text/csv')
+
+
+def fetch_all_modules_with_desc(req, **kwargs):
+    return HttpResponse('OK!')
 
 # </editor-fold desc="FETCHERS">
 

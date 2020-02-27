@@ -46,6 +46,7 @@ urlpatterns = [
     url(r'^contact/(?P<tutor>\w{2,8})?$', views.contact, name="contact"),
     url(r'^((?P<year>\d{4}))?(/(?P<week>\d{1,2}))?$', views.edt, name="edt"),
     url(r'^tv(/(?P<year>\d+))?(/(?P<week>\d+))?$', views.edt_light, name="edt_light"),
+    url(r'^all_modules_with_desc$', views.all_modules_with_desc, name="all_modules_with_desc"),
 
     # exchanges with the db via django
     # ---------------------------------
@@ -76,6 +77,7 @@ urlpatterns = [
     path('fetch_perfect_day/<str:username>', views.fetch_perfect_day, name="fetch_perfect_day"),
     url(r'^fetch_module/(?P<year>\d+)/(?P<week>\d+)$', views.fetch_module, name="fetch_module"),
     url(r'^fetch_tutors/(?P<year>\d+)/(?P<week>\d+)$', views.fetch_tutor, name="fetch_tutor"),
+    url(r'^fetch_all_modules_with_desc$', views.fetch_all_modules_with_desc, name="fetch_all_modules_with_desc"),
 
     # statistics
     # ---------------------------------
