@@ -932,3 +932,6 @@ for (var i = 0 ; i<day_refs.length ; i++) {
 var working_time = {} ;
 
 var splash_hold = false ;
+     
+var modules_info = {};
+var tutors_info = {};

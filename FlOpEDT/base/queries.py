@@ -115,6 +115,7 @@ def get_scheduled_courses(department, week, year, num_copy):
                         course__module__train_prog__department=department,
                         course__week=week,
                         course__year=year,
+                        day__in=get_working_days(department),
                         work_copy=num_copy).select_related('course',
                                                            'course__tutor',
                                                            'course__group',
@@ -265,7 +266,8 @@ def get_time_settings(dept):
                      {'day_start_time': ts.day_start_time,
                       'day_finish_time': ts.day_finish_time,
                       'lunch_break_start_time': ts.lunch_break_start_time,
-                      'lunch_break_finish_time': ts.lunch_break_finish_time},
+                      'lunch_break_finish_time': ts.lunch_break_finish_time,
+                      'def_pref_duration':ts.default_preference_duration},
                      'days': ts.days}
     return time_settings
 
@@ -287,3 +289,9 @@ def get_training_programmes(dept):
     :return: list of training programme names
     """
     return [d.abbrev for d in TrainingProgramme.objects.filter(department=dept)]
+
+def get_working_days(dept):
+    """
+    :return: list of abbreviated working days in dept
+    """
+    return TimeGeneralSettings.objects.get(department=dept).days
