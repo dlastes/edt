@@ -876,6 +876,7 @@ class ScheduledCoursesViewSet(viewsets.ModelViewSet):
         week = self.request.query_params.get('week', None)
         work_copy = self.request.query_params.get('work_copy', 0)
         department = self.request.query_params.get('department', None)
+    #    full_week = self.request.query_params.get('')
 
         # Filtering
         if department is not None:
@@ -884,10 +885,14 @@ class ScheduledCoursesViewSet(viewsets.ModelViewSet):
             return None
         if year is not None:
             queryset = queryset.filter(course__year=year)
+        else:
+            return None
         if week is not None:
             queryset=queryset.filter(course__week=week)
-        if work_copy is not None:
-            queryset = queryset.filter(work_copy=work_copy)
+        else:
+            return None
+
+        queryset = queryset.filter(work_copy=work_copy)
         
 
         return queryset
@@ -909,16 +914,17 @@ class UnscheduledCoursesViewSet(viewsets.ModelViewSet):
         # Getting filters from the URL params (?param1=...&param2=...&...)
         year = self.request.query_params.get('year', None)
         week = self.request.query_params.get('week', None)
-        work_copy = self.request.query_params.get('work_copy', None)
+        work_copy = self.request.query_params.get('work_copy', 0)
         department = self.request.query_params.get('department', None)
 
         # Filtering different querysets
         if year is not None:
             queryset_course = queryset_course.filter(year=year)
+
         if week is not None:
             queryset_course=queryset_course.filter(week=week)
-        if work_copy is not None:
-            queryset_sc = queryset_sc.filter(work_copy=work_copy)
+
+        queryset_sc = queryset_sc.filter(work_copy=work_copy)
         if department is not None:
             queryset_course = queryset_course.filter(module__train_prog__department__abbrev=department)
             queryset_sc = queryset_sc.filter(course__module__train_prog__department__abrrev=department)
@@ -1013,13 +1019,23 @@ class TrainingProgrammesViewSet(viewsets.ModelViewSet):
     filterset_fields = '__all__'
 
 
+class AllTutorsFilterSet(filters.FilterSet):
+    dept = filters.CharFilter(field_name='user__departments__abbrev', required=True)
+    year = filters.CharFilter(field_name='user__departments__train_pro__module__module__year')
+    week = filters.CharFilter(field_name='user__departments__train_pro__module__module__week')
+
+    class Meta:
+        model = pm.UserDepartmentSettings
+        fields = ['dept', 'year', 'week']
+
 class AllTutorsViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the training programs 
     """
+
     queryset = pm.UserDepartmentSettings.objects.all()
     serializer_class = serializers.AllTutorsSerializer
-    filterset_fields = '__all__'
+    filter_class = AllTutorsFilterSet
 
 
 class AllVersionsViewSet(viewsets.ModelViewSet):
@@ -1042,6 +1058,16 @@ class DepartmentsViewSet(viewsets.ModelViewSet):
     filterset_fields = '__all__'   
 
 
+class TutorCoursesFilterSet(filters.FilterSet):
+    tutor_name = filters.CharFilter(field_name='user__departments__train_pro__module__module__tutor__username', required=True)
+    year = filters.CharFilter(field_name='user__departments__train_pro__module__module__year')
+    week = filters.CharFilter(field_name='user__departments__train_pro__module__module__week')
+    dept = filters.CharFilter(field_name='user__departments__abbrev')
+
+    class Meta:
+        model = pm.UserDepartmentSettings
+        fields = ['tutor_name', 'year', 'week', 'dept']
+
 class TutorCoursesViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the courses of a tutor
@@ -1050,27 +1076,29 @@ class TutorCoursesViewSet(viewsets.ModelViewSet):
     Filtering is also possible with week and year.
     """
     serializer_class = serializers.TutorCourses_Serializer
+    queryset = pm.UserDepartmentSettings.objects.all()
+    filter_class = TutorCoursesFilterSet
 
-    def get_queryset(self):
-        # Getting all the needed data
-        qs = bm.ScheduledCourse.objects.all()
+    #def get_queryset(self):
+       # Getting all the needed data
+     #   qs = bm.ScheduledCourse.objects.all()
 
         # Getting the filters
-        tutor = self.request.query_params.get('tutor', None)
-        week = self.request.query_params.get('week', None)
-        year = self.request.query_params.get('year', None)
+      #  tutor = self.request.query_params.get('tutor', None)
+       # week = self.request.query_params.get('week', None)
+        #year = self.request.query_params.get('year', None)
 
         # Filtering
-        if tutor is None:
-            return None
-        else:
-            qs = qs.filter(tutor__username=tutor)
-        if week is not None:
-            qs = qs.filter(course__week=week)
-        if year is not None:
-            qs = qs.filter(course__year=year)
+  #      if tutor is None:
+   #         return None
+    #    else:
+     #       qs = qs.filter(tutor__username=tutor)
+      #  if week is not None:
+       #     qs = qs.filter(course__week=week)
+        #if year is not None:
+      #      qs = qs.filter(course__year=year)
 
-        return qs
+       # return qs
 
 
 class ExtraSchedCoursesViewSet(viewsets.ModelViewSet):

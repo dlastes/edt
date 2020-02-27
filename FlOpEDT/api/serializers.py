@@ -707,7 +707,7 @@ class TutorCourses_Serializer(serializers.Serializer):
 
     class Meta:
         model = bm.ScheduledCourse
-        fields = [ 'no', 'room', 'start_time', 'course']
+        fields = ['room', 'start_time', 'course']
 
 #                           -------------------------------------                       #
 #                           ----Extra Scheduled Courses (ESC)----                       #

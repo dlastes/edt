@@ -51,7 +51,7 @@ class Department(models.Model):
 class TrainingProgramme(models.Model):
     name = models.CharField(max_length=50)
     abbrev = models.CharField(max_length=5)
-    department =  models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
+    department = models.ForeignKey(Department, related_name='train_pro', on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return self.abbrev
@@ -286,7 +286,7 @@ class Module(models.Model):
                              blank=True,
                              on_delete=models.CASCADE)
     ppn = models.CharField(max_length=8, default='M')
-    train_prog = models.ForeignKey('TrainingProgramme', on_delete=models.CASCADE)
+    train_prog = models.ForeignKey('TrainingProgramme', related_name='module', on_delete=models.CASCADE)
     period = models.ForeignKey('Period', on_delete=models.CASCADE)
     url = models.CharField(max_length=200, null=True, blank=True, default=None)
 
