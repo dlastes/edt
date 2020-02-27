@@ -208,8 +208,8 @@
                                         style="display:none;border-radius:5px;"></div>
                                     <button id="button-submit" type="submit" class="btn btn-raised btn-success mr-3">Valider <i
                                             class="fa fa-check"></i></button>
-                                    <button type="reset" class="btn btn-raised btn-danger">Annuler <i
-                                            class="fa fa-times"></i></button>
+                                    <a id="button-cancel" href="{% url 'flopeditor:flopeditor-department-parameters' department_abbrev=department.abbrev %}" class="btn btn-raised btn-danger">Annuler <i
+                                            class="fa fa-times"></i></a>
                                 </div>
                             </div>
 
