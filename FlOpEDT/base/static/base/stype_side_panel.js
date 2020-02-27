@@ -5,6 +5,8 @@ dd_selections['type'].url = url_course_types ;
 dd_selections['type'].id ="#dd_course_types";
 dd_selections['prog'].url = url_training_programmes;
 dd_selections['prog'].id = "#dd_programmes" ;
+dd_selections['room'].url = url_rooms;
+dd_selections['room'].id = "#dd_rooms" ;
 
 for (var key in dd_selections){
     dd_selections[key].filled = false ;
@@ -46,12 +48,21 @@ function fetch_selected() {
     for(var key in dd_selections) {
         dd_selections[key].value = $(dd_selections[key].id).find(':selected').val() ;
     }
-    if (mode == 'tutor') {
+    switch(mode){
+    case 'tutor':
         user.name = dd_selections['tutor'].value;
-    } else {
+        break;
+    case 'course':
         user.name = course_type_prog_name(
             dd_selections['prog'].value,
             dd_selections['type'].value) ;
+        break;
+    case 'room':
+        user.name = dd_selections['room'].value;
+        break;
+    default:
+        console.log("What's this mode?");
+        return ;
     }
     fetch_pref_only() ;
     if (mode == 'tutor') {
@@ -96,6 +107,8 @@ function dd_fetch_ended() {
         fetch_selected();
     } else if (mode == 'course' && dd_selections['type'].filled && dd_selections['prog'].filled) {
         fetch_selected();
+    } else if (mode == 'room' && dd_selections['room'].filled) {
+        fetch_selected();
     }
 }
 
@@ -112,6 +125,7 @@ function openNav() {
 
 //    $('#sp_tutor').hide();
     $('#sp_course_type').hide();
+    $('#sp_room').hide();
 
     // add event listeners
     for (var key in dd_selections) {
@@ -150,8 +164,9 @@ function closeNav() {
 // show tutor selection in the side panel
 function show_tutors() {
     // refresh side panel
-    $('#sp_course_type').hide();
     $('#sp_tutor').show();
+    $('#sp_course_type').hide();
+    $('#sp_room').hide();
 
     // change button behaviors
     mode = "tutor" ;
@@ -165,9 +180,22 @@ function show_tutors() {
 function show_course_types(){
     $('#sp_tutor').hide();
     $('#sp_course_type').show();
+    $('#sp_room').hide();
 
     // change button behaviors
     mode = "course" ;
+
+    fetch_selected();
+}
+
+// show course type selection in the side panel
+function show_rooms(){
+    $('#sp_tutor').hide();
+    $('#sp_course_type').hide();
+    $('#sp_room').show();
+
+    // change button behaviors
+    mode = "room" ;
 
     fetch_selected();
 }

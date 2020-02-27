@@ -23,36 +23,33 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-
-
-from base import weeks
-from base.models import TrainingProgramme, ScheduledCourse
-from base.core.period_weeks import PeriodWeeks
-from people.models import FullStaff
-from solve_board.models import SolveRun
-# from solve_board.consumers import ws_add
-from MyFlOp.MyTTModel import MyTTModel
-from TTapp.models import TTConstraint
-from TTapp.TTModel import get_constraints
+from multiprocessing import Process
+from io import StringIO
+import os
+import sys
+import json
+import pulp.solvers as pulp_solvers
 
 from django.shortcuts import render
 from django.contrib.admin.views.decorators import staff_member_required
 from django.http import Http404, JsonResponse, HttpResponse
 from django.conf import settings
 from django.db.models import Q
-
 # from channels import Group
-
-from multiprocessing import Process
-from io import StringIO
-import os
-import sys
-import json
-
 from django.template.response import TemplateResponse
-from django.conf import settings
 
-import pulp.solvers as pulp_solvers
+from FlOpEDT.decorators import dept_admin_required
+
+from base import weeks
+from base.models import TrainingProgramme, ScheduledCourse
+from base.core.period_weeks import PeriodWeeks
+from people.models import FullStaff
+from MyFlOp.MyTTModel import MyTTModel
+from TTapp.models import TTConstraint
+from TTapp.TTModel import get_constraints
+
+from solve_board.models import SolveRun
+# from solve_board.consumers import ws_add
 
 # String used to specify all filter
 text_all='All'
@@ -135,14 +132,14 @@ def get_context(department, year, week, train_prog=None):
     return context
 
 
-@staff_member_required
+@dept_admin_required
 def fetch_context(req, train_prog, year, week, **kwargs):
 
     context = get_context(req.department, year, week, train_prog)
     return HttpResponse(json.dumps(context), content_type='text/json')
 
 
-@staff_member_required
+@dept_admin_required
 def main_board(req, **kwargs):
 
     department = req.department

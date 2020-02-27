@@ -102,7 +102,6 @@ function init_date() {
     var hm = new Array(2);
     hm[0] = 360*(d.getHours() % 12 + d.getMinutes()/60)/12;
     hm[1] = 360*(d.getMinutes()+d.getSeconds()/60)/60;
-    console.log(hm);
     var anim = new Array(2);
     anim[0] = document.getElementById("csh")
 	.getElementsByTagName("animateTransform")[0];
