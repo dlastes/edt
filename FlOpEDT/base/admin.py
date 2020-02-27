@@ -307,7 +307,7 @@ class TutorRessource(resources.ModelResource):
         fields = ('tutor__username', 'tutor__first_name', 'tutor__last_name', 'tutor__email')
 
 
-class ModuleResource(resources.ModelResource):
+class ModuleDescriptionResource(resources.ModelResource):
     desc = fields.Field(column_name='description',
                         attribute='desc',
                         widget=ForeignKeyWidget(ModuleDescription, 'desc'))

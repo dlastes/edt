@@ -34,7 +34,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
-from django.core.mail import EmailMessage, send_mail
+from django.core.mail import EmailMessage, send_mailModuleRessource
 from django.db import transaction
 from django.db.models import Sum
 from django.http import HttpResponse, Http404, JsonResponse, HttpRequest
@@ -55,7 +55,10 @@ from base.admin import CoursResource, DispoResource, VersionResource, \
     CoursPlaceResource, UnavailableRoomsResource, TutorCoursesResource, \
     CoursePreferenceResource, MultiDepartmentTutorResource, \
     SharedRoomGroupsResource, RoomPreferenceResource, ModuleRessource, \
-    TutorRessource
+    TutorRessource, ModuleDescriptionResource
+
+from FlOpEDT.base.models import Module
+
 if COSMO_MODE:
     from base.admin import CoursPlaceResourceCosmo
 from base.forms import ContactForm, PerfectDayForm
@@ -955,7 +958,9 @@ def fetch_shared_roomgroups(req, year, week, **kwargs):
 
 
 def fetch_all_modules_with_desc(req, **kwargs):
-    return HttpResponse('OK!')
+    data = Module.objects.all()
+    res = ModuleDescriptionResource().export(data)
+    return HttpResponse(res.json, content_type='application/json')
 
 # </editor-fold desc="FETCHERS">
 
