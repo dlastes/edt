@@ -94,13 +94,13 @@
                         </div>
                         {% if has_department_perm %}
                             <a type="button"
-                                href="{% url 'flopeditor:flopeditor-department-parameters-edit' department_abbrev=department_abbrev %}"
+                                href="{% url 'flopeditor:flopeditor-department-parameters-edit' department_abbrev=department.abbrev %}"
                                 class="btn btn-raised btn-info mx-auto mt-4">Modifier</a>
 
                         {% endif %}
                         {% else %}
                         <form id="form-parameters" class="mb-0"
-                            action="{% url 'flopeditor:flopeditor-ajax-edit-department-parameters' department_abbrev=department_abbrev %}">
+                            action="{% url 'flopeditor:flopeditor-ajax-edit-department-parameters' department_abbrev=department.abbrev %}">
                             {% csrf_token %}
                             <div class="form-group row mb-0">
                                 <div class="col-sm-6  mt-3 pl-4" style="border-right: solid 1px grey;">
@@ -225,6 +225,6 @@
 
     {% block script %}
     {{ block.super }}
-    <script> const parametersUrl = "{% url 'flopeditor:flopeditor-department-parameters' department_abbrev=department_abbrev %}"; </script>
+    <script> const parametersUrl = "{% url 'flopeditor:flopeditor-department-parameters' department_abbrev=department.abbrev %}"; </script>
     <script src="{% static 'flopeditor/js/edit-parameters.js' %}" charset="utf-8"></script>
     {% endblock %}
