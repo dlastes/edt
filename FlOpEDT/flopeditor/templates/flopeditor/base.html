@@ -54,6 +54,9 @@
                     </li>
 
                 </ul>
+                {% if not list_departments %}
+                <span class="navbar-text">Département {{ department.name }}</span>
+                {% else %}
                 <div class="dropdown">
                   <a class="btn btn-secondary dropdown-toggle text-white border border-secondary" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     Département {{ department.name }}
@@ -64,6 +67,7 @@
                     {% endfor %}
                   </div>
                 </div>
+                {% endif %}
               </div>
         </nav>
         {% endblock %}
