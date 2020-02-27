@@ -57,3 +57,7 @@ class PerfectDayForm(forms.Form):
         self.fields['max_hours_per_day'] = forms.IntegerField(label="Maximum", min_value=1, max_value=9,
                                                               required=False, initial=6)
 
+class DescriptionForm(forms.Form):
+    description = forms.CharField(label='Description du module : ',
+                                  max_length=2000,
+                                  widget=forms.Textarea())

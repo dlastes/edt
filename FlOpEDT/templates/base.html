@@ -82,9 +82,11 @@
       <li><a href="{% url "ics:index" department %}">iCal</a></li>
       <li><a href="{% url "base:aide" department %}">Aide</a></li>
       <li><a href="{% url "base:contact" department %}">Contact</a></li>
+      <li><a href="{% url "base:description" department %}">Description</a></li>
+
       {% if is_department_admin %}
       <li><a href="{% url "solve_board:main_board" department %}">Générer</a></li>
-      <li><a href="{% url "base:statistics" department %}">Statistiques</a></li>
+      <li><a href="{% url "base:statistics" depar00tment %}">Statistiques</a></li>
       {% endif %}
       {% endif %}
       {% if is_department_admin %}
