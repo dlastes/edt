@@ -90,10 +90,11 @@ def department_parameters(request, department_abbrev):
 
     """
     department = get_object_or_404(Department, abbrev=department_abbrev)
+    departments = Department.objects.exclude(abbrev=department_abbrev)
     parameters = get_object_or_404(TimeGeneralSettings, department=department)
     return render(request, "flopeditor/parameters.html", {
         'title': 'Paramètres',
-        'department_abbrev': department_abbrev,
+        'department': department,
         'day_start_time': min_to_str(parameters.day_start_time),
         'day_finish_time': min_to_str(parameters.day_finish_time),
         'lunch_break_start_time': min_to_str(parameters.lunch_break_start_time),
@@ -101,6 +102,7 @@ def department_parameters(request, department_abbrev):
         'days': parameters.days,
         'day_choices': Day.CHOICES,
         'default_preference_duration': min_to_str(parameters.default_preference_duration),
+        'list_departments': departments,
         'has_department_perm': request.user.has_department_perm(department=department, admin=True),
         'edit': False
 
@@ -146,9 +148,13 @@ def department_rooms(request, department_abbrev):
     :rtype:  django.http.HttpResponse
 
     """
+    department = get_object_or_404(Department, abbrev=department_abbrev)
+    departments = Department.objects.exclude(abbrev=department_abbrev)
     return render(request, "flopeditor/rooms.html", {
         'title': 'Salles',
-        'department_abbrev': department_abbrev
+        'department': department,
+        'list_departments': departments
+
     })
 
 
@@ -164,9 +170,12 @@ def department_groups(request, department_abbrev):
     :rtype:  django.http.HttpResponse
 
     """
+    department = get_object_or_404(Department, abbrev=department_abbrev)
+    departments = Department.objects.exclude(abbrev=department_abbrev)
     return render(request, "flopeditor/groups.html", {
         'title': 'Groupes',
-        'department_abbrev': department_abbrev
+        'department': department,
+        'list_departments': departments
     })
 
 
@@ -182,9 +191,12 @@ def department_modules(request, department_abbrev):
     :rtype:  django.http.HttpResponse
 
     """
+    department = get_object_or_404(Department, abbrev=department_abbrev)
+    departments = Department.objects.exclude(abbrev=department_abbrev)
     return render(request, "flopeditor/modules.html", {
         'title': 'Modules',
-        'department_abbrev': department_abbrev
+        'department': department,
+        'list_departments': departments
     })
 
 
@@ -200,9 +212,12 @@ def department_classes(request, department_abbrev):
     :rtype:  django.http.HttpResponse
 
     """
+    department = get_object_or_404(Department, abbrev=department_abbrev)
+    departments = Department.objects.exclude(abbrev=department_abbrev)
     return render(request, "flopeditor/classes.html", {
         'title': 'Classes',
-        'department_abbrev': department_abbrev
+        'department': department,
+        'list_departments': departments
     })
 
 

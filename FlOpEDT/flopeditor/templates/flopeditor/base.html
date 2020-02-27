@@ -3,6 +3,7 @@
 {% block html %}
 <html lang="fr-fr" dir="ltr">
     <head>
+
         {% block head %}
 
         {% block meta %}
@@ -33,30 +34,37 @@
                 <ul class="navbar-nav mr-auto">
                     <li class="nav-item {% block nav-classes-rooms %}{% endblock %}">
                         <a class="nav-link"
-                            href="{% url 'flopeditor:flopeditor-department-rooms' department_abbrev=department_abbrev %}">Salles</a>
+                            href="{% url 'flopeditor:flopeditor-department-rooms' department_abbrev=department.abbrev %}">Salles</a>
                     </li>
                     <li class="nav-item {% block nav-classes-groups %}{% endblock %}">
                         <a class="nav-link"
-                            href="{% url 'flopeditor:flopeditor-department-groups' department_abbrev=department_abbrev %}">Groupes</a>
+                            href="{% url 'flopeditor:flopeditor-department-groups' department_abbrev=department.abbrev %}">Groupes</a>
                     </li>
                     <li class="nav-item {% block nav-classes-modules %}{% endblock %}">
                         <a class="nav-link"
-                            href="{% url 'flopeditor:flopeditor-department-modules' department_abbrev=department_abbrev %}">Modules</a>
+                            href="{% url 'flopeditor:flopeditor-department-modules' department_abbrev=department.abbrev %}">Modules</a>
                     </li>
                     <li class="nav-item {% block nav-classes-class %}{% endblock %}">
                         <a class="nav-link"
-                            href="{% url 'flopeditor:flopeditor-department-classes' department_abbrev=department_abbrev %}">Cours</a>
+                            href="{% url 'flopeditor:flopeditor-department-classes' department_abbrev=department.abbrev %}">Cours</a>
                     </li>
                     <li class="nav-item {% block nav-classes-parameters %}{% endblock %}">
                         <a class="nav-link"
-                            href="{% url 'flopeditor:flopeditor-department-parameters' department_abbrev=department_abbrev %}">Paramètres</a>
+                            href="{% url 'flopeditor:flopeditor-department-parameters' department_abbrev=department.abbrev %}">Paramètres</a>
                     </li>
-        
+
                 </ul>
-                <span class="navbar-text">
-                    Departement: {{ department_abbrev }}
-                </span>
-            </div>
+                <div class="dropdown">
+                  <a class="btn btn-secondary dropdown-toggle text-white border border-secondary" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Département {{ department.name }}
+                  </a>
+                  <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                    {% for dept in list_departments %}
+                      <a class="dropdown-item" href="{% url request.resolver_match.view_name department_abbrev=dept.abbrev %}">{{ dept.name }}</a>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
         </nav>
         {% endblock %}
 
