@@ -271,6 +271,13 @@ class RoomGroupsViewSet(viewsets.ModelViewSet):
     
     filterset_fields = '__all__'
 
+class RoomsFilterSet(filters.FilterSet):
+    dept = filters.CharFilter(field_name='departments__abbrev', required=True)
+
+    class Meta:
+        model = bm.Room
+        fields = ['dept']
+
 class RoomsViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the rooms.
@@ -279,8 +286,9 @@ class RoomsViewSet(viewsets.ModelViewSet):
     """
     queryset = bm.Room.objects.all()
     serializer_class = serializers.RoomsSerializer
+    filter_class = RoomsFilterSet
     
-    filterset_fields = '__all__'
+    #filterset_fields = '__all__'
     
 
 class RoomSortsViewSet(viewsets.ModelViewSet):
@@ -356,7 +364,12 @@ class Modules_Course_ViewSet(viewsets.ModelViewSet):
 
         return res
 
+class CourseTypesFilterSet(filters.FilterSet):
+    dept = filters.CharFilter(field_name='department__abbrev', required=True)
 
+    class Meta:
+        model = bm.CourseType
+        fields = ['dept']
 
 class CourseTypesViewSet(viewsets.ModelViewSet):
     """
@@ -366,6 +379,7 @@ class CourseTypesViewSet(viewsets.ModelViewSet):
     """
     queryset = bm.CourseType.objects.all()
     serializer_class = serializers.CourseTypesSerializer
+    filter_class = CourseTypesFilterSet
     
     filterset_fields = '__all__'
 
@@ -513,6 +527,7 @@ class UserPreferenceSingleOwDefaultViewSet(UserPreferenceGenViewSet):
             print(self.request.query_params.get('week', None))
             qs = bm.UserPreference.objects.filter(week=None)
         return qs
+
 
 
 class RoomPreferencesViewSet(viewsets.ModelViewSet):
@@ -876,6 +891,7 @@ class ScheduledCourseFilterSet(filters.FilterSet):
     # makes the fields required
     week = filters.NumberFilter(field_name='course__week', required=True)
     year = filters.NumberFilter(field_name='course__year', required=True)
+    #num_copy = filters.NumberFilter(field_name='num_copy')
 
     class Meta:
         model = bm.ScheduledCourse
