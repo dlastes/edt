@@ -44,6 +44,7 @@ import TTapp.models as ttm
 
 # ------------
 # -- PEOPLE --
+
 # ------------
 class UsersViewSet(viewsets.ModelViewSet):
     """
@@ -143,7 +144,16 @@ class DepartmentViewSet(viewsets.ModelViewSet):
     """
     queryset = bm.Department.objects.all()
     serializer_class = serializers.DepartmentSerializer
-    
+
+
+class TrainingProgramsFilterSet(filters.FilterSet):
+    dept = filters.CharFilter(field_name='department__abbrev', required=True)
+
+    class Meta:
+        model = bm.TrainingProgramme
+        fields = ['dept']
+
+
 
 class TrainingProgramsViewSet(viewsets.ModelViewSet):
     """
@@ -153,6 +163,8 @@ class TrainingProgramsViewSet(viewsets.ModelViewSet):
     """
     queryset = bm.TrainingProgramme.objects.all()
     serializer_class = serializers.TrainingProgramsSerializer
+    filter_class = TrainingProgramsFilterSet
+
     
 
 class GroupTypesViewSet(viewsets.ModelViewSet):
@@ -165,6 +177,14 @@ class GroupTypesViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.GroupTypesSerializer
     
 
+class GroupsFilterSet(filters.FilterSet):
+    dept = filters.CharFilter(field_name='train_prog__department__abbrev', required=True)
+
+    class Meta:
+        model = bm.Group
+        fields = ['dept']
+
+
 class GroupsViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the groups.
@@ -172,20 +192,22 @@ class GroupsViewSet(viewsets.ModelViewSet):
     Can be filtered as wanted with every field of a Group object.
     """
     serializer_class = serializers.GroupsSerializer
+    queryset = bm.Group.objects.all()
+    filter_class = GroupsFilterSet
 
-    def get_queryset(self):
-        # Creating a queryset containing all Groups
-        queryset = bm.Group.objects.all()
+ #   def get_queryset(self):
+  #      # Creating a queryset containing all Groups
+   #     queryset = bm.Group.objects.all()
+#
+ #       # Getting filters from the request
+  ##      department = self.request.query_params.get('dept', None)
 
-        # Getting filters from the request
-        department = self.request.query_params.get('dept', None)
-
-        # Applying filters
-        if department is None:
-            return None
-        else:
-            return queryset.filter(train_prog__department__abbrev=department)
-    
+    #    # Applying filters
+     #   if department is None:
+       #     return None
+      #  else:
+     #       return queryset.filter(train_prog__department__abbrev=department)
+    #
 
 # ------------
 # -- TIMING --
@@ -639,6 +661,17 @@ class CourseStartTimeConstraintsViewSet(viewsets.ModelViewSet):
     
     filterset_class = CoureStartTimeFilter
 
+
+class RegensFilterSet(filters.FilterSet):
+    year = filters.CharFilter(field_name='department__train_pro__module__module__year', required=True)
+    week = filters.CharFilter(field_name='department__train_pro__module__module__week',required=True)
+    dept = filters.CharFilter(field_name='department__abbrev', required=True)
+
+    class Meta:
+        model = bm.Regen
+        fields = ['dept', 'year', 'week']
+
+
 class RegensViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the regenerations.
@@ -647,8 +680,7 @@ class RegensViewSet(viewsets.ModelViewSet):
     """
     queryset = bm.Regen.objects.all()
     serializer_class = serializers.RegensSerializer
-    
-    filterset_fields = '__all__'
+    filter_class = RegensFilterSet
 
 # ----------
 # -- QUOTE -
@@ -714,6 +746,8 @@ class TrainingProgrammeDisplaysViewSet(viewsets.ModelViewSet):
     
     filterset_fields = '__all__'
 
+
+
 class GroupDisplaysViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the group displays.
@@ -722,7 +756,6 @@ class GroupDisplaysViewSet(viewsets.ModelViewSet):
     """
     queryset = dwm.GroupDisplay.objects.all()
     serializer_class = serializers.GroupDisplaysSerializer
-    
     filterset_fields = '__all__'
 
 
@@ -1065,6 +1098,13 @@ class AllTutorsViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.AllTutorsSerializer
     filter_class = AllTutorsFilterSet
 
+class AllVersionsFilterSet(filters.FilterSet):
+    dept = filters.CharFilter(field_name='department__abbrev')
+
+    class Meta:
+        model = bm.EdtVersion
+        fields = ['dept']
+
 
 class AllVersionsViewSet(viewsets.ModelViewSet):
     """
@@ -1072,8 +1112,7 @@ class AllVersionsViewSet(viewsets.ModelViewSet):
     """
     queryset = bm.EdtVersion.objects.all()
     serializer_class = serializers.AllVersionsSerializer
-    
-    filterset_fields = '__all__'
+    filter_class = AllVersionsFilterSet
 
 
 class DepartmentsViewSet(viewsets.ModelViewSet):

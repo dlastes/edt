@@ -59,7 +59,7 @@ class TrainingProgramme(models.Model):
 
 class GroupType(models.Model):
     name = models.CharField(max_length=50)
-    department =  models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
+    department = models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
     
     def __str__(self):
         return self.name
@@ -456,7 +456,7 @@ class RoomPreference(models.Model):
 
 
 class EdtVersion(models.Model):
-    department =  models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
+    department = models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
     week = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)])
     year = models.PositiveSmallIntegerField()
