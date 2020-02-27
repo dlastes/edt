@@ -308,16 +308,22 @@ class TutorRessource(resources.ModelResource):
 
 
 class ModuleDescriptionResource(resources.ModelResource):
-    desc = fields.Field(column_name='desc',
-                        attribute='description',
+    desc = fields.Field(column_name='description',
+                        attribute='moduledescription',
                         widget=ForeignKeyWidget(ModuleDescription, 'desc'))
     head = fields.Field(column_name='resp',
                         attribute='head',
                         widget=ForeignKeyWidget(Tutor, 'username'))
+    head_first_name = fields.Field(column_name='resp_first_name',
+                             attribute='head',
+                             widget=ForeignKeyWidget(Tutor, 'first_name'))
+    head_last_name = fields.Field(column_name='resp_last_name',
+                                   attribute='head',
+                                   widget=ForeignKeyWidget(Tutor, 'last_name'))
 
     class Meta:
         model = Module
-        fields = ('name', 'abbrev', 'head', 'description')
+        fields = ('name', 'abbrev', 'head', 'resp_first_name', 'resp_last_name', 'description')
 
 
 # </editor-fold desc="RESOURCES">
