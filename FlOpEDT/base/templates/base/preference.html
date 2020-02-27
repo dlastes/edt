@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% csrf_token %}
+
+
+
+{% block title %} EDT {% endblock %}
+{% block content %}
+{% load static %}
+
+<html>
+    <body>
+
+        <div>
+            <h1>Mes preferences de salles</h1>
+
+            <table>
+                <tr>
+                    <td>
+                    {% for d in data.roomtypes %}
+                        data.roomtypes.d <-- liste des valeurs associées à d
+                    {% end for %}
+                </tr>>
+
+            </table>
+
+
+        </div>
+    </body>
+</html>
+
+{% endblock %}
+

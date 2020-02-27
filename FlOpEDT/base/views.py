@@ -282,6 +282,10 @@ def stype(req, *args, **kwargs):
                        'days': num_all_days(1, 1, req.department)
                       })
 
+def pref(req, department):
+    return render(req, 'base/preference.html', {})
+    # {'data' : })
+
 
 @login_required
 def user_perfect_day_changes(req, username=None, *args, **kwargs):
