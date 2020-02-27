@@ -21,7 +21,7 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from rest_framework import routers
+from rest_framework import routers, permissions
 from api import views
 from django.urls import path
 from django.conf.urls import include, url
@@ -31,6 +31,8 @@ from django.contrib.auth.decorators import login_required
 from rest_framework.authtoken.views import obtain_auth_token 
 # from rest_framework_swagger.renderers import SwaggerUIRenderer, OpenAPIRenderer
 from rest_framework_swagger.views import get_swagger_view
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
 
 #####################################
 # URLS based on django applications #
@@ -44,8 +46,8 @@ routerTTapp = routers.SimpleRouter()
 routerFetch = routers.SimpleRouter()
 
 
-routerBase.register(r'studentspreferences', views.StudentPreferencesViewSet, basename="students")
-routerBase.register(r'groupspreferences', views.GroupPreferencesViewSet)
+# routerBase.register(r'studentspreferences', views.StudentPreferencesViewSet, basename="students")
+# routerBase.register(r'groupspreferences', views.GroupPreferencesViewSet)
 routerBase.register(r'departments', views.DepartmentViewSet)
 routerBase.register(r'trainingprograms', views.TrainingProgramsViewSet)
 routerBase.register(r'grouptypes', views.GroupTypesViewSet)
@@ -124,8 +126,8 @@ routerFetch.register(r'coursetypes', views.AllCourseTypesViewSet)
 
 routerPreferences= routers.SimpleRouter()
 
-routerPreferences.register(r'students', views.StudentPreferencesViewSet, basename="students")
-routerPreferences.register(r'groups', views.GroupPreferencesViewSet)
+# routerPreferences.register(r'students', views.StudentPreferencesViewSet, basename="students")
+# routerPreferences.register(r'groups', views.GroupPreferencesViewSet)
 routerPreferences.register(r'default', views.UsersPreferences_Default_ViewSet, basename="default")
 routerPreferences.register(r'single-week', views.UsersPreferences_Single_ViewSet, basename="single-week")
 routerPreferences.register(r'single-week-or-default', views.UsersPreferences_SingleODefault_ViewSet, basename="single-week-or-default")
@@ -158,7 +160,18 @@ routerGroups.register(r'groups', views.GroupsViewSet, basename="groups")
 ################
 # SWAGGER VIEW #
 ################
-swagger_view = get_swagger_view(title='FlOpREST API')
+schema_view = get_schema_view(
+   openapi.Info(
+      title="Snippets API",
+      default_version='v1',
+      description="Test description",
+      terms_of_service="https://www.google.com/policies/terms/",
+      contact=openapi.Contact(email="contact@snippets.local"),
+      license=openapi.License(name="BSD License"),
+   ),
+   public=True,
+   permission_classes=(permissions.AllowAny,),
+)
 
 
 urlpatterns = [
@@ -172,7 +185,7 @@ urlpatterns = [
     path('fetch/', include(routerFetch.urls)),
     path('rest-auth/', include('rest_auth.urls')),
     path('api-token-auth/', obtain_auth_token, name='api_token_auth'),
-    url('doc', swagger_view),
+    url('doc/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('preferences/', include(routerPreferences.urls)),
     path('rooms/', include(routerRooms.urls)),
     path('courses/', include(routerCourses.urls)),
