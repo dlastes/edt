@@ -37,6 +37,7 @@ from drf_yasg import openapi
 #####################################
 # URLS based on django applications #
 #####################################
+app_name = "api"
 
 routerBase = routers.SimpleRouter()
 routerPeople = routers.SimpleRouter()
