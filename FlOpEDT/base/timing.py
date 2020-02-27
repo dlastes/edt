@@ -43,8 +43,18 @@ def str_slot(day, start_time, duration):
 def min_to_str(minutes):
     """Convert minute number into input time format
 
-    :param min: integer minutes
+    :param minutes: integer minutes
     :return: string in hour:minute format
 
     """
     return "%02d:%02d" % hr_min(minutes)
+
+def str_to_min(time_string):
+    """Convert input time format into minute number
+
+    :param time_string string in hour:minute format
+    :return: Integer minutes
+
+    """
+    hours_minutes = time_string.split(':')
+    return int(hours_minutes[0]) * 60 + int(hours_minutes[1])
