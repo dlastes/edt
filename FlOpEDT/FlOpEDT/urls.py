@@ -41,14 +41,14 @@ from django.conf.urls import url, include
 from django.contrib import admin
 from django.views.generic import RedirectView
 
-import base
+from base import views
 
 urlpatterns = [
 
     # favicon
     # ----------------------------
-    url(base.views.fav_regexp,
-        base.views.favicon,
+    url(views.fav_regexp,
+        views.favicon,
         name="favicon"),
 
     url(r'^admin$', RedirectView.as_view(url='/admin/')),
@@ -63,6 +63,6 @@ urlpatterns = [
     url(r'^configuration/', include('configuration.urls')),
 #    url(r'^importation/(?P<department>[a-zA-Z]\w{0,6})/', include('importation.urls')),
     url('ttapp/', include('TTapp.urls')),
-    url(r'^$', base.views.index, name='index'),
+    url(r'^$', views.index, name='index'),
     url(r'^flopeditor/', include('flopeditor.urls'))
 ]
