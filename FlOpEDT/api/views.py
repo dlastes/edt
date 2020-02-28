@@ -407,66 +407,6 @@ class CoursesViewSet(viewsets.ModelViewSet):
 # -- PREFERENCES --
 # -----------------
 
-class UsersPreferences_Default_ViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet to see all the users' preferences for the default week.
-
-    Can be filtered as wanted with every field of a UserPreference object except week.
-    """
-    permission_classes = (IsAuthenticated,)  
-    serializer_class = serializers.UsersPreferencesSerializer
-    filterset_fields = '__all__'
-
-    def get_queryset(self):
-        # Getting the default week UserPreference
-        qs = bm.UserPreference.objects.filter(week=None)
-
-        return qs
-
-
-class UsersPreferences_Single_ViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet to see all the users' preferences for a single week.
-
-    Can be filtered as wanted with every field of a UserPreference object.
-    Must be filtered by a week.
-    """
-    permission_classes = (IsAuthenticated,)  
-    serializer_class = serializers.UsersPreferencesSerializer
-    filterset_fields = '__all__'
-
-    def get_queryset(self):
-        # Getting the filters from the request
-        week = self.request.query_params.get('week', None)
-
-        # Filtering with week (needed filter)
-        if week is None:
-            return None
-        else:
-            qs = bm.UserPreference.objects.filter(week=week)
-
-        return qs
-
-
-class UsersPreferences_SingleODefault_ViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet to see all the users' preferences for a single week, ut, if no week wqs given, return the default one.
-
-    Can be filtered as wanted with every field of a UserPreference object.
-    """
-    permission_classes = (IsAuthenticated,)  
-    serializer_class = serializers.UsersPreferencesSerializer
-    filterset_fields = '__all__'
-
-    def get_queryset(self):
-        # Getting the filters
-        week = self.request.query_params.get('week', None)
-
-        qs = bm.UserPreference.objects.filter(week=week)
-
-        return qs
-        
-
 class CoursePreferencesViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the course preferences.
@@ -548,6 +488,20 @@ class RoomPreferencesViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.RoomPreferencesSerializer
     
     filterset_fields = '__all__'
+
+
+
+class TutorPreferenceDefaultFilterSet(filters.FilterSet):
+    user = filters.CharFilter(field_name='user__username')
+    dept = filters.CharFilter(field_name='user__departments__abbrev')
+
+    class Meta:
+        model = bm.UserPreference
+        fields = ['user', 'dept']
+
+class TutorPreferenceDefaultViewSet(UserPreferenceGenViewSet):
+    filter_class = TutorPreferenceDefaultFilterSet
+    queryset = bm.UserPreference.objects.filter(pk__in=pm.Tutor.objects.all(), week=None)
 
 # -----------------
 # - MODIFICATIONS -

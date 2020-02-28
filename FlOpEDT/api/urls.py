@@ -81,9 +81,6 @@ routerPeople.register(r'userdepartmentsettings', views.UserDepartmentSettingsVie
 routerPeople.register(r'tutors', views.TutorsViewSet)
 routerPeople.register(r'supplystaff', views.SupplyStaffsViewSet)
 routerPeople.register(r'students', views.StudentsViewSet)
-routerPeople.register(r'default', views.UsersPreferences_Default_ViewSet, basename="default")
-routerPeople.register(r'single-week', views.UsersPreferences_Single_ViewSet, basename="single-week")
-routerPeople.register(r'single-week-or-default', views.UsersPreferences_SingleODefault_ViewSet, basename="single-week-or-default")
 routerPeople.register(r'coursepreferences', views.CoursePreferencesViewSet)
 routerPeople.register(r'roompreferences', views.RoomPreferencesViewSet)
 
@@ -128,14 +125,13 @@ routerPreferences= routers.SimpleRouter()
 
 # routerPreferences.register(r'students', views.StudentPreferencesViewSet, basename="students")
 # routerPreferences.register(r'groups', views.GroupPreferencesViewSet)
-routerPreferences.register(r'default', views.UsersPreferences_Default_ViewSet, basename="default")
-routerPreferences.register(r'single-week', views.UsersPreferences_Single_ViewSet, basename="single-week")
-routerPreferences.register(r'single-week-or-default', views.UsersPreferences_SingleODefault_ViewSet, basename="single-week-or-default")
+
 routerPreferences.register(r'course', views.CoursePreferencesViewSet)
 routerPreferences.register(r'room', views.RoomPreferencesViewSet)
-routerPreferences.register(r'test-user-def', views.UserPreferenceDefaultViewSet, basename="plop")
-routerPreferences.register(r'test-user-single', views.UserPreferenceSingleViewSet, basename="plop")
-routerPreferences.register(r'test-user-sowdef', views.UserPreferenceSingleOwDefaultViewSet, basename="plop")
+routerPreferences.register(r'user-def', views.UserPreferenceDefaultViewSet, basename="user-def")
+routerPreferences.register(r'user-single', views.UserPreferenceSingleViewSet, basename="user-single")
+routerPreferences.register(r'user-sowdef', views.UserPreferenceSingleOwDefaultViewSet, basename="user-sowdef")
+routerPreferences.register(r'tutor-def', views.TutorPreferenceDefaultViewSet, basename="tutor-def")
 
 
 routerRooms = routers.SimpleRouter()
