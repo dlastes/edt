@@ -809,12 +809,6 @@ def fetch_week_infos(req, year, week, **kwargs):
     return response
 
 
-def pref_roomtype(req, abbrev):
-    stock = get_roomsType('INFO')
-    print(stock)
-
-
-
 def pref_requirements(department, tutor, year, week):
     """
     Return a pair (filled, required): number of preferences
