@@ -222,6 +222,17 @@ def edt_light(req, year=None, week=None, **kwargs):
                             })
 
 
+def tri_pref(req, dict):
+    exclus = []
+    for rtname, listpref in dict['roompreferences']:
+        listpref.sort(key=lambda x: (x['value']))
+        for e in listpref:
+            if e['value'] == 0:
+                exclus.append(e)
+            for value in listpref:
+    return listpref
+
+
 @login_required
 def preferences(req, **kwargs):
     if req.user.is_student:
