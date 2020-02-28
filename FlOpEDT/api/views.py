@@ -948,7 +948,7 @@ class UnscheduledCoursesViewSet(viewsets.ModelViewSet):
         queryset_sc = queryset_sc.filter(work_copy=work_copy)
         if department is not None:
             queryset_course = queryset_course.filter(module__train_prog__department__abbrev=department)
-            queryset_sc = queryset_sc.filter(course__module__train_prog__department__abrrev=department)
+            queryset_sc = queryset_sc.filter(course__module__train_prog__department__abbrev=department)
 
         # Getting courses values of ScheduledCourse objects
         queryset_sc = queryset_sc.values('course')
@@ -974,12 +974,15 @@ class AvailabilitiesViewSet(viewsets.ModelViewSet):
         # Getting all the filters
         week = self.request.query_params.get('week', None)
         year = self.request.query_params.get('year', None)
+        dept = self.request.query_params.get('dept', None)
 
         # Filtering
         if week is not None:
             qs = qs.filter(week=week)
         if year is not None:
             qs = qs.filter(year=year)
+        if dept is not None:
+            qs = qs.filter(user__departments__abbrev=dept)
 
         return qs
 

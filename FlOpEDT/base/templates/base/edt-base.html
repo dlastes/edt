@@ -46,10 +46,8 @@
 
     var url_cours_pl = "{% url "base:fetch_cours_pl" department 0 0 0 %}";
     url_cours_pl = url_cours_pl.slice(0, -5);
-    var url_cours_pp = "{% url "base:fetch_cours_pp" department 0 0 0 %}";
-    url_cours_pp = url_cours_pp.slice(0, -5);
-    var url_dispos = "{% url "base:fetch_dispos" department 0 0 %}";
-    url_dispos = url_dispos.slice(0, -3);
+    var url_cours_pp = "{% url "api:unscheduledcourses-list" %}?department={{ dept }}&week={{ week }}&year={{ year }}";
+    var url_dispos = "{% url "api:availabilities-list" %}?dept={{ department }}&week={{ week }}&year={{ year }}";
     var url_unavailable_rooms = "{% url "base:fetch_unavailable_rooms" department 0 0 %}";
     url_unavailable_rooms = url_unavailable_rooms.slice(0,-3);
     var url_all_tutors = "{% url "base:fetch_all_tutors" department %}";
@@ -60,7 +58,7 @@
     url_user_pref_changes = url_user_pref_changes.slice(0, -5);
     var url_fetch_user_dweek = "{% url "base:fetch_user_dweek" department '.' %}";
     url_fetch_user_dweek = url_fetch_user_dweek.slice(0, -1);
-    var url_bknews = "{% url "api:BKNews-list" %}?dept=INFO&week=46&year=2019";
+    var url_bknews = "{% url "api:BKNews-list" %}?dept={{ dept }}&week={{ week }}&year={{ year }}";
     {% comment %} url_bknews = url_bknews.slice(0, -3); {% endcomment %}
     var url_quote = "{% url "quote:fetch_quote" %}";
     var url_week_infos = "{% url "base:fetch_week_infos" department 0 0 %}";

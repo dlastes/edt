@@ -535,7 +535,7 @@ function fetch_cours() {
     $.ajax({
         type: "GET", //rest Type
         dataType: 'text',
-        url: url_cours_pp  + exp_week.url() + "/" + num_copie,
+        url: url_cours_pp  /*+ exp_week.url() + "/" + num_copie*/,
         async: true,
         contentType: "text/csv",
         success: function(msg, ts, req) {
