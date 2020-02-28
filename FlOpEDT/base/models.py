@@ -264,8 +264,8 @@ class RoomSort(models.Model):
                                related_name='+', on_delete=models.CASCADE)
     unprefer = models.ForeignKey(RoomGroup, blank=True, null=True,
                                  related_name='+', on_delete=models.CASCADE)
-    tutor = model.ForeignKey('people.Tutor',
-                              related_name='taught_courses',
+    tutor = models.ForeignKey('people.Tutor',
+                              related_name='abcd',
                               null=True,
                               default=None,
                               on_delete=models.CASCADE)

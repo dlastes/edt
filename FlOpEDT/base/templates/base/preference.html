@@ -10,22 +10,63 @@
 
 <html>
     <body>
+        <style>
+            .rooms-container {
+                display: flex;
+                flex-direction: row;
+            }
 
+            .rooms {
+            margin: 0 15px;
+            }
+        </style>
         <div>
             <h1>Mes preferences de salles</h1>
 
-            <table>
-                <tr>
-                    <td>
-                    {% for d in data.roomtypes %}
-                        data.roomtypes.d <-- liste des valeurs associées à d
-                    {% end for %}
-                </tr>>
+            <div id="rooms-table" class="rooms-container">
 
-            </table>
-
-
+            </div>
         </div>
+    <script>
+                         var data = "{% url 'base:fetch_rooms' department='INFO' %}" ;
+
+                         $.ajax({
+                            type: "GET",
+                            dataType: 'json',
+                            url: data,
+                            async: true,
+                            contentType: "text/json",
+                            success: function(msg, ts, req) {
+                            
+                            let container = document.getElementById('rooms-table');
+                             for(const type in msg.roomtypes) {
+                                let rooms = msg.roomtypes[type];
+                                let roomContainer = document.createElement('div');
+                                roomContainer.setAttribute('class', 'rooms');
+                                roomContainer.setAttribute('id', type);
+                                let title = document.createElement('strong');
+                                title.innerText = type;
+                                roomContainer.append(title)
+                                rooms.forEach(r => {
+                                       let room = document.createElement('div');
+                                       room.setAttribute('id', r);
+                                       room.innerText = r;
+                                       roomContainer.append(room);
+                                })
+                                container.append(roomContainer);
+                             }
+
+
+
+                            },
+                            error: function(msg) {
+                                console.log("error");
+                            }
+                        })
+
+
+
+        </script>
     </body>
 </html>
 
