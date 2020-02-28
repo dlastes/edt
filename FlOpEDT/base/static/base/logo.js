@@ -137,3 +137,44 @@ function add_headline() {
     var draw = Math.floor(Math.random()*headlines.length);
     document.getElementById("head_logo").innerHTML = headlines[draw];
 }
+
+
+
+var aiguille = $("#path4334-5");
+var animate_aiguille = $("#caca");
+var carre_rouge = $('#path4264');
+var drag = false;
+var logo_svg = d3.select('#Vectoriel_1_');
+var refresh = true;
+
+$(document).not(aiguille).not(carre_rouge).on('mousedown', function(e){
+    if(!$(e.target).is(aiguille)&&!$.contains(aiguille[0],e.target)) {
+            drag= false;
+        }
+});
+$(document).not(aiguille).not(carre_rouge).on('mouseup', function(e){
+          animate_aiguille.attr('dur', '3600');
+});
+aiguille.on('mousedown', function(){
+    animate_aiguille.attr('dur', '0.5');
+    drag = true;
+    refresh = false;
+     });
+carre_rouge.on('mouseup', function(){
+    if(drag){
+        animate_aiguille.attr('dur', '3600');
+        console.log("fonction");
+        document.location.href = url_game;
+        drag = false;
+        refresh = false;
+    }
+    drag = false;
+     });
+logo_svg.on('click', function(){
+    if(refresh){
+        document.location = document.location;
+    }
+    refresh = true;
+});
+
+
