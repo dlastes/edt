@@ -13,7 +13,7 @@ const fetchModules = () => {
             console.error(e);
         }
     })
-}
+};
 
 class ModulesApp{
 
@@ -38,15 +38,15 @@ class ModulesApp{
         this.render();
     }
 
-    render = () => {
+    render(){
         this.promos.forEach(this.buildFilter);
         this.searchResult.forEach(this.buildModules);
-        for(var elem of this.filters.children) {
+        for(let elem of this.filters.children) {
             elem.addEventListener('click',this.filterModule);
         }
     }
 
-    buildModules = mod => {
+    buildModules(mod){
         let card = document.createElement('div');
         card.setAttribute("class", "module__card");
         card.innerHTML = `
