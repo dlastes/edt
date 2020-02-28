@@ -569,6 +569,17 @@ class RoomPreferencesViewSet(viewsets.ModelViewSet):
     filterset_fields = '__all__'
 
 
+class TutorPreferenceDefaultFilterSet(filters.FilterSet):
+    user = filters.CharFilter(field_name='user__username')
+    dept = filters.CharFilter(field_name='user__departments__abbrev')
+
+    class Meta:
+        model = bm.UserPreference
+        fields = ['user', 'dept']
+
+class TutorPreferenceDefaultViewSet(UserPreferenceGenViewSet):
+    filter_class = TutorPreferenceDefaultFilterSet
+    queryset = bm.UserPreference.objects.filter(pk__in=pm.Tutor.objects.all(), week=None)
 # -----------------
 # - MODIFICATIONS -
 # -----------------
