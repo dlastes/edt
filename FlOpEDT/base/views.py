@@ -70,7 +70,7 @@ from base.weeks import *
 logger = logging.getLogger(__name__)
 
 from django.db.models import Q
-from base.queries import get_roomsType
+
 
 # <editor-fold desc="FAVICON">
 # ----------
