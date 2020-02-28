@@ -121,10 +121,12 @@
   </section>
 
   {% block logo %}
-  <script src="{% static 'base/logo.js' %}";></script>
+  <script src="{% static 'base/logo.js' %}"></script>
   {% endblock %}
   <script>
-    
-  </script>  
+
+  </script>
+  {% block javascript %}
+  {% endblock %}
 </body>
 </html>

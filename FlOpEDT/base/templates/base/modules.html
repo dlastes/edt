@@ -30,6 +30,11 @@
 <link rel="stylesheet" href="{% static "base/better.css" %}"/>
 
 <h1>Liste des modules</h1>
-<div class="container"></div>
+<input type="text" class="modules-search" id="modules-search" placeholder="Rechercher"/>
+<div class="modules-container" id="modules-container"></div>
 
+{% endblock %}
+
+{% block javascript %}
+    <script src="{% static 'base/modules.js' %}"></script>
 {% endblock %}
