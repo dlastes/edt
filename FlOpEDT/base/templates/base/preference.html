@@ -18,15 +18,20 @@
             }
 
             .rooms {
-            margin: 0 15px;
+                margin: 0 10px;
             }
+
+            .pref{
+                display: flex;
+                flex-direction: row;
+            }
+
         </style>
-        <div>
+        <div id="main-container">
             <h1>Mes preferences de salles</h1>
 
 
             <div id="rooms-table" class="rooms-container">
-
 
             </div>
         </div>
@@ -44,6 +49,7 @@
                             let container = document.getElementById('rooms-table');
                              for(const type in msg.roomtypes) {
                                 let rooms = msg.roomtypes[type];
+                                console.log(rooms.length);
                                 let roomContainer = document.createElement('div');
                                 roomContainer.setAttribute('class', 'rooms');
                                 roomContainer.setAttribute('id', type);
@@ -52,12 +58,29 @@
                                 roomContainer.append(title)
                                 rooms.forEach(r => {
                                        let room = document.createElement('div');
+                                       let pref = document.createElement('form');
+
+                                       room.setAttribute('class', 'pref');
+                                       pref.innerHTML = `<select name="pref">
+                                                            <option selected>Peu importe</option>
+                                                            <option>Préféré</option>
+                                                            <option>À exclure</option>
+                                                         </select>`;
                                        room.setAttribute('id', r);
                                        room.innerText = r;
+
                                        roomContainer.append(room);
+                                       room.append(pref);
+
                                 })
+
                                 container.append(roomContainer);
+
                              }
+                              let mainContainer = document.getElementById('main-container');
+                              let submit = document.createElement('submit');
+                              submit.innerHTML = `<input type="submit" value="Valider" onclick=alert("OK") />`;
+                              mainContainer.append(submit);
 
 
 
