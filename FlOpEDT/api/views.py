@@ -504,6 +504,8 @@ class UserPreferenceSingleOwDefaultViewSet(UserPreferenceGenViewSet):
 class RoomPreferencesViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the room preferences
+
+    Can be filtered as wanted with every field of a Room object.
     """
     permission_classes = (IsAuthenticated,)
     queryset = bm.RoomPreference.objects.all()
@@ -521,6 +523,12 @@ class TutorPreferenceDefaultFilterSet(filters.FilterSet):
         fields = ['user', 'dept']
 
 class TutorPreferenceDefaultViewSet(UserPreferenceGenViewSet):
+    """
+    ViewSet shows a Tutor Preference Default List
+
+    Can be filtered as wanted with "user"/"dept"
+    of a TutorPreference object by calling the function  TutorPreferenceDefaultFilterSet
+    """
     filter_class = TutorPreferenceDefaultFilterSet
     queryset = bm.UserPreference.objects.filter(pk__in=pm.Tutor.objects.all(), week=None)
 # -----------------
@@ -634,7 +642,8 @@ class CourseStartTimeConstraintsViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the courses start time constraints.
 
-    Can be filtered as wanted with every field of a CourseStartTime object.
+    Can be filtered as wanted with "allowed_start_times"
+    of a CourseStartTime object by using the function CoureStartTimeFilter
     """
     queryset = bm.CourseStartTimeConstraint.objects.all()
     serializer_class = serializers.CourseStartTimeConstraintsSerializer
@@ -656,7 +665,8 @@ class RegensViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the regenerations.
 
-    Can be filtered as wanted with every field of a Regen object.
+    Can be filtered as wanted with "year"[required] / "week"[required] / "dept"[required]
+    of a Regen object by calling the function RegensFilterSet
     """
     queryset = bm.Regen.objects.all()
     serializer_class = serializers.RegensSerializer
@@ -686,7 +696,6 @@ class QuotesViewSet(viewsets.ModelViewSet):
     Can be filtered as wanted with every field of a Quote object.
     """
     queryset = p.Quote.objects.all()
-
     serializer_class = serializers.QuotesSerializer
 
     filterset_fields = '__all__'
@@ -710,7 +719,7 @@ class BreakingNewsViewSet(viewsets.ModelViewSet):
 
 class ModuleDisplaysViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the module displays.
+    ViewSet to see all the module displays(the color of the background and the txt)
 
     Can be filtered as wanted with every field of a ModuleDisplay object.
     """
@@ -799,7 +808,8 @@ class TTStabilizeViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the Stabilize objects from TTapp.
 
-    Can be filtered as wanted with every field of a Stabilize object.
+    Can be filtered as wanted with "fixed_days"
+    of a Stabilize object by calling the function TTStabilizeFilter
     """
     queryset = ttm.Stabilize.objects.all()
     serializer_class = serializers.TTStabilizeSerializer
@@ -870,7 +880,8 @@ class TTLimitedStartTimeChoicesViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the LimitedStartTimeChoices.
 
-    Can be filtered as wanted with every field of a LimitedStartChoices object.
+    Can be filtered as wanted with "possible_start_times"
+    of a LimitedStartChoices object by calling the function TTLimitedFilter
     """
     queryset = ttm.LimitedStartTimeChoices.objects.all()
     serializer_class = serializers.TTLimitedStartTimeChoicesSerializer
@@ -910,7 +921,8 @@ class ScheduledCoursesViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the scheduled courses
 
-    Result can be filtered as wanted with week, year and work_copy (0 by default).
+    Result can be filtered by function ScheduledCourseFilterSet
+    as wanted with week, year and work_copy (0 by default).
     Request needs a department filter.
     """
     queryset = bm.ScheduledCourse.objects.all()
@@ -948,7 +960,7 @@ class UnscheduledCoursesViewSet(viewsets.ModelViewSet):
         queryset_sc = queryset_sc.filter(work_copy=work_copy)
         if department is not None:
             queryset_course = queryset_course.filter(module__train_prog__department__abbrev=department)
-            queryset_sc = queryset_sc.filter(course__module__train_prog__department__abrrev=department)
+            queryset_sc = queryset_sc.filter(course__module__train_prog__department__abbrev=department)
 
         # Getting courses values of ScheduledCourse objects
         queryset_sc = queryset_sc.values('course')
@@ -1054,8 +1066,10 @@ class AllTutorsFilterSet(filters.FilterSet):
 class AllTutorsViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the training programs
-    """
 
+    Result can be filtered as wanted with the department, the year and the week
+    by using the function AllTutorsFilterSet
+    """
     queryset = pm.UserDepartmentSettings.objects.all()
     serializer_class = serializers.AllTutorsSerializer
     filter_class = AllTutorsFilterSet
@@ -1072,6 +1086,9 @@ class AllVersionsFilterSet(filters.FilterSet):
 class AllVersionsViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the versions of the Scheduler
+
+    Result can be filtered as wanted with the department
+    by using the function AllVersionsFilterSet
     """
     queryset = bm.EdtVersion.objects.all()
     serializer_class = serializers.AllVersionsSerializer
@@ -1081,6 +1098,8 @@ class AllVersionsViewSet(viewsets.ModelViewSet):
 class DepartmentsViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the departments
+
+    Can be filtered as wanted with every field of a Department object.
     """
     queryset = bm.Department.objects.all()
     serializer_class = serializers.DepartmentAbbrevSerializer
@@ -1105,7 +1124,7 @@ class TutorCoursesViewSet(viewsets.ModelViewSet):
     ViewSet to see all the courses of a tutor
 
     Result needs to be filtered by the username of a tutor.
-    Filtering is also possible with week and year.
+    Filtering is also possible with week, department and year.
     """
     serializer_class = serializers.TutorCourses_Serializer
     queryset = pm.UserDepartmentSettings.objects.all()
@@ -1152,7 +1171,7 @@ class BKNewsViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the BKNews
 
-    Result can be filtered with week and year
+    Result needs to be filtered by the department,the week and the year.
     """
     queryset = dwm.BreakingNews.objects.all()
     serializer_class = serializers.BKNewsSerializer
@@ -1162,6 +1181,8 @@ class BKNewsViewSet(viewsets.ModelViewSet):
 class AllCourseTypesViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the course types
+
+    Can be filtered as wanted with every field of a CourseType object.
     """
     queryset = bm.CourseType.objects.all()
     serializer_class = serializers.AllCourseTypesSerializer
