@@ -195,19 +195,6 @@ class GroupsViewSet(viewsets.ModelViewSet):
     queryset = bm.Group.objects.all()
     filter_class = GroupsFilterSet
 
- #   def get_queryset(self):
-  #      # Creating a queryset containing all Groups
-   #     queryset = bm.Group.objects.all()
-#
- #       # Getting filters from the request
-  ##      department = self.request.query_params.get('dept', None)
-
-    #    # Applying filters
-     #   if department is None:
-       #     return None
-      #  else:
-     #       return queryset.filter(train_prog__department__abbrev=department)
-    #
 
 # ------------
 # -- TIMING --
@@ -940,37 +927,7 @@ class ScheduledCoursesViewSet(viewsets.ModelViewSet):
     queryset = bm.ScheduledCourse.objects.all()
     serializer_class = serializers.ScheduledCoursesSerializer
     filter_class = ScheduledCourseFilterSet
-    """
-    def get_queryset(self):
-        # Creating a default queryset
-        queryset = bm.ScheduledCourse.objects.select_related('course__module__train_prog__department').all()
-
-        # Getting filters from the URL params (?param1=...&param2=...&...)
-        year = self.request.query_params.get('year', None)
-        week = self.request.query_params.get('week', None)
-        work_copy = self.request.query_params.get('work_copy', 0)
-        department = self.request.query_params.get('department', None)
-    #    full_week = self.request.query_params.get('')
-
-        # Filtering
-        if department is not None:
-            queryset = queryset.filter(course__module__train_prog__department__abbrev=department)
-        else:
-            return None
-        if year is not None:
-            queryset = queryset.filter(course__year=year)
-        else:
-            return None
-        if week is not None:
-            queryset=queryset.filter(course__week=week)
-        else:
-            return None
-
-        queryset = queryset.filter(work_copy=work_copy)
-        
-
-        return queryset
-     """
+    
 
 class UnscheduledCoursesViewSet(viewsets.ModelViewSet):
     """
@@ -1162,26 +1119,6 @@ class TutorCoursesViewSet(viewsets.ModelViewSet):
     queryset = pm.UserDepartmentSettings.objects.all()
     filter_class = TutorCoursesFilterSet
 
-    #def get_queryset(self):
-       # Getting all the needed data
-     #   qs = bm.ScheduledCourse.objects.all()
-
-        # Getting the filters
-      #  tutor = self.request.query_params.get('tutor', None)
-       # week = self.request.query_params.get('week', None)
-        #year = self.request.query_params.get('year', None)
-
-        # Filtering
-  #      if tutor is None:
-   #         return None
-    #    else:
-     #       qs = qs.filter(tutor__username=tutor)
-      #  if week is not None:
-       #     qs = qs.filter(course__week=week)
-        #if year is not None:
-      #      qs = qs.filter(course__year=year)
-
-       # return qs
 
 
 class ExtraSchedCoursesViewSet(viewsets.ModelViewSet):
@@ -1228,22 +1165,7 @@ class BKNewsViewSet(viewsets.ModelViewSet):
     queryset = dwm.BreakingNews.objects.all()
     serializer_class = serializers.BKNewsSerializer
     filter_class = BKNewsFilterSet
-    """
-    def get_queryset(self):
-        # Getting all the needed data
-        qs = dwm.BreakingNews.objects.all()
 
-        #getting all the filters
-        week = self.request.query_params.get('week', None)
-        year = self.request.query_params.get('year', None)
-
-        # Filtering
-        if year is not None:
-            qs = qs.filter(week=week)
-        if week is not None:
-            qs = qs.filter(year=year)
-        return qs
-    """
 
 class AllCourseTypesViewSet(viewsets.ModelViewSet):
     """

@@ -211,7 +211,7 @@ d3.json(departments_fi,
  	function(d){ main('department', d); });
 
 d3.json(groupes_fi,
- 	function(d){ main('groups', d); } );
+ 	function(d){ console.log(d);main('groups', d); } );
 
     
 
