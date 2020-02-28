@@ -552,7 +552,7 @@ function extract_groups_structure(r, npro, nrow) {
     } else {
         gr.buttxt = r.buttxt;
     }
-    
+    console.log(r);
 
     if (r.parent == "null") {
 
