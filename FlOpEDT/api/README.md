@@ -161,6 +161,22 @@ Comme dit précédemment, il pourra être utile de passer un paramètre basename
 routeur.register(r'a', views.AViewSet, basename="A")
 ```
 
+L'attribut basename est facultatif si votre ViewSet contient un attribut ``queryset``. Cependant si, par nécessité, vous avez besoins de créer un filtre personnalisé ou de réaliser un traitemet de données dans la vue vous obligeant à surcharger la méthode get_queryset, cet attribut est obligatoire.
+
+De plus, cet attribut permet de retrouver les requêtes au sein de templates par exemple. Ce qui peut être utile afin d'utiliser l'API au sein du logiciel. Pour cela il vous suffit de renommer l'attribut queryset par la valeur de l'attribut basename.
+
+```
+# Dans la vue
+class ViewSet(...):
+    ...
+    # Nouvel attribut remplaçant queryset
+    ceci_est_un_basename = Model.objects.all()
+    ...
+
+# Dans les urls
+routerModel.register(r'url_de_la_vue', views.ViewSet, basename='ceci_est_un_basename')
+```
+
 ### L'authentification
 Les données qui ne sont pas accessibles lors de la consultation publique du client web FlOpEDT ne le sont pas non plus par l'API. Pour protéger ces données, nous avons utilisé le module ```django-rest-auth```
 
