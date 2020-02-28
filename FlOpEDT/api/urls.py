@@ -82,7 +82,6 @@ routerPeople.register(r'tutors', views.TutorsViewSet)
 routerPeople.register(r'supplystaff', views.SupplyStaffsViewSet)
 routerPeople.register(r'students', views.StudentsViewSet)
 routerPeople.register(r'coursepreferences', views.CoursePreferencesViewSet)
-routerPeople.register(r'roompreferences', views.RoomPreferencesViewSet)
 
 
 routerDisplayweb.register(r'breakingnews', views.BreakingNewsViewSet)
@@ -126,12 +125,14 @@ routerPreferences= routers.SimpleRouter()
 # routerPreferences.register(r'students', views.StudentPreferencesViewSet, basename="students")
 # routerPreferences.register(r'groups', views.GroupPreferencesViewSet)
 routerPreferences.register(r'course', views.CoursePreferencesViewSet)
-routerPreferences.register(r'room', views.RoomPreferencesViewSet)
+routerPreferences.register(r'room-def', views.RoomPreferenceDefaultViewSet)
+routerPreferences.register(r'room-single', views.RoomPreferenceSingleViewSet)
 routerPreferences.register(r'user-def', views.UserPreferenceDefaultViewSet, basename="user-def")
 routerPreferences.register(r'user-single', views.UserPreferenceSingleViewSet, basename="user-single")
 routerPreferences.register(r'user-sowdef', views.UserPreferenceSingleOwDefaultViewSet, basename="user-sowdef")
 routerPreferences.register(r'tutor-def', views.TutorPreferenceDefaultViewSet, basename="tutor-def")
-
+routerPreferences.register(r'tutor-single', views.TutorPreferenceSingleViewSet, basename="tutor-single")
+routerPreferences.register(r'tutor-sowdef', views.TutorPreferenceSingleOwDefaultViewSet, basename="tutor-sowdef")
 
 routerRooms = routers.SimpleRouter()
 
@@ -186,3 +187,4 @@ urlpatterns = [
     path('courses/', include(routerCourses.urls)),
     path('groups/', include(routerGroups.urls)),
 ]
+
