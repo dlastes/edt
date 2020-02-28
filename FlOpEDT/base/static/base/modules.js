@@ -58,7 +58,7 @@ class ModulesApp {
                   <div class="module__modal__content">
                         <h1>Decription du module</h1>
                       <p>
-                      ${mod.description}
+                      ${mod.description !== "" ? mod.description : "Aucune description n'a été renseignée."}
                       </p>
                       <span><strong>Responsable du module :</strong> ${mod.resp_last_name} ${mod.resp_first_name}</span>
                   </div>
