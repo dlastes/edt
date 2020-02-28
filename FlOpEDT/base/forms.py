@@ -25,6 +25,7 @@
 
 from django import forms
 from people.models import Tutor, FullStaff
+from base.models import ModuleDescription, Module
 
 
 class ContactForm(forms.Form):
@@ -57,3 +58,26 @@ class PerfectDayForm(forms.Form):
         self.fields['max_hours_per_day'] = forms.IntegerField(label="Maximum", min_value=1, max_value=9,
                                                               required=False, initial=6)
 
+"""
+class DescriptionForm(forms.Form):
+    description = forms.CharField(label='Description du module ',
+                                  max_length=33000,
+                                  widget=forms.Textarea(attrs={'class': 'description-text'}))
+"""
+
+
+class DescriptionForm(forms.ModelForm):
+
+    def __init__(self, user=None, *args, **kwargs):
+        # first call parent's constructor
+        super(DescriptionForm, self).__init__(*args, **kwargs)
+        self.fields['desc'].widget.attrs.update({'class' : 'description-text'})
+        # there's a `fields` property now
+        self.fields['module'].required = True
+        self.fields['desc'].required = True
+        if user:
+            self.fields['module'].queryset = Module.objects.filter(head=user)
+
+    class Meta:
+        model = ModuleDescription
+        fields = ['module', 'desc']         

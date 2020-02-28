@@ -56,10 +56,10 @@
   <nav id="menu-edt">
     <a class="hide_this_link" href="{% url 'index' %}" id="live-logo"  style="padding: 0px 0px 0px 0px; float: left">
     </a>
-    <div id="full_logo">     
+    <div id="full_logo">
       <a style="text-decoration: none; font-family: inherit; color: inherit" href="{% url 'index' %}">
           <span id="acro_logo"><span id=flopGreen >flop</span>!<span id=EDTRed >EDT</span></span>
-      </a> 
+      </a>
       {% autoescape off %}
       <span id="head_logo"></span>
       {% endautoescape %}
@@ -67,7 +67,7 @@
 	      <img src="{% static 'base/agplv3-88x31.png'%}" height="31" width="88" alt="AGPL v.3"/>
       </a>
     </div>
-    
+
     {% block nav %}
     <ul>
       {% if department %}
@@ -75,8 +75,9 @@
       <li><a href="#" onclick="openNav()">☰</a></li>
       {% endif %}
       <li><a href="{% url "base:edt" department %}">Consulter</a></li>
-      {% if has_department_perm %} 
+      {% if has_department_perm %}
       <li><a href="{% url "base:decale" department %}">Décaler/Annuler</a></li>
+      <li><a href="{% url "base:description" department %}">Description</a></li>
       {% endif %}
       <li><a href="{% url "base:preferences" department %}">Préférences</a></li>
       <li><a href="{% url "ics:index" department %}">iCal</a></li>
