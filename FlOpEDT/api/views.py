@@ -1073,7 +1073,7 @@ class AllTutorsViewSet(viewsets.ModelViewSet):
     Result can be filtered as wanted with the department, the year and the week
     by using the function AllTutorsFilterSet
     """
-    queryset = pm.UserDepartmentSettings.objects.all()
+    alltutors = pm.UserDepartmentSettings.objects.all()
     serializer_class = serializers.AllTutorsSerializer
     filter_class = AllTutorsFilterSet
 
@@ -1143,20 +1143,32 @@ class ExtraSchedCoursesViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.ExtraScheduledCoursesSerializer
 
     def get_queryset(self):
-        # Getting all the needed data
         qs = bm.ScheduledCourse.objects.all()
-
+        qs_esc = bm.ScheduledCourse.objects.all()
         # Getting all the filters
+        user = self.request.query_params.get('username', None)
+        dept = self.request.query_params.get('dept', None)
         week = self.request.query_params.get('week', None)
         year = self.request.query_params.get('year', None)
 
         # Filtering
+        if user is None:
+            return None
+        if dept is None:
+            return None
+
         if week is not None:
+            qs_esc = qs_esc.filter(course__week=week)
             qs = qs.filter(course__week=week)
         if year is not None:
+            qs_esc = qs_esc.filter(course__year=year)
             qs = qs.filter(course__year=year)
 
-        return qs
+        # Getting all the needed data
+        qs.filter(course__tutor__username=user, course__module__train_prog__department__abbrev=dept)
+        qs_esc.filter(course__tutor__username=user).exclude(pk__in=qs)
+
+        return qs_esc
 
 
 class BKNewsFilterSet(filters.FilterSet):
