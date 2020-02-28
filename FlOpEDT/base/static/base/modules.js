@@ -20,31 +20,66 @@ class ModulesApp{
     static init(modules){
         let container = document.getElementById("modules-container");
         let search = document.getElementById("modules-search");
-        let app = new ModulesApp(modules, container, search);
-        app.render();
+        let filters = document.getElementById("filters");
+        let app = new ModulesApp(modules, container, search, filters);
     }
 
-    constructor(modules, container, search){
+    constructor(modules, container, search, filters){
         this.modules = modules;
+        this.promos = ['ALL'];
+        this.modules.forEach(e => !this.promos.includes(e.promo) ? this.promos.push(e.promo):null);
+        this.promos.sort();
+        this.filters = filters;
+        this.selectedFilter = this.promos[0];
         this.searchResult = modules;
         this.container = container;
         this.search = search;
         this.search.addEventListener('input', this.searchModule);
+        this.render();
     }
 
     render = () => {
+        this.promos.forEach(this.buildFilter);
         this.searchResult.forEach(this.buildModules);
+        for(var elem of this.filters.children) {
+            elem.addEventListener('click',this.filterModule);
+        }
     }
 
     buildModules = mod => {
         let card = document.createElement('div');
         card.setAttribute("class", "module__card");
         card.innerHTML = `
-            <h3 class="module__abbrev">${mod.abbrev}</h3>
-            <span class="module__name">${mod.name}</span>
-            <span class="module__resp">${mod.resp}</span>
+            <div class="left_vertical" style="background: ${mod.color_bg}; color: ${mod.color_txt}">
+                <h3 class="module__abbrev">${mod.abbrev}</h3>
+            </div>
+            <div class="right">
+                <span class="module__name">${mod.name}</span>
+                <span class="module__resp">${mod.resp}</span>
+                <span class="module__promo">${mod.promo}</span>
+            </div>
         `;
         this.container.append(card);
+    }
+
+    buildFilter = promo => {
+        let filter = document.createElement('button');
+        filter.setAttribute("class", this.selectedFilter === promo ? "filter__btn filter__active" : "filter__btn");
+        filter.setAttribute("id", promo);
+        filter.innerText = `${promo}`;
+        this.filters.append(filter);
+    }
+
+    filterModule = e => {
+        let selected = e.target;
+        let promo = selected.getAttribute('id');
+        $(`#${promo}`).siblings().removeClass('filter__active');
+        selected.classList.add('filter__active');
+        this.searchResult = promo == 'ALL' ? this.modules : this.modules.filter(mod => mod.promo == promo) ;
+        this.selectedFilter = promo;
+        this.clearModules();
+        this.render();
+
     }
 
     searchModule = e => {
@@ -60,6 +95,11 @@ class ModulesApp{
         while(child){
             this.container.removeChild(child);
             child = this.container.lastElementChild;
+        }
+        child = this.filters.lastElementChild;
+        while(child){
+            this.filters.removeChild(child);
+            child = this.filters.lastElementChild;
         }
     }
 }

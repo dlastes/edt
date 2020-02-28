@@ -320,10 +320,19 @@ class ModuleDescriptionResource(resources.ModelResource):
     head_last_name = fields.Field(column_name='resp_last_name',
                                    attribute='head',
                                    widget=ForeignKeyWidget(Tutor, 'last_name'))
+    color_bg = fields.Field(column_name='color_bg',
+                                   attribute='display',
+                                   widget=ForeignKeyWidget(ModuleDisplay, 'color_bg'))
+    color_txt = fields.Field(column_name='color_txt',
+                                   attribute='display',
+                                   widget=ForeignKeyWidget(ModuleDisplay, 'color_txt'))
+    promo = fields.Field(column_name='promo',
+                                   attribute='train_prog',
+                                   widget=ForeignKeyWidget(TrainingProgramme, 'abbrev'))
 
     class Meta:
         model = Module
-        fields = ('name', 'abbrev', 'head', 'resp_first_name', 'resp_last_name', 'description')
+        fields = ('name', 'abbrev', 'head', 'resp_first_name', 'resp_last_name', 'description', 'color_bg', 'color_txt', 'promo')
 
 
 # </editor-fold desc="RESOURCES">

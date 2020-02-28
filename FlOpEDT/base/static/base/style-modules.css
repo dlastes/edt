@@ -1,0 +1,121 @@
+:root {
+    --borderRadius : 15px;
+}
+
+.module__card {
+    display: flex;
+    flex-direction: row;
+    background-color: #333;
+    position: relative;
+    color: oldlace;
+    max-width: 300px;
+    min-height: 80px;
+    justify-content: space-between;
+    align-items: center;
+    font-family: sans-serif;
+    text-align: center;
+    border-radius: var(--borderRadius);
+    margin: 10px 10px;
+    width: calc(100%/3);
+    transition: .6s ease-in-out;
+    -webkit-box-shadow: 10px 10px 15px -6px rgba(0,0,0,0.75);
+    -moz-box-shadow: 10px 10px 15px -6px rgba(0,0,0,0.75);
+    box-shadow: 10px 10px 15px -6px rgba(0,0,0,0.75);
+}
+
+.modules-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+    justify-content: center;
+}
+
+.module__card:hover {
+    cursor: pointer;
+}
+
+.module__card h3 {
+    text-transform: uppercase;
+    text-orientation: mixed;
+    writing-mode: sideways-lr;
+}
+
+.module__card .left_vertical {
+    height: 100%;
+    display: flex;
+    border-top-left-radius: var(--borderRadius);
+    border-bottom-left-radius: var(--borderRadius);
+    justify-content: center;
+    align-items: center;
+    width: 50px;
+}
+
+.module__card .right {
+    display: flex;
+    padding: 15px 15px;
+    flex-direction: column;
+    border-top-left-radius: var(--borderRadius);
+    border-bottom-left-radius: var(--borderRadius);
+    justify-content: center;
+    align-items: center;
+    width: calc(100% - 50px);
+}
+
+.appbar {
+    display: flex;
+    height: 50px;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 15px 15px;
+}
+
+.appbar input {
+    outline: none;
+    padding: 15px 15px;
+    border: none;
+    border-radius: 50px;
+}
+
+.search {
+    border: 3px solid #333;
+    border-radius: 50px;
+    background: #FFF;
+    display: flex;
+    align-content: center;
+}
+
+.actions {
+    display: flex;
+    flex-direction: row;
+}
+
+.filters {
+    display: flex;
+    flex-direction: row;
+    border: 3px solid #333333;
+    background-color: #fff;
+    border-radius: 50px;
+    padding: 0 10px;
+    margin-right: 15px;
+}
+
+.filters .filter__btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    margin: 0 5px;
+    transition: .6s ease-in-out;
+}
+
+.filters .filter__btn.filter__active {
+    font-weight: bold;
+    font-size: 20px;
+}
+
+.loupe {
+    height: auto;
+    width: 25px;
+    margin-left: 12px;
+}
