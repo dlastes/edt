@@ -18,7 +18,8 @@ class Constraint:
         """
         self.id = id
         self.constraint_type = constraint_type
-        self.instructor = instructor
+        if instructor is not None:
+            self.instructor = instructor.value
         self.slot = slot  # a enlever
         self.course = course  # a enlever
         self.week = week
