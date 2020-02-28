@@ -70,7 +70,7 @@ from base.weeks import *
 logger = logging.getLogger(__name__)
 
 from django.db.models import Q
-from base.queries import get_roomsType
+
 
 # <editor-fold desc="FAVICON">
 # ----------
@@ -807,12 +807,6 @@ def fetch_week_infos(req, year, week, **kwargs):
                              'required_pref': required_pref,
                              'regen': regen})
     return response
-
-
-def pref_roomtype(req, abbrev):
-    stock = get_roomsType('INFO')
-    print(stock)
-
 
 
 def pref_requirements(department, tutor, year, week):
