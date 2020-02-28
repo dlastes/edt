@@ -285,6 +285,7 @@ def stype(req, *args, **kwargs):
                                  'days': num_all_days(1, 1, req.department)
                                  })
 
+
 def pref(req, department):
     return render(req, 'base/preference.html', {})
 
