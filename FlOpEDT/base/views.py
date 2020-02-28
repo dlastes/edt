@@ -1522,28 +1522,28 @@ def contact(req, tutor, **kwargs):
 # HELPERS
 # ---------
 @login_required
-def description(req, department, module, **kwargs):
+def description(req, department, **kwargs): 
     ack = ''
-    mod = ModuleDescription.objects.get(module=Module.objects.get(abbrev=module));
-    
+
     if req.method == 'POST':
-        user_modules = Module.objects.filter(head=req.user)
-        form.fields['module'] = user_modules
-        form = DescriptionForm(req.POST)
+        form = DescriptionForm(req.user, req.POST)
         if form.is_valid():
-            dat = form.cleaned_data
-            # enregistrer en base
-
+            mod = form.cleaned_data['module']
+            desc = form.cleaned_data['desc']
+            module = Module.objects.get(abbrev=mod)
+            if ModuleDescription.objects.filter(module=module).exists():
+                module.moduledescription.desc = desc
+            else:
+                module.moduledescription = ModuleDescription()
+                module.moduledescription.desc = desc
+            module.moduledescription.save()
         else: 
-            form = DescriptionForm(req.POST)
-    
+            form = DescriptionForm(req.user, req.POST)
     else:
-        form = DescriptionForm()
-
+        form = DescriptionForm(user=req.user)   
     return TemplateResponse(req, 'base/description.html',
                             {'form': form,
                              'ack': ack,
-                             'module': module,
                              'user': req.user
                              })
 

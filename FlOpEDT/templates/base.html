@@ -77,12 +77,12 @@
       <li><a href="{% url "base:edt" department %}">Consulter</a></li>
       {% if has_department_perm %}
       <li><a href="{% url "base:decale" department %}">Décaler/Annuler</a></li>
+      <li><a href="{% url "base:description" department %}">Description</a></li>
       {% endif %}
       <li><a href="{% url "base:preferences" department %}">Préférences</a></li>
       <li><a href="{% url "ics:index" department %}">iCal</a></li>
       <li><a href="{% url "base:aide" department %}">Aide</a></li>
       <li><a href="{% url "base:contact" department %}">Contact</a></li>
-
       {% if is_department_admin %}
       <li><a href="{% url "solve_board:main_board" department %}">Générer</a></li>
       <li><a href="{% url "base:statistics" department %}">Statistiques</a></li>
@@ -90,7 +90,6 @@
       {% endif %}
       {% if is_department_admin %}
       <li><a href="{% url "configuration:configuration" %}">Importer</a></li>
-      <li><a href="{% url "base:description" department %}">Description</a></li>
       <li><a href="{% url "admin:index" %}">Admin</a></li>
       {% endif %}
       <li style="float:right">

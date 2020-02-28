@@ -25,7 +25,7 @@
 
 from django import forms
 from people.models import Tutor, FullStaff
-from base.models import ModuleDescription
+from base.models import ModuleDescription, Module
 
 
 class ContactForm(forms.Form):
@@ -68,11 +68,15 @@ class DescriptionForm(forms.Form):
 
 class DescriptionForm(forms.ModelForm):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, user=None, *args, **kwargs):
         # first call parent's constructor
         super(DescriptionForm, self).__init__(*args, **kwargs)
+        self.fields['desc'].widget.attrs.update({'class' : 'description-text'})
         # there's a `fields` property now
         self.fields['module'].required = True
+        self.fields['desc'].required = True
+        if user:
+            self.fields['module'].queryset = Module.objects.filter(head=user)
 
     class Meta:
         model = ModuleDescription

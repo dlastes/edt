@@ -31,15 +31,14 @@
 <link rel="stylesheet" href="{% static 'base/description.css' %}" />
 
 {% if user.is_tutor %}
-
 <div class="description-container">
-    <h1>Vous modifiez actuelllement la description du module {{module}}</h1>
+    <h1>Modification de la description d'un module</h1>
     <form method="post" novalidate>
         {% csrf_token %}
         <table cellpadding="10">
             {{ form }}
         </table>
-        <button type="submit" class="edit">Modifier</button>
+        <button type="submit" class="edit" name="submit" value="Submit">Modifier</button>
     </form>
 </div>
 {% endif %}

@@ -38,13 +38,13 @@ urlpatterns = [
         name="favicon"),
 
     # directly reachable by users
-    # ----------------------------
+    # -------------------)---------
     url(r'^preferences$', views.preferences, name="preferences"),
     url(r'^semaine-type$', views.stype, name="stype"),
     url(r'^aide$', views.aide, name="aide"),
     url(r'^decale$', views.decale, name="decale"),    
     url(r'^contact/(?P<tutor>\w{2,8})?$', views.contact, name="contact"),
-    url(r'^edit-description/(?P<module>\w{2,8})?$', views.description, name="description"),
+    url(r'^edit-description/$', views.description, name="description"),
     url(r'^((?P<year>\d{4}))?(/(?P<week>\d{1,2}))?$', views.edt, name="edt"),
     url(r'^tv(/(?P<year>\d+))?(/(?P<week>\d+))?$', views.edt_light, name="edt_light"),
     url(r'^all_modules_with_desc$', views.all_modules_with_desc, name="all_modules_with_desc"),
