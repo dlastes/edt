@@ -986,12 +986,15 @@ class AvailabilitiesViewSet(viewsets.ModelViewSet):
         # Getting all the filters
         week = self.request.query_params.get('week', None)
         year = self.request.query_params.get('year', None)
+        dept = self.request.query_params.get('dept', None)
 
         # Filtering
         if week is not None:
             qs = qs.filter(week=week)
         if year is not None:
             qs = qs.filter(year=year)
+        if dept is not None:
+            qs = qs.filter(user__departments__abbrev=dept)
 
         return qs
 

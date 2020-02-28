@@ -1,0 +1,8 @@
+groupes_fi
+rooms_fi
+constraints_fi
+departments_fi
+        (Type de données bizarre)
+
+url_cours_pl : données récupérées dans la requête non disponibles avec l'API
+
