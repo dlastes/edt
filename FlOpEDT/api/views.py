@@ -414,9 +414,6 @@ class CoursesViewSet(viewsets.ModelViewSet):
 # -- PREFERENCES --
 # -----------------
 
-
-
-
 class CoursePreferencesViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the course preferences.
@@ -428,6 +425,7 @@ class CoursePreferencesViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.CoursePreferencesSerializer
 
     filterset_fields = '__all__'
+
 
 
 class UserPreferenceGenViewSet(viewsets.ModelViewSet):
@@ -449,6 +447,7 @@ class UserPreferenceDefaultViewSet(UserPreferenceGenViewSet):
 
     Can be filtered as wanted with "user"/"dept" of a UserPreference object.
     """
+    permission_classes = (IsAuthenticated,)
     filter_class = UserPreferenceDefaultFilterSet
     queryset = bm.UserPreference.objects.filter(week=None)
 
@@ -471,11 +470,13 @@ class UserPreferenceSingleViewSet(UserPreferenceGenViewSet):
 
     Can be filtered as wanted with "user"/"dept" of a UserPreference object.
     """
+    permission_classes = (IsAuthenticated,)
     filter_class = UserPreferenceSingleFilterSet
     queryset = bm.UserPreference.objects.all()
 
 
 class UserPreferenceSingleOwDefaultViewSet(UserPreferenceGenViewSet):
+    permission_classes = (IsAuthenticated,)
     filter_class = UserPreferenceSingleFilterSet
 
     def get_query_params(self, req):
@@ -501,17 +502,37 @@ class UserPreferenceSingleOwDefaultViewSet(UserPreferenceGenViewSet):
         return qs
 
 
-class RoomPreferencesViewSet(viewsets.ModelViewSet):
+class RoomPreferenceDefaultFilterSet(filters.FilterSet):
+    dept = filters.CharFilter(field_name='room__departments__abbrev')
+
+    class Meta:
+        model = bm.RoomPreference
+        fields = ['dept']
+
+class RoomPreferenceDefaultViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the room preferences
 
     Can be filtered as wanted with every field of a Room object.
     """
     permission_classes = (IsAuthenticated,)
-    queryset = bm.RoomPreference.objects.all()
+    filter_class = RoomPreferenceDefaultFilterSet
+    queryset = bm.RoomPreference.objects.filter(week=None)
     serializer_class = serializers.RoomPreferencesSerializer
 
-    filterset_fields = '__all__'
+class RoomPreferenceSingleFilterSet(filters.FilterSet):
+    dept = filters.CharFilter(field_name='room__departments__abbrev', required=True)
+
+    class Meta:
+        model = bm.RoomPreference
+        fields = ['dept']
+
+class RoomPreferenceSingleViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated,)
+    filter_class = RoomPreferenceSingleFilterSet
+    queryset = bm.RoomPreference.objects.filter()
+    serializer_class = serializers.RoomPreferencesSerializer
+
 
 
 class TutorPreferenceDefaultFilterSet(filters.FilterSet):
@@ -529,8 +550,52 @@ class TutorPreferenceDefaultViewSet(UserPreferenceGenViewSet):
     Can be filtered as wanted with "user"/"dept"
     of a TutorPreference object by calling the function  TutorPreferenceDefaultFilterSet
     """
+    permission_classes = (IsAuthenticated,)
     filter_class = TutorPreferenceDefaultFilterSet
     queryset = bm.UserPreference.objects.filter(pk__in=pm.Tutor.objects.all(), week=None)
+
+
+class TutorPreferenceSingleFilterSet(filters.FilterSet):
+    user = filters.CharFilter(field_name='user__username')
+    dept = filters.CharFilter(field_name='user__departments__abbrev')
+    week = filters.NumberFilter(field_name='week', required=True)
+    year = filters.NumberFilter(field_name='year', required=True)
+
+    class Meta:
+        model = bm.UserPreference
+        fields = ['user', 'dept', 'week', 'year']
+
+class TutorPreferenceSingleViewSet(UserPreferenceGenViewSet):
+    permission_classes = (IsAuthenticated,)
+    filter_class = TutorPreferenceSingleFilterSet
+    queryset = bm.UserPreference.objects.filter(pk__in=pm.Tutor.objects.all())
+
+class TutorPreferenceSingleOwDefaultViewSet(UserPreferenceGenViewSet):
+    permission_classes = (IsAuthenticated,)
+    filter_class = TutorPreferenceSingleFilterSet
+
+    def get_query_params(self, req):
+        # Getting the filters
+        dict_params = {}
+        week = req.query_params.get('week', None)
+        if week is not None:
+            dict_params['week'] = week
+        year = self.request.query_params.get('year', None)
+        if year is not None:
+            dict_params['year'] = year
+
+        return dict_params
+
+    def get_queryset(self):
+        params = self.get_query_params(self.request)
+        print(params)
+        qs = bm.UserPreference.objects.filter(**params, pk__in=pm.Tutor.objects.all())
+        if len(qs) == 0:
+            print(self.filter_class.week)
+            print(self.request.query_params.get('week', None))
+            qs = bm.UserPreference.objects.filter(week=None)
+        return qs
+
 # -----------------
 # - MODIFICATIONS -
 # -----------------
@@ -1236,5 +1301,6 @@ class LogoutView(TemplateView):
 
     def get_extra_actions():
         return []
+
 
 
