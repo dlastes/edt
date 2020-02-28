@@ -125,7 +125,6 @@ routerPreferences= routers.SimpleRouter()
 
 # routerPreferences.register(r'students', views.StudentPreferencesViewSet, basename="students")
 # routerPreferences.register(r'groups', views.GroupPreferencesViewSet)
-
 routerPreferences.register(r'course', views.CoursePreferencesViewSet)
 routerPreferences.register(r'room', views.RoomPreferencesViewSet)
 routerPreferences.register(r'user-def', views.UserPreferenceDefaultViewSet, basename="user-def")
