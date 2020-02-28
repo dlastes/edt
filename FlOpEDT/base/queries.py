@@ -43,6 +43,7 @@ from displayweb.models import GroupDisplay, TrainingProgrammeDisplay, BreakingNe
 from people.models import Tutor
 from TTapp.models import TTConstraint
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -234,6 +235,28 @@ def get_rooms(department_abbrev):
 
     return {'roomtypes':dic_rt,
             'roomgroups':dic_rg}
+
+def get_roomsType(department_abbrev):
+    """
+    From the data stored in the database, fill the room description file, that
+    will be used by the website.
+    All room that belongs to a roomgroup that belongs to at least one room type
+    of department_abbrev
+    :return: an object containing one dictionary roomtype -> (list of roomgroups),
+    and one dictionary roomgroup -> (list of rooms)
+    """
+    dic_rt = {}
+    dept_rg = set()
+
+    for rt in RoomType.objects.filter(department__abbrev=department_abbrev):
+
+        dic_rt[str(rt)] = []
+        for rg in rt.members.all():
+            dept_rg.add(rg)
+            if str(rg) not in dic_rt[str(rt)]:
+                dic_rt[str(rt)].append(str(rg))
+
+    return {'roomtypes':dic_rt}
 
 
 def get_coursetype_constraints(department_abbrev):
