@@ -38,7 +38,7 @@ class ModulesApp{
         this.render();
     }
 
-    render = () => {
+    render() {
         this.promos.forEach(this.buildFilter);
         this.searchResult.forEach(this.buildModules);
         for(var elem of this.filters.children) {
@@ -46,7 +46,7 @@ class ModulesApp{
         }
     }
 
-    buildModules = mod => {
+    buildModules (mod) {
         let card = document.createElement('div');
         card.setAttribute("class", "module__card");
         card.innerHTML = `
@@ -62,7 +62,7 @@ class ModulesApp{
         this.container.append(card);
     }
 
-    buildFilter = promo => {
+    buildFilter(promo) {
         let filter = document.createElement('button');
         filter.setAttribute("class", this.selectedFilter === promo ? "filter__btn filter__active" : "filter__btn");
         filter.setAttribute("id", promo);
@@ -70,7 +70,7 @@ class ModulesApp{
         this.filters.append(filter);
     }
 
-    filterModule = e => {
+    filterModule(e) {
         let selected = e.target;
         let promo = selected.getAttribute('id');
         $(`#${promo}`).siblings().removeClass('filter__active');
@@ -82,7 +82,7 @@ class ModulesApp{
 
     }
 
-    searchModule = e => {
+    searchModule(e) {
         let searchQuery = e.target.value;
         this.searchResult = this.modules.filter(mod => mod.abbrev.toLowerCase().startsWith(searchQuery.toLowerCase()) || 
                                                        mod.name.toLowerCase().startsWith(searchQuery.toLowerCase())) ;
@@ -90,7 +90,7 @@ class ModulesApp{
         this.render();
     }
 
-    clearModules = () => {
+    clearModules() {
         let child = this.container.lastElementChild;
         while(child){
             this.container.removeChild(child);
