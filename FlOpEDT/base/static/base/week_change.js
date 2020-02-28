@@ -362,7 +362,7 @@ function fetch_bknews(first) {
     $.ajax({
         type: "GET", //rest Type
         dataType: 'text',
-        url: url_bknews  + exp_week.url(),
+        url: url_bknews,
         async: true,
         contentType: "text/csv",
         success: function(msg) {
