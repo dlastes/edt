@@ -63,7 +63,7 @@ from base.forms import ContactForm, PerfectDayForm, DescriptionForm
 from base.models import Course, UserPreference, ScheduledCourse, EdtVersion, \
     CourseModification, Day, Time, RoomGroup, Room, PlanningModification, \
     Regen, RoomPreference, Department, TimeGeneralSettings, CoursePreference, \
-    TrainingProgramme, CourseType, Module
+    TrainingProgramme, CourseType, Module, ModuleDescription
 import base.queries as queries
 from base.weeks import *
 
@@ -971,7 +971,7 @@ def fetch_all_modules_with_desc(req, **kwargs):
 # </editor-fold desc="FETCHERS">
 
 # <editor-fold desc="CHANGERS">
-# ----------
+# ----------ModuleDescription
 # CHANGERS
 # ----------
 
@@ -1229,7 +1229,7 @@ class HelperRoomPreference():
                               start_time=start_time,
                               duration=duration,
                               value=value)
-
+ModuleDescription
 
 def preferences_changes(req, year, week, helper_pref):
     good_response = {'status': 'OK', 'more': ''}
@@ -1385,7 +1385,7 @@ def course_preferences_changes(req, year, week, train_prog, course_type, **kwarg
         return JsonResponse(response)
 
     return preferences_changes(req, year, week, HelperCoursePreference(tp, ct))
-
+ModuleDescription
 
 @tutor_required
 def decale_changes(req, **kwargs):
@@ -1521,43 +1521,31 @@ def contact(req, tutor, **kwargs):
 # ---------
 # HELPERS
 # ---------
-
-def description(req, department, module,**kwargs):
+@login_required
+def description(req, department, module, **kwargs):
     ack = ''
-    form = DescriptionForm()
+    mod = ModuleDescription.objects.get(module=Module.objects.get(abbrev=module));
+    
     if req.method == 'POST':
-        form = ContactForm(req.POST)
+        user_modules = Module.objects.filter(head=req.user)
+        form.fields['module'] = user_modules
+        form = DescriptionForm(req.POST)
         if form.is_valid():
             dat = form.cleaned_data
-            try:
-                email = EmailMessage(
-                    '[EdT IUT Blagnac] ' + dat.get("subject"),
-                    "(Cet e-mail vous a été envoyé depuis le site des emplois"
-                    " du temps de l'IUT de Blagnac)\n\n"
-                    + dat.get("message"),
-                    to=recip_send,
-                    reply_to=[dat.get("sender")]
-                    )
-                email.send()
-            except:
-                ack = 'Envoi du mail impossible !'
-                return TemplateResponse(req, 'base/contact.html',
-                                {'form': form,
-                                 'ack': ack
-                                 })
+            # enregistrer en base
 
-            return edt(req, None, None, 1)
-
-        else:
-            init_mail = ''
-            if req.user.is_authenticated:
-                init_mail = req.user.email
-            form = DescriptionForm()
+        else: 
+            form = DescriptionForm(req.POST)
+    
+    else:
+        form = DescriptionForm()
 
     return TemplateResponse(req, 'base/description.html',
-                        {'form': form,
-                         'ack': ack
-                         })
+                            {'form': form,
+                             'ack': ack,
+                             'module': module,
+                             'user': req.user
+                             })
 
 
 def clean_train_prog(req):

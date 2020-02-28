@@ -22,18 +22,26 @@
 <!-- without disclosing the source code of your own applications.          -->
 
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %} EDT {% endblock %}
+
 {% block content %}
-<font color="black">
-<form method="post" novalidate>
-  {% csrf_token %}
-  <table cellpadding="10">
-    {{ form }}
-  </table>
-  <button type="submit">Envoyer</button>
-  <div> {{ ack }} </div>
-  <div> <br/><br/> </div>
-</form>
-</font>
+
+<link rel="stylesheet" href="{% static 'base/description.css' %}" />
+
+{% if user.is_tutor %}
+
+<div class="description-container">
+    <h1>Vous modifiez actuelllement la description du module {{module}}</h1>
+    <form method="post" novalidate>
+        {% csrf_token %}
+        <table cellpadding="10">
+            {{ form }}
+        </table>
+        <button type="submit" class="edit">Modifier</button>
+    </form>
+</div>
+{% endif %}
+
 {% endblock %}
