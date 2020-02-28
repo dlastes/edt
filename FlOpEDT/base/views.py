@@ -222,6 +222,17 @@ def edt_light(req, year=None, week=None, **kwargs):
                             })
 
 
+def tri_pref(req, dict):
+    exclus = []
+    for rtname, listpref in dict['roompreferences']:
+        listpref.sort(key=lambda x: (x['value']))
+        for e in listpref:
+            if e['value'] == 0:
+                exclus.append(e)
+            for value in listpref:
+                return listpref
+
+
 @login_required
 def preferences(req, **kwargs):
     if req.user.is_student:
@@ -284,7 +295,12 @@ def stype(req, *args, **kwargs):
                                  'time_settings': queries.get_time_settings(req.department),
                                  'days': num_all_days(1, 1, req.department)
                                  })
+
 @login_required
+
+
+
+
 def pref(req, department):
     return render(req, 'base/preference.html',
                   {'user':req.user})

@@ -82,8 +82,10 @@
                                 container.append(roomContainer);
 
                              }
+
                               let mainContainer = document.getElementById('main-container');
                               let submit = document.createElement('submit');
+
                               submit.innerHTML = `<input type="submit" value="Valider" onclick="exporter()" />`;
                               mainContainer.append(submit);
 
@@ -92,6 +94,11 @@
 
 
 
+
+
+                              submit.innerHTML = `<input type="submit" value="Valider" onclick="window.alert('Préférences enregistrées'); window.location.href = '../semaine-type';";
+ />`;
+                              mainContainer.append(submit);
 
                             },
                             error: function(msg) {

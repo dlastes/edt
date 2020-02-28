@@ -30,34 +30,32 @@ from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
 
 from base.models import Group, TrainingProgramme, \
-                        ScheduledCourse, EdtVersion, Department, Regen
+    ScheduledCourse, EdtVersion, Department, Regen
 
 from base.models import Room, RoomType, RoomGroup, \
-                        RoomSort, Period, CourseType, \
-                        TutorCost, CourseStartTimeConstraint, \
-                        TimeGeneralSettings, GroupType, CourseType, \
-                        TrainingProgramme
+    RoomSort, Period, CourseType, \
+    TutorCost, CourseStartTimeConstraint, \
+    TimeGeneralSettings, GroupType, CourseType, \
+    TrainingProgramme
 
 from displayweb.models import GroupDisplay, TrainingProgrammeDisplay, BreakingNews
 
 from people.models import Tutor
 from TTapp.models import TTConstraint
 
-
 logger = logging.getLogger(__name__)
 
 
 @transaction.atomic
-def create_first_department():    
-
+def create_first_department():
     department = Department.objects.create(name="Default Department", abbrev="default")
-    
+
     # Update all existing department related models
     models = [
         TrainingProgramme, EdtVersion, Regen, \
         RoomType, Period, CourseType, BreakingNews, \
         TutorCost, GroupType]
-   
+
     for model in models:
         model.objects.all().update(department=department)
 
@@ -71,22 +69,21 @@ def create_first_department():
     types = TTConstraint.__subclasses__()
 
     for type in types:
-        type.objects.all().update(department=department)    
+        type.objects.all().update(department=department)
 
-    # Init TimeGeneralSettings with default values
+        # Init TimeGeneralSettings with default values
     TimeGeneralSettings.objects.create(
-                        department=department,
-                        day_start_time=8*60,
-                        day_finish_time=18*60+45,
-                        lunch_break_start_time=12*60+30,
-                        lunch_break_finish_time=14*60,
-                        days=["m", "tu", "w", "th", "f"])
+        department=department,
+        day_start_time=8 * 60,
+        day_finish_time=18 * 60 + 45,
+        lunch_break_start_time=12 * 60 + 30,
+        lunch_break_finish_time=14 * 60,
+        days=["m", "tu", "w", "th", "f"])
 
     return department
 
 
 def get_edt_version(department, week, year, create=False):
-
     params = {'week': week, 'year': year, 'department': department}
 
     if create:
@@ -94,8 +91,8 @@ def get_edt_version(department, week, year, create=False):
             edt_version, _ = EdtVersion.objects.get_or_create(defaults={'version': 0}, **params)
         except EdtVersion.MultipleObjectsReturned as e:
             logger.error(f'get_edt_version: database inconsistency, multiple objects returned for {params}')
-            raise(e)
-        else:    
+            raise (e)
+        else:
             version = edt_version.version
     else:
         """
@@ -103,31 +100,30 @@ def get_edt_version(department, week, year, create=False):
         when no item is matching filter parameters
         """
         try:
-            version = EdtVersion.objects.filter(**params).values_list("version", flat=True)[0]   
+            version = EdtVersion.objects.filter(**params).values_list("version", flat=True)[0]
         except IndexError:
-            raise(EdtVersion.DoesNotExist)
+            raise (EdtVersion.DoesNotExist)
     return version
 
 
 def get_scheduled_courses(department, week, year, num_copy):
-
     qs = ScheduledCourse.objects \
-                    .filter(
-                        course__module__train_prog__department=department,
-                        course__week=week,
-                        course__year=year,
-                        day__in=get_working_days(department),
-                        work_copy=num_copy).select_related('course',
-                                                           'course__tutor',
-                                                           'course__group',
-                                                           'course__group__train_prog',
-                                                           'course__module',
-                                                           'course__type',
-                                                           'room',
-                                                           'course__room_type',
-                                                           'course__module__display'
-                        )
-    return qs    
+        .filter(
+        course__module__train_prog__department=department,
+        course__week=week,
+        course__year=year,
+        day__in=get_working_days(department),
+        work_copy=num_copy).select_related('course',
+                                           'course__tutor',
+                                           'course__group',
+                                           'course__group__train_prog',
+                                           'course__module',
+                                           'course__type',
+                                           'room',
+                                           'course__room_type',
+                                           'course__module__display'
+                                           )
+    return qs
 
 
 def get_groups(department_abbrev):
@@ -233,8 +229,8 @@ def get_rooms(department_abbrev):
         for r in rg.subrooms.all():
             dic_rg[rg.name].append(str(r))
 
-    return {'roomtypes':dic_rt,
-            'roomgroups':dic_rg}
+    return {'roomtypes': dic_rt,
+            'roomgroups': dic_rg}
 
 
 def get_coursetype_constraints(department_abbrev):
@@ -247,10 +243,10 @@ def get_coursetype_constraints(department_abbrev):
     """
     dic = {}
     for ct in CourseType.objects.filter(department__abbrev=department_abbrev):
-        dic[ct.name] = {'duration':ct.duration,
-                        'allowed_st':[]}
+        dic[ct.name] = {'duration': ct.duration,
+                        'allowed_st': []}
         for ct_constraint in \
-              CourseStartTimeConstraint.objects.filter(course_type=ct):
+                CourseStartTimeConstraint.objects.filter(course_type=ct):
             dic[ct.name]['allowed_st'] += ct_constraint.allowed_start_times
         if len(dic[ct.name]['allowed_st']) == 0:
             dic[ct.name]['allowed_st'] += \
@@ -264,11 +260,11 @@ def get_time_settings(dept):
     """
     ts = TimeGeneralSettings.objects.get(department=dept)
     time_settings = {'time':
-                     {'day_start_time': ts.day_start_time,
-                      'day_finish_time': ts.day_finish_time,
-                      'lunch_break_start_time': ts.lunch_break_start_time,
-                      'lunch_break_finish_time': ts.lunch_break_finish_time,
-                      'def_pref_duration':ts.default_preference_duration},
+                         {'day_start_time': ts.day_start_time,
+                          'day_finish_time': ts.day_finish_time,
+                          'lunch_break_start_time': ts.lunch_break_start_time,
+                          'lunch_break_finish_time': ts.lunch_break_finish_time,
+                          'def_pref_duration': ts.default_preference_duration},
                      'days': ts.days}
     return time_settings
 
@@ -279,17 +275,20 @@ def get_departments():
     """
     return [d.abbrev for d in Department.objects.all()]
 
+
 def get_course_types(dept):
     """
     :return: list of course type names
     """
     return [d.name for d in CourseType.objects.filter(department=dept)]
 
+
 def get_training_programmes(dept):
     """
     :return: list of training programme names
     """
     return [d.abbrev for d in TrainingProgramme.objects.filter(department=dept)]
+
 
 def get_working_days(dept):
     """
