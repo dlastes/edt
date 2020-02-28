@@ -74,6 +74,7 @@ class ModulesApp {
     }
 
     filterModule(e) {
+        e.preventDefault();
         let selected = e.target;
         let promo = selected.getAttribute('id');
         $(`#${promo}`).siblings().removeClass('filter__active');
