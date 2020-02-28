@@ -36,7 +36,9 @@
             </div>
         </div>
     <script>
+                        var user = "{{user}}";
                          var data = "{% url 'base:fetch_rooms' department='INFO' %}" ;
+                         var donnees;
 
                          $.ajax({
                             type: "GET",
@@ -45,11 +47,12 @@
                             async: true,
                             contentType: "text/json",
                             success: function(msg, ts, req) {
-                            
+
+                            donnees=msg;
+
                             let container = document.getElementById('rooms-table');
                              for(const type in msg.roomtypes) {
                                 let rooms = msg.roomtypes[type];
-                                console.log(rooms.length);
                                 let roomContainer = document.createElement('div');
                                 roomContainer.setAttribute('class', 'rooms');
                                 roomContainer.setAttribute('id', type);
@@ -61,11 +64,13 @@
                                        let pref = document.createElement('form');
 
                                        room.setAttribute('class', 'pref');
-                                       pref.innerHTML = `<select name="pref">
-                                                            <option selected>Peu importe</option>
-                                                            <option>Préféré</option>
-                                                            <option>À exclure</option>
-                                                         </select>`;
+                                       var options = `<option selected value=1>1</option>`;
+                                       for (var i = 2; i<=rooms.length;i++){
+                                            options += `<option value=${i}>${i}</option>`;
+                                       }
+                                        options += `<option value=0>NON</option>`;
+
+                                       pref.innerHTML = `<select name="pref">${options}</select>`;
                                        room.setAttribute('id', r);
                                        room.innerText = r;
 
@@ -79,8 +84,12 @@
                              }
                               let mainContainer = document.getElementById('main-container');
                               let submit = document.createElement('submit');
-                              submit.innerHTML = `<input type="submit" value="Valider" onclick=alert("OK") />`;
+                              submit.innerHTML = `<input type="submit" value="Valider" onclick="exporter()" />`;
                               mainContainer.append(submit);
+
+
+
+
 
 
 
@@ -89,6 +98,30 @@
                                 console.log("error");
                             }
                         })
+
+                        function exporter() {
+                                alert("Envoyer");
+                                var dico1 = new Map();
+                                var dico2 = new Map();
+
+                                dico1.set('tutor',user);
+
+                                for (t in donnees.roomtypes){
+                                    var pref = [];
+                                    for (s of donnees.roomtypes[t]){
+                                        var temp = new Map();
+                                        temp.set('roomgroup', s);
+                                        temp.set('value', 1);
+                                        pref.push(temp);
+                                    }
+                                    dico2.set(t,pref);
+                                }
+                                dico1.set('roompreferences', dico2);
+
+                                console.log(dico1);
+
+                             }
+
 
 
 

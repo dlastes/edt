@@ -284,9 +284,10 @@ def stype(req, *args, **kwargs):
                                  'time_settings': queries.get_time_settings(req.department),
                                  'days': num_all_days(1, 1, req.department)
                                  })
-
+@login_required
 def pref(req, department):
-    return render(req, 'base/preference.html', {})
+    return render(req, 'base/preference.html',
+                  {'user':req.user})
 
     # {'data' : })
 
