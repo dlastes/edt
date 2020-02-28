@@ -2,7 +2,7 @@ const fetchModules = () => {
     $.ajax({
         type: "GET",
         dataType: "text",
-        url: 'http://localhost:8000/edt/INFO/fetch_all_modules_with_desc',
+        url: 'http://127.0.0.1:8000/edt/INFO/fetch_all_modules_with_desc',
         async: true,
         contentType: 'application/json',
         success: response => {
