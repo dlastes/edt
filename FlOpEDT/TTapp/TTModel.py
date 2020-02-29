@@ -648,8 +648,8 @@ class TTModel(object):
         self.var_nb += 1
         return LpVariable(countedname, cat=LpBinary)
 
-    def add_constraint(self, expr, relation, value, constraint_type=None, instructor=None, slot=None, course=None,
-                       week=None, room=None, group=None, days=None):
+    def add_constraint(self, expr, relation, value, constraint_type=None, instructor=[], slot=[], course=[],
+                       week=[], room=[], group=[], days=[]):
         """
         Add a constraint to the model
         """
@@ -669,8 +669,8 @@ class TTModel(object):
                                    rhs=value, name=str(name))  # + '_' + str(self.constraint_nb))
 
         self.constraintManager.add_constraint(Constraint(id=name, constraint_type=constraint_type,
-                                                         instructor=instructor, slot=slot, course=course, week=week,
-                                                         room=room, group=group, days=days))
+                                                         instructors=instructor, slots=slot, courses=course, weeks=week,
+                                                         rooms=room, groups=group, days=days))
         self.constraint_nb += 1
 
     def lin_expr(self, expr=None):
@@ -1017,8 +1017,9 @@ class TTModel(object):
                             # , "Dependency %s %g" % (p, self.constraint_nb)
                             self.add_constraint(self.TT[(sl1, c1)]
                                                 + self.TT[(sl2, c2)], '<=', 1,
-                                                constraint_type="Problème de dépendance", course=p,
-                                                slot=str(sl1) + " / " + str(sl2))
+                                                constraint_type="Problème de dépendance",
+                                                course=[c1, c2],
+                                                slot=[sl1, sl2])
                         else:
                             conj_var = self.add_conjunct(self.TT[(sl1, c1)],
                                                          self.TT[(sl2, c2)])
@@ -1028,9 +1029,10 @@ class TTModel(object):
                             for rg2 in self.wdb.room_groups_for_type[c2.room_type].exclude(id=rg1.id):
                                 self.add_constraint(self.TTrooms[(sl1, c1, rg1)]
                                                     + self.TTrooms[(sl2, c2, rg2)], '<=', 1,
-                                                    constraint_type="Problème de dépendance entre les salles", course=p,
-                                                    slot=str(sl1) + " / " + str(sl2),
-                                                    room=str(rg1) + " / " + str(rg2))
+                                                    constraint_type="Problème de dépendance entre les salles",
+                                                    course=[c1, c2],
+                                                    slot=[sl1, sl2],
+                                                    room=[rg1, rg2])
 
     def compute_non_prefered_slot_cost(self):
         """
