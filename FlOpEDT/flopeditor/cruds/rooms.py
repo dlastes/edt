@@ -25,39 +25,33 @@ a commercial license. Buying such a license is mandatory as soon as
 you develop activities involving the FlOpEDT/FlOpScheduler software
 without disclosing the source code of your own applications.
 
-
-This module is used to establish the crud back-end interface.
 """
 
-from base import queries
-from django.http import JsonResponse, HttpResponseForbidden
-from base.models import Department, Room
-from django.shortcuts import get_object_or_404
-from flopeditor.cruds import rooms
+from django.http import JsonResponse
+from base.models import Room
+from FlOpEDT.decorators import dept_admin_required, tutor_required
 
-def crud_rooms(request, department_abbrev):
-    """Crud url for rooms edition
+@tutor_required
+def read(request, department):
+    """Return all rooms for a department
 
     :param request: Client request.
     :type request:  django.http.HttpRequest
+    :param department: Department.
+    :type department:  base.models.Department
     :return: Server response for the request.
     :rtype:  django.http.JsonResponse
 
     """
-    department = get_object_or_404(Department, abbrev=department_abbrev)
-    if request.method == "GET":
-        return rooms.read(request, department)
-    elif request.method == "PUT":
-        pass
-
-    elif request.method == "POST":
-        pass
-
-    elif request.method == "DELETE":
-        # Verifier la forme/structure de la donnée reçue par CrudJS
-        # Vérifier que les salles demandées existent bien dans la base de données
-        # Supprimer le(s) salle(s)
-        # Retourner un message si OK ou pas
-        pass
-
-    return HttpResponseForbidden()
+    rooms = Room.objects.filter(departments=department)
+    values = []
+    for room in rooms:
+        values.append((room.name,))
+    return JsonResponse({
+        "columns" :  [{
+            'name': 'Nom',
+            "type": "text",
+            "options": {}
+        }],
+        "values" : values
+    })
