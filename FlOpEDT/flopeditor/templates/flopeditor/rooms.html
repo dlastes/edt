@@ -1,7 +1,47 @@
 {% extends "flopeditor/base.html" %}
 {% block nav-classes-rooms %} active {% endblock %}
 {% block content %}
+<div class="card">
+    <ul class="nav card-header">
+        <li class="nav-item">
+            <a  class="nav-link {% block rooms-nav-classes-rooms %}disabled{% endblock %}" 
+                href="{% url 'flopeditor:flopeditor-department-rooms' department_abbrev=department.abbrev %}">
+                Salles
+            </a>
+        </li>
+        <li class="nav-item">
+            <a 
+                class="nav-link {% block rooms-nav-classes-groups %}{% endblock %}" 
+                href="#">
+                Groupes de salles
+            </a>
+        </li>
+        <li class="nav-item">
+            <a  class="nav-link {% block rooms-nav-classes-types %}{% endblock %}" 
+                href="#">
+                Catégories de salles
+            </a>
+        </li>
+    </ul>
+    <div class="card-body">
+    {% block card-content %}
+    {% endblock %}
+    </div>
+</div>
+{% endblock %}
 
-rooms
-
+{% block script %}
+    {{ block.super }}
+    <script>
+        $.ajax({
+            type: "GET",
+            url: "{% url 'flopeditor:flopeditor-crud-rooms' department_abbrev=department.abbrev %}",
+            success: function(response) {    
+                console.log(response)        
+            },
+            error: function(error) {
+                console.log(error)
+            },
+        });
+    </script>
 {% endblock %}
