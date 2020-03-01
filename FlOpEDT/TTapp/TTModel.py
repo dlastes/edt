@@ -243,7 +243,6 @@ class WeekDB(object):
             other_departments_sched_courses_for_room[r] = set()
             for rg in r.subroom_of.all():
                 other_departments_sched_courses_for_room[r] |= set(self.other_departments_sched_courses.filter(room=rg))
-
         return room_types, room_groups, rooms, room_prefs, room_groups_for_type, room_course_compat, course_rg_compat,\
             fixed_courses_for_room, other_departments_sched_courses_for_room
 
@@ -540,7 +539,7 @@ class TTModel(object):
                 card = 2 * len(dayslots)
                 expr = self.lin_expr()
                 expr += card * IBD[(i, d)]
-                for c in self.wdb.possible_courses[i] & self.wdb.courses_for_supp_tutor[i]:
+                for c in self.wdb.possible_courses[i] | self.wdb.courses_for_supp_tutor[i]:
                     for sl in dayslots & self.wdb.compatible_slots[c]:
                         expr -= self.TTinstructors[(sl, c, i)]
                 self.add_constraint(expr, '>=', 0)
@@ -549,9 +548,9 @@ class TTModel(object):
                                                  day=d) \
                         or self.wdb.other_departments_sched_courses.filter(Q(course__tutor=i) | Q(tutor=i), day=d):
                         self.add_constraint(IBD[(i, d)], '==', 1)
-                    # This next constraint impides to force IBD to be 1
-                    # (if there is a meeting, for example...)
-                    # self.add_constraint(expr, '<=', card-1)
+                        # This next constraint impides to force IBD to be 1
+                        # (if there is a meeting, for example...)
+                        #self.add_constraint(expr, '<=', card-1)
 
         forced_IBD = {}
         for i in self.wdb.instructors:
@@ -570,7 +569,7 @@ class TTModel(object):
                 IBD_GTE[week].append({})
 
             for i in self.wdb.instructors:
-                for j in range(2, max_days + 1):
+                for j in range(1, max_days + 1):
                     IBD_GTE[week][j][i] = self.add_floor(str(i) + str(j),
                                                          self.sum(IBD[(i, d)]
                                                                   for d in days_filter(self.wdb.days, week=week)),
@@ -1217,6 +1216,7 @@ class TTModel(object):
         """
         Add the constraints imposed by other departments' scheduled courses.
         """
+        print("adding other departments constraints")
         for sl in self.wdb.slots:
             # constraint : other_departments_sched_courses rooms are not available
             for r in self.wdb.rooms:
