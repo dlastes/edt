@@ -121,10 +121,12 @@ def department_parameters_edit(request, department_abbrev):
 
     """
     department = get_object_or_404(Department, abbrev=department_abbrev)
+    departments = Department.objects.exclude(abbrev=department_abbrev)
     parameters = get_object_or_404(TimeGeneralSettings, department=department)
     return render(request, "flopeditor/parameters.html", {
         'title': 'Paramètres',
-        'department_abbrev': department_abbrev,
+        'department': department,
+        'list_departments': departments,
         'day_start_time': min_to_str(parameters.day_start_time),
         'day_finish_time': min_to_str(parameters.day_finish_time),
         'lunch_break_start_time': min_to_str(parameters.lunch_break_start_time),
@@ -154,7 +156,6 @@ def department_rooms(request, department_abbrev):
         'title': 'Salles',
         'department': department,
         'list_departments': departments
-
     })
 
 

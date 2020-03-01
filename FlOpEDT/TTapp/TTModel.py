@@ -30,6 +30,7 @@ from pulp import LpVariable, LpConstraint, LpBinary, LpConstraintEQ, \
     LpMinimize, lpSum, LpStatusOptimal, LpStatusNotSolved
 
 from pulp import GUROBI_CMD, PULP_CBC_CMD
+import pulp.solvers as pulp_solvers
 #from pulp.solvers import GUROBI_CMD as GUROBI
 
 from FlOpEDT.settings.base import COSMO_MODE
@@ -61,7 +62,7 @@ import datetime
 import logging
 
 logger = logging.getLogger(__name__)
-GUROBI = 'GUROBI_CMD'
+GUROBI_NAME = 'GUROBI_CMD'
 
 class WeekDB(object):
     def __init__(self, department, weeks, year, train_prog):
@@ -411,7 +412,8 @@ class TTModel(object):
                  min_bhd_i=1.,
                  min_nps_c=1.,
                  max_stab=5.,
-                 lim_ld=1.):
+                 lim_ld=1.,
+                 core_only=False):
         print("\nLet's start weeks #%s" % weeks)
         # beg_file = os.path.join('logs',"FlOpTT")
         self.model = LpProblem("FlOpTT", LpMinimize)
@@ -422,6 +424,7 @@ class TTModel(object):
         self.min_ups_c = min_nps_c
         self.max_stab = max_stab
         self.lim_ld = lim_ld
+        self.core_only = core_only
         self.var_nb = 0
         self.constraint_nb = 0
         if type(weeks) is int:
@@ -537,7 +540,7 @@ class TTModel(object):
                 card = 2 * len(dayslots)
                 expr = self.lin_expr()
                 expr += card * IBD[(i, d)]
-                for c in self.wdb.possible_courses[i]:
+                for c in self.wdb.possible_courses[i] & self.wdb.courses_for_supp_tutor[i]:
                     for sl in dayslots & self.wdb.compatible_slots[c]:
                         expr -= self.TTinstructors[(sl, c, i)]
                 self.add_constraint(expr, '>=', 0)
@@ -1282,13 +1285,18 @@ class TTModel(object):
 
         self.add_core_constraints()
 
+        self.add_dependency_constraints()
+
         self.add_rooms_constraints()
 
         self.add_instructors_constraints()
 
-        self.add_slot_preferences()
+        if self.core_only:
+            return
 
-        self.add_dependency_constraints()
+        self.add_other_departments_constraints()
+
+        self.add_slot_preferences()
 
         self.add_specific_constraints()
 
@@ -1377,12 +1385,15 @@ class TTModel(object):
 
     def optimize(self, time_limit, solver, presolve=2):
 
-        # The solver value shall one of the available
-        # solver corresponding pulp command
+        # The solver value shall be one of the available
+        # solver corresponding pulp command or contain
+        # gurobi
 
-        if solver == GUROBI:
+        
+        if 'gurobi' in solver.lower() or hasattr(pulp_solvers, solver):
             # ignore SIGINT while solver is running
             # => SIGINT is still delivered to the solver, which is what we want
+            solver = GUROBI_NAME
             signal.signal(signal.SIGINT, signal.SIG_IGN)
             self.model.solve(GUROBI_CMD(keepFiles=1,
                                         msg=True,
@@ -1390,22 +1401,22 @@ class TTModel(object):
                                                  ("Presolve", presolve),
                                                  ("MIPGapAbs", 0.2)]))
         else:
-            # TODO Use the solver parameter to get
-            # the target class by reflection
-            self.model.solve(PULP_CBC_CMD(keepFiles=1,
-                                          msg=True,
-                                          presolve=presolve,
-                                          maxSeconds=time_limit))
+            # raise an exception when the solver name is incorrect
+            command = getattr(pulp_solvers, solver)
+            self.model.solve(command(keepFiles=1,
+                                     msg=True,
+                                     presolve=presolve,
+                                     maxSeconds=time_limit))
         status = self.model.status
         print(LpStatus[status])
-        if status == LpStatusOptimal or (solver != GUROBI and status == LpStatusNotSolved):
+        if status == LpStatusOptimal or (solver != GUROBI_NAME and status == LpStatusNotSolved):
             return self.get_obj_coeffs()
 
         else:
             print('lpfile has been saved in FlOpTT-pulp.lp')
             return None
 
-    def solve(self, time_limit=3600, target_work_copy=None, solver=GUROBI):
+    def solve(self, time_limit=3600, target_work_copy=None, solver=GUROBI_NAME):
         """
         Generates a schedule from the TTModel
         The solver stops either when the best schedule is obtained or timeLimit

@@ -53,7 +53,8 @@ var mode = "tutor" ;
 var dd_selections = {
     'tutor': {value:logged_usr.name},
     'prog': {value:''},
-    'type': {value:''}};
+    'type': {value:''},
+    'room': {value:''}};
 
 
 
@@ -128,12 +129,15 @@ function create_lunchbar() {
   ------- DISPOS ------
   ---------------------*/
 function fetch_url() {
-    if (mode == 'tutor') {
+    switch(mode) {
+    case 'tutor':
         return url_fetch_user_dweek + user.name ;
-    } else if (mode == 'course') {
+    case 'course':
         return url_fetch_course_dweek 
             + dd_selections['prog'].value
             + '/' + dd_selections['type'].value ;
+    case 'room':
+        return url_fetch_room_dweek + user.name ;
     }
 }
 
@@ -157,11 +161,28 @@ function translate_course_preferences_from_csv(d) {
 }
 
 
+function translate_room_preferences_from_csv(d) {
+    var i ;
+    console.log(d);
+    if (Object.keys(dispos).indexOf(d.room)==-1){
+	unavailable_rooms[d.room] = {} ; 
+	week_days.forEach(function(day){
+	    unavailable_rooms[d.room][day.ref] = [] ;
+	});
+    }
+    dispos[d.room][d.day].push({start_time: +d.start_time,
+				duration: +d.duration});
+}
+
+
 function translate_pref_from_csv(d) {
-    if (mode == 'tutor') {
+    switch(mode) {
+    case 'tutor':
         return translate_dispos_from_csv(d);
-    } else if (mode == 'course') {
+    case 'course':
         return translate_course_preferences_from_csv(d);
+    case 'room':
+        return translate_room_preferences_from_csv(d);
     }
 }
 
@@ -248,13 +269,17 @@ d3.select("body")
 // compute url to send preference changes to
 // according to mode
 function send_url(year, week) {
-    if (mode == 'tutor') {
+    switch(mode){
+    case 'tutor':
         return url_user_pref_changes + year + "/" + week
 	    + "/" + user.name ;
-    } else if (mode == 'course') {
+    case 'course':
         return url_course_pref_changes + year + "/" + week
 	    + "/" + dd_selections['prog'].value
             + "/" + dd_selections['type'].value ;
+    case 'room':
+        return url_room_pref_changes + year + "/" + week
+	    + "/" + user.name ;
     }
 }
 
