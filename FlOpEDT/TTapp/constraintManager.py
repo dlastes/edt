@@ -15,6 +15,7 @@ def parse_iis(iis_filename):
     id_constraints = list(map(lambda constraint: int(constraint[1:]), id_constraints))
     return id_constraints
 
+
 def inc(dic, key):
     if key is not None:
         if key in dic.keys():
@@ -22,15 +23,18 @@ def inc(dic, key):
         else:
             dic[key] = 1
 
+
 # To link the type of the constraint to the parameter occurence
-def inc_with_type(dic, key, c_type):
-    if key is not None:
-        if key in dic.keys():
-            dic[key][0] += 1
-            if dic[key][1].count(c_type) == 0:
-                dic[key][1].append(c_type)
-        else:
-            dic[key] = [1, [str(c_type)]]
+def inc_with_type(dic, keys, c_type):
+    if keys is not []:
+        for key in keys:
+            if key in dic.keys():
+                dic[key][0] += 1
+                if dic[key][1].count(c_type) == 0:
+                    dic[key][1].append(c_type)
+            else:
+                dic[key] = [1, [str(c_type)]]
+
 
 # Create result string to print
 def make_occur_buf(dic):
@@ -48,6 +52,22 @@ def make_occur_buf(dic):
     return buf
 
 
+def handle_occur_type_with_priority(priority_types, occur_type, decreasing):
+    nb_occ_init = []
+    max_priority = max(occur_type.values()) + len(priority_types)
+    min_priority = -len(priority_types) + 1
+    for priority_type in priority_types:
+        nb_occ_init.append(occur_type[priority_type])
+        if priority_type in occur_type:
+            occur_type[priority_type] = max_priority if decreasing else min_priority
+        max_priority -= 1
+        min_priority += 1
+    occur_type = {k: v for k, v in sorted(occur_type.items(), key=lambda item: item[1], reverse=decreasing)}
+    for i in range(len(priority_types)):
+        occur_type[priority_types[i]] = nb_occ_init[i]
+    return occur_type
+
+
 class ConstraintManager:
     def __init__(self):
         self.constraints = []
@@ -61,7 +81,6 @@ class ConstraintManager:
     def get_constraints_by_ids(self, id_constraints):
         return [self.constraints[id_constraint] for id_constraint in id_constraints]
 
-    """
     def get_occurs(self, id_constraints, decreasing=True):
         occur_type = {}
         occur_instructor = {}
@@ -76,24 +95,16 @@ class ConstraintManager:
         for i in id_constraints:
             c_type = self.get_constraint_by_id(i).constraint_type
             inc(occur_type, self.get_constraint_by_id(i).constraint_type)
-            inc_with_type(occur_instructor, self.get_constraint_by_id(i).instructor, c_type)
-            inc_with_type(occur_slot, self.get_constraint_by_id(i).slot, c_type)
-            inc_with_type(occur_course, self.get_constraint_by_id(i).course, c_type)
-            inc_with_type(occur_week, self.get_constraint_by_id(i).week, c_type)
-            inc_with_type(occur_room, self.get_constraint_by_id(i).room, c_type)
-            inc_with_type(occur_group, self.get_constraint_by_id(i).group, c_type)
+            inc_with_type(occur_instructor, self.get_constraint_by_id(i).instructors, c_type)
+            inc_with_type(occur_slot, self.get_constraint_by_id(i).slots, c_type)
+            inc_with_type(occur_course, self.get_constraint_by_id(i).courses, c_type)
+            inc_with_type(occur_week, self.get_constraint_by_id(i).weeks, c_type)
+            inc_with_type(occur_room, self.get_constraint_by_id(i).rooms, c_type)
+            inc_with_type(occur_group, self.get_constraint_by_id(i).groups, c_type)
             inc_with_type(occur_days, self.get_constraint_by_id(i).days, c_type)
 
-        #TODO fix for list len > 1
-        priority_types = ["Le cours doit être placé"]
-        for priority_type in priority_types:
-            if priority_type in occur_type:
-                occ = occur_type[priority_type]
-                occur_type[priority_type] = np.inf if decreasing else 0
-                occur_type = {k: v for k, v in sorted(occur_type.items(), key=lambda item: item[1], reverse=decreasing)}
-                occur_type[priority_type] = occ
-            else:
-                occur_type = {k: v for k, v in sorted(occur_type.items(), key=lambda item: item[1], reverse=decreasing)}
+        priority_types = ["Le cours doit être placé", "Pas_de_cours_le_jeudi_aprem"]
+        occur_type = handle_occur_type_with_priority(priority_types, occur_type, decreasing)
 
         occur_instructor = {k: v for k, v in
                             sorted(occur_instructor.items(), key=lambda item: item[1][0], reverse=decreasing)}
@@ -105,27 +116,23 @@ class ConstraintManager:
         occur_days = {k: v for k, v in sorted(occur_days.items(), key=lambda item: item[1][0], reverse=decreasing)}
 
         return occur_type, occur_instructor, occur_slot, occur_course, occur_week, occur_room, occur_group, occur_days
-    """
 
     def show_reduces_result_brut(self, id_constraints, week, decreasing=True):
-        """
         occur_type, occur_instructor, occur_slot, occur_course, occur_week, occur_room, occur_group, occur_days = \
             self.get_occurs(id_constraints, decreasing)
 
         order = list(occur_type.keys())
-        constraints = sorted(constraints, key=lambda constraint: order.index(constraint.constraint_type))
-        """
         constraints = self.get_constraints_by_ids(id_constraints)
+        constraints = sorted(constraints, key=lambda x: order.index(x.constraint_type))
         output = ""
         for constraint in constraints:
             output += str(constraint) + "\n"
-        # print(output)
         filename = "logs/intelligible_constraints%s.txt" % week
         print("writting %s ..." % filename)
         with open(filename, "w+") as file:
             file.write(output)
+        # print(output)
 
-    """
     def show_reduces_result(self, id_constraints, week):
         occur_type, occur_instructor, occur_slot, occur_course, occur_week, occur_room, occur_group, occur_days = \
             self.get_occurs(id_constraints)
@@ -159,14 +166,13 @@ class ConstraintManager:
             output += "\nParametre Days : \n" + buf_days
         if buf_slot != "":
             output += "\nParametre Slot :\n" + buf_slot
-        print(output)
         filename = "logs/intelligible_constraints_factorised%s.txt" % week
         print("writting %s ..." % filename)
         with open(filename, "w+") as file:
             file.write(output)
-    """
+        # print(output)
 
     def handle_reduced_result(self, ilp_file_name, week):
         id_constraints = parse_iis(ilp_file_name)
         self.show_reduces_result_brut(id_constraints, week, decreasing=True)
-        #self.show_reduces_result(id_constraints, week)
+        self.show_reduces_result(id_constraints, week)
