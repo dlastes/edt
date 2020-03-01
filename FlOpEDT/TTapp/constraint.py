@@ -14,7 +14,7 @@ def list2str(myList):
 
 class Constraint:
     def __init__(self, id, constraint_type=None, instructors=[], slots=[], courses=[], weeks=[], rooms=[],
-                 groups=[], days=[]):
+                 groups=[], days=[], departments=[]):
         self.id = id
         self.constraint_type = constraint_type
 
@@ -39,6 +39,9 @@ class Constraint:
         if type(days) is not list:
             days = [days]
         self.days = days
+        if type(departments) is not list:
+            departments = [departments]
+        self.departments = departments
 
     def get_id(self):
         return self.id
@@ -68,13 +71,18 @@ class Constraint:
             d, c = singular_or_plurial(self.weeks, isMale=False)
             res += "pour %s semaine%s %s ; " % (d, c, list2str([str(week) for week in self.weeks]))
 
+        if len(self.groups) >= 1:
+            d, c = singular_or_plurial(self.groups, isMale=True)
+            res += "pour %s groupe%s %s ; " % (d, c, list2str([str(group) for group in self.groups]))
+
         if len(self.days) >= 1:
             d, c = singular_or_plurial(self.days, isMale=True)
             res += "pour %s jour%s %s ; " % (d, c, list2str([str(day) for day in self.days]))
 
-        if len(self.groups) >= 1:
-            d, c = singular_or_plurial(self.groups, isMale=True)
-            res += "pour %s groupe%s %s ; " % (d, c, list2str([str(group) for group in self.groups]))
+        if len(self.departments) >= 1:
+            d, c = singular_or_plurial(self.departments, isMale=True)
+            res += "pour %s departement%s %s ; " % (d, c, list2str(
+                [str(department) for department in self.departments]))
 
         res += "doit être respectée."
         return res

@@ -90,6 +90,7 @@ class ConstraintManager:
         occur_room = {}
         occur_group = {}
         occur_days = {}
+        occur_departments = {}
 
         # Initiate all occurences
         for i in id_constraints:
@@ -102,6 +103,7 @@ class ConstraintManager:
             inc_with_type(occur_room, self.get_constraint_by_id(i).rooms, c_type)
             inc_with_type(occur_group, self.get_constraint_by_id(i).groups, c_type)
             inc_with_type(occur_days, self.get_constraint_by_id(i).days, c_type)
+            inc_with_type(occur_departments, self.get_constraint_by_id(i).departments, c_type)
 
         priority_types = ["Le cours doit être placé", "Pas_de_cours_le_jeudi_aprem"]
         occur_type = handle_occur_type_with_priority(priority_types, occur_type, decreasing)
@@ -114,12 +116,15 @@ class ConstraintManager:
         occur_room = {k: v for k, v in sorted(occur_room.items(), key=lambda item: item[1][0], reverse=decreasing)}
         occur_group = {k: v for k, v in sorted(occur_group.items(), key=lambda item: item[1][0], reverse=decreasing)}
         occur_days = {k: v for k, v in sorted(occur_days.items(), key=lambda item: item[1][0], reverse=decreasing)}
+        occur_departments = \
+            {k: v for k, v in sorted(occur_departments.items(), key=lambda item: item[1][0], reverse=decreasing)}
 
-        return occur_type, occur_instructor, occur_slot, occur_course, occur_week, occur_room, occur_group, occur_days
+        return occur_type, occur_instructor, occur_slot, occur_course, occur_week, occur_room, occur_group, \
+            occur_days, occur_departments
 
     def show_reduces_result_brut(self, id_constraints, week, decreasing=True):
-        occur_type, occur_instructor, occur_slot, occur_course, occur_week, occur_room, occur_group, occur_days = \
-            self.get_occurs(id_constraints, decreasing)
+        occur_type, occur_instructor, occur_slot, occur_course, occur_week, occur_room, occur_group, occur_days,\
+            occur_department = self.get_occurs(id_constraints, decreasing)
 
         order = list(occur_type.keys())
         constraints = self.get_constraints_by_ids(id_constraints)
@@ -134,8 +139,8 @@ class ConstraintManager:
         # print(output)
 
     def show_reduces_result(self, id_constraints, week):
-        occur_type, occur_instructor, occur_slot, occur_course, occur_week, occur_room, occur_group, occur_days = \
-            self.get_occurs(id_constraints)
+        occur_type, occur_instructor, occur_slot, occur_course, occur_week, occur_room, occur_group, occur_days,\
+            occur_department = self.get_occurs(id_constraints)
 
         buf_type = ""
         for x in occur_type:
@@ -148,6 +153,7 @@ class ConstraintManager:
         buf_room = make_occur_buf(occur_room)
         buf_group = make_occur_buf(occur_group)
         buf_days = make_occur_buf(occur_days)
+        buf_department = make_occur_buf(occur_department)
 
         output = "Sommaire des contraintes : \n"
         if buf_type != "":
@@ -166,6 +172,9 @@ class ConstraintManager:
             output += "\nParametre Days : \n" + buf_days
         if buf_slot != "":
             output += "\nParametre Slot :\n" + buf_slot
+        if buf_department != "":
+            output += "\nParametre Department :\n" + buf_department
+
         filename = "logs/intelligible_constraints_factorised%s.txt" % week
         print("writting %s ..." % filename)
         with open(filename, "w+") as file:

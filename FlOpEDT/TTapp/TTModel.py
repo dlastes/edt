@@ -649,7 +649,7 @@ class TTModel(object):
         return LpVariable(countedname, cat=LpBinary)
 
     def add_constraint(self, expr, relation, value, constraint_type=None, instructor=[], slot=[], course=[],
-                       week=[], room=[], group=[], days=[]):
+                       week=[], room=[], group=[], days=[], department=[]):
         """
         Add a constraint to the model
         """
@@ -670,7 +670,7 @@ class TTModel(object):
 
         self.constraintManager.add_constraint(Constraint(id=name, constraint_type=constraint_type,
                                                          instructors=instructor, slots=slot, courses=course, weeks=week,
-                                                         rooms=room, groups=group, days=days))
+                                                         rooms=room, groups=group, days=days, departments=department))
         self.constraint_nb += 1
 
     def lin_expr(self, expr=None):
@@ -1262,6 +1262,7 @@ class TTModel(object):
                             (sc.start_time < sl.end_time
                              and sl.start_time < sc.start_time + sc.course.type.duration):
                         occupied_in_another_department = True
+                        d = sc
                 if occupied_in_another_department:
                     name = 'other_dep_room_' + str(r) + '_' + str(sl) + '_' + str(self.constraint_nb)
                     self.add_constraint(self.sum(self.TTrooms[(sl, c, room)]
@@ -1269,7 +1270,8 @@ class TTModel(object):
                                                  for room in self.wdb.course_rg_compat[c]
                                                  if r in room.subrooms.all()),
                                         '==',
-                                        0, constraint_type="Les autres départements bloquent le slot", slot=sl, room=r)
+                                        0, constraint_type="Les autres départements bloquent le slot",
+                                        slot=sl, room=r, department=d)
 
             # constraint : other_departments_sched_courses instructors are not available
             for i in self.wdb.instructors:
@@ -1279,6 +1281,7 @@ class TTModel(object):
                             (sc.start_time < sl.end_time
                              and sl.start_time < sc.start_time + sc.course.type.duration):
                         occupied_in_another_department = True
+                        d = sc
                 if occupied_in_another_department:
                     name = 'other_dep_' + str(i) + '_' + str(sl) + '_' + str(self.constraint_nb)
                     self.add_constraint(self.sum(self.TT[(sl, c)]
@@ -1287,10 +1290,10 @@ class TTModel(object):
                                                  self.wdb.compatible_courses[sl]),
                                         '==',
                                         0, constraint_type="Le professeur a déjà un cours dans un autre département",
-                                        slot=sl, instructor=i)
+                                        slot=sl, instructor=i, department=d)
                     self.add_constraint(self.IBD[(i, sl.day)], '==', 1,
                                         constraint_type="Le professeur a déjà un cours dans un autre département IBD",
-                                        slot=sl, instructor=i)
+                                        slot=sl, instructor=i, department=d)
 
     def add_specific_constraints(self):
         """
