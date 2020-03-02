@@ -1,16 +1,18 @@
-def singular_or_plurial(myList, isMale):
-    determinant = "les" if len(myList) > 1 else ("le" if isMale else "la")
-    conjugation = "s" if len(myList) > 1 else ""
+def singular_or_plurial(my_list, is_male):
+    determinant = "les" if len(my_list) > 1 else ("le" if is_male else "la")
+    conjugation = "s" if len(my_list) > 1 else ""
     return determinant, conjugation
 
-def list2str(myList):
-    if len(myList) == 1:
-        return myList[0]
+
+def list2str(my_list):
+    if len(my_list) == 1:
+        return my_list[0]
 
     output = "["
-    for i in range(len(myList) - 1):
-        output += myList[i] + ", "
-    return output + myList[-1] + "]"
+    for i in range(len(my_list) - 1):
+        output += my_list[i] + ", "
+    return output + my_list[-1] + "]"
+
 
 class Constraint:
     def __init__(self, id, constraint_type=None, instructors=[], slots=[], courses=[], weeks=[], rooms=[],
@@ -20,28 +22,46 @@ class Constraint:
 
         if type(instructors) is not list:
             instructors = [instructors]
-        self.instructors = instructors
-        if type(slots) is not list:
-            slots = [slots]
-        self.slots = slots
-        if type(courses) is not list:
-            courses = [courses]
-        self.courses = courses
+        self.instructors = list(instructors)
+
         if type(weeks) is not list:
             weeks = [weeks]
-        self.weeks = weeks
+        self.weeks = list(weeks)
+
         if type(rooms) is not list:
             rooms = [rooms]
-        self.rooms = rooms
+        self.rooms = list(rooms)
+
         if type(groups) is not list:
             groups = [groups]
-        self.groups = groups
+        self.groups = list(groups)
+
         if type(days) is not list:
             days = [days]
-        self.days = days
+        self.days = list(days)
+
         if type(departments) is not list:
             departments = [departments]
-        self.departments = departments
+        self.departments = list(departments)
+
+        if type(slots) is not list:
+            slots = [slots]
+        self.slots = list(slots)
+
+        if type(courses) is not list:
+            courses = [courses]
+        self.courses = list(courses)
+
+        for s in self.slots:
+            self.days.append(s.get_day().day)
+            self.weeks.append(s.get_day().week)
+
+        self.modules = []
+        for c in self.courses:
+            self.instructors.append(c.get_tutor())
+            self.groups.append(c.get_group())
+            self.modules.append(c.get_module())
+        self.courses = list(self.modules)
 
     def get_id(self):
         return self.id
