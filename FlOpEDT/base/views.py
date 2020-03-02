@@ -60,7 +60,7 @@ if COSMO_MODE:
     from base.admin import CoursPlaceResourceCosmo
 from base.forms import ContactForm, PerfectDayForm
 from base.models import Course, UserPreference, ScheduledCourse, EdtVersion, \
-    CourseModification, Day, Time, RoomGroup, Room, PlanningModification, \
+    CourseModification, Day, Time, RoomGroup, Room, \
     Regen, RoomPreference, Department, TimeGeneralSettings, CoursePreference, \
     TrainingProgramme, CourseType
 import base.queries as queries
@@ -1097,11 +1097,12 @@ def edt_changes(req, **kwargs):
                         if co.tutor is not None:
                             co.tutor = Tutor.objects.get(username=new_tutor)
                             co.save()
-                        pm = PlanningModification(course=co,
-                                                  old_week=co.week,
-                                                  old_year=co.year,
-                                                  tutor_old=prev_tut,
-                                                  initiator=req.user.tutor)
+                        pm = CourseModification(course=co,
+                                                old_week=co.week,
+                                                old_year=co.year,
+                                                tutor_old=prev_tut,
+                                                version_old=old_version,
+                                                initiator=req.user.tutor)
                         pm.save()
                     except ObjectDoesNotExist:
                         bad_response['more'] = \
@@ -1429,11 +1430,12 @@ def decale_changes(req, **kwargs):
                                                0))
                 # note: add work_copy in Cours might be of interest
 
-            pm = PlanningModification(course=changing_course,
-                                      old_week=old_week,
-                                      old_year=old_year,
-                                      tutor_old=changing_course.tutor,
-                                      initiator=req.user.tutor)
+            pm = CourseModification(course=changing_course,
+                                    old_week=old_week,
+                                    old_year=old_year,
+                                    tutor_old=changing_course.tutor,
+                                    version_old=0,
+                                    initiator=req.user.tutor)
             pm.save()
 
             changing_course.week = new_week
