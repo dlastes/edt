@@ -37,7 +37,7 @@ from FlOpEDT.settings.base import COSMO_MODE
 from people.models import Tutor, User
 from base.models import Day, RoomGroup, Module, Course, Group, \
     UserPreference, Time, ScheduledCourse, EdtVersion, CourseModification, \
-    PlanningModification, TrainingProgramme,  \
+    TrainingProgramme,  \
     Regen, Holiday, TrainingHalfDay, \
     CoursePreference, Dependency, Department, CourseType
 
@@ -571,6 +571,7 @@ class CourseModificationAdmin(DepartmentModelAdmin):
     course_year.admin_order_field = 'course__year'
 
     list_display = ('course', week_course, course_year,
+                    'tutor_old',
                     'version_old', 'room_old', 'day_old',
                     'start_time_old', 'updated_at', 'initiator'
                     )
@@ -578,18 +579,6 @@ class CourseModificationAdmin(DepartmentModelAdmin):
                    ('course__year', DropdownFilterAll),
                    ('course__week', DropdownFilterAll),)
     ordering = ('-updated_at', 'old_year', 'old_week')
-
-
-class PlanningModificationAdmin(DepartmentModelAdmin):
-    list_display = ('course', 'old_week', 'old_year',
-                    'tutor_old',
-                    'updated_at',
-                    'initiator'
-                    )
-    ordering = ('-updated_at', 'old_year', 'old_week')
-    list_filter = (('initiator', DropdownFilterRel),
-                   ('old_week', DropdownFilterAll),
-                   ('old_year', DropdownFilterAll),)
 
 
 class DispoAdmin(DepartmentModelAdmin):
@@ -627,7 +616,6 @@ admin.site.register(Course, CourseAdmin)
 admin.site.register(CourseModification, CourseModificationAdmin)
 admin.site.register(CoursePreference, CoursePreferenceAdmin)
 admin.site.register(Dependency, DependencyAdmin)
-admin.site.register(PlanningModification, PlanningModificationAdmin)
 admin.site.register(ScheduledCourse, CoursPlaceAdmin)
 admin.site.register(UserPreference, DispoAdmin)
 admin.site.register(Regen,RegenAdmin)
