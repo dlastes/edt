@@ -473,6 +473,11 @@ class CourseModification(models.Model):
     room_old = models.ForeignKey('RoomGroup', blank=True, null=True, on_delete=models.CASCADE)
     day_old = models.CharField(max_length=2, choices=Day.CHOICES, default=None, null=True)
     start_time_old = models.PositiveSmallIntegerField(default=None, null=True)
+    tutor_old = models.ForeignKey('people.Tutor',
+                                  related_name='impacted_by_course_modif',
+                                  null=True,
+                                  default=None,
+                                  on_delete=models.SET_NULL)
     version_old = models.PositiveIntegerField()
     updated_at = models.DateTimeField(auto_now=True)
     initiator = models.ForeignKey('people.Tutor', on_delete=models.CASCADE)
@@ -491,22 +496,6 @@ class CourseModification(models.Model):
             olds += f' NumV {self.version_old} ;'
         return f"by {self.initiator.username}, at {self.updated_at}\n" + \
             f"{self.course} <- {olds}"
-
-
-class PlanningModification(models.Model):
-    course = models.ForeignKey('Course', on_delete=models.CASCADE)
-    old_week = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(0), MaxValueValidator(53)], null=True)
-    old_year = models.PositiveSmallIntegerField(null=True)
-    tutor_old = models.ForeignKey('people.Tutor',
-                                  related_name='impacted_by_planif_modif',
-                                  null=True,
-                                  default=None,
-                                  on_delete=models.CASCADE)
-    updated_at = models.DateTimeField(auto_now=True)
-    initiator = models.ForeignKey('people.Tutor',
-                                  related_name='operated_planif_modif',
-                                  on_delete=models.CASCADE)
 
 
 # </editor-fold desc="MODIFICATIONS">
