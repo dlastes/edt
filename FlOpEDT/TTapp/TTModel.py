@@ -539,9 +539,13 @@ class TTModel(object):
                 card = 2 * len(dayslots)
                 expr = self.lin_expr()
                 expr += card * IBD[(i, d)]
-                for c in self.wdb.possible_courses[i] | self.wdb.courses_for_supp_tutor[i]:
+                for c in self.wdb.possible_courses[i]:
                     for sl in dayslots & self.wdb.compatible_slots[c]:
                         expr -= self.TTinstructors[(sl, c, i)]
+                # Be careful, here as elsewhere, being a supp_tutor is not a possibility, it is necessary...
+                for c in self.wdb.courses_for_supp_tutor[i]:
+                    for sl in dayslots & self.wdb.compatible_slots[c]:
+                        expr -= self.TT[(sl, c)]
                 self.add_constraint(expr, '>=', 0)
 
                 if self.wdb.fixed_courses.filter(Q(course__tutor=i) | Q(tutor=i),
