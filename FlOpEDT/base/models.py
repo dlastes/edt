@@ -33,7 +33,7 @@ from django.db import models
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
-from base.timing import hr_min, str_slot
+from base.timing import hhmm, str_slot
 
 # <editor-fold desc="GROUPS">
 # ------------
@@ -211,13 +211,10 @@ class TimeGeneralSettings(models.Model):
     default_preference_duration = models.PositiveSmallIntegerField(default=90)
 
     def __str__(self):
-        dsh, dsm = hr_min(self.day_start_time)
-        lsh, lsm = hr_min(self.lunch_break_start_time)
-        dfh, dfm = hr_min(self.day_finish_time)
-        lfh, lfm = hr_min(self.lunch_break_finish_time)
         return f"Dept {self.department.abbrev}: " + \
-            f"{dsh}:{dsm:02d} - {lsh}:{lsm:02d}" + \
-            f" | {lfh}:{lfm:02d} - {dfh}:{dfm:02d};" + \
+            f"{hhmm(self.day_start_time)} - {hhmm(self.lunch_break_start_time)}" + \
+            f" | {hhmm(self.lunch_break_finish_time)} - " + \
+            f"{hhmm(day_finish_time)};" + \
             f" Days: {self.days}"
     
 # </editor-fold>
