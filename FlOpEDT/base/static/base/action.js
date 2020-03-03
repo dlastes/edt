@@ -1290,6 +1290,49 @@ function confirm_contact_all(changes, conc_tutors, gps) {
     splash(splash_confirm);
 }
 
+function send_mail_proposal(changes) {
+
+    var cur_week = wdw_weeks.get_selected();
+    var sent_data = {} ;
+    sent_data['version'] = JSON.stringify(version) ;
+    sent_data['week'] = JSON.stringify(cur_week.week) ;
+    sent_data['year'] = JSON.stringify(cur_week.year) ;
+    sent_data['work_copy'] = JSON.stringify(num_copie) ;
+    sent_data['tab'] = JSON.stringify(changes) ;
+
+    $.ajax({
+        url: url_mail_auto,
+        type: 'POST',
+        data: sent_data,
+        dataType: 'json',
+        success: function(msg) {
+            console.log("SUCCESSSSSSSSSSSSSSSSSSSSSSSSSS");
+            console.log(msg);
+            mail_ack(msg);
+        },
+        error: function(msg) {
+            console.log("ERROOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOR");
+            console.log(msg);
+            mail_ack(msg);
+        }
+    });
+}
+
+function mail_ack(msg) {
+    var splash_disclaimer = {
+	id: "mail-ack",
+	but: {list: [{txt: "Ok.", click: function(d){} }]},
+	com: {list: []}
+    }
+    if (msg.status == "OK") {
+        splash_disclaimer.com.list[0] = {txt:"Email envoyé !"};
+    } else {
+        splash_disclaimer.com.list[0] = {txt:"Email non envoyé !"};
+        splash_disclaimer.com.list[1] = {txt:msg.more};
+    }
+    splash(splash_disclaimer);
+}
+
 
 
 function array_to_msg(a) {
