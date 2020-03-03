@@ -480,7 +480,7 @@ class CourseModification(models.Model):
                                   on_delete=models.SET_NULL)
     version_old = models.PositiveIntegerField()
     updated_at = models.DateTimeField(auto_now=True)
-    initiator = models.ForeignKey('people.Tutor', on_delete=models.CASCADE)
+    initiator = models.ForeignKey('people.User', on_delete=models.CASCADE)
 
     def __str__(self):
         olds = 'OLD:'
