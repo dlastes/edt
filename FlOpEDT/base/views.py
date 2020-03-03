@@ -1454,6 +1454,90 @@ def contact(req, tutor, **kwargs):
                              })
 
 
+@login_required
+def send_email_proposal(req, **kwargs):
+    bad_response = {'status': 'KO', 'more': ''}
+    good_response = {'status': 'OK', 'more': ''}
+
+    if not req.is_ajax():
+        bad_response['more'] = "Non ajax"
+        return JsonResponse(bad_response)
+
+    if req.method != "POST":
+        bad_response['more'] = "Non POST"
+        return bad_response
+
+    try:
+        week = json.loads(req.POST.get('week'))
+        year = json.loads(req.POST.get('year'))
+        work_copy = json.loads(req.POST.get('work_copy'))
+        initiator = User.objects.get(username=req.user.username)
+    except:
+        bad_response['more'] \
+            = "Problème semaine, année ou numéro de copie."
+        return JsonResponse(bad_response)
+
+    recv_changes = json.loads(req.POST.get('tab',[]))
+
+    impacted_inst = set()
+
+    msg = f'Bonjour,\n\n{initiator.first_name} {initiator.last_name} vous propose '
+    if len(recv_changes)>1:
+        msg += 'les modifications suivantes'
+    else:
+        msg += 'la modification suivante'
+    msg += ' : \n\n'
+
+    
+    try:
+        for change in recv_changes:
+            new_courses = clean_change(year, week, 0, change, work_copy=work_copy,
+                                       initiator=initiator, apply=False)
+            same, changed = new_courses['log'].strs_course_changes(course=new_courses['course'],
+                                                                   sched_course=new_courses['sched'])
+            msg += same + changed + '\n'
+            impacted_inst.add(new_courses['course'].tutor)
+            impacted_inst.add(new_courses['sched'].tutor)
+        if None in impacted_inst:
+            impacted_inst.remove(None)
+    except Exception as e:
+        bad_response['more'] = str(e)
+        return JsonResponse(bad_response)
+
+    if initiator in impacted_inst:
+        impacted_inst.remove(initiator)
+    if len(impacted_inst) > 0:
+        # send_mail(
+        #     subject,
+        #     msg,
+        #     'edt@iut-blagnac',
+        #     ['edt.info.iut.blagnac@gmail.com']
+        # )
+        msg += "\nQu'en dites-vous ?\n\n-- \n" + \
+            f"Envoyé de mon flop!EDT\n"
+
+        try:
+            subject = '[flop!EDT] Proposition de modification'
+            email_list = [t.email for t in list(impacted_inst) + [initiator]]
+            reply_to = initiator.email
+            logger.info('Envoi de mail :')
+            logger.info(f'- sujet : {subject}')
+            logger.info(f'- destinataire(s) : {email_list}')
+            logger.info(f'- répondre à : {reply_to}')
+            logger.info(msg)
+            # email = EmailMessage(
+            #     subject,
+            #     msg,
+            #     to=email_list,
+            #     reply_to=reply_to
+            # )
+            # email.send()
+        except Exception:
+            bad_response['more'] = 'Envoi du mail impossible !'
+            return JsonResponse(bad_response)
+
+    return JsonResponse(good_response)
+
 # </editor-fold desc="EMAILS">
 
 # <editor-fold desc="HELPERS">
