@@ -960,6 +960,66 @@ def fetch_shared_roomgroups(req, year, week, **kwargs):
 # CHANGERS
 # ----------
 
+def clean_change(year, week, old_version, change, work_copy=0, initiator=None, apply=False):
+    
+    scheduled_before = True
+    course = Course.objects.get(id=change['id'])
+    try:
+        sched_course = ScheduledCourse.objects.get(course=course,
+                                                   work_copy=work_copy)
+    except ObjectDoesNotExist:
+        scheduled_before = False
+        sched_course = ScheduledCourse(course=course,
+                                       work_copy=work_copy)
+
+    tutor_old = sched_course.tutor
+    if tutor_old is None:
+        tutor_old = sched_course.course.tutor
+        
+    course_log = CourseModification(course=course,
+                                    old_week=week,
+                                    old_year=year,
+                                    room_old=sched_course.room if scheduled_before else None,
+                                    day_old=sched_course.day if scheduled_before else None,
+                                    start_time_old=sched_course.start_time if scheduled_before else None,
+                                    tutor_old=tutor_old,
+                                    version_old=old_version,
+                                    initiator=initiator)
+
+    ret = {'course': course,
+           'sched': sched_course,
+           'log': course_log}
+
+    # Rooms
+    try:
+        new_room = RoomGroup.objects.get(name=change['room'])
+        ret['sched'].room = new_room
+    except ObjectDoesNotExist:
+        if new_room == 'salle?' or new_room is None:
+            raise Exception('Oublié de trouver une salle ' \
+                  'pour un cours ?')
+        else:
+            raise Exception(f"Problème : salle {change['room']} inconnue")
+
+    # Timing
+    ret['sched'].start_time = change['start']
+    ret['sched'].day = change['day']
+
+    # Tutor
+    try:
+        tutor = Tutor.objects.get(username=change['tutor'])
+        ret['sched'].tutor = tutor
+        if ret['course'].tutor is not None:
+            ret['course'].tutor = tutor
+    except ObjectDoesNotExist:
+        raise Exception(f"Problème : prof {change['tutor']} inconnu")
+
+    if apply:
+        for obj in ret.values():
+            obj.save()
+
+    return ret
+
 
 @login_required
 def edt_changes(req, **kwargs):
@@ -972,9 +1032,6 @@ def edt_changes(req, **kwargs):
 
     impacted_inst = set()
 
-    msg = 'Notation : (numero_week, numer_year, ' \
-          + 'numero_jour, numero_creneau, prof)\n\n'
-
     if not req.is_ajax():
         bad_response['more'] = "Non ajax"
         return JsonResponse(bad_response)
@@ -984,24 +1041,23 @@ def edt_changes(req, **kwargs):
         return bad_response
 
     try:
-        week = req.GET.get('s', '')
-        year = req.GET.get('a', '')
-        work_copy = req.GET.get('c', '')
-        week = int(week)
-        year = int(year)
-        work_copy = int(work_copy)
-        version = None
+        week = json.loads(req.POST.get('week'))
+        year = json.loads(req.POST.get('year'))
+        work_copy = json.loads(req.POST.get('work_copy'))
+        old_version = json.loads(req.POST.get('version'))
         department = req.department
+        initiator = Tutor.objects.get(username=req.user.username)
     except:
         bad_response['more'] \
-            = "Problème semaine, année ou work_copy."
+            = "Problème prof, semaine, année ou numéro de copie."
         return JsonResponse(bad_response)
 
-    logger.info(f"REQ: edt change; {req.body}")
-    # logger.info(req.POST)
-
-    old_version = json.loads(req.POST.get('v',-1))
     recv_changes = json.loads(req.POST.get('tab',[]))
+
+    logger.info(f"REQ: edt change; W{week} Y{year} WC{work_copy} V{old_version} "
+                f"by {initiator.username}")
+    logger.info(recv_changes)
+    # logger.info(req.POST)
 
     version = EdtVersion.objects.filter(week=week,
                                         year=year).aggregate(Sum('version'))['version__sum']
@@ -1009,153 +1065,49 @@ def edt_changes(req, **kwargs):
     logger.info(f'Versions: incoming {old_version}, currently {version}')
 
     if work_copy != 0 or old_version == version:
+        if work_copy == 0:
+            edt_versions = EdtVersion \
+                .objects \
+                .select_for_update() \
+                .filter(week=week, year=year)
+
         with transaction.atomic():
+            try:
+                for change in recv_changes:
+                    new_courses = clean_change(year, week, old_version, change, work_copy=work_copy,
+                                               initiator=initiator, apply=True)
+                    same, changed = new_courses['log'].strs_course_changes()
+                    msg += same + changed + '\n'
+                    impacted_inst.add(new_courses['course'].tutor)
+                    impacted_inst.add(new_courses['sched'].tutor)
+                if None in impacted_inst:
+                    impacted_inst.remove(None)
+            except Exception as e:
+                bad_response['more'] = str(e)
+                return JsonResponse(bad_response)
             if work_copy == 0:
-                edt_version = EdtVersion \
-                    .objects \
-                    .select_for_update() \
-                    .get(department=department, week=week, year=year)
-            for a in recv_changes:
-                non_place = False
-                co = Course.objects.get(id=a['id'])
-                try:
-                    cp = ScheduledCourse.objects.get(course=co,
-                                                     work_copy=work_copy)
-                except ObjectDoesNotExist:
-                    non_place = True
-                    cp = ScheduledCourse(course=co,
-                                         work_copy=work_copy)
-
-                m = CourseModification(course=co,
-                                       version_old=old_version,
-                                       initiator=req.user.tutor)
-                # old_day = a.day.o
-                # old_slot = a.slot.o
-                new_day = a['day']['n']
-                old_day = a['day']['o']
-                new_start_time = a['start']['n']
-                old_start_time = a['start']['o']
-                old_room = a['room']['o']
-                new_room = a['room']['n']
-                new_week = a['week']['n']
-                old_week = a['week']['o']
-                new_year = a['year']['n']
-                old_year = a['year']['o']
-                new_tutor = a['tutor']['n']
-                old_tutor = a['tutor']['o']
-
-                if non_place:
-                    # old_day = new_day
-                    # old_slot = new_slot
-                    if new_room is None:
-                        new_room = old_room
-
-                if new_day is not None:
-                    # None, None means no change
-                    # same, same means not scheduled before
-                    if non_place:
-                        cp.day = new_day
-                        cp.start_time = new_start_time
-                    m.day_old = cp.day
-                    m.start_time_old = cp.start_time
-                    cp.day = new_day
-                    cp.start_time = new_start_time
-                    logger.info(f"Course modification: {m}")
-                    logger.info(f"New scheduled course: {cp}")
-                if new_room is not None:
-                    try:
-                        sal_n = RoomGroup.objects.get(name=new_room)
-                    except ObjectDoesNotExist:
-                        if new_room == 'salle?':
-                            bad_response['more'] \
-                                = 'Oublié de trouver une salle ' \
-                                  'pour un cours ?'
-                        else:
-                            bad_response['more'] = \
-                                f"Problème : salle {new_room} inconnue"
-                        return JsonResponse(bad_response)
-
-                    if non_place:
-                        cp.room = sal_n
-                    m.room_old = cp.room
-                    cp.room = sal_n
-                if new_week is not None:
-                    m.old_week = old_week
-                    m.old_year = old_year
-                    cp.course.week = new_week
-                    cp.course.year = new_year
-                cp.save()
-                if work_copy == 0:
-                    m.save()
-
-                if new_tutor is not None:
-                    try:
-                        prev_tut = cp.tutor
-                        cp.tutor = Tutor.objects.get(username=new_tutor)
-                        cp.save()
-                        if co.tutor is not None:
-                            co.tutor = Tutor.objects.get(username=new_tutor)
-                            co.save()
-                        pm = CourseModification(course=co,
-                                                old_week=co.week,
-                                                old_year=co.year,
-                                                tutor_old=prev_tut,
-                                                version_old=old_version,
-                                                initiator=req.user.tutor)
-                        pm.save()
-                    except ObjectDoesNotExist:
-                        bad_response['more'] = \
-                            f"Problème : prof {new_tutor} inconnu"
-                        return JsonResponse(bad_response)
-
-                if new_week is not None or new_year is not None \
-                   or new_day is not None or new_start_time is not None \
-                   or new_tutor is not None:
-                    msg += str(co) + '\n'
-                    impacted_inst.add(co.tutor.username)
-                    if new_tutor is not None:
-                        impacted_inst.add(old_tutor)
-
-                    msg += f'({old_week}, {old_year}, ' \
-                           + f'{old_day}, {old_start_time}, {old_tutor})'
-                    msg += ' -> ('
-                    msg += str(new_week) if new_week is not None else '-'
-                    msg += ', '
-                    msg += str(new_year) if new_year is not None else '-'
-                    msg += ', '
-                    msg += str(new_day) if new_day is not None else '-'
-                    msg += ', '
-                    msg += str(new_start_time) if new_start_time is not None else '-'
-                    msg += ','
-                    msg += str(new_tutor) if new_tutor is not None else '-'
-                    msg += ')\n\n'
-
-            if work_copy == 0:
+                edt_version = EdtVersion.objects.get(week=week, year=year)
                 edt_version.version += 1
                 edt_version.save()
 
-            if new_week is not None and new_year is not None:
-                cache.delete(get_key_course_pl(department.abbrev, new_year, new_week, work_copy))
-            cache.delete(get_key_course_pl(department.abbrev, old_year, old_week, work_copy))
-            cache.delete(get_key_course_pp(department.abbrev, old_year, old_week, work_copy))
+            cache.delete(get_key_course_pl(department.abbrev, year, week, work_copy))
+            cache.delete(get_key_course_pp(department.abbrev, year, week, work_copy))
 
-        # subject = '[Modif sur tierce] ' + req.user.username \
-        #           + ' a déplacé '
-        # for inst in impacted_inst:
-        #     if inst is not req.user.username:
-        #         subject += inst + ' '
+        subject = '[Modif sur tierce] ' + initiator.username + ' a déplacé '
+        for inst in impacted_inst:
+            subject += inst.username + ' '
 
-        # if len(impacted_inst) > 0 and work_copy == 0:
-        #     if len(impacted_inst) > 1 \
-        #             or req.user.username not in impacted_inst:
-        #         send_mail(
-        #             subject,
-        #             msg,
-        #             'edt@iut-blagnac',
-        #             ['edt.info.iut.blagnac@gmail.com']
-        #         )
-        logger.info('Envoi de mail')
-        logger.info(msg)
+        if initiator in impacted_inst:
+            impacted_inst.remove(initiator)
+        if len(impacted_inst) > 0:
+            # send_mail(
+            #     subject,
+            #     msg,
+            #     'edt@iut-blagnac',
+            #     ['edt.info.iut.blagnac@gmail.com']
+            # )
+            logger.info(subject)
+            logger.info(msg)
 
         return JsonResponse(good_response)
     else:
