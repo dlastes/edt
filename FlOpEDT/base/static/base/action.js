@@ -1256,35 +1256,64 @@ function confirm_change() {
     }
 }
 
-
-
 function confirm_contact_all(changes, conc_tutors, gps) {
+
     var  prof_txt, gp_txt;
-    
-    if (conc_tutors.length > 0) {
-        prof_txt = "Avez-vous contacté " ;
-	prof_txt += array_to_msg(conc_tutors) ;
-	prof_txt += " ?" ;
+
+    if (logged_usr.is_student == "True") {
+        if (conc_tutors.length > 0) {
+            prof_txt = "Souhaitez-vous envoyer un mail automatique suggérant la modification du cours à :" ;
+            prof_txt += array_to_msg(conc_tutors) ;
+            prof_txt += " ?" ;
+        } else {
+            prof_txt = "Il y quelqu'un·e à contacter ?" ;
+        }
+
+        gp_txt = "Par ailleurs, ce serait bien de prévenir ";
+        if (gps.length == 1) {
+            gp_txt += "le groupe ";
+        } else {
+            gp_txt += "les groupes ";
+        }
+        gp_txt += array_to_msg(gps) ;
+        gp_txt += "."
+
+        att_txt = "/!\\ Votre nom sera mentionné dans le mail /!\\";
     } else {
-        prof_txt = "Tudo bem ?" ;
+        if (conc_tutors.length > 0) {
+            prof_txt = "Avez-vous contacté " ;
+	        prof_txt += array_to_msg(conc_tutors) ;
+	        prof_txt += " ?" ;
+        } else {
+            prof_txt = "Tudo bem ?" ;
+        }
+
+        gp_txt = "(Par ailleurs, ce serait bien de prévenir ";
+        if (gps.length == 1) {
+            gp_txt += "le groupe ";
+        } else {
+            gp_txt += "les groupes ";
+        }
+        gp_txt += array_to_msg(gps) ;
+        gp_txt += ").";
+        att_txt = "";
     }
-    
-    gp_txt = "(Par ailleurs, ce serait bien de prévenir ";
-    if (gps.length == 1) {
-	gp_txt += "le groupe ";
+
+    if (logged_usr.is_student == "True") {
+        list_but =  {list: [{txt: "Oui", click: function(d){send_mail_proposal(changes);}},
+		            {txt: "Non", click: function(d){} }]};
     } else {
-	gp_txt += "les groupes ";
+        list_but =  {list: [{txt: "Oui", click: function(d){send_edt_change(changes);}},
+                            {txt: "Contacter (email)", click: function(d){send_mail_proposal(changes)}},
+		            {txt: "Non", click: function(d){} }]};
     }
-    gp_txt += array_to_msg(gps) ;
-    gp_txt += ").";
-    
     
     var splash_confirm = {
 	id: "conf-cont",
-	but: {list: [{txt: "Oui", click: function(d){send_edt_change(changes);}},
-		     {txt: "Non", click: function(d){} }]},
+	but: list_but,
 	com: {list: [{txt: prof_txt},
-		     {txt:gp_txt}]}
+		     {txt:gp_txt},
+		     {txt:att_txt}]}
     }
     
     splash(splash_confirm);
