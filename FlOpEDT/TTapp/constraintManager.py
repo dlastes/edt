@@ -114,11 +114,10 @@ class ConstraintManager:
         output = ""
         for constraint in constraints:
             output += constraint.get_intelligible_form() + "\n"
-        print(output)
-        """
-        with open("logs/intelligible_constraints%s.txt" % week, "w+") as file:
+        # print(output)
+        with open("logs/intelligible_constraints%s.txt" % week, "w+", encoding='utf-8') as file:
             file.write(output)
-        """
+            file.close()
 
     # Affichage "intelligent" des contraintes incompatibles
     def show_reduces_result(self, id_constraints, week):
@@ -155,10 +154,9 @@ class ConstraintManager:
         if buf_slot != "":
             output += "\nParametre Slot :\n" + buf_slot
         print(output)
-        """
-        with open("logs/intelligible_constraints_factorised%s.txt" % week, "w+") as file:
+        with open("logs/intelligible_constraints_factorised%s.txt" % week, "w+",encoding='utf-8') as file:
             file.write(output)
-        """
+            file.close()
 
     def handle_reduced_result(self, ilp_file_name, week):
         id_constraints = self.parse_iis(ilp_file_name)
