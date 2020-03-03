@@ -34,6 +34,7 @@ from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
 from base.timing import hhmm, str_slot
+import base.weeks
 
 # <editor-fold desc="GROUPS">
 # ------------
@@ -479,20 +480,60 @@ class CourseModification(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     initiator = models.ForeignKey('people.User', on_delete=models.CASCADE)
 
+    def strs_course_changes(self, course=None, sched_course=None):
+        if course is None:
+            course = self.course
+        if sched_course is None:
+            sched_course = ScheduledCourse.objects.get(course=course, work_copy=0)
+        department = course.type.department
+        al = '\n  + '
+        same = f'- Cours {course.module.abbrev} semaine {course.week} ({course.year})'
+        changed = ''
+
+        tutor_old_name = self.tutor_old.username if self.tutor_old is not None else "personne"
+        if sched_course.tutor == self.tutor_old:
+            same += f', par {tutor_old_name}'
+        else:
+            cur_tutor_name =  sched_course.tutor.username if sched_course.tutor is not None else "personne"
+            changed += al + f'Prof : {tutor_old_name} -> {cur_tutor_name}'
+
+        room_old_name = self.room_old.name if self.room_old is not None else "nulle part"
+        if sched_course.room == self.room_old:
+            same += f', en {room_old_name}'
+        else:
+            cur_room_name = sched_course.room.name if sched_course.room.name is not None else "nulle part"
+            changed += al + f'Salle : {room_old_name} -> {cur_room_name}'
+
+        day_list = base.weeks.num_all_days(course.year, course.week, department)
+        if sched_course.day == self.day_old \
+           and sched_course.start_time == self.start_time_old:
+            for d in day_list:
+                if d['ref'] == sched_course.day:
+                    day = d
+            same += f', {day["name"]} {day["date"]} à {hhmm(sched_course.start_time)}'
+        else:
+            changed += al + 'Horaire : '
+            if self.day_old is None or self.start_time_old is None:
+                changed += 'non placé'
+            else:
+                for d in day_list:
+                    if d['ref'] == self.day_old:
+                        day = d
+                changed += f'{day["name"]} {day["date"]} à {hhmm(self.start_time_old)}'
+            changed += ' -> '
+            for d in day_list:
+                if d['ref'] == sched_course.day:
+                    day = d
+            changed += f'{day["name"]} {day["date"]} à {hhmm(sched_course.start_time)}'
+        
+        return same, changed
+        
     def __str__(self):
-        olds = 'OLD:'
-        if self.old_week is not None:
-            olds += f' Sem {self.old_week} ;'
-        if self.old_year is not None:
-            olds += f' An {self.old_year} ;'
-        if self.room_old is not None:
-            olds += f' Salle {self.room_old} ;'
-        if self.day_old is not None:
-            olds += f' Cren {self.day_old}-{self.start_time_old} ;'
+        same, changed = self.strs_course_changes()
         if self.version_old is not None:
-            olds += f' NumV {self.version_old} ;'
-        return f"by {self.initiator.username}, at {self.updated_at}\n" + \
-            f"{self.course} <- {olds}"
+            same += f' ; (NumV {self.version_old})'
+        ret = same + changed + f"\n  by {self.initiator.username}, at {self.updated_at}"
+        return ret
 
 
 # </editor-fold desc="MODIFICATIONS">
