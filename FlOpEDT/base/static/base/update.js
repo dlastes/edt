@@ -1007,7 +1007,8 @@ function go_courses(quick) {
             }
 	    go_cm_room_tutor_change();
 	}})
-        .call(dragListener);
+        .call(dragListener)
+        .on("dblclick",show_detailed_courses);
 
     incg
         .merge(cg)

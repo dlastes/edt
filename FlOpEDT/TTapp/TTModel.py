@@ -25,15 +25,15 @@
 # without disclosing the source code of your own applications.
 import importlib
 from distutils.command.config import config
-
+from django.core.mail import EmailMessage
 from pulp import LpVariable, LpConstraint, LpBinary, LpConstraintEQ, \
     LpConstraintGE, LpConstraintLE, LpAffineExpression, LpProblem, LpStatus, \
     LpMinimize, lpSum, LpStatusOptimal, LpStatusNotSolved
 
 from pulp import GUROBI_CMD, PULP_CBC_CMD
-# from pulp.solvers import GUROBI_CMD as GUROBI
 
-from gurobipy import read
+import pulp.solvers as pulp_solvers
+#from pulp.solvers import GUROBI_CMD as GUROBI
 
 from FlOpEDT.settings.base import COSMO_MODE
 
@@ -72,7 +72,7 @@ import logging
 logger = logging.getLogger(__name__)
 pattern = r".+: (.|\s)+ (=|>=|<=) \d*"
 GUROBI = 'GUROBI'
-
+GUROBI_NAME = 'GUROBI_CMD'
 
 class WeekDB(object):
     def __init__(self, department, weeks, year, train_prog):
@@ -258,6 +258,7 @@ class WeekDB(object):
         return room_types, room_groups, rooms, room_prefs, room_groups_for_type, room_course_compat, course_rg_compat, \
                fixed_courses_for_room, other_departments_sched_courses_for_room
 
+
     def compatibilities_init(self):
         # COMPATIBILITY
         # Slots and courses are compatible if they have the same type
@@ -423,7 +424,9 @@ class TTModel(object):
                  min_bhd_i=1.,
                  min_nps_c=1.,
                  max_stab=5.,
-                 lim_ld=1.):
+                 lim_ld=1.,
+                 core_only=False,
+                 send_mails=False):
         print("\nLet's start weeks #%s" % weeks)
         # beg_file = os.path.join('logs',"FlOpTT")
         self.model = LpProblem("FlOpTT", LpMinimize)
@@ -434,6 +437,8 @@ class TTModel(object):
         self.min_ups_c = min_nps_c
         self.max_stab = max_stab
         self.lim_ld = lim_ld
+        self.core_only = core_only
+        self.send_mails = send_mails
         self.var_nb = 0
         self.constraint_nb = 0
         self.constraintManager = ConstraintManager()
@@ -488,6 +493,10 @@ class TTModel(object):
 
         if settings.DEBUG:
             self.model.writeLP('FlOpEDT.lp')
+
+        if self.send_mails:
+            self.send_lack_of_availability_mail()
+
 
     def wdb_init(self):
         wdb = WeekDB(self.department, self.weeks, self.year, self.train_prog)
@@ -555,18 +564,24 @@ class TTModel(object):
                 card = 2 * len(dayslots)
                 expr = self.lin_expr()
                 expr += card * IBD[(i, d)]
-                for c in self.wdb.possible_courses[i] & self.wdb.courses_for_supp_tutor[i]:
+                for c in self.wdb.possible_courses[i]:
                     for sl in dayslots & self.wdb.compatible_slots[c]:
                         expr -= self.TTinstructors[(sl, c, i)]
+                # Be careful, here as elsewhere, being a supp_tutor is not a possibility, it is necessary...
+                for c in self.wdb.courses_for_supp_tutor[i]:
+                    for sl in dayslots & self.wdb.compatible_slots[c]:
+                        expr -= self.TT[(sl, c)]
                 self.add_constraint(expr, '>=', 0, constraint_type="IBD inf", instructor=i, days=d)
+                # This next constraint impides to force IBD to be 1
+                # (if there is a meeting, for example...)
+                # self.add_constraint(expr, '<=', card-1, , constraint_type="IBD sup", instructor=i, days=d)
 
                 if self.wdb.fixed_courses.filter(Q(course__tutor=i) | Q(tutor=i),
                                                  day=d) \
                         or self.wdb.other_departments_sched_courses.filter(Q(course__tutor=i) | Q(tutor=i), day=d):
+
                     self.add_constraint(IBD[(i, d)], '==', 1, constraint_type="IBD eq", instructor=i, days=d)
-                # This next constraint impides to force IBD to be 1
-                # (if there is a meeting, for example...)
-                # self.add_constraint(expr, '<=', card-1)
+
 
         forced_IBD = {}
         for i in self.wdb.instructors:
@@ -585,7 +600,7 @@ class TTModel(object):
                 IBD_GTE[week].append({})
 
             for i in self.wdb.instructors:
-                for j in range(2, max_days + 1):
+                for j in range(1, max_days + 1):
                     IBD_GTE[week][j][i] = self.add_floor(str(i) + str(j),
                                                          self.sum(IBD[(i, d)]
                                                                   for d in days_filter(self.wdb.days, week=week)),
@@ -952,7 +967,7 @@ class TTModel(object):
                     for c in set(self.wdb.courses.filter(room_type=rp.for_type)) & self.wdb.compatible_courses[sl])
                 preferred_is_unavailable = False
                 for r in rp.prefer.subrooms.all():
-                    if self.avail_room[r][sl]:
+                    if not self.avail_room[r][sl]:
                         preferred_is_unavailable = True
                         break
                     e -= self.sum(self.TTrooms[(sl, c, rg)]
@@ -1031,6 +1046,38 @@ class TTModel(object):
                                                     constraint_type="Problème de dépendance entre les salles", course=p,
                                                     slot=str(sl1) + " / " + str(sl2),
                                                     room=str(rg1) + " / " + str(rg2))
+
+    def send_unitary_lack_of_availability_mail(self, tutor, week, available_hours, teaching_hours,
+                                               prefix="[flop!EDT] "):
+        subject = f"Manque de dispos semaine {week}"
+        message = f"Bonjour {tutor.first_name}\n" \
+                  f"Semaine {week} vous ne donnez que {available_hours} heures de disponibilités, " \
+                  f"alors que vous êtes censé⋅e assurer {teaching_hours} heures de cours...\n" \
+                  f"Est-ce que vous avez la possibilité d'ajouter des créneaux de disponibilité ?\n" \
+                  f"Sinon, pouvez-vous s'il vous plaît décaler des cours à une semaine précédente ou suivante ?\n" \
+                  f"Merci d'avance.\n" \
+                  f"Les gestionnaires d'emploi du temps."
+        email = EmailMessage(
+            prefix + subject,
+            "(Cet e-mail vous a été envoyé automatiquement par le générateur "
+            "d'emplois du temps du logiciel flop!EDT)\n\n"
+            + message +
+            "\n\nPS: Attention, cet email risque de vous être renvoyé à chaque prochaine génération "
+            "d'emploi du temps si vous n'avez pas fait les modifications attendues...\n"
+            "N'hésitez pas à nous contacter en cas de souci.",
+            to=(tutor.email,)
+        )
+        email.send()
+
+    def send_lack_of_availability_mail(self, prefix="[flop!EDT] "):
+        for key in self.warnings:
+            if key in self.wdb.instructors:
+                for w in self.warnings[key]:
+                    if ' < ' in w:
+                        data = w.split(' ')
+                        self.send_unitary_lack_of_availability_mail(key, data[-1], data[0], data[4],
+                                                                    prefix=prefix)
+
 
     def compute_non_prefered_slot_cost(self):
         """
@@ -1249,6 +1296,7 @@ class TTModel(object):
         """
         Add the constraints imposed by other departments' scheduled courses.
         """
+        print("adding other departments constraints")
         for sl in self.wdb.slots:
             # constraint : other_departments_sched_courses rooms are not available
             for r in self.wdb.rooms:
@@ -1318,13 +1366,18 @@ class TTModel(object):
 
         self.add_core_constraints()
 
+        self.add_dependency_constraints()
+
         self.add_rooms_constraints()
 
         self.add_instructors_constraints()
 
-        self.add_slot_preferences()
+        if self.core_only:
+            return
 
-        self.add_dependency_constraints()
+        self.add_other_departments_constraints()
+
+        self.add_slot_preferences()
 
         self.add_specific_constraints()
 
@@ -1412,46 +1465,45 @@ class TTModel(object):
                 cg.save()
 
     def optimize(self, time_limit, solver, presolve=2):
-
-        # The solver value shall one of the available
-        # solver corresponding pulp command
-
-        # if solver == GUROBI_CMD:
-        # ignore SIGINT while solver is running
-        # => SIGINT is still delivered to the solver, which is what we want
-        signal.signal(signal.SIGINT, signal.SIG_IGN)
-        result = self.model.solve(GUROBI_CMD(keepFiles=1,
-                                             msg=True,
-                                             options=[("TimeLimit", time_limit),
-                                                      ("Presolve", presolve),
-                                                      ("MIPGapAbs", 0.2)]))
-        if result is None or result == 0:
-            lp = "FlOpTT-pulp.lp"
-            ilp_filename = "logs/IIS_week%s.ilp" % self.weeks[0]
-            m = read(lp)
-            m.computeIIS()
-            m.write(ilp_filename)
-            print("IIS written in file %s" % ilp_filename)
-            self.constraintManager.handle_reduced_result(ilp_filename, self.weeks[0])
-        """
+        # The solver value shall be one of the available
+        # solver corresponding pulp command or contain
+        # gurobi
+        if 'gurobi' in solver.lower() or hasattr(pulp_solvers, solver):
+            # ignore SIGINT while solver is running
+            # => SIGINT is still delivered to the solver, which is what we want
+            signal.signal(signal.SIGINT, signal.SIG_IGN)
+            solver = GUROBI_NAME
+            result = self.model.solve(GUROBI_CMD(keepFiles=1,
+                                                 msg=True,
+                                                 options=[("TimeLimit", time_limit),
+                                                          ("Presolve", presolve),
+                                                          ("MIPGapAbs", 0.2)]))
+            if result is None or result == 0:
+                from gurobipy import read
+                lp = "FlOpTT-pulp.lp"
+                ilp_filename = "logs/IIS_week%s.ilp" % self.weeks[0]
+                m = read(lp)
+                m.computeIIS()
+                m.write(ilp_filename)
+                print("IIS written in file %s" % ilp_filename)
+                self.constraintManager.handle_reduced_result(ilp_filename, self.weeks[0])
         else:
-            # TODO Use the solver parameter to get
-            # the target class by reflection
-            self.model.solve(PULP_CBC_CMD(keepFiles=1,
-                                          msg=True,
-                                          presolve=presolve,
-                                          maxSeconds=time_limit))
-        """
+            # raise an exception when the solver name is incorrect
+            command = getattr(pulp_solvers, solver)
+            self.model.solve(command(keepFiles=1,
+                                     msg=True,
+                                     presolve=presolve,
+                                     maxSeconds=time_limit))
         status = self.model.status
         print(LpStatus[status])
-        if status == LpStatusOptimal or (solver != GUROBI and status == LpStatusNotSolved):
+        if status == LpStatusOptimal or (solver != GUROBI_NAME and status == LpStatusNotSolved):
             return self.get_obj_coeffs()
 
         else:
             print('lpfile has been saved in FlOpTT-pulp.lp')
             return None
 
-    def solve(self, time_limit=3600, target_work_copy=None, solver=GUROBI):
+    def solve(self, time_limit=3600, target_work_copy=None, solver=GUROBI_NAME):
         """
         Generates a schedule from the TTModel
         The solver stops either when the best schedule is obtained or timeLimit
