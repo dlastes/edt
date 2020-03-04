@@ -2,145 +2,145 @@
 (7564) La contrainte de type "Le cours doit être placé" ; pour le cours TD-CDAM-JD-2 ; doit être respectée.
 (7614) La contrainte de type "Le cours doit être placé" ; pour le cours CM-CDAM-AP-CE ; doit être respectée.
 (45682) La contrainte de type "Pas_de_cours_le_jeudi_aprem" ; doit être respectée.
-(34726) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_w_s5_9h30, TD_tu_s5_11h] ; doit être respectée.
-(34735) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_w_s5_9h30, TD_th_s5_15h45] ; doit être respectée.
-(34737) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_w_s5_9h30, TD_f_s5_8h] ; doit être respectée.
-(34738) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_w_s5_9h30, TD_f_s5_9h30] ; doit être respectée.
-(34740) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_w_s5_9h30, TD_f_s5_14h15] ; doit être respectée.
-(34751) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_w_s5_9h30, TD_tu_s5_8h] ; doit être respectée.
-(34752) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_w_s5_9h30, TD_tu_s5_15h45] ; doit être respectée.
-(34754) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_w_s5_9h30, TD_w_s5_8h] ; doit être respectée.
-(34756) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_tu_s5_11h, TD_w_s5_9h30] ; doit être respectée.
-(34765) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_tu_s5_11h, TD_th_s5_15h45] ; doit être respectée.
-(34767) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_tu_s5_11h, TD_f_s5_8h] ; doit être respectée.
-(34768) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_tu_s5_11h, TD_f_s5_9h30] ; doit être respectée.
-(34770) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_tu_s5_11h, TD_f_s5_14h15] ; doit être respectée.
-(34781) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_tu_s5_11h, TD_tu_s5_8h] ; doit être respectée.
-(34782) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_tu_s5_11h, TD_tu_s5_15h45] ; doit être respectée.
-(34784) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_tu_s5_11h, TD_w_s5_8h] ; doit être respectée.
-(35002) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_th_s5_15h45, TD_tu_s5_9h30] ; doit être respectée.
-(35003) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_th_s5_15h45, TD_w_s5_17h15] ; doit être respectée.
+(34726) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_tu_s5_14h15, TD_th_s5_14h15] ; doit être respectée.
+(34735) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_tu_s5_14h15, TD_th_s5_15h45] ; doit être respectée.
+(34737) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_tu_s5_14h15, TD_f_s5_14h15] ; doit être respectée.
+(34738) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_tu_s5_14h15, TD_f_s5_11h] ; doit être respectée.
+(34740) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_tu_s5_14h15, TD_th_s5_11h] ; doit être respectée.
+(34751) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_tu_s5_14h15, TD_w_s5_15h45] ; doit être respectée.
+(34752) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_tu_s5_14h15, TD_w_s5_17h15] ; doit être respectée.
+(34754) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_tu_s5_14h15, TD_tu_s5_8h] ; doit être respectée.
+(34756) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_th_s5_14h15, TD_tu_s5_14h15] ; doit être respectée.
+(34767) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_th_s5_14h15, TD_th_s5_9h30] ; doit être respectée.
+(34768) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_th_s5_14h15, TD_f_s5_14h15] ; doit être respectée.
+(34770) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_th_s5_14h15, TD_th_s5_17h15] ; doit être respectée.
+(34781) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_th_s5_14h15, TD_w_s5_14h15] ; doit être respectée.
+(34782) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_th_s5_14h15, TD_w_s5_15h45] ; doit être respectée.
+(34784) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_th_s5_14h15, TD_tu_s5_11h] ; doit être respectée.
+(35002) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_th_s5_15h45, TD_tu_s5_14h15] ; doit être respectée.
+(35003) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_th_s5_15h45, TD_th_s5_14h15] ; doit être respectée.
 (35014) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_th_s5_15h45, TD_f_s5_11h] ; doit être respectée.
-(35015) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_th_s5_15h45, TD_f_s5_14h15] ; doit être respectée.
-(35017) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_th_s5_15h45, TD_f_s5_17h15] ; doit être respectée.
-(35028) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_th_s5_15h45, TD_m_s5_15h45] ; doit être respectée.
-(35029) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_th_s5_15h45, TD_w_s5_8h] ; doit être respectée.
-(35031) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_th_s5_17h15, TD_w_s5_9h30] ; doit être respectée.
-(35093) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_f_s5_9h30, TD_tu_s5_11h] ; doit être respectée.
-(35094) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_f_s5_9h30, TD_tu_s5_9h30] ; doit être respectée.
-(35102) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_f_s5_9h30, TD_th_s5_17h15] ; doit être respectée.
-(35104) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_f_s5_9h30, TD_f_s5_9h30] ; doit être respectée.
-(35108) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_f_s5_9h30, TD_f_s5_15h45] ; doit être respectée.
-(35119) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_f_s5_9h30, TD_tu_s5_15h45] ; doit être respectée.
-(35120) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_f_s5_9h30, TD_m_s5_15h45] ; doit être respectée.
-(35122) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_f_s5_9h30, TD_w_s5_15h45] ; doit être respectée.
-(35491) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_tu_s5_8h, TD_tu_s5_11h] ; doit être respectée.
-(35500) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_tu_s5_8h, TD_th_s5_15h45] ; doit être respectée.
-(35502) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_tu_s5_8h, TD_f_s5_8h] ; doit être respectée.
-(35503) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_tu_s5_8h, TD_f_s5_9h30] ; doit être respectée.
-(35505) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_tu_s5_8h, TD_f_s5_14h15] ; doit être respectée.
-(35520) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_tu_s5_8h, TD_w_s5_15h45] ; doit être respectée.
-(35553) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_m_s5_15h45, TD_tu_s5_11h] ; doit être respectée.
-(35554) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_m_s5_15h45, TD_tu_s5_9h30] ; doit être respectée.
-(35562) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_m_s5_15h45, TD_th_s5_17h15] ; doit être respectée.
-(35564) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_m_s5_15h45, TD_f_s5_9h30] ; doit être respectée.
-(35565) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_m_s5_15h45, TD_f_s5_11h] ; doit être respectée.
-(35567) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_m_s5_15h45, TD_f_s5_15h45] ; doit être respectée.
-(35578) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_m_s5_15h45, TD_tu_s5_8h] ; doit être respectée.
-(35579) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_m_s5_15h45, TD_tu_s5_15h45] ; doit être respectée.
-(35581) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_m_s5_15h45, TD_w_s5_8h] ; doit être respectée.
-(42781) La contrainte de type "Problème de dépendance" ; pour les cours [CM-CDAM-AP-CE, TD-CDAM-JD-2] ; pour les slots [CM_tu_s5_9h30, TD_m_s5_9h30] ; doit être respectée.
-(42794) La contrainte de type "Problème de dépendance" ; pour les cours [CM-CDAM-AP-CE, TD-CDAM-JD-2] ; pour les slots [CM_w_s5_11h, TD_m_s5_11h] ; doit être respectée.
-(42820) La contrainte de type "Problème de dépendance" ; pour les cours [CM-CDAM-AP-CE, TD-CDAM-JD-2] ; pour les slots [CM_w_s5_15h45, TD_m_s5_8h] ; doit être respectée.
-(42834) La contrainte de type "Problème de dépendance" ; pour les cours [CM-CDAM-AP-CE, TD-CDAM-JD-2] ; pour les slots [CM_w_s5_17h15, TD_w_s5_9h30] ; doit être respectée.
-(42861) La contrainte de type "Problème de dépendance" ; pour les cours [CM-CDAM-AP-CE, TD-CDAM-JD-2] ; pour les slots [CM_w_s5_14h15, TD_m_s5_8h] ; doit être respectée.
-(42867) La contrainte de type "Problème de dépendance" ; pour les cours [CM-CDAM-AP-CE, TD-CDAM-JD-2] ; pour les slots [CM_w_s5_14h15, TD_m_s5_17h15] ; doit être respectée.
-(43115) La contrainte de type "Problème de dépendance" ; pour les cours [CM-CDAM-AP-CE, TD-CDAM-JD-2] ; pour les slots [CM_f_s5_14h15, TD_m_s5_17h15] ; doit être respectée.
-(43136) La contrainte de type "Problème de dépendance" ; pour les cours [CM-CDAM-AP-CE, TD-CDAM-JD-2] ; pour les slots [CM_f_s5_15h45, TD_f_s5_15h45] ; doit être respectée.
-(43164) La contrainte de type "Problème de dépendance" ; pour les cours [CM-CDAM-AP-CE, TD-CDAM-JD-2] ; pour les slots [CM_f_s5_17h15, TD_f_s5_11h] ; doit être respectée.
-(43202) La contrainte de type "Problème de dépendance" ; pour les cours [CM-CDAM-AP-CE, TD-CDAM-JD-2] ; pour les slots [CM_m_s5_17h15, TD_m_s5_9h30] ; doit être respectée.
-(43227) La contrainte de type "Problème de dépendance" ; pour les cours [CM-CDAM-AP-CE, TD-CDAM-JD-2] ; pour les slots [CM_tu_s5_15h45, TD_tu_s5_8h] ; doit être respectée.
-(43230) La contrainte de type "Problème de dépendance" ; pour les cours [CM-CDAM-AP-CE, TD-CDAM-JD-2] ; pour les slots [CM_w_s5_9h30, TD_w_s5_9h30] ; doit être respectée.
-(43359) La contrainte de type "Problème de dépendance" ; pour les cours [CM-CDAM-AP-CE, TD-CDAM-JD-2] ; pour les slots [CM_th_s5_9h30, TD_w_s5_17h15] ; doit être respectée.
-(43365) La contrainte de type "Problème de dépendance" ; pour les cours [CM-CDAM-AP-CE, TD-CDAM-JD-2] ; pour les slots [CM_th_s5_9h30, TD_m_s5_9h30] ; doit être respectée.
-(43422) La contrainte de type "Problème de dépendance" ; pour les cours [CM-CDAM-AP-CE, TD-CDAM-JD-2] ; pour les slots [CM_th_s5_14h15, TD_m_s5_17h15] ; doit être respectée.
-(43442) La contrainte de type "Problème de dépendance" ; pour les cours [CM-CDAM-AP-CE, TD-CDAM-JD-2] ; pour les slots [CM_th_s5_15h45, TD_w_s5_14h15] ; doit être respectée.
-(43462) La contrainte de type "Problème de dépendance" ; pour les cours [CM-CDAM-AP-CE, TD-CDAM-JD-2] ; pour les slots [CM_th_s5_17h15, TD_tu_s5_17h15] ; doit être respectée.
-(43485) La contrainte de type "Problème de dépendance" ; pour les cours [CM-CDAM-AP-CE, TD-CDAM-JD-2] ; pour les slots [CM_f_s5_8h, TD_th_s5_17h15] ; doit être respectée.
-(43562) La contrainte de type "Problème de dépendance" ; pour les cours [CM-CDAM-AP-CE, TD-CDAM-JD-2] ; pour les slots [CM_f_s5_14h15, TD_w_s5_11h] ; doit être respectée.
-(43570) La contrainte de type "Problème de dépendance" ; pour les cours [CM-CDAM-AP-CE, TD-CDAM-JD-2] ; pour les slots [CM_f_s5_14h15, TD_f_s5_9h30] ; doit être respectée.
-(43589) La contrainte de type "Problème de dépendance" ; pour les cours [CM-CDAM-AP-CE, TD-CDAM-JD-2] ; pour les slots [CM_f_s5_15h45, TD_w_s5_17h15] ; doit être respectée.
-(43645) La contrainte de type "Problème de dépendance" ; pour les cours [CM-CDAM-AP-CE, TD-CDAM-JD-2] ; pour les slots [CM_f_s5_17h15, TD_w_s5_15h45] ; doit être respectée.
-(43649) La contrainte de type "Problème de dépendance" ; pour les cours [CM-CDAM-AP-CE, TD-CDAM-JD-2] ; pour les slots [CM_tu_s5_14h15, TD_m_s5_9h30] ; doit être respectée.
-(16317) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_tu_s5_9h30 ; doit être respectée.
-(16318) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_w_s5_17h15 ; doit être respectée.
-(16319) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_w_s5_11h ; doit être respectée.
-(16320) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_th_s5_8h ; doit être respectée.
-(16321) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_th_s5_9h30 ; doit être respectée.
-(16322) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_th_s5_11h ; doit être respectée.
-(16323) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_th_s5_14h15 ; doit être respectée.
-(16325) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_th_s5_17h15 ; doit être respectée.
-(16326) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_f_s5_8h ; doit être respectée.
-(16328) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_f_s5_11h ; doit être respectée.
-(16329) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_f_s5_14h15 ; doit être respectée.
-(16333) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_m_s5_8h ; doit être respectée.
-(16334) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_m_s5_9h30 ; doit être respectée.
-(16335) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_m_s5_11h ; doit être respectée.
-(16336) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_w_s5_14h15 ; doit être respectée.
-(16337) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_m_s5_14h15 ; doit être respectée.
-(16338) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_tu_s5_14h15 ; doit être respectée.
-(16339) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_m_s5_17h15 ; doit être respectée.
-(16341) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_tu_s5_15h45 ; doit être respectée.
-(16343) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_w_s5_8h ; doit être respectée.
-(16344) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_w_s5_15h45 ; doit être respectée.
-(16347) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_tu_s5_9h30 ; doit être respectée.
-(16348) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_w_s5_17h15 ; doit être respectée.
-(16349) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_w_s5_11h ; doit être respectée.
-(16350) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_th_s5_8h ; doit être respectée.
-(16351) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_th_s5_9h30 ; doit être respectée.
-(16352) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_th_s5_11h ; doit être respectée.
-(16353) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_th_s5_14h15 ; doit être respectée.
-(16355) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_th_s5_17h15 ; doit être respectée.
-(16358) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_f_s5_11h ; doit être respectée.
-(16363) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_m_s5_8h ; doit être respectée.
-(16364) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_m_s5_9h30 ; doit être respectée.
-(16365) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_m_s5_11h ; doit être respectée.
-(16366) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_w_s5_14h15 ; doit être respectée.
-(16367) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_m_s5_14h15 ; doit être respectée.
-(16368) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_tu_s5_14h15 ; doit être respectée.
-(16369) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_m_s5_17h15 ; doit être respectée.
-(16372) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_m_s5_15h45 ; doit être respectée.
-(16374) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_w_s5_15h45 ; doit être respectée.
-(17854) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours CM-CDAM-AP-CE ; pour le slot CM_th_s5_8h ; doit être respectée.
-(17869) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours CM-CDAM-AP-CE ; pour le slot CM_tu_s5_14h15 ; doit être respectée.
-(19587) La contrainte de type "Pas de professeur disponible" ; pour le professeur AP ; pour le slot CM_tu_s5_11h ; doit être respectée.
-(19643) La contrainte de type "Pas de professeur disponible" ; pour le professeur AP ; pour le slot TD_m_s5_9h30 ; doit être respectée.
-(21809) La contrainte de type "Pas de professeur disponible" ; pour le professeur JD ; pour le slot DS_m_s5_11h ; doit être respectée.
-(21817) La contrainte de type "Pas de professeur disponible" ; pour le professeur JD ; pour le slot DS_m_s5_14h15 ; doit être respectée.
-(21821) La contrainte de type "Pas de professeur disponible" ; pour le professeur JD ; pour le slot TD_tu_s5_14h15 ; doit être respectée.
-(21825) La contrainte de type "Pas de professeur disponible" ; pour le professeur JD ; pour le slot TD_m_s5_17h15 ; doit être respectée.
-(21829) La contrainte de type "Pas de professeur disponible" ; pour le professeur JD ; pour le slot TD_tu_s5_8h ; doit être respectée.
-(21841) La contrainte de type "Pas de professeur disponible" ; pour le professeur JD ; pour le slot TD_w_s5_8h ; doit être respectée.
-(21845) La contrainte de type "Pas de professeur disponible" ; pour le professeur JD ; pour le slot TD_w_s5_15h45 ; doit être respectée.
-(21851) La contrainte de type "Pas de professeur disponible" ; pour le professeur JD ; pour le slot TD_w_s5_9h30 ; doit être respectée.
-(21855) La contrainte de type "Pas de professeur disponible" ; pour le professeur JD ; pour le slot CM_tu_s5_9h30 ; doit être respectée.
-(21859) La contrainte de type "Pas de professeur disponible" ; pour le professeur JD ; pour le slot DS_tu_s5_11h ; doit être respectée.
-(21863) La contrainte de type "Pas de professeur disponible" ; pour le professeur JD ; pour le slot DS_tu_s5_9h30 ; doit être respectée.
-(21869) La contrainte de type "Pas de professeur disponible" ; pour le professeur JD ; pour le slot DS_w_s5_17h15 ; doit être respectée.
-(21879) La contrainte de type "Pas de professeur disponible" ; pour le professeur JD ; pour le slot TD_th_s5_9h30 ; doit être respectée.
-(21883) La contrainte de type "Pas de professeur disponible" ; pour le professeur JD ; pour le slot TD_th_s5_11h ; doit être respectée.
-(21891) La contrainte de type "Pas de professeur disponible" ; pour le professeur JD ; pour le slot TD_th_s5_15h45 ; doit être respectée.
-(21895) La contrainte de type "Pas de professeur disponible" ; pour le professeur JD ; pour le slot TD_th_s5_17h15 ; doit être respectée.
-(21911) La contrainte de type "Pas de professeur disponible" ; pour le professeur JD ; pour le slot DS_f_s5_11h ; doit être respectée.
-(21915) La contrainte de type "Pas de professeur disponible" ; pour le professeur JD ; pour le slot DS_f_s5_14h15 ; doit être respectée.
-(21919) La contrainte de type "Pas de professeur disponible" ; pour le professeur JD ; pour le slot DS_f_s5_15h45 ; doit être respectée.
-(21923) La contrainte de type "Pas de professeur disponible" ; pour le professeur JD ; pour le slot DS_f_s5_17h15 ; doit être respectée.
-(21927) La contrainte de type "Pas de professeur disponible" ; pour le professeur JD ; pour le slot TP_tu_s5_14h15 ; doit être respectée.
-(21931) La contrainte de type "Pas de professeur disponible" ; pour le professeur JD ; pour le slot CM_m_s5_11h ; doit être respectée.
-(7038) La contrainte de type "Pas plus d'un cours par créneau" ; pour le slot DS_w_s5_14h15 ; pour le groupe 2A ; doit être respectée.
-(7052) La contrainte de type "Pas plus d'un cours par créneau" ; pour le slot DS_m_s5_14h15 ; pour le groupe 2A ; doit être respectée.
-(7108) La contrainte de type "Pas plus d'un cours par créneau" ; pour le slot TD_tu_s5_15h45 ; pour le groupe 2A ; doit être respectée.
-(7122) La contrainte de type "Pas plus d'un cours par créneau" ; pour le slot TD_m_s5_15h45 ; pour le groupe 2A ; doit être respectée.
-(7249) La contrainte de type "Pas plus d'un cours par créneau" ; pour le slot DS_w_s5_11h ; pour le groupe 2B ; doit être respectée.
-(7298) La contrainte de type "Pas plus d'un cours par créneau" ; pour le slot TD_th_s5_14h15 ; pour le groupe 2B ; doit être respectée.
-(35492) La contrainte de type "Problème de dépendance entre les salles" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_tu_s5_8h, TD_tu_s5_9h30] ; pour les salles [B101, B106] ; doit être respectée.
+(35017) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_th_s5_15h45, TD_th_s5_11h] ; doit être respectée.
+(35028) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_th_s5_15h45, TD_w_s5_15h45] ; doit être respectée.
+(35029) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_th_s5_15h45, TD_w_s5_17h15] ; doit être respectée.
+(35031) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_th_s5_15h45, TD_tu_s5_8h] ; doit être respectée.
+(35093) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_f_s5_14h15, TD_tu_s5_8h] ; doit être respectée.
+(35094) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_f_s5_14h15, TD_tu_s5_9h30] ; doit être respectée.
+(35102) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_f_s5_11h, TD_tu_s5_17h15] ; doit être respectée.
+(35104) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_f_s5_11h, TD_th_s5_15h45] ; doit être respectée.
+(35108) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_f_s5_11h, TD_th_s5_17h15] ; doit être respectée.
+(35119) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_f_s5_11h, TD_w_s5_14h15] ; doit être respectée.
+(35120) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_f_s5_11h, TD_w_s5_15h45] ; doit être respectée.
+(35122) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_f_s5_11h, TD_tu_s5_11h] ; doit être respectée.
+(35491) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_w_s5_14h15, TD_tu_s5_9h30] ; doit être respectée.
+(35492) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_w_s5_15h45, TD_tu_s5_14h15] ; doit être respectée.
+(35500) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_w_s5_15h45, TD_th_s5_8h] ; doit être respectée.
+(35502) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_w_s5_15h45, TD_th_s5_9h30] ; doit être respectée.
+(35503) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_w_s5_15h45, TD_f_s5_14h15] ; doit être respectée.
+(35505) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_w_s5_15h45, TD_th_s5_17h15] ; doit être respectée.
+(35520) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_w_s5_15h45, TD_tu_s5_11h] ; doit être respectée.
+(35553) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_tu_s5_11h, TD_tu_s5_14h15] ; doit être respectée.
+(35554) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_tu_s5_11h, TD_th_s5_14h15] ; doit être respectée.
+(35562) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_tu_s5_11h, TD_th_s5_15h45] ; doit être respectée.
+(35564) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_tu_s5_11h, TD_f_s5_14h15] ; doit être respectée.
+(35565) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_tu_s5_11h, TD_f_s5_11h] ; doit être respectée.
+(35567) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_tu_s5_11h, TD_th_s5_11h] ; doit être respectée.
+(35578) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_tu_s5_11h, TD_w_s5_15h45] ; doit être respectée.
+(35579) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_tu_s5_11h, TD_w_s5_17h15] ; doit être respectée.
+(35581) La contrainte de type "Problème de dépendance" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_tu_s5_11h, TD_tu_s5_8h] ; doit être respectée.
+(42781) La contrainte de type "Problème de dépendance" ; pour les cours [CM-CDAM-AP-CE, TD-CDAM-JD-2] ; pour les slots [CM_f_s5_9h30, TD_m_s5_17h15] ; doit être respectée.
+(42794) La contrainte de type "Problème de dépendance" ; pour les cours [CM-CDAM-AP-CE, TD-CDAM-JD-2] ; pour les slots [CM_tu_s5_11h, TD_m_s5_14h15] ; doit être respectée.
+(42820) La contrainte de type "Problème de dépendance" ; pour les cours [CM-CDAM-AP-CE, TD-CDAM-JD-2] ; pour les slots [CM_f_s5_11h, TD_w_s5_11h] ; doit être respectée.
+(42834) La contrainte de type "Problème de dépendance" ; pour les cours [CM-CDAM-AP-CE, TD-CDAM-JD-2] ; pour les slots [CM_f_s5_14h15, TD_th_s5_15h45] ; doit être respectée.
+(42861) La contrainte de type "Problème de dépendance" ; pour les cours [CM-CDAM-AP-CE, TD-CDAM-JD-2] ; pour les slots [CM_th_s5_8h, TD_m_s5_11h] ; doit être respectée.
+(42867) La contrainte de type "Problème de dépendance" ; pour les cours [CM-CDAM-AP-CE, TD-CDAM-JD-2] ; pour les slots [CM_th_s5_8h, TD_w_s5_11h] ; doit être respectée.
+(43115) La contrainte de type "Problème de dépendance" ; pour les cours [CM-CDAM-AP-CE, TD-CDAM-JD-2] ; pour les slots [CM_f_s5_8h, TD_f_s5_8h] ; doit être respectée.
+(43136) La contrainte de type "Problème de dépendance" ; pour les cours [CM-CDAM-AP-CE, TD-CDAM-JD-2] ; pour les slots [CM_f_s5_8h, TD_tu_s5_9h30] ; doit être respectée.
+(43164) La contrainte de type "Problème de dépendance" ; pour les cours [CM-CDAM-AP-CE, TD-CDAM-JD-2] ; pour les slots [CM_w_s5_15h45, TD_w_s5_11h] ; doit être respectée.
+(43202) La contrainte de type "Problème de dépendance" ; pour les cours [CM-CDAM-AP-CE, TD-CDAM-JD-2] ; pour les slots [CM_th_s5_9h30, TD_w_s5_14h15] ; doit être respectée.
+(43227) La contrainte de type "Problème de dépendance" ; pour les cours [CM-CDAM-AP-CE, TD-CDAM-JD-2] ; pour les slots [CM_th_s5_14h15, TD_tu_s5_11h] ; doit être respectée.
+(43230) La contrainte de type "Problème de dépendance" ; pour les cours [CM-CDAM-AP-CE, TD-CDAM-JD-2] ; pour les slots [CM_f_s5_9h30, TD_tu_s5_14h15] ; doit être respectée.
+(43359) La contrainte de type "Problème de dépendance" ; pour les cours [CM-CDAM-AP-CE, TD-CDAM-JD-2] ; pour les slots [CM_f_s5_17h15, TD_m_s5_17h15] ; doit être respectée.
+(43365) La contrainte de type "Problème de dépendance" ; pour les cours [CM-CDAM-AP-CE, TD-CDAM-JD-2] ; pour les slots [CM_f_s5_17h15, TD_w_s5_17h15] ; doit être respectée.
+(43422) La contrainte de type "Problème de dépendance" ; pour les cours [CM-CDAM-AP-CE, TD-CDAM-JD-2] ; pour les slots [CM_tu_s5_17h15, TD_m_s5_14h15] ; doit être respectée.
+(43442) La contrainte de type "Problème de dépendance" ; pour les cours [CM-CDAM-AP-CE, TD-CDAM-JD-2] ; pour les slots [CM_th_s5_11h, TD_w_s5_11h] ; doit être respectée.
+(43462) La contrainte de type "Problème de dépendance" ; pour les cours [CM-CDAM-AP-CE, TD-CDAM-JD-2] ; pour les slots [CM_tu_s5_8h, TD_m_s5_11h] ; doit être respectée.
+(43485) La contrainte de type "Problème de dépendance" ; pour les cours [CM-CDAM-AP-CE, TD-CDAM-JD-2] ; pour les slots [CM_f_s5_15h45, TD_f_s5_15h45] ; doit être respectée.
+(43562) La contrainte de type "Problème de dépendance" ; pour les cours [CM-CDAM-AP-CE, TD-CDAM-JD-2] ; pour les slots [CM_w_s5_11h, TD_tu_s5_14h15] ; doit être respectée.
+(43570) La contrainte de type "Problème de dépendance" ; pour les cours [CM-CDAM-AP-CE, TD-CDAM-JD-2] ; pour les slots [CM_w_s5_11h, TD_m_s5_17h15] ; doit être respectée.
+(43589) La contrainte de type "Problème de dépendance" ; pour les cours [CM-CDAM-AP-CE, TD-CDAM-JD-2] ; pour les slots [CM_f_s5_8h, TD_m_s5_11h] ; doit être respectée.
+(43645) La contrainte de type "Problème de dépendance" ; pour les cours [CM-CDAM-AP-CE, TD-CDAM-JD-2] ; pour les slots [CM_w_s5_17h15, TD_w_s5_9h30] ; doit être respectée.
+(43649) La contrainte de type "Problème de dépendance" ; pour les cours [CM-CDAM-AP-CE, TD-CDAM-JD-2] ; pour les slots [CM_w_s5_17h15, TD_w_s5_17h15] ; doit être respectée.
+(16317) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_tu_s5_15h45 ; doit être respectée.
+(16318) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_f_s5_17h15 ; doit être respectée.
+(16319) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_f_s5_8h ; doit être respectée.
+(16320) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_f_s5_9h30 ; doit être respectée.
+(16321) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_f_s5_15h45 ; doit être respectée.
+(16322) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_tu_s5_17h15 ; doit être respectée.
+(16323) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_th_s5_8h ; doit être respectée.
+(16325) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_th_s5_9h30 ; doit être respectée.
+(16326) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_f_s5_14h15 ; doit être respectée.
+(16328) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_th_s5_17h15 ; doit être respectée.
+(16329) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_th_s5_11h ; doit être respectée.
+(16333) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_m_s5_14h15 ; doit être respectée.
+(16334) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_m_s5_15h45 ; doit être respectée.
+(16335) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_m_s5_17h15 ; doit être respectée.
+(16336) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_w_s5_8h ; doit être respectée.
+(16337) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_w_s5_9h30 ; doit être respectée.
+(16338) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_w_s5_11h ; doit être respectée.
+(16339) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_w_s5_14h15 ; doit être respectée.
+(16341) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_w_s5_17h15 ; doit être respectée.
+(16343) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_tu_s5_8h ; doit être respectée.
+(16344) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_tu_s5_9h30 ; doit être respectée.
+(16347) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_tu_s5_15h45 ; doit être respectée.
+(16348) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_f_s5_17h15 ; doit être respectée.
+(16349) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_f_s5_8h ; doit être respectée.
+(16350) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_f_s5_9h30 ; doit être respectée.
+(16351) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_f_s5_15h45 ; doit être respectée.
+(16352) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_tu_s5_17h15 ; doit être respectée.
+(16353) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_th_s5_8h ; doit être respectée.
+(16355) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_th_s5_9h30 ; doit être respectée.
+(16358) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_th_s5_17h15 ; doit être respectée.
+(16363) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_m_s5_14h15 ; doit être respectée.
+(16364) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_m_s5_15h45 ; doit être respectée.
+(16365) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_m_s5_17h15 ; doit être respectée.
+(16366) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_w_s5_8h ; doit être respectée.
+(16367) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_w_s5_9h30 ; doit être respectée.
+(16368) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_w_s5_11h ; doit être respectée.
+(16369) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_w_s5_14h15 ; doit être respectée.
+(16372) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_tu_s5_11h ; doit être respectée.
+(16374) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours TD-CDAM-JD-2 ; pour le slot TD_tu_s5_9h30 ; doit être respectée.
+(17854) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours CM-CDAM-AP-CE ; pour le slot CM_th_s5_11h ; doit être respectée.
+(17869) La contrainte de type "Chaque cours doit avoir un professeur" ; pour le cours CM-CDAM-AP-CE ; pour le slot CM_f_s5_8h ; doit être respectée.
+(19587) La contrainte de type "Pas de professeur disponible" ; pour le professeur AP ; pour le slot TD_tu_s5_17h15 ; doit être respectée.
+(19643) La contrainte de type "Pas de professeur disponible" ; pour le professeur AP ; pour le slot TD_m_s5_15h45 ; doit être respectée.
+(21809) La contrainte de type "Pas de professeur disponible" ; pour le professeur JD ; pour le slot DS_m_s5_17h15 ; doit être respectée.
+(21817) La contrainte de type "Pas de professeur disponible" ; pour le professeur JD ; pour le slot DS_w_s5_9h30 ; doit être respectée.
+(21821) La contrainte de type "Pas de professeur disponible" ; pour le professeur JD ; pour le slot TD_w_s5_11h ; doit être respectée.
+(21825) La contrainte de type "Pas de professeur disponible" ; pour le professeur JD ; pour le slot TD_w_s5_14h15 ; doit être respectée.
+(21829) La contrainte de type "Pas de professeur disponible" ; pour le professeur JD ; pour le slot TD_w_s5_15h45 ; doit être respectée.
+(21841) La contrainte de type "Pas de professeur disponible" ; pour le professeur JD ; pour le slot TP_tu_s5_8h ; doit être respectée.
+(21845) La contrainte de type "Pas de professeur disponible" ; pour le professeur JD ; pour le slot TP_tu_s5_9h30 ; doit être respectée.
+(21851) La contrainte de type "Pas de professeur disponible" ; pour le professeur JD ; pour le slot TP_tu_s5_14h15 ; doit être respectée.
+(21855) La contrainte de type "Pas de professeur disponible" ; pour le professeur JD ; pour le slot TP_tu_s5_17h15 ; doit être respectée.
+(21859) La contrainte de type "Pas de professeur disponible" ; pour le professeur JD ; pour le slot TP_f_s5_15h45 ; doit être respectée.
+(21863) La contrainte de type "Pas de professeur disponible" ; pour le professeur JD ; pour le slot CM_tu_s5_11h ; doit être respectée.
+(21869) La contrainte de type "Pas de professeur disponible" ; pour le professeur JD ; pour le slot CM_f_s5_14h15 ; doit être respectée.
+(21879) La contrainte de type "Pas de professeur disponible" ; pour le professeur JD ; pour le slot TP_f_s5_9h30 ; doit être respectée.
+(21883) La contrainte de type "Pas de professeur disponible" ; pour le professeur JD ; pour le slot TP_th_s5_17h15 ; doit être respectée.
+(21891) La contrainte de type "Pas de professeur disponible" ; pour le professeur JD ; pour le slot CM_tu_s5_15h45 ; doit être respectée.
+(21895) La contrainte de type "Pas de professeur disponible" ; pour le professeur JD ; pour le slot CM_m_s5_8h ; doit être respectée.
+(21911) La contrainte de type "Pas de professeur disponible" ; pour le professeur JD ; pour le slot TP_m_s5_14h15 ; doit être respectée.
+(21915) La contrainte de type "Pas de professeur disponible" ; pour le professeur JD ; pour le slot TP_m_s5_15h45 ; doit être respectée.
+(21919) La contrainte de type "Pas de professeur disponible" ; pour le professeur JD ; pour le slot TP_m_s5_17h15 ; doit être respectée.
+(21923) La contrainte de type "Pas de professeur disponible" ; pour le professeur JD ; pour le slot TP_w_s5_8h ; doit être respectée.
+(21927) La contrainte de type "Pas de professeur disponible" ; pour le professeur JD ; pour le slot TP_w_s5_9h30 ; doit être respectée.
+(21931) La contrainte de type "Pas de professeur disponible" ; pour le professeur JD ; pour le slot TP_w_s5_11h ; doit être respectée.
+(7038) La contrainte de type "Pas plus d'un cours par créneau" ; pour le slot DS_w_s5_8h ; pour le groupe 2A ; doit être respectée.
+(7052) La contrainte de type "Pas plus d'un cours par créneau" ; pour le slot DS_w_s5_9h30 ; pour le groupe 2A ; doit être respectée.
+(7108) La contrainte de type "Pas plus d'un cours par créneau" ; pour le slot TD_w_s5_17h15 ; pour le groupe 2A ; doit être respectée.
+(7122) La contrainte de type "Pas plus d'un cours par créneau" ; pour le slot CM_th_s5_9h30 ; pour le groupe 2A ; doit être respectée.
+(7249) La contrainte de type "Pas plus d'un cours par créneau" ; pour le slot CM_th_s5_8h ; pour le groupe 2B ; doit être respectée.
+(7298) La contrainte de type "Pas plus d'un cours par créneau" ; pour le slot CM_th_s5_11h ; pour le groupe 2B ; doit être respectée.
+(34765) La contrainte de type "Problème de dépendance entre les salles" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_th_s5_14h15, TD_th_s5_15h45] ; pour les salles [B101, B106] ; doit être respectée.
+(35015) La contrainte de type "Problème de dépendance entre les salles" ; pour les cours [TD-CDAM-JD-2, TD-CDAM-JD-2] ; pour les slots [TD_th_s5_15h45, TD_th_s5_17h15] ; pour les salles [B101, B106] ; doit être respectée.
