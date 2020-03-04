@@ -1077,7 +1077,7 @@ def edt_changes(req, **kwargs):
                     new_courses = clean_change(year, week, old_version, change, work_copy=work_copy,
                                                initiator=initiator, apply=True)
                     same, changed = new_courses['log'].strs_course_changes()
-                    msg += same + changed + '\n'
+                    msg += str(new_courses['log'])
                     impacted_inst.add(new_courses['course'].tutor)
                     impacted_inst.add(new_courses['sched'].tutor)
                 if None in impacted_inst:
@@ -1100,14 +1100,13 @@ def edt_changes(req, **kwargs):
         if initiator in impacted_inst:
             impacted_inst.remove(initiator)
         if len(impacted_inst) > 0:
-            # send_mail(
-            #     subject,
-            #     msg,
-            #     'edt@iut-blagnac',
-            #     ['edt.info.iut.blagnac@gmail.com']
-            # )
-            logger.info(subject)
-            logger.info(msg)
+            email = EmailMessage(
+                subject,
+                msg,
+                to=['edt.info.iut.blagnac@gmail.com']
+            )
+            # email.send()
+            logger.info(email)
 
         return JsonResponse(good_response)
     else:
@@ -1507,30 +1506,20 @@ def send_email_proposal(req, **kwargs):
     if initiator in impacted_inst:
         impacted_inst.remove(initiator)
     if len(impacted_inst) > 0:
-        # send_mail(
-        #     subject,
-        #     msg,
-        #     'edt@iut-blagnac',
-        #     ['edt.info.iut.blagnac@gmail.com']
-        # )
         msg += "\nQu'en dites-vous ?\n\n-- \n" + \
             f"Envoyé de mon flop!EDT\n"
 
         try:
             subject = '[flop!EDT] Proposition de modification'
             email_list = [t.email for t in list(impacted_inst) + [initiator]]
-            reply_to = initiator.email
-            logger.info('Envoi de mail :')
-            logger.info(f'- sujet : {subject}')
-            logger.info(f'- destinataire(s) : {email_list}')
-            logger.info(f'- répondre à : {reply_to}')
-            logger.info(msg)
-            # email = EmailMessage(
-            #     subject,
-            #     msg,
-            #     to=email_list,
-            #     reply_to=reply_to
-            # )
+            reply_to_list = [initiator.email]
+            email = EmailMessage(
+                subject,
+                msg,
+                to=email_list,
+                reply_to=reply_to_list
+            )
+            logger.info(email)
             # email.send()
         except Exception:
             bad_response['more'] = 'Envoi du mail impossible !'
