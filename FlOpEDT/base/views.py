@@ -297,7 +297,8 @@ def stype(req, *args, **kwargs):
 @login_required
 def room_preference(req, department):
     return render(req, 'base/room_preference.html',
-                  {'user':req.user})
+                  {'user':req.user,
+                   'donnees': queries.get_rooms(department)})
 
     # {'data' : })
 
