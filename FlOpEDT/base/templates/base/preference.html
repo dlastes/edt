@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% csrf_token %}
+
+
+
+{% block title %} EDT {% endblock %}
+
+{% block content %}
+{% load static %}
+
+<html>
+    <body>
+        <style>
+            .rooms-container {
+                display: flex;
+                flex-direction: row;
+            }
+
+            .rooms {
+                margin: 0 10px;
+            }
+
+            .pref{
+                display: flex;
+                flex-direction: row;
+            }
+
+        </style>
+        <div id="main-container">
+            <h1>Mes preferences de salles</h1>
+
+
+            <div id="rooms-table" class="rooms-container">
+
+            </div>
+        </div>
+    <script>
+                        var user = "{{user}}";
+                         var data = "{% url 'base:fetch_rooms' department='INFO' %}" ;
+                         var donnees;
+
+                         $.ajax({
+                            type: "GET",
+                            dataType: 'json',
+                            url: data,
+                            async: true,
+                            contentType: "text/json",
+                            success: function(msg, ts, req) {
+
+                            donnees=msg;
+
+                            let container = document.getElementById('rooms-table');
+                             for(const type in msg.roomtypes) {
+                                let rooms = msg.roomtypes[type];
+                                let roomContainer = document.createElement('div');
+                                roomContainer.setAttribute('class', 'rooms');
+                                roomContainer.setAttribute('id', type);
+                                let title = document.createElement('strong');
+                                title.innerText = type;
+                                roomContainer.append(title)
+                                rooms.forEach(r => {
+                                       let room = document.createElement('div');
+                                       let pref = document.createElement('form');
+
+                                       room.setAttribute('class', 'pref');
+                                       var options = `<option selected value=1>1</option>`;
+                                       for (var i = 2; i<=rooms.length;i++){
+                                            options += `<option value=${i}>${i}</option>`;
+                                       }
+                                        options += `<option value=0>NON</option>`;
+
+                                       pref.innerHTML = `<select name="pref">${options}</select>`;
+                                       room.setAttribute('id', r);
+                                       room.innerText = r;
+
+                                       roomContainer.append(room);
+                                       room.append(pref);
+
+                                })
+
+                                container.append(roomContainer);
+
+                             }
+
+                              let mainContainer = document.getElementById('main-container');
+                              let submit = document.createElement('submit');
+
+                              submit.innerHTML = `<input type="submit" value="Valider" onclick="exporter()" />`;
+                              mainContainer.append(submit);
+
+
+
+
+
+
+
+
+                              submit.innerHTML = `<input type="submit" value="Valider" onclick="window.alert('Préférences enregistrées'); window.location.href = '../semaine-type';";
+ />`;
+                              mainContainer.append(submit);
+
+                            },
+                            error: function(msg) {
+                                console.log("error");
+                            }
+                        })
+
+                        function exporter() {
+                                alert("Envoyer");
+                                var dico1 = new Map();
+                                var dico2 = new Map();
+
+                                dico1.set('tutor',user);
+
+                                for (t in donnees.roomtypes){
+                                    var pref = [];
+                                    for (s of donnees.roomtypes[t]){
+                                        var temp = new Map();
+                                        temp.set('roomgroup', s);
+                                        temp.set('value', 1);
+                                        pref.push(temp);
+                                    }
+                                    dico2.set(t,pref);
+                                }
+                                dico1.set('roompreferences', dico2);
+
+                                console.log(dico1);
+
+                             }
+
+
+
+
+        </script>
+    </body>
+</html>
+
+{% endblock %}
+
