@@ -1054,6 +1054,8 @@ def edt_changes(req, **kwargs):
 
     recv_changes = json.loads(req.POST.get('tab',[]))
 
+    msg = ''
+
     logger.info(f"REQ: edt change; W{week} Y{year} WC{work_copy} V{old_version} "
                 f"by {initiator.username}")
     logger.info(recv_changes)
