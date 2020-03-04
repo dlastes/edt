@@ -23,8 +23,7 @@
 # a commercial license. Buying such a license is mandatory as soon as
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
-
-
+from django.core.mail import EmailMessage
 from pulp import LpVariable, LpConstraint, LpBinary, LpConstraintEQ, \
     LpConstraintGE, LpConstraintLE, LpAffineExpression, LpProblem, LpStatus, \
     LpMinimize, lpSum, LpStatusOptimal, LpStatusNotSolved
@@ -243,7 +242,6 @@ class WeekDB(object):
             other_departments_sched_courses_for_room[r] = set()
             for rg in r.subroom_of.all():
                 other_departments_sched_courses_for_room[r] |= set(self.other_departments_sched_courses.filter(room=rg))
-
         return room_types, room_groups, rooms, room_prefs, room_groups_for_type, room_course_compat, course_rg_compat,\
             fixed_courses_for_room, other_departments_sched_courses_for_room
 
@@ -413,7 +411,8 @@ class TTModel(object):
                  min_nps_c=1.,
                  max_stab=5.,
                  lim_ld=1.,
-                 core_only=False):
+                 core_only=False,
+                 send_mails=False):
         print("\nLet's start weeks #%s" % weeks)
         # beg_file = os.path.join('logs',"FlOpTT")
         self.model = LpProblem("FlOpTT", LpMinimize)
@@ -425,6 +424,7 @@ class TTModel(object):
         self.max_stab = max_stab
         self.lim_ld = lim_ld
         self.core_only = core_only
+        self.send_mails = send_mails
         self.var_nb = 0
         self.constraint_nb = 0
         if type(weeks) is int:
@@ -477,6 +477,10 @@ class TTModel(object):
 
         if settings.DEBUG:
             self.model.writeLP('FlOpEDT.lp')
+
+        if self.send_mails:
+            self.send_lack_of_availability_mail()
+
 
     def wdb_init(self):
         wdb = WeekDB(self.department, self.weeks, self.year, self.train_prog)
@@ -540,18 +544,22 @@ class TTModel(object):
                 card = 2 * len(dayslots)
                 expr = self.lin_expr()
                 expr += card * IBD[(i, d)]
-                for c in self.wdb.possible_courses[i] & self.wdb.courses_for_supp_tutor[i]:
+                for c in self.wdb.possible_courses[i]:
                     for sl in dayslots & self.wdb.compatible_slots[c]:
                         expr -= self.TTinstructors[(sl, c, i)]
+                # Be careful, here as elsewhere, being a supp_tutor is not a possibility, it is necessary...
+                for c in self.wdb.courses_for_supp_tutor[i]:
+                    for sl in dayslots & self.wdb.compatible_slots[c]:
+                        expr -= self.TT[(sl, c)]
                 self.add_constraint(expr, '>=', 0)
 
                 if self.wdb.fixed_courses.filter(Q(course__tutor=i) | Q(tutor=i),
                                                  day=d) \
                         or self.wdb.other_departments_sched_courses.filter(Q(course__tutor=i) | Q(tutor=i), day=d):
                         self.add_constraint(IBD[(i, d)], '==', 1)
-                    # This next constraint impides to force IBD to be 1
-                    # (if there is a meeting, for example...)
-                    # self.add_constraint(expr, '<=', card-1)
+                        # This next constraint impides to force IBD to be 1
+                        # (if there is a meeting, for example...)
+                        #self.add_constraint(expr, '<=', card-1)
 
         forced_IBD = {}
         for i in self.wdb.instructors:
@@ -570,7 +578,7 @@ class TTModel(object):
                 IBD_GTE[week].append({})
 
             for i in self.wdb.instructors:
-                for j in range(2, max_days + 1):
+                for j in range(1, max_days + 1):
                     IBD_GTE[week][j][i] = self.add_floor(str(i) + str(j),
                                                          self.sum(IBD[(i, d)]
                                                                   for d in days_filter(self.wdb.days, week=week)),
@@ -926,7 +934,7 @@ class TTModel(object):
                     for c in set(self.wdb.courses.filter(room_type=rp.for_type)) & self.wdb.compatible_courses[sl])
                 preferred_is_unavailable = False
                 for r in rp.prefer.subrooms.all():
-                    if self.avail_room[r][sl]:
+                    if not self.avail_room[r][sl]:
                         preferred_is_unavailable = True
                         break
                     e -= self.sum(self.TTrooms[(sl, c, rg)]
@@ -1003,6 +1011,38 @@ class TTModel(object):
                             for rg2 in self.wdb.room_groups_for_type[c2.room_type].exclude(id=rg1.id):
                                 self.add_constraint(self.TTrooms[(sl1, c1, rg1)]
                                                     + self.TTrooms[(sl2, c2, rg2)], '<=', 1)
+
+    def send_unitary_lack_of_availability_mail(self, tutor, week, available_hours, teaching_hours,
+                                               prefix="[flop!EDT] "):
+        subject = f"Manque de dispos semaine {week}"
+        message = f"Bonjour {tutor.first_name}\n" \
+                  f"Semaine {week} vous ne donnez que {available_hours} heures de disponibilités, " \
+                  f"alors que vous êtes censé⋅e assurer {teaching_hours} heures de cours...\n" \
+                  f"Est-ce que vous avez la possibilité d'ajouter des créneaux de disponibilité ?\n" \
+                  f"Sinon, pouvez-vous s'il vous plaît décaler des cours à une semaine précédente ou suivante ?\n" \
+                  f"Merci d'avance.\n" \
+                  f"Les gestionnaires d'emploi du temps."
+        email = EmailMessage(
+            prefix + subject,
+            "(Cet e-mail vous a été envoyé automatiquement par le générateur "
+            "d'emplois du temps du logiciel flop!EDT)\n\n"
+            + message +
+            "\n\nPS: Attention, cet email risque de vous être renvoyé à chaque prochaine génération "
+            "d'emploi du temps si vous n'avez pas fait les modifications attendues...\n"
+            "N'hésitez pas à nous contacter en cas de souci.",
+            to=(tutor.email,)
+        )
+        email.send()
+
+    def send_lack_of_availability_mail(self, prefix="[flop!EDT] "):
+        for key in self.warnings:
+            if key in self.wdb.instructors:
+                for w in self.warnings[key]:
+                    if ' < ' in w:
+                        data = w.split(' ')
+                        self.send_unitary_lack_of_availability_mail(key, data[-1], data[0], data[4],
+                                                                    prefix=prefix)
+
 
     def compute_non_prefered_slot_cost(self):
         """
@@ -1217,6 +1257,7 @@ class TTModel(object):
         """
         Add the constraints imposed by other departments' scheduled courses.
         """
+        print("adding other departments constraints")
         for sl in self.wdb.slots:
             # constraint : other_departments_sched_courses rooms are not available
             for r in self.wdb.rooms:
