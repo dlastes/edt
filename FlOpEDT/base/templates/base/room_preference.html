@@ -38,36 +38,11 @@
       <input type="submit" value="Valider" onclick="exporter()" />
     </div>
     <script>
-                        var user = "{{user}}";
-
-                        function exporter() {
-                                alert("Envoyer");
-                                var dico1 = new Map();
-                                var dico2 = new Map();
-
-                                dico1.set('tutor',user);
-
-                                for (t in donnees.roomtypes){
-                                    var pref = [];
-                                    for (s of donnees.roomtypes[t]){
-                                        var temp = new Map();
-                                        temp.set('roomgroup', s);
-                                        temp.set('value', 1);
-                                        pref.push(temp);
-                                    }
-                                    dico2.set(t,pref);
-                                }
-                                dico1.set('roompreferences', dico2);
-
-                                console.log(dico1);
-
-                             }
-
-
-
-
-        </script>
-    </body>
+      var user = "{{user}}";
+      var donnees = {{donnees | safe}} ;
+    </script>
+    <script type='text/javascript' src="{% static 'base/room_preference.js' %}"></script>
+  </body>
 </html>
 
 {% endblock %}
