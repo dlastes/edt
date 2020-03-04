@@ -295,8 +295,8 @@ def stype(req, *args, **kwargs):
                                  })
 
 @login_required
-def pref(req, department):
-    return render(req, 'base/preference.html',
+def room_preference(req, department):
+    return render(req, 'base/room_preference.html',
                   {'user':req.user})
 
     # {'data' : })

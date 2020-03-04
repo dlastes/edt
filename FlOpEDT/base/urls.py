@@ -39,7 +39,7 @@ urlpatterns = [
 
     # directly reachable by users
     # ----------------------------
-    url(r'^room-preference/$', views.pref, name='pref'),
+    path(r'room-preference', views.room_preference, name='room-pref'),
     url(r'^preferences$', views.preferences, name="preferences"),
     url(r'^semaine-type$', views.stype, name="stype"),
     url(r'^aide$', views.aide, name="aide"),
