@@ -1434,12 +1434,12 @@ class TTModel(object):
                                                       ("MIPGapAbs", 0.2)]))
         if result is None or result == 0:
             lp = "FlOpTT-pulp.lp"
-            ilp_filename = "logs/IIS_week%s.ilp" % self.weeks[0]
+            ilp_filename = "logs/IIS_week%s.ilp" % self.weeks
             #m = read(lp)
             #m.computeIIS()
             #m.write(ilp_filename)
             print("IIS written in file %s" % ilp_filename)
-            self.constraintManager.handle_reduced_result(ilp_filename, self.weeks[0])
+            self.constraintManager.handle_reduced_result(ilp_filename, self.weeks)
         """
         else:
             # TODO Use the solver parameter to get

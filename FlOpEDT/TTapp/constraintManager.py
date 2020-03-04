@@ -122,7 +122,7 @@ class ConstraintManager:
         return occur_type, occur_instructor, occur_slot, occur_course, occur_week, occur_room, occur_group, \
             occur_days, occur_departments
 
-    def show_reduces_result_brut(self, id_constraints, week, decreasing=True):
+    def show_reduces_result_brut(self, id_constraints, weeks, decreasing=True):
         occur_type, occur_instructor, occur_slot, occur_course, occur_week, occur_room, occur_group, occur_days,\
             occur_department = self.get_occurs(id_constraints, decreasing)
 
@@ -132,13 +132,13 @@ class ConstraintManager:
         output = ""
         for constraint in constraints:
             output += str(constraint) + "\n"
-        filename = "logs/intelligible_constraints%s.txt" % week
+        filename = "logs/intelligible_constraints%s.txt" % weeks
         print("writting %s ..." % filename)
         with open(filename, "w+") as file:
             file.write(output)
         # print(output)
 
-    def show_reduces_result(self, id_constraints, week):
+    def show_reduces_result(self, id_constraints, weeks):
         occur_type, occur_instructor, occur_slot, occur_course, occur_week, occur_room, occur_group, occur_days,\
             occur_department = self.get_occurs(id_constraints)
 
@@ -175,13 +175,13 @@ class ConstraintManager:
         if buf_department != "":
             output += "\nParametre Department :\n" + buf_department
 
-        filename = "logs/intelligible_constraints_factorised%s.txt" % week
+        filename = "logs/intelligible_constraints_factorised%s.txt" % weeks
         print("writting %s ..." % filename)
         with open(filename, "w+") as file:
             file.write(output)
         # print(output)
 
-    def handle_reduced_result(self, ilp_file_name, week):
+    def handle_reduced_result(self, ilp_file_name, weeks):
         id_constraints = parse_iis(ilp_file_name)
-        self.show_reduces_result_brut(id_constraints, week, decreasing=True)
-        self.show_reduces_result(id_constraints, week)
+        self.show_reduces_result_brut(id_constraints, weeks, decreasing=True)
+        self.show_reduces_result(id_constraints, weeks)
