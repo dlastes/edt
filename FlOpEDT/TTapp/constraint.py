@@ -61,7 +61,7 @@ class Constraint:
             self.instructors.append(c.get_tutor())
             self.groups.append(c.get_group())
             self.modules.append(c.get_module())
-        self.courses = list(self.modules)
+        #self.courses = list(self.modules)
 
     def get_id(self):
         return self.id
@@ -72,35 +72,35 @@ class Constraint:
             res += 'de type "%s" ; ' % str(self.constraint_type)
 
         if len(self.instructors) >= 1:
-            d, c = singular_or_plurial(self.instructors, isMale=True)
+            d, c = singular_or_plurial(self.instructors, is_male=True)
             res += "pour %s professeur%s %s ; " % (d, c, list2str([str(instructor) for instructor in self.instructors]))
 
         if len(self.courses) >= 1:
-            d, _ = singular_or_plurial(self.courses, isMale=True)
+            d, _ = singular_or_plurial(self.courses, is_male=True)
             res += "pour %s cours %s ; " % (d, list2str([str(course) for course in self.courses]))
 
         if len(self.slots) >= 1:
-            d, c = singular_or_plurial(self.slots, isMale=True)
+            d, c = singular_or_plurial(self.slots, is_male=True)
             res += "pour %s slot%s %s ; " % (d, c, list2str([str(slot) for slot in self.slots]))
 
         if len(self.rooms) >= 1:
-            d, c = singular_or_plurial(self.rooms, isMale=False)
+            d, c = singular_or_plurial(self.rooms, is_male=False)
             res += "pour %s salle%s %s ; " % (d, c, list2str([str(room) for room in self.rooms]))
 
         if len(self.weeks) >= 1:
-            d, c = singular_or_plurial(self.weeks, isMale=False)
+            d, c = singular_or_plurial(self.weeks, is_male=False)
             res += "pour %s semaine%s %s ; " % (d, c, list2str([str(week) for week in self.weeks]))
 
         if len(self.groups) >= 1:
-            d, c = singular_or_plurial(self.groups, isMale=True)
+            d, c = singular_or_plurial(self.groups, is_male=True)
             res += "pour %s groupe%s %s ; " % (d, c, list2str([str(group) for group in self.groups]))
 
         if len(self.days) >= 1:
-            d, c = singular_or_plurial(self.days, isMale=True)
+            d, c = singular_or_plurial(self.days, is_male=True)
             res += "pour %s jour%s %s ; " % (d, c, list2str([str(day) for day in self.days]))
 
         if len(self.departments) >= 1:
-            d, c = singular_or_plurial(self.departments, isMale=True)
+            d, c = singular_or_plurial(self.departments, is_male=True)
             res += "pour %s departement%s %s ; " % (d, c, list2str(
                 [str(department) for department in self.departments]))
 
