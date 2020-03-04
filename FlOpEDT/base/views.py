@@ -1512,18 +1512,14 @@ def send_email_proposal(req, **kwargs):
         try:
             subject = '[flop!EDT] Proposition de modification'
             email_list = [t.email for t in list(impacted_inst) + [initiator]]
-            reply_to = initiator.email
-            logger.info('Envoi de mail :')
-            logger.info(f'- sujet : {subject}')
-            logger.info(f'- destinataire(s) : {email_list}')
-            logger.info(f'- répondre à : {reply_to}')
-            logger.info(msg)
-            # email = EmailMessage(
-            #     subject,
-            #     msg,
-            #     to=email_list,
-            #     reply_to=reply_to
-            # )
+            reply_to_list = [initiator.email]
+            email = EmailMessage(
+                subject,
+                msg,
+                to=email_list,
+                reply_to=reply_to_list
+            )
+            logger.info(email)
             # email.send()
         except Exception:
             bad_response['more'] = 'Envoi du mail impossible !'
