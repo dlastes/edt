@@ -78,6 +78,9 @@
     var url_fetch_shared_rooms = "{% url 'base:fetch_shared_rooms' department 0 0 %}" ;
     url_fetch_shared_rooms = url_fetch_shared_rooms.slice(0, -3) ;
 
+
+    var url_mail_auto = "{% url "base:email-proposal" department %}";
+
     var department = "{{ dept }}" ;
     var week_year_list = {{ all_weeks| safe }};
     var week_init = +"{{ week }}";
