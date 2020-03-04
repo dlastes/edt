@@ -8,32 +8,9 @@
 
 {% block content %}
 {% load static %}
-
+<link rel="stylesheet" href="{% static 'base/room_preference.css' %}" />
 <html>
-    <body>
-        <style>
-            .rooms-container {
-                display: flex;
-                flex-direction: row;
-            }
-
-            .rooms {
-                margin: 0 10px;
-            }
-
-            .pref{
-                display: flex;
-                flex-direction: row;
-            }
-
-        </style>
-        <div id="main-container">
-            <h1>Mes preferences de salles</h1>
-
-
-            <div id="rooms-table" class="rooms-container">
-
-            </div>
+  <body>
         </div>
     <script>
                         var user = "{{user}}";
