@@ -297,9 +297,68 @@ def stype(req, *args, **kwargs):
 @tutor_required
 def room_preference(req, department, tutor=None):
     
+
+    
+    roomtypes = RoomType.objects.filter(department=req.department)\
+                                .prefetch_related('members')
+    roomgroups = RoomGroup.objects.filter(types__in=roomtypes)
+    rt_dict = {rt.id: rt.name for rt in roomtypes}
+    rg_dict = {rg.id: rg.name for rg in roomgroups}
+    try:
+        if tutor is None:
+            tutor = req.user.username
+        tutor = Tutor.objects.get(username=tutor)
+    except:
+        pass
+
+    base_pref = {}
+    for rs in RoomSort.objects.filter(tutor=tutor):
+        if rs.for_type not in base_pref:
+            base_pref[rs.for_type] = []
+        base_pref[rs.for_type].append({'better': rs.prefer, 'worse': rs.unprefer})
+
+    pref = {rt :{rg: len(rt.members.all()) for rg in rt.members.all()} for rt in roomtypes}
+
+    for rt in base_pref:
+        rank = 1
+        initial_rg = set([rg for p in base_pref[rt] for rg in p.values()])
+        ranked_rg = set()
+            
+        while base_pref[rt]:
+            better = set([p['better'] for p in base_pref[rt]])
+            worse = set([p['worse'] for p in base_pref[rt]])
+            best = better - worse
+            if not best:
+                for rg in better & worse:
+                    pref[rt][rg] = rank
+                base_pref[rt]=[]
+            else:
+                base_pref[rt]=[p for p in base_pref[rt]\
+                               if p['better'] not in best]
+                for rg in best:
+                    ranked_rg.add(rg)
+                    pref[rt][rg] = rank
+                rank += 1
+
+        for rg in initial_rg - ranked_rg:
+            pref[rt][rg] = rank
+
+        for rg in set(rt.members.all()) - initial_rg:
+            pref[rt][rg] = 0
+
+    for rt in set(roomtypes) - set(base_pref.keys()):
+        for rg in rt.members.all():
+            pref[rt][rg] = 0
+
+    pref_js = {rt.id :{rg.id: pref[rt][rg] for rg in rt.members.all()} for rt in roomtypes}
+            
     return render(req, 'base/room_preference.html',
                   {'user':req.user,
-                   'donnees': queries.get_rooms(department)})
+                   'roomtypes': rt_dict,
+                   'roomgroups': rg_dict,
+                   'pref_tmpl': pref,
+                   'pref_js': pref_js,
+                   'department': department})
 
     # {'data' : })
 

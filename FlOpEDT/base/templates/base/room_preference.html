@@ -12,34 +12,47 @@
 <html>
   <body>
     <div id="main-container">
-      <h1>Mes preferences de salles</h1>
+      <h1>Mes préférences de salles</h1>
+      <p>(Classement de vos salles préférées, pouvant contenir des égalités.)</p>
       
-      
-      <div id="rooms-table-sec" class="rooms-container">
-        {% for roomtype, roomgroup_list in donnees.roomtypes.items %}
-        <div class="rooms" id="{{roomtype}}">
-          <strong>{{roomtype}}</strong>
-          {% for roomgroup in roomgroup_list %}
-          <div class="pref" id="{{roomgroup}}">
-            {{roomgroup}}
+      <div id="rooms-table" class="rooms-container">
+        {% for roomtype, pref in pref_tmpl.items %}
+        <div class="rooms" id="{{roomtype.id}}">
+          <strong>{{roomtype.name}}</strong>
+          {% for roomgroup, value in pref.items %}
+          <div class="pref" id="{{roomgroup.id}}">
             <form>
               <select name="pref">
-                {% for rank in roomgroup_list %}
-                <option value={{forloop.counter}}>{{forloop.counter}}</option>
+                {% for rank in pref.items %}
+                <option value={{forloop.counter}}
+                        {% if value == forloop.counter %}
+                        selected="selected"
+                        {% endif %}
+                        >{{forloop.counter}}</option>
                 {% endfor %}
-                <option value=-1>NON</option>
+                {% comment %}
+                TODO exclude a room
+                <option value=0
+                        {% if value == 0 %}
+                        selected="selected"
+                        {% endif %}
+                        >Exclus</option>
+                {% endcomment %}
               </select>
             </form>
+            {{roomgroup.name}}
           </div>
           {% endfor %}
         </div>
         {% endfor %}
       </div>
       <input type="submit" value="Valider" onclick="exporter()" />
+      <p id="ack"></p>
     </div>
     <script>
       var user = "{{user}}";
-      var donnees = {{donnees | safe}} ;
+      var init_pref = {{ pref_js | safe}};
+      var url_changes = "{% url 'base:room_pref_changes_per_tutor' department user %}";
     </script>
     <script type='text/javascript' src="{% static 'base/room_preference.js' %}"></script>
   </body>
