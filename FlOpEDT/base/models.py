@@ -33,7 +33,8 @@ from django.db import models
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
-from base.timing import hr_min, str_slot
+from base.timing import hhmm, str_slot
+import base.weeks
 
 
 # <editor-fold desc="GROUPS">
@@ -213,16 +214,12 @@ class TimeGeneralSettings(models.Model):
     default_preference_duration = models.PositiveSmallIntegerField(default=90)
 
     def __str__(self):
-        dsh, dsm = hr_min(self.day_start_time)
-        lsh, lsm = hr_min(self.lunch_break_start_time)
-        dfh, dfm = hr_min(self.day_finish_time)
-        lfh, lfm = hr_min(self.lunch_break_finish_time)
         return f"Dept {self.department.abbrev}: " + \
-               f"{dsh}:{dsm:02d} - {lsh}:{lsm:02d}" + \
-               f" | {lfh}:{lfm:02d} - {dfh}:{dfm:02d};" + \
-               f" Days: {self.days}"
-
-
+            f"{hhmm(self.day_start_time)} - {hhmm(self.lunch_break_start_time)}" + \
+            f" | {hhmm(self.lunch_break_finish_time)} - " + \
+            f"{hhmm(self.day_finish_time)};" + \
+            f" Days: {self.days}"
+    
 # </editor-fold>
 
 # <editor-fold desc="ROOMS">
@@ -487,40 +484,69 @@ class CourseModification(models.Model):
     room_old = models.ForeignKey('RoomGroup', blank=True, null=True, on_delete=models.CASCADE)
     day_old = models.CharField(max_length=2, choices=Day.CHOICES, default=None, null=True)
     start_time_old = models.PositiveSmallIntegerField(default=None, null=True)
-    version_old = models.PositiveIntegerField()
-    updated_at = models.DateTimeField(auto_now=True)
-    initiator = models.ForeignKey('people.Tutor', on_delete=models.CASCADE)
-
-    def __str__(self):
-        olds = 'OLD:'
-        if self.old_week is not None:
-            olds += f' Sem {self.old_week} ;'
-        if self.old_year is not None:
-            olds += f' An {self.old_year} ;'
-        if self.room_old is not None:
-            olds += f' Salle {self.room_old} ;'
-        if self.day_old is not None:
-            olds += f' Cren {self.day_old}-{self.start_time_old} ;'
-        if self.version_old is not None:
-            olds += f' NumV {self.version_old} ;'
-        return f"by {self.initiator.username}, at {self.updated_at}\n" + \
-               f"{self.course} <- {olds}"
-
-
-class PlanningModification(models.Model):
-    course = models.ForeignKey('Course', on_delete=models.CASCADE)
-    old_week = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(0), MaxValueValidator(53)], null=True)
-    old_year = models.PositiveSmallIntegerField(null=True)
     tutor_old = models.ForeignKey('people.Tutor',
-                                  related_name='impacted_by_planif_modif',
+                                  related_name='impacted_by_course_modif',
                                   null=True,
                                   default=None,
-                                  on_delete=models.CASCADE)
+                                  on_delete=models.SET_NULL)
+    version_old = models.PositiveIntegerField()
     updated_at = models.DateTimeField(auto_now=True)
-    initiator = models.ForeignKey('people.Tutor',
-                                  related_name='operated_planif_modif',
-                                  on_delete=models.CASCADE)
+    initiator = models.ForeignKey('people.User', on_delete=models.CASCADE)
+
+    def strs_course_changes(self, course=None, sched_course=None):
+        if course is None:
+            course = self.course
+        if sched_course is None:
+            sched_course = ScheduledCourse.objects.get(course=course, work_copy=0)
+        department = course.type.department
+        al = '\n  + '
+        same = f'- Cours {course.module.abbrev} semaine {course.week} ({course.year})'
+        changed = ''
+
+        tutor_old_name = self.tutor_old.username if self.tutor_old is not None else "personne"
+        if sched_course.tutor == self.tutor_old:
+            same += f', par {tutor_old_name}'
+        else:
+            cur_tutor_name =  sched_course.tutor.username if sched_course.tutor is not None else "personne"
+            changed += al + f'Prof : {tutor_old_name} -> {cur_tutor_name}'
+
+        room_old_name = self.room_old.name if self.room_old is not None else "nulle part"
+        if sched_course.room == self.room_old:
+            same += f', en {room_old_name}'
+        else:
+            cur_room_name = sched_course.room.name if sched_course.room.name is not None else "nulle part"
+            changed += al + f'Salle : {room_old_name} -> {cur_room_name}'
+
+        day_list = base.weeks.num_all_days(course.year, course.week, department)
+        if sched_course.day == self.day_old \
+           and sched_course.start_time == self.start_time_old:
+            for d in day_list:
+                if d['ref'] == sched_course.day:
+                    day = d
+            same += f', {day["name"]} {day["date"]} à {hhmm(sched_course.start_time)}'
+        else:
+            changed += al + 'Horaire : '
+            if self.day_old is None or self.start_time_old is None:
+                changed += 'non placé'
+            else:
+                for d in day_list:
+                    if d['ref'] == self.day_old:
+                        day = d
+                changed += f'{day["name"]} {day["date"]} à {hhmm(self.start_time_old)}'
+            changed += ' -> '
+            for d in day_list:
+                if d['ref'] == sched_course.day:
+                    day = d
+            changed += f'{day["name"]} {day["date"]} à {hhmm(sched_course.start_time)}'
+        
+        return same, changed
+        
+    def __str__(self):
+        same, changed = self.strs_course_changes()
+        if self.version_old is not None:
+            same += f' ; (NumV {self.version_old})'
+        ret = same + changed + f"\n  by {self.initiator.username}, at {self.updated_at}"
+        return ret
 
 
 # </editor-fold desc="MODIFICATIONS">
