@@ -60,7 +60,7 @@ if COSMO_MODE:
     from base.admin import CoursPlaceResourceCosmo
 from base.forms import ContactForm, PerfectDayForm
 from base.models import Course, UserPreference, ScheduledCourse, EdtVersion, \
-    CourseModification, Day, Time, RoomGroup, Room, \
+    CourseModification, Day, Time, RoomGroup, Room, RoomType, RoomSort, \
     Regen, RoomPreference, Department, TimeGeneralSettings, CoursePreference, \
     TrainingProgramme, CourseType
 import base.queries as queries
@@ -282,6 +282,74 @@ def stype(req, *args, **kwargs):
                                  'time_settings': queries.get_time_settings(req.department),
                                  'days': num_all_days(1, 1, req.department)
                                  })
+
+@tutor_required
+def room_preference(req, department, tutor=None):
+    
+
+    
+    roomtypes = RoomType.objects.filter(department=req.department)\
+                                .prefetch_related('members')
+    roomgroups = RoomGroup.objects.filter(types__in=roomtypes)
+    rt_dict = {rt.id: rt.name for rt in roomtypes}
+    rg_dict = {rg.id: rg.name for rg in roomgroups}
+    try:
+        if tutor is None:
+            tutor = req.user.username
+        tutor = Tutor.objects.get(username=tutor)
+    except:
+        pass
+
+    base_pref = {}
+    for rs in RoomSort.objects.filter(tutor=tutor):
+        if rs.for_type not in base_pref:
+            base_pref[rs.for_type] = []
+        base_pref[rs.for_type].append({'better': rs.prefer, 'worse': rs.unprefer})
+
+    pref = {rt :{rg: len(rt.members.all()) for rg in rt.members.all()} for rt in roomtypes}
+
+    for rt in base_pref:
+        rank = 1
+        initial_rg = set([rg for p in base_pref[rt] for rg in p.values()])
+        ranked_rg = set()
+            
+        while base_pref[rt]:
+            better = set([p['better'] for p in base_pref[rt]])
+            worse = set([p['worse'] for p in base_pref[rt]])
+            best = better - worse
+            if not best:
+                for rg in better & worse:
+                    pref[rt][rg] = rank
+                base_pref[rt]=[]
+            else:
+                base_pref[rt]=[p for p in base_pref[rt]\
+                               if p['better'] not in best]
+                for rg in best:
+                    ranked_rg.add(rg)
+                    pref[rt][rg] = rank
+                rank += 1
+
+        for rg in initial_rg - ranked_rg:
+            pref[rt][rg] = rank
+
+        for rg in set(rt.members.all()) - initial_rg:
+            pref[rt][rg] = 0
+
+    for rt in set(roomtypes) - set(base_pref.keys()):
+        for rg in rt.members.all():
+            pref[rt][rg] = 0
+
+    pref_js = {rt.id :{rg.id: pref[rt][rg] for rg in rt.members.all()} for rt in roomtypes}
+            
+    return render(req, 'base/room_preference.html',
+                  {'user':req.user,
+                   'roomtypes': rt_dict,
+                   'roomgroups': rg_dict,
+                   'pref_tmpl': pref,
+                   'pref_js': pref_js,
+                   'department': department})
+
+    # {'data' : })
 
 
 @login_required
@@ -1168,6 +1236,81 @@ class HelperRoomPreference():
                               start_time=start_time,
                               duration=duration,
                               value=value)
+
+
+@tutor_required
+def room_preferences_changes_per_tutor(req, tutor, **kwargs):
+    bad_response = {'status': 'KO', 'more': ''}
+    good_response = {'status': 'OK', 'more': ''}
+
+    if not req.is_ajax():
+        bad_response['more'] = "Non ajax"
+        return JsonResponse(bad_response)
+
+    if req.method != "POST":
+        bad_response['more'] = "Non POST"
+        return bad_response
+
+    if tutor != req.user.username \
+       and not req.user.has_department_perm(req.department, admin=True):
+        bad_response['more'] = "Vous ne pouvez pas changez les préférences " +\
+            "de quelqu'un·e d'autre sans être responsable d'emplois du temps."
+        return bad_response
+
+    try:
+        tutor = Tutor.objects.get(username=tutor)
+    except ObjectDoesNotExist:
+        bad_response['more'] = "Qui est-ce ?"
+        return bad_response
+        
+
+    try:
+        recv_pref = json.loads(req.POST.get('roompreferences'))
+    except:
+        bad_response['more'] \
+            = "Problème format."
+        return JsonResponse(bad_response)
+
+    roomtypes = RoomType.objects.filter(department=req.department)\
+                                .prefetch_related('members')
+
+    pref_list = {roomtypes.get(id=rt_id) : \
+                 [{'rg': RoomGroup.objects.get(id=rg_id),
+                   'rank': val} for rg_id, val in rg_val_dict.items()\
+                  if val != 0] \
+                 for rt_id, rg_val_dict in recv_pref.items() }
+
+    print(pref_list)
+
+    bulk = []
+    for rt in pref_list:
+        pref_list[rt].sort(key=lambda p: p['rank'])
+        prev_rg = []
+        cur_rg = []
+        cur_rank = pref_list[rt][0]['rank']
+        for pref in pref_list[rt]:
+            if pref['rank'] != cur_rank:
+                prev_rg = cur_rg
+                cur_rg = []
+                cur_rank = pref['rank']
+            cur_rg.append(pref['rg'])
+            for rg in prev_rg:
+                bulk.append(RoomSort(
+                    tutor=tutor,
+                    for_type=rt,
+                    prefer=rg,
+                    unprefer=pref['rg']
+                    ))
+
+    RoomSort.objects.filter(for_type__department=req.department,
+                            tutor=tutor)\
+                    .select_related('for_type')\
+                    .delete()
+    
+    RoomSort.objects.bulk_create(bulk)
+    
+    return JsonResponse(good_response)
+
 
 
 def preferences_changes(req, year, week, helper_pref):

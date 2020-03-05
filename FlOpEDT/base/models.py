@@ -262,10 +262,14 @@ class RoomSort(models.Model):
                                related_name='+', on_delete=models.CASCADE)
     unprefer = models.ForeignKey(RoomGroup, blank=True, null=True,
                                  related_name='+', on_delete=models.CASCADE)
+    tutor = models.ForeignKey('people.Tutor',
+                              related_name='abcd',
+                              null=True,
+                              default=None,
+                              on_delete=models.CASCADE)
 
     def __str__(self):
-        return "{self.for_type}-pref-{self.prefer}-to-{self.unprefer}"
-
+        return f"{self.for_type}-pref-{self.prefer}-to-{self.unprefer}"
 
 # </editor-fold>
 
