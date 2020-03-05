@@ -4,10 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased]
+
+### Changed
+
+### TBD
+- finish adding the link in the email to validate the modifications
+
 ### Added
 - New mode for employees planning
   - new constraints (week-ends, consecutive working hours/days, etc.)
   - batch of weeks
+- Modification proposal sent via email
 
 ### Changed
 - front-end: dispatch week/day management in js files
