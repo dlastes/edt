@@ -66,6 +66,7 @@ import datetime
 
 from TTapp.constraintManager import ConstraintManager
 from TTapp.constraint import Constraint
+from TTapp.constraint_type import ConstraintType
 
 import logging
 
@@ -541,10 +542,10 @@ class TTModel(object):
                     for c in self.wdb.possible_courses[i] & self.wdb.compatible_courses[s_sl]:
                         expr -= self.TTinstructors[(s_sl, c, i)]
                 # , "IBS_sup(%s,%s)" % (i, sl)
-                self.add_constraint(expr, '<=', 99, constraint_type="IBS sup", instructor=i, slot=sl)
+                self.add_constraint(expr, '<=', 99, constraint_type=ConstraintType.IBS_SUP, instructor=i, slot=sl)
 
                 # , "IBS_inf(%s,%s)" % (i, sl)
-                self.add_constraint(expr, '>=', 0, constraint_type="IBS inf", instructor=i, slot=sl)
+                self.add_constraint(expr, '>=', 0, constraint_type=ConstraintType.IBS_INF, instructor=i, slot=sl)
 
         IBD = {}
         for i in self.wdb.instructors:
@@ -558,12 +559,12 @@ class TTModel(object):
                 for c in self.wdb.possible_courses[i] & self.wdb.courses_for_supp_tutor[i]:
                     for sl in dayslots & self.wdb.compatible_slots[c]:
                         expr -= self.TTinstructors[(sl, c, i)]
-                self.add_constraint(expr, '>=', 0, constraint_type="IBD inf", instructor=i, days=d)
+                self.add_constraint(expr, '>=', 0, constraint_type=ConstraintType.IBD_INF, instructor=i, days=d)
 
                 if self.wdb.fixed_courses.filter(Q(course__tutor=i) | Q(tutor=i),
                                                  day=d) \
                         or self.wdb.other_departments_sched_courses.filter(Q(course__tutor=i) | Q(tutor=i), day=d):
-                    self.add_constraint(IBD[(i, d)], '==', 1, constraint_type="IBD eq", instructor=i, days=d)
+                    self.add_constraint(IBD[(i, d)], '==', 1, constraint_type=ConstraintType.IBD_EQ, instructor=i, days=d)
                 # This next constraint impides to force IBD to be 1
                 # (if there is a meeting, for example...)
                 # self.add_constraint(expr, '<=', card-1)
@@ -606,17 +607,17 @@ class TTModel(object):
                     for sl in halfdayslots:
                         for c in self.wdb.possible_courses[i] & self.wdb.compatible_courses[sl]:
                             expr -= self.TTinstructors[(sl, c, i)]
-                    self.add_constraint(expr, '>=', 0, constraint_type="IBHD inf", instructor=i, days=d)
+                    self.add_constraint(expr, '>=', 0, constraint_type=ConstraintType.IBHD_INF, instructor=i, days=d)
                     # This constraint impides to force IBHD to be 1
                     # (if there is a meeting, for example...)
                     if self.wdb.fixed_courses.filter(course__tutor=i,
                                                      course__week=d.week,
                                                      day=d.day):
                         # ,creneau__heure__apm=apm):
-                        self.add_constraint(IBHD[(i, d, apm)], '==', 1, constraint_type="IBHD eq", instructor=i, days=d)
+                        self.add_constraint(IBHD[(i, d, apm)], '==', 1, constraint_type=ConstraintType.IBHD_EQ, instructor=i, days=d)
 
                     else:
-                        self.add_constraint(expr, '<=', card - 1, constraint_type="IBHD sup", instructor=i, days=d)
+                        self.add_constraint(expr, '<=', card - 1, constraint_type=ConstraintType.IBHD_SUP, instructor=i, days=d)
 
         GBHD = {}
         for g in self.wdb.basic_groups:
@@ -635,8 +636,8 @@ class TTModel(object):
                         for sg in g.ancestor_groups():
                             for c in self.wdb.courses_for_group[sg] & self.wdb.compatible_courses[sl]:
                                 expr -= self.TT[(sl, c)]
-                    self.add_constraint(expr, '>=', 0, constraint_type="GBHD inf", group=g, days=d)
-                    self.add_constraint(expr, '<=', card - 1, constraint_type="GBHD sup", group=g, days=d)
+                    self.add_constraint(expr, '>=', 0, constraint_type=ConstraintType.GBHD_INF, group=g, days=d)
+                    self.add_constraint(expr, '<=', card - 1, constraint_type=ConstraintType.GBHD_SUP, group=g, days=d)
         return IBD, IBD_GTE, IBHD, GBHD, IBS, forced_IBD
 
     def add_var(self, name):
@@ -728,8 +729,8 @@ class TTModel(object):
         et l'ajoute au modèle
         """
         l_conj_var = self.add_var("%s AND %s" % (str(v1), str(v2)))
-        self.add_constraint(l_conj_var - (v1 + v2), '>=', -1, constraint_type="conjonction")
-        self.add_constraint(2 * l_conj_var - (v1 + v2), '<=', 0, constraint_type="conjonction")
+        self.add_constraint(l_conj_var - (v1 + v2), '>=', -1, constraint_type=ConstraintType.CONJONCTION)
+        self.add_constraint(2 * l_conj_var - (v1 + v2), '<=', 0, constraint_type=ConstraintType.CONJONCTION)
         return l_conj_var
 
     def add_floor(self, name, expr, floor, bound):
@@ -738,8 +739,8 @@ class TTModel(object):
         known to be within [0, bound]
         """
         l_floor = self.add_var("FLOOR %s %d" % (name, floor))
-        self.add_constraint(expr - l_floor * floor, '>=', 0, constraint_type="seuil")
-        self.add_constraint(l_floor * bound - expr, '>=', 1 - floor, constraint_type="seuil")
+        self.add_constraint(expr - l_floor * floor, '>=', 0, constraint_type=ConstraintType.SEUIL)
+        self.add_constraint(l_floor * bound - expr, '>=', 1 - floor, constraint_type=ConstraintType.SEUIL)
         return l_floor
 
     def add_if_var_a_then_not_vars_b_constraint(self, var_a, vars_b_list, name_of_b_list=None):
@@ -752,7 +753,7 @@ class TTModel(object):
             +
             self.sum(var for var in vars_b_list),
             '<=',
-            bound, constraint_type="si a alors non b")
+            bound, constraint_type=ConstraintType.SI_A_ALORS_NON_B)
 
     def add_to_slot_cost(self, slot, cost):
         self.cost_SL[slot] += cost
@@ -814,21 +815,19 @@ class TTModel(object):
         print('Simultaneous slots constraints for groups')
         for sl1 in self.wdb.slots:
             for bg in self.wdb.basic_groups:
-                name = 'simul_slots' + bg.full_name() + '_' + str(sl1)
                 self.add_constraint(1000 * self.sum(self.TT[(sl1, c1)] for c1 in self.wdb.courses_for_basic_group[bg]
                                                     & self.wdb.compatible_courses[sl1]) +
                                     self.sum(self.TT[(sl2, c2)] for sl2 in self.wdb.slots_intersecting[sl1] - {sl1}
                                              for c2 in self.wdb.courses_for_basic_group[bg]
                                              & self.wdb.compatible_courses[sl2]),
-                                    '<=', 1000, constraint_type="Pas plus d'un cours par créneau", slot=sl1, group=bg)
+                                    '<=', 1000, constraint_type=ConstraintType.PAS_PLUS_1_COURS_PAR_CRENEAU, slot=sl1, group=bg)
 
         # a course is scheduled once and only once
         for c in self.wdb.courses:
-            name = 'core_course_' + str(c) + str(self.constraint_nb)
             self.add_constraint(
                 self.sum([self.TT[(sl, c)] for sl in self.wdb.compatible_slots[c]]),
                 '==',
-                1, constraint_type="Le cours doit être placé", course=c)
+                1, constraint_type=ConstraintType.COURS_DOIT_ETRE_PLACE, course=c)
 
         # Training half day
         for training_half_day in self.wdb.training_half_days:
@@ -843,7 +842,7 @@ class TTModel(object):
                                          for c in self.wdb.compatible_courses[sl]
                                          & set(self.wdb.courses.filter(group__train_prog__in=training_progs))),
                                 '==', 0,
-                                constraint_type="Pas de cours de demi-journée",
+                                constraint_type=ConstraintType.PAS_DE_COURS_DE_DEMI_JOURNEE,
                                 days=[training_half_day.day, training_half_day.apm])
 
     def add_instructors_constraints(self):
@@ -853,7 +852,7 @@ class TTModel(object):
                 # , "Each_course_to_one_tutor %s-%s_%g" % (c, sl, self.constraint_nb)
                 self.add_constraint(self.sum(self.TTinstructors[(sl, c, i)]
                                              for i in self.wdb.possible_tutors[c]) - self.TT[sl, c],
-                                    '==', 0, constraint_type="Chaque cours doit avoir un professeur", slot=sl, course=c)
+                                    '==', 0, constraint_type=ConstraintType.COURS_DOIT_AVOIR_PROFESSEUR, slot=sl, course=c)
             if c.supp_tutor.exists():
                 supp_tutors = set(c.supp_tutor.all()) & self.wdb.instructors
                 if supp_tutors:
@@ -867,20 +866,18 @@ class TTModel(object):
                                                        self.wdb.compatible_courses[sl2]),
                                             '<=',
                                             1000 * min(self.avail_instr[s_t][sl] for s_t in supp_tutors),
-                                            constraint_type="Un professeur ne peut pas donner 2 cours en même temps",
+                                            constraint_type=ConstraintType.PROFESSEUR_NE_PEUT_DONNER_2_COURS_EN_MEME_TEMPS,
                                             slot=sl,
                                             course=c)
 
         for i in self.wdb.instructors:
             for sl in self.wdb.slots:
-                name = 'core_instr_' + str(i) + '_' + str(sl)
                 self.add_constraint(self.sum(self.TTinstructors[(sl, c, i)]
                                              for c in (self.wdb.compatible_courses[sl]
                                                        & self.wdb.possible_courses[i])),
                                     '<=',
-                                    self.avail_instr[i][sl], constraint_type="Pas de professeur disponible", slot=sl,
-                                    instructor=i)
-                name = 'simul_slots' + str(i) + '_' + str(sl)
+                                    self.avail_instr[i][sl],
+                                    constraint_type=ConstraintType.PAS_DE_PROFESSEUR_DISPONIBLE, slot=sl, instructor=i)
                 self.add_constraint(1000 * self.sum(self.TTinstructors[(sl, c1, i)]
                                                     for c1 in self.wdb.possible_courses[i]
                                                     & self.wdb.compatible_courses[sl])
@@ -888,7 +885,8 @@ class TTModel(object):
                                     self.sum(self.TTinstructors[(sl2, c2, i)]
                                              for sl2 in self.wdb.slots_intersecting[sl] - {sl}
                                              for c2 in self.wdb.possible_courses[i] & self.wdb.compatible_courses[sl2]),
-                                    '<=', 1000, constraint_type="simul slots", slot=sl, instructor=i)
+                                    '<=', 1000,
+                                    constraint_type=ConstraintType.SIMUL_SLOT, slot=sl, instructor=i)
 
     def add_rooms_constraints(self):
         print("adding room constraints")
@@ -897,7 +895,6 @@ class TTModel(object):
         # constraint : each Room is only used once on simultaneous slots
         for r in self.wdb.rooms:
             for sl1 in self.wdb.slots:
-                name = 'simul_slots_rooms' + str(r) + '_' + str(sl1)
                 self.add_constraint(1000 * self.sum(self.TTrooms[(sl1, c, rg)]
                                                     for (c, rg) in self.wdb.room_course_compat[r]
                                                     if c in self.wdb.compatible_courses[sl1]) +
@@ -906,7 +903,7 @@ class TTModel(object):
                                              for (c, rg) in self.wdb.room_course_compat[r]
                                              if c in self.wdb.compatible_courses[sl2]),
                                     '<=', 1000,
-                                    constraint_type="Une salle ne peut pas être disponible pour 2 cours à un même moment",
+                                    constraint_type=ConstraintType.SALLE_NE_PEUT_ACCEPTER_2_COURS_EN_MEME_TEMPS,
                                     room=r, slot=sl1)
 
         for sl in self.wdb.slots:
@@ -916,7 +913,7 @@ class TTModel(object):
                 self.add_constraint(
                     self.sum(self.TTrooms[(sl, c, rg)] for rg in self.wdb.course_rg_compat[c]) - self.TT[(sl, c)],
                     '==',
-                    0, constraint_type="Chaque cours doit être assigné à un type de salle", slot=sl, course=c)
+                    0, constraint_type=ConstraintType.UN_COURS_POUR_UN_TYPE_DE_SALLE, slot=sl, course=c)
 
             # constraint : fixed_courses rooms are not available
             for rg in self.wdb.room_groups:
@@ -933,7 +930,7 @@ class TTModel(object):
                                                      for room in self.wdb.course_rg_compat[c]
                                                      if r in room.subrooms.all()),
                                             '==',
-                                            0, constraint_type="La salle n'est pas disponible", slot=sl, room=r, )
+                                            0, constraint_type=ConstraintType.SALLE_PAS_DISPONIBLE, slot=sl, room=r)
 
             # constraint : each Room is only used once and only when available
             for r in self.wdb.rooms:
@@ -943,8 +940,8 @@ class TTModel(object):
                              for (c, rg) in self.wdb.room_course_compat[r]
                              if c in self.wdb.compatible_courses[sl]),
                     '<=',
-                    self.avail_room[r][sl], constraint_type="Chaque salle ne peut être utilisée qu'une seule fois",
-                    slot=sl, room=r)
+                    self.avail_room[r][sl],
+                    constraint_type=ConstraintType.SALLE_DISPO_AU_PLUS_1_FOIS, slot=sl, room=r)
 
             ########TO BE CHECKED################
             # constraint : respect preference order,
@@ -965,8 +962,8 @@ class TTModel(object):
                     continue
                 # print "### slot :", sl, rp.unprefer, "after", rp.prefer
                 # print e <= 0
-                self.add_constraint(e, '<=', 0, constraint_type="La salle préférée n'est pas disponible", room=rp,
-                                    slot=sl)
+                self.add_constraint(e, '<=', 0,
+                                    constraint_type=ConstraintType.SALLE_PREFEREE_NON_DISPONIBLE, room=rp, slot=sl)
 
     # constraint : respect preference order with full order for each room type :
     # perfs OK
@@ -1020,7 +1017,7 @@ class TTModel(object):
                             # , "Dependency %s %g" % (p, self.constraint_nb)
                             self.add_constraint(self.TT[(sl1, c1)]
                                                 + self.TT[(sl2, c2)], '<=', 1,
-                                                constraint_type="Problème de dépendance",
+                                                constraint_type=ConstraintType.DEPENDANCE,
                                                 course=[c1, c2],
                                                 slot=[sl1, sl2])
                         else:
@@ -1032,7 +1029,7 @@ class TTModel(object):
                             for rg2 in self.wdb.room_groups_for_type[c2.room_type].exclude(id=rg1.id):
                                 self.add_constraint(self.TTrooms[(sl1, c1, rg1)]
                                                     + self.TTrooms[(sl2, c2, rg2)], '<=', 1,
-                                                    constraint_type="Problème de dépendance entre les salles",
+                                                    constraint_type=ConstraintType.DEPENDANCE_SALLE,
                                                     course=[c1, c2],
                                                     slot=[sl1, sl2],
                                                     room=[rg1, rg2])
@@ -1271,7 +1268,7 @@ class TTModel(object):
                                                  for room in self.wdb.course_rg_compat[c]
                                                  if r in room.subrooms.all()),
                                         '==',
-                                        0, constraint_type="Les autres départements bloquent le slot",
+                                        0, constraint_type=ConstraintType.DEPARTEMENT_BLOQUE_SLOT,
                                         slot=sl, room=r, department=d)
 
             # constraint : other_departments_sched_courses instructors are not available
@@ -1290,10 +1287,10 @@ class TTModel(object):
                                                            | self.wdb.courses_for_supp_tutor[i]) &
                                                  self.wdb.compatible_courses[sl]),
                                         '==',
-                                        0, constraint_type="Le professeur a déjà un cours dans un autre département",
+                                        0, constraint_type=ConstraintType.PROFESSEUR_A_DEJA_COURS_EN_AUTRE_DEPARTEMENT,
                                         slot=sl, instructor=i, department=d)
                     self.add_constraint(self.IBD[(i, sl.day)], '==', 1,
-                                        constraint_type="Le professeur a déjà un cours dans un autre département IBD",
+                                        constraint_type=ConstraintType.PROFESSEUR_A_DEJA_COURS_EN_AUTRE_DEPARTEMENT_IBD,
                                         slot=sl, instructor=i, department=d)
 
     def add_specific_constraints(self):
