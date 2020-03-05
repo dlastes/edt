@@ -21,32 +21,61 @@ class Constraint:
 
         if type(instructors) is not list:
             instructors = [instructors]
-        self.instructors = instructors
-        if type(slots) is not list:
-            slots = [slots]
-        self.slots = slots
-        if type(courses) is not list:
-            courses = [courses]
-        self.courses = courses
+        self.instructors = list(instructors)
+
         if type(weeks) is not list:
             weeks = [weeks]
-        self.weeks = weeks
+        self.weeks = list(weeks)
+
         if type(rooms) is not list:
             rooms = [rooms]
-        self.rooms = rooms
+        self.rooms = list(rooms)
+
         if type(groups) is not list:
             groups = [groups]
-        self.groups = groups
+        self.groups = list(groups)
+
         if type(days) is not list:
             days = [days]
-        self.days = days
+        self.days = list(days)
+
         if type(departments) is not list:
             departments = [departments]
-        self.departments = departments
+        self.departments = list(departments)
+
         if type(modules) is not list:
             modules = [modules]
-        self.modules = modules
+        self.modules = list(modules)
         self.apm = apm
+
+        if type(slots) is not list:
+            slots = [slots]
+        self.slots = list(slots)
+
+        if type(courses) is not list:
+            courses = [courses]
+        self.courses = list(courses)
+
+        for s in self.slots:
+            day = s.get_day().day
+            if day not in self.days:
+                self.days.append(day)
+            week = s.get_day().week
+            if week not in self.weeks:
+                self.weeks.append(week)
+
+        if len(self.courses) >= 2 and self.courses[0].equals(self.courses[1]):
+            del self.courses[1]
+        for c in self.courses:
+            instructor = c.get_tutor()
+            if instructor not in self.instructors:
+                self.instructors.append(instructor)
+            group = c.get_group()
+            if group not in self.groups:
+                self.groups.append(group)
+            module = c.get_module()
+            if module not in self.modules:
+                self.modules.append(module)
 
     def get_id(self):
         return self.id

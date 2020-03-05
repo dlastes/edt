@@ -80,6 +80,7 @@ class Slot(object):
         else:
             self.apm = Time.AM
 
+
     def is_simultaneous_to(self, other):
         if self.day == other.day and self.start_time < other.end_time and other.start_time < self.end_time:
             return True
@@ -113,7 +114,9 @@ class Slot(object):
     def __repr__(self):
         return str(self)
 
-
+    def get_day(self):
+        return self.day
+        
 def slots_filter(slot_set, day=None, apm=None, course_type=None, start_time=None, week_day=None,
                  simultaneous_to=None, week=None, is_after=None, starts_after=None, starts_before=None, ends_before=None):
     slots = slot_set
