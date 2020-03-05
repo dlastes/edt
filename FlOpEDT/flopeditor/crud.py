@@ -29,11 +29,26 @@ without disclosing the source code of your own applications.
 This module is used to establish the crud back-end interface.
 """
 
-from base import queries
+import json
 from django.http import JsonResponse, HttpResponseForbidden
-from base.models import Department, Room
 from django.shortcuts import get_object_or_404
+from base.models import Department
 from flopeditor.cruds import rooms
+
+def good_request(request, department):
+    """ Request rights verification
+    :param request: Client request.
+    :type request:  django.http.HttpRequest
+    :param department: Department.
+    :type department:  base.models.Department
+    :return: true if the user has the right access to do the request
+    :rtype:  boolean
+    """
+    if request.method == 'GET':
+        return not request.user.is_anonymous and request.user.is_tutor
+    return not request.user.is_anonymous and \
+    request.user.has_department_perm(department, admin=True)
+
 
 def crud_rooms(request, department_abbrev):
     """Crud url for rooms edition
@@ -45,19 +60,23 @@ def crud_rooms(request, department_abbrev):
 
     """
     department = get_object_or_404(Department, abbrev=department_abbrev)
+    if not good_request(request, department):
+        return HttpResponseForbidden()
+
+
     if request.method == "GET":
-        return rooms.read(request, department)
-    elif request.method == "PUT":
-        pass
-
+        return rooms.read(department)
     elif request.method == "POST":
-        pass
-
-    elif request.method == "DELETE":
-        # Verifier la forme/structure de la donnée reçue par CrudJS
-        # Vérifier que les salles demandées existent bien dans la base de données
-        # Supprimer le(s) salle(s)
-        # Retourner un message si OK ou pas
-        pass
-
+        actions = json.loads(request.POST.get('actions'))
+        result = []
+        for action in actions:
+            if action['request'] == 'NEW':
+                result.append(rooms.create(action, department))
+            elif action['request'] == 'MODIFIED':
+                result.append(rooms.update(action, department))
+            elif action['request'] == 'DELETED':
+                result.append(rooms.delete(action, department))
+        return JsonResponse({
+            'actions': result
+        })
     return HttpResponseForbidden()
