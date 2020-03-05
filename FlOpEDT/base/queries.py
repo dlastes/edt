@@ -278,17 +278,20 @@ def get_departments():
     """
     return [d.abbrev for d in Department.objects.all()]
 
+
 def get_course_types(dept):
     """
     :return: list of course type names
     """
     return [d.name for d in CourseType.objects.filter(department=dept)]
 
+
 def get_training_programmes(dept):
     """
     :return: list of training programme names
     """
     return [d.abbrev for d in TrainingProgramme.objects.filter(department=dept)]
+
 
 def get_working_days(dept):
     """

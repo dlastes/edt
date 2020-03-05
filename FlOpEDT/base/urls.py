@@ -22,7 +22,7 @@
 # without disclosing the source code of your own applications.
 
 from django.conf.urls import url, include
-from django.urls import path
+from django.urls import path, re_path
 from . import views
 from . import statistics
 from django.views.generic import RedirectView
@@ -39,6 +39,7 @@ urlpatterns = [
 
     # directly reachable by users
     # ----------------------------
+    re_path(r'room-preference/(?P<tutor>\w{2,8})?', views.room_preference, name='room-pref'),
     url(r'^preferences$', views.preferences, name="preferences"),
     url(r'^semaine-type$', views.stype, name="stype"),
     url(r'^aide$', views.aide, name="aide"),
@@ -94,6 +95,7 @@ urlpatterns = [
     path('change_room_pref/<int:year>/<int:week>/<str:room>', views.room_preferences_changes, name="room_pref_changes"),
     path('change_decale', views.decale_changes, name="decale_changes"),
     path('change_perfect_day/<str:username>', views.user_perfect_day_changes, name="user_perfect_day_changes"),
+    path(r'change_room_pref_per_tutor/<str:tutor>', views.room_preferences_changes_per_tutor, name='room_pref_changes_per_tutor'),
 
     # predefined
     # ------------
