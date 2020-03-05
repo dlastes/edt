@@ -961,7 +961,7 @@ def fetch_shared_roomgroups(req, year, week, **kwargs):
 
 
 def fetch_all_modules_with_desc(req, **kwargs):
-    data = Module.objects.all()
+    data = Module.objects.filter(period__department=req.department)
     res = ModuleDescriptionResource().export(data)
     return HttpResponse(res.json, content_type='application/json')
 
