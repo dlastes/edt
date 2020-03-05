@@ -124,7 +124,7 @@ class ConstraintManager:
         return occur_type, occur_instructor, occur_slot, occur_course, occur_week, occur_room, occur_group, \
             occur_days, occur_departments, occur_module
 
-    def show_reduces_result_brut(self, id_constraints, week, decreasing=True):
+    def show_reduces_result_brut(self, id_constraints, weeks, decreasing=True):
         occur_type, _, _, _, _, _, _, _, _, _ = self.get_occurs(id_constraints, decreasing)
         order = list(occur_type.keys())
         constraints = self.get_constraints_by_ids(id_constraints)
