@@ -1015,21 +1015,24 @@ class TTModel(object):
     def send_unitary_lack_of_availability_mail(self, tutor, week, available_hours, teaching_hours,
                                                prefix="[flop!EDT] "):
         subject = f"Manque de dispos semaine {week}"
-        message = f"Bonjour {tutor.first_name}\n" \
-                  f"Semaine {week} vous ne donnez que {available_hours} heures de disponibilités, " \
-                  f"alors que vous êtes censé⋅e assurer {teaching_hours} heures de cours...\n" \
-                  f"Est-ce que vous avez la possibilité d'ajouter des créneaux de disponibilité ?\n" \
-                  f"Sinon, pouvez-vous s'il vous plaît décaler des cours à une semaine précédente ou suivante ?\n" \
-                  f"Merci d'avance.\n" \
-                  f"Les gestionnaires d'emploi du temps."
+        message = "(Cet e-mail vous a été envoyé automatiquement par le générateur " \
+                  "d'emplois du temps du logiciel flop!EDT)\n\n"
+        message += f"Bonjour {tutor.first_name}\n" \
+                   f"Semaine {week} vous ne donnez que {available_hours} heures de disponibilités, " \
+                   f"alors que vous êtes censé⋅e assurer {teaching_hours} heures de cours...\n"
+        if self.wdb.holidays:
+            message += f"(Notez qu'il y a {len(self.wdb.holidays)} jour(s) férié(s) cette semaine là...)\n"
+        message += f"Est-ce que vous avez la possibilité d'ajouter des créneaux de disponibilité ?\n" \
+                   f"Sinon, pouvez-vous s'il vous plaît décaler des cours à une semaine précédente ou suivante ?\n" \
+                   f"Merci d'avance.\n" \
+                   f"Les gestionnaires d'emploi du temps."
+
+        message += "\n\nPS: Attention, cet email risque de vous être renvoyé à chaque prochaine génération " \
+                   "d'emploi du temps si vous n'avez pas fait les modifications attendues...\n" \
+                   "N'hésitez pas à nous contacter en cas de souci."
         email = EmailMessage(
             prefix + subject,
-            "(Cet e-mail vous a été envoyé automatiquement par le générateur "
-            "d'emplois du temps du logiciel flop!EDT)\n\n"
-            + message +
-            "\n\nPS: Attention, cet email risque de vous être renvoyé à chaque prochaine génération "
-            "d'emploi du temps si vous n'avez pas fait les modifications attendues...\n"
-            "N'hésitez pas à nous contacter en cas de souci.",
+            message,
             to=(tutor.email,)
         )
         email.send()
