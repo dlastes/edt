@@ -215,7 +215,7 @@ class TimeGeneralSettings(models.Model):
         return f"Dept {self.department.abbrev}: " + \
             f"{hhmm(self.day_start_time)} - {hhmm(self.lunch_break_start_time)}" + \
             f" | {hhmm(self.lunch_break_finish_time)} - " + \
-            f"{hhmm(day_finish_time)};" + \
+            f"{hhmm(self.day_finish_time)};" + \
             f" Days: {self.days}"
     
 # </editor-fold>
