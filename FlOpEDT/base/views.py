@@ -60,7 +60,7 @@ if COSMO_MODE:
     from base.admin import CoursPlaceResourceCosmo
 from base.forms import ContactForm, PerfectDayForm
 from base.models import Course, UserPreference, ScheduledCourse, EdtVersion, \
-    CourseModification, Day, Time, RoomGroup, Room, \
+    CourseModification, Day, Time, RoomGroup, Room, RoomType, RoomSort, \
     Regen, RoomPreference, Department, TimeGeneralSettings, CoursePreference, \
     TrainingProgramme, CourseType
 import base.queries as queries
@@ -218,17 +218,6 @@ def edt_light(req, year=None, week=None, **kwargs):
                                 'tv_svg_top_m': svg_top_m,
                                 'cosmo': COSMO_MODE,
                             })
-
-
-def tri_pref(req, dict):
-    exclus = []
-    for rtname, listpref in dict['roompreferences']:
-        listpref.sort(key=lambda x: (x['value']))
-        for e in listpref:
-            if e['value'] == 0:
-                exclus.append(e)
-            for value in listpref:
-                return listpref
 
 
 @login_required
