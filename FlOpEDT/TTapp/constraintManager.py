@@ -91,6 +91,7 @@ class ConstraintManager:
         occur_group = {}
         occur_days = {}
         occur_departments = {}
+        occur_module = {}
 
         # Initiate all occurences
         for i in id_constraints:
@@ -118,14 +119,13 @@ class ConstraintManager:
         occur_days = {k: v for k, v in sorted(occur_days.items(), key=lambda item: item[1][0], reverse=decreasing)}
         occur_departments = \
             {k: v for k, v in sorted(occur_departments.items(), key=lambda item: item[1][0], reverse=decreasing)}
+        occur_module = {k: v for k, v in sorted(occur_module.items(), key=lambda item: item[1][0], reverse=decreasing)}
 
         return occur_type, occur_instructor, occur_slot, occur_course, occur_week, occur_room, occur_group, \
-            occur_days, occur_departments
+            occur_days, occur_departments, occur_module
 
-    def show_reduces_result_brut(self, id_constraints, weeks, decreasing=True):
-        occur_type, occur_instructor, occur_slot, occur_course, occur_week, occur_room, occur_group, occur_days,\
-            occur_department = self.get_occurs(id_constraints, decreasing)
-
+    def show_reduces_result_brut(self, id_constraints, week, decreasing=True):
+        occur_type, _, _, _, _, _, _, _, _, _ = self.get_occurs(id_constraints, decreasing)
         order = list(occur_type.keys())
         constraints = self.get_constraints_by_ids(id_constraints)
         constraints = sorted(constraints, key=lambda x: order.index(x.constraint_type))
@@ -140,7 +140,7 @@ class ConstraintManager:
 
     def show_reduces_result(self, id_constraints, weeks):
         occur_type, occur_instructor, occur_slot, occur_course, occur_week, occur_room, occur_group, occur_days,\
-            occur_department = self.get_occurs(id_constraints)
+            occur_department, occur_modules = self.get_occurs(id_constraints)
 
         buf_type = ""
         for x in occur_type:
@@ -154,6 +154,7 @@ class ConstraintManager:
         buf_group = make_occur_buf(occur_group)
         buf_days = make_occur_buf(occur_days)
         buf_department = make_occur_buf(occur_department)
+        buf_module = make_occur_buf(occur_modules)
 
         output = "Sommaire des contraintes : \n"
         if buf_type != "":
@@ -174,6 +175,8 @@ class ConstraintManager:
             output += "\nParametre Slot :\n" + buf_slot
         if buf_department != "":
             output += "\nParametre Department :\n" + buf_department
+        if buf_module != "":
+            output += "\nParametre Module :\n" + buf_module
 
         filename = "logs/intelligible_constraints_factorised%s.txt" % weeks
         print("writting %s ..." % filename)

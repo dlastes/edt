@@ -649,7 +649,7 @@ class TTModel(object):
         return LpVariable(countedname, cat=LpBinary)
 
     def add_constraint(self, expr, relation, value, constraint_type=None, instructor=[], slot=[], course=[],
-                       week=[], room=[], group=[], days=[], department=[]):
+                       week=[], room=[], group=[], days=[], department=[], module=[], apm=None):
         """
         Add a constraint to the model
         """
@@ -670,7 +670,8 @@ class TTModel(object):
 
         self.constraintManager.add_constraint(Constraint(id=name, constraint_type=constraint_type,
                                                          instructors=instructor, slots=slot, courses=course, weeks=week,
-                                                         rooms=room, groups=group, days=days, departments=department))
+                                                         rooms=room, groups=group, days=days, departments=department,
+                                                         modules=module, apm=apm))
         self.constraint_nb += 1
 
     def lin_expr(self, expr=None):

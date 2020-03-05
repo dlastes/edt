@@ -14,7 +14,7 @@ def list2str(myList):
 
 class Constraint:
     def __init__(self, id, constraint_type=None, instructors=[], slots=[], courses=[], weeks=[], rooms=[],
-                 groups=[], days=[], departments=[]):
+                 groups=[], days=[], departments=[], modules=[], apm=None):
         self.id = id
         self.constraint_type = constraint_type
 
@@ -42,6 +42,10 @@ class Constraint:
         if type(departments) is not list:
             departments = [departments]
         self.departments = departments
+        if type(modules) is not list:
+            modules = [modules]
+        self.modules = modules
+        self.apm = apm
 
     def get_id(self):
         return self.id
@@ -83,6 +87,13 @@ class Constraint:
             d, c = singular_or_plurial(self.departments, isMale=True)
             res += "pour %s departement%s %s ; " % (d, c, list2str(
                 [str(department) for department in self.departments]))
+
+        if len(self.modules) >= 1:
+            d, c = singular_or_plurial(self.modules, isMale=True)
+            res += "pour %s module%s %s ; " % (d, c, list2str([str(module) for module in self.modules]))
+
+        if self.apm is not None:
+            res += 'de demi-journée "%s" ; ' % str(self.apm)
 
         res += "doit être respectée."
         return res

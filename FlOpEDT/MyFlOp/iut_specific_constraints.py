@@ -77,7 +77,7 @@ def bound_hours_per_day(ttmodel, week, tutor):
                                            & ttmodel.wdb.compatible_slots[c]),
                                '<=',
                                tutor.max_hours_per_day,
-                               constraint_type='bound_hours_per_day_%s_%s' % (tutor, d))
+                               constraint_type="bound hours per day", instructor=tutor, days=d)
 
 def add_iut_blagnac_basics(ttmodel):
     print("adding IUT Blagnac's basic constraints")
@@ -190,7 +190,7 @@ def add_iut_blagnac_specials(ttmodel):
                                            ),
                                "==",
                                0,
-                               constraint_type="pas de sport sauf lundi et mardi %s" % sport)
+                               constraint_type="pas de sport sauf lundi et mardi", module=sport)
 
     if promos1.exists():
         if not ttmodel.department.abbrev == 'RT':
@@ -350,7 +350,7 @@ def add_iut_blagnac_info(ttmodel):
                 ttmodel.IBS[PDU, sl8] + 0.5 * (ttmodel.IBS[PDU, sl11] + ttmodel.IBS[PDU, sl14]),
                 '<=',
                 1,
-                constraint_type="spécificites PDU %s" % (day))
+                constraint_type="spécificites PDU", days=day)
 
     # MN : pas plus de 2 cours par demie-journée
         # En base?
@@ -385,11 +385,11 @@ def add_iut_blagnac_info(ttmodel):
             if sl.start_time > 15*60 or sl.start_time < 9*60:
                 ttmodel.add_constraint(ttmodel.TT[(sl, c1)] +
                                        ttmodel.TT[(sl, c2)], '==', 0,
-                                       constraint_type="reu_peda_%s" % sl)
+                                       constraint_type="reu_peda", slot=sl)
             else:
                 ttmodel.add_constraint(ttmodel.TT[(sl, c1)] -
                                        ttmodel.TT[(sl, c2)], '==', 0,
-                                       constraint_type="reu_peda_%s" % sl)
+                                       constraint_type="reu_peda", slot=sl)
 
     # Éviter que EPE ait un cours à 8h et un à 15h45 le même jour...)
     # prof_epe = Tutor.objects.get(username='EPE')
@@ -565,7 +565,7 @@ def add_iut_blagnac_info(ttmodel):
                                                & ttmodel.wdb.compatible_slots[c])
                                    , '==',
                                    0,
-                                   constraint_type='PTUT_no_Courses%s' % day)
+                                   constraint_type="PTUT_no_Courses", days=day)
 
     # Paul et Pablo ont un créneau de libre le lundi à 11h, sauf s'ils n'ont aucun jours en commun...
     # Paul = Tutor.objects.get(username='PRG')
@@ -852,11 +852,12 @@ def add_iut_blagnac_rt(ttmodel):
                                          if c.tutor.status == 'fs')
                 vacataires_sans_permanents = ttmodel.add_var("vacataires_sans_permanents_%s_%s" % (m, sl))
                 ttmodel.add_constraint(10 * vacataires_sans_permanents + permanents - vacataires, '<=', 10,
-                                       constraint_type="Vac_perm_%s_%s_%g" % (sl, m, ttmodel.constraint_nb))
+                                       constraint_type="vacataires_sans_permanents", slot=sl, module=m)
 
                 ttmodel.add_constraint(vacataires - permanents - 10 * vacataires_sans_permanents,
                                        '<=',
-                                       0, constraint_type="Vac_perm_%s_%s_%g" % (m, sl, ttmodel.constraint_nb))
+                                       0,
+                                       constraint_type="vacataires_sans_permanents", slot=sl, module=m)
                 ttmodel.add_to_slot_cost(sl, 100*vacataires_sans_permanents)
 
     # Quand même par paire, et chaque vacataire doit avoir un permanent...
@@ -875,7 +876,9 @@ def add_iut_blagnac_rt(ttmodel):
                                     for sl in slots_filter(ttmodel.wdb.slots, day=d, apm=apm)
                                     & ttmodel.wdb.compatible_slots[c]),
                         '<=',
-                        2, constraint_type="Pas plus d'un TD par demie-journee_%s_%s_%s_%s_%g" % (m, g, d, apm, ttmodel.constraint_nb))
+                        2,
+                        constraint_type="Pas plus d'un TD par demie-journee", module=m, group=g, days=d, apm=apm
+                    )
 
     # minimiser les demie-journées pour tous les vacataires + regrouper les cours si 2 par demie-journée
     contrainte = False
@@ -893,7 +896,7 @@ def add_iut_blagnac_rt(ttmodel):
                     ttmodel.add_constraint(total_dj,
                                            '<=',
                                            nb_dj_min,
-                                           constraint_type="Min_Half_Days_%s" % t.username)
+                                           constraint_type="Min_Half_Days", instructor=t)
                 else:
                     ttmodel.add_to_inst_cost(t, 1000*(total_dj-nb_dj_min*local_var_un), week=week)
 
@@ -914,7 +917,7 @@ def add_iut_blagnac_rt(ttmodel):
                                         for c in ttmodel.wdb.courses_for_tutor[t]
                                         & ttmodel.wdb.compatible_courses[sl]),
                             '<=',
-                            4*60, constraint_type="Pas plus de 4 heures par demie_journee_%s_%s_%s" % (t.username, d, apm))
+                            4*60, constraint_type="Pas plus de 4 heures par demie_journee", instructor=t, days=d, apm=apm)
 
     # Pas plus de 2 examens par jour!
     DS = CourseType.objects.get(name='Examen', department=ttmodel.department)
@@ -957,7 +960,7 @@ def add_iut_blagnac_gim(ttmodel):
                                        ttmodel.sum(ttmodel.TT[(sl2, c2)]
                                                    for c2 in ttmodel.wdb.courses_for_basic_group[bg]
                                                    & ttmodel.wdb.compatible_courses[sl2]),
-                                       '<=', 1, constraint_type=name)
+                                       '<=', 1, constraint_type="simul slot", group=bg, slot=[sl1, sl2])
 
     TPB1 = ttmodel.wdb.groups.filter(name='TPB1', train_prog__abbrev='GIM2')
     TPB2 = ttmodel.wdb.groups.filter(name='TPB2', train_prog__abbrev='GIM2')
@@ -981,8 +984,7 @@ def add_iut_blagnac_gim(ttmodel):
                     c2 = C2[i]
                     for sl in ttmodel.wdb.compatible_slots[c1]:
                         ttmodel.add_constraint(ttmodel.TT[sl, c1] - ttmodel.TT[sl, c2], '==', 0,
-                                               constraint_type="Simul_fake_%s_%s_%s_%s_%s" % (G1[nb].name, G2[nb].name, m, sl,
-                                                                              ttmodel.constraint_nb))
+                                               constraint_type="Simul_fake", groups=[G1[nb], G2[nb]], module=m, slot=sl)
 
     # TPB = ttmodel.wdb.groups.get(name='TPB', train_prog__abbrev='GIM2')
     # # TPCm = ttmodel.wdb.groups.get(name='TPCm', train_prog__abbrev='GIM2')
@@ -1023,7 +1025,7 @@ def add_iut_blagnac_gim(ttmodel):
                                 for sl in slots_filter(ttmodel.wdb.slots, day=d)
                                 & ttmodel.wdb.compatible_slots[c]),
                     '<=',
-                    2, constraint_type="Pas plus de seance du meme module par jour_%s_%s_%s_%g" % (m, bg, d, ttmodel.constraint_nb))
+                    2, constraint_type="Pas plus de seance du meme module par jour", module=m, group=bg, days=d)
 
 
     # semaine 2 Les cours de NBE de PPP3 sont le vendredi
@@ -1120,7 +1122,7 @@ def add_iut_blagnac_cs(ttmodel):
                             for sl in slots_filter(ttmodel.wdb.compatible_slots[c], day=day)),
                 '<=',
                 5,
-                constraint_type='Pas_plus_de_5_creneau_%s_%s' % (day, bg))
+                constraint_type="Pas plus de 5 creneau", days=day, group=bg)
 
     # si 3h d'intervention dans la semaine et dispo sur 2 demi-journées, concentrer sur 1 seule demi-journée (++)
     for week in ttmodel.weeks:
@@ -1153,4 +1155,4 @@ def add_iut_blagnac_cs(ttmodel):
                                                    for c in Cg2 & ttmodel.wdb.compatible_courses[sl]),
                                        '==',
                                        0,
-                                       constraint_type="G1 et G2 ont cours le meme jour %s %s _%g" % (m, d, ttmodel.constraint_nb))
+                                       constraint_type="G1 et G2 ont cours le meme jour", module=m, days=d)
