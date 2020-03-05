@@ -4,21 +4,21 @@
 # This file is part of the FlOpEDT/FlOpScheduler project.
 # Copyright (c) 2017
 # Authors: Iulian Ober, Paul Renaud-Goud, Pablo Seban, et al.
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
 # published by the Free Software Foundation, either version 3 of the
 # License, or (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful, but
 # WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 # Affero General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Affero General Public
 # License along with this program. If not, see
 # <http://www.gnu.org/licenses/>.
-# 
+#
 # You can be released from the requirements of the license by purchasing
 # a commercial license. Buying such a license is mandatory as soon as
 # you develop activities involving the FlOpEDT/FlOpScheduler software
@@ -42,7 +42,7 @@ from base.timing import hr_min, str_slot
 
 class Department(models.Model):
     name = models.CharField(max_length=50)
-    abbrev = models.CharField(max_length=7)    
+    abbrev = models.CharField(max_length=7)
 
     def __str__(self):
         return self.abbrev
@@ -60,7 +60,7 @@ class TrainingProgramme(models.Model):
 class GroupType(models.Model):
     name = models.CharField(max_length=50)
     department =  models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
-    
+
     def __str__(self):
         return self.name
 
@@ -170,7 +170,7 @@ def define_apm(sender, instance, *args, **kwargs):
     if instance.hours >= 12:
         instance.apm = Time.PM
 
-    
+
 class Holiday(models.Model):
     day = models.CharField(max_length=2, choices=Day.CHOICES, default=Day.MONDAY)
     week = models.PositiveSmallIntegerField(
@@ -219,7 +219,7 @@ class TimeGeneralSettings(models.Model):
             f"{dsh}:{dsm:02d} - {lsh}:{lsm:02d}" + \
             f" | {lfh}:{lfm:02d} - {dfh}:{dfm:02d};" + \
             f" Days: {self.days}"
-    
+
 # </editor-fold>
 
 # <editor-fold desc="ROOMS">
@@ -338,11 +338,19 @@ class Course(models.Model):
     def __str__(self):
         username_mod = self.tutor.username if self.tutor is not None else '-no_tut-'
         return f"{self.type}-{self.module}-{username_mod}-{self.group}"
-    
+
     def full_name(self):
         username_mod = self.tutor.username if self.tutor is not None else '-no_tut-'
         return f"{self.type}-{self.module}-{username_mod}-{self.group}"
 
+    def get_tutor(self):
+        return self.tutor
+
+    def get_group(self):
+        return self.group
+
+    def get_module(self):
+        return self.module
 
 class CoursePossibleTutors(models.Model):
     course = models.OneToOneField('Course', on_delete=models.CASCADE)
@@ -420,7 +428,7 @@ class CoursePreference(models.Model):
         return f"{self.course_type}=Sem{self.week}:" + \
             f"({str_slot(self.day, self.start_time, self.duration)})" + \
             f"--{self.train_prog}={self.value}"
-    
+
 
 class RoomPreference(models.Model):
     room = models.ForeignKey('Room', on_delete=models.CASCADE)
@@ -578,12 +586,12 @@ class CourseStartTimeConstraint(models.Model):
     # foreignkey instead of onetoone to leave room for a day attribute
     course_type = models.ForeignKey('CourseType', null=True, default=None, on_delete=models.CASCADE)
     allowed_start_times = ArrayField(models.PositiveSmallIntegerField(), blank=True)
-    
+
 
 
 class Regen(models.Model):
 
-    department =  models.ForeignKey(Department, on_delete=models.CASCADE, null=True)   
+    department =  models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
     week = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)])
     year = models.PositiveSmallIntegerField()

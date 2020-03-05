@@ -648,8 +648,8 @@ class TTModel(object):
         self.var_nb += 1
         return LpVariable(countedname, cat=LpBinary)
 
-    def add_constraint(self, expr, relation, value, constraint_type=None, instructor=None, slot=None, course=None,
-                       week=None, room=None, group=None, days=None):
+    def add_constraint(self, expr, relation, value, constraint_type=None, instructor=[], slot=[], course=[],
+                       week=[], room=[], group=[], days=[], department=[]):
         """
         Add a constraint to the model
         """
@@ -669,8 +669,8 @@ class TTModel(object):
                                    rhs=value, name=str(name))  # + '_' + str(self.constraint_nb))
 
         self.constraintManager.add_constraint(Constraint(id=name, constraint_type=constraint_type,
-                                                         instructor=instructor, slot=slot, course=course, week=week,
-                                                         room=room, group=group, days=days))
+                                                         instructors=instructor, slots=slot, courses=course, weeks=week,
+                                                         rooms=room, groups=group, days=days, departments=department))
         self.constraint_nb += 1
 
     def lin_expr(self, expr=None):
@@ -841,7 +841,9 @@ class TTModel(object):
             self.add_constraint(self.sum(self.TT[(sl, c)] for sl in training_slots
                                          for c in self.wdb.compatible_courses[sl]
                                          & set(self.wdb.courses.filter(group__train_prog__in=training_progs))),
-                                '==', 0, "Pas de cours le %s %s" % (training_half_day.day, training_half_day.apm))
+                                '==', 0,
+                                constraint_type="Pas de cours de demi-journée",
+                                days=[training_half_day.day, training_half_day.apm])
 
     def add_instructors_constraints(self):
         print("adding instructors constraints")
@@ -885,7 +887,7 @@ class TTModel(object):
                                     self.sum(self.TTinstructors[(sl2, c2, i)]
                                              for sl2 in self.wdb.slots_intersecting[sl] - {sl}
                                              for c2 in self.wdb.possible_courses[i] & self.wdb.compatible_courses[sl2]),
-                                    '<=', 1000, constraint_type=name, slot=sl, instructor=i)
+                                    '<=', 1000, constraint_type="simul slots", slot=sl, instructor=i)
 
     def add_rooms_constraints(self):
         print("adding room constraints")
@@ -1017,8 +1019,9 @@ class TTModel(object):
                             # , "Dependency %s %g" % (p, self.constraint_nb)
                             self.add_constraint(self.TT[(sl1, c1)]
                                                 + self.TT[(sl2, c2)], '<=', 1,
-                                                constraint_type="Problème de dépendance", course=p,
-                                                slot=str(sl1) + " / " + str(sl2))
+                                                constraint_type="Problème de dépendance",
+                                                course=[c1, c2],
+                                                slot=[sl1, sl2])
                         else:
                             conj_var = self.add_conjunct(self.TT[(sl1, c1)],
                                                          self.TT[(sl2, c2)])
@@ -1028,9 +1031,10 @@ class TTModel(object):
                             for rg2 in self.wdb.room_groups_for_type[c2.room_type].exclude(id=rg1.id):
                                 self.add_constraint(self.TTrooms[(sl1, c1, rg1)]
                                                     + self.TTrooms[(sl2, c2, rg2)], '<=', 1,
-                                                    constraint_type="Problème de dépendance entre les salles", course=p,
-                                                    slot=str(sl1) + " / " + str(sl2),
-                                                    room=str(rg1) + " / " + str(rg2))
+                                                    constraint_type="Problème de dépendance entre les salles",
+                                                    course=[c1, c2],
+                                                    slot=[sl1, sl2],
+                                                    room=[rg1, rg2])
 
     def compute_non_prefered_slot_cost(self):
         """
@@ -1258,6 +1262,7 @@ class TTModel(object):
                             (sc.start_time < sl.end_time
                              and sl.start_time < sc.start_time + sc.course.type.duration):
                         occupied_in_another_department = True
+                        d = sc
                 if occupied_in_another_department:
                     name = 'other_dep_room_' + str(r) + '_' + str(sl) + '_' + str(self.constraint_nb)
                     self.add_constraint(self.sum(self.TTrooms[(sl, c, room)]
@@ -1265,7 +1270,8 @@ class TTModel(object):
                                                  for room in self.wdb.course_rg_compat[c]
                                                  if r in room.subrooms.all()),
                                         '==',
-                                        0, constraint_type="Les autres départements bloquent le slot", slot=sl, room=r)
+                                        0, constraint_type="Les autres départements bloquent le slot",
+                                        slot=sl, room=r, department=d)
 
             # constraint : other_departments_sched_courses instructors are not available
             for i in self.wdb.instructors:
@@ -1275,6 +1281,7 @@ class TTModel(object):
                             (sc.start_time < sl.end_time
                              and sl.start_time < sc.start_time + sc.course.type.duration):
                         occupied_in_another_department = True
+                        d = sc
                 if occupied_in_another_department:
                     name = 'other_dep_' + str(i) + '_' + str(sl) + '_' + str(self.constraint_nb)
                     self.add_constraint(self.sum(self.TT[(sl, c)]
@@ -1283,10 +1290,10 @@ class TTModel(object):
                                                  self.wdb.compatible_courses[sl]),
                                         '==',
                                         0, constraint_type="Le professeur a déjà un cours dans un autre département",
-                                        slot=sl, instructor=i)
+                                        slot=sl, instructor=i, department=d)
                     self.add_constraint(self.IBD[(i, sl.day)], '==', 1,
                                         constraint_type="Le professeur a déjà un cours dans un autre département IBD",
-                                        slot=sl, instructor=i)
+                                        slot=sl, instructor=i, department=d)
 
     def add_specific_constraints(self):
         """
