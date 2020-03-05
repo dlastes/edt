@@ -1238,6 +1238,81 @@ class HelperRoomPreference():
                               value=value)
 
 
+@tutor_required
+def room_preferences_changes_per_tutor(req, tutor, **kwargs):
+    bad_response = {'status': 'KO', 'more': ''}
+    good_response = {'status': 'OK', 'more': ''}
+
+    if not req.is_ajax():
+        bad_response['more'] = "Non ajax"
+        return JsonResponse(bad_response)
+
+    if req.method != "POST":
+        bad_response['more'] = "Non POST"
+        return bad_response
+
+    if tutor != req.user.username \
+       and not req.user.has_department_perm(req.department, admin=True):
+        bad_response['more'] = "Vous ne pouvez pas changez les préférences " +\
+            "de quelqu'un·e d'autre sans être responsable d'emplois du temps."
+        return bad_response
+
+    try:
+        tutor = Tutor.objects.get(username=tutor)
+    except ObjectDoesNotExist:
+        bad_response['more'] = "Qui est-ce ?"
+        return bad_response
+        
+
+    try:
+        recv_pref = json.loads(req.POST.get('roompreferences'))
+    except:
+        bad_response['more'] \
+            = "Problème format."
+        return JsonResponse(bad_response)
+
+    roomtypes = RoomType.objects.filter(department=req.department)\
+                                .prefetch_related('members')
+
+    pref_list = {roomtypes.get(id=rt_id) : \
+                 [{'rg': RoomGroup.objects.get(id=rg_id),
+                   'rank': val} for rg_id, val in rg_val_dict.items()\
+                  if val != 0] \
+                 for rt_id, rg_val_dict in recv_pref.items() }
+
+    print(pref_list)
+
+    bulk = []
+    for rt in pref_list:
+        pref_list[rt].sort(key=lambda p: p['rank'])
+        prev_rg = []
+        cur_rg = []
+        cur_rank = pref_list[rt][0]['rank']
+        for pref in pref_list[rt]:
+            if pref['rank'] != cur_rank:
+                prev_rg = cur_rg
+                cur_rg = []
+                cur_rank = pref['rank']
+            cur_rg.append(pref['rg'])
+            for rg in prev_rg:
+                bulk.append(RoomSort(
+                    tutor=tutor,
+                    for_type=rt,
+                    prefer=rg,
+                    unprefer=pref['rg']
+                    ))
+
+    RoomSort.objects.filter(for_type__department=req.department,
+                            tutor=tutor)\
+                    .select_related('for_type')\
+                    .delete()
+    
+    RoomSort.objects.bulk_create(bulk)
+    
+    return JsonResponse(good_response)
+
+
+
 def preferences_changes(req, year, week, helper_pref):
     good_response = {'status': 'OK', 'more': ''}
 
