@@ -294,8 +294,9 @@ def stype(req, *args, **kwargs):
                                  'days': num_all_days(1, 1, req.department)
                                  })
 
-@login_required
-def room_preference(req, department):
+@tutor_required
+def room_preference(req, department, tutor=None):
+    
     return render(req, 'base/room_preference.html',
                   {'user':req.user,
                    'donnees': queries.get_rooms(department)})
