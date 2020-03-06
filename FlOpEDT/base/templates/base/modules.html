@@ -26,7 +26,9 @@
 {% block title %} EDT {% endblock %}
 {% block content %}
 {% load static %}
-
+    <script>
+    var url_all_modules_with_desc = "{% url "base:fetch_all_modules_with_desc" department %}";
+    </script>
 <link rel="stylesheet" href="{% static "base/better.css" %}"/>
 <link rel="stylesheet" href="{% static "base/style-modules.css" %}"/>
 
