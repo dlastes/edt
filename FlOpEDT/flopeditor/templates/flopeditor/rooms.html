@@ -1,38 +1,49 @@
-{% extends "flopeditor/base.html" %}
+ {% extends "flopeditor/base.html" %}
 {% load static %}
 {% block nav-classes-rooms %} active {% endblock %}
 {% block content %}
 <div class="card">
-    <ul class="nav card-header">
+    <ul class="nav card-header nav-tabs" id="tab-bar">
         <li class="nav-item">
-            <a  class="nav-link {% block rooms-nav-classes-rooms %}disabled{% endblock %}"
-                href="{% url 'flopeditor:flopeditor-department-rooms' department_abbrev=department.abbrev %}">
+            <a  class="nav-link active"
+                href="#rooms"
+                data-toggle="tab"
+                role="tab">
                 Salles
             </a>
         </li>
         <li class="nav-item">
             <a
-                class="nav-link {% block rooms-nav-classes-groups %}{% endblock %}"
-                href="#">
+                class="nav-link "
+                href="#room-groups"
+                data-toggle="tab"
+                role="tab">
                 Groupes de salles
             </a>
         </li>
         <li class="nav-item">
-            <a  class="nav-link {% block rooms-nav-classes-types %}{% endblock %}"
-                href="#">
+            <a  class="nav-link "
+                href="#room-types"
+                data-toggle="tab"
+                role="tab">
                 Catégories de salles
             </a>
         </li>
     </ul>
-    <div class="card-body">
-    {% block card-content %}
-    <crud-js url="{% url 'flopeditor:flopeditor-crud-rooms' department_abbrev=department.abbrev %}" save-button="btntest" editable>
-      <loading>
-        <h1 class="text-info"><i class="fas fa-spinner fa-pulse"></i></h1>
-      </loading>
-    </crud-js>
-    <button type="button" name="button" id="btntest">Save</button>
-    {% endblock %}
+    <div class="card-body tab-content">
+      <div id="rooms" class="tab-pane fade show active" role="tabpanel">
+        <crud-js url="{% url 'flopeditor:flopeditor-crud-rooms' department_abbrev=department.abbrev %}" save-button="btntest" editable>
+          <loading>
+            <h1 class="text-info"><i class="fas fa-spinner fa-pulse"></i></h1>
+          </loading>
+        </crud-js>
+        <button type="button" name="button" id="btntest" class="btn btn-raised btn-success ">Save</button>
+      </div>
+
+      <div id="room-groups" class="tab-pane fade" role="tabpanel">groups</div>
+
+      <div id="room-types" class="tab-pane fade" role="tabpanel">types</div>
+
     </div>
 </div>
 
@@ -42,5 +53,10 @@
 
 {% block script %}
     {{ block.super }}
+    <script type="text/javascript">
+      /*$(function(){
+        $('#tab-bar li:last-child a').tab('show');
+      });*/
+    </script>
     <script src="{% static 'flopeditor/js/crudjs.min.js' %}" charset="utf-8"></script>
 {% endblock %}
