@@ -168,6 +168,7 @@ class TTConstraint(models.Model):
     week = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(52)],
         null=True,
+
         default=None,
         blank=True)
     year = models.PositiveSmallIntegerField(null=True, default=None, blank=True)

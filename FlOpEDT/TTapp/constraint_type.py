@@ -8,6 +8,7 @@ IBHD =
 GBHD =
 """
 class ConstraintType(Enum):
+    #TTModel
     IBS_SUP = "IBS supérieur"
     IBS_INF = "IBS inférieur"
     IBD_INF = "IBD inférieur"
@@ -37,6 +38,8 @@ class ConstraintType(Enum):
     DEPARTEMENT_BLOQUE_SLOT = "Les autres départements bloquent le slot"
     PROFESSEUR_A_DEJA_COURS_EN_AUTRE_DEPARTEMENT = "Le professeur a déjà un cours dans un autre département"
     PROFESSEUR_A_DEJA_COURS_EN_AUTRE_DEPARTEMENT_IBD = "Le professeur a déjà un cours dans un autre département IBD"
+
+    #iut
     BOUND_HOURS_PER_DAY = "Bound_hours per day"
     PAS_COURS_JEUDI_APREM = "Pas_de_cours_le_jeudi_aprem"
     PAS_SPORT_SAUF_LUNDI_ET_MARDI = "Pas de sport sauf lundi et mardi"
@@ -71,3 +74,6 @@ class ConstraintType(Enum):
     TECH_MARDI_APREM = "Tech le mardi aprem"
     PAS_PLUS_5_CRENEAU = "Pas_plus_de_5_creneau"
     G1_G2_COURS_MEME_JOUR = "G1 et G2 ont cours le meme jour"
+
+    #TTApp/models.py
+    #minhalfdays
