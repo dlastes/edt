@@ -50,11 +50,15 @@ def good_request(request, department):
     request.user.has_department_perm(department, admin=True)
 
 
-def crud_rooms(request, department_abbrev):
-    """Crud url for rooms edition
+def crud_model(request, department_abbrev, crud):
+    """Crud model for edition
 
     :param request: Client request.
     :type request:  django.http.HttpRequest
+    :param department_abbrev: Department abbreviation.
+    :type department_abbrev:  String
+    :param crud: Module associated to the crud.
+    :type crud:  Module
     :return: Server response for the request.
     :rtype:  django.http.JsonResponse
 
@@ -65,18 +69,31 @@ def crud_rooms(request, department_abbrev):
 
 
     if request.method == "GET":
-        return rooms.read(department)
+        return crud.read(department)
     elif request.method == "POST":
         actions = json.loads(request.body.decode('utf-8'))['actions']
         result = []
         for action in actions:
             if action['request'] == 'NEW':
-                result.append(rooms.create(action, department))
+                result.append(crud.create(action, department))
             elif action['request'] == 'MODIFIED':
-                result.append(rooms.update(action, department))
+                result.append(crud.update(action, department))
             elif action['request'] == 'DELETED':
-                result.append(rooms.delete(action, department))
+                result.append(crud.delete(action, department))
         return JsonResponse({
             'actions': result
         })
     return HttpResponseForbidden()
+
+def crud_rooms(request, department_abbrev):
+    """Crud url for rooms edition
+
+    :param request: Client request.
+    :type request:  django.http.HttpRequest
+    :param department_abbrev: Department abbreviation.
+    :type department_abbrev:  String
+    :return: Server response for the request.
+    :rtype:  django.http.JsonResponse
+
+    """
+    return crud_model(request, department_abbrev, rooms)
