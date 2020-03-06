@@ -84,50 +84,60 @@
   }
   </script>
 <body>
-  <div  id="tools-main" style="width: 100%; overflow: hidden;">
+<div  id="tools-main" style="width: 100%; overflow: hidden;">
     <div id="svg" style="width: 900px; float: left;"></div>
     <div style="margin-left: 700px;">
-      <form style="white-space: nowrap;" name="app" action="javascript:apply_stype_from_button(false)" id="form-nweek">
-	<fieldset>
-	  <legend>Semaines particulières</legend>
-	  Appliquer la configuration ci-contre<br/>
-	  de la semaine
-	  <input type="number" name="week_st" style="width: 40px" value="{{ date_deb.semaine }}" min="1" max="53">, année
-	  <input type="number" name="year_st" style="width: 60px" value="{{ date_deb.an }}" min="{{current_year}}" max="{{current_year|add:"1"}}"></br>
-	  à la semaine
-	    <input type="number" name="week_end" style="width: 40px" value="{{ date_fin.semaine }}" min="1" max="53">, année
-	    <input type="number" name="year_end" style="width: 60px" value="{{ date_fin.an }}" min="{{current_year}}" max="{{current_year|add:"1"}}"></br></br>
-	    <input type="submit" name="apply" value="Appliquer">
-	</fieldset></br></br>
-      </form>
-      <fieldset>
-	<legend>Semaine type</legend>
-	<form style="white-space: nowrap;" name="sav"  action="javascript:apply_stype_from_button(true)" id="form-dweek">
-	  Redéfinir ma semaine type<br/>
-          <br/>
-          <input type="submit" name="save" value="Sauvegarder"></br>
-        </form>
-      </fieldset>
-      <br/><br/>
-      <fieldset>
-        <legend>Ma journée idéale</legend>
-        <form action='{% url "base:user_perfect_day_changes" department user.username %}'  method='POST' id="form-perfect_day" >
-          {% csrf_token %}
-          Chaque jour, voici le nombre d'heures de cours que je souhaite donner:<br/>
-          <br/>
-          Idéalement <input id="user_pref_hours_per_day" type="number" name="user_pref_hours" style="width: 30px" min="1" max="9" value="{{ usr_pref_hours }}">
-          <br/>
-          Maximum <input id="user_max_hours_per_day" type="number" name="user_max_hours" style="width: 30px" min="1" max="9" value="{{ usr_max_hours }}">
-        </br>
-        </br>
-        <input type="submit" name="save_perfect_day" value="Sauvegarder">
-        </br>
-        </form>
-      </fieldset>
+        <form style="white-space: nowrap;" name="app" action="javascript:apply_stype_from_button(false)" id="form-nweek">
+            </br>
+            <fieldset>
+                <legend>Mes préférences de salles</legend>
+                Choisir mes salles préférées
+                <br/><br/>
+                <button onclick="window.location.href = '{% url 'base:room-pref' department %}';">Modifier</button>
+            </fieldset>
+            </br></br>
 
-      <span id="ack"></span>
+            <fieldset>
+                <legend>Semaines particulières</legend>
+                <p>Appliquer la configuration ci-contre<p/>
+                de la semaine
+                <input type="number" name="week_st" style="width: 40px" value="{{ date_deb.semaine }}" min="1" max="53">, année
+                <input type="number" name="year_st" style="width: 60px" value="{{ date_deb.an }}" min="{{current_year}}" max="{{current_year|add:"1"}}"></br>
+                à la semaine
+                <input type="number" name="week_end" style="width: 40px" value="{{ date_fin.semaine }}" min="1" max="53">, année
+                <input type="number" name="year_end" style="width: 60px" value="{{ date_fin.an }}" min="{{current_year}}" max="{{current_year|add:"1"}}"></br></br>
+                <input type="submit" name="apply" value="Appliquer">
+            </fieldset>
+            </br></br>
+        </form>
+        <fieldset>
+            <legend>Semaine type</legend>
+            <form style="white-space: nowrap;" name="sav"  action="javascript:apply_stype_from_button(true)" id="form-dweek">
+                Redéfinir ma semaine type<br/>
+                <br/>
+                <input type="submit" name="save" value="Sauvegarder"></br>
+            </form>
+        </fieldset>
+        <br/><br/>
+        <fieldset>
+            <legend>Ma journée idéale</legend>
+            <form action='{% url "base:user_perfect_day_changes" department user.username %}'  method='POST' id="form-perfect_day" >
+                {% csrf_token %}
+                <p>Chaque jour, voici le nombre d'heures de cours que je souhaite donner:</p>
+
+                Idéalement <input id="user_pref_hours_per_day" type="number" name="user_pref_hours" style="width: 30px" min="1" max="9" value="{{ usr_pref_hours }}">
+                <br/>
+                Maximum <input id="user_max_hours_per_day" type="number" name="user_max_hours" style="width: 30px" min="1" max="9" value="{{ usr_max_hours }}">
+                </br>
+                </br>
+                <input type="submit" name="save_perfect_day" value="Sauvegarder">
+                </br>
+            </form>
+        </fieldset>
+
+        <span id="ack"></span>
     </div>
-  </div>
+</div>
 </body>
 <script type='text/javascript' src="{% static 'base/helpers.js' %}"></script>
 <script type='text/javascript' src="{% static 'base/days.js' %}"></script>
