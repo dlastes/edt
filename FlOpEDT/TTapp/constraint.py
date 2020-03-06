@@ -64,8 +64,8 @@ class Constraint:
             if week not in self.weeks:
                 self.weeks.append(week)
 
-        if len(self.courses) >= 2 and self.courses[0].equals(self.courses[1]):
-            del self.courses[1]
+        #if len(self.courses) >= 2 and self.courses[0].equals(self.courses[1]):
+        #    del self.courses[1]
         for c in self.courses:
             instructor = c.get_tutor()
             if instructor not in self.instructors:
