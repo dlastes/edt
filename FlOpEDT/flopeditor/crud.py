@@ -80,7 +80,7 @@ def crud_promotions(request, department_abbrev):
     if request.method == "GET":
         return groups.read(department)
     elif request.method == "POST":
-        actions = json.loads(request.POST.get('actions'))
+        actions = json.loads(request.body.decode('utf-8'))['actions']
         result = []
         for action in actions:
             if action['request'] == 'NEW':
