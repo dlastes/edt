@@ -155,7 +155,8 @@ def department_rooms(request, department_abbrev):
     return render(request, "flopeditor/rooms.html", {
         'title': 'Salles',
         'department': department,
-        'list_departments': departments
+        'list_departments': departments,
+        'has_dept_perm' : request.user.has_department_perm(department=department, admin=True)
     })
 
 
