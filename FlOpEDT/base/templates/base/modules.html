@@ -28,6 +28,8 @@
 {% load static %}
     <script>
     var url_all_modules_with_desc = "{% url "base:fetch_all_modules_with_desc" department %}";
+    var url_modules_desc = "{% url "base:module_description" department module %}";
+
     </script>
 <link rel="stylesheet" href="{% static "base/better.css" %}"/>
 <link rel="stylesheet" href="{% static "base/style-modules.css" %}"/>

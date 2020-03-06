@@ -59,7 +59,7 @@ from base.admin import CoursResource, DispoResource, VersionResource, \
 
 if COSMO_MODE:
     from base.admin import CoursPlaceResourceCosmo
-from base.forms import ContactForm, PerfectDayForm, DescriptionForm
+from base.forms import ContactForm, PerfectDayForm, ModuleDescriptionForm
 from base.models import Course, UserPreference, ScheduledCourse, EdtVersion, \
     CourseModification, Day, Time, RoomGroup, Room, RoomType, RoomSort, \
     Regen, RoomPreference, Department, TimeGeneralSettings, CoursePreference, \
@@ -1693,11 +1693,11 @@ def send_email_proposal(req, **kwargs):
 # HELPERS
 # ---------
 @login_required
-def description(req, department, **kwargs): 
+def module_description(req, module, **kwargs):
     ack = ''
 
     if req.method == 'POST':
-        form = DescriptionForm(req.user, req.POST)
+        form = ModuleDescriptionForm(req.user, req.POST)
         if form.is_valid():
             mod = form.cleaned_data['module']
             desc = form.cleaned_data['desc']
@@ -1709,10 +1709,10 @@ def description(req, department, **kwargs):
                 module.moduledescription.desc = desc
             module.moduledescription.save()
         else: 
-            form = DescriptionForm(req.user, req.POST)
+            form = ModuleDescriptionForm(req.user, req.POST)
     else:
-        form = DescriptionForm(user=req.user)   
-    return TemplateResponse(req, 'base/description.html',
+        form = ModuleDescriptionForm(user=req.user, module=module)
+    return TemplateResponse(req, 'base/module_description.html',
                             {'form': form,
                              'ack': ack,
                              'user': req.user

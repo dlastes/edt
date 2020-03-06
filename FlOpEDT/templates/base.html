@@ -77,7 +77,6 @@
       <li><a href="{% url "base:edt" department %}">Consulter</a></li>
       {% if has_department_perm %}
       <li><a href="{% url "base:decale" department %}">Décaler/Annuler</a></li>
-      <li><a href="{% url "base:description" department %}">Description</a></li>
       {% endif %}
       <li><a href="{% url "base:preferences" department %}">Préférences</a></li>
       <li><a href="{% url "ics:index" department %}">iCal</a></li>
