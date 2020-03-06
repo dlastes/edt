@@ -51,7 +51,7 @@ def good_request(request, department):
 
 
 def crud_student_group_type(request, department_abbrev):
-    """Crud url for studentGroupType edition
+    """Crud url for student group type (TP, TD...) edition
 
     :param request: Client request.
     :type request:  django.http.HttpRequest
