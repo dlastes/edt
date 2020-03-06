@@ -67,7 +67,7 @@ def crud_rooms(request, department_abbrev):
     if request.method == "GET":
         return rooms.read(department)
     elif request.method == "POST":
-        actions = json.loads(request.POST.get('actions'))
+        actions = json.loads(request.body.decode('utf-8'))['actions']
         result = []
         for action in actions:
             if action['request'] == 'NEW':
