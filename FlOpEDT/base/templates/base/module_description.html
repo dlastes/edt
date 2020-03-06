@@ -32,7 +32,7 @@
 
 {% if user.is_tutor %}
 <div class="description-container">
-    <h1>Modification de la description d'un module</h1>
+    <h1>Modification de la description du module {{ module }}.</h1>
     <form method="post" novalidate>
         {% csrf_token %}
         <table cellpadding="10">

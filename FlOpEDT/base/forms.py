@@ -68,21 +68,13 @@ class DescriptionForm(forms.Form):
 
 class ModuleDescriptionForm(forms.ModelForm):
 
-    def __init__(self, user=None, module=None, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         # first call parent's constructor
         super(ModuleDescriptionForm, self).__init__(*args, **kwargs)
         self.fields['desc'].widget.attrs.update({'class' : 'description-text'})
         # there's a `fields` property now
-        self.fields['module'].required = True
         self.fields['desc'].required = True
-        if user:
-            self.fields['module'].queryset = Module.objects.filter(head=user)
-        if module is not None:
-            self.fields['module'].queryset = Module.objects.filter(abbrev=module)
-
-            # self.fields['desc'].default = Module.objects.get(abbrev=module).module_description.desc
-
 
     class Meta:
         model = ModuleDescription
-        fields = ['module', 'desc']         
+        fields = ['desc']

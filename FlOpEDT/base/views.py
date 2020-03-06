@@ -1697,25 +1697,26 @@ def module_description(req, module, **kwargs):
     ack = ''
 
     if req.method == 'POST':
-        form = ModuleDescriptionForm(req.user, req.POST)
+        form = ModuleDescriptionForm(req.POST)
         if form.is_valid():
-            mod = form.cleaned_data['module']
             desc = form.cleaned_data['desc']
-            module = Module.objects.get(abbrev=mod)
-            if ModuleDescription.objects.filter(module=module).exists():
-                module.moduledescription.desc = desc
+            mod = Module.objects.get(abbrev=module)
+            if ModuleDescription.objects.filter(module=mod).exists():
+                module.description.desc = desc
+                module.description.save()
             else:
-                module.moduledescription = ModuleDescription()
-                module.moduledescription.desc = desc
-            module.moduledescription.save()
-        else: 
-            form = ModuleDescriptionForm(req.user, req.POST)
+                M = ModuleDescription(module=mod)
+                M.desc = desc
+                M.save()
+        else:
+            form = ModuleDescriptionForm(req.POST)
     else:
-        form = ModuleDescriptionForm(user=req.user, module=module)
+        form = ModuleDescriptionForm()
     return TemplateResponse(req, 'base/module_description.html',
                             {'form': form,
                              'ack': ack,
-                             'user': req.user
+                             'user': req.user,
+                             'module':module,
                              })
 
 
