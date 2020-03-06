@@ -35,6 +35,8 @@ from people.models import Tutor
 
 
 OK_RESPONSE = "OK"
+ERROR_RESPONSE = 'ERROR'
+UNKNOWN_RESPONSE = 'UNKNOWN'
 
 
 def validate_department_creation(name, abbrev, tutor_id):
