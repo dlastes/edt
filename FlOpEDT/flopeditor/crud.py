@@ -33,7 +33,7 @@ import json
 from django.http import JsonResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 from base.models import Department
-from flopeditor.cruds import groups
+from flopeditor.cruds import training_programmes
 
 def good_request(request, department):
     """ Request rights verification
@@ -49,21 +49,7 @@ def good_request(request, department):
     return not request.user.is_anonymous and \
     request.user.has_department_perm(department, admin=True)
 
-
-
-
-def crud_groups(request, department_abbrev):
-    """Crud url for groups edition
-
-    :param request: Client request.
-    :type request:  django.http.HttpRequest
-    :return: Server response for the request.
-    :rtype:  django.http.JsonResponse
-
-    """
-    return JsonResponse({})
-
-def crud_promotions(request, department_abbrev):
+def crud_training_programmes(request, department_abbrev):
     """Crud url for groups edition
 
     :param request: Client request.
@@ -78,17 +64,17 @@ def crud_promotions(request, department_abbrev):
 
 
     if request.method == "GET":
-        return groups.read(department)
+        return training_programmes.read(department)
     elif request.method == "POST":
         actions = json.loads(request.body.decode('utf-8'))['actions']
         result = []
         for action in actions:
             if action['request'] == 'NEW':
-                result.append(groups.create(action, department))
+                result.append(training_programmes.create(action, department))
             elif action['request'] == 'MODIFIED':
-                result.append(groups.update(action, department))
+                result.append(training_programmes.update(action, department))
             elif action['request'] == 'DELETED':
-                result.append(groups.delete(action, department))
+                result.append(training_programmes.delete(action, department))
         return JsonResponse({
             'actions': result
         })

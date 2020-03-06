@@ -42,9 +42,9 @@ def read(department):
     :rtype:  django.http.JsonResponse
 
     """
-    training_programs = TrainingProgramme.objects.filter(department=department)
+    training_programmes = TrainingProgramme.objects.filter(department=department)
     values = []
-    for tp in training_programs:
+    for tp in training_programmes:
         values.append((tp.abbrev, tp.name))
     return JsonResponse({
         "columns" :  [{

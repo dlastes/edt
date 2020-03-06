@@ -63,9 +63,7 @@ urlpatterns = [
 
     # exchanges with the CRUD
     # --------------------------------
-    path('<slug:department_abbrev>/crud/groups', crud.crud_groups,
-         name='flopeditor-crud-groups'),
-    path('<slug:department_abbrev>/crud/promotions', crud.crud_promotions,
-         name='flopeditor-crud-promotions')
+    path('<slug:department_abbrev>/crud/training_programmes', crud.crud_training_programmes,
+         name='flopeditor-crud-training-programmes')
 
 ]
