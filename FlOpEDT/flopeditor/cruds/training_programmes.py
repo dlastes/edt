@@ -29,7 +29,7 @@ without disclosing the source code of your own applications.
 
 from django.http import JsonResponse
 from base.models import TrainingProgramme
-
+from flopeditor.validator import validate_training_programme_values, OK_RESPONSE, ERROR_RESPONSE
 
 def read(department):
     """Return all rooms for a department
@@ -60,7 +60,7 @@ def read(department):
         })
 
 def create(entries, department):
-    """Create values for rooms
+    """Create values for training programmes
     :param entries: Values to create.
     :type entries:  django.http.JsonResponse
     :param department: Department.
@@ -70,6 +70,19 @@ def create(entries, department):
     """
 
     entries['result'] = []
+    for i in range(len(entries['new_values'])):
+        new_abbrev = entries['new_values'][i][0]
+        new_name = entries['new_values'][i][1]
+        if not validate_training_programme_values(new_abbrev, new_name, entries):
+            pass
+        elif TrainingProgramme.objects.filter(abbrev=new_abbrev, department=department):
+            entries['result'].append([
+                ERROR_RESPONSE,
+                "La promo à ajouter est déjà présente dans la base de données."
+            ])
+        else:
+            TrainingProgramme.objects.create(name=new_name, abbrev = new_abbrev, department=department)
+            entries['result'].append([OK_RESPONSE])
     return entries
 
 def update(entries, department):
@@ -82,10 +95,28 @@ def update(entries, department):
     :rtype:  django.http.JsonResponse
     """
 
+    entries['result'] = []
     if len(entries['old_values']) != len(entries['new_values']):
         # old and new values must have same size
         return entries
-    entries['result'] = []
+    for i in range(len(entries['old_values'])):
+        old_abbrev = entries['old_values'][i][0]
+        old_name = entries['old_values'][i][1]
+        new_abbrev = entries['new_values'][i][0]
+        new_name = entries['new_values'][i][1]
+
+        if validate_training_programme_values(new_abbrev, new_name, entries):
+            try:
+                tp_to_update = TrainingProgramme.objects.get(abbrev=old_abbrev, name=old_name, department=department)
+                tp_to_update.abbrev = new_abbrev
+                tp_to_update.name = new_name
+                tp_to_update.save()
+                entries['result'].append([OK_RESPONSE])
+            except TrainingProgramme.DoesNotExist:
+                entries['result'].append(
+                    [ERROR_RESPONSE,
+                     "Une promo à modifier n'a pas été trouvée dans la base de données."])
+
     return entries
 
 def delete(entries, department):
@@ -97,7 +128,17 @@ def delete(entries, department):
     :return: Server response for the request.
     :rtype:  django.http.JsonResponse
     """
-
-
     entries['result'] = []
+    for i in range(len(entries['old_values'])):
+        old_abbrev = entries['old_values'][i][0]
+        old_name = entries['old_values'][i][1]
+        try:
+            TrainingProgramme.objects.get(abbrev=old_abbrev,
+                                          name=old_name,
+                                          department=department).delete()
+            entries['result'].append([OK_RESPONSE])
+        except TrainingProgramme.DoesNotExist:
+            entries['result'].append(
+                [ERROR_RESPONSE,
+                 "Une promo à supprimer n'a pas été trouvée dans la base de données."])
     return entries
