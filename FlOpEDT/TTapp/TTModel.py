@@ -222,7 +222,7 @@ class WeekDB(object):
         for r in basic_rooms:
             # print "compat for ", r
             room_course_compat[r] = []
-            for rg in r.and_all_subrooms():
+            for rg in r.and_all_overrooms():
                 room_course_compat[r].extend(
                     [(c, rg) for c in
                      self.courses.filter(room_type__in=rg.types.all())])
@@ -234,13 +234,13 @@ class WeekDB(object):
         fixed_courses_for_room = {}
         for r in basic_rooms:
             fixed_courses_for_room[r] = set()
-            for rg in r.and_all_subrooms():
+            for rg in r.and_all_overrooms():
                 fixed_courses_for_room[r] |= set(self.fixed_courses.filter(room=rg))
 
         other_departments_sched_courses_for_room = {}
         for r in basic_rooms:
             other_departments_sched_courses_for_room[r] = set()
-            for rg in r.and_all_subrooms():
+            for rg in r.and_all_overrooms():
                 other_departments_sched_courses_for_room[r] |= set(self.other_departments_sched_courses.filter(room=rg))
         return room_types, rooms, basic_rooms, room_prefs, rooms_for_type, room_course_compat, course_rg_compat,\
             fixed_courses_for_room, other_departments_sched_courses_for_room
@@ -960,7 +960,7 @@ class TTModel(object):
     #                 e = quicksum(self.TTrooms[(sl, c, rgp)]
     #                              for c in self.wdb.courses.filter(room_type=rt))
     #                 preferred_is_unavailable = False
-    #                 for r in rgp_before.subrooms.all():
+    #                 for r in rgp_before.and_all_subrooms():
     #                     if len(db.RoomUnavailability.objects.filter(
     #                                   week=self.weeks, year=self.year,
     #                                   creneau=sl, room=r)) > 0:
