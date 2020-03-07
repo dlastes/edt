@@ -293,6 +293,7 @@ class Module(models.Model):
     train_prog = models.ForeignKey('TrainingProgramme', on_delete=models.CASCADE)
     period = models.ForeignKey('Period', on_delete=models.CASCADE)
     url = models.CharField(max_length=200, null=True, blank=True, default=None)
+    description = models.TextField(null=True, blank=True, default=None)
 
     def __str__(self):
         return self.abbrev
@@ -306,13 +307,13 @@ class ModulePossibleTutors(models.Model):
     possible_tutors = models.ManyToManyField('people.Tutor', blank=True, related_name='possible_modules')
 
 
-class ModuleDescription(models.Model):
-    module = models.OneToOneField('Module', on_delete=models.CASCADE, related_name='description')
-    desc = models.TextField(
-        default="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.")
-
-    def __str__(self):
-        return '{} : {}'.format(self.module, self.desc)
+# class ModuleDescription(models.Model):
+#     module = models.OneToOneField('Module', on_delete=models.CASCADE)
+#     desc = models.TextField(
+#         default="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.")
+#
+#     def __str__(self):
+#         return '{} : {}'.format(self.module, self.desc)
 
 
 class CourseType(models.Model):

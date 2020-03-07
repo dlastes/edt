@@ -63,7 +63,7 @@ from base.forms import ContactForm, PerfectDayForm, ModuleDescriptionForm
 from base.models import Course, UserPreference, ScheduledCourse, EdtVersion, \
     CourseModification, Day, Time, RoomGroup, Room, RoomType, RoomSort, \
     Regen, RoomPreference, Department, TimeGeneralSettings, CoursePreference, \
-    TrainingProgramme, CourseType, Module, ModuleDescription
+    TrainingProgramme, CourseType, Module
 import base.queries as queries
 from base.weeks import *
 
@@ -1250,7 +1250,7 @@ class HelperRoomPreference():
                               start_time=start_time,
                               duration=duration,
                               value=value)
-ModuleDescription
+
 
 @tutor_required
 def room_preferences_changes_per_tutor(req, tutor, **kwargs):
@@ -1692,31 +1692,24 @@ def send_email_proposal(req, **kwargs):
 # ---------
 # HELPERS
 # ---------
-@login_required
+@tutor_required
 def module_description(req, module, **kwargs):
-    ack = ''
 
     if req.method == 'POST':
-        form = ModuleDescriptionForm(req.POST)
+        form = ModuleDescriptionForm(module, req.POST)
         if form.is_valid():
-            desc = form.cleaned_data['desc']
-            mod = Module.objects.get(abbrev=module)
-            if ModuleDescription.objects.filter(module=mod).exists():
-                module.description.desc = desc
-                module.description.save()
-            else:
-                M = ModuleDescription(module=mod)
-                M.desc = desc
-                M.save()
+            description = form.cleaned_data['description']
+            m = Module.objects.get(abbrev=module)
+            m.description = description
+            m.save()
         else:
-            form = ModuleDescriptionForm(req.POST)
+            form = ModuleDescriptionForm(module, req.POST)
     else:
-        form = ModuleDescriptionForm()
+        form = ModuleDescriptionForm(module)
     return TemplateResponse(req, 'base/module_description.html',
                             {'form': form,
-                             'ack': ack,
-                             'user': req.user,
-                             'module':module,
+                             'req': req,
+                             'module': module
                              })
 
 

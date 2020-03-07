@@ -25,7 +25,7 @@
 
 from django import forms
 from people.models import Tutor, FullStaff
-from base.models import ModuleDescription, Module
+from base.models import Module
 
 
 class ContactForm(forms.Form):
@@ -66,15 +66,34 @@ class DescriptionForm(forms.Form):
 """
 
 
+# class ModuleDescriptionForm(forms.ModelForm):
+#
+#     def __init__(self, module, *args, **kwargs):
+#         # first call parent's constructor
+#         super(ModuleDescriptionForm, self).__init__(*args, **kwargs)
+#         self.fields['desc'].widget.attrs.update({'class' : 'description-text'})
+#         # there's a `fields` property now
+#         self.fields['desc'].required = True
+#         try:
+#             description = Module.objects.get(abbrev=module).description
+#             self.fields['desc'].initial = description.desc
+#         except:
+#             pass
+#
+#
+#     class Meta:
+#         model = ModuleDescription
+#         fields = ['desc']
+
 class ModuleDescriptionForm(forms.ModelForm):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, module, *args, **kwargs):
         # first call parent's constructor
         super(ModuleDescriptionForm, self).__init__(*args, **kwargs)
-        self.fields['desc'].widget.attrs.update({'class' : 'description-text'})
-        # there's a `fields` property now
-        self.fields['desc'].required = True
+        m = Module.objects.get(abbrev=module)
+        self.fields['description'].initial = m.description
+
 
     class Meta:
-        model = ModuleDescription
-        fields = ['desc']
+        model = Module
+        fields = ['description']

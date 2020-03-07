@@ -41,7 +41,7 @@ from base.models import Day, RoomGroup, Module, Course, Group, \
     Regen, Holiday, TrainingHalfDay, \
     CoursePreference, Dependency, Department, CourseType
 
-from base.models import RoomPreference, RoomSort, RoomType, Room, ModuleDescription
+from base.models import RoomPreference, RoomSort, RoomType, Room
 from displayweb.models import ModuleDisplay
 from displayweb.models import TutorDisplay
 from import_export import resources, fields
@@ -308,9 +308,6 @@ class TutorRessource(resources.ModelResource):
 
 
 class ModuleDescriptionResource(resources.ModelResource):
-    desc = fields.Field(column_name='description',
-                        attribute='moduledescription',
-                        widget=ForeignKeyWidget(ModuleDescription, 'desc'))
     head = fields.Field(column_name='resp',
                         attribute='head',
                         widget=ForeignKeyWidget(Tutor, 'username'))
