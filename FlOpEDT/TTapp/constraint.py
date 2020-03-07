@@ -17,7 +17,7 @@ class Constraint:
     def __init__(self, id, constraint_type=None, instructors=[], slots=[], courses=[], weeks=[], rooms=[],
                  groups=[], days=[], departments=[], modules=[], apm=None):
         self.id = id
-        if self.constraint_type is not None:
+        if constraint_type is not None:
             self.constraint_type = constraint_type.value
 
         if type(instructors) is not list:

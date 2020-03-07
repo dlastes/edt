@@ -22,7 +22,7 @@ class ConstraintType(Enum):
     SEUIL = "Seuil"
     SI_A_ALORS_NON_B = "Si a alors non b"
     PAS_PLUS_1_COURS_PAR_CRENEAU = "Pas plus d'un cours par créneau"
-    COURS_DOIT_ETRE_PLACE = "Le cours doit êre placé"
+    COURS_DOIT_ETRE_PLACE = "Le cours doit être placé"
     PAS_DE_COURS_DE_DEMI_JOURNEE = "Pas de cours de demi-journée"
     COURS_DOIT_AVOIR_PROFESSEUR = "Le cours doit avoir un professeur"
     PROFESSEUR_NE_PEUT_DONNER_2_COURS_EN_MEME_TEMPS = "Le professeur ne peut pas donner 2 cours en même temps"
@@ -61,7 +61,7 @@ class ConstraintType(Enum):
     JURY = "Jury"
     SEMAINE_FLOP = "Semaine FLOP"
     VACATAIRE_FAIT_TP240_ALORS_TITULAIRE_FAIT_TP_EN_MEME_TEMPS_MEME_MATIERE = "Si un vacataire fait un TP240, un titulaire fait un TP en même temps de la même matière"
-    VAC_PERM = "Vac_perm"
+    VACACATAIRE_SANS_PERMANENTS = "Vacataires_sans_permanents"
     PAS_PLUS_1_TD_PAR_DEMI_JOURNEE = "Pas plus d'un TD par demie-journee"
     MIN_HALF_DAYS = "Min half days"
     PAS_PLUS_4_COURS_PAR_DEMI_JOURNEE = "Pas plus de 4 heures par demie_journee"
@@ -71,9 +71,20 @@ class ConstraintType(Enum):
     PAS_PLUS_SEANCE_MEME_MODULE_PAR_JOUR = "Pas plus de seance du meme module par jour"
     SEMAINE_2_COURS_NBE_PPP3_VENDREDI = "semaine 2 Les cours de NBE de PPP3 sont le vendredi"
     SEMAINE_6_COURS_DBE_PPP2_LUNDI_MATIN = "semaine 6 Les cours de DBE et PPP2 sont le lundi matin"
+    SEMAINE_6_COURS_CPR_PPP2_LUNDI_MATIN = "semaine 6 Les cours de CPR et PPP2 sont le lundi matin"
+    SEMAINE_6_COURS_MPH_PPP2_JEUDI_APRES_MIDI = "semaine 6 Les cours de MPH et PPP2 sont le jeudi après-midi"
+    SEMAINE_6_COURS_EPI_PPP2_MARDI_MATIN = "semaine 6 Les cours de EPI et PPP2 sont le mardi matin"
     TECH_MARDI_APREM = "Tech le mardi aprem"
     PAS_PLUS_5_CRENEAU = "Pas_plus_de_5_creneau"
     G1_G2_COURS_MEME_JOUR = "G1 et G2 ont cours le meme jour"
 
     #TTApp/models.py
+    MAX_HOURS = "Max hours"
+    REGISTER_EXPRESSION = "Reasonable days : register expression"
+    STABILIZE_ENRICH_MODEL = "Stabilize : enrich model"
+    AVOID_BOTH_TIME = "avoid both time : enrich model"
+    COURS_SIMULTANES = "cours simultanes"
+    LIMITED_START_TIME_CHOICES = "Limited Start Time Choices"
+    LIMITED_ROOM_CHOICES = "Limited Room Choices"
+
     #minhalfdays
