@@ -28,6 +28,7 @@ def inc(dic, key):
 def inc_with_type(dic, keys, c_type):
     if keys is not []:
         for key in keys:
+            key = str(key)
             if key in dic.keys():
                 dic[key][0] += 1
                 if dic[key][1].count(c_type) == 0:
@@ -57,14 +58,15 @@ def handle_occur_type_with_priority(priority_types, occur_type, decreasing):
     max_priority = max(occur_type.values()) + len(priority_types)
     min_priority = -len(priority_types) + 1
     for priority_type in priority_types:
-        nb_occ_init.append(occur_type[priority_type])
         if priority_type in occur_type:
+            nb_occ_init.append(occur_type[priority_type])
             occur_type[priority_type] = max_priority if decreasing else min_priority
-        max_priority -= 1
-        min_priority += 1
+            max_priority -= 1
+            min_priority += 1
     occur_type = {k: v for k, v in sorted(occur_type.items(), key=lambda item: item[1], reverse=decreasing)}
     for i in range(len(priority_types)):
-        occur_type[priority_types[i]] = nb_occ_init[i]
+        if priority_types[i] in occur_type:
+            occur_type[priority_types[i]] = nb_occ_init[i]
     return occur_type
 
 
@@ -105,6 +107,8 @@ class ConstraintManager:
             inc_with_type(occur_group, self.get_constraint_by_id(i).groups, c_type)
             inc_with_type(occur_days, self.get_constraint_by_id(i).days, c_type)
             inc_with_type(occur_departments, self.get_constraint_by_id(i).departments, c_type)
+
+        print(occur_course)
 
         priority_types = ["Le cours doit être placé", "Pas_de_cours_le_jeudi_aprem"]
         occur_type = handle_occur_type_with_priority(priority_types, occur_type, decreasing)

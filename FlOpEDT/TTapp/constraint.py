@@ -54,6 +54,8 @@ class Constraint:
 
         if type(courses) is not list:
             courses = [courses]
+        if len(courses) >= 3:
+            print(courses)
         self.courses = list(courses)
 
         for s in self.slots:
@@ -64,8 +66,6 @@ class Constraint:
             if week not in self.weeks:
                 self.weeks.append(week)
 
-        if len(self.courses) >= 2 and self.courses[0].equals(self.courses[1]):
-            del self.courses[1]
         for c in self.courses:
             instructor = c.get_tutor()
             if instructor not in self.instructors:
