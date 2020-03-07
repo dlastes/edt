@@ -342,7 +342,7 @@ def basic_swap_version(department, week, year, copy_a, copy_b=0):
         cp.work_copy = copy_b
         cp.save()
 
-    if copy_a ==0 or copy_b == 0:
+    if copy_a == 0 or copy_b == 0:
         CourseModification.objects.filter(course__year=year,
                                           course__week=week).delete()
         version_copy.version += 1
