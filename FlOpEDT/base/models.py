@@ -490,7 +490,7 @@ class CourseModification(models.Model):
         if sched_course is None:
             sched_course = ScheduledCourse.objects.get(course=course, work_copy=0)
         department = course.type.department
-        al = '\n  + '
+        al = '\n  · '
         same = f'- Cours {course.module.abbrev} semaine {course.week} ({course.year})'
         changed = ''
 
