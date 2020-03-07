@@ -31,7 +31,7 @@ to manage a department statistics for FlOpEDT.
 """
 
 from django.urls import path
-from . import views
+from . import views, crud
 
 app_name = "flopeditor"
 
@@ -60,4 +60,10 @@ urlpatterns = [
          name="flopeditor-ajax-create-department"),
     path('ajax/parameters-edit/<slug:department_abbrev>', views.ajax_edit_parameters,
          name='flopeditor-ajax-edit-department-parameters'),
+
+    # exchanges with the CRUD
+    # --------------------------------
+    path('<slug:department_abbrev>/crud/room_types', crud.crud_room_types,
+        name='flopeditor-crud-room-types')
+
 ]
