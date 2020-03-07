@@ -78,10 +78,10 @@ def get_readable_day(day):
     }.get(day, "None")
 
 
-def get_first_keys(dictionaries):
+def dict2keys(dictionaries):
     res = []
     for dictionary in dictionaries:
-        res.append(list(dictionary.keys())[0] if len(list(dictionary.keys())) >= 1 else None)
+        res.append(list(dictionary.keys()) if len(list(dictionary.keys())) >= 1 else None)
     return tuple(res)
 
 
@@ -202,22 +202,29 @@ class ConstraintManager:
             file.write(output)
         # print(output)
 
-    def show_simplified_result(self, id_constraints, weeks):
-        most_type, most_instructor, most_slot, most_course, most_week, most_room, most_group, most_day, \
-            most_department, most_module = get_first_keys(self.get_occurs(id_constraints))
+    def show_simplified_result(self, id_constraints, weeks, max_slots_to_print=5):
+        occur_type, occur_instructor, occur_slot, occur_course, occur_week, occur_room, occur_group, occur_days,\
+            occur_department, occur_modules = dict2keys(self.get_occurs(id_constraints))
 
         output = "Voici les raisons principales pour lesquelles le solveur n'a pas pu résoudre l'ensemble " \
                  "des contraintes spécifiées: \n"
-        if most_day is not None and most_week is not None:
-            output += "\t- Le jour %s (semaine %s) est le plus impliqué\n" % (get_readable_day(most_day), most_week)
-        if most_instructor is not None:
-            output += "\t- Le professeur %s est le plus impliqué\n" % most_instructor
-        if most_group is not None:
-            output += "\t- Le groupe %s est le plus impliqué\n" % most_group
-        if most_module is not None:
-            output += "\t- Le module %s est le plus impliqué\n" % most_module
-        if most_room is not None:
-            output += "\t- La salle %s est la plus impliqué\n" % most_room
+        if occur_days is not None and occur_week is not None:
+            output += "\t- Le jour %s (semaine %s) est le plus impliqué\n" % \
+                      (get_readable_day(occur_days[0]), occur_week[0])
+
+        if occur_instructor is not None:
+            output += "\t- Le professeur %s est le plus impliqué\n" % occur_instructor[0]
+        if occur_group is not None:
+            output += "\t- Le groupe %s est le plus impliqué\n" % occur_group[0]
+        if occur_modules is not None:
+            output += "\t- Le module %s est le plus impliqué\n" % occur_modules[0]
+        if occur_room is not None:
+            output += "\t- La salle %s est la plus impliqué\n" % occur_room[0]
+
+        if occur_slot is not None:
+            output += "\n\t- Les slots les plus impliqués sont les suivants :\n"
+            for i in range(min(len(occur_slot), max_slots_to_print)):
+                output += "\t\t- %s\n" % occur_slot[i]
 
         filename = "logs/intelligible_constraints_simplified%s.txt" % weeks
         print("writting %s ..." % filename)
