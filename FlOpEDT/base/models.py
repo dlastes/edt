@@ -245,12 +245,12 @@ class RoomGroup(models.Model):
     departments = models.ManyToManyField(Department)
     basic = models.BooleanField(verbose_name='Basic room?', default=False)
 
-    def and_all_subrooms(self):
+    def and_subrooms(self):
         s = {self}
         s |= self.subrooms.all()
         return s
 
-    def and_all_overrooms(self):
+    def and_overrooms(self):
         s = {self}
         s |= self.subroom_of.all()
         return s

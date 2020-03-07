@@ -74,7 +74,7 @@ class RoomEventFeed(EventFeed):
                 room_o = RoomGroup.objects.get(name=room.replace('_',' '))
             except ObjectDoesNotExist:
                 return []
-        return room_o.and_all_subrooms()
+        return room_o.and_subrooms()
 
     def items(self, room_groups):
         return ScheduledCourse.objects.filter(room__in=room_groups, work_copy=0).order_by('-course__year','-course__week')

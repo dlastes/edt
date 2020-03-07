@@ -96,7 +96,7 @@ def basic_reassign_rooms(department, week, year, target_work_copy):
                     continue
                 # test if precedent.room is available
                 prec_is_unavailable = False
-                for r in precedent.room.and_all_subrooms():
+                for r in precedent.room.and_subrooms():
                     if RoomPreference.objects.filter(week=week, year=year,  day=day,
                                                      start_time=st, room=r, value=0).exists():
                         prec_is_unavailable = True
@@ -234,7 +234,7 @@ def compute_conflicts(department, week, year, copy_a):
     conflict_roomgroup_list = get_shared_roomgroups()
     
     for rg in conflict_roomgroup_list:
-        dic_rooms[str(rg.id)] = [r.name for r in rg.and_all_subrooms()]
+        dic_rooms[str(rg.id)] = [r.name for r in rg.and_subrooms()]
     print(dic_rooms)
     courses_list = ScheduledCourse.objects.select_related('course__type__duration')\
                                           .filter(Q(work_copy=copy_a) & Q(course__module__train_prog__department__abbrev=department) \
