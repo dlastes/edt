@@ -1083,8 +1083,10 @@ def clean_change(year, week, old_version, change, work_copy=0, initiator=None, a
         raise Exception(f"Problème : prof {change['tutor']} inconnu")
 
     if apply:
-        for obj in ret.values():
-            obj.save()
+        ret['course'].save()
+        ret['sched'].save()
+        if work_copy == 0:
+            ret['log'].save()
 
     return ret
 
@@ -1146,15 +1148,17 @@ def edt_changes(req, **kwargs):
                 for change in recv_changes:
                     new_courses = clean_change(year, week, old_version, change, work_copy=work_copy,
                                                initiator=initiator, apply=True)
-                    same, changed = new_courses['log'].strs_course_changes()
-                    msg += str(new_courses['log'])
-                    impacted_inst.add(new_courses['course'].tutor)
-                    impacted_inst.add(new_courses['sched'].tutor)
-                if None in impacted_inst:
-                    impacted_inst.remove(None)
+                    if work_copy == 0:
+                        same, changed = new_courses['log'].strs_course_changes()
+                        msg += str(new_courses['log'])
+                        impacted_inst.add(new_courses['course'].tutor)
+                        impacted_inst.add(new_courses['sched'].tutor)
+                        if None in impacted_inst:
+                            impacted_inst.remove(None)
             except Exception as e:
                 bad_response['more'] = str(e)
                 return JsonResponse(bad_response)
+
             if work_copy == 0:
                 edt_version = EdtVersion.objects.get(week=week, year=year)
                 edt_version.version += 1
@@ -1163,20 +1167,21 @@ def edt_changes(req, **kwargs):
             cache.delete(get_key_course_pl(department.abbrev, year, week, work_copy))
             cache.delete(get_key_course_pp(department.abbrev, year, week, work_copy))
 
-        subject = '[Modif sur tierce] ' + initiator.username + ' a déplacé '
-        for inst in impacted_inst:
-            subject += inst.username + ' '
+        if work_copy == 0:
+            subject = '[Modif sur tierce] ' + initiator.username + ' a déplacé '
+            for inst in impacted_inst:
+                subject += inst.username + ' '
 
-        if initiator in impacted_inst:
-            impacted_inst.remove(initiator)
-        if len(impacted_inst) > 0:
-            email = EmailMessage(
-                subject,
-                msg,
-                to=['edt.info.iut.blagnac@gmail.com']
-            )
-            # email.send()
-            logger.info(email)
+            if initiator in impacted_inst:
+                impacted_inst.remove(initiator)
+            if len(impacted_inst) > 0:
+                email = EmailMessage(
+                    subject,
+                    msg,
+                    to=['edt.info.iut.blagnac@gmail.com']
+                )
+                # email.send()
+                logger.info(email)
 
         return JsonResponse(good_response)
     else:
