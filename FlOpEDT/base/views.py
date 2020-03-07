@@ -60,7 +60,7 @@ if COSMO_MODE:
     from base.admin import CoursPlaceResourceCosmo
 from base.forms import ContactForm, PerfectDayForm
 from base.models import Course, UserPreference, ScheduledCourse, EdtVersion, \
-    CourseModification, Day, Time, RoomGroup, Room, RoomType, RoomSort, \
+    CourseModification, Day, Time, RoomGroup, RoomType, RoomSort, \
     Regen, RoomPreference, Department, TimeGeneralSettings, CoursePreference, \
     TrainingProgramme, CourseType
 import base.queries as queries
@@ -728,7 +728,7 @@ def fetch_user_default_week(req, username, **kwargs):
 
 def fetch_room_default_week(req, room, **kwargs):
     try:
-        room = Room.objects.get(name=room)
+        room = RoomGroup.objects.get(name=room)
     except ObjectDoesNotExist:
         return HttpResponse('Problem')
 
@@ -922,7 +922,7 @@ def fetch_flat_rooms(req, **kwargs):
     """
     Return rooms for a given department
     """
-    return JsonResponse([room.name for room in Room.objects.filter(departments=req.department)],
+    return JsonResponse([room.name for room in RoomGroup.objects.filter(departments=req.department, basic=True)],
                          safe=False)    
 
 def fetch_constraints(req, **kwargs):
@@ -1432,7 +1432,7 @@ def room_preferences_changes(req, year, week, room, **kwargs):
     logger.info(f"     W{week} Y{year}")
 
     try:
-        room = Room.objects.get(name=room)
+        room = RoomGroup.objects.get(name=room)
     except ObjectDoesNotExist:
         response['more'] \
             = "Problème d'utilisateur."

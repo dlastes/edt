@@ -33,7 +33,7 @@ from random import choice
 
 from displayweb.models import TrainingProgrammeDisplay
 
-from base.models import Room, RoomType, RoomGroup, TrainingProgramme,\
+from base.models import RoomType, RoomGroup, TrainingProgramme,\
     Group, Module, GroupType, Period, Time, Day, CourseType, \
     Department, CourseStartTimeConstraint, TimeGeneralSettings, UserPreference, CoursePreference
 
@@ -171,13 +171,11 @@ def rooms_extract(department, book):
     while idRoom is not None :
 
         try:
-            room, _ = Room.objects.get_or_create(name=idRoom)
+            room, _ = RoomGroup.objects.get_or_create(name=idRoom)
             
-            room_group, _ = RoomGroup.objects.get_or_create(name=idRoom)
-            room_group.types.add(temporay_room_type)
+            room.types.add(temporay_room_type)
             
             # Ensure that a room_group exits with the same roomid
-            room.subroom_of.add(room_group)
             room.departments.add(department)
 
 
@@ -199,7 +197,7 @@ def rooms_extract(department, book):
     while room_group_id is not None :
 
         try:
-            if not Room.objects.filter(name=room_group_id).exists():
+            if not RoomGroup.objects.filter(name=room_group_id).exists():
                 room_group = RoomGroup.objects.create(name=room_group_id)
                 room_group.types.add(temporay_room_type)
             else:
@@ -230,7 +228,7 @@ def rooms_extract(department, book):
             logger.info(f"Add room [{idRoom}] to group : {idGroup}")
             
             try:                
-                room = Room.objects.get(name=idRoom)
+                room = RoomGroup.objects.get(name=idRoom)
                 room_group = RoomGroup.objects.get(name=idGroup, types__in=[temporay_room_type,])
                 room.subroom_of.add(room_group)
 
@@ -658,7 +656,7 @@ def displayInfo():
 
     print("The Rooms are : ")
 
-    for r in Room.objects.all():
+    for r in RoomGroup.objects.all():
 
         print(r.name, ", subroom of : ")
 

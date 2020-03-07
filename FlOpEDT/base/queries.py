@@ -32,7 +32,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from base.models import Group, TrainingProgramme, \
                         ScheduledCourse, EdtVersion, Department, Regen
 
-from base.models import Room, RoomType, RoomGroup, \
+from base.models import RoomType, RoomGroup, \
                         RoomSort, Period, CourseType, \
                         TutorCost, CourseStartTimeConstraint, \
                         TimeGeneralSettings, GroupType, CourseType, \

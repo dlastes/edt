@@ -41,7 +41,7 @@ from base.models import Day, RoomGroup, Module, Course, Group, \
     Regen, Holiday, TrainingHalfDay, \
     CoursePreference, Dependency, Department, CourseType
 
-from base.models import RoomPreference, RoomSort, RoomType, Room
+from base.models import RoomPreference, RoomSort, RoomType
 from displayweb.models import ModuleDisplay
 from displayweb.models import TutorDisplay
 from import_export import resources, fields
@@ -280,13 +280,13 @@ class UnavailableRoomsResource(resources.ModelResource):
         
 class RoomPreferenceResource(resources.ModelResource):
     room = fields.Field(attribute='room',
-                        widget=ForeignKeyWidget(Room, 'name'))
+                        widget=ForeignKeyWidget(RoomGroup, 'name'))
     
     class Meta:
         model = RoomPreference
         fields = ("room", "day", "start_time", "duration", "value")
 
-        
+
 class VersionResource(resources.ModelResource):
     class Meta:
         model = EdtVersion;
@@ -451,18 +451,14 @@ class GroupAdmin(DepartmentModelAdmin):
                    )
 
 
-class RoomAdmin(DepartmentModelAdmin):
-    pass
-
-
-class RoomInline(admin.TabularInline):
-    model = Room.subroom_of.through
-    show_change_link = False
+# class RoomInline(admin.TabularInline):
+#     model = RoomGroup.subroom_of.through
+#     show_change_link = False
 
 
 class RoomGroupAdmin(DepartmentModelAdmin):
-    inlines = [RoomInline,]
-    list_display = ('name',)    
+    # inlines = [RoomInline,]
+    list_display = ('name',)
 
   
 class RoomPreferenceAdmin(DepartmentModelAdmin):
@@ -607,7 +603,6 @@ admin.site.unregister(auth.models.Group)
 admin.site.register(Holiday, HolidayAdmin)
 admin.site.register(TrainingHalfDay, TrainingHalfDayAdmin)
 admin.site.register(Group, GroupAdmin)
-admin.site.register(Room, RoomAdmin)
 admin.site.register(RoomGroup, RoomGroupAdmin)
 admin.site.register(RoomPreference, RoomPreferenceAdmin)
 admin.site.register(RoomSort, RoomSortAdmin)

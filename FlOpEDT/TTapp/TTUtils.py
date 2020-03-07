@@ -26,7 +26,7 @@
 # without disclosing the source code of your own applications.
 
 from base.models import ScheduledCourse, RoomPreference, EdtVersion, Department, CourseStartTimeConstraint,\
-    TimeGeneralSettings, Room, RoomGroup, CourseModification
+    TimeGeneralSettings, RoomGroup, CourseModification
 from base.timing import str_slot
 from django.db.models import Count, Max, Q, F
 from TTapp.models import LimitedRoomChoices, slot_pause
@@ -96,7 +96,7 @@ def basic_reassign_rooms(department, week, year, target_work_copy):
                     continue
                 # test if precedent.room is available
                 prec_is_unavailable = False
-                for r in precedent.room.subrooms.all():
+                for r in precedent.room.and_all_subrooms():
                     if RoomPreference.objects.filter(week=week, year=year,  day=day,
                                                      start_time=st, room=r, value=0).exists():
                         prec_is_unavailable = True
@@ -104,7 +104,7 @@ def basic_reassign_rooms(department, week, year, target_work_copy):
                     if ScheduledCourse.objects \
                         .filter(start_time=st,
                                 day=day,
-                                room__in=r.subroom_of.exclude(id=precedent.room.id),
+                                room__in={r}|set(r.subroom_of.exclude(id=precedent.room.id)),
                                 **scheduled_courses_params) \
                         .exists():
                             prec_is_unavailable = True
@@ -169,14 +169,14 @@ def get_shared_rooms():
     '''
     Returns the rooms that are shared between departments
     '''
-    return Room.objects.annotate(num_depts=Count('departments')).filter(num_depts__gt=1)
+    return RoomGroup.objects.annotate(num_depts=Count('departments')).filter(num_depts__gt=1)
 
 
 def get_shared_roomgroups():
     '''
     Returns all roomgroups in conflict between departments
     '''
-    return RoomGroup.objects.filter(subrooms__in=get_shared_rooms())
+    return get_shared_rooms()
 
 
 def compute_conflicts_helper(dic):
@@ -234,7 +234,7 @@ def compute_conflicts(department, week, year, copy_a):
     conflict_roomgroup_list = get_shared_roomgroups()
     
     for rg in conflict_roomgroup_list:
-        dic_rooms[str(rg.id)] = [r.name for r in rg.subrooms.all()]
+        dic_rooms[str(rg.id)] = [r.name for r in rg.and_all_subrooms()]
     print(dic_rooms)
     courses_list = ScheduledCourse.objects.select_related('course__type__duration')\
                                           .filter(Q(work_copy=copy_a) & Q(course__module__train_prog__department__abbrev=department) \
