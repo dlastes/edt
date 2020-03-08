@@ -45,7 +45,7 @@ def read(department):
 
     """
 
-    rooms = Room.objects.filter(department=department)
+    rooms = Room.objects.filter(departments=department)
     choices = []
     for room in rooms:
         choices.append(room.name)
@@ -53,7 +53,10 @@ def read(department):
     room_types = RoomType.objects.filter(department=department)
     values = []
     for room_type in room_types:
-        values.append((room_type.name, room_type.members))
+        members = []
+        for member in room_type.members.all():
+            members.append(member.name)
+        values.append((room_type.name, members))
 
     return JsonResponse({
         "columns" :  [{
