@@ -1,13 +1,13 @@
 Voici les raisons principales pour lesquelles le solveur n'a pas pu résoudre l'ensemble des contraintes spécifiées: 
-	- Le jour Jeudi (semaine 5) est le plus impliqué
+	- Le jour Lundi (semaine 5) est le plus impliqué
 	- Le professeur JD est le plus impliqué
 	- Le groupe 2 est le plus impliqué
 	- Le module CDAM est le plus impliqué
 	- La salle B106 est la plus impliqué
 
 	- Les slots les plus impliqués sont les suivants :
-		- TD_m_s5_15h45
+		- TD_w_s5_15h45
 		- TD_tu_s5_11h
-		- TD_w_s5_9h30
-		- TD_w_s5_8h
-		- TD_m_s5_17h15
+		- TD_m_s5_8h
+		- TD_m_s5_15h45
+		- TD_th_s5_9h30

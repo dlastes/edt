@@ -134,7 +134,7 @@ class ConstraintManager:
             inc_with_type(occur_departments, self.get_constraint_by_id(i).departments, c_type)
             inc_with_type(occur_module, self.get_constraint_by_id(i).modules, c_type)
 
-        priority_types = ["Le cours doit être placé", "Pas_de_cours_le_jeudi_aprem"]
+        priority_types = ["Le cours doit être placé", "Problème de dépendance entre les salles"]
         occur_type = handle_occur_type_with_priority(priority_types, occur_type, decreasing)
 
         occur_instructor = {k: v for k, v in
@@ -196,12 +196,12 @@ class ConstraintManager:
             output += "\nParametre Group : \n" + buf_group
         if buf_days != "":
             output += "\nParametre Days : \n" + buf_days
-        if buf_slot != "":
-            output += "\nParametre Slot :\n" + buf_slot
         if buf_department != "":
             output += "\nParametre Department :\n" + buf_department
         if buf_module != "":
             output += "\nParametre Module :\n" + buf_module
+        if buf_slot != "":
+            output += "\nParametre Slot :\n" + buf_slot
 
         filename = "logs/intelligible_constraints_factorised%s.txt" % weeks
         write_file(filename, output)
