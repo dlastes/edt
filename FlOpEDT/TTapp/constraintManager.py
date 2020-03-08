@@ -70,6 +70,23 @@ def handle_occur_type_with_priority(priority_types, occur_type, decreasing):
     return occur_type
 
 
+def get_readable_day(day):
+    return {
+        "m": "Lundi",
+        "tu": "Mardi",
+        "w": "Mercredi",
+        "th": "Jeudi",
+        "f": "Vendredi"
+    }.get(day, "None")
+
+
+def dict2keys(dictionaries):
+    res = []
+    for dictionary in dictionaries:
+        res.append(list(dictionary.keys()) if len(list(dictionary.keys())) >= 1 else None)
+    return tuple(res)
+
+
 class ConstraintManager:
     def __init__(self):
         self.constraints = []
@@ -107,8 +124,7 @@ class ConstraintManager:
             inc_with_type(occur_group, self.get_constraint_by_id(i).groups, c_type)
             inc_with_type(occur_days, self.get_constraint_by_id(i).days, c_type)
             inc_with_type(occur_departments, self.get_constraint_by_id(i).departments, c_type)
-
-        print(occur_course)
+            inc_with_type(occur_module, self.get_constraint_by_id(i).modules, c_type)
 
         priority_types = ["Le cours doit être placé", "Pas_de_cours_le_jeudi_aprem"]
         occur_type = handle_occur_type_with_priority(priority_types, occur_type, decreasing)
@@ -188,7 +204,38 @@ class ConstraintManager:
             file.write(output)
         # print(output)
 
+    def show_simplified_result(self, id_constraints, weeks, max_slots_to_print=5):
+        occur_type, occur_instructor, occur_slot, occur_course, occur_week, occur_room, occur_group, occur_days,\
+            occur_department, occur_modules = dict2keys(self.get_occurs(id_constraints))
+
+        output = "Voici les raisons principales pour lesquelles le solveur n'a pas pu résoudre l'ensemble " \
+                 "des contraintes spécifiées: \n"
+        if occur_days is not None and occur_week is not None:
+            output += "\t- Le jour %s (semaine %s) est le plus impliqué\n" % \
+                      (get_readable_day(occur_days[0]), occur_week[0])
+
+        if occur_instructor is not None:
+            output += "\t- Le professeur %s est le plus impliqué\n" % occur_instructor[0]
+        if occur_group is not None:
+            output += "\t- Le groupe %s est le plus impliqué\n" % occur_group[0]
+        if occur_modules is not None:
+            output += "\t- Le module %s est le plus impliqué\n" % occur_modules[0]
+        if occur_room is not None:
+            output += "\t- La salle %s est la plus impliqué\n" % occur_room[0]
+
+        if occur_slot is not None:
+            output += "\n\t- Les slots les plus impliqués sont les suivants :\n"
+            for i in range(min(len(occur_slot), max_slots_to_print)):
+                output += "\t\t- %s\n" % occur_slot[i]
+
+        filename = "logs/intelligible_constraints_simplified%s.txt" % weeks
+        print("writting %s ..." % filename)
+        with open(filename, "w+") as file:
+            file.write(output)
+        # print(output)
+
     def handle_reduced_result(self, ilp_file_name, weeks):
         id_constraints = parse_iis(ilp_file_name)
         self.show_reduces_result_brut(id_constraints, weeks, decreasing=True)
         self.show_reduces_result(id_constraints, weeks)
+        self.show_simplified_result(id_constraints, weeks)
