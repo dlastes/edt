@@ -87,6 +87,14 @@ def dict2keys(dictionaries):
     return tuple(res)
 
 
+def write_file(filename, output, print_output=False):
+    print("writting %s ..." % filename)
+    with open(filename, "w+") as file:
+        file.write(output)
+    if print_output:
+        print(output)
+
+
 class ConstraintManager:
     def __init__(self):
         self.constraints = []
@@ -153,10 +161,7 @@ class ConstraintManager:
         for constraint in constraints:
             output += str(constraint) + "\n"
         filename = "logs/intelligible_constraints%s.txt" % weeks
-        print("writting %s ..." % filename)
-        with open(filename, "w+") as file:
-            file.write(output)
-        # print(output)
+        write_file(filename, output)
 
     def show_reduces_result(self, id_constraints, weeks):
         occur_type, occur_instructor, occur_slot, occur_course, occur_week, occur_room, occur_group, occur_days,\
@@ -199,10 +204,7 @@ class ConstraintManager:
             output += "\nParametre Module :\n" + buf_module
 
         filename = "logs/intelligible_constraints_factorised%s.txt" % weeks
-        print("writting %s ..." % filename)
-        with open(filename, "w+") as file:
-            file.write(output)
-        # print(output)
+        write_file(filename, output)
 
     def show_simplified_result(self, id_constraints, weeks, max_slots_to_print=5):
         occur_type, occur_instructor, occur_slot, occur_course, occur_week, occur_room, occur_group, occur_days,\
@@ -229,10 +231,7 @@ class ConstraintManager:
                 output += "\t\t- %s\n" % occur_slot[i]
 
         filename = "logs/intelligible_constraints_simplified%s.txt" % weeks
-        print("writting %s ..." % filename)
-        with open(filename, "w+") as file:
-            file.write(output)
-        # print(output)
+        write_file(filename, output)
 
     def handle_reduced_result(self, ilp_file_name, weeks):
         id_constraints = parse_iis(ilp_file_name)
