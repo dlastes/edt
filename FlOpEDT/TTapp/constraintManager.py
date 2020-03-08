@@ -88,11 +88,11 @@ def dict2keys(dictionaries):
 
 
 def write_file(filename, output, print_output=False):
-    print("writting %s ..." % filename)
+    print("writting %s..." % filename)
     with open(filename, "w+") as file:
         file.write(output)
     if print_output:
-        print(output)
+        print("\n%s" % output)
 
 
 class ConstraintManager:
@@ -231,10 +231,11 @@ class ConstraintManager:
                 output += "\t\t- %s\n" % occur_slot[i]
 
         filename = "logs/intelligible_constraints_simplified%s.txt" % weeks
-        write_file(filename, output)
+        write_file(filename, output, print_output=True)
 
     def handle_reduced_result(self, ilp_file_name, weeks):
         id_constraints = parse_iis(ilp_file_name)
+        print()
         self.show_reduces_result_brut(id_constraints, weeks, decreasing=True)
         self.show_reduces_result(id_constraints, weeks)
         self.show_simplified_result(id_constraints, weeks)
