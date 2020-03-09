@@ -259,15 +259,15 @@ class RoomGroup(models.Model):
         return self.name
 
 
-# class Room(models.Model):
-#     name = models.CharField(max_length=20)
-#     subroom_of = models.ManyToManyField(RoomGroup,
-#                                         blank=True,
-#                                         related_name="subrooms")
-#     departments = models.ManyToManyField(Department)
-#
-#     def __str__(self):
-#         return self.name
+class Room(models.Model):
+    name = models.CharField(max_length=20)
+    subroom_of = models.ManyToManyField(RoomGroup,
+                                        blank=True,
+                                        related_name="subrooms")
+    departments = models.ManyToManyField(Department)
+
+    def __str__(self):
+        return self.name
 
 
 class RoomSort(models.Model):
