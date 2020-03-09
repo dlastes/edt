@@ -65,7 +65,7 @@ def read(department):
             "options": {}
         }, {
             'name': 'Groupes et salles concernées',
-            "type": "chips",
+            "type": "select-chips",
             "options": {
                 "values": choices
             }
@@ -103,7 +103,18 @@ def create(entries, department):
                 "Le type de salle à ajouter est déjà présent dans la base de données."
             ])
         else:
-            RoomType.objects.create(name=new_name, members=new_rooms, department=department)
+            room_type = RoomType.objects.create(name=new_name, department=department)
+            for room_name in new_rooms:
+                room = Room.objects.get(name=room_name)
+                if not room:
+                    entries['result'].append([
+                        ERROR_RESPONSE,
+                        "Une salle à ajouter n'a pas été trouvée dans la base de données."
+                    ])
+                    return entries
+                else:
+                    room_type.subrooms.add(room)
+            room_type.save()
             entries['result'].append([OK_RESPONSE])
     return entries
 
@@ -139,7 +150,18 @@ def update(entries, department):
             try:
                 rt_to_update = RoomType.objects.get(name=old_name, department=department)
                 rt_to_update.name = new_name
-                rt_to_update.subrooms = new_rooms
+                subrooms = []
+                for room_name in new_rooms:
+                    room = Room.objects.get(name=room_name)
+                    if not room:
+                        entries['result'].append([
+                            ERROR_RESPONSE,
+                            "Une salle à ajouter n'a pas été trouvée dans la base de données."
+                        ])
+                        return entries
+                    else:
+                        subrooms.add(room)
+                room_type.subrooms = subrooms
                 rt_to_update.save()
                 entries['result'].append([OK_RESPONSE])
             except RoomType.DoesNotExist:

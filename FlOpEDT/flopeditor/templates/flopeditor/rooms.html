@@ -56,4 +56,32 @@
 {% block script %}
    {{ block.super }}
    <script src="{% static 'flopeditor/js/crudjs.min.js' %}" charset="utf-8"></script>
+   <script>
+        $.ajax({
+            type: "POST",
+            headers: {
+              "X-CSRFToken": $("[name=csrfmiddlewaretoken]").val()
+            },
+            data: JSON.stringify({
+              "actions": [
+                {
+                  "request": "NEW",
+                  "new_values": [["Groupe 1", ["Salle 1"]], ["groupe 2", ["Salle 2","Salle 3"]]]
+                },{
+                  "request": "MODIFIED",
+                  "old_values": [["Groupe 1", ["Salle 1"]]],
+                  "new_values": [["Groupe 1 modifié", ["Salle 1"]]]
+                },{
+                  "request": "DELETED",
+                  "old_values": [["U3 02",[]]]
+                }]}),
+            url: "{% url 'flopeditor:flopeditor-crud-room-types' department_abbrev=department.abbrev %}",
+            success: function(response) {
+                console.log(response)
+            },
+            error: function(error) {
+                console.log(error)
+            },
+        });
+    </script>
 {% endblock %}
