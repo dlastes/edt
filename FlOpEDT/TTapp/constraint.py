@@ -13,6 +13,16 @@ def list2str(my_list):
     return output + my_list[-1] + "]"
 
 
+def get_readable_day(day):
+    return {
+        "m": "Lundi",
+        "tu": "Mardi",
+        "w": "Mercredi",
+        "th": "Jeudi",
+        "f": "Vendredi"
+    }.get(day, "None")
+
+
 class Constraint:
     def __init__(self, id, constraint_type=None, instructors=[], slots=[], courses=[], weeks=[], rooms=[],
                  groups=[], days=[], departments=[], modules=[], apm=None):
@@ -39,6 +49,7 @@ class Constraint:
         if type(days) is not list:
             days = [days]
         self.days = list(days)
+        self.days = [get_readable_day(day) for day in self.days]
 
         if type(departments) is not list:
             departments = [departments]
@@ -60,7 +71,7 @@ class Constraint:
         self.courses = list(courses)
 
         for s in self.slots:
-            day = s.get_day().day
+            day = get_readable_day(s.get_day().day)
             if day not in self.days:
                 self.days.append(day)
             week = s.get_day().week

@@ -70,16 +70,6 @@ def handle_occur_type_with_priority(priority_types, occur_type, decreasing):
     return occur_type
 
 
-def get_readable_day(day):
-    return {
-        "m": "Lundi",
-        "tu": "Mardi",
-        "w": "Mercredi",
-        "th": "Jeudi",
-        "f": "Vendredi"
-    }.get(day, "None")
-
-
 def dict2keys(dictionaries):
     res = []
     for dictionary in dictionaries:
@@ -213,8 +203,7 @@ class ConstraintManager:
         output = "Voici les raisons principales pour lesquelles le solveur n'a pas pu résoudre l'ensemble " \
                  "des contraintes spécifiées: \n"
         if occur_days is not None and occur_week is not None:
-            output += "\t- Le jour %s (semaine %s) est le plus impliqué\n" % \
-                      (get_readable_day(occur_days[0]), occur_week[0])
+            output += "\t- Le jour %s (semaine %s) est le plus impliqué\n" % (occur_days[0], occur_week[0])
 
         if occur_instructor is not None:
             output += "\t- Le professeur %s est le plus impliqué\n" % occur_instructor[0]
