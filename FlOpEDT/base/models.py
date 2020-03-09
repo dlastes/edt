@@ -240,14 +240,15 @@ class RoomGroup(models.Model):
                                    blank=True,
                                    related_name="members")
     subroom_of = models.ManyToManyField('self',
-                                      blank=True,
-                                      related_name="subrooms")
+                                        symmetrical=False,
+                                        blank=True,
+                                        related_name="subroomgroups")
     departments = models.ManyToManyField(Department)
     basic = models.BooleanField(verbose_name='Basic room?', default=False)
 
     def and_subrooms(self):
         s = {self}
-        s |= self.subrooms.all()
+        s |= self.subroomgroups.all()
         return s
 
     def and_overrooms(self):
@@ -257,6 +258,12 @@ class RoomGroup(models.Model):
 
     def __str__(self):
         return self.name
+
+    def str_extended(self):
+        return f'{self.name}, ' + f'{"basic" if self.basic else "not basic"}, ' \
+            + f'Types: {[t.name for t in self.types.all()]}, '\
+            + f'Depts: {self.departments.all()}, '\
+            + f'Is in: {[rg.name for rg in self.subroom_of.all()]}'
 
 
 class Room(models.Model):
