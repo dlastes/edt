@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('base', '0046_roomsort_tutor'),
+        ('base', '0047_module_description'),
     ]
 
     operations = [
