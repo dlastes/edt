@@ -61,10 +61,10 @@ class PerfectDayForm(forms.Form):
 
 class ModuleDescriptionForm(forms.ModelForm):
 
-    def __init__(self, module, *args, **kwargs):
+    def __init__(self, module, dept, *args, **kwargs):
         # first call parent's constructor
         super(ModuleDescriptionForm, self).__init__(*args, **kwargs)
-        m = Module.objects.get(abbrev=module)
+        m = Module.objects.get(train_prog__department=dept, abbrev=module)
         self.fields['description'].initial = m.description
 
 
