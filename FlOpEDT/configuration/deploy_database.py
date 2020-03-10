@@ -33,7 +33,7 @@ from random import choice
 
 from displayweb.models import TrainingProgrammeDisplay
 
-from base.models import RoomType, RoomGroup, TrainingProgramme,\
+from base.models import RoomType, Room, TrainingProgramme,\
     Group, Module, GroupType, Period, Time, Day, CourseType, \
     Department, CourseStartTimeConstraint, TimeGeneralSettings, UserPreference, CoursePreference
 
@@ -148,7 +148,7 @@ def rooms_extract(department, book):
     # Create temporary RoomType for import purposes. This type 
     # will be deleted at the end of the process
     temporay_room_random_key = ''.join(choice(string.ascii_lowercase + string.digits) for _ in range(6))
-    temporay_room_type = RoomType.objects.create(department=department, name=f"temp_{department.abbrev}_{temporay_room_random_key}")
+    temporary_room_type = RoomType.objects.create(department=department, name=f"temp_{department.abbrev}_{temporay_room_random_key}")
 
     while idCat is not None :
         try:
@@ -171,9 +171,9 @@ def rooms_extract(department, book):
     while idRoom is not None :
 
         try:
-            room, _ = RoomGroup.objects.get_or_create(name=idRoom)
+            room, _ = Room.objects.get_or_create(name=idRoom)
             
-            room.types.add(temporay_room_type)
+            room.types.add(temporary_room_type)
             
             # Ensure that a room_group exits with the same roomid
             room.departments.add(department)
@@ -192,22 +192,22 @@ def rooms_extract(department, book):
 
     row = ROOMGROUP_DECLARATION_START_ROW
     col = ROOMGROUP_DECLARATION_COL
-    room_group_id = sheet.cell(row=row, column=col).value
+    room_id = sheet.cell(row=row, column=col).value
 
-    while room_group_id is not None :
+    while room_id is not None :
 
         try:
-            if not RoomGroup.objects.filter(name=room_group_id).exists():
-                room_group = RoomGroup.objects.create(name=room_group_id)
-                room_group.types.add(temporay_room_type)
+            if not Room.objects.filter(name=room_id).exists():
+                room_group, _ = Room.objects.get_or_create(name=room_id)
+                room_group.types.add(temporary_room_type)
             else:
-                logger.warning(f"A custom group can't have the same name thant an existing Room : {room_group_id}")
+                logger.warning(f"A custom group can't have the same name thant an existing Room : {room_id}")
 
         except IntegrityError as ie:
-            logger.warning("A constraint has not been respected creating the RoomGroup %s : \n" %room_group_id, ie)
+            logger.warning("A constraint has not been respected creating the RoomGroup %s : \n" %room_id, ie)
 
         row += 1
-        room_group_id = sheet.cell(row=row, column=col).value
+        room_id = sheet.cell(row=row, column=col).value
 
     ######################## Filling the RoomGroups with Rooms ####################################
 
@@ -228,14 +228,14 @@ def rooms_extract(department, book):
             logger.info(f"Add room [{idRoom}] to group : {idGroup}")
             
             try:                
-                room = RoomGroup.objects.get(name=idRoom)
-                room_group = RoomGroup.objects.get(name=idGroup, types__in=[temporay_room_type,])
+                room = Room.objects.get(name=idRoom)
+                room_group = Room.objects.get(name=idGroup, types__in=[temporary_room_type, ])
                 room.subroom_of.add(room_group)
 
             except Room.DoesNotExist:
                 logger.warning(f"unable to find room '{idRoom}' with correct RoomType'")
             
-            except RoomGroup.DoesNotExist:
+            except Room.DoesNotExist:
                 logger.warning(f"unable to find  RoomGroup '{idGroup}' with correct RoomType'")                            
 
             col += 1
@@ -254,29 +254,29 @@ def rooms_extract(department, book):
     while idCat is not None :
 
         col = ROOM_CATEGORY_START_COL + 1
-        room_group_id = sheet.cell(row=row, column=col).value
+        room_id = sheet.cell(row=row, column=col).value
 
         room_type = RoomType.objects.get(department=department, name=idCat)
 
-        while room_group_id is not None :
+        while room_id is not None :
             try:
                 # Test if group is a common room based group or a department custom group
                 try:
-                    room_group = RoomGroup.objects.get(subrooms__id=room_group_id)
+                    room_group = Room.objects.get(subrooms__id=room_id)
                 except:
-                    room_group = RoomGroup.objects.get(name=room_group_id, types__in=[temporay_room_type,])
+                    room_group = Room.objects.get(name=room_id, types__in=[temporary_room_type, ])
 
                 room_group.types.add(room_type)
-            except RoomGroup.DoesNotExist:
-                logger.warning(f"unable to find  RoomGroup '{room_group_id}'")
+            except Room.DoesNotExist:
+                logger.warning(f"unable to find  RoomGroup '{room_id}'")
 
             col += 1
-            room_group_id = sheet.cell(row=row, column=col).value
+            room_id = sheet.cell(row=row, column=col).value
 
         row += 1
         idCat = sheet.cell(row=row, column=ROOM_CATEGORY_START_COL).value
 
-    temporay_room_type.delete()
+    temporary_room_type.delete()
     logger.info("Rooms extraction done")
 
 
@@ -656,7 +656,7 @@ def displayInfo():
 
     print("The Rooms are : ")
 
-    for r in RoomGroup.objects.all():
+    for r in Room.objects.all():
 
         print(r.name, ", subroom of : ")
 
@@ -668,7 +668,7 @@ def displayInfo():
 
     print("The Room groups are : ")
 
-    for rg in RoomGroup.objects.all():
+    for rg in Room.objects.all():
 
         print(rg.name, ", types : ")
 

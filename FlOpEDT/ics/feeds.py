@@ -6,7 +6,7 @@ from django_ical.views import ICalFeed
 
 from django.core.exceptions import ObjectDoesNotExist
 
-from base.models import ScheduledCourse, RoomGroup, Group, Day
+from base.models import ScheduledCourse, Room, Group, Day
 from people.models import Tutor
 
 
@@ -68,10 +68,10 @@ class TutorEventFeed(EventFeed):
 class RoomEventFeed(EventFeed):
     def get_object(self, request, department, room):
         try:
-            room_o = RoomGroup.objects.get(name=room)
+            room_o = Room.objects.get(name=room)
         except ObjectDoesNotExist:
             try:
-                room_o = RoomGroup.objects.get(name=room.replace('_',' '))
+                room_o = Room.objects.get(name=room.replace('_', ' '))
             except ObjectDoesNotExist:
                 return []
         return room_o.and_subrooms()

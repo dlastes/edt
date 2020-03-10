@@ -35,7 +35,7 @@ import pulp.solvers as pulp_solvers
 from FlOpEDT.settings.base import COSMO_MODE
 
 from base.models import Group, Day, Time, \
-    RoomGroup, RoomSort, RoomType, RoomPreference, \
+    Room, RoomSort, RoomType, RoomPreference, \
     Course, ScheduledCourse, UserPreference, CoursePreference, \
     Department, Module, TrainingProgramme, CourseType, \
     Dependency, TutorCost, GroupFreeHalfDay, GroupCost, Holiday, TrainingHalfDay, \
@@ -213,8 +213,8 @@ class WeekDB(object):
     def rooms_init(self):
         # ROOMS
         room_types = RoomType.objects.filter(department=self.department)
-        rooms = RoomGroup.objects.filter(departments=self.department).distinct()
-        basic_rooms = RoomGroup.objects.filter(departments=self.department, basic=True).distinct()
+        rooms = Room.objects.filter(departments=self.department).distinct()
+        basic_rooms = Room.objects.filter(departments=self.department, basic=True).distinct()
         room_prefs = RoomSort.objects.filter(for_type__department=self.department)
         rooms_for_type = {t: t.members.all() for t in room_types}
         # for each Room, first build the list of courses that may use it

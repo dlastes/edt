@@ -234,7 +234,7 @@ class RoomType(models.Model):
         return self.name
 
 
-class RoomGroup(models.Model):
+class Room(models.Model):
     name = models.CharField(max_length=20)
     types = models.ManyToManyField(RoomType,
                                    blank=True,
@@ -269,9 +269,9 @@ class RoomGroup(models.Model):
 class RoomSort(models.Model):
     for_type = models.ForeignKey(RoomType, blank=True, null=True,
                                  related_name='+', on_delete=models.CASCADE)
-    prefer = models.ForeignKey(RoomGroup, blank=True, null=True,
+    prefer = models.ForeignKey(Room, blank=True, null=True,
                                related_name='+', on_delete=models.CASCADE)
-    unprefer = models.ForeignKey(RoomGroup, blank=True, null=True,
+    unprefer = models.ForeignKey(Room, blank=True, null=True,
                                  related_name='+', on_delete=models.CASCADE)
     tutor = models.ForeignKey('people.Tutor',
                               related_name='abcd',
@@ -368,7 +368,7 @@ class ScheduledCourse(models.Model):
     day = models.CharField(max_length=2, choices=Day.CHOICES, default=Day.MONDAY)
     # in minutes from 12AM
     start_time = models.PositiveSmallIntegerField()
-    room = models.ForeignKey('RoomGroup', blank=True, null=True, on_delete=models.CASCADE)
+    room = models.ForeignKey('Room', blank=True, null=True, on_delete=models.CASCADE)
     no = models.PositiveSmallIntegerField(null=True, blank=True)
     noprec = models.BooleanField(
         verbose_name='vrai si on ne veut pas garder la salle', default=True)
@@ -437,7 +437,7 @@ class CoursePreference(models.Model):
     
 
 class RoomPreference(models.Model):
-    roomgroup = models.ForeignKey('RoomGroup', on_delete=models.CASCADE, default=None, null=True)
+    room = models.ForeignKey('Room', on_delete=models.CASCADE, default=None, null=True)
     week = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)],
         null=True,
@@ -483,7 +483,7 @@ class CourseModification(models.Model):
     old_week = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)], null=True)
     old_year = models.PositiveSmallIntegerField(null=True)
-    room_old = models.ForeignKey('RoomGroup', blank=True, null=True, on_delete=models.CASCADE)
+    room_old = models.ForeignKey('Room', blank=True, null=True, on_delete=models.CASCADE)
     day_old = models.CharField(max_length=2, choices=Day.CHOICES, default=None, null=True)
     start_time_old = models.PositiveSmallIntegerField(default=None, null=True)
     tutor_old = models.ForeignKey('people.Tutor',
