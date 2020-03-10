@@ -57,12 +57,12 @@ def room2roomgroup(apps, schema_editor):
         rg.departments.add(*list(depts))
         print(f'{rg.name} {rg.basic} {rg.types.all()} {rg.departments.all()}')
 
-    print("RoomPreference", end=': ')
+    print("RoomPreferences", end=': ')
     # departments according to basic rooms
     for rp in RoomPreference.objects.all():
         rp.roomgroup= RoomGroup.objects.get(name=rp.room.name)
         rp.save()
-        print('OK')
+    print('OK')
 
 
 
