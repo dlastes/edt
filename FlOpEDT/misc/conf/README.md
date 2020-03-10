@@ -54,6 +54,9 @@ configurations sont possibles.
 ### Installation d'un solveur de programme linéaire en nombres entiers
 
 #### CBC
+```
+sudo apt-get install coinor-cbc
+```
 
 #### Gurobi
 
