@@ -1434,7 +1434,7 @@ class TTModel(object):
         # gurobi
 
         
-        if 'gurobi' in solver.lower() or hasattr(pulp_solvers, solver):
+        if 'gurobi' in solver.lower() and hasattr(pulp_solvers, GUROBI_NAME):
             # ignore SIGINT while solver is running
             # => SIGINT is still delivered to the solver, which is what we want
             solver = GUROBI_NAME
@@ -1444,13 +1444,17 @@ class TTModel(object):
                                         options=[("TimeLimit", time_limit),
                                                  ("Presolve", presolve),
                                                  ("MIPGapAbs", 0.2)]))
-        else:
+        elif hasattr(pulp_solvers, solver):
             # raise an exception when the solver name is incorrect
             command = getattr(pulp_solvers, solver)
             self.model.solve(command(keepFiles=1,
                                      msg=True,
                                      presolve=presolve,
                                      maxSeconds=time_limit))
+        else:
+            print(f'Solver {solver} not found.')
+            return None
+
         status = self.model.status
         print(LpStatus[status])
         if status == LpStatusOptimal or (solver != GUROBI_NAME and status == LpStatusNotSolved):
