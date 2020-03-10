@@ -28,112 +28,117 @@
 
 
 
-    /*
-     +----------------------------------------------------+
-     |			^				  |
-     |			| 50                              |
-     |			v				  |
-     |       +---------------+  +---------------+	  |
-     |       |---------------|  |---------------|	  |
-     |       |---------------|  |---------------|	  |
-     |       |_______________|  |_______________|	  |
-     | 							  |
-     |<----->+---------------+  +---------------+	  |
-     |  50   |---------------|  |---------------|	  |
-     |       |---------------|  |---------------|	  |
-     |       |_______________|  |_______________|	  |
-     | 							  |
-     |       +---------------+  +---------------+	  |
-     |       |---------------|  |---------------|	  |
-     |       |---------------|  |---------------|	  |
-     |       |_______________|  |_______________|	  |
-     | 							  |
-     |                       1050                         |
-     |<-------------------------------------------------->|
-     +----------------------------------------------------+       
-     */
+/*
+ +----------------------------------------------------+
+ |			^				  |
+ |			| 50                              |
+ |			v				  |
+ |       +---------------+  +---------------+	  |
+ |       |---------------|  |---------------|	  |
+ |       |---------------|  |---------------|	  |
+ |       |_______________|  |_______________|	  |
+ | 							  |
+ |<----->+---------------+  +---------------+	  |
+ |  50   |---------------|  |---------------|	  |
+ |       |---------------|  |---------------|	  |
+ |       |_______________|  |_______________|	  |
+ | 							  |
+ |       +---------------+  +---------------+	  |
+ |       |---------------|  |---------------|	  |
+ |       |---------------|  |---------------|	  |
+ |       |_______________|  |_______________|	  |
+ | 							  |
+ |                       1050                         |
+ |<-------------------------------------------------->|
+ +----------------------------------------------------+       
+ */
 
-var logo = {scale: .12,
-	    init:{dim: 1000,
-		  margin: 50},
-	    get_current_dim: function () {
-		return this.scale * this.init.dim ;},
-	    get_current_margin: function () {
-		return this.scale * this.init.margin ;}
-	   }
+var logo = {
+  scale: .12,
+  init: {
+    dim: 1000,
+    margin: 50
+  },
+  get_current_dim: function () {
+    return this.scale * this.init.dim;
+  },
+  get_current_margin: function () {
+    return this.scale * this.init.margin;
+  }
+}
 
 
 var headlines =
-    [ "Gestionnaire d'emploi du temps <span id=\"flopGreen\">fl"
-        + "</span>exible et <span id=\"flopGreen\">op</span>enSource",
-      "\"Qui veut faire les <span id=\"flopRed\">EDT</span> cette année ?\" ... "
-      + "<span id=\"flopGreen\">flop</span> !",
-      "Et votre emploi du temps fera un "
-      + "<span id=\"flopRedDel\">flop</span> carton !",
-      "Et même votre logo sera à l'heure..." 
-    ];
+  ["Gestionnaire d'emploi du temps <span id=\"flopGreen\">fl"
+    + "</span>exible et <span id=\"flopGreen\">op</span>enSource",
+  "\"Qui veut faire les <span id=\"flopRed\">EDT</span> cette année ?\" ... "
+  + "<span id=\"flopGreen\">flop</span> !",
+  "Et votre emploi du temps fera un "
+  + "<span id=\"flopRedDel\">flop</span> carton !",
+    "Et même votre logo sera à l'heure..."
+  ];
 
 
 init_logo();
 
 
 function init_logo() {
-    fetch_logo();
-    init_date();
-    resize_logo();
-    add_headline();
+  fetch_logo();
+  init_date();
+  resize_logo();
+  add_headline();
 }
 
 
 // fetch the logo and include it as svg
-function fetch_logo(){
-    var xhr = new XMLHttpRequest();
-    xhr.open("GET",url_logo,false);
-    xhr.overrideMimeType("image/svg+xml");
-    xhr.send("");
-    var lolo = document.getElementById("live-logo");
-    lolo.appendChild(xhr.responseXML.documentElement);
+function fetch_logo() {
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET", url_logo, false);
+  xhr.overrideMimeType("image/svg+xml");
+  xhr.send("");
+  var lolo = document.getElementById("live-logo");
+  lolo.appendChild(xhr.responseXML.documentElement);
 }
 
 
 // initialize the long and short hands of the logo
 function init_date() {
-    var d = new Date();
-    var hm = new Array(2);
-    hm[0] = 360*(d.getHours() % 12 + d.getMinutes()/60)/12;
-    hm[1] = 360*(d.getMinutes()+d.getSeconds()/60)/60;
-    var anim = new Array(2);
-    anim[0] = document.getElementById("csh")
-	.getElementsByTagName("animateTransform")[0];
-    anim[1] = document.getElementById("clh")
-	.getElementsByTagName("animateTransform")[0];
-    for (var i = 0 ; i<2 ; i++) {
-	var from = anim[i].getAttribute("from").split(" ");
-	from[0] = (+from[0]) + hm[i] ;
-	anim[i].setAttribute("from", from.join(" "));
-	var to = anim[i].getAttribute("to").split(" ");
-	to[0] = (+to[0]) + hm[i] ;
-	anim[i].setAttribute("to", to.join(" "));
-    }
+  var d = new Date();
+  var hm = new Array(2);
+  hm[0] = 360 * (d.getHours() % 12 + d.getMinutes() / 60) / 12;
+  hm[1] = 360 * (d.getMinutes() + d.getSeconds() / 60) / 60;
+  var anim = new Array(2);
+  anim[0] = document.getElementById("csh")
+    .getElementsByTagName("animateTransform")[0];
+  anim[1] = document.getElementById("clh")
+    .getElementsByTagName("animateTransform")[0];
+  for (var i = 0; i < 2; i++) {
+    var from = anim[i].getAttribute("from").split(" ");
+    from[0] = (+from[0]) + hm[i];
+    anim[i].setAttribute("from", from.join(" "));
+    var to = anim[i].getAttribute("to").split(" ");
+    to[0] = (+to[0]) + hm[i];
+    anim[i].setAttribute("to", to.join(" "));
+  }
 }
 
 
 function resize_logo() {
-    logo.svg = d3
-	.select("#live-logo")
-	.select("svg");
-  
-  
-    logo.svg
-	.select("#dims")
-	.attr("transform", "scale(" + logo.scale + ")");
-  
-    logo.svg
-	.attr("width", logo.get_current_dim() + logo.get_current_margin())
-	.attr("height", logo.get_current_dim() + logo.get_current_margin());
+  logo.svg = d3
+    .select("#live-logo")
+    .select("svg");
+
+
+  logo.svg
+    .select("#dims")
+    .attr("transform", "scale(" + logo.scale + ")");
+
+  logo.svg
+    .attr("width", logo.get_current_dim() + logo.get_current_margin())
+    .attr("height", logo.get_current_dim() + logo.get_current_margin());
 }
 
 function add_headline() {
-    var draw = Math.floor(Math.random()*headlines.length);
-    document.getElementById("head_logo").innerHTML = headlines[draw];
+  var draw = Math.floor(Math.random() * headlines.length);
+  document.getElementById("head_logo").innerHTML = headlines[draw];
 }
