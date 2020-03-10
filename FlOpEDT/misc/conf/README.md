@@ -9,10 +9,10 @@ configurations sont possibles.
 - Récupérer le module pour gérer les environnements virtuels
 ```pip install virtualenv```
 - Créer un env virtuel quelque part, par exemple :
-```
-cd FlOpEDT
-virtualenv -p /usr/bin/python3.6 venv
-```
+  ```
+  cd FlOpEDT
+  virtualenv -p /usr/bin/python3.6 venv
+  ```
 - Y aller :
 ```source venv/bin/activate```
 - Mettre à jour pip :
