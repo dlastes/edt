@@ -23,7 +23,7 @@ def room2roomgroup(apps, schema_editor):
         print(f'{nb_rg} associated roomgroup(s)')
         if nb_rg > 1:
             all_types = set()
-            for rg in associated:
+            for rg in associated_rg:
                 all_types.update(rg.types.all())
             associated_rg.delete()
             associated_rg = RoomGroup(name=room.name)
