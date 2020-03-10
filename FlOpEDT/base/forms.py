@@ -58,32 +58,6 @@ class PerfectDayForm(forms.Form):
         self.fields['max_hours_per_day'] = forms.IntegerField(label="Maximum", min_value=1, max_value=9,
                                                               required=False, initial=6)
 
-"""
-class DescriptionForm(forms.Form):
-    description = forms.CharField(label='Description du module ',
-                                  max_length=33000,
-                                  widget=forms.Textarea(attrs={'class': 'description-text'}))
-"""
-
-
-# class ModuleDescriptionForm(forms.ModelForm):
-#
-#     def __init__(self, module, *args, **kwargs):
-#         # first call parent's constructor
-#         super(ModuleDescriptionForm, self).__init__(*args, **kwargs)
-#         self.fields['desc'].widget.attrs.update({'class' : 'description-text'})
-#         # there's a `fields` property now
-#         self.fields['desc'].required = True
-#         try:
-#             description = Module.objects.get(abbrev=module).description
-#             self.fields['desc'].initial = description.desc
-#         except:
-#             pass
-#
-#
-#     class Meta:
-#         model = ModuleDescription
-#         fields = ['desc']
 
 class ModuleDescriptionForm(forms.ModelForm):
 

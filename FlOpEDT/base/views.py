@@ -1037,7 +1037,7 @@ def fetch_all_modules_with_desc(req, **kwargs):
 # </editor-fold desc="FETCHERS">
 
 # <editor-fold desc="CHANGERS">
-# ----------ModuleDescription
+# ----------
 # CHANGERS
 # ----------
 

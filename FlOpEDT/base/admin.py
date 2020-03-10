@@ -385,14 +385,14 @@ class DepartmentModelAdminMixin():
 
     def get_department_lookup(self, department):
         """
-		Hook for overriding default department lookup research
-		"""
+	Hook for overriding default department lookup research
+	"""
         return get_model_department_lookup(self.model, department)
 
     def get_queryset(self, request):
         """
-		Filter only department related instances
-		"""
+	Filter only department related instances
+	"""
         qs = super().get_queryset(request)
 
         try:
@@ -407,8 +407,8 @@ class DepartmentModelAdminMixin():
 
     def formfield_with_department_filtering(self, db_field, request, kwargs):
         """
-		Filter form fields for with specific department related items
-		"""
+	Filter form fields for with specific department related items
+	"""
 
         if hasattr(request, 'department') and db_field.related_model:
             related_filter = get_model_department_lookup(db_field.related_model, request.department)
