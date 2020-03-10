@@ -242,13 +242,13 @@ class RoomGroup(models.Model):
     subroom_of = models.ManyToManyField('self',
                                         symmetrical=False,
                                         blank=True,
-                                        related_name="subroomgroups")
+                                        related_name="subrooms")
     departments = models.ManyToManyField(Department)
     basic = models.BooleanField(verbose_name='Basic room?', default=False)
 
     def and_subrooms(self):
         s = {self}
-        s |= self.subroomgroups.all()
+        s |= self.subrooms.all()
         return s
 
     def and_overrooms(self):
@@ -264,17 +264,6 @@ class RoomGroup(models.Model):
             + f'Types: {[t.name for t in self.types.all()]}, '\
             + f'Depts: {self.departments.all()}, '\
             + f'Is in: {[rg.name for rg in self.subroom_of.all()]}'
-
-
-class Room(models.Model):
-    name = models.CharField(max_length=20)
-    subroom_of = models.ManyToManyField(RoomGroup,
-                                        blank=True,
-                                        related_name="subrooms")
-    departments = models.ManyToManyField(Department)
-
-    def __str__(self):
-        return self.name
 
 
 class RoomSort(models.Model):
@@ -449,8 +438,6 @@ class CoursePreference(models.Model):
 
 class RoomPreference(models.Model):
     roomgroup = models.ForeignKey('RoomGroup', on_delete=models.CASCADE, default=None, null=True)
-    room = models.ForeignKey('Room', on_delete=models.SET_NULL, null=True)
-    room = models.ForeignKey('Room', on_delete=models.SET_NULL, null=True)
     week = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)],
         null=True,

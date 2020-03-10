@@ -462,7 +462,7 @@ class RoomGroupAdmin(DepartmentModelAdmin):
 
   
 class RoomPreferenceAdmin(DepartmentModelAdmin):
-    list_display = ('room', 'week', 'year', 'day', 'start_time',
+    list_display = ('roomgroup', 'week', 'year', 'day', 'start_time',
                     'duration', 'value')
     ordering = ('-year','-week', 'day', 'start_time')
     list_filter = (
