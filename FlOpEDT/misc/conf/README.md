@@ -36,19 +36,19 @@ pip install daphne
 - Se logger avec l'utilisateur postgres pour toute la suite.
 `sudo -i -u postgres`
 - Regarder les infos de la database que django va utiliser dans [les
-settings](https://framagit.org/flopedt/FlOpEDT/blob/master/FlOpEDT/FlOpEDT/settings/local.py). Chercher
-la DATABASE par defaut : admettons qu'elle a un nom flopdb, un user
-flopuser et un mot de passe floppwd. Utiliser ces informations pour la
+settings](https://framagit.org/flopedt/FlOpEDT/blob/dev/FlOpEDT/FlOpEDT/settings/local.py). Chercher
+la DATABASE par defaut : admettons qu'elle a un nom `flop_database_public_dev`, un user
+`flop_user` et un mot de passe `your_password`. Utiliser ces informations pour la
 suite.
 - Créer l'utilisateur pour flop,
-`createuser -P flopuser`,
-et renseignez le mot de passe `pwddb`.
+`createuser -P flop_user`,
+et renseignez le mot de passe `your_password`.
 - Créer la base pour flop :
-`createdb flopdb`
+`createdb flop_database_public_dev`
 - Aller configurer la base. Lancer postgresql
 `psql`,
 et dans la console PSQL, octroyer à l'utilisateur les droits sur la base :
-`GRANT ALL PRIVILEGES ON DATABASE flopdb TO flopuser;`
+`GRANT ALL PRIVILEGES ON DATABASE flop_database_public_dev TO flop_user;`
 - Sortir de la console PSQL (par exemple Ctrl+d).
 
 ### Installation d'un solveur de programme linéaire en nombres entiers
@@ -67,12 +67,12 @@ environnement virtuel.
 - Aller dans l'environnement virtuel
 `source venv/bin/activate`
 - *Pour une première exécution*, 
- + appliquer les migrations :
-`python manage.py migrate`
- + éventuellement, remplir la base avec les données d'exemple :
-`python manage.py loaddata ../dump.json`
- + pour supprimer ces données :
- `python manage.py flush`
+  - appliquer les migrations :
+    `python manage.py migrate`
+  - éventuellement, remplir la base avec les données d'exemple :
+    `python manage.py loaddata ../dump.json`
+  - pour supprimer ces données :
+    `python manage.py flush`
 
 ### Exécution en local
 
