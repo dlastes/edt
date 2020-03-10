@@ -1709,6 +1709,7 @@ def module_description(req, module, **kwargs):
             m = Module.objects.get(abbrev=module)
             m.description = description
             m.save()
+            return all_modules_with_desc(req)
         else:
             form = ModuleDescriptionForm(module, req.POST)
     else:
