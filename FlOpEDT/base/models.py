@@ -249,12 +249,12 @@ class Room(models.Model):
 
     def and_subrooms(self):
         s = {self}
-        s |= self.subrooms.all()
+        s |= set(self.subrooms.all())
         return s
 
     def and_overrooms(self):
         s = {self}
-        s |= self.subroom_of.all()
+        s |= set(self.subroom_of.all())
         return s
 
     def __str__(self):
