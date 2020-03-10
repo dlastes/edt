@@ -411,7 +411,9 @@ def decale(req, **kwargs):
 
 
 def all_modules_with_desc(req, **kwargs):
-    return TemplateResponse(req, 'base/modules.html')
+    return TemplateResponse(req, 'base/modules.html',
+                            {'is_tutor': req.user.is_tutor\
+                             if req.user.is_authenticated else False})
 
 
 

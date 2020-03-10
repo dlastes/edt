@@ -52,5 +52,8 @@
 {% endblock %}
 
 {% block javascript %}
-    <script src="{% static 'base/modules.js' %}"></script>
+<script>
+  var is_tutor = {{is_tutor|yesno:"true,false"}};
+</script>
+<script src="{% static 'base/modules.js' %}"></script>
 {% endblock %}
