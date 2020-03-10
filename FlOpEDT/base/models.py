@@ -36,6 +36,7 @@ from django.dispatch import receiver
 from base.timing import hhmm, str_slot
 import base.weeks
 
+
 # <editor-fold desc="GROUPS">
 # ------------
 # -- GROUPS --
@@ -43,7 +44,7 @@ import base.weeks
 
 class Department(models.Model):
     name = models.CharField(max_length=50)
-    abbrev = models.CharField(max_length=7)    
+    abbrev = models.CharField(max_length=7)
 
     def __str__(self):
         return self.abbrev
@@ -52,7 +53,7 @@ class Department(models.Model):
 class TrainingProgramme(models.Model):
     name = models.CharField(max_length=50)
     abbrev = models.CharField(max_length=5)
-    department =  models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
+    department = models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return self.abbrev
@@ -60,8 +61,8 @@ class TrainingProgramme(models.Model):
 
 class GroupType(models.Model):
     name = models.CharField(max_length=50)
-    department =  models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
-    
+    department = models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
+
     def __str__(self):
         return self.name
 
@@ -127,8 +128,8 @@ class Day(object):
 
     CHOICES = ((MONDAY, "monday"), (TUESDAY, "tuesday"),
                (WEDNESDAY, "wednesday"), (THURSDAY, "thursday"),
-               (FRIDAY, "friday"),(SATURDAY, "saturday"),
-               (SUNDAY,"sunday"))
+               (FRIDAY, "friday"), (SATURDAY, "saturday"),
+               (SUNDAY, "sunday"))
 
     def __init__(self, day, week):
         self.day = day
@@ -150,7 +151,6 @@ class Time(models.Model):
                            verbose_name="Half day",
                            default=AM)
     no = models.PositiveSmallIntegerField(default=0)
-    #nom = models.CharField(max_length=20)
     hours = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(25)], default=8)
     minutes = models.PositiveSmallIntegerField(
@@ -166,12 +166,13 @@ class Time(models.Model):
         message += str(self.minutes)
         return message
 
+
 @receiver(pre_save, sender=Time)
 def define_apm(sender, instance, *args, **kwargs):
     if instance.hours >= 12:
         instance.apm = Time.PM
 
-    
+
 class Holiday(models.Model):
     day = models.CharField(max_length=2, choices=Day.CHOICES, default=Day.MONDAY)
     week = models.PositiveSmallIntegerField(
@@ -191,7 +192,7 @@ class TrainingHalfDay(models.Model):
 
 class Period(models.Model):
     name = models.CharField(max_length=20)
-    department =  models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
+    department = models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
     starting_week = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)])
     ending_week = models.PositiveSmallIntegerField(
@@ -202,7 +203,7 @@ class Period(models.Model):
 
 
 class TimeGeneralSettings(models.Model):
-    department =  models.OneToOneField(Department, on_delete=models.CASCADE)
+    department = models.OneToOneField(Department, on_delete=models.CASCADE)
     day_start_time = models.PositiveSmallIntegerField()
     day_finish_time = models.PositiveSmallIntegerField()
     lunch_break_start_time = models.PositiveSmallIntegerField()
@@ -227,7 +228,7 @@ class TimeGeneralSettings(models.Model):
 
 
 class RoomType(models.Model):
-    department =  models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
+    department = models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
     name = models.CharField(max_length=20)
 
     def __str__(self):
@@ -291,22 +292,22 @@ class Module(models.Model):
     train_prog = models.ForeignKey('TrainingProgramme', on_delete=models.CASCADE)
     period = models.ForeignKey('Period', on_delete=models.CASCADE)
     url = models.CharField(max_length=200, null=True, blank=True, default=None)
+    description = models.TextField(null=True, blank=True, default=None)
 
     def __str__(self):
         return self.abbrev
 
     class Meta:
-       ordering = ['abbrev',]
+        ordering = ['abbrev', ]
 
 
 class ModulePossibleTutors(models.Model):
     module = models.OneToOneField('Module', on_delete=models.CASCADE)
     possible_tutors = models.ManyToManyField('people.Tutor', blank=True, related_name='possible_modules')
 
-
 class CourseType(models.Model):
     name = models.CharField(max_length=50)
-    department =  models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
+    department = models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
     duration = models.PositiveSmallIntegerField(default=90)
     group_types = models.ManyToManyField(GroupType,
                                          blank=True,
@@ -341,7 +342,7 @@ class Course(models.Model):
     def __str__(self):
         username_mod = self.tutor.username if self.tutor is not None else '-no_tut-'
         return f"{self.type}-{self.module}-{username_mod}-{self.group}"
-    
+
     def full_name(self):
         username_mod = self.tutor.username if self.tutor is not None else '-no_tut-'
         return f"{self.type}-{self.module}-{username_mod}-{self.group}"
@@ -399,8 +400,8 @@ class UserPreference(models.Model):
 
     def __str__(self):
         return f"{self.user.username}-Sem{self.week}: " + \
-            f"({str_slot(self.day, self.start_time, self.duration)})" + \
-            f"={self.value}"
+               f"({str_slot(self.day, self.start_time, self.duration)})" + \
+               f"={self.value}"
 
 
 class CoursePreference(models.Model):
@@ -411,7 +412,7 @@ class CoursePreference(models.Model):
         null=True,
         blank=True)
     year = models.PositiveSmallIntegerField(null=True,
-                                          blank=True)
+                                            blank=True)
     day = models.CharField(max_length=2, choices=Day.CHOICES, default=Day.MONDAY)
     start_time = models.PositiveSmallIntegerField()
     duration = models.PositiveSmallIntegerField()
@@ -421,9 +422,9 @@ class CoursePreference(models.Model):
 
     def __str__(self):
         return f"{self.course_type}=Sem{self.week}:" + \
-            f"({str_slot(self.day, self.start_time, self.duration)})" + \
-            f"--{self.train_prog}={self.value}"
-    
+               f"({str_slot(self.day, self.start_time, self.duration)})" + \
+               f"--{self.train_prog}={self.value}"
+
 
 class RoomPreference(models.Model):
     room = models.ForeignKey('Room', on_delete=models.CASCADE)
@@ -432,7 +433,7 @@ class RoomPreference(models.Model):
         null=True,
         blank=True)
     year = models.PositiveSmallIntegerField(null=True,
-                                          blank=True)
+                                            blank=True)
     day = models.CharField(max_length=2, choices=Day.CHOICES, default=Day.MONDAY)
     start_time = models.PositiveSmallIntegerField()
     duration = models.PositiveSmallIntegerField()
@@ -442,8 +443,8 @@ class RoomPreference(models.Model):
 
     def __str__(self):
         return f"{self.room}-Sem{self.week}:" + \
-            f"({str_slot(self.day, self.start_time, self.duration)})" + \
-            f"={self.value}"
+               f"({str_slot(self.day, self.start_time, self.duration)})" + \
+               f"={self.value}"
 
 
 # </editor-fold desc="PREFERENCES">
@@ -455,14 +456,16 @@ class RoomPreference(models.Model):
 
 
 class EdtVersion(models.Model):
-    department =  models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
+    department = models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
     week = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)])
     year = models.PositiveSmallIntegerField()
     version = models.PositiveIntegerField(default=0)
 
     class Meta:
-        unique_together = (("department","week","year"),)
+        unique_together = (("department", "week", "year"),)
+
+
 #    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
 
@@ -549,7 +552,7 @@ class CourseModification(models.Model):
 
 
 class TutorCost(models.Model):
-    department =  models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
+    department = models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
     week = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)])
     year = models.PositiveSmallIntegerField()
@@ -569,7 +572,6 @@ class GroupCost(models.Model):
     value = models.FloatField()
     work_copy = models.PositiveSmallIntegerField(default=0)
 
-
     def __str__(self):
         return f"sem{self.week}-{self.group}:{self.value}"
 
@@ -581,7 +583,6 @@ class GroupFreeHalfDay(models.Model):
     group = models.ForeignKey('Group', on_delete=models.CASCADE)
     DJL = models.PositiveSmallIntegerField()
     work_copy = models.PositiveSmallIntegerField(default=0)
-
 
     def __str__(self):
         return f"sem{self.week}-{self.group}:{self.DJL}"
@@ -610,12 +611,10 @@ class CourseStartTimeConstraint(models.Model):
     # foreignkey instead of onetoone to leave room for a day attribute
     course_type = models.ForeignKey('CourseType', null=True, default=None, on_delete=models.CASCADE)
     allowed_start_times = ArrayField(models.PositiveSmallIntegerField(), blank=True)
-    
 
 
 class Regen(models.Model):
-
-    department =  models.ForeignKey(Department, on_delete=models.CASCADE, null=True)   
+    department = models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
     week = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)])
     year = models.PositiveSmallIntegerField()
@@ -651,10 +650,10 @@ class Regen(models.Model):
 
         if self.full:
             ret += f'Génération complète le ' + \
-                f'{self.fday}/{self.fmonth}/{self.fyear}'
+                   f'{self.fday}/{self.fmonth}/{self.fyear}'
         elif self.stabilize:
             ret += 'Génération stabilisée le ' + \
-                f'{self.sday}/{self.smonth}/{self.syear}'
+                   f'{self.sday}/{self.smonth}/{self.syear}'
         else:
             ret += "Pas de (re-)génération prévue"
 
