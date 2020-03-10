@@ -1176,7 +1176,7 @@ def edt_changes(req, **kwargs):
                 return JsonResponse(bad_response)
 
             if work_copy == 0:
-                edt_version = EdtVersion.objects.get(week=week, year=year)
+                edt_version = EdtVersion.objects.get(week=week, year=year, department=department)
                 edt_version.version += 1
                 edt_version.save()
 
