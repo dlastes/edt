@@ -1703,10 +1703,10 @@ def send_email_proposal(req, **kwargs):
 def module_description(req, module, **kwargs):
 
     if req.method == 'POST':
-        form = ModuleDescriptionForm(module, req.POST)
+        form = ModuleDescriptionForm(req.department, module, req.POST)
         if form.is_valid():
             description = form.cleaned_data['description']
-            m = Module.objects.get(abbrev=module)
+            m = Module.objects.get(train_prog__department=req.department, abbrev=module)
             m.description = description
             m.save()
             return all_modules_with_desc(req)
