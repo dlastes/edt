@@ -35,13 +35,13 @@ import django.contrib.auth as auth
 from FlOpEDT.settings.base import COSMO_MODE
 
 from people.models import Tutor, User
-from base.models import Day, RoomGroup, Module, Course, Group, \
+from base.models import Day, Room, Module, Course, Group, \
     UserPreference, Time, ScheduledCourse, EdtVersion, CourseModification, \
     TrainingProgramme,  \
     Regen, Holiday, TrainingHalfDay, \
     CoursePreference, Dependency, Department, CourseType
 
-from base.models import RoomPreference, RoomSort, RoomType, Room
+from base.models import RoomPreference, RoomSort, RoomType
 from displayweb.models import ModuleDisplay
 from displayweb.models import TutorDisplay
 from import_export import resources, fields
@@ -103,7 +103,7 @@ class CoursPlaceResource(resources.ModelResource):
     #                      widget = ForeignKeyWidget(Salle,'nom'))
     room = fields.Field(column_name='room',
                         attribute='room',
-                        widget=ForeignKeyWidget(RoomGroup, 'name'))
+                        widget=ForeignKeyWidget(Room, 'name'))
     room_type = fields.Field(column_name='room_type',
                              attribute='course__room_type',
                              widget=ForeignKeyWidget(RoomType, 'name'))
@@ -158,7 +158,7 @@ class CoursPlaceResourceCosmo(resources.ModelResource):
     #                      widget = ForeignKeyWidget(Salle,'nom'))
     room = fields.Field(column_name='room',
                         attribute='room',
-                        widget=ForeignKeyWidget(RoomGroup, 'name'))
+                        widget=ForeignKeyWidget(Room, 'name'))
     color_bg = fields.Field(column_name='color_bg',
                             attribute='tutor__display',
                             widget=ForeignKeyWidget(TutorDisplay, 'color_bg'))
@@ -198,14 +198,13 @@ class MultiDepartmentTutorResource(resources.ModelResource):
         model = ScheduledCourse
         fields = ('tutor', 'department', 'day', 'start_time', 'duration')
 
-
-class SharedRoomGroupsResource(resources.ModelResource):
+class SharedRoomsResource(resources.ModelResource):
     room = fields.Field(column_name='room',
                         attribute='room',
-                        widget=ForeignKeyWidget(RoomGroup, 'name'))
-    department = fields.Field(column_name='department',
-                              attribute='course__type__department',
-                              widget=ForeignKeyWidget(Department, 'abbrev'))
+                        widget=ForeignKeyWidget(Room, 'name'))
+    department =  fields.Field(column_name='department',
+                               attribute='course__type__department',
+                               widget=ForeignKeyWidget(Department, 'abbrev'))
     duration = fields.Field(column_name='duration',
                             attribute='course__type__duration')
 
@@ -472,17 +471,13 @@ class GroupAdmin(DepartmentModelAdmin):
                    )
 
 
+# class RoomInline(admin.TabularInline):
+#     model = RoomGroup.subroom_of.through
+#     show_change_link = False
+
+
 class RoomAdmin(DepartmentModelAdmin):
-    pass
-
-
-class RoomInline(admin.TabularInline):
-    model = Room.subroom_of.through
-    show_change_link = False
-
-
-class RoomGroupAdmin(DepartmentModelAdmin):
-    inlines = [RoomInline, ]
+    # inlines = [RoomInline,]
     list_display = ('name',)
 
 
@@ -628,7 +623,6 @@ admin.site.register(Holiday, HolidayAdmin)
 admin.site.register(TrainingHalfDay, TrainingHalfDayAdmin)
 admin.site.register(Group, GroupAdmin)
 admin.site.register(Room, RoomAdmin)
-admin.site.register(RoomGroup, RoomGroupAdmin)
 admin.site.register(RoomPreference, RoomPreferenceAdmin)
 admin.site.register(RoomSort, RoomSortAdmin)
 admin.site.register(Module, ModuleAdmin)

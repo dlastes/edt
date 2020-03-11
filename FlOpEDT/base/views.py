@@ -54,14 +54,13 @@ from displayweb.models import BreakingNews
 from base.admin import CoursResource, DispoResource, VersionResource, \
     CoursPlaceResource, UnavailableRoomsResource, TutorCoursesResource, \
     CoursePreferenceResource, MultiDepartmentTutorResource, \
-    SharedRoomGroupsResource, RoomPreferenceResource, ModuleRessource, \
+    SharedRoomsResource, RoomPreferenceResource, ModuleRessource, \
     TutorRessource, ModuleDescriptionResource
-
 if COSMO_MODE:
     from base.admin import CoursPlaceResourceCosmo
 from base.forms import ContactForm, PerfectDayForm, ModuleDescriptionForm
 from base.models import Course, UserPreference, ScheduledCourse, EdtVersion, \
-    CourseModification, Day, Time, RoomGroup, Room, RoomType, RoomSort, \
+    CourseModification, Day, Time, Room, RoomType, RoomSort, \
     Regen, RoomPreference, Department, TimeGeneralSettings, CoursePreference, \
     TrainingProgramme, CourseType, Module
 import base.queries as queries
@@ -291,7 +290,7 @@ def room_preference(req, department, tutor=None):
     
     roomtypes = RoomType.objects.filter(department=req.department)\
                                 .prefetch_related('members')
-    roomgroups = RoomGroup.objects.filter(types__in=roomtypes)
+    roomgroups = Room.objects.filter(types__in=roomtypes)
     rt_dict = {rt.id: rt.name for rt in roomtypes}
     rg_dict = {rg.id: rg.name for rg in roomgroups}
     try:
@@ -929,7 +928,7 @@ def fetch_flat_rooms(req, **kwargs):
     """
     Return rooms for a given department
     """
-    return JsonResponse([room.name for room in Room.objects.filter(departments=req.department)],
+    return JsonResponse([room.name for room in Room.objects.filter(departments=req.department, basic=True)],
                         safe=False)
 
 
@@ -1007,26 +1006,26 @@ def fetch_extra_sched(req, year, week, **kwargs):
     return HttpResponse(dataset.csv, content_type='text/csv')
 
 
-def fetch_shared_roomgroups(req, year, week, **kwargs):
+def fetch_shared_rooms(req, year, week, **kwargs):
     # which room groups are shared among departments
-    shared_roomgroups = []
-    for rg in RoomGroup.objects.all():
-        depts = set()
-        for rt in rg.types.all():
-            depts.add(rt.department)
-            if len(depts) > 1:
-                shared_roomgroups.append(rg)
+    shared_rooms = []
+    for rg in Room.objects.all():
+        depts = set() 
+        for rt in rg.types.all(): 
+            depts.add(rt.department) 
+            if len(depts) > 1: 
+                shared_rooms.append(rg)
 
     # courses in any shared room
     courses = ScheduledCourse.objects \
-        .filter(
-        course__week=week,
-        course__year=year,
-        work_copy=0,
-        room__in=shared_roomgroups,
-    ) \
-        .exclude(course__room_type__department=req.department)
-    dataset = SharedRoomGroupsResource().export(courses)
+                .filter(
+                    course__week=week,
+                    course__year=year,
+                    work_copy=0,
+                    room__in=shared_rooms,
+                ) \
+                .exclude(course__room_type__department=req.department)
+    dataset = SharedRoomsResource().export(courses)
     return HttpResponse(dataset.csv, content_type='text/csv')
 
 
@@ -1075,7 +1074,7 @@ def clean_change(year, week, old_version, change, work_copy=0, initiator=None, a
 
     # Rooms
     try:
-        new_room = RoomGroup.objects.get(name=change['room'])
+        new_room = Room.objects.get(name=change['room'])
         ret['sched'].room = new_room
     except ObjectDoesNotExist:
         if new_room == 'salle?' or new_room is None:
@@ -1296,7 +1295,7 @@ def room_preferences_changes_per_tutor(req, tutor, **kwargs):
                                 .prefetch_related('members')
 
     pref_list = {roomtypes.get(id=rt_id) : \
-                 [{'rg': RoomGroup.objects.get(id=rg_id),
+                 [{'rg': Room.objects.get(id=rg_id),
                    'rank': val} for rg_id, val in rg_val_dict.items()\
                   if val != 0] \
                  for rt_id, rg_val_dict in recv_pref.items() }

@@ -235,33 +235,44 @@ class RoomType(models.Model):
         return self.name
 
 
-class RoomGroup(models.Model):
+class Room(models.Model):
     name = models.CharField(max_length=20)
     types = models.ManyToManyField(RoomType,
                                    blank=True,
                                    related_name="members")
-
-    def __str__(self):
-        return self.name
-
-
-class Room(models.Model):
-    name = models.CharField(max_length=20)
-    subroom_of = models.ManyToManyField(RoomGroup,
+    subroom_of = models.ManyToManyField('self',
+                                        symmetrical=False,
                                         blank=True,
                                         related_name="subrooms")
     departments = models.ManyToManyField(Department)
+    basic = models.BooleanField(verbose_name='Basic room?', default=False)
+
+    def and_subrooms(self):
+        s = {self}
+        s |= set(self.subrooms.all())
+        return s
+
+    def and_overrooms(self):
+        s = {self}
+        s |= set(self.subroom_of.all())
+        return s
 
     def __str__(self):
         return self.name
+
+    def str_extended(self):
+        return f'{self.name}, ' + f'{"basic" if self.basic else "not basic"}, ' \
+            + f'Types: {[t.name for t in self.types.all()]}, '\
+            + f'Depts: {self.departments.all()}, '\
+            + f'Is in: {[rg.name for rg in self.subroom_of.all()]}'
 
 
 class RoomSort(models.Model):
     for_type = models.ForeignKey(RoomType, blank=True, null=True,
                                  related_name='+', on_delete=models.CASCADE)
-    prefer = models.ForeignKey(RoomGroup, blank=True, null=True,
+    prefer = models.ForeignKey(Room, blank=True, null=True,
                                related_name='+', on_delete=models.CASCADE)
-    unprefer = models.ForeignKey(RoomGroup, blank=True, null=True,
+    unprefer = models.ForeignKey(Room, blank=True, null=True,
                                  related_name='+', on_delete=models.CASCADE)
     tutor = models.ForeignKey('people.Tutor',
                               related_name='abcd',
@@ -358,7 +369,7 @@ class ScheduledCourse(models.Model):
     day = models.CharField(max_length=2, choices=Day.CHOICES, default=Day.MONDAY)
     # in minutes from 12AM
     start_time = models.PositiveSmallIntegerField()
-    room = models.ForeignKey('RoomGroup', blank=True, null=True, on_delete=models.CASCADE)
+    room = models.ForeignKey('Room', blank=True, null=True, on_delete=models.CASCADE)
     no = models.PositiveSmallIntegerField(null=True, blank=True)
     noprec = models.BooleanField(
         verbose_name='vrai si on ne veut pas garder la salle', default=True)
@@ -427,7 +438,7 @@ class CoursePreference(models.Model):
 
 
 class RoomPreference(models.Model):
-    room = models.ForeignKey('Room', on_delete=models.CASCADE)
+    room = models.ForeignKey('Room', on_delete=models.CASCADE, default=None, null=True)
     week = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)],
         null=True,
@@ -475,7 +486,7 @@ class CourseModification(models.Model):
     old_week = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)], null=True)
     old_year = models.PositiveSmallIntegerField(null=True)
-    room_old = models.ForeignKey('RoomGroup', blank=True, null=True, on_delete=models.CASCADE)
+    room_old = models.ForeignKey('Room', blank=True, null=True, on_delete=models.CASCADE)
     day_old = models.CharField(max_length=2, choices=Day.CHOICES, default=None, null=True)
     start_time_old = models.PositiveSmallIntegerField(default=None, null=True)
     tutor_old = models.ForeignKey('people.Tutor',

@@ -931,7 +931,7 @@ function update_selection() {
             return d.name == c.prof ;
         });
         var roo = rooms_sel.all.find(function(d) {
-            return d.name == c.room ;
+            return rooms.roomgroups[c.room].includes(d.name) ;
         });
         if (typeof mod === 'undefined' || typeof tut === 'undefined'
             || typeof roo === 'undefined') {

@@ -32,7 +32,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from base.models import Group, TrainingProgramme, \
                         ScheduledCourse, EdtVersion, Department, Regen
 
-from base.models import Room, RoomType, RoomGroup, \
+from base.models import RoomType, Room, \
                         RoomSort, Period, CourseType, \
                         TutorCost, CourseStartTimeConstraint, \
                         TimeGeneralSettings, GroupType, CourseType, \
@@ -217,23 +217,21 @@ def get_rooms(department_abbrev):
     and one dictionary roomgroup -> (list of rooms)
     """
     dic_rt = {}
-    dept_rg = set()
+    dept = Department.objects.get(abbrev=department_abbrev)
 
-    for rt in RoomType.objects.filter(department__abbrev=department_abbrev):
+    for rt in RoomType.objects.filter(department=dept):
         dic_rt[str(rt)] = []
-        for rg in rt.members.all():
-            dept_rg.add(rg)
-            if str(rg) not in dic_rt[str(rt)]:
-                dic_rt[str(rt)].append(str(rg))
+        for room in rt.members.all():
+            if str(room) not in dic_rt[str(rt)]:
+                dic_rt[str(rt)].append(str(room))
 
-    dic_rg = {}
-    for rg in dept_rg:
-        dic_rg[rg.name] = []
-        for r in rg.subrooms.all():
-            dic_rg[rg.name].append(str(r))
+    dic_room = {}
+    for room in Room.objects.filter(departments=dept, basic=False):
+        dic_room[room.name] = [r.name for r in room.and_subrooms()]
 
-    return {'roomtypes':dic_rt,
-            'roomgroups':dic_rg}
+    return {'roomtypes': dic_rt,
+            'roomgroups': dic_room,
+            'atomic_rooms': [r.name for r in Room.objects.filter(departments=dept, basic=True)]}
 
 
 def get_coursetype_constraints(department_abbrev):
