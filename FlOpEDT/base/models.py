@@ -266,7 +266,7 @@ class Room(models.Model):
         return self.name
 
     def str_extended(self):
-        return f'{self.name}, ' + \
+        return f'{self.name}, ' \
             + f'Types: {[t.name for t in self.types.all()]}, '\
             + f'Depts: {self.departments.all()}, '\
             + f'Is in: {[rg.name for rg in self.subroom_of.all()]}'
