@@ -26,7 +26,7 @@
 # without disclosing the source code of your own applications.
 
 from base.models import ScheduledCourse, RoomPreference, EdtVersion, Department, CourseStartTimeConstraint,\
-    TimeGeneralSettings, Room, RoomGroup, CourseModification
+    TimeGeneralSettings, Room, CourseModification
 from base.timing import str_slot
 from django.db.models import Count, Max, Q, F
 from TTapp.models import LimitedRoomChoices, slot_pause
@@ -96,7 +96,7 @@ def basic_reassign_rooms(department, week, year, target_work_copy):
                     continue
                 # test if precedent.room is available
                 prec_is_unavailable = False
-                for r in precedent.room.subrooms.all():
+                for r in precedent.room.and_subrooms():
                     if RoomPreference.objects.filter(week=week, year=year,  day=day,
                                                      start_time=st, room=r, value=0).exists():
                         prec_is_unavailable = True
@@ -104,7 +104,7 @@ def basic_reassign_rooms(department, week, year, target_work_copy):
                     if ScheduledCourse.objects \
                         .filter(start_time=st,
                                 day=day,
-                                room__in=r.subroom_of.exclude(id=precedent.room.id),
+                                room__in={r}|set(r.subroom_of.exclude(id=precedent.room.id)),
                                 **scheduled_courses_params) \
                         .exists():
                             prec_is_unavailable = True
@@ -172,13 +172,6 @@ def get_shared_rooms():
     return Room.objects.annotate(num_depts=Count('departments')).filter(num_depts__gt=1)
 
 
-def get_shared_roomgroups():
-    '''
-    Returns all roomgroups in conflict between departments
-    '''
-    return RoomGroup.objects.filter(subrooms__in=get_shared_rooms())
-
-
 def compute_conflicts_helper(dic):
     '''
     Computes overlapping slots
@@ -230,19 +223,19 @@ def compute_conflicts(department, week, year, copy_a):
     # rooms that are used in parallel
     tmp_conflicts = []
     dic_by_room = {}
-    dic_rooms = {}
-    conflict_roomgroup_list = get_shared_roomgroups()
+    dic_subrooms = {}
+    conflict_room_list = get_shared_rooms()
     
-    for rg in conflict_roomgroup_list:
-        dic_rooms[str(rg.id)] = [r.name for r in rg.subrooms.all()]
-    print(dic_rooms)
+    for room in conflict_room_list:
+        dic_subrooms[str(room.id)] = [r.name for r in room.and_subrooms()]
+    print(dic_subrooms)
     courses_list = ScheduledCourse.objects.select_related('course__type__duration')\
                                           .filter(Q(work_copy=copy_a) & Q(course__module__train_prog__department__abbrev=department) \
                                                   | Q(work_copy=0)&~Q(course__module__train_prog__department__abbrev=department),
                                                   course__week=week,
                                                   course__year=year,
                                                   work_copy=copy_a,
-                                                  room__in=conflict_roomgroup_list)\
+                                                  room__in=conflict_room_list)\
                                           .annotate(duration=F('course__type__duration'),
                                                     week=F('course__week'),
                                                     year=F('course__year'))\
@@ -255,10 +248,10 @@ def compute_conflicts(department, week, year, copy_a):
     # create busy slots for every room in the roomgroups
     for sc in courses_list:
         roomgroup = sc['room']
-        for room in dic_rooms[str(roomgroup)]:
-            if room in dic_by_room:
+        for subroom in dic_subrooms[str(roomgroup)]:
+            if subroom in dic_by_room:
                 new_sc = sc.copy()
-                new_sc['room'] = room
+                new_sc['room'] = subroom
                 dic_by_room[new_sc['room']].append(new_sc)
 
     conflicts['room'] = compute_conflicts_helper(dic_by_room)

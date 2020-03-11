@@ -19,8 +19,8 @@
         {% for roomtype, pref in pref_tmpl.items %}
         <div class="rooms" id="{{roomtype.id}}">
           <strong>{{roomtype.name}}</strong>
-          {% for roomgroup, value in pref.items %}
-          <div class="pref" id="{{roomgroup.id}}">
+          {% for room, value in pref.items %}
+          <div class="pref" id="{{room.id}}">
             <form>
               <select name="pref">
                 {% for rank in pref.items %}
@@ -40,7 +40,7 @@
                 {% endcomment %}
               </select>
             </form>
-            {{roomgroup.name}}
+            {{room.name}}
           </div>
           {% endfor %}
         </div>
