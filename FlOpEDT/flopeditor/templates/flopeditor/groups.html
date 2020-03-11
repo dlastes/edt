@@ -3,7 +3,7 @@
 {% block nav-classes-groups %} active {% endblock %}
 {% block content %}
 
-groups
+
 {% csrf_token %}
 
 
@@ -11,7 +11,7 @@ groups
 
 
 <div class="card">
-    
+
     <div class="card-body tab-content">
       <div id="rooms" class="tab-pane fade show active" role="tabpanel">
         <crud-js url="{% url 'flopeditor:flopeditor-crud-student-group-type' department_abbrev=department.abbrev %}" save-button="btntest" editable>
@@ -38,45 +38,11 @@ groups
 
 
 {{ block.super }}
+<script> const CSRF = $("[name=csrfmiddlewaretoken]").val(); </script>
+
+
 <script src="{% static 'flopeditor/js/crudjs.min.js' %}" charset="utf-8"></script>
 
-<script>
-        $.ajax({
-            type: "GET",
-            url: "{% url 'flopeditor:flopeditor-crud-student-group-type' department_abbrev=department.abbrev %}",
-            success: function(response) {
-                console.log(response)
-            },
-            error: function(error) {
-                console.log(error)
-            },
-        });
-      </script>
-      <script>
-          $.ajax({
-              type: "POST",
-              headers: {
-                "X-CSRFToken": $("[name=csrfmiddlewaretoken]").val()
-              },
-              data: JSON.stringify({
-                "actions": [
-                {
-                  "request": "NEW",
-                  "new_values": [["pl"], [], [""], ["jr"]]
-                },{
-                  "request": "MODIFIED",
-                  "old_values": [["U3 02"],["CE"]],
-                  "new_values": [["U3-089"],["U3-coucou"]]
-                }
-              ]}),
-              url: "{% url 'flopeditor:flopeditor-crud-student-group-type' department_abbrev=department.abbrev %}",
-              success: function(response) {
-                  console.log(response)
-              },
-              error: function(error) {
-                  console.log(error)
-              },
-          });
-      </script>
+
 
 {% endblock %}

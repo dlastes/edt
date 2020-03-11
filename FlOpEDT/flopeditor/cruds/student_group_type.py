@@ -118,7 +118,7 @@ def update(entries, department):
     for i in range(len(entries['old_values'])):
         if not entries['new_values'][i]:
             entries['result'].append([ERROR_RESPONSE,
-                              "Le nom du type de goupe est vide (none)."])
+                                      "Le nom du type de goupe est vide (none)."])
         else:
             old_name = entries['old_values'][i][0]
             new_name = entries['new_values'][i][0]
@@ -128,9 +128,17 @@ def update(entries, department):
             elif not new_name:
                 entries['result'].append([ERROR_RESPONSE,
                                           "Le nom du type de goupe ne peut pas être vide."])
+
+            elif GroupType.objects.filter(name=new_name, department=department).count() != 0:
+                entries['result'].append(
+                    [ERROR_RESPONSE,
+                     "Un nom de groupe est déjà utilis dans le département"])
             else:
                 try:
-                    group_type_to_update = GroupType.objects.get(name=old_name, department=department)
+                    group_type_to_update = GroupType.objects.get(
+                        name=old_name,
+                        department=department
+                    )
                     group_type_to_update.name = new_name
                     group_type_to_update.save()
                     entries['result'].append([OK_RESPONSE])
