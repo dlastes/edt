@@ -252,6 +252,10 @@ class Room(models.Model):
         s |= set(self.subrooms.all())
         return s
 
+    def basic_rooms(self):
+        s = set(r for r in self.and_subrooms() if r.basic)
+        return s
+
     def and_overrooms(self):
         s = {self}
         s |= set(self.subroom_of.all())
