@@ -221,8 +221,8 @@ def get_room_types_groups(department_abbrev):
 
     return {'roomtypes': {str(rt): list(set(
         [room.name for room in rt.members.all()]
-    )) },
-            'roomgroups': {room.name: [sub.name for sub in room.subrooms.all()] \
+    )) for rt in RoomType.objects.filter(department=dept)},
+            'roomgroups': {room.name: [sub.name for sub in room.and_subrooms()] \
                            for room in Room.objects.filter(departments=dept)}
             }
 
