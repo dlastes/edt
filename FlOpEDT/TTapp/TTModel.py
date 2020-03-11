@@ -1370,14 +1370,15 @@ class TTModel(object):
 
         self.add_dependency_constraints()
 
+        #Has to be before rooms_constraints because it contains rooms availability modification...
+        self.add_other_departments_constraints()
+
         self.add_rooms_constraints()
 
         self.add_instructors_constraints()
 
         if self.core_only:
             return
-
-        self.add_other_departments_constraints()
 
         self.add_slot_preferences()
 
