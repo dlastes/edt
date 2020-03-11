@@ -27,6 +27,7 @@
 import logging
 
 from django.db import transaction
+from django.db.models import Count
 from django.core.exceptions import ObjectDoesNotExist
 
 from base.models import Group, TrainingProgramme, \
@@ -226,6 +227,26 @@ def get_room_types_groups(department_abbrev):
             }
 
 
+def get_rooms(department_abbrev, basic=False):
+    """
+    :return: 
+    """
+    if department_abbrev is not None:
+        dept = Department.objects.get(abbrev=department_abbrev)
+    else:
+        dept = None
+    if not basic:
+        if dept is None:
+            return Room.objects.all()
+        else:
+            return Room.objects.filter(departments=dept)
+    else:
+        if dept is None:
+            return Room.objects.annotate(nb_sub=Count('subrooms'))\
+                           .filter(nb_sub=0)
+        else:
+            return Room.objects.annotate(nb_sub=Count('subrooms'))\
+                               .filter(departments=dept, nb_sub=0)
 
 
 def get_coursetype_constraints(department_abbrev):
