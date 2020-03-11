@@ -21,37 +21,26 @@
 <!-- you develop activities involving the FlOpEDT/FlOpScheduler software   -->
 <!-- without disclosing the source code of your own applications.          -->
 
-{% extends "base/edt-base.html" %}
-
+{% extends "base.html" %}
 {% load static %}
 
-{% block script_variable %}
-<script>
-  var promo_init = "{{ promo }}";
-  var gp_init = "{{ gp }}";
-  var num_copie = "{{ copie }}";
-  var logged_usr = { name: "{{ name_usr }}", rights: +"{{ rights_usr }}", is_student: "{{ user.is_student }}" };
-  var splash_id = "{{ splash_id }}";
-  var cosmo = JSON.parse("{{ cosmo | lower }}") ;
-</script>
-{% endblock %}
+{% block title %} EDT {% endblock %}
 
-{% block script_file %}
-<script type='text/javascript' src="{% static 'base/all.js' %}?2"></script>
-{% endblock %}
+{% block content %}
 
-{% block side_panel %}
-<p>Numéro de copie :
-  <select id="dd_work_copy">
-  </select>
-</p>
-<p onclick="check_swap_with_copy_0()" class="btn_panel">
-  Vérifier élection
-</p>
-<p id="ack-check-swap"></p>
-<p onclick="swap_with_copy_0()" class="btn_panel">
-  Élire cette copie
-</p>
-<p id="ack-swap"></p>
-<p onclick="reassign_rooms()" class="btn_panel">Réassigner les salles</p>
-{% endblock%}
+<link rel="stylesheet" href="{% static 'base/description.css' %}" />
+
+{% if user.is_tutor %}
+<div class="description-container">
+    <h1>Modification de la description du module {{ module }}.</h1>
+    <form method="post" novalidate>
+        {% csrf_token %}
+        <table cellpadding="10">
+            {{ form }}
+        </table>
+        <button type="submit" class="edit" name="submit" value="Submit">Modifier</button>
+    </form>
+</div>
+{% endif %}
+
+{% endblock %}

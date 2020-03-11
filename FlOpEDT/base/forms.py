@@ -25,6 +25,7 @@
 
 from django import forms
 from people.models import Tutor, FullStaff
+from base.models import Module
 
 
 class ContactForm(forms.Form):
@@ -57,3 +58,16 @@ class PerfectDayForm(forms.Form):
         self.fields['max_hours_per_day'] = forms.IntegerField(label="Maximum", min_value=1, max_value=9,
                                                               required=False, initial=6)
 
+
+class ModuleDescriptionForm(forms.ModelForm):
+
+    def __init__(self, module, dept, *args, **kwargs):
+        # first call parent's constructor
+        super(ModuleDescriptionForm, self).__init__(*args, **kwargs)
+        m = Module.objects.get(train_prog__department=dept, abbrev=module)
+        self.fields['description'].initial = m.description
+
+
+    class Meta:
+        model = Module
+        fields = ['description']

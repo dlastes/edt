@@ -1,11 +1,10 @@
 from base.models import Department, TrainingProgramme, \
                         CourseType, CourseModification, CoursePreference, \
-                        Dependency, Module, Group, PlanningModification, \
-                        ScheduledCourse
+                        Dependency, Module, Group, ScheduledCourse
 
 from base.models import Period, GroupType, \
-                        TutorCost, UserPreference, Course, TrainingHalfDay,\
-                        Room, RoomGroup, RoomPreference, RoomType, RoomSort
+                        TutorCost, UserPreference, Course, TrainingHalfDay, \
+                        Room, RoomPreference, RoomType, RoomSort
 
 from people.models import Tutor
 
@@ -36,12 +35,10 @@ def get_model_department_lookup(model, department, field_name=None):
             Module: 'train_prog__department',
             Group: 'train_prog__department',
             Room: 'departments',
-            RoomGroup: 'types__department',
             RoomPreference: 'room__subroom_of__types__department',
             RoomSort: 'for_type__department',
             TrainingHalfDay: 'train_prog__department',
             Tutor: 'departments',
-            PlanningModification: 'course__type__department',
             UserPreference: 'user__departments',
         }
         

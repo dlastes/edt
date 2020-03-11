@@ -26,37 +26,34 @@
 {% block title %} EDT {% endblock %}
 {% block content %}
 {% load static %}
+    <script>
+    var url_all_modules_with_desc = "{% url "base:fetch_all_modules_with_desc" department %}";
+    var url_modules_desc = "{% url "base:module_description" department module %}";
 
+    </script>
 <link rel="stylesheet" href="{% static "base/better.css" %}"/>
+<link rel="stylesheet" href="{% static "base/style-modules.css" %}"/>
 
-<div id="tools-main" style="padding:10px;">
 
-    <h4>Modification de salle</h4>
-    <p>Cliquer droit sur le cours en question, les salles disponibles apparaissent. Cliquer sur + pour choisir une salle non prévue pour ce cours. Ne pas oublier de valider tout changement.</p>
+<div class="appbar">
+    <h1>MODULES</h1>
+    <div class="actions">
+        <div id="filters" class="filters">
 
-    {% if has_department_perm %}
-    <h4>Création d'un compte</h4>
-    <p><a href="{% url "people:create_user" %}">Ici</a></p>
-    {% endif %}
-    
-    <h4>Modification d'un compte</h4>
-    <p>Cliquer sur son pseudo (ses initiales) en haut à droite de la page.</p>
-    
-    <h4>Modification de mot de passe</h4>
-    <p>Cliquer sur <a href="{% url 'people:password_change' %}">ce lien</a> pour modifier son mot de passe.</p>
-
-    <h4>Rappel de mot de passe</h4>
-    <p>Cliquer sur <a href="{% url 'people:password_reset' %}">ce lien</a> pour un rappel de mot de passe, ou via "Se connecter" en haut de page.</p>
-     
-    <h4>Fonctionnement de la saisie des disponibilités</h4>
-    <p>Au moment de la génération de l'emploi du temps d'une semaine donnée, si aucune disponibilité n'est renseignée pour cette semaine, la semaine type définit les disponibilités.</p>
-    
-    <h4>Quelques Tutos Vidéos </h4>
-    <table><tr>
-    <td><iframe width="560" height="315" src="https://www.youtube.com/embed/4uxITtWVkIs" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></td>
-    <td><iframe width="560" height="315" src="https://www.youtube.com/embed/XrAzkiHydnw" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></td>
-    <td><iframe width="560" height="315" src="https://www.youtube.com/embed/Yvyg2ad7kCA" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></td>
-    </tr></table>
-    
+        </div>
+        <div class="search">
+            <svg class="loupe" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="search" class="svg-inline--fa fa-search fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z"></path></svg>
+            <input type="text" class="modules-search" id="modules-search" placeholder="Rechercher"/>
+        </div>
+    </div>
 </div>
+<div class="modules-container" id="modules-container"></div>
+
+{% endblock %}
+
+{% block javascript %}
+<script>
+  var is_tutor = {{is_tutor|yesno:"true,false"}};
+</script>
+<script src="{% static 'base/modules.js' %}"></script>
 {% endblock %}

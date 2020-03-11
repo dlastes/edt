@@ -127,7 +127,10 @@ function main(name, data) {
 file_fetch.rooms.callback = function () {
     rooms = this.data;
     var room_names ;
-    room_names = Object.keys(rooms.roomgroups) ;
+    room_names = rooms.atomic_rooms ;
+    for(var i=0 ; i<room_names.length ; i++) {
+        rooms.roomgroups[room_names[i]] = [room_names[i]] ;
+    }
     swap_data(room_names, rooms_sel, "room");
 } ;
 
