@@ -34,6 +34,9 @@ from base.views import get_key_course_pl, get_key_course_pp
 from django.core.cache import cache
 
 def basic_reassign_rooms(department, week, year, target_work_copy):
+    minimize_moves(department, week, year, target_work_copy)
+
+def minimize_moves(department, week, year, target_work_copy):
     """
     Reassign the rooms to minimize moves...
     """
