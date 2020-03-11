@@ -26,7 +26,7 @@
 # without disclosing the source code of your own applications.
 
 from base.models import ScheduledCourse, RoomPreference, EdtVersion, Department, CourseStartTimeConstraint,\
-    TimeGeneralSettings, Room, RoomGroup
+    TimeGeneralSettings, Room, RoomGroup, CourseModification
 from base.timing import str_slot
 from django.db.models import Count, Max, Q, F
 from TTapp.models import LimitedRoomChoices, slot_pause
@@ -342,7 +342,9 @@ def basic_swap_version(department, week, year, copy_a, copy_b=0):
         cp.work_copy = copy_b
         cp.save()
 
-    if copy_a ==0 or copy_b == 0:
+    if copy_a == 0 or copy_b == 0:
+        CourseModification.objects.filter(course__year=year,
+                                          course__week=week).delete()
         version_copy.version += 1
         version_copy.save()
 

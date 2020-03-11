@@ -37,7 +37,7 @@ from FlOpEDT.settings.base import COSMO_MODE
 from people.models import Tutor, User
 from base.models import Day, RoomGroup, Module, Course, Group, \
     UserPreference, Time, ScheduledCourse, EdtVersion, CourseModification, \
-    PlanningModification, TrainingProgramme,  \
+    TrainingProgramme,  \
     Regen, Holiday, TrainingHalfDay, \
     CoursePreference, Dependency, Department, CourseType
 
@@ -50,6 +50,7 @@ from import_export.widgets import ForeignKeyWidget
 from FlOpEDT.filters import DropdownFilterAll, DropdownFilterRel, DropdownFilterSimple
 
 logger = logging.getLogger('admin')
+
 
 # from core.models import Book
 
@@ -83,8 +84,8 @@ class CoursPlaceResource(resources.ModelResource):
     #                               attribute='cours__tutor',
     #                               widget=ForeignKeyWidget(Tutor, 'last_name'))
     group = fields.Field(column_name='gpe_name',
-                          attribute='course__group',
-                          widget=ForeignKeyWidget(Group, 'name'))
+                         attribute='course__group',
+                         widget=ForeignKeyWidget(Group, 'name'))
     promo = fields.Field(column_name='gpe_promo',
                          attribute='course__group__train_prog',
                          widget=ForeignKeyWidget(TrainingProgramme, 'abbrev'))
@@ -92,8 +93,8 @@ class CoursPlaceResource(resources.ModelResource):
                           attribute='course__module',
                           widget=ForeignKeyWidget(Module, 'abbrev'))
     coursetype = fields.Field(column_name='coursetype',
-                          attribute='course__type',
-                          widget=ForeignKeyWidget(CourseType, 'name'))
+                              attribute='course__type',
+                              widget=ForeignKeyWidget(CourseType, 'name'))
     # day = fields.Field(column_name='day',
     #                     attribute='day',
     #                     widget=ForeignKeyWidget(Day, 'no'))
@@ -107,8 +108,8 @@ class CoursPlaceResource(resources.ModelResource):
                              attribute='course__room_type',
                              widget=ForeignKeyWidget(RoomType, 'name'))
     course_type = fields.Field(column_name='course_type',
-                             attribute='cours__type',
-                             widget=ForeignKeyWidget(CourseType, 'name'))
+                               attribute='cours__type',
+                               widget=ForeignKeyWidget(CourseType, 'name'))
     color_bg = fields.Field(column_name='color_bg',
                             attribute='course__module__display',
                             widget=ForeignKeyWidget(ModuleDisplay, 'color_bg'))
@@ -150,8 +151,8 @@ class CoursPlaceResourceCosmo(resources.ModelResource):
                           attribute='course__module',
                           widget=ForeignKeyWidget(Module, 'abbrev'))
     coursetype = fields.Field(column_name='coursetype',
-                          attribute='course__type',
-                          widget=ForeignKeyWidget(CourseType, 'name'))
+                              attribute='course__type',
+                              widget=ForeignKeyWidget(CourseType, 'name'))
     # salle = fields.Field(column_name = 'salle',
     #                      attribute = 'salle',
     #                      widget = ForeignKeyWidget(Salle,'nom'))
@@ -170,11 +171,11 @@ class CoursPlaceResourceCosmo(resources.ModelResource):
         fields = ('id', 'no', 'group', 'promo', 'color_bg', 'color_txt',
                   'module', 'day', 'start_time', 'week', 'room', 'prof')
 
-        
+
 class TutorCoursesResource(CoursPlaceResource):
-    department =  fields.Field(column_name='dept',
-                               attribute='course__type__department',
-                               widget=ForeignKeyWidget(Department, 'abbrev'))
+    department = fields.Field(column_name='dept',
+                              attribute='course__type__department',
+                              widget=ForeignKeyWidget(Department, 'abbrev'))
 
     class Meta:
         model = ScheduledCourse
@@ -182,14 +183,14 @@ class TutorCoursesResource(CoursPlaceResource):
                   'module', 'coursetype', 'day', 'start_time',
                   'week', 'room', 'prof', 'room_type', 'department')
 
-    
+
 class MultiDepartmentTutorResource(resources.ModelResource):
     tutor = fields.Field(column_name='tutor',
                          attribute='course__tutor',
                          widget=ForeignKeyWidget(Tutor, 'username'))
-    department =  fields.Field(column_name='department',
-                               attribute='course__type__department',
-                               widget=ForeignKeyWidget(Department, 'abbrev'))
+    department = fields.Field(column_name='department',
+                              attribute='course__type__department',
+                              widget=ForeignKeyWidget(Department, 'abbrev'))
     duration = fields.Field(column_name='duration',
                             attribute='course__type__duration')
 
@@ -197,13 +198,14 @@ class MultiDepartmentTutorResource(resources.ModelResource):
         model = ScheduledCourse
         fields = ('tutor', 'department', 'day', 'start_time', 'duration')
 
+
 class SharedRoomGroupsResource(resources.ModelResource):
     room = fields.Field(column_name='room',
                         attribute='room',
                         widget=ForeignKeyWidget(RoomGroup, 'name'))
-    department =  fields.Field(column_name='department',
-                               attribute='course__type__department',
-                               widget=ForeignKeyWidget(Department, 'abbrev'))
+    department = fields.Field(column_name='department',
+                              attribute='course__type__department',
+                              widget=ForeignKeyWidget(Department, 'abbrev'))
     duration = fields.Field(column_name='duration',
                             attribute='course__type__duration')
 
@@ -211,7 +213,7 @@ class SharedRoomGroupsResource(resources.ModelResource):
         model = ScheduledCourse
         fields = ('room', 'department', 'day', 'start_time', 'duration')
 
-    
+
 class CoursResource(resources.ModelResource):
     promo = fields.Field(column_name='promo',
                          attribute='group__train_prog',
@@ -223,13 +225,13 @@ class CoursResource(resources.ModelResource):
                           attribute='module',
                           widget=ForeignKeyWidget(Module, 'abbrev'))
     coursetype = fields.Field(column_name='coursetype',
-                          attribute='type',
-                          widget=ForeignKeyWidget(CourseType, 'name'))
+                              attribute='type',
+                              widget=ForeignKeyWidget(CourseType, 'name'))
     duration = fields.Field(column_name='duration',
-                          attribute='course__type__duration')
+                            attribute='course__type__duration')
     group = fields.Field(column_name='group',
-                          attribute='group',
-                          widget=ForeignKeyWidget(Group, 'name'))
+                         attribute='group',
+                         widget=ForeignKeyWidget(Group, 'name'))
     color_bg = fields.Field(column_name='color_bg',
                             attribute='module__display',
                             widget=ForeignKeyWidget(ModuleDisplay, 'color_bg'))
@@ -263,7 +265,7 @@ class DispoResource(resources.ModelResource):
 
 class CoursePreferenceResource(resources.ModelResource):
     type_name = fields.Field(attribute='course_type',
-                        widget=ForeignKeyWidget(CourseType, 'name'))
+                             widget=ForeignKeyWidget(CourseType, 'name'))
     train_prog = fields.Field(attribute='train_prog',
                               widget=ForeignKeyWidget(TrainingProgramme, 'abbrev'))
 
@@ -277,36 +279,62 @@ class UnavailableRoomsResource(resources.ModelResource):
         model = RoomPreference
         fields = ("room", "day", "start_time", "duration")
 
-        
+
 class RoomPreferenceResource(resources.ModelResource):
     room = fields.Field(attribute='room',
                         widget=ForeignKeyWidget(Room, 'name'))
-    
+
     class Meta:
         model = RoomPreference
         fields = ("room", "day", "start_time", "duration", "value")
 
-        
+
 class VersionResource(resources.ModelResource):
     class Meta:
         model = EdtVersion;
         fields = ("year", "week", "version", "department")
 
+
 class ModuleRessource(resources.ModelResource):
-	class Meta:
-		model = Course
-		fields = ('module__abbrev', 'module__name', 'module__url')
-		
+    class Meta:
+        model = Course
+        fields = ('module__abbrev', 'module__name', 'module__url')
+
+
 class TutorRessource(resources.ModelResource):
-	class Meta:
-		model = Course
-		fields = ('tutor__username', 'tutor__first_name', 'tutor__last_name', 'tutor__email')
+    class Meta:
+        model = Course
+        fields = ('tutor__username', 'tutor__first_name', 'tutor__last_name', 'tutor__email')
+
+
+class ModuleDescriptionResource(resources.ModelResource):
+    head = fields.Field(column_name='resp',
+                        attribute='head',
+                        widget=ForeignKeyWidget(Tutor, 'username'))
+    head_first_name = fields.Field(column_name='resp_first_name',
+                             attribute='head',
+                             widget=ForeignKeyWidget(Tutor, 'first_name'))
+    head_last_name = fields.Field(column_name='resp_last_name',
+                                   attribute='head',
+                                   widget=ForeignKeyWidget(Tutor, 'last_name'))
+    color_bg = fields.Field(column_name='color_bg',
+                                   attribute='display',
+                                   widget=ForeignKeyWidget(ModuleDisplay, 'color_bg'))
+    color_txt = fields.Field(column_name='color_txt',
+                                   attribute='display',
+                                   widget=ForeignKeyWidget(ModuleDisplay, 'color_txt'))
+    promo = fields.Field(column_name='promo',
+                                   attribute='train_prog',
+                                   widget=ForeignKeyWidget(TrainingProgramme, 'abbrev'))
+
+    class Meta:
+        model = Module
+        fields = ('name', 'abbrev', 'head', 'resp_first_name', 'resp_last_name', 'description', 'color_bg', 'color_txt', 'promo')
+
 
 # </editor-fold desc="RESOURCES">
 
 
-
-        
 # <editor-fold desc="ADMIN_MENU">
 # ----------------
 # -- ADMIN MENU --
@@ -320,7 +348,7 @@ class DepartmentModelAdminMixin():
     department_field_tuple = (department_field_name,)
 
     def get_exclude(self, request, obj=None):
-        # Hide department field if a department attribute exists 
+        # Hide department field if a department attribute exists
         # on the related model and a department value has been set
         base = super().get_exclude(request, obj)
         exclude = list() if base is None else list(base)
@@ -332,7 +360,6 @@ class DepartmentModelAdminMixin():
 
         return tuple(exclude)
 
-    
     def save_model(self, request, obj, form, change):
         #
         # Automaticaly associate model to department when required
@@ -356,37 +383,34 @@ class DepartmentModelAdminMixin():
         for field in m2m_fields:
             getattr(obj, field.name).add(request.department)
 
-
     def get_department_lookup(self, department):
         """
-        Hook for overriding default department lookup research
-        """
+	Hook for overriding default department lookup research
+	"""
         return get_model_department_lookup(self.model, department)
 
-    
     def get_queryset(self, request):
         """
-        Filter only department related instances
-        """
+	Filter only department related instances
+	"""
         qs = super().get_queryset(request)
-        
+
         try:
             if hasattr(request, 'department'):
                 related_filter = self.get_department_lookup(request.department)
-                if related_filter:                    
+                if related_filter:
                     return qs.filter(**related_filter).distinct()
         except FieldDoesNotExist:
             pass
 
         return qs
 
-
     def formfield_with_department_filtering(self, db_field, request, kwargs):
         """
-        Filter form fields for with specific department related items
-        """
+	Filter form fields for with specific department related items
+	"""
 
-        if hasattr(request, 'department') and db_field.related_model: 
+        if hasattr(request, 'department') and db_field.related_model:
             related_filter = get_model_department_lookup(db_field.related_model, request.department)
             if related_filter:
                 db = kwargs.get('using')
@@ -394,16 +418,13 @@ class DepartmentModelAdminMixin():
                 if queryset:
                     kwargs["queryset"] = queryset
 
-
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         self.formfield_with_department_filtering(db_field, request, kwargs)
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
-
     # def formfield_for_manytomany(self, db_field, request, **kwargs):
     #     self.formfield_with_department_filtering(db_field, request, kwargs)
     #     return super().formfield_for_manytomany(db_field, request, **kwargs)
-
 
     def get_field_queryset(self, db, db_field, request):
 
@@ -417,9 +438,9 @@ class DepartmentModelAdminMixin():
                     return queryset.filter(**related_filter).distinct()
                 else:
                     return db_field.remote_field \
-                            .model._default_manager \
-                            .using(db) \
-                            .filter(**related_filter).distinct()
+                        .model._default_manager \
+                        .using(db) \
+                        .filter(**related_filter).distinct()
 
         return queryset
 
@@ -441,7 +462,7 @@ class HolidayAdmin(admin.ModelAdmin):
 class TrainingHalfDayAdmin(DepartmentModelAdmin):
     list_display = ('train_prog', 'day', 'week', 'year', 'apm')
     ordering = ('-year', '-week', 'train_prog', 'day')
-    
+
 
 class GroupAdmin(DepartmentModelAdmin):
     list_display = ('name', 'type', 'size', 'train_prog')
@@ -461,21 +482,21 @@ class RoomInline(admin.TabularInline):
 
 
 class RoomGroupAdmin(DepartmentModelAdmin):
-    inlines = [RoomInline,]
-    list_display = ('name',)    
+    inlines = [RoomInline, ]
+    list_display = ('name',)
 
-  
+
 class RoomPreferenceAdmin(DepartmentModelAdmin):
     list_display = ('room', 'week', 'year', 'day', 'start_time',
                     'duration', 'value')
-    ordering = ('-year','-week', 'day', 'start_time')
+    ordering = ('-year', '-week', 'day', 'start_time')
     list_filter = (
         ('room', DropdownFilterRel),
         ('year', DropdownFilterAll),
         ('week', DropdownFilterAll),
     )
 
-    
+
 class RoomSortAdmin(DepartmentModelAdmin):
     list_display = ('for_type', 'prefer', 'unprefer',)
     list_filter = (
@@ -484,7 +505,7 @@ class RoomSortAdmin(DepartmentModelAdmin):
         ('unprefer', DropdownFilterRel),
     )
 
-    
+
 class ModuleAdmin(DepartmentModelAdmin):
     list_display = ('name', 'ppn', 'abbrev',
                     'head',
@@ -493,6 +514,7 @@ class ModuleAdmin(DepartmentModelAdmin):
     list_filter = (
         ('head', DropdownFilterRel),
         ('train_prog', DropdownFilterRel),)
+
 
 class CourseAdmin(DepartmentModelAdmin):
     list_display = ('module', 'type', 'group', 'tutor', 'week', 'year')
@@ -536,7 +558,7 @@ class CoursePreferenceAdmin(DepartmentModelAdmin):
                    ('year', DropdownFilterAll),
                    ('train_prog', DropdownFilterRel),
                    )
-    
+
 
 class DependencyAdmin(DepartmentModelAdmin):
     def course1_week(o):
@@ -556,7 +578,7 @@ class DependencyAdmin(DepartmentModelAdmin):
                    ('course1__week', DropdownFilterAll),
                    )
 
-    
+
 class CourseModificationAdmin(DepartmentModelAdmin):
     def week_course(o):
         return str(o.course.week)
@@ -571,6 +593,7 @@ class CourseModificationAdmin(DepartmentModelAdmin):
     course_year.admin_order_field = 'course__year'
 
     list_display = ('course', week_course, course_year,
+                    'tutor_old',
                     'version_old', 'room_old', 'day_old',
                     'start_time_old', 'updated_at', 'initiator'
                     )
@@ -578,18 +601,6 @@ class CourseModificationAdmin(DepartmentModelAdmin):
                    ('course__year', DropdownFilterAll),
                    ('course__week', DropdownFilterAll),)
     ordering = ('-updated_at', 'old_year', 'old_week')
-
-
-class PlanningModificationAdmin(DepartmentModelAdmin):
-    list_display = ('course', 'old_week', 'old_year',
-                    'tutor_old',
-                    'updated_at',
-                    'initiator'
-                    )
-    ordering = ('-updated_at', 'old_year', 'old_week')
-    list_filter = (('initiator', DropdownFilterRel),
-                   ('old_week', DropdownFilterAll),
-                   ('old_year', DropdownFilterAll),)
 
 
 class DispoAdmin(DepartmentModelAdmin):
@@ -603,13 +614,11 @@ class DispoAdmin(DepartmentModelAdmin):
 
 
 class RegenAdmin(DepartmentModelAdmin):
-    list_display = ('year', 'week', 'full', 'fday', 'fmonth', 'fyear', 'stabilize', 'sday', 'smonth', 'syear', )
+    list_display = ('year', 'week', 'full', 'fday', 'fmonth', 'fyear', 'stabilize', 'sday', 'smonth', 'syear',)
     ordering = ('-year', '-week')
 
 
 # </editor-fold desc="ADMIN_MENU">
-
-
 
 
 # admin.site.unregister(auth.models.User)
@@ -627,7 +636,6 @@ admin.site.register(Course, CourseAdmin)
 admin.site.register(CourseModification, CourseModificationAdmin)
 admin.site.register(CoursePreference, CoursePreferenceAdmin)
 admin.site.register(Dependency, DependencyAdmin)
-admin.site.register(PlanningModification, PlanningModificationAdmin)
 admin.site.register(ScheduledCourse, CoursPlaceAdmin)
 admin.site.register(UserPreference, DispoAdmin)
-admin.site.register(Regen,RegenAdmin)
+admin.site.register(Regen, RegenAdmin)
