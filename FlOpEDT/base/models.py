@@ -245,23 +245,28 @@ class Room(models.Model):
                                         blank=True,
                                         related_name="subrooms")
     departments = models.ManyToManyField(Department)
-    basic = models.BooleanField(verbose_name='Basic room?', default=False)
+
+    @property
+    def is_basic(self):
+        return self.subrooms.count() == 0
 
     def and_subrooms(self):
-        s = {self}
-        s |= set(self.subrooms.all())
-        return s
+        ret = {self}
+        for sub in self.subrooms.all():
+            ret |= sub.and_subrooms()
+        return ret
 
     def and_overrooms(self):
-        s = {self}
-        s |= set(self.subroom_of.all())
-        return s
+        ret = {self}
+        for over in self.subrooms_of.all():
+            ret |= over.and_overrooms()
+        return ret
 
     def __str__(self):
         return self.name
 
     def str_extended(self):
-        return f'{self.name}, ' + f'{"basic" if self.basic else "not basic"}, ' \
+        return f'{self.name}, ' + \
             + f'Types: {[t.name for t in self.types.all()]}, '\
             + f'Depts: {self.departments.all()}, '\
             + f'Is in: {[rg.name for rg in self.subroom_of.all()]}'
