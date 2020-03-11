@@ -1271,16 +1271,15 @@ class TTModel(object):
                              and sl.start_time < sc.start_time + sc.course.type.duration):
                         occupied_in_another_department = True
                 if occupied_in_another_department:
-                    # isn't it sufficient ?
-                    # self.avail_room[r][sl] = 0
-                    name = 'other_dep_room_' + str(r) + '_' + str(sl) + '_' + str(self.constraint_nb)
-                    self.add_constraint(self.sum(self.TTrooms[(sl, c, room)]
-                                                 for c in self.wdb.compatible_courses[sl]
-                                                 for room in self.wdb.course_rg_compat[c]
-                                                 if r in room.and_subrooms()),
-                                        '==',
-                                        0,
-                                        name=name)
+                    self.avail_room[r][sl] = 0
+                    # name = 'other_dep_room_' + str(r) + '_' + str(sl) + '_' + str(self.constraint_nb)
+                    # self.add_constraint(self.sum(self.TTrooms[(sl, c, room)]
+                    #                              for c in self.wdb.compatible_courses[sl]
+                    #                              for room in self.wdb.course_rg_compat[c]
+                    #                              if r in room.and_subrooms()),
+                    #                     '==',
+                    #                     0,
+                    #                     name=name)
 
             # constraint : other_departments_sched_courses instructors are not available
             for i in self.wdb.instructors:
@@ -1333,14 +1332,15 @@ class TTModel(object):
 
         self.add_dependency_constraints()
 
+        #Has to be before rooms_constraints because it contains rooms availability modification...
+        self.add_other_departments_constraints()
+
         self.add_rooms_constraints()
 
         self.add_instructors_constraints()
 
         if self.core_only:
             return
-
-        self.add_other_departments_constraints()
 
         self.add_slot_preferences()
 
