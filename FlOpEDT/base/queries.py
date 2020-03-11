@@ -226,11 +226,12 @@ def get_rooms(department_abbrev):
                 dic_rt[str(rt)].append(str(room))
 
     dic_room = {}
-    for room in Room.objects.filter(departments=dept):
+    for room in Room.objects.filter(departments=dept, basic=False):
         dic_room[room.name] = [r.name for r in room.and_subrooms()]
 
-    return {'roomtypes':dic_rt,
-            'roomgroups':dic_room}
+    return {'roomtypes': dic_rt,
+            'roomgroups': dic_room,
+            'atomic_rooms': [r.name for r in Room.objects.filter(departments=dept, basic=True)]}
 
 
 def get_coursetype_constraints(department_abbrev):
