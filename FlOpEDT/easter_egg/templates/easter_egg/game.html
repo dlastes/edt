@@ -1,0 +1,133 @@
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>FlOppy Bird</title>
+    <style>
+        @font-face {
+            font-family: "sc";
+            src: url("/static/easter_egg/Space Comics.ttf");
+        }
+        body {
+            /* padding: 0;
+            margin: 0; */
+            text-align: center;
+        }
+        #easter_egg {
+            width: 90%;
+            font-family: 'sc', Arial, sans-serif;
+        }
+        #game {
+            display: table-cell;
+            margin: 0;
+            width: 60%;
+            float: left;
+        }
+        #leaderboard {
+            padding: 20px;
+            width: 100%;
+            background-color: rgba(255, 112, 34, 1);
+            margin: 0;
+            text-align: center;
+        }
+        #leaderboard h1 { 
+            font-size: 1.2em;
+        }
+        .table {
+            display: table;
+            position: relative;
+            background-color: rgba(255, 112, 34, 1);
+            width: 100%;
+        }
+        .table-cell {
+            display: table-cell;
+            vertical-align: middle;
+            width: 100%;
+        }
+        .leader {
+            list-style-type: none;
+            padding: 0;
+            margin: 0 auto;
+            width: 80%;
+            height: 40%;
+        }
+        .leader ul {
+            width: 100%;
+        }
+        .leader li {
+            background-color: #fff;
+            border-radius: 5px;
+            height: 70px;
+            margin-bottom: 10px;
+            overflow: hidden;
+            width: 100%;
+            box-shadow: 0 5px 5px rgba(0, 0, 0, 0.1);
+        }
+        .leader li .list_num {
+            float: left;
+            line-height: 40px;
+            font-size: 18px;
+            color: rgba(0, 0, 0, 0.65);
+            margin: 15px;
+            font-weight: bold;
+            text-align: right;
+        }
+        .leader li h2 {
+            display: block;
+            margin: 0;
+            font-size: 18px;
+            line-height: 40px;
+            font-weight: 300;
+            margin-top: 15px;
+            padding-right: 20px;
+        }
+    </style>
+    <script type='text/javascript' src="{% static 'easter_egg/phaser.js' %}"></script>
+    <script src="{% static 'base/jquery.min.js' %}"></script>
+</head>
+<body>
+    <table id="easter_egg">
+        <tr>
+            <td>
+                <div id="game"></div>
+            </td>
+            <td>
+                <div id="leaderboard">
+                    <h1>TABLEAU DES SCORES</h1>
+                    <div class="table">
+                        <div class="table-cell">
+                            <ul class="leader">
+                                <li>
+                                <span class="list_num">#1</span>
+                                <h2 align="center" id="1"></h2>
+                                </li>
+                                <li>
+                                <span class="list_num">#2</span>
+                                <h2 align="center" id="2"></h2>
+                                </li>
+                                <li>
+                                <span class="list_num">#3</span>
+                                <h2 align="center" id="3"></h2>
+                                </li>
+                                <li>
+                                <span class="list_num">#4</span>
+                                <h2 align="center" id="4"></h2>
+                                </li>
+                                <li>
+                                <span class="list_num">#5</span>
+                                <h2 align="center" id="5"></h2>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    </table>
+</body>
+<script type="text/javascript">
+    var url_edt = "{% url 'base:edt' department='INFO'%}";
+    var url_fetch_leaderboard = "{% url 'easter_egg:fetch_leaderboard' %}";
+    var url_set_score = "{% url 'easter_egg:set_score' %}";
+</script>
+<script type='text/javascript' src="{% static 'easter_egg/script.js' %}"></script>
