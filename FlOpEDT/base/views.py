@@ -920,7 +920,7 @@ def fetch_rooms(req, **kwargs):
     """
     Return rooms for a given department
     """
-    rooms = queries.get_rooms(req.department.abbrev)
+    rooms = queries.get_room_types_groups(req.department.abbrev)
     return JsonResponse(rooms, safe=False)
 
 
