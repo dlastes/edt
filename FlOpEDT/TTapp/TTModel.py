@@ -25,20 +25,20 @@
 # without disclosing the source code of your own applications.
 import importlib
 from distutils.command.config import config
-
+from django.core.mail import EmailMessage
 from pulp import LpVariable, LpConstraint, LpBinary, LpConstraintEQ, \
     LpConstraintGE, LpConstraintLE, LpAffineExpression, LpProblem, LpStatus, \
     LpMinimize, lpSum, LpStatusOptimal, LpStatusNotSolved
 
 from pulp import GUROBI_CMD, PULP_CBC_CMD
-# from pulp.solvers import GUROBI_CMD as GUROBI
 
-from gurobipy import read
+import pulp.solvers as pulp_solvers
+#from pulp.solvers import GUROBI_CMD as GUROBI
 
 from FlOpEDT.settings.base import COSMO_MODE
 
 from base.models import Group, Day, Time, \
-    Room, RoomGroup, RoomSort, RoomType, RoomPreference, \
+    Room, RoomSort, RoomType, RoomPreference, \
     Course, ScheduledCourse, UserPreference, CoursePreference, \
     Department, Module, TrainingProgramme, CourseType, \
     Dependency, TutorCost, GroupFreeHalfDay, GroupCost, Holiday, TrainingHalfDay, \
@@ -73,7 +73,7 @@ import logging
 logger = logging.getLogger(__name__)
 pattern = r".+: (.|\s)+ (=|>=|<=) \d*"
 GUROBI = 'GUROBI'
-
+GUROBI_NAME = 'GUROBI_CMD'
 
 class WeekDB(object):
     def __init__(self, department, weeks, year, train_prog):
@@ -85,20 +85,20 @@ class WeekDB(object):
         self.slots, self.slots_by_day, self.slots_intersecting, self.slots_by_half_day, self.slots_by_week \
             = self.slots_init()
         self.course_types, self.courses, self.courses_by_week, \
-        self.sched_courses, self.fixed_courses, self.fixed_courses_for_slot, \
-        self.other_departments_courses, self.other_departments_sched_courses, \
-        self.other_departments_sched_courses_for_slot, \
-        self.courses_availabilities, self.modules, self.dependencies = self.courses_init()
-        self.room_types, self.room_groups, self.rooms, self.room_prefs, self.room_groups_for_type, \
-        self.room_course_compat, self.course_rg_compat, self.fixed_courses_for_room, \
-        self.other_departments_sched_courses_for_room = self.rooms_init()
+            self.sched_courses, self.fixed_courses, self.fixed_courses_for_slot, \
+            self.other_departments_courses, self.other_departments_sched_courses, \
+            self.other_departments_sched_courses_for_slot, \
+            self.courses_availabilities, self.modules, self.dependencies = self.courses_init()
+        self.room_types, self.rooms, self.basic_rooms, self.room_prefs, self.rooms_for_type,\
+            self.room_course_compat, self.course_rg_compat, self.fixed_courses_for_room, \
+            self.other_departments_sched_courses_for_room = self.rooms_init()
         self.compatible_slots, self.compatible_courses = self.compatibilities_init()
         self.groups, self.basic_groups, self.all_groups_of, self.basic_groups_of, self.courses_for_group, \
-        self.courses_for_basic_group = self.groups_init()
+            self.courses_for_basic_group = self.groups_init()
         self.instructors, self.courses_for_tutor, self.courses_for_supp_tutor, self.availabilities, \
-        self.fixed_courses_for_tutor, \
-        self.other_departments_courses_for_tutor, self.other_departments_courses_for_supp_tutor, \
-        self.other_departments_scheduled_courses_for_tutor = self.users_init()
+            self.fixed_courses_for_tutor, \
+            self.other_departments_courses_for_tutor, self.other_departments_courses_for_supp_tutor, \
+            self.other_departments_scheduled_courses_for_tutor = self.users_init()
         self.possible_tutors, self.possible_modules, self.possible_courses = self.possible_courses_tutor_init()
 
     def days_init(self):
@@ -226,16 +226,16 @@ class WeekDB(object):
     def rooms_init(self):
         # ROOMS
         room_types = RoomType.objects.filter(department=self.department)
-        room_groups = RoomGroup.objects.filter(types__department=self.department).distinct()
-        rooms = Room.objects.filter(subroom_of__types__department=self.department).distinct()
+        rooms = Room.objects.filter(departments=self.department).distinct()
+        basic_rooms = Room.objects.filter(departments=self.department, basic=True).distinct()
         room_prefs = RoomSort.objects.filter(for_type__department=self.department)
-        room_groups_for_type = {t: t.members.all() for t in room_types}
+        rooms_for_type = {t: t.members.all() for t in room_types}
         # for each Room, first build the list of courses that may use it
         room_course_compat = {}
-        for r in rooms:
+        for r in basic_rooms:
             # print "compat for ", r
             room_course_compat[r] = []
-            for rg in r.subroom_of.all():
+            for rg in r.and_overrooms():
                 room_course_compat[r].extend(
                     [(c, rg) for c in
                      self.courses.filter(room_type__in=rg.types.all())])
@@ -245,19 +245,19 @@ class WeekDB(object):
             course_rg_compat[c] = c.room_type.members.all()
 
         fixed_courses_for_room = {}
-        for r in rooms:
+        for r in basic_rooms:
             fixed_courses_for_room[r] = set()
-            for rg in r.subroom_of.all():
+            for rg in r.and_overrooms():
                 fixed_courses_for_room[r] |= set(self.fixed_courses.filter(room=rg))
 
         other_departments_sched_courses_for_room = {}
-        for r in rooms:
+        for r in basic_rooms:
             other_departments_sched_courses_for_room[r] = set()
-            for rg in r.subroom_of.all():
+            for rg in r.and_overrooms():
                 other_departments_sched_courses_for_room[r] |= set(self.other_departments_sched_courses.filter(room=rg))
 
-        return room_types, room_groups, rooms, room_prefs, room_groups_for_type, room_course_compat, course_rg_compat, \
-               fixed_courses_for_room, other_departments_sched_courses_for_room
+        return room_types, rooms, basic_rooms, room_prefs, rooms_for_type, room_course_compat, course_rg_compat,\
+            fixed_courses_for_room, other_departments_sched_courses_for_room
 
     def compatibilities_init(self):
         # COMPATIBILITY
@@ -424,7 +424,9 @@ class TTModel(object):
                  min_bhd_i=1.,
                  min_nps_c=1.,
                  max_stab=5.,
-                 lim_ld=1.):
+                 lim_ld=1.,
+                 core_only=False,
+                 send_mails=False):
         print("\nLet's start weeks #%s" % weeks)
         # beg_file = os.path.join('logs',"FlOpTT")
         self.model = LpProblem("FlOpTT", LpMinimize)
@@ -435,6 +437,8 @@ class TTModel(object):
         self.min_ups_c = min_nps_c
         self.max_stab = max_stab
         self.lim_ld = lim_ld
+        self.core_only = core_only
+        self.send_mails = send_mails
         self.var_nb = 0
         self.constraint_nb = 0
         self.constraintManager = ConstraintManager()
@@ -490,6 +494,10 @@ class TTModel(object):
         if settings.DEBUG:
             self.model.writeLP('FlOpEDT.lp')
 
+        if self.send_mails:
+            self.send_lack_of_availability_mail()
+
+
     def wdb_init(self):
         wdb = WeekDB(self.department, self.weeks, self.year, self.train_prog)
         return wdb
@@ -522,7 +530,7 @@ class TTModel(object):
             for c in self.wdb.compatible_courses[sl]:
                 # print c, c.room_type
                 TT[(sl, c)] = self.add_var("TT(%s,%s)" % (sl, c))
-                for rg in self.wdb.room_groups_for_type[c.room_type]:
+                for rg in self.wdb.rooms_for_type[c.room_type]:
                     TTrooms[(sl, c, rg)] \
                         = self.add_var("TTroom(%s,%s,%s)" % (sl, c, rg))
                 for i in self.wdb.possible_tutors[c]:
@@ -556,18 +564,21 @@ class TTModel(object):
                 card = 2 * len(dayslots)
                 expr = self.lin_expr()
                 expr += card * IBD[(i, d)]
-                for c in self.wdb.possible_courses[i] & self.wdb.courses_for_supp_tutor[i]:
+                for c in self.wdb.possible_courses[i]:
                     for sl in dayslots & self.wdb.compatible_slots[c]:
                         expr -= self.TTinstructors[(sl, c, i)]
-                self.add_constraint(expr, '>=', 0, constraint_type=ConstraintType.IBD_INF, instructors=i, days=d)
 
-                if self.wdb.fixed_courses.filter(Q(course__tutor=i) | Q(tutor=i),
-                                                 day=d) \
-                        or self.wdb.other_departments_sched_courses.filter(Q(course__tutor=i) | Q(tutor=i), day=d):
-                    self.add_constraint(IBD[(i, d)], '==', 1, constraint_type=ConstraintType.IBD_EQ, instructors=i, days=d)
+                # Be careful, here as elsewhere, being a supp_tutor is not a possibility, it is necessary...
+                for c in self.wdb.courses_for_supp_tutor[i]:
+                    for sl in dayslots & self.wdb.compatible_slots[c]:
+                        expr -= self.TT[(sl, c)]
+                self.add_constraint(expr, '>=', 0, constraint_type=ConstraintType.IBD_INF, instructors=i, days=d)
                 # This next constraint impides to force IBD to be 1
                 # (if there is a meeting, for example...)
-                # self.add_constraint(expr, '<=', card-1)
+                # self.add_constraint(expr, '<=', card-1, , constraint_type="IBD sup", instructor=i, days=d)
+                if self.wdb.fixed_courses.filter(Q(course__tutor=i) | Q(tutor=i), day=d) \
+                        or self.wdb.other_departments_sched_courses.filter(Q(course__tutor=i) | Q(tutor=i), day=d):
+                    self.add_constraint(IBD[(i, d)], '==', 1, constraint_type=ConstraintType.IBD_EQ, instructors=i, days=d)
 
         forced_IBD = {}
         for i in self.wdb.instructors:
@@ -586,7 +597,7 @@ class TTModel(object):
                 IBD_GTE[week].append({})
 
             for i in self.wdb.instructors:
-                for j in range(2, max_days + 1):
+                for j in range(1, max_days + 1):
                     IBD_GTE[week][j][i] = self.add_floor(str(i) + str(j),
                                                          self.sum(IBD[(i, d)]
                                                                   for d in days_filter(self.wdb.days, week=week)),
@@ -893,7 +904,7 @@ class TTModel(object):
         # constraint Rooms : there are enough rooms of each type for each slot
 
         # constraint : each Room is only used once on simultaneous slots
-        for r in self.wdb.rooms:
+        for r in self.wdb.basic_rooms:
             for sl1 in self.wdb.slots:
                 self.add_constraint(1000 * self.sum(self.TTrooms[(sl1, c, rg)]
                                                     for (c, rg) in self.wdb.room_course_compat[r]
@@ -907,7 +918,7 @@ class TTModel(object):
                                     rooms=r, slots=sl1)
 
         for sl in self.wdb.slots:
-            # constraint : each course is assigned to a RoomGroup
+            # constraint : each course is assigned to a Room
             for c in self.wdb.compatible_courses[sl]:
                 name = 'core_roomtype_' + str(c) + '_' + str(sl) + '_' + str(self.constraint_nb)
                 self.add_constraint(
@@ -916,25 +927,24 @@ class TTModel(object):
                     0, constraint_type=ConstraintType.UN_COURS_POUR_UN_TYPE_DE_SALLE, slots=sl, courses=c)
 
             # constraint : fixed_courses rooms are not available
-            for rg in self.wdb.room_groups:
+            for rg in self.wdb.rooms:
                 fcrg = set(fc for fc in self.wdb.fixed_courses_for_slot[sl] if fc.room == rg)
                 # if self.wdb.fixed_courses.filter((Q(start_time__lt=sl.start_time + sl.duration) |
                 #                                   Q(start_time__gt=sl.start_time - F('course__type__duration'))),
                 #                                  room=rg, day=sl.day).exists():
                 if fcrg:
-                    for r in rg.subrooms.all():
+                    for r in rg.and_subrooms():
                         name = 'fixed_room' + str(r) + '_' + str(sl) + '_' + str(self.constraint_nb)
                         self.add_constraint(self.sum(self.TTrooms[(s_sl, c, room)]
                                                      for s_sl in self.wdb.slots_intersecting[sl]
                                                      for c in self.wdb.compatible_courses[s_sl]
                                                      for room in self.wdb.course_rg_compat[c]
-                                                     if r in room.subrooms.all()),
+                                                     if r in room.and_subrooms()),
                                             '==',
                                             0, constraint_type=ConstraintType.SALLE_PAS_DISPONIBLE, slots=sl, rooms=r)
 
             # constraint : each Room is only used once and only when available
-            for r in self.wdb.rooms:
-                # , name='core_room_' + str(r) + '_' + str(sl) + '_' + str(self.constraint_nb)
+            for r in self.wdb.basic_rooms:
                 self.add_constraint(
                     self.sum(self.TTrooms[(sl, c, rg)]
                              for (c, rg) in self.wdb.room_course_compat[r]
@@ -951,8 +961,8 @@ class TTModel(object):
                     self.TTrooms[(sl, c, rp.unprefer)]
                     for c in set(self.wdb.courses.filter(room_type=rp.for_type)) & self.wdb.compatible_courses[sl])
                 preferred_is_unavailable = False
-                for r in rp.prefer.subrooms.all():
-                    if self.avail_room[r][sl]:
+                for r in rp.prefer.basic_rooms():
+                    if not self.avail_room[r][sl]:
                         preferred_is_unavailable = True
                         break
                     e -= self.sum(self.TTrooms[(sl, c, rg)]
@@ -975,7 +985,7 @@ class TTModel(object):
     #                 e = quicksum(self.TTrooms[(sl, c, rgp)]
     #                              for c in self.wdb.courses.filter(room_type=rt))
     #                 preferred_is_unavailable = False
-    #                 for r in rgp_before.subrooms.all():
+    #                 for r in rgp_before.and_subrooms():
     #                     if len(db.RoomUnavailability.objects.filter(
     #                                   week=self.weeks, year=self.year,
     #                                   creneau=sl, room=r)) > 0:
@@ -1025,14 +1035,49 @@ class TTModel(object):
                                                          self.TT[(sl2, c2)])
                             self.obj += conj_var * weight
                     if p.successive and sl2.is_successor_of(sl1):
-                        for rg1 in self.wdb.room_groups_for_type[c1.room_type]:
-                            for rg2 in self.wdb.room_groups_for_type[c2.room_type].exclude(id=rg1.id):
+                        for rg1 in self.wdb.rooms_for_type[c1.room_type]:
+                            for rg2 in self.wdb.rooms_for_type[c2.room_type].exclude(id=rg1.id):
                                 self.add_constraint(self.TTrooms[(sl1, c1, rg1)]
                                                     + self.TTrooms[(sl2, c2, rg2)], '<=', 1,
                                                     constraint_type=ConstraintType.DEPENDANCE_SALLE,
                                                     courses=[c1, c2],
                                                     slots=[sl1, sl2],
                                                     rooms=[rg1, rg2])
+
+    def send_unitary_lack_of_availability_mail(self, tutor, week, available_hours, teaching_hours,
+                                               prefix="[flop!EDT] "):
+        subject = f"Manque de dispos semaine {week}"
+        message = "(Cet e-mail vous a été envoyé automatiquement par le générateur " \
+                  "d'emplois du temps du logiciel flop!EDT)\n\n"
+        message += f"Bonjour {tutor.first_name}\n" \
+                   f"Semaine {week} vous ne donnez que {available_hours} heures de disponibilités, " \
+                   f"alors que vous êtes censé⋅e assurer {teaching_hours} heures de cours...\n"
+        if self.wdb.holidays:
+            message += f"(Notez qu'il y a {len(self.wdb.holidays)} jour(s) férié(s) cette semaine là...)\n"
+        message += f"Est-ce que vous avez la possibilité d'ajouter des créneaux de disponibilité ?\n" \
+                   f"Sinon, pouvez-vous s'il vous plaît décaler des cours à une semaine précédente ou suivante ?\n" \
+                   f"Merci d'avance.\n" \
+                   f"Les gestionnaires d'emploi du temps."
+
+        message += "\n\nPS: Attention, cet email risque de vous être renvoyé à chaque prochaine génération " \
+                   "d'emploi du temps si vous n'avez pas fait les modifications attendues...\n" \
+                   "N'hésitez pas à nous contacter en cas de souci."
+        email = EmailMessage(
+            prefix + subject,
+            message,
+            to=(tutor.email,)
+        )
+        email.send()
+
+    def send_lack_of_availability_mail(self, prefix="[flop!EDT] "):
+        for key in self.warnings:
+            if key in self.wdb.instructors:
+                for w in self.warnings[key]:
+                    if ' < ' in w:
+                        data = w.split(' ')
+                        self.send_unitary_lack_of_availability_mail(key, data[-1], data[0], data[4],
+                                                                    prefix=prefix)
+
 
     def compute_non_prefered_slot_cost(self):
         """
@@ -1208,7 +1253,7 @@ class TTModel(object):
 
     def compute_avail_room(self):
         avail_room = {}
-        for room in self.wdb.rooms:
+        for room in self.wdb.basic_rooms:
             avail_room[room] = {}
             for sl in self.wdb.slots:
                 if RoomPreference.objects.filter(
@@ -1251,9 +1296,10 @@ class TTModel(object):
         """
         Add the constraints imposed by other departments' scheduled courses.
         """
+        print("adding other departments constraints")
         for sl in self.wdb.slots:
             # constraint : other_departments_sched_courses rooms are not available
-            for r in self.wdb.rooms:
+            for r in self.wdb.basic_rooms:
                 occupied_in_another_department = False
                 for sc in self.wdb.other_departments_sched_courses_for_room[r]:
                     if sl.day.day == sc.day and sl.day.week == sc.course.week and \
@@ -1262,14 +1308,16 @@ class TTModel(object):
                         occupied_in_another_department = True
                         d = sc
                 if occupied_in_another_department:
-                    name = 'other_dep_room_' + str(r) + '_' + str(sl) + '_' + str(self.constraint_nb)
-                    self.add_constraint(self.sum(self.TTrooms[(sl, c, room)]
-                                                 for c in self.wdb.compatible_courses[sl]
-                                                 for room in self.wdb.course_rg_compat[c]
-                                                 if r in room.subrooms.all()),
-                                        '==',
-                                        0, constraint_type=ConstraintType.DEPARTEMENT_BLOQUE_SLOT,
-                                        slots=sl, rooms=r, departments=d)
+                    self.avail_room[r][sl] = 0
+                    # name = 'other_dep_room_' + str(r) + '_' + str(sl) + '_' + str(self.constraint_nb)
+                    # self.add_constraint(self.sum(self.TTrooms[(sl, c, room)]
+                    #                              for c in self.wdb.compatible_courses[sl]
+                    #                              for room in self.wdb.course_rg_compat[c]
+                    #                              if r in room.and_subrooms()),
+                    #                     '==',
+                    #                     0, constraint_type=ConstraintType.DEPARTEMENT_BLOQUE_SLOT,
+                    #                                         slots=sl, rooms=r, departments=d)
+
 
             # constraint : other_departments_sched_courses instructors are not available
             for i in self.wdb.instructors:
@@ -1323,13 +1371,18 @@ class TTModel(object):
 
         self.add_core_constraints()
 
+        self.add_dependency_constraints()
+
         self.add_rooms_constraints()
 
         self.add_instructors_constraints()
 
-        self.add_slot_preferences()
+        if self.core_only:
+            return
 
-        self.add_dependency_constraints()
+        self.add_other_departments_constraints()
+
+        self.add_slot_preferences()
 
         self.add_specific_constraints()
 
@@ -1417,46 +1470,50 @@ class TTModel(object):
                 cg.save()
 
     def optimize(self, time_limit, solver, presolve=2):
+        # The solver value shall be one of the available
+        # solver corresponding pulp command or contain
+        # gurobi
+        if 'gurobi' in solver.lower() and hasattr(pulp_solvers, GUROBI_NAME):
+            # ignore SIGINT while solver is running
+            # => SIGINT is still delivered to the solver, which is what we want
+            signal.signal(signal.SIGINT, signal.SIG_IGN)
+            solver = GUROBI_NAME
+            result = self.model.solve(GUROBI_CMD(keepFiles=1,
+                                                 msg=True,
+                                                 options=[("TimeLimit", time_limit),
+                                                          ("Presolve", presolve),
+                                                          ("MIPGapAbs", 0.2)]))
+            if result is None or result == 0:
+                from gurobipy import read
+                lp = "FlOpTT-pulp.lp"
+                ilp_filename = "logs/IIS_week%s.ilp" % self.weeks[0]
+                m = read(lp)
+                m.computeIIS()
+                m.write(ilp_filename)
+                print("IIS written in file %s" % ilp_filename)
+                self.constraintManager.handle_reduced_result(ilp_filename, self.weeks[0])
 
-        # The solver value shall one of the available
-        # solver corresponding pulp command
-
-        # if solver == GUROBI_CMD:
-        # ignore SIGINT while solver is running
-        # => SIGINT is still delivered to the solver, which is what we want
-        signal.signal(signal.SIGINT, signal.SIG_IGN)
-        result = self.model.solve(GUROBI_CMD(keepFiles=1,
-                                             msg=True,
-                                             options=[("TimeLimit", time_limit),
-                                                      ("Presolve", presolve),
-                                                      ("MIPGapAbs", 0.2)]))
-        if result is None or result == 0:
-            lp = "FlOpTT-pulp.lp"
-            ilp_filename = "logs/IIS_week%s.ilp" % self.weeks
-            #m = read(lp)
-            #m.computeIIS()
-            #m.write(ilp_filename)
-            print("IIS written in file %s" % ilp_filename)
-            self.constraintManager.handle_reduced_result(ilp_filename, self.weeks)
-        """
+        elif hasattr(pulp_solvers, solver):
+            # raise an exception when the solver name is incorrect
+            command = getattr(pulp_solvers, solver)
+            self.model.solve(command(keepFiles=1,
+                                     msg=True,
+                                     presolve=presolve,
+                                     maxSeconds=time_limit))
         else:
-            # TODO Use the solver parameter to get
-            # the target class by reflection
-            self.model.solve(PULP_CBC_CMD(keepFiles=1,
-                                          msg=True,
-                                          presolve=presolve,
-                                          maxSeconds=time_limit))
-        """
+            print(f'Solver {solver} not found.')
+            return None
+
         status = self.model.status
         print(LpStatus[status])
-        if status == LpStatusOptimal or (solver != GUROBI and status == LpStatusNotSolved):
+        if status == LpStatusOptimal or (solver != GUROBI_NAME and status == LpStatusNotSolved):
             return self.get_obj_coeffs()
 
         else:
             print('lpfile has been saved in FlOpTT-pulp.lp')
             return None
 
-    def solve(self, time_limit=3600, target_work_copy=None, solver=GUROBI):
+    def solve(self, time_limit=3600, target_work_copy=None, solver=GUROBI_NAME):
         """
         Generates a schedule from the TTModel
         The solver stops either when the best schedule is obtained or timeLimit

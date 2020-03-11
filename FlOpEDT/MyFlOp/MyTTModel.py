@@ -25,10 +25,12 @@
 # without disclosing the source code of your own applications.
 
 import importlib
-from TTapp.TTModel import TTModel
+
+import pulp.solvers as pulp_solvers
+
+from TTapp.TTModel import TTModel, GUROBI_NAME
 
 from MyFlOp.MyTTUtils import print_differences
-from MyFlOp.iut_specific_constraints import add_iut_specific_constraints
 
 
 class MyTTModel(TTModel):
@@ -41,7 +43,9 @@ class MyTTModel(TTModel):
                  min_bhd_i=1.,
                  min_nps_c=1.,
                  max_stab=5.,
-                 lim_ld=1.):
+                 lim_ld=1.,
+                 core_only=False,
+                 send_mails=False):
         TTModel.__init__(self, department_abbrev, weeks, year,
                          train_prog=train_prog,
                          stabilize_work_copy=stabilize_work_copy,
@@ -51,7 +55,9 @@ class MyTTModel(TTModel):
                          min_bhd_i=min_bhd_i,
                          min_nps_c=min_nps_c,
                          max_stab=max_stab,
-                         lim_ld=lim_ld)
+                         lim_ld=lim_ld,
+                         core_only=core_only,
+                         send_mails=send_mails)
 
     def add_specific_constraints(self):
         """
@@ -60,10 +66,9 @@ class MyTTModel(TTModel):
         If you shall add more specific ones, you may write it down here.
         """
         TTModel.add_specific_constraints(self)
-        add_iut_specific_constraints(self)
 
     def solve(self, time_limit=3600, target_work_copy=None,
-              solver='gurobi'):
+              solver=GUROBI_NAME):
         """
         If you shall add pre (or post) processing apps, you may write them down
         here.
@@ -72,18 +77,5 @@ class MyTTModel(TTModel):
                                time_limit=time_limit,
                                target_work_copy=target_work_copy,
                                solver=solver)
-        """
-        if result is None:
-            spec = importlib.util.find_spec('gurobipy')
-            if spec:
-                from gurobipy import read
-                lp = "FlOpTT-pulp.lp"
-                m = read(lp)
-                # m.optimize()
-                m.computeIIS()
-                m.write("logs/IIS_weeks%s.ilp" % self.weeks)
-                print("IIS written in file logs/IIS_week%s.ilp" % (self.weeks))
-        else :
-            if self.stabilize_work_copy is not None:
-                print_differences(self.weeks, self.year, self.stabilize_work_copy, target_work_copy, self.wdb.instructors)
-        """
+        if result is not None and self.stabilize_work_copy is not None:
+            print_differences(self.weeks, self.year, self.stabilize_work_copy, target_work_copy, self.wdb.instructors)

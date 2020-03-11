@@ -26,11 +26,19 @@
 
 import datetime
 
-from base.models import TimeGeneralSettings
+import base.models
 actual_year = 2019
 
-week_ref_days = ['m', 'tu', 'w', 'th', 'f', 'sa', 'su']
-week_display_days = ['Lun.', 'Mar.', 'Mer.', 'Jeu.', 'Ven.', 'Sam.', 'Dim.']
+days_infos = {
+    'm' :{'shift': 0, 'fr_slug': 'Lun.'},
+    'tu':{'shift': 1, 'fr_slug': 'Mar.'},
+    'w' :{'shift': 2, 'fr_slug': 'Mer.'},
+    'th':{'shift': 3, 'fr_slug': 'Jeu.'},
+    'f' :{'shift': 4, 'fr_slug': 'Ven.'},
+    'sa':{'shift': 5, 'fr_slug': 'Sam.'},
+    'su':{'shift': 6, 'fr_slug': 'Dim.'}
+}
+
 
 # monday of Week #2
 def monday_w2(y):
@@ -54,33 +62,20 @@ def current_week():
 
 
 # list of days
-def num_days(y, w):
-    if w == 0:
-        return []
-    cur_day = monday_w2(y) + datetime.timedelta(7 * (w - 2))
-    day_list = []
-    for d in range(5):
-        day_list.append("%02d/%02d" % (cur_day.day, cur_day.month))
-        cur_day += datetime.timedelta(1)
-    return day_list
-
-# list of days
 def num_all_days(y, w, dept):
     if w == 0:
         return []
-    cur_day = monday_w2(y) + datetime.timedelta(7 * (w - 2))
+    monday = monday_w2(y) + datetime.timedelta(7 * (w - 2))
     day_list = []
-    dept_day_list = TimeGeneralSettings.objects.get(department=dept).days
+    dept_day_list = base.models.TimeGeneralSettings.objects.get(department=dept).days
     iday = 0
-    for i in range(len(week_ref_days)):
-        d_ref = week_ref_days[i]
-        if d_ref in dept_day_list:
-            day_list.append({'num':iday,
-                             'date':f"{cur_day.day:02d}/{cur_day.month:02d}",
-                             'ref':d_ref,
-                             'name':week_display_days[i]})
-            cur_day += datetime.timedelta(1)
-            iday += 1
+    for d_ref in dept_day_list:
+        cur_day = monday + datetime.timedelta(days_infos[d_ref]['shift'])
+        day_list.append({'num':iday,
+                         'date':f"{cur_day.day:02d}/{cur_day.month:02d}",
+                         'ref':d_ref,
+                         'name':days_infos[d_ref]['fr_slug']})
+        iday += 1
     return day_list
 
 # More or less working weeks

@@ -184,6 +184,9 @@ g[class^="gp-but-"] {
 .quote {
   text-anchor:start;
 }
+legend {
+    color: #383838;
+}
 
 
 

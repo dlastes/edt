@@ -33,7 +33,9 @@ from django.db import models
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
-from base.timing import hr_min, str_slot
+from base.timing import hhmm, str_slot
+import base.weeks
+
 
 
 # <editor-fold desc="GROUPS">
@@ -150,7 +152,6 @@ class Time(models.Model):
                            verbose_name="Half day",
                            default=AM)
     no = models.PositiveSmallIntegerField(default=0)
-    # nom = models.CharField(max_length=20)
     hours = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(25)], default=8)
     minutes = models.PositiveSmallIntegerField(
@@ -213,16 +214,12 @@ class TimeGeneralSettings(models.Model):
     default_preference_duration = models.PositiveSmallIntegerField(default=90)
 
     def __str__(self):
-        dsh, dsm = hr_min(self.day_start_time)
-        lsh, lsm = hr_min(self.lunch_break_start_time)
-        dfh, dfm = hr_min(self.day_finish_time)
-        lfh, lfm = hr_min(self.lunch_break_finish_time)
         return f"Dept {self.department.abbrev}: " + \
-               f"{dsh}:{dsm:02d} - {lsh}:{lsm:02d}" + \
-               f" | {lfh}:{lfm:02d} - {dfh}:{dfm:02d};" + \
-               f" Days: {self.days}"
-
-
+            f"{hhmm(self.day_start_time)} - {hhmm(self.lunch_break_start_time)}" + \
+            f" | {hhmm(self.lunch_break_finish_time)} - " + \
+            f"{hhmm(self.day_finish_time)};" + \
+            f" Days: {self.days}"
+    
 # </editor-fold>
 
 # <editor-fold desc="ROOMS">
@@ -239,38 +236,57 @@ class RoomType(models.Model):
         return self.name
 
 
-class RoomGroup(models.Model):
+class Room(models.Model):
     name = models.CharField(max_length=20)
     types = models.ManyToManyField(RoomType,
                                    blank=True,
                                    related_name="members")
-
-    def __str__(self):
-        return self.name
-
-
-class Room(models.Model):
-    name = models.CharField(max_length=20)
-    subroom_of = models.ManyToManyField(RoomGroup,
+    subroom_of = models.ManyToManyField('self',
+                                        symmetrical=False,
                                         blank=True,
                                         related_name="subrooms")
     departments = models.ManyToManyField(Department)
+    basic = models.BooleanField(verbose_name='Basic room?', default=False)
+
+    def and_subrooms(self):
+        s = {self}
+        s |= set(self.subrooms.all())
+        return s
+
+    def basic_rooms(self):
+        s = set(r for r in self.and_subrooms() if r.basic)
+        return s
+
+    def and_overrooms(self):
+        s = {self}
+        s |= set(self.subroom_of.all())
+        return s
 
     def __str__(self):
         return self.name
+
+    def str_extended(self):
+        return f'{self.name}, ' + f'{"basic" if self.basic else "not basic"}, ' \
+            + f'Types: {[t.name for t in self.types.all()]}, '\
+            + f'Depts: {self.departments.all()}, '\
+            + f'Is in: {[rg.name for rg in self.subroom_of.all()]}'
 
 
 class RoomSort(models.Model):
     for_type = models.ForeignKey(RoomType, blank=True, null=True,
                                  related_name='+', on_delete=models.CASCADE)
-    prefer = models.ForeignKey(RoomGroup, blank=True, null=True,
+    prefer = models.ForeignKey(Room, blank=True, null=True,
                                related_name='+', on_delete=models.CASCADE)
-    unprefer = models.ForeignKey(RoomGroup, blank=True, null=True,
+    unprefer = models.ForeignKey(Room, blank=True, null=True,
                                  related_name='+', on_delete=models.CASCADE)
+    tutor = models.ForeignKey('people.Tutor',
+                              related_name='abcd',
+                              null=True,
+                              default=None,
+                              on_delete=models.CASCADE)
 
     def __str__(self):
-        return "{self.for_type}-pref-{self.prefer}-to-{self.unprefer}"
-
+        return f"{self.for_type}-pref-{self.prefer}-to-{self.unprefer}"
 
 # </editor-fold>
 
@@ -291,6 +307,8 @@ class Module(models.Model):
     ppn = models.CharField(max_length=8, default='M')
     train_prog = models.ForeignKey('TrainingProgramme', on_delete=models.CASCADE)
     period = models.ForeignKey('Period', on_delete=models.CASCADE)
+    url = models.CharField(max_length=200, null=True, blank=True, default=None)
+    description = models.TextField(null=True, blank=True, default=None)
 
     def __str__(self):
         return self.abbrev
@@ -302,7 +320,6 @@ class Module(models.Model):
 class ModulePossibleTutors(models.Model):
     module = models.OneToOneField('Module', on_delete=models.CASCADE)
     possible_tutors = models.ManyToManyField('people.Tutor', blank=True, related_name='possible_modules')
-
 
 class CourseType(models.Model):
     name = models.CharField(max_length=50)
@@ -376,7 +393,7 @@ class ScheduledCourse(models.Model):
     day = models.CharField(max_length=2, choices=Day.CHOICES, default=Day.MONDAY)
     # in minutes from 12AM
     start_time = models.PositiveSmallIntegerField()
-    room = models.ForeignKey('RoomGroup', blank=True, null=True, on_delete=models.CASCADE)
+    room = models.ForeignKey('Room', blank=True, null=True, on_delete=models.CASCADE)
     no = models.PositiveSmallIntegerField(null=True, blank=True)
     noprec = models.BooleanField(
         verbose_name='vrai si on ne veut pas garder la salle', default=True)
@@ -445,7 +462,7 @@ class CoursePreference(models.Model):
 
 
 class RoomPreference(models.Model):
-    room = models.ForeignKey('Room', on_delete=models.CASCADE)
+    room = models.ForeignKey('Room', on_delete=models.CASCADE, default=None, null=True)
     week = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)],
         null=True,
@@ -493,43 +510,72 @@ class CourseModification(models.Model):
     old_week = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)], null=True)
     old_year = models.PositiveSmallIntegerField(null=True)
-    room_old = models.ForeignKey('RoomGroup', blank=True, null=True, on_delete=models.CASCADE)
+    room_old = models.ForeignKey('Room', blank=True, null=True, on_delete=models.CASCADE)
     day_old = models.CharField(max_length=2, choices=Day.CHOICES, default=None, null=True)
     start_time_old = models.PositiveSmallIntegerField(default=None, null=True)
-    version_old = models.PositiveIntegerField()
-    updated_at = models.DateTimeField(auto_now=True)
-    initiator = models.ForeignKey('people.Tutor', on_delete=models.CASCADE)
-
-    def __str__(self):
-        olds = 'OLD:'
-        if self.old_week is not None:
-            olds += f' Sem {self.old_week} ;'
-        if self.old_year is not None:
-            olds += f' An {self.old_year} ;'
-        if self.room_old is not None:
-            olds += f' Salle {self.room_old} ;'
-        if self.day_old is not None:
-            olds += f' Cren {self.day_old}-{self.start_time_old} ;'
-        if self.version_old is not None:
-            olds += f' NumV {self.version_old} ;'
-        return f"by {self.initiator.username}, at {self.updated_at}\n" + \
-               f"{self.course} <- {olds}"
-
-
-class PlanningModification(models.Model):
-    course = models.ForeignKey('Course', on_delete=models.CASCADE)
-    old_week = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(0), MaxValueValidator(53)], null=True)
-    old_year = models.PositiveSmallIntegerField(null=True)
     tutor_old = models.ForeignKey('people.Tutor',
-                                  related_name='impacted_by_planif_modif',
+                                  related_name='impacted_by_course_modif',
                                   null=True,
                                   default=None,
-                                  on_delete=models.CASCADE)
+                                  on_delete=models.SET_NULL)
+    version_old = models.PositiveIntegerField()
     updated_at = models.DateTimeField(auto_now=True)
-    initiator = models.ForeignKey('people.Tutor',
-                                  related_name='operated_planif_modif',
-                                  on_delete=models.CASCADE)
+    initiator = models.ForeignKey('people.User', on_delete=models.CASCADE)
+
+    def strs_course_changes(self, course=None, sched_course=None):
+        if course is None:
+            course = self.course
+        if sched_course is None:
+            sched_course = ScheduledCourse.objects.get(course=course, work_copy=0)
+        department = course.type.department
+        al = '\n  · '
+        same = f'- Cours {course.module.abbrev} semaine {course.week} ({course.year})'
+        changed = ''
+
+        tutor_old_name = self.tutor_old.username if self.tutor_old is not None else "personne"
+        if sched_course.tutor == self.tutor_old:
+            same += f', par {tutor_old_name}'
+        else:
+            cur_tutor_name =  sched_course.tutor.username if sched_course.tutor is not None else "personne"
+            changed += al + f'Prof : {tutor_old_name} -> {cur_tutor_name}'
+
+        room_old_name = self.room_old.name if self.room_old is not None else "nulle part"
+        if sched_course.room == self.room_old:
+            same += f', en {room_old_name}'
+        else:
+            cur_room_name = sched_course.room.name if sched_course.room.name is not None else "nulle part"
+            changed += al + f'Salle : {room_old_name} -> {cur_room_name}'
+
+        day_list = base.weeks.num_all_days(course.year, course.week, department)
+        if sched_course.day == self.day_old \
+           and sched_course.start_time == self.start_time_old:
+            for d in day_list:
+                if d['ref'] == sched_course.day:
+                    day = d
+            same += f', {day["name"]} {day["date"]} à {hhmm(sched_course.start_time)}'
+        else:
+            changed += al + 'Horaire : '
+            if self.day_old is None or self.start_time_old is None:
+                changed += 'non placé'
+            else:
+                for d in day_list:
+                    if d['ref'] == self.day_old:
+                        day = d
+                changed += f'{day["name"]} {day["date"]} à {hhmm(self.start_time_old)}'
+            changed += ' -> '
+            for d in day_list:
+                if d['ref'] == sched_course.day:
+                    day = d
+            changed += f'{day["name"]} {day["date"]} à {hhmm(sched_course.start_time)}'
+        
+        return same, changed
+        
+    def __str__(self):
+        same, changed = self.strs_course_changes()
+        if self.version_old is not None:
+            same += f' ; (NumV {self.version_old})'
+        ret = same + changed + f"\n  by {self.initiator.username}, at {self.updated_at}"
+        return ret
 
 
 # </editor-fold desc="MODIFICATIONS">

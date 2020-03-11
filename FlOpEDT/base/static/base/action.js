@@ -852,38 +852,16 @@ function compute_changes(changes, conc_tutors, gps) {
 
 	    // build the communication with django
 	    var sel_week = wdw_weeks.get_selected() ;
-            change = {id: id,
-		      day: {o: cb.day,
-			    n: null },
-		      start: {o: cb.start,
-			     n: null },
-		      room: {o: cb.room,
-			     n: null },
-		      week: {o: sel_week.week,
-			     n: null },
-		      year: {o: sel_week.year,
-			     n: null},
-		      tutor:{o: cb.prof,
-			     n: null}
+            change = {id:    id,
+		      day:   cur_course.day,
+		      start: cur_course.start,
+		      room:  cur_course.room,
+		      tutor: cur_course.prof
 		     };
 	    
 	    
             console.log("change", change);
-	    if (cb.day != cur_course.day ||
-                cb.start != cur_course.start) {
-                change.day.n = cur_course.day;
-                change.start.n = cur_course.start;
-	    }
-	    if (cb.room != cur_course.room) {
-                change.room.n = cur_course.room;
-	    }
-	    if (cb.prof != cur_course.prof) {
-                change.tutor.n = cur_course.prof;
-	    }
-	    
 	    changes.push(change);
-		
-            
 	    
 	}
 
@@ -1254,9 +1232,6 @@ function confirm_law_constraints(changes, conc_tutors, gps) {
 }
 
 
-
-
-
 function confirm_change() {
     var changes, conc_tutors, gps;
     changes = [];
@@ -1281,38 +1256,110 @@ function confirm_change() {
     }
 }
 
-
-
 function confirm_contact_all(changes, conc_tutors, gps) {
+
     var  prof_txt, gp_txt;
-    
-    if (conc_tutors.length > 0) {
-        prof_txt = "Avez-vous contacté " ;
-	prof_txt += array_to_msg(conc_tutors) ;
-	prof_txt += " ?" ;
+
+    if (logged_usr.is_student == "True") {
+        if (conc_tutors.length > 0) {
+            prof_txt = "Souhaitez-vous envoyer un mail automatique suggérant la modification du cours à :" ;
+            prof_txt += array_to_msg(conc_tutors) ;
+            prof_txt += " ?" ;
+        } else {
+            prof_txt = "Il y quelqu'un·e à contacter ?" ;
+        }
+
+        gp_txt = "Par ailleurs, ce serait bien de prévenir ";
+        if (gps.length == 1) {
+            gp_txt += "le groupe ";
+        } else {
+            gp_txt += "les groupes ";
+        }
+        gp_txt += array_to_msg(gps) ;
+        gp_txt += "."
+
+        att_txt = "/!\\ Votre nom sera mentionné dans le mail /!\\";
     } else {
-        prof_txt = "Tudo bem ?" ;
+        if (conc_tutors.length > 0) {
+            prof_txt = "Avez-vous contacté " ;
+	        prof_txt += array_to_msg(conc_tutors) ;
+	        prof_txt += " ?" ;
+        } else {
+            prof_txt = "Tudo bem ?" ;
+        }
+
+        gp_txt = "(Par ailleurs, ce serait bien de prévenir ";
+        if (gps.length == 1) {
+            gp_txt += "le groupe ";
+        } else {
+            gp_txt += "les groupes ";
+        }
+        gp_txt += array_to_msg(gps) ;
+        gp_txt += ").";
+        att_txt = "";
     }
-    
-    gp_txt = "(Par ailleurs, ce serait bien de prévenir ";
-    if (gps.length == 1) {
-	gp_txt += "le groupe ";
+
+    if (logged_usr.is_student == "True") {
+        list_but =  {list: [{txt: "Oui", click: function(d){send_mail_proposal(changes);}},
+		            {txt: "Non", click: function(d){} }]};
     } else {
-	gp_txt += "les groupes ";
+        list_but =  {list: [{txt: "Oui", click: function(d){send_edt_change(changes);}},
+                            {txt: "Contacter (email)", click: function(d){send_mail_proposal(changes)}},
+		            {txt: "Non", click: function(d){} }]};
     }
-    gp_txt += array_to_msg(gps) ;
-    gp_txt += ").";
-    
     
     var splash_confirm = {
 	id: "conf-cont",
-	but: {list: [{txt: "Oui", click: function(d){send_edt_change(changes);}},
-		     {txt: "Non", click: function(d){} }]},
+	but: list_but,
 	com: {list: [{txt: prof_txt},
-		     {txt:gp_txt}]}
+		     {txt:gp_txt},
+		     {txt:att_txt}]}
     }
     
     splash(splash_confirm);
+}
+
+function send_mail_proposal(changes) {
+
+    var cur_week = wdw_weeks.get_selected();
+    var sent_data = {} ;
+    sent_data['version'] = JSON.stringify(version) ;
+    sent_data['week'] = JSON.stringify(cur_week.week) ;
+    sent_data['year'] = JSON.stringify(cur_week.year) ;
+    sent_data['work_copy'] = JSON.stringify(num_copie) ;
+    sent_data['tab'] = JSON.stringify(changes) ;
+
+    $.ajax({
+        url: url_mail_auto,
+        type: 'POST',
+        data: sent_data,
+        dataType: 'json',
+        success: function(msg) {
+            console.log("SUCCESSSSSSSSSSSSSSSSSSSSSSSSSS");
+            console.log(msg);
+            mail_ack(msg);
+        },
+        error: function(msg) {
+            console.log("ERROOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOR");
+            console.log(msg);
+            mail_ack(msg);
+        }
+    });
+}
+
+function mail_ack(msg) {
+    var splash_disclaimer = {
+	id: "mail-ack",
+	but: {list: [{txt: "Ok.", click: function(d){} }]},
+	com: {list: []}
+    }
+    if (msg.status == "OK") {
+        splash_disclaimer.com.list[0] = {txt:"Email envoyé !"};
+    } else {
+        splash_disclaimer.com.list[0] = {txt:"Email non envoyé !"};
+        splash_disclaimer.com.list[1] = {txt:msg.more};
+    }
+    splash(splash_disclaimer);
 }
 
 
@@ -1336,18 +1383,19 @@ function array_to_msg(a) {
 
 
 function send_edt_change(changes) {
+    var cur_week = wdw_weeks.get_selected();
     var sent_data = {} ;
-    sent_data['v'] = JSON.stringify(version) ; 
+    sent_data['version'] = JSON.stringify(version) ;
+    sent_data['week'] = JSON.stringify(cur_week.week) ;
+    sent_data['year'] = JSON.stringify(cur_week.year) ;
+    sent_data['work_copy'] = JSON.stringify(num_copie) ;
     sent_data['tab'] = JSON.stringify(changes) ;
 
     var sel_week = wdw_weeks.get_selected() ;
 
     show_loader(true);
     $.ajax({
-        url: url_edt_changes
-	    + "?s=" + sel_week.week
-	    + "&a=" + sel_week.year
-	    + "&c=" + num_copie,
+        url: url_edt_changes,
         type: 'POST',
 //        contentType: 'application/json; charset=utf-8',
         data: sent_data,
@@ -1742,6 +1790,87 @@ function compute_cm_room_tutor_direction() {
     }
 }
 
+function show_detailed_courses(cours){
+    remove_details();
+    var details = svg.get_dom("dg").append("g")
+        .attr("id", "course_details");
+
+    var width = grid_width()/4;
+    var height = grid_height()/3;
+    var pos_x = placement_details_x(cours);
+    var pos_y = placement_details_y(cours);
+    var strokeColor;
+    var strokeWidth;
+
+    if(cours.course_type=="CTRL"){
+        strokeColor = "red";
+        strokeWidth = 4;
+    }
+    else{
+        strokeColor = "black";
+        strokeWidth = 2;
+    }
+
+    details
+        .append("rect")
+        .attr("x",pos_x)
+        .attr("y",pos_y)
+        .attr("width",width)
+        .attr("height",height)
+        .attr("rx",15)
+        .attr("ry",15)
+        .attr("fill", cours.color_bg)
+        .attr("stroke", strokeColor)
+        .attr("stroke-width",strokeWidth)
+        .on("click",remove_details);
+
+    details
+        .append("a")
+        .attr("xlink:href", modules_info[cours.mod].url)
+        .attr("target", "_blank")
+        .append("text")
+        .text(modules_info[cours.mod].name)
+        .attr("fill", cours.color_txt)
+        .attr("style", "text-decoration:underline")
+        .attr("x", pos_x+width/2)
+        .attr("y", pos_y+height/6);
+
+    details
+        .append("text")
+        .text(cours.room)
+        .attr("fill", cours.color_txt)
+        .attr("x", pos_x+width/2)
+        .attr("y", pos_y+height/6*2);
+
+    details
+        .append("text")
+        .text(cours.course_type)
+        .attr("fill", cours.color_txt)
+        .attr("x", pos_x+width/2)
+        .attr("y", pos_y+height/6*3);
+
+    details
+        .append("text")
+        .text(tutors_info[cours.prof].full_name)
+        .attr("fill", cours.color_txt)
+        .attr("x", pos_x+width/2)
+        .attr("y", pos_y+height/6*4);
+
+    details
+        .append("a")
+        .attr("xlink:href", url_contact + cours.prof)
+        .attr("target", "_blank")
+        .append("text")
+        .text(tutors_info[cours.prof].email)
+        .attr("fill", cours.color_txt)
+        .attr("style", "text-decoration:underline")
+        .attr("x", pos_x+width/2)
+        .attr("y", pos_y+height/6*5);
+}
+
+function remove_details(){
+    d3.select("#course_details").remove();
+}
 
 function apply_selection_display(choice) {
     if (fetch.done) {
@@ -1867,3 +1996,4 @@ function redirect_dept(d) {
     split_addr.push(sel_week.week);
     window.location.href = split_addr.join("/") ;
 }
+

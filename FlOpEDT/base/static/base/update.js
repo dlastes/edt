@@ -931,7 +931,11 @@ function update_selection() {
             return d.name == c.prof ;
         });
         var roo = rooms_sel.all.find(function(d) {
-            return d.name == c.room ;
+            if (c.room in rooms.roomgroups) {
+                return rooms.roomgroups[c.room].includes(d.name) ;
+            } else {
+                return false;
+            }
         });
         if (typeof mod === 'undefined' || typeof tut === 'undefined'
             || typeof roo === 'undefined') {
@@ -1007,7 +1011,8 @@ function go_courses(quick) {
             }
 	    go_cm_room_tutor_change();
 	}})
-        .call(dragListener);
+        .call(dragListener)
+        .on("dblclick",show_detailed_courses);
 
     incg
         .merge(cg)

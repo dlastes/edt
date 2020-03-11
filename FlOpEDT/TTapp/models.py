@@ -1083,7 +1083,7 @@ class LimitedRoomChoices(TTConstraint):
                               null=True,
                               default=None,
                               on_delete=models.CASCADE)
-    possible_rooms = models.ManyToManyField('base.RoomGroup',
+    possible_rooms = models.ManyToManyField('base.Room',
                                             related_name="limited_rooms")
 
     def enrich_model(self, ttmodel, ponderation=1.):
