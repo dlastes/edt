@@ -839,6 +839,19 @@ class TTModel(object):
                 self.add_constraint(self.sum(self.TTinstructors[(sl, c, i)]
                                              for i in self.wdb.possible_tutors[c]) - self.TT[sl, c],
                                     '==', 0, "Each_course_to_one_tutor %s-%s_%g" % (c, sl, self.constraint_nb))
+
+        for i in self.wdb.instructors:
+            for sl in self.wdb.slots:
+                name = 'simul_slots' + str(i) + '_' + str(sl)
+                self.add_constraint(1000 * self.sum(self.TTinstructors[(sl, c1, i)]
+                                                    for c1 in self.wdb.possible_courses[i]
+                                                    & self.wdb.compatible_courses[sl])
+                                    +
+                                    self.sum(self.TTinstructors[(sl2, c2, i)]
+                                             for sl2 in self.wdb.slots_intersecting[sl] - {sl}
+                                             for c2 in self.wdb.possible_courses[i] & self.wdb.compatible_courses[sl2]),
+                                    '<=', 1000, name=name)
+
         if self.core_only:
             return
 
@@ -866,15 +879,6 @@ class TTModel(object):
                                     '<=',
                                     self.avail_instr[i][sl],
                                     name=name)
-                name = 'simul_slots' + str(i) + '_' + str(sl)
-                self.add_constraint(1000 * self.sum(self.TTinstructors[(sl, c1, i)]
-                                                    for c1 in self.wdb.possible_courses[i]
-                                                    & self.wdb.compatible_courses[sl])
-                                    +
-                                    self.sum(self.TTinstructors[(sl2, c2, i)]
-                                             for sl2 in self.wdb.slots_intersecting[sl] - {sl}
-                                             for c2 in self.wdb.possible_courses[i] & self.wdb.compatible_courses[sl2]),
-                                    '<=', 1000, name=name)
 
     def add_rooms_constraints(self):
         print("adding room constraints")
@@ -1289,6 +1293,10 @@ class TTModel(object):
                     #                     0,
                     #                     name=name)
 
+        if self.core_only:
+            return
+
+        for sl in self.wdb.slots:
             # constraint : other_departments_sched_courses instructors are not available
             for i in self.wdb.instructors:
                 occupied_in_another_department = False
@@ -1298,14 +1306,15 @@ class TTModel(object):
                              and sl.start_time < sc.start_time + sc.course.type.duration):
                         occupied_in_another_department = True
                 if occupied_in_another_department:
-                    name = 'other_dep_' + str(i) + '_' + str(sl) + '_' + str(self.constraint_nb)
-                    self.add_constraint(self.sum(self.TT[(sl, c)]
-                                                 for c in (self.wdb.courses_for_tutor[i]
-                                                           | self.wdb.courses_for_supp_tutor[i]) &
-                                                 self.wdb.compatible_courses[sl]),
-                                        '==',
-                                        0,
-                                        name=name)
+                    self.avail_instr[i][sl] = 0
+                    # name = 'other_dep_' + str(i) + '_' + str(sl) + '_' + str(self.constraint_nb)
+                    # self.add_constraint(self.sum(self.TT[(sl, c)]
+                    #                              for c in (self.wdb.courses_for_tutor[i]
+                    #                                        | self.wdb.courses_for_supp_tutor[i]) &
+                    #                              self.wdb.compatible_courses[sl]),
+                    #                     '==',
+                    #                     0,
+                    #                     name=name)
                     self.add_constraint(self.IBD[(i, sl.day)], '==', 1)
 
     def add_specific_constraints(self):
