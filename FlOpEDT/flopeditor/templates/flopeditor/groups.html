@@ -15,7 +15,9 @@
         <div id="training-programmes" class="tab-pane fade show active" role="tabpanel">
           {% include "flopeditor/snippets/crud_crudjs_item.html" with route_name='flopeditor:flopeditor-crud-training-programmes' id_btn="btn-rooms" %}
         </div>
-        <div id="student-groups" class="tab-pane fade" role="tabpanel">Student groups</div>
+        <div id="student-groups" class="tab-pane fade" role="tabpanel">
+          {% include "flopeditor/snippets/crud_crudjs_item.html" with route_name='flopeditor:flopeditor-crud-student-group-type' id_btn="btn-stg" %}
+        </div>
 
         <div id="student-group-types" class="tab-pane fade" role="tabpanel">Student group types</div>
       {% endblock card_content %}
@@ -29,4 +31,5 @@
     {{ block.super }}
     <script> const CSRF = "{{ csrf_token }}" </script>
     <script src="{% static 'flopeditor/js/crudjs.min.js' %}" charset="utf-8"></script>
+
 {% endblock %}
