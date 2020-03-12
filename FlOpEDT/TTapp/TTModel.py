@@ -839,6 +839,10 @@ class TTModel(object):
                 self.add_constraint(self.sum(self.TTinstructors[(sl, c, i)]
                                              for i in self.wdb.possible_tutors[c]) - self.TT[sl, c],
                                     '==', 0, "Each_course_to_one_tutor %s-%s_%g" % (c, sl, self.constraint_nb))
+        if self.core_only:
+            return
+
+        for c in self.wdb.courses:
             if c.supp_tutor.exists():
                 supp_tutors = set(c.supp_tutor.all()) & self.wdb.instructors
                 if supp_tutors:
