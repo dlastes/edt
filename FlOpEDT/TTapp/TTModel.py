@@ -386,7 +386,7 @@ class WeekDB(object):
             if c.tutor is not None:
                 possible_tutors[c] = {c.tutor}
             elif CoursePossibleTutors.objects.filter(course=c).exists():
-                possible_tutors[c] = set(ModulePossibleTutors.objects.get(course=c).possible_tutors.all())
+                possible_tutors[c] = set(CoursePossibleTutors.objects.get(course=c).possible_tutors.all())
             else:
                 possible_tutors[c] = possible_tutors[c.module]
 
