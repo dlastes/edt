@@ -927,31 +927,32 @@ class TTModel(object):
                     self.avail_room[r][sl],
                     name='core_room_' + str(r) + '_' + str(sl) + '_' + str(self.constraint_nb))
 
-            ########TO BE CHECKED################
-            # constraint : respect preference order,
-            # if preferred room is available
-            for rp in self.wdb.room_prefs:
-                e = self.sum(
-                    self.TTrooms[(sl, c, rp.unprefer)]
-                    for c in set(self.wdb.courses.filter(room_type=rp.for_type)) & self.wdb.compatible_courses[sl])
-                preferred_is_unavailable = False
-                for r in rp.prefer.basic_rooms():
-                    if not self.avail_room[r][sl]:
-                        preferred_is_unavailable = True
-                        break
-                    e -= self.sum(self.TTrooms[(sl, c, rg)]
-                                  for (c, rg) in self.wdb.room_course_compat[r]
-                                  if c in self.wdb.compatible_courses[sl])
-                if preferred_is_unavailable:
-                    continue
-                # print "### slot :", sl, rp.unprefer, "after", rp.prefer
-                # print e <= 0
-                self.add_constraint(
-                    e,
-                    '<=',
-                    0,
-                    name=f'{rp.prefer }prefered to {rp.unprefer} on slot {sl}_{self.constraint_nb} '
-                    )
+            # ########TO BE CHECKED################
+            # To be moved in reassign rooms !!
+            # # constraint : respect preference order,
+            # # if preferred room is available
+            # for rp in self.wdb.room_prefs:
+            #     e = self.sum(
+            #         self.TTrooms[(sl, c, rp.unprefer)]
+            #         for c in set(self.wdb.courses.filter(room_type=rp.for_type)) & self.wdb.compatible_courses[sl])
+            #     preferred_is_unavailable = False
+            #     for r in rp.prefer.basic_rooms():
+            #         if not self.avail_room[r][sl]:
+            #             preferred_is_unavailable = True
+            #             break
+            #         e -= self.sum(self.TTrooms[(sl, c, rg)]
+            #                       for (c, rg) in self.wdb.room_course_compat[r]
+            #                       if c in self.wdb.compatible_courses[sl])
+            #     if preferred_is_unavailable:
+            #         continue
+            #     # print "### slot :", sl, rp.unprefer, "after", rp.prefer
+            #     # print e <= 0
+            #     self.add_constraint(
+            #         e,
+            #         '<=',
+            #         0,
+            #         name=f'{rp.prefer }prefered to {rp.unprefer} on slot {sl}_{self.constraint_nb} '
+            #         )
 
     # constraint : respect preference order with full order for each room type :
     # perfs OK
