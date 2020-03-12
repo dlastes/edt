@@ -23,11 +23,10 @@
       
 </div>
 
-
 {% endblock %}
 
 {% block script %}
     {{ block.super }}
-    <script>const CSRF = "{{ csrf_token  }}"</script>
+    <script> const CSRF = "{{ csrf_token }}" </script>
     <script src="{% static 'flopeditor/js/crudjs.min.js' %}" charset="utf-8"></script>
 {% endblock %}
