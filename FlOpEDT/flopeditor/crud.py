@@ -89,6 +89,8 @@ def crud_training_programmes(request, department_abbrev):
 
     :param request: Client request.
     :type request:  django.http.HttpRequest
+    :param department_abbrev: Department abbreviation.
+    :type department_abbrev:  String
     :return: Server response for the request.
     :rtype:  django.http.JsonResponse
 

@@ -11,16 +11,16 @@
         {% endblock %}
     </ul>
     <div class="card-body tab-content">
-      {% block content %}
+      {% block card_content %}
         <div id="training-programmes" class="tab-pane fade show active" role="tabpanel">
           {% include "flopeditor/snippets/crud_crudjs_item.html" with route_name='flopeditor:flopeditor-crud-training-programmes' id_btn="btn-rooms" %}
         </div>
         <div id="student-groups" class="tab-pane fade" role="tabpanel">Student groups</div>
 
         <div id="student-group-types" class="tab-pane fade" role="tabpanel">Student group types</div>
-      {% endblock content %}
+      {% endblock card_content %}
     </div>
-      
+
 </div>
 
 {% endblock %}

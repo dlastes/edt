@@ -33,9 +33,6 @@ from flopeditor.validator import validate_training_programme_values, OK_RESPONSE
 
 def read(department):
     """Return all rooms for a department
-
-    :param request: Client request.
-    :type request:  django.http.HttpRequest
     :param department: Department.
     :type department:  base.models.Department
     :return: Server response for the request.
@@ -44,8 +41,8 @@ def read(department):
     """
     training_programmes = TrainingProgramme.objects.filter(department=department)
     values = []
-    for tp in training_programmes:
-        values.append((tp.abbrev, tp.name))
+    for programme in training_programmes:
+        values.append((programme.abbrev, programme.name))
     return JsonResponse({
         "columns" :  [{
             'name': 'Abbréviation de vos promos',
@@ -81,7 +78,9 @@ def create(entries, department):
                 "La promo à ajouter est déjà présente dans la base de données."
             ])
         else:
-            TrainingProgramme.objects.create(name=new_name, abbrev = new_abbrev, department=department)
+            TrainingProgramme.objects.create(name=new_name,
+                                             abbrev=new_abbrev,
+                                             department=department)
             entries['result'].append([OK_RESPONSE])
     return entries
 
@@ -107,15 +106,26 @@ def update(entries, department):
 
         if validate_training_programme_values(new_abbrev, new_name, entries):
             try:
-                tp_to_update = TrainingProgramme.objects.get(abbrev=old_abbrev, name=old_name, department=department)
-                tp_to_update.abbrev = new_abbrev
-                tp_to_update.name = new_name
-                tp_to_update.save()
-                entries['result'].append([OK_RESPONSE])
+                programme_to_update = TrainingProgramme.objects.get(abbrev=old_abbrev,
+                                                                    name=old_name,
+                                                                    department=department)
+                if TrainingProgramme.objects.filter(abbrev=new_abbrev, department=department):
+                    entries['result'].append(
+                        [ERROR_RESPONSE,
+                         "L'abbréviation de cette promo est déjà utilisée."])
+                else:
+                    programme_to_update.abbrev = new_abbrev
+                    programme_to_update.name = new_name
+                    programme_to_update.save()
+                    entries['result'].append([OK_RESPONSE])
             except TrainingProgramme.DoesNotExist:
                 entries['result'].append(
                     [ERROR_RESPONSE,
                      "Une promo à modifier n'a pas été trouvée dans la base de données."])
+            except TrainingProgramme.MultipleObjectsReturned:
+                entries['result'].append(
+                    [ERROR_RESPONSE,
+                     "Plusieurs promos du même nom existent en base de données."])
 
     return entries
 
