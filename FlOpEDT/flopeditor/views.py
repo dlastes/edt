@@ -34,6 +34,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponseForbidden
 from django.contrib.auth.decorators import user_passes_test
 from base.models import Department, TimeGeneralSettings, Day
+from FlOpEDT.decorators import dept_admin_required
 from base.timing import min_to_str, str_to_min
 from base.check_admin import check_admin
 from people.models import Tutor
@@ -285,7 +286,7 @@ def ajax_create_department(request):
         return JsonResponse(response)
     return HttpResponseForbidden()
 
-@user_passes_test(check_admin)
+@dept_admin_required
 def ajax_edit_parameters(request, department_abbrev):
     """Ajax url for parameters edition
 
