@@ -4,81 +4,30 @@
 {% block content %}
 <div class="card">
   <ul class="nav card-header nav-tabs" id="tab-bar">
-      <li class="nav-item">
-          <a  class="nav-link active"
-              href="#training-programmes"
-              data-toggle="tab"
-              role="tab">
-                Liste des promos
-            </a>
-        </li>
-        <li class="nav-item">
-            <a
-                class="nav-link"
-                href="#student-groups"
-                data-toggle="tab"
-                role="tab">
-                Liste des groupes
-            </a>
-        </li>
-        <li class="nav-item">
-            <a  class="nav-link"
-                href="#student-group-types"
-                data-toggle="tab"
-                role="tab">
-                Liste des natures de groupes
-            </a>
-        </li>
+        {% block tabs %}
+            {% include "flopeditor/snippets/crud_nav_item.html" with title="Promos" id_tab="training-programmes" class="active"%}
+            {% include "flopeditor/snippets/crud_nav_item.html" with title="Groupes" id_tab="student-groups"%}
+            {% include "flopeditor/snippets/crud_nav_item.html" with title="Natures de groupes" id_tab="student-group-types"%}
+        {% endblock %}
     </ul>
     <div class="card-body tab-content">
-      <div id="training-programmes" class="tab-pane fade show active" role="tabpanel">
-        <crud-js url="{% url 'flopeditor:flopeditor-crud-training-programmes' department_abbrev=department.abbrev %}" save-button="btntest" editable>
-          <loading>
-            <h1 class="text-info"><i class="fas fa-spinner fa-pulse"></i></h1>
-          </loading>
-        </crud-js>
-        <button type="button" name="button" id="btntest" class="btn btn-raised btn-success ">Save</button>
-      </div>
-    <div id="student-groups" class="tab-pane fade" role="tabpanel">Student groups</div>
+      {% block content %}
+        <div id="training-programmes" class="tab-pane fade show active" role="tabpanel">
+          {% include "flopeditor/snippets/crud_crudjs_item.html" with route_name='flopeditor:flopeditor-crud-training-programmes' id_btn="btn-rooms" %}
+        </div>
+        <div id="student-groups" class="tab-pane fade" role="tabpanel">Student groups</div>
 
-    <div id="student-group-types" class="tab-pane fade" role="tabpanel">Student group types</div>
-
+        <div id="student-group-types" class="tab-pane fade" role="tabpanel">Student group types</div>
+      {% endblock content %}
     </div>
+      
 </div>
 
-{% csrf_token %}
 
 {% endblock %}
 
 {% block script %}
     {{ block.super }}
+    <script>const CSRF = "{{ csrf_token  }}"</script>
     <script src="{% static 'flopeditor/js/crudjs.min.js' %}" charset="utf-8"></script>
-    <script>
-          $.ajax({
-              type: "POST",
-              headers: {
-                "X-CSRFToken": $("[name=csrfmiddlewaretoken]").val()
-              },
-              data: JSON.stringify({
-                "actions": [
-                  {
-                    "request": "NEW",
-                    "new_values": [["DL","Développement Logiciel"]]
-                  },{
-                    "request": "MODIFIED",
-                    "old_values": [["DL","Développement Logiciel"]],
-                    "new_values": [["U3 02","Titre U3-02"]]
-                  },{
-                    "request": "DELETED",
-                    "old_values": [["INFO2","DUT Informatique deuxième année"]]
-                  }]}),
-              url: "{% url 'flopeditor:flopeditor-crud-training-programmes' department_abbrev=department.abbrev %}",
-              success: function(response) {
-                  console.log(response)
-              },
-              error: function(error) {
-                  console.log(error)
-              },
-          });
-      </script>
 {% endblock %}
