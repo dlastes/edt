@@ -157,9 +157,9 @@ def validate_training_programme_values(abbrev, name, entries):
     if not abbrev:
         entries['result'].append([ERROR_RESPONSE,
                                   "L'abbreviation de la promo ne peut pas être vide."])
-    elif len(abbrev) > 6:
+    elif len(abbrev) > 5:
         entries['result'].append([ERROR_RESPONSE,
-                                  "L'abbreviation de la promo est trop long."])
+                                  "L'abbreviation de la promo est trop longue."])
     # verifie la longueur du nom
     elif not name:
         entries['result'].append([ERROR_RESPONSE,

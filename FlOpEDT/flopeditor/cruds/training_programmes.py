@@ -48,7 +48,7 @@ def read(department):
         values.append((tp.abbrev, tp.name))
     return JsonResponse({
         "columns" :  [{
-            'name': 'Id de vos promos',
+            'name': 'Abbréviation de vos promos',
             "type": "text",
             "options": {}
         }, {

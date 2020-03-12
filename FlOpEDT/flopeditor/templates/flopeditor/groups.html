@@ -46,39 +46,10 @@
     </div>
 </div>
 
-{% csrf_token %}
-
 {% endblock %}
 
 {% block script %}
     {{ block.super }}
+    <script> const CSRF = "{{ csrf_token }}" </script>
     <script src="{% static 'flopeditor/js/crudjs.min.js' %}" charset="utf-8"></script>
-    <script>
-          $.ajax({
-              type: "POST",
-              headers: {
-                "X-CSRFToken": $("[name=csrfmiddlewaretoken]").val()
-              },
-              data: JSON.stringify({
-                "actions": [
-                  {
-                    "request": "NEW",
-                    "new_values": [["DL","Développement Logiciel"]]
-                  },{
-                    "request": "MODIFIED",
-                    "old_values": [["DL","Développement Logiciel"]],
-                    "new_values": [["U3 02","Titre U3-02"]]
-                  },{
-                    "request": "DELETED",
-                    "old_values": [["INFO2","DUT Informatique deuxième année"]]
-                  }]}),
-              url: "{% url 'flopeditor:flopeditor-crud-training-programmes' department_abbrev=department.abbrev %}",
-              success: function(response) {
-                  console.log(response)
-              },
-              error: function(error) {
-                  console.log(error)
-              },
-          });
-      </script>
 {% endblock %}
