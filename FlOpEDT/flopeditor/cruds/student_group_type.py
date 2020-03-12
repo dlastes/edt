@@ -37,8 +37,6 @@ from flopeditor.validator import OK_RESPONSE, ERROR_RESPONSE
 def read(department):
     """Return all groups types in the department
 
-    :param request: Client request.
-    :type request:  django.http.HttpRequest
     :param department: Department.
     :type department:  base.models.Department
     :return: Server response for the request.
@@ -72,31 +70,25 @@ def create(entries, department):
 
     entries['result'] = []
     for i in range(len(entries['new_values'])):
-        if not entries['new_values'][i]:
+        new_name = entries['new_values'][i][0]
+        # verifier la longueur du nom
+        if len(new_name) > 50:
             entries['result'].append([ERROR_RESPONSE,
-                                      "Le nom du type de goupe est vide (none)."])
+                                      "Le nom du type de goupe est trop long."])
+        elif not new_name:
+            entries['result'].append([ERROR_RESPONSE,
+                                      "Le nom du type de goupe ne peut pas être vide."])
         else:
-            new_name = entries['new_values'][i][0]
-            # verifier la longueur du nom
-
-            if len(new_name) > 50:
-                entries['result'].append([ERROR_RESPONSE,
-                                          "Le nom du type de goupe est trop long."])
-            elif not new_name:
-                entries['result'].append([ERROR_RESPONSE,
-                                          "Le nom du type de goupe ne peut pas être vide."])
+            if GroupType.objects.filter(name=new_name, department=department):
+                entries['result'].append([
+                    ERROR_RESPONSE,
+                    "Le type de goupe est déjà présent dans le département."
+                ])
             else:
-
-                if GroupType.objects.filter(name=new_name, department=department):
-                    entries['result'].append([
-                        ERROR_RESPONSE,
-                        "Le type de goupe est déjà présent dans le département."
-                    ])
-                else:
-                    group_type = GroupType.objects.create(name=new_name)
-                    group_type.department = department
-                    group_type.save()
-                    entries['result'].append([OK_RESPONSE])
+                group_type = GroupType.objects.create(name=new_name)
+                group_type.department = department
+                group_type.save()
+                entries['result'].append([OK_RESPONSE])
     return entries
 
 
@@ -116,36 +108,32 @@ def update(entries, department):
         return entries
     entries['result'] = []
     for i in range(len(entries['old_values'])):
-        if not entries['new_values'][i]:
+        old_name = entries['old_values'][i][0]
+        new_name = entries['new_values'][i][0]
+        if len(new_name) > 50:
             entries['result'].append([ERROR_RESPONSE,
-                                      "Le nom du type de goupe est vide (none)."])
-        else:
-            old_name = entries['old_values'][i][0]
-            new_name = entries['new_values'][i][0]
-            if len(new_name) > 50:
-                entries['result'].append([ERROR_RESPONSE,
-                                          "Le nom du type de goupe est trop long."])
-            elif not new_name:
-                entries['result'].append([ERROR_RESPONSE,
-                                          "Le nom du type de goupe ne peut pas être vide."])
+                                      "Le nom du type de goupe est trop long."])
+        elif not new_name:
+            entries['result'].append([ERROR_RESPONSE,
+                                      "Le nom du type de goupe ne peut pas être vide."])
 
-            elif GroupType.objects.filter(name=new_name, department=department).count() != 0:
+        elif GroupType.objects.filter(name=new_name, department=department).count() != 0:
+            entries['result'].append(
+                [ERROR_RESPONSE,
+                 "Un nom de groupe est déjà utilisé dans le département."])
+        else:
+            try:
+                group_type_to_update = GroupType.objects.get(
+                    name=old_name,
+                    department=department
+                )
+                group_type_to_update.name = new_name
+                group_type_to_update.save()
+                entries['result'].append([OK_RESPONSE])
+            except GroupType.DoesNotExist:
                 entries['result'].append(
                     [ERROR_RESPONSE,
-                     "Un nom de groupe est déjà utilis dans le département"])
-            else:
-                try:
-                    group_type_to_update = GroupType.objects.get(
-                        name=old_name,
-                        department=department
-                    )
-                    group_type_to_update.name = new_name
-                    group_type_to_update.save()
-                    entries['result'].append([OK_RESPONSE])
-                except GroupType.DoesNotExist:
-                    entries['result'].append(
-                        [ERROR_RESPONSE,
-                         "Un type de goupe à modifier n'a pas été trouvé dans le département"])
+                     "Un type de goupe à modifier n'a pas été trouvé dans le département."])
     return entries
 
 
@@ -159,7 +147,6 @@ def delete(entries, department):
     :rtype:  django.http.JsonResponse
     """
 
-
     entries['result'] = []
     for i in range(len(entries['old_values'])):
         old_name = entries['old_values'][i][0]
@@ -169,5 +156,5 @@ def delete(entries, department):
         except GroupType.DoesNotExist:
             entries['result'].append(
                 [ERROR_RESPONSE,
-                 "Un type de goupe à modifier n'a pas été trouvé dans le département"])
+                 "Un type de goupe à supprimer n'a pas été trouvé dans le département."])
     return entries

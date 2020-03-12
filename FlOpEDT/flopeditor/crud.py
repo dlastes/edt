@@ -38,8 +38,8 @@ from flopeditor.cruds import student_group_type
 def good_request(request, department):
     """ Request rights verification
     :param request: Client request.
-    :type request:  django.http.HttpRequest
     :param department: Department.
+    :type request:  django.http.HttpRequest
     :type department:  base.models.Department
     :return: true if the user has the right access to do the request
     :rtype:  boolean
@@ -54,6 +54,7 @@ def crud_student_group_type(request, department_abbrev):
     """Crud url for student group type (TP, TD...) edition
 
     :param request: Client request.
+    :param department_abbrev: Department abbreviation.
     :type request:  django.http.HttpRequest
     :return: Server response for the request.
     :rtype:  django.http.JsonResponse
