@@ -44,6 +44,8 @@ from base.models import Group, Day, Time, \
     Dependency, TutorCost, GroupFreeHalfDay, GroupCost, Holiday, TrainingHalfDay, \
     CourseStartTimeConstraint, TimeGeneralSettings, ModulePossibleTutors, CoursePossibleTutors
 
+import base.queries as queries
+
 from people.models import Tutor
 
 from base.weeks import current_year
@@ -226,7 +228,7 @@ class WeekDB(object):
         # ROOMS
         room_types = RoomType.objects.filter(department=self.department)
         rooms = Room.objects.filter(departments=self.department).distinct()
-        basic_rooms = Room.objects.filter(departments=self.department, basic=True).distinct()
+        basic_rooms = queries.get_rooms(self.department.abbrev, basic=True).distinct()
         room_prefs = RoomSort.objects.filter(for_type__department=self.department)
         rooms_for_type = {t: t.members.all() for t in room_types}
         # for each Room, first build the list of courses that may use it
