@@ -949,8 +949,9 @@ class TTModel(object):
                 self.add_constraint(
                     e,
                     '<=',
-                    0
-                )
+                    0,
+                    name=f'{rp.prefer }prefered to {rp.unprefer} on slot {sl} '
+                    )
 
     # constraint : respect preference order with full order for each room type :
     # perfs OK
@@ -1008,11 +1009,11 @@ class TTModel(object):
                             conj_var = self.add_conjunct(self.TT[(sl1, c1)],
                                                          self.TT[(sl2, c2)])
                             self.obj += conj_var * weight
-                    if p.successive and sl2.is_successor_of(sl1):
-                        for rg1 in self.wdb.rooms_for_type[c1.room_type]:
-                            for rg2 in self.wdb.rooms_for_type[c2.room_type].exclude(id=rg1.id):
-                                self.add_constraint(self.TTrooms[(sl1, c1, rg1)]
-                                                    + self.TTrooms[(sl2, c2, rg2)], '<=', 1)
+                    # if p.successive and sl2.is_successor_of(sl1):
+                    #     for rg1 in self.wdb.rooms_for_type[c1.room_type]:
+                    #         for rg2 in self.wdb.rooms_for_type[c2.room_type].exclude(id=rg1.id):
+                    #             self.add_constraint(self.TTrooms[(sl1, c1, rg1)]
+                    #                                 + self.TTrooms[(sl2, c2, rg2)], '<=', 1)
 
     def send_unitary_lack_of_availability_mail(self, tutor, week, available_hours, teaching_hours,
                                                prefix="[flop!EDT] "):
