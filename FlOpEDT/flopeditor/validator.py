@@ -153,6 +153,16 @@ def validate_parameters_edit(days, day_start_time, day_finish_time, lunch_break_
     return response
 
 def validate_training_programme_values(abbrev, name, entries):
+    """Validate parameters for training programme's CRUD
+
+    :param abbrev: department abbreviation to test
+    :type abbrev: str
+    :param name: department name to test
+    :type name: str
+    :param entries: list that is returned to CrudJS
+    :type abbrev: list
+    :return: (boolean,json) (are the paramaters valid , status and errors)
+    """
     # Verifie la validite du slug
     if not abbrev:
         entries['result'].append([ERROR_RESPONSE,
