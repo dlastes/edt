@@ -33,13 +33,13 @@ import json
 from django.http import JsonResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 from base.models import Department
-from flopeditor.cruds import student_group_type
+from flopeditor.cruds import training_programmes, student_group_type
 
 def good_request(request, department):
     """ Request rights verification
     :param request: Client request.
-    :param department: Department.
     :type request:  django.http.HttpRequest
+    :param department: Department.
     :type department:  base.models.Department
     :return: true if the user has the right access to do the request
     :rtype:  boolean
@@ -49,6 +49,40 @@ def good_request(request, department):
     return not request.user.is_anonymous and \
     request.user.has_department_perm(department, admin=True)
 
+def crud_model(request, department_abbrev, crud):
+    """Crud model for edition
+
+    :param request: Client request.
+    :type request:  django.http.HttpRequest
+    :param department_abbrev: Department abbreviation.
+    :type department_abbrev:  String
+    :param crud: Module associated to the crud.
+    :type crud:  Module
+    :return: Server response for the request.
+    :rtype:  django.http.JsonResponse
+
+    """
+    department = get_object_or_404(Department, abbrev=department_abbrev)
+    if not good_request(request, department):
+        return HttpResponseForbidden()
+
+
+    if request.method == "GET":
+        return crud.read(department)
+    elif request.method == "POST":
+        actions = json.loads(request.body.decode('utf-8'))['actions']
+        result = []
+        for action in actions:
+            if action['request'] == 'NEW':
+                result.append(crud.create(action, department))
+            elif action['request'] == 'MODIFIED':
+                result.append(crud.update(action, department))
+            elif action['request'] == 'DELETED':
+                result.append(crud.delete(action, department))
+        return JsonResponse({
+            'actions': result
+        })
+    return HttpResponseForbidden()
 
 def crud_student_group_type(request, department_abbrev):
     """Crud url for student group type (TP, TD...) edition
@@ -60,24 +94,17 @@ def crud_student_group_type(request, department_abbrev):
     :rtype:  django.http.JsonResponse
 
     """
-    department = get_object_or_404(Department, abbrev=department_abbrev)
-    if not good_request(request, department):
-        return HttpResponseForbidden()
+    return crud_model(request, department_abbrev, student_group_type)
 
+def crud_training_programmes(request, department_abbrev):
+    """Crud url for groups edition
 
-    if request.method == "GET":
-        return student_group_type.read(department)
-    elif request.method == "POST":
-        actions = json.loads(request.body.decode('utf-8'))['actions']
-        result = []
-        for action in actions:
-            if action['request'] == 'NEW':
-                result.append(student_group_type.create(action, department))
-            elif action['request'] == 'MODIFIED':
-                result.append(student_group_type.update(action, department))
-            elif action['request'] == 'DELETED':
-                result.append(student_group_type.delete(action, department))
-        return JsonResponse({
-            'actions': result
-        })
-    return HttpResponseForbidden()
+    :param request: Client request.
+    :type request:  django.http.HttpRequest
+    :param department_abbrev: Department abbreviation.
+    :type department_abbrev:  String
+    :return: Server response for the request.
+    :rtype:  django.http.JsonResponse
+
+    """
+    return crud_model(request, department_abbrev, training_programmes)

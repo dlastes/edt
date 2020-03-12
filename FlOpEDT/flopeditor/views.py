@@ -176,7 +176,8 @@ def department_groups(request, department_abbrev):
     return render(request, "flopeditor/groups.html", {
         'title': 'Groupes',
         'department': department,
-        'list_departments': departments
+        'list_departments': departments,
+        'has_dept_perm': request.user.has_department_perm(department=department, admin=True),
     })
 
 
