@@ -950,7 +950,7 @@ class TTModel(object):
                     e,
                     '<=',
                     0,
-                    name=f'{rp.prefer }prefered to {rp.unprefer} on slot {sl} '
+                    name=f'{rp.prefer }prefered to {rp.unprefer} on slot {sl}_{self.constraint_nb} '
                     )
 
     # constraint : respect preference order with full order for each room type :
