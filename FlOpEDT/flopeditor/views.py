@@ -180,6 +180,48 @@ def department_groups(request, department_abbrev):
         'has_dept_perm': request.user.has_department_perm(department=department, admin=True),
     })
 
+@user_passes_test(check_tutor)
+def department_training_programmes(request, department_abbrev):
+    """Groups view of FlopEditor.
+
+    :param request:           Client request.
+    :param department_abbrev: Department abbreviation.
+    :type request:            django.http.HttpRequest
+    :type department_abbrev:  str
+    :return: Parameters page rendered from the groups template of FlopEditor.
+    :rtype:  django.http.HttpResponse
+
+    """
+    department = get_object_or_404(Department, abbrev=department_abbrev)
+    departments = Department.objects.exclude(abbrev=department_abbrev)
+    return render(request, "flopeditor/training_programmes.html", {
+        'title': 'Groupes',
+        'department': department,
+        'list_departments': departments,
+        'has_dept_perm': request.user.has_department_perm(department=department, admin=True),
+    })
+
+@user_passes_test(check_tutor)
+def department_student_group_types(request, department_abbrev):
+    """Groups view of FlopEditor.
+
+    :param request:           Client request.
+    :param department_abbrev: Department abbreviation.
+    :type request:            django.http.HttpRequest
+    :type department_abbrev:  str
+    :return: Parameters page rendered from the groups template of FlopEditor.
+    :rtype:  django.http.HttpResponse
+
+    """
+    department = get_object_or_404(Department, abbrev=department_abbrev)
+    departments = Department.objects.exclude(abbrev=department_abbrev)
+    return render(request, "flopeditor/student_group_types.html", {
+        'title': 'Groupes',
+        'department': department,
+        'list_departments': departments,
+        'has_dept_perm': request.user.has_department_perm(department=department, admin=True),
+    })
+
 
 @user_passes_test(check_tutor)
 def department_modules(request, department_abbrev):

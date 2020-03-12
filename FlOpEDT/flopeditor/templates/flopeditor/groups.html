@@ -5,22 +5,17 @@
 <div class="card">
   <ul class="nav card-header nav-tabs" id="tab-bar">
         {% block tabs %}
-            {% include "flopeditor/snippets/crud_nav_item.html" with title="Promos" id_tab="training-programmes" class="active"%}
-            {% include "flopeditor/snippets/crud_nav_item.html" with title="Groupes" id_tab="student-groups"%}
-            {% include "flopeditor/snippets/crud_nav_item.html" with title="Natures de groupes" id_tab="student-group-types"%}
+            {% include "flopeditor/snippets/crud_nav_item.html" with title="Promos" route_name="flopeditor-department-training-programmes" class="active" %}
+            {% include "flopeditor/snippets/crud_nav_item.html" with title="Groupes" route_name="flopeditor-department-group-types"  %}
+            {% include "flopeditor/snippets/crud_nav_item.html" with title="Natures de groupes" route_name="flopeditor-department-training-programmes"  %}
         {% endblock %}
     </ul>
-    <div class="card-body tab-content">
-      {% block card_content %}
-        <div id="training-programmes" class="tab-pane fade show active" role="tabpanel">
+    <div class="card-body">
+        {% if tab == 'training_programmes' %}
           {% include "flopeditor/snippets/crud_crudjs_item.html" with route_name='flopeditor:flopeditor-crud-training-programmes' id_btn="btn-rooms" %}
-        </div>
-        <div id="student-groups" class="tab-pane fade" role="tabpanel">
+        {% elif tab == 'student_groups' %}
           {% include "flopeditor/snippets/crud_crudjs_item.html" with route_name='flopeditor:flopeditor-crud-student-group-type' id_btn="btn-stg" %}
-        </div>
-
-        <div id="student-group-types" class="tab-pane fade" role="tabpanel">Student group types</div>
-      {% endblock card_content %}
+        {% endif %}
     </div>
 
 </div>

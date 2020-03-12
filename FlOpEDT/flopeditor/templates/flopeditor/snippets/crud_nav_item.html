@@ -1,8 +1,6 @@
 <li class="nav-item">
     <a  class="nav-link {{ class }}"
-        href="#{{ id_tab }}"
-        data-toggle="tab"
-        role="tab">
+        href="{% url route_name department_abbrev=department.abbrev %}">
         {{ title }}
     </a>
 </li>
