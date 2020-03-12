@@ -27,6 +27,7 @@
 import logging
 
 from django.db import transaction
+from django.db.models import Count
 from django.core.exceptions import ObjectDoesNotExist
 
 from base.models import Group, TrainingProgramme, \
@@ -207,7 +208,7 @@ def get_descendant_groups(gp, children):
     return current
 
 
-def get_rooms(department_abbrev):
+def get_room_types_groups(department_abbrev):
     """
     From the data stored in the database, fill the room description file, that
     will be used by the website.
@@ -216,22 +217,36 @@ def get_rooms(department_abbrev):
     :return: an object containing one dictionary roomtype -> (list of roomgroups),
     and one dictionary roomgroup -> (list of rooms)
     """
-    dic_rt = {}
     dept = Department.objects.get(abbrev=department_abbrev)
 
-    for rt in RoomType.objects.filter(department=dept):
-        dic_rt[str(rt)] = []
-        for room in rt.members.all():
-            if str(room) not in dic_rt[str(rt)]:
-                dic_rt[str(rt)].append(str(room))
+    return {'roomtypes': {str(rt): list(set(
+        [room.name for room in rt.members.all()]
+    )) for rt in RoomType.objects.filter(department=dept)},
+            'roomgroups': {room.name: [sub.name for sub in room.and_subrooms()] \
+                           for room in Room.objects.filter(departments=dept)}
+            }
 
-    dic_room = {}
-    for room in Room.objects.filter(departments=dept, basic=False):
-        dic_room[room.name] = [r.name for r in room.and_subrooms()]
 
-    return {'roomtypes': dic_rt,
-            'roomgroups': dic_room,
-            'atomic_rooms': [r.name for r in Room.objects.filter(departments=dept, basic=True)]}
+def get_rooms(department_abbrev, basic=False):
+    """
+    :return: 
+    """
+    if department_abbrev is not None:
+        dept = Department.objects.get(abbrev=department_abbrev)
+    else:
+        dept = None
+    if not basic:
+        if dept is None:
+            return Room.objects.all()
+        else:
+            return Room.objects.filter(departments=dept)
+    else:
+        if dept is None:
+            return Room.objects.annotate(nb_sub=Count('subrooms'))\
+                           .filter(nb_sub=0)
+        else:
+            return Room.objects.annotate(nb_sub=Count('subrooms'))\
+                               .filter(departments=dept, nb_sub=0)
 
 
 def get_coursetype_constraints(department_abbrev):
