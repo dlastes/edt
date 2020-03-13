@@ -1,7 +1,7 @@
 /* jshint esversion: 6 */
 
 function is_slug(string) {
-    return /^[a-zA-Z]\w{1,6}$/.test(string);
+    return /^[a-zA-Z]\w{0,6}$/.test(string);
 }
 
 function message_reset() {
@@ -72,7 +72,7 @@ $("#button-create-department").click(function(){
                 message_display("warning", "Vous devez sélectionner un responsable.");
             }
         } else {
-            message_display("warning", "L'abréviation du département est invalide. Elle peut comporter des lettres et des chiffres. Elle ne doit pas comporter d'espace, utilisez des '-' pour les séparations.");
+            message_display("warning", "L'abréviation du département est invalide. Elle doit être entre 1 et 7 caractères. Elle peut comporter des lettres et des chiffres et doit commencer par une lettre. Elle ne doit pas comporter d'espace, utilisez des '_' pour les séparations.");
         }
     } else {
         message_display("warning", "Le nom du département est invalide. Il doit comporter entre 1 et 50 caractères.");

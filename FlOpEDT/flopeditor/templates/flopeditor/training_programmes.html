@@ -1,0 +1,25 @@
+{% extends "flopeditor/base.html" %}
+{% load static %}
+{% block nav-classes-groups %} active {% endblock %}
+{% block content %}
+<div class="card">
+  <ul class="nav card-header nav-tabs" id="tab-bar">
+        {% block tabs %}
+            {% include "flopeditor/snippets/crud_nav_item.html" with title="Promos" route_name="flopeditor:flopeditor-department-training-programmes" class="active" %}
+            {% include "flopeditor/snippets/crud_nav_item.html" with title="Natures de groupes" route_name="flopeditor:flopeditor-department-group-types"  %}
+        {% endblock %}
+    </ul>
+    <div class="card-body">
+          {% include "flopeditor/snippets/crud_crudjs_item.html" with route_name='flopeditor:flopeditor-crud-training-programmes' id_btn="btn-rooms" %}
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block script %}
+    {{ block.super }}
+    <script> const CSRF = "{{ csrf_token }}" </script>
+    <script src="{% static 'flopeditor/js/crudjs.min.js' %}" charset="utf-8"></script>
+
+{% endblock %}

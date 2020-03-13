@@ -414,7 +414,7 @@ function set_butgp() {
 	    }
 	    tot_row_gp += cur_rootgp.gp.width*butgp.width ;
 	    tot_row_gp += (npro==0)?0:(butgp.mar_h) ;
-            console.log(cur_rootgp.gp.width, butgp.width);
+            // console.log(cur_rootgp.gp.width, butgp.width);
 	    cur_rootgp.butx = cur_butx ;
             cur_butx += butgp.mar_h + cur_rootgp.gp.width*butgp.width ;
 	}
@@ -941,7 +941,7 @@ function create_quote() {
         async: true,
         contentType: "text/csv",
         success: function(msg) {
-            console.log(msg);
+            // console.log(msg);
 
             var quotes = d3.csvParse(msg, translate_quote_from_csv);
 	    if(quotes.length > 0){
@@ -1176,7 +1176,11 @@ function warning_check(check_tot) {
         } else if (check.nok == 'tutor_free_week') {
             expand = "L'enseignant·e " + check.more.tutor + " ne donne pas de cours cette week.";
         } else if (check.nok == 'room_busy') {
-            expand = "La salle " + check.more.room + " est déjà prise.";
+            if (check.more.rooms.length == 1) {
+                expand = "La salle " + check.more.rooms[0] + " est déjà prise.";
+            } else {
+                expand = "Les salles " + check.more.rooms.join(", ") + " sont déjà prises.";
+            }
         } else if (check.nok == 'room_busy_other_dept') {
             expand = "La salle " + check.more.room + " est utilisée par un autre département.";
         }
@@ -1325,11 +1329,27 @@ function check_course(wanted_course) {
 
     if (! pending.pass.room) {
 
-        if(possible_conflicts.map(function(c){
-            return c.room ;
-        }).includes(wanted_course.room)) {
+        var busy_rooms = [] ;
+        possible_conflicts.forEach(function(c) {
+            if (c.room in rooms.roomgroups) {
+                rooms.roomgroups[c.room].forEach(function(r){
+                    busy_rooms.push(r) ;
+                });
+            }
+        });
+
+        var conflict_rooms = [] ;
+        if (wanted_course.room in rooms.roomgroups) {
+            rooms.roomgroups[wanted_course.room].forEach(function(r){
+                if (busy_rooms.includes(r)) {
+                    conflict_rooms.push(r) ;
+                }
+            });
+        }
+
+        if (conflict_rooms.length > 0) {
 	    ret.push({nok: 'room_busy',
-                      more: {room: wanted_course.room}}) ;
+                      more: {rooms: [conflict_rooms]}}) ;
         }
            
         var extra_unavailable = find_in_pref(extra_pref.rooms, wanted_course.room, wanted_course);

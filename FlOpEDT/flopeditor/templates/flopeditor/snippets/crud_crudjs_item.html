@@ -1,0 +1,7 @@
+{% if has_dept_perm %}<button type="button" name="button" id="{{ id_btn }}" class="btn btn-raised btn-success ">Enregistrer</button>{% endif %}
+
+<crud-js url="{% url route_name department_abbrev=department.abbrev %}" {% if has_dept_perm %} save-button="{{ id_btn }}" editable {% endif %}>
+    <loading>
+        <h1 class="text-info"><i class="fas fa-spinner fa-pulse"></i></h1>
+    </loading>
+</crud-js>

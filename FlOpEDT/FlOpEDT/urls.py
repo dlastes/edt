@@ -41,28 +41,28 @@ from django.conf.urls import url, include
 from django.contrib import admin
 from django.views.generic import RedirectView
 
-import base.views
+from base import views
 
 urlpatterns = [
 
     # favicon
     # ----------------------------
-    url(base.views.fav_regexp,
-        base.views.favicon,
+    url(views.fav_regexp,
+        views.favicon,
         name="favicon"),
 
     url(r'^admin$', RedirectView.as_view(url='/admin/')),
     url(r'^admin/', admin.site.urls),
     url(r'^accounts/', include('people.urls')),
     url(r'^citations/', include('quote.urls')),
-    url(r'^edt/(?P<department>[a-zA-Z]\w{1,7})/', include('base.urls')),
-    url(r'^solve-board/(?P<department>[a-zA-Z]\w{1,7})/', include('solve_board.urls')),
-    url(r'^ical/(?P<department>[a-zA-Z]\w{1,7})/', include('synchro.urls')),
-    url(r'^ics/(?P<department>[a-zA-Z]\w{1,7})/', include('ics.urls')),
+    url(r'^edt/(?P<department>[a-zA-Z]\w{0,6})/', include('base.urls')),    
+    url(r'^solve-board/(?P<department>[a-zA-Z]\w{0,6})/', include('solve_board.urls')),    
+    url(r'^ical/(?P<department>[a-zA-Z]\w{0,6})/', include('synchro.urls')),
+    url(r'^ics/(?P<department>[a-zA-Z]\w{0,6})/', include('ics.urls')),
 #    url(r'^api-auth/', include('rest_framework.urls')),
     url(r'^configuration/', include('configuration.urls')),
-#    url(r'^importation/(?P<department>[a-zA-Z]\w{1,7})/', include('importation.urls')),
+#    url(r'^importation/(?P<department>[a-zA-Z]\w{0,6})/', include('importation.urls')),
     url('ttapp/', include('TTapp.urls')),
-    url(r'^$', base.views.index, name='index'),
+    url(r'^$', views.index, name='index'),
     url(r'^flopeditor/', include('flopeditor.urls'))
 ]

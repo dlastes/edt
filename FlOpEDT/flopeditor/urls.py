@@ -31,7 +31,7 @@ to manage a department statistics for FlOpEDT.
 """
 
 from django.urls import path
-from . import views
+from . import views, crud
 
 app_name = "flopeditor"
 
@@ -43,8 +43,10 @@ urlpatterns = [
          name='flopeditor-department-default'),
     path('<slug:department_abbrev>/rooms', views.department_rooms,
          name='flopeditor-department-rooms'),
-    path('<slug:department_abbrev>/groups', views.department_groups,
-         name='flopeditor-department-groups'),
+    path('<slug:department_abbrev>/natures', views.department_student_group_types,
+         name='flopeditor-department-group-types'),
+     path('<slug:department_abbrev>/promos', views.department_training_programmes,
+         name='flopeditor-department-training-programmes'),
     path('<slug:department_abbrev>/modules', views.department_modules,
          name='flopeditor-department-modules'),
     path('<slug:department_abbrev>/classes', views.department_classes,
@@ -60,4 +62,12 @@ urlpatterns = [
          name="flopeditor-ajax-create-department"),
     path('ajax/parameters-edit/<slug:department_abbrev>', views.ajax_edit_parameters,
          name='flopeditor-ajax-edit-department-parameters'),
+
+    # exchanges with the CRUD
+    # --------------------------------
+    path('<slug:department_abbrev>/crud/group_type', crud.crud_student_group_type,
+         name='flopeditor-crud-student-group-type'),
+    path('<slug:department_abbrev>/crud/training_programmes', crud.crud_training_programmes,
+         name='flopeditor-crud-training-programmes')
+
 ]

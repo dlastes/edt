@@ -59,21 +59,28 @@ $("#form-parameters").submit(function (event) {
     }
     else {
         const button_html = $("#button-submit").html();
+        $("#button-cancel").addClass('disabled');
+        $("#button-submit").addClass('disabled');
         $("#button-submit").html("<i class=\"fas fa-spinner fa-pulse\"></i>");
         $.ajax({
             type: "POST",
             url: url,
             data: form.serializeArray(),
             success: function (response) {
-                $("#button-submit").html(button_html);
                 switch (response.status) {
                     case 'OK':
                         window.location.href = parametersUrl;
                         break;
                     case 'ERROR':
+                        $("#button-submit").html(button_html);
+                        $("#button-submit").removeClass('disabled');
+                        $("#button-cancel").removeClass('disabled');
                         message_display("warning", response.message);
                         break;
                     case 'UNKNOWN':
+                        $("#button-submit").html(button_html);
+                        $("#button-submit").removeClass('disabled');
+                        $("#button-cancel").removeClass('disabled');
                         message_display("warning", response.message);
                 }
 
@@ -85,4 +92,3 @@ $("#form-parameters").submit(function (event) {
         });
     }
 });
-

@@ -34,6 +34,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponseForbidden
 from django.contrib.auth.decorators import user_passes_test
 from base.models import Department, TimeGeneralSettings, Day
+from FlOpEDT.decorators import dept_admin_required
 from base.timing import min_to_str, str_to_min
 from base.check_admin import check_admin
 from people.models import Tutor
@@ -90,10 +91,11 @@ def department_parameters(request, department_abbrev):
 
     """
     department = get_object_or_404(Department, abbrev=department_abbrev)
+    departments = Department.objects.exclude(abbrev=department_abbrev)
     parameters = get_object_or_404(TimeGeneralSettings, department=department)
     return render(request, "flopeditor/parameters.html", {
         'title': 'Paramètres',
-        'department_abbrev': department_abbrev,
+        'department': department,
         'day_start_time': min_to_str(parameters.day_start_time),
         'day_finish_time': min_to_str(parameters.day_finish_time),
         'lunch_break_start_time': min_to_str(parameters.lunch_break_start_time),
@@ -101,6 +103,7 @@ def department_parameters(request, department_abbrev):
         'days': parameters.days,
         'day_choices': Day.CHOICES,
         'default_preference_duration': min_to_str(parameters.default_preference_duration),
+        'list_departments': departments,
         'has_department_perm': request.user.has_department_perm(department=department, admin=True),
         'edit': False
 
@@ -119,10 +122,12 @@ def department_parameters_edit(request, department_abbrev):
 
     """
     department = get_object_or_404(Department, abbrev=department_abbrev)
+    departments = Department.objects.exclude(abbrev=department_abbrev)
     parameters = get_object_or_404(TimeGeneralSettings, department=department)
     return render(request, "flopeditor/parameters.html", {
         'title': 'Paramètres',
-        'department_abbrev': department_abbrev,
+        'department': department,
+        'list_departments': departments,
         'day_start_time': min_to_str(parameters.day_start_time),
         'day_finish_time': min_to_str(parameters.day_finish_time),
         'lunch_break_start_time': min_to_str(parameters.lunch_break_start_time),
@@ -146,9 +151,12 @@ def department_rooms(request, department_abbrev):
     :rtype:  django.http.HttpResponse
 
     """
+    department = get_object_or_404(Department, abbrev=department_abbrev)
+    departments = Department.objects.exclude(abbrev=department_abbrev)
     return render(request, "flopeditor/rooms.html", {
         'title': 'Salles',
-        'department_abbrev': department_abbrev
+        'department': department,
+        'list_departments': departments
     })
 
 
@@ -164,9 +172,55 @@ def department_groups(request, department_abbrev):
     :rtype:  django.http.HttpResponse
 
     """
+    department = get_object_or_404(Department, abbrev=department_abbrev)
+    departments = Department.objects.exclude(abbrev=department_abbrev)
     return render(request, "flopeditor/groups.html", {
         'title': 'Groupes',
-        'department_abbrev': department_abbrev
+        'department': department,
+        'list_departments': departments,
+        'has_dept_perm': request.user.has_department_perm(department=department, admin=True),
+    })
+
+@user_passes_test(check_tutor)
+def department_training_programmes(request, department_abbrev):
+    """Groups view of FlopEditor.
+
+    :param request:           Client request.
+    :param department_abbrev: Department abbreviation.
+    :type request:            django.http.HttpRequest
+    :type department_abbrev:  str
+    :return: Parameters page rendered from the groups template of FlopEditor.
+    :rtype:  django.http.HttpResponse
+
+    """
+    department = get_object_or_404(Department, abbrev=department_abbrev)
+    departments = Department.objects.exclude(abbrev=department_abbrev)
+    return render(request, "flopeditor/training_programmes.html", {
+        'title': 'Groupes',
+        'department': department,
+        'list_departments': departments,
+        'has_dept_perm': request.user.has_department_perm(department=department, admin=True),
+    })
+
+@user_passes_test(check_tutor)
+def department_student_group_types(request, department_abbrev):
+    """Groups view of FlopEditor.
+
+    :param request:           Client request.
+    :param department_abbrev: Department abbreviation.
+    :type request:            django.http.HttpRequest
+    :type department_abbrev:  str
+    :return: Parameters page rendered from the groups template of FlopEditor.
+    :rtype:  django.http.HttpResponse
+
+    """
+    department = get_object_or_404(Department, abbrev=department_abbrev)
+    departments = Department.objects.exclude(abbrev=department_abbrev)
+    return render(request, "flopeditor/student_group_types.html", {
+        'title': 'Groupes',
+        'department': department,
+        'list_departments': departments,
+        'has_dept_perm': request.user.has_department_perm(department=department, admin=True),
     })
 
 
@@ -182,9 +236,12 @@ def department_modules(request, department_abbrev):
     :rtype:  django.http.HttpResponse
 
     """
+    department = get_object_or_404(Department, abbrev=department_abbrev)
+    departments = Department.objects.exclude(abbrev=department_abbrev)
     return render(request, "flopeditor/modules.html", {
         'title': 'Modules',
-        'department_abbrev': department_abbrev
+        'department': department,
+        'list_departments': departments
     })
 
 
@@ -200,9 +257,12 @@ def department_classes(request, department_abbrev):
     :rtype:  django.http.HttpResponse
 
     """
+    department = get_object_or_404(Department, abbrev=department_abbrev)
+    departments = Department.objects.exclude(abbrev=department_abbrev)
     return render(request, "flopeditor/classes.html", {
         'title': 'Classes',
-        'department_abbrev': department_abbrev
+        'department': department,
+        'list_departments': departments
     })
 
 
@@ -226,7 +286,7 @@ def ajax_create_department(request):
         return JsonResponse(response)
     return HttpResponseForbidden()
 
-@user_passes_test(check_admin)
+@dept_admin_required
 def ajax_edit_parameters(request, department_abbrev):
     """Ajax url for parameters edition
 
