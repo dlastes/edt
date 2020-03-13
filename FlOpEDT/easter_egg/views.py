@@ -1,53 +1,49 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
+from django.contrib.auth.decorators import login_required
 
 from easter_egg.models import GameScore
 from django.contrib.auth.models import User
 
 import simplejson
 
+
+
+def get_score(max_nb_score):
+    score_list = [{'user': gs.user.username, 'score': gs.score} \
+        for gs in GameScore.objects.order_by('-score')[:max_nb_score]]
+    if len(score_list) < max_nb_score:
+        for s in range(len(score_list), max_nb_score):
+            score_list.append({'user': 'fake', 'score':0})
+    return score_list
+    
+
+@login_required
 def start_game(request):
-    return render(request, "easter_egg/game.html", {})
-
-# def fetch_leaderboard(req):
-#     scores = GameScore.objects.all()
-#     d = {}
-#     for s in scores:
-#         d['username'] = s.user.username
-#         d['score'] = s.score
-#     board = simplejson.dumps(d)
-
-#     return HttpResponse(board, content_type='application/json')
-
-def set_score(req):
-    b = False
-    d = dict(req.GET.lists())
-    u = req.user.username
-    if type(u)==User:
-        best = list(GameScore.objects.order_by('-score')[:5])
-        for sc in best:
-            if u == sc.username:
-                b = True
-            else:
-                b = False
-        if b:
-            if d['score']>GameScore.objects.filter(username=u).score:
-                GameScore.objects.filter(username=u).delete()
-                s = GameScore(score=d['score'], user=u)
-                s.save()
-        else :
-            if d['score']>best[best.length-1]:
-                GameScore.objects.filter(username=best[best.length-1].user.username).delete()
-                s = GameScore(score=d['score'], user=u)
-                s.save()
-    return HttpResponse(status=204)
+    return render(request, "easter_egg/game.html",
+                  {'score_list': get_score(5)})
 
 
+@login_required
+def set_score(req, **kwargs):
+    bad_response = HttpResponse(status=400)
+    
+    if req.method != "POST" or not req.is_ajax():
+        return bad_response
+
+    new_score = int(req.POST.get('score', '0'))
+
+    result, created = GameScore.objects.get_or_create(user=req.user,
+                                                      defaults={'score':0})
+    if created:
+        result.score = new_score
+    else:
+        result.score = max(new_score, result.score)
+    result.save()
+
+    return JsonResponse(get_score(5), safe=False)
+
+
+@login_required
 def fetch_leaderboard(req):
-    scores = GameScore.objects.order_by('-score')[:5]
-    board = {}
-    for s in scores:
-        board[s.user.username] = s.score
-
-    finalBoard = simplejson.dumps(board)
-    return HttpResponse(finalBoard, content_type='application/json')
+    return JsonResponse(get_score(5), safe=False)

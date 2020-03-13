@@ -354,7 +354,7 @@ game_scene.update = function() {
     // Score server's updates
     if(this.score != 0 && !updated && this.score % 10 == 0) {
         updated = true;
-        sendScore(this.score, false);
+        send_score(this.score, false);
     }
     if(this.score == 0 || this.score % 10 != 0) {
         updated = false;
@@ -366,18 +366,16 @@ game_scene.update = function() {
 game = new Phaser.Game(config);
 
 
-function sendScore(s, isLastScore) {
+function send_score(s, isLastScore) {
+    var sent_data = {} ;
     $.ajax({
-        type: "GET",
-        dataType: 'text/json',
-        contentType: 'text/json',
-        async: true,
-        data: {finished: isLastScore, score: s},
         url: url_set_score,
+        type: 'POST',
+        data: {finished: true, score: game_scene.score},
+        dataType: 'json',
         success: function(data, ts, req) {
-            console.log("Score envoyé au serveur ! Reçu :");
-            console.log(data);
-            initBoard();
+            score_list = data;
+            go_board() ;
         },
         error: function(msg) {
             console.log("Sorry, your score could not be transmitted to the server...");
@@ -387,38 +385,18 @@ function sendScore(s, isLastScore) {
 
 function onFinish() {
     game_scene.started = false;
-    sendScore(this.score, true);
+    send_score(game_scene.score, true);
     game.scene.stop("main");
     game.scene.start("main");
 }
 
-
-function set_board(map){
-    var cle  = map.keys();
-    var valeur = map.values();
-    for (var i = 1; i <= map.size ; i++){
-        document.getElementById(i).innerHTML=cle.next().value+
-          "<span class='number' style='float: right;font-weight: bold;color: rgba(0, 0, 0, 0.65); transition: color 0.3s;'>"+valeur.next().value+"</span>";
-    }
+function go_board() {
+    var dat = d3.select("#list-score")
+        .selectAll("li")
+        .data(score_list)
+        .attr("class", function(d) {return d.score==0?"invisible":"visible"; })
+        .select(".score")
+        .text(function(d) {return d.user;});
 }
 
-function initBoard() {
-    $.ajax({
-        type: "GET",
-        dataType: 'text/json',
-        contentType: 'text/json',
-        async: true,
-        url: url_fetch_leaderboard,
-        success: function(data, ts, req) {
-            set_board(data);
-        },
-        error: function(msg) {
-            console.log("Sorry, the board could not be set...");
-            console.log(msg);
-        }
-    });
-}
-
-// Views: REQUEST.USER.ISAUTHENTICATED, request.user.username
-
-initBoard();
+go_board();
