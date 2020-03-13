@@ -1,5 +1,7 @@
 {% load static %}
-<html lang="en">
+{% csrf_token %}
+
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <title>FlOppy Bird</title>
@@ -7,6 +9,22 @@
     <script type='text/javascript' src="{% static 'easter_egg/phaser.js' %}"></script>
     <script src="{% static 'base/jquery.min.js' %}"></script>
 </head>
+<script>
+  var csrftoken = '{{ csrf_token }}';
+  if(!jQuery.fn.jquery.startsWith("1")){
+      function csrfSafeMethod(method) {
+          // these HTTP methods do not require CSRF protection
+          return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+      }
+      $.ajaxSetup({
+          beforeSend: function(xhr, settings) {
+              if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+              }
+          }
+      });
+  }
+</script>
 <body>
     <table id="easter_egg">
         <tr>
