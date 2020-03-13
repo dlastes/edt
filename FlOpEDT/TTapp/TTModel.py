@@ -863,15 +863,30 @@ class TTModel(object):
         print("adding instructors constraints")
         for c in self.wdb.courses:
             for sl in self.wdb.compatible_slots[c]:
-                # , "Each_course_to_one_tutor %s-%s_%g" % (c, sl, self.constraint_nb)
                 self.add_constraint(self.sum(self.TTinstructors[(sl, c, i)]
                                              for i in self.wdb.possible_tutors[c]) - self.TT[sl, c],
                                     '==', 0, constraint_type="Chaque cours doit avoir un professeur", slot=sl, course=c)
+
+        for i in self.wdb.instructors:
+            for sl in self.wdb.slots:
+                name = 'simul_slots' + str(i) + '_' + str(sl)
+                self.add_constraint(1000 * self.sum(self.TTinstructors[(sl, c1, i)]
+                                                    for c1 in self.wdb.possible_courses[i]
+                                                    & self.wdb.compatible_courses[sl])
+                                    +
+                                    self.sum(self.TTinstructors[(sl2, c2, i)]
+                                             for sl2 in self.wdb.slots_intersecting[sl] - {sl}
+                                             for c2 in self.wdb.possible_courses[i] & self.wdb.compatible_courses[sl2]),
+                                    '<=', 1000, constraint_type=name, slot=sl, instructor=i)
+
+        if self.core_only:
+            return
+
+        for c in self.wdb.courses:
             if c.supp_tutor.exists():
                 supp_tutors = set(c.supp_tutor.all()) & self.wdb.instructors
                 if supp_tutors:
                     for sl in self.wdb.compatible_slots[c]:
-                        # , f"No course simultaneous to {sl} for {c}'s supp_tutors"
                         self.add_constraint(1000 * self.TT[(sl, c)]
                                             + self.sum(self.TTinstructors[(sl2, c2, supp_tutor)]
                                                        for supp_tutor in supp_tutors
@@ -891,17 +906,9 @@ class TTModel(object):
                                              for c in (self.wdb.compatible_courses[sl]
                                                        & self.wdb.possible_courses[i])),
                                     '<=',
-                                    self.avail_instr[i][sl], constraint_type="Pas de professeur disponible", slot=sl,
+                                    self.avail_instr[i][sl],
+                                    constraint_type="Pas de professeur disponible", slot=sl,
                                     instructor=i)
-                name = 'simul_slots' + str(i) + '_' + str(sl)
-                self.add_constraint(1000 * self.sum(self.TTinstructors[(sl, c1, i)]
-                                                    for c1 in self.wdb.possible_courses[i]
-                                                    & self.wdb.compatible_courses[sl])
-                                    +
-                                    self.sum(self.TTinstructors[(sl2, c2, i)]
-                                             for sl2 in self.wdb.slots_intersecting[sl] - {sl}
-                                             for c2 in self.wdb.possible_courses[i] & self.wdb.compatible_courses[sl2]),
-                                    '<=', 1000, constraint_type=name, slot=sl, instructor=i)
 
     def add_rooms_constraints(self):
         print("adding room constraints")
