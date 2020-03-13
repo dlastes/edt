@@ -399,7 +399,7 @@ class WeekDB(object):
             if c.tutor is not None:
                 possible_tutors[c] = {c.tutor}
             elif CoursePossibleTutors.objects.filter(course=c).exists():
-                possible_tutors[c] = set(ModulePossibleTutors.objects.get(course=c).possible_tutors.all())
+                possible_tutors[c] = set(CoursePossibleTutors.objects.get(course=c).possible_tutors.all())
             else:
                 possible_tutors[c] = possible_tutors[c.module]
 
@@ -867,6 +867,7 @@ class TTModel(object):
                                              for i in self.wdb.possible_tutors[c]) - self.TT[sl, c],
                                     '==', 0, constraint_type="Chaque cours doit avoir un professeur", slot=sl, course=c)
 
+
         for i in self.wdb.instructors:
             for sl in self.wdb.slots:
                 name = 'simul_slots' + str(i) + '_' + str(sl)
@@ -878,6 +879,7 @@ class TTModel(object):
                                              for sl2 in self.wdb.slots_intersecting[sl] - {sl}
                                              for c2 in self.wdb.possible_courses[i] & self.wdb.compatible_courses[sl2]),
                                     '<=', 1000, constraint_type=name, slot=sl, instructor=i)
+
 
         if self.core_only:
             return
@@ -909,6 +911,7 @@ class TTModel(object):
                                     self.avail_instr[i][sl],
                                     constraint_type="Pas de professeur disponible", slot=sl,
                                     instructor=i)
+
 
     def add_rooms_constraints(self):
         print("adding room constraints")
@@ -965,27 +968,28 @@ class TTModel(object):
                     self.avail_room[r][sl], constraint_type="Chaque salle ne peut être utilisée qu'une seule fois",
                     slot=sl, room=r)
 
-            ########TO BE CHECKED################
-            # constraint : respect preference order,
-            # if preferred room is available
-            for rp in self.wdb.room_prefs:
-                e = self.sum(
-                    self.TTrooms[(sl, c, rp.unprefer)]
-                    for c in set(self.wdb.courses.filter(room_type=rp.for_type)) & self.wdb.compatible_courses[sl])
-                preferred_is_unavailable = False
-                for r in rp.prefer.basic_rooms():
-                    if not self.avail_room[r][sl]:
-                        preferred_is_unavailable = True
-                        break
-                    e -= self.sum(self.TTrooms[(sl, c, rg)]
-                                  for (c, rg) in self.wdb.room_course_compat[r]
-                                  if c in self.wdb.compatible_courses[sl])
-                if preferred_is_unavailable:
-                    continue
-                # print "### slot :", sl, rp.unprefer, "after", rp.prefer
-                # print e <= 0
-                self.add_constraint(e, '<=', 0, constraint_type="La salle préférée n'est pas disponible", room=rp,
-                                    slot=sl)
+            # ########TO BE CHECKED################
+            # # constraint : respect preference order,
+            # # if preferred room is available
+            # for rp in self.wdb.room_prefs:
+            #     e = self.sum(
+            #         self.TTrooms[(sl, c, rp.unprefer)]
+            #         for c in set(self.wdb.courses.filter(room_type=rp.for_type)) & self.wdb.compatible_courses[sl])
+            #     preferred_is_unavailable = False
+            #     for r in rp.prefer.basic_rooms():
+            #         if not self.avail_room[r][sl]:
+            #             preferred_is_unavailable = True
+            #             break
+            #         e -= self.sum(self.TTrooms[(sl, c, rg)]
+            #                       for (c, rg) in self.wdb.room_course_compat[r]
+            #                       if c in self.wdb.compatible_courses[sl])
+            #     if preferred_is_unavailable:
+            #         continue
+            #     # print "### slot :", sl, rp.unprefer, "after", rp.prefer
+            #     # print e <= 0
+            #     self.add_constraint(e, '<=', 0, constraint_type="La salle préférée n'est pas disponible", room=rp,
+            #                         slot=sl)
+
 
     # constraint : respect preference order with full order for each room type :
     # perfs OK
@@ -1045,14 +1049,15 @@ class TTModel(object):
                             conj_var = self.add_conjunct(self.TT[(sl1, c1)],
                                                          self.TT[(sl2, c2)])
                             self.obj += conj_var * weight
-                    if p.successive and sl2.is_successor_of(sl1):
-                        for rg1 in self.wdb.rooms_for_type[c1.room_type]:
-                            for rg2 in self.wdb.rooms_for_type[c2.room_type].exclude(id=rg1.id):
-                                self.add_constraint(self.TTrooms[(sl1, c1, rg1)]
-                                                    + self.TTrooms[(sl2, c2, rg2)], '<=', 1,
-                                                    constraint_type="Problème de dépendance entre les salles", course=p,
-                                                    slot=str(sl1) + " / " + str(sl2),
-                                                    room=str(rg1) + " / " + str(rg2))
+                    # if p.successive and sl2.is_successor_of(sl1):
+                    #     for rg1 in self.wdb.rooms_for_type[c1.room_type]:
+                    #         for rg2 in self.wdb.rooms_for_type[c2.room_type].exclude(id=rg1.id):
+                    #             self.add_constraint(self.TTrooms[(sl1, c1, rg1)]
+                    #                                 + self.TTrooms[(sl2, c2, rg2)], '<=', 1,
+                    #                                 constraint_type="Problème de dépendance entre les salles", course=p,
+                    #                                 slot=str(sl1) + " / " + str(sl2),
+                    #                                 room=str(rg1) + " / " + str(rg2))
+
 
     def send_unitary_lack_of_availability_mail(self, tutor, week, available_hours, teaching_hours,
                                                prefix="[flop!EDT] "):
@@ -1326,6 +1331,10 @@ class TTModel(object):
                     #                     '==',
                     #                     0, constraint_type="Les autres départements bloquent le slot", slot=sl, room=r)
 
+        if self.core_only:
+            return
+
+        for sl in self.wdb.slots:
             # constraint : other_departments_sched_courses instructors are not available
             for i in self.wdb.instructors:
                 occupied_in_another_department = False
@@ -1335,17 +1344,18 @@ class TTModel(object):
                              and sl.start_time < sc.start_time + sc.course.type.duration):
                         occupied_in_another_department = True
                 if occupied_in_another_department:
-                    name = 'other_dep_' + str(i) + '_' + str(sl) + '_' + str(self.constraint_nb)
-                    self.add_constraint(self.sum(self.TT[(sl, c)]
-                                                 for c in (self.wdb.courses_for_tutor[i]
-                                                           | self.wdb.courses_for_supp_tutor[i]) &
-                                                 self.wdb.compatible_courses[sl]),
-                                        '==',
-                                        0, constraint_type="Le professeur a déjà un cours dans un autre département",
-                                        slot=sl, instructor=i)
+                    self.avail_instr[i][sl] = 0
+                    # name = 'other_dep_' + str(i) + '_' + str(sl) + '_' + str(self.constraint_nb)
+                    # self.add_constraint(self.sum(self.TT[(sl, c)]
+                    #                              for c in (self.wdb.courses_for_tutor[i]
+                    #                                        | self.wdb.courses_for_supp_tutor[i]) &
+                    #                              self.wdb.compatible_courses[sl]),
+                    #                     '==',
+                    #                     0, constraint_type="Le professeur a déjà un cours dans un autre département",
+                    #                     slot=sl, instructor=i)
                     self.add_constraint(self.IBD[(i, sl.day)], '==', 1,
-                                        constraint_type="Le professeur a déjà un cours dans un autre département IBD",
-                                        slot=sl, instructor=i)
+                                         constraint_type="Le professeur a déjà un cours dans un autre département IBD",
+                                         slot=sl, instructor=i)
 
     def add_specific_constraints(self):
         """
