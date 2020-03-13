@@ -79,11 +79,10 @@ def dict2keys(dictionaries):
 
 def write_file(filename, output, print_output=False):
     print("writting %s..." % filename)
-    with open(filename, "w+") as file:
+    with open(filename, "w+", encoding='utf-8') as file:
         file.write(output)
     if print_output:
         print("\n%s" % output)
-
 
 class ConstraintManager:
     def __init__(self):
