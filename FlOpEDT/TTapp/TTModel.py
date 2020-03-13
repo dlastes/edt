@@ -877,7 +877,7 @@ class TTModel(object):
                                     self.sum(self.TTinstructors[(sl2, c2, i)]
                                              for sl2 in self.wdb.slots_intersecting[sl] - {sl}
                                              for c2 in self.wdb.possible_courses[i] & self.wdb.compatible_courses[sl2]),
-                                    constraint_type=ConstraintType.SIMUL_SLOT, slots=sl, instructors=i)
+                                    '<=', 1000, constraint_type=ConstraintType.SIMUL_SLOT, slots=sl, instructors=i)
 
 
         if self.core_only:
