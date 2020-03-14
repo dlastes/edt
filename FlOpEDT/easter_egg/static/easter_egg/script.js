@@ -1,4 +1,14 @@
 var game_scene = new Phaser.Scene('main');
+game_scene.lastn_pipe = 6;
+game_scene.n_pipe = Math.ceil(Math.random() * game_scene.lastn_pipe);
+game_scene.pop_pipe_name = function(kind) {
+    if (this.n_pipe < this.lastn_pipe) {
+        this.n_pipe ++ ;
+    } else {
+        this.n_pipe = 0;
+    }
+    return "pipe_" + kind + this.n_pipe ;
+}
 var game;
 
 var config = {
@@ -36,9 +46,10 @@ game_scene.preload = function() {
     this.load.spritesheet('bird', '/static/easter_egg/img/bird.png', { frameWidth: 496, frameHeight: 351 });
 
     this.load.image('ground', '/static/easter_egg/img/ground.png');
-    this.load.image('pipe', '/static/easter_egg/img/pipe.png');
-    this.load.image('pipe_top', '/static/easter_egg/img/pipe_top.png');
-    this.load.image('pipe_bottom', '/static/easter_egg/img/pipe_bottom.png');
+    for (var i = 0 ; i <= this.lastn_pipe ; i++) {
+        this.load.image('pipe_end' + i, '/static/easter_egg/img/pipe_end' + i + '.png');
+        this.load.image('pipe_mid' + i, '/static/easter_egg/img/pipe_mid' + i + '.png');
+    }
     this.load.image('cross', '/static/easter_egg/img/cross.png');
 };
 
@@ -205,12 +216,12 @@ game_scene.addPipes = function() {
                 if(i == empty + 2) {
                     // Taking the first unuse top pipe
                     pipeEnd = this.topPipes.getFirst(false);
-                    pipeEnd.setTexture("pipe_top");
+                    pipeEnd.setTexture(this.pop_pipe_name("end"));
                     yPipe = y + yDiff;
                 } else {
                     // Taking the first unuse bottom pipe
                     pipeEnd = this.bottomPipes.getFirst(false);
-                    pipeEnd.setTexture("pipe_bottom");
+                    pipeEnd.setTexture(this.pop_pipe_name("end"));
                     yPipe = y - yDiff;
                 }
                 pipeEnd.body.reset(x, yPipe);
@@ -227,7 +238,7 @@ game_scene.addPipes = function() {
             var pipe = this.pipes.getFirst(false);
             pipe.setActive(true);
             pipe.setVisible(true);
-            pipe.setTexture("pipe");
+                    pipe.setTexture(this.pop_pipe_name("mid"));
 
             pipe.body.reset(x, y);
             pipe.body.immovable = true;
