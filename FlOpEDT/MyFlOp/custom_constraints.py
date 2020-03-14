@@ -54,6 +54,22 @@
 #         """
 #         return "DummyConstraint online description"
 
+def define_attributes(kwargs):
+    if 'weeks' in kwargs:
+        weeks = [week for week in ttmodel.weeks if week in kwargs["weeks"]]
+    else:
+        weeks = ttmodel.weeks
+    if 'tutors' in kwargs:
+        tutors = set(t for t in ttmodel.wdb.instructors if t in kwargs["tutors"])
+    else:
+        tutors = set(ttmodel.wdb.instructors)
+    if 'groups' in kwargs:
+        tutors = set(g for g in ttmodel.wdb.basic_groups if t in kwargs["groups"])
+    else:
+        tutors = set(ttmodel.wdb.basic_groups)
+    return weeks, tutors, groups
+
+
 class MinimizeBusyDays():
     """
     This class is a template for writing your own custom contraint.
@@ -66,14 +82,7 @@ class MinimizeBusyDays():
         Minimize the number of busy days for tutor with cost
         (if it does not overcome the bound expressed in pref_hours_per_day)
         """
-        if 'weeks' in kwargs:
-            weeks = [week for week in ttmodel.weeks if week in kwargs["weeks"]]
-        else:
-            weeks = ttmodel.weeks
-        if 'tutors' in kwargs:
-            tutors = set(t for t in ttmodel.wdb.instructors if t in kwargs["tutors"])
-        else:
-            tutors = set(ttmodel.wdb.instructors)
+        weeks, tutors, groups = define_attributes(kwargs)
         for week in weeks:
             for tutor in tutors:
                 slot_by_day_cost = 0
@@ -110,3 +119,44 @@ class MinimizeBusyDays():
 
     class Meta:
         verbose_name = "Minimiser les jours de présence"
+
+
+class RespectBoundPerDay():
+    """
+    This class is a template for writing your own custom contraint.
+
+    The module can contains several custom constraints.
+    """
+
+    def enrich_model(self, ttmodel, ponderation, **kwargs):
+        """
+        Minimize the number of busy days for tutor with cost
+        (if it does not overcome the bound expressed in pref_hours_per_day)
+        """
+        weeks, tutors, groups = define_attributes(kwargs)
+        for week in weeks:
+            for tutor in tutors:
+                for d in days_filter(ttmodel.wdb.days, week=week):
+                    ttmodel.add_constraint(ttmodel.sum(ttmodel.TT[sl, c] * c.type.duration / 60
+                                                       for c in ttmodel.wdb.courses_for_tutor[tutor] if c.week == week
+                                                       for sl in slots_filter(ttmodel.wdb.slots, day=d)
+                                                       & ttmodel.wdb.compatible_slots[c]),
+                                           '<=',
+                                           tutor.max_hours_per_day,
+                                           constraint_type='bound_hours_per_day_%s_%s' % (tutor, d))
+
+    def get_viewmodel(self):
+        """
+        You can add one or more details to be displayed in the solve board
+        interface about what this constraint does
+        """
+        return {'detail_name_sample': "detail_content_sample", }
+
+    def one_line_description(self):
+        """
+        You can give a contextual explanation about what this constraint doesnt
+        """
+        return "RespectBoundPerDay online description"
+
+    class Meta:
+        verbose_name = "Respecter les limites horaires"
