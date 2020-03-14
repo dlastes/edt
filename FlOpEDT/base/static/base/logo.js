@@ -204,7 +204,6 @@ function logo_transform() {
 // disable animation
 function drag_hand_start() {
     ['#clh', '#csh'].forEach( function(hand) {
-        console.log(hand);
         var bu = d3.select(hand).attr("transform");
         d3.select(hand + " animateTransform").attr("attributeName", "transformBU");
         d3.select(hand).attr("transform",bu);
@@ -227,7 +226,13 @@ function drag_hand_end() {
     var accuracy = 10 ;
 
     if (Math.abs(stop[0] % 360) < accuracy && Math.abs(stop[1] - 10*360/12) < accuracy) {
-        document.location.href = url_game;
+        d3.select("html")
+            .append("form")
+            .attr("style", "display: none")
+            .attr("action", url_game)
+            .attr("method", "POST")
+            .attr("id", "game_form");
+        $("#game_form").submit();
     }
 }
 
