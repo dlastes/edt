@@ -54,3 +54,59 @@
 #         """
 #         return "DummyConstraint online description"
 
+class MinimizeBusyDays():
+    """
+    This class is a template for writing your own custom contraint.
+
+    The module can contains several custom constraints.
+    """
+
+    def enrich_model(self, ttmodel, ponderation, **kwargs):
+        """
+        Minimize the number of busy days for tutor with cost
+        (if it does not overcome the bound expressed in pref_hours_per_day)
+        """
+        if 'weeks' in kwargs:
+            weeks = [week for week in ttmodel.weeks if week in kwargs["weeks"]]
+        else:
+            weeks = ttmodel.weeks
+        if 'tutors' in kwargs:
+            tutors = set(t for t in ttmodel.wdb.instructors if t in kwargs["tutors"])
+        else:
+            tutors = set(ttmodel.wdb.instructors)
+        for week in weeks:
+            for tutor in tutors:
+                slot_by_day_cost = 0
+                # need to be sorted
+                courses_hours = sum(c.type.duration
+                                    for c in (ttmodel.wdb.courses_for_tutor[tutor]
+                                              | ttmodel.wdb.courses_for_supp_tutor[tutor])
+                                    & ttmodel.wdb.courses_by_week[week]) \
+                                / 60
+                nb_days = 5
+                frontier_pref_busy_days = [tutor.pref_hours_per_day * d for d in range(nb_days - 1, 0, -1)]
+
+                for fr in frontier_pref_busy_days:
+                    if courses_hours <= fr:
+                        slot_by_day_cost *= 2
+                        slot_by_day_cost += ttmodel.IBD_GTE[week][nb_days][tutor]
+                        nb_days -= 1
+                    else:
+                        break
+                ttmodel.add_to_inst_cost(tutor, ttmodel.min_bd_i * slot_by_day_cost, week=week)
+
+    def get_viewmodel(self):
+        """
+        You can add one or more details to be displayed in the solve board
+        interface about what this constraint does
+        """
+        return {'detail_name_sample': "detail_content_sample", }
+
+    def one_line_description(self):
+        """
+        You can give a contextual explanation about what this constraint doesnt
+        """
+        return "MinimizeBusyDays online description"
+
+    class Meta:
+        verbose_name = "Minimiser les jours de présence"
