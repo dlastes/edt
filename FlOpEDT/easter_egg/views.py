@@ -5,8 +5,6 @@ from django.contrib.auth.decorators import login_required
 from easter_egg.models import GameScore
 from django.contrib.auth.models import User
 
-import simplejson
-
 
 
 def get_score(max_nb_score):
