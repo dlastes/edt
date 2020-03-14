@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
 
 from easter_egg.models import GameScore
 from django.contrib.auth.models import User
@@ -16,9 +17,12 @@ def get_score(max_nb_score):
     return score_list
     
 
+@csrf_exempt
 @login_required
-def start_game(request):
-    return render(request, "easter_egg/game.html",
+def start_game(req):
+    if req.method != "POST":
+        return HttpResponse("Ce n'est pas si simple.")
+    return render(req, "easter_egg/game.html",
                   {'score_list': get_score(5)})
 
 
