@@ -4,21 +4,21 @@
 # This file is part of the FlOpEDT/FlOpScheduler project.
 # Copyright (c) 2017
 # Authors: Iulian Ober, Paul Renaud-Goud, Pablo Seban, et al.
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
 # published by the Free Software Foundation, either version 3 of the
 # License, or (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful, but
 # WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 # Affero General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Affero General Public
 # License along with this program. If not, see
 # <http://www.gnu.org/licenses/>.
-# 
+#
 # You can be released from the requirements of the license by purchasing
 # a commercial license. Buying such a license is mandatory as soon as
 # you develop activities involving the FlOpEDT/FlOpScheduler software
@@ -35,6 +35,7 @@ from django.dispatch import receiver
 
 from base.timing import hhmm, str_slot
 import base.weeks
+
 
 
 # <editor-fold desc="GROUPS">
@@ -366,6 +367,25 @@ class Course(models.Model):
     def full_name(self):
         username_mod = self.tutor.username if self.tutor is not None else '-no_tut-'
         return f"{self.type}-{self.module}-{username_mod}-{self.group}"
+
+    def get_type(self):
+        return self.type
+
+    def get_tutor(self):
+        return self.tutor
+
+    def get_group(self):
+        return self.group
+
+    def get_module(self):
+        return self.module
+
+    def equals(self, other):
+        return self.__class__ == other.__class__ \
+               and self.get_type() == other.get_type() \
+               and self.get_tutor() == other.get_tutor() \
+               and self.get_group() == other.get_group() \
+               and self.get_module() == other.get_module()
 
 
 class CoursePossibleTutors(models.Model):
