@@ -68,18 +68,18 @@ def minimize_busy_days(ttmodel, week, tutor, cost):
     ttmodel.add_to_inst_cost(tutor, cost * slot_by_day_cost, week=week)
 
 
-def bound_hours_per_day(ttmodel, week, tutor):
-    """
-    respect max_hours_per_days bound
-    """
-    for d in days_filter(ttmodel.wdb.days, week=week):
-        ttmodel.add_constraint(ttmodel.sum(ttmodel.TT[sl, c] * c.type.duration / 60
-                                           for c in ttmodel.wdb.courses_for_tutor[tutor] if c.week == week
-                                           for sl in slots_filter(ttmodel.wdb.slots, day=d)
-                                           & ttmodel.wdb.compatible_slots[c]),
-                               '<=',
-                               tutor.max_hours_per_day,
-                               constraint_type=ConstraintType.BOUND_HOURS_PER_DAY, instructors=tutor, days=d)
+# def bound_hours_per_day(ttmodel, week, tutor):
+#     """
+#     respect max_hours_per_days bound
+#     """
+#     for d in days_filter(ttmodel.wdb.days, week=week):
+#         ttmodel.add_constraint(ttmodel.sum(ttmodel.TT[sl, c] * c.type.duration / 60
+#                                            for c in ttmodel.wdb.courses_for_tutor[tutor] if c.week == week
+#                                            for sl in slots_filter(ttmodel.wdb.slots, day=d)
+#                                            & ttmodel.wdb.compatible_slots[c]),
+#                                '<=',
+#                                tutor.max_hours_per_day,
+#                                constraint_type=ConstraintType.BOUND_HOURS_PER_DAY, instructors=tutor, days=d)
 
 
 def add_iut_blagnac_basics(ttmodel):
@@ -133,14 +133,15 @@ def add_iut_blagnac_specials(ttmodel):
     pas_plus_de_2_exams_par_jour = True
     if pas_plus_de_2_exams_par_jour:
         for promo in ttmodel.train_prog:
-            L = LimitCourseTypeTimePerPeriod(max_hours=3,
+            L, created = LimitCourseTypeTimePerPeriod.objects.get_or_create(max_hours=3,
                                              course_type=DS,
                                              period=LimitCourseTypeTimePerPeriod.FULL_DAY,
-                                             train_prog=promo)
-            L.save()
-            for week in ttmodel.weeks:
-                L.enrich_model(ttmodel, week)
-            L.delete()
+                                             train_prog=promo, department=ttmodel.department)
+            if created:
+                L.save()
+                for week in ttmodel.weeks:
+                    L.enrich_model(ttmodel, week)
+            #L.delete()
 
     # Pas plus de 2 amphis par demie journée
     pas_plus_de_2_amphis_par_demi_journee = True
@@ -148,14 +149,15 @@ def add_iut_blagnac_specials(ttmodel):
         pas_plus_de_2_amphis_par_demi_journee = False
     if pas_plus_de_2_amphis_par_demi_journee:
         for promo in ttmodel.train_prog:
-            L = LimitCourseTypeTimePerPeriod(max_hours=3,
+            L, created = LimitCourseTypeTimePerPeriod.objects.get_or_create(max_hours=3,
                                              course_type=CM,
                                              period=LimitCourseTypeTimePerPeriod.HALF_DAY,
-                                             train_prog=promo)
-            L.save()
-            for week in ttmodel.weeks:
-                L.enrich_model(ttmodel, week)
-            L.delete()
+                                             train_prog=promo, department=ttmodel.department)
+            if created:
+                L.save()
+                for week in ttmodel.weeks:
+                    L.enrich_model(ttmodel, week)
+            # L.delete()
 
     # Pas plus d'un amphi par matière et par jour
     un_amphi_par_matiere_par_jour = True
@@ -163,14 +165,15 @@ def add_iut_blagnac_specials(ttmodel):
         un_amphi_par_matiere_par_jour = False
     if un_amphi_par_matiere_par_jour:
         for module in ttmodel.wdb.modules:
-            L = LimitCourseTypeTimePerPeriod(max_hours=2,
+            L, created = LimitCourseTypeTimePerPeriod.objects.get_or_create(max_hours=2,
                                              course_type=CM,
                                              period=LimitCourseTypeTimePerPeriod.FULL_DAY,
-                                             module=module)
-            L.save()
-            for week in ttmodel.weeks:
-                L.enrich_model(ttmodel, week)
-            L.delete()
+                                             module=module, department=ttmodel.department)
+            if created:
+                L.save()
+                for week in ttmodel.weeks:
+                    L.enrich_model(ttmodel, week)
+            # L.delete()
 
     promos1 = ttmodel.wdb.train_prog.filter(abbrev__in=['RT1', 'GIM1', 'CS1', 'INFO1'])
 
@@ -929,14 +932,15 @@ def add_iut_blagnac_rt(ttmodel):
     pas_plus_de_1_exam_par_demie_journee = True
     if pas_plus_de_1_exam_par_demie_journee:
         for promo in ttmodel.train_prog:
-            L = LimitCourseTypeTimePerPeriod(max_hours=2,
+            L, created = LimitCourseTypeTimePerPeriod.objects.get_or_create(max_hours=2,
                                              course_type=DS,
                                              period=LimitCourseTypeTimePerPeriod.HALF_DAY,
-                                             train_prog=promo)
-            L.save()
-            for week in ttmodel.weeks:
-                L.enrich_model(ttmodel, week)
-            L.delete()
+                                             train_prog=promo, department=ttmodel.department)
+            if created:
+                L.save()
+                for week in ttmodel.weeks:
+                    L.enrich_model(ttmodel, week)
+            # L.delete()
 
     if 36 in ttmodel.weeks:
         ttmodel.add_constraint(ttmodel.sum(ttmodel.TT[sl, c]

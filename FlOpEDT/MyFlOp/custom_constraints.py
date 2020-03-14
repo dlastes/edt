@@ -54,7 +54,7 @@
 #         """
 #         return "DummyConstraint online description"
 
-def define_attributes(kwargs):
+def define_attributes(ttmodel, kwargs):
     if 'weeks' in kwargs:
         weeks = [week for week in ttmodel.weeks if week in kwargs["weeks"]]
     else:
@@ -64,7 +64,7 @@ def define_attributes(kwargs):
     else:
         tutors = set(ttmodel.wdb.instructors)
     if 'groups' in kwargs:
-        tutors = set(g for g in ttmodel.wdb.basic_groups if t in kwargs["groups"])
+        tutors = set(g for g in ttmodel.wdb.basic_groups if g in kwargs["groups"])
     else:
         tutors = set(ttmodel.wdb.basic_groups)
     return weeks, tutors, groups
@@ -82,7 +82,7 @@ class MinimizeBusyDays():
         Minimize the number of busy days for tutor with cost
         (if it does not overcome the bound expressed in pref_hours_per_day)
         """
-        weeks, tutors, groups = define_attributes(kwargs)
+        weeks, tutors, groups = define_attributes(ttmodel, kwargs)
         for week in weeks:
             for tutor in tutors:
                 slot_by_day_cost = 0
@@ -133,7 +133,7 @@ class RespectBoundPerDay():
         Minimize the number of busy days for tutor with cost
         (if it does not overcome the bound expressed in pref_hours_per_day)
         """
-        weeks, tutors, groups = define_attributes(kwargs)
+        weeks, tutors, groups = define_attributes(ttmodel, kwargs)
         for week in weeks:
             for tutor in tutors:
                 for d in days_filter(ttmodel.wdb.days, week=week):
@@ -143,7 +143,8 @@ class RespectBoundPerDay():
                                                        & ttmodel.wdb.compatible_slots[c]),
                                            '<=',
                                            tutor.max_hours_per_day,
-                                           constraint_type='bound_hours_per_day_%s_%s' % (tutor, d))
+                                           constraint_type=ConstraintType.BOUND_HOURS_PER_DAY, instructors=tutor,
+                                           days=d)
 
     def get_viewmodel(self):
         """
