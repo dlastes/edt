@@ -29,7 +29,7 @@ from base.models import ScheduledCourse, RoomPreference, EdtVersion, Department,
     TimeGeneralSettings, Room, CourseModification
 from base.timing import str_slot
 from django.db.models import Count, Max, Q, F
-from TTapp.models import slot_pause
+from TTapp.models import slot_pause, MinNonPreferedTrainProgsSlot, MinNonPreferedTutorsSlot, max_weight
 from base.views import get_key_course_pl, get_key_course_pp
 from django.core.cache import cache
 
@@ -354,3 +354,17 @@ def basic_swap_version(department, week, year, copy_a, copy_b=0):
                                    year,
                                    week,
                                    copy_b))
+
+
+def add_generic_constraints_to_database():
+    for department in Department.objects.filter(abbrev__in=['INFO','RT','GIM','CS']):
+
+        M = MinNonPreferedTutorsSlot(weight=max_weight, department=department)
+        M.save()
+
+        # second objective  => minimise use of unpreferred slots for courses
+        # ponderation MIN_UPS_C
+
+        M = MinNonPreferedTrainProgsSlot(weight=max_weight, department=department)
+        M.save()
+
