@@ -30,8 +30,10 @@ from TTapp.models import LimitCourseTypeTimePerPeriod, MinHalfDays, max_weight, 
 from base.models import Time, Day, TrainingProgramme, CourseType, Module, Room, Department, ScheduledCourse, Group
 from people.models import Tutor, SupplyStaff
 from TTapp.constraint_type import ConstraintType
+from TTapp.TTUtils import add_generic_constraints_to_database
 
 def add_iut_constraints_to_database():
+    add_generic_constraints_to_database()
     # Libérer des demi-journées aux étudiants
     for department in Department.objects.filter(abbrev__in=['INFO','RT','GIM','CS']):
         TP = TrainingProgramme.objects.filter(department=department)
