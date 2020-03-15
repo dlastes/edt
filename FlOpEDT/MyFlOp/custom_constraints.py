@@ -23,7 +23,8 @@
 # a commercial license. Buying such a license is mandatory as soon as
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
-
+from TTapp.constraint_type import ConstraintType
+from TTapp.models import days_filter, slots_filter
 
 # class DummyConstraintTemplate():
 #     """
@@ -54,6 +55,7 @@
 #         """
 #         return "DummyConstraint online description"
 
+# TO BE IMPROVED!!!
 def define_attributes(ttmodel, kwargs):
     if 'weeks' in kwargs:
         weeks = [week for week in ttmodel.weeks if week in kwargs["weeks"]]
@@ -64,9 +66,9 @@ def define_attributes(ttmodel, kwargs):
     else:
         tutors = set(ttmodel.wdb.instructors)
     if 'groups' in kwargs:
-        tutors = set(g for g in ttmodel.wdb.basic_groups if g in kwargs["groups"])
+        groups = set(g for g in ttmodel.wdb.groups if g in kwargs["groups"])
     else:
-        tutors = set(ttmodel.wdb.basic_groups)
+        groups = set(ttmodel.wdb.basic_groups)
     return weeks, tutors, groups
 
 
