@@ -50,7 +50,8 @@ from people.models import Tutor
 
 from base.weeks import current_year
 
-from TTapp.models import MinNonPreferedSlot, max_weight, Stabilize, TTConstraint, \
+from TTapp.models import MinNonPreferedTutorsSlot, MinNonPreferedTrainProgsSlot,\
+    max_weight, Stabilize, TTConstraint, \
     Slot, slot_pause, basic_slot_duration, slots_filter, days_filter
 
 from MyFlOp.MyTTUtils import reassign_rooms
@@ -1289,21 +1290,27 @@ class TTModel(object):
         print("adding slot preferences")
         # first objective  => minimise use of unpreferred slots for teachers
         # ponderation MIN_UPS_I
-        for i in self.wdb.instructors:
-            M = MinNonPreferedSlot(tutor=i,
-                                   weight=max_weight)
-            for week in self.weeks:
-                M.enrich_model(self, week,
-                               ponderation=self.min_ups_i)
+
+        M = MinNonPreferedTutorsSlot(weight=max_weight, department=self.department)
+        M.save()
+        # for i in self.wdb.instructors:
+        #     M.tutors.add(i)
+        # M.save()
+        for week in self.weeks:
+            M.enrich_model(self, week,
+                           ponderation=self.min_ups_i)
 
         # second objective  => minimise use of unpreferred slots for courses
         # ponderation MIN_UPS_C
-        for promo in self.train_prog:
-            M = MinNonPreferedSlot(train_prog=promo,
-                                   weight=max_weight)
-            for week in self.weeks:
-                M.enrich_model(self, week,
-                               ponderation=self.min_ups_c)
+
+        M = MinNonPreferedTrainProgsSlot(weight=max_weight, department=self.department)
+        M.save()
+        # for promo in self.train_prog:
+        #     M.train_progs.add(promo)
+        # M.save()
+        for week in self.weeks:
+            M.enrich_model(self, week,
+                           ponderation=self.min_ups_c)
 
     def add_other_departments_constraints(self):
         """
@@ -1346,7 +1353,6 @@ class TTModel(object):
                         occupied_in_another_department = True
                         d = sc
                 if occupied_in_another_department:
-
                     self.avail_instr[i][sl] = 0
                     # name = 'other_dep_' + str(i) + '_' + str(sl) + '_' + str(self.constraint_nb)
                     # self.add_constraint(self.sum(self.TT[(sl, c)]
@@ -1365,15 +1371,14 @@ class TTModel(object):
         Add the active specific constraints stored in the database.
         """
         print("adding active specific constraints")
-        for promo in self.train_prog:
-            for week in self.weeks:
-                for constr in get_constraints(
-                        self.department,
-                        week=week,
-                        year=self.year,
-                        train_prog=promo,
-                        is_active=True):
-                    constr.enrich_model(self, week)
+        for week in self.weeks:
+            for constr in get_constraints(
+                    self.department,
+                    week=week,
+                    year=self.year,
+                    # train_prog=promo,
+                    is_active=True):
+                constr.enrich_model(self, week)
 
     def update_objective(self):
         for week in self.weeks + [None]:
@@ -1402,7 +1407,7 @@ class TTModel(object):
         if self.core_only:
             return
 
-        self.add_slot_preferences()
+        # self.add_slot_preferences()
 
         self.add_specific_constraints()
 
@@ -1583,7 +1588,7 @@ class TTModel(object):
             return target_work_copy
 
 
-def get_constraints(department, week=None, year=None, train_prog=None, is_active=None):
+def get_constraints(department, week=None, year=None, is_active=None):
     #
     #  Return constraints corresponding to the specific filters
     #
@@ -1596,16 +1601,8 @@ def get_constraints(department, week=None, year=None, train_prog=None, is_active
         logger.warning(f"Unable to filter constraint for weeks {week} without specifing year")
         return
 
-    if week and train_prog:
-        query &= \
-            Q(train_prog__abbrev=train_prog) & Q(week__isnull=True) & Q(year__isnull=True) | \
-            Q(train_prog__abbrev=train_prog) & Q(week=week) & Q(year=year) | \
-            Q(train_prog__isnull=True) & Q(week=week) & Q(year=year) | \
-            Q(train_prog__isnull=True) & Q(week__isnull=True) & Q(year__isnull=True)
-    elif week:
+    else:
         query &= Q(week=week) & Q(year=year) | Q(week__isnull=True) & Q(year__isnull=True)
-    elif train_prog:
-        query &= Q(train_prog__abbrev=train_prog) | Q(train_prog__isnull=True)
 
     # Look up the TTConstraint subclasses records to update
     types = TTConstraint.__subclasses__()

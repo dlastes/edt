@@ -29,7 +29,7 @@ from base.models import ScheduledCourse, RoomPreference, EdtVersion, Department,
     TimeGeneralSettings, Room, CourseModification
 from base.timing import str_slot
 from django.db.models import Count, Max, Q, F
-from TTapp.models import LimitedRoomChoices, slot_pause
+from TTapp.models import slot_pause
 from base.views import get_key_course_pl, get_key_course_pp
 from django.core.cache import cache
 
@@ -124,12 +124,6 @@ def minimize_moves(department, week, year, target_work_copy):
                 elif cp_using_prec.count() == 1:
                     sib = cp_using_prec[0]
                     if sib.course.room_type == CP.course.room_type and sib.course:
-                        if not LimitedRoomChoices.objects.filter(
-                                    Q(week=week) | Q(week=None),
-                                    Q(year=year) | Q(year=None),
-                                    Q(train_prog=sib.course.module.train_prog) | Q(module=sib.course.module) | Q(group=sib.course.group) |
-                                    Q(tutor=sib.course.tutor) | Q(type=sib.course.type),
-                                    possible_rooms=sib.room).exists():
                             r = CP.room
                             CP.room = precedent.room
                             sib.room = r
