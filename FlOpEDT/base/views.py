@@ -159,10 +159,6 @@ def edt(req, year=None, week=None, splash_id=0, **kwargs):
                                 'splash_id': splash_id,
                                 'time_settings': queries.get_time_settings(req.department),
                                 'days': num_all_days(year, week, req.department),
-                                'has_department_perm': req.user.is_authenticated \
-                                                       and req.user.has_department_perm(req.department),
-                                'is_department_admin': req.user.is_authenticated \
-                                                       and req.user.has_department_perm(req.department, admin=True),
                                 'dept': req.department.abbrev,
                                 'cosmo': COSMO_MODE,
                             })
@@ -208,8 +204,6 @@ def edt_light(req, year=None, week=None, **kwargs):
                                 'splash_id': 0,
                                 'time_settings': queries.get_time_settings(req.department),
                                 'days': num_all_days(year, week, req.department),
-                                'has_department_perm': False,
-                                'is_department_admin': False,
                                 'dept': req.department.abbrev,
                                 'tv_svg_h': svg_h,
                                 'tv_svg_w': svg_w,
@@ -242,7 +236,6 @@ def stype(req, *args, **kwargs):
                                  'usr_pref_hours': req.user.tutor.pref_hours_per_day,
                                  'usr_max_hours': req.user.tutor.max_hours_per_day,
                                  'err': err,
-                                 'is_department_admin': req.user.has_department_perm(req.department, admin=True),
                                  'current_year': current_year,
                                  'time_settings': queries.get_time_settings(req.department),
                                  'days': num_all_days(1, 1, req.department),
@@ -377,12 +370,7 @@ def fetch_perfect_day(req, username=None, *args, **kwargs):
 
 @dept_admin_required
 def aide(req, **kwargs):
-    return TemplateResponse(req, 'base/aide.html',
-                            {'has_department_perm': req.user.is_authenticated \
-                                                    and req.user.has_department_perm(req.department),
-                             'is_department_admin': req.user.is_authenticated \
-                                                    and req.user.has_department_perm(req.department, admin=True)
-                             })
+    return TemplateResponse(req, 'base/aide.html')
 
 
 @login_required
