@@ -64,7 +64,8 @@ INSTALLED_APPS = [
     'synchro',
     'ics',
     'displayweb',
-    'configuration'
+    'configuration',
+    'easter_egg'
 #    'importation'
 ]
 
