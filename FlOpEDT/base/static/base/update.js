@@ -592,14 +592,16 @@ function go_grid(quick) {
 
 
   grid = svg.get_dom("edt-bg").selectAll(".gridscg")
-    .data(data_grid_scale_gp
-      .filter(function (d) {
-        return d.gp.display;
-      }),
+    .data(
+      data_grid_scale_gp
+        .filter(function (d) {
+          return d.gp.display;
+        }),
       function (d) {
         return d.gp.promo + "," + d.day + "," +
           d.gp.name;
-      });
+      }
+    );
 
   grid
     .enter()
@@ -617,13 +619,15 @@ function go_grid(quick) {
 
 
   grid = svg.get_dom("edt-bg").selectAll(".gridscp")
-    .data(data_grid_scale_row
-      .filter(function (d) {
-        return row_gp[d.row].display;
-      }),
+    .data(
+      data_grid_scale_row
+        .filter(function (d) {
+          return row_gp[d.row].display;
+        }),
       function (d) {
         return d.row + "," + d.start;
-      });
+      }
+    );
 
   grid
     .enter()
@@ -978,13 +982,14 @@ function go_courses(quick) {
 
   update_selection();
 
-  var cg = svg.get_dom("edt-mg").selectAll(".cours")
-    .data(cours.filter(function (d) {
-      return groups[d.promo][d.group].display;
-    }),
-      function (d) {
-        return d.id_course;
-      })
+  var cg = svg.get_dom("edt-mg")
+    .selectAll(".cours")
+    .data(
+      cours.filter(function (d) {
+        return groups[d.promo][d.group].display;
+      }),
+      function (d) { return d.id_course; }
+    )
     .attr("cursor", ckbox["edt-mod"].cked ? "pointer" : "default");
 
   var incg = cg.enter()
@@ -1041,7 +1046,7 @@ function go_courses(quick) {
       }
 
       return smi_fill(lDis / par_dispos.nmax);
-    })
+    });
   } else {
     d3.selectAll("rect.crect").style("fill", cours_fill);
   }
@@ -1138,7 +1143,7 @@ function go_ack_msg() {
     id: "ack-edt-mod",
     but: { list: [{ txt: btn_txt, click: function (d) { } }] },
     com: { list: [{ txt: com_txt }] }
-  }
+  };
   splash(splash_ack);
 
 }

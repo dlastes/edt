@@ -95,7 +95,7 @@ function apply_pref_mode(d) {
 function apply_pref_mode_choice(d) {
   pref_selection.choice.data.forEach(function (p) {
     p.selected = false;
-  })
+  });
   d.selected = true;
   pref_selection.mode.forEach(function (m) {
     m.selected = false;
@@ -523,7 +523,7 @@ function go_cm_room_tutor_change() {
       .attr("x", cm_chg_but_txt_x)
       .attr("y", cm_chg_but_txt_y)
       .attr("fill", cm_chg_but_txt_fill)
-      .text(cm_chg_but_txt)
+      .text(cm_chg_but_txt);
     // .attr("stroke", "darkslategrey")
     // .attr("stroke-width", 2);
 
@@ -719,10 +719,10 @@ function apply_ckbox(dk) {
             but: { list: [{ txt: "Ok", click: function (d) { } }] },
             com: {
               list: [{ txt: "Avis", ftsi: 23 }, { txt: "" },
-              { txt: "L'emploi du temps va être regénéré totalement (cf. en bas à droite)." },
-              { txt: "Contentez-vous de mettre à jour vos disponibilités : elles seront prises en compte lors de la regénération." }]
+                { txt: "L'emploi du temps va être regénéré totalement (cf. en bas à droite)." },
+                { txt: "Contentez-vous de mettre à jour vos disponibilités : elles seront prises en compte lors de la regénération." }]
             }
-          }
+          };
           splash(splash_disclaimer);
 
           return;
@@ -786,8 +786,9 @@ function compute_changes(changes, conc_tutors, gps) {
           id: "garb-sched",
           but: butOK,
           com: {
-            list: [{ txt: "Vous avez déplacé, puis laissé des cours non placés." },
-            { txt: msgRetry }]
+            list: [
+              { txt: "Vous avez déplacé, puis laissé des cours non placés." },
+              { txt: msgRetry }]
           }
         };
 
@@ -1022,7 +1023,7 @@ function aggregate_hours(tutor, iweek) {
     return ret;
   }
 
-  for (let i = 0; i < week_desc.days.day_list.length; i++) {
+  for (var i = 0; i < week_desc.days.day_list.length; i++) {
     var dday = week_desc.days.day_list[i];
     ret[day_shifts[dday.ref]].month = dday.month;
   }
@@ -1469,7 +1470,7 @@ function compute_pref_changes(changes) {
   }
 
 
-  for (let i = 0; i < Object.keys(user.dispos).length; i++) {
+  for (i = 0; i < Object.keys(user.dispos).length; i++) {
     cur_pref = user.dispos[i];
     bu_pref = user.dispos_bu[i];
     if (cur_pref.val > 0) {
