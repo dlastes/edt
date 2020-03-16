@@ -161,7 +161,7 @@ def department_rooms(request, department_abbrev):
 
 
 @user_passes_test(check_tutor)
-def department_groups(request, department_abbrev):
+def department_student_groups(request, department_abbrev):
     """Groups view of FlopEditor.
 
     :param request:           Client request.
@@ -174,8 +174,8 @@ def department_groups(request, department_abbrev):
     """
     department = get_object_or_404(Department, abbrev=department_abbrev)
     departments = Department.objects.exclude(abbrev=department_abbrev)
-    return render(request, "flopeditor/groups.html", {
-        'title': 'Groupes',
+    return render(request, "flopeditor/student_groups.html", {
+        'title': 'Groupes d\'élèves',
         'department': department,
         'list_departments': departments,
         'has_dept_perm': request.user.has_department_perm(department=department, admin=True),
@@ -196,7 +196,7 @@ def department_training_programmes(request, department_abbrev):
     department = get_object_or_404(Department, abbrev=department_abbrev)
     departments = Department.objects.exclude(abbrev=department_abbrev)
     return render(request, "flopeditor/training_programmes.html", {
-        'title': 'Groupes',
+        'title': 'Promos',
         'department': department,
         'list_departments': departments,
         'has_dept_perm': request.user.has_department_perm(department=department, admin=True),
@@ -217,7 +217,7 @@ def department_student_group_types(request, department_abbrev):
     department = get_object_or_404(Department, abbrev=department_abbrev)
     departments = Department.objects.exclude(abbrev=department_abbrev)
     return render(request, "flopeditor/student_group_types.html", {
-        'title': 'Groupes',
+        'title': 'Natures de groupes d\'élèves',
         'department': department,
         'list_departments': departments,
         'has_dept_perm': request.user.has_department_perm(department=department, admin=True),
