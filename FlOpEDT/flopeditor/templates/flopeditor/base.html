@@ -32,27 +32,26 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarText">
                 <ul class="navbar-nav mr-auto">
-                    <li class="nav-item {% block nav-classes-rooms %}{% endblock %}">
+                    <!-- <li class="nav-item {% block nav-classes-rooms %}{% endblock %}">
                         <a class="nav-link"
-                            href="{% url 'flopeditor:flopeditor-department-rooms' department_abbrev=department.abbrev %}">Salles</a>
-                    </li>
+                            href="{--% url 'flopeditor:flopeditor-department-rooms' department_abbrev=department.abbrev %}">Salles</a>
+                    </li> -->
                     <li class="nav-item {% block nav-classes-groups %}{% endblock %}">
                         <a class="nav-link"
                             href="{% url 'flopeditor:flopeditor-department-training-programmes' department_abbrev=department.abbrev %}">Élèves</a>
                     </li>
-                    <li class="nav-item {% block nav-classes-modules %}{% endblock %}">
+                    <!-- <li class="nav-item {% block nav-classes-modules %}{% endblock %}">
                         <a class="nav-link"
                             href="{% url 'flopeditor:flopeditor-department-modules' department_abbrev=department.abbrev %}">Modules</a>
-                    </li>
-                    <li class="nav-item {% block nav-classes-class %}{% endblock %}">
+                    </li> -->
+                    <!-- <li class="nav-item {% block nav-classes-course %}{% endblock %}">
                         <a class="nav-link"
-                            href="{% url 'flopeditor:flopeditor-department-classes' department_abbrev=department.abbrev %}">Cours</a>
-                    </li>
+                            href="{% url 'flopeditor:flopeditor-department-course-types' department_abbrev=department.abbrev %}">Cours</a>
+                    </li> -->
                     <li class="nav-item {% block nav-classes-parameters %}{% endblock %}">
                         <a class="nav-link"
                             href="{% url 'flopeditor:flopeditor-department-parameters' department_abbrev=department.abbrev %}">Paramètres</a>
                     </li>
-
                 </ul>
                 {% if not list_departments %}
                 <span class="navbar-text">Département {{ department.name }}</span>
