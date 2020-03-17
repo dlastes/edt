@@ -32,23 +32,22 @@
 <div id="tools-main" style="padding:10px;">
 
     <h4>Modification de salle</h4>
-    <p>Click droit sur le cours en question. Ne pas oublier de valider tout changement.</p>
+    <p>Cliquer droit sur le cours en question, les salles disponibles apparaissent. Cliquer sur + pour choisir une salle non prévue pour ce cours. Ne pas oublier de valider tout changement.</p>
 
     {% if has_department_perm %}
     <h4>Création d'un compte</h4>
     <p><a href="{% url "people:create_user" %}">Ici</a></p>
     {% endif %}
     
-    
     <h4>Modification d'un compte</h4>
-    <p>Cliquer sur son pseudo en haut de la page.</p>
+    <p>Cliquer sur son pseudo (ses initiales) en haut à droite de la page.</p>
     
-    <h5>Modification de mot de passe</h5>
-    <p><a href="{% url 'people:password_change' %}">Ici</a>.</p>
+    <h4>Modification de mot de passe</h4>
+    <p>Cliquer sur <a href="{% url 'people:password_change' %}">ce lien</a> pour modifier son mot de passe.</p>
 
-    <h4>Oubli de mot de passe</h4>
-    <p><a href="{% url 'people:password_reset' %}">Ici</a>, ou "Se connecter" en haut de page.</p>
-    
+    <h4>Rappel de mot de passe</h4>
+    <p>Cliquer sur <a href="{% url 'people:password_reset' %}">ce lien</a> pour un rappel de mot de passe, ou via "Se connecter" en haut de page.</p>
+     
     <h4>Fonctionnement de la saisie des disponibilités</h4>
     <p>Au moment de la génération de l'emploi du temps d'une semaine donnée, si aucune disponibilité n'est renseignée pour cette semaine, la semaine type définit les disponibilités.</p>
     

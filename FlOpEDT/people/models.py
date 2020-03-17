@@ -60,17 +60,16 @@ class User(AbstractUser):
         if self.is_superuser:
             return True
         
-        perm = self.is_tutor
-
-        if department:
-            perm = department in self.departments.all()
-            if admin:
-                if perm:
-                    user_dept = UserDepartmentSettings.objects.get(user=self,
-                                                                   department=department)
-                    perm &= user_dept.is_admin
-
-        return perm
+        return (self.is_tutor 
+                and department in self.departments.all()
+                and (not admin
+                     or
+                     UserDepartmentSettings.objects\
+                     .get(user=self,
+                          department=department)\
+                     .is_admin
+                    )
+               )
 
     def has_perm(self, perm, obj=None):
         "Does the user have a specific permission?"

@@ -33,12 +33,13 @@ def hr_min(t):
     return h, m
 
 
-def str_slot(day, start_time, duration):
-    hs, ms = hr_min(start_time)
-    hd, md = hr_min(start_time + duration)
-    return f"{day}. {hs:02d}:{ms:02d}" + \
-        f"-{hd:02d}:{md:02d}"
+def hhmm(t):
+    h,m = hr_min(t)
+    return f'{h:02d}:{m:02d}'
 
+def str_slot(day, start_time, duration):
+    return f"{day}. {hhmm(start_time)}" + \
+        f"-{hhmm(start_time + duration)}"
 
 def min_to_str(minutes):
     """Convert minute number into input time format
