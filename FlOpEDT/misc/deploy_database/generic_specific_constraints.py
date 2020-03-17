@@ -28,7 +28,7 @@
 
 from TTapp.models import LimitCourseTypeTimePerPeriod, ReasonableDays, MinHalfDays, max_weight, \
     SimultaneousCourses, LimitedSlotChoices
-from base.models import Time, Day, TrainingProgramme, CourseType, Module, RoomGroup, Slot, Group, Course, Department
+from base.models import Time, Day, TrainingProgramme, CourseType, Module, Room, Slot, Group, Course, Department
 from people.models import Tutor
 
 info=Department.objects.get(abbrev='info')

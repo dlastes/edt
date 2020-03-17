@@ -26,7 +26,7 @@
 
 import datetime
 
-from base.models import TimeGeneralSettings
+import base.models
 actual_year = 2019
 
 days_infos = {
@@ -67,7 +67,7 @@ def num_all_days(y, w, dept):
         return []
     monday = monday_w2(y) + datetime.timedelta(7 * (w - 2))
     day_list = []
-    dept_day_list = TimeGeneralSettings.objects.get(department=dept).days
+    dept_day_list = base.models.TimeGeneralSettings.objects.get(department=dept).days
     iday = 0
     for d_ref in dept_day_list:
         cur_day = monday + datetime.timedelta(days_infos[d_ref]['shift'])
