@@ -865,7 +865,7 @@ for(var l = 0 ; l < room_cm_settings.length ; l++) {
 
 
 var salarie_cm_settings =
-    {type: 'entry',
+    {type: 'tutor',
      w: 100,
      h: 18,
      fs: 10,
