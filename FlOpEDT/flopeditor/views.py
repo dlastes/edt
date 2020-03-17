@@ -104,11 +104,9 @@ def department_parameters(request, department_abbrev):
         'default_preference_duration': min_to_str(parameters.default_preference_duration),
         'list_departments': departments,
         'has_department_perm': request.user.has_department_perm(department=department, admin=True),
-        'edit': False
-
     })
 
-@tutor_required
+@dept_admin_required
 def department_parameters_edit(request, department_abbrev):
     """Parameters edit view of FlopEditor.
 
@@ -123,7 +121,7 @@ def department_parameters_edit(request, department_abbrev):
     department = get_object_or_404(Department, abbrev=department_abbrev)
     departments = Department.objects.exclude(abbrev=department_abbrev)
     parameters = get_object_or_404(TimeGeneralSettings, department=department)
-    return render(request, "flopeditor/parameters.html", {
+    return render(request, "flopeditor/parameters_edit.html", {
         'title': 'Paramètres',
         'department': department,
         'list_departments': departments,
@@ -135,7 +133,6 @@ def department_parameters_edit(request, department_abbrev):
         'day_choices': Day.CHOICES,
         'default_preference_duration': min_to_str(parameters.default_preference_duration),
         'has_department_perm': request.user.has_department_perm(department=department, admin=True),
-        'edit': True
     })
 
 
@@ -170,34 +167,32 @@ def ajax_edit_parameters(request, department_abbrev):
 
     """
     department = get_object_or_404(Department, abbrev=department_abbrev)
-    if not request.user.has_department_perm(department=department, admin=True):
+    if not request.is_ajax() or not request.method == "POST":
         return HttpResponseForbidden()
-    if request.is_ajax() and request.method == "POST":
-        days = request.POST.getlist('days')
-        day_start_time = request.POST['day_start_time']
-        day_finish_time = request.POST['day_finish_time']
-        lunch_break_start_time = request.POST['lunch_break_start_time']
-        lunch_break_finish_time = request.POST['lunch_break_finish_time']
-        default_preference_duration = request.POST['default_preference_duration']
-        response = validate_parameters_edit(
-            days,
-            day_start_time,
-            day_finish_time,
-            lunch_break_start_time,
-            lunch_break_finish_time,
-            default_preference_duration)
-        if response['status'] == OK_RESPONSE:
-            parameters = get_object_or_404(TimeGeneralSettings, department=department)
-            parameters.days = days
-            parameters.day_start_time = str_to_min(day_start_time)
-            parameters.day_finish_time = str_to_min(day_finish_time)
-            parameters.lunch_break_start_time = str_to_min(lunch_break_start_time)
-            parameters.lunch_break_finish_time = str_to_min(lunch_break_finish_time)
-            parameters.default_preference_duration = str_to_min(default_preference_duration)
-            parameters.save()
-            response['message'] = "Les modifications ont bien été enregistrées."
-        return JsonResponse(response)
-    return HttpResponseForbidden()
+    days = request.POST.getlist('days')
+    day_start_time = request.POST['day_start_time']
+    day_finish_time = request.POST['day_finish_time']
+    lunch_break_start_time = request.POST['lunch_break_start_time']
+    lunch_break_finish_time = request.POST['lunch_break_finish_time']
+    default_preference_duration = request.POST['default_preference_duration']
+    response = validate_parameters_edit(
+        days,
+        day_start_time,
+        day_finish_time,
+        lunch_break_start_time,
+        lunch_break_finish_time,
+        default_preference_duration)
+    if response['status'] == OK_RESPONSE:
+        parameters = get_object_or_404(TimeGeneralSettings, department=department)
+        parameters.days = days
+        parameters.day_start_time = str_to_min(day_start_time)
+        parameters.day_finish_time = str_to_min(day_finish_time)
+        parameters.lunch_break_start_time = str_to_min(lunch_break_start_time)
+        parameters.lunch_break_finish_time = str_to_min(lunch_break_finish_time)
+        parameters.default_preference_duration = str_to_min(default_preference_duration)
+        parameters.save()
+        response['message'] = "Les modifications ont bien été enregistrées."
+    return JsonResponse(response)
 
 # Crud views
 # --------------------------------
