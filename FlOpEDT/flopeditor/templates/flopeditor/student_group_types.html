@@ -1,25 +1,28 @@
-{% extends "flopeditor/base.html" %}
+{% extends "flopeditor/base_crud.html" %}
 {% load static %}
 {% block nav-classes-groups %} active {% endblock %}
-{% block content %}
-<div class="card">
-  <ul class="nav card-header nav-tabs" id="tab-bar">
-        {% block tabs %}
-            {% include "flopeditor/snippets/crud_nav_item.html" with title="Promos" route_name="flopeditor:flopeditor-department-training-programmes" %}
-            {% include "flopeditor/snippets/crud_nav_item.html" with title="Natures de groupes" route_name="flopeditor:flopeditor-department-group-types" class="active" %}
-        {% endblock %}
-    </ul>
-    <div class="card-body">
-          {% include "flopeditor/snippets/crud_crudjs_item.html" with route_name='flopeditor:flopeditor-crud-student-group-type' id_btn="btn-stg" %}
-    </div>
 
-</div>
-
+{% block card_header %}
+    <li class="nav-item">
+        <a  class="nav-link {% block card-nav-classes-training-programmes %}{% endblock %}"
+            href="{% url 'flopeditor:flopeditor-department-training-programmes' department_abbrev=department.abbrev %}">
+            Promos
+        </a>
+    </li>
+    <li class="nav-item">
+        <a  class="nav-link {% block card-nav-classes-student-group-types %}active{% endblock %}"
+            href="{% url 'flopeditor:flopeditor-department-student-group-types' department_abbrev=department.abbrev %}">
+            Natures de groupes
+        </a>
+    </li>
+    <!--<li class="nav-item">
+        <a  class="nav-link {% block card-nav-classes-student-groups %}{% endblock %}"
+            href="{% url 'flopeditor:flopeditor-department-student-groups' department_abbrev=department.abbrev %}">
+            Groupes
+        </a>
+    </li>-->
 {% endblock %}
 
-{% block script %}
-    {{ block.super }}
-    <script> const CSRF = "{{ csrf_token }}" </script>
-    <script src="{% static 'flopeditor/js/crudjs.min.js' %}" charset="utf-8"></script>
+{% block crud_js_url %}{% url 'flopeditor:flopeditor-crud-student-group-type' department_abbrev=department.abbrev %}{% endblock %}
 
-{% endblock %}
+
