@@ -34,9 +34,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponseForbidden
 from django.contrib.auth.decorators import user_passes_test
 from base.models import Department, TimeGeneralSettings, Day
-from FlOpEDT.decorators import dept_admin_required, tutor_required
 from base.timing import min_to_str, str_to_min
 from base.check_admin import check_admin
+from FlOpEDT.decorators import dept_admin_required, tutor_required
 from people.models import Tutor
 from flopeditor.db_requests import create_departments_in_database
 from flopeditor.validator import validate_department_creation, validate_parameters_edit, OK_RESPONSE
@@ -106,6 +106,7 @@ def department_parameters(request, department_abbrev):
         'has_department_perm': request.user.has_department_perm(department=department, admin=True),
     })
 
+
 @dept_admin_required
 def department_parameters_edit(request, department_abbrev):
     """Parameters edit view of FlopEditor.
@@ -156,6 +157,7 @@ def ajax_create_department(request):
         return JsonResponse(response)
     return HttpResponseForbidden()
 
+
 @dept_admin_required
 def ajax_edit_parameters(request, department_abbrev):
     """Ajax url for parameters edition
@@ -183,13 +185,16 @@ def ajax_edit_parameters(request, department_abbrev):
         lunch_break_finish_time,
         default_preference_duration)
     if response['status'] == OK_RESPONSE:
-        parameters = get_object_or_404(TimeGeneralSettings, department=department)
+        parameters = get_object_or_404(
+            TimeGeneralSettings, department=department)
         parameters.days = days
         parameters.day_start_time = str_to_min(day_start_time)
         parameters.day_finish_time = str_to_min(day_finish_time)
         parameters.lunch_break_start_time = str_to_min(lunch_break_start_time)
-        parameters.lunch_break_finish_time = str_to_min(lunch_break_finish_time)
-        parameters.default_preference_duration = str_to_min(default_preference_duration)
+        parameters.lunch_break_finish_time = str_to_min(
+            lunch_break_finish_time)
+        parameters.default_preference_duration = str_to_min(
+            default_preference_duration)
         parameters.save()
         response['message'] = "Les modifications ont bien été enregistrées."
     return JsonResponse(response)
@@ -197,7 +202,8 @@ def ajax_edit_parameters(request, department_abbrev):
 # Crud views
 # --------------------------------
 
-def crud_view(request,department_abbrev,view_name,title):
+
+def crud_view(request, department_abbrev, view_name, title):
     """default view rendering for paje using crudjs.
 
     :param request:           Client request.
@@ -223,6 +229,7 @@ def crud_view(request,department_abbrev,view_name,title):
         'has_dept_perm': request.user.has_department_perm(department=department, admin=True),
     })
 
+
 @tutor_required
 def department_student_groups(request, department_abbrev):
     """Student groups view of FlopEditor.
@@ -235,7 +242,10 @@ def department_student_groups(request, department_abbrev):
     :rtype:  django.http.HttpResponse
 
     """
-    return crud_view(request,department_abbrev,"flopeditor/student_groups.html","Groupes d'élèves")
+    return crud_view(request,
+                     department_abbrev,
+                     "flopeditor/student_groups.html",
+                     "Groupes d'élèves")
 
 
 @tutor_required
@@ -250,7 +260,11 @@ def department_student_group_types(request, department_abbrev):
     :rtype:  django.http.HttpResponse
 
     """
-    return crud_view(request,department_abbrev,"flopeditor/student_group_types.html","Natures de groupes d'élèves")
+    return crud_view(request,
+                     department_abbrev,
+                     "flopeditor/student_group_types.html",
+                     "Natures de groupes d'élèves")
+
 
 @tutor_required
 def department_course_types(request, department_abbrev):
@@ -264,7 +278,8 @@ def department_course_types(request, department_abbrev):
     :rtype:  django.http.HttpResponse
 
     """
-    return crud_view(request,department_abbrev,"flopeditor/course_types.html","Types de cours")
+    return crud_view(request, department_abbrev, "flopeditor/course_types.html", "Types de cours")
+
 
 @tutor_required
 def department_modules(request, department_abbrev):
@@ -278,7 +293,8 @@ def department_modules(request, department_abbrev):
     :rtype:  django.http.HttpResponse
 
     """
-    return crud_view(request,department_abbrev,"flopeditor/modules.html",'Modules')
+    return crud_view(request, department_abbrev, "flopeditor/modules.html", 'Modules')
+
 
 @tutor_required
 def department_periods(request, department_abbrev):
@@ -292,7 +308,8 @@ def department_periods(request, department_abbrev):
     :rtype:  django.http.HttpResponse
 
     """
-    return crud_view(request,department_abbrev,"flopeditor/periods.html",'Périodes')
+    return crud_view(request, department_abbrev, "flopeditor/periods.html", 'Périodes')
+
 
 @tutor_required
 def department_training_programmes(request, department_abbrev):
@@ -306,7 +323,7 @@ def department_training_programmes(request, department_abbrev):
     :rtype:  django.http.HttpResponse
 
     """
-    return crud_view(request,department_abbrev,'flopeditor/training_programmes.html','Promos')
+    return crud_view(request, department_abbrev, 'flopeditor/training_programmes.html', 'Promos')
 
 # @tutor_required
 # def department_rooms(request, department_abbrev):
