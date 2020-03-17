@@ -176,4 +176,4 @@ if 'ADMINS' in os.environ:
     ADMINS = [tuple(admin.split(",")) for admin in os.environ.get('ADMINS').split(" ")]
     MANAGERS = ADMINS
 
-COSMO_MODE = False
+COSMO_MODE = True
