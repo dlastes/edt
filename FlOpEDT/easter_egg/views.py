@@ -18,8 +18,9 @@ def get_score(max_nb_score):
     
 
 @csrf_exempt
-@login_required
 def start_game(req):
+    if not req.user.is_authenticated:
+        return HttpResponse("Commencez par vous logger.")
     if req.method != "POST":
         return HttpResponse("Ce n'est pas si simple.")
     return render(req, "easter_egg/game.html",
