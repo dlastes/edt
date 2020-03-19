@@ -4,10 +4,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased]
+
+### Changed
+
+### TBD
+- Modification proposal: id for modification bunch, modification
+  applicability, email notification
+- Room preferences: user interface improvement, room exclusion
+
 ### Added
 - New mode for employees planning
   - new constraints (week-ends, consecutive working hours/days, etc.)
   - batch of weeks
+- Modification proposal sent via email
+- A tutor can choose her/his favorite rooms
+- Module description
 
 ### Changed
 - front-end: dispatch week/day management in js files
