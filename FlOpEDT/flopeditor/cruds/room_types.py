@@ -33,6 +33,33 @@ OK_RESPONSE = "OK"
 ERROR_RESPONSE = "ERROR"
 
 
+def set_rooms(room_type, new_rooms, entries):
+    """Adds the rooms to the RoomType
+
+    :param room_type: Room Type to update.
+    :type room_type:  base.models.RoomType.
+    :param new_rooms: List of rooms to add.
+    :type new_rooms:  List
+    :param entries: values to create/update (used here only for error reporting).
+    :type entries:  django.http.JsonResponse
+    :return: True if there is non problem.
+    :rtype:  boolean
+
+    """
+    members = []
+    for room_name in new_rooms:
+        room = Room.objects.filter(name=room_name)
+        if not room:
+            entries['result'].append([
+                ERROR_RESPONSE,
+                "Une salle n'a pas été trouvée dans la base de données."
+            ])
+            return False
+        members.append(room[0])
+    room_type.members.set(members)
+    return True
+
+
 def read(department):
     """Return all room types for a department
 
@@ -104,18 +131,9 @@ def create(entries, department):
             ])
         else:
             room_type = RoomType.objects.create(name=new_name, department=department)
-            for room_name in new_rooms:
-                room = Room.objects.get(name=room_name)
-                if not room:
-                    entries['result'].append([
-                        ERROR_RESPONSE,
-                        "Une salle à ajouter n'a pas été trouvée dans la base de données."
-                    ])
-                    return entries
-                else:
-                    room_type.subrooms.add(room)
-            room_type.save()
-            entries['result'].append([OK_RESPONSE])
+            if set_rooms(room_type, new_rooms, entries):
+                room_type.save()
+                entries['result'].append([OK_RESPONSE])
     return entries
 
 def update(entries, department):
@@ -146,24 +164,17 @@ def update(entries, department):
                 ERROR_RESPONSE,
                 "Le nom du type de salle à modifier est trop long."
             ])
+        elif RoomType.objects.filter(name=new_name, department=department) and old_name != new_name:
+            entries['result'].append(
+                [ERROR_RESPONSE,
+                 "L'abbréviation de ce type de salle est déjà utilisé."])
         else:
             try:
                 rt_to_update = RoomType.objects.get(name=old_name, department=department)
                 rt_to_update.name = new_name
-                subrooms = []
-                for room_name in new_rooms:
-                    room = Room.objects.get(name=room_name)
-                    if not room:
-                        entries['result'].append([
-                            ERROR_RESPONSE,
-                            "Une salle à ajouter n'a pas été trouvée dans la base de données."
-                        ])
-                        return entries
-                    else:
-                        subrooms.add(room)
-                room_type.subrooms = subrooms
-                rt_to_update.save()
-                entries['result'].append([OK_RESPONSE])
+                if set_rooms(rt_to_update, new_rooms, entries):
+                    rt_to_update.save()
+                    entries['result'].append([OK_RESPONSE])
             except RoomType.DoesNotExist:
                 entries['result'].append(
                     [ERROR_RESPONSE,

@@ -43,6 +43,8 @@ urlpatterns = [
          name='flopeditor-department-default'),
     # path('<slug:department_abbrev>/rooms', views.department_rooms,
     #      name='flopeditor-department-rooms'),
+    path('<slug:department_abbrev>/categories-de-salles', views.department_room_types,
+         name='flopeditor-department-room-types'),
     path('<slug:department_abbrev>/groupes', views.department_student_groups,
          name='flopeditor-department-student-groups'),
     path('<slug:department_abbrev>/natures', views.department_student_group_types,
