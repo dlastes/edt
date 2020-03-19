@@ -230,6 +230,24 @@ def crud_view(request, department_abbrev, view_name, title):
 
 
 @tutor_required
+def department_room_types(request, department_abbrev):
+    """Student groups view of FlopEditor.
+
+    :param request:           Client request.
+    :param department_abbrev: Department abbreviation.
+    :type request:            django.http.HttpRequest
+    :type department_abbrev:  str
+    :return: Page rendered from the template of FlopEditor.
+    :rtype:  django.http.HttpResponse
+
+    """
+    return crud_view(request,
+                     department_abbrev,
+                     "flopeditor/room_types.html",
+                     "Catégories de salles")
+
+
+@tutor_required
 def department_student_groups(request, department_abbrev):
     """Student groups view of FlopEditor.
 
