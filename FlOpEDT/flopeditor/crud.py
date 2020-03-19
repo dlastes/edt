@@ -33,7 +33,7 @@ import json
 from django.http import JsonResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 from base.models import Department
-from flopeditor.cruds import training_programmes, student_group_type
+from flopeditor.cruds import training_programmes, student_group_type, course
 
 def good_request(request, department):
     """ Request rights verification
@@ -108,3 +108,17 @@ def crud_training_programmes(request, department_abbrev):
 
     """
     return crud_model(request, department_abbrev, training_programmes)
+
+
+def crud_course(request, department_abbrev):
+    """Crud url for course edition
+
+    :param request: Client request.
+    :type request:  django.http.HttpRequest
+    :param department_abbrev: Department abbreviation.
+    :type department_abbrev:  String
+    :return: Server response for the request.
+    :rtype:  django.http.JsonResponse
+
+    """
+    return crud_model(request, department_abbrev, course)
