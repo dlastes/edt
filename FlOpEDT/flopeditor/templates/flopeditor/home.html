@@ -6,7 +6,11 @@
 {% block main-class %}container h-100{% endblock %}
 
 {% block navbar %}
-<div id="logo_fixe"> <img src="{% static 'base/img/flop2.png' %}" class='btn btn-raised p-0' style='width:300px' alt="Retourner vers FlopEDT"> </div>
+<div id="logo_fixe">
+  <a href="{% url 'index' %}">
+    <img src="{% static 'base/img/flop2.png' %}" class='btn btn-raised p-0' style='width:300px' alt="Retourner vers FlopEDT">
+  </a>
+</div>
 {% endblock %}
 
 {% block content %}
