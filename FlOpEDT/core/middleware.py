@@ -47,6 +47,12 @@ class EdtContextMiddleware:
                 logger.debug(f'store department [{department.abbrev}] in cache with key [{department_key}]')
                 cache.set(department_key, department)
 
+        def set_request_department_prop(req):
+            dept = req.department if hasattr(req, 'department') else None
+            req.has_department_perm = req.user.is_authenticated \
+                and req.user.has_department_perm(dept)
+            req.is_department_admin = req.user.is_authenticated \
+                and req.user.has_department_perm(dept, admin=True)
 
         def get_department_abbrev(lookup_items):
             #
@@ -87,6 +93,8 @@ class EdtContextMiddleware:
                         logger.warning(f'wrong department value : [{department_abbrev}]')
                         return redirect('/')
 
+        set_request_department_prop(request)
+
         if request.path.startswith('/admin'):
             if not department:
                 # Check if the user is a superuser in order to 
@@ -96,8 +104,5 @@ class EdtContextMiddleware:
             else:
                 # Check if the user is associated with the 
                 # requested department
-                if hasattr(request.user, 'departments'):
-                    if not request.user.has_department_perm(department, admin=True):
-                        return HttpResponseForbidden()
-                else:
+                if not request.is_department_admin:
                     return HttpResponseForbidden()

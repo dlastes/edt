@@ -40,13 +40,16 @@ urlpatterns = [
     # directly reachable by users
     # ----------------------------
     re_path(r'room-preference/(?P<tutor>\w{2,8})?', views.room_preference, name='room-pref'),
+
     url(r'^preferences$', views.preferences, name="preferences"),
     url(r'^semaine-type$', views.stype, name="stype"),
     url(r'^aide$', views.aide, name="aide"),
     url(r'^decale$', views.decale, name="decale"),    
     url(r'^contact/(?P<tutor>\w{2,8})?$', views.contact, name="contact"),
+    url(r'^module_description(/(?P<module>\w{1,8}))?$', views.module_description, name="module_description"),
     url(r'^((?P<year>\d{4}))?(/(?P<week>\d{1,2}))?$', views.edt, name="edt"),
     url(r'^tv(/(?P<year>\d+))?(/(?P<week>\d+))?$', views.edt_light, name="edt_light"),
+    url(r'^modules$', views.all_modules_with_desc, name="modules"),
     #Send Email to teacher when student want modify schedule
     url(r'^email-modif$', views.send_email_proposal, name='email-proposal'),
 
@@ -75,10 +78,11 @@ urlpatterns = [
     path('fetch_departments', views.fetch_departments, name="fetch_departments"),
     path('fetch_tutor_courses/<int:year>/<int:week>/<str:tutor>', views.fetch_tutor_courses, name="fetch_tutor_courses"),
     path('fetch_extra_sched/<int:year>/<int:week>', views.fetch_extra_sched, name="fetch_extra_sched"),
-    path('fetch_shared_rooms/<int:year>/<int:week>', views.fetch_shared_roomgroups, name="fetch_shared_rooms"),
+    path('fetch_shared_rooms/<int:year>/<int:week>', views.fetch_shared_rooms, name="fetch_shared_rooms"),
     path('fetch_perfect_day/<str:username>', views.fetch_perfect_day, name="fetch_perfect_day"),
     url(r'^fetch_module/(?P<year>\d+)/(?P<week>\d+)$', views.fetch_module, name="fetch_module"),
     url(r'^fetch_tutors/(?P<year>\d+)/(?P<week>\d+)$', views.fetch_tutor, name="fetch_tutor"),
+    url(r'^fetch_all_modules_with_desc$', views.fetch_all_modules_with_desc, name="fetch_all_modules_with_desc"),
 
     # statistics
     # ---------------------------------

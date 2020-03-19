@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
   - batch of weeks
 - Modification proposal sent via email
 - A tutor can choose her/his favorite rooms
+- Module description
 
 ### Changed
 - front-end: dispatch week/day management in js files

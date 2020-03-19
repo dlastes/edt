@@ -128,8 +128,10 @@ function main(name, data) {
 
 file_fetch.rooms.callback = function () {
   rooms = this.data;
-  var room_names;
-  room_names = Object.keys(rooms.roomgroups);
+  var room_names ;
+  room_names = Object.keys(rooms.roomgroups).filter(function(k){
+    return rooms.roomgroups[k].length == 1 ;
+  });
   swap_data(room_names, rooms_sel, "room");
 };
 
@@ -899,9 +901,8 @@ for (var l = 0; l < room_cm_settings.length; l++) {
 }
 
 
-var salarie_cm_settings =
-{
-  type: 'entry',
+var salarie_cm_settings = {
+  type: 'tutor',
   w: 100,
   h: 18,
   fs: 10,
@@ -909,7 +910,7 @@ var salarie_cm_settings =
   my: 3,
   ncol: 3,
   nlin: 0,
-  txt_intro: { 'default': "Qui s'y colle ?" }
+  txt_intro: {'default':"Qui s'y colle ?"}
 };
 
 // level=0: salaries qui ont le même poste dans la semaine

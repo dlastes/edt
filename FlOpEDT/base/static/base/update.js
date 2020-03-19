@@ -930,21 +930,25 @@ function go_menus() {
 // if its module, tutor or room does not appear in selection lists,
 // the course is not displayed
 function update_selection() {
-  cours.forEach(function (c) {
-    var mod = modules.all.find(function (d) {
-      return d.name == c.mod;
+  cours.forEach(function(c) {
+    var mod = modules.all.find(function(d) {
+      return d.name == c.mod ;
     });
-    var tut = tutors.all.find(function (d) {
-      return d.name == c.prof;
+    var tut = tutors.all.find(function(d) {
+      return d.name == c.prof ;
     });
-    var roo = rooms_sel.all.find(function (d) {
-      return d.name == c.room;
+    var roo = rooms_sel.all.find(function(d) {
+      if (c.room in rooms.roomgroups) {
+        return rooms.roomgroups[c.room].includes(d.name) ;
+      } else {
+        return false;
+      }
     });
     if (typeof mod === 'undefined' || typeof tut === 'undefined'
         || typeof roo === 'undefined') {
-      c.display = false;
+      c.display = false ;
     } else {
-      c.display = mod.display && tut.display && roo.display;
+      c.display = mod.display && tut.display && roo.display ;
     }
   });
 }
