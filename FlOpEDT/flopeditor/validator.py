@@ -180,3 +180,24 @@ def validate_training_programme_values(abbrev, name, entries):
     else:
         return True
     return False
+
+def validate_course_values(name, duree, entries):
+    """Validate parameters for course type
+
+    :param name: string course type name
+    :param abbrev: string duration
+    :param entries: list that is returned to CrudJS
+    :type abbrev: list
+
+    :return: (boolean,json) (are the paramaters valid , status and errors)
+    """
+    slug_re = re.compile("^([1-9]\d*|0)$")
+    if not slug_re.match(duree):
+        entries['result'].append([ERROR_RESPONSE,
+                                  "La durée doit être un nombre"])
+    elif len(name) > 50:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "Le nom du type de cours est trop long."])
+    else:
+        return True
+    return False
