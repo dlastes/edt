@@ -41,7 +41,6 @@ from people.models import Tutor
 from flopeditor.db_requests import create_departments_in_database
 from flopeditor.validator import validate_department_creation, validate_parameters_edit, OK_RESPONSE
 
-
 @tutor_required
 def home(request):
     """Main view of FlopEditor.
