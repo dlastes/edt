@@ -6,9 +6,9 @@
 {% block main-class %}container h-100{% endblock %}
 
 {% block navbar %}
-<div id="logo_fixe">
+<div class='container-fluid pt-2 pl-2'>
   <a href="{% url 'index' %}">
-    <img src="{% static 'base/img/flop2.png' %}" class='btn btn-raised p-0' style='width:300px' alt="Retourner vers FlopEDT">
+    <img src="{% static 'base/img/flop2.png' %}" class='btn btn-raised p-0' style='max-width:300px' alt="Retourner vers FlopEDT">
   </a>
 </div>
 {% endblock %}
