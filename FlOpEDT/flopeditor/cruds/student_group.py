@@ -49,8 +49,8 @@ def read(department):
     parents_choices = []
     for group in groups:
         parents = []
-        for p in group.parent_groups.all():
-            parents.append(p.name)
+        for parent in group.parent_groups.all():
+            parents.append(parent.name)
         values.append((group.name, group.train_prog.abbrev,
                        parents, group.type.name, group.size))
         parents_choices.append(group.name)
