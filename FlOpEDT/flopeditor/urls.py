@@ -41,14 +41,23 @@ urlpatterns = [
     path('', views.home, name='flopeditor-home'),
     path('<slug:department_abbrev>/', views.department_default,
          name='flopeditor-department-default'),
-    path('<slug:department_abbrev>/rooms', views.department_rooms,
-         name='flopeditor-department-rooms'),
-    path('<slug:department_abbrev>/groups', views.department_groups,
-         name='flopeditor-department-groups'),
+    # path('<slug:department_abbrev>/rooms', views.department_rooms,
+    #      name='flopeditor-department-rooms'),
+    path('<slug:department_abbrev>/categories-de-salles', views.department_room_types,
+         name='flopeditor-department-room-types'),
+    path('<slug:department_abbrev>/groupes', views.department_student_groups,
+         name='flopeditor-department-student-groups'),
+    path('<slug:department_abbrev>/natures', views.department_student_group_types,
+         name='flopeditor-department-student-group-types'),
+    path('<slug:department_abbrev>/promos', views.department_training_programmes,
+         name='flopeditor-department-training-programmes'),
     path('<slug:department_abbrev>/modules', views.department_modules,
          name='flopeditor-department-modules'),
-    path('<slug:department_abbrev>/classes', views.department_classes,
-         name='flopeditor-department-classes'),
+    path('<slug:department_abbrev>/types-de-cours', views.department_course_types,
+         name='flopeditor-department-course-types'),
+    path('<slug:department_abbrev>/periodes', views.department_periods,
+         name='flopeditor-department-periods'),
+
     path('<slug:department_abbrev>/parameters', views.department_parameters,
          name='flopeditor-department-parameters'),
     path('<slug:department_abbrev>/parameters/edit', views.department_parameters_edit,
@@ -63,6 +72,14 @@ urlpatterns = [
 
     # exchanges with the CRUD
     # --------------------------------
-    path('<slug:department_abbrev>/crud/rooms', crud.crud_rooms, 
+    path('<slug:department_abbrev>/crud/rooms', crud.crud_rooms,
         name='flopeditor-crud-rooms')
+    path('<slug:department_abbrev>/crud/room_types', crud.crud_room_types,
+        name='flopeditor-crud-room-types'),
+    path('<slug:department_abbrev>/crud/group_type', crud.crud_student_group_type,
+         name='flopeditor-crud-student-group-type'),
+    path('<slug:department_abbrev>/crud/student_group', crud.crud_student_group,
+         name='flopeditor-crud-student-group'),
+    path('<slug:department_abbrev>/crud/training_programmes', crud.crud_training_programmes,
+         name='flopeditor-crud-training-programmes')
 ]

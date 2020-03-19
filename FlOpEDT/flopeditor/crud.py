@@ -33,7 +33,7 @@ import json
 from django.http import JsonResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 from base.models import Department
-from flopeditor.cruds import rooms
+from flopeditor.cruds import training_programmes, student_group_type, room_types, student_group, rooms
 
 def good_request(request, department):
     """ Request rights verification
@@ -97,3 +97,54 @@ def crud_rooms(request, department_abbrev):
 
     """
     return crud_model(request, department_abbrev, rooms)
+
+def crud_room_types(request, department_abbrev):
+    """Crud url for room types edition
+
+    :param request: Client request.
+    :type request:  django.http.HttpRequest
+    :param department_abbrev: Department abbreviation.
+    :type department_abbrev:  String
+    :return: Server response for the request.
+    :rtype:  django.http.JsonResponse
+
+    """
+    return crud_model(request, department_abbrev, room_types)
+
+
+def crud_student_group_type(request, department_abbrev):
+    """Crud url for student group type (TP, TD...) edition
+
+    :param request: Client request.
+    :param department_abbrev: Department abbreviation.
+    :type request:  django.http.HttpRequest
+    :return: Server response for the request.
+    :rtype:  django.http.JsonResponse
+
+    """
+    return crud_model(request, department_abbrev, student_group_type)
+
+
+def crud_student_group(request, department_abbrev):
+    """Crud url for student group edition
+
+    :param request: Client request.
+    :param department_abbrev: Department abbreviation.
+    :type request:  django.http.HttpRequest
+    :return: Server response for the request.
+    :rtype:  django.http.JsonResponse
+
+    """
+    return crud_model(request, department_abbrev, student_group)
+
+
+def crud_training_programmes(request, department_abbrev):
+    """Crud url for groups edition
+    :param request: Client request.
+    :param department_abbrev: Department abbreviation.
+    :type request:  django.http.HttpRequest
+    :return: Server response for the request.
+    :rtype:  django.http.JsonResponse
+
+    """
+    return crud_model(request, department_abbrev, training_programmes)
