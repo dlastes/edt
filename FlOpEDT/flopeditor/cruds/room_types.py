@@ -29,8 +29,7 @@ without disclosing the source code of your own applications.
 
 from django.http import JsonResponse
 from base.models import Room, RoomType
-OK_RESPONSE = "OK"
-ERROR_RESPONSE = "ERROR"
+from flopeditor.validator import OK_RESPONSE, ERROR_RESPONSE
 
 
 def set_rooms(room_type, new_rooms, entries):
