@@ -33,10 +33,10 @@ import re
 from base.models import Department
 from people.models import Tutor
 
-
 OK_RESPONSE = 'OK'
 ERROR_RESPONSE = 'ERROR'
 UNKNOWN_RESPONSE = 'UNKNOWN'
+
 
 def validate_department_creation(name, abbrev, tutor_id):
     """Validate parameters for department creation
@@ -149,8 +149,9 @@ def validate_parameters_edit(days, day_start_time, day_finish_time, lunch_break_
             'message': "La durée par défaut d'un cours ne peut pas être nulle."
         }
     else:
-        response = {'status': OK_RESPONSE, 'message':''}
+        response = {'status': OK_RESPONSE, 'message': ''}
     return response
+
 
 def validate_training_programme_values(abbrev, name, entries):
     """Validate parameters for training programme's CRUD
@@ -177,6 +178,32 @@ def validate_training_programme_values(abbrev, name, entries):
     elif len(name) > 50:
         entries['result'].append([ERROR_RESPONSE,
                                   "Le nom de la promo est trop long."])
+    else:
+        return True
+    return False
+
+
+def validate_student_groups_values(entry, entries):
+    """Validate parameters for training programme's CRUD
+
+    :param abbrev: data returned by crudJS
+    :type abbrev: list
+    :param entries: list that is returned to CrudJS
+    :type abbrev: list
+    :return: boolean are the paramaters valid
+    """
+    if not entry[0]:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "Le nom ne peut pas être vide."])
+    elif len(entry[0]) > 10:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "Le nom ne peut pas être plus long que 10 caractères."])
+    elif entry[4] < 0:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "La taille ne peut pas être négative."])
+    elif entry[0] in entry[2]:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "Le groupe ne peut pas être un sous-groupe de lui-même."])
     else:
         return True
     return False

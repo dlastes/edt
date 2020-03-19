@@ -31,7 +31,7 @@ This module is used to create, read, update and/or delete a group type
 
 from django.http import JsonResponse
 from base.models import Group, TrainingProgramme, GroupType
-from flopeditor.validator import OK_RESPONSE, ERROR_RESPONSE
+from flopeditor.validator import OK_RESPONSE, ERROR_RESPONSE, validate_student_groups_values
 
 
 def read(department):
@@ -43,52 +43,56 @@ def read(department):
     :rtype:  django.http.JsonResponse
 
     """
-    groups = Group.objects.filter(train_prog__in=TrainingProgramme.objects.filter(department=department))
+    groups = Group.objects.filter(
+        train_prog__in=TrainingProgramme.objects.filter(department=department))
     values = []
     parents_choices = []
     for group in groups:
         parents = []
         for p in group.parent_groups.all():
             parents.append(p.name)
-        values.append((group.name, group.train_prog.name, parents, group.type.name, ))
+        values.append((group.name, group.train_prog.abbrev,
+                       parents, group.type.name, group.size))
         parents_choices.append(group.name)
-
 
     train_prog_choices = []
     for training_p in TrainingProgramme.objects.filter(department=department):
-        train_prog_choices.append(training_p.name)
+        train_prog_choices.append(training_p.abbrev)
 
     type_choices = []
     for type_choice in GroupType.objects.filter(department=department):
         type_choices.append(type_choice.name)
 
     return JsonResponse({
-        "columns" :  [{
+        "columns":  [{
             'name': 'Nom',
             "type": "text",
             "options": {}
-        },{
+        }, {
             'name': 'Promo',
             "type": "select",
             "options": {
                 "values": train_prog_choices
             }
-        },{
+        }, {
             'name': 'Sous-groupe de...',
             "type": "select-chips",
             "options": {
                 "values": parents_choices
             }
-        },{
+        }, {
             'name': 'Nature',
             "type": "select",
             "options": {
                 "values": type_choices
             }
+        }, {
+            'name': 'Taille',
+            "type": "int",
+            "options": {}
         }],
-        "values" : values
+        "values": values
     })
-
 
 
 def create(entries, department):
@@ -102,28 +106,46 @@ def create(entries, department):
     """
 
     entries['result'] = []
-    # for i in range(len(entries['new_values'])):
-    #     new_name = entries['new_values'][i][0]
-    #     # verifier la longueur du nom
-    #     if len(new_name) > 50:
-    #         entries['result'].append([ERROR_RESPONSE,
-    #                                   "Le nom du type de goupe est trop long."])
-    #     elif not new_name:
-    #         entries['result'].append([ERROR_RESPONSE,
-    #                                   "Le nom du type de goupe ne peut pas être vide."])
-    #     else:
-    #         if GroupType.objects.filter(name=new_name, department=department):
-    #             entries['result'].append([
-    #                 ERROR_RESPONSE,
-    #                 "Le type de goupe est déjà présent dans le département."
-    #             ])
-    #         else:
-    #             group_type = GroupType.objects.create(name=new_name)
-    #             group_type.department = department
-    #             group_type.save()
-    #             entries['result'].append([OK_RESPONSE])
-    return entries
 
+    for i in range(len(entries['new_values'])):
+        new_name = entries['new_values'][i][0]
+        new_tp_abbrev = entries['new_values'][i][1]
+        new_type_name = entries['new_values'][i][3]
+        try:
+            train = TrainingProgramme.objects.get(
+                abbrev=new_tp_abbrev, department=department)
+            gtype = GroupType.objects.get(
+                name=new_type_name, department=department)
+            if validate_student_groups_values(entries['new_values'][i], entries):
+                if Group.objects.filter(name=new_name, train_prog=train):
+                    entries['result'].append([
+                        ERROR_RESPONSE,
+                        "un groupe de ce nom existe déjà dans cette promo."
+                    ])
+                else:
+                    group = Group.objects.create(
+                        name=new_name, size=entries['new_values'][i][4], train_prog=train, type=gtype)
+                    group.basic = True
+
+                    for group_name in entries['new_values'][i][2]:
+                        group.basic = False
+                        parent = Group.objects.get(
+                            name=group_name, train_prog=train)
+                        group.parent_groups.add(parent)
+
+                    group.save()
+                    entries['result'].append([OK_RESPONSE])
+
+        except (TrainingProgramme.DoesNotExist, GroupType.DoesNotExist):
+            entries['result'].append(
+                [ERROR_RESPONSE,
+                 "Erreur en base de données."])
+        except Group.DoesNotExist:
+            entries['result'].append(
+                [ERROR_RESPONSE,
+                 "Un groupe de peut-être le sous-groupe que d'un groupe de la même promo."])
+
+    return entries
 
 
 def update(entries, department):
@@ -135,38 +157,63 @@ def update(entries, department):
     :return: Server response for the request.
     :rtype:  django.http.JsonResponse
     """
+    entries['result'] = []
+    if len(entries['old_values']) != len(entries['new_values']):
+        return entries
 
-    # if len(entries['old_values']) != len(entries['new_values']):
-    #     # old and new values must have same size
-    #     return entries
-    # entries['result'] = []
-    # for i in range(len(entries['old_values'])):
-    #     old_name = entries['old_values'][i][0]
-    #     new_name = entries['new_values'][i][0]
-    #     if len(new_name) > 50:
-    #         entries['result'].append([ERROR_RESPONSE,
-    #                                   "Le nom du type de goupe est trop long."])
-    #     elif not new_name:
-    #         entries['result'].append([ERROR_RESPONSE,
-    #                                   "Le nom du type de goupe ne peut pas être vide."])
+    for i in range(len(entries['old_values'])):
+        if not validate_student_groups_values(entries['new_values'][i], entries):
+            return entries
 
-    #     elif GroupType.objects.filter(name=new_name, department=department).count() != 0:
-    #         entries['result'].append(
-    #             [ERROR_RESPONSE,
-    #              "Un nom de groupe est déjà utilisé dans le département."])
-    #     else:
-    #         try:
-    #             group_type_to_update = GroupType.objects.get(
-    #                 name=old_name,
-    #                 department=department
-    #             )
-    #             group_type_to_update.name = new_name
-    #             group_type_to_update.save()
-    #             entries['result'].append([OK_RESPONSE])
-    #         except GroupType.DoesNotExist:
-    #             entries['result'].append(
-    #                 [ERROR_RESPONSE,
-    #                  "Un type de goupe à modifier n'a pas été trouvé dans le département."])
+        old_name = entries['old_values'][i][0]
+        old_tp_abbrev = entries['old_values'][i][1]
+
+        new_name = entries['new_values'][i][0]
+        new_tp_abbrev = entries['new_values'][i][1]
+        new_type_name = entries['new_values'][i][3]
+
+        try:
+            old_train = TrainingProgramme.objects.get(
+                abbrev=old_tp_abbrev, department=department)
+            new_train = TrainingProgramme.objects.get(
+                abbrev=new_tp_abbrev, department=department)
+            new_gtype = GroupType.objects.get(
+                name=new_type_name, department=department)
+
+            if new_name != old_name and Group.objects.filter(name=new_name, train_prog=new_train):
+                entries['result'].append([
+                    ERROR_RESPONSE,
+                    "un groupe de ce nom existe déjà dans cette promo."
+                ])
+                return entries
+
+            group = Group.objects.get(name=old_name, train_prog=old_train)
+            group.train_prog = new_train
+            group.name = new_name
+            group.size = entries['new_values'][i][4]
+            group.type = new_gtype
+            group.basic = True
+
+            group.parent_groups.remove(*group.parent_groups.all())
+            for group_name in entries['new_values'][i][2]:
+                group.basic = False
+                parent = Group.objects.get(
+                    name=group_name, train_prog=new_train)
+                group.parent_groups.add(parent)
+
+            group.save()
+            entries['result'].append([OK_RESPONSE])
+
+        except (TrainingProgramme.DoesNotExist, GroupType.DoesNotExist):
+            entries['result'].append(
+                [ERROR_RESPONSE,
+                 "Erreur en base de données."])
+
+        except Group.DoesNotExist:
+            entries['result'].append(
+                [ERROR_RESPONSE,
+                 "Un groupe de peut-être le sous-groupe que d'un groupe de la même promo."])
+
     return entries
 
 
@@ -180,14 +227,17 @@ def delete(entries, department):
     :rtype:  django.http.JsonResponse
     """
 
-    # entries['result'] = []
-    # for i in range(len(entries['old_values'])):
-    #     old_name = entries['old_values'][i][0]
-    #     try:
-    #         GroupType.objects.get(name=old_name, department=department).delete()
-    #         entries['result'].append([OK_RESPONSE])
-    #     except GroupType.DoesNotExist:
-    #         entries['result'].append(
-    #             [ERROR_RESPONSE,
-    #              "Un type de goupe à supprimer n'a pas été trouvé dans le département."])
+    entries['result'] = []
+    for i in range(len(entries['old_values'])):
+        old_name = entries['old_values'][i][0]
+        old_tp_abbrev = entries['old_values'][i][1]
+        try:
+            train = TrainingProgramme.objects.get(
+                abbrev=old_tp_abbrev, department=department)
+            Group.objects.get(name=old_name, train_prog=train).delete()
+            entries['result'].append([OK_RESPONSE])
+        except (GroupType.DoesNotExist, TrainingProgramme.DoesNotExist):
+            entries['result'].append(
+                [ERROR_RESPONSE,
+                 "Erreur en base de données."])
     return entries

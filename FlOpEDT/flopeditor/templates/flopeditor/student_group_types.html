@@ -15,12 +15,12 @@
             Natures de groupes
         </a>
     </li>
-    <!--<li class="nav-item">
+    <li class="nav-item">
         <a  class="nav-link {% block card-nav-classes-student-groups %}{% endblock %}"
             href="{% url 'flopeditor:flopeditor-department-student-groups' department_abbrev=department.abbrev %}">
-            Groupes
+            Groupes d'élèves
         </a>
-    </li>-->
+    </li>
 {% endblock %}
 
 {% block crud_js_url %}{% url 'flopeditor:flopeditor-crud-student-group-type' department_abbrev=department.abbrev %}{% endblock %}
