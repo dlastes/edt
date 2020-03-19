@@ -162,7 +162,7 @@ function select_room_change() {
   room_tutor_change.cur_value = c.room;
 
   var busy_rooms, cur_roomgroup, cur_room, is_occupied, is_available, proposed_rg, initial_rg;
-  var i, j, i_unav;
+  var j, i_unav;
 
   proposed_rg = [];
 
@@ -172,7 +172,7 @@ function select_room_change() {
     var concurrent_courses = simultaneous_courses(c);
 
     var occupied_rooms = [];
-    for (i = 0; i < concurrent_courses.length; i++) {
+    for (let i = 0; i < concurrent_courses.length; i++) {
       busy_rooms = rooms.roomgroups[concurrent_courses[i].room];
       for (j = 0; j < busy_rooms.length; j++) {
         if (occupied_rooms.indexOf(busy_rooms[j]) == -1) {
@@ -191,7 +191,7 @@ function select_room_change() {
       initial_rg = [];
     }
 
-    for (i = 0; i < initial_rg.length; i++) {
+    for (let i = 0; i < initial_rg.length; i++) {
       cur_roomgroup = initial_rg[i];
       if (!is_garbage({ day: c.day, start_time: c.start })) {
 
@@ -225,14 +225,14 @@ function select_room_change() {
 
 
   // atomic rooms first, then composed
-  var rg, atomic_rooms, composed_rooms, room;
+  var atomic_rooms, composed_rooms, room;
   atomic_rooms = [];
   composed_rooms = [];
   var fake_id = new Date();
   fake_id = fake_id.getMilliseconds() + "-";
   room_tutor_change.proposal = [];
 
-  for (rg = 0; rg < proposed_rg.length; rg++) {
+  for (let rg = 0; rg < proposed_rg.length; rg++) {
     room = { fid: fake_id + proposed_rg[rg], content: proposed_rg[rg] };
     if (rooms.roomgroups[room.content].length == 1) {
       atomic_rooms.push(room);
@@ -553,8 +553,8 @@ var is_no_hidden_grp = true;
 
 function check_hidden_groups() {
   is_no_hidden_grp = true;
-  for (var a in groups) {
-    for (var g in groups[a]) {
+  for (let a in groups) {
+    for (let g in groups[a]) {
       if (groups[a][g].display == false) {
         is_no_hidden_grp = false;
         return;
@@ -566,8 +566,8 @@ function check_hidden_groups() {
 function are_all_groups_hidden() {
   // if all groups are hidden
   // all groups are automatically displayed
-  for (var a in groups) {
-    for (var g in groups[a]) {
+  for (let a in groups) {
+    for (let g in groups[a]) {
       if (groups[a][g].display == true) {
         return;
       }
@@ -577,8 +577,8 @@ function are_all_groups_hidden() {
 }
 
 function set_all_groups_display(isDisplayed) {
-  for (var a in groups) {
-    for (var g in groups[a]) {
+  for (let a in groups) {
+    for (let g in groups[a]) {
       groups[a][g].display = isDisplayed;
     }
   }
@@ -618,7 +618,7 @@ function apply_gp_display(gp, start, go_button) {
 // that is a descendant of gp, gp included
 function propagate_display_down(gp, b) {
   gp.display = b;
-  for (var i = 0; i < gp.children.length; i++) {
+  for (let i = 0; i < gp.children.length; i++) {
     propagate_display_down(groups[gp.promo][gp.children[i]], b);
   }
 }
@@ -758,7 +758,7 @@ function apply_ckbox(dk) {
    ----------------------*/
 
 function compute_changes(changes, conc_tutors, gps) {
-  var i, id, change, prof_changed, gp_changed, gp_named, date;
+  var id, change, prof_changed, gp_changed, gp_named, date;
 
   var cur_course, cb;
 
@@ -767,7 +767,7 @@ function compute_changes(changes, conc_tutors, gps) {
   var butOK = { list: [{ txt: "Ok", click: function (d) { } }] };
 
 
-  for (i = 0; i < Object.keys(cours_bouge).length; i++) {
+  for (let i = 0; i < Object.keys(cours_bouge).length; i++) {
     id = Object.keys(cours_bouge)[i];
     cur_course = get_course(id);
     cb = cours_bouge[id];
@@ -1010,7 +1010,7 @@ function aggregate_hours(tutor, iweek) {
   //console.log("Aggregate "+ tutor + "IW " + iweek);
 
   var ret = new Array(7);
-  for (var i = 0; i < ret.length; i++) {
+  for (let i = 0; i < ret.length; i++) {
     ret[i] = {
       duration: 0, month: 0,
       iweek: iweek
@@ -1025,7 +1025,7 @@ function aggregate_hours(tutor, iweek) {
     return ret;
   }
 
-  for (i = 0; i < week_desc.days.day_list.length; i++) {
+  for (let i = 0; i < week_desc.days.day_list.length; i++) {
     var dday = week_desc.days.day_list[i];
     ret[day_shifts[dday.ref]].month = dday.month;
   }
@@ -1041,7 +1041,7 @@ function aggregate_hours(tutor, iweek) {
 
 function print_agg(service) {
   console.log("Service");
-  for (var i = 0; i < service.length; i++) {
+  for (let i = 0; i < service.length; i++) {
     console.log("D" + service[i].duration + " -M" + service[i].month + " -IW"
       + service[i].iweek);
   }
@@ -1066,7 +1066,7 @@ function compute_weekend(service, issues) {
 // append problem infos in issues
 function compute_weekly(tutor, service, issues) {
   var working_minutes = 0;
-  for (var i = 0; i < service.length; i++) {
+  for (let i = 0; i < service.length; i++) {
     working_minutes += service[i].duration;
   }
   if (Object.keys(working_time).includes(tutor)) {
@@ -1095,7 +1095,7 @@ function build_day_desc(service, iday) {
 function compute_tunnels(service, issues) {
   var last_free = -1;
   var consec_busy = 0;
-  for (var i = 0; i < service.length; i++) {
+  for (let i = 0; i < service.length; i++) {
     if (service[i].duration == 0) {
       if (consec_busy > law_constraints.max_consec_days) {
         if ((i - 1 > 6 || last_free > 6)
@@ -1229,9 +1229,9 @@ function law_issue_to_txt(tutor, issue) {
 function confirm_law_constraints(changes, conc_tutors, gps) {
   var issues;
   var issues_txt = [];
-  for (var i = 0; i < conc_tutors.length; i++) {
+  for (let i = 0; i < conc_tutors.length; i++) {
     issues = check_constraints_tutor(conc_tutors[i]);
-    for (var j = 0; j < issues.length; j++) {
+    for (let j = 0; j < issues.length; j++) {
       issues_txt.push({ txt: law_issue_to_txt(conc_tutors[i], issues[j]) });
     }
   }
@@ -1409,9 +1409,8 @@ function mail_ack(msg) {
 
 function array_to_msg(a) {
   console.log(a);
-  var i;
   var ret = "";
-  for (i = 0; i < a.length - 2; i++) {
+  for (let i = 0; i < a.length - 2; i++) {
     ret += a[i] + ", ";
   }
   if (a.length > 1) {
@@ -1463,14 +1462,14 @@ function compute_pref_changes(changes) {
   var nbDispos = 0;
   var modified_days = [];
 
-  for (var i = 0; i < Object.keys(user.dispos).length; i++) {
+  for (let i = 0; i < Object.keys(user.dispos).length; i++) {
     //user.dispos[i].val != user.dispos_bu[i].val	   &&
     if (modified_days.indexOf(user.dispos[i].day) == -1) {
       modified_days.push(user.dispos[i].day);
     }
   }
 
-  for (i = 0; i < modified_days.length; i++) {
+  for (let i = 0; i < modified_days.length; i++) {
     changes.push({
       day: modified_days[i],
       val_inter: []
@@ -1637,7 +1636,7 @@ function splash(splash_ds) {
 
 
 
-  var i, f;
+  var f;
 
   var but_par = splash_ds.but;
 
@@ -1660,7 +1659,7 @@ function splash(splash_ds) {
     - .5 * (but_dat.length * but_par.width
       + (but_dat.length - 1) * but_par.slack_x);
   var init_but_y = wp.y + wp.height - but_par.height - but_par.slack_y;
-  for (i = 0; i < but_dat.length; i++) {
+  for (let i = 0; i < but_dat.length; i++) {
     f = but_dat[i].click;
     but_dat[i].x = init_but_x + i * (but_par.width + but_par.slack_x);
     but_dat[i].y = init_but_y;
@@ -1761,7 +1760,7 @@ function splash(splash_ds) {
 
 function apply_stype() {
   if (ckbox["dis-mod"].cked) {
-    for (var d = 0; d < user.dispos.length; d++) {
+    for (let d = 0; d < user.dispos.length; d++) {
       user.dispos[d].day = user.dispos_type[d].day;
       user.dispos[d].hour = user.dispos_type[d].hour;
       user.dispos[d].val = user.dispos_type[d].val;
@@ -1997,7 +1996,7 @@ function apply_cancel_selections() {
   var display = function (d) {
     d.display = true;
   };
-  for (var di = 0; di < sel_popup.available.length; di++) {
+  for (let di = 0; di < sel_popup.available.length; di++) {
     popup_data(sel_popup.available[di].type)
       .forEach(display);
   }
