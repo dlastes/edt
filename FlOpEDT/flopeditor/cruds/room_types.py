@@ -63,8 +63,6 @@ def set_rooms(room_type, new_rooms, entries):
 def read(department):
     """Return all room types for a department
 
-    :param request: Client request.
-    :type request:  django.http.HttpRequest
     :param department: Department.
     :type department:  base.models.Department
     :return: Server response for the request.
