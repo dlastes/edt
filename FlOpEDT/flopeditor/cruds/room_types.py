@@ -161,7 +161,7 @@ def update(entries, department):
                 ERROR_RESPONSE,
                 "Le nom du type de salle à modifier est trop long."
             ])
-        elif RoomType.objects.filter(name=new_name, department=department) and old_name != new_name:
+        elif old_name != new_name and RoomType.objects.filter(name=new_name, department=department):
             entries['result'].append(
                 [ERROR_RESPONSE,
                  "L'abbréviation de ce type de salle est déjà utilisé."])

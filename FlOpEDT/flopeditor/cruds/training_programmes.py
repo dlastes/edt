@@ -109,7 +109,9 @@ def update(entries, department):
                 programme_to_update = TrainingProgramme.objects.get(abbrev=old_abbrev,
                                                                     name=old_name,
                                                                     department=department)
-                if TrainingProgramme.objects.filter(abbrev=new_abbrev, department=department):
+                if old_abbrev != new_abbrev and \
+                            TrainingProgramme.objects.filter(abbrev=new_abbrev,
+                                                             department=department):
                     entries['result'].append(
                         [ERROR_RESPONSE,
                          "L'abbréviation de cette promo est déjà utilisée."])
