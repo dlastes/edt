@@ -111,11 +111,17 @@ def create(entries, department):
         new_name = entries['new_values'][i][0]
         new_tp_abbrev = entries['new_values'][i][1]
         new_type_name = entries['new_values'][i][3]
+
         try:
             train = TrainingProgramme.objects.get(
                 abbrev=new_tp_abbrev, department=department)
             gtype = GroupType.objects.get(
                 name=new_type_name, department=department)
+            new_parents = []
+            for group_name in entries['new_values'][i][2]:
+                new_parents.append(Group.objects.get(
+                    name=group_name, train_prog=train))
+
             if validate_student_groups_values(entries['new_values'][i], entries):
                 if Group.objects.filter(name=new_name, train_prog=train):
                     entries['result'].append([
@@ -123,14 +129,13 @@ def create(entries, department):
                         "un groupe de ce nom existe déjà dans cette promo."
                     ])
                 else:
+
                     group = Group.objects.create(
                         name=new_name, size=entries['new_values'][i][4], train_prog=train, type=gtype)
                     group.basic = True
 
-                    for group_name in entries['new_values'][i][2]:
+                    for parent in new_parents:
                         group.basic = False
-                        parent = Group.objects.get(
-                            name=group_name, train_prog=train)
                         group.parent_groups.add(parent)
 
                     group.save()
@@ -143,7 +148,7 @@ def create(entries, department):
         except Group.DoesNotExist:
             entries['result'].append(
                 [ERROR_RESPONSE,
-                 "Un groupe de peut-être le sous-groupe que d'un groupe de la même promo."])
+                 "Un groupe ne peut-être le sous-groupe que d'un groupe de la même promo."])
 
     return entries
 
@@ -180,7 +185,7 @@ def update(entries, department):
             new_gtype = GroupType.objects.get(
                 name=new_type_name, department=department)
 
-            if new_name != old_name and Group.objects.filter(name=new_name, train_prog=new_train):
+            if (new_name != old_name or new_tp_abbrev != old_tp_abbrev) and Group.objects.filter(name=new_name, train_prog=new_train):
                 entries['result'].append([
                     ERROR_RESPONSE,
                     "un groupe de ce nom existe déjà dans cette promo."
@@ -212,7 +217,7 @@ def update(entries, department):
         except Group.DoesNotExist:
             entries['result'].append(
                 [ERROR_RESPONSE,
-                 "Un groupe de peut-être le sous-groupe que d'un groupe de la même promo."])
+                 "Un groupe ne peut-être le sous-groupe que d'un groupe de la même promo."])
 
     return entries
 
