@@ -195,14 +195,14 @@ function create_grid_data() {
       create_slot_grid_data();
     }
 
-    for (var p = 0; p < set_promos.length; p++) {
+    for (let p = 0; p < set_promos.length; p++) {
       compute_promo_leaves(root_gp[p].gp);
     }
 
 
     if (slot_case) {
-      for (var s = 0; s < Object.keys(rev_constraints).length; s++) {
-        for (var r = 0; r < set_rows.length; r++) {
+      for (let s = 0; s < Object.keys(rev_constraints).length; s++) {
+        for (let r = 0; r < set_rows.length; r++) {
           var start = Object.keys(rev_constraints)[s];
           if (start < time_settings.time.day_finish_time) {
             var gscp = {
@@ -341,7 +341,7 @@ function def_drag_sca() {
         drag.y = 0;
         drag.init = +drag.sel.select("rect").attr("y");
         svg.get_dom("dg").node().appendChild(drag.sel.node());
-        drag.svg = d3.select("#edt-main")
+        drag.svg = d3.select("#edt-main");
         drag.svg_h = +drag.svg.attr("height"); //+200;
 
         drag.sel
@@ -487,8 +487,8 @@ function create_groups(data_groups) {
 
   extract_all_groups_structure(data_groups);
 
-  for (var r = 0; r < set_rows.length; r++) {
-    for (var p = 0; p < row_gp[r].promos.length; p++) {
+  for (let r = 0; r < set_rows.length; r++) {
+    for (let p = 0; p < row_gp[r].promos.length; p++) {
       root = root_gp[row_gp[r].promos[p]].gp;
       create_static_att_groups(root);
     }
@@ -504,7 +504,7 @@ function create_groups(data_groups) {
   }
   for (let p = 0; p < set_promos.length; p++) {
     var keys = Object.keys(groups[p]);
-    for (var g = 0; g < keys.length; g++) {
+    for (let g = 0; g < keys.length; g++) {
       groups[p][keys[g]].bx = groups[p][keys[g]].x;
       groups[p][keys[g]].bw = groups[p][keys[g]].width;
     }
@@ -516,7 +516,7 @@ function create_groups(data_groups) {
 
 function extract_all_groups_structure(r) {
   var init_nbPromos = r.length;
-  for (var npro = 0; npro < init_nbPromos; npro++) {
+  for (let npro = 0; npro < init_nbPromos; npro++) {
     extract_groups_structure(r[npro], -1, -1);
   }
   var sorted_rows = set_rows.sort();
@@ -539,7 +539,7 @@ function extract_groups_structure(r, npro, nrow) {
     width: 0,
     est: 0,
     lft: 0,
-  }
+  };
 
   if ("undefined" === typeof r.buth) {
     gr.buth = 1;
@@ -724,10 +724,10 @@ function update_all_groups() {
   var cur_rw, root, disp;
 
   // compute EST and width, and compute display row
-  for (var r = 0; r < set_rows.length; r++) {
+  for (let r = 0; r < set_rows.length; r++) {
     cur_rw = 0;
     disp = false;
-    for (var p = 0; p < row_gp[r].promos.length; p++) {
+    for (let p = 0; p < row_gp[r].promos.length; p++) {
       root = root_gp[row_gp[r].promos[p]].gp;
       root.est = cur_rw;
       compute_promo_est_n_wh(root);
@@ -1006,12 +1006,9 @@ function def_drag() {
     .on("drag", function (d) {
       if (ckbox["edt-mod"].cked && fetch.done) {
         pending.prepare_dragndrop(d);
-        cur_over = which_slot(drag.x +
-          parseInt(drag.sel.select("rect")
-            .attr("x")),
-          drag.y +
-          parseInt(drag.sel.select("rect")
-            .attr("y")),
+        cur_over = which_slot(
+          drag.x + parseInt(drag.sel.select("rect").attr("x")),
+          drag.y + parseInt(drag.sel.select("rect").attr("y")),
           d);
         //console.log(cur_over.day, cur_over.start_time);
 
@@ -1422,9 +1419,11 @@ function splash_violated_constraints(check_list, step) {
         }]
       },
       com: {
-        list: [{ txt: "Attention", ftsi: 23 },
-        { txt: "" },
-        { txt: privilege_warning }]
+        list: [
+          { txt: "Attention", ftsi: 23 },
+          { txt: "" },
+          { txt: privilege_warning }
+        ]
       }
     };
     splash_csts.com.list = splash_csts.com.list.concat(warn_check.map(function (el) {
@@ -1456,7 +1455,7 @@ function splash_violated_constraints(check_list, step) {
         list: [{ txt: warning_sentence, ftsi: 23 }
         ]
       }
-    }
+    };
     splash_csts.com.list = splash_csts.com.list.concat(warn_check.map(function (el) {
       return { txt: el };
     }));
@@ -1978,7 +1977,7 @@ function def_cm_change() {
         confirm_room_change(d);
       }
       go_cm_room_tutor_change();
-    }
+    };
   }
 
   salarie_cm_settings.click = function (d) {
@@ -1990,7 +1989,7 @@ function def_cm_change() {
       confirm_salarie_change(d);
     }
     go_cm_room_tutor_change();
-  }
+  };
 
 }
 
@@ -2090,14 +2089,14 @@ function add_panel(d) {
 // returns the data related to a given filter type
 function popup_data(type) {
   switch (type) {
-    case "tutor":
-      return tutors.all;
-    case "module":
-      return modules.all;
-    case "room":
-      return rooms_sel.all;
-    default:
-      return [];
+  case "tutor":
+    return tutors.all;
+  case "module":
+    return modules.all;
+  case "room":
+    return rooms_sel.all;
+  default:
+    return [];
   }
 }
 

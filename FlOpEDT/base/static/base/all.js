@@ -171,7 +171,7 @@ file_fetch.groups.callback = function () {
 
   fetch.groups_ok = true;
   create_grid_data();
-}
+};
 
 
 
@@ -185,7 +185,7 @@ file_fetch.groups.callback = function () {
 
 
 
-create_quote()
+create_quote();
 
 def_drag();
 def_cm_change();
@@ -224,7 +224,7 @@ d3.select("body")
     }
     cancel_cm_adv_preferences();
     cancel_cm_room_tutor_change();
-  })
+  });
 
 
 

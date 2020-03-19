@@ -59,7 +59,8 @@ function go_pref(quick) {
   // preferences: background color, and smiley
 
   dat = svg.get_dom("edt-mg").selectAll(".dispo")
-    .data(user.dispos,
+    .data(
+      user.dispos,
       function (d) {
         return [d.day, d.start_time, d.duration, d.val].join('-');
       })
@@ -727,8 +728,10 @@ function go_bknews(quick) {
 
   var fl_all = flash
     .selectAll(".bn-all")
-    .data(bknews.cont,
-      function (d) { return d.id; });
+    .data(
+      bknews.cont,
+      function (d) { return d.id; }
+    );
 
   var ffl = fl_all
     .enter()
@@ -920,7 +923,7 @@ function go_menus() {
 
 
 /*--------------------
-   ------ COURS -------
+  ------ COURS -------
   --------------------*/
 
 // update display cours attribute according to current selections
@@ -938,7 +941,7 @@ function update_selection() {
       return d.name == c.room;
     });
     if (typeof mod === 'undefined' || typeof tut === 'undefined'
-      || typeof roo === 'undefined') {
+        || typeof roo === 'undefined') {
       c.display = false;
     } else {
       c.display = mod.display && tut.display && roo.display;
@@ -1037,7 +1040,7 @@ function go_courses(quick) {
     .attr("height", cours_height);
 
   if (ckbox["edt-mod"].cked
-    && logged_usr.dispo_all_see) {
+      && logged_usr.dispo_all_see) {
     d3.selectAll("rect.crect").style("fill", function (d) {
       try {
         lDis = dispos[d.prof][d.day][d.slot];
@@ -1126,7 +1129,7 @@ function go_courses(quick) {
 
 
 /*-----------------------
-   ------ VALIDATE ------
+  ------ VALIDATE ------
   -----------------------*/
 
 // update acknowledgment message
@@ -1203,7 +1206,7 @@ function but_back() {
 
 
 /*--------------------
-   ------ ALL -------
+  ------ ALL -------
   --------------------*/
 
 // update everything
@@ -1298,7 +1301,7 @@ function update_relevant() {
         mod.relevant = true;
       }
     } else if (typeof mod !== 'undefined'
-      && typeof tut !== 'undefined' && tut.display) {
+               && typeof tut !== 'undefined' && tut.display) {
       mod.relevant = true;
     }
   });

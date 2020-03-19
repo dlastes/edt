@@ -827,11 +827,13 @@ function compute_changes(changes, conc_tutors, gps) {
           id: "def-room",
           but: butOK,
           com: {
-            list: [{ txt: "Vous avez laissé la salle 'par défaut'." },
-            { txt: "Pour l'instant, le changement n'est pas accepté." },
-            { txt: "Merci de chercher et de renseigner une salle disponible." }]
+            list: [
+              { txt: "Vous avez laissé la salle 'par défaut'." },
+              { txt: "Pour l'instant, le changement n'est pas accepté." },
+              { txt: "Merci de chercher et de renseigner une salle disponible." }
+            ]
           }
-        }
+        } ;
 
         splash(splash_case);
         return false;
@@ -926,8 +928,8 @@ function compute_next_day(day_desc) {
     ref: ''
   };
   if (day_desc.ref == 'su') {
-    ret.iweek++;
-    ret.ref = 'm'
+    ret.iweek++ ;
+    ret.ref = 'm' ;
   } else {
     ret.ref = day_refs[day_refs.indexOf(day_desc.ref) + 1];
   }
@@ -1023,7 +1025,7 @@ function aggregate_hours(tutor, iweek) {
     return ret;
   }
 
-  for (var i = 0; i < week_desc.days.day_list.length; i++) {
+  for (i = 0; i < week_desc.days.day_list.length; i++) {
     var dday = week_desc.days.day_list[i];
     ret[day_shifts[dday.ref]].month = dday.month;
   }
@@ -1072,7 +1074,7 @@ function compute_weekly(tutor, service, issues) {
       issues.push({
         nok_type: 'weekly',
         duration: working_minutes
-      })
+      }) ;
     }
   }
 }
@@ -1106,7 +1108,7 @@ function compute_tunnels(service, issues) {
             begin: beg_day.date,
             end: end_day.date,
             nb_consec: consec_busy
-          })
+          }) ;
         }
       }
       last_free = i;
@@ -1199,25 +1201,25 @@ function min_to_hm_txt(minutes) {
 function law_issue_to_txt(tutor, issue) {
   var ret;
   switch (issue.nok_type) {
-    case 'sleep':
-      ret = "Nuit trop courte pour " + tutor + " entre le " + issue.prev + " et le " + issue.next + " : "
-        + min_to_hm_txt(issue.duration) + " (min " + min_to_hm_txt(law_constraints.sleep_time) + ")"
-      break;
-    case 'weekend':
-      ret = tutor + " a seulement " + issue.nb_free_days + " jour libre dans la semaine (min "
-        + law_constraints.free_days_per_week + ")";
-      break;
-    case 'tunnel':
-      ret = tutor + " a " + issue.nb_consec + " jours consécutifs sans repos (max "
-        + law_constraints.max_consec_days + ") entre le " + issue.begin
-        + " et le " + issue.end;
-      break;
-    case 'weekly':
-      ret = tutor + " travaille " + min_to_hm_txt(issue.duration) + "  cette semaine (max "
-        + min_to_hm_txt(working_time[tutor] + law_constraints.week) + ")"
-      break;
-    case 'monthly':
-      break;
+  case 'sleep':
+    ret = "Nuit trop courte pour " + tutor + " entre le " + issue.prev + " et le " + issue.next + " : "
+      + min_to_hm_txt(issue.duration) + " (min " + min_to_hm_txt(law_constraints.sleep_time) + ")" ;
+    break;
+  case 'weekend':
+    ret = tutor + " a seulement " + issue.nb_free_days + " jour libre dans la semaine (min "
+      + law_constraints.free_days_per_week + ")";
+    break;
+  case 'tunnel':
+    ret = tutor + " a " + issue.nb_consec + " jours consécutifs sans repos (max "
+      + law_constraints.max_consec_days + ") entre le " + issue.begin
+      + " et le " + issue.end;
+    break;
+  case 'weekly':
+    ret = tutor + " travaille " + min_to_hm_txt(issue.duration) + "  cette semaine (max "
+      + min_to_hm_txt(working_time[tutor] + law_constraints.week) + ")" ;
+    break;
+  case 'monthly':
+    break;
   }
   return ret;
 }
@@ -1253,7 +1255,7 @@ function confirm_law_constraints(changes, conc_tutors, gps) {
         width: 250
       },
       com: { list: issues_txt }
-    }
+    } ;
 
     splash(splash_confirm);
   }
@@ -1305,7 +1307,7 @@ function confirm_contact_all(changes, conc_tutors, gps) {
       gp_txt += "les groupes ";
     }
     gp_txt += array_to_msg(gps);
-    gp_txt += "."
+    gp_txt += ".";
 
     att_txt = "/!\\ Votre nom sera mentionné dans le mail /!\\";
   } else {
@@ -1330,14 +1332,18 @@ function confirm_contact_all(changes, conc_tutors, gps) {
 
   if (logged_usr.is_student == "True") {
     list_but = {
-      list: [{ txt: "Oui", click: function (d) { send_mail_proposal(changes); } },
-      { txt: "Non", click: function (d) { } }]
+      list: [
+        { txt: "Oui", click: function (d) { send_mail_proposal(changes); } },
+        { txt: "Non", click: function (d) { } }
+      ]
     };
   } else {
     list_but = {
-      list: [{ txt: "Oui", click: function (d) { send_edt_change(changes); } },
-      { txt: "Contacter (email)", click: function (d) { send_mail_proposal(changes) } },
-      { txt: "Non", click: function (d) { } }]
+      list: [
+        { txt: "Oui", click: function (d) { send_edt_change(changes); } },
+        { txt: "Contacter (email)", click: function (d) { send_mail_proposal(changes); } },
+        { txt: "Non", click: function (d) { } }
+      ]
     };
   }
 
@@ -1345,11 +1351,13 @@ function confirm_contact_all(changes, conc_tutors, gps) {
     id: "conf-cont",
     but: list_but,
     com: {
-      list: [{ txt: prof_txt },
-      { txt: gp_txt },
-      { txt: att_txt }]
+      list: [
+        { txt: prof_txt },
+        { txt: gp_txt },
+        { txt: att_txt }
+      ]
     }
-  }
+  };
 
   splash(splash_confirm);
 }
@@ -1387,7 +1395,7 @@ function mail_ack(msg) {
     id: "mail-ack",
     but: { list: [{ txt: "Ok.", click: function (d) { } }] },
     com: { list: [] }
-  }
+  };
   if (msg.status == "OK") {
     splash_disclaimer.com.list[0] = { txt: "Email envoyé !" };
   } else {
@@ -1453,7 +1461,7 @@ function send_edt_change(changes) {
 //
 function compute_pref_changes(changes) {
   var nbDispos = 0;
-  var modified_days = []
+  var modified_days = [];
 
   for (var i = 0; i < Object.keys(user.dispos).length; i++) {
     //user.dispos[i].val != user.dispos_bu[i].val	   &&
@@ -1566,13 +1574,13 @@ function edt_change_ack(msg) {
     ack.status = 'KO';
     ack.more = msg.more;
     if (ack.more != null && ack.more.startsWith("Version")) {
-      ack.more = "Il y a eu une modification concurrente. Rechargez et réessayez."
+      ack.more = "Il y a eu une modification concurrente. Rechargez et réessayez.";
     }
     var splash_disclaimer = {
       id: "failed-edt-mod",
       but: { list: [{ txt: "Zut. Ok.", click: function (d) { } }] },
       com: { list: [{ txt: ack.edt }] }
-    }
+    };
     splash(splash_disclaimer);
   }
   // console.log(ack.more);
@@ -1736,7 +1744,7 @@ function splash(splash_ds) {
     .attr("text-anchor", function (d) { return d.anch; })
     .attr("x", classic_x)
     .attr("y", classic_y)
-    .text(classic_txt)
+    .text(classic_txt);
 
 }
 
@@ -1974,7 +1982,7 @@ function apply_selection_display_all(p) {
         || !ckbox["dis-mod"].cked))) {
     p.list.forEach(function (d) {
       d.display = true;
-    })
+    });
     update_active();
     update_relevant();
     go_selection_buttons();

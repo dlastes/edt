@@ -65,18 +65,18 @@ var logo = {
   get_current_margin: function () {
     return this.scale * this.init.margin;
   }
-}
+};
 
 
-var headlines =
-  ["Gestionnaire d'emploi du temps <span id=\"flopGreen\">fl"
+var headlines = [
+  "Gestionnaire d'emploi du temps <span id=\"flopGreen\">fl"
     + "</span>exible et <span id=\"flopGreen\">op</span>enSource",
   "\"Qui veut faire les <span id=\"flopRed\">EDT</span> cette année ?\" ... "
-  + "<span id=\"flopGreen\">flop</span> !",
+    + "<span id=\"flopGreen\">flop</span> !",
   "Et votre emploi du temps fera un "
-  + "<span id=\"flopRedDel\">flop</span> carton !",
-    "Et même votre logo sera à l'heure..."
-  ];
+    + "<span id=\"flopRedDel\">flop</span> carton !",
+  "Et même votre logo sera à l'heure..."
+];
 
 
 init_logo();

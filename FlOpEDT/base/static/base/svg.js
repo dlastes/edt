@@ -42,12 +42,12 @@ Svg.prototype.add_child = function (parent_name, child_name) {
   this.layout[child_name] = this.layout[parent_name]
     .append("g").attr("id", "layout-" + child_name);
   return this.layout[child_name];
-}
+};
 
 // get the dom element corresponding to a layout name
 Svg.prototype.get_dom = function (name) {
   return this.layout[name];
-}
+};
 
 // create the svg element in the page
 Svg.prototype.create_container = function () {
@@ -76,11 +76,11 @@ Svg.prototype.create_container = function () {
     .append("g")
     .attr("transform", dsp_svg.trans());
 
-}
+};
 
 // create layouts according to the plan
 Svg.prototype.create_layouts = function (build_plan_grounds) {
   build_plan_grounds.forEach(function (parent_child) {
     this.add_child(parent_child[0], parent_child[1]);
   }, this);
-}
+};

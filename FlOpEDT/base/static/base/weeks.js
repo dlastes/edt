@@ -34,7 +34,7 @@ function Week(year, week) {
 // useful for url generation
 Week.prototype.url = function () {
   return this.year + "/" + this.week;
-}
+};
 
 // comparison function
 Week.compare = function (week_a, week_b) {
@@ -49,12 +49,12 @@ Week.compare = function (week_a, week_b) {
     }
   }
   return 1;
-}
+};
 
 // id function
 Week.id_fun = function (week) {
   return "Y" + week.year + "-W" + week.week;
-}
+};
 
 
 
@@ -82,24 +82,24 @@ WeeksExcerpt.prototype.add_full_weeks = function (weeks) {
   this.adapt_full_weeks();
   this.first = 0;
   this.selected = 0;
-}
+};
 // the excerpt should not exceed full weeks size
 WeeksExcerpt.prototype.adapt_full_weeks = function () {
   this.nb = Math.min(this.desired_nb, this.full_weeks.get_nb());
-}
+};
 
 // getter for the selected index
 WeeksExcerpt.prototype.get_iselected = function () {
   return [this.selected];
-}
+};
 WeeksExcerpt.prototype.get_iselected_pure = function () {
   return this.selected;
-}
+};
 
 // getter for the selected week
 WeeksExcerpt.prototype.get_selected = function () {
   return this.full_weeks.data[this.selected];
-}
+};
 
 
 // try to go at week chosen, and set the window around
@@ -127,7 +127,7 @@ WeeksExcerpt.prototype.chose = function (chosen) {
   // extract the data
   this.data = this.full_weeks.data.slice(this.first,
     this.first + this.nb);
-}
+};
 
 // move the excerpt data to earlier weeks
 WeeksExcerpt.prototype.move_earlier = function () {
@@ -136,7 +136,7 @@ WeeksExcerpt.prototype.move_earlier = function () {
     this.data.pop();
     this.data.unshift(this.full_weeks.data[this.first]);
   }
-}
+};
 
 // move the excerpt data to later weeks
 WeeksExcerpt.prototype.move_later = function () {
@@ -145,14 +145,14 @@ WeeksExcerpt.prototype.move_later = function () {
     this.data.splice(0, 1);
     this.data.push(this.full_weeks.data[this.first + this.nb]);
   }
-}
+};
 
 // new selection
 WeeksExcerpt.prototype.change_selection = function (shift) {
   if (shift >= 0 && shift < this.nb) {
     this.selected = this.first + shift;
   }
-}
+};
 
 
 
@@ -175,20 +175,20 @@ Weeks.prototype.add_all = function (all_weeks) {
   all_weeks.forEach(function (week) {
     this.data.push(new Week(week.year, week.week));
   }, this);
-}
+};
 
 
 Weeks.prototype.get_min = function () {
   return this.data[0];
-}
+};
 
 Weeks.prototype.get_max = function () {
   return this.data[this.data.length - 1];
-}
+};
 
 Weeks.prototype.get_nb = function () {
   return this.data.length;
-}
+};
 
 // add a week indexed by iweek in full_weeks
 Weeks.prototype.add_by_index = function (full_weeks, iweek) {
@@ -204,7 +204,7 @@ Weeks.prototype.add_by_index = function (full_weeks, iweek) {
     return true;
   }
   return false;
-}
+};
 
 /********************/
 /* class WeekBanner */
@@ -283,7 +283,7 @@ WeekBanner.prototype.spawn = function (full_weeks) {
     .attr("stroke-width", 1)
     .attr("cx", this.mix.right_sel_x())
     .attr("cy", .5 * this.mix.height)
-    .attr("r", this.mix.rad * .5 * this.mix.height)
+    .attr("r", this.mix.rad * .5 * this.mix.height);
 
   btn_later
     .append("text")
@@ -376,20 +376,20 @@ WeekBanner.prototype.update = function (quick) {
       .select("ellipse")
       .transition(t)
       .attr("cx", this.mix.sel_x);
-}
+};
 
 
 // move timeline to the left
 WeekBanner.prototype.week_left = function () {
   this.mix.weeks.move_earlier();
   this.update(false);
-}
+};
 
 // move timeline to the right
 WeekBanner.prototype.week_right = function () {
   this.mix.weeks.move_later();
   this.update(false);
-}
+};
 
 
 // go to selected week
@@ -404,7 +404,7 @@ WeekBanner.prototype.apply_wk_change = function (d, i) { //if(fetch.done) {
   fetch_all(false, true);
 
   this.update(false);
-} //}
+}; //}
 
 
 // could be done with prototype and (Object.getPrototypeOf(parameter)

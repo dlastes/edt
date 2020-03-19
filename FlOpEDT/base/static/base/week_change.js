@@ -254,18 +254,22 @@ function fill_missing_preferences(tutor, ts) {
     var next;
     while (current < ts.day_finish_time) {
       if (current < ts.lunch_break_start_time) {
-        next = Math.min(current + ts.def_pref_duration,
+        next = Math.min(
+          current + ts.def_pref_duration,
           ts.lunch_break_start_time);
       } else {
-        next = Math.min(current + ts.def_pref_duration,
+        next = Math.min(
+          current + ts.def_pref_duration,
           ts.day_finish_time);
       }
-      insert_interval({
-        start_time: current,
-        duration: next - current,
-        value: -1
-      },
-        dispos[tutor][day.ref]);
+      insert_interval(
+        {
+          start_time: current,
+          duration: next - current,
+          value: -1
+        },
+        dispos[tutor][day.ref]
+      );
       if (next == ts.lunch_break_start_time) {
         next = ts.lunch_break_finish_time;
       }
@@ -396,7 +400,7 @@ function fetch_bknews(first) {
               id: "mail-sent",
               but: { list: [{ txt: "Ok", click: function (d) { splash_id = 0; } }] },
               com: { list: [{ txt: "E-mail envoyé !", ftsi: 23 }] }
-            }
+            };
             splash(splash_mail);
 
           } else if (splash_id == 2) {
@@ -405,7 +409,7 @@ function fetch_bknews(first) {
               id: "quote-sent",
               but: { list: [{ txt: "Ok", click: function (d) { splash_id = 0; } }] },
               com: { list: [{ txt: "Citation envoyée ! (en attente de modération)", ftsi: 23 }] }
-            }
+            };
             splash(splash_quote);
 
           }
@@ -438,7 +442,7 @@ function translate_bknews_from_csv(d) {
     fill_color: d.fill_color,
     strk_color: d.strk_color,
     txt: d.txt
-  }
+  };
 }
 
 
@@ -509,7 +513,7 @@ function fetch_cours() {
       var sel_week = wdw_weeks.get_selected();
       if (Week.compare(exp_week, sel_week) == 0) {
 
-        week_days = new WeekDays(JSON.parse(req.getResponseHeader('days').replace(/\'/g, '"')));
+        week_days = new WeekDays(JSON.parse(req.getResponseHeader('days').replace(/'/g, '"')));
         days_header.mix.days = week_days;
 
         tutors.pl = [];
@@ -729,12 +733,12 @@ function side_week_rcv(side_week) {
   return function (msg, ts, req) {
 
 
-    var side_days = new WeekDays(JSON.parse(req.getResponseHeader('days').replace(/\'/g, '"')));
+    var side_days = new WeekDays(JSON.parse(req.getResponseHeader('days').replace(/'/g, '"')));
     var side_cours_pl = d3.csvParse(msg, translate_cours_pl_from_csv);
 
     insert_side_week(side_week, side_days, side_cours_pl);
 
-  }
+  };
 }
 
 
@@ -1146,10 +1150,10 @@ function swap_data(fetched, current, type) {
       }
       return em;
     }
-  )
+  );
   var panel = sel_popup.panels.find(function (p) {
     return p.type == type;
-  })
+  });
   if (typeof panel !== 'undefined') {
     panel.list = current.all;
   }

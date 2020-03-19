@@ -45,14 +45,14 @@ Day.prototype.max_days_in_month = function () {
   } else {
     return 30;
   }
-}
+};
 
 
 
 // 'static' function 
 Day.id_fun = function (d) {
   return d.name + "-" + d.date;
-}
+};
 
 
 
@@ -67,29 +67,29 @@ function WeekDays(days) {
 
 WeekDays.prototype.nb_days = function () {
   return this.day_list.length;
-}
+};
 
 WeekDays.prototype.day_by_ref = function (ref) {
   return this.day_dict[ref];
-}
+};
 
 WeekDays.prototype.day_by_num = function (num) {
   return this.day_list.find(function (d) {
     return d.num == num;
   });
-}
+};
 
 WeekDays.prototype.data = function () {
   return this.day_list;
-}
+};
 
 WeekDays.prototype.refs = function () {
   return Object.keys(this.day_list);
-}
+};
 
 WeekDays.prototype.forEach = function (callback, this_arg) {
   return this.day_list.forEach(callback, this_arg);
-}
+};
 
 WeekDays.prototype.add_day = function (day = {
   num: iday,
@@ -100,13 +100,13 @@ WeekDays.prototype.add_day = function (day = {
   var new_day = new Day(day);
   this.day_list.push(new_day);
   this.day_dict[new_day.ref] = new_day;
-}
+};
 
 WeekDays.prototype.add_all = function (days) {
   days.forEach(function (day) {
     this.add_day(day);
   }, this);
-}
+};
 
 
 // Name and date of the days above the grid
@@ -119,7 +119,7 @@ function WeekDayHeader(svg, layout_name, days, half_day_rect, par) {
 
 WeekDayHeader.prototype.data = function () {
   return this.mix.days.data();
-}
+};
 
 WeekDayHeader.prototype.update = function (quick, half_day_rect) {
   var t = get_transition(quick);
@@ -166,7 +166,7 @@ WeekDayHeader.prototype.update = function (quick, half_day_rect) {
   }
 
   day_scale.exit().remove();
-}
+};
 
 
 // Private class
@@ -180,41 +180,41 @@ function WeekDayMix(par, days) {
     return i * (rootgp_width * labgp.width +
       dim_dispo.plot * (dim_dispo.width + dim_dispo.right)) +
       rootgp_width * labgp.width * .5;
-  }
+  };
   this.gsckd_y = function () {
     return -.75 * labgp.height_init;
-  }
+  };
   this.gsckd_txt = function (d) {
     return d.name + " " + d.date;
-  }
+  };
   this.grid_day_am_x = function (d) {
     return d.num * (rootgp_width * labgp.width +
       dim_dispo.plot * (dim_dispo.width + dim_dispo.right));
-  }
+  };
   this.grid_day_am_y = function () {
     return 0;
-  }
+  };
   this.grid_day_am_height = function () {
     var t = time_settings.time;
     return scale * nbRows * (t.lunch_break_start_time - t.day_start_time);
-  }
+  };
   this.grid_day_am_width = function () {
     return rootgp_width * labgp.width;
-  }
+  };
   this.grid_day_pm_x = function (d) {
     return this.grid_day_am_x(d);
-  }
+  };
   this.grid_day_pm_y = function () {
     var t = time_settings.time;
     return this.grid_day_am_y() + this.grid_day_am_height()
       + bknews_h();
-  }
+  };
   this.grid_day_pm_height = function () {
     var t = time_settings.time;
     return scale * nbRows * (t.day_finish_time - t.lunch_break_finish_time);
-  }
+  };
   this.grid_day_pm_width = function () {
     return rootgp_width * labgp.width;
-  }
+  };
 
 }

@@ -153,7 +153,7 @@ file_fetch.constraints.callback = function () {
 
   fetch.constraints_ok = true;
   create_grid_data();
-}
+};
 
 file_fetch.department.callback = function () {
   departments.data = this.data;
@@ -588,7 +588,7 @@ if (cosmo) {
 }
 sel_popup.available.forEach(function (f) {
   f.active = false;
-})
+});
 sel_popup.but["tutor"] = {
   // selector dimensions
   h: 30,
@@ -777,7 +777,7 @@ var departments = {
   topy: sel_popup.sely - sel_popup.selh - sel_popup.selmy,
   w: 35,
   h: sel_popup.selh
-}
+};
 
 // version number of the schedule
 var version;

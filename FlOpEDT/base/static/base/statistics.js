@@ -39,30 +39,30 @@ function removeChildNodes(parentNode) {
     their total number of hours of activity
 */
 function displayTutorHours(data) {
-  let container = d3.select('#statistics table')
+  let container = d3.select('#statistics table');
 
   // Clear table    
   removeChildNodes(container.node());
 
   // Insert header 
-  header = container.append('tr')
-  header.append('th').text('Professeur')
-  header.append('th').text('Nombre de cours')
+  header = container.append('tr');
+  header.append('th').text('Professeur');
+  header.append('th').text('Nombre de cours');
 
   tutor = container.selectAll('tr')
     .data(data)
     .enter()
-    .append('tr')
+    .append('tr');
 
   // Tutor name
   tutor
     .append('td')
-    .text((d) => d[1])
+    .text((d) => d[1]);
 
   // Number of slots
   tutor
     .append('td')
-    .text((d) => d[4])
+    .text((d) => d[4]);
 }
 
 /*
@@ -70,37 +70,37 @@ function displayTutorHours(data) {
 */
 function displayRoomActivity(data) {
 
-  let container = d3.select('#statistics table')
+  let container = d3.select('#statistics table');
 
   // Clear table
   removeChildNodes(container.node());
 
   // Insert header 
-  header = container.append('tr')
-  header.append('th').text('Salle')
-  header.append('th').text('Nombre de jours')
+  header = container.append('tr');
+  header.append('th').text('Salle');
+  header.append('th').text('Nombre de jours');
 
   rooms = container.selectAll('tr')
     .data(data.room_activity)
     .enter()
-    .append('tr')
+    .append('tr');
 
   // Room name
   rooms
     .append('td')
-    .text((d) => d.room)
+    .text((d) => d.room);
 
   // Number of days of inactivity
   rooms
     .append('td')
-    .text((d) => d.count)
+    .text((d) => d.count);
 }
 
 /*
     Global method to display 
 */
 function displayStatistic(label) {
-  let statistic = available_statistics[label]
+  let statistic = available_statistics[label];
   if (statistic) {
     // TODO : loading
 
@@ -164,6 +164,6 @@ var available_statistics = {
     url: statistics_urls['tutor_hours'],
     callback: displayTutorHours,
   },
-}
+};
 
 document.addEventListener('DOMContentLoaded', init);

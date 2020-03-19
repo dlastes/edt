@@ -262,7 +262,7 @@ function cross_d_y(d) {
 function txt_reqDispos() {
   var ret = "";
   if (required_dispos > 0) {
-    ret += "Dispos souhaitées : " + required_dispos + " créneaux."
+    ret += "Dispos souhaitées : " + required_dispos + " créneaux.";
   } else if (required_dispos == 0) {
     ret += "Vous n'intervenez pas cette semaine.";
   }
@@ -566,7 +566,7 @@ function butgp_txt_x(gp) {
 }
 
 function butgp_txt_y(gp) {
-  return butgp_y(gp) + 0.5 * butgp_height(gp)
+  return butgp_y(gp) + 0.5 * butgp_height(gp);
 }
 
 function butgp_txt(gp) {

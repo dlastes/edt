@@ -86,16 +86,16 @@ function WeekDayMixStype() {
   this.gsckd_x = function (datum, i) {
     return i * (dim_dispo.width + dim_dispo.mh)
       + dim_dispo.width * .5;
-  }
+  };
   this.gsckd_y = function (datum) {
     return - 20;
-  }
+  };
   this.gsckd_txt = function (d) {
     return d.name;
-  }
+  };
   this.gsckh_x = function (datum) {
     return - dim_dispo.width;
-  }
+  };
 }
 Object.assign(days_header.mix, new WeekDayMixStype());
 hard_bind(days_header.mix);
@@ -131,14 +131,14 @@ function create_lunchbar() {
   ---------------------*/
 function fetch_url() {
   switch (mode) {
-    case 'tutor':
-      return url_fetch_user_dweek + user.name;
-    case 'course':
-      return url_fetch_course_dweek
-        + dd_selections['prog'].value
-        + '/' + dd_selections['type'].value;
-    case 'room':
-      return url_fetch_room_dweek + user.name;
+  case 'tutor':
+    return url_fetch_user_dweek + user.name;
+  case 'course':
+    return url_fetch_course_dweek
+      + dd_selections['prog'].value
+      + '/' + dd_selections['type'].value;
+  case 'room':
+    return url_fetch_room_dweek + user.name;
   }
 }
 
@@ -182,12 +182,12 @@ function translate_room_preferences_from_csv(d) {
 
 function translate_pref_from_csv(d) {
   switch (mode) {
-    case 'tutor':
-      return translate_dispos_from_csv(d);
-    case 'course':
-      return translate_course_preferences_from_csv(d);
-    case 'room':
-      return translate_room_preferences_from_csv(d);
+  case 'tutor':
+    return translate_dispos_from_csv(d);
+  case 'course':
+    return translate_course_preferences_from_csv(d);
+  case 'room':
+    return translate_room_preferences_from_csv(d);
   }
 }
 
@@ -269,7 +269,7 @@ d3.select("body")
   .on("click", function (d) {
     cancel_cm_adv_preferences();
     cancel_cm_room_tutor_change();
-  })
+  });
 
 
 
@@ -277,16 +277,16 @@ d3.select("body")
 // according to mode
 function send_url(year, week) {
   switch (mode) {
-    case 'tutor':
-      return url_user_pref_changes + year + "/" + week
-        + "/" + user.name;
-    case 'course':
-      return url_course_pref_changes + year + "/" + week
-        + "/" + dd_selections['prog'].value
-        + "/" + dd_selections['type'].value;
-    case 'room':
-      return url_room_pref_changes + year + "/" + week
-        + "/" + user.name;
+  case 'tutor':
+    return url_user_pref_changes + year + "/" + week
+      + "/" + user.name;
+  case 'course':
+    return url_course_pref_changes + year + "/" + week
+      + "/" + dd_selections['prog'].value
+      + "/" + dd_selections['type'].value;
+  case 'room':
+    return url_room_pref_changes + year + "/" + week
+      + "/" + user.name;
   }
 }
 

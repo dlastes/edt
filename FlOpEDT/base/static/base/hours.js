@@ -115,7 +115,7 @@ HourHeader.prototype.update = function (quick) {
 
   hour_scale.exit().remove();
 
-}
+};
 
 
 // Display parameters and functions
@@ -123,10 +123,10 @@ function HourMix(settings) {
   this.settings = settings;
   this.gsckh_x1 = function () {
     return 0;
-  }
+  };
   this.gsckh_x2 = function () {
     return -5;
-  }
+  };
   this.gsckh_y = function (d) {
     var ret = (d.h * 60 - this.settings.day_start_time) * nbRows * scale;
     if (d.hd == 'pm') {
@@ -135,7 +135,7 @@ function HourMix(settings) {
           - this.settings.lunch_break_start_time) * nbRows * scale;
     }
     return ret;
-  }
+  };
   this.gsckh_txt = function (d) {
     var ret = d.h;
     if (ret >= 24) {
@@ -143,5 +143,5 @@ function HourMix(settings) {
     }
     ret += "h";
     return ret;
-  }
+  };
 }

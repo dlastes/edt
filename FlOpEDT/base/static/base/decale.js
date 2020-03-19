@@ -345,7 +345,7 @@ function create_dd() {
     //    rad
     .append("select")
     .attr("id", "aim_date")
-    .on("change", function (d) { choose_aim('d'); })
+    .on("change", function (d) { choose_aim('d'); });
   //    
   rad
     .append("span")
@@ -557,8 +557,8 @@ function send_cours() {
 function recv(msg) {
   var i;
 
-  console.log("lc", liste_cours)
-  console.log("c", commit)
+  console.log("lc", liste_cours);
+  console.log("c", commit);
 
   d3.select(".cours")
     .selectAll(".ck")
@@ -628,7 +628,7 @@ function plot_cours(d) {
     ret += liste_jours[d.d].name + " " + liste_jours[d.d].date + " ";
     ret += min_to_hm_txt(d.t);
   } else {
-    ret += "non placé"
+    ret += "non placé";
   }
   ret += ")";
   return ret;

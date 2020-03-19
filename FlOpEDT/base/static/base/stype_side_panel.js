@@ -49,20 +49,20 @@ function fetch_selected() {
     dd_selections[key].value = $(dd_selections[key].id).find(':selected').val();
   }
   switch (mode) {
-    case 'tutor':
-      user.name = dd_selections['tutor'].value;
-      break;
-    case 'course':
-      user.name = course_type_prog_name(
-        dd_selections['prog'].value,
-        dd_selections['type'].value);
-      break;
-    case 'room':
-      user.name = dd_selections['room'].value;
-      break;
-    default:
-      console.log("What's this mode?");
-      return;
+  case 'tutor':
+    user.name = dd_selections['tutor'].value;
+    break;
+  case 'course':
+    user.name = course_type_prog_name(
+      dd_selections['prog'].value,
+      dd_selections['type'].value);
+    break;
+  case 'room':
+    user.name = dd_selections['room'].value;
+    break;
+  default:
+    console.log("What's this mode?");
+    return;
   }
   fetch_pref_only();
   if (mode == 'tutor') {
