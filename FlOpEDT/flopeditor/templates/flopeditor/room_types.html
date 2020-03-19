@@ -3,8 +3,14 @@
 {% block nav-classes-rooms %} active {% endblock %}
 
 {% block card_header %}
+  <li class="nav-item">
+      <a  class="nav-link {% block card-nav-classes-rooms %}{% endblock %}"
+          href="{% url 'flopeditor:flopeditor-department-rooms' department_abbrev=department.abbrev %}">
+          Salles
+      </a>
+  </li>
     <li class="nav-item">
-        <a  class="nav-link {% block card-nav-classes-rooms %}active{% endblock %}"
+        <a  class="nav-link {% block card-nav-classes-room-types %}active{% endblock %}"
             href="{% url 'flopeditor:flopeditor-department-room-types' department_abbrev=department.abbrev %}">
             Catégories de salles
         </a>

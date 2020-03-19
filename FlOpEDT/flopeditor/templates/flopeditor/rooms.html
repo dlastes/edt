@@ -1,32 +1,22 @@
-{% extends "flopeditor/base.html" %}
+{% extends "flopeditor/base_crud.html" %}
 {% load static %}
 {% block nav-classes-rooms %} active {% endblock %}
-{% block content %}
-<div class="card">
-    <ul class="nav card-header nav-tabs" id="tab-bar">
-        {% block tabs %}
-            {% include "flopeditor/snippets/crud_nav_item.html" with title="Salles" id_tab="rooms" class="active"%}
-            {% include "flopeditor/snippets/crud_nav_item.html" with title="Groupes de salles" id_tab="room-groups"%}
-            {% include "flopeditor/snippets/crud_nav_item.html" with title="Catégories de salles" id_tab="room-types"%}
-        {% endblock %}
-    </ul>
-    <div class="card-body tab-content">
-        {% block card-content %}
-        <div id="rooms" class="tab-pane fade show active" role="tabpanel">
-            {% include "flopeditor/snippets/crud_crudjs_item.html" with route_name='flopeditor:flopeditor-crud-rooms' id_btn="btn-rooms" %}
-        </div>
 
-        <div id="room-groups" class="tab-pane fade" role="tabpanel">groups</div>
-
-        <div id="room-types" class="tab-pane fade" role="tabpanel">types</div>
-        {% endblock %}
-    </div>
-</div>
-{% csrf_token %}
+{% block card_header %}
+    <li class="nav-item">
+        <a  class="nav-link {% block card-nav-classes-rooms %}active{% endblock %}"
+            href="{% url 'flopeditor:flopeditor-department-rooms' department_abbrev=department.abbrev %}">
+            Salles
+        </a>
+    </li>
+      <li class="nav-item">
+          <a  class="nav-link {% block card-nav-classes-room-types %}{% endblock %}"
+              href="{% url 'flopeditor:flopeditor-department-room-types' department_abbrev=department.abbrev %}">
+              Catégories de salles
+          </a>
+      </li>
 {% endblock %}
 
-{% block script %}
-    {{ block.super }}
-    <script> const CSRF = $("[name=csrfmiddlewaretoken]").val(); </script>
-    <script src="{% static 'flopeditor/js/crudjs.min.js' %}" charset="utf-8"></script>
-{% endblock %}
+
+{% block crud_js_url %}{% url 'flopeditor:flopeditor-crud-rooms' department_abbrev=department.abbrev %}{% endblock %}
+<!-- {---% url 'flopeditor:flopeditor-crud-xxxxx' department_abbrev=department.abbrev %} -->
