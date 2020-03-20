@@ -269,14 +269,14 @@ class RoomTypesViewSet(viewsets.ModelViewSet):
     filterset_fields = '__all__'
 
 
-class RoomGroupsViewSet(viewsets.ModelViewSet):
+class RoomFreeViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see a list which shows each room is with what kind of group.
 
-    Can be filtered as wanted with every field of a RoomGroup object.
+    Can be filtered as wanted with every field of a Room object.
     """
-    queryset = bm.RoomGroup.objects.all()
-    serializer_class = serializers.RoomGroupsSerializer
+    queryset = bm.Room.objects.all()
+    serializer_class = serializers.RoomsSerializer
     filterset_fields = '__all__'
 
 
@@ -620,18 +620,6 @@ class CourseModificationsViewSet(viewsets.ModelViewSet):
     """
     queryset = bm.CourseModification.objects.all()
     serializer_class = serializers.CourseModificationsSerializer
-
-    filterset_fields = '__all__'
-
-
-class PlanningModificationsViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet to see all the planning modifications.
-
-    Can be filtered as wanted with every field of a PlanningModification object.
-    """
-    queryset = bm.PlanningModification.objects.all()
-    serializer_class = serializers.PlanningModificationsSerializer
 
     filterset_fields = '__all__'
 

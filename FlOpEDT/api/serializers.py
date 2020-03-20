@@ -130,16 +130,10 @@ class RoomTypesSerializer(serializers.ModelSerializer):
         model = bm.RoomType
         fields = '__all__'
 
-class RoomGroupsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = bm.RoomGroup
-        fields = '__all__'
-
-
 class RoomsSerializer(serializers.ModelSerializer):
     class Meta:
         model = bm.Room
-        fields = ['id', 'name', 'subroom_of', 'departments'] 
+        fields = '__all__' #['id', 'name', 'subroom_of', 'departments'] 
 
 class RoomSortsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -281,12 +275,6 @@ class CourseModificationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = bm.CourseModification
         fields = '__all__'
-
-class PlanningModificationsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = bm.PlanningModification
-        fields = '__all__'
-
 
 # -----------
 # -- COSTS --
