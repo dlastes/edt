@@ -28,7 +28,7 @@ without disclosing the source code of your own applications.
 """
 
 from django.http import JsonResponse
-from base.models import Room
+from base.models import Room, RoomType, Department
 from flopeditor.validator import OK_RESPONSE, ERROR_RESPONSE
 
 
@@ -43,15 +43,34 @@ def read(department):
     :rtype:  django.http.JsonResponse
 
     """
+    # Chips options
+    rooms_available = list(Room.objects.values_list('name', flat=True))
+    rooms_types_available = list(RoomType.objects.values_list('name', flat=True))
+    departments = list(Department.objects.values_list('name', flat=True))
+
+    # Rows
     rooms = Room.objects.filter(departments=department)
     values = []
     for room in rooms:
-        values.append((room.name,))
+        values.append((room.name, [], [], []))
+
     return JsonResponse({
         "columns" :  [{
             'name': 'Nom',
             "type": "text",
             "options": {}
+        }, {
+            'name': 'Sous-salle de...',
+            "type": "select-chips",
+            "options": {'values': rooms_available}
+        }, {
+            'name': 'Types de salles associés',
+            "type": "select-chips",
+            "options": {'values': rooms_types_available}
+        }, {
+            'name': 'Départements associés',
+            "type": "select-chips",
+            "options": {'values': departments}
         }],
         "values" : values
         })
