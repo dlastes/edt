@@ -72,6 +72,7 @@ INSTALLED_APPS = [
     'rest_auth',
     'rest_framework_swagger',
     'drf_yasg',
+    'easter_egg'
 ]
 
 MIDDLEWARE = [
@@ -181,10 +182,6 @@ if 'ADMINS' in os.environ:
     ADMINS = [tuple(admin.split(",")) for admin in os.environ.get('ADMINS').split(" ")]
     MANAGERS = ADMINS
 
-#
-# REST FRAMEWORK Settings
-#
-
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
@@ -199,21 +196,13 @@ REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
 }
 
-
-
 # LOG IN-AND-OUT
-
-
 LOGIN_REDIRECT_URL = '/backoffice/'
 LOGIN_URL = '/'
 TEMPLATE_DIRS = (
     BASE_DIR + '/templates/',
 )
 
-
-
-
-
-
+SHELL_PLUS_MODEL_IMPORTS_RESOLVER = 'django_extensions.collision_resolvers.AppLabelSuffixCR'
 
 COSMO_MODE = False

@@ -60,17 +60,16 @@ class User(AbstractUser):
         if self.is_superuser:
             return True
         
-        perm = self.is_tutor
-
-        if department:
-            perm = department in self.departments.all()
-            if admin:
-                if perm:
-                    user_dept = UserDepartmentSettings.objects.get(user=self,
-                                                                   department=department)
-                    perm &= user_dept.is_admin
-
-        return perm
+        return (self.is_tutor 
+                and department in self.departments.all()
+                and (not admin
+                     or
+                     UserDepartmentSettings.objects\
+                     .get(user=self,
+                          department=department)\
+                     .is_admin
+                    )
+               )
 
     def has_perm(self, perm, obj=None):
         "Does the user have a specific permission?"
@@ -135,6 +134,9 @@ class Tutor(User):
         ret = super(Tutor, self).uni_extended()
         ret += '-' + self.status + '-' + 'P' + str(self.pref_hours_per_day) + 'M' + str(self.max_hours_per_day)
         return ret
+
+    class Meta:
+        verbose_name = 'Tutor'
 
 
 class FullStaff(Tutor):

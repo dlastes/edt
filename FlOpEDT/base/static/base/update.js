@@ -46,155 +46,156 @@
 
 // update all preferences
 function go_pref(quick) {
-        var t, dat, datdi, datsmi;
+  var t, dat, datdi, datsmi;
 
-        if (quick) {
-            t = d3.transition()
-                .duration(0);
-        } else {
-            t = d3.transition();
-        }
-
-
-	// preferences: background color, and smiley
-	
-        dat = svg.get_dom("edt-mg").selectAll(".dispo")
-            .data(user.dispos,
-                  function(d) {
-                      return [d.day,d.start_time,d.duration,d.val].join('-');
-                  })
-            .attr("cursor", ckbox["dis-mod"].cked ? "pointer" : "default");
-
-        datdi = dat
-            .enter()
-            .append("g")
-            .attr("class", "dispo");
-
-        var datdisi = datdi
-            .append("g")
-            .attr("class", "dispo-si")
-            .on("click", apply_change_simple_pref);
-
-        datdisi
-            .append("rect")
-            .attr("class", "dispo-bg")
-            .attr("stroke", "black")
-            .attr("stroke-width", 1)
-            .attr("width", dispo_w)
-            .attr("height", 0)
-            .attr("x", dispo_x)
-            .attr("y", dispo_y)
-            .attr("fill", dispo_fill)
-            .merge(dat.select(".dispo-bg"))
-            .transition(t)
-            .attr("width", dispo_w)
-            .attr("height", dispo_h)
-            .attr("x", dispo_x)
-            .attr("y", dispo_y)
-            .attr("fill", dispo_fill);
-
-        var datex = dat
-            .exit();
-
-        datex
-            .select(".dispo-bg")
-            .transition(t)
-            .attr("height", 0);
-
-        datex
-            .remove();
-
-        go_smiley(dat, datdisi, t);
+  if (quick) {
+    t = d3.transition()
+      .duration(0);
+  } else {
+    t = d3.transition();
+  }
 
 
+  // preferences: background color, and smiley
 
-	// detailed view
+  dat = svg.get_dom("edt-mg").selectAll(".dispo")
+    .data(
+      user.dispos,
+      function (d) {
+        return [d.day, d.start_time, d.duration, d.val].join('-');
+      })
+    .attr("cursor", ckbox["dis-mod"].cked ? "pointer" : "default");
 
-        datadvdi = datdi
-            .append("g")
-            .attr("class", "dispo-a");
+  datdi = dat
+    .enter()
+    .append("g")
+    .attr("class", "dispo");
 
-        datadvdi
-            .merge(dat.select(".dispo-a"))
-            .on("click", function(d) {
-                if (ckbox["dis-mod"].cked) {
-		    context_menu.dispo_hold = true ;
-                    data_dispo_adv_cur = data_dispo_adv_init.map(
-                        function(c) {
-                            return {
-                                day: d.day,
-                                start_time: d.start_time,
-				duration: d.duration,
-                                off: c.off
-                            };
-                        });
-		    go_cm_advanced_pref(true);
-                }
-            });
+  var datdisi = datdi
+    .append("g")
+    .attr("class", "dispo-si")
+    .on("click", apply_change_simple_pref);
 
+  datdisi
+    .append("rect")
+    .attr("class", "dispo-bg")
+    .attr("stroke", "black")
+    .attr("stroke-width", 1)
+    .attr("width", dispo_w)
+    .attr("height", 0)
+    .attr("x", dispo_x)
+    .attr("y", dispo_y)
+    .attr("fill", dispo_fill)
+    .merge(dat.select(".dispo-bg"))
+    .transition(t)
+    .attr("width", dispo_w)
+    .attr("height", dispo_h)
+    .attr("x", dispo_x)
+    .attr("y", dispo_y)
+    .attr("fill", dispo_fill);
 
-        datadvdi
-            .append("rect")
-            .attr("stroke", "none")
-            .attr("stroke-width", 1)
-            .attr("fill", "black")
-            .attr("opacity", 0)
-            .merge(dat.select(".dispo-a").select("rect"))
-            .attr("width", dispo_more_h)
-            .attr("height", dispo_more_h)
-            .attr("x", dispo_more_x)
-            .attr("y", dispo_more_y);
+  var datex = dat
+    .exit();
 
-        datadvdi
-            .append("line")
-            .attr("stroke-linecap", "butt")
-            .attr("stroke", "antiquewhite")
-            .attr("stroke-width", 2)
-            .attr("li", "h")
-            .attr("x1", cross_l_x)
-            .attr("y1", cross_m_y)
-            .attr("x2", cross_r_x)
-            .attr("y2", cross_m_y)
-            .merge(dat.select(".dispo-a").select("[li=h]"))
-            .transition(t)
-            .attr("x1", cross_l_x)
-            .attr("y1", cross_m_y)
-            .attr("x2", cross_r_x)
-            .attr("y2", cross_m_y);
+  datex
+    .select(".dispo-bg")
+    .transition(t)
+    .attr("height", 0);
 
-        datadvdi
-            .append("line")
-            .attr("stroke-linecap", "butt")
-            .attr("stroke", "antiquewhite")
-            .attr("stroke-width", 2)
-            .attr("li", "v")
-            .attr("x1", cross_m_x)
-            .attr("y1", cross_t_y)
-            .attr("x2", cross_m_x)
-            .attr("y2", cross_d_y)
-            .merge(dat.select(".dispo-a").select("[li=v]"))
-            .transition(t)
-            .attr("x1", cross_m_x)
-            .attr("y1", cross_t_y)
-            .attr("x2", cross_m_x)
-            .attr("y2", cross_d_y);
+  datex
+    .remove();
 
-        datadvdi
-            .append("circle")
-            .attr("fill", "none")
-            .attr("stroke", "antiquewhite")
-            .attr("stroke-width", 2)
-            .attr("cx", cross_m_x)
-            .attr("cy", cross_m_y)
-            .attr("r", par_dispos.rad_cross * smiley.tete)
-            .merge(dat.select(".dispo-a").select("circle"))
-            .transition(t)
-            .attr("cx", cross_m_x)
-            .attr("cy", cross_m_y)
-            .attr("r", par_dispos.rad_cross * smiley.tete);
+  go_smiley(dat, datdisi, t);
 
 
-	go_cm_advanced_pref(quick) ;
+
+  // detailed view
+
+  datadvdi = datdi
+    .append("g")
+    .attr("class", "dispo-a");
+
+  datadvdi
+    .merge(dat.select(".dispo-a"))
+    .on("click", function (d) {
+      if (ckbox["dis-mod"].cked) {
+        context_menu.dispo_hold = true;
+        data_dispo_adv_cur = data_dispo_adv_init.map(
+          function (c) {
+            return {
+              day: d.day,
+              start_time: d.start_time,
+              duration: d.duration,
+              off: c.off
+            };
+          });
+        go_cm_advanced_pref(true);
+      }
+    });
+
+
+  datadvdi
+    .append("rect")
+    .attr("stroke", "none")
+    .attr("stroke-width", 1)
+    .attr("fill", "black")
+    .attr("opacity", 0)
+    .merge(dat.select(".dispo-a").select("rect"))
+    .attr("width", dispo_more_h)
+    .attr("height", dispo_more_h)
+    .attr("x", dispo_more_x)
+    .attr("y", dispo_more_y);
+
+  datadvdi
+    .append("line")
+    .attr("stroke-linecap", "butt")
+    .attr("stroke", "antiquewhite")
+    .attr("stroke-width", 2)
+    .attr("li", "h")
+    .attr("x1", cross_l_x)
+    .attr("y1", cross_m_y)
+    .attr("x2", cross_r_x)
+    .attr("y2", cross_m_y)
+    .merge(dat.select(".dispo-a").select("[li=h]"))
+    .transition(t)
+    .attr("x1", cross_l_x)
+    .attr("y1", cross_m_y)
+    .attr("x2", cross_r_x)
+    .attr("y2", cross_m_y);
+
+  datadvdi
+    .append("line")
+    .attr("stroke-linecap", "butt")
+    .attr("stroke", "antiquewhite")
+    .attr("stroke-width", 2)
+    .attr("li", "v")
+    .attr("x1", cross_m_x)
+    .attr("y1", cross_t_y)
+    .attr("x2", cross_m_x)
+    .attr("y2", cross_d_y)
+    .merge(dat.select(".dispo-a").select("[li=v]"))
+    .transition(t)
+    .attr("x1", cross_m_x)
+    .attr("y1", cross_t_y)
+    .attr("x2", cross_m_x)
+    .attr("y2", cross_d_y);
+
+  datadvdi
+    .append("circle")
+    .attr("fill", "none")
+    .attr("stroke", "antiquewhite")
+    .attr("stroke-width", 2)
+    .attr("cx", cross_m_x)
+    .attr("cy", cross_m_y)
+    .attr("r", par_dispos.rad_cross * smiley.tete)
+    .merge(dat.select(".dispo-a").select("circle"))
+    .transition(t)
+    .attr("cx", cross_m_x)
+    .attr("cy", cross_m_y)
+    .attr("r", par_dispos.rad_cross * smiley.tete);
+
+
+  go_cm_advanced_pref(quick);
 
 
 }
@@ -205,127 +206,127 @@ function go_pref(quick) {
 // mid: container with new smileys
 // t:   transition
 function go_smiley(top, mid, t) {
-    
-    var datsmi = mid
-        .append("g")
-        .attr("class", "smiley")
-        .attr("stroke-width", 1)
-        .attr("transform", smile_trans)
-        .attr("stroke", "black");
 
-    datsmi
-        .merge(top.select(".smiley"))
-        .transition(t)
-        .attr("transform", smile_trans)
-        .attr("stroke", "black");
+  var datsmi = mid
+    .append("g")
+    .attr("class", "smiley")
+    .attr("stroke-width", 1)
+    .attr("transform", smile_trans)
+    .attr("stroke", "black");
 
-    datsmi
-        .append("circle")
-        .attr("st", "t")
-        .merge(top.select("[st=t]"))
-        .attr("cx", 0)
-        .attr("cy", 0)
-        .attr("r", smiley.tete)
-        .attr("stroke", function(d) {
-            return tete_str(rc(d));
-        })
-        .attr("fill", function(d) {
-            return smi_fill(rc(d));
-        });
+  datsmi
+    .merge(top.select(".smiley"))
+    .transition(t)
+    .attr("transform", smile_trans)
+    .attr("stroke", "black");
 
-    datsmi
-        .append("circle")
-        .attr("st", "od")
-        .attr("fill", "none")
-        .merge(top.select("[st=od]"))
-        .attr("cx", smiley.tete * smiley.oeil_x)
-        .attr("cy", smiley.tete * smiley.oeil_y)
-        .attr("r", function(d) {
-            return oeil_r(rc(d));
-        })
-        .attr("stroke-width", function(d) {
-            return trait_vis_strw(rc(d));
-        });
+  datsmi
+    .append("circle")
+    .attr("st", "t")
+    .merge(top.select("[st=t]"))
+    .attr("cx", 0)
+    .attr("cy", 0)
+    .attr("r", smiley.tete)
+    .attr("stroke", function (d) {
+      return tete_str(rc(d));
+    })
+    .attr("fill", function (d) {
+      return smi_fill(rc(d));
+    });
 
-    datsmi
-        .append("circle")
-        .attr("st", "og")
-        .attr("fill", "none")
-        .merge(top.select("[st=og]"))
-        .attr("cx", -smiley.tete * smiley.oeil_x)
-        .attr("cy", smiley.tete * smiley.oeil_y)
-        .attr("r", function(d) {
-            return oeil_r(rc(d));
-        })
-        .attr("stroke-width", function(d) {
-            return trait_vis_strw(rc(d));
-        });
+  datsmi
+    .append("circle")
+    .attr("st", "od")
+    .attr("fill", "none")
+    .merge(top.select("[st=od]"))
+    .attr("cx", smiley.tete * smiley.oeil_x)
+    .attr("cy", smiley.tete * smiley.oeil_y)
+    .attr("r", function (d) {
+      return oeil_r(rc(d));
+    })
+    .attr("stroke-width", function (d) {
+      return trait_vis_strw(rc(d));
+    });
+
+  datsmi
+    .append("circle")
+    .attr("st", "og")
+    .attr("fill", "none")
+    .merge(top.select("[st=og]"))
+    .attr("cx", -smiley.tete * smiley.oeil_x)
+    .attr("cy", smiley.tete * smiley.oeil_y)
+    .attr("r", function (d) {
+      return oeil_r(rc(d));
+    })
+    .attr("stroke-width", function (d) {
+      return trait_vis_strw(rc(d));
+    });
 
 
-    datsmi
-        .append("line")
-        .attr("st", "sd")
-        .merge(top.select("[st=sd]"))
-        .attr("x1", function(d) {
-            return sourcil_int_x(rc(d));
-        })
-        .attr("y1", function(d) {
-            return sourcil_int_y(rc(d));
-        })
-        .attr("x2", function(d) {
-            return sourcil_ext_x(rc(d));
-        })
-        .attr("y2", function(d) {
-            return sourcil_ext_y(rc(d));
-        })
-        .attr("stroke-width", function(d) {
-            return trait_vis_strw(rc(d));
-        });
+  datsmi
+    .append("line")
+    .attr("st", "sd")
+    .merge(top.select("[st=sd]"))
+    .attr("x1", function (d) {
+      return sourcil_int_x(rc(d));
+    })
+    .attr("y1", function (d) {
+      return sourcil_int_y(rc(d));
+    })
+    .attr("x2", function (d) {
+      return sourcil_ext_x(rc(d));
+    })
+    .attr("y2", function (d) {
+      return sourcil_ext_y(rc(d));
+    })
+    .attr("stroke-width", function (d) {
+      return trait_vis_strw(rc(d));
+    });
 
-    datsmi
-        .append("line")
-        .attr("st", "sg")
-        .merge(top.select("[st=sg]"))
-        .attr("x1", function(d) {
-            return sourcil_intg_x(rc(d));
-        })
-        .attr("y1", function(d) {
-            return sourcil_int_y(rc(d));
-        })
-        .attr("x2", function(d) {
-            return sourcil_extg_x(rc(d));
-        })
-        .attr("y2", function(d) {
-            return sourcil_ext_y(rc(d));
-        })
-        .attr("stroke-width", function(d) {
-            return trait_vis_strw(rc(d));
-        });
+  datsmi
+    .append("line")
+    .attr("st", "sg")
+    .merge(top.select("[st=sg]"))
+    .attr("x1", function (d) {
+      return sourcil_intg_x(rc(d));
+    })
+    .attr("y1", function (d) {
+      return sourcil_int_y(rc(d));
+    })
+    .attr("x2", function (d) {
+      return sourcil_extg_x(rc(d));
+    })
+    .attr("y2", function (d) {
+      return sourcil_ext_y(rc(d));
+    })
+    .attr("stroke-width", function (d) {
+      return trait_vis_strw(rc(d));
+    });
 
-    datsmi
-        .append("rect")
-        .attr("st", "si")
-        .merge(top.select("[st=si]"))
-        .attr("x", -.5 * smiley.rect_w * smiley.tete)
-        .attr("y", -.5 * smiley.rect_h * smiley.tete)
-        .attr("width", function(d) {
-            return interdit_w(rc(d));
-        })
-        .attr("height", smiley.rect_h * smiley.tete)
-        .attr("fill", "white")
-        .attr("stroke", "none");
+  datsmi
+    .append("rect")
+    .attr("st", "si")
+    .merge(top.select("[st=si]"))
+    .attr("x", -.5 * smiley.rect_w * smiley.tete)
+    .attr("y", -.5 * smiley.rect_h * smiley.tete)
+    .attr("width", function (d) {
+      return interdit_w(rc(d));
+    })
+    .attr("height", smiley.rect_h * smiley.tete)
+    .attr("fill", "white")
+    .attr("stroke", "none");
 
-    datsmi
-        .append("path")
-        .attr("st", "b")
-        .merge(top.select("[st=b]"))
-        .attr("d", function(d) {
-            return smile(rc(d));
-        })
-        .attr("fill", "none")
-        .attr("stroke-width", function(d) {
-            return trait_vis_strw(rc(d));
-        });
+  datsmi
+    .append("path")
+    .attr("st", "b")
+    .merge(top.select("[st=b]"))
+    .attr("d", function (d) {
+      return smile(rc(d));
+    })
+    .attr("fill", "none")
+    .attr("stroke-width", function (d) {
+      return trait_vis_strw(rc(d));
+    });
 
 
 }
@@ -333,173 +334,173 @@ function go_smiley(top, mid, t) {
 
 // advanced preference menu
 function go_cm_advanced_pref(quick) {
-    if (quick) {
-        t = d3.transition()
-            .duration(0);
-    } else {
-        t = d3.transition();
-    }
-    
-    var dis_men_dat = svg.get_dom("cmpg")
-        .selectAll(".dispo-menu")
-        .data(data_dispo_adv_cur);
-    
-    var dis_men = dis_men_dat
-        .enter()
-        .append("g")
-        .attr("class", "dispo-menu")
-        .attr("cursor", "pointer")
-        .on("click", function(d) {
-	    update_pref_interval(user.name, d.day, d.start_time, d.off) ;
-	    data_dispo_adv_cur = [] ;
-	    go_pref(true);
-        });
-    
-    dis_men
-        .append("rect")
-        .attr("class", "dis-men-bg")
-        .merge(dis_men_dat.select(".dis-men-bg"))
-        .transition(t)
-        .attr("x", dispo_all_x)
-        .attr("y", dispo_all_y)
-        .attr("width", dispo_all_w)
-        .attr("height", dispo_all_h)
-        .attr("fill", function(d) {
-            return smi_fill(d.off / par_dispos.nmax);
-            })
-        .attr("stroke", "darkslategrey")
-        .attr("stroke-width", 2);
-    
-    go_smiley(dis_men_dat, dis_men, t);
-    
+  if (quick) {
+    t = d3.transition()
+      .duration(0);
+  } else {
+    t = d3.transition();
+  }
 
-    dis_men_dat.exit().remove();
+  var dis_men_dat = svg.get_dom("cmpg")
+    .selectAll(".dispo-menu")
+    .data(data_dispo_adv_cur);
+
+  var dis_men = dis_men_dat
+    .enter()
+    .append("g")
+    .attr("class", "dispo-menu")
+    .attr("cursor", "pointer")
+    .on("click", function (d) {
+      update_pref_interval(user.name, d.day, d.start_time, d.off);
+      data_dispo_adv_cur = [];
+      go_pref(true);
+    });
+
+  dis_men
+    .append("rect")
+    .attr("class", "dis-men-bg")
+    .merge(dis_men_dat.select(".dis-men-bg"))
+    .transition(t)
+    .attr("x", dispo_all_x)
+    .attr("y", dispo_all_y)
+    .attr("width", dispo_all_w)
+    .attr("height", dispo_all_h)
+    .attr("fill", function (d) {
+      return smi_fill(d.off / par_dispos.nmax);
+    })
+    .attr("stroke", "darkslategrey")
+    .attr("stroke-width", 2);
+
+  go_smiley(dis_men_dat, dis_men, t);
+
+
+  dis_men_dat.exit().remove();
 }
 
 
 // check and inform whenever there is not enough available slots
 function go_alarm_pref() {
 
-    var dig = svg.get_dom("dig");
-    dig
+  var dig = svg.get_dom("dig");
+  dig
 
-        .select(".disp-info").select(".disp-required")
-        .text(txt_reqDispos)
-        .attr("x", menus.x + menus.mx - 5)
-        .attr("y", did.tly + valid.h * 1.5);
-    dig
-        .select(".disp-info").select(".disp-filled")
-        .text(txt_filDispos)
-        .attr("x", menus.x + menus.mx - 5)
-        .attr("y", did.tly + valid.h * 1.5 + valid.margin_h);
+    .select(".disp-info").select(".disp-required")
+    .text(txt_reqDispos)
+    .attr("x", menus.x + menus.mx - 5)
+    .attr("y", did.tly + valid.h * 1.5);
+  dig
+    .select(".disp-info").select(".disp-filled")
+    .text(txt_filDispos)
+    .attr("x", menus.x + menus.mx - 5)
+    .attr("y", did.tly + valid.h * 1.5 + valid.margin_h);
 
-    if (required_dispos > filled_dispos) {
-        dig
-            .select(".disp-info").select(".disp-filled")
-            .attr("font-weight", "bold").attr("fill", "red");
-        dig
-            .select(".disp-info").select(".disp-required")
-            .attr("font-weight", "bold");
-    } else {
-        dig
-            .select(".disp-info").select(".disp-filled")
-            .attr("font-weight", "normal").attr("fill", "black");
-        dig
-            .select(".disp-info").select(".disp-required")
-            .attr("font-weight", "normal");
-    }
+  if (required_dispos > filled_dispos) {
+    dig
+      .select(".disp-info").select(".disp-filled")
+      .attr("font-weight", "bold").attr("fill", "red");
+    dig
+      .select(".disp-info").select(".disp-required")
+      .attr("font-weight", "bold");
+  } else {
+    dig
+      .select(".disp-info").select(".disp-filled")
+      .attr("font-weight", "normal").attr("fill", "black");
+    dig
+      .select(".disp-info").select(".disp-required")
+      .attr("font-weight", "normal");
+  }
 }
 
 
 function go_pref_mode() {
 
-    var selall = svg.get_dom("pmg")
-        .select("#pm-but-head")
-        .selectAll(".pm-but")
-        .data(pref_selection.mode);
-    
-    var g_new = selall
-        .enter()
-        .append("g")
-        .attr("cursor", "pointer")
-        .attr("class", "pm-but")
-        .on("click", apply_pref_mode);
+  var selall = svg.get_dom("pmg")
+    .select("#pm-but-head")
+    .selectAll(".pm-but")
+    .data(pref_selection.mode);
 
-    var rect_new = g_new
-        .append("rect")
-        .attr("x", 0)
-        .attr("y", pref_mode_but_y)
-        .attr("rx", 5)
-        .attr("ry", 10)
-        .attr("width", pref_selection.butw)
-        .attr("height", pref_selection.buth);
+  var g_new = selall
+    .enter()
+    .append("g")
+    .attr("cursor", "pointer")
+    .attr("class", "pm-but")
+    .on("click", apply_pref_mode);
 
-    g_new
-        .append("text")
-        .attr("x", pref_mode_but_txt_x)
-        .attr("y", pref_mode_but_txt_y)
-        .text(pref_mode_but_txt);
+  var rect_new = g_new
+    .append("rect")
+    .attr("x", 0)
+    .attr("y", pref_mode_but_y)
+    .attr("rx", 5)
+    .attr("ry", 10)
+    .attr("width", pref_selection.butw)
+    .attr("height", pref_selection.buth);
 
-    rect_new
-        .merge(selall.select("rect"))
-        .attr("class", pref_mode_but_cls);
+  g_new
+    .append("text")
+    .attr("x", pref_mode_but_txt_x)
+    .attr("y", pref_mode_but_txt_y)
+    .text(pref_mode_but_txt);
 
-    go_paint_pref_mode_choices(false);
+  rect_new
+    .merge(selall.select("rect"))
+    .attr("class", pref_mode_but_cls);
+
+  go_paint_pref_mode_choices(false);
 }
 
 // smileys in paint preference mode
-function go_paint_pref_mode_choices(quick){
-    var t, dat, datdi, datsmi;
-    
-    if (quick) {
-        t = d3.transition()
-            .duration(0);
-    } else {
-        t = d3.transition();
-    }
+function go_paint_pref_mode_choices(quick) {
+  var t, dat, datdi, datsmi;
 
-    var parent = svg.get_dom("pmg")
-        .select("#pm-choices");
+  if (quick) {
+    t = d3.transition()
+      .duration(0);
+  } else {
+    t = d3.transition();
+  }
 
-    parent
-        .attr("opacity", pref_sel_choice_opac);
+  var parent = svg.get_dom("pmg")
+    .select("#pm-choices");
 
-    // preferences: background color, and smiley
-    dat = parent
-        .selectAll(".dispo")
-        .data(pref_selection.choice.data);
-    
-    datdi = dat
-        .enter()
-        .append("g")
-        .attr("cursor", "pointer")
-        .attr("class", "dispo");
-    
-    var datdisi = datdi
-        .append("g")
-        .attr("class", "dispo-si")
-        .on("click", apply_pref_mode_choice);
-    
-    datdisi
-        .append("rect")
-        .attr("class", "dispo-bg")
-        .attr("stroke", "black")
-        .attr("width", pref_selection.choice.w)
-        .attr("height", pref_selection.choice.h)
-        .attr("x", pref_sel_choice_x)
-        .attr("y", 0)
-        .attr("fill", dispo_fill)
-        .merge(dat.select(".dispo-bg"))
-        .transition(t)
-        .attr("width", pref_selection.choice.w)
-        .attr("height", pref_selection.choice.w)
-        .attr("x", pref_sel_choice_x)
-        .attr("y", pref_sel_choice_y)
-        .attr("fill", dispo_fill)
-        .attr("stroke-width", pref_sel_choice_stkw);
+  parent
+    .attr("opacity", pref_sel_choice_opac);
 
-    go_smiley(dat, datdisi, t);
-    
+  // preferences: background color, and smiley
+  dat = parent
+    .selectAll(".dispo")
+    .data(pref_selection.choice.data);
+
+  datdi = dat
+    .enter()
+    .append("g")
+    .attr("cursor", "pointer")
+    .attr("class", "dispo");
+
+  var datdisi = datdi
+    .append("g")
+    .attr("class", "dispo-si")
+    .on("click", apply_pref_mode_choice);
+
+  datdisi
+    .append("rect")
+    .attr("class", "dispo-bg")
+    .attr("stroke", "black")
+    .attr("width", pref_selection.choice.w)
+    .attr("height", pref_selection.choice.h)
+    .attr("x", pref_sel_choice_x)
+    .attr("y", 0)
+    .attr("fill", dispo_fill)
+    .merge(dat.select(".dispo-bg"))
+    .transition(t)
+    .attr("width", pref_selection.choice.w)
+    .attr("height", pref_selection.choice.w)
+    .attr("x", pref_sel_choice_x)
+    .attr("y", pref_sel_choice_y)
+    .attr("fill", dispo_fill)
+    .attr("stroke-width", pref_sel_choice_stkw);
+
+  go_smiley(dat, datdisi, t);
+
 }
 
 
@@ -517,148 +518,152 @@ function go_paint_pref_mode_choices(quick){
 
 
 function go_grid(quick) {
-    var t;
-    if (quick) {
-        t = d3.transition()
-            .duration(0);
-    } else {
-        t = d3.transition();
-    }
+  var t;
+  if (quick) {
+    t = d3.transition()
+      .duration(0);
+  } else {
+    t = d3.transition();
+  }
 
-    var fg = svg.get_dom("edt-fg") ;
+  var fg = svg.get_dom("edt-fg");
 
-    svg.get_dom("edt-bg")
-	.select("rbg")
-	.attr("x",0)
-	.attr("y",0)
-	.attr("height",grid_height())
-	.attr("width",grid_width());
-    
-    
-
-    var grid = fg.selectAll(".grids")
-        .data(data_slot_grid);
-
-    var gridg = grid
-        .enter()
-        .append("g")
-        .attr("class", "grids")
-        .style("cursor", gs_cursor)
-        .on("click", clear_pop);
+  svg.get_dom("edt-bg")
+    .select("rbg")
+    .attr("x", 0)
+    .attr("y", 0)
+    .attr("height", grid_height())
+    .attr("width", grid_width());
 
 
-    gridg
-        .append("rect")
-        .attr("x", gs_x)
-        .attr("y", gs_y)
-        .attr("stroke", gs_sc)
-        .attr("stroke-width", gs_sw)
-        .attr("stroke-dasharray", gs_sda)
-        .attr("stroke-linecap", gs_slc)
-        .merge(grid.select("rect"))
-        .transition(t)
-        .attr("fill-opacity", gs_opacity)
-        .attr("x", gs_x)
-        .attr("y", gs_y)
-        .attr("width", gs_width)
-        .attr("height", gs_height)
-        .attr("fill", gs_fill);
 
-    gridg
-        .append("text")
-        .attr("stroke", "none")
-        .attr("font-size", 14)
-        .attr("x", function(s) {
-            return gs_x(s) + .5 * gs_width(s);
-        })
-        .attr("y", function(s) {
-            return gs_y(s) + .5 * gs_height(s);
-        })
-        .merge(grid.select("text"))
-        .transition(t)
-        .attr("x", function(s) {
-            return gs_x(s) + .5 * gs_width(s);
-        })
-        .attr("y", function(s) {
-            return gs_y(s) + .5 * gs_height(s);
-        })
-        .text(gs_txt);
+  var grid = fg.selectAll(".grids")
+    .data(data_slot_grid);
 
-    grid
-	.exit()
-	.remove();
+  var gridg = grid
+    .enter()
+    .append("g")
+    .attr("class", "grids")
+    .style("cursor", gs_cursor)
+    .on("click", clear_pop);
 
 
-    
+  gridg
+    .append("rect")
+    .attr("x", gs_x)
+    .attr("y", gs_y)
+    .attr("stroke", gs_sc)
+    .attr("stroke-width", gs_sw)
+    .attr("stroke-dasharray", gs_sda)
+    .attr("stroke-linecap", gs_slc)
+    .merge(grid.select("rect"))
+    .transition(t)
+    .attr("fill-opacity", gs_opacity)
+    .attr("x", gs_x)
+    .attr("y", gs_y)
+    .attr("width", gs_width)
+    .attr("height", gs_height)
+    .attr("fill", gs_fill);
 
-    grid = svg.get_dom("edt-bg").selectAll(".gridscg")
-        .data(data_grid_scale_gp
-            .filter(function(d) {
-                return d.gp.display;
-            }),
-            function(d) {
-                return d.gp.promo + "," + d.day + "," +
-                    d.gp.name;
-            });
+  gridg
+    .append("text")
+    .attr("stroke", "none")
+    .attr("font-size", 14)
+    .attr("x", function (s) {
+      return gs_x(s) + .5 * gs_width(s);
+    })
+    .attr("y", function (s) {
+      return gs_y(s) + .5 * gs_height(s);
+    })
+    .merge(grid.select("text"))
+    .transition(t)
+    .attr("x", function (s) {
+      return gs_x(s) + .5 * gs_width(s);
+    })
+    .attr("y", function (s) {
+      return gs_y(s) + .5 * gs_height(s);
+    })
+    .text(gs_txt);
 
-    grid
-        .enter()
-        .append("text")
-        .attr("class", "gridscg")
-        .attr("x", gscg_x)
-        .attr("y", gscg_y)
-        .text(gscg_txt)
-        .merge(grid)
-        .transition(t)
-        .attr("x", gscg_x)
-        .attr("y", gscg_y);
-
-    grid.exit().remove();
-
-
-    grid = svg.get_dom("edt-bg").selectAll(".gridscp")
-        .data(data_grid_scale_row
-            .filter(function(d) {
-                return row_gp[d.row].display;
-            }),
-            function(d) {
-                return d.row + "," + d.start;
-            });
-
-    grid
-        .enter()
-        .append("text")
-        .attr("class", "gridscp")
-        .attr("x", gscp_x)
-        .attr("y", gscp_y)
-        .text(gscp_txt)
-        .merge(grid)
-        .transition(t)
-        .attr("x", gscp_x)
-        .attr("y", gscp_y);
-
-    grid.exit().remove();
+  grid
+    .exit()
+    .remove();
 
 
-    go_days(quick, true) ;
 
-    
 
-    fg.select(".h-sca").select("rect")
-        .transition(t)
-        .attr("x", but_sca_h_x())
-        .attr("y", but_sca_h_y());
-    fg.select(".h-sca").select("path")
-        .transition(t)
-        .attr("d", but_sca_tri_h(0));
+  grid = svg.get_dom("edt-bg").selectAll(".gridscg")
+    .data(
+      data_grid_scale_gp
+        .filter(function (d) {
+          return d.gp.display;
+        }),
+      function (d) {
+        return d.gp.promo + "," + d.day + "," +
+          d.gp.name;
+      }
+    );
 
-    fg.select(".v-sca").select("rect")
-        .transition(t)
-        .attr("x", but_sca_v_x())
-        .attr("y", but_sca_v_y());
-    fg.select(".v-sca").select("path")
-        .transition(t)
-        .attr("d", but_sca_tri_v(0));
+  grid
+    .enter()
+    .append("text")
+    .attr("class", "gridscg")
+    .attr("x", gscg_x)
+    .attr("y", gscg_y)
+    .text(gscg_txt)
+    .merge(grid)
+    .transition(t)
+    .attr("x", gscg_x)
+    .attr("y", gscg_y);
+
+  grid.exit().remove();
+
+
+  grid = svg.get_dom("edt-bg").selectAll(".gridscp")
+    .data(
+      data_grid_scale_row
+        .filter(function (d) {
+          return row_gp[d.row].display;
+        }),
+      function (d) {
+        return d.row + "," + d.start;
+      }
+    );
+
+  grid
+    .enter()
+    .append("text")
+    .attr("class", "gridscp")
+    .attr("x", gscp_x)
+    .attr("y", gscp_y)
+    .text(gscp_txt)
+    .merge(grid)
+    .transition(t)
+    .attr("x", gscp_x)
+    .attr("y", gscp_y);
+
+  grid.exit().remove();
+
+
+  go_days(quick, true);
+
+
+
+  fg.select(".h-sca").select("rect")
+    .transition(t)
+    .attr("x", but_sca_h_x())
+    .attr("y", but_sca_h_y());
+  fg.select(".h-sca").select("path")
+    .transition(t)
+    .attr("d", but_sca_tri_h(0));
+
+  fg.select(".v-sca").select("rect")
+    .transition(t)
+    .attr("x", but_sca_v_x())
+    .attr("y", but_sca_v_y());
+  fg.select(".v-sca").select("path")
+    .transition(t)
+    .attr("d", but_sca_tri_v(0));
 
 
 
@@ -682,11 +687,11 @@ function go_grid(quick) {
 //        gsckh: x1, y, x2, txt
 function go_days(quick) {
 
-    var t = get_transition(quick);
+  var t = get_transition(quick);
 
-    days_header.update(quick) ;
+  days_header.update(quick);
 
-    hours_header.update(quick) ;
+  hours_header.update(quick);
 }
 
 /*----------------------
@@ -695,73 +700,75 @@ function go_days(quick) {
 
 
 function go_bknews(quick) {
-    var t;
-    if (quick) {
-        t = d3.transition()
-            .duration(0);
-    } else {
-        t = d3.transition();
-    }
+  var t;
+  if (quick) {
+    t = d3.transition()
+      .duration(0);
+  } else {
+    t = d3.transition();
+  }
 
-    svg.get_dom("edt-fig")
-	.select(".top-bar")
-        .transition(t)
-        .attr("x1", 0)
-        .attr("y1", bknews_top_y())
-        .attr("x2", grid_width())
-        .attr("y2", bknews_top_y());
+  svg.get_dom("edt-fig")
+    .select(".top-bar")
+    .transition(t)
+    .attr("x1", 0)
+    .attr("y1", bknews_top_y())
+    .attr("x2", grid_width())
+    .attr("y2", bknews_top_y());
 
-    svg.get_dom("edt-fig")
-	.select(".bot-bar")
-        .transition(t)
-        .attr("x1", 0)
-        .attr("y1", bknews_bot_y())
-        .attr("x2", grid_width())
-        .attr("y2", bknews_bot_y());
-    
-    var flash = svg.get_dom("edt-fig").select(".txt-info");
+  svg.get_dom("edt-fig")
+    .select(".bot-bar")
+    .transition(t)
+    .attr("x1", 0)
+    .attr("y1", bknews_bot_y())
+    .attr("x2", grid_width())
+    .attr("y2", bknews_bot_y());
 
-    var fl_all = flash
-	.selectAll(".bn-all")
-	.data(bknews.cont,
-	      function(d) { return d.id ; });
+  var flash = svg.get_dom("edt-fig").select(".txt-info");
 
-    var ffl = fl_all
-	.enter()
-	.append("g")
-	.attr("class", "bn-all")
-	.append("a")
-	.attr("xlink:href", bknews_link);
+  var fl_all = flash
+    .selectAll(".bn-all")
+    .data(
+      bknews.cont,
+      function (d) { return d.id; }
+    );
 
-    ffl
-	.append("rect")
-	.attr("class", "bn-rec")
-	.attr("fill", bknews_row_fill)
-	.attr("stroke", bknews_row_fill)
-	.attr("stroke-width", 1)
-	.attr("y", bknews_row_y)
-	.merge(fl_all.select(".bn-rec"))
-        .transition(t)
-	.attr("x", bknews_row_x)
-	.attr("y", bknews_row_y)
-	.attr("width", bknews_row_width)
-	.attr("height", bknews_row_height);
-    
-    
+  var ffl = fl_all
+    .enter()
+    .append("g")
+    .attr("class", "bn-all")
+    .append("a")
+    .attr("xlink:href", bknews_link);
 
-    ffl
-	.append("text")
-	.attr("class", "bn-txt")
-	.attr("fill", bknews_row_txt_strk)
-	.text(bknews_row_txt)
-	.attr("y", bknews_row_txt_y)
-	.merge(fl_all.select(".bn-txt"))
-        .transition(t)
-	.attr("x", bknews_row_txt_x)
-	.attr("y", bknews_row_txt_y);
+  ffl
+    .append("rect")
+    .attr("class", "bn-rec")
+    .attr("fill", bknews_row_fill)
+    .attr("stroke", bknews_row_fill)
+    .attr("stroke-width", 1)
+    .attr("y", bknews_row_y)
+    .merge(fl_all.select(".bn-rec"))
+    .transition(t)
+    .attr("x", bknews_row_x)
+    .attr("y", bknews_row_y)
+    .attr("width", bknews_row_width)
+    .attr("height", bknews_row_height);
 
-    fl_all.exit().remove();
-    
+
+
+  ffl
+    .append("text")
+    .attr("class", "bn-txt")
+    .attr("fill", bknews_row_txt_strk)
+    .text(bknews_row_txt)
+    .attr("y", bknews_row_txt_y)
+    .merge(fl_all.select(".bn-txt"))
+    .transition(t)
+    .attr("x", bknews_row_txt_x)
+    .attr("y", bknews_row_txt_y);
+
+  fl_all.exit().remove();
+
 }
 
 
@@ -771,10 +778,10 @@ function go_bknews(quick) {
 
 
 function go_quote() {
-    svg.get_dom("vg").select(".quote").select("text")
-        .transition(d3.transition())
-        .attr("x", quote_x())
-        .attr("y", quote_y());
+  svg.get_dom("vg").select(".quote").select("text")
+    .transition(d3.transition())
+    .attr("x", quote_x())
+    .attr("y", quote_y());
 }
 
 
@@ -785,49 +792,49 @@ function go_quote() {
   ----------------------*/
 
 function go_gp_buttons() {
-    for (var p = 0; p < set_promos.length; p++) {
-        var cont = svg.get_dom("selg")
-            .select(".sel-pop-g#" + popup_type_id("group"))
-            .selectAll(".gp-but-" + set_promos[p] + "P")
-            .data(Object.keys(groups[p]).map(function(k) {
-                return groups[p][k];
-            }));
+  for (var p = 0; p < set_promos.length; p++) {
+    var cont = svg.get_dom("selg")
+      .select(".sel-pop-g#" + popup_type_id("group"))
+      .selectAll(".gp-but-" + set_promos[p] + "P")
+      .data(Object.keys(groups[p]).map(function (k) {
+        return groups[p][k];
+      }));
 
-        var contg = cont
-            .enter()
-            .append("g")
-            .attr("class", "gp-but-" + set_promos[p] + "P")
-            .attr("transform", function(gp) {
-                return "translate(" + (root_gp[gp.promo].butx) + ","
-                    + (root_gp[gp.promo].buty) + ")";
-            })
-            .attr("gpe", function(gp) {
-                return gp.name;
-            })
-            .attr("promo", function(gp) {
-                return gp.promo;
-            })
-            .on("click", function(gp) {
-		apply_gp_display(gp, false, true);
-	    });
+    var contg = cont
+      .enter()
+      .append("g")
+      .attr("class", "gp-but-" + set_promos[p] + "P")
+      .attr("transform", function (gp) {
+        return "translate(" + (root_gp[gp.promo].butx) + ","
+          + (root_gp[gp.promo].buty) + ")";
+      })
+      .attr("gpe", function (gp) {
+        return gp.name;
+      })
+      .attr("promo", function (gp) {
+        return gp.promo;
+      })
+      .on("click", function (gp) {
+        apply_gp_display(gp, false, true);
+      });
 
 
-        contg.append("rect")
-            .attr("x", butgp_x)
-            .attr("y", butgp_y)
-            .attr("width", butgp_width)
-            .attr("height", butgp_height)
-            .merge(cont.select("rect"))
-            .attr("fill", fill_gp_button)
-            .attr("stroke-width", 1)
-            .attr("stroke", "black");
+    contg.append("rect")
+      .attr("x", butgp_x)
+      .attr("y", butgp_y)
+      .attr("width", butgp_width)
+      .attr("height", butgp_height)
+      .merge(cont.select("rect"))
+      .attr("fill", fill_gp_button)
+      .attr("stroke-width", 1)
+      .attr("stroke", "black");
 
-        contg.append("text")
-            .attr("x", butgp_txt_x)
-            .attr("y", butgp_txt_y)
-            .text(butgp_txt);
+    contg.append("text")
+      .attr("x", butgp_txt_x)
+      .attr("y", butgp_txt_y)
+      .text(butgp_txt);
 
-    }
+  }
 
 
 
@@ -839,64 +846,64 @@ function go_gp_buttons() {
   --------------------*/
 function go_menus() {
 
-    var init = svg.get_dom("meg")
-        .selectAll(".ckline")
-        .data(Object.keys(ckbox));
+  var init = svg.get_dom("meg")
+    .selectAll(".ckline")
+    .data(Object.keys(ckbox));
 
 
-    var ent = init
-        .enter()
-        .append("g")
-        .attr("class", "ckline")
-        .on("click", apply_ckbox);
+  var ent = init
+    .enter()
+    .append("g")
+    .attr("class", "ckline")
+    .on("click", apply_ckbox);
 
 
 
-    var cs = ent
-        .append("g")
-        .attr("class", "ckstat");
+  var cs = ent
+    .append("g")
+    .attr("class", "ckstat");
 
-    var cd = ent.
+  var cd = ent.
     append("g")
-        .attr("class", "ckdyn");
+    .attr("class", "ckdyn");
 
 
-    cs
-        .append("rect")
-        .attr("x", menu_cks_x)
-        .attr("y", menu_cks_y)
-        .attr("rx", 2)
-        .attr("ry", 2)
-        .attr("width", menus.sfac * menus.h)
-        .attr("height", menus.sfac * menus.h)
-        .merge(init.select(".ckstat").select("rect"))
-        .attr("stroke", menu_cks_fill)
-        .attr("stroke-width", menu_cks_stw);
+  cs
+    .append("rect")
+    .attr("x", menu_cks_x)
+    .attr("y", menu_cks_y)
+    .attr("rx", 2)
+    .attr("ry", 2)
+    .attr("width", menus.sfac * menus.h)
+    .attr("height", menus.sfac * menus.h)
+    .merge(init.select(".ckstat").select("rect"))
+    .attr("stroke", menu_cks_fill)
+    .attr("stroke-width", menu_cks_stw);
 
-    cs
-        .append("text")
-        .attr("x", menu_ck_txt_x)
-        .attr("y", menu_ck_txt_y)
-        .merge(init.select(".ckstat").select("text"))
-        .attr("fill", menu_cks_fill)
-        .text(menu_cks_txt);
-
-
-    cd
-        .append("rect")
-        .attr("stroke", "none")
-        .attr("x", menu_ckd_x)
-        .attr("y", menu_ckd_y)
-        .attr("width", menus.ifac * menus.sfac * menus.h)
-        .attr("height", menus.ifac * menus.sfac * menus.h)
-        .merge(init.select(".ckdyn").select("rect"))
-        .attr("fill", menu_ckd_fill);
+  cs
+    .append("text")
+    .attr("x", menu_ck_txt_x)
+    .attr("y", menu_ck_txt_y)
+    .merge(init.select(".ckstat").select("text"))
+    .attr("fill", menu_cks_fill)
+    .text(menu_cks_txt);
 
 
-    svg.get_dom("meg")
-        .selectAll(".ckline")
-        .data(Object.keys(ckbox))
-        .attr("cursor", menu_curs);
+  cd
+    .append("rect")
+    .attr("stroke", "none")
+    .attr("x", menu_ckd_x)
+    .attr("y", menu_ckd_y)
+    .attr("width", menus.ifac * menus.sfac * menus.h)
+    .attr("height", menus.ifac * menus.sfac * menus.h)
+    .merge(init.select(".ckdyn").select("rect"))
+    .attr("fill", menu_ckd_fill);
+
+
+  svg.get_dom("meg")
+    .selectAll(".ckline")
+    .data(Object.keys(ckbox))
+    .attr("cursor", menu_curs);
 
 }
 
@@ -916,356 +923,363 @@ function go_menus() {
 
 
 /*--------------------
-   ------ COURS -------
+  ------ COURS -------
   --------------------*/
 
 // update display cours attribute according to current selections
 // if its module, tutor or room does not appear in selection lists,
 // the course is not displayed
 function update_selection() {
-    cours.forEach(function(c) {
-        var mod = modules.all.find(function(d) {
-            return d.name == c.mod ;
-        });
-        var tut = tutors.all.find(function(d) {
-            return d.name == c.prof ;
-        });
-        var roo = rooms_sel.all.find(function(d) {
-            return d.name == c.room ;
-        });
-        if (typeof mod === 'undefined' || typeof tut === 'undefined'
-            || typeof roo === 'undefined') {
-            c.display = false ;
-        } else {
-            c.display = mod.display && tut.display && roo.display ;
-        }
+  cours.forEach(function(c) {
+    var mod = modules.all.find(function(d) {
+      return d.name == c.mod ;
     });
+    var tut = tutors.all.find(function(d) {
+      return d.name == c.prof ;
+    });
+    var roo = rooms_sel.all.find(function(d) {
+      if (c.room in rooms.roomgroups) {
+        return rooms.roomgroups[c.room].includes(d.name) ;
+      } else {
+        return false;
+      }
+    });
+    if (typeof mod === 'undefined' || typeof tut === 'undefined'
+        || typeof roo === 'undefined') {
+      c.display = false ;
+    } else {
+      c.display = mod.display && tut.display && roo.display ;
+    }
+  });
 }
 
 // update active flags for selections
 function update_active() {
-    var tut_av = sel_popup.get_available("tutor");
-    var mod_av = sel_popup.get_available("module");
+  var tut_av = sel_popup.get_available("tutor");
+  var mod_av = sel_popup.get_available("module");
 
-    tut_av.active = tutors.all.filter(function(d) {
-        return d.display;
-    }).length != tutors.all.length ;
-    mod_av.active = modules.all.filter(function(d) {
-        return d.display;
-    }).length != modules.all.length ;
+  tut_av.active = tutors.all.filter(function (d) {
+    return d.display;
+  }).length != tutors.all.length;
+  mod_av.active = modules.all.filter(function (d) {
+    return d.display;
+  }).length != modules.all.length;
 
-    sel_popup.active_filter = tut_av.active || mod_av.active ;
+  sel_popup.active_filter = tut_av.active || mod_av.active;
 
-    if(!cosmo) {
-        var room_av = sel_popup.get_available("room");
-        room_av.active = rooms_sel.all.filter(function(d) {
-            return d.display;
-        }).length != rooms_sel.all.length ;
-        sel_popup.active_filter = sel_popup.active_filter || room_av.active ;
-    }
+  if (!cosmo) {
+    var room_av = sel_popup.get_available("room");
+    room_av.active = rooms_sel.all.filter(function (d) {
+      return d.display;
+    }).length != rooms_sel.all.length;
+    sel_popup.active_filter = sel_popup.active_filter || room_av.active;
+  }
 
 }
 
 function go_courses(quick) {
-    var t;
-    if (quick) {
-        t = d3.transition()
-            .duration(0);
-    } else {
-        t = d3.transition();
-    }
+  var t;
+  if (quick) {
+    t = d3.transition()
+      .duration(0);
+  } else {
+    t = d3.transition();
+  }
 
 
-    update_selection() ;
-    
-    var cg = svg.get_dom("edt-mg").selectAll(".cours")
-        .data(cours.filter(function(d) {
-                return groups[d.promo][d.group].display;
-            }),
-            function(d) {
-                return d.id_course;
-            })
-        .attr("cursor", ckbox["edt-mod"].cked ? "pointer" : "default");
+  update_selection();
 
-    var incg = cg.enter()
-        .append("g")
-        .attr("class", "cours")
-        .attr("cursor", ckbox["edt-mod"].cked ? "pointer" : "default")
-        .on("contextmenu", function(d) { if (ckbox["edt-mod"].cked) {
-	    d3.event.preventDefault();
-            if(!cosmo) {
-	        room_tutor_change.cm_settings = entry_cm_settings ;
-            }
-            pending.prepare_modif(d) ;
-	    compute_cm_room_tutor_direction();
-	    //select_room_change(d);
-            if (!cosmo) {
-	        select_entry_cm();
-            } else {
-                salarie_cm_level = 0 ;
-	        select_salarie_change();
-            }
-	    go_cm_room_tutor_change();
-	}})
-        .call(dragListener)
-        .on("dblclick",show_detailed_courses);
+  var cg = svg.get_dom("edt-mg")
+    .selectAll(".cours")
+    .data(
+      cours.filter(function (d) {
+        return groups[d.promo][d.group].display;
+      }),
+      function (d) { return d.id_course; }
+    )
+    .attr("cursor", ckbox["edt-mod"].cked ? "pointer" : "default");
+
+  var incg = cg.enter()
+    .append("g")
+    .attr("class", "cours")
+    .attr("cursor", ckbox["edt-mod"].cked ? "pointer" : "default")
+    .on("contextmenu", function (d) {
+      if (ckbox["edt-mod"].cked) {
+        d3.event.preventDefault();
+        if (!cosmo) {
+          room_tutor_change.cm_settings = entry_cm_settings;
+        }
+        pending.prepare_modif(d);
+        compute_cm_room_tutor_direction();
+        //select_room_change(d);
+        if (!cosmo) {
+          select_entry_cm();
+        } else {
+          salarie_cm_level = 0;
+          select_salarie_change();
+        }
+        go_cm_room_tutor_change();
+      }
+    })
+    .call(dragListener)
+    .on("dblclick", show_detailed_courses);
+
+  incg
+    .merge(cg)
+    .attr("opacity", cours_opac);
+
+  incg
+    .append("rect")
+    .attr("class", "crect")
+    .attr("x", cours_x)
+    .attr("y", cours_y)
+    .attr("width", 0)
+    .merge(cg.select("rect"))
+    .attr("fill", cours_fill)
+    .attr("stroke", cours_stk)
+    .transition(t)
+    .attr("x", cours_x)
+    .attr("y", cours_y)
+    .attr("width", cours_width)
+    .attr("height", cours_height);
+
+  if (ckbox["edt-mod"].cked
+      && logged_usr.dispo_all_see) {
+    d3.selectAll("rect.crect").style("fill", function (d) {
+      try {
+        lDis = dispos[d.prof][d.day][d.slot];
+      } catch (e) {
+        lDis = par_dispos.nmax;
+      }
+
+      return smi_fill(lDis / par_dispos.nmax);
+    });
+  } else {
+    d3.selectAll("rect.crect").style("fill", cours_fill);
+  }
+
+  // Tutor's fullname 
+
+  // var divtip = d3.select("body").append("div")
+  // .attr("class", "tooltip")
+  // .style("opacity", 0);
+
+  // 
+  // d3.selectAll("g.cours")
+  // .on("mouseover", function(d) {
+  //     divtip.transition()
+  //         .duration(500)
+  //         .style("opacity", .95);
+  //     divtip.html(d.prof_full_name + " : "  + d.mod)
+  //         .style("left", (d3.event.pageX) + "px")
+  //         .style("top", (d3.event.pageY+15) + "px");
+  //     })
+  // .on("mouseout", function(d) {
+  //     divtip.transition()
+  //         .duration(200)
+  //         .style("opacity", 0);
+  // })
+
+  incg
+    .append("text")
+    .attr("st", "p")
+    .attr("fill", cours_txt_fill)
+    .attr("font-weight", cours_txt_weight)
+    .attr("font-size", cours_txt_size)
+    .merge(cg.select("[st=p]"))
+    .transition(t)
+    .attr("x", cours_txt_x)
+    .attr("y", cours_txt_mid_y)
+    .attr("x", cours_txt_x)
+    .attr("y", cours_txt_mid_y)
+    .text(cours_txt_mid_txt);
+
+
+  if (!cosmo) {
+    incg
+      .append("text")
+      .attr("st", "m")
+      .attr("x", cours_txt_x)
+      .attr("y", cours_txt_top_y)
+      .text(cours_txt_top_txt)
+      .attr("fill", cours_txt_fill)
+      .attr("font-weight", cours_txt_weight)
+      .attr("font-size", cours_txt_size)
+      .merge(cg.select("[st=m]"))
+      .transition(t)
+      .attr("x", cours_txt_x)
+      .attr("y", cours_txt_top_y);
 
     incg
-        .merge(cg)
-        .attr("opacity", cours_opac);
-    
-    incg
-        .append("rect")
-        .attr("class", "crect")
-        .attr("x", cours_x)
-        .attr("y", cours_y)
-        .attr("width", 0)
-        .merge(cg.select("rect"))
-        .attr("fill", cours_fill)
-        .attr("stroke", cours_stk)
-        .transition(t)
-        .attr("x", cours_x)
-        .attr("y", cours_y)
-        .attr("width", cours_width)
-        .attr("height", cours_height);
+      .append("text")
+      .attr("st", "r")
+      .attr("x", cours_txt_x)
+      .attr("y", cours_txt_bot_y)
+      .merge(cg.select("[st=r]"))
+      .text(cours_txt_bot_txt)
+      .attr("fill", cours_txt_fill)
+      .attr("font-weight", cours_txt_weight)
+      .attr("font-size", cours_txt_size)
+      .transition(t)
+      .attr("x", cours_txt_x)
+      .attr("y", cours_txt_bot_y);
+  }
 
-    if (ckbox["edt-mod"].cked
-	&& logged_usr.dispo_all_see) {
-        d3.selectAll("rect.crect").style("fill", function(d) {
-            try {
-                lDis = dispos[d.prof][d.day][d.slot];
-            } catch (e) {
-                lDis = par_dispos.nmax;
-            }
+  cg.exit()
+    .remove();
 
-            return smi_fill(lDis / par_dispos.nmax);
-        })
-    } else {
-        d3.selectAll("rect.crect").style("fill", cours_fill);
-    }
-
-    // Tutor's fullname 
-
-    // var divtip = d3.select("body").append("div")
-    // .attr("class", "tooltip")
-    // .style("opacity", 0);
-
-    // 
-    // d3.selectAll("g.cours")
-    // .on("mouseover", function(d) {
-    //     divtip.transition()
-    //         .duration(500)
-    //         .style("opacity", .95);
-    //     divtip.html(d.prof_full_name + " : "  + d.mod)
-    //         .style("left", (d3.event.pageX) + "px")
-    //         .style("top", (d3.event.pageY+15) + "px");
-    //     })
-    // .on("mouseout", function(d) {
-    //     divtip.transition()
-    //         .duration(200)
-    //         .style("opacity", 0);
-    // })
-
-    incg
-        .append("text")
-        .attr("st", "p")
-        .attr("fill", cours_txt_fill)
-        .attr("font-weight", cours_txt_weight)
-        .attr("font-size", cours_txt_size)
-        .merge(cg.select("[st=p]"))
-        .transition(t)
-        .attr("x", cours_txt_x)
-        .attr("y", cours_txt_mid_y)
-        .attr("x", cours_txt_x)
-        .attr("y", cours_txt_mid_y)
-        .text(cours_txt_mid_txt);
-        
-    
-    if (!cosmo) {
-        incg
-            .append("text")
-            .attr("st", "m")
-            .attr("x", cours_txt_x)
-            .attr("y", cours_txt_top_y)
-            .text(cours_txt_top_txt)
-            .attr("fill", cours_txt_fill)
-            .attr("font-weight", cours_txt_weight)
-            .attr("font-size", cours_txt_size)
-            .merge(cg.select("[st=m]"))
-            .transition(t)
-            .attr("x", cours_txt_x)
-            .attr("y", cours_txt_top_y);
-        
-        incg
-            .append("text")
-            .attr("st", "r")
-            .attr("x", cours_txt_x)
-            .attr("y", cours_txt_bot_y)
-            .merge(cg.select("[st=r]"))
-            .text(cours_txt_bot_txt)
-            .attr("fill", cours_txt_fill)
-            .attr("font-weight", cours_txt_weight)
-            .attr("font-size", cours_txt_size)
-            .transition(t)
-            .attr("x", cours_txt_x)
-            .attr("y", cours_txt_bot_y);
-    }
-
-    cg.exit()
-        .remove();
-
-    go_cm_room_tutor_change();
+  go_cm_room_tutor_change();
 }
 
 
 /*-----------------------
-   ------ VALIDATE ------
+  ------ VALIDATE ------
   -----------------------*/
 
 // update acknowledgment message
 function go_ack_msg() {
-    var btn_txt = "Super" ;
-    if (ack.status == 'KO') {
-        btn_txt = "Ok" ;
-    }
-    var com_txt = ack.more ;
-    if (com_txt == '') {
-        com_txt = ack.predefined[ack.status];
-    }
-    var splash_ack = {
-	id: "ack-edt-mod",
-	but: {list: [{txt: btn_txt, click: function(d){} }]},
-	com: {list: [{txt: com_txt}]}
-    }
-    splash(splash_ack);
+  var btn_txt = "Super";
+  if (ack.status == 'KO') {
+    btn_txt = "Ok";
+  }
+  var com_txt = ack.more;
+  if (com_txt == '') {
+    com_txt = ack.predefined[ack.status];
+  }
+  var splash_ack = {
+    id: "ack-edt-mod",
+    but: { list: [{ txt: btn_txt, click: function (d) { } }] },
+    com: { list: [{ txt: com_txt }] }
+  };
+  splash(splash_ack);
 
 }
 
 
 // update info about re-generation
 function go_regen(s) {
-    if (s != null) {
-	total_regen = false ;
-        var txt = "";
-        var elements = s.split(/,| /);
-        if (elements.length % 2 != 0 && elements.length > 1) {
-            txt = "";
-        } else if (elements[0] == 'N') {
-            txt = "Pas de (re)génération prévue";
-        } else if (elements[0] == 'C') {
-	    total_regen = true ;
-            if (elements.length > 2 && elements[2] == 'S') {
-                txt = "Regénération totale (mineure) le " + elements[1] +
-                    "(" + elements[3] + ")";
-            } else {
-                txt = "Regénération totale prévue (probablement le " + elements[1] + ")";
-            }
-        } else if (elements[0] == 'S') {
-            txt = "Regénération mineure prévue (probablement le " + elements[1] + ")";
-        }
-
-        ack.regen = txt;
-
-        svg.get_dom("vg").select(".ack-reg").select("text")
-            .text(ack.regen);
-
+  if (s != null) {
+    total_regen = false;
+    var txt = "";
+    var elements = s.split(/,| /);
+    if (elements.length % 2 != 0 && elements.length > 1) {
+      txt = "";
+    } else if (elements[0] == 'N') {
+      txt = "Pas de (re)génération prévue";
+    } else if (elements[0] == 'C') {
+      total_regen = true;
+      if (elements.length > 2 && elements[2] == 'S') {
+        txt = "Regénération totale (mineure) le " + elements[1] +
+          "(" + elements[3] + ")";
+      } else {
+        txt = "Regénération totale prévue (probablement le " + elements[1] + ")";
+      }
+    } else if (elements[0] == 'S') {
+      txt = "Regénération mineure prévue (probablement le " + elements[1] + ")";
     }
 
+    ack.regen = txt;
+
     svg.get_dom("vg").select(".ack-reg").select("text")
-        .transition(d3.transition())
-        .attr("x", grid_width())
-        .attr("y", ack_reg_y());
+      .text(ack.regen);
+
+  }
+
+  svg.get_dom("vg").select(".ack-reg").select("text")
+    .transition(d3.transition())
+    .attr("x", grid_width())
+    .attr("y", ack_reg_y());
 
 }
 
 
 function but_bold() {
-    d3
-        .select(this)
-        .select("rect")
-        .attr("stroke-width", 4);
+  d3
+    .select(this)
+    .select("rect")
+    .attr("stroke-width", 4);
 }
 
 function but_back() {
-    d3
-        .select(this)
-        .select("rect")
-        .attr("stroke-width", 2);
+  d3
+    .select(this)
+    .select("rect")
+    .attr("stroke-width", 2);
 }
 
 
 
 /*--------------------
-   ------ ALL -------
+  ------ ALL -------
   --------------------*/
 
 // update everything
 function go_edt(t) {
-    go_grid(t);
-    go_courses(t);
-    //go_tutors();
-    go_pref(t);
-    //go_ack_msg(t);
-    go_bknews(t);
-    go_alarm_pref();
-    go_regen(null);
-    go_quote();
+  go_grid(t);
+  go_courses(t);
+  //go_tutors();
+  go_pref(t);
+  //go_ack_msg(t);
+  go_bknews(t);
+  go_alarm_pref();
+  go_regen(null);
+  go_quote();
 }
 
 
 function go_selection_buttons() {
 
-    var cont = svg.get_dom("selg")
-        .selectAll(".sel-pop-g")
-        .data(sel_popup.panels, function(p) {
-            return p.type ;
-        })
-        .selectAll(".sel-button")
-        .data(function(p) {
-            p.list.forEach(function(c){
-                c.panel = p ;
-            });
-            return p.list ;
-        }, function(c) {
-            return c.name ;
-        });
+  var cont = svg.get_dom("selg")
+    .selectAll(".sel-pop-g")
+    .data(sel_popup.panels, function (p) {
+      return p.type;
+    })
+    .selectAll(".sel-button")
+    .data(function (p) {
+      p.list.forEach(function (c) {
+        c.panel = p;
+      });
+      return p.list;
+    }, function (c) {
+      return c.name;
+    });
 
-    var contg = cont
-        .enter()
-        .append("g")
-        .attr("class", "sel-button")
-        .on("click", apply_selection_display);
+  var contg = cont
+    .enter()
+    .append("g")
+    .attr("class", "sel-button")
+    .on("click", apply_selection_display);
 
-    var concon = contg
-        .merge(cont)
-        .attr("opacity", but_sel_opac);
+  var concon = contg
+    .merge(cont)
+    .attr("opacity", but_sel_opac);
 
-    
-    
-    contg
-        .append("rect")
-        .attr("ty", "ch")
-        .attr("width", popup_choice_w)
-        .attr("height", popup_choice_h)
-        .attr("rx", 5)
-        .attr("ry", 10)
-        .merge(cont.select("rect"))
-        .attr("class", but_sel_class)
-        .attr("x", but_sel_x)
-        .attr("y", but_sel_y);
 
-    contg
-        .append("text")
-        .attr("class", but_sel_class)
-        .text(function(d) {
-            return d.name;
-        })
-        .merge(cont.select("text"))
-        .attr("class", but_sel_class)
-        .attr("x", but_sel_txt_x)
-        .attr("y", but_sel_txt_y);
 
-    cont.exit().remove();
+  contg
+    .append("rect")
+    .attr("ty", "ch")
+    .attr("width", popup_choice_w)
+    .attr("height", popup_choice_h)
+    .attr("rx", 5)
+    .attr("ry", 10)
+    .merge(cont.select("rect"))
+    .attr("class", but_sel_class)
+    .attr("x", but_sel_x)
+    .attr("y", but_sel_y);
+
+  contg
+    .append("text")
+    .attr("class", but_sel_class)
+    .text(function (d) {
+      return d.name;
+    })
+    .merge(cont.select("text"))
+    .attr("class", but_sel_class)
+    .attr("x", but_sel_txt_x)
+    .attr("y", but_sel_txt_y);
+
+  cont.exit().remove();
 
 }
 
@@ -1275,24 +1289,24 @@ function go_selection_buttons() {
 // tutor(s) selected -> any taught module
 // no selected tutor -> module taught by logged user if any
 function update_relevant() {
-    modules.all.forEach(function(m){
-        m.relevant = false ;
+  modules.all.forEach(function (m) {
+    m.relevant = false;
+  });
+  var tut_act = sel_popup.get_available("tutor").active;
+  cours.forEach(function (c) {
+    var mod = modules.all.find(function (d) {
+      return d.name == c.mod;
     });
-    var tut_act = sel_popup.get_available("tutor").active ;
-    cours.forEach(function(c) {
-        var mod = modules.all.find(function(d) {
-            return d.name == c.mod ;
-        });
-        var tut = tutors.all.find(function(d) {
-            return d.name == c.prof ;
-        });
-        if (!tut_act) {
-            if(c.prof == user.name) {
-                mod.relevant = true ;
-            }
-        } else if (typeof mod !== 'undefined'
-                   && typeof tut !== 'undefined' && tut.display) {
-            mod.relevant = true ;
-        }
+    var tut = tutors.all.find(function (d) {
+      return d.name == c.prof;
     });
+    if (!tut_act) {
+      if (c.prof == user.name) {
+        mod.relevant = true;
+      }
+    } else if (typeof mod !== 'undefined'
+               && typeof tut !== 'undefined' && tut.display) {
+      mod.relevant = true;
+    }
+  });
 }

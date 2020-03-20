@@ -27,12 +27,13 @@
 import logging
 
 from django.db import transaction
+from django.db.models import Count
 from django.core.exceptions import ObjectDoesNotExist
 
 from base.models import Group, TrainingProgramme, \
                         ScheduledCourse, EdtVersion, Department, Regen
 
-from base.models import Room, RoomType, RoomGroup, \
+from base.models import RoomType, Room, \
                         RoomSort, Period, CourseType, \
                         TutorCost, CourseStartTimeConstraint, \
                         TimeGeneralSettings, GroupType, CourseType, \
@@ -207,7 +208,7 @@ def get_descendant_groups(gp, children):
     return current
 
 
-def get_rooms(department_abbrev):
+def get_room_types_groups(department_abbrev):
     """
     From the data stored in the database, fill the room description file, that
     will be used by the website.
@@ -216,24 +217,36 @@ def get_rooms(department_abbrev):
     :return: an object containing one dictionary roomtype -> (list of roomgroups),
     and one dictionary roomgroup -> (list of rooms)
     """
-    dic_rt = {}
-    dept_rg = set()
+    dept = Department.objects.get(abbrev=department_abbrev)
 
-    for rt in RoomType.objects.filter(department__abbrev=department_abbrev):
-        dic_rt[str(rt)] = []
-        for rg in rt.members.all():
-            dept_rg.add(rg)
-            if str(rg) not in dic_rt[str(rt)]:
-                dic_rt[str(rt)].append(str(rg))
+    return {'roomtypes': {str(rt): list(set(
+        [room.name for room in rt.members.all()]
+    )) for rt in RoomType.objects.filter(department=dept)},
+            'roomgroups': {room.name: [sub.name for sub in room.and_subrooms()] \
+                           for room in Room.objects.filter(departments=dept)}
+            }
 
-    dic_rg = {}
-    for rg in dept_rg:
-        dic_rg[rg.name] = []
-        for r in rg.subrooms.all():
-            dic_rg[rg.name].append(str(r))
 
-    return {'roomtypes':dic_rt,
-            'roomgroups':dic_rg}
+def get_rooms(department_abbrev, basic=False):
+    """
+    :return: 
+    """
+    if department_abbrev is not None:
+        dept = Department.objects.get(abbrev=department_abbrev)
+    else:
+        dept = None
+    if not basic:
+        if dept is None:
+            return Room.objects.all()
+        else:
+            return Room.objects.filter(departments=dept)
+    else:
+        if dept is None:
+            return Room.objects.annotate(nb_sub=Count('subrooms'))\
+                           .filter(nb_sub=0)
+        else:
+            return Room.objects.annotate(nb_sub=Count('subrooms'))\
+                               .filter(departments=dept, nb_sub=0)
 
 
 def get_coursetype_constraints(department_abbrev):
@@ -278,17 +291,20 @@ def get_departments():
     """
     return [d.abbrev for d in Department.objects.all()]
 
+
 def get_course_types(dept):
     """
     :return: list of course type names
     """
     return [d.name for d in CourseType.objects.filter(department=dept)]
 
+
 def get_training_programmes(dept):
     """
     :return: list of training programme names
     """
     return [d.abbrev for d in TrainingProgramme.objects.filter(department=dept)]
+
 
 def get_working_days(dept):
     """

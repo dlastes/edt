@@ -63,7 +63,7 @@ urlpatterns = [
     url(r'^configuration/', include('configuration.urls')),
 #    url(r'^importation/(?P<department>[a-zA-Z]\w{0,6})/', include('importation.urls')),
     url('ttapp/', include('TTapp.urls')),
-    url(r'^$', base.views.index, name='index'),
-
+    url('game/', include('easter_egg.urls')),
     url('api/', include('api.urls')),
+    url(r'^$', base.views.index, name='index'),
 ]
