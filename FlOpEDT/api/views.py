@@ -347,7 +347,7 @@ class Modules_Course_ViewSet(viewsets.ModelViewSet):
         return res
 
 
-class CourseTypesFilterSet(filters.FilterSet):
+class CourseTypeFilterSet(filters.FilterSet):
     dept = filters.CharFilter(field_name='department__abbrev', required=True)
 
     class Meta:
@@ -355,15 +355,28 @@ class CourseTypesFilterSet(filters.FilterSet):
         fields = ['dept']
 
 
-class CourseTypesViewSet(viewsets.ModelViewSet):
+class CourseTypeViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the course types.
 
     Can be filtered as wanted with the department of a CourseType object, with the function CourseTypesFilterSet
     """
     queryset = bm.CourseType.objects.all()
-    serializer_class = serializers.CourseTypesSerializer
-    filter_class = CourseTypesFilterSet
+    serializer_class = serializers.CourseTypeSerializer
+    filter_class = CourseTypeFilterSet
+
+    filterset_fields = '__all__'
+
+
+class CourseTypeNameViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet to see all the course types.
+
+    Can be filtered as wanted with the department of a CourseType object, with the function CourseTypesFilterSet
+    """
+    queryset = bm.CourseType.objects.all()
+    serializer_class = serializers.CourseTypeNameSerializer
+    filter_class = CourseTypeFilterSet
 
     filterset_fields = '__all__'
 
@@ -1191,18 +1204,6 @@ class BKNewsViewSet(viewsets.ModelViewSet):
     queryset = dwm.BreakingNews.objects.all()
     serializer_class = serializers.BKNewsSerializer
     filter_class = BKNewsFilterSet
-
-
-class AllCourseTypesViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet to see all the course types
-
-    Can be filtered as wanted with every field of a CourseType object.
-    """
-    queryset = bm.CourseType.objects.all()
-    serializer_class = serializers.AllCourseTypesSerializer
-
-    filterset_fields = '__all__'
 
 
 class LoginView(TemplateView):

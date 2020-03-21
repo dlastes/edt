@@ -175,11 +175,6 @@ class ModulesSerializer(serializers.Serializer):
         model = bm.Module
         fields = ['name', 'abbrev', 'head', 'ppn', 'train_prog', 'period']
 
-class CourseTypesSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = bm.CourseType
-        fields = '__all__'
-
 
 class Department_Name_Serializer(serializers.Serializer):
     name = serializers.CharField()
@@ -755,7 +750,15 @@ class BKNewsSerializer(serializers.ModelSerializer):
 #                                  ----Course Types----                                 #
 #                                  --------------------                                 #
 
-class AllCourseTypesSerializer(serializers.ModelSerializer):
+class CourseTypeSerializer(serializers.ModelSerializer):
+    name = serializers.CharField()
+
+    class Meta:
+        model = bm.CourseType
+        fields = ['name', 'duration']
+
+
+class CourseTypeNameSerializer(serializers.ModelSerializer):
     name = serializers.CharField()
 
     class Meta:

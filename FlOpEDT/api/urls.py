@@ -62,7 +62,8 @@ routerBase.register(r'rooms', views.RoomFreeViewSet)
 routerBase.register(r'roomsorts', views.RoomSortsViewSet)
 routerBase.register(r'modules', views.ModulesViewSet)
 routerBase.register(r'modules-course', views.Modules_Course_ViewSet)
-routerBase.register(r'coursetypes', views.CourseTypesViewSet)
+routerBase.register(r'coursetype/name', views.CourseTypeNameViewSet, basename='coursetype-name')
+routerBase.register(r'coursetype', views.CourseTypeViewSet)
 routerBase.register(r'courses', views.CoursesViewSet)
 routerBase.register(r'edtversions', views.EdtVersionsViewSet)
 routerBase.register(r'coursemodifications', views.CourseModificationsViewSet)
@@ -111,7 +112,6 @@ routerFetch.register(r'alldepts', views.DepartmentsViewSet)
 routerFetch.register(r'tutorcourses', views.TutorCoursesViewSet, basename='tutorcourses')
 routerFetch.register(r'extrasched', views.ExtraSchedCoursesViewSet, basename='extrasched')
 routerFetch.register(r'bknews', views.BKNewsViewSet, basename='BKNews')
-routerFetch.register(r'coursetypes', views.AllCourseTypesViewSet)
 
 
 ######################
@@ -139,7 +139,8 @@ routerCourses = routers.SimpleRouter()
 
 routerCourses.register(r'modules', views.ModulesViewSet)
 routerCourses.register(r'modules-course', views.Modules_Course_ViewSet)
-routerCourses.register(r'types', views.CourseTypesViewSet)
+routerCourses.register(r'type/name', views.CourseTypeNameViewSet, basename='type-name')
+routerCourses.register(r'type', views.CourseTypeViewSet, basename='type')
 routerCourses.register(r'courses', views.CoursesViewSet)
 
 routerGroups = routers.SimpleRouter()
