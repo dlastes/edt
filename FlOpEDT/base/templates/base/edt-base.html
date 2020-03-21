@@ -41,8 +41,8 @@
     var url_contact = "{% url "base:contact" department %}";
     var url_module = "{% url "base:fetch_module" department 0 0 %}";
     url_module = url_module.slice(0, -3);
-    var url_tutor = "{% url "base:fetch_tutor" department 0 0 %}";
-    url_tutor = url_tutor.slice(0, -3);
+    var url_tutor = "{% url 'api:tutor-list' %}";
+    var url_all_tutors = "{% url 'api:tutor_username-list' %}";
 
     var url_cours_pl = "{% url "base:fetch_cours_pl" department 0 0 0 %}";
     url_cours_pl = url_cours_pl.slice(0, -5);
@@ -50,7 +50,6 @@
     var url_dispos = "{% url "api:availabilities-list" %}?dept={{ dept }}&week={{ week }}&year={{ year }}";
     var url_unavailable_rooms = "{% url "base:fetch_unavailable_rooms" department 0 0 %}";
     url_unavailable_rooms = url_unavailable_rooms.slice(0,-3);
-    var url_all_tutors = "{% url "api:alltutors-list" %}?dept={{ dept }}&week={{ week }}&year={{ year }}";
     var url_login = "{% url "people:login" %}";
     var url_edt = "{% url "base:edt" department %}";
     var url_edt_changes = "{% url "base:edt_changes" department %}";
