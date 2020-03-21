@@ -498,6 +498,8 @@ function fetch_cours() {
   ack.more = "";
 
   var exp_week = wdw_weeks.get_selected();
+  let context = {work_copy: num_copie, dept: department};
+  exp_week.add_to_context(context);
 
   cours_bouge = {};
 
@@ -550,7 +552,7 @@ function fetch_cours() {
   $.ajax({
     type: "GET", //rest Type
     dataType: 'text',
-    url: url_cours_pp + exp_week.url() + "/" + num_copie,
+    url: build_url(url_cours_pp, context),
     async: true,
     contentType: "text/csv",
     success: function (msg, ts, req) {
