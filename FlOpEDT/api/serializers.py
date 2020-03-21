@@ -41,10 +41,15 @@ class UserDepartmentSettingsSerializer(serializers.ModelSerializer):
         model = pm.UserDepartmentSettings
         fields = '__all__'
 
-class TutorsSerializer(serializers.ModelSerializer):
+class TutorSerializer(serializers.ModelSerializer):
     class Meta:
         model = pm.Tutor
         fields = '__all__'
+
+class TutorUsernameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = pm.Tutor
+        fields = ['username']
 
 class SupplyStaffsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -617,12 +622,6 @@ class User_AT_Serializer(serializers.Serializer):
     class Meta:
         model = pm.User
         fields = ['username']
-
-class AllTutorsSerializer(serializers.Serializer):
-    user = User_AT_Serializer()
-    class Meta:
-        model = pm.UserDepartmentSettings
-        fields = ['user']
 
 #                                  -------------------                                  #
 #                                  ----Departments----                                  #

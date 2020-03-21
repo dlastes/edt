@@ -69,16 +69,6 @@ class UserDepartmentSettingsViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.UserDepartmentSettingsSerializer
 
 
-class TutorsViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet to see all the tutors
-
-    Can be filtered as wanted with every field of a Tutor object.
-    """
-    queryset = pm.Tutor.objects.all()
-    serializer_class = serializers.TutorsSerializer
-
-
 class SupplyStaffsViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the supply staff
@@ -1047,26 +1037,48 @@ class TrainingProgrammesViewSet(viewsets.ModelViewSet):
     filterset_fields = '__all__'
 
 
-class AllTutorsFilterSet(filters.FilterSet):
-    dept = filters.CharFilter(field_name='user__departments__abbrev', required=True)
-    year = filters.CharFilter(field_name='user__departments__train_pro__module__module__year')
-    week = filters.CharFilter(field_name='user__departments__train_pro__module__module__week')
+class TutorFilterSet(filters.FilterSet):
+    dept = filters.CharFilter(field_name='departments__abbrev', required=True)
 
     class Meta:
-        model = pm.UserDepartmentSettings
-        fields = ['dept', 'year', 'week']
+        model = pm.Tutor
+        fields = ['dept']
 
 
-class AllTutorsViewSet(viewsets.ModelViewSet):
+class TutorViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the training programs
 
     Result can be filtered as wanted with the department, the year and the week
     by using the function AllTutorsFilterSet
     """
-    alltutors = pm.UserDepartmentSettings.objects.all()
-    serializer_class = serializers.AllTutorsSerializer
-    filter_class = AllTutorsFilterSet
+    def get_queryset(self):
+        # Getting all the filters
+        week = self.request.query_params.get('week', None)
+        year = self.request.query_params.get('year', None)
+
+        # Filtering
+        if week is not None and year is not None:
+            return [sc.tutor \
+                    for sc in bm.ScheduledCourse.objects.filter(
+                            course__week=week,
+                            course__year=year)\
+                    .distinct('tutor')]
+        else:
+            return pm.Tutor.objects.all()
+    serializer_class = serializers.TutorSerializer
+    filter_class = TutorFilterSet
+
+
+class TutorUsernameViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet to see all the tutors
+
+    Can be filtered as wanted with every field of a Tutor object.
+    """
+    queryset = pm.Tutor.objects.all()
+    serializer_class = serializers.TutorUsernameSerializer
+    filter_class = TutorFilterSet
 
 
 class AllVersionsFilterSet(filters.FilterSet):
