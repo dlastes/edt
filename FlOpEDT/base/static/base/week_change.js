@@ -1214,10 +1214,10 @@ function fetch_tutor() {
   show_loader(true);
   $.ajax({
     type: "GET",
+    headers: {Accept: 'text/csv'},
     dataType: 'text',
     url: build_url(url_tutor, context),
     async: true,
-    contentType: "text/csv",
     success: function (msg, ts, req) {
       var sel_week = wdw_weeks.get_selected();
       if (Week.compare(exp_week, sel_week) == 0) {
@@ -1225,18 +1225,19 @@ function fetch_tutor() {
       }
       show_loader(false);
     },
-    error: function (msg) {
+    error: function (xhr, status, msg) {
       console.log("error");
+      console.log(msg);
       show_loader(false);
     }
   });
 }
 function translate_tutor_from_csv(d) {
   //console.log(d);
-  if (Object.keys(tutors_info).indexOf(d.tutor__username) == -1) {
-    tutors_info[d.tutor__username] = {
-      full_name: d.tutor__first_name + " " + d.tutor__last_name,
-      email: d.tutor__email
+  if (Object.keys(tutors_info).indexOf(d.username) == -1) {
+    tutors_info[d.username] = {
+      full_name: d.first_name + " " + d.last_name,
+      email: d.email
     };
   }
 }
