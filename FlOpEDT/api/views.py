@@ -625,9 +625,7 @@ class CourseStartTimeConstraintsViewSet(viewsets.ModelViewSet):
     filterset_class = CoureStartTimeFilter
 
 
-class RegensFilterSet(filters.FilterSet):
-    year = filters.CharFilter(field_name='department__train_pro__module__module__year', required=True)
-    week = filters.CharFilter(field_name='department__train_pro__module__module__week', required=True)
+class RegenFilterSet(filters.FilterSet):
     dept = filters.CharFilter(field_name='department__abbrev', required=True)
 
     class Meta:
@@ -644,7 +642,7 @@ class RegensViewSet(viewsets.ModelViewSet):
     """
     queryset = bm.Regen.objects.all()
     serializer_class = serializers.RegensSerializer
-    filter_class = RegensFilterSet
+    filter_class = RegenFilterSet
 
 
 # ----------

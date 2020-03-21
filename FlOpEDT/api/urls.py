@@ -100,7 +100,7 @@ routerTTapp.register(r'minnonpreferedslots', views.TTMinNonPreferedSlotsViewSet)
 routerTTapp.register(r'avoidbothtimes', views.TTAvoidBothTimesViewSet)
 routerTTapp.register(r'simultaneouscourses', views.TTSimultaneousCoursesViewSet)
 routerTTapp.register(r'limitedstarttimechoices', views.TTLimitedStartTimeChoicesViewSet) # TODO: Fix
-routerTTapp.register(r'limitiedroomchoices', views.TTLimitedRoomChoicesViewSet)
+routerTTapp.register(r'limitedroomchoices', views.TTLimitedRoomChoicesViewSet)
 
 routerFetch.register(r'scheduledcourses', views.ScheduledCoursesViewSet, basename='scheduledcourses')
 routerFetch.register(r'unscheduledcourses', views.UnscheduledCoursesViewSet, basename='unscheduledcourses')
