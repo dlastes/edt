@@ -1045,6 +1045,7 @@ def clean_change(year, week, old_version, change, work_copy=0, initiator=None, a
     tutor_old = sched_course.tutor
     if tutor_old is None:
         tutor_old = sched_course.course.tutor
+        sched_course.tutor = tutor_old
         
     course_log = CourseModification(course=course,
                                     old_week=week,
