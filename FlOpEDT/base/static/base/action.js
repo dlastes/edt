@@ -279,7 +279,7 @@ function fetch_all_tutors() {
     $.ajax({
       type: "GET",
       dataType: 'json',
-      url: url_all_tutors,
+      url: build_url(url_all_tutors, {dept: department}),
       async: false,
       success: function (data) {
         all_tutors = data.filter(function (d) {

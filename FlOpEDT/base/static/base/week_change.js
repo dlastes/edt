@@ -1204,12 +1204,14 @@ function translate_module_from_csv(d) {
 // Get all the information of the Tutor present in the week and stored him in a dictionary of Tutor_info
 function fetch_tutor() {
   var exp_week = wdw_weeks.get_selected();
+  let context = {dept: department};
+  exp_week.add_to_context(context);
 
   show_loader(true);
   $.ajax({
     type: "GET",
     dataType: 'text',
-    url: url_tutor + exp_week.url(),
+    url: build_url(url_tutor, context),
     async: true,
     contentType: "text/csv",
     success: function (msg, ts, req) {
