@@ -128,9 +128,6 @@ routerPreferences.register(r'room-single', views.RoomPreferenceSingleViewSet)
 routerPreferences.register(r'user-def', views.UserPreferenceDefaultViewSet, basename="user-def")
 routerPreferences.register(r'user-single', views.UserPreferenceSingleViewSet, basename="user-single")
 routerPreferences.register(r'user-sowdef', views.UserPreferenceSingleOwDefaultViewSet, basename="user-sowdef")
-routerPreferences.register(r'tutor-def', views.TutorPreferenceDefaultViewSet, basename="tutor-def")
-routerPreferences.register(r'tutor-single', views.TutorPreferenceSingleViewSet, basename="tutor-single")
-routerPreferences.register(r'tutor-sowdef', views.TutorPreferenceSingleOwDefaultViewSet, basename="tutor-sowdef")
 
 routerRooms = routers.SimpleRouter()
 
