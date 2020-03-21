@@ -38,10 +38,9 @@
 
     var url_fetch_user_dweek = "{% url 'base:fetch_user_dweek' department '.' %}";
     url_fetch_user_dweek = url_fetch_user_dweek.slice(0, -1);
-    var url_fetch_course_dweek = "{% url 'base:fetch_course_dweek' department '.' '.' %}";
-    url_fetch_course_dweek = url_fetch_course_dweek.slice(0, -3);
     var url_fetch_room_dweek = "{% url 'base:fetch_room_dweek' department '.' %}";
     url_fetch_room_dweek = url_fetch_room_dweek.slice(0, -1);
+    var url_fetch_course_dweek = "{% url 'api:fetch:coursedefweek-list' %}";
     
     var url_user_pref_changes = "{% url "base:user_pref_changes" department 0 0 '.' %}";
     url_user_pref_changes = url_user_pref_changes.slice(0, -5);

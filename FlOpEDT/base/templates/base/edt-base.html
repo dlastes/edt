@@ -46,8 +46,8 @@
 
     var url_cours_pl = "{% url "base:fetch_cours_pl" department 0 0 0 %}";
     url_cours_pl = url_cours_pl.slice(0, -5);
-    var url_cours_pp = "{% url "api:unscheduledcourses-list" %}?department={{ dept }}&week={{ week }}&year={{ year }}";
-    var url_dispos = "{% url "api:availabilities-list" %}?dept={{ dept }}&week={{ week }}&year={{ year }}";
+    var url_cours_pp = "{% url 'api:fetch:unscheduledcourses-list' %}";
+    var url_tutor_pref = "{% url 'api:fetch:availabilities-list' %}";
     var url_unavailable_rooms = "{% url "base:fetch_unavailable_rooms" department 0 0 %}";
     url_unavailable_rooms = url_unavailable_rooms.slice(0,-3);
     var url_login = "{% url "people:login" %}";
@@ -57,7 +57,7 @@
     url_user_pref_changes = url_user_pref_changes.slice(0, -5);
     var url_fetch_user_dweek = "{% url "api:dweek-list" %}?username={{ name_usr }}";
     {% comment %} url_fetch_user_dweek = url_fetch_user_dweek.slice(0, -1); {% endcomment %}
-    var url_bknews = "{% url 'api:BKNews-list' %}";
+    var url_bknews = "{% url 'api:fetch:BKNews-list' %}";
     var url_quote = "{% url "quote:fetch_quote" %}";
     var url_week_infos = "{% url "base:fetch_week_infos" department 0 0 %}";
     url_week_infos = url_week_infos.slice(0, -3);
@@ -69,7 +69,7 @@
     url_swap = url_swap.slice(0, -5) ;
     var url_reassign_rooms = "{% url 'TTapp:reassign_rooms' department 0 0 0 %}" ;
     url_reassign_rooms = url_reassign_rooms.slice(0, -5) ;
-    var url_fetch_extra_sched = "{% url 'api:extrasched-list' %}?dept={{ dept }}&week={{ week }}&year={{ year }}&username={{ name_usr }}" ;
+    var url_fetch_extra_sched = "{% url 'api:fetch:extrasched-list' %}?dept={{ dept }}&week={{ week }}&year={{ year }}&username={{ name_usr }}" ;
     {% comment %} url_fetch_extra_sched = url_fetch_extra_sched.slice(0, -3) ; {% endcomment %}
     var url_fetch_shared_rooms = "{% url 'base:fetch_shared_rooms' department 0 0 %}" ;
     url_fetch_shared_rooms = url_fetch_shared_rooms.slice(0, -3) ;
