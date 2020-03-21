@@ -176,11 +176,13 @@ function fetch_cours_light() {
 function fetch_bknews_light(first) {
   fetch.ongoing_bknews = true;
   var exp_week = new Week(year, week);
+  let context = {dept: department};
+  exp_week.add_to_context(context);
 
   $.ajax({
     type: "GET", //rest Type
     dataType: 'text',
-    url: url_bknews + year_att + "/" + week_att,
+    url: build_url(url_bknews, context),
     async: true,
     contentType: "text/json",
     success: function (msg) {

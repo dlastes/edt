@@ -369,12 +369,14 @@ function fetch_bknews(first) {
   fetch.ongoing_bknews = true;
 
   var exp_week = wdw_weeks.get_selected();
+  let context = {dept: department};
+  exp_week.add_to_context(context);
 
   show_loader(true);
   $.ajax({
     type: "GET", //rest Type
     dataType: 'text',
-    url: url_bknews + exp_week.url(),
+    url: build_url(url_bknews, context),
     async: true,
     contentType: "text/csv",
     success: function (msg) {
