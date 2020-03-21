@@ -20,11 +20,14 @@ function fetch_infos_dd(dd) {
     $.ajax({
       type: "GET",
       dataType: 'json',
-      url: dd.url,
+      url: build_url(dd.url, {dept: department}),
       async: true,
       contentType: "application/json; charset=utf-8",
       success: function (data) {
         // add elements in the dropdown list
+        data = data.map(function(d) {
+          return d[Object.keys(d)[0]] ;
+        });
         data.sort();
         var option;
         for (var i = 0; i < data.length; i++) {
