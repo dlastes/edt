@@ -35,6 +35,10 @@ function Week(year, week) {
 Week.prototype.url = function () {
   return this.year + "/" + this.week;
 };
+Week.prototype.add_to_context = function(context) {
+  context['week'] = this.week ;
+  context['year'] = this.year ;
+};
 
 // comparison function
 Week.compare = function (week_a, week_b) {

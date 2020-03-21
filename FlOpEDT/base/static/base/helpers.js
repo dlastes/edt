@@ -40,3 +40,13 @@ function get_transition(immediate) {
     return d3.transition();
   }
 }
+
+
+// add get parameters to the url
+function build_url(url, context) {
+  return url + "?" + Object.keys(context).map(
+    function (p) {
+      return p + "=" + context[p] ;
+    }
+  ).join("&");
+}
