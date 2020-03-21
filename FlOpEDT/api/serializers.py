@@ -601,12 +601,20 @@ class CourseDefaultWeekSerializer(serializers.Serializer):
 #                                ----Training Programs----                              #
 #                                -------------------------                              #
 
-class TrainingProgramsSerializer(serializers.Serializer):
+class TrainingProgrammeNameSerializer(serializers.ModelSerializer):
     abbrev = serializers.CharField()
 
     class Meta:
         model = bm.TrainingProgramme
         fields = ['abbrev']
+
+
+class TrainingProgrammeSerializer(serializers.ModelSerializer):
+    abbrev = serializers.CharField()
+
+    class Meta:
+        model = bm.TrainingProgramme
+        fields = ['abbrev', 'name']
 
 #                                -------------------------                              #
 #                                ----Unavailable rooms----                              #

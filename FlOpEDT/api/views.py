@@ -136,26 +136,6 @@ class DepartmentViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.DepartmentSerializer
 
 
-class TrainingProgramsFilterSet(filters.FilterSet):
-    dept = filters.CharFilter(field_name='department__abbrev', required=True)
-
-    class Meta:
-        model = bm.TrainingProgramme
-        fields = ['dept']
-
-
-class TrainingProgramsViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet to see all the training programs
-
-    Can be filtered as wanted with parameter="dept"[required]
-     of a TrainingProgram object by calling the function TrainingProgramsFilterSet
-    """
-    queryset = bm.TrainingProgramme.objects.all()
-    serializer_class = serializers.TrainingProgramsSerializer
-    filter_class = TrainingProgramsFilterSet
-
-
 class GroupTypesViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the group types
@@ -1028,13 +1008,30 @@ class CourseDefaultWeekViewSet(viewsets.ModelViewSet):
         return qs
 
 
-class TrainingProgrammesViewSet(viewsets.ModelViewSet):
+class TrainingProgrammeFilterSet(filters.FilterSet):
+    dept = filters.CharFilter(field_name='department__abbrev', required=True)
+
+    class Meta:
+        model = bm.TrainingProgramme
+        fields = ['dept']
+
+
+class TrainingProgrammeNameViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the training programs
     """
     queryset = bm.TrainingProgramme.objects.all()
-    serializer_class = serializers.TrainingProgramsSerializer
-    filterset_fields = '__all__'
+    serializer_class = serializers.TrainingProgrammeNameSerializer
+    filterset_class = TrainingProgrammeFilterSet
+
+
+class TrainingProgrammeViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet to see all the training programs
+    """
+    queryset = bm.TrainingProgramme.objects.all()
+    serializer_class = serializers.TrainingProgrammeSerializer
+    filterset_class = TrainingProgrammeFilterSet
 
 
 class TutorFilterSet(filters.FilterSet):
