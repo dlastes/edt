@@ -132,13 +132,13 @@ function create_lunchbar() {
 function fetch_url() {
   switch (mode) {
   case 'tutor':
-    return url_fetch_user_dweek + user.name;
+    return build_url(url_user_pref_default, {user: user.name});
   case 'course':
     return url_fetch_course_dweek
       + dd_selections['prog'].value
       + '/' + dd_selections['type'].value;
   case 'room':
-    return url_fetch_room_dweek + user.name;
+    return build_url(url_fetch_room_dweek, {room: user.name});
   }
 }
 

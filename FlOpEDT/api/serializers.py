@@ -244,7 +244,7 @@ class CoursesSerializer(serializers.Serializer):
 # -- PREFERENCES --
 # -----------------
 
-class UsersPreferencesSerializer(serializers.Serializer):
+class UserPreferenceSerializer(serializers.Serializer):
     user = serializers.CharField()
     week = serializers.IntegerField()
     year = serializers.IntegerField()

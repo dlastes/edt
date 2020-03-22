@@ -465,7 +465,7 @@ class CoursePreferencesViewSet(viewsets.ModelViewSet):
 
 
 class UserPreferenceGenViewSet(viewsets.ModelViewSet):
-    serializer_class = serializers.UsersPreferencesSerializer
+    serializer_class = serializers.UserPreferenceSerializer
 
 
 class UserPreferenceDefaultFilterSet(filters.FilterSet):
@@ -488,7 +488,7 @@ class UserPreferenceDefaultViewSet(UserPreferenceGenViewSet):
     queryset = bm.UserPreference.objects.filter(week=None)
 
 
-class UserPreferenceSingleFilterSet(filters.FilterSet):
+class UserPreferenceSingularFilterSet(filters.FilterSet):
     user = filters.CharFilter(field_name='user__username')
     dept = filters.CharFilter(field_name='user__departments__abbrev')
     # makes the fields required
@@ -500,14 +500,14 @@ class UserPreferenceSingleFilterSet(filters.FilterSet):
         fields = ['user', 'dept', 'week', 'year']
 
 
-class UserPreferenceSingleViewSet(UserPreferenceGenViewSet):
+class UserPreferenceSingularViewSet(UserPreferenceGenViewSet):
     """
     ViewSet shows a User Preference Default List
 
     Can be filtered as wanted with "user"/"dept" of a UserPreference object.
     """
     permission_classes = (IsAuthenticated,)
-    filter_class = UserPreferenceSingleFilterSet
+    filter_class = UserPreferenceSingularFilterSet
     queryset = bm.UserPreference.objects.all()
 
 
@@ -560,10 +560,12 @@ class UserPreferenceActualViewSet(UserPreferenceGenViewSet):
 
 class RoomPreferenceDefaultFilterSet(filters.FilterSet):
     dept = filters.CharFilter(field_name='room__departments__abbrev')
+    room = filters.CharFilter(field_name='room__name')
 
     class Meta:
         model = bm.RoomPreference
-        fields = ['dept']
+        fields = ['dept', 'room']
+
 
 class RoomPreferenceDefaultViewSet(viewsets.ModelViewSet):
     """
@@ -576,16 +578,16 @@ class RoomPreferenceDefaultViewSet(viewsets.ModelViewSet):
     queryset = bm.RoomPreference.objects.filter(week=None)
     serializer_class = serializers.RoomPreferencesSerializer
 
-class RoomPreferenceSingleFilterSet(filters.FilterSet):
+class RoomPreferenceSingularFilterSet(filters.FilterSet):
     dept = filters.CharFilter(field_name='room__departments__abbrev', required=True)
 
     class Meta:
         model = bm.RoomPreference
         fields = ['dept']
 
-class RoomPreferenceSingleViewSet(viewsets.ModelViewSet):
+class RoomPreferenceSingularViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
-    filter_class = RoomPreferenceSingleFilterSet
+    filter_class = RoomPreferenceSingularFilterSet
     queryset = bm.RoomPreference.objects.filter()
     serializer_class = serializers.RoomPreferencesSerializer
 
