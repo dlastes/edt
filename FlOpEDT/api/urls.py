@@ -125,9 +125,9 @@ routerPreferences= routers.SimpleRouter()
 routerPreferences.register(r'course', views.CoursePreferencesViewSet)
 routerPreferences.register(r'room-def', views.RoomPreferenceDefaultViewSet)
 routerPreferences.register(r'room-single', views.RoomPreferenceSingleViewSet)
-routerPreferences.register(r'user-def', views.UserPreferenceDefaultViewSet, basename="user-def")
-routerPreferences.register(r'user-single', views.UserPreferenceSingleViewSet, basename="user-single")
-routerPreferences.register(r'user-sowdef', views.UserPreferenceSingleOwDefaultViewSet, basename="user-sowdef")
+routerPreferences.register(r'user-default', views.UserPreferenceDefaultViewSet, basename="user-def")
+routerPreferences.register(r'user-singular', views.UserPreferenceSingularViewSet, basename="user-single")
+routerPreferences.register(r'user-actual', views.UserPreferenceActualViewSet, basename="user-actual")
 
 routerRooms = routers.SimpleRouter()
 
