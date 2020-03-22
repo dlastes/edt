@@ -49,9 +49,45 @@ import displayweb.models as dwm
 import TTapp.models as ttm
 
 
+
+
+# --------------------------------
+# -- Frequently used parameters --
+# --------------------------------
+
+def week_param(**kwargs):
+    return openapi.Parameter('week',
+                             openapi.IN_QUERY,
+                             description="week",
+                             type=openapi.TYPE_INTEGER,
+                             **kwargs)
+def year_param(**kwargs):
+    return openapi.Parameter('year',
+                             openapi.IN_QUERY,
+                             description="year",
+                             type=openapi.TYPE_INTEGER,
+                             **kwargs)
+def user_param(**kwargs):
+    return openapi.Parameter('user',
+                             openapi.IN_QUERY,
+                             description="username",
+                             type=openapi.TYPE_STRING,
+                             **kwargs)
+def dept_param(**kwargs):
+    return openapi.Parameter('dept',
+                             openapi.IN_QUERY,
+                             description="department abbreviation",
+                             type=openapi.TYPE_STRING,
+                             **kwargs)
+
+
+
+
+
+
+
 # ------------
 # -- PEOPLE --
-
 # ------------
 class UsersViewSet(viewsets.ModelViewSet):
     """
@@ -473,31 +509,15 @@ class UserPreferenceActualFilterSet(filters.FilterSet):
         fields = ['user', 'dept']
 
 
-week_param = openapi.Parameter('week',
-                               openapi.IN_QUERY,
-                               description="week",
-                               type=openapi.TYPE_INTEGER,
-                               required=True)
-year_param = openapi.Parameter('year',
-                               openapi.IN_QUERY,
-                               description="year",
-                               type=openapi.TYPE_INTEGER,
-                               required=True)
-user_param = openapi.Parameter('user',
-                               openapi.IN_QUERY,
-                               description="username",
-                               type=openapi.TYPE_STRING)
-dept_param = openapi.Parameter('dept',
-                               openapi.IN_QUERY,
-                               description="department abbreviation",
-                               type=openapi.TYPE_STRING)
-
 # Custom schema generation: see
 # https://drf-yasg.readthedocs.io/en/stable/custom_spec.html
 @method_decorator(name='list',
                   decorator=swagger_auto_schema(
-                      operation_description="description from swagger_auto_schema via method_decorator",
-                       manual_parameters=[week_param, year_param, user_param, dept_param])
+                      operation_description="Preferences from (week,year) if exist otherwise default week",
+                       manual_parameters=[week_param(required=True),
+                                          year_param(required=True),
+                                          user_param(),
+                                          dept_param()])
 )
 class UserPreferenceActualViewSet(UserPreferenceGenViewSet):
     #permission_classes = (IsAuthenticated,)
