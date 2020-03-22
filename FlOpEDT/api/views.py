@@ -1046,13 +1046,13 @@ class AvailabilitiesViewSet(viewsets.ModelViewSet):
         return qs
 
 
-class CourseDefaultWeekViewSet(viewsets.ModelViewSet):
+class CourseTypeDefaultWeekViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the scheduled courses
 
     Result can be filtered as wanted with the training program and the course type
     """
-    serializer_class = serializers.CourseDefaultWeekSerializer
+    serializer_class = serializers.CourseTypeDefaultWeekSerializer
 
     def get_queryset(self):
         # Getting the wanted data
@@ -1061,12 +1061,15 @@ class CourseDefaultWeekViewSet(viewsets.ModelViewSet):
         # Getting all the filters
         train_prog = self.request.query_params.get('train_prog', None)
         course_type = self.request.query_params.get('course_type', None)
+        department = self.request.query_params.get('dept', None)
 
         # Filtering
+        if department is not None:
+            qs = qs.filter(train_prog__department=department)
         if train_prog is not None:
-            qs = qs.filter(course_type__name=course_type)
-        if course_type is not None:
             qs = qs.filter(train_prog__abbrev=train_prog)
+        if course_type is not None:
+            qs = qs.filter(course_type__name=course_type)
         return qs
 
 

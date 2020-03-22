@@ -585,7 +585,7 @@ class DefaultWeekSerializer(serializers.Serializer):
 #                              ---------------------------                              #
 #   No data to display
 
-class CourseDefaultWeekSerializer(serializers.Serializer):
+class CourseTypeDefaultWeekSerializer(serializers.Serializer):
     course_type = serializers.CharField()
     train_prog = serializers.CharField()
     day = serializers.CharField()
