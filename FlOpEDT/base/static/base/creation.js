@@ -1835,11 +1835,11 @@ function fetch_dispos_type() {
   if (user.name != "") {
     show_loader(true);
     $.ajax({
-      type: "GET", //rest Type
+      type: "GET",
+      headers: {Accept: 'text/csv'},
       dataType: 'text',
-      url: url_fetch_user_dweek + logged_usr.name,
+      url: build_url(url_user_pref_default, {user: user.name}),
       async: true,
-      contentType: "text/csv",
       success: function (msg) {
         //console.log(msg);
         user.dispos_type = [];

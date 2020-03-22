@@ -51,14 +51,16 @@ function fetch_tutor_preferences() {
   fetch.ongoing_dispos = true;
 
   var exp_week = wdw_weeks.get_selected();
+  let context = {dept: department};
+  exp_week.add_to_context(context);
 
   show_loader(true);
   $.ajax({
     type: "GET", //rest Type
+    headers: {Accept: 'text/csv'},
     dataType: 'text',
-    url: url_dispos + exp_week.url(),
+    url: build_url(url_user_pref, context),
     async: true,
-    contentType: "text/csv",
     success: function (msg) {
       var sel_week = wdw_weeks.get_selected();
       if (Week.compare(exp_week, sel_week) == 0) {
@@ -92,13 +94,13 @@ function fetch_tutor_preferences() {
 
 
 function translate_dispos_from_csv(d) {
-  if (Object.keys(dispos).indexOf(d.prof) == -1) {
-    dispos[d.prof] = {};
+  if (Object.keys(dispos).indexOf(d.user) == -1) {
+    dispos[d.user] = {};
     week_days.forEach(function (day) {
-      dispos[d.prof][day.ref] = [];
+      dispos[d.user][day.ref] = [];
     });
   }
-  dispos[d.prof][d.day].push({
+  dispos[d.user][d.day].push({
     start_time: +d.start_time,
     duration: +d.duration,
     value: +d.value

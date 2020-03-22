@@ -196,11 +196,11 @@ function translate_pref_from_csv(d) {
 function fetch_pref_only() {
   show_loader(true);
   $.ajax({
-    type: "GET", //rest Type
+    type: "GET",
+    headers: {Accept: 'text/csv'},
     dataType: 'text',
     url: fetch_url(),
     async: false,
-    contentType: "text/csv",
     success: function (msg) {
       console.log(msg);
 
