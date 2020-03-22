@@ -27,14 +27,20 @@ from rest_framework import authentication, exceptions, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
+from rest_framework.decorators import api_view
+
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 import django_filters.rest_framework as filters
+
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.http import *
 from django.views.generic import TemplateView
 from django.conf import settings
+from django.utils.decorators import method_decorator
 
 import people.models as pm
 import base.models as bm
@@ -458,30 +464,66 @@ class UserPreferenceSingleViewSet(UserPreferenceGenViewSet):
     queryset = bm.UserPreference.objects.all()
 
 
-class UserPreferenceSingleOwDefaultViewSet(UserPreferenceGenViewSet):
-    permission_classes = (IsAuthenticated,)
-    filter_class = UserPreferenceSingleFilterSet
+class UserPreferenceActualFilterSet(filters.FilterSet):
+    user = filters.CharFilter(field_name='user__username')
+    dept = filters.CharFilter(field_name='user__departments__abbrev')
 
-    def get_query_params(self, req):
+    class Meta:
+        model = bm.UserPreference
+        fields = ['user', 'dept']
+
+
+week_param = openapi.Parameter('week',
+                               openapi.IN_QUERY,
+                               description="week",
+                               type=openapi.TYPE_INTEGER,
+                               required=True)
+year_param = openapi.Parameter('year',
+                               openapi.IN_QUERY,
+                               description="year",
+                               type=openapi.TYPE_INTEGER,
+                               required=True)
+user_param = openapi.Parameter('user',
+                               openapi.IN_QUERY,
+                               description="username",
+                               type=openapi.TYPE_STRING)
+dept_param = openapi.Parameter('dept',
+                               openapi.IN_QUERY,
+                               description="department abbreviation",
+                               type=openapi.TYPE_STRING)
+
+# Custom schema generation: see
+# https://drf-yasg.readthedocs.io/en/stable/custom_spec.html
+@method_decorator(name='list',
+                  decorator=swagger_auto_schema(
+                      operation_description="description from swagger_auto_schema via method_decorator",
+                       manual_parameters=[week_param, year_param, user_param, dept_param])
+)
+class UserPreferenceActualViewSet(UserPreferenceGenViewSet):
+    #permission_classes = (IsAuthenticated,)
+    #filter_class = UserPreferenceSingularFilterSet
+
+    def get_query_params(self):
         # Getting the filters
         dict_params = {}
-        week = req.query_params.get('week', None)
+        week = self.request.query_params.get('week', None)
         if week is not None:
-            dict_params['week'] = week
+            dict_params['week'] = int(week)
         year = self.request.query_params.get('year', None)
         if year is not None:
-            dict_params['year'] = year
-
+            dict_params['year'] = int(year)
+        user = self.request.query_params.get('user', None)
+        if user is not None:
+            dict_params['user__username'] = user
+        dept = self.request.query_params.get('dept', None)
+        if dept is not None:
+            dict_params['user__departments__abbrev'] = dept
         return dict_params
 
     def get_queryset(self):
-        params = self.get_query_params(self.request)
+        params = self.get_query_params()
         print(params)
         qs = bm.UserPreference.objects.filter(**params)
-        if len(qs) == 0:
-            print(self.filter_class.week)
-            print(self.request.query_params.get('week', None))
-            qs = bm.UserPreference.objects.filter(week=None)
         return qs
 
 
