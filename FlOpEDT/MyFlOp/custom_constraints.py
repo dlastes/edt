@@ -23,7 +23,8 @@
 # a commercial license. Buying such a license is mandatory as soon as
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
-from TTapp.constraint_type import ConstraintType
+
+import TTapp.constraint_type as ct
 from TTapp.models import days_filter, slots_filter
 
 # class DummyConstraintTemplate():
@@ -145,7 +146,7 @@ class RespectBoundPerDay():
                                                        & ttmodel.wdb.compatible_slots[c]),
                                            '<=',
                                            tutor.max_hours_per_day,
-                                           constraint_type=ConstraintType.BOUND_HOURS_PER_DAY, instructors=tutor,
+                                           constraint_type=ct.ConstraintType.BOUND_HOURS_PER_DAY, instructors=tutor,
                                            days=d)
 
     def get_viewmodel(self):

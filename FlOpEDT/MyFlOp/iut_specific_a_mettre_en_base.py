@@ -34,6 +34,10 @@ from TTapp.TTUtils import add_generic_constraints_to_database
 
 def add_iut_constraints_to_database():
     add_generic_constraints_to_database()
+    add_common_constraints()
+    add_info_constraints()
+
+def add_common_constraints():
     # Libérer des demi-journées aux étudiants
     for department in Department.objects.filter(abbrev__in=['INFO','RT','GIM','CS']):
         TP = TrainingProgramme.objects.filter(department=department)
@@ -44,7 +48,7 @@ def add_iut_constraints_to_database():
             M.groups.add(g)
         M.save()
 
-        abbrev=department.abbrev
+        abbrev = department.abbrev
         CM = CourseType.objects.get(name='CM', department=department)
         if abbrev == 'INFO':
             DS = CourseType.objects.get(name='DS', department=department)
@@ -106,22 +110,23 @@ def add_iut_constraints_to_database():
                 L.train_progs.add(promo)
             L.save()
 
-        if abbrev == 'INFO':
-            lp_apsio = TrainingProgramme.objects.get(abbrev='APSIO')
+def add_info_constraints():
+    department = Department.objects.get(abbrev='INFO')
+    lp_apsio = TrainingProgramme.objects.get(abbrev='APSIO')
 
-            M = MinHalfDays(join2courses=True, weight=max_weight)
-            M.save()
-            for module in Module.objects.filter(train_prog=lp_apsio):
-                M.modules.add(module)
-            M.save()
+    M = MinHalfDays(join2courses=True, weight=max_weight)
+    M.save()
+    for module in Module.objects.filter(train_prog=lp_apsio):
+        M.modules.add(module)
+    M.save()
 
-            # Impose pour certains vacataires le fait qu'ils viennent sur une seule demi-journée (si moins de 3 cours)
-            # C'EST CETTE CONTRAINTE, LORSQU'ELLE N'EST QUE PREFERENCE, QUI CREE LA PAGAILLE DANS CBC!!!
+    # Impose pour certains vacataires le fait qu'ils viennent sur une seule demi-journée (si moins de 3 cours)
+    # C'EST CETTE CONTRAINTE, LORSQU'ELLE N'EST QUE PREFERENCE, QUI CREE LA PAGAILLE DANS CBC!!!
 
-            M = MinHalfDays(join2courses=True, weight=max_weight, department=department)
-            M.save()
-            for i in Tutor.objects.all():
-                if i.username in ['AB', 'AJ', 'CDU', 'FMA', 'GRJ', 'JD', 'SD', 'FMO',
-                                  'JPC', 'MN', 'NJ', 'TC', 'XB', 'PDU', 'VG', 'LC', 'MTH', 'BB']:
-                    M.tutors.add(i)
-            M.save()
+    M = MinHalfDays(join2courses=True, weight=max_weight, department=department)
+    M.save()
+    for i in Tutor.objects.all():
+        if i.username in ['AB', 'AJ', 'CDU', 'FMA', 'GRJ', 'JD', 'SD', 'FMO',
+                          'JPC', 'MN', 'NJ', 'TC', 'XB', 'PDU', 'VG', 'LC', 'MTH', 'BB']:
+            M.tutors.add(i)
+    M.save()
