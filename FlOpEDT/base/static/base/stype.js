@@ -134,9 +134,14 @@ function fetch_url() {
   case 'tutor':
     return build_url(url_user_pref_default, {user: user.name});
   case 'course':
-    return url_fetch_course_dweek
-      + dd_selections['prog'].value
-      + '/' + dd_selections['type'].value;
+    return build_url(
+      url_fetch_course_dweek,
+      {
+        dept: department,
+        train_prog: dd_selections['prog'].value,
+        course_type: dd_selections['type'].value
+      }
+    );
   case 'room':
     return build_url(url_fetch_room_dweek, {room: user.name});
   }
