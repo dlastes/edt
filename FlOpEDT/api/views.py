@@ -1044,30 +1044,6 @@ class AvailabilitiesViewSet(viewsets.ModelViewSet):
         return qs
 
 
-class DefaultWeekViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet to see all the scheduled courses
-
-    Result needs to be filtered with the username of the wanted tutor
-    """
-    permission_classes = (IsAuthenticated,)
-    serializer_class = serializers.DefaultWeekSerializer
-
-    def get_queryset(self):
-        # Getting all the wanted data
-        queryset = bm.UserPreference.objects.all()
-
-        # Getting filters from the request
-        username = self.request.query_params.get('username', None)
-
-        # Filtering
-        if username is not None:
-            queryset = queryset.objects.filter(user__username=username)
-            return queryset
-        else:
-            return None
-
-
 class CourseDefaultWeekViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the scheduled courses
