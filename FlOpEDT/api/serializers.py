@@ -135,10 +135,15 @@ class RoomTypesSerializer(serializers.ModelSerializer):
         model = bm.RoomType
         fields = '__all__'
 
-class RoomsSerializer(serializers.ModelSerializer):
+class RoomSerializer(serializers.ModelSerializer):
     class Meta:
         model = bm.Room
         fields = '__all__' #['id', 'name', 'subroom_of', 'departments'] 
+
+class RoomNameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = bm.Room
+        fields = ['name'] 
 
 class RoomSortsSerializer(serializers.ModelSerializer):
     class Meta:

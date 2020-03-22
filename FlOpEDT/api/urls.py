@@ -58,7 +58,7 @@ routerBase.register(r'traininghalfdays', views.TrainingHalfDaysViewSet)
 routerBase.register(r'periods', views.PeriodsViewSet)
 routerBase.register(r'timesettings', views.TimeGeneralSettingsViewSet)
 routerBase.register(r'roomtypes', views.RoomTypesViewSet)
-routerBase.register(r'rooms', views.RoomFreeViewSet)
+routerBase.register(r'rooms', views.RoomViewSet)
 routerBase.register(r'roomsorts', views.RoomSortsViewSet)
 routerBase.register(r'modules', views.ModulesViewSet)
 routerBase.register(r'modules-course', views.Modules_Course_ViewSet)
@@ -132,7 +132,8 @@ routerPreferences.register(r'user-actual', views.UserPreferenceActualViewSet, ba
 routerRooms = routers.SimpleRouter()
 
 routerRooms.register(r'types', views.RoomTypesViewSet)
-routerRooms.register(r'rooms', views.RoomFreeViewSet)
+routerRooms.register(r'room/name', views.RoomNameViewSet)
+routerRooms.register(r'room', views.RoomViewSet)
 routerRooms.register(r'sorts', views.RoomSortsViewSet)
 
 routerCourses = routers.SimpleRouter()

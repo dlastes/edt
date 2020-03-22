@@ -281,18 +281,18 @@ class RoomTypesViewSet(viewsets.ModelViewSet):
     filterset_fields = '__all__'
 
 
-class RoomFreeViewSet(viewsets.ModelViewSet):
+class RoomViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see a list which shows each room is with what kind of group.
 
     Can be filtered as wanted with every field of a Room object.
     """
     queryset = bm.Room.objects.all()
-    serializer_class = serializers.RoomsSerializer
+    serializer_class = serializers.RoomSerializer
     filterset_fields = '__all__'
 
 
-class RoomsFilterSet(filters.FilterSet):
+class RoomFilterSet(filters.FilterSet):
     dept = filters.CharFilter(field_name='departments__abbrev', required=True)
 
     class Meta:
@@ -300,15 +300,26 @@ class RoomsFilterSet(filters.FilterSet):
         fields = ['dept']
 
 
-class RoomsViewSet(viewsets.ModelViewSet):
+class RoomNameViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet to see a list which shows each room is with what kind of group.
+
+    Can be filtered as wanted with every field of a Room object.
+    """
+    queryset = bm.Room.objects.all()
+    serializer_class = serializers.RoomNameSerializer
+    filter_class = RoomFilterSet
+
+
+class RoomViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the rooms.
 
     Can be filtered as wanted with parameter="dept"[required] of a Room object, with the function RoomsFilterSet
     """
     queryset = bm.Room.objects.all()
-    serializer_class = serializers.RoomsSerializer
-    filter_class = RoomsFilterSet
+    serializer_class = serializers.RoomSerializer
+    filter_class = RoomFilterSet
 
     # filterset_fields = '__all__'
 
