@@ -463,6 +463,13 @@ class CoursePreferencesViewSet(viewsets.ModelViewSet):
     filterset_fields = '__all__'
 
 
+# enabling only GET methods:
+# from rest_framework import viewsets, mixins
+# class Blabla(mixins.RetrieveModelMixin, viewsets.GenericViewSet)
+# (cf https://stackoverflow.com/questions/23639113/disable-a-method-in-a-viewset-django-rest-framework)
+#
+# TODO check how to generate custom schema with this
+
 
 class UserPreferenceGenViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.UserPreferenceSerializer
