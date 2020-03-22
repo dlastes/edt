@@ -1115,13 +1115,12 @@ class TutorFilterSet(filters.FilterSet):
         fields = ['dept']
 
 
+@method_decorator(name='list',
+                  decorator=swagger_auto_schema(
+                      operation_description="Active tutors",
+                      manual_parameters=[week_param(), year_param()])
+)
 class TutorViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet to see all the training programs
-
-    Result can be filtered as wanted with the department, the year and the week
-    by using the function AllTutorsFilterSet
-    """
     def get_queryset(self):
         # Getting all the filters
         week = self.request.query_params.get('week', None)
@@ -1129,11 +1128,12 @@ class TutorViewSet(viewsets.ModelViewSet):
 
         # Filtering
         if week is not None and year is not None:
-            return [sc.tutor \
-                    for sc in bm.ScheduledCourse.objects.filter(
-                            course__week=week,
-                            course__year=year)\
-                    .distinct('tutor')]
+            return pm.Tutor.objects.filter(
+                pk__in=bm.ScheduledCourse.objects.filter(
+                    course__week=week,
+                    course__year=year)\
+                .distinct('tutor').values('tutor')
+            )
         else:
             return pm.Tutor.objects.all()
     serializer_class = serializers.TutorSerializer

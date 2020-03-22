@@ -44,7 +44,7 @@ class UserDepartmentSettingsSerializer(serializers.ModelSerializer):
 class TutorSerializer(serializers.ModelSerializer):
     class Meta:
         model = pm.Tutor
-        fields = '__all__'
+        fields = ['username', 'first_name', 'last_name', 'email']
 
 class TutorUsernameSerializer(serializers.ModelSerializer):
     class Meta:
