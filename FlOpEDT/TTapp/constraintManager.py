@@ -230,7 +230,9 @@ class ConstraintManager:
             self.show_result_dependency(occurs, weeks)
 
     def show_result_dependency(self, occurs, weeks):
-        output = "L'infaisabilité de l'EDT vient probablement d'un problème de dépendance"
+        _, _, _, occur_courses, _, _, _, _, _, _ = dict2keys(occurs)
+        output = "L'infaisabilité de l'EDT vient probablement d'un problème de dépendance entre %s et %s" \
+            % (occur_courses[0], occur_courses[1])
         filename = "logs/intelligible_constraints_dependency%s.txt" % weeks
         write_file(filename, output, print_output=False)
 
