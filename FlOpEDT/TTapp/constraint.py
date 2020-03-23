@@ -27,8 +27,7 @@ class Constraint:
     def __init__(self, id, constraint_type=None, instructors=[], slots=[], courses=[], weeks=[], rooms=[],
                  groups=[], days=[], departments=[], modules=[], apm=None):
         self.id = id
-        if constraint_type is not None:
-            self.constraint_type = constraint_type.value
+        self.constraint_type = constraint_type
 
         if type(instructors) is not list:
             instructors = [instructors]
@@ -95,7 +94,7 @@ class Constraint:
     def __str__(self):
         res = "(%s) La contrainte " % self.id
         if self.constraint_type is not None:
-            res += 'de type "%s" ; ' % str(self.constraint_type)
+            res += 'de type "%s" ; ' % str(self.constraint_type.value)
 
         if len(self.instructors) >= 1:
             d, c = singular_or_plurial(self.instructors, is_male=True)

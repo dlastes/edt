@@ -1,5 +1,7 @@
 import numpy as np
 
+from TTapp.constraint_type import ConstraintType
+
 
 def parse_iis(iis_filename):
     f = open(iis_filename, "r")
@@ -33,26 +35,28 @@ def inc_with_type(dic, keys, c_type):
                 if dic[key][1].count(c_type) == 0:
                     dic[key][1].append(c_type)
             else:
-                dic[key] = [1, [str(c_type)]]
+                dic[key] = [1, [c_type]]
 
 
 # Create result string to print
-def make_occur_buf(dic):
+def make_occur_buf(occurs):
     buf = ""
     types = ""
-    for x in dic:
-        param = dic.get(x)
-        n = len(param[1])
+    for occur in occurs:
+        nb_occ, types_occ = occurs.get(occur)
+        n = len(types_occ)
         if n > 0:
             types = "("
             for t in range(n - 1):
-                types += param[1][t] + ", "
-            types += param[1][n - 1] + ")"
-        buf += "[" + str(x) + " -> " + str(param[0]) + "] types : " + types + "\n"
+                types += types_occ[t].value + ", "
+            types += types_occ[n - 1].value + ")"
+        buf += "[" + str(occur) + " -> " + str(nb_occ) + "] types : " + types + "\n"
     return buf
 
 
 def handle_occur_type_with_priority(priority_types, occur_type, decreasing):
+    if priority_types is []:
+        return occur_type
     nb_occ_init = []
     max_priority = max(occur_type.values()) + len(priority_types)
     min_priority = -len(priority_types) + 1
@@ -123,7 +127,7 @@ class ConstraintManager:
             inc_with_type(occur_departments, self.get_constraint_by_id(i).departments, c_type)
             inc_with_type(occur_module, self.get_constraint_by_id(i).modules, c_type)
 
-        priority_types = ["Le cours doit être placé", "Problème de dépendance entre les salles"]
+        priority_types = []
         occur_type = handle_occur_type_with_priority(priority_types, occur_type, decreasing)
 
         occur_instructor = {k: v for k, v in
@@ -141,8 +145,8 @@ class ConstraintManager:
         return occur_type, occur_instructor, occur_slot, occur_course, occur_week, occur_room, occur_group, \
             occur_days, occur_departments, occur_module
 
-    def show_reduces_result_brut(self, id_constraints, weeks, decreasing=True):
-        occur_type, _, _, _, _, _, _, _, _, _ = self.get_occurs(id_constraints, decreasing)
+    def show_reduces_result_brut(self, id_constraints, occurs, weeks):
+        occur_type, _, _, _, _, _, _, _, _, _ = occurs
         order = list(occur_type.keys())
         constraints = self.get_constraints_by_ids(id_constraints)
         constraints = sorted(constraints, key=lambda x: order.index(x.constraint_type))
@@ -152,13 +156,13 @@ class ConstraintManager:
         filename = "logs/intelligible_constraints%s.txt" % weeks
         write_file(filename, output)
 
-    def show_reduces_result(self, id_constraints, weeks):
+    def show_reduces_result(self, occurs, weeks):
         occur_type, occur_instructor, occur_slot, occur_course, occur_week, occur_room, occur_group, occur_days,\
-            occur_department, occur_modules = self.get_occurs(id_constraints)
+            occur_department, occur_modules = occurs
 
         buf_type = ""
-        for x in occur_type:
-            buf_type += "[" + str(x) + " -> " + str(occur_type.get(x)) + "] \n"
+        for constraint_type in occur_type:
+            buf_type += "[" + constraint_type.value + " -> " + str(occur_type.get(constraint_type)) + "] \n"
 
         buf_instructor = make_occur_buf(occur_instructor)
         buf_slot = make_occur_buf(occur_slot)
@@ -194,9 +198,9 @@ class ConstraintManager:
         filename = "logs/intelligible_constraints_factorised%s.txt" % weeks
         write_file(filename, output)
 
-    def show_simplified_result(self, id_constraints, weeks, max_slots_to_print=5):
+    def show_simplified_result(self, occurs, weeks, max_slots_to_print=5):
         occur_type, occur_instructor, occur_slot, occur_course, occur_week, occur_room, occur_group, occur_days,\
-            occur_department, occur_modules = dict2keys(self.get_occurs(id_constraints))
+            occur_department, occur_modules = dict2keys(occurs)
 
         output = "Voici les raisons principales pour lesquelles le solveur n'a pas pu résoudre l'ensemble " \
                  "des contraintes spécifiées: \n"
@@ -218,11 +222,24 @@ class ConstraintManager:
                 output += "\t\t- %s\n" % occur_slot[i]
 
         filename = "logs/intelligible_constraints_simplified%s.txt" % weeks
-        write_file(filename, output, print_output=True)
+        write_file(filename, output, print_output=False)
+
+    def show_result_by_type(self, occurs, weeks):
+        occur_type, _, _, _, _, _, _, _, _, _ = dict2keys(occurs)
+        if occur_type[0] == ConstraintType.DEPENDANCE:
+            self.show_result_dependency(occurs, weeks)
+
+    def show_result_dependency(self, occurs, weeks):
+        output = "L'infaisabilité de l'EDT vient probablement d'un problème de dépendance"
+        filename = "logs/intelligible_constraints_dependency%s.txt" % weeks
+        write_file(filename, output, print_output=False)
 
     def handle_reduced_result(self, ilp_file_name, weeks):
         id_constraints = parse_iis(ilp_file_name)
+        occurs = self.get_occurs(id_constraints)
+
         print()
-        self.show_reduces_result_brut(id_constraints, weeks, decreasing=True)
-        self.show_reduces_result(id_constraints, weeks)
-        self.show_simplified_result(id_constraints, weeks)
+        self.show_reduces_result_brut(id_constraints, occurs, weeks)
+        self.show_reduces_result(occurs, weeks)
+        self.show_simplified_result(occurs, weeks)
+        self.show_result_by_type(occurs, weeks)
