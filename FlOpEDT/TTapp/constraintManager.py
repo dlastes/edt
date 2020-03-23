@@ -1,4 +1,4 @@
-import numpy as np
+# from base.models import Course
 
 
 def parse_iis(iis_filename):
@@ -24,16 +24,14 @@ def inc(dic, key):
             dic[key] = 1
 
 
-# To link the type of the constraint to the parameter occurence
-def inc_with_type(dic, keys, c_type):
-    if keys is not []:
-        for key in keys:
-            if key in dic.keys():
-                dic[key][0] += 1
-                if dic[key][1].count(c_type) == 0:
-                    dic[key][1].append(c_type)
-            else:
-                dic[key] = [1, [str(c_type)]]
+def inc_with_type(dic, keys, constraint_type):
+    for key in keys:
+        if key in dic.keys():
+            dic[key][0] += 1
+            if dic[key][1].count(constraint_type) == 0:
+                dic[key][1].append(constraint_type)
+        else:
+            dic[key] = [1, [str(constraint_type)]]
 
 
 # Create result string to print
@@ -111,17 +109,17 @@ class ConstraintManager:
 
         # Initiate all occurences
         for i in id_constraints:
-            c_type = self.get_constraint_by_id(i).constraint_type
+            constraint_type = self.get_constraint_by_id(i).constraint_type
             inc(occur_type, self.get_constraint_by_id(i).constraint_type)
-            inc_with_type(occur_instructor, self.get_constraint_by_id(i).instructors, c_type)
-            inc_with_type(occur_slot, self.get_constraint_by_id(i).slots, c_type)
-            inc_with_type(occur_course, self.get_constraint_by_id(i).courses, c_type)
-            inc_with_type(occur_week, self.get_constraint_by_id(i).weeks, c_type)
-            inc_with_type(occur_room, self.get_constraint_by_id(i).rooms, c_type)
-            inc_with_type(occur_group, self.get_constraint_by_id(i).groups, c_type)
-            inc_with_type(occur_days, self.get_constraint_by_id(i).days, c_type)
-            inc_with_type(occur_departments, self.get_constraint_by_id(i).departments, c_type)
-            inc_with_type(occur_module, self.get_constraint_by_id(i).modules, c_type)
+            inc_with_type(occur_instructor, self.get_constraint_by_id(i).instructors, constraint_type)
+            inc_with_type(occur_slot, self.get_constraint_by_id(i).slots, constraint_type)
+            inc_with_type(occur_course, self.get_constraint_by_id(i).courses, constraint_type)
+            inc_with_type(occur_week, self.get_constraint_by_id(i).weeks, constraint_type)
+            inc_with_type(occur_room, self.get_constraint_by_id(i).rooms, constraint_type)
+            inc_with_type(occur_group, self.get_constraint_by_id(i).groups, constraint_type)
+            inc_with_type(occur_days, self.get_constraint_by_id(i).days, constraint_type)
+            inc_with_type(occur_departments, self.get_constraint_by_id(i).departments, constraint_type)
+            inc_with_type(occur_module, self.get_constraint_by_id(i).modules, constraint_type)
 
         priority_types = ["Le cours doit être placé", "Problème de dépendance entre les salles"]
         occur_type = handle_occur_type_with_priority(priority_types, occur_type, decreasing)
@@ -141,7 +139,27 @@ class ConstraintManager:
         return occur_type, occur_instructor, occur_slot, occur_course, occur_week, occur_room, occur_group, \
             occur_days, occur_departments, occur_module
 
-    def show_reduces_result_brut(self, id_constraints, weeks, decreasing=True):
+    def set_index_courses(self, id_constraints):
+        _, _, _, occur_course, _, _, _, _, _, _ = self.get_occurs(id_constraints)
+        courses = list(occur_course.keys())
+
+        done = []
+        mat_courses = []
+        for index_course in range(len(courses)):
+            if index_course not in done:
+                courses_equals = [courses[index_course]]
+                for index_course2 in range(index_course + 1, len(courses)):
+                    if courses[index_course].equals(courses[index_course2]):
+                        courses_equals.append(courses[index_course2])
+                        done.append(index_course2)
+                if len(courses_equals) > 1:
+                    mat_courses.append(courses_equals)
+
+        for courses_equals in mat_courses:
+            for index_course in range(len(courses_equals)):
+                courses_equals[index_course].set_index(index_course + 1)
+
+    def show_constraints(self, id_constraints, weeks, decreasing=True, print_output=False):
         occur_type, _, _, _, _, _, _, _, _, _ = self.get_occurs(id_constraints, decreasing)
         order = list(occur_type.keys())
         constraints = self.get_constraints_by_ids(id_constraints)
@@ -150,9 +168,9 @@ class ConstraintManager:
         for constraint in constraints:
             output += str(constraint) + "\n"
         filename = "logs/intelligible_constraints%s.txt" % weeks
-        write_file(filename, output)
+        write_file(filename, output, print_output=print_output)
 
-    def show_reduces_result(self, id_constraints, weeks):
+    def show_constraints_factorised(self, id_constraints, weeks, print_output=False):
         occur_type, occur_instructor, occur_slot, occur_course, occur_week, occur_room, occur_group, occur_days,\
             occur_department, occur_modules = self.get_occurs(id_constraints)
 
@@ -192,9 +210,9 @@ class ConstraintManager:
         if buf_slot != "":
             output += "\nParametre Slot :\n" + buf_slot
         filename = "logs/intelligible_constraints_factorised%s.txt" % weeks
-        write_file(filename, output)
+        write_file(filename, output, print_output=print_output)
 
-    def show_simplified_result(self, id_constraints, weeks, max_slots_to_print=5):
+    def show_constraints_simplified(self, id_constraints, weeks, max_slots_to_print=5, print_output=False):
         occur_type, occur_instructor, occur_slot, occur_course, occur_week, occur_room, occur_group, occur_days,\
             occur_department, occur_modules = dict2keys(self.get_occurs(id_constraints))
 
@@ -218,11 +236,12 @@ class ConstraintManager:
                 output += "\t\t- %s\n" % occur_slot[i]
 
         filename = "logs/intelligible_constraints_simplified%s.txt" % weeks
-        write_file(filename, output, print_output=True)
+        write_file(filename, output, print_output=print_output)
 
     def handle_reduced_result(self, ilp_file_name, weeks):
         id_constraints = parse_iis(ilp_file_name)
+        self.set_index_courses(id_constraints)
         print()
-        self.show_reduces_result_brut(id_constraints, weeks, decreasing=True)
-        self.show_reduces_result(id_constraints, weeks)
-        self.show_simplified_result(id_constraints, weeks)
+        self.show_constraints(id_constraints, weeks, decreasing=True)
+        self.show_constraints_factorised(id_constraints, weeks)
+        self.show_constraints_simplified(id_constraints, weeks)
