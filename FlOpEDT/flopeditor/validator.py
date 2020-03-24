@@ -38,6 +38,7 @@ OK_RESPONSE = 'OK'
 ERROR_RESPONSE = 'ERROR'
 UNKNOWN_RESPONSE = 'UNKNOWN'
 
+
 def validate_department_creation(name, abbrev, tutor_id):
     """Validate parameters for department creation
 
@@ -84,7 +85,10 @@ def validate_department_creation(name, abbrev, tutor_id):
     return response
 
 
-def validate_parameters_edit(days, day_start_time, day_finish_time, lunch_break_start_time, lunch_break_finish_time, default_preference_duration):
+def validate_parameters_edit(days, day_start_time,
+                             day_finish_time, lunch_break_start_time,
+                             lunch_break_finish_time,
+                             default_preference_duration):
     """Validate parameters for department creation
 
     :param days: array List of checked working days
@@ -149,8 +153,9 @@ def validate_parameters_edit(days, day_start_time, day_finish_time, lunch_break_
             'message': "La durée par défaut d'un cours ne peut pas être nulle."
         }
     else:
-        response = {'status': OK_RESPONSE, 'message':''}
+        response = {'status': OK_RESPONSE, 'message': ''}
     return response
+
 
 def validate_training_programme_values(abbrev, name, entries):
     """Validate parameters for training programme's CRUD
@@ -181,6 +186,7 @@ def validate_training_programme_values(abbrev, name, entries):
         return True
     return False
 
+
 def validate_course_values(name, duree, entries):
     """Validate parameters for course type
 
@@ -191,10 +197,12 @@ def validate_course_values(name, duree, entries):
 
     :return: (boolean,json) (are the paramaters valid , status and errors)
     """
-    slug_re = re.compile("^([1-9]\d*|0)$")
-    if not slug_re.match(duree):
+    if duree < 0:
         entries['result'].append([ERROR_RESPONSE,
-                                  "La durée doit être un nombre"])
+                                  "La durée ne peut pas être négative"])
+    elif not name:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "Le nom du type de cours ne peut pas être vide."])
     elif len(name) > 50:
         entries['result'].append([ERROR_RESPONSE,
                                   "Le nom du type de cours est trop long."])
