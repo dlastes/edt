@@ -1,5 +1,5 @@
 import numpy as np
-from TTapp.infaisibility_shower import show_result
+from TTapp.print_infaisibility import print_all
 
 
 def parse_iis(iis_filename):
@@ -119,4 +119,4 @@ class ConstraintManager:
         constraints = self.get_constraints_by_ids(id_constraints)
         occurs = get_occurs(constraints)
 
-        show_result(constraints, occurs, weeks)
+        print_all(constraints, occurs, weeks)

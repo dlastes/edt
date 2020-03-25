@@ -17,22 +17,23 @@ def make_occur_buf(occurs):
     return buf
 
 
-def dict2keys(dictionaries):
+def dict_to_keys(dictionaries):
     res = []
     for dictionary in dictionaries:
         res.append(list(dictionary.keys()) if len(list(dictionary.keys())) >= 1 else None)
     return tuple(res)
 
 
-def write_file(filename, output, print_output=False):
+def write_file(filename, output, print_output=False, mode="w+"):
     print("writting %s..." % filename)
-    with open(filename, "w+", encoding="utf-8") as file:
+    with open(filename, mode, encoding="utf-8") as file:
         file.write(output)
+        file.write("\n")
     if print_output:
         print("\n%s" % output)
 
 
-def show_reduces_result_brut(constraints, occurs, weeks):
+def print_brut_constraints(constraints, occurs, weeks):
     occur_type, _, _, _, _, _, _, _, _, _ = occurs
     order = list(occur_type.keys())
     constraints = sorted(constraints, key=lambda x: order.index(x.constraint_type))
@@ -43,7 +44,7 @@ def show_reduces_result_brut(constraints, occurs, weeks):
     write_file(filename, output)
 
 
-def show_reduces_result(occurs, weeks):
+def print_occurrence_of_constraints(occurs, weeks):
     occur_type, occur_instructor, occur_slot, occur_course, occur_week, occur_room, occur_group, occur_days, \
         occur_department, occur_modules = occurs
 
@@ -86,9 +87,9 @@ def show_reduces_result(occurs, weeks):
     write_file(filename, output)
 
 
-def show_simplified_result(occurs, weeks, max_slots_to_print=5):
+def print_summary_of_constraints(occurs, weeks, max_slots_to_print=5):
     occur_type, occur_instructor, occur_slot, occur_course, occur_week, occur_room, occur_group, occur_days, \
-        occur_department, occur_modules = dict2keys(occurs)
+        occur_department, occur_modules = dict_to_keys(occurs)
 
     output = "Voici les raisons principales pour lesquelles le solveur n'a pas pu résoudre l'ensemble " \
              "des contraintes spécifiées: \n"
@@ -113,23 +114,97 @@ def show_simplified_result(occurs, weeks, max_slots_to_print=5):
     write_file(filename, output, print_output=False)
 
 
-def show_result_by_type(occurs, weeks):
-    occur_type, _, _, _, _, _, _, _, _, _ = dict2keys(occurs)
-    if occur_type[0] == ConstraintType.DEPENDANCE:
-        show_result_dependency(occurs, weeks)
+def print_summary_from_type(occurs, weeks):
+    threshold = 75
+    occur_type = occurs[0]
+    keys = list(occur_type.keys())
+    for i in range(number_of_important_types(occur_type, threshold)):
+        type = keys[i]
+        print(type)
+        if(type == ConstraintType.DEPENDANCE):
+            print_summary_dependency(occurs, weeks)
+        elif(type == ConstraintType.CONJONCTION):
+            print_summary_conjonction(occurs, weeks)
 
 
-def show_result_dependency(occurs, weeks):
-    _, _, _, occur_courses, _, _, _, _, _, _ = dict2keys(occurs)
-    output = "L'infaisabilité de l'EDT vient probablement d'un problème de dépendance entre %s et %s" \
-             % (occur_courses[0], occur_courses[1])
-    filename = "logs/intelligible_constraints_dependency%s.txt" % weeks
-    write_file(filename, output, print_output=False)
+def print_summary_conjonction(occurs, weeks):
+    output = "CONJONCTION"
+    filename = "logs/summary_of_constraints_from_types%s.txt" % weeks
+    write_file(filename, output, mode="a+")
 
 
-def show_result(constraints, occurs, weeks):
-    print()
-    show_reduces_result_brut(constraints, occurs, weeks)
-    show_reduces_result(occurs, weeks)
-    show_simplified_result(occurs, weeks)
-    show_result_by_type(occurs, weeks)
+def print_summary_dependency(occurs, weeks):
+    if occurs[1] != "" :
+        _, _, _, occur_courses, _, _, _, _, _, _ = dict_to_keys(occurs)
+        output = "L'infaisabilité de l'EDT vient probablement d'un problème de dépendance entre %s et %s" \
+                 % (occur_courses[0], occur_courses[1])
+        filename = "logs/summary_of_constraints_from_types%s.txt" % weeks
+        write_file(filename, output, mode="a+")
+    else:
+        output = "DEPENDENCY"
+        filename = "logs/summary_of_constraints_from_types%s.txt" % weeks
+        write_file(filename, output, mode="a+")
+
+def number_of_important_types(occur_type, threshold):
+    total = get_total_occurrences(occur_type)
+    max = threshold*total/100
+    current = 0
+    count = 0
+    for type in occur_type:
+        if(current >= max):
+            break;
+        current += occur_type.get(type)
+        count += 1
+    return count
+
+
+def get_total_occurrences(occur_type):
+    total = 0
+    for type in occur_type:
+        total += occur_type.get(type)
+    return total
+
+
+def print_all(constraints, occurs, weeks):
+    print_brut_constraints(constraints, occurs, weeks)
+    print_occurrence_of_constraints(occurs, weeks)
+    print_summary_of_constraints(occurs, weeks)
+    print_summary_from_type(occurs, weeks)
+
+
+#===================================================================================
+
+
+def test_run():
+    test_get_total_occurrences()
+    test_number_of_important_types()
+
+
+def test_get_total_occurrences():
+    dico = {}
+    dico["type1"] = 3
+    dico["type2"] = 4
+    print("test_get_total_occurences : " + str(get_total_occurrences(dico) == 7))
+
+
+def test_number_of_important_types():
+    dico = {}
+    dico["1"] = 84
+    dico["2"] = 45
+    dico["3"] = 24
+    dico["4"] = 2
+    dico["5"] = 2
+    dico["6"] = 1
+    print("test_number_of_important_types : " + str(number_of_important_types(dico, 75) == 2))
+
+
+def test_print_summary_from_type():
+    dico = {}
+    dico[ConstraintType.DEPENDANCE] = 200
+    dico[ConstraintType.CONJONCTION] = 25
+    dico[ConstraintType.AVOID_BOTH_TIME] = 25
+    dico[ConstraintType.CDU_VEUT_VENIR_1_JOUR_ENTIER_QUAND_6_CRENEAUX] = 25
+    dico[ConstraintType.IBD_EQ] = 25
+    dico[ConstraintType.B219_TO_LP] = 25
+    dicos_tab = [dico, "", "", "", "", "", "", "", "", ""]
+    print_summary_from_type(dicos_tab, [1])
