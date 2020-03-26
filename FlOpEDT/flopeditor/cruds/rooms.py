@@ -35,8 +35,8 @@ def set_values_for_room(room, i, new_name, entries):
     """
     :param room: Room to add/update.
     :type department:  base.models.Department
-    :return: Server response for the request.
-    :rtype:  django.http.JsonResponse
+    :return: False in case of problem. True instead.
+    :rtype:  String
 
     """
     sur_salles = []
@@ -83,7 +83,7 @@ def set_values_for_room(room, i, new_name, entries):
 
 
 def read(department):
-    """Return all rooms for a department
+    """Return all rooms
     :param department: Department.
     :type department:  base.models.Department
     :return: Server response for the request.
