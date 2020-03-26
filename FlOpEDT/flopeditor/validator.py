@@ -189,8 +189,10 @@ def validate_training_programme_values(abbrev, name, entries):
 def validate_course_values(name, duree, entries):
     """Validate parameters for course type
 
-    :param name: string course type name
-    :param abbrev: string duration
+    :param name: course name to test
+    :type abbrev: text
+    :param duree: value of duration of course
+    :type abbrev: int
     :param entries: list that is returned to CrudJS
     :type abbrev: list
 
@@ -233,6 +235,47 @@ def validate_student_groups_values(entry, entries):
     elif entry[0] in entry[2]:
         entries['result'].append([ERROR_RESPONSE,
                                   "Le groupe ne peut pas être un sous-groupe de lui-même."])
+    else:
+        return True
+    return False
+
+
+def validate_period_values(name, starting_week, ending_week, entries):
+    """Validate parameters for period values' CRUD
+
+    :param name: period name to test
+    :type abbrev: text
+    :param starting_week: value of starting_week
+    :type abbrev: int
+    :param ending_week: value of ending_week
+    :type abbrev: int
+    :param entries: list that is returned to CrudJS
+    :type abbrev: list
+
+    :return: boolean are the paramaters valid
+    """
+
+    if starting_week is None:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "La semaine de début est invalide"])
+    elif ending_week is None:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "La semaine de fin est invalide"])
+    elif starting_week <= 0 or starting_week > 53:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "La semaine de début doit être compris entre [1-53]"])
+    elif ending_week <= 0 or ending_week > 53:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "La semaine de fin doit être compris entre [1-53]"])
+    elif starting_week == ending_week:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "La semaine de début ne peut pas être égale à la semaine de fin"])
+    elif not name:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "Le nom du semestre ne peut pas être vide."])
+    elif len(name) > 20:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "Le nom du semestre est trop long. (<20)"])
     else:
         return True
     return False
