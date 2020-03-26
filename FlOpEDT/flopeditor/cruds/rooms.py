@@ -82,6 +82,7 @@ def set_values_for_room(room, i, new_name, entries):
     return True
 
 
+# pylint: disable=W0613
 def read(department):
     """Return all rooms
     :param department: Department.
@@ -131,6 +132,8 @@ def read(department):
         "values" : values
         })
 
+
+# pylint: disable=W0613
 def create(entries, department):
     """Create values for rooms
     :param entries: Values to create.
@@ -163,6 +166,8 @@ def create(entries, department):
             entries['result'].append([OK_RESPONSE])
     return entries
 
+
+# pylint: disable=W0613
 def update(entries, department):
     """Update values for rooms
     :param entries: Values to modify.
@@ -182,7 +187,7 @@ def update(entries, department):
         new_name = entries['new_values'][i][0]
         if not new_name:
             entries['result'].append([ERROR_RESPONSE,
-                 "Le nouveau nom de la salle ne peut pas être vide."])
+                                      "Le nouveau nom de la salle ne peut pas être vide."])
         elif len(new_name) > 20:
             entries['result'].append(
                 [ERROR_RESPONSE,
