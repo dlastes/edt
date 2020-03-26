@@ -102,6 +102,8 @@ urlpatterns = [
     path('change_perfect_day/<str:username>', views.user_perfect_day_changes, name="user_perfect_day_changes"),
     path('change_user_notifications_pref/<str:username>', views.user_notifications_pref_changes,
          name="user_notifications_pref_changes"),
+    path('change_student_notifications_pref/<str:username>', views.student_notifications_pref_changes,
+         name="student_notifications_pref_changes"),
     path(r'change_room_pref_per_tutor/<str:tutor>', views.room_preferences_changes_per_tutor, name='room_pref_changes_per_tutor'),
 
     # predefined

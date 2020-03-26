@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.template.response import TemplateResponse
 from django.core.exceptions import ObjectDoesNotExist
 
-from people.models import Tutor, GroupPreferences, StudentPreferences, Student
+from people.models import Tutor, GroupPreferences, StudentPreferences, Student, NotificationsPreferences
 from people.admin import TutorResource, GroupPreferencesResource, StudentPreferencesResource
 
 
@@ -90,6 +90,10 @@ def student_preferences(req):
             raise Http404("Who are you?")
     else:
         if req.user.is_authenticated and req.user.is_student:
+            try:
+                student_notifications_pref = req.user.notifications_preference.nb_of_notified_weeks
+            except NotificationsPreferences.DoesNotExist:
+                student_notifications_pref = 0
             student = Student.objects.get(username=req.user.username)
             try:
                 student_pref = StudentPreferences.objects.get(student=student)
@@ -100,7 +104,8 @@ def student_preferences(req):
             free_half_day = student_pref.free_half_day_weight
             return TemplateResponse(req, 'people/studentPreferencesSelection.html',
                                     {'morning': morning,
-                                     'free_half_day': free_half_day})
+                                     'free_half_day': free_half_day,
+                                     'student_notifications_pref': student_notifications_pref})
         else:
             # Make a decorator instead
             raise Http404("Who are you?")

@@ -75,14 +75,14 @@
       <li><a href="#" onclick="openNav()">☰</a></li>
       {% endif %}
       <li><a href="{% url "base:edt" department %}">Consulter</a></li>
-      <li><a href="{% url "base:modules" department %}">Modules</a></li>
       {% if request.has_department_perm %}
       <li><a href="{% url "base:decale" department %}">Décaler/Annuler</a></li>
+      {% endif %}
       <li><a href="{% url "base:preferences" department %}">Préférences</a></li>
       <li><a href="{% url "ics:index" department %}">iCal</a></li>
       <li><a href="{% url "base:aide" department %}">Aide</a></li>
       <li><a href="{% url "base:contact" department %}">Contact</a></li>
-      {% endif %}
+      <li><a href="{% url "base:modules" department %}">Modules</a></li>
       {% if request.is_department_admin %}
       <li><a href="{% url "solve_board:main_board" department %}">Générer</a></li>
       <li><a href="{% url "base:statistics" department %}">Statistiques</a></li>

@@ -395,6 +395,17 @@ def user_notifications_pref_changes(req, username=None, *args, **kwargs):
         n.save()
     return redirect('base:stype', req.department)
 
+@login_required
+def student_notifications_pref_changes(req, username=None, *args, **kwargs):
+    if username is not None:
+        u = User.objects.get(username=username)
+        n, created = NotificationsPreferences.objects.get_or_create(user=u)
+        data = req.POST
+        user_notifications_pref = int(data['student_notifications_pref'])
+        n.nb_of_notified_weeks = user_notifications_pref
+        n.save()
+    return redirect('people:student_preferences')
+
 
 
 @dept_admin_required
