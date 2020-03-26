@@ -43,6 +43,8 @@ urlpatterns = [
          name='flopeditor-department-default'),
     # path('<slug:department_abbrev>/rooms', views.department_rooms,
     #      name='flopeditor-department-rooms'),
+    path('<slug:department_abbrev>/categories-de-salles', views.department_room_types,
+         name='flopeditor-department-room-types'),
     path('<slug:department_abbrev>/groupes', views.department_student_groups,
          name='flopeditor-department-student-groups'),
     path('<slug:department_abbrev>/natures', views.department_student_group_types,
@@ -70,8 +72,12 @@ urlpatterns = [
 
     # exchanges with the CRUD
     # --------------------------------
+    path('<slug:department_abbrev>/crud/room_types', crud.crud_room_types,
+        name='flopeditor-crud-room-types'),
     path('<slug:department_abbrev>/crud/group_type', crud.crud_student_group_type,
          name='flopeditor-crud-student-group-type'),
+    path('<slug:department_abbrev>/crud/student_group', crud.crud_student_group,
+         name='flopeditor-crud-student-group'),
     path('<slug:department_abbrev>/crud/training_programmes', crud.crud_training_programmes,
          name='flopeditor-crud-training-programmes'),
     path('<slug:department_abbrev>/crud/courses', crud.crud_course,

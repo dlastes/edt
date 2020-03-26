@@ -41,7 +41,6 @@ from people.models import Tutor
 from flopeditor.db_requests import create_departments_in_database
 from flopeditor.validator import validate_department_creation, validate_parameters_edit, OK_RESPONSE
 
-
 @tutor_required
 def home(request):
     """Main view of FlopEditor.
@@ -228,6 +227,24 @@ def crud_view(request, department_abbrev, view_name, title):
         'list_departments': departments,
         'has_dept_perm': request.user.has_department_perm(department=department, admin=True),
     })
+
+
+@tutor_required
+def department_room_types(request, department_abbrev):
+    """Student groups view of FlopEditor.
+
+    :param request:           Client request.
+    :param department_abbrev: Department abbreviation.
+    :type request:            django.http.HttpRequest
+    :type department_abbrev:  str
+    :return: Page rendered from the template of FlopEditor.
+    :rtype:  django.http.HttpResponse
+
+    """
+    return crud_view(request,
+                     department_abbrev,
+                     "flopeditor/room_types.html",
+                     "Catégories de salles")
 
 
 @tutor_required

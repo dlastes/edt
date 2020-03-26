@@ -32,10 +32,10 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarText">
                 <ul class="navbar-nav mr-auto">
-                    <!-- <li class="nav-item {% block nav-classes-rooms %}{% endblock %}">
+                    <li class="nav-item {% block nav-classes-rooms %}{% endblock %}">
                         <a class="nav-link"
-                            href="{--% url 'flopeditor:flopeditor-department-rooms' department_abbrev=department.abbrev %}">Salles</a>
-                    </li> -->
+                            href="{% url 'flopeditor:flopeditor-department-room-types' department_abbrev=department.abbrev %}">Salles</a>
+                    </li>
                     <li class="nav-item {% block nav-classes-groups %}{% endblock %}">
                         <a class="nav-link"
                             href="{% url 'flopeditor:flopeditor-department-training-programmes' department_abbrev=department.abbrev %}">Élèves</a>
