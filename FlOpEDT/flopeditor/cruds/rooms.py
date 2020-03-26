@@ -31,6 +31,56 @@ from django.http import JsonResponse
 from base.models import Room, RoomType, Department
 from flopeditor.validator import OK_RESPONSE, ERROR_RESPONSE
 
+def set_values_for_room(room, i, new_name, entries):
+    """
+    :param room: Room to add/update.
+    :type department:  base.models.Department
+    :return: Server response for the request.
+    :rtype:  django.http.JsonResponse
+
+    """
+    sur_salles = []
+    for nom_sur_salle in entries['new_values'][i][1]:
+        sur_salles_found = Room.objects.filter(name=nom_sur_salle)
+        if sur_salles_found[0].name == new_name:
+            entries['result'].append([
+                ERROR_RESPONSE,
+                "Une salle ne peut pas être sur-salle d'elle-même."
+            ])
+            return False
+        if len(sur_salles_found) != 1:
+            entries['result'].append([
+                ERROR_RESPONSE,
+                "Erreur en base de données."
+            ])
+            return False
+        sur_salles.append(sur_salles_found[0])
+    room_types = []
+    for room_type_name in entries['new_values'][i][2]:
+        room_types_found = RoomType.objects.filter(name=room_type_name)
+        if len(room_types_found) != 1:
+            entries['result'].append([
+                ERROR_RESPONSE,
+                "Erreur en base de données."
+            ])
+            return False
+        room_types.append(room_types_found[0])
+    depts = []
+    for dept_name in entries['new_values'][i][3]:
+        depts_found = Department.objects.filter(name=dept_name)
+        if len(depts_found) != 1:
+            entries['result'].append([
+                ERROR_RESPONSE,
+                "Erreur en base de données."
+            ])
+            return False
+        depts.append(depts_found[0])
+    room.name = new_name
+    room.subroom_of.set(sur_salles)
+    room.types.set(room_types)
+    room.departments.set(depts)
+    return True
+
 
 def read(department):
     """Return all rooms for a department
@@ -46,7 +96,7 @@ def read(department):
     departments = list(Department.objects.values_list('name', flat=True))
 
     # Rows
-    rooms = Room.objects.filter(departments=department)
+    rooms = Room.objects.all()
     values = []
     for room in rooms:
         subrooms = []
@@ -95,61 +145,21 @@ def create(entries, department):
     for i in range(len(entries['new_values'])):
         new_name = entries['new_values'][i][0]
         # verifier la longueur du nom
-        if len(new_name) > 20:
+        if not new_name:
+            entries['result'].append([ERROR_RESPONSE,
+                                      "Le nom de la salle ne peut pas être vide."])
+        elif len(new_name) > 20:
             entries['result'].append([ERROR_RESPONSE,
                                       "Le nom de la salle est trop long."])
-        elif Room.objects.filter(name=new_name, departments=department):
+        elif Room.objects.filter(name=new_name):
             entries['result'].append([
                 ERROR_RESPONSE,
                 "La salle à ajouter est déjà présente dans la base de données."
             ])
         else:
-            sur_salles = []
-            for nom_sur_salle in entries['new_values'][i][1]:
-                sur_salles_found = Room.objects.filter(name=nom_sur_salle)
-                if sur_salles_found[0].name == new_name:
-                    entries['result'].append([
-                        ERROR_RESPONSE,
-                        "Une salle ne peut pas être sur-salle d'elle-même."
-                    ])
-                    return entries
-                if len(sur_salles_found) != 1:
-                    print(nom_sur_salle)
-                    print(len(sur_salles_found))
-                    entries['result'].append([
-                        ERROR_RESPONSE,
-                        "Erreur en base de données."
-                    ])
-                    return entries
-                sur_salles.append(sur_salles_found[0])
-            room_types = []
-            for room_type_name in entries['new_values'][i][2]:
-                room_types_found = RoomType.objects.filter(name=room_type_name)
-                if len(room_types_found) != 1:
-                    print(room_type_name)
-                    print(len(room_types_found))
-                    entries['result'].append([
-                        ERROR_RESPONSE,
-                        "Erreur en base de données."
-                    ])
-                    return entries
-                room_types.append(room_types_found[0])
-            depts = []
-            for dept_name in entries['new_values'][i][3]:
-                depts_found = Department.objects.filter(name=dept_name)
-                if len(depts_found) != 1:
-                    print(dept_name)
-                    print(len(depts_found))
-                    entries['result'].append([
-                        ERROR_RESPONSE,
-                        "Erreur en base de données."
-                    ])
-                    return entries
-                depts.append(depts_found[0])
             room = Room.objects.create(name=new_name)
-            room.subroom_of.set(sur_salles)
-            room.types.set(room_types)
-            room.departments.set(depts)
+            if not set_values_for_room(room, i, new_name, entries):
+                return entries
             entries['result'].append([OK_RESPONSE])
     return entries
 
@@ -170,16 +180,24 @@ def update(entries, department):
     for i in range(len(entries['old_values'])):
         old_name = entries['old_values'][i][0]
         new_name = entries['new_values'][i][0]
-        if len(new_name) > 20:
+        if not new_name:
+            entries['result'].append([ERROR_RESPONSE,
+                 "Le nouveau nom de la salle ne peut pas être vide."])
+        elif len(new_name) > 20:
             entries['result'].append(
                 [ERROR_RESPONSE,
                  "Le nom de la salle est trop long."])
+        elif Room.objects.filter(name=new_name) and old_name != new_name:
+            entries['result'].append([
+                ERROR_RESPONSE,
+                "La salle à modifier est déjà présente dans la base de données."
+            ])
         else:
             try:
-                room_to_update = Room.objects.get(name=old_name, departments=department)
-                room_to_update.name = new_name
-                room_to_update.save()
-                entries['result'].append([OK_RESPONSE])
+                room_to_update = Room.objects.get(name=old_name)
+                if set_values_for_room(room_to_update, i, new_name, entries):
+                    room_to_update.save()
+                    entries['result'].append([OK_RESPONSE])
             except Room.DoesNotExist:
                 entries['result'].append(
                     [ERROR_RESPONSE,
@@ -201,7 +219,7 @@ def delete(entries, department):
     for i in range(len(entries['old_values'])):
         old_name = entries['old_values'][i][0]
         try:
-            Room.objects.get(name=old_name, departments=department).delete()
+            Room.objects.get(name=old_name).delete()
             entries['result'].append([OK_RESPONSE])
         except Room.DoesNotExist:
             entries['result'].append(
