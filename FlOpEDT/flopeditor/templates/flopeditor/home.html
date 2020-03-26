@@ -1,6 +1,11 @@
 {% extends "flopeditor/base.html" %}
 {% load static %}
 
+{% block link %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'flopeditor/css/bootstrap-select.min.css' %}">
+{% endblock %}
+
 {% block body-class %}bg-dark{% endblock %}
 
 {% block main-class %}container h-100{% endblock %}
@@ -67,8 +72,7 @@
                     <div class="form-inline mt-4">
                         <label for="inputResp" class="col-form-label col-sm-4">Responsable</label>
                         <div class="col-sm-8">
-                            <select name="respDep" class="form-control w-100" id="inputResp">
-                                <option disabled selected>Sélectionner...</option>
+                            <select class="selectpicker" data-live-search=true multiple name="respsDep" id="inputResp">
                                 {% for admin in admins %}
                                 <option value="{{ admin.id }}">{{ admin.last_name }} {{ admin.first_name }}</option>
                                 {% endfor %}
@@ -90,5 +94,11 @@
 
 {% block script %}
 {{ block.super }}
+<script src="{% static 'flopeditor/js/bootstrap-select.min.js' %}" charset="utf-8"></script>
+<script type="text/javascript">
+  $(function () {
+    $('select').selectpicker();
+  });
+</script>
 <script src="{% static 'flopeditor/js/create-department.js' %}" charset="utf-8"></script>
 {% endblock %}

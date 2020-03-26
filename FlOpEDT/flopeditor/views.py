@@ -149,10 +149,10 @@ def ajax_create_department(request):
     if request.is_ajax() and request.method == "POST":
         name = request.POST['nomDep']
         abbrev = request.POST['abbrevDep']
-        tutor_id = request.POST['respDep']
-        response = validate_department_creation(name, abbrev, tutor_id)
+        tutors_id = request.POST.getlist('respsDep')
+        response = validate_department_creation(name, abbrev, tutors_id)
         if response['status'] == OK_RESPONSE:
-            create_departments_in_database(name, abbrev, tutor_id)
+            create_departments_in_database(name, abbrev, tutors_id)
         return JsonResponse(response)
     return HttpResponseForbidden()
 

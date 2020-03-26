@@ -38,17 +38,20 @@ ERROR_RESPONSE = 'ERROR'
 UNKNOWN_RESPONSE = 'UNKNOWN'
 
 
-def validate_department_creation(name, abbrev, tutor_id):
+def validate_department_creation(name, abbrev, tutors_id):
     """Validate parameters for department creation
 
-    :param name: string department name
-    :param abbrev: string department abbrev
-    :param tutor_id: string tutor id
+    :param name: Department name
+    :type name: String
+    :param abbrev: department abbrev
+    :type abbrev: String
+    :param tutors_id: tutors' id
+    :type tutors_id: List
 
     :return: (boolean,json) (are the paramaters valid , status and errors)
     """
     response = {'status': UNKNOWN_RESPONSE}
-    slug_re = re.compile("^[a-zA-Z]\w{0,6}$")
+    slug_re = re.compile(r"^[a-zA-Z]\w{0,6}$")
     if not name or len(name) > 50:
         response = {
             'status': ERROR_RESPONSE,
@@ -73,14 +76,16 @@ def validate_department_creation(name, abbrev, tutor_id):
             'status': ERROR_RESPONSE,
             'message': "L'abbréviation est déjà utilisée."
         }
-    elif not Tutor.objects.filter(id=tutor_id):
-        response = {
-            'status': ERROR_RESPONSE,
-            'message': "Le tuteur que vous recherchez est introuvable. \
-            Veuillez en sélectionner un autre."
-        }
     else:
-        response = {'status': OK_RESPONSE}
+        for tutor_id in tutors_id:
+            if not Tutor.objects.filter(id=tutor_id):
+                response = {
+                    'status': ERROR_RESPONSE,
+                    'message': "Le tuteur que vous recherchez est introuvable. \
+                    Veuillez en sélectionner un autre."
+                }
+                return response
+    response = {'status': OK_RESPONSE}
     return response
 
 
@@ -90,12 +95,18 @@ def validate_parameters_edit(days, day_start_time,
                              default_preference_duration):
     """Validate parameters for department creation
 
-    :param days: array List of checked working days
-    :param day_start_time: string day start time hh:mm
-    :param day_finish_time: string day finish time hh:mm
-    :param lunch_break_start_time: string lunch start time hh:mm
-    :param lunch_break_finish_time: string lunch finish time hh:mm
-    :param default_preference_duration: string class default duration hh:mm
+    :param days: List of checked working days
+    :type days: List
+    :param day_start_time: Day start time hh:mm
+    :type day_start_time: String
+    :param day_finish_time: Day finish time hh:mm
+    :type day_finish_time: String
+    :param lunch_break_start_time: Lunch start time hh:mm
+    :type lunch_break_start_time: String
+    :param lunch_break_finish_time: Lunch finish time hh:mm
+    :type lunch_break_finish_time: String
+    :param default_preference_duration: Class default duration hh:mm
+    :type default_preference_duration: String
 
     :return: (boolean,json) (are the paramaters valid , status and errors)
     """
