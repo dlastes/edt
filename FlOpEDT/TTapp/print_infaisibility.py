@@ -115,53 +115,103 @@ def print_summary_of_constraints(occurs, weeks, max_slots_to_print=5):
 
 
 def print_summary_from_type(occurs, weeks):
-    threshold = 75
+    threshold_type = 70 # % des types sont pris en compte
+    threshold_attr = 70 # % des attributs sont pris en compte
+
     occur_type = occurs[0]
     keys = list(occur_type.keys())
-    for i in range(number_of_important_types(occur_type, threshold)):
-        type = keys[i]
-        print(type)
-        if(type == ConstraintType.DEPENDANCE):
-            print_summary_dependency(occurs, weeks)
-        elif(type == ConstraintType.CONJONCTION):
-            print_summary_conjonction(occurs, weeks)
 
-
-def print_summary_conjonction(occurs, weeks):
-    output = "CONJONCTION"
     filename = "logs/summary_of_constraints_from_types%s.txt" % weeks
+    output = "Voici les principaux problèmes liés à l'infaisabilité :\n"
+    write_file(filename, output)
+
+    for i in range(number_of_important_types(occur_type, threshold_type)):
+        type = keys[i]
+
+        if type == ConstraintType.DEPENDANCE:
+            print_summary_dependency(occurs, filename, threshold_attr)
+
+        elif type == ConstraintType.COURS_DOIT_AVOIR_PROFESSEUR:
+            print_summary_cours_prof(occurs, filename, threshold_attr)
+
+        elif type == ConstraintType.PAS_DE_PROFESSEUR_DISPONIBLE:
+            print_summary_pas_de_prof(occurs, filename, threshold_attr)
+
+        elif False:
+            pass # TODO
+
+
+def print_summary_dependency(occurs, filename, threshold):
+    courses = occurs[3]
+    output = "  Problème de dépendance entre les cours suivants :\n"
+    output += get_str_attr(courses, threshold, ConstraintType.DEPENDANCE)
     write_file(filename, output, mode="a+")
 
 
-def print_summary_dependency(occurs, weeks):
-    if occurs[1] != "" :
-        _, _, _, occur_courses, _, _, _, _, _, _ = dict_to_keys(occurs)
-        output = "L'infaisabilité de l'EDT vient probablement d'un problème de dépendance entre %s et %s" \
-                 % (occur_courses[0], occur_courses[1])
-        filename = "logs/summary_of_constraints_from_types%s.txt" % weeks
-        write_file(filename, output, mode="a+")
-    else:
-        output = "DEPENDENCY"
-        filename = "logs/summary_of_constraints_from_types%s.txt" % weeks
-        write_file(filename, output, mode="a+")
+def print_summary_cours_prof(occurs, filename, threshold):
+    courses = occurs[3]
+    prof = occurs[1]
+    output = "  Les cours suivants:\n"
+    output += get_str_attr(courses, threshold, ConstraintType.COURS_DOIT_AVOIR_PROFESSEUR)
+    output += "  devraient avoir un professeur, surement parmis:\n"
+    output += get_str_attr(prof, threshold, ConstraintType.COURS_DOIT_AVOIR_PROFESSEUR)
+    write_file(filename, output, mode="a+")
+
+
+def print_summary_pas_de_prof(occurs, filename, threshold):
+    prof = occurs[1]
+    output = "  Les professeurs suivants:\n"
+    output += get_str_attr(prof, threshold, ConstraintType.PAS_DE_PROFESSEUR_DISPONIBLE)
+    output += "  devrais pouvoir faire cours\n"
+    write_file(filename, output, mode="a+")
+
+
+def get_str_attr(attr_tab, threshold, type):
+    output = ""
+    for attr in get_important_attr(attr_tab, threshold, type):
+        output += "    %s\n" % str(attr)
+    return output
+
 
 def number_of_important_types(occur_type, threshold):
-    total = get_total_occurrences(occur_type)
+    total = get_total_occurrences_type(occur_type)
     max = threshold*total/100
     current = 0
     count = 0
     for type in occur_type:
-        if(current >= max):
-            break;
+        if current >= max:
+            break
         current += occur_type.get(type)
         count += 1
     return count
 
 
-def get_total_occurrences(occur_type):
+def get_total_occurrences_type(occur_type):
     total = 0
     for type in occur_type:
         total += occur_type.get(type)
+    return total
+
+
+def get_important_attr(occur_attr, threshold, type):
+    total = get_total_occurrences_attr(occur_attr, type)
+    max = threshold*total/100
+    current = 0
+    tab = []
+    for attr in occur_attr:
+        if current >= max:
+            break
+        if type in occur_attr.get(attr)[1]:
+            current += occur_attr.get(attr)[0]
+            tab.append(attr)
+    return tab
+
+
+def get_total_occurrences_attr(occur_attr, type):
+    total = 0
+    for attr in occur_attr:
+        if type in occur_attr.get(attr)[1]:
+            total += occur_attr.get(attr)[0]
     return total
 
 
@@ -176,15 +226,16 @@ def print_all(constraints, occurs, weeks):
 
 
 def test_run():
-    test_get_total_occurrences()
+    test_get_total_occurrences_type()
     test_number_of_important_types()
+    test_get_total_occurrences_attr()
+    test_get_important_attr()
 
-
-def test_get_total_occurrences():
+def test_get_total_occurrences_type():
     dico = {}
     dico["type1"] = 3
     dico["type2"] = 4
-    print("test_get_total_occurences : " + str(get_total_occurrences(dico) == 7))
+    print("test_get_total_occurrences_type : " + str(get_total_occurrences_type(dico) == 7))
 
 
 def test_number_of_important_types():
@@ -198,6 +249,25 @@ def test_number_of_important_types():
     print("test_number_of_important_types : " + str(number_of_important_types(dico, 75) == 2))
 
 
+def test_get_total_occurrences_attr():
+    dico = {}
+    dico["attr1"] = (3, [ConstraintType.IBD_EQ])
+    dico["attr2"] = (4, [ConstraintType.DEPENDANCE]) ##
+    dico["attr3"] = (3, [ConstraintType.DEPENDANCE, ConstraintType.IBD_EQ]) ##
+    print("test_get_total_occurrences_attr : " + str(get_total_occurrences_attr(dico, ConstraintType.DEPENDANCE) == 7))
+
+
+def test_get_important_attr():
+    dico = {}
+    dico["1"] = (384, [ConstraintType.IBD_EQ])
+    dico["2"] = (45, [ConstraintType.DEPENDANCE]) ##
+    dico["3"] = (24, [ConstraintType.DEPARTEMENT_BLOQUE_SLOT, ConstraintType.AVOID_BOTH_TIME, ConstraintType.DEPENDANCE]) ##
+    dico["4"] = (2, [ConstraintType.DEPENDANCE, ConstraintType.CONJONCTION]) ##
+    dico["5"] = (2, [])
+    dico["6"] = (1, [ConstraintType.DEPENDANCE]) ##
+    print("test_get_important_attr : " + str(get_important_attr(dico, 75, ConstraintType.DEPENDANCE) == ['2', '3']))
+
+
 def test_print_summary_from_type():
     dico = {}
     dico[ConstraintType.DEPENDANCE] = 200
@@ -206,5 +276,9 @@ def test_print_summary_from_type():
     dico[ConstraintType.CDU_VEUT_VENIR_1_JOUR_ENTIER_QUAND_6_CRENEAUX] = 25
     dico[ConstraintType.IBD_EQ] = 25
     dico[ConstraintType.B219_TO_LP] = 25
-    dicos_tab = [dico, "", "", "", "", "", "", "", "", ""]
+    cours = {}
+    cours["cours1"] = (200, [ConstraintType.CONJONCTION, ConstraintType.AVOID_BOTH_TIME])
+    cours["cours2"] = (10, [ConstraintType.DEPENDANCE, ConstraintType.AVOID_BOTH_TIME])
+    cours["cours3"] = (4, [ConstraintType.DEPARTEMENT_BLOQUE_SLOT, ConstraintType.DEPENDANCE])
+    dicos_tab = [dico, "", "", cours, "", "", "", "", "", ""]
     print_summary_from_type(dicos_tab, [1])
