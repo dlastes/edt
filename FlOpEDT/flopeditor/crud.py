@@ -33,7 +33,8 @@ import json
 from django.http import JsonResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 from base.models import Department
-from flopeditor.cruds import training_programmes, student_group_type, room_types, student_group
+from flopeditor.cruds import training_programmes, student_group_type, room_types, student_group, course_type
+
 
 def good_request(request, department):
     """ Request rights verification
@@ -47,7 +48,8 @@ def good_request(request, department):
     if request.method == 'GET':
         return not request.user.is_anonymous and request.user.is_tutor
     return not request.user.is_anonymous and \
-    request.user.has_department_perm(department, admin=True)
+        request.user.has_department_perm(department, admin=True)
+
 
 def crud_model(request, department_abbrev, crud):
     """Crud model for edition
@@ -66,7 +68,6 @@ def crud_model(request, department_abbrev, crud):
     if not good_request(request, department):
         return HttpResponseForbidden()
 
-
     if request.method == "GET":
         return crud.read(department)
     elif request.method == "POST":
@@ -83,6 +84,7 @@ def crud_model(request, department_abbrev, crud):
             'actions': result
         })
     return HttpResponseForbidden()
+
 
 def crud_room_types(request, department_abbrev):
     """Crud url for rooms edition
@@ -134,3 +136,17 @@ def crud_training_programmes(request, department_abbrev):
 
     """
     return crud_model(request, department_abbrev, training_programmes)
+
+
+def crud_course(request, department_abbrev):
+    """Crud url for course edition
+
+    :param request: Client request.
+    :type request:  django.http.HttpRequest
+    :param department_abbrev: Department abbreviation.
+    :type department_abbrev:  String
+    :return: Server response for the request.
+    :rtype:  django.http.JsonResponse
+
+    """
+    return crud_model(request, department_abbrev, course_type)
