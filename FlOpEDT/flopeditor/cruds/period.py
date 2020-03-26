@@ -134,8 +134,8 @@ def update(entries, department):
                          "Le nom du semestre est déjà utilisé."])
                 else:
                     period_to_update.name = new_name
-                    period_to_update.new_starting_week = new_starting_week
-                    period_to_update.new_ending_week = new_ending_week
+                    period_to_update.starting_week = new_starting_week
+                    period_to_update.ending_week = new_ending_week
                     period_to_update.save()
                     entries['result'].append([OK_RESPONSE])
             except Period.DoesNotExist:
