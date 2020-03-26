@@ -34,7 +34,7 @@
                 <ul class="navbar-nav mr-auto">
                     <li class="nav-item {% block nav-classes-rooms %}{% endblock %}">
                         <a class="nav-link"
-                            href="{% url 'flopeditor:flopeditor-department-room-types' department_abbrev=department.abbrev %}">Salles</a>
+                            href="{% url 'flopeditor:flopeditor-department-rooms' department_abbrev=department.abbrev %}">Salles</a>
                     </li>
                     <li class="nav-item {% block nav-classes-groups %}{% endblock %}">
                         <a class="nav-link"
@@ -47,7 +47,7 @@
                      <li class="nav-item {% block nav-classes-course %}{% endblock %}">
                         <a class="nav-link"
                             href="{% url 'flopeditor:flopeditor-department-course-types' department_abbrev=department.abbrev %}">Cours</a>
-                    </li> 
+                    </li>
                     <li class="nav-item {% block nav-classes-parameters %}{% endblock %}">
                         <a class="nav-link"
                             href="{% url 'flopeditor:flopeditor-department-parameters' department_abbrev=department.abbrev %}">Paramètres</a>

@@ -38,17 +38,20 @@ ERROR_RESPONSE = 'ERROR'
 UNKNOWN_RESPONSE = 'UNKNOWN'
 
 
-def validate_department_creation(name, abbrev, tutor_id):
+def validate_department_creation(name, abbrev, tutors_id):
     """Validate parameters for department creation
 
-    :param name: string department name
-    :param abbrev: string department abbrev
-    :param tutor_id: string tutor id
+    :param name: Department name
+    :type name: String
+    :param abbrev: department abbrev
+    :type abbrev: String
+    :param tutors_id: tutors' id
+    :type tutors_id: List
 
     :return: (boolean,json) (are the paramaters valid , status and errors)
     """
     response = {'status': UNKNOWN_RESPONSE}
-    slug_re = re.compile("^[a-zA-Z]\w{0,6}$")
+    slug_re = re.compile(r"^[a-zA-Z]\w{0,6}$")
     if not name or len(name) > 50:
         response = {
             'status': ERROR_RESPONSE,
@@ -73,14 +76,16 @@ def validate_department_creation(name, abbrev, tutor_id):
             'status': ERROR_RESPONSE,
             'message': "L'abbréviation est déjà utilisée."
         }
-    elif not Tutor.objects.filter(id=tutor_id):
-        response = {
-            'status': ERROR_RESPONSE,
-            'message': "Le tuteur que vous recherchez est introuvable. \
-            Veuillez en sélectionner un autre."
-        }
     else:
-        response = {'status': OK_RESPONSE}
+        for tutor_id in tutors_id:
+            if not Tutor.objects.filter(id=tutor_id):
+                response = {
+                    'status': ERROR_RESPONSE,
+                    'message': "Le tuteur que vous recherchez est introuvable. \
+                    Veuillez en sélectionner un autre."
+                }
+                return response
+    response = {'status': OK_RESPONSE}
     return response
 
 
@@ -90,12 +95,18 @@ def validate_parameters_edit(days, day_start_time,
                              default_preference_duration):
     """Validate parameters for department creation
 
-    :param days: array List of checked working days
-    :param day_start_time: string day start time hh:mm
-    :param day_finish_time: string day finish time hh:mm
-    :param lunch_break_start_time: string lunch start time hh:mm
-    :param lunch_break_finish_time: string lunch finish time hh:mm
-    :param default_preference_duration: string class default duration hh:mm
+    :param days: List of checked working days
+    :type days: List
+    :param day_start_time: Day start time hh:mm
+    :type day_start_time: String
+    :param day_finish_time: Day finish time hh:mm
+    :type day_finish_time: String
+    :param lunch_break_start_time: Lunch start time hh:mm
+    :type lunch_break_start_time: String
+    :param lunch_break_finish_time: Lunch finish time hh:mm
+    :type lunch_break_finish_time: String
+    :param default_preference_duration: Class default duration hh:mm
+    :type default_preference_duration: String
 
     :return: (boolean,json) (are the paramaters valid , status and errors)
     """
@@ -189,8 +200,10 @@ def validate_training_programme_values(abbrev, name, entries):
 def validate_course_values(name, duree, entries):
     """Validate parameters for course type
 
-    :param name: string course type name
-    :param abbrev: string duration
+    :param name: course name to test
+    :type abbrev: text
+    :param duree: value of duration of course
+    :type abbrev: int
     :param entries: list that is returned to CrudJS
     :type abbrev: list
 
@@ -266,6 +279,47 @@ def validate_module_values(entry, entries):
     elif len(entry[2]) > 100:
         entries['result'].append([ERROR_RESPONSE,
                                   "Le nom complet est trop long."])
+    else:
+        return True
+    return False
+
+
+def validate_period_values(name, starting_week, ending_week, entries):
+    """Validate parameters for period values' CRUD
+
+    :param name: period name to test
+    :type abbrev: text
+    :param starting_week: value of starting_week
+    :type abbrev: int
+    :param ending_week: value of ending_week
+    :type abbrev: int
+    :param entries: list that is returned to CrudJS
+    :type abbrev: list
+
+    :return: boolean are the paramaters valid
+    """
+
+    if starting_week is None:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "La semaine de début est invalide"])
+    elif ending_week is None:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "La semaine de fin est invalide"])
+    elif starting_week <= 0 or starting_week > 53:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "La semaine de début doit être compris entre [1-53]"])
+    elif ending_week <= 0 or ending_week > 53:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "La semaine de fin doit être compris entre [1-53]"])
+    elif starting_week == ending_week:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "La semaine de début ne peut pas être égale à la semaine de fin"])
+    elif not name:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "Le nom du semestre ne peut pas être vide."])
+    elif len(name) > 20:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "Le nom du semestre est trop long. (<20)"])
     else:
         return True
     return False

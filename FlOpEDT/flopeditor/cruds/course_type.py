@@ -121,7 +121,7 @@ def read(department):
             "type": "select-chips",
             "options": {"values": groups_types(department)}
         }, {
-            'name': 'Horaire auquels ce type de cours peut commencer',
+            'name': 'Horaire auxquels ce type de cours peut commencer',
             "type": "select-chips",
             "options": {"values": possible_start_time(department)}
         }],

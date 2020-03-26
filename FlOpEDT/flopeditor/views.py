@@ -149,10 +149,10 @@ def ajax_create_department(request):
     if request.is_ajax() and request.method == "POST":
         name = request.POST['nomDep']
         abbrev = request.POST['abbrevDep']
-        tutor_id = request.POST['respDep']
-        response = validate_department_creation(name, abbrev, tutor_id)
+        tutors_id = request.POST.getlist('respsDep')
+        response = validate_department_creation(name, abbrev, tutors_id)
         if response['status'] == OK_RESPONSE:
-            create_departments_in_database(name, abbrev, tutor_id)
+            create_departments_in_database(name, abbrev, tutors_id)
         return JsonResponse(response)
     return HttpResponseForbidden()
 
@@ -227,6 +227,21 @@ def crud_view(request, department_abbrev, view_name, title):
         'list_departments': departments,
         'has_dept_perm': request.user.has_department_perm(department=department, admin=True),
     })
+
+
+@tutor_required
+def department_rooms(request, department_abbrev):
+    """Rooms view of FlopEditor.
+
+    :param request:           Client request.
+    :param department_abbrev: Department abbreviation.
+    :type request:            django.http.HttpRequest
+    :type department_abbrev:  str
+    :return: page rendered from the rooms template of FlopEditor.
+    :rtype:  django.http.HttpResponse
+
+    """
+    return crud_view(request, department_abbrev, "flopeditor/rooms.html", "Salles")
 
 
 @tutor_required
@@ -341,17 +356,3 @@ def department_training_programmes(request, department_abbrev):
 
     """
     return crud_view(request, department_abbrev, 'flopeditor/training_programmes.html', 'Promos')
-
-# @tutor_required
-# def department_rooms(request, department_abbrev):
-#     """Rooms view of FlopEditor.
-
-#     :param request:           Client request.
-#     :param department_abbrev: Department abbreviation.
-#     :type request:            django.http.HttpRequest
-#     :type department_abbrev:  str
-#     :return: page rendered from the rooms template of FlopEditor.
-#     :rtype:  django.http.HttpResponse
-
-#     """
-#     return crud_view(request,department_abbrev,"flopeditor/rooms.html","Salles")
