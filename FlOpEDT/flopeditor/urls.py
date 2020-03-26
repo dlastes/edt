@@ -82,4 +82,6 @@ urlpatterns = [
          name='flopeditor-crud-student-group'),
     path('<slug:department_abbrev>/crud/training_programmes', crud.crud_training_programmes,
          name='flopeditor-crud-training-programmes'),
+    path('<slug:department_abbrev>/crud/courses', crud.crud_course,
+         name='flopeditor-crud-courses'),
 ]

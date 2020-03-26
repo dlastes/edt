@@ -84,7 +84,10 @@ def validate_department_creation(name, abbrev, tutor_id):
     return response
 
 
-def validate_parameters_edit(days, day_start_time, day_finish_time, lunch_break_start_time, lunch_break_finish_time, default_preference_duration):
+def validate_parameters_edit(days, day_start_time,
+                             day_finish_time, lunch_break_start_time,
+                             lunch_break_finish_time,
+                             default_preference_duration):
     """Validate parameters for department creation
 
     :param days: array List of checked working days
@@ -183,8 +186,34 @@ def validate_training_programme_values(abbrev, name, entries):
     return False
 
 
+def validate_course_values(name, duree, entries):
+    """Validate parameters for course type
+
+    :param name: string course type name
+    :param abbrev: string duration
+    :param entries: list that is returned to CrudJS
+    :type abbrev: list
+
+    :return: (boolean,json) (are the paramaters valid , status and errors)
+    """
+    if duree is None:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "La durée est invalide"])
+    elif duree < 0:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "La durée ne peut pas être négative"])
+    elif not name:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "Le nom du type de cours ne peut pas être vide."])
+    elif len(name) > 50:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "Le nom du type de cours est trop long."])
+    else:
+        return True
+    return False
+
 def validate_student_groups_values(entry, entries):
-    """Validate parameters for training programme's CRUD
+    """Validate parameters for student group values' CRUD
 
     :param abbrev: data returned by crudJS
     :type abbrev: list
