@@ -28,7 +28,7 @@
 
 
 
-    /*
+/*
      +----------------------------------------------------+
      |			^				  |
      |			| 50                              |
@@ -51,89 +51,228 @@
      |                       1050                         |
      |<-------------------------------------------------->|
      +----------------------------------------------------+       
-     */
+*/
 
-var logo = {scale: .12,
-	    init:{dim: 1000,
-		  margin: 50},
-	    get_current_dim: function () {
-		return this.scale * this.init.dim ;},
-	    get_current_margin: function () {
-		return this.scale * this.init.margin ;}
-	   }
+var logo = {
+  scale: .12,
+  init:{
+    dim: 1000,
+    margin: 50},
+  get_current_dim: function () {
+    return this.scale * this.init.dim ;},
+  get_current_margin: function () {
+    return this.scale * this.init.margin ;},
+  par:{
+    short_h: {
+      id: 'csh',
+      hid: '#csh',
+      subid: 'shorth',
+      subhid: '#shorth'
+    },
+    long_h: {
+      id: 'clh',
+      hid: '#clh',
+      subid: 'longh',
+      subhid: '#longh'
+    }
+  }
+};
 
 
-var headlines =
-    [ "Gestionnaire d'emploi du temps <span id=\"flopGreen\">fl"
-        + "</span>exible et <span id=\"flopGreen\">op</span>enSource",
-      "\"Qui veut faire les <span id=\"flopRed\">EDT</span> cette année ?\" ... "
-      + "<span id=\"flopGreen\">flop</span> !",
-      "Et votre emploi du temps fera un "
-      + "<span id=\"flopRedDel\">flop</span> carton !",
-      "Et même votre logo sera à l'heure..." 
-    ];
+
+var headlines = [
+  "Gestionnaire d'emploi du temps <span id=\"flopGreen\">fl"
+    + "</span>exible et <span id=\"flopGreen\">op</span>enSource",
+  "\"Qui veut faire les <span id=\"flopRed\">EDT</span> cette année ?\" ... "
+    + "<span id=\"flopGreen\">flop</span> !",
+  "Et votre emploi du temps fera un "
+    + "<span id=\"flopRedDel\">flop</span> carton !",
+  "Et même votre logo sera à l'heure..." 
+];
 
 
 init_logo();
 
 
 function init_logo() {
-    fetch_logo();
-    init_date();
-    resize_logo();
-    add_headline();
+  fetch_logo();
+  init_par_logo();
+  init_date();
+  resize_logo();
+  add_headline();
 }
 
 
 // fetch the logo and include it as svg
-function fetch_logo(){
-    var xhr = new XMLHttpRequest();
-    xhr.open("GET",url_logo,false);
-    xhr.overrideMimeType("image/svg+xml");
-    xhr.send("");
-    var lolo = document.getElementById("live-logo");
-    lolo.appendChild(xhr.responseXML.documentElement);
+function fetch_logo() {
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET", url_logo, false);
+  xhr.overrideMimeType("image/svg+xml");
+  xhr.send("");
+  var lolo = document.getElementById("live-logo");
+  lolo.appendChild(xhr.responseXML.documentElement);
 }
 
 
 // initialize the long and short hands of the logo
 function init_date() {
-    var d = new Date();
-    var hm = new Array(2);
-    hm[0] = 360*(d.getHours() % 12 + d.getMinutes()/60)/12;
-    hm[1] = 360*(d.getMinutes()+d.getSeconds()/60)/60;
-    var anim = new Array(2);
-    anim[0] = document.getElementById("csh")
-	.getElementsByTagName("animateTransform")[0];
-    anim[1] = document.getElementById("clh")
-	.getElementsByTagName("animateTransform")[0];
-    for (var i = 0 ; i<2 ; i++) {
-	var from = anim[i].getAttribute("from").split(" ");
-	from[0] = (+from[0]) + hm[i] ;
-	anim[i].setAttribute("from", from.join(" "));
-	var to = anim[i].getAttribute("to").split(" ");
-	to[0] = (+to[0]) + hm[i] ;
-	anim[i].setAttribute("to", to.join(" "));
-    }
+  var d = new Date();
+  var hm = {};
+  hm.short_h = 360*(d.getHours() % 12 + d.getMinutes()/60)/12;
+  hm.long_h = 360*(d.getMinutes()+d.getSeconds()/60)/60;
+  Object.keys(logo.par).forEach(function(h) {
+    logo.par[h].rotation[0] += hm[h] ;
+  });
+  remove_anim_logo() ;
+  add_anim_logo() ;
 }
+
+
+function remove_anim_logo() {
+  Object.keys(logo.par).forEach(function (h) {
+    logo.par[h].anim = $(logo.par[h].hid + ' animateTransform').detach();
+  });
+}
+
+function add_anim_logo() {
+  Object.keys(logo.par).forEach(function (h) {
+    var end_rot = logo.par[h].rotation.slice() ;
+    end_rot[0] += 360 ;
+
+    logo.par[h].anim.appendTo(logo.par[h].hid);
+
+    $(logo.par[h].hid + ' animateTransform')
+      .attr('from', logo.par[h].rotation.join(" "))
+      .attr('to', end_rot.join(" "));
+
+    // time is passing even if the animateTransform is out
+    document.querySelectorAll('animateTransform').forEach(element => {
+      element.beginElement();
+    });
+    
+  });
+}
+
+      
+function update_rotate_logo() {
+  Object.keys(logo.par).forEach(function (h) {
+    d3.select(logo.par[h].hid)
+      .attr('transform', 'rotate(' + logo.par[h].rotation.join(' ' ) + ')');
+  });
+}
+
 
 
 function resize_logo() {
-    logo.svg = d3
-	.select("#live-logo")
-	.select("svg");
+  logo.svg = d3
+    .select("#live-logo")
+    .select("svg");
   
+  logo.svg
+    .select("#dims")
+    .attr("transform", "scale(" + logo.scale + ")");
   
-    logo.svg
-	.select("#dims")
-	.attr("transform", "scale(" + logo.scale + ")");
-  
-    logo.svg
-	.attr("width", logo.get_current_dim() + logo.get_current_margin())
-	.attr("height", logo.get_current_dim() + logo.get_current_margin());
+  logo.svg
+    .attr("width", logo.get_current_dim() + logo.get_current_margin())
+    .attr("height", logo.get_current_dim() + logo.get_current_margin());
 }
 
 function add_headline() {
-    var draw = Math.floor(Math.random()*headlines.length);
-    document.getElementById("head_logo").innerHTML = headlines[draw];
+  var draw = Math.floor(Math.random() * headlines.length);
+  document.getElementById("head_logo").innerHTML = headlines[draw];
 }
+
+
+function init_par_logo () {
+  Object.keys(logo.par).forEach( function(hand) {
+    var anim_trans = d3.select(logo.par[hand].hid + " animateTransform") ;
+    logo.par[hand].from_init = anim_trans.attr("from_init")
+      .split(" ")
+      .map(function(c){ return +c ; });
+    logo.par[hand].rotation = logo.par[hand].from_init.slice() ;
+    logo.par[hand].dur = anim_trans.attr("dur") ;
+    logo.par[hand].repeatCount = anim_trans.attr("repeatCount") ;
+  });
+}
+
+
+// drag long hand
+function logo_transform() {
+
+  // compute new angle for the long hand
+  
+  var center = {x:logo.par.long_h.rotation[1], y:logo.par.long_h.rotation[2]} ;
+  var mouse = {x: d3.event.x, y: d3.event.y} ;
+  var dx = center.x - mouse.x ;
+  var dy = center.y - mouse.y ;
+
+  var angle = -180*Math.atan2(dx, dy)/Math.PI;
+
+  var new_rot = (logo.par.long_h.from_init[0] + angle + 360) % 360 ;
+
+  angle = (new_rot - logo.par.long_h.rotation[0] + 360) % 360 ;
+
+  logo.par.long_h.rotation[0] = new_rot ;
+  
+  if (angle >= 180) {
+    angle -= 360 ;
+  }
+
+  angle /= 12 ;
+  
+  logo.par.short_h.rotation[0] = (logo.par.short_h.rotation[0] + angle + 360) % 360 ;
+
+  update_rotate_logo(false);
+}
+
+// disable animation
+function drag_hand_start() {
+  Object.keys(logo.par).forEach( function(h) {
+    // get current rotation
+    // firefox does not update 'transform' attribute
+    logo.par[h].rotation[0] = document
+      .getElementById('logo_svg')
+      .querySelector(logo.par[h].hid)
+      .transform
+      .animVal[0]
+      .angle ;
+  });
+  remove_anim_logo() ;
+  update_rotate_logo() ;      
+}
+
+
+
+// re-enable animation and check final hour
+function drag_hand_end() {
+
+  var accuracy = 10 ;
+  var diff = ((logo.par.long_h.rotation[0] - logo.par.long_h.from_init[0] + 360) % 360) ;
+  if (diff > 180) {
+    diff -= 360 ;
+  }
+
+  if (Math.abs(diff) < accuracy
+      && Math.abs((logo.par.short_h.rotation[0] - logo.par.short_h.from_init[0] + 360)%360  - 10*360/12) < 360/24) {
+    add_anim_logo();
+    d3.select("html")
+      .append("form")
+      .attr("style", "display: none")
+      .attr("action", url_game)
+      .attr("method", "POST")
+      .attr("id", "game_form");
+    $("#game_form").submit();
+  } else {
+    add_anim_logo();
+  }
+
+}
+
+// enable drag on the long hand
+var logo_listener = d3.drag()
+  .on('start', drag_hand_start)
+  .on('drag', logo_transform)
+  .on('end', drag_hand_end);
+
+d3.select("#clh").call(logo_listener);
+

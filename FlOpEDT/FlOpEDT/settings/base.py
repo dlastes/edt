@@ -64,7 +64,8 @@ INSTALLED_APPS = [
     'synchro',
     'ics',
     'displayweb',
-    'configuration'
+    'configuration',
+    'easter_egg'
 #    'importation'
 ]
 
@@ -174,5 +175,7 @@ CUSTOM_CONSTRAINTS_PATH = 'MyFlOp.custom_constraints'
 if 'ADMINS' in os.environ:
     ADMINS = [tuple(admin.split(",")) for admin in os.environ.get('ADMINS').split(" ")]
     MANAGERS = ADMINS
+
+SHELL_PLUS_MODEL_IMPORTS_RESOLVER = 'django_extensions.collision_resolvers.AppLabelSuffixCR'
 
 COSMO_MODE = False

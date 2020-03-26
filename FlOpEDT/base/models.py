@@ -262,7 +262,7 @@ class Room(models.Model):
 
     def and_overrooms(self):
         ret = {self}
-        for over in self.subrooms_of.all():
+        for over in self.subroom_of.all():
             ret |= over.and_overrooms()
         return ret
 
