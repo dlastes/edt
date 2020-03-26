@@ -86,7 +86,7 @@ def create(entries, department):
         elif Period.objects.filter(name=new_name, department=department):
             entries['result'].append([
                 ERROR_RESPONSE,
-                "Le semestre à ajouter est déjà présente dans la base de données."
+                "Le semestre à ajouter est déjà présent dans la base de données."
             ])
         else:
             Period.objects.create(name=new_name,
@@ -145,7 +145,7 @@ def update(entries, department):
             except Period.MultipleObjectsReturned:
                 entries['result'].append(
                     [ERROR_RESPONSE,
-                     "Plusieurs semestre du même nom existent en base de données."])
+                     "Plusieurs semestres du même nom existent en base de données."])
 
     return entries
 
