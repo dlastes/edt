@@ -197,7 +197,10 @@ def validate_course_values(name, duree, entries):
 
     :return: (boolean,json) (are the paramaters valid , status and errors)
     """
-    if duree < 0:
+    if duree is None:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "La durée est invalide"])
+    elif duree < 0:
         entries['result'].append([ERROR_RESPONSE,
                                   "La durée ne peut pas être négative"])
     elif not name:
