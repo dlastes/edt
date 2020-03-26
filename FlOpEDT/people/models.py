@@ -261,3 +261,8 @@ class GroupPreferences(Preferences):
             # To calculate the average of each attributs
             self.morning_weight = local_morning_weight/nb_student_prefs
             self.free_half_day_weight = local_free_half_day_weight/nb_student_prefs
+
+
+class NotificationsPreferences(models.Model):
+    user = models.OneToOneField('User', on_delete=models.CASCADE, related_name='notifications_preference')
+    nb_of_notified_weeks = models.PositiveSmallIntegerField(default=0)

@@ -46,7 +46,7 @@ from django.views.generic import RedirectView
 from FlOpEDT.decorators import dept_admin_required, tutor_required
 from FlOpEDT.settings.base import COSMO_MODE
 
-from people.models import Tutor, UserDepartmentSettings, User
+from people.models import Tutor, UserDepartmentSettings, User, NotificationsPreferences
 
 from displayweb.admin import BreakingNewsResource
 from displayweb.models import BreakingNews
@@ -233,6 +233,10 @@ def preferences(req, **kwargs):
 @login_required
 def stype(req, *args, **kwargs):
     err = ''
+    try:
+        user_notifications_pref = req.user.notifications_preference.nb_of_notified_weeks
+    except NotificationsPreferences.DoesNotExist:
+        user_notifications_pref = 0
     if req.method == 'GET':
         return TemplateResponse(req,
                                 'base/show-stype.html',
@@ -241,6 +245,7 @@ def stype(req, *args, **kwargs):
                                  'name_usr': req.user.username,
                                  'usr_pref_hours': req.user.tutor.pref_hours_per_day,
                                  'usr_max_hours': req.user.tutor.max_hours_per_day,
+                                 'user_notifications_pref':user_notifications_pref,
                                  'err': err,
                                  'is_department_admin': req.user.has_department_perm(req.department, admin=True),
                                  'current_year': current_year,
@@ -277,6 +282,7 @@ def stype(req, *args, **kwargs):
                                  'name_usr': req.user.username,
                                  'usr_pref_hours': req.user.tutor.pref_hours_per_day,
                                  'usr_max_hours': req.user.tutor.max_hours_per_day,
+                                 'user_notifications_pref': user_notifications_pref,
                                  'err': err,
                                  'current_year': current_year,
                                  'time_settings': queries.get_time_settings(req.department),
@@ -364,7 +370,6 @@ def user_perfect_day_changes(req, username=None, *args, **kwargs):
         t.save()
     return redirect('base:stype', req.department)
 
-
 @login_required
 def fetch_perfect_day(req, username=None, *args, **kwargs):
     perfect_day = {'pref': 4, 'max': 9}
@@ -373,6 +378,30 @@ def fetch_perfect_day(req, username=None, *args, **kwargs):
         perfect_day['pref'] = t.pref_hours_per_day
         perfect_day['max'] = t.max_hours_per_day
     return JsonResponse(perfect_day, safe=False)
+
+
+@login_required
+def fetch_user_notifications_pref(req, username=None, *args, **kwargs):
+    res = {"nb_weeks": 0}
+    if username is not None:
+        u = User.objects.get(username=username)
+        try:
+            res['nb_weeks'] = u.notifications_preference.nb_of_notified_weeks
+        except NotificationsPreferences.DoesNotExist:
+            pass
+    return JsonResponse(res, safe=False)
+
+@login_required
+def user_notifications_pref_changes(req, username=None, *args, **kwargs):
+    if username is not None:
+        u = User.objects.get(username=username)
+        n, created = NotificationsPreferences.objects.get_or_create(user=u)
+        data = req.POST
+        user_notifications_pref = int(data['user_notifications_pref'])
+        n.nb_of_notified_weeks = user_notifications_pref
+        n.save()
+    return redirect('base:stype', req.department)
+
 
 
 @dept_admin_required
