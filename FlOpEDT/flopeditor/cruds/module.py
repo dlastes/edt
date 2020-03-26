@@ -157,8 +157,11 @@ def update(entries, department):
                     abbrev=entries['old_values'][i][0],
                     train_prog__in=TrainingProgramme.objects.filter(department=department))
 
-                if entries['old_values'][i][0] != entries['new_values'][i][0] and Module.objects.filter(abbrev=entries['new_values'][i][0], train_prog__in=TrainingProgramme.objects.filter(
-                        department=department)):
+                if entries['old_values'][i][0] != entries['new_values'][i][0] and \
+                    Module.objects.filter(abbrev=entries['new_values'][i][0],
+                                          train_prog__in=TrainingProgramme
+                                          .objects.filter(department=department)):
+
                     entries['result'].append([
                         ERROR_RESPONSE,
                         "Un module de ce nom existe déjà dans ce départment"
@@ -176,7 +179,10 @@ def update(entries, department):
                         name=entries['new_values'][i][6], department=department)
                     module.save()
                     entries['result'].append([OK_RESPONSE])
-            except (Module.DoesNotExist, TrainingProgramme.DoesNotExist, Tutor.DoesNotExist, Period.DoesNotExist):
+            except (Module.DoesNotExist,
+                    TrainingProgramme.DoesNotExist,
+                    Tutor.DoesNotExist,
+                    Period.DoesNotExist):
                 entries['result'].append([
                     ERROR_RESPONSE,
                     "Erreur en base de données"
