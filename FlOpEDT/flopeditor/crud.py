@@ -33,7 +33,7 @@ import json
 from django.http import JsonResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 from base.models import Department
-from flopeditor.cruds import training_programmes, student_group_type, room_types, student_group, course_type
+from flopeditor.cruds import training_programmes, student_group_type, room_types, student_group, rooms, course_type
 
 
 def good_request(request, department):
@@ -49,6 +49,7 @@ def good_request(request, department):
         return not request.user.is_anonymous and request.user.is_tutor
     return not request.user.is_anonymous and \
         request.user.has_department_perm(department, admin=True)
+
 
 
 def crud_model(request, department_abbrev, crud):
@@ -86,8 +87,21 @@ def crud_model(request, department_abbrev, crud):
     return HttpResponseForbidden()
 
 
-def crud_room_types(request, department_abbrev):
+def crud_rooms(request, department_abbrev):
     """Crud url for rooms edition
+
+    :param request: Client request.
+    :type request:  django.http.HttpRequest
+    :param department_abbrev: Department abbreviation.
+    :type department_abbrev:  String
+    :return: Server response for the request.
+    :rtype:  django.http.JsonResponse
+
+    """
+    return crud_model(request, department_abbrev, rooms)
+
+def crud_room_types(request, department_abbrev):
+    """Crud url for room types edition
 
     :param request: Client request.
     :type request:  django.http.HttpRequest
