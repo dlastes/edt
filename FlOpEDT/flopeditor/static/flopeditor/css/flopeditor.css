@@ -23,9 +23,9 @@ body {
     color: grey !important;
 }
 
-/* #modal-create-department .modal-body {
-    padding-bottom: 0;
-} */
+.filter-option-inner-inner {
+  color: #495057;
+}
 
 #modal-create-department .bmd-form-group {
     padding-top: 0;
