@@ -80,7 +80,7 @@ def get_start_time(new_starts_times):
 
 
 def read(department):
-    """Return all rooms for a department
+    """Return all course type for a department
     :param department: Department.
     :type department:  base.models.Department
     :return: Server response for the request.
@@ -130,7 +130,7 @@ def read(department):
 
 
 def create(entries, department):
-    """Create values for training programmes
+    """Create values for course type
     :param entries: Values to create.
     :type entries:  django.http.JsonResponse
     :param department: Department.
@@ -172,7 +172,7 @@ def create(entries, department):
 
 
 def update(entries, department):
-    """Update values for rooms
+    """Update values for course type
     :param entries: Values to modify.
     :type entries:  django.http.JsonResponse
     :param department: Department.
