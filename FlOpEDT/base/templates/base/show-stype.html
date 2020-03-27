@@ -134,22 +134,7 @@
                 </br>
             </form>
         </fieldset>
-
-        <fieldset>
-            <legend>Notifications</legend>
-            <form action='{% url "base:user_notifications_pref_changes" department user.username %}'  method='POST' id="form-notifications" >
-                {% csrf_token %}
-                <p>Je souhaite être notifié⋅e des modifications pour les
-                    <input id="user_notifications_pref" type="number" name="user_notifications_pref" style="width: 30px" min="0" max="52"
-                           value="{{ user_notifications_pref }}">
-                     prochaines semaines.<br>
-                    (0 si aucune notification, 1 pour la semaine en cours seulement, 2 pour celle-ci et la suivante, etc.)
-                </p>
-                <input type="submit" name="save_notifications_pref" value="Sauvegarder">
-                </br>
-            </form>
-        </fieldset>
-
+        {% include 'base/notification.html' %}
         <span id="ack"></span>
     </div>
 </div>

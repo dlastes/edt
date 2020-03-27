@@ -92,10 +92,6 @@ def student_preferences(req):
             raise Http404("Who are you?")
     else:
         if req.user.is_authenticated and req.user.is_student:
-            try:
-                student_notifications_pref = req.user.notifications_preference.nb_of_notified_weeks
-            except NotificationsPreferences.DoesNotExist:
-                student_notifications_pref = 0
             student = Student.objects.get(username=req.user.username)
             try:
                 student_pref = StudentPreferences.objects.get(student=student)
@@ -107,7 +103,7 @@ def student_preferences(req):
             return TemplateResponse(req, 'people/studentPreferencesSelection.html',
                                     {'morning': morning,
                                      'free_half_day': free_half_day,
-                                     'student_notifications_pref': queries.get_notification_preference(req.user)})
+                                     'user_notifications_pref': queries.get_notification_preference(req.user)})
         else:
             # Make a decorator instead
             raise Http404("Who are you?")
