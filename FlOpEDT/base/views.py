@@ -281,9 +281,6 @@ def stype(req, *args, **kwargs):
 
 @tutor_required
 def room_preference(req, department, tutor=None):
-    
-
-    
     roomtypes = RoomType.objects.filter(department=req.department)\
                                 .prefetch_related('members')
     roomgroups = Room.objects.filter(types__in=roomtypes)
@@ -358,7 +355,7 @@ def user_perfect_day_changes(req, username=None, *args, **kwargs):
         t.pref_hours_per_day = user_pref_hours
         t.max_hours_per_day = user_max_hours
         t.save()
-    return redirect('base:stype', req.department)
+    return redirect('base:preferences', req.department)
 
 @login_required
 def fetch_perfect_day(req, username=None, *args, **kwargs):

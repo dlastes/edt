@@ -100,10 +100,14 @@ def student_preferences(req):
                 student_pref.save()
             morning = student_pref.morning_weight
             free_half_day = student_pref.free_half_day_weight
-            return TemplateResponse(req, 'people/studentPreferencesSelection.html',
-                                    {'morning': morning,
-                                     'free_half_day': free_half_day,
-                                     'user_notifications_pref': queries.get_notification_preference(req.user)})
+            return TemplateResponse(
+                req,
+                'people/studentPreferencesSelection.html',
+                {'morning': morning,
+                 'free_half_day': free_half_day,
+                 'user_notifications_pref':
+                 queries.get_notification_preference(req.user)
+                })
         else:
             # Make a decorator instead
             raise Http404("Who are you?")
