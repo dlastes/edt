@@ -28,7 +28,7 @@
 
 
 
-    /*
+/*
      +----------------------------------------------------+
      |			^				  |
      |			| 50                              |
@@ -51,42 +51,44 @@
      |                       1050                         |
      |<-------------------------------------------------->|
      +----------------------------------------------------+       
-     */
+*/
 
-var logo = {scale: .12,
-	    init:{dim: 1000,
-		  margin: 50},
-	    get_current_dim: function () {
-	      return this.scale * this.init.dim ;},
-	    get_current_margin: function () {
-	      return this.scale * this.init.margin ;},
-            par:
-            {short_h: {
-              id: 'csh',
-              hid: '#csh',
-              subid: 'shorth',
-              subhid: '#shorth'
-            },
-             long_h: {
-               id: 'clh',
-               hid: '#clh',
-               subid: 'longh',
-               subhid: '#longh'
-             }
-            }
-	   };
+var logo = {
+  scale: .12,
+  init:{
+    dim: 1000,
+    margin: 50},
+  get_current_dim: function () {
+    return this.scale * this.init.dim ;},
+  get_current_margin: function () {
+    return this.scale * this.init.margin ;},
+  par:{
+    short_h: {
+      id: 'csh',
+      hid: '#csh',
+      subid: 'shorth',
+      subhid: '#shorth'
+    },
+    long_h: {
+      id: 'clh',
+      hid: '#clh',
+      subid: 'longh',
+      subhid: '#longh'
+    }
+  }
+};
 
 
 
-var headlines =
-    [ "Gestionnaire d'emploi du temps <span id=\"flopGreen\">fl"
-        + "</span>exible et <span id=\"flopGreen\">op</span>enSource",
-      "\"Qui veut faire les <span id=\"flopRed\">EDT</span> cette année ?\" ... "
-      + "<span id=\"flopGreen\">flop</span> !",
-      "Et votre emploi du temps fera un "
-      + "<span id=\"flopRedDel\">flop</span> carton !",
-      "Et même votre logo sera à l'heure..." 
-    ];
+var headlines = [
+  "Gestionnaire d'emploi du temps <span id=\"flopGreen\">fl"
+    + "</span>exible et <span id=\"flopGreen\">op</span>enSource",
+  "\"Qui veut faire les <span id=\"flopRed\">EDT</span> cette année ?\" ... "
+    + "<span id=\"flopGreen\">flop</span> !",
+  "Et votre emploi du temps fera un "
+    + "<span id=\"flopRedDel\">flop</span> carton !",
+  "Et même votre logo sera à l'heure..." 
+];
 
 
 init_logo();
@@ -102,13 +104,13 @@ function init_logo() {
 
 
 // fetch the logo and include it as svg
-function fetch_logo(){
-    var xhr = new XMLHttpRequest();
-    xhr.open("GET",url_logo,false);
-    xhr.overrideMimeType("image/svg+xml");
-    xhr.send("");
-    var lolo = document.getElementById("live-logo");
-    lolo.appendChild(xhr.responseXML.documentElement);
+function fetch_logo() {
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET", url_logo, false);
+  xhr.overrideMimeType("image/svg+xml");
+  xhr.send("");
+  var lolo = document.getElementById("live-logo");
+  lolo.appendChild(xhr.responseXML.documentElement);
 }
 
 
@@ -134,7 +136,7 @@ function remove_anim_logo() {
 
 function add_anim_logo() {
   Object.keys(logo.par).forEach(function (h) {
-      var end_rot = logo.par[h].rotation.slice() ;
+    var end_rot = logo.par[h].rotation.slice() ;
     end_rot[0] += 360 ;
 
     logo.par[h].anim.appendTo(logo.par[h].hid);
@@ -162,33 +164,22 @@ function update_rotate_logo() {
 
 
 function resize_logo() {
-    logo.svg = d3
-	.select("#live-logo")
-	.select("svg");
+  logo.svg = d3
+    .select("#live-logo")
+    .select("svg");
   
-    logo.svg
-	.select("#dims")
-	.attr("transform", "scale(" + logo.scale + ")");
+  logo.svg
+    .select("#dims")
+    .attr("transform", "scale(" + logo.scale + ")");
   
-    logo.svg
-	.attr("width", logo.get_current_dim() + logo.get_current_margin())
-	.attr("height", logo.get_current_dim() + logo.get_current_margin());
+  logo.svg
+    .attr("width", logo.get_current_dim() + logo.get_current_margin())
+    .attr("height", logo.get_current_dim() + logo.get_current_margin());
 }
 
 function add_headline() {
-    var draw = Math.floor(Math.random()*headlines.length);
-    document.getElementById("head_logo").innerHTML = headlines[draw];
-}
-
-
-// helper functions to manipulate rotations in the DOM
-function get_rotate_array(id) {
-    var ret = document.getElementById(id).getAttribute("transform").slice(7,-1).split(" ");
-    return ret.map(function(d){ return +d; });
-}
-function set_rotate(id, array) {
-    document.getElementById(id).setAttribute("transform",
-                                             "rotate("+array.join(" ")+")");
+  var draw = Math.floor(Math.random() * headlines.length);
+  document.getElementById("head_logo").innerHTML = headlines[draw];
 }
 
 
@@ -196,8 +187,8 @@ function init_par_logo () {
   Object.keys(logo.par).forEach( function(hand) {
     var anim_trans = d3.select(logo.par[hand].hid + " animateTransform") ;
     logo.par[hand].from_init = anim_trans.attr("from_init")
-        .split(" ")
-        .map(function(c){ return +c ; });
+      .split(" ")
+      .map(function(c){ return +c ; });
     logo.par[hand].rotation = logo.par[hand].from_init.slice() ;
     logo.par[hand].dur = anim_trans.attr("dur") ;
     logo.par[hand].repeatCount = anim_trans.attr("repeatCount") ;
@@ -264,13 +255,13 @@ function drag_hand_end() {
   if (Math.abs(diff) < accuracy
       && Math.abs((logo.par.short_h.rotation[0] - logo.par.short_h.from_init[0] + 360)%360  - 10*360/12) < 360/24) {
     add_anim_logo();
-        d3.select("html")
-            .append("form")
-            .attr("style", "display: none")
-            .attr("action", url_game)
-            .attr("method", "POST")
-            .attr("id", "game_form");
-        $("#game_form").submit();
+    d3.select("html")
+      .append("form")
+      .attr("style", "display: none")
+      .attr("action", url_game)
+      .attr("method", "POST")
+      .attr("id", "game_form");
+    $("#game_form").submit();
   } else {
     add_anim_logo();
   }
@@ -279,9 +270,9 @@ function drag_hand_end() {
 
 // enable drag on the long hand
 var logo_listener = d3.drag()
-    .on('start', drag_hand_start)
-    .on('drag', logo_transform)
-    .on('end', drag_hand_end);
+  .on('start', drag_hand_start)
+  .on('drag', logo_transform)
+  .on('end', drag_hand_end);
 
 d3.select("#clh").call(logo_listener);
 

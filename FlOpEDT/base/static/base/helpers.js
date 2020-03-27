@@ -21,22 +21,22 @@
 // you develop activities involving the FlOpEDT/FlOpScheduler software
 // without disclosing the source code of your own applications.
 
-getMethods = (obj) => Object.getOwnPropertyNames(obj).filter(item => typeof obj[item] === 'function') ;
+getMethods = (obj) => Object.getOwnPropertyNames(obj).filter(item => typeof obj[item] === 'function');
 
 // useful to avoid d3 to redefine 'this'
 function hard_bind(obj) {
-    var methods = getMethods(obj) ; 
-    for (var i = 0 ; i < methods.length ; i++) {
-        obj[methods[i]] = obj[methods[i]].bind(obj) ;
-    }
+  var methods = getMethods(obj);
+  for (var i = 0; i < methods.length; i++) {
+    obj[methods[i]] = obj[methods[i]].bind(obj);
+  }
 }
 
 
 function get_transition(immediate) {
-    if (immediate) {
-        return d3.transition()
-            .duration(0);
-    } else {
-        return d3.transition();
-    }
+  if (immediate) {
+    return d3.transition()
+      .duration(0);
+  } else {
+    return d3.transition();
+  }
 }
