@@ -188,6 +188,11 @@ legend {
     color: #383838;
 }
 
+.stype-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
 
 
 /* loadingspin.svg */
