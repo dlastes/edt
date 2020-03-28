@@ -23,5 +23,6 @@ djangorestframework-csv
 django-rest-auth
 django-rest-swagger
 Markdown~=3.1.1
+django-debug-toolbar
 #django-filter
 drf-yasg

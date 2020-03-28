@@ -38,6 +38,8 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 from django.conf.urls import url, include
+from django.conf import settings
+from django.urls import path
 from django.contrib import admin
 from django.views.generic import RedirectView
 
@@ -67,3 +69,9 @@ urlpatterns = [
     url('api/', include('api.urls')),
     url(r'^$', base.views.index, name='index'),
 ]
+
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns = [
+        path('__debug__/', include(debug_toolbar.urls)),
+    ] + urlpatterns
