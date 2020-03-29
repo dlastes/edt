@@ -115,8 +115,8 @@ def print_summary_of_constraints(occurs, weeks, max_slots_to_print=5):
 
 
 def print_summary_from_type(occurs, weeks):
-    threshold_type = 70 # % des types sont pris en compte
-    threshold_attr = 70 # % des attributs sont pris en compte
+    threshold_type = 90 # % des types sont pris en compte
+    threshold_attr = 90 # % des attributs sont pris en compte
 
     occur_type = occurs[0]
     keys = list(occur_type.keys())
@@ -162,7 +162,7 @@ def print_summary_pas_de_prof(occurs, filename, threshold):
     prof = occurs[1]
     output = "  Les professeurs suivants:\n"
     output += get_str_attr(prof, threshold, ConstraintType.PAS_DE_PROFESSEUR_DISPONIBLE)
-    output += "  devrais pouvoir faire cours\n"
+    output += "  devraient pouvoir faire cours\n"
     write_file(filename, output, mode="a+")
 
 
