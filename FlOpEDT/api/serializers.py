@@ -165,21 +165,21 @@ class Period_M_Serializer(serializers.ModelSerializer):
         model = bm.Period
         fields = ['starting_week', 'ending_week', 'name']
 
+
 class ModuleFullSerializer(serializers.ModelSerializer):
     train_prog = TrainingProgramsSerializer()
     period = Period_M_Serializer()
 
     class Meta:
         model = bm.Module
-        fields = ['name', 'abbrev', 'head', 'ppn', 'train_prog', 'period']
+        fields = ['name', 'abbrev', 'head', 'ppn', 'url', 'train_prog', 'period']
 
 
 class ModuleSerializer(serializers.ModelSerializer):
-    train_prog = serializers.CharField(source='train_prog.abbrev')
 
     class Meta:
         model = bm.Module
-        fields = ['name', 'abbrev', 'train_prog']
+        fields = ['name', 'abbrev', 'url']
 
 
 class Department_Name_Serializer(serializers.Serializer):

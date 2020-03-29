@@ -1173,14 +1173,16 @@ function swap_data(fetched, current, type) {
 // Get all the information of the module present in the week and stored him in a dictionary of Module_info
 function fetch_module() {
   var exp_week = wdw_weeks.get_selected();
-
+  let context = {dept: department};
+  exp_week.add_to_context(context);
+  
   show_loader(true);
   $.ajax({
     type: "GET",
     dataType: 'text',
-    url: url_module + exp_week.url(),
+    headers: {Accept: 'text/csv'},
+    url: build_url(url_module, context),
     async: true,
-    contentType: "text/csv",
     success: function (msg, ts, req) {
       var sel_week = wdw_weeks.get_selected();
       if (Week.compare(exp_week, sel_week) == 0) {
@@ -1196,10 +1198,10 @@ function fetch_module() {
 }
 function translate_module_from_csv(d) {
   //console.log(d);
-  if (Object.keys(modules_info).indexOf(d.module__abbrev) == -1) {
-    modules_info[d.module__abbrev] = {
-      name: d.module__name,
-      url: d.module__url
+  if (Object.keys(modules_info).indexOf(d.abbrev) == -1) {
+    modules_info[d.abbrev] = {
+      name: d.name,
+      url: d.url
     };
   }
 }
