@@ -301,14 +301,15 @@ class RoomSort(models.Model):
 
 
 class Module(models.Model):
-    name = models.CharField(max_length=100, null=True)
-    abbrev = models.CharField(max_length=10, verbose_name='Intitulé abbrégé')
+    name = models.CharField(max_length=100, null=True, verbose_name='nom complet')
+    abbrev = models.CharField(max_length=10, verbose_name='intitulé abbrégé')
     head = models.ForeignKey('people.Tutor',
                              null=True,
                              default=None,
                              blank=True,
-                             on_delete=models.CASCADE)
-    ppn = models.CharField(max_length=8, default='M')
+                             on_delete=models.CASCADE,
+                             verbose_name='responsable')
+    ppn = models.CharField(max_length=8, default='M', verbose_name='référence PPN')
     train_prog = models.ForeignKey('TrainingProgramme', related_name='module', on_delete=models.CASCADE)
     period = models.ForeignKey('Period', on_delete=models.CASCADE)
     url = models.CharField(max_length=200, null=True, blank=True, default=None)
