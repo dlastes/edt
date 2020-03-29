@@ -359,10 +359,12 @@ class Course(models.Model):
         null=True, blank=True)
     year = models.PositiveSmallIntegerField()
     suspens = models.BooleanField(verbose_name='En suspens?', default=False)
+    index = None
 
     def __str__(self):
         username_mod = self.tutor.username if self.tutor is not None else '-no_tut-'
-        return f"{self.type}-{self.module}-{username_mod}-{self.group}"
+        return f"{self.type}-{self.module}-{username_mod}-{self.group}" \
+               + (" (%s)" % self.index if self.index is not None else "")
 
     def full_name(self):
         username_mod = self.tutor.username if self.tutor is not None else '-no_tut-'
@@ -379,6 +381,12 @@ class Course(models.Model):
 
     def get_module(self):
         return self.module
+
+    def get_index(self):
+        return self.index
+
+    def set_index(self, index):
+        self.index = index
 
     def equals(self, other):
         return self.__class__ == other.__class__ \

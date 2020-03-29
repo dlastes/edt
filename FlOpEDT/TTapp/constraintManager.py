@@ -1,4 +1,3 @@
-import numpy as np
 from TTapp.print_infaisibility import print_all
 
 
@@ -101,6 +100,27 @@ def get_occurs(constraints, decreasing=True):
            occur_days, occur_departments, occur_module
 
 
+def set_index_courses(id_constraints):
+    _, _, _, occur_course, _, _, _, _, _, _ = get_occurs(id_constraints)
+    courses = list(occur_course.keys())
+
+    done = []
+    mat_courses = []
+    for index_course in range(len(courses)):
+        if index_course not in done:
+            courses_equals = [courses[index_course]]
+            for index_course2 in range(index_course + 1, len(courses)):
+                if courses[index_course].equals(courses[index_course2]):
+                    courses_equals.append(courses[index_course2])
+                    done.append(index_course2)
+            if len(courses_equals) > 1:
+                mat_courses.append(courses_equals)
+
+    for courses_equals in mat_courses:
+        for index_course in range(len(courses_equals)):
+            courses_equals[index_course].set_index(index_course + 1)
+
+
 class ConstraintManager:
     def __init__(self):
         self.constraints = []
@@ -116,7 +136,7 @@ class ConstraintManager:
 
     def handle_reduced_result(self, ilp_file_name, weeks):
         id_constraints = parse_iis(ilp_file_name)
+        set_index_courses(id_constraints)
         constraints = self.get_constraints_by_ids(id_constraints)
         occurs = get_occurs(constraints)
-
         print_all(constraints, occurs, weeks)
