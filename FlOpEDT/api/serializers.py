@@ -165,12 +165,8 @@ class Period_M_Serializer(serializers.ModelSerializer):
         model = bm.Period
         fields = ['starting_week', 'ending_week', 'name']
 
-class ModulesSerializer(serializers.Serializer):
-    name = serializers.CharField()
-    abbrev= serializers.CharField()
-    head = serializers.CharField()
-    ppn = serializers.CharField()
-    train_prog = TrainingPrograms_M_Serializer()
+class ModuleFullSerializer(serializers.ModelSerializer):
+    train_prog = TrainingProgramsSerializer()
     period = Period_M_Serializer()
 
     class Meta:

@@ -382,6 +382,15 @@ class ModuleViewSet(viewsets.ModelViewSet):
             return bm.Module.objects.filter(train_prog__department=department)
 
 
+class ModuleFullViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet to see all the modules that have a Scheduled course in a given week/year couple.
+
+    can also be filtered with a department.
+    """
+    queryset = bm.Module.objects.all()
+    serializer_class = serializers.ModuleFullSerializer
+    filterset_fields = '__all__'
 
 
 class CourseTypeFilterSet(filters.FilterSet):
