@@ -25,7 +25,8 @@ def dict_to_keys(dictionaries):
 
 
 def write_file(filename, output, print_output=False, mode="w+"):
-    print("writting %s..." % filename)
+    if(mode == 'w+'):
+        print("writting %s..." % filename)
     with open(filename, mode, encoding="utf-8") as file:
         file.write(output)
         file.write("\n")
@@ -62,7 +63,7 @@ def print_occurrence_of_constraints(occurs, weeks):
     buf_department = make_occur_buf(occur_department)
     buf_module = make_occur_buf(occur_modules)
 
-    output = "Sommaire des contraintes : \n"
+    output = "Sommaire des contraintes :\n"
     if buf_type != "":
         output += "\nParametre Type :\n" + buf_type
     if buf_instructor != "":
@@ -143,7 +144,7 @@ def print_summary_from_type(occurs, weeks):
 
 def print_summary_dependency(occurs, filename, threshold):
     courses = occurs[3]
-    output = "  Problème de dépendance entre les cours suivants :\n"
+    output = "\tProblème de dépendance entre les cours suivants:\n"
     output += get_str_attr(courses, threshold, ConstraintType.DEPENDANCE)
     write_file(filename, output, mode="a+")
 
@@ -151,25 +152,25 @@ def print_summary_dependency(occurs, filename, threshold):
 def print_summary_cours_prof(occurs, filename, threshold):
     courses = occurs[3]
     prof = occurs[1]
-    output = "  Les cours suivants:\n"
+    output = "\tLes cours suivants:\n"
     output += get_str_attr(courses, threshold, ConstraintType.COURS_DOIT_AVOIR_PROFESSEUR)
-    output += "  devraient avoir un professeur, surement parmis:\n"
+    output += "\tdevraient avoir un professeur, surement parmis:\n"
     output += get_str_attr(prof, threshold, ConstraintType.COURS_DOIT_AVOIR_PROFESSEUR)
     write_file(filename, output, mode="a+")
 
 
 def print_summary_pas_de_prof(occurs, filename, threshold):
     prof = occurs[1]
-    output = "  Les professeurs suivants:\n"
+    output = "\tLes professeurs suivants:\n"
     output += get_str_attr(prof, threshold, ConstraintType.PAS_DE_PROFESSEUR_DISPONIBLE)
-    output += "  devraient pouvoir faire cours\n"
+    output += "\tdevraient pouvoir faire cours\n"
     write_file(filename, output, mode="a+")
 
 
 def get_str_attr(attr_tab, threshold, type):
     output = ""
     for attr in get_important_attr(attr_tab, threshold, type):
-        output += "    %s\n" % str(attr)
+        output += "\t\t%s\n" % str(attr)
     return output
 
 
