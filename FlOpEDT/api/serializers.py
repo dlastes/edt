@@ -178,6 +178,14 @@ class ModulesSerializer(serializers.Serializer):
         fields = ['name', 'abbrev', 'head', 'ppn', 'train_prog', 'period']
 
 
+class ModuleSerializer(serializers.ModelSerializer):
+    train_prog = serializers.CharField(source='train_prog.abbrev')
+
+    class Meta:
+        model = bm.Module
+        fields = ['name', 'abbrev', 'train_prog']
+
+
 class Department_Name_Serializer(serializers.Serializer):
     name = serializers.CharField()
 

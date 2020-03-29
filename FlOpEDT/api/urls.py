@@ -138,8 +138,7 @@ routerRooms.register(r'sorts', views.RoomSortsViewSet)
 
 routerCourses = routers.SimpleRouter()
 
-routerCourses.register(r'modules', views.ModulesViewSet)
-routerCourses.register(r'modules-course', views.Modules_Course_ViewSet)
+routerCourses.register(r'module', views.ModuleViewSet)
 routerCourses.register(r'type/name', views.CourseTypeNameViewSet, basename='type-name')
 routerCourses.register(r'type', views.CourseTypeViewSet, basename='type')
 routerCourses.register(r'courses', views.CoursesViewSet)

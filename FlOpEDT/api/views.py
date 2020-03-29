@@ -340,64 +340,48 @@ class RoomSortsViewSet(viewsets.ModelViewSet):
 # -- COURSES --
 # -------------
 
-class ModulesFilterSet(filters.FilterSet):
-    dept = filters.CharFilter(field_name='train_prog__department__abbrev', required=True)
-    # makes the fields required
-    week = filters.NumberFilter(field_name='week')
-    year = filters.NumberFilter(field_name='year')
-
-    class Meta:
-        model = bm.Module
-        fields = ['dept', 'week', 'year']
-
-
-class ModulesViewSet(viewsets.ModelViewSet):
+@method_decorator(
+    name='list',
+    decorator=swagger_auto_schema(
+        operation_description='If (week,year) is given, any module that is taught in this week',
+        manual_parameters=[week_param(),
+                           year_param(),
+                           dept_param()])
+)
+class ModuleViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the modules.
+    Modules in a given department
 
-    Can be filtered as wanted with "dept"[required] / "week" / "year"
-    of a Module object by calling the function ModulesFilterSet
+    TODO: (Header for list)
+
     """
     queryset = bm.Module.objects.all()
-    serializer_class = serializers.ModulesSerializer
-    filter_class = ModulesFilterSet
-
-    filterset_fields = '__all__'
-
-
-class Modules_Course_ViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet to see all the modules that have a Scheduled course in a given week/year couple.
-
-    can also be filtered with a department.
-    """
-    queryset = bm.Module.objects.all()
-    serializer_class = serializers.ModulesSerializer
+    serializer_class = serializers.ModuleSerializer
     filterset_fields = '__all__'
 
     def get_queryset(self):
         # Get the filters from the request
         week = self.request.query_params.get('week', None)
-        department = self.request.query_params.get('department', None)
         year = self.request.query_params.get('year', None)
+        department = bm.Department.objects.get(
+            abbrev=self.request.query_params.get('dept', None))
 
         # Applying filters
         if week is not None and year is not None:
             # Those 2 filters are needed to have returned data
             # distinct method allows us to get each module only once
             qs = bm.ScheduledCourse.objects.distinct('course__module').filter(course__week=week, course__year=year)
-        else:
-            return None
-        if department is not None:
             # Filtering with department
-            qs = qs.filter(course__module__train_prog__department__abbrev=department)
+            qs = qs.filter(course__module__train_prog__department=department)
 
-        # Getting every module that appears
-        qs_module = qs.values('course__module')
-        # Get all the modules that appears in the scheduled courses. Those primary keys come from the previous line
-        res = bm.Module.objects.filter(pk__in=qs_module)
+            # Getting every module that appears
+            qs_module = qs.values('course__module')
+            # Get all the modules that appears in the scheduled courses. Those primary keys come from the previous line
+            return bm.Module.objects.filter(pk__in=qs_module)
+        else:
+            return bm.Module.objects.filter(train_prog__department=department)
 
-        return res
+
 
 
 class CourseTypeFilterSet(filters.FilterSet):
