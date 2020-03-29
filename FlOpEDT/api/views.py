@@ -464,97 +464,90 @@ class CoursePreferencesViewSet(viewsets.ModelViewSet):
 # TODO check how to generate custom schema with this
 
 
-class UserPreferenceGenViewSet(viewsets.ModelViewSet):
+class UserPreferenceViewSet(viewsets.ModelViewSet):
+    '''
+    Helper for user preferences:
+    - read parameters
+    - build queryset
+    '''
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.params = {}
+        
     serializer_class = serializers.UserPreferenceSerializer
+    
+    def set_common_params(self):
+        # Getting the filters
+        user = self.request.query_params.get('user', None)
+        if user is not None:
+            self.params['user__username'] = user
+        dept = self.request.query_params.get('dept', None)
+        if dept is not None:
+            self.params['user__departments__abbrev'] = dept
 
+    def set_default_params(self):
+        self.params['week'] = None
+        self.params['year'] = None
 
-class UserPreferenceDefaultFilterSet(filters.FilterSet):
-    user = filters.CharFilter(field_name='user__username')
-    dept = filters.CharFilter(field_name='user__departments__abbrev')
+    def set_singular_params(self):
+        self.params['week'] = int(self.request.query_params.get('week'))
+        self.params['year'] = int(self.request.query_params.get('year'))
 
-    class Meta:
-        model = bm.UserPreference
-        fields = ['user', 'dept']
-
-
-class UserPreferenceDefaultViewSet(UserPreferenceGenViewSet):
-    """
-    ViewSet shows a User Preference Default List
-
-    Can be filtered as wanted with "user"/"dept" of a UserPreference object.
-    """
-    permission_classes = (IsAuthenticated,)
-    filter_class = UserPreferenceDefaultFilterSet
-    queryset = bm.UserPreference.objects.filter(week=None)
-
-
-class UserPreferenceSingularFilterSet(filters.FilterSet):
-    user = filters.CharFilter(field_name='user__username')
-    dept = filters.CharFilter(field_name='user__departments__abbrev')
-    # makes the fields required
-    week = filters.NumberFilter(field_name='week', required=True)
-    year = filters.NumberFilter(field_name='year', required=True)
-
-    class Meta:
-        model = bm.UserPreference
-        fields = ['user', 'dept', 'week', 'year']
-
-
-class UserPreferenceSingularViewSet(UserPreferenceGenViewSet):
-    """
-    ViewSet shows a User Preference Default List
-
-    Can be filtered as wanted with "user"/"dept" of a UserPreference object.
-    """
-    permission_classes = (IsAuthenticated,)
-    filter_class = UserPreferenceSingularFilterSet
-    queryset = bm.UserPreference.objects.all()
-
-
-class UserPreferenceActualFilterSet(filters.FilterSet):
-    user = filters.CharFilter(field_name='user__username')
-    dept = filters.CharFilter(field_name='user__departments__abbrev')
-
-    class Meta:
-        model = bm.UserPreference
-        fields = ['user', 'dept']
+    def get_queryset(self):
+        self.set_common_params()
+        return bm.UserPreference.objects.filter(**self.params)
 
 
 # Custom schema generation: see
 # https://drf-yasg.readthedocs.io/en/stable/custom_spec.html
-@method_decorator(name='list',
-                  decorator=swagger_auto_schema(
-                      operation_description="Preferences from (week,year) if exist otherwise default week",
-                       manual_parameters=[week_param(required=True),
-                                          year_param(required=True),
-                                          user_param(),
-                                          dept_param()])
+@method_decorator(
+    name='list',
+    decorator=swagger_auto_schema(
+        manual_parameters=[user_param(),
+                           dept_param()],
+        operation_description="Default user preferences",
+    )
 )
-class UserPreferenceActualViewSet(UserPreferenceGenViewSet):
-    #permission_classes = (IsAuthenticated,)
-    #filter_class = UserPreferenceSingularFilterSet
-
-    def get_query_params(self):
-        # Getting the filters
-        dict_params = {}
-        week = self.request.query_params.get('week', None)
-        if week is not None:
-            dict_params['week'] = int(week)
-        year = self.request.query_params.get('year', None)
-        if year is not None:
-            dict_params['year'] = int(year)
-        user = self.request.query_params.get('user', None)
-        if user is not None:
-            dict_params['user__username'] = user
-        dept = self.request.query_params.get('dept', None)
-        if dept is not None:
-            dict_params['user__departments__abbrev'] = dept
-        return dict_params
-
+class UserPreferenceDefaultViewSet(UserPreferenceViewSet):
     def get_queryset(self):
-        params = self.get_query_params()
-        print(params)
-        qs = bm.UserPreference.objects.filter(**params)
+        self.set_default_params()
+        return super().get_queryset()
+
+
+@method_decorator(
+    name='list',
+    decorator=swagger_auto_schema(
+        manual_parameters=[week_param(required=True),
+                           year_param(required=True),
+                           user_param(),
+                           dept_param()],
+        operation_description="User preferences in (week,year)"
+    )
+)
+class UserPreferenceSingularViewSet(UserPreferenceViewSet):
+    def get_queryset(self):
+        self.set_singular_params()
+        return super().get_queryset()
+
+
+@method_decorator(
+    name='list',
+    decorator=swagger_auto_schema(
+        manual_parameters=[week_param(required=True),
+                           year_param(required=True),
+                           user_param(),
+                           dept_param()],
+        operation_description=
+        "User preferences in (week,year) if exist otherwise in default week",
+    )
+)
+class UserPreferenceActualViewSet(UserPreferenceViewSet):
+    def get_queryset(self):
+        self.set_singular_params()
+        qs = super().get_queryset()
+        if len(qs) == 0:
+            self.set_default_params()
+            qs = super().get_queryset()
         return qs
 
 
