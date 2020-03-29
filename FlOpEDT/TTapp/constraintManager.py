@@ -100,8 +100,8 @@ def get_occurs(constraints, decreasing=True):
            occur_days, occur_departments, occur_module
 
 
-def set_index_courses(id_constraints):
-    _, _, _, occur_course, _, _, _, _, _, _ = get_occurs(id_constraints)
+def set_index_courses(occurs):
+    _, _, _, occur_course, _, _, _, _, _, _ = occurs
     courses = list(occur_course.keys())
 
     done = []
@@ -136,7 +136,7 @@ class ConstraintManager:
 
     def handle_reduced_result(self, ilp_file_name, weeks):
         id_constraints = parse_iis(ilp_file_name)
-        set_index_courses(id_constraints)
         constraints = self.get_constraints_by_ids(id_constraints)
         occurs = get_occurs(constraints)
+        set_index_courses(occurs)
         print_all(constraints, occurs, weeks)
