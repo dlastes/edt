@@ -73,7 +73,7 @@ def define_attributes(ttmodel, kwargs):
     return weeks, tutors, groups
 
 
-class MinimizeBusyDays():
+class MinimizeBusyDays:
     """
     This class is a template for writing your own custom contraint.
 
@@ -124,7 +124,7 @@ class MinimizeBusyDays():
         verbose_name = "Minimiser les jours de présence"
 
 
-class RespectBoundPerDay():
+class RespectBoundPerDay:
     """
     This class is a template for writing your own custom contraint.
 
