@@ -1,0 +1,20 @@
+Voici les principaux problèmes liés à l'infaisabilité :
+
+	Problème de dépendance entre les cours suivants:
+		CM-RES-PSO-CE
+		TP-RES-PG-3A
+		TP-RES-PG-2A
+
+	Les cours suivants:
+		TD-AMN-PSE-2 (1)
+		TD-AMN-PSE-2 (2)
+		TD-COO-TG-2
+	devraient avoir un professeur, surement parmis:
+		PSE
+		TG
+
+	Les professeurs suivants:
+		MTR
+		MN
+	devraient pouvoir faire cours
+
