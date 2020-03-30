@@ -170,6 +170,7 @@ class TTConstraint(models.Model):
     week = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(52)],
         null=True,
+
         default=None,
         blank=True)
     year = models.PositiveSmallIntegerField(null=True, default=None, blank=True)
@@ -759,10 +760,10 @@ class MinNonPreferedTutorsSlot(TTConstraint):
 
 
 class MinNonPreferedTrainProgsSlot(TTConstraint):
+
     """
     Minimize the use of unprefered Slots for tutors
     """
-
 
     def enrich_model(self, ttmodel, week, ponderation=1):
         if self.train_progs.exists():

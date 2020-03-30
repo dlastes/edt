@@ -81,6 +81,7 @@ def add_iut_specific_constraints(ttmodel):
 #                                constraint_type=ConstraintType.BOUND_HOURS_PER_DAY, instructors=tutor, days=d)
 
 
+
 def add_iut_blagnac_basics(ttmodel):
     print("adding IUT Blagnac's basic constraints")
 
@@ -923,6 +924,7 @@ def add_iut_blagnac_rt(ttmodel):
     #             for week in ttmodel.weeks:
     #                 L.enrich_model(ttmodel, week)
     #         # L.delete()
+
 
     if 36 in ttmodel.weeks:
         ttmodel.add_constraint(ttmodel.sum(ttmodel.TT[sl, c]

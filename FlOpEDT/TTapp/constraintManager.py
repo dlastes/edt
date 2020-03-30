@@ -28,7 +28,6 @@ def inc(dic, key):
 def inc_with_type(dic, keys, c_type):
     if keys is not []:
         for key in keys:
-            key = str(key)
             if key in dic.keys():
                 dic[key][0] += 1
                 if dic[key][1].count(c_type) == 0:
@@ -79,10 +78,11 @@ def dict2keys(dictionaries):
 
 def write_file(filename, output, print_output=False):
     print("writting %s..." % filename)
-    with open(filename, "w+", encoding='utf-8') as file:
+    with open(filename, "w+", encoding="utf-8") as file:
         file.write(output)
     if print_output:
         print("\n%s" % output)
+
 
 class ConstraintManager:
     def __init__(self):

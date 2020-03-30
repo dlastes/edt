@@ -176,4 +176,6 @@ if 'ADMINS' in os.environ:
     ADMINS = [tuple(admin.split(",")) for admin in os.environ.get('ADMINS').split(" ")]
     MANAGERS = ADMINS
 
+SHELL_PLUS_MODEL_IMPORTS_RESOLVER = 'django_extensions.collision_resolvers.AppLabelSuffixCR'
+
 COSMO_MODE = False

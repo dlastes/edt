@@ -152,6 +152,7 @@ class Time(models.Model):
                            verbose_name="Half day",
                            default=AM)
     no = models.PositiveSmallIntegerField(default=0)
+    # nom = models.CharField(max_length=20)
     hours = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(25)], default=8)
     minutes = models.PositiveSmallIntegerField(
@@ -219,7 +220,6 @@ class TimeGeneralSettings(models.Model):
             f" | {hhmm(self.lunch_break_finish_time)} - " + \
             f"{hhmm(self.day_finish_time)};" + \
             f" Days: {self.days}"
-    
 # </editor-fold>
 
 # <editor-fold desc="ROOMS">
