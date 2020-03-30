@@ -27,7 +27,7 @@ from random import randint
 
 from rest_framework import authentication, exceptions, viewsets
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, APIException
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 
@@ -1299,4 +1299,12 @@ class LogoutView(TemplateView):
         return []
 
 
+# -------------------
+# --- Exceptions ----
+# -------------------
 
+
+class DepartmentUnknown(APIException):
+    status_code = 400
+    default_detail = 'There is no department with this abbreviated name.'
+    default_code = 'department_unknown'
