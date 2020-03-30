@@ -80,6 +80,7 @@ urlpatterns = [
     path('fetch_extra_sched/<int:year>/<int:week>', views.fetch_extra_sched, name="fetch_extra_sched"),
     path('fetch_shared_rooms/<int:year>/<int:week>', views.fetch_shared_rooms, name="fetch_shared_rooms"),
     path('fetch_perfect_day/<str:username>', views.fetch_perfect_day, name="fetch_perfect_day"),
+    path('fetch_user_notifications_pref/<str:username>', views.fetch_user_notifications_pref, name="fetch_user_notifications_pref"),
     url(r'^fetch_module/(?P<year>\d+)/(?P<week>\d+)$', views.fetch_module, name="fetch_module"),
     url(r'^fetch_tutors/(?P<year>\d+)/(?P<week>\d+)$', views.fetch_tutor, name="fetch_tutor"),
     url(r'^fetch_all_modules_with_desc$', views.fetch_all_modules_with_desc, name="fetch_all_modules_with_desc"),
@@ -99,6 +100,8 @@ urlpatterns = [
     path('change_room_pref/<int:year>/<int:week>/<str:room>', views.room_preferences_changes, name="room_pref_changes"),
     path('change_decale', views.decale_changes, name="decale_changes"),
     path('change_perfect_day/<str:username>', views.user_perfect_day_changes, name="user_perfect_day_changes"),
+    path('change_user_notifications_pref/<str:username>', views.user_notifications_pref_changes,
+         name="user_notifications_pref_changes"),
     path(r'change_room_pref_per_tutor/<str:tutor>', views.room_preferences_changes_per_tutor, name='room_pref_changes_per_tutor'),
 
     # predefined
