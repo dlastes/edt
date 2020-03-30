@@ -46,7 +46,7 @@ from django.views.generic import RedirectView
 from FlOpEDT.decorators import dept_admin_required, tutor_required
 from FlOpEDT.settings.base import COSMO_MODE
 
-from people.models import Tutor, UserDepartmentSettings, User
+from people.models import Tutor, UserDepartmentSettings, User, NotificationsPreferences
 
 from displayweb.admin import BreakingNewsResource
 from displayweb.models import BreakingNews
@@ -227,6 +227,7 @@ def preferences(req, **kwargs):
 @login_required
 def stype(req, *args, **kwargs):
     err = ''
+    user_notifications_pref = queries.get_notification_preference(req.user)
     if req.method == 'GET':
         return TemplateResponse(req,
                                 'base/show-stype.html',
@@ -235,6 +236,7 @@ def stype(req, *args, **kwargs):
                                  'name_usr': req.user.username,
                                  'usr_pref_hours': req.user.tutor.pref_hours_per_day,
                                  'usr_max_hours': req.user.tutor.max_hours_per_day,
+                                 'user_notifications_pref': user_notifications_pref,
                                  'err': err,
                                  'current_year': current_year,
                                  'time_settings': queries.get_time_settings(req.department),
@@ -270,6 +272,7 @@ def stype(req, *args, **kwargs):
                                  'name_usr': req.user.username,
                                  'usr_pref_hours': req.user.tutor.pref_hours_per_day,
                                  'usr_max_hours': req.user.tutor.max_hours_per_day,
+                                 'user_notifications_pref': user_notifications_pref,
                                  'err': err,
                                  'current_year': current_year,
                                  'time_settings': queries.get_time_settings(req.department),
@@ -278,9 +281,6 @@ def stype(req, *args, **kwargs):
 
 @tutor_required
 def room_preference(req, department, tutor=None):
-    
-
-    
     roomtypes = RoomType.objects.filter(department=req.department)\
                                 .prefetch_related('members')
     roomgroups = Room.objects.filter(types__in=roomtypes)
@@ -355,8 +355,7 @@ def user_perfect_day_changes(req, username=None, *args, **kwargs):
         t.pref_hours_per_day = user_pref_hours
         t.max_hours_per_day = user_max_hours
         t.save()
-    return redirect('base:stype', req.department)
-
+    return redirect('base:preferences', req.department)
 
 @login_required
 def fetch_perfect_day(req, username=None, *args, **kwargs):
@@ -366,6 +365,28 @@ def fetch_perfect_day(req, username=None, *args, **kwargs):
         perfect_day['pref'] = t.pref_hours_per_day
         perfect_day['max'] = t.max_hours_per_day
     return JsonResponse(perfect_day, safe=False)
+
+
+@login_required
+def fetch_user_notifications_pref(req, username=None, *args, **kwargs):
+    try:
+        user = User.objects.get(username=username)
+    except User.DoesNotExist:
+        user = None
+    
+    return JsonResponse({"nb_weeks": queries.get_notification_preference(user)},
+                        safe=False)
+
+@login_required
+def user_notifications_pref_changes(req, username=None, *args, **kwargs):
+    if username is not None:
+        u = User.objects.get(username=username)
+        n, created = NotificationsPreferences.objects.get_or_create(user=u)
+        data = req.POST
+        user_notifications_pref = int(data['user_notifications_pref'])
+        n.nb_of_notified_weeks = user_notifications_pref
+        n.save()
+    return redirect('base:preferences', req.department)
 
 
 @dept_admin_required
@@ -1045,6 +1066,7 @@ def clean_change(year, week, old_version, change, work_copy=0, initiator=None, a
     tutor_old = sched_course.tutor
     if tutor_old is None:
         tutor_old = sched_course.course.tutor
+        sched_course.tutor = tutor_old
         
     course_log = CourseModification(course=course,
                                     old_week=week,
