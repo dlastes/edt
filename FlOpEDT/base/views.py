@@ -857,33 +857,6 @@ def fetch_all_versions(req, **kwargs):
     return response
 
 
-def fetch_week_infos(req, year, week, **kwargs):
-    """
-    Export aggregated infos of a given week:
-    version number, required number of available slots,
-    proposed number of available slots
-    (not cached)
-    """
-    version = 0
-    for dept in Department.objects.all():
-        version += queries.get_edt_version(dept, week, year, create=True)
-
-    proposed_pref, required_pref = \
-        pref_requirements(req.department, req.user, year, week) if req.user.is_authenticated \
-            else (-1, -1)
-
-    try:
-        regen = str(Regen.objects.get(department=req.department, week=week, year=year))
-    except ObjectDoesNotExist:
-        regen = 'I'
-
-    response = JsonResponse({'version': version,
-                             'proposed_pref': proposed_pref,
-                             'required_pref': required_pref,
-                             'regen': regen})
-    return response
-
-
 def pref_requirements(department, tutor, year, week):
     """
     Return a pair (filled, required): number of preferences
