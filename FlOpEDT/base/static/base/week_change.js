@@ -1237,7 +1237,6 @@ function fetch_tutor() {
   });
 }
 function translate_tutor_from_csv(d) {
-  //console.log(d);
   if (Object.keys(tutors_info).indexOf(d.username) == -1) {
     tutors_info[d.username] = {
       full_name: d.first_name + " " + d.last_name,

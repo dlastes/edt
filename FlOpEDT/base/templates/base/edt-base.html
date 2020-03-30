@@ -38,27 +38,30 @@
     var constraints_fi = "{% url "base:fetch_constraints" department %}";
     var departments_fi = "{% url "base:fetch_departments" department %}";
     
-    var url_contact = "{% url "base:contact" department %}";
-    var url_module = "{% url "base:fetch_module" department 0 0 %}";
-    url_module = url_module.slice(0, -3);
+    var url_module = "{% url 'api:course:module-list' %}";
     var url_tutor = "{% url 'api:tutor-list' %}";
     var url_all_tutors = "{% url 'api:tutor_username-list' %}";
+    var url_user_pref = "{% url 'api:user-actual-list' %}";
+    var url_user_pref_default = "{% url 'api:user-def-list' %}";
+
     var url_bknews = "{% url 'api:extra:bknews-list' %}";
+    var url_quote = "{% url 'api:extra:random-quote-list' %}";
+
+    var url_cours_pp = "{% url 'api:fetch:unscheduledcourses-list' %}";
+
+    var url_contact = "{% url "base:contact" department %}";
+    var url_login = "{% url "people:login" %}";
+    var url_edt = "{% url "base:edt" department %}";
 
     var url_cours_pl = "{% url "base:fetch_cours_pl" department 0 0 0 %}";
     url_cours_pl = url_cours_pl.slice(0, -5);
-    var url_cours_pp = "{% url 'api:fetch:unscheduledcourses-list' %}";
-    var url_user_pref = "{% url 'api:user-actual-list' %}";
+
     var url_unavailable_rooms = "{% url "base:fetch_unavailable_rooms" department 0 0 %}";
     url_unavailable_rooms = url_unavailable_rooms.slice(0,-3);
-    var url_login = "{% url "people:login" %}";
-    var url_edt = "{% url "base:edt" department %}";
+
     var url_edt_changes = "{% url "base:edt_changes" department %}";
     var url_user_pref_changes = "{% url "base:user_pref_changes" department 0 0 '.' %}";
     url_user_pref_changes = url_user_pref_changes.slice(0, -5);
-    var url_user_pref_default = "{% url 'api:user-def-list' %}";
-    var url_quote = "{% url "quote:fetch_quote" %}";
-    var url_week_infos = "{% url "base:fetch_week_infos" department 0 0 %}";
 
     var url_week_infos = "{% url 'api:extra:week-infos-list' %}";
 
