@@ -43,6 +43,7 @@
     url_module = url_module.slice(0, -3);
     var url_tutor = "{% url 'api:tutor-list' %}";
     var url_all_tutors = "{% url 'api:tutor_username-list' %}";
+    var url_bknews = "{% url 'api:extra:bknews-list' %}";
 
     var url_cours_pl = "{% url "base:fetch_cours_pl" department 0 0 0 %}";
     url_cours_pl = url_cours_pl.slice(0, -5);
@@ -56,7 +57,6 @@
     var url_user_pref_changes = "{% url "base:user_pref_changes" department 0 0 '.' %}";
     url_user_pref_changes = url_user_pref_changes.slice(0, -5);
     var url_user_pref_default = "{% url 'api:user-def-list' %}";
-    var url_bknews = "{% url 'api:fetch:BKNews-list' %}";
     var url_quote = "{% url "quote:fetch_quote" %}";
     var url_week_infos = "{% url "base:fetch_week_infos" department 0 0 %}";
     url_week_infos = url_week_infos.slice(0, -3);

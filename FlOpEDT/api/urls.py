@@ -147,6 +147,9 @@ routerGroups = routers.SimpleRouter()
 routerGroups.register(r'types', views.GroupTypesViewSet)
 routerGroups.register(r'groups', views.GroupsViewSet, basename="groups")
 
+routerExtra = routers.SimpleRouter()
+
+routerExtra.register('bknews', views.BKNewsViewSet, basename="bknews")
 ################
 # SWAGGER VIEW #
 ################
@@ -183,5 +186,7 @@ urlpatterns = [
     path('courses/',
          include((routerCourses.urls, 'api'), namespace='course')),
     path('groups/', include(routerGroups.urls)),
+    path('extra/',
+         include((routerExtra.urls, 'api'), namespace='extra')),
 ]
 
