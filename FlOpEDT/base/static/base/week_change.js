@@ -1049,17 +1049,17 @@ function fetch_all(first, fetch_work_copies) {
 
 function fetch_version() {
   var exp_week = wdw_weeks.get_selected();
+  let context = {dept: department};
+  exp_week.add_to_context(context);
 
   show_loader(true);
   $.ajax({
     type: "GET", //rest Type
-    dataType: 'text',
-    url: url_week_infos + exp_week.url(),
+    dataType: 'text/json',
+    url: build_url(url_week_infos, context),
     async: true,
-    contentType: "text/json",
     success: function (msg) {
       var parsed = JSON.parse(msg);
-
       var sel_week = wdw_weeks.get_selected();
       if (Week.compare(exp_week, sel_week) == 0) {
         version = parsed.version;
