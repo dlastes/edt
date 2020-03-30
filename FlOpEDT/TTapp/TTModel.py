@@ -913,14 +913,9 @@ class TTModel(object):
                                                        & self.wdb.possible_courses[i])),
                                     '<=',
                                     self.avail_instr[i][sl],
-<<<<<<< HEAD
                                     constraint_type = ConstraintType.PAS_DE_PROFESSEUR_DISPONIBLE, slots = sl,
                                     instructors = i)
 
-=======
-                                    constraint_type=ConstraintType.PAS_DE_PROFESSEUR_DISPONIBLE,
-                                    slots=sl, instructors=i)
->>>>>>> dev
 
     def add_rooms_constraints(self):
         print("adding room constraints")
