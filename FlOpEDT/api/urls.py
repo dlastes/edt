@@ -152,6 +152,7 @@ routerExtra = routers.SimpleRouter()
 routerExtra.register('bknews', views.BKNewsViewSet, basename="bknews")
 routerExtra.register('quote/random', views.RandomQuoteViewSet, basename="random-quote")
 routerExtra.register('quote', views.QuoteViewSet)
+routerExtra.register('week-infos', views.WeekInfoViewSet, basename="week-infos")
 
 ################
 # SWAGGER VIEW #

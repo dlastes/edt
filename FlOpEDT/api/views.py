@@ -50,7 +50,7 @@ import quote.models as qm
 import displayweb.models as dwm
 import TTapp.models as ttm
 
-
+import base.queries as queries
 
 
 # --------------------------------
@@ -954,6 +954,54 @@ class TTLimitedRoomChoicesViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.TTLimitedRoomChoicesSerializer
 
     filterset_fields = '__all__'
+
+
+# --------------------
+# --- WEEK-INFOS  ----
+# --------------------
+
+@method_decorator(name='list',
+                  decorator=swagger_auto_schema(
+                      manual_parameters=[week_param(required=True),
+                                         year_param(required=True),
+                                         dept_param(required=True)])
+)
+class WeekInfoViewSet(viewsets.ViewSet):
+    """
+    Aggregated infos of a given week
+
+    Version number, required number of available slots,
+    proposed number of available slots
+    (not cached)
+    """
+    def list(self, request, format=None):
+        week = int(request.query_params.get('week'))
+        year = int(request.query_params.get('year'))
+        try:
+            department = bm.Department.objects.get(
+                abbrev=request.query_params.get('dept')
+            )
+        except bm.Department.DoesNotExist:
+            raise DepartmentUnknown
+
+        version = 0
+        for dept in bm.Department.objects.all():
+            version += queries.get_edt_version(dept, week, year, create=True)
+
+        proposed_pref, required_pref = \
+            pref_requirements(department, request.user, year, week) if request.user.is_authenticated \
+                else (-1, -1)
+
+        try:
+            regen = str(bm.Regen.objects.get(department=department, week=week, year=year))
+        except bm.Regen.DoesNotExist:
+            regen = 'I'
+
+        return Response({'version': version,
+                         'proposed_pref': proposed_pref,
+                         'required_pref': required_pref,
+                         'regen': regen})
+
 
 
 # ---------------
