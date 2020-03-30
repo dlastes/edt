@@ -324,12 +324,12 @@ class RegensSerializer(serializers.ModelSerializer):
 # -- QUOTE -
 # ----------
 
-class QuoteTypesSerializer(serializers.ModelSerializer):
+class QuoteTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = q.QuoteType
         fields = '__all__'
 
-class QuotesSerializer(serializers.ModelSerializer):
+class QuoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = q.Quote
         fields = '__all__'

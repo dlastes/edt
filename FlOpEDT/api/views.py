@@ -23,6 +23,8 @@
 
 from api import serializers
 
+from random import randint
+
 from rest_framework import authentication, exceptions, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import ValidationError
@@ -44,7 +46,7 @@ from django.utils.decorators import method_decorator
 
 import people.models as pm
 import base.models as bm
-import quote.models as p
+import quote.models as qm
 import displayweb.models as dwm
 import TTapp.models as ttm
 
@@ -717,29 +719,42 @@ class RegensViewSet(viewsets.ModelViewSet):
 # -- QUOTE -
 # ----------
 
-class QuoteTypesViewSet(viewsets.ModelViewSet):
+class QuoteTypeViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the quote types.
 
     Can be filtered as wanted with every field of a QuoteType object.
     """
-    queryset = p.QuoteType.objects.all()
-    serializer_class = serializers.QuoteTypesSerializer
+    queryset = qm.QuoteType.objects.all()
+    serializer_class = serializers.QuoteTypeSerializer
 
     filterset_fields = '__all__'
 
 
-class QuotesViewSet(viewsets.ModelViewSet):
+class QuoteViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the quotes.
 
     Can be filtered as wanted with every field of a Quote object.
     """
-    queryset = p.Quote.objects.all()
-    serializer_class = serializers.QuotesSerializer
+    queryset = qm.Quote.objects.all()
+    serializer_class = serializers.QuoteSerializer
 
     filterset_fields = '__all__'
 
+
+class RandomQuoteViewSet(viewsets.ViewSet):
+    def list(self, request, format=None):
+        """
+        Return a random quote
+        """
+        ids = qm.Quote.objects.filter(status=qm.Quote.ACCEPTED).values_list('id',
+                                                                            flat=True)
+        nb_quotes = len(ids)
+        if nb_quotes > 0:
+            chosen_id = ids[randint(0,nb_quotes-1)] if nb_quotes > 0 else -1
+            return Response(str(qm.Quote.objects.get(id=chosen_id)))
+        return Response('')
 
 # ---------------
 # -- DISPLAYWEB -

@@ -150,6 +150,9 @@ routerGroups.register(r'groups', views.GroupsViewSet, basename="groups")
 routerExtra = routers.SimpleRouter()
 
 routerExtra.register('bknews', views.BKNewsViewSet, basename="bknews")
+routerExtra.register('quote/random', views.RandomQuoteViewSet, basename="random-quote")
+routerExtra.register('quote', views.QuoteViewSet)
+
 ################
 # SWAGGER VIEW #
 ################

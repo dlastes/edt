@@ -939,20 +939,11 @@ function create_quote() {
     dataType: 'text',
     url: url_quote,
     async: true,
-    contentType: "text/csv",
     success: function (msg) {
-      // console.log(msg);
-
-      var quotes = d3.csvParse(msg, translate_quote_from_csv);
-      if (quotes.length > 0) {
-        quote = quotes[0];
-      } else {
-        quote = '';
-      }
+      var quote = msg.slice(1,-1) ;
 
       svg.get_dom("vg").select(".quote").select("text")
         .text(quote);
-
 
       show_loader(false);
 
