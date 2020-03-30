@@ -1525,6 +1525,8 @@ class TTModel(object):
                     m.write(ilp_filename)
                     print("IIS file written in file %s" % ilp_filename)
                 self.constraintManager.handle_reduced_result(ilp_filename, self.weeks)
+                summary_filename = f'logs/summary_of_constraints_from_types{self.weeks}.txt'
+                os.system(f"cat {summary_filename}")
 
         elif hasattr(pulp_solvers, solver):
             # raise an exception when the solver name is incorrect
