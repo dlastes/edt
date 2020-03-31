@@ -27,8 +27,7 @@ class Constraint:
     def __init__(self, id, constraint_type=None, instructors=[], slots=[], courses=[], weeks=[], rooms=[],
                  groups=[], days=[], departments=[], modules=[], apm=None):
         self.id = id
-        if constraint_type is not None:
-            self.constraint_type = constraint_type.value
+        self.constraint_type = constraint_type
 
         if type(instructors) is not list:
             instructors = [instructors]
@@ -66,26 +65,24 @@ class Constraint:
 
         if type(courses) is not list:
             courses = [courses]
-        if len(courses) >= 3:
-            print(courses)
         self.courses = list(courses)
 
-        for s in self.slots:
-            day = get_readable_day(s.get_day().day)
+        for slot in self.slots:
+            day = get_readable_day(slot.get_day().day)
             if day not in self.days:
                 self.days.append(day)
-            week = s.get_day().week
+            week = slot.get_day().week
             if week not in self.weeks:
                 self.weeks.append(week)
 
-        for c in self.courses:
-            instructor = c.get_tutor()
+        for course in self.courses:
+            instructor = course.get_tutor()
             if instructor not in self.instructors:
                 self.instructors.append(instructor)
-            group = c.get_group()
+            group = course.get_group()
             if group not in self.groups:
                 self.groups.append(group)
-            module = c.get_module()
+            module = course.get_module()
             if module not in self.modules:
                 self.modules.append(module)
 
@@ -95,7 +92,7 @@ class Constraint:
     def __str__(self):
         res = "(%s) La contrainte " % self.id
         if self.constraint_type is not None:
-            res += 'de type "%s" ; ' % str(self.constraint_type)
+            res += 'de type "%s" ; ' % str(self.constraint_type.value)
 
         if len(self.instructors) >= 1:
             d, c = singular_or_plurial(self.instructors, is_male=True)

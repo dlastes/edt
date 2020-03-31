@@ -1,0 +1,60 @@
+Sommaire des contraintes :
+
+Parametre Type :
+[Problème de dépendance -> 45] 
+[Le cours doit avoir un professeur -> 38] 
+[Pas de professeur disponible -> 19] 
+[Le cours doit être placé -> 2] 
+[Simul slot -> 1] 
+[Pas plus d'un cours par créneau -> 1] 
+
+Parametre Instructor :
+[TG -> 105] types : (Problème de dépendance, Le cours doit avoir un professeur, Simul slot, Pas de professeur disponible, Le cours doit être placé)
+
+Parametre Course : 
+[TD-COO-TG-2 (1) -> 66] types : (Problème de dépendance, Le cours doit avoir un professeur, Le cours doit être placé)
+[TD-COO-TG-2 (2) -> 64] types : (Problème de dépendance, Le cours doit avoir un professeur, Le cours doit être placé)
+
+Parametre Week : 
+[18 -> 104] types : (Problème de dépendance, Le cours doit avoir un professeur, Simul slot, Pas de professeur disponible, Pas plus d'un cours par créneau)
+
+Parametre Group : 
+[2 -> 85] types : (Problème de dépendance, Le cours doit avoir un professeur, Le cours doit être placé)
+[2A -> 1] types : (Pas plus d'un cours par créneau)
+
+Parametre Days : 
+[Lundi -> 48] types : (Problème de dépendance, Le cours doit avoir un professeur, Simul slot, Pas de professeur disponible)
+[Mercredi -> 33] types : (Problème de dépendance, Le cours doit avoir un professeur, Pas de professeur disponible, Pas plus d'un cours par créneau)
+[Jeudi -> 28] types : (Problème de dépendance, Le cours doit avoir un professeur, Pas de professeur disponible)
+[Mardi -> 27] types : (Problème de dépendance, Le cours doit avoir un professeur, Pas de professeur disponible)
+
+Parametre Module :
+[COO -> 85] types : (Problème de dépendance, Le cours doit avoir un professeur, Le cours doit être placé)
+
+Parametre Slot :
+[TD_m_s18_8h -> 15] types : (Problème de dépendance, Le cours doit avoir un professeur, Pas de professeur disponible)
+[TD_m_s18_11h -> 15] types : (Problème de dépendance, Le cours doit avoir un professeur, Simul slot)
+[TD_th_s18_8h -> 14] types : (Problème de dépendance)
+[TD_m_s18_17h15 -> 14] types : (Problème de dépendance)
+[TD_tu_s18_8h -> 14] types : (Problème de dépendance)
+[TD_w_s18_17h15 -> 13] types : (Problème de dépendance, Pas plus d'un cours par créneau)
+[TD_w_s18_9h30 -> 8] types : (Problème de dépendance, Le cours doit avoir un professeur, Pas de professeur disponible)
+[TD_m_s18_14h15 -> 8] types : (Problème de dépendance, Le cours doit avoir un professeur, Pas de professeur disponible)
+[TD_tu_s18_11h -> 3] types : (Le cours doit avoir un professeur, Pas de professeur disponible)
+[TD_tu_s18_14h15 -> 3] types : (Le cours doit avoir un professeur, Pas de professeur disponible)
+[TD_tu_s18_15h45 -> 3] types : (Le cours doit avoir un professeur, Pas de professeur disponible)
+[TD_th_s18_17h15 -> 3] types : (Le cours doit avoir un professeur, Pas de professeur disponible)
+[TD_w_s18_8h -> 3] types : (Le cours doit avoir un professeur, Pas de professeur disponible)
+[TD_w_s18_11h -> 3] types : (Le cours doit avoir un professeur, Pas de professeur disponible)
+[TD_w_s18_14h15 -> 3] types : (Le cours doit avoir un professeur, Pas de professeur disponible)
+[TD_th_s18_14h15 -> 3] types : (Le cours doit avoir un professeur, Pas de professeur disponible)
+[TD_th_s18_15h45 -> 3] types : (Le cours doit avoir un professeur, Pas de professeur disponible)
+[TD_w_s18_15h45 -> 3] types : (Le cours doit avoir un professeur, Pas de professeur disponible)
+[TD_m_s18_15h45 -> 3] types : (Le cours doit avoir un professeur, Pas de professeur disponible)
+[TD_m_s18_9h30 -> 3] types : (Le cours doit avoir un professeur, Pas de professeur disponible)
+[TD_th_s18_11h -> 3] types : (Le cours doit avoir un professeur, Pas de professeur disponible)
+[TD_th_s18_9h30 -> 3] types : (Le cours doit avoir un professeur, Pas de professeur disponible)
+[TD_tu_s18_9h30 -> 3] types : (Le cours doit avoir un professeur, Pas de professeur disponible)
+[TD_tu_s18_17h15 -> 2] types : (Le cours doit avoir un professeur)
+[CM_w_s18_14h15 -> 1] types : (Pas de professeur disponible)
+
