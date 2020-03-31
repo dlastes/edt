@@ -132,9 +132,6 @@ def edt(req, year=None, week=None, splash_id=0, **kwargs):
         copie = 0
         gp = ''
 
-    # une_salle = RoomGroup.objects.all()[1].name
-    une_salle = 'salle?'
-
     if req.user.is_authenticated:
         name_usr = req.user.username
         try:
@@ -151,7 +148,6 @@ def edt(req, year=None, week=None, splash_id=0, **kwargs):
                                 'week': week,
                                 'year': year,
                                 'promo': promo,
-                                'une_salle': une_salle,
                                 'copie': copie,
                                 'gp': gp,
                                 'name_usr': name_usr,
@@ -188,15 +184,12 @@ def edt_light(req, year=None, week=None, **kwargs):
         gp_w = 30
         svg_top_m = 40
 
-    une_salle = "salle?"  # RoomGroup.objects.all()[0].name
-
     return TemplateResponse(req, 'base/show-edt-light.html',
                             {
                                 'all_weeks': week_list(),
                                 'week': week,
                                 'year': year,
                                 'promo': promo,
-                                'une_salle': une_salle,
                                 'copie': 0,
                                 'gp': '',
                                 'name_usr': '',
@@ -1084,14 +1077,11 @@ def clean_change(year, week, old_version, change, work_copy=0, initiator=None, a
 
     # Rooms
     try:
-        new_room = Room.objects.get(name=change['room'])
+        new_room = Room.objects.get(name=change['room']) \
+            if change['room'] != '' else None
         ret['sched'].room = new_room
-    except ObjectDoesNotExist:
-        if new_room == 'salle?' or new_room is None:
-            raise Exception('Oublié de trouver une salle ' \
-                  'pour un cours ?')
-        else:
-            raise Exception(f"Problème : salle {change['room']} inconnue")
+    except Room.DoesNotExist:
+        raise Exception(f"Problème : salle {change['room']} inconnue")
 
     # Timing
     ret['sched'].start_time = change['start']
