@@ -539,11 +539,16 @@ class UserPreferenceSingularViewSet(UserPreferenceViewSet):
                            year_param(required=True),
                            user_param(),
                            dept_param()],
-        operation_description=
-        "User preferences in (week,year) if exist otherwise in default week",
+        # operation_description=
+        # "User preferences in (week,year) if exist otherwise in default week",
     )
 )
 class UserPreferenceActualViewSet(UserPreferenceViewSet):
+    """
+    User preference in (week, year) if exist. Otherwise, default week.
+
+    Also can be filtered with dept and user
+    """
     def get_queryset(self):
         self.set_singular_params()
         qs = super().get_queryset()
@@ -1032,7 +1037,17 @@ class ScheduledCoursesViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.ScheduledCoursesSerializer
     filter_class = ScheduledCourseFilterSet
 
-
+@method_decorator(name='list',
+                  decorator=swagger_auto_schema(
+                      manual_parameters=[
+                          week_param(),
+                          year_param(),
+                          dept_param(),
+                          openapi.Parameter('work_copy',
+                             openapi.IN_QUERY,
+                             description="N° of work copy",
+                             type=openapi.TYPE_INTEGER),])
+)
 class UnscheduledCoursesViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the unscheduled courses
@@ -1073,7 +1088,11 @@ class UnscheduledCoursesViewSet(viewsets.ModelViewSet):
 
         return queryset
 
-
+        
+@method_decorator(name='list',
+                  decorator=swagger_auto_schema(
+                      manual_parameters=[week_param(), year_param(), dept_param()])
+)
 class AvailabilitiesViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the availabilities of the tutors.
@@ -1101,10 +1120,23 @@ class AvailabilitiesViewSet(viewsets.ModelViewSet):
 
         return qs
 
-
+@method_decorator(name='list',
+                  decorator=swagger_auto_schema(
+                      manual_parameters=[
+                          openapi.Parameter('course_type',
+                             openapi.IN_QUERY,
+                             description="Type of course",
+                             type=openapi.TYPE_STRING),
+                          openapi.Parameter('train_prog',
+                             openapi.IN_QUERY,
+                             description="Training Program",
+                             type=openapi.TYPE_STRING),
+                          dept_param()
+                    ])
+)
 class CourseTypeDefaultWeekViewSet(viewsets.ModelViewSet):
     """
-    ViewSet to see all the scheduled courses
+    ViewSet to see all the Preferences of a given course type in a training program
 
     Result can be filtered as wanted with the training program and the course type
     """
@@ -1254,7 +1286,10 @@ class TutorCoursesViewSet(viewsets.ModelViewSet):
     queryset = pm.UserDepartmentSettings.objects.all()
     filter_class = TutorCoursesFilterSet
 
-
+@method_decorator(name='list',
+                  decorator=swagger_auto_schema(
+                      manual_parameters=[week_param(), year_param(), user_param(required=True), dept_param(required=True)])
+)
 class ExtraSchedCoursesViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the Scheduled courses of a tutor in an other department
