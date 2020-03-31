@@ -1314,6 +1314,52 @@ class BKNewsViewSet(viewsets.ModelViewSet):
     filter_class = BKNewsFilterSet
 
 
+@method_decorator(name='list',
+                  decorator=swagger_auto_schema(
+                      manual_parameters=[week_param(required=True),
+                                         year_param(required=True),
+                                         dept_param(required=True)]),
+                  
+)
+class UnavailableRoomViewSet(viewsets.ViewSet):
+    """
+    Allow user to search for unavailable rooms for a given year, week and department
+
+    Each result contains room name, day, start_time, duration, and value (unavailable => 0)
+    """
+    def list(self, req, format=None):
+
+        try:
+            week = int(req.query_params.get('week'))
+            year = int(req.query_params.get('year'))
+            department = req.query_params.get('dept')
+            if department == 'None':
+                department = None
+        except ValueError:
+            return HttpResponse("KO")
+
+        # ----------------
+        # To be done later
+        # ----------------
+        #
+        # cache_key = get_key_unavailable_rooms(department.abbrev, year, week)
+        # cached = cache.get(cache_key)
+        # if cached is not None:
+        #     return cached
+
+
+        dataset = bm.RoomPreference.objects.filter(room__departments__abbrev=department,
+                            week=week,
+                            year=year,
+                            value=0)
+
+        # cache.set(cache_key, response)7
+        res = [{"room": d.room.name, "day": d.day, "start_time": d.start_time, "duration": d.duration, "value": d.value} for d in dataset]
+
+        return Response(res)
+
+
+
 class LoginView(TemplateView):
     template_name = 'login.html'
     queryset = ''

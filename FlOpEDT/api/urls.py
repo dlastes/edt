@@ -111,6 +111,7 @@ routerFetch.register(r'alldepts', views.DepartmentsViewSet)
 routerFetch.register(r'tutorcourses', views.TutorCoursesViewSet, basename='tutorcourses')
 routerFetch.register(r'extrasched', views.ExtraSchedCoursesViewSet, basename='extrasched')
 routerFetch.register(r'bknews', views.BKNewsViewSet, basename='BKNews')
+routerFetch.register(r'unavailableroom', views.UnavailableRoomViewSet, basename="unavailablerooms")
 
 
 ######################
@@ -153,6 +154,7 @@ routerExtra.register('bknews', views.BKNewsViewSet, basename="bknews")
 routerExtra.register('quote/random', views.RandomQuoteViewSet, basename="random-quote")
 routerExtra.register('quote', views.QuoteViewSet)
 routerExtra.register('week-infos', views.WeekInfoViewSet, basename="week-infos")
+
 
 ################
 # SWAGGER VIEW #
