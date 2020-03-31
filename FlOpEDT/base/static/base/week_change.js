@@ -1055,7 +1055,7 @@ function fetch_version() {
   show_loader(true);
   $.ajax({
     type: "GET", //rest Type
-    dataType: 'text/json',
+    dataType: 'text',
     url: build_url(url_week_infos, context),
     async: true,
     success: function (msg) {
