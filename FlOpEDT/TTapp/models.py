@@ -281,9 +281,9 @@ class CustomConstraint(TTConstraint):
         Return class_method located in the targeted constraint class instance
         """
         if self.constraint is None:
+            module_name, class_name = class_name.rsplit('.', 1)
             try:
                 # Get class instance
-                module_name, class_name = class_name.rsplit('.', 1)
                 module = importlib.import_module(module_name)
                 self.constraint = getattr(module, class_name)()
             except ModuleNotFoundError:
