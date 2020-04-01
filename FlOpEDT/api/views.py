@@ -25,6 +25,8 @@ from api import serializers
 
 from random import randint
 
+from distutils.util import strtobool
+
 from rest_framework import authentication, exceptions, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import ValidationError, APIException
@@ -497,7 +499,8 @@ class UserPreferenceViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         self.set_common_params()
-        return bm.UserPreference.objects.filter(**self.params)
+        return bm.UserPreference.objects.filter(**self.params)\
+                                        .order_by('user__username')
 
 
 # Custom schema generation: see
@@ -538,7 +541,11 @@ class UserPreferenceSingularViewSet(UserPreferenceViewSet):
         manual_parameters=[week_param(required=True),
                            year_param(required=True),
                            user_param(),
-                           dept_param()],
+                           dept_param(),
+                           openapi.Parameter('teach-only',
+                                             openapi.IN_QUERY,
+                                             description="only teachers teaching in this week",
+                                             type=openapi.TYPE_BOOLEAN)],
         # operation_description=
         # "User preferences in (week,year) if exist otherwise in default week",
     )
@@ -550,11 +557,49 @@ class UserPreferenceActualViewSet(UserPreferenceViewSet):
     Also can be filtered with dept and user
     """
     def get_queryset(self):
+        # set initial parameters
         self.set_singular_params()
+        teach_only = self.request.query_params.get('teach-only', None)
+        teach_only = True if teach_only is None else strtobool(teach_only)
+
+        # get teaching teachers only
+        if teach_only:
+            sched_params = {}
+            sched_params['course__week'] = self.params['week']
+            sched_params['course__year'] = self.params['year']
+            if 'user__departments__abbrev' in self.params:
+                sched_params['course__module__train_prog__department__abbrev'] = \
+                    self.params.pop('user__departments__abbrev')
+            teaching_ids = bm.ScheduledCourse.objects.filter(**sched_params)\
+                                                     .distinct('tutor')\
+                                                     .values_list('tutor__id')
+            self.params['user__id__in'] = teaching_ids
+
+        # get preferences in singular week
         qs = super().get_queryset()
-        if len(qs) == 0:
+
+        # get users in play
+        if teach_only:
+            users = teaching_ids
+        else:
+            filter_user = {}
+            if 'user__username' in self.params:
+                filter_user['username'] = self.params.pop('user__username')
+            if 'user__departments__abbrev' in self.params:
+                filter_user['departments__abbrev'] = \
+                    self.params.pop('user__departments__abbrev')
+            users = pm.User.objects.filter(**filter_user).values_list('id')
+
+        # get users with no singular week
+        singular_users = qs.distinct('user__username').values_list('user__id')
+        users = users.difference(singular_users)
+
+        # get remaining preferences in default week
+        if len(users) != 0:
+            self.params['user__id__in'] = users
             self.set_default_params()
-            qs = super().get_queryset()
+            qs = list(qs) + list(super().get_queryset())
+        
         return qs
 
 
