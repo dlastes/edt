@@ -86,9 +86,6 @@ class Constraint:
             if module not in self.modules:
                 self.modules.append(module)
 
-    def get_id(self):
-        return self.id
-
     def __str__(self):
         res = "(%s) La contrainte " % self.id
         if self.constraint_type is not None:
