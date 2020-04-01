@@ -5,9 +5,9 @@ Voici les raisons principales pour lesquelles le solveur n'a pas pu résoudre l'
 	- Le module CDAM est le plus impliqué
 
 	- Les slots les plus impliqués sont les suivants :
-		- TD_th_s5_8h
 		- TD_m_s5_8h
-		- TD_m_s5_17h15
-		- TD_th_s5_15h45
-		- TD_f_s5_15h45
+		- TD_w_s5_8h
+		- TD_th_s5_8h
+		- TD_tu_s5_9h30
+		- TD_f_s5_14h15
 

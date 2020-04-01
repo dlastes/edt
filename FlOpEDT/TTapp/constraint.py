@@ -76,13 +76,13 @@ class Constraint:
                 self.weeks.append(week)
 
         for course in self.courses:
-            instructor = course.get_tutor()
+            instructor = course.tutor
             if instructor not in self.instructors:
                 self.instructors.append(instructor)
-            group = course.get_group()
+            group = course.group
             if group not in self.groups:
                 self.groups.append(group)
-            module = course.get_module()
+            module = course.module
             if module not in self.modules:
                 self.modules.append(module)
 

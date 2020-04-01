@@ -1,16 +1,20 @@
 Voici les principaux problèmes liés à l'infaisabilité :
 
+	Problème de dépendance entre les cours suivants:
+		TD-CDAM-JD-2 (44881)
+		TD-CDAM-JD-2 (44882)
+		CM-CDAM-AP-CE
+
 	Les cours suivants:
-		TD-CDAM-JD-2 (1)
-		TD-CDAM-JD-2 (2)
+		TD-CDAM-JD-2 (44881)
+		TD-CDAM-JD-2 (44882)
+		CM-CDAM-AP-CE
 	devraient avoir un professeur, surement parmis:
 		JD
-
-	Problème de dépendance entre les cours suivants:
-		TD-CDAM-JD-2 (1)
-		TD-CDAM-JD-2 (2)
+		AP
 
 	Les professeurs suivants:
 		JD
+		AP
 	devraient pouvoir faire cours
 

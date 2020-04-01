@@ -1,14 +1,14 @@
 Voici les principaux problèmes liés à l'infaisabilité :
 
 	Les cours suivants:
-		TD-AMN-MB-3 (1)
-		TD-AMN-MB-3 (2)
+		TD-AMN-MB-3 (44199)
+		TD-AMN-MB-3 (44200)
 	devraient avoir un professeur, surement parmis:
 		MB
 
 	Problème de dépendance entre les cours suivants:
-		TD-AMN-MB-3 (1)
-		TD-AMN-MB-3 (2)
+		TD-AMN-MB-3 (44199)
+		TD-AMN-MB-3 (44200)
 
 	Les professeurs suivants:
 		MB

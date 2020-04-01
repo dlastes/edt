@@ -5,9 +5,9 @@ Voici les raisons principales pour lesquelles le solveur n'a pas pu résoudre l'
 	- Le module AMN est le plus impliqué
 
 	- Les slots les plus impliqués sont les suivants :
-		- TD_th_s17_15h45
-		- TD_f_s17_14h15
+		- TD_th_s17_11h
+		- TD_m_s17_9h30
+		- TD_th_s17_8h
 		- TD_m_s17_14h15
-		- TD_w_s17_15h45
-		- TD_f_s17_8h
+		- TD_tu_s17_17h15
 

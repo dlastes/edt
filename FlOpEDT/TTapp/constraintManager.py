@@ -104,6 +104,12 @@ def set_index_courses(occurs):
     _, _, _, occur_course, _, _, _, _, _, _ = occurs
     courses = list(occur_course.keys())
 
+    for index_course1 in range(len(courses)):
+        for index_course2 in range(index_course1 + 1, len(courses)):
+            if courses[index_course1].equals(courses[index_course2]):
+                courses[index_course1].show_id = True
+                courses[index_course2].show_id = True
+    """
     done = []
     mat_courses = []
     for index_course in range(len(courses)):
@@ -115,10 +121,12 @@ def set_index_courses(occurs):
                     done.append(index_course2)
             if len(courses_equals) > 1:
                 mat_courses.append(courses_equals)
-
     for courses_equals in mat_courses:
-        for index_course in range(len(courses_equals)):
-            courses_equals[index_course].set_index(index_course + 1)
+        for course in courses_equals:
+            course.show_id = True
+        #for index_course in range(len(courses_equals)):
+        #    courses_equals[index_course].set_index(index_course + 1)
+    """
 
 
 class ConstraintManager:
