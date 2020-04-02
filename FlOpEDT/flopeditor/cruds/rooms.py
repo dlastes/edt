@@ -148,7 +148,7 @@ def has_rights_to_update_room(user, entries, i):
                 ERROR_RESPONSE,
                 "impossible d'ajouter un départment dont vous n'êtes pas responsable à une salle."
             ])
-            return
+            return False
 
     return True
 
