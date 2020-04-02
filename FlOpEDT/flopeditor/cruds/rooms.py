@@ -154,8 +154,6 @@ def has_rights_to_update_room(user, entries, i):
 
 
 # pylint: disable=W0613
-
-
 def read(department):
     """Return all rooms
     :param department: Department.
