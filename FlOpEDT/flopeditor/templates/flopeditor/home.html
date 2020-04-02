@@ -10,15 +10,26 @@
 
 {% block main-class %}container h-100{% endblock %}
 
-{% block navbar %}
-<div class='pt-2 pl-2'>
-  <a href="{% url 'index' %}" class="d-block mx-auto mx-sm-0" style='max-width:300px'>
-    <img src="{% static 'base/img/flop2.png' %}" class='btn btn-raised p-0' style='max-width:300px' alt="Retourner vers FlopEDT">
-  </a>
-</div>
-{% endblock %}
-
+{% block navbar %} {% endblock %}
 {% block content %}
+<div class="row">
+
+
+  <div class='pt-2 pl-2' style="position:fixed; left:10px; top:10px">
+ <a href="{% url 'index' %}" class="d-block mx-auto mx-sm-0" style='max-width:300px'>
+  <img src="{% static 'base/img/flop2.png' %}" class='btn btn-raised p-0' style='max-width:300px' alt="Retourner vers FlopEDT">
+ </a>
+</div>
+
+  <div class="col-md-6 d-flex justify-content-end align-items-center" style="position:fixed; right:10px; top:10px">
+    <a class="btn btn-raised btn-secondary" href="{% url 'flopeditor:flopeditor-user-profile' %}" title='Profil'> <i class='fas fa-user'></i></a>
+  </div>
+
+
+</div>
+
+
+
 <div class="row h-100 justify-content-center align-items-center text-center text-white">
     <div class="col-12">
         <h1 class="display-1 mb-4"><strong>Flop Editor</strong></h1>
