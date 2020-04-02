@@ -151,8 +151,9 @@
   $(function () {
     {% for dept,resps in dict_depts.items %}
     $('select[name=respsDep-{{ dept.abbrev }}]').val({{ resps }});
+    $('select[name=respsDep-{{ dept.abbrev }}]').selectpicker();
     {% endfor %}
-    $('select').selectpicker();
+    $('.selectpicker').selectpicker('render');
   });
 
 </script>

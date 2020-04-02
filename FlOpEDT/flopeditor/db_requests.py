@@ -95,3 +95,4 @@ def update_departments_in_database(old_dept_name, new_dept_name,
         tutor = Tutor.objects.get(id=tutor_id)
         UserDepartmentSettings.objects.create(user=tutor, department=dept,
                                               is_main=False, is_admin=True)
+    dept.save()
