@@ -348,7 +348,7 @@ class RoomSortsViewSet(viewsets.ModelViewSet):
         operation_description='If (week,year) is given, any module that is taught in this week',
         manual_parameters=[week_param(),
                            year_param(),
-                           dept_param()])
+                           dept_param(required=True)])
 )
 class ModuleViewSet(viewsets.ModelViewSet):
     """
@@ -365,8 +365,7 @@ class ModuleViewSet(viewsets.ModelViewSet):
         # Get the filters from the request
         week = self.request.query_params.get('week', None)
         year = self.request.query_params.get('year', None)
-        department = bm.Department.objects.get(
-            abbrev=self.request.query_params.get('dept', None))
+        abbrev=self.request.query_params.get('dept', None)
 
         # Applying filters
         if week is not None and year is not None:
@@ -374,14 +373,14 @@ class ModuleViewSet(viewsets.ModelViewSet):
             # distinct method allows us to get each module only once
             qs = bm.ScheduledCourse.objects.distinct('course__module').filter(course__week=week, course__year=year)
             # Filtering with department
-            qs = qs.filter(course__module__train_prog__department=department)
+            qs = qs.filter(course__module__train_prog__department__abbrev=abbrev)
 
             # Getting every module that appears
             qs_module = qs.values('course__module')
             # Get all the modules that appears in the scheduled courses. Those primary keys come from the previous line
             return bm.Module.objects.filter(pk__in=qs_module)
         else:
-            return bm.Module.objects.filter(train_prog__department=department)
+            return bm.Module.objects.filter(train_prog__department__abbrev=abbrev)
 
 
 class ModuleFullViewSet(viewsets.ModelViewSet):
