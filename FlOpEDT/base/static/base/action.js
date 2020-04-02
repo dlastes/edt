@@ -282,9 +282,12 @@ function fetch_all_tutors() {
       url: build_url(url_all_tutors, {dept: department}),
       async: false,
       success: function (data) {
-        all_tutors = data.filter(function (d) {
-          return d > 'A';
-        });
+        
+        all_tutors = data
+          .map(function(d) { return d.username; })
+          .filter(function (d) {
+            return d > 'A';
+          });
         all_tutors.sort();
         show_loader(false);
       },
