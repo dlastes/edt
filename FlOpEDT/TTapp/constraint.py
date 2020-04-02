@@ -89,6 +89,12 @@ class Constraint:
     def get_id(self):
         return self.id
 
+    def get_csv_info(self):
+        def f(x):
+            return "" if (x == [] or x is None) else x
+        return self.id, f(self.constraint_type), f(self.instructors), f(self.slots), f(self.courses), f(self.weeks), \
+            f(self.rooms), f(self.groups), f(self.days), f(self.departments), f(self.modules), f(self.apm)
+
     def __str__(self):
         res = "(%s) La contrainte " % self.id
         if self.constraint_type is not None:

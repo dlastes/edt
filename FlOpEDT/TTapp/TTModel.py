@@ -1045,9 +1045,8 @@ class TTModel(object):
                             # , "Dependency %s %g" % (p, self.constraint_nb)
                             self.add_constraint(self.TT[(sl1, c1)]
                                                 + self.TT[(sl2, c2)], '<=', 1,
-                                                constraint_type=ConstraintType.DEPENDANCE,
-                                                courses=[c1, c2],
-                                                slots=[sl1, sl2])
+                                                DependencyConstraint(self.constraint_nb,
+                                                                     course1=c1, course2=c2, slot1=sl1, slot2=sl2))
                         else:
                             conj_var = self.add_conjunct(self.TT[(sl1, c1)],
                                                          self.TT[(sl2, c2)])

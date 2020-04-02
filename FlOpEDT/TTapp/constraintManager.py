@@ -140,3 +140,12 @@ class ConstraintManager:
         occurs = get_occurs(constraints)
         set_index_courses(occurs)
         print_all(constraints, occurs, weeks)
+        self.write_csv(constraints, weeks)
+
+    def write_csv(self, constraints, weeks):
+        import csv
+        with open("weeks%s.csv" % weeks) as file:
+            for constraint in constraints:
+                csv_info = constraint.get_csv_info()
+                spamwriter = csv.writer(file, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+                spamwriter.writerow(csv_info)
