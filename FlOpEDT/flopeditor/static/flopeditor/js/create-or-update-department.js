@@ -31,7 +31,7 @@ $(".modal-form").submit(function(event) {
 
     var form = $(this);
     var url = form.attr('action');
-    const button = form.find(".button-submit")
+    const button = form.find(".button-submit");
     const button_html = button.html();
     button.html("<i class=\"fas fa-spinner fa-pulse\"></i>");
     $.ajax({
