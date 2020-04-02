@@ -857,38 +857,6 @@ def fetch_all_versions(req, **kwargs):
     return response
 
 
-def pref_requirements(department, tutor, year, week):
-    """
-    Return a pair (filled, required): number of preferences
-    that have been proposed VS required number of prefs, according
-    to local policy
-    """
-    nb_courses = Course.objects.filter(tutor=tutor,
-                                       week=week,
-                                       year=year) \
-        .count()
-    week_av = UserPreference \
-        .objects \
-        .filter(user=tutor,
-                week=week,
-                year=year,
-                day__in=queries.get_working_days(department))
-    if not week_av.exists():
-        filled = UserPreference \
-            .objects \
-            .filter(user=tutor,
-                    week=None,
-                    value__gte=1,
-                    day__in=queries.get_working_days(department)) \
-            .count()
-    else:
-        filled = week_av \
-            .filter(value__gte=1,
-                    day__in=queries.get_working_days(department)) \
-            .count()
-    return filled, 2 * nb_courses
-
-
 @cache_page(15 * 60)
 def fetch_groups(req, **kwargs):
     """
