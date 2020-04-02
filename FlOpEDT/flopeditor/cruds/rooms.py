@@ -31,12 +31,13 @@ from django.http import JsonResponse
 from base.models import Room, RoomType, Department
 from flopeditor.validator import OK_RESPONSE, ERROR_RESPONSE
 
+
 def set_values_for_room(room, i, new_name, entries):
     """
     :param room: Room to add/update.
     :type department:  base.models.Department
     :return: False in case of problem. True instead.
-    :rtype:  String
+    :rtype:  Boolean
 
     """
     sur_salles = []
@@ -82,7 +83,79 @@ def set_values_for_room(room, i, new_name, entries):
     return True
 
 
+def has_rights_to_create_or_delete_room(user, room, entries):
+    """
+    :param user: User trying to create or delete a room.
+    :type user:  people.models.User
+    :param room: Room to add/delete.
+    :type room:  base.models.Room
+    :return: True if user has rights.
+    :rtype:  Boolean
+
+    """
+    for dept in room.departments.all():
+        if not user.has_department_perm(department=dept, admin=True):
+            entries['result'].append([
+                ERROR_RESPONSE,
+                "Vous ne pouvez pas créer ou supprimer une salle avec un département (" +
+                dept.name+") dont vous n'êtes pas responsable."
+            ])
+            return False
+    return True
+
+
+def has_rights_to_update_room(user, entries, i):
+    """
+    :param user: User trying to create or delete a room.
+    :type user:  people.models.User
+    :param entries: flopeditor list.
+    :type room:  list
+    :return: True if user has rights.
+    :rtype:  Boolean
+
+    """
+    if set(entries['new_values'][i][3]) == set(entries['old_values'][i][3]):
+        departments = Department.objects.filter(
+            name__in=entries['new_values'][i][3])
+        if not departments:
+            return True
+        for dept in departments:
+            if user.has_department_perm(department=dept, admin=True):
+                return True
+        entries['result'].append([
+            ERROR_RESPONSE,
+            "Vous ne pouvez pas modifier une salle dont vous n'êtes pas responsbale."
+        ])
+        return False
+
+    old_departments = Department.objects.filter(
+        name__in=entries['old_values'][i][3])
+
+    new_departments = Department.objects.filter(
+        name__in=entries['new_values'][i][3])
+
+    for dep in old_departments:
+        if not user.has_department_perm(department=dep, admin=True) and dep not in new_departments:
+            entries['result'].append([
+                ERROR_RESPONSE,
+                "Impossible de retirer un départment dont vous n'êtes pas responsable d'une salle."
+            ])
+            return False
+
+    for dep in new_departments:
+        if not user.has_department_perm(department=dep, admin=True) and dep not in old_departments:
+            entries['result'].append([
+                ERROR_RESPONSE,
+                "impossible d'ajouter un départment dont vous n'êtes pas responsable à une salle."
+            ])
+            return
+
+    return True
+
+
 # pylint: disable=W0613
+
+
 def read(department):
     """Return all rooms
     :param department: Department.
@@ -93,7 +166,8 @@ def read(department):
     """
     # Chips options
     rooms_available = list(Room.objects.values_list('name', flat=True))
-    rooms_types_available = list(RoomType.objects.values_list('name', flat=True))
+    rooms_types_available = list(
+        RoomType.objects.values_list('name', flat=True))
     departments = list(Department.objects.values_list('name', flat=True))
 
     # Rows
@@ -112,7 +186,7 @@ def read(department):
         values.append((room.name, subrooms, room_types, room_departments))
 
     return JsonResponse({
-        "columns" :  [{
+        "columns":  [{
             'name': 'Nom',
             "type": "text",
             "options": {}
@@ -129,12 +203,12 @@ def read(department):
             "type": "select-chips",
             "options": {'values': departments}
         }],
-        "values" : values
-        })
+        "values": values
+    })
 
 
 # pylint: disable=W0613
-def create(entries, department):
+def create(request, entries, department):
     """Create values for rooms
     :param entries: Values to create.
     :type entries:  django.http.JsonResponse
@@ -147,7 +221,6 @@ def create(entries, department):
     entries['result'] = []
     for i in range(len(entries['new_values'])):
         new_name = entries['new_values'][i][0]
-        # verifier la longueur du nom
         if not new_name:
             entries['result'].append([ERROR_RESPONSE,
                                       "Le nom de la salle ne peut pas être vide."])
@@ -161,14 +234,18 @@ def create(entries, department):
             ])
         else:
             room = Room.objects.create(name=new_name)
-            if not set_values_for_room(room, i, new_name, entries):
-                return entries
-            entries['result'].append([OK_RESPONSE])
+            if set_values_for_room(room, i, new_name, entries) and \
+                    has_rights_to_create_or_delete_room(request.user, room, entries):
+                room.save()
+                entries['result'].append([OK_RESPONSE])
+            else:
+                room.delete()
+
     return entries
 
 
 # pylint: disable=W0613
-def update(entries, department):
+def update(request, entries, department):
     """Update values for rooms
     :param entries: Values to modify.
     :type entries:  django.http.JsonResponse
@@ -179,13 +256,15 @@ def update(entries, department):
     """
 
     if len(entries['old_values']) != len(entries['new_values']):
-        # old and new values must have same size
         return entries
+
     entries['result'] = []
     for i in range(len(entries['old_values'])):
         old_name = entries['old_values'][i][0]
         new_name = entries['new_values'][i][0]
-        if not new_name:
+        if not has_rights_to_update_room(request.user, entries, i):
+            pass
+        elif not new_name:
             entries['result'].append([ERROR_RESPONSE,
                                       "Le nouveau nom de la salle ne peut pas être vide."])
         elif len(new_name) > 20:
@@ -209,7 +288,8 @@ def update(entries, department):
                      "Une salle à modifier n'a pas été trouvée dans la base de données."])
     return entries
 
-def delete(entries, department):
+
+def delete(request, entries, department):
     """Delete values for rooms
     :param entries: Values to delete.
     :type entries:  django.http.JsonResponse
@@ -219,13 +299,15 @@ def delete(entries, department):
     :rtype:  django.http.JsonResponse
     """
 
-
     entries['result'] = []
     for i in range(len(entries['old_values'])):
         old_name = entries['old_values'][i][0]
         try:
-            Room.objects.get(name=old_name).delete()
-            entries['result'].append([OK_RESPONSE])
+            room = Room.objects.get(name=old_name)
+            if has_rights_to_create_or_delete_room(request.user, room, entries):
+                room.delete()
+                entries['result'].append([OK_RESPONSE])
+
         except Room.DoesNotExist:
             entries['result'].append(
                 [ERROR_RESPONSE,

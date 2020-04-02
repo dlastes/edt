@@ -98,7 +98,26 @@ def crud_rooms(request, department_abbrev):
     :rtype:  django.http.JsonResponse
 
     """
-    return crud_model(request, department_abbrev, rooms)
+    department = get_object_or_404(Department, abbrev=department_abbrev)
+    if not good_request(request, department):
+        return HttpResponseForbidden()
+
+    if request.method == "GET":
+        return rooms.read(department)
+    elif request.method == "POST":
+        actions = json.loads(request.body.decode('utf-8'))['actions']
+        result = []
+        for action in actions:
+            if action['request'] == 'NEW':
+                result.append(rooms.create(request, action, department))
+            elif action['request'] == 'MODIFIED':
+                result.append(rooms.update(request, action, department))
+            elif action['request'] == 'DELETED':
+                result.append(rooms.delete(request, action, department))
+        return JsonResponse({
+            'actions': result
+        })
+    return HttpResponseForbidden()
 
 
 def crud_room_types(request, department_abbrev):
