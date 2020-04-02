@@ -84,8 +84,24 @@ def validate_department_creation(name, abbrev, tutors_id):
                     'message': "Le tuteur que vous recherchez est introuvable. \
                     Veuillez en sélectionner un autre."
                 }
-                return response
-    response = {'status': OK_RESPONSE}
+        response = {'status': OK_RESPONSE}
+    return response
+
+def validate_department_update(old_dept_name, new_dept_name,
+                               old_dept_abbrev, new_dept_abbrev, tutors_id):
+    response = validate_department_creation(new_dept_name, new_dept_abbrev, tutors_id)
+    if response['status'] != OK_RESPONSE:
+        pass
+    elif old_dept_name != new_dept_name and Department.objects.filter(name=new_dept_name):
+        response = {
+            'status': ERROR_RESPONSE,
+            'message': "Un autre département possède déjà ce nom."
+        }
+    elif old_dept_abbrev != new_dept_abbrev and Department.objects.filter(abbrev=new_dept_abbrev):
+        response = {
+            'status': ERROR_RESPONSE,
+            'message': "Un autre département possède déjà cette abbréviation."
+        }
     return response
 
 

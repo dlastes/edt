@@ -38,17 +38,22 @@ from people.models import Tutor, UserDepartmentSettings
 def create_departments_in_database(dept_name, dept_abbrev, tutors_id):
     """Create department with admin and default settings in database
 
-    :param dept_name: string department name
-    :param dept_abbrev: string department abbrev
-    :param tutor_id: string tutor id
-
+    :param dept_name: Department name
+    :type dept_name: String
+    :param dept_abbrev: Department abbrev
+    :type dept_abbrev: String
+    :param tutor_id: Tutor id
+    :type tutor_id: String
     """
+
     dept = Department(name=dept_name, abbrev=dept_abbrev)
+
     dept.save()
     for tutor_id in tutors_id:
         tutor = Tutor.objects.get(id=tutor_id)
         UserDepartmentSettings(user=tutor, department=dept,
                                is_main=False, is_admin=True).save()
+
     TimeGeneralSettings(
         department=dept,
         day_start_time=8*60,
@@ -62,3 +67,31 @@ def create_departments_in_database(dept_name, dept_abbrev, tutors_id):
             Day.THURSDAY,
             Day.FRIDAY,
         ]).save()
+
+def update_departments_in_database(old_dept_name, new_dept_name,
+                                   old_dept_abbrev, new_dept_abbrev, tutors_id):
+    """Update department with admin and default settings in database
+
+    :param dept_name: Department name
+    :type dept_name: String
+    :param old_dept_abbrev: Old department abbrev
+    :type old_dept_abbrev: String
+    :param new_dept_abbrev: New department abbrev
+    :type new_dept_abbrev: String
+    :param tutor_id: Tutor id
+    :type tutor_id: String
+
+    """
+    dept = Department.objects.get(name=old_dept_name, abbrev=old_dept_abbrev)
+    # On change les noms et abbreviations du departement
+    dept.name = new_dept_name
+    dept.abbrev = new_dept_abbrev
+    # On retire les droits a tous les Tutor
+    uds = UserDepartmentSettings.objects.filter(department=dept, is_admin=True)
+    for u_d in uds:
+        u_d.delete()
+    # On ajoute chaque nouveau responsable
+    for tutor_id in tutors_id:
+        tutor = Tutor.objects.get(id=tutor_id)
+        UserDepartmentSettings.objects.create(user=tutor, department=dept,
+                                              is_main=False, is_admin=True)
