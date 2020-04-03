@@ -91,8 +91,13 @@ class Constraint:
 
     def get_csv_info(self):
         def f(x):
-            return "" if (x == [] or x is None) else x
-        return self.id, f(self.constraint_type), f(self.instructors), f(self.slots), f(self.courses), f(self.weeks), \
+            if x == [] or x is None:
+                return ""
+            elif type(x) is list:
+                return ' '.join([str(elem) + ' ' for elem in x])
+            else:
+                return str(x)
+        return self.id, self.constraint_type.value, f(self.instructors), f(self.slots), f(self.courses), f(self.weeks), \
             f(self.rooms), f(self.groups), f(self.days), f(self.departments), f(self.modules), f(self.apm)
 
     def __str__(self):

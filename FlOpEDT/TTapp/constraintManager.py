@@ -144,8 +144,9 @@ class ConstraintManager:
 
     def write_csv(self, constraints, weeks):
         import csv
-        with open("weeks%s.csv" % weeks) as file:
+        with open("weeks%s.csv" % weeks, 'w') as file:
+            writer = csv.writer(file)
+            writer.writerow(['ID', 'Constraint type', 'Instructors', 'Slots', 'Courses', 'Week', 'Rooms', 'Group', 'Days', 'Departement', 'Module'])
             for constraint in constraints:
                 csv_info = constraint.get_csv_info()
-                spamwriter = csv.writer(file, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-                spamwriter.writerow(csv_info)
+                writer.writerow(csv_info)
