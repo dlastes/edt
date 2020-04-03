@@ -34,8 +34,6 @@ from django.shortcuts import render
 from django.db import transaction
 from django.conf import settings
 
-from misc.generate_static_files import generate_group_file, generate_room_file
-
 from FlOpEDT.decorators import dept_admin_required
 
 from base.models import Department, Course

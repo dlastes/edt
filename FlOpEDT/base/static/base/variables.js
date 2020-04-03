@@ -127,7 +127,9 @@ function main(name, data) {
 file_fetch.rooms.callback = function () {
     rooms = this.data;
     var room_names ;
-    room_names = Object.keys(rooms.roomgroups) ;
+    room_names = Object.keys(rooms.roomgroups).filter(function(k){
+        return rooms.roomgroups[k].length == 1 ;
+    });
     swap_data(room_names, rooms_sel, "room");
 } ;
 

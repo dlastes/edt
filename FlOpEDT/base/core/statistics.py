@@ -26,7 +26,7 @@
 import datetime
 
 from django.db.models import Count
-from base.models import ScheduledCourse, RoomGroup, Holiday, Day
+from base.models import ScheduledCourse, Room, Holiday, Day
 from base.core.period_weeks import PeriodWeeks
 
 from people.models import Tutor
@@ -50,10 +50,10 @@ def get_room_activity_by_day(department, year=None):
     period_filter = period.get_filter()
     
     # Get room list 
-    rooms = tuple(RoomGroup.objects \
-        .filter(types__department = department) \
-        .values_list('name', flat=True)
-        .distinct())
+    rooms = tuple(Room.objects \
+                  .filter(types__department = department) \
+                  .values_list('name', flat=True)
+                  .distinct())
 
     # Filter all the scheduled courses for the period
     scheduled = set()

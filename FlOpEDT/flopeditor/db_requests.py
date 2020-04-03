@@ -35,7 +35,7 @@ from base.models import Department, TimeGeneralSettings, Day
 from people.models import Tutor, UserDepartmentSettings
 
 
-def create_departments_in_database(dept_name, dept_abbrev, tutor_id):
+def create_departments_in_database(dept_name, dept_abbrev, tutors_id):
     """Create department with admin and default settings in database
 
     :param dept_name: string department name
@@ -45,9 +45,10 @@ def create_departments_in_database(dept_name, dept_abbrev, tutor_id):
     """
     dept = Department(name=dept_name, abbrev=dept_abbrev)
     dept.save()
-    tutor = Tutor.objects.get(id=tutor_id)
-    UserDepartmentSettings(user=tutor, department=dept,
-                           is_main=False, is_admin=True).save()
+    for tutor_id in tutors_id:
+        tutor = Tutor.objects.get(id=tutor_id)
+        UserDepartmentSettings(user=tutor, department=dept,
+                               is_main=False, is_admin=True).save()
     TimeGeneralSettings(
         department=dept,
         day_start_time=8*60,

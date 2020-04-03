@@ -38,21 +38,20 @@
                     </li>
                     <li class="nav-item {% block nav-classes-groups %}{% endblock %}">
                         <a class="nav-link"
-                            href="{% url 'flopeditor:flopeditor-department-training-programmes' department_abbrev=department.abbrev %}">Groupes</a>
+                            href="{% url 'flopeditor:flopeditor-department-training-programmes' department_abbrev=department.abbrev %}">Élèves</a>
                     </li>
                     <li class="nav-item {% block nav-classes-modules %}{% endblock %}">
                         <a class="nav-link"
                             href="{% url 'flopeditor:flopeditor-department-modules' department_abbrev=department.abbrev %}">Modules</a>
                     </li>
-                    <li class="nav-item {% block nav-classes-class %}{% endblock %}">
+                     <li class="nav-item {% block nav-classes-course %}{% endblock %}">
                         <a class="nav-link"
-                            href="{% url 'flopeditor:flopeditor-department-classes' department_abbrev=department.abbrev %}">Cours</a>
+                            href="{% url 'flopeditor:flopeditor-department-course-types' department_abbrev=department.abbrev %}">Cours</a>
                     </li>
                     <li class="nav-item {% block nav-classes-parameters %}{% endblock %}">
                         <a class="nav-link"
                             href="{% url 'flopeditor:flopeditor-department-parameters' department_abbrev=department.abbrev %}">Paramètres</a>
                     </li>
-
                 </ul>
                 {% if not list_departments %}
                 <span class="navbar-text">Département {{ department.name }}</span>

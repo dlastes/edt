@@ -33,22 +33,25 @@ import re
 from base.models import Department
 from people.models import Tutor
 
-
 OK_RESPONSE = 'OK'
 ERROR_RESPONSE = 'ERROR'
 UNKNOWN_RESPONSE = 'UNKNOWN'
 
-def validate_department_creation(name, abbrev, tutor_id):
+
+def validate_department_creation(name, abbrev, tutors_id):
     """Validate parameters for department creation
 
-    :param name: string department name
-    :param abbrev: string department abbrev
-    :param tutor_id: string tutor id
+    :param name: Department name
+    :type name: String
+    :param abbrev: department abbrev
+    :type abbrev: String
+    :param tutors_id: tutors' id
+    :type tutors_id: List
 
     :return: (boolean,json) (are the paramaters valid , status and errors)
     """
     response = {'status': UNKNOWN_RESPONSE}
-    slug_re = re.compile("^[a-zA-Z]\w{0,6}$")
+    slug_re = re.compile(r"^[a-zA-Z]\w{0,6}$")
     if not name or len(name) > 50:
         response = {
             'status': ERROR_RESPONSE,
@@ -73,26 +76,37 @@ def validate_department_creation(name, abbrev, tutor_id):
             'status': ERROR_RESPONSE,
             'message': "L'abbréviation est déjà utilisée."
         }
-    elif not Tutor.objects.filter(id=tutor_id):
-        response = {
-            'status': ERROR_RESPONSE,
-            'message': "Le tuteur que vous recherchez est introuvable. \
-            Veuillez en sélectionner un autre."
-        }
     else:
-        response = {'status': OK_RESPONSE}
+        for tutor_id in tutors_id:
+            if not Tutor.objects.filter(id=tutor_id):
+                response = {
+                    'status': ERROR_RESPONSE,
+                    'message': "Le tuteur que vous recherchez est introuvable. \
+                    Veuillez en sélectionner un autre."
+                }
+                return response
+    response = {'status': OK_RESPONSE}
     return response
 
 
-def validate_parameters_edit(days, day_start_time, day_finish_time, lunch_break_start_time, lunch_break_finish_time, default_preference_duration):
+def validate_parameters_edit(days, day_start_time,
+                             day_finish_time, lunch_break_start_time,
+                             lunch_break_finish_time,
+                             default_preference_duration):
     """Validate parameters for department creation
 
-    :param days: array List of checked working days
-    :param day_start_time: string day start time hh:mm
-    :param day_finish_time: string day finish time hh:mm
-    :param lunch_break_start_time: string lunch start time hh:mm
-    :param lunch_break_finish_time: string lunch finish time hh:mm
-    :param default_preference_duration: string class default duration hh:mm
+    :param days: List of checked working days
+    :type days: List
+    :param day_start_time: Day start time hh:mm
+    :type day_start_time: String
+    :param day_finish_time: Day finish time hh:mm
+    :type day_finish_time: String
+    :param lunch_break_start_time: Lunch start time hh:mm
+    :type lunch_break_start_time: String
+    :param lunch_break_finish_time: Lunch finish time hh:mm
+    :type lunch_break_finish_time: String
+    :param default_preference_duration: Class default duration hh:mm
+    :type default_preference_duration: String
 
     :return: (boolean,json) (are the paramaters valid , status and errors)
     """
@@ -149,8 +163,9 @@ def validate_parameters_edit(days, day_start_time, day_finish_time, lunch_break_
             'message': "La durée par défaut d'un cours ne peut pas être nulle."
         }
     else:
-        response = {'status': OK_RESPONSE, 'message':''}
+        response = {'status': OK_RESPONSE, 'message': ''}
     return response
+
 
 def validate_training_programme_values(abbrev, name, entries):
     """Validate parameters for training programme's CRUD
@@ -177,6 +192,134 @@ def validate_training_programme_values(abbrev, name, entries):
     elif len(name) > 50:
         entries['result'].append([ERROR_RESPONSE,
                                   "Le nom de la promo est trop long."])
+    else:
+        return True
+    return False
+
+
+def validate_course_values(name, duree, entries):
+    """Validate parameters for course type
+
+    :param name: course name to test
+    :type abbrev: text
+    :param duree: value of duration of course
+    :type abbrev: int
+    :param entries: list that is returned to CrudJS
+    :type abbrev: list
+
+    :return: (boolean,json) (are the paramaters valid , status and errors)
+    """
+    if duree is None:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "La durée est invalide"])
+    elif duree < 0:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "La durée ne peut pas être négative"])
+    elif not name:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "Le nom du type de cours ne peut pas être vide."])
+    elif len(name) > 50:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "Le nom du type de cours est trop long."])
+    else:
+        return True
+    return False
+
+
+def validate_student_groups_values(entry, entries):
+    """Validate parameters for student group values' CRUD
+
+    :param abbrev: data returned by crudJS
+    :type abbrev: list
+    :param entries: list that is returned to CrudJS
+    :type abbrev: list
+    :return: boolean are the paramaters valid
+    """
+    if not entry[0]:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "Le nom ne peut pas être vide."])
+    elif len(entry[0]) > 10:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "Le nom ne peut pas être plus long que 10 caractères."])
+    elif entry[4] < 0:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "La taille ne peut pas être négative."])
+    elif entry[0] in entry[2]:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "Le groupe ne peut pas être un sous-groupe de lui-même."])
+    else:
+        return True
+    return False
+
+
+def validate_module_values(entry, entries):
+    """Validate parameters for module CRUD
+
+    :param abbrev: data returned by crudJS
+    :type abbrev: list
+    :param entries: list that is returned to CrudJS
+    :type abbrev: list
+    :return: boolean are the paramaters valid
+    """
+    if not entry[0]:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "L'abréviation ne peut pas être vide."])
+    elif not entry[1]:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "Le code PPN ne peut pas être vide."])
+    elif not entry[2]:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "Le nom complet ne peut pas être vide."])
+    elif len(entry[0]) > 10:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "L'abréviation est trop longue."])
+    elif len(entry[1]) > 8:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "Le code PPN est trop long."])
+    elif len(entry[2]) > 100:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "Le nom complet est trop long."])
+    else:
+        return True
+    return False
+
+
+def validate_period_values(name, starting_week, ending_week, entries):
+    """Validate parameters for period values' CRUD
+
+    :param name: period name to test
+    :type abbrev: text
+    :param starting_week: value of starting_week
+    :type abbrev: int
+    :param ending_week: value of ending_week
+    :type abbrev: int
+    :param entries: list that is returned to CrudJS
+    :type abbrev: list
+
+    :return: boolean are the paramaters valid
+    """
+
+    if starting_week is None:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "La semaine de début est invalide"])
+    elif ending_week is None:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "La semaine de fin est invalide"])
+    elif starting_week <= 0 or starting_week > 53:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "La semaine de début doit être compris entre [1-53]"])
+    elif ending_week <= 0 or ending_week > 53:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "La semaine de fin doit être compris entre [1-53]"])
+    elif starting_week == ending_week:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "La semaine de début ne peut pas être égale à la semaine de fin"])
+    elif not name:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "Le nom du semestre ne peut pas être vide."])
+    elif len(name) > 20:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "Le nom du semestre est trop long. (<20)"])
     else:
         return True
     return False
