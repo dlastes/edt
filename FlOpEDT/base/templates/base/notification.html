@@ -21,41 +21,17 @@
 <!-- you develop activities involving the FlOpEDT/FlOpScheduler software   -->
 <!-- without disclosing the source code of your own applications.          -->
 
-
-
-{% extends "base.html" %}
-
-{% load static %}
-<link rel="stylesheet" href="{% static "people/student_preferences.css" %}" />
-<script href="https://code.jquery.com/jquery-3.3.1.js"></script>
-
-{% block title %} EDT {% endblock %}
-
-{% block content %}
-
-</br></br></br>
 <fieldset>
-  <legend>Préférences étudiant par groupe</legend>
-</br>
-  <div class="msg-prefs">Vous préférez :</div><br/>
-  </br>
-  <form action="{% url 'people:student_preferences' %}" method="post" id="form_pref">
-  {% csrf_token %}
-    <div>
-        <input type="range" id="morning" name="morning_evening" min="0" max="1" step="0.25" value="{{ morning}}"/>
-        <output name="result"></output>
-    </div>
-  </br>
-    <div>
-        <input type="range" id="free_half_day" name="light_free" min="0" max="1" step="0.25" value="{{free_half_day}}"/>
-        <output name="resultdeux"></output>
-    </div>
-
-  </br>
-  <button type="submit" form="form_pref" value="Submit">Valider</button>
-</form>
+  <legend>Notifications</legend>
+  <form action='{% url "base:user_notifications_pref_changes" department user.username %}'  method='POST' id="form-notifications" >
+    {% csrf_token %}
+    <p>Je souhaite être notifié⋅e des modifications pour les
+      <input id="user_notifications_pref" type="number" name="user_notifications_pref" style="width: 30px" min="0" max="52"
+             value="{{ user_notifications_pref }}">
+      prochaines semaines.<br>
+      (0 si aucune notification, 1 pour les 7 prochains jours, etc.)
+    </p>
+    <input type="submit" name="save_notifications_pref" value="Sauvegarder">
+                </br>
+  </form>
 </fieldset>
-{% include 'base/notification.html' %}
-<script src="{% static 'people/student_preferences.js' %}"></script>
-
-{% endblock %}

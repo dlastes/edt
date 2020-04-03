@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Room preferences: user interface improvement, room exclusion
 
 ### Added
+- Preferences for mail notification
 - New mode for employees planning
   - new constraints (week-ends, consecutive working hours/days, etc.)
   - batch of weeks
