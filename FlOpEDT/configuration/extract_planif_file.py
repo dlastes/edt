@@ -184,9 +184,14 @@ def ReadPlanifWeek(department, book, feuille, week, year):
 
 
 def extract_period(department, book, period, year):
-    if period.starting_week < period.ending_week:
+    if 33 < period.starting_week < period.ending_week:
         for week in range(period.starting_week, period.ending_week + 1):
             ReadPlanifWeek(department, book, period.name, week, year)
+            print(week, year)
+    elif period.starting_week < period.ending_week < 32:
+        for week in range(period.starting_week, period.ending_week + 1):
+            ReadPlanifWeek(department, book, period.name, week, year+1)
+            print(week, year+1)
     else:
         for week in range(period.starting_week, 53):
             ReadPlanifWeek(department, book, period.name, week, year)
