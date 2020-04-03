@@ -316,5 +316,10 @@ def get_notification_preference(user):
         try:
             return user.notifications_preference.nb_of_notified_weeks
         except NotificationsPreferences.DoesNotExist:
-            pass
+            if user.is_tutor:
+                return 4
+            elif user.is_student:
+                return 0
+            else:
+                pass
     return 0
