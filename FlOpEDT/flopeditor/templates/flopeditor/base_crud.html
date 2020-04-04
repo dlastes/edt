@@ -1,0 +1,34 @@
+{% extends "flopeditor/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="card">
+  <ul class="nav card-header nav-tabs">
+        {% block card_header %}
+        {% endblock %}
+    </ul>
+    <div class="card-body">
+        {% block before_crud_js %}{% endblock %}
+
+        {% if has_dept_perm %}<button type="button" name="button" id="cjs-btn" class="btn btn-raised btn-success ">Enregistrer</button>{% endif %}
+        
+        {% block between_crud_js_and_save_btn %}{% endblock %}
+        
+        <crud-js url="{% block crud_js_url%}{% endblock %}" {% if has_dept_perm %} save-button="cjs-btn" editable {% endif %}>
+            <loading>
+                <h1 class="text-info"><i class="fas fa-spinner fa-pulse"></i></h1>
+            </loading>
+        </crud-js>
+        
+        {% block after_crud_js %}{% endblock %}
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block script %}
+    {{ block.super }}
+    <script> const CSRF = "{{ csrf_token }}" </script>
+    <script src="https://raw.githack.com/CGuichard/crud-js/latest/dist/crudjs.min.js"></script>
+{% endblock %}

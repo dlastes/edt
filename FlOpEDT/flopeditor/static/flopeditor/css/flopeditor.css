@@ -1,0 +1,32 @@
+html {
+    height: 100%;
+}
+body {
+    height: 100%;
+}
+.nonfluid {
+   width: auto !important;
+}
+.bmd-btn-fab-sm {
+    font-size: 0.7em !important;
+}
+.bg-dark {
+    background-color: #343a40 !important;
+}
+
+.bg-grey {
+    background-color: #d2d2d2 !important;
+}
+
+#main .btn-secondary:hover {
+    background-color: white !important;
+    color: grey !important;
+}
+
+.filter-option-inner-inner {
+  color: #495057;
+}
+
+#modal-create-department .bmd-form-group {
+    padding-top: 0;
+}
