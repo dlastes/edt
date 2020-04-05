@@ -46,7 +46,7 @@ from django.utils.translation import ugettext_lazy as _
 
 # from caching.base import CachingManager, CachingMixin
 
-from base.models import Time, Department, Module, Group, Day
+from base.models import Time, Department, Module, Group, Day, TimeGeneralSettings
 
 from people.models import Tutor
 
@@ -58,7 +58,7 @@ max_weight = 8
 
 slot_pause = 30
 
-PM_start = 12*60
+midday = 12 * 60
 
 basic_slot_duration = 90
 
@@ -71,13 +71,17 @@ for c in Day.CHOICES:
 class Slot(object):
     def __init__(self, day, start_time, course_type=None):
         self.course_type = course_type
+        if course_type is not None:
+            pm_start = TimeGeneralSettings.objects.get(department=course_type.department).lunch_break_finish_time
+        else:
+            pm_start = midday
         self.day = day
         self.start_time = start_time
         self.duration = basic_slot_duration
         if self.course_type is not None:
             self.duration = self.course_type.duration
         self.end_time = self.start_time + self.duration
-        if self.start_time >= PM_start:
+        if self.start_time >= pm_start:
             self.apm = Time.PM
         else:
             self.apm = Time.AM
@@ -436,7 +440,7 @@ class LimitCourseTypeTimePerPeriod(TTConstraint):  # , pond):
         if self.period == self.FULL_DAY:
             periods = [None]
         else:
-            periods = [Time.AM, Time.PM]
+            periods = ttmodel.possible_apms
 
         period_by_day = []
         for day in days_filter(ttmodel.wdb.days, week=week):

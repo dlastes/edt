@@ -27,7 +27,6 @@
 import datetime
 
 import base.models
-actual_year = 2019
 
 days_infos = {
     'm' :{'shift': 0, 'fr_slug': 'Lun.'},
@@ -38,6 +37,19 @@ days_infos = {
     'sa':{'shift': 5, 'fr_slug': 'Sam.'},
     'su':{'shift': 6, 'fr_slug': 'Dim.'}
 }
+
+
+def get_current_school_year():
+    now = datetime.datetime.now()
+    # TODO find a alternative way to test the swap month
+    if now.month <= 6:
+        school_year = now.year - 1
+    else:
+        school_year = now.year
+    return school_year
+
+
+actual_year = get_current_school_year()
 
 
 # monday of Week #2

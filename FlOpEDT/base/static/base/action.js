@@ -250,7 +250,7 @@ function select_room_change() {
     = Math.ceil(room_tutor_change.proposal.length
       / room_tutor_change.cm_settings.ncol);
 
-  if (level > 0 || c.room == une_salle ||
+  if (level > 0 || c.room == "" ||
     occupied_rooms.indexOf(c.room) != -1) {
     return true;
   } else {
@@ -822,13 +822,13 @@ function compute_changes(changes, conc_tutors, gps) {
       // } else 
 
 
-      if (cur_course.room == une_salle) {
+      if (cur_course.room == "") {
         splash_case = {
           id: "def-room",
           but: butOK,
           com: {
             list: [
-              { txt: "Vous avez laissé la salle 'par défaut'." },
+              { txt: "Vous n'avez pas attribué de salle à un cours." },
               { txt: "Pour l'instant, le changement n'est pas accepté." },
               { txt: "Merci de chercher et de renseigner une salle disponible." }
             ]
