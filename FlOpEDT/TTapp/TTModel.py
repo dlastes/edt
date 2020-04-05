@@ -1185,9 +1185,10 @@ class TTModel(object):
         avail_course = {}
         for course_type in self.wdb.course_types:
             for promo in self.train_prog:
+                avail_course[(course_type, promo)] = {}
+                non_prefered_slot_cost_course[(course_type, promo)] = {}
                 for week in self.weeks:
-                    avail_course[(course_type, promo)] = {}
-                    non_prefered_slot_cost_course[(course_type, promo)] = {}
+                    week_slots = slots_filter(self.wdb.slots, week=week)
                     courses_avail = set(self.wdb.courses_availabilities
                                         .filter(course_type=course_type,
                                                 train_prog=promo,
@@ -1199,16 +1200,16 @@ class TTModel(object):
                                                     week=None))
                     if not courses_avail:
                         print("No course availability given for %s - %s" % (course_type, promo))
-                        for sl in self.wdb.slots:
+                        for sl in week_slots:
                             avail_course[(course_type, promo)][sl] = 1
                             non_prefered_slot_cost_course[(course_type,
                                                            promo)][sl] = 0
                     else:
-                        for sl in self.wdb.slots:
+                        for sl in week_slots:
                             try:
                                 avail = set(a for a in courses_avail
                                             if a.start_time < sl.end_time and sl.start_time < a.start_time + a.duration
-                                                and a.day == sl.day.day)
+                                            and a.day == sl.day.day)
                                 if avail:
                                     minimum = min(a.value for a in avail)
                                     if minimum == 0:
