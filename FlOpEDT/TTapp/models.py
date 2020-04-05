@@ -866,7 +866,7 @@ class MinNonPreferedSlot(TTConstraint):
                 .filter(group__train_prog=self.train_prog, week=week)
             filtered_courses = set(filtered_courses)
         basic_groups = ttmodel.wdb.basic_groups.filter(train_prog=self.train_prog)
-        for sl in ttmodel.wdb.slots:
+        for sl in slots_filter(ttmodel.wdb.slots, week=week):
             for c in filtered_courses & ttmodel.wdb.compatible_courses[sl]:
                 if self.tutor is not None:
                     cost = (float(self.weight) / max_weight) \
