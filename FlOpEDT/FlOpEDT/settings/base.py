@@ -33,6 +33,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.10/ref/settings/
 """
 
+from django.utils.translation import gettext_lazy as _
+
 import os
 import sys
 
@@ -73,6 +75,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -105,7 +108,8 @@ ASGI_APPLICATION = 'FlOpEDT.routing.application'
 
 CACHES = {
    'default': {
-       'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+       'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+       #'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
        'LOCATION': 'flop',
    }
 }
@@ -133,13 +137,24 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/1.10/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'fr'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 CSRF_USE_SESSION = True
 AUTH_USER_MODEL = 'people.User'
+
+# Available languages
+LANGUAGES = [
+  ('fr', _('Français')),
+  ('en', _('Anglais')),
+]
+
+# Folder which contains traduction files
+LOCALE_PATHS = (
+    os.path.join(BASE_DIR, 'locale'),
+)
 
 #
 # ASSETS Settings
@@ -179,4 +194,4 @@ if 'ADMINS' in os.environ:
 
 SHELL_PLUS_MODEL_IMPORTS_RESOLVER = 'django_extensions.collision_resolvers.AppLabelSuffixCR'
 
-COSMO_MODE = False
+COSMO_MODE = True
