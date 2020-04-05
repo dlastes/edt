@@ -13,4 +13,4 @@ node_modules
 docker/env/web.prod.env
 docker/env/db.prod.env
 global.env
-
+venv/*

@@ -3,21 +3,21 @@
 # This file is part of the FlOpEDT/FlOpScheduler project.
 # Copyright (c) 2017
 # Authors: Iulian Ober, Paul Renaud-Goud, Pablo Seban, et al.
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
 # published by the Free Software Foundation, either version 3 of the
 # License, or (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful, but
 # WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 # Affero General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Affero General Public
 # License along with this program. If not, see
 # <http://www.gnu.org/licenses/>.
-# 
+#
 # You can be released from the requirements of the license by purchasing
 # a commercial license. Buying such a license is mandatory as soon as
 # you develop activities involving the FlOpEDT/FlOpScheduler software
@@ -52,6 +52,8 @@ from people.models import Tutor
 
 from TTapp.helpers.minhalfdays import MinHalfDaysHelperGroup, MinHalfDaysHelperModule, MinHalfDaysHelperTutor
 
+from TTapp.constraint_type import ConstraintType
+
 max_weight = 8
 
 slot_pause = 30
@@ -83,6 +85,7 @@ class Slot(object):
             self.apm = Time.PM
         else:
             self.apm = Time.AM
+
 
     def is_simultaneous_to(self, other):
         if self.day == other.day and self.start_time < other.end_time and other.start_time < self.end_time:
@@ -117,7 +120,9 @@ class Slot(object):
     def __repr__(self):
         return str(self)
 
-
+    def get_day(self):
+        return self.day
+        
 def slots_filter(slot_set, day=None, apm=None, course_type=None, start_time=None, week_day=None,
                  simultaneous_to=None, week=None, is_after=None, starts_after=None, starts_before=None, ends_before=None):
     slots = slot_set
@@ -166,13 +171,14 @@ class TTConstraint(models.Model):
     department = models.ForeignKey(Department, null=True, on_delete=models.CASCADE)
     train_prog = models.ForeignKey('base.TrainingProgramme',
                                    null=True,
-                                   default=None, 
-                                   blank=True, 
-                                   on_delete=models.CASCADE)    
+                                   default=None,
+                                   blank=True,
+                                   on_delete=models.CASCADE)
     week = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(52)],
         null=True,
-        default=None, 
+
+        default=None,
         blank=True)
     year = models.PositiveSmallIntegerField(null=True, default=None, blank=True)
     weight = models.PositiveSmallIntegerField(
@@ -203,18 +209,18 @@ class TTConstraint(models.Model):
         # Return a dictionnary with view-related data
         #
         if self.train_prog:
-            train_prog_value = f"{self.train_prog.name} ({self.train_prog.abbrev})" 
+            train_prog_value = f"{self.train_prog.name} ({self.train_prog.abbrev})"
         else:
             train_prog_value = 'All'
-        
+
         if self.week:
-            week_value = f"{self.week} ({self.year})" 
+            week_value = f"{self.week} ({self.year})"
         else:
             week_value = 'All'
 
         return {
             'model': self.__class__.__name__,
-            'pk': self.pk, 
+            'pk': self.pk,
             'is_active': self.is_active,
             'name': self.full_name(),
             'description': self.description(),
@@ -261,15 +267,15 @@ def get_constraint_list():
 class CustomConstraint(TTConstraint):
     """
     Call a custom constraint implementation.
-    """   
+    """
 
     class_name = models.CharField(
                     max_length=200,
-                    null=False, 
+                    null=False,
                     blank=False)
     groups = models.ManyToManyField('base.Group', blank=True)
     tutors = models.ManyToManyField('people.Tutor', blank=True)
-    modules = models.ManyToManyField('base.Module', blank=True)          
+    modules = models.ManyToManyField('base.Module', blank=True)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -291,7 +297,7 @@ class CustomConstraint(TTConstraint):
                 print(f"can't find the <{module_name}> module")
             except:
                 print(f"an error has occured while loading class <{class_name}>")
-        
+
         return self.constraint
 
     def get_method(self, method_name):
@@ -301,12 +307,12 @@ class CustomConstraint(TTConstraint):
         method = None
         constraint = self.get_constraint(self.class_name)
         if constraint:
-            method = getattr(constraint, method_name, None)          
+            method = getattr(constraint, method_name, None)
         return method
 
     def inject_method(func):
         """
-        This decorator lookup for a method, in the class described by 
+        This decorator lookup for a method, in the class described by
         class_name attribute, with the same name as the decorated method.
         Once retrieve the method is then injected as a method keyword parameter.
         """
@@ -321,7 +327,7 @@ class CustomConstraint(TTConstraint):
     def enrich_model(self, ttmodel, week, ponderation=1, injected_method=None):
         """
         Call custom constraint method
-        """ 
+        """
         args = {}
 
         if self.groups.count():
@@ -333,17 +339,17 @@ class CustomConstraint(TTConstraint):
 
 
         if self.modules.count():
-            args.update({'modules': list(self.modules.all())})                        
-        
+            args.update({'modules': list(self.modules.all())})
+
         if injected_method:
             injected_method(ttmodel, ponderation, **args)
 
     @inject_method
-    def one_line_description(self, injected_method=None):    
+    def one_line_description(self, injected_method=None):
         description = ''
         if injected_method:
             description = injected_method()
-            if not description:                
+            if not description:
                 description = self.class_name
         return description
 
@@ -368,7 +374,7 @@ class LimitCourseTypeTimePerPeriod(TTConstraint):  # , pond):
     max_hours = models.PositiveSmallIntegerField()
     module = models.ForeignKey('base.Module',
                                    null=True,
-                                   default=None, 
+                                   default=None,
                                    blank=True,
                                    on_delete=models.CASCADE)
     tutors = models.ManyToManyField('people.Tutor',
@@ -414,21 +420,24 @@ class LimitCourseTypeTimePerPeriod(TTConstraint):  # , pond):
 
             if self.weight is not None:
                 var = ttmodel.add_floor(
-                                'limit course type per period', 
+                                'limit course type per period',
                                 expr,
                                 int(self.max_hours * 60) + 1, 3600*24)
                 ttmodel.obj += self.local_weight() * ponderation * var
             else:
+                """
                 name = 'Max_%d_hours_of_%s_per_%s_%s_%s%g' % (self.max_hours,
                                                               self.course_type,
                                                               self.period,
                                                               day,
                                                               period if period is not None else '',
                                                               ttmodel.constraint_nb)
-                ttmodel.add_constraint(expr, '<=', self.max_hours*60, name=name)
+                """
+                ttmodel.add_constraint(expr, '<=', self.max_hours*60,
+                                       constraint_type=ConstraintType.MAX_HOURS, modules=self.course_type, days=day)
 
     def enrich_model(self, ttmodel, week, ponderation=1.):
-        
+
         if self.period == self.FULL_DAY:
             periods = [None]
         else:
@@ -534,12 +543,12 @@ class ReasonableDays(TTConstraint):
 
     def update_combinations(self, ttmodel, slot_boundaries, combinations, tutor=None, group=None):
         """
-        Update courses combinations for slot boundaries with all courses 
+        Update courses combinations for slot boundaries with all courses
         corresponding to the given filters (tutors, groups)
         """
         courses_query = self.get_courses_queryset(ttmodel, tutor=tutor, group=group)
         courses_set = set(courses_query)
-        
+
         for first_slot, last_slot in slot_boundaries:
             while courses_set:
                 c1 = courses_set.pop()
@@ -549,7 +558,7 @@ class ReasonableDays(TTConstraint):
 
     def register_expression(self, ttmodel, ponderation, combinations):
         """
-        Update model with expressions corresponding to 
+        Update model with expressions corresponding to
         all courses combinations
         """
         for first, last in combinations:
@@ -557,7 +566,8 @@ class ReasonableDays(TTConstraint):
                 conj_var = ttmodel.add_conjunct(ttmodel.TT[first], ttmodel.TT[last])
                 ttmodel.obj += self.local_weight() * ponderation * conj_var
             else:
-                ttmodel.add_constraint(ttmodel.TT[first] + ttmodel.TT[last], '<=', 1)
+                ttmodel.add_constraint(ttmodel.TT[first] + ttmodel.TT[last], '<=', 1,
+                                       constraint_type=ConstraintType.REGISTER_EXPRESSION)
 
 
     def enrich_model(self, ttmodel, week, ponderation=1):
@@ -570,11 +580,11 @@ class ReasonableDays(TTConstraint):
         last_slots = set([slot for slot in ttmodel.wdb.slots if slot.end_time > 18*60])
         slots = first_slots | last_slots
 
-        
+
         slot_boundaries = {}
         for slot in slots:
             slot_boundaries.setdefault(slot.day, []).append(slot)
-              
+
         # Create all combinations with slot boundaries for all courses
         # corresponding to the given filters (tutors, groups)
         try:
@@ -700,7 +710,7 @@ class Stabilize(TTConstraint):
                         if not slot.is_simultaneous_to(chosen_slot):
                             ttmodel.add_constraint(ttmodel.TT[(slot, c)],
                                                    '==',
-                                                   0)
+                                                   0, constraint_type=ConstraintType.STABILIZE_ENRICH_MODEL, courses=fc, slots=slot)
 
         # else:
         #     fc = ttmodel.wdb.courses
@@ -803,7 +813,7 @@ class MinHalfDays(TTConstraint):
             details.update({'modules': ', '.join([module.name for module in self.modules.all()])})
 
         return view_model
-        
+
 
     def one_line_description(self):
         text = "Minimise les demie-journées"
@@ -816,12 +826,12 @@ class MinHalfDays(TTConstraint):
 
         if self.modules.exists():
             text += ' de : ' + ', '.join([str(module) for module in self.modules.all()])
-            
+
         if self.train_prog:
             text += ' en ' + str(self.train_prog)
 
         return text
-        
+
 
 class MinNonPreferedSlot(TTConstraint):
     """
@@ -837,7 +847,7 @@ class MinNonPreferedSlot(TTConstraint):
     def get_viewmodel_prefetch_attributes(cls):
         attributes = super().get_viewmodel_prefetch_attributes()
         attributes.extend(['tutor'])
-        return attributes                              
+        return attributes
 
     # is not called when save() is
     def clean(self):
@@ -856,7 +866,7 @@ class MinNonPreferedSlot(TTConstraint):
                 .filter(group__train_prog=self.train_prog, week=week)
             filtered_courses = set(filtered_courses)
         basic_groups = ttmodel.wdb.basic_groups.filter(train_prog=self.train_prog)
-        for sl in ttmodel.wdb.slots:
+        for sl in slots_filter(ttmodel.wdb.slots, week=week):
             for c in filtered_courses & ttmodel.wdb.compatible_courses[sl]:
                 if self.tutor is not None:
                     cost = (float(self.weight) / max_weight) \
@@ -901,7 +911,7 @@ class AvoidBothTimes(TTConstraint):
     def get_viewmodel_prefetch_attributes(cls):
         attributes = super().get_viewmodel_prefetch_attributes()
         attributes.extend(['group', 'tutor'])
-        return attributes                              
+        return attributes
 
     def enrich_model(self, ttmodel, ponderation=1):
         fc = ttmodel.wdb.courses
@@ -926,7 +936,9 @@ class AvoidBothTimes(TTConstraint):
                             ttmodel.add_constraint(ttmodel.TT[(sl1, c1)]
                                                    + ttmodel.TT[(sl2, c2)],
                                                    '<=',
-                                                   1)
+                                                   1,
+                                                   constraint_type=ConstraintType.AVOID_BOTH_TIME, courses=[c1, c2],
+                                                   slots=[sl1, sl2])
 
     def one_line_description(self):
         text = "Pas à la fois à " + str(self.time1/60) + "h et à" + str(self.time2/60) + "h."
@@ -958,7 +970,8 @@ class SimultaneousCourses(TTConstraint):
         for sl in ttmodel.wdb.compatible_slots[self.course1] & ttmodel.wdb.compatible_slots[self.course2]:
             var1 = ttmodel.TT[(sl, self.course1)]
             var2 = ttmodel.TT[(sl, self.course2)]
-            ttmodel.add_constraint(var1 - var2, '==', 0)
+            ttmodel.add_constraint(var1 - var2, '==', 0,
+                                   constraint_type=ConstraintType.COURS_SIMULTANES, courses=[self.course1, self.course2])
             # A compléter, l'idée est que si les cours ont le même prof, ou des
             # groupes qui se superposent, il faut veiller à supprimer les core
             # constraints qui empêchent que les cours soient simultanés...
@@ -1028,7 +1041,8 @@ class LimitedStartTimeChoices(TTConstraint):
                 if self.weight is not None:
                     ttmodel.obj += self.local_weight() * ponderation * ttmodel.TT[(sl, c)]
                 else:
-                    ttmodel.add_constraint(ttmodel.TT[(sl, c)], '==', 0)
+                    ttmodel.add_constraint(ttmodel.TT[(sl, c)], '==', 0, constraint_type=ConstraintType.LIMITED_START_TIME_CHOICES,
+                                           courses=fc, slots=sl)
 
     def one_line_description(self):
         text = "Les "
@@ -1094,7 +1108,8 @@ class LimitedRoomChoices(TTConstraint):
                     if self.weight is not None:
                         ttmodel.obj += self.local_weight() * ponderation * ttmodel.TTrooms[(sl, c, rg)]
                     else:
-                        ttmodel.add_constraint(ttmodel.TTrooms[(sl, c,rg)], '==', 0)
+                        ttmodel.add_constraint(ttmodel.TTrooms[(sl, c,rg)], '==', 0,
+                                               constraint_type=ConstraintType.LIMITED_ROOM_CHOICES, courses=c, slots=sl, rooms=rg)
 
     def one_line_description(self):
         text = "Les "

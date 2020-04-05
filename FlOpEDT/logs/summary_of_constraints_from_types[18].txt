@@ -1,0 +1,16 @@
+Voici les principaux problèmes liés à l'infaisabilité :
+
+	Problème de dépendance entre les cours suivants:
+		TD-COO-TG-2 (1)
+		TD-COO-TG-2 (2)
+
+	Les cours suivants:
+		TD-COO-TG-2 (1)
+		TD-COO-TG-2 (2)
+	devraient avoir un professeur, surement parmis:
+		TG
+
+	Les professeurs suivants:
+		TG
+	devraient pouvoir faire cours
+
