@@ -10,7 +10,7 @@ After adding new internationalised strings, you have to do the following:
 It will create the file `FlOpEDT/locale/en/LC_MESSAGES/django.po`
 * Edit this file and translate sentences
 * run `django-admin compilemessages`  
-It compiles `django.po` to be used by Django
+It compiles `django.po` to be used by Django  
 The resulting file is `django.mo`
 
 Now you can invite your English-speaking friends to enjoy FlOpEDT!
