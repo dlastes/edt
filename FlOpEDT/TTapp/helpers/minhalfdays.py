@@ -29,7 +29,6 @@ from base.models import Time, TimeGeneralSettings
 
 logger = logging.Logger(__name__)
 
-
 class MinHalfDaysHelperBase():
 
     def __init__(self, ttmodel, constraint, week, ponderation):
