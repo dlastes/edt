@@ -249,11 +249,6 @@ def add_iut_blagnac_lp(ttmodel):
     lp = TrainingProgramme.objects.get(abbrev='APSIO')
     if ttmodel.wdb.courses.filter(group__train_prog=lp).exists():
         print("adding LP constraints")
-        # Avoid first and last slot at the same time for train_prog 3
-        R = ReasonableDays(train_prog=lp,
-                           weight=max_weight)
-        R.save()
-        R.delete()
 
         # Force that only 3 courses are the same HD, and only on 2 HD if 4 courses
         M = MinHalfDays(join2courses=True, weight=max_weight)
@@ -293,15 +288,6 @@ def add_iut_blagnac_info(ttmodel):
     CM = CourseType.objects.get(name='CM', department=ttmodel.department)
     TD = CourseType.objects.get(name='TD', department=ttmodel.department)
     print("finally, adding info specific constraints")
-
-    # Limit Long Days for instructors
-    R = ReasonableDays(weight=max_weight)
-    R.save()
-    for i in ttmodel.wdb.instructors:
-        R.tutors.add(i)
-    R.save()
-    # R.enrich_model(ttmodel, ponderation=ttmodel.lim_ld)
-    R.delete()
 
     # Impose pour certains vacataires le fait qu'ils viennent sur une seule demi-journée (si moins de 3 cours)
     # C'EST CETTE CONTRAINTE, LORSQU'ELLE N'EST QUE PREFERENCE, QUI CREE LA PAGAILLE DANS CBC!!!
