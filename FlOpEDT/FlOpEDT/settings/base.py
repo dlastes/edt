@@ -108,8 +108,7 @@ ASGI_APPLICATION = 'FlOpEDT.routing.application'
 
 CACHES = {
    'default': {
-       'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
-       #'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+       'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
        'LOCATION': 'flop',
    }
 }
@@ -194,4 +193,4 @@ if 'ADMINS' in os.environ:
 
 SHELL_PLUS_MODEL_IMPORTS_RESOLVER = 'django_extensions.collision_resolvers.AppLabelSuffixCR'
 
-COSMO_MODE = True
+COSMO_MODE = False

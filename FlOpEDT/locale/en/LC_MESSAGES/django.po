@@ -56,7 +56,7 @@ msgstr "A student"
 
 #: people/templates/people/login.html:79
 msgid "Enseignant·e permanent·e"
-msgstr "A teachter"
+msgstr "A teacher"
 
 #: people/templates/people/login.html:80
 msgid "Vacataire"
