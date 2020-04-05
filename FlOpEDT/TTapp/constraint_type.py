@@ -88,3 +88,7 @@ class ConstraintType(Enum):
     LIMITED_ROOM_CHOICES = "Limited Room Choices"
 
     #minhalfdays
+    MIN_HALF_DAYS_LIMIT = "Min Half Days limit"
+    MIN_HALF_DAYS_LOCAL = "Min Half Days local"
+    MIN_HALF_DAYS_JOIN_AM = "Min Half Days join AM"
+    MIN_HALF_DAYS_JOIN_PM = "Min Half Days join PM"
