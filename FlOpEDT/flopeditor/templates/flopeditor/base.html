@@ -1,0 +1,97 @@
+{% load static %}
+<!DOCTYPE html>
+{% block html %}
+<html lang="fr-fr" dir="ltr">
+    <head>
+
+        {% block head %}
+
+        {% block meta %}
+        <meta charset="utf-8">
+        <title>{% block title %}FlopEditor - {{ title }}{% endblock %}</title>
+
+        {% block link %}
+        <link rel="stylesheet" href="{% static 'flopeditor/lib/bootstrap-material-design/css/bootstrap-material-design.min.css' %}">
+        <link rel="stylesheet" href="{% static 'flopeditor/css/flopeditor.css' %}">
+        {% endblock %}
+
+        {% endblock %}
+
+        {% endblock %}
+    </head>
+    <body class="{% block body-class %}bg-grey{% endblock %}">
+        {% block body %}
+
+        {% block navbar %}
+        <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4">
+            <a class="navbar-brand" href="{% url 'flopeditor:flopeditor-home' %}">FlopEditor</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText"
+                aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarText">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item {% block nav-classes-rooms %}{% endblock %}">
+                        <a class="nav-link"
+                            href="{% url 'flopeditor:flopeditor-department-rooms' department_abbrev=department.abbrev %}">Salles</a>
+                    </li>
+                    <li class="nav-item {% block nav-classes-groups %}{% endblock %}">
+                        <a class="nav-link"
+                            href="{% url 'flopeditor:flopeditor-department-training-programmes' department_abbrev=department.abbrev %}">Élèves</a>
+                    </li>
+                    <li class="nav-item {% block nav-classes-modules %}{% endblock %}">
+                        <a class="nav-link"
+                            href="{% url 'flopeditor:flopeditor-department-modules' department_abbrev=department.abbrev %}">Modules</a>
+                    </li>
+                     <li class="nav-item {% block nav-classes-course %}{% endblock %}">
+                        <a class="nav-link"
+                            href="{% url 'flopeditor:flopeditor-department-course-types' department_abbrev=department.abbrev %}">Cours</a>
+                    </li>
+                    <li class="nav-item {% block nav-classes-parameters %}{% endblock %}">
+                        <a class="nav-link"
+                            href="{% url 'flopeditor:flopeditor-department-parameters' department_abbrev=department.abbrev %}">Paramètres</a>
+                    </li>
+                </ul>
+                {% if not list_departments %}
+                <span class="navbar-text">Département {{ department.name }}</span>
+                {% else %}
+                <div class="dropdown">
+                  <a class="btn btn-secondary dropdown-toggle text-white border border-secondary" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Département {{ department.name }}
+                  </a>
+                  <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                    {% for dept in list_departments %}
+                      <a class="dropdown-item" href="{% url request.resolver_match.view_name department_abbrev=dept.abbrev %}">{{ dept.name }}</a>
+                    {% endfor %}
+                  </div>
+                </div>
+                {% endif %}
+              </div>
+        </nav>
+        {% endblock %}
+
+        <div id="main" class="{% block main-class %}container{% endblock %}">
+            {% block content %}
+            {% endblock %}
+        </div>
+
+        {% block footer %}
+        {% endblock %}
+
+        {% block modal %}
+        {% endblock %}
+
+        {% block script %}
+        <script src="https://kit.fontawesome.com/5bf4c39447.js" crossorigin="anonymous"></script>
+        <script src="{% static 'flopeditor/lib/jquery/jquery-3.2.1.min.js' %}" charset="utf-8"></script>
+        <script src="{% static 'flopeditor/lib/popper/popper.js' %}" charset="utf-8"></script>
+        <script src="{% static 'flopeditor/lib/bootstrap-material-design/js/bootstrap-material-design.min.js' %}" charset="utf-8"></script>
+        <script>
+            $(document).ready(function() { $('body').bootstrapMaterialDesign(); });
+        </script>
+        {% endblock %}
+
+        {% endblock %}
+    </body>
+</html>
+{% endblock %}

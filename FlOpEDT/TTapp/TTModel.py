@@ -86,6 +86,7 @@ class WeekDB(object):
         self.department = department
         self.weeks = weeks
         self.year = year
+        self.possible_apms=set()
         self.days, self.day_after, self.holidays, self.training_half_days = self.days_init()
         self.slots, self.slots_by_day, self.slots_intersecting, self.slots_by_half_day, self.slots_by_week \
             = self.slots_init()
@@ -143,6 +144,9 @@ class WeekDB(object):
                          for d in self.days
                          for start_time in cc.allowed_start_times)
 
+        for slot in slots:
+            self.possible_apms.add(slot.apm)
+
         slots_by_day = {}
         for d in self.days:
             slots_by_day[d] = slots_filter(slots, day=d)
@@ -153,7 +157,7 @@ class WeekDB(object):
 
         slots_by_half_day = {}
         for d in self.days:
-            for apm in [Time.AM, Time.PM]:
+            for apm in self.possible_apms:
                 slots_by_half_day[(d, apm)] = slots_filter(slots, day=d, apm=apm)
         print('Ok')
 
@@ -469,6 +473,7 @@ class TTModel(object):
         self.stabilize_work_copy = stabilize_work_copy
         self.obj = self.lin_expr()
         self.wdb = self.wdb_init()
+        self.possible_apms = self.wdb.possible_apms
         self.cost_I, self.FHD_G, self.cost_G, self.cost_SL = self.costs_init()
         self.TT, self.TTrooms, self.TTinstructors = self.TT_vars_init()
         self.IBD, self.IBD_GTE, self.IBHD, self.GBHD, self.IBS, self.forced_IBD = self.busy_vars_init()
@@ -511,7 +516,7 @@ class TTModel(object):
                                [{week: self.lin_expr() for week in self.weeks + [None]} for _ in
                                 self.wdb.instructors])))
         FHD_G = {}
-        for apm in [Time.AM, Time.PM]:
+        for apm in self.possible_apms:
             FHD_G[apm] = dict(
                 list(zip(self.wdb.basic_groups,
                          [{week: self.lin_expr() for week in self.weeks} for _ in self.wdb.basic_groups])))
@@ -615,7 +620,7 @@ class TTModel(object):
         for i in self.wdb.instructors:
             for d in self.wdb.days:
                 # add constraint linking IBHD to TT
-                for apm in [Time.AM, Time.PM]:
+                for apm in self.possible_apms:
                     IBHD[(i, d, apm)] \
                         = self.add_var("IBHD(%s,%s,%s)" % (i, d, apm))
                     halfdayslots = self.wdb.slots_by_half_day[(d, apm)]
@@ -643,7 +648,7 @@ class TTModel(object):
         for g in self.wdb.basic_groups:
             for d in self.wdb.days:
                 # add constraint linking IBD to EDT
-                for apm in [Time.AM, Time.PM]:
+                for apm in self.possible_apms:
                     GBHD[(g, d, apm)] \
                         = self.add_var("GBHD(%s,%s,%s)" % (g, d, apm))
                     halfdayslots = self.wdb.slots_by_half_day[(d, apm)]
@@ -1479,12 +1484,17 @@ class TTModel(object):
                 tc.save()
 
             for g in self.wdb.basic_groups:
+                DJL=0
+                if Time.PM in self.possible_apms:
+                    DJL += self.get_expr_value(self.FHD_G[Time.PM][g][week])
+                if Time.AM in self.possible_apms:
+                    DJL += 0.01 * self.get_expr_value(self.FHD_G[Time.AM][g][week])
+
                 djlg = GroupFreeHalfDay(group=g,
                                         year=self.wdb.year,
                                         week=week,
                                         work_copy=target_work_copy,
-                                        DJL=self.get_expr_value(self.FHD_G[Time.PM][g][week]) +
-                                            0.01 * self.get_expr_value(self.FHD_G['AM'][g][week]))
+                                        DJL= DJL)
                 djlg.save()
                 cg = GroupCost(group=g,
                                year=self.wdb.year,

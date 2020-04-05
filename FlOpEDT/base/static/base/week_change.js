@@ -642,7 +642,7 @@ function translate_cours_pp_from_csv(d) {
     day: garbage.day,
     start: garbage.start,
     duration: constraints[d.coursetype].duration,
-    room: une_salle,
+    room: "",
     room_type: d.room_type,
     color_bg: d.color_bg,
     color_txt: d.color_txt,

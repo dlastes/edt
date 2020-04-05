@@ -8,6 +8,7 @@
         var departements = {{ departements|safe }};
     </script>
     <h1>Étape 1 - Configuration de la base de données (profs, groupes, salles, types de cours, etc.)</h1>
+    <h2>Option A : En utilisant un fichier tableur </h2>
     <div class="step">
         <h3>Canevas du fichier de configuration</h3>
         <p>Téléchargez puis remplissez le fichier ci-dessous.</p>
@@ -36,6 +37,11 @@
           <p></p>
         </div>
     </div>
+    <h2>Option B : Avec Flopeditor </h2>
+    <div class="step">
+      <p>Cliquez <a href="{% url 'flopeditor:flopeditor-home' %}">ici</a></p>
+    </div>
+
     <h1>Étape 2 - Planifier les cours (quel cours dans quelle semaine, quel prof donne quel cours)</h1>
     <div class="step">
     <h3>Canevas du fichier de planification à partir du fichier de configuration</h3>
