@@ -1053,7 +1053,7 @@ function go_courses(quick) {
 
   if (ckbox["edt-mod"].cked
       && logged_usr.dispo_all_see) {
-    d3.selectAll("rect.crect").style("fill", function (d) {
+    d3.selectAll("rect.crect").attr("fill", function (d) {
       try {
         lDis = dispos[d.prof][d.day][d.slot];
       } catch (e) {
@@ -1063,7 +1063,7 @@ function go_courses(quick) {
       return smi_fill(lDis / par_dispos.nmax);
     });
   } else {
-    d3.selectAll("rect.crect").style("fill", cours_fill);
+    d3.selectAll("rect.crect").attr("fill", cours_fill);
   }
 
   // Tutor's fullname 
