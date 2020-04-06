@@ -965,7 +965,7 @@ function update_active() {
   } else {
     tut_av = {active: false} ;
   }
-  if (typeof tut_av !== 'undefined') {
+  if (typeof mod_av !== 'undefined') {
     mod_av.active = modules.all.filter(function (d) {
       return d.display;
     }).length != modules.all.length;
