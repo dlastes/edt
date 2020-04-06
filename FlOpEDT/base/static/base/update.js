@@ -958,12 +958,20 @@ function update_active() {
   var tut_av = sel_popup.get_available("tutor");
   var mod_av = sel_popup.get_available("module");
 
-  tut_av.active = tutors.all.filter(function (d) {
-    return d.display;
-  }).length != tutors.all.length;
-  mod_av.active = modules.all.filter(function (d) {
-    return d.display;
-  }).length != modules.all.length;
+  if (typeof tut_av !== 'undefined') {
+    tut_av.active = tutors.all.filter(function (d) {
+      return d.display;
+    }).length != tutors.all.length;
+  } else {
+    tut_av = {active: false} ;
+  }
+  if (typeof tut_av !== 'undefined') {
+    mod_av.active = modules.all.filter(function (d) {
+      return d.display;
+    }).length != modules.all.length;
+  } else {
+    mod_av = {active: false} ;
+  }
 
   sel_popup.active_filter = tut_av.active || mod_av.active;
 
