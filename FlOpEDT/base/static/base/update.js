@@ -1055,7 +1055,7 @@ function go_courses(quick) {
       && logged_usr.dispo_all_see) {
     d3.selectAll("rect.crect").attr("fill", function (d) {
       try {
-        lDis = dispos[d.prof][d.day][d.slot];
+        lDis = get_preference(dispos[d.prof][d.day], d.duration);
       } catch (e) {
         lDis = par_dispos.nmax;
       }
