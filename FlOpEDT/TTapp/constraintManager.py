@@ -1,54 +1,42 @@
+import json
 from TTapp.print_infaisibility import print_all
-from TTapp.occurs import Occurs
+
+from TTapp.constraint_type import ConstraintType
 
 
-def inc(dic, key):
-    if key is not None:
-        if key in dic.keys():
-            dic[key] += 1
+def inc(occurs_types, constraint_type):
+    if constraint_type is not None:
+        if constraint_type in occurs_types.keys():
+            occurs_types[constraint_type]["occurences"] += 1
         else:
-            dic[key] = 1
+            occurs_types[constraint_type] = {"occurences": 1}
 
 
-# To link the type of the constraint to the parameter occurence
-def inc_with_type(dic, keys, c_type):
-    if keys is not []:
-        for key in keys:
-            if key in dic.keys():
-                dic[key][0] += 1
-                if dic[key][1].count(c_type) == 0:
-                    dic[key][1].append(c_type)
+def inc_with_type(occurs_dimension, dimension, constraint_type):
+    if dimension is not []:
+        for elt in dimension:
+            if elt in occurs_dimension.keys():
+                occurs_dimension[elt]["occurences"] += 1
+                if constraint_type not in occurs_dimension[elt]["types"]:
+                    occurs_dimension[elt]["types"].append(constraint_type)
             else:
-                dic[key] = [1, [c_type]]
-
-
-def handle_occur_type_with_priority(priority_types, occur_type, decreasing):
-    if priority_types is []:
-        return occur_type
-    nb_occ_init = []
-    max_priority = max(occur_type.values()) + len(priority_types)
-    min_priority = -len(priority_types) + 1
-    for priority_type in priority_types:
-        if priority_type in occur_type:
-            nb_occ_init.append(occur_type[priority_type])
-            occur_type[priority_type] = max_priority if decreasing else min_priority
-            max_priority -= 1
-            min_priority += 1
-    occur_type = {k: v for k, v in sorted(occur_type.items(), key=lambda item: item[1], reverse=decreasing)}
-    for i in range(len(priority_types)):
-        if priority_types[i] in occur_type:
-            occur_type[priority_types[i]] = nb_occ_init[i]
-    return occur_type
+                occurs_dimension[elt] = {
+                    "occurences": 1,
+                    "types": [constraint_type]
+                }
 
 
 class ConstraintManager:
     def __init__(self):
         self.constraints = []
         self.infeasible_constraints = []
-        self.infeasible_occurs = None
+        self.occurs = None
 
     def add_constraint(self, constraint):
         self.constraints.append(constraint)
+
+    def get_nb_constraints(self):
+        return len(self.constraints)
 
     def get_constraints(self, id_constraints):
         return [self.constraints[id_constraint] for id_constraint in id_constraints]
@@ -67,53 +55,24 @@ class ConstraintManager:
         id_constraints = list(map(lambda constraint: int(constraint[1:]), id_constraints))
         return self.get_constraints(id_constraints)
 
-    def get_occurs(self, decreasing=True):
-        occur_type = {}
-        occur_instructor = {}
-        occur_slot = {}
-        occur_course = {}
-        occur_week = {}
-        occur_room = {}
-        occur_group = {}
-        occur_days = {}
-        occur_departments = {}
-        occur_module = {}
+    def get_occurs(self):
+        occurs = {"types": {}}
+        for dimension in self.infeasible_constraints[0].dimensions.keys():
+            occurs[dimension] = {}
 
-        # Initiate all occurences
         for constraint in self.infeasible_constraints:
-            c_type = constraint.constraint_type
-            inc(occur_type, constraint.constraint_type)
-            inc_with_type(occur_instructor, constraint.instructors, c_type)
-            inc_with_type(occur_slot, constraint.slots, c_type)
-            inc_with_type(occur_course, constraint.courses, c_type)
-            inc_with_type(occur_week, constraint.weeks, c_type)
-            inc_with_type(occur_room, constraint.rooms, c_type)
-            inc_with_type(occur_group, constraint.groups, c_type)
-            inc_with_type(occur_days, constraint.days, c_type)
-            inc_with_type(occur_departments, constraint.departments, c_type)
-            inc_with_type(occur_module, constraint.modules, c_type)
+            constraint_type = constraint.constraint_type.value
+            inc(occurs["types"], constraint_type)
+            for dimension in constraint.dimensions.keys():
+                inc_with_type(occurs[dimension], constraint.dimensions[dimension]["value"], constraint_type)
 
-        priority_types = []
-        occur_type = handle_occur_type_with_priority(priority_types, occur_type, decreasing)
-
-        occur_instructor = {k: v for k, v in
-                            sorted(occur_instructor.items(), key=lambda item: item[1][0], reverse=decreasing)}
-        occur_slot = {k: v for k, v in sorted(occur_slot.items(), key=lambda item: item[1][0], reverse=decreasing)}
-        occur_course = {k: v for k, v in sorted(occur_course.items(), key=lambda item: item[1][0], reverse=decreasing)}
-        occur_week = {k: v for k, v in sorted(occur_week.items(), key=lambda item: item[1][0], reverse=decreasing)}
-        occur_room = {k: v for k, v in sorted(occur_room.items(), key=lambda item: item[1][0], reverse=decreasing)}
-        occur_group = {k: v for k, v in sorted(occur_group.items(), key=lambda item: item[1][0], reverse=decreasing)}
-        occur_days = {k: v for k, v in sorted(occur_days.items(), key=lambda item: item[1][0], reverse=decreasing)}
-        occur_departments = \
-            {k: v for k, v in sorted(occur_departments.items(), key=lambda item: item[1][0], reverse=decreasing)}
-        occur_module = {k: v for k, v in sorted(occur_module.items(), key=lambda item: item[1][0], reverse=decreasing)}
-
-        return occur_type, occur_instructor, occur_slot, occur_course, occur_week, occur_room, occur_group, \
-                      occur_days, occur_departments, occur_module # Occurs TODO
+        for dimension in occurs.keys():
+            occurs[dimension] = {k: v for k, v in
+                                 sorted(occurs[dimension].items(), key=lambda elt: elt[1]["occurences"], reverse=True)}
+        return occurs
 
     def set_index_courses(self):
-        courses = list(self.infeasible_occurs[3].keys()) #Occurs TODO
-        #courses = list(self.infeasible_occurs.course.keys())
+        courses = list(self.occurs["courses"].keys())
 
         done = []
         mat_courses = []
@@ -133,6 +92,70 @@ class ConstraintManager:
 
     def handle_reduced_result(self, ilp_file_name, weeks):
         self.infeasible_constraints = self.parse_iis(ilp_file_name)
-        self.infeasible_occurs = self.get_occurs()
+        self.occurs = self.get_occurs()
         self.set_index_courses()
-        print_all(self.infeasible_constraints, self.infeasible_occurs, weeks)
+        print_brut_constraints(self.infeasible_constraints, self.occurs, weeks)
+        print_factorised_constraints(self.occurs, weeks)
+        print_summary_from_types(self.infeasible_constraints, self.occurs, weeks)
+
+
+def sort_constraints_by_type(constraints, occurs):
+    order = list(occurs["types"].keys())
+    constraints = sorted(constraints, key=lambda constraint: order.index(constraint.constraint_type.value))
+    return constraints
+
+
+def print_brut_constraints(constraints, occurs, weeks):
+    constraints = sort_constraints_by_type(constraints, occurs)
+    output = ""
+    for constraint in constraints:
+        output += str(constraint) + "\n"
+
+    filename = "logs/intelligible_constraints2%s.txt" % weeks
+    write_file(filename, output)
+
+
+def print_factorised_constraints(occurs, weeks):
+    output = "Sommaire des contraintes :"
+    for dimension in occurs.keys():
+        output += "\n\n%s:" % dimension
+        for elt in occurs[dimension].keys():
+            output += "\n%s -> %s" % (elt, occurs[dimension][elt]["occurences"])
+            if dimension is not "types":
+                output += " (%s)" % ", ".join(occurs[dimension][elt]["types"])
+    filename = "logs/intelligible_constraints_factorised2%s.txt" % weeks
+    write_file(filename, output)
+
+
+def print_summary_from_types(constraints, occurs, weeks):
+    def get_value(dictionnary, index):
+        a = iter(dictionnary)
+        for i in range(index - 1):
+            print(next(a))
+        return next(a)
+
+    constraint = sort_constraints_by_type(constraints, occurs)[0]
+    output, dimensions_to_fill = constraint.get_info_summary()
+
+    if dimensions_to_fill is not []:
+        fill = []
+        for dimension_to_fill in dimensions_to_fill:
+            index = 0
+            if "_" in dimension_to_fill:
+                s = dimension_to_fill.split("_")
+                dimension_to_fill, index = s[0], int(s[1])
+            fill.append(get_value(occurs[dimension_to_fill], index))
+
+        output = output % tuple(fill)
+
+    filename = "logs/summary_of_constraints_from_types2%s.txt" % weeks
+    write_file(filename, output, print_output=False)
+
+
+def write_file(filename, output, print_output=False):
+    print("writting %s..." % filename)
+    with open(filename, "w+", encoding="utf-8") as file:
+        file.write(output)
+        file.write("\n")
+    if print_output:
+        print("\n%s" % output)

@@ -1,14 +1,9 @@
 from enum import Enum
 
-"""
-Liste de tous les types de contraintes actuellement identifiees et utilisees
-IBS =
-IBD =
-IBHD =
-GBHD =
-"""
+
 class ConstraintType(Enum):
-    #TTModel
+    # From TTModel
+    # TECHNICAL
     IBS_SUP = "IBS supérieur"
     IBS_INF = "IBS inférieur"
     IBD_INF = "IBD inférieur"
@@ -21,17 +16,21 @@ class ConstraintType(Enum):
     CONJONCTION = "Conjonction"
     SEUIL = "Seuil"
     SI_A_ALORS_NON_B = "Si a alors non b"
+
+    # CORE
     PAS_PLUS_1_COURS_PAR_CRENEAU = "Pas plus d'un cours par créneau"
     COURS_DOIT_ETRE_PLACE = "Le cours doit être placé"
-    PAS_DE_COURS_DE_DEMI_JOURNEE = "Pas de cours de demi-journée"
     COURS_DOIT_AVOIR_PROFESSEUR = "Le cours doit avoir un professeur"
     PROFESSEUR_NE_PEUT_DONNER_2_COURS_EN_MEME_TEMPS = "Le professeur ne peut pas donner 2 cours en même temps"
-    PAS_DE_PROFESSEUR_DISPONIBLE = "Pas de professeur disponible"
-    SIMUL_SLOT = "Simul slot"
     SALLE_NE_PEUT_ACCEPTER_2_COURS_EN_MEME_TEMPS = "Une salle ne peut pas être disponible pour 2 cours à un même moment"
     UN_COURS_POUR_UN_TYPE_DE_SALLE = "Chaque cours doit être assigné à un type de salle"
-    SALLE_PAS_DISPONIBLE = "La salle n'est pas disponible"
     SALLE_DISPO_AU_PLUS_1_FOIS = "Chaque salle ne peut être utilisée qu'une seule fois"
+
+    # SPECIFIC
+    PAS_DE_COURS_DE_DEMI_JOURNEE = "Pas de cours de demi-journée"
+    PAS_DE_PROFESSEUR_DISPONIBLE = "Pas de professeur disponible"
+    SIMUL_SLOT = "Simul slot"
+    SALLE_PAS_DISPONIBLE = "La salle n'est pas disponible"
     SALLE_PREFEREE_NON_DISPONIBLE = "La salle préférée n'est pas disponible"
     DEPENDANCE = "Problème de dépendance"
     DEPENDANCE_SALLE = "Problème de dépendance entre les salles"
@@ -39,7 +38,7 @@ class ConstraintType(Enum):
     PROFESSEUR_A_DEJA_COURS_EN_AUTRE_DEPARTEMENT = "Le professeur a déjà un cours dans un autre département"
     PROFESSEUR_A_DEJA_COURS_EN_AUTRE_DEPARTEMENT_IBD = "Le professeur a déjà un cours dans un autre département IBD"
 
-    #iut
+    # From iut
     BOUND_HOURS_PER_DAY = "Bound_hours per day"
     PAS_COURS_JEUDI_APREM = "Pas_de_cours_le_jeudi_aprem"
     PAS_SPORT_SAUF_LUNDI_ET_MARDI = "Pas de sport sauf lundi et mardi"
@@ -78,13 +77,8 @@ class ConstraintType(Enum):
     PAS_PLUS_5_CRENEAU = "Pas_plus_de_5_creneau"
     G1_G2_COURS_MEME_JOUR = "G1 et G2 ont cours le meme jour"
 
-    #TTApp/models.py
+    # From TTApp/models
     MAX_HOURS = "Max hours"
-    REGISTER_EXPRESSION = "Reasonable days : register expression"
     STABILIZE_ENRICH_MODEL = "Stabilize : enrich model"
-    AVOID_BOTH_TIME = "avoid both time : enrich model"
-    COURS_SIMULTANES = "cours simultanes"
-    LIMITED_START_TIME_CHOICES = "Limited Start Time Choices"
-    LIMITED_ROOM_CHOICES = "Limited Room Choices"
 
-    #minhalfdays
+    # From minhalfdays
