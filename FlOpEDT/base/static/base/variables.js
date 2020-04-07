@@ -976,3 +976,9 @@ splash_hold = false;
 
 var modules_info = {};
 var tutors_info = {};
+
+
+// rectangle colors
+// cosmo mode: tutor_username -> {color_bg: color, color_txt: color}
+// tutor mode: module_abbrev -> {color_bg: color, color_txt: color}
+var colors = {} ;

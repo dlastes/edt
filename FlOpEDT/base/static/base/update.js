@@ -958,12 +958,20 @@ function update_active() {
   var tut_av = sel_popup.get_available("tutor");
   var mod_av = sel_popup.get_available("module");
 
-  tut_av.active = tutors.all.filter(function (d) {
-    return d.display;
-  }).length != tutors.all.length;
-  mod_av.active = modules.all.filter(function (d) {
-    return d.display;
-  }).length != modules.all.length;
+  if (typeof tut_av !== 'undefined') {
+    tut_av.active = tutors.all.filter(function (d) {
+      return d.display;
+    }).length != tutors.all.length;
+  } else {
+    tut_av = {active: false} ;
+  }
+  if (typeof mod_av !== 'undefined') {
+    mod_av.active = modules.all.filter(function (d) {
+      return d.display;
+    }).length != modules.all.length;
+  } else {
+    mod_av = {active: false} ;
+  }
 
   sel_popup.active_filter = tut_av.active || mod_av.active;
 
@@ -1045,9 +1053,9 @@ function go_courses(quick) {
 
   if (ckbox["edt-mod"].cked
       && logged_usr.dispo_all_see) {
-    d3.selectAll("rect.crect").style("fill", function (d) {
+    d3.selectAll("rect.crect").attr("fill", function (d) {
       try {
-        lDis = dispos[d.prof][d.day][d.slot];
+        lDis = get_preference(dispos[d.prof][d.day], d.duration);
       } catch (e) {
         lDis = par_dispos.nmax;
       }
@@ -1055,7 +1063,7 @@ function go_courses(quick) {
       return smi_fill(lDis / par_dispos.nmax);
     });
   } else {
-    d3.selectAll("rect.crect").style("fill", cours_fill);
+    d3.selectAll("rect.crect").attr("fill", cours_fill);
   }
 
   // Tutor's fullname 

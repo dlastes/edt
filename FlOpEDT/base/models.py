@@ -37,6 +37,7 @@ from base.timing import hhmm, str_slot
 import base.weeks
 
 
+
 # <editor-fold desc="GROUPS">
 # ------------
 # -- GROUPS --
@@ -154,6 +155,7 @@ class Time(models.Model):
                            verbose_name="Half day",
                            default=AM)
     no = models.PositiveSmallIntegerField(default=0)
+    # nom = models.CharField(max_length=20)
     hours = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(25)], default=8)
     minutes = models.PositiveSmallIntegerField(
@@ -372,14 +374,41 @@ class Course(models.Model):
         null=True, blank=True)
     year = models.PositiveSmallIntegerField()
     suspens = models.BooleanField(verbose_name='En suspens?', default=False)
+    index = None
 
     def __str__(self):
         username_mod = self.tutor.username if self.tutor is not None else '-no_tut-'
-        return f"{self.type}-{self.module}-{username_mod}-{self.group}"
+        return f"{self.type}-{self.module}-{username_mod}-{self.group}" \
+               + (" (%s)" % self.index if self.index is not None else "")
 
     def full_name(self):
         username_mod = self.tutor.username if self.tutor is not None else '-no_tut-'
         return f"{self.type}-{self.module}-{username_mod}-{self.group}"
+
+    def get_type(self):
+        return self.type
+
+    def get_tutor(self):
+        return self.tutor
+
+    def get_group(self):
+        return self.group
+
+    def get_module(self):
+        return self.module
+
+    def get_index(self):
+        return self.index
+
+    def set_index(self, index):
+        self.index = index
+
+    def equals(self, other):
+        return self.__class__ == other.__class__ \
+               and self.get_type() == other.get_type() \
+               and self.get_tutor() == other.get_tutor() \
+               and self.get_group() == other.get_group() \
+               and self.get_module() == other.get_module()
 
 
 class CoursePossibleTutors(models.Model):
