@@ -875,6 +875,9 @@ class SimultaneousCourses(TTConstraint):
         return attributes
 
     def enrich_model(self, ttmodel, week, ponderation=1):
+        possible_start_times = set()
+        for c in self.courses.all():
+            
         same_tutor = (self.course1.tutor == self.course2.tutor)
         for sl in ttmodel.wdb.compatible_slots[self.course1] & ttmodel.wdb.compatible_slots[self.course2]:
             var1 = ttmodel.TT[(sl, self.course1)]
