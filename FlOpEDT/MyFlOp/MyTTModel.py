@@ -34,7 +34,7 @@ from MyFlOp.MyTTUtils import print_differences
 
 
 class MyTTModel(TTModel):
-    def __init__(self, department_abbrev, weeks, year,
+    def __init__(self, department_abbrev, week_year_list,
                  train_prog=None,
                  stabilize_work_copy=None,
                  min_nps_i=1.,
@@ -46,7 +46,7 @@ class MyTTModel(TTModel):
                  lim_ld=1.,
                  core_only=False,
                  send_mails=False):
-        TTModel.__init__(self, department_abbrev, weeks, year,
+        TTModel.__init__(self, department_abbrev, weeks_year,
                          train_prog=train_prog,
                          stabilize_work_copy=stabilize_work_copy,
                          min_nps_i=min_nps_i,

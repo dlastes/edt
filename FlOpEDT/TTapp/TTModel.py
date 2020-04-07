@@ -424,7 +424,7 @@ class WeekDB(object):
 
 
 class TTModel(object):
-    def __init__(self, department_abbrev, weeks, year,
+    def __init__(self, department_abbrev, week_year_list,
                  train_prog=None,
                  stabilize_work_copy=None,
                  min_nps_i=1.,
@@ -436,7 +436,6 @@ class TTModel(object):
                  lim_ld=1.,
                  core_only=False,
                  send_mails=False):
-        print("\nLet's start weeks #%s" % weeks)
         # beg_file = os.path.join('logs',"FlOpTT")
         self.model = LpProblem("FlOpTT", LpMinimize)
         self.min_ups_i = min_nps_i
@@ -452,14 +451,22 @@ class TTModel(object):
         self.constraint_nb = 0
         self.constraintManager = ConstraintManager()
 
-        if type(weeks) is int:
-            self.weeks = [weeks]
-        else:
-            try:
-                self.weeks = list(weeks)
-            except TypeError:
-                raise TypeError("Weeks has to be int or iterable")
+        # Split week_year_list into weeks (list), and year (int)
+        # week_year should be a list of {'week': week, 'year': year}
+        year = None
+        weeks = []
+        for week_year in week_year_list:
+            y = week_year['year']
+            w = week_year['week']
+            if year is None: year = y
+            weeks.append(w)
+            if year != y:
+              raise Exception("Multiple week selection only support same year")
+
+        self.weeks = weeks
         self.year = year
+        print("\nLet's start weeks #%s" % weeks)
+
         self.warnings = {}
 
         self.department = Department.objects.get(abbrev=department_abbrev)
