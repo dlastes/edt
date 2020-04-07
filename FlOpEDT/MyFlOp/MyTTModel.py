@@ -46,6 +46,11 @@ class MyTTModel(TTModel):
                  lim_ld=1.,
                  core_only=False,
                  send_mails=False):
+        """
+        If you shall change something in the database ahead of creating the
+        problem, you must write it here, before calling TTModel's constructor.
+
+        """
         TTModel.__init__(self, department_abbrev, week_year_list,
                          train_prog=train_prog,
                          stabilize_work_copy=stabilize_work_copy,
