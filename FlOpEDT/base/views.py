@@ -1548,11 +1548,16 @@ def decale_changes(req, **kwargs):
             changing_course.week = new_week
             changing_course.year = new_year
             if new_year != 0:
-                changing_course.tutor = Tutor.objects.get(username=new_assignment['np'])
+                changing_course.tutor = Tutor.objects.get(
+                    username=new_assignment['np']
+                )
             cache.delete(get_key_course_pp(req.department.abbrev,
                                            new_year,
                                            new_week,
                                            0))
+            cache.delete(get_key_preferences_tutor(req.department.abbrev,
+                                                   new_year,
+                                                   new_week))
             changing_course.save()
             ev, _ = EdtVersion.objects.update_or_create(
                 year=new_year,
