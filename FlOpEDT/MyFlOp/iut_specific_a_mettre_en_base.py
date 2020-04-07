@@ -26,7 +26,8 @@
 # without disclosing the source code of your own applications.
 
 
-from TTapp.models import LimitCourseTypeTimePerPeriod, MinHalfDays, max_weight,  slots_filter, days_filter
+from TTapp.models import LimitCourseTypeTimePerPeriod, MinGroupsHalfDays, MinTutorsHalfDays, MinModulesHalfDays,\
+    max_weight,  slots_filter, days_filter
 from base.models import Time, Day, TrainingProgramme, CourseType, Module, Room, Department, ScheduledCourse, Group
 from people.models import Tutor, SupplyStaff
 from TTapp.constraint_type import ConstraintType
@@ -42,7 +43,7 @@ def add_common_constraints():
     for department in Department.objects.filter(abbrev__in=['INFO','RT','GIM','CS']):
         TP = TrainingProgramme.objects.filter(department=department)
 
-        M = MinHalfDays(weight=max_weight, department=department)
+        M = MinGroupsHalfDays(weight=max_weight, department=department)
         M.save()
         for g in Group.objects.filter(train_prog__in=TP, basic=True).exclude(train_prog__abbrev='APSIO'):
             M.groups.add(g)
@@ -114,7 +115,7 @@ def add_info_constraints():
     department = Department.objects.get(abbrev='INFO')
     lp_apsio = TrainingProgramme.objects.get(abbrev='APSIO')
 
-    M = MinHalfDays(join2courses=True, weight=max_weight)
+    M = MinModulesHalfDays(join2courses=True, weight=max_weight)
     M.save()
     for module in Module.objects.filter(train_prog=lp_apsio):
         M.modules.add(module)
@@ -123,7 +124,7 @@ def add_info_constraints():
     # Impose pour certains vacataires le fait qu'ils viennent sur une seule demi-journée (si moins de 3 cours)
     # C'EST CETTE CONTRAINTE, LORSQU'ELLE N'EST QUE PREFERENCE, QUI CREE LA PAGAILLE DANS CBC!!!
 
-    M = MinHalfDays(join2courses=True, weight=max_weight, department=department)
+    M = MinTutorsHalfDays(join2courses=True, weight=max_weight, department=department)
     M.save()
     for i in Tutor.objects.all():
         if i.username in ['AB', 'AJ', 'CDU', 'FMA', 'GRJ', 'JD', 'SD', 'FMO',

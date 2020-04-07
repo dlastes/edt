@@ -238,134 +238,6 @@ class TTConstraint(models.Model):
     def get_viewmodel_prefetch_attributes(cls):
         return ['train_progs', 'department',]
 
-#
-#   CustomConstraint
-#
-
-
-def get_constraint_list():
-    """
-    Return constraint class list contained in CUSTOM_CONSTRAINTS_PATH
-    """
-    try:
-        module = importlib.import_module(settings.CUSTOM_CONSTRAINTS_PATH)
-        classes = inspect.getmembers(module, inspect.isclass)
-
-        constraints = []
-        for class_name, _ in classes:
-            fully_qualified_name = f'{module.__name__}.{class_name}'
-            constraints.append((fully_qualified_name, fully_qualified_name))
-
-        return constraints
-    except ModuleNotFoundError:
-        print(f"can't find the {settings.CUSTOM_CONSTRAINTS_PATH} module")
-
-
-class CustomConstraint(TTConstraint):
-    """
-    Call a custom constraint implementation.
-    """
-
-    class_name = models.CharField(
-                    max_length=200,
-                    null=False,
-                    blank=False)
-    groups = models.ManyToManyField('base.Group', blank=True)
-    tutors = models.ManyToManyField('people.Tutor', blank=True)
-    modules = models.ManyToManyField('base.Module', blank=True)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Delay class_name field choices loading
-        self._meta.get_field('class_name').choices = lazy(get_constraint_list, list)()
-        self.constraint = None
-
-    def get_constraint(self, class_name):
-        """
-        Return class_method located in the targeted constraint class instance
-        """
-        if self.constraint is None:
-            module_name, class_name = class_name.rsplit('.', 1)
-            try:
-                # Get class instance
-                module = importlib.import_module(module_name)
-                self.constraint = getattr(module, class_name)()
-            except ModuleNotFoundError:
-                print(f"can't find the <{module_name}> module")
-            except:
-                print(f"an error has occured while loading class <{class_name}>")
-
-        return self.constraint
-
-    def get_method(self, method_name):
-        """
-        Return the method reference by inspecting the constraint instance
-        """
-        method = None
-        constraint = self.get_constraint(self.class_name)
-        if constraint:
-            method = getattr(constraint, method_name, None)
-        return method
-
-    def inject_method(func):
-        """
-        This decorator lookup for a method, in the class described by
-        class_name attribute, with the same name as the decorated method.
-        Once retrieve the method is then injected as a method keyword parameter.
-        """
-        @wraps(func)
-        def _wrapper(self, *args, **kwargs):
-            method = self.get_method(func.__name__)
-            return func(self, *args, injected_method=method, **kwargs)
-
-        return _wrapper
-
-    @inject_method
-    def enrich_model(self, ttmodel, week, ponderation=1, injected_method=None):
-        """
-        Call custom constraint method
-        """
-        args = {}
-
-        if self.groups.count():
-            args.update({'groups': list(self.groups.all())})
-
-
-        if self.tutors.count():
-            args.update({'tutors': list(self.tutors.all())})
-
-
-        if self.modules.count():
-            args.update({'modules': list(self.modules.all())})
-
-
-        if self.train_progs.count():
-            args.update({'train_progs': list(self.train_progs.all())})
-
-        if injected_method:
-            injected_method(ttmodel, ponderation, **args)
-
-    @inject_method
-    def one_line_description(self, injected_method=None):
-        description = ''
-        if injected_method:
-            description = injected_method()
-            if not description:
-                description = self.class_name
-        return description
-
-    @inject_method
-    def get_viewmodel(self, injected_method=None):
-        view_model = super().get_viewmodel()
-        details = view_model['details']
-        if injected_method:
-            details.update({'class': self.class_name})
-            details.update(injected_method())
-        else:
-            details.update({'class': f'{self.class_name} class not found'})
-
-        return view_model
-
 
 class LimitCourseTypeTimePerPeriod(TTConstraint):  # , pond):
     """
@@ -605,38 +477,6 @@ class Stabilize(TTConstraint):
                                                    '==',
                                                    0, constraint_type=ConstraintType.STABILIZE_ENRICH_MODEL, courses=fc, slots=slot)
 
-        # else:
-        #     fc = ttmodel.wdb.courses
-        #     if self.tutor is not None:
-        #         fc = fc.filter(tutor=self.tutor)
-        #     if self.type is not None:
-        #         fc = fc.filter(type=self.type)
-        #     if self.train_prog is not None:
-        #         fc = fc.filter(group__train_prog=self.train_prog)
-        #     if self.group:
-        #         fc = fc.filter(group=self.group)
-        #     if self.module:
-        #         fc = fc.filter(module=self.module)
-        #     for c in fc:
-        #         sched_c = ttmodel.wdb \
-        #             .sched_courses \
-        #             .get(course=c,
-        #                  work_copy=self.work_copy)
-        #         chosen_slot = sched_c.creneau
-        #         chosen_roomgroup = sched_c.room
-        #         if self.weight is not None:
-        #             ttmodel.obj -= self.local_weight() \
-        #                            * ponderation * ttmodel.TT[(chosen_slot, c)]
-        #
-        #         else:
-        #             ttmodel.add_constraint(ttmodel.TT[(chosen_slot, c)],
-        #                                    '==',
-        #                                    1)
-        #             if c.room_type in chosen_roomgroup.types.all():
-        #                 ttmodel.add_constraint(
-        #                     ttmodel.TTrooms[(chosen_slot, c, chosen_roomgroup)],
-        #                     '==',
-        #                     1)
 
     def one_line_description(self):
         text = "Minimiser les changements"
@@ -654,15 +494,57 @@ class Stabilize(TTConstraint):
         return text
 
 
-class MinHalfDays(TTConstraint):
+class MinGroupsHalfDays(TTConstraint):
     """
     All courses will fit in a minimum of half days
     You have to chose EITHER tutor OR group OR module
     Optional for tutors : if 2 courses only, possibility to join it
     """
     groups = models.ManyToManyField('base.Group', blank=True)
+
+
+
+    def enrich_model(self, ttmodel, week, ponderation=1):
+
+
+        if self.groups.exists():
+            helper = MinHalfDaysHelperGroup(ttmodel, self, week, ponderation)
+            for group in self.groups.all():
+                helper.enrich_model(group=group)
+
+        else:
+            print("MinGroupHalfDays must have at least one group  --> Ignored")
+            return
+
+
+    def get_viewmodel(self):
+        view_model = super().get_viewmodel()
+        details = view_model['details']
+
+        if self.groups.exists():
+            details.update({'groups': ', '.join([group.name for group in self.groups.all()])})
+
+        return view_model
+
+
+    def one_line_description(self):
+        text = "Minimise les demie-journées"
+
+        if self.groups.exists():
+            text += ' du(des) groupe(s) : ' + ', '.join([group.name for group in self.groups.all()])
+
+        if self.train_progs.exists():
+            text += ' en ' + ', '.join([train_prog.abbrev for train_prog in self.train_progs.all()])
+
+        return text
+
+
+class MinTutorsHalfDays(TTConstraint):
+    """
+    All courses will fit in a minimum of half days
+    Optional: if 2 courses only, possibility to join it
+    """
     tutors = models.ManyToManyField('people.Tutor', blank=True)
-    modules = models.ManyToManyField('base.Module', blank=True)
 
     join2courses = models.BooleanField(
         verbose_name='If a tutor has 2 or 4 courses only, join it?',
@@ -677,18 +559,8 @@ class MinHalfDays(TTConstraint):
                 if tutor in ttmodel.wdb.instructors:
                     helper.enrich_model(tutor=tutor)
 
-        elif self.modules.exists():
-            helper = MinHalfDaysHelperModule(ttmodel, self, week, ponderation)
-            for module in self.modules.all():
-                helper.enrich_model(module=module)
-
-        elif self.groups.exists():
-            helper = MinHalfDaysHelperGroup(ttmodel, self, week, ponderation)
-            for group in self.groups.all():
-                helper.enrich_model(group=group)
-
         else:
-            print("MinHalfDays must have at least one tutor or one group or one module --> Ignored")
+            print("MinTutorsHalfDays must have at least one tutor --> Ignored")
             return
 
 
@@ -699,12 +571,6 @@ class MinHalfDays(TTConstraint):
         if self.tutors.exists():
             details.update({'tutors': ', '.join([tutor.username for tutor in self.tutors.all()])})
 
-        if self.groups.exists():
-            details.update({'groups': ', '.join([group.name for group in self.groups.all()])})
-
-        if self.modules.exists():
-            details.update({'modules': ', '.join([module.name for module in self.modules.all()])})
-
         return view_model
 
 
@@ -714,8 +580,42 @@ class MinHalfDays(TTConstraint):
         if self.tutors.exists():
             text += ' de : ' + ', '.join([tutor.username for tutor in self.tutors.all()])
 
-        if self.groups.exists():
-            text += ' du(des) groupe(s) : ' + ', '.join([group.name for group in self.groups.all()])
+        if self.train_progs.exists():
+            text += ' en ' + ', '.join([train_prog.abbrev for train_prog in self.train_progs.all()])
+
+        return text
+
+
+class MinModulesHalfDays(TTConstraint):
+    """
+    All courses will fit in a minimum of half days
+    """
+    modules = models.ManyToManyField('base.Module', blank=True)
+
+    def enrich_model(self, ttmodel, week, ponderation=1):
+
+        if self.modules.exists():
+            helper = MinHalfDaysHelperModule(ttmodel, self, week, ponderation)
+            for module in self.modules.all():
+                helper.enrich_model(module=module)
+
+        else:
+            print("MinHalfDays must have at least  one module --> Ignored")
+            return
+
+
+    def get_viewmodel(self):
+        view_model = super().get_viewmodel()
+        details = view_model['details']
+
+        if self.modules.exists():
+            details.update({'modules': ', '.join([module.name for module in self.modules.all()])})
+
+        return view_model
+
+
+    def one_line_description(self):
+        text = "Minimise les demie-journées"
 
         if self.modules.exists():
             text += ' de : ' + ', '.join([str(module) for module in self.modules.all()])
@@ -764,11 +664,9 @@ class MinNonPreferedTutorsSlot(TTConstraint):
 
 
 class MinNonPreferedTrainProgsSlot(TTConstraint):
-
     """
     Minimize the use of unprefered Slots for tutors
     """
-
     def enrich_model(self, ttmodel, week, ponderation=1):
         if self.train_progs.exists():
             train_progs = set(tp for tp in self.train_progs.all() if tp in ttmodel.train_prog)
@@ -798,8 +696,113 @@ class MinNonPreferedTrainProgsSlot(TTConstraint):
         return text
 
 
-'''
-Ex TTConstraints that would have to be re-written.....
+
+# From Custom
+
+
+class MinimizeBusyDays(TTConstraint):
+    """
+    This class is a template for writing your own custom contraint.
+
+    The module can contains several custom constraints.
+    """
+    tutors = models.ManyToManyField('people.Tutor', blank=True)
+
+    def enrich_model(self, ttmodel, week, ponderation=None):
+        """
+        Minimize the number of busy days for tutor with cost
+        (if it does not overcome the bound expressed in pref_hours_per_day)
+        """
+        if ponderation is None:
+            ponderation = ttmodel.min_bd_i
+
+        for tutor in self.tutors:
+            slot_by_day_cost = 0
+            # need to be sorted
+            courses_hours = sum(c.type.duration
+                                for c in (ttmodel.wdb.courses_for_tutor[tutor]
+                                          | ttmodel.wdb.courses_for_supp_tutor[tutor])
+                                & ttmodel.wdb.courses_by_week[week]) \
+                            / 60
+            nb_days = 5
+            frontier_pref_busy_days = [tutor.pref_hours_per_day * d for d in range(nb_days - 1, 0, -1)]
+
+            for fr in frontier_pref_busy_days:
+                if courses_hours <= fr:
+                    slot_by_day_cost *= 2
+                    slot_by_day_cost += ttmodel.IBD_GTE[week][nb_days][tutor]
+                    nb_days -= 1
+                else:
+                    break
+            ttmodel.add_to_inst_cost(tutor, ponderation * slot_by_day_cost, week=week)
+
+    def get_viewmodel(self):
+        view_model = super().get_viewmodel()
+        details = view_model['details']
+
+        if self.tutors.exists():
+            details.update({'tutors': ', '.join([tutor.username for tutor in self.tutors.all()])})
+
+        return view_model
+
+    def one_line_description(self):
+        """
+        You can give a contextual explanation about what this constraint doesnt
+        """
+        return "MinimizeBusyDays online description"
+
+    class Meta:
+        verbose_name = "Minimiser les jours de présence"
+
+
+class RespectBoundPerDay:
+    """
+    Respect the max_hours_per_day declared
+    """
+    tutors = models.ManyToManyField('people.Tutor', blank=True)
+
+
+    def enrich_model(self, ttmodel, week):
+        """
+        Minimize the number of busy days for tutor with cost
+        (if it does not overcome the bound expressed in pref_hours_per_day)
+        """
+        for tutor in self.tutors:
+            for d in days_filter(ttmodel.wdb.days, week=week):
+                ttmodel.add_constraint(ttmodel.sum(ttmodel.TT[sl, c] * c.type.duration / 60
+                                                   for c in ttmodel.wdb.courses_for_tutor[tutor] if c.week == week
+                                                   for sl in slots_filter(ttmodel.wdb.slots, day=d)
+                                                   & ttmodel.wdb.compatible_slots[c]),
+                                       '<=',
+                                       tutor.max_hours_per_day,
+                                       constraint_type=ConstraintType.BOUND_HOURS_PER_DAY, instructors=tutor,
+                                       days=d)
+
+    def get_viewmodel(self):
+        view_model = super().get_viewmodel()
+        details = view_model['details']
+
+        if self.tutors.exists():
+            details.update({'tutors': ', '.join([tutor.username for tutor in self.tutors.all()])})
+
+        return view_model
+
+    def one_line_description(self):
+        """
+        You can give a contextual explanation about what this constraint doesnt
+        """
+        return "RespectBoundPerDay online description"
+
+    class Meta:
+        verbose_name = "Respecter les limites horaires"
+
+
+
+
+
+
+
+# Ex TTConstraints that have to be re-written.....
 
 class AvoidBothTimes(TTConstraint):
     """
@@ -861,11 +864,9 @@ class AvoidBothTimes(TTConstraint):
 
 class SimultaneousCourses(TTConstraint):
     """
-    Force two courses to be simultaneous
-    It modifies the core constraints that impides such a simultaneity
+    Force courses to start simultaneously
     """
-    course1 = models.ForeignKey('base.Course', related_name='course1', on_delete=models.CASCADE)
-    course2 = models.ForeignKey('base.Course', related_name='course2', on_delete=models.CASCADE)
+    courses = models.ManyToManyField('base.Course', related_name='simultaneous_courses_constraints')
 
     @classmethod
     def get_viewmodel_prefetch_attributes(cls):
@@ -873,7 +874,7 @@ class SimultaneousCourses(TTConstraint):
         attributes.extend(['course1', 'course2'])
         return attributes
 
-    def enrich_model(self, ttmodel, ponderation=1):
+    def enrich_model(self, ttmodel, week, ponderation=1):
         same_tutor = (self.course1.tutor == self.course2.tutor)
         for sl in ttmodel.wdb.compatible_slots[self.course1] & ttmodel.wdb.compatible_slots[self.course2]:
             var1 = ttmodel.TT[(sl, self.course1)]
@@ -1037,4 +1038,140 @@ class LimitedRoomChoices(TTConstraint):
         for sl in self.possible_rooms.values_list():
             text += str(sl) + ', '
         return text
-'''
+
+
+
+
+
+
+
+
+
+
+#
+#   CustomConstraint
+#
+
+
+def get_constraint_list():
+    """
+    Return constraint class list contained in CUSTOM_CONSTRAINTS_PATH
+    """
+    try:
+        module = importlib.import_module(settings.CUSTOM_CONSTRAINTS_PATH)
+        classes = inspect.getmembers(module, inspect.isclass)
+
+        constraints = []
+        for class_name, _ in classes:
+            fully_qualified_name = f'{module.__name__}.{class_name}'
+            constraints.append((fully_qualified_name, fully_qualified_name))
+
+        return constraints
+    except ModuleNotFoundError:
+        print(f"can't find the {settings.CUSTOM_CONSTRAINTS_PATH} module")
+
+
+class CustomConstraint(TTConstraint):
+    """
+    Call a custom constraint implementation.
+    """
+
+    class_name = models.CharField(
+                    max_length=200,
+                    null=False,
+                    blank=False)
+    groups = models.ManyToManyField('base.Group', blank=True)
+    tutors = models.ManyToManyField('people.Tutor', blank=True)
+    modules = models.ManyToManyField('base.Module', blank=True)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Delay class_name field choices loading
+        self._meta.get_field('class_name').choices = lazy(get_constraint_list, list)()
+        self.constraint = None
+
+    def get_constraint(self, class_name):
+        """
+        Return class_method located in the targeted constraint class instance
+        """
+        if self.constraint is None:
+            module_name, class_name = class_name.rsplit('.', 1)
+            try:
+                # Get class instance
+                module = importlib.import_module(module_name)
+                self.constraint = getattr(module, class_name)()
+            except ModuleNotFoundError:
+                print(f"can't find the <{module_name}> module")
+            except:
+                print(f"an error has occured while loading class <{class_name}>")
+
+        return self.constraint
+
+    def get_method(self, method_name):
+        """
+        Return the method reference by inspecting the constraint instance
+        """
+        method = None
+        constraint = self.get_constraint(self.class_name)
+        if constraint:
+            method = getattr(constraint, method_name, None)
+        return method
+
+    def inject_method(func):
+        """
+        This decorator lookup for a method, in the class described by
+        class_name attribute, with the same name as the decorated method.
+        Once retrieve the method is then injected as a method keyword parameter.
+        """
+        @wraps(func)
+        def _wrapper(self, *args, **kwargs):
+            method = self.get_method(func.__name__)
+            return func(self, *args, injected_method=method, **kwargs)
+
+        return _wrapper
+
+    @inject_method
+    def enrich_model(self, ttmodel, week, ponderation=1, injected_method=None):
+        """
+        Call custom constraint method
+        """
+        args = {}
+
+        if self.groups.count():
+            args.update({'groups': list(self.groups.all())})
+
+
+        if self.tutors.count():
+            args.update({'tutors': list(self.tutors.all())})
+
+
+        if self.modules.count():
+            args.update({'modules': list(self.modules.all())})
+
+
+        if self.train_progs.count():
+            args.update({'train_progs': list(self.train_progs.all())})
+
+        if injected_method:
+            injected_method(ttmodel, ponderation, **args)
+
+    @inject_method
+    def one_line_description(self, injected_method=None):
+        description = ''
+        if injected_method:
+            description = injected_method()
+            if not description:
+                description = self.class_name
+        return description
+
+    @inject_method
+    def get_viewmodel(self, injected_method=None):
+        view_model = super().get_viewmodel()
+        details = view_model['details']
+        if injected_method:
+            details.update({'class': self.class_name})
+            details.update(injected_method())
+        else:
+            details.update({'class': f'{self.class_name} class not found'})
+
+        return view_model
