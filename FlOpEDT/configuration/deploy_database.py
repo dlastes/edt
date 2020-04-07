@@ -197,11 +197,8 @@ def rooms_extract(department, book):
     while room_id is not None :
 
         try:
-            if not Room.objects.filter(name=room_id).exists():
-                room_group, _ = Room.objects.get_or_create(name=room_id)
-                room_group.types.add(temporary_room_type)
-            else:
-                logger.warning(f"A custom group can't have the same name thant an existing Room : {room_id}")
+            room_group, _ = Room.objects.get_or_create(name=room_id)
+            room_group.types.add(temporary_room_type)
 
         except IntegrityError as ie:
             logger.warning("A constraint has not been respected creating the RoomGroup %s : \n" %room_id, ie)
