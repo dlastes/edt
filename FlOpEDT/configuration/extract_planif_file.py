@@ -31,7 +31,8 @@ from openpyxl import *
 from base.weeks import actual_year
 from base.models import Group, Module, Course, CourseType, RoomType,\
     TrainingProgramme, Dependency, Period, Department
-from people.models import Tutor
+from people.models import Tutor, UserDepartmentSettings
+from people.tutor import fill_default_user_preferences
 from misc.assign_colors import assign_module_color
 
 
@@ -113,6 +114,8 @@ def ReadPlanifWeek(department, book, feuille, week, year):
                 TUTOR, created = Tutor.objects.get_or_create(username='---')
                 if created:
                     TUTOR.save()
+                    fill_default_user_preferences(TUTOR)
+                    UserDepartmentSettings(user=TUTOR, department=department).save()
                 supp_profs=[]
             else:
                 assert isinstance(prof, str) and prof is not None
