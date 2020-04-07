@@ -631,7 +631,7 @@ class MinNonPreferedTutorsSlot(TTConstraint):
     Minimize the use of unprefered Slots for tutors
     """
     tutors = models.ManyToManyField('people.Tutor',
-                                    related_name='min_non_prefered_slots_constraints')
+                                    related_name='min_non_prefered_tutors_slots_constraints')
 
     @classmethod
     def get_viewmodel_prefetch_attributes(cls):
@@ -716,7 +716,7 @@ class MinimizeBusyDays(TTConstraint):
         if ponderation is None:
             ponderation = ttmodel.min_bd_i
 
-        for tutor in self.tutors:
+        for tutor in self.tutors.all():
             slot_by_day_cost = 0
             # need to be sorted
             courses_hours = sum(c.type.duration
@@ -755,7 +755,7 @@ class MinimizeBusyDays(TTConstraint):
         verbose_name = "Minimiser les jours de présence"
 
 
-class RespectBoundPerDay:
+class RespectBoundPerDay(TTConstraint):
     """
     Respect the max_hours_per_day declared
     """
@@ -767,7 +767,7 @@ class RespectBoundPerDay:
         Minimize the number of busy days for tutor with cost
         (if it does not overcome the bound expressed in pref_hours_per_day)
         """
-        for tutor in self.tutors:
+        for tutor in self.tutors.all():
             for d in days_filter(ttmodel.wdb.days, week=week):
                 ttmodel.add_constraint(ttmodel.sum(ttmodel.TT[sl, c] * c.type.duration / 60
                                                    for c in ttmodel.wdb.courses_for_tutor[tutor] if c.week == week
@@ -797,6 +797,71 @@ class RespectBoundPerDay:
         verbose_name = "Respecter les limites horaires"
 
 
+
+# A tester!
+class SimultaneousCourses(TTConstraint):
+    """
+    Force courses to start simultaneously
+    """
+    courses = models.ManyToManyField('base.Course', related_name='simultaneous_courses_constraints')
+
+    @classmethod
+    def get_viewmodel_prefetch_attributes(cls):
+        attributes = super().get_viewmodel_prefetch_attributes()
+        attributes.extend(['courses'])
+        return attributes
+
+    def enrich_model(self, ttmodel, week, ponderation=1):
+        types = set(c.type for c in self.courses.all())
+        nb_courses = self.courses.count()
+        possible_start_times = set()
+        for t in types:
+            possible_start_times |= set(t.coursestarttimeconstraint_set.all()[0].allowed_start_times)
+        for day in ttmodel.wdb.days:
+            for st in possible_start_times:
+                check_var = ttmodel.add_var("check_var")
+                expr = ttmodel.lin_expr()
+                for c in self.courses.all():
+                    possible_slots = slots_filter(ttmodel.wdb.compatible_slots[c], start_time=st, day=day)
+                    for sl in possible_slots:
+                        expr += ttmodel.TT[(sl, c)]
+                ttmodel.add_constraint(nb_courses * check_var - expr, '==', 0,
+                                       constraint_type=ConstraintType.COURS_SIMULTANES, courses=list(self.courses.all()))
+                ttmodel.add_constraint(expr - check_var, '>=', 0,
+                                       constraint_type=ConstraintType.COURS_SIMULTANES,
+                                       courses=list(self.courses.all()))
+            # A compléter, l'idée est que si les cours ont le même prof, ou des
+            # groupes qui se superposent, il faut veiller à supprimer les core
+            # constraints qui empêchent que les cours soient simultanés...
+            # same_tutor = (self.course1.tutor == self.course2.tutor)
+            # if same_tutor and self.course1.tutor in ttmodel.wdb.instructors:
+            #     for sl2 in ttmodel.wdb.slots_intersecting[sl] - {sl}:
+            #         name_tutor_constr_sl2 = 'simul_slots' + str(self.course1.tutor) + '_' + str(sl) + '_' + str(sl2)
+            #         tutor_constr = ttmodel.get_constraint(name_tutor_constr_sl2)
+            #         print(tutor_constr)
+            #         if ttmodel.var_coeff(var1, tutor_constr) == 1:
+            #             ttmodel.change_var_coeff(var1, tutor_constr, 0)
+            # for bg in ttmodel.wdb.basic_groups:
+            #     bg_groups = ttmodel.wdb.all_groups_of[bg]
+            #     if self.course1.group in bg_groups and self.course2.group in bg_groups:
+            #         for sl2 in ttmodel.wdb.slots_intersecting[sl] - {sl}:
+            #             name_group_constr_sl2 = 'simul_slots' + bg.full_name() + '_' + str(sl) + '_' + str(sl2)
+            #             group_constr = ttmodel.get_constraint(name_group_constr_sl2)
+            #             if ttmodel.var_coeff(var1, group_constr) == 1:
+            #                 ttmodel.change_var_coeff(var1, group_constr, 0)
+
+    def get_viewmodel(self):
+        view_model = super().get_viewmodel()
+        details = view_model['details']
+
+        if self.courses.exists():
+            details.update({'courses': ', '.join([str(course) for course in self.courses.all()])})
+
+        return view_model
+
+
+    def one_line_description(self):
+        return f"Les cours {self.courses.all()} doivent être simultanés !"
 
 
 
@@ -862,54 +927,9 @@ class AvoidBothTimes(TTConstraint):
         return text
 
 
-class SimultaneousCourses(TTConstraint):
-    """
-    Force courses to start simultaneously
-    """
-    courses = models.ManyToManyField('base.Course', related_name='simultaneous_courses_constraints')
-
-    @classmethod
-    def get_viewmodel_prefetch_attributes(cls):
-        attributes = super().get_viewmodel_prefetch_attributes()
-        attributes.extend(['course1', 'course2'])
-        return attributes
-
-    def enrich_model(self, ttmodel, week, ponderation=1):
-        possible_start_times = set()
-        for c in self.courses.all():
-            
-        same_tutor = (self.course1.tutor == self.course2.tutor)
-        for sl in ttmodel.wdb.compatible_slots[self.course1] & ttmodel.wdb.compatible_slots[self.course2]:
-            var1 = ttmodel.TT[(sl, self.course1)]
-            var2 = ttmodel.TT[(sl, self.course2)]
-            ttmodel.add_constraint(var1 - var2, '==', 0,
-                                   constraint_type=ConstraintType.COURS_SIMULTANES, courses=[self.course1, self.course2])
-            # A compléter, l'idée est que si les cours ont le même prof, ou des
-            # groupes qui se superposent, il faut veiller à supprimer les core
-            # constraints qui empêchent que les cours soient simultanés...
-            if same_tutor and self.course1.tutor in ttmodel.wdb.instructors:
-                for sl2 in ttmodel.wdb.slots_intersecting[sl] - {sl}:
-                    name_tutor_constr_sl2 = 'simul_slots' + str(self.course1.tutor) + '_' + str(sl) + '_' + str(sl2)
-                    tutor_constr = ttmodel.get_constraint(name_tutor_constr_sl2)
-                    print(tutor_constr)
-                    if ttmodel.var_coeff(var1, tutor_constr) == 1:
-                        ttmodel.change_var_coeff(var1, tutor_constr, 0)
-            for bg in ttmodel.wdb.basic_groups:
-                bg_groups = ttmodel.wdb.all_groups_of[bg]
-                if self.course1.group in bg_groups and self.course2.group in bg_groups:
-                    for sl2 in ttmodel.wdb.slots_intersecting[sl] - {sl}:
-                        name_group_constr_sl2 = 'simul_slots' + bg.full_name() + '_' + str(sl) + '_' + str(sl2)
-                        group_constr = ttmodel.get_constraint(name_group_constr_sl2)
-                        if ttmodel.var_coeff(var1, group_constr) == 1:
-                            ttmodel.change_var_coeff(var1, group_constr, 0)
-
-    def one_line_description(self):
-        return "Les cours " + str(self.course1) + " et " + str(self.course2) + " doivent être simultanés !"
-
-
 class LimitedStartTimeChoices(TTConstraint):
     """
-    Limit the possible slots for the courses
+    Limit the possible start times
     """
 
     module = models.ForeignKey('base.Module',
@@ -933,7 +953,7 @@ class LimitedStartTimeChoices(TTConstraint):
 
 
 
-    def enrich_model(self, ttmodel, ponderation=1.):
+    def enrich_model(self, ttmodel, week, ponderation=1.):
         fc = ttmodel.wdb.courses
         if self.tutor is not None:
             fc = fc.filter(tutor=self.tutor)
@@ -941,8 +961,8 @@ class LimitedStartTimeChoices(TTConstraint):
             fc = fc.filter(module=self.module)
         if self.type is not None:
             fc = fc.filter(type=self.type)
-        if self.train_prog is not None:
-            fc = fc.filter(group__train_prog=self.train_prog)
+        if self.train_progs.exists():
+            fc = fc.filter(group__train_prog__in=self.train_progs.all())
         if self.group is not None:
             fc = fc.filter(group=self.group)
         possible_slots_ids = set(slot.id for slot in ttmodel.wdb.slots
@@ -966,8 +986,8 @@ class LimitedStartTimeChoices(TTConstraint):
             text += " de " + str(self.module)
         if self.tutor:
             text += ' de ' + str(self.tutor)
-        if self.train_prog:
-            text += ' en ' + str(self.train_prog)
+        if self.train_progs.exists():
+            text += ' en ' + str(self.train_progs.all())
         if self.group:
             text += ' avec le groupe ' + str(self.group)
         text += " ne peuvent avoir lieu qu'à "
@@ -1002,7 +1022,7 @@ class LimitedRoomChoices(TTConstraint):
     possible_rooms = models.ManyToManyField('base.Room',
                                             related_name="limited_rooms")
 
-    def enrich_model(self, ttmodel, ponderation=1.):
+    def enrich_model(self, ttmodel, week, ponderation=1.):
         fc = ttmodel.wdb.courses
         if self.tutor is not None:
             fc = fc.filter(tutor=self.tutor)
@@ -1033,8 +1053,8 @@ class LimitedRoomChoices(TTConstraint):
             text += " de " + str(self.module)
         if self.tutor:
             text += ' de ' + str(self.tutor)
-        if self.train_prog:
-            text += ' en ' + str(self.train_prog)
+        if self.train_progs.exists():
+            text += ' en ' + str(self.train_progs.all())
         if self.group:
             text += ' avec le groupe ' + str(self.group)
         text += " ne peuvent avoir lieu qu'en salle "

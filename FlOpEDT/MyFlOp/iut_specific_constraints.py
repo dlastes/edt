@@ -26,7 +26,7 @@
 # without disclosing the source code of your own applications.
 
 
-from TTapp.models import LimitCourseTypeTimePerPeriod, MinHalfDays, max_weight,  slots_filter, days_filter
+from TTapp.models import LimitCourseTypeTimePerPeriod, MinTutorsHalfDays, max_weight,  slots_filter, days_filter
 from base.models import Time, Day, TrainingProgramme, CourseType, Module, Room, Department, ScheduledCourse
 from people.models import Tutor, SupplyStaff
 from TTapp.constraint_type import ConstraintType
@@ -1119,7 +1119,7 @@ def add_iut_blagnac_cs(ttmodel):
 
     # si 3h d'intervention dans la semaine et dispo sur 2 demi-journées, concentrer sur 1 seule demi-journée (++)
     for week in ttmodel.weeks:
-        M = MinHalfDays(join2courses=True, weight=max_weight, department=ttmodel.department)
+        M = MinTutorsHalfDays(join2courses=True, weight=max_weight, department=ttmodel.department)
         M.save()
         for i in ttmodel.wdb.instructors:
             if sum(c.type.duration / 60 for c in ttmodel.wdb.courses_for_tutor[i] if c.week == week) <= 180:
