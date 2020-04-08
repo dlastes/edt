@@ -136,7 +136,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/1.10/topics/i18n/
 
-LANGUAGE_CODE = 'fr'
+LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_L10N = True
@@ -146,8 +146,8 @@ AUTH_USER_MODEL = 'people.User'
 
 # Available languages
 LANGUAGES = [
-  ('fr', _('Français')),
-  ('en', _('Anglais')),
+  ('fr', _('French')),
+  ('en', _('English')),
 ]
 
 # Folder which contains traduction files
