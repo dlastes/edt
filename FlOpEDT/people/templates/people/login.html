@@ -50,8 +50,12 @@
 	  </tr>
 	</table>
 	
-	<span><a href="{% url 'people:password_reset' %}">{% trans "Mot de passe perdu ?" %}</a></span>
-	<input style="float:right" type="submit" value="{% trans "Se connecter" %}"/>
+	<span>
+          <a href="{% url 'people:password_reset' %}">
+            {% trans "Forgot password?" %}
+          </a>
+        </span>
+	<input style="float:right" type="submit" value="{% trans 'Sign in' %}"/>
 	<input type="hidden" name="next" value="{{ next }}"/>
       </form>
     </fieldset>
@@ -72,14 +76,14 @@
 <!--  <br style="clear: both" />-->
   
   <fieldset style="width:300px">
-    <legend>{% trans "Nouveau compte" %}</legend>
-    {% trans "Je suis" %}
+    <legend>{% trans 'Sign up' %}</legend>
+    {% trans 'I am' %}
     <form name="add">
-      <input type="radio" id="stud" name="create" checked="checked">{% trans "Étudiant·e" %}</input><br/>
-      <input type="radio" id="full" name="create">{% trans "Enseignant·e permanent·e" %}</input><br/>
-      <input type="radio" id="supp" name="create">{% trans "Vacataire" %}</input><br/>
-      <input type="radio" id="BIAT" name="create">{% trans "BIATOS" %}</input><br/>
-      <input style="float:right" type="button" value="{% trans "Créer" %}" onClick="create_user()"/>
+      <input type="radio" id="stud" name="create" checked="checked">{% trans 'A student' %}</input><br/>
+      <input type="radio" id="full" name="create">{% trans 'A teacher' %}</input><br/>
+      <input type="radio" id="supp" name="create">{% trans 'A temporary teacher' %}</input><br/>
+      <input type="radio" id="BIAT" name="create">{% trans 'A tech or administrative staff' %}</input><br/>
+      <input style="float:right" type="button" value="{% trans 'Create' %}" onClick="create_user()"/>
     </form>
     <!--<p><a href="{ % url 'add_user' % }">Créer un nouveau compte</a></p>-->
   </fieldset>

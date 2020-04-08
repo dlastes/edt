@@ -853,10 +853,12 @@ class MinNonPreferedSlot(TTConstraint):
     def clean(self):
         if not self.tutor and not self.train_prog:
             raise ValidationError({
-                'train_prog': ValidationError(_('Si pas de prof alors promo.',
-                                                code='invalid')),
-                'tutor': ValidationError(_('Si pas de promo alors prof.',
-                                           code='invalid'))})
+                'train_prog': ValidationError(
+                    _('If no tutor then training programme.',
+                      code='invalid')),
+                'tutor': ValidationError(
+                    _('If no training programme then tutor.',
+                      code='invalid'))})
 
     def enrich_model(self, ttmodel, week, ponderation=1):
         if self.tutor is not None:

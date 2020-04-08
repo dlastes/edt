@@ -48,7 +48,7 @@
 <script src="{% static 'base/loader.js' %}"></script>
 <script>var url_logo = "{% static 'base/logo-clock.svg' %}";</script>
 <!-- script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script -->
-<title>{% block title %}{% trans "Emplois du temps" %}{% endblock %}</title>
+<title>{% block title %}{% trans "Schedule_title" %}{% endblock %}</title>
 </head>
 <body>
   {% block loader %}
@@ -77,20 +77,20 @@
       {% if request.is_department_admin %}
       <li><a href="#" onclick="openNav()">☰</a></li>
       {% endif %}
-      <li><a href="{% url "base:edt" department %}">{% trans "Consulter" %}</a></li>
+      <li><a href="{% url "base:edt" department %}">{% trans 'Schedule_banner' %}</a></li>
       {% if request.has_department_perm %}
-      <li><a href="{% url "base:decale" department %}">{% trans "Décaler/Annuler" %}</a></li>
+      <li><a href="{% url "base:decale" department %}">{% trans 'Move/Cancel' %}</a></li>
       {% endif %}
-      <li><a href="{% url "base:preferences" department %}">{% trans "Préférences" %}</a></li>
-      <li><a href="{% url "ics:index" department %}">{% trans "iCal" %}</a></li>
-      <li><a href="{% url "base:aide" department %}">{% trans "Aide" %}</a></li>
-      <li><a href="{% url "base:contact" department %}">{% trans "Contact" %}</a></li>
-      <li><a href="{% url "base:modules" department %}">{% trans "Modules" %}</a></li>
+      <li><a href="{% url "base:preferences" department %}">{% trans 'Preferences' %}</a></li>
+      <li><a href="{% url "ics:index" department %}">{% trans 'iCal' %}</a></li>
+      <li><a href="{% url "base:aide" department %}">{% trans 'Help' %}</a></li>
+      <li><a href="{% url "base:contact" department %}">{% trans 'Messages' %}</a></li>
+      <li><a href="{% url "base:modules" department %}">{% trans 'Modules' %}</a></li>
       {% if request.is_department_admin %}
-      <li><a href="{% url "solve_board:main_board" department %}">{% trans "Générer" %}</a></li>
-      <li><a href="{% url "base:statistics" department %}">{% trans "Statistiques" %}</a></li>
-      <li><a href="{% url "configuration:configuration" %}">{% trans "Importer" %}</a></li>
-      <li><a href="{% url "admin:index" %}">{% trans "Admin" %}</a></li>
+      <li><a href="{% url "solve_board:main_board" department %}">{% trans 'Generate' %}</a></li>
+      <li><a href="{% url "base:statistics" department %}">{% trans 'Statistics' %}</a></li>
+      <li><a href="{% url "configuration:configuration" %}">{% trans 'Import'%}</a></li>
+      <li><a href="{% url "admin:index" %}">{% trans 'Admin'%}</a></li>
       {% endif %}
       {% endif %}
       <li style="float:right">
@@ -98,16 +98,16 @@
 	{% if request.department %}
 	<a href="{% url "people:logout" %}?next={% url "base:edt" department %}">{% trans "Déconnexion" %}</a>
 	{% elif not 'accounts' in request.path %}
-	<a href="{% url "people:logout" %}?next={{request.path}}">{% trans "Déconnexion" %}</a>
+	<a href="{% url "people:logout" %}?next={{request.path}}">{% trans 'Sign out' %}</a>
 	{% else %}
-	<a href="{% url "people:logout" %}">{% trans "Déconnexion" %}</a>
+	<a href="{% url "people:logout" %}">{% trans "Sign out" %}</a>
 	{% endif %}
 	{% else %}
-	<a href="{% url "people:login" %}?next={{request.path}}">{% trans "Se connecter" %}</a>
+	<a href="{% url "people:login" %}?next={{request.path}}">{% trans 'Sign in' %}</a>
 	{% endif %}
       </li>
       <li style="float:right">{% if user.is_authenticated %}
-	<a href="{% url "people:change_redirect" %}">{% trans "Connecté·e sous " %} {{ user.username }}</a> {% endif %}
+	<a href="{% url "people:change_redirect" %}">{% trans 'Signed in as ' %} {{ user.username }}</a> {% endif %}
       </li>
     </ul>
     {% endblock %}
