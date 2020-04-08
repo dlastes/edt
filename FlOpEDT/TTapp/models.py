@@ -550,7 +550,6 @@ class MinTutorsHalfDays(TTConstraint):
         verbose_name='If a tutor has 2 or 4 courses only, join it?',
         default=False)
 
-
     def enrich_model(self, ttmodel, week, ponderation=1):
 
         if self.tutors.exists():

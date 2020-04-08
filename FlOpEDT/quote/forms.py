@@ -38,14 +38,14 @@ class QuoteForm(ModelForm):
         model = Quote
         fields = ['quote', 'last_name', 'for_name', 'nick_name', 'desc_author', 'date', 'header', 'quote_type']
         labels = {
-            'quote': _('Citation '),
-            'last_name': _('Nom '),
-            'for_name': _('Prénom '),
-            'nick_name': _('Pseudo '),
-            'desc_author': mark_safe(_("Fonction, description<br/> de l'auteur/autrice ")),
+            'quote': _('Quote '),
+            'last_name': _('Last name '),
+            'for_name': _('First name '),
+            'nick_name': _('Nickname '),
+            'desc_author': mark_safe(_("Author description ")),
             'date': _('Date '),
-            'header': _('En-tête '),
-            'quote_type': _('Catégorie '),
+            'header': _('Header '),
+            'quote_type': _('Category '),
         }
         required = {
             'last_name': False,
