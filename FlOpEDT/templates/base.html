@@ -96,7 +96,7 @@
       <li style="float:right">
 	{% if user.is_authenticated %}
 	{% if request.department %}
-	<a href="{% url "people:logout" %}?next={% url "base:edt" department %}">{% trans "Déconnexion" %}</a>
+	<a href="{% url "people:logout" %}?next={% url "base:edt" department %}">{% trans 'Sign out' %}</a>
 	{% elif not 'accounts' in request.path %}
 	<a href="{% url "people:logout" %}?next={{request.path}}">{% trans 'Sign out' %}</a>
 	{% else %}
