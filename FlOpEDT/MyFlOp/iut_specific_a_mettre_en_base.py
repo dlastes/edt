@@ -115,7 +115,7 @@ def add_info_constraints():
     department = Department.objects.get(abbrev='INFO')
     lp_apsio = TrainingProgramme.objects.get(abbrev='APSIO')
 
-    M = MinModulesHalfDays(join2courses=True, weight=max_weight)
+    M = MinModulesHalfDays(weight=max_weight)
     M.save()
     for module in Module.objects.filter(train_prog=lp_apsio):
         M.modules.add(module)
