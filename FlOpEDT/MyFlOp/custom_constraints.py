@@ -25,12 +25,10 @@
 # without disclosing the source code of your own applications.
 
 import TTapp.constraint_type as ct
-from TTapp.models import days_filter, slots_filter
 
 # class DummyConstraintTemplate():
 #     """
-#     This class is a template for writing your own custom contraint. 
-
+#     This class is a template for writing your own custom contraint.
 #     The module can contains several custom constraints.
 #     """
 
@@ -55,19 +53,3 @@ from TTapp.models import days_filter, slots_filter
 #         You can give a contextual explanation about what this constraint doesnt
 #         """
 #         return "DummyConstraint online description"
-
-# TO BE IMPROVED!!!
-def define_attributes(ttmodel, kwargs):
-    if 'weeks' in kwargs:
-        weeks = [week for week in ttmodel.weeks if week in kwargs["weeks"]]
-    else:
-        weeks = ttmodel.weeks
-    if 'tutors' in kwargs:
-        tutors = set(t for t in ttmodel.wdb.instructors if t in kwargs["tutors"])
-    else:
-        tutors = set(ttmodel.wdb.instructors)
-    if 'groups' in kwargs:
-        groups = set(g for g in ttmodel.wdb.groups if g in kwargs["groups"])
-    else:
-        groups = set(ttmodel.wdb.basic_groups)
-    return weeks, tutors, groups
