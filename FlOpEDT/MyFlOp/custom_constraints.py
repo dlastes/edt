@@ -24,11 +24,11 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-import TTapp.constraint_type as ct
 
 # class DummyConstraintTemplate():
 #     """
-#     This class is a template for writing your own custom contraint.
+#     This class is a template for writing your own custom contraint. 
+
 #     The module can contains several custom constraints.
 #     """
 
@@ -53,3 +53,4 @@ import TTapp.constraint_type as ct
 #         You can give a contextual explanation about what this constraint doesnt
 #         """
 #         return "DummyConstraint online description"
+
