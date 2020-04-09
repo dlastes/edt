@@ -1110,10 +1110,10 @@ function go_courses(quick) {
       .attr("x", cours_txt_x)
       .attr("y", cours_txt_top_y)
       .text(cours_txt_top_txt)
-      .attr("fill", cours_txt_fill)
       .attr("font-weight", cours_txt_weight)
       .attr("font-size", cours_txt_size)
       .merge(cg.select("[st=m]"))
+      .attr("fill", cours_txt_fill)
       .transition(t)
       .attr("x", cours_txt_x)
       .attr("y", cours_txt_top_y);
