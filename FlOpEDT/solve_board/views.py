@@ -28,7 +28,7 @@ from io import StringIO
 import os
 import sys
 import json
-import pulp.solvers as pulp_solvers
+import pulp
 
 from django.shortcuts import render
 from django.contrib.admin.views.decorators import staff_member_required
@@ -80,7 +80,7 @@ def get_pulp_solvers(available=True):
 
             yield from recurse_solver_hierachy(s.__subclasses__())
     
-    solvers = pulp_solvers.LpSolver_CMD.__subclasses__()
+    solvers = pulp.LpSolver_CMD.__subclasses__()
     return tuple(recurse_solver_hierachy(solvers))
 
 
