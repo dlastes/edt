@@ -33,6 +33,7 @@ from TTapp.constraint_type import ConstraintType
 
 
 def add_iut_specific_constraints(ttmodel):
+    return
     add_iut_blagnac_basics(ttmodel)
     add_iut_blagnac_specials(ttmodel)
     if ttmodel.department.abbrev == 'INFO':
