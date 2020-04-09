@@ -357,7 +357,7 @@ def basic_swap_version(department, week, year, copy_a, copy_b=0):
 
 
 def add_generic_constraints_to_database():
-    for department in Department.objects.filter(abbrev__in=['INFO','RT','GIM','CS']):
+    for department in Department.objects.all():
 
         M = MinNonPreferedTutorsSlot(weight=max_weight, department=department)
         M.save()
