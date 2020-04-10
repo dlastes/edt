@@ -1091,11 +1091,11 @@ function go_courses(quick) {
   incg
     .append("text")
     .attr("st", "p")
-    .attr("fill", cours_txt_fill)
     .attr("font-weight", cours_txt_weight)
     .attr("font-size", cours_txt_size)
     .merge(cg.select("[st=p]"))
     .transition(t)
+    .attr("fill", cours_txt_fill)
     .attr("x", cours_txt_x)
     .attr("y", cours_txt_mid_y)
     .attr("x", cours_txt_x)
