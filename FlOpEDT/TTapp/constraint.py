@@ -135,6 +135,10 @@ class Constraint:
     def get_info_summary(self):
         return "La semaine n'a pas pu être générée à cause du cours %s", ["courses"]
 
+    def get_summary_format(self):
+        output = "\tDes contraintes de type '%s' posent problème dans la résolution\n" % self.constraint_type.value
+        return output, []
+
     def __str__(self):
         res = "(%s) La contrainte " % self.id
         if self.constraint_type is not None:

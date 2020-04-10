@@ -15,3 +15,8 @@ class DependencyConstraint(Constraint):
         output = "Problème de dépendance entre les cours suivants:\n\t%s\n\t%s"
         dimensions_to_fill = ["courses_1", "courses_2"]
         return output, dimensions_to_fill
+
+    def get_summary_format(self):
+        output = "\tProblème de dépendance entre les cours suivants:\n%s"
+        dimensions = ["courses"]
+        return output, dimensions

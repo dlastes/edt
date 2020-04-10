@@ -1,4 +1,6 @@
 import json
+
+from TTapp.constraint import Constraint
 from TTapp.print_infaisibility import print_all
 
 from TTapp.constraint_type import ConstraintType
@@ -28,6 +30,8 @@ def inc_with_type(occurs_dimension, dimension, constraint_type):
 
 class ConstraintManager:
     def __init__(self):
+        self.threshold_type = 20 # % des types sont pris en compte
+        self.threshold_attr = 80 # % des attributs sont pris en compte
         self.constraints = []
         self.infeasible_constraints = []
         self.occurs = None
@@ -97,6 +101,8 @@ class ConstraintManager:
         print_brut_constraints(self.infeasible_constraints, self.occurs, weeks)
         print_factorised_constraints(self.occurs, weeks)
         print_summary_from_types(self.infeasible_constraints, self.occurs, weeks)
+        print_summary_from_types_with_threshold(self.infeasible_constraints, self.occurs, weeks,
+                                                self.threshold_type, self.threshold_attr)
 
 
 def sort_constraints_by_type(constraints, occurs):
@@ -157,9 +163,81 @@ def print_summary_from_types(constraints, occurs, weeks):
     write_file(filename, output, print_output=False)
 
 
-def write_file(filename, output, print_output=False):
-    print("writting %s..." % filename)
-    with open(filename, "w+", encoding="utf-8") as file:
+def get_most_important(dico, threshold, constraint_type=""):
+    '''
+    Retourne une liste avec les X dimensions les plus occurentes,
+    dont les occurences constituent threshold % du tout.
+    '''
+    total = get_total_occurrences(dico, constraint_type)
+    max = threshold*total/100
+    current = 0
+    result = []
+    for key in dico.keys():
+        if current >= max:
+            break
+        if constraint_type != "":
+            if constraint_type in dico.get(key).get("types"):
+                current += dico.get(key).get("occurences")
+                result.append(key)
+        else:
+            current += dico.get(key).get("occurences")
+            result.append(key)
+    return result
+
+
+def get_total_occurrences(dico, contraint_type):
+    '''
+    Retourne la somme de toutes les occurences
+    '''
+    total = 0
+    for key in dico.keys():
+        if contraint_type != "":
+            if contraint_type in dico.get(key).get("types"):
+                total += dico.get(key).get("occurences")
+        else:
+            total += dico.get(key).get("occurences")
+    return total
+
+
+def get_str_attr(dico, threshold, constraint_type):
+    '''
+    Forme une liste indenté des X attributs les plus occurents,
+    dont les occurences constituent threshold % du tout.
+    '''
+    output = ""
+    for attr in get_most_important(dico, threshold, constraint_type):
+        output += "\t\t%s\n" % str(attr)
+    return output
+
+
+def find_object_from_type(constraint_type, constraints):
+    '''
+    Retourne une instance de la classe constraint correspondant au type donné,
+    pour utiliser sa méthode get_summary_format().
+    '''
+    for constraint in constraints:
+        if constraint.constraint_type.value == constraint_type:
+            return constraint
+    return Constraint()
+
+
+def print_summary_from_types_with_threshold(constraints, occurs, weeks, threshold_type, threshold_attr):
+    filename = "logs/summary_of_constraints_from_types_with_threshold%s.txt" % weeks
+    output = "Voici les principaux problèmes liés à l'infaisabilité :\n"
+    write_file(filename, output)
+    for constraint_type in get_most_important(occurs['types'], threshold_type):
+        output, dimensions = find_object_from_type(constraint_type, constraints).get_summary_format()
+        fill = []
+        for dimension in dimensions:
+            fill.append(get_str_attr(occurs.get(dimension), threshold_attr, constraint_type))
+        output %= tuple(fill)
+        write_file(filename, output, mode="a+")
+
+
+def write_file(filename, output, print_output=False, mode="w+"):
+    if mode == 'w+':
+        print("writting %s..." % filename)
+    with open(filename, mode, encoding="utf-8") as file:
         file.write(output)
         file.write("\n")
     if print_output:

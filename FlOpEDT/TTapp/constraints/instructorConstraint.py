@@ -11,3 +11,8 @@ class InstructorConstraint(Constraint):
         output = "Le cours %s doit avoir un professeur"
         dimensions_to_fill = ["courses"]
         return output, dimensions_to_fill
+
+    def get_summary_format(self):
+        output = "\tLes cours suivants:\n%s\tdoivent avoir un professeur, surement parmis:\n%s"
+        dimensions = ["courses", "instructors"]
+        return output, dimensions
