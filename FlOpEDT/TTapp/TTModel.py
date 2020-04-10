@@ -424,7 +424,7 @@ class WeekDB(object):
 
 
 class TTModel(object):
-    def __init__(self, department_abbrev, weeks, year,
+    def __init__(self, department_abbrev, week_year_list,
                  train_prog=None,
                  stabilize_work_copy=None,
                  min_nps_i=1.,
@@ -436,7 +436,6 @@ class TTModel(object):
                  lim_ld=1.,
                  core_only=False,
                  send_mails=False):
-        print("\nLet's start weeks #%s" % weeks)
         # beg_file = os.path.join('logs',"FlOpTT")
         self.model = LpProblem("FlOpTT", LpMinimize)
         self.min_ups_i = min_nps_i
@@ -452,14 +451,22 @@ class TTModel(object):
         self.constraint_nb = 0
         self.constraintManager = ConstraintManager()
 
-        if type(weeks) is int:
-            self.weeks = [weeks]
-        else:
-            try:
-                self.weeks = list(weeks)
-            except TypeError:
-                raise TypeError("Weeks has to be int or iterable")
+        # Split week_year_list into weeks (list), and year (int)
+        # week_year should be a list of {'week': week, 'year': year}
+        year = None
+        weeks = []
+        for week_year in week_year_list:
+            y = week_year['year']
+            w = week_year['week']
+            if year is None: year = y
+            weeks.append(w)
+            if year != y:
+              raise Exception("Multiple week selection only support same year")
+
+        self.weeks = weeks
         self.year = year
+        print("\nLet's start weeks #%s" % weeks)
+
         self.warnings = {}
 
         self.department = Department.objects.get(abbrev=department_abbrev)
@@ -1226,9 +1233,10 @@ class TTModel(object):
         avail_course = {}
         for course_type in self.wdb.course_types:
             for promo in self.train_prog:
+                avail_course[(course_type, promo)] = {}
+                non_prefered_slot_cost_course[(course_type, promo)] = {}
                 for week in self.weeks:
-                    avail_course[(course_type, promo)] = {}
-                    non_prefered_slot_cost_course[(course_type, promo)] = {}
+                    week_slots = slots_filter(self.wdb.slots, week=week)
                     courses_avail = set(self.wdb.courses_availabilities
                                         .filter(course_type=course_type,
                                                 train_prog=promo,
@@ -1240,12 +1248,12 @@ class TTModel(object):
                                                     week=None))
                     if not courses_avail:
                         print("No course availability given for %s - %s" % (course_type, promo))
-                        for sl in self.wdb.slots:
+                        for sl in week_slots:
                             avail_course[(course_type, promo)][sl] = 1
                             non_prefered_slot_cost_course[(course_type,
                                                            promo)][sl] = 0
                     else:
-                        for sl in self.wdb.slots:
+                        for sl in week_slots:
                             try:
                                 avail = set(a for a in courses_avail
                                             if a.start_time < sl.end_time and sl.start_time < a.start_time + a.duration

@@ -197,11 +197,8 @@ def rooms_extract(department, book):
     while room_id is not None :
 
         try:
-            if not Room.objects.filter(name=room_id).exists():
-                room_group, _ = Room.objects.get_or_create(name=room_id)
-                room_group.types.add(temporary_room_type)
-            else:
-                logger.warning(f"A custom group can't have the same name thant an existing Room : {room_id}")
+            room_group, _ = Room.objects.get_or_create(name=room_id)
+            room_group.types.add(temporary_room_type)
 
         except IntegrityError as ie:
             logger.warning("A constraint has not been respected creating the RoomGroup %s : \n" %room_id, ie)
@@ -602,6 +599,7 @@ def settings_extract(department, book):
         'day_finish_time': None,
         'lunch_break_start_time': None,
         'lunch_break_finish_time': None,
+        'default_preference_duration': None,
 
     }
 
@@ -629,6 +627,11 @@ def settings_extract(department, book):
         except:
             logger.error(f'an error has occured while converting hour at Paramètres[{current_row}, {hours_col}]')
 
+    try:
+        default_preference_duration = int(sheet.cell(row=7, column=2).value)
+        settings['default_preference_duration'] = default_preference_duration
+    except:
+        logger.error(f'an error has occured while defining default_preference_duration')
 
     # Set settings
     logger.info(f'TimeGeneralSettings : {settings}')

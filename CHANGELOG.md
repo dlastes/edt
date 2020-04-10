@@ -26,10 +26,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Modification proposal sent via email
 - A tutor can choose her/his favorite rooms
 - Module description
+- Enabled text translation
 
 ### Changed
 - front-end: dispatch week/day management in js files
 - back-end refactoring: all model attributes in english
+- Selection of multiple weeks possible with the solve board
 
 ### TBD
 - right permissions in TTapp/views

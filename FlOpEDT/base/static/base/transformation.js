@@ -709,17 +709,18 @@ function cours_height(c) {
 function cours_txt_x(c) {
   return cours_x(c) + .5 * cours_width(c);
 }
+function get_color(c){
+//  console.log(c);
+  let key = cosmo?c.prof:c.mod;
+  return colors[key];
+}
 function cours_txt_fill(c) {
-  if (c.id_course != -1) {
-    return c.color_txt;
-  }
-  return "black";
+  let coco = get_color(c) ;
+  return (typeof coco === 'undefined')?"black":coco.color_txt;
 }
 function cours_fill(c) {
-  if (c.id_course != -1) {
-    return c.color_bg;
-  }
-  return "red";
+  let coco = get_color(c) ;
+  return (typeof coco === 'undefined')?"white":coco.color_bg;
 }
 function is_exam(c) {
   return false;

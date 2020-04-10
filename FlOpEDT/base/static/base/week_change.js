@@ -359,8 +359,51 @@ function create_dispos_user_data() {
 /*--------------------
   ------ PROFS -------
   --------------------*/
+function fetch_colors() {
+  var exp_week = wdw_weeks.get_selected();
 
+  cours_bouge = {};
 
+  show_loader(true);
+  $.ajax({
+    type: "GET", //rest Type
+    dataType: 'text',
+    url: url_colors + "?week=" + exp_week.week
+      + "&year=" + exp_week.year
+      + "&work_copy=" + num_copie,
+    async: true,
+    success: function (msg, ts, req) {
+      var sel_week = wdw_weeks.get_selected();
+      if (Week.compare(exp_week, sel_week) == 0) {
+        colors = {} ;
+        d3.csvParse(msg, translate_colors_from_csv);
+
+        fetch.ongoing_colors = false;
+        fetch_ended(false);
+      }
+      show_loader(false);
+    },
+    error: function (msg) {
+      console.log("error");
+      show_loader(false);
+    }
+  });
+
+}
+
+function translate_colors_from_csv(d) {
+  colors[d.key] = {
+    color_bg: d.color_bg,
+    color_txt: d.color_txt
+  };
+}
+// touch courses to trigger color update
+function ping_colors() {
+  cours.forEach(function(c) {
+    c.color_bg = cours_fill(c) ;
+    c.color_txt = cours_txt_fill(c);
+  });
+}
 
 /*--------------------
   ------ BKNEWS -------
@@ -1012,6 +1055,7 @@ function fetch_all(first, fetch_work_copies) {
     fetch.ongoing_un_rooms = true;
   }
   fetch.ongoing_bknews = true;
+  fetch_ongoing_colors = true;
 
   fetch_version();
 
@@ -1019,6 +1063,7 @@ function fetch_all(first, fetch_work_copies) {
     fetch_module();
     fetch_tutor();
     fetch_cours();
+    fetch_colors();
   }
   if (!fetch.pref_saved &&
     (ckbox["dis-mod"].cked
@@ -1120,8 +1165,9 @@ function fetch_ended(light) {
   if (fetch.course_saved &&
     !fetch.ongoing_dispos &&
     !fetch.ongoing_un_rooms &&
-    !fetch.ongoing_bknews) {
-
+    !fetch.ongoing_bknews &&
+    !fetch.ongoing_colors) {
+    ping_colors();
     fetch.done = true;
     go_edt(false);
 

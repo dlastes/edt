@@ -853,10 +853,12 @@ class MinNonPreferedSlot(TTConstraint):
     def clean(self):
         if not self.tutor and not self.train_prog:
             raise ValidationError({
-                'train_prog': ValidationError(_('Si pas de prof alors promo.',
-                                                code='invalid')),
-                'tutor': ValidationError(_('Si pas de promo alors prof.',
-                                           code='invalid'))})
+                'train_prog': ValidationError(
+                    _('If no tutor then training programme.',
+                      code='invalid')),
+                'tutor': ValidationError(
+                    _('If no training programme then tutor.',
+                      code='invalid'))})
 
     def enrich_model(self, ttmodel, week, ponderation=1):
         if self.tutor is not None:
@@ -866,7 +868,7 @@ class MinNonPreferedSlot(TTConstraint):
                 .filter(group__train_prog=self.train_prog, week=week)
             filtered_courses = set(filtered_courses)
         basic_groups = ttmodel.wdb.basic_groups.filter(train_prog=self.train_prog)
-        for sl in ttmodel.wdb.slots:
+        for sl in slots_filter(ttmodel.wdb.slots, week=week):
             for c in filtered_courses & ttmodel.wdb.compatible_courses[sl]:
                 if self.tutor is not None:
                     cost = (float(self.weight) / max_weight) \
