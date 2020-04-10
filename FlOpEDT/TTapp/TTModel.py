@@ -30,8 +30,10 @@ from pulp import LpVariable, LpConstraint, LpBinary, LpConstraintEQ, \
     LpConstraintGE, LpConstraintLE, LpAffineExpression, LpProblem, LpStatus, \
     LpMinimize, lpSum, LpStatusOptimal, LpStatusNotSolved
 
-import pulp
 from pulp import GUROBI_CMD, PULP_CBC_CMD
+
+import pulp.solvers as pulp_solvers
+# from pulp.solvers import GUROBI_CMD as GUROBI
 
 from FlOpEDT.settings.base import COSMO_MODE
 
@@ -1513,7 +1515,7 @@ class TTModel(object):
         # The solver value shall be one of the available
         # solver corresponding pulp command or contain
         # gurobi
-        if 'gurobi' in solver.lower() and hasattr(pulp, GUROBI_NAME):
+        if 'gurobi' in solver.lower() and hasattr(pulp_solvers, GUROBI_NAME):
             # ignore SIGINT while solver is running
             # => SIGINT is still delivered to the solver, which is what we want
             signal.signal(signal.SIGINT, signal.SIG_IGN)
@@ -1534,9 +1536,9 @@ class TTModel(object):
                     print("IIS file written in file %s" % ilp_filename)
                 self.constraintManager.handle_reduced_result(ilp_filename, self.weeks)
 
-        elif hasattr(pulp, solver):
+        elif hasattr(pulp_solvers, solver):
             # raise an exception when the solver name is incorrect
-            command = getattr(pulp, solver)
+            command = getattr(pulp_solvers, solver)
             self.model.solve(command(keepFiles=1,
                                      msg=True,
                                      presolve=presolve,
