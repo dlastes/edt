@@ -599,6 +599,7 @@ def settings_extract(department, book):
         'day_finish_time': None,
         'lunch_break_start_time': None,
         'lunch_break_finish_time': None,
+        'default_preference_duration': None,
 
     }
 
@@ -626,6 +627,11 @@ def settings_extract(department, book):
         except:
             logger.error(f'an error has occured while converting hour at Paramètres[{current_row}, {hours_col}]')
 
+    try:
+        default_preference_duration = int(sheet.cell(row=7, column=2).value)
+        settings['default_preference_duration'] = default_preference_duration
+    except:
+        logger.error(f'an error has occured while defining default_preference_duration')
 
     # Set settings
     logger.info(f'TimeGeneralSettings : {settings}')
