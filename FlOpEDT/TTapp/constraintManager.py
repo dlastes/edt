@@ -30,7 +30,7 @@ def inc_with_type(occurs_dimension, dimension, constraint_type):
 
 class ConstraintManager:
     def __init__(self):
-        self.threshold_type = 20 # % des types sont pris en compte
+        self.threshold_type = 50 # % des types sont pris en compte
         self.threshold_attr = 80 # % des attributs sont pris en compte
         self.constraints = []
         self.infeasible_constraints = []
@@ -100,7 +100,7 @@ class ConstraintManager:
         self.set_index_courses()
         print_brut_constraints(self.infeasible_constraints, self.occurs, weeks)
         print_factorised_constraints(self.occurs, weeks)
-        print_summary_from_types(self.infeasible_constraints, self.occurs, weeks)
+        #print_summary_from_types(self.infeasible_constraints, self.occurs, weeks)
         print_summary_from_types_with_threshold(self.infeasible_constraints, self.occurs, weeks,
                                                 self.threshold_type, self.threshold_attr)
 
@@ -117,7 +117,7 @@ def print_brut_constraints(constraints, occurs, weeks):
     for constraint in constraints:
         output += str(constraint) + "\n"
 
-    filename = "logs/intelligible_constraints2%s.txt" % weeks
+    filename = "logs/intelligible_constraints%s.txt" % weeks
     write_file(filename, output)
 
 
@@ -129,38 +129,38 @@ def print_factorised_constraints(occurs, weeks):
             output += "\n%s -> %s" % (elt, occurs[dimension][elt]["occurences"])
             if dimension is not "types":
                 output += " (%s)" % ", ".join(occurs[dimension][elt]["types"])
-    filename = "logs/intelligible_constraints_factorised2%s.txt" % weeks
+    filename = "logs/intelligible_constraints_factorised%s.txt" % weeks
     write_file(filename, output)
 
 
-def print_summary_from_types(constraints, occurs, weeks):
-    def get_value(dictionnary, index):
-        a = iter(dictionnary)
-        for i in range(index - 1):
-            print(next(a))
-        return next(a)
-
-    constraint = sort_constraints_by_type(constraints, occurs)[0]
-    output, dimensions_to_fill = constraint.get_info_summary()
-
-    if dimensions_to_fill is not []:
-        fill = []
-
-        for dimension_to_fill in dimensions_to_fill:
-            index = 1
-            if "_" in dimension_to_fill:
-                s = dimension_to_fill.split("_")
-                dimension_to_fill, index = s[0], int(s[1])
-            for elt in occurs[dimension_to_fill]:
-                if constraint.constraint_type.value not in occurs[dimension_to_fill][elt]["types"]:
-                    index += 1
-                else:
-                    break
-            fill.append(get_value(occurs[dimension_to_fill], index))
-        output = output % tuple(fill)
-
-    filename = "logs/summary_of_constraints_from_types2%s.txt" % weeks
-    write_file(filename, output, print_output=False)
+# def print_summary_from_types(constraints, occurs, weeks):
+#     def get_value(dictionnary, index):
+#         a = iter(dictionnary)
+#         for i in range(index - 1):
+#             print(next(a))
+#         return next(a)
+#
+#     constraint = sort_constraints_by_type(constraints, occurs)[0]
+#     output, dimensions_to_fill = constraint.get_info_summary()
+#
+#     if dimensions_to_fill is not []:
+#         fill = []
+#
+#         for dimension_to_fill in dimensions_to_fill:
+#             index = 1
+#             if "_" in dimension_to_fill:
+#                 s = dimension_to_fill.split("_")
+#                 dimension_to_fill, index = s[0], int(s[1])
+#             for elt in occurs[dimension_to_fill]:
+#                 if constraint.constraint_type.value not in occurs[dimension_to_fill][elt]["types"]:
+#                     index += 1
+#                 else:
+#                     break
+#             fill.append(get_value(occurs[dimension_to_fill], index))
+#         output = output % tuple(fill)
+#
+#     filename = "logs/summary_of_constraints_from_types2%s.txt" % weeks
+#     write_file(filename, output, print_output=False)
 
 
 def get_most_important(dico, threshold, constraint_type=""):
@@ -222,7 +222,7 @@ def find_object_from_type(constraint_type, constraints):
 
 
 def print_summary_from_types_with_threshold(constraints, occurs, weeks, threshold_type, threshold_attr):
-    filename = "logs/summary_of_constraints_from_types_with_threshold%s.txt" % weeks
+    filename = "logs/summary_of_constraints_with_threshold%s.txt" % weeks
     output = "Voici les principaux problèmes liés à l'infaisabilité :\n"
     write_file(filename, output)
     for constraint_type in get_most_important(occurs['types'], threshold_type):

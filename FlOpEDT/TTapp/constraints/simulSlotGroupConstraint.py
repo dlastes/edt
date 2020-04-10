@@ -1,5 +1,5 @@
 from TTapp.constraint import Constraint
-
+from TTapp.constraint_type import ConstraintType
 
 class SimulSlotGroupConstraint(Constraint):
     def __init__(self, slot, group):
@@ -7,7 +7,7 @@ class SimulSlotGroupConstraint(Constraint):
         self.group = group
         Constraint.__init__(self, constraint_type=ConstraintType.PAS_PLUS_1_COURS_PAR_CRENEAU, slots=[slot], groups=[group])
 
-    def get_info_summary(self):
-        output = "Trop de cours simultanés pour le slot %s et le groupe %s"
-        dimensions_to_fill = ["slots", "groups"]
-        return output, dimensions_to_fill
+    def get_summary_format(self):
+        output = "\tTrop de cours simultanés pour le slot : \n%s et le groupe : \n%s"
+        dimensions = ["slots", "groups"]
+        return output, dimensions

@@ -132,9 +132,6 @@ class Constraint:
         return instructors, slots, courses, weeks, rooms, groups, days, departments, modules, apm
 
     # cas générique
-    def get_info_summary(self):
-        return "La semaine n'a pas pu être générée à cause du cours %s", ["courses"]
-
     def get_summary_format(self):
         output = "\tDes contraintes de type '%s' posent problème dans la résolution\n" % self.constraint_type.value
         return output, []

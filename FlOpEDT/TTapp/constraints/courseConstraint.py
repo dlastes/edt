@@ -1,5 +1,5 @@
 from TTapp.constraint import Constraint
-
+from TTapp.constraint_type import ConstraintType
 
 class CourseConstraint(Constraint):
     def __init__(self, course):
@@ -7,7 +7,7 @@ class CourseConstraint(Constraint):
         Constraint.__init__(self, constraint_type=ConstraintType.COURS_DOIT_ETRE_PLACE,
                             courses=[course])
 
-    def get_info_summary(self):
-        output = "Le cours %s doit être placé"
-        dimensions_to_fill = ["course"]
-        return output, dimensions_to_fill
+    def get_summary_format(self):
+        output = "\tLe cours \n%s doit être placé\n"
+        dimensions = ["courses"]
+        return output, dimensions
