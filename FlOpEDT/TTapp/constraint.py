@@ -131,8 +131,9 @@ class Constraint:
 
         return instructors, slots, courses, weeks, rooms, groups, days, departments, modules, apm
 
+    # cas générique
     def get_info_summary(self):
-        return "no idea", []
+        return "La semaine n'a pas pu être générée à cause du cours %s", ["courses"]
 
     def __str__(self):
         res = "(%s) La contrainte " % self.id

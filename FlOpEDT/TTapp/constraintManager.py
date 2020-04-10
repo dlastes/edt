@@ -139,13 +139,18 @@ def print_summary_from_types(constraints, occurs, weeks):
 
     if dimensions_to_fill is not []:
         fill = []
+
         for dimension_to_fill in dimensions_to_fill:
-            index = 0
+            index = 1
             if "_" in dimension_to_fill:
                 s = dimension_to_fill.split("_")
                 dimension_to_fill, index = s[0], int(s[1])
+            for elt in occurs[dimension_to_fill]:
+                if constraint.constraint_type.value not in occurs[dimension_to_fill][elt]["types"]:
+                    index += 1
+                else:
+                    break
             fill.append(get_value(occurs[dimension_to_fill], index))
-
         output = output % tuple(fill)
 
     filename = "logs/summary_of_constraints_from_types2%s.txt" % weeks

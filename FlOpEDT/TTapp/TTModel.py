@@ -75,8 +75,10 @@ from TTapp.constraint_type import ConstraintType
 import logging
 
 from TTapp.constraints.dependencyConstraint import DependencyConstraint
-
 from TTapp.constraints.instructorConstraint import InstructorConstraint
+from TTapp.constraints.simulSlotGroupConstraint import SimulSlotGroupConstraint
+from TTapp.constraints.slotInstructorConstraint import SlotInstructorConstraint
+from TTapp.constraints.courseConstraint import CourseConstraint
 
 logger = logging.getLogger(__name__)
 pattern = r".+: (.|\s)+ (=|>=|<=) \d*"
@@ -871,14 +873,12 @@ class TTModel(object):
                                     self.sum(self.TT[(sl2, c2)] for sl2 in self.wdb.slots_intersecting[sl1] - {sl1}
                                              for c2 in self.wdb.courses_for_basic_group[bg]
                                              & self.wdb.compatible_courses[sl2]),
-                                    '<=', 1000,
-                                    Constraint(constraint_type=ConstraintType.PAS_PLUS_1_COURS_PAR_CRENEAU, slots=sl1,
-                                               groups=bg))
+                                    '<=', 1000, SimulSlotGroupConstraint(sl1, bg))
 
         # a course is scheduled once and only once
         for c in self.wdb.courses:
             self.add_constraint(self.sum([self.TT[(sl, c)] for sl in self.wdb.compatible_slots[c]]), '==', 1,
-                                Constraint(constraint_type=ConstraintType.COURS_DOIT_ETRE_PLACE, courses=c))
+                                CourseConstraint(c))
 
         # Training half day
         for training_half_day in self.wdb.training_half_days:
@@ -944,8 +944,7 @@ class TTModel(object):
                                                        & self.wdb.possible_courses[i])),
                                     '<=',
                                     self.avail_instr[i][sl],
-                                    Constraint(constraint_type=ConstraintType.PAS_DE_PROFESSEUR_DISPONIBLE,
-                                    slots=sl, instructors=i))
+                                    SlotInstructorConstraint(sl, i))
 
     def add_rooms_constraints(self):
         print("adding room constraints")
