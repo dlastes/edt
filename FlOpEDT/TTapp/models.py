@@ -751,7 +751,7 @@ class MinimizeBusyDays(TTConstraint):
         return "MinimizeBusyDays online description"
 
     class Meta:
-        verbose_name = "Minimiser les jours de présence"
+        verbose_name_plural = "Minimize busy days"
 
 
 class RespectBoundPerDay(TTConstraint):
@@ -760,8 +760,7 @@ class RespectBoundPerDay(TTConstraint):
     """
     tutors = models.ManyToManyField('people.Tutor', blank=True)
 
-
-    def enrich_model(self, ttmodel, week):
+    def enrich_model(self, ttmodel, week, ponderation=1):
         """
         Minimize the number of busy days for tutor with cost
         (if it does not overcome the bound expressed in pref_hours_per_day)
@@ -793,8 +792,7 @@ class RespectBoundPerDay(TTConstraint):
         return "RespectBoundPerDay online description"
 
     class Meta:
-        verbose_name = "Respecter les limites horaires"
-
+        verbose_name_plural = "Respecter les limites horaires"
 
 
 # A tester!
@@ -858,12 +856,11 @@ class SimultaneousCourses(TTConstraint):
 
         return view_model
 
-
     def one_line_description(self):
         return f"Les cours {self.courses.all()} doivent être simultanés !"
 
-
-
+    class Meta:
+        verbose_name_plural = "Simultaneous courses"
 
 
 # Ex TTConstraints that have to be re-written.....
