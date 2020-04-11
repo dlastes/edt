@@ -133,6 +133,7 @@ function apply_pref_mode(d) {
     }
   }
   go_pref_mode();
+  go_pref();
 }
 
 // 

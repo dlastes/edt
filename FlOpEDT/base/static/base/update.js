@@ -63,15 +63,16 @@ function go_pref(quick) {
       user.dispos,
       function (d) {
         return [d.day, d.start_time, d.duration, d.val, d.selected].join('-');
-      })
-    .attr("cursor", ckbox["dis-mod"].cked ? "pointer" : "default");
+      });
 
   datdi = dat
     .enter()
     .append("g")
     .attr("class", "dispo");
 
-  datdi.merge(dat).attr("opacity", pref_opacity) ;
+  datdi.merge(dat)
+    .attr("opacity", pref_opacity)
+    .attr("cursor", cursor_pref());
 
   var datdisi = datdi
     .append("g")
