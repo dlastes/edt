@@ -74,7 +74,8 @@ function go_pref(quick) {
   var datdisi = datdi
     .append("g")
     .attr("class", "dispo-si")
-    .on("click", apply_change_simple_pref);
+    .on("mousedown", function(d) { pref_selected = d ;})
+    .on("mouseup", apply_change_simple_pref);
 
   datdisi
     .append("rect")

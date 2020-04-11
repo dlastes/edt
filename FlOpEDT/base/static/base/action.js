@@ -61,11 +61,17 @@ function apply_change_simple_pref(d) {
         d.val++;
       }
       update_pref_interval(user.name, d.day, d.start_time, d.duration, d.val);
-      //dispos[user.name][idays[d.day]][d.hour] = d.val;
-      //user.dispos[day_hour_2_1D(d)].val = d.val;
     } else {
-      d.val = sel.val;
-      update_pref_interval(user.name, d.day, d.start_time, d.val);
+      // paint-like selection mode
+      let covered_days = week_days.get_days_between(d.day, pref_selected.day);
+      covered_days.forEach(function(day) {
+        let start = Math.min(pref_selected.start_time, d.start_time) ;
+        let end = Math.max(
+          pref_selected.start_time+pref_selected.duration,
+          d.start_time + d.duration
+        ) ;
+        update_pref_interval(user.name, day.ref, start, end - start, sel.val);
+      });
     }
     go_pref(true);
   }

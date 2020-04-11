@@ -982,3 +982,8 @@ var tutors_info = {};
 // cosmo mode: tutor_username -> {color_bg: color, color_txt: color}
 // tutor mode: module_abbrev -> {color_bg: color, color_txt: color}
 var colors = {} ;
+
+
+// select several preferences
+// first selected preference
+var pref_selected ;
