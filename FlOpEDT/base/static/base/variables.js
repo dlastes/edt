@@ -986,4 +986,4 @@ var colors = {} ;
 
 // select several preferences
 // first selected preference
-var pref_selected ;
+var pref_selected = null ;
