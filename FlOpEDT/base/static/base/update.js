@@ -71,10 +71,13 @@ function go_pref(quick) {
     .append("g")
     .attr("class", "dispo");
 
+  datdi.merge(dat).attr("opacity", pref_opacity) ;
+
   var datdisi = datdi
     .append("g")
     .attr("class", "dispo-si")
-    .on("mousedown", function(d) { pref_selected = d ;})
+    .on("mousedown", function(d) { pref_selected = d; })
+    .on("mouseover", update_pref_selection)
     .on("mouseup", apply_change_simple_pref);
 
   datdisi
