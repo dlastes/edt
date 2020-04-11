@@ -52,6 +52,7 @@ function apply_change_simple_pref(d) {
       return dd.selected;
     });
     if (typeof sel === 'undefined') {
+      // normal selection mode
       if (Math.floor(d.val % (par_dispos.nmax / 2)) != 0) {
         d.val = Math.floor(d.val / (par_dispos.nmax / 2)) * par_dispos.nmax / 2;
       }
@@ -59,7 +60,7 @@ function apply_change_simple_pref(d) {
       if (cosmo && d.val == 0) {
         d.val++;
       }
-      update_pref_interval(user.name, d.day, d.start_time, d.val);
+      update_pref_interval(user.name, d.day, d.start_time, d.duration, d.val);
       //dispos[user.name][idays[d.day]][d.hour] = d.val;
       //user.dispos[day_hour_2_1D(d)].val = d.val;
     } else {
