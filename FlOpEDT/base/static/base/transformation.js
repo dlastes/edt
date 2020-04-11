@@ -284,6 +284,9 @@ function txt_filDispos() {
 }
 
 
+function pref_opacity(d) {
+  return d.selected && pref_selected !== null?opac:1;
+}
 
 /*---------------------
   ------- SMILEY -------

@@ -301,3 +301,10 @@ cursor : wait;
 .dept_list li:hover{
   border-color: #b3b3b3;
 }
+
+svg text {
+    -webkit-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none;
+}

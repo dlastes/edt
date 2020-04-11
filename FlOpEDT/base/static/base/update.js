@@ -62,7 +62,7 @@ function go_pref(quick) {
     .data(
       user.dispos,
       function (d) {
-        return [d.day, d.start_time, d.duration, d.val].join('-');
+        return [d.day, d.start_time, d.duration, d.val, d.selected].join('-');
       })
     .attr("cursor", ckbox["dis-mod"].cked ? "pointer" : "default");
 
@@ -71,10 +71,14 @@ function go_pref(quick) {
     .append("g")
     .attr("class", "dispo");
 
+  datdi.merge(dat).attr("opacity", pref_opacity) ;
+
   var datdisi = datdi
     .append("g")
     .attr("class", "dispo-si")
-    .on("click", apply_change_simple_pref);
+    .on("mousedown", function(d) { pref_selected = d; })
+    .on("mouseover", update_pref_selection)
+    .on("mouseup", apply_change_simple_pref);
 
   datdisi
     .append("rect")
@@ -351,7 +355,7 @@ function go_cm_advanced_pref(quick) {
     .attr("class", "dispo-menu")
     .attr("cursor", "pointer")
     .on("click", function (d) {
-      update_pref_interval(user.name, d.day, d.start_time, d.off);
+      update_pref_interval(user.name, d.day, d.start_time, d.duration, d.off);
       data_dispo_adv_cur = [];
       go_pref(true);
     });
@@ -1091,11 +1095,11 @@ function go_courses(quick) {
   incg
     .append("text")
     .attr("st", "p")
-    .attr("fill", cours_txt_fill)
     .attr("font-weight", cours_txt_weight)
     .attr("font-size", cours_txt_size)
     .merge(cg.select("[st=p]"))
     .transition(t)
+    .attr("fill", cours_txt_fill)
     .attr("x", cours_txt_x)
     .attr("y", cours_txt_mid_y)
     .attr("x", cours_txt_x)

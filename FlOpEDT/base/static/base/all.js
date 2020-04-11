@@ -224,6 +224,9 @@ d3.select("body")
     }
     cancel_cm_adv_preferences();
     cancel_cm_room_tutor_change();
+  })
+  .on("mouseup", function(d) {
+    pref_selected = null ;
   });
 
 

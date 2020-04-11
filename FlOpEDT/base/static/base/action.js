@@ -45,6 +45,41 @@
   ------- PREFERENCES ------
   --------------------------*/
 
+// is the preference selection in paint-like mode?
+function is_paint_mode(){
+  let sel = pref_selection.choice.data.find(function (dd) {
+    return dd.selected;
+  }) ;
+  return typeof sel !== 'undefined' ;
+}
+
+
+// 
+function update_pref_selection(d) {
+  // paint-like mode?
+  if (!is_paint_mode() || pref_selected === null) {
+    return ;
+  }
+  
+  let covered_days = week_days.get_days_between(d.day, pref_selected.day);
+  user.dispos.forEach(function (p) { p.selected = false ; });
+  covered_days.forEach(function(day) {
+    let start = Math.min(pref_selected.start_time, d.start_time) ;
+    let end = Math.max(
+      pref_selected.start_time+pref_selected.duration,
+      d.start_time + d.duration
+    ) ;
+    user.dispos.filter(function(p) {
+      return p.day == day.ref
+        && ! (p.start_time>=end || p.start_time + p.duration <= start) ;
+    }).forEach( function(p) {
+      p.selected = true ;
+    });
+  });
+
+  go_pref(true);
+}
+
 // apply pref change when simple mode
 function apply_change_simple_pref(d) {
   if (pref_only || ckbox["dis-mod"].cked) {
@@ -52,6 +87,7 @@ function apply_change_simple_pref(d) {
       return dd.selected;
     });
     if (typeof sel === 'undefined') {
+      // normal selection mode
       if (Math.floor(d.val % (par_dispos.nmax / 2)) != 0) {
         d.val = Math.floor(d.val / (par_dispos.nmax / 2)) * par_dispos.nmax / 2;
       }
@@ -59,15 +95,23 @@ function apply_change_simple_pref(d) {
       if (cosmo && d.val == 0) {
         d.val++;
       }
-      update_pref_interval(user.name, d.day, d.start_time, d.val);
-      //dispos[user.name][idays[d.day]][d.hour] = d.val;
-      //user.dispos[day_hour_2_1D(d)].val = d.val;
+      update_pref_interval(user.name, d.day, d.start_time, d.duration, d.val);
     } else {
-      d.val = sel.val;
-      update_pref_interval(user.name, d.day, d.start_time, d.val);
+      // paint-like selection mode
+      let covered_days = week_days.get_days_between(d.day, pref_selected.day);
+      user.dispos.forEach(function (p) { p.selected = false ; });
+      covered_days.forEach(function(day) {
+        let start = Math.min(pref_selected.start_time, d.start_time) ;
+        let end = Math.max(
+          pref_selected.start_time+pref_selected.duration,
+          d.start_time + d.duration
+        ) ;
+        update_pref_interval(user.name, day.ref, start, end - start, sel.val);
+      });
     }
     go_pref(true);
   }
+  pref_selected = null ;
 }
 
 // change preference selection mode

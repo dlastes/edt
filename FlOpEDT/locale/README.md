@@ -7,10 +7,10 @@ More info on how to add a internationalised text
 
 After adding new internationalised strings, you have to do the following:
 * go in the FlOpEDT folder
-* run `django-admin makemessages -l fr`
+* run `django-admin makemessages -l fr`  
 It will create the file `FlOpEDT/locale/fr/LC_MESSAGES/django.po`
 * Edit this file and translate sentences
-* run `django-admin compilemessages`
+* run `django-admin compilemessages`  
 It compiles `django.po` to be used by Django.
 The resulting file is `django.mo`
 
