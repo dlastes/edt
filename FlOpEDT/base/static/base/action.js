@@ -99,6 +99,7 @@ function apply_change_simple_pref(d) {
     } else {
       // paint-like selection mode
       let covered_days = week_days.get_days_between(d.day, pref_selected.day);
+      user.dispos.forEach(function (p) { p.selected = false ; });
       covered_days.forEach(function(day) {
         let start = Math.min(pref_selected.start_time, d.start_time) ;
         let end = Math.max(
@@ -110,6 +111,7 @@ function apply_change_simple_pref(d) {
     }
     go_pref(true);
   }
+  pref_selected = null ;
 }
 
 // change preference selection mode
