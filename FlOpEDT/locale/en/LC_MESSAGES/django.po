@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.3.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-13 16:59+0200\n"
+"POT-Creation-Date: 2020-04-13 17:31+0200\n"
 "PO-Revision-Date: 2020-04-05 18:44+0200\n"
 "Last-Translator: Benoît Roche (benoit.roche@esrf.fr)\n"
 "Language-Team: none\n"
@@ -99,6 +99,34 @@ msgstr ""
 
 #: base/templates/base/show-stype.html:133
 msgid "Maximum"
+msgstr ""
+
+#: base/weeks.py:34
+msgid "Mon."
+msgstr ""
+
+#: base/weeks.py:35
+msgid "Tue."
+msgstr ""
+
+#: base/weeks.py:36
+msgid "Wed."
+msgstr ""
+
+#: base/weeks.py:37
+msgid "Thu."
+msgstr ""
+
+#: base/weeks.py:38
+msgid "Fri."
+msgstr ""
+
+#: base/weeks.py:39
+msgid "Sat."
+msgstr ""
+
+#: base/weeks.py:40
+msgid "Sun."
 msgstr ""
 
 #: people/templates/people/login.html:55

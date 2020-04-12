@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-13 16:59+0200\n"
+"POT-Creation-Date: 2020-04-13 17:31+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -101,6 +101,34 @@ msgstr "Idéalement"
 #: base/templates/base/show-stype.html:133
 msgid "Maximum"
 msgstr "Maximum"
+
+#: base/weeks.py:34
+msgid "Mon."
+msgstr "Lun."
+
+#: base/weeks.py:35
+msgid "Tue."
+msgstr "Mar."
+
+#: base/weeks.py:36
+msgid "Wed."
+msgstr "Mer."
+
+#: base/weeks.py:37
+msgid "Thu."
+msgstr "Jeu."
+
+#: base/weeks.py:38
+msgid "Fri."
+msgstr "Ven."
+
+#: base/weeks.py:39
+msgid "Sat."
+msgstr "Sam."
+
+#: base/weeks.py:40
+msgid "Sun."
+msgstr "Dim."
 
 #: people/templates/people/login.html:55
 msgid "Forgot password?"
