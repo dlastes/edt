@@ -6,7 +6,8 @@ from django.db import transaction
 
 import os
 
-from base.check_admin import check_admin
+from FlOpEDT.decorators import superuser_required
+
 from base.models import Period, Department
 
 from configuration.forms import ImportFile
@@ -17,8 +18,7 @@ from importation.make_dispo_file import make_dispo_file
 from importation.translate_to_csv import convert_xlsx2csv
 
 
-@user_passes_test(check_admin)
-@login_required
+@superuser_required
 def importation_dispo(req, **kwargs):
     try:
         department = Department.objects.get(abbrev=kwargs['department'])
@@ -52,8 +52,7 @@ def importation_dispo(req, **kwargs):
     return render(req, 'importation/importation.html', {'form': form, 'periods': periods})
 
 
-@user_passes_test(check_admin)
-@login_required
+@superuser_required
 def get_dispo_file(req, period, **kwargs):
     print(period)
     try:
