@@ -310,7 +310,7 @@ var pref_selection = {
 };
 for (let i = 0; i <= par_dispos.nmax; i++) {
   pref_selection.choice.data.push({
-    val: i,
+    value: i,
     // for smile_trans
     off: -2,
     selected: false

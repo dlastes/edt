@@ -1742,14 +1742,14 @@ function create_stype() {
     .attr("stroke", "#555555")
     .attr("stroke-width", 1)
     .attr("fill", function (d) {
-      return smi_fill(d.val / par_dispos.nmax);
+      return smi_fill(d.value / par_dispos.nmax);
     })
     .attr("width", dispot_w)
     .attr("height", dispot_h)
     .attr("x", dispot_x)
     .attr("y", dispot_y)
     .attr("fill", function (d) {
-      return smi_fill(d.val / par_dispos.nmax);
+      return smi_fill(d.value / par_dispos.nmax);
     });
 
   datdisi
@@ -1867,7 +1867,7 @@ function translate_dispos_type_from_csv(d) {
     day: d.day,
     start_time: +d.start_time,
     duration: +d.duration,
-    val: +d.value,
+    value: +d.value,
     off: -1
   };
 }

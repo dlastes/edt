@@ -148,7 +148,7 @@ function dispo_h(d) {
 }
 
 function dispo_fill(d) {
-  return smi_fill(d.val / par_dispos.nmax);
+  return smi_fill(d.value / par_dispos.nmax);
 }
 
 function pref_sel_choice_x(d, i) {
@@ -306,7 +306,7 @@ function cursor_pref() {
 
 //ratio content
 function rc(d) {
-  return d.off < 0 ? d.val / par_dispos.nmax : d.off / par_dispos.nmax;
+  return d.off < 0 ? d.value / par_dispos.nmax : d.off / par_dispos.nmax;
 }
 
 
