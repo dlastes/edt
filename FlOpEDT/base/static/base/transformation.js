@@ -148,7 +148,7 @@ function dispo_h(d) {
 }
 
 function dispo_fill(d) {
-  return smi_fill(d.val / par_dispos.nmax);
+  return smi_fill(d.value / par_dispos.nmax);
 }
 
 function pref_sel_choice_x(d, i) {
@@ -285,7 +285,18 @@ function txt_filDispos() {
 
 
 function pref_opacity(d) {
-  return d.selected && pref_selected !== null?opac:1;
+  return pref_selection.start !== null && d.selected?opac:1;
+}
+
+function cursor_pref() {
+  if (!ckbox["dis-mod"].cked) {
+    return "default" ;
+  }
+  if (pref_selection.is_paint_mode()) {
+    return "crosshair" ;
+  } else {
+    return "pointer" ;
+  }
 }
 
 /*---------------------
@@ -295,7 +306,7 @@ function pref_opacity(d) {
 
 //ratio content
 function rc(d) {
-  return d.off < 0 ? d.val / par_dispos.nmax : d.off / par_dispos.nmax;
+  return d.off < 0 ? d.value / par_dispos.nmax : d.off / par_dispos.nmax;
 }
 
 

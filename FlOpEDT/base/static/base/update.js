@@ -62,21 +62,22 @@ function go_pref(quick) {
     .data(
       user.dispos,
       function (d) {
-        return [d.day, d.start_time, d.duration, d.val, d.selected].join('-');
-      })
-    .attr("cursor", ckbox["dis-mod"].cked ? "pointer" : "default");
+        return [d.day, d.start_time, d.duration, d.value, d.selected].join('-');
+      });
 
   datdi = dat
     .enter()
     .append("g")
     .attr("class", "dispo");
 
-  datdi.merge(dat).attr("opacity", pref_opacity) ;
+  datdi.merge(dat)
+    .attr("opacity", pref_opacity)
+    .attr("cursor", cursor_pref());
 
   var datdisi = datdi
     .append("g")
     .attr("class", "dispo-si")
-    .on("mousedown", function(d) { pref_selected = d; })
+    .on("mousedown", function(d) { pref_selection.start = d; })
     .on("mouseover", update_pref_selection)
     .on("mouseup", apply_change_simple_pref);
 
