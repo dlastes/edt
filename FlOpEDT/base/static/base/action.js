@@ -142,6 +142,7 @@ function apply_pref_mode_choice(d) {
   });
   sel_mode.selected = true;
   go_pref_mode(false);
+  go_pref(true);
 }
 
 /*---------------------
