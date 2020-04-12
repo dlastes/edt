@@ -226,7 +226,7 @@ d3.select("body")
     cancel_cm_room_tutor_change();
   })
   .on("mouseup", function(d) {
-    pref_selected = null ;
+    pref_selection.start = null ;
   });
 
 

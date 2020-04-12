@@ -285,14 +285,14 @@ function txt_filDispos() {
 
 
 function pref_opacity(d) {
-  return d.selected && pref_selected !== null?opac:1;
+  return pref_selection.start !== null && d.selected?opac:1;
 }
 
 function cursor_pref() {
   if (!ckbox["dis-mod"].cked) {
     return "default" ;
   }
-  if (is_paint_mode()) {
+  if (pref_selection.is_paint_mode()) {
     return "crosshair" ;
   } else {
     return "pointer" ;

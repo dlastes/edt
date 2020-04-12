@@ -45,28 +45,19 @@
   ------- PREFERENCES ------
   --------------------------*/
 
-// is the preference selection in paint-like mode?
-function is_paint_mode(){
-  let sel = pref_selection.choice.data.find(function (dd) {
-    return dd.selected;
-  }) ;
-  return typeof sel !== 'undefined' ;
-}
-
-
 // 
 function update_pref_selection(d) {
   // paint-like mode?
-  if (!is_paint_mode() || pref_selected === null) {
+  if (!pref_selection.is_paint_mode() || pref_selection.start === null) {
     return ;
   }
   
-  let covered_days = week_days.get_days_between(d.day, pref_selected.day);
+  let covered_days = week_days.get_days_between(d.day, pref_selection.start.day);
   user.dispos.forEach(function (p) { p.selected = false ; });
   covered_days.forEach(function(day) {
-    let start = Math.min(pref_selected.start_time, d.start_time) ;
+    let start = Math.min(pref_selection.start.start_time, d.start_time) ;
     let end = Math.max(
-      pref_selected.start_time+pref_selected.duration,
+      pref_selection.start.start_time+pref_selection.start.duration,
       d.start_time + d.duration
     ) ;
     user.dispos.filter(function(p) {
@@ -98,12 +89,13 @@ function apply_change_simple_pref(d) {
       update_pref_interval(user.name, d.day, d.start_time, d.duration, d.val);
     } else {
       // paint-like selection mode
-      let covered_days = week_days.get_days_between(d.day, pref_selected.day);
+      let covered_days = week_days.get_days_between(d.day,
+                                                    pref_selection.start.day);
       user.dispos.forEach(function (p) { p.selected = false ; });
       covered_days.forEach(function(day) {
-        let start = Math.min(pref_selected.start_time, d.start_time) ;
+        let start = Math.min(pref_selection.start.start_time, d.start_time) ;
         let end = Math.max(
-          pref_selected.start_time+pref_selected.duration,
+          pref_selection.start.start_time+pref_selection.start.duration,
           d.start_time + d.duration
         ) ;
         update_pref_interval(user.name, day.ref, start, end - start, sel.val);
@@ -111,7 +103,7 @@ function apply_change_simple_pref(d) {
     }
     go_pref(true);
   }
-  pref_selected = null ;
+  pref_selection.start = null ;
 }
 
 // change preference selection mode
