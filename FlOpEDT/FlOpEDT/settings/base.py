@@ -56,7 +56,7 @@ INSTALLED_APPS = [
     'import_export',
     'colorfield',
     'rest_framework',
-    'django_filters',
+    # 'django_filters',
     'base',
     'TTapp',
     'quote',
