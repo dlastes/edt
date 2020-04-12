@@ -51,8 +51,8 @@ class EventFeed(ICalFeed):
 
 
 class TutorEventFeed(EventFeed):
-    def get_object(self, request, department, tutor):
-        return Tutor.objects.get(username=tutor)
+    def get_object(self, request, department, tutor_id):
+        return Tutor.objects.get(id=tutor_id)
 
     def items(self, tutor):
         return ScheduledCourse.objects.filter(tutor=tutor, work_copy=0).order_by('-course__year','-course__week')
