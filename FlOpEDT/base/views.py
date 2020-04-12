@@ -514,11 +514,11 @@ def fetch_cours_pp(req, week, year, num_copy, **kwargs):
         course__module__train_prog__department=department,
         work_copy=num_copy)
                          .values('course'))
-                .select_related('group__train_prog',
+                .select_related('module__train_prog',
                                 'tutor',
                                 'module',
                                 'type',
-                                'group',
+                                'groups',
                                 'room_type',
                                 'module__display'
                                 ))
