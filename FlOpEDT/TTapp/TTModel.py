@@ -451,7 +451,6 @@ class TTModel(object):
         self.core_only = core_only
         self.send_mails = send_mails
         self.var_nb = 0
-        self.constraint_nb = 0 #Dream
         self.constraintManager = ConstraintManager()
 
         if type(weeks) is int:
@@ -681,34 +680,6 @@ class TTModel(object):
         self.var_nb += 1
         return LpVariable(countedname, cat=LpBinary)
 
-    #Dream
-    """
-    def add_constraint(self, expr, relation, value, constraint_type=None, instructors=[], slots=[], courses=[],
-                       weeks=[], rooms=[], groups=[], days=[], departments=[], modules=[], apm=None):
-        id = self.constraint_nb
-
-        # add mathematic constraint
-        if relation == '==':
-            pulp_relation = LpConstraintEQ
-        elif relation == '<=':
-            pulp_relation = LpConstraintLE
-        elif relation == '>=':
-            pulp_relation = LpConstraintGE
-        else:
-            raise Exception("relation must be either '==' or '>=' or '<='")
-        self.model += LpConstraint(e=expr, sense=pulp_relation,
-                                   rhs=value, name=str(id))
-
-        # add intelligible constraint
-        self.constraintManager.add_constraint(Constraint(id=id, constraint_type=constraint_type,
-                                                         instructors=instructors, slots=slots, courses=courses,
-                                                         weeks=weeks,
-                                                         rooms=rooms, groups=groups, days=days, departments=departments,
-                                                         modules=modules, apm=apm))
-        self.constraint_nb += 1
-    """
-
-    #Dream
     def add_constraint(self, expr, relation, value, constraint):
         constraint_id = self.constraintManager.get_nb_constraints()
 
@@ -1070,13 +1041,6 @@ class TTModel(object):
                             or (p.successive and not sl2.is_successor_of(sl1)):
                         if not weight:
                             # , "Dependency %s %g" % (p, self.constraint_nb)
-
-                            # Constraint(constraint_type=ConstraintType.DEPENDANCE)
-                            """ Dream
-                            self.add_constraint(self.TT[(sl1, c1)] + self.TT[(sl2, c2)], '<=', 1,
-                                                Constraint(constraint_type=ConstraintType.DEPENDANCE, courses=[c1, c2],
-                                                slots=[sl1, sl2]))
-                            """
                             self.add_constraint(self.TT[(sl1, c1)] + self.TT[(sl2, c2)], '<=', 1,
                                                 DependencyConstraint(c1, c2, sl1, sl2))
                         else:

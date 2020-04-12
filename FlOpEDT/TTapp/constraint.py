@@ -133,6 +133,22 @@ class Constraint:
         output = "\tDes contraintes de type '%s' posent problème dans la résolution\n" % self.constraint_type.value
         return output, []
 
+    def get_csv_info(self):
+        def f(x):
+            if x == [] or x is None:
+                return ""
+            elif type(x) is list:
+                return ' '.join([str(elem) + ' ' for elem in x])
+            else:
+                return str(x)
+        res = [self.id, self.constraint_type.value]
+        for dimension in self.dimensions:
+            res.append(f(self.dimensions[dimension]["value"]))
+        return tuple(res)
+
+        # return self.id, self.constraint_type.value, f(self.instructors), f(self.slots), f(self.courses), f(self.weeks),\
+        #    f(self.rooms), f(self.groups), f(self.days), f(self.departments), f(self.modules), f(self.apm)
+
     def __str__(self):
         res = "(%s) La contrainte " % self.id
         if self.constraint_type is not None:

@@ -1,4 +1,5 @@
 from TTapp.print_infaisibility import print_all
+import csv
 
 
 def inc(occurs_types, constraint_type):
@@ -84,3 +85,15 @@ class ConstraintManager:
         self.occurs = self.get_occurs()
         self.set_index_courses()
         print_all(self.infeasible_constraints, self.occurs, weeks, self.threshold_type, self.threshold_attr)
+        self.write_csv(self.infeasible_constraints, weeks)
+
+    def write_csv(self, constraints, weeks):
+        filename = "logs/weeks%s.csv" % weeks
+        print("writting %s..." % filename)
+        with open(filename, 'w+') as file:
+            writer = csv.writer(file)
+            writer.writerow(['ID', 'Constraint type', 'Instructors', 'Slots', 'Courses', 'Week', 'Rooms', 'Group',
+                             'Days', 'Departement', 'Module'])
+            for constraint in constraints:
+                csv_info = constraint.get_csv_info()
+                writer.writerow(csv_info)
