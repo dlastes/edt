@@ -73,21 +73,11 @@ class ConstraintManager:
     def set_index_courses(self):
         courses = list(self.occurs["courses"].keys())
 
-        done = []
-        mat_courses = []
-        for index_course in range(len(courses)):
-            if index_course not in done:
-                courses_equals = [courses[index_course]]
-                for index_course2 in range(index_course + 1, len(courses)):
-                    if courses[index_course].equals(courses[index_course2]):
-                        courses_equals.append(courses[index_course2])
-                        done.append(index_course2)
-                if len(courses_equals) > 1:
-                    mat_courses.append(courses_equals)
-
-        for courses_equals in mat_courses:
-            for index_course in range(len(courses_equals)):
-                courses_equals[index_course].set_index(index_course + 1)
+        for index_course1 in range(len(courses)):
+            for index_course2 in range(index_course1 + 1, len(courses)):
+                if courses[index_course1].equals(courses[index_course2]):
+                    courses[index_course1].show_id = True
+                    courses[index_course2].show_id = True
 
     def handle_reduced_result(self, ilp_file_name, weeks):
         self.infeasible_constraints = self.parse_iis(ilp_file_name)

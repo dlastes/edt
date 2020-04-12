@@ -119,15 +119,12 @@ class Constraint:
                 weeks.append(week)
 
         for course in courses:
-            instructor = course.get_tutor()
-            if instructor not in instructors:
-                instructors.append(instructor)
-            group = course.get_group()
-            if group not in groups:
-                groups.append(group)
-            module = course.get_module()
-            if module not in modules:
-                modules.append(module)
+            if course.tutor not in instructors:
+                instructors.append(course.tutor)
+            if course.group not in groups:
+                groups.append(course.group)
+            if course.module not in modules:
+                modules.append(course.module)
 
         return instructors, slots, courses, weeks, rooms, groups, days, departments, modules, apm
 

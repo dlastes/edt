@@ -1,11 +1,11 @@
 Voici les principaux problèmes liés à l'infaisabilité :
 
-	Les cours suivants:
-		TD-CDAM-JD-2 (1)
-		TD-CDAM-JD-2 (2)
-	doivent avoir un professeur
-
 	Problème de dépendance entre les cours suivants:
-		TD-CDAM-JD-2 (1)
-		TD-CDAM-JD-2 (2)
+		TD-CDAM-JD-2 (44882)
+		TD-CDAM-JD-2 (44881)
+
+	Les cours suivants:
+		TD-CDAM-JD-2 (44882)
+		TD-CDAM-JD-2 (44881)
+	doivent avoir un professeur
 

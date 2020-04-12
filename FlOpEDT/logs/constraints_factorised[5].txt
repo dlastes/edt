@@ -1,94 +1,105 @@
 Sommaire des contraintes :
 
 types:
-Le cours doit avoir un professeur -> 48
-Problème de dépendance -> 33
-Pas de professeur disponible -> 26
-Pas plus d'un cours par créneau -> 3
-Le cours doit être placé -> 2
+Problème de dépendance -> 62
+Le cours doit avoir un professeur -> 51
+Pas de professeur disponible -> 27
+Pas plus d'un cours par créneau -> 4
+Le cours doit être placé -> 3
+Simul slot -> 1
 
 instructors:
-JD -> 109 (Problème de dépendance, Le cours doit avoir un professeur, Pas de professeur disponible, Le cours doit être placé)
+JD -> 139 (Problème de dépendance, Le cours doit avoir un professeur, Simul slot, Pas de professeur disponible, Le cours doit être placé)
+AP -> 32 (Problème de dépendance, Le cours doit avoir un professeur, Pas de professeur disponible, Le cours doit être placé)
 
 slots:
-TD_m_s5_8h -> 10 (Problème de dépendance)
-TD_th_s5_17h15 -> 7 (Problème de dépendance, Le cours doit avoir un professeur)
-TD_w_s5_14h15 -> 7 (Problème de dépendance, Le cours doit avoir un professeur, Pas de professeur disponible)
-TD_w_s5_9h30 -> 7 (Problème de dépendance, Le cours doit avoir un professeur)
-TD_m_s5_9h30 -> 7 (Problème de dépendance)
-TD_th_s5_14h15 -> 7 (Problème de dépendance, Le cours doit avoir un professeur)
-TD_f_s5_17h15 -> 6 (Problème de dépendance, Le cours doit avoir un professeur)
-TD_w_s5_11h -> 6 (Problème de dépendance, Le cours doit avoir un professeur)
-TD_th_s5_8h -> 6 (Problème de dépendance, Le cours doit avoir un professeur)
-TD_tu_s5_8h -> 5 (Problème de dépendance)
-TD_tu_s5_11h -> 5 (Problème de dépendance)
-TD_tu_s5_14h15 -> 4 (Problème de dépendance, Le cours doit avoir un professeur, Pas de professeur disponible)
-TD_f_s5_14h15 -> 3 (Problème de dépendance, Le cours doit avoir un professeur, Pas de professeur disponible)
-TD_tu_s5_15h45 -> 3 (Problème de dépendance, Le cours doit avoir un professeur)
-TD_m_s5_11h -> 3 (Problème de dépendance, Le cours doit avoir un professeur)
-TD_th_s5_11h -> 3 (Problème de dépendance, Le cours doit avoir un professeur)
-TD_tu_s5_17h15 -> 3 (Le cours doit avoir un professeur, Pas de professeur disponible)
+TD_m_s5_8h -> 31 (Problème de dépendance, Le cours doit avoir un professeur, Simul slot)
+TD_w_s5_8h -> 15 (Problème de dépendance, Le cours doit avoir un professeur, Pas de professeur disponible)
+TD_f_s5_14h15 -> 13 (Problème de dépendance)
+TD_m_s5_17h15 -> 12 (Problème de dépendance, Pas plus d'un cours par créneau)
+TD_th_s5_8h -> 12 (Problème de dépendance, Pas plus d'un cours par créneau)
+TD_th_s5_15h45 -> 12 (Problème de dépendance, Pas plus d'un cours par créneau)
+TD_f_s5_17h15 -> 7 (Problème de dépendance, Le cours doit avoir un professeur, Pas de professeur disponible)
+TD_tu_s5_15h45 -> 7 (Problème de dépendance, Le cours doit avoir un professeur, Pas de professeur disponible)
+TD_th_s5_17h15 -> 3 (Le cours doit avoir un professeur, Pas de professeur disponible)
+TD_w_s5_9h30 -> 3 (Le cours doit avoir un professeur, Pas de professeur disponible)
+TD_w_s5_11h -> 3 (Le cours doit avoir un professeur, Pas de professeur disponible)
+TD_w_s5_14h15 -> 3 (Le cours doit avoir un professeur, Pas de professeur disponible)
+TD_w_s5_15h45 -> 3 (Le cours doit avoir un professeur, Pas de professeur disponible)
+TD_w_s5_17h15 -> 3 (Le cours doit avoir un professeur, Pas de professeur disponible)
 TD_f_s5_8h -> 3 (Le cours doit avoir un professeur, Pas de professeur disponible)
+TD_f_s5_9h30 -> 3 (Le cours doit avoir un professeur, Pas de professeur disponible)
 TD_f_s5_11h -> 3 (Le cours doit avoir un professeur, Pas de professeur disponible)
-TD_th_s5_9h30 -> 2 (Problème de dépendance, Le cours doit avoir un professeur)
-TD_f_s5_9h30 -> 2 (Le cours doit avoir un professeur)
-TD_f_s5_15h45 -> 2 (Le cours doit avoir un professeur)
-TD_w_s5_8h -> 2 (Le cours doit avoir un professeur)
-TD_w_s5_15h45 -> 2 (Le cours doit avoir un professeur)
-TD_tu_s5_9h30 -> 2 (Le cours doit avoir un professeur)
-TD_w_s5_17h15 -> 2 (Le cours doit avoir un professeur)
-TD_m_s5_14h15 -> 2 (Le cours doit avoir un professeur)
-TD_m_s5_15h45 -> 2 (Le cours doit avoir un professeur)
-TD_m_s5_17h15 -> 2 (Le cours doit avoir un professeur)
-TD_th_s5_15h45 -> 2 (Le cours doit avoir un professeur)
-CM_th_s5_17h15 -> 1 (Pas de professeur disponible)
-CM_tu_s5_11h -> 1 (Pas de professeur disponible)
-TP_f_s5_11h -> 1 (Pas de professeur disponible)
-TP_f_s5_17h15 -> 1 (Pas de professeur disponible)
-CM_f_s5_15h45 -> 1 (Pas de professeur disponible)
-TP_tu_s5_15h45 -> 1 (Pas de professeur disponible)
-TP_f_s5_15h45 -> 1 (Pas de professeur disponible)
-TP_w_s5_8h -> 1 (Pas de professeur disponible)
-CM_w_s5_8h -> 1 (Pas de professeur disponible)
-CM_w_s5_15h45 -> 1 (Pas de professeur disponible)
-CM_f_s5_9h30 -> 1 (Pas de professeur disponible)
-TP_m_s5_8h -> 1 (Pas de professeur disponible)
-CM_m_s5_11h -> 1 (Pas de professeur disponible)
-CM_m_s5_14h15 -> 1 (Pas de professeur disponible)
-CM_m_s5_15h45 -> 1 (Pas de professeur disponible)
-TP_m_s5_17h15 -> 1 (Pas de professeur disponible)
-TP_th_s5_8h -> 1 (Pas de professeur disponible)
-CM_th_s5_11h -> 1 (Pas de professeur disponible)
-CM_th_s5_14h15 -> 1 (Pas de professeur disponible)
-CM_th_s5_15h45 -> 1 (Pas de professeur disponible)
-TP_f_s5_14h15 -> 1 (Pas plus d'un cours par créneau)
-CM_tu_s5_14h15 -> 1 (Pas plus d'un cours par créneau)
-TP_w_s5_11h -> 1 (Pas plus d'un cours par créneau)
+TD_f_s5_15h45 -> 3 (Le cours doit avoir un professeur, Pas de professeur disponible)
+TD_tu_s5_17h15 -> 3 (Le cours doit avoir un professeur, Pas de professeur disponible)
+TD_m_s5_9h30 -> 3 (Le cours doit avoir un professeur, Pas de professeur disponible)
+TD_m_s5_11h -> 3 (Le cours doit avoir un professeur, Pas de professeur disponible)
+TD_th_s5_11h -> 3 (Le cours doit avoir un professeur, Pas de professeur disponible)
+TD_m_s5_14h15 -> 3 (Le cours doit avoir un professeur, Pas de professeur disponible)
+TD_tu_s5_14h15 -> 3 (Le cours doit avoir un professeur, Pas de professeur disponible)
+TD_tu_s5_8h -> 3 (Le cours doit avoir un professeur, Pas de professeur disponible)
+TD_m_s5_15h45 -> 3 (Le cours doit avoir un professeur, Pas de professeur disponible)
+TD_th_s5_14h15 -> 3 (Le cours doit avoir un professeur, Pas de professeur disponible)
+TD_th_s5_9h30 -> 3 (Le cours doit avoir un professeur, Pas de professeur disponible)
+TD_tu_s5_11h -> 3 (Le cours doit avoir un professeur, Pas de professeur disponible)
+TD_tu_s5_9h30 -> 3 (Le cours doit avoir un professeur, Pas de professeur disponible)
+CM_m_s5_11h -> 2 (Le cours doit avoir un professeur, Pas de professeur disponible)
+CM_tu_s5_17h15 -> 2 (Le cours doit avoir un professeur, Pas de professeur disponible)
+CM_m_s5_9h30 -> 1 (Problème de dépendance)
+CM_w_s5_11h -> 1 (Problème de dépendance)
+CM_w_s5_14h15 -> 1 (Problème de dépendance)
+CM_w_s5_15h45 -> 1 (Problème de dépendance)
+CM_w_s5_17h15 -> 1 (Problème de dépendance)
+CM_tu_s5_11h -> 1 (Problème de dépendance)
+CM_f_s5_11h -> 1 (Problème de dépendance)
+CM_tu_s5_14h15 -> 1 (Problème de dépendance)
+CM_f_s5_14h15 -> 1 (Problème de dépendance)
+CM_f_s5_15h45 -> 1 (Problème de dépendance)
+CM_m_s5_17h15 -> 1 (Problème de dépendance)
+CM_tu_s5_9h30 -> 1 (Problème de dépendance)
+CM_m_s5_15h45 -> 1 (Problème de dépendance)
+CM_tu_s5_8h -> 1 (Problème de dépendance)
+CM_m_s5_14h15 -> 1 (Problème de dépendance)
+CM_tu_s5_15h45 -> 1 (Problème de dépendance)
+CM_th_s5_9h30 -> 1 (Problème de dépendance)
+CM_th_s5_15h45 -> 1 (Problème de dépendance)
+CM_th_s5_14h15 -> 1 (Problème de dépendance)
+CM_w_s5_8h -> 1 (Problème de dépendance)
+CM_w_s5_9h30 -> 1 (Problème de dépendance)
+CM_th_s5_11h -> 1 (Problème de dépendance)
+CM_f_s5_8h -> 1 (Problème de dépendance)
+CM_f_s5_9h30 -> 1 (Problème de dépendance)
+CM_f_s5_17h15 -> 1 (Problème de dépendance)
+CM_th_s5_8h -> 1 (Problème de dépendance)
+CM_th_s5_17h15 -> 1 (Problème de dépendance)
+CM_m_s5_8h -> 1 (Pas plus d'un cours par créneau)
 
 courses:
-TD-CDAM-JD-2 (1) -> 58 (Problème de dépendance, Le cours doit avoir un professeur, Le cours doit être placé)
-TD-CDAM-JD-2 (2) -> 58 (Problème de dépendance, Le cours doit avoir un professeur, Le cours doit être placé)
+TD-CDAM-JD-2 (44882) -> 80 (Problème de dépendance, Le cours doit avoir un professeur, Le cours doit être placé)
+TD-CDAM-JD-2 (44881) -> 68 (Problème de dépendance, Le cours doit avoir un professeur, Le cours doit être placé)
+CM-CDAM-AP-CE -> 30 (Problème de dépendance, Le cours doit avoir un professeur, Le cours doit être placé)
 
 weeks:
-5 -> 110 (Problème de dépendance, Le cours doit avoir un professeur, Pas de professeur disponible, Pas plus d'un cours par créneau)
+5 -> 145 (Problème de dépendance, Le cours doit avoir un professeur, Simul slot, Pas de professeur disponible, Pas plus d'un cours par créneau)
 
 rooms:
 
 groups:
-2 -> 83 (Problème de dépendance, Le cours doit avoir un professeur, Le cours doit être placé)
+2 -> 113 (Problème de dépendance, Le cours doit avoir un professeur, Le cours doit être placé)
+CE -> 30 (Problème de dépendance, Le cours doit avoir un professeur, Le cours doit être placé)
 2B -> 2 (Pas plus d'un cours par créneau)
-2A -> 1 (Pas plus d'un cours par créneau)
+2A -> 2 (Pas plus d'un cours par créneau)
 
 days:
-Jeudi -> 30 (Problème de dépendance, Le cours doit avoir un professeur, Pas de professeur disponible)
-Mercredi -> 30 (Problème de dépendance, Le cours doit avoir un professeur, Pas de professeur disponible, Pas plus d'un cours par créneau)
-Lundi -> 30 (Problème de dépendance, Le cours doit avoir un professeur, Pas de professeur disponible)
-Vendredi -> 25 (Problème de dépendance, Le cours doit avoir un professeur, Pas de professeur disponible, Pas plus d'un cours par créneau)
-Mardi -> 23 (Problème de dépendance, Le cours doit avoir un professeur, Pas de professeur disponible, Pas plus d'un cours par créneau)
+Lundi -> 56 (Problème de dépendance, Le cours doit avoir un professeur, Simul slot, Pas de professeur disponible, Pas plus d'un cours par créneau)
+Jeudi -> 40 (Problème de dépendance, Le cours doit avoir un professeur, Pas de professeur disponible, Pas plus d'un cours par créneau)
+Vendredi -> 36 (Problème de dépendance, Le cours doit avoir un professeur, Pas de professeur disponible)
+Mercredi -> 34 (Problème de dépendance, Le cours doit avoir un professeur, Pas de professeur disponible)
+Mardi -> 29 (Problème de dépendance, Le cours doit avoir un professeur, Pas de professeur disponible)
 
 departments:
 
 modules:
-CDAM -> 83 (Problème de dépendance, Le cours doit avoir un professeur, Le cours doit être placé)
+CDAM -> 116 (Problème de dépendance, Le cours doit avoir un professeur, Le cours doit être placé)
 
 apm:
