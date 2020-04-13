@@ -80,11 +80,11 @@ class ConstraintManager:
                     courses[index_course1].show_id = True
                     courses[index_course2].show_id = True
 
-    def handle_reduced_result(self, ilp_file_name, weeks):
+    def handle_reduced_result(self, ilp_file_name, department_abbrev, weeks):
         self.infeasible_constraints = self.parse_iis(ilp_file_name)
         self.occurs = self.get_occurs()
         self.set_index_courses()
-        print_all(self.infeasible_constraints, self.occurs, weeks, self.threshold_type, self.threshold_attr)
+        print_all(self.infeasible_constraints, self.occurs, department_abbrev, weeks, self.threshold_type, self.threshold_attr)
         self.write_csv(self.infeasible_constraints, weeks)
 
     def write_csv(self, constraints, weeks):
@@ -95,5 +95,5 @@ class ConstraintManager:
             writer.writerow(['ID', 'Constraint type', 'Instructors', 'Slots', 'Courses', 'Week', 'Rooms', 'Group',
                              'Days', 'Departement', 'Module'])
             for constraint in constraints:
-                csv_info = constraint.get_csv_info()
+                csv_info = constraint.handle_reduced_result()
                 writer.writerow(csv_info)

@@ -1,9 +1,9 @@
 from TTapp.constraint import Constraint
 
-def print_all(constraints, occurs, weeks, threshold_type, threshold_attr):
-    print_brut_constraints(constraints, occurs, weeks)
-    print_factorised_constraints(occurs, weeks)
-    print_summary_from_types_with_threshold(constraints, occurs, weeks, threshold_type, threshold_attr)
+def print_all(constraints, occurs, department_abbrev, weeks, threshold_type, threshold_attr):
+    print_brut_constraints(constraints, occurs, department_abbrev, weeks)
+    print_factorised_constraints(occurs, department_abbrev, weeks)
+    print_summary_from_types_with_threshold(constraints, occurs, department_abbrev, weeks, threshold_type, threshold_attr)
 
 
 def sort_constraints_by_type(constraints, occurs):
@@ -12,17 +12,17 @@ def sort_constraints_by_type(constraints, occurs):
     return constraints
 
 
-def print_brut_constraints(constraints, occurs, weeks):
+def print_brut_constraints(constraints, occurs, department_abbrev, weeks):
     constraints = sort_constraints_by_type(constraints, occurs)
     output = ""
     for constraint in constraints:
         output += str(constraint) + "\n"
 
-    filename = "logs/constraints_all%s.txt" % weeks
+    filename = "logs/constraints_all_%s_%s.txt" % (department_abbrev, weeks)
     write_file(filename, output)
 
 
-def print_factorised_constraints(occurs, weeks):
+def print_factorised_constraints(occurs, department_abbrev, weeks):
     output = "Sommaire des contraintes :"
     for dimension in occurs.keys():
         output += "\n\n%s:" % dimension
@@ -30,7 +30,7 @@ def print_factorised_constraints(occurs, weeks):
             output += "\n%s -> %s" % (elt, occurs[dimension][elt]["occurences"])
             if dimension is not "types":
                 output += " (%s)" % ", ".join(occurs[dimension][elt]["types"])
-    filename = "logs/constraints_factorised%s.txt" % weeks
+    filename = "logs/constraints_factorised_%s_%s.txt" % (department_abbrev, weeks)
     write_file(filename, output)
 
 
@@ -92,8 +92,9 @@ def find_object_from_type(constraint_type, constraints):
     return Constraint()
 
 
-def print_summary_from_types_with_threshold(constraints, occurs, weeks, threshold_type, threshold_attr):
-    filename = "logs/constraints_summary%s.txt" % weeks
+def print_summary_from_types_with_threshold(constraints, occurs, department_abbrev, weeks,
+                                            threshold_type, threshold_attr, print_output=True):
+    filename = "logs/constraints_summary_%s_%s.txt" % (department_abbrev, weeks)
     output = "Voici les principaux problèmes liés à l'infaisabilité :\n"
     write_file(filename, output)
     for constraint_type in get_most_important(occurs['types'], threshold_type):
@@ -102,7 +103,7 @@ def print_summary_from_types_with_threshold(constraints, occurs, weeks, threshol
         for dimension in dimensions:
             fill.append(get_str_attr(occurs.get(dimension), threshold_attr, constraint_type))
         output %= tuple(fill)
-        write_file(filename, output, mode="a+")
+        write_file(filename, output, mode="a+", print_output=print_output)
 
 
 def write_file(filename, output, print_output=False, mode="w+"):
