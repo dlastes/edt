@@ -53,6 +53,7 @@ from people.models import Tutor
 from TTapp.helpers.minhalfdays import MinHalfDaysHelperGroup, MinHalfDaysHelperModule, MinHalfDaysHelperTutor
 
 from TTapp.constraint_type import ConstraintType
+from TTapp.constraint import Constraint
 
 max_weight = 8
 
@@ -305,7 +306,8 @@ class LimitCourseTypeTimePerPeriod(TTConstraint):  # , pond):
                                                               ttmodel.constraint_nb)
                 """
                 ttmodel.add_constraint(expr, '<=', self.max_hours*60,
-                                       constraint_type=ConstraintType.MAX_HOURS, modules=self.course_type, days=day)
+                                       Constraint(constraint_type=ConstraintType.MAX_HOURS,
+                                                  modules=self.course_type, days=day))
 
     def enrich_model(self, ttmodel, week, ponderation=1.):
 
@@ -475,7 +477,9 @@ class Stabilize(TTConstraint):
                         if not slot.is_simultaneous_to(chosen_slot):
                             ttmodel.add_constraint(ttmodel.TT[(slot, c)],
                                                    '==',
-                                                   0, constraint_type=ConstraintType.STABILIZE_ENRICH_MODEL, courses=fc, slots=slot)
+                                                   0,
+                                                   Constraint(constraint_type=ConstraintType.STABILIZE_ENRICH_MODEL,
+                                                              courses=fc, slots=slot))
 
 
     def one_line_description(self):
@@ -638,7 +642,9 @@ class MinNonPreferedTutorsSlot(TTConstraint):
         attributes.extend(['tutors'])
         return attributes
 
-    def enrich_model(self, ttmodel, week, ponderation=1):
+    def enrich_model(self, ttmodel, week, ponderation=None):
+        if ponderation is None:
+            ponderation = ttmodel.min_ups_i
         if self.tutors.exists():
             tutors = set(t for t in ttmodel.wdb.instructors if t in self.tutors.all())
         else:
@@ -666,7 +672,9 @@ class MinNonPreferedTrainProgsSlot(TTConstraint):
     """
     Minimize the use of unprefered Slots for tutors
     """
-    def enrich_model(self, ttmodel, week, ponderation=1):
+    def enrich_model(self, ttmodel, week, ponderation=None):
+        if ponderation is None:
+            ponderation = ttmodel.min_ups_c
         if self.train_progs.exists():
             train_progs = set(tp for tp in self.train_progs.all() if tp in ttmodel.train_prog)
         else:
@@ -773,8 +781,9 @@ class RespectBoundPerDay(TTConstraint):
                                                    & ttmodel.wdb.compatible_slots[c]),
                                        '<=',
                                        tutor.max_hours_per_day,
-                                       constraint_type=ConstraintType.BOUND_HOURS_PER_DAY, instructors=tutor,
-                                       days=d)
+                                       Constraint(constraint_type=ConstraintType.BOUND_HOURS_PER_DAY,
+                                                  instructors=tutor,
+                                                  days=d))
 
     def get_viewmodel(self):
         view_model = super().get_viewmodel()
@@ -823,10 +832,11 @@ class SimultaneousCourses(TTConstraint):
                     for sl in possible_slots:
                         expr += ttmodel.TT[(sl, c)]
                 ttmodel.add_constraint(nb_courses * check_var - expr, '==', 0,
-                                       constraint_type=ConstraintType.COURS_SIMULTANES, courses=list(self.courses.all()))
+                                       Constraint(constraint_type=ConstraintType.COURS_SIMULTANES,
+                                                  courses=list(self.courses.all())))
                 ttmodel.add_constraint(expr - check_var, '>=', 0,
-                                       constraint_type=ConstraintType.COURS_SIMULTANES,
-                                       courses=list(self.courses.all()))
+                                       Constraint(constraint_type=ConstraintType.COURS_SIMULTANES,
+                                       courses=list(self.courses.all())))
             # A compléter, l'idée est que si les cours ont le même prof, ou des
             # groupes qui se superposent, il faut veiller à supprimer les core
             # constraints qui empêchent que les cours soient simultanés...
@@ -909,8 +919,8 @@ class AvoidBothTimes(TTConstraint):
                                                    + ttmodel.TT[(sl2, c2)],
                                                    '<=',
                                                    1,
-                                                   constraint_type=ConstraintType.AVOID_BOTH_TIME, courses=[c1, c2],
-                                                   slots=[sl1, sl2])
+                                                   Constraint(constraint_type=ConstraintType.AVOID_BOTH_TIME,
+                                                              courses=[c1, c2], slots=[sl1, sl2]))
 
     def one_line_description(self):
         text = "Pas à la fois à " + str(self.time1/60) + "h et à" + str(self.time2/60) + "h."
@@ -969,8 +979,9 @@ class LimitedStartTimeChoices(TTConstraint):
                 if self.weight is not None:
                     ttmodel.obj += self.local_weight() * ponderation * ttmodel.TT[(sl, c)]
                 else:
-                    ttmodel.add_constraint(ttmodel.TT[(sl, c)], '==', 0, constraint_type=ConstraintType.LIMITED_START_TIME_CHOICES,
-                                           courses=fc, slots=sl)
+                    ttmodel.add_constraint(ttmodel.TT[(sl, c)], '==', 0,
+                                           Constraint(constraint_type=ConstraintType.LIMITED_START_TIME_CHOICES,
+                                                      courses=fc, slots=sl))
 
     def one_line_description(self):
         text = "Les "
@@ -1037,7 +1048,8 @@ class LimitedRoomChoices(TTConstraint):
                         ttmodel.obj += self.local_weight() * ponderation * ttmodel.TTrooms[(sl, c, rg)]
                     else:
                         ttmodel.add_constraint(ttmodel.TTrooms[(sl, c,rg)], '==', 0,
-                                               constraint_type=ConstraintType.LIMITED_ROOM_CHOICES, courses=c, slots=sl, rooms=rg)
+                                               Constraint(constraint_type=ConstraintType.LIMITED_ROOM_CHOICES,
+                                                          courses=c, slots=sl, rooms=rg))
 
     def one_line_description(self):
         text = "Les "

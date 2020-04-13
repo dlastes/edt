@@ -1303,26 +1303,19 @@ class TTModel(object):
         # first objective  => minimise use of unpreferred slots for teachers
         # ponderation MIN_UPS_I
 
-        M = MinNonPreferedTutorsSlot(weight=max_weight, department=self.department)
-        M.save()
-        # for i in self.wdb.instructors:
-        #     M.tutors.add(i)
-        # M.save()
-        for week in self.weeks:
-            M.enrich_model(self, week,
-                           ponderation=self.min_ups_i)
+        M, created = MinNonPreferedTutorsSlot.objects.get_or_create(weight=max_weight, department=self.department)
+        if created:
+            M.save()
+            for week in self.weeks:
+                M.enrich_model(self, week)
 
         # second objective  => minimise use of unpreferred slots for courses
         # ponderation MIN_UPS_C
-
-        M = MinNonPreferedTrainProgsSlot(weight=max_weight, department=self.department)
-        M.save()
-        # for promo in self.train_prog:
-        #     M.train_progs.add(promo)
-        # M.save()
-        for week in self.weeks:
-            M.enrich_model(self, week,
-                           ponderation=self.min_ups_c)
+        M, created = MinNonPreferedTrainProgsSlot.objects.get_or_create(weight=max_weight, department=self.department)
+        if created:
+            M.save()
+            for week in self.weeks:
+                M.enrich_model(self, week)
 
     def add_other_departments_constraints(self):
         """
@@ -1420,7 +1413,7 @@ class TTModel(object):
         if self.core_only:
             return
 
-        # self.add_slot_preferences()
+        self.add_slot_preferences()
 
         self.add_specific_constraints()
 
@@ -1534,7 +1527,6 @@ class TTModel(object):
                 m.computeIIS()
                 m.write(ilp_filename)
                 self.constraintManager.handle_reduced_result(ilp_filename, self.department.abbrev, self.weeks)
-
 
         elif hasattr(pulp_solvers, solver):
             # raise an exception when the solver name is incorrect
