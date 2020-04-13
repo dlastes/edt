@@ -1526,12 +1526,11 @@ class TTModel(object):
             if result is None or result == 0:
                 from gurobipy import read
                 lp = "FlOpTT-pulp.lp"
-                ilp_filename = "logs/IIS_week%s.ilp" % self.weeks
-                if not os.path.isfile(ilp_filename):
-                    m = read(lp)
-                    m.computeIIS()
-                    m.write(ilp_filename)
-                    print("IIS file written in file %s" % ilp_filename)
+                ilp_filename = "logs/IIS_%s_weeks_%s.ilp" % (self.department.abbrev, self.weeks)
+                m = read(lp)
+                m.computeIIS()
+                m.write(ilp_filename)
+                print("IIS file written in file %s" % ilp_filename)
                 self.constraintManager.handle_reduced_result(ilp_filename, self.weeks)
 
         elif hasattr(pulp, solver):

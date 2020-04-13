@@ -42,7 +42,7 @@
         <tr>
           <td>{{ g.train_prog.abbrev }}</td>
           <td>{{ g.name }}</td>
-          <td><a href="{% url "ics:group" department g.train_prog.abbrev g.name %}">{{ requi }}{% url "ics:group" department g.train_prog.abbrev g.name %}</a></td>
+          <td><a href="{% url "ics:group" department g.train_prog.id g.id %}">{{ requi }}{% url "ics:group" department g.train_prog.id g.id %}</a></td>
         </tr>
       {% endfor %}
       </table>
@@ -55,10 +55,10 @@
 	{% for e in enseignants %}
 	<tr>
           <td>{{ e.username }}</td>
-          <td>{{ e.last_name }}</td>
           <td>{{ e.first_name }}</td>
+          <td>{{ e.last_name }}</td>
           <td>{{ e.departments.all | join:", " }}</td>
-          <td><a href="{% url "ics:tutor" department e.username %}">{{ requi }}{% url "ics:tutor" department e.username %}</a></td>
+          <td><a href="{% url "ics:tutor" department e.id %}">{{ requi }}{% url "ics:tutor" department e.id %}</a></td>
         </tr>
 	{% endfor %}
       </table>
@@ -70,8 +70,8 @@
         <tr><th>Nom</th><th>Adresse</th></tr>
         {% for s in salles %}
         <tr>
-          <td>{{ s }}</td>
-          <td><a href="{% url "ics:room" department s %}">{{ requi }}{% url "ics:room" department s %}</a></td>
+          <td>{{ s.name }}</td>
+          <td><a href="{% url "ics:room" department s.id %}">{{ requi }}{% url "ics:room" department s.id %}</a></td>
         </tr>
         {% endfor %}
       </table>
