@@ -1,0 +1,11 @@
+Voici les principaux problèmes liés à l'infaisabilité :
+
+	Problème de dépendance entre les cours suivants:
+		TD-COO-TG-2 (44271)
+		TD-COO-TG-2 (44270)
+
+	Les cours suivants:
+		TD-COO-TG-2 (44271)
+		TD-COO-TG-2 (44270)
+	doivent avoir un professeur
+

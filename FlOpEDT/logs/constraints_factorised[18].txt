@@ -1,0 +1,78 @@
+Sommaire des contraintes :
+
+types:
+Problème de dépendance -> 45
+Le cours doit avoir un professeur -> 38
+Pas de professeur disponible -> 19
+Le cours doit être placé -> 2
+Simul slot -> 1
+Pas plus d'un cours par créneau -> 1
+
+instructors:
+TG -> 105 (Problème de dépendance, Le cours doit avoir un professeur, Simul slot, Pas de professeur disponible, Le cours doit être placé)
+
+slots:
+TD_tu_s18_9h30 -> 14 (Problème de dépendance, Simul slot)
+TD_w_s18_9h30 -> 12 (Problème de dépendance, Le cours doit avoir un professeur, Pas de professeur disponible)
+TD_tu_s18_17h15 -> 11 (Problème de dépendance, Le cours doit avoir un professeur)
+TD_th_s18_15h45 -> 10 (Problème de dépendance)
+TD_tu_s18_8h -> 9 (Problème de dépendance)
+TD_th_s18_14h15 -> 8 (Problème de dépendance)
+TD_m_s18_17h15 -> 7 (Problème de dépendance, Le cours doit avoir un professeur)
+TD_w_s18_15h45 -> 7 (Problème de dépendance, Le cours doit avoir un professeur)
+TD_w_s18_11h -> 6 (Problème de dépendance, Le cours doit avoir un professeur, Pas de professeur disponible)
+TD_th_s18_9h30 -> 6 (Problème de dépendance, Le cours doit avoir un professeur)
+TD_th_s18_17h15 -> 5 (Problème de dépendance, Le cours doit avoir un professeur)
+TD_w_s18_8h -> 5 (Problème de dépendance, Le cours doit avoir un professeur)
+TD_w_s18_14h15 -> 4 (Problème de dépendance, Le cours doit avoir un professeur, Pas de professeur disponible)
+TD_tu_s18_11h -> 4 (Problème de dépendance, Le cours doit avoir un professeur)
+TD_tu_s18_15h45 -> 4 (Problème de dépendance, Le cours doit avoir un professeur, Pas de professeur disponible)
+TD_w_s18_17h15 -> 4 (Problème de dépendance, Le cours doit avoir un professeur, Pas de professeur disponible)
+TD_th_s18_11h -> 3 (Problème de dépendance, Le cours doit avoir un professeur)
+TD_tu_s18_14h15 -> 3 (Problème de dépendance, Le cours doit avoir un professeur)
+TD_m_s18_11h -> 3 (Le cours doit avoir un professeur, Pas de professeur disponible)
+TD_m_s18_15h45 -> 2 (Le cours doit avoir un professeur)
+TD_m_s18_14h15 -> 2 (Le cours doit avoir un professeur)
+TD_m_s18_9h30 -> 2 (Le cours doit avoir un professeur)
+TD_m_s18_8h -> 2 (Le cours doit avoir un professeur)
+TD_th_s18_8h -> 2 (Le cours doit avoir un professeur)
+DS_th_s18_14h15 -> 1 (Pas de professeur disponible)
+DS_th_s18_15h45 -> 1 (Pas de professeur disponible)
+CM_m_s18_11h -> 1 (Pas de professeur disponible)
+TP_th_s18_17h15 -> 1 (Pas de professeur disponible)
+DS_m_s18_8h -> 1 (Pas de professeur disponible)
+CM_w_s18_9h30 -> 1 (Pas de professeur disponible)
+DS_w_s18_14h15 -> 1 (Pas de professeur disponible)
+DS_m_s18_15h45 -> 1 (Pas de professeur disponible)
+CM_tu_s18_8h -> 1 (Pas de professeur disponible)
+DS_tu_s18_14h15 -> 1 (Pas de professeur disponible)
+DS_m_s18_17h15 -> 1 (Pas de professeur disponible)
+DS_th_s18_8h -> 1 (Pas de professeur disponible)
+DS_th_s18_11h -> 1 (Pas de professeur disponible)
+CM_tu_s18_17h15 -> 1 (Pas plus d'un cours par créneau)
+
+courses:
+TD-COO-TG-2 (44271) -> 66 (Problème de dépendance, Le cours doit avoir un professeur, Le cours doit être placé)
+TD-COO-TG-2 (44270) -> 64 (Problème de dépendance, Le cours doit avoir un professeur, Le cours doit être placé)
+
+weeks:
+18 -> 104 (Problème de dépendance, Le cours doit avoir un professeur, Simul slot, Pas de professeur disponible, Pas plus d'un cours par créneau)
+
+rooms:
+
+groups:
+2 -> 85 (Problème de dépendance, Le cours doit avoir un professeur, Le cours doit être placé)
+2A -> 1 (Pas plus d'un cours par créneau)
+
+days:
+Mardi -> 41 (Problème de dépendance, Le cours doit avoir un professeur, Simul slot, Pas de professeur disponible, Pas plus d'un cours par créneau)
+Mercredi -> 39 (Problème de dépendance, Le cours doit avoir un professeur, Pas de professeur disponible)
+Jeudi -> 37 (Problème de dépendance, Le cours doit avoir un professeur, Pas de professeur disponible)
+Lundi -> 22 (Problème de dépendance, Le cours doit avoir un professeur, Pas de professeur disponible)
+
+departments:
+
+modules:
+COO -> 85 (Problème de dépendance, Le cours doit avoir un professeur, Le cours doit être placé)
+
+apm:

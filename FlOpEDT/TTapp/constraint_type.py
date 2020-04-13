@@ -1,15 +1,10 @@
 from enum import Enum
 
-"""
-Liste de tous les types de contraintes actuellement identifiees et utilisees
-IBS =
-IBD =
-IBHD =
-GBHD =
-"""
+
 class ConstraintType(Enum):
     # From TTModel
     # TECHNICAL
+    TECHNICAL = "Technical"
     IBS_SUP = "IBS supérieur"
     IBS_INF = "IBS inférieur"
     IBD_INF = "IBD inférieur"
@@ -83,12 +78,14 @@ class ConstraintType(Enum):
     PAS_PLUS_5_CRENEAU = "Pas_plus_de_5_creneau"
     G1_G2_COURS_MEME_JOUR = "G1 et G2 ont cours le meme jour"
 
-    # From TTApp/models.py
+    # From TTApp/models
     MAX_HOURS = "Max hours"
     STABILIZE_ENRICH_MODEL = "Stabilize : enrich model"
 
-    #minhalfdays
+    # From minhalfdays
     MIN_HALF_DAYS_LIMIT = "Min Half Days limit"
     MIN_HALF_DAYS_LOCAL = "Min Half Days local"
     MIN_HALF_DAYS_JOIN_AM = "Min Half Days join AM"
     MIN_HALF_DAYS_JOIN_PM = "Min Half Days join PM"
+    MIN_HALF_DAYS_SUP = "MIN_HALF_DAYS_SUP"
+    MIN_HALF_DAYS_INF = "MIN_HALF_DAYS_INF"
