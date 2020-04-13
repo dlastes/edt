@@ -138,7 +138,7 @@ class Constraint:
             if x == [] or x is None:
                 return ""
             elif type(x) is list:
-                return ' '.join(';'.join(x))
+                return ' '.join(';'.join(str(x)))
             else:
                 return str(x)
         res = [self.id, self.constraint_type.value]

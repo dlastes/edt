@@ -1,4 +1,4 @@
-from TTapp.constraint import Constraint
+from TTapp.constraints.constraint import Constraint
 from TTapp.constraint_type import ConstraintType
 
 class SlotInstructorConstraint(Constraint):
