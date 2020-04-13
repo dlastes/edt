@@ -1,4 +1,4 @@
-# coding: utf8
+# coding: utf-8
 # -*- coding: utf-8 -*-
 
 # This file is part of the FlOpEDT/FlOpScheduler project.
@@ -46,16 +46,16 @@ logger = logging.getLogger(__name__)
 
 
 @transaction.atomic
-def create_first_department():    
+def create_first_department():
 
     department = Department.objects.create(name="Default Department", abbrev="default")
-    
+
     # Update all existing department related models
     models = [
         TrainingProgramme, EdtVersion, Regen, \
         RoomType, Period, CourseType, BreakingNews, \
         TutorCost, GroupType]
-   
+
     for model in models:
         model.objects.all().update(department=department)
 
@@ -69,7 +69,7 @@ def create_first_department():
     types = TTConstraint.__subclasses__()
 
     for type in types:
-        type.objects.all().update(department=department)    
+        type.objects.all().update(department=department)
 
     # Init TimeGeneralSettings with default values
     TimeGeneralSettings.objects.create(
@@ -93,15 +93,15 @@ def get_edt_version(department, week, year, create=False):
         except EdtVersion.MultipleObjectsReturned as e:
             logger.error(f'get_edt_version: database inconsistency, multiple objects returned for {params}')
             raise(e)
-        else:    
+        else:
             version = edt_version.version
     else:
         """
-        Raise model.DoesNotExist to simulate get behaviour 
+        Raise model.DoesNotExist to simulate get behaviour
         when no item is matching filter parameters
         """
         try:
-            version = EdtVersion.objects.filter(**params).values_list("version", flat=True)[0]   
+            version = EdtVersion.objects.filter(**params).values_list("version", flat=True)[0]
         except IndexError:
             raise(EdtVersion.DoesNotExist)
     return version
@@ -125,7 +125,7 @@ def get_scheduled_courses(department, week, year, num_copy):
                                                            'course__room_type',
                                                            'course__module__display'
                         )
-    return qs    
+    return qs
 
 
 def get_groups(department_abbrev):
@@ -249,7 +249,7 @@ def get_rooms(department_abbrev, basic=False):
 
 def get_coursetype_constraints(department_abbrev):
     """
-    From the data stored in the database, fill the course type 
+    From the data stored in the database, fill the course type
     description file (duration and allowed start times), that will
     be used by the website
     :return: a dictionary course type -> (object containing duration
@@ -316,5 +316,10 @@ def get_notification_preference(user):
         try:
             return user.notifications_preference.nb_of_notified_weeks
         except NotificationsPreferences.DoesNotExist:
-            pass
+            if user.is_tutor:
+                return 4
+            elif user.is_student:
+                return 0
+            else:
+                pass
     return 0

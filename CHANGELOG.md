@@ -11,8 +11,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Modification proposal: id for modification bunch, modification
   applicability, email notification
 - Room preferences: user interface improvement, room exclusion
+- Flopeditor: staff members
 
 ### Added
+- New app flopeditor: save initial data through graphical interface
+  - Department
+  - Rooms (hierarchy, room types)
+  - Training programmes
+  - Modules
 - Preferences for mail notification
 - New mode for employees planning
   - new constraints (week-ends, consecutive working hours/days, etc.)
@@ -20,10 +26,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Modification proposal sent via email
 - A tutor can choose her/his favorite rooms
 - Module description
+- Enabled text translation
 
 ### Changed
 - front-end: dispatch week/day management in js files
 - back-end refactoring: all model attributes in english
+- Selection of multiple weeks possible with the solve board
 
 ### TBD
 - right permissions in TTapp/views

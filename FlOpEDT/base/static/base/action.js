@@ -45,6 +45,32 @@
   ------- PREFERENCES ------
   --------------------------*/
 
+// 
+function update_pref_selection(d) {
+  // paint-like mode?
+  if (!pref_selection.is_paint_mode() || pref_selection.start === null) {
+    return ;
+  }
+  
+  let covered_days = week_days.get_days_between(d.day, pref_selection.start.day);
+  user.dispos.forEach(function (p) { p.selected = false ; });
+  covered_days.forEach(function(day) {
+    let start = Math.min(pref_selection.start.start_time, d.start_time) ;
+    let end = Math.max(
+      pref_selection.start.start_time+pref_selection.start.duration,
+      d.start_time + d.duration
+    ) ;
+    user.dispos.filter(function(p) {
+      return p.day == day.ref
+        && ! (p.start_time>=end || p.start_time + p.duration <= start) ;
+    }).forEach( function(p) {
+      p.selected = true ;
+    });
+  });
+
+  go_pref(true);
+}
+
 // apply pref change when simple mode
 function apply_change_simple_pref(d) {
   if (pref_only || ckbox["dis-mod"].cked) {
@@ -52,22 +78,32 @@ function apply_change_simple_pref(d) {
       return dd.selected;
     });
     if (typeof sel === 'undefined') {
-      if (Math.floor(d.val % (par_dispos.nmax / 2)) != 0) {
-        d.val = Math.floor(d.val / (par_dispos.nmax / 2)) * par_dispos.nmax / 2;
+      // normal selection mode
+      if (Math.floor(d.value % (par_dispos.nmax / 2)) != 0) {
+        d.value = Math.floor(d.value / (par_dispos.nmax / 2)) * par_dispos.nmax / 2;
       }
-      d.val = (d.val + par_dispos.nmax / 2) % (3 * par_dispos.nmax / 2);
-      if (cosmo && d.val == 0) {
-        d.val++;
+      d.value = (d.value + par_dispos.nmax / 2) % (3 * par_dispos.nmax / 2);
+      if (cosmo && d.value == 0) {
+        d.value++;
       }
-      update_pref_interval(user.name, d.day, d.start_time, d.val);
-      //dispos[user.name][idays[d.day]][d.hour] = d.val;
-      //user.dispos[day_hour_2_1D(d)].val = d.val;
+      update_pref_interval(user.name, d.day, d.start_time, d.duration, d.value);
     } else {
-      d.val = sel.val;
-      update_pref_interval(user.name, d.day, d.start_time, d.val);
+      // paint-like selection mode
+      let covered_days = week_days.get_days_between(d.day,
+                                                    pref_selection.start.day);
+      user.dispos.forEach(function (p) { p.selected = false ; });
+      covered_days.forEach(function(day) {
+        let start = Math.min(pref_selection.start.start_time, d.start_time) ;
+        let end = Math.max(
+          pref_selection.start.start_time+pref_selection.start.duration,
+          d.start_time + d.duration
+        ) ;
+        update_pref_interval(user.name, day.ref, start, end - start, sel.value);
+      });
     }
     go_pref(true);
   }
+  pref_selection.start = null ;
 }
 
 // change preference selection mode
@@ -89,6 +125,7 @@ function apply_pref_mode(d) {
     }
   }
   go_pref_mode();
+  go_pref();
 }
 
 // 
@@ -105,6 +142,7 @@ function apply_pref_mode_choice(d) {
   });
   sel_mode.selected = true;
   go_pref_mode(false);
+  go_pref(true);
 }
 
 /*---------------------
@@ -250,7 +288,7 @@ function select_room_change() {
     = Math.ceil(room_tutor_change.proposal.length
       / room_tutor_change.cm_settings.ncol);
 
-  if (level > 0 || c.room == une_salle ||
+  if (level > 0 || c.room == "" ||
     occupied_rooms.indexOf(c.room) != -1) {
     return true;
   } else {
@@ -822,13 +860,13 @@ function compute_changes(changes, conc_tutors, gps) {
       // } else 
 
 
-      if (cur_course.room == une_salle) {
+      if (cur_course.room == "") {
         splash_case = {
           id: "def-room",
           but: butOK,
           com: {
             list: [
-              { txt: "Vous avez laissé la salle 'par défaut'." },
+              { txt: "Vous n'avez pas attribué de salle à un cours." },
               { txt: "Pour l'instant, le changement n'est pas accepté." },
               { txt: "Merci de chercher et de renseigner une salle disponible." }
             ]
@@ -1463,7 +1501,7 @@ function compute_pref_changes(changes) {
   var modified_days = [];
 
   for (let i = 0; i < Object.keys(user.dispos).length; i++) {
-    //user.dispos[i].val != user.dispos_bu[i].val	   &&
+    //user.dispos[i].value != user.dispos_bu[i].value	   &&
     if (modified_days.indexOf(user.dispos[i].day) == -1) {
       modified_days.push(user.dispos[i].day);
     }
@@ -1480,7 +1518,7 @@ function compute_pref_changes(changes) {
   for (i = 0; i < Object.keys(user.dispos).length; i++) {
     cur_pref = user.dispos[i];
     bu_pref = user.dispos_bu[i];
-    if (cur_pref.val > 0) {
+    if (cur_pref.value > 0) {
       nbDispos++;
     }
     if (modified_days.indexOf(cur_pref.day) != -1) {
@@ -1490,7 +1528,7 @@ function compute_pref_changes(changes) {
       })[0].val_inter.push({
         start_time: cur_pref.start_time,
         duration: cur_pref.duration,
-        value: cur_pref.val
+        value: cur_pref.value
       });
     }
   }
@@ -1763,9 +1801,10 @@ function apply_stype() {
     for (let d = 0; d < user.dispos.length; d++) {
       user.dispos[d].day = user.dispos_type[d].day;
       user.dispos[d].hour = user.dispos_type[d].hour;
-      user.dispos[d].val = user.dispos_type[d].val;
+      user.dispos[d].value = user.dispos_type[d].value;
       user.dispos[d].off = user.dispos_type[d].off;
-      dispos[user.name][user.dispos[d].day][user.dispos[d].hour] = user.dispos[d].val;
+      dispos[user.name][user.dispos[d].day][user.dispos[d].hour]
+        = user.dispos[d].value;
     }
     go_pref(true);
     send_dis_change();

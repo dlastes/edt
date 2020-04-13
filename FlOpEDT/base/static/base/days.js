@@ -108,6 +108,19 @@ WeekDays.prototype.add_all = function (days) {
   }, this);
 };
 
+WeekDays.prototype.get_days_between = function(first_ref, last_ref) {
+  let first_num = this.day_by_ref(first_ref).num ;
+  let last_num = this.day_by_ref(last_ref).num ;
+  if (first_num > last_num) {
+    let tmp = first_num ;
+    first_num = last_num ;
+    last_num = tmp ;
+  }
+  return this.day_list.filter(function (day) {
+    return day.num >= first_num && day.num <= last_num ;
+  });
+};
+
 
 // Name and date of the days above the grid
 function WeekDayHeader(svg, layout_name, days, half_day_rect, par) {

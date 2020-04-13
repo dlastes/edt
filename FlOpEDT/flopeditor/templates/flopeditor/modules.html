@@ -1,0 +1,26 @@
+{% extends "flopeditor/base_crud.html" %} 
+{% load static %} 
+{% block nav-classes-modules %} active {% endblock %} 
+
+{% block main-class %}container-fluid{% endblock %}
+
+{% block card_header %}
+<li class="nav-item">
+  <a
+    class="nav-link {% block card-nav-classes-modules %}active{% endblock %}"
+    href="{% url 'flopeditor:flopeditor-department-modules' department_abbrev=department.abbrev %}"
+  >
+    Modules
+  </a>
+</li>
+<li class="nav-item">
+  <a
+    class="nav-link {% block card-nav-classes-periods %}{% endblock %}"
+    href="{% url 'flopeditor:flopeditor-department-periods' department_abbrev=department.abbrev %}"
+  >
+    Périodes
+  </a>
+</li>
+{% endblock %} 
+
+{% block crud_js_url %}{% url 'flopeditor:flopeditor-crud-modules' department_abbrev=department.abbrev %}{% endblock %}

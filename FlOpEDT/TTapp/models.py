@@ -46,7 +46,7 @@ from django.utils.translation import ugettext_lazy as _
 
 # from caching.base import CachingManager, CachingMixin
 
-from base.models import Time, Department, Module, Group, Day
+from base.models import Time, Department, Module, Group, Day, TimeGeneralSettings
 
 from people.models import Tutor
 
@@ -58,7 +58,7 @@ max_weight = 8
 
 slot_pause = 30
 
-PM_start = 12*60
+midday = 12 * 60
 
 basic_slot_duration = 90
 
@@ -71,13 +71,17 @@ for c in Day.CHOICES:
 class Slot(object):
     def __init__(self, day, start_time, course_type=None):
         self.course_type = course_type
+        if course_type is not None:
+            pm_start = TimeGeneralSettings.objects.get(department=course_type.department).lunch_break_finish_time
+        else:
+            pm_start = midday
         self.day = day
         self.start_time = start_time
         self.duration = basic_slot_duration
         if self.course_type is not None:
             self.duration = self.course_type.duration
         self.end_time = self.start_time + self.duration
-        if self.start_time >= PM_start:
+        if self.start_time >= pm_start:
             self.apm = Time.PM
         else:
             self.apm = Time.AM
@@ -437,7 +441,7 @@ class LimitCourseTypeTimePerPeriod(TTConstraint):  # , pond):
         if self.period == self.FULL_DAY:
             periods = [None]
         else:
-            periods = [Time.AM, Time.PM]
+            periods = ttmodel.possible_apms
 
         period_by_day = []
         for day in days_filter(ttmodel.wdb.days, week=week):
@@ -849,10 +853,12 @@ class MinNonPreferedSlot(TTConstraint):
     def clean(self):
         if not self.tutor and not self.train_prog:
             raise ValidationError({
-                'train_prog': ValidationError(_('Si pas de prof alors promo.',
-                                                code='invalid')),
-                'tutor': ValidationError(_('Si pas de promo alors prof.',
-                                           code='invalid'))})
+                'train_prog': ValidationError(
+                    _('If no tutor then training programme.',
+                      code='invalid')),
+                'tutor': ValidationError(
+                    _('If no training programme then tutor.',
+                      code='invalid'))})
 
     def enrich_model(self, ttmodel, week, ponderation=1):
         if self.tutor is not None:
@@ -862,7 +868,7 @@ class MinNonPreferedSlot(TTConstraint):
                 .filter(group__train_prog=self.train_prog, week=week)
             filtered_courses = set(filtered_courses)
         basic_groups = ttmodel.wdb.basic_groups.filter(train_prog=self.train_prog)
-        for sl in ttmodel.wdb.slots:
+        for sl in slots_filter(ttmodel.wdb.slots, week=week):
             for c in filtered_courses & ttmodel.wdb.compatible_courses[sl]:
                 if self.tutor is not None:
                     cost = (float(self.weight) / max_weight) \

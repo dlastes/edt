@@ -92,6 +92,7 @@ class WeekDB(object):
         self.department = department
         self.weeks = weeks
         self.year = year
+        self.possible_apms=set()
         self.days, self.day_after, self.holidays, self.training_half_days = self.days_init()
         self.slots, self.slots_by_day, self.slots_intersecting, self.slots_by_half_day, self.slots_by_week \
             = self.slots_init()
@@ -149,6 +150,9 @@ class WeekDB(object):
                          for d in self.days
                          for start_time in cc.allowed_start_times)
 
+        for slot in slots:
+            self.possible_apms.add(slot.apm)
+
         slots_by_day = {}
         for d in self.days:
             slots_by_day[d] = slots_filter(slots, day=d)
@@ -159,7 +163,7 @@ class WeekDB(object):
 
         slots_by_half_day = {}
         for d in self.days:
-            for apm in [Time.AM, Time.PM]:
+            for apm in self.possible_apms:
                 slots_by_half_day[(d, apm)] = slots_filter(slots, day=d, apm=apm)
         print('Ok')
 
@@ -426,7 +430,7 @@ class WeekDB(object):
 
 
 class TTModel(object):
-    def __init__(self, department_abbrev, weeks, year,
+    def __init__(self, department_abbrev, week_year_list,
                  train_prog=None,
                  stabilize_work_copy=None,
                  min_nps_i=1.,
@@ -438,7 +442,6 @@ class TTModel(object):
                  lim_ld=1.,
                  core_only=False,
                  send_mails=False):
-        print("\nLet's start weeks #%s" % weeks)
         # beg_file = os.path.join('logs',"FlOpTT")
         self.model = LpProblem("FlOpTT", LpMinimize)
         self.min_ups_i = min_nps_i
@@ -453,14 +456,22 @@ class TTModel(object):
         self.var_nb = 0
         self.constraintManager = ConstraintManager()
 
-        if type(weeks) is int:
-            self.weeks = [weeks]
-        else:
-            try:
-                self.weeks = list(weeks)
-            except TypeError:
-                raise TypeError("Weeks has to be int or iterable")
+        # Split week_year_list into weeks (list), and year (int)
+        # week_year should be a list of {'week': week, 'year': year}
+        year = None
+        weeks = []
+        for week_year in week_year_list:
+            y = week_year['year']
+            w = week_year['week']
+            if year is None: year = y
+            weeks.append(w)
+            if year != y:
+              raise Exception("Multiple week selection only support same year")
+
+        self.weeks = weeks
         self.year = year
+        print("\nLet's start weeks #%s" % weeks)
+
         self.warnings = {}
 
         self.department = Department.objects.get(abbrev=department_abbrev)
@@ -474,6 +485,7 @@ class TTModel(object):
         self.stabilize_work_copy = stabilize_work_copy
         self.obj = self.lin_expr()
         self.wdb = self.wdb_init()
+        self.possible_apms = self.wdb.possible_apms
         self.cost_I, self.FHD_G, self.cost_G, self.cost_SL = self.costs_init()
         self.TT, self.TTrooms, self.TTinstructors = self.TT_vars_init()
         self.IBD, self.IBD_GTE, self.IBHD, self.GBHD, self.IBS, self.forced_IBD = self.busy_vars_init()
@@ -516,7 +528,7 @@ class TTModel(object):
                                [{week: self.lin_expr() for week in self.weeks + [None]} for _ in
                                 self.wdb.instructors])))
         FHD_G = {}
-        for apm in [Time.AM, Time.PM]:
+        for apm in self.possible_apms:
             FHD_G[apm] = dict(
                 list(zip(self.wdb.basic_groups,
                          [{week: self.lin_expr() for week in self.weeks} for _ in self.wdb.basic_groups])))
@@ -623,7 +635,7 @@ class TTModel(object):
         for i in self.wdb.instructors:
             for d in self.wdb.days:
                 # add constraint linking IBHD to TT
-                for apm in [Time.AM, Time.PM]:
+                for apm in self.possible_apms:
                     IBHD[(i, d, apm)] \
                         = self.add_var("IBHD(%s,%s,%s)" % (i, d, apm))
                     halfdayslots = self.wdb.slots_by_half_day[(d, apm)]
@@ -652,7 +664,7 @@ class TTModel(object):
         for g in self.wdb.basic_groups:
             for d in self.wdb.days:
                 # add constraint linking IBD to EDT
-                for apm in [Time.AM, Time.PM]:
+                for apm in self.possible_apms:
                     GBHD[(g, d, apm)] \
                         = self.add_var("GBHD(%s,%s,%s)" % (g, d, apm))
                     halfdayslots = self.wdb.slots_by_half_day[(d, apm)]
@@ -1216,9 +1228,10 @@ class TTModel(object):
         avail_course = {}
         for course_type in self.wdb.course_types:
             for promo in self.train_prog:
+                avail_course[(course_type, promo)] = {}
+                non_prefered_slot_cost_course[(course_type, promo)] = {}
                 for week in self.weeks:
-                    avail_course[(course_type, promo)] = {}
-                    non_prefered_slot_cost_course[(course_type, promo)] = {}
+                    week_slots = slots_filter(self.wdb.slots, week=week)
                     courses_avail = set(self.wdb.courses_availabilities
                                         .filter(course_type=course_type,
                                                 train_prog=promo,
@@ -1230,12 +1243,12 @@ class TTModel(object):
                                                     week=None))
                     if not courses_avail:
                         print("No course availability given for %s - %s" % (course_type, promo))
-                        for sl in self.wdb.slots:
+                        for sl in week_slots:
                             avail_course[(course_type, promo)][sl] = 1
                             non_prefered_slot_cost_course[(course_type,
                                                            promo)][sl] = 0
                     else:
-                        for sl in self.wdb.slots:
+                        for sl in week_slots:
                             try:
                                 avail = set(a for a in courses_avail
                                             if a.start_time < sl.end_time and sl.start_time < a.start_time + a.duration
@@ -1474,12 +1487,17 @@ class TTModel(object):
                 tc.save()
 
             for g in self.wdb.basic_groups:
+                DJL=0
+                if Time.PM in self.possible_apms:
+                    DJL += self.get_expr_value(self.FHD_G[Time.PM][g][week])
+                if Time.AM in self.possible_apms:
+                    DJL += 0.01 * self.get_expr_value(self.FHD_G[Time.AM][g][week])
+
                 djlg = GroupFreeHalfDay(group=g,
                                         year=self.wdb.year,
                                         week=week,
                                         work_copy=target_work_copy,
-                                        DJL=self.get_expr_value(self.FHD_G[Time.PM][g][week]) +
-                                            0.01 * self.get_expr_value(self.FHD_G['AM'][g][week]))
+                                        DJL= DJL)
                 djlg.save()
                 cg = GroupCost(group=g,
                                year=self.wdb.year,
@@ -1505,12 +1523,11 @@ class TTModel(object):
             if result is None or result == 0:
                 from gurobipy import read
                 lp = "FlOpTT-pulp.lp"
-                ilp_filename = "logs/IIS_week%s.ilp" % self.weeks
-                if not os.path.isfile(ilp_filename):
-                    m = read(lp)
-                    m.computeIIS()
-                    m.write(ilp_filename)
-                    print("IIS file written in file %s" % ilp_filename)
+                ilp_filename = "logs/IIS_%s_weeks_%s.ilp" % (self.department.abbrev, self.weeks)
+                m = read(lp)
+                m.computeIIS()
+                m.write(ilp_filename)
+                print("IIS file written in file %s" % ilp_filename)
                 self.constraintManager.handle_reduced_result(ilp_filename, self.weeks)
 
         elif hasattr(pulp_solvers, solver):

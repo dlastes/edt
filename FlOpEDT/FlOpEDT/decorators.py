@@ -1,4 +1,4 @@
-# coding: utf8
+# coding: utf-8
 # -*- coding: utf-8 -*-
 
 # This file is part of the FlOpEDT/FlOpScheduler project.
@@ -66,7 +66,7 @@ def dept_admin_required(view_func=None, redirect_field_name=REDIRECT_FIELD_NAME,
     Decorator for views that checks that the user is logged in and is an admin
     of the department, redirecting to the login page if necessary.
     """
-    
+
     actual_decorator = request_passes_test(
         lambda r: not r.user.is_anonymous and r.user.has_department_perm(r.department, admin=True),
         login_url=login_url,
@@ -80,11 +80,11 @@ def dept_admin_required(view_func=None, redirect_field_name=REDIRECT_FIELD_NAME,
 def tutor_required(view_func=None, redirect_field_name=REDIRECT_FIELD_NAME,
                    login_url='people:login'):
     """
-    Decorator for views that checks that the user is a tutor, 
+    Decorator for views that checks that the user is a tutor,
     redirecting to the login page if necessary.
     """
     actual_decorator = user_passes_test(
-        lambda u: u.is_tutor,
+        lambda u: not u.is_anonymous and u.is_tutor,
         login_url=login_url,
         redirect_field_name=redirect_field_name
     )
@@ -92,3 +92,36 @@ def tutor_required(view_func=None, redirect_field_name=REDIRECT_FIELD_NAME,
         return actual_decorator(view_func)
     return actual_decorator
 
+
+def tutor_or_superuser_required(view_func=None, redirect_field_name=REDIRECT_FIELD_NAME,
+                                login_url='people:login'):
+    """
+    Decorator for views that checks that the user is a tutor,
+    redirecting to the login page if necessary.
+    """
+    actual_decorator = user_passes_test(
+        lambda u: not u.is_anonymous and (
+            u.is_superuser or u.is_tutor
+        ),
+        login_url=login_url,
+        redirect_field_name=redirect_field_name
+    )
+    if view_func:
+        return actual_decorator(view_func)
+    return actual_decorator
+
+
+def superuser_required(view_func=None, redirect_field_name=REDIRECT_FIELD_NAME,
+                       login_url='people:login'):
+    """
+    Decorator for views that checks that the user is a superuser,
+    redirecting to the login page if necessary.
+    """
+    actual_decorator = user_passes_test(
+        lambda u: u.is_superuser,
+        login_url=login_url,
+        redirect_field_name=redirect_field_name
+    )
+    if view_func:
+        return actual_decorator(view_func)
+    return actual_decorator

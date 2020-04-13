@@ -148,7 +148,7 @@ function dispo_h(d) {
 }
 
 function dispo_fill(d) {
-  return smi_fill(d.val / par_dispos.nmax);
+  return smi_fill(d.value / par_dispos.nmax);
 }
 
 function pref_sel_choice_x(d, i) {
@@ -284,6 +284,20 @@ function txt_filDispos() {
 }
 
 
+function pref_opacity(d) {
+  return pref_selection.start !== null && d.selected?opac:1;
+}
+
+function cursor_pref() {
+  if (!ckbox["dis-mod"].cked) {
+    return "default" ;
+  }
+  if (pref_selection.is_paint_mode()) {
+    return "crosshair" ;
+  } else {
+    return "pointer" ;
+  }
+}
 
 /*---------------------
   ------- SMILEY -------
@@ -292,7 +306,7 @@ function txt_filDispos() {
 
 //ratio content
 function rc(d) {
-  return d.off < 0 ? d.val / par_dispos.nmax : d.off / par_dispos.nmax;
+  return d.off < 0 ? d.value / par_dispos.nmax : d.off / par_dispos.nmax;
 }
 
 
@@ -709,17 +723,18 @@ function cours_height(c) {
 function cours_txt_x(c) {
   return cours_x(c) + .5 * cours_width(c);
 }
+function get_color(c){
+//  console.log(c);
+  let key = cosmo?c.prof:c.mod;
+  return colors[key];
+}
 function cours_txt_fill(c) {
-  if (c.id_course != -1) {
-    return c.color_txt;
-  }
-  return "black";
+  let coco = get_color(c) ;
+  return (typeof coco === 'undefined')?"black":coco.color_txt;
 }
 function cours_fill(c) {
-  if (c.id_course != -1) {
-    return c.color_bg;
-  }
-  return "red";
+  let coco = get_color(c) ;
+  return (typeof coco === 'undefined')?"white":coco.color_bg;
 }
 function is_exam(c) {
   return false;

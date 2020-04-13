@@ -167,27 +167,28 @@ function no_overlap(list, start_time, duration) {
 
 
 
-function update_pref_interval(tutor, day, start_time, value) {
-  var pref = dispos[user.name][day];
-  var p = pref.filter(function (d) {
-    return d.start_time == start_time;
+// get all prefs that includes ]start_time, start_time+duration[
+function get_covered_preferences(pref, start_time, duration) {
+  return  pref.filter(function(p) {
+    return ! (p.start_time>=start_time+duration
+              || p.start_time + p.duration <=start_time) ;
   });
-  if (p.length == 1) {
-    p[0].value = value;
-  } else {
-    console.log("Problem with the time interval");
-  }
+}
+
+
+function update_pref_interval(tutor, day, start_time, duration, value) {
+  var pref = dispos[user.name][day];
+  var covered_preferences = get_covered_preferences(pref, start_time, duration);
+  covered_preferences.forEach(function (p) {
+    p.value = value ;
+  });
   if (user.name == tutor) {
-    pref = user.dispos;
-    p = pref.filter(function (d) {
-      return d.day == day && d.start_time == start_time;
+    user.dispos = user.dispos.filter(function(p) {
+      return p.day != day ;
     });
-    console.log(p);
-    if (p.length == 1) {
-      p[0].val = value;
-    } else {
-      console.log("Problem with the time interval");
-    }
+    dispos[user.name][day].forEach(function(p) {
+      user.dispos.push(Object.assign({day:day, off:-1}, p));
+    });
   }
 }
 
