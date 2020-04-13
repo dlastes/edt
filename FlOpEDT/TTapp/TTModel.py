@@ -23,13 +23,12 @@
 # a commercial license. Buying such a license is mandatory as soon as
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
-import importlib
 from django.core.mail import EmailMessage
 from pulp import LpVariable, LpConstraint, LpBinary, LpConstraintEQ, \
     LpConstraintGE, LpConstraintLE, LpAffineExpression, LpProblem, LpStatus, \
     LpMinimize, lpSum, LpStatusOptimal, LpStatusNotSolved
 
-from pulp import GUROBI_CMD, PULP_CBC_CMD
+from pulp import GUROBI_CMD
 
 import pulp.solvers as pulp_solvers
 # from pulp.solvers import GUROBI_CMD as GUROBI
@@ -47,18 +46,13 @@ import base.queries as queries
 
 from people.models import Tutor
 
-from base.weeks import current_year
-
 from TTapp.models import MinNonPreferedTutorsSlot, MinNonPreferedTrainProgsSlot,\
     max_weight, Stabilize, TTConstraint, \
-    Slot, slot_pause, basic_slot_duration, slots_filter, days_filter
+    Slot, slots_filter, days_filter
 
 from MyFlOp.MyTTUtils import reassign_rooms
 
-import re
 import signal
-
-import numpy as np
 
 from django.db import close_old_connections
 from django.db.models import Q, Max, F
@@ -66,10 +60,8 @@ from django.conf import settings
 
 import datetime
 
-import os.path
-
 from TTapp.constraintManager import ConstraintManager
-from TTapp.constraint import Constraint
+from TTapp.constraints.constraint import Constraint
 from TTapp.constraint_type import ConstraintType
 
 import logging
