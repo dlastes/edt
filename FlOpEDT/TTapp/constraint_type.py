@@ -4,6 +4,7 @@ from enum import Enum
 class ConstraintType(Enum):
     # From TTModel
     # TECHNICAL
+    TECHNICAL = "Technical"
     IBS_SUP = "IBS supérieur"
     IBS_INF = "IBS inférieur"
     IBD_INF = "IBD inférieur"

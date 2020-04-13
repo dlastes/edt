@@ -1,3 +1,5 @@
+from TTapp.constraint import Constraint
+
 def print_all(constraints, occurs, weeks, threshold_type, threshold_attr):
     print_brut_constraints(constraints, occurs, weeks)
     print_factorised_constraints(occurs, weeks)

@@ -25,9 +25,9 @@ def inc_with_type(occurs_dimension, dimension, constraint_type):
 
 
 class ConstraintManager:
-    def __init__(self):
-        self.threshold_type = 50 # % des types sont pris en compte
-        self.threshold_attr = 80 # % des attributs sont pris en compte
+    def __init__(self, threshold_type=50, threshold_attr=80):
+        self.threshold_type = threshold_type # % des types sont pris en compte
+        self.threshold_attr = threshold_attr # % des attributs sont pris en compte
         self.constraints = []
         self.infeasible_constraints = []
         self.occurs = None
