@@ -95,5 +95,5 @@ class ConstraintManager:
             writer.writerow(['ID', 'Constraint type', 'Instructors', 'Slots', 'Courses', 'Week', 'Rooms', 'Group',
                              'Days', 'Departement', 'Module'])
             for constraint in constraints:
-                csv_info = constraint.handle_reduced_result()
+                csv_info = constraint.get_csv_info()
                 writer.writerow(csv_info)
