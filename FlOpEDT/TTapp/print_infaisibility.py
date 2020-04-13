@@ -96,6 +96,7 @@ def print_summary_from_types_with_threshold(constraints, occurs, department_abbr
                                             threshold_type, threshold_attr, print_output=True):
     filename = "logs/constraints_summary_%s_%s.txt" % (department_abbrev, weeks)
     output = "Voici les principaux problèmes liés à l'infaisabilité :\n"
+    print(output)
     write_file(filename, output)
     for constraint_type in get_most_important(occurs['types'], threshold_type):
         output, dimensions = find_object_from_type(constraint_type, constraints).get_summary_format()
