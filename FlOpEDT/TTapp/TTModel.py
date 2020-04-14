@@ -60,17 +60,17 @@ from django.conf import settings
 
 import datetime
 
-from TTapp.constraintManager import ConstraintManager
-from TTapp.constraints.constraint import Constraint
-from TTapp.constraint_type import ConstraintType
+from TTapp.iic.constraintManager import ConstraintManager
+from TTapp.iic.constraints.constraint import Constraint
+from TTapp.iic.constraint_type import ConstraintType
 
 import logging
 
-from TTapp.constraints.dependencyConstraint import DependencyConstraint
-from TTapp.constraints.instructorConstraint import InstructorConstraint
-from TTapp.constraints.simulSlotGroupConstraint import SimulSlotGroupConstraint
-from TTapp.constraints.slotInstructorConstraint import SlotInstructorConstraint
-from TTapp.constraints.courseConstraint import CourseConstraint
+from TTapp.iic.constraints.dependencyConstraint import DependencyConstraint
+from TTapp.iic.constraints.instructorConstraint import InstructorConstraint
+from TTapp.iic.constraints.simulSlotGroupConstraint import SimulSlotGroupConstraint
+from TTapp.iic.constraints.slotInstructorConstraint import SlotInstructorConstraint
+from TTapp.iic.constraints.courseConstraint import CourseConstraint
 
 logger = logging.getLogger(__name__)
 pattern = r".+: (.|\s)+ (=|>=|<=) \d*"

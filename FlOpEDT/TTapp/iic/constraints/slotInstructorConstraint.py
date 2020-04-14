@@ -1,5 +1,5 @@
-from TTapp.constraints.constraint import Constraint
-from TTapp.constraint_type import ConstraintType
+from TTapp.iic.constraints.constraint import Constraint
+from TTapp.iic.constraint_type import ConstraintType
 
 class SlotInstructorConstraint(Constraint):
     def __init__(self, slot, instructor):

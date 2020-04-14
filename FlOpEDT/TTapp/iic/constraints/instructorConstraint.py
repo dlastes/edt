@@ -1,4 +1,4 @@
-from TTapp.constraints.constraint import Constraint
+from TTapp.iic.constraints.constraint import Constraint
 
 
 class InstructorConstraint(Constraint):
