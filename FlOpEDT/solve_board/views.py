@@ -73,8 +73,13 @@ def get_pulp_solvers(available=True):
     def recurse_solver_hierachy(solvers):
         for s in solvers:
             if available:
-                if s().available():
-                    yield s
+                try:
+                    if s().available():
+                        yield s
+                except pulp.PulpSolverError:
+                    # cf in pulp: pulp/apis/choco_api.py l38
+                    # CHOCO solver poorly handled
+                    pass
             else:
                 yield s
 
