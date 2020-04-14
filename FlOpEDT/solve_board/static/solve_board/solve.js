@@ -271,12 +271,12 @@ function init_constraints(constraints) {
 
             // Display title
             var label = clone.querySelector("label");
-            label.setAttribute('for', constraintId)
-            label.className = "title"
+            label.setAttribute('for', constraintId);
+            label.className = "title";
             label.textContent = constraint.name;
 
             // Display mandatory
-            if (constraint.details.weight) {
+            if (constraint.details.weight===null) {
                 label.classList.add("mandatory");
             }
 
@@ -299,13 +299,13 @@ function init_constraints(constraints) {
             }
 
             // Display details items
-            var details = clone.querySelector("#details")
+            var details = clone.querySelector("#details");
 
             for (var key in constraint.details) {
                 var detail = document.createElement("div")
                 details.appendChild(detail)
 
-                var content = document.createTextNode(`${key} : ${constraint.details[key]}`)
+                var content = document.createTextNode(`${key} : ${constraint.details[key]}`);
                 detail.appendChild(content)
             }
 
@@ -428,13 +428,13 @@ function dispatchAction(token) {
 	Main process
 */
 
-var solver_select = document.querySelector("#solver")
-var stabilize_select = document.querySelector("#stabilize select")
+var solver_select = document.querySelector("#solver");
+var stabilize_select = document.querySelector("#stabilize select");
 
-time_limit_select = document.querySelector("#limit")
+time_limit_select = document.querySelector("#limit");
 txt_area = document.getElementsByTagName("textarea")[0];
 
-launchButton = document.querySelector("#launch")
+launchButton = document.querySelector("#launch");
 if (launchButton)
     launchButton.addEventListener("click", manageSolverProcess);
 

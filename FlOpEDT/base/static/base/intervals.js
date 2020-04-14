@@ -187,7 +187,6 @@ function update_pref_interval(tutor, day, start_time, duration, value) {
       return p.day != day ;
     });
     dispos[user.name][day].forEach(function(p) {
-      p.val = p.value ;
       user.dispos.push(Object.assign({day:day, off:-1}, p));
     });
   }

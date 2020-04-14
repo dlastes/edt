@@ -26,7 +26,8 @@
 import logging
 
 from base.models import Time, TimeGeneralSettings
-from TTapp.constraint_type import ConstraintType
+from TTapp.iic.constraint_type import ConstraintType
+from TTapp.iic.constraints.constraint import Constraint
 
 
 logger = logging.Logger(__name__)
@@ -49,7 +50,8 @@ class MinHalfDaysHelperBase():
 
     
     def add_constraint(self, expression, courses, local_var):
-        self.ttmodel.add_constraint(local_var, '==', 1, constraint_type=ConstraintType.MIN_HALF_DAYS_LOCAL)
+        self.ttmodel.add_constraint(local_var, '==', 1,
+                                    Constraint(constraint_type=ConstraintType.MIN_HALF_DAYS_LOCAL))
         course_time = sum(c.type.duration for c in courses)
         t = TimeGeneralSettings.objects.get(department=self.ttmodel.department)
         half_days_min_time = min(t.lunch_break_start_time-t.day_start_time, t.day_finish_time-t.lunch_break_finish_time)
@@ -59,7 +61,8 @@ class MinHalfDaysHelperBase():
             cost = self.constraint.local_weight() * self.ponderation * (expression - limit * local_var)
             self.add_cost(cost)
         else:
-            self.ttmodel.add_constraint(expression, '<=', limit, constraint_type=ConstraintType.MIN_HALF_DAYS_LIMIT)
+            self.ttmodel.add_constraint(expression, '<=', limit,
+                                        Constraint(constraint_type=ConstraintType.MIN_HALF_DAYS_LIMIT))
 
     def enrich_model(self, **args):
         expression, courses, local_var = self.build_variables()
@@ -89,8 +92,10 @@ class MinHalfDaysHelperModule(MinHalfDaysHelperBase):
                     for c in set(self.ttmodel.wdb.courses.filter(module=self.module))\
                             & self.ttmodel.wdb.compatible_courses[sl]:
                         expr -= self.ttmodel.TT[(sl, c)]
-                self.ttmodel.add_constraint(expr, '>=', 0, constraint_type=ConstraintType.MIN_HALF_DAYS_SUP)
-                self.ttmodel.add_constraint(expr, '<=', card - 1, constraint_type=ConstraintType.MIN_HALF_DAYS_INF)
+                self.ttmodel.add_constraint(expr, '>=', 0,
+                                            Constraint(constraint_type=ConstraintType.MIN_HALF_DAYS_SUP))
+                self.ttmodel.add_constraint(expr, '<=', card - 1,
+                                            Constraint(constraint_type=ConstraintType.MIN_HALF_DAYS_INF))
         
         local_var = self.ttmodel.add_var("MinMBHD_var_%s" % self.module)
         # no year?
@@ -138,7 +143,7 @@ class MinHalfDaysHelperGroup(MinHalfDaysHelperBase):
             self.group = group
             super().enrich_model()
         else:
-            raise("MinHalfDaysHelperGroup requires a group argument")
+            raise Exception("MinHalfDaysHelperGroup requires a group argument")
 
 
 
@@ -186,16 +191,16 @@ class MinHalfDaysHelperTutor(MinHalfDaysHelperBase):
                             self.ttmodel.add_constraint(
                                 self.ttmodel.TT[(sl8h, c)] + self.ttmodel.TT[(sl11h, c2)],
                                 '<=',
-                                1, constraint_type=ConstraintType.MIN_HALF_DAYS_JOIN_AM)
+                                1,
+                                Constraint(constraint_type=ConstraintType.MIN_HALF_DAYS_JOIN_AM))
                             self.ttmodel.add_constraint(
                                 self.ttmodel.TT[(sl14h, c)] + self.ttmodel.TT[(sl17h, c2)],
                                 '<=',
-                                1, constraint_type=ConstraintType.MIN_HALF_DAYS_JOIN_PM)
-
+                                1, Constraint(constraint_type=ConstraintType.MIN_HALF_DAYS_JOIN_PM))
 
     def enrich_model(self, tutor=None):
         if tutor:
             self.tutor = tutor
             super().enrich_model()
         else:
-            raise("MinHalfDaysHelperTutor requires a tutor argument")            
+            raise Exception("MinHalfDaysHelperTutor requires a tutor argument")

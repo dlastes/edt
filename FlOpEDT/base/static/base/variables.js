@@ -296,11 +296,21 @@ var pref_selection = {
     desc: "paint",
     txt: "Sélection",
     selected: false,
-  }]
+  }],
+  is_paint_mode: function () {
+    let p = this.mode.find(function(m){ return m.desc=='paint';});
+    if (typeof p === 'undefined') {
+      console.log('Something is wrong with paint-like mode.');
+    } else {
+      return p.selected ;
+    }
+  },
+  // pref when mouse was initialy pressed
+  start: null
 };
 for (let i = 0; i <= par_dispos.nmax; i++) {
   pref_selection.choice.data.push({
-    val: i,
+    value: i,
     // for smile_trans
     off: -2,
     selected: false
@@ -982,8 +992,3 @@ var tutors_info = {};
 // cosmo mode: tutor_username -> {color_bg: color, color_txt: color}
 // tutor mode: module_abbrev -> {color_bg: color, color_txt: color}
 var colors = {} ;
-
-
-// select several preferences
-// first selected preference
-var pref_selected = null ;

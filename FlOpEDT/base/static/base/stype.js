@@ -384,6 +384,6 @@ function apply_stype_from_button(save) {
 
 d3.select("html")
   .on("mouseup", function(d) {
-    pref_selected = null ;
+    pref_selection.start = null ;
     go_pref(true);
   });
