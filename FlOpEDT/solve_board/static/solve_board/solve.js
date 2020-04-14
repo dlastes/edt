@@ -54,7 +54,7 @@ function start() {
 function stop() {
     console.log("STOOOOP");
 
-    socket = new WebSocket("ws://" + window.location.host + "/solver/");
+    socket = new WebSocket("wss://" + window.location.host + "/solver/");
     socket.onmessage = function (e) {
         var dat = JSON.parse(e.data);
         dispatchAction(dat);
@@ -91,7 +91,7 @@ function open_connection() {
         + format_zero(now.getMinutes()) + "-"
         + format_zero(now.getSeconds());
 
-    socket = new WebSocket("ws://" + window.location.host + "/solver/");
+    socket = new WebSocket("wss://" + window.location.host + "/solver/");
 
     socket.onmessage = function (e) {
         var dat = JSON.parse(e.data);
