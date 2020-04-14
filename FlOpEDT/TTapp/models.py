@@ -52,7 +52,7 @@ from people.models import Tutor
 
 from TTapp.helpers.minhalfdays import MinHalfDaysHelperGroup, MinHalfDaysHelperModule, MinHalfDaysHelperTutor
 
-from TTapp.constraint_type import ConstraintType
+from TTapp.constraintHandler.constraint_type import ConstraintType
 
 max_weight = 8
 

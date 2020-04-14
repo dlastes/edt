@@ -26,7 +26,7 @@
 import logging
 
 from base.models import Time, TimeGeneralSettings
-from TTapp.constraint_type import ConstraintType
+from TTapp.constraintHandler.constraint_type import ConstraintType
 
 
 logger = logging.Logger(__name__)
