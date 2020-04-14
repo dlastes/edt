@@ -5,7 +5,9 @@ from base.models import Group, Room
 import base.queries as queries
 
 def index(request, **kwargs):
-    enseignant_list = Tutor.objects.filter(is_active=True, is_tutor=True).order_by('username')
+    enseignant_list = Tutor.objects.filter(is_active=True, is_tutor=True)\
+                                   .prefetch_related('departments')\
+                                   .order_by('username')
     group_list = Group.objects.filter(basic=True,
                                        train_prog__department=request.department)\
                                .order_by('train_prog__abbrev', 'name')
