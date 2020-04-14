@@ -44,8 +44,6 @@ from django.core.exceptions import ValidationError
 
 from django.utils.translation import ugettext_lazy as _
 
-# from caching.base import CachingManager, CachingMixin
-
 from base.models import Time, Department, Module, Group, Day, TimeGeneralSettings
 
 from people.models import Tutor
