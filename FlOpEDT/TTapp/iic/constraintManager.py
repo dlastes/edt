@@ -1,4 +1,4 @@
-from TTapp.print_infaisibility import print_all
+from TTapp.iic.print_infaisibility import print_all
 import csv
 
 

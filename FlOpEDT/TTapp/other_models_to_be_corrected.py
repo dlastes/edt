@@ -23,36 +23,15 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-import inspect
-import importlib
-import sys
-from functools import wraps
-
-from django.conf import settings
-from django.utils.functional import lazy
-
-from django.core.validators import MinValueValidator, MaxValueValidator
 from django.contrib.postgres.fields import ArrayField
 
 from django.db import models
 
-from django.db.models import Q, F
-
 # from django.contrib.auth.models import User
-
-from django.core.exceptions import ValidationError
-
-from django.utils.translation import ugettext_lazy as _
 
 # from caching.base import CachingManager, CachingMixin
 
-from base.models import Time, Department, Module, Group, Day
-
-from people.models import Tutor
-
-from TTapp.helpers.minhalfdays import MinHalfDaysHelperGroup, MinHalfDaysHelperModule, MinHalfDaysHelperTutor
-
-from TTapp.constraint_type import ConstraintType
+from TTapp.iic.constraint_type import ConstraintType
 
 from TTapp.models import TTConstraint
 
