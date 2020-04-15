@@ -30,9 +30,6 @@ from pulp import LpVariable, LpConstraint, LpBinary, LpConstraintEQ, \
 
 from pulp import GUROBI_CMD
 
-import pulp.solvers as pulp_solvers
-# from pulp.solvers import GUROBI_CMD as GUROBI
-
 from FlOpEDT.settings.base import COSMO_MODE
 
 from base.models import Group, Day, Time, \
@@ -1501,7 +1498,7 @@ class TTModel(object):
         # The solver value shall be one of the available
         # solver corresponding pulp command or contain
         # gurobi
-        if 'gurobi' in solver.lower() and hasattr(pulp_solvers, GUROBI_NAME):
+        if 'gurobi' in solver.lower() and hasattr(pulp, GUROBI_NAME):
             # ignore SIGINT while solver is running
             # => SIGINT is still delivered to the solver, which is what we want
             signal.signal(signal.SIGINT, signal.SIG_IGN)
@@ -1520,9 +1517,9 @@ class TTModel(object):
                 m.write(ilp_filename)
                 self.constraintManager.handle_reduced_result(ilp_filename, self.department.abbrev, self.weeks)
 
-        elif hasattr(pulp_solvers, solver):
+        elif hasattr(pulp, solver):
             # raise an exception when the solver name is incorrect
-            command = getattr(pulp_solvers, solver)
+            command = getattr(pulp, solver)
             self.model.solve(command(keepFiles=1,
                                      msg=True,
                                      presolve=presolve,
