@@ -39,7 +39,9 @@ from django.db.models import F
 
 # from django.contrib.auth.models import User
 
-# from caching.base import CachingManager, CachingMixin
+from django.core.exceptions import ValidationError
+
+from django.utils.translation import ugettext_lazy as _
 
 from base.models import Time, Department, Module, Group, Day, TimeGeneralSettings
 
