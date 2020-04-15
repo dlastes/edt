@@ -28,7 +28,7 @@ def print_factorised_constraints(occurs, department_abbrev, weeks):
         output += "\n\n%s:" % dimension
         for elt in occurs[dimension].keys():
             output += "\n%s -> %s" % (elt, occurs[dimension][elt]["occurences"])
-            if dimension is not "types":
+            if dimension != "types":
                 output += " (%s)" % ", ".join(occurs[dimension][elt]["types"])
     filename = "logs/constraints_factorised_%s_%s.txt" % (department_abbrev, weeks)
     write_file(filename, output)
