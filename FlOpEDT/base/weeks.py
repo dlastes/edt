@@ -24,20 +24,34 @@
 # Week numbers issues helper
 # ---------------------------
 
+from django.utils.translation import gettext_lazy as _
+
 import datetime
 
 import base.models
-actual_year = 2019
 
 days_infos = {
-    'm' :{'shift': 0, 'fr_slug': 'Lun.'},
-    'tu':{'shift': 1, 'fr_slug': 'Mar.'},
-    'w' :{'shift': 2, 'fr_slug': 'Mer.'},
-    'th':{'shift': 3, 'fr_slug': 'Jeu.'},
-    'f' :{'shift': 4, 'fr_slug': 'Ven.'},
-    'sa':{'shift': 5, 'fr_slug': 'Sam.'},
-    'su':{'shift': 6, 'fr_slug': 'Dim.'}
+    'm' :{'shift': 0, 'slug': _('Mon.')},
+    'tu':{'shift': 1, 'slug': _('Tue.')},
+    'w' :{'shift': 2, 'slug': _('Wed.')},
+    'th':{'shift': 3, 'slug': _('Thu.')},
+    'f' :{'shift': 4, 'slug': _('Fri.')},
+    'sa':{'shift': 5, 'slug': _('Sat.')},
+    'su':{'shift': 6, 'slug': _('Sun.')}
 }
+
+
+def get_current_school_year():
+    now = datetime.datetime.now()
+    # TODO find a alternative way to test the swap month
+    if now.month <= 6:
+        school_year = now.year - 1
+    else:
+        school_year = now.year
+    return school_year
+
+
+actual_year = get_current_school_year()
 
 
 # monday of Week #2
@@ -74,7 +88,7 @@ def num_all_days(y, w, dept):
         day_list.append({'num':iday,
                          'date':f"{cur_day.day:02d}/{cur_day.month:02d}",
                          'ref':d_ref,
-                         'name':days_infos[d_ref]['fr_slug']})
+                         'name':days_infos[d_ref]['slug']})
         iday += 1
     return day_list
 

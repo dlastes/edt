@@ -70,6 +70,8 @@ urlpatterns = [
     # --------------------------------
     path('ajax/create-department', views.ajax_create_department,
          name="flopeditor-ajax-create-department"),
+    path('ajax/update-department', views.ajax_update_department,
+         name="flopeditor-ajax-update-department"),
     path('ajax/parameters-edit/<slug:department_abbrev>', views.ajax_edit_parameters,
          name='flopeditor-ajax-edit-department-parameters'),
 
@@ -83,6 +85,8 @@ urlpatterns = [
          name='flopeditor-crud-student-group-type'),
     path('<slug:department_abbrev>/crud/student_group', crud.crud_student_group,
          name='flopeditor-crud-student-group'),
+    path('<slug:department_abbrev>/crud/modules', crud.crud_module,
+         name='flopeditor-crud-modules'),
     path('<slug:department_abbrev>/crud/training_programmes', crud.crud_training_programmes,
          name='flopeditor-crud-training-programmes'),
     path('<slug:department_abbrev>/crud/courses', crud.crud_course,

@@ -1,4 +1,4 @@
-# coding: utf8
+# coding: utf-8
 # -*- coding: utf-8 -*-
 
 # This file is part of the FlOpEDT/FlOpScheduler project.
@@ -30,10 +30,8 @@ from django.db import transaction
 from django.db.models import Count
 from django.core.exceptions import ObjectDoesNotExist
 
-from base.models import Group, TrainingProgramme, \
-                        ScheduledCourse, EdtVersion, Department, Regen
-
-from base.models import RoomType, Room, \
+from base.models import Group, RoomType, Room, \
+                        ScheduledCourse, EdtVersion, Department, Regen, \
                         RoomSort, Period, CourseType, \
                         TutorCost, CourseStartTimeConstraint, \
                         TimeGeneralSettings, GroupType, CourseType, \
@@ -41,7 +39,7 @@ from base.models import RoomType, Room, \
 
 from displayweb.models import GroupDisplay, TrainingProgrammeDisplay, BreakingNews
 
-from people.models import Tutor
+from people.models import Tutor, NotificationsPreferences
 from TTapp.models import TTConstraint
 
 logger = logging.getLogger(__name__)
@@ -311,3 +309,17 @@ def get_working_days(dept):
     :return: list of abbreviated working days in dept
     """
     return TimeGeneralSettings.objects.get(department=dept).days
+
+
+def get_notification_preference(user):
+    if user is not None:
+        try:
+            return user.notifications_preference.nb_of_notified_weeks
+        except NotificationsPreferences.DoesNotExist:
+            if user.is_tutor:
+                return 4
+            elif user.is_student:
+                return 0
+            else:
+                pass
+    return 0

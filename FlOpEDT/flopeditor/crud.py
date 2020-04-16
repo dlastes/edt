@@ -34,7 +34,7 @@ from django.http import JsonResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 from base.models import Department
 from flopeditor.cruds import training_programmes, student_group_type,\
- rooms, room_types, student_group, course_type, period
+    rooms, room_types, student_group, course_type, period, module
 
 
 def good_request(request, department):
@@ -50,7 +50,6 @@ def good_request(request, department):
         return not request.user.is_anonymous and request.user.is_tutor
     return not request.user.is_anonymous and \
         request.user.has_department_perm(department, admin=True)
-
 
 
 def crud_model(request, department_abbrev, crud):
@@ -99,7 +98,27 @@ def crud_rooms(request, department_abbrev):
     :rtype:  django.http.JsonResponse
 
     """
-    return crud_model(request, department_abbrev, rooms)
+    department = get_object_or_404(Department, abbrev=department_abbrev)
+    if not good_request(request, department):
+        return HttpResponseForbidden()
+
+    if request.method == "GET":
+        return rooms.read(department)
+    elif request.method == "POST":
+        actions = json.loads(request.body.decode('utf-8'))['actions']
+        result = []
+        for action in actions:
+            if action['request'] == 'NEW':
+                result.append(rooms.create(request, action, department))
+            elif action['request'] == 'MODIFIED':
+                result.append(rooms.update(request, action, department))
+            elif action['request'] == 'DELETED':
+                result.append(rooms.delete(request, action, department))
+        return JsonResponse({
+            'actions': result
+        })
+    return HttpResponseForbidden()
+
 
 def crud_room_types(request, department_abbrev):
     """Crud url for room types edition
@@ -126,6 +145,19 @@ def crud_student_group_type(request, department_abbrev):
 
     """
     return crud_model(request, department_abbrev, student_group_type)
+
+
+def crud_module(request, department_abbrev):
+    """Crud url for module edition
+
+    :param request: Client request.
+    :param department_abbrev: Department abbreviation.
+    :type request:  django.http.HttpRequest
+    :return: Server response for the request.
+    :rtype:  django.http.JsonResponse
+
+    """
+    return crud_model(request, department_abbrev, module)
 
 
 def crud_student_group(request, department_abbrev):
@@ -165,7 +197,6 @@ def crud_course(request, department_abbrev):
 
     """
     return crud_model(request, department_abbrev, course_type)
-
 
 
 def crud_periods(request, department_abbrev):
