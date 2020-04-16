@@ -52,7 +52,7 @@ from people.models import Tutor
 
 from TTapp.helpers.minhalfdays import MinHalfDaysHelperGroup, MinHalfDaysHelperModule, MinHalfDaysHelperTutor
 
-from TTapp.constraintsLogger.constraint_type import ConstraintType
+from TTapp.iic.constraint_type import ConstraintType
 
 max_weight = 8
 
@@ -122,7 +122,7 @@ class Slot(object):
 
     def get_day(self):
         return self.day
-        
+
 def slots_filter(slot_set, day=None, apm=None, course_type=None, start_time=None, week_day=None,
                  simultaneous_to=None, week=None, is_after=None, starts_after=None, starts_before=None, ends_before=None):
     slots = slot_set

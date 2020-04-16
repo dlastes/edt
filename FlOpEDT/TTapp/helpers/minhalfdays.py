@@ -3,21 +3,21 @@
 # This file is part of the FlOpEDT/FlOpScheduler project.
 # Copyright (c) 2017
 # Authors: Iulian Ober, Paul Renaud-Goud, Pablo Seban, et al.
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
 # published by the Free Software Foundation, either version 3 of the
 # License, or (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful, but
 # WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 # Affero General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Affero General Public
 # License along with this program. If not, see
 # <http://www.gnu.org/licenses/>.
-# 
+#
 # You can be released from the requirements of the license by purchasing
 # a commercial license. Buying such a license is mandatory as soon as
 # you develop activities involving the FlOpEDT/FlOpScheduler software
@@ -26,7 +26,7 @@
 import logging
 
 from base.models import Time, TimeGeneralSettings
-from TTapp.constraintHandler.constraint_type import ConstraintType
+from TTapp.iic.constraint_type import ConstraintType
 
 
 logger = logging.Logger(__name__)
@@ -47,7 +47,7 @@ class MinHalfDaysHelperBase():
     def add_cost(self, cost):
         pass
 
-    
+
     def add_constraint(self, expression, courses, local_var):
         self.ttmodel.add_constraint(local_var, '==', 1, constraint_type=ConstraintType.MIN_HALF_DAYS_LOCAL)
         course_time = sum(c.type.duration for c in courses)
@@ -78,7 +78,7 @@ class MinHalfDaysHelperModule(MinHalfDaysHelperBase):
             mod_b_h_d[(self.module, d, Time.PM)] \
                 = self.ttmodel.add_var("ModBHD(%s,%s,%s)"
                                     % (self.module, d, Time.PM))
-            
+
             # add constraint linking MBHD to TT
             for apm in [Time.AM, Time.PM]:
                 halfdayslots = set(sl for sl in self.ttmodel.wdb.slots if sl.day == d and sl.apm == apm)
@@ -91,7 +91,7 @@ class MinHalfDaysHelperModule(MinHalfDaysHelperBase):
                         expr -= self.ttmodel.TT[(sl, c)]
                 self.ttmodel.add_constraint(expr, '>=', 0, constraint_type=ConstraintType.MIN_HALF_DAYS_SUP)
                 self.ttmodel.add_constraint(expr, '<=', card - 1, constraint_type=ConstraintType.MIN_HALF_DAYS_INF)
-        
+
         local_var = self.ttmodel.add_var("MinMBHD_var_%s" % self.module)
         # no year?
         courses = self.ttmodel.wdb.courses.filter(module=self.module, week=self.week)
@@ -103,7 +103,7 @@ class MinHalfDaysHelperModule(MinHalfDaysHelperBase):
         return expression, courses, local_var
 
 
-    def add_cost(self, cost):        
+    def add_cost(self, cost):
         self.ttmodel.obj += cost
 
 
@@ -156,7 +156,7 @@ class MinHalfDaysHelperTutor(MinHalfDaysHelperBase):
 
         return expression, courses, local_var
 
-    def add_cost(self, cost):        
+    def add_cost(self, cost):
         self.ttmodel.add_to_inst_cost(self.tutor, cost, self.week)
 
     def add_constraint(self, expression, courses, local_var):
@@ -198,4 +198,4 @@ class MinHalfDaysHelperTutor(MinHalfDaysHelperBase):
             self.tutor = tutor
             super().enrich_model()
         else:
-            raise("MinHalfDaysHelperTutor requires a tutor argument")            
+            raise("MinHalfDaysHelperTutor requires a tutor argument")
