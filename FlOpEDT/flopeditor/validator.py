@@ -37,6 +37,46 @@ OK_RESPONSE = 'OK'
 ERROR_RESPONSE = 'ERROR'
 UNKNOWN_RESPONSE = 'UNKNOWN'
 
+def validate_department_values(name, abbrev, tutors_id):
+    """Validate parameters for department creation
+
+    :param name: Department name
+    :type name: String
+    :param abbrev: department abbrev
+    :type abbrev: String
+    :param tutors_id: tutors' id
+    :type tutors_id: List
+
+    :return: (are the paramaters valid , status and errors)
+    :rtype: (boolean,json)
+    """
+    response = {'status': UNKNOWN_RESPONSE}
+    slug_re = re.compile(r"^[a-zA-Z]\w{0,6}$")
+    if not name or len(name) > 50:
+        response = {
+            'status': ERROR_RESPONSE,
+            'message': "Le nom du département est invalide. \
+            Il doit comporter entre 1 et 50 caractères."
+        }
+    elif not slug_re.match(abbrev):
+        response = {
+            'status': ERROR_RESPONSE,
+            'message': "L'abréviation du département est invalide. Elle doit être \
+            entre 1 et 7 caractères. Elle peut comporter des lettres et des chiffres \
+            et doit commencer par une lettre. Elle ne doit pas comporter d'espace, \
+            utilisez des '_' pour les séparations."
+        }
+    else:
+        for tutor_id in tutors_id:
+            if not Tutor.objects.filter(id=tutor_id):
+                response = {
+                    'status': ERROR_RESPONSE,
+                    'message': "Le tuteur que vous recherchez est introuvable. \
+                    Veuillez en sélectionner un autre."
+                }
+        response = {'status': OK_RESPONSE}
+    return response
+
 
 def validate_department_creation(name, abbrev, tutors_id):
     """Validate parameters for department creation
@@ -48,28 +88,16 @@ def validate_department_creation(name, abbrev, tutors_id):
     :param tutors_id: tutors' id
     :type tutors_id: List
 
-    :return: (boolean,json) (are the paramaters valid , status and errors)
+    :return: (are the paramaters valid , status and errors)
+    :rtype: (boolean,json)
     """
-    response = {'status': UNKNOWN_RESPONSE}
-    slug_re = re.compile(r"^[a-zA-Z]\w{0,6}$")
-    if not name or len(name) > 50:
-        response = {
-            'status': ERROR_RESPONSE,
-            'message': "Le nom du département est invalide. \
-            Il doit comporter entre 1 et 50 caractères."
-        }
+    response = validate_department_values(name, abbrev, tutors_id)
+    if response['status'] != OK_RESPONSE:
+        pass
     elif Department.objects.filter(name=name):
         response = {
             'status': ERROR_RESPONSE,
             'message': "Le nom du département est déjà utilisé. veuillez en choisir un autre."
-        }
-    elif not slug_re.match(abbrev):
-        response = {
-            'status': ERROR_RESPONSE,
-            'message': "L'abréviation du département est invalide. Elle doit être \
-            entre 1 et 7 caractères. Elle peut comporter des lettres et des chiffres \
-            et doit commencer par une lettre. Elle ne doit pas comporter d'espace, \
-            utilisez des '_' pour les séparations."
         }
     elif Department.objects.filter(abbrev=abbrev):
         response = {
@@ -77,15 +105,45 @@ def validate_department_creation(name, abbrev, tutors_id):
             'message': "L'abbréviation est déjà utilisée."
         }
     else:
-        for tutor_id in tutors_id:
-            if not Tutor.objects.filter(id=tutor_id):
-                response = {
-                    'status': ERROR_RESPONSE,
-                    'message': "Le tuteur que vous recherchez est introuvable. \
-                    Veuillez en sélectionner un autre."
-                }
-                return response
-    response = {'status': OK_RESPONSE}
+        response = {'status': OK_RESPONSE}
+    return response
+
+def validate_department_update(old_dept_name, new_dept_name,
+                               old_dept_abbrev, new_dept_abbrev, tutors_id):
+    """Validate parameters for department updaten
+
+    :param old_dept_name: Old department name
+    :type old_dept_name: String
+    :param new_dept_name: New department name
+    :type new_dept_name: String
+    :param old_dept_abbrev: Old department abbreviation
+    :type old_dept_abbrev: String
+    :param new_dept_abbrev: New department abbreviation
+    :type new_dept_abbrev: String
+    :param tutors_id: tutors' id
+    :type tutors_id: List
+
+    :return: (are the paramaters valid , status and errors)
+    :rtype: (boolean,json)
+    """
+    response = validate_department_values(new_dept_name, new_dept_abbrev, tutors_id)
+    if response['status'] != OK_RESPONSE:
+        pass
+    elif old_dept_name != new_dept_name and Department.objects.filter(name=new_dept_name):
+        response = {
+            'status': ERROR_RESPONSE,
+            'message': "Un autre département possède déjà ce nom."
+        }
+    elif old_dept_abbrev != new_dept_abbrev and Department.objects.filter(abbrev=new_dept_abbrev):
+        response = {
+            'status': ERROR_RESPONSE,
+            'message': "Un autre département possède déjà cette abbréviation."
+        }
+    else:
+        response = {
+            'status': OK_RESPONSE,
+            'message': ''
+        }
     return response
 
 

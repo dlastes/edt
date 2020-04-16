@@ -37,9 +37,10 @@ from base.models import Department, TimeGeneralSettings, Day
 from base.timing import min_to_str, str_to_min
 from base.check_admin import check_admin
 from FlOpEDT.decorators import dept_admin_required, tutor_required
-from people.models import Tutor
-from flopeditor.db_requests import create_departments_in_database
-from flopeditor.validator import validate_department_creation, validate_parameters_edit, OK_RESPONSE
+from people.models import Tutor, UserDepartmentSettings
+from flopeditor.db_requests import create_departments_in_database, update_departments_in_database
+from flopeditor.validator import validate_department_creation, validate_department_update, \
+                                 validate_parameters_edit, OK_RESPONSE
 
 @tutor_required
 def home(request):
@@ -52,11 +53,15 @@ def home(request):
 
     """
     departments = Department.objects.all()
+    dict_depts = {}
+    for dept in departments:
+        uds = UserDepartmentSettings.objects.filter(department=dept).values_list('user', flat=True)
+        dict_depts[dept] = list(uds)
     tutors = Tutor.objects.all()
     return render(request, "flopeditor/home.html", {
-        'departements': departments,
+        'dict_depts': dict_depts,
         'title': 'Choix du département',
-        'admins': tutors
+        'admins': tutors,
     })
 
 
@@ -153,6 +158,28 @@ def ajax_create_department(request):
         response = validate_department_creation(name, abbrev, tutors_id)
         if response['status'] == OK_RESPONSE:
             create_departments_in_database(name, abbrev, tutors_id)
+        return JsonResponse(response)
+    return HttpResponseForbidden()
+
+@user_passes_test(check_admin)
+def ajax_update_department(request):
+    """Ajax url for department update
+
+    :param request: Client request.
+    :type request:  django.http.HttpRequest
+    :return: Server response for the creation request.
+    :rtype:  django.http.JsonResponse
+
+    """
+    if request.is_ajax() and request.method == "POST":
+        old_name = request.POST['oldNomDep']
+        new_name = request.POST['newNomDep']
+        old_abbrev = request.POST['oldAbbrevDep']
+        new_abbrev = request.POST['newAbbrevDep']
+        tutors_id = request.POST.getlist('respsDep-' + old_abbrev)
+        response = validate_department_update(old_name, new_name, old_abbrev, new_abbrev, tutors_id)
+        if response['status'] == OK_RESPONSE:
+            update_departments_in_database(old_name, new_name, old_abbrev, new_abbrev, tutors_id)
         return JsonResponse(response)
     return HttpResponseForbidden()
 
