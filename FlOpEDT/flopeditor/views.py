@@ -32,15 +32,16 @@ to manage a department statistics for FlOpEDT.
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponseForbidden
-from django.contrib.auth.decorators import user_passes_test
 from base.models import Department, TimeGeneralSettings, Day
 from base.timing import min_to_str, str_to_min
 from FlOpEDT.decorators import superuser_required, \
     tutor_or_superuser_required
 
-from people.models import Tutor, UserDepartmentSettings, SupplyStaff
-from flopeditor.db_requests import create_departments_in_database, update_departments_in_database, get_status_of_user
-from flopeditor.validator import validate_department_creation, validate_department_update, validate_parameters_edit, OK_RESPONSE
+from people.models import Tutor, UserDepartmentSettings
+from flopeditor.db_requests import create_departments_in_database, \
+    update_departments_in_database, get_status_of_user
+from flopeditor.validator import validate_department_creation,\
+    validate_department_update, validate_parameters_edit, OK_RESPONSE
 
 @tutor_or_superuser_required
 def home(request):
@@ -402,37 +403,3 @@ def department_training_programmes(request, department_abbrev):
 
     """
     return crud_view(request, department_abbrev, 'flopeditor/training_programmes.html', 'Promos')
-
-
-@tutor_required
-def user_profile(request):
-    """User profile view of FlopEditor.
-
-    :param request:           Client request.
-    :type request:            django.http.HttpRequest
-    :return: page rendered from the user profile template of FlopEditor.
-    :rtype:  django.http.HttpResponse
-
-
-    """
-    tutor = Tutor.objects.get(username=request.user)
-    if tutor.status == 'fs':
-        statue = 'Permanent'
-    elif tutor.status == 'ss':
-        statue = 'Vacataire'
-        supply_staff = SupplyStaff.objects.get(username=tutor.username)
-        return render(request,
-                      'flopeditor/user_profile.html',
-                      {'statue':statue,
-                       'statue_vacataire':supply_staff.position,
-                       'employer':supply_staff.employer
-                      })
-    else:
-        statue = 'Biatos'
-
-    return render(request,
-                  'flopeditor/user_profile.html',
-                  {'statue':statue,
-                   'statue_vacataire':None,
-                   'employer':None
-                  })

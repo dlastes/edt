@@ -99,9 +99,9 @@
                           <div class="form-group">
                             <p class="h6"><u><strong>Statut</strong></u></p>
                           </div>
-                            {% if not statue_vacataire is None %}
+                            {% if not status_vacataire is None %}
                               <div class="col-form-label">
-                                <label> Statut : {{ status }}</label>
+                                <label> Statut : {{ status }} </label>
                               </div>
                               <div class="col-form-label">
                                 <label>Statut vacataire : {{ status_vacataire }}</label>
@@ -110,9 +110,9 @@
                                 <label>Employeur : {{ employer }}</label>
                               </div>
                             {% endif %}
-                            {% if statue_vacataire is None %}
+                            {% if status_vacataire is None %}
                              <div class="col-form-label">
-                               <label> {{ status }}</label>
+                               <label> {{ status }} </label>
                              </div>
                             {% endif %}
                         </div>
