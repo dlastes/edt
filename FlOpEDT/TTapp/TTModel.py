@@ -75,11 +75,11 @@ from TTapp.iic.constraintManager import ConstraintManager
 from TTapp.iic.constraint import Constraint
 from TTapp.iic.constraint_type import ConstraintType
 
-from TTapp.iic.specific_constraints.dependencyConstraint import DependencyConstraint
-from TTapp.iic.specific_constraints.instructorConstraint import InstructorConstraint
-from TTapp.iic.specific_constraints.simulSlotGroupConstraint import SimulSlotGroupConstraint
-from TTapp.iic.specific_constraints.slotInstructorConstraint import SlotInstructorConstraint
-from TTapp.iic.specific_constraints.courseConstraint import CourseConstraint
+from TTapp.iic.constraints.dependencyConstraint import DependencyConstraint
+from TTapp.iic.constraints.instructorConstraint import InstructorConstraint
+from TTapp.iic.constraints.simulSlotGroupConstraint import SimulSlotGroupConstraint
+from TTapp.iic.constraints.slotInstructorConstraint import SlotInstructorConstraint
+from TTapp.iic.constraints.courseConstraint import CourseConstraint
 
 logger = logging.getLogger(__name__)
 pattern = r".+: (.|\s)+ (=|>=|<=) \d*"

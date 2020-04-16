@@ -1,4 +1,4 @@
-from TTapp.constraintsLogger.print_infaisibility import print_all
+from TTapp.iic.print_infaisibility import print_all
 
 
 def inc(occurs_types, constraint_type):

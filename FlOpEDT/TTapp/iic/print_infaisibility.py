@@ -1,5 +1,5 @@
 import csv
-from TTapp.constraintsLogger.constraint import Constraint
+from TTapp.iic.constraint import Constraint
 
 
 def print_all(constraints, occurs, threshold_type, threshold_attr, file_path, filename_suffixe):
