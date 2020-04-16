@@ -22,6 +22,7 @@
 <!-- without disclosing the source code of your own applications.          -->
 
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block content %}
 {% load static %}
@@ -49,8 +50,12 @@
 	  </tr>
 	</table>
 	
-	<span><a href="{% url 'people:password_reset' %}">Mot de passe perdu ?</a></span>
-	<input style="float:right" type="submit" value="Se connecter"/>
+	<span>
+          <a href="{% url 'people:password_reset' %}">
+            {% trans "Forgot password?" %}
+          </a>
+        </span>
+	<input style="float:right" type="submit" value="{% trans 'Sign in' %}"/>
 	<input type="hidden" name="next" value="{{ next }}"/>
       </form>
     </fieldset>
@@ -71,14 +76,14 @@
 <!--  <br style="clear: both" />-->
   
   <fieldset style="width:300px">
-    <legend>Nouveau compte</legend>
-    Je suis
+    <legend>{% trans 'Sign up' %}</legend>
+    {% trans 'I am' %}
     <form name="add">
-      <input type="radio" id="stud" name="create" checked="checked">Étudiant&middot;e</input><br/>
-      <input type="radio" id="full" name="create">Enseignant&middot;e permanent&middot;e</input><br/>
-      <input type="radio" id="supp" name="create">Vacataire</input><br/>
-      <input type="radio" id="BIAT" name="create">BIATOS</input><br/>
-      <input style="float:right" type="button" value="Créer" onClick="create_user()"/>
+      <input type="radio" id="stud" name="create" checked="checked">{% trans 'A student' %}</input><br/>
+      <input type="radio" id="full" name="create">{% trans 'A teacher' %}</input><br/>
+      <input type="radio" id="supp" name="create">{% trans 'A temporary teacher' %}</input><br/>
+      <input type="radio" id="BIAT" name="create">{% trans 'A tech or administrative staff' %}</input><br/>
+      <input style="float:right" type="button" value="{% trans 'Create' %}" onClick="create_user()"/>
     </form>
     <!--<p><a href="{ % url 'add_user' % }">Créer un nouveau compte</a></p>-->
   </fieldset>

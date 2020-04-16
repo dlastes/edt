@@ -121,8 +121,7 @@ function open_connection() {
                 "C'est ti-par.\n" + opti_timestamp + "\nSolver ok?",
             'action': "go",
             'department': department,
-            'week': week_year_sel.week,
-            'year': week_year_sel.year,
+            'week_year': week_year_sel,
             'train_prog': tp,
             'constraints': constraints,
             'stabilize': stabilize_working_copy,
@@ -146,7 +145,7 @@ function open_connection() {
 function init_dropdowns() {
     // create drop down for week selection
     select_opti_date = d3.select("#opti_date");
-    select_opti_date.on("change", function () { choose_week(true); fetch_context(); });
+    select_opti_date.on("change", function () { choose_week(); fetch_context(); });
     select_opti_date
         .selectAll("option")
         .data(week_list)
@@ -157,7 +156,7 @@ function init_dropdowns() {
     // create drop down for training programme selection
     train_prog_list.unshift(text_all);
     select_opti_train_prog = d3.select("#opti_train_prog");
-    select_opti_train_prog.on("change", function () { choose_train_prog(true); fetch_context(); });
+    select_opti_train_prog.on("change", function () { choose_train_prog(); fetch_context(); });
     select_opti_train_prog
         .selectAll("option")
         .data(train_prog_list)
@@ -171,11 +170,8 @@ function init_dropdowns() {
 
 function choose_week() {
     var di = select_opti_date.property('selectedIndex');
-    var sa = select_opti_date
-        .selectAll("option")
-        .filter(function (d, i) { return i == di; })
-        .datum();
-    week_year_sel = { week: sa[1], year: sa[0] };
+    var yw = select_opti_date.selectAll("option:checked").data();
+    week_year_sel = yw.map(yw => {return { year: yw[0], week: yw[1] };});
 }
 function choose_train_prog() {
     var di = select_opti_train_prog.property('selectedIndex');
@@ -195,6 +191,9 @@ function update_context_view(context) {
     if (context) {
         work_copies = context.work_copies;
         constraints = context.constraints;
+    } else {
+        work_copies = [];
+        constraints = [];
     }
 
     init_work_copies(work_copies);
@@ -223,9 +222,9 @@ function init_work_copies(work_copies) {
 
     stabilize_sel_data = stabilize_sel 
         .selectAll("option")
-        .data(copies);
+        .data(copies, (x) => x);
 
-    stabilize_sel_data    
+    stabilize_sel_data
         .enter()
         .append("option")
         .attr('value', (d) => d)
@@ -272,12 +271,12 @@ function init_constraints(constraints) {
 
             // Display title
             var label = clone.querySelector("label");
-            label.setAttribute('for', constraintId)
-            label.className = "title"
+            label.setAttribute('for', constraintId);
+            label.className = "title";
             label.textContent = constraint.name;
 
             // Display mandatory
-            if (constraint.details.weight) {
+            if (constraint.details.weight===null) {
                 label.classList.add("mandatory");
             }
 
@@ -300,13 +299,13 @@ function init_constraints(constraints) {
             }
 
             // Display details items
-            var details = clone.querySelector("#details")
+            var details = clone.querySelector("#details");
 
             for (var key in constraint.details) {
                 var detail = document.createElement("div")
                 details.appendChild(detail)
 
-                var content = document.createTextNode(`${key} : ${constraint.details[key]}`)
+                var content = document.createTextNode(`${key} : ${constraint.details[key]}`);
                 detail.appendChild(content)
             }
 
@@ -346,23 +345,33 @@ function get_constraints_url(train_prog, year, week) {
     return fetch_context_url_template.replace(regexp, replacer)
 }
 
+/*
+  Retrieve work_copies and contraints for a specific week
+  This doesn't apply if more than one week is selected
+*/
 function fetch_context() {
-    $.ajax({
-        type: "GET",
-        dataType: 'json',
-        url: get_constraints_url(train_prog_sel, week_year_sel.year, week_year_sel.week),
-        async: true,
-        contentType: "application/json; charset=utf-8",
-        success: function (context) {
-            update_context_view(context);
-        },
-        error: function (msg) {
-            console.log("error");
-        },
-        complete: function (msg) {
-            console.log("complete");
-        }
-    });
+    if (week_year_sel.length == 1) {
+      week = week_year_sel[0].week
+      year = week_year_sel[0].year
+      $.ajax({
+          type: "GET",
+          dataType: 'json',
+          url: get_constraints_url(train_prog_sel, year, week),
+          async: true,
+          contentType: "application/json; charset=utf-8",
+          success: function (context) {
+              update_context_view(context);
+          },
+          error: function (msg) {
+              console.log("error");
+          },
+          complete: function (msg) {
+              console.log("complete");
+          }
+      });
+    } else {
+      update_context_view();
+    }
 }
 
 
@@ -419,13 +428,13 @@ function dispatchAction(token) {
 	Main process
 */
 
-var solver_select = document.querySelector("#solver")
-var stabilize_select = document.querySelector("#stabilize select")
+var solver_select = document.querySelector("#solver");
+var stabilize_select = document.querySelector("#stabilize select");
 
-time_limit_select = document.querySelector("#limit")
+time_limit_select = document.querySelector("#limit");
 txt_area = document.getElementsByTagName("textarea")[0];
 
-launchButton = document.querySelector("#launch")
+launchButton = document.querySelector("#launch");
 if (launchButton)
     launchButton.addEventListener("click", manageSolverProcess);
 

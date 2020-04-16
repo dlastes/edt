@@ -25,12 +25,12 @@
 /*
     HELPER : remove child nodes
 */
-function removeChildNodes(parentNode){
-    if(parentNode){
-        while (parentNode.hasChildNodes()) {
-            parentNode.removeChild(parentNode.firstChild);
-         }            
+function removeChildNodes(parentNode) {
+  if (parentNode) {
+    while (parentNode.hasChildNodes()) {
+      parentNode.removeChild(parentNode.firstChild);
     }
+  }
 }
 
 
@@ -39,114 +39,114 @@ function removeChildNodes(parentNode){
     their total number of hours of activity
 */
 function displayTutorHours(data) {
-    let container = d3.select('#statistics table')
+  let container = d3.select('#statistics table');
 
-    // Clear table    
-    removeChildNodes(container.node());
+  // Clear table    
+  removeChildNodes(container.node());
 
-    // Insert header 
-    header = container.append('tr')
-    header.append('th').text('Professeur')
-    header.append('th').text('Nombre de cours')
+  // Insert header 
+  header = container.append('tr');
+  header.append('th').text('Professeur');
+  header.append('th').text('Nombre de cours');
 
-    tutor =  container.selectAll('tr')
-        .data(data)
-        .enter()
-        .append('tr')
+  tutor = container.selectAll('tr')
+    .data(data)
+    .enter()
+    .append('tr');
 
-    // Tutor name
-    tutor
-        .append('td')
-        .text((d) => d[1])
+  // Tutor name
+  tutor
+    .append('td')
+    .text((d) => d[1]);
 
-    // Number of slots
-    tutor
-        .append('td')
-        .text((d) =>  d[4])
+  // Number of slots
+  tutor
+    .append('td')
+    .text((d) => d[4]);
 }
 
 /*
     Display the number of days of inactivity for each room
 */
 function displayRoomActivity(data) {
-    
-    let container = d3.select('#statistics table')
-    
-    // Clear table
-    removeChildNodes(container.node());
 
-    // Insert header 
-    header = container.append('tr')
-    header.append('th').text('Salle')
-    header.append('th').text('Nombre de jours')    
+  let container = d3.select('#statistics table');
 
-    rooms =  container.selectAll('tr')
-        .data(data.room_activity)
-        .enter()
-        .append('tr')
+  // Clear table
+  removeChildNodes(container.node());
 
-    // Room name
-    rooms
-        .append('td')
-        .text((d) => d.room)
+  // Insert header 
+  header = container.append('tr');
+  header.append('th').text('Salle');
+  header.append('th').text('Nombre de jours');
 
-    // Number of days of inactivity
-    rooms
-        .append('td')
-        .text((d) => d.count)
+  rooms = container.selectAll('tr')
+    .data(data.room_activity)
+    .enter()
+    .append('tr');
+
+  // Room name
+  rooms
+    .append('td')
+    .text((d) => d.room);
+
+  // Number of days of inactivity
+  rooms
+    .append('td')
+    .text((d) => d.count);
 }
 
 /*
     Global method to display 
 */
-function displayStatistic(label){
-    let statistic = available_statistics[label]
-    if(statistic){
-        // TODO : loading
+function displayStatistic(label) {
+  let statistic = available_statistics[label];
+  if (statistic) {
+    // TODO : loading
 
-        // Request server to get datas
-        fetchStatistcs(statistic.url, statistic.callback);
-    }
+    // Request server to get datas
+    fetchStatistcs(statistic.url, statistic.callback);
+  }
 }
 
-function changeStatisticEventHandler(event){
-    displayStatistic(event.target.value);
+function changeStatisticEventHandler(event) {
+  displayStatistic(event.target.value);
 }
 
 /*
     Global method to request statistics 
 */
 function fetchStatistcs(url, callback) {
-    show_loader(true);
-    $.ajax({
-        type: "GET",
-        dataType: 'json',
-        url: url,
-        async: true,
-        contentType: "text/json",
-        success: function (value) {
-            callback(value);
-        },
-        error: function (xhr, error) {
-            console.log(xhr);
-            console.log(error);
-        },
-        complete: function(){
-            show_loader(false);
-        }
-    });
+  show_loader(true);
+  $.ajax({
+    type: "GET",
+    dataType: 'json',
+    url: url,
+    async: true,
+    contentType: "text/json",
+    success: function (value) {
+      callback(value);
+    },
+    error: function (xhr, error) {
+      console.log(xhr);
+      console.log(error);
+    },
+    complete: function () {
+      show_loader(false);
+    }
+  });
 }
 
 /*
     Initialization
 */
-function init(){
-    statisticContainer = document.querySelector('#statistics');
-    
-    statisticSelect = document.querySelector('#select_statistic');
-    statisticSelect.onchange= changeStatisticEventHandler;
+function init() {
+  statisticContainer = document.querySelector('#statistics');
 
-    displayStatistic(statisticSelect.options[statisticSelect.selectedIndex].value);
+  statisticSelect = document.querySelector('#select_statistic');
+  statisticSelect.onchange = changeStatisticEventHandler;
+
+  displayStatistic(statisticSelect.options[statisticSelect.selectedIndex].value);
 }
 
 /*
@@ -156,14 +156,14 @@ var statisticContainer;
 var statisticSelect;
 
 var available_statistics = {
-    'room_activity': {
-        url: statistics_urls['room_activity'], 
-        callback: displayRoomActivity,
-    },
-    'tutor_hours': {
-        url: statistics_urls['tutor_hours'],
-        callback: displayTutorHours,
-    },
-}
+  'room_activity': {
+    url: statistics_urls['room_activity'],
+    callback: displayRoomActivity,
+  },
+  'tutor_hours': {
+    url: statistics_urls['tutor_hours'],
+    callback: displayTutorHours,
+  },
+};
 
 document.addEventListener('DOMContentLoaded', init);
