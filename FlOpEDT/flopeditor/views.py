@@ -38,8 +38,12 @@ from base.timing import min_to_str, str_to_min
 from base.check_admin import check_admin
 from FlOpEDT.decorators import dept_admin_required, tutor_required
 from people.models import Tutor, SupplyStaff
-from flopeditor.db_requests import create_departments_in_database
+from flopeditor.db_requests import create_departments_in_database, get_status_of_user
 from flopeditor.validator import validate_department_creation, validate_parameters_edit, OK_RESPONSE
+
+
+
+
 
 @tutor_required
 def home(request):
@@ -53,11 +57,18 @@ def home(request):
     """
     departments = Department.objects.all()
     tutors = Tutor.objects.all()
-    return render(request, "flopeditor/home.html", {
-        'departements': departments,
-        'title': 'Choix du département',
-        'admins': tutors
-    })
+    status, position, employer = get_status_of_user(request)
+    return render(request,
+                  'flopeditor/home.html',
+                  {'departements': departments,
+                   'title': 'Choix du département',
+                   'admins': tutors,
+                   'status':status,
+                   'status_vacataire':position,
+                   'employer':employer,
+                  })
+
+
 
 
 @tutor_required
@@ -91,6 +102,7 @@ def department_parameters(request, department_abbrev):
     department = get_object_or_404(Department, abbrev=department_abbrev)
     departments = Department.objects.exclude(abbrev=department_abbrev)
     parameters = get_object_or_404(TimeGeneralSettings, department=department)
+    status, position, employer = get_status_of_user(request)
     return render(request, "flopeditor/parameters.html", {
         'title': 'Paramètres',
         'department': department,
@@ -103,6 +115,9 @@ def department_parameters(request, department_abbrev):
         'default_preference_duration': min_to_str(parameters.default_preference_duration),
         'list_departments': departments,
         'has_department_perm': request.user.has_department_perm(department=department, admin=True),
+        'status':status,
+        'status_vacataire':position,
+        'employer':employer,
     })
 
 
@@ -121,6 +136,7 @@ def department_parameters_edit(request, department_abbrev):
     department = get_object_or_404(Department, abbrev=department_abbrev)
     departments = Department.objects.exclude(abbrev=department_abbrev)
     parameters = get_object_or_404(TimeGeneralSettings, department=department)
+    status, position, employer = get_status_of_user(request)
     return render(request, "flopeditor/parameters_edit.html", {
         'title': 'Paramètres',
         'department': department,
@@ -133,6 +149,9 @@ def department_parameters_edit(request, department_abbrev):
         'day_choices': Day.CHOICES,
         'default_preference_duration': min_to_str(parameters.default_preference_duration),
         'has_department_perm': request.user.has_department_perm(department=department, admin=True),
+        'status':status,
+        'status_vacataire':position,
+        'employer':employer,
     })
 
 
@@ -221,11 +240,15 @@ def crud_view(request, department_abbrev, view_name, title):
     """
     department = get_object_or_404(Department, abbrev=department_abbrev)
     departments = Department.objects.exclude(abbrev=department_abbrev)
+    status, position, employer = get_status_of_user(request)
     return render(request, view_name, {
         'title': title,
         'department': department,
         'list_departments': departments,
         'has_dept_perm': request.user.has_department_perm(department=department, admin=True),
+        'status':status,
+        'status_vacataire':position,
+        'employer':employer,
     })
 
 
