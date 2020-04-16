@@ -1,0 +1,6 @@
+{% extends "flopeditor/base_crud.html" %}
+{% load static %}
+{% block nav-classes-tutors %} active {% endblock %}
+
+
+{% block crud_js_url %}{% url 'flopeditor:flopeditor-crud-tutors' department_abbrev=department.abbrev %}{% endblock %}

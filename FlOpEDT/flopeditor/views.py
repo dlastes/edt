@@ -37,7 +37,7 @@ from base.models import Department, TimeGeneralSettings, Day
 from base.timing import min_to_str, str_to_min
 from FlOpEDT.decorators import superuser_required, \
     tutor_or_superuser_required
-    
+
 from people.models import Tutor, UserDepartmentSettings
 from flopeditor.db_requests import create_departments_in_database, update_departments_in_database
 from flopeditor.validator import validate_department_creation, validate_department_update, validate_parameters_edit, OK_RESPONSE
@@ -254,6 +254,21 @@ def crud_view(request, department_abbrev, view_name, title):
         'list_departments': departments,
         'has_dept_perm': request.user.has_department_perm(department=department, admin=True),
     })
+
+
+@tutor_or_superuser_required
+def department_tutors(request, department_abbrev):
+    """Tutors view of FlopEditor.
+
+    :param request:           Client request.
+    :param department_abbrev: Department abbreviation.
+    :type request:            django.http.HttpRequest
+    :type department_abbrev:  str
+    :return: page rendered from the rooms template of FlopEditor.
+    :rtype:  django.http.HttpResponse
+
+    """
+    return crud_view(request, department_abbrev, "flopeditor/tutors.html", "Intervenants")
 
 
 @tutor_or_superuser_required
