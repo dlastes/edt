@@ -1,4 +1,4 @@
-from TTapp.constraintHandler.constraint_type import ConstraintType
+from TTapp.constraintsLogger.constraint_type import ConstraintType
 
 
 def sing_or_plural(dimension):
