@@ -71,15 +71,15 @@ import os.path
 import logging
 
 
-from TTapp.constraintHandler.constraintManager import ConstraintManager
-from TTapp.constraintHandler.constraint import Constraint
-from TTapp.constraintHandler.constraint_type import ConstraintType
+from TTapp.constraintsLogger.constraintManager import ConstraintManager
+from TTapp.constraintsLogger.constraint import Constraint
+from TTapp.constraintsLogger.constraint_type import ConstraintType
 
-from TTapp.constraintHandler.specific_constraints.dependencyConstraint import DependencyConstraint
-from TTapp.constraintHandler.specific_constraints.instructorConstraint import InstructorConstraint
-from TTapp.constraintHandler.specific_constraints.simulSlotGroupConstraint import SimulSlotGroupConstraint
-from TTapp.constraintHandler.specific_constraints.slotInstructorConstraint import SlotInstructorConstraint
-from TTapp.constraintHandler.specific_constraints.courseConstraint import CourseConstraint
+from TTapp.constraintsLogger.specific_constraints.dependencyConstraint import DependencyConstraint
+from TTapp.constraintsLogger.specific_constraints.instructorConstraint import InstructorConstraint
+from TTapp.constraintsLogger.specific_constraints.simulSlotGroupConstraint import SimulSlotGroupConstraint
+from TTapp.constraintsLogger.specific_constraints.slotInstructorConstraint import SlotInstructorConstraint
+from TTapp.constraintsLogger.specific_constraints.courseConstraint import CourseConstraint
 
 logger = logging.getLogger(__name__)
 pattern = r".+: (.|\s)+ (=|>=|<=) \d*"
