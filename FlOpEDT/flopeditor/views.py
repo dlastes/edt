@@ -35,7 +35,7 @@ from django.http import JsonResponse, HttpResponseForbidden
 from django.contrib.auth.decorators import user_passes_test
 from base.models import Department, TimeGeneralSettings, Day
 from base.timing import min_to_str, str_to_min
-from FlOpEDT.decorators import dept_admin_required, superuser_required, \
+from FlOpEDT.decorators import superuser_required, \
     tutor_or_superuser_required
     
 from people.models import Tutor, UserDepartmentSettings
@@ -111,7 +111,7 @@ def department_parameters(request, department_abbrev):
     })
 
 
-@dept_admin_required
+@tutor_or_superuser_required
 def department_parameters_edit(request, department_abbrev):
     """Parameters edit view of FlopEditor.
 
@@ -161,7 +161,7 @@ def ajax_create_department(request):
         return JsonResponse(response)
     return HttpResponseForbidden()
 
-@dept_admin_required
+@superuser_required
 def ajax_update_department(request):
     """Ajax url for department update
 
@@ -184,7 +184,7 @@ def ajax_update_department(request):
     return HttpResponseForbidden()
 
 
-@dept_admin_required
+@tutor_or_superuser_required
 def ajax_edit_parameters(request, department_abbrev):
     """Ajax url for parameters edition
 
