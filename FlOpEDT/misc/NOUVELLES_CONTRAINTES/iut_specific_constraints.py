@@ -33,82 +33,6 @@ from TTapp.iic.constraint_type import ConstraintType
 from TTapp.iic.constraints.constraint import Constraint
 
 
-def add_iut_specific_constraints(ttmodel):
-    add_iut_blagnac_basics(ttmodel)
-    add_iut_blagnac_specials(ttmodel)
-    if ttmodel.department.abbrev == 'INFO':
-        add_iut_blagnac_lp(ttmodel)
-        add_iut_blagnac_info(ttmodel)
-    elif ttmodel.department.abbrev == 'RT':
-        add_iut_blagnac_rt(ttmodel)
-    elif ttmodel.department.abbrev == 'GIM':
-        add_iut_blagnac_gim(ttmodel)
-    elif ttmodel.department.abbrev == 'CS':
-        add_iut_blagnac_cs(ttmodel)
-
-
-# def minimize_busy_days(ttmodel, week, tutor, cost):
-#     """
-#     Minimize the number of busy days for tutor with cost
-#     (if it does not overcome the bound expressed in pref_hours_per_day)
-#     """
-#     slot_by_day_cost = 0
-#     # need to be sorted
-#     courses_hours = sum(c.type.duration
-#                         for c in ttmodel.wdb.courses_for_tutor[tutor] & ttmodel.wdb.courses_by_week[week]) / 60
-#     nb_days = 5
-#     frontier_pref_busy_days = [tutor.pref_hours_per_day * d for d in range(nb_days - 1, 0, -1)]
-#
-#     for fr in frontier_pref_busy_days:
-#         if courses_hours <= fr:
-#             slot_by_day_cost += ttmodel.IBD_GTE[week][nb_days][tutor]
-#             nb_days -= 1
-#         else:
-#             break
-#     ttmodel.add_to_inst_cost(tutor, cost * slot_by_day_cost, week=week)
-
-
-# def bound_hours_per_day(ttmodel, week, tutor):
-#     """
-#     respect max_hours_per_days bound
-#     """
-#     for d in days_filter(ttmodel.wdb.days, week=week):
-#         ttmodel.add_constraint(ttmodel.sum(ttmodel.TT[sl, c] * c.type.duration / 60
-#                                            for c in ttmodel.wdb.courses_for_tutor[tutor] if c.week == week
-#                                            for sl in slots_filter(ttmodel.wdb.slots, day=d)
-#                                            & ttmodel.wdb.compatible_slots[c]),
-#                                '<=',
-#                                tutor.max_hours_per_day,
-#                                constraint_type=ConstraintType.BOUND_HOURS_PER_DAY, instructors=tutor, days=d)
-
-
-
-def add_iut_blagnac_basics(ttmodel):
-    print("adding IUT Blagnac's basic constraints")
-
-    # # Libérer des demi-journées aux étudiants
-    # M = MinHalfDays(weight=max_weight, department=ttmodel.department)
-    # M.save()
-    # for g in ttmodel.wdb.basic_groups.exclude(train_prog__abbrev='APSIO'):
-    #     M.groups.add(g)
-    # M.save()
-    # for week in ttmodel.weeks:
-    #     M.enrich_model(ttmodel, week, ttmodel.min_bhd_g)
-    # M.delete()
-    # # Minimize the number of busy days
-    # for week in ttmodel.wdb.weeks:
-    #     for i in ttmodel.wdb.instructors:
-    #         minimize_busy_days(ttmodel, week, i, ttmodel.min_bd_i)
-
-    # exceptions_bound_hours_per_day = [(46, 'MN')]
-    #
-    # for i in ttmodel.wdb.instructors:
-    #     for week in ttmodel.wdb.weeks:
-    #         if (week, i.username) not in exceptions_bound_hours_per_day:
-    #             bound_hours_per_day(ttmodel, week, i)
-    #         else:
-    #             ttmodel.add_warning(i, "No bound on hours per day week %g!" % week)
-
 
 def add_iut_blagnac_specials(ttmodel):
     print("adding IUT Blagnac's special constraints")
@@ -131,58 +55,6 @@ def add_iut_blagnac_specials(ttmodel):
                            '==', 0,
                            Constraint(constraint_type=ConstraintType.PAS_COURS_JEUDI_APREM))
 
-    # # Pas plus de 2 examens par jour!
-    # pas_plus_de_2_exams_par_jour = True
-    # if pas_plus_de_2_exams_par_jour:
-    #     L, created = LimitCourseTypeTimePerPeriod.objects.get_or_create(max_hours=3,
-    #                                      course_type=DS,
-    #                                      period=LimitCourseTypeTimePerPeriod.FULL_DAY,
-    #                                      department=ttmodel.department)
-    #     if created:
-    #         L.save()
-    #         for promo in ttmodel.train_prog:
-    #             L.train_progs.add(promo)
-    #         L.save()
-    #         for week in ttmodel.weeks:
-    #             L.enrich_model(ttmodel, week)
-    #     #L.delete()
-
-    # # Pas plus de 2 amphis par demie journée
-    # pas_plus_de_2_amphis_par_demi_journee = True
-    # if 36 in ttmodel.weeks:
-    #     pas_plus_de_2_amphis_par_demi_journee = False
-    # if pas_plus_de_2_amphis_par_demi_journee:
-    #     L, created = LimitCourseTypeTimePerPeriod.objects.get_or_create(max_hours=3,
-    #                                      course_type=CM,
-    #                                      period=LimitCourseTypeTimePerPeriod.HALF_DAY,
-    #                                      department=ttmodel.department)
-    #     if created:
-    #         L.save()
-    #         for promo in ttmodel.train_prog:
-    #             L.train_progs.add(promo)
-    #         L.save()
-    #         for week in ttmodel.weeks:
-    #             L.enrich_model(ttmodel, week)
-    #     # L.delete()
-
-    # # Pas plus d'un amphi par matière et par jour
-    # un_amphi_par_matiere_par_jour = True
-    # if ttmodel.department.abbrev in ['RT', 'CS', 'GIM']:
-    #     un_amphi_par_matiere_par_jour = False
-    # if un_amphi_par_matiere_par_jour:
-    #     L, created = LimitCourseTypeTimePerPeriod.objects.get_or_create(max_hours=2,
-    #                                          course_type=CM,
-    #                                          period=LimitCourseTypeTimePerPeriod.FULL_DAY,
-    #                                         department=ttmodel.department)
-    #     if created:
-    #         L.save()
-    #         for module in ttmodel.wdb.modules:
-    #             L.modules.add(module)
-    #         L.save()
-    #         for week in ttmodel.weeks:
-    #             L.enrich_model(ttmodel, week)
-    #         # L.delete()
-
     promos1 = ttmodel.wdb.train_prog.filter(abbrev__in=['RT1', 'GIM1', 'CS1', 'INFO1'])
 
     sports = ttmodel.wdb.modules.filter(abbrev='SC', train_prog__in=promos1)
@@ -190,12 +62,6 @@ def add_iut_blagnac_specials(ttmodel):
         cours_de_sport = set(ttmodel.wdb.courses.filter(module=sport))
         if not cours_de_sport:
             continue
-        # C, created = LimitedStartTimeChoices.objects.get_or_create(module=sport)
-        # if created:
-        #     C.save()
-        #     C.possible_start_times.add(17*60+15)
-        #     C.save()
-        # C.enrich_model(ttmodel)
         ttmodel.add_constraint(ttmodel.sum(ttmodel.TT[sl, c]
                                            for sl in set(slot for slot in ttmodel.wdb.slots
                                                          if not (slot.day.day in [Day.MONDAY, Day.TUESDAY]
@@ -238,46 +104,11 @@ def add_iut_blagnac_specials(ttmodel):
                                0,
                                Constraint(constraint_type=ConstraintType.CONF_SATELLITES))
 
-    # if 6 in ttmodel.weeks and ttmodel.year == 2020:
-    #     mardi_4 = days_filter(ttmodel.wdb.days, week=6, day=Day.TUESDAY).pop()
-    #     mardi_11h_16h = set(sl for sl in slots_filter(ttmodel.wdb.slots, day=mardi_4)
-    #                         if 11*60 <= sl.start_time < 15*60 + 45)
-    #     # ttmodel.add_constraint(ttmodel.sum(ttmodel.TT[sl, c]
-    #     #                                    for slot in mardi_11h_16h
-    #     #                                    for sl in ttmodel.wdb.slots_intersecting[slot]
-    #     #                                    for c in ttmodel.wdb.compatible_courses[sl]),
-    #     #                        '==',
-    #     #                        0,
-    #     #                        "Journee d'ateliers citoyens")
-    #     for slot in mardi_11h_16h:
-    #         ttmodel.add_to_slot_cost(slot, 100 * ttmodel.sum(ttmodel.TT[sl, c]
-    #                                                          for sl in ttmodel.wdb.slots_intersecting[slot]
-    #                                                          for c in ttmodel.wdb.compatible_courses[sl]))
-    #     for i in ttmodel.wdb.instructors:
-    #         ttmodel.add_constraint(ttmodel.IBD[(i, mardi_4)],
-    #                                '==',
-    #                                1)
-
 
 def add_iut_blagnac_lp(ttmodel):
     lp = TrainingProgramme.objects.get(abbrev='APSIO')
     if ttmodel.wdb.courses.filter(group__train_prog=lp).exists():
         print("adding LP constraints")
-        # Avoid first and last slot at the same time for train_prog 3
-        # R = ReasonableDays(train_prog=lp,
-        #                    weight=max_weight)
-        # R.save()
-        # R.delete()
-
-        # # Force that only 3 courses are the same HD, and only on 2 HD if 4 courses
-        # M = MinHalfDays(join2courses=True, weight=max_weight, department=ttmodel.department)
-        # M.save()
-        # for module in ttmodel.wdb.modules.filter(train_prog=lp):
-        #     M.modules.add(module)
-        # M.save()
-        # for week in ttmodel.weeks:
-        #     M.enrich_model(ttmodel, week, ponderation=100)
-        # # M.delete()
 
         B219 = Room.objects.get(name='B219')
         ttmodel.add_constraint(
@@ -297,29 +128,6 @@ def add_iut_blagnac_info(ttmodel):
     TD = CourseType.objects.get(name='TD', department=ttmodel.department)
     print("finally, adding info specific constraints")
 
-    # # Limit Long Days for instructors
-    # R = ReasonableDays(weight=max_weight)
-    # R.save()
-    # for i in ttmodel.wdb.instructors:
-    #     R.tutors.add(i)
-    # R.save()
-    # # R.enrich_model(ttmodel, ponderation=ttmodel.lim_ld)
-    # R.delete()
-
-    # Impose pour certains vacataires le fait qu'ils viennent sur une seule demi-journée (si moins de 3 cours)
-    # C'EST CETTE CONTRAINTE, LORSQU'ELLE N'EST QUE PREFERENCE, QUI CREE LA PAGAILLE DANS CBC!!!
-    # M = MinHalfDays(join2courses=True, weight=max_weight, department=ttmodel.department)
-    # M.save()
-    # for i in Tutor.objects.all():
-    #     if i.username in ['AB', 'AJ', 'CDU', 'FMA', 'GRJ', 'JD', 'SD', 'FMO',
-    #                       'JPC', 'MN', 'NJ', 'TC', 'XB', 'PDU', 'VG', 'LC', 'MTH', 'BB']:
-    #         M.tutors.add(i)
-    # M.save()
-    # for week in ttmodel.weeks:
-    #     M.enrich_model(ttmodel, week, ponderation=1000)
-    # M.delete()
-
-    # 2019 / 2020
     # Semaine 41 et 42: IC veut venir au moins 4 jours différents
     IC = Tutor.objects.get(username='IC')
     if IC in ttmodel.wdb.instructors:
