@@ -29,38 +29,6 @@ from TTapp.models import slots_filter, days_filter, slot_pause, days_list
 from TTapp.TTModel import max_weight
 import random
 
-possible_tutors = {
-    'Caisse' : {'Annie', 'Elsa', 'Emilie', 'Jeremy', 'Marine', 'Nicolas', 'Manon'},
-    'Ménage' : {'Florian', 'Leandre', 'Pierre'},
-    'Proj' : {'Adelaide', 'Annie', 'Elsa', 'Frederic', 'Jeremy', 'Nicolas', 'Manon'},
-    'Autre' : {'Annie', 'Elsa', 'Emilie', 'Jeremy', 'Marine', 'Nicolas', 'Florian',
-               'Leandre', 'Pierre', 'Adelaide', 'Frederic', 'Manon'}
-    }
-
-salaries = {'Manon': {'base': 35},
-            'Adelaide': {'base': 28, 10: 0},
-            'Frederic': {'base': 35, 9: 0},
-            'Marine': {'base': 25, 3: 0, 4: 0, 5: 0, 6: 0},
-            'Emilie': {'base': 15.5, 3: 33, 4: 33, 5: 33, 6: 33},
-            'Nicolas': {'base': 17.5, 3: 26.5, 4: 26.5, 5: 26.5, 6: 26.5},
-            'Elsa': {'base': 28},
-            'Florian': {'base': 35},
-            'Leandre': {'base': 35},
-            'Pierre': {'base': 35},
-            'Annie': {'base': 35, 8: 12},
-            'Jeremy': {'base': 35}}
-
-#temps_plein = {'Frederic',  'Manon', 'Marine', 'Elsa', 'Adelaide'}
-patrons = {'Annie', 'Jeremy'}
-menage = {'Florian', 'Leandre', 'Pierre'}
-temps_plein = set(s for s in salaries if salaries[s]['base'] > 20) - patrons - menage
-#temps_partiel = {'Emilie', 'Nicolas'
-temps_partiel = set(s for s in salaries if salaries[s]['base'] <= 20) - patrons - menage
-prorata = {}
-for s in salaries:
-    prorata[s] = salaries[s]['base'] / 35
-
-
 
 def previous_week(week):
     previous = week - 1
@@ -978,14 +946,6 @@ def equilibrer_journees_et_soirees(ttmodel, salarie, diff_max_par_semaine, diff_
 
 
 
-def nouvelles_preferences(ttmodel):
-    Marine = set(t for t in ttmodel.wdb.instructors if t.username == "Marine").pop()
-    Emilie = set(t for t in ttmodel.wdb.instructors if t.username == "Emilie").pop()
-    si_module_a_alors_pas_autres_modules(ttmodel, ttmodel.wdb.modules.get(abbrev="Autre"),
-                                             ttmodel.wdb.modules.exclude(abbrev='Autre'), Marine)
-
-    bosse_en_soiree_jourA_ou_jourB(ttmodel, Emilie, 'm', ttmodel.weeks[-2])
-    bosse_en_soiree_jourA_ou_jourB(ttmodel, Emilie, 'tu', ttmodel.weeks[-2], 'f', ttmodel.weeks[-3])
     # 1. Au consensus unanime:
         # OK 2 week-ends par fanzine (repos du vendredi 17h au dimanche minuit inclus)
         # OK équilibrer le nombre de soirées et de journées
