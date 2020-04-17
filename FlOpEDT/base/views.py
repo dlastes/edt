@@ -1577,7 +1577,7 @@ def decale_changes(req, **kwargs):
 # ---------
 
 
-def contact(req, tutor, **kwargs):
+def contact(req, tutor=None, **kwargs):
     ack = ''
     if req.method == 'POST':
         form = ContactForm(req.POST)

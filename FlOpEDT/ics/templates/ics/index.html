@@ -38,11 +38,11 @@
     <ul>
       <table>
         <th>Promo</th><th>Groupe</th>
-        {% for g in groupes %}
+        {% for g in groups %}
         <tr>
           <td>{{ g.train_prog.abbrev }}</td>
           <td>{{ g.name }}</td>
-          <td><a href="{% url "ics:group" department g.train_prog.id g.id %}">{{ requi }}{% url "ics:group" department g.train_prog.id g.id %}</a></td>
+          <td><a href="{% url "ics:group" department g.id %}">{{ requi }}{% url "ics:group" department g.id %}</a></td>
         </tr>
       {% endfor %}
       </table>
@@ -52,7 +52,7 @@
     <ul>
       <table>
         <tr><th>Pseudo</th><th>Prénom</th><th>Nom</th><th>Département(s)</th><th>Adresse</th></tr>
-	{% for e in enseignants %}
+	{% for e in tutors %}
 	<tr>
           <td>{{ e.username }}</td>
           <td>{{ e.first_name }}</td>
@@ -68,7 +68,7 @@
     <ul>
       <table>
         <tr><th>Nom</th><th>Adresse</th></tr>
-        {% for s in salles %}
+        {% for s in rooms %}
         <tr>
           <td>{{ s.name }}</td>
           <td><a href="{% url "ics:room" department s.id %}">{{ requi }}{% url "ics:room" department s.id %}</a></td>

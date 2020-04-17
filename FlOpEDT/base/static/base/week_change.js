@@ -309,15 +309,15 @@ function create_dispos_user_data() {
         day: day.ref,
         start_time: pref_list[k].start_time,
         duration: pref_list[k].duration,
-        val: pref_list[k].value,
+        value: pref_list[k].value,
         off: -1
       };
       user.dispos_bu.push(d2p);
       if (pref_list[k].value < 0) {
         if (!pref_only) {
-          pref_list[k].val = get_dispos_type(d2p).val;
+          pref_list[k].value = get_dispos_type(d2p).value;
         } else {
-          pref_list[k].val = par_dispos.nmax;
+          pref_list[k].value = par_dispos.nmax;
         }
       }
 
@@ -326,7 +326,7 @@ function create_dispos_user_data() {
         day: day.ref,
         start_time: pref_list[k].start_time,
         duration: pref_list[k].duration,
-        val: pref_list[k].value,
+        value: pref_list[k].value,
         off: -1
       });
     }
