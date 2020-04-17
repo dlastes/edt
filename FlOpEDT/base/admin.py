@@ -45,7 +45,7 @@ from base.models import RoomPreference, RoomSort, RoomType
 from displayweb.models import ModuleDisplay
 from displayweb.models import TutorDisplay
 from import_export import resources, fields
-from import_export.widgets import ForeignKeyWidget
+from import_export.widgets import ForeignKeyWidget, ManyToManyWidget
 
 from FlOpEDT.filters import DropdownFilterAll, DropdownFilterRel, DropdownFilterSimple
 
@@ -84,10 +84,10 @@ class CoursPlaceResource(resources.ModelResource):
     #                               attribute='cours__tutor',
     #                               widget=ForeignKeyWidget(Tutor, 'last_name'))
     groups = fields.Field(column_name='gpe_name',
-                         attribute='course__groups',
-                         widget=ForeignKeyWidget(Group, 'name'))
+                          attribute='course__groups',
+                          widget=ManyToManyWidget(Group, field='name', separator='|'))
     promo = fields.Field(column_name='gpe_promo',
-                         attribute='course__group__train_prog',
+                         attribute='course__module__train_prog',
                          widget=ForeignKeyWidget(TrainingProgramme, 'abbrev'))
     module = fields.Field(column_name='module',
                           attribute='course__module',
@@ -145,7 +145,7 @@ class CoursPlaceResourceCosmo(resources.ModelResource):
                           attribute='course__groups',
                           widget=ForeignKeyWidget(Group, 'name'))
     promo = fields.Field(column_name='gpe_promo',
-                         attribute='course__group__train_prog',
+                         attribute='course__module__train_prog',
                          widget=ForeignKeyWidget(TrainingProgramme, 'abbrev'))
     module = fields.Field(column_name='module',
                           attribute='course__module',
