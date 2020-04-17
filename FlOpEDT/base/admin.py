@@ -512,7 +512,7 @@ class ModuleAdmin(DepartmentModelAdmin):
 
 
 class CourseAdmin(DepartmentModelAdmin):
-    list_display = ('module', 'type', 'groups', 'tutor', 'week', 'year')
+    list_display = ('module', 'type', 'tutor', 'week', 'year')
     ordering = ('year', 'week', 'module', 'type', 'no', 'groups', 'tutor')
     list_filter = (
         ('tutor', DropdownFilterRel),
