@@ -143,7 +143,7 @@ class CoursPlaceResourceCosmo(resources.ModelResource):
     #                               widget=ForeignKeyWidget(Tutor, 'last_name'))
     groups = fields.Field(column_name='gpe_name',
                           attribute='course__groups',
-                          widget=ForeignKeyWidget(Group, 'name'))
+                          widget=ManyToManyWidget(Group, field='name', separator='|'))
     promo = fields.Field(column_name='gpe_promo',
                          attribute='course__module__train_prog',
                          widget=ForeignKeyWidget(TrainingProgramme, 'abbrev'))
@@ -230,7 +230,7 @@ class CoursResource(resources.ModelResource):
                             attribute='course__type__duration')
     groups = fields.Field(column_name='groups',
                          attribute='groups',
-                         widget=ForeignKeyWidget(Group, 'name'))
+                         widget=ManyToManyWidget(Group, field='name', separator='|'))
     color_bg = fields.Field(column_name='color_bg',
                             attribute='module__display',
                             widget=ForeignKeyWidget(ModuleDisplay, 'color_bg'))

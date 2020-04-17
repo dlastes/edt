@@ -378,18 +378,18 @@ class Course(models.Model):
 
     def __str__(self):
         username_mod = self.tutor.username if self.tutor is not None else '-no_tut-'
-        return f"{self.type}-{self.module}-{username_mod}-{self.group}" \
+        return f"{self.type}-{self.module}-{username_mod}-{'|'.join([g.name for g in self.groups.all()])}" \
                + (" (%s)" % self.id if self.show_id else "")
 
     def full_name(self):
         username_mod = self.tutor.username if self.tutor is not None else '-no_tut-'
-        return f"{self.type}-{self.module}-{username_mod}-{self.group}"
+        return f"{self.type}-{self.module}-{username_mod}-{'|'.join([g.name for g in self.groups.all()])}"
 
     def equals(self, other):
         return self.__class__ == other.__class__ \
                and self.type == other.type \
                and self.tutor == other.tutor \
-               and self.group == other.group \
+               and self.groups == other.groups \
                and self.module == other.module
 
 
