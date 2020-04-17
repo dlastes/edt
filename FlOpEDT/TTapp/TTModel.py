@@ -28,6 +28,7 @@ from pulp import LpVariable, LpConstraint, LpBinary, LpConstraintEQ, \
     LpConstraintGE, LpConstraintLE, LpAffineExpression, LpProblem, LpStatus, \
     LpMinimize, lpSum, LpStatusOptimal, LpStatusNotSolved
 
+import pulp
 from pulp import GUROBI_CMD
 
 from FlOpEDT.settings.base import COSMO_MODE
