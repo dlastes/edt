@@ -81,7 +81,7 @@ def minimize_moves(department, week, year, target_work_copy):
                                 start_time__gt = st - F('course__type__duration') - slot_pause,
                                 day=day,
                                 course__room_type=CP.course.room_type,
-                                course__group=CP.course.group,
+                                course__groups__in=CP.course.groups.all(),
                                 **scheduled_courses_params)
                     if len(precedent) == 0:
                         continue
