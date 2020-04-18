@@ -442,9 +442,10 @@ class Stabilize(TTConstraint):
                                                 day=sl.day):
                         ttmodel.obj += ponderation * ttmodel.TT[(sl, c)]
                         # nb_changements_I[i]+=ttmodel.TT[(sl,c)]
-                    if not sched_courses.filter(course__groups=c.group,
-                                                day=sl.day):
-                        ttmodel.obj += ponderation * ttmodel.TT[(sl, c)]
+                    for g in c.groups.all():
+                        if not sched_courses.filter(course__groups=g,
+                                                    day=sl.day):
+                            ttmodel.obj += ponderation * ttmodel.TT[(sl, c)]
         else:
             fc = ttmodel.wdb.courses.filter(week=week)
             if self.tutor is not None:
@@ -683,13 +684,14 @@ class MinNonPreferedTrainProgsSlot(TTConstraint):
                 basic_groups = ttmodel.wdb.basic_groups.filter(train_prog=train_prog)
                 for g in basic_groups:
                     for c in filtered_courses & ttmodel.wdb.compatible_courses[sl]:
-                        if c.group in ttmodel.wdb.all_groups_of[g]:
-                            cost = self.local_weight() \
-                                   * ponderation * ttmodel.TT[(sl, c)] \
-                                   * ttmodel.unp_slot_cost_course[c.type,
-                                                                  train_prog][sl]
-                            ttmodel.add_to_group_cost(g, cost, week=week)
-                            #ttmodel.add_to_slot_cost(sl, cost)
+                        for gr in c.groups.all():
+                            if gr in ttmodel.wdb.all_groups_of[g]:
+                                cost = self.local_weight() \
+                                       * ponderation * ttmodel.TT[(sl, c)] \
+                                       * ttmodel.unp_slot_cost_course[c.type,
+                                                                      train_prog][sl]
+                                ttmodel.add_to_group_cost(g, cost, week=week)
+                                #ttmodel.add_to_slot_cost(sl, cost)
 
     def one_line_description(self):
         text = "Respecte les préférences"
