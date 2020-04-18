@@ -123,7 +123,7 @@ class Constraint:
                 instructors.append(course.tutor)
             for g in course.groups.all():
                 if g not in groups:
-                    groups.append(course.group)
+                    groups.append(g)
             if course.module not in modules:
                 modules.append(course.module)
 
