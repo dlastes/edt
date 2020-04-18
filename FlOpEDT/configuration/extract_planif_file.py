@@ -139,8 +139,6 @@ def ReadPlanifWeek(department, book, feuille, week, year):
             groups = [str(g) for g in grps]
 
             GROUPS = list(Group.objects.filter(name__in=groups, train_prog=PROMO))
-            if GROUPS == []:
-                GROUPS = list(Group.objects.filter(name='CE', train_prog=PROMO))
 
             N=int(N)
 
