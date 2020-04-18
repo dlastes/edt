@@ -617,7 +617,7 @@ def settings_extract(department, book):
     hours_row = 2
     hours_col = 2
 
-    for index, setting in enumerate(list(settings)[2:]):
+    for index, setting in enumerate(list(settings)[2:6]):
         current_row = hours_row + index
         hour_raw_value = sheet.cell(row=current_row, column=hours_col).value
         try:
@@ -636,104 +636,3 @@ def settings_extract(department, book):
     # Set settings
     logger.info(f'TimeGeneralSettings : {settings}')
     TimeGeneralSettings.objects.get_or_create(**settings)
-
-
-def displayInfo():
-
-    print("The Professors are : ")
-
-    for p in Tutor.objects.all():
-
-        print(p.username, " : ", p.first_name, " ", p.last_name.upper())
-
-        if p.status == Tutor.SUPP_STAFF :
-            print("Qualite : ", p.qualite)
-            print("Employer : ", p.employer)
-            print("Status : SupplyStaff")
-        else:
-            print("Status : FullStaff")
-
-        print("e-mail : ", p.email, "\n")
-
-    print("------------------")
-
-    print("The Rooms are : ")
-
-    for r in Room.objects.all():
-
-        print(r.name, ", subroom of : ")
-
-        for sub in r.subroom_of.all():
-
-            print(sub)
-
-    print("---")
-
-    print("The Room groups are : ")
-
-    for rg in Room.objects.all():
-
-        print(rg.name, ", types : ")
-
-        for t in rg.types.all():
-
-            print("| ", t, " |")
-
-    print("---")
-
-    print("The Room types are : ")
-
-    for rt in RoomType.objects.all():
-
-        print(rt)
-
-    print("------------------")
-
-    print("The Training programs are : ")
-
-    for tp in TrainingProgramme.objects.all():
-
-        print(tp.abbrev, " : ", tp)
-
-    print("---")
-
-    print("The Group types are : ")
-
-    for gt in GroupType.objects.all():
-
-        print(gt)
-
-    print("---")
-
-    print("The Groups are : ")
-
-    for g in Group.objects.all():
-
-        print(g, " : ")
-        print(" - size : ", g.size)
-        print(" - type : ", g.type)
-        print(" - basic : ", g.basic)
-
-        print(" - parent groups : ")
-        for i in g.ancestor_groups():
-            print(i)
-
-    print("------------------")
-
-    print("The Modules are : ")
-
-    for m in Module.objects.all():
-
-        print(m, " : ", m.name, " - ", m.ppn)
-        print("- head : ", m.head)
-        print("- training program : ", m.train_prog)
-        print("- starting week : ", m.period.starting_week)
-        print("- ending week : ", m.period.ending_week)
-
-    print("------------------")
-
-    print("The CourseTypes are : ")
-
-    for ct in CourseType.objects.all():
-
-        print(ct)

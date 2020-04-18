@@ -72,7 +72,7 @@ environnement virtuel.
   - appliquer les migrations :
     `python manage.py migrate`
   - éventuellement, remplir la base avec les données d'exemple :
-    `python manage.py loaddata ../dump.json`
+    `python manage.py loaddata ../dump.json.bz2`
   - pour supprimer ces données :
     `python manage.py flush`
 
