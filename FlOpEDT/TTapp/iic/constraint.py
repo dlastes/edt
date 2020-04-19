@@ -27,7 +27,7 @@
 def sing_or_plural(dimension):
     plurial = ""
     if len(dimension["value"]) >= 2 \
-            and dimension["display"][-1] is not "s":
+            and dimension["display"][-1] != "s":
         plurial = "s"
     return dimension["display"] + plurial
 

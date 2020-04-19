@@ -58,7 +58,7 @@ def print_factorised_constraints(occurs, file_path, filename_suffixe):
         output += "\n\n%s:" % dimension
         for elt in occurs[dimension].keys():
             output += "\n%s -> %s" % (elt, occurs[dimension][elt]["occurences"])
-            if dimension is not "types":
+            if dimension != "types":
                 output += " (%s)" % ", ".join(occurs[dimension][elt]["types"])
     filename = "%s/constraints_factorised%s.txt" % (file_path, filename_suffixe)
     write_file(filename, output)

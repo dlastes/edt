@@ -28,7 +28,7 @@ from io import StringIO
 import os
 import sys
 import json
-import pulp.solvers as pulp_solvers
+import pulp
 
 from django.shortcuts import render
 from django.contrib.admin.views.decorators import staff_member_required
@@ -73,14 +73,19 @@ def get_pulp_solvers(available=True):
     def recurse_solver_hierachy(solvers):
         for s in solvers:
             if available:
-                if s().available():
-                    yield s
+                try:
+                    if s().available():
+                        yield s
+                except pulp.PulpSolverError:
+                    # cf in pulp: pulp/apis/choco_api.py l38
+                    # CHOCO solver poorly handled
+                    pass
             else:
                 yield s
 
             yield from recurse_solver_hierachy(s.__subclasses__())
     
-    solvers = pulp_solvers.LpSolver_CMD.__subclasses__()
+    solvers = pulp.LpSolver_CMD.__subclasses__()
     return tuple(recurse_solver_hierachy(solvers))
 
 
