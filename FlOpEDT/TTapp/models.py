@@ -51,8 +51,7 @@ from TTapp.helpers.minhalfdays import MinHalfDaysHelperGroup, MinHalfDaysHelperM
 
 from TTapp.iic.constraint_type import ConstraintType
 from TTapp.iic.constraints.constraint import Constraint
-from TTapp.slots import Slot, days_filter, slots_filter, \
-    slot_pause, midday, basic_slot_duration, days_list, days_index
+from TTapp.slots import Slot, days_filter, slots_filter
 
 
 max_weight = 8
