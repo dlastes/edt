@@ -142,7 +142,7 @@ class WeekDB(object):
         for slot in slots:
             self.possible_apms.add(slot.apm)
 
-        print('Ok')
+        print('Ok' + f' : {len(slots)} slots created!' )
 
         return slots
 
@@ -659,9 +659,11 @@ class TTModel(object):
         Create a PuLP binary variable
         """
         # return LpVariable(name, lowBound = 0, upBound = 1, cat = LpBinary)
-        countedname = name + '_' + str(self.var_nb)
+        # countedname = name + '_' + str(self.var_nb)
         self.var_nb += 1
-        return LpVariable(countedname, cat=LpBinary)
+
+        # return LpVariable(countedname, cat=LpBinary)
+        return LpVariable(self.var_nb, cat=LpBinary)
 
     def add_constraint(self, expr, relation, value, constraint):
         constraint_id = self.constraintManager.get_nb_constraints()
@@ -824,7 +826,8 @@ class TTModel(object):
             for bg in self.wdb.basic_groups:
                 self.add_constraint(1000 * self.sum(self.TT[(sl1, c1)] for c1 in self.wdb.courses_for_basic_group[bg]
                                                     & self.wdb.compatible_courses[sl1]) +
-                                    self.sum(self.TT[(sl2, c2)] for sl2 in self.wdb.slots_intersecting[sl1] - {sl1}
+                                    self.sum(self.TT[(sl2, c2)]
+                                             for sl2 in slots_filter(self.wdb.slots, simultaneous_to=sl1) - {sl1}
                                              for c2 in self.wdb.courses_for_basic_group[bg]
                                              & self.wdb.compatible_courses[sl2]),
                                     '<=', 1000, SimulSlotGroupConstraint(sl1, bg))
@@ -911,7 +914,7 @@ class TTModel(object):
                                                     for (c, rg) in self.wdb.room_course_compat[r]
                                                     if c in self.wdb.compatible_courses[sl1]) +
                                     self.sum(self.TTrooms[(sl2, c, rg)]
-                                             for sl2 in self.wdb.slots_intersecting[sl1] - {sl1}
+                                             for sl2 in slots_filter(self.wdb.slots, simultaneous_to=sl1) - {sl1}
                                              for (c, rg) in self.wdb.room_course_compat[r]
                                              if c in self.wdb.compatible_courses[sl2]),
                                     '<=', 1000,
