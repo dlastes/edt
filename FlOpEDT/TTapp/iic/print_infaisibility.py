@@ -2,12 +2,13 @@ import csv
 from TTapp.iic.constraint import Constraint
 
 
-def print_all(constraints, occurs, threshold_type, threshold_attr, file_path, filename_suffixe):
+def print_all(constraints, occurs, threshold_type, threshold_attr, file_path, filename_suffixe, write_csv_file):
     print_brut_constraints(constraints, occurs, file_path, filename_suffixe)
     print_factorised_constraints(occurs, file_path, filename_suffixe)
     print_summary_from_types_with_threshold(constraints, occurs, threshold_type, threshold_attr, file_path,
                                             filename_suffixe)
-    write_csv(constraints, file_path, filename_suffixe)
+    if write_csv_file:
+        write_csv(constraints, file_path, filename_suffixe)
 
 
 def sort_constraints_by_type(constraints, occurs):
@@ -100,6 +101,7 @@ def print_summary_from_types_with_threshold(constraints, occurs, threshold_type,
                                             file_path, filename_suffixe, print_output=True):
     filename = "%s/constraints_summary%s.txt" % (file_path, filename_suffixe)
     output = "Voici les principaux problèmes liés à l'infaisabilité :\n"
+    print(output)
     write_file(filename, output)
     for constraint_type in get_most_important(occurs['types'], threshold_type):
         output, dimensions = find_object_from_type(constraint_type, constraints).get_summary_format()

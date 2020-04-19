@@ -1,7 +1,6 @@
 from TTapp.iic.constraint import Constraint
 from TTapp.iic.constraint_type import ConstraintType
 
-
 class SimulSlotGroupConstraint(Constraint):
     def __init__(self, slot, group):
         self.slot = slot

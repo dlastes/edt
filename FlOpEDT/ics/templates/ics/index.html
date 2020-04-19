@@ -42,7 +42,7 @@
         <tr>
           <td>{{ g.train_prog.abbrev }}</td>
           <td>{{ g.name }}</td>
-          <td><a href="{% url "ics:group" department g.train_prog.id g.id %}">{{ requi }}{% url "ics:group" department g.train_prog.id g.id %}</a></td>
+          <td><a href="{% url "ics:group" department g.id %}">{{ requi }}{% url "ics:group" department g.id %}</a></td>
         </tr>
       {% endfor %}
       </table>

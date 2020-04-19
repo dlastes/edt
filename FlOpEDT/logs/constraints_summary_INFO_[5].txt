@@ -1,6 +1,0 @@
-Voici les principaux problèmes liés à l'infaisabilité :
-
-	Problème de dépendance entre les cours suivants:
-		TD-CDAM-JD-2 (44881)
-		TD-CDAM-JD-2 (44882)
-

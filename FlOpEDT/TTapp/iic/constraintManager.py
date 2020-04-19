@@ -1,6 +1,5 @@
 from TTapp.iic.print_infaisibility import print_all
 
-
 def inc(occurs_types, constraint_type):
     if constraint_type is not None:
         if constraint_type in occurs_types.keys():
@@ -24,7 +23,7 @@ def inc_with_type(occurs_dimension, dimension, constraint_type):
 
 
 class ConstraintManager:
-    def __init__(self, threshold_type=50, threshold_attr=80):
+    def __init__(self, threshold_type=60, threshold_attr=80):
         self.threshold_type = threshold_type  # % des types sont pris en compte
         self.threshold_attr = threshold_attr  # % des attributs sont pris en compte
         self.constraints = []
@@ -78,9 +77,9 @@ class ConstraintManager:
                     courses[index_course1].show_id = True
                     courses[index_course2].show_id = True
 
-    def handle_reduced_result(self, ilp_file_name, file_path, filename_suffixe):
+    def handle_reduced_result(self, ilp_file_name, file_path, filename_suffixe, write_csv_file=False):
         self.infeasible_constraints = self.parse_iis(ilp_file_name)
         self.occurs = self.get_occurs()
         self.set_index_courses()
         print_all(self.infeasible_constraints, self.occurs, self.threshold_type, self.threshold_attr,
-                  file_path, filename_suffixe)
+                  file_path, filename_suffixe, write_csv_file=write_csv_file)

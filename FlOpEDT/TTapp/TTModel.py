@@ -23,19 +23,17 @@
 # a commercial license. Buying such a license is mandatory as soon as
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
-import importlib
-from distutils.command.config import config
 from django.core.mail import EmailMessage
 from pulp import LpVariable, LpConstraint, LpBinary, LpConstraintEQ, \
     LpConstraintGE, LpConstraintLE, LpAffineExpression, LpProblem, LpStatus, \
     LpMinimize, lpSum, LpStatusOptimal, LpStatusNotSolved
 
-from pulp import GUROBI_CMD, PULP_CBC_CMD
+from pulp import GUROBI_CMD
 
 import pulp.solvers as pulp_solvers
 # from pulp.solvers import GUROBI_CMD as GUROBI
 
-from FlOpEDT.settings.base import COSMO_MODE
+from FlOpEDT.FlOpEDT.settings.base import COSMO_MODE
 
 from base.models import Group, Day, Time, \
     Room, RoomSort, RoomType, RoomPreference, \
@@ -48,17 +46,13 @@ import base.queries as queries
 
 from people.models import Tutor
 
-from base.weeks import current_year
-
-from TTapp.models import MinNonPreferedSlot, max_weight, Stabilize, TTConstraint, \
-    Slot, slot_pause, basic_slot_duration, slots_filter, days_filter
+from TTapp.models import MinNonPreferedTutorsSlot, MinNonPreferedTrainProgsSlot,\
+    max_weight, Stabilize, TTConstraint, \
+    Slot, slots_filter, days_filter
 
 from MyFlOp.MyTTUtils import reassign_rooms
 
-import re
 import signal
-
-import numpy as np
 
 from django.db import close_old_connections
 from django.db.models import Q, Max, F
@@ -601,9 +595,7 @@ class TTModel(object):
                 # This next constraint impides to force IBD to be 1
                 # (if there is a meeting, for example...)
                 # self.add_constraint(expr, '<=', card-1, , constraint_type="IBD sup", instructor=i, days=d)
-
-                if self.wdb.fixed_courses.filter(Q(course__tutor=i) | Q(tutor=i),
-                                                 day=d) \
+                if self.wdb.fixed_courses.filter(Q(course__tutor=i) | Q(tutor=i), day=d) \
                         or self.wdb.other_departments_sched_courses.filter(Q(course__tutor=i) | Q(tutor=i), day=d):
                     self.add_constraint(IBD[(i, d)], '==', 1,
                                         Constraint(constraint_type=ConstraintType.IBD_EQ, instructors=i, days=d))
@@ -982,9 +974,9 @@ class TTModel(object):
                     '<=', self.avail_room[r][sl],
                     Constraint(constraint_type=ConstraintType.SALLE_DISPO_AU_PLUS_1_FOIS, slots=sl, rooms=r))
 
-            # ########TO BE CHECKED################
-            # # constraint : respect preference order,
-            # # if preferred room is available
+            ########TO BE CHECKED################
+            # constraint : respect preference order,
+            # if preferred room is available
             # for rp in self.wdb.room_prefs:
             #     e = self.sum(
             #         self.TTrooms[(sl, c, rp.unprefer)]
@@ -1001,8 +993,9 @@ class TTModel(object):
             #         continue
             #     # print "### slot :", sl, rp.unprefer, "after", rp.prefer
             #     # print e <= 0
-            #     self.add_constraint(e, '<=', 0, constraint_type="La salle préférée n'est pas disponible", room=rp,
-            #                         slot=sl)
+            #     self.add_constraint(e, '<=', 0,
+            #                         constraint_type=ConstraintType.SALLE_PREFEREE_NON_DISPONIBLE, rooms=rp, slots=sl)
+
 
     # constraint : respect preference order with full order for each room type :
     # perfs OK
@@ -1066,10 +1059,11 @@ class TTModel(object):
                     #         for rg2 in self.wdb.rooms_for_type[c2.room_type].exclude(id=rg1.id):
                     #             self.add_constraint(self.TTrooms[(sl1, c1, rg1)]
                     #                                 + self.TTrooms[(sl2, c2, rg2)], '<=', 1,
-                    #                                 constraint_type="Problème de dépendance entre les salles",
-                    #                                 course=p,
-                    #                                 slot=str(sl1) + " / " + str(sl2),
-                    #                                 room=str(rg1) + " / " + str(rg2))
+                    #                                 constraint_type=ConstraintType.DEPENDANCE_SALLE,
+                    #                                 courses=[c1, c2],
+                    #                                 slots=[sl1, sl2],
+                    #                                 rooms=[rg1, rg2])
+
 
     def send_unitary_lack_of_availability_mail(self, tutor, week, available_hours, teaching_hours,
                                                prefix="[flop!EDT] "):
@@ -1303,21 +1297,20 @@ class TTModel(object):
         print("adding slot preferences")
         # first objective  => minimise use of unpreferred slots for teachers
         # ponderation MIN_UPS_I
-        for i in self.wdb.instructors:
-            M = MinNonPreferedSlot(tutor=i,
-                                   weight=max_weight)
+
+        M, created = MinNonPreferedTutorsSlot.objects.get_or_create(weight=max_weight, department=self.department)
+        if created:
+            M.save()
             for week in self.weeks:
-                M.enrich_model(self, week,
-                               ponderation=self.min_ups_i)
+                M.enrich_model(self, week)
 
         # second objective  => minimise use of unpreferred slots for courses
         # ponderation MIN_UPS_C
-        for promo in self.train_prog:
-            M = MinNonPreferedSlot(train_prog=promo,
-                                   weight=max_weight)
+        M, created = MinNonPreferedTrainProgsSlot.objects.get_or_create(weight=max_weight, department=self.department)
+        if created:
+            M.save()
             for week in self.weeks:
-                M.enrich_model(self, week,
-                               ponderation=self.min_ups_c)
+                M.enrich_model(self, week)
 
     def add_other_departments_constraints(self):
         """
@@ -1342,8 +1335,9 @@ class TTModel(object):
                     #                              for room in self.wdb.course_rg_compat[c]
                     #                              if r in room.and_subrooms()),
                     #                     '==',
-                    #                     0, constraint_type="Les autres départements bloquent le slot", slot=sl,
-                    #                     room=r)
+                    #                     0, constraint_type=ConstraintType.DEPARTEMENT_BLOQUE_SLOT,
+                    #                                         slots=sl, rooms=r, departments=d)
+
 
         if self.core_only:
             return
@@ -1378,15 +1372,14 @@ class TTModel(object):
         Add the active specific constraints stored in the database.
         """
         print("adding active specific constraints")
-        for promo in self.train_prog:
-            for week in self.weeks:
-                for constr in get_constraints(
-                        self.department,
-                        week=week,
-                        year=self.year,
-                        train_prog=promo,
-                        is_active=True):
-                    constr.enrich_model(self, week)
+        for week in self.weeks:
+            for constr in get_constraints(
+                    self.department,
+                    week=week,
+                    year=self.year,
+                    # train_prog=promo,
+                    is_active=True):
+                constr.enrich_model(self, week)
 
     def update_objective(self):
         for week in self.weeks + [None]:
@@ -1607,7 +1600,7 @@ class TTModel(object):
             return target_work_copy
 
 
-def get_constraints(department, week=None, year=None, train_prog=None, is_active=None):
+def get_constraints(department, week=None, year=None, is_active=None):
     #
     #  Return constraints corresponding to the specific filters
     #
@@ -1620,16 +1613,8 @@ def get_constraints(department, week=None, year=None, train_prog=None, is_active
         logger.warning(f"Unable to filter constraint for weeks {week} without specifing year")
         return
 
-    if week and train_prog:
-        query &= \
-            Q(train_prog__abbrev=train_prog) & Q(week__isnull=True) & Q(year__isnull=True) | \
-            Q(train_prog__abbrev=train_prog) & Q(week=week) & Q(year=year) | \
-            Q(train_prog__isnull=True) & Q(week=week) & Q(year=year) | \
-            Q(train_prog__isnull=True) & Q(week__isnull=True) & Q(year__isnull=True)
-    elif week:
+    else:
         query &= Q(week=week) & Q(year=year) | Q(week__isnull=True) & Q(year__isnull=True)
-    elif train_prog:
-        query &= Q(train_prog__abbrev=train_prog) | Q(train_prog__isnull=True)
 
     # Look up the TTConstraint subclasses records to update
     types = TTConstraint.__subclasses__()
