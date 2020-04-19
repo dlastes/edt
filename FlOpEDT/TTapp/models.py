@@ -172,9 +172,9 @@ class LimitCourseTypeTimePerPeriod(TTConstraint):  # , pond):
         for day, period in period_by_day:
             expr = ttmodel.lin_expr()
             if period is None:
-                slots = ttmodel.wdb.slots_by_day[day]
+                slots = slots_filter(ttmodel.wdb.slots, day=day)
             else:
-                slots = ttmodel.wdb.slots_by_half_day[(day, period)]
+                slots = slots_filter(ttmodel.wdb.slots, day=day, apm=period)
 
             for slot in slots:
                 for course in courses & ttmodel.wdb.compatible_courses[slot]:

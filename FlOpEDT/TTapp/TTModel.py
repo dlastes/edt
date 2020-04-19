@@ -84,8 +84,7 @@ class WeekDB(object):
         self.year = year
         self.possible_apms=set()
         self.days, self.day_after, self.holidays, self.training_half_days = self.days_init()
-        self.slots, self.slots_by_day, self.slots_intersecting, self.slots_by_half_day, self.slots_by_week \
-            = self.slots_init()
+        self.slots = self.slots_init()
         self.course_types, self.courses, self.courses_by_week, \
         self.sched_courses, self.fixed_courses, self.fixed_courses_for_slot, \
         self.other_departments_courses, self.other_departments_sched_courses, \
@@ -143,25 +142,9 @@ class WeekDB(object):
         for slot in slots:
             self.possible_apms.add(slot.apm)
 
-        slots_by_day = {}
-        for d in self.days:
-            slots_by_day[d] = slots_filter(slots, day=d)
-
-        slots_intersecting = {}
-        for sl in slots:
-            slots_intersecting[sl] = slots_filter(slots, simultaneous_to=sl)
-
-        slots_by_half_day = {}
-        for d in self.days:
-            for apm in self.possible_apms:
-                slots_by_half_day[(d, apm)] = slots_filter(slots, day=d, apm=apm)
         print('Ok')
 
-        slots_by_week = {}
-        for week in self.weeks:
-            slots_by_week[week] = slots_filter(slots, week=week)
-
-        return slots, slots_by_day, slots_intersecting, slots_by_half_day, slots_by_week
+        return slots
 
     def courses_init(self):
         # COURSES
@@ -557,7 +540,7 @@ class TTModel(object):
                 # Linking the variable to the TT
                 expr = self.lin_expr()
                 expr += 100 * IBS[(i, sl)]
-                for s_sl in self.wdb.slots_intersecting[sl] | {sl}:
+                for s_sl in slots_filter(self.wdb.slots, simultaneous_to=sl) | {sl}:
                     for c in self.wdb.possible_courses[i] & self.wdb.compatible_courses[s_sl]:
                         expr -= self.TTinstructors[(s_sl, c, i)]
                 # , "IBS_sup(%s,%s)" % (i, sl)
@@ -573,7 +556,7 @@ class TTModel(object):
             for d in self.wdb.days:
                 IBD[(i, d)] = self.add_var("IBD(%s,%s)" % (i, d))
                 # Linking the variable to the TT
-                dayslots = self.wdb.slots_by_day[d]
+                dayslots = slots_filter(self.wdb.slots, day=d)
                 card = 2 * len(dayslots)
                 expr = self.lin_expr()
                 expr += card * IBD[(i, d)]
@@ -626,7 +609,7 @@ class TTModel(object):
                 for apm in self.possible_apms:
                     IBHD[(i, d, apm)] \
                         = self.add_var("IBHD(%s,%s,%s)" % (i, d, apm))
-                    halfdayslots = self.wdb.slots_by_half_day[(d, apm)]
+                    halfdayslots = slots_filter(self.wdb.slots, day=d, apm=apm)
                     card = 2 * len(halfdayslots)
                     expr = self.lin_expr()
                     expr += card * IBHD[(i, d, apm)]
@@ -655,7 +638,7 @@ class TTModel(object):
                 for apm in self.possible_apms:
                     GBHD[(g, d, apm)] \
                         = self.add_var("GBHD(%s,%s,%s)" % (g, d, apm))
-                    halfdayslots = self.wdb.slots_by_half_day[(d, apm)]
+                    halfdayslots = slots_filter(self.wdb.slots, day=d, apm=apm)
                     card = 2 * len(halfdayslots)
                     expr = self.lin_expr()
                     expr += card * GBHD[(g, d, apm)]
@@ -884,7 +867,7 @@ class TTModel(object):
                                                     & self.wdb.compatible_courses[sl])
                                     +
                                     self.sum(self.TTinstructors[(sl2, c2, i)]
-                                             for sl2 in self.wdb.slots_intersecting[sl] - {sl}
+                                             for sl2 in slots_filter(self.wdb.slots, simultaneous_to=sl) - {sl}
                                              for c2 in self.wdb.possible_courses[i] & self.wdb.compatible_courses[sl2]),
                                     '<=', 1000,
                                     Constraint(constraint_type=ConstraintType.SIMUL_SLOT, slots=sl, instructors=i))
@@ -900,7 +883,7 @@ class TTModel(object):
                         self.add_constraint(1000 * self.TT[(sl, c)]
                                             + self.sum(self.TTinstructors[(sl2, c2, supp_tutor)]
                                                        for supp_tutor in supp_tutors
-                                                       for sl2 in self.wdb.slots_intersecting[sl] - {sl}
+                                                       for sl2 in slots_filter(self.wdb.slots, simultaneous_to=sl) - {sl}
                                                        for c2 in self.wdb.possible_courses[supp_tutor] &
                                                        self.wdb.compatible_courses[sl2]),
                                             '<=',
@@ -952,7 +935,7 @@ class TTModel(object):
                 if fcrg:
                     for r in rg.and_subrooms():
                         self.add_constraint(self.sum(self.TTrooms[(s_sl, c, room)]
-                                                     for s_sl in self.wdb.slots_intersecting[sl]
+                                                     for s_sl in slots_filter(self.wdb.slots, simultaneous_to=sl)
                                                      for c in self.wdb.compatible_courses[s_sl]
                                                      for room in self.wdb.course_rg_compat[c]
                                                      if r in room.and_subrooms()),
