@@ -41,14 +41,12 @@ from django.db.models import F
 
 # from caching.base import CachingManager, CachingMixin
 
-from base.models import Time, Department, Module, Group, Day, TimeGeneralSettings
-
-from people.models import Tutor
+from base.models import Time, Department, Day, TimeGeneralSettings
 
 from TTapp.helpers.minhalfdays import MinHalfDaysHelperGroup, MinHalfDaysHelperModule, MinHalfDaysHelperTutor
 
 from TTapp.iic.constraint_type import ConstraintType
-from TTapp.iic.constraints.constraint import Constraint
+from TTapp.iic.constraint import Constraint
 
 max_weight = 8
 

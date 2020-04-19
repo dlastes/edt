@@ -1,4 +1,4 @@
-from TTapp.iic.constraints.constraint import Constraint
+from TTapp.iic.constraint import Constraint
 from TTapp.iic.constraint_type import ConstraintType
 
 class CourseConstraint(Constraint):

@@ -1,4 +1,4 @@
-from TTapp.iic.constraints.constraint import Constraint
+from TTapp.iic.constraint import Constraint
 
 def print_all(constraints, occurs, department_abbrev, weeks, threshold_type, threshold_attr):
     print_brut_constraints(constraints, occurs, department_abbrev, weeks)

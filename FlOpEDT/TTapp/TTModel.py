@@ -61,7 +61,7 @@ from django.conf import settings
 import datetime
 
 from TTapp.iic.constraintManager import ConstraintManager
-from TTapp.iic.constraints.constraint import Constraint
+from TTapp.iic.constraint import Constraint
 from TTapp.iic.constraint_type import ConstraintType
 
 import logging
