@@ -174,17 +174,6 @@ function week_right() {
   -------- GRID --------
   ----------------------*/
 
-// clear pop message when unauthorized course modification
-function clear_pop(gs) {
-  if (gs.pop) {
-    gs.pop = false;
-    gs.display = false;
-    gs.reason = "";
-    go_grid(false);
-  }
-}
-
-
 /*--------------------
   ------- ROOMS ------
   --------------------*/

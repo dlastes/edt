@@ -138,7 +138,7 @@ file_fetch.rooms.callback = function () {
 file_fetch.constraints.callback = function () {
   constraints = this.data;
 
-  // rev_constraints only used in slot_case
+  // rev_constraints only used when training programmes on multiple lines
   let i, j, coursetypes, cur_start_time;
   coursetypes = Object.keys(constraints);
   for (i = 0; i < coursetypes.length; i++) {
@@ -358,9 +358,8 @@ var wdw_weeks = new WeeksExcerpt(dsp_weeks.visible_weeks);
   -------- GRID --------
   ----------------------*/
 
-// one element per slot
-// non-empty iff slot_case
-// filled in create_grid_data()
+// possible slots when drag'n'drop
+// filled in create_slot_grid_data()
 var data_slot_grid = [];
 
 // keys on top or at the bottom of the grid representing the name of

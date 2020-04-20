@@ -195,6 +195,14 @@ legend {
 }
 
 
+.grids {
+    stroke-dasharray: 2, 2;
+    stroke-width: 2;
+    stroke-linecap: "round";
+    fill-opacity: .5;
+}
+
+
 /* loadingspin.svg */
 
 /* ************ Logo ************ */

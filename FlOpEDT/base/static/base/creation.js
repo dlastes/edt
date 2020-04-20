@@ -115,86 +115,27 @@ function create_edt_grid() {
 }
 
 
-
-function add_garbage() {
-
-  if (slot_case) {
-
-    var garbage_dsg = {
-      day: garbage.day,
-      start: garbage.start,
-      duration: rev_constraints[garbage.start],
-      display: false,
-      dispo: false,
-      pop: false,
-      reason: ""
-    };
-
-    data_slot_grid.push(garbage_dsg);
-
-  }
-}
-function remove_garbage() {
-  var found = false;
-  var i = 0;
-  while (!found && i < data_slot_grid.length) {
-    if (data_slot_grid[i].day == garbage.day
-      && data_slot_grid[i].slot == garbage.slot) {
-      found = true;
-      data_slot_grid.splice(i, 1);
-    }
-    i += 1;
-  }
-}
-
-
 // create potential slots for course c
 function create_slot_grid_data(c) {
   data_slot_grid = [];
-  if (slot_case) {
-    // does not depend on course c
-
-    week_days.forEach(function (day) {
-      for (var s in rev_constraints) {
-        var start = +s;
-        if (start < time_settings.time.day_finish_time) {
-          var gs = {
-            day: day.ref,
-            start: start,
-            duration: rev_constraints[s],
-            display: false,
-            dispo: false,
-            pop: false,
-            reason: ""
-          };
-          data_slot_grid.push(gs);
-        }
-      }
-    });
-  } else {
-    var ok_starts = constraints[c.c_type].allowed_st;
-    week_days.forEach(function (day) {
-      for (var s = 0; s < ok_starts.length; s++) {
-        data_slot_grid.push({
-          c_type: c.c_type,
-          day: day.ref,
-          group: c.group,
-          promo: c.promo,
-          start: ok_starts[s],
-          duration: c.duration
-        });
-      }
-    });
-  }
+  var ok_starts = constraints[c.c_type].allowed_st;
+  week_days.forEach(function (day) {
+    for (var s = 0; s < ok_starts.length; s++) {
+      data_slot_grid.push({
+        c_type: c.c_type,
+        day: day.ref,
+        group: c.group,
+        promo: c.promo,
+        start: ok_starts[s],
+        duration: c.duration
+      });
+    }
+  });
 }
 
 
 function create_grid_data() {
   if (fetch.constraints_ok && fetch.groups_ok) {
-    if (slot_case) {
-      create_slot_grid_data();
-    }
-
     for (let p = 0; p < set_promos.length; p++) {
       compute_promo_leaves(root_gp[p].gp);
     }
@@ -984,11 +925,8 @@ function def_drag() {
       cancel_cm_room_tutor_change();
       if (ckbox["edt-mod"].cked && fetch.done) {
 
-        if (!slot_case) {
-          create_slot_grid_data(c);
-        }
-
-        // no data_slot_grid when uniline
+        // compute available slots for this course
+        create_slot_grid_data(c);
         data_slot_grid.forEach(function (sl) {
           fill_grid_slot(c, sl);
         });
@@ -1046,24 +984,9 @@ function def_drag() {
 
         if (cur_over != null && ckbox["edt-mod"].cked && fetch.done) {
 
-
-          if (slot_case) {
-            data_slot_grid.forEach(function (s) {
-              s.display = false;
-            });
-          } else {
-            data_slot_grid = [];
-          }
-
+          data_slot_grid = [];
 
           if (!is_garbage(cur_over)) {
-
-            // console.log("not garbage");
-
-            // var gs = data_slot_grid.filter(function(s) {
-            //     return s.day == cur_over.day
-            // 	    && s.start == cur_over.start_time;
-            // });
 
             var pending_change = {
               day: cur_over.day,
@@ -1512,19 +1435,6 @@ function check_pending_course() {
     if (core_constraints.length > 0) {
 
       splash_violated_constraints(warn_check, 'core');
-
-      /* TO BE REMOVED
-if (slot_case) {
-var gs = data_slot_grid.filter(function(s) {
-  return s.day == wanted_course.day
-    && s.start == wanted_course.start;
-});
-console.log(gs);
-if (gs.length==1) {
-  gs[0].pop = true;
-}
-    } 
-      */
 
     } else if (tutor_constraints.length > 0) {
       if (pending.force.tutor) {
