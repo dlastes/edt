@@ -994,18 +994,21 @@ function def_drag() {
         });
 
 
-        drag.x = 0;
-        drag.y = 0;
+        
+        drag.set_selection(c.id_course);
 
         // raise the course to the drag layer
-        drag.sel = d3.select(this);
-        svg.get_dom("dg").node().appendChild(drag.sel.node());
+        drag.sel.nodes().forEach(function (n) {
+          svg.get_dom("dg").node().appendChild(n);
+        });
 
       }
     })
     .on("drag", function (d) {
       if (ckbox["edt-mod"].cked && fetch.done) {
         pending.prepare_dragndrop(d);
+
+        // get the time interval, whatever the group
         cur_over = which_slot(
           drag.x + parseInt(drag.sel.select("rect").attr("x")),
           drag.y + parseInt(drag.sel.select("rect").attr("y")),
@@ -1034,10 +1037,12 @@ function def_drag() {
     .on("end", function (d) {
 
       // click => end. So if real drag
-      if (drag.sel != null) {
+      if (drag.sel.length != 0) {
 
         // lower the course to the middleground layer
-        svg.get_dom("edt-mg").node().appendChild(drag.sel.node());
+        drag.sel.nodes().forEach(function(n) {
+          svg.get_dom("edt-mg").node().appendChild(n);
+        });
 
         if (cur_over != null && ckbox["edt-mod"].cked && fetch.done) {
 
@@ -1086,7 +1091,7 @@ function def_drag() {
 
           drag.x = 0;
           drag.y = 0;
-          drag.sel = null;
+          drag.sel = [];
           cur_over = null;
 
           go_grid(true);

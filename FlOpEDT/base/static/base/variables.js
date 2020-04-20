@@ -665,13 +665,19 @@ var drag_popup;
 
 // helper for the d&d
 var drag = {
-  sel: null,
+  sel: [],
   x: 0,
   y: 0,
   init: 0,
   svg: null,
   svg_w: 0,
-  svg_h: 0
+  svg_h: 0,
+  set_selection: function(id_course) {
+    this.sel = d3.selectAll(".cours")
+      .filter(function(c) {return c.id_course == id_course;});
+    this.x = 0 ;
+    this.y = 0 ;
+  }
 };
 
 // course being moved
