@@ -693,7 +693,7 @@ function translate_cours_pp_from_csv(d, result) {
   }
 
   // multiple groups
-  let groups = d.group.split("|");
+  let groups = d.groups.split("|");
 
   for (let i = 0 ; i < groups.length ; i++) {
     result.push({
