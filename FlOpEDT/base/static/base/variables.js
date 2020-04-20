@@ -359,7 +359,7 @@ var wdw_weeks = new WeeksExcerpt(dsp_weeks.visible_weeks);
   ----------------------*/
 
 // possible slots when drag'n'drop
-// filled in create_slot_grid_data()
+// filled in add_slot_grid_data()
 var data_slot_grid = [];
 
 // keys on top or at the bottom of the grid representing the name of

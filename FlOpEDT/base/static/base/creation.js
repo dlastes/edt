@@ -116,8 +116,7 @@ function create_edt_grid() {
 
 
 // create potential slots for course c
-function create_slot_grid_data(c) {
-  data_slot_grid = [];
+function add_slot_grid_data(c) {
   var ok_starts = constraints[c.c_type].allowed_st;
   week_days.forEach(function (day) {
     for (var s = 0; s < ok_starts.length; s++) {
@@ -926,10 +925,15 @@ function def_drag() {
       if (ckbox["edt-mod"].cked && fetch.done) {
 
         // compute available slots for this course
-        create_slot_grid_data(c);
         pending.prepare_modif(c);
+        data_slot_grid = [];
+        pending.linked_courses.forEach(function (d) {
+          add_slot_grid_data(d);
+        });
         data_slot_grid.forEach(function (sl) {
-          fill_grid_slot(c, sl);
+          pending.linked_courses.forEach(function (d) {
+            fill_grid_slot(d, sl);
+          });
         });
         pending.rollback();
 
@@ -1050,8 +1054,13 @@ function def_drag() {
 
 
 function fill_grid_slot(c2m, grid_slot) {
-  Object.assign(c2m, {day: grid_slot.day, start: grid_slot.start});
-  grid_slot.dispo = check_course().length == 0;
+  Object.assign(c2m, {
+    day: grid_slot.day,
+    start: grid_slot.start,
+    promo: grid_slot.promo,
+    group: grid_slot.group
+  });
+  grid_slot.dispo = check_course(c2m.group, c2m.promo).length == 0;
 }
 
 function warning_check(check_tot) {
@@ -1114,13 +1123,24 @@ function simultaneous_courses(target_course) {
 */
 // c2m element of course
 // date {day, start_time}
-function check_course() {
+function check_course(group_name, train_prog_id) {
 
   let ret = [];
   let possible_conflicts = [];
   let conflicts = [];
 
+  let group_filter ;
+  if (typeof group_name === 'undefined') {
+    group_filter = function(c) {
+      return c.group == group_name && c.promo == train_prog_id ;
+    };
+  } else {
+    group_filter = function(c) { return true ; } ;
+  }
+
   let wanted_course = pending.wanted_course ;
+
+  
 
   pending.update_linked();
 
@@ -1140,7 +1160,7 @@ function check_course() {
     }
 
     // training programme was supposed to be free
-    pending.linked_courses.forEach(function(c) {
+    pending.linked_courses.filter(group_filter).forEach(function(c) {
       if (is_free(c, c.promo)) {
         ret.push({
           nok: 'train_prog_unavailable',
@@ -1157,7 +1177,7 @@ function check_course() {
 
   if (!pending.pass.core) {
 
-    pending.linked_courses.forEach(function(wanted) {
+    pending.linked_courses.filter(group_filter).forEach(function(wanted) {
       // group is busy
       conflicts = possible_conflicts.filter(function (c) {
         return (
