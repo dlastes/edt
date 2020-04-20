@@ -927,9 +927,11 @@ function def_drag() {
 
         // compute available slots for this course
         create_slot_grid_data(c);
+        pending.prepare_modif(c);
         data_slot_grid.forEach(function (sl) {
           fill_grid_slot(c, sl);
         });
+        pending.rollback();
 
 
         
@@ -1048,25 +1050,8 @@ function def_drag() {
 
 
 function fill_grid_slot(c2m, grid_slot) {
-  grid_slot.dispo = true;
-  grid_slot.reason = "";
-
-  // // the user has the right to do whatever s/he wants
-  // if ((logged_usr.rights >> 2) % 2 == 1) {
-  // 	return ;
-  // }
-  var wanted_course = Object.assign({}, c2m);
-  Object.assign(wanted_course, { day: grid_slot.day, start: grid_slot.start });
-
-  var check = check_course(wanted_course);
-
-  if (check.length == 0) {
-    return;
-  } else {
-    grid_slot.dispo = false;
-    return;
-  }
-
+  Object.assign(c2m, {day: grid_slot.day, start: grid_slot.start});
+  grid_slot.dispo = check_course().length == 0;
 }
 
 function warning_check(check_tot) {
@@ -1129,13 +1114,17 @@ function simultaneous_courses(target_course) {
 */
 // c2m element of course
 // date {day, start_time}
-function check_course(wanted_course) {
+function check_course() {
 
-  var ret = [];
-  var possible_conflicts = [];
-  var conflicts = [];
+  let ret = [];
+  let possible_conflicts = [];
+  let conflicts = [];
 
-  if (is_garbage(wanted_course)) {
+  let wanted_course = pending.wanted_course ;
+
+  pending.update_linked();
+
+  if (is_garbage(pending.wanted_course)) {
     return ret;
   }
 
@@ -1146,45 +1135,54 @@ function check_course(wanted_course) {
   if (!pending.pass.core) {
 
     // course was supposed to be fix
-    if (wanted_course.id_course == -1) {
+    if (pending.wanted_course.id_course == -1) {
       ret.push({ nok: 'stable' });
     }
 
     // training programme was supposed to be free
-    if (is_free(wanted_course, wanted_course.promo)) {
-      ret.push({
-        nok: 'train_prog_unavailable',
-        more: { train_prog: set_promos[wanted_course.promo] }
-      });
-    }
+    pending.linked_courses.forEach(function(c) {
+      if (is_free(c, c.promo)) {
+        ret.push({
+          nok: 'train_prog_unavailable',
+          more: { train_prog: set_promos[c.promo] }
+        });
+      }
+    });
   }
 
 
 
 
-  possible_conflicts = simultaneous_courses(wanted_course);
+  possible_conflicts = simultaneous_courses(pending.wanted_course);
 
   if (!pending.pass.core) {
 
-    // group is busy
-    conflicts = possible_conflicts.filter(function (c) {
-      return ((c.group == wanted_course.group
-        || groups[wanted_course.promo][wanted_course.group].ancetres.indexOf(c.group) > -1
-        || groups[wanted_course.promo][wanted_course.group].descendants.indexOf(c.group) > -1)
-        && c.promo == wanted_course.promo);
-    });
-
-    if (conflicts.length > 0) {
-      ret.push({
-        nok: 'group_busy',
-        more: { group: wanted_course.group }
+    pending.linked_courses.forEach(function(wanted) {
+      // group is busy
+      conflicts = possible_conflicts.filter(function (c) {
+        return (
+          (c.group == wanted.group
+           || groups[wanted.promo][wanted.group]
+             .ancetres.indexOf(c.group) > -1
+           || groups[wanted.promo][wanted.group]
+             .descendants.indexOf(c.group) > -1
+          )
+            && c.promo == wanted.promo
+        );
       });
-    }
 
-    // we will ask later about other constraints
-    if (ret.length > 0 && (pending.force.tutor || pending.force.room)) {
-      return ret;
-    }
+      if (conflicts.length > 0) {
+        ret.push({
+          nok: 'group_busy',
+          more: { group: wanted.group }
+        });
+      }
+
+      // we will ask later about other constraints
+      if (ret.length > 0 && (pending.force.tutor || pending.force.room)) {
+        return ret;
+      }
+    });
 
   }
 
@@ -1392,7 +1390,7 @@ function clean_pending() {
 
 
 function check_pending_course() {
-  var warn_check = check_course(pending.wanted_course);
+  var warn_check = check_course();
   console.log(warn_check);
 
   if (warn_check.length == 0) {
