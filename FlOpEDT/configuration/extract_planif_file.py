@@ -120,6 +120,7 @@ def ReadPlanifWeek(department, book, feuille, week, year):
                     UserDepartmentSettings(user=TUTOR, department=department).save()
             else:
                 assert isinstance(prof, str) and prof is not None
+                prof = prof.replace(' ', '')
                 if '|' in prof:
                     possible_profs = prof.split("|")
                     TUTOR = None
