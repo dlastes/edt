@@ -518,10 +518,10 @@ def fetch_cours_pp(req, week, year, num_copy, **kwargs):
                                 'tutor',
                                 'module',
                                 'type',
-                                'groups',
                                 'room_type',
                                 'module__display'
-                                ))
+                                )\
+                .prefetch_related('groups'))
 
     response = HttpResponse(dataset.csv, content_type='text/csv')
     response['week'] = week
