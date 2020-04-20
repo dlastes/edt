@@ -68,7 +68,8 @@ INSTALLED_APPS = [
     'ics',
     'displayweb',
     'configuration',
-    'easter_egg'
+    'easter_egg',
+    'MyFlOp'
 #    'importation'
 ]
 
