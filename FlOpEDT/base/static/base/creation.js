@@ -1054,13 +1054,8 @@ function def_drag() {
 
 
 function fill_grid_slot(c2m, grid_slot) {
-  Object.assign(c2m, {
-    day: grid_slot.day,
-    start: grid_slot.start,
-    promo: grid_slot.promo,
-    group: grid_slot.group
-  });
-  grid_slot.dispo = check_course(c2m.group, c2m.promo).length == 0;
+  Object.assign(c2m, {day: grid_slot.day, start: grid_slot.start});
+  grid_slot.dispo = check_course().length == 0;
 }
 
 function warning_check(check_tot) {
@@ -1123,20 +1118,11 @@ function simultaneous_courses(target_course) {
 */
 // c2m element of course
 // date {day, start_time}
-function check_course(group_name, train_prog_id) {
+function check_course() {
 
   let ret = [];
   let possible_conflicts = [];
   let conflicts = [];
-
-  let group_filter ;
-  if (typeof group_name === 'undefined') {
-    group_filter = function(c) {
-      return c.group == group_name && c.promo == train_prog_id ;
-    };
-  } else {
-    group_filter = function(c) { return true ; } ;
-  }
 
   let wanted_course = pending.wanted_course ;
 
@@ -1160,7 +1146,7 @@ function check_course(group_name, train_prog_id) {
     }
 
     // training programme was supposed to be free
-    pending.linked_courses.filter(group_filter).forEach(function(c) {
+    pending.linked_courses.forEach(function(c) {
       if (is_free(c, c.promo)) {
         ret.push({
           nok: 'train_prog_unavailable',
@@ -1176,8 +1162,7 @@ function check_course(group_name, train_prog_id) {
   possible_conflicts = simultaneous_courses(pending.wanted_course);
 
   if (!pending.pass.core) {
-
-    pending.linked_courses.filter(group_filter).forEach(function(wanted) {
+    pending.linked_courses.forEach(function(wanted) {
       // group is busy
       conflicts = possible_conflicts.filter(function (c) {
         return (
