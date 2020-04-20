@@ -1006,7 +1006,7 @@ function def_drag() {
             d.day = cur_over.day;
             d.start = cur_over.start_time;
 
-            add_bouge(pending.init_course);
+            add_bouge(pending);
             pending.clean();
           }
 
@@ -1410,7 +1410,7 @@ function check_pending_course() {
 
   if (warn_check.length == 0) {
 
-    add_bouge(pending.init_course);
+    add_bouge(pending);
     //pending.save_wanted() ;
     pending.clean();
 

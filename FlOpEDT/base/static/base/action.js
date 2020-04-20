@@ -1808,17 +1808,24 @@ function apply_stype() {
 
 // add the initial comfiguration of a course to cours_bouge if
 // it has not been moved until now
-function add_bouge(d) {
-  console.log("new");
-  if (Object.keys(cours_bouge).indexOf(d.id_course.toString()) == -1) {
-    cours_bouge[d.id_course] = {
-      id: d.id_course,
-      day: d.day,
-      start: d.start,
-      room: d.room,
-      prof: d.prof
+function add_bouge(pending) {
+  if (Object.keys(cours_bouge).indexOf(pending.init_course.id_course.toString()) == -1) {
+    cours_bouge[pending.init_course.id_course] = {
+      id: pending.init_course.id_course,
+      day: pending.init_course.day,
+      start: pending.init_course.start,
+      room: pending.init_course.room,
+      prof: pending.init_course.prof
     };
-    console.log(cours_bouge[d.id_course]);
+    cours.forEach(function(c) {
+      if (c.id_course == pending.wanted_course.id_course) {
+        c.day = pending.wanted_course.day ;
+        c.start = pending.wanted_course.start ;
+        c.room = pending.wanted_course.room ;
+        c.prof = pending.wanted_course.prof ;
+      }
+    });
+    console.log(cours_bouge[pending.init_course.id_course]);
   }
 }
 
