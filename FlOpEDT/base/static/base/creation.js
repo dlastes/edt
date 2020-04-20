@@ -1064,19 +1064,6 @@ function fill_grid_slot(c2m, grid_slot) {
     return;
   } else {
     grid_slot.dispo = false;
-    if (check.nok_type == 'stable') {
-      grid_slot.reason = "Cours fixe";
-    } else if (check.nok_type == 'train_prog_unavailable') {
-      grid_slot.reason = "CRENEAU NON DISPO POUR " + check.train_prog;
-    } else if (check.nok_type == 'tutor_busy') {
-      grid_slot.reason = "PB PROF OCCUPE";
-    } else if (check.nok_type == 'group_busy') {
-      grid_slot.reason = "PB GROUPE";
-    } else if (check.nok_type == 'tutor_unavailable') {
-      grid_slot.reason = "PB PROF PAS DISPO";
-    } else if (check.nok_type == 'tutor_availability_unknown') {
-      grid_slot.reason = "PB DISPO NON DECLAREE";
-    }
     return;
   }
 
