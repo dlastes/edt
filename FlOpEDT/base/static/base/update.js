@@ -543,7 +543,12 @@ function go_grid(quick) {
 
 
   var grid = fg.selectAll(".grids")
-    .data(data_slot_grid);
+    .data(
+      data_slot_grid.filter(function (d) {
+        return groups[d.promo][d.group].display;
+      }),
+      function (d) { return d.day + d.start + d.group + d.promo; }
+    );
 
   var gridg = grid
     .enter()
