@@ -554,11 +554,8 @@ function go_grid(quick) {
 
   gridg
     .append("rect")
-    .attr("x", cours_x)
-    .attr("y", cours_y)
     .attr("stroke", gs_sc)
     .merge(grid.select("rect"))
-    .transition(t)
     .attr("x", cours_x)
     .attr("y", cours_y)
     .attr("width", cours_width)
