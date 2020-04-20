@@ -615,19 +615,11 @@ function fetch_cours() {
         d3.csvParse(
           msg,
           function(d) {
-            translate_cours_pp_from_csv(d. cours_pp);
+            translate_cours_pp_from_csv(d, cours_pp);
           }
         );
 
-        if (cours_pp.length > 0 && !garbage_plot) {
-          garbage_plot = true;
-          add_garbage();
-          go_grid(true);
-        } else if (cours_pp.length == 0 && garbage_plot) {
-          garbage_plot = false;
-          remove_garbage();
-          go_grid(true);
-        }
+        go_grid(true);
 
         fetch.ongoing_cours_pp = false;
         fetch_ended(false);
