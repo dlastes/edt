@@ -683,6 +683,7 @@ var drag = {
 var pending = {
   init_course: null,
   wanted_course: null,
+  linked_courses: null,
   time: null,
   pass: {
     tutor: false,
@@ -696,11 +697,25 @@ var pending = {
   clean: function () {
     this.init_course = null;
     this.wanted_course = null;
+    this.linked_courses = null;
     this.time = null;
   },
   fork_course: function (d) {
     this.wanted_course = d;
+    this.linked_courses = cours.filter(function(c){
+      return c.id_course == d.id_course ;
+    });
+    this.update_linked();
     this.init_course = Object.assign({}, d);
+  },
+  update_linked: function() {
+    let w = this.wanted_course ;
+    this.linked_courses.forEach(function(c){
+      c.day =   w.day ;
+      c.start = w.start ;
+      c.room =  w.room ;
+      c.prof =  w.prof ;
+    });
   },
   prepare_dragndrop: function (d) {
     this.fork_course(d);
@@ -717,6 +732,7 @@ var pending = {
   },
   rollback: function (t) {
     Object.assign(this.wanted_course, this.init_course);
+    this.update_linked();
     this.clean();
   }
 };
