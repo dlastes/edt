@@ -99,21 +99,16 @@
                           <div class="form-group row">
                             <p class="col-sm-12 h6"><u><strong>Statut</strong></u></p>
                           </div>
-                            {% if not status_vacataire is None %}
-                              <div class="form-group col-form-label">
-                                <label> Statut : {{ status }} </label>
-                              </div>
+                          <div class="form-group col-form-label">
+                            <label> Statut : {{ status }} </label>
+                          </div>
+                            {% if status_vacataire is not None %}
                               <div class="form-group col-form-label">
                                 <label>Statut vacataire : {{ status_vacataire }}</label>
                               </div>
                               <div class="form-group col-form-label">
                                 <label>Employeur : {{ employer }}</label>
                               </div>
-                            {% endif %}
-                            {% if status_vacataire is None %}
-                             <div class="col-form-label">
-                               <label> {{ status }} </label>
-                             </div>
                             {% endif %}
                         </div>
                          <div class="col-sm-8 mt-3">
