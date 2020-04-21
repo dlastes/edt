@@ -32,15 +32,16 @@ to manage a department statistics for FlOpEDT.
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponseForbidden
-from django.contrib.auth.decorators import user_passes_test
 from base.models import Department, TimeGeneralSettings, Day
 from base.timing import min_to_str, str_to_min
 from FlOpEDT.decorators import superuser_required, \
     tutor_or_superuser_required
-    
+
 from people.models import Tutor, UserDepartmentSettings
-from flopeditor.db_requests import create_departments_in_database, update_departments_in_database
-from flopeditor.validator import validate_department_creation, validate_department_update, validate_parameters_edit, OK_RESPONSE
+from flopeditor.db_requests import create_departments_in_database, \
+    update_departments_in_database, get_status_of_user
+from flopeditor.validator import validate_department_creation,\
+    validate_department_update, validate_parameters_edit, OK_RESPONSE
 
 @tutor_or_superuser_required
 def home(request):
@@ -58,11 +59,18 @@ def home(request):
         uds = UserDepartmentSettings.objects.filter(department=dept).values_list('user', flat=True)
         dict_depts[dept] = list(uds)
     tutors = Tutor.objects.all()
-    return render(request, "flopeditor/home.html", {
-        'dict_depts': dict_depts,
-        'title': 'Choix du département',
-        'admins': tutors,
-    })
+    status, position, employer = get_status_of_user(request)
+    return render(request,
+                  'flopeditor/home.html',
+                  {'dict_depts': dict_depts,
+                   'title': 'Choix du département',
+                   'admins': tutors,
+                   'status':status,
+                   'status_vacataire':position,
+                   'employer':employer,
+                  })
+
+
 
 
 @tutor_or_superuser_required
@@ -96,6 +104,7 @@ def department_parameters(request, department_abbrev):
     department = get_object_or_404(Department, abbrev=department_abbrev)
     departments = Department.objects.exclude(abbrev=department_abbrev)
     parameters = get_object_or_404(TimeGeneralSettings, department=department)
+    status, position, employer = get_status_of_user(request)
     return render(request, "flopeditor/parameters.html", {
         'title': 'Paramètres',
         'department': department,
@@ -108,6 +117,9 @@ def department_parameters(request, department_abbrev):
         'default_preference_duration': min_to_str(parameters.default_preference_duration),
         'list_departments': departments,
         'has_department_perm': request.user.has_department_perm(department=department, admin=True),
+        'status':status,
+        'status_vacataire':position,
+        'employer':employer,
     })
 
 
@@ -126,6 +138,7 @@ def department_parameters_edit(request, department_abbrev):
     department = get_object_or_404(Department, abbrev=department_abbrev)
     departments = Department.objects.exclude(abbrev=department_abbrev)
     parameters = get_object_or_404(TimeGeneralSettings, department=department)
+    status, position, employer = get_status_of_user(request)
     return render(request, "flopeditor/parameters_edit.html", {
         'title': 'Paramètres',
         'department': department,
@@ -138,6 +151,9 @@ def department_parameters_edit(request, department_abbrev):
         'day_choices': Day.CHOICES,
         'default_preference_duration': min_to_str(parameters.default_preference_duration),
         'has_department_perm': request.user.has_department_perm(department=department, admin=True),
+        'status':status,
+        'status_vacataire':position,
+        'employer':employer,
     })
 
 
@@ -248,11 +264,15 @@ def crud_view(request, department_abbrev, view_name, title):
     """
     department = get_object_or_404(Department, abbrev=department_abbrev)
     departments = Department.objects.exclude(abbrev=department_abbrev)
+    status, position, employer = get_status_of_user(request)
     return render(request, view_name, {
         'title': title,
         'department': department,
         'list_departments': departments,
         'has_dept_perm': request.user.has_department_perm(department=department, admin=True),
+        'status':status,
+        'status_vacataire':position,
+        'employer':employer,
     })
 
 

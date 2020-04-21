@@ -66,6 +66,9 @@
                   </div>
                 </div>
                 {% endif %}
+                <div class="ml-2">
+                  <button class="btn btn-raised btn-secondary" data-toggle="modal" data-target="#modal-profil" title='Profil'> <i class='fas fa-user'></i></button>
+                </div>
               </div>
         </nav>
         {% endblock %}
@@ -79,6 +82,83 @@
         {% endblock %}
 
         {% block modal %}
+
+        <div class="modal fade text-black" id="modal-profil" tabindex="-1" role="dialog" aria-labelledby="modal-profil" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Votre profil</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+                </div>
+                  <div class="card container">
+                    <div class="card-body pb-0">
+                      <div class="form-group row">
+                        <div class="col-sm-4  mt-3 " style="border-right: solid 1px grey;">
+                          <div class="form-group row">
+                            <p class="col-sm-12 h6"><u><strong>Statut</strong></u></p>
+                          </div>
+                          <div class="form-group col-form-label">
+                            <label> Statut : {{ status }} </label>
+                          </div>
+                            {% if status_vacataire is not None %}
+                              <div class="form-group col-form-label">
+                                <label>Statut vacataire : {{ status_vacataire }}</label>
+                              </div>
+                              <div class="form-group col-form-label">
+                                <label>Employeur : {{ employer }}</label>
+                              </div>
+                            {% endif %}
+                        </div>
+                         <div class="col-sm-8 mt-3">
+                            <div class="form-group row">
+                              <div class="col-sm-12 h6">
+                                <u><strong>Informations</strong></u>
+                              </div>
+                            </div>
+                            <div class="form-group row">
+                              <label class="col-sm-4 col-form-label">Id</label>
+                              <div class="col-auto col-form-label">
+                                {{ request.user.username }}
+                              </div>
+                            </div>
+                            <div class="form-group row">
+                              <label class="col-sm-4 col-form-label">Nom</label>
+                              <div class="col-auto col-form-label">
+                                {{ request.user.first_name }}
+                              </div>
+                            </div>
+                            <div class="form-group row">
+                              <label class="col-sm-4 col-form-label">Prénom</label>
+                              <div class="col-auto col-form-label">
+                                {{ request.user.last_name }}
+                              </div>
+                            </div>
+                            <div class="form-group row">
+                              <label class="col-sm-4 col-form-label">email</label>
+                              <div class="col-auto col-form-label">
+                                {{ request.user.email }}
+                              </div>
+                            </div>
+
+                              <!--
+                              </div>
+
+                                  <a type="button"
+                                      href="#"
+                                      class="btn btn-raised btn-info mx-auto mt-4">Modifier</a>
+
+                            </div>
+                            -->
+                       </div>
+                      </div>
+                     </div>
+                    </div>
+                   </div>
+                  </div>
+                 </div>
+
         {% endblock %}
 
         {% block script %}

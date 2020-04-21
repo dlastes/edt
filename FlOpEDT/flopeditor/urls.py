@@ -63,6 +63,8 @@ urlpatterns = [
     path('<slug:department_abbrev>/parameters/edit', views.department_parameters_edit,
          name='flopeditor-department-parameters-edit'),
 
+
+
     # exchanges with the db via django
     # --------------------------------
     path('ajax/create-department', views.ajax_create_department,
