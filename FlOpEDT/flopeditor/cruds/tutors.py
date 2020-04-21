@@ -29,7 +29,7 @@ without disclosing the source code of your own applications.
 
 from django.http import JsonResponse
 from base.models import Room, RoomType, Department
-from people.models import Tutor
+from people.models import Tutor, SupplyStaff
 from flopeditor.validator import OK_RESPONSE, ERROR_RESPONSE
 
 
@@ -171,8 +171,11 @@ def read(department):
 
     tutors = Tutor.objects.all()
     values = []
-    for tut in tutors:
-        values.append((tut.username, tut.first_name, tut.last_name, tut.status, "l" ,"o" ,"l" ))
+    for tut in tutors:        
+        if hasattr(tut, 'employer'):
+            values.append((tut.username, tut.first_name, tut.last_name, tut.status, tut.email ,"" , tut.employer ))
+        else:
+            values.append((tut.username, tut.first_name, tut.last_name, tut.status, tut.email ,"" , "" ))
 
     return JsonResponse({
         "columns":  [{
@@ -190,7 +193,7 @@ def read(department):
         }, {
             'name': 'Statut',
             "type": "select",
-            "options": {'values': rooms_available}
+            "options": {'values': [Tutor.FULL_STAFF, Tutor.SUPP_STAFF, Tutor.BIATOS]}
         }, {
             'name': 'Email',
             "type": "text",
@@ -198,11 +201,15 @@ def read(department):
         }, {
             'name': 'Cas Vacataire',
             "type": "select",
-            "options": {'values': rooms_available}
+            "options": {'values': [Tutor.FULL_STAFF, Tutor.SUPP_STAFF, Tutor.BIATOS]}
         },{
             'name': 'Employeur',
             "type": "text",
             "options": {}
+        },{
+            'name': 'Départements',
+            "type": 'select-chips',
+            "options":{'values': list(Department.objects.values_list('name', flat=True))}
         }],
         "values": values
     })
