@@ -170,38 +170,40 @@ def read(department):
         RoomType.objects.values_list('name', flat=True))
     departments = list(Department.objects.values_list('name', flat=True))
 
-    # Rows
-    rooms = Room.objects.all()
+    tutors = Tutor.objects.all()
     values = []
-    for room in rooms:
-        subrooms = []
-        for subroom in room.subroom_of.all():
-            subrooms.append(subroom.name)
-        room_types = []
-        for room_type in room.types.all():
-            room_types.append(room_type.name)
-        room_departments = []
-        for dept in room.departments.all():
-            room_departments.append(dept.name)
-        values.append((room.name, subrooms, room_types, room_departments))
+    for tut in tutors:
+        values.append((tut.username, tut.first_name, tut.last_name, tut.status, "l" ,"o" ,"l" ))
 
     return JsonResponse({
         "columns":  [{
+            'name': 'Id',
+            "type": "text",
+            "options": {}
+        }, {
+            'name': 'Prénom',
+            "type": "text",
+            "options": {}
+        }, {
             'name': 'Nom',
             "type": "text",
             "options": {}
         }, {
-            'name': 'Sous-salle de...',
-            "type": "select-chips",
+            'name': 'Statut',
+            "type": "select",
             "options": {'values': rooms_available}
         }, {
-            'name': 'Types de salles associés',
-            "type": "select-chips",
-            "options": {'values': rooms_types_available}
+            'name': 'Email',
+            "type": "text",
+            "options": {}
         }, {
-            'name': 'Départements associés',
-            "type": "select-chips",
-            "options": {'values': departments}
+            'name': 'Cas Vacataire',
+            "type": "select",
+            "options": {'values': rooms_available}
+        },{
+            'name': 'Employeur',
+            "type": "text",
+            "options": {}
         }],
         "values": values
     })
