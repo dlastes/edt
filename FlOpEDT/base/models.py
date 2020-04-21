@@ -364,9 +364,9 @@ class Course(models.Model):
     supp_tutor = models.ManyToManyField('people.Tutor',
                                         related_name='courses_as_supp',
                                         blank=True)
-    group = models.ForeignKey('Group', on_delete=models.CASCADE)
+    groups = models.ManyToManyField('Group', related_name='courses')
     module = models.ForeignKey(
-        'Module', related_name='module', on_delete=models.CASCADE)
+        'Module', related_name='courses', on_delete=models.CASCADE)
     modulesupp = models.ForeignKey('Module', related_name='modulesupp',
                                    null=True, blank=True, on_delete=models.CASCADE)
     week = models.PositiveSmallIntegerField(
@@ -378,18 +378,18 @@ class Course(models.Model):
 
     def __str__(self):
         username_mod = self.tutor.username if self.tutor is not None else '-no_tut-'
-        return f"{self.type}-{self.module}-{username_mod}-{self.group}" \
+        return f"{self.type}-{self.module}-{username_mod}-{'|'.join([g.name for g in self.groups.all()])}" \
                + (" (%s)" % self.id if self.show_id else "")
 
     def full_name(self):
         username_mod = self.tutor.username if self.tutor is not None else '-no_tut-'
-        return f"{self.type}-{self.module}-{username_mod}-{self.group}"
+        return f"{self.type}-{self.module}-{username_mod}-{'|'.join([g.name for g in self.groups.all()])}"
 
     def equals(self, other):
         return self.__class__ == other.__class__ \
                and self.type == other.type \
                and self.tutor == other.tutor \
-               and self.group == other.group \
+               and self.groups == other.groups \
                and self.module == other.module
 
 

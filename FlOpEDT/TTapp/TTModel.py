@@ -152,7 +152,7 @@ class WeekDB(object):
 
         courses = Course.objects.filter(
             week__in=self.weeks, year=self.year,
-            group__train_prog__in=self.train_prog)
+            groups__train_prog__in=self.train_prog)
 
         courses_by_week = {week: set(courses.filter(week=week)) for week in self.weeks}
 
@@ -160,15 +160,15 @@ class WeekDB(object):
             .objects \
             .filter(course__week__in=self.weeks,
                     course__year=self.year,
-                    course__group__train_prog__in=self.train_prog,
+                    course__groups__train_prog__in=self.train_prog,
                     work_copy=0)
 
         fixed_courses = ScheduledCourse.objects \
-            .filter(course__group__train_prog__department=self.department,
+            .filter(course__groups__train_prog__department=self.department,
                     course__week__in=self.weeks,
                     course__year=self.year,
                     work_copy=0) \
-            .exclude(course__group__train_prog__in=self.train_prog)
+            .exclude(course__groups__train_prog__in=self.train_prog)
 
         fixed_courses_for_slot = {}
         for sl in self.slots:
@@ -205,7 +205,7 @@ class WeekDB(object):
             course1__week__in=self.weeks,
             course1__year=self.year,
             course2__week__in=self.weeks,
-            course1__group__train_prog__in=self.train_prog)
+            course1__groups__train_prog__in=self.train_prog)
 
         return course_types, courses, courses_by_week, sched_courses, fixed_courses, fixed_courses_for_slot, \
                other_departments_courses, other_departments_sched_courses, other_departments_sched_courses_for_slot, \
@@ -316,11 +316,11 @@ class WeekDB(object):
 
         courses_for_group = {}
         for g in groups:
-            courses_for_group[g] = set(self.courses.filter(group=g))
+            courses_for_group[g] = set(self.courses.filter(groups=g))
 
         courses_for_basic_group = {}
         for bg in basic_groups:
-            courses_for_basic_group[bg] = set(self.courses.filter(group__in=all_groups_of[bg]))
+            courses_for_basic_group[bg] = set(self.courses.filter(groups__in=all_groups_of[bg]))
 
         return groups, basic_groups, all_groups_of, basic_groups_of, courses_for_group, courses_for_basic_group
 
