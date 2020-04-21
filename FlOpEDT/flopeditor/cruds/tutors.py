@@ -31,7 +31,7 @@ from django.http import JsonResponse
 from base.models import Room, RoomType, Department
 from people.models import Tutor, SupplyStaff
 from flopeditor.validator import OK_RESPONSE, ERROR_RESPONSE
-
+from flopeditor.db_requests import get_status_of_tutor
 
 # def set_values_for_room(room, i, new_name, entries):
 #     """
@@ -163,19 +163,12 @@ def read(department):
     :rtype:  django.http.JsonResponse
 
     """
-    # Chips options
-    rooms_available = list(Room.objects.values_list('name', flat=True))
-    rooms_types_available = list(
-        RoomType.objects.values_list('name', flat=True))
-    departments = list(Department.objects.values_list('name', flat=True))
 
     tutors = Tutor.objects.all()
     values = []
-    for tut in tutors:        
-        if hasattr(tut, 'employer'):
-            values.append((tut.username, tut.first_name, tut.last_name, tut.status, tut.email ,"" , tut.employer ))
-        else:
-            values.append((tut.username, tut.first_name, tut.last_name, tut.status, tut.email ,"" , "" ))
+    for tut in tutors: 
+        status, position, employer = get_status_of_tutor(tut)       
+        values.append((tut.username, tut.first_name, tut.last_name, status, tut.email ,position , employer, list(tut.departments.values_list('name', flat=True)) ))
 
     return JsonResponse({
         "columns":  [{
@@ -199,14 +192,14 @@ def read(department):
             "type": "text",
             "options": {}
         }, {
-            'name': 'Cas Vacataire',
-            "type": "select",
-            "options": {'values': [Tutor.FULL_STAFF, Tutor.SUPP_STAFF, Tutor.BIATOS]}
-        },{
+            'name': 'Position',
+            "type": "text",
+            "options": {}
+        }, {
             'name': 'Employeur',
             "type": "text",
             "options": {}
-        },{
+        }, {
             'name': 'Départements',
             "type": 'select-chips',
             "options":{'values': list(Department.objects.values_list('name', flat=True))}
