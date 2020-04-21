@@ -30,7 +30,7 @@ from openpyxl import *
 
 from base.weeks import actual_year
 from base.models import Group, Module, Course, CourseType, RoomType,\
-    TrainingProgramme, Dependency, Period, Department
+    TrainingProgramme, Dependency, Period, Department, CoursePossibleTutors
 from people.models import Tutor, UserDepartmentSettings
 from people.tutor import fill_default_user_preferences
 from misc.assign_colors import assign_module_color
@@ -110,20 +110,25 @@ def ReadPlanifWeek(department, book, feuille, week, year):
             grps = sheet.cell(row=row, column=group_COL).value
             COURSE_TYPE = CourseType.objects.get(name=nature, department=department)
             ROOMTYPE = RoomType.objects.get(name=salle, department=department)
+            supp_profs = []
+            possible_profs = []
             if prof is None:
                 TUTOR, created = Tutor.objects.get_or_create(username='---')
                 if created:
                     TUTOR.save()
                     fill_default_user_preferences(TUTOR)
                     UserDepartmentSettings(user=TUTOR, department=department).save()
-                supp_profs=[]
             else:
                 assert isinstance(prof, str) and prof is not None
-                profs = prof.split(";")
-                prof = profs[0]
-                TUTOR = Tutor.objects.get(username=prof)
-                supp_profs = profs[1:]
-            SUPP_TUTORS = Tutor.objects.filter(username__in=supp_profs)
+                prof = prof.replace(' ', '')
+                if '|' in prof:
+                    possible_profs = prof.split("|")
+                    TUTOR = None
+                else:
+                    profs = prof.split(";")
+                    prof = profs[0]
+                    TUTOR = Tutor.objects.get(username=prof)
+                    supp_profs = profs[1:]
 
             if Cell.comment:
                 local_comments = Cell.comment.text.replace(' ', '').replace('\n', '').replace(',', ';').split(';')
@@ -149,9 +154,19 @@ def ReadPlanifWeek(department, book, feuille, week, year):
                 for g in GROUPS:
                     C.groups.add(g)
                 C.save()
-                for sp in SUPP_TUTORS:
-                    C.supp_tutor.add(sp)
-                C.save()
+                if supp_profs != []:
+                    SUPP_TUTORS = Tutor.objects.filter(username__in=supp_profs)
+                    for sp in SUPP_TUTORS:
+                        C.supp_tutor.add(sp)
+                    C.save()
+                if possible_profs != []:
+                    cpt = CoursePossibleTutors(course=C)
+                    cpt.save()
+                    for pp in possible_profs:
+                        t = Tutor.objects.get(username=pp)
+                        cpt.possible_tutors.add(t)
+                    cpt.save()
+
                 for after_type in [x for x in comments + local_comments if x[0] == 'A']:
                     try:
                         n = int(after_type[1])

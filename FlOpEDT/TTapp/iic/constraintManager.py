@@ -31,12 +31,14 @@ class ConstraintManager:
         self.constraints = []
         self.infeasible_constraints = []
         self.occurs = None
+        self.nb_constraints = 0
 
     def add_constraint(self, constraint):
         self.constraints.append(constraint)
+        self.nb_constraints += 1
 
     def get_nb_constraints(self):
-        return len(self.constraints)
+        return self.nb_constraints
 
     def get_constraints(self, id_constraints):
         return [self.constraints[id_constraint] for id_constraint in id_constraints]

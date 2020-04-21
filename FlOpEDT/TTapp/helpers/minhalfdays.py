@@ -28,7 +28,7 @@ import logging
 from base.models import Time, TimeGeneralSettings
 from TTapp.iic.constraint_type import ConstraintType
 from TTapp.iic.constraints.constraint import Constraint
-
+from TTapp.slots import slots_filter
 
 logger = logging.Logger(__name__)
 
@@ -127,7 +127,8 @@ class MinHalfDaysHelperGroup(MinHalfDaysHelperBase):
 
         expression = self.ttmodel.check_and_sum(
             self.ttmodel.GBHD,
-            ((self.group, d, apm) for d, apm in self.ttmodel.wdb.slots_by_half_day if d.week==self.week))
+            ((self.group, d, apm) for apm in self.ttmodel.possible_apms
+             for d in self.ttmodel.wdb.days if d.week == self.week))
 
         local_var = self.ttmodel.add_var("MinGBHD_var_%s" % self.group)
 
@@ -171,13 +172,13 @@ class MinHalfDaysHelperTutor(MinHalfDaysHelperBase):
         if self.constraint.join2courses and len(courses) in [2, 4]:
             for d in days:
                 for c in courses:
-                    sl8h = min(self.ttmodel.wdb.slots_by_half_day[d,Time.AM] & self.ttmodel.wdb.compatible_slots[c])
-                    sl14h = min(self.ttmodel.wdb.slots_by_half_day[d,Time.PM] & self.ttmodel.wdb.compatible_slots[c])
+                    sl8h = min(slots_filter(self.ttmodel.wdb.slots, day=d, apm=Time.AM) & self.ttmodel.wdb.compatible_slots[c])
+                    sl14h = min(slots_filter(self.ttmodel.wdb.slots, day=d, apm=Time.PM) & self.ttmodel.wdb.compatible_slots[c])
                     for c2 in courses.exclude(id=c.id):
                         sl11h = max(
-                            self.ttmodel.wdb.slots_by_half_day[d, Time.AM] & self.ttmodel.wdb.compatible_slots[c2])
+                            slots_filter(self.ttmodel.wdb.slots, day=d, apm=Time.AM) & self.ttmodel.wdb.compatible_slots[c2])
                         sl17h = max(
-                            self.ttmodel.wdb.slots_by_half_day[d, Time.PM] & self.ttmodel.wdb.compatible_slots[c2])
+                            slots_filter(self.ttmodel.wdb.slots, day=d, apm=Time.PM) & self.ttmodel.wdb.compatible_slots[c2])
                         if self.constraint.weight:
                             conj_var_AM = self.ttmodel.add_conjunct(self.ttmodel.TT[(sl8h, c)],
                                                                     self.ttmodel.TT[(sl11h, c2)])
