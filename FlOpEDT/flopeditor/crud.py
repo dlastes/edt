@@ -34,7 +34,7 @@ from django.http import JsonResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 from base.models import Department
 from flopeditor.cruds import training_programmes, student_group_type,\
-    rooms, room_types, student_group, course_type, period, module
+    rooms, room_types, student_group, course_type, period, module, tutors
 
 
 def good_request(request, department):
@@ -102,7 +102,7 @@ def crud_tutors(request, department_abbrev):
     if not good_request(request, department):
         pass
     elif request.method == "GET":
-        return rooms.read(department)
+        return tutors.read(department)
     elif request.method == "POST":
         actions = json.loads(request.body.decode('utf-8'))['actions']
         result = []
