@@ -29,7 +29,7 @@ without disclosing the source code of your own applications.
 
 from django.http import JsonResponse
 from base.models import Room, RoomType, Department
-from people.models import Tutor, UserDepartmentSettings
+from people.models import Tutor
 from flopeditor.validator import OK_RESPONSE, ERROR_RESPONSE
 
 
@@ -94,6 +94,16 @@ def has_rights_to_create_or_delete_tutor(user, tutor, entries):
     :rtype:  Boolean
     """
 
+    if user.username == tutor.username:
+        entries['result'].append(
+            [ERROR_RESPONSE,
+             "Vous ne pouvez pas vous supprimer vous-même."])
+        return False
+    if not user.is_superuser and tutor.is_superuser:
+        entries['result'].append(
+            [ERROR_RESPONSE,
+             "Vous n'avez pas les droits nécessaires pour supprimer cet utilisateur."])
+        return False
     for dept in tutor.departments.all():
         if not user.has_department_perm(department=dept, admin=True):
             entries['result'].append([
@@ -305,6 +315,7 @@ def delete(request, entries, department):
         username = entries['old_values'][i][0]
         try:
             tutor = Tutor.objects.get(username=username)
+
             if has_rights_to_create_or_delete_tutor(request.user, tutor, entries):
                 tutor.delete()
                 entries['result'].append([OK_RESPONSE])
@@ -313,4 +324,5 @@ def delete(request, entries, department):
             entries['result'].append(
                 [ERROR_RESPONSE,
                  "Un intervenant à supprimer n'a pas été trouvé dans la base de données."])
+    print(entries)
     return entries
