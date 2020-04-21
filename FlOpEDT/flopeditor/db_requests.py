@@ -32,7 +32,10 @@ to manage a department statistics for FlOpEDT.
 
 
 from base.models import Department, TimeGeneralSettings, Day
-from people.models import Tutor, UserDepartmentSettings
+from people.models import Tutor, UserDepartmentSettings, SupplyStaff
+
+
+
 
 
 def create_departments_in_database(dept_name, dept_abbrev, tutors_id):
@@ -96,3 +99,41 @@ def update_departments_in_database(old_dept_name, new_dept_name,
         UserDepartmentSettings.objects.create(user=tutor, department=dept,
                                               is_main=False, is_admin=True)
     dept.save()
+
+
+
+def get_status_of_user(request):
+    """
+    :param request: Client request.
+    :type request:  django.http.HttpRequest
+    :return: status of user with position and employer if he's a supply_staff
+    :rtype:  string status
+    :rtype:  string position if supply_staff else None
+    :rtype:  string employer if supply_staff else None
+
+    """
+    tutor = Tutor.objects.get(username=request.user)
+    return get_status_of_tutor(tutor)
+
+def get_status_of_tutor(tutor):
+    """
+    :param tutor: tutor.
+    :type tutor:  people.models.Tutor
+    :return: status of user with position and employer if he's a supply_staff
+    :rtype:  string status
+    :rtype:  string position if supply_staff else None
+    :rtype:  string employer if supply_staff else None
+
+    """
+    if tutor.status == 'fs':
+        status = 'Permanent'
+    elif tutor.status == 'ss':
+        status = 'Vacataire'
+        try:
+            supply_staff = SupplyStaff.objects.get(username=tutor.username)
+            return status, supply_staff.position, supply_staff.employer
+        except SupplyStaff.DoesNotExist:
+            pass
+    else:
+        status = 'Biatos'
+    return status, None, None

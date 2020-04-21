@@ -29,9 +29,9 @@ without disclosing the source code of your own applications.
 
 from django.http import JsonResponse
 from base.models import Room, RoomType, Department
-from people.models import Tutor
+from people.models import Tutor, SupplyStaff
 from flopeditor.validator import OK_RESPONSE, ERROR_RESPONSE
-
+from flopeditor.db_requests import get_status_of_tutor
 
 # def set_values_for_room(room, i, new_name, entries):
 #     """
@@ -173,16 +173,13 @@ def read(department):
     :rtype:  django.http.JsonResponse
 
     """
-    # Chips options
-    rooms_available = list(Room.objects.values_list('name', flat=True))
-    rooms_types_available = list(
-        RoomType.objects.values_list('name', flat=True))
-    departments = list(Department.objects.values_list('name', flat=True))
 
     tutors = Tutor.objects.all()
     values = []
     for tut in tutors:
-        values.append((tut.username, tut.first_name, tut.last_name, tut.status, "l" ,"o" ,"l" ))
+        status, position, employer = get_status_of_tutor(tut)
+        values.append((tut.username, tut.first_name, tut.last_name, status, tut.email,
+                       position, employer, list(tut.departments.values_list('name', flat=True))))
 
     return JsonResponse({
         "columns":  [{
@@ -200,21 +197,28 @@ def read(department):
         }, {
             'name': 'Statut',
             "type": "select",
-            "options": {'values': rooms_available}
+            "options": {'values': ["Permanent", "Vacataire", "Biatos"]}
         }, {
             'name': 'Email',
             "type": "text",
             "options": {}
         }, {
-            'name': 'Cas Vacataire',
-            "type": "select",
-            "options": {'values': rooms_available}
-        },{
+            'name': 'Position',
+            "type": "text",
+            "options": {}
+        }, {
             'name': 'Employeur',
             "type": "text",
             "options": {}
+        }, {
+            'name': 'Départements',
+            "type": 'select-chips',
+            "options": {'values': list(Department.objects.values_list('name', flat=True))}
         }],
-        "values": values
+        "values": values,
+        "options": {
+            "deleteMessage": "Si vous supprimez cet intervenant, tous les cours associés seront supprimés et ce dernier ne pourra plus se connecter."
+        }
     })
 
 
