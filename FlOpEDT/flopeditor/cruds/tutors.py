@@ -166,9 +166,10 @@ def read(department):
 
     tutors = Tutor.objects.all()
     values = []
-    for tut in tutors: 
-        status, position, employer = get_status_of_tutor(tut)       
-        values.append((tut.username, tut.first_name, tut.last_name, status, tut.email ,position , employer, list(tut.departments.values_list('name', flat=True)) ))
+    for tut in tutors:
+        status, position, employer = get_status_of_tutor(tut)
+        values.append((tut.username, tut.first_name, tut.last_name, status, tut.email,
+                       position, employer, list(tut.departments.values_list('name', flat=True))))
 
     return JsonResponse({
         "columns":  [{
@@ -202,9 +203,12 @@ def read(department):
         }, {
             'name': 'Départements',
             "type": 'select-chips',
-            "options":{'values': list(Department.objects.values_list('name', flat=True))}
+            "options": {'values': list(Department.objects.values_list('name', flat=True))}
         }],
-        "values": values
+        "values": values,
+        "options": {
+            "deleteMessage": "Si vous supprimez cet intervenant, tous les cours associés seront supprimés et ce dernier ne pourra plus se connecter."
+        }
     })
 
 
