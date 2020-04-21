@@ -10,9 +10,19 @@
 
 {% block main-class %}container h-100{% endblock %}
 
-{% block navbar %}{% endblock %}
-
+{% block navbar %} {% endblock %}
 {% block content %}
+
+
+
+
+<div class="col-md-6 d-flex justify-content-end align-items-center" style="position:fixed; right:10px; top:10px">
+  <button class="btn btn-raised btn-secondary" data-toggle="modal" data-target="#modal-profil" title='Profil'> <i class='fas fa-user'></i></button>
+</div>
+
+
+
+
 <div class="row h-100 justify-content-center align-items-center text-center text-white">
   <div class='pt-2 pl-2' style="position:fixed; left:10px; top:10px">
     <a href="{% url 'index' %}" class="d-block mx-auto mx-sm-0" style='max-width:300px'>
@@ -48,6 +58,9 @@
 {% endblock %}
 
 {% block modal %}
+
+{{ block.super }}
+
 {% if request.user.is_superuser %}
 <div class="modal fade text-black" id="modal-create-department" tabindex="-1" role="dialog" aria-labelledby="modal-create-department" aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -142,6 +155,7 @@
 </div>
 {% endfor %}
 {% endif %}
+
 {% endblock %}
 
 {% block script %}
