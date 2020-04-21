@@ -32,125 +32,125 @@ from base.models import Room, RoomType, Department
 from flopeditor.validator import OK_RESPONSE, ERROR_RESPONSE
 
 
-def set_values_for_room(room, i, new_name, entries):
-    """
-    :param room: Room to add/update.
-    :type department:  base.models.Department
-    :return: False in case of problem. True instead.
-    :rtype:  Boolean
+# def set_values_for_room(room, i, new_name, entries):
+#     """
+#     :param room: Room to add/update.
+#     :type department:  base.models.Department
+#     :return: False in case of problem. True instead.
+#     :rtype:  Boolean
 
-    """
-    sur_salles = []
-    for nom_sur_salle in entries['new_values'][i][1]:
-        sur_salles_found = Room.objects.filter(name=nom_sur_salle)
-        if sur_salles_found[0].name == new_name:
-            entries['result'].append([
-                ERROR_RESPONSE,
-                "Une salle ne peut pas être sur-salle d'elle-même."
-            ])
-            return False
-        if len(sur_salles_found) != 1:
-            entries['result'].append([
-                ERROR_RESPONSE,
-                "Erreur en base de données."
-            ])
-            return False
-        sur_salles.append(sur_salles_found[0])
-    room_types = []
-    for room_type_name in entries['new_values'][i][2]:
-        room_types_found = RoomType.objects.filter(name=room_type_name)
-        if len(room_types_found) != 1:
-            entries['result'].append([
-                ERROR_RESPONSE,
-                "Erreur en base de données."
-            ])
-            return False
-        room_types.append(room_types_found[0])
-    depts = []
-    for dept_name in entries['new_values'][i][3]:
-        depts_found = Department.objects.filter(name=dept_name)
-        if len(depts_found) != 1:
-            entries['result'].append([
-                ERROR_RESPONSE,
-                "Erreur en base de données."
-            ])
-            return False
-        depts.append(depts_found[0])
-    room.name = new_name
-    room.subroom_of.set(sur_salles)
-    room.types.set(room_types)
-    room.departments.set(depts)
-    return True
-
-
-def has_rights_to_create_or_delete_room(user, room, entries):
-    """
-    :param user: User trying to create or delete a room.
-    :type user:  people.models.User
-    :param room: Room to add/delete.
-    :type room:  base.models.Room
-    :return: True if user has rights.
-    :rtype:  Boolean
-
-    """
-    for dept in room.departments.all():
-        if not user.has_department_perm(department=dept, admin=True):
-            entries['result'].append([
-                ERROR_RESPONSE,
-                "Vous ne pouvez pas créer ou supprimer une salle avec un département (" +
-                dept.name+") dont vous n'êtes pas responsable."
-            ])
-            return False
-    return True
+#     """
+#     sur_salles = []
+#     for nom_sur_salle in entries['new_values'][i][1]:
+#         sur_salles_found = Room.objects.filter(name=nom_sur_salle)
+#         if sur_salles_found[0].name == new_name:
+#             entries['result'].append([
+#                 ERROR_RESPONSE,
+#                 "Une salle ne peut pas être sur-salle d'elle-même."
+#             ])
+#             return False
+#         if len(sur_salles_found) != 1:
+#             entries['result'].append([
+#                 ERROR_RESPONSE,
+#                 "Erreur en base de données."
+#             ])
+#             return False
+#         sur_salles.append(sur_salles_found[0])
+#     room_types = []
+#     for room_type_name in entries['new_values'][i][2]:
+#         room_types_found = RoomType.objects.filter(name=room_type_name)
+#         if len(room_types_found) != 1:
+#             entries['result'].append([
+#                 ERROR_RESPONSE,
+#                 "Erreur en base de données."
+#             ])
+#             return False
+#         room_types.append(room_types_found[0])
+#     depts = []
+#     for dept_name in entries['new_values'][i][3]:
+#         depts_found = Department.objects.filter(name=dept_name)
+#         if len(depts_found) != 1:
+#             entries['result'].append([
+#                 ERROR_RESPONSE,
+#                 "Erreur en base de données."
+#             ])
+#             return False
+#         depts.append(depts_found[0])
+#     room.name = new_name
+#     room.subroom_of.set(sur_salles)
+#     room.types.set(room_types)
+#     room.departments.set(depts)
+#     return True
 
 
-def has_rights_to_update_room(user, entries, i):
-    """
-    :param user: User trying to create or delete a room.
-    :type user:  people.models.User
-    :param entries: flopeditor list.
-    :type room:  list
-    :return: True if user has rights.
-    :rtype:  Boolean
+# def has_rights_to_create_or_delete_room(user, room, entries):
+#     """
+#     :param user: User trying to create or delete a room.
+#     :type user:  people.models.User
+#     :param room: Room to add/delete.
+#     :type room:  base.models.Room
+#     :return: True if user has rights.
+#     :rtype:  Boolean
 
-    """
-    if set(entries['new_values'][i][3]) == set(entries['old_values'][i][3]):
-        departments = Department.objects.filter(
-            name__in=entries['new_values'][i][3])
-        if not departments:
-            return True
-        for dept in departments:
-            if user.has_department_perm(department=dept, admin=True):
-                return True
-        entries['result'].append([
-            ERROR_RESPONSE,
-            "Vous ne pouvez pas modifier une salle dont vous n'êtes pas responsbale."
-        ])
-        return False
+#     """
+#     for dept in room.departments.all():
+#         if not user.has_department_perm(department=dept, admin=True):
+#             entries['result'].append([
+#                 ERROR_RESPONSE,
+#                 "Vous ne pouvez pas créer ou supprimer une salle avec un département (" +
+#                 dept.name+") dont vous n'êtes pas responsable."
+#             ])
+#             return False
+#     return True
 
-    old_departments = Department.objects.filter(
-        name__in=entries['old_values'][i][3])
 
-    new_departments = Department.objects.filter(
-        name__in=entries['new_values'][i][3])
+# def has_rights_to_update_room(user, entries, i):
+#     """
+#     :param user: User trying to create or delete a room.
+#     :type user:  people.models.User
+#     :param entries: flopeditor list.
+#     :type room:  list
+#     :return: True if user has rights.
+#     :rtype:  Boolean
 
-    for dep in old_departments:
-        if not user.has_department_perm(department=dep, admin=True) and dep not in new_departments:
-            entries['result'].append([
-                ERROR_RESPONSE,
-                "Impossible de retirer un départment dont vous n'êtes pas responsable d'une salle."
-            ])
-            return False
+#     """
+#     if set(entries['new_values'][i][3]) == set(entries['old_values'][i][3]):
+#         departments = Department.objects.filter(
+#             name__in=entries['new_values'][i][3])
+#         if not departments:
+#             return True
+#         for dept in departments:
+#             if user.has_department_perm(department=dept, admin=True):
+#                 return True
+#         entries['result'].append([
+#             ERROR_RESPONSE,
+#             "Vous ne pouvez pas modifier une salle dont vous n'êtes pas responsbale."
+#         ])
+#         return False
 
-    for dep in new_departments:
-        if not user.has_department_perm(department=dep, admin=True) and dep not in old_departments:
-            entries['result'].append([
-                ERROR_RESPONSE,
-                "impossible d'ajouter un départment dont vous n'êtes pas responsable à une salle."
-            ])
-            return False
+#     old_departments = Department.objects.filter(
+#         name__in=entries['old_values'][i][3])
 
-    return True
+#     new_departments = Department.objects.filter(
+#         name__in=entries['new_values'][i][3])
+
+#     for dep in old_departments:
+#         if not user.has_department_perm(department=dep, admin=True) and dep not in new_departments:
+#             entries['result'].append([
+#                 ERROR_RESPONSE,
+#                 "Impossible de retirer un départment dont vous n'êtes pas responsable d'une salle."
+#             ])
+#             return False
+
+#     for dep in new_departments:
+#         if not user.has_department_perm(department=dep, admin=True) and dep not in old_departments:
+#             entries['result'].append([
+#                 ERROR_RESPONSE,
+#                 "impossible d'ajouter un départment dont vous n'êtes pas responsable à une salle."
+#             ])
+#             return False
+
+#     return True
 
 
 # pylint: disable=W0613
@@ -217,27 +217,27 @@ def create(request, entries, department):
     """
 
     entries['result'] = []
-    for i in range(len(entries['new_values'])):
-        new_name = entries['new_values'][i][0]
-        if not new_name:
-            entries['result'].append([ERROR_RESPONSE,
-                                      "Le nom de la salle ne peut pas être vide."])
-        elif len(new_name) > 20:
-            entries['result'].append([ERROR_RESPONSE,
-                                      "Le nom de la salle est trop long."])
-        elif Room.objects.filter(name=new_name):
-            entries['result'].append([
-                ERROR_RESPONSE,
-                "La salle à ajouter est déjà présente dans la base de données."
-            ])
-        else:
-            room = Room.objects.create(name=new_name)
-            if set_values_for_room(room, i, new_name, entries) and \
-                    has_rights_to_create_or_delete_room(request.user, room, entries):
-                room.save()
-                entries['result'].append([OK_RESPONSE])
-            else:
-                room.delete()
+    # for i in range(len(entries['new_values'])):
+    #     new_name = entries['new_values'][i][0]
+    #     if not new_name:
+    #         entries['result'].append([ERROR_RESPONSE,
+    #                                   "Le nom de la salle ne peut pas être vide."])
+    #     elif len(new_name) > 20:
+    #         entries['result'].append([ERROR_RESPONSE,
+    #                                   "Le nom de la salle est trop long."])
+    #     elif Room.objects.filter(name=new_name):
+    #         entries['result'].append([
+    #             ERROR_RESPONSE,
+    #             "La salle à ajouter est déjà présente dans la base de données."
+    #         ])
+    #     else:
+    #         room = Room.objects.create(name=new_name)
+    #         if set_values_for_room(room, i, new_name, entries) and \
+    #                 has_rights_to_create_or_delete_room(request.user, room, entries):
+    #             room.save()
+    #             entries['result'].append([OK_RESPONSE])
+    #         else:
+    #             room.delete()
 
     return entries
 
@@ -257,33 +257,33 @@ def update(request, entries, department):
         return entries
 
     entries['result'] = []
-    for i in range(len(entries['old_values'])):
-        old_name = entries['old_values'][i][0]
-        new_name = entries['new_values'][i][0]
-        if not has_rights_to_update_room(request.user, entries, i):
-            pass
-        elif not new_name:
-            entries['result'].append([ERROR_RESPONSE,
-                                      "Le nouveau nom de la salle ne peut pas être vide."])
-        elif len(new_name) > 20:
-            entries['result'].append(
-                [ERROR_RESPONSE,
-                 "Le nom de la salle est trop long."])
-        elif Room.objects.filter(name=new_name) and old_name != new_name:
-            entries['result'].append([
-                ERROR_RESPONSE,
-                "La salle à modifier est déjà présente dans la base de données."
-            ])
-        else:
-            try:
-                room_to_update = Room.objects.get(name=old_name)
-                if set_values_for_room(room_to_update, i, new_name, entries):
-                    room_to_update.save()
-                    entries['result'].append([OK_RESPONSE])
-            except Room.DoesNotExist:
-                entries['result'].append(
-                    [ERROR_RESPONSE,
-                     "Une salle à modifier n'a pas été trouvée dans la base de données."])
+    # for i in range(len(entries['old_values'])):
+    #     old_name = entries['old_values'][i][0]
+    #     new_name = entries['new_values'][i][0]
+    #     if not has_rights_to_update_room(request.user, entries, i):
+    #         pass
+    #     elif not new_name:
+    #         entries['result'].append([ERROR_RESPONSE,
+    #                                   "Le nouveau nom de la salle ne peut pas être vide."])
+    #     elif len(new_name) > 20:
+    #         entries['result'].append(
+    #             [ERROR_RESPONSE,
+    #              "Le nom de la salle est trop long."])
+    #     elif Room.objects.filter(name=new_name) and old_name != new_name:
+    #         entries['result'].append([
+    #             ERROR_RESPONSE,
+    #             "La salle à modifier est déjà présente dans la base de données."
+    #         ])
+    #     else:
+    #         try:
+    #             room_to_update = Room.objects.get(name=old_name)
+    #             if set_values_for_room(room_to_update, i, new_name, entries):
+    #                 room_to_update.save()
+    #                 entries['result'].append([OK_RESPONSE])
+    #         except Room.DoesNotExist:
+    #             entries['result'].append(
+    #                 [ERROR_RESPONSE,
+    #                  "Une salle à modifier n'a pas été trouvée dans la base de données."])
     return entries
 
 
@@ -298,16 +298,16 @@ def delete(request, entries, department):
     """
 
     entries['result'] = []
-    for i in range(len(entries['old_values'])):
-        old_name = entries['old_values'][i][0]
-        try:
-            room = Room.objects.get(name=old_name)
-            if has_rights_to_create_or_delete_room(request.user, room, entries):
-                room.delete()
-                entries['result'].append([OK_RESPONSE])
+    # for i in range(len(entries['old_values'])):
+    #     old_name = entries['old_values'][i][0]
+    #     try:
+    #         room = Room.objects.get(name=old_name)
+    #         if has_rights_to_create_or_delete_room(request.user, room, entries):
+    #             room.delete()
+    #             entries['result'].append([OK_RESPONSE])
 
-        except Room.DoesNotExist:
-            entries['result'].append(
-                [ERROR_RESPONSE,
-                 "Une salle à supprimer n'a pas été trouvée dans la base de données."])
+    #     except Room.DoesNotExist:
+    #         entries['result'].append(
+    #             [ERROR_RESPONSE,
+    #              "Une salle à supprimer n'a pas été trouvée dans la base de données."])
     return entries
