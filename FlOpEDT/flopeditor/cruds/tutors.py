@@ -187,7 +187,7 @@ def read(department):
         }, {
             'name': 'Statut',
             "type": "select",
-            "options": {'values': [Tutor.FULL_STAFF, Tutor.SUPP_STAFF, Tutor.BIATOS]}
+            "options": {'values': ["Permanent", "Vacataire", "Biatos"]}
         }, {
             'name': 'Email',
             "type": "text",
