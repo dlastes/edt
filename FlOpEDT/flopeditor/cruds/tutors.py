@@ -29,6 +29,7 @@ without disclosing the source code of your own applications.
 
 from django.http import JsonResponse
 from base.models import Room, RoomType, Department
+from people.models import Tutor, UserDepartmentSettings
 from flopeditor.validator import OK_RESPONSE, ERROR_RESPONSE
 
 
@@ -83,25 +84,26 @@ from flopeditor.validator import OK_RESPONSE, ERROR_RESPONSE
 #     return True
 
 
-# def has_rights_to_create_or_delete_room(user, room, entries):
-#     """
-#     :param user: User trying to create or delete a room.
-#     :type user:  people.models.User
-#     :param room: Room to add/delete.
-#     :type room:  base.models.Room
-#     :return: True if user has rights.
-#     :rtype:  Boolean
+def has_rights_to_create_or_delete_tutor(user, tutor, entries):
+    """
+    :param user: User trying to create or delete a tutor.
+    :type user:  people.models.User
+    :param tutor: Tutor to add/delete.
+    :type tutor:  base.models.Room
+    :return: True if user has rights.
+    :rtype:  Boolean
 
-#     """
-#     for dept in room.departments.all():
-#         if not user.has_department_perm(department=dept, admin=True):
-#             entries['result'].append([
-#                 ERROR_RESPONSE,
-#                 "Vous ne pouvez pas créer ou supprimer une salle avec un département (" +
-#                 dept.name+") dont vous n'êtes pas responsable."
-#             ])
-#             return False
-#     return True
+    """
+    departments = UserDepartmentSettings.filter(user=tutor).values_list('dept', flat=True)
+    for dept in departments:
+        if not user.has_department_perm(department=dept, admin=True):
+            entries['result'].append([
+                ERROR_RESPONSE,
+                "Vous ne pouvez pas créer ou supprimer un intervenant avec un département (" +
+                dept.name+") dont vous n'êtes pas responsable."
+            ])
+            return False
+    return True
 
 
 # def has_rights_to_update_room(user, entries, i):
@@ -298,16 +300,16 @@ def delete(request, entries, department):
     """
 
     entries['result'] = []
-    # for i in range(len(entries['old_values'])):
-    #     old_name = entries['old_values'][i][0]
-    #     try:
-    #         room = Room.objects.get(name=old_name)
-    #         if has_rights_to_create_or_delete_room(request.user, room, entries):
-    #             room.delete()
-    #             entries['result'].append([OK_RESPONSE])
+    for i in range(len(entries['old_values'])):
+        old_name = entries['old_values'][i][0]
+        try:
+            tutor = Tutor.objects.get(name=old_name)
+            if has_rights_to_create_or_delete_tutor(request.user, room, entries):
+                tutor.delete()
+                entries['result'].append([OK_RESPONSE])
 
-    #     except Room.DoesNotExist:
-    #         entries['result'].append(
-    #             [ERROR_RESPONSE,
-    #              "Une salle à supprimer n'a pas été trouvée dans la base de données."])
+        except Tutor.DoesNotExist:
+            entries['result'].append(
+                [ERROR_RESPONSE,
+                 "Un intervenant à supprimer n'a pas été trouvé dans la base de données."])
     return entries
