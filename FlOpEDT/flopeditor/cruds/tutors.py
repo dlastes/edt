@@ -92,10 +92,9 @@ def has_rights_to_create_or_delete_tutor(user, tutor, entries):
     :type tutor:  base.models.Room
     :return: True if user has rights.
     :rtype:  Boolean
-
     """
-    departments = UserDepartmentSettings.filter(user=tutor).values_list('dept', flat=True)
-    for dept in departments:
+
+    for dept in tutor.departments.all():
         if not user.has_department_perm(department=dept, admin=True):
             entries['result'].append([
                 ERROR_RESPONSE,
@@ -303,10 +302,10 @@ def delete(request, entries, department):
 
     entries['result'] = []
     for i in range(len(entries['old_values'])):
-        old_name = entries['old_values'][i][0]
+        username = entries['old_values'][i][0]
         try:
-            tutor = Tutor.objects.get(name=old_name)
-            if has_rights_to_create_or_delete_tutor(request.user, room, entries):
+            tutor = Tutor.objects.get(username=username)
+            if has_rights_to_create_or_delete_tutor(request.user, tutor, entries):
                 tutor.delete()
                 entries['result'].append([OK_RESPONSE])
 
