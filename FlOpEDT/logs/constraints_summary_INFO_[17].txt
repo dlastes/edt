@@ -1,0 +1,29 @@
+Voici les principaux problèmes liés à l'infaisabilité :
+
+	Les cours suivants:
+		TD-AMN-MB-3 (44199)
+		TD-AMN-MB-3 (44200)
+	doivent avoir un professeur
+
+	Le professeur 
+		MB
+ n'est pas disponible le slot : 
+		TD_f_s17_9h30
+		TD_m_s17_8h
+		TD_th_s17_8h
+		TD_m_s17_14h15
+		TD_f_s17_15h45
+		TD_w_s17_11h
+		TP_m_s17_8h
+		CM_tu_s17_14h15
+		TP_w_s17_8h
+		DS_m_s17_15h45
+		CM_th_s17_14h15
+		CM_th_s17_17h15
+		CM_tu_s17_8h
+		DS_th_s17_8h
+		CM_f_s17_9h30
+		CM_th_s17_15h45
+		TP_th_s17_15h45
+		DS_f_s17_9h30
+

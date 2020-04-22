@@ -58,17 +58,20 @@ from django.conf import settings
 
 import datetime
 
-from TTapp.iic.constraintManager import ConstraintManager
-from TTapp.iic.constraints.constraint import Constraint
-from TTapp.iic.constraint_type import ConstraintType
+import os.path
 
 import logging
 
-from TTapp.iic.constraints.dependencyConstraint import DependencyConstraint
-from TTapp.iic.constraints.instructorConstraint import InstructorConstraint
-from TTapp.iic.constraints.simulSlotGroupConstraint import SimulSlotGroupConstraint
-from TTapp.iic.constraints.slotInstructorConstraint import SlotInstructorConstraint
-from TTapp.iic.constraints.courseConstraint import CourseConstraint
+
+from TTapp.ilp_constraint.constraintManager import ConstraintManager
+from TTapp.ilp_constraint.constraint import Constraint
+from TTapp.ilp_constraint.constraint_type import ConstraintType
+
+from TTapp.ilp_constraint.constraints.dependencyConstraint import DependencyConstraint
+from TTapp.ilp_constraint.constraints.instructorConstraint import InstructorConstraint
+from TTapp.ilp_constraint.constraints.simulSlotGroupConstraint import SimulSlotGroupConstraint
+from TTapp.ilp_constraint.constraints.slotInstructorConstraint import SlotInstructorConstraint
+from TTapp.ilp_constraint.constraints.courseConstraint import CourseConstraint
 
 logger = logging.getLogger(__name__)
 pattern = r".+: (.|\s)+ (=|>=|<=) \d*"
@@ -1481,6 +1484,19 @@ class TTModel(object):
                                value=self.get_expr_value(self.cost_G[g][week]))
                 cg.save()
 
+    def write_infaisability(self, write_iis=True, write_analysis=True):
+        file_path = "logs/"
+        filename_suffixe = "_%s_%s" % (self.department.abbrev, self.weeks)
+        iis_filename = "%s/IIS%s.ilp" % (file_path, filename_suffixe)
+        if write_iis:
+            from gurobipy import read
+            lp = "FlOpTT-pulp.lp"
+            m = read(lp)
+            m.computeIIS()
+            m.write(iis_filename)
+        if write_analysis:
+            self.constraintManager.handle_reduced_result(iis_filename, file_path, filename_suffixe)
+
     def optimize(self, time_limit, solver, presolve=2):
         # The solver value shall be one of the available
         # solver corresponding pulp command or contain
@@ -1496,13 +1512,7 @@ class TTModel(object):
                                                           ("Presolve", presolve),
                                                           ("MIPGapAbs", 0.2)]))
             if result is None or result == 0:
-                from gurobipy import read
-                lp = "FlOpTT-pulp.lp"
-                ilp_filename = "logs/IIS_%s_weeks_%s.ilp" % (self.department.abbrev, self.weeks)
-                m = read(lp)
-                m.computeIIS()
-                m.write(ilp_filename)
-                self.constraintManager.handle_reduced_result(ilp_filename, self.department.abbrev, self.weeks)
+                self.write_infaisability()
 
         elif hasattr(pulp, solver):
             # raise an exception when the solver name is incorrect
