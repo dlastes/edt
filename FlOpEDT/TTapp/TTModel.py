@@ -63,15 +63,15 @@ import os.path
 import logging
 
 
-from TTapp.iic.constraintManager import ConstraintManager
-from TTapp.iic.constraint import Constraint
-from TTapp.iic.constraint_type import ConstraintType
+from TTapp.ilp_constraint.constraintManager import ConstraintManager
+from TTapp.ilp_constraint.constraint import Constraint
+from TTapp.ilp_constraint.constraint_type import ConstraintType
 
-from TTapp.iic.constraints.dependencyConstraint import DependencyConstraint
-from TTapp.iic.constraints.instructorConstraint import InstructorConstraint
-from TTapp.iic.constraints.simulSlotGroupConstraint import SimulSlotGroupConstraint
-from TTapp.iic.constraints.slotInstructorConstraint import SlotInstructorConstraint
-from TTapp.iic.constraints.courseConstraint import CourseConstraint
+from TTapp.ilp_constraint.constraints.dependencyConstraint import DependencyConstraint
+from TTapp.ilp_constraint.constraints.instructorConstraint import InstructorConstraint
+from TTapp.ilp_constraint.constraints.simulSlotGroupConstraint import SimulSlotGroupConstraint
+from TTapp.ilp_constraint.constraints.slotInstructorConstraint import SlotInstructorConstraint
+from TTapp.ilp_constraint.constraints.courseConstraint import CourseConstraint
 
 logger = logging.getLogger(__name__)
 pattern = r".+: (.|\s)+ (=|>=|<=) \d*"
@@ -1484,18 +1484,18 @@ class TTModel(object):
                                value=self.get_expr_value(self.cost_G[g][week]))
                 cg.save()
 
-    def write_infaisability(self, write_ilp=True, write_analysis=True):
+    def write_infaisability(self, write_iis=True, write_analysis=True):
         file_path = "logs/"
         filename_suffixe = "_%s_%s" % (self.department.abbrev, self.weeks)
-        ilp_filename = "%s/IIS%s.ilp" % (file_path, filename_suffixe)
-        if write_ilp:
+        iis_filename = "%s/IIS%s.ilp" % (file_path, filename_suffixe)
+        if write_iis:
             from gurobipy import read
             lp = "FlOpTT-pulp.lp"
             m = read(lp)
             m.computeIIS()
-            m.write(ilp_filename)
+            m.write(iis_filename)
         if write_analysis:
-            self.constraintManager.handle_reduced_result(ilp_filename, file_path, filename_suffixe)
+            self.constraintManager.handle_reduced_result(iis_filename, file_path, filename_suffixe)
 
     def optimize(self, time_limit, solver, presolve=2):
         # The solver value shall be one of the available

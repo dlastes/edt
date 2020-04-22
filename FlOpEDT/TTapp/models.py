@@ -47,8 +47,8 @@ from base.models import Time, Department, Day, TimeGeneralSettings
 
 from TTapp.helpers.minhalfdays import MinHalfDaysHelperGroup, MinHalfDaysHelperModule, MinHalfDaysHelperTutor
 
-from TTapp.iic.constraint_type import ConstraintType
-from TTapp.iic.constraint import Constraint
+from TTapp.ilp_constraint.constraint_type import ConstraintType
+from TTapp.ilp_constraint.constraint import Constraint
 from TTapp.slots import Slot, days_filter, slots_filter
 
 

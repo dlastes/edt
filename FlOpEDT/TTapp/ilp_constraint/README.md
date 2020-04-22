@@ -37,7 +37,7 @@ Cela permettra d'écrire le fichier IIS et les fichiers d'analyse de l'infaisabi
 
 **Si vous ne voulez pas écrire le fichier IIS (et qu'il est déjà écrit)**, faites plutôt :
 ```python
-tt.write_infaisability(write_ilp=False)
+tt.write_infaisability(write_iis=False)
 ```
 Ils écrira les même fichiers à l'exception du fichier IIS.
 

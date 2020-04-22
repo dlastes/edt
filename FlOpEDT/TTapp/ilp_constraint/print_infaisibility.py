@@ -24,7 +24,7 @@
 # without disclosing the source code of your own applications.
 
 import csv
-from TTapp.iic.constraint import Constraint
+from TTapp.ilp_constraint.constraint import Constraint
 
 
 def print_all(constraints, occurs, threshold_type, threshold_attr, file_path, filename_suffixe, write_csv_file):

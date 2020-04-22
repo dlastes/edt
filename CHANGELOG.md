@@ -27,6 +27,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - A tutor can choose her/his favorite rooms
 - Module description
 - Enabled text translation
+- TTApp/ilp_constraints : contains all code + documentation allowing to write files in logs/ 
+that explain the infaisability by the solver of a set of constraints
 
 ### Changed
 - front-end: dispatch week/day management in js files
@@ -84,7 +86,3 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ## [0.1] - 2018-11-06
 ### Added
 - Initial features
-
-### Added
-- TTApp/constraintHandler : contains all code + documentation allowing to write files in logs/ 
-that explain the infaisability by the solver of a set of constraints

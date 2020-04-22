@@ -23,7 +23,7 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from TTapp.iic.print_infaisibility import print_all
+from TTapp.ilp_constraint.print_infaisibility import print_all
 
 def inc(occurs_types, constraint_type):
     if constraint_type is not None:
@@ -104,8 +104,8 @@ class ConstraintManager:
                     courses[index_course1].show_id = True
                     courses[index_course2].show_id = True
 
-    def handle_reduced_result(self, ilp_file_name, file_path, filename_suffixe, write_csv_file=False):
-        self.infeasible_constraints = self.parse_iis(ilp_file_name)
+    def handle_reduced_result(self, iis_file_name, file_path, filename_suffixe, write_csv_file=False):
+        self.infeasible_constraints = self.parse_iis(iis_file_name)
         self.occurs = self.get_occurs()
         self.set_index_courses()
         print_all(self.infeasible_constraints, self.occurs, self.threshold_type, self.threshold_attr,
