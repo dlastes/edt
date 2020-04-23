@@ -33,12 +33,14 @@ from pulp import GUROBI_CMD
 
 from FlOpEDT.settings.base import COSMO_MODE
 
-from base.models import Group, Time, \
+from base.models import Group, \
     Room, RoomSort, RoomType, RoomPreference, \
     Course, ScheduledCourse, UserPreference, CoursePreference, \
     Department, Module, TrainingProgramme, CourseType, \
     Dependency, TutorCost, GroupFreeHalfDay, GroupCost, Holiday, TrainingHalfDay, \
     CourseStartTimeConstraint, TimeGeneralSettings, ModulePossibleTutors, CoursePossibleTutors
+
+from base.timing import Time, Day
 
 import base.queries as queries
 
@@ -47,7 +49,7 @@ from people.models import Tutor
 from TTapp.models import MinNonPreferedTutorsSlot, MinNonPreferedTrainProgsSlot,\
     max_weight, Stabilize, TTConstraint
 
-from TTapp.slots import Slot, CourseSlot, slots_filter, days_filter, Day
+from TTapp.slots import Slot, CourseSlot, slots_filter, days_filter
 
 from MyFlOp.MyTTUtils import reassign_rooms
 
@@ -839,15 +841,14 @@ class TTModel(object):
 
         # constraint : only one course on simultaneous slots
         print('Simultaneous slots constraints for groups')
-        for sl1 in self.wdb.courses_slots:
+        for sl in self.wdb.availability_slots:
             for bg in self.wdb.basic_groups:
-                self.add_constraint(1000 * self.sum(self.TT[(sl1, c1)] for c1 in self.wdb.courses_for_basic_group[bg]
-                                                    & self.wdb.compatible_courses[sl1]) +
-                                    self.sum(self.TT[(sl2, c2)]
-                                             for sl2 in slots_filter(self.wdb.courses_slots, simultaneous_to=sl1) - {sl1}
+                self.add_constraint(self.sum(self.TT[(sl2, c2)]
+                                             for sl2 in slots_filter(self.wdb.courses_slots,
+                                                                     simultaneous_to=sl)
                                              for c2 in self.wdb.courses_for_basic_group[bg]
                                              & self.wdb.compatible_courses[sl2]),
-                                    '<=', 1000, SimulSlotGroupConstraint(sl1, bg))
+                                    '<=', 1, SimulSlotGroupConstraint(sl, bg))
 
         # a course is scheduled once and only once
         for c in self.wdb.courses:
@@ -881,16 +882,12 @@ class TTModel(object):
                                     slot=sl, course=c))
 
         for i in self.wdb.instructors:
-            for sl in self.wdb.courses_slots:
-                self.add_constraint(1000 * self.sum(self.TTinstructors[(sl, c1, i)]
-                                                    for c1 in self.wdb.possible_courses[i]
-                                                    & self.wdb.compatible_courses[sl])
-                                    +
-                                    self.sum(self.TTinstructors[(sl2, c2, i)]
-                                             for sl2 in slots_filter(self.wdb.courses_slots, simultaneous_to=sl) - {sl}
+            for sl in self.wdb.availability_slots:
+                self.add_constraint(self.sum(self.TTinstructors[(sl2, c2, i)]
+                                             for sl2 in slots_filter(self.wdb.courses_slots, simultaneous_to=sl)
                                              for c2 in self.wdb.possible_courses[i] & self.wdb.compatible_courses[sl2]),
-                                    '<=', 1000,
-                                    Constraint(constraint_type=ConstraintType.SIMUL_SLOT, slots=sl, instructors=i))
+                                    '<=', self.avail_instr[i][sl],
+                                    SlotInstructorConstraint(sl, i))
 
         if self.core_only:
             return
@@ -911,14 +908,6 @@ class TTModel(object):
                                             Constraint(constraint_type=ConstraintType.PROFESSEUR_NE_PEUT_DONNER_2_COURS_EN_MEME_TEMPS,
                                             slots=sl, courses=c))
 
-        for i in self.wdb.instructors:
-            for sl in self.wdb.courses_slots:
-                self.add_constraint(self.sum(self.TTinstructors[(sl, c, i)]
-                                             for c in (self.wdb.compatible_courses[sl]
-                                                       & self.wdb.possible_courses[i])),
-                                    '<=',
-                                    self.avail_instr[i][sl],
-                                    SlotInstructorConstraint(sl, i))
 
     def add_rooms_constraints(self):
         print("adding room constraints")
@@ -926,17 +915,14 @@ class TTModel(object):
 
         # constraint : each Room is only used once on simultaneous slots
         for r in self.wdb.basic_rooms:
-            for sl1 in self.wdb.courses_slots:
-                self.add_constraint(1000 * self.sum(self.TTrooms[(sl1, c, rg)]
-                                                    for (c, rg) in self.wdb.room_course_compat[r]
-                                                    if c in self.wdb.compatible_courses[sl1]) +
-                                    self.sum(self.TTrooms[(sl2, c, rg)]
-                                             for sl2 in slots_filter(self.wdb.courses_slots, simultaneous_to=sl1) - {sl1}
+            for sl in self.wdb.availability_slots:
+                self.add_constraint(self.sum(self.TTrooms[(sl2, c, rg)]
+                                             for sl2 in slots_filter(self.wdb.courses_slots, simultaneous_to=sl)
                                              for (c, rg) in self.wdb.room_course_compat[r]
                                              if c in self.wdb.compatible_courses[sl2]),
-                                    '<=', 1000,
+                                    '<=', self.avail_room[r][sl],
                                     Constraint(constraint_type=ConstraintType.CORE_ROOMS,
-                                               rooms=r, slots=sl1))
+                                               rooms=r, slots=sl))
 
         for sl in self.wdb.courses_slots:
             # constraint : each course is assigned to a Room
@@ -946,6 +932,7 @@ class TTModel(object):
                     '==', 0,
                     Constraint(constraint_type=ConstraintType.CORE_ROOMS, slots=sl, courses=c))
 
+        for sl in self.wdb.courses_slots:
             # constraint : fixed_courses rooms are not available
             for rg in self.wdb.rooms:
                 fcrg = set(fc for fc in self.wdb.fixed_courses_for_slot[sl] if fc.room == rg)
@@ -962,66 +949,6 @@ class TTModel(object):
                                             '==', 0,
                                             Constraint(constraint_type=ConstraintType.CORE_ROOMS,
                                                        slots=sl, rooms=r))
-
-            # constraint : each Room is only used once and only when available
-            for r in self.wdb.basic_rooms:
-                self.add_constraint(
-                    self.sum(self.TTrooms[(sl, c, rg)]
-                             for (c, rg) in self.wdb.room_course_compat[r]
-                             if c in self.wdb.compatible_courses[sl]),
-                    '<=', self.avail_room[r][sl],
-                    Constraint(constraint_type=ConstraintType.CORE_ROOMS, slots=sl, rooms=r))
-
-            ########TO BE CHECKED################
-            # constraint : respect preference order,
-            # if preferred room is available
-            # for rp in self.wdb.room_prefs:
-            #     e = self.sum(
-            #         self.TTrooms[(sl, c, rp.unprefer)]
-            #         for c in set(self.wdb.courses.filter(room_type=rp.for_type)) & self.wdb.compatible_courses[sl])
-            #     preferred_is_unavailable = False
-            #     for r in rp.prefer.basic_rooms():
-            #         if not self.avail_room[r][sl]:
-            #             preferred_is_unavailable = True
-            #             break
-            #         e -= self.sum(self.TTrooms[(sl, c, rg)]
-            #                       for (c, rg) in self.wdb.room_course_compat[r]
-            #                       if c in self.wdb.compatible_courses[sl])
-            #     if preferred_is_unavailable:
-            #         continue
-            #     # print "### slot :", sl, rp.unprefer, "after", rp.prefer
-            #     # print e <= 0
-            #     self.add_constraint(e, '<=', 0,
-            #                         constraint_type=ConstraintType.SALLE_PREFEREE_NON_DISPONIBLE, rooms=rp, slots=sl)
-
-
-    # constraint : respect preference order with full order for each room type :
-    # perfs OK
-    # for rt in self.wdb.room_types:
-    #     l=[]
-    #     for rgp in rt.members.all():
-    #         if len(l)>0:
-    #             for rgp_before in l:
-    #                 e = quicksum(self.TTrooms[(sl, c, rgp)]
-    #                              for c in self.wdb.courses.filter(room_type=rt))
-    #                 preferred_is_unavailable = False
-    #                 for r in rgp_before.and_subrooms():
-    #                     if len(db.RoomUnavailability.objects.filter(
-    #                                   week=self.weeks, year=self.year,
-    #                                   creneau=sl, room=r)) > 0:
-    #                         # print r, "unavailable for ",sl
-    #                         preferred_is_unavailable = True
-    #                         break
-    #                     e -= quicksum(self.TTrooms[(sl, c, rg)] for (c, rg) in
-    #                                   room_course_compat[r])
-    #                 if preferred_is_unavailable:
-    #                     continue
-    #                 self.add_constraint(
-    #                     e,
-    #                     GRB.LESS_EQUAL,
-    #                     0
-    #                 )
-    #         l.append(rgp)
 
     def add_dependency_constraints(self, weight=None):
         """
@@ -1271,7 +1198,7 @@ class TTModel(object):
         avail_room = {}
         for room in self.wdb.basic_rooms:
             avail_room[room] = {}
-            for sl in self.wdb.courses_slots:
+            for sl in self.wdb.availability_slots:
                 if RoomPreference.objects.filter(
                         start_time__lt=sl.start_time + sl.duration,
                         start_time__gt=sl.start_time - F('duration'),

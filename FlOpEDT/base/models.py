@@ -30,10 +30,8 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.postgres.fields import ArrayField
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
-from django.db.models.signals import pre_save
-from django.dispatch import receiver
 
-from base.timing import hhmm, str_slot
+from base.timing import hhmm, str_slot, Day, Time
 import base.weeks
 
 
@@ -120,40 +118,6 @@ class Group(models.Model):
 # ------------
 # -- TIMING --
 # ------------
-
-
-# will not be used
-# TO BE DELETED at the end
-class Time(models.Model):
-    AM = 'AM'
-    PM = 'PM'
-    HALF_DAY_CHOICES = ((AM, 'AM'), (PM, 'PM'))
-    apm = models.CharField(max_length=2,
-                           choices=HALF_DAY_CHOICES,
-                           verbose_name="Half day",
-                           default=AM)
-    no = models.PositiveSmallIntegerField(default=0)
-    # nom = models.CharField(max_length=20)
-    hours = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(0), MaxValueValidator(25)], default=8)
-    minutes = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(0), MaxValueValidator(59)], default=0)
-
-    def __str__(self):
-        return str(self.hours)
-
-    def full_name(self):
-        message = str(self.hours) + ":"
-        if self.minutes < 10:
-            message += "0"
-        message += str(self.minutes)
-        return message
-
-
-@receiver(pre_save, sender=Time)
-def define_apm(sender, instance, *args, **kwargs):
-    if instance.hours >= 12:
-        instance.apm = Time.PM
 
 
 class Holiday(models.Model):

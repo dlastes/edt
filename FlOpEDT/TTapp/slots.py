@@ -22,41 +22,14 @@
 # a commercial license. Buying such a license is mandatory as soon as
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
-from base.models import Time, TimeGeneralSettings
+from base.models import TimeGeneralSettings
+from base.timing import Time, days_index
 
 slot_pause = 30
 
 midday = 12 * 60
 
 basic_slot_duration = 90
-
-class Day(object):
-    MONDAY = "m"
-    TUESDAY = "tu"
-    WEDNESDAY = "w"
-    THURSDAY = "th"
-    FRIDAY = "f"
-    SATURDAY = "sa"
-    SUNDAY = "su"
-
-    CHOICES = ((MONDAY, "monday"), (TUESDAY, "tuesday"),
-               (WEDNESDAY, "wednesday"), (THURSDAY, "thursday"),
-               (FRIDAY, "friday"), (SATURDAY, "saturday"),
-               (SUNDAY, "sunday"))
-
-    def __init__(self, day, week):
-        self.day = day
-        self.week = week
-
-    def __str__(self):
-        # return self.nom[:3]
-        return self.day + '_s' + str(self.week)
-
-
-days_list = [c[0] for c in Day.CHOICES]
-days_index = {}
-for c in Day.CHOICES:
-    days_index[c[0]] = days_list.index(c[0])
 
 
 class Slot:

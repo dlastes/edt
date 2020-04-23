@@ -43,7 +43,8 @@ from django.core.exceptions import ValidationError
 
 from django.utils.translation import ugettext_lazy as _
 
-from base.models import Time, Department, Day, TimeGeneralSettings
+from base.models import Department, TimeGeneralSettings
+from base.timing import Day
 
 from TTapp.helpers.minhalfdays import MinHalfDaysHelperGroup, MinHalfDaysHelperModule, MinHalfDaysHelperTutor
 
@@ -537,14 +538,16 @@ class MinNonPreferedTutorsSlot(TTConstraint):
             tutors = set(t for t in ttmodel.wdb.instructors if t in self.tutors.all())
         else:
             tutors = set(ttmodel.wdb.instructors)
-        for sl in ttmodel.wdb.courses_slots:
+        for sl in ttmodel.wdb.availability_slots:
             for tutor in tutors:
                 filtered_courses = set(c for c in ttmodel.wdb.possible_courses[tutor] if c.week == week)
-                for c in filtered_courses & ttmodel.wdb.compatible_courses[sl]:
+                for c in filtered_courses:
+                    slot_vars_sum = ttmodel.sum(ttmodel.TTinstructors[(sl2, c, tutor)]
+                                                for sl2 in slots_filter(ttmodel.wdb.compatible_slots[c],
+                                                                        simultaneous_to=sl))
                     cost = (float(self.weight) / max_weight) \
-                           * ponderation * ttmodel.TTinstructors[(sl, c, tutor)] \
+                           * ponderation * slot_vars_sum \
                            * ttmodel.unp_slot_cost[tutor][sl]
-                    #ttmodel.add_to_slot_cost(sl, cost)
                     ttmodel.add_to_inst_cost(tutor, cost, week=week)
 
     def one_line_description(self):
@@ -567,16 +570,19 @@ class MinNonPreferedTrainProgsSlot(TTConstraint):
             train_progs = set(tp for tp in self.train_progs.all() if tp in ttmodel.train_prog)
         else:
             train_progs = set(ttmodel.train_prog)
-        for sl in ttmodel.wdb.courses_slots:
+        for sl in ttmodel.wdb.availability_slots:
             for train_prog in train_progs:
                 filtered_courses = set(ttmodel.wdb.courses.filter(group__train_prog=train_prog,
                                                                               week=week))
                 basic_groups = ttmodel.wdb.basic_groups.filter(train_prog=train_prog)
                 for g in basic_groups:
-                    for c in filtered_courses & ttmodel.wdb.compatible_courses[sl]:
+                    for c in filtered_courses:
                         if c.group in ttmodel.wdb.all_groups_of[g]:
+                            slot_vars_sum = ttmodel.sum(ttmodel.TT[(sl2, c)]
+                                                        for sl2 in slots_filter(ttmodel.wdb.compatible_slots[c],
+                                                                                simultaneous_to=sl))
                             cost = self.local_weight() \
-                                   * ponderation * ttmodel.TT[(sl, c)] \
+                                   * ponderation * slot_vars_sum \
                                    * ttmodel.unp_slot_cost_course[c.type,
                                                                   train_prog][sl]
                             ttmodel.add_to_group_cost(g, cost, week=week)
