@@ -43,6 +43,21 @@ from flopeditor.db_requests import create_departments_in_database, \
 from flopeditor.validator import validate_department_creation,\
     validate_department_update, validate_parameters_edit, OK_RESPONSE
 
+
+def has_any_dept_perm(request):
+    """ rights verification
+    :param request: Client request.
+    :type request:  django.http.HttpRequest
+
+    :return: true if the user is admin of any dept
+    :rtype:  boolean
+    """
+    for dept in Department.objects.all():
+        if request.user.has_department_perm(department=dept, admin=True):
+            return True
+    return False
+
+
 @tutor_or_superuser_required
 def home(request):
     """Main view of FlopEditor.
@@ -56,7 +71,8 @@ def home(request):
     departments = Department.objects.all()
     dict_depts = {}
     for dept in departments:
-        uds = UserDepartmentSettings.objects.filter(department=dept).values_list('user', flat=True)
+        uds = UserDepartmentSettings.objects.filter(
+            department=dept).values_list('user', flat=True)
         dict_depts[dept] = list(uds)
     tutors = Tutor.objects.all()
     status, position, employer = get_status_of_user(request)
@@ -65,12 +81,10 @@ def home(request):
                   {'dict_depts': dict_depts,
                    'title': 'Choix du département',
                    'admins': tutors,
-                   'status':status,
-                   'status_vacataire':position,
-                   'employer':employer,
-                  })
-
-
+                   'status': status,
+                   'status_vacataire': position,
+                   'employer': employer,
+                   })
 
 
 @tutor_or_superuser_required
@@ -117,9 +131,10 @@ def department_parameters(request, department_abbrev):
         'default_preference_duration': min_to_str(parameters.default_preference_duration),
         'list_departments': departments,
         'has_department_perm': request.user.has_department_perm(department=department, admin=True),
-        'status':status,
-        'status_vacataire':position,
-        'employer':employer,
+        'has_any_dept_perm': has_any_dept_perm(request),
+        'status': status,
+        'status_vacataire': position,
+        'employer': employer,
     })
 
 
@@ -151,9 +166,10 @@ def department_parameters_edit(request, department_abbrev):
         'day_choices': Day.CHOICES,
         'default_preference_duration': min_to_str(parameters.default_preference_duration),
         'has_department_perm': request.user.has_department_perm(department=department, admin=True),
-        'status':status,
-        'status_vacataire':position,
-        'employer':employer,
+        'has_any_dept_perm': has_any_dept_perm(request),
+        'status': status,
+        'status_vacataire': position,
+        'employer': employer,
     })
 
 
@@ -177,6 +193,7 @@ def ajax_create_department(request):
         return JsonResponse(response)
     return HttpResponseForbidden()
 
+
 @superuser_required
 def ajax_update_department(request):
     """Ajax url for department update
@@ -193,9 +210,11 @@ def ajax_update_department(request):
         old_abbrev = request.POST['oldAbbrevDep']
         new_abbrev = request.POST['newAbbrevDep']
         tutors_id = request.POST.getlist('respsDep-' + old_abbrev)
-        response = validate_department_update(old_name, new_name, old_abbrev, new_abbrev, tutors_id)
+        response = validate_department_update(
+            old_name, new_name, old_abbrev, new_abbrev, tutors_id)
         if response['status'] == OK_RESPONSE:
-            update_departments_in_database(old_name, new_name, old_abbrev, new_abbrev, tutors_id)
+            update_departments_in_database(
+                old_name, new_name, old_abbrev, new_abbrev, tutors_id)
         return JsonResponse(response)
     return HttpResponseForbidden()
 
@@ -270,9 +289,10 @@ def crud_view(request, department_abbrev, view_name, title):
         'department': department,
         'list_departments': departments,
         'has_dept_perm': request.user.has_department_perm(department=department, admin=True),
-        'status':status,
-        'status_vacataire':position,
-        'employer':employer,
+        'has_any_dept_perm': has_any_dept_perm(request),
+        'status': status,
+        'status_vacataire': position,
+        'employer': employer,
     })
 
 
@@ -288,7 +308,10 @@ def department_tutors(request, department_abbrev):
     :rtype:  django.http.HttpResponse
 
     """
-    return crud_view(request, department_abbrev, "flopeditor/tutors.html", "Intervenants")
+    if has_any_dept_perm(request):
+        return crud_view(request, department_abbrev, "flopeditor/tutors.html", "Intervenants")
+
+    return HttpResponseForbidden()
 
 
 @tutor_or_superuser_required

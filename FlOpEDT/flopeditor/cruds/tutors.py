@@ -29,62 +29,11 @@ without disclosing the source code of your own applications.
 
 from django.http import JsonResponse
 from base.models import Room, RoomType, Department
-from people.models import Tutor, SupplyStaff
-from flopeditor.validator import OK_RESPONSE, ERROR_RESPONSE
+from people.models import Tutor, SupplyStaff, User, FullStaff, BIATOS, UserDepartmentSettings
+from flopeditor.validator import OK_RESPONSE, ERROR_RESPONSE, validate_tutor_values
 from flopeditor.db_requests import get_status_of_tutor
 
-# def set_values_for_room(room, i, new_name, entries):
-#     """
-#     :param room: Room to add/update.
-#     :type department:  base.models.Department
-#     :return: False in case of problem. True instead.
-#     :rtype:  Boolean
-
-#     """
-#     sur_salles = []
-#     for nom_sur_salle in entries['new_values'][i][1]:
-#         sur_salles_found = Room.objects.filter(name=nom_sur_salle)
-#         if sur_salles_found[0].name == new_name:
-#             entries['result'].append([
-#                 ERROR_RESPONSE,
-#                 "Une salle ne peut pas être sur-salle d'elle-même."
-#             ])
-#             return False
-#         if len(sur_salles_found) != 1:
-#             entries['result'].append([
-#                 ERROR_RESPONSE,
-#                 "Erreur en base de données."
-#             ])
-#             return False
-#         sur_salles.append(sur_salles_found[0])
-#     room_types = []
-#     for room_type_name in entries['new_values'][i][2]:
-#         room_types_found = RoomType.objects.filter(name=room_type_name)
-#         if len(room_types_found) != 1:
-#             entries['result'].append([
-#                 ERROR_RESPONSE,
-#                 "Erreur en base de données."
-#             ])
-#             return False
-#         room_types.append(room_types_found[0])
-#     depts = []
-#     for dept_name in entries['new_values'][i][3]:
-#         depts_found = Department.objects.filter(name=dept_name)
-#         if len(depts_found) != 1:
-#             entries['result'].append([
-#                 ERROR_RESPONSE,
-#                 "Erreur en base de données."
-#             ])
-#             return False
-#         depts.append(depts_found[0])
-#     room.name = new_name
-#     room.subroom_of.set(sur_salles)
-#     room.types.set(room_types)
-#     room.departments.set(depts)
-#     return True
-
-
-def has_rights_to_create_or_delete_tutor(user, tutor, entries):
+def has_rights_to_delete_tutor(user, tutor, entries):
     """
     :param user: User trying to create or delete a tutor.
     :type user:  people.models.User
@@ -108,60 +57,83 @@ def has_rights_to_create_or_delete_tutor(user, tutor, entries):
         if not user.has_department_perm(department=dept, admin=True):
             entries['result'].append([
                 ERROR_RESPONSE,
-                "Vous ne pouvez pas créer ou supprimer un intervenant avec un département (" +
+                "Vous ne pouvez pas supprimer un intervenant avec un département (" +
                 dept.name+") dont vous n'êtes pas responsable."
             ])
             return False
     return True
 
 
-# def has_rights_to_update_room(user, entries, i):
-#     """
-#     :param user: User trying to create or delete a room.
-#     :type user:  people.models.User
-#     :param entries: flopeditor list.
-#     :type room:  list
-#     :return: True if user has rights.
-#     :rtype:  Boolean
+def has_rights_to_create_tutor(user, tutor, entries):
+    """
+    :param user: User trying to create or delete a tutor.
+    :type user:  people.models.User
+    :param tutor: Tutor to add/delete.
+    :type tutor:  base.models.Room
+    :return: True if user has rights.
+    :rtype:  Boolean
+    """
 
-#     """
-#     if set(entries['new_values'][i][3]) == set(entries['old_values'][i][3]):
-#         departments = Department.objects.filter(
-#             name__in=entries['new_values'][i][3])
-#         if not departments:
-#             return True
-#         for dept in departments:
-#             if user.has_department_perm(department=dept, admin=True):
-#                 return True
-#         entries['result'].append([
-#             ERROR_RESPONSE,
-#             "Vous ne pouvez pas modifier une salle dont vous n'êtes pas responsbale."
-#         ])
-#         return False
+    for dept in tutor.departments.all():
+        if not user.has_department_perm(department=dept, admin=True):
+            entries['result'].append([
+                ERROR_RESPONSE,
+                "Vous ne pouvez pas créer un intervenant avec un département (" +
+                dept.name+") dont vous n'êtes pas responsable."
+            ])
+            return False
+    return True
 
-#     old_departments = Department.objects.filter(
-#         name__in=entries['old_values'][i][3])
 
-#     new_departments = Department.objects.filter(
-#         name__in=entries['new_values'][i][3])
+def has_rights_to_update_tutor(user, entries, i):
+    """
+    :param user: User trying to create or delete a tutor.
+    :type user:  people.models.User
+    :param entries: flopeditor list.
+    :type room:  list
+    :return: True if user has rights.
+    :rtype:  Boolean
 
-#     for dep in old_departments:
-#         if not user.has_department_perm(department=dep, admin=True) and dep not in new_departments:
-#             entries['result'].append([
-#                 ERROR_RESPONSE,
-#                 "Impossible de retirer un départment dont vous n'êtes pas responsable d'une salle."
-#             ])
-#             return False
+    """
+    if set(entries['new_values'][i][7]) == set(entries['old_values'][i][7]):
+        departments = Department.objects.filter(
+            name__in=entries['new_values'][i][7])
+        if not departments:
+            return True
+        for dept in departments:
+            if user.has_department_perm(department=dept, admin=True):
+                return True
+        entries['result'].append([
+            ERROR_RESPONSE,
+            "Vous ne pouvez pas modifier un intervenant dont vous n'êtes pas responsbale."
+        ])
+        return False
 
-#     for dep in new_departments:
-#         if not user.has_department_perm(department=dep, admin=True) and dep not in old_departments:
-#             entries['result'].append([
-#                 ERROR_RESPONSE,
-#                 "impossible d'ajouter un départment dont vous n'êtes pas responsable à une salle."
-#             ])
-#             return False
+    old_departments = Department.objects.filter(
+        name__in=entries['old_values'][i][7])
 
-#     return True
+    new_departments = Department.objects.filter(
+        name__in=entries['new_values'][i][7])
+
+    for dep in old_departments:
+        if not user.has_department_perm(department=dep, admin=True) and dep not in new_departments:
+            entries['result'].append([
+                ERROR_RESPONSE,
+                "Impossible de retirer un départment" +
+                " dont vous n'êtes pas responsable d'un intervenant."
+            ])
+            return False
+
+    for dep in new_departments:
+        if not user.has_department_perm(department=dep, admin=True) and dep not in old_departments:
+            entries['result'].append([
+                ERROR_RESPONSE,
+                "Impossible d'ajouter un départment" +
+                " dont vous n'êtes pas responsable à un intervenant."
+            ])
+            return False
+
+    return True
 
 
 # pylint: disable=W0613
@@ -217,7 +189,8 @@ def read(department):
         }],
         "values": values,
         "options": {
-            "deleteMessage": "Si vous supprimez cet intervenant, tous les cours associés seront supprimés et ce dernier ne pourra plus se connecter."
+            "deleteMessage": "Si vous supprimez cet intervenant," +
+            " tous les cours associés seront supprimés et ce dernier ne pourra plus se connecter."
         }
     })
 
@@ -234,34 +207,55 @@ def create(request, entries, department):
     """
 
     entries['result'] = []
-    # for i in range(len(entries['new_values'])):
-    #     new_name = entries['new_values'][i][0]
-    #     if not new_name:
-    #         entries['result'].append([ERROR_RESPONSE,
-    #                                   "Le nom de la salle ne peut pas être vide."])
-    #     elif len(new_name) > 20:
-    #         entries['result'].append([ERROR_RESPONSE,
-    #                                   "Le nom de la salle est trop long."])
-    #     elif Room.objects.filter(name=new_name):
-    #         entries['result'].append([
-    #             ERROR_RESPONSE,
-    #             "La salle à ajouter est déjà présente dans la base de données."
-    #         ])
-    #     else:
-    #         room = Room.objects.create(name=new_name)
-    #         if set_values_for_room(room, i, new_name, entries) and \
-    #                 has_rights_to_create_or_delete_room(request.user, room, entries):
-    #             room.save()
-    #             entries['result'].append([OK_RESPONSE])
-    #         else:
-    #             room.delete()
+    for i in range(len(entries['new_values'])):
+        if not validate_tutor_values(entries['new_values'][i], entries):
+            pass
+        elif User.objects.filter(username=entries['new_values'][i][0]):
+            entries['result'].append([
+                ERROR_RESPONSE,
+                "Un utilisateur avec cet id existe déjà."
+            ])
+        else:
+            tutor = None
 
+            if entries['new_values'][i][3] == "Vacataire":
+                tutor = SupplyStaff.objects.create(
+                    username=entries['new_values'][i][0],
+                    first_name=entries['new_values'][i][1],
+                    last_name=entries['new_values'][i][2],
+                    status=Tutor.SUPP_STAFF,
+                    email=entries['new_values'][i][4],
+                    position=entries['new_values'][i][5],
+                    employer=entries['new_values'][i][6])
+            elif entries['new_values'][i][3] == "Permanent":
+                tutor = FullStaff.objects.create(
+                    username=entries['new_values'][i][0],
+                    first_name=entries['new_values'][i][1],
+                    last_name=entries['new_values'][i][2],
+                    status=Tutor.FULL_STAFF,
+                    email=entries['new_values'][i][4])
+            elif entries['new_values'][i][3] == "Biatos":
+                tutor = BIATOS.objects.create(
+                    username=entries['new_values'][i][0],
+                    first_name=entries['new_values'][i][1],
+                    last_name=entries['new_values'][i][2],
+                    status=Tutor.BIATOS,
+                    email=entries['new_values'][i][4])
+
+            tutor.departments.set(Department.objects.filter(
+                name__in=entries['new_values'][i][7]))
+
+            if has_rights_to_create_tutor(request.user, tutor, entries):
+                tutor.save()
+                entries['result'].append([OK_RESPONSE])
+            else:
+                tutor.delete()
     return entries
 
 
 # pylint: disable=W0613
 def update(request, entries, department):
-    """Update values for rooms
+    """Update values for tutors
     :param entries: Values to modify.
     :type entries:  django.http.JsonResponse
     :param department: Department.
@@ -274,33 +268,57 @@ def update(request, entries, department):
         return entries
 
     entries['result'] = []
-    # for i in range(len(entries['old_values'])):
-    #     old_name = entries['old_values'][i][0]
-    #     new_name = entries['new_values'][i][0]
-    #     if not has_rights_to_update_room(request.user, entries, i):
-    #         pass
-    #     elif not new_name:
-    #         entries['result'].append([ERROR_RESPONSE,
-    #                                   "Le nouveau nom de la salle ne peut pas être vide."])
-    #     elif len(new_name) > 20:
-    #         entries['result'].append(
-    #             [ERROR_RESPONSE,
-    #              "Le nom de la salle est trop long."])
-    #     elif Room.objects.filter(name=new_name) and old_name != new_name:
-    #         entries['result'].append([
-    #             ERROR_RESPONSE,
-    #             "La salle à modifier est déjà présente dans la base de données."
-    #         ])
-    #     else:
-    #         try:
-    #             room_to_update = Room.objects.get(name=old_name)
-    #             if set_values_for_room(room_to_update, i, new_name, entries):
-    #                 room_to_update.save()
-    #                 entries['result'].append([OK_RESPONSE])
-    #         except Room.DoesNotExist:
-    #             entries['result'].append(
-    #                 [ERROR_RESPONSE,
-    #                  "Une salle à modifier n'a pas été trouvée dans la base de données."])
+    for i in range(len(entries['old_values'])):
+        if not has_rights_to_update_tutor(request.user, entries, i):
+            pass
+        elif not validate_tutor_values(entries['new_values'][i], entries):
+            pass
+        elif entries['new_values'][i][3] != entries['old_values'][i][3]:
+            #NB: c'est le cas où il faudrait changer un objet de classe
+            entries['result'].append([
+                ERROR_RESPONSE,
+                "Opération non supportée."
+            ])
+        elif User.objects.filter(username=entries['new_values'][i][0]) and \
+                entries['old_values'][i][0] != entries['new_values'][i][0]:
+            entries['result'].append([
+                ERROR_RESPONSE,
+                "Un utilisateur avec cet id existe déjà."
+            ])
+        else:
+            try:
+                tutor_to_update = Tutor.objects.get(
+                    username=entries['old_values'][i][0])
+
+                if entries['new_values'][i][3] == "Vacataire":
+                    # tutor_to_update.__class__ = SupplyStaff
+                    # tutor_to_update.status = Tutor.SUPP_STAFF
+                    tutor_to_update = SupplyStaff.objects.get(
+                        username=entries['old_values'][i][0])
+                    tutor_to_update.position = entries['new_values'][i][5]
+                    tutor_to_update.employer = entries['new_values'][i][6]
+
+                # elif entries['new_values'][i][3] == "Permanent":
+                #     tutor_to_update.__class__ = FullStaff
+                #     tutor_to_update.status = Tutor.FULL_STAFF
+                # elif entries['new_values'][i][3] == "Biatos":
+                #     tutor_to_update.__class__ = BIATOS
+                #     tutor_to_update.status = Tutor.BIATOS
+
+                tutor_to_update.username = entries['new_values'][i][0]
+                tutor_to_update.first_name = entries['new_values'][i][1]
+                tutor_to_update.last_name = entries['new_values'][i][2]
+                tutor_to_update.email = entries['new_values'][i][4]
+                tutor_to_update.departments.set(Department.objects.filter(
+                    name__in=entries['new_values'][i][7]))
+
+                tutor_to_update.save()
+
+                entries['result'].append([OK_RESPONSE])
+            except Tutor.DoesNotExist:
+                entries['result'].append(
+                    [ERROR_RESPONSE,
+                     "Un intervenant à modifier n'a pas été trouvée dans la base de données."])
     return entries
 
 
@@ -320,7 +338,7 @@ def delete(request, entries, department):
         try:
             tutor = Tutor.objects.get(username=username)
 
-            if has_rights_to_create_or_delete_tutor(request.user, tutor, entries):
+            if has_rights_to_delete_tutor(request.user, tutor, entries):
                 tutor.delete()
                 entries['result'].append([OK_RESPONSE])
 
