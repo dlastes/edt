@@ -104,8 +104,8 @@ class ReasonableDays(TTConstraint):
         combinations = set()
 
         # Get two dicts with the first and last slot by day
-        first_slots = set([slot for slot in ttmodel.wdb.slots if slot.start_time <= 9*60])
-        last_slots = set([slot for slot in ttmodel.wdb.slots if slot.end_time > 18*60])
+        first_slots = set([slot for slot in ttmodel.wdb.courses_slots if slot.start_time <= 9 * 60])
+        last_slots = set([slot for slot in ttmodel.wdb.courses_slots if slot.end_time > 18 * 60])
         slots = first_slots | last_slots
 
 
@@ -176,8 +176,8 @@ class AvoidBothTimes(TTConstraint):
             fc = fc.filter(group__train_prog=self.train_prog)
         if self.group:
             fc = fc.filter(group=self.group)
-        slots1 = set([slot for slot in ttmodel.wdb.slots if slot.start_time <= self.time1 < slot.end_time])
-        slots2 = set([slot for slot in ttmodel.wdb.slots if slot.start_time <= self.time2 < slot.end_time])
+        slots1 = set([slot for slot in ttmodel.wdb.courses_slots if slot.start_time <= self.time1 < slot.end_time])
+        slots2 = set([slot for slot in ttmodel.wdb.courses_slots if slot.start_time <= self.time2 < slot.end_time])
         for c1 in fc:
             for c2 in fc.exclude(id__lte=c1.id):
                 for sl1 in slots1:
@@ -246,11 +246,11 @@ class LimitedStartTimeChoices(TTConstraint):
             fc = fc.filter(group__train_prog=self.train_prog)
         if self.group is not None:
             fc = fc.filter(group=self.group)
-        possible_slots_ids = set(slot.id for slot in ttmodel.wdb.slots
+        possible_slots_ids = set(slot.id for slot in ttmodel.wdb.courses_slots
                                  if slot.start_time in self.possible_start_times.values_list())
 
         for c in fc:
-            for sl in ttmodel.wdb.slots.exclude(id__in=possible_slots_ids):
+            for sl in ttmodel.wdb.courses_slots.exclude(id__in=possible_slots_ids):
                 if self.weight is not None:
                     ttmodel.obj += self.local_weight() * ponderation * ttmodel.TT[(sl, c)]
                 else:
@@ -316,7 +316,7 @@ class LimitedRoomChoices(TTConstraint):
         possible_rooms_ids = self.possible_rooms.values_list('id', flat=True)
 
         for c in fc:
-            for sl in ttmodel.wdb.slots:
+            for sl in ttmodel.wdb.courses_slots:
                 for rg in ttmodel.wdb.room_groups.filter(types__in=[c.room_type]).exclude(id__in = possible_rooms_ids):
                     if self.weight is not None:
                         ttmodel.obj += self.local_weight() * ponderation * ttmodel.TTrooms[(sl, c, rg)]
