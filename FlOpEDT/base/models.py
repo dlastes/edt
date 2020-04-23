@@ -121,28 +121,6 @@ class Group(models.Model):
 # -- TIMING --
 # ------------
 
-class Day(object):
-    MONDAY = "m"
-    TUESDAY = "tu"
-    WEDNESDAY = "w"
-    THURSDAY = "th"
-    FRIDAY = "f"
-    SATURDAY = "sa"
-    SUNDAY = "su"
-
-    CHOICES = ((MONDAY, "monday"), (TUESDAY, "tuesday"),
-               (WEDNESDAY, "wednesday"), (THURSDAY, "thursday"),
-               (FRIDAY, "friday"), (SATURDAY, "saturday"),
-               (SUNDAY, "sunday"))
-
-    def __init__(self, day, week):
-        self.day = day
-        self.week = week
-
-    def __str__(self):
-        # return self.nom[:3]
-        return self.day + '_s' + str(self.week)
-
 
 # will not be used
 # TO BE DELETED at the end

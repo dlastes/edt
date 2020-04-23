@@ -22,7 +22,7 @@
 # a commercial license. Buying such a license is mandatory as soon as
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
-from base.models import Time, Day, TimeGeneralSettings
+from base.models import Time, TimeGeneralSettings
 
 slot_pause = 30
 
@@ -30,43 +30,56 @@ midday = 12 * 60
 
 basic_slot_duration = 90
 
+class Day(object):
+    MONDAY = "m"
+    TUESDAY = "tu"
+    WEDNESDAY = "w"
+    THURSDAY = "th"
+    FRIDAY = "f"
+    SATURDAY = "sa"
+    SUNDAY = "su"
+
+    CHOICES = ((MONDAY, "monday"), (TUESDAY, "tuesday"),
+               (WEDNESDAY, "wednesday"), (THURSDAY, "thursday"),
+               (FRIDAY, "friday"), (SATURDAY, "saturday"),
+               (SUNDAY, "sunday"))
+
+    def __init__(self, day, week):
+        self.day = day
+        self.week = week
+
+    def __str__(self):
+        # return self.nom[:3]
+        return self.day + '_s' + str(self.week)
+
+
 days_list = [c[0] for c in Day.CHOICES]
 days_index = {}
 for c in Day.CHOICES:
     days_index[c[0]] = days_list.index(c[0])
 
-class Interval(object):
+
+class Slot:
     def __init__(self, day, start_time, end_time):
         self.day = day
         self.start_time = start_time
         self.end_time = end_time
 
-
-class Slot(object):
-    def __init__(self, day, start_time, course_type=None):
-        self.course_type = course_type
-        self.day = day
-        self.start_time = start_time
-        self.end_time = self.start_time + self.duration
-
     @property
     def duration(self):
-        if self.course_type is not None:
-            return self.course_type.duration
-        else:
-            return basic_slot_duration
-
+        return self.end_time - self.start_time
 
     @property
     def apm(self):
-        if self.course_type is not None:
-            pm_start = TimeGeneralSettings.objects.get(department=self.course_type.department).lunch_break_finish_time
-        else:
-            pm_start = midday
+        pm_start = midday
         if self.start_time >= pm_start:
             return Time.PM
         else:
             return Time.AM
+
+    def __str__(self):
+        return f"{self.day} de {self.start_time//60}h{self.start_time%60 if self.start_time%60!=0 else ''} " \
+               f"à {self.end_time//60}h{self.end_time%60 if self.end_time%60!=0 else ''} "
 
     def is_simultaneous_to(self, other):
         if self.day == other.day and self.start_time < other.end_time and other.start_time < self.end_time:
@@ -91,13 +104,6 @@ class Slot(object):
     def __lt__(self, other):
         return other.is_after(self) and not self.is_after(other)
 
-    def __str__(self):
-        hours = self.start_time // 60
-        minuts = self.start_time % 60
-        if minuts == 0:
-            minuts = ''
-        return str(self.course_type) + '_' + str(self.day) + '_' + str(hours) + 'h' + str(minuts)
-
     def __repr__(self):
         return str(self)
 
@@ -105,27 +111,42 @@ class Slot(object):
         return self.day
 
 
-class Interval(Slot):
-    def __init__(self, day, start_time, end_time):
-        self.day = day
-        self.start_time = start_time
-        self.end_time = end_time
+class CourseSlot(Slot):
+    def __init__(self, day, start_time, course_type=None):
+        if course_type is not None:
+            duration = course_type.duration
+        else:
+            duration = basic_slot_duration
+        Slot.__init__(self, day, start_time, start_time+duration)
+        self.course_type = course_type
 
     @property
     def duration(self):
-        return self.end_time - self.start_time
+        if self.course_type is not None:
+            return self.course_type.duration
+        else:
+            return basic_slot_duration
+
 
     @property
     def apm(self):
-        pm_start = midday
+        if self.course_type is not None:
+            pm_start = TimeGeneralSettings.objects.get(department=self.course_type.department).lunch_break_finish_time
+        else:
+            pm_start = midday
         if self.start_time >= pm_start:
             return Time.PM
         else:
             return Time.AM
 
     def __str__(self):
-        return f"{self.day} de {self.start_time//60}h{self.start_time%60 if self.start_time%60!=0 else ''} " \
-               f"à {self.end_time//60}h{self.end%60 if self.end_time%60!=0 else ''} "
+        hours = self.start_time // 60
+        minuts = self.start_time % 60
+        if minuts == 0:
+            minuts = ''
+        return str(self.course_type) + '_' + str(self.day) + '_' + str(hours) + 'h' + str(minuts)
+
+
 
 def slots_filter(slot_set, day=None, apm=None, course_type=None, start_time=None, week_day=None,
                  simultaneous_to=None, week=None, is_after=None, starts_after=None, starts_before=None,
