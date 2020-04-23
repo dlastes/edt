@@ -29,7 +29,8 @@ from base.models import ScheduledCourse, RoomPreference, EdtVersion, Department,
     TimeGeneralSettings, Room, CourseModification
 from base.timing import str_slot
 from django.db.models import Count, Max, Q, F
-from TTapp.models import slot_pause, MinNonPreferedTrainProgsSlot, MinNonPreferedTutorsSlot, max_weight
+from TTapp.models import MinNonPreferedTrainProgsSlot, MinNonPreferedTutorsSlot, max_weight
+from TTapp.slots import slot_pause
 from base.views import get_key_course_pl, get_key_course_pp
 from django.core.cache import cache
 

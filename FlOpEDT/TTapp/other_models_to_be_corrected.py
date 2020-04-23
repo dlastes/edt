@@ -31,7 +31,7 @@ from django.db import models
 
 # from caching.base import CachingManager, CachingMixin
 
-from TTapp.iic.constraint_type import ConstraintType
+from TTapp.ilp_constraint.constraint_type import ConstraintType
 
 from TTapp.models import TTConstraint
 
