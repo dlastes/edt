@@ -578,15 +578,16 @@ class MinNonPreferedTrainProgsSlot(TTConstraint):
                 basic_groups = ttmodel.wdb.basic_groups.filter(train_prog=train_prog)
                 for g in basic_groups:
                     for c in filtered_courses:
-                        if c.group in ttmodel.wdb.all_groups_of[g]:
-                            slot_vars_sum = ttmodel.sum(ttmodel.TT[(sl2, c)]
+                        for gr in c.groups.all():
+                            if gr in ttmodel.wdb.all_groups_of[g]:
+                                slot_vars_sum = ttmodel.sum(ttmodel.TT[(sl2, c)]
                                                         for sl2 in slots_filter(ttmodel.wdb.compatible_slots[c],
                                                                                 simultaneous_to=sl))
                             cost = self.local_weight() \
                                    * ponderation * slot_vars_sum \
                                    * ttmodel.unp_slot_cost_course[c.type,
                                                                   train_prog][sl]
-                            ttmodel.add_to_group_cost(g, cost, week=week)
+                            ttmodel.add_to_group_cost(gr, cost, week=week)
                             #ttmodel.add_to_slot_cost(sl, cost)
 
     def one_line_description(self):
