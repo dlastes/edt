@@ -904,7 +904,10 @@ class TTModel(object):
                                                        for c2 in self.wdb.possible_courses[supp_tutor] &
                                                        self.wdb.compatible_courses[sl2]),
                                             '<=',
-                                            1000 * min(self.avail_instr[s_t][sl] for s_t in supp_tutors),
+                                            1000 * min(self.avail_instr[s_t][avail_sl]
+                                                       for s_t in supp_tutors
+                                                       for avail_sl in slots_filter(self.wdb.availability_slots,
+                                                                                    simultaneous_to=sl)),
                                             Constraint(constraint_type=ConstraintType.PROFESSEUR_NE_PEUT_DONNER_2_COURS_EN_MEME_TEMPS,
                                             slots=sl, courses=c))
 
