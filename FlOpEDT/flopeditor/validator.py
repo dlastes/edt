@@ -32,6 +32,8 @@ to manage a department statistics for FlOpEDT.
 import re
 from base.models import Department
 from people.models import Tutor
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
 
 OK_RESPONSE = 'OK'
 ERROR_RESPONSE = 'ERROR'
@@ -381,3 +383,64 @@ def validate_period_values(name, starting_week, ending_week, entries):
     else:
         return True
     return False
+
+
+def validate_profil_update(old_username, request):
+    """
+    Validate profiles attributs for profile update
+
+    :param request: Client request.
+    :type request:  django.http.HttpRequest
+    :return: (are the paramaters valid , status and errors)
+    :rtype: (boolean,json)
+
+    """
+    new_username = request.POST['newIdProfil']
+    new_first_name = request.POST['newFirtNameProfil']
+    new_last_name = request.POST['newLastNameProfil']
+    new_email = request.POST['newEmailProfil']
+    new_status_vacataire = request.POST['newstatusVacataire']
+    new_employer = request.POST['newEmployer']
+    try:
+        validate_email(new_email)
+        email = True
+    except ValidationError:
+        email = False
+    if len(new_username) > 191:
+        response = {
+            'status': ERROR_RESPONSE,
+            'message': "Le username est trop long. (<191caractère)'"
+        }
+    elif len(new_first_name) > 30:
+        response = {
+            'status': ERROR_RESPONSE,
+            'message': "Le prénom est trop long. (<30caractère)'"
+        }
+    elif len(new_last_name) > 150:
+        response = {
+            'status': ERROR_RESPONSE,
+            'message': "Le nom est trop long. (<150caractère)'"
+        }
+    elif not email:
+        response = {
+            'status': ERROR_RESPONSE,
+            'message': "L'email est invalide"
+        }
+    elif new_status_vacataire is not None and len(new_status_vacataire) > 50:
+        response = {
+            'status': ERROR_RESPONSE,
+            'message': "Le statut vacataire est trop long. (<50caractère)"
+        }
+    elif new_employer is not None and len(new_employer) > 50:
+        response = {
+            'status': ERROR_RESPONSE,
+            'message': "Le nom de l'employer est trop long. (<50caractère)"
+        }
+    elif old_username != new_username and Tutor.objects.filter(username=new_username):
+        response = {
+            'status': ERROR_RESPONSE,
+            'message': "Un username possède déjà ce nom."
+        }
+    else:
+        response = {'status': OK_RESPONSE, 'message': ''}
+    return response

@@ -32,7 +32,7 @@ to manage a department statistics for FlOpEDT.
 
 
 from base.models import Department, TimeGeneralSettings, Day
-from people.models import Tutor, UserDepartmentSettings, SupplyStaff
+from people.models import Tutor, UserDepartmentSettings, SupplyStaff, FullStaff, BIATOS
 
 
 
@@ -122,3 +122,50 @@ def get_status_of_user(request):
     else:
         status = 'Biatos'
     return status, None, None
+
+
+
+def update_user_in_database(old_username, request):
+    """
+    update user in database
+
+    :param request: Client request.
+    :type request:  django.http.HttpRequest
+    :param old_username: username
+    :type old_username: String
+
+    """
+
+    new_username = request.POST['newIdProfil']
+    new_first_name = request.POST['newFirtNameProfil']
+    new_last_name = request.POST['newLastNameProfil']
+    new_email = request.POST['newEmailProfil']
+    new_status = request.POST['newInputStatus']
+    old_status = request.POST['oldStatus']
+    new_status_vacataire = request.POST['newstatusVacataire']
+    new_employer = request.POST['newEmployer']
+
+    if old_status == 'Permanent':
+        user = FullStaff.objects.get(username=old_username)
+    elif old_status == 'Vacataire':
+        user = SupplyStaff.objects.get(username=old_username)
+    else:
+        user = BIATOS.objects.get(username=old_username)
+
+    user.username = new_username
+    user.first_name = new_first_name
+    user.last_name = new_last_name
+    user.email = new_email
+    if old_status != new_status and new_status == 'Permanent':
+        user.__class__ = FullStaff
+        user.status = 'fs'
+    elif old_status != new_status and new_status == 'Vacataire':
+        user.__class__ = SupplyStaff
+        user.save()
+        user.employer = new_employer
+        user.position = new_status_vacataire
+        user.status = 'ss'
+    elif old_status != new_status:
+        user.__class__ = BIATOS
+        user.status = 'bi'
+    user.save()

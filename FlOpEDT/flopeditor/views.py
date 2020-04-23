@@ -39,9 +39,9 @@ from FlOpEDT.decorators import superuser_required, \
 
 from people.models import Tutor, UserDepartmentSettings
 from flopeditor.db_requests import create_departments_in_database, \
-    update_departments_in_database, get_status_of_user
+    update_departments_in_database, get_status_of_user, update_user_in_database
 from flopeditor.validator import validate_department_creation,\
-    validate_department_update, validate_parameters_edit, OK_RESPONSE
+    validate_department_update, validate_parameters_edit, validate_profil_update, OK_RESPONSE
 
 @tutor_or_superuser_required
 def home(request):
@@ -403,3 +403,24 @@ def department_training_programmes(request, department_abbrev):
 
     """
     return crud_view(request, department_abbrev, 'flopeditor/training_programmes.html', 'Promos')
+
+
+def ajax_update_profil(request):
+    """
+
+    Ajax url for profil edition
+
+    :param request: Client request.
+    :type request:  django.http.HttpRequest
+    :return: Server response for the request.
+    :rtype:  django.http.JsonResponse
+
+    """
+
+    if request.is_ajax() and request.method == "POST":
+        old_username = request.user.username
+        response = validate_profil_update(old_username, request)
+        if response['status'] == OK_RESPONSE:
+            update_user_in_database(old_username, request)
+        return JsonResponse(response)
+    return HttpResponseForbidden()

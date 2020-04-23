@@ -73,6 +73,8 @@ urlpatterns = [
          name="flopeditor-ajax-update-department"),
     path('ajax/parameters-edit/<slug:department_abbrev>', views.ajax_edit_parameters,
          name='flopeditor-ajax-edit-department-parameters'),
+    path('ajax/update-profil', views.ajax_update_profil,
+         name='flopeditor-ajax-update-profil'),
 
     # exchanges with the CRUD
     # --------------------------------
