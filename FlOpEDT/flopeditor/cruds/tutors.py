@@ -273,12 +273,12 @@ def update(request, entries, department):
             pass
         elif not validate_tutor_values(entries['new_values'][i], entries):
             pass
-        elif entries['new_values'][i][3] != entries['old_values'][i][3]:
-            #NB: c'est le cas où il faudrait changer un objet de classe
-            entries['result'].append([
-                ERROR_RESPONSE,
-                "Opération non supportée."
-            ])
+        # elif entries['new_values'][i][3] != entries['old_values'][i][3]:
+        #     #NB: c'est le cas où il faudrait changer un objet de classe
+        #     entries['result'].append([
+        #         ERROR_RESPONSE,
+        #         "Opération non supportée."
+        #     ])
         elif User.objects.filter(username=entries['new_values'][i][0]) and \
                 entries['old_values'][i][0] != entries['new_values'][i][0]:
             entries['result'].append([
@@ -287,34 +287,64 @@ def update(request, entries, department):
             ])
         else:
             try:
-                tutor_to_update = Tutor.objects.get(
-                    username=entries['old_values'][i][0])
-
-                if entries['new_values'][i][3] == "Vacataire":
-                    # tutor_to_update.__class__ = SupplyStaff
-                    # tutor_to_update.status = Tutor.SUPP_STAFF
-                    tutor_to_update = SupplyStaff.objects.get(
+                if entries['new_values'][i][3] != entries['old_values'][i][3]:
+                    tutor_to_update = Tutor.objects.get(
                         username=entries['old_values'][i][0])
-                    tutor_to_update.position = entries['new_values'][i][5]
-                    tutor_to_update.employer = entries['new_values'][i][6]
+                    if entries['new_values'][i][3] == "Vacataire":
+                        new = SupplyStaff(tutor_ptr_id=tutor_to_update.id)
+                        new.__dict__.update(tutor_to_update.__dict__)
+                        new.status = Tutor.SUPP_STAFF
+                        new.position = entries['new_values'][i][5]
+                        new.employer = entries['new_values'][i][6]
+                    elif entries['new_values'][i][3] == "Permanent":
+                        new = FullStaff(tutor_ptr_id=tutor_to_update.id)
+                        new.__dict__.update(tutor_to_update.__dict__)
+                        new.status = Tutor.FULL_STAFF
+                    else:
+                        new = BIATOS(tutor_ptr_id=tutor_to_update.id)
+                        new.__dict__.update(tutor_to_update.__dict__)
+                        new.status = Tutor.BIATOS
+                    
+                    new.username = entries['new_values'][i][0]
+                    new.first_name = entries['new_values'][i][1]
+                    new.last_name = entries['new_values'][i][2]
+                    new.email = entries['new_values'][i][4]
+                    new.departments.set(Department.objects.filter(
+                        name__in=entries['new_values'][i][7]))
+                    new.save()
 
-                # elif entries['new_values'][i][3] == "Permanent":
-                #     tutor_to_update.__class__ = FullStaff
-                #     tutor_to_update.status = Tutor.FULL_STAFF
-                # elif entries['new_values'][i][3] == "Biatos":
-                #     tutor_to_update.__class__ = BIATOS
-                #     tutor_to_update.status = Tutor.BIATOS
+                    if entries['old_values'][i][3] == "Vacataire":
+                        SupplyStaff.objects.get(id=tutor_to_update.id).delete(keep_parents=True)
+                    elif entries['old_values'][i][3] == "Permanent":
+                        FullStaff.objects.get(id=tutor_to_update.id).delete(keep_parents=True)
+                    else:
+                        BIATOS.objects.get(id=tutor_to_update.id).delete(keep_parents=True)
+                    entries['result'].append([OK_RESPONSE])
+                else:
+                    tutor_to_update = Tutor.objects.get(
+                        username=entries['old_values'][i][0])
 
-                tutor_to_update.username = entries['new_values'][i][0]
-                tutor_to_update.first_name = entries['new_values'][i][1]
-                tutor_to_update.last_name = entries['new_values'][i][2]
-                tutor_to_update.email = entries['new_values'][i][4]
-                tutor_to_update.departments.set(Department.objects.filter(
-                    name__in=entries['new_values'][i][7]))
+                    if entries['new_values'][i][3] == "Vacataire":
+                        tutor_to_update.status = Tutor.SUPP_STAFF
+                        tutor_to_update = SupplyStaff.objects.get(
+                            username=entries['old_values'][i][0])
+                        tutor_to_update.position = entries['new_values'][i][5]
+                        tutor_to_update.employer = entries['new_values'][i][6]
+                    elif entries['new_values'][i][3] == "Permanent":
+                        tutor_to_update.status = Tutor.FULL_STAFF
+                    elif entries['new_values'][i][3] == "Biatos":
+                        tutor_to_update.status = Tutor.BIATOS
 
-                tutor_to_update.save()
+                    tutor_to_update.username = entries['new_values'][i][0]
+                    tutor_to_update.first_name = entries['new_values'][i][1]
+                    tutor_to_update.last_name = entries['new_values'][i][2]
+                    tutor_to_update.email = entries['new_values'][i][4]
+                    tutor_to_update.departments.set(Department.objects.filter(
+                        name__in=entries['new_values'][i][7]))
 
-                entries['result'].append([OK_RESPONSE])
+                    tutor_to_update.save()
+
+                    entries['result'].append([OK_RESPONSE])
             except Tutor.DoesNotExist:
                 entries['result'].append(
                     [ERROR_RESPONSE,
