@@ -58,17 +58,20 @@ from django.conf import settings
 
 import datetime
 
-from TTapp.iic.constraintManager import ConstraintManager
-from TTapp.iic.constraints.constraint import Constraint
-from TTapp.iic.constraint_type import ConstraintType
+import os.path
 
 import logging
 
-from TTapp.iic.constraints.dependencyConstraint import DependencyConstraint
-from TTapp.iic.constraints.instructorConstraint import InstructorConstraint
-from TTapp.iic.constraints.simulSlotGroupConstraint import SimulSlotGroupConstraint
-from TTapp.iic.constraints.slotInstructorConstraint import SlotInstructorConstraint
-from TTapp.iic.constraints.courseConstraint import CourseConstraint
+
+from TTapp.ilp_constraint.constraintManager import ConstraintManager
+from TTapp.ilp_constraint.constraint import Constraint
+from TTapp.ilp_constraint.constraint_type import ConstraintType
+
+from TTapp.ilp_constraint.constraints.dependencyConstraint import DependencyConstraint
+from TTapp.ilp_constraint.constraints.instructorConstraint import InstructorConstraint
+from TTapp.ilp_constraint.constraints.simulSlotGroupConstraint import SimulSlotGroupConstraint
+from TTapp.ilp_constraint.constraints.slotInstructorConstraint import SlotInstructorConstraint
+from TTapp.ilp_constraint.constraints.courseConstraint import CourseConstraint
 
 logger = logging.getLogger(__name__)
 pattern = r".+: (.|\s)+ (=|>=|<=) \d*"
@@ -84,8 +87,7 @@ class WeekDB(object):
         self.year = year
         self.possible_apms=set()
         self.days, self.day_after, self.holidays, self.training_half_days = self.days_init()
-        self.slots, self.slots_by_day, self.slots_intersecting, self.slots_by_half_day, self.slots_by_week \
-            = self.slots_init()
+        self.slots = self.slots_init()
         self.course_types, self.courses, self.courses_by_week, \
         self.sched_courses, self.fixed_courses, self.fixed_courses_for_slot, \
         self.other_departments_courses, self.other_departments_sched_courses, \
@@ -143,25 +145,9 @@ class WeekDB(object):
         for slot in slots:
             self.possible_apms.add(slot.apm)
 
-        slots_by_day = {}
-        for d in self.days:
-            slots_by_day[d] = slots_filter(slots, day=d)
+        print('Ok' + f' : {len(slots)} slots created!' )
 
-        slots_intersecting = {}
-        for sl in slots:
-            slots_intersecting[sl] = slots_filter(slots, simultaneous_to=sl)
-
-        slots_by_half_day = {}
-        for d in self.days:
-            for apm in self.possible_apms:
-                slots_by_half_day[(d, apm)] = slots_filter(slots, day=d, apm=apm)
-        print('Ok')
-
-        slots_by_week = {}
-        for week in self.weeks:
-            slots_by_week[week] = slots_filter(slots, week=week)
-
-        return slots, slots_by_day, slots_intersecting, slots_by_half_day, slots_by_week
+        return slots
 
     def courses_init(self):
         # COURSES
@@ -169,7 +155,7 @@ class WeekDB(object):
 
         courses = Course.objects.filter(
             week__in=self.weeks, year=self.year,
-            group__train_prog__in=self.train_prog)
+            groups__train_prog__in=self.train_prog)
 
         courses_by_week = {week: set(courses.filter(week=week)) for week in self.weeks}
 
@@ -177,15 +163,15 @@ class WeekDB(object):
             .objects \
             .filter(course__week__in=self.weeks,
                     course__year=self.year,
-                    course__group__train_prog__in=self.train_prog,
+                    course__groups__train_prog__in=self.train_prog,
                     work_copy=0)
 
         fixed_courses = ScheduledCourse.objects \
-            .filter(course__group__train_prog__department=self.department,
+            .filter(course__groups__train_prog__department=self.department,
                     course__week__in=self.weeks,
                     course__year=self.year,
                     work_copy=0) \
-            .exclude(course__group__train_prog__in=self.train_prog)
+            .exclude(course__groups__train_prog__in=self.train_prog)
 
         fixed_courses_for_slot = {}
         for sl in self.slots:
@@ -222,7 +208,7 @@ class WeekDB(object):
             course1__week__in=self.weeks,
             course1__year=self.year,
             course2__week__in=self.weeks,
-            course1__group__train_prog__in=self.train_prog)
+            course1__groups__train_prog__in=self.train_prog)
 
         return course_types, courses, courses_by_week, sched_courses, fixed_courses, fixed_courses_for_slot, \
                other_departments_courses, other_departments_sched_courses, other_departments_sched_courses_for_slot, \
@@ -333,11 +319,11 @@ class WeekDB(object):
 
         courses_for_group = {}
         for g in groups:
-            courses_for_group[g] = set(self.courses.filter(group=g))
+            courses_for_group[g] = set(self.courses.filter(groups=g))
 
         courses_for_basic_group = {}
         for bg in basic_groups:
-            courses_for_basic_group[bg] = set(self.courses.filter(group__in=all_groups_of[bg]))
+            courses_for_basic_group[bg] = set(self.courses.filter(groups__in=all_groups_of[bg]))
 
         return groups, basic_groups, all_groups_of, basic_groups_of, courses_for_group, courses_for_basic_group
 
@@ -557,7 +543,7 @@ class TTModel(object):
                 # Linking the variable to the TT
                 expr = self.lin_expr()
                 expr += 100 * IBS[(i, sl)]
-                for s_sl in self.wdb.slots_intersecting[sl] | {sl}:
+                for s_sl in slots_filter(self.wdb.slots, simultaneous_to=sl) | {sl}:
                     for c in self.wdb.possible_courses[i] & self.wdb.compatible_courses[s_sl]:
                         expr -= self.TTinstructors[(s_sl, c, i)]
                 # , "IBS_sup(%s,%s)" % (i, sl)
@@ -573,7 +559,7 @@ class TTModel(object):
             for d in self.wdb.days:
                 IBD[(i, d)] = self.add_var("IBD(%s,%s)" % (i, d))
                 # Linking the variable to the TT
-                dayslots = self.wdb.slots_by_day[d]
+                dayslots = slots_filter(self.wdb.slots, day=d)
                 card = 2 * len(dayslots)
                 expr = self.lin_expr()
                 expr += card * IBD[(i, d)]
@@ -626,7 +612,7 @@ class TTModel(object):
                 for apm in self.possible_apms:
                     IBHD[(i, d, apm)] \
                         = self.add_var("IBHD(%s,%s,%s)" % (i, d, apm))
-                    halfdayslots = self.wdb.slots_by_half_day[(d, apm)]
+                    halfdayslots = slots_filter(self.wdb.slots, day=d, apm=apm)
                     card = 2 * len(halfdayslots)
                     expr = self.lin_expr()
                     expr += card * IBHD[(i, d, apm)]
@@ -655,7 +641,7 @@ class TTModel(object):
                 for apm in self.possible_apms:
                     GBHD[(g, d, apm)] \
                         = self.add_var("GBHD(%s,%s,%s)" % (g, d, apm))
-                    halfdayslots = self.wdb.slots_by_half_day[(d, apm)]
+                    halfdayslots = slots_filter(self.wdb.slots, day=d, apm=apm)
                     card = 2 * len(halfdayslots)
                     expr = self.lin_expr()
                     expr += card * GBHD[(g, d, apm)]
@@ -676,9 +662,11 @@ class TTModel(object):
         Create a PuLP binary variable
         """
         # return LpVariable(name, lowBound = 0, upBound = 1, cat = LpBinary)
-        countedname = name + '_' + str(self.var_nb)
+        # countedname = name + '_' + str(self.var_nb)
         self.var_nb += 1
-        return LpVariable(countedname, cat=LpBinary)
+
+        # return LpVariable(countedname, cat=LpBinary)
+        return LpVariable(self.var_nb, cat=LpBinary)
 
     def add_constraint(self, expr, relation, value, constraint):
         constraint_id = self.constraintManager.get_nb_constraints()
@@ -841,7 +829,8 @@ class TTModel(object):
             for bg in self.wdb.basic_groups:
                 self.add_constraint(1000 * self.sum(self.TT[(sl1, c1)] for c1 in self.wdb.courses_for_basic_group[bg]
                                                     & self.wdb.compatible_courses[sl1]) +
-                                    self.sum(self.TT[(sl2, c2)] for sl2 in self.wdb.slots_intersecting[sl1] - {sl1}
+                                    self.sum(self.TT[(sl2, c2)]
+                                             for sl2 in slots_filter(self.wdb.slots, simultaneous_to=sl1) - {sl1}
                                              for c2 in self.wdb.courses_for_basic_group[bg]
                                              & self.wdb.compatible_courses[sl2]),
                                     '<=', 1000, SimulSlotGroupConstraint(sl1, bg))
@@ -884,7 +873,7 @@ class TTModel(object):
                                                     & self.wdb.compatible_courses[sl])
                                     +
                                     self.sum(self.TTinstructors[(sl2, c2, i)]
-                                             for sl2 in self.wdb.slots_intersecting[sl] - {sl}
+                                             for sl2 in slots_filter(self.wdb.slots, simultaneous_to=sl) - {sl}
                                              for c2 in self.wdb.possible_courses[i] & self.wdb.compatible_courses[sl2]),
                                     '<=', 1000,
                                     Constraint(constraint_type=ConstraintType.SIMUL_SLOT, slots=sl, instructors=i))
@@ -900,7 +889,7 @@ class TTModel(object):
                         self.add_constraint(1000 * self.TT[(sl, c)]
                                             + self.sum(self.TTinstructors[(sl2, c2, supp_tutor)]
                                                        for supp_tutor in supp_tutors
-                                                       for sl2 in self.wdb.slots_intersecting[sl] - {sl}
+                                                       for sl2 in slots_filter(self.wdb.slots, simultaneous_to=sl) - {sl}
                                                        for c2 in self.wdb.possible_courses[supp_tutor] &
                                                        self.wdb.compatible_courses[sl2]),
                                             '<=',
@@ -928,7 +917,7 @@ class TTModel(object):
                                                     for (c, rg) in self.wdb.room_course_compat[r]
                                                     if c in self.wdb.compatible_courses[sl1]) +
                                     self.sum(self.TTrooms[(sl2, c, rg)]
-                                             for sl2 in self.wdb.slots_intersecting[sl1] - {sl1}
+                                             for sl2 in slots_filter(self.wdb.slots, simultaneous_to=sl1) - {sl1}
                                              for (c, rg) in self.wdb.room_course_compat[r]
                                              if c in self.wdb.compatible_courses[sl2]),
                                     '<=', 1000,
@@ -952,7 +941,7 @@ class TTModel(object):
                 if fcrg:
                     for r in rg.and_subrooms():
                         self.add_constraint(self.sum(self.TTrooms[(s_sl, c, room)]
-                                                     for s_sl in self.wdb.slots_intersecting[sl]
+                                                     for s_sl in slots_filter(self.wdb.slots, simultaneous_to=sl)
                                                      for c in self.wdb.compatible_courses[s_sl]
                                                      for room in self.wdb.course_rg_compat[c]
                                                      if r in room.and_subrooms()),
@@ -1495,6 +1484,19 @@ class TTModel(object):
                                value=self.get_expr_value(self.cost_G[g][week]))
                 cg.save()
 
+    def write_infaisability(self, write_iis=True, write_analysis=True):
+        file_path = "logs/"
+        filename_suffixe = "_%s_%s" % (self.department.abbrev, self.weeks)
+        iis_filename = "%s/IIS%s.ilp" % (file_path, filename_suffixe)
+        if write_iis:
+            from gurobipy import read
+            lp = "FlOpTT-pulp.lp"
+            m = read(lp)
+            m.computeIIS()
+            m.write(iis_filename)
+        if write_analysis:
+            self.constraintManager.handle_reduced_result(iis_filename, file_path, filename_suffixe)
+
     def optimize(self, time_limit, solver, presolve=2):
         # The solver value shall be one of the available
         # solver corresponding pulp command or contain
@@ -1510,13 +1512,7 @@ class TTModel(object):
                                                           ("Presolve", presolve),
                                                           ("MIPGapAbs", 0.2)]))
             if result is None or result == 0:
-                from gurobipy import read
-                lp = "FlOpTT-pulp.lp"
-                ilp_filename = "logs/IIS_%s_weeks_%s.ilp" % (self.department.abbrev, self.weeks)
-                m = read(lp)
-                m.computeIIS()
-                m.write(ilp_filename)
-                self.constraintManager.handle_reduced_result(ilp_filename, self.department.abbrev, self.weeks)
+                self.write_infaisability()
 
         elif hasattr(pulp, solver):
             # raise an exception when the solver name is incorrect

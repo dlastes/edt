@@ -543,52 +543,29 @@ function go_grid(quick) {
 
 
   var grid = fg.selectAll(".grids")
-    .data(data_slot_grid);
+    .data(
+      data_slot_grid.filter(function (d) {
+        return groups[d.promo][d.group].display;
+      }),
+      function (d) { return d.day + d.start + d.group + d.promo; }
+    );
 
   var gridg = grid
     .enter()
     .append("g")
     .attr("class", "grids")
-    .style("cursor", gs_cursor)
-    .on("click", clear_pop);
+    .style("cursor", "default");
 
 
   gridg
     .append("rect")
-    .attr("x", gs_x)
-    .attr("y", gs_y)
     .attr("stroke", gs_sc)
-    .attr("stroke-width", gs_sw)
-    .attr("stroke-dasharray", gs_sda)
-    .attr("stroke-linecap", gs_slc)
     .merge(grid.select("rect"))
-    .transition(t)
-    .attr("fill-opacity", gs_opacity)
-    .attr("x", gs_x)
-    .attr("y", gs_y)
-    .attr("width", gs_width)
-    .attr("height", gs_height)
+    .attr("x", cours_x)
+    .attr("y", cours_y)
+    .attr("width", cours_width)
+    .attr("height", cours_height)
     .attr("fill", gs_fill);
-
-  gridg
-    .append("text")
-    .attr("stroke", "none")
-    .attr("font-size", 14)
-    .attr("x", function (s) {
-      return gs_x(s) + .5 * gs_width(s);
-    })
-    .attr("y", function (s) {
-      return gs_y(s) + .5 * gs_height(s);
-    })
-    .merge(grid.select("text"))
-    .transition(t)
-    .attr("x", function (s) {
-      return gs_x(s) + .5 * gs_width(s);
-    })
-    .attr("y", function (s) {
-      return gs_y(s) + .5 * gs_height(s);
-    })
-    .text(gs_txt);
 
   grid
     .exit()
@@ -1008,7 +985,7 @@ function go_courses(quick) {
       cours.filter(function (d) {
         return groups[d.promo][d.group].display;
       }),
-      function (d) { return d.id_course; }
+      function (d) { return d.group + d.id_course; }
     )
     .attr("cursor", ckbox["edt-mod"].cked ? "pointer" : "default");
 

@@ -29,7 +29,8 @@ from base.models import ScheduledCourse, RoomPreference, EdtVersion, Department,
     TimeGeneralSettings, Room, CourseModification
 from base.timing import str_slot
 from django.db.models import Count, Max, Q, F
-from TTapp.models import slot_pause, MinNonPreferedTrainProgsSlot, MinNonPreferedTutorsSlot, max_weight
+from TTapp.models import MinNonPreferedTrainProgsSlot, MinNonPreferedTutorsSlot, max_weight
+from TTapp.slots import slot_pause
 from base.views import get_key_course_pl, get_key_course_pp
 from django.core.cache import cache
 
@@ -81,7 +82,7 @@ def minimize_moves(department, week, year, target_work_copy):
                                 start_time__gt = st - F('course__type__duration') - slot_pause,
                                 day=day,
                                 course__room_type=CP.course.room_type,
-                                course__group=CP.course.group,
+                                course__groups__in=CP.course.groups.all(),
                                 **scheduled_courses_params)
                     if len(precedent) == 0:
                         continue
