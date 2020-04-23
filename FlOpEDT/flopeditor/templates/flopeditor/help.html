@@ -8,6 +8,14 @@
 
 {% block navbar %} {% endblock %}
 {% block content %}
+<div class="row h-100 justify-content-center align-items-center text-center text-white">
+  <div class='pt-2 pl-2' style="position:fixed; left:10px; top:10px">
+    <a href="{% url 'flopeditor:flopeditor-home' %}" class="btn btn-raised d-block mx-auto mx-sm-0" style='max-width:300px'>
+      FlopEditor
+    </a>
+  </div>
+</div>
+
 <div class="container justify-content-center" style="margin-top:4%">
   <div class="card container">
     <div class="card-body pb-0">

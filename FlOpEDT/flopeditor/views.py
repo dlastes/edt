@@ -71,7 +71,7 @@ def home(request):
                   })
 
 
-def help(request):
+def flopeditor_help(request):
     """Shows the help page.
 
     :param request:           Client request.

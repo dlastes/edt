@@ -39,7 +39,7 @@ urlpatterns = [
     # directly reachable by users
     # ---------------------------
     path('', views.home, name='flopeditor-home'),
-    path('help', views.help,
+    path('help', views.flopeditor_help,
          name='flopeditor-help'),
     path('<slug:department_abbrev>/', views.department_default,
          name='flopeditor-department-default'),
