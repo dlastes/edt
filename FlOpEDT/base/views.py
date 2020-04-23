@@ -786,7 +786,7 @@ def fetch_decale(req, **kwargs):
             courses.append({'i': c.id,
                             'm': c.module.abbrev,
                             'p': c.tutor.username,
-                            'g': c.group.name,
+                            'g': [g.name for g in c.groups.all()],
                             'd': day,
                             't': time})
 
@@ -804,7 +804,10 @@ def fetch_decale(req, **kwargs):
             tutors.append(c.tutor.username)
 
     if module != '':
-        course_queryset = Course.objects.filter(module__train_prog__department=department)
+        course_queryset = Course\
+            .objects\
+            .filter(module__train_prog__department=department)\
+            .select_related('module__train_prog__department')
         course = filt_m(course_queryset, module) \
             .order_by('tutor__username') \
             .distinct('tutor__username')
@@ -813,9 +816,14 @@ def fetch_decale(req, **kwargs):
                 module_tutors.append(c.tutor.username)
 
     course = filt_p(filt_m(filt_sa(department, week, year), module), prof) \
-        .distinct('group')
+        .distinct('groups')
+    groups = set()
     for c in course:
-        groups.append(c.group.name)
+        for g in c.groups.all():
+            groups.add((g.train_prog.abbrev, g.name))
+    groups = [{'training_programme': g[0],
+               'group': g[1]} for g in groups]
+    groups.sort(key=lambda g:(g['training_programme'],g['group']))
 
     return JsonResponse({'cours': courses,
                          'modules': modules,
@@ -1767,8 +1775,8 @@ def filt_p(r, prof):
 
 
 def filt_g(r, group):
-    if group != '':
-        r = r.filter(group__name=group)
+    if group is not None:
+        r = r.filter(groups=group).prefetch_related('groups')
     return r
 
 
