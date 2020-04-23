@@ -30,9 +30,9 @@ from TTapp.TTModel import TTModel, GUROBI_NAME
 
 from MyFlOp.MyTTUtils import print_differences
 
-from base.models import ModuleTutorRepartition
+from MyFlOp.models import ModuleTutorRepartition
 from TTapp.slots import slots_filter
-from TTapp.iic.constraints.constraint import Constraint
+from TTapp.ilp_constraint.constraint import Constraint
 
 class MyTTModel(TTModel):
     def __init__(self, department_abbrev, week_year_list,
