@@ -34,7 +34,37 @@ from base.models import Group, Module, Course, CourseType, RoomType,\
 from people.models import Tutor, UserDepartmentSettings
 from people.tutor import fill_default_user_preferences
 from misc.assign_colors import assign_module_color
+from MyFlOp.models import ModuleTutorRepartition
 
+
+def do_assign(module, course_type, week, year, book):
+    already_done = ModuleTutorRepartition.objects.filter(module=module, course_type=course_type,
+                                                         week=week, year=year).exists()
+    if already_done:
+        return
+
+    assignation_sheet = book['Assignation']
+    assign_ok = False
+    for assignation_row in range(1, 100):
+        if assignation_sheet.cell(row=assignation_row, column=1).value == module.abbrev \
+                and assignation_sheet.cell(row=assignation_row, column=2).value == course_type.name:
+            assign_ok = True
+            break
+    if not assign_ok:
+        raise Exception(f"Rien n'est prévu pour assigner {module.abbrev} / {course_type.name}...")
+    column = 3
+    tutor_username = assignation_sheet.cell(row=assignation_row, column=column)
+    while tutor_username is not None:
+        tutor = Tutor.objects.get(username = tutor_username)
+        mtr = ModuleTutorRepartition(module=module, course_type=course_type,
+                                     week=week, year=year, tutor=tutor)
+        nb = assignation_sheet.cell(row=assignation_row+1, column=column)
+        if nb is not None:
+            mtr.courses_nb=nb
+        mtr.save()
+        column += 1
+        tutor_username = assignation_sheet.cell(row=assignation_row, column=column)
+    print(f"Assignation done for {module.abbrev} / {course_type.name}!")
 
 
 def ReadPlanifWeek(department, book, feuille, week, year):
@@ -67,7 +97,6 @@ def ReadPlanifWeek(department, book, feuille, week, year):
     salle_COL = 6
     group_COL = 7
     sumtotal = 0
-    do_assign = False
     while 1:
         row += 1
         is_total = sheet.cell(row=row, column=group_COL).value
@@ -83,7 +112,6 @@ def ReadPlanifWeek(department, book, feuille, week, year):
         try:
             salle = sheet.cell(row=row, column=salle_COL).value
             module = sheet.cell(row=row, column=module_COL).value
-            nature = sheet.cell(row=row, column=nature_COL).value
             N = float(N)
             # handle dark green lines - Vert fonce
             assert isinstance(salle, str) and salle is not None
@@ -99,18 +127,6 @@ def ReadPlanifWeek(department, book, feuille, week, year):
                     comments = []
 
                 sumtotal += nominal
-                # Regardons s'il faut assigner les profs
-                if sheet.cell(row=row+1, column=prof_COL).value == '*':
-                    print(f"On tente l'assignation du module {module} pour le type {nature}")
-                assignation_sheet = book['Assignation']
-                assign_ok = False
-                for assignation_row in range(1, 100):
-                    if assignation_sheet.cell(row=assignation_row, column=1).value == module \
-                            and assignation_sheet.cell(row=assignation_row, column=2).value == nature:
-                        assign_ok = True
-                        break
-                if not assign_ok:
-                    raise Exception(f"Rien n'est prévu pour assigner {module} / {nature}...")
 
                 continue
             try:
@@ -121,6 +137,7 @@ def ReadPlanifWeek(department, book, feuille, week, year):
             # handle light green lines - Vert clair
             MODULE = Module.objects.get(abbrev=module, period=period)
             PROMO = MODULE.train_prog
+            nature = sheet.cell(row=row, column=nature_COL).value
             prof = sheet.cell(row=row, column=prof_COL).value
             grps = sheet.cell(row=row, column=group_COL).value
             COURSE_TYPE = CourseType.objects.get(name=nature, department=department)
@@ -135,7 +152,7 @@ def ReadPlanifWeek(department, book, feuille, week, year):
                     UserDepartmentSettings(user=TUTOR, department=department).save()
             elif prof == '*':
                 TUTOR = None
-
+                do_assign(MODULE, COURSE_TYPE, week, year, book)
             else:
                 assert isinstance(prof, str) and prof is not None
                 prof = prof.replace(' ', '')

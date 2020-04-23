@@ -15,4 +15,4 @@ class ModuleTutorRepartition(models.Model):
         blank=True)
     year = models.PositiveSmallIntegerField(null=True,
                                             blank=True)
-    courses_nb = models.PositiveSmallIntegerField()
+    courses_nb = models.PositiveSmallIntegerField(default=1)
