@@ -587,7 +587,7 @@ class MinNonPreferedTrainProgsSlot(TTConstraint):
                                    * ponderation * slot_vars_sum \
                                    * ttmodel.unp_slot_cost_course[c.type,
                                                                   train_prog][sl]
-                                ttmodel.add_to_group_cost(gr, cost, week=week)
+                                ttmodel.add_to_group_cost(g, cost, week=week)
                                 #ttmodel.add_to_slot_cost(sl, cost)
 
     def one_line_description(self):
