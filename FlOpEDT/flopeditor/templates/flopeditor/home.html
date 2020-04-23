@@ -17,7 +17,12 @@
 
 
 <div class="col-md-6 d-flex justify-content-end align-items-center" style="position:fixed; right:10px; top:10px">
-  <button class="btn btn-raised btn-secondary" data-toggle="modal" data-target="#modal-profil" title='Profil'> <i class='fas fa-user'></i></button>
+  <div class="ml-2">
+    <a type=button class="btn btn-raised btn-secondary"  href="{% url 'flopeditor:flopeditor-help' %}" title='Aide'> <i class='fas fa-question'></i></a>
+  </div>
+  <div class="ml-2">
+    <button class="btn btn-raised btn-secondary" data-toggle="modal" data-target="#modal-profil" title='Profil'> <i class='fas fa-user'></i></button>
+  </div>
 </div>
 
 

@@ -1,0 +1,105 @@
+{% extends "flopeditor/base.html" %}
+{% load static %}
+
+{% block body-class %}bg-dark{% endblock %}
+
+{% block main-class %}container-fluid{% endblock %}
+
+
+{% block navbar %} {% endblock %}
+{% block content %}
+<div class="container justify-content-center" style="margin-top:4%">
+  <div class="card container">
+    <div class="card-body pb-0">
+      <div class="text-center">
+        <h1>Documentation de FlopEditor</h1>
+        <h5>
+          Flopeditor est une application Django développée dans le cadre de
+          FlopEDT par quatre étudiants de M1 Informatique de l'Université Paul Sabatier.
+          Son but est de permettre aux professeurs et autres intervenants de modifier
+          tous les éléments liés à la gestion de leurs départements, de la création de
+          promotions à l'attribution de salles, en passant par la gestion des responsables
+          et tuteurs de leur département.
+        </h5>
+        <br>
+      </div>
+
+      <p>En introduction de la doc, un tableau de résumé des droits
+        (comme dans framagit pour les droits des membres d'un projet https://framagit.org/help/user/permissions)
+        où chaque ligne serait un lien vers la section concernée dans la doc pourrait jouer le rôle de table des
+        matières et de récap des droits nécessaires (le top étant que les colonnes qui correspondent aux permissions
+        du user connecté soit mises en valeur)</p>
+      {% if request.user.is_superuser %}
+      <h3>Vous êtes superuser ! Trop bien !</h3>
+      <p>En tant que super-utillisateur de FlopEDT, vous pouvez tout faire
+      dans FlopEditor, dans tous les départements.</p>
+      {% endif %}
+
+      <br>
+      <h3>Sommaire</h3>
+      {% if request.user.is_superuser %}
+      <h5><a href="#dept">Création, modification d'un département</a></h5>
+      {% endif %}
+      <h5><a href="#intervenant">Ajouter, modifier, supprimer un intervenant</a></h5>
+      <h5><a href="#salle">Ajouter, modifier, supprimer une salle / un groupe de salles</a></h5>
+      <h5><a href="#cat-salle">Ajouter, modifier, supprimer une catégorie de salle</a></h5>
+      <h5><a href="#semestre">Ajouter, Modifier, supprimer un semestre</a></h5>
+      <h5><a href="#promo">Ajouter, Modifier, supprimer une promo</a></h5>
+      <h5><a href="#nature-groupe">Ajouter, Modifier, supprimer une nature de groupes</a></h5>
+      <h5><a href="#groupe">Ajouter, Modifier, supprimer un groupe d'élèves</a></h5>
+      <h5><a href="#module">Ajouter, Modifier, supprimer un module</a></h5>
+      <h5><a href="#cours">Ajouter, Modifier, supprimer un cours</a></h5>
+      <h5><a href="#params">Modifier les paramètres</a></h5>
+      <h5><a href="profil">Afficher, modifier son profil</a></h5>
+      <br>
+      {% if request.user.is_superuser %}
+      <h3 id="dept">Création, modification d'un département</h3>
+      {% endif %}
+
+      <h3 id="intervenant">Ajouter, modifier, supprimer un intervenant</h3>
+      <div class="alert alert-info">Note : Si vous n'êtes pas responsable d'un département, vous ne pouvez pas visualiser la liste des intervenants.</div>
+
+      <h3 id="salle">Ajouter, modifier, supprimer une salle / un groupe de salles</h3>
+      <h2 style="color:red">A écrire !</h2>
+      <div class="alert alert-info">Note : Si vous n'êtes pas responsable d'un département, vous ne pouvez que visualiser la liste des salles.</div>
+
+      <h3 id="cat-salle">Ajouter, modifier, supprimer une catégorie de salle</h3>
+      <h2 style="color:red">A écrire !</h2>
+      <div class="alert alert-info">Note : Si vous n'êtes pas responsable d'un département, vous ne pouvez que visualiser la liste des catégories de salles.</div>
+
+      <h3 id="semestre">Ajouter, Modifier, supprimer un semestre</h3>
+      <h2 style="color:red">A écrire !</h2>
+      <div class="alert alert-info">Note : Si vous n'êtes pas responsable d'un département, vous ne pouvez que visualiser la liste des semestres.</div>
+
+      <h3 id="promo">Ajouter, Modifier, supprimer une promo</h3>
+      <h2 style="color:red">A écrire !</h2>
+      <div class="alert alert-info">Note : Si vous n'êtes pas responsable d'un département, vous ne pouvez que visualiser la liste des promotions.</div>
+
+      <h3 id="nature-groupe">Ajouter, Modifier, supprimer une nature de groupes</h3>
+      <h2 style="color:red">A écrire !</h2>
+      <div class="alert alert-info">Note : Si vous n'êtes pas responsable d'un département, vous ne pouvez que visualiser la liste des natures de groupes.</div>
+
+      <h3 id="groupe">Ajouter, Modifier, supprimer un groupe d'élèves</h3>
+      <h2 style="color:red">A écrire !</h2>
+      <div class="alert alert-info">Note : Si vous n'êtes pas responsable d'un département, vous ne pouvez que visualiser la liste des groupes d'élèves.</div>
+
+      <h3 id="module">Ajouter, Modifier, supprimer un module</h3>
+      <h2 style="color:red">A écrire !</h2>
+      <div class="alert alert-info">Note : Si vous n'êtes pas responsable d'un département, vous ne pouvez que visualiser la liste des modules.</div>
+
+      <h3 id="cours">Ajouter, Modifier, supprimer un cours</h3>
+      <h2 style="color:red">A écrire !</h2>
+      <div class="alert alert-info">Note : Si vous n'êtes pas responsable d'un département, vous ne pouvez que visualiser la liste des cours.</div>
+
+      <h3 id="params">Modifier les paramètres</h3>
+      <h2 style="color:red">A écrire !</h2>
+      <div class="alert alert-info">Note : Si vous n'êtes pas responsable d'un département, vous ne pouvez que visualiser les paramètres.</div>
+
+      <h3 id="profil">Afficher, modifier son profil</h3>
+      <h2 style="color:red">A écrire !</h2>
+
+    </div>
+  </div>
+</div>
+{% block modal %} {% endblock %}
+{% endblock %}

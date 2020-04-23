@@ -71,7 +71,18 @@ def home(request):
                   })
 
 
+def help(request):
+    """Shows the help page.
 
+    :param request:           Client request.
+    :type request:            django.http.HttpRequest
+    :return: Help page rendered.
+    :rtype:  django.http.HttpResponse
+
+    """
+    return render(request, "flopeditor/help.html", {
+        'title': 'Aide',
+        })
 
 @tutor_or_superuser_required
 def department_default(request, department_abbrev):
