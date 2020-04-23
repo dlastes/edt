@@ -35,24 +35,38 @@ days_index = {}
 for c in Day.CHOICES:
     days_index[c[0]] = days_list.index(c[0])
 
+class Interval(object):
+    def __init__(self, day, start_time, end_time):
+        self.day = day
+        self.start_time = start_time
+        self.end_time = end_time
+
 
 class Slot(object):
     def __init__(self, day, start_time, course_type=None):
         self.course_type = course_type
-        if course_type is not None:
-            pm_start = TimeGeneralSettings.objects.get(department=course_type.department).lunch_break_finish_time
-        else:
-            pm_start = midday
         self.day = day
         self.start_time = start_time
-        self.duration = basic_slot_duration
-        if self.course_type is not None:
-            self.duration = self.course_type.duration
         self.end_time = self.start_time + self.duration
-        if self.start_time >= pm_start:
-            self.apm = Time.PM
+
+    @property
+    def duration(self):
+        if self.course_type is not None:
+            return self.course_type.duration
         else:
-            self.apm = Time.AM
+            return basic_slot_duration
+
+
+    @property
+    def apm(self):
+        if self.course_type is not None:
+            pm_start = TimeGeneralSettings.objects.get(department=self.course_type.department).lunch_break_finish_time
+        else:
+            pm_start = midday
+        if self.start_time >= pm_start:
+            return Time.PM
+        else:
+            return Time.AM
 
     def is_simultaneous_to(self, other):
         if self.day == other.day and self.start_time < other.end_time and other.start_time < self.end_time:
@@ -90,6 +104,28 @@ class Slot(object):
     def get_day(self):
         return self.day
 
+
+class Interval(Slot):
+    def __init__(self, day, start_time, end_time):
+        self.day = day
+        self.start_time = start_time
+        self.end_time = end_time
+
+    @property
+    def duration(self):
+        return self.end_time - self.start_time
+
+    @property
+    def apm(self):
+        pm_start = midday
+        if self.start_time >= pm_start:
+            return Time.PM
+        else:
+            return Time.AM
+
+    def __str__(self):
+        return f"{self.day} de {self.start_time//60}h{self.start_time%60 if self.start_time%60!=0 else ''} " \
+               f"à {self.end_time//60}h{self.end%60 if self.end_time%60!=0 else ''} "
 
 def slots_filter(slot_set, day=None, apm=None, course_type=None, start_time=None, week_day=None,
                  simultaneous_to=None, week=None, is_after=None, starts_after=None, starts_before=None,

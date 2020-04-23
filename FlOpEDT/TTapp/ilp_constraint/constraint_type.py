@@ -48,9 +48,7 @@ class ConstraintType(Enum):
     COURS_DOIT_ETRE_PLACE = "Le cours doit être placé"
     COURS_DOIT_AVOIR_PROFESSEUR = "Le cours doit avoir un professeur"
     PROFESSEUR_NE_PEUT_DONNER_2_COURS_EN_MEME_TEMPS = "Le professeur ne peut pas donner 2 cours en même temps"
-    SALLE_NE_PEUT_ACCEPTER_2_COURS_EN_MEME_TEMPS = "Une salle ne peut pas être disponible pour 2 cours à un même moment"
-    UN_COURS_POUR_UN_TYPE_DE_SALLE = "Chaque cours doit être assigné à un type de salle"
-    SALLE_DISPO_AU_PLUS_1_FOIS = "Chaque salle ne peut être utilisée qu'une seule fois"
+    CORE_ROOMS = "Core rooms"
 
     # SPECIFIC
     PAS_DE_COURS_DE_DEMI_JOURNEE = "Pas de cours de demi-journée"
