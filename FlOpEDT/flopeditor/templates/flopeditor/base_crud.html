@@ -30,6 +30,5 @@
 {% block script %}
     {{ block.super }}
     <script> const CSRF = "{{ csrf_token }}" </script>
-    <!-- https://raw.githack.com/CGuichard/crud-js/latest/dist/crudjs.min.js -->
-    <script src="{% static 'flopeditor/js/crudjs.min.js' %}"></script>
+    <script src="https://raw.githack.com/CGuichard/crud-js/latest/dist/crudjs.min.js"></script>
 {% endblock %}
