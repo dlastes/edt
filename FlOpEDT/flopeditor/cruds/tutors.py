@@ -119,8 +119,8 @@ def has_rights_to_update_tutor(user, entries, i):
         if not user.has_department_perm(department=dep, admin=True) and dep not in new_departments:
             entries['result'].append([
                 ERROR_RESPONSE,
-                "Impossible de retirer un départment" +
-                " dont vous n'êtes pas responsable d'un intervenant."
+                "Impossible de retirer d'un intervenant" +
+                " un département dont vous n'êtes pas responsable."
             ])
             return False
 
@@ -128,8 +128,8 @@ def has_rights_to_update_tutor(user, entries, i):
         if not user.has_department_perm(department=dep, admin=True) and dep not in old_departments:
             entries['result'].append([
                 ERROR_RESPONSE,
-                "Impossible d'ajouter un départment" +
-                " dont vous n'êtes pas responsable à un intervenant."
+                "Impossible d'ajouter à un intervenant" +
+                " un département dont vous n'êtes pas responsable."
             ])
             return False
 
