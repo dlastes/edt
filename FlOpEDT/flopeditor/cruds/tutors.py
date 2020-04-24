@@ -376,5 +376,4 @@ def delete(request, entries, department):
             entries['result'].append(
                 [ERROR_RESPONSE,
                  "Un intervenant à supprimer n'a pas été trouvé dans la base de données."])
-    print(entries)
     return entries
