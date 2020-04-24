@@ -885,32 +885,14 @@ class TTModel(object):
             for sl in self.wdb.availability_slots:
                 self.add_constraint(self.sum(self.TTinstructors[(sl2, c2, i)]
                                              for sl2 in slots_filter(self.wdb.courses_slots, simultaneous_to=sl)
-                                             for c2 in self.wdb.possible_courses[i] & self.wdb.compatible_courses[sl2]),
+                                             for c2 in self.wdb.possible_courses[i] & self.wdb.compatible_courses[sl2])
+                                    +
+                                    self.sum(self.TT[(sl2, c2)]
+                                             for sl2 in slots_filter(self.wdb.courses_slots, simultaneous_to=sl)
+                                             for c2 in self.wdb.courses_for_supp_tutor[i]
+                                             & self.wdb.compatible_courses[sl2]),
                                     '<=', self.avail_instr[i][sl],
                                     SlotInstructorConstraint(sl, i))
-
-        if self.core_only:
-            return
-
-        for c in self.wdb.courses:
-            if c.supp_tutor.exists():
-                supp_tutors = set(c.supp_tutor.all()) & self.wdb.instructors
-                if supp_tutors:
-                    for sl in self.wdb.compatible_slots[c]:
-                        self.add_constraint(1000 * self.TT[(sl, c)]
-                                            + self.sum(self.TTinstructors[(sl2, c2, supp_tutor)]
-                                                       for supp_tutor in supp_tutors
-                                                       for sl2 in slots_filter(self.wdb.courses_slots, simultaneous_to=sl) - {sl}
-                                                       for c2 in self.wdb.possible_courses[supp_tutor] &
-                                                       self.wdb.compatible_courses[sl2]),
-                                            '<=',
-                                            1000 * min(self.avail_instr[s_t][avail_sl]
-                                                       for s_t in supp_tutors
-                                                       for avail_sl in slots_filter(self.wdb.availability_slots,
-                                                                                    simultaneous_to=sl)),
-                                            Constraint(constraint_type=ConstraintType.PROFESSEUR_NE_PEUT_DONNER_2_COURS_EN_MEME_TEMPS,
-                                            slots=sl, courses=c))
-
 
     def add_rooms_constraints(self):
         print("adding room constraints")
