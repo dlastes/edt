@@ -20,20 +20,27 @@ function message_display2(msg_type, content) {
 
 
 $('#modal-profil-edit').on('show.bs.modal', function(e){
-  checkVacataire();
+  checkVacataireOrFullStaff();
 });
 
-function checkVacataire() {
+function checkVacataireOrFullStaff() {
   var statusSelect = document.getElementById('newInputStatus');
   var strUser = statusSelect.options[statusSelect.selectedIndex].text;
   var idStatusVacataire = document.getElementById('statusVacataire');
   var idEmployer = document.getElementById('employer');
+  var idIsIut = document.getElementById('is_iut_checkbox');
   if(strUser=='Vacataire') {
       idStatusVacataire.style.display = "block";
       idEmployer.style.display = "block";
-  } else {
+      idIsIut.style.display = "none";
+  } else if(strUser=='Permanent'){
       idStatusVacataire.style.display = "none";
       idEmployer.style.display = "none";
+      idIsIut.style.display = "block";
+  } else {
+    idStatusVacataire.style.display = "none";
+    idEmployer.style.display = "none";
+    idIsIut.style.display = "none";
   }
 
 }
@@ -58,22 +65,22 @@ $('#validerProfil').click(function(){
     employer = elements.namedItem("newEmployer").value;
     console.log(employer);
   }
-  if (id == null) {
+  if (id == "") {
      message_display2("Warning", "L'identifiant ne peut pas être vide");
   }
-  else if (firstName == null) {
+  if (firstName == "") {
      message_display2("Warning", "Le nom ne peut pas être vide");
   }
-  else if (lastName == null) {
+  if (lastName == "") {
      message_display2("Warning", "Le prénom ne peut pas être vide");
   }
-  else if (email == null) {
+  if (email == "") {
      message_display2("Warning", "L'email ne peut pas être vide");
   }
-  else if (status=='Vacataire' && statusVacataire == null) {
+  if (status=='Vacataire' && statusVacataire == "") {
      message_display2("Warning", "Le status Vacataire ne peut pas être vide");
   }
-  else if (status=='Vacataire' && employer == null) {
+  if (status=='Vacataire' && employer == "") {
      message_display2("Warning", "L'employeur ne peut pas être vide");
   }
 })

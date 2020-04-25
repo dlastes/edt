@@ -110,6 +110,15 @@
                                 <label>Employeur : {{ employer }}</label>
                               </div>
                             {% endif %}
+                            {% if status == 'Permanent' %}
+                              <div class="form-group col-form-label">
+                                {% if is_iut == True %}
+                                  <label>Membre de l'iut</label>
+                                {% else %}
+                                  <label>Non membre de l'iut</label>
+                                {% endif %}
+                              </div>
+                            {% endif %}
                         </div>
                          <div class="col-sm-8 mt-3">
                             <div class="form-group row">
@@ -168,22 +177,22 @@
                          </div>
                            <div class="card container">
                              <div class="card-body pb-0">
-                               <div class="form-group row">
+                               <div class="row">
 
                                   <form class="col-sm-12" id="form-profil" action="{% url 'flopeditor:flopeditor-ajax-update-profil' %}">
                                     {% csrf_token %}
                                     <div class="row">
                                       <div class="col-sm-4  mt-3 " style="border-right: solid 1px grey;">
-                                        <div class="form-group row">
+                                        <div class="row">
                                           <p class="col-sm-12 h6"><u><strong>Statut</strong></u></p>
                                         </div>
-                                        <div class="mt-3 row">
-                                          <fieldset class="form-group">
+                                        <div class="row">
+                                          <fieldset class="bmd-form-group">
                                             <div class="row">
                                               <input name="oldStatus" class="old_dept_name" value="{{ status }}" hidden>
                                               <label for="newInputStatus" class="col-sm-12 text-dark">Statut</label>
                                               <div class="col-sm-12">
-                                                <select name="newInputStatus" class="resps selectpicker" size="3" onchange="checkVacataire()" id="newInputStatus">
+                                                <select name="newInputStatus" class="input-status" onchange="checkVacataireOrFullStaff()" id="newInputStatus">
                                                   <option value="Permanent" {% if status == "Permanent" %}selected{% endif %}>Permanent</option>
                                                   <option value="Vacataire"{% if status == "Vacataire" %}selected{% endif %}>Vacataire</option>
                                                   <option value="Biatos"{% if status == "Biatos" %}selected{% endif %}>Biatos</option>
@@ -191,23 +200,33 @@
                                               </div>
                                             </div>
                                           </fieldset>
-                                          <fieldset class="form-group">
+                                          <fieldset class="bmd-form-group">
                                             <div class="row" id="statusVacataire">
-                                              <label for="inputstatusVacataire" class="bmd-label-static text-dark">Statut vacataire</label>
+                                              <label for="newstatusVacataire" class="bmd-label-static text-dark">Statut vacataire</label>
                                               <div class="col-sm-8">
                                                 <input name="newstatusVacataire" maxlength="50" type="text" class="new_dept_name form-control w-100" id="newStatusVacataire" value="{{ status_vacataire }}" required>
                                               </div>
                                             </div>
                                           </fieldset>
-                                          <fieldset class="form-group">
-                                          <div class="row" id="employer">
-                                              <label for="inputEmployer" class="bmd-label-static text-dark">Employeur</label>
-                                              <div class="col-sm-8">
-                                                <input name="newEmployer" maxlength="50" type="text" class="new_dept_name form-control w-100" id="newEmployer" value="{{ employer }}" required>
-                                              </div>
-                                          </div>
-                                       </fieldset>
-                                     </div>
+                                          <fieldset class="bmd-form-group">
+                                            <div class="row" id="employer">
+                                                <label for="newEmployer" class="bmd-label-static text-dark">Employeur</label>
+                                                <div class="col-sm-8">
+                                                  <input name="newEmployer" maxlength="50" type="text" class="new_dept_name form-control w-100" id="newEmployer" value="{{ employer }}" required>
+                                                </div>
+                                            </div>
+                                          </fieldset>
+
+
+                                          <fieldset class="bmd-form-group">
+                                            <div id="is_iut_checkbox">
+                                                <label for="iut" class="text-dark">membre iut</label>
+                                                <input type="checkbox" name="iut" id="iut" {% if is_iut == True %} checked {% endif %}>
+                                            </div>
+                                          </fieldset>
+
+
+                                        </div>
                                    </div>
                                    <div class="col-sm-8 mt-3">
                                        <div class="form-group row">
@@ -252,9 +271,10 @@
                                 <div class="col-sm-12 mt-4 text-center">
                                     <div id="form-message-profil" class="alert mt-4 mr-2 ml-2 mb-3" role="alert"
                                         style="display:none;border-radius:5px;"></div>
-                                    <button id="validerProfil" type="submit" class="btn btn-raised btn-success mr-3" >Valider<i
-                                            class="fa fa-check"></i></button>
-                                    <button id="cancel-profil" class="btn btn-raised btn-info mx-auto mt-4" data-dismiss="modal" title='Annuler'>Annuler<i class="fas fa-pencil-alt"></i> </button>
+                                    <button id="validerProfil" type="submit" class="btn btn-raised btn-success mx-auto" >Valider
+                                      <i class="fa fa-check ml-2"></i></button>
+                                    <button id="cancel-profil" class="btn btn-raised btn-info ml-3" data-dismiss="modal" title='Annuler'>Annuler
+                                        <i class="fas fa-pencil-alt ml-2"></i> </button>
                                 </div>
                               </form>
                                </div>

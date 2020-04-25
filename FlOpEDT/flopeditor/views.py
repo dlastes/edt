@@ -39,7 +39,7 @@ from FlOpEDT.decorators import superuser_required, \
 
 from people.models import Tutor, UserDepartmentSettings
 from flopeditor.db_requests import create_departments_in_database, \
-    update_departments_in_database, get_status_of_user, update_user_in_database
+    update_departments_in_database, get_status_of_user, update_user_in_database, get_is_iut
 from flopeditor.validator import validate_department_creation,\
     validate_department_update, validate_parameters_edit, validate_profil_update, OK_RESPONSE
 
@@ -68,6 +68,7 @@ def home(request):
                    'status':status,
                    'status_vacataire':position,
                    'employer':employer,
+                   'is_iut': get_is_iut(request),
                   })
 
 
@@ -120,6 +121,7 @@ def department_parameters(request, department_abbrev):
         'status':status,
         'status_vacataire':position,
         'employer':employer,
+        'is_iut': get_is_iut(request),
     })
 
 
@@ -154,6 +156,7 @@ def department_parameters_edit(request, department_abbrev):
         'status':status,
         'status_vacataire':position,
         'employer':employer,
+        'is_iut': get_is_iut(request),
     })
 
 
@@ -273,6 +276,7 @@ def crud_view(request, department_abbrev, view_name, title):
         'status':status,
         'status_vacataire':position,
         'employer':employer,
+        'is_iut': get_is_iut(request),
     })
 
 
