@@ -794,13 +794,8 @@ class AvoidBothTimes(TTConstraint):
             fc = fc.filter(groups__train_prog=self.train_prog)
         if self.group:
             fc = fc.filter(groups=self.group)
-<<<<<<< HEAD
         slots1 = set([slot for slot in ttmodel.wdb.courses_slots if slot.start_time <= self.time1 < slot.end_time])
         slots2 = set([slot for slot in ttmodel.wdb.courses_slots if slot.start_time <= self.time2 < slot.end_time])
-=======
-        slots1 = set([slot for slot in ttmodel.wdb.slots if slot.start_time <= self.time1 < slot.end_time])
-        slots2 = set([slot for slot in ttmodel.wdb.slots if slot.start_time <= self.time2 < slot.end_time])
->>>>>>> many_groups
         for c1 in fc:
             for c2 in fc.exclude(id__lte=c1.id):
                 for sl1 in slots1:
@@ -867,11 +862,7 @@ class LimitedStartTimeChoices(TTConstraint):
             fc = fc.filter(groups__train_prog__in=self.train_progs.all())
         if self.group is not None:
             fc = fc.filter(groups=self.group)
-<<<<<<< HEAD
         possible_slots_ids = set(slot.id for slot in ttmodel.wdb.courses_slots
-=======
-        possible_slots_ids = set(slot.id for slot in ttmodel.wdb.slots
->>>>>>> many_groups
                                  if slot.start_time in self.possible_start_times.values_list())
 
         for c in fc:
