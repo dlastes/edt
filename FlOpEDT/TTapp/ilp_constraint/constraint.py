@@ -142,8 +142,9 @@ class Constraint:
         for course in courses:
             if course.tutor not in instructors:
                 instructors.append(course.tutor)
-            if course.group not in groups:
-                groups.append(course.group)
+            for g in course.groups.all():
+                if g not in groups:
+                    groups.append(g)
             if course.module not in modules:
                 modules.append(course.module)
 
