@@ -28,10 +28,46 @@ without disclosing the source code of your own applications.
 """
 
 from django.http import JsonResponse
-from base.models import Room, RoomType, Department
-from people.models import Tutor, SupplyStaff, User, FullStaff, BIATOS, UserDepartmentSettings
+from base.models import Department
+from people.models import Tutor, SupplyStaff, User, FullStaff, BIATOS
 from flopeditor.validator import OK_RESPONSE, ERROR_RESPONSE, validate_tutor_values
-from flopeditor.db_requests import get_status_of_tutor
+from flopeditor.db_requests import get_status_of_tutor, TUTOR_CHOICES_LIST, TUTOR_CHOICES_DICT
+
+# Le rang de la chaîne de caractère dans la liste correspond au rang du bit dans user.rights
+RIGHTS_LIST = [
+    "Quand 'modifier Cours' coché, les cours sont colorés avec la dispo de l'intervenant",
+    "Peut changer les dispos de tout le monde",
+    "Peut modifier l'emploi du temps comme bon lui semble",
+    "Si responsable d'un module, peut changer les dispos des vacataires de ce module",
+    "Peut surpasser les contraintes lors de la modification de cours"
+]
+
+def user_rights_to_list(rights):
+    """Convert User.rights integer to list of string
+    :param rights: rights integer.
+    :type rights:  int
+    :return: List containing the corresponding rights.
+    :rtype:  list
+    """
+    result = []
+    for (i, right) in enumerate(RIGHTS_LIST):
+        if (rights >> i) % 2 == 1:
+            result.append(right)
+    return result
+
+def list_to_user_rights(right_list):
+    """Convert list of rights to User.rights integer
+    :param right_list: List containing the user's rights.
+    :type right_list:  list
+    :return: rights integer
+    :rtype:  int
+    """
+    rights = 0
+    for (i, right) in enumerate(RIGHTS_LIST):
+        if right in right_list:
+            rights += 2**i
+    return rights
+
 
 def has_rights_to_delete_tutor(user, tutor, entries):
     """
@@ -95,9 +131,9 @@ def has_rights_to_update_tutor(user, entries, i):
     :rtype:  Boolean
 
     """
-    if set(entries['new_values'][i][7]) == set(entries['old_values'][i][7]):
+    if set(entries['new_values'][i][8]) == set(entries['old_values'][i][8]):
         departments = Department.objects.filter(
-            name__in=entries['new_values'][i][7])
+            name__in=entries['new_values'][i][8])
         if not departments:
             return True
         for dept in departments:
@@ -110,10 +146,10 @@ def has_rights_to_update_tutor(user, entries, i):
         return False
 
     old_departments = Department.objects.filter(
-        name__in=entries['old_values'][i][7])
+        name__in=entries['old_values'][i][8])
 
     new_departments = Department.objects.filter(
-        name__in=entries['new_values'][i][7])
+        name__in=entries['new_values'][i][8])
 
     for dep in old_departments:
         if not user.has_department_perm(department=dep, admin=True) and dep not in new_departments:
@@ -150,8 +186,17 @@ def read(department):
     values = []
     for tut in tutors:
         status, position, employer = get_status_of_tutor(tut)
-        values.append((tut.username, tut.first_name, tut.last_name, status, tut.email,
-                       position, employer, list(tut.departments.values_list('name', flat=True))))
+        values.append((
+            tut.username,
+            tut.first_name,
+            tut.last_name,
+            status,
+            tut.email,
+            position,
+            employer,
+            user_rights_to_list(tut.rights),
+            list(tut.departments.values_list('name', flat=True))
+        ))
 
     return JsonResponse({
         "columns":  [{
@@ -169,7 +214,7 @@ def read(department):
         }, {
             'name': 'Statut',
             "type": "select",
-            "options": {'values': ["Permanent", "Vacataire", "Biatos"]}
+            "options": {'values': TUTOR_CHOICES_LIST}
         }, {
             'name': 'Email',
             "type": "text",
@@ -182,6 +227,10 @@ def read(department):
             'name': 'Employeur',
             "type": "text",
             "options": {}
+        }, {
+            'name': 'Droits particuliers',
+            "type": "select-chips",
+            "options": {'values': RIGHTS_LIST}
         }, {
             'name': 'Départements',
             "type": 'select-chips',
@@ -218,7 +267,7 @@ def create(request, entries, department):
         else:
             tutor = None
 
-            if entries['new_values'][i][3] == "Vacataire":
+            if entries['new_values'][i][3] == TUTOR_CHOICES_DICT[Tutor.SUPP_STAFF]:
                 tutor = SupplyStaff.objects.create(
                     username=entries['new_values'][i][0],
                     first_name=entries['new_values'][i][1],
@@ -226,24 +275,27 @@ def create(request, entries, department):
                     status=Tutor.SUPP_STAFF,
                     email=entries['new_values'][i][4],
                     position=entries['new_values'][i][5],
-                    employer=entries['new_values'][i][6])
-            elif entries['new_values'][i][3] == "Permanent":
+                    employer=entries['new_values'][i][6],
+                    rights=list_to_user_rights(entries['new_values'][i][7]))
+            elif entries['new_values'][i][3] == TUTOR_CHOICES_DICT[Tutor.FULL_STAFF]:
                 tutor = FullStaff.objects.create(
                     username=entries['new_values'][i][0],
                     first_name=entries['new_values'][i][1],
                     last_name=entries['new_values'][i][2],
                     status=Tutor.FULL_STAFF,
-                    email=entries['new_values'][i][4])
-            elif entries['new_values'][i][3] == "Biatos":
+                    email=entries['new_values'][i][4],
+                    rights=list_to_user_rights(entries['new_values'][i][7]))
+            elif entries['new_values'][i][3] == TUTOR_CHOICES_DICT[Tutor.BIATOS]:
                 tutor = BIATOS.objects.create(
                     username=entries['new_values'][i][0],
                     first_name=entries['new_values'][i][1],
                     last_name=entries['new_values'][i][2],
                     status=Tutor.BIATOS,
-                    email=entries['new_values'][i][4])
+                    email=entries['new_values'][i][4],
+                    rights=list_to_user_rights(entries['new_values'][i][7]))
 
             tutor.departments.set(Department.objects.filter(
-                name__in=entries['new_values'][i][7]))
+                name__in=entries['new_values'][i][8]))
 
             if has_rights_to_create_tutor(request.user, tutor, entries):
                 tutor.save()
@@ -273,12 +325,6 @@ def update(request, entries, department):
             pass
         elif not validate_tutor_values(entries['new_values'][i], entries):
             pass
-        # elif entries['new_values'][i][3] != entries['old_values'][i][3]:
-        #     #NB: c'est le cas où il faudrait changer un objet de classe
-        #     entries['result'].append([
-        #         ERROR_RESPONSE,
-        #         "Opération non supportée."
-        #     ])
         elif User.objects.filter(username=entries['new_values'][i][0]) and \
                 entries['old_values'][i][0] != entries['new_values'][i][0]:
             entries['result'].append([
@@ -290,13 +336,13 @@ def update(request, entries, department):
                 if entries['new_values'][i][3] != entries['old_values'][i][3]:
                     tutor_to_update = Tutor.objects.get(
                         username=entries['old_values'][i][0])
-                    if entries['new_values'][i][3] == "Vacataire":
+                    if entries['new_values'][i][3] == TUTOR_CHOICES_DICT[Tutor.SUPP_STAFF]:
                         new = SupplyStaff(tutor_ptr_id=tutor_to_update.id)
                         new.__dict__.update(tutor_to_update.__dict__)
                         new.status = Tutor.SUPP_STAFF
                         new.position = entries['new_values'][i][5]
                         new.employer = entries['new_values'][i][6]
-                    elif entries['new_values'][i][3] == "Permanent":
+                    elif entries['new_values'][i][3] == TUTOR_CHOICES_DICT[Tutor.FULL_STAFF]:
                         new = FullStaff(tutor_ptr_id=tutor_to_update.id)
                         new.__dict__.update(tutor_to_update.__dict__)
                         new.status = Tutor.FULL_STAFF
@@ -304,18 +350,19 @@ def update(request, entries, department):
                         new = BIATOS(tutor_ptr_id=tutor_to_update.id)
                         new.__dict__.update(tutor_to_update.__dict__)
                         new.status = Tutor.BIATOS
-                    
+
                     new.username = entries['new_values'][i][0]
                     new.first_name = entries['new_values'][i][1]
                     new.last_name = entries['new_values'][i][2]
                     new.email = entries['new_values'][i][4]
+                    new.rights = list_to_user_rights(entries['new_values'][i][7])
                     new.departments.set(Department.objects.filter(
-                        name__in=entries['new_values'][i][7]))
+                        name__in=entries['new_values'][i][8]))
                     new.save()
 
-                    if entries['old_values'][i][3] == "Vacataire":
+                    if entries['old_values'][i][3] == TUTOR_CHOICES_DICT[Tutor.SUPP_STAFF]:
                         SupplyStaff.objects.get(id=tutor_to_update.id).delete(keep_parents=True)
-                    elif entries['old_values'][i][3] == "Permanent":
+                    elif entries['old_values'][i][3] == TUTOR_CHOICES_DICT[Tutor.FULL_STAFF]:
                         FullStaff.objects.get(id=tutor_to_update.id).delete(keep_parents=True)
                     else:
                         BIATOS.objects.get(id=tutor_to_update.id).delete(keep_parents=True)
@@ -324,23 +371,24 @@ def update(request, entries, department):
                     tutor_to_update = Tutor.objects.get(
                         username=entries['old_values'][i][0])
 
-                    if entries['new_values'][i][3] == "Vacataire":
+                    if entries['new_values'][i][3] == TUTOR_CHOICES_DICT[Tutor.SUPP_STAFF]:
                         tutor_to_update.status = Tutor.SUPP_STAFF
                         tutor_to_update = SupplyStaff.objects.get(
                             username=entries['old_values'][i][0])
                         tutor_to_update.position = entries['new_values'][i][5]
                         tutor_to_update.employer = entries['new_values'][i][6]
-                    elif entries['new_values'][i][3] == "Permanent":
+                    elif entries['new_values'][i][3] == TUTOR_CHOICES_DICT[Tutor.FULL_STAFF]:
                         tutor_to_update.status = Tutor.FULL_STAFF
-                    elif entries['new_values'][i][3] == "Biatos":
+                    elif entries['new_values'][i][3] == TUTOR_CHOICES_DICT[Tutor.BIATOS]:
                         tutor_to_update.status = Tutor.BIATOS
 
                     tutor_to_update.username = entries['new_values'][i][0]
                     tutor_to_update.first_name = entries['new_values'][i][1]
                     tutor_to_update.last_name = entries['new_values'][i][2]
                     tutor_to_update.email = entries['new_values'][i][4]
+                    tutor_to_update.rights = list_to_user_rights(entries['new_values'][i][7])
                     tutor_to_update.departments.set(Department.objects.filter(
-                        name__in=entries['new_values'][i][7]))
+                        name__in=entries['new_values'][i][8]))
 
                     tutor_to_update.save()
 
