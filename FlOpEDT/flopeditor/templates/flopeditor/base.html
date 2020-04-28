@@ -208,17 +208,17 @@
                                           </fieldset>
                                           <fieldset class="bmd-form-group">
                                             <div class="row" id="statusVacataire">
-                                              <label for="newstatusVacataire" class="bmd-label-static text-dark">Statut vacataire</label>
+                                              <label for="newstatusVacataire" class="bmd-label-static text-dark">Statut vacataire {{status_vacataire}}</label>
                                               <div class="col-sm-8">
-                                                <input name="newstatusVacataire" maxlength="50" autocomplete="off" type="text" class="new_dept_name form-control w-100" id="newStatusVacataire" value="{{ status_vacataire }}"  required>
+                                                <input name="newstatusVacataire" maxlength="50" autocomplete="off" type="text" class="new_dept_name form-control w-100" id="newStatusVacataire" {% if status_vacataire != None %} value="{{ status_vacataire }}" {% else %}  value="" {% endif %} >
                                               </div>
                                             </div>
                                           </fieldset>
                                           <fieldset class="bmd-form-group">
                                             <div class="row" id="employer">
-                                                <label for="newEmployer" class="bmd-label-static text-dark">Employeur</label>
+                                                <label for="newEmployer" class="bmd-label-static text-dark">Employeur{{employer}}</label>
                                                 <div class="col-sm-8">
-                                                  <input name="newEmployer" maxlength="50" type="text" autocomplete="off" class="new_dept_name form-control w-100" id="newEmployer"  value="{{ employer }}"  required>
+                                                  <input name="newEmployer" maxlength="50" type="text" autocomplete="off" class="new_dept_name form-control w-100" id="newEmployer" {% if employer != None %} value="{{ employer }}" {% else %}  value="" {% endif %}>
                                                 </div>
                                             </div>
                                           </fieldset>

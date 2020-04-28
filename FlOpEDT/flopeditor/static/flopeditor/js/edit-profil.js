@@ -1,6 +1,6 @@
 /* jshint esversion: 6 */
 
-function message_reset2() {
+function message_reset_display() {
     const message_div = $("#form-message-profil");
     message_div.removeClass(function (index, className) {
         return (className.match(/(^|\s)alert-\S+/g) || []).join(' ');
@@ -10,8 +10,8 @@ function message_reset2() {
 
 
 
-function message_display2(msg_type, content) {
-    message_reset2();
+function message_ondisplay(msg_type, content) {
+    message_reset_display();
     const message_div = $("#form-message-profil");
     message_div.addClass("alert-" + msg_type);
     message_div.text(content);
@@ -94,19 +94,19 @@ $('#form-profil').submit(function(event) {
             case 'ERROR':
               $("#validerProfil").removeClass('disabled');
               $("#cancel-profil").removeClass('disabled');
-              message_display2("warning", response.message);
+              message_ondisplay("warning", response.message);
               break;
             case 'UNKNOWN':
               $("#validerProfil").removeClass('disabled');
               $("#cancel-profil").removeClass('disabled');
-              message_display2("warning", response.message);
+              message_ondisplay("warning", response.message);
               break;
           }
 
       },
       error: function(error) {
           $("#validerProfil").html(button_html);
-          message_display2(form, "warning", "Une erreur est survenue. Veuillez réessayer.");
+          message_ondisplay(form, "warning", "Une erreur est survenue. Veuillez réessayer.");
       },
   });
 });

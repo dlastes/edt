@@ -429,20 +429,21 @@ def validate_profil_update(request):
         email = True
     except ValidationError:
         email = False
+
     if len(new_username) > 150:
         response = {
             'status': ERROR_RESPONSE,
-            'message': "Le username est trop long. (<150caractère)"
+            'message': "Le username est trop long. (<150caractères)"
         }
     elif len(new_first_name) > 30:
         response = {
             'status': ERROR_RESPONSE,
-            'message': "Le prénom est trop long. (<30caractère)'"
+            'message': "Le prénom est trop long. (<30caractères)'"
         }
     elif len(new_last_name) > 150:
         response = {
             'status': ERROR_RESPONSE,
-            'message': "Le nom est trop long. (<150caractère)'"
+            'message': "Le nom est trop long. (<150caractères)'"
         }
     elif not email:
         response = {
@@ -452,12 +453,12 @@ def validate_profil_update(request):
     elif new_status_vacataire is not None and len(new_status_vacataire) > 50:
         response = {
             'status': ERROR_RESPONSE,
-            'message': "Le statut de vacataire est trop long. (<50caractère)"
+            'message': "Le statut de vacataire est trop long. (<50caractères)"
         }
     elif new_employer is not None and len(new_employer) > 50:
         response = {
             'status': ERROR_RESPONSE,
-            'message': "Le nom de l'employeur est trop long. (<50caractère)"
+            'message': "Le nom de l'employeur est trop long. (<50caractères)"
         }
     elif old_username != new_username and Tutor.objects.filter(username=new_username):
         response = {
