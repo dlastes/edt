@@ -31,7 +31,92 @@
         </h5>
         <br>
       </div>
+      <h3>Sommaire</h3>
 
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Action</th>
+            <th scope="col">Tuteur</th>
+            <th scope="col">Responsable d'un département</th>
+            <th scope="col">Superuser</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row"><a href="#dept">Création, modification d'un département</a></th>
+            <td><i class=" fas fa-times"><i></td>
+            <td><i class=" fas fa-times"><i></td>
+            <td><i class=" fas fa-check"><i></td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="#intervenant">Ajouter, modifier, supprimer un intervenant</a</th>
+            <td><i class=" fas fa-times"><i></td>
+            <td><i class=" fas fa-check"><i></td>
+            <td><i class=" fas fa-check"><i></td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="#salle">Ajouter, modifier, supprimer une salle / un groupe de salles</a></th>
+            <td><i class=" fas fa-times"><i></td>
+            <td><i class=" fas fa-check"><i></td>
+            <td><i class=" fas fa-check"><i></td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="#cat-salle">Ajouter, modifier, supprimer une catégorie de salle</a></th>
+            <td><i class=" fas fa-times"><i></td>
+            <td><i class=" fas fa-check"><i></td>
+            <td><i class=" fas fa-check"><i></td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="#semestre">Ajouter, Modifier, supprimer un semestre</a></th>
+            <td><i class=" fas fa-times"><i></td>
+            <td><i class=" fas fa-check"><i></td>
+            <td><i class=" fas fa-check"><i></td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="#promo">Ajouter, Modifier, supprimer une promo</a></th>
+            <td><i class=" fas fa-times"><i></td>
+            <td><i class=" fas fa-check"><i></td>
+            <td><i class=" fas fa-check"><i></td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="#nature-groupe">Ajouter, Modifier, supprimer une nature de groupes</a></th>
+            <td><i class=" fas fa-times"><i></td>
+            <td><i class=" fas fa-check"><i></td>
+            <td><i class=" fas fa-check"><i></td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="#groupe">Ajouter, Modifier, supprimer un groupe d'élèves</a></th>
+            <td><i class=" fas fa-times"><i></td>
+            <td><i class=" fas fa-check"><i></td>
+            <td><i class=" fas fa-check"><i></td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="#module">Ajouter, Modifier, supprimer un module</a></th>
+            <td><i class=" fas fa-times"><i></td>
+            <td><i class=" fas fa-check"><i></td>
+            <td><i class=" fas fa-check"><i></td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="#cours">Ajouter, Modifier, supprimer un cours</a></th>
+            <td><i class=" fas fa-times"><i></td>
+            <td><i class=" fas fa-check"><i></td>
+            <td><i class=" fas fa-check"><i></td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="#params">Modifier les paramètres</a></th>
+            <td><i class=" fas fa-times"><i></td>
+            <td><i class=" fas fa-check"><i></td>
+            <td><i class=" fas fa-check"><i></td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="profil">Afficher, modifier son profil</a></th>
+            <td><i class=" fas fa-check"><i></td>
+            <td><i class=" fas fa-check"><i></td>
+            <td><i class=" fas fa-check"><i></td>
+          </tr>
+        </tbody>
+      </table>
       <p>En introduction de la doc, un tableau de résumé des droits
         (comme dans framagit pour les droits des membres d'un projet https://framagit.org/help/user/permissions)
         où chaque ligne serait un lien vers la section concernée dans la doc pourrait jouer le rôle de table des
@@ -44,23 +129,6 @@
       {% endif %}
 
       <br>
-      <h3>Sommaire</h3>
-      {% if request.user.is_superuser %}
-      <h5><a href="#dept">Création, modification d'un département</a></h5>
-      {% endif %}
-      {% if is_admin %}
-      <h5><a href="#intervenant">Ajouter, modifier, supprimer un intervenant</a></h5>
-      <h5><a href="#salle">Ajouter, modifier, supprimer une salle / un groupe de salles</a></h5>
-      <h5><a href="#cat-salle">Ajouter, modifier, supprimer une catégorie de salle</a></h5>
-      <h5><a href="#semestre">Ajouter, Modifier, supprimer un semestre</a></h5>
-      <h5><a href="#promo">Ajouter, Modifier, supprimer une promo</a></h5>
-      <h5><a href="#nature-groupe">Ajouter, Modifier, supprimer une nature de groupes</a></h5>
-      <h5><a href="#groupe">Ajouter, Modifier, supprimer un groupe d'élèves</a></h5>
-      <h5><a href="#module">Ajouter, Modifier, supprimer un module</a></h5>
-      <h5><a href="#cours">Ajouter, Modifier, supprimer un cours</a></h5>
-      <h5><a href="#params">Modifier les paramètres</a></h5>
-      {% endif %}
-      <h5><a href="profil">Afficher, modifier son profil</a></h5>
       <br>
       {% if request.user.is_superuser %}
       <h3 id="dept">Création, modification d'un département</h3>
