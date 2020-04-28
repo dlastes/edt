@@ -45,28 +45,6 @@ function checkVacataireOrFullStaff() {
 
 }
 
-$('#validerProfil').click(function(){
-  var elements = document.getElementById("form-profil").elements;
-  var id = elements.namedItem("newIdProfil").value;
-  console.log(id);
-  var firstName = elements.namedItem("newFirtNameProfil").value;
-  console.log(firstName);
-  var lastName = elements.namedItem("newSecondNameProfil").value;
-  console.log(lastName);
-  var email = elements.namedItem("newEmailProfil").value;
-  console.log(email);
-  var status = elements.namedItem("newInputStatus").value;
-  console.log(status);
-  var statusVacataire = null;
-  var employer = null;
-  if (status == 'Vacataire') {
-    statusVacataire = elements.namedItem("newStatusVacataire").value;
-    console.log(statusVacataire);
-    employer = elements.namedItem("newEmployer").value;
-    console.log(employer);
-  }
-
-})
 
 
 $('#form-profil').submit(function(event) {
@@ -78,27 +56,22 @@ $('#form-profil').submit(function(event) {
   $("#cancel-profil").addClass('disabled');
   const button_html = $("#validerProfil").html();
   $("#validerProfil").html("<i class=\"fas fa-spinner fa-pulse\"></i>");
-  console.log("OK");
   $.ajax({
       type: "POST",
       url: url,
       data: form.serialize(),
       success: function(response) {
           $("#validerProfil").html(button_html);
+          $("#validerProfil").removeClass('disabled');
+          $("#cancel-profil").removeClass('disabled');
           switch(response.status) {
             case 'OK':
-              $("#validerProfil").removeClass('disabled');
-              $("#cancel-profil").removeClass('disabled');
               window.location.href = "";
               break;
             case 'ERROR':
-              $("#validerProfil").removeClass('disabled');
-              $("#cancel-profil").removeClass('disabled');
               message_ondisplay("warning", response.message);
               break;
             case 'UNKNOWN':
-              $("#validerProfil").removeClass('disabled');
-              $("#cancel-profil").removeClass('disabled');
               message_ondisplay("warning", response.message);
               break;
           }
