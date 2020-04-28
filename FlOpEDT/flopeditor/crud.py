@@ -34,7 +34,7 @@ from django.http import JsonResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 from base.models import Department
 from flopeditor.cruds import training_programmes, student_group_type,\
-    rooms, room_types, student_group, course_type, period, module
+    rooms, room_types, student_group, course_type, period, module, tutors
 
 
 def good_request(request, department):
@@ -87,6 +87,38 @@ def crud_model(request, department_abbrev, crud):
     return HttpResponseForbidden()
 
 
+def crud_tutors(request, department_abbrev):
+    """Crud url for rooms edition
+
+    :param request: Client request.
+    :type request:  django.http.HttpRequest
+    :param department_abbrev: Department abbreviation.
+    :type department_abbrev:  String
+    :return: Server response for the request.
+    :rtype:  django.http.JsonResponse
+
+    """
+    department = get_object_or_404(Department, abbrev=department_abbrev)
+    if not good_request(request, department):
+        pass
+    elif request.method == "GET":
+        return tutors.read(department)
+    elif request.method == "POST":
+        actions = json.loads(request.body.decode('utf-8'))['actions']
+        result = []
+        for action in actions:
+            if action['request'] == 'NEW':
+                result.append(tutors.create(request, action, department))
+            elif action['request'] == 'MODIFIED':
+                result.append(tutors.update(request, action, department))
+            elif action['request'] == 'DELETED':
+                result.append(tutors.delete(request, action, department))
+        return JsonResponse({
+            'actions': result
+        })
+    return HttpResponseForbidden()
+
+
 def crud_rooms(request, department_abbrev):
     """Crud url for rooms edition
 
@@ -100,9 +132,8 @@ def crud_rooms(request, department_abbrev):
     """
     department = get_object_or_404(Department, abbrev=department_abbrev)
     if not good_request(request, department):
-        return HttpResponseForbidden()
-
-    if request.method == "GET":
+        pass
+    elif request.method == "GET":
         return rooms.read(department)
     elif request.method == "POST":
         actions = json.loads(request.body.decode('utf-8'))['actions']
