@@ -29,12 +29,12 @@
       <img src="{% static 'base/img/flop2.png' %}" class='btn btn-raised p-0' style='max-width:300px' alt="Retourner vers FlopEDT">
     </a>
   </div>
-  <div class="col-12">
+  <div class="col-12" style="pointer-events:none">
       <h1 class="display-1 mb-4"><strong>Flop Editor</strong></h1>
       <p class="lead mb-4">
           Choix du département à éditer :
       </p>
-      <div class="department-list row">
+      <div class="department-list row" style="pointer-events:auto">
         {% for dept,resps in dict_depts.items %}
         <div class="col-12">
           <div class="btn-group mb-3" role="group">
@@ -48,7 +48,7 @@
       </div>
 
       {% if request.user.is_superuser %}
-      <p class="lead">
+      <p class="lead" style="pointer-events:auto">
           Vous pouvez aussi créer un nouveau département <button type="button" class="btn btn-secondary bmd-btn-fab bmd-btn-fab-sm mt-1" data-toggle="modal" data-target="#modal-create-department">ici</button>
       </p>
       {% endif %}

@@ -31,6 +31,12 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarText">
                 <ul class="navbar-nav mr-auto">
+                  {% if has_any_dept_perm %}
+                    <li class="nav-item {% block nav-classes-tutors %}{% endblock %}">
+                        <a class="nav-link"
+                            href="{% url 'flopeditor:flopeditor-department-tutors' department_abbrev=department.abbrev %}">Intervenants</a>
+                    </li>
+                  {% endif %}
                     <li class="nav-item {% block nav-classes-rooms %}{% endblock %}">
                         <a class="nav-link"
                             href="{% url 'flopeditor:flopeditor-department-rooms' department_abbrev=department.abbrev %}">Salles</a>
@@ -133,19 +139,19 @@
                               </div>
                             </div>
                             <div class="form-group row">
-                              <label class="col-sm-4 col-form-label">Nom</label>
+                              <label class="col-sm-4 col-form-label">Prénom</label>
                               <div class="col-auto col-form-label">
                                 {{ request.user.first_name }}
                               </div>
                             </div>
                             <div class="form-group row">
-                              <label class="col-sm-4 col-form-label">Prénom</label>
+                              <label class="col-sm-4 col-form-label">Nom</label>
                               <div class="col-auto col-form-label">
                                 {{ request.user.last_name }}
                               </div>
                             </div>
                             <div class="form-group row">
-                              <label class="col-sm-4 col-form-label">email</label>
+                              <label class="col-sm-4 col-form-label">Email</label>
                               <div class="col-auto col-form-label">
                                 {{ request.user.email }}
                               </div>
