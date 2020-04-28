@@ -141,7 +141,7 @@ def get_status_of_tutor(tutor):
         except SupplyStaff.DoesNotExist:
             pass
     else:
-        status = Tutor.BIATOS
+        status = TUTOR_CHOICES_DICT[Tutor.BIATOS]
     return status, None, None
 
 
@@ -158,21 +158,19 @@ def get_is_iut(request):
 
     """
     tutor = Tutor.objects.get(username=request.user)
-    if tutor.status == 'fs':
+    if tutor.status == Tutor.FULL_STAFF:
         return FullStaff.objects.get(username=request.user).is_iut
     return None
 
-def update_user_in_database(old_username, request):
+def update_user_in_database(request):
     """
     update user in database
 
     :param request: Client request.
     :type request:  django.http.HttpRequest
-    :param old_username: username
-    :type old_username: String
 
     """
-
+    old_username = request.user.username
     new_username = request.POST['newIdProfil']
     new_first_name = request.POST['newFirtNameProfil']
     new_last_name = request.POST['newLastNameProfil']
@@ -184,34 +182,34 @@ def update_user_in_database(old_username, request):
     new_is_iut = 'iut' in request.POST
     tutor = Tutor.objects.get(username=old_username)
 
-    if old_status == 'Permanent':
+    if old_status == TUTOR_CHOICES_DICT[Tutor.FULL_STAFF]:
         user = FullStaff.objects.get(id=tutor.id)
-    elif old_status == 'Vacataire':
+    elif old_status == TUTOR_CHOICES_DICT[Tutor.SUPP_STAFF]:
         user = SupplyStaff.objects.get(id=tutor.id)
     else:
         user = BIATOS.objects.get(id=tutor.id)
 
 
 
-    if old_status != new_status and new_status == 'Permanent':
+    if old_status != new_status and new_status == TUTOR_CHOICES_DICT[Tutor.FULL_STAFF]:
         user_update = FullStaff(tutor_ptr_id=tutor.id)
         user_update.__dict__.update(tutor.__dict__)
         user_update.username = new_username
         user_update.first_name = new_first_name
         user_update.last_name = new_last_name
         user_update.email = new_email
-        user_update.status = 'fs'
+        user_update.status = Tutor.FULL_STAFF
         user_update.is_iut = new_is_iut
         user_update.save()
         user.delete(keep_parents=True)
-    elif old_status != new_status and new_status == 'Vacataire':
+    elif old_status != new_status and new_status == TUTOR_CHOICES_DICT[Tutor.SUPP_STAFF]:
         user_update = SupplyStaff(tutor_ptr_id=tutor.id)
         user_update.__dict__.update(tutor.__dict__)
         user_update.username = new_username
         user_update.first_name = new_first_name
         user_update.last_name = new_last_name
         user_update.email = new_email
-        user_update.status = 'ss'
+        user_update.status = Tutor.SUPP_STAFF
         user_update.employer = new_employer
         user_update.position = new_status_vacataire
         user_update.save()
@@ -223,7 +221,7 @@ def update_user_in_database(old_username, request):
         user_update.first_name = new_first_name
         user_update.last_name = new_last_name
         user_update.email = new_email
-        user_update.status = 'bi'
+        user_update.status = Tutor.BIATOS
         user_update.save()
         user.delete(keep_parents=True)
     else:
@@ -231,9 +229,9 @@ def update_user_in_database(old_username, request):
         user.first_name = new_first_name
         user.last_name = new_last_name
         user.email = new_email
-        if new_status == 'Vacataire':
+        if new_status == TUTOR_CHOICES_DICT[Tutor.SUPP_STAFF]:
             user.employer = new_employer
             user.position = new_status_vacataire
-        elif new_status == 'Permanent':
+        elif new_status == TUTOR_CHOICES_DICT[Tutor.FULL_STAFF]:
             user.is_iut = new_is_iut
         user.save()

@@ -389,7 +389,7 @@ def validate_period_values(name, starting_week, ending_week, entries):
     return False
 
 
-def validate_profil_update(old_username, request):
+def validate_profil_update(request):
     """
     Validate profile attributs for profile update
 
@@ -399,6 +399,7 @@ def validate_profil_update(old_username, request):
     :rtype: (boolean,json)
 
     """
+    old_username = request.user.username
     new_username = request.POST['newIdProfil']
     new_first_name = request.POST['newFirtNameProfil']
     new_last_name = request.POST['newLastNameProfil']

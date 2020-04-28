@@ -462,9 +462,8 @@ def ajax_update_profil(request):
     """
 
     if request.is_ajax() and request.method == "POST":
-        old_username = request.user.username
-        response = validate_profil_update(old_username, request)
+        response = validate_profil_update(request)
         if response['status'] == OK_RESPONSE:
-            update_user_in_database(old_username, request)
+            update_user_in_database(request)
         return JsonResponse(response)
     return HttpResponseForbidden()
