@@ -194,7 +194,8 @@ class WeeksDatabase(object):
         for sl in self.availability_slots:
             other_departments_sched_courses_for_avail_slot[sl] = \
                 set(fc for fc in other_departments_sched_courses
-                    if fc.start_time < sl.end_time and sl.start_time < fc.end_time and fc.day == sl.day)
+                    if fc.start_time < sl.end_time and sl.start_time < fc.end_time
+                    and fc.day == sl.day.day and fc.course.week == sl.day.week)
 
         courses_availabilities = CoursePreference.objects \
             .filter(Q(week__in=self.weeks, year=self.year) | Q(week=None),
