@@ -35,13 +35,13 @@ from django.http import JsonResponse, HttpResponseForbidden
 from base.models import Department, TimeGeneralSettings, Day
 from base.timing import min_to_str, str_to_min
 from FlOpEDT.decorators import superuser_required, \
-    tutor_or_superuser_required
+    tutor_or_superuser_required, tutor_required
 
 from people.models import Tutor, UserDepartmentSettings
 from flopeditor.db_requests import create_departments_in_database, \
-    update_departments_in_database, get_status_of_user
+    update_departments_in_database, get_status_of_user, update_user_in_database, get_is_iut
 from flopeditor.validator import validate_department_creation,\
-    validate_department_update, validate_parameters_edit, OK_RESPONSE
+    validate_department_update, validate_parameters_edit, validate_profil_update, OK_RESPONSE
 
 
 def has_any_dept_perm(request):
@@ -84,10 +84,14 @@ def home(request):
                   {'dict_depts': dict_depts,
                    'title': 'Choix du département',
                    'admins': tutors,
-                   'status': status,
-                   'status_vacataire': position,
-                   'employer': employer,
-                   })
+                   'status':status,
+                   'status_vacataire':position,
+                   'employer':employer,
+                   'is_iut': get_is_iut(request),
+                   'has_any_dept_perm': has_any_dept_perm(request),
+                  })
+
+
 
 
 @tutor_or_superuser_required
@@ -134,10 +138,11 @@ def department_parameters(request, department_abbrev):
         'default_preference_duration': min_to_str(parameters.default_preference_duration),
         'list_departments': departments,
         'has_department_perm': request.user.has_department_perm(department=department, admin=True),
+        'status':status,
+        'status_vacataire':position,
+        'employer':employer,
+        'is_iut': get_is_iut(request),
         'has_any_dept_perm': has_any_dept_perm(request),
-        'status': status,
-        'status_vacataire': position,
-        'employer': employer,
     })
 
 
@@ -169,10 +174,11 @@ def department_parameters_edit(request, department_abbrev):
         'day_choices': Day.CHOICES,
         'default_preference_duration': min_to_str(parameters.default_preference_duration),
         'has_department_perm': request.user.has_department_perm(department=department, admin=True),
+        'status':status,
+        'status_vacataire':position,
+        'employer':employer,
+        'is_iut': get_is_iut(request),
         'has_any_dept_perm': has_any_dept_perm(request),
-        'status': status,
-        'status_vacataire': position,
-        'employer': employer,
     })
 
 
@@ -292,10 +298,11 @@ def crud_view(request, department_abbrev, view_name, title):
         'department': department,
         'list_departments': departments,
         'has_dept_perm': request.user.has_department_perm(department=department, admin=True),
+        'status':status,
+        'status_vacataire':position,
+        'employer':employer,
+        'is_iut': get_is_iut(request),
         'has_any_dept_perm': has_any_dept_perm(request),
-        'status': status,
-        'status_vacataire': position,
-        'employer': employer,
     })
 
 
@@ -444,3 +451,23 @@ def department_training_programmes(request, department_abbrev):
 
     """
     return crud_view(request, department_abbrev, 'flopeditor/training_programmes.html', 'Promos')
+
+@tutor_required
+def ajax_update_profil(request):
+    """
+
+    Ajax url for profil edition
+
+    :param request: Client request.
+    :type request:  django.http.HttpRequest
+    :return: Server response for the request.
+    :rtype:  django.http.JsonResponse
+
+    """
+
+    if request.is_ajax() and request.method == "POST":
+        response = validate_profil_update(request)
+        if response['status'] == OK_RESPONSE:
+            update_user_in_database(request)
+        return JsonResponse(response)
+    return HttpResponseForbidden()
