@@ -35,7 +35,7 @@ from django.http import JsonResponse, HttpResponseForbidden
 from base.models import Department, TimeGeneralSettings, Day
 from base.timing import min_to_str, str_to_min
 from FlOpEDT.decorators import superuser_required, \
-    tutor_or_superuser_required
+    tutor_or_superuser_required, tutor_required
 
 from people.models import Tutor, UserDepartmentSettings
 from flopeditor.db_requests import create_departments_in_database, \
@@ -452,7 +452,7 @@ def department_training_programmes(request, department_abbrev):
     """
     return crud_view(request, department_abbrev, 'flopeditor/training_programmes.html', 'Promos')
 
-
+@tutor_required
 def ajax_update_profil(request):
     """
 
