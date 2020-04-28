@@ -159,7 +159,12 @@ def get_is_iut(request):
     """
     tutor = Tutor.objects.get(username=request.user)
     if tutor.status == Tutor.FULL_STAFF:
-        return FullStaff.objects.get(username=request.user).is_iut
+        try:
+            fs = FullStaff.objects.get(username=request.user)
+            return fs.is_iut
+        except FullStaff.DoesNotExist:
+            pass
+
     return None
 
 def update_user_in_database(request):

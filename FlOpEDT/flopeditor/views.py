@@ -88,6 +88,7 @@ def home(request):
                    'status_vacataire':position,
                    'employer':employer,
                    'is_iut': get_is_iut(request),
+                   'has_any_dept_perm': has_any_dept_perm(request),
                   })
 
 
@@ -141,6 +142,7 @@ def department_parameters(request, department_abbrev):
         'status_vacataire':position,
         'employer':employer,
         'is_iut': get_is_iut(request),
+        'has_any_dept_perm': has_any_dept_perm(request),
     })
 
 
@@ -176,6 +178,7 @@ def department_parameters_edit(request, department_abbrev):
         'status_vacataire':position,
         'employer':employer,
         'is_iut': get_is_iut(request),
+        'has_any_dept_perm': has_any_dept_perm(request),
     })
 
 
@@ -299,6 +302,7 @@ def crud_view(request, department_abbrev, view_name, title):
         'status_vacataire':position,
         'employer':employer,
         'is_iut': get_is_iut(request),
+        'has_any_dept_perm': has_any_dept_perm(request),
     })
 
 
