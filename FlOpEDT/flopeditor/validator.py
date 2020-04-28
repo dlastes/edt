@@ -430,10 +430,16 @@ def validate_profil_update(request):
     except ValidationError:
         email = False
 
+    idregex = re.compile(r'^[\w.@+-]+$')
     if len(new_username) > 150:
         response = {
             'status': ERROR_RESPONSE,
             'message': "Le username est trop long. (<150caractères)"
+        }
+    elif not idregex.match(new_username):
+        response = {
+            'status': ERROR_RESPONSE,
+            'message': "Le nom d'utilisateur n'est pas valide"
         }
     elif len(new_first_name) > 30:
         response = {
