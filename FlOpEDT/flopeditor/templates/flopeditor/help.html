@@ -36,10 +36,25 @@
       <table class="table">
         <thead>
           <tr>
+
             <th scope="col">Action</th>
+            {% if not request.user.is_superuser and not is_admin %}
+            <th scope="col" class="text-primary">Tuteur  <b>(Vous)</b></th>
+            {% else %}
             <th scope="col">Tuteur</th>
+            {% endif %}
+
+            {% if not request.user.is_superuser and is_admin %}
+            <th scope="col" class="text-primary">Responsable d'un département <b>(Vous)</b></th>
+            {% else %}
             <th scope="col">Responsable d'un département</th>
+            {% endif %}
+            {% if request.user.is_superuser %}
+            <th scope="col" class="text-primary">Superuser <b>(Vous)</b></th>
+            {% else %}
             <th scope="col">Superuser</th>
+            {% endif %}
+
           </tr>
         </thead>
         <tbody>
@@ -130,15 +145,92 @@
 
       <br>
       <br>
-      {% if request.user.is_superuser %}
-      <h3 id="dept">Création, modification d'un département</h3>
-      <h2 style="color:red">A écrire !</h2>
-      {% endif %}
 
-      {% if is_admin %}
+      <h3 id="dept">Création, modification d'un département</h3>
+      <div class="alert alert-info">Note : Seul un superuser peut créer ou modifier un département.</div>
+      <h4>Créer un département</h4>
+      <h2 style="color:red">A relire</h2>
+      <div class="row">
+        <div class="col">
+          <p>
+          Il est possible de créer un départemment à partir de la page d'accueil de Flopeditor.
+          Pour cela, cliquez sur le bouton en bas à droite, ce qui ouvrira le menu de création d'un département.
+          A partir de là, vous pourrez ajouter le nom, l'abbréviation ainsi que les responsables du département à créer.
+          </p>
+        </div>
+        <div class="col">
+          <img src="{% static 'flopeditor/help/creer_dept.gif' %}" alt="Animation création département" style="max-width:70%">
+        </div>
+      </div>
+      <h4>Modifier un département</h4>
+      <div class="row">
+        <div class="col">
+          <p>
+          Il est possible de modifier le nom, l'abbréviation et les responsables d'un départemment à partir de la page d'accueil de Flopeditor.
+          Pour cela, à côté du bouton portant le nom du département, se trouve un bouton en forme de crayon.
+          En cliquant sur celui-ci un menu s'ouvre, permettant de modifier les attributs du département.
+          A partir de ce menu, vous pourrez modifier le nom, l'abbréviation ainsi que les responsables du département à créer.
+          </p>
+        </div>
+        <div class="col">
+          <img src="{% static 'flopeditor/help/modifier_dept.gif' %}" alt="Animation création département" style="max-width:70%">
+        </div>
+      </div>
       <h3 id="intervenant">Ajouter, modifier, supprimer un intervenant</h3>
       <div class="alert alert-info">Note : Si vous n'êtes pas responsable d'un département, vous pourrez uniquement visualiser la liste des intervenants.</div>
+      <p>
+      Le premier onglet en gaut à gauche permet d'accéder au tableau des intervenants.
+      A partir de ce tableau, vous pouvez créer un intervenant, l'ajouter ou le retirer d'un département,
+      modifier des éléments le caractérisant, ou encore le supprimer de la liste.
+      </p>
+      <h4>Ajouter un intervenant</h4>
+      <div class="row">
+        <div class="col">
+          <p>
+          Ajouter un intervenant
+          La première ligne vous permet d'ajouter un intervenant à la liste.
+          Pour cela, il faut y renseigner son ID, son prénom, son nom de famille et son statut.
+          Si l'intervenant à ajouter est vacataire, il faut également renseigner son employeur.
+          Vous avez également la possibilité d'affecter à cet intervenant un ou plusieurs départements.
 
+          </p>
+          <div class="alert alert-info">
+            Si vous affectez un département à un intervenant, il n'en devient pas responsable.
+            Pour ajouter un responsable à un département, reportez-vous à la section <a href="#dept">Création, modification d'un département</a>.
+          </div>
+        </div>
+        <div class="col">
+          <img src="{% static 'flopeditor/help/crudIntervenantCreate.gif' %}" alt="Animation ajout intervenant" style="max-width:100%">
+        </div>
+      </div>
+      <h4>Modifier un intervenant</h4>
+      <div class="row">
+        <div class="col">
+          <p>
+          Pour modifier un intervenant, vous pouvez cliquer sur le bouton avec le symbole de crayon, tout à droite de la ligne.
+          Vous pouvez modifier son ID, son prénom, son nom de famille et son statut.
+          Si l'intervenant à modifier est vacataire, il faut également renseigner son employeur.
+          Vous avez également la possibilité d'affecter ou de retirer un ou plusieurs départements à cet intervenant.
+          </p>
+        </div>
+        <div class="col">
+          <img src="{% static 'flopeditor/help/crudIntervenantUpdate.gif' %}" alt="Animation ajout intervenant" style="max-width:100%">
+        </div>
+        </div>
+        <h4>Supprimer un intervenant</h4>
+        <div class="row">
+          <div class="col">
+            <p>
+            Si vous voulez supprimer un intervenant, il vous suffit d'appuyer sur le bouton rouge tout à droite de la ligne.
+            Un avertissement apparaît pour vous demander de confirmer la suppression. Il ne vous reste qu'à valider la suppression.
+            </p>
+            <div class="alert alert-warning">Attention : Si vous supprimez cet intervenant, tous les cours associés seront supprimés et ce dernier ne pourra plus se connecter.</div>
+          </div>
+          <div class="col">
+            <img src="{% static 'flopeditor/help/crudIntervenantDelete.gif' %}" alt="Animation ajout intervenant" style="max-width:100%">
+          </div>
+        </div>
+      </div>
       <h3 id="salle">Ajouter, modifier, supprimer une salle / un groupe de salles</h3>
       <h2 style="color:red">A écrire !</h2>
       <div class="alert alert-info">Note : Si vous n'êtes responsable d'aucun département, vous pourrez uniquement visualiser la liste des salles.</div>
@@ -174,7 +266,6 @@
       <h3 id="params">Modifier les paramètres</h3>
       <h2 style="color:red">A écrire !</h2>
       <div class="alert alert-info">Note : Si vous n'êtes pas responsable d'un département, vous pourrez uniquement visualiser les paramètres de ce département.</div>
-      {% endif %}
 
       <h3 id="profil">Afficher, modifier son profil</h3>
       <h2 style="color:red">A écrire !</h2>
