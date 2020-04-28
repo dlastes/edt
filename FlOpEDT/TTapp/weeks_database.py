@@ -134,11 +134,17 @@ class WeeksDatabase(object):
         dayly_availability_slots.add(tgs.day_finish_time)
         dayly_availability_slots = list(dayly_availability_slots)
         dayly_availability_slots.sort()
+        start_times = dayly_availability_slots[:-1]
+        end_times = dayly_availability_slots[1:]
+        for i in range(len(end_times)):
+            if tgs.lunch_break_start_time < end_times[i] <= tgs.lunch_break_finish_time:
+                end_times[i] = tgs.lunch_break_start_time
+
         availability_slots = {Slot(day=day,
-                                   start_time=dayly_availability_slots[i],
-                                   end_time=dayly_availability_slots[i+1])
+                                   start_time=start_times[i],
+                                   end_time=end_times[i])
                               for day in self.days
-                              for i in range(len(dayly_availability_slots)-1)}
+                              for i in range(len(start_times))}
         print('Ok' + f' : {len(courses_slots)} courses_slots and {len(availability_slots)} availability_slots created!')
 
         return courses_slots, availability_slots
