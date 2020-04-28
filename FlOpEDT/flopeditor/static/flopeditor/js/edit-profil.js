@@ -65,24 +65,7 @@ $('#validerProfil').click(function(){
     employer = elements.namedItem("newEmployer").value;
     console.log(employer);
   }
-  if (id == "") {
-     message_display2("Warning", "L'identifiant ne peut pas être vide");
-  }
-  if (firstName == "") {
-     message_display2("Warning", "Le nom ne peut pas être vide");
-  }
-  if (lastName == "") {
-     message_display2("Warning", "Le prénom ne peut pas être vide");
-  }
-  if (email == "") {
-     message_display2("Warning", "L'email ne peut pas être vide");
-  }
-  if (status=='Vacataire' && statusVacataire == "") {
-     message_display2("Warning", "Le status Vacataire ne peut pas être vide");
-  }
-  if (status=='Vacataire' && employer == "") {
-     message_display2("Warning", "L'employeur ne peut pas être vide");
-  }
+
 })
 
 
@@ -110,19 +93,19 @@ $('#form-profil').submit(function(event) {
             case 'ERROR':
               $("#validerProfil").removeClass('disabled');
               $("#cancel-profil").removeClass('disabled');
-              message_display("warning", response.message);
+              message_display2("warning", response.message);
               break;
             case 'UNKNOWN':
               $("#validerProfil").removeClass('disabled');
               $("#cancel-profil").removeClass('disabled');
-              message_display("warning", response.message);
+              message_display2("warning", response.message);
               break;
           }
 
       },
       error: function(error) {
           $("#validerProfil").html(button_html);
-          message_display(form, "warning", "Une erreur est survenue. Veuillez réessayer.");
+          message_display2(form, "warning", "Une erreur est survenue. Veuillez réessayer.");
       },
   });
 });

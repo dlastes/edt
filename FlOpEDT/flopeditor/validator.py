@@ -30,10 +30,11 @@ This module is used to declare the form validations related to FlopEditor, an ap
 to manage a department statistics for FlOpEDT.
 """
 import re
-from base.models import Department
-from people.models import Tutor
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
+from base.models import Department
+from people.models import Tutor
+
 
 OK_RESPONSE = 'OK'
 ERROR_RESPONSE = 'ERROR'
@@ -387,7 +388,7 @@ def validate_period_values(name, starting_week, ending_week, entries):
 
 def validate_profil_update(old_username, request):
     """
-    Validate profiles attributs for profile update
+    Validate profile attributs for profile update
 
     :param request: Client request.
     :type request:  django.http.HttpRequest
@@ -406,10 +407,10 @@ def validate_profil_update(old_username, request):
         email = True
     except ValidationError:
         email = False
-    if len(new_username) > 191:
+    if len(new_username) > 150:
         response = {
             'status': ERROR_RESPONSE,
-            'message': "Le username est trop long. (<191caractère)'"
+            'message': "Le username est trop long. (<150caractère)'"
         }
     elif len(new_first_name) > 30:
         response = {
@@ -429,17 +430,17 @@ def validate_profil_update(old_username, request):
     elif new_status_vacataire is not None and len(new_status_vacataire) > 50:
         response = {
             'status': ERROR_RESPONSE,
-            'message': "Le statut vacataire est trop long. (<50caractère)"
+            'message': "Le statut de vacataire est trop long. (<50caractère)"
         }
     elif new_employer is not None and len(new_employer) > 50:
         response = {
             'status': ERROR_RESPONSE,
-            'message': "Le nom de l'employer est trop long. (<50caractère)"
+            'message': "Le nom de l'employeur est trop long. (<50caractère)"
         }
     elif old_username != new_username and Tutor.objects.filter(username=new_username):
         response = {
             'status': ERROR_RESPONSE,
-            'message': "Un username possède déjà ce nom."
+            'message': "Id déjà utilisé"
         }
     else:
         response = {'status': OK_RESPONSE, 'message': ''}
