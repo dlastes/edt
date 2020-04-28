@@ -78,6 +78,7 @@ $('#form-profil').submit(function(event) {
   $("#cancel-profil").addClass('disabled');
   const button_html = $("#validerProfil").html();
   $("#validerProfil").html("<i class=\"fas fa-spinner fa-pulse\"></i>");
+  console.log("OK");
   $.ajax({
       type: "POST",
       url: url,

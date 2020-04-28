@@ -160,8 +160,8 @@ def get_is_iut(request):
     tutor = Tutor.objects.get(username=request.user)
     if tutor.status == Tutor.FULL_STAFF:
         try:
-            fs = FullStaff.objects.get(username=request.user)
-            return fs.is_iut
+            fullstaff = FullStaff.objects.get(username=request.user)
+            return fullstaff.is_iut
         except FullStaff.DoesNotExist:
             pass
 
@@ -186,6 +186,7 @@ def update_user_in_database(request):
     new_employer = request.POST['newEmployer']
     new_is_iut = 'iut' in request.POST
     tutor = Tutor.objects.get(username=old_username)
+
 
     if old_status == TUTOR_CHOICES_DICT[Tutor.FULL_STAFF]:
         user = FullStaff.objects.get(id=tutor.id)

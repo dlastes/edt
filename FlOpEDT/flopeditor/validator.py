@@ -33,7 +33,7 @@ import re
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from base.models import Department
-from people.models import Tutor
+from people.models import Tutor, SupplyStaff, FullStaff, BIATOS
 
 
 OK_RESPONSE = 'OK'
@@ -406,6 +406,24 @@ def validate_profil_update(request):
     new_email = request.POST['newEmailProfil']
     new_status_vacataire = request.POST['newstatusVacataire']
     new_employer = request.POST['newEmployer']
+    old_status = request.POST['oldStatus']
+    tutor = Tutor.objects.get(username=old_username)
+
+
+    try:
+        if old_status == 'Vacataire':
+            SupplyStaff.objects.get(id=tutor.id)
+            tutor_exist = True
+        elif old_status == 'Permanent':
+            FullStaff.objects.get(id=tutor.id)
+            tutor_exist = True
+        else:
+            BIATOS.objects.get(id=tutor.id)
+            tutor_exist = True
+    except Tutor.DoesNotExist:
+        tutor_exist = False
+
+
     try:
         validate_email(new_email)
         email = True
@@ -414,7 +432,7 @@ def validate_profil_update(request):
     if len(new_username) > 150:
         response = {
             'status': ERROR_RESPONSE,
-            'message': "Le username est trop long. (<150caractère)'"
+            'message': "Le username est trop long. (<150caractère)"
         }
     elif len(new_first_name) > 30:
         response = {
@@ -445,6 +463,12 @@ def validate_profil_update(request):
         response = {
             'status': ERROR_RESPONSE,
             'message': "Id déjà utilisé"
+        }
+    elif not tutor_exist:
+        response = {
+            'status': ERROR_RESPONSE,
+            'message': "Impossible de modifier votre profil : \
+            vous n'avez pas de statut en base de données"
         }
     else:
         response = {'status': OK_RESPONSE, 'message': ''}
