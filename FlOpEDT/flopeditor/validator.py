@@ -40,6 +40,7 @@ OK_RESPONSE = 'OK'
 ERROR_RESPONSE = 'ERROR'
 UNKNOWN_RESPONSE = 'UNKNOWN'
 
+
 def validate_department_values(name, abbrev, tutors_id):
     """Validate parameters for department creation
 
@@ -111,6 +112,7 @@ def validate_department_creation(name, abbrev, tutors_id):
         response = {'status': OK_RESPONSE}
     return response
 
+
 def validate_department_update(old_dept_name, new_dept_name,
                                old_dept_abbrev, new_dept_abbrev, tutors_id):
     """Validate parameters for department updaten
@@ -129,7 +131,8 @@ def validate_department_update(old_dept_name, new_dept_name,
     :return: (are the paramaters valid , status and errors)
     :rtype: (boolean,json)
     """
-    response = validate_department_values(new_dept_name, new_dept_abbrev, tutors_id)
+    response = validate_department_values(
+        new_dept_name, new_dept_abbrev, tutors_id)
     if response['status'] != OK_RESPONSE:
         pass
     elif old_dept_name != new_dept_name and Department.objects.filter(name=new_dept_name):
@@ -445,3 +448,57 @@ def validate_profil_update(old_username, request):
     else:
         response = {'status': OK_RESPONSE, 'message': ''}
     return response
+
+
+def validate_tutor_values(entry, entries):
+    """Validate parameters for tutor CRUD
+
+    :param abbrev: data returned by crudJS
+    :type abbrev: list
+    :param entries: list that is returned to CrudJS
+    :type abbrev: list
+    :return: boolean are the paramaters valid
+    """
+    idregex = re.compile(r'^[\w.@+-]+$')
+    if not entry[0]:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "L'id ne peut pas être vide."])
+    elif len(entry[0]) > 30:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "L'id est trop long."])
+    elif not idregex.match(entry[0]):
+        entries['result'].append([ERROR_RESPONSE,
+                                  "Le nom d'utilisateur n'est pas valide"])
+    elif not entry[1]:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "Le prénom ne peut pas être vide."])
+    elif len(entry[1]) > 30:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "Le prénom est trop long."])
+    elif not entry[2]:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "Le nom ne peut pas être vide."])
+    elif len(entry[2]) > 30:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "Le nom est trop long."])
+    elif not entry[3]:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "Le statut ne doit pas être vide."])
+    elif not entry[4]:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "L'email' ne doit pas être vide."])
+    elif entry[3] != "Vacataire" and entry[5]:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "Seul un vacataire peut avoir une position"])
+    elif entry[3] != "Vacataire" and entry[6]:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "Seul un vacataire peut avoir un employeur"])
+    elif len(entry[5]) > 50:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "La position est trop longue."])
+    elif len(entry[6]) > 50:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "L'employeur est trop long."])
+    else:
+        return True
+    return False
