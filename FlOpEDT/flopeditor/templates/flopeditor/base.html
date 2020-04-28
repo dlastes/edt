@@ -31,12 +31,12 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarText">
                 <ul class="navbar-nav mr-auto">
-
+                  {% if has_any_dept_perm %}
                     <li class="nav-item {% block nav-classes-tutors %}{% endblock %}">
                         <a class="nav-link"
                             href="{% url 'flopeditor:flopeditor-department-tutors' department_abbrev=department.abbrev %}">Intervenants</a>
                     </li>
-
+                  {% endif %}
                     <li class="nav-item {% block nav-classes-rooms %}{% endblock %}">
                         <a class="nav-link"
                             href="{% url 'flopeditor:flopeditor-department-rooms' department_abbrev=department.abbrev %}">Salles</a>
