@@ -33,7 +33,7 @@ from people.models import Tutor, SupplyStaff, User, FullStaff, BIATOS
 from flopeditor.validator import OK_RESPONSE, ERROR_RESPONSE, validate_tutor_values
 from flopeditor.db_requests import get_status_of_tutor, TUTOR_CHOICES_LIST, TUTOR_CHOICES_DICT
 
-# Le rang de la chaîne de caractère dans la liste correspond au rang du bit dans user.rights
+# rank in this list == bit's position in user.rights
 RIGHTS_LIST = [
     "Quand 'modifier Cours' coché, les cours sont colorés avec la dispo de l'intervenant",
     "Peut changer les dispos de tout le monde",
