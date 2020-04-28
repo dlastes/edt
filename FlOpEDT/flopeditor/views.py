@@ -71,8 +71,11 @@ def home(request):
     departments = Department.objects.all()
     dict_depts = {}
     for dept in departments:
-        uds = UserDepartmentSettings.objects.filter(
-            department=dept).values_list('user', flat=True)
+        uds = []
+        for tut in Tutor.objects.filter(departments=dept):
+            if tut.has_department_perm(department=dept, admin=True):
+                uds.append(tut.id)
+
         dict_depts[dept] = list(uds)
     tutors = Tutor.objects.all()
     status, position, employer = get_status_of_user(request)

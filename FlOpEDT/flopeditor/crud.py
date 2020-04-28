@@ -102,7 +102,7 @@ def crud_tutors(request, department_abbrev):
     if not good_request(request, department):
         pass
     elif request.method == "GET":
-        return tutors.read(department)
+        return tutors.read()
     elif request.method == "POST":
         actions = json.loads(request.body.decode('utf-8'))['actions']
         result = []
@@ -134,17 +134,17 @@ def crud_rooms(request, department_abbrev):
     if not good_request(request, department):
         pass
     elif request.method == "GET":
-        return rooms.read(department)
+        return rooms.read()
     elif request.method == "POST":
         actions = json.loads(request.body.decode('utf-8'))['actions']
         result = []
         for action in actions:
             if action['request'] == 'NEW':
-                result.append(rooms.create(request, action, department))
+                result.append(rooms.create(request, action))
             elif action['request'] == 'MODIFIED':
-                result.append(rooms.update(request, action, department))
+                result.append(rooms.update(request, action))
             elif action['request'] == 'DELETED':
-                result.append(rooms.delete(request, action, department))
+                result.append(rooms.delete(request, action))
         return JsonResponse({
             'actions': result
         })

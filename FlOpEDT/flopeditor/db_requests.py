@@ -34,6 +34,14 @@ to manage a department statistics for FlOpEDT.
 from base.models import Department, TimeGeneralSettings, Day
 from people.models import Tutor, UserDepartmentSettings, SupplyStaff
 
+TUTOR_CHOICES_LIST = ["Permanent", "Vacataire", "Biatos"]
+
+TUTOR_CHOICES_DICT = {
+    Tutor.FULL_STAFF: TUTOR_CHOICES_LIST[0],
+    Tutor.SUPP_STAFF: TUTOR_CHOICES_LIST[1],
+    Tutor.BIATOS: TUTOR_CHOICES_LIST[2]
+}
+
 def create_departments_in_database(dept_name, dept_abbrev, tutors_id):
     """Create department with admin and default settings in database
 
@@ -123,15 +131,15 @@ def get_status_of_tutor(tutor):
     :rtype:  string employer if supply_staff else None
 
     """
-    if tutor.status == 'fs':
-        status = 'Permanent'
-    elif tutor.status == 'ss':
-        status = 'Vacataire'
+    if tutor.status == Tutor.FULL_STAFF:
+        status = TUTOR_CHOICES_DICT[Tutor.FULL_STAFF]
+    elif tutor.status == Tutor.SUPP_STAFF:
+        status = TUTOR_CHOICES_DICT[Tutor.SUPP_STAFF]
         try:
             supply_staff = SupplyStaff.objects.get(username=tutor.username)
             return status, supply_staff.position, supply_staff.employer
         except SupplyStaff.DoesNotExist:
             pass
     else:
-        status = 'Biatos'
+        status = Tutor.BIATOS
     return status, None, None
