@@ -153,8 +153,7 @@ def has_rights_to_update_room(user, entries, i):
     return True
 
 
-# pylint: disable=W0613
-def read(department):
+def read():
     """Return all rooms
     :param department: Department.
     :type department:  base.models.Department
@@ -205,8 +204,7 @@ def read(department):
     })
 
 
-# pylint: disable=W0613
-def create(request, entries, department):
+def create(request, entries):
     """Create values for rooms
     :param entries: Values to create.
     :type entries:  django.http.JsonResponse
@@ -242,8 +240,7 @@ def create(request, entries, department):
     return entries
 
 
-# pylint: disable=W0613
-def update(request, entries, department):
+def update(request, entries):
     """Update values for rooms
     :param entries: Values to modify.
     :type entries:  django.http.JsonResponse
@@ -287,7 +284,7 @@ def update(request, entries, department):
     return entries
 
 
-def delete(request, entries, department):
+def delete(request, entries):
     """Delete values for rooms
     :param entries: Values to delete.
     :type entries:  django.http.JsonResponse
