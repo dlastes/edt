@@ -364,6 +364,7 @@ class ScheduledCourse(models.Model):
     def __str__(self):
         return f"{self.course}{self.no}:{self.day}-t{self.start_time}-{self.room}"
 
+    @property
     def end_time(self):
         return self.start_time + self.course.type.duration
 
