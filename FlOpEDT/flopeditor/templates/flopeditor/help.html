@@ -48,6 +48,7 @@
       {% if request.user.is_superuser %}
       <h5><a href="#dept">Création, modification d'un département</a></h5>
       {% endif %}
+      {% if is_admin %}
       <h5><a href="#intervenant">Ajouter, modifier, supprimer un intervenant</a></h5>
       <h5><a href="#salle">Ajouter, modifier, supprimer une salle / un groupe de salles</a></h5>
       <h5><a href="#cat-salle">Ajouter, modifier, supprimer une catégorie de salle</a></h5>
@@ -58,50 +59,54 @@
       <h5><a href="#module">Ajouter, Modifier, supprimer un module</a></h5>
       <h5><a href="#cours">Ajouter, Modifier, supprimer un cours</a></h5>
       <h5><a href="#params">Modifier les paramètres</a></h5>
+      {% endif %}
       <h5><a href="profil">Afficher, modifier son profil</a></h5>
       <br>
       {% if request.user.is_superuser %}
       <h3 id="dept">Création, modification d'un département</h3>
+      <h2 style="color:red">A écrire !</h2>
       {% endif %}
 
+      {% if is_admin %}
       <h3 id="intervenant">Ajouter, modifier, supprimer un intervenant</h3>
-      <div class="alert alert-info">Note : Si vous n'êtes pas responsable d'un département, vous ne pouvez pas visualiser la liste des intervenants.</div>
+      <div class="alert alert-info">Note : Si vous n'êtes pas responsable d'un département, vous pourrez uniquement visualiser la liste des intervenants.</div>
 
       <h3 id="salle">Ajouter, modifier, supprimer une salle / un groupe de salles</h3>
       <h2 style="color:red">A écrire !</h2>
-      <div class="alert alert-info">Note : Si vous n'êtes pas responsable d'un département, vous ne pouvez que visualiser la liste des salles.</div>
+      <div class="alert alert-info">Note : Si vous n'êtes responsable d'aucun département, vous pourrez uniquement visualiser la liste des salles.</div>
 
       <h3 id="cat-salle">Ajouter, modifier, supprimer une catégorie de salle</h3>
       <h2 style="color:red">A écrire !</h2>
-      <div class="alert alert-info">Note : Si vous n'êtes pas responsable d'un département, vous ne pouvez que visualiser la liste des catégories de salles.</div>
+      <div class="alert alert-info">Note : Si vous n'êtes pas responsable d'un département, vous pourrez uniquement visualiser la liste des catégories de salles.</div>
 
       <h3 id="semestre">Ajouter, Modifier, supprimer un semestre</h3>
       <h2 style="color:red">A écrire !</h2>
-      <div class="alert alert-info">Note : Si vous n'êtes pas responsable d'un département, vous ne pouvez que visualiser la liste des semestres.</div>
+      <div class="alert alert-info">Note : Si vous n'êtes pas responsable d'un département, vous pourrez uniquement visualiser la liste des semestres.</div>
 
       <h3 id="promo">Ajouter, Modifier, supprimer une promo</h3>
       <h2 style="color:red">A écrire !</h2>
-      <div class="alert alert-info">Note : Si vous n'êtes pas responsable d'un département, vous ne pouvez que visualiser la liste des promotions.</div>
+      <div class="alert alert-info">Note : Si vous n'êtes pas responsable d'un département, vous pourrez uniquement visualiser la liste des promotions.</div>
 
       <h3 id="nature-groupe">Ajouter, Modifier, supprimer une nature de groupes</h3>
       <h2 style="color:red">A écrire !</h2>
-      <div class="alert alert-info">Note : Si vous n'êtes pas responsable d'un département, vous ne pouvez que visualiser la liste des natures de groupes.</div>
+      <div class="alert alert-info">Note : Si vous n'êtes pas responsable d'un département, vous pourrez uniquement visualiser la liste des natures de groupes.</div>
 
       <h3 id="groupe">Ajouter, Modifier, supprimer un groupe d'élèves</h3>
       <h2 style="color:red">A écrire !</h2>
-      <div class="alert alert-info">Note : Si vous n'êtes pas responsable d'un département, vous ne pouvez que visualiser la liste des groupes d'élèves.</div>
+      <div class="alert alert-info">Note : Si vous n'êtes pas responsable d'un département, vous pourrez uniquement visualiser la liste des groupes d'élèves.</div>
 
       <h3 id="module">Ajouter, Modifier, supprimer un module</h3>
       <h2 style="color:red">A écrire !</h2>
-      <div class="alert alert-info">Note : Si vous n'êtes pas responsable d'un département, vous ne pouvez que visualiser la liste des modules.</div>
+      <div class="alert alert-info">Note : Si vous n'êtes pas responsable d'un département, vous pourrez uniquement visualiser la liste des modules.</div>
 
       <h3 id="cours">Ajouter, Modifier, supprimer un cours</h3>
       <h2 style="color:red">A écrire !</h2>
-      <div class="alert alert-info">Note : Si vous n'êtes pas responsable d'un département, vous ne pouvez que visualiser la liste des cours.</div>
+      <div class="alert alert-info">Note : Si vous n'êtes pas responsable d'un département, vous pourrez uniquement visualiser la liste des cours.</div>
 
       <h3 id="params">Modifier les paramètres</h3>
       <h2 style="color:red">A écrire !</h2>
-      <div class="alert alert-info">Note : Si vous n'êtes pas responsable d'un département, vous ne pouvez que visualiser les paramètres.</div>
+      <div class="alert alert-info">Note : Si vous n'êtes pas responsable d'un département, vous pourrez uniquement visualiser les paramètres de ce département.</div>
+      {% endif %}
 
       <h3 id="profil">Afficher, modifier son profil</h3>
       <h2 style="color:red">A écrire !</h2>

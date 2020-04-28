@@ -102,6 +102,7 @@ def flopeditor_help(request):
     """
     return render(request, "flopeditor/help.html", {
         'title': 'Aide',
+        'is_admin': has_any_dept_perm(request),
         })
 
 @tutor_or_superuser_required
