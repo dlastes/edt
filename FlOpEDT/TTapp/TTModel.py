@@ -464,6 +464,8 @@ class TTModel(object):
         self.year = year
         print("\nLet's start weeks #%s" % weeks)
 
+        print("Initialisation...")
+        a=datetime.datetime.now()
         self.warnings = {}
 
         self.department = Department.objects.get(abbrev=department_abbrev)
@@ -479,16 +481,32 @@ class TTModel(object):
         self.wdb = self.wdb_init()
         self.possible_apms = self.wdb.possible_apms
         self.cost_I, self.FHD_G, self.cost_G, self.cost_SL = self.costs_init()
+        print('Ok', datetime.datetime.now()-a)
+        print("Vars definition...")
+        a=datetime.datetime.now()
         self.TT, self.TTrooms, self.TTinstructors = self.TT_vars_init()
+        print('Ok', datetime.datetime.now()-a)
+        print("Busy vars definition...")
+        a=datetime.datetime.now()
         self.IBD, self.IBD_GTE, self.IBHD, self.GBHD, self.IBS, self.forced_IBD = self.busy_vars_init()
+        print('Ok', datetime.datetime.now()-a)
 
+        print("Availability instr definition ...")
+        a=datetime.datetime.now()
         self.avail_instr, self.unp_slot_cost \
             = self.compute_non_preferred_slots_cost()
+        print('Ok', datetime.datetime.now()-a)
 
+        print("Availability courses definition ...")
+        a=datetime.datetime.now()
         self.unp_slot_cost_course, self.avail_course \
             = self.compute_non_preferred_slots_cost_course()
+        print('Ok', datetime.datetime.now()-a)
 
+        print("Availability rooms definition ...")
+        a=datetime.datetime.now()
         self.avail_room = self.compute_avail_room()
+        print('Ok', datetime.datetime.now()-a)
 
         # Hack : permet que ça marche même si les dispos sur la base sont pas complètes
         for i in self.wdb.instructors:
