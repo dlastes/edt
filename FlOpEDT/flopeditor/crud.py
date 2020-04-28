@@ -108,11 +108,11 @@ def crud_tutors(request, department_abbrev):
         result = []
         for action in actions:
             if action['request'] == 'NEW':
-                result.append(tutors.create(request, action, department))
+                result.append(tutors.create(request, action))
             elif action['request'] == 'MODIFIED':
-                result.append(tutors.update(request, action, department))
+                result.append(tutors.update(request, action))
             elif action['request'] == 'DELETED':
-                result.append(tutors.delete(request, action, department))
+                result.append(tutors.delete(request, action))
         return JsonResponse({
             'actions': result
         })
