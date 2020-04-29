@@ -43,7 +43,8 @@ from django.core.exceptions import ValidationError
 
 from django.utils.translation import ugettext_lazy as _
 
-from base.models import Time, Department, Day, TimeGeneralSettings
+from base.models import Department, TimeGeneralSettings
+from base.timing import Day
 
 from TTapp.helpers.minhalfdays import MinHalfDaysHelperGroup, MinHalfDaysHelperModule, MinHalfDaysHelperTutor
 
@@ -170,9 +171,9 @@ class LimitCourseTypeTimePerPeriod(TTConstraint):  # , pond):
         for day, period in period_by_day:
             expr = ttmodel.lin_expr()
             if period is None:
-                slots = slots_filter(ttmodel.wdb.slots, day=day)
+                slots = slots_filter(ttmodel.wdb.courses_slots, day=day)
             else:
-                slots = slots_filter(ttmodel.wdb.slots, day=day, apm=period)
+                slots = slots_filter(ttmodel.wdb.courses_slots, day=day, apm=period)
 
             for slot in slots:
                 for course in courses & ttmodel.wdb.compatible_courses[slot]:
@@ -321,7 +322,7 @@ class Stabilize(TTConstraint):
 
         if self.general:
             # nb_changements_I=dict(zip(ttmodel.wdb.instructors,[0 for i in ttmodel.wdb.instructors]))
-            for sl in slots_filter(ttmodel.wdb.slots, week=week):
+            for sl in slots_filter(ttmodel.wdb.courses_slots, week=week):
                 for c in ttmodel.wdb.compatible_courses[sl]:
                     if not sched_courses.filter(start_time__lt=sl.end_time,
                                                 start_time__gt=sl.start_time - F('course__type__duration'),
@@ -362,7 +363,7 @@ class Stabilize(TTConstraint):
                                    * ponderation * ttmodel.TT[(chosen_slot, c)]
 
                 else:
-                    for slot in ttmodel.wdb.slots & ttmodel.wdb.compatible_slots[c]:
+                    for slot in ttmodel.wdb.courses_slots & ttmodel.wdb.compatible_slots[c]:
                         if not slot.is_simultaneous_to(chosen_slot):
                             ttmodel.add_constraint(ttmodel.TT[(slot, c)],
                                                    '==',
@@ -538,14 +539,16 @@ class MinNonPreferedTutorsSlot(TTConstraint):
             tutors = set(t for t in ttmodel.wdb.instructors if t in self.tutors.all())
         else:
             tutors = set(ttmodel.wdb.instructors)
-        for sl in ttmodel.wdb.slots:
+        for sl in ttmodel.wdb.availability_slots:
             for tutor in tutors:
                 filtered_courses = set(c for c in ttmodel.wdb.possible_courses[tutor] if c.week == week)
-                for c in filtered_courses & ttmodel.wdb.compatible_courses[sl]:
+                for c in filtered_courses:
+                    slot_vars_sum = ttmodel.sum(ttmodel.TTinstructors[(sl2, c, tutor)]
+                                                for sl2 in slots_filter(ttmodel.wdb.compatible_slots[c],
+                                                                        simultaneous_to=sl))
                     cost = (float(self.weight) / max_weight) \
-                           * ponderation * ttmodel.TTinstructors[(sl, c, tutor)] \
+                           * ponderation * slot_vars_sum \
                            * ttmodel.unp_slot_cost[tutor][sl]
-                    #ttmodel.add_to_slot_cost(sl, cost)
                     ttmodel.add_to_inst_cost(tutor, cost, week=week)
 
     def one_line_description(self):
@@ -568,19 +571,19 @@ class MinNonPreferedTrainProgsSlot(TTConstraint):
             train_progs = set(tp for tp in self.train_progs.all() if tp in ttmodel.train_prog)
         else:
             train_progs = set(ttmodel.train_prog)
-        for sl in ttmodel.wdb.slots:
+        for sl in ttmodel.wdb.availability_slots:
             for train_prog in train_progs:
                 basic_groups = ttmodel.wdb.basic_groups.filter(train_prog=train_prog)
                 for g in basic_groups:
-                    slot_vars_sum = ttmodel.sum(ttmodel.TT[(sl2, c)]
-                                                for c in ttmodel.wdb.courses_for_basic_group[g]
-                                                for sl2 in slots_filter(ttmodel.wdb.compatible_slots[c],
-                                                                        simultaneous_to=sl))
-                    cost = self.local_weight() \
-                           * ponderation * slot_vars_sum \
-                           * ttmodel.unp_slot_cost_course[c.type,
-                                                          train_prog][sl]
-                    ttmodel.add_to_group_cost(g, cost, week=week)
+                    for c in ttmodel.wdb.courses_for_basic_group[g]:
+                        slot_vars_sum = ttmodel.sum(ttmodel.TT[(sl2, c)]
+                                                    for sl2 in slots_filter(ttmodel.wdb.compatible_slots[c],
+                                                                            simultaneous_to=sl))
+                        cost = self.local_weight() \
+                               * ponderation * slot_vars_sum \
+                               * ttmodel.unp_slot_cost_course[c.type,
+                                                              train_prog][sl]
+                        ttmodel.add_to_group_cost(g, cost, week=week)
 
     def one_line_description(self):
         text = "Respecte les préférences"
@@ -665,7 +668,7 @@ class RespectBoundPerDay(TTConstraint):
             for d in days_filter(ttmodel.wdb.days, week=week):
                 ttmodel.add_constraint(ttmodel.sum(ttmodel.TT[sl, c] * c.type.duration / 60
                                                    for c in ttmodel.wdb.courses_for_tutor[tutor] if c.week == week
-                                                   for sl in slots_filter(ttmodel.wdb.slots, day=d)
+                                                   for sl in slots_filter(ttmodel.wdb.courses_slots, day=d)
                                                    & ttmodel.wdb.compatible_slots[c]),
                                        '<=',
                                        tutor.max_hours_per_day,
@@ -791,8 +794,8 @@ class AvoidBothTimes(TTConstraint):
             fc = fc.filter(groups__train_prog=self.train_prog)
         if self.group:
             fc = fc.filter(groups=self.group)
-        slots1 = set([slot for slot in ttmodel.wdb.slots if slot.start_time <= self.time1 < slot.end_time])
-        slots2 = set([slot for slot in ttmodel.wdb.slots if slot.start_time <= self.time2 < slot.end_time])
+        slots1 = set([slot for slot in ttmodel.wdb.courses_slots if slot.start_time <= self.time1 < slot.end_time])
+        slots2 = set([slot for slot in ttmodel.wdb.courses_slots if slot.start_time <= self.time2 < slot.end_time])
         for c1 in fc:
             for c2 in fc.exclude(id__lte=c1.id):
                 for sl1 in slots1:
@@ -859,11 +862,11 @@ class LimitedStartTimeChoices(TTConstraint):
             fc = fc.filter(groups__train_prog__in=self.train_progs.all())
         if self.group is not None:
             fc = fc.filter(groups=self.group)
-        possible_slots_ids = set(slot.id for slot in ttmodel.wdb.slots
+        possible_slots_ids = set(slot.id for slot in ttmodel.wdb.courses_slots
                                  if slot.start_time in self.possible_start_times.values_list())
 
         for c in fc:
-            for sl in ttmodel.wdb.slots.exclude(id__in=possible_slots_ids):
+            for sl in ttmodel.wdb.courses_slots.exclude(id__in=possible_slots_ids):
                 if self.weight is not None:
                     ttmodel.obj += self.local_weight() * ponderation * ttmodel.TT[(sl, c)]
                 else:
@@ -930,7 +933,7 @@ class LimitedRoomChoices(TTConstraint):
         possible_rooms_ids = self.possible_rooms.values_list('id', flat=True)
 
         for c in fc:
-            for sl in ttmodel.wdb.slots:
+            for sl in ttmodel.wdb.courses_slots:
                 for rg in ttmodel.wdb.room_groups.filter(types__in=[c.room_type]).exclude(id__in = possible_rooms_ids):
                     if self.weight is not None:
                         ttmodel.obj += self.local_weight() * ponderation * ttmodel.TTrooms[(sl, c, rg)]
