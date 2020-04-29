@@ -570,19 +570,17 @@ class MinNonPreferedTrainProgsSlot(TTConstraint):
             train_progs = set(ttmodel.train_prog)
         for sl in ttmodel.wdb.slots:
             for train_prog in train_progs:
-                filtered_courses = set(ttmodel.wdb.courses.filter(groups__train_prog=train_prog,
-                                                                              week=week))
                 basic_groups = ttmodel.wdb.basic_groups.filter(train_prog=train_prog)
                 for g in basic_groups:
-                    for c in filtered_courses & ttmodel.wdb.compatible_courses[sl]:
-                        for gr in c.groups.all():
-                            if gr in ttmodel.wdb.all_groups_of[g]:
-                                cost = self.local_weight() \
-                                       * ponderation * ttmodel.TT[(sl, c)] \
-                                       * ttmodel.unp_slot_cost_course[c.type,
-                                                                      train_prog][sl]
-                                ttmodel.add_to_group_cost(g, cost, week=week)
-                                #ttmodel.add_to_slot_cost(sl, cost)
+                    slot_vars_sum = ttmodel.sum(ttmodel.TT[(sl2, c)]
+                                                for c in ttmodel.wdb.courses_for_basic_group[g]
+                                                for sl2 in slots_filter(ttmodel.wdb.compatible_slots[c],
+                                                                        simultaneous_to=sl))
+                    cost = self.local_weight() \
+                           * ponderation * slot_vars_sum \
+                           * ttmodel.unp_slot_cost_course[c.type,
+                                                          train_prog][sl]
+                    ttmodel.add_to_group_cost(g, cost, week=week)
 
     def one_line_description(self):
         text = "Respecte les préférences"
