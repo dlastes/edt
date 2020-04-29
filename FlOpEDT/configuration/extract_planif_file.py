@@ -232,7 +232,7 @@ def ReadPlanifWeek(department, book, feuille, week, year):
                 P = Dependency(course1=relevant_courses[0], course2=relevant_courses[1], ND=True)
                 P.save()
         except Exception as e:
-            raise Exception(f"Exception ligne {row}, semaine {week} de {feuille} : {module} \n")
+            raise Exception(f"Exception ligne {row}, semaine {week} de {feuille}: {e} \n")
 
 
 def extract_period(department, book, period, year):
