@@ -34,7 +34,7 @@ var filtered = {
   mod_prof_gp: [
     { title: 'Module    ', id: 'fil-mod', get: 'm', arr: [default_dd], val: default_dd },
     { title: 'Enseignant·e    ', id: 'fil-prof', get: 'p', arr: [default_dd], val: default_dd },
-    { title: 'Groupe(s)    ', id: 'fil-gp', get: 'g', arr: [default_dd], val: default_dd }],
+    { title: 'Groupe    ', id: 'fil-gp', get: 'g', arr: [default_dd], val: default_dd }],
   //[,[default_dd],[default_dd]],
   chosen: [0, 0, 0]
 };
@@ -142,7 +142,15 @@ function go_filter() {
       .filter(function (d, i) { return i == di; })
       .datum();
     if (sa != default_dd) {
-      url_fd_full += "&" + filtered.mod_prof_gp[i].get + "=" + sa;
+      if (typeof sa === "string") {
+        url_fd_full += "&" + filtered.mod_prof_gp[i].get + "=" + sa;
+      } else {
+        let keys = Object.keys(sa) ;
+        for( let i = 0 ; i < keys.length ; i++) {
+          url_fd_full += "&" + keys[i]
+            + "=" + sa[keys[i]];
+        }
+      }
     }
     if (i == 1 && sa != filtered.mod_prof_gp[i].val) {
       prof_changed = true;
@@ -448,7 +456,13 @@ function go_dd() {
     .selectAll("option")
     .data(function (d, i, j) { return d.arr; })
     .attr("value", function (d) { return d; })
-    .text(function (d) { return d; });
+    .text(function (d) {
+      if (typeof d === "string") {
+        return d ;
+      } else {
+        return Object.values(d).join("-") ;
+      }
+    });
 
 
   se
@@ -622,7 +636,7 @@ function go_cours() {
 
 
 function plot_cours(d) {
-  var ret = d.m + "-" + d.p + "-" + d.g + " (";
+  var ret = d.m + "-" + d.p + "-" + d.g.join(",") + " (";
   var h, m;
   if (d.d != '') {
     ret += liste_jours[d.d].name + " " + liste_jours[d.d].date + " ";
