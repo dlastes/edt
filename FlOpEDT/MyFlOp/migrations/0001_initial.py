@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('base', '0054_remove_course_group'),
         ('people', '0017_notificationspreferences'),
-    ]
+        ]
 
     operations = [
         migrations.CreateModel(
