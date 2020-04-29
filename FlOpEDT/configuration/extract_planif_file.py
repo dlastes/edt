@@ -53,17 +53,18 @@ def do_assign(module, course_type, week, year, book):
     if not assign_ok:
         raise Exception(f"Rien n'est prévu pour assigner {module.abbrev} / {course_type.name}...")
     column = 3
-    tutor_username = assignation_sheet.cell(row=assignation_row, column=column)
+    tutor_username = assignation_sheet.cell(row=assignation_row, column=column).value
     while tutor_username is not None:
-        tutor = Tutor.objects.get(username = tutor_username)
+        tutor = Tutor.objects.get(username=tutor_username)
         mtr = ModuleTutorRepartition(module=module, course_type=course_type,
                                      week=week, year=year, tutor=tutor)
-        nb = assignation_sheet.cell(row=assignation_row+1, column=column)
+        nb = assignation_sheet.cell(row=assignation_row+1, column=column).value
         if nb is not None:
-            mtr.courses_nb=nb
+            nb = int(nb)
+            mtr.courses_nb = nb
         mtr.save()
         column += 1
-        tutor_username = assignation_sheet.cell(row=assignation_row, column=column)
+        tutor_username = assignation_sheet.cell(row=assignation_row, column=column).value
     print(f"Assignation done for {module.abbrev} / {course_type.name}!")
 
 
