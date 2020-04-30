@@ -28,7 +28,7 @@ without disclosing the source code of your own applications.
 """
 
 from django.http import JsonResponse
-from base.models import Room, RoomType, Department
+from base.models import Room, Department
 from flopeditor.validator import OK_RESPONSE, ERROR_RESPONSE
 
 
