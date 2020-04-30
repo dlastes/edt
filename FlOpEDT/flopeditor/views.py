@@ -37,7 +37,7 @@ from base.timing import min_to_str, str_to_min
 from FlOpEDT.decorators import superuser_required, \
     tutor_or_superuser_required, tutor_required
 
-from people.models import Tutor, UserDepartmentSettings
+from people.models import Tutor
 from flopeditor.db_requests import create_departments_in_database, \
     update_departments_in_database, get_status_of_user, update_user_in_database, get_is_iut
 from flopeditor.validator import validate_department_creation,\
