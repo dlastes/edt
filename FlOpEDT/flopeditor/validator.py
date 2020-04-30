@@ -30,8 +30,11 @@ This module is used to declare the form validations related to FlopEditor, an ap
 to manage a department statistics for FlOpEDT.
 """
 import re
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
 from base.models import Department
-from people.models import Tutor
+from people.models import Tutor, SupplyStaff, FullStaff, BIATOS
+
 
 OK_RESPONSE = 'OK'
 ERROR_RESPONSE = 'ERROR'
@@ -384,6 +387,99 @@ def validate_period_values(name, starting_week, ending_week, entries):
     else:
         return True
     return False
+
+
+def validate_profil_update(request):
+    """
+    Validate profile attributs for profile update
+
+    :param request: Client request.
+    :type request:  django.http.HttpRequest
+    :return: (are the paramaters valid , status and errors)
+    :rtype: (boolean,json)
+
+    """
+    old_username = request.user.username
+    new_username = request.POST['newIdProfil']
+    new_first_name = request.POST['newFirtNameProfil']
+    new_last_name = request.POST['newLastNameProfil']
+    new_email = request.POST['newEmailProfil']
+    new_status_vacataire = request.POST['newstatusVacataire']
+    new_employer = request.POST['newEmployer']
+    old_status = request.POST['oldStatus']
+    tutor = Tutor.objects.get(username=old_username)
+
+
+    try:
+        if old_status == 'Vacataire':
+            SupplyStaff.objects.get(id=tutor.id)
+            tutor_exist = True
+        elif old_status == 'Permanent':
+            FullStaff.objects.get(id=tutor.id)
+            tutor_exist = True
+        else:
+            BIATOS.objects.get(id=tutor.id)
+            tutor_exist = True
+    except Tutor.DoesNotExist:
+        tutor_exist = False
+
+
+    try:
+        validate_email(new_email)
+        email = True
+    except ValidationError:
+        email = False
+
+    idregex = re.compile(r'^[\w.@+-]+$')
+    if len(new_username) > 150:
+        response = {
+            'status': ERROR_RESPONSE,
+            'message': "Le username est trop long. (<150caractères)"
+        }
+    elif not idregex.match(new_username):
+        response = {
+            'status': ERROR_RESPONSE,
+            'message': "Le nom d'utilisateur n'est pas valide"
+        }
+    elif len(new_first_name) > 30:
+        response = {
+            'status': ERROR_RESPONSE,
+            'message': "Le prénom est trop long. (<30caractères)'"
+        }
+    elif len(new_last_name) > 150:
+        response = {
+            'status': ERROR_RESPONSE,
+            'message': "Le nom est trop long. (<150caractères)'"
+        }
+    elif not email:
+        response = {
+            'status': ERROR_RESPONSE,
+            'message': "L'email est invalide"
+        }
+    elif new_status_vacataire is not None and len(new_status_vacataire) > 50:
+        response = {
+            'status': ERROR_RESPONSE,
+            'message': "Le statut de vacataire est trop long. (<50caractères)"
+        }
+    elif new_employer is not None and len(new_employer) > 50:
+        response = {
+            'status': ERROR_RESPONSE,
+            'message': "Le nom de l'employeur est trop long. (<50caractères)"
+        }
+    elif old_username != new_username and Tutor.objects.filter(username=new_username):
+        response = {
+            'status': ERROR_RESPONSE,
+            'message': "Id déjà utilisé"
+        }
+    elif not tutor_exist:
+        response = {
+            'status': ERROR_RESPONSE,
+            'message': "Impossible de modifier votre profil : \
+            vous n'avez pas de statut en base de données"
+        }
+    else:
+        response = {'status': OK_RESPONSE, 'message': ''}
+    return response
 
 
 def validate_tutor_values(entry, entries):

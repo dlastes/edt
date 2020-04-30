@@ -32,7 +32,15 @@ to manage a department statistics for FlOpEDT.
 
 
 from base.models import Department, TimeGeneralSettings, Day
-from people.models import Tutor, UserDepartmentSettings, SupplyStaff
+from people.models import Tutor, UserDepartmentSettings, SupplyStaff, FullStaff, BIATOS
+
+TUTOR_CHOICES_LIST = ["Permanent", "Vacataire", "Biatos"]
+
+TUTOR_CHOICES_DICT = {
+    Tutor.FULL_STAFF: TUTOR_CHOICES_LIST[0],
+    Tutor.SUPP_STAFF: TUTOR_CHOICES_LIST[1],
+    Tutor.BIATOS: TUTOR_CHOICES_LIST[2]
+}
 
 def create_departments_in_database(dept_name, dept_abbrev, tutors_id):
     """Create department with admin and default settings in database
@@ -123,15 +131,113 @@ def get_status_of_tutor(tutor):
     :rtype:  string employer if supply_staff else None
 
     """
-    if tutor.status == 'fs':
-        status = 'Permanent'
-    elif tutor.status == 'ss':
-        status = 'Vacataire'
+    if tutor.status == Tutor.FULL_STAFF:
+        status = TUTOR_CHOICES_DICT[Tutor.FULL_STAFF]
+    elif tutor.status == Tutor.SUPP_STAFF:
+        status = TUTOR_CHOICES_DICT[Tutor.SUPP_STAFF]
         try:
             supply_staff = SupplyStaff.objects.get(username=tutor.username)
             return status, supply_staff.position, supply_staff.employer
         except SupplyStaff.DoesNotExist:
             pass
     else:
-        status = 'Biatos'
+        status = TUTOR_CHOICES_DICT[Tutor.BIATOS]
     return status, None, None
+
+
+
+
+def get_is_iut(request):
+    """
+
+    :param request: Client request.
+    :type request:  django.http.HttpRequest
+    :return: true if FullStaff and is_iut
+    :rtype:  Boolean
+
+
+    """
+    tutor = Tutor.objects.get(username=request.user)
+    if tutor.status == Tutor.FULL_STAFF:
+        try:
+            fullstaff = FullStaff.objects.get(username=request.user)
+            return fullstaff.is_iut
+        except FullStaff.DoesNotExist:
+            pass
+
+    return None
+
+def update_user_in_database(request):
+    """
+    update user in database
+
+    :param request: Client request.
+    :type request:  django.http.HttpRequest
+
+    """
+    old_username = request.user.username
+    new_username = request.POST['newIdProfil']
+    new_first_name = request.POST['newFirtNameProfil']
+    new_last_name = request.POST['newLastNameProfil']
+    new_email = request.POST['newEmailProfil']
+    new_status = request.POST['newInputStatus']
+    old_status = request.POST['oldStatus']
+    new_status_vacataire = request.POST['newstatusVacataire']
+    new_employer = request.POST['newEmployer']
+    new_is_iut = 'iut' in request.POST
+    tutor = Tutor.objects.get(username=old_username)
+
+
+    if old_status == TUTOR_CHOICES_DICT[Tutor.FULL_STAFF]:
+        user = FullStaff.objects.get(id=tutor.id)
+    elif old_status == TUTOR_CHOICES_DICT[Tutor.SUPP_STAFF]:
+        user = SupplyStaff.objects.get(id=tutor.id)
+    else:
+        user = BIATOS.objects.get(id=tutor.id)
+
+
+
+    if old_status != new_status and new_status == TUTOR_CHOICES_DICT[Tutor.FULL_STAFF]:
+        user_update = FullStaff(tutor_ptr_id=tutor.id)
+        user_update.__dict__.update(tutor.__dict__)
+        user_update.username = new_username
+        user_update.first_name = new_first_name
+        user_update.last_name = new_last_name
+        user_update.email = new_email
+        user_update.status = Tutor.FULL_STAFF
+        user_update.is_iut = new_is_iut
+        user_update.save()
+        user.delete(keep_parents=True)
+    elif old_status != new_status and new_status == TUTOR_CHOICES_DICT[Tutor.SUPP_STAFF]:
+        user_update = SupplyStaff(tutor_ptr_id=tutor.id)
+        user_update.__dict__.update(tutor.__dict__)
+        user_update.username = new_username
+        user_update.first_name = new_first_name
+        user_update.last_name = new_last_name
+        user_update.email = new_email
+        user_update.status = Tutor.SUPP_STAFF
+        user_update.employer = new_employer
+        user_update.position = new_status_vacataire
+        user_update.save()
+        user.delete(keep_parents=True)
+    elif old_status != new_status:
+        user_update = BIATOS(tutor_ptr_id=tutor.id)
+        user_update.__dict__.update(tutor.__dict__)
+        user_update.username = new_username
+        user_update.first_name = new_first_name
+        user_update.last_name = new_last_name
+        user_update.email = new_email
+        user_update.status = Tutor.BIATOS
+        user_update.save()
+        user.delete(keep_parents=True)
+    else:
+        user.username = new_username
+        user.first_name = new_first_name
+        user.last_name = new_last_name
+        user.email = new_email
+        if new_status == TUTOR_CHOICES_DICT[Tutor.SUPP_STAFF]:
+            user.employer = new_employer
+            user.position = new_status_vacataire
+        elif new_status == TUTOR_CHOICES_DICT[Tutor.FULL_STAFF]:
+            user.is_iut = new_is_iut
+        user.save()
