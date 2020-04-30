@@ -8,19 +8,13 @@
 
 {% block navbar %} {% endblock %}
 {% block content %}
-<div class="row h-100 justify-content-center align-items-center text-center text-white">
-  <div class='pt-2 pl-2' style="position:fixed; left:10px; top:10px">
-    <a href="{% url 'flopeditor:flopeditor-home' %}" class="btn btn-raised d-block mx-auto mx-sm-0" style='max-width:300px'>
-      FlopEditor
-    </a>
-  </div>
-</div>
-
 <div class="container justify-content-center" style="margin-top:4%">
+  <a href="{% url 'flopeditor:flopeditor-home' %}" class="btn btn-raised btn-primary d-block mx-auto mx-sm-0" style='max-width:300px'>
+    Retour à FlopEditor
+  </a>
   <div class="card container">
-    <div class="card-body pb-0">
-      <div class="text-center">
-        <h1>Documentation de FlopEditor</h1>
+    <div class="card-header">
+      <h1 class="text-center">Documentation de FlopEditor</h1>
         <h5>
           Flopeditor est une application développée dans le cadre de
           FlopEDT par quatre étudiants de M1 Informatique de l'Université Paul Sabatier.
@@ -29,8 +23,8 @@
           promotions à l'attribution de salles, en passant par la gestion des responsables
           et tuteurs de leur département.
         </h5>
-        <br>
-      </div>
+    </div>
+    <div class="card-body pb-0">
       <h3>Table des matières récapitulant les droits</h3>
       <h6>
         Dans FlopEDT, trois rôles peuvent être attribués à un utilisateur : Tuteur, Responsable d'un département et Superuser.<br>
@@ -46,22 +40,22 @@
         <thead>
           <tr>
 
-            <th scope="col">Action</th>
+            <th scope="col-md-6">Action</th>
             {% if not request.user.is_superuser and not is_admin %}
-            <th scope="col" class="text-primary">Tuteur  <b>(Vous)</b></th>
+            <th scope="col-md-6" class="text-primary">Tuteur  <b>(Vous)</b></th>
             {% else %}
-            <th scope="col">Tuteur</th>
+            <th scope="col-md-6">Tuteur</th>
             {% endif %}
 
             {% if not request.user.is_superuser and is_admin %}
-            <th scope="col" class="text-primary">Responsable d'un département <b>(Vous)</b></th>
+            <th scope="col-md-6" class="text-primary">Responsable d'un département <b>(Vous)</b></th>
             {% else %}
-            <th scope="col">Responsable d'un département</th>
+            <th scope="col-md-6">Responsable d'un département</th>
             {% endif %}
             {% if request.user.is_superuser %}
-            <th scope="col" class="text-primary">Superuser <b>(Vous)</b></th>
+            <th scope="col-md-6" class="text-primary">Superuser <b>(Vous)</b></th>
             {% else %}
-            <th scope="col">Superuser</th>
+            <th scope="col-md-6">Superuser</th>
             {% endif %}
 
           </tr>
@@ -134,7 +128,7 @@
             <td><i class="fas fa-check"><i></td>
           </tr>
           <tr>
-            <th scope="row"><a href="profil">Afficher, modifier son profil</a></th>
+            <th scope="row"><a href="profil">Afficher, modifier votre profil</a></th>
             <td><i class="fas fa-check"><i></td>
             <td><i class="fas fa-check"><i></td>
             <td><i class="fas fa-check"><i></td>
@@ -210,7 +204,7 @@
       <br><br>
       <h4>Ajouter un intervenant</h4>
       <div class="row">
-        <div class="col">
+        <div class="col-md-6">
           <p>
           La première ligne vous permet d'ajouter un intervenant à la liste. Pour cela :
           </p>
@@ -225,17 +219,21 @@
             Pour ajouter un responsable à un département, reportez-vous à la section <a href="#dept">Création, modification d'un département</a>.
           </div>
         </div>
-        <div class="col">
+        <div class="col-md-6">
           <img src="{% static 'flopeditor/help/crudIntervenantCreate.gif' %}" alt="Animation ajout intervenant" style="max-width:100%">
+        </div>
+        <div class="col alert alert-info">
+          Si vous affectez un département à un intervenant, il n'en devient pas responsable.
+          Pour ajouter un responsable à un département, reportez-vous à la section <a href="#dept">Création, modification d'un département</a>.
         </div>
       </div>
       <br><br>
       <h4>Modifier un intervenant</h4>
       <div class="row">
-        <div class="col">
+        <div class="col-md-6">
           <img src="{% static 'flopeditor/help/crudIntervenantUpdate.gif' %}" alt="Animation modification intervenant" style="max-width:100%">
         </div>
-        <div class="col">
+        <div class="col-md-6">
           <ol>
             <li>Cliquer sur le bouton <i class="fas fa-pencil-alt"></i>, tout à droite de la ligne.</li>
             <li>Vous pouvez modifier l'ID, le prénom, le nom de famille et le statut.</li>
@@ -248,14 +246,14 @@
       <br><br>
       <h4>Supprimer un intervenant</h4>
       <div class="row">
-        <div class="col">
+        <div class="col-md-6">
           <ol>
             <li>Appuyez sur le bouton <i class="fas fa-trash"></i> tout à droite de la ligne.</li>
             <li>Un avertissement apparaît pour vous demander de confirmer la suppression. Validez la suppression.</li>
           </ol>
           <div class="alert alert-warning">Attention : Si vous supprimez cet intervenant, tous les cours associés seront supprimés et ce dernier ne pourra plus se connecter.</div>
         </div>
-        <div class="col">
+        <div class="col-md-6">
           <img src="{% static 'flopeditor/help/crudIntervenantDelete.gif' %}" alt="Animation suppression intervenant" style="max-width:100%">
         </div>
       </div>
@@ -270,10 +268,10 @@
       <br><br>
       <h4>Ajouter une salle</h4>
       <div class="row">
-        <div class="col">
+        <div class="col-md-6">
           <img src="{% static 'flopeditor/help/crudSalleCreate.gif' %}" alt="Animation ajout salle" style="max-width:100%">
         </div>
-        <div class="col">
+        <div class="col-md-6">
           <p>La première ligne vous permet d'ajouter une salle à la liste. Pour cela : </p>
           <ol>
             <li>Renseignez au moins le nom de la salle.</li>
@@ -288,7 +286,7 @@
       <br><br>
       <h4>Modifier une salle</h4>
       <div class="row">
-        <div class="col">
+        <div class="col-md-6">
           <p>
             <ol>
               <li>Cliquer sur le bouton <i class="fas fa-pencil-alt"></i>, tout à droite de la ligne.</li>
@@ -296,17 +294,17 @@
               <li>Cliquez sur le bouton <i class="fas fa-sm fa-check"></i> à droite pour valider.</li>
             </ol>
         </div>
-        <div class="col">
+        <div class="col-md-6">
           <img src="{% static 'flopeditor/help/crudSalleUpdate.gif' %}" alt="Animation modification salle" style="max-width:100%">
         </div>
       </div>
       <br><br>
       <h4>Supprimer une salle</h4>
       <div class="row">
-        <div class="col">
+        <div class="col-md-6">
           <img src="{% static 'flopeditor/help/crudSalleDelete.gif' %}" alt="Animation suppression salle" style="max-width:100%">
         </div>
-        <div class="col">
+        <div class="col-md-6">
           <ol>
             <li>Appuyez sur le bouton <i class="fas fa-trash"></i> tout à droite de la ligne.</li>
             <li>Un avertissement apparaît pour vous demander de confirmer la suppression. Validez la suppression.</li>
@@ -324,10 +322,10 @@
       <br><br>
       <h4>Ajouter une catégorie de salle</h4>
       <div class="row">
-        <div class="col">
+        <div class="col-md-6">
           <img src="{% static 'flopeditor/help/crudGroupeSalleCreate.gif' %}" alt="Animation ajout salle" style="max-width:100%">
         </div>
-        <div class="col">
+        <div class="col-md-6">
           <p>La première ligne vous permet d'ajouter une catégorie de salle à la liste.</p>
           <ol>
             <li>Renseignez au moins le nom de la catégorie.</li>
@@ -339,7 +337,7 @@
       <br><br>
       <h4>Modifier une catégorie de salle</h4>
       <div class="row">
-        <div class="col">
+        <div class="col-md-6">
           <ol>
             <li>Cliquer sur le bouton <i class="fas fa-pencil-alt"></i>, tout à droite de la ligne.</li>
             <li>Vous pouvez modifier son nom, ainsi que ses salles et groupes de salles associées.</li>
@@ -348,17 +346,17 @@
           <div class="alert alert-info">Note : Si vous ne trouvez pas la salle que vous souhaitez ajouter, c'est sûrement parce qu'elle n'est pas affectée à votre département.
           Rendez-vous à la section  <a href="#salle">Ajouter, modifier, supprimer une salle / un groupe de salles</a> pour affecter cette salle à votre département.</div>
         </div>
-        <div class="col">
+        <div class="col-md-6">
           <img src="{% static 'flopeditor/help/crudGroupeSalleUpdate.gif' %}" alt="Animation modification catégorie de salle" style="max-width:100%">
         </div>
       </div>
       <br><br>
       <h4>Supprimer une catégorie de salle</h4>
       <div class="row">
-        <div class="col">
+        <div class="col-md-6">
           <img src="{% static 'flopeditor/help/crudGroupeSalleDelete.gif' %}" alt="Animation suppression catégorie de salle" style="max-width:100%">
         </div>
-        <div class="col">
+        <div class="col-md-6">
           <ol>
             <li>Appuyez sur le bouton <i class="fas fa-trash"></i> tout à droite de la ligne.</li>
             <li>Un avertissement apparaît pour vous demander de confirmer la suppression. Validez la suppression.</li>
@@ -369,8 +367,63 @@
 
       <br><br>
       <h3 id="semestre">Ajouter, Modifier, supprimer un semestre</h3>
-      <h2 style="color:red">A écrire !</h2>
-      <div class="alert alert-info">Note : Si vous n'êtes pas responsable du département, vous pourrez uniquement visualiser la liste des semestres.</div>
+      <div class="alert alert-info">Note : Si vous n'êtes pas responsable d'un département, vous pourrez uniquement visualiser la liste des semestres.</div>
+      <p> Pour atteindre le tableau permettant de visualiser et modifier les semestres : vous devez vous rendre dans l'onglet "Module" dans la barre de navigation en haut à droite
+        puis dans l'onglet "SEMESTRE" au-dessus du bouton "ENREGISTRER".
+      </p>
+      <br><br>
+      <h4>Ajouter un semestre</h4>
+      <div class="row">
+        <div class="col-md-6">
+          <img src="{% static 'flopeditor/help/crudPeriodCreate.gif' %}" alt="Animation ajout semestre" style="max-width:100%">
+        </div>
+        <div class="col-md-6">
+          <p>
+            <ol>
+              <li>Sur la première ligne : renseigner l'id du semestre (exemples : S1, S2 ou S3; il doit être unique), le numéro de la semaine de
+              début entre [1-53] et le numéro de la semaine de fin du nouveau semestre entre [1-53] </li>
+              <li>Appuyez ensuite sur le bouton "+" à droite</li>
+              <li>Répétez les 2 premiers points si vous voulez ajouter d'autre semestre</li>
+              <li>Appuyez sur le bouton "ENREGISTRER" à gauche si vous n'avez plus de semestre à ajouter.</li>
+            </ol>
+          </p>
+        </div>
+      </div>
+      <h4>Modifier un semestre</h4>
+      <div class="row">
+        <div class="col-md-6">
+          <p>
+            <ol>
+              <li>Trouvez le semestre à modifier dans le tableau, puis cliquer sur l'icône de modification (crayon bleu) à droite</li>
+              <li>Modifiez les champs que vous souhaitez (Id doit être unique, le numéro des semaines comprit entre [1-53]) puis cliquer sur <i class="fas fa-sm fa-check"></i> à droite</li>
+              <li>Répétez les 2 premiers points si vous voulez modifier d'autre semestre</li>
+              <li>Cliquez sur "ENREGISTRER" en haut à gauche si vous n'avez plus de semestre à modifier.</li>
+            </ol>
+          </p>
+        </div>
+        <div class="col-md-6">
+          <img src="{% static 'flopeditor/help/crudPeriodUpdate.gif' %}" alt="Animation modification semestre" style="max-width:100%">
+        </div>
+      </div>
+      <br><br>
+      <h4>Supprimer un semestre</h4>
+      <div class="row">
+        <div class="col-md-6">
+          <img src="{% static 'flopeditor/help/crudPeriodDelete.gif' %}" alt="Animation suppression semestre" style="max-width:100%">
+        </div>
+        <div class="col-md-6">
+          <p>
+            <ol>
+              <li>Trouvez le semestre à supprimer dans le tableau, puis cliquer sur l'icône de suppression (<i class="fas fa-sm fa-trash"></i> rouge) à droite</li>
+              <li>Cliquez sur "OUI" si vous êtes sûr de vouloir supprimer ce semestre, "NON" sinon.</li>
+              <li>Répétez les 2 premiers points si vous voulez supprimer d'autre semestre</li>
+              <li>Cliquez sur "ENREGISTRER" en haut à gauche si vous n'avez plus de semestre à supprimer.</li>
+            </ol>
+          </p>
+          <div class="alert alert-warning">Attention : Si vous supprimez un semestre, tous les modules associés seront supprimés.</div>
+        </div>
+      </div>
+
 
       <br><br>
       <h3 id="promo">Ajouter, Modifier, supprimer une promo</h3>
@@ -380,10 +433,10 @@
       <br><br>
       <h4>Ajouter une promo</h4>
       <div class="row">
-        <div class="col">
+        <div class="col-md-6">
           <img src="{% static 'flopeditor/help/crudPromoCreate.gif' %}" alt="Animation ajout promo" style="max-width:100%">
         </div>
-        <div class="col">
+        <div class="col-md-6">
           <ol>
             <li>Renseignez le nom et l'abréviation de la promo à ajouter.</li>
             <li>Si vous le souhaitez, vous pouvez l'associer à un département ou à un groupe de salles.</li>
@@ -394,24 +447,24 @@
       <br><br>
       <h4>Modifier une promo</h4>
       <div class="row">
-        <div class="col">
+        <div class="col-md-6">
           <ol>
             <li>Cliquer sur le bouton <i class="fas fa-pencil-alt"></i>, tout à droite de la ligne.</li>
             <li>Vous pouvez modifier le nom et l'abbréviation de la promo.</li>
             <li>Cliquez sur le bouton <i class="fas fa-sm fa-check"></i> à droite pour valider.</li>
           </ol>
         </div>
-        <div class="col">
+        <div class="col-md-6">
           <img src="{% static 'flopeditor/help/crudPromoUpdate.gif' %}" alt="Animation modification promo" style="max-width:100%">
         </div>
       </div>
       <br><br>
       <h4>Supprimer une promo</h4>
       <div class="row">
-        <div class="col">
+        <div class="col-md-6">
           <img src="{% static 'flopeditor/help/crudPromoDelete.gif' %}" alt="Animation suppression promo" style="max-width:100%">
         </div>
-        <div class="col">
+        <div class="col-md-6">
           <ol>
             <li>Appuyez sur le bouton <i class="fas fa-trash"></i> tout à droite de la ligne.</li>
             <li>Un avertissement apparaît pour vous demander de confirmer la suppression. Validez la suppression.</li>
@@ -420,10 +473,65 @@
         </div>
       </div>
 
+
       <br><br>
       <h3 id="nature-groupe">Ajouter, Modifier, supprimer une nature de groupes</h3>
-      <h2 style="color:red">A écrire !</h2>
       <div class="alert alert-info">Note : Si vous n'êtes pas responsable du département, vous pourrez uniquement visualiser la liste des natures de groupes.</div>
+      <p> Pour atteindre le tableau permettant de visualiser et modifier les natures de groupes (TP, TD, CE...) : vous devez vous rendre dans l'onglet "élève" dans la barre de navigation en haut à droite
+        puis dans l'onglet "SEMESTRE" au-dessus du bouton "ENREGISTRER".
+      </p>
+      <br><br>
+      <h4>Ajouter une nature de groupes</h4>
+      <div class="row">
+        <div class="col-md-6">
+          <img src="{% static 'flopeditor/help/crudNatureGroupeCreate.gif' %}" alt="Animation ajout semestre" style="max-width:100%">
+        </div>
+        <div class="col-md-6">
+          <p>
+            <ol>
+              <li>Sur la première ligne : renseigner l'id de la nature de groupes (exemples : TD ou TP; il doit être unique et < 50 caractères) </li>
+              <li>Appuyez ensuite sur le bouton "+" à droite</li>
+              <li>Répétez les 2 premiers points si vous voulez ajouter d'autre nature de groupes</li>
+              <li>Appuyez sur le bouton "ENREGISTRER" à gauche si vous n'avez plus de nature de groupes à ajouter.</li>
+            </ol>
+          </p>
+        </div>
+      </div>
+      <h4>Modifier une nature de groupes</h4>
+      <div class="row">
+        <div class="col-md-6">
+          <p>
+            <ol>
+              <li>Trouvez la nature de groupes à modifier dans le tableau, puis cliquer sur l'icône de modification (crayon bleu) à droite</li>
+              <li>Modifiez le champ Id (doit être unique et < 50 caractères) puis cliquez sur le bouton <i class="fas fa-sm fa-check"></i> à droite pour valider.</li>
+              <li>Répétez les 2 premiers points si vous voulez modifier d'autre nature de groupes</li>
+              <li>Cliquez sur "ENREGISTRER" en haut à gauche si vous n'avez plus de nature de groupes à modifier.</li>
+            </ol>
+          </p>
+        </div>
+        <div class="col-md-6">
+          <img src="{% static 'flopeditor/help/crudNatureGroupeUpdate.gif' %}" alt="Animation modification semestre" style="max-width:100%">
+        </div>
+      </div>
+      <br><br>
+      <h4>Supprimer une nature de groupes</h4>
+      <div class="row">
+        <div class="col-md-6">
+          <img src="{% static 'flopeditor/help/crudNatureGroupeDelete.gif' %}" alt="Animation suppression semestre" style="max-width:100%">
+        </div>
+        <div class="col-md-6">
+          <p>
+            <ol>
+              <li>Trouvez la nature de groupes à supprimer dans le tableau, puis cliquer sur l'icône de suppression <i class="fas fa-sm fa-trash"></i> à droite</li>
+              <li>Cliquez sur "OUI" si vous êtes sûr de vouloir supprimer cete nature de groupes, "NON" sinon.</li>
+              <li>Répétez les 2 premiers points si vous voulez supprimer d'autre nature de groupes</li>
+              <li>Cliquez sur "ENREGISTRER" en haut à gauche si vous n'avez plus de nature de groupes à supprimer.</li>
+            </ol>
+          </p>
+          <div class="alert alert-warning">ATTENTION : Si vous supprimez une nature de groupes, tous les groupes d'élèves et les cours associés seront supprimés.</div>
+        </div>
+      </div>
+
 
       <br><br>
       <h3 id="groupe">Ajouter, Modifier, supprimer un groupe d'élèves</h3>
@@ -434,21 +542,170 @@
       <h3 id="module">Ajouter, Modifier, supprimer un module</h3>
       <h2 style="color:red">A écrire !</h2>
       <div class="alert alert-info">Note : Si vous n'êtes pas responsable du département, vous pourrez uniquement visualiser la liste des modules.</div>
+      L'onglet "Modules" de la barre de navigation vous permet d'accéder à la liste des modules enregistrés dans FlopEDT.
+      <br><br>
+      <h4>Ajouter un module</h4>
+      <div class="row">
+        <div class="col-md-4">
+          <img src="{% static 'flopeditor/help/crudModuleCreate.gif' %}" alt="Animation ajout module" style="max-width:100%">
+        </div>
+        <div class="col-md-8">
+          <ol>
+            <li>Dans la première ligne du tableau, saisissez les informations du module que vous souhaitez ajouter. Il est obligatoire de saisir une abbréviation, un code PPN et un nom pour le module.</li>
+            <li>Appuyez sur le bouton '+' à droite de la ligne.</li>
+            <li>Répétez les étapes 1 et 2 si vous souhaitez ajouter d'autres modules.</li>
+            <li>Appuyez sur le bouton 'Enregistrer' pour valider les modifications.</li>
+          </ol>
+          <div class="alert alert-info">Note : pour ajouter un module, il est nécessaire d'avoir ajouté au moins une promo, un intervenant et un semestre au département.</div>
+        </div>
+      </div>
+      <br><br>
+      <h4>Modifier un module</h4>
+      <div class="row">
+        <div class="col-md-8">
+          <ol>
+            <li>Après avoir choisi un module à modifier, appuyez sur le bouton bleu à droite de la ligne correspondante.</li>
+            <li>Vous pouvez alors modifier l'abbréviation, le code PPN, le nom, la description, la promo, l'enseignant responsable et le semsestre du module.</li>
+            <li>Appuyez sur le bouton vert à droite de la ligne pour valider l'édition du module.</li>
+            <li>Répétez les étapes 1, 2 et 3 si vous souhaitez modifier d'autres modules.</li>
+            <li>Appuyez sur le bouton 'Enregistrer' pour valider les modifications.</li>
+          </ol>
+        </div>
+        <div class="col-md-4">
+          <img src="{% static 'flopeditor/help/crudModuleUpdate.gif' %}" alt="Animation modification module" style="max-width:100%">
+        </div>
+      </div>
+      <br><br>
+      <h4>Supprimer un module</h4>
+      <div class="row">
+        <div class="col-md-4">
+          <img src="{% static 'flopeditor/help/crudModuleDelete.gif' %}" alt="Animation suppression module" style="max-width:100%">
+        </div>
+        <div class="col-md-8">
+          <ol>
+            <li>Après avoir choisi un module à supprimer, appuyez sur le bouton rouge à droite de la ligne correspondante.</li>
+            <li>Confirmez la suppression en cliquant sur 'oui'.</li>
+            <li>Répétez les étapes 1 et 2 si vous souhaitez supprimer d'autres modules.</li>
+            <li>Appuyez sur le bouton 'Enregistrer' pour valider les modifications.</li>
+          </ol>
+        </div>
+      </div>
 
       <br><br>
       <h3 id="cours">Ajouter, Modifier, supprimer un cours</h3>
-      <h2 style="color:red">A écrire !</h2>
+      <h2 style="color:red">A relire !</h2>
       <div class="alert alert-info">Note : Si vous n'êtes pas responsable du département, vous pourrez uniquement visualiser la liste des cours.</div>
+      L'onglet "Cours" vous permet d'accéder à la liste des types de cours enregistrés dans FlopEDT.
+      <br><br>
+      <h4>Ajouter un type de cours</h4>
+      <div class="row">
+        <div class="col-md-4">
+          <img src="{% static 'flopeditor/help/crudCoursCreate.gif' %}" alt="Animation ajout cours" style="max-width:100%">
+        </div>
+        <div class="col-md-8">
+          <ol>
+            <li>Dans la première ligne du tableau, saisissez les informations du type de cours que vous souhaitez ajouter. Il est obligatoire de saisir un identifiant de type de cours pour pouvoir en ajouter un.</li>
+            <li>Appuyez sur le bouton '+' à droite de la ligne.</li>
+            <li>Répétez les étapes 1 et 2 si vous souhaitez ajouter d'autres types de cours.</li>
+            <li>Appuyez sur le bouton 'Enregistrer' pour valider les modifications.</li>
+          </ol>
+        </div>
+      </div>
+      <br><br>
+      <h4>Modifier un type de cours</h4>
+      <div class="row">
+        <div class="col-md-8">
+          <ol>
+            <li>Après avoir choisi un type de cours à modifier, appuyez sur le bouton bleu à droite de la ligne correspondante.</li>
+            <li>Vous pouvez alors modifier l'identifiant du type de cours, sa durée, les types de groupes d'élèves concernés et les horaires auxquels ce type de cours peut commencer.</li>
+            <li>Appuyez sur le bouton vert à droite de la ligne pour valider l'édition du module.</li>
+            <li>Répétez les étapes 1, 2 et 3 si vous souhaitez modifier d'autres types de cours.</li>
+            <li>Appuyez sur le bouton 'Enregistrer' pour valider les modifications.</li>
+          </ol>
+        </div>
+        <div class="col-md-4">
+          <img src="{% static 'flopeditor/help/crudCoursUpdate.gif' %}" alt="Animation modification cours" style="max-width:100%">
+        </div>
+      </div>
+      <br><br>
+      <h4>Supprimer un type de cours</h4>
+      <div class="row">
+        <div class="col-md-4">
+          <img src="{% static 'flopeditor/help/crudCoursDelete.gif' %}" alt="Animation suppression cours" style="max-width:100%">
+        </div>
+        <div class="col-md-8">
+          <ol>
+            <li>Après avoir choisi un type de cours à supprimer, appuyez sur le bouton rouge à droite de la ligne correspondante.</li>
+            <li>Confirmez la suppression en cliquant sur 'oui'.</li>
+            <li>Répétez les étapes 1 et 2 si vous souhaitez supprimer d'autres types de cours.</li>
+            <li>Appuyez sur le bouton 'Enregistrer' pour valider les modifications.</li>
+          </ol>
+        </div>
+      </div>
 
       <br><br>
       <h3 id="params">Modifier les paramètres</h3>
-      <h2 style="color:red">A écrire !</h2>
+      <h2 style="color:red">A relire</h2>
       <div class="alert alert-info">Note : Si vous n'êtes pas responsable du département, vous pourrez uniquement visualiser les paramètres de ce département.</div>
+      <h4>Afficher les paramètres</h4>
+      <div class="row">
+        <div class="col-md-4">
+          <img src="{% static 'flopeditor/help/paramsAfficher.gif' %}" alt="Animation affichage parametres" style="max-width:100%">
+        </div>
+        <div class="col-md-8">
+          <ol>
+            <li>Depuis une page d'un département de flopeditor, cliquez sur le bouton 'Paramètres' à droite de la barre de navigation.</li>
+            <li>Les paramètres de ce département s'affichent.</li>
+          </ol>
+        </div>
+      </div>
+      <br><br>
+      <h4>Modifier les paramètres</h4>
+      <div class="row">
+        <div class="col-md-8">
+          <ol>
+            <li>Sur la page des paramètres d'un départment, cliquez sur le bouton 'Modifier' en bas.</li>
+            <li>Vous pouvez modifier les jours ouvrables et les horaires par défaut du département.</li>
+            <li>Une fois que toutes les modifications ont été apportées, appuyez sur le bouton 'Valider' en bas à gauche.</li>
+            <li>Quand les modifications sont validées, les champs d'édition disparaissent.</li>
+          </ol>
+          <div class="alert alert-info">Note : L'heure de début des cours doit être inférieure à l'heure de fin des cours, les heures du déjeuner doivent être comprises entre les heures de début et de fin des cours.</div>
+        </div>
+        <div class="col-md-4">
+          <img src="{% static 'flopeditor/help/paramsModif.gif' %}" alt="Animation modification paramètres" style="max-width:100%">
+        </div>
+      </div>
 
       <br><br>
-      <h3 id="profil">Afficher, modifier son profil</h3>
-      <h2 style="color:red">A écrire !</h2>
-
+      <h3 id="profil">Afficher, modifier votre profil</h3>
+      <h2 style="color:red">A relire</h2>
+      <h4>Afficher votre profil</h4>
+      <div class="row">
+        <div class="col-md-4">
+          <img src="{% static 'flopeditor/help/profilAfficher.gif' %}" alt="Animation affichage profil" style="max-width:100%">
+        </div>
+        <div class="col-md-8">
+          <ol>
+            <li>Depuis une page de flopeditor cliquez sur le bouton en forme de bonhomme en haut à droite.</li>
+            <li>Votre profil s'affiche.</li>
+          </ol>
+        </div>
+      </div>
+      <br><br>
+      <h4>Modifier votre profil</h4>
+      <div class="row">
+        <div class="col-md-8">
+          <ol>
+            <li>Depuis votre profil, cliquez sur le bouton 'Modifier' en bas.</li>
+            <li>Vous pouvez modifier votre identifiant, statut, nom, prénom et adresse mail.</li>
+            <li>Une fois que toutes les modifications ont été apportées, appuyez sur le bouton 'Valider' en bas à gauche.</li>
+            <li>Quand les modifications sont validées, la fenêtre du profil disparaît.</li>
+          </ol>
+        </div>
+        <div class="col-md-4">
+          <img src="{% static 'flopeditor/help/profilupdate.gif' %}" alt="Animation modification profil" style="max-width:100%">
+        </div>
+      </div>
     </div>
   </div>
 </div>
