@@ -305,8 +305,63 @@
 
       <br><br>
       <h3 id="semestre">Ajouter, Modifier, supprimer un semestre</h3>
-      <h2 style="color:red">A écrire !</h2>
       <div class="alert alert-info">Note : Si vous n'êtes pas responsable d'un département, vous pourrez uniquement visualiser la liste des semestres.</div>
+      <p> Pour atteindre le tableau permettant de visualiser et modifier les semestres : vous devez vous rendre dans l'onglet "Module" dans la barre de navigation en haut à droite
+        puis dans l'onglet "SEMESTRE" au-dessus du bouton "ENREGISTRER".
+      </p>
+      <br><br>
+      <h4>Ajouter un semestre</h4>
+      <div class="row">
+        <div class="col">
+          <img src="{% static 'flopeditor/help/crudPeriodCreate.gif' %}" alt="Animation ajout semestre" style="max-width:100%">
+        </div>
+        <div class="col">
+          <p>
+            <ol>
+              <li>Sur la première ligne : renseigner l'id du semestre (exemples : S1, S2 ou S3; il doit être unique), le numéro de la semaine de
+              début entre [1-53] et le numéro de la semaine de fin du nouveau semestre entre [1-53] </li>
+              <li>Appuyez ensuite sur le bouton "+" à droite</li>
+              <li>Répétez les 2 premiers points si vous voulez ajouter d'autre semestre</li>
+              <li>Appuyez sur le bouton "ENREGISTRER" à gauche si vous n'avez plus de semestre à ajouter.</li>
+            </ol>
+          </p>
+        </div>
+      </div>
+      <h4>Modifier un semestre</h4>
+      <div class="row">
+        <div class="col">
+          <p>
+            <ol>
+              <li>Trouvez le semestre à modifier dans le tableau, puis cliquer sur l'icône de modification (crayon bleu) à droite</li>
+              <li>Modifiez les champs que vous souhaitez (Id doit être unique, le numéro des semaines comprit entre [1-53]) puis cliquer sur "V" à droite</li>
+              <li>Répétez les 2 premiers points si vous voulez modifier d'autre semestre</li>
+              <li>Cliquez sur "ENREGISTRER" en haut à gauche si vous n'avez plus de semestre à modifier.</li>
+            </ol>
+          </p>
+        </div>
+        <div class="col">
+          <img src="{% static 'flopeditor/help/crudPeriodUpdate.gif' %}" alt="Animation modification semestre" style="max-width:100%">
+        </div>
+      </div>
+      <br><br>
+      <h4>Supprimer une salle</h4>
+      <div class="row">
+        <div class="col">
+          <img src="{% static 'flopeditor/help/crudPeriodDelete.gif' %}" alt="Animation suppression semestre" style="max-width:100%">
+        </div>
+        <div class="col">
+          <p>
+            <ol>
+              <li>Trouvez le semestre à supprimer dans le tableau, puis cliquer sur l'icône de suppression (X rouge) à droite</li>
+              <li>Cliquez sur "OUI" si vous êtes sûr de vouloir supprimer ce semestre, "NON" sinon.</li>
+              <li>Répétez les 2 premiers points si vous voulez supprimer d'autre semestre</li>
+              <li>Cliquez sur "ENREGISTRER" en haut à gauche si vous n'avez plus de semestre à supprimer.</li>
+            </ol>
+          </p>
+          <div class="alert alert-warning">Attention : Si vous supprimez un semestre, tous les modules associés seront supprimés.</div>
+        </div>
+      </div>
+
 
       <br><br>
       <h3 id="promo">Ajouter, Modifier, supprimer une promo</h3>
