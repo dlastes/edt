@@ -58,7 +58,7 @@ urlpatterns = [
          name='flopeditor-department-modules'),
     path('<slug:department_abbrev>/types-de-cours', views.department_course_types,
          name='flopeditor-department-course-types'),
-    path('<slug:department_abbrev>/periodes', views.department_periods,
+    path('<slug:department_abbrev>/semestres', views.department_periods,
          name='flopeditor-department-periods'),
 
     path('<slug:department_abbrev>/parameters', views.department_parameters,

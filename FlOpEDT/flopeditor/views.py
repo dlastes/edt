@@ -451,7 +451,7 @@ def department_periods(request, department_abbrev):
     :rtype:  django.http.HttpResponse
 
     """
-    return crud_view(request, department_abbrev, "flopeditor/periods.html", 'Périodes')
+    return crud_view(request, department_abbrev, "flopeditor/periods.html", 'Semestres')
 
 
 @tutor_or_superuser_required
