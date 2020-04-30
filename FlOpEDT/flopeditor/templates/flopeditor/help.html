@@ -171,8 +171,15 @@
           <br class="d-none d-md-block">
           <p>
           Il est possible de créer un départemment à partir de la page d'accueil de Flopeditor.
-          Pour cela, cliquez sur le bouton en bas à droite, ce qui ouvrira le menu de création d'un département.
-          A partir de là, vous pourrez ajouter le nom, l'abréviation ainsi que les responsables du département à créer.
+          Pour cela :
+          </p>
+          <ol>
+            <li>Cliquez sur le bouton en bas à droite, ce qui ouvrira le menu de création d'un département.</li>
+            <li>Ajoutez le nom, l'abréviation ainsi que les responsables du département à créer.</li>
+            <li>Validez la création du département en appuyant sur le bouton "CREER".</li>
+          </ol>
+          <p>
+
           </p>
           <br class="d-none d-md-block">
           <img src="{% static 'flopeditor/help/creer_dept.gif' %}" alt="Animation création département" style="max-width:100%">
@@ -181,11 +188,14 @@
           <br><br>
           <h4>Modifier un département</h4>
           <p>
-          Il est possible de modifier le nom, l'abrevviation et les responsables d'un départemment à partir de la page d'accueil de Flopeditor.
-          Pour cela, à côté du bouton portant le nom du département, se trouve un bouton en forme de crayon.
-          En cliquant sur celui-ci un menu s'ouvre, permettant de modifier les attributs du département.
-          A partir de ce menu, vous pourrez modifier le nom, l'abréviation ainsi que les responsables du département à créer.
+            Il est possible de modifier le nom, l'abréviation et les responsables d'un départemment à partir de la page d'accueil de Flopeditor.
           </p>
+            <ol>
+              <li>Cliquez sur le bouton <i class="fas fa-pencil-alt"></i> à côté du nom du département à modifier,</li>
+              En cliquant sur celui-ci un menu s'ouvre, permettant de modifier les attributs du département.
+              <li>  A partir de ce menu, modifiez les éléments à mettre à jour.</li>
+              <li>Validez la modification du département en appuyant sur le bouton "MODIFIER".</li>
+            </ol>
           <img src="{% static 'flopeditor/help/modifier_dept.gif' %}" alt="Animation création département" style="max-width:100%">
         </div>
       </div>
@@ -202,11 +212,14 @@
       <div class="row">
         <div class="col">
           <p>
-          La première ligne vous permet d'ajouter un intervenant à la liste.
-          Pour cela, il faut y renseigner son ID, son prénom, son nom de famille et son statut.
-          Si l'intervenant à ajouter est vacataire, il faut également renseigner son employeur.
-          Vous avez également la possibilité d'affecter à cet intervenant un ou plusieurs départements.
+          La première ligne vous permet d'ajouter un intervenant à la liste. Pour cela :
           </p>
+          <ol>
+            <li>Renseignez son ID, son prénom, son nom de famille et son statut.</li>
+            <li>Si l'intervenant à ajouter est vacataire, il faut également renseigner son employeur.</li>
+            <li>Si vous les souhaitez, vous pouvez affecter à cet intervenant un ou plusieurs départements.</li>
+            <li>Validez l'ajout avec le bouton <i class="fas fa-plus"></i> à droite.</li>
+          </ol>
           <div class="alert alert-info">
             Si vous affectez un département à un intervenant, il n'en devient pas responsable.
             Pour ajouter un responsable à un département, reportez-vous à la section <a href="#dept">Création, modification d'un département</a>.
@@ -223,22 +236,23 @@
           <img src="{% static 'flopeditor/help/crudIntervenantUpdate.gif' %}" alt="Animation modification intervenant" style="max-width:100%">
         </div>
         <div class="col">
-          <p>
-          Pour modifier un intervenant, vous pouvez cliquer sur le bouton avec le symbole de crayon, tout à droite de la ligne.
-          Vous pouvez modifier son ID, son prénom, son nom de famille et son statut.
-          Si l'intervenant à modifier est vacataire, il faut également renseigner son employeur.
-          Vous avez également la possibilité d'affecter ou de retirer un ou plusieurs départements à cet intervenant.
-          </p>
+          <ol>
+            <li>Cliquer sur le bouton <i class="fas fa-pencil-alt"></i>, tout à droite de la ligne.</li>
+            <li>Vous pouvez modifier l'ID, le prénom, le nom de famille et le statut.</li>
+            <li>Si l'intervenant à modifier est vacataire, il faut également renseigner son employeur.</li>
+            <li>Vous pouvez affecter ou retirer un ou plusieurs départements à cet intervenant.</li>
+            <li>Cliquez sur le bouton <i class="fas fa-sm fa-check"></i> à droite pour valider.</li>
+          </ol>
         </div>
       </div>
       <br><br>
       <h4>Supprimer un intervenant</h4>
       <div class="row">
         <div class="col">
-          <p>
-          Si vous voulez supprimer un intervenant, il vous suffit d'appuyer sur le bouton rouge tout à droite de la ligne.
-          Un avertissement apparaît pour vous demander de confirmer la suppression. Il ne vous reste qu'à valider la suppression.
-          </p>
+          <ol>
+            <li>Appuyez sur le bouton <i class="fas fa-trash"></i> tout à droite de la ligne.</li>
+            <li>Un avertissement apparaît pour vous demander de confirmer la suppression. Validez la suppression.</li>
+          </ol>
           <div class="alert alert-warning">Attention : Si vous supprimez cet intervenant, tous les cours associés seront supprimés et ce dernier ne pourra plus se connecter.</div>
         </div>
         <div class="col">
@@ -260,13 +274,15 @@
           <img src="{% static 'flopeditor/help/crudSalleCreate.gif' %}" alt="Animation ajout salle" style="max-width:100%">
         </div>
         <div class="col">
-          <p>
-            La première ligne vous permet d'ajouter une salle à la liste. Pour cela, vous devez au moins renseigner le nom de la salle.
-            Si vous le souhaitez, vous pouvez l'associer à un département ou à un groupe de salles.
-          </p>
+          <p>La première ligne vous permet d'ajouter une salle à la liste. Pour cela : </p>
+          <ol>
+            <li>Renseignez au moins le nom de la salle.</li>
+            <li>Si vous le souhaitez, vous pouvez l'associer à un département ou à un groupe de salles.</li>
+            <li>Validez l'ajout avec le bouton <i class="fas fa-plus"></i> à droite.</li>
+          </ol>
           <div class="alert alert-info">Si vous souhaitez créer un groupe de salles, faites comme si c'était une salle simple : Indiquez un nom,
-          puis appuyez sur le boton "+", et enregistrez les modifications. Après avoir actualisé la page, votre nouveau groupe de salles apparaitra
-          bien dans la liste "Sous-salle de..." !</div>
+          puis appuyez sur le boton "+", et enregistrez les modifications. Après avoir actualisé la page, vous pourrez ajouter les salles de votre
+          choix dans le groupe à l'aide de la liste "Sous-salle de...".</div>
         </div>
       </div>
       <br><br>
@@ -274,9 +290,11 @@
       <div class="row">
         <div class="col">
           <p>
-          Pour modifier une salle, vous pouvez cliquer sur le bouton avec le symbole de crayon, tout à droite de la ligne.
-          Vous pouvez modifier son nom, ses sous-salles associées et les départements auxquels la salle est affectée.
-          </p>
+            <ol>
+              <li>Cliquer sur le bouton <i class="fas fa-pencil-alt"></i>, tout à droite de la ligne.</li>
+              <li>Vous pouvez modifier le nom, les sous-salles associées et les départements auxquels la salle est affectée.</li>
+              <li>Cliquez sur le bouton <i class="fas fa-sm fa-check"></i> à droite pour valider.</li>
+            </ol>
         </div>
         <div class="col">
           <img src="{% static 'flopeditor/help/crudSalleUpdate.gif' %}" alt="Animation modification salle" style="max-width:100%">
@@ -289,10 +307,10 @@
           <img src="{% static 'flopeditor/help/crudSalleDelete.gif' %}" alt="Animation suppression salle" style="max-width:100%">
         </div>
         <div class="col">
-          <p>
-            Si vous voulez supprimer une salle, il vous suffit d'appuyer sur le bouton rouge tout à droite de la ligne.
-            Un avertissement apparaît pour vous demander de confirmer la suppression. Il ne vous reste qu'à valider la suppression.
-          </p>
+          <ol>
+            <li>Appuyez sur le bouton <i class="fas fa-trash"></i> tout à droite de la ligne.</li>
+            <li>Un avertissement apparaît pour vous demander de confirmer la suppression. Validez la suppression.</li>
+          </ol>
           <div class="alert alert-info">Note : Si vous supprimez une salle comportant des sous-salles, les sous-salles ne sont pas supprimées.</div>
         </div>
       </div>
@@ -300,7 +318,7 @@
       <h3 id="cat-salle">Ajouter, modifier, supprimer une catégorie de salle</h3>
       <h2 style="color:red">A relire</h2>
       <div class="alert alert-info">Note : Si vous n'êtes pas responsable du département, vous pourrez uniquement visualiser la liste des catégories de salles.</div>
-      L'onglet "Catégories de salles", trouvable en cliquand sur "SALLES" dans la barre de navigation, vous permet d'accéder aux différentes des catégories de salles enregistrées dans FlopEDT.
+      L'onglet "Catégories de salles", trouvable en cliquant sur "SALLES" dans la barre de navigation, vous permet d'accéder aux différentes catégories de salles enregistrées dans FlopEDT.
       A partir de ce tableau, vous pouvez notamment créer une salle ou un groupe de salles, ou encore modifier ou supprimer une salle existante.
       Vous pouvez également associer un ou plusieurs départements à ces salles.
       <br><br>
@@ -310,38 +328,41 @@
           <img src="{% static 'flopeditor/help/crudGroupeSalleCreate.gif' %}" alt="Animation ajout salle" style="max-width:100%">
         </div>
         <div class="col">
-          <p>
-            La première ligne vous permet d'ajouter une catégorie de salle à la liste. Pour cela, vous devez au moins renseigner le nom de la catégorie.
-            Vous pouvez également ajouter dans cette catégorie des salles ou des groupes de salles, en les sélectionnant dans le menu.
-          </p>
+          <p>La première ligne vous permet d'ajouter une catégorie de salle à la liste.</p>
+          <ol>
+            <li>Renseignez au moins le nom de la catégorie.</li>
+            <li>Vous pouvez également ajouter dans cette catégorie des salles ou des groupes de salles, en les sélectionnant dans le menu.</li>
+            <li>Validez l'ajout avec le bouton <i class="fas fa-plus"></i> à droite.</li>
+          </ol>
         </div>
       </div>
       <br><br>
       <h4>Modifier une catégorie de salle</h4>
       <div class="row">
         <div class="col">
-          <p>
-          Pour modifier une catégorie de salle, vous pouvez cliquer sur le bouton avec le symbole de crayon, tout à droite de la ligne.
-          Vous pouvez modifier son nom et ses salles et groupes de salles associées.
-          </p>
+          <ol>
+            <li>Cliquer sur le bouton <i class="fas fa-pencil-alt"></i>, tout à droite de la ligne.</li>
+            <li>Vous pouvez modifier son nom, ainsi que ses salles et groupes de salles associées.</li>
+            <li>Cliquez sur le bouton <i class="fas fa-sm fa-check"></i> à droite pour valider.</li>
+          </ol>
           <div class="alert alert-info">Note : Si vous ne trouvez pas la salle que vous souhaitez ajouter, c'est sûrement parce qu'elle n'est pas affectée à votre département.
-          Rendez-vous à la section  <a href="#salle">Ajouter, modifier, supprimer une salle / un groupe de salles</a> pour affecter cette sale à votre département.</div>
+          Rendez-vous à la section  <a href="#salle">Ajouter, modifier, supprimer une salle / un groupe de salles</a> pour affecter cette salle à votre département.</div>
         </div>
         <div class="col">
-          <img src="{% static 'flopeditor/help/crudGroupeSalleUpdate.gif' %}" alt="Animation modification salle" style="max-width:100%">
+          <img src="{% static 'flopeditor/help/crudGroupeSalleUpdate.gif' %}" alt="Animation modification catégorie de salle" style="max-width:100%">
         </div>
       </div>
       <br><br>
       <h4>Supprimer une catégorie de salle</h4>
       <div class="row">
         <div class="col">
-          <img src="{% static 'flopeditor/help/crudGroupeSalleDelete.gif' %}" alt="Animation suppression salle" style="max-width:100%">
+          <img src="{% static 'flopeditor/help/crudGroupeSalleDelete.gif' %}" alt="Animation suppression catégorie de salle" style="max-width:100%">
         </div>
         <div class="col">
-          <p>
-            Si vous voulez supprimer un groupe de salle, il vous suffit d'appuyer sur le bouton rouge tout à droite de la ligne.
-            Un avertissement apparaît pour vous demander de confirmer la suppression. Il ne vous reste qu'à valider la suppression.
-          </p>
+          <ol>
+            <li>Appuyez sur le bouton <i class="fas fa-trash"></i> tout à droite de la ligne.</li>
+            <li>Un avertissement apparaît pour vous demander de confirmer la suppression. Validez la suppression.</li>
+          </ol>
           <div class="alert alert-info">Note : Si vous supprimez une catégorie de salle, les salles et groupes de salles associées ne sont pas supprimées.</div>
         </div>
       </div>
@@ -353,8 +374,51 @@
 
       <br><br>
       <h3 id="promo">Ajouter, Modifier, supprimer une promo</h3>
-      <h2 style="color:red">A écrire !</h2>
+      <h2 style="color:red">A relire</h2>
       <div class="alert alert-info">Note : Si vous n'êtes pas responsable du département, vous pourrez uniquement visualiser la liste des promotions.</div>
+      L'onglet "Promos", trouvable en cliquant sur "ELEVES" dans la barre de navigation, vous permet d'accéder aux différentes promos enregistrées dans FlopEDT.
+      <br><br>
+      <h4>Ajouter une promo</h4>
+      <div class="row">
+        <div class="col">
+          <img src="{% static 'flopeditor/help/crudPromoCreate.gif' %}" alt="Animation ajout promo" style="max-width:100%">
+        </div>
+        <div class="col">
+          <ol>
+            <li>Renseignez le nom et l'abréviation de la promo à ajouter.</li>
+            <li>Si vous le souhaitez, vous pouvez l'associer à un département ou à un groupe de salles.</li>
+            <li>Validez l'ajout avec le bouton <i class="fas fa-plus"></i> à droite.</li>
+          </ol>
+        </div>
+      </div>
+      <br><br>
+      <h4>Modifier une promo</h4>
+      <div class="row">
+        <div class="col">
+          <ol>
+            <li>Cliquer sur le bouton <i class="fas fa-pencil-alt"></i>, tout à droite de la ligne.</li>
+            <li>Vous pouvez modifier le nom et l'abbréviation de la promo.</li>
+            <li>Cliquez sur le bouton <i class="fas fa-sm fa-check"></i> à droite pour valider.</li>
+          </ol>
+        </div>
+        <div class="col">
+          <img src="{% static 'flopeditor/help/crudPromoUpdate.gif' %}" alt="Animation modification promo" style="max-width:100%">
+        </div>
+      </div>
+      <br><br>
+      <h4>Supprimer une promo</h4>
+      <div class="row">
+        <div class="col">
+          <img src="{% static 'flopeditor/help/crudPromoDelete.gif' %}" alt="Animation suppression promo" style="max-width:100%">
+        </div>
+        <div class="col">
+          <ol>
+            <li>Appuyez sur le bouton <i class="fas fa-trash"></i> tout à droite de la ligne.</li>
+            <li>Un avertissement apparaît pour vous demander de confirmer la suppression. Validez la suppression.</li>
+          </ol>
+          <div class="alert alert-warning">Attention : Si vous supprimez une promo, tous leurs modules et les groupes d'élèves associés seront également supprimés.</div>
+        </div>
+      </div>
 
       <br><br>
       <h3 id="nature-groupe">Ajouter, Modifier, supprimer une nature de groupes</h3>
