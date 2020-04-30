@@ -265,7 +265,7 @@
             Si vous le souhaitez, vous pouvez l'associer à un département ou à un groupe de salles.
           </p>
           <div class="alert alert-info">Si vous souhaitez créer un groupe de salles, faites comme si c'était une salle simple : Indiquez un nom,
-          puis appuyez sur le boton "+", et enregistrez les modifications. Après avoir actualisé la page, votre nouveau groupe de salles apparaitra
+          puis appuyez sur le boton <i class="fas fa-sm fa-plus"></i>, et enregistrez les modifications. Après avoir actualisé la page, votre nouveau groupe de salles apparaitra
           bien dans la liste "Sous-salle de..." !</div>
         </div>
       </div>
@@ -363,7 +363,7 @@
             <ol>
               <li>Sur la première ligne : renseigner l'id du semestre (exemples : S1, S2 ou S3; il doit être unique), le numéro de la semaine de
               début entre [1-53] et le numéro de la semaine de fin du nouveau semestre entre [1-53] </li>
-              <li>Appuyez ensuite sur le bouton "+" à droite</li>
+              <li>Appuyez ensuite sur le bouton <i class="fas fa-sm fa-plus"></i> à droite</li>
               <li>Répétez les 2 premiers points si vous voulez ajouter d'autre semestre</li>
               <li>Appuyez sur le bouton "ENREGISTRER" à gauche si vous n'avez plus de semestre à ajouter.</li>
             </ol>
@@ -375,7 +375,7 @@
         <div class="col">
           <p>
             <ol>
-              <li>Trouvez le semestre à modifier dans le tableau, puis cliquer sur l'icône de modification (crayon bleu) à droite</li>
+              <li>Trouvez le semestre à modifier dans le tableau, puis cliquer sur l'icône de modification (<i class="fas fa-sm fa-pencil-alt"></i> bleu) à droite</li>
               <li>Modifiez les champs que vous souhaitez (Id doit être unique, le numéro des semaines comprit entre [1-53]) puis cliquer sur <i class="fas fa-sm fa-check"></i> à droite</li>
               <li>Répétez les 2 premiers points si vous voulez modifier d'autre semestre</li>
               <li>Cliquez sur "ENREGISTRER" en haut à gauche si vous n'avez plus de semestre à modifier.</li>
@@ -404,31 +404,32 @@
           <div class="alert alert-warning">Attention : Si vous supprimez un semestre, tous les modules associés seront supprimés.</div>
         </div>
       </div>
-
-
       <br><br>
+
+
       <h3 id="promo">Ajouter, Modifier, supprimer une promo</h3>
       <h2 style="color:red">A écrire !</h2>
       <div class="alert alert-info">Note : Si vous n'êtes pas responsable du département, vous pourrez uniquement visualiser la liste des promotions.</div>
-
-
       <br><br>
+
+
+
       <h3 id="nature-groupe">Ajouter, Modifier, supprimer une nature de groupes</h3>
       <div class="alert alert-info">Note : Si vous n'êtes pas responsable du département, vous pourrez uniquement visualiser la liste des natures de groupes.</div>
       <p> Pour atteindre le tableau permettant de visualiser et modifier les natures de groupes (TP, TD, CE...) : vous devez vous rendre dans l'onglet "élève" dans la barre de navigation en haut à droite
-        puis dans l'onglet "SEMESTRE" au-dessus du bouton "ENREGISTRER".
+        puis dans l'onglet "natures de groupes" au-dessus du bouton "ENREGISTRER".
       </p>
       <br><br>
       <h4>Ajouter une nature de groupes</h4>
       <div class="row">
         <div class="col">
-          <img src="{% static 'flopeditor/help/crudNatureGroupeCreate.gif' %}" alt="Animation ajout semestre" style="max-width:100%">
+          <img src="{% static 'flopeditor/help/crudNatureGroupeCreate.gif' %}" alt="Animation ajout nature groupe" style="max-width:100%">
         </div>
         <div class="col">
           <p>
             <ol>
               <li>Sur la première ligne : renseigner l'id de la nature de groupes (exemples : TD ou TP; il doit être unique et < 50 caractères) </li>
-              <li>Appuyez ensuite sur le bouton "+" à droite</li>
+              <li>Appuyez ensuite sur le bouton <i class="fas fa-sm fa-plus"></i> à droite</li>
               <li>Répétez les 2 premiers points si vous voulez ajouter d'autre nature de groupes</li>
               <li>Appuyez sur le bouton "ENREGISTRER" à gauche si vous n'avez plus de nature de groupes à ajouter.</li>
             </ol>
@@ -440,7 +441,7 @@
         <div class="col">
           <p>
             <ol>
-              <li>Trouvez la nature de groupes à modifier dans le tableau, puis cliquer sur l'icône de modification (crayon bleu) à droite</li>
+              <li>Trouvez la nature de groupes à modifier dans le tableau, puis cliquer sur l'icône de modification (<i class="fas fa-sm fa-pencil-alt"></i> bleu) à droite</li>
               <li>Modifiez le champ Id (doit être unique et < 50 caractères) puis cliquez sur le bouton <i class="fas fa-sm fa-check"></i> à droite pour valider.</li>
               <li>Répétez les 2 premiers points si vous voulez modifier d'autre nature de groupes</li>
               <li>Cliquez sur "ENREGISTRER" en haut à gauche si vous n'avez plus de nature de groupes à modifier.</li>
@@ -448,14 +449,14 @@
           </p>
         </div>
         <div class="col">
-          <img src="{% static 'flopeditor/help/crudNatureGroupeUpdate.gif' %}" alt="Animation modification semestre" style="max-width:100%">
+          <img src="{% static 'flopeditor/help/crudNatureGroupeUpdate.gif' %}" alt="Animation modification nature groupe" style="max-width:100%">
         </div>
       </div>
       <br><br>
       <h4>Supprimer une nature de groupes</h4>
       <div class="row">
         <div class="col">
-          <img src="{% static 'flopeditor/help/crudNatureGroupeDelete.gif' %}" alt="Animation suppression semestre" style="max-width:100%">
+          <img src="{% static 'flopeditor/help/crudNatureGroupeDelete.gif' %}" alt="Animation suppression nature groupe" style="max-width:100%">
         </div>
         <div class="col">
           <p>
@@ -469,12 +470,69 @@
           <div class="alert alert-warning">ATTENTION : Si vous supprimez une nature de groupes, tous les groupes d'élèves et les cours associés seront supprimés.</div>
         </div>
       </div>
-
-
       <br><br>
+
+
+
       <h3 id="groupe">Ajouter, Modifier, supprimer un groupe d'élèves</h3>
-      <h2 style="color:red">A écrire !</h2>
       <div class="alert alert-info">Note : Si vous n'êtes pas responsable du département, vous pourrez uniquement visualiser la liste des groupes d'élèves.</div>
+      <p> Pour atteindre le tableau permettant de visualiser et modifier la liste des groupes d'élèves : vous devez vous rendre dans l'onglet "élève" dans la barre de navigation en haut à droite
+        puis dans l'onglet "groupe d'élèves" au-dessus du bouton "ENREGISTRER".
+      </p>
+      <br><br>
+      <h4>Ajouter un groupe d'élèves</h4>
+      <div class="row">
+        <div class="col">
+          <img src="{% static 'flopeditor/help/crudGroupeEleveCreate.gif' %}" alt="Animation ajout groupe élève" style="max-width:100%">
+        </div>
+        <div class="col">
+          <p>
+            <ol>
+              <li>Sur la première ligne : renseigner l'id du groupe d'élèves (inférieur à 10 caractères), la promo, un/des sous groupe (facultatif) la nature de goupe et la taille</li>
+              <li>Appuyez ensuite sur le bouton <i class="fas fa-sm fa-plus"></i> à droite</li>
+              <li>Répétez les 2 premiers points si vous voulez ajouter d'autre groupe d'élèves</li>
+              <li>Appuyez sur le bouton "ENREGISTRER" à gauche si vous n'avez plus de groupes à ajouter.</li>
+            </ol>
+          </p>
+          <div class="alert alert-info">Note : vous devez avoir créé au moins une promo et une nature de groupes pour pouvoir créer un groupe d'élèves.</div>
+<div class="alert alert-info">Note : Si vous avez créé une promo et une nature de groupes mais qu'ils n'apparaissent pas lors de la création : actualisez la page.</div>
+        </div>
+      </div>
+      <h4>Modifier un groupe d'élèves</h4>
+      <div class="row">
+        <div class="col">
+          <p>
+            <ol>
+              <li>Trouvez le groupe d'élève à modifier dans le tableau, puis cliquer sur l'icône de modification (<i class="fas fa-sm fa-pencil-alt"></i> bleu) à droite</li>
+              <li>Modifiez les champs que vous voulez, puis cliquez sur le bouton <i class="fas fa-sm fa-check"></i> à droite pour valider.</li>
+              <li>Répétez les 2 premiers points si vous voulez modifier d'autre groupe</li>
+              <li>Cliquez sur "ENREGISTRER" en haut à gauche si vous n'avez plus de groupe à modifier.</li>
+            </ol>
+          </p>
+        </div>
+        <div class="col">
+          <img src="{% static 'flopeditor/help/crudGroupeEleveUpdate.gif' %}" alt="Animation modification groupe élève" style="max-width:100%">
+        </div>
+      </div>
+      <br><br>
+      <h4>Supprimer un groupe d'élèves</h4>
+      <div class="row">
+        <div class="col">
+          <img src="{% static 'flopeditor/help/crudGroupeEleveDelete.gif' %}" alt="Animation suppression groupe élève" style="max-width:100%">
+        </div>
+        <div class="col">
+          <p>
+            <ol>
+              <li>Trouvez le groupe d'élèves à supprimer dans le tableau, puis cliquer sur l'icône de suppression <i class="fas fa-sm fa-trash"></i> à droite</li>
+              <li>Cliquez sur "OUI" si vous êtes sûr de vouloir supprimer ce groupe, "NON" sinon.</li>
+              <li>Répétez les 2 premiers points si vous voulez supprimer d'autre groupe d'élèves</li>
+              <li>Cliquez sur "ENREGISTRER" en haut à gauche si vous n'avez plus de groupe à supprimer.</li>
+            </ol>
+          </p>
+        </div>
+      </div>
+
+
 
       <br><br>
       <h3 id="module">Ajouter, Modifier, supprimer un module</h3>
