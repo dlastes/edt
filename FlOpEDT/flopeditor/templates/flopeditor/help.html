@@ -1,0 +1,349 @@
+{% extends "flopeditor/base.html" %}
+{% load static %}
+
+{% block body-class %}bg-dark{% endblock %}
+
+{% block main-class %}container-fluid{% endblock %}
+
+
+{% block navbar %} {% endblock %}
+{% block content %}
+<div class="row h-100 justify-content-center align-items-center text-center text-white">
+  <div class='pt-2 pl-2' style="position:fixed; left:10px; top:10px">
+    <a href="{% url 'flopeditor:flopeditor-home' %}" class="btn btn-raised d-block mx-auto mx-sm-0" style='max-width:300px'>
+      FlopEditor
+    </a>
+  </div>
+</div>
+
+<div class="container justify-content-center" style="margin-top:4%">
+  <div class="card container">
+    <div class="card-body pb-0">
+      <div class="text-center">
+        <h1>Documentation de FlopEditor</h1>
+        <h5>
+          Flopeditor est une application développée dans le cadre de
+          FlopEDT par quatre étudiants de M1 Informatique de l'Université Paul Sabatier.
+          Son but est de permettre aux professeurs et autres intervenants de modifier
+          tous les éléments liés à la gestion de leurs départements, de la création de
+          promotions à l'attribution de salles, en passant par la gestion des responsables
+          et tuteurs de leur département.
+        </h5>
+        <br>
+      </div>
+      <h3>Table des matières récapitulant les droits</h3>
+      <h6>
+        Dans FlopEDT, trois rôles peuvent être attribués à un utilisateur : Tuteur, Responsable d'un département et Superuser.<br>
+        - Un tuteur peut visualiser toutes les données (excepté la liste des intervenants) mais ne peut pas les modifier.<br>
+        - Un responsable d'un département peut visualiser toutes les données de tous les départements et peut modifier les données concernant son département.<br>
+        - Un superuser a tous les droits. Il peut visualiser et modifier toutes les données de tous les départements de FlopEDT.
+        Il peut également créer un département, ou modifier les attributs d'un département existant, comme les responsables de celui-ci.<br>
+        <br>
+        Le tableau ci-dessous récapitule les droits de chaque utilisateur.
+        Vous pouvez cliquer sur les éléments de la première colonne pour vous rendre à la partie de la documentation correspondante.
+      </h6>
+      <table class="table">
+        <thead>
+          <tr>
+
+            <th scope="col">Action</th>
+            {% if not request.user.is_superuser and not is_admin %}
+            <th scope="col" class="text-primary">Tuteur  <b>(Vous)</b></th>
+            {% else %}
+            <th scope="col">Tuteur</th>
+            {% endif %}
+
+            {% if not request.user.is_superuser and is_admin %}
+            <th scope="col" class="text-primary">Responsable d'un département <b>(Vous)</b></th>
+            {% else %}
+            <th scope="col">Responsable d'un département</th>
+            {% endif %}
+            {% if request.user.is_superuser %}
+            <th scope="col" class="text-primary">Superuser <b>(Vous)</b></th>
+            {% else %}
+            <th scope="col">Superuser</th>
+            {% endif %}
+
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row"><a href="#dept">Création, modification d'un département</a></th>
+            <td><i class="fas fa-times"><i></td>
+            <td><i class="fas fa-times"><i></td>
+            <td><i class="fas fa-check"><i></td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="#intervenant">Ajouter, modifier, supprimer un intervenant</a</th>
+            <td><i class="fas fa-times"><i></td>
+            <td><i class="fas fa-check"><i></td>
+            <td><i class="fas fa-check"><i></td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="#salle">Ajouter, modifier, supprimer une salle / un groupe de salles</a></th>
+            <td><i class="fas fa-times"><i></td>
+            <td><i class="fas fa-check"><i></td>
+            <td><i class="fas fa-check"><i></td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="#cat-salle">Ajouter, modifier, supprimer une catégorie de salle</a></th>
+            <td><i class="fas fa-times"><i></td>
+            <td><i class="fas fa-check"><i></td>
+            <td><i class="fas fa-check"><i></td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="#semestre">Ajouter, Modifier, supprimer un semestre</a></th>
+            <td><i class="fas fa-times"><i></td>
+            <td><i class="fas fa-check"><i></td>
+            <td><i class="fas fa-check"><i></td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="#promo">Ajouter, Modifier, supprimer une promo</a></th>
+            <td><i class="fas fa-times"><i></td>
+            <td><i class="fas fa-check"><i></td>
+            <td><i class="fas fa-check"><i></td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="#nature-groupe">Ajouter, Modifier, supprimer une nature de groupes</a></th>
+            <td><i class="fas fa-times"><i></td>
+            <td><i class="fas fa-check"><i></td>
+            <td><i class="fas fa-check"><i></td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="#groupe">Ajouter, Modifier, supprimer un groupe d'élèves</a></th>
+            <td><i class="fas fa-times"><i></td>
+            <td><i class="fas fa-check"><i></td>
+            <td><i class="fas fa-check"><i></td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="#module">Ajouter, Modifier, supprimer un module</a></th>
+            <td><i class="fas fa-times"><i></td>
+            <td><i class="fas fa-check"><i></td>
+            <td><i class="fas fa-check"><i></td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="#cours">Ajouter, Modifier, supprimer un cours</a></th>
+            <td><i class="fas fa-times"><i></td>
+            <td><i class="fas fa-check"><i></td>
+            <td><i class="fas fa-check"><i></td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="#params">Modifier les paramètres</a></th>
+            <td><i class="fas fa-times"><i></td>
+            <td><i class="fas fa-check"><i></td>
+            <td><i class="fas fa-check"><i></td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="profil">Afficher, modifier son profil</a></th>
+            <td><i class="fas fa-check"><i></td>
+            <td><i class="fas fa-check"><i></td>
+            <td><i class="fas fa-check"><i></td>
+          </tr>
+        </tbody>
+      </table>
+      <br><br>
+      {% if request.user.is_superuser %}
+      <h3>Vous êtes superuser ! Trop bien !</h3>
+      <h6>En tant que super-utillisateur de FlopEDT, vous pouvez tout faire
+      dans FlopEditor, dans tous les départements.</h6>
+      {% elif is_admin %}
+      <h3>Vous êtes responsable d'au moins un département. Vous pouvez (presque) tout faire.</h3>
+      <h6>En tant que responsable d'un département de FlopEDT, vous pouvez visualiser les paramètres de tous les départements,
+      et modifier les paramètres du(des) département(s) dont vous êtes le responsable.
+      Toutefois, certaines actions nécessiteront de passer par un superuser, comme par exemple ajouter un intervenant dans FlopEDT,
+      ou modifier les responsables de votre département.</h6>
+      {% else %}
+      <h3>Vous intervenez dans un ou plusieurs départements.</h3>
+      <h6>En tant qu'intervenant dans FlopEDT, vous pouvez visualiser les paramètres de tous les départements.
+      En revanche, vous ne pouvez pas les modifier. Vous n'avez pas non plus accès à la liste des intervenants de FlopEDT.
+      En cas de besoin de modifier un élément, il vous faudra contacter un des responsables de votre département, ou directement un superuser.</h6>
+      {% endif %}
+
+      <br><br>
+      <h3 id="dept">Création, modification d'un département</h3>
+      <div class="alert alert-info">Note : Seul un superuser peut créer ou modifier un département.</div>
+      <h4>Créer un département</h4>
+      <h2 style="color:red">A relire</h2>
+      <div class="row">
+        <div class="col">
+          <p>
+          Il est possible de créer un départemment à partir de la page d'accueil de Flopeditor.
+          Pour cela, cliquez sur le bouton en bas à droite, ce qui ouvrira le menu de création d'un département.
+          A partir de là, vous pourrez ajouter le nom, l'abréviation ainsi que les responsables du département à créer.
+          </p>
+        </div>
+        <div class="col">
+          <img src="{% static 'flopeditor/help/creer_dept.gif' %}" alt="Animation création département" style="max-width:70%">
+        </div>
+      </div>
+      <br><br>
+      <h4>Modifier un département</h4>
+      <div class="row">
+        <div class="col">
+          <img src="{% static 'flopeditor/help/modifier_dept.gif' %}" alt="Animation création département" style="max-width:70%">
+        </div>
+        <div class="col">
+          <p>
+          Il est possible de modifier le nom, l'abrevviation et les responsables d'un départemment à partir de la page d'accueil de Flopeditor.
+          Pour cela, à côté du bouton portant le nom du département, se trouve un bouton en forme de crayon.
+          En cliquant sur celui-ci un menu s'ouvre, permettant de modifier les attributs du département.
+          A partir de ce menu, vous pourrez modifier le nom, l'abréviation ainsi que les responsables du département à créer.
+          </p>
+        </div>
+      </div>
+      <br><br>
+      <h3 id="intervenant">Ajouter, modifier, supprimer un intervenant</h3>
+      <div class="alert alert-info">Note : Si vous n'êtes pas responsable d'un département, vous ne pouvez pas voir ce menu.</div>
+      <p>
+      Le premier élément du menu, en gaut à gauche, permet d'accéder au tableau des intervenants.
+      A partir de ce tableau, vous pouvez créer un intervenant, l'ajouter ou le retirer d'un département,
+      modifier des éléments le caractérisant, ou encore le supprimer de la liste.
+      </p>
+      <br><br>
+      <h4>Ajouter un intervenant</h4>
+      <div class="row">
+        <div class="col">
+          <div class="alert alert-info">Note : Seul un superuser peut ajouter un intervenant.</div>
+          <p>
+          La première ligne vous permet d'ajouter un intervenant à la liste.
+          Pour cela, il faut y renseigner son ID, son prénom, son nom de famille et son statut.
+          Si l'intervenant à ajouter est vacataire, il faut également renseigner son employeur.
+          Vous avez également la possibilité d'affecter à cet intervenant un ou plusieurs départements.
+          </p>
+          <div class="alert alert-info">
+            Si vous affectez un département à un intervenant, il n'en devient pas responsable.
+            Pour ajouter un responsable à un département, reportez-vous à la section <a href="#dept">Création, modification d'un département</a>.
+          </div>
+        </div>
+        <div class="col">
+          <img src="{% static 'flopeditor/help/crudIntervenantCreate.gif' %}" alt="Animation ajout intervenant" style="max-width:100%">
+        </div>
+      </div>
+      <br><br>
+      <h4>Modifier un intervenant</h4>
+      <div class="row">
+        <div class="col">
+          <img src="{% static 'flopeditor/help/crudIntervenantUpdate.gif' %}" alt="Animation modification intervenant" style="max-width:100%">
+        </div>
+        <div class="col">
+          <p>
+          Pour modifier un intervenant, vous pouvez cliquer sur le bouton avec le symbole de crayon, tout à droite de la ligne.
+          Vous pouvez modifier son ID, son prénom, son nom de famille et son statut.
+          Si l'intervenant à modifier est vacataire, il faut également renseigner son employeur.
+          Vous avez également la possibilité d'affecter ou de retirer un ou plusieurs départements à cet intervenant.
+          </p>
+        </div>
+      </div>
+      <br><br>
+      <h4>Supprimer un intervenant</h4>
+      <div class="row">
+        <div class="col">
+          <p>
+          Si vous voulez supprimer un intervenant, il vous suffit d'appuyer sur le bouton rouge tout à droite de la ligne.
+          Un avertissement apparaît pour vous demander de confirmer la suppression. Il ne vous reste qu'à valider la suppression.
+          </p>
+          <div class="alert alert-warning">Attention : Si vous supprimez cet intervenant, tous les cours associés seront supprimés et ce dernier ne pourra plus se connecter.</div>
+        </div>
+        <div class="col">
+          <img src="{% static 'flopeditor/help/crudIntervenantDelete.gif' %}" alt="Animation suppression intervenant" style="max-width:100%">
+        </div>
+      </div>
+      <br><br>
+
+      <h3 id="salle">Ajouter, modifier, supprimer une salle / un groupe de salles</h3>
+      <h2 style="color:red">A relire</h2>
+      <div class="alert alert-info">Note : Si vous n'êtes responsable d'aucun département, vous pourrez uniquement visualiser la liste des salles.</div>
+      L'onglet "Salles" vous permet d'accéder à la liste des salles enregistrées dans FlopEDT.
+      A partir de ce tableau, vous pouvez notamment créer une salle ou un groupe de salles, ou encore modifier ou supprimer une salle existante.
+      Vous pouvez également associer un ou plusieurs départements à ces salles.
+      <br><br>
+      <h4>Ajouter une salle</h4>
+      <div class="row">
+        <div class="col">
+          <img src="{% static 'flopeditor/help/crudSalleCreate.gif' %}" alt="Animation ajout salle" style="max-width:100%">
+        </div>
+        <div class="col">
+          <p>
+            La première ligne vous permet d'ajouter une salle à la liste. Pour cela, vous devez au moins renseigner le nom de la salle.
+            Si vous le souhaitez, vous pouvez l'associer à un département ou à un groupe de salles.
+          </p>
+          <div class="alert alert-info">Si vous souhaitez créer un groupe de salles, faites comme si c'était une salle simple : Indiquez un nom,
+          puis appuyez sur le boton "+", et enregistrez les modifications. Après avoir actualisé la page, votre nouveau groupe de salles apparaitra
+          bien dans la liste "Sous-salle de..." !</div>
+        </div>
+      </div>
+      <br><br>
+      <h4>Modifier une salle</h4>
+      <div class="row">
+        <div class="col">
+          <p>
+          A ECRIRE
+          </p>
+          <div class="alert alert-info">Note : Si vous supprimez une sous-salle.</div>
+        </div>
+        <div class="col">
+          <img src="{% static 'flopeditor/help/crudSalleUpdate.gif' %}" alt="Animation modification salle" style="max-width:100%">
+        </div>
+      </div>
+      <br><br>
+      <h4>Supprimer une salle</h4>
+      <div class="row">
+        <div class="col">
+          <img src="{% static 'flopeditor/help/crudSalleDelete.gif' %}" alt="Animation suppression salle" style="max-width:100%">
+        </div>
+        <div class="col">
+          <p>
+            A ECRIRE
+          </p>
+          <div class="alert alert-warning">Attention : Si vous supprimez cet intervenant, tous les cours associés seront supprimés et ce dernier ne pourra plus se connecter.</div>
+        </div>
+      </div>
+      <br><br>
+      <h3 id="cat-salle">Ajouter, modifier, supprimer une catégorie de salle</h3>
+      <h2 style="color:red">A écrire !</h2>
+      <div class="alert alert-info">Note : Si vous n'êtes pas responsable d'un département, vous pourrez uniquement visualiser la liste des catégories de salles.</div>
+
+      <br><br>
+      <h3 id="semestre">Ajouter, Modifier, supprimer un semestre</h3>
+      <h2 style="color:red">A écrire !</h2>
+      <div class="alert alert-info">Note : Si vous n'êtes pas responsable d'un département, vous pourrez uniquement visualiser la liste des semestres.</div>
+
+      <br><br>
+      <h3 id="promo">Ajouter, Modifier, supprimer une promo</h3>
+      <h2 style="color:red">A écrire !</h2>
+      <div class="alert alert-info">Note : Si vous n'êtes pas responsable d'un département, vous pourrez uniquement visualiser la liste des promotions.</div>
+
+      <br><br>
+      <h3 id="nature-groupe">Ajouter, Modifier, supprimer une nature de groupes</h3>
+      <h2 style="color:red">A écrire !</h2>
+      <div class="alert alert-info">Note : Si vous n'êtes pas responsable d'un département, vous pourrez uniquement visualiser la liste des natures de groupes.</div>
+
+      <br><br>
+      <h3 id="groupe">Ajouter, Modifier, supprimer un groupe d'élèves</h3>
+      <h2 style="color:red">A écrire !</h2>
+      <div class="alert alert-info">Note : Si vous n'êtes pas responsable d'un département, vous pourrez uniquement visualiser la liste des groupes d'élèves.</div>
+
+      <br><br>
+      <h3 id="module">Ajouter, Modifier, supprimer un module</h3>
+      <h2 style="color:red">A écrire !</h2>
+      <div class="alert alert-info">Note : Si vous n'êtes pas responsable d'un département, vous pourrez uniquement visualiser la liste des modules.</div>
+
+      <br><br>
+      <h3 id="cours">Ajouter, Modifier, supprimer un cours</h3>
+      <h2 style="color:red">A écrire !</h2>
+      <div class="alert alert-info">Note : Si vous n'êtes pas responsable d'un département, vous pourrez uniquement visualiser la liste des cours.</div>
+
+      <br><br>
+      <h3 id="params">Modifier les paramètres</h3>
+      <h2 style="color:red">A écrire !</h2>
+      <div class="alert alert-info">Note : Si vous n'êtes pas responsable d'un département, vous pourrez uniquement visualiser les paramètres de ce département.</div>
+
+      <br><br>
+      <h3 id="profil">Afficher, modifier son profil</h3>
+      <h2 style="color:red">A écrire !</h2>
+
+    </div>
+  </div>
+</div>
+{% block modal %} {% endblock %}
+{% endblock %}

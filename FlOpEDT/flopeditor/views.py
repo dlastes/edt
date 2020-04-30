@@ -91,8 +91,23 @@ def home(request):
                    'has_any_dept_perm': has_any_dept_perm(request),
                   })
 
+def flopeditor_help(request):
+    """Shows the help page.
+                   'status': status,
+                   'status_vacataire': position,
+                   'employer': employer,
+                   })
 
+    :param request:           Client request.
+    :type request:            django.http.HttpRequest
+    :return: Help page rendered.
+    :rtype:  django.http.HttpResponse
 
+    """
+    return render(request, "flopeditor/help.html", {
+        'title': 'Aide',
+        'is_admin': has_any_dept_perm(request),
+        })
 
 @tutor_or_superuser_required
 def department_default(request, department_abbrev):
