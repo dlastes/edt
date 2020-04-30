@@ -1,4 +1,4 @@
-# coding: utf8
+# coding: utf-8
 # -*- coding: utf-8 -*-
 
 # This file is part of the FlOpEDT/FlOpScheduler project.
@@ -35,6 +35,7 @@ from django.dispatch import receiver
 
 from base.timing import hhmm, str_slot
 import base.weeks
+
 
 
 # <editor-fold desc="GROUPS">
@@ -154,6 +155,7 @@ class Time(models.Model):
                            verbose_name="Half day",
                            default=AM)
     no = models.PositiveSmallIntegerField(default=0)
+    # nom = models.CharField(max_length=20)
     hours = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(25)], default=8)
     minutes = models.PositiveSmallIntegerField(
@@ -372,14 +374,23 @@ class Course(models.Model):
         null=True, blank=True)
     year = models.PositiveSmallIntegerField()
     suspens = models.BooleanField(verbose_name='En suspens?', default=False)
+    show_id = False
 
     def __str__(self):
         username_mod = self.tutor.username if self.tutor is not None else '-no_tut-'
-        return f"{self.type}-{self.module}-{username_mod}-{self.group}"
+        return f"{self.type}-{self.module}-{username_mod}-{self.group}" \
+               + (" (%s)" % self.id if self.show_id else "")
 
     def full_name(self):
         username_mod = self.tutor.username if self.tutor is not None else '-no_tut-'
         return f"{self.type}-{self.module}-{username_mod}-{self.group}"
+
+    def equals(self, other):
+        return self.__class__ == other.__class__ \
+               and self.type == other.type \
+               and self.tutor == other.tutor \
+               and self.group == other.group \
+               and self.module == other.module
 
 
 class CoursePossibleTutors(models.Model):

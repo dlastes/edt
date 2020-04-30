@@ -4,7 +4,7 @@
 from django.test import TestCase
 from solve_board.views import get_constraints, get_pulp_solvers, get_pulp_solvers_viewmodel
 from base import models as base
-import pulp.solvers as solver_classes
+import pulp
 
 
 from TTapp.models import *
@@ -23,15 +23,15 @@ class GetAvailableSolversTestCase(TestCase):
 
     def test_coin_cmd(self):
         solvers = get_pulp_solvers(False)
-        self.assertIn(solver_classes.COIN_CMD, solvers)
+        self.assertIn(pulp.COIN_CMD, solvers)
 
     def test_cbc_cmd(self):
         solvers = get_pulp_solvers(False)
-        self.assertIn(solver_classes.PULP_CBC_CMD, solvers)
+        self.assertIn(pulp.PULP_CBC_CMD, solvers)
 
     def test_default_available_solver(self):
         solvers = get_pulp_solvers(True)
-        self.assertIn(solver_classes.PULP_CBC_CMD, solvers)
+        self.assertIn(pulp.PULP_CBC_CMD, solvers)
 
 
 class GetConstraintsTestCase(TestCase):

@@ -38,11 +38,11 @@
     <ul>
       <table>
         <th>Promo</th><th>Groupe</th>
-        {% for g in groupes %}
+        {% for g in groups %}
         <tr>
           <td>{{ g.train_prog.abbrev }}</td>
           <td>{{ g.name }}</td>
-          <td><a href="{% url "ics:group" department g.train_prog.abbrev g.name %}">{{ requi }}{% url "ics:group" department g.train_prog.abbrev g.name %}</a></td>
+          <td><a href="{% url "ics:group" department g.id %}">{{ requi }}{% url "ics:group" department g.id %}</a></td>
         </tr>
       {% endfor %}
       </table>
@@ -52,13 +52,13 @@
     <ul>
       <table>
         <tr><th>Pseudo</th><th>Prénom</th><th>Nom</th><th>Département(s)</th><th>Adresse</th></tr>
-	{% for e in enseignants %}
+	{% for e in tutors %}
 	<tr>
           <td>{{ e.username }}</td>
-          <td>{{ e.last_name }}</td>
           <td>{{ e.first_name }}</td>
+          <td>{{ e.last_name }}</td>
           <td>{{ e.departments.all | join:", " }}</td>
-          <td><a href="{% url "ics:tutor" department e.username %}">{{ requi }}{% url "ics:tutor" department e.username %}</a></td>
+          <td><a href="{% url "ics:tutor" department e.id %}">{{ requi }}{% url "ics:tutor" department e.id %}</a></td>
         </tr>
 	{% endfor %}
       </table>
@@ -68,10 +68,10 @@
     <ul>
       <table>
         <tr><th>Nom</th><th>Adresse</th></tr>
-        {% for s in salles %}
+        {% for s in rooms %}
         <tr>
-          <td>{{ s }}</td>
-          <td><a href="{% url "ics:room" department s %}">{{ requi }}{% url "ics:room" department s %}</a></td>
+          <td>{{ s.name }}</td>
+          <td><a href="{% url "ics:room" department s.id %}">{{ requi }}{% url "ics:room" department s.id %}</a></td>
         </tr>
         {% endfor %}
       </table>

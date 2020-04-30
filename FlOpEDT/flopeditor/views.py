@@ -32,16 +32,33 @@ to manage a department statistics for FlOpEDT.
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponseForbidden
-from django.contrib.auth.decorators import user_passes_test
 from base.models import Department, TimeGeneralSettings, Day
 from base.timing import min_to_str, str_to_min
-from base.check_admin import check_admin
-from FlOpEDT.decorators import dept_admin_required, tutor_required
-from people.models import Tutor
-from flopeditor.db_requests import create_departments_in_database
-from flopeditor.validator import validate_department_creation, validate_parameters_edit, OK_RESPONSE
+from FlOpEDT.decorators import superuser_required, \
+    tutor_or_superuser_required, tutor_required
 
-@tutor_required
+from people.models import Tutor
+from flopeditor.db_requests import create_departments_in_database, \
+    update_departments_in_database, get_status_of_user, update_user_in_database, get_is_iut
+from flopeditor.validator import validate_department_creation,\
+    validate_department_update, validate_parameters_edit, validate_profil_update, OK_RESPONSE
+
+
+def has_any_dept_perm(request):
+    """ rights verification
+    :param request: Client request.
+    :type request:  django.http.HttpRequest
+
+    :return: true if the user is admin of any dept
+    :rtype:  boolean
+    """
+    for dept in Department.objects.all():
+        if request.user.has_department_perm(department=dept, admin=True):
+            return True
+    return False
+
+
+@tutor_or_superuser_required
 def home(request):
     """Main view of FlopEditor.
 
@@ -52,15 +69,48 @@ def home(request):
 
     """
     departments = Department.objects.all()
+    dict_depts = {}
+    for dept in departments:
+        uds = []
+        for tut in Tutor.objects.filter(departments=dept):
+            if tut.has_department_perm(department=dept, admin=True):
+                uds.append(tut.id)
+
+        dict_depts[dept] = list(uds)
     tutors = Tutor.objects.all()
-    return render(request, "flopeditor/home.html", {
-        'departements': departments,
-        'title': 'Choix du département',
-        'admins': tutors
-    })
+    status, position, employer = get_status_of_user(request)
+    return render(request,
+                  'flopeditor/home.html',
+                  {'dict_depts': dict_depts,
+                   'title': 'Choix du département',
+                   'admins': tutors,
+                   'status':status,
+                   'status_vacataire':position,
+                   'employer':employer,
+                   'is_iut': get_is_iut(request),
+                   'has_any_dept_perm': has_any_dept_perm(request),
+                  })
 
+@tutor_or_superuser_required
+def flopeditor_help(request):
+    """Shows the help page.
+                   'status': status,
+                   'status_vacataire': position,
+                   'employer': employer,
+                   })
 
-@tutor_required
+    :param request:           Client request.
+    :type request:            django.http.HttpRequest
+    :return: Help page rendered.
+    :rtype:  django.http.HttpResponse
+
+    """
+    return render(request, "flopeditor/help.html", {
+        'title': 'Aide',
+        'is_admin': has_any_dept_perm(request),
+        })
+
+@tutor_or_superuser_required
 def department_default(request, department_abbrev):
     """Redirects to default department view.
 
@@ -76,7 +126,7 @@ def department_default(request, department_abbrev):
                     department_abbrev=department_abbrev)
 
 
-@tutor_required
+@tutor_or_superuser_required
 def department_parameters(request, department_abbrev):
     """Parameters view of FlopEditor.
 
@@ -91,6 +141,7 @@ def department_parameters(request, department_abbrev):
     department = get_object_or_404(Department, abbrev=department_abbrev)
     departments = Department.objects.exclude(abbrev=department_abbrev)
     parameters = get_object_or_404(TimeGeneralSettings, department=department)
+    status, position, employer = get_status_of_user(request)
     return render(request, "flopeditor/parameters.html", {
         'title': 'Paramètres',
         'department': department,
@@ -103,10 +154,15 @@ def department_parameters(request, department_abbrev):
         'default_preference_duration': min_to_str(parameters.default_preference_duration),
         'list_departments': departments,
         'has_department_perm': request.user.has_department_perm(department=department, admin=True),
+        'status':status,
+        'status_vacataire':position,
+        'employer':employer,
+        'is_iut': get_is_iut(request),
+        'has_any_dept_perm': has_any_dept_perm(request),
     })
 
 
-@dept_admin_required
+@tutor_or_superuser_required
 def department_parameters_edit(request, department_abbrev):
     """Parameters edit view of FlopEditor.
 
@@ -121,6 +177,7 @@ def department_parameters_edit(request, department_abbrev):
     department = get_object_or_404(Department, abbrev=department_abbrev)
     departments = Department.objects.exclude(abbrev=department_abbrev)
     parameters = get_object_or_404(TimeGeneralSettings, department=department)
+    status, position, employer = get_status_of_user(request)
     return render(request, "flopeditor/parameters_edit.html", {
         'title': 'Paramètres',
         'department': department,
@@ -133,10 +190,15 @@ def department_parameters_edit(request, department_abbrev):
         'day_choices': Day.CHOICES,
         'default_preference_duration': min_to_str(parameters.default_preference_duration),
         'has_department_perm': request.user.has_department_perm(department=department, admin=True),
+        'status':status,
+        'status_vacataire':position,
+        'employer':employer,
+        'is_iut': get_is_iut(request),
+        'has_any_dept_perm': has_any_dept_perm(request),
     })
 
 
-@user_passes_test(check_admin)
+@superuser_required
 def ajax_create_department(request):
     """Ajax url for department creation
 
@@ -157,7 +219,32 @@ def ajax_create_department(request):
     return HttpResponseForbidden()
 
 
-@dept_admin_required
+@superuser_required
+def ajax_update_department(request):
+    """Ajax url for department update
+
+    :param request: Client request.
+    :type request:  django.http.HttpRequest
+    :return: Server response for the creation request.
+    :rtype:  django.http.JsonResponse
+
+    """
+    if request.is_ajax() and request.method == "POST":
+        old_name = request.POST['oldNomDep']
+        new_name = request.POST['newNomDep']
+        old_abbrev = request.POST['oldAbbrevDep']
+        new_abbrev = request.POST['newAbbrevDep']
+        tutors_id = request.POST.getlist('respsDep-' + old_abbrev)
+        response = validate_department_update(
+            old_name, new_name, old_abbrev, new_abbrev, tutors_id)
+        if response['status'] == OK_RESPONSE:
+            update_departments_in_database(
+                old_name, new_name, old_abbrev, new_abbrev, tutors_id)
+        return JsonResponse(response)
+    return HttpResponseForbidden()
+
+
+@tutor_or_superuser_required
 def ajax_edit_parameters(request, department_abbrev):
     """Ajax url for parameters edition
 
@@ -221,15 +308,39 @@ def crud_view(request, department_abbrev, view_name, title):
     """
     department = get_object_or_404(Department, abbrev=department_abbrev)
     departments = Department.objects.exclude(abbrev=department_abbrev)
+    status, position, employer = get_status_of_user(request)
     return render(request, view_name, {
         'title': title,
         'department': department,
         'list_departments': departments,
         'has_dept_perm': request.user.has_department_perm(department=department, admin=True),
+        'status':status,
+        'status_vacataire':position,
+        'employer':employer,
+        'is_iut': get_is_iut(request),
+        'has_any_dept_perm': has_any_dept_perm(request),
     })
 
 
-@tutor_required
+@tutor_or_superuser_required
+def department_tutors(request, department_abbrev):
+    """Tutors view of FlopEditor.
+
+    :param request:           Client request.
+    :param department_abbrev: Department abbreviation.
+    :type request:            django.http.HttpRequest
+    :type department_abbrev:  str
+    :return: page rendered from the rooms template of FlopEditor.
+    :rtype:  django.http.HttpResponse
+
+    """
+    if has_any_dept_perm(request):
+        return crud_view(request, department_abbrev, "flopeditor/tutors.html", "Intervenants")
+
+    return HttpResponseForbidden()
+
+
+@tutor_or_superuser_required
 def department_rooms(request, department_abbrev):
     """Rooms view of FlopEditor.
 
@@ -244,7 +355,7 @@ def department_rooms(request, department_abbrev):
     return crud_view(request, department_abbrev, "flopeditor/rooms.html", "Salles")
 
 
-@tutor_required
+@tutor_or_superuser_required
 def department_room_types(request, department_abbrev):
     """Student groups view of FlopEditor.
 
@@ -262,7 +373,7 @@ def department_room_types(request, department_abbrev):
                      "Catégories de salles")
 
 
-@tutor_required
+@tutor_or_superuser_required
 def department_student_groups(request, department_abbrev):
     """Student groups view of FlopEditor.
 
@@ -280,7 +391,7 @@ def department_student_groups(request, department_abbrev):
                      "Groupes d'élèves")
 
 
-@tutor_required
+@tutor_or_superuser_required
 def department_student_group_types(request, department_abbrev):
     """Student group types view of FlopEditor.
 
@@ -298,7 +409,7 @@ def department_student_group_types(request, department_abbrev):
                      "Natures de groupes d'élèves")
 
 
-@tutor_required
+@tutor_or_superuser_required
 def department_course_types(request, department_abbrev):
     """course_types view of FlopEditor.
 
@@ -313,7 +424,7 @@ def department_course_types(request, department_abbrev):
     return crud_view(request, department_abbrev, "flopeditor/course_types.html", "Types de cours")
 
 
-@tutor_required
+@tutor_or_superuser_required
 def department_modules(request, department_abbrev):
     """Modules view of FlopEditor.
 
@@ -328,7 +439,7 @@ def department_modules(request, department_abbrev):
     return crud_view(request, department_abbrev, "flopeditor/modules.html", 'Modules')
 
 
-@tutor_required
+@tutor_or_superuser_required
 def department_periods(request, department_abbrev):
     """Periods/Semesters view of FlopEditor.
 
@@ -340,10 +451,10 @@ def department_periods(request, department_abbrev):
     :rtype:  django.http.HttpResponse
 
     """
-    return crud_view(request, department_abbrev, "flopeditor/periods.html", 'Périodes')
+    return crud_view(request, department_abbrev, "flopeditor/periods.html", 'Semestres')
 
 
-@tutor_required
+@tutor_or_superuser_required
 def department_training_programmes(request, department_abbrev):
     """Training programme view of FlopEditor.
 
@@ -356,3 +467,23 @@ def department_training_programmes(request, department_abbrev):
 
     """
     return crud_view(request, department_abbrev, 'flopeditor/training_programmes.html', 'Promos')
+
+@tutor_required
+def ajax_update_profil(request):
+    """
+
+    Ajax url for profil edition
+
+    :param request: Client request.
+    :type request:  django.http.HttpRequest
+    :return: Server response for the request.
+    :rtype:  django.http.JsonResponse
+
+    """
+
+    if request.is_ajax() and request.method == "POST":
+        response = validate_profil_update(request)
+        if response['status'] == OK_RESPONSE:
+            update_user_in_database(request)
+        return JsonResponse(response)
+    return HttpResponseForbidden()
