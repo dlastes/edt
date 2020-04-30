@@ -37,7 +37,7 @@ from base.timing import min_to_str, str_to_min
 from FlOpEDT.decorators import superuser_required, \
     tutor_or_superuser_required, tutor_required
 
-from people.models import Tutor, UserDepartmentSettings
+from people.models import Tutor
 from flopeditor.db_requests import create_departments_in_database, \
     update_departments_in_database, get_status_of_user, update_user_in_database, get_is_iut
 from flopeditor.validator import validate_department_creation,\
@@ -91,8 +91,24 @@ def home(request):
                    'has_any_dept_perm': has_any_dept_perm(request),
                   })
 
+@tutor_or_superuser_required
+def flopeditor_help(request):
+    """Shows the help page.
+                   'status': status,
+                   'status_vacataire': position,
+                   'employer': employer,
+                   })
 
+    :param request:           Client request.
+    :type request:            django.http.HttpRequest
+    :return: Help page rendered.
+    :rtype:  django.http.HttpResponse
 
+    """
+    return render(request, "flopeditor/help.html", {
+        'title': 'Aide',
+        'is_admin': has_any_dept_perm(request),
+        })
 
 @tutor_or_superuser_required
 def department_default(request, department_abbrev):
@@ -435,7 +451,7 @@ def department_periods(request, department_abbrev):
     :rtype:  django.http.HttpResponse
 
     """
-    return crud_view(request, department_abbrev, "flopeditor/periods.html", 'Périodes')
+    return crud_view(request, department_abbrev, "flopeditor/periods.html", 'Semestres')
 
 
 @tutor_or_superuser_required
