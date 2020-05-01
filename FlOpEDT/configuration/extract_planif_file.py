@@ -155,7 +155,7 @@ def ReadPlanifWeek(department, book, feuille, week, year):
                 do_assign(MODULE, COURSE_TYPE, week, year, book)
             else:
                 assert isinstance(prof, str) and prof is not None
-                prof = prof.replace(' ', '')
+                prof = prof.replace('\xa0', '').replace(' ', '')
                 if '|' in prof:
                     possible_profs = prof.split("|")
                     TUTOR = None
@@ -166,7 +166,7 @@ def ReadPlanifWeek(department, book, feuille, week, year):
                     supp_profs = profs[1:]
 
             if Cell.comment:
-                local_comments = Cell.comment.text.replace(' ', '').replace('\n', '').replace(',', ';').split(';')
+                local_comments = Cell.comment.text.replace('\xa0', '').replace(' ', '').replace('\n', '').replace(',', ';').split(';')
             else:
                 local_comments = []
 
@@ -175,7 +175,7 @@ def ReadPlanifWeek(department, book, feuille, week, year):
             if not grps:
                 grps = []
             else:
-                grps = grps.replace(' ', '').replace(',', ';').split(';')
+                grps = grps.replace('\xa0', '').replace(' ', '').replace(',', ';').split(';')
             groups = [str(g) for g in grps]
 
             GROUPS = list(Group.objects.filter(name__in=groups, train_prog=PROMO))
