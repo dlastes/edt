@@ -280,6 +280,19 @@ class ModulePossibleTutors(models.Model):
         'people.Tutor', blank=True, related_name='possible_modules')
 
 
+class ModuleTutorRepartition(models.Model):
+    module = models.ForeignKey('Module', on_delete=models.CASCADE)
+    course_type = models.ForeignKey('CourseType', on_delete=models.CASCADE)
+    tutor = models.ForeignKey('people.Tutor', on_delete=models.CASCADE)
+    week = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(0), MaxValueValidator(53)],
+        null=True,
+        blank=True)
+    year = models.PositiveSmallIntegerField(null=True,
+                                            blank=True)
+    courses_nb = models.PositiveSmallIntegerField(default=1)
+
+
 class CourseType(models.Model):
     name = models.CharField(max_length=50)
     department = models.ForeignKey(

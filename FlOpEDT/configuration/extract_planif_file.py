@@ -30,11 +30,10 @@ from openpyxl import *
 
 from base.weeks import actual_year
 from base.models import Group, Module, Course, CourseType, RoomType,\
-    TrainingProgramme, Dependency, Period, Department, CoursePossibleTutors
+    TrainingProgramme, Dependency, Period, Department, CoursePossibleTutors, ModuleTutorRepartition
 from people.models import Tutor, UserDepartmentSettings
 from people.tutor import fill_default_user_preferences
 from misc.assign_colors import assign_module_color
-from MyFlOp.models import ModuleTutorRepartition
 
 
 def do_assign(module, course_type, week, year, book):
@@ -43,7 +42,7 @@ def do_assign(module, course_type, week, year, book):
     if already_done:
         return
 
-    assignation_sheet = book['Assignation']
+    assignation_sheet = book['ModuleTutorsAssignation']
     assign_ok = False
     for assignation_row in range(1, 100):
         if assignation_sheet.cell(row=assignation_row, column=1).value == module.abbrev \
