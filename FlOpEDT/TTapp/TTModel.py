@@ -140,32 +140,32 @@ class TTModel(object):
         self.wdb = self.wdb_init()
         self.possible_apms = self.wdb.possible_apms
         self.cost_I, self.FHD_G, self.cost_G, self.cost_SL = self.costs_init()
-        print('Ok', datetime.datetime.now()-a)
+        print('Ok')  #, datetime.datetime.now()-a)
         print("Vars definition...")
         a=datetime.datetime.now()
         self.TT, self.TTrooms, self.TTinstructors = self.TT_vars_init()
-        print('Ok', datetime.datetime.now()-a)
+        print('Ok')  #, datetime.datetime.now()-a)
         print("Busy vars definition...")
         a=datetime.datetime.now()
         self.IBD, self.IBD_GTE, self.IBHD, self.GBHD, self.IBS, self.forced_IBD = self.busy_vars_init()
-        print('Ok', datetime.datetime.now()-a)
+        print('Ok')  #, datetime.datetime.now()-a)
 
         print("Availability instr definition ...")
         a=datetime.datetime.now()
         self.avail_instr, self.unp_slot_cost \
             = self.compute_non_preferred_slots_cost()
-        print('Ok', datetime.datetime.now()-a)
+        print('Ok')  #, datetime.datetime.now()-a)
 
         print("Availability courses definition ...")
         a=datetime.datetime.now()
         self.unp_slot_cost_course, self.avail_course \
             = self.compute_non_preferred_slots_cost_course()
-        print('Ok', datetime.datetime.now()-a)
+        print('Ok')  #, datetime.datetime.now()-a)
 
         print("Availability rooms definition ...")
         a=datetime.datetime.now()
         self.avail_room = self.compute_avail_room()
-        print('Ok', datetime.datetime.now()-a)
+        print('Ok')  #, datetime.datetime.now()-a)
 
         # Hack : permet que ça marche même si les dispos sur la base sont pas complètes
         for i in self.wdb.instructors:
@@ -886,7 +886,6 @@ class TTModel(object):
                                     & self.wdb.other_departments_sched_courses_for_avail_slot[sl]
                 if other_dep_sched_courses:
                     d = other_dep_sched_courses.pop().course.type.department
-                    print(r, 'is occupied in', d, sl)
                     self.avail_room[r][sl] = 0
 
         if self.core_only:
@@ -901,7 +900,6 @@ class TTModel(object):
                 if other_dep_sched_courses:
                     d = other_dep_sched_courses.pop().course.type.department
                     self.avail_instr[i][sl] = 0
-                    print(i, 'is occupied in', d, sl)
                     self.add_constraint(self.IBS[i, sl], '==', 1,
                                         Constraint(constraint_type=ConstraintType.
                                                    PROFESSEUR_A_DEJA_COURS_EN_AUTRE_DEPARTEMENT_IBD,
