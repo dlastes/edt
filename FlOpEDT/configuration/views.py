@@ -202,7 +202,7 @@ def import_planif_file(req, **kwargs):
                     except Exception as e:
                         response = {'status': 'error', 'data': str(e)}
                         return HttpResponse(json.dumps(response), content_type='application/json')
-                    Course.objects.filter(group__train_prog__department=dept).delete()
+                    Course.objects.filter(type__department=dept).delete()
                     logger.info("Flush planif database OK")
 
                     extract_planif(dept, bookname=path)
