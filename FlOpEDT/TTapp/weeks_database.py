@@ -85,7 +85,7 @@ class WeeksDatabase(object):
         self.courses_for_basic_group = self.groups_init()
         self.instructors, self.courses_for_tutor, self.courses_for_supp_tutor, self.availabilities, \
         self.fixed_courses_for_tutor, \
-        self.other_departments_courses_for_tutor, self.other_departments_courses_for_supp_tutor, \
+        self.other_departments_courses_for_tutor, self.other_departments_scheduled_courses_for_supp_tutor, \
         self.other_departments_scheduled_courses_for_tutor = self.users_init()
         self.possible_tutors, self.possible_modules, self.possible_courses = self.possible_courses_tutor_init()
 
@@ -381,9 +381,9 @@ class WeeksDatabase(object):
         for i in instructors:
             other_departments_courses_for_tutor[i] = set(self.other_departments_courses.filter(tutor=i))
 
-        other_departments_courses_for_supp_tutor = {}
+        other_departments_scheduled_courses_for_supp_tutor = {}
         for i in instructors:
-            other_departments_courses_for_supp_tutor[i] = set(self.other_departments_sched_courses
+            other_departments_scheduled_courses_for_supp_tutor[i] = set(self.other_departments_sched_courses
                                                               .filter(course__supp_tutor=i))
 
         other_departments_scheduled_courses_for_tutor = {}
@@ -392,7 +392,8 @@ class WeeksDatabase(object):
                                                                    .filter(course__tutor=i))
 
         return instructors, courses_for_tutor, courses_for_supp_tutor, availabilities, \
-               fixed_courses_for_tutor, other_departments_courses_for_tutor, other_departments_courses_for_supp_tutor, \
+               fixed_courses_for_tutor, other_departments_courses_for_tutor, \
+               other_departments_scheduled_courses_for_supp_tutor, \
                other_departments_scheduled_courses_for_tutor
 
     def possible_courses_tutor_init(self):
