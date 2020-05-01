@@ -30,10 +30,41 @@ from openpyxl import *
 
 from base.weeks import actual_year
 from base.models import Group, Module, Course, CourseType, RoomType,\
-    TrainingProgramme, Dependency, Period, Department, CoursePossibleTutors
+    TrainingProgramme, Dependency, Period, Department, CoursePossibleTutors, ModuleTutorRepartition
 from people.models import Tutor, UserDepartmentSettings
 from people.tutor import fill_default_user_preferences
 from misc.assign_colors import assign_module_color
+
+
+def do_assign(module, course_type, week, year, book):
+    already_done = ModuleTutorRepartition.objects.filter(module=module, course_type=course_type,
+                                                         week=week, year=year).exists()
+    if already_done:
+        return
+
+    assignation_sheet = book['ModuleTutorsAssignation']
+    assign_ok = False
+    for assignation_row in range(1, 100):
+        if assignation_sheet.cell(row=assignation_row, column=1).value == module.abbrev \
+                and assignation_sheet.cell(row=assignation_row, column=2).value == course_type.name:
+            assign_ok = True
+            break
+    if not assign_ok:
+        raise Exception(f"Rien n'est prévu pour assigner {module.abbrev} / {course_type.name}...")
+    column = 3
+    tutor_username = assignation_sheet.cell(row=assignation_row, column=column).value
+    while tutor_username is not None:
+        tutor = Tutor.objects.get(username=tutor_username)
+        mtr = ModuleTutorRepartition(module=module, course_type=course_type,
+                                     week=week, year=year, tutor=tutor)
+        nb = assignation_sheet.cell(row=assignation_row+1, column=column).value
+        if nb is not None:
+            nb = int(nb)
+            mtr.courses_nb = nb
+        mtr.save()
+        column += 1
+        tutor_username = assignation_sheet.cell(row=assignation_row, column=column).value
+    print(f"Assignation done for {module.abbrev} / {course_type.name}!")
 
 
 def ReadPlanifWeek(department, book, feuille, week, year):
@@ -96,16 +127,17 @@ def ReadPlanifWeek(department, book, feuille, week, year):
                     comments = []
 
                 sumtotal += nominal
+
                 continue
             try:
                 comments = comments
             except:
                 comments = []
+
             # handle light green lines - Vert clair
             MODULE = Module.objects.get(abbrev=module, period=period)
             PROMO = MODULE.train_prog
             nature = sheet.cell(row=row, column=nature_COL).value
-            salle = sheet.cell(row=row, column=salle_COL).value
             prof = sheet.cell(row=row, column=prof_COL).value
             grps = sheet.cell(row=row, column=group_COL).value
             COURSE_TYPE = CourseType.objects.get(name=nature, department=department)
@@ -118,6 +150,9 @@ def ReadPlanifWeek(department, book, feuille, week, year):
                     TUTOR.save()
                     fill_default_user_preferences(TUTOR)
                     UserDepartmentSettings(user=TUTOR, department=department).save()
+            elif prof == '*':
+                TUTOR = None
+                do_assign(MODULE, COURSE_TYPE, week, year, book)
             else:
                 assert isinstance(prof, str) and prof is not None
                 prof = prof.replace(' ', '')
@@ -144,15 +179,15 @@ def ReadPlanifWeek(department, book, feuille, week, year):
             groups = [str(g) for g in grps]
 
             GROUPS = list(Group.objects.filter(name__in=groups, train_prog=PROMO))
-            if GROUPS == []:
-                GROUPS = list(Group.objects.filter(name='CE', train_prog=PROMO))
 
             N=int(N)
 
             for i in range(N):
-                GROUP = GROUPS[i % len(GROUPS)]
-                C = Course(tutor=TUTOR, type=COURSE_TYPE, module=MODULE, group=GROUP, week=week, year=year,
+                C = Course(tutor=TUTOR, type=COURSE_TYPE, module=MODULE, week=week, year=year,
                            room_type=ROOMTYPE)
+                C.save()
+                for g in GROUPS:
+                    C.groups.add(g)
                 C.save()
                 if supp_profs != []:
                     SUPP_TUTORS = Tutor.objects.filter(username__in=supp_profs)
@@ -166,6 +201,7 @@ def ReadPlanifWeek(department, book, feuille, week, year):
                         t = Tutor.objects.get(username=pp)
                         cpt.possible_tutors.add(t)
                     cpt.save()
+
                 for after_type in [x for x in comments + local_comments if x[0] == 'A']:
                     try:
                         n = int(after_type[1])
@@ -174,29 +210,28 @@ def ReadPlanifWeek(department, book, feuille, week, year):
                         n = 1
                         s = 1
                     course_type = after_type[s:]
+                    relevant_groups = set()
+                    for g in GROUPS:
+                        relevant_groups |= g.ancestor_groups() | {g} | g.descendants_groups()
                     courses = Course.objects.filter(type__name=course_type, module=MODULE, week=week, year=year,
-                                                    group__in = GROUP.ancestor_groups() |
-                                                                 {GROUP} |
-                                                                 GROUP.descendants_groups())
+                                                    groups__in = relevant_groups)
                     for course in courses[:n]:
                         P = Dependency(course1=course, course2=C)
                         P.save()
 
             if 'D' in comments or 'D' in local_comments and N >= 2:
-                for GROUP in GROUPS:
-                    relevant_courses = Course.objects.filter(type=COURSE_TYPE, module=MODULE, group=GROUP, year=year,
-                                                  week=week)
-                    for i in range(N//2-1):
-                        P = Dependency(course1=relevant_courses[2*i], course2=relevant_courses[2*i+1], successive=True)
-                        P.save()
-            if 'ND' in comments or 'ND' in local_comments  and N >= 2:
-                for GROUP in GROUPS:
-                    relevant_courses = Course.objects.filter(type=COURSE_TYPE, module=MODULE, group=GROUP, year=year,
-                                                  week=week)
-                    P = Dependency(course1=relevant_courses[0], course2=relevant_courses[1], ND=True)
+                relevant_courses = Course.objects.filter(type=COURSE_TYPE, module=MODULE, groups__in=GROUPS, year=year,
+                                              week=week)
+                for i in range(N//2-1):
+                    P = Dependency(course1=relevant_courses[2*i], course2=relevant_courses[2*i+1], successive=True)
                     P.save()
+            if 'ND' in comments or 'ND' in local_comments  and N >= 2:
+                relevant_courses = Course.objects.filter(type=COURSE_TYPE, module=MODULE, groups__in=GROUPS, year=year,
+                                              week=week)
+                P = Dependency(course1=relevant_courses[0], course2=relevant_courses[1], ND=True)
+                P.save()
         except Exception as e:
-            raise Exception(f"Exception ligne {row}, semaine {week} de {feuille} : {module} \n")
+            raise Exception(f"Exception ligne {row}, semaine {week} de {feuille}: {e} \n")
 
 
 def extract_period(department, book, period, year):
