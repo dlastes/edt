@@ -124,7 +124,7 @@ class TTModel(object):
         print("\nLet's start weeks #%s" % weeks)
 
         print("Initialisation...")
-        a=datetime.datetime.now()
+        a = datetime.datetime.now()
         self.warnings = {}
 
         self.department = Department.objects.get(abbrev=department_abbrev)
@@ -144,10 +144,8 @@ class TTModel(object):
         self.IBD, self.IBD_GTE, self.IBHD, self.GBHD, self.IBS, self.forced_IBD = self.busy_vars_init()
         self.avail_instr, self.unp_slot_cost \
             = self.compute_non_preferred_slots_cost()
-        a=datetime.datetime.now()
         self.unp_slot_cost_course, self.avail_course \
             = self.compute_non_preferred_slots_cost_course()
-        a=datetime.datetime.now()
         self.avail_room = self.compute_avail_room()
         print('Ok', datetime.datetime.now()-a)
 
