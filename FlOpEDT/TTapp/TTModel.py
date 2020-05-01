@@ -36,7 +36,8 @@ from base.models import Group, \
     Course, ScheduledCourse, UserPreference, CoursePreference, \
     Department, Module, TrainingProgramme, CourseType, \
     Dependency, TutorCost, GroupFreeHalfDay, GroupCost, Holiday, TrainingHalfDay, \
-    CourseStartTimeConstraint, TimeGeneralSettings, ModulePossibleTutors, CoursePossibleTutors
+    CourseStartTimeConstraint, TimeGeneralSettings, ModulePossibleTutors, CoursePossibleTutors, \
+    ModuleTutorRepartition
 
 from base.timing import Time, Day
 
@@ -89,7 +90,8 @@ class TTModel(object):
                  max_stab=5.,
                  lim_ld=1.,
                  core_only=False,
-                 send_mails=False):
+                 send_mails=False,
+                 slots_step=None):
         # beg_file = os.path.join('logs',"FlOpTT")
         self.model = LpProblem("FlOpTT", LpMinimize)
         self.min_ups_i = min_nps_i
@@ -101,6 +103,7 @@ class TTModel(object):
         self.lim_ld = lim_ld
         self.core_only = core_only
         self.send_mails = send_mails
+        self.slots_step = slots_step
         self.var_nb = 0
         self.constraintManager = ConstraintManager()
 
@@ -186,7 +189,7 @@ class TTModel(object):
             self.send_lack_of_availability_mail()
 
     def wdb_init(self):
-        wdb = WeeksDatabase(self.department, self.weeks, self.year, self.train_prog)
+        wdb = WeeksDatabase(self.department, self.weeks, self.year, self.train_prog, self.slots_step)
         return wdb
 
     def costs_init(self):
@@ -519,6 +522,8 @@ class TTModel(object):
                                     slot=sl, course=c))
 
         for i in self.wdb.instructors:
+            if i.username == '---':
+                continue
             for sl in self.wdb.availability_slots:
                 self.add_constraint(self.sum(self.TTinstructors[(sl2, c2, i)]
                                              for sl2 in slots_filter(self.wdb.courses_slots, simultaneous_to=sl)
@@ -530,6 +535,19 @@ class TTModel(object):
                                              & self.wdb.compatible_courses[sl2]),
                                     '<=', self.avail_instr[i][sl],
                                     SlotInstructorConstraint(sl, i))
+
+        for mtr in ModuleTutorRepartition.objects.filter(module__in=self.wdb.modules,
+                                                         week__in=self.weeks,
+                                                         year=self.year):
+            self.add_constraint(
+                self.sum(self.TTinstructors[sl, c, mtr.tutor]
+                         for c in set(c for c in self.wdb.courses if c.module == mtr.module
+                                      and c.type == mtr.course_type)
+                         for sl in slots_filter(self.wdb.compatible_slots[c],
+                                                week=mtr.week)
+                         ),
+                '==', mtr.courses_nb, Constraint()
+            )
 
     def add_rooms_constraints(self):
         print("adding room constraints")

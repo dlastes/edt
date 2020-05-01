@@ -30,7 +30,6 @@ from TTapp.TTModel import TTModel, GUROBI_NAME
 
 from MyFlOp.MyTTUtils import print_differences
 
-from MyFlOp.models import ModuleTutorRepartition
 from TTapp.slots import slots_filter
 from TTapp.ilp_constraint.constraint import Constraint
 
@@ -46,7 +45,8 @@ class MyTTModel(TTModel):
                  max_stab=5.,
                  lim_ld=1.,
                  core_only=False,
-                 send_mails=False):
+                 send_mails=False,
+                 slots_step=None):
         """
         If you shall change something in the database ahead of creating the
         problem, you must write it here, before calling TTModel's constructor.
@@ -63,7 +63,8 @@ class MyTTModel(TTModel):
                          max_stab=max_stab,
                          lim_ld=lim_ld,
                          core_only=core_only,
-                         send_mails=send_mails)
+                         send_mails=send_mails,
+                         slots_step=slots_step)
 
     def add_specific_constraints(self):
         """
@@ -72,16 +73,6 @@ class MyTTModel(TTModel):
         If you shall add more specific ones, you may write it down here.
         """
         TTModel.add_specific_constraints(self)
-        for mtr in ModuleTutorRepartition.objects.filter(module__in=self.wdb.modules,
-                                                         week__in=self.weeks,
-                                                         year=self.year):
-
-            self.add_constraint(
-                self.sum(self.TTinstructors[sl, c ,mtr.tutor]
-                for sl in slots_filter(week=mtr.week, course_type=mtr.course_type)
-                for c in set(c for c in self.wdb.compatible_courses[sl] if c.module==mtr.module)),
-                '==', mtr.courses_nb, Constraint()
-            )
 
     def solve(self, time_limit=3600, target_work_copy=None,
               solver=GUROBI_NAME):
