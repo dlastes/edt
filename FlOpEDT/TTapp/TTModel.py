@@ -882,13 +882,11 @@ class TTModel(object):
         for sl in self.wdb.availability_slots:
             # constraint : other_departments_sched_courses rooms are not available
             for r in self.wdb.basic_rooms:
-                occupied_in_another_department = False
-                for sc in self.wdb.other_departments_sched_courses_for_room[r]:
-                    if sl.day.day == sc.day and sl.day.week == sc.course.week and \
-                            (sc.start_time < sl.end_time
-                             and sl.start_time < sc.start_time + sc.course.type.duration):
-                        occupied_in_another_department = True
-                if occupied_in_another_department:
+                other_dep_sched_courses = self.wdb.other_departments_sched_courses_for_room[r] \
+                                    & self.wdb.other_departments_sched_courses_for_avail_slot[sl]
+                if other_dep_sched_courses:
+                    d = other_dep_sched_courses.pop().course.type.department
+                    print(r, 'is occupied in', d, sl)
                     self.avail_room[r][sl] = 0
 
         if self.core_only:
@@ -897,22 +895,17 @@ class TTModel(object):
         for sl in self.wdb.availability_slots:
             # constraint : other_departments_sched_courses instructors are not available
             for i in self.wdb.instructors:
-                occupied_in_another_department = False
-                for sc in self.wdb.other_departments_scheduled_courses_for_tutor[i]:
-                    if sl.day.day == sc.day and sl.day.week == sc.course.week and \
-                            (sc.start_time < sl.end_time
-                             and sl.start_time < sc.start_time + sc.course.type.duration):
-                        occupied_in_another_department = True
-                        d = sc.course.type.department
-                if occupied_in_another_department:
+                other_dep_sched_courses = ((self.wdb.other_departments_scheduled_courses_for_tutor[i]
+                                      | self.wdb.other_departments_scheduled_courses_for_supp_tutor[i])
+                                     & self.wdb.other_departments_sched_courses_for_avail_slot[sl])
+                if other_dep_sched_courses:
+                    d = other_dep_sched_courses.pop().course.type.department
                     self.avail_instr[i][sl] = 0
+                    print(i, 'is occupied in', d, sl)
                     self.add_constraint(self.IBS[i, sl], '==', 1,
                                         Constraint(constraint_type=ConstraintType.
                                                    PROFESSEUR_A_DEJA_COURS_EN_AUTRE_DEPARTEMENT_IBD,
                                                    slots=sl, instructors=i, departments=d))
-                    # self.add_constraint(self.IBD[(i, sl.day)], '==', 1,
-                    #                     Constraint(constraint_type=ConstraintType.PROFESSEUR_A_DEJA_COURS_EN_AUTRE_DEPARTEMENT_IBD,
-                    #                     slots=sl, instructors=i, departments=d))
 
     def add_specific_constraints(self):
         """
@@ -945,7 +938,8 @@ class TTModel(object):
 
         self.add_dependency_constraints()
 
-        # Has to be before rooms_constraints because it contains rooms availability modification...
+        # Has to be before add_rooms_constraints and add_instructors_constraints
+        # because it contains rooms/instructors availability modification...
         self.add_other_departments_constraints()
 
         self.add_rooms_constraints()
