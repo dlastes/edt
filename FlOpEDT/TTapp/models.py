@@ -43,125 +43,17 @@ from django.core.exceptions import ValidationError
 
 from django.utils.translation import ugettext_lazy as _
 
-from base.models import Time, Department, Module, Group, Day, TimeGeneralSettings
-
-from people.models import Tutor
+from base.models import Department, TimeGeneralSettings
+from base.timing import Day
 
 from TTapp.helpers.minhalfdays import MinHalfDaysHelperGroup, MinHalfDaysHelperModule, MinHalfDaysHelperTutor
 
-from TTapp.iic.constraint_type import ConstraintType
-from TTapp.iic.constraints.constraint import Constraint
+from TTapp.ilp_constraint.constraint_type import ConstraintType
+from TTapp.ilp_constraint.constraint import Constraint
+from TTapp.slots import Slot, days_filter, slots_filter
+
 
 max_weight = 8
-
-slot_pause = 30
-
-midday = 12 * 60
-
-basic_slot_duration = 90
-
-days_list = [c[0] for c in Day.CHOICES]
-days_index = {}
-for c in Day.CHOICES:
-    days_index[c[0]] = days_list.index(c[0])
-
-
-class Slot(object):
-    def __init__(self, day, start_time, course_type=None):
-        self.course_type = course_type
-        if course_type is not None:
-            pm_start = TimeGeneralSettings.objects.get(department=course_type.department).lunch_break_finish_time
-        else:
-            pm_start = midday
-        self.day = day
-        self.start_time = start_time
-        self.duration = basic_slot_duration
-        if self.course_type is not None:
-            self.duration = self.course_type.duration
-        self.end_time = self.start_time + self.duration
-        if self.start_time >= pm_start:
-            self.apm = Time.PM
-        else:
-            self.apm = Time.AM
-
-
-    def is_simultaneous_to(self, other):
-        if self.day == other.day and self.start_time < other.end_time and other.start_time < self.end_time:
-            return True
-        else:
-            return False
-
-    def is_after(self, other):
-        if self.day.week > other.day.week \
-                or self.day.week == other.day.week and days_index[self.day.day] > days_index[other.day.day] \
-                or self.day == other.day and self.start_time >= other.end_time:
-            return True
-        else:
-            return False
-
-    def is_successor_of(self, other):
-        if self.day == other.day and other.end_time <= self.start_time <= other.end_time + slot_pause:
-            return True
-        else:
-            return False
-
-    def __lt__(self, other):
-        return other.is_after(self) and not self.is_after(other)
-
-    def __str__(self):
-        hours = self.start_time//60
-        minuts = self.start_time % 60
-        if minuts == 0:
-            minuts = ''
-        return str(self.course_type) + '_' + str(self.day) + '_' + str(hours) + 'h' + str(minuts)
-
-    def __repr__(self):
-        return str(self)
-
-    def get_day(self):
-        return self.day
-        
-def slots_filter(slot_set, day=None, apm=None, course_type=None, start_time=None, week_day=None,
-                 simultaneous_to=None, week=None, is_after=None, starts_after=None, starts_before=None, ends_before=None):
-    slots = slot_set
-    if week is not None:
-        slots = set(sl for sl in slots if sl.day.week == week)
-    if day is not None:
-        slots = set(sl for sl in slots if sl.day == day)
-    if week_day is not None:
-        slots = set(sl for sl in slots if sl.day.day == week_day)
-    if course_type is not None:
-        slots = set(sl for sl in slots if sl.course_type == course_type)
-    if apm is not None:
-        slots = set(sl for sl in slots if sl.apm == apm)
-    if simultaneous_to is not None:
-        slots = set(sl for sl in slots if sl.is_simultaneous_to(simultaneous_to))
-    if is_after is not None:
-        slots = set(sl for sl in slots if sl.is_after(is_after))
-    if starts_after is not None:
-        slots = set(sl for sl in slots if sl.start_time >= starts_after)
-    if starts_before is not None:
-        slots = set(sl for sl in slots if sl.start_time <= starts_before)
-    if ends_before is not None:
-        slots = set(sl for sl in slots if sl.end_time <= ends_before)
-    if start_time is not None:
-        slots = set(sl for sl in slots if sl.start_time == start_time)
-    return slots
-
-
-def days_filter(days_set, index=None, index_in=None, week=None, week_in=None, day=None):
-    days = days_set
-    if week is not None:
-        days = set(d for d in days if d.week == week)
-    if week_in is not None:
-        days = set(d for d in days if d.week in week_in)
-    if index is not None:
-        days = set(d for d in days if days_index[d.day] == index)
-    if index_in is not None:
-        days = set(d for d in days if days_index[d.day] in index_in)
-    if day is not None:
-        days = set(d for d in days if d.day == day)
-    return days
 
 
 class TTConstraint(models.Model):
@@ -268,7 +160,7 @@ class LimitCourseTypeTimePerPeriod(TTConstraint):  # , pond):
             courses_filter['module'] = module
 
         if train_prog is not None:
-            courses_filter['group__train_prog'] = train_prog
+            courses_filter['groups__train_prog'] = train_prog
 
         return courses_qs.filter(**courses_filter)
 
@@ -279,9 +171,9 @@ class LimitCourseTypeTimePerPeriod(TTConstraint):  # , pond):
         for day, period in period_by_day:
             expr = ttmodel.lin_expr()
             if period is None:
-                slots = ttmodel.wdb.slots_by_day[day]
+                slots = slots_filter(ttmodel.wdb.courses_slots, day=day)
             else:
-                slots = ttmodel.wdb.slots_by_half_day[(day, period)]
+                slots = slots_filter(ttmodel.wdb.courses_slots, day=day, apm=period)
 
             for slot in slots:
                 for course in courses & ttmodel.wdb.compatible_courses[slot]:
@@ -430,7 +322,7 @@ class Stabilize(TTConstraint):
 
         if self.general:
             # nb_changements_I=dict(zip(ttmodel.wdb.instructors,[0 for i in ttmodel.wdb.instructors]))
-            for sl in slots_filter(ttmodel.wdb.slots, week=week):
+            for sl in slots_filter(ttmodel.wdb.courses_slots, week=week):
                 for c in ttmodel.wdb.compatible_courses[sl]:
                     if not sched_courses.filter(start_time__lt=sl.end_time,
                                                 start_time__gt=sl.start_time - F('course__type__duration'),
@@ -442,9 +334,10 @@ class Stabilize(TTConstraint):
                                                 day=sl.day):
                         ttmodel.obj += ponderation * ttmodel.TT[(sl, c)]
                         # nb_changements_I[i]+=ttmodel.TT[(sl,c)]
-                    if not sched_courses.filter(course__group=c.group,
-                                                day=sl.day):
-                        ttmodel.obj += ponderation * ttmodel.TT[(sl, c)]
+                    for g in c.groups.all():
+                        if not sched_courses.filter(course__groups=g,
+                                                    day=sl.day):
+                            ttmodel.obj += ponderation * ttmodel.TT[(sl, c)]
         else:
             fc = ttmodel.wdb.courses.filter(week=week)
             if self.tutor is not None:
@@ -452,9 +345,9 @@ class Stabilize(TTConstraint):
             if self.type is not None:
                 fc = fc.filter(type=self.type)
             if self.train_progs.exists():
-                fc = fc.filter(group__train_prog__in=self.train_progs.all())
+                fc = fc.filter(groups__train_prog__in=self.train_progs.all())
             if self.group:
-                fc = fc.filter(group=self.group)
+                fc = fc.filter(groups=self.group)
             if self.module:
                 fc = fc.filter(module=self.module)
             for c in fc:
@@ -470,7 +363,7 @@ class Stabilize(TTConstraint):
                                    * ponderation * ttmodel.TT[(chosen_slot, c)]
 
                 else:
-                    for slot in ttmodel.wdb.slots & ttmodel.wdb.compatible_slots[c]:
+                    for slot in ttmodel.wdb.courses_slots & ttmodel.wdb.compatible_slots[c]:
                         if not slot.is_simultaneous_to(chosen_slot):
                             ttmodel.add_constraint(ttmodel.TT[(slot, c)],
                                                    '==',
@@ -646,14 +539,16 @@ class MinNonPreferedTutorsSlot(TTConstraint):
             tutors = set(t for t in ttmodel.wdb.instructors if t in self.tutors.all())
         else:
             tutors = set(ttmodel.wdb.instructors)
-        for sl in ttmodel.wdb.slots:
+        for sl in ttmodel.wdb.availability_slots:
             for tutor in tutors:
                 filtered_courses = set(c for c in ttmodel.wdb.possible_courses[tutor] if c.week == week)
-                for c in filtered_courses & ttmodel.wdb.compatible_courses[sl]:
+                for c in filtered_courses:
+                    slot_vars_sum = ttmodel.sum(ttmodel.TTinstructors[(sl2, c, tutor)]
+                                                for sl2 in slots_filter(ttmodel.wdb.compatible_slots[c],
+                                                                        simultaneous_to=sl))
                     cost = (float(self.weight) / max_weight) \
-                           * ponderation * ttmodel.TTinstructors[(sl, c, tutor)] \
+                           * ponderation * slot_vars_sum \
                            * ttmodel.unp_slot_cost[tutor][sl]
-                    #ttmodel.add_to_slot_cost(sl, cost)
                     ttmodel.add_to_inst_cost(tutor, cost, week=week)
 
     def one_line_description(self):
@@ -676,20 +571,19 @@ class MinNonPreferedTrainProgsSlot(TTConstraint):
             train_progs = set(tp for tp in self.train_progs.all() if tp in ttmodel.train_prog)
         else:
             train_progs = set(ttmodel.train_prog)
-        for sl in ttmodel.wdb.slots:
+        for sl in ttmodel.wdb.availability_slots:
             for train_prog in train_progs:
-                filtered_courses = set(ttmodel.wdb.courses.filter(group__train_prog=train_prog,
-                                                                              week=week))
                 basic_groups = ttmodel.wdb.basic_groups.filter(train_prog=train_prog)
                 for g in basic_groups:
-                    for c in filtered_courses & ttmodel.wdb.compatible_courses[sl]:
-                        if c.group in ttmodel.wdb.all_groups_of[g]:
-                            cost = self.local_weight() \
-                                   * ponderation * ttmodel.TT[(sl, c)] \
-                                   * ttmodel.unp_slot_cost_course[c.type,
-                                                                  train_prog][sl]
-                            ttmodel.add_to_group_cost(g, cost, week=week)
-                            #ttmodel.add_to_slot_cost(sl, cost)
+                    for c in ttmodel.wdb.courses_for_basic_group[g]:
+                        slot_vars_sum = ttmodel.sum(ttmodel.TT[(sl2, c)]
+                                                    for sl2 in slots_filter(ttmodel.wdb.compatible_slots[c],
+                                                                            simultaneous_to=sl))
+                        cost = self.local_weight() \
+                               * ponderation * slot_vars_sum \
+                               * ttmodel.unp_slot_cost_course[c.type,
+                                                              train_prog][sl]
+                        ttmodel.add_to_group_cost(g, cost, week=week)
 
     def one_line_description(self):
         text = "Respecte les préférences"
@@ -774,7 +668,7 @@ class RespectBoundPerDay(TTConstraint):
             for d in days_filter(ttmodel.wdb.days, week=week):
                 ttmodel.add_constraint(ttmodel.sum(ttmodel.TT[sl, c] * c.type.duration / 60
                                                    for c in ttmodel.wdb.courses_for_tutor[tutor] if c.week == week
-                                                   for sl in slots_filter(ttmodel.wdb.slots, day=d)
+                                                   for sl in slots_filter(ttmodel.wdb.courses_slots, day=d)
                                                    & ttmodel.wdb.compatible_slots[c]),
                                        '<=',
                                        tutor.max_hours_per_day,
@@ -897,11 +791,11 @@ class AvoidBothTimes(TTConstraint):
         if self.tutor is not None:
             fc = fc.filter(tutor=self.tutor)
         if self.train_prog is not None:
-            fc = fc.filter(group__train_prog=self.train_prog)
+            fc = fc.filter(groups__train_prog=self.train_prog)
         if self.group:
-            fc = fc.filter(group=self.group)
-        slots1 = set([slot for slot in ttmodel.wdb.slots if slot.start_time <= self.time1 < slot.end_time])
-        slots2 = set([slot for slot in ttmodel.wdb.slots if slot.start_time <= self.time2 < slot.end_time])
+            fc = fc.filter(groups=self.group)
+        slots1 = set([slot for slot in ttmodel.wdb.courses_slots if slot.start_time <= self.time1 < slot.end_time])
+        slots2 = set([slot for slot in ttmodel.wdb.courses_slots if slot.start_time <= self.time2 < slot.end_time])
         for c1 in fc:
             for c2 in fc.exclude(id__lte=c1.id):
                 for sl1 in slots1:
@@ -965,14 +859,14 @@ class LimitedStartTimeChoices(TTConstraint):
         if self.type is not None:
             fc = fc.filter(type=self.type)
         if self.train_progs.exists():
-            fc = fc.filter(group__train_prog__in=self.train_progs.all())
+            fc = fc.filter(groups__train_prog__in=self.train_progs.all())
         if self.group is not None:
-            fc = fc.filter(group=self.group)
-        possible_slots_ids = set(slot.id for slot in ttmodel.wdb.slots
+            fc = fc.filter(groups=self.group)
+        possible_slots_ids = set(slot.id for slot in ttmodel.wdb.courses_slots
                                  if slot.start_time in self.possible_start_times.values_list())
 
         for c in fc:
-            for sl in ttmodel.wdb.slots.exclude(id__in=possible_slots_ids):
+            for sl in ttmodel.wdb.courses_slots.exclude(id__in=possible_slots_ids):
                 if self.weight is not None:
                     ttmodel.obj += self.local_weight() * ponderation * ttmodel.TT[(sl, c)]
                 else:
@@ -1035,11 +929,11 @@ class LimitedRoomChoices(TTConstraint):
         if self.type is not None:
             fc = fc.filter(type=self.type)
         if self.group is not None:
-            fc = fc.filter(group=self.group)
+            fc = fc.filter(groups=self.group)
         possible_rooms_ids = self.possible_rooms.values_list('id', flat=True)
 
         for c in fc:
-            for sl in ttmodel.wdb.slots:
+            for sl in ttmodel.wdb.courses_slots:
                 for rg in ttmodel.wdb.room_groups.filter(types__in=[c.room_type]).exclude(id__in = possible_rooms_ids):
                     if self.weight is not None:
                         ttmodel.obj += self.local_weight() * ponderation * ttmodel.TTrooms[(sl, c, rg)]
