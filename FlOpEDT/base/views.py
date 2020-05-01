@@ -62,7 +62,7 @@ from base.forms import ContactForm, PerfectDayForm, ModuleDescriptionForm
 from base.models import Course, UserPreference, ScheduledCourse, EdtVersion, \
     CourseModification, Day, Time, Room, RoomType, RoomSort, \
     Regen, RoomPreference, Department, TimeGeneralSettings, CoursePreference, \
-    TrainingProgramme, CourseType, Module
+    TrainingProgramme, CourseType, Module, Group
 import base.queries as queries
 from base.weeks import *
 
@@ -514,14 +514,14 @@ def fetch_cours_pp(req, week, year, num_copy, **kwargs):
         course__module__train_prog__department=department,
         work_copy=num_copy)
                          .values('course'))
-                .select_related('group__train_prog',
+                .select_related('module__train_prog',
                                 'tutor',
                                 'module',
                                 'type',
-                                'group',
                                 'room_type',
                                 'module__display'
-                                ))
+                                )\
+                .prefetch_related('groups'))
 
     response = HttpResponse(dataset.csv, content_type='text/csv')
     response['week'] = week
@@ -757,9 +757,20 @@ def fetch_decale(req, **kwargs):
     year = int(req.GET.get('a', '0'))
     module = req.GET.get('m', '')
     prof = req.GET.get('p', '')
-    group = req.GET.get('g', '')
+    group_name = req.GET.get('group', '')
+    training_programme = req.GET.get('training_programme', '')
     department = req.department
 
+    try:
+        print(group_name, training_programme)
+        group = Group.objects.get(
+            name=group_name,
+            train_prog__abbrev=training_programme,
+            train_prog__department=req.department
+        )
+    except Exception as e:
+        group = None
+    
     courses = []
     modules = []
     tutors = []
@@ -786,7 +797,7 @@ def fetch_decale(req, **kwargs):
             courses.append({'i': c.id,
                             'm': c.module.abbrev,
                             'p': c.tutor.username,
-                            'g': c.group.name,
+                            'g': [g.name for g in c.groups.all()],
                             'd': day,
                             't': time})
 
@@ -804,7 +815,10 @@ def fetch_decale(req, **kwargs):
             tutors.append(c.tutor.username)
 
     if module != '':
-        course_queryset = Course.objects.filter(module__train_prog__department=department)
+        course_queryset = Course\
+            .objects\
+            .filter(module__train_prog__department=department)\
+            .select_related('module__train_prog__department')
         course = filt_m(course_queryset, module) \
             .order_by('tutor__username') \
             .distinct('tutor__username')
@@ -813,9 +827,14 @@ def fetch_decale(req, **kwargs):
                 module_tutors.append(c.tutor.username)
 
     course = filt_p(filt_m(filt_sa(department, week, year), module), prof) \
-        .distinct('group')
+        .distinct('groups')
+    groups = set()
     for c in course:
-        groups.append(c.group.name)
+        for g in c.groups.all():
+            groups.add((g.train_prog.abbrev, g.name))
+    groups = [{'training_programme': g[0],
+               'group': g[1]} for g in groups]
+    groups.sort(key=lambda g:(g['training_programme'],g['group']))
 
     return JsonResponse({'cours': courses,
                          'modules': modules,
@@ -1767,8 +1786,8 @@ def filt_p(r, prof):
 
 
 def filt_g(r, group):
-    if group != '':
-        r = r.filter(group__name=group)
+    if group is not None:
+        r = r.filter(groups=group).prefetch_related('groups')
     return r
 
 

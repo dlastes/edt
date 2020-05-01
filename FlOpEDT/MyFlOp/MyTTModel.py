@@ -30,6 +30,8 @@ from TTapp.TTModel import TTModel, GUROBI_NAME
 
 from MyFlOp.MyTTUtils import print_differences
 
+from TTapp.slots import slots_filter
+from TTapp.ilp_constraint.constraint import Constraint
 
 class MyTTModel(TTModel):
     def __init__(self, department_abbrev, week_year_list,
@@ -43,7 +45,8 @@ class MyTTModel(TTModel):
                  max_stab=5.,
                  lim_ld=1.,
                  core_only=False,
-                 send_mails=False):
+                 send_mails=False,
+                 slots_step=None):
         """
         If you shall change something in the database ahead of creating the
         problem, you must write it here, before calling TTModel's constructor.
@@ -60,7 +63,8 @@ class MyTTModel(TTModel):
                          max_stab=max_stab,
                          lim_ld=lim_ld,
                          core_only=core_only,
-                         send_mails=send_mails)
+                         send_mails=send_mails,
+                         slots_step=slots_step)
 
     def add_specific_constraints(self):
         """

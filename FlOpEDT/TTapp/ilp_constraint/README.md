@@ -21,7 +21,7 @@ L'interpréteur Python va alors s'ouvrir.
 
 Faites ensuite les commandes suivantes pour créer le TTModel : base servant à produire l'ensemble des contraintes
 ```python
-from TTapp.TTModel import WeekDB, TTModel
+from TTapp.TTModel import WeeksDatabase, TTModel
 import base.models as models  
 from MyFlOp.MyTTModel import MyTTModel
 tp1 = models.TrainingProgramme.objects.get(abbrev=<mon departement>)

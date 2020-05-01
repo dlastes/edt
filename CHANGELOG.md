@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Flopeditor: staff members
 
 ### Added
+- Enable courses with multiple groups
 - New app flopeditor: save initial data through graphical interface
   - Department
   - Rooms (hierarchy, room types)
