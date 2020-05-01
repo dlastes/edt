@@ -107,7 +107,7 @@ class GroupEventFeed(EventFeed):
 
     def items(self, groups):
         return ScheduledCourse.objects\
-                              .filter(course__groups=groups, work_copy=0\
+                              .filter(course__groups__in=groups, work_copy=0\
                               ).order_by('-course__year','-course__week')
 
     def item_title(self, scourse):
