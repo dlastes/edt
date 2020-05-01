@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('people', '0017_notificationspreferences'),
-        ('base', '0054_remove_course_group'),
+        ('base', '0055_delete_time'),
     ]
 
     operations = [
