@@ -695,7 +695,6 @@ class RespectBoundPerDay(TTConstraint):
         verbose_name_plural = "Respecter les limites horaires"
 
 
-# A tester!
 class SimultaneousCourses(TTConstraint):
     """
     Force courses to start simultaneously
@@ -714,7 +713,7 @@ class SimultaneousCourses(TTConstraint):
         possible_start_times = set()
         for t in types:
             possible_start_times |= set(t.coursestarttimeconstraint_set.all()[0].allowed_start_times)
-        for day in ttmodel.wdb.days:
+        for day in days_filter(ttmodel.wdb.days, week=week):
             for st in possible_start_times:
                 check_var = ttmodel.add_var("check_var")
                 expr = ttmodel.lin_expr()
@@ -723,30 +722,11 @@ class SimultaneousCourses(TTConstraint):
                     for sl in possible_slots:
                         expr += ttmodel.TT[(sl, c)]
                 ttmodel.add_constraint(nb_courses * check_var - expr, '==', 0,
-                                       Constraint(constraint_type=ConstraintType.COURS_SIMULTANES,
+                                       Constraint(constraint_type=ConstraintType.SIMULTANEOUS_COURSES,
                                                   courses=list(self.courses.all())))
                 ttmodel.add_constraint(expr - check_var, '>=', 0,
-                                       Constraint(constraint_type=ConstraintType.COURS_SIMULTANES,
+                                       Constraint(constraint_type=ConstraintType.SIMULTANEOUS_COURSES,
                                        courses=list(self.courses.all())))
-            # A compléter, l'idée est que si les cours ont le même prof, ou des
-            # groupes qui se superposent, il faut veiller à supprimer les core
-            # constraints qui empêchent que les cours soient simultanés...
-            # same_tutor = (self.course1.tutor == self.course2.tutor)
-            # if same_tutor and self.course1.tutor in ttmodel.wdb.instructors:
-            #     for sl2 in ttmodel.wdb.slots_intersecting[sl] - {sl}:
-            #         name_tutor_constr_sl2 = 'simul_slots' + str(self.course1.tutor) + '_' + str(sl) + '_' + str(sl2)
-            #         tutor_constr = ttmodel.get_constraint(name_tutor_constr_sl2)
-            #         print(tutor_constr)
-            #         if ttmodel.var_coeff(var1, tutor_constr) == 1:
-            #             ttmodel.change_var_coeff(var1, tutor_constr, 0)
-            # for bg in ttmodel.wdb.basic_groups:
-            #     bg_groups = ttmodel.wdb.all_groups_of[bg]
-            #     if self.course1.group in bg_groups and self.course2.group in bg_groups:
-            #         for sl2 in ttmodel.wdb.slots_intersecting[sl] - {sl}:
-            #             name_group_constr_sl2 = 'simul_slots' + bg.full_name() + '_' + str(sl) + '_' + str(sl2)
-            #             group_constr = ttmodel.get_constraint(name_group_constr_sl2)
-            #             if ttmodel.var_coeff(var1, group_constr) == 1:
-            #                 ttmodel.change_var_coeff(var1, group_constr, 0)
 
     def get_viewmodel(self):
         view_model = super().get_viewmodel()
@@ -786,16 +766,18 @@ class AvoidBothTimes(TTConstraint):
         attributes.extend(['group', 'tutor'])
         return attributes
 
-    def enrich_model(self, ttmodel, ponderation=1):
-        fc = ttmodel.wdb.courses
+    def enrich_model(self, ttmodel, week, ponderation=1):
+        fc = ttmodel.wdb.courses_by_week[week]
         if self.tutor is not None:
             fc = fc.filter(tutor=self.tutor)
         if self.train_prog is not None:
-            fc = fc.filter(groups__train_prog=self.train_prog)
+            fc = fc.filter(module__train_prog=self.train_prog)
         if self.group:
             fc = fc.filter(groups=self.group)
-        slots1 = set([slot for slot in ttmodel.wdb.courses_slots if slot.start_time <= self.time1 < slot.end_time])
-        slots2 = set([slot for slot in ttmodel.wdb.courses_slots if slot.start_time <= self.time2 < slot.end_time])
+        slots1 = set([slot for slot in ttmodel.wdb.courses_slots
+                      if slot.start_time <= self.time1 < slot.end_time])
+        slots2 = set([slot for slot in ttmodel.wdb.courses_slots
+                      if slot.start_time <= self.time2 < slot.end_time])
         for c1 in fc:
             for c2 in fc.exclude(id__lte=c1.id):
                 for sl1 in slots1:
