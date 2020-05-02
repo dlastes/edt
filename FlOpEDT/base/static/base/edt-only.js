@@ -160,7 +160,12 @@ function fetch_cours_light() {
       modules.pl = [];
       salles.pl = [];
 
-      cours_pl = d3.csvParse(msg, translate_cours_pl_from_csv);
+      cours_pl = [] ;
+      d3.csvParse(
+        msg,
+        function(d) {
+          translate_cours_pl_from_csv(d, cours_pl) ;
+        });
 
       fetch.ongoing_cours_pl = false;
       fetch_ended(true);

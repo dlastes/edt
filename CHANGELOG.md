@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Flopeditor: staff members
 
 ### Added
+- Enable courses with multiple groups
 - New app flopeditor: save initial data through graphical interface
   - Department
   - Rooms (hierarchy, room types)
@@ -29,6 +30,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Enabled text translation
 - TTApp/ilp_constraints : contains all code + documentation allowing to write files in logs/ 
 that explain the infaisability by the solver of a set of constraints
+- Availability slots in TTModel to optimize resources
+- Allow parametrized repartition between tutors on a given Module
 
 ### Changed
 - front-end: dispatch week/day management in js files
