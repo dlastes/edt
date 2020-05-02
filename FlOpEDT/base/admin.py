@@ -74,7 +74,7 @@ class CoursPlaceResource(resources.ModelResource):
                       attribute='course',
                       widget=ForeignKeyWidget(Course, 'no'))
     prof = fields.Field(column_name='prof_name',
-                        attribute='course__tutor',
+                        attribute='tutor',
                         widget=ForeignKeyWidget(Tutor, 'username'))
     # prof_first_name = fields.Field(column_name='prof_first_name',
     #                                attribute='cours__tutor',
