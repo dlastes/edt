@@ -10,6 +10,13 @@ from base.models import ScheduledCourse, Room, Group, Day
 from people.models import Tutor
 
 
+def str_groups(c):
+    groups = c.groups.all()
+    gp_str = ', '.join([f'{g.train_prog.abbrev} {g.name}'
+                        for g in groups])
+    plural = len(groups) > 1
+    return gp_str, plural
+
 class EventFeed(ICalFeed):
     """
     A simple event calender
@@ -20,19 +27,23 @@ class EventFeed(ICalFeed):
 
     def item_title(self, scourse):
         course = scourse.course
-        return (f'{course.module.abbrev} {course.type.name} '
-                f'- {course.group.train_prog.abbrev} G{course.group.name}'
-        )
+        gp_str, plural = str_groups(course)
+        return (f'{course.module.abbrev} {course.type.name} - ' + gp_str)
 
     def item_description(self, scourse):
         location = scourse.room.name if scourse.room is not None else ''
         course = scourse.course
         tutor = scourse.tutor
-        return (f'Cours : {course.module.abbrev} {course.type.name}\n'
-                f'Groupe : {course.group.train_prog.abbrev} '
-                f'{course.group.name}\n'
-                f'Enseignant : {tutor}\nSalle : {location}'
-        )
+        ret = f'Cours : {course.module.abbrev} {course.type.name}\n'
+        gp_str, plural = str_groups(course)
+        ret += 'Groupe'
+        if plural:
+            ret += 's'
+        ret += ' : '
+        ret += gp_str
+        ret += f'\nEnseignant·e : {tutor}\n'
+        ret += f'Salle : {location}'
+        return ret
 
     def item_start_datetime(self, scourse):
         course = scourse.course
@@ -63,8 +74,9 @@ class TutorEventFeed(EventFeed):
     def item_title(self, scourse):
         course = scourse.course
         location = scourse.room.name if scourse.room is not None else ''
+        gp_str, plural = str_groups(course)
         return (f'{course.module.abbrev} {course.type.name} '
-                f'- {course.group.train_prog.abbrev} G{course.group.name} '
+                f'- {gp_str} '
                 f'- {location}'
         )
 
@@ -79,8 +91,9 @@ class RoomEventFeed(EventFeed):
 
     def item_title(self, scourse):
         course = scourse.course
+        gp_str, plural = str_groups(course)
         return (f'{course.module.abbrev} {course.type.name} '
-                f'- {course.group.train_prog.abbrev} G{course.group.name}'
+                f'- {gp_str} '
                 f'- {scourse.tutor.username}'
         )
 
@@ -94,7 +107,7 @@ class GroupEventFeed(EventFeed):
 
     def items(self, groups):
         return ScheduledCourse.objects\
-                              .filter(course__group__in=groups, work_copy=0\
+                              .filter(course__groups__in=groups, work_copy=0\
                               ).order_by('-course__year','-course__week')
 
     def item_title(self, scourse):
