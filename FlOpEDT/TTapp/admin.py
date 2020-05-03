@@ -33,7 +33,8 @@ from TTapp.models import \
     LimitCourseTypeTimePerPeriod, Stabilize, \
     MinModulesHalfDays, MinTutorsHalfDays, MinGroupsHalfDays,\
     MinNonPreferedTrainProgsSlot, MinNonPreferedTutorsSlot, \
-    CustomConstraint, SimultaneousCourses, MinimizeBusyDays, RespectBoundPerDay
+    CustomConstraint, SimultaneousCourses, MinimizeBusyDays, RespectBoundPerDay,\
+    AvoidBothTimes, LimitedRoomChoices, LimitedStartTimeChoices
 
 # Register your models here.
 
@@ -194,6 +195,32 @@ class MinimizeBusyDaysAdmin(DepartmentModelAdmin):
                    )
 
 
+class LimitedRoomChoicesAdmin(DepartmentModelAdmin):
+    list_display = ('week', 'year', 'group', 'tutor', 'module', 'type', 'comment')
+    ordering = ()
+    list_filter = (('week', DropdownFilterAll),
+                   ('year', DropdownFilterAll),
+                   ('train_progs', DropdownFilterRel),
+                   ('group', DropdownFilterRel),
+                   ('tutor', DropdownFilterRel),
+                   ('module', DropdownFilterRel),
+                   ('type', DropdownFilterRel),
+                   )
+
+
+class LimitedStartTimeChoicesAdmin(DepartmentModelAdmin):
+    list_display = ('week', 'year', 'group', 'tutor', 'module', 'type', 'comment')
+    ordering = ()
+    list_filter = (('week', DropdownFilterAll),
+                   ('year', DropdownFilterAll),
+                   ('train_progs', DropdownFilterRel),
+                   ('group', DropdownFilterRel),
+                   ('tutor', DropdownFilterRel),
+                   ('module', DropdownFilterRel),
+                   ('type', DropdownFilterRel),
+                   )
+
+
 admin.site.register(CustomConstraint, CustomConstraintAdmin)
 admin.site.register(LimitCourseTypeTimePerPeriod, LimitCourseTypeTimePerPeriodAdmin)
 #admin.site.register(ReasonableDays, ReasonableDaysAdmin)
@@ -203,7 +230,9 @@ admin.site.register(MinTutorsHalfDays, MinTutorsHalfDaysAdmin)
 admin.site.register(MinModulesHalfDays, MinModulesHalfDaysAdmin)
 admin.site.register(MinNonPreferedTutorsSlot, MinNonPreferedTutorsSlotAdmin)
 admin.site.register(MinNonPreferedTrainProgsSlot, MinNonPreferedTrainProgsSlotAdmin)
-#admin.site.register(AvoidBothTimes, AvoidBothTimesAdmin)
+admin.site.register(AvoidBothTimes, AvoidBothTimesAdmin)
 admin.site.register(SimultaneousCourses, SimultaneousCoursesAdmin)
 admin.site.register(MinimizeBusyDays, MinimizeBusyDaysAdmin)
 admin.site.register(RespectBoundPerDay, RespectBoundPerDayAdmin)
+admin.site.register(LimitedStartTimeChoices, LimitedStartTimeChoicesAdmin)
+admin.site.register(LimitedRoomChoices, LimitedRoomChoicesAdmin)

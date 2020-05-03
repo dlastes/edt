@@ -44,7 +44,7 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 
 from base.models import Department, TimeGeneralSettings
-from base.timing import Day
+from base.timing import Day, french_format
 
 from TTapp.helpers.minhalfdays import MinHalfDaysHelperGroup, MinHalfDaysHelperModule, MinHalfDaysHelperTutor
 
@@ -186,14 +186,6 @@ class LimitCourseTypeTimePerPeriod(TTConstraint):  # , pond):
                                 int(self.max_hours * 60) + 1, 3600*24)
                 ttmodel.obj += self.local_weight() * ponderation * var
             else:
-                """
-                name = 'Max_%d_hours_of_%s_per_%s_%s_%s%g' % (self.max_hours,
-                                                              self.course_type,
-                                                              self.period,
-                                                              day,
-                                                              period if period is not None else '',
-                                                              ttmodel.constraint_nb)
-                """
                 ttmodel.add_constraint(expr, '<=', self.max_hours*60,
                                        Constraint(constraint_type=ConstraintType.MAX_HOURS,
                                                   modules=self.course_type, days=day))
@@ -796,7 +788,7 @@ class AvoidBothTimes(TTConstraint):
                                                               courses=[c1, c2], slots=[sl1, sl2]))
 
     def one_line_description(self):
-        text = "Pas à la fois à " + str(self.time1/60) + "h et à" + str(self.time2/60) + "h."
+        text = f"Pas à la fois à {french_format(self.time1)} et à {french_format(self.time2)}"
         if self.tutor:
             text += ' pour ' + str(self.tutor)
         if self.group:
@@ -833,7 +825,7 @@ class LimitedStartTimeChoices(TTConstraint):
 
 
     def enrich_model(self, ttmodel, week, ponderation=1.):
-        fc = ttmodel.wdb.courses
+        fc = ttmodel.wdb.courses_by_week[week]
         if self.tutor is not None:
             fc = fc.filter(tutor=self.tutor)
         if self.module is not None:
@@ -844,17 +836,16 @@ class LimitedStartTimeChoices(TTConstraint):
             fc = fc.filter(groups__train_prog__in=self.train_progs.all())
         if self.group is not None:
             fc = fc.filter(groups=self.group)
-        possible_slots_ids = set(slot.id for slot in ttmodel.wdb.courses_slots
-                                 if slot.start_time in self.possible_start_times.values_list())
-
-        for c in fc:
-            for sl in ttmodel.wdb.courses_slots.exclude(id__in=possible_slots_ids):
-                if self.weight is not None:
-                    ttmodel.obj += self.local_weight() * ponderation * ttmodel.TT[(sl, c)]
-                else:
-                    ttmodel.add_constraint(ttmodel.TT[(sl, c)], '==', 0,
-                                           Constraint(constraint_type=ConstraintType.LIMITED_START_TIME_CHOICES,
-                                                      courses=fc, slots=sl))
+        pst = self.possible_start_times.values_list()
+        relevant_sum = ttmodel.sum(ttmodel.TT[(sl, c)]
+                                   for c in fc
+                                   for sl in ttmodel.wdb.compatible_slots[c] if sl.start_time not in pst)
+        if self.weight is not None:
+            ttmodel.obj += self.local_weight() * ponderation * relevant_sum
+        else:
+            ttmodel.add_constraint(relevant_sum, '==', 0,
+                                   Constraint(constraint_type=ConstraintType.LIMITED_START_TIME_CHOICES,
+                                              courses=fc))
 
     def one_line_description(self):
         text = "Les "
@@ -871,11 +862,8 @@ class LimitedStartTimeChoices(TTConstraint):
         if self.group:
             text += ' avec le groupe ' + str(self.group)
         text += " ne peuvent avoir lieu qu'à "
-        for sl in self.possible_start_times.values_list():
-            if sl % 60==0:
-                text += str(sl//60) + 'h, '
-            else:
-                text += str(sl//60) + 'h' + str(sl % 60) + ', '
+        for pst in self.possible_start_times.values_list():
+            text += french_format(pst) + ', '
         return text
 
 
@@ -903,7 +891,7 @@ class LimitedRoomChoices(TTConstraint):
                                             related_name="limited_rooms")
 
     def enrich_model(self, ttmodel, week, ponderation=1.):
-        fc = ttmodel.wdb.courses
+        fc = ttmodel.wdb.courses_by_week[week]
         if self.tutor is not None:
             fc = fc.filter(tutor=self.tutor)
         if self.module is not None:
@@ -912,17 +900,17 @@ class LimitedRoomChoices(TTConstraint):
             fc = fc.filter(type=self.type)
         if self.group is not None:
             fc = fc.filter(groups=self.group)
-        possible_rooms_ids = self.possible_rooms.values_list('id', flat=True)
-
-        for c in fc:
-            for sl in ttmodel.wdb.courses_slots:
-                for rg in ttmodel.wdb.room_groups.filter(types__in=[c.room_type]).exclude(id__in = possible_rooms_ids):
-                    if self.weight is not None:
-                        ttmodel.obj += self.local_weight() * ponderation * ttmodel.TTrooms[(sl, c, rg)]
-                    else:
-                        ttmodel.add_constraint(ttmodel.TTrooms[(sl, c,rg)], '==', 0,
-                                               Constraint(constraint_type=ConstraintType.LIMITED_ROOM_CHOICES,
-                                                          courses=c, slots=sl, rooms=rg))
+        possible_rooms = self.possible_rooms.values_list()
+        relevant_sum = ttmodel.sum(ttmodel.TTrooms[(sl, c, rg)]
+                                   for c in fc
+                                   for sl in ttmodel.wdb.compatible_slots[c]
+                                   for rg in ttmodel.wdb.course_rg_compat[c] if rg not in possible_rooms)
+        if self.weight is not None:
+            ttmodel.obj += self.local_weight() * ponderation * relevant_sum
+        else:
+            ttmodel.add_constraint(relevant_sum, '==', 0,
+                                   Constraint(constraint_type=ConstraintType.LIMITED_ROOM_CHOICES,
+                                              courses=fc, rooms=possible_rooms))
 
     def one_line_description(self):
         text = "Les "
