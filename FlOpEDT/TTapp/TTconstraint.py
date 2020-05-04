@@ -1,0 +1,131 @@
+# -*- coding: utf-8 -*-
+
+# This file is part of the FlOpEDT/FlOpScheduler project.
+# Copyright (c) 2017
+# Authors: Iulian Ober, Paul Renaud-Goud, Pablo Seban, et al.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public
+# License along with this program. If not, see
+# <http://www.gnu.org/licenses/>.
+#
+# You can be released from the requirements of the license by purchasing
+# a commercial license. Buying such a license is mandatory as soon as
+# you develop activities involving the FlOpEDT/FlOpScheduler software
+# without disclosing the source code of your own applications.
+
+from django.core.validators import MinValueValidator, MaxValueValidator
+
+from django.db import models
+
+max_weight = 8
+
+
+class TTConstraint(models.Model):
+
+    department = models.ForeignKey('base.Department', null=True, on_delete=models.CASCADE)
+    train_progs = models.ManyToManyField('base.TrainingProgramme',
+                                         blank=True)
+    week = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(52)],
+        null=True,
+
+        default=None,
+        blank=True)
+    year = models.PositiveSmallIntegerField(null=True, default=None, blank=True)
+    weight = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(max_weight)],
+        null=True, default=None, blank=True)
+    comment = models.CharField(max_length=100, null=True, default=None, blank=True)
+    is_active = models.BooleanField(verbose_name='Contrainte active?', default=True)
+
+    def local_weight(self):
+        return float(self.weight) / max_weight
+
+    class Meta:
+        abstract = True
+
+    def enrich_model(self, ttmodel, week, ponderation=1):
+        raise NotImplementedError
+
+    def full_name(self):
+        # Return a human readable constraint name
+        return str(self)
+
+    def description(self):
+        # Return a human readable constraint name
+        return self.__doc__ or str(self)
+
+    def get_viewmodel(self):
+        #
+        # Return a dictionnary with view-related data
+        #
+        if self.train_progs.exists():
+            train_prog_value = ', '.join([train_prog.abbrev for train_prog in self.train_progs.all()])
+        else:
+            train_prog_value = 'All'
+
+        if self.week:
+            week_value = f"{self.week} ({self.year})"
+        else:
+            week_value = 'All'
+
+        return {
+            'model': self.__class__.__name__,
+            'pk': self.pk,
+            'is_active': self.is_active,
+            'name': self.full_name(),
+            'description': self.description(),
+            'explanation': self.one_line_description(),
+            'comment': self.comment,
+            'details': {
+                'train_progs': train_prog_value,
+                'week': week_value,
+                'weight': self.weight,
+                }
+            }
+
+    def one_line_description(self):
+        # Return a human readable constraint name with its attributes
+        raise NotImplementedError
+
+    @classmethod
+    def get_viewmodel_prefetch_attributes(cls):
+        return ['train_progs', 'department',]
+
+    def get_courses_queryset_by_parameters(self, ttmodel, train_prog=None, tutor=None, module=None):
+        """
+        Filter courses depending on constraints parameters
+        """
+        courses_qs = ttmodel.wdb.courses
+        courses_filter = {}
+
+        if tutor is not None:
+            courses_filter['tutor'] = tutor
+
+        if module is not None:
+            courses_filter['module'] = module
+
+        if train_prog is not None:
+            courses_filter['module__train_prog'] = train_prog
+
+        return courses_qs.filter(**courses_filter)
+
+    def get_courses_queryset_by_attributes(self, ttmodel, **kwargs):
+        """
+        Filter courses depending constraint attributes
+        """
+        for attr in ['tutor', 'group', 'module', 'train_prog']:
+            if hasattr(self, attr) and attr not in kwargs:
+                kwargs[attr] = getattr(self, attr)
+
+        return self.get_courses_queryset_by_parameters(ttmodel, **kwargs)
