@@ -23,8 +23,8 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from TTapp.ilp_constraint.constraint import Constraint
-from TTapp.ilp_constraint.constraint_type import ConstraintType
+from TTapp.ilp_constraints.constraint import Constraint
+from TTapp.ilp_constraints.constraint_type import ConstraintType
 
 class CourseConstraint(Constraint):
     def __init__(self, course):

@@ -39,12 +39,14 @@ from base.models import Group, \
     CourseStartTimeConstraint, TimeGeneralSettings, ModulePossibleTutors, CoursePossibleTutors, \
     ModuleTutorRepartition
 
-from base.timing import Time, Day
+from base.timing import Time
 
 from people.models import Tutor
 
-from TTapp.models import MinNonPreferedTutorsSlot, MinNonPreferedTrainProgsSlot,\
-    max_weight, Stabilize, TTConstraint
+from TTapp.TTconstraint import TTConstraint, max_weight
+from TTapp.TTConstraints.tutors_constraints import MinNonPreferedTutorsSlot
+from TTapp.TTConstraints.other_constraints import Stabilize
+from TTapp.TTConstraints.groups_constraints import MinNonPreferedTrainProgsSlot
 
 from TTapp.slots import slots_filter, days_filter
 
@@ -62,15 +64,15 @@ import datetime
 
 import logging
 
-from TTapp.ilp_constraint.constraintManager import ConstraintManager
-from TTapp.ilp_constraint.constraint import Constraint
-from TTapp.ilp_constraint.constraint_type import ConstraintType
+from TTapp.ilp_constraints.constraintManager import ConstraintManager
+from TTapp.ilp_constraints.constraint import Constraint
+from TTapp.ilp_constraints.constraint_type import ConstraintType
 
-from TTapp.ilp_constraint.constraints.dependencyConstraint import DependencyConstraint
-from TTapp.ilp_constraint.constraints.instructorConstraint import InstructorConstraint
-from TTapp.ilp_constraint.constraints.simulSlotGroupConstraint import SimulSlotGroupConstraint
-from TTapp.ilp_constraint.constraints.slotInstructorConstraint import SlotInstructorConstraint
-from TTapp.ilp_constraint.constraints.courseConstraint import CourseConstraint
+from TTapp.ilp_constraints.constraints.dependencyConstraint import DependencyConstraint
+from TTapp.ilp_constraints.constraints.instructorConstraint import InstructorConstraint
+from TTapp.ilp_constraints.constraints.simulSlotGroupConstraint import SimulSlotGroupConstraint
+from TTapp.ilp_constraints.constraints.slotInstructorConstraint import SlotInstructorConstraint
+from TTapp.ilp_constraints.constraints.courseConstraint import CourseConstraint
 
 logger = logging.getLogger(__name__)
 pattern = r".+: (.|\s)+ (=|>=|<=) \d*"

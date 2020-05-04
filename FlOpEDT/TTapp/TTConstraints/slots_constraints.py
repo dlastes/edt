@@ -30,8 +30,8 @@ from django.db import models
 
 from base.timing import french_format
 
-from TTapp.ilp_constraint.constraint_type import ConstraintType
-from TTapp.ilp_constraint.constraint import Constraint
+from TTapp.ilp_constraints.constraint_type import ConstraintType
+from TTapp.ilp_constraints.constraint import Constraint
 from TTapp.slots import days_filter, slots_filter
 from TTapp.TTconstraint import TTConstraint
 

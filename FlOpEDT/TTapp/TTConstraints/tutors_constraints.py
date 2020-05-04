@@ -27,8 +27,8 @@ from django.db import models
 
 from TTapp.helpers.minhalfdays import MinHalfDaysHelperTutor
 
-from TTapp.ilp_constraint.constraint_type import ConstraintType
-from TTapp.ilp_constraint.constraint import Constraint
+from TTapp.ilp_constraints.constraint_type import ConstraintType
+from TTapp.ilp_constraints.constraint import Constraint
 from TTapp.slots import days_filter, slots_filter
 from TTapp.TTconstraint import TTConstraint, max_weight
 

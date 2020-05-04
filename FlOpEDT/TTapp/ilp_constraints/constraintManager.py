@@ -23,7 +23,7 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from TTapp.ilp_constraint.print_infaisibility import print_all
+from TTapp.ilp_constraints.print_infaisibility import print_all
 
 def inc(occurs_types, constraint_type):
     if constraint_type is not None:

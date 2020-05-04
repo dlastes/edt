@@ -31,8 +31,8 @@ from django.db.models import F
 
 from base.timing import Day
 
-from TTapp.ilp_constraint.constraint_type import ConstraintType
-from TTapp.ilp_constraint.constraint import Constraint
+from TTapp.ilp_constraints.constraint_type import ConstraintType
+from TTapp.ilp_constraints.constraint import Constraint
 from TTapp.slots import Slot, days_filter, slots_filter
 from TTapp.TTconstraint import TTConstraint
 
