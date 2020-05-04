@@ -502,26 +502,9 @@ def fetch_cours_pp(req, week, year, num_copy, **kwargs):
         return cached
 
     dataset = CoursResource() \
-        .export(Course
-                .objects
-                .filter(
-        module__train_prog__department=department,
-        week=week,
-        year=year)
-                .exclude(pk__in=ScheduledCourse
-                         .objects
-                         .filter(
-        course__module__train_prog__department=department,
-        work_copy=num_copy)
-                         .values('course'))
-                .select_related('module__train_prog',
-                                'tutor',
-                                'module',
-                                'type',
-                                'room_type',
-                                'module__display'
-                                )\
-                .prefetch_related('groups'))
+        .export(
+            queries.get_unscheduled_courses(department, week, year, num_copy)
+        )
 
     response = HttpResponse(dataset.csv, content_type='text/csv')
     response['week'] = week
