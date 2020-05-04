@@ -488,7 +488,7 @@ class TTModel(object):
             # , "no_course_on_%s_%s_%g" % (training_half_day.day, training_half_day.apm, self.constraint_nb)
             self.add_constraint(self.sum(self.TT[(sl, c)] for sl in training_slots
                                          for c in self.wdb.compatible_courses[sl]
-                                         & set(self.wdb.courses.filter(groups__train_prog__in=training_progs))),
+                                         & set(self.wdb.courses.filter(module__train_prog__in=training_progs))),
                                 '==', 0,
                                 Constraint(constraint_type=ConstraintType.PAS_DE_COURS_DE_DEMI_JOURNEE,
                                 days=training_half_day.day, apm=training_half_day.apm))
