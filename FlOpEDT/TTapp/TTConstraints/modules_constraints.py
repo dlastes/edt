@@ -53,7 +53,7 @@ class MinModulesHalfDays(TTConstraint):
         details = view_model['details']
 
         if self.modules.exists():
-            details.update({'modules': ', '.join([module.name for module in self.modules.all()])})
+            details.update({'modules': ', '.join([module.abbrev for module in self.modules.all()])})
 
         return view_model
 
