@@ -180,7 +180,14 @@ def read():
             "type": "select-chips",
             "options": {'values': departments}
         }],
-        "values": values
+        "values": values,
+        "options": {
+            "examples": [
+                ["Étage entier", [], []],
+                ["E101", ["Étage entier"], []],
+                ["E102", ["Étage entier"], []]
+            ]
+        }
     })
 
 

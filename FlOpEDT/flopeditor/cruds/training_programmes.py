@@ -53,7 +53,13 @@ def read(department):
             "type": "text",
             "options": {}
         }],
-        "values" : values
+        "values" : values,
+        "options": {
+            "examples": [
+                ["INFO1", "DUT Informatique première année"],
+                ["INFO2", "DUT Informatique deuxième année"]
+            ]
+        }
         })
 
 def create(entries, department):

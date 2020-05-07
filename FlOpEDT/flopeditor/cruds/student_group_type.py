@@ -53,7 +53,16 @@ def read(department):
             "type": "text",
             "options": {}
         }],
-        "values" : values
+        "values" : values,
+        "options": {
+            "examples": [
+                ["TP"],
+                ["TD"],
+                ["CE (Classe Entière)"],
+                ["TD Alt (TD Alternance)"],
+                ["TP Alt (TP Alternance)"]
+            ]
+        }
     })
 
 
