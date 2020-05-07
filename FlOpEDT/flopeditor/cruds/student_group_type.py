@@ -61,7 +61,7 @@ def read(department):
                 ["CE (Classe Entière)"],
                 ["TD Alt (TD Alternance)"],
                 ["TP Alt (TP Alternance)"]
-                ]
+            ]
         }
     })
 

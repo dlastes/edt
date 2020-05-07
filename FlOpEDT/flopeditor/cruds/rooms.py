@@ -186,7 +186,7 @@ def read():
                 ["Étage entier", [], []],
                 ["E101", ["Étage entier"], []],
                 ["E102", ["Étage entier"], []]
-                ]
+            ]
         }
     })
 

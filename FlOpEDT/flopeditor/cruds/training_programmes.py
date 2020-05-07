@@ -58,7 +58,7 @@ def read(department):
             "examples": [
                 ["INFO1", "DUT Informatique première année"],
                 ["INFO2", "DUT Informatique deuxième année"]
-                ]
+            ]
         }
         })
 

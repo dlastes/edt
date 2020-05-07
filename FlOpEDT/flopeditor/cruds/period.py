@@ -67,7 +67,7 @@ def read(department):
         "options": {
             "examples": [
                 ["S1", 36, 5]
-                ]
+            ]
         }
     })
 

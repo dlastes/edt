@@ -101,7 +101,7 @@ def read(department):
                 ["TD", []],
                 ["Amphi", ["Amphi 1", "Amphi 2", "Amphi 3"]],
                 ["Exam", []]
-                ]
+            ]
         }
         })
 
