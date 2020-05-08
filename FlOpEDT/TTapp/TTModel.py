@@ -44,9 +44,7 @@ from base.timing import Time
 from people.models import Tutor
 
 from TTapp.TTconstraint import TTConstraint, max_weight
-from TTapp.TTConstraints.tutors_constraints import MinNonPreferedTutorsSlot
-from TTapp.TTConstraints.other_constraints import Stabilize
-from TTapp.TTConstraints.groups_constraints import MinNonPreferedTrainProgsSlot
+from TTapp.models import MinNonPreferedTutorsSlot, Stabilize, MinNonPreferedTrainProgsSlot
 
 from TTapp.slots import slots_filter, days_filter
 

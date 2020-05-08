@@ -46,7 +46,7 @@ class LimitedRoomChoices(TTConstraint):
                               null=True,
                               default=None,
                               on_delete=models.CASCADE)
-    type = models.ForeignKey('base.CourseType',
+    course_type = models.ForeignKey('base.CourseType',
                               null=True,
                               default=None,
                               on_delete=models.CASCADE)
@@ -59,8 +59,8 @@ class LimitedRoomChoices(TTConstraint):
             fc = fc.filter(tutor=self.tutor)
         if self.module is not None:
             fc = fc.filter(module=self.module)
-        if self.type is not None:
-            fc = fc.filter(type=self.type)
+        if self.course_type is not None:
+            fc = fc.filter(type=self.course_type)
         if self.group is not None:
             fc = fc.filter(groups=self.group)
         possible_rooms = self.possible_rooms.values_list()
@@ -77,8 +77,8 @@ class LimitedRoomChoices(TTConstraint):
 
     def one_line_description(self):
         text = "Les "
-        if self.type:
-            text += str(self.type)
+        if self.course_type:
+            text += str(self.course_type)
         else:
             text += "cours"
         if self.module:

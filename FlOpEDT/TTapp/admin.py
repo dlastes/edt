@@ -88,7 +88,7 @@ class ReasonableDaysAdmin(DepartmentModelAdmin):
 
 class StabilizeAdmin(DepartmentModelAdmin):
     list_display = ('week', 'year', 'general',
-                    'group', 'tutor', 'module', 'type', 'comment')
+                    'group', 'tutor', 'module', 'course_type', 'comment')
     ordering = ()
     list_filter = (('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
@@ -96,7 +96,7 @@ class StabilizeAdmin(DepartmentModelAdmin):
                    ('group', DropdownFilterRel),
                    ('tutor', DropdownFilterRel),
                    ('module', DropdownFilterRel),
-                   ('type', DropdownFilterRel),
+                   ('course_type', DropdownFilterRel),
                    )
 
 
@@ -196,7 +196,7 @@ class MinimizeBusyDaysAdmin(DepartmentModelAdmin):
 
 
 class LimitedRoomChoicesAdmin(DepartmentModelAdmin):
-    list_display = ('week', 'year', 'group', 'tutor', 'module', 'type', 'comment')
+    list_display = ('week', 'year', 'group', 'tutor', 'module', 'course_type', 'comment')
     ordering = ()
     list_filter = (('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
@@ -204,12 +204,12 @@ class LimitedRoomChoicesAdmin(DepartmentModelAdmin):
                    ('group', DropdownFilterRel),
                    ('tutor', DropdownFilterRel),
                    ('module', DropdownFilterRel),
-                   ('type', DropdownFilterRel),
+                   ('course_type', DropdownFilterRel),
                    )
 
 
 class LimitedStartTimeChoicesAdmin(DepartmentModelAdmin):
-    list_display = ('week', 'year', 'group', 'tutor', 'module', 'type', 'comment')
+    list_display = ('week', 'year', 'group', 'tutor', 'module', 'course_type', 'comment')
     ordering = ()
     list_filter = (('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
@@ -217,7 +217,7 @@ class LimitedStartTimeChoicesAdmin(DepartmentModelAdmin):
                    ('group', DropdownFilterRel),
                    ('tutor', DropdownFilterRel),
                    ('module', DropdownFilterRel),
-                   ('type', DropdownFilterRel),
+                   ('course_type', DropdownFilterRel),
                    )
 
 

@@ -49,10 +49,10 @@ class SimultaneousCourses(TTConstraint):
         return attributes
 
     def enrich_model(self, ttmodel, week, ponderation=1):
-        types = set(c.type for c in self.courses.all())
+        course_types = set(c.type for c in self.courses.all())
         nb_courses = self.courses.count()
         possible_start_times = set()
-        for t in types:
+        for t in course_types:
             possible_start_times |= set(t.coursestarttimeconstraint_set.all()[0].allowed_start_times)
         for day in days_filter(ttmodel.wdb.days, week=week):
             for st in possible_start_times:
@@ -164,10 +164,10 @@ class LimitedStartTimeChoices(TTConstraint):
                               null=True,
                               default=None,
                               on_delete=models.CASCADE)
-    type = models.ForeignKey('base.CourseType',
-                              null=True,
-                              default=None,
-                              on_delete=models.CASCADE)
+    course_type = models.ForeignKey('base.CourseType',
+                                    null=True,
+                                    default=None,
+                                    on_delete=models.CASCADE)
     possible_start_times = ArrayField(models.PositiveSmallIntegerField())
 
     def enrich_model(self, ttmodel, week, ponderation=1.):
@@ -176,8 +176,8 @@ class LimitedStartTimeChoices(TTConstraint):
             fc = fc.filter(tutor=self.tutor)
         if self.module is not None:
             fc = fc.filter(module=self.module)
-        if self.type is not None:
-            fc = fc.filter(type=self.type)
+        if self.course_type is not None:
+            fc = fc.filter(type=self.course_type)
         if self.train_progs.exists():
             fc = fc.filter(groups__train_prog__in=self.train_progs.all())
         if self.group is not None:
@@ -195,8 +195,8 @@ class LimitedStartTimeChoices(TTConstraint):
 
     def one_line_description(self):
         text = "Les "
-        if self.type:
-            text += str(self.type)
+        if self.course_type:
+            text += str(self.course_type)
         else:
             text += "cours"
         if self.module:

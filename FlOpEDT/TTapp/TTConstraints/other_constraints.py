@@ -197,7 +197,7 @@ class Stabilize(TTConstraint):
                               null=True,
                               default=None,
                               on_delete=models.CASCADE)
-    type = models.ForeignKey('base.CourseType', null=True, default=None, on_delete=models.CASCADE)
+    course_type = models.ForeignKey('base.CourseType', null=True, default=None, on_delete=models.CASCADE)
     work_copy = models.PositiveSmallIntegerField(default=0)
     fixed_days = ArrayField(models.CharField(max_length=2,
                                              choices=Day.CHOICES), blank=True, null=True)
@@ -205,7 +205,7 @@ class Stabilize(TTConstraint):
     @classmethod
     def get_viewmodel_prefetch_attributes(cls):
         attributes = super().get_viewmodel_prefetch_attributes()
-        attributes.extend(['group', 'module', 'tutor', 'type'])
+        attributes.extend(['group', 'module', 'tutor', 'course_type'])
         return attributes
 
     def enrich_model(self, ttmodel, week, ponderation=1):
@@ -242,8 +242,8 @@ class Stabilize(TTConstraint):
             fc = ttmodel.wdb.courses.filter(week=week)
             if self.tutor is not None:
                 fc = fc.filter(tutor=self.tutor)
-            if self.type is not None:
-                fc = fc.filter(type=self.type)
+            if self.course_type is not None:
+                fc = fc.filter(type=self.course_type)
             if self.train_progs.exists():
                 fc = fc.filter(groups__train_prog__in=self.train_progs.all())
             if self.group:
@@ -274,8 +274,9 @@ class Stabilize(TTConstraint):
 
     def one_line_description(self):
         text = "Minimiser les changements"
-        if self.type:
-            text += " pour les " + str(self.type)
+        if self.course_type:
+            text += " pour les " + str(self.course_type
+                                       )
         if self.module:
             text += " de " + str(self.module)
         if self.tutor:

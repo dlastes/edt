@@ -102,12 +102,24 @@ class TTConstraint(models.Model):
     def get_viewmodel_prefetch_attributes(cls):
         return ['train_progs', 'department',]
 
-    def get_courses_queryset_by_parameters(self, ttmodel, train_prog=None, tutor=None, module=None):
+    def get_courses_queryset_by_parameters(self, ttmodel, week,
+                                           train_progs=None,
+                                           train_prog=None,
+                                           tutor=None,
+                                           module=None,
+                                           group=None,
+                                           course_type=None):
         """
         Filter courses depending on constraints parameters
         """
-        courses_qs = ttmodel.wdb.courses
+        courses_qs = ttmodel.wdb.courses.filter(week=week)
         courses_filter = {}
+
+        if train_progs is not None:
+            courses_filter['module__train_prog__in'] = train_progs
+
+        if train_prog is not None:
+            courses_filter['module__train_prog'] = train_prog
 
         if tutor is not None:
             courses_filter['tutor'] = tutor
@@ -115,17 +127,20 @@ class TTConstraint(models.Model):
         if module is not None:
             courses_filter['module'] = module
 
-        if train_prog is not None:
-            courses_filter['module__train_prog'] = train_prog
+        if group is not None:
+            courses_filter['group'] = group
+
+        if course_type is not None:
+            courses_filter['type'] = course_type
 
         return courses_qs.filter(**courses_filter)
 
-    def get_courses_queryset_by_attributes(self, ttmodel, **kwargs):
+    def get_courses_queryset_by_attributes(self, ttmodel, week, **kwargs):
         """
         Filter courses depending constraint attributes
         """
-        for attr in ['tutor', 'group', 'module', 'train_prog']:
+        for attr in ['train_progs', 'train_prog', 'tutor', 'module', 'group', 'course_type']:
             if hasattr(self, attr) and attr not in kwargs:
                 kwargs[attr] = getattr(self, attr)
 
-        return self.get_courses_queryset_by_parameters(ttmodel, **kwargs)
+        return self.get_courses_queryset_by_parameters(ttmodel, week, **kwargs)
