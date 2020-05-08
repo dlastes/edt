@@ -49,7 +49,8 @@ class SimultaneousCourses(TTConstraint):
         if nb == 0:
             return
         elif nb > 1:
-            raise Exception("Simultaneous courses need to have the same week : Constraint deleted")
+            self.delete()
+            raise Exception("Simultaneous courses need to have the same week: not saved")
         else:
             week, year = courses_weeks_and_years.pop()
             self.week = week
@@ -122,13 +123,7 @@ class AvoidBothTimes(TTConstraint):
         return attributes
 
     def enrich_model(self, ttmodel, week, ponderation=1):
-        fc = ttmodel.wdb.courses.filter(week=week)
-        if self.tutor is not None:
-            fc = fc.filter(tutor=self.tutor)
-        if self.train_progs is not None:
-            fc = fc.filter(module__train_prog__in=self.train_progs)
-        if self.group:
-            fc = fc.filter(groups=self.group)
+        fc = self.get_courses_queryset_by_attributes(ttmodel, week)
         slots1 = set([slot for slot in ttmodel.wdb.courses_slots
                       if slot.start_time <= self.time1 < slot.end_time])
         slots2 = set([slot for slot in ttmodel.wdb.courses_slots
@@ -185,17 +180,7 @@ class LimitedStartTimeChoices(TTConstraint):
     possible_start_times = ArrayField(models.PositiveSmallIntegerField())
 
     def enrich_model(self, ttmodel, week, ponderation=1.):
-        fc = ttmodel.wdb.courses.filter(week=week)
-        if self.tutor is not None:
-            fc = fc.filter(tutor=self.tutor)
-        if self.module is not None:
-            fc = fc.filter(module=self.module)
-        if self.course_type is not None:
-            fc = fc.filter(type=self.course_type)
-        if self.train_progs.exists():
-            fc = fc.filter(groups__train_prog__in=self.train_progs.all())
-        if self.group is not None:
-            fc = fc.filter(groups=self.group)
+        fc = self.get_courses_queryset_by_attributes(ttmodel, week)
         pst = self.possible_start_times.values_list()
         relevant_sum = ttmodel.sum(ttmodel.TT[(sl, c)]
                                    for c in fc

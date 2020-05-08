@@ -54,27 +54,14 @@ class LimitCourseTypeTimePerPeriod(TTConstraint):  # , pond):
     PERIOD_CHOICES = ((FULL_DAY, 'Full day'), (HALF_DAY, 'Half day'))
     period = models.CharField(max_length=2, choices=PERIOD_CHOICES)
 
-    def get_courses_queryset(self, ttmodel, train_prog=None, tutor=None, module=None):
-        """
-        Filter courses depending on constraints parameters
-        """
-        courses_qs = ttmodel.wdb.courses.filter(type=self.course_type)
-        courses_filter = {}
+    def register_expression(self, ttmodel, week, period_by_day, ponderation,
+                            train_prog=None, tutor=None, module=None):
 
-        if tutor is not None:
-            courses_filter['tutor'] = tutor
-
-        if module is not None:
-            courses_filter['module'] = module
-
-        if train_prog is not None:
-            courses_filter['module__train_prog'] = train_prog
-
-        return courses_qs.filter(**courses_filter)
-
-    def register_expression(self, ttmodel, period_by_day, ponderation, train_prog=None, tutor=None, module=None):
-
-        courses = set(self.get_courses_queryset(ttmodel, train_prog, tutor, module))
+        courses = set(self.get_courses_queryset_by_parameters(ttmodel, week,
+                                                              course_type=self.course_type,
+                                                              train_prog=train_prog,
+                                                              tutor=tutor,
+                                                              module=module))
 
         for day, period in period_by_day:
             expr = ttmodel.lin_expr()
@@ -113,15 +100,15 @@ class LimitCourseTypeTimePerPeriod(TTConstraint):  # , pond):
         try:
             if self.tutors.count():
                 for tutor in self.tutors.all():
-                    self.register_expression(ttmodel, period_by_day, ponderation, tutor=tutor)
+                    self.register_expression(ttmodel, week, period_by_day, ponderation, tutor=tutor)
             elif self.modules.count():
                 for module in self.modules.all():
-                    self.register_expression(ttmodel, period_by_day, ponderation, module=module)
+                    self.register_expression(ttmodel, week, period_by_day, ponderation, module=module)
             elif self.train_progs.count():
                 for train_prog in self.train_progs.all():
-                    self.register_expression(ttmodel, period_by_day, ponderation, train_prog=train_prog)
+                    self.register_expression(ttmodel, week, period_by_day, ponderation, train_prog=train_prog)
             else:
-                self.register_expression(ttmodel, period_by_day, ponderation)
+                self.register_expression(ttmodel, week, period_by_day, ponderation)
         except ValueError:
             self.register_expression(ttmodel, period_by_day, ponderation)
 
@@ -239,25 +226,15 @@ class Stabilize(TTConstraint):
                                                     day=sl.day):
                             ttmodel.obj += ponderation * ttmodel.TT[(sl, c)]
         else:
-            fc = ttmodel.wdb.courses.filter(week=week)
-            if self.tutor is not None:
-                fc = fc.filter(tutor=self.tutor)
-            if self.course_type is not None:
-                fc = fc.filter(type=self.course_type)
-            if self.train_progs.exists():
-                fc = fc.filter(groups__train_prog__in=self.train_progs.all())
-            if self.group:
-                fc = fc.filter(groups=self.group)
-            if self.module:
-                fc = fc.filter(module=self.module)
+            fc = self.get_courses_queryset_by_attributes(ttmodel, week)
             for c in fc:
                 sched_c = ttmodel.wdb \
                     .sched_courses \
                     .get(course=c,
                          work_copy=self.work_copy)
-                chosen_slot = Slot(start_time=sched_c.start_time, course_type=sched_c.course.type,
+                chosen_slot = Slot(start_time=sched_c.start_time,
+                                   end_time=sched_c.end_time,
                                    day=sched_c.day)
-                chosen_roomgroup = sched_c.room
                 if self.weight is not None:
                     ttmodel.obj -= self.local_weight() \
                                    * ponderation * ttmodel.TT[(chosen_slot, c)]

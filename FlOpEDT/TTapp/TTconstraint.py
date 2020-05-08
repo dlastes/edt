@@ -139,8 +139,9 @@ class TTConstraint(models.Model):
         """
         Filter courses depending constraint attributes
         """
-        for attr in ['train_progs', 'train_prog', 'tutor', 'module', 'group', 'course_type']:
+        if self.train_progs.exists() and 'train_progs' not in kwargs:
+            kwargs['train_progs'] = self.train_progs.all()
+        for attr in ['train_prog', 'tutor', 'module', 'group', 'course_type']:
             if hasattr(self, attr) and attr not in kwargs:
                 kwargs[attr] = getattr(self, attr)
-
         return self.get_courses_queryset_by_parameters(ttmodel, week, **kwargs)

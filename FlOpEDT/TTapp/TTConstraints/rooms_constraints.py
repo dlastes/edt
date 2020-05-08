@@ -54,15 +54,7 @@ class LimitedRoomChoices(TTConstraint):
                                             related_name="limited_rooms")
 
     def enrich_model(self, ttmodel, week, ponderation=1.):
-        fc = ttmodel.wdb.courses.filter(week=week)
-        if self.tutor is not None:
-            fc = fc.filter(tutor=self.tutor)
-        if self.module is not None:
-            fc = fc.filter(module=self.module)
-        if self.course_type is not None:
-            fc = fc.filter(type=self.course_type)
-        if self.group is not None:
-            fc = fc.filter(groups=self.group)
+        fc = self.get_courses_queryset_by_attributes(ttmodel, week)
         possible_rooms = self.possible_rooms.values_list()
         relevant_sum = ttmodel.sum(ttmodel.TTrooms[(sl, c, rg)]
                                    for c in fc
