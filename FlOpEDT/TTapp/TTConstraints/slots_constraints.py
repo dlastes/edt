@@ -42,6 +42,20 @@ class SimultaneousCourses(TTConstraint):
     """
     courses = models.ManyToManyField('base.Course', related_name='simultaneous_courses_constraints')
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        courses_weeks_and_years = set((c.week, c.year) for c in self.courses.all())
+        nb = len(courses_weeks_and_years)
+        if nb == 0:
+            return
+        elif nb > 1:
+            raise Exception("Simultaneous courses need to have the same week : Constraint deleted")
+        else:
+            week, year = courses_weeks_and_years.pop()
+            self.week = week
+            self.year = year
+            super().save(*args, **kwargs)
+
     @classmethod
     def get_viewmodel_prefetch_attributes(cls):
         attributes = super().get_viewmodel_prefetch_attributes()
