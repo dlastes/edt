@@ -39,22 +39,16 @@ class MinTutorsHalfDays(TTConstraint):
     Optional: if 2 courses only, possibility to join it
     """
     tutors = models.ManyToManyField('people.Tutor', blank=True)
-
     join2courses = models.BooleanField(
         verbose_name='If a tutor has 2 or 4 courses only, join it?',
         default=False)
 
     def enrich_model(self, ttmodel, week, ponderation=1):
 
-        if self.tutors.exists():
-            helper = MinHalfDaysHelperTutor(ttmodel, self, week, ponderation)
-            for tutor in self.tutors.all():
-                if tutor in ttmodel.wdb.instructors:
-                    helper.enrich_model(tutor=tutor)
-
-        else:
-            print("MinTutorsHalfDays must have at least one tutor --> Ignored")
-            return
+        helper = MinHalfDaysHelperTutor(ttmodel, self, week, ponderation)
+        for tutor in self.tutors.all():
+            if tutor in ttmodel.wdb.instructors:
+                helper.enrich_model(tutor=tutor)
 
     def get_viewmodel(self):
         view_model = super().get_viewmodel()
@@ -185,10 +179,8 @@ class RespectBoundPerDay(TTConstraint):
         """
         for tutor in self.tutors.all():
             for d in days_filter(ttmodel.wdb.days, week=week):
-                ttmodel.add_constraint(ttmodel.sum(ttmodel.TT[sl, c] * c.type.duration / 60
-                                                   for c in ttmodel.wdb.courses_for_tutor[tutor] if c.week == week
-                                                   for sl in slots_filter(ttmodel.wdb.courses_slots, day=d)
-                                                   & ttmodel.wdb.compatible_slots[c]),
+                ttmodel.add_constraint(ttmodel.sum(ttmodel.IBS[tutor, sl] * sl.duration / 60
+                                                   for sl in slots_filter(ttmodel.wdb.availability_slots, day=d)),
                                        '<=',
                                        tutor.max_hours_per_day,
                                        Constraint(constraint_type=ConstraintType.BOUND_HOURS_PER_DAY,

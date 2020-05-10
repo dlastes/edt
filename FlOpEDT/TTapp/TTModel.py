@@ -43,7 +43,7 @@ from base.timing import Time
 
 from people.models import Tutor
 
-from TTapp.TTconstraint import TTConstraint, max_weight
+from TTapp.TTconstraint import TTConstraint, max_weight, all_subclasses
 from TTapp.models import MinNonPreferedTutorsSlot, Stabilize, MinNonPreferedTrainProgsSlot
 
 from TTapp.slots import slots_filter, days_filter
@@ -1138,7 +1138,7 @@ def get_constraints(department, week=None, year=None, is_active=None):
         query &= Q(week=week) & Q(year=year) | Q(week__isnull=True) & Q(year__isnull=True)
 
     # Look up the TTConstraint subclasses records to update
-    types = TTConstraint.__subclasses__()
+    types = all_subclasses(TTConstraint)
     for type in types:
         queryset = type.objects.filter(query)
 

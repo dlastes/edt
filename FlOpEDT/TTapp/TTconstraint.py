@@ -30,6 +30,11 @@ from django.db import models
 max_weight = 8
 
 
+def all_subclasses(cls):
+    return set([c for c in cls.__subclasses__() if not c._meta.abstract]).union(
+        [s for c in cls.__subclasses__() for s in all_subclasses(c)])
+
+
 class TTConstraint(models.Model):
 
     department = models.ForeignKey('base.Department', null=True, on_delete=models.CASCADE)
@@ -105,7 +110,6 @@ class TTConstraint(models.Model):
     def get_courses_queryset_by_parameters(self, ttmodel, week,
                                            train_progs=None,
                                            train_prog=None,
-                                           tutor=None,
                                            module=None,
                                            group=None,
                                            course_type=None):
@@ -121,14 +125,11 @@ class TTConstraint(models.Model):
         if train_prog is not None:
             courses_filter['module__train_prog'] = train_prog
 
-        if tutor is not None:
-            courses_filter['tutor'] = tutor
-
         if module is not None:
             courses_filter['module'] = module
 
         if group is not None:
-            courses_filter['group'] = group
+            courses_filter['groups'] = group
 
         if course_type is not None:
             courses_filter['type'] = course_type
@@ -141,7 +142,7 @@ class TTConstraint(models.Model):
         """
         if self.train_progs.exists() and 'train_progs' not in kwargs:
             kwargs['train_progs'] = self.train_progs.all()
-        for attr in ['train_prog', 'tutor', 'module', 'group', 'course_type']:
+        for attr in ['train_prog', 'module', 'group', 'course_type']:
             if hasattr(self, attr) and attr not in kwargs:
                 kwargs[attr] = getattr(self, attr)
         return self.get_courses_queryset_by_parameters(ttmodel, week, **kwargs)
