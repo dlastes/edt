@@ -35,7 +35,7 @@ from base.models import Group, RoomType, Room, \
                         RoomSort, Period, CourseType, \
                         TutorCost, CourseStartTimeConstraint, \
                         TimeGeneralSettings, GroupType, CourseType, \
-                        TrainingProgramme
+                        TrainingProgramme, Course
 
 from displayweb.models import GroupDisplay, TrainingProgrammeDisplay, BreakingNews
 
@@ -125,6 +125,24 @@ def get_scheduled_courses(department, week, year, num_copy):
                                                            'course__module__display'
                         )
     return qs
+
+
+def get_unscheduled_courses(department, week, year, num_copy):
+    return Course.objects.filter(
+        module__train_prog__department=department,
+        week=week,
+        year=year
+    ).exclude(pk__in=ScheduledCourse.objects.filter(
+        course__module__train_prog__department=department,
+        work_copy=num_copy
+    ).values('course')
+    ).select_related('module__train_prog',
+                     'tutor',
+                     'module',
+                     'type',
+                     'room_type',
+                     'module__display'
+    ).prefetch_related('groups')
 
 
 def get_groups(department_abbrev):

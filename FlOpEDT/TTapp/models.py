@@ -31,7 +31,6 @@ from django.conf import settings
 from django.utils.functional import lazy
 
 from django.db import models
-
 # Import constraints from other files
 
 from TTapp.TTconstraint import TTConstraint, max_weight
