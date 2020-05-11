@@ -38,6 +38,9 @@ def build_period_slots(ttmodel, day, period):
 
 
 class LimitCourseTypeTimePerPeriod(TTConstraint):
+    """
+    Permet de limiter le nombre d'heures d'un type de cours donné par jour / demie-journée
+    """
     course_type = models.ForeignKey('base.CourseType', on_delete=models.CASCADE)
     max_hours = models.PositiveSmallIntegerField()
     FULL_DAY = 'fd'
@@ -68,13 +71,12 @@ class LimitCourseTypeTimePerPeriod(TTConstraint):
         return train_progs
 
     def considered_courses(self, ttmodel, week, train_prog, tutor, module, group):
-        if tutor is not None:
-            raise NotImplementedError
         return set(self.get_courses_queryset_by_parameters(ttmodel, week,
                                                            course_type=self.course_type,
                                                            train_prog=train_prog,
                                                            module=module,
-                                                           group=group))
+                                                           group=group,
+                                                           tutor=tutor))
 
     def build_period_expression(self, ttmodel, day, period, considered_courses, tutor=None):
         expr = ttmodel.lin_expr()
@@ -235,9 +237,6 @@ class LimitTutorsCourseTypeTimePerPeriod(LimitCourseTypeTimePerPeriod):
     tutors = models.ManyToManyField('people.Tutor',
                                     blank=True,
                                     related_name="Course_type_limits")
-
-    def considered_courses(self, ttmodel, week, train_prog, tutor, module, group):
-        return set(c for c in ttmodel.wdb.possible_courses[tutor] if c.week == week)
 
     def build_period_expression(self, ttmodel, day, period, considered_courses, tutor=None):
         expr = ttmodel.lin_expr()
