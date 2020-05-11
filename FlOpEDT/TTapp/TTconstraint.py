@@ -36,14 +36,15 @@ def all_subclasses(cls):
 
 
 class TTConstraint(models.Model):
+    """
 
+    """
     department = models.ForeignKey('base.Department', null=True, on_delete=models.CASCADE)
     train_progs = models.ManyToManyField('base.TrainingProgramme',
                                          blank=True)
     week = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(52)],
         null=True,
-
         default=None,
         blank=True)
     year = models.PositiveSmallIntegerField(null=True, default=None, blank=True)
@@ -112,7 +113,8 @@ class TTConstraint(models.Model):
                                            train_prog=None,
                                            module=None,
                                            group=None,
-                                           course_type=None):
+                                           course_type=None,
+                                           tutor=None):
         """
         Filter courses depending on constraints parameters
         """
@@ -134,6 +136,9 @@ class TTConstraint(models.Model):
         if course_type is not None:
             courses_filter['type'] = course_type
 
+        if tutor is not None:
+            courses_filter['id__in'] = [c.id for c in ttmodel.wdb.possible_courses[tutor]]
+
         return courses_qs.filter(**courses_filter)
 
     def get_courses_queryset_by_attributes(self, ttmodel, week, **kwargs):
@@ -142,7 +147,7 @@ class TTConstraint(models.Model):
         """
         if self.train_progs.exists() and 'train_progs' not in kwargs:
             kwargs['train_progs'] = self.train_progs.all()
-        for attr in ['train_prog', 'module', 'group', 'course_type']:
+        for attr in ['train_prog', 'module', 'group', 'course_type', 'tutor']:
             if hasattr(self, attr) and attr not in kwargs:
                 kwargs[attr] = getattr(self, attr)
         return self.get_courses_queryset_by_parameters(ttmodel, week, **kwargs)
