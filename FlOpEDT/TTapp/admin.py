@@ -245,16 +245,14 @@ class LimitedStartTimeChoicesAdmin(DepartmentModelAdmin):
                    ('course_type', DropdownFilterRel),
                    )
 
+
 class LowerBoundBusyDaysAdmin(DepartmentModelAdmin):
-    list_display = ('week', 'year', 'group', 'tutor', 'module', 'course_type', 'comment')
+    list_display = ('week', 'year', 'tutor', 'min_days_nb', 'lower_bound_hours', 'comment')
     ordering = ()
     list_filter = (('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
                    ('train_progs', DropdownFilterRel),
-                   ('group', DropdownFilterRel),
                    ('tutor', DropdownFilterRel),
-                   ('module', DropdownFilterRel),
-                   ('course_type', DropdownFilterRel),
                    )
 
 
