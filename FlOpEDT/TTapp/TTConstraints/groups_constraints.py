@@ -38,15 +38,19 @@ class MinGroupsHalfDays(TTConstraint):
     groups = models.ManyToManyField('base.Group', blank=True)
 
     def enrich_model(self, ttmodel, week, ponderation=1):
-
-        if self.groups.exists():
-            helper = MinHalfDaysHelperGroup(ttmodel, self, week, ponderation)
-            for group in self.groups.all():
-                helper.enrich_model(group=group)
-
+        if self.train_progs.exists():
+            considered_groups = set(ttmodel.wdb.basic_groups.filter(train_prog__in=self.train_progs.all()))
         else:
-            print("MinGroupHalfDays must have at least one group  --> Ignored")
-            return
+            considered_groups = set(ttmodel.wdb.basic_groups)
+        if self.groups.exists():
+            basic_groups = set()
+            for g in self.groups.all():
+                basic_groups |= g.basic_groups()
+            considered_groups &= basic_groups
+
+        helper = MinHalfDaysHelperGroup(ttmodel, self, week, ponderation)
+        for group in considered_groups:
+            helper.enrich_model(group=group)
 
     def get_viewmodel(self):
         view_model = super().get_viewmodel()
@@ -61,10 +65,14 @@ class MinGroupsHalfDays(TTConstraint):
         text = "Minimise les demie-journées"
 
         if self.groups.exists():
-            text += ' du(des) groupe(s) : ' + ', '.join([group.name for group in self.groups.all()])
+            text += ' des groupes ' + ', '.join([group.name for group in self.groups.all()])
+        else:
+            text += " de tous les groupes"
 
         if self.train_progs.exists():
-            text += ' en ' + ', '.join([train_prog.abbrev for train_prog in self.train_progs.all()])
+            text += ' de ' + ', '.join([train_prog.abbrev for train_prog in self.train_progs.all()])
+        else:
+            text += " de toutes les promos."
 
         return text
 

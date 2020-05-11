@@ -38,15 +38,12 @@ class MinModulesHalfDays(TTConstraint):
     modules = models.ManyToManyField('base.Module', blank=True)
 
     def enrich_model(self, ttmodel, week, ponderation=1):
-
+        considered_modules = set(ttmodel.wdb.modules)
         if self.modules.exists():
-            helper = MinHalfDaysHelperModule(ttmodel, self, week, ponderation)
-            for module in self.modules.all():
-                helper.enrich_model(module=module)
-
-        else:
-            print("MinHalfDays must have at least  one module --> Ignored")
-            return
+            considered_modules &= set(self.modules.all())
+        helper = MinHalfDaysHelperModule(ttmodel, self, week, ponderation)
+        for module in considered_modules:
+            helper.enrich_model(module=module)
 
     def get_viewmodel(self):
         view_model = super().get_viewmodel()
@@ -62,8 +59,12 @@ class MinModulesHalfDays(TTConstraint):
 
         if self.modules.exists():
             text += ' de : ' + ', '.join([str(module) for module in self.modules.all()])
+        else:
+            text += "de chaque module"
 
         if self.train_progs.exists():
-            text += ' en ' + ', '.join([train_prog.abbrev for train_prog in self.train_progs.all()])
+            text += ' de ' + ', '.join([train_prog.abbrev for train_prog in self.train_progs.all()])
+        else:
+            text += ' pour toutes les promos.'
 
         return text

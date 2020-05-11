@@ -46,9 +46,11 @@ class MinTutorsHalfDays(TTConstraint):
     def enrich_model(self, ttmodel, week, ponderation=1):
 
         helper = MinHalfDaysHelperTutor(ttmodel, self, week, ponderation)
-        for tutor in self.tutors.all():
-            if tutor in ttmodel.wdb.instructors:
-                helper.enrich_model(tutor=tutor)
+        considered_tutors = set(ttmodel.wdb.instructors)
+        if self.tutors.exists():
+            considered_tutors &= set(self.tutors.all())
+        for tutor in considered_tutors:
+            helper.enrich_model(tutor=tutor)
 
     def get_viewmodel(self):
         view_model = super().get_viewmodel()
@@ -64,6 +66,8 @@ class MinTutorsHalfDays(TTConstraint):
 
         if self.tutors.exists():
             text += ' de : ' + ', '.join([tutor.username for tutor in self.tutors.all()])
+        else:
+            text += " de tous les profs"
 
         if self.train_progs.exists():
             text += ' en ' + ', '.join([train_prog.abbrev for train_prog in self.train_progs.all()])
