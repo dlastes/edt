@@ -110,6 +110,10 @@ class Group(models.Model):
 
         return descendants
 
+    def basic_groups(self):
+        s = set(g for g in self.descendants_groups() | {self} if g.basic)
+        return s
+
 
 # </editor-fold desc="GROUPS">
 

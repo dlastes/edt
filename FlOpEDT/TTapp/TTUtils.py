@@ -361,12 +361,12 @@ def add_generic_constraints_to_database(department):
     # first objective  => minimise use of unpreferred slots for teachers
     # ponderation MIN_UPS_I
 
-    M = MinNonPreferedTutorsSlot(weight=max_weight, department=department)
+    M, created = MinNonPreferedTutorsSlot.objects.get_or_create(weight=max_weight, department=department)
     M.save()
 
     # second objective  => minimise use of unpreferred slots for courses
     # ponderation MIN_UPS_C
 
-    M = MinNonPreferedTrainProgsSlot(weight=max_weight, department=department)
+    M, created = MinNonPreferedTrainProgsSlot.objects.get_or_create(weight=max_weight, department=department)
     M.save()
 

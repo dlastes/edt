@@ -39,12 +39,12 @@ from base.models import Group, \
     CourseStartTimeConstraint, TimeGeneralSettings, ModulePossibleTutors, CoursePossibleTutors, \
     ModuleTutorRepartition
 
-from base.timing import Time, Day
+from base.timing import Time
 
 from people.models import Tutor
 
-from TTapp.models import MinNonPreferedTutorsSlot, MinNonPreferedTrainProgsSlot,\
-    max_weight, Stabilize, TTConstraint
+from TTapp.TTconstraint import TTConstraint, max_weight, all_subclasses
+from TTapp.models import MinNonPreferedTutorsSlot, Stabilize, MinNonPreferedTrainProgsSlot
 
 from TTapp.slots import slots_filter, days_filter
 
@@ -62,15 +62,15 @@ import datetime
 
 import logging
 
-from TTapp.ilp_constraint.constraintManager import ConstraintManager
-from TTapp.ilp_constraint.constraint import Constraint
-from TTapp.ilp_constraint.constraint_type import ConstraintType
+from TTapp.ilp_constraints.constraintManager import ConstraintManager
+from TTapp.ilp_constraints.constraint import Constraint
+from TTapp.ilp_constraints.constraint_type import ConstraintType
 
-from TTapp.ilp_constraint.constraints.dependencyConstraint import DependencyConstraint
-from TTapp.ilp_constraint.constraints.instructorConstraint import InstructorConstraint
-from TTapp.ilp_constraint.constraints.simulSlotGroupConstraint import SimulSlotGroupConstraint
-from TTapp.ilp_constraint.constraints.slotInstructorConstraint import SlotInstructorConstraint
-from TTapp.ilp_constraint.constraints.courseConstraint import CourseConstraint
+from TTapp.ilp_constraints.constraints.dependencyConstraint import DependencyConstraint
+from TTapp.ilp_constraints.constraints.instructorConstraint import InstructorConstraint
+from TTapp.ilp_constraints.constraints.simulSlotGroupConstraint import SimulSlotGroupConstraint
+from TTapp.ilp_constraints.constraints.slotInstructorConstraint import SlotInstructorConstraint
+from TTapp.ilp_constraints.constraints.courseConstraint import CourseConstraint
 
 logger = logging.getLogger(__name__)
 pattern = r".+: (.|\s)+ (=|>=|<=) \d*"
@@ -488,7 +488,7 @@ class TTModel(object):
             # , "no_course_on_%s_%s_%g" % (training_half_day.day, training_half_day.apm, self.constraint_nb)
             self.add_constraint(self.sum(self.TT[(sl, c)] for sl in training_slots
                                          for c in self.wdb.compatible_courses[sl]
-                                         & set(self.wdb.courses.filter(groups__train_prog__in=training_progs))),
+                                         & set(self.wdb.courses.filter(module__train_prog__in=training_progs))),
                                 '==', 0,
                                 Constraint(constraint_type=ConstraintType.PAS_DE_COURS_DE_DEMI_JOURNEE,
                                 days=training_half_day.day, apm=training_half_day.apm))
@@ -1138,7 +1138,7 @@ def get_constraints(department, week=None, year=None, is_active=None):
         query &= Q(week=week) & Q(year=year) | Q(week__isnull=True) & Q(year__isnull=True)
 
     # Look up the TTConstraint subclasses records to update
-    types = TTConstraint.__subclasses__()
+    types = all_subclasses(TTConstraint)
     for type in types:
         queryset = type.objects.filter(query)
 

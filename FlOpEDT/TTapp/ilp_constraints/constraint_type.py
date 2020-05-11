@@ -104,6 +104,7 @@ class ConstraintType(Enum):
     # From TTApp/models
     MAX_HOURS = "Max hours"
     STABILIZE_ENRICH_MODEL = "Stabilize : enrich model"
+    SIMULTANEOUS_COURSES = "Simultaneous courses"
 
     # From minhalfdays
     MIN_HALF_DAYS_LIMIT = "Min Half Days limit"

@@ -26,8 +26,8 @@
 import logging
 
 from base.models import Time, TimeGeneralSettings
-from TTapp.ilp_constraint.constraint_type import ConstraintType
-from TTapp.ilp_constraint.constraint import Constraint
+from TTapp.ilp_constraints.constraint_type import ConstraintType
+from TTapp.ilp_constraints.constraint import Constraint
 from TTapp.slots import slots_filter
 
 logger = logging.Logger(__name__)
