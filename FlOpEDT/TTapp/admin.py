@@ -35,7 +35,7 @@ from TTapp.models import \
     MinNonPreferedTrainProgsSlot, MinNonPreferedTutorsSlot, \
     CustomConstraint, SimultaneousCourses, MinimizeBusyDays, RespectBoundPerDay,\
     AvoidBothTimes, LimitedRoomChoices, LimitedStartTimeChoices, \
-    LimitTutorsCourseTypeTimePerPeriod, LimitGroupsCourseTypeTimePerPeriod
+    LimitTutorsCourseTypeTimePerPeriod, LimitGroupsCourseTypeTimePerPeriod, LowerBoundBusyDays
 
 # Register your models here.
 
@@ -221,7 +221,7 @@ class MinimizeBusyDaysAdmin(DepartmentModelAdmin):
 
 
 class LimitedRoomChoicesAdmin(DepartmentModelAdmin):
-    list_display = ('week', 'year', 'group', 'tutor', 'module', 'course_type', 'comment')
+    list_display = ('week', 'year', 'group', 'tutor', 'module', 'course_type')
     ordering = ()
     list_filter = (('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
@@ -245,6 +245,19 @@ class LimitedStartTimeChoicesAdmin(DepartmentModelAdmin):
                    ('course_type', DropdownFilterRel),
                    )
 
+class LowerBoundBusyDaysAdmin(DepartmentModelAdmin):
+    list_display = ('week', 'year', 'group', 'tutor', 'module', 'course_type', 'comment')
+    ordering = ()
+    list_filter = (('week', DropdownFilterAll),
+                   ('year', DropdownFilterAll),
+                   ('train_progs', DropdownFilterRel),
+                   ('group', DropdownFilterRel),
+                   ('tutor', DropdownFilterRel),
+                   ('module', DropdownFilterRel),
+                   ('course_type', DropdownFilterRel),
+                   )
+
+
 
 admin.site.register(CustomConstraint, CustomConstraintAdmin)
 admin.site.register(Stabilize, StabilizeAdmin)
@@ -262,3 +275,4 @@ admin.site.register(LimitedRoomChoices, LimitedRoomChoicesAdmin)
 admin.site.register(LimitModulesCourseTypeTimePerPeriod, LimitModulesCourseTypeTimePerPeriodAdmin)
 admin.site.register(LimitGroupsCourseTypeTimePerPeriod, LimitGroupsCourseTypeTimePerPeriodAdmin)
 admin.site.register(LimitTutorsCourseTypeTimePerPeriod, LimitTutorsCourseTypeTimePerPeriodAdmin)
+admin.site.register(LowerBoundBusyDays, LowerBoundBusyDaysAdmin)
