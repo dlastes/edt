@@ -143,22 +143,6 @@ def add_iut_blagnac_specials(ttmodel):
     #                                1)
 
 
-def add_iut_blagnac_lp(ttmodel):
-    lp = TrainingProgramme.objects.get(abbrev='APSIO')
-    if ttmodel.wdb.courses.filter(groups__train_prog=lp).exists():
-        print("adding LP constraints")
-
-        B219 = Room.objects.get(name='B219')
-        ttmodel.add_constraint(
-            ttmodel.sum(ttmodel.TTrooms[(sl, c, B219)]
-                        for sl in ttmodel.wdb.courses_slots
-                        for c in set(ttmodel.wdb.courses.exclude(groups__train_prog=lp))
-                        & ttmodel.wdb.compatible_courses[sl]
-                        if B219 in ttmodel.wdb.rooms_for_type[c.room_type]),
-            '==',
-            0,
-            Constraint(constraint_type=ConstraintType.B219_TO_LP))
-
 
 def add_iut_blagnac_info(ttmodel):
     DS = CourseType.objects.get(name='DS', department=ttmodel.department)
@@ -185,13 +169,6 @@ def add_iut_blagnac_info(ttmodel):
             B2 = ttmodel.add_conjunct(ttmodel.IBS[IC, sl15], ttmodel.IBS[IC, sl17])
             ttmodel.add_to_inst_cost(IC, ttmodel.IBS[IC, sl15] - B2, week=d.week)
 
-    # if 43 in ttmodel.weeks :
-    #     Exam_EE = ttmodel.wdb.courses.get(type__name='DS', module__abbrev='EE')
-    #     Exam_FO = ttmodel.wdb.courses.get(type__name='DS', module__abbrev='FO')
-    #     for sl in ttmodel.wdb.compatible_slots[Exam_EE]:
-    #         ttmodel.add_constraint(ttmodel.TT[(sl,Exam_EE)] - ttmodel.TT[(sl, Exam_FO)], '==', 0,
-    #                                'Exams de EE et FO en parallele %s' % sl)
-
     # si PDU vient à 8h, il ne vient pas ni à 11 ni à 14.
     PDU = Tutor.objects.get(username='PDU')
     if PDU in ttmodel.wdb.instructors:
@@ -205,8 +182,6 @@ def add_iut_blagnac_info(ttmodel):
                 1,
                 Constraint(constraint_type=ConstraintType.SPECIFICITE_PDU, days=day))
 
-    # MN : pas plus de 2 cours par demie-journée
-    # En base?
 
     # Semaine 40 : WE d'intégration
     if 40 in ttmodel.weeks and ttmodel.year == 2019:
@@ -320,28 +295,6 @@ def add_iut_blagnac_info(ttmodel):
 
     # VG et AO sont toujours dans la même salle!
 
-    for week in ttmodel.weeks:
-        if week != 36:
-            B008 = Room.objects.get(name='B008')
-            B007 = Room.objects.get(name='B007')
-            B005 = Room.objects.get(name='B005')
-            Exam = Room.objects.filter(name__in=['A011', 'Exam'])[0]
-            for c in ttmodel.wdb.courses.filter(tutor__username='VG', type=TD, room_type__in=B008.types.all()):
-                for sl in ttmodel.wdb.compatible_slots[c]:
-                    for rg in Room.objects.filter(types__in=[c.room_type]).exclude(id=B008.id):
-                        ttmodel.add_constraint(ttmodel.TTrooms[(sl, c, rg)], '==', 0,
-                                               Constraint(constraint_type=ConstraintType.VG_ET_AO_SONT_TOUJOURS_DANS_LA_MEME_SALLE))
-            for c in ttmodel.wdb.courses.filter(tutor__username='VG').exclude(room_type__in=B008.types.all()):
-                for sl in ttmodel.wdb.compatible_slots[c]:
-                    for rg in Room.objects.filter(types__in=[c.room_type]).exclude(id__in=[B007.id, Exam.id]):
-                        ttmodel.add_constraint(ttmodel.TTrooms[(sl, c, rg)], '==', 0,
-                                               Constraint(constraint_type=ConstraintType.VG_ET_AO_SONT_TOUJOURS_DANS_LA_MEME_SALLE))
-            for c in ttmodel.wdb.courses.filter(tutor__username='AO', type=TD, room_type__in=B005.types.all()):
-                for sl in ttmodel.wdb.compatible_slots[c]:
-                    for rg in Room.objects.filter(types__in=[c.room_type]).exclude(id=B005.id):
-                        ttmodel.add_constraint(ttmodel.TTrooms[(sl, c, rg)], '==', 0,
-                                               Constraint(constraint_type=ConstraintType.VG_ET_AO_SONT_TOUJOURS_DANS_LA_MEME_SALLE))
-
     # Semaine de réunion péda ou d'équipe
     if ttmodel.year == 2020:
         for week in [2, 5, 7, 14]:
@@ -446,21 +399,6 @@ def add_iut_blagnac_info(ttmodel):
         ttmodel.add_constraint(ttmodel.sum(used_slot[sl] for sl in ttmodel.wdb.courses_slots), '<=', n/2,
                                Constraint(constraint_type=ConstraintType.SEMAINE_3_EXAM_ISI))
 
-
-    if 5 in ttmodel.weeks and ttmodel.year == 2020:
-        C1 = ttmodel.wdb.courses.filter(type__name='CM', module__abbrev='PR', group__name='1')
-        C4 = ttmodel.wdb.courses.filter(type__name='TD', module__abbrev='PR', group__name='4')
-        for i in range(2):
-            c1 = C1[i]
-            c4 = C4[i]
-            for sl in ttmodel.wdb.compatible_slots[c1]:
-                ttmodel.add_constraint(ttmodel.TT[sl, c1] -
-                                       ttmodel.sum(ttmodel.TT[sl1, c4] for sl1 in
-                                                   slots_filter(ttmodel.wdb.compatible_slots[c4], simultaneous_to=sl)),
-                                       '==',
-                                       0,
-                                       Constraint(constraint_type=ConstraintType.SEMAINE_5_MODULE_PR_GROUPE_1_4))
-
     # Semaine 4 PTUT le jeudi et le vendredi
 
     if 4 in ttmodel.weeks and ttmodel.year == 2019:
@@ -559,119 +497,6 @@ def add_iut_blagnac_info(ttmodel):
     #             '>=',
     #             2,
     #             name="SF_8h")
-
-    # Trucs du passé:
-    #
-    # # Semaine 23, un peu spéciale... Le PTUT a lieu du lundi au mercredi, le reste ensuite
-    # if 23 in ttmodel.weeks:
-    #     for c in ttmodel.wdb.courses.filter(group__train_prog=1,
-    #                                         module__abbrev='PTUT'):
-    #         sl = ttmodel.wdb.courses_slots.get(id=1)
-    #         if c.type == Cours.TD:
-    #             ttmodel.add_constraint(ttmodel.TT[(sl, c)], '==', 1)
-    #         else:
-    #             ttmodel.add_constraint(ttmodel.TT[(sl, c)], '==', 0)
-    #             for sl in ttmodel.wdb.courses_slots.filter(jour__no__gte=3):
-    #                 ttmodel.add_constraint(ttmodel.TT[(sl, c)], '==', 0)
-    #     for c in ttmodel.wdb.courses.filter(group__train_prog=1) \
-    #             .exclude(module__abbrev='PTUT'):
-    #         for sl in ttmodel.wdb.courses_slots.filter(jour__no__lte=2):
-    #             ttmodel.add_constraint(ttmodel.TT[(sl, c)], '==', 0)
-    #
-    # # Semaine 20 bizarre
-
-    # if 20 in ttmodel.weeks:
-    #     for c in ttmodel.wdb.courses.filter(group__train_prog=1):
-    #         if c.room_type.name == 'A':
-    #             for sl in ttmodel.wdb.courses_slots.exclude(heure__no=0, jour__no__lte=3):
-    #                 ttmodel.add_constraint(ttmodel.TT[(sl, c)], '==', 0)
-    #         if c.room_type.name == '6M':
-    #             for sl in ttmodel.wdb.courses_slots.filter(heure__no__gte=3).exclude(jour__no=4):
-    #                 ttmodel.add_constraint(ttmodel.TT[(sl, c)], '==', 0)
-    #         for sl in ttmodel.wdb.courses_slots.filter(heure__no=5):
-    #             ttmodel.add_constraint(ttmodel.TT[(sl, c)], '==', 0)
-    #
-    # # Semaine 6, Jury!
-    # if 6 in ttmodel.weeks and ttmodel.year == 2018:
-    #     for i in ttmodel.wdb.instructors.filter(statut=Tutor.FULL_STAFF):
-    #         ttmodel.add_constraint(ttmodel.IBD[(i, Jour.objects.get(no=4))],
-    #                                '==',
-    #                                1)
-    #         for c in ttmodel.wdb.courses.filter(tutor=i):
-    #             for sl in ttmodel.wdb.courses_slots.filter(jour__no=4,
-    #                                                heure__no__gte=3,
-    #                                                heure__no__lte=4):
-    #                 ttmodel.add_constraint(ttmodel.TT[(sl, c)], '==', 0)
-
-    # # Pas d'examen le vendredi 6 avril, semaine 14:
-    # if (ttmodel.week, ttmodel.year) == (14, 2018):
-    #     for c in ttmodel.wdb.courses.filter(type='DS'):
-    #         for sl in ttmodel.wdb.courses_slots.filter(jour__no=4):
-    #             ttmodel.add_constraint(ttmodel.TT[(sl, c)], '==', 0)
-    #
-    # # Les TP de OM seront simultanés en semaine 25
-    # prof_om = Tutor.objects.get(username='OM')
-    # if 25 in ttmodel.weeks 25:
-    #     tp1A = ttmodel.wdb.courses.get(tutor=prof_om, group__name='1A1A')
-    #     tp1B = ttmodel.wdb.courses.get(tutor=prof_om, group__name='1A1B')
-    #     tp2A = ttmodel.wdb.courses.get(tutor=prof_om, group__name='1A2A')
-    #     tp2B = ttmodel.wdb.courses.get(tutor=prof_om, group__name='1A2B')
-    #     SimultaneousCourses(course1=tp1A, course2=tp1B).enrich_model(ttmodel)
-    #     SimultaneousCourses(course1=tp2A, course2=tp2B).enrich_model(ttmodel)
-    #
-    #     # Semaine 36
-    #     if 36 in ttmodel.weeks 36:
-    #         # Pas de TP S3 le lundi PM
-    #         for sl in Creneau.objects.filter(jour=0, heure__apm='PM'):
-    #             for c in ttmodel.wdb.courses.filter(group__promo=2, nature='TP'):
-    #                 ttmodel.add_constraint(ttmodel.TT[(sl, c)], '==', 0)
-    #         # Pas de cours le lundi AM
-    #         for sl in Creneau.objects.filter(jour=0, heure__apm='AM'):
-    #             for c in ttmodel.wdb.courses.filter(group__promo=2):
-    #                 ttmodel.add_constraint(ttmodel.TT[(sl, c)], '==', 0)
-    #
-    #         # Pas de cours planifiés S1 le lundi et le mardi
-    #         for sl in Creneau.objects.filter(jour__in=[0, 1]):
-    #             for c in ttmodel.wdb.courses.filter(group__promo=1):
-    #                 ttmodel.add_constraint(ttmodel.TT[(sl, c)], '==', 0)
-    #
-    #     # Semaine 42, conf à 11h le lundi
-    #     if 42 in ttmodel.weeks:
-    #         for sl in Creneau.objects.filter(jour=0, heure__no=2):
-    #             for c in ttmodel.wdb.courses.filter(group__promo__in=[2, 3]).exclude(module__abbrev='Conf'):
-    #                 ttmodel.add_constraint(ttmodel.TT[(sl, c)], '==', 0)
-    #
-    #     # Semaines 41 à 45 : Les TP de ZU ont lieu pendant un TP de IO
-    #     if ttmodel.week in range(41, 46):
-    #         TPs_IO = ttmodel.wdb.courses.filter(module__abbrev='PSE',
-    #                                             nature='TP',
-    #                                             prof__user__username='IO')
-    #
-    #         TPs_ZU = ttmodel.wdb.courses.filter(module__abbrev='PSE',
-    #                                             nature='TP',
-    #                                             prof__user__username='ZU')
-    #         for sl in ttmodel.wdb.courses_slots:
-    #             IO_SUM = ttmodel.sum(ttmodel.TT[(sl, c)] for c in TPs_IO)
-    #             ZU_SUM = ttmodel.sum(ttmodel.TT[(sl, c)] for c in TPs_ZU)
-    #             ttmodel.add_constraint(IO_SUM - ZU_SUM, '>=', 0)
-    #     # Le groupe 2A3 n'a pas cours le lundi à 17h
-    #     lu17h = ttmodel.wdb.courses_slots.get(jour__no=0, heure__no=5)
-    #     for c in ttmodel.wdb.courses.filter(group__name__in=['2A3', '2A3A', '2A3B']):
-    #         ttmodel.add_constraint(ttmodel.TT[(lu17h, c)], '==', 0)
-    #
-    #     # Réunion flop le 19/11
-    #     if ttmodel.week in [47] and ttmodel.year == 2018:
-    #         for i in ttmodel.wdb.instructors.filter(user__username__in=['PSE', 'PRG', 'IO']):
-    #             ttmodel.add_constraint(ttmodel.IBD[(i, Jour.objects.get(no=3))],
-    #                                    '==',
-    #                                    1)
-    # #Semaine 45, PTUT "entretien d'embauche" le jeudi matin
-    # if 45 in ttmodel.weeks  and ttmodel.year==2018:
-    #     for sl in Creneau.objects.exclude(jour=3):
-    #         for c in ttmodel.wdb.courses.filter(prof__user__username='---', module__abbrev='PTUT'):
-    #             ttmodel.add_constraint(ttmodel.TT[(sl, c)], '==', 0)
-    #
-
 
 def add_iut_blagnac_rt(ttmodel):
     print("finally, adding RT specific constraints")
