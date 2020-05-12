@@ -31,11 +31,6 @@ var week_year_sel, train_prog_sel, txt_area;
 var launchButton;
 var started = false;
 
-var protocol = 'ws' ;
-if (is_https) {
-  protocol = 'wss' ;
-}
-
 
 function displayConsoleMessage(message){
     while (message.length > 0 && message.slice(-1) == '\n') {
@@ -59,6 +54,10 @@ function start() {
 function stop() {
   console.log("STOOOOP");
 
+  var protocol = 'ws' ;
+  if (is_https) {
+    protocol = 'wss' ;
+  }
     socket = new WebSocket(protocol + "://" + window.location.host + "/solver/");
     socket.onmessage = function (e) {
         var dat = JSON.parse(e.data);
@@ -96,7 +95,7 @@ function open_connection() {
         + format_zero(now.getMinutes()) + "-"
         + format_zero(now.getSeconds());
 
-    socket = new WebSocket(protocol + "://" + window.location.host + "/solver/");
+    socket = new WebSocket("ws://" + window.location.host + "/solver/");
 
     socket.onmessage = function (e) {
         var dat = JSON.parse(e.data);
