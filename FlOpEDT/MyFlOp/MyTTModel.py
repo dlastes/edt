@@ -44,7 +44,7 @@ class MyTTModel(TTModel):
                  lim_ld=1.,
                  core_only=False,
                  send_mails=False,
-                 slots_step=None):
+                 slots_step=30):
         """
         If you shall change something in the database ahead of creating the
         problem, you must write it here, before calling TTModel's constructor.
