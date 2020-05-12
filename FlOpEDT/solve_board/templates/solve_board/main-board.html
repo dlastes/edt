@@ -40,7 +40,6 @@
     var fetch_context_url_template = '{% url "solve_board:fetch_context" department 'tp' 1111 11 %}';
     var constraints = JSON.parse('{{ constraints|escapejs }}');
     var work_copies = JSON.parse('{{ work_copies|escapejs }}');
-    var is_https = {{ is_https|yesno:"true,false" }};
   </script>
 
   <template id="constraints_template">

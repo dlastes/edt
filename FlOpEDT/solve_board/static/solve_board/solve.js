@@ -52,13 +52,9 @@ function start() {
 }
 
 function stop() {
-  console.log("STOOOOP");
+    console.log("STOOOOP");
 
-  var protocol = 'ws' ;
-  if (is_https) {
-    protocol = 'wss' ;
-  }
-    socket = new WebSocket(protocol + "://" + window.location.host + "/solver/");
+    socket = new WebSocket("ws://" + window.location.host + "/solver/");
     socket.onmessage = function (e) {
         var dat = JSON.parse(e.data);
         dispatchAction(dat);
