@@ -162,12 +162,13 @@ def main_board(req, **kwargs):
                     .values_list('abbrev', flat=True)) 
 
     view_context = {
-                   'department': department,
-                   'text_all': text_all,
-                   'weeks': json.dumps(week_list),
-                   'train_progs': json.dumps(all_tps),
-                   'solvers': solvers_viewmodel,
-                   }
+        'department': department,
+        'text_all': text_all,
+        'weeks': json.dumps(week_list),
+        'train_progs': json.dumps(all_tps),
+        'solvers': solvers_viewmodel,
+        'is_https':req.is_secure()
+    }
     
     # Get contextual datas (constraints, work_copies)
     if len(week_list) > 0:
