@@ -11,15 +11,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Modification proposal: id for modification bunch, modification
   applicability, email notification
 - Room preferences: user interface improvement, room exclusion
-- Flopeditor: staff members
 
 ### Added
 - Enable courses with multiple groups
 - New app flopeditor: save initial data through graphical interface
-  - Department
+  - Departments
   - Rooms (hierarchy, room types)
   - Training programmes
+  - Course types
   - Modules
+  - Student groups
+  - Staff members
 - Preferences for mail notification
 - New mode for employees planning
   - new constraints (week-ends, consecutive working hours/days, etc.)

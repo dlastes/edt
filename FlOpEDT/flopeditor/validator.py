@@ -30,12 +30,56 @@ This module is used to declare the form validations related to FlopEditor, an ap
 to manage a department statistics for FlOpEDT.
 """
 import re
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
 from base.models import Department
-from people.models import Tutor
+from people.models import Tutor, SupplyStaff, FullStaff, BIATOS
+
 
 OK_RESPONSE = 'OK'
 ERROR_RESPONSE = 'ERROR'
 UNKNOWN_RESPONSE = 'UNKNOWN'
+
+
+def validate_department_values(name, abbrev, tutors_id):
+    """Validate parameters for department creation
+
+    :param name: Department name
+    :type name: String
+    :param abbrev: department abbrev
+    :type abbrev: String
+    :param tutors_id: tutors' id
+    :type tutors_id: List
+
+    :return: (are the paramaters valid , status and errors)
+    :rtype: (boolean,json)
+    """
+    response = {'status': UNKNOWN_RESPONSE}
+    slug_re = re.compile(r"^[a-zA-Z]\w{0,6}$")
+    if not name or len(name) > 50:
+        response = {
+            'status': ERROR_RESPONSE,
+            'message': "Le nom du département est invalide. \
+            Il doit comporter entre 1 et 50 caractères."
+        }
+    elif not slug_re.match(abbrev):
+        response = {
+            'status': ERROR_RESPONSE,
+            'message': "L'abréviation du département est invalide. Elle doit être \
+            entre 1 et 7 caractères. Elle peut comporter des lettres et des chiffres \
+            et doit commencer par une lettre. Elle ne doit pas comporter d'espace, \
+            utilisez des '_' pour les séparations."
+        }
+    else:
+        for tutor_id in tutors_id:
+            if not Tutor.objects.filter(id=tutor_id):
+                response = {
+                    'status': ERROR_RESPONSE,
+                    'message': "Le tuteur que vous recherchez est introuvable. \
+                    Veuillez en sélectionner un autre."
+                }
+        response = {'status': OK_RESPONSE}
+    return response
 
 
 def validate_department_creation(name, abbrev, tutors_id):
@@ -48,28 +92,16 @@ def validate_department_creation(name, abbrev, tutors_id):
     :param tutors_id: tutors' id
     :type tutors_id: List
 
-    :return: (boolean,json) (are the paramaters valid , status and errors)
+    :return: (are the paramaters valid , status and errors)
+    :rtype: (boolean,json)
     """
-    response = {'status': UNKNOWN_RESPONSE}
-    slug_re = re.compile(r"^[a-zA-Z]\w{0,6}$")
-    if not name or len(name) > 50:
-        response = {
-            'status': ERROR_RESPONSE,
-            'message': "Le nom du département est invalide. \
-            Il doit comporter entre 1 et 50 caractères."
-        }
+    response = validate_department_values(name, abbrev, tutors_id)
+    if response['status'] != OK_RESPONSE:
+        pass
     elif Department.objects.filter(name=name):
         response = {
             'status': ERROR_RESPONSE,
             'message': "Le nom du département est déjà utilisé. veuillez en choisir un autre."
-        }
-    elif not slug_re.match(abbrev):
-        response = {
-            'status': ERROR_RESPONSE,
-            'message': "L'abréviation du département est invalide. Elle doit être \
-            entre 1 et 7 caractères. Elle peut comporter des lettres et des chiffres \
-            et doit commencer par une lettre. Elle ne doit pas comporter d'espace, \
-            utilisez des '_' pour les séparations."
         }
     elif Department.objects.filter(abbrev=abbrev):
         response = {
@@ -77,15 +109,47 @@ def validate_department_creation(name, abbrev, tutors_id):
             'message': "L'abbréviation est déjà utilisée."
         }
     else:
-        for tutor_id in tutors_id:
-            if not Tutor.objects.filter(id=tutor_id):
-                response = {
-                    'status': ERROR_RESPONSE,
-                    'message': "Le tuteur que vous recherchez est introuvable. \
-                    Veuillez en sélectionner un autre."
-                }
-                return response
-    response = {'status': OK_RESPONSE}
+        response = {'status': OK_RESPONSE}
+    return response
+
+
+def validate_department_update(old_dept_name, new_dept_name,
+                               old_dept_abbrev, new_dept_abbrev, tutors_id):
+    """Validate parameters for department updaten
+
+    :param old_dept_name: Old department name
+    :type old_dept_name: String
+    :param new_dept_name: New department name
+    :type new_dept_name: String
+    :param old_dept_abbrev: Old department abbreviation
+    :type old_dept_abbrev: String
+    :param new_dept_abbrev: New department abbreviation
+    :type new_dept_abbrev: String
+    :param tutors_id: tutors' id
+    :type tutors_id: List
+
+    :return: (are the paramaters valid , status and errors)
+    :rtype: (boolean,json)
+    """
+    response = validate_department_values(
+        new_dept_name, new_dept_abbrev, tutors_id)
+    if response['status'] != OK_RESPONSE:
+        pass
+    elif old_dept_name != new_dept_name and Department.objects.filter(name=new_dept_name):
+        response = {
+            'status': ERROR_RESPONSE,
+            'message': "Un autre département possède déjà ce nom."
+        }
+    elif old_dept_abbrev != new_dept_abbrev and Department.objects.filter(abbrev=new_dept_abbrev):
+        response = {
+            'status': ERROR_RESPONSE,
+            'message': "Un autre département possède déjà cette abbréviation."
+        }
+    else:
+        response = {
+            'status': OK_RESPONSE,
+            'message': ''
+        }
     return response
 
 
@@ -320,6 +384,153 @@ def validate_period_values(name, starting_week, ending_week, entries):
     elif len(name) > 20:
         entries['result'].append([ERROR_RESPONSE,
                                   "Le nom du semestre est trop long. (<20)"])
+    else:
+        return True
+    return False
+
+
+def validate_profil_update(request):
+    """
+    Validate profile attributs for profile update
+
+    :param request: Client request.
+    :type request:  django.http.HttpRequest
+    :return: (are the paramaters valid , status and errors)
+    :rtype: (boolean,json)
+
+    """
+    old_username = request.user.username
+    new_username = request.POST['newIdProfil']
+    new_first_name = request.POST['newFirtNameProfil']
+    new_last_name = request.POST['newLastNameProfil']
+    new_email = request.POST['newEmailProfil']
+    new_status_vacataire = request.POST['newstatusVacataire']
+    new_employer = request.POST['newEmployer']
+    old_status = request.POST['oldStatus']
+    tutor = Tutor.objects.get(username=old_username)
+
+
+    try:
+        if old_status == 'Vacataire':
+            SupplyStaff.objects.get(id=tutor.id)
+            tutor_exist = True
+        elif old_status == 'Permanent':
+            FullStaff.objects.get(id=tutor.id)
+            tutor_exist = True
+        else:
+            BIATOS.objects.get(id=tutor.id)
+            tutor_exist = True
+    except Tutor.DoesNotExist:
+        tutor_exist = False
+
+
+    try:
+        validate_email(new_email)
+        email = True
+    except ValidationError:
+        email = False
+
+    idregex = re.compile(r'^[\w.@+-]+$')
+    if len(new_username) > 150:
+        response = {
+            'status': ERROR_RESPONSE,
+            'message': "Le username est trop long. (<150caractères)"
+        }
+    elif not idregex.match(new_username):
+        response = {
+            'status': ERROR_RESPONSE,
+            'message': "Le nom d'utilisateur n'est pas valide"
+        }
+    elif len(new_first_name) > 30:
+        response = {
+            'status': ERROR_RESPONSE,
+            'message': "Le prénom est trop long. (<30caractères)'"
+        }
+    elif len(new_last_name) > 150:
+        response = {
+            'status': ERROR_RESPONSE,
+            'message': "Le nom est trop long. (<150caractères)'"
+        }
+    elif not email:
+        response = {
+            'status': ERROR_RESPONSE,
+            'message': "L'email est invalide"
+        }
+    elif new_status_vacataire is not None and len(new_status_vacataire) > 50:
+        response = {
+            'status': ERROR_RESPONSE,
+            'message': "Le statut de vacataire est trop long. (<50caractères)"
+        }
+    elif new_employer is not None and len(new_employer) > 50:
+        response = {
+            'status': ERROR_RESPONSE,
+            'message': "Le nom de l'employeur est trop long. (<50caractères)"
+        }
+    elif old_username != new_username and Tutor.objects.filter(username=new_username):
+        response = {
+            'status': ERROR_RESPONSE,
+            'message': "Id déjà utilisé"
+        }
+    elif not tutor_exist:
+        response = {
+            'status': ERROR_RESPONSE,
+            'message': "Impossible de modifier votre profil : \
+            vous n'avez pas de statut en base de données"
+        }
+    else:
+        response = {'status': OK_RESPONSE, 'message': ''}
+    return response
+
+
+def validate_tutor_values(entry, entries):
+    """Validate parameters for tutor CRUD
+
+    :param abbrev: data returned by crudJS
+    :type abbrev: list
+    :param entries: list that is returned to CrudJS
+    :type abbrev: list
+    :return: boolean are the paramaters valid
+    """
+    idregex = re.compile(r'^[\w.@+-]+$')
+    if not entry[0]:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "L'id ne peut pas être vide."])
+    elif len(entry[0]) > 30:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "L'id est trop long."])
+    elif not idregex.match(entry[0]):
+        entries['result'].append([ERROR_RESPONSE,
+                                  "Le nom d'utilisateur n'est pas valide"])
+    elif not entry[1]:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "Le prénom ne peut pas être vide."])
+    elif len(entry[1]) > 30:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "Le prénom est trop long."])
+    elif not entry[2]:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "Le nom ne peut pas être vide."])
+    elif len(entry[2]) > 30:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "Le nom est trop long."])
+    elif not entry[3]:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "Le statut ne doit pas être vide."])
+    elif not entry[4]:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "L'email' ne doit pas être vide."])
+    elif entry[3] != "Vacataire" and entry[5]:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "Seul un vacataire peut avoir une position"])
+    elif entry[3] != "Vacataire" and entry[6]:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "Seul un vacataire peut avoir un employeur"])
+    elif len(entry[5]) > 50:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "La position est trop longue."])
+    elif len(entry[6]) > 50:
+        entries['result'].append([ERROR_RESPONSE,
+                                  "L'employeur est trop long."])
     else:
         return True
     return False

@@ -63,7 +63,12 @@ def read(department):
             "type": "int",
             "options": {}
         }],
-        "values": values
+        "values": values,
+        "options": {
+            "examples": [
+                ["S1", 36, 5]
+            ]
+        }
     })
 
 def create(entries, department):
