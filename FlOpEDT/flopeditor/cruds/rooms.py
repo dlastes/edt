@@ -28,7 +28,7 @@ without disclosing the source code of your own applications.
 """
 
 from django.http import JsonResponse
-from base.models import Room, RoomType, Department
+from base.models import Room, Department
 from flopeditor.validator import OK_RESPONSE, ERROR_RESPONSE
 
 
@@ -56,18 +56,8 @@ def set_values_for_room(room, i, new_name, entries):
             ])
             return False
         sur_salles.append(sur_salles_found[0])
-    room_types = []
-    for room_type_name in entries['new_values'][i][2]:
-        room_types_found = RoomType.objects.filter(name=room_type_name)
-        if len(room_types_found) != 1:
-            entries['result'].append([
-                ERROR_RESPONSE,
-                "Erreur en base de données."
-            ])
-            return False
-        room_types.append(room_types_found[0])
     depts = []
-    for dept_name in entries['new_values'][i][3]:
+    for dept_name in entries['new_values'][i][2]:
         depts_found = Department.objects.filter(name=dept_name)
         if len(depts_found) != 1:
             entries['result'].append([
@@ -78,7 +68,6 @@ def set_values_for_room(room, i, new_name, entries):
         depts.append(depts_found[0])
     room.name = new_name
     room.subroom_of.set(sur_salles)
-    room.types.set(room_types)
     room.departments.set(depts)
     return True
 
@@ -114,9 +103,9 @@ def has_rights_to_update_room(user, entries, i):
     :rtype:  Boolean
 
     """
-    if set(entries['new_values'][i][3]) == set(entries['old_values'][i][3]):
+    if set(entries['new_values'][i][2]) == set(entries['old_values'][i][2]):
         departments = Department.objects.filter(
-            name__in=entries['new_values'][i][3])
+            name__in=entries['new_values'][i][2])
         if not departments:
             return True
         for dept in departments:
@@ -124,21 +113,21 @@ def has_rights_to_update_room(user, entries, i):
                 return True
         entries['result'].append([
             ERROR_RESPONSE,
-            "Vous ne pouvez pas modifier une salle dont vous n'êtes pas responsbale."
+            "Vous ne pouvez pas modifier une salle dont vous n'êtes pas responsable."
         ])
         return False
 
     old_departments = Department.objects.filter(
-        name__in=entries['old_values'][i][3])
+        name__in=entries['old_values'][i][2])
 
     new_departments = Department.objects.filter(
-        name__in=entries['new_values'][i][3])
+        name__in=entries['new_values'][i][2])
 
     for dep in old_departments:
         if not user.has_department_perm(department=dep, admin=True) and dep not in new_departments:
             entries['result'].append([
                 ERROR_RESPONSE,
-                "Impossible de retirer un départment dont vous n'êtes pas responsable d'une salle."
+                "Impossible de retirer d'une salle un départment dont vous n'êtes pas responsable."
             ])
             return False
 
@@ -146,15 +135,14 @@ def has_rights_to_update_room(user, entries, i):
         if not user.has_department_perm(department=dep, admin=True) and dep not in old_departments:
             entries['result'].append([
                 ERROR_RESPONSE,
-                "impossible d'ajouter un départment dont vous n'êtes pas responsable à une salle."
+                "impossible d'ajouter à une salle un départment dont vous n'êtes pas responsable."
             ])
             return False
 
     return True
 
 
-# pylint: disable=W0613
-def read(department):
+def read():
     """Return all rooms
     :param department: Department.
     :type department:  base.models.Department
@@ -164,8 +152,6 @@ def read(department):
     """
     # Chips options
     rooms_available = list(Room.objects.values_list('name', flat=True))
-    rooms_types_available = list(
-        RoomType.objects.values_list('name', flat=True))
     departments = list(Department.objects.values_list('name', flat=True))
 
     # Rows
@@ -175,13 +161,10 @@ def read(department):
         subrooms = []
         for subroom in room.subroom_of.all():
             subrooms.append(subroom.name)
-        room_types = []
-        for room_type in room.types.all():
-            room_types.append(room_type.name)
         room_departments = []
         for dept in room.departments.all():
             room_departments.append(dept.name)
-        values.append((room.name, subrooms, room_types, room_departments))
+        values.append((room.name, subrooms, room_departments))
 
     return JsonResponse({
         "columns":  [{
@@ -193,20 +176,22 @@ def read(department):
             "type": "select-chips",
             "options": {'values': rooms_available}
         }, {
-            'name': 'Types de salles associés',
-            "type": "select-chips",
-            "options": {'values': rooms_types_available}
-        }, {
             'name': 'Départements associés',
             "type": "select-chips",
             "options": {'values': departments}
         }],
-        "values": values
+        "values": values,
+        "options": {
+            "examples": [
+                ["Étage entier", [], []],
+                ["E101", ["Étage entier"], []],
+                ["E102", ["Étage entier"], []]
+            ]
+        }
     })
 
 
-# pylint: disable=W0613
-def create(request, entries, department):
+def create(request, entries):
     """Create values for rooms
     :param entries: Values to create.
     :type entries:  django.http.JsonResponse
@@ -242,8 +227,7 @@ def create(request, entries, department):
     return entries
 
 
-# pylint: disable=W0613
-def update(request, entries, department):
+def update(request, entries):
     """Update values for rooms
     :param entries: Values to modify.
     :type entries:  django.http.JsonResponse
@@ -287,7 +271,7 @@ def update(request, entries, department):
     return entries
 
 
-def delete(request, entries, department):
+def delete(request, entries):
     """Delete values for rooms
     :param entries: Values to delete.
     :type entries:  django.http.JsonResponse

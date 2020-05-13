@@ -54,7 +54,8 @@ function start() {
 function stop() {
     console.log("STOOOOP");
 
-    socket = new WebSocket("ws://" + window.location.host + "/solver/");
+  open_socket();
+  
     socket.onmessage = function (e) {
         var dat = JSON.parse(e.data);
         dispatchAction(dat);
@@ -82,6 +83,17 @@ function format_zero(x) {
     return x;
 }
 
+function open_socket() {
+  try {
+    console.log('Try ws://') ;
+    socket = new WebSocket("ws://" + window.location.host + "/solver/");
+  } catch (error) {
+    console.log('Fail. Try wss://') ;
+    socket = new WebSocket("wss://" + window.location.host + "/solver/");
+  }
+  console.log('Success.');
+}
+
 function open_connection() {
     var now = new Date();
     opti_timestamp = now.getFullYear() + "-"
@@ -91,7 +103,7 @@ function open_connection() {
         + format_zero(now.getMinutes()) + "-"
         + format_zero(now.getSeconds());
 
-    socket = new WebSocket("ws://" + window.location.host + "/solver/");
+  open_socket();
 
     socket.onmessage = function (e) {
         var dat = JSON.parse(e.data);
