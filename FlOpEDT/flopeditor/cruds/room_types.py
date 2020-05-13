@@ -94,7 +94,15 @@ def read(department):
                 "values": choices
             }
         }],
-        "values" : values
+        "values" : values,
+        "options": {
+            "examples": [
+                ["TP", []],
+                ["TD", []],
+                ["Amphi", ["Amphi 1", "Amphi 2", "Amphi 3"]],
+                ["Exam", []]
+            ]
+        }
         })
 
 def create(entries, department):

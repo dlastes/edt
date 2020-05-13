@@ -125,7 +125,14 @@ def read(department):
             "type": "select-chips",
             "options": {"values": possible_start_time(department)}
         }],
-        "values": values
+        "values": values,
+        "options": {
+            "examples": [
+                ["Amphi", 90, ["C"], ["08:00", "09:30", "11:00", "14:15", "15:45"]],
+                ["TP120", 120, ["TPA", "TPB"], ["10:00", "14:15", "16:15"]],
+                ["TP240", 240, ["TP"], ["08:00", "14:15"]]
+            ]
+        }
     })
 
 
