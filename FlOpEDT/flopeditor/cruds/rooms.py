@@ -113,7 +113,7 @@ def has_rights_to_update_room(user, entries, i):
                 return True
         entries['result'].append([
             ERROR_RESPONSE,
-            "Vous ne pouvez pas modifier une salle dont vous n'êtes pas responsbale."
+            "Vous ne pouvez pas modifier une salle dont vous n'êtes pas responsable."
         ])
         return False
 
@@ -127,7 +127,7 @@ def has_rights_to_update_room(user, entries, i):
         if not user.has_department_perm(department=dep, admin=True) and dep not in new_departments:
             entries['result'].append([
                 ERROR_RESPONSE,
-                "Impossible de retirer un départment dont vous n'êtes pas responsable d'une salle."
+                "Impossible de retirer d'une salle un départment dont vous n'êtes pas responsable."
             ])
             return False
 
@@ -135,7 +135,7 @@ def has_rights_to_update_room(user, entries, i):
         if not user.has_department_perm(department=dep, admin=True) and dep not in old_departments:
             entries['result'].append([
                 ERROR_RESPONSE,
-                "impossible d'ajouter un départment dont vous n'êtes pas responsable à une salle."
+                "impossible d'ajouter à une salle un départment dont vous n'êtes pas responsable."
             ])
             return False
 

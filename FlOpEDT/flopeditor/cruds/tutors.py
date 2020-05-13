@@ -93,7 +93,7 @@ def has_rights_to_delete_tutor(user, tutor, entries):
         if not user.has_department_perm(department=dept, admin=True):
             entries['result'].append([
                 ERROR_RESPONSE,
-                "Vous ne pouvez pas supprimer un intervenant avec un département (" +
+                "Vous ne pouvez pas supprimer un·e intervenant·e avec un département (" +
                 dept.name+") dont vous n'êtes pas responsable."
             ])
             return False
@@ -114,7 +114,7 @@ def has_rights_to_create_tutor(user, tutor, entries):
         if not user.has_department_perm(department=dept, admin=True):
             entries['result'].append([
                 ERROR_RESPONSE,
-                "Vous ne pouvez pas créer un intervenant avec un département (" +
+                "Vous ne pouvez pas créer un·e intervenant·e avec un département (" +
                 dept.name+") dont vous n'êtes pas responsable."
             ])
             return False
@@ -141,7 +141,7 @@ def has_rights_to_update_tutor(user, entries, i):
                 return True
         entries['result'].append([
             ERROR_RESPONSE,
-            "Vous ne pouvez pas modifier un intervenant dont vous n'êtes pas responsbale."
+            "Vous ne pouvez pas modifier un·e intervenant·e dont vous n'êtes pas responsbale."
         ])
         return False
 
@@ -164,7 +164,7 @@ def has_rights_to_update_tutor(user, entries, i):
         if not user.has_department_perm(department=dep, admin=True) and dep not in old_departments:
             entries['result'].append([
                 ERROR_RESPONSE,
-                "Impossible d'ajouter à un intervenant" +
+                "Impossible d'ajouter à un·e intervenant·e" +
                 " un département dont vous n'êtes pas responsable."
             ])
             return False
@@ -237,8 +237,8 @@ def read():
         }],
         "values": values,
         "options": {
-            "deleteMessage": "Si vous supprimez cet intervenant, tous les cours associés " +
-                             "seront supprimés et ce dernier ne pourra plus se connecter."
+            "deleteMessage": "Supprimer une·e intervenant·e supprime également tous les cours " +
+                             "qui lui sont associés."
         }
     })
 
@@ -261,7 +261,7 @@ def create(request, entries):
         elif User.objects.filter(username=entries['new_values'][i][0]):
             entries['result'].append([
                 ERROR_RESPONSE,
-                "Un utilisateur avec cet id existe déjà."
+                "Id déjà utilisé par quelqu'un·e d'autre."
             ])
         else:
             tutor = None
@@ -327,7 +327,7 @@ def update(request, entries):
                 entries['old_values'][i][0] != entries['new_values'][i][0]:
             entries['result'].append([
                 ERROR_RESPONSE,
-                "Un utilisateur avec cet id existe déjà."
+                "Id déjà utilisé par quelqu'un·e d'autre."
             ])
         else:
             try:

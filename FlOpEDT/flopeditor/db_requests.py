@@ -112,7 +112,7 @@ def get_status_of_user(request):
     """
     :param request: Client request.
     :type request:  django.http.HttpRequest
-    :return: status of user with position and employer if he's a supply_staff
+    :return: status of user with position and employer if it's a supply_staff
     :rtype:  string status
     :rtype:  string position if supply_staff else None
     :rtype:  string employer if supply_staff else None
@@ -125,7 +125,7 @@ def get_status_of_tutor(tutor):
     """
     :param tutor: tutor.
     :type tutor:  people.models.Tutor
-    :return: status of user with position and employer if he's a supply_staff
+    :return: status of user with position and employer if it's a supply_staff
     :rtype:  string status
     :rtype:  string position if supply_staff else None
     :rtype:  string employer if supply_staff else None

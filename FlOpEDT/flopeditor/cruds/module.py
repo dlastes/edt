@@ -79,7 +79,7 @@ def read(department):
                            .values_list('name', flat=True)]
             }
         }, {
-            'name': 'Enseignant responsable',
+            'name': 'Enseignant·e responsable',
             "type": "select",
             "options": {
                 "values": [*Tutor.objects.filter(departments=department)
