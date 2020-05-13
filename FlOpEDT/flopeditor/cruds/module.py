@@ -45,10 +45,15 @@ def read(department):
 
     modules = Module.objects.filter(
         train_prog__in=TrainingProgramme.objects.filter(department=department))
+
     values = []
     for module in modules:
+        if module.head is None:
+            head = ""
+        else:
+            head = module.head.username
         values.append((module.abbrev, module.ppn, module.name, module.description,
-                       module.train_prog.name, module.head.username, module.period.name))
+                       module.train_prog.name, head, module.period.name))
     return JsonResponse({
         "columns":  [{
             'name': 'Abréviation',
@@ -74,7 +79,7 @@ def read(department):
                            .values_list('name', flat=True)]
             }
         }, {
-            'name': 'Enseignant responsable',
+            'name': 'Enseignant·e responsable',
             "type": "select",
             "options": {
                 "values": [*Tutor.objects.filter(departments=department)
