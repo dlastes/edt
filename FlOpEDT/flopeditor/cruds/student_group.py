@@ -131,7 +131,10 @@ def create(entries, department):
                 else:
 
                     group = Group.objects.create(
-                        name=new_name, size=entries['new_values'][i][4], train_prog=train, type=gtype)
+                        name=new_name,
+                        size=entries['new_values'][i][4],
+                        train_prog=train,
+                        type=gtype)
                     group.basic = True
 
                     for parent in new_parents:
@@ -185,7 +188,8 @@ def update(entries, department):
             new_gtype = GroupType.objects.get(
                 name=new_type_name, department=department)
 
-            if (new_name != old_name or new_tp_abbrev != old_tp_abbrev) and Group.objects.filter(name=new_name, train_prog=new_train):
+            if (new_name != old_name or new_tp_abbrev != old_tp_abbrev) and \
+            Group.objects.filter(name=new_name, train_prog=new_train):
                 entries['result'].append([
                     ERROR_RESPONSE,
                     "un groupe de ce nom existe déjà dans cette promo."
