@@ -32,7 +32,7 @@ from TTapp.ilp_constraints.constraint import Constraint
 
 class LowerBoundBusyDays(TTConstraint):
     """
-    Commentaire à écrire
+    Impose a minimum number of days if the number of hours is higher than a lower bound
     """
     tutor = models.ForeignKey('people.Tutor', on_delete=models.CASCADE)
     min_days_nb = models.PositiveSmallIntegerField()
@@ -47,3 +47,12 @@ class LowerBoundBusyDays(TTConstraint):
 
     def one_line_description(self):
         return f"Si plus de {self.lower_bound_hours} heures pour {self.tutor}  alors au moins {self.min_days_nb} jours"
+
+    def get_viewmodel(self):
+        view_model = super().get_viewmodel()
+
+        view_model['details'].update({
+            'tutor': self.tutor.username,
+        })
+
+        return view_model

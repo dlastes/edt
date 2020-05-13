@@ -32,7 +32,9 @@ from TTapp.TTconstraint import TTConstraint
 
 class LimitedRoomChoices(TTConstraint):
     """
-    Limit the possible rooms for the cources
+    Limit the possible rooms for the courses
+    Attributes are cumulative :
+        limit the room choice for the courses of this/every tutor, of this/every module, for this/every group ...
     """
     module = models.ForeignKey('base.Module',
                                null=True,
@@ -60,7 +62,15 @@ class LimitedRoomChoices(TTConstraint):
     def enrich_model(self, ttmodel, week, ponderation=1.):
         fc = self.get_courses_queryset_by_attributes(ttmodel, week)
         possible_rooms = self.possible_rooms.values_list()
-        relevant_sum = ttmodel.sum(ttmodel.TTrooms[(sl, c, rg)]
+        if self.tutor is None:
+            relevant_var_dic = ttmodel.TTrooms
+        else:
+            relevant_var_dic = {(sl, c, rg): ttmodel.add_conjunct(ttmodel.TTrooms[(sl, c, rg)],
+                                                                  ttmodel.TTinstructors[sl, c, self.tutor])
+                            for c in fc
+                            for sl in ttmodel.wdb.compatible_slots[c]
+                            for rg in ttmodel.wdb.course_rg_compat[c] if rg not in possible_rooms }
+        relevant_sum = ttmodel.sum(relevant_var_dic[(sl, c, rg)]
                                    for c in fc
                                    for sl in ttmodel.wdb.compatible_slots[c]
                                    for rg in ttmodel.wdb.course_rg_compat[c] if rg not in possible_rooms)

@@ -182,9 +182,14 @@ class LimitedStartTimeChoices(TTConstraint):
     def enrich_model(self, ttmodel, week, ponderation=1.):
         fc = self.get_courses_queryset_by_attributes(ttmodel, week)
         pst = self.possible_start_times.values_list()
-        relevant_sum = ttmodel.sum(ttmodel.TT[(sl, c)]
-                                   for c in fc
-                                   for sl in ttmodel.wdb.compatible_slots[c] if sl.start_time not in pst)
+        if self.tutor is None:
+            relevant_sum = ttmodel.sum(ttmodel.TT[(sl, c)]
+                                       for c in fc
+                                       for sl in ttmodel.wdb.compatible_slots[c] if sl.start_time not in pst)
+        else:
+            relevant_sum = ttmodel.sum(ttmodel.TTinstructors[(sl, c, self.tutor)]
+                                       for c in fc
+                                       for sl in ttmodel.wdb.compatible_slots[c] if sl.start_time not in pst)
         if self.weight is not None:
             ttmodel.obj += self.local_weight() * ponderation * relevant_sum
         else:

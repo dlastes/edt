@@ -37,7 +37,16 @@ def all_subclasses(cls):
 
 class TTConstraint(models.Model):
     """
+    Abstract parent class of specific constraints that users may define
 
+    Attributes:
+        department : the department concerned by the constraint. Has to be filled.
+        train_progs : the training programs concerned by the constraint. All of self.department if None
+        week : the week for which the constraint should be applied. All if None.
+        year : the year for which the constraint should be applied. All if None.
+        weight : from 1 to max_weight if the constraint is optional, depending on its importance
+                 None if the constraint is necessary
+        is_active : usefull to de-activate a Constraint just before the generation
     """
     department = models.ForeignKey('base.Department', null=True, on_delete=models.CASCADE)
     train_progs = models.ManyToManyField('base.TrainingProgramme',
@@ -72,9 +81,11 @@ class TTConstraint(models.Model):
         return self.__doc__ or str(self)
 
     def get_viewmodel(self):
-        #
-        # Return a dictionnary with view-related data
-        #
+        """
+
+        :return: a dictionnary with view-related data
+        """
+
         if self.train_progs.exists():
             train_prog_value = ', '.join([train_prog.abbrev for train_prog in self.train_progs.all()])
         else:
