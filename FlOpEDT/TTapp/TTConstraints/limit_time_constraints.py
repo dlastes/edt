@@ -39,7 +39,7 @@ def build_period_slots(ttmodel, day, period):
 
 class LimitCourseTypeTimePerPeriod(TTConstraint):
     """
-    Permet de limiter le nombre d'heures d'un type de cours donné par jour / demie-journée
+    Abstract class : Limit the number of hours of a given course_type in every day/half-day
     """
     course_type = models.ForeignKey('base.CourseType', on_delete=models.CASCADE)
     max_hours = models.PositiveSmallIntegerField()
@@ -109,6 +109,9 @@ class LimitCourseTypeTimePerPeriod(TTConstraint):
 class LimitGroupsCourseTypeTimePerPeriod(LimitCourseTypeTimePerPeriod):  # , pond):
     """
     Bound the number of courses of type 'type' per day/half day for some group
+
+    Attributes:
+        groups : the groups concerned by the limitation. All the groups of self.train_progs if None.
     """
     groups = models.ManyToManyField('base.Group',
                                     blank=True,
@@ -169,7 +172,9 @@ class LimitGroupsCourseTypeTimePerPeriod(LimitCourseTypeTimePerPeriod):  # , pon
 
 class LimitModulesCourseTypeTimePerPeriod(LimitCourseTypeTimePerPeriod):
     """
-    Bound the number of courses of type 'type' per day/half day
+    Bound the number of hours of courses of type 'type' per day/half day
+    Attributes:
+        modules : the modules concerned by the limitation. All the modules of self.train_progs if None.
     """
     modules = models.ManyToManyField('base.Module',
                                      blank=True,
@@ -232,7 +237,10 @@ class LimitModulesCourseTypeTimePerPeriod(LimitCourseTypeTimePerPeriod):
 
 class LimitTutorsCourseTypeTimePerPeriod(LimitCourseTypeTimePerPeriod):
     """
-    Bound the number of courses of type 'type' per day/half day for tutors
+    Bound the time of tutor courses of type 'course_type' per day/half day for tutors
+    Attributes:
+        tutors : the tutors concerned by the limitation. All if None.
+
     """
     tutors = models.ManyToManyField('people.Tutor',
                                     blank=True,

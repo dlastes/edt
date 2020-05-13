@@ -85,42 +85,47 @@ class Stabilize(TTConstraint):
             # nb_changements_I=dict(zip(ttmodel.wdb.instructors,[0 for i in ttmodel.wdb.instructors]))
             for sl in slots_filter(ttmodel.wdb.courses_slots, week=week):
                 for c in ttmodel.wdb.compatible_courses[sl]:
-                    if not sched_courses.filter(start_time__lt=sl.end_time,
-                                                start_time__gt=sl.start_time - F('course__type__duration'),
-                                                day=sl.day,
-                                                course__tutor=c.tutor):
-                        ttmodel.obj += ponderation * ttmodel.TT[(sl, c)]
-                        # nb_changements_I[c.tutor]+=ttmodel.TT[(sl,c)]
-                    if not sched_courses.filter(course__tutor=c.tutor,
-                                                day=sl.day):
-                        ttmodel.obj += ponderation * ttmodel.TT[(sl, c)]
-                        # nb_changements_I[i]+=ttmodel.TT[(sl,c)]
                     for g in c.groups.all():
                         if not sched_courses.filter(course__groups=g,
                                                     day=sl.day):
                             ttmodel.obj += ponderation * ttmodel.TT[(sl, c)]
-        else:
-            fc = self.get_courses_queryset_by_attributes(ttmodel, week)
-            for c in fc:
-                sched_c = ttmodel.wdb \
-                    .sched_courses \
-                    .get(course=c,
-                         work_copy=self.work_copy)
-                chosen_slot = Slot(start_time=sched_c.start_time,
-                                   end_time=sched_c.end_time,
-                                   day=sched_c.day)
-                if self.weight is not None:
-                    ttmodel.obj -= self.local_weight() \
-                                   * ponderation * ttmodel.TT[(chosen_slot, c)]
+                for i in ttmodel.wdb.instructors:
+                    for c in ttmodel.wdb.possible_courses[i] & ttmodel.wdb.compatible_courses[sl]:
+                        if not sched_courses.filter(start_time__lt=sl.end_time,
+                                                    start_time__gt=sl.start_time - F('course__type__duration'),
+                                                    day=sl.day,
+                                                    tutor=i):
+                            ttmodel.obj += ponderation * ttmodel.TTinstructors[(sl, c, i)]
+                            # nb_changements_I[c.tutor]+=ttmodel.TT[(sl,c)]
+                        if not sched_courses.filter(tutor=i,
+                                                    day=sl.day):
+                            ttmodel.obj += ponderation * ttmodel.TTinstructors[(sl, c, i)]
+                            # nb_changements_I[i]+=ttmodel.TT[(sl,c)]
 
-                else:
-                    for slot in ttmodel.wdb.courses_slots & ttmodel.wdb.compatible_slots[c]:
-                        if not slot.is_simultaneous_to(chosen_slot):
-                            ttmodel.add_constraint(ttmodel.TT[(slot, c)],
-                                                   '==',
-                                                   0,
-                                                   Constraint(constraint_type=ConstraintType.STABILIZE_ENRICH_MODEL,
-                                                              courses=fc, slots=slot))
+        else:
+            # TO BE CHECKED !!!
+            pass
+            # fc = self.get_courses_queryset_by_attributes(ttmodel, week)
+            # for c in fc:
+            #     sched_c = ttmodel.wdb \
+            #         .sched_courses \
+            #         .get(course=c,
+            #              work_copy=self.work_copy)
+            #     chosen_slot = Slot(start_time=sched_c.start_time,
+            #                        end_time=sched_c.end_time,
+            #                        day=sched_c.day)
+            #     if self.weight is not None:
+            #         ttmodel.obj -= self.local_weight() \
+            #                        * ponderation * ttmodel.TT[(chosen_slot, c)]
+            #
+            #     else:
+            #         for slot in ttmodel.wdb.compatible_slots[c]:
+            #             if not slot.is_simultaneous_to(chosen_slot):
+            #                 ttmodel.add_constraint(ttmodel.TT[(slot, c)],
+            #                                        '==',
+            #                                        0,
+            #                                        Constraint(constraint_type=ConstraintType.STABILIZE_ENRICH_MODEL,
+            #                                                   courses=fc, slots=slot))
 
 
     def one_line_description(self):
