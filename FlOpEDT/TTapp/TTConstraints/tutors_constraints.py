@@ -208,3 +208,31 @@ class RespectBoundPerDay(TTConstraint):
 
     class Meta:
         verbose_name_plural = "Respecter les limites horaires"
+
+
+class LowerBoundBusyDays(TTConstraint):
+    """
+    Impose a minimum number of days if the number of hours is higher than a lower bound
+    """
+    tutor = models.ForeignKey('people.Tutor', on_delete=models.CASCADE)
+    min_days_nb = models.PositiveSmallIntegerField()
+    lower_bound_hours = models.PositiveSmallIntegerField()
+
+    def enrich_model(self, ttmodel, week, ponderation=1):
+        relevant_courses = self.get_courses_queryset_by_attributes(ttmodel, week)
+
+        if sum(c.type.duration for c in relevant_courses) > self.lower_bound_hours:
+            ttmodel.add_constraint(ttmodel.IBD_GTE[self.min_days_nb][self.tutor], '==', 1,
+                                   Constraint(constraint_type='LowerBoundBusyDays', instructors=self.tutor))
+
+    def one_line_description(self):
+        return f"Si plus de {self.lower_bound_hours} heures pour {self.tutor}  alors au moins {self.min_days_nb} jours"
+
+    def get_viewmodel(self):
+        view_model = super().get_viewmodel()
+
+        view_model['details'].update({
+            'tutor': self.tutor.username,
+        })
+
+        return view_model
