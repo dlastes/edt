@@ -145,6 +145,8 @@ def slots_filter(slot_set, day=None, apm=None, course_type=None, start_time=None
         slots = set(sl for sl in slots if sl.start_time <= starts_before)
     if ends_before is not None:
         slots = set(sl for sl in slots if sl.end_time <= ends_before)
+    if ends_after is not None:
+        slots = set(sl for sl in slots if sl.end_time >= ends_before)
     if start_time is not None:
         slots = set(sl for sl in slots if sl.start_time == start_time)
     return slots
