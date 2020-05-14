@@ -1024,7 +1024,7 @@ class TTModel(object):
                 cg.save()
 
     def write_infaisability(self, write_iis=True, write_analysis=True):
-        file_path = "misc/logs/"
+        file_path = "misc/logs/iis"
         filename_suffixe = "_%s_%s" % (self.department.abbrev, self.weeks)
         iis_filename = "%s/IIS%s.ilp" % (file_path, filename_suffixe)
         if write_iis:
@@ -1047,7 +1047,8 @@ class TTModel(object):
             solver = GUROBI_NAME
             options = [("TimeLimit", time_limit), ("Presolve", presolve), ("MIPGapAbs", 0.2)]
             if self.keep_many_solution_files:
-                options.append(('SolFiles', "misc/logs/'flopmodel_%s_%s" % (self.department.abbrev, self.weeks)))
+                options.append(('SolFiles',
+                                f"misc/logs/solutions/flopmodel_{self.department.abbrev}_{self.weeks}"))
             result = self.model.solve(GUROBI_CMD(keepFiles=1,
                                                  msg=True,
                                                  options=options))
