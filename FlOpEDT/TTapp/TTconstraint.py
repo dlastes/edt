@@ -148,7 +148,10 @@ class TTConstraint(models.Model):
             courses_filter['type'] = course_type
 
         if tutor is not None:
-            courses_filter['id__in'] = [c.id for c in ttmodel.wdb.possible_courses[tutor]]
+            if tutor in ttmodel.wdb.instructors:
+                courses_filter['id__in'] = [c.id for c in ttmodel.wdb.possible_courses[tutor]]
+            else:
+                courses_filter['id__in'] = []
 
         return courses_qs.filter(**courses_filter)
 

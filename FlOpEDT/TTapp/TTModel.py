@@ -91,7 +91,8 @@ class TTModel(object):
                  lim_ld=1.,
                  core_only=False,
                  send_mails=False,
-                 slots_step=None):
+                 slots_step=None,
+                 keep_many_solution_files=False):
         # beg_file = os.path.join('logs',"FlOpTT")
         self.model = LpProblem("FlOpTT", LpMinimize)
         self.min_ups_i = min_nps_i
@@ -104,6 +105,7 @@ class TTModel(object):
         self.core_only = core_only
         self.send_mails = send_mails
         self.slots_step = slots_step
+        self.keep_many_solution_files = keep_many_solution_files
         self.var_nb = 0
         self.constraintManager = ConstraintManager()
 
@@ -1022,7 +1024,7 @@ class TTModel(object):
                 cg.save()
 
     def write_infaisability(self, write_iis=True, write_analysis=True):
-        file_path = "logs/"
+        file_path = "misc/logs/"
         filename_suffixe = "_%s_%s" % (self.department.abbrev, self.weeks)
         iis_filename = "%s/IIS%s.ilp" % (file_path, filename_suffixe)
         if write_iis:
@@ -1043,11 +1045,12 @@ class TTModel(object):
             # => SIGINT is still delivered to the solver, which is what we want
             signal.signal(signal.SIGINT, signal.SIG_IGN)
             solver = GUROBI_NAME
+            options = [("TimeLimit", time_limit), ("Presolve", presolve), ("MIPGapAbs", 0.2)]
+            if self.keep_many_solution_files:
+                options.append(('SolFiles', "misc/logs/'flopmodel_%s_%s" % (self.department.abbrev, self.weeks)))
             result = self.model.solve(GUROBI_CMD(keepFiles=1,
                                                  msg=True,
-                                                 options=[("TimeLimit", time_limit),
-                                                          ("Presolve", presolve),
-                                                          ("MIPGapAbs", 0.2)]))
+                                                 options=options))
             if result is None or result == 0:
                 self.write_infaisability()
 
