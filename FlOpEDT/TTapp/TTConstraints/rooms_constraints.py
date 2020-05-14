@@ -78,8 +78,9 @@ class LimitedRoomChoices(TTConstraint):
             ttmodel.obj += self.local_weight() * ponderation * relevant_sum
         else:
             ttmodel.add_constraint(relevant_sum, '==', 0,
-                                   Constraint(constraint_type=ConstraintType.LIMITED_ROOM_CHOICES,
-                                              courses=fc, rooms=possible_rooms))
+                                   Constraint(constraint_type="LIMITED_ROOM_CHOICES",
+                                              instructors=self.tutor, groups=self.group, modules=self.module,
+                                              rooms=possible_rooms))
 
     def one_line_description(self):
         text = "Les "

@@ -143,7 +143,7 @@ class AvoidBothTimes(TTConstraint):
                                                    '<=',
                                                    1,
                                                    Constraint(constraint_type=ConstraintType.AVOID_BOTH_TIME,
-                                                              courses=[c1, c2], slots=[sl1, sl2]))
+                                                              instructors=self.tutor, groups=self.group))
 
     def one_line_description(self):
         text = f"Pas à la fois à {french_format(self.time1)} et à {french_format(self.time2)}"
@@ -195,7 +195,7 @@ class LimitedStartTimeChoices(TTConstraint):
         else:
             ttmodel.add_constraint(relevant_sum, '==', 0,
                                    Constraint(constraint_type=ConstraintType.LIMITED_START_TIME_CHOICES,
-                                              courses=fc))
+                                              instructors=self.tutor, groups=self.group, modules=self.module,))
 
     def one_line_description(self):
         text = "Les "
