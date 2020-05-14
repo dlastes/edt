@@ -28,7 +28,7 @@ from solve_board import views
 app_name="solve_board"
 
 urlpatterns = [
-    url(r'^fetch_context/(?P<train_prog>[a-zA-Z]\w{1,4})/(?P<year>\d{4})/(?P<week>\d{2})/$', views.fetch_context, name="fetch_context"),
+    url(r'^fetch_context/(?P<train_prog>[a-zA-Z]\w{1,4})/(?P<year>\d{4})/(?P<week>\d{1,2})/$', views.fetch_context, name="fetch_context"),
     url(r'^main/$', views.main_board, name="main_board"),
 #    url(r'^run/(?P<timestamp>[0-9-]+)?$', views.run, name="run"),
 ]
