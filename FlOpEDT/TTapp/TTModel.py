@@ -389,7 +389,7 @@ class TTModel(object):
 
     def add_floor(self, name, expr, floor, bound):
         """
-        Add a variable that equals 1 if expr >= floor, is integer expr is
+        Add a variable that equals 1 if expr >= floor, if integer expr is
         known to be within [0, bound]
         """
         l_floor = self.add_var("FLOOR %s %d" % (name, floor))
