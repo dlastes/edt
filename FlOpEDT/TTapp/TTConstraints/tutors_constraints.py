@@ -79,7 +79,7 @@ class MinNonPreferedTutorsSlot(TTConstraint):
     """
     Minimize the use of unprefered Slots for tutors
     """
-    tutors = models.ManyToManyField('people.Tutor',
+    tutors = models.ManyToManyField('people.Tutor', blank=True,
                                     related_name='min_non_prefered_tutors_slots_constraints')
 
     @classmethod
