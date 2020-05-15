@@ -97,8 +97,8 @@ class LimitCourseTypeTimePerPeriod(TTConstraint):
             if self.weight is not None:
                 var = ttmodel.add_floor(
                                 'limit course type per period',
-                                int(self.max_hours * 60) + 1,
-								expr, 3600*24)
+                                expr,
+                                int(self.max_hours * 60) + 1, 3600*24)
                 ttmodel.obj += self.local_weight() * ponderation * var
             else:
                 ttmodel.add_constraint(expr, '<=', self.max_hours*60,
