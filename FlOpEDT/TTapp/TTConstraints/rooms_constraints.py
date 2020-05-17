@@ -27,7 +27,7 @@ from django.db import models
 
 from TTapp.ilp_constraints.constraint_type import ConstraintType
 from TTapp.ilp_constraints.constraint import Constraint
-from TTapp.TTconstraint import TTConstraint
+from TTapp.TTConstraint import TTConstraint
 
 
 class LimitedRoomChoices(TTConstraint):

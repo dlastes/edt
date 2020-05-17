@@ -33,7 +33,7 @@ from django.utils.functional import lazy
 from django.db import models
 # Import constraints from other files
 
-from TTapp.TTconstraint import TTConstraint, max_weight
+from TTapp.TTConstraint import TTConstraint, max_weight
 from TTapp.TTConstraints.stabilization_constraints import Stabilize
 from TTapp.TTConstraints.groups_constraints import MinGroupsHalfDays, MinNonPreferedTrainProgsSlot
 from TTapp.TTConstraints.tutors_constraints import MinTutorsHalfDays, MinNonPreferedTutorsSlot, \
