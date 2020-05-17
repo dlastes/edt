@@ -128,6 +128,7 @@ class TTConstraint(models.Model):
                                            tutor=None):
         """
         Filter courses depending on constraints parameters
+        :parameter group : if not None, return all courses that has one group connected to group
         """
         courses_qs = ttmodel.wdb.courses.filter(week=week)
         courses_filter = {}
@@ -142,7 +143,7 @@ class TTConstraint(models.Model):
             courses_filter['module'] = module
 
         if group is not None:
-            courses_filter['groups'] = group
+            courses_filter['groups__in'] = group.connected_groups()
 
         if course_type is not None:
             courses_filter['type'] = course_type

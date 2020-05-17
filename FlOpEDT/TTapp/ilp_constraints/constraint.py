@@ -23,6 +23,7 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
+from collections.abc import Iterable
 
 def sing_or_plural(dimension):
     plurial = ""
@@ -40,6 +41,15 @@ def get_readable_day(day):
         "th": "Jeudi",
         "f": "Vendredi"
     }.get(day, "None")
+
+
+def convert_to_list(dimension):
+    if dimension is None:
+        return []
+    elif isinstance(dimension, Iterable):
+        return list(dimension)
+    else:
+        return [dimension]
 
 
 class Constraint:
@@ -97,39 +107,16 @@ class Constraint:
 
     def handle_dimensions(self, instructors, slots, courses, weeks, rooms, groups, days, departments,
                           modules, apm):
-        if type(instructors) is not list:
-            instructors = [instructors]
-        instructors = list(instructors)
-        if type(weeks) is not list:
-            weeks = [weeks]
-        weeks = list(weeks)
-        if type(rooms) is not list:
-            rooms = [rooms]
-        rooms = list(rooms)
-        if type(groups) is not list:
-            groups = [groups]
-        groups = list(groups)
-        if type(days) is not list:
-            days = [days]
-        days = list([get_readable_day(day) for day in days])
-
-        if type(departments) is not list:
-            departments = [departments]
-        departments = list(departments)
-        if type(modules) is not list:
-            modules = [modules]
-        modules = list(modules)
-        if type(apm) is not list:
-            apm = [apm]
-        apm = list(apm)
-
-        if type(slots) is not list:
-            slots = [slots]
-        slots = list(slots)
-
-        if type(courses) is not list:
-            courses = [courses]
-        courses = list(courses)
+        instructors = convert_to_list(instructors)
+        weeks = convert_to_list(weeks)
+        rooms = convert_to_list(rooms)
+        groups = convert_to_list(groups)
+        days = [get_readable_day(day) for day in convert_to_list(days)]
+        departments = convert_to_list(departments)
+        modules = convert_to_list(modules)
+        apm = convert_to_list(apm)
+        slots = convert_to_list(slots)
+        courses = convert_to_list(courses)
 
         for slot in slots:
             day = get_readable_day(slot.get_day().day)

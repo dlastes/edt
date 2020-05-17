@@ -24,11 +24,11 @@
 # without disclosing the source code of your own applications.
 
 from django.db import models
-from TTapp.TTconstraint import TTConstraint
+from TTapp.TTConstraint import TTConstraint
 from TTapp.slots import days_filter, slots_filter
 from TTapp.ilp_constraints.constraint import Constraint
 from TTapp.ilp_constraints.constraint_type import ConstraintType
-
+from TTapp.TTConstraints.groups_constraints import considered_basic_groups
 
 def build_period_slots(ttmodel, day, period):
     if period is None:
@@ -119,13 +119,12 @@ class LimitGroupsCourseTypeTimePerPeriod(LimitCourseTypeTimePerPeriod):  # , pon
 
     def enrich_model(self, ttmodel, week, ponderation=1.):
 
-        if self.groups.exists():
-            considered_groups = self.groups.filter(train_prog__in=self.considered_train_progs(ttmodel))
-        else:
-            considered_groups = ttmodel.wdb.groups.filter(train_prog__in=self.considered_train_progs(ttmodel))
-
-        for group in considered_groups:
-          self.enrich_model_for_one_object(ttmodel, week, ponderation, group=group)
+        # if self.groups.exists():
+        #     considered_groups = self.groups.filter(train_prog__in=self.considered_train_progs(ttmodel))
+        # else:
+        #     considered_groups = ttmodel.wdb.groups.filter(train_prog__in=self.considered_train_progs(ttmodel))
+        for group in considered_basic_groups(self,ttmodel):
+            self.enrich_model_for_one_object(ttmodel, week, ponderation, group=group)
 
     def full_name(self):
         return "Limit Groups Course Type Per Period"

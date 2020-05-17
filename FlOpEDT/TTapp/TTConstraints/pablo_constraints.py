@@ -26,7 +26,7 @@
 
 from django.db import models
 
-from TTapp.TTconstraint import TTConstraint
+from TTapp.TTConstraint import TTConstraint
 from TTapp.ilp_constraints.constraint import Constraint
 
 

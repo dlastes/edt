@@ -28,7 +28,20 @@ from django.db import models
 from TTapp.helpers.minhalfdays import MinHalfDaysHelperGroup
 
 from TTapp.slots import slots_filter
-from TTapp.TTconstraint import TTConstraint
+from TTapp.TTConstraint import TTConstraint
+
+def considered_basic_groups(group_ttconstraint, ttmodel):
+    if group_ttconstraint.train_progs.exists():
+        considered_basic_groups = set(ttmodel.wdb.basic_groups.filter(train_prog__in=group_ttconstraint.train_progs.all()))
+    else:
+        considered_basic_groups = set(ttmodel.wdb.basic_groups)
+    if group_ttconstraint.groups.exists():
+        basic_groups = set()
+        for g in group_ttconstraint.groups.all():
+            basic_groups |= g.basic_groups()
+        considered_basic_groups &= basic_groups
+    return considered_basic_groups
+
 
 
 class MinGroupsHalfDays(TTConstraint):
@@ -38,18 +51,8 @@ class MinGroupsHalfDays(TTConstraint):
     groups = models.ManyToManyField('base.Group', blank=True)
 
     def enrich_model(self, ttmodel, week, ponderation=1):
-        if self.train_progs.exists():
-            considered_groups = set(ttmodel.wdb.basic_groups.filter(train_prog__in=self.train_progs.all()))
-        else:
-            considered_groups = set(ttmodel.wdb.basic_groups)
-        if self.groups.exists():
-            basic_groups = set()
-            for g in self.groups.all():
-                basic_groups |= g.basic_groups()
-            considered_groups &= basic_groups
-
         helper = MinHalfDaysHelperGroup(ttmodel, self, week, ponderation)
-        for group in considered_groups:
+        for group in considered_basic_groups(self, ttmodel):
             helper.enrich_model(group=group)
 
     def get_viewmodel(self):
