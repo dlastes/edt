@@ -223,7 +223,7 @@ class LowerBoundBusyDays(TTConstraint):
 
         if sum(c.type.duration for c in relevant_courses) > self.lower_bound_hours:
             ttmodel.add_constraint(ttmodel.IBD_GTE[self.min_days_nb][self.tutor], '==', 1,
-                                   Constraint(constraint_type='LowerBoundBusyDays', instructors=self.tutor))
+                                   Constraint(constraint_type=ConstraintType.LowerBoundBusyDays, instructors=self.tutor))
 
     def one_line_description(self):
         return f"Si plus de {self.lower_bound_hours} heures pour {self.tutor}  alors au moins {self.min_days_nb} jours"

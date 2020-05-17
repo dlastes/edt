@@ -105,6 +105,8 @@ class ConstraintType(Enum):
     MAX_HOURS = "Max hours"
     STABILIZE_ENRICH_MODEL = "Stabilize : enrich model"
     SIMULTANEOUS_COURSES = "Simultaneous courses"
+    LIMITED_ROOM_CHOICES = "LIMITED_ROOM_CHOICES"
+    LowerBoundBusyDays = "LowerBoundBusyDays"
 
     # From minhalfdays
     MIN_HALF_DAYS_LIMIT = "Min Half Days limit"
