@@ -28,7 +28,10 @@ from django.contrib.postgres.fields import ArrayField
 
 from django.db import models
 
+from django.core.exceptions import ObjectDoesNotExist
+
 from base.timing import french_format
+from base.timing import Day
 
 from TTapp.ilp_constraints.constraint_type import ConstraintType
 from TTapp.ilp_constraints.constraint import Constraint
@@ -45,7 +48,7 @@ class GroupsLunchBreak(TTConstraint):
 
     start_time = models.PositiveSmallIntegerField()
     end_time = models.PositiveSmallIntegerField()
-    # weekdays = models.
+    weekdays = ArrayField(models.CharField(max_length=2, choices=Day.CHOICES), blank=True, null=True)
     lunch_length = models.PositiveSmallIntegerField()
     groups = models.ManyToManyField('base.Group', blank=True, related_name='lunch_breaks_constraints')
 
@@ -53,8 +56,10 @@ class GroupsLunchBreak(TTConstraint):
         considered_groups = considered_basic_groups(self, ttmodel)
         local_one_var = ttmodel.one_var
         days = days_filter(ttmodel.wdb.days, week=week)
-        # if self.weekdays.exists():
-        #     days = days_filter(days, day_in=self.weekdays.all())
+        try:
+            days = days_filter(days, day_in=self.weekdays)
+        except ObjectDoesNotExist:
+            pass
         for day in days:
             local_slots = [Slot(day=day, start_time=st, end_time=st+60) for st in range(self.start_time,
                                                                                    self.end_time - self.lunch_length + 1,
@@ -88,8 +93,10 @@ class GroupsLunchBreak(TTConstraint):
     def one_line_description(self):
         text = f"Il faut une pause déjeuner d'au moins {self.lunch_length} minutes " \
                f"entre {french_format(self.start_time)} et {french_format(self.end_time)}"
-        # if self.weekdays.exists:
-        #     text += " les " + ', '.join([wd for wd in self.weekdays.all()])
+        try:
+            text += " les " + ', '.join([wd for wd in self.weekdays])
+        except ObjectDoesNotExist:
+            pass
         if self.groups.exists():
             text += ' pour les groupes ' + ', '.join([group.name for group in self.groups.all()])
         else:
