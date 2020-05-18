@@ -152,7 +152,7 @@ def slots_filter(slot_set, day=None, apm=None, course_type=None, start_time=None
     return slots
 
 
-def days_filter(days_set, index=None, index_in=None, week=None, week_in=None, day=None):
+def days_filter(days_set, index=None, index_in=None, week=None, week_in=None, day=None, day_in=None):
     days = days_set
     if week is not None:
         days = set(d for d in days if d.week == week)
@@ -164,5 +164,7 @@ def days_filter(days_set, index=None, index_in=None, week=None, week_in=None, da
         days = set(d for d in days if days_index[d.day] in index_in)
     if day is not None:
         days = set(d for d in days if d.day == day)
+    if day_in is not None:
+        days = set(d for d in days if d.day in day_in)
     return days
 

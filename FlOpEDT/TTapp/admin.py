@@ -35,7 +35,7 @@ from TTapp.models import \
     MinNonPreferedTrainProgsSlot, MinNonPreferedTutorsSlot, \
     CustomConstraint, SimultaneousCourses, MinimizeBusyDays, RespectBoundPerDay,\
     AvoidBothTimes, LimitedRoomChoices, LimitedStartTimeChoices, \
-    LimitTutorsCourseTypeTimePerPeriod, LimitGroupsCourseTypeTimePerPeriod, LowerBoundBusyDays
+    LimitTutorsCourseTypeTimePerPeriod, LimitGroupsCourseTypeTimePerPeriod, LowerBoundBusyDays, GroupsLunchBreak
 
 # Register your models here.
 
@@ -256,6 +256,15 @@ class LowerBoundBusyDaysAdmin(DepartmentModelAdmin):
                    )
 
 
+class GroupsLunchBreakAdmin(DepartmentModelAdmin):
+    list_display = ('week', 'year', 'comment')
+    ordering = ()
+    list_filter = (('week', DropdownFilterAll),
+                   ('year', DropdownFilterAll),
+                   ('train_progs', DropdownFilterRel),
+                   ('groups', DropdownFilterRel),
+                   )
+
 
 admin.site.register(CustomConstraint, CustomConstraintAdmin)
 admin.site.register(Stabilize, StabilizeAdmin)
@@ -274,3 +283,5 @@ admin.site.register(LimitModulesCourseTypeTimePerPeriod, LimitModulesCourseTypeT
 admin.site.register(LimitGroupsCourseTypeTimePerPeriod, LimitGroupsCourseTypeTimePerPeriodAdmin)
 admin.site.register(LimitTutorsCourseTypeTimePerPeriod, LimitTutorsCourseTypeTimePerPeriodAdmin)
 admin.site.register(LowerBoundBusyDays, LowerBoundBusyDaysAdmin)
+admin.site.register(GroupsLunchBreak, GroupsLunchBreakAdmin)
+

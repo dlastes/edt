@@ -107,6 +107,7 @@ class ConstraintType(Enum):
     SIMULTANEOUS_COURSES = "Simultaneous courses"
     LIMITED_ROOM_CHOICES = "LIMITED_ROOM_CHOICES"
     LowerBoundBusyDays = "LowerBoundBusyDays"
+    LUNCH_BREAK = "LUNCH_BREAK"
 
     # From minhalfdays
     MIN_HALF_DAYS_LIMIT = "Min Half Days limit"
