@@ -69,9 +69,9 @@ class GroupsLunchBreak(TTConstraint):
                 for local_slot in local_slots:
                     " Je veux que slot_vars[group, local_slot] soit à 1 seulement si undesired_scheduled_courses vaut 0"
                     undesired_scheduled_courses = \
-                        ttmodel.sum(ttmodel.TT[sl, c] for sl in slots_filter(ttmodel.wdb.courses_slots,
-                                                                             simultaneous_to=local_slot)
-                                for c in considered_courses)
+                        ttmodel.sum(ttmodel.TT[sl, c] for c in considered_courses
+                                    for sl in slots_filter(ttmodel.wdb.compatible_slots[c],
+                                                           simultaneous_to=local_slot))
                     slot_vars[group, local_slot] = ttmodel.add_floor(undesired_scheduled_courses, 1,
                                                                      len(considered_courses))
                 if self.weight is None:
