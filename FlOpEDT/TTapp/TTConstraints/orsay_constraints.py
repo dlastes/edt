@@ -38,7 +38,6 @@ from TTapp.TTConstraints.groups_constraints import considered_basic_groups
 from TTapp.slots import Slot
 
 
-
 class GroupsLunchBreak(TTConstraint):
     """
     Ensures time for lunch in a given interval for given groups (all if groups is Null)
@@ -49,7 +48,6 @@ class GroupsLunchBreak(TTConstraint):
     # weekdays = models.
     lunch_length = models.PositiveSmallIntegerField()
     groups = models.ManyToManyField('base.Group', blank=True, related_name='lunch_breaks_constraints')
-
 
     def enrich_model(self, ttmodel, week, ponderation=1):
         considered_groups = considered_basic_groups(self, ttmodel)
@@ -72,8 +70,10 @@ class GroupsLunchBreak(TTConstraint):
                         ttmodel.sum(ttmodel.TT[sl, c] for c in considered_courses
                                     for sl in slots_filter(ttmodel.wdb.compatible_slots[c],
                                                            simultaneous_to=local_slot))
-                    slot_vars[group, local_slot] = ttmodel.add_floor(undesired_scheduled_courses, 1,
-                                                                     len(considered_courses))
+                    slot_vars[group, local_slot] = ttmodel.add_floor(name='',
+                                                                     expr=undesired_scheduled_courses,
+                                                                     floor=1,
+                                                                     bound=len(considered_courses))
                 if self.weight is None:
                     ttmodel.add_constraint(ttmodel.sum(local_one_var - slot_vars[group, sl] for sl in local_slots),
                                            '>=', 1,
@@ -83,7 +83,6 @@ class GroupsLunchBreak(TTConstraint):
                     cost = ttmodel.sum(slot_vars[group, sl] for sl in local_slots) * ponderation \
                            * self.local_weight()
                     ttmodel.add_to_group_cost(group, cost, week)
-
 
 
     def one_line_description(self):
