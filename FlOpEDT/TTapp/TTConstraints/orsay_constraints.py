@@ -53,8 +53,7 @@ class GroupsLunchBreak(TTConstraint):
 
     def enrich_model(self, ttmodel, week, ponderation=1):
         considered_groups = considered_basic_groups(self, ttmodel)
-        local_one_var = ttmodel.add_var()
-        ttmodel.add_constraint(local_one_var, '==', 1)
+        local_one_var = ttmodel.one_var
         days = days_filter(ttmodel.wdb.days, week=week)
         # if self.weekdays.exists():
         #     days = days_filter(days, day_in=self.weekdays.all())
@@ -63,9 +62,7 @@ class GroupsLunchBreak(TTConstraint):
                                                                                    self.end_time - self.lunch_length + 1,
                                                                                         15)]
             # pour chaque groupe, au moins un de ces slots ne voit aucun cours lui être simultané
-            slot_vars = {(group, local_slot) : ttmodel.add_var() for local_slot in local_slots
-                         for group in considered_groups }
-
+            slot_vars = {}
 
             for group in considered_groups:
                 considered_courses = self.get_courses_queryset_by_parameters(ttmodel, week, group=group)
@@ -75,14 +72,15 @@ class GroupsLunchBreak(TTConstraint):
                         ttmodel.sum(ttmodel.TT[sl, c] for sl in slots_filter(ttmodel.wdb.courses_slots,
                                                                              simultaneous_to=local_slot)
                                 for c in considered_courses)
-                    slot_vars[group, local_slot] = local_one_var - ttmodel.add_floor(undesired_scheduled_courses, 1,
-                                                                                     len(considered_courses))
+                    slot_vars[group, local_slot] = ttmodel.add_floor(undesired_scheduled_courses, 1,
+                                                                     len(considered_courses))
                 if self.weight is None:
-                    ttmodel.add_constraint(ttmodel.sum(slot_vars[group, sl] for sl in local_slots), '>=', 1,
+                    ttmodel.add_constraint(ttmodel.sum(local_one_var - slot_vars[group, sl] for sl in local_slots),
+                                           '>=', 1,
                                            Constraint(constraint_type=ConstraintType.LUNCH_BREAK,
                                                       groups=group, days=day))
                 else:
-                    cost = ttmodel.sum(local_one_var - slot_vars[group, sl] for sl in local_slots) * ponderation \
+                    cost = ttmodel.sum(slot_vars[group, sl] for sl in local_slots) * ponderation \
                            * self.local_weight()
                     ttmodel.add_to_group_cost(group, cost, week)
 

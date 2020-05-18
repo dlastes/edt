@@ -150,6 +150,8 @@ class TTModel(object):
             = self.compute_non_preferred_slots_cost_course()
         self.avail_room = self.compute_avail_room()
         print('Ok', datetime.datetime.now()-a)
+        self.one_var = self.add_var()
+        self.add_constraint(self.one_var, '==', 1, Constraint(constraint_type=ConstraintType.TECHNICAL))
 
         # Hack : permet que ça marche même si les dispos sur la base sont pas complètes
         for i in self.wdb.instructors:
