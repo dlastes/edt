@@ -54,7 +54,6 @@ class GroupsLunchBreak(TTConstraint):
 
     def enrich_model(self, ttmodel, week, ponderation=100):
         considered_groups = considered_basic_groups(self, ttmodel)
-        local_one_var = ttmodel.one_var
         days = days_filter(ttmodel.wdb.days, week=week)
         try:
             days = days_filter(days, day_in=self.weekdays)
@@ -69,7 +68,8 @@ class GroupsLunchBreak(TTConstraint):
             for group in considered_groups:
                 considered_courses = self.get_courses_queryset_by_parameters(ttmodel, week, group=group)
                 for local_slot in local_slots:
-                    " Je veux que slot_vars[group, local_slot] soit à 1 seulement si undesired_scheduled_courses vaut 0"
+                    # Je veux que slot_vars[group, local_slot] soit à 1
+                    # si et seulement si undesired_scheduled_courses vaut plus que 1
                     undesired_scheduled_courses = \
                         ttmodel.sum(ttmodel.TT[sl, c] for c in considered_courses
                                     for sl in slots_filter(ttmodel.wdb.compatible_slots[c],
@@ -79,8 +79,8 @@ class GroupsLunchBreak(TTConstraint):
                                                                      floor=1,
                                                                      bound=len(considered_courses))
                 if self.weight is None:
-                    ttmodel.add_constraint(ttmodel.sum(local_one_var - slot_vars[group, sl] for sl in local_slots),
-                                           '>=', 1,
+                    ttmodel.add_constraint(ttmodel.sum(slot_vars[group, sl] for sl in local_slots),
+                                           '<=', len(local_slots),
                                            Constraint(constraint_type=ConstraintType.LUNCH_BREAK,
                                                       groups=group, days=day))
                 else:
