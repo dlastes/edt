@@ -62,6 +62,7 @@ class GroupsLunchBreak(TTConstraint):
         for day in days:
             local_slots = [Slot(day=day, start_time=st, end_time=st+self.lunch_length)
                            for st in range(self.start_time, self.end_time - self.lunch_length + 1, 15)]
+            slots_nb = len(local_slots)
             # pour chaque groupe, au moins un de ces slots ne voit aucun cours lui être simultané
             slot_vars = {}
 
@@ -78,14 +79,20 @@ class GroupsLunchBreak(TTConstraint):
                                                                      expr=undesired_scheduled_courses,
                                                                      floor=1,
                                                                      bound=len(considered_courses))
+                not_ok = ttmodel.add_floor(name='',
+                                           expr=ttmodel.sum(slot_vars[group, sl] for sl in local_slots),
+                                           floor=slots_nb,
+                                           bound=2 * slots_nb)
                 if self.weight is None:
-                    ttmodel.add_constraint(ttmodel.sum(slot_vars[group, sl] for sl in local_slots),
-                                           '<=', len(local_slots),
-                                           Constraint(constraint_type=ConstraintType.LUNCH_BREAK,
-                                                      groups=group, days=day))
+                    ttmodel.add_constraint(not_ok,'==', 0, Constraint())
+                    # ttmodel.add_constraint(ttmodel.sum(slot_vars[group, sl] for sl in local_slots),
+                    #                        '<=', len(local_slots),
+                    #                        Constraint(constraint_type=ConstraintType.LUNCH_BREAK,
+                    #                                   groups=group, days=day))
                 else:
-                    cost = ttmodel.sum(slot_vars[group, sl] for sl in local_slots) * ponderation \
-                           * self.local_weight()
+                    cost = not_ok * ponderation * self.local_weight()
+                    # cost = ttmodel.sum(slot_vars[group, sl] for sl in local_slots) * ponderation \
+                    #        * self.local_weight()
                     ttmodel.add_to_group_cost(group, cost, week)
 
 
