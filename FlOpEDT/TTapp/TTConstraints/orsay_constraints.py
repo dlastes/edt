@@ -52,7 +52,7 @@ class GroupsLunchBreak(TTConstraint):
     lunch_length = models.PositiveSmallIntegerField()
     groups = models.ManyToManyField('base.Group', blank=True, related_name='lunch_breaks_constraints')
 
-    def enrich_model(self, ttmodel, week, ponderation=1):
+    def enrich_model(self, ttmodel, week, ponderation=100):
         considered_groups = considered_basic_groups(self, ttmodel)
         local_one_var = ttmodel.one_var
         days = days_filter(ttmodel.wdb.days, week=week)
@@ -61,9 +61,8 @@ class GroupsLunchBreak(TTConstraint):
         except ObjectDoesNotExist:
             pass
         for day in days:
-            local_slots = [Slot(day=day, start_time=st, end_time=st+60) for st in range(self.start_time,
-                                                                                   self.end_time - self.lunch_length + 1,
-                                                                                        15)]
+            local_slots = [Slot(day=day, start_time=st, end_time=st+self.lunch_length)
+                           for st in range(self.start_time, self.end_time - self.lunch_length + 1, 15)]
             # pour chaque groupe, au moins un de ces slots ne voit aucun cours lui être simultané
             slot_vars = {}
 
