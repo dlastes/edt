@@ -113,3 +113,57 @@ class GroupsLunchBreak(TTConstraint):
         else:
             text += " de toutes les promos."
         return text
+
+class AmphiBreak(TTConstraint):
+    """
+    Ensures that a CM and another type of course cannot be consecutive for the given groups.
+    """
+    weekdays = ArrayField(models.CharField(max_length=2, choices=Day.CHOICES), blank=True, null=True)
+    groups = models.ManyToManyField('base.Group', blank=True, related_name='amphi_break_constraint')
+
+    def enrich_model(self, ttmodel, week, ponderation=1):
+        considered_groups = considered_basic_groups(self, ttmodel)
+		break_vars = {}
+        days = days_filter(ttmodel.wdb.days, week=week)
+        try:
+            days = days_filter(days, day_in=self.weekdays)
+        except ObjectDoesNotExist:
+            pass
+        for group in considered_groups:
+            amphis = self.get_courses_queryset_by_parameters(ttmodel, week, group=group, course_type="CM")
+			all_courses = self.get_courses_queryset_by_parameters(ttmodel, week, group=group)
+			other_courses = all_courses - amphis
+			all_slots = ttmodel.wdb.courses_slots
+            for slot1 in all_slots
+				for slot2 in all_slots
+					if slot1.day = slot2.day and slot1.end_time = slot2.start_time:
+						for course1 in amphis
+							for course2 in other_courses
+								broken_break = ttmodel.sum(ttmodel.TT[s, c] for s in [slot1, slot2] for c in [course1, course2])
+								break_vars[group, slot1, slot2, course1, course2] = ttmodel.add_floor(name='', expr=broken_breaks, floor=2,
+bound=2)
+			total_broken_breaks=ttmodel.sum(slot_vars[group, slot1, slot2, course1, course2] for slot1 in all_slots for slot2 in all_slots for course1 in amphis for course2 in other_courses if (slot1.day = slot2.day and slot1.end_time = slot2.start_time))
+			if self.weight is None:
+				ttmodel.add_constraint(total_broken_breaks, '==', 0, Constraint())
+			else:
+				cost = total_broken_breaks * ponderation * self.local_weight()
+				ttmodel.add_to_group_cost(group, cost, week)
+
+
+    def one_line_description(self):
+        text = f"Il faut une pause " \
+               f"entre un cours CM et un autre cours"
+        try:
+            text += " les " + ', '.join([wd for wd in self.weekdays])
+        except ObjectDoesNotExist:
+            pass
+        if self.groups.exists():
+            text += ' pour les groupes ' + ', '.join([group.name for group in self.groups.all()])
+        else:
+            text += " pour tous les groupes"
+
+        if self.train_progs.exists():
+            text += ' de ' + ', '.join([train_prog.abbrev for train_prog in self.train_progs.all()])
+        else:
+            text += " de toutes les promos."
+        return text
