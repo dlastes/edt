@@ -265,6 +265,15 @@ class GroupsLunchBreakAdmin(DepartmentModelAdmin):
                    ('groups', DropdownFilterRel),
                    )
 
+class AmphiBreakAdmin(DepartmentModelAdmin):
+    list_display = ('week', 'year', 'comment')
+    ordering = ()
+    list_filter = (('week', DropdownFilterAll),
+                   ('year', DropdownFilterAll),
+                   ('train_progs', DropdownFilterRel),
+                   ('groups', DropdownFilterRel),
+                   )
+
 
 admin.site.register(CustomConstraint, CustomConstraintAdmin)
 admin.site.register(Stabilize, StabilizeAdmin)
@@ -284,4 +293,4 @@ admin.site.register(LimitGroupsCourseTypeTimePerPeriod, LimitGroupsCourseTypeTim
 admin.site.register(LimitTutorsCourseTypeTimePerPeriod, LimitTutorsCourseTypeTimePerPeriodAdmin)
 admin.site.register(LowerBoundBusyDays, LowerBoundBusyDaysAdmin)
 admin.site.register(GroupsLunchBreak, GroupsLunchBreakAdmin)
-
+admin.site.register(AmphiBreak, AmphiBreakAdmin)
