@@ -35,7 +35,8 @@ from TTapp.models import \
     MinNonPreferedTrainProgsSlot, MinNonPreferedTutorsSlot, \
     CustomConstraint, SimultaneousCourses, MinimizeBusyDays, RespectBoundPerDay,\
     AvoidBothTimes, LimitedRoomChoices, LimitedStartTimeChoices, \
-    LimitTutorsCourseTypeTimePerPeriod, LimitGroupsCourseTypeTimePerPeriod, LowerBoundBusyDays, GroupsLunchBreak
+    LimitTutorsCourseTypeTimePerPeriod, LimitGroupsCourseTypeTimePerPeriod, LowerBoundBusyDays, GroupsLunchBreak,
+	AmphiBreak
 
 # Register your models here.
 
