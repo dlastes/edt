@@ -137,13 +137,13 @@ class AmphiBreak(TTConstraint):
             all_slots = ttmodel.wdb.courses_slots
             for slot1 in all_slots:
                 for slot2 in all_slots:
-                    if slot1.day = slot2.day and slot1.end_time = slot2.start_time:
+                    if slot1.day == slot2.day and slot1.end_time == slot2.start_time:
                         for course1 in amphis:
                             for course2 in other_courses:
                                 broken_break = ttmodel.sum(ttmodel.TT[s, c] for s in [slot1, slot2] for c in [course1, course2])
                                 break_vars[group, slot1, slot2, course1, course2] = ttmodel.add_floor(name='', expr=broken_breaks, floor=2,
 bound=2)
-            total_broken_breaks=ttmodel.sum(slot_vars[group, slot1, slot2, course1, course2] for slot1 in all_slots for slot2 in all_slots for course1 in amphis for course2 in other_courses if (slot1.day = slot2.day and slot1.end_time = slot2.start_time))
+            total_broken_breaks=ttmodel.sum(slot_vars[group, slot1, slot2, course1, course2] for slot1 in all_slots for slot2 in all_slots for course1 in amphis for course2 in other_courses if (slot1.day == slot2.day and slot1.end_time == slot2.start_time))
             if self.weight is None:
                 ttmodel.add_constraint(total_broken_breaks, '==', 0, Constraint())
             else:
