@@ -43,7 +43,7 @@ from TTapp.TTConstraints.slots_constraints import SimultaneousCourses, AvoidBoth
 from TTapp.TTConstraints.rooms_constraints import LimitedRoomChoices
 from TTapp.TTConstraints.limit_time_constraints import LimitModulesCourseTypeTimePerPeriod, \
     LimitGroupsCourseTypeTimePerPeriod, LimitTutorsCourseTypeTimePerPeriod, LimitCourseTypeTimePerPeriod
-from TTapp.TTConstraints.orsay_constraints import GroupsLunchBreak, AmphiBreak
+from TTapp.TTConstraints.orsay_constraints import GroupsLunchBreak, BreakAroundCourseType
 
 #
 #   CustomConstraint

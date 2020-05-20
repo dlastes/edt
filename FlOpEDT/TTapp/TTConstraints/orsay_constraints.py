@@ -115,39 +115,46 @@ class GroupsLunchBreak(TTConstraint):
         return text
 
 
-class AmphiBreak(TTConstraint):
+class BreakAroundCourseType(TTConstraint):
     """
-    Ensures that a CM and another type of course cannot be consecutive for the given groups.
+    Ensures that a course and another type of course cannot be consecutive for the given groups.
     """
     weekdays = ArrayField(models.CharField(max_length=2, choices=Day.CHOICES), blank=True, null=True)
     groups = models.ManyToManyField('base.Group', blank=True, related_name='amphi_break_constraint')
+    course_type = models.ForeignKey('base.CourseType', related_name='amphi_break_constraint', on_delete=models.CASCADE)
 
     def enrich_model(self, ttmodel, week, ponderation=1):
         considered_groups = considered_basic_groups(self, ttmodel)
-        break_vars = {}
         days = days_filter(ttmodel.wdb.days, week=week)
         try:
             days = days_filter(days, day_in=self.weekdays)
         except ObjectDoesNotExist:
             pass
         for group in considered_groups:
-            amphis = self.get_courses_queryset_by_parameters(ttmodel, week, group=group, course_type="CM")
-            all_courses = self.get_courses_queryset_by_parameters(ttmodel, week, group=group)
-            other_courses = all_courses - amphis
-            all_slots = ttmodel.wdb.courses_slots
-            for slot1 in all_slots:
-                for slot2 in all_slots:
-                    if slot1.day == slot2.day and slot1.end_time == slot2.start_time:
-                        for course1 in amphis:
-                            for course2 in other_courses:
-                                broken_break = ttmodel.sum(ttmodel.TT[s, c] for s in [slot1, slot2] for c in [course1, course2])
-                                break_vars[group, slot1, slot2, course1, course2] = ttmodel.add_floor(name='', expr=broken_breaks, floor=2,
-bound=2)
-            total_broken_breaks=ttmodel.sum(slot_vars[group, slot1, slot2, course1, course2] for slot1 in all_slots for slot2 in all_slots for course1 in amphis for course2 in other_courses if (slot1.day == slot2.day and slot1.end_time == slot2.start_time))
+            amphis = set(self.get_courses_queryset_by_parameters(ttmodel, week, group=group, course_type=self.course_type))
+            other_courses = set(self.get_courses_queryset_by_parameters(ttmodel, week, group=group).exclude(course_type=self.course_type))
+            broken_breaks = ttmodel.lin_expr()
+            for day in days:
+                day_slots = slots_filter(ttmodel.wdb.courses_slots, day=day)
+                for slot1 in day_slots:
+                    successive_slots = slots_filter(day_slots, start_time=slot1.end_time)
+                    if not successive_slots:
+                        continue
+                    amphi_slot1 = ttmodel.sum(ttmodel.TT[slot1, c] for c in amphis & ttmodel.wdb.compatible_courses[slot1])
+                    other_slot1 = ttmodel.sum(ttmodel.TT[slot1, c] for c in other_courses & ttmodel.wdb.compatible_courses[slot1])
+                    other_slot2 = ttmodel.sum(ttmodel.TT[slot2, c]
+                                              for slot2 in successive_slots
+                                              for c in other_courses & ttmodel.wdb.compatible_courses[slot2])
+                    amphi_slot2 = ttmodel.sum(ttmodel.TT[slot2, c]
+                                              for slot2 in successive_slots
+                                              for c in amphis & ttmodel.wdb.compatible_courses[slot2])
+                    broken_breaks += ttmodel.add_floor(name='', expr=amphi_slot1+other_slot2, floor=2, bound=2)
+                    broken_breaks += ttmodel.add_floor(name='', expr=amphi_slot2+other_slot1, floor=2, bound=2)
+
             if self.weight is None:
-                ttmodel.add_constraint(total_broken_breaks, '==', 0, Constraint())
+                ttmodel.add_constraint(broken_breaks, '==', 0, Constraint())
             else:
-                cost = total_broken_breaks * ponderation * self.local_weight()
+                cost = broken_breaks * ponderation * self.local_weight()
                 ttmodel.add_to_group_cost(group, cost, week)
 
 
