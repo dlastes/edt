@@ -122,6 +122,7 @@ class BreakAroundCourseType(TTConstraint):
     weekdays = ArrayField(models.CharField(max_length=2, choices=Day.CHOICES), blank=True, null=True)
     groups = models.ManyToManyField('base.Group', blank=True, related_name='amphi_break_constraint')
     course_type = models.ForeignKey('base.CourseType', related_name='amphi_break_constraint', on_delete=models.CASCADE)
+    min_break_length = models.PositiveSmallIntegerField(default=15)
 
     def enrich_model(self, ttmodel, week, ponderation=1):
         considered_groups = considered_basic_groups(self, ttmodel)
@@ -137,7 +138,8 @@ class BreakAroundCourseType(TTConstraint):
             for day in days:
                 day_slots = slots_filter(ttmodel.wdb.courses_slots, day=day)
                 for slot1 in day_slots:
-                    successive_slots = slots_filter(day_slots, start_time=slot1.end_time)
+                    successive_slots = set(sl for sl in day_slots
+                                           if slot1.end_time <= sl.start_time < slot1.end_time + self.min_break_length)
                     if not successive_slots:
                         continue
                     amphi_slot1 = ttmodel.sum(ttmodel.TT[slot1, c] for c in amphis & ttmodel.wdb.compatible_courses[slot1])
@@ -160,7 +162,7 @@ class BreakAroundCourseType(TTConstraint):
 
     def one_line_description(self):
         text = f"Il faut une pause " \
-               f"entre un cours CM et un autre cours"
+               f"entre un cours de type {self.course_type.name} et un autre type de cours"
         try:
             text += " les " + ', '.join([wd for wd in self.weekdays])
         except ObjectDoesNotExist:
