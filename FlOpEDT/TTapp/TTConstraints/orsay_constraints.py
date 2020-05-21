@@ -133,7 +133,7 @@ class BreakAroundCourseType(TTConstraint):
             pass
         for group in considered_groups:
             amphis = set(self.get_courses_queryset_by_parameters(ttmodel, week, group=group, course_type=self.course_type))
-            other_courses = set(self.get_courses_queryset_by_parameters(ttmodel, week, group=group).exclude(course_type=self.course_type))
+            other_courses = set(self.get_courses_queryset_by_parameters(ttmodel, week, group=group).exclude(type=self.course_type))
             broken_breaks = ttmodel.lin_expr()
             for day in days:
                 day_slots = slots_filter(ttmodel.wdb.courses_slots, day=day)
