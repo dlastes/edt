@@ -117,7 +117,7 @@ class GroupsLunchBreak(TTConstraint):
 
 class BreakAroundCourseType(TTConstraint):
     """
-    Ensures that a course and another type of course cannot be consecutive for the given groups.
+    Ensures that the courses of a given course type and other types of courses cannot be consecutive for the given groups.
     """
     weekdays = ArrayField(models.CharField(max_length=2, choices=Day.CHOICES), blank=True, null=True)
     groups = models.ManyToManyField('base.Group', blank=True, related_name='amphi_break_constraint')
