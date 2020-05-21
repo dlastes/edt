@@ -44,7 +44,7 @@ class MyTTModel(TTModel):
                  lim_ld=1.,
                  core_only=False,
                  send_mails=False,
-                 slots_step=30,
+                 slots_step=None,
                  keep_many_solution_files=False):
         """
         If you shall change something in the database ahead of creating the
