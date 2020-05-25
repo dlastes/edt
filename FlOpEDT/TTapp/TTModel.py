@@ -1043,11 +1043,13 @@ class TTModel(object):
             # => SIGINT is still delivered to the solver, which is what we want
             signal.signal(signal.SIGINT, signal.SIG_IGN)
             solver = GUROBI_NAME
+            options = [("Presolve", presolve),
+                       ("MIPGapAbs", 0.2)]
+            if time_limit is not None:
+                options.append(("TimeLimit", time_limit))
             result = self.model.solve(GUROBI_CMD(keepFiles=1,
                                                  msg=True,
-                                                 options=[("TimeLimit", time_limit),
-                                                          ("Presolve", presolve),
-                                                          ("MIPGapAbs", 0.2)]))
+                                                 options=options))
             if result is None or result == 0:
                 self.write_infaisability()
 
@@ -1071,7 +1073,7 @@ class TTModel(object):
             print('lpfile has been saved in FlOpTT-pulp.lp')
             return None
 
-    def solve(self, time_limit=3600, target_work_copy=None, solver=GUROBI_NAME):
+    def solve(self, time_limit, target_work_copy=None, solver=GUROBI_NAME):
         """
         Generates a schedule from the TTModel
         The solver stops either when the best schedule is obtained or timeLimit
