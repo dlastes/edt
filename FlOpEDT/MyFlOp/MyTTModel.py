@@ -74,7 +74,7 @@ class MyTTModel(TTModel):
         """
         TTModel.add_specific_constraints(self)
 
-    def solve(self, time_limit=3600, target_work_copy=None,
+    def solve(self, time_limit, target_work_copy=None,
               solver=GUROBI_NAME):
         """
         If you shall add pre (or post) processing apps, you may write them down
