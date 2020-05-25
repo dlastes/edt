@@ -27,6 +27,7 @@ from enum import Enum
 
 
 class ConstraintType(Enum):
+    UNDEFINED = "Undefined"
     # From TTModel
     # TECHNICAL
     TECHNICAL = "Technical"
