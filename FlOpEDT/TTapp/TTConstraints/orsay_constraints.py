@@ -152,7 +152,8 @@ class BreakAroundCourseType(TTConstraint):
                     broken_breaks += a1o2 + o1a2
 
             if self.weight is None:
-                ttmodel.add_constraint(broken_breaks, '==', 0, Constraint(BREAK_AROUND_COURSE))
+                ttmodel.add_constraint(broken_breaks, '==', 0,
+                                       Constraint(constraint_type=ConstraintType.BREAK_AROUND_COURSE))
             else:
                 cost = broken_breaks * ponderation * self.local_weight()
                 ttmodel.add_to_group_cost(group, cost, week)
