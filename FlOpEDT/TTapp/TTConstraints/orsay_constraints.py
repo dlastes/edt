@@ -83,7 +83,8 @@ class GroupsLunchBreak(TTConstraint):
                                            bound=2 * slots_nb)
 
                 if self.weight is None:
-                    ttmodel.add_constraint(not_ok,'==', 0, Constraint(ConstraintType.LUNCH_BREAK))
+                    ttmodel.add_constraint(not_ok,'==', 0, Constraint(ConstraintType.LUNCH_BREAK,
+                                                                      groups=group))
                     # ttmodel.add_constraint(ttmodel.sum(slot_vars[group, sl] for sl in local_slots),
                     #                        '<=', len(local_slots),
                     #                        Constraint(constraint_type=ConstraintType.LUNCH_BREAK,
@@ -153,7 +154,8 @@ class BreakAroundCourseType(TTConstraint):
 
             if self.weight is None:
                 ttmodel.add_constraint(broken_breaks, '==', 0,
-                                       Constraint(constraint_type=ConstraintType.BREAK_AROUND_COURSE))
+                                       Constraint(constraint_type=ConstraintType.BREAK_AROUND_COURSE,
+                                                  groups=group))
             else:
                 cost = broken_breaks * ponderation * self.local_weight()
                 ttmodel.add_to_group_cost(group, cost, week)
