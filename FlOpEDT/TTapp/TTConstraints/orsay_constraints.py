@@ -52,13 +52,11 @@ class GroupsLunchBreak(TTConstraint):
     lunch_length = models.PositiveSmallIntegerField()
     groups = models.ManyToManyField('base.Group', blank=True, related_name='lunch_breaks_constraints')
 
-    def enrich_model(self, ttmodel, week, ponderation=1000):
+    def enrich_model(self, ttmodel, week, ponderation=1000000):
         considered_groups = considered_basic_groups(self, ttmodel)
         days = days_filter(ttmodel.wdb.days, week=week)
-        try:
+        if self.weekdays:
             days = days_filter(days, day_in=self.weekdays)
-        except ObjectDoesNotExist:
-            pass
         for day in days:
             local_slots = [Slot(day=day, start_time=st, end_time=st+self.lunch_length)
                            for st in range(self.start_time, self.end_time - self.lunch_length + 1, 15)]
@@ -83,6 +81,7 @@ class GroupsLunchBreak(TTConstraint):
                                            expr=ttmodel.sum(slot_vars[group, sl] for sl in local_slots),
                                            floor=slots_nb,
                                            bound=2 * slots_nb)
+
                 if self.weight is None:
                     ttmodel.add_constraint(not_ok,'==', 0, Constraint())
                     # ttmodel.add_constraint(ttmodel.sum(slot_vars[group, sl] for sl in local_slots),
@@ -124,13 +123,11 @@ class BreakAroundCourseType(TTConstraint):
     course_type = models.ForeignKey('base.CourseType', related_name='amphi_break_constraint', on_delete=models.CASCADE)
     min_break_length = models.PositiveSmallIntegerField(default=15)
 
-    def enrich_model(self, ttmodel, week, ponderation=100):
+    def enrich_model(self, ttmodel, week, ponderation=1000):
         considered_groups = considered_basic_groups(self, ttmodel)
         days = days_filter(ttmodel.wdb.days, week=week)
-        try:
+        if self.weekdays:
             days = days_filter(days, day_in=self.weekdays)
-        except ObjectDoesNotExist:
-            pass
         for group in considered_groups:
             amphis = set(self.get_courses_queryset_by_parameters(ttmodel, week, group=group, course_type=self.course_type))
             other_courses = set(self.get_courses_queryset_by_parameters(ttmodel, week, group=group).exclude(type=self.course_type))
@@ -150,8 +147,9 @@ class BreakAroundCourseType(TTConstraint):
                     amphi_slot2 = ttmodel.sum(ttmodel.TT[slot2, c]
                                               for slot2 in successive_slots
                                               for c in amphis & ttmodel.wdb.compatible_courses[slot2])
-                    broken_breaks += ttmodel.add_floor(name='', expr=amphi_slot1+other_slot2, floor=2, bound=2)
-                    broken_breaks += ttmodel.add_floor(name='', expr=amphi_slot2+other_slot1, floor=2, bound=2)
+                    a1o2 = ttmodel.add_floor(name='', expr=amphi_slot1+other_slot2, floor=2, bound=2)
+                    o1a2 = ttmodel.add_floor(name='', expr=amphi_slot2+other_slot1, floor=2, bound=2)
+                    broken_breaks += a1o2 + o1a2
 
             if self.weight is None:
                 ttmodel.add_constraint(broken_breaks, '==', 0, Constraint())
