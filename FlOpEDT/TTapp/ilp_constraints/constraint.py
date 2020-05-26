@@ -24,6 +24,7 @@
 # without disclosing the source code of your own applications.
 
 from collections.abc import Iterable
+from TTapp.ilp_constraints.constraint_type import ConstraintType
 
 def sing_or_plural(dimension):
     plurial = ""
@@ -53,7 +54,7 @@ def convert_to_list(dimension):
 
 
 class Constraint:
-    def __init__(self, constraint_type=None, instructors=[], slots=[], courses=[], weeks=[], rooms=[],
+    def __init__(self, constraint_type=ConstraintType.UNDEFINED, instructors=[], slots=[], courses=[], weeks=[], rooms=[],
                  groups=[], days=[], departments=[], modules=[], apm=[]):
 
         instructors, slots, courses, weeks, rooms, groups, days, departments, modules, apm \
