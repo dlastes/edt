@@ -310,7 +310,7 @@ class TTModel(object):
         # return LpVariable(countedname, cat=LpBinary)
         return LpVariable(self.var_nb, cat=LpBinary)
 
-    def add_constraint(self, expr, relation, value, constraint:Constraint):
+    def add_constraint(self, expr, relation, value, constraint=Constraint()):
         constraint_id = self.constraintManager.get_nb_constraints()
 
         # Add mathematic constraint
