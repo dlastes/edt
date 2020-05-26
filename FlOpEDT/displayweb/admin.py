@@ -8,6 +8,7 @@ from base.models import Module
 from people.models import Tutor
 from displayweb.models import BreakingNews, TutorDisplay, ModuleDisplay
 
+from FlOpEDT.settings.base import COSMO_MODE
 
 class BreakingNewsResource(resources.ModelResource):
     class Meta:
@@ -41,5 +42,18 @@ class ModuleDisplayResource(resources.ModelResource):
         fields = ('key', 'color_bg', 'color_txt')
 
 
+class ModuleDisplayAdmin(DepartmentModelAdmin):
+    list_display = ('module', 'color_bg', 'color_txt')
+    ordering = ('module',)
+
+    
+class TutorDisplayAdmin(DepartmentModelAdmin):
+    list_display = ('tutor', 'color_bg', 'color_txt')
+    ordering = ('tutor',)
+
     
 admin.site.register(BreakingNews, BreakingNewsAdmin)
+if COSMO_MODE:
+    admin.site.register(TutorDisplay, TutorDisplayAdmin)
+else:
+    admin.site.register(ModuleDisplay, ModuleDisplayAdmin)
