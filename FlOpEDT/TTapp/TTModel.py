@@ -1080,7 +1080,7 @@ class TTModel(object):
             print('lpfile has been saved in FlOpTT-pulp.lp')
             return None
 
-    def solve(self, time_limit, target_work_copy=None, solver=GUROBI_NAME):
+    def solve(self, time_limit=None, target_work_copy=None, solver=GUROBI_NAME):
         """
         Generates a schedule from the TTModel
         The solver stops either when the best schedule is obtained or timeLimit
