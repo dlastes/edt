@@ -1038,7 +1038,7 @@ class TTModel(object):
         if write_analysis:
             self.constraintManager.handle_reduced_result(iis_filename, file_path, filename_suffixe)
 
-    def optimize(self, time_limit, solver, presolve=2):
+    def optimize(self, time_limit, solver, presolve=2, threads=None):
         # The solver value shall be one of the available
         # solver corresponding pulp command or contain
         # gurobi
@@ -1051,6 +1051,8 @@ class TTModel(object):
                        ("MIPGapAbs", 0.2)]
             if time_limit is not None:
                 options.append(("TimeLimit", time_limit))
+            if threads is not None:
+                options.append(("Threads",threads))
             if self.keep_many_solution_files:
                 options.append(('SolFiles',
                                 f"misc/logs/solutions/flopmodel_{self.department.abbrev}_{self.weeks}"))
@@ -1080,7 +1082,7 @@ class TTModel(object):
             print('lpfile has been saved in FlOpTT-pulp.lp')
             return None
 
-    def solve(self, time_limit=None, target_work_copy=None, solver=GUROBI_NAME):
+    def solve(self, time_limit=None, target_work_copy=None, solver=GUROBI_NAME, threads=None):
         """
         Generates a schedule from the TTModel
         The solver stops either when the best schedule is obtained or timeLimit
@@ -1119,7 +1121,7 @@ class TTModel(object):
 
         print("Optimization started at", \
               datetime.datetime.today().strftime('%Hh%M'))
-        result = self.optimize(time_limit, solver)
+        result = self.optimize(time_limit, solver, threads=threads)
         print("Optimization ended at", \
               datetime.datetime.today().strftime('%Hh%M'))
 
