@@ -528,7 +528,7 @@ class TTModel(object):
             self.add_constraint(
                 self.sum(self.TTinstructors[sl, c, mtr.tutor]
                          for c in set(c for c in self.wdb.courses if c.module == mtr.module
-                                      and c.type == mtr.course_type)
+                                      and c.type == mtr.course_type and c.tutor is None)
                          for sl in slots_filter(self.wdb.compatible_slots[c],
                                                 week=mtr.week)
                          ),
