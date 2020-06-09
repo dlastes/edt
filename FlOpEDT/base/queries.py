@@ -50,6 +50,10 @@ def create_first_department():
 
     department = Department.objects.create(name="Default Department", abbrev="default")
 
+    T = Tutor.objects.create(username='MOI', is_staff=True, is_superuser=True, rights=6)
+    T.set_password('passe')
+    T.save()
+
     # Update all existing department related models
     models = [
         TrainingProgramme, EdtVersion, Regen, \
