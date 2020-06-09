@@ -468,7 +468,7 @@ def modules_extract(department, book):
 
 
     while idMod is not None:
-        idMod = idMod.replace(' ','')
+        #idMod = idMod.replace(' ','')
         tpMod = sheet.cell(row=MODULE_ROW, column=4).value
         period = sheet.cell(row=MODULE_ROW, column=6).value
         verif = Module.objects.filter(abbrev=idMod,
@@ -480,7 +480,7 @@ def modules_extract(department, book):
         if not verif.exists():
 
             codeMod = sheet.cell(row=MODULE_ROW, column=2).value
-            codeMod = codeMod.replace(' ','')
+            #codeMod = codeMod.replace(' ','')
             nameMod = sheet.cell(row=MODULE_ROW, column=3).value
             tpMod = sheet.cell(row=MODULE_ROW, column=4).value
             profMod = sheet.cell(row=MODULE_ROW, column=5).value
