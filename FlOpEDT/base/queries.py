@@ -40,7 +40,7 @@ from base.models import Group, RoomType, Room, \
 from displayweb.models import GroupDisplay, TrainingProgrammeDisplay, BreakingNews
 
 from people.models import Tutor, NotificationsPreferences
-from TTapp.models import TTConstraint
+from TTapp.TTConstraint import TTConstraint, all_subclasses
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +66,7 @@ def create_first_department():
             model_class.departments.add(department)
 
     # Update existing Constraint
-    types = TTConstraint.__subclasses__()
+    types = all_subclasses(TTConstraint)
 
     for type in types:
         type.objects.all().update(department=department)
