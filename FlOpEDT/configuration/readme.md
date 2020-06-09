@@ -22,7 +22,7 @@ On vous invite à utiliser LibreOffice, mais **enregistrez-le en xlsx** (car on 
 Saisissez vos enseignants, avec un `id` unique (et court si possible) en ne laissant aucune colonne vide.
 ![Récupérer le fichier de database](static/configuration/intervenants.png)
 
-Attention : Ne sautez pas de ligne! Les lignes après le saut seraient ignorées...
+:pushpin: Ne sautez pas de ligne! Les lignes après le saut seraient ignorées...
 
 #### Onglet `Salles`
 Remplir d'abord le nom des salles et des groupes de salles, puis la composition des groupes et des types de salles.
@@ -66,9 +66,9 @@ Cela permettra d'attribuer aux cours d'un type donné des caractéristiques prop
 Et enfin...
 #### Onglet `Paramètres`
 Décrire les horaires et les jours d'activité devotre département, ainsi que la taille des créneaux de définition des disponibilités (en minutes).
-:::info
+
 :bulb: S'il n'y a pas de pause méridionale, choisissez une heure de début de fin identique (par exemple 13 h).
-:::
+
 
 
 ### Déployer le fichier rempli pour définir votre département
