@@ -456,12 +456,13 @@ def groups_extract(department, book):
     for index, tp in enumerate(TrainingProgramme.objects.filter(department=department)):
         try:
             TPD = TrainingProgrammeDisplay.objects.get(training_programme=tp)
-            TPD.row = index
+            # TPD.row = index
+            TPD.row = 0
             TPD.save()
 
         except TrainingProgrammeDisplay.DoesNotExist:
-            TrainingProgrammeDisplay(training_programme=tp, row=index).save()
-        
+            # TrainingProgrammeDisplay(training_programme=tp, row=index).save()
+            TrainingProgrammeDisplay(training_programme=tp, row=0).save()
 
     #generate_group_file(department.abbrev)
 
