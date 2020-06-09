@@ -55,12 +55,12 @@ def convert_to_list(dimension):
 
 class Constraint:
     def __init__(self, constraint_type=ConstraintType.UNDEFINED, instructors=[], slots=[], courses=[], weeks=[], rooms=[],
-                 groups=[], days=[], departments=[], modules=[], apm=[]):
+                 groups=[], days=[], departments=[], modules=[], apm=[], name=None):
 
         instructors, slots, courses, weeks, rooms, groups, days, departments, modules, apm \
             = self.handle_dimensions(instructors, slots, courses, weeks, rooms, groups, days,
                                      departments, modules, apm)
-        self.name=name
+        self.name = name
 
         # self.id added with add_constraint
         self.constraint_type = constraint_type
