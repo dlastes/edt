@@ -60,6 +60,7 @@ class Constraint:
         instructors, slots, courses, weeks, rooms, groups, days, departments, modules, apm \
             = self.handle_dimensions(instructors, slots, courses, weeks, rooms, groups, days,
                                      departments, modules, apm)
+        self.name=name
 
         # self.id added with add_constraint
         self.constraint_type = constraint_type
@@ -159,6 +160,8 @@ class Constraint:
 
     def __str__(self):
         res = "(%s) La contrainte " % self.id
+        if self.name:
+            res += '"%s "' % self.name
         if self.constraint_type is not None:
             res += 'de type "%s" ; ' % self.constraint_type.value
         for dimension in self.dimensions.keys():
