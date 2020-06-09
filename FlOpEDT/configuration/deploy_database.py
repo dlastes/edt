@@ -288,7 +288,7 @@ def groups_extract(department, book):
     ######################## Creating the TrainingPrograms ####################################
 
     TP_ROW = 3
-    TP_COL = 13
+    TP_COL = 11
 
     idTP = sheet.cell(row=TP_ROW, column=TP_COL).value
 
@@ -314,7 +314,7 @@ def groups_extract(department, book):
 
     GT_ROW = 17
 
-    idGroupType = sheet.cell(row=GT_ROW, column=13).value
+    idGroupType = sheet.cell(row=GT_ROW, column=TP_COL).value
 
     while idGroupType is not None:
 
@@ -332,7 +332,7 @@ def groups_extract(department, book):
                 pass
 
         GT_ROW += 1
-        idGroupType = sheet.cell(row=GT_ROW, column=13).value
+        idGroupType = sheet.cell(row=GT_ROW, column=TP_COL).value
 
 
     ######################## Creating the Groups ####################################
@@ -353,7 +353,7 @@ def groups_extract(department, book):
                 tpGr = sheet.cell(row=GROUP_ROW, column=2).value
                 tpGroup = TrainingProgramme.objects.get(abbrev=tpGr, department=department)
 
-                gt = sheet.cell(row=GROUP_ROW, column=5).value
+                gt = sheet.cell(row=GROUP_ROW, column=4).value
                 groupType = GroupType.objects.get(name=gt, department=department)
 
                 group = Group(name=idGroup, size=0, train_prog=tpGroup, type=groupType)
@@ -377,7 +377,6 @@ def groups_extract(department, book):
 
         tpGr = sheet.cell(row=GROUP_ROW, column=2).value
         p_group = sheet.cell(row=GROUP_ROW, column=3).value
-        p_group2 = sheet.cell(row=GROUP_ROW, column=4).value
 
         if p_group is not None:
 
@@ -388,16 +387,6 @@ def groups_extract(department, book):
             group.parent_groups.add(parent_group)
 
             group.save()
-
-            if p_group2 is not None:
-
-                parent_group = Group.objects.get(name=p_group2, train_prog__abbrev=tpGr, train_prog__department=department)
-
-                group = Group.objects.get(name=idGroup, train_prog__abbrev=tpGr, train_prog__department=department)
-
-                group.parent_groups.add(parent_group)
-
-                group.save()
 
         GROUP_ROW += 1
         idGroup = sheet.cell(row=GROUP_ROW, column=1).value
@@ -420,14 +409,14 @@ def groups_extract(department, book):
 ######################## Defining Periods ####################################
 
     PERIOD_ROW = 12
-
-    id_per = sheet.cell(row=PERIOD_ROW, column=7).value
+    id_per_col = 6
+    id_per = sheet.cell(row=PERIOD_ROW, column=id_per_col).value
 
     while id_per is not None:
 
         verif = Period.objects.filter(department=department, name = id_per)
-        s_week = int(sheet.cell(row=PERIOD_ROW, column=8).value)
-        e_week = int(sheet.cell(row=PERIOD_ROW, column=9).value)
+        s_week = int(sheet.cell(row=PERIOD_ROW, column=id_per_col+1).value)
+        e_week = int(sheet.cell(row=PERIOD_ROW, column=id_per_col+2).value)
 
         if verif.exists():
             period = verif[0]
@@ -451,7 +440,7 @@ def groups_extract(department, book):
                 pass
 
         PERIOD_ROW += 1
-        id_per = sheet.cell(row=PERIOD_ROW, column=7).value
+        id_per = sheet.cell(row=PERIOD_ROW, column=id_per_col).value
 
     for index, tp in enumerate(TrainingProgramme.objects.filter(department=department)):
         try:
