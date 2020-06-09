@@ -138,9 +138,14 @@ def rooms_extract(department, book):
     sheet = book['Salles']
     ######################## Creating RoomTypes ####################################
 
-    ROOM_CATEGORY_START_ROW = 20
     ROOM_CATEGORY_START_COL = 5
-    
+    ROOM_CATEGORY_START_ROW = 1
+    test_type = sheet.cell(row=ROOM_CATEGORY_START_COL, column=ROOM_CATEGORY_START_ROW).value
+    while test_type != "Type":
+        ROOM_CATEGORY_START_ROW += 1
+        test_type = sheet.cell(row=ROOM_CATEGORY_START_COL, column=ROOM_CATEGORY_START_ROW).value
+    ROOM_CATEGORY_START_ROW += 1
+
     row = ROOM_CATEGORY_START_ROW
     col = ROOM_CATEGORY_START_COL
     idCat = sheet.cell(row=row, column=col).value
