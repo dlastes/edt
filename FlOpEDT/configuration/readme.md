@@ -78,8 +78,9 @@ Il y aura probablement des erreurs... à corriger!
 
 ## Deuxième étape : définir les cours à placer
 ### Récupérer le fichier planif_file.xlsx correspondant à votre département
-Il a été fait sur mesure pour vos besoins :cooking: :male-cook: !
+Il a été fait sur mesure pour vos besoins !
 
 ### Remplir les onglets pour chaque département
 ***flop!EDT*** a été pensé pour des structures où les cours à placer changeaient complètement chaque semaine. Il y a donc un gros travail pour remplir ce tableur. Mais une fois que c'est fait, vous aurez passé le plus gros.
+
 :pushpin: Evidemment, si votre planification de cours ne change pas d'une semaine sur l'autre, vous pouvez ne remplir qu'une semaine...
