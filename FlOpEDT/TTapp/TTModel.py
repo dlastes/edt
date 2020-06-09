@@ -216,20 +216,34 @@ class TTModel(object):
 
     def busy_vars_init(self):
         IBS = {}
+        limit = 1000
         for i in self.wdb.instructors:
+            other_dep_sched_courses = self.wdb.other_departments_scheduled_courses_for_tutor[i] \
+                                      | self.wdb.other_departments_scheduled_courses_for_supp_tutor[i]
             for sl in self.wdb.availability_slots:
+                other_dep_sched_courses_for_sl = other_dep_sched_courses \
+                                                 & self.wdb.other_departments_sched_courses_for_avail_slot[sl]
+                other_dep_nb = len(other_dep_sched_courses_for_sl)
                 IBS[(i, sl)] = self.add_var("IBS(%s,%s)" % (i, sl))
                 # Linking the variable to the TT
                 expr = self.lin_expr()
-                expr += 1000 * IBS[(i, sl)]
+                expr += limit * IBS[(i, sl)]
                 for s_sl in slots_filter(self.wdb.courses_slots, simultaneous_to=sl):
                     for c in self.wdb.possible_courses[i] & self.wdb.compatible_courses[s_sl]:
                         expr -= self.TTinstructors[(s_sl, c, i)]
+                # if TTinstructors == 1 for some i, then IBS==1 !
                 self.add_constraint(expr, '>=', 0,
                                     Constraint(constraint_type=ConstraintType.IBS_INF, instructors=i, slots=sl))
 
-                # self.add_constraint(expr, '<=', 999,
-                #                     Constraint(constraint_type=ConstraintType.IBS_SUP, instructors=i, slots=sl))
+                # If IBS == 1, then TTinstructors equals 1 for some OR other_dep_nb i > 1
+                self.add_constraint(expr, '<=', (limit - 1) + other_dep_nb,
+                                    Constraint(constraint_type=ConstraintType.IBS_SUP, instructors=i, slots=sl))
+
+                # if other_dep_nb >1 for some i, then IBS==1 !
+                self.add_constraint(limit * IBS[(i, sl)], '>=', other_dep_nb,
+                                    Constraint(constraint_type=
+                                               ConstraintType.PROFESSEUR_A_DEJA_COURS_EN_AUTRE_DEPARTEMENT_IBD,
+                                               slots=sl, instructors=i))
 
         IBD = {}
         IBHD = {}
@@ -871,7 +885,6 @@ class TTModel(object):
                 other_dep_sched_courses = self.wdb.other_departments_sched_courses_for_room[r] \
                                     & self.wdb.other_departments_sched_courses_for_avail_slot[sl]
                 if other_dep_sched_courses:
-                    d = other_dep_sched_courses.pop().course.type.department
                     self.avail_room[r][sl] = 0
 
         if self.core_only:
@@ -884,12 +897,7 @@ class TTModel(object):
                                       | self.wdb.other_departments_scheduled_courses_for_supp_tutor[i])
                                      & self.wdb.other_departments_sched_courses_for_avail_slot[sl])
                 if other_dep_sched_courses:
-                    d = other_dep_sched_courses.pop().course.type.department
                     self.avail_instr[i][sl] = 0
-                    self.add_constraint(self.IBS[i, sl], '==', 1,
-                                        Constraint(constraint_type=ConstraintType.
-                                                   PROFESSEUR_A_DEJA_COURS_EN_AUTRE_DEPARTEMENT_IBD,
-                                                   slots=sl, instructors=i, departments=d))
 
     def add_specific_constraints(self):
         """
