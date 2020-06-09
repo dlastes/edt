@@ -356,6 +356,11 @@ class WeeksDatabase(object):
                                                          week__in=self.weeks,
                                                          year=self.year):
             instructors.add(mtr.tutor)
+        try:
+            no_tut = Tutor.objects.get(username='---')
+            instructors.add(no_tut)
+        except:
+            pass
         courses_for_tutor = {}
         for i in instructors:
             courses_for_tutor[i] = set(self.courses.filter(tutor=i))
@@ -397,6 +402,10 @@ class WeeksDatabase(object):
 
     def possible_courses_tutor_init(self):
         possible_tutors = {}
+        try:
+            no_tut = Tutor.objects.get(username='---')
+        except:
+            no_tut = None
         for m in self.modules:
             if ModulePossibleTutors.objects.filter(module=m).exists():
                 possible_tutors[m] = set(ModulePossibleTutors.objects.get(module=m).possible_tutors.all())
@@ -412,6 +421,8 @@ class WeeksDatabase(object):
                 possible_tutors[c] = set(mtr.tutor for mtr in
                                          ModuleTutorRepartition.objects.filter(course_type=c.type, module=c.module,
                                                                                year=c.year, week=c.week))
+                if no_tut is not None:
+                    possible_tutors[c].add(no_tut)
             else:
                 possible_tutors[c] = possible_tutors[c.module]
 
