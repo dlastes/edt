@@ -11,13 +11,14 @@ Nous allons voir ici les deux premières étapes.
 
 ### Récupérer le fichier database_file.xlsx
 
-Se connecter avec un superuser (par défaut: username `MOI` et mot de passe `passe`).
+Se connecter avec un superuser (par défaut: username `admin` et mot de passe `passe`).
 Aller dans l'ongler Importer et récupérer le fichier.
 ![Récupérer le fichier de database](static/configuration/download_database_file.gif)
 
 ### Remplir le fichier
 On vous invite à utiliser LibreOffice, mais **enregistrez-le en xlsx** (car on utilise le module python `openpyxl` qui a besoin de ce format.)
-
+Globalement, évitez de modifier la structure du fichier: n'ajoutez pas de colonnes, si vous ajoutez des lignes faites
+le plutôt en bas de chaque onglet...). 
 #### Onglet `Intervenants`
 Saisissez vos enseignants, avec un `id` unique (et court si possible) en ne laissant aucune colonne vide.
 ![Récupérer le fichier de database](static/configuration/intervenants.png)
@@ -28,13 +29,15 @@ Saisissez vos enseignants, avec un `id` unique (et court si possible) en ne lais
 Remplir d'abord le nom des salles et des groupes de salles, puis la composition des groupes et des types de salles.
 
 Ne pas confondre :
-* un **type de salles** : *une* de ses salles seront affectées à cours qui est de ce type
-* un **groupe de salles** : ayant le même statut que les salles, le groupe sera affecté à un cours, donc toutes les salles qui le composent seront affectées à un *même* cours.
+* un **type de salles** : *une* de ses salles sera affectée à un cours qui est de ce type. 
+* un **groupe de salles** : ayant le même statut que les salles, le groupe sera affecté à un cours, 
+donc toutes les salles qui le composent seront affectées à un *même* cours.
 
 ![Récupérer le fichier de database](static/configuration/salles.png)
 
-Dans l'exemple, il y a 4 salles et deux groupes.
-Le type `simple` affectera à un cours une des salles au choix, le type `double` affectera à un cours le groupe `B12` ou le groupe `A12`...
+Dans l'exemple, il y a 5 salles et deux groupes.
+Le type `simple` affectera à un cours une des salles au choix, le type `double` affectera à un cours le groupe `B12` 
+ou le groupe `A12`...
 
 #### Onglet `Groupes`
 C'est l'onglet le plus galère à remplir, notamment parce qu'il faut le faire de droite à gauche... :smirk_cat: 
