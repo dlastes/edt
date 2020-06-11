@@ -27,7 +27,6 @@
 import string, logging
 
 from django.db import transaction
-from openpyxl import load_workbook
 
 from random import choice
 
@@ -38,6 +37,8 @@ from base.models import RoomType, Room, TrainingProgramme,\
     Department, CourseStartTimeConstraint, TimeGeneralSettings, UserPreference, CoursePreference
 
 from people.models import FullStaff, SupplyStaff, Tutor, UserDepartmentSettings
+
+from configuration.parse_database_file_xlsx import parse_file
 
 from django.db import IntegrityError
 
@@ -57,52 +58,39 @@ def extract_database_file(department_name=None, department_abbrev=None, bookname
                     f"It will be updated")
     if bookname is None:
         bookname = f"{media_dir}/database_file_{department_abbrev}.xlsx"
-    try:
-        book = load_workbook(filename=bookname, data_only=True)
-    except FileNotFoundError as ie:
+
+    book = parse_file(bookname)
+    if book == None:
         logger.warning("Database file could not be loaded : \n", ie)
         return
 
-    tutors_extract(department, book)
-    rooms_extract(department, book)
-    groups_extract(department, book)
-    modules_extract(department, book)
-    coursetypes_extract(department, book)
-    settings_extract(department, book)
+    settings_extract(department, book['settings'])
+    people_extract(department, book['people'])
+    rooms_extract(department, book['room_groups'], book['room_categories'], book['rooms'])
+    groups_extract(department, book['promotions'], book['group_types'], book['groups'])
+    modules_extract(department, book['modules'])
+    courses_extract(department, book['cours'])
 
+def people_extract(department, people):
 
-def tutors_extract(department, book):
+    logger.info("People extraction : start")    
+    for id_, person in people.items():
 
-    sheet = book["Intervenants"]
-
-    INTER_ID_ROW = 3
-    id = sheet.cell(row=INTER_ID_ROW, column=1).value
-
-    while id is not None :
-
-        name = sheet.cell(row=INTER_ID_ROW, column=2).value
-        last_name = sheet.cell(row=INTER_ID_ROW, column=3).value
-        status = sheet.cell(row=INTER_ID_ROW, column=4).value
-        email = sheet.cell(row=INTER_ID_ROW, column=5).value
-        
         try:
-            tutor = Tutor.objects.get(username=id)
-            logger.debug(f'update tutor : [{id}]')
+            tutor = Tutor.objects.get(username=id_)
+            logger.debug(f"update tutor : '{id_}'")
 
         except Tutor.DoesNotExist:
 
             try:
-                params = { 'username': id, 'first_name': name, 'last_name': last_name, 'email': email, }    
-                
-                if status == "Permanent":
-                    tutor = FullStaff(**params)
+
+                if person['status'] == "Permanent":
+                    del person['employer']
+                    tutor = FullStaff(username=id_, **person)
                     tutor.status=Tutor.FULL_STAFF
                 else:
-                    employer = sheet.cell(row=INTER_ID_ROW, column=9).value
-                    position = sheet.cell(row=INTER_ID_ROW, column=8).value
-
-                    params.update({'employer': employer, 'position': position})
-                    tutor = SupplyStaff(**params)
+                    # FIXME: can 'position' be anything else?!
+                    tutor = SupplyStaff(username=id_, position='Salarié', **person)
                     tutor.status = Tutor.SUPP_STAFF
 
                 tutor.set_password("passe")
@@ -110,14 +98,6 @@ def tutors_extract(department, book):
                 tutor.save()
 
                 UserDepartmentSettings.objects.create(department=department, user=tutor)
-
-                # user_preference_start_times = [480, 570, 660, 855, 945, 1035]
-                # for t in Tutor.objects.all():
-                #     for d in [day[0] for day in Day.CHOICES[:5]]:
-                #         for st in user_preference_start_times:
-                #             up = UserPreference(user=t, day=d, start_time=st, duration=90, value=8)
-                #             up.save()
-
 
             except IntegrityError as ie :
                 logger.warning("A constraint has not been respected while creating the Professor : \n", ie)
@@ -127,302 +107,219 @@ def tutors_extract(department, book):
         else:
             UserDepartmentSettings.objects.get_or_create(department=department, user=tutor)
 
-        INTER_ID_ROW += 1
-        id = sheet.cell(row=INTER_ID_ROW, column=1).value
-
-    logger.info("Tutors extraction done")
+    logger.info('People extraction : finish')
 
 
-def rooms_extract(department, book):
+def rooms_extract(department, room_groups, room_categories, rooms):
 
-    sheet = book['Salles']
-    ######################## Creating RoomTypes ####################################
-
-    ROOM_CATEGORY_START_COL = 5
-    ROOM_CATEGORY_START_ROW = 1
-    test_type = sheet.cell(row=ROOM_CATEGORY_START_COL, column=ROOM_CATEGORY_START_ROW).value
-    while test_type != "Type":
-        ROOM_CATEGORY_START_ROW += 1
-        test_type = sheet.cell(row=ROOM_CATEGORY_START_COL, column=ROOM_CATEGORY_START_ROW).value
-    ROOM_CATEGORY_START_ROW += 1
-
-    row = ROOM_CATEGORY_START_ROW
-    col = ROOM_CATEGORY_START_COL
-    idCat = sheet.cell(row=row, column=col).value
-
-    # Create temporary RoomType for import purposes. This type 
+    logger.info('Room extraction : start')
+    
+    # Create temporary RoomType for import purposes. This type
     # will be deleted at the end of the process
     temporary_room_random_key = ''.join(choice(string.ascii_lowercase + string.digits) for _ in range(6))
     temporary_room_type = RoomType.objects.create(department=department, name=f"temp_{department.abbrev}_{temporary_room_random_key}")
 
-    while idCat is not None :
+    for cat_id in room_categories.keys():
+
         try:
-            RoomType.objects.get_or_create(department=department, name=idCat)
+            RoomType.objects.get_or_create(department=department, name=cat_id)
         except IntegrityError as ie:
-            logger.warning("A constraint has not been respected creating the RoomType %s : \n" %idCat, ie)
+            logger.warning(f"A constraint has not been respected creating the room category '{cat_id}' : {ie}")
 
-        row += 1
-        idCat = sheet.cell(row=row, column=col).value
-
-    ######################## Creating Rooms ####################################
-
-    ROOM_DECLARATION_START_ROW = 3
-    ROOM_DECLARATION_COL = 1
-    
-    row = ROOM_DECLARATION_START_ROW
-    col = ROOM_DECLARATION_COL
-    idRoom = sheet.cell(row=row, column=col).value
-
-    while idRoom is not None :
+    for id_ in rooms:
 
         try:
-            room, _ = Room.objects.get_or_create(name=idRoom)
-            
+            room, _ = Room.objects.get_or_create(name=id_)
+
             room.types.add(temporary_room_type)
-            
-            # Ensure that a room_group exits with the same roomid
             room.departments.add(department)
 
-
         except IntegrityError as ie:
-            logger.warning("A constraint has not been respected creating the Room %s : \n" %idRoom, ie)
+            logger.warning(f"A constraint has not been respected creating the room '{id_}' : {ie}")
 
-        row += 1
-        idRoom = sheet.cell(row=row, column=col).value
-
-    ######################## Creating RoomGroups ####################################
-
-    ROOMGROUP_DECLARATION_START_ROW = 3
-    ROOMGROUP_DECLARATION_COL = 2
-
-    row = ROOMGROUP_DECLARATION_START_ROW
-    col = ROOMGROUP_DECLARATION_COL
-    room_id = sheet.cell(row=row, column=col).value
-
-    while room_id is not None :
+    for group_id, members in room_groups.items():
 
         try:
-            room_group, _ = Room.objects.get_or_create(name=room_id)
+            room_group, _ = Room.objects.get_or_create(name=id_)
             room_group.types.add(temporary_room_type)
 
         except IntegrityError as ie:
-            logger.warning("A constraint has not been respected creating the RoomGroup %s : \n" %room_id, ie)
+            logger.warning(f"A constraint has not been respected creating the room group '{group_id}' : {ie}")
+            pass # FIXME: continue?
 
-        row += 1
-        room_id = sheet.cell(row=row, column=col).value
+        for room_id in members:
 
-    ######################## Filling the RoomGroups with Rooms ####################################
+            logger.info(f"Add room '{room_id}' to group '{group_id}'")
 
-    ROOMGROUP_DEFINITION_START_ROW = 4
-    ROOMGROUP_DEFINITION_START_COL = 5
-
-    row = ROOMGROUP_DEFINITION_START_ROW
-    col = ROOMGROUP_DEFINITION_START_COL
-    idGroup = sheet.cell(row=row, column=col).value
-
-    while idGroup is not None :
-
-        col = ROOMGROUP_DEFINITION_START_COL + 1
-        idRoom = sheet.cell(row=row, column=col).value
-        room_group = Room.objects.get(name=idGroup, types__in=[temporary_room_type, ])
-
-        while idRoom is not None :
-
-            logger.info(f"Add room [{idRoom}] to group : {idGroup}")
-            
-            try:                
-                room = Room.objects.get(name=idRoom)
+            try:
+                room = Room.objects.get(name=room_id)
                 room.subroom_of.add(room_group)
 
             except Room.DoesNotExist:
-                logger.warning(f"unable to find room '{idRoom}' with correct RoomType'")
-            
-            except Room.DoesNotExist:
-                logger.warning(f"unable to find  RoomGroup '{idGroup}' with correct RoomType'")                            
+                logger.warning(f"Unable to find room '{room_id}'")
 
-            col += 1
-            idRoom = sheet.cell(row=row, column=col).value
+    for cat_id, members in room_categories.items():
 
-        row += 1
-        idGroup = sheet.cell(row=row,
-                             column=ROOMGROUP_DEFINITION_START_COL).value
+        room_type = RoomType.objects.get(department=department, name=cat_id)
+        for member in members:
 
-    ######################## Giving a RoomType to each RoomGroup ####################################
-
-    row = ROOM_CATEGORY_START_ROW
-    col = ROOM_CATEGORY_START_COL
-    idCat = sheet.cell(row=row, column=col).value
-
-    while idCat is not None :
-
-        col = ROOM_CATEGORY_START_COL + 1
-        room_id = sheet.cell(row=row, column=col).value
-
-        room_type = RoomType.objects.get(department=department, name=idCat)
-
-        while room_id is not None :
             try:
-                # Test if group is a common room based group or a department custom group
+                # Test if member is a room group or a room
                 try:
-                    room_group = Room.objects.get(subrooms__id=room_id)
+                    room_group = Room.objects.get(subrooms__id=member)
                 except:
-                    room_group = Room.objects.get(name=room_id, types__in=[temporary_room_type, ])
+                    room_group = Room.objects.get(name=member, types__in=[temporary_room_type, ])
 
                 room_group.types.add(room_type)
             except Room.DoesNotExist:
-                logger.warning(f"unable to find  RoomGroup '{room_id}'")
-
-            col += 1
-            room_id = sheet.cell(row=row, column=col).value
-
-        row += 1
-        idCat = sheet.cell(row=row, column=ROOM_CATEGORY_START_COL).value
+                logger.warning(f"Unable to find room '{member}'")
 
     temporary_room_type.delete()
-    logger.info("Rooms extraction done")
+    logger.info('Room extraction : finish')
 
 
-# groups_extract
-# Creates the groups, the training programs, and
-# and fills the groups with their parent groups
+def groups_extract(department, promotions, group_types, groups):
 
-def groups_extract(department, book):
+    logger.info('Groups extraction : start')
+    for id_, name in promotions.items():
 
-    sheet = book['Groupes']
-
-    ######################## Creating the TrainingPrograms ####################################
-
-    TP_ROW = 3
-    TP_COL = 11
-
-    idTP = sheet.cell(row=TP_ROW, column=TP_COL).value
-
-    while idTP is not None:
-
-        verif = TrainingProgramme.objects.filter(abbrev=idTP, department=department)
+        verif = TrainingProgramme.objects.filter(abbrev=id_, department=department)
 
         if not verif.exists():
 
-            nameTP = sheet.cell(row=TP_ROW, column=TP_COL + 1).value
-
             try:
-                trainingProg = TrainingProgramme(department=department, name=nameTP, abbrev=idTP)
-                trainingProg.save()
+                promotion = TrainingProgramme(department=department, name=name, abbrev=id_)
+                promotion.save()
             except IntegrityError as ie:
-                logger.warning("A constraint has not been respected creating the TrainingProgramme %s : \n" % idTP, ie)
-                pass
+                logger.warning(f"A constraint has not been respected creating the promotion '{id_}' : {ie}")
+                pass # FIXME: continue?
 
-        TP_ROW += 1
-        idTP = sheet.cell(row=TP_ROW, column=TP_COL).value
+    for id_ in group_types:
 
-    ######################## Creating the GroupTypes ####################################
-
-    GT_ROW = 17
-
-    idGroupType = sheet.cell(row=GT_ROW, column=TP_COL).value
-
-    while idGroupType is not None:
-
-        verif = GroupType.objects.filter(name=idGroupType, department=department)
+        verif = GroupType.objects.filter(name=id_, department=department)
 
         if not verif.exists():
 
             try:
-
-                gt = GroupType(name=idGroupType, department=department)
-                gt.save()
+                group_type = GroupType(name=id_, department=department)
+                group_type.save()
 
             except IntegrityError as ie:
-                logger.warning("A constraint has not been respected creating the GroupType %s : \n" % idGroupType, ie)
-                pass
+                logger.warning(f"A constraint has not been respected creating the group type '{id_}' : {ie}")
+                pass # FIXME: continue ?
 
-        GT_ROW += 1
-        idGroupType = sheet.cell(row=GT_ROW, column=TP_COL).value
+    # first loop on groups just to create them - it's too early to set the parents
+    for id_, group in groups.items():
 
-
-    ######################## Creating the Groups ####################################
-
-    GROUP_ROW = 3
-
-    idGroup = sheet.cell(row=GROUP_ROW, column=1).value
-
-    while idGroup is not None:
-
-        tpGr = sheet.cell(row=GROUP_ROW, column=2).value
-        verif = Group.objects.filter(name=idGroup, train_prog__abbrev=tpGr, train_prog__department=department)
+        verif = Group.objects.filter(name=id_, train_prog__abbrev=group['promotion'],
+                                     train_prog__department=department)
 
         if not verif.exists():
 
             try:
 
-                tpGr = sheet.cell(row=GROUP_ROW, column=2).value
-                tpGroup = TrainingProgramme.objects.get(abbrev=tpGr, department=department)
-
-                gt = sheet.cell(row=GROUP_ROW, column=4).value
-                groupType = GroupType.objects.get(name=gt, department=department)
-
-                group = Group(name=idGroup, size=0, train_prog=tpGroup, type=groupType)
+                promotion = TrainingProgramme.objects.get(abbrev=group['promotion'],
+                                                          department=department)
+                groupType = GroupType.objects.get(name=group['nature'], department=department)
+                group = Group(name=id_, size=0, train_prog=promotion, type=groupType)
                 group.save()
 
             except IntegrityError as ie:
-                logger.warning("A constraint has not been respected creating the Group %s : \n" % idGroup, ie)
-                pass
+                logger.warning(f"A constraint has not been respected creating the group '{id_}' : {ie}")
+                pass # FIXME: continue?
 
-        GROUP_ROW += 1
-        idGroup = sheet.cell(row=GROUP_ROW, column=1).value
+    # second loop, set the parents
 
+    for id_, group in groups.items():
 
-    ######################## Filling the Groups with their parent groups ####################################
+        for parent in group['parent']:
 
-    GROUP_ROW = 3
-
-    idGroup = sheet.cell(row=GROUP_ROW, column=1).value
-
-    while idGroup is not None:
-
-        tpGr = sheet.cell(row=GROUP_ROW, column=2).value
-        p_group = sheet.cell(row=GROUP_ROW, column=3).value
-
-        if p_group is not None:
-
-            parent_group = Group.objects.get(name=p_group, train_prog__abbrev=tpGr, train_prog__department=department)
-
-            group = Group.objects.get(name=idGroup, train_prog__abbrev=tpGr, train_prog__department=department)
-
+            parent_group = Group.objects.get(name=parent, train_prog__abbrev=group['promotion'], train_prog__department=department)
+            group = Group.objects.get(name=id_, train_prog__abbrev=group['promotion'], train_prog__department=department)
             group.parent_groups.add(parent_group)
-
             group.save()
-
-        GROUP_ROW += 1
-        idGroup = sheet.cell(row=GROUP_ROW, column=1).value
-
-######################## Defining basic groups ####################################
 
     for g in Group.objects.all():
 
         isbasic = True
 
         for g1 in Group.objects.all():
-
             if g in g1.parent_groups.all():
-
                 isbasic = False
                 break
 
         g.basic = isbasic
         g.save()
 
-######################## Defining Periods ####################################
+    logger.info('Groups extraction : finish')
 
-    PERIOD_ROW = 12
-    id_per_col = 6
-    id_per = sheet.cell(row=PERIOD_ROW, column=id_per_col).value
 
-    while id_per is not None:
+def modules_extract(department, modules):
 
-        verif = Period.objects.filter(department=department, name = id_per)
-        s_week = int(sheet.cell(row=PERIOD_ROW, column=id_per_col+1).value)
-        e_week = int(sheet.cell(row=PERIOD_ROW, column=id_per_col+2).value)
+    logger.info('Modules extraction : start')
+    for id_, module in modules.items():
+
+        verif = Module.objects.filter(abbrev=id_,
+                                      train_prog__abbrev=module['promotion'],
+                                      train_prog__department=department,
+                                      period__name=module['period'])
+
+
+        if not verif.exists():
+
+            print(f"{module['promotion']=}")
+            promotion = TrainingProgramme.objects.get(abbrev=module['promotion'],
+                                                      department=department)
+            prof = Tutor.objects.get(username=module['responsable'])
+            period = Period.objects.get(name=module['period'], department=department)
+
+            try:
+
+                module = Module(name=module['name'], abbrev=id_, ppn=module['PPN'],
+                                train_prog=promotion, head=prof, period=period)
+                module.save()
+
+            except IntegrityError as ie:
+                logger.warning(f"A constraint has not been respected creating the module {id_} : {ie}")
+                pass # FIXME: continue?
+
+    logger.info('Modules extraction : finish')
+
+
+def courses_extract(department, cours_):
+
+       logger.info('Courses extraction : start')
+       for id_, cours in cours_.items():
+
+        verif = CourseType.objects.filter(name=id_, department=department, duration=cours['duration'])
+
+        if not verif.exists():
+            try:
+                course_type = CourseType(name=id_, department=department, duration=cours['duration'])
+                course_type.save()
+
+                time_constraint = CourseStartTimeConstraint(course_type=course_type, allowed_start_times=list(cours['start_times']))
+                time_constraint.save()
+
+                for id_group in cours['group_types']:
+                    group = GroupType.objects.get(name=id_group, department=department)
+                    course_type.group_types.add(group)
+                    course_type.save()
+
+            except IntegrityError as ie:
+
+                logger.warning(f"A constraint has not been respected creating the course type {id_} : {ie}")
+                pass # FIXME: continue?
+
+       logger.info('Courses extraction : finish')
+
+
+def settings_extract(department, settings):
+
+    logger.info('Settings extraction : start')
+    for id_, (s_week, e_week) in settings['periods'].items():
+
+        verif = Period.objects.filter(department=department, name = id_)
 
         if verif.exists():
             period = verif[0]
@@ -431,204 +328,25 @@ def groups_extract(department, book):
                 period.ending_week = e_week
                 period.save()
                 logger.info(f" Period {id_per}' extreme weeks have been updated")
-
         else:
-
             try:
-
-                Period.objects.create(name=id_per,
-                                      department=department,
-                                      starting_week=s_week,
-                                      ending_week=e_week)
+                Period.objects.create(name=id_, department=department,
+                                      starting_week=s_week, ending_week=e_week)
 
             except IntegrityError as ie:
-                logger.warning("A constraint has not been respected creating the Period %s : \n" % id_per, ie)
-                pass
+                logger.warning(f"A constraint has not been respected creating the period '{id_}' : {ie}")
+                pass # FIXME: continue?
 
-        PERIOD_ROW += 1
-        id_per = sheet.cell(row=PERIOD_ROW, column=id_per_col).value
-
-    for index, tp in enumerate(TrainingProgramme.objects.filter(department=department)):
-        try:
-            TPD = TrainingProgrammeDisplay.objects.get(training_programme=tp)
-            # TPD.row = index
-            TPD.row = 0
-            TPD.save()
-
-        except TrainingProgrammeDisplay.DoesNotExist:
-            # TrainingProgrammeDisplay(training_programme=tp, row=index).save()
-            TrainingProgrammeDisplay(training_programme=tp, row=0).save()
-
-    #generate_group_file(department.abbrev)
-
-    logger.info("Groups extraction done")
-
-
-def modules_extract(department, book):
-
-    sheet = book["Modules"]
-
-    MODULE_ROW=3
-
-    idMod=sheet.cell(row=MODULE_ROW, column=1).value
-
-
-    while idMod is not None:
-        #idMod = idMod.replace(' ','')
-        tpMod = sheet.cell(row=MODULE_ROW, column=4).value
-        period = sheet.cell(row=MODULE_ROW, column=6).value
-        verif = Module.objects.filter(abbrev=idMod,
-                                      train_prog__abbrev=tpMod,
-                                      train_prog__department=department,
-                                      period__name=period)
-
-
-        if not verif.exists():
-
-            codeMod = sheet.cell(row=MODULE_ROW, column=2).value
-            #codeMod = codeMod.replace(' ','')
-            nameMod = sheet.cell(row=MODULE_ROW, column=3).value
-            tpMod = sheet.cell(row=MODULE_ROW, column=4).value
-            profMod = sheet.cell(row=MODULE_ROW, column=5).value
-            tpModule = TrainingProgramme.objects.get(abbrev=tpMod,
-                                                     department=department)
-            try:
-                profesMod = Tutor.objects.get(username=profMod)
-            except:
-                logger.warning(f"unable to find tutor '{profMod}'")
-            periodMod = Period.objects.get(name=period, department=department)
-
-            try:
-
-                module = Module(name=nameMod, abbrev=idMod, ppn=codeMod, train_prog=tpModule, head=profesMod, period=periodMod)
-                module.save()
-
-            except IntegrityError as ie:
-                logger.warning("A constraint has not been respected creating the Module %s : \n" % idMod, ie)
-                pass
-
-        MODULE_ROW+=1
-
-        idMod=sheet.cell(row=MODULE_ROW, column=1).value
-
-    logger.info("Modules extraction done")
-
-def coursetypes_extract(department, book):
-
-    sheet = book['Cours']
-
-    type_row = 2
-
-    idType = sheet.cell(row=type_row, column=1).value
-
-    while idType is not None:
-
-        duration_col = 2
-        duration = sheet.cell(row=type_row, column=duration_col).value
-
-        verif = CourseType.objects.filter(name=idType, department=department, duration=duration)
-
-        if not verif.exists():
-            try:
-                course_type = CourseType(name=idType, department=department, duration=duration)
-                course_type.save()
-
-                time_col = 8
-                start_times = []
-                time = sheet.cell(row=type_row, column=time_col).value
-                while time is not None:
-                    time = time.split('h')
-                    hours = int(time[0])
-                    if time[1] != "":
-                        minutes = int(time[1])
-                    else:
-                        minutes = 0
-                    start_time = 60*hours + minutes
-                    start_times.append(start_time)
-                    time_col += 1
-                    time = sheet.cell(row=type_row, column=time_col).value
-
-                time_constraint = CourseStartTimeConstraint(course_type=course_type, allowed_start_times=start_times)
-                time_constraint.save()
-
-                grouptype_col = 3
-                idGroup = sheet.cell(row=type_row, column=grouptype_col).value
-
-                while idGroup is not None:
-                    group = GroupType.objects.get(name=idGroup, department=department)
-                    course_type.group_types.add(group)
-                    course_type.save()
-
-                    grouptype_col += 1
-                    idGroup = sheet.cell(row=type_row, column=grouptype_col).value
-
-            except IntegrityError as ie:
-
-                logger.warning("A constraint has not been respected creating the CourseType %s : \n" % idType, ie)
-                pass
-
-        type_row += 1
-        idType = sheet.cell(row=type_row, column=1).value
-
-    logger.info("CourseType extraction done")
-
-
-def convert_time(value):
-    """
-    Return an integer value from a time (hh:mm:ss) formated value 
-    representing the number of minutes since midnight
-    """
-    time_array = value.split(':')
-    return int(time_array[0]) * 60 + int(time_array[1])
-
-
-def settings_extract(department, book):
-    """
-    Extract general settings
-    """
-
-    sheet = book['Paramètres']
-    settings = {
+    params = {
         'department': department,
-        'days': [],
-        'day_start_time': None,
-        'day_finish_time': None,
-        'lunch_break_start_time': None,
-        'lunch_break_finish_time': None,
-        'default_preference_duration': None,
-
+        'days': list(settings['days']),
+        'day_start_time': settings['jalons']['day_start_time'],
+        'day_finish_time': settings['jalons']['day_finish_time'],
+        'lunch_break_start_time': settings['jalons']['lunch_break_start_time'],
+        'lunch_break_finish_time': settings['jalons']['lunch_break_finish_time'],
+        'default_preference_duration': settings['default_preference_duration'],
     }
 
-    # Get days opened for scheduling
-    days_row = 3
-    days_col = 4
-
-    for index, day in enumerate(Day.CHOICES):
-        day_raw_value = sheet.cell(row=days_row, column=days_col + index).value
-        if day_raw_value:
-            logger.debug(f'Day {day[0]} : {day_raw_value}')
-            settings['days'].append(day[0])
-
-    # Get time settings
-    hours_row = 2
-    hours_col = 2
-
-    for index, setting in enumerate(list(settings)[2:6]):
-        current_row = hours_row + index
-        hour_raw_value = sheet.cell(row=current_row, column=hours_col).value
-        try:
-            logger.debug(f'Hour {setting} : [{hour_raw_value}]')
-            hour = convert_time(str(hour_raw_value))
-            settings[setting] = hour
-        except:
-            logger.error(f'an error has occured while converting hour at Paramètres[{current_row}, {hours_col}]')
-
-    try:
-        default_preference_duration = int(sheet.cell(row=7, column=2).value)
-        settings['default_preference_duration'] = default_preference_duration
-    except:
-        logger.error(f'an error has occured while defining default_preference_duration')
-
-    # Set settings
-    logger.info(f'TimeGeneralSettings : {settings}')
-    TimeGeneralSettings.objects.get_or_create(**settings)
+    logger.info(f'TimeGeneralSettings : {params}')
+    TimeGeneralSettings.objects.get_or_create(**params)
+    logger.info('Settings extraction : finish')

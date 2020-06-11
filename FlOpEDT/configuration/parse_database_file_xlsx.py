@@ -8,7 +8,7 @@ rooms_sheet = 'Salles'
 groups_sheet = 'Groupes'
 modules_sheet = 'Modules'
 cours_sheet = 'Cours'
-params_sheet = 'Paramètres'
+settings_sheet = 'Paramètres'
 
 REASONABLE = 3141 # large enough?
 
@@ -207,11 +207,11 @@ def parse_people(sheet):
             logger.warning(f"Duplicate identifier '{id_}' in row {row}: ignoring the line")
             row = row + 1
             continue
-        result[id_] = {'nom': parse_string(sheet, row, col + 1),
-                       'prenom': parse_string(sheet, row, col + 2),
-                       'adresse': parse_string(sheet, row, col + 3),
-                       'statut': parse_string(sheet, row, col + 4),
-                       'employeur': parse_string(sheet, row, col + 5)}
+        result[id_] = {'first_name': parse_string(sheet, row, col + 1),
+                       'last_name': parse_string(sheet, row, col + 2),
+                       'email': parse_string(sheet, row, col + 3),
+                       'status': parse_string(sheet, row, col + 4),
+                       'employer': parse_string(sheet, row, col + 5)}
         row = row + 1
     return result
 
@@ -233,9 +233,9 @@ def parse_modules(sheet):
             row = row + 1
             continue
         result[id_] = {'PPN': parse_string(sheet, row, col + 1),
-                       'nom': parse_string(sheet, row, col + 2),
+                       'name': parse_string(sheet, row, col + 2),
                        'promotion': parse_string(sheet, row, col + 3),
-                       'période': parse_string(sheet, row, col + 4),
+                       'period': parse_string(sheet, row, col + 4),
                        'responsable': parse_string(sheet, row, col + 5)}
         row = row + 1
     return result
@@ -263,55 +263,54 @@ def parse_cours(sheet):
             logger.warning(f"Invalid duration in row {row} and column {col + 1}: ignoring the line")
             row = row + 1
             continue
-        result[id_] = {'durée': duree,
-                       'type_groupes': set(parse_string_list_in_line(sheet, row, col + 2)),
-                       'debuts_possibles': set(parse_time_list_in_line(sheet, row + 1, col + 2))}
+        result[id_] = {'duration': duree,
+                       'group_types': set(parse_string_list_in_line(sheet, row, col + 2)),
+                       'start_times': set(parse_time_list_in_line(sheet, row + 1, col + 2))}
         row = row + 2 # sic
     return result
 
-def parse_params(sheet):
+def parse_settings(sheet):
     jalons = dict()
     row, col = find_cell(sheet, 'Jalon')
     if row == None:
-        logger.warning(f"The 'Jalon' cell in sheet {params_sheet} is missing : using defaults")
-        jalons['debut_jour'] = 0 * 60
-        jalons['fin_jour'] = 23 * 60
-        jalons['debut_midi'] = 12 * 60
-        jalons['fin_midi'] = 13 * 60
+        logger.warning(f"The 'Jalon' cell in sheet {settings_sheet} is missing : using defaults")
+        jalons['day_start_time'] = 0 * 60
+        jalons['day_finish_time'] = 23 * 60
+        jalons['lunch_break_start_time'] = 12 * 60
+        jalons['lunch_break_finish_time'] = 13 * 60
     else:
         val = parse_time(sheet, row + 1, col + 1)
         if val == None:
-            logger.warning("Invalid time for day start")
+            logger.warning("Invalid time for day start time")
             val = 0 * 60
-        jalons['debut_jour'] = val
+        jalons['day_start_time'] = val
         val = parse_time(sheet, row + 2, col + 1)
         if val == None:
-            logger.warning("Invalid time for day end")
+            logger.warning("Invalid time for day finish time")
             val = 23 * 60
-        jalons['fin_jour'] = val
+        jalons['day_finish_time'] = val
         val = parse_time(sheet, row + 3, col + 1)
         if val == None:
-            logger.warning("Invalid time for noon start")
+            logger.warning("Invalid time for lunch break start time")
             val = 12 * 60
-        jalons['debut_midi'] = val
+        jalons['lunch_break_start_time'] = val
         val = parse_time(sheet, row + 4, col + 1)
         if val == None:
-            logger.warning("Invalid time for noon end")
+            logger.warning("Invalid time for lunch break finish time")
             val = 13 * 60
-        jalons['fin_midi'] = val
+        jalons['lunch_break_finish_time'] = val
 
     row, col = find_cell(sheet, 'Granularité')
+    duration = 60
     if row == None:
         logger.warning(f"The 'Granularité' cell in sheet {params_sheet} is missing : using default 60")
-        granul = 60
     else:
         try:
-            granul = int(parse_string(sheet, row, col + 1))
+            duration = int(parse_string(sheet, row, col + 1))
         except:
             logger.warning(f"The 'Granularité' in sheet {params_sheet} has an invalid value: using default 60")
-            granul = 60
 
-    ouvrables = set()
+    days = set()
     row, col = find_cell(sheet, 'Jours ouvrables')
     if row == None:
         logger.warning(f"The 'Jours ouvrables' cell in sheet {params_sheet} is missing")
@@ -319,9 +318,9 @@ def parse_params(sheet):
         # FIXME base.timing.Day has a CHOICES with this, but it's not available here
         for index, day in enumerate(['m', 'tu', 'w', 'th', 'f', 'sa', 'su']):
             if parse_string(sheet, row + 2, col + index) == 'X':
-                ouvrables.add(day[0])
+                days.add(day)
 
-    periodes = dict()
+    periods = dict()
     row, col = find_cell(sheet, 'Périodes')
     if row == None:
         logger.warning(f"The 'Périodes' cell in sheet {params_sheet} is missing")
@@ -332,17 +331,17 @@ def parse_params(sheet):
             if id_ == '':
                 row = row + 1
                 continue
-            if id_ in periodes:
+            if id_ in periods:
                 logger.warning(f"Duplicate period identifier '{id_}' in row {row}: ignoring the line")
                 row = row + 1
                 continue
-            periodes[id_] = (parse_string(sheet, row, col + 1), parse_string(sheet, row, col + 2))
+            periods[id_] = (parse_string(sheet, row, col + 1), parse_string(sheet, row, col + 2))
             row = row + 1
 
     return {'jalons': jalons,
-            'granularité': granul,
-            'ouvrables': ouvrables,
-            'périodes': periodes }
+            'default_preference_duration': duration,
+            'days': days,
+            'periods': periods }
 
 def parse_groups(sheet):
     row_prom, col_prom = find_cell(sheet, 'Identifiant')
@@ -460,12 +459,12 @@ def parse_file(filename = 'file_essai.xlsx'):
 
         cours = parse_cours(sheet)
 
-        sheet = wb[params_sheet]
+        sheet = wb[settings_sheet]
         if not sheet:
-            logger.warning(f"Sheet {params_sheet} doesn't exist")
+            logger.warning(f"Sheet {settings_sheet} doesn't exist")
             return None
 
-        params = parse_params(sheet)
+        settings = parse_settings(sheet)
 
         sheet = wb[groups_sheet]
         if not sheet:
@@ -480,7 +479,7 @@ def parse_file(filename = 'file_essai.xlsx'):
                 'people' : people,
                 'modules' : modules,
                 'cours' : cours,
-                'params' : params,
+                'settings' : settings,
                 'promotions': promotions,
                 'group_types' : group_types,
                 'groups' : groups }
