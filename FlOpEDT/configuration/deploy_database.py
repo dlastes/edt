@@ -120,7 +120,7 @@ def tutors_extract(department, book):
 
 
             except IntegrityError as ie :
-                logger.warning("A constraint has not been respected creation the Professor : \n", ie)
+                logger.warning("A constraint has not been respected while creating the Professor : \n", ie)
                 pass
             else:
                 logger.info(f'create tutor with id:{id}')
