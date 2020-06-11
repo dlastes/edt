@@ -407,6 +407,7 @@ def groups_extract(department, book):
             if g in g1.parent_groups.all():
 
                 isbasic = False
+                break
 
         g.basic = isbasic
         g.save()
