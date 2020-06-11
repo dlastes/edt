@@ -274,27 +274,30 @@ def parse_params(sheet):
     row, col = find_cell(sheet, 'Jalon')
     if row == None:
         logger.warning(f"The 'Jalon' cell in sheet {params_sheet} is missing : using defaults")
-        jalons['debut_jour'] = 0*60
-        jalons['fin_jour'] = 23*60
-        jalons['debut_midi'] = 12*60
-        jalons['fin_midi'] = 13*60
+        jalons['debut_jour'] = 0 * 60
+        jalons['fin_jour'] = 23 * 60
+        jalons['debut_midi'] = 12 * 60
+        jalons['fin_midi'] = 13 * 60
     else:
-        if (val := parse_time(sheet, row + 1, col + 1)) == None:
+        val = parse_time(sheet, row + 1, col + 1)
+        if val == None:
             logger.warning("Invalid time for day start")
-            val = 0*60
+            val = 0 * 60
         jalons['debut_jour'] = val
-        if (val := parse_time(sheet, row + 2, col + 1)) == None:
+        val = parse_time(sheet, row + 2, col + 1)
+        if val == None:
             logger.warning("Invalid time for day end")
-            val = 23*60
+            val = 23 * 60
         jalons['fin_jour'] = val
-        jalons['fin_jour'] = parse_time(sheet, row + 2, col + 1)
-        if (val := parse_time(sheet, row + 3, col + 1)) == None:
+        val = parse_time(sheet, row + 3, col + 1)
+        if val == None:
             logger.warning("Invalid time for noon start")
-            val = 12*60
+            val = 12 * 60
         jalons['debut_midi'] = val
-        if (val := parse_time(sheet, row + 4, col + 1)) == None:
+        val = parse_time(sheet, row + 4, col + 1)
+        if val == None:
             logger.warning("Invalid time for noon end")
-            val = 13*60
+            val = 13 * 60
         jalons['fin_midi'] = val
 
     row, col = find_cell(sheet, 'Granularité')
