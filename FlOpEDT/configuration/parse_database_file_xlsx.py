@@ -365,18 +365,18 @@ def parse_settings(sheet):
     row, col = find_cell(sheet, 'Granularité')
     duration = 60
     if row == None:
-        logger.warning(f"The 'Granularité' cell in sheet {params_sheet} is missing : using default 60")
+        logger.warning(f"The 'Granularité' cell in sheet {settings_sheet} is missing : using default 60")
     else:
         try:
             duration = int(parse_string(sheet, row, col + 1))
         except:
-            logger.warning(f"The 'Granularité' in sheet {params_sheet} has an invalid value: using default 60")
+            logger.warning(f"The 'Granularité' in sheet {settings_sheet} has an invalid value: using default 60")
     result['default_preference_duration'] = duration
 
     days = []
     row, col = find_cell(sheet, 'Jours ouvrables')
     if row == None:
-        logger.warning(f"The 'Jours ouvrables' cell in sheet {params_sheet} is missing")
+        logger.warning(f"The 'Jours ouvrables' cell in sheet {settings_sheet} is missing")
     else:
         # FIXME base.timing.Day has a CHOICES with this, but it's not available here
         for index, day in enumerate(['m', 'tu', 'w', 'th', 'f', 'sa', 'su']):
@@ -387,7 +387,7 @@ def parse_settings(sheet):
     periods = dict()
     row, col = find_cell(sheet, 'Périodes')
     if row == None:
-        logger.warning(f"The 'Périodes' cell in sheet {params_sheet} is missing")
+        logger.warning(f"The 'Périodes' cell in sheet {settings_sheet} is missing")
     else:
         row = row + 2
         while row < REASONABLE:

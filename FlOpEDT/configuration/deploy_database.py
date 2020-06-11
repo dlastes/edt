@@ -268,7 +268,7 @@ def modules_extract(department, modules):
 
         if not verif.exists():
 
-            print(f"{module['promotion']=}")
+            print(f"{module['promotion']}")
             promotion = TrainingProgramme.objects.get(abbrev=module['promotion'],
                                                       department=department)
             prof = Tutor.objects.get(username=module['responsable'])
@@ -328,7 +328,7 @@ def settings_extract(department, settings):
                 period.starting_week = s_week
                 period.ending_week = e_week
                 period.save()
-                logger.info(f" Period {id_per}' extreme weeks have been updated")
+                logger.info(f" Period {id_}' extreme weeks have been updated")
         else:
             try:
                 Period.objects.create(name=id_, department=department,
