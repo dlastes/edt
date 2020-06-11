@@ -12,22 +12,14 @@ params_sheet = 'Paramètres'
 
 REASONABLE = 3141 # large enough?
 
-def find_cell(sheet, marker, row = 1, col = 1):
-    "Helper function to find the marker of a data block"
-    "(Will return either row, col or None, None)"
-    "(With optional parameters to start the search at some position)"
+#################################################
+#                                               #
+#   Helper functions to parse various types     #
+#   of cells, either individually or by range   #
+#                                               #
+#################################################
 
-    while row < REASONABLE:
-        while col < REASONABLE:
-            if string_cell(sheet, row, col) == marker:
-                return row, col
-            col = col + 1
-        row = row + 1
-        col = 1
-    logger.warning(f"The marker cell {marker} wasn't found")
-    return None, None
-
-def time_cell(sheet, row, column):
+def parse_time(sheet, row, column):
     "Helper function to get a time out of a cell"
     "as a number of minutes since midnight"
     "(will return None if anything goes wrong)"
@@ -44,7 +36,7 @@ def parse_time_list_in_line(sheet, row, col_start):
     result = []
     col = col_start
     while col < REASONABLE:
-        val = time_cell(sheet, row, col)
+        val = parse_time(sheet, row, col)
         if val == None:
             break
         result.append(val)
@@ -52,7 +44,7 @@ def parse_time_list_in_line(sheet, row, col_start):
 
     return result
 
-def string_cell(sheet, row, column):
+def parse_string(sheet, row, column):
     "Helper function to get a clean string out of a cell"
     "(will return '' if there's nothing to see)"
 
@@ -60,6 +52,7 @@ def string_cell(sheet, row, column):
     if val == None:
         val=''
     val = str(val).strip()
+
     return val
 
 def parse_string_list_in_line(sheet, row, col_start):
@@ -69,7 +62,7 @@ def parse_string_list_in_line(sheet, row, col_start):
     result = []
     col = col_start
     while col < REASONABLE:
-        val = string_cell(sheet, row, col)
+        val = parse_string(sheet, row, col)
         if val == '':
             break
         result.append(val)
@@ -77,14 +70,14 @@ def parse_string_list_in_line(sheet, row, col_start):
 
     return result
 
-def parse_dictionary(sheet, row_start, col_start, row_end = REASONABLE):
+def parse_string_list_dictionary(sheet, row_start, col_start, row_end = REASONABLE):
     "Parse a block, turning it into a dictionary of string lists"
     "The first column gives the keys, the line at the right of the key is"
     "the associated value"
     result = dict()
     row = row_start
     while row < row_end:
-        name = string_cell(sheet, row, col_start)
+        name = parse_string(sheet, row, col_start)
         if name == '':
             row = row + 1
             continue
@@ -97,6 +90,34 @@ def parse_dictionary(sheet, row_start, col_start, row_end = REASONABLE):
 
     return result
 
+################################
+#                              #
+#   Various helper functions   #
+#                              #
+################################
+
+
+def find_cell(sheet, marker, row = 1, col = 1):
+    "Helper function to find the marker of a data block"
+    "(Will return either row, col or None, None)"
+    "(With optional parameters to start the search at some position)"
+
+    while row < REASONABLE:
+        while col < REASONABLE:
+            if parse_string(sheet, row, col) == marker:
+                return row, col
+            col = col + 1
+        row = row + 1
+        col = 1
+    logger.warning(f"The marker cell {marker} wasn't found")
+    return None, None
+
+#################################################
+#                                               #
+#   Parser functions for the different pages    #
+#                                               #
+#################################################
+
 def parse_rooms(sheet):
     row_groups, col_groups = find_cell(sheet, 'Groupes')
     row_cats, col_cats = find_cell(sheet, 'Catégories')
@@ -108,7 +129,7 @@ def parse_rooms(sheet):
     # parse the groups
     #
     groups = dict()
-    pre_groups = parse_dictionary(sheet, row_groups + 1, col_groups, row_cats)
+    pre_groups = parse_string_list_dictionary(sheet, row_groups + 1, col_groups, row_cats)
 
     # drop empty groups
     empty = set() # empty groups
@@ -134,7 +155,7 @@ def parse_rooms(sheet):
     # parse the categories
     #
     categories = dict()
-    pre_cats = parse_dictionary(sheet, row_cats + 1, col_cats)
+    pre_cats = parse_string_list_dictionary(sheet, row_cats + 1, col_cats)
 
     # drop empty categories
     empty = set() # empty groups
@@ -178,7 +199,7 @@ def parse_people(sheet):
     row = row + 1
     result = dict()
     while row < REASONABLE:
-        id_ = string_cell(sheet, row, col)
+        id_ = parse_string(sheet, row, col)
         if id_ == '':
             row = row + 1
             continue
@@ -186,11 +207,11 @@ def parse_people(sheet):
             logger.warning(f"Duplicate identifier '{id_}' in row {row}: ignoring the line")
             row = row + 1
             continue
-        result[id_] = {'nom': string_cell(sheet, row, col + 1),
-                       'prenom': string_cell(sheet, row, col + 2),
-                       'adresse': string_cell(sheet, row, col + 3),
-                       'statut': string_cell(sheet, row, col + 4),
-                       'employeur': string_cell(sheet, row, col + 5)}
+        result[id_] = {'nom': parse_string(sheet, row, col + 1),
+                       'prenom': parse_string(sheet, row, col + 2),
+                       'adresse': parse_string(sheet, row, col + 3),
+                       'statut': parse_string(sheet, row, col + 4),
+                       'employeur': parse_string(sheet, row, col + 5)}
         row = row + 1
     return result
 
@@ -203,7 +224,7 @@ def parse_modules(sheet):
     row = row + 1
     result = dict()
     while row < REASONABLE:
-        id_ = string_cell(sheet, row, col)
+        id_ = parse_string(sheet, row, col)
         if id_ == '':
             row = row + 1
             continue
@@ -211,11 +232,11 @@ def parse_modules(sheet):
             logger.warning(f"Duplicate module identifier '{id_}' in row {row}: ignoring the line")
             row = row + 1
             continue
-        result[id_] = {'PPN': string_cell(sheet, row, col + 1),
-                       'nom': string_cell(sheet, row, col + 2),
-                       'promotion': string_cell(sheet, row, col + 3),
-                       'période': string_cell(sheet, row, col + 4),
-                       'responsable': string_cell(sheet, row, col + 5)}
+        result[id_] = {'PPN': parse_string(sheet, row, col + 1),
+                       'nom': parse_string(sheet, row, col + 2),
+                       'promotion': parse_string(sheet, row, col + 3),
+                       'période': parse_string(sheet, row, col + 4),
+                       'responsable': parse_string(sheet, row, col + 5)}
         row = row + 1
     return result
 
@@ -228,7 +249,7 @@ def parse_cours(sheet):
     row = row + 1
     result = dict()
     while row < REASONABLE:
-        id_ = string_cell(sheet, row, col)
+        id_ = parse_string(sheet, row, col)
         if id_ == '':
             row = row + 1
             continue
@@ -237,7 +258,7 @@ def parse_cours(sheet):
             row = row + 1
             continue
         try:
-            duree = int(string_cell(sheet, row, col + 1))
+            duree = int(parse_string(sheet, row, col + 1))
         except:
             logger.warning(f"Invalid duration in row {row} and column {col + 1}: ignoring the line")
             row = row + 1
@@ -258,20 +279,20 @@ def parse_params(sheet):
         jalons['debut_midi'] = 12*60
         jalons['fin_midi'] = 13*60
     else:
-        if (val := time_cell(sheet, row + 1, col + 1)) == None:
+        if (val := parse_time(sheet, row + 1, col + 1)) == None:
             logger.warning("Invalid time for day start")
             val = 0*60
         jalons['debut_jour'] = val
-        if (val := time_cell(sheet, row + 2, col + 1)) == None:
+        if (val := parse_time(sheet, row + 2, col + 1)) == None:
             logger.warning("Invalid time for day end")
             val = 23*60
         jalons['fin_jour'] = val
-        jalons['fin_jour'] = time_cell(sheet, row + 2, col + 1)
-        if (val := time_cell(sheet, row + 3, col + 1)) == None:
+        jalons['fin_jour'] = parse_time(sheet, row + 2, col + 1)
+        if (val := parse_time(sheet, row + 3, col + 1)) == None:
             logger.warning("Invalid time for noon start")
             val = 12*60
         jalons['debut_midi'] = val
-        if (val := time_cell(sheet, row + 4, col + 1)) == None:
+        if (val := parse_time(sheet, row + 4, col + 1)) == None:
             logger.warning("Invalid time for noon end")
             val = 13*60
         jalons['fin_midi'] = val
@@ -282,7 +303,7 @@ def parse_params(sheet):
         granul = 60
     else:
         try:
-            granul = int(string_cell(sheet, row, col + 1))
+            granul = int(parse_string(sheet, row, col + 1))
         except:
             logger.warning(f"The 'Granularité' in sheet {params_sheet} has an invalid value: using default 60")
             granul = 60
@@ -294,7 +315,7 @@ def parse_params(sheet):
     else:
         # FIXME base.timing.Day has a CHOICES with this, but it's not available here
         for index, day in enumerate(['m', 'tu', 'w', 'th', 'f', 'sa', 'su']):
-            if string_cell(sheet, row + 2, col + index) == 'X':
+            if parse_string(sheet, row + 2, col + index) == 'X':
                 ouvrables.add(day[0])
 
     periodes = dict()
@@ -304,7 +325,7 @@ def parse_params(sheet):
     else:
         row = row + 2
         while row < REASONABLE:
-            id_ = string_cell(sheet, row, col)
+            id_ = parse_string(sheet, row, col)
             if id_ == '':
                 row = row + 1
                 continue
@@ -312,7 +333,7 @@ def parse_params(sheet):
                 logger.warning(f"Duplicate period identifier '{id_}' in row {row}: ignoring the line")
                 row = row + 1
                 continue
-            periodes[id_] = (string_cell(sheet, row, col + 1), string_cell(sheet, row, col + 2))
+            periodes[id_] = (parse_string(sheet, row, col + 1), parse_string(sheet, row, col + 2))
             row = row + 1
 
     return {'jalons': jalons,
@@ -340,21 +361,21 @@ def parse_groups(sheet):
     row = row_prom + 1
     while row < row_nat: # should stop before
 
-        id_ = string_cell(sheet, row, col_prom)
+        id_ = parse_string(sheet, row, col_prom)
         if id_ == '':
             break
         if id_ in promotions:
             logger.warning(f"Duplicate promotion identifier '{id_}' in row {row}: ignoring the line")
             row = row + 1
             continue
-        promotions[id_] = string_cell(sheet, row, col_prom + 1)
+        promotions[id_] = parse_string(sheet, row, col_prom + 1)
         row = row + 1
 
     group_types = set()
     row = row_nat + 1
     while row < row_grp: # should stop before
 
-        id_ = string_cell(sheet, row, col_nat)
+        id_ = parse_string(sheet, row, col_nat)
         if id_ == '':
             break
         if id_ in group_types:
@@ -366,7 +387,7 @@ def parse_groups(sheet):
     row = row_grp + 1
     while row < REASONABLE:
 
-        id_ = string_cell(sheet, row, col_grp)
+        id_ = parse_string(sheet, row, col_grp)
         if id_ == '':
             row = row + 1
             continue
@@ -374,17 +395,17 @@ def parse_groups(sheet):
             logger.warning(f"Duplicate group identifier '{id_}' in row {row}: ignoring the line")
             row = row + 1
             continue
-        promotion = string_cell(sheet, row, col_grp + 1)
+        promotion = parse_string(sheet, row, col_grp + 1)
         if not promotion in promotions:
             logger.warning(f"Group in non-existing promotion '{promotion}' at row {row}: ignoring the line")
             row = row + 1
             continue
-        nature = string_cell(sheet, row, col_grp + 2)
+        nature = parse_string(sheet, row, col_grp + 2)
         if not nature in group_types:
             logger.warning(f"Group in non-existing nature '{nature}' at row {row}: ignoring the line")
             row = row + 1
             continue
-        parent_ = string_cell(sheet, row, col_grp + 3)
+        parent_ = parse_string(sheet, row, col_grp + 3)
         if parent_ == '':
             parent = set()
         else:
@@ -395,6 +416,14 @@ def parse_groups(sheet):
         row = row + 1
 
     return promotions, group_types, groups
+
+
+#################################################
+#                                               #
+#           Main parsing function               #
+#                                               #
+#################################################
+
 
 def parse_file(filename = 'file_essai.xlsx'):
     try:
