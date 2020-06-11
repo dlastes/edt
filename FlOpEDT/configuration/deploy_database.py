@@ -152,8 +152,8 @@ def rooms_extract(department, book):
 
     # Create temporary RoomType for import purposes. This type 
     # will be deleted at the end of the process
-    temporay_room_random_key = ''.join(choice(string.ascii_lowercase + string.digits) for _ in range(6))
-    temporary_room_type = RoomType.objects.create(department=department, name=f"temp_{department.abbrev}_{temporay_room_random_key}")
+    temporary_room_random_key = ''.join(choice(string.ascii_lowercase + string.digits) for _ in range(6))
+    temporary_room_type = RoomType.objects.create(department=department, name=f"temp_{department.abbrev}_{temporary_room_random_key}")
 
     while idCat is not None :
         try:
