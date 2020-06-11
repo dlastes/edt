@@ -430,7 +430,7 @@ def parse_groups(sheet):
 
 def parse_file(filename = 'file_essai.xlsx'):
     try:
-        wb = load_workbook(filename)
+        wb = load_workbook(filename, data_only=True)
 
         sheet = wb[rooms_sheet]
         if not sheet:
