@@ -29,7 +29,7 @@
 #
 # 'settings': a dictionary with keys:
 #
-#   - 'day_start_time', 'day_finish_time', 'lunch_break_time' and
+#   - 'day_start_time', 'day_finish_time', 'lunch_break_start_time' and
 #     'lunch_break_finish_time' : integers with explicit meaning
 #
 #   - 'default_preference_duration': integer with explicit meaning
