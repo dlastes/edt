@@ -224,6 +224,7 @@ def rooms_extract(department, book):
 
         col = ROOMGROUP_DEFINITION_START_COL + 1
         idRoom = sheet.cell(row=row, column=col).value
+        room_group = Room.objects.get(name=idGroup, types__in=[temporary_room_type, ])
 
         while idRoom is not None :
 
@@ -231,7 +232,6 @@ def rooms_extract(department, book):
             
             try:                
                 room = Room.objects.get(name=idRoom)
-                room_group = Room.objects.get(name=idGroup, types__in=[temporary_room_type, ])
                 room.subroom_of.add(room_group)
 
             except Room.DoesNotExist:
