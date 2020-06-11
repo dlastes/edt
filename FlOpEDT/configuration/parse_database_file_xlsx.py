@@ -1,3 +1,59 @@
+#
+# This code takes a XLSX database file description and turns it into
+# structured Python data. The main parse_file function will return a
+# dictionary with keys:
+#
+# 'rooms': a set of strings, the room identifiers - the
+# brick-and-mortar rooms
+#
+# 'room_groups': a dictionary where a key is a group identifier and
+# the data is a set of brick-and-mortar room identifiers
+#
+# 'room_categories': a dictionary where a key is a category identifier
+# and the data is a set of room identifiers (both brick-and-mortar and
+# groups)
+#
+# 'people': a dictionary where a key is a person identifier, and the
+# data is itself a dictionary with explicit key names, giving strings:
+# 'first_name', 'last_name', 'email', 'status' and 'employer'.
+#
+# 'modules': a dictionary where a key is an identifier, and the data
+# is itself a dictionary with explicit key names, giving strings:
+# 'PPN', 'name', 'promotion', 'period' and 'responsable'.
+#
+# 'cours': a dictionary where a key is an identifier, and the data is
+# itself a dictionary, 'duration' an integer, 'group_types' a set of
+# strings consisting of the concerned group types identifiers, and
+# 'start_times' a set of integers consisting of the possible start
+# times.
+#
+# 'settings': a dictionary with keys:
+#
+#   - 'day_start_time', 'day_finish_time', 'lunch_break_time' and
+#     'lunch_break_finish_time' : integers with explicit meaning
+#
+#   - 'default_preference_duration': integer with explicit meaning
+#
+#   - 'days': a list of strings among 'm', 'tu', 'w', 'th', 'f', 'sa'
+#     and 'su' (fixme)
+#
+#   - 'periods': a dictionary where a key is a period identifier, and
+#     the data is a pair of integers : the start week and finish week.
+#
+# 'promotions': a dictionary where a key is an identifier and the
+# associated data is the name of the promotion.
+#
+# 'group_types': a set of group type identifiers
+#
+# 'groups': a dictionary where a key is a group identifier, and the
+# data is itself a dictionary with keys:
+#
+#   - 'promotion': the promotion identifier
+#
+#   - 'group_type': a group type identifier
+#
+#   - 'parent': a set containing either a group identifier or nothing
+
 from openpyxl import load_workbook
 
 import logging
@@ -18,6 +74,12 @@ REASONABLE = 3141 # large enough?
 #   of cells, either individually or by range   #
 #                                               #
 #################################################
+
+def parse_integer(sheet, row, column):
+    try:
+        return int(sheet.cell(row=row, column=column).value)
+    except:
+        return None
 
 def parse_time(sheet, row, column):
     "Helper function to get a time out of a cell"
@@ -270,35 +332,35 @@ def parse_cours(sheet):
     return result
 
 def parse_settings(sheet):
-    jalons = dict()
+    result = dict()
     row, col = find_cell(sheet, 'Jalon')
     if row == None:
         logger.warning(f"The 'Jalon' cell in sheet {settings_sheet} is missing : using defaults")
-        jalons['day_start_time'] = 0 * 60
-        jalons['day_finish_time'] = 23 * 60
-        jalons['lunch_break_start_time'] = 12 * 60
-        jalons['lunch_break_finish_time'] = 13 * 60
+        result['day_start_time'] = 0 * 60
+        result['day_finish_time'] = 23 * 60
+        result['lunch_break_start_time'] = 12 * 60
+        result['lunch_break_finish_time'] = 13 * 60
     else:
         val = parse_time(sheet, row + 1, col + 1)
         if val == None:
             logger.warning("Invalid time for day start time")
             val = 0 * 60
-        jalons['day_start_time'] = val
+        result['day_start_time'] = val
         val = parse_time(sheet, row + 2, col + 1)
         if val == None:
             logger.warning("Invalid time for day finish time")
             val = 23 * 60
-        jalons['day_finish_time'] = val
+        result['day_finish_time'] = val
         val = parse_time(sheet, row + 3, col + 1)
         if val == None:
             logger.warning("Invalid time for lunch break start time")
             val = 12 * 60
-        jalons['lunch_break_start_time'] = val
+        result['lunch_break_start_time'] = val
         val = parse_time(sheet, row + 4, col + 1)
         if val == None:
             logger.warning("Invalid time for lunch break finish time")
             val = 13 * 60
-        jalons['lunch_break_finish_time'] = val
+        result['lunch_break_finish_time'] = val
 
     row, col = find_cell(sheet, 'Granularité')
     duration = 60
@@ -309,8 +371,9 @@ def parse_settings(sheet):
             duration = int(parse_string(sheet, row, col + 1))
         except:
             logger.warning(f"The 'Granularité' in sheet {params_sheet} has an invalid value: using default 60")
+    result['default_preference_duration'] = duration
 
-    days = set()
+    days = []
     row, col = find_cell(sheet, 'Jours ouvrables')
     if row == None:
         logger.warning(f"The 'Jours ouvrables' cell in sheet {params_sheet} is missing")
@@ -318,7 +381,8 @@ def parse_settings(sheet):
         # FIXME base.timing.Day has a CHOICES with this, but it's not available here
         for index, day in enumerate(['m', 'tu', 'w', 'th', 'f', 'sa', 'su']):
             if parse_string(sheet, row + 2, col + index) == 'X':
-                days.add(day)
+                days.append(day)
+    result['days'] = days
 
     periods = dict()
     row, col = find_cell(sheet, 'Périodes')
@@ -335,13 +399,21 @@ def parse_settings(sheet):
                 logger.warning(f"Duplicate period identifier '{id_}' in row {row}: ignoring the line")
                 row = row + 1
                 continue
-            periods[id_] = (parse_string(sheet, row, col + 1), parse_string(sheet, row, col + 2))
+            start = parse_integer(sheet, row, col + 1)
+            if start == None:
+                logger.warning(f"Invalid integer for the start of period '{id_}' : ignoring the line")
+                row = row + 1
+                continue
+            finish = parse_integer(sheet, row, col + 2)
+            if finish == None:
+                logger.warning(f"Invalid integer for the end of period '{id_}' : ignoring the line")
+                row = row + 1
+                continue
+            periods[id_] = (start, finish)
             row = row + 1
+    result['periods'] = periods
 
-    return {'jalons': jalons,
-            'default_preference_duration': duration,
-            'days': days,
-            'periods': periods }
+    return result
 
 def parse_groups(sheet):
     row_prom, col_prom = find_cell(sheet, 'Identifiant')
@@ -402,9 +474,9 @@ def parse_groups(sheet):
             logger.warning(f"Group in non-existing promotion '{promotion}' at row {row}: ignoring the line")
             row = row + 1
             continue
-        nature = parse_string(sheet, row, col_grp + 2)
-        if not nature in group_types:
-            logger.warning(f"Group in non-existing nature '{nature}' at row {row}: ignoring the line")
+        group_type = parse_string(sheet, row, col_grp + 2)
+        if not group_type in group_types:
+            logger.warning(f"Group of non-existing group type '{group_type}' at row {row}: ignoring the line")
             row = row + 1
             continue
         parent_ = parse_string(sheet, row, col_grp + 3)
@@ -413,7 +485,7 @@ def parse_groups(sheet):
         else:
             parent = {parent_}
         groups[id_] = {'promotion': promotion,
-                       'nature' : nature,
+                       'group_type' : group_type,
                        'parent' : parent}
         row = row + 1
 

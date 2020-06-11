@@ -25,6 +25,7 @@
 # without disclosing the source code of your own applications.
 
 import string, logging
+from copy import copy
 
 from django.db import transaction
 
@@ -73,7 +74,7 @@ def extract_database_file(department_name=None, department_abbrev=None, bookname
 
 def people_extract(department, people):
 
-    logger.info("People extraction : start")    
+    logger.info("People extraction : start")
     for id_, person in people.items():
 
         try:
@@ -113,7 +114,7 @@ def people_extract(department, people):
 def rooms_extract(department, room_groups, room_categories, rooms):
 
     logger.info('Room extraction : start')
-    
+
     # Create temporary RoomType for import purposes. This type
     # will be deleted at the end of the process
     temporary_room_random_key = ''.join(choice(string.ascii_lowercase + string.digits) for _ in range(6))
@@ -220,7 +221,7 @@ def groups_extract(department, promotions, group_types, groups):
 
                 promotion = TrainingProgramme.objects.get(abbrev=group['promotion'],
                                                           department=department)
-                groupType = GroupType.objects.get(name=group['nature'], department=department)
+                groupType = GroupType.objects.get(name=group['group_type'], department=department)
                 group = Group(name=id_, size=0, train_prog=promotion, type=groupType)
                 group.save()
 
@@ -337,16 +338,8 @@ def settings_extract(department, settings):
                 logger.warning(f"A constraint has not been respected creating the period '{id_}' : {ie}")
                 pass # FIXME: continue?
 
-    params = {
-        'department': department,
-        'days': list(settings['days']),
-        'day_start_time': settings['jalons']['day_start_time'],
-        'day_finish_time': settings['jalons']['day_finish_time'],
-        'lunch_break_start_time': settings['jalons']['lunch_break_start_time'],
-        'lunch_break_finish_time': settings['jalons']['lunch_break_finish_time'],
-        'default_preference_duration': settings['default_preference_duration'],
-    }
-
+    params = copy(settings)
+    del params['periods']
     logger.info(f'TimeGeneralSettings : {params}')
-    TimeGeneralSettings.objects.get_or_create(**params)
+    TimeGeneralSettings.objects.get_or_create(department=department, **params)
     logger.info('Settings extraction : finish')
