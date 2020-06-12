@@ -21,7 +21,7 @@
 # is itself a dictionary with explicit key names, giving strings:
 # 'PPN', 'name', 'promotion', 'period' and 'responsable'.
 #
-# 'cours': a dictionary where a key is an identifier, and the data is
+# 'courses': a dictionary where a key is an identifier, and the data is
 # itself a dictionary, 'duration' an integer, 'group_types' a set of
 # strings consisting of the concerned group types identifiers, and
 # 'start_times' a set of integers consisting of the possible start
@@ -55,6 +55,7 @@
 #   - 'parent': a set containing either a group identifier or nothing
 
 from openpyxl import load_workbook
+from openpyxl.utils import get_column_letter
 
 import logging
 logger = logging.getLogger(__name__)
@@ -63,10 +64,14 @@ people_sheet = 'Intervenants'
 rooms_sheet = 'Salles'
 groups_sheet = 'Groupes'
 modules_sheet = 'Modules'
-cours_sheet = 'Cours'
+courses_sheet = 'Cours'
 settings_sheet = 'Paramètres'
 
 REASONABLE = 3141 # large enough?
+
+# trivial helper
+def cell_name(row, column):
+    return '{0:s}{1:d}'.format(get_column_letter(column), row)
 
 #################################################
 #                                               #
@@ -117,23 +122,23 @@ def parse_string(sheet, row, column):
 
     return val
 
-def parse_string_list_in_line(sheet, row, col_start):
-    "Parse a line representing a list of strings"
+def parse_string_set_in_line(sheet, row, col_start):
+    "Parse a line representing a set of strings"
     "(stop at the first empty cell)"
 
-    result = []
+    result = set()
     col = col_start
     while col < REASONABLE:
         val = parse_string(sheet, row, col)
         if val == '':
             break
-        result.append(val)
+        result.add(val)
         col = col + 1
 
     return result
 
-def parse_string_list_dictionary(sheet, row_start, col_start, row_end = REASONABLE):
-    "Parse a block, turning it into a dictionary of string lists"
+def parse_string_set_dictionary(sheet, row_start, col_start, row_end = REASONABLE):
+    "Parse a block, turning it into a dictionary of string sets"
     "The first column gives the keys, the line at the right of the key is"
     "the associated value"
     result = dict()
@@ -144,10 +149,8 @@ def parse_string_list_dictionary(sheet, row_start, col_start, row_end = REASONAB
             row = row + 1
             continue
         if name in result:
-            logger.warning(f"At row {row:d}, key {name} is a duplicate: ignoring the line")
-            row = row + 1
-            continue
-        result[name] = parse_string_list_in_line(sheet, row, col_start + 1)
+            name = ':INVALID:DUPLICATE:{0:s}'.format(cell_name(row, col_start))
+        result[name] = parse_string_set_in_line(sheet, row, col_start + 1)
         row = row + 1
 
     return result
@@ -159,19 +162,18 @@ def parse_string_list_dictionary(sheet, row_start, col_start, row_end = REASONAB
 ################################
 
 
-def find_cell(sheet, marker, row = 1, col = 1):
+def find_marker_cell(sheet, marker, row = 1, col = 1):
     "Helper function to find the marker of a data block"
     "(Will return either row, col or None, None)"
     "(With optional parameters to start the search at some position)"
 
     while row < REASONABLE:
         while col < REASONABLE:
-            if parse_string(sheet, row, col) == marker:
+            if parse_string(sheet, row, col) == marker and sheet.cell(row=row, column=col).font.size > 10:
                 return row, col
             col = col + 1
         row = row + 1
         col = 1
-    logger.warning(f"The marker cell {marker} wasn't found")
     return None, None
 
 #################################################
@@ -181,8 +183,8 @@ def find_cell(sheet, marker, row = 1, col = 1):
 #################################################
 
 def parse_rooms(sheet):
-    row_groups, col_groups = find_cell(sheet, 'Groupes')
-    row_cats, col_cats = find_cell(sheet, 'Catégories')
+    row_groups, col_groups = find_marker_cell(sheet, 'Groupes')
+    row_cats, col_cats = find_marker_cell(sheet, 'Catégories')
     if col_groups != col_cats or row_cats < row_groups:
         logger.warning(f"The marker cells in sheet {rooms_sheet} are misplaced")
         return set(), dict(), dict()
@@ -190,72 +192,30 @@ def parse_rooms(sheet):
     #
     # parse the groups
     #
-    groups = dict()
-    pre_groups = parse_string_list_dictionary(sheet, row_groups + 1, col_groups, row_cats)
-
-    # drop empty groups
-    empty = set() # empty groups
-    for name, lst in pre_groups.items():
-        if len(lst) == 0:
-            empty.add(name)
-    if len(empty) > 0:
-        logger.warning("Some groups of rooms are empty, hence ignored: {0:s}".format(', '.join(empty)))
-        for solo in empty:
-            del pre_groups[solo]
-
-    # don't accept group names in groups
-    group_names = pre_groups.keys()
-    for name, lst in pre_groups.items():
-        bad = set.intersection(set(lst), group_names)
-        if len(bad) > 0:
-            logger.warning("Group '{0:s}' contains group names, ignoring them: {1:s}".format(name,', '.join(bad)))
-            groups[name] = set.difference(set(lst), group_names)
-        else:
-            groups[name] = set(lst)
+    groups = parse_string_set_dictionary(sheet, row_groups + 1, col_groups, row_cats)
 
     #
     # parse the categories
     #
-    categories = dict()
-    pre_cats = parse_string_list_dictionary(sheet, row_cats + 1, col_cats)
-
-    # drop empty categories
-    empty = set() # empty groups
-    for name, lst in pre_cats.items():
-        if len(lst) == 0:
-            empty.add(name)
-    if len(empty) > 0:
-        logger.warning("Some categories of rooms are empty, hence ignored: {0:s}".format(', '.join(empty)))
-        for solo in empty:
-            del pre_cats[solo]
-
-    # don't accept category names in categories
-    cat_names = pre_cats.keys()
-    for name, lst in pre_cats.items():
-        bad = set.intersection(set(lst), cat_names)
-        if len(bad) > 0:
-            logger.warning("Category '{0:s}' contains category names, ignoring them: {1:s}".format(name,', '.join(bad)))
-            categories[name] = set.difference(set(lst), cat_names)
-        else:
-            categories[name] = set(lst)
+    categories = parse_string_set_dictionary(sheet, row_cats + 1, col_cats)
 
     #
     # Build the set of rooms
     #
+    # FIXME: what if a room group or category gets named like a room?
     rooms = set()
     for lst in groups.values():
         rooms.update(lst)
     for lst in categories.values():
         rooms.update(lst)
-    rooms.difference_update(group_names)
-    rooms.difference_update(cat_names)
+    rooms.difference_update(groups.keys())
+    rooms.difference_update(categories.keys())
 
     return rooms, groups, categories
 
 def parse_people(sheet):
-    row, col = find_cell(sheet, "Identifiant")
+    row, col = find_marker_cell(sheet, "Identifiant")
     if row == None:
-        logger.warning(f"The marker cell in sheet {people_sheet} is missing")
         return dict()
 
     row = row + 1
@@ -266,9 +226,7 @@ def parse_people(sheet):
             row = row + 1
             continue
         if id_ in result:
-            logger.warning(f"Duplicate identifier '{id_}' in row {row}: ignoring the line")
-            row = row + 1
-            continue
+            id_ = ':INVALID:DUPLICATE:{0:s}'.format(cell_name(row, col))
         result[id_] = {'first_name': parse_string(sheet, row, col + 1),
                        'last_name': parse_string(sheet, row, col + 2),
                        'email': parse_string(sheet, row, col + 3),
@@ -278,7 +236,7 @@ def parse_people(sheet):
     return result
 
 def parse_modules(sheet):
-    row, col = find_cell(sheet, "Abréviation")
+    row, col = find_marker_cell(sheet, "Abréviation")
     if row == None:
         logger.warning(f"The marker cell in sheet {modules_sheet} is missing")
         return dict()
@@ -291,9 +249,7 @@ def parse_modules(sheet):
             row = row + 1
             continue
         if id_ in result:
-            logger.warning(f"Duplicate module identifier '{id_}' in row {row}: ignoring the line")
-            row = row + 1
-            continue
+            id_ = ':INVALID:DUPLICATE:{0:s}'.format(cell_name(row, col))
         result[id_] = {'PPN': parse_string(sheet, row, col + 1),
                        'name': parse_string(sheet, row, col + 2),
                        'promotion': parse_string(sheet, row, col + 3),
@@ -302,10 +258,10 @@ def parse_modules(sheet):
         row = row + 1
     return result
 
-def parse_cours(sheet):
-    row, col = find_cell(sheet, 'Type')
+def parse_courses(sheet):
+    row, col = find_marker_cell(sheet, 'Type')
     if row == None:
-        logger.warning(f"The marker cell in sheet {cours_sheet} is missing")
+        logger.warning(f"The marker cell in sheet {courses_sheet} is missing")
         return dict()
 
     row = row + 1
@@ -316,79 +272,67 @@ def parse_cours(sheet):
             row = row + 1
             continue
         if id_ in result:
-            logger.warning(f"Duplicate course identifier '{id_}' in row {row}: ignoring the line")
-            row = row + 1
-            continue
+            id_ = ':INVALID:DUPLICATE:{0:s}'.format(cell_name(row, col))
         try:
             duree = int(parse_string(sheet, row, col + 1))
         except:
-            logger.warning(f"Invalid duration in row {row} and column {col + 1}: ignoring the line")
-            row = row + 1
-            continue
+            duree = -1
         result[id_] = {'duration': duree,
-                       'group_types': set(parse_string_list_in_line(sheet, row, col + 2)),
+                       'group_types': set(parse_string_set_in_line(sheet, row, col + 2)),
                        'start_times': set(parse_time_list_in_line(sheet, row + 1, col + 2))}
         row = row + 2 # sic
     return result
 
 def parse_settings(sheet):
     result = dict()
-    row, col = find_cell(sheet, 'Jalon')
+    row, col = find_marker_cell(sheet, 'Jalon')
     if row == None:
-        logger.warning(f"The 'Jalon' cell in sheet {settings_sheet} is missing : using defaults")
-        result['day_start_time'] = 0 * 60
-        result['day_finish_time'] = 23 * 60
-        result['lunch_break_start_time'] = 12 * 60
-        result['lunch_break_finish_time'] = 13 * 60
+        logger.warning(f"The 'Jalon' cell in sheet {settings_sheet} is missing")
+        result['day_start_time'] = -1
+        result['day_finish_time'] = -1
+        result['lunch_break_start_time'] = -1
+        result['lunch_break_finish_time'] = -1
     else:
         val = parse_time(sheet, row + 1, col + 1)
         if val == None:
-            logger.warning("Invalid time for day start time")
-            val = 0 * 60
+            val = -1
         result['day_start_time'] = val
         val = parse_time(sheet, row + 2, col + 1)
         if val == None:
-            logger.warning("Invalid time for day finish time")
-            val = 23 * 60
+            val = -1
         result['day_finish_time'] = val
         val = parse_time(sheet, row + 3, col + 1)
         if val == None:
-            logger.warning("Invalid time for lunch break start time")
-            val = 12 * 60
+            val = -1
         result['lunch_break_start_time'] = val
         val = parse_time(sheet, row + 4, col + 1)
         if val == None:
-            logger.warning("Invalid time for lunch break finish time")
-            val = 13 * 60
+            val = -1
         result['lunch_break_finish_time'] = val
 
-    row, col = find_cell(sheet, 'Granularité')
-    duration = 60
+    row, col = find_marker_cell(sheet, 'Granularité')
     if row == None:
-        logger.warning(f"The 'Granularité' cell in sheet {settings_sheet} is missing : using default 60")
+        logger.warning(f"The 'Granularité' cell in sheet {settings_sheet} is missing")
+        duration = -1
     else:
         try:
             duration = int(parse_string(sheet, row, col + 1))
         except:
-            logger.warning(f"The 'Granularité' in sheet {settings_sheet} has an invalid value: using default 60")
+            duration = -1
     result['default_preference_duration'] = duration
 
     days = []
-    row, col = find_cell(sheet, 'Jours ouvrables')
-    if row == None:
-        logger.warning(f"The 'Jours ouvrables' cell in sheet {settings_sheet} is missing")
-    else:
+    row, col = find_marker_cell(sheet, 'Jours ouvrables')
+    if row != None:
         # FIXME base.timing.Day has a CHOICES with this, but it's not available here
         for index, day in enumerate(['m', 'tu', 'w', 'th', 'f', 'sa', 'su']):
-            if parse_string(sheet, row + 2, col + index) == 'X':
+            if parse_string(sheet, row + 2, col + index) != '':
                 days.append(day)
     result['days'] = days
 
     periods = dict()
-    row, col = find_cell(sheet, 'Périodes')
-    if row == None:
-        logger.warning(f"The 'Périodes' cell in sheet {settings_sheet} is missing")
-    else:
+    row, col = find_marker_cell(sheet, 'Périodes')
+    if row != None:
         row = row + 2
         while row < REASONABLE:
             id_ = parse_string(sheet, row, col)
@@ -396,19 +340,13 @@ def parse_settings(sheet):
                 row = row + 1
                 continue
             if id_ in periods:
-                logger.warning(f"Duplicate period identifier '{id_}' in row {row}: ignoring the line")
-                row = row + 1
-                continue
+                id_ = ':INVALID:DUPLICATE:{0:s}'.format(cell_name(row, col))
             start = parse_integer(sheet, row, col + 1)
             if start == None:
-                logger.warning(f"Invalid integer for the start of period '{id_}' : ignoring the line")
-                row = row + 1
-                continue
+                start = -1
             finish = parse_integer(sheet, row, col + 2)
             if finish == None:
-                logger.warning(f"Invalid integer for the end of period '{id_}' : ignoring the line")
-                row = row + 1
-                continue
+                finish = -1
             periods[id_] = (start, finish)
             row = row + 1
     result['periods'] = periods
@@ -416,19 +354,16 @@ def parse_settings(sheet):
     return result
 
 def parse_groups(sheet):
-    row_prom, col_prom = find_cell(sheet, 'Identifiant')
+    row_prom, col_prom = find_marker_cell(sheet, 'Identifiant')
     if row_prom == None:
-        logger.warning(f"The 'Identifiant' cell in sheet {groups_sheet} is missing")
         return dict(), set(), dict()
 
-    row_nat, col_nat = find_cell(sheet, 'Identifiant', row_prom + 1)
+    row_nat, col_nat = find_marker_cell(sheet, 'Identifiant', row_prom + 1)
     if row_nat == None:
-        logger.warning(f"The second 'Identifiant' cell in sheet {groups_sheet} is missing")
         return dict(), set(), dict()
 
-    row_grp, col_grp = find_cell(sheet, 'Identifiant', row_nat + 1)
+    row_grp, col_grp = find_marker_cell(sheet, 'Identifiant', row_nat + 1)
     if row_grp == None:
-        logger.warning(f"The third 'Identifiant' cell in sheet {groups_sheet} is missing")
         return dict(), set(), dict()
 
     promotions = dict()
@@ -439,9 +374,7 @@ def parse_groups(sheet):
         if id_ == '':
             break
         if id_ in promotions:
-            logger.warning(f"Duplicate promotion identifier '{id_}' in row {row}: ignoring the line")
-            row = row + 1
-            continue
+            id_ = ':INVALID:DUPLICATE:{0:s}'.format(cell_name(row, col_prom))
         promotions[id_] = parse_string(sheet, row, col_prom + 1)
         row = row + 1
 
@@ -453,7 +386,7 @@ def parse_groups(sheet):
         if id_ == '':
             break
         if id_ in group_types:
-            logger.warning(f"Duplicate group type identifier '{id_}' in row {row}")
+            id_ = ':INVALID:DUPLICATE:{0:s}'.format(cell_name(row, col_prom))
         group_types.add(id_)
         row = row + 1
 
@@ -466,19 +399,9 @@ def parse_groups(sheet):
             row = row + 1
             continue
         if id_ in groups:
-            logger.warning(f"Duplicate group identifier '{id_}' in row {row}: ignoring the line")
-            row = row + 1
-            continue
+            id_ = ':INVALID:DUPLICATE:{0:s}'.format(cell_name(row, col_prom))
         promotion = parse_string(sheet, row, col_grp + 1)
-        if not promotion in promotions:
-            logger.warning(f"Group in non-existing promotion '{promotion}' at row {row}: ignoring the line")
-            row = row + 1
-            continue
         group_type = parse_string(sheet, row, col_grp + 2)
-        if not group_type in group_types:
-            logger.warning(f"Group of non-existing group type '{group_type}' at row {row}: ignoring the line")
-            row = row + 1
-            continue
         parent_ = parse_string(sheet, row, col_grp + 3)
         if parent_ == '':
             parent = set()
@@ -524,12 +447,12 @@ def parse_file(filename = 'file_essai.xlsx'):
 
         modules = parse_modules(sheet)
 
-        sheet = wb[cours_sheet]
+        sheet = wb[courses_sheet]
         if not sheet:
-            logger.warning(f"Sheet {cours_sheet} doesn't exist")
+            logger.warning(f"Sheet {courses_sheet} doesn't exist")
             return None
 
-        cours = parse_cours(sheet)
+        courses = parse_courses(sheet)
 
         sheet = wb[settings_sheet]
         if not sheet:
@@ -550,7 +473,7 @@ def parse_file(filename = 'file_essai.xlsx'):
                 'room_categories' : room_categories,
                 'people' : people,
                 'modules' : modules,
-                'cours' : cours,
+                'courses' : courses,
                 'settings' : settings,
                 'promotions': promotions,
                 'group_types' : group_types,
@@ -561,20 +484,7 @@ def parse_file(filename = 'file_essai.xlsx'):
 
 # dirty, but for testing purposes it's nice
 if __name__ == '__main__':
-    print("""===== WARNINGS (expected) ======\n"""
-          """At row 15, key doublon is a duplicate: ignoring the line\n"""
-          """Some groups of rooms are empty, hence ignored: rien\n"""
-          """Group 'test' contains group names, ignoring them: TP_phy\n"""
-          """Some categories of rooms are empty, hence ignored: vide\n"""
-          """Category 'langue' contains category names, ignoring them: TP\n"""
-          """Duplicate identifier 'AB' in row 7: ignoring the line\n"""
-          """Duplicate module identifier 'doublon' in row 22: ignoring the line\n"""
-          """Duplicate course identifier 'TP' in row 16: ignoring the line\n"""
-          """Duplicate period identifier 'S3' in row 18: ignoring the line\n"""
-          """Duplicate promotion identifier 'INFO1' in row 8: ignoring the line\n"""
-          """Duplicate group identifier 'MP' in row 42: ignoring the line\n""")
-
-    print("===== WARNINGS (actual) ======")
+    print("===== WARNINGS (should be empty) ======")
     results = parse_file()
     print("===== RESULTS ===========")
     print(results)

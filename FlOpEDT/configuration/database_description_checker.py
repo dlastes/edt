@@ -19,6 +19,13 @@
 # - main checker
 #
 
+people_sheet = 'Intervenants'
+rooms_sheet = 'Salles'
+groups_sheet = 'Groupes'
+modules_sheet = 'Modules'
+courses_sheet = 'Cours'
+settings_sheet = 'Paramètres'
+
 ##########################################
 #                                        #
 #          Helper functions              #
@@ -42,6 +49,7 @@ def check_identifiers(ids, name):
             found_issue3 = True
     return result
 
+
 def check_type(obj, type_, name):
     result = []
     if not isinstance(obj, type_):
@@ -50,7 +58,7 @@ def check_type(obj, type_, name):
 
 ##########################################
 #                                        #
-#       Individual chunk checks          #
+#          Low level checks              #
 #                                        #
 ##########################################
 
@@ -62,12 +70,18 @@ def check_rooms(rooms):
         result.extend(check_identifiers(rooms, "rooms"))
     return result
 
+
 def check_room_groups(room_groups):
     result = []
     if not isinstance(room_groups, dict):
         result.append("D: the room_groups chunk should be a 'dict'")
     else:
         result.extend(check_identifiers(room_groups.keys(), "room groups"))
+        for id_, rooms in room_groups.items():
+            if isinstance(rooms, set):
+                result.extend(check_identifiers(rooms, f"room identifier in room group '{id_}'"))
+            else:
+                result.extend(f"D: room group '{id_}' should be a set")
     return result
 
 def check_room_categories(room_categories):
@@ -76,7 +90,13 @@ def check_room_categories(room_categories):
         result.append("D: the room categories chunk should be a 'dict'")
     else:
         result.extend(check_identifiers(room_categories.keys(), "room categories"))
+        for id_, rooms in room_categories.items():
+            if isinstance(rooms, set):
+                result.extend(check_identifiers(rooms, f"room identifier in room category '{id_}'"))
+            else:
+                result.extend(f"D: room category '{id_}' should be a set")
     return result
+
 
 def check_people(people):
     result = []
@@ -93,10 +113,8 @@ def check_people(people):
         if person.keys() != { 'first_name', 'last_name', 'email', 'status', 'employer' }:
             result.append(f"D: person '{id_}' doesn't have the expected keys")
             continue
-        if person['status'] not in ['Vacataire', 'Permanent']:
-            result.append(f"D: person '{id_}' doesn't have a correct status")
-            continue
     return result
+
 
 def check_modules(modules):
     result = []
@@ -116,6 +134,7 @@ def check_modules(modules):
         for key, val in module.items():
             result.extend(check_type(val, str, f"field '{key}' of module '{id_}'"))
     return result
+
 
 def check_cours(cours):
     result = []
@@ -144,6 +163,7 @@ def check_cours(cours):
         else:
             result.append(f"D: start times of cours '{id_}' isn't a 'set'")
     return result
+
 
 def check_settings(settings):
     result = []
@@ -179,6 +199,7 @@ def check_settings(settings):
 
     return result
 
+
 def check_promotions(promotions):
     result = []
     if not isinstance(promotions, dict):
@@ -189,6 +210,7 @@ def check_promotions(promotions):
         result.extend(check_type(name, str, f"name of promotion '{id_}'"))
     return result
 
+
 def check_group_types(group_types):
     result = []
     if not isinstance(group_types, set):
@@ -196,6 +218,7 @@ def check_group_types(group_types):
         return result
     result.extend(check_identifiers(group_types, "group types"))
     return result
+
 
 def check_groups(groups):
     result = []
@@ -222,13 +245,287 @@ def check_groups(groups):
             result.append(f"Group '{id_}' isn't a 'dict'")
     return result
 
+
 ##########################################
 #                                        #
-#            Cross checks                #
+#             Helper functions           #
 #                                        #
 ##########################################
 
-# BIG FIXME! THAT'S WHERE THE USER GETS EXPLAINED WHAT WAS DONE WRONG!
+def check_duplicates(ids, name):
+    result = []
+
+    duplicates = set()
+    for id_ in ids:
+        if id_.startswith(':INVALID:'):
+            _, _, reason, cell = id_.split(':')
+            if reason == 'DUPLICATE':
+                duplicates.add(cell)
+            else:
+                result.append(f"D: identifier in cell '{cell}' is invalid for unknown reason '{reason}'")
+    if len(duplicates) > 0:
+        result.append("Les identifiants de {0:s} dans ces cases sont des doublons : {1:s}".format(name,', '.join(duplicates)))
+
+    return result
+
+
+##########################################
+#                                        #
+#         Higher level checks            #
+#                                        #
+##########################################
+
+def check_settings_sheet(database):
+    result = []
+
+    #
+    # check the time settings
+    #
+    day_start_time = database['settings']['day_start_time']
+    day_finish_time = database['settings']['day_finish_time']
+    lunch_break_start_time = database['settings']['lunch_break_start_time']
+    lunch_break_finish_time = database['settings']['lunch_break_finish_time']
+
+    if day_start_time < 0:
+        result.append(f"L'heure de début de journée dans '{settings_sheet}' est invalide")
+    elif day_finish_time < 0:
+        result.append(f"L'heure de fin de journée dans '{settings_sheet}' est invalide")
+    elif lunch_break_start_time < 0:
+        result.append(f"L'heure de début de pause méridienne dans '{settings_sheet}' est invalide")
+    elif database['settings']['lunch_break_finish_time'] < 0:
+        result.append(f"L'heure de fin de pause méridienne '{settings_sheet}' est invalide")
+    else:
+        sane = True
+        if not day_start_time < day_finish_time:
+            result.append(f"Les horaires de début et de fin de journée dans '{settings_sheet}' sont incohérents")
+            sane = False
+        if not lunch_break_start_time < lunch_break_finish_time:
+            result.append(f"Les horaires de début et de fin de pause méridienne dans '{settings_sheet}' sont incohérents")
+            sane = False
+        if sane and not (day_start_time <= lunch_break_start_time
+                       and lunch_break_start_time < day_finish_time):
+            result.append(f"La pause méridienne dans '{settings_sheet}' ne commence pas pendant la journée")
+        if sane and not (day_start_time < lunch_break_finish_time
+                       and lunch_break_finish_time <= day_finish_time):
+            result.append(f"La pause méridienne dans '{settings_sheet}' ne termine pas pendant la journée")
+
+    #
+    # check default duration
+    #
+    if database['settings']['default_preference_duration'] < 0:
+        result.append(f"La granularité des séances dans '{settings_sheet}' est invalide")
+
+    #
+    # check days
+    #
+    if len(database['settings']['days']) == 0:
+        result.append(f"Aucun jour ouvrable déclaré dans '{settings_sheet}'")
+
+    #
+    # check periods
+    #
+    periods = database['settings']['periods']
+    if len(periods) == 0:
+        result.append(f"Aucune période n'est définie dans '{settings_sheet}'")
+
+    check_duplicates(periods.keys(), f"périodes dans '{settings_sheet}'")
+
+    for id_, (start, finish) in periods.items():
+        if start < 0:
+            result.append(f"Le début de la période '{id_}' dans '{settings_sheet}' est invalide")
+        elif finish < 0:
+            result.append(f"La fin de la période '{id_}' dans '{settings_sheet}' est invalide")
+        else:
+            # week 33 is around mid-august and years have 52 weeks
+            if start > 33:
+                start = start - 52
+            if finish > 33:
+                finish = finish - 52
+            if not (start < finish):
+                result.append(f"Il semblerait que la période '{id_}' dans '{settings_sheet}' finisse avant son début")
+
+    # FIXME: check for overlapping periods? Looks tricky, but possible
+
+    return result
+
+
+def check_rooms_sheet(database):
+    result = []
+
+    if len(database['rooms']) == 0:
+        result.append(f"Votre liste de salles dans '{rooms_sheet}' est vide!")
+
+    check_duplicates(database['rooms'], "salle dans '{rooms_sheet}'")
+    check_duplicates(database['room_groups'].keys(), f"groupes de salles dans '{rooms_sheet}'")
+    check_duplicates(database['room_categories'].keys(), f"catégories de salles dans '{rooms_sheet}'")
+
+    empty = set()
+    for id_, rooms in database['room_groups'].items():
+        if len(rooms) == 0 and not id_.startswith(':INVALID:'):
+            empty.add(id_)
+    if len(empty) > 0:
+        result.append("Les groupes de salles suivants dans '{0:s}' sont vides : {1:s}".format(rooms_sheet,
+                                                                                             ', '.join(empty)))
+
+    empty = set()
+    for id_, rooms in database['room_categories'].items():
+        if len(rooms) == 0 and not id_.startswith(':INVALID:'):
+            empty.add(id_)
+    if len(empty) > 0:
+        result.append("Les catégories de salles suivantes dans '{0:s}' sont vides : {1:s}".format(rooms_sheet,
+                                                                                                 ', '.join(empty)))
+
+    # don't accept group names in groups
+    group_names = database['room_groups'].keys()
+    for id_, rooms in database['room_groups'].items():
+        bad = rooms.intersection(group_names)
+        if len(bad) > 0:
+            result.append("Le groupe de salles '{0:s}' dans '{1:s}' contient des noms de groupe : {2:s}".format(id_, rooms_sheet, ', '.join(bad)))
+
+    # don't accept category names in categories
+    cat_names = database['room_categories'].keys()
+    for id_, names in database['room_categories'].items():
+        bad = set.intersection(names, cat_names)
+        if len(bad) > 0:
+            result.append("La catégorie de salles '{0:s}' dans '{1:s}' contient des noms de catégorie : {2:s}".format(id_, rooms_sheet, ', '.join(bad)))
+
+    return result
+
+
+def check_people_sheet(database):
+    result = []
+
+    people = database['people']
+
+    if len(people) == 0:
+        result.append(f"Votre liste d'intervenants dans '{people_sheet}' est vide!")
+
+    check_duplicates(people.keys(), f"personnes dans '{people_sheet}'")
+
+    for id_, person in database['people'].items():
+        if person['status'] == '' and not id_.startswith(':INVALID:'):
+            result.append(f"Le statut de la personne '{id_}' dans '{people_sheet}' n'est pas valide")
+
+    return result
+
+
+def check_groups_sheet(database):
+    result = []
+
+    #
+    # check promotions
+    #
+    promotions = database['promotions']
+    if len(promotions) == 0:
+        result.append(f"Votre liste de promotions dans '{groups_sheet}' est vide!")
+
+    check_duplicates(promotions.keys(), f"promotion dans '{groups_sheet}'")
+
+    #
+    # check group types
+    #
+    group_types = database['group_types']
+    if len(group_types) == 0:
+        result.append(f"Votre liste de natures de groupes dans '{groups_sheet}' est vide!")
+
+    check_duplicates(group_types, f"nature de groupes dans '{groups_sheet}'")
+
+    #
+    # check groups
+    #
+    groups = database['groups']
+    if len(groups) == 0:
+        result.append(f"Votre liste de groupes dans '{groups_sheet}' est vide!")
+
+    check_duplicates(groups.keys(), f"groupes dans '{groups_sheet}'")
+
+    for id_, group in groups.items():
+        if not group['promotion'] in promotions.keys() and not id_.startswith(':INVALID:'):
+            result.append(f"La promotion du groupe '{id_}' dans '{groups_sheet}' n'est pas valide")
+        if not group['group_type'] in group_types and not id_.startswith(':INVALID:'):
+            result.append(f"La nature du groupe '{id_}' dans '{groups_sheet}' n'est pas valide")
+        for parent in group['parent']:
+            if not parent in groups.keys() and not id_.startswith(':INVALID:'):
+                result.append(f"Le sur-groupe du groupe '{id_}' dans '{groups_sheet}' n'est pas valide")
+
+    return result
+
+
+def check_modules_sheet(database):
+    result = []
+
+    modules = database['modules']
+
+    check_duplicates(modules.keys(), f"modules dans '{modules_sheet}'")
+
+    for id_, module in modules.items():
+        if not module['promotion'] in database['promotions'].keys() and not id_.startswith(':INVALID:'):
+            result.append(f"La promotion du module '{id_}' dans '{modules_sheet}' est invalide")
+        if not module['period'] in database['settings']['periods'].keys() and not id_.startswith(':INVALID:'):
+            result.append(f"La période du module '{id_}' dans '{modules_sheet}' est invalide")
+        if not module['responsable'] in database['people'].keys() and not id_.startswith(':INVALID:'):
+            result.append(f"La personne responsable du module '{id_}' dans '{modules_sheet}' est invalide")
+
+    return result
+
+
+def check_courses_sheet(database):
+    result = []
+
+    courses = database['courses']
+
+    check_duplicates(courses.keys(), f"cours in '{courses_sheet}'")
+
+    for id_, course in courses.items():
+        
+        if course['duration'] <= 0 and not id_.startswith(':INVALID:'):
+            result.append(f"Le cours '{id_}' dans '{courses_sheet}' a une durée invalide")
+            
+        invalid = course['group_types'].difference(database['group_types'])
+        if len(invalid) > 0 and not id_.startswith(':INVALID:'):
+            result.append("Certaines natures de groupe du groupe '{0:s}' dans '{1:s}' sont invalides: {2:s}".format(id_, courses_sheet, ', '.join(invalid)))
+    
+        settings = database['settings']
+        day_start_time = settings['day_start_time']
+        day_finish_time = settings['day_finish_time']
+        lunch_break_start_time = settings['lunch_break_start_time']
+        lunch_break_finish_time = settings['lunch_break_finish_time']
+        flag_invalid = False
+        flag_start_not_in_day = False
+        flag_start_in_lunch_break = False
+        flag_finish_not_in_day = False
+        flag_finish_in_lunch_break = False
+        for start_time in course['start_times']:
+            if start_time < 0 and not flag_invalid:
+                flag_invalid = True
+                continue
+            if not (start_time >= day_start_time and start_time < day_finish_time) and not flag_start_not_in_day:
+                flag_start_not_in_day = True
+                continue
+            if start_time >= lunch_break_start_time and start_time < lunch_break_finish_time and not flag_start_in_lunch_break:
+                flag_start_in_lunch_break = True
+                continue
+            if course['duration'] <= 0:
+                continue
+            end_time = start_time + course['duration']
+            if not (end_time > day_start_time and end_time <= day_finish_time) and not flag_finish_not_in_day:
+                flag_finish_not_in_day = True
+                continue
+            if end_time > lunch_break_start_time and end_time <= lunch_break_finish_time and not flag_finish_in_lunch_break:
+                flag_finish_in_lunch_break = True
+                continue
+        if flag_invalid:
+            result.append(f"L'heure de début du cours '{id_}' dans '{courses_sheet}' est invalide")
+        if flag_start_not_in_day:
+            result.append(f"L'heure de début du cours '{id_}' dans '{courses_sheet}' n'est pas dans la journée")
+        if flag_start_in_lunch_break:
+            result.append(f"L'heure de début du cours '{id_}' dans '{courses_sheet}' est dans la pause méridienne")
+        if flag_finish_not_in_day:
+            result.append(f"L'heure de fin du cours '{id_}' dans '{courses_sheet}' n'est pas dans la journée")
+        if flag_finish_in_lunch_break:
+            result.append(f"L'heure de fin du cours '{id_}' dans '{courses_sheet}' est dans la pause méridienne")
+    return result
+
 
 ##########################################
 #                                        #
@@ -249,7 +546,7 @@ def database_description_check (database):
         'room_categories': check_room_categories,
         'people': check_people,
         'modules': check_modules,
-        'cours': check_cours,
+        'courses': check_cours,
         'settings': check_settings,
         'promotions': check_promotions,
         'group_types': check_group_types,
@@ -275,20 +572,20 @@ def database_description_check (database):
     if len(result) > 0:
         return result
 
-    # BIG FIXME: here comes the second round - user-oriented, this time
+    for checker in [check_settings_sheet, check_people_sheet,
+                    check_rooms_sheet, check_groups_sheet,
+                    check_modules_sheet, check_courses_sheet]:
+        result.extend(checker(database))
 
     return result
 
 
 if __name__ == '__main__':
     from parse_database_file_xlsx import parse_file
-    print("=========== PARSING BEGIN ============")
     database = parse_file()
-    print("=========== PARSING END ============")
-    print("Remarks:")
     remarks = database_description_check(database)
     if len(remarks) == 0:
-        print(" nil")
+        print("nil")
     else:
         for remark in remarks:
             print(remark)
