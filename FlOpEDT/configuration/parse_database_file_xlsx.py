@@ -19,7 +19,7 @@
 #
 # 'modules': a dictionary where a key is an identifier, and the data
 # is itself a dictionary with explicit key names, giving strings:
-# 'PPN', 'name', 'promotion', 'period' and 'responsable'.
+# 'PPN', 'short', 'name', 'promotion', 'period' and 'responsable'.
 #
 # 'courses': a dictionary where a key is an identifier, and the data is
 # itself a dictionary, 'duration' an integer, 'group_types' a set of
@@ -236,7 +236,7 @@ def parse_people(sheet):
     return result
 
 def parse_modules(sheet):
-    row, col = find_marker_cell(sheet, "Abréviation")
+    row, col = find_marker_cell(sheet, "Identifiant")
     if row == None:
         logger.warning(f"The marker cell in sheet {modules_sheet} is missing")
         return dict()
@@ -250,11 +250,12 @@ def parse_modules(sheet):
             continue
         if id_ in result:
             id_ = ':INVALID:DUPLICATE:{0:s}'.format(cell_name(row, col))
-        result[id_] = {'PPN': parse_string(sheet, row, col + 1),
-                       'name': parse_string(sheet, row, col + 2),
-                       'promotion': parse_string(sheet, row, col + 3),
-                       'period': parse_string(sheet, row, col + 4),
-                       'responsable': parse_string(sheet, row, col + 5)}
+        result[id_] = { 'short': parse_string(sheet, row, col + 1),
+                        'PPN': parse_string(sheet, row, col + 2),
+                        'name': parse_string(sheet, row, col + 3),
+                        'promotion': parse_string(sheet, row, col + 4),
+                        'period': parse_string(sheet, row, col + 5),
+                        'responsable': parse_string(sheet, row, col + 6)}
         row = row + 1
     return result
 

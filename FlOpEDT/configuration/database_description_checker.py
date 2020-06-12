@@ -128,7 +128,7 @@ def check_modules(modules):
         if not isinstance(module, dict):
             result.append("D: module '{id_}' should be a 'dict'")
             continue
-        if module.keys() != { 'PPN', 'name', 'promotion', 'period', 'responsable' }:
+        if module.keys() != { 'short', 'PPN', 'name', 'promotion', 'period', 'responsable' }:
             result.append(f"D: module '{id_}' doesn't have the expected keys")
             continue
         for key, val in module.items():
@@ -328,7 +328,7 @@ def check_settings_sheet(database):
     if len(periods) == 0:
         result.append(f"Aucune période n'est définie dans '{settings_sheet}'")
 
-    check_duplicates(periods.keys(), f"périodes dans '{settings_sheet}'")
+    result.extend(check_duplicates(periods.keys(), f"périodes dans '{settings_sheet}'"))
 
     for id_, (start, finish) in periods.items():
         if start < 0:
@@ -355,9 +355,9 @@ def check_rooms_sheet(database):
     if len(database['rooms']) == 0:
         result.append(f"Votre liste de salles dans '{rooms_sheet}' est vide!")
 
-    check_duplicates(database['rooms'], "salle dans '{rooms_sheet}'")
-    check_duplicates(database['room_groups'].keys(), f"groupes de salles dans '{rooms_sheet}'")
-    check_duplicates(database['room_categories'].keys(), f"catégories de salles dans '{rooms_sheet}'")
+    result.extend(check_duplicates(database['rooms'], "salle dans '{rooms_sheet}'"))
+    result.extend(check_duplicates(database['room_groups'].keys(), f"groupes de salles dans '{rooms_sheet}'"))
+    result.extend(check_duplicates(database['room_categories'].keys(), f"catégories de salles dans '{rooms_sheet}'"))
 
     empty = set()
     for id_, rooms in database['room_groups'].items():
@@ -400,7 +400,7 @@ def check_people_sheet(database):
     if len(people) == 0:
         result.append(f"Votre liste d'intervenants dans '{people_sheet}' est vide!")
 
-    check_duplicates(people.keys(), f"personnes dans '{people_sheet}'")
+    result.extend(check_duplicates(people.keys(), f"personnes dans '{people_sheet}'"))
 
     for id_, person in database['people'].items():
         if person['status'] == '' and not id_.startswith(':INVALID:'):
@@ -419,7 +419,7 @@ def check_groups_sheet(database):
     if len(promotions) == 0:
         result.append(f"Votre liste de promotions dans '{groups_sheet}' est vide!")
 
-    check_duplicates(promotions.keys(), f"promotion dans '{groups_sheet}'")
+    result.extend(check_duplicates(promotions.keys(), f"promotion dans '{groups_sheet}'"))
 
     #
     # check group types
@@ -428,7 +428,7 @@ def check_groups_sheet(database):
     if len(group_types) == 0:
         result.append(f"Votre liste de natures de groupes dans '{groups_sheet}' est vide!")
 
-    check_duplicates(group_types, f"nature de groupes dans '{groups_sheet}'")
+    result.extend(check_duplicates(group_types, f"nature de groupes dans '{groups_sheet}'"))
 
     #
     # check groups
@@ -437,7 +437,7 @@ def check_groups_sheet(database):
     if len(groups) == 0:
         result.append(f"Votre liste de groupes dans '{groups_sheet}' est vide!")
 
-    check_duplicates(groups.keys(), f"groupes dans '{groups_sheet}'")
+    result.extend(check_duplicates(groups.keys(), f"groupes dans '{groups_sheet}'"))
 
     for id_, group in groups.items():
         if not group['promotion'] in promotions.keys() and not id_.startswith(':INVALID:'):
@@ -456,9 +456,11 @@ def check_modules_sheet(database):
 
     modules = database['modules']
 
-    check_duplicates(modules.keys(), f"modules dans '{modules_sheet}'")
+    result.extend(check_duplicates(modules.keys(), f"modules dans '{modules_sheet}'"))
 
     for id_, module in modules.items():
+        if module['short'] == '' and not id_.startswith(':INVALID:'):
+            result.append(f"L'abréviation du module '{id_}' dans '{modules_sheet}' est vide")
         if not module['promotion'] in database['promotions'].keys() and not id_.startswith(':INVALID:'):
             result.append(f"La promotion du module '{id_}' dans '{modules_sheet}' est invalide")
         if not module['period'] in database['settings']['periods'].keys() and not id_.startswith(':INVALID:'):
@@ -474,7 +476,7 @@ def check_courses_sheet(database):
 
     courses = database['courses']
 
-    check_duplicates(courses.keys(), f"cours in '{courses_sheet}'")
+    result.extend(check_duplicates(courses.keys(), f"cours in '{courses_sheet}'"))
 
     for id_, course in courses.items():
         
