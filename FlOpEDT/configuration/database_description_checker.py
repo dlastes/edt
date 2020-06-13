@@ -361,7 +361,7 @@ def check_settings_sheet(database):
                 result.append(f"Il semblerait que la période '{id_}' dans '{settings_sheet}' finisse avant son début")
             elif not id_.startswith(':INVALID:'):
                 valid_periods.append((id_, start, finish))
-    result.extend(check_non_overlapping_periods(valid_periods))
+    # result.extend(check_non_overlapping_periods(valid_periods))
 
     return result
 
@@ -600,7 +600,7 @@ def database_description_check (database):
 
 
 if __name__ == '__main__':
-    from parse_database_file_xlsx import parse_file
+    from configuration.parse_database_file_xlsx import parse_file
     database = parse_file()
     remarks = database_description_check(database)
     if len(remarks) == 0:
