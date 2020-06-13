@@ -19,6 +19,8 @@
 # - main checker
 #
 
+import operator
+
 people_sheet = 'Intervenants'
 rooms_sheet = 'Salles'
 groups_sheet = 'Groupes'
@@ -268,6 +270,19 @@ def check_duplicates(ids, name):
 
     return result
 
+def check_non_overlapping_periods(periods):
+    result = []
+
+    periods.sort(key=operator.itemgetter(1))
+
+    for ii in range(0, len(periods)):
+
+        for jj in range(ii+1, len(periods)):
+
+            if periods[jj][1] <= periods[ii][2]:
+                result.append(f"Les périodes '{periods[ii][0]}' et '{periods[jj][0]}' se chevauchent dans '{settings_sheet}'")
+    
+    return result
 
 ##########################################
 #                                        #
@@ -330,6 +345,7 @@ def check_settings_sheet(database):
 
     result.extend(check_duplicates(periods.keys(), f"périodes dans '{settings_sheet}'"))
 
+    valid_periods = []
     for id_, (start, finish) in periods.items():
         if start < 0:
             result.append(f"Le début de la période '{id_}' dans '{settings_sheet}' est invalide")
@@ -343,8 +359,9 @@ def check_settings_sheet(database):
                 finish = finish - 52
             if not (start < finish):
                 result.append(f"Il semblerait que la période '{id_}' dans '{settings_sheet}' finisse avant son début")
-
-    # FIXME: check for overlapping periods? Looks tricky, but possible
+            elif not id_.startswith(':INVALID:'):
+                valid_periods.append((id_, start, finish))
+    result.extend(check_non_overlapping_periods(valid_periods))
 
     return result
 
