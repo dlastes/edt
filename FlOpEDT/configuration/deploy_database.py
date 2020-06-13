@@ -45,6 +45,7 @@ from django.db import IntegrityError
 
 from misc.assign_colors import assign_module_color
 
+from configuration.database_description_checker import database_description_check
 
 media_dir = 'media/configuration'
 logger = logging.getLogger('base')
@@ -61,9 +62,12 @@ def extract_database_file(department_name=None, department_abbrev=None, bookname
         bookname = f"{media_dir}/database_file_{department_abbrev}.xlsx"
 
     book = parse_file(bookname)
-    if book == None:
-        logger.warning("Database file could not be loaded : \n", ie)
-        return
+    if book is None:
+        raise Exception("Database file could not be loaded.")
+
+    check = database_description_check(book)
+    if check:
+        raise Exception('\n'.join(check))
 
     settings_extract(department, book['settings'])
     people_extract(department, book['people'])
