@@ -74,7 +74,7 @@ def extract_database_file(department_name=None, department_abbrev=None, bookname
     rooms_extract(department, book['room_groups'], book['room_categories'], book['rooms'])
     groups_extract(department, book['promotions'], book['group_types'], book['groups'])
     modules_extract(department, book['modules'])
-    courses_extract(department, book['cours'])
+    courses_extract(department, book['courses'])
 
 def people_extract(department, people):
 
