@@ -195,6 +195,7 @@ def groups_extract(department, promotions, group_types, groups):
             try:
                 promotion = TrainingProgramme(department=department, name=name, abbrev=id_)
                 promotion.save()
+                TrainingProgrammeDisplay(training_programme=promotion, row=0).save()
             except IntegrityError as ie:
                 logger.warning(f"A constraint has not been respected creating the promotion '{id_}' : {ie}")
                 pass # FIXME: continue?
