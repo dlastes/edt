@@ -66,7 +66,7 @@ def extract_database_file(department_name=None, department_abbrev=None, bookname
         raise Exception("Database file could not be loaded.")
 
     check = database_description_check(book)
-    if check:
+    if len(check) > 0:
         raise Exception('\n'.join(check))
 
     settings_extract(department, book['settings'])
