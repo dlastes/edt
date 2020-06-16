@@ -148,7 +148,7 @@ def ReadPlanifWeek(department, book, feuille, week, year):
                 TUTOR, created = Tutor.objects.get_or_create(username='---')
                 if created:
                     TUTOR.save()
-                    fill_default_user_preferences(TUTOR)
+                    fill_default_user_preferences(TUTOR, dept=department)
                     UserDepartmentSettings(user=TUTOR, department=department).save()
             elif prof == '*':
                 TUTOR = None
