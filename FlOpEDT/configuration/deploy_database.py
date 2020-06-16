@@ -38,6 +38,7 @@ from base.models import RoomType, Room, TrainingProgramme,\
     Department, CourseStartTimeConstraint, TimeGeneralSettings, UserPreference, CoursePreference
 
 from people.models import FullStaff, SupplyStaff, Tutor, UserDepartmentSettings
+from people.tutor import fill_default_user_preferences
 
 from configuration.parse_database_file_xlsx import parse_file
 
@@ -55,6 +56,13 @@ def extract_database_file(department_name=None, department_abbrev=None, bookname
 
     # Test department existence
     department, created = Department.objects.get_or_create(name=department_name, abbrev=department_abbrev)
+    if created:
+        try:
+            admin = Tutor.objects.get(username='admin')
+            UserDepartmentSettings(user=admin, department=department).save()
+        except Tutor.DoesNotExist:
+            pass
+
     if not created:
         logger.info(f"Department with abbrev {department_abbrev} and name {department_name} already exists. "
                     f"It will be updated")
@@ -103,12 +111,13 @@ def people_extract(department, people):
                 tutor.save()
 
                 UserDepartmentSettings.objects.create(department=department, user=tutor)
+                fill_default_user_preferences(tutor, dept=department)
 
             except IntegrityError as ie :
                 logger.warning("A constraint has not been respected while creating the Professor : \n", ie)
                 pass
             else:
-                logger.info(f'create tutor with id:{id}')
+                logger.info(f'create tutor with id:{id_}')
         else:
             UserDepartmentSettings.objects.get_or_create(department=department, user=tutor)
 
@@ -145,7 +154,7 @@ def rooms_extract(department, room_groups, room_categories, rooms):
     for group_id, members in room_groups.items():
 
         try:
-            room_group, _ = Room.objects.get_or_create(name=id_)
+            room_group, _ = Room.objects.get_or_create(name=group_id)
             room_group.types.add(temporary_room_type)
 
         except IntegrityError as ie:
@@ -157,25 +166,22 @@ def rooms_extract(department, room_groups, room_categories, rooms):
             logger.info(f"Add room '{room_id}' to group '{group_id}'")
 
             try:
-                room = Room.objects.get(name=room_id)
+                room, _ = Room.objects.get_or_create(name=room_id)
                 room.subroom_of.add(room_group)
+                room.save()
 
             except Room.DoesNotExist:
                 logger.warning(f"Unable to find room '{room_id}'")
+
 
     for cat_id, members in room_categories.items():
 
         room_type = RoomType.objects.get(department=department, name=cat_id)
         for member in members:
-
             try:
-                # Test if member is a room group or a room
-                try:
-                    room_group = Room.objects.get(subrooms__id=member)
-                except:
-                    room_group = Room.objects.get(name=member, types__in=[temporary_room_type, ])
-
-                room_group.types.add(room_type)
+                room = Room.objects.get(name=member)
+                room.types.add(room_type)
+                room.save()
             except Room.DoesNotExist:
                 logger.warning(f"Unable to find room '{member}'")
 
@@ -273,7 +279,6 @@ def modules_extract(department, modules):
 
         if not verif.exists():
 
-            print(f"{module['promotion']}")
             promotion = TrainingProgramme.objects.get(abbrev=module['promotion'],
                                                       department=department)
             prof = Tutor.objects.get(username=module['responsable'])
