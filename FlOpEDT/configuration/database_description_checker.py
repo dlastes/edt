@@ -24,8 +24,13 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-# This code finds the list of problems in a description of a database,
-# for example the result of parse_file in parse_database_file_xlsx.py.
+
+##############
+# PRINCIPLE  #
+##############
+#
+# This code finds the list of problems in a description of a database
+# in the form of structured Python data.
 #
 # The goal is that if there's any problem with what the user entered,
 # it is seen, it is precisely diagnosed and explained : no need to ask.
@@ -35,14 +40,74 @@
 # a very direct and explicit indication of what was wrong.
 #
 # The checks go from the very basic (structural, typing) to the more
-# specific, in turn.
+# specific, in turn, as the more specific requires some assumptions to
+# be already satisfied.
+
+##################
+# DATA STRUCTURE #
+##################
 #
+# The main object is a dictionary with keys:
+#
+# 'rooms': a set of strings, the room identifiers - the
+# brick-and-mortar rooms
+#
+# 'room_groups': a dictionary where a key is a group identifier and
+# the data is a set of brick-and-mortar room identifiers
+#
+# 'room_categories': a dictionary where a key is a category identifier
+# and the data is a set of room identifiers (both brick-and-mortar and
+# groups)
+#
+# 'people': a dictionary where a key is a person identifier, and the
+# data is itself a dictionary with explicit key names, giving strings:
+# 'first_name', 'last_name', 'email', 'status' and 'employer'.
+#
+# 'modules': a dictionary where a key is an identifier, and the data
+# is itself a dictionary with explicit key names, giving strings:
+# 'PPN', 'short', 'name', 'promotion', 'period' and 'responsable'.
+#
+# 'courses': a dictionary where a key is an identifier, and the data is
+# itself a dictionary, 'duration' an integer, 'group_types' a set of
+# strings consisting of the concerned group types identifiers, and
+# 'start_times' a set of integers consisting of the possible start
+# times.
+#
+# 'settings': a dictionary with keys:
+#
+#   - 'day_start_time', 'day_finish_time', 'lunch_break_start_time' and
+#     'lunch_break_finish_time' : integers with explicit meaning
+#
+#   - 'default_preference_duration': integer with explicit meaning
+#
+#   - 'days': a list of strings among 'm', 'tu', 'w', 'th', 'f', 'sa'
+#     and 'su' (fixme)
+#
+#   - 'periods': a dictionary where a key is a period identifier, and
+#     the data is a pair of integers : the start week and finish week.
+#
+# 'promotions': a dictionary where a key is an identifier and the
+# associated data is the name of the promotion.
+#
+# 'group_types': a set of group type identifiers
+#
+# 'groups': a dictionary where a key is a group identifier, and the
+# data is itself a dictionary with keys:
+#
+#   - 'promotion': the promotion identifier
+#
+#   - 'group_type': a group type identifier
+#
+#   - 'parent': a set containing either a group identifier or nothing
+
+################
+# ORGANISATION #
+################
 # The basic organisation of the file is the following :
 # - helper functions for first level checkers
 # - first level checkers
 # - <helpers and checkers of higher levels>
 # - main checker
-#
 
 import operator
 
