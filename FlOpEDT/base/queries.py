@@ -50,7 +50,7 @@ def create_first_department():
 
     department = Department.objects.create(name="Default Department", abbrev="default")
 
-    T = Tutor.objects.create(username='admin', is_staff=True, is_superuser=True, rights=6)
+    T = Tutor.objects.create(username='admin', is_staff=True, is_tutor=True, is_superuser=True, rights=6)
     T.set_password('passe')
     T.save()
 
