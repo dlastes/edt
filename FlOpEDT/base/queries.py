@@ -283,6 +283,7 @@ def get_coursetype_constraints(department_abbrev):
         for ct_constraint in \
               CourseStartTimeConstraint.objects.filter(course_type=ct):
             dic[ct.name]['allowed_st'] += ct_constraint.allowed_start_times
+        dic[ct.name]['allowed_st'].sort()
         if len(dic[ct.name]['allowed_st']) == 0:
             dic[ct.name]['allowed_st'] += \
                 CourseStartTimeConstraint.objects.get(course_type=None).allowed_start_times
