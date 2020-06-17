@@ -67,7 +67,7 @@ urlpatterns = [
     url('ttapp/', include('TTapp.urls')),
     url('game/', include('easter_egg.urls')),
     url('api/', include('api.urls')),
-    url(r'^$', base.views.index, name='index'),
+    url(r'^$', views.index, name='index'),
     url(r'^flopeditor/', include('flopeditor.urls')),
     url(r'^display/', include('displayweb.urls'))
 ]

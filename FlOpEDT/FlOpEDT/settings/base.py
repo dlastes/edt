@@ -58,7 +58,6 @@ INSTALLED_APPS = [
     'import_export',
     'colorfield',
     'flopeditor',
-#    'rest_framework',
     'rest_framework',
     # 'django_filters',
     'base',
@@ -71,9 +70,8 @@ INSTALLED_APPS = [
     'displayweb',
     'configuration',
     'easter_egg',
-    'MyFlOp'
+    'MyFlOp',
 #    'importation'
-#    'importation',
     'api',
     'rest_framework.authtoken',
     'rest_auth',

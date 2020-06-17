@@ -22,17 +22,17 @@
 # without disclosing the source code of your own applications.
 from rest_framework import routers
 
-from api.TTapp import views
+# from api.TTapp import views
 
 routerTTapp = routers.SimpleRouter()
 
-routerTTapp.register(r'customconstrains', views.TTCustomConstraintsViewSet)
-routerTTapp.register(r'limitcoursetypetimeperperiods', views.TTLimitCourseTypeTimePerPeriodsViewSet)
-routerTTapp.register(r'reasonabledays', views.TTReasonableDaysViewSet)
-routerTTapp.register(r'stabilize', views.TTStabilizeViewSet)
-routerTTapp.register(r'minhalfdays', views.TTMinHalfDaysViewSet)
-routerTTapp.register(r'minnonpreferedslots', views.TTMinNonPreferedSlotsViewSet)
-routerTTapp.register(r'avoidbothtimes', views.TTAvoidBothTimesViewSet)
-routerTTapp.register(r'simultaneouscourses', views.TTSimultaneousCoursesViewSet)
-routerTTapp.register(r'limitedstarttimechoices', views.TTLimitedStartTimeChoicesViewSet) # TODO: Fix
-routerTTapp.register(r'limitedroomchoices', views.TTLimitedRoomChoicesViewSet)
+# routerTTapp.register(r'customconstrains', views.TTCustomConstraintsViewSet)
+# routerTTapp.register(r'limitcoursetypetimeperperiods', views.TTLimitCourseTypeTimePerPeriodsViewSet)
+# routerTTapp.register(r'reasonabledays', views.TTReasonableDaysViewSet)
+# routerTTapp.register(r'stabilize', views.TTStabilizeViewSet)
+# routerTTapp.register(r'minhalfdays', views.TTMinHalfDaysViewSet)
+# routerTTapp.register(r'minnonpreferedslots', views.TTMinNonPreferedSlotsViewSet)
+# routerTTapp.register(r'avoidbothtimes', views.TTAvoidBothTimesViewSet)
+# routerTTapp.register(r'simultaneouscourses', views.TTSimultaneousCoursesViewSet)
+# routerTTapp.register(r'limitedstarttimechoices', views.TTLimitedStartTimeChoicesViewSet) # TODO: Fix
+# routerTTapp.register(r'limitedroomchoices', views.TTLimitedRoomChoicesViewSet)
