@@ -262,6 +262,15 @@ class DispoResource(resources.ModelResource):
         fields = ('day', 'start_time', 'duration', 'value', 'prof')
 
 
+class AllDispoResource(resources.ModelResource):
+    prof = fields.Field(attribute='user',
+                        widget=ForeignKeyWidget(User, 'username'))
+
+    class Meta:
+        model = UserPreference
+        fields = ('year', 'week', 'day', 'start_time', 'duration', 'value', 'prof')
+
+
 class CoursePreferenceResource(resources.ModelResource):
     type_name = fields.Field(attribute='course_type',
                              widget=ForeignKeyWidget(CourseType, 'name'))
