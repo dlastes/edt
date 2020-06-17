@@ -1,0 +1,254 @@
+# Translation file for FlOpEDT/FlOpScheduler project.
+# Copyright (C) 2017
+# This file is distributed under the same license as the FlOpEDT/FlOpScheduler project.
+# Authors: Iulian Ober, Paul Renaud-Goud, Pablo Seban, et al.
+#
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 0.3.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-04-13 17:31+0200\n"
+"PO-Revision-Date: 2020-04-05 18:44+0200\n"
+"Last-Translator: Benoît Roche (benoit.roche@esrf.fr)\n"
+"Language-Team: none\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: FlOpEDT/settings/base.py:149
+msgid "French"
+msgstr ""
+
+#: FlOpEDT/settings/base.py:150
+msgid "English"
+msgstr ""
+
+#: TTapp/models.py:857
+msgid "If no tutor then training programme."
+msgstr ""
+
+#: TTapp/models.py:860
+msgid "If no training programme then tutor."
+msgstr ""
+
+#: base/templates/base/show-stype.html:94
+msgid "Weeks"
+msgstr ""
+
+#: base/templates/base/show-stype.html:95
+msgid "Set default week"
+msgstr ""
+
+#: base/templates/base/show-stype.html:96
+msgid "from week"
+msgstr ""
+
+#: base/templates/base/show-stype.html:97
+#: base/templates/base/show-stype.html:100
+msgid "year"
+msgstr ""
+
+#: base/templates/base/show-stype.html:99
+msgid "until week"
+msgstr ""
+
+#: base/templates/base/show-stype.html:102
+msgid "button_apply"
+msgstr "Apply"
+
+#: base/templates/base/show-stype.html:107
+msgid "Default week"
+msgstr ""
+
+#: base/templates/base/show-stype.html:109
+msgid "Update my default week"
+msgstr ""
+
+#: base/templates/base/show-stype.html:111
+#: base/templates/base/show-stype.html:136
+msgid "button_save"
+msgstr "Save"
+
+#: base/templates/base/show-stype.html:120
+msgid "My favorite rooms"
+msgstr ""
+
+#: base/templates/base/show-stype.html:121
+msgid "Select my favorite rooms"
+msgstr ""
+
+#: base/templates/base/show-stype.html:123
+msgid "button_change"
+msgstr "Change"
+
+#: base/templates/base/show-stype.html:126
+msgid "My ideal day"
+msgstr ""
+
+#: base/templates/base/show-stype.html:129
+msgid ""
+"This is the total number of teaching hours I would like to give every day:"
+msgstr ""
+
+#: base/templates/base/show-stype.html:131
+msgid "Peferred"
+msgstr ""
+
+#: base/templates/base/show-stype.html:133
+msgid "Maximum"
+msgstr ""
+
+#: base/weeks.py:34
+msgid "Mon."
+msgstr ""
+
+#: base/weeks.py:35
+msgid "Tue."
+msgstr ""
+
+#: base/weeks.py:36
+msgid "Wed."
+msgstr ""
+
+#: base/weeks.py:37
+msgid "Thu."
+msgstr ""
+
+#: base/weeks.py:38
+msgid "Fri."
+msgstr ""
+
+#: base/weeks.py:39
+msgid "Sat."
+msgstr ""
+
+#: base/weeks.py:40
+msgid "Sun."
+msgstr ""
+
+#: people/templates/people/login.html:55
+msgid "Forgot password?"
+msgstr ""
+
+#: people/templates/people/login.html:58 templates/base.html:106
+msgid "Sign in"
+msgstr ""
+
+#: people/templates/people/login.html:79
+msgid "Sign up"
+msgstr ""
+
+#: people/templates/people/login.html:80
+msgid "I am"
+msgstr ""
+
+#: people/templates/people/login.html:82
+msgid "A student"
+msgstr ""
+
+#: people/templates/people/login.html:83
+msgid "A teacher"
+msgstr ""
+
+#: people/templates/people/login.html:84
+msgid "A temporary teacher"
+msgstr ""
+
+#: people/templates/people/login.html:85
+msgid "A tech or administrative staff"
+msgstr ""
+
+#: people/templates/people/login.html:86
+msgid "Create"
+msgstr ""
+
+#: quote/forms.py:41
+msgid "Quote "
+msgstr ""
+
+#: quote/forms.py:42
+msgid "Last name "
+msgstr ""
+
+#: quote/forms.py:43
+msgid "First name "
+msgstr ""
+
+#: quote/forms.py:44
+msgid "Nickname "
+msgstr ""
+
+#: quote/forms.py:45
+msgid "Author description "
+msgstr ""
+
+#: quote/forms.py:46
+msgid "Date "
+msgstr ""
+
+#: quote/forms.py:47
+msgid "Header "
+msgstr ""
+
+#: quote/forms.py:48
+msgid "Category "
+msgstr ""
+
+#: templates/base.html:51
+msgid "Schedule_title"
+msgstr "Schedule"
+
+#: templates/base.html:80
+msgid "Schedule_banner"
+msgstr "Schedule "
+
+#: templates/base.html:82
+msgid "Move/Cancel"
+msgstr ""
+
+#: templates/base.html:84
+msgid "Preferences"
+msgstr ""
+
+#: templates/base.html:85
+msgid "iCal"
+msgstr ""
+
+#: templates/base.html:86
+msgid "Help"
+msgstr ""
+
+#: templates/base.html:87
+msgid "Messages"
+msgstr ""
+
+#: templates/base.html:88
+msgid "Modules"
+msgstr ""
+
+#: templates/base.html:90
+msgid "Generate"
+msgstr ""
+
+#: templates/base.html:91
+msgid "Statistics"
+msgstr ""
+
+#: templates/base.html:92
+msgid "Import"
+msgstr ""
+
+#: templates/base.html:93
+msgid "Admin"
+msgstr ""
+
+#: templates/base.html:99 templates/base.html:101 templates/base.html:103
+msgid "Sign out"
+msgstr ""
+
+#: templates/base.html:110
+msgid "Signed in as "
+msgstr ""

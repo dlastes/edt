@@ -30,16 +30,14 @@ from django.contrib import admin
 from base.admin import DepartmentModelAdmin
 
 from TTapp.models import \
-    LimitCourseTypeTimePerPeriod, ReasonableDays, Stabilize, \
-    MinHalfDays, MinNonPreferedSlot, AvoidBothTimes, \
-    SimultaneousCourses, CustomConstraint
+    LimitModulesCourseTypeTimePerPeriod, Stabilize, \
+    MinModulesHalfDays, MinTutorsHalfDays, MinGroupsHalfDays,\
+    MinNonPreferedTrainProgsSlot, MinNonPreferedTutorsSlot, \
+    CustomConstraint, SimultaneousCourses, MinimizeBusyDays, RespectBoundPerDay,\
+    AvoidBothTimes, LimitedRoomChoices, LimitedStartTimeChoices, \
+    LimitTutorsCourseTypeTimePerPeriod, LimitGroupsCourseTypeTimePerPeriod, LowerBoundBusyDays, GroupsLunchBreak, BreakAroundCourseType
 
 # Register your models here.
-
-# from TTapp.models import TestJour
-
-from import_export import resources, fields
-from import_export.widgets import ForeignKeyWidget
 
 from FlOpEDT.filters import DropdownFilterAll, DropdownFilterRel, \
     DropdownFilterCho
@@ -48,8 +46,7 @@ from FlOpEDT.filters import DropdownFilterAll, DropdownFilterRel, \
 class CustomConstraintAdmin(DepartmentModelAdmin):
     list_display = ('class_name', 
                 'week', 
-                'year', 
-                'train_prog',
+                'year',
                 'comment')
     ordering = ()
     list_filter = (('groups', DropdownFilterRel),
@@ -58,27 +55,59 @@ class CustomConstraintAdmin(DepartmentModelAdmin):
                    )   
 
 
-class LimitCourseTypeTimePerPeriodAdmin(DepartmentModelAdmin):
+class LimitModulesCourseTypeTimePerPeriodAdmin(DepartmentModelAdmin):
     list_display = ('week', 
-                    'year', 
-                    'train_prog', 
+                    'year',
                     'course_type',
                     'max_hours',
                     'period', 
-                    'comment')
+                    'comment',
+                    'weight')
     ordering = ()
-    list_filter = (('train_prog', DropdownFilterRel),
+    list_filter = (('train_progs', DropdownFilterRel),
+                   ('week', DropdownFilterAll),
+                   ('year', DropdownFilterAll),
+                   ('modules', DropdownFilterRel),
+                   ('course_type', DropdownFilterRel),
+                   )
+
+class LimitGroupsCourseTypeTimePerPeriodAdmin(DepartmentModelAdmin):
+    list_display = ('week',
+                    'year',
+                    'course_type',
+                    'max_hours',
+                    'period',
+                    'comment',
+                    'weight')
+    ordering = ()
+    list_filter = (('train_progs', DropdownFilterRel),
+                   ('week', DropdownFilterAll),
+                   ('year', DropdownFilterAll),
+                   ('groups', DropdownFilterRel),
+                   ('course_type', DropdownFilterRel),
+                   )
+
+class LimitTutorsCourseTypeTimePerPeriodAdmin(DepartmentModelAdmin):
+    list_display = ('week',
+                    'year',
+                    'course_type',
+                    'max_hours',
+                    'period',
+                    'comment',
+                    'weight')
+    ordering = ()
+    list_filter = (('train_progs', DropdownFilterRel),
                    ('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
                    ('tutors', DropdownFilterRel),
                    ('course_type', DropdownFilterRel),
                    )
 
-
 class ReasonableDaysAdmin(DepartmentModelAdmin):
-    list_display = ('week', 'year', 'train_prog', 'comment')
+    list_display = ('week', 'year', 'comment',
+                    'weight')
     ordering = ()
-    list_filter = (('train_prog', DropdownFilterRel),
+    list_filter = (('train_progs', DropdownFilterRel),
                    ('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
                    ('groups', DropdownFilterRel),
@@ -87,28 +116,48 @@ class ReasonableDaysAdmin(DepartmentModelAdmin):
 
 
 class StabilizeAdmin(DepartmentModelAdmin):
-    list_display = ('week', 'year', 'train_prog', 'general',
-                    'group', 'tutor', 'module', 'type', 'comment')
+    list_display = ('week', 'year', 'general',
+                    'group', 'tutor', 'module', 'course_type', 'comment',
+                    'weight')
     ordering = ()
     list_filter = (('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
-                   ('train_prog', DropdownFilterRel),
+                   ('train_progs', DropdownFilterRel),
                    ('group', DropdownFilterRel),
                    ('tutor', DropdownFilterRel),
                    ('module', DropdownFilterRel),
-                   ('type', DropdownFilterRel),
+                   ('course_type', DropdownFilterRel),
                    )
 
 
-class MinHalfDaysAdmin(DepartmentModelAdmin):
-    list_display = ('week', 'year', 'train_prog', 'join2courses', 'comment')
+class MinTutorsHalfDaysAdmin(DepartmentModelAdmin):
+    list_display = ('week', 'year', 'join2courses', 'comment',
+                    'weight')
+    ordering = ()
+    list_filter = (('week', DropdownFilterAll),
+                   ('year', DropdownFilterAll),
+                   ('tutors', DropdownFilterRel),
+                   'join2courses',
+                   )
+
+
+class MinModulesHalfDaysAdmin(DepartmentModelAdmin):
+    list_display = ('week', 'year', 'comment',
+                    'weight')
+    ordering = ()
+    list_filter = (('week', DropdownFilterAll),
+                   ('year', DropdownFilterAll),
+                   ('modules', DropdownFilterRel),
+                   )
+
+
+class MinGroupsHalfDaysAdmin(DepartmentModelAdmin):
+    list_display = ('week', 'year', 'comment',
+                    'weight')
     ordering = ()
     list_filter = (('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
                    ('groups', DropdownFilterRel),
-                   ('tutors', DropdownFilterRel),
-                   ('modules', DropdownFilterRel),
-                   'join2courses',
                    )
 
     
@@ -122,22 +171,32 @@ class MinHalfDaysAdmin(DepartmentModelAdmin):
         return queryset                          
 
 
-class MinNonPreferedSlotAdmin(DepartmentModelAdmin):
-    list_display = ('week', 'year', 'train_prog', 'tutor', 'comment')
+class MinNonPreferedTutorsSlotAdmin(DepartmentModelAdmin):
+    list_display = ('week', 'year', 'comment',
+                    'weight')
     ordering = ()
     list_filter = (('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
-                   ('tutor', DropdownFilterRel),
-                   ('train_prog', DropdownFilterRel),
+                   ('tutors', DropdownFilterRel),
+                   )
+
+class MinNonPreferedTrainProgsSlotAdmin(DepartmentModelAdmin):
+    list_display = ('week', 'year', 'comment',
+                    'weight')
+    ordering = ()
+    list_filter = (('week', DropdownFilterAll),
+                   ('year', DropdownFilterAll),
+                   ('train_progs', DropdownFilterRel),
                    )
 
 
 class AvoidBothTimesAdmin(DepartmentModelAdmin):
-    list_display = ('week', 'year', 'train_prog', 'tutor', 'group', 'time1', 'time2', 'comment')
+    list_display = ('week', 'year', 'tutor', 'group', 'time1', 'time2', 'comment',
+                    'weight')
     ordering = ()
     list_filter = (('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
-                   ('train_prog', DropdownFilterRel),
+                   ('train_progs', DropdownFilterRel),
                    ('tutor', DropdownFilterRel),
                    ('group', DropdownFilterRel),
                    ('time1', DropdownFilterRel),
@@ -146,20 +205,110 @@ class AvoidBothTimesAdmin(DepartmentModelAdmin):
 
 
 class SimultaneousCoursesAdmin(DepartmentModelAdmin):
-    list_display = ('week', 'year', 'train_prog', 'course1', 'course2', 'comment')
+    list_display = ('week', 'year', 'comment',
+                    'weight')
     ordering = ()
     list_filter = (('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
-                   ('course1', DropdownFilterRel),
-                   ('course2', DropdownFilterRel),
+                   ('courses', DropdownFilterRel),
+                   )
+
+
+class RespectBoundPerDayAdmin(DepartmentModelAdmin):
+    list_display = ('week', 'year', 'comment',
+                    'weight')
+    ordering = ()
+    list_filter = (('week', DropdownFilterAll),
+                   ('year', DropdownFilterAll),
+                   ('tutors', DropdownFilterRel),
+                   )
+
+
+class MinimizeBusyDaysAdmin(DepartmentModelAdmin):
+    list_display = ('week', 'year', 'comment')
+    ordering = ()
+    list_filter = (('week', DropdownFilterAll),
+                   ('year', DropdownFilterAll),
+                   ('tutors', DropdownFilterRel),
+                   )
+
+
+class LimitedRoomChoicesAdmin(DepartmentModelAdmin):
+    list_display = ('week', 'year', 'group', 'tutor', 'module', 'course_type',
+                    'weight')
+    ordering = ()
+    list_filter = (('week', DropdownFilterAll),
+                   ('year', DropdownFilterAll),
+                   ('train_progs', DropdownFilterRel),
+                   ('group', DropdownFilterRel),
+                   ('tutor', DropdownFilterRel),
+                   ('module', DropdownFilterRel),
+                   ('course_type', DropdownFilterRel),
+                   )
+
+
+class LimitedStartTimeChoicesAdmin(DepartmentModelAdmin):
+    list_display = ('week', 'year', 'group', 'tutor', 'module', 'course_type', 'comment',
+                    'weight')
+    ordering = ()
+    list_filter = (('week', DropdownFilterAll),
+                   ('year', DropdownFilterAll),
+                   ('train_progs', DropdownFilterRel),
+                   ('group', DropdownFilterRel),
+                   ('tutor', DropdownFilterRel),
+                   ('module', DropdownFilterRel),
+                   ('course_type', DropdownFilterRel),
+                   )
+
+
+class LowerBoundBusyDaysAdmin(DepartmentModelAdmin):
+    list_display = ('week', 'year', 'tutor', 'min_days_nb', 'lower_bound_hours', 'comment',
+                    'weight')
+    ordering = ()
+    list_filter = (('week', DropdownFilterAll),
+                   ('year', DropdownFilterAll),
+                   ('train_progs', DropdownFilterRel),
+                   ('tutor', DropdownFilterRel),
+                   )
+
+
+class GroupsLunchBreakAdmin(DepartmentModelAdmin):
+    list_display = ('week', 'year', 'comment',
+                    'weight')
+    ordering = ()
+    list_filter = (('week', DropdownFilterAll),
+                   ('year', DropdownFilterAll),
+                   ('train_progs', DropdownFilterRel),
+                   ('groups', DropdownFilterRel),
+                   )
+
+class AmphiBreakAdmin(DepartmentModelAdmin):
+    list_display = ('week', 'year', 'comment',
+                    'weight')
+    ordering = ()
+    list_filter = (('week', DropdownFilterAll),
+                   ('year', DropdownFilterAll),
+                   ('train_progs', DropdownFilterRel),
+                   ('groups', DropdownFilterRel),
                    )
 
 
 admin.site.register(CustomConstraint, CustomConstraintAdmin)
-admin.site.register(LimitCourseTypeTimePerPeriod, LimitCourseTypeTimePerPeriodAdmin)
-admin.site.register(ReasonableDays, ReasonableDaysAdmin)
 admin.site.register(Stabilize, StabilizeAdmin)
-admin.site.register(MinHalfDays, MinHalfDaysAdmin)
-admin.site.register(MinNonPreferedSlot, MinNonPreferedSlotAdmin)
+admin.site.register(MinGroupsHalfDays, MinGroupsHalfDaysAdmin)
+admin.site.register(MinTutorsHalfDays, MinTutorsHalfDaysAdmin)
+admin.site.register(MinModulesHalfDays, MinModulesHalfDaysAdmin)
+admin.site.register(MinNonPreferedTutorsSlot, MinNonPreferedTutorsSlotAdmin)
+admin.site.register(MinNonPreferedTrainProgsSlot, MinNonPreferedTrainProgsSlotAdmin)
 admin.site.register(AvoidBothTimes, AvoidBothTimesAdmin)
 admin.site.register(SimultaneousCourses, SimultaneousCoursesAdmin)
+admin.site.register(MinimizeBusyDays, MinimizeBusyDaysAdmin)
+admin.site.register(RespectBoundPerDay, RespectBoundPerDayAdmin)
+admin.site.register(LimitedStartTimeChoices, LimitedStartTimeChoicesAdmin)
+admin.site.register(LimitedRoomChoices, LimitedRoomChoicesAdmin)
+admin.site.register(LimitModulesCourseTypeTimePerPeriod, LimitModulesCourseTypeTimePerPeriodAdmin)
+admin.site.register(LimitGroupsCourseTypeTimePerPeriod, LimitGroupsCourseTypeTimePerPeriodAdmin)
+admin.site.register(LimitTutorsCourseTypeTimePerPeriod, LimitTutorsCourseTypeTimePerPeriodAdmin)
+admin.site.register(LowerBoundBusyDays, LowerBoundBusyDaysAdmin)
+admin.site.register(GroupsLunchBreak, GroupsLunchBreakAdmin)
+admin.site.register(BreakAroundCourseType, AmphiBreakAdmin)

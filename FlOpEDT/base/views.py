@@ -3,21 +3,21 @@
 # This file is part of the FlOpEDT/FlOpScheduler project.
 # Copyright (c) 2017
 # Authors: Iulian Ober, Paul Renaud-Goud, Pablo Seban, et al.
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
 # published by the Free Software Foundation, either version 3 of the
 # License, or (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful, but
 # WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 # Affero General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Affero General Public
 # License along with this program. If not, see
 # <http://www.gnu.org/licenses/>.
-# 
+#
 # You can be released from the requirements of the license by purchasing
 # a commercial license. Buying such a license is mandatory as soon as
 # you develop activities involving the FlOpEDT/FlOpScheduler software
@@ -62,7 +62,7 @@ from base.forms import ContactForm, PerfectDayForm, ModuleDescriptionForm
 from base.models import Course, UserPreference, ScheduledCourse, EdtVersion, \
     CourseModification, Day, Time, Room, RoomType, RoomSort, \
     Regen, RoomPreference, Department, TimeGeneralSettings, CoursePreference, \
-    TrainingProgramme, CourseType, Module
+    TrainingProgramme, CourseType, Module, Group
 import base.queries as queries
 from base.weeks import *
 
@@ -98,8 +98,8 @@ def favicon(req, fav, **kwargs):
 def index(req):
     """
     Display department selection view.
-    
-    The view create a default department if not exist and 
+
+    The view create a default department if not exist and
     redirects to edt vue if only one department exist
     """
 
@@ -132,9 +132,6 @@ def edt(req, year=None, week=None, splash_id=0, **kwargs):
         copie = 0
         gp = ''
 
-    # une_salle = RoomGroup.objects.all()[1].name
-    une_salle = 'salle?'
-
     if req.user.is_authenticated:
         name_usr = req.user.username
         try:
@@ -151,7 +148,6 @@ def edt(req, year=None, week=None, splash_id=0, **kwargs):
                                 'week': week,
                                 'year': year,
                                 'promo': promo,
-                                'une_salle': une_salle,
                                 'copie': copie,
                                 'gp': gp,
                                 'name_usr': name_usr,
@@ -188,15 +184,12 @@ def edt_light(req, year=None, week=None, **kwargs):
         gp_w = 30
         svg_top_m = 40
 
-    une_salle = "salle?"  # RoomGroup.objects.all()[0].name
-
     return TemplateResponse(req, 'base/show-edt-light.html',
                             {
                                 'all_weeks': week_list(),
                                 'week': week,
                                 'year': year,
                                 'promo': promo,
-                                'une_salle': une_salle,
                                 'copie': 0,
                                 'gp': '',
                                 'name_usr': '',
@@ -509,26 +502,9 @@ def fetch_cours_pp(req, week, year, num_copy, **kwargs):
         return cached
 
     dataset = CoursResource() \
-        .export(Course
-                .objects
-                .filter(
-        module__train_prog__department=department,
-        week=week,
-        year=year)
-                .exclude(pk__in=ScheduledCourse
-                         .objects
-                         .filter(
-        course__module__train_prog__department=department,
-        work_copy=num_copy)
-                         .values('course'))
-                .select_related('group__train_prog',
-                                'tutor',
-                                'module',
-                                'type',
-                                'group',
-                                'room_type',
-                                'module__display'
-                                ))
+        .export(
+            queries.get_unscheduled_courses(department, week, year, num_copy)
+        )
 
 
     response = HttpResponse(dataset.csv, content_type='text/csv')
@@ -765,9 +741,20 @@ def fetch_decale(req, **kwargs):
     year = int(req.GET.get('a', '0'))
     module = req.GET.get('m', '')
     prof = req.GET.get('p', '')
-    group = req.GET.get('g', '')
+    group_name = req.GET.get('group', '')
+    training_programme = req.GET.get('training_programme', '')
     department = req.department
 
+    try:
+        print(group_name, training_programme)
+        group = Group.objects.get(
+            name=group_name,
+            train_prog__abbrev=training_programme,
+            train_prog__department=req.department
+        )
+    except Exception as e:
+        group = None
+    
     courses = []
     modules = []
     tutors = []
@@ -794,7 +781,7 @@ def fetch_decale(req, **kwargs):
             courses.append({'i': c.id,
                             'm': c.module.abbrev,
                             'p': c.tutor.username,
-                            'g': c.group.name,
+                            'g': [g.name for g in c.groups.all()],
                             'd': day,
                             't': time})
 
@@ -812,7 +799,10 @@ def fetch_decale(req, **kwargs):
             tutors.append(c.tutor.username)
 
     if module != '':
-        course_queryset = Course.objects.filter(module__train_prog__department=department)
+        course_queryset = Course\
+            .objects\
+            .filter(module__train_prog__department=department)\
+            .select_related('module__train_prog__department')
         course = filt_m(course_queryset, module) \
             .order_by('tutor__username') \
             .distinct('tutor__username')
@@ -821,9 +811,14 @@ def fetch_decale(req, **kwargs):
                 module_tutors.append(c.tutor.username)
 
     course = filt_p(filt_m(filt_sa(department, week, year), module), prof) \
-        .distinct('group')
+        .distinct('groups')
+    groups = set()
     for c in course:
-        groups.append(c.group.name)
+        for g in c.groups.all():
+            groups.add((g.train_prog.abbrev, g.name))
+    groups = [{'training_programme': g[0],
+               'group': g[1]} for g in groups]
+    groups.sort(key=lambda g:(g['training_programme'],g['group']))
 
     return JsonResponse({'cours': courses,
                          'modules': modules,
@@ -890,7 +885,6 @@ def fetch_constraints(req, **kwargs):
     constraints = queries.get_coursetype_constraints(req.department.abbrev)
     return JsonResponse(constraints, safe=False)
 
-
 def fetch_departments(req, **kwargs):
     """
     Return departments
@@ -905,7 +899,6 @@ def fetch_course_types(req, **kwargs):
     """
     course_types = queries.get_course_types(req.department)
     return JsonResponse(course_types, safe=False)
-
 
 def fetch_training_programmes(req, **kwargs):
     """
@@ -1026,14 +1019,11 @@ def clean_change(year, week, old_version, change, work_copy=0, initiator=None, a
 
     # Rooms
     try:
-        new_room = Room.objects.get(name=change['room'])
+        new_room = Room.objects.get(name=change['room']) \
+            if change['room'] != '' else None
         ret['sched'].room = new_room
-    except ObjectDoesNotExist:
-        if new_room == 'salle?' or new_room is None:
-            raise Exception('Oublié de trouver une salle ' \
-                  'pour un cours ?')
-        else:
-            raise Exception(f"Problème : salle {change['room']} inconnue")
+    except Room.DoesNotExist:
+        raise Exception(f"Problème : salle {change['room']} inconnue")
 
     # Timing
     ret['sched'].start_time = change['start']
@@ -1502,11 +1492,16 @@ def decale_changes(req, **kwargs):
             changing_course.week = new_week
             changing_course.year = new_year
             if new_year != 0:
-                changing_course.tutor = Tutor.objects.get(username=new_assignment['np'])
+                changing_course.tutor = Tutor.objects.get(
+                    username=new_assignment['np']
+                )
             cache.delete(get_key_course_pp(req.department.abbrev,
                                            new_year,
                                            new_week,
                                            0))
+            cache.delete(get_key_preferences_tutor(req.department.abbrev,
+                                                   new_year,
+                                                   new_week))
             changing_course.save()
             ev, _ = EdtVersion.objects.update_or_create(
                 year=new_year,
@@ -1526,7 +1521,7 @@ def decale_changes(req, **kwargs):
 # ---------
 
 
-def contact(req, tutor, **kwargs):
+def contact(req, tutor=None, **kwargs):
     ack = ''
     if req.method == 'POST':
         form = ContactForm(req.POST)
@@ -1716,8 +1711,8 @@ def filt_p(r, prof):
 
 
 def filt_g(r, group):
-    if group != '':
-        r = r.filter(group__name=group)
+    if group is not None:
+        r = r.filter(groups=group).prefetch_related('groups')
     return r
 
 

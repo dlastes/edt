@@ -1,10 +1,14 @@
-from import_export import resources
+from import_export import resources, fields
+from import_export.widgets import ForeignKeyWidget
 
 from django.contrib import admin
 
 from base.admin import DepartmentModelAdmin
-from displayweb.models import BreakingNews
+from base.models import Module
+from people.models import Tutor
+from displayweb.models import BreakingNews, TutorDisplay, ModuleDisplay
 
+from FlOpEDT.settings.base import COSMO_MODE
 
 class BreakingNewsResource(resources.ModelResource):
     class Meta:
@@ -17,5 +21,39 @@ class BreakingNewsAdmin(DepartmentModelAdmin):
                     'fill_color', 'strk_color')
     ordering = ('-year', '-week')
 
+
+class TutorDisplayResource(resources.ModelResource):
+    tutor = fields.Field(column_name='key',
+                         attribute='tutor',
+                         widget=ForeignKeyWidget(Tutor, 'username'))
+
+    class Meta:
+        model = TutorDisplay
+        fields = ('key', 'color_bg', 'color_txt')
+
+
+class ModuleDisplayResource(resources.ModelResource):
+    module = fields.Field(column_name='key',
+                          attribute='module',
+                          widget=ForeignKeyWidget(Module, 'abbrev'))
+
+    class Meta:
+        model = ModuleDisplay
+        fields = ('key', 'color_bg', 'color_txt')
+
+
+class ModuleDisplayAdmin(DepartmentModelAdmin):
+    list_display = ('module', 'color_bg', 'color_txt')
+    ordering = ('module',)
+
+    
+class TutorDisplayAdmin(DepartmentModelAdmin):
+    list_display = ('tutor', 'color_bg', 'color_txt')
+    ordering = ('tutor',)
+
     
 admin.site.register(BreakingNews, BreakingNewsAdmin)
+if COSMO_MODE:
+    admin.site.register(TutorDisplay, TutorDisplayAdmin)
+else:
+    admin.site.register(ModuleDisplay, ModuleDisplayAdmin)

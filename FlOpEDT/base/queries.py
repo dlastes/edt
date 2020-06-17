@@ -1,4 +1,4 @@
-# coding: utf8
+# coding: utf-8
 # -*- coding: utf-8 -*-
 
 # This file is part of the FlOpEDT/FlOpScheduler project.
@@ -35,27 +35,31 @@ from base.models import Group, RoomType, Room, \
                         RoomSort, Period, CourseType, \
                         TutorCost, CourseStartTimeConstraint, \
                         TimeGeneralSettings, GroupType, CourseType, \
-                        TrainingProgramme
+                        TrainingProgramme, Course
 
 from displayweb.models import GroupDisplay, TrainingProgrammeDisplay, BreakingNews
 
 from people.models import Tutor, NotificationsPreferences
-from TTapp.models import TTConstraint
+from TTapp.TTConstraint import TTConstraint, all_subclasses
 
 logger = logging.getLogger(__name__)
 
 
 @transaction.atomic
-def create_first_department():    
+def create_first_department():
 
     department = Department.objects.create(name="Default Department", abbrev="default")
-    
+
+    T = Tutor.objects.create(username='admin', is_staff=True, is_superuser=True, rights=6)
+    T.set_password('passe')
+    T.save()
+
     # Update all existing department related models
     models = [
         TrainingProgramme, EdtVersion, Regen, \
         RoomType, Period, CourseType, BreakingNews, \
         TutorCost, GroupType]
-   
+
     for model in models:
         model.objects.all().update(department=department)
 
@@ -66,10 +70,10 @@ def create_first_department():
             model_class.departments.add(department)
 
     # Update existing Constraint
-    types = TTConstraint.__subclasses__()
+    types = all_subclasses(TTConstraint)
 
     for type in types:
-        type.objects.all().update(department=department)    
+        type.objects.all().update(department=department)
 
     # Init TimeGeneralSettings with default values
     TimeGeneralSettings.objects.create(
@@ -93,15 +97,15 @@ def get_edt_version(department, week, year, create=False):
         except EdtVersion.MultipleObjectsReturned as e:
             logger.error(f'get_edt_version: database inconsistency, multiple objects returned for {params}')
             raise(e)
-        else:    
+        else:
             version = edt_version.version
     else:
         """
-        Raise model.DoesNotExist to simulate get behaviour 
+        Raise model.DoesNotExist to simulate get behaviour
         when no item is matching filter parameters
         """
         try:
-            version = EdtVersion.objects.filter(**params).values_list("version", flat=True)[0]   
+            version = EdtVersion.objects.filter(**params).values_list("version", flat=True)[0]
         except IndexError:
             raise(EdtVersion.DoesNotExist)
     return version
@@ -117,15 +121,32 @@ def get_scheduled_courses(department, week, year, num_copy):
                         day__in=get_working_days(department),
                         work_copy=num_copy).select_related('course',
                                                            'course__tutor',
-                                                           'course__group',
-                                                           'course__group__train_prog',
+                                                           'course__module__train_prog',
                                                            'course__module',
                                                            'course__type',
                                                            'room',
                                                            'course__room_type',
                                                            'course__module__display'
                         )
-    return qs    
+    return qs
+
+
+def get_unscheduled_courses(department, week, year, num_copy):
+    return Course.objects.filter(
+        module__train_prog__department=department,
+        week=week,
+        year=year
+    ).exclude(pk__in=ScheduledCourse.objects.filter(
+        course__module__train_prog__department=department,
+        work_copy=num_copy
+    ).values('course')
+    ).select_related('module__train_prog',
+                     'tutor',
+                     'module',
+                     'type',
+                     'room_type',
+                     'module__display'
+    ).prefetch_related('groups')
 
 
 def get_groups(department_abbrev):
@@ -249,7 +270,7 @@ def get_rooms(department_abbrev, basic=False):
 
 def get_coursetype_constraints(department_abbrev):
     """
-    From the data stored in the database, fill the course type 
+    From the data stored in the database, fill the course type
     description file (duration and allowed start times), that will
     be used by the website
     :return: a dictionary course type -> (object containing duration
@@ -262,6 +283,7 @@ def get_coursetype_constraints(department_abbrev):
         for ct_constraint in \
               CourseStartTimeConstraint.objects.filter(course_type=ct):
             dic[ct.name]['allowed_st'] += ct_constraint.allowed_start_times
+        dic[ct.name]['allowed_st'].sort()
         if len(dic[ct.name]['allowed_st']) == 0:
             dic[ct.name]['allowed_st'] += \
                 CourseStartTimeConstraint.objects.get(course_type=None).allowed_start_times
@@ -316,5 +338,10 @@ def get_notification_preference(user):
         try:
             return user.notifications_preference.nb_of_notified_weeks
         except NotificationsPreferences.DoesNotExist:
-            pass
+            if user.is_tutor:
+                return 4
+            elif user.is_student:
+                return 0
+            else:
+                pass
     return 0

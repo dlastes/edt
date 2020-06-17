@@ -37,7 +37,7 @@ songez à une exécution en `sudo`.)
 
 L'application sera accessible à l'adresse http://localhost:8000.
 
-Vous pouvez importer les données d'exemple contenues dans le fichier [dump.json](./dump.json) (qui est une
+Vous pouvez importer les données d'exemple contenues dans le fichier [dump.json.bz2](./dump.json.bz2) (qui est une
 base pour jouer avec l'interface) avec la commande :
 
 `make init` 

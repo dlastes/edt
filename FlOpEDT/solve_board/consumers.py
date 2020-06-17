@@ -100,8 +100,7 @@ class SolverConsumer(WebsocketConsumer):
 
             Solve(
                 data['department'],
-                data['week'],
-                data['year'],
+                data['week_year'],
                 data['timestamp'],
                 data['train_prog'],
                 self,
@@ -134,11 +133,10 @@ def solver_subprocess_SIGINT_handler(sig, stack):
 
 
 class Solve():
-    def __init__(self, department_abbrev, week, year, timestamp, training_programme, chan, time_limit, solver, stabilize_work_copy=None):
+    def __init__(self, department_abbrev, week_year, timestamp, training_programme, chan, time_limit, solver, stabilize_work_copy=None):
         super(Solve, self).__init__()
         self.department_abbrev = department_abbrev
-        self.week = week
-        self.year = year
+        self.week_year = week_year
         self.timestamp = timestamp
         self.channel = chan
         self.time_limit = time_limit
@@ -163,7 +161,7 @@ class Solve():
                 os.dup2(wd,1)   # redirect stdout
                 os.dup2(wd,2)   # redirect stderr
                 try:
-                    t = MyTTModel(self.department_abbrev, self.week, self.year, train_prog=self.training_programme, stabilize_work_copy = self.stabilize_work_copy)
+                    t = MyTTModel(self.department_abbrev, self.week_year, train_prog=self.training_programme, stabilize_work_copy = self.stabilize_work_copy)
                     os.setpgid(os.getpid(), os.getpid())
                     signal.signal(signal.SIGINT, solver_subprocess_SIGINT_handler)
                     t.solve(time_limit=self.time_limit, solver=self.solver)

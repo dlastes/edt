@@ -138,7 +138,7 @@ file_fetch.rooms.callback = function () {
 file_fetch.constraints.callback = function () {
   constraints = this.data;
 
-  // rev_constraints only used in slot_case
+  // rev_constraints only used when training programmes on multiple lines
   let i, j, coursetypes, cur_start_time;
   coursetypes = Object.keys(constraints);
   for (i = 0; i < coursetypes.length; i++) {
@@ -296,11 +296,21 @@ var pref_selection = {
     desc: "paint",
     txt: "Sélection",
     selected: false,
-  }]
+  }],
+  is_paint_mode: function () {
+    let p = this.mode.find(function(m){ return m.desc=='paint';});
+    if (typeof p === 'undefined') {
+      console.log('Something is wrong with paint-like mode.');
+    } else {
+      return p.selected ;
+    }
+  },
+  // pref when mouse was initialy pressed
+  start: null
 };
 for (let i = 0; i <= par_dispos.nmax; i++) {
   pref_selection.choice.data.push({
-    val: i,
+    value: i,
     // for smile_trans
     off: -2,
     selected: false
@@ -348,9 +358,8 @@ var wdw_weeks = new WeeksExcerpt(dsp_weeks.visible_weeks);
   -------- GRID --------
   ----------------------*/
 
-// one element per slot
-// non-empty iff slot_case
-// filled in create_grid_data()
+// possible slots when drag'n'drop
+// filled in add_slot_grid_data()
 var data_slot_grid = [];
 
 // keys on top or at the bottom of the grid representing the name of
@@ -655,19 +664,26 @@ var drag_popup;
 
 // helper for the d&d
 var drag = {
-  sel: null,
+  sel: [],
   x: 0,
   y: 0,
   init: 0,
   svg: null,
   svg_w: 0,
-  svg_h: 0
+  svg_h: 0,
+  set_selection: function(id_course) {
+    this.sel = d3.selectAll(".cours")
+      .filter(function(c) {return c.id_course == id_course;});
+    this.x = 0 ;
+    this.y = 0 ;
+  }
 };
 
 // course being moved
 var pending = {
   init_course: null,
   wanted_course: null,
+  linked_courses: null,
   time: null,
   pass: {
     tutor: false,
@@ -681,11 +697,25 @@ var pending = {
   clean: function () {
     this.init_course = null;
     this.wanted_course = null;
+    this.linked_courses = null;
     this.time = null;
   },
   fork_course: function (d) {
     this.wanted_course = d;
+    this.linked_courses = cours.filter(function(c){
+      return c.id_course == d.id_course ;
+    });
+    this.update_linked();
     this.init_course = Object.assign({}, d);
+  },
+  update_linked: function() {
+    let w = this.wanted_course ;
+    this.linked_courses.forEach(function(c){
+      c.day =   w.day ;
+      c.start = w.start ;
+      c.room =  w.room ;
+      c.prof =  w.prof ;
+    });
   },
   prepare_dragndrop: function (d) {
     this.fork_course(d);
@@ -702,6 +732,7 @@ var pending = {
   },
   rollback: function (t) {
     Object.assign(this.wanted_course, this.init_course);
+    this.update_linked();
     this.clean();
   }
 };
@@ -976,3 +1007,9 @@ splash_hold = false;
 
 var modules_info = {};
 var tutors_info = {};
+
+
+// rectangle colors
+// cosmo mode: tutor_username -> {color_bg: color, color_txt: color}
+// tutor mode: module_abbrev -> {color_bg: color, color_txt: color}
+var colors = {} ;

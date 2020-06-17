@@ -33,6 +33,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.10/ref/settings/
 """
 
+from django.utils.translation import gettext_lazy as _
+
 import os
 import sys
 
@@ -40,7 +42,7 @@ import sys
 BASE_DIR = os.path.dirname(os.path.dirname(
     os.path.dirname(os.path.abspath(__file__))))
 
-# 
+#
 # Application definition
 #
 
@@ -55,6 +57,8 @@ INSTALLED_APPS = [
     'django_extensions',
     'import_export',
     'colorfield',
+    'flopeditor',
+#    'rest_framework',
     'rest_framework',
     # 'django_filters',
     'base',
@@ -66,18 +70,21 @@ INSTALLED_APPS = [
     'ics',
     'displayweb',
     'configuration',
+    'easter_egg',
+    'MyFlOp'
+#    'importation'
 #    'importation',
     'api',
     'rest_framework.authtoken',
     'rest_auth',
     'rest_framework_swagger',
-    'drf_yasg',
-    'easter_egg'
+    'drf_yasg'
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -146,17 +153,28 @@ USE_TZ = True
 CSRF_USE_SESSION = True
 AUTH_USER_MODEL = 'people.User'
 
+# Available languages
+LANGUAGES = [
+  ('fr', _('French')),
+  ('en', _('English')),
+]
+
+# Folder which contains traduction files
+LOCALE_PATHS = (
+    os.path.join(BASE_DIR, 'locale'),
+)
+
 #
 # ASSETS Settings
 #
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
-   
+
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
-# 
+#
 # EMAIL SETTINGS
 #
 

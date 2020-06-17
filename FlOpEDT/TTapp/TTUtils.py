@@ -29,7 +29,8 @@ from base.models import ScheduledCourse, RoomPreference, EdtVersion, Department,
     TimeGeneralSettings, Room, CourseModification
 from base.timing import str_slot
 from django.db.models import Count, Max, Q, F
-from TTapp.models import LimitedRoomChoices, slot_pause
+from TTapp.models import MinNonPreferedTrainProgsSlot, MinNonPreferedTutorsSlot, max_weight
+from TTapp.slots import slot_pause
 from base.views import get_key_course_pl, get_key_course_pp
 from django.core.cache import cache
 
@@ -81,7 +82,7 @@ def minimize_moves(department, week, year, target_work_copy):
                                 start_time__gt = st - F('course__type__duration') - slot_pause,
                                 day=day,
                                 course__room_type=CP.course.room_type,
-                                course__group=CP.course.group,
+                                course__groups__in=CP.course.groups.all(),
                                 **scheduled_courses_params)
                     if len(precedent) == 0:
                         continue
@@ -124,12 +125,6 @@ def minimize_moves(department, week, year, target_work_copy):
                 elif cp_using_prec.count() == 1:
                     sib = cp_using_prec[0]
                     if sib.course.room_type == CP.course.room_type and sib.course:
-                        if not LimitedRoomChoices.objects.filter(
-                                    Q(week=week) | Q(week=None),
-                                    Q(year=year) | Q(year=None),
-                                    Q(train_prog=sib.course.module.train_prog) | Q(module=sib.course.module) | Q(group=sib.course.group) |
-                                    Q(tutor=sib.course.tutor) | Q(type=sib.course.type),
-                                    possible_rooms=sib.room).exists():
                             r = CP.room
                             CP.room = precedent.room
                             sib.room = r
@@ -360,3 +355,18 @@ def basic_swap_version(department, week, year, copy_a, copy_b=0):
                                    year,
                                    week,
                                    copy_b))
+
+
+def add_generic_constraints_to_database(department):
+    # first objective  => minimise use of unpreferred slots for teachers
+    # ponderation MIN_UPS_I
+
+    M, created = MinNonPreferedTutorsSlot.objects.get_or_create(weight=max_weight, department=department)
+    M.save()
+
+    # second objective  => minimise use of unpreferred slots for courses
+    # ponderation MIN_UPS_C
+
+    M, created = MinNonPreferedTrainProgsSlot.objects.get_or_create(weight=max_weight, department=department)
+    M.save()
+

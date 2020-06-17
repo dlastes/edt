@@ -23,6 +23,7 @@
 
 {% extends "base.html" %}
 
+{% load i18n %}
 {% csrf_token %}
 
 
@@ -88,24 +89,24 @@
         <form style="white-space: nowrap;" name="app" action="javascript:apply_stype_from_button(false)" id="form-nweek">
             </br>
             <fieldset>
-                <legend>Semaines particulières</legend>
-                <p>Appliquer la configuration ci-contre<p/>
-                de la semaine
-                <input type="number" name="week_st" style="width: 40px" value="{{ date_deb.semaine }}" min="1" max="53">, année
+                <legend>{% trans "Weeks" %}</legend>
+                <p>{% trans "Set default week" %}<p/>
+                {% trans "from week" %}
+                <input type="number" name="week_st" style="width: 40px" value="{{ date_deb.semaine }}" min="1" max="53">, {% trans "year" %}
                 <input type="number" name="year_st" style="width: 60px" value="{{ date_deb.an }}" min="{{current_year}}" max="{{current_year|add:"1"}}"></br>
-                à la semaine
-                <input type="number" name="week_end" style="width: 40px" value="{{ date_fin.semaine }}" min="1" max="53">, année
+                {% trans "until week" %}
+                <input type="number" name="week_end" style="width: 40px" value="{{ date_fin.semaine }}" min="1" max="53">, {% trans "year" %}
                 <input type="number" name="year_end" style="width: 60px" value="{{ date_fin.an }}" min="{{current_year}}" max="{{current_year|add:"1"}}"></br></br>
-                <input type="submit" name="apply" value="Appliquer">
+                <input type="submit" name="apply" value="{% trans "button_apply" %}">
             </fieldset>
             </br></br>
         </form>
         <fieldset>
-            <legend>Semaine type</legend>
+            <legend>{% trans "Default week" %}</legend>
             <form style="white-space: nowrap;" name="sav"  action="javascript:apply_stype_from_button(true)" id="form-dweek">
-                Redéfinir ma semaine type<br/>
+                {% trans "Update my default week" %}<br/>
                 <br/>
-                <input type="submit" name="save" value="Sauvegarder"></br>
+                <input type="submit" name="save" value="{% trans "button_save" %}"></br>
             </form>
         </fieldset>
         <br/><br/>
@@ -114,23 +115,23 @@
 </div>
 <div class='stype-container'>
   <fieldset>
-    <legend>Mes préférences de salles</legend>
-    <p>Choisir mes salles préférées</p>
+    <legend>{% trans "My favorite rooms" %}</legend>
+    <p>{% trans "Select my favorite rooms" %}</p>
     <br/>
-    <button onclick="window.location.href = '{% url 'base:room-pref' department %}';">Modifier</button>
+    <button onclick="window.location.href = '{% url 'base:room-pref' department %}';">{% trans "button_change" %}</button>
   </fieldset>
   <fieldset>
-    <legend>Ma journée idéale</legend>
+    <legend>{% trans "My ideal day" %}</legend>
     <form action='{% url "base:user_perfect_day_changes" department user.username %}'  method='POST' id="form-perfect_day" >
       {% csrf_token %}
-      <p>Chaque jour, voici le nombre d'heures de cours que je souhaite donner :</p>
+      <p>{% trans "This is the total number of teaching hours I would like to give every day:" %}</p>
 
-      Idéalement <input id="user_pref_hours_per_day" type="number" name="user_pref_hours" style="width: 30px" min="1" max="9" value="{{ usr_pref_hours }}">
+      {% trans "Peferred" %} <input id="user_pref_hours_per_day" type="number" name="user_pref_hours" style="width: 30px" min="1" max="9" value="{{ usr_pref_hours }}">
       <br/>
-      Maximum <input id="user_max_hours_per_day" type="number" name="user_max_hours" style="width: 30px" min="1" max="9" value="{{ usr_max_hours }}">
+      {% trans "Maximum" %} <input id="user_max_hours_per_day" type="number" name="user_max_hours" style="width: 30px" min="1" max="9" value="{{ usr_max_hours }}">
       <br/>
       <br/>
-      <input type="submit" name="save_perfect_day" value="Sauvegarder">
+      <input type="submit" name="save_perfect_day" value="{% trans "button_save" %}">
     </form>
   </fieldset>
   <br/>

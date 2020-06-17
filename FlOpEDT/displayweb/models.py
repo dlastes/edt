@@ -35,8 +35,8 @@ class BreakingNews(models.Model):
 
 class TutorDisplay(models.Model):
     tutor = models.OneToOneField('people.Tutor', related_name='display', on_delete=models.CASCADE)
-    color_bg = models.CharField(max_length=20, default="red")
-    color_txt = models.CharField(max_length=20, default="black")
+    color_bg = ColorField(default="#FF0000")
+    color_txt = ColorField(default="#000000")
 
     def __str__(self):
         return str(self.tutor) + ' -> BG: ' + str(self.color_bg) \
@@ -47,8 +47,8 @@ class ModuleDisplay(models.Model):
     module = models.OneToOneField('base.Module',
                                   related_name='display',
                                   on_delete=models.CASCADE)
-    color_bg = models.CharField(max_length=20, default="red")
-    color_txt = models.CharField(max_length=20, default="black")
+    color_bg = ColorField(default="#FF0000")
+    color_txt = ColorField(default="#000000")
 
     def __str__(self):
         return f"{self.module} -> BG: {self.color_bg} ; TXT: {self.color_txt}"

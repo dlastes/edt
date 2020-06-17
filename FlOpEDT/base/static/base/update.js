@@ -62,19 +62,24 @@ function go_pref(quick) {
     .data(
       user.dispos,
       function (d) {
-        return [d.day, d.start_time, d.duration, d.val].join('-');
-      })
-    .attr("cursor", ckbox["dis-mod"].cked ? "pointer" : "default");
+        return [d.day, d.start_time, d.duration, d.value, d.selected].join('-');
+      });
 
   datdi = dat
     .enter()
     .append("g")
     .attr("class", "dispo");
 
+  datdi.merge(dat)
+    .attr("opacity", pref_opacity)
+    .attr("cursor", cursor_pref());
+
   var datdisi = datdi
     .append("g")
     .attr("class", "dispo-si")
-    .on("click", apply_change_simple_pref);
+    .on("mousedown", function(d) { pref_selection.start = d; })
+    .on("mouseover", update_pref_selection)
+    .on("mouseup", apply_change_simple_pref);
 
   datdisi
     .append("rect")
@@ -351,7 +356,7 @@ function go_cm_advanced_pref(quick) {
     .attr("class", "dispo-menu")
     .attr("cursor", "pointer")
     .on("click", function (d) {
-      update_pref_interval(user.name, d.day, d.start_time, d.off);
+      update_pref_interval(user.name, d.day, d.start_time, d.duration, d.off);
       data_dispo_adv_cur = [];
       go_pref(true);
     });
@@ -538,52 +543,29 @@ function go_grid(quick) {
 
 
   var grid = fg.selectAll(".grids")
-    .data(data_slot_grid);
+    .data(
+      data_slot_grid.filter(function (d) {
+        return groups[d.promo][d.group].display;
+      }),
+      function (d) { return d.day + d.start + d.group + d.promo; }
+    );
 
   var gridg = grid
     .enter()
     .append("g")
     .attr("class", "grids")
-    .style("cursor", gs_cursor)
-    .on("click", clear_pop);
+    .style("cursor", "default");
 
 
   gridg
     .append("rect")
-    .attr("x", gs_x)
-    .attr("y", gs_y)
     .attr("stroke", gs_sc)
-    .attr("stroke-width", gs_sw)
-    .attr("stroke-dasharray", gs_sda)
-    .attr("stroke-linecap", gs_slc)
     .merge(grid.select("rect"))
-    .transition(t)
-    .attr("fill-opacity", gs_opacity)
-    .attr("x", gs_x)
-    .attr("y", gs_y)
-    .attr("width", gs_width)
-    .attr("height", gs_height)
+    .attr("x", cours_x)
+    .attr("y", cours_y)
+    .attr("width", cours_width)
+    .attr("height", cours_height)
     .attr("fill", gs_fill);
-
-  gridg
-    .append("text")
-    .attr("stroke", "none")
-    .attr("font-size", 14)
-    .attr("x", function (s) {
-      return gs_x(s) + .5 * gs_width(s);
-    })
-    .attr("y", function (s) {
-      return gs_y(s) + .5 * gs_height(s);
-    })
-    .merge(grid.select("text"))
-    .transition(t)
-    .attr("x", function (s) {
-      return gs_x(s) + .5 * gs_width(s);
-    })
-    .attr("y", function (s) {
-      return gs_y(s) + .5 * gs_height(s);
-    })
-    .text(gs_txt);
 
   grid
     .exit()
@@ -958,12 +940,20 @@ function update_active() {
   var tut_av = sel_popup.get_available("tutor");
   var mod_av = sel_popup.get_available("module");
 
-  tut_av.active = tutors.all.filter(function (d) {
-    return d.display;
-  }).length != tutors.all.length;
-  mod_av.active = modules.all.filter(function (d) {
-    return d.display;
-  }).length != modules.all.length;
+  if (typeof tut_av !== 'undefined') {
+    tut_av.active = tutors.all.filter(function (d) {
+      return d.display;
+    }).length != tutors.all.length;
+  } else {
+    tut_av = {active: false} ;
+  }
+  if (typeof mod_av !== 'undefined') {
+    mod_av.active = modules.all.filter(function (d) {
+      return d.display;
+    }).length != modules.all.length;
+  } else {
+    mod_av = {active: false} ;
+  }
 
   sel_popup.active_filter = tut_av.active || mod_av.active;
 
@@ -995,7 +985,7 @@ function go_courses(quick) {
       cours.filter(function (d) {
         return groups[d.promo][d.group].display;
       }),
-      function (d) { return d.id_course; }
+      function (d) { return d.group + d.id_course; }
     )
     .attr("cursor", ckbox["edt-mod"].cked ? "pointer" : "default");
 
@@ -1045,9 +1035,9 @@ function go_courses(quick) {
 
   if (ckbox["edt-mod"].cked
       && logged_usr.dispo_all_see) {
-    d3.selectAll("rect.crect").style("fill", function (d) {
+    d3.selectAll("rect.crect").attr("fill", function (d) {
       try {
-        lDis = dispos[d.prof][d.day][d.slot];
+        lDis = get_preference(dispos[d.prof][d.day], d.duration);
       } catch (e) {
         lDis = par_dispos.nmax;
       }
@@ -1055,7 +1045,7 @@ function go_courses(quick) {
       return smi_fill(lDis / par_dispos.nmax);
     });
   } else {
-    d3.selectAll("rect.crect").style("fill", cours_fill);
+    d3.selectAll("rect.crect").attr("fill", cours_fill);
   }
 
   // Tutor's fullname 
@@ -1083,11 +1073,11 @@ function go_courses(quick) {
   incg
     .append("text")
     .attr("st", "p")
-    .attr("fill", cours_txt_fill)
     .attr("font-weight", cours_txt_weight)
     .attr("font-size", cours_txt_size)
     .merge(cg.select("[st=p]"))
     .transition(t)
+    .attr("fill", cours_txt_fill)
     .attr("x", cours_txt_x)
     .attr("y", cours_txt_mid_y)
     .attr("x", cours_txt_x)
@@ -1102,10 +1092,10 @@ function go_courses(quick) {
       .attr("x", cours_txt_x)
       .attr("y", cours_txt_top_y)
       .text(cours_txt_top_txt)
-      .attr("fill", cours_txt_fill)
       .attr("font-weight", cours_txt_weight)
       .attr("font-size", cours_txt_size)
       .merge(cg.select("[st=m]"))
+      .attr("fill", cours_txt_fill)
       .transition(t)
       .attr("x", cours_txt_x)
       .attr("y", cours_txt_top_y);

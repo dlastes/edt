@@ -311,15 +311,15 @@ function create_dispos_user_data() {
         day: day.ref,
         start_time: pref_list[k].start_time,
         duration: pref_list[k].duration,
-        val: pref_list[k].value,
+        value: pref_list[k].value,
         off: -1
       };
       user.dispos_bu.push(d2p);
       if (pref_list[k].value < 0) {
         if (!pref_only) {
-          pref_list[k].val = get_dispos_type(d2p).val;
+          pref_list[k].value = get_dispos_type(d2p).value;
         } else {
-          pref_list[k].val = par_dispos.nmax;
+          pref_list[k].value = par_dispos.nmax;
         }
       }
 
@@ -328,7 +328,7 @@ function create_dispos_user_data() {
         day: day.ref,
         start_time: pref_list[k].start_time,
         duration: pref_list[k].duration,
-        val: pref_list[k].value,
+        value: pref_list[k].value,
         off: -1
       });
     }
@@ -361,8 +361,51 @@ function create_dispos_user_data() {
 /*--------------------
   ------ PROFS -------
   --------------------*/
+function fetch_colors() {
+  var exp_week = wdw_weeks.get_selected();
 
+  cours_bouge = {};
 
+  show_loader(true);
+  $.ajax({
+    type: "GET", //rest Type
+    dataType: 'text',
+    url: url_colors + "?week=" + exp_week.week
+      + "&year=" + exp_week.year
+      + "&work_copy=" + num_copie,
+    async: true,
+    success: function (msg, ts, req) {
+      var sel_week = wdw_weeks.get_selected();
+      if (Week.compare(exp_week, sel_week) == 0) {
+        colors = {} ;
+        d3.csvParse(msg, translate_colors_from_csv);
+
+        fetch.ongoing_colors = false;
+        fetch_ended(false);
+      }
+      show_loader(false);
+    },
+    error: function (msg) {
+      console.log("error");
+      show_loader(false);
+    }
+  });
+
+}
+
+function translate_colors_from_csv(d) {
+  colors[d.key] = {
+    color_bg: d.color_bg,
+    color_txt: d.color_txt
+  };
+}
+// touch courses to trigger color update
+function ping_colors() {
+  cours.forEach(function(c) {
+    c.color_bg = cours_fill(c) ;
+    c.color_txt = cours_txt_fill(c);
+  });
+}
 
 /*--------------------
   ------ BKNEWS -------
@@ -527,7 +570,13 @@ function fetch_cours() {
         modules.pl = [];
         salles.pl = [];
 
-        cours_pl = d3.csvParse(msg, translate_cours_pl_from_csv);
+        cours_pl = [] ;
+        d3.csvParse(
+          msg,
+          function(d) {
+            translate_cours_pl_from_csv(d, cours_pl);
+          }
+        );
 
 
         fetch.ongoing_cours_pl = false;
@@ -569,17 +618,15 @@ function fetch_cours() {
 
         // console.log(exp_week,num_copie);
 
-        cours_pp = d3.csvParse(msg, translate_cours_pp_from_csv);
+        cours_pp = [] ;
+        d3.csvParse(
+          msg,
+          function(d) {
+            translate_cours_pp_from_csv(d, cours_pp);
+          }
+        );
 
-        if (cours_pp.length > 0 && !garbage_plot) {
-          garbage_plot = true;
-          add_garbage();
-          go_grid(true);
-        } else if (cours_pp.length == 0 && garbage_plot) {
-          garbage_plot = false;
-          remove_garbage();
-          go_grid(true);
-        }
+        go_grid(true);
 
         fetch.ongoing_cours_pp = false;
         fetch_ended(false);
@@ -595,7 +642,7 @@ function fetch_cours() {
 }
 
 
-function translate_cours_pl_from_csv(d) {
+function translate_cours_pl_from_csv(d, result) {
   var ind = tutors.pl.indexOf(d.prof_name);
   if (ind == -1) {
     tutors.pl.push(d.prof_name);
@@ -606,29 +653,34 @@ function translate_cours_pl_from_csv(d) {
   if (salles.pl.indexOf(d.room) == -1) {
     salles.pl.push(d.room);
   }
-  var co = {
-    id_course: +d.id_course,
-    no_course: +d.num_course,
-    prof: d.prof_name,
-    //        prof_full_name: d.prof_first_name + " " + d.prof_last_name,
-    group: translate_gp_name(d.gpe_name),
-    promo: set_promos.indexOf(d.gpe_promo),
-    mod: d.module,
-    c_type: d.coursetype,
-    day: d.day,
-    start: +d.start_time,
-    duration: constraints[d.coursetype].duration,
-    room: d.room,
-    room_type: d.room_type,
-    color_bg: d.color_bg,
-    color_txt: d.color_txt,
-    display: true
-  };
-  return co;
+
+  // multiple groups
+  let groups = d.gpe_name.split("|");
+
+  for (let i = 0 ; i < groups.length ; i++) {
+    result.push({
+      id_course: +d.id_course,
+      no_course: +d.num_course,
+      prof: d.prof_name,
+      //        prof_full_name: d.prof_first_name + " " + d.prof_last_name,
+      group: translate_gp_name(groups[i]),
+      promo: set_promos.indexOf(d.gpe_promo),
+      mod: d.module,
+      c_type: d.coursetype,
+      day: d.day,
+      start: +d.start_time,
+      duration: constraints[d.coursetype].duration,
+      room: d.room,
+      room_type: d.room_type,
+      color_bg: d.color_bg,
+      color_txt: d.color_txt,
+      display: true
+    });
+  }
 }
 
 
-function translate_cours_pp_from_csv(d) {
+function translate_cours_pp_from_csv(d, result) {
   if (tutors.pp.indexOf(d.prof) == -1) {
     tutors.pp.push(d.prof);
   }
@@ -638,25 +690,29 @@ function translate_cours_pp_from_csv(d) {
   if (salles.pp.indexOf(d.room) == -1) {
     salles.pp.push(d.room);
   }
-  var co = {
-    id_course: +d.id,
-    no_course: +d.no,
-    prof: d.prof,
-    group: translate_gp_name(d.group),
-    promo: set_promos.indexOf(d.promo),
-    mod: d.module,
-    c_type: d.coursetype,
-    day: garbage.day,
-    start: garbage.start,
-    duration: constraints[d.coursetype].duration,
-    room: une_salle,
-    room_type: d.room_type,
-    color_bg: d.color_bg,
-    color_txt: d.color_txt,
-    display: true
-  };
-  console.log(co);
-  return co;
+
+  // multiple groups
+  let groups = d.groups.split("|");
+
+  for (let i = 0 ; i < groups.length ; i++) {
+    result.push({
+      id_course: +d.id,
+      no_course: +d.no,
+      prof: d.prof,
+      group: translate_gp_name(groups[i]),
+      promo: set_promos.indexOf(d.promo),
+      mod: d.module,
+      c_type: d.coursetype,
+      day: garbage.day,
+      start: garbage.start,
+      duration: constraints[d.coursetype].duration,
+      room: "",
+      room_type: d.room_type,
+      color_bg: d.color_bg,
+      color_txt: d.color_txt,
+      display: true
+    });
+  }
 }
 
 
@@ -741,7 +797,14 @@ function side_week_rcv(side_week) {
 
 
     var side_days = new WeekDays(JSON.parse(req.getResponseHeader('days').replace(/'/g, '"')));
-    var side_cours_pl = d3.csvParse(msg, translate_cours_pl_from_csv);
+
+    side_cours_pl = [] ;
+    var side_cours_pl = d3.csvParse(
+      msg,
+      function(d) {
+        translate_cours_pl_from_csv(d, side_cours_pl) ;
+      }
+    );
 
     insert_side_week(side_week, side_days, side_cours_pl);
 
@@ -1019,6 +1082,7 @@ function fetch_all(first, fetch_work_copies) {
     fetch.ongoing_un_rooms = true;
   }
   fetch.ongoing_bknews = true;
+  fetch_ongoing_colors = true;
 
   fetch_version();
 
@@ -1026,6 +1090,7 @@ function fetch_all(first, fetch_work_copies) {
     fetch_module();
     fetch_tutor();
     fetch_cours();
+    fetch_colors();
   }
   if (!fetch.pref_saved &&
     (ckbox["dis-mod"].cked
@@ -1127,8 +1192,9 @@ function fetch_ended(light) {
   if (fetch.course_saved &&
     !fetch.ongoing_dispos &&
     !fetch.ongoing_un_rooms &&
-    !fetch.ongoing_bknews) {
-
+    !fetch.ongoing_bknews &&
+    !fetch.ongoing_colors) {
+    ping_colors();
     fetch.done = true;
     go_edt(false);
 

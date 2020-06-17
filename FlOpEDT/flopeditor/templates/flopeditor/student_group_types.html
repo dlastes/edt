@@ -1,0 +1,28 @@
+{% extends "flopeditor/base_crud.html" %}
+{% load static %}
+{% block nav-classes-groups %} active {% endblock %}
+
+{% block card_header %}
+    <li class="nav-item">
+        <a  class="nav-link {% block card-nav-classes-training-programmes %}{% endblock %}"
+            href="{% url 'flopeditor:flopeditor-department-training-programmes' department_abbrev=department.abbrev %}">
+            Promos
+        </a>
+    </li>
+    <li class="nav-item">
+        <a  class="nav-link {% block card-nav-classes-student-group-types %}active{% endblock %}"
+            href="{% url 'flopeditor:flopeditor-department-student-group-types' department_abbrev=department.abbrev %}">
+            Natures de groupes
+        </a>
+    </li>
+    <li class="nav-item">
+        <a  class="nav-link {% block card-nav-classes-student-groups %}{% endblock %}"
+            href="{% url 'flopeditor:flopeditor-department-student-groups' department_abbrev=department.abbrev %}">
+            Groupes d'élèves
+        </a>
+    </li>
+{% endblock %}
+
+{% block crud_js_url %}{% url 'flopeditor:flopeditor-crud-student-group-type' department_abbrev=department.abbrev %}{% endblock %}
+
+
