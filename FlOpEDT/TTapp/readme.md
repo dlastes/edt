@@ -41,10 +41,10 @@ un ou plusieurs groupes.
 - Min tutors half days : minimise les demie-journées de présence/cours pour les profs choisis
 - Simultaneous courses : impose qu'un ensemble de cours donnés soient simultanés
 
-:bulb: le paramètre weight définit s'il s'agit d'une contrainte (si laissé vide) qui sera toujours respectée
+:bulb: le paramètre weight définit s'il s'agit d'**une contrainte (si weight est laissé vide)** qui sera toujours respectée
 ou d'une préférence (avec un degré d'importance de 1 à 8) que le solveur essaiera d'appliquer.
 
-:bulb: Globalement, lorsqu'un paramètre autorise un choix multiple, n'en prendre aucun signifie les considérer tous.
+:bulb: Globalement, lorsqu'un paramètre autorise un choix multiple, **n'en prendre aucun signifie les considérer tous**.
 Par exemple : Si vous choisissez les modules maths et français dans Limit modules time per period ça ne s'appliquera 
 qu'à ces deux modules, mais si vous n'en cliquez aucun ça s'appliquera à tous!
 
