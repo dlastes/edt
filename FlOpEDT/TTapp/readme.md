@@ -17,7 +17,15 @@ On fera de la doc ici bientôt.
 
 ## Ajout des contraintes via l'interface admin
 
-Se connecter avec un user ayant des droits suffisants. Cliquer sur l'onglet admin.
+La première étape consiste à lister (sur un feuille de papier ou dans un fichier texte) les contraintes/préférences,
+que l'on souhaiterait voir appliquer.
+Par exemple:
+- pas plus de 4h de maths par jour pour les groupes première année
+- essayer de faire venir les enseignant le moins de demie-journées possibles
+- ...
+
+Une fois que vous êtes au clair, il s'agit de se connecter avec un user ayant des droits suffisants et 
+de cliquer sur l'onglet admin.
 
 Dans la rubrique `TTapp` vos trouverez les contraintes prêtes à être en base.
 ![TTConstraints](static/TTapp/TTConstraints.png) En voici une description des plus fréquemment utilisées, 
@@ -32,6 +40,9 @@ un ou plusieurs groupes.
 - Limited start time choices: limite les heures de début possible 
 - Min tutors half days : minimise les demie-journées de présence/cours pour les profs choisis
 - Simultaneous courses : impose qu'un ensemble de cours donnés soient simultanés
+
+:bulb: le paramètre weight définit s'il s'agit d'une contrainte (si laissé vide) qui sera toujours respectée
+ou d'une préférence (avec un degré d'importance de 1 à 8) que le solveur essaiera d'appliquer.
 
 :bulb: Globalement, lorsqu'un paramètre autorise un choix multiple, n'en prendre aucun signifie les considérer tous.
 Par exemple : Si vous choisissez les modules maths et français dans Limit modules time per period ça ne s'appliquera 
