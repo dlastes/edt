@@ -55,7 +55,7 @@ class CustomConstraintAdmin(DepartmentModelAdmin):
                    )   
 
 
-class LimitModulesCourseTypeTimePerPeriodAdmin(DepartmentModelAdmin):
+class LimitModulesTimePerPeriodAdmin(DepartmentModelAdmin):
     list_display = ('week', 
                     'year',
                     'course_type',
@@ -71,7 +71,7 @@ class LimitModulesCourseTypeTimePerPeriodAdmin(DepartmentModelAdmin):
                    ('course_type', DropdownFilterRel),
                    )
 
-class LimitGroupsCourseTypeTimePerPeriodAdmin(DepartmentModelAdmin):
+class LimitGroupsTimePerPeriodAdmin(DepartmentModelAdmin):
     list_display = ('week',
                     'year',
                     'course_type',
@@ -87,7 +87,7 @@ class LimitGroupsCourseTypeTimePerPeriodAdmin(DepartmentModelAdmin):
                    ('course_type', DropdownFilterRel),
                    )
 
-class LimitTutorsCourseTypeTimePerPeriodAdmin(DepartmentModelAdmin):
+class LimitTutorsTimePerPeriodAdmin(DepartmentModelAdmin):
     list_display = ('week',
                     'year',
                     'course_type',
@@ -306,9 +306,9 @@ admin.site.register(MinimizeBusyDays, MinimizeBusyDaysAdmin)
 admin.site.register(RespectBoundPerDay, RespectBoundPerDayAdmin)
 admin.site.register(LimitedStartTimeChoices, LimitedStartTimeChoicesAdmin)
 admin.site.register(LimitedRoomChoices, LimitedRoomChoicesAdmin)
-admin.site.register(LimitModulesTimePerPeriod, LimitModulesCourseTypeTimePerPeriodAdmin)
-admin.site.register(LimitGroupsTimePerPeriod, LimitGroupsCourseTypeTimePerPeriodAdmin)
-admin.site.register(LimitTutorsTimePerPeriod, LimitTutorsCourseTypeTimePerPeriodAdmin)
+admin.site.register(LimitModulesTimePerPeriod, LimitModulesTimePerPeriodAdmin)
+admin.site.register(LimitGroupsTimePerPeriod, LimitGroupsTimePerPeriodAdmin)
+admin.site.register(LimitTutorsTimePerPeriod, LimitTutorsTimePerPeriodAdmin)
 admin.site.register(LowerBoundBusyDays, LowerBoundBusyDaysAdmin)
 admin.site.register(GroupsLunchBreak, GroupsLunchBreakAdmin)
 admin.site.register(BreakAroundCourseType, AmphiBreakAdmin)
