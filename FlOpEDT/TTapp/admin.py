@@ -30,12 +30,12 @@ from django.contrib import admin
 from base.admin import DepartmentModelAdmin
 
 from TTapp.models import \
-    LimitModulesCourseTypeTimePerPeriod, Stabilize, \
+    LimitModulesTimePerPeriod, Stabilize, \
     MinModulesHalfDays, MinTutorsHalfDays, MinGroupsHalfDays,\
     MinNonPreferedTrainProgsSlot, MinNonPreferedTutorsSlot, \
     CustomConstraint, SimultaneousCourses, MinimizeBusyDays, RespectBoundPerDay,\
     AvoidBothTimes, LimitedRoomChoices, LimitedStartTimeChoices, \
-    LimitTutorsCourseTypeTimePerPeriod, LimitGroupsCourseTypeTimePerPeriod, LowerBoundBusyDays, GroupsLunchBreak, BreakAroundCourseType
+    LimitTutorsTimePerPeriod, LimitGroupsTimePerPeriod, LowerBoundBusyDays, GroupsLunchBreak, BreakAroundCourseType
 
 # Register your models here.
 
@@ -306,9 +306,9 @@ admin.site.register(MinimizeBusyDays, MinimizeBusyDaysAdmin)
 admin.site.register(RespectBoundPerDay, RespectBoundPerDayAdmin)
 admin.site.register(LimitedStartTimeChoices, LimitedStartTimeChoicesAdmin)
 admin.site.register(LimitedRoomChoices, LimitedRoomChoicesAdmin)
-admin.site.register(LimitModulesCourseTypeTimePerPeriod, LimitModulesCourseTypeTimePerPeriodAdmin)
-admin.site.register(LimitGroupsCourseTypeTimePerPeriod, LimitGroupsCourseTypeTimePerPeriodAdmin)
-admin.site.register(LimitTutorsCourseTypeTimePerPeriod, LimitTutorsCourseTypeTimePerPeriodAdmin)
+admin.site.register(LimitModulesTimePerPeriod, LimitModulesCourseTypeTimePerPeriodAdmin)
+admin.site.register(LimitGroupsTimePerPeriod, LimitGroupsCourseTypeTimePerPeriodAdmin)
+admin.site.register(LimitTutorsTimePerPeriod, LimitTutorsCourseTypeTimePerPeriodAdmin)
 admin.site.register(LowerBoundBusyDays, LowerBoundBusyDaysAdmin)
 admin.site.register(GroupsLunchBreak, GroupsLunchBreakAdmin)
 admin.site.register(BreakAroundCourseType, AmphiBreakAdmin)
