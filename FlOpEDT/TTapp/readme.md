@@ -61,6 +61,11 @@ néanmoins de les désactiver):
 - Respecter les limites horaires: respecte la limite maximale définie par les profs
 - Min groups half days: tente de libérer une/plusieurs demie-journées aux étudiant⋅e⋅s 
 
+### Spoil
+Vous ne trouverez probablement pas toutes les contraintes qui vous intéresseront dans cette liste. 
+De nombreuses autres contraintes sont sur le point d'être ajoutées (on y travaille!). Si vous voulez nous y aider,
+ou simplement nous proposer une nouvelle contrainte qui vous serez utile, [contactez-nous!](mailto:contact@flopedt.org) 
+
 
 ## Vérifier que les contraintes sont bien prises en compte
 Une fois enregistrées en base, les contraintes apparaîtront lorsque le⋅a gestionnaire voudra générer un emploi du temps.
