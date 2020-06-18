@@ -611,7 +611,7 @@ def fetch_dispos(req, year, week, **kwargs):
 @dept_admin_required
 def fetch_all_dispos(req, **kwargs):
     dataset = AllDispoResource().export(UserPreference.objects.all())
-    return HttpResponse(dataset.csv,content_type='text/csv')
+    return HttpResponse(dataset.json, content_type='text/json')
 
 
 def fetch_course_default_week(req, train_prog, course_type, **kwargs):
