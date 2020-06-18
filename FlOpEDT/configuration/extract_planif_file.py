@@ -100,7 +100,8 @@ def ReadPlanifWeek(department, book, feuille, week, year, courses_to_stabilize=N
     while 1:
         row += 1
         if courses_to_stabilize is not None:
-            courses_to_stabilize[row] = []
+            if row not in courses_to_stabilize:
+                courses_to_stabilize[row] = []
         is_total = sheet.cell(row=row, column=group_COL).value
         if is_total == "TOTAL":
             # print "Sem %g de %s - TOTAL: %g"%(week, feuille,sumtotal)
@@ -260,7 +261,7 @@ def extract_period(department, book, period, year, stabilize_courses=False):
 
     if stabilize_courses:
         for courses_list in courses_to_stabilize.values():
-            if not courses_list:
+            if len(courses_list) < 2:
                 continue
             stw = StabilizationThroughWeeks.objects.create(department=department)
             for c in courses_list:
