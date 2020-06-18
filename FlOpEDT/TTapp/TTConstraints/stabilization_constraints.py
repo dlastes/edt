@@ -160,8 +160,6 @@ class StabilizationThroughWeeks(TTConstraint):
         for i in range(len(courses_data)-1):
             for sl0 in ttmodel.wdb.compatible_slots[courses_data[i]['courses'][0]]:
                 sl1 = ttmodel.find_same_course_slot_in_other_week(sl0, courses_data[i+1]['week'])
-                print(2 * ttmodel.sum(ttmodel.TT[sl0, c0] for c0 in courses_data[i]['courses'])
-                    - ttmodel.sum(ttmodel.TT[sl1, c1] for c1 in courses_data[i+1]['courses']))
                 ttmodel.add_constraint(
                     2 * ttmodel.sum(ttmodel.TT[sl0, c0] for c0 in courses_data[i]['courses'])
                     - ttmodel.sum(ttmodel.TT[sl1, c1] for c1 in courses_data[i+1]['courses']),
