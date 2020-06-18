@@ -243,6 +243,7 @@ def ReadPlanifWeek(department, book, feuille, week, year, courses_to_stabilize=N
 def extract_period(department, book, period, year, stabilize_courses=False):
     if stabilize_courses:
         courses_to_stabilize = {}
+        print("Courses will be stabilized through weeks for period", period)
     else:
         courses_to_stabilize = None
     if period.starting_week < period.ending_week:
