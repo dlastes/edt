@@ -93,6 +93,7 @@ def import_config_file(req, **kwargs):
                             dept_name = req.POST['name']
                         except:
                             dept_name = None
+                        stabilize_courses = "stabilize" in req.POST
                         logger.debug(dept_name)
                         try:
                             dept = Department.objects.get(abbrev=dept_abbrev)
@@ -108,7 +109,8 @@ def import_config_file(req, **kwargs):
                             logger.warning(e)
 
                         extract_database_file(department_name=dept_name,
-                                              department_abbrev=dept_abbrev, bookname=path)
+                                              department_abbrev=dept_abbrev, bookname=path,
+                                              stabilize_courses=stabilize_courses)
                         logger.debug("extract OK")
 
                         os.rename(path, os.path.join(settings.MEDIA_ROOT,
