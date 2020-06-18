@@ -1139,6 +1139,13 @@ class TTModel(object):
                 # reassign_rooms(self.department, week, self.year, target_work_copy)
             return target_work_copy
 
+    def find_same_course_slot_in_other_week(self, slot, week):
+        other_slots = slots_filter(self.wdb.courses_slots, week=week, same=slot)
+        if len(other_slots) != 1:
+            raise Exception("Wrong slots among weeks!")
+        return other_slots.pop()
+
+
 
 def get_constraints(department, week=None, year=None, is_active=None):
     #
