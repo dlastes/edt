@@ -93,7 +93,6 @@ def import_config_file(req, **kwargs):
                             dept_name = req.POST['name']
                         except:
                             dept_name = None
-                        stabilize_courses = "stabilize" in req.POST
                         logger.debug(dept_name)
                         try:
                             dept = Department.objects.get(abbrev=dept_abbrev)
@@ -109,8 +108,7 @@ def import_config_file(req, **kwargs):
                             logger.warning(e)
 
                         extract_database_file(department_name=dept_name,
-                                              department_abbrev=dept_abbrev, bookname=path,
-                                              stabilize_courses=stabilize_courses)
+                                              department_abbrev=dept_abbrev, bookname=path)
                         logger.debug("extract OK")
 
                         os.rename(path, os.path.join(settings.MEDIA_ROOT,
@@ -204,10 +202,12 @@ def import_planif_file(req, **kwargs):
                     except Exception as e:
                         response = {'status': 'error', 'data': str(e)}
                         return HttpResponse(json.dumps(response), content_type='application/json')
+                    print(req.POST)
+                    stabilize_courses = "stabilize" in req.POST
                     Course.objects.filter(type__department=dept).delete()
                     logger.info("Flush planif database OK")
 
-                    extract_planif(dept, bookname=path)
+                    extract_planif(dept, bookname=path, stabilize_courses=stabilize_courses)
                     logger.info("Extract file OK")
                     rep = "OK !"
 

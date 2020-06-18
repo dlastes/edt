@@ -55,8 +55,7 @@ function handleRadioChanges(value) {
     if (value === "1") {
         document.getElementById("depart_choice").innerHTML = "" +
             "<tr><th><label for=\"id_nom\">Nom:</label></th><td><input type=\"text\" name=\"name\" required id=\"id_nom\"></td></tr>" +
-            "<tr><th><label for=\"id_abbrev\">Abbrev:</label></th><td><input type=\"text\" name=\"abbrev\" maxlength=\"7\" required id=\"id_abbrev\"></td></tr>\n" +
-            "<div><input type=\"checkbox\" name=\"stabilize\"/><span>Stabilisation inter semaines ?</span></div>"
+            "<tr><th><label for=\"id_abbrev\">Abbrev:</label></th><td><input type=\"text\" name=\"abbrev\" maxlength=\"7\" required id=\"id_abbrev\"></td></tr>\n"
     } else if (value === "2") {
         opts = "";
         for(let dep of departements) {
