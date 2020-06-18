@@ -84,7 +84,7 @@ class Slot:
         return self.day
 
     def same_through_weeks(self, other):
-        return self.day == other.day and self.start_time == other.start_time and self.end_time == other.end_time
+        return self.day.day == other.day.day and self.start_time == other.start_time and self.end_time == other.end_time
 
 
 class CourseSlot(Slot):
@@ -97,7 +97,7 @@ class CourseSlot(Slot):
         self.course_type = course_type
 
     def same_through_weeks(self, other):
-        return self.day == other.day and self.start_time == other.start_time and self.course_type == other.course_type
+        return self.day.day == other.day.day and self.start_time == other.start_time and self.course_type == other.course_type
 
 
     @property

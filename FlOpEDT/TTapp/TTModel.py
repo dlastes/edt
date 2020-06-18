@@ -1142,7 +1142,7 @@ class TTModel(object):
     def find_same_course_slot_in_other_week(self, slot, week):
         other_slots = slots_filter(self.wdb.courses_slots, week=week, same=slot)
         if len(other_slots) != 1:
-            raise Exception("Wrong slots among weeks!")
+            raise Exception(f"Wrong slots among weeks {week}, {slot.day.week} \n {slot} vs {other_slots}")
         return other_slots.pop()
 
 
