@@ -24,9 +24,10 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-# This code takes a XLSX database file description and turns it into
-# structured Python data, with the main parse_file function, following
-# the data structure described in database_description_checker.py.
+# This code takes a XLSX database file description and turns it with
+# the main function database_description_load_xlsx_file into
+# structured Python data, following the data structure described in
+# database_description_checker.py.
 #
 
 from openpyxl import load_workbook
@@ -398,7 +399,7 @@ def parse_groups(sheet):
 #################################################
 
 
-def parse_file(filename = 'file_essai.xlsx'):
+def database_description_load_xlsx_file(filename = 'file_essai.xlsx'):
     try:
         wb = load_workbook(filename, data_only=True)
 
@@ -461,6 +462,6 @@ def parse_file(filename = 'file_essai.xlsx'):
 # dirty, but for testing purposes it's nice
 if __name__ == '__main__':
     print("===== WARNINGS (should be empty) ======")
-    results = parse_file()
+    results = database_description_load_xlsx_file()
     print("===== RESULTS ===========")
     print(results)

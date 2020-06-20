@@ -690,8 +690,8 @@ def database_description_check (database):
 
 
 if __name__ == '__main__':
-    from configuration.parse_database_file_xlsx import parse_file
-    database = parse_file()
+    from configuration.database_description_xlsx import database_description_load_xlsx_file
+    database = database_description_load_xlsx_file()
     remarks = database_description_check(database)
     if len(remarks) == 0:
         print("nil")

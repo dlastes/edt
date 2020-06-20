@@ -40,7 +40,7 @@ from base.models import RoomType, Room, TrainingProgramme,\
 from people.models import FullStaff, SupplyStaff, Tutor, UserDepartmentSettings
 from people.tutor import fill_default_user_preferences
 
-from configuration.parse_database_file_xlsx import parse_file
+from configuration.database_description_xlsx import database_description_load_xlsx_file
 
 from django.db import IntegrityError
 
@@ -69,7 +69,7 @@ def extract_database_file(department_name=None, department_abbrev=None, bookname
     if bookname is None:
         bookname = f"{media_dir}/database_file_{department_abbrev}.xlsx"
 
-    book = parse_file(bookname)
+    book = database_description_load_xlsx_file(bookname)
     if book is None:
         raise Exception("Database file could not be loaded.")
 
