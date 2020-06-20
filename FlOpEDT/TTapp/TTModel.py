@@ -863,16 +863,12 @@ class TTModel(object):
         M, created = MinNonPreferedTutorsSlot.objects.get_or_create(weight=max_weight, department=self.department)
         if created:
             M.save()
-            for week in self.weeks:
-                M.enrich_model(self, week)
 
         # second objective  => minimise use of unpreferred slots for courses
         # ponderation MIN_UPS_C
         M, created = MinNonPreferedTrainProgsSlot.objects.get_or_create(weight=max_weight, department=self.department)
         if created:
             M.save()
-            for week in self.weeks:
-                M.enrich_model(self, week)
 
     def add_other_departments_constraints(self):
         """
