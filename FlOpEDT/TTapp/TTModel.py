@@ -168,6 +168,8 @@ class TTModel(object):
             for key, key_warnings in self.warnings.items():
                 print("%s : %s" % (key, ", ".join([str(x) for x in key_warnings])))
 
+        self.update_objective()
+
         if settings.DEBUG:
             self.model.writeLP('FlOpEDT.lp')
 
@@ -1108,8 +1110,6 @@ class TTModel(object):
         Returns the number of the work copy
         """
         print("\nLet's solve weeks #%s" % self.weeks)
-
-        self.update_objective()
 
         if target_work_copy is None:
             local_max_wc = ScheduledCourse \
