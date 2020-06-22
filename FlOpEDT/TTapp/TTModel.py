@@ -523,6 +523,9 @@ class TTModel(object):
                                     InstructorConstraint(constraint_type=ConstraintType.COURS_DOIT_AVOIR_PROFESSEUR,
                                     slot=sl, course=c))
 
+        if self.core_only:
+            return
+
         for i in self.wdb.instructors:
             if i.username == '---':
                 continue
