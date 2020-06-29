@@ -141,9 +141,9 @@ WeeksExcerpt.prototype.move_earlier = function () {
 // move the excerpt data to later weeks
 WeeksExcerpt.prototype.move_later = function () {
   if (this.first + this.nb < this.full_weeks.get_nb()) {
-    this.first += 1;
     this.data.splice(0, 1);
     this.data.push(this.full_weeks.data[this.first + this.nb]);
+    this.first += 1;
   }
 };
 
