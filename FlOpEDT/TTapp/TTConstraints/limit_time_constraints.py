@@ -82,7 +82,7 @@ class LimitTimePerPeriod(TTConstraint):
         expr = ttmodel.lin_expr()
         for slot in build_period_slots(ttmodel, day, period):
             for course in considered_courses & ttmodel.wdb.compatible_courses[slot]:
-                expr += ttmodel.TT[(slot, course)] * self.course_type.duration
+                expr += ttmodel.TT[(slot, course)] * course.type.duration
 
         return expr
 
@@ -188,8 +188,15 @@ class LimitModulesTimePerPeriod(LimitTimePerPeriod):
         else:
             considered_modules = ttmodel.wdb.modules.filter(train_prog__in=self.considered_train_progs(ttmodel))
 
+        if self.train_progs.exists():
+            considered_basic_groups = set(
+                ttmodel.wdb.basic_groups.filter(train_prog__in=self.train_progs.all()))
+        else:
+            considered_basic_groups = set(ttmodel.wdb.basic_groups)
+
         for module in considered_modules:
-            self.enrich_model_for_one_object(ttmodel, week, ponderation, module=module)
+            for group in considered_basic_groups:
+                self.enrich_model_for_one_object(ttmodel, week, ponderation, module=module, group=group)
 
     def full_name(self):
         return "Limit Modules Course Type Per Period"
@@ -253,7 +260,7 @@ class LimitTutorsTimePerPeriod(LimitTimePerPeriod):
         expr = ttmodel.lin_expr()
         for slot in build_period_slots(ttmodel, day, period):
             for course in considered_courses & ttmodel.wdb.compatible_courses[slot]:
-                expr += ttmodel.TTinstructors[(slot, course, tutor)] * self.course_type.duration
+                expr += ttmodel.TTinstructors[(slot, course, tutor)] * course.type.duration
 
         return expr
 
