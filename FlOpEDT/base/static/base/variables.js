@@ -252,6 +252,7 @@ var smiley = {
   bouche_haut_y: -.1,
   bouche_bas_y: .6,
   sourcil: .4,
+  headphone: .6,
   init_x: 0,
   init_y: -180,
   max_r: 1,

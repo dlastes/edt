@@ -250,7 +250,7 @@ function go_smiley(top, mid, t) {
       return oeil_r(rc(d));
     })
     .attr("stroke-width", function (d) {
-      return trait_vis_strw(rc(d));
+      return eye_str_width(d);
     });
 
   datsmi
@@ -264,7 +264,7 @@ function go_smiley(top, mid, t) {
       return oeil_r(rc(d));
     })
     .attr("stroke-width", function (d) {
-      return trait_vis_strw(rc(d));
+      return eye_str_width(d);
     });
 
 
@@ -285,7 +285,7 @@ function go_smiley(top, mid, t) {
       return sourcil_ext_y(rc(d));
     })
     .attr("stroke-width", function (d) {
-      return trait_vis_strw(rc(d));
+      return brow_str_width(d);
     });
 
   datsmi
@@ -305,7 +305,7 @@ function go_smiley(top, mid, t) {
       return sourcil_ext_y(rc(d));
     })
     .attr("stroke-width", function (d) {
-      return trait_vis_strw(rc(d));
+      return brow_str_width(d);
     });
 
   datsmi
@@ -330,9 +330,32 @@ function go_smiley(top, mid, t) {
     })
     .attr("fill", "none")
     .attr("stroke-width", function (d) {
-      return trait_vis_strw(rc(d));
+      return mouth_str_width(d);
     });
 
+  datsmi
+    .append("path")
+    .attr("st", "hpr")
+    .attr("fill", hp_fill)
+    .merge(top.select("[st=hpr]"))
+    .attr("d", path_hpr)
+    .attr("stroke-width", hp_stroke_width);
+
+  datsmi
+    .append("path")
+    .attr("st", "hpl")
+    .attr("fill", hp_fill)
+    .merge(top.select("[st=hpl]"))
+    .attr("d", path_hpl)
+    .attr("stroke-width", hp_stroke_width);
+
+  datsmi
+    .append("path")
+    .attr("st", "hpt")
+    .attr("fill", "none")
+    .merge(top.select("[st=hpt]"))
+    .attr("d", path_hpt)
+    .attr("stroke-width", hp_stroke_width);
 
 }
 

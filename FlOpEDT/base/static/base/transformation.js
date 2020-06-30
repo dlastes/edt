@@ -304,9 +304,13 @@ function cursor_pref() {
   ---------------------*/
 
 
+function availability_content(d) {
+  return d.off < 0 ? d.value : d.off ;
+}
+
 //ratio content
 function rc(d) {
-  return d.off < 0 ? d.value / par_dispos.nmax : d.off / par_dispos.nmax;
+  return availability_content(d) / par_dispos.nmax ;
 }
 
 
@@ -370,8 +374,17 @@ function tete_str(d) {
   return d == 0 ? "white" : "black";
 }
 
-function trait_vis_strw(d) {
-  return d == 0 ? 0 : 1;
+function eye_str_width(d) {
+  return availability_content(d) < 1 ? 0 : 1;
+}
+
+function mouth_str_width(d) {
+  return availability_content(d) < 2 ? 0 : 1;
+}
+
+function brow_str_width(d) {
+  let v = availability_content(d) ;
+  return v < 2 || v > 4 ? 0 : 1;
 }
 
 function interdit_w(d) {
@@ -392,6 +405,37 @@ function smile_trans(d, i) {
       (dispo_x(d) + (1 - .5 * par_dispos.adv_red) * dispo_w(d)) + "," +
       (dispo_all_y(d) + smiley.tete + dim_dispo.adv_v_margin) + ")";
   }
+}
+
+function path_hpr() {
+  let mid_hp = smiley.tete * smiley.headphone ;
+  return "M " + smiley.tete + "," + mid_hp
+    + " a " + mid_hp + " " + mid_hp
+    + " 0 1 0 " + "0,-" + 2*mid_hp ;
+}
+
+function path_hpl() {
+  let mid_hp = smiley.tete * smiley.headphone ;
+  return "M -" + smiley.tete + "," + mid_hp
+    + " a " + mid_hp + " " + mid_hp
+    + " 0 1 1 " + "0,-" + 2*mid_hp ;
+}
+
+function path_hpt() {
+  let mid_hp = smiley.tete * smiley.headphone ;
+  return "M -" + 1.05*smiley.tete + ",-" + .5*mid_hp
+    + " a " + smiley.tete + " " + smiley.tete
+    + " 0 1 1 " + 2.1*smiley.tete + ",0" ;
+}
+
+function hp_stroke_width(d) {
+  let v = availability_content(d) ;
+  return v == 1 ? 3 : 0 ;
+}
+
+function hp_fill(d) {
+  let v = availability_content(d) ;
+  return v == 1 ? "black" : "none" ;
 }
 
 
