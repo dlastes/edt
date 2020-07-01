@@ -236,7 +236,7 @@ function go_smiley(top, mid, t) {
       return tete_str(rc(d));
     })
     .attr("fill", function (d) {
-      return smi_fill(rc(d));
+      return smi_fill(availability_content(d));
     });
 
   datsmi
@@ -394,7 +394,7 @@ function go_cm_advanced_pref(quick) {
     .attr("width", dispo_all_w)
     .attr("height", dispo_all_h)
     .attr("fill", function (d) {
-      return smi_fill(d.off / par_dispos.nmax);
+      return smi_fill(d.off);
     })
     .attr("stroke", "darkslategrey")
     .attr("stroke-width", 2);
@@ -1065,7 +1065,7 @@ function go_courses(quick) {
         lDis = par_dispos.nmax;
       }
 
-      return smi_fill(lDis / par_dispos.nmax);
+      return smi_fill(lDis);
     });
   } else {
     d3.selectAll("rect.crect").attr("fill", cours_fill);

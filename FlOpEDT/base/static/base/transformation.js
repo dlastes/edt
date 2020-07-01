@@ -148,7 +148,7 @@ function dispo_h(d) {
 }
 
 function dispo_fill(d) {
-  return smi_fill(d.value / par_dispos.nmax);
+  return smi_fill(d.value);
 }
 
 function pref_sel_choice_x(d, i) {
@@ -357,15 +357,20 @@ function smile_coin_y(d) {
 }
 
 function smi_fill(d) {
-  if (d <= .5) {
+  // remote teaching
+  if (d == 1) {
+    return "rgb(0,191,255)" ;
+  }
+  let val = d / par_dispos.nmax ;
+  if (val <= .5) {
     return "rgb(" +
       100 + "%," +
-      2 * d * smiley.mid_o_v + "%," +
+      2 * val * smiley.mid_o_v + "%," +
       0 + "%)";
   } else {
     return "rgb(" +
-      200 * (1 - d) + "%," +
-      ((smiley.min_v - smiley.mid_y_v) * (-1 + 2 * d) + smiley.mid_y_v) + "%," +
+      200 * (1 - val) + "%," +
+      ((smiley.min_v - smiley.mid_y_v) * (-1 + 2 * val) + smiley.mid_y_v) + "%," +
       0 + "%)";
   }
 }
@@ -408,24 +413,24 @@ function smile_trans(d, i) {
 }
 
 function path_hpr() {
-  let mid_hp = smiley.tete * smiley.headphone ;
+  let mid_hp = smiley.tete * smiley.headphone.ear ;
   return "M " + smiley.tete + "," + mid_hp
     + " a " + mid_hp + " " + mid_hp
     + " 0 1 0 " + "0,-" + 2*mid_hp ;
 }
 
 function path_hpl() {
-  let mid_hp = smiley.tete * smiley.headphone ;
+  let mid_hp = smiley.tete * smiley.headphone.ear ;
   return "M -" + smiley.tete + "," + mid_hp
     + " a " + mid_hp + " " + mid_hp
     + " 0 1 1 " + "0,-" + 2*mid_hp ;
 }
 
 function path_hpt() {
-  let mid_hp = smiley.tete * smiley.headphone ;
-  return "M -" + 1.05*smiley.tete + ",-" + .5*mid_hp
+  let mid_hp = smiley.tete * smiley.headphone.ear ;
+  return "M -" + smiley.headphone.top*smiley.tete + ",-" + .5*mid_hp
     + " a " + smiley.tete + " " + smiley.tete
-    + " 0 1 1 " + 2.1*smiley.tete + ",0" ;
+    + " 0 1 1 " + 2*smiley.headphone.top*smiley.tete + ",0" ;
 }
 
 function hp_stroke_width(d) {
@@ -899,7 +904,7 @@ function cm_chg_but_fill(d) {
   if (["+", arrow.right, arrow.back].includes(d.content)) {
     ret = "steelblue";
   } else if (['tutor_module', 'tutor', 'room'].includes(room_tutor_change.cm_settings.type)) {
-    ret = smi_fill(cm_chg_but_pref(d) / par_dispos.nmax);
+    ret = smi_fill(cm_chg_but_pref(d));
   }
   return ret;
 }

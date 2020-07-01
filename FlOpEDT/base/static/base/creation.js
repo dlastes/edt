@@ -1647,14 +1647,14 @@ function create_stype() {
     .attr("stroke", "#555555")
     .attr("stroke-width", 1)
     .attr("fill", function (d) {
-      return smi_fill(d.value / par_dispos.nmax);
+      return smi_fill(d.value);
     })
     .attr("width", dispot_w)
     .attr("height", dispot_h)
     .attr("x", dispot_x)
     .attr("y", dispot_y)
     .attr("fill", function (d) {
-      return smi_fill(d.value / par_dispos.nmax);
+      return smi_fill(d.value);
     });
 
   datdisi
