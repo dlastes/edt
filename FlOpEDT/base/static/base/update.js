@@ -357,6 +357,30 @@ function go_smiley(top, mid, t) {
     .attr("d", path_hpt)
     .attr("stroke-width", hp_stroke_width);
 
+  datsmi
+    .append("rect")
+    .attr("st", "hpm")
+    .merge(top.select("[st=hpm]"))
+    .attr("x", -.5 * smiley.headphone.mouth_w * smiley.tete)
+    .attr("y", .5 * smiley.headphone.mouth_h * smiley.tete)
+    .attr("rx", 2)
+    .attr("width", hp_mouth_w)
+    .attr("height", smiley.headphone.mouth_h * smiley.tete)
+    .attr("fill", "black")
+    .attr("stroke", "none");
+
+  datsmi
+    .append("line")
+    .attr("st", "hpmr")
+    .merge(top.select("[st=hpmr]"))
+    .attr("x1", .45 * smiley.headphone.mouth_w * smiley.tete)
+    .attr("y1", smiley.headphone.mouth_h * smiley.tete)
+    .attr("x2", smiley.tete)
+    .attr("y2", 0)
+    .attr("stroke", "black")
+    .attr("stroke-width", hp_mouth_sw);
+  
+
 }
 
 

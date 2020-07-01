@@ -443,7 +443,15 @@ function hp_fill(d) {
   return v == 1 ? "black" : "none" ;
 }
 
+function hp_mouth_w(d) {
+  let val = availability_content(d) ;
+  return val == 1 ? smiley.headphone.mouth_w * smiley.tete : 0 ;
+}
 
+function hp_mouth_sw(d) {
+  let val = availability_content(d) ;
+  return val == 1 ? 2 : 0 ;
+}
 
 /*----------------------
   -------- GRID --------
