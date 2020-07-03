@@ -108,8 +108,6 @@ class TTModel(object):
         self.slots_step = slots_step
         self.keep_many_solution_files = keep_many_solution_files
         self.allow_visio = allow_visio
-        if self.allow_visio:
-            self.visio_room = Room.objects.get_or_create(name='Visio')
         self.var_nb = 0
         self.constraintManager = ConstraintManager()
 
@@ -181,7 +179,7 @@ class TTModel(object):
             self.send_lack_of_availability_mail()
 
     def wdb_init(self):
-        wdb = WeeksDatabase(self.department, self.weeks, self.year, self.train_prog, self.slots_step)
+        wdb = WeeksDatabase(self.department, self.weeks, self.year, self.train_prog, self.slots_step, self.allow_visio)
         return wdb
 
     def costs_init(self):
@@ -212,7 +210,7 @@ class TTModel(object):
             for c in self.wdb.compatible_courses[sl]:
                 # print c, c.room_type
                 TT[(sl, c)] = self.add_var("TT(%s,%s)" % (sl, c))
-                for rg in self.wdb.rooms_for_type[c.room_type]:
+                for rg in self.wdb.course_rg_compat[c]:
                     TTrooms[(sl, c, rg)] \
                         = self.add_var("TTroom(%s,%s,%s)" % (sl, c, rg))
                 for i in self.wdb.possible_tutors[c]:
@@ -548,7 +546,7 @@ class TTModel(object):
                 if self.allow_visio:
                     # avail_at_school_instr consideration...
                     self.add_constraint(
-                        self.sum(self.TTinstructors[(sl2, c2, i)] - self.TTrooms[(sl2, c2, self.visio_room)]
+                        self.sum(self.TTinstructors[(sl2, c2, i)] - self.TTrooms[(sl2, c2, self.wdb.visio_room)]
                                  for sl2 in slots_filter(self.wdb.courses_slots, simultaneous_to=sl)
                                  for c2 in self.wdb.possible_courses[i] & self.wdb.compatible_courses[sl2]),
                         '<=', self.avail_at_school_instr[i][sl],
@@ -584,11 +582,8 @@ class TTModel(object):
         for sl in self.wdb.courses_slots:
             # constraint : each course is assigned to a Room
             for c in self.wdb.compatible_courses[sl]:
-                compatible_rooms =self.wdb.course_rg_compat[c]
-                if self.allow_visio:
-                    compatible_rooms |= {self.visio_room}
                 self.add_constraint(
-                    self.sum(self.TTrooms[(sl, c, r)] for r in compatible_rooms) - self.TT[(sl, c)],
+                    self.sum(self.TTrooms[(sl, c, r)] for r in self.wdb.course_rg_compat[c]) - self.TT[(sl, c)],
                     '==', 0,
                     Constraint(constraint_type=ConstraintType.CORE_ROOMS, slots=sl, courses=c))
 
