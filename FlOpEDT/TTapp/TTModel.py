@@ -92,7 +92,8 @@ class TTModel(object):
                  core_only=False,
                  send_mails=False,
                  slots_step=None,
-                 keep_many_solution_files=False):
+                 keep_many_solution_files=False,
+                 allow_visio=False):
         # beg_file = os.path.join('logs',"FlOpTT")
         self.model = LpProblem("FlOpTT", LpMinimize)
         self.min_ups_i = min_nps_i
@@ -106,6 +107,9 @@ class TTModel(object):
         self.send_mails = send_mails
         self.slots_step = slots_step
         self.keep_many_solution_files = keep_many_solution_files
+        self.allow_visio = allow_visio
+        if self.allow_visio:
+            self.visio_room = Room.objects.get_or_create(name='Visio')
         self.var_nb = 0
         self.constraintManager = ConstraintManager()
 
@@ -515,7 +519,6 @@ class TTModel(object):
 
     def add_instructors_constraints(self):
         print("adding instructors constraints")
-        visio = Room.objects.get(name="Visio")
 
         # Each course is assigned to a unique tutor
         for c in self.wdb.courses:
@@ -542,14 +545,15 @@ class TTModel(object):
                                     '<=', self.avail_instr[i][sl],
                                     SlotInstructorConstraint(sl, i))
 
-                # avail_at_school_instr consideration...
-                self.add_constraint(
-                    self.sum(self.TTinstructors[(sl2, c2, i)] - self.TTrooms[(sl2, c2, visio)]
-                             for sl2 in slots_filter(self.wdb.courses_slots, simultaneous_to=sl)
-                             for c2 in self.wdb.possible_courses[i] & self.wdb.compatible_courses[sl2]),
-                    '<=', self.avail_at_school_instr[i][sl],
-                    SlotInstructorConstraint(sl, i)
-                )
+                if self.allow_visio:
+                    # avail_at_school_instr consideration...
+                    self.add_constraint(
+                        self.sum(self.TTinstructors[(sl2, c2, i)] - self.TTrooms[(sl2, c2, self.visio_room)]
+                                 for sl2 in slots_filter(self.wdb.courses_slots, simultaneous_to=sl)
+                                 for c2 in self.wdb.possible_courses[i] & self.wdb.compatible_courses[sl2]),
+                        '<=', self.avail_at_school_instr[i][sl],
+                        SlotInstructorConstraint(sl, i)
+                    )
 
         for mtr in ModuleTutorRepartition.objects.filter(module__in=self.wdb.modules,
                                                          week__in=self.weeks,
@@ -580,8 +584,11 @@ class TTModel(object):
         for sl in self.wdb.courses_slots:
             # constraint : each course is assigned to a Room
             for c in self.wdb.compatible_courses[sl]:
+                compatible_rooms =self.wdb.course_rg_compat[c]
+                if self.allow_visio:
+                    compatible_rooms |= {self.visio_room}
                 self.add_constraint(
-                    self.sum(self.TTrooms[(sl, c, rg)] for rg in self.wdb.course_rg_compat[c]) - self.TT[(sl, c)],
+                    self.sum(self.TTrooms[(sl, c, r)] for r in compatible_rooms) - self.TT[(sl, c)],
                     '==', 0,
                     Constraint(constraint_type=ConstraintType.CORE_ROOMS, slots=sl, courses=c))
 
