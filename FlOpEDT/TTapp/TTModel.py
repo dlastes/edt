@@ -92,7 +92,8 @@ class TTModel(object):
                  core_only=False,
                  send_mails=False,
                  slots_step=None,
-                 keep_many_solution_files=False):
+                 keep_many_solution_files=False,
+                 allow_visio=False):
         # beg_file = os.path.join('logs',"FlOpTT")
         self.model = LpProblem("FlOpTT", LpMinimize)
         self.min_ups_i = min_nps_i
@@ -106,6 +107,7 @@ class TTModel(object):
         self.send_mails = send_mails
         self.slots_step = slots_step
         self.keep_many_solution_files = keep_many_solution_files
+        self.allow_visio = allow_visio
         self.var_nb = 0
         self.constraintManager = ConstraintManager()
 
@@ -144,7 +146,7 @@ class TTModel(object):
         self.cost_I, self.FHD_G, self.cost_G, self.cost_SL = self.costs_init()
         self.TT, self.TTrooms, self.TTinstructors = self.TT_vars_init()
         self.IBD, self.IBD_GTE, self.IBHD, self.GBHD, self.IBS, self.forced_IBD = self.busy_vars_init()
-        self.avail_instr, self.unp_slot_cost \
+        self.avail_instr, self.avail_at_school_instr, self.unp_slot_cost \
             = self.compute_non_preferred_slots_cost()
         self.unp_slot_cost_course, self.avail_course \
             = self.compute_non_preferred_slots_cost_course()
@@ -177,7 +179,7 @@ class TTModel(object):
             self.send_lack_of_availability_mail()
 
     def wdb_init(self):
-        wdb = WeeksDatabase(self.department, self.weeks, self.year, self.train_prog, self.slots_step)
+        wdb = WeeksDatabase(self.department, self.weeks, self.year, self.train_prog, self.slots_step, self.allow_visio)
         return wdb
 
     def costs_init(self):
@@ -208,7 +210,7 @@ class TTModel(object):
             for c in self.wdb.compatible_courses[sl]:
                 # print c, c.room_type
                 TT[(sl, c)] = self.add_var("TT(%s,%s)" % (sl, c))
-                for rg in self.wdb.rooms_for_type[c.room_type]:
+                for rg in self.wdb.course_rg_compat[c]:
                     TTrooms[(sl, c, rg)] \
                         = self.add_var("TTroom(%s,%s,%s)" % (sl, c, rg))
                 for i in self.wdb.possible_tutors[c]:
@@ -515,6 +517,8 @@ class TTModel(object):
 
     def add_instructors_constraints(self):
         print("adding instructors constraints")
+
+        # Each course is assigned to a unique tutor
         for c in self.wdb.courses:
             for sl in self.wdb.compatible_slots[c]:
                 self.add_constraint(self.sum(self.TTinstructors[(sl, c, i)]
@@ -530,6 +534,7 @@ class TTModel(object):
             if i.username == '---':
                 continue
             for sl in self.wdb.availability_slots:
+                # a course is assigned to a tutor only if s⋅he is available
                 self.add_constraint(self.sum(self.TTinstructors[(sl2, c2, i)]
                                              for sl2 in slots_filter(self.wdb.courses_slots, simultaneous_to=sl)
                                              for c2 in self.wdb.possible_courses[i] & self.wdb.compatible_courses[sl2])
@@ -540,6 +545,16 @@ class TTModel(object):
                                              & self.wdb.compatible_courses[sl2]),
                                     '<=', self.avail_instr[i][sl],
                                     SlotInstructorConstraint(sl, i))
+
+                if self.allow_visio:
+                    # avail_at_school_instr consideration...
+                    self.add_constraint(
+                        self.sum(self.TTinstructors[(sl2, c2, i)] - self.TTrooms[(sl2, c2, self.wdb.visio_room)]
+                                 for sl2 in slots_filter(self.wdb.courses_slots, simultaneous_to=sl)
+                                 for c2 in self.wdb.possible_courses[i] & self.wdb.compatible_courses[sl2]),
+                        '<=', self.avail_at_school_instr[i][sl],
+                        SlotInstructorConstraint(sl, i)
+                    )
 
         for mtr in ModuleTutorRepartition.objects.filter(module__in=self.wdb.modules,
                                                          week__in=self.weeks,
@@ -556,10 +571,8 @@ class TTModel(object):
 
     def add_rooms_constraints(self):
         print("adding room constraints")
-        # constraint Rooms : there are enough rooms of each type for each slot
-
         # constraint : each Room is only used once on simultaneous slots
-        for r in self.wdb.basic_rooms:
+        for r in self.wdb.basic_rooms.exclude(name='Visio'):
             for sl in self.wdb.availability_slots:
                 self.add_constraint(self.sum(self.TTrooms[(sl2, c, rg)]
                                              for sl2 in slots_filter(self.wdb.courses_slots, simultaneous_to=sl)
@@ -573,7 +586,7 @@ class TTModel(object):
             # constraint : each course is assigned to a Room
             for c in self.wdb.compatible_courses[sl]:
                 self.add_constraint(
-                    self.sum(self.TTrooms[(sl, c, rg)] for rg in self.wdb.course_rg_compat[c]) - self.TT[(sl, c)],
+                    self.sum(self.TTrooms[(sl, c, r)] for r in self.wdb.course_rg_compat[c]) - self.TT[(sl, c)],
                     '==', 0,
                     Constraint(constraint_type=ConstraintType.CORE_ROOMS, slots=sl, courses=c))
 
@@ -611,15 +624,18 @@ class TTModel(object):
                 print("Warning: %s is declared depend on itself" % c1)
                 continue
             for sl1 in self.wdb.compatible_slots[c1]:
-                for sl2 in self.wdb.compatible_slots[c2]:
-                    if not sl2.is_after(sl1) \
-                            or (p.ND and (sl2.day == sl1.day)) \
-                            or (p.successive and not sl2.is_successor_of(sl1)):
-                        if not weight:
-                            # , "Dependency %s %g" % (p, self.constraint_nb)
-                            self.add_constraint(self.TT[(sl1, c1)] + self.TT[(sl2, c2)], '<=', 1,
-                                                DependencyConstraint(c1, c2, sl1, sl2))
-                        else:
+                if not weight:
+                    self.add_constraint(1000000 * self.TT[(sl1, c1)] +
+                                        self.sum(self.TT[(sl2, c2)] for sl2 in self.wdb.compatible_slots[c2]
+                                                 if not sl2.is_after(sl1)
+                                                 or (p.ND and (sl2.day == sl1.day))
+                                                 or (p.successive and not sl2.is_successor_of(sl1))),
+                                        '<=', 1000000, DependencyConstraint(c1, c2, sl1))
+                else:
+                    for sl2 in self.wdb.compatible_slots[c2]:
+                        if not sl2.is_after(sl1) \
+                                or (p.ND and (sl2.day == sl1.day)) \
+                                or (p.successive and not sl2.is_successor_of(sl1)):
                             conj_var = self.add_conjunct(self.TT[(sl1, c1)],
                                                          self.TT[(sl2, c2)])
                             self.obj += conj_var * weight
@@ -672,9 +688,10 @@ class TTModel(object):
     def compute_non_preferred_slots_cost(self):
         """
         Returns:
-            - UnpSlotCost : a 2 level-dictionary
+            - unp_slot_cost : a 2 level-dictionary
                             { teacher => availability_slot => cost (float in [0,1])}}
-            - availInstr : a 2 level-dictionary { teacher => availability_slot => 0/1 }
+            - avail_instr : a 2 level-dictionary { teacher => availability_slot => 0/1 } including availability to home-teaching
+            - avail_at_school_instr : idem, excluding home-teaching
 
         The slot cost will be:
             - 0 if it is a prefered slot
@@ -682,6 +699,7 @@ class TTModel(object):
         """
 
         avail_instr = {}
+        avail_at_school_instr = {}
         unp_slot_cost = {}
 
         holidays = [h.day for h in self.wdb.holidays]
@@ -691,6 +709,7 @@ class TTModel(object):
 
         for i in self.wdb.instructors:
             avail_instr[i] = {}
+            avail_at_school_instr[i] = {}
             unp_slot_cost[i] = {}
             for week in self.weeks:
                 week_availability_slots = slots_filter(self.wdb.availability_slots, week=week)
@@ -711,6 +730,7 @@ class TTModel(object):
                     self.add_warning(i, "no availability information given week %g" % week)
                     for availability_slot in week_availability_slots:
                         unp_slot_cost[i][availability_slot] = 0
+                        avail_at_school_instr[i][availability_slot] = 1
                         avail_instr[i][availability_slot] = 1
 
                 else:
@@ -725,6 +745,7 @@ class TTModel(object):
                                          (avail_time / 60, teaching_duration / 60, week))
                         for availability_slot in week_availability_slots:
                             unp_slot_cost[i][availability_slot] = 0
+                            avail_at_school_instr[i][availability_slot] = 1
                             avail_instr[i][availability_slot] = 1
 
                     elif avail_time < total_teaching_duration:
@@ -732,6 +753,7 @@ class TTModel(object):
                             avail_time / 60, total_teaching_duration / 60, week))
                         for availability_slot in week_availability_slots:
                             unp_slot_cost[i][availability_slot] = 0
+                            avail_at_school_instr[i][availability_slot] = 1
                             avail_instr[i][availability_slot] = 1
 
                     else:
@@ -741,6 +763,7 @@ class TTModel(object):
                         if average_value == maximum:
                             for availability_slot in week_availability_slots:
                                 unp_slot_cost[i][availability_slot] = 0
+                                avail_at_school_instr[i][availability_slot] = 1
                                 avail_instr[i][availability_slot] = 1
                             continue
                         for availability_slot in week_availability_slots:
@@ -751,13 +774,20 @@ class TTModel(object):
                             if not avail:
                                 print(f"availability pbm for {i} availability_slot {availability_slot}")
                                 unp_slot_cost[i][availability_slot] = 0
+                                avail_at_school_instr[i][availability_slot] = 1
                                 avail_instr[i][availability_slot] = 1
                             else:
                                 minimum = min(a.value for a in avail)
                                 if minimum == 0:
                                     unp_slot_cost[i][availability_slot] = 0
+                                    avail_at_school_instr[i][availability_slot] = 0
                                     avail_instr[i][availability_slot] = 0
+                                elif minimum == 1:
+                                    unp_slot_cost[i][availability_slot] = 1
+                                    avail_at_school_instr[i][availability_slot] = 0
+                                    avail_instr[i][availability_slot] = 1
                                 else:
+                                    avail_at_school_instr[i][availability_slot] = 1
                                     avail_instr[i][availability_slot] = 1
                                     value = minimum
                                     if value == maximum:
@@ -772,7 +802,7 @@ class TTModel(object):
                                               teaching_duration / 60,
                                               week))
 
-        return avail_instr, unp_slot_cost
+        return avail_instr, avail_at_school_instr, unp_slot_cost
 
     def compute_non_preferred_slots_cost_course(self):
         """
