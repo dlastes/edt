@@ -137,8 +137,10 @@ class LimitGroupsTimePerPeriod(LimitTimePerPeriod):  # , pond):
 
     def get_viewmodel(self):
         view_model = super().get_viewmodel()
-
-        type_value = self.course_type.name
+        if self.course_type is not None:
+            type_value = self.course_type.name
+        else:
+            type_value = 'Any'
 
         if self.groups.exists():
             groups_value = ', '.join([group.name for group in self.groups.all()])
