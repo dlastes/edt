@@ -35,7 +35,8 @@ from TTapp.models import \
     MinNonPreferedTrainProgsSlot, MinNonPreferedTutorsSlot, \
     CustomConstraint, SimultaneousCourses, MinimizeBusyDays, RespectBoundPerDay,\
     AvoidBothTimes, LimitedRoomChoices, LimitedStartTimeChoices, \
-    LimitTutorsTimePerPeriod, LimitGroupsTimePerPeriod, LowerBoundBusyDays, GroupsLunchBreak, BreakAroundCourseType
+    LimitTutorsTimePerPeriod, LimitGroupsTimePerPeriod, LowerBoundBusyDays, GroupsLunchBreak, BreakAroundCourseType, \
+    NoVisio
 
 # Register your models here.
 
@@ -292,6 +293,16 @@ class AmphiBreakAdmin(DepartmentModelAdmin):
                    ('groups', DropdownFilterRel),
                    )
 
+class NoVisioAdmin(DepartmentModelAdmin):
+    list_display = ('week', 'year', 'comment',
+                    'weight')
+    ordering = ()
+    list_filter = (('week', DropdownFilterAll),
+                   ('year', DropdownFilterAll),
+                   ('train_progs', DropdownFilterRel),
+                   ('groups', DropdownFilterRel),
+                   )
+
 
 admin.site.register(CustomConstraint, CustomConstraintAdmin)
 admin.site.register(Stabilize, StabilizeAdmin)
@@ -312,3 +323,4 @@ admin.site.register(LimitTutorsTimePerPeriod, LimitTutorsTimePerPeriodAdmin)
 admin.site.register(LowerBoundBusyDays, LowerBoundBusyDaysAdmin)
 admin.site.register(GroupsLunchBreak, GroupsLunchBreakAdmin)
 admin.site.register(BreakAroundCourseType, AmphiBreakAdmin)
+admin.site.register(NoVisio, NoVisioAdmin)
