@@ -25,20 +25,38 @@
 function Hours(settings) {
   // side time scale: list of {h: int, hd:('am'|'pm')}
   this.data = [];
-  var stime = Math.floor(settings.day_start_time / 60);
-  if (stime * 60 < settings.day_start_time) {
-    stime++;
-  }
+  this.settings = settings ;
+
+  this.add_time = function(t) {
+    let to_push = { min: t, hd: 'am' } ;
+    if (t > this.settings.lunch_break_start_time) {
+      if (t < this.settings.lunch_break_finish_time) {
+        return ;
+      }
+      to_push.hd = 'pm' ;
+    }
+    this.data.push(to_push);
+  } ;
+  
+  var stime = Math.ceil(settings.day_start_time / 60);
   while (stime * 60 <= settings.day_finish_time) {
-    if (stime * 60 <= settings.lunch_break_start_time) {
-      this.data.push({ h: stime, hd: 'am' });
-    }
-    if (stime * 60 >= settings.lunch_break_finish_time) {
-      this.data.push({ h: stime, hd: 'pm' });
-    }
+    this.add_time(stime * 60) ;
     stime++;
   }
-  this.settings = settings;
+  
+  if (settings.lunch_break_finish_time !=
+      settings.lunch_break_start_time) {
+    this.add_time(settings.lunch_break_start_time) ;
+    this.add_time(settings.lunch_break_finish_time) ;
+  }
+
+  if (settings.day_start_time % 60 != 0) {
+    this.add_time(settings.day_start_time);
+  }
+  if (settings.day_finish_time % 60 != 0) {
+    this.add_time(settings.day_finish_time);
+  }
+  
 }
 
 
@@ -128,7 +146,7 @@ function HourMix(settings) {
     return -5;
   };
   this.gsckh_y = function (d) {
-    var ret = (d.h * 60 - this.settings.day_start_time) * nbRows * scale;
+    var ret = (d.min - this.settings.day_start_time) * nbRows * scale;
     if (d.hd == 'pm') {
       ret += bknews_h()
         - (this.settings.lunch_break_finish_time
@@ -137,11 +155,12 @@ function HourMix(settings) {
     return ret;
   };
   this.gsckh_txt = function (d) {
-    var ret = d.h;
-    if (ret >= 24) {
-      ret -= 24;
+    let m = d.min;
+    if (m >= 24*60) {
+      m -= 24*60;
     }
-    ret += "h";
-    return ret;
+    let h = Math.floor(m / 60) ;
+    m = m - h * 60 ;
+    return h + "h" + m.toString().padStart(2, "0");
   };
 }
