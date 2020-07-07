@@ -30,12 +30,13 @@ from django.contrib import admin
 from base.admin import DepartmentModelAdmin
 
 from TTapp.models import \
-    LimitModulesCourseTypeTimePerPeriod, Stabilize, \
+    LimitModulesTimePerPeriod, Stabilize, \
     MinModulesHalfDays, MinTutorsHalfDays, MinGroupsHalfDays,\
     MinNonPreferedTrainProgsSlot, MinNonPreferedTutorsSlot, \
     CustomConstraint, SimultaneousCourses, MinimizeBusyDays, RespectBoundPerDay,\
     AvoidBothTimes, LimitedRoomChoices, LimitedStartTimeChoices, \
-    LimitTutorsCourseTypeTimePerPeriod, LimitGroupsCourseTypeTimePerPeriod, LowerBoundBusyDays, GroupsLunchBreak, BreakAroundCourseType
+    LimitTutorsTimePerPeriod, LimitGroupsTimePerPeriod, LowerBoundBusyDays, GroupsLunchBreak, BreakAroundCourseType, \
+    NoVisio
 
 # Register your models here.
 
@@ -55,7 +56,7 @@ class CustomConstraintAdmin(DepartmentModelAdmin):
                    )   
 
 
-class LimitModulesCourseTypeTimePerPeriodAdmin(DepartmentModelAdmin):
+class LimitModulesTimePerPeriodAdmin(DepartmentModelAdmin):
     list_display = ('week', 
                     'year',
                     'course_type',
@@ -71,7 +72,7 @@ class LimitModulesCourseTypeTimePerPeriodAdmin(DepartmentModelAdmin):
                    ('course_type', DropdownFilterRel),
                    )
 
-class LimitGroupsCourseTypeTimePerPeriodAdmin(DepartmentModelAdmin):
+class LimitGroupsTimePerPeriodAdmin(DepartmentModelAdmin):
     list_display = ('week',
                     'year',
                     'course_type',
@@ -87,7 +88,7 @@ class LimitGroupsCourseTypeTimePerPeriodAdmin(DepartmentModelAdmin):
                    ('course_type', DropdownFilterRel),
                    )
 
-class LimitTutorsCourseTypeTimePerPeriodAdmin(DepartmentModelAdmin):
+class LimitTutorsTimePerPeriodAdmin(DepartmentModelAdmin):
     list_display = ('week',
                     'year',
                     'course_type',
@@ -292,6 +293,16 @@ class AmphiBreakAdmin(DepartmentModelAdmin):
                    ('groups', DropdownFilterRel),
                    )
 
+class NoVisioAdmin(DepartmentModelAdmin):
+    list_display = ('week', 'year', 'comment',
+                    'weight')
+    ordering = ()
+    list_filter = (('week', DropdownFilterAll),
+                   ('year', DropdownFilterAll),
+                   ('train_progs', DropdownFilterRel),
+                   ('groups', DropdownFilterRel),
+                   )
+
 
 admin.site.register(CustomConstraint, CustomConstraintAdmin)
 admin.site.register(Stabilize, StabilizeAdmin)
@@ -300,15 +311,16 @@ admin.site.register(MinTutorsHalfDays, MinTutorsHalfDaysAdmin)
 admin.site.register(MinModulesHalfDays, MinModulesHalfDaysAdmin)
 admin.site.register(MinNonPreferedTutorsSlot, MinNonPreferedTutorsSlotAdmin)
 admin.site.register(MinNonPreferedTrainProgsSlot, MinNonPreferedTrainProgsSlotAdmin)
-admin.site.register(AvoidBothTimes, AvoidBothTimesAdmin)
+# admin.site.register(AvoidBothTimes, AvoidBothTimesAdmin)
 admin.site.register(SimultaneousCourses, SimultaneousCoursesAdmin)
 admin.site.register(MinimizeBusyDays, MinimizeBusyDaysAdmin)
 admin.site.register(RespectBoundPerDay, RespectBoundPerDayAdmin)
 admin.site.register(LimitedStartTimeChoices, LimitedStartTimeChoicesAdmin)
 admin.site.register(LimitedRoomChoices, LimitedRoomChoicesAdmin)
-admin.site.register(LimitModulesCourseTypeTimePerPeriod, LimitModulesCourseTypeTimePerPeriodAdmin)
-admin.site.register(LimitGroupsCourseTypeTimePerPeriod, LimitGroupsCourseTypeTimePerPeriodAdmin)
-admin.site.register(LimitTutorsCourseTypeTimePerPeriod, LimitTutorsCourseTypeTimePerPeriodAdmin)
+admin.site.register(LimitModulesTimePerPeriod, LimitModulesTimePerPeriodAdmin)
+admin.site.register(LimitGroupsTimePerPeriod, LimitGroupsTimePerPeriodAdmin)
+admin.site.register(LimitTutorsTimePerPeriod, LimitTutorsTimePerPeriodAdmin)
 admin.site.register(LowerBoundBusyDays, LowerBoundBusyDaysAdmin)
 admin.site.register(GroupsLunchBreak, GroupsLunchBreakAdmin)
 admin.site.register(BreakAroundCourseType, AmphiBreakAdmin)
+admin.site.register(NoVisio, NoVisioAdmin)

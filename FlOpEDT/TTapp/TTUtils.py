@@ -26,13 +26,15 @@
 # without disclosing the source code of your own applications.
 
 from base.models import ScheduledCourse, RoomPreference, EdtVersion, Department, CourseStartTimeConstraint,\
-    TimeGeneralSettings, Room, CourseModification
+    TimeGeneralSettings, Room, CourseModification, UserPreference
 from base.timing import str_slot
 from django.db.models import Count, Max, Q, F
 from TTapp.models import MinNonPreferedTrainProgsSlot, MinNonPreferedTutorsSlot, max_weight
 from TTapp.slots import slot_pause
 from base.views import get_key_course_pl, get_key_course_pp
 from django.core.cache import cache
+from people.models import Tutor
+import json
 
 def basic_reassign_rooms(department, week, year, target_work_copy):
     minimize_moves(department, week, year, target_work_copy)
@@ -370,3 +372,33 @@ def add_generic_constraints_to_database(department):
     M, created = MinNonPreferedTrainProgsSlot.objects.get_or_create(weight=max_weight, department=department)
     M.save()
 
+
+def int_or_none(value):
+    if value == "":
+        return
+    else:
+        return value
+
+
+def load_dispos(json_filename):
+    data = json.loads(open(json_filename, 'r').read())
+    exceptions = set()
+    for dispo in data:
+        try:
+            tutor = Tutor.objects.get(username=dispo['prof'])
+        except Tutor.DoesNotExist:
+            exceptions.add(dispo['prof'])
+            continue
+        U, created = UserPreference.objects.get_or_create(
+            user=tutor,
+            week=int_or_none(dispo["week"]),
+            year=int_or_none(dispo["year"]),
+            day=dispo['day'],
+            start_time=dispo['start_time'],
+            duration=dispo['duration']
+        )
+        U.value = dispo['value']
+        U.save()
+
+    if exceptions:
+        print("The following tutor do not exist:", exceptions)

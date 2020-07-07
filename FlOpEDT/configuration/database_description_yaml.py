@@ -24,31 +24,29 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from django.conf import settings
-import os
+#############
+# PRINCIPLE #
+#############
+#
+# This code loads and saves the description of a database ; in-memory
+# the format is the one described in database_description_checker.py, and
+# on-disk in a JSON format
+#
 
-def upload_file(file, file_name):
-    """
-    Save the file at the path in the folder MEDIA.
-    :param file: the file
-    :param path_name: the target's path
-    :return: the path of the saved file
-    """
-    path = os.path.join(settings.MEDIA_ROOT, file_name)
-    with open(path, 'wb+') as dest:
-        for chunk in file.chunks():
-            dest.write(chunk)
-    return path
+import yaml
 
+def database_description_save_yaml_file(filename, database):
+    try:
+        with open(filename, 'w') as handle:
+            handle.write(yaml.dump(database))
+    except Exception as exc:
+        print('Problem saving: ', exc) # FIXME complain better
 
-def check_ext_file(file, exts):
-    """
-    Check the matching of extension file.
-    :param file: file name
-    :param exts: extensions to match against
-    :return:
-    """
-    for ext in exts:
-        if file.name.endswith(ext):
-            return True
-    return False
+def database_description_load_yaml_file(filename):
+    try:
+        with open(filename, 'r') as handle:
+            result = yaml.load(handle.read(), Loader=yaml.FullLoader)
+            return result
+    except Exception as exc:
+        print('Problem loading: ', exc) # FIXME complain better
+        return None

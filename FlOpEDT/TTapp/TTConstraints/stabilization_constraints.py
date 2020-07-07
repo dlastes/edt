@@ -143,3 +143,28 @@ class Stabilize(TTConstraint):
             text += ' du groupe ' + str(self.group)
         text += ': copie ' + str(self.work_copy)
         return text
+
+
+class StabilizationThroughWeeks(TTConstraint):
+    courses = models.ManyToManyField('base.Course')
+
+    def enrich_model(self, ttmodel, week, ponderation=1):
+        if week != ttmodel.weeks[0]:
+            return
+        ttmodel_courses_id = [c.id for c in ttmodel.wdb.courses]
+        courses = self.courses.filter(id__in=ttmodel_courses_id)
+        weeks = [c.week for c in courses.distinct('week')]
+        courses_data = [{'week': w, 'courses': courses.filter(week=w)} for w in weeks]
+        courses_data = [c for c in courses_data if len(c['courses']) != 0]
+        courses_data.sort(key=lambda c: len(c['courses']))
+        for i in range(len(courses_data)-1):
+            for sl0 in ttmodel.wdb.compatible_slots[courses_data[i]['courses'][0]]:
+                sl1 = ttmodel.find_same_course_slot_in_other_week(sl0, courses_data[i+1]['week'])
+                ttmodel.add_constraint(
+                    2 * ttmodel.sum(ttmodel.TT[sl0, c0] for c0 in courses_data[i]['courses'])
+                    - ttmodel.sum(ttmodel.TT[sl1, c1] for c1 in courses_data[i+1]['courses']),
+                    '<=',
+                    1, Constraint(constraint_type=ConstraintType.STABILIZE_THROUGH_WEEKS))
+
+    def one_line_description(self):
+        return "Stabilization through weeks"

@@ -37,11 +37,11 @@ def build_period_slots(ttmodel, day, period):
         return slots_filter(ttmodel.wdb.courses_slots, day=day, apm=period)
 
 
-class LimitCourseTypeTimePerPeriod(TTConstraint):
+class LimitTimePerPeriod(TTConstraint):
     """
-    Abstract class : Limit the number of hours of a given course_type in every day/half-day
+    Abstract class : Limit the number of hours (of a given course_type) in every day/half-day
     """
-    course_type = models.ForeignKey('base.CourseType', on_delete=models.CASCADE)
+    course_type = models.ForeignKey('base.CourseType', on_delete=models.CASCADE, null=True, blank=True)
     max_hours = models.PositiveSmallIntegerField()
     FULL_DAY = 'fd'
     HALF_DAY = 'hd'
@@ -82,7 +82,7 @@ class LimitCourseTypeTimePerPeriod(TTConstraint):
         expr = ttmodel.lin_expr()
         for slot in build_period_slots(ttmodel, day, period):
             for course in considered_courses & ttmodel.wdb.compatible_courses[slot]:
-                expr += ttmodel.TT[(slot, course)] * self.course_type.duration
+                expr += ttmodel.TT[(slot, course)] * course.type.duration
 
         return expr
 
@@ -106,9 +106,9 @@ class LimitCourseTypeTimePerPeriod(TTConstraint):
                                                   days=day, modules=module, instructors=tutor, groups=group))
 
 
-class LimitGroupsCourseTypeTimePerPeriod(LimitCourseTypeTimePerPeriod):  # , pond):
+class LimitGroupsTimePerPeriod(LimitTimePerPeriod):  # , pond):
     """
-    Bound the number of courses of type 'type' per day/half day for some group
+    Bound the number of course time (of type 'type') per day/half day for some group
 
     Attributes:
         groups : the groups concerned by the limitation. All the groups of self.train_progs if None.
@@ -137,8 +137,10 @@ class LimitGroupsCourseTypeTimePerPeriod(LimitCourseTypeTimePerPeriod):  # , pon
 
     def get_viewmodel(self):
         view_model = super().get_viewmodel()
-
-        type_value = self.course_type.name
+        if self.course_type is not None:
+            type_value = self.course_type.name
+        else:
+            type_value = 'Any'
 
         if self.groups.exists():
             groups_value = ', '.join([group.name for group in self.groups.all()])
@@ -152,7 +154,9 @@ class LimitGroupsCourseTypeTimePerPeriod(LimitCourseTypeTimePerPeriod):  # , pon
         return view_model
 
     def one_line_description(self):
-        text = "Pas plus de " + str(self.max_hours) + ' heures de ' + str(self.course_type)
+        text = "Pas plus de " + str(self.max_hours) + ' heures '
+        if self.course_type is not None:
+            text += 'de ' + str(self.course_type)
         text += " par "
         if self.period == self.FULL_DAY:
             text += 'jour'
@@ -169,9 +173,9 @@ class LimitGroupsCourseTypeTimePerPeriod(LimitCourseTypeTimePerPeriod):  # , pon
         return text
 
 
-class LimitModulesCourseTypeTimePerPeriod(LimitCourseTypeTimePerPeriod):
+class LimitModulesTimePerPeriod(LimitTimePerPeriod):
     """
-    Bound the number of hours of courses of type 'type' per day/half day
+    Bound the number of hours of courses (of type 'type') per day/half day
     Attributes:
         modules : the modules concerned by the limitation. All the modules of self.train_progs if None.
     """
@@ -186,8 +190,15 @@ class LimitModulesCourseTypeTimePerPeriod(LimitCourseTypeTimePerPeriod):
         else:
             considered_modules = ttmodel.wdb.modules.filter(train_prog__in=self.considered_train_progs(ttmodel))
 
+        if self.train_progs.exists():
+            considered_basic_groups = set(
+                ttmodel.wdb.basic_groups.filter(train_prog__in=self.train_progs.all()))
+        else:
+            considered_basic_groups = set(ttmodel.wdb.basic_groups)
+
         for module in considered_modules:
-            self.enrich_model_for_one_object(ttmodel, week, ponderation, module=module)
+            for group in considered_basic_groups:
+                self.enrich_model_for_one_object(ttmodel, week, ponderation, module=module, group=group)
 
     def full_name(self):
         return "Limit Modules Course Type Per Period"
@@ -216,7 +227,9 @@ class LimitModulesCourseTypeTimePerPeriod(LimitCourseTypeTimePerPeriod):
         return view_model
 
     def one_line_description(self):
-        text = "Pas plus de " + str(self.max_hours) + ' heures de ' + str(self.course_type)
+        text = "Pas plus de " + str(self.max_hours) + " heures"
+        if self.course_type:
+            text += ' de ' + str(self.course_type)
         text += " par "
         if self.period == self.FULL_DAY:
             text += 'jour'
@@ -234,7 +247,7 @@ class LimitModulesCourseTypeTimePerPeriod(LimitCourseTypeTimePerPeriod):
         return text
 
 
-class LimitTutorsCourseTypeTimePerPeriod(LimitCourseTypeTimePerPeriod):
+class LimitTutorsTimePerPeriod(LimitTimePerPeriod):
     """
     Bound the time of tutor courses of type 'course_type' per day/half day for tutors
     Attributes:
@@ -249,7 +262,7 @@ class LimitTutorsCourseTypeTimePerPeriod(LimitCourseTypeTimePerPeriod):
         expr = ttmodel.lin_expr()
         for slot in build_period_slots(ttmodel, day, period):
             for course in considered_courses & ttmodel.wdb.compatible_courses[slot]:
-                expr += ttmodel.TTinstructors[(slot, course, tutor)] * self.course_type.duration
+                expr += ttmodel.TTinstructors[(slot, course, tutor)] * course.type.duration
 
         return expr
 
@@ -264,7 +277,7 @@ class LimitTutorsCourseTypeTimePerPeriod(LimitCourseTypeTimePerPeriod):
             self.enrich_model_for_one_object(ttmodel, week, ponderation, tutor=tutor)
 
     def full_name(self):
-        return "Limit Tutors Course Type Per Period"
+        return "Limit Tutors Time Per Period"
 
     @classmethod
     def get_viewmodel_prefetch_attributes(cls):
@@ -290,7 +303,9 @@ class LimitTutorsCourseTypeTimePerPeriod(LimitCourseTypeTimePerPeriod):
         return view_model
 
     def one_line_description(self):
-        text = "Pas plus de " + str(self.max_hours) + ' heures de ' + str(self.course_type)
+        text = "Pas plus de " + str(self.max_hours) + " heures"
+        if self.course_type:
+            text += ' de ' + str(self.course_type)
         text += " par "
         if self.period == self.FULL_DAY:
             text += 'jour'

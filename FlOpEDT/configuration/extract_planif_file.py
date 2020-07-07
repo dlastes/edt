@@ -34,7 +34,7 @@ from base.models import Group, Module, Course, CourseType, RoomType,\
 from people.models import Tutor, UserDepartmentSettings
 from people.tutor import fill_default_user_preferences
 from misc.assign_colors import assign_module_color
-
+from TTapp.models import StabilizationThroughWeeks
 
 def do_assign(module, course_type, week, year, book):
     already_done = ModuleTutorRepartition.objects.filter(module=module, course_type=course_type,
@@ -67,7 +67,7 @@ def do_assign(module, course_type, week, year, book):
     print(f"Assignation done for {module.abbrev} / {course_type.name}!")
 
 
-def ReadPlanifWeek(department, book, feuille, week, year):
+def ReadPlanifWeek(department, book, feuille, week, year, courses_to_stabilize=None):
     sheet = book[feuille]
     period=Period.objects.get(name=feuille, department=department)
 
@@ -99,6 +99,9 @@ def ReadPlanifWeek(department, book, feuille, week, year):
     sumtotal = 0
     while 1:
         row += 1
+        if courses_to_stabilize is not None:
+            if row not in courses_to_stabilize:
+                courses_to_stabilize[row] = []
         is_total = sheet.cell(row=row, column=group_COL).value
         if is_total == "TOTAL":
             # print "Sem %g de %s - TOTAL: %g"%(week, feuille,sumtotal)
@@ -148,7 +151,7 @@ def ReadPlanifWeek(department, book, feuille, week, year):
                 TUTOR, created = Tutor.objects.get_or_create(username='---')
                 if created:
                     TUTOR.save()
-                    fill_default_user_preferences(TUTOR)
+                    fill_default_user_preferences(TUTOR, dept=department)
                     UserDepartmentSettings(user=TUTOR, department=department).save()
             elif prof == '*':
                 TUTOR = None
@@ -182,10 +185,13 @@ def ReadPlanifWeek(department, book, feuille, week, year):
 
             N=int(N)
 
+
             for i in range(N):
                 C = Course(tutor=TUTOR, type=COURSE_TYPE, module=MODULE, week=week, year=year,
                            room_type=ROOMTYPE)
                 C.save()
+                if courses_to_stabilize is not None:
+                    courses_to_stabilize[row].append(C)
                 for g in GROUPS:
                     C.groups.add(g)
                 C.save()
@@ -234,22 +240,36 @@ def ReadPlanifWeek(department, book, feuille, week, year):
             raise Exception(f"Exception ligne {row}, semaine {week} de {feuille}: {e} \n")
 
 
-def extract_period(department, book, period, year):
+def extract_period(department, book, period, year, stabilize_courses=False):
+    if stabilize_courses:
+        courses_to_stabilize = {}
+        print("Courses will be stabilized through weeks for period", period)
+    else:
+        courses_to_stabilize = None
     if period.starting_week < period.ending_week:
         if period.ending_week < 31:
             year += 1
         for week in range(period.starting_week, period.ending_week + 1):
-            ReadPlanifWeek(department, book, period.name, week, year)
+            ReadPlanifWeek(department, book, period.name, week, year, courses_to_stabilize)
             print(week, year)
 
     else:
         for week in range(period.starting_week, 53):
-            ReadPlanifWeek(department, book, period.name, week, year)
+            ReadPlanifWeek(department, book, period.name, week, year, courses_to_stabilize)
         for week in range(1, period.ending_week + 1):
-            ReadPlanifWeek(department, book, period.name, week, year+1)
+            ReadPlanifWeek(department, book, period.name, week, year+1, courses_to_stabilize)
+
+    if stabilize_courses:
+        for courses_list in courses_to_stabilize.values():
+            if len(courses_list) < 2:
+                continue
+            stw = StabilizationThroughWeeks.objects.create(department=department)
+            for c in courses_list:
+                stw.courses.add(c)
 
 
-def extract_planif(department, bookname=None):
+
+def extract_planif(department, bookname=None, stabilize_courses=False):
     '''
     Generate the courses from bookname; the school year starts in actual_year
     '''
@@ -257,7 +277,7 @@ def extract_planif(department, bookname=None):
         bookname = 'media/configuration/planif_file_'+department.abbrev+'.xlsx'
     book = load_workbook(filename=bookname, data_only=True)
     for period in Period.objects.filter(department=department):
-        extract_period(department, book, period, actual_year)
+        extract_period(department, book, period, actual_year, stabilize_courses)
     assign_module_color(department)
 
 

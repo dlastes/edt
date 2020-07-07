@@ -55,7 +55,7 @@ from base.admin import CoursResource, DispoResource, VersionResource, \
     CoursPlaceResource, UnavailableRoomsResource, TutorCoursesResource, \
     CoursePreferenceResource, MultiDepartmentTutorResource, \
     SharedRoomsResource, RoomPreferenceResource, ModuleRessource, \
-    TutorRessource, ModuleDescriptionResource
+    TutorRessource, ModuleDescriptionResource, AllDispoResource
 if COSMO_MODE:
     from base.admin import CoursPlaceResourceCosmo
 from base.forms import ContactForm, PerfectDayForm, ModuleDescriptionForm
@@ -606,6 +606,12 @@ def fetch_dispos(req, year, week, **kwargs):
 
     cache.set(cache_key, response)
     return response
+
+
+@dept_admin_required
+def fetch_all_dispos(req, **kwargs):
+    dataset = AllDispoResource().export(UserPreference.objects.all())
+    return HttpResponse(dataset.json, content_type='application/force-download')
 
 
 def fetch_course_default_week(req, train_prog, course_type, **kwargs):

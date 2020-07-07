@@ -101,10 +101,12 @@ class ConstraintType(Enum):
     TECH_MARDI_APREM = "Tech le mardi aprem"
     PAS_PLUS_5_CRENEAU = "Pas_plus_de_5_creneau"
     G1_G2_COURS_MEME_JOUR = "G1 et G2 ont cours le meme jour"
+    VISIO = "Visio"
 
     # From TTApp/models
     MAX_HOURS = "Max hours"
     STABILIZE_ENRICH_MODEL = "Stabilize : enrich model"
+    STABILIZE_THROUGH_WEEKS = "Stabilization through weeks"
     SIMULTANEOUS_COURSES = "Simultaneous courses"
     LIMITED_ROOM_CHOICES = "LIMITED_ROOM_CHOICES"
     LowerBoundBusyDays = "LowerBoundBusyDays"

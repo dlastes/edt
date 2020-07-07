@@ -202,10 +202,12 @@ def import_planif_file(req, **kwargs):
                     except Exception as e:
                         response = {'status': 'error', 'data': str(e)}
                         return HttpResponse(json.dumps(response), content_type='application/json')
+                    print(req.POST)
+                    stabilize_courses = "stabilize" in req.POST
                     Course.objects.filter(type__department=dept).delete()
                     logger.info("Flush planif database OK")
 
-                    extract_planif(dept, bookname=path)
+                    extract_planif(dept, bookname=path, stabilize_courses=stabilize_courses)
                     logger.info("Extract file OK")
                     rep = "OK !"
 
