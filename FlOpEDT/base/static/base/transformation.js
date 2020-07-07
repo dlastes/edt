@@ -53,6 +53,7 @@ function bknews_bot_y() {
   return bknews_top_y() + bknews_h();
 }
 function bknews_h() {
+  var t = time_settings.time;
   if (t.lunch_break_finish_time == t.lunch_break_start_time) {
     return 0;
   } else {
