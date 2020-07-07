@@ -204,7 +204,7 @@ function dispo_more_h(d) {
 }
 
 function dispo_more_y(d) {
-  return dispo_y(d) + dispo_h(d) - dispo_more_h(d);
+  return dispo_y(d) + dispo_h(d) - 2*dispo_more_h(d);
 }
 
 function dispo_more_x(d) {

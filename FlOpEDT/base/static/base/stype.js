@@ -59,7 +59,7 @@ var dd_selections = {
 
 
 
-smiley.tete = 13;
+smiley.tete = 8;
 
 dim_dispo.width = 80;
 dim_dispo.height = 500;

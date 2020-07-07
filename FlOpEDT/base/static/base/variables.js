@@ -243,7 +243,7 @@ var par_dispos = {
 
 // parameters for the smileys
 var smiley = {
-  tete: 10,
+  tete: 5,
   oeil_x: .35,
   oeil_y: -.35,
   oeil_max: .08,
