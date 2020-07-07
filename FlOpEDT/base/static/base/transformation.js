@@ -528,7 +528,7 @@ function nb_minutes_in_grid() {
     + nbRows * (t.lunch_break_start_time - t.day_start_time
       + t.day_finish_time - t.lunch_break_finish_time);
   if (t.lunch_break_finish_time != t.lunch_break_start_time) {
-  minutes += 2 * bknews.time_margin;
+    minutes += 2 * bknews.time_margin;
   }
   return minutes;
 }
