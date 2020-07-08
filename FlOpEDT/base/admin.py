@@ -114,10 +114,10 @@ class CoursPlaceResource(resources.ModelResource):
                              attribute='course__module__display',
                              widget=ForeignKeyWidget(ModuleDisplay, 'color_txt'))
     url = fields.Field(column_name='url',
-                       attribute='additional__url',
+                       attribute='additional',
                        widget=ForeignKeyWidget(ScheduledCourseAdditional, 'url'))
     allow_visio = fields.Field(column_name='allow_visio',
-                               attribute='course__visio_pref__value',
+                               attribute='course__visio_pref',
                                widget=ForeignKeyWidget(VisioPreference, 'value'))
 
     class Meta:
@@ -169,7 +169,7 @@ class CoursPlaceResourceCosmo(resources.ModelResource):
                              attribute='tutor__display',
                              widget=ForeignKeyWidget(TutorDisplay, 'color_txt'))
     url = fields.Field(column_name='url',
-                       attribute='additional__url',
+                       attribute='additional',
                        widget=ForeignKeyWidget(ScheduledCourseAdditional, 'url'))
 
     class Meta:
