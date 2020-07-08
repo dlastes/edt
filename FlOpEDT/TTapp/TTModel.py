@@ -37,7 +37,7 @@ from base.models import Group, \
     Department, Module, TrainingProgramme, CourseType, \
     Dependency, TutorCost, GroupFreeHalfDay, GroupCost, Holiday, TrainingHalfDay, \
     CourseStartTimeConstraint, TimeGeneralSettings, ModulePossibleTutors, CoursePossibleTutors, \
-    ModuleTutorRepartition
+    ModuleTutorRepartition, VisioPreference
 
 from base.timing import Time
 
@@ -606,6 +606,45 @@ class TTModel(object):
                                             Constraint(constraint_type=ConstraintType.CORE_ROOMS,
                                                        slots=sl, rooms=r))
 
+    def add_visio_room_constraints(self):
+        Visio = self.wdb.visio_room
+
+        visio_courses = set()
+        no_visio_courses = set()
+        visio_ponderation = {c: 1 for c in self.wdb.courses}
+
+        for vp in VisioPreference.objects.filter(course__in=self.wdb.courses):
+            if vp.value == 0:
+                no_visio_courses.add(vp.course)
+            elif vp.value==8:
+                visio_courses.add(vp.course)
+            else:
+                visio_ponderation[c] = vp.value / 4
+
+
+        # the no_visio_courses are not in Visio room
+        self.add_constraint(self.sum(self.TTrooms[(sl, c, Visio)]
+                                     for c in no_visio_courses
+                                     for sl in self.wdb.compatible_slots[c]),
+                            '==', 0,
+                            Constraint(constraint_type=ConstraintType.VISIO))
+
+        # the courses with no == 1 are in Visio room
+        self.add_constraint(
+            self.sum(self.TTrooms[(sl, c, rg)]
+                     for c in visio_courses
+                     for sl in self.wdb.compatible_slots[c]
+                     for rg in set(self.wdb.course_rg_compat[c])-{Visio}),
+            '==', 0,
+            Constraint(constraint_type=ConstraintType.VISIO))
+
+        # other courses are preferentially not in Visio room
+        for bg in self.wdb.basic_groups:
+            self.add_to_group_cost(bg,
+                                   0.1 * self.sum(self.TTrooms[(sl, c, Visio)] * visio_ponderation[c]
+                                                  for c in self.wdb.courses_for_basic_group[bg] if c.no != 1
+                                                  for sl in self.wdb.compatible_slots[c]))
+
     def add_dependency_constraints(self, weight=None):
         """
         Add the constraints of dependency saved on the DB:
@@ -964,6 +1003,9 @@ class TTModel(object):
         self.add_other_departments_constraints()
 
         self.add_rooms_constraints()
+
+        if settings.VISIO_MODE:
+            self.add_visio_room_constraints
 
         self.add_instructors_constraints()
 
