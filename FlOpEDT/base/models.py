@@ -274,7 +274,7 @@ class Module(models.Model):
     train_prog = models.ForeignKey(
         'TrainingProgramme', on_delete=models.CASCADE)
     period = models.ForeignKey('Period', on_delete=models.CASCADE)
-    url = models.CharField(max_length=200, null=True, blank=True, default=None)
+    url = models.URLField(null=True, blank=True, default=None)
     description = models.TextField(null=True, blank=True, default=None)
 
     def __str__(self):
@@ -358,6 +358,11 @@ class Course(models.Model):
                and self.module == other.module
 
 
+class VisioPreference(models.Model):
+    course = models.OneToOneField('Course', on_delete=models.CASCADE, related_name='visio_pref')
+    value = models.SmallIntegerField(validators=[MinValueValidator(0), MaxValueValidator(8)], default=8)
+
+
 class CoursePossibleTutors(models.Model):
     course = models.OneToOneField('Course', on_delete=models.CASCADE)
     possible_tutors = models.ManyToManyField(
@@ -390,6 +395,11 @@ class ScheduledCourse(models.Model):
     @property
     def end_time(self):
         return self.start_time + self.course.type.duration
+
+
+class ScheduledCourseAdditional(models.Model):
+    scheduled_course = models.OneToOneField('ScheduledCourse', on_delete=models.CASCADE, related_name='additional')
+    url = models.URLField(null=True, blank=True, default=None)
 
 
 # </editor-fold desc="COURSES">

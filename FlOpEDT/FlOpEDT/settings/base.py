@@ -195,3 +195,4 @@ if 'ADMINS' in os.environ:
 SHELL_PLUS_MODEL_IMPORTS_RESOLVER = 'django_extensions.collision_resolvers.AppLabelSuffixCR'
 
 COSMO_MODE = False
+VISIO_MODE = False

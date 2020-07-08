@@ -31,7 +31,7 @@ from pulp import LpVariable, LpConstraint, LpBinary, LpConstraintEQ, \
 import pulp
 from pulp import GUROBI_CMD
 
-from FlOpEDT.settings.base import COSMO_MODE
+from django.conf import settings
 
 from base.models import Group, \
     Room, RoomSort, RoomType, RoomPreference, \
@@ -63,14 +63,13 @@ GUROBI_NAME = 'GUROBI_CMD'
 
 
 class WeeksDatabase(object):
-    def __init__(self, department, weeks, year, train_prog, slots_step=None, allow_visio=False):
+    def __init__(self, department, weeks, year, train_prog, slots_step=None):
         self.train_prog = train_prog
         self.department = department
         self.weeks = weeks
         self.year = year
         self.slots_step = slots_step
-        self.allow_visio = allow_visio
-        if self.allow_visio:
+        if settings.VISIO_MODE:
             self.visio_room, visio_room_created = Room.objects.get_or_create(name='Visio')
         self.possible_apms=set()
         self.days, self.day_after, self.holidays, self.training_half_days = self.days_init()
@@ -250,7 +249,7 @@ class WeeksDatabase(object):
         course_rg_compat = {}
         for c in self.courses:
             course_rg_compat[c] = set(c.room_type.members.all())
-            if self.allow_visio:
+            if settings.VISIO_MODE:
                 course_rg_compat[c] |= {self.visio_room}
 
         fixed_courses_for_room = {}
@@ -272,7 +271,7 @@ class WeeksDatabase(object):
         # COMPATIBILITY
         # Slots and courses are compatible if they have the same type
         # OR if slot type is None and they have the same duration
-        if not COSMO_MODE:
+        if not settings.COSMO_MODE:
             compatible_slots = {}
             for c in self.courses:
                 compatible_slots[c] = set(slot for slot in self.courses_slots

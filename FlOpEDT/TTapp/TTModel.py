@@ -92,8 +92,7 @@ class TTModel(object):
                  core_only=False,
                  send_mails=False,
                  slots_step=None,
-                 keep_many_solution_files=False,
-                 allow_visio=False):
+                 keep_many_solution_files=False):
         # beg_file = os.path.join('logs',"FlOpTT")
         self.model = LpProblem("FlOpTT", LpMinimize)
         self.min_ups_i = min_nps_i
@@ -107,7 +106,6 @@ class TTModel(object):
         self.send_mails = send_mails
         self.slots_step = slots_step
         self.keep_many_solution_files = keep_many_solution_files
-        self.allow_visio = allow_visio
         self.var_nb = 0
         self.constraintManager = ConstraintManager()
 
@@ -179,7 +177,7 @@ class TTModel(object):
             self.send_lack_of_availability_mail()
 
     def wdb_init(self):
-        wdb = WeeksDatabase(self.department, self.weeks, self.year, self.train_prog, self.slots_step, self.allow_visio)
+        wdb = WeeksDatabase(self.department, self.weeks, self.year, self.train_prog, self.slots_step)
         return wdb
 
     def costs_init(self):
@@ -546,7 +544,7 @@ class TTModel(object):
                                     '<=', self.avail_instr[i][sl],
                                     SlotInstructorConstraint(sl, i))
 
-                if self.allow_visio:
+                if settings.VISIO_MODE:
                     # avail_at_school_instr consideration...
                     self.add_constraint(
                         self.sum(self.TTinstructors[(sl2, c2, i)] - self.TTrooms[(sl2, c2, self.wdb.visio_room)]
