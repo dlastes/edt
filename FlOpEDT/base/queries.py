@@ -40,7 +40,7 @@ from base.models import Group, RoomType, Room, \
 from displayweb.models import GroupDisplay, TrainingProgrammeDisplay, BreakingNews
 
 from people.models import Tutor, NotificationsPreferences
-from TTapp.models import TTConstraint
+from TTapp.TTConstraint import TTConstraint, all_subclasses
 
 logger = logging.getLogger(__name__)
 
@@ -49,6 +49,10 @@ logger = logging.getLogger(__name__)
 def create_first_department():
 
     department = Department.objects.create(name="Default Department", abbrev="default")
+
+    T = Tutor.objects.create(username='admin', is_staff=True, is_tutor=True, is_superuser=True, rights=6)
+    T.set_password('passe')
+    T.save()
 
     # Update all existing department related models
     models = [
@@ -66,7 +70,7 @@ def create_first_department():
             model_class.departments.add(department)
 
     # Update existing Constraint
-    types = TTConstraint.__subclasses__()
+    types = all_subclasses(TTConstraint)
 
     for type in types:
         type.objects.all().update(department=department)
@@ -279,6 +283,7 @@ def get_coursetype_constraints(department_abbrev):
         for ct_constraint in \
               CourseStartTimeConstraint.objects.filter(course_type=ct):
             dic[ct.name]['allowed_st'] += ct_constraint.allowed_start_times
+        dic[ct.name]['allowed_st'].sort()
         if len(dic[ct.name]['allowed_st']) == 0:
             dic[ct.name]['allowed_st'] += \
                 CourseStartTimeConstraint.objects.get(course_type=None).allowed_start_times

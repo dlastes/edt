@@ -45,14 +45,14 @@ class GetConstraintsTestCase(TestCase):
         self.tp2 = base.TrainingProgramme.objects.create(name="TrainingProgramme2", abbrev="tp2", department=self.department2)
         self.ct1 = base.CourseType.objects.create(name="CourseType1")
 
-        self.c_basic = LimitCourseTypeTimePerPeriod.objects.create(limit=0, type=self.ct1, department=self.department1)
+        self.c_basic = LimitTimePerPeriod.objects.create(limit=0, type=self.ct1, department=self.department1)
 
-        self.c_2018 = LimitCourseTypeTimePerPeriod.objects.create(train_prog=self.tp1, year=2018, limit=0, type=self.ct1, department=self.department1)
-        self.c_2018_39 = LimitCourseTypeTimePerPeriod.objects.create(train_prog=self.tp1, year=2018, week=39, limit=0, type=self.ct1, department=self.department1)
-        self.c_2018_39_without_tp = LimitCourseTypeTimePerPeriod.objects.create(year=2018, week=39, limit=0, type=self.ct1, department=self.department1)
+        self.c_2018 = LimitTimePerPeriod.objects.create(train_prog=self.tp1, year=2018, limit=0, type=self.ct1, department=self.department1)
+        self.c_2018_39 = LimitTimePerPeriod.objects.create(train_prog=self.tp1, year=2018, week=39, limit=0, type=self.ct1, department=self.department1)
+        self.c_2018_39_without_tp = LimitTimePerPeriod.objects.create(year=2018, week=39, limit=0, type=self.ct1, department=self.department1)
 
-        self.c_tp2 = LimitCourseTypeTimePerPeriod.objects.create(train_prog=self.tp2, limit=0, type=self.ct1, department=self.department1)
-        self.c_2019_1 = LimitCourseTypeTimePerPeriod.objects.create(train_prog=self.tp2, year=2019, week=1, limit=0, type=self.ct1, department=self.department1)
+        self.c_tp2 = LimitTimePerPeriod.objects.create(train_prog=self.tp2, limit=0, type=self.ct1, department=self.department1)
+        self.c_2019_1 = LimitTimePerPeriod.objects.create(train_prog=self.tp2, year=2019, week=1, limit=0, type=self.ct1, department=self.department1)
 
     def test_week_without_train_prog(self):   
         constraints = set(get_constraints(self.department1, year=2018, week=39))

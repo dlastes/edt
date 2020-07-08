@@ -63,12 +63,15 @@ GUROBI_NAME = 'GUROBI_CMD'
 
 
 class WeeksDatabase(object):
-    def __init__(self, department, weeks, year, train_prog, slots_step=None):
+    def __init__(self, department, weeks, year, train_prog, slots_step=None, allow_visio=False):
         self.train_prog = train_prog
         self.department = department
         self.weeks = weeks
         self.year = year
         self.slots_step = slots_step
+        self.allow_visio = allow_visio
+        if self.allow_visio:
+            self.visio_room, visio_room_created = Room.objects.get_or_create(name='Visio')
         self.possible_apms=set()
         self.days, self.day_after, self.holidays, self.training_half_days = self.days_init()
         self.courses_slots, self.availability_slots = self.slots_init()
@@ -161,9 +164,8 @@ class WeeksDatabase(object):
         # COURSES
         course_types = CourseType.objects.filter(department=self.department)
 
-        courses = Course.objects.filter(
-            week__in=self.weeks, year=self.year,
-            module__train_prog__in=self.train_prog)
+        courses = Course.objects.filter(week__in=self.weeks, year=self.year, module__train_prog__in=self.train_prog)\
+            .select_related('module')
 
         courses_by_week = {week: set(courses.filter(week=week)) for week in self.weeks}
 
@@ -247,7 +249,9 @@ class WeeksDatabase(object):
 
         course_rg_compat = {}
         for c in self.courses:
-            course_rg_compat[c] = c.room_type.members.all()
+            course_rg_compat[c] = set(c.room_type.members.all())
+            if self.allow_visio:
+                course_rg_compat[c] |= {self.visio_room}
 
         fixed_courses_for_room = {}
         for r in basic_rooms:
@@ -357,6 +361,11 @@ class WeeksDatabase(object):
                                                          week__in=self.weeks,
                                                          year=self.year):
             instructors.add(mtr.tutor)
+        try:
+            no_tut = Tutor.objects.get(username='---')
+            instructors.add(no_tut)
+        except:
+            pass
         courses_for_tutor = {}
         for i in instructors:
             courses_for_tutor[i] = set(self.courses.filter(tutor=i))
@@ -398,6 +407,10 @@ class WeeksDatabase(object):
 
     def possible_courses_tutor_init(self):
         possible_tutors = {}
+        try:
+            no_tut = Tutor.objects.get(username='---')
+        except:
+            no_tut = None
         for m in self.modules:
             if ModulePossibleTutors.objects.filter(module=m).exists():
                 possible_tutors[m] = set(ModulePossibleTutors.objects.get(module=m).possible_tutors.all())
@@ -413,6 +426,8 @@ class WeeksDatabase(object):
                 possible_tutors[c] = set(mtr.tutor for mtr in
                                          ModuleTutorRepartition.objects.filter(course_type=c.type, module=c.module,
                                                                                year=c.year, week=c.week))
+                if no_tut is not None:
+                    possible_tutors[c].add(no_tut)
             else:
                 possible_tutors[c] = possible_tutors[c.module]
 

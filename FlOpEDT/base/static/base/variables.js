@@ -243,7 +243,7 @@ var par_dispos = {
 
 // parameters for the smileys
 var smiley = {
-  tete: 10,
+  tete: 5,
   oeil_x: .35,
   oeil_y: -.35,
   oeil_max: .08,
@@ -252,6 +252,13 @@ var smiley = {
   bouche_haut_y: -.1,
   bouche_bas_y: .6,
   sourcil: .4,
+  headphone: {
+    ear: .5,
+    top: 1.02,
+    mouth_y: .2,
+    mouth_w: 1,
+    mouth_h: .4
+  },
   init_x: 0,
   init_y: -180,
   max_r: 1,

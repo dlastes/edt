@@ -110,6 +110,16 @@ class Group(models.Model):
 
         return descendants
 
+    def basic_groups(self):
+        s = set(g for g in self.descendants_groups() | {self} if g.basic)
+        return s
+
+    def connected_groups(self):
+        """
+        :return: the set of all Groupe that have a non empty intersection with self (self included)
+        """
+        return {self} | self.descendants_groups() | self.ancestor_groups()
+
 
 # </editor-fold desc="GROUPS">
 

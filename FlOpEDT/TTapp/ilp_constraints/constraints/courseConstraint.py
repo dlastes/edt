@@ -23,16 +23,16 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from TTapp.ilp_constraint.constraint import Constraint
-from TTapp.ilp_constraint.constraint_type import ConstraintType
+from TTapp.ilp_constraints.constraint import Constraint
+from TTapp.ilp_constraints.constraint_type import ConstraintType
 
-class SlotInstructorConstraint(Constraint):
-    def __init__(self, slot, instructor):
-        self.slot = slot
-        self.instructor = instructor
-        Constraint.__init__(self, constraint_type=ConstraintType.PAS_DE_PROFESSEUR_DISPONIBLE, slots=[slot], instructors=[instructor])
+class CourseConstraint(Constraint):
+    def __init__(self, course):
+        self.course = course
+        Constraint.__init__(self, constraint_type=ConstraintType.COURS_DOIT_ETRE_PLACE,
+                            courses=[course])
 
     def get_summary_format(self):
-        output = "\tLe professeur \n%s n'est pas disponible le slot : \n%s"
-        dimensions = ["instructors", "slots"]
+        output = "\tLe cours \n%s doit être placé\n"
+        dimensions = ["courses"]
         return output, dimensions

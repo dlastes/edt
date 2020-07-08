@@ -109,9 +109,9 @@ def week_list():
         return li
     else:
         # should start 1 week before the first week
-        for i in list(range(35, 44)) + list(range(45, 52)):
+        for i in list(range(35, 53)):
             li.append({'week': i, 'year': actual_year})
-        for i in list(range(2, 10)) + list(range(11, 17)) + list(range(19, 31)):
+        for i in list(range(1, 31)):
             li.append({'week': i, 'year': actual_year+1})
         return li
 

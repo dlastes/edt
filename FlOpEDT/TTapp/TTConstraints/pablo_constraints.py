@@ -23,16 +23,11 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from TTapp.ilp_constraint.constraint import Constraint
+
+from django.db import models
+
+from TTapp.TTConstraint import TTConstraint
+from TTapp.ilp_constraints.constraint import Constraint
 
 
-class InstructorConstraint(Constraint):
-    def __init__(self, constraint_type, slot, course):
-        self.slot = slot
-        self.course = course
-        Constraint.__init__(self, constraint_type=constraint_type, courses=[course], slots=[slot])
 
-    def get_summary_format(self):
-        output = "\tLes cours suivants:\n%s\tdoivent avoir un professeur\n"
-        dimensions = ["courses"]
-        return output, dimensions

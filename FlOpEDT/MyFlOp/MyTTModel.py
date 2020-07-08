@@ -44,7 +44,8 @@ class MyTTModel(TTModel):
                  lim_ld=1.,
                  core_only=False,
                  send_mails=False,
-                 slots_step=None):
+                 slots_step=None,
+                 keep_many_solution_files=False):
         """
         If you shall change something in the database ahead of creating the
         problem, you must write it here, before calling TTModel's constructor.
@@ -62,7 +63,8 @@ class MyTTModel(TTModel):
                          lim_ld=lim_ld,
                          core_only=core_only,
                          send_mails=send_mails,
-                         slots_step=slots_step)
+                         slots_step=slots_step,
+                         keep_many_solution_files=keep_many_solution_files)
 
     def add_specific_constraints(self):
         """
@@ -72,8 +74,8 @@ class MyTTModel(TTModel):
         """
         TTModel.add_specific_constraints(self)
 
-    def solve(self, time_limit=3600, target_work_copy=None,
-              solver=GUROBI_NAME):
+    def solve(self, time_limit=None, target_work_copy=None,
+              solver=GUROBI_NAME, threads=None):
         """
         If you shall add pre (or post) processing apps, you may write them down
         here.
@@ -81,6 +83,7 @@ class MyTTModel(TTModel):
         result = TTModel.solve(self,
                                time_limit=time_limit,
                                target_work_copy=target_work_copy,
-                               solver=solver)
+                               solver=solver,
+                               threads=None)
         if result is not None and self.stabilize_work_copy is not None:
             print_differences(self.weeks, self.year, self.stabilize_work_copy, target_work_copy, self.wdb.instructors)

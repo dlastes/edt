@@ -327,7 +327,13 @@ def make_planif_file(department, empty_bookname=default_empty_bookname, target_r
 
     ############ Make Assignation sheet ############
     sheet = new_book['ModuleTutorsAssignation']
-    sheet.add_data_validation(tutor_validator)
+    tutor_assignation_validator = DataValidation(type="list", formula1="Rules!$B$7:$EE$7", allow_blank=True)
+    tutor_assignation_validator.error = "Ce prof n'est pas dans la liste de l'onglet Rules"
+    tutor_assignation_validator.errorTitle = 'Erreur de prof'
+    tutor_assignation_validator.prompt = 'Choisir un prof dans la liste'
+    tutor_assignation_validator.promptTitle = 'Prof possibles'
+
+    sheet.add_data_validation(tutor_assignation_validator)
 
     module_validator = DataValidation(type="custom", allow_blank=True)
     module_validator.prompt = "Choisir un module existant"
@@ -342,7 +348,7 @@ def make_planif_file(department, empty_bookname=default_empty_bookname, target_r
         module_validator.add(sheet.cell(row=row, column=1))
         course_type_validator.add(sheet.cell(row=row, column=2))
         for col in range(3, 16):
-            tutor_validator.add(sheet.cell(row=row, column=col))
+            tutor_assignation_validator.add(sheet.cell(row=row, column=col))
 
     new_book.remove(new_book['empty_recap'])
     new_book.remove(new_book['empty'])

@@ -236,7 +236,7 @@ function go_smiley(top, mid, t) {
       return tete_str(rc(d));
     })
     .attr("fill", function (d) {
-      return smi_fill(rc(d));
+      return smi_fill(availability_content(d));
     });
 
   datsmi
@@ -250,7 +250,7 @@ function go_smiley(top, mid, t) {
       return oeil_r(rc(d));
     })
     .attr("stroke-width", function (d) {
-      return trait_vis_strw(rc(d));
+      return eye_str_width(d);
     });
 
   datsmi
@@ -264,7 +264,7 @@ function go_smiley(top, mid, t) {
       return oeil_r(rc(d));
     })
     .attr("stroke-width", function (d) {
-      return trait_vis_strw(rc(d));
+      return eye_str_width(d);
     });
 
 
@@ -285,7 +285,7 @@ function go_smiley(top, mid, t) {
       return sourcil_ext_y(rc(d));
     })
     .attr("stroke-width", function (d) {
-      return trait_vis_strw(rc(d));
+      return brow_str_width(d);
     });
 
   datsmi
@@ -305,7 +305,7 @@ function go_smiley(top, mid, t) {
       return sourcil_ext_y(rc(d));
     })
     .attr("stroke-width", function (d) {
-      return trait_vis_strw(rc(d));
+      return brow_str_width(d);
     });
 
   datsmi
@@ -330,9 +330,56 @@ function go_smiley(top, mid, t) {
     })
     .attr("fill", "none")
     .attr("stroke-width", function (d) {
-      return trait_vis_strw(rc(d));
+      return mouth_str_width(d);
     });
 
+  datsmi
+    .append("path")
+    .attr("st", "hpr")
+    .attr("fill", hp_fill)
+    .merge(top.select("[st=hpr]"))
+    .attr("d", path_hpr)
+    .attr("stroke-width", hp_stroke_width);
+
+  datsmi
+    .append("path")
+    .attr("st", "hpl")
+    .attr("fill", hp_fill)
+    .merge(top.select("[st=hpl]"))
+    .attr("d", path_hpl)
+    .attr("stroke-width", hp_stroke_width);
+
+  datsmi
+    .append("path")
+    .attr("st", "hpt")
+    .attr("fill", "none")
+    .merge(top.select("[st=hpt]"))
+    .attr("d", path_hpt)
+    .attr("stroke-width", hp_stroke_width);
+
+  datsmi
+    .append("rect")
+    .attr("st", "hpm")
+    .merge(top.select("[st=hpm]"))
+    .attr("x", -.5 * smiley.headphone.mouth_w * smiley.tete)
+    .attr("y", .5 * smiley.headphone.mouth_h * smiley.tete)
+    .attr("rx", 2)
+    .attr("width", hp_mouth_w)
+    .attr("height", smiley.headphone.mouth_h * smiley.tete)
+    .attr("fill", "black")
+    .attr("stroke", "none");
+
+  datsmi
+    .append("line")
+    .attr("st", "hpmr")
+    .merge(top.select("[st=hpmr]"))
+    .attr("x1", .45 * smiley.headphone.mouth_w * smiley.tete)
+    .attr("y1", smiley.headphone.mouth_h * smiley.tete)
+    .attr("x2", smiley.tete)
+    .attr("y2", 0)
+    .attr("stroke", "black")
+    .attr("stroke-width", hp_mouth_sw);
+  
 
 }
 
@@ -371,7 +418,7 @@ function go_cm_advanced_pref(quick) {
     .attr("width", dispo_all_w)
     .attr("height", dispo_all_h)
     .attr("fill", function (d) {
-      return smi_fill(d.off / par_dispos.nmax);
+      return smi_fill(d.off);
     })
     .attr("stroke", "darkslategrey")
     .attr("stroke-width", 2);
@@ -1042,7 +1089,7 @@ function go_courses(quick) {
         lDis = par_dispos.nmax;
       }
 
-      return smi_fill(lDis / par_dispos.nmax);
+      return smi_fill(lDis);
     });
   } else {
     d3.selectAll("rect.crect").attr("fill", cours_fill);

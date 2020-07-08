@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 # This file is part of the FlOpEDT/FlOpScheduler project.
@@ -23,20 +24,29 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from TTapp.ilp_constraint.constraint import Constraint
-from TTapp.ilp_constraint.constraint_type import ConstraintType
+#############
+# PRINCIPLE #
+#############
+#
+# This code loads and saves the description of a database ; in-memory
+# the format is the one described in database_description_checker.py, and
+# on-disk in a JSON format
+#
 
+import yaml
 
-class DependencyConstraint(Constraint):
-    def __init__(self, course1, course2, slot1, slot2):
-        self.course1 = course1
-        self.course2 = course2
-        self.slot1 = slot1
-        self.slot2 = slot2
-        Constraint.__init__(self, constraint_type=ConstraintType.DEPENDANCE,
-                            courses=[course1, course2], slots=[slot1, slot2])
+def database_description_save_yaml_file(filename, database):
+    try:
+        with open(filename, 'w') as handle:
+            handle.write(yaml.dump(database))
+    except Exception as exc:
+        print('Problem saving: ', exc) # FIXME complain better
 
-    def get_summary_format(self):
-        output = "\tProblème de dépendance entre les cours suivants:\n%s"
-        dimensions = ["courses"]
-        return output, dimensions
+def database_description_load_yaml_file(filename):
+    try:
+        with open(filename, 'r') as handle:
+            result = yaml.load(handle.read(), Loader=yaml.FullLoader)
+            return result
+    except Exception as exc:
+        print('Problem loading: ', exc) # FIXME complain better
+        return None

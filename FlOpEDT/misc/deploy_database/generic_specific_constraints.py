@@ -26,7 +26,7 @@
 # without disclosing the source code of your own applications.
 
 
-from TTapp.models import LimitCourseTypeTimePerPeriod, ReasonableDays, MinHalfDays, max_weight, \
+from TTapp.models import LimitTimePerPeriod, ReasonableDays, MinHalfDays, max_weight, \
     SimultaneousCourses, LimitedSlotChoices
 from base.models import Time, Day, TrainingProgramme, CourseType, Module, Room, Slot, Group, Course, Department
 from people.models import Tutor
@@ -81,27 +81,27 @@ def add_iut_blagnac_specials():
     no_more_than_2_exams_a_day = True
     if no_more_than_2_exams_a_day:
         for promo in TrainingProgramme.objects.all():
-            L = LimitCourseTypeTimePerPeriod(limit=2, department=info,
-                                             type=DS,
-                                             period=LimitCourseTypeTimePerPeriod.FULL_DAY,
-                                             train_prog=promo)
+            L = LimitTimePerPeriod(limit=2, department=info,
+                                   type=DS,
+                                   period=LimitTimePerPeriod.FULL_DAY,
+                                   train_prog=promo)
             L.save()
 
     # Pas plus de 2 amphis par demie journée
     for week in range(1,52,2):
         for promo in TrainingProgramme.objects.all():
-            L = LimitCourseTypeTimePerPeriod(limit=2, week=week, year=2018,
-                                             type=CM, department=info,
-                                             period=LimitCourseTypeTimePerPeriod.HALF_DAY,
-                                             train_prog=promo)
+            L = LimitTimePerPeriod(limit=2, week=week, year=2018,
+                                   type=CM, department=info,
+                                   period=LimitTimePerPeriod.HALF_DAY,
+                                   train_prog=promo)
             L.save()
     # Pas plus d'un amphi par matière et par jour
     for week in range(1,52,3):
         for module in Module.objects.all():
-            L = LimitCourseTypeTimePerPeriod(limit=1, week=week, year=2018,
-                                             type=CM, department=info,
-                                             period=LimitCourseTypeTimePerPeriod.FULL_DAY,
-                                             module=module)
+            L = LimitTimePerPeriod(limit=1, week=week, year=2018,
+                                   type=CM, department=info,
+                                   period=LimitTimePerPeriod.FULL_DAY,
+                                   module=module)
             L.save()
 
 

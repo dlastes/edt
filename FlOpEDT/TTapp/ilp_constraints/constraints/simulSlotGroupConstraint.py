@@ -23,16 +23,16 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from TTapp.ilp_constraint.constraint import Constraint
-from TTapp.ilp_constraint.constraint_type import ConstraintType
+from TTapp.ilp_constraints.constraint import Constraint
+from TTapp.ilp_constraints.constraint_type import ConstraintType
 
-class CourseConstraint(Constraint):
-    def __init__(self, course):
-        self.course = course
-        Constraint.__init__(self, constraint_type=ConstraintType.COURS_DOIT_ETRE_PLACE,
-                            courses=[course])
+class SimulSlotGroupConstraint(Constraint):
+    def __init__(self, slot, group):
+        self.slot = slot
+        self.group = group
+        Constraint.__init__(self, constraint_type=ConstraintType.PAS_PLUS_1_COURS_PAR_CRENEAU, slots=[slot], groups=[group])
 
     def get_summary_format(self):
-        output = "\tLe cours \n%s doit être placé\n"
-        dimensions = ["courses"]
+        output = "\tTrop de cours simultanés pour le slot : \n%s et le groupe : \n%s"
+        dimensions = ["slots", "groups"]
         return output, dimensions
