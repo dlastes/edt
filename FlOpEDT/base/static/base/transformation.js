@@ -698,7 +698,7 @@ function cours_x(c) {
 function cours_y(c) {
   var t = time_settings.time;
   var ret = (c.start - t.day_start_time) * nbRows * scale
-    + row_gp[root_gp[c.promo].row].y * rev_constraints[c.start.toString()] * scale;
+    + row_gp[root_gp[c.promo].row].y * c.duration * scale;
   if (c.start >= t.lunch_break_finish_time) {
     ret += bknews_h() - (t.lunch_break_finish_time - t.lunch_break_start_time) * nbRows * scale;
   }
