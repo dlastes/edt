@@ -690,6 +690,18 @@ function apply_ckbox(dk) {
     }
 
     if (dk == "dis-mod") {
+
+      // close back lunck break
+      let bus = [
+        "day_start_time", "day_finish_time",
+        "lunch_break_start_time", "lunch_break_finish_time"
+      ] ;
+      for (let i = 0 ; i < bus.length ; i ++) {
+        if (typeof time_settings.time.bu[bus[i]] !== 'undefined') {
+          time_settings.time[bus[i]] = time_settings.time.bu[bus[i]] ;
+        }
+      }
+      
       if (ckbox[dk].cked) {
         //create_dispos_user_data();
         //ckbox["dis-mod"].disp = true;

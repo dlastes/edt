@@ -85,7 +85,8 @@
     var week_year_list = {{ all_weeks| safe }};
     var week_init = +"{{ week }}";
     var year_init = +"{{ year }}";
-    var time_settings = {{ time_settings | safe }} ;
+  var time_settings = {{ time_settings | safe }} ;
+  time_settings.time.bu = {} ;
     var days = {{ days | safe }} ;
   var csrftoken = '{{ csrf_token }}';
   if(!jQuery.fn.jquery.startsWith("1")){
