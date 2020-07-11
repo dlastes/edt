@@ -1281,8 +1281,11 @@ function pref_mode_trans() {
         - pref_selection.mary))
     + ")";
 }
+function pref_mode_choice_trans_x() {
+  return pref_selection.butw + pref_selection.marx ;
+}
 function pref_mode_choice_trans() {
-  return "translate(" + (pref_selection.butw + pref_selection.marx) + ",0)";
+  return "translate(" + pref_mode_choice_trans_x() + ", 0)";
 }
 
 function pref_mode_but_txt(d) {
