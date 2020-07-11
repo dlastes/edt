@@ -71,6 +71,8 @@ function fetch_tutor_preferences() {
         if (ckbox["dis-mod"].cked) {
           create_dispos_user_data();
           open_lunch() ;
+          go_edt(false);
+          create_pref_modes();
         }
 
         fetch_ended(false);

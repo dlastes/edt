@@ -721,9 +721,6 @@ function apply_ckbox(dk) {
             user.name = logged_usr.name;
           }
         }
-        create_dispos_user_data();
-        go_edt(false);
-        create_pref_modes();
       } else {
 
         // close back lunck break
