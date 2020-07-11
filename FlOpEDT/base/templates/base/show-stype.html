@@ -67,6 +67,7 @@
     var url_login = "{% url 'people:login' %}";
     var current_year = "{{ current_year }}" ;
     var time_settings = {{ time_settings | safe }} ;
+    time_settings.time.bu = {} ;
     var days = {{ days | safe }} ;
     var csrftoken = '{{ csrf_token }}';
 
