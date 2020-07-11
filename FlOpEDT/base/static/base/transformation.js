@@ -1258,11 +1258,21 @@ function dept_txt(d) {
 
 
 function pmg_x() {
-  var wid = pref_only ? dsp_svg.w - dsp_svg.margin.left - 10 : grid_width();
+  let wid = 0 ;
+  if (pref_only) {
+    if (pref_fetched) {
+      let last_day = {day: week_days.last_day().ref} ;
+      return dispo_x(last_day) + dispo_w(last_day) + 2 * dim_dispo.mh ;
+    } else {
+      wid = dsp_svg.w - dsp_svg.margin.left - 10 ;
+    }
+  } else {
+    wid = grid_width();
+  }
   return wid
     - 2 * pref_selection.marx
     - pref_selection.choice.w
-    - pref_selection.butw;
+    - pref_selection.butw ;
 }
 function pmg_y() {
   if (pref_only) {
