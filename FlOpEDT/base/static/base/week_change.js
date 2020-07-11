@@ -335,7 +335,7 @@ function create_dispos_user_data() {
     sort_preferences(dispos);
   }
 
-  week_days.forEach(function (day) {
+  week_days.day_list.forEach(function (day) {
     pref_list = dispos[user.name][day.ref];
     for (var k = 0; k < pref_list.length; k++) {
       d2p = {
