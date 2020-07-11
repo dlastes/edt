@@ -30,7 +30,7 @@ from openpyxl import *
 
 from base.weeks import actual_year
 from base.models import Group, Module, Course, CourseType, RoomType,\
-    TrainingProgramme, Dependency, Period, Department, CoursePossibleTutors, ModuleTutorRepartition
+    TrainingProgramme, Dependency, Period, Department, CoursePossibleTutors, ModuleTutorRepartition, VisioPreference
 from people.models import Tutor, UserDepartmentSettings
 from people.tutor import fill_default_user_preferences
 from misc.assign_colors import assign_module_color
@@ -173,6 +173,8 @@ def ReadPlanifWeek(department, book, feuille, week, year, courses_to_stabilize=N
             else:
                 local_comments = []
 
+            all_comments = comments + local_comments
+
             if isinstance(grps, int) or isinstance(grps, float):
                 grps = str(int(grps))
             if not grps:
@@ -208,7 +210,7 @@ def ReadPlanifWeek(department, book, feuille, week, year, courses_to_stabilize=N
                         cpt.possible_tutors.add(t)
                     cpt.save()
 
-                for after_type in [x for x in comments + local_comments if x[0] == 'A']:
+                for after_type in [x for x in all_comments if x[0] == 'A']:
                     try:
                         n = int(after_type[1])
                         s = 2
@@ -225,13 +227,18 @@ def ReadPlanifWeek(department, book, feuille, week, year, courses_to_stabilize=N
                         P = Dependency(course1=course, course2=C)
                         P.save()
 
+                if 'P' in all_comments:
+                    VisioPreference.objects.create(course=C, value=0)
+                elif 'DI' in all_comments:
+                    VisioPreference.objects.create(course=C, value=8)
+
             if 'D' in comments or 'D' in local_comments and N >= 2:
                 relevant_courses = Course.objects.filter(type=COURSE_TYPE, module=MODULE, groups__in=GROUPS, year=year,
                                               week=week)
                 for i in range(N//2-1):
                     P = Dependency(course1=relevant_courses[2*i], course2=relevant_courses[2*i+1], successive=True)
                     P.save()
-            if 'ND' in comments or 'ND' in local_comments  and N >= 2:
+            if 'ND' in comments or 'ND' in local_comments and N >= 2:
                 relevant_courses = Course.objects.filter(type=COURSE_TYPE, module=MODULE, groups__in=GROUPS, year=year,
                                               week=week)
                 P = Dependency(course1=relevant_courses[0], course2=relevant_courses[1], ND=True)

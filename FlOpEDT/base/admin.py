@@ -39,7 +39,7 @@ from base.models import Day, Room, Module, Course, Group, \
     UserPreference, Time, ScheduledCourse, EdtVersion, CourseModification, \
     TrainingProgramme,  \
     Regen, Holiday, TrainingHalfDay, \
-    CoursePreference, Dependency, Department, CourseType
+    CoursePreference, Dependency, Department, CourseType, ScheduledCourseAdditional, VisioPreference
 
 from base.models import RoomPreference, RoomSort, RoomType
 from displayweb.models import ModuleDisplay
@@ -107,21 +107,24 @@ class CoursPlaceResource(resources.ModelResource):
     room_type = fields.Field(column_name='room_type',
                              attribute='course__room_type',
                              widget=ForeignKeyWidget(RoomType, 'name'))
-    course_type = fields.Field(column_name='course_type',
-                               attribute='cours__type',
-                               widget=ForeignKeyWidget(CourseType, 'name'))
     color_bg = fields.Field(column_name='color_bg',
                             attribute='course__module__display',
                             widget=ForeignKeyWidget(ModuleDisplay, 'color_bg'))
     color_txt = fields.Field(column_name='color_txt',
                              attribute='course__module__display',
                              widget=ForeignKeyWidget(ModuleDisplay, 'color_txt'))
+    url = fields.Field(column_name='url',
+                       attribute='additional',
+                       widget=ForeignKeyWidget(ScheduledCourseAdditional, 'url'))
+    allow_visio = fields.Field(column_name='allow_visio',
+                               attribute='course__visio_pref',
+                               widget=ForeignKeyWidget(VisioPreference, 'value'))
 
     class Meta:
         model = ScheduledCourse
         fields = ('id', 'no', 'groups', 'promo', 'color_bg', 'color_txt',
                   'module', 'coursetype', 'day', 'start_time',
-                  'week', 'room', 'prof', 'room_type')
+                  'week', 'room', 'prof', 'room_type', 'url', 'allow_visio')
 
 
 class CoursPlaceResourceCosmo(resources.ModelResource):
@@ -165,11 +168,14 @@ class CoursPlaceResourceCosmo(resources.ModelResource):
     color_txt = fields.Field(column_name='color_txt',
                              attribute='tutor__display',
                              widget=ForeignKeyWidget(TutorDisplay, 'color_txt'))
+    url = fields.Field(column_name='url',
+                       attribute='additional',
+                       widget=ForeignKeyWidget(ScheduledCourseAdditional, 'url'))
 
     class Meta:
         model = ScheduledCourse
         fields = ('id', 'no', 'groups', 'promo', 'color_bg', 'color_txt',
-                  'module', 'day', 'start_time', 'week', 'room', 'prof')
+                  'module', 'day', 'start_time', 'week', 'room', 'prof', 'url')
 
 
 class TutorCoursesResource(CoursPlaceResource):
@@ -240,11 +246,14 @@ class CoursResource(resources.ModelResource):
     room_type = fields.Field(column_name='room_type',
                              attribute='room_type',
                              widget=ForeignKeyWidget(RoomType, 'name'))
+    allow_visio = fields.Field(column_name='allow_visio',
+                               attribute='visio_pref__value',
+                               widget=ForeignKeyWidget(VisioPreference, 'value'))
 
     class Meta:
         model = Course
         fields = ('id', 'no', 'tutor_name', 'groups', 'promo', 'module',
-                  'coursetype', 'color_bg', 'color_txt', 'prof', 'room_type')
+                  'coursetype', 'color_bg', 'color_txt', 'prof', 'room_type', 'allow_visio')
 
 
 class SemaineAnResource(resources.ModelResource):
