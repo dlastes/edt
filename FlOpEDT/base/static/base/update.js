@@ -1070,6 +1070,9 @@ function go_courses(quick) {
     .attr("class", "crect")
     .attr("x", cours_x)
     .attr("y", cours_y)
+  // rx and ry regular attributes...
+    .attr("rx", 3)
+    .attr("ry", 3)
     .attr("width", 0)
     .merge(cg.select("rect"))
     .attr("fill", cours_fill)
