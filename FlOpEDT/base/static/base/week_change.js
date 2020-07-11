@@ -110,6 +110,9 @@ function translate_dispos_from_csv(d) {
 // if there exist tutor preferences that would be cut 
 function open_lunch() {
   let t = time_settings.time ;
+  if (Object.keys(t.bu).length > 0) {
+    return ;
+  }
   let during_lunch = user.dispos.filter(function(d){
     return !(d.start_time + d.duration < t.lunch_break_start_time
              || d.start_time > t.lunch_break_finish_time) ;
