@@ -946,11 +946,11 @@ function def_drag() {
           svg.get_dom("dg").node().appendChild(n);
         });
 
+        pending.prepare_dragndrop(c);
       }
     })
     .on("drag", function (d) {
       if (ckbox["edt-mod"].cked && fetch.done) {
-        pending.prepare_dragndrop(d);
 
         // get the time interval, whatever the group
         cur_over = which_slot(
@@ -1487,6 +1487,7 @@ function indexOf_constraints(c, y) {
         y: cours_y({
           start: d,
           promo: c.promo,
+          duration: c.duration
         }),
         start: d
       };
