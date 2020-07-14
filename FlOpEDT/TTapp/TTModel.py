@@ -716,7 +716,7 @@ class TTModel(object):
             - unp_slot_cost : a 2 level-dictionary
                             { teacher => availability_slot => cost (float in [0,1])}}
             - avail_instr : a 2 level-dictionary { teacher => availability_slot => 0/1 } including availability to home-teaching
-            - avail_at_school_instr : idem, excluding home-teaching
+            - avail_at_school_instr : idem, excluding home-teaching (usefull only in visio_mode)
 
         The slot cost will be:
             - 0 if it is a prefered slot
@@ -993,7 +993,7 @@ class TTModel(object):
         self.add_rooms_constraints()
 
         if settings.VISIO_MODE:
-            self.add_visio_room_constraints
+            self.add_visio_room_constraints()
 
         self.add_instructors_constraints()
 

@@ -33,6 +33,7 @@ from TTapp.TTConstraint import TTConstraint
 from TTapp.TTConstraints.groups_constraints import considered_basic_groups
 from base.timing import Day
 from django.contrib.postgres.fields import ArrayField
+from django.conf import settings
 
 
 class NoVisio(TTConstraint):
@@ -40,6 +41,9 @@ class NoVisio(TTConstraint):
     groups = models.ManyToManyField('base.Group', blank=True, related_name='no_visio')
 
     def enrich_model(self, ttmodel, week, ponderation=1000000):
+        if not settings.VISIO_MODE:
+            "Visio Mode is not activated : ignore NoVisio constraint"
+            return
         visio = ttmodel.wdb.visio_room
         considered_groups = considered_basic_groups(self, ttmodel)
         days = days_filter(ttmodel.wdb.days, week=week)
@@ -54,7 +58,7 @@ class NoVisio(TTConstraint):
                 '==', 0, Constraint(constraint_type=ConstraintType.VISIO, groups=group))
 
     def one_line_description(self):
-        text = "Pas de visio"
+        text = "Pas de visio (sauf demande expresse)"
         if self.weekdays:
             text += " les " + ', '.join([wd for wd in self.weekdays])
         if self.groups.exists():
