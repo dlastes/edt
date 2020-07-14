@@ -70,6 +70,9 @@ function fetch_tutor_preferences() {
         fetch.pref_saved = true;
         if (ckbox["dis-mod"].cked) {
           create_dispos_user_data();
+          open_lunch() ;
+          go_edt(false);
+          create_pref_modes();
         }
 
         fetch_ended(false);
@@ -106,6 +109,41 @@ function translate_dispos_from_csv(d) {
 }
 
 
+// if there exist tutor preferences that would be cut 
+function open_lunch() {
+  let t = time_settings.time ;
+  if (Object.keys(t.bu).length > 0) {
+    return ;
+  }
+  let during_lunch = user.dispos.filter(function(d){
+    return !(d.start_time + d.duration < t.lunch_break_start_time
+             || d.start_time > t.lunch_break_finish_time) ;
+  });
+  if (during_lunch.length > 0) {
+    t.bu.lunch_break_finish_time = t.lunch_break_finish_time ;
+    t.lunch_break_finish_time = t.lunch_break_start_time ;
+  }
+  let min_start = t.day_start_time ;
+  user.dispos.forEach(function(d){
+    if (d.start_time < min_start) {
+      min_start = d.start_time ;
+    }
+  });
+  if (min_start < t.day_start_time) {
+    t.bu.day_start_time = t.day_start_time ;
+    t.day_start_time = min_start ;
+  }
+  let max_finish = t.day_finish_time ;
+  user.dispos.forEach(function(d){
+    if (d.start_time + d.duration > max_finish) {
+      max_finish = d.start_time + d.duration ;
+    }
+  });
+  if (max_finish > t.day_finish_time) {
+    t.bu.day_finish_time = t.day_finish_time ;
+    t.day_finish_time = max_finish ;
+  }
+}
 
 
 // fetch the moments where a tutor teaches in another departement
@@ -302,7 +340,7 @@ function create_dispos_user_data() {
     sort_preferences(dispos);
   }
 
-  week_days.forEach(function (day) {
+  week_days.day_list.forEach(function (day) {
     pref_list = dispos[user.name][day.ref];
     for (var k = 0; k < pref_list.length; k++) {
       d2p = {

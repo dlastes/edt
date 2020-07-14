@@ -99,11 +99,6 @@ g[class^="gp-but-"] {
 /*     cursor: pointer; */
 /* } */
 
-.cours rect {
-    rx: 3;
-    ry: 3;
-}
-
 .cir_wk {
   fill: darkgreen;
   cursor: pointer;

@@ -38,7 +38,7 @@ from base.models import Group, \
     Course, ScheduledCourse, UserPreference, CoursePreference, \
     Department, Module, TrainingProgramme, CourseType, \
     Dependency, TutorCost, GroupFreeHalfDay, GroupCost, Holiday, TrainingHalfDay, \
-    CourseStartTimeConstraint, TimeGeneralSettings, ModulePossibleTutors, CoursePossibleTutors
+    CourseStartTimeConstraint, TimeGeneralSettings, ModulePossibleTutors, CoursePossibleTutors, VisioPreference
 
 from base.timing import Time, Day
 
@@ -69,8 +69,6 @@ class WeeksDatabase(object):
         self.weeks = weeks
         self.year = year
         self.slots_step = slots_step
-        if settings.VISIO_MODE:
-            self.visio_room, visio_room_created = Room.objects.get_or_create(name='Visio')
         self.possible_apms=set()
         self.days, self.day_after, self.holidays, self.training_half_days = self.days_init()
         self.courses_slots, self.availability_slots = self.slots_init()
@@ -90,6 +88,8 @@ class WeeksDatabase(object):
         self.other_departments_courses_for_tutor, self.other_departments_scheduled_courses_for_supp_tutor, \
         self.other_departments_scheduled_courses_for_tutor = self.users_init()
         self.possible_tutors, self.possible_modules, self.possible_courses = self.possible_courses_tutor_init()
+        if settings.VISIO_MODE:
+            self.visio_room, self.visio_courses, self.no_visio_courses, self.visio_ponderation = self.visio_init()
 
     def days_init(self):
         holidays = Holiday.objects.filter(week__in=self.weeks, year=self.year)
@@ -440,3 +440,20 @@ class WeeksDatabase(object):
             possible_courses[i] = set(c for c in self.courses if i in possible_tutors[c])
 
         return possible_tutors, possible_modules, possible_courses
+
+    def visio_init(self):
+        visio_room, visio_room_created = Room.objects.get_or_create(name='Visio')
+
+        visio_courses = set()
+        no_visio_courses = set()
+        visio_ponderation = {c: 1 for c in self.courses}
+
+        for vp in VisioPreference.objects.filter(course__in=self.courses):
+            if vp.value == 0:
+                no_visio_courses.add(vp.course)
+            elif vp.value == 8:
+                visio_courses.add(vp.course)
+            else:
+                visio_ponderation[vp.course] = vp.value / 4
+
+        return visio_room, visio_courses, no_visio_courses, visio_ponderation

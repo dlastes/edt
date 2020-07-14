@@ -79,6 +79,16 @@ WeekDays.prototype.day_by_num = function (num) {
   });
 };
 
+WeekDays.prototype.last_day = function () {
+  return this.day_by_num(
+    this.day_list.reduce(
+      function(a, b) {
+        return {num: Math.max(a.num, b.num)} ;
+      }
+    ).num
+  );
+};
+
 WeekDays.prototype.data = function () {
   return this.day_list;
 };
