@@ -77,6 +77,8 @@ class WeeksDatabase(object):
         self.other_departments_courses, self.other_departments_sched_courses, \
         self.other_departments_sched_courses_for_avail_slot, \
         self.courses_availabilities, self.modules, self.dependencies = self.courses_init()
+        if settings.VISIO_MODE:
+            self.visio_room, self.visio_courses, self.no_visio_courses, self.visio_ponderation = self.visio_init()
         self.room_types, self.rooms, self.basic_rooms, self.room_prefs, self.rooms_for_type, \
         self.room_course_compat, self.course_rg_compat, self.fixed_courses_for_room, \
         self.other_departments_sched_courses_for_room = self.rooms_init()
@@ -88,8 +90,6 @@ class WeeksDatabase(object):
         self.other_departments_courses_for_tutor, self.other_departments_scheduled_courses_for_supp_tutor, \
         self.other_departments_scheduled_courses_for_tutor = self.users_init()
         self.possible_tutors, self.possible_modules, self.possible_courses = self.possible_courses_tutor_init()
-        if settings.VISIO_MODE:
-            self.visio_room, self.visio_courses, self.no_visio_courses, self.visio_ponderation = self.visio_init()
 
     def days_init(self):
         holidays = Holiday.objects.filter(week__in=self.weeks, year=self.year)
