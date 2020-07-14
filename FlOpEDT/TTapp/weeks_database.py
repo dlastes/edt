@@ -455,6 +455,6 @@ class WeeksDatabase(object):
                 visio_ponderation[vp.course] = vp.value / 4
 
         for c in self.courses:
-            self.course_rg_compat[c] |= {self.visio_room}
+            self.course_rg_compat[c] |= {visio_room}
 
         return visio_room, visio_courses, no_visio_courses, visio_ponderation
