@@ -42,6 +42,7 @@ from TTapp.models import \
 
 from FlOpEDT.filters import DropdownFilterAll, DropdownFilterRel, \
     DropdownFilterCho
+from django.conf import settings
 
 
 class CustomConstraintAdmin(DepartmentModelAdmin):
@@ -323,4 +324,5 @@ admin.site.register(LimitTutorsTimePerPeriod, LimitTutorsTimePerPeriodAdmin)
 admin.site.register(LowerBoundBusyDays, LowerBoundBusyDaysAdmin)
 admin.site.register(GroupsLunchBreak, GroupsLunchBreakAdmin)
 admin.site.register(BreakAroundCourseType, AmphiBreakAdmin)
-admin.site.register(NoVisio, NoVisioAdmin)
+if settings.VISIO_MODE:
+    admin.site.register(NoVisio, NoVisioAdmin)
