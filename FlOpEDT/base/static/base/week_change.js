@@ -116,8 +116,8 @@ function open_lunch() {
     return ;
   }
   let during_lunch = user.dispos.filter(function(d){
-    return !(d.start_time + d.duration < t.lunch_break_start_time
-             || d.start_time > t.lunch_break_finish_time) ;
+    return !(d.start_time + d.duration <= t.lunch_break_start_time
+             || d.start_time >= t.lunch_break_finish_time) ;
   });
   if (during_lunch.length > 0) {
     t.bu.lunch_break_finish_time = t.lunch_break_finish_time ;

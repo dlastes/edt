@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # This file is part of the FlOpEDT/FlOpScheduler project.
 # Copyright (c) 2017
 # Authors: Iulian Ober, Paul Renaud-Goud, Pablo Seban, et al.
@@ -21,13 +23,13 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
+from django.db.models.signals import m2m_changed
+from django.dispatch import receiver
 
+from people.models import User
+from base.preferences import split_preferences
 
-from django.apps import AppConfig
-
-
-class BaseConfig(AppConfig):
-    name = 'base'
-
-    def ready(self):
-        import base.signals
+@receiver(m2m_changed)
+def user_department_changed(sender, **kwargs):
+    if kwargs['action'] == 'post_add':
+        split_preferences(kwargs['instance'])
