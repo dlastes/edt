@@ -43,7 +43,6 @@ from base.timing import Time
 
 from people.models import Tutor
 
-from TTapp.TTConstraint import TTConstraint, max_weight, all_subclasses
 from TTapp.models import MinNonPreferedTutorsSlot, Stabilize, MinNonPreferedTrainProgsSlot
 
 from TTapp.slots import slots_filter, days_filter
@@ -609,22 +608,6 @@ class TTModel(object):
     def add_visio_room_constraints(self):
         Visio = self.wdb.visio_room
 
-        # the no_visio_courses are not in Visio room
-        self.add_constraint(self.sum(self.TTrooms[(sl, c, Visio)]
-                                     for c in self.wdb.no_visio_courses
-                                     for sl in self.wdb.compatible_slots[c]),
-                            '==', 0,
-                            Constraint(constraint_type=ConstraintType.VISIO))
-
-        # the courses with no == 1 are in Visio room
-        self.add_constraint(
-            self.sum(self.TTrooms[(sl, c, rg)]
-                     for c in self.wdb.visio_courses
-                     for sl in self.wdb.compatible_slots[c]
-                     for rg in set(self.wdb.course_rg_compat[c])-{Visio}),
-            '==', 0,
-            Constraint(constraint_type=ConstraintType.VISIO))
-
         # other courses are preferentially not in Visio room
         for bg in self.wdb.basic_groups:
             group_courses_except_visio_ones = self.wdb.courses_for_basic_group[bg] - self.wdb.visio_courses
@@ -917,6 +900,7 @@ class TTModel(object):
          Add the constraints derived from the slot preferences expressed on the database
          """
         print("adding slot preferences")
+        from TTapp.TTConstraint import max_weight
         # first objective  => minimise use of unpreferred slots for teachers
         # ponderation MIN_UPS_I
 
@@ -1208,7 +1192,6 @@ class TTModel(object):
         return other_slots.pop()
 
 
-
 def get_constraints(department, week=None, year=None, is_active=None):
     #
     #  Return constraints corresponding to the specific filters
@@ -1226,6 +1209,7 @@ def get_constraints(department, week=None, year=None, is_active=None):
         query &= Q(week=week) & Q(year=year) | Q(week__isnull=True) & Q(year__isnull=True)
 
     # Look up the TTConstraint subclasses records to update
+    from TTapp.TTConstraint import TTConstraint, all_subclasses
     types = all_subclasses(TTConstraint)
     for type in types:
         queryset = type.objects.filter(query)

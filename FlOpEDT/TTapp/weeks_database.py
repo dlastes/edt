@@ -454,7 +454,14 @@ class WeeksDatabase(object):
             else:
                 visio_ponderation[vp.course] = vp.value / 4
 
-        for c in self.courses:
-            self.course_rg_compat[c] |= {visio_room}
+        for c in set(self.courses):
+            if c in no_visio_courses:
+                continue
+            # visio courses can only be in visio_room
+            elif c in visio_courses:
+                self.course_rg_compat[c] = {visio_room}
+            # other courses can also be in visio room
+            else:
+                self.course_rg_compat[c] |= {visio_room}
 
         return visio_room, visio_courses, no_visio_courses, visio_ponderation
