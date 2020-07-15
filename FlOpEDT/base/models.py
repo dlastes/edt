@@ -400,6 +400,7 @@ class ScheduledCourse(models.Model):
 class ScheduledCourseAdditional(models.Model):
     scheduled_course = models.OneToOneField('ScheduledCourse', on_delete=models.CASCADE, related_name='additional')
     url = models.URLField(null=True, blank=True, default=None)
+    comment = models.CharField(max_length=100, null=True, default=None, blank=True)
 
 
 # </editor-fold desc="COURSES">
