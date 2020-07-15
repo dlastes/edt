@@ -404,7 +404,7 @@ def check_settings_sheet(database):
         if not day_start_time < day_finish_time:
             result.append(f"Les horaires de début et de fin de journée dans '{settings_sheet}' sont incohérents")
             sane = False
-        if not lunch_break_start_time < lunch_break_finish_time:
+        if not lunch_break_start_time <= lunch_break_finish_time:
             result.append(f"Les horaires de début et de fin de pause méridienne dans '{settings_sheet}' sont incohérents")
             sane = False
         if sane and not (day_start_time <= lunch_break_start_time
@@ -490,11 +490,11 @@ def check_rooms_sheet(database):
             result.append("Le groupe de salles '{0:s}' dans '{1:s}' contient des noms de groupe : {2:s}".format(id_, rooms_sheet, ', '.join(bad)))
 
     # don't accept category names in categories
-    cat_names = database['room_categories'].keys()
-    for id_, names in database['room_categories'].items():
-        bad = set.intersection(names, cat_names)
-        if len(bad) > 0:
-            result.append("La catégorie de salles '{0:s}' dans '{1:s}' contient des noms de catégorie : {2:s}".format(id_, rooms_sheet, ', '.join(bad)))
+    # cat_names = database['room_categories'].keys()
+    # for id_, names in database['room_categories'].items():
+    #     bad = set.intersection(names, cat_names)
+    #     if len(bad) > 0:
+    #         result.append("La catégorie de salles '{0:s}' dans '{1:s}' contient des noms de catégorie : {2:s}".format(id_, rooms_sheet, ', '.join(bad)))
 
     return result
 
