@@ -29,7 +29,7 @@ from django.dispatch import receiver
 from people.models import User
 from base.preferences import split_preferences
 
-@receiver(m2m_changed)
+@receiver(m2m_changed, sender=User.departments.through)
 def user_department_changed(sender, **kwargs):
     if kwargs['action'] == 'post_add':
         split_preferences(kwargs['instance'])

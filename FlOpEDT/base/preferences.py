@@ -76,7 +76,9 @@ def split_preferences(tutor, departments=None):
     # create typical week if non existing
     if len([wy for wy in weeks
             if wy['week'] is None and wy['year'] is None]) == 0:
-        weeks.append({'week': None, 'year':None})
+        # QuerySet does not support append
+        weeks = list(weeks)
+        weeks.append({'week': None, 'year': None})
     
     for week_dict in weeks:
         for d in days:
