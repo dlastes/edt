@@ -91,7 +91,8 @@ class TTModel(object):
                  core_only=False,
                  send_mails=False,
                  slots_step=None,
-                 keep_many_solution_files=False):
+                 keep_many_solution_files=False,
+                 min_visio=0.5):
         # beg_file = os.path.join('logs',"FlOpTT")
         self.model = LpProblem("FlOpTT", LpMinimize)
         self.min_ups_i = min_nps_i
@@ -105,6 +106,7 @@ class TTModel(object):
         self.send_mails = send_mails
         self.slots_step = slots_step
         self.keep_many_solution_files = keep_many_solution_files
+        self.min_visio = min_visio
         self.var_nb = 0
         self.constraintManager = ConstraintManager()
 
@@ -545,10 +547,12 @@ class TTModel(object):
 
                 if settings.VISIO_MODE:
                     # avail_at_school_instr consideration...
+                    relevant_courses = set(c for c in self.wdb.possible_courses[i]
+                                           if self.wdb.visio_room in self.wdb.course_rg_compat[c])
                     self.add_constraint(
                         self.sum(self.TTinstructors[(sl2, c2, i)] - self.TTrooms[(sl2, c2, self.wdb.visio_room)]
                                  for sl2 in slots_filter(self.wdb.courses_slots, simultaneous_to=sl)
-                                 for c2 in self.wdb.possible_courses[i] & self.wdb.compatible_courses[sl2]),
+                                 for c2 in relevant_courses & self.wdb.compatible_courses[sl2]),
                         '<=', self.avail_at_school_instr[i][sl],
                         SlotInstructorConstraint(sl, i)
                     )
@@ -572,9 +576,9 @@ class TTModel(object):
         for r in self.wdb.basic_rooms.exclude(name='Visio'):
             for sl in self.wdb.availability_slots:
                 self.add_constraint(self.sum(self.TTrooms[(sl2, c, rg)]
-                                             for sl2 in slots_filter(self.wdb.courses_slots, simultaneous_to=sl)
                                              for (c, rg) in self.wdb.room_course_compat[r]
-                                             if c in self.wdb.compatible_courses[sl2]),
+                                             for sl2 in slots_filter(self.wdb.compatible_slots[c], simultaneous_to=sl)
+                                             ),
                                     '<=', self.avail_room[r][sl],
                                     Constraint(constraint_type=ConstraintType.CORE_ROOMS,
                                                rooms=r, slots=sl))
@@ -608,13 +612,16 @@ class TTModel(object):
     def add_visio_room_constraints(self):
         Visio = self.wdb.visio_room
 
-        # other courses are preferentially not in Visio room
+        # courses that are neither visio neither no-visio are preferentially not in Visio room
         for bg in self.wdb.basic_groups:
-            group_courses_except_visio_ones = self.wdb.courses_for_basic_group[bg] - self.wdb.visio_courses
+            group_courses_except_visio_and_no_visio_ones = \
+                self.wdb.courses_for_basic_group[bg] - self.wdb.visio_courses - self.wdb.no_visio_courses
             self.add_to_group_cost(bg,
-                                   0.1 * self.sum(self.TTrooms[(sl, c, Visio)] * self.wdb.visio_ponderation[c]
-                                                  for c in group_courses_except_visio_ones
-                                                  for sl in self.wdb.compatible_slots[c]))
+                                   self.min_visio *
+                                   self.sum(self.TTrooms[(sl, c, Visio)] * self.wdb.visio_ponderation[c]
+                                            for c in group_courses_except_visio_and_no_visio_ones
+                                            for sl in self.wdb.compatible_slots[c])
+                                   )
 
     def add_dependency_constraints(self, weight=None):
         """
@@ -1019,10 +1026,11 @@ class TTModel(object):
                                              day=sl.day.day,
                                              work_copy=target_work_copy)
                         if settings.VISIO_MODE:
-                            if self.get_var_value(self.TTrooms[(sl, c, self.wdb.visio_room)]) == 1:
-                                cp.room = self.wdb.visio_room
-                                cp.save()
-                                continue
+                            if self.wdb.visio_room in self.wdb.course_rg_compat[c]:
+                                if self.get_var_value(self.TTrooms[(sl, c, self.wdb.visio_room)]) == 1:
+                                    cp.room = self.wdb.visio_room
+                                    cp.save()
+                                    continue
                         for rg in c.room_type.members.all():
                             if self.get_var_value(self.TTrooms[(sl, c, rg)]) == 1:
                                 cp.room = rg

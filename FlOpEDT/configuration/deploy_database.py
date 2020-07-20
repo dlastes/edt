@@ -221,16 +221,16 @@ def groups_extract(department, promotions, group_types, groups):
                 pass # FIXME: continue ?
 
     # first loop on groups just to create them - it's too early to set the parents
-    for id_, group in groups.items():
+    for (promotion_id, id_), group in groups.items():
 
-        verif = Group.objects.filter(name=id_, train_prog__abbrev=group['promotion'],
+        verif = Group.objects.filter(name=id_, train_prog__abbrev=promotion_id,
                                      train_prog__department=department)
 
         if not verif.exists():
 
             try:
 
-                promotion = TrainingProgramme.objects.get(abbrev=group['promotion'],
+                promotion = TrainingProgramme.objects.get(abbrev=promotion_id,
                                                           department=department)
                 groupType = GroupType.objects.get(name=group['group_type'], department=department)
                 group = Group(name=id_, size=0, train_prog=promotion, type=groupType)
@@ -242,12 +242,12 @@ def groups_extract(department, promotions, group_types, groups):
 
     # second loop, set the parents
 
-    for id_, group in groups.items():
+    for (promotion_id, id_), group in groups.items():
 
         for parent in group['parent']:
 
-            parent_group = Group.objects.get(name=parent, train_prog__abbrev=group['promotion'], train_prog__department=department)
-            group = Group.objects.get(name=id_, train_prog__abbrev=group['promotion'], train_prog__department=department)
+            parent_group = Group.objects.get(name=parent, train_prog__abbrev=promotion, train_prog__department=department)
+            group = Group.objects.get(name=id_, train_prog__abbrev=promotion, train_prog__department=department)
             group.parent_groups.add(parent_group)
             group.save()
 
@@ -298,9 +298,8 @@ def modules_extract(department, modules):
 
 
 def courses_extract(department, cours_):
-
-       logger.info('Courses extraction : start')
-       for id_, cours in cours_.items():
+    logger.info('Courses extraction : start')
+    for id_, cours in cours_.items():
 
         verif = CourseType.objects.filter(name=id_, department=department, duration=cours['duration'])
 
@@ -321,8 +320,15 @@ def courses_extract(department, cours_):
 
                 logger.warning(f"A constraint has not been respected creating the course type {id_} : {ie}")
                 pass # FIXME: continue?
+    logger.info('Courses extraction : finish')
 
-       logger.info('Courses extraction : finish')
+def convert_time(value):
+    """
+    Return an integer value from a time (hh:mm:ss) formated value
+    representing the number of minutes since midnight
+    """
+    time_array = value.split(':')
+    return int(time_array[0]) * 60 + int(time_array[1])
 
 
 def settings_extract(department, settings):

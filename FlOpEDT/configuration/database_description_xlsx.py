@@ -389,9 +389,8 @@ def parse_groups(sheet):
             parent = set()
         else:
             parent = {parent_}
-        groups[id_] = {'promotion': promotion,
-                       'group_type' : group_type,
-                       'parent' : parent}
+        groups[promotion, id_] = {'group_type' : group_type,
+                                  'parent' : parent}
         row = row + 1
 
     return promotions, group_types, groups

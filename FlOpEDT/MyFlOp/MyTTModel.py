@@ -45,7 +45,8 @@ class MyTTModel(TTModel):
                  core_only=False,
                  send_mails=False,
                  slots_step=None,
-                 keep_many_solution_files=False):
+                 keep_many_solution_files=False,
+                 min_visio=0.5):
         """
         If you shall change something in the database ahead of creating the
         problem, you must write it here, before calling TTModel's constructor.
@@ -64,7 +65,8 @@ class MyTTModel(TTModel):
                          core_only=core_only,
                          send_mails=send_mails,
                          slots_step=slots_step,
-                         keep_many_solution_files=keep_many_solution_files)
+                         keep_many_solution_files=keep_many_solution_files,
+                         min_visio=min_visio)
 
     def add_specific_constraints(self):
         """

@@ -358,6 +358,11 @@ class Course(models.Model):
                and self.module == other.module
 
 
+class CourseAdditional(models.Model):
+    course = models.OneToOneField('Course', on_delete=models.CASCADE, related_name='additional')
+    graded = models.BooleanField(verbose_name='noté ?', default=False)
+
+
 class VisioPreference(models.Model):
     course = models.OneToOneField('Course', on_delete=models.CASCADE, related_name='visio_pref')
     value = models.SmallIntegerField(validators=[MinValueValidator(0), MaxValueValidator(8)], default=8)

@@ -30,7 +30,8 @@ from openpyxl import *
 
 from base.weeks import actual_year
 from base.models import Group, Module, Course, CourseType, RoomType,\
-    TrainingProgramme, Dependency, Period, Department, CoursePossibleTutors, ModuleTutorRepartition, VisioPreference
+    TrainingProgramme, Dependency, Period, Department, CoursePossibleTutors, ModuleTutorRepartition, \
+    VisioPreference, CourseAdditional
 from people.models import Tutor, UserDepartmentSettings
 from people.tutor import fill_default_user_preferences
 from misc.assign_colors import assign_module_color
@@ -231,6 +232,8 @@ def ReadPlanifWeek(department, book, feuille, week, year, courses_to_stabilize=N
                     VisioPreference.objects.create(course=C, value=0)
                 elif 'DI' in all_comments:
                     VisioPreference.objects.create(course=C, value=8)
+                if 'E' in all_comments:
+                    CourseAdditional.objects.create(course=C, graded=True)
 
             if 'D' in comments or 'D' in local_comments and N >= 2:
                 relevant_courses = Course.objects.filter(type=COURSE_TYPE, module=MODULE, groups__in=GROUPS, year=year,
