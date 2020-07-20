@@ -39,7 +39,8 @@ from base.models import Day, Room, Module, Course, Group, \
     UserPreference, Time, ScheduledCourse, EdtVersion, CourseModification, \
     TrainingProgramme,  \
     Regen, Holiday, TrainingHalfDay, \
-    CoursePreference, Dependency, Department, CourseType, ScheduledCourseAdditional, VisioPreference
+    CoursePreference, Dependency, Department, CourseType, \
+    ScheduledCourseAdditional, VisioPreference, CourseAdditional
 
 from base.models import RoomPreference, RoomSort, RoomType
 from displayweb.models import ModuleDisplay
@@ -119,12 +120,15 @@ class CoursPlaceResource(resources.ModelResource):
     allow_visio = fields.Field(column_name='allow_visio',
                                attribute='course__visio_pref',
                                widget=ForeignKeyWidget(VisioPreference, 'value'))
+    graded = fields.Field(column_name='graded',
+                          attribute='course__additional',
+                          widget=ForeignKeyWidget(CourseAdditional, 'graded'))
 
     class Meta:
         model = ScheduledCourse
         fields = ('id', 'no', 'groups', 'promo', 'color_bg', 'color_txt',
                   'module', 'coursetype', 'day', 'start_time',
-                  'week', 'room', 'prof', 'room_type', 'url', 'allow_visio')
+                  'week', 'room', 'prof', 'room_type', 'url', 'allow_visio', 'graded')
 
 
 class CoursPlaceResourceCosmo(resources.ModelResource):
@@ -204,6 +208,7 @@ class MultiDepartmentTutorResource(resources.ModelResource):
         model = ScheduledCourse
         fields = ('tutor', 'department', 'day', 'start_time', 'duration')
 
+
 class SharedRoomsResource(resources.ModelResource):
     room = fields.Field(column_name='room',
                         attribute='room',
@@ -249,11 +254,14 @@ class CoursResource(resources.ModelResource):
     allow_visio = fields.Field(column_name='allow_visio',
                                attribute='visio_pref__value',
                                widget=ForeignKeyWidget(VisioPreference, 'value'))
+    graded = fields.Field(column_name='graded',
+                          attribute='additional',
+                          widget=ForeignKeyWidget(CourseAdditional, 'graded'))
 
     class Meta:
         model = Course
         fields = ('id', 'no', 'tutor_name', 'groups', 'promo', 'module',
-                  'coursetype', 'color_bg', 'color_txt', 'prof', 'room_type', 'allow_visio')
+                  'coursetype', 'color_bg', 'color_txt', 'prof', 'room_type', 'allow_visio','graded')
 
 
 class SemaineAnResource(resources.ModelResource):
