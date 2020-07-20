@@ -91,10 +91,9 @@
 #
 # 'group_types': a set of group type identifiers
 #
-# 'groups': a dictionary where a key is a group identifier, and the
-# data is itself a dictionary with keys:
-#
-#   - 'promotion': the promotion identifier
+# 'groups': a dictionary where a key is a pair promotion
+# identifier-group identifier, and the data is itself a dictionary
+# with keys:
 #
 #   - 'group_type': a group type identifier
 #
@@ -317,13 +316,13 @@ def check_groups(groups):
     if not isinstance(groups, dict):
         result.append("D: the groups chunk should be a 'dict'")
         return result
-    result.extend(check_identifiers(groups.keys(), "groups"))
-    for id_, group in groups.items():
+    result.extend(check_identifiers(map(lambda pair: pair[1], groups.keys()), "groups"))
+    for (promotion, id_), group in groups.items():
         if isinstance(group, dict):
-            if group.keys() != { 'promotion', 'group_type', 'parent'}:
-                result.append(f"D: group '{id_}' doesn't have the expected keys")
+            if group.keys() != {'group_type', 'parent'}:
+                result.append(f"D: group '{id_}' in promotion '{promotion}' doesn't have the expected keys")
             else:
-                result.extend(check_type(group['promotion'], str, f"promotion of group '{id_}'"))
+                result.extend(check_type(promotion, str, f"promotion for group '{id_}'"))
                 result.extend(check_type(group['group_type'], str, f"group type of group '{id_}'"))
                 if isinstance(group['parent'], set):
                     if len(group['parent']) > 1:
@@ -334,7 +333,7 @@ def check_groups(groups):
                 else:
                     result.append(f"D: the parent of group '{id_}' isn't a set")
         else:
-            result.append(f"Group '{id_}' isn't a 'dict'")
+            result.append(f"Group '{id_}' in promotion '{promotion}' isn't a 'dict'")
     return result
 
 
@@ -544,16 +543,14 @@ def check_groups_sheet(database):
     if len(groups) == 0:
         result.append(f"Votre liste de groupes dans '{groups_sheet}' est vide!")
 
-    result.extend(check_duplicates(groups.keys(), f"groupes dans '{groups_sheet}'"))
-
-    for id_, group in groups.items():
-        if not group['promotion'] in promotions.keys() and not id_.startswith(':INVALID:'):
-            result.append(f"La promotion du groupe '{id_}' dans '{groups_sheet}' n'est pas valide")
+    for (promotion, id_), group in groups.items():
+        if not promotion in promotions.keys() and not id_.startswith(':INVALID:'):
+            result.append(f"La promotion '{promotion}' du groupe '{id_}' dans '{groups_sheet}' n'est pas valide")
         if not group['group_type'] in group_types and not id_.startswith(':INVALID:'):
             result.append(f"La nature du groupe '{id_}' dans '{groups_sheet}' n'est pas valide")
         for parent in group['parent']:
-            if not parent in groups.keys() and not id_.startswith(':INVALID:'):
-                result.append(f"Le sur-groupe du groupe '{id_}' dans '{groups_sheet}' n'est pas valide")
+            if not (promotion, parent) in groups.keys() and not id_.startswith(':INVALID:'):
+                result.append(f"Le sur-groupe du groupe '{id_}' de la promotion '{promotion}' dans '{groups_sheet}' n'est pas valide")
 
     return result
 
