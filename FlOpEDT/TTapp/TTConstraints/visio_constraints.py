@@ -31,9 +31,11 @@ from TTapp.ilp_constraints.constraint import Constraint
 from TTapp.slots import days_filter, slots_filter
 from TTapp.TTConstraint import TTConstraint
 from TTapp.TTConstraints.groups_constraints import considered_basic_groups
-from base.timing import Day
+from base.timing import Day, Time
 from django.contrib.postgres.fields import ArrayField
 from django.conf import settings
+from django.core.validators import MinValueValidator, MaxValueValidator
+
 
 
 class NoVisio(TTConstraint):
@@ -66,6 +68,81 @@ class NoVisio(TTConstraint):
         else:
             text += " pour tous les groupes"
 
+        if self.train_progs.exists():
+            text += ' de ' + ', '.join([train_prog.abbrev for train_prog in self.train_progs.all()])
+        else:
+            text += " de toutes les promos."
+        return text
+
+
+class LimitGroupsPhysicalPresence(TTConstraint):
+    """
+    at most a given proportion of basic groups are present each half-day
+    """
+    percentage = models.PositiveSmallIntegerField(validators=[MinValueValidator(0), MaxValueValidator(100)])
+    weekdays = ArrayField(models.CharField(max_length=2, choices=Day.CHOICES), blank=True, null=True)
+
+    def enrich_model(self, ttmodel, week, ponderation=1):
+        if self.train_progs.exists():
+            considered_basic_groups = set(
+                ttmodel.wdb.basic_groups.filter(train_prog__in=self.train_progs.all()))
+        else:
+            considered_basic_groups = set(ttmodel.wdb.basic_groups)
+        days = days_filter(ttmodel.wdb.days, week=week)
+        if self.weekdays:
+            days = days_filter(days, day_in=self.weekdays)
+        proportion = self.percentage / 100
+        nb_of_basic_groups = len(considered_basic_groups)
+        for d in days:
+            for apm in [Time.AM, Time.PM]:
+                ttmodel.add_constraint(
+                    ttmodel.sum(ttmodel.physical_presence[g][d, apm] for g in ttmodel.wdb.basic_groups),
+                    '<=', nb_of_basic_groups * proportion,
+                    Constraint(constraint_type=ConstraintType.VISIO))
+
+    def one_line_description(self):
+        text = "Pas plus de " + str(self.percentage) + "% des groupes"
+        if self.train_progs.exists():
+            text += ' de ' + ', '.join([train_prog.abbrev for train_prog in self.train_progs.all()])
+        else:
+            text += ", toutes promos confondues,"
+        text += "sont physiquement présents chaque demie-journée"
+        if self.weekdays:
+            text += " les " + ', '.join([wd for wd in self.weekdays])
+        return text
+
+
+class BoundVisioHalfDays(TTConstraint):
+    """
+    at most a given proportion of basic groups are present each half-day
+    """
+    nb_max = models.PositiveSmallIntegerField(validators=[MinValueValidator(0), MaxValueValidator(14)])
+    nb_min = models.PositiveSmallIntegerField(validators=[MinValueValidator(0), MaxValueValidator(14)], default=0)
+    groups = models.ManyToManyField('base.Group', blank=True, related_name='bound_visio_half_days')
+
+
+    def enrich_model(self, ttmodel, week, ponderation=1):
+        considered_groups = considered_basic_groups(self, ttmodel)
+        total_nb_half_days = len(ttmodel.wdb.days) * 2
+        for g in considered_groups:
+            # at most nb_max half-days of visio-courses for each group
+            ttmodel.add_constraint(
+                ttmodel.sum(ttmodel.GBHD[g, d,apm] - ttmodel.physical_presence[g][d,apm]
+                            for (d, apm) in ttmodel.physical_presence[g]),
+                '<=', self.nb_max, Constraint(constraint_type=ConstraintType.VISIO))
+
+            # at least n_min half-days of physical-presence for each group
+            ttmodel.add_constraint(
+                ttmodel.sum(ttmodel.physical_presence[g][d,apm]
+                            for (d, apm) in ttmodel.physical_presence[g]),
+                '<=', total_nb_half_days - self.nb_min, Constraint(constraint_type=ConstraintType.VISIO))
+
+    def one_line_description(self):
+        text = f"Au moins {self.nb_min} et au plus {self.nb_max} demie_journées de visio"
+        if self.groups.exists():
+            text += ' pour les groupes ' + ', '.join([group.name for group in self.groups.all()])
+        else:
+            text += " pour chaque groupe"
         if self.train_progs.exists():
             text += ' de ' + ', '.join([train_prog.abbrev for train_prog in self.train_progs.all()])
         else:
