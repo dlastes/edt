@@ -145,6 +145,8 @@ class TTModel(object):
         self.cost_I, self.FHD_G, self.cost_G, self.cost_SL = self.costs_init()
         self.TT, self.TTrooms, self.TTinstructors = self.TT_vars_init()
         self.IBD, self.IBD_GTE, self.IBHD, self.GBHD, self.IBS, self.forced_IBD = self.busy_vars_init()
+        if settings.VISIO_MODE:
+            self.physical_presence = self.visio_vars_init()
         self.avail_instr, self.avail_at_school_instr, self.unp_slot_cost \
             = self.compute_non_preferred_slots_cost()
         self.unp_slot_cost_course, self.avail_course \
@@ -315,6 +317,25 @@ class TTModel(object):
                                         Constraint(constraint_type=ConstraintType.GBHD_SUP, groups=g, days=d))
 
         return IBD, IBD_GTE, IBHD, GBHD, IBS, forced_IBD
+
+    def visio_vars_init(self):
+        physical_presence = {g: {(d, apm): self.add_var()
+                                 for d in self.wdb.days for apm in [Time.AM, Time.PM]}
+                             for g in self.wdb.basic_groups}
+
+        for g in self.wdb.basic_groups:
+            for (d, apm) in physical_presence[g]:
+                expr = 1000 * physical_presence[g][d, apm] \
+                       - self.sum(self.TTrooms[sl, c, r]
+                                  for c in self.wdb.courses_for_basic_group[g]
+                                  for r in self.wdb.course_rg_compat[c] if r != self.wdb.visio_room
+                                  for sl in slots_filter(self.wdb.compatible_slots[c], day=d, apm=apm))
+                self.add_constraint(expr, '<=', 999,
+                                    Constraint(constraint_type=ConstraintType.VISIO, groups=g, days=d))
+                self.add_constraint(expr, '>=', 0,
+                                    Constraint(constraint_type=ConstraintType.VISIO, groups=g, days=d))
+
+        return physical_presence
 
     def add_var(self, name=''):
         """
@@ -622,6 +643,8 @@ class TTModel(object):
                                             for c in group_courses_except_visio_and_no_visio_ones
                                             for sl in self.wdb.compatible_slots[c])
                                    )
+
+
 
     def add_dependency_constraints(self, weight=None):
         """
@@ -983,13 +1006,13 @@ class TTModel(object):
 
         self.add_rooms_constraints()
 
-        if settings.VISIO_MODE:
-            self.add_visio_room_constraints()
-
         self.add_instructors_constraints()
 
         if self.core_only:
             return
+
+        if settings.VISIO_MODE:
+            self.add_visio_room_constraints()
 
         self.add_slot_preferences()
 
