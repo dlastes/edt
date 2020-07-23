@@ -163,12 +163,14 @@ def rooms_extract(department, room_groups, room_categories, rooms):
 
         for room_id in members:
 
-            logger.info(f"Add room '{room_id}' to group '{group_id}'")
-
             try:
                 room, _ = Room.objects.get_or_create(name=room_id)
-                room.subroom_of.add(room_group)
-                room.save()
+                if room_group in room.subroom_of.all():
+                    continue
+                else:
+                    logger.info(f"Add room '{room_id}' to group '{group_id}'")
+                    room.subroom_of.add(room_group)
+                    room.save()
 
             except Room.DoesNotExist:
                 logger.warning(f"Unable to find room '{room_id}'")
