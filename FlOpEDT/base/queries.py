@@ -175,6 +175,10 @@ def get_groups(department_abbrev):
                                 'handled')
             gp_dict_children[gp.full_name()] = []
 
+        if gp_master is None:
+            raise Exception(f"Training program {train_prog} does not have any group"
+                            f" with no parent.")
+
         for gp in Group.objects.filter(train_prog=train_prog).order_by('name'):
             for new_gp in gp.parent_groups.all():
                 gp_dict_children[new_gp.full_name()].append(gp)
