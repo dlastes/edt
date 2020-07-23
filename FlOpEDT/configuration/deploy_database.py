@@ -246,8 +246,8 @@ def groups_extract(department, promotions, group_types, groups):
 
         for parent in group['parent']:
 
-            parent_group = Group.objects.get(name=parent, train_prog__abbrev=promotion, train_prog__department=department)
-            group = Group.objects.get(name=id_, train_prog__abbrev=promotion, train_prog__department=department)
+            parent_group = Group.objects.get(name=parent, train_prog__abbrev=promotion_id, train_prog__department=department)
+            group = Group.objects.get(name=id_, train_prog__abbrev=promotion_id, train_prog__department=department)
             group.parent_groups.add(parent_group)
             group.save()
 
