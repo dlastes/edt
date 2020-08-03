@@ -52,7 +52,8 @@ class NoVisio(TTConstraint):
         if self.weekdays:
             days = days_filter(days, day_in=self.weekdays)
         for group in considered_groups:
-            group_courses_except_visio_ones = ttmodel.wdb.courses_for_basic_group[group] - ttmodel.wdb.visio_courses
+            group_courses_except_visio_ones = ttmodel.wdb.courses_for_basic_group[group] \
+                                              - ttmodel.wdb.visio_courses - ttmodel.wdb.no_visio_courses
             ttmodel.add_constraint(
                 ttmodel.sum(ttmodel.TTrooms[sl,c,visio]
                             for c in group_courses_except_visio_ones
