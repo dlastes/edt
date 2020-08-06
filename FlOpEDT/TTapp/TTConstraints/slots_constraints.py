@@ -100,6 +100,74 @@ class SimultaneousCourses(TTConstraint):
         verbose_name_plural = "Simultaneous courses"
 
 
+class LimitedStartTimeChoices(TTConstraint):
+    """
+    Limit the possible start times
+    """
+
+    module = models.ForeignKey('base.Module',
+                               null=True,
+                               blank=True,
+                               default=None,
+                               on_delete=models.CASCADE)
+    tutor = models.ForeignKey('people.Tutor',
+                              null=True,
+                              blank=True,
+                              default=None,
+                              on_delete=models.CASCADE)
+    group = models.ForeignKey('base.Group',
+                              null=True,
+                              blank=True,
+                              default=None,
+                              on_delete=models.CASCADE)
+    course_type = models.ForeignKey('base.CourseType',
+                                    null=True,
+                                    blank=True,
+                                    default=None,
+                                    on_delete=models.CASCADE)
+    possible_start_times = ArrayField(models.PositiveSmallIntegerField())
+
+    def enrich_model(self, ttmodel, week, ponderation=1.):
+        fc = self.get_courses_queryset_by_attributes(ttmodel, week)
+        pst = self.possible_start_times
+        if self.tutor is None:
+            relevant_sum = ttmodel.sum(ttmodel.TT[(sl, c)]
+                                       for c in fc
+                                       for sl in ttmodel.wdb.compatible_slots[c] if sl.start_time not in pst)
+        else:
+            relevant_sum = ttmodel.sum(ttmodel.TTinstructors[(sl, c, self.tutor)]
+                                       for c in fc
+                                       for sl in ttmodel.wdb.compatible_slots[c] if sl.start_time not in pst)
+        if self.weight is not None:
+            ttmodel.obj += self.local_weight() * ponderation * relevant_sum
+        else:
+            ttmodel.add_constraint(relevant_sum, '==', 0,
+                                   Constraint(constraint_type=ConstraintType.LIMITED_START_TIME_CHOICES,
+                                              instructors=self.tutor, groups=self.group, modules=self.module,))
+
+    def one_line_description(self):
+        text = "Les "
+        if self.course_type:
+            text += str(self.course_type)
+        else:
+            text += "cours"
+        if self.module:
+            text += " de " + str(self.module)
+        if self.tutor:
+            text += ' de ' + str(self.tutor)
+        if self.train_progs.exists():
+            text += ' en ' + ', '.join([train_prog.abbrev for train_prog in self.train_progs.all()])
+        else:
+            text += " pour toutes les promos."
+        if self.group:
+            text += ' avec le groupe ' + str(self.group)
+        text += " ne peuvent avoir lieu qu'à "
+        for pst in self.possible_start_times:
+            text += french_format(pst) + ', '
+        return text
+
+
+
 # Ex TTConstraints that have to be re-written.....
 
 class AvoidBothTimes(TTConstraint):
@@ -151,67 +219,8 @@ class AvoidBothTimes(TTConstraint):
             text += ' pour ' + str(self.tutor)
         if self.group:
             text += ' avec le groupe ' + str(self.group)
-        if self.train_progs:
-            text += ' en ' + str(self.train_progs)
-        return text
-
-
-class LimitedStartTimeChoices(TTConstraint):
-    """
-    Limit the possible start times
-    """
-
-    module = models.ForeignKey('base.Module',
-                               null=True,
-                               default=None,
-                               on_delete=models.CASCADE)
-    tutor = models.ForeignKey('people.Tutor',
-                              null=True,
-                              default=None,
-                              on_delete=models.CASCADE)
-    group = models.ForeignKey('base.Group',
-                              null=True,
-                              default=None,
-                              on_delete=models.CASCADE)
-    course_type = models.ForeignKey('base.CourseType',
-                                    null=True,
-                                    default=None,
-                                    on_delete=models.CASCADE)
-    possible_start_times = ArrayField(models.PositiveSmallIntegerField())
-
-    def enrich_model(self, ttmodel, week, ponderation=1.):
-        fc = self.get_courses_queryset_by_attributes(ttmodel, week)
-        pst = self.possible_start_times.values_list()
-        if self.tutor is None:
-            relevant_sum = ttmodel.sum(ttmodel.TT[(sl, c)]
-                                       for c in fc
-                                       for sl in ttmodel.wdb.compatible_slots[c] if sl.start_time not in pst)
-        else:
-            relevant_sum = ttmodel.sum(ttmodel.TTinstructors[(sl, c, self.tutor)]
-                                       for c in fc
-                                       for sl in ttmodel.wdb.compatible_slots[c] if sl.start_time not in pst)
-        if self.weight is not None:
-            ttmodel.obj += self.local_weight() * ponderation * relevant_sum
-        else:
-            ttmodel.add_constraint(relevant_sum, '==', 0,
-                                   Constraint(constraint_type=ConstraintType.LIMITED_START_TIME_CHOICES,
-                                              instructors=self.tutor, groups=self.group, modules=self.module,))
-
-    def one_line_description(self):
-        text = "Les "
-        if self.course_type:
-            text += str(self.course_type)
-        else:
-            text += "cours"
-        if self.module:
-            text += " de " + str(self.module)
-        if self.tutor:
-            text += ' de ' + str(self.tutor)
         if self.train_progs.exists():
-            text += ' en ' + str(self.train_progs.all())
-        if self.group:
-            text += ' avec le groupe ' + str(self.group)
-        text += " ne peuvent avoir lieu qu'à "
-        for pst in self.possible_start_times.values_list():
-            text += french_format(pst) + ', '
+            text += ' des promos ' + ', '.join([train_prog.abbrev for train_prog in self.train_progs.all()])
+        else:
+            text += " de toutes les promos."
         return text
