@@ -132,6 +132,7 @@ file_fetch.rooms.callback = function () {
   room_names = Object.keys(rooms.roomgroups).filter(function(k){
     return rooms.roomgroups[k].length == 1 ;
   });
+  room_names.sort(function comp(a, b) { return a.localeCompare(b) ; }) ;
   swap_data(room_names, rooms_sel, "room");
 };
 
