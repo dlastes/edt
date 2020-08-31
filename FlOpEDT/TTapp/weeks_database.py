@@ -244,8 +244,8 @@ class WeeksDatabase(object):
                 if c in self.no_visio_courses:
                     continue
                 # visio courses can only be in visio_room
-                elif c in self.visio_courses:
-                    course_rg_compat[c] = {self.visio_room}
+                # elif c in self.visio_courses:
+                #     course_rg_compat[c] = {self.visio_room}
                 # other courses can also be in visio room
                 else:
                     course_rg_compat[c] |= {self.visio_room}
