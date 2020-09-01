@@ -79,7 +79,7 @@
     url_fetch_shared_rooms = url_fetch_shared_rooms.slice(0, -3) ;
     var url_mail_auto = "{% url "base:email-proposal" department %}";
     var url_game = "{% url 'easter_egg:start_game' %}" ;
-  var url_colors = "{% url 'displayweb:fetch_colors' %}" ;
+  var url_colors = "{% url 'displayweb:fetch_colors' department %}" ;
 
     var department = "{{ dept }}" ;
     var week_year_list = {{ all_weeks| safe }};
