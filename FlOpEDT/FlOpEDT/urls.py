@@ -68,7 +68,7 @@ urlpatterns = [
     url(r'^$', views.index, name='index'),
     url('game/', include('easter_egg.urls')),
     url(r'^flopeditor/', include('flopeditor.urls')),
-    url(r'^display/', include('displayweb.urls'))
+    url(r'^display/(?P<department>[a-zA-Z]\w{0,6})/', include('displayweb.urls'))
 ]
 
 if settings.DEBUG:
