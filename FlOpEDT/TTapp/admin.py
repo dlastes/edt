@@ -36,7 +36,7 @@ from TTapp.models import \
     CustomConstraint, SimultaneousCourses, MinimizeBusyDays, RespectBoundPerDay,\
     AvoidBothTimes, LimitedRoomChoices, LimitedStartTimeChoices, \
     LimitTutorsTimePerPeriod, LimitGroupsTimePerPeriod, LowerBoundBusyDays, GroupsLunchBreak, BreakAroundCourseType, \
-    NoVisio, LimitGroupsPhysicalPresence, BoundVisioHalfDays
+    NoVisio, LimitGroupsPhysicalPresence, BoundVisioHalfDays, TutorsLunchBreak
 
 # Register your models here.
 
@@ -284,6 +284,16 @@ class GroupsLunchBreakAdmin(DepartmentModelAdmin):
                    ('groups', DropdownFilterRel),
                    )
 
+
+class TutorsLunchBreakAdmin(DepartmentModelAdmin):
+    list_display = ('week', 'year', 'comment',
+                    'weight')
+    ordering = ()
+    list_filter = (('week', DropdownFilterAll),
+                   ('year', DropdownFilterAll),
+                   ('tutors', DropdownFilterRel),
+                   )
+
 class AmphiBreakAdmin(DepartmentModelAdmin):
     list_display = ('week', 'year', 'comment',
                     'weight')
@@ -343,6 +353,7 @@ admin.site.register(LimitGroupsTimePerPeriod, LimitGroupsTimePerPeriodAdmin)
 admin.site.register(LimitTutorsTimePerPeriod, LimitTutorsTimePerPeriodAdmin)
 admin.site.register(LowerBoundBusyDays, LowerBoundBusyDaysAdmin)
 admin.site.register(GroupsLunchBreak, GroupsLunchBreakAdmin)
+admin.site.register(TutorsLunchBreak, TutorsLunchBreakAdmin)
 admin.site.register(BreakAroundCourseType, AmphiBreakAdmin)
 if settings.VISIO_MODE:
     admin.site.register(NoVisio, NoVisioAdmin)
