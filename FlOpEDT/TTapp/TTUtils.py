@@ -71,20 +71,20 @@ def minimize_moves(department, week, year, target_work_copy):
             for CP in nsl:
                 precedent = ScheduledCourse \
                     .objects \
-                    .filter(start_time__lte=st - F('course__type__duration'),
-                            start_time__gt=st - F('course__type__duration') - slot_pause,
+                    .filter(start_time__lte = st - F('course__type__duration'),
+                            start_time__gt = st - F('course__type__duration') - slot_pause,
                             day=day,
                             course__room_type=CP.course.room_type,
-                            course__tutor=CP.course.tutor,
+                            course__groups__in=CP.course.groups.all(),
                             **scheduled_courses_params)
                 if len(precedent) == 0:
                     precedent = ScheduledCourse \
                         .objects \
-                        .filter(start_time__lte = st - F('course__type__duration'),
-                                start_time__gt = st - F('course__type__duration') - slot_pause,
+                        .filter(start_time__lte=st - F('course__type__duration'),
+                                start_time__gt=st - F('course__type__duration') - slot_pause,
                                 day=day,
                                 course__room_type=CP.course.room_type,
-                                course__groups__in=CP.course.groups.all(),
+                                course__tutor=CP.course.tutor,
                                 **scheduled_courses_params)
                     if len(precedent) == 0:
                         continue
