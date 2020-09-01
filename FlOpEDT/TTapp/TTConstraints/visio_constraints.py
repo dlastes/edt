@@ -54,21 +54,23 @@ class NoVisio(TTConstraint):
         for group in considered_groups:
             # Si contrainte forte, AUCUN cours en visio, sinon seulement ceux non-indiqués Visio
             if self.weight is None:
-                group_courses_except_visio_ones = ttmodel.wdb.courses_for_basic_group[group] \
+                considered_group_courses = ttmodel.wdb.courses_for_basic_group[group] \
                                                   - ttmodel.wdb.no_visio_courses
             else:
-                group_courses_except_visio_ones = ttmodel.wdb.courses_for_basic_group[group] \
+                considered_group_courses = ttmodel.wdb.courses_for_basic_group[group] \
                                                   - ttmodel.wdb.no_visio_courses \
                                                   - ttmodel.wdb.visio_courses
 
             ttmodel.add_constraint(
                 ttmodel.sum(ttmodel.TTrooms[sl,c,visio]
-                            for c in group_courses_except_visio_ones
+                            for c in considered_group_courses
                             for sl in slots_filter(ttmodel.wdb.compatible_slots[c], day_in=days)),
                 '==', 0, Constraint(constraint_type=ConstraintType.VISIO, groups=group))
 
     def one_line_description(self):
-        text = "Pas de visio (sauf demande expresse)"
+        text = "Pas de visio"
+        if self.weight is not None:
+            " (sauf demande expresse)"
         if self.weekdays:
             text += " les " + ', '.join([wd for wd in self.weekdays])
         if self.groups.exists():

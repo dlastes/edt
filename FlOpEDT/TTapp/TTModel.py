@@ -1064,7 +1064,7 @@ class TTModel(object):
                                     cp.room = self.wdb.visio_room
                                     cp.save()
                                     continue
-                        for rg in c.room_type.members.all():
+                        for rg in self.wdb.course_rg_compat[c]:
                             if self.get_var_value(self.TTrooms[(sl, c, rg)]) == 1:
                                 cp.room = rg
                                 break

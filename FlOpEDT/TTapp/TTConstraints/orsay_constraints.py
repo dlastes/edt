@@ -115,6 +115,77 @@ class GroupsLunchBreak(TTConstraint):
         return text
 
 
+class TutorsLunchBreak(TTConstraint):
+    """
+    Ensures time for lunch in a given interval for given groups (all if groups is Null)
+    """
+
+    start_time = models.PositiveSmallIntegerField()
+    end_time = models.PositiveSmallIntegerField()
+    weekdays = ArrayField(models.CharField(max_length=2, choices=Day.CHOICES), blank=True, null=True)
+    lunch_length = models.PositiveSmallIntegerField()
+    tutors = models.ManyToManyField('people.Tutor', blank=True, related_name='lunch_breaks_constraints')
+
+    def enrich_model(self, ttmodel, week, ponderation=1000000):
+        considered_tutors = set(ttmodel.wdb.instructors)
+        if self.tutors.exists():
+            considered_tutors &= set(self.tutors.all())
+        days = days_filter(ttmodel.wdb.days, week=week)
+        if self.weekdays:
+            days = days_filter(days, day_in=self.weekdays)
+        for day in days:
+            local_slots = [Slot(day=day, start_time=st, end_time=st+self.lunch_length)
+                           for st in range(self.start_time, self.end_time - self.lunch_length + 1, 15)]
+            slots_nb = len(local_slots)
+            # pour chaque groupe, au moins un de ces slots ne voit aucun cours lui être simultané
+            slot_vars = {}
+
+            for tutor in considered_tutors:
+                considered_courses = self.get_courses_queryset_by_parameters(ttmodel, week, tutor=tutor)
+                for local_slot in local_slots:
+                    # Je veux que slot_vars[tutor, local_slot] soit à 1
+                    # si et seulement si undesired_scheduled_courses vaut plus que 1
+                    undesired_scheduled_courses = \
+                        ttmodel.sum(ttmodel.TTinstructors[sl, c, tutor] for c in considered_courses
+                                    for sl in slots_filter(ttmodel.wdb.compatible_slots[c],
+                                                           simultaneous_to=local_slot))
+                    slot_vars[tutor, local_slot] = ttmodel.add_floor(name='',
+                                                                     expr=undesired_scheduled_courses,
+                                                                     floor=1,
+                                                                     bound=len(considered_courses))
+                not_ok = ttmodel.add_floor(name='',
+                                           expr=ttmodel.sum(slot_vars[tutor, sl] for sl in local_slots),
+                                           floor=slots_nb,
+                                           bound=2 * slots_nb)
+
+                if self.weight is None:
+                    ttmodel.add_constraint(not_ok,'==', 0, Constraint(ConstraintType.LUNCH_BREAK,
+                                                                      instructors=tutor))
+                    # ttmodel.add_constraint(ttmodel.sum(slot_vars[group, sl] for sl in local_slots),
+                    #                        '<=', len(local_slots),
+                    #                        Constraint(constraint_type=ConstraintType.LUNCH_BREAK,
+                    #                                   groups=group, days=day))
+                else:
+                    cost = not_ok * ponderation * self.local_weight()
+                    # cost = ttmodel.sum(slot_vars[group, sl] for sl in local_slots) * ponderation \
+                    #        * self.local_weight()
+                    ttmodel.add_to_inst_cost(tutor, cost, week)
+
+
+    def one_line_description(self):
+        text = f"Il faut une pause déjeuner d'au moins {self.lunch_length} minutes " \
+               f"entre {french_format(self.start_time)} et {french_format(self.end_time)}"
+        try:
+            text += " les " + ', '.join([wd for wd in self.weekdays])
+        except ObjectDoesNotExist:
+            pass
+        if self.tutors.exists():
+            text += ' pour ' + ', '.join([tutor.username for tutor in self.tutors.all()])
+        else:
+            text += " pour tous les profs."
+        return text
+
+
 class BreakAroundCourseType(TTConstraint):
     """
     Ensures that the courses of a given course type and other types of courses cannot be consecutive for the given groups.
