@@ -1,5 +1,7 @@
 // Text for morning preferences
-function txt_morning(val) {
+// Text for preferences concerning day length
+function txt_morning_half(val, id) {
+  if (id == 'morning') {
     switch (val) {
     case "0":
         return 'Commencer le plus tôt possible mais finir tôt';
@@ -18,11 +20,7 @@ function txt_morning(val) {
     default:
         return val;
     }
-}
-
-
-// Text for preferences concerning day length
-function txt_free_half_day(val) {
+  } else {
     switch (val) {
     case "0":
         return 'Avoir toute la semaine des journées allégées';
@@ -42,12 +40,15 @@ function txt_free_half_day(val) {
     default:
         return val;
     }
+  }
 }
+
 
 // update comments associated with range value
 function update_comment(id) {
-    return function () {
-        var txt = txt_morning($('#'+id).val());
+  return function () {
+    
+    var txt = txt_morning_half($('#'+id).val(), id);
         $('#'+id).next().text(txt);
     } ;
 }
