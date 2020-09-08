@@ -434,8 +434,13 @@ function go_cm_advanced_pref(quick) {
 function go_alarm_pref() {
 
   var dig = svg.get_dom("dig");
-  dig
 
+  // escape if there is no alarm 
+  if (typeof dig === 'undefined') {
+    return ;
+  }
+  
+  dig
     .select(".disp-info").select(".disp-required")
     .text(txt_reqDispos)
     .attr("x", menus.x + menus.mx - 5)
