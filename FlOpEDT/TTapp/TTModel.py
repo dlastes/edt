@@ -1233,7 +1233,7 @@ class TTModel(object):
         return other_slots.pop()
 
 
-def get_constraints(department, week=None, year=None, is_active=None):
+def get_constraints(department, week=None, year=None, train_prog=None, is_active=None):
     #
     #  Return constraints corresponding to the specific filters
     #
@@ -1245,7 +1245,12 @@ def get_constraints(department, week=None, year=None, is_active=None):
     if week and not year:
         logger.warning(f"Unable to filter constraint for weeks {week} without specifing year")
         return
-
+    elif train_prog:
+        query &= \
+            Q(train_progs__abbrev=train_prog) & Q(week__isnull=True) & Q(year__isnull=True) | \
+            Q(train_progs__abbrev=train_prog) & Q(week=week) & Q(year=year) | \
+            Q(train_progs__isnull=True) & Q(week=week) & Q(year=year) | \
+            Q(train_progs__isnull=True) & Q(week__isnull=True) & Q(year__isnull=True)
     else:
         query &= Q(week=week) & Q(year=year) | Q(week__isnull=True) & Q(year__isnull=True)
 
