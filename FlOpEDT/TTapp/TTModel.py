@@ -247,7 +247,7 @@ class TTModel(object):
                 # if other_dep_nb >1 for some i, then IBS==1 !
                 self.add_constraint(limit * IBS[(i, sl)], '>=', other_dep_nb,
                                     Constraint(constraint_type=
-                                               ConstraintType.PROFESSEUR_A_DEJA_COURS_EN_AUTRE_DEPARTEMENT_IBD,
+                                               ConstraintType.PROFESSEUR_A_DEJA_COURS_EN_AUTRE_DEPARTEMENT,
                                                slots=sl, instructors=i))
 
         IBD = {}

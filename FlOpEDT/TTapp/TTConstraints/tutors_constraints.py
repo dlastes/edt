@@ -195,8 +195,13 @@ class RespectBoundPerDay(TTConstraint):
 
         for tutor in tutors:
             for d in days_filter(ttmodel.wdb.days, week=week):
-                ttmodel.add_constraint(ttmodel.sum(ttmodel.IBS[tutor, sl] * sl.duration / 60
-                                                   for sl in slots_filter(ttmodel.wdb.availability_slots, day=d)),
+                ttmodel.add_constraint(ttmodel.sum(ttmodel.TTinstructors[sl, c, tutor] * sl.duration / 60
+                                                   for c in ttmodel.wdb.courses_for_tutor[tutor]
+                                                   for sl in slots_filter(ttmodel.wdb.compatible_slots[c], day=d)
+                                                   )
+                                       + sum(sc.course.type.duration
+                                             for sc in ttmodel.wdb.other_departments_scheduled_courses_for_tutor[tutor]
+                                             if sc.course.week == week and sc.day == d.day) / 60,
                                        '<=',
                                        tutor.max_hours_per_day,
                                        Constraint(constraint_type=ConstraintType.BOUND_HOURS_PER_DAY,
