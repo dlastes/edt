@@ -248,8 +248,8 @@ class GroupPreferences(Preferences):
         local_free_half_day_weight = 0
         nb_student_prefs = len(students_preferences)
         if nb_student_prefs == 0:
-            self.morning_weight = 1
-            self.free_half_day_weight = 1
+            self.morning_weight = 0.5
+            self.free_half_day_weight = 0.5
 
         else:
             # To range the table
@@ -260,6 +260,7 @@ class GroupPreferences(Preferences):
             # To calculate the average of each attributs
             self.morning_weight = local_morning_weight/nb_student_prefs
             self.free_half_day_weight = local_free_half_day_weight/nb_student_prefs
+            self.save()
 
 
 class NotificationsPreferences(models.Model):
