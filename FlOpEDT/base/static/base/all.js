@@ -171,6 +171,7 @@ file_fetch.groups.callback = function () {
 
   fetch.groups_ok = true;
   create_grid_data();
+  hours_header.create_indicator();
 };
 
 

@@ -62,7 +62,7 @@ function Hours(settings) {
 
 // Hour labels to the left of the grid
 function HourHeader(svg, layout_name, hours) {
-  this.layout = svg.get_dom(layout_name);
+  this.layout = svg.get_dom(layout_name).append("g").attr("class", "hour-scale");
   this.hours = hours;
   this.mix = new HourMix(this.hours.settings);
   hard_bind(this.mix);
@@ -103,7 +103,7 @@ HourHeader.prototype.update = function (quick) {
 
   hour_bar.exit().remove();
 
-  var hour_scale = svg.get_dom("edt-fg")
+  var hour_scale = this.layout
     .selectAll(".gridsckh")
     .data(this.hours.data);
 
@@ -134,6 +134,54 @@ HourHeader.prototype.update = function (quick) {
   hour_scale.exit().remove();
 
 };
+
+HourHeader.prototype.create_indicator = function() {
+
+  var hour_scale = this.layout
+    .append("rect")
+    .attr("x", -40)
+    .attr("y", 0)
+    .attr("width", 40)
+    .attr("height", grid_height())
+    .attr("fill", "white");
+
+  this.layout.append("text")
+    .attr("id", "exact-time-txt")
+    .attr("x", -20)
+    .attr("y", -20);
+
+  this.layout.append("line")
+    .attr("id", "exact-time-line")
+    .attr("x1", 0)
+    .attr("x2", 0)
+    .attr("y1", 0)
+    .attr("y2", 0);
+
+  this.layout
+    .on('mouseenter', function() {
+      d3.select("#exact-time-line")
+        .attr("stroke", "black")
+        .attr("stroke-width", 2)
+        .attr("x2", grid_width());
+    })
+    .on('mousemove', function() {
+      let m = d3.mouse(this) ;
+      let computed_time = cours_reverse_y(m[1]);
+      d3.select("#exact-time-txt").text(computed_time) ;
+      d3.select("#exact-time-line")
+        .attr("y1", m[1])
+        .attr("y2", m[1]);
+    })
+    .on('mouseleave', function() {
+      d3.select("#exact-time-txt").text("");
+      d3.select("#exact-time-line")
+        .attr("stroke-width", 0);
+    });
+} ;
+
+// HourHeader.prototype.indicate_time = function () {
+
+// } ;
 
 
 // Display parameters and functions
