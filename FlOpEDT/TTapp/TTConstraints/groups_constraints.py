@@ -43,7 +43,6 @@ def considered_basic_groups(group_ttconstraint, ttmodel):
     return considered_basic_groups
 
 
-
 class MinGroupsHalfDays(TTConstraint):
     """
     All courses will fit in a minimum of half days
@@ -82,7 +81,7 @@ class MinGroupsHalfDays(TTConstraint):
 
 class MinNonPreferedTrainProgsSlot(TTConstraint):
     """
-    Minimize the use of unprefered Slots for tutors
+    Minimize the use of unprefered Slots for groups
     """
     def enrich_model(self, ttmodel, week, ponderation=None):
         if ponderation is None:
@@ -91,10 +90,21 @@ class MinNonPreferedTrainProgsSlot(TTConstraint):
             train_progs = set(tp for tp in self.train_progs.all() if tp in ttmodel.train_prog)
         else:
             train_progs = set(ttmodel.train_prog)
-        for sl in ttmodel.wdb.availability_slots:
-            for train_prog in train_progs:
-                basic_groups = ttmodel.wdb.basic_groups.filter(train_prog=train_prog)
-                for g in basic_groups:
+        for train_prog in train_progs:
+            basic_groups = ttmodel.wdb.basic_groups.filter(train_prog=train_prog)
+            for g in basic_groups:
+                g_pref = g.preferences
+                g_pref.calculate_fields()
+                morning_weight = 2 * g_pref.get_morning_weight()
+                evening_weight = 2 * g_pref.get_evening_weight()
+                light_day_weight = 2 * g_pref.get_light_day_weight()
+                for sl in ttmodel.wdb.availability_slots:
+                    day_time_ponderation = light_day_weight
+                    if sl in ttmodel.wdb.morning_slots:
+                        day_time_ponderation *= morning_weight
+                    elif sl in ttmodel.wdb.evening_slots:
+                        day_time_ponderation *= evening_weight
+
                     for c in ttmodel.wdb.courses_for_basic_group[g]:
                         slot_vars_sum = ttmodel.sum(ttmodel.TT[(sl2, c)]
                                                     for sl2 in slots_filter(ttmodel.wdb.compatible_slots[c],
@@ -102,6 +112,7 @@ class MinNonPreferedTrainProgsSlot(TTConstraint):
                         cost = self.local_weight() * ponderation * slot_vars_sum \
                             * ttmodel.unp_slot_cost_course[c.type,
                                                            train_prog][sl]
+                        cost *= day_time_ponderation
                         ttmodel.add_to_group_cost(g, cost, week=week)
 
     def one_line_description(self):
