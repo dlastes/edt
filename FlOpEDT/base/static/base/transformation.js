@@ -706,6 +706,24 @@ function cours_y(c) {
   return ret;
 }
 
+function cours_reverse_y(y) {
+  let t = time_settings.time;
+  let break_start = (t.lunch_break_start_time - t.day_start_time)
+    * (nbRows * scale) ;
+  if (y <= break_start) {
+    return min_to_hm_txt(t.day_start_time + y / (nbRows * scale));
+  } else {
+    let break_finish = break_start + bknews_h();
+    if (y <= break_finish) {
+      return "";
+    } else {
+      return min_to_hm_txt(
+        t.lunch_break_finish_time + (y - break_finish) / (nbRows * scale)
+      );
+    }
+  }
+}
+
 function cours_width(c) {
   var gp = groups[c.promo][c.group];
   return (gp.maxx - gp.x) * labgp.width;
