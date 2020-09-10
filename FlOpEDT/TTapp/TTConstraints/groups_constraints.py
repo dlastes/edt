@@ -100,9 +100,9 @@ class MinNonPreferedTrainProgsSlot(TTConstraint):
                 light_day_weight = 2 * g_pref.get_light_day_weight()
                 for sl in ttmodel.wdb.availability_slots:
                     day_time_ponderation = light_day_weight
-                    if sl in ttmodel.wdb.morning_slots:
+                    if sl in ttmodel.wdb.first_hour_slots:
                         day_time_ponderation *= morning_weight
-                    elif sl in ttmodel.wdb.evening_slots:
+                    elif sl in ttmodel.wdb.last_hour_slots:
                         day_time_ponderation *= evening_weight
 
                     for c in ttmodel.wdb.courses_for_basic_group[g]:
