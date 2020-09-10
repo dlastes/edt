@@ -103,7 +103,9 @@ hard_bind(days_header.mix);
 
 var hours_header = new HourHeader(svg, "edt-fg", hours);
 
+var labgp = {width: 0};
 
+hours_header.create_indicator();
 
 go_days(true, false);
 create_pref_modes(pref_only);

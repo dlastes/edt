@@ -1227,6 +1227,7 @@ function check_constraints_tutor(tutor) {
 
 
 function min_to_hm_txt(minutes) {
+  minutes = Math.round(minutes);
   var h = Math.floor(minutes / 60);
   var m = minutes - h * 60;
   var mt = '';
