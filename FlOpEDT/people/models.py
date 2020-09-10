@@ -229,13 +229,13 @@ class Preferences(models.Model):
 
 class StudentPreferences(Preferences):
     student = models.OneToOneField('people.Student',
-                                   related_name='studentPreferences',
+                                   related_name='preferences',
                                    on_delete=models.CASCADE)
 
 
 class GroupPreferences(Preferences):
     group = models.OneToOneField('base.Group',
-                                 related_name='groupPreferences',
+                                 related_name='preferences',
                                  on_delete=models.CASCADE)
 
     def calculate_fields(self):

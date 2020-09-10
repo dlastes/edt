@@ -71,7 +71,8 @@ class WeeksDatabase(object):
         self.slots_step = slots_step
         self.possible_apms=set()
         self.days, self.day_after, self.holidays, self.training_half_days = self.days_init()
-        self.courses_slots, self.availability_slots = self.slots_init()
+        self.courses_slots, self.availability_slots, \
+        self.first_hour_slots, self.last_hour_slots, self.min_slots_step = self.slots_init()
         self.course_types, self.courses, self.courses_by_week, \
             self.sched_courses, self.fixed_courses, self.fixed_courses_for_avail_slot, \
             self.other_departments_courses, self.other_departments_sched_courses, \
@@ -125,11 +126,15 @@ class WeeksDatabase(object):
         courses_slots = set()
         for cc in CourseStartTimeConstraint.objects.filter(Q(course_type__department=self.department)
                                                            | Q(course_type=None)):
+            start_times = cc.allowed_start_times
             if self.slots_step is None:
                 courses_slots |= set(CourseSlot(d, start_time, cc.course_type)
                              for d in self.days
-                             for start_time in cc.allowed_start_times)
+                             for start_time in start_times)
+                min_slots_step = min(start_times[i]-start_times[i-1]
+                                    for i in range(1, len(start_times)))
             else:
+                min_slots_step = self.slots_step
                 courses_slots |= set(CourseSlot(d, start_time, cc.course_type)
                                      for d in self.days
                                      for start_time in cc.allowed_start_times if start_time % self.slots_step == 0)
@@ -157,7 +162,11 @@ class WeeksDatabase(object):
                               for i in range(len(start_times))}
         print('Ok' + f' : {len(courses_slots)} courses_slots and {len(availability_slots)} availability_slots created!')
 
-        return courses_slots, availability_slots
+        first_hour_slots = {slot for slot in availability_slots if slot.start_time < start_times[0] + 60}
+
+        last_hour_slots = {slot for slot in availability_slots if slot.end_time > end_times[-1] - 60}
+
+        return courses_slots, availability_slots, first_hour_slots, last_hour_slots, min_slots_step
 
     def courses_init(self):
         # COURSES
