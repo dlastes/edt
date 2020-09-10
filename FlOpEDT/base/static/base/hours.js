@@ -28,6 +28,7 @@ function Hours(settings) {
   this.settings = settings ;
 
   this.add_time = function(t) {
+    t = +t ;
     let to_push = { min: t, hd: 'am' } ;
     if (t > this.settings.lunch_break_start_time) {
       if (t < this.settings.lunch_break_finish_time) {
@@ -35,7 +36,28 @@ function Hours(settings) {
       }
       to_push.hd = 'pm' ;
     }
-    this.data.push(to_push);
+    let already = this.data.filter(function(t) {
+      return (t.hd == to_push.hd
+              && to_push.min - t.min < 10
+              && t.min - to_push.min < 10);
+    });
+    if (already.length == 0) {
+      this.data.push(to_push);
+      if (t == this.settings.lunch_break_start_time
+          && t == this.settings.lunch_break_finish_time) {
+        this.data.push({min:t, hd: 'pm'}) ;
+      }
+    }
+  } ;
+
+  this.clear = function() {
+    this.data = [] ;
+  } ;
+
+  this.add_times = function(time_list) {
+    for (let i = 0 ; i < time_list.length ; i++) {
+      this.add_time(time_list[i]);
+    }
   } ;
   
   var stime = Math.ceil(settings.day_start_time / 60);

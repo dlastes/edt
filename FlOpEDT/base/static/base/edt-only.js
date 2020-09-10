@@ -133,6 +133,23 @@ file_fetch.groups.callback = function () {
   fetch.groups_ok = true;
   //go_edt(true);
   create_grid_data();
+
+  if (nbRows > 1) {
+    hours_header.hours.clear() ;
+    hours_header.hours.add_times(Object.keys(rev_constraints));
+    hours_header.hours.add_times(
+      Object.keys(rev_constraints).map(function(r){
+        return +r + rev_constraints[r];
+      }));
+    let t = time_settings.time ;
+    hours_header.hours.add_times([
+      t.day_start_time,
+      t.lunch_break_start_time,
+      t.lunch_break_finish_time,
+      t.day_finish_time
+    ]);
+  }
+
 };
 
 
