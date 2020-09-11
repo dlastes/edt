@@ -710,18 +710,59 @@ function cours_reverse_y(y) {
   let t = time_settings.time;
   let break_start = (t.lunch_break_start_time - t.day_start_time)
     * (nbRows * scale) ;
-  if (y <= break_start) {
-    return min_to_hm_txt(t.day_start_time + y / (nbRows * scale));
-  } else {
-    let break_finish = break_start + bknews_h();
-    if (y <= break_finish) {
-      return "";
+  let i = 0 ;
+  let break_finish = break_start + bknews_h();
+
+  // nothing during lunch break
+  if (y > break_start && y < break_finish) {
+    return "" ;
+  }
+
+  // 1 row: compare with last cut
+  if (nbRows == 1) {
+    if (y <= break_start) {
+      return min_to_hm_txt(t.day_start_time
+                           + y/scale);
     } else {
-      return min_to_hm_txt(
-        t.lunch_break_finish_time + (y - break_finish) / (nbRows * scale)
-      );
+      return min_to_hm_txt(t.lunch_break_finish_time
+                     + (y-break_finish)/scale);
     }
   }
+
+  // several rows: based on rev_constraints
+
+  // y coordinate for every constraint start
+  let rev_cst_y = Object.keys(rev_constraints).map(function(c) {
+    if (c <= t.lunch_break_start_time) {
+      return (c - t.day_start_time) * (nbRows * scale) ;
+    } else {
+      if (c < t.lunch_break_finish_time) {
+        console.log("Course during lunch break?");
+      } else {
+        return (t.lunch_break_start_time - t.day_start_time) * (nbRows * scale)
+          + bknews_h()
+          + (c - t.lunch_break_finish_time) * (nbRows * scale) ;
+      }
+    }
+  });
+
+  // get last constraint before y
+  while (i+1 < rev_cst_y.length
+         && rev_cst_y[i+1] < y) {
+    i = i+1 ;
+  }
+  let before_last_slot = Object.keys(rev_constraints)[i];
+
+  // get time since last constraint
+  y -= rev_cst_y[i] ;
+  while (y > 0) {
+    y -= rev_constraints[before_last_slot] * scale ;
+  }
+  
+  return min_to_hm_txt(+before_last_slot
+                       + rev_constraints[before_last_slot]
+                       + y / scale );
+
 }
 
 function cours_width(c) {
