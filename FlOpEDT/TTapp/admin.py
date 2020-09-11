@@ -64,7 +64,8 @@ class LimitModulesTimePerPeriodAdmin(DepartmentModelAdmin):
                     'max_hours',
                     'period', 
                     'comment',
-                    'weight')
+                    'weight',
+                    'is_active')
     ordering = ()
     list_filter = (('train_progs', DropdownFilterRel),
                    ('week', DropdownFilterAll),
@@ -80,7 +81,8 @@ class LimitGroupsTimePerPeriodAdmin(DepartmentModelAdmin):
                     'max_hours',
                     'period',
                     'comment',
-                    'weight')
+                    'weight',
+                    'is_active')
     ordering = ()
     list_filter = (('train_progs', DropdownFilterRel),
                    ('week', DropdownFilterAll),
@@ -96,7 +98,8 @@ class LimitTutorsTimePerPeriodAdmin(DepartmentModelAdmin):
                     'max_hours',
                     'period',
                     'comment',
-                    'weight')
+                    'weight',
+                    'is_active')
     ordering = ()
     list_filter = (('train_progs', DropdownFilterRel),
                    ('week', DropdownFilterAll),
@@ -107,7 +110,8 @@ class LimitTutorsTimePerPeriodAdmin(DepartmentModelAdmin):
 
 class ReasonableDaysAdmin(DepartmentModelAdmin):
     list_display = ('week', 'year', 'comment',
-                    'weight')
+                    'weight',
+                    'is_active')
     ordering = ()
     list_filter = (('train_progs', DropdownFilterRel),
                    ('week', DropdownFilterAll),
@@ -120,7 +124,8 @@ class ReasonableDaysAdmin(DepartmentModelAdmin):
 class StabilizeAdmin(DepartmentModelAdmin):
     list_display = ('week', 'year', 'general',
                     'group', 'tutor', 'module', 'course_type', 'comment',
-                    'weight')
+                    'weight',
+                    'is_active')
     ordering = ()
     list_filter = (('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
@@ -134,7 +139,8 @@ class StabilizeAdmin(DepartmentModelAdmin):
 
 class MinTutorsHalfDaysAdmin(DepartmentModelAdmin):
     list_display = ('week', 'year', 'join2courses', 'comment',
-                    'weight')
+                    'weight',
+                    'is_active')
     ordering = ()
     list_filter = (('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
@@ -145,7 +151,8 @@ class MinTutorsHalfDaysAdmin(DepartmentModelAdmin):
 
 class MinModulesHalfDaysAdmin(DepartmentModelAdmin):
     list_display = ('week', 'year', 'comment',
-                    'weight')
+                    'weight',
+                    'is_active')
     ordering = ()
     list_filter = (('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
@@ -155,7 +162,8 @@ class MinModulesHalfDaysAdmin(DepartmentModelAdmin):
 
 class MinGroupsHalfDaysAdmin(DepartmentModelAdmin):
     list_display = ('week', 'year', 'comment',
-                    'weight')
+                    'weight',
+                    'is_active')
     ordering = ()
     list_filter = (('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
@@ -175,7 +183,8 @@ class MinGroupsHalfDaysAdmin(DepartmentModelAdmin):
 
 class MinNonPreferedTutorsSlotAdmin(DepartmentModelAdmin):
     list_display = ('week', 'year', 'comment',
-                    'weight')
+                    'weight',
+                    'is_active')
     ordering = ()
     list_filter = (('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
@@ -184,7 +193,8 @@ class MinNonPreferedTutorsSlotAdmin(DepartmentModelAdmin):
 
 class MinNonPreferedTrainProgsSlotAdmin(DepartmentModelAdmin):
     list_display = ('week', 'year', 'comment',
-                    'weight')
+                    'weight',
+                    'is_active')
     ordering = ()
     list_filter = (('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
@@ -194,7 +204,8 @@ class MinNonPreferedTrainProgsSlotAdmin(DepartmentModelAdmin):
 
 class AvoidBothTimesAdmin(DepartmentModelAdmin):
     list_display = ('week', 'year', 'tutor', 'group', 'time1', 'time2', 'comment',
-                    'weight')
+                    'weight',
+                    'is_active')
     ordering = ()
     list_filter = (('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
@@ -208,7 +219,8 @@ class AvoidBothTimesAdmin(DepartmentModelAdmin):
 
 class SimultaneousCoursesAdmin(DepartmentModelAdmin):
     list_display = ('week', 'year', 'comment',
-                    'weight')
+                    'weight',
+                    'is_active')
     ordering = ()
     list_filter = (('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
@@ -218,7 +230,8 @@ class SimultaneousCoursesAdmin(DepartmentModelAdmin):
 
 class RespectBoundPerDayAdmin(DepartmentModelAdmin):
     list_display = ('week', 'year', 'comment',
-                    'weight')
+                    'weight',
+                    'is_active')
     ordering = ()
     list_filter = (('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
@@ -227,7 +240,8 @@ class RespectBoundPerDayAdmin(DepartmentModelAdmin):
 
 
 class MinimizeBusyDaysAdmin(DepartmentModelAdmin):
-    list_display = ('week', 'year', 'comment')
+    list_display = ('week', 'year', 'comment',
+                    'is_active')
     ordering = ()
     list_filter = (('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
@@ -237,7 +251,8 @@ class MinimizeBusyDaysAdmin(DepartmentModelAdmin):
 
 class LimitedRoomChoicesAdmin(DepartmentModelAdmin):
     list_display = ('week', 'year', 'group', 'tutor', 'module', 'course_type',
-                    'weight')
+                    'weight',
+                    'is_active')
     ordering = ()
     list_filter = (('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
@@ -251,7 +266,8 @@ class LimitedRoomChoicesAdmin(DepartmentModelAdmin):
 
 class LimitedStartTimeChoicesAdmin(DepartmentModelAdmin):
     list_display = ('week', 'year', 'group', 'tutor', 'module', 'course_type', 'comment',
-                    'weight')
+                    'weight',
+                    'is_active')
     ordering = ()
     list_filter = (('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
@@ -265,7 +281,8 @@ class LimitedStartTimeChoicesAdmin(DepartmentModelAdmin):
 
 class LowerBoundBusyDaysAdmin(DepartmentModelAdmin):
     list_display = ('week', 'year', 'tutor', 'min_days_nb', 'lower_bound_hours', 'comment',
-                    'weight')
+                    'weight',
+                    'is_active')
     ordering = ()
     list_filter = (('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
@@ -276,7 +293,8 @@ class LowerBoundBusyDaysAdmin(DepartmentModelAdmin):
 
 class GroupsLunchBreakAdmin(DepartmentModelAdmin):
     list_display = ('week', 'year', 'comment',
-                    'weight')
+                    'weight',
+                    'is_active')
     ordering = ()
     list_filter = (('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
@@ -287,7 +305,8 @@ class GroupsLunchBreakAdmin(DepartmentModelAdmin):
 
 class TutorsLunchBreakAdmin(DepartmentModelAdmin):
     list_display = ('week', 'year', 'comment',
-                    'weight')
+                    'weight',
+                    'is_active')
     ordering = ()
     list_filter = (('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
@@ -296,7 +315,8 @@ class TutorsLunchBreakAdmin(DepartmentModelAdmin):
 
 class AmphiBreakAdmin(DepartmentModelAdmin):
     list_display = ('week', 'year', 'comment',
-                    'weight')
+                    'weight',
+                    'is_active')
     ordering = ()
     list_filter = (('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
@@ -306,7 +326,8 @@ class AmphiBreakAdmin(DepartmentModelAdmin):
 
 class NoVisioAdmin(DepartmentModelAdmin):
     list_display = ('week', 'year', 'comment',
-                    'weight')
+                    'weight',
+                    'is_active')
     ordering = ()
     list_filter = (('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
@@ -317,7 +338,8 @@ class NoVisioAdmin(DepartmentModelAdmin):
 
 class BoundVisioHalfDaysAdmin(DepartmentModelAdmin):
     list_display = ('week', 'year', 'comment',
-                    'weight')
+                    'weight',
+                    'is_active')
     ordering = ()
     list_filter = (('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
@@ -328,7 +350,8 @@ class BoundVisioHalfDaysAdmin(DepartmentModelAdmin):
 
 class LimitGroupsPhysicalPresenceAdmin(DepartmentModelAdmin):
     list_display = ('week', 'year', 'comment',
-                    'weight')
+                    'weight',
+                    'is_active')
     ordering = ()
     list_filter = (('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
