@@ -1065,27 +1065,36 @@ function warning_check(check_tot) {
     if (check.nok == 'stable') {
       expand = "Le cours était censé être fixe.";
     } else if (check.nok == 'train_prog_unavailable') {
-      expand = "La promo " + check.more.train_prog + " ne devait pas avoir cours à ce moment-là.";
+      expand = "La promo " + check.more.train_prog
+        + " ne devait pas avoir cours à ce moment-là.";
     } else if (check.nok == 'tutor_busy') {
-      expand = "L'enseignant·e " + check.more.tutor + " avait déjà un cours prévu.";
+      expand = "L'enseignant·e " + check.more.tutor
+        + " avait déjà un cours prévu.";
     } else if (check.nok == 'group_busy') {
-      expand = "Le groupe " + check.more.group + " avait déjà un cours prévu.";
+      expand = "Le groupe " + check.more.group
+        + " avait déjà un cours prévu.";
     } else if (check.nok == 'tutor_unavailable') {
-      expand = "L'enseignant·e " + check.more.tutor + " s'était déclaré·e indisponible.";
+      expand = "L'enseignant·e " + check.more.tutor
+        + " s'était déclaré·e indisponible.";
     } else if (check.nok == 'tutor_availability_unknown') {
-      expand = "L'enseignant·e " + check.more.tutor + " n'a pas déclaré ses dispos.";
+      expand = "L'enseignant·e " + check.more.tutor
+        + " n'a pas déclaré ses dispos.";
     } else if (check.nok == 'tutor_busy_other_dept') {
-      expand = "L'enseignant·e " + check.more.tutor + " est occupé dans un autre département.";
+      expand = "L'enseignant·e " + check.more.tutor
+        + " est occupé dans un autre département.";
     } else if (check.nok == 'tutor_free_week') {
-      expand = "L'enseignant·e " + check.more.tutor + " ne donne pas de cours cette week.";
+      expand = "L'enseignant·e " + check.more.tutor
+        + " ne donne pas de cours cette week.";
     } else if (check.nok == 'room_busy') {
       if (check.more.rooms.length == 1) {
         expand = "La salle " + check.more.rooms[0] + " est déjà prise.";
       } else {
-        expand = "Les salles " + check.more.rooms.join(", ") + " sont déjà prises.";
+        expand = "Les salles " + check.more.rooms.join(", ")
+          + " sont déjà prises.";
       }
     } else if (check.nok == 'room_busy_other_dept') {
-      expand = "La salle " + check.more.room + " est utilisée par un autre département.";
+      expand = "La salle " + check.more.room
+        + " est utilisée par un autre département.";
     }
     return expand;
   });
@@ -1104,7 +1113,7 @@ function simultaneous_courses(target_course) {
 }
 
 /*
- check whether it is possible to schedule c2m on time date.start_time, day date.day. 
+ check whether pending.wanted_course is acceptable. 
  returns an object containing at least contraints_ok: true iff it is, and
  - nok_type: 'stable' -> course cannot be moved
  - nok_type: 'train_prog_unavailable', train_prog: abbrev_train_prog -> students
@@ -1116,8 +1125,6 @@ function simultaneous_courses(target_course) {
    unavailable
  - nok_type: 'sleep', tutor: tutor_username -> the tutor needs to sleep (11h break)
 */
-// c2m element of course
-// date {day, start_time}
 function check_course() {
   let ret = [];
   let possible_conflicts = [];
