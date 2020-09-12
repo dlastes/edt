@@ -30,6 +30,9 @@ from base.models import ScheduledCourse
 
 from TTapp.TTUtils import get_conflicts
 
+from TTapp.admin import GroupsLunchBreakResource
+from TTapp.TTConstraints.orsay_constraints import GroupsLunchBreak
+
 from MyFlOp import MyTTUtils
 
             
@@ -66,3 +69,8 @@ def reassign_rooms(req, dept, year, week, work_copy):
     Reassign rooms of scheduled courses with work copy work_copy
     '''
     return JsonResponse(MyTTUtils.reassign_rooms(dept, week, year, work_copy))
+
+def fetch_group_lunch(req):
+    dataset = GroupsLunchBreakResource().export(
+        GroupsLunchBreak.objects.filter(department=req.department))
+    return HttpResponse(dataset.csv)
