@@ -61,7 +61,7 @@ class GroupsLunchBreak(TTConstraint):
         for day in days:
             local_slots = [Slot(day=day, start_time=st, end_time=st+self.lunch_length)
                            for st in range(self.start_time, self.end_time - self.lunch_length + 1,
-                                           ttmodel.wdb.min_slots_step)]
+                                           15)]
             slots_nb = len(local_slots)
             # pour chaque groupe, au moins un de ces slots ne voit aucun cours lui être simultané
             slot_vars = {}
@@ -138,7 +138,7 @@ class TutorsLunchBreak(TTConstraint):
         for day in days:
             local_slots = [Slot(day=day, start_time=st, end_time=st+self.lunch_length)
                            for st in range(self.start_time, self.end_time - self.lunch_length + 1,
-                                           ttmodel.wdb.min_slots_step)]
+                                           15)]
             slots_nb = len(local_slots)
             # pour chaque groupe, au moins un de ces slots ne voit aucun cours lui être simultané
             slot_vars = {}
