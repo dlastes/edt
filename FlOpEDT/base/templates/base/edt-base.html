@@ -80,6 +80,7 @@
     var url_mail_auto = "{% url "base:email-proposal" department %}";
     var url_game = "{% url 'easter_egg:start_game' %}" ;
   var url_colors = "{% url 'displayweb:fetch_colors' department %}" ;
+  var url_group_lunch = "{% url 'TTapp:fetch_group_lunch' %}" ;
 
     var department = "{{ dept }}" ;
     var week_year_list = {{ all_weeks| safe }};

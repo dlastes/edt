@@ -69,6 +69,7 @@ class GroupType(models.Model):
 
 
 class Group(models.Model):
+    # should not include "-" nor "|"
     name = models.CharField(max_length=10)
     train_prog = models.ForeignKey(
         'TrainingProgramme', on_delete=models.CASCADE)
@@ -79,6 +80,7 @@ class Group(models.Model):
                                            blank=True,
                                            related_name="children_groups")
 
+    @property
     def full_name(self):
         return self.train_prog.abbrev + "-" + self.name
 

@@ -1065,27 +1065,41 @@ function warning_check(check_tot) {
     if (check.nok == 'stable') {
       expand = "Le cours était censé être fixe.";
     } else if (check.nok == 'train_prog_unavailable') {
-      expand = "La promo " + check.more.train_prog + " ne devait pas avoir cours à ce moment-là.";
+      expand = "La promo " + check.more.train_prog
+        + " ne devait pas avoir cours à ce moment-là.";
     } else if (check.nok == 'tutor_busy') {
-      expand = "L'enseignant·e " + check.more.tutor + " avait déjà un cours prévu.";
+      expand = "L'enseignant·e " + check.more.tutor
+        + " avait déjà un cours prévu.";
     } else if (check.nok == 'group_busy') {
-      expand = "Le groupe " + check.more.group + " avait déjà un cours prévu.";
+      expand = "Le groupe " + check.more.group
+        + " avait déjà un cours prévu.";
     } else if (check.nok == 'tutor_unavailable') {
-      expand = "L'enseignant·e " + check.more.tutor + " s'était déclaré·e indisponible.";
+      expand = "L'enseignant·e " + check.more.tutor
+        + " s'était déclaré·e indisponible.";
     } else if (check.nok == 'tutor_availability_unknown') {
-      expand = "L'enseignant·e " + check.more.tutor + " n'a pas déclaré ses dispos.";
+      expand = "L'enseignant·e " + check.more.tutor
+        + " n'a pas déclaré ses dispos.";
     } else if (check.nok == 'tutor_busy_other_dept') {
-      expand = "L'enseignant·e " + check.more.tutor + " est occupé dans un autre département.";
+      expand = "L'enseignant·e " + check.more.tutor
+        + " est occupé dans un autre département.";
     } else if (check.nok == 'tutor_free_week') {
-      expand = "L'enseignant·e " + check.more.tutor + " ne donne pas de cours cette week.";
+      expand = "L'enseignant·e " + check.more.tutor
+        + " ne donne pas de cours cette week.";
     } else if (check.nok == 'room_busy') {
       if (check.more.rooms.length == 1) {
         expand = "La salle " + check.more.rooms[0] + " est déjà prise.";
       } else {
-        expand = "Les salles " + check.more.rooms.join(", ") + " sont déjà prises.";
+        expand = "Les salles " + check.more.rooms.join(", ")
+          + " sont déjà prises.";
       }
     } else if (check.nok == 'room_busy_other_dept') {
-      expand = "La salle " + check.more.room + " est utilisée par un autre département.";
+      expand = "La salle " + check.more.room
+        + " est utilisée par un autre département.";
+    } else if (check.nok == 'group_lunch') {
+      expand = "Le groupe " + check.more.group
+        + " de " + set_promos[check.more.promo]
+        + " aura du mal à manger le "
+        + week_days.day_by_ref(check.more.day).date + ".";
     }
     return expand;
   });
@@ -1103,8 +1117,146 @@ function simultaneous_courses(target_course) {
   });
 }
 
+
+// return courses that involve any student of target_course during
+// during the same day
+function gp_courses(target_course) {
+  let ret = cours.filter(function (c) {
+    return (
+      c.day == target_course.day
+        && c.id_course != target_course.id_course
+        && c.promo == target_course.promo
+        && (
+          c.group == target_course.group
+          ||
+          groups[target_course.promo][target_course.group]
+            .ancetres.indexOf(c.group) > -1
+          ||
+          groups[target_course.promo][target_course.group]
+            .descendants.indexOf(c.group) > -1
+        )
+    ) ;
+  }) ;
+  ret.push(pending.wanted_course);
+  return ret ;
+}
+
+// return courses that involve the tutor of target_course during
+// during the same day
+function tutor_courses(target_course) {
+  return cours.filter(function (c) {
+    return (
+      c.day == target_course.day
+        && c.id_course != target_course.id_course
+        && c.prof == target_course.prof
+    ) ;
+  });
+}
+
+function check_group_lunch(issues) {
+
+  // is there a constraint for this group
+  let related_cst = lunch_constraint.groups.filter(function(c){
+    return (
+      c.groups.filter(function(g){
+        return (
+          g.group == pending.wanted_course.group
+            && g.promo == pending.wanted_course.promo) ;
+      }).length > 0) ;
+  }) ;
+
+  // if not, is there a general constraint
+  if (related_cst.length == 0) {
+    related_cst = lunch_constraint.groups.filter(function(c){
+      return c.groups.length == 0 ;
+    }) ;
+  }
+
+  // no lunch constraint
+  if (related_cst.length == 0) {
+    return ;
+  }
+
+  if (!have_lunch(
+    gp_courses(pending.wanted_course),
+    related_cst[0].start,
+    related_cst[0].end,
+    related_cst[0].min_length
+  )) {
+    issues.push({
+      nok: 'group_lunch',
+      more: {
+        group: pending.wanted_course.group,
+        promo: pending.wanted_course.promo,
+        day: pending.wanted_course.day}
+    });
+  }
+}
+
+// could someone with courses in course_list have lunch of length
+// lunch_length between lunch_start and lunch_end?
+function have_lunch(course_list, lunch_start, lunch_end, lunch_length) {
+  if (course_list.length == 0) {
+    return true ;
+  }
+  course_list.sort(function(a,b) {
+    return a.start - b.start ;
+  });
+
+  // get all busy intervals of the day
+  let i = 1 ; let j = 0 ;
+  let busy_times = [] ;
+  busy_times.push({
+    start: course_list[0].start,
+    duration: course_list[0].duration
+  });
+  while (i < course_list.length) {
+    if (course_list[i].start > busy_times[j].start + busy_times[j].duration) {
+      busy_times.push({
+        start: course_list[i].start,
+        duration: course_list[i].duration
+      });
+      j ++ ;
+    } else {
+      busy_times[j].duration =
+        Math.max(
+          busy_times[j].start + busy_times[j].duration,
+          course_list[i].start + course_list[i].duration
+        )
+        - busy_times[j].start ;
+    }
+    i++ ;
+  }
+
+  // do we have enough consecutive time?
+  i = 0 ;
+  // enough time before the first course or after the last course
+  if (busy_times[0].start >= lunch_start + lunch_length
+      ||
+      busy_times[busy_times.length-1].start
+      + busy_times[busy_times.length-1].duration
+      <= lunch_end - lunch_length) {
+    return true ;
+  }
+  // maybe between two courses?
+  while (
+    i+1 < busy_times.length
+      && busy_times[i].start + busy_times[i].duration
+      <= lunch_end - lunch_length) {
+    if (
+      Math.min(busy_times[i+1].start, lunch_end)
+        - Math.max(busy_times[i].start + busy_times[i].duration, lunch_start)
+        >= lunch_length) {
+      return true ;
+    }
+    i ++ ;
+  }
+  return false ;
+}
+
+
 /*
- check whether it is possible to schedule c2m on time date.start_time, day date.day. 
+ check whether pending.wanted_course is acceptable. 
  returns an object containing at least contraints_ok: true iff it is, and
  - nok_type: 'stable' -> course cannot be moved
  - nok_type: 'train_prog_unavailable', train_prog: abbrev_train_prog -> students
@@ -1116,20 +1268,13 @@ function simultaneous_courses(target_course) {
    unavailable
  - nok_type: 'sleep', tutor: tutor_username -> the tutor needs to sleep (11h break)
 */
-// c2m element of course
-// date {day, start_time}
 function check_course() {
-
   let ret = [];
   let possible_conflicts = [];
-  let conflicts = [];
-
-  let wanted_course = pending.wanted_course ;
-
-  
 
   pending.update_linked();
 
+  // everything allowed in the garbage
   if (is_garbage(pending.wanted_course)) {
     return ret;
   }
@@ -1139,163 +1284,204 @@ function check_course() {
   }
 
   if (!pending.pass.core) {
-
-    // course was supposed to be fix
-    if (pending.wanted_course.id_course == -1) {
-      ret.push({ nok: 'stable' });
-    }
-
-    // training programme was supposed to be free
-    pending.linked_courses.forEach(function(c) {
-      if (is_free(c, c.promo)) {
-        ret.push({
-          nok: 'train_prog_unavailable',
-          more: { train_prog: set_promos[c.promo] }
-        });
-      }
-    });
+    check_stable_course(ret) ;
+    check_free_training_programme(ret) ;
   }
-
-
 
 
   possible_conflicts = simultaneous_courses(pending.wanted_course);
 
   if (!pending.pass.core) {
-    pending.linked_courses.forEach(function(wanted) {
-      // group is busy
-      conflicts = possible_conflicts.filter(function (c) {
-        return (
-          (c.group == wanted.group
-           || groups[wanted.promo][wanted.group]
-             .ancetres.indexOf(c.group) > -1
-           || groups[wanted.promo][wanted.group]
-             .descendants.indexOf(c.group) > -1
-          )
-            && c.promo == wanted.promo
-        );
-      });
 
-      if (conflicts.length > 0) {
-        ret.push({
-          nok: 'group_busy',
-          more: { group: wanted.group }
-        });
-      }
+    check_busy_group(ret, possible_conflicts) ;
 
-      // we will ask later about other constraints
-      if (ret.length > 0 && (pending.force.tutor || pending.force.room)) {
-        return ret;
-      }
-    });
+    check_group_lunch(ret);    
+
+    // we will ask later about other constraints
+    if (ret.length > 0 && (pending.force.tutor || pending.force.room)) {
+      return ret;
+    }
 
   }
-
 
 
   // tutor availability
   if (!pending.pass.tutor) {
-    conflicts = possible_conflicts.filter(function (c) {
-      return (c.prof == wanted_course.prof);
-    });
-
-
-
-    if (conflicts.length > 0) {
-      ret.push({
-        nok: 'tutor_busy',
-        more: { tutor: wanted_course.prof }
-      });
-    }
-
-
-
+    
+    check_tutor_busy(ret, possible_conflicts) ;
+    
     // tutor availability
-    if (dispos[wanted_course.prof] !== undefined) {
-
-      // in the current department
-      var pref_tut = get_preference(dispos[wanted_course.prof][wanted_course.day],
-        wanted_course.start, wanted_course.duration);
-      if (pref_tut == 0) {
-        ret.push({
-          nok: 'tutor_unavailable',
-          more: { tutor: wanted_course.prof }
-        });
-      } else if (pref_tut == -1) {
-        ret.push({
-          nok: 'tutor_availability_unknown',
-          more: { tutor: wanted_course.prof }
-        });
-      }
-
-      // in other departments
-      var extra_unavailable = find_in_pref(extra_pref.tutors, wanted_course.prof, wanted_course);
-
-      if (extra_unavailable == 0) {
-        ret.push({
-          nok: 'tutor_busy_other_dept',
-          more: { tutor: wanted_course.prof }
-        });
-      }
-
-    } else {
-      ret.push({
-        nok: 'tutor_free_week',
-        more: { tutor: wanted_course.prof }
-      });
+    if (!check_tutor_free_week(ret)) {
+      check_tutor_preferences(ret) ;
+      check_tutor_busy_other_departments(ret) ;
     }
-
+        
     // we will ask later about room constraints
     if (ret.length > 0 && pending.force.room) {
       return ret;
     }
-
-
+        
   }
 
-  // shared rooms availability
-  // var extra_unavailable = find_in_pref(extra_pref.rooms,
-  //                                      wanted_course.room,
-  //                                      wanted_course);
 
   if (!pending.pass.room) {
-
-    var busy_rooms = [];
-    possible_conflicts.forEach(function (c) {
-      if (c.room in rooms.roomgroups) {
-        rooms.roomgroups[c.room].forEach(function (r) {
-          busy_rooms.push(r);
-        });
-      }
-    });
-
-    var conflict_rooms = [];
-    if (wanted_course.room in rooms.roomgroups) {
-      rooms.roomgroups[wanted_course.room].forEach(function (r) {
-        if (busy_rooms.includes(r)) {
-          conflict_rooms.push(r);
-        }
-      });
-    }
-
-    if (conflict_rooms.length > 0) {
-      ret.push({
-        nok: 'room_busy',
-        more: { rooms: [conflict_rooms] }
-      });
-    }
-
-    extra_unavailable = find_in_pref(extra_pref.rooms, wanted_course.room, wanted_course);
-
-    if (extra_unavailable == 0) {
-      ret.push({
-        nok: 'room_busy_other_dept',
-        more: { room: wanted_course.room }
-      });
-    }
+    check_unshared_rooms(ret, possible_conflicts) ;
+    check_shared_rooms(ret, possible_conflicts) ;
   }
 
   return ret;
+}
+
+// course cannot be moved
+function check_stable_course(issues) {
+  if (pending.wanted_course.id_course == -1) {
+    issues.push({ nok: 'stable' });
+  }
+}
+
+
+// training programme is free
+function check_free_training_programme(issues) {
+  pending.linked_courses.forEach(function(c) {
+    if (is_free(c, c.promo)) {
+      issues.push({
+        nok: 'train_prog_unavailable',
+        more: { train_prog: set_promos[c.promo] }
+      });
+    }
+  });
+}
+
+// group is busy
+function check_busy_group(issues, possible_conflicts) {
+  let conflicts = [] ;
+  pending.linked_courses.forEach(function(wanted) {
+    conflicts = possible_conflicts.filter(function (c) {
+      return (
+        (c.group == wanted.group
+         || groups[wanted.promo][wanted.group].ancetres.indexOf(c.group) > -1
+         || groups[wanted.promo][wanted.group].descendants.indexOf(c.group) > -1
+        )
+          && c.promo == wanted.promo
+      );
+    });
+
+    if (conflicts.length > 0) {
+      issues.push({
+        nok: 'group_busy',
+        more: { group: wanted.group }
+      });
+    }
+  }) ;
+}
+
+// tutor does not teach this week
+// return true iff does not teach  
+function check_tutor_free_week(issues) {
+  if (typeof dispos[pending.wanted_course.prof] === 'undefined') {
+    issues.push({
+      nok: 'tutor_free_week',
+      more: { tutor: pending.wanted_course.prof }
+    });
+    return true ;
+  }
+  return false ;
+}
+
+
+// tutor teaches already in the current department
+function check_tutor_busy(issues, possible_conflicts) {
+  let conflicts = possible_conflicts.filter(function (c) {
+    return (c.prof == pending.wanted_course.prof);
+  });
+  
+  if (conflicts.length > 0) {
+    issues.push({
+      nok: 'tutor_busy',
+      more: { tutor: pending.wanted_course.prof }
+    });
+  }
+}
+
+
+// tutor teaches already in another department
+function check_tutor_busy_other_departments(issues) {
+  let extra_unavailable = find_in_pref(
+    extra_pref.tutors,
+    pending.wanted_course.prof,
+    pending.wanted_course);
+  
+  if (extra_unavailable == 0) {
+    issues.push({
+      nok: 'tutor_busy_other_dept',
+      more: { tutor: pending.wanted_course.prof }
+    });
+  }
+}
+
+// tutor is a priori available
+function check_tutor_preferences(issues) {
+  let wanted_course = pending.wanted_course ;
+  let pref_tut = get_preference(
+    dispos[wanted_course.prof][wanted_course.day],
+    wanted_course.start, wanted_course.duration);
+  if (pref_tut == 0) {
+    issues.push({
+      nok: 'tutor_unavailable',
+      more: { tutor: wanted_course.prof }
+    });
+  } else if (pref_tut == -1) {
+    issues.push({
+      nok: 'tutor_availability_unknown',
+      more: { tutor: wanted_course.prof }
+    });
+  }
+}
+
+
+// room available in the current department
+function check_unshared_rooms(issues, possible_conflicts) {
+  let busy_rooms = [];
+  possible_conflicts.forEach(function (c) {
+    if (c.room in rooms.roomgroups) {
+      rooms.roomgroups[c.room].forEach(function (r) {
+        busy_rooms.push(r);
+      });
+    }
+  });
+
+  let conflict_rooms = [];
+  if (pending.wanted_course.room in rooms.roomgroups) {
+    rooms.roomgroups[pending.wanted_course.room].forEach(function (r) {
+      if (busy_rooms.includes(r)) {
+        conflict_rooms.push(r);
+      }
+    });
+  }
+
+  if (conflict_rooms.length > 0) {
+    issues.push({
+      nok: 'room_busy',
+      more: { rooms: [conflict_rooms] }
+    });
+  }
+}
+
+
+// room available in the current department
+function check_shared_rooms(issues, possible_conflicts) {
+  let wanted_course = pending.wanted_course ;
+  let extra_unavailable = find_in_pref(
+    extra_pref.rooms,
+    wanted_course.room,
+    wanted_course);
+
+  if (extra_unavailable == 0) {
+    issues.push({
+      nok: 'room_busy_other_dept',
+      more: { room: wanted_course.room }
+    });
+  }
 }
 
 
@@ -1305,7 +1491,8 @@ function splash_violated_constraints(check_list, step) {
   console.log(warn_check);
   //console.log(pending.wanted_course.id_course);
   if ((logged_usr.rights >> 2) % 2 == 1) {
-    var privilege_warning = "Des privilèges vous ont été accordés, et vous en profitez pour outrepasser ";
+    var privilege_warning = "Des privilèges vous ont été accordés, "
+    + "et vous en profitez pour outrepasser ";
     if (warn_check.length > 1) {
       privilege_warning += "les contraintes suivantes :";
     } else {
@@ -1795,6 +1982,59 @@ function get_dispos_type(dt) {
 // --   end   --
 // -- no slot --
 
+
+/*--------------------------
+   ------ CONSTRAINTS ------
+   -------------------------*/
+
+
+function fetch_lunch_constraints() {
+  show_loader(true);
+  $.ajax({
+    type: "GET", //rest Type
+    dataType: 'text',
+    url: url_group_lunch,
+    async: true,
+    contentType: "text/csv",
+    success: function (msg) {
+      console.log(msg);
+      lunch_constraint.groups = d3.csvParse(
+        msg,
+        translate_group_lunch_constraints);
+      show_loader(false);
+    },
+    error: function (xhr, error) {
+      console.log("error");
+      console.log(xhr);
+      console.log(error);
+      console.log(xhr.responseText);
+      show_loader(false);
+      // window.location.href = url_login;
+      //window.location.replace(url_login+"?next="+url_stype);
+    }
+  });
+}
+
+
+function translate_group_lunch_constraints(d) {
+  let ret = {
+    start: +d.start_time,
+    end: +d.end_time,
+    min_length: +d.lunch_length,
+    groups: []
+  };
+  let groups = d.groups.split("|");
+  if (groups.length > 1) {
+    for (let i = 0 ; i < groups.length ; i++) {
+      let tp_gp = groups[i].split("-");
+      ret.groups.push({
+        promo: set_promos.indexOf(tp_gp[0]),
+        group: translate_gp_name(tp_gp[1])
+      });
+    }
+  }
+  return ret ;
+}
 
 
 
