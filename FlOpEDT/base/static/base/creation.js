@@ -1095,6 +1095,11 @@ function warning_check(check_tot) {
     } else if (check.nok == 'room_busy_other_dept') {
       expand = "La salle " + check.more.room
         + " est utilisée par un autre département.";
+    } else if (check.nok == 'group_lunch') {
+      expand = "Le groupe " + check.more.group
+        + " de " + set_promos[check.more.promo]
+        + " aura du mal à manger le "
+        + week_days.day_by_ref(check.more.day).date + ".";
     }
     return expand;
   });
@@ -1111,6 +1116,144 @@ function simultaneous_courses(target_course) {
       && c.id_course != target_course.id_course);
   });
 }
+
+
+// return courses that involve any student of target_course during
+// during the same day
+function gp_courses(target_course) {
+  let ret = cours.filter(function (c) {
+    return (
+      c.day == target_course.day
+        && c.id_course != target_course.id_course
+        && c.promo == target_course.promo
+        && (
+          c.group == target_course.group
+          ||
+          groups[target_course.promo][target_course.group]
+            .ancetres.indexOf(c.group) > -1
+          ||
+          groups[target_course.promo][target_course.group]
+            .descendants.indexOf(c.group) > -1
+        )
+    ) ;
+  }) ;
+  ret.push(pending.wanted_course);
+  return ret ;
+}
+
+// return courses that involve the tutor of target_course during
+// during the same day
+function tutor_courses(target_course) {
+  return cours.filter(function (c) {
+    return (
+      c.day == target_course.day
+        && c.id_course != target_course.id_course
+        && c.prof == target_course.prof
+    ) ;
+  });
+}
+
+function check_group_lunch(issues) {
+
+  // is there a constraint for this group
+  let related_cst = lunch_constraint.groups.filter(function(c){
+    return (
+      c.groups.filter(function(g){
+        return (
+          g.group == pending.wanted_course.group
+            && g.promo == pending.wanted_course.promo) ;
+      }).length > 0) ;
+  }) ;
+
+  // if not, is there a general constraint
+  if (related_cst.length == 0) {
+    related_cst = lunch_constraint.groups.filter(function(c){
+      return c.groups.length == 0 ;
+    }) ;
+  }
+
+  // no lunch constraint
+  if (related_cst.length == 0) {
+    return ;
+  }
+
+  if (!have_lunch(
+    gp_courses(pending.wanted_course),
+    related_cst[0].start,
+    related_cst[0].end,
+    related_cst[0].min_length
+  )) {
+    issues.push({
+      nok: 'group_lunch',
+      more: {
+        group: pending.wanted_course.group,
+        promo: pending.wanted_course.promo,
+        day: pending.wanted_course.day}
+    });
+  }
+}
+
+// could someone with courses in course_list have lunch of length
+// lunch_length between lunch_start and lunch_end?
+function have_lunch(course_list, lunch_start, lunch_end, lunch_length) {
+  if (course_list.length == 0) {
+    return true ;
+  }
+  course_list.sort(function(a,b) {
+    return a.start - b.start ;
+  });
+
+  // get all busy intervals of the day
+  let i = 1 ; let j = 0 ;
+  let busy_times = [] ;
+  busy_times.push({
+    start: course_list[0].start,
+    duration: course_list[0].duration
+  });
+  while (i < course_list.length) {
+    if (course_list[i].start > busy_times[j].start + busy_times[j].duration) {
+      busy_times.push({
+        start: course_list[i].start,
+        duration: course_list[i].duration
+      });
+      j ++ ;
+    } else {
+      busy_times[j].duration =
+        Math.max(
+          busy_times[j].start + busy_times[j].duration,
+          course_list[i].start + course_list[i].duration
+        )
+        - busy_times[j].start ;
+    }
+    i++ ;
+  }
+
+  // do we have enough consecutive time?
+  i = 0 ;
+  // enough time before the first course or after the last course
+  if (busy_times[0].start >= lunch_start + lunch_length
+      ||
+      busy_times[busy_times.length-1].start
+      + busy_times[busy_times.length-1].duration
+      <= lunch_end - lunch_length) {
+    return true ;
+  }
+  // maybe between two courses?
+  while (
+    i+1 < busy_times.length
+      && busy_times[i].start + busy_times[i].duration
+      <= lunch_end - lunch_length) {
+    if (
+      Math.min(busy_times[i+1].start, lunch_end)
+        - Math.max(busy_times[i].start + busy_times[i].duration, lunch_start)
+        >= lunch_length) {
+      return true ;
+    }
+    i ++ ;
+  }
+  return false ;
+}
+
 
 /*
  check whether pending.wanted_course is acceptable. 
@@ -1151,6 +1294,8 @@ function check_course() {
   if (!pending.pass.core) {
 
     check_busy_group(ret, possible_conflicts) ;
+
+    check_group_lunch(ret);    
 
     // we will ask later about other constraints
     if (ret.length > 0 && (pending.force.tutor || pending.force.room)) {
