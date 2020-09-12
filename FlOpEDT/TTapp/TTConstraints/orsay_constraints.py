@@ -48,6 +48,7 @@ class GroupsLunchBreak(TTConstraint):
 
     start_time = models.PositiveSmallIntegerField()
     end_time = models.PositiveSmallIntegerField()
+    # ArrayField unusable with django-import-export
     weekdays = ArrayField(models.CharField(max_length=2, choices=Day.CHOICES), blank=True, null=True)
     lunch_length = models.PositiveSmallIntegerField()
     groups = models.ManyToManyField('base.Group', blank=True, related_name='lunch_breaks_constraints')

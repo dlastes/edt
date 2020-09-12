@@ -353,7 +353,12 @@ function create_dispos_user_data() {
       user.dispos_bu.push(d2p);
       if (pref_list[k].value < 0) {
         if (!pref_only) {
-          pref_list[k].value = get_dispos_type(d2p).value;
+          let default_pref = get_dispos_type(d2p);
+          if (default_pref != null) {
+            pref_list[k].value = default_pref.value;
+          } else {
+            pref_list[k].value = 0 ;
+          }
         } else {
           pref_list[k].value = par_dispos.nmax;
         }

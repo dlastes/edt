@@ -163,7 +163,7 @@ def get_groups(department_abbrev):
         gp_dict_children = {}
         gp_master = None
         for gp in Group.objects.filter(train_prog=train_prog):
-            if gp.full_name() in gp_dict_children:
+            if gp.full_name in gp_dict_children:
                 raise Exception('Group name should be unique')
             if gp.parent_groups.all().count() == 0:
                 if gp_master is not None:
@@ -173,7 +173,7 @@ def get_groups(department_abbrev):
             elif gp.parent_groups.all().count() > 1:
                 raise Exception('Not tree-like group structures are not yet '
                                 'handled')
-            gp_dict_children[gp.full_name()] = []
+            gp_dict_children[gp.full_name] = []
 
         if gp_master is None:
             raise Exception(f"Training program {train_prog} does not have any group"
@@ -181,7 +181,7 @@ def get_groups(department_abbrev):
 
         for gp in Group.objects.filter(train_prog=train_prog).order_by('name'):
             for new_gp in gp.parent_groups.all():
-                gp_dict_children[new_gp.full_name()].append(gp)
+                gp_dict_children[new_gp.full_name].append(gp)
 
         final_groups.append(get_descendant_groups(gp_master, gp_dict_children))
 
@@ -221,9 +221,9 @@ def get_descendant_groups(gp, children):
     except ObjectDoesNotExist:
         pass
 
-    if len(children[gp.full_name()]) > 0:
+    if len(children[gp.full_name]) > 0:
         current['children'] = []
-        for gp_child in children[gp.full_name()]:
+        for gp_child in children[gp.full_name]:
             gp_obj = get_descendant_groups(gp_child, children)
             gp_obj['parent'] = gp.name
             current['children'].append(gp_obj)

@@ -33,7 +33,7 @@ from base.models import Group
 
 class GroupChoiceField(forms.ModelMultipleChoiceField):
     def label_from_instance(self, obj):
-        return obj.full_name()
+        return obj.full_name
 
 class AddStudentForm(UserCreationForm):
     gps = GroupChoiceField(

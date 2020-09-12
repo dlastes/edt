@@ -187,7 +187,11 @@ file_fetch.groups.callback = function () {
       t.day_finish_time
     ]);
   }
-  
+
+  //need set_promos
+  fetch_lunch_constraints();
+
+  //need nbRows
   hours_header.create_indicator();
 };
 

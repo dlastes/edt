@@ -29,6 +29,9 @@
 from django.contrib import admin
 from base.admin import DepartmentModelAdmin
 
+from import_export import resources, fields
+from import_export.widgets import ManyToManyWidget
+
 from TTapp.models import \
     LimitModulesTimePerPeriod, Stabilize, \
     MinModulesHalfDays, MinTutorsHalfDays, MinGroupsHalfDays,\
@@ -37,6 +40,8 @@ from TTapp.models import \
     AvoidBothTimes, LimitedRoomChoices, LimitedStartTimeChoices, \
     LimitTutorsTimePerPeriod, LimitGroupsTimePerPeriod, LowerBoundBusyDays, GroupsLunchBreak, BreakAroundCourseType, \
     NoVisio, LimitGroupsPhysicalPresence, BoundVisioHalfDays, TutorsLunchBreak
+
+from TTapp.TTConstraints.orsay_constraints import GroupsLunchBreak
 
 # Register your models here.
 
@@ -358,6 +363,20 @@ class LimitGroupsPhysicalPresenceAdmin(DepartmentModelAdmin):
                    ('train_progs', DropdownFilterRel),
                    )
 
+
+
+class GroupsLunchBreakResource(resources.ModelResource):
+    groups = fields.Field(
+        column_name='groups',
+        attribute='groups',
+        widget=ManyToManyWidget('base.Group', field='full_name', separator='|'))
+
+    class Meta:
+        model = GroupsLunchBreak
+        fields = ('start_time', 'end_time', 'lunch_length', 'groups')
+
+
+    
 admin.site.register(CustomConstraint, CustomConstraintAdmin)
 admin.site.register(Stabilize, StabilizeAdmin)
 admin.site.register(MinGroupsHalfDays, MinGroupsHalfDaysAdmin)
