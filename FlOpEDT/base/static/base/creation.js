@@ -1838,6 +1838,59 @@ function get_dispos_type(dt) {
 // -- no slot --
 
 
+/*--------------------------
+   ------ CONSTRAINTS ------
+   -------------------------*/
+
+
+function fetch_lunch_constraints() {
+  show_loader(true);
+  $.ajax({
+    type: "GET", //rest Type
+    dataType: 'text',
+    url: url_group_lunch,
+    async: true,
+    contentType: "text/csv",
+    success: function (msg) {
+      console.log(msg);
+      lunch_constraint.groups = d3.csvParse(
+        msg,
+        translate_group_lunch_constraints);
+      show_loader(false);
+    },
+    error: function (xhr, error) {
+      console.log("error");
+      console.log(xhr);
+      console.log(error);
+      console.log(xhr.responseText);
+      show_loader(false);
+      // window.location.href = url_login;
+      //window.location.replace(url_login+"?next="+url_stype);
+    }
+  });
+}
+
+
+function translate_group_lunch_constraints(d) {
+  let ret = {
+    start: +d.start_time,
+    end: +d.end_time,
+    min_length: +d.lunch_length,
+    groups: []
+  };
+  let groups = d.groups.split("|");
+  if (groups.length > 1) {
+    for (let i = 0 ; i < groups.length ; i++) {
+      let tp_gp = groups[i].split("-");
+      ret.groups.push({
+        promo: set_promos.indexOf(tp_gp[0]),
+        group: translate_gp_name(tp_gp[1])
+      });
+    }
+  }
+  return ret ;
+}
+
 
 
 /*--------------------

@@ -1021,3 +1021,8 @@ var tutors_info = {};
 // cosmo mode: tutor_username -> {color_bg: color, color_txt: color}
 // tutor mode: module_abbrev -> {color_bg: color, color_txt: color}
 var colors = {} ;
+
+
+var lunch_constraint = {} ;
+lunch_constraint['groups'] = {};
+lunch_constraint['tutors'] = {};
