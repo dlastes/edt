@@ -151,8 +151,14 @@ class TutorsLunchBreak(TTConstraint):
                         ttmodel.sum(ttmodel.TTinstructors[sl, c, tutor] for c in considered_courses
                                     for sl in slots_filter(ttmodel.wdb.compatible_slots[c],
                                                            simultaneous_to=local_slot))
+                    # Je veux que slot_vars[tutor, local_slot] soit à 1
+                    # si et seulement si le tutor est busy (éventuellement dans un autre dep)
+                    # sur tout ou partie de local_slot
+                    undesired_IBS = \
+                        ttmodel.sum(ttmodel.IBS[tutor, sl]
+                                    for sl in slots_filter(ttmodel.wdb.availability_slots, simultaneous_to=local_slot))
                     slot_vars[tutor, local_slot] = ttmodel.add_floor(name='',
-                                                                     expr=undesired_scheduled_courses,
+                                                                     expr=undesired_IBS,
                                                                      floor=1,
                                                                      bound=len(considered_courses))
                 not_ok = ttmodel.add_floor(name='',
