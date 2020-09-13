@@ -145,21 +145,29 @@ class TutorsLunchBreak(TTConstraint):
 
             for tutor in considered_tutors:
                 considered_courses = self.get_courses_queryset_by_parameters(ttmodel, week, tutor=tutor)
+                other_dep_scheduled_courses = \
+                    set(ttmodel.wdb.other_departments_scheduled_courses_for_tutor[tutor]) | \
+                    set(ttmodel.wdb.other_departments_scheduled_courses_for_supp_tutor[tutor])
                 for local_slot in local_slots:
                     # Je veux que slot_vars[tutor, local_slot] soit à 1
-                    # si et seulement si undesired_scheduled_courses vaut plus que 1
+                    # si et seulement si
+                    # undesired_scheduled_courses ou other_dep_undesired_sc_nb vaut plus que 1
                     undesired_scheduled_courses = \
                         ttmodel.sum(ttmodel.TTinstructors[sl, c, tutor] for c in considered_courses
                                     for sl in slots_filter(ttmodel.wdb.compatible_slots[c],
                                                            simultaneous_to=local_slot))
-                    # Je veux que slot_vars[tutor, local_slot] soit à 1
-                    # si et seulement si le tutor est busy (éventuellement dans un autre dep)
-                    # sur tout ou partie de local_slot
-                    undesired_IBS = \
-                        ttmodel.sum(ttmodel.IBS[tutor, sl]
-                                    for sl in slots_filter(ttmodel.wdb.availability_slots, simultaneous_to=local_slot))
+                    if not other_dep_scheduled_courses:
+                        other_dep_undesired_sc_nb = 0
+                    else:
+                        other_dep_undesired_scheduled_courses = \
+                            set(sc for sc in other_dep_scheduled_courses
+                                if (sc.day, sc.course.week) == (day.day, day.week)
+                                and sc.start_time < local_slot.end_time
+                                and local_slot.start_time < sc.end_time())
+                        other_dep_undesired_sc_nb = len(other_dep_undesired_scheduled_courses)
+                    undesired_expression = undesired_scheduled_courses + other_dep_undesired_sc_nb * ttmodel.one_var
                     slot_vars[tutor, local_slot] = ttmodel.add_floor(name='',
-                                                                     expr=undesired_IBS,
+                                                                     expr=undesired_expression,
                                                                      floor=1,
                                                                      bound=len(considered_courses))
                 not_ok = ttmodel.add_floor(name='',
