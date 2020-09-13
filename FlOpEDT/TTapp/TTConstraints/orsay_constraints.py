@@ -163,7 +163,7 @@ class TutorsLunchBreak(TTConstraint):
                             set(sc for sc in other_dep_scheduled_courses
                                 if (sc.day, sc.course.week) == (day.day, day.week)
                                 and sc.start_time < local_slot.end_time
-                                and local_slot.start_time < sc.end_time())
+                                and local_slot.start_time < sc.end_time)
                         other_dep_undesired_sc_nb = len(other_dep_undesired_scheduled_courses)
                     undesired_expression = undesired_scheduled_courses + other_dep_undesired_sc_nb * ttmodel.one_var
                     slot_vars[tutor, local_slot] = ttmodel.add_floor(name='',
