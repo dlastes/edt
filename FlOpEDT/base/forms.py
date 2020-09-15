@@ -53,10 +53,18 @@ class ContactForm(forms.Form):
 class PerfectDayForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(PerfectDayForm, self).__init__(*args, **kwargs)
-        self.fields['pref_hours_per_day'] = forms.IntegerField(label="Idéalement", min_value=1, max_value=9,
-                                                               required=False, initial=4)
-        self.fields['max_hours_per_day'] = forms.IntegerField(label="Maximum", min_value=1, max_value=9,
-                                                              required=False, initial=6)
+        self.fields['pref_hours_per_day'] =\
+            forms.IntegerField(label="Idéalement",
+                               min_value=1,
+                               max_value=9,
+                               required=False,
+                               initial=4)
+        self.fields['max_hours_per_day'] = \
+            forms.IntegerField(label="Maximum",
+                               min_value=1,
+                               max_value=9,
+                               required=False,
+                               initial=6)
 
 
 class ModuleDescriptionForm(forms.ModelForm):

@@ -402,15 +402,25 @@ class ScheduledCourse(models.Model):
 
 
 class ScheduledCourseAdditional(models.Model):
-    scheduled_course = models.OneToOneField('ScheduledCourse', on_delete=models.CASCADE, related_name='additional')
-    link = models.ForeignKey('EnrichedLink', blank=True, null=True, default=None, related_name='additionnal',
-                             on_delete=models.SET_NULL)
-    comment = models.CharField(max_length=100, null=True, default=None, blank=True)
+    scheduled_course = models.OneToOneField(
+        'ScheduledCourse',
+        on_delete=models.CASCADE,
+        related_name='additional')
+    link = models.ForeignKey(
+        'EnrichedLink',
+        blank=True, null=True, default=None,
+        related_name='additionnal',
+        on_delete=models.SET_NULL)
+    comment = models.CharField(
+        max_length=100,
+        null=True, default=None, blank=True)
 
 
 class EnrichedLink(models.Model):
     url = models.URLField()
-    description = models.CharField(max_length=100, null=True, default=None, blank=True)
+    description = models.CharField(max_length=100,
+                                   null=True, default=None, blank=True)
+
     @property
     def concatenated(self):
         return self.url + ' ' + description

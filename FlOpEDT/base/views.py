@@ -46,7 +46,8 @@ from django.views.generic import RedirectView
 from FlOpEDT.decorators import dept_admin_required, tutor_required
 from FlOpEDT.settings.base import COSMO_MODE
 
-from people.models import Tutor, UserDepartmentSettings, User, NotificationsPreferences
+from people.models import Tutor, UserDepartmentSettings, User, \
+    NotificationsPreferences
 
 from displayweb.admin import BreakingNewsResource
 from displayweb.models import BreakingNews
