@@ -38,7 +38,7 @@ from base.models import Group, \
     Course, ScheduledCourse, UserPreference, CoursePreference, \
     Department, Module, TrainingProgramme, CourseType, \
     Dependency, TutorCost, GroupFreeHalfDay, GroupCost, Holiday, TrainingHalfDay, \
-    CourseStartTimeConstraint, TimeGeneralSettings, ModulePossibleTutors, CoursePossibleTutors, VisioPreference
+    CourseStartTimeConstraint, TimeGeneralSettings, ModulePossibleTutors, CoursePossibleTutors, CourseAdditional
 
 from base.timing import Time, Day
 
@@ -79,7 +79,7 @@ class WeeksDatabase(object):
             self.other_departments_sched_courses_for_avail_slot, \
             self.courses_availabilities, self.modules, self.dependencies = self.courses_init()
         if settings.VISIO_MODE:
-            self.visio_room, self.visio_courses, self.no_visio_courses, self.visio_ponderation = self.visio_init()
+            self.visio_courses, self.no_visio_courses, self.visio_ponderation = self.visio_init()
         self.room_types, self.rooms, self.basic_rooms, self.room_prefs, self.rooms_for_type, \
             self.room_course_compat, self.course_rg_compat, self.fixed_courses_for_room, \
             self.other_departments_sched_courses_for_room = self.rooms_init()
@@ -245,16 +245,6 @@ class WeeksDatabase(object):
         course_rg_compat = {}
         for c in self.courses:
             course_rg_compat[c] = set(c.room_type.members.all())
-        if settings.VISIO_MODE:
-            for c in set(self.courses):
-                if c in self.no_visio_courses:
-                    continue
-                # visio courses can only be in visio_room
-                # elif c in self.visio_courses:
-                #     course_rg_compat[c] = {self.visio_room}
-                # other courses can also be in visio room
-                else:
-                    course_rg_compat[c] |= {self.visio_room}
 
         # for each Room, build the list of courses that may use it
         room_course_compat = {}
@@ -265,7 +255,11 @@ class WeeksDatabase(object):
                 room_course_compat[r].extend(
                     [(c, rg) for c in self.courses if rg in course_rg_compat[c]])
                      # self.courses.filter(room_type__in=rg.types.all())])
-
+        if settings.VISIO_MODE:
+            # All courses can have no room (except no-visio ones)
+            for c in set(self.courses):
+                if c not in self.no_visio_courses:
+                    course_rg_compat[c].add(None)
         fixed_courses_for_room = {}
         for r in basic_rooms:
             fixed_courses_for_room[r] = set()
@@ -456,13 +450,13 @@ class WeeksDatabase(object):
         return possible_tutors, possible_modules, possible_courses
 
     def visio_init(self):
-        visio_room, visio_room_created = Room.objects.get_or_create(name='Visio')
 
         visio_courses = set()
         no_visio_courses = set()
         visio_ponderation = {c: 1 for c in self.courses}
 
-        for vp in VisioPreference.objects.filter(course__in=self.courses):
+        for course_additional in CourseAdditional.objects.filter(course__in=self.courses):
+            vp = course_additional.visio_preference_value
             if vp.value == 0:
                 no_visio_courses.add(vp.course)
             elif vp.value == 8:
@@ -470,4 +464,4 @@ class WeeksDatabase(object):
             else:
                 visio_ponderation[vp.course] = vp.value / 4
 
-        return visio_room, visio_courses, no_visio_courses, visio_ponderation
+        return visio_courses, no_visio_courses, visio_ponderation
