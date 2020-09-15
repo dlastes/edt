@@ -36,8 +36,10 @@ from django.core.cache import cache
 from people.models import Tutor
 import json
 
+
 def basic_reassign_rooms(department, week, year, target_work_copy):
     minimize_moves(department, week, year, target_work_copy)
+
 
 def minimize_moves(department, week, year, target_work_copy):
     """
@@ -74,7 +76,7 @@ def minimize_moves(department, week, year, target_work_copy):
                     .filter(start_time__lte = st - F('course__type__duration'),
                             start_time__gt = st - F('course__type__duration') - slot_pause,
                             day=day,
-                            course__room_type=CP.course.room_type,
+                            # course__room_type=CP.course.room_type,
                             course__groups__in=CP.course.groups.all(),
                             **scheduled_courses_params)
                 if len(precedent) == 0:
@@ -83,7 +85,7 @@ def minimize_moves(department, week, year, target_work_copy):
                         .filter(start_time__lte=st - F('course__type__duration'),
                                 start_time__gt=st - F('course__type__duration') - slot_pause,
                                 day=day,
-                                course__room_type=CP.course.room_type,
+                                # course__room_type=CP.course.room_type,
                                 course__tutor=CP.course.tutor,
                                 **scheduled_courses_params)
                     if len(precedent) == 0:
@@ -98,7 +100,7 @@ def minimize_moves(department, week, year, target_work_copy):
                             **scheduled_courses_params)
                 # test if lucky
                 if cp_using_prec.count() == 1 and cp_using_prec[0] == CP:
-                    # print "lucky, no change needed"
+                    print (CP, ": lucky, no change needed")
                     continue
                 # test if precedent.room is available
                 prec_is_unavailable = False
@@ -126,7 +128,7 @@ def minimize_moves(department, week, year, target_work_copy):
                     # print "assigned", CP
                 elif cp_using_prec.count() == 1:
                     sib = cp_using_prec[0]
-                    if sib.course.room_type == CP.course.room_type and sib.course:
+                    if CP.room in sib.course.room_type.members.all() and sib.course:
                             r = CP.room
                             CP.room = precedent.room
                             sib.room = r
