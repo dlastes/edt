@@ -10,8 +10,10 @@ from django.core.exceptions import ObjectDoesNotExist
 
 import base.queries as queries
 
-from people.models import Tutor, GroupPreferences, StudentPreferences, Student, NotificationsPreferences
-from people.admin import TutorResource, GroupPreferencesResource, StudentPreferencesResource
+from people.models import Tutor, GroupPreferences, StudentPreferences, Student,\
+    NotificationsPreferences, PreferredLinks
+from people.admin import TutorResource, GroupPreferencesResource, \
+    StudentPreferencesResource, PreferredLinksResource
 
 
 def redirect_add_people_kind(req, kind):
@@ -118,3 +120,14 @@ def create_user(req):
     print(req.user)
     print(req.user.is_authenticated and req.user.has_department_perm(req.department))
     return TemplateResponse(req, 'people/login_create.html')
+
+
+def fetch_preferred_links(req):
+    pref = PreferredLinks.objects\
+                         .prefetch_related('user__departments')\
+                         .filter(user__departments=req.department)
+    dataset = PreferredLinksResource().export(pref)
+    response = HttpResponse(dataset.csv,
+                            content_type='text/csv')
+    return response
+    
