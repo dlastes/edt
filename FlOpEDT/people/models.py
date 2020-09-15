@@ -271,3 +271,7 @@ class NotificationsPreferences(models.Model):
 class PreferredLinks(models.Model):
     user = models.OneToOneField('User', on_delete=models.CASCADE, related_name='preferred_links')
     links = models.ManyToManyField('base.EnrichedLink', related_name='preffered_set')
+
+    def __str__(self):
+        return self.user.username + ' : ' + \
+            ' ; '.join([str(l) for l in self.links.all()])

@@ -423,7 +423,10 @@ class EnrichedLink(models.Model):
 
     @property
     def concatenated(self):
-        return self.url + ' ' + description
+        return ' '.join([str(self.id), self.url, self.description])
+
+    def __str__(self):
+        return self.description + ' -> ' + self.url
 
 # </editor-fold desc="COURSES">
 
