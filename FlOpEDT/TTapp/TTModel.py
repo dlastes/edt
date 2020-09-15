@@ -37,7 +37,7 @@ from base.models import Group, \
     Department, Module, TrainingProgramme, CourseType, \
     Dependency, TutorCost, GroupFreeHalfDay, GroupCost, Holiday, TrainingHalfDay, \
     CourseStartTimeConstraint, TimeGeneralSettings, ModulePossibleTutors, CoursePossibleTutors, \
-    ModuleTutorRepartition, VisioPreference
+    ModuleTutorRepartition
 
 from base.timing import Time
 
