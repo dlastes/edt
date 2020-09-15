@@ -363,6 +363,8 @@ class Course(models.Model):
 class CourseAdditional(models.Model):
     course = models.OneToOneField('Course', on_delete=models.CASCADE, related_name='additional')
     graded = models.BooleanField(verbose_name='noté ?', default=False)
+    visio_preference_value = models.SmallIntegerField(validators=[MinValueValidator(0), MaxValueValidator(8)],
+                                                      default=8)
 
 
 class VisioPreference(models.Model):
@@ -383,7 +385,7 @@ class ScheduledCourse(models.Model):
     # in minutes from 12AM
     start_time = models.PositiveSmallIntegerField()
     room = models.ForeignKey(
-        'Room', blank=True, null=True, on_delete=models.CASCADE)
+        'Room', blank=True, null=True, on_delete=models.SET_NULL)
     no = models.PositiveSmallIntegerField(null=True, blank=True)
     noprec = models.BooleanField(
         verbose_name='vrai si on ne veut pas garder la salle', default=True)
@@ -406,9 +408,13 @@ class ScheduledCourse(models.Model):
 
 class ScheduledCourseAdditional(models.Model):
     scheduled_course = models.OneToOneField('ScheduledCourse', on_delete=models.CASCADE, related_name='additional')
-    url = models.URLField(null=True, blank=True, default=None)
+    links = models.ManyToManyField('EnrichedLink', related_name='additionnal_set')
     comment = models.CharField(max_length=100, null=True, default=None, blank=True)
 
+
+class EnrichedLink(models.Model):
+    url = models.URLField()
+    description = models.CharField(max_length=100, null=True, default=None, blank=True)
 
 # </editor-fold desc="COURSES">
 
