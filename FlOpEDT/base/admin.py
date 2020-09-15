@@ -48,7 +48,8 @@ from displayweb.models import TutorDisplay
 from import_export import resources, fields
 from import_export.widgets import ForeignKeyWidget, ManyToManyWidget
 
-from FlOpEDT.filters import DropdownFilterAll, DropdownFilterRel, DropdownFilterSimple
+from FlOpEDT.filters import DropdownFilterAll, DropdownFilterRel, \
+    DropdownFilterSimple
 
 logger = logging.getLogger('admin')
 
@@ -86,7 +87,8 @@ class CoursPlaceResource(resources.ModelResource):
     #                               widget=ForeignKeyWidget(Tutor, 'last_name'))
     groups = fields.Field(column_name='gpe_name',
                           attribute='course__groups',
-                          widget=ManyToManyWidget(Group, field='name', separator='|'))
+                          widget=ManyToManyWidget(Group, field='name',
+                                                  separator='|'))
     promo = fields.Field(column_name='gpe_promo',
                          attribute='course__module__train_prog',
                          widget=ForeignKeyWidget(TrainingProgramme, 'abbrev'))
@@ -113,13 +115,16 @@ class CoursPlaceResource(resources.ModelResource):
                             widget=ForeignKeyWidget(ModuleDisplay, 'color_bg'))
     color_txt = fields.Field(column_name='color_txt',
                              attribute='course__module__display',
-                             widget=ForeignKeyWidget(ModuleDisplay, 'color_txt'))
+                             widget=ForeignKeyWidget(ModuleDisplay,
+                                                     'color_txt'))
     url = fields.Field(column_name='url',
                        attribute='additional__link',
                        widget=ForeignKeyWidget(EnrichedLink, 'url'))
     allow_visio = fields.Field(column_name='allow_visio',
                                attribute='course__additional',
-                               widget=ForeignKeyWidget(CourseAdditional, 'visio_preference_value'))
+                               widget=ForeignKeyWidget(
+                                   CourseAdditional,
+                                   'visio_preference_value'))
     graded = fields.Field(column_name='graded',
                           attribute='course__additional',
                           widget=ForeignKeyWidget(CourseAdditional, 'graded'))
@@ -128,7 +133,8 @@ class CoursPlaceResource(resources.ModelResource):
         model = ScheduledCourse
         fields = ('id', 'no', 'groups', 'promo', 'color_bg', 'color_txt',
                   'module', 'coursetype', 'day', 'start_time',
-                  'week', 'room', 'prof', 'room_type', 'url', 'allow_visio', 'graded')
+                  'week', 'room', 'prof', 'room_type', 'url', 'allow_visio',
+                  'graded')
 
 
 class CoursPlaceResourceCosmo(resources.ModelResource):
@@ -150,7 +156,8 @@ class CoursPlaceResourceCosmo(resources.ModelResource):
     #                               widget=ForeignKeyWidget(Tutor, 'last_name'))
     groups = fields.Field(column_name='gpe_name',
                           attribute='course__groups',
-                          widget=ManyToManyWidget(Group, field='name', separator='|'))
+                          widget=ManyToManyWidget(Group, field='name',
+                                                  separator='|'))
     promo = fields.Field(column_name='gpe_promo',
                          attribute='course__module__train_prog',
                          widget=ForeignKeyWidget(TrainingProgramme, 'abbrev'))
@@ -174,7 +181,8 @@ class CoursPlaceResourceCosmo(resources.ModelResource):
                              widget=ForeignKeyWidget(TutorDisplay, 'color_txt'))
     url = fields.Field(column_name='url',
                        attribute='additional',
-                       widget=ForeignKeyWidget(ScheduledCourseAdditional, 'url'))
+                       widget=ForeignKeyWidget(ScheduledCourseAdditional,
+                                               'url'))
 
     class Meta:
         model = ScheduledCourse
@@ -241,19 +249,25 @@ class CoursResource(resources.ModelResource):
                             attribute='course__type__duration')
     groups = fields.Field(column_name='groups',
                          attribute='groups',
-                         widget=ManyToManyWidget(Group, field='name', separator='|'))
+                         widget=ManyToManyWidget(Group, field='name',
+                                                 separator='|'))
     color_bg = fields.Field(column_name='color_bg',
                             attribute='module__display',
-                            widget=ForeignKeyWidget(ModuleDisplay, 'color_bg'))
+                            widget=ForeignKeyWidget(ModuleDisplay,
+                                                    'color_bg'))
     color_txt = fields.Field(column_name='color_txt',
                              attribute='module__display',
-                             widget=ForeignKeyWidget(ModuleDisplay, 'color_txt'))
+                             widget=ForeignKeyWidget(ModuleDisplay,
+                                                     'color_txt'))
     room_type = fields.Field(column_name='room_type',
                              attribute='room_type',
                              widget=ForeignKeyWidget(RoomType, 'name'))
     allow_visio = fields.Field(column_name='allow_visio',
                                attribute='additional',
-                               widget=ForeignKeyWidget(CourseAdditional, 'visio_preference_value'))
+                               widget=ForeignKeyWidget(
+                                   CourseAdditional,
+                                   'visio_preference_value'
+                               ))
     graded = fields.Field(column_name='graded',
                           attribute='additional',
                           widget=ForeignKeyWidget(CourseAdditional, 'graded'))
@@ -261,7 +275,8 @@ class CoursResource(resources.ModelResource):
     class Meta:
         model = Course
         fields = ('id', 'no', 'tutor_name', 'groups', 'promo', 'module',
-                  'coursetype', 'color_bg', 'color_txt', 'prof', 'room_type', 'allow_visio','graded')
+                  'coursetype', 'color_bg', 'color_txt', 'prof', 'room_type',
+                  'allow_visio','graded')
 
 
 class SemaineAnResource(resources.ModelResource):
@@ -285,18 +300,21 @@ class AllDispoResource(resources.ModelResource):
 
     class Meta:
         model = UserPreference
-        fields = ('year', 'week', 'day', 'start_time', 'duration', 'value', 'prof')
+        fields = ('year', 'week', 'day', 'start_time', 'duration', 'value',
+                  'prof')
 
 
 class CoursePreferenceResource(resources.ModelResource):
     type_name = fields.Field(attribute='course_type',
                              widget=ForeignKeyWidget(CourseType, 'name'))
     train_prog = fields.Field(attribute='train_prog',
-                              widget=ForeignKeyWidget(TrainingProgramme, 'abbrev'))
+                              widget=ForeignKeyWidget(TrainingProgramme,
+                                                      'abbrev'))
 
     class Meta:
         model = CoursePreference
-        fields = ('type_name', 'train_prog', 'day', 'start_time', 'duration', 'value')
+        fields = ('type_name', 'train_prog', 'day', 'start_time', 'duration',
+                  'value')
 
 
 class UnavailableRoomsResource(resources.ModelResource):
@@ -329,7 +347,8 @@ class ModuleRessource(resources.ModelResource):
 class TutorRessource(resources.ModelResource):
     class Meta:
         model = Course
-        fields = ('tutor__username', 'tutor__first_name', 'tutor__last_name', 'tutor__email')
+        fields = ('tutor__username', 'tutor__first_name', 'tutor__last_name',
+                  'tutor__email')
 
 
 class ModuleDescriptionResource(resources.ModelResource):
@@ -344,17 +363,21 @@ class ModuleDescriptionResource(resources.ModelResource):
                                    widget=ForeignKeyWidget(Tutor, 'last_name'))
     color_bg = fields.Field(column_name='color_bg',
                                    attribute='display',
-                                   widget=ForeignKeyWidget(ModuleDisplay, 'color_bg'))
+                                   widget=ForeignKeyWidget(ModuleDisplay,
+                                                           'color_bg'))
     color_txt = fields.Field(column_name='color_txt',
                                    attribute='display',
-                                   widget=ForeignKeyWidget(ModuleDisplay, 'color_txt'))
+                                   widget=ForeignKeyWidget(ModuleDisplay,
+                                                           'color_txt'))
     promo = fields.Field(column_name='promo',
                                    attribute='train_prog',
-                                   widget=ForeignKeyWidget(TrainingProgramme, 'abbrev'))
+                                   widget=ForeignKeyWidget(TrainingProgramme,
+                                                           'abbrev'))
 
     class Meta:
         model = Module
-        fields = ('name', 'abbrev', 'head', 'resp_first_name', 'resp_last_name', 'description', 'color_bg', 'color_txt', 'promo')
+        fields = ('name', 'abbrev', 'head', 'resp_first_name', 'resp_last_name',
+                  'description', 'color_bg', 'color_txt', 'promo')
 
 
 # </editor-fold desc="RESOURCES">
@@ -380,7 +403,9 @@ class DepartmentModelAdminMixin():
 
         if hasattr(request, 'department'):
             for field in self.model._meta.get_fields():
-                if not field.auto_created and field.related_model == Department and not field.name in exclude:
+                if (not field.auto_created
+                    and field.related_model == Department
+                    and not field.name in exclude):
                     exclude.append(field.name)
 
         return tuple(exclude)
@@ -399,7 +424,8 @@ class DepartmentModelAdminMixin():
                     if isinstance(field, related_fields.ForeignKey):
                         setattr(obj, field.name, request.department)
                     elif isinstance(field, related_fields.ManyToManyField):
-                        if field.remote_field.through and field.remote_field.through._meta.auto_created:
+                        if (field.remote_field.through
+                            and field.remote_field.through._meta.auto_created):
                             m2m_fields.append(field)
 
         super().save_model(request, obj, form, change)
@@ -436,7 +462,8 @@ class DepartmentModelAdminMixin():
 	"""
 
         if hasattr(request, 'department') and db_field.related_model:
-            related_filter = get_model_department_lookup(db_field.related_model, request.department)
+            related_filter = get_model_department_lookup(db_field.related_model,
+                                                         request.department)
             if related_filter:
                 db = kwargs.get('using')
                 queryset = self.get_field_queryset(db, db_field, request)
@@ -456,7 +483,8 @@ class DepartmentModelAdminMixin():
         queryset = super().get_field_queryset(db, db_field, request)
 
         if hasattr(request, 'department'):
-            related_filter = get_model_department_lookup(db_field.related_model, request.department)
+            related_filter = get_model_department_lookup(db_field.related_model,
+                                                         request.department)
 
             if related_filter:
                 if queryset:
@@ -563,7 +591,8 @@ class CoursPlaceAdmin(DepartmentModelAdmin):
     course_year.short_description = 'Année'
     course_year.admin_order_field = 'course__year'
 
-    list_display = (week_course, course_year, 'course', 'day', 'start_time', 'room')
+    list_display = (week_course, course_year, 'course', 'day', 'start_time',
+                    'room')
     ordering = ('day', 'start_time', 'course', 'room')
     list_filter = (
         ('course__tutor', DropdownFilterRel),
@@ -635,7 +664,8 @@ class DispoAdmin(DepartmentModelAdmin):
 
 
 class RegenAdmin(DepartmentModelAdmin):
-    list_display = ('year', 'week', 'full', 'fday', 'fmonth', 'fyear', 'stabilize', 'sday', 'smonth', 'syear',)
+    list_display = ('year', 'week', 'full', 'fday', 'fmonth', 'fyear',
+                    'stabilize', 'sday', 'smonth', 'syear',)
     ordering = ('-year', '-week')
 
 
