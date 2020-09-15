@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.3.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-13 17:31+0200\n"
+"POT-Creation-Date: 2020-09-15 13:05+0000\n"
 "PO-Revision-Date: 2020-04-05 18:44+0200\n"
 "Last-Translator: Benoît Roche (benoit.roche@esrf.fr)\n"
 "Language-Team: none\n"
@@ -18,87 +18,87 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: FlOpEDT/settings/base.py:149
+#: FlOpEDT/settings/base.py:150
 msgid "French"
 msgstr ""
 
-#: FlOpEDT/settings/base.py:150
+#: FlOpEDT/settings/base.py:151
 msgid "English"
 msgstr ""
 
-#: TTapp/models.py:857
-msgid "If no tutor then training programme."
-msgstr ""
-
-#: TTapp/models.py:860
-msgid "If no training programme then tutor."
-msgstr ""
-
-#: base/templates/base/show-stype.html:94
+#: base/templates/base/show-stype.html:95
 msgid "Weeks"
 msgstr ""
 
-#: base/templates/base/show-stype.html:95
+#: base/templates/base/show-stype.html:96
 msgid "Set default week"
 msgstr ""
 
-#: base/templates/base/show-stype.html:96
+#: base/templates/base/show-stype.html:97
 msgid "from week"
 msgstr ""
 
-#: base/templates/base/show-stype.html:97
-#: base/templates/base/show-stype.html:100
+#: base/templates/base/show-stype.html:98
+#: base/templates/base/show-stype.html:101
 msgid "year"
 msgstr ""
 
-#: base/templates/base/show-stype.html:99
+#: base/templates/base/show-stype.html:100
 msgid "until week"
 msgstr ""
 
-#: base/templates/base/show-stype.html:102
+#: base/templates/base/show-stype.html:103
 msgid "button_apply"
 msgstr "Apply"
 
-#: base/templates/base/show-stype.html:107
+#: base/templates/base/show-stype.html:108
 msgid "Default week"
 msgstr ""
 
-#: base/templates/base/show-stype.html:109
+#: base/templates/base/show-stype.html:110
 msgid "Update my default week"
 msgstr ""
 
-#: base/templates/base/show-stype.html:111
-#: base/templates/base/show-stype.html:136
+#: base/templates/base/show-stype.html:112
+#: base/templates/base/show-stype.html:137
 msgid "button_save"
 msgstr "Save"
 
-#: base/templates/base/show-stype.html:120
+#: base/templates/base/show-stype.html:121
 msgid "My favorite rooms"
 msgstr ""
 
-#: base/templates/base/show-stype.html:121
+#: base/templates/base/show-stype.html:122
 msgid "Select my favorite rooms"
 msgstr ""
 
-#: base/templates/base/show-stype.html:123
+#: base/templates/base/show-stype.html:124
 msgid "button_change"
 msgstr "Change"
 
-#: base/templates/base/show-stype.html:126
+#: base/templates/base/show-stype.html:127
 msgid "My ideal day"
 msgstr ""
 
-#: base/templates/base/show-stype.html:129
+#: base/templates/base/show-stype.html:130
 msgid ""
 "This is the total number of teaching hours I would like to give every day:"
 msgstr ""
 
-#: base/templates/base/show-stype.html:131
+#: base/templates/base/show-stype.html:132
 msgid "Peferred"
 msgstr ""
 
-#: base/templates/base/show-stype.html:133
+#: base/templates/base/show-stype.html:134
 msgid "Maximum"
+msgstr ""
+
+#: base/templates/base/visio.html:30
+msgid "My video conference rooms"
+msgstr ""
+
+#: base/templates/base/visio.html:36
+msgid "Send"
 msgstr ""
 
 #: base/weeks.py:34
