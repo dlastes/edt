@@ -40,7 +40,7 @@ from base.models import Day, Room, Module, Course, Group, \
     TrainingProgramme,  \
     Regen, Holiday, TrainingHalfDay, \
     CoursePreference, Dependency, Department, CourseType, \
-    ScheduledCourseAdditional, VisioPreference, CourseAdditional
+    ScheduledCourseAdditional, CourseAdditional, EnrichedLink
 
 from base.models import RoomPreference, RoomSort, RoomType
 from displayweb.models import ModuleDisplay
@@ -115,11 +115,11 @@ class CoursPlaceResource(resources.ModelResource):
                              attribute='course__module__display',
                              widget=ForeignKeyWidget(ModuleDisplay, 'color_txt'))
     url = fields.Field(column_name='url',
-                       attribute='additional',
-                       widget=ForeignKeyWidget(ScheduledCourseAdditional, 'url'))
+                       attribute='additional__link',
+                       widget=ForeignKeyWidget(EnrichedLink, 'url'))
     allow_visio = fields.Field(column_name='allow_visio',
-                               attribute='course__visio_pref',
-                               widget=ForeignKeyWidget(VisioPreference, 'value'))
+                               attribute='course__additional',
+                               widget=ForeignKeyWidget(CourseAdditional, 'visio_preference_value'))
     graded = fields.Field(column_name='graded',
                           attribute='course__additional',
                           widget=ForeignKeyWidget(CourseAdditional, 'graded'))
@@ -252,8 +252,8 @@ class CoursResource(resources.ModelResource):
                              attribute='room_type',
                              widget=ForeignKeyWidget(RoomType, 'name'))
     allow_visio = fields.Field(column_name='allow_visio',
-                               attribute='visio_pref__value',
-                               widget=ForeignKeyWidget(VisioPreference, 'value'))
+                               attribute='additional',
+                               widget=ForeignKeyWidget(CourseAdditional, 'visio_preference_value'))
     graded = fields.Field(column_name='graded',
                           attribute='additional',
                           widget=ForeignKeyWidget(CourseAdditional, 'graded'))

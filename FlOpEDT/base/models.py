@@ -367,11 +367,6 @@ class CourseAdditional(models.Model):
                                                       default=8)
 
 
-class VisioPreference(models.Model):
-    course = models.OneToOneField('Course', on_delete=models.CASCADE, related_name='visio_pref')
-    value = models.SmallIntegerField(validators=[MinValueValidator(0), MaxValueValidator(8)], default=8)
-
-
 class CoursePossibleTutors(models.Model):
     course = models.OneToOneField('Course', on_delete=models.CASCADE)
     possible_tutors = models.ManyToManyField(
@@ -408,7 +403,8 @@ class ScheduledCourse(models.Model):
 
 class ScheduledCourseAdditional(models.Model):
     scheduled_course = models.OneToOneField('ScheduledCourse', on_delete=models.CASCADE, related_name='additional')
-    links = models.ManyToManyField('EnrichedLink', related_name='additionnal_set')
+    link = models.ForeignKey('EnrichedLink', blank=True, null=True, default=None, related_name='additionnal',
+                             on_delete=models.SET_NULL)
     comment = models.CharField(max_length=100, null=True, default=None, blank=True)
 
 
