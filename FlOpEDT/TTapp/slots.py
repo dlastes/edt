@@ -24,6 +24,7 @@
 # without disclosing the source code of your own applications.
 from base.models import TimeGeneralSettings
 from base.timing import Time, days_index
+from base.models import ScheduledCourse
 
 slot_pause = 30
 
@@ -54,22 +55,38 @@ class Slot:
         return f"{self.day} de {self.start_time//60}h{self.start_time%60 if self.start_time%60!=0 else ''} " \
                f"à {self.end_time//60}h{self.end_time%60 if self.end_time%60!=0 else ''} "
 
+    def has_same_day(self, other):
+        if type(other) == type(self):
+            return self.day == other.day
+        elif type(other) == ScheduledCourse:
+            return self.day.week == other.course.week and self.day.day == other.day
+        else:
+            raise TypeError("A slot can only have same day than a ScheduledCourse or another slot")
+
+    def has_previous_day_than(self, other):
+        if type(other) == type(self):
+            return self.day.week > other.day.week \
+                or self.day.week == other.day.week and days_index[self.day.day] > days_index[other.day.day]
+        elif type(other) == ScheduledCourse:
+            return self.day.week > other.course.week \
+                or self.day.week == other.course.week and days_index[self.day.day] > days_index[other.day]
+        else:
+            raise TypeError("A slot can only have previous day than a ScheduledCourse or another slot")
+
     def is_simultaneous_to(self, other):
-        if self.day == other.day and self.start_time < other.end_time and other.start_time < self.end_time:
+        if self.has_same_day(other) and self.start_time < other.end_time and other.start_time < self.end_time:
             return True
         else:
             return False
 
     def is_after(self, other):
-        if self.day.week > other.day.week \
-                or self.day.week == other.day.week and days_index[self.day.day] > days_index[other.day.day] \
-                or self.day == other.day and self.start_time >= other.end_time:
+        if self.has_previous_day_than(other) or self.has_same_day(other) and self.start_time >= other.end_time:
             return True
         else:
             return False
 
     def is_successor_of(self, other):
-        if self.day == other.day and other.end_time <= self.start_time <= other.end_time + slot_pause:
+        if self.has_same_day(other) and other.end_time <= self.start_time <= other.end_time + slot_pause:
             return True
         else:
             return False
