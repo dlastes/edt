@@ -42,7 +42,7 @@ from base.models import Day, Room, Module, Course, Group, \
     CoursePreference, Dependency, Department, CourseType, \
     ScheduledCourseAdditional, CourseAdditional, EnrichedLink
 
-from base.models import RoomPreference, RoomSort, RoomType
+from base.models import RoomPreference, RoomSort, RoomType, EnrichedLink
 from displayweb.models import ModuleDisplay
 from displayweb.models import TutorDisplay
 from import_export import resources, fields
@@ -639,6 +639,11 @@ class RegenAdmin(DepartmentModelAdmin):
     ordering = ('-year', '-week')
 
 
+class EnrichedLinkAdmin(admin.ModelAdmin):
+    list_display = ('url', 'description',)
+    ordering = ('description',)
+
+    
 # </editor-fold desc="ADMIN_MENU">
 
 
@@ -659,3 +664,4 @@ admin.site.register(Dependency, DependencyAdmin)
 admin.site.register(ScheduledCourse, CoursPlaceAdmin)
 admin.site.register(UserPreference, DispoAdmin)
 admin.site.register(Regen, RegenAdmin)
+admin.site.register(EnrichedLink, EnrichedLinkAdmin)
