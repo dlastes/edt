@@ -4,14 +4,14 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from import_export.widgets import ForeignKeyWidget
+from import_export.widgets import ForeignKeyWidget, ManyToManyWidget
 from import_export import resources, fields
 
 from base.admin import DepartmentModelAdminMixin
 
 from people.models import User, Tutor, FullStaff, SupplyStaff, BIATOS, Student
-from people.models import UserDepartmentSettings
-from people.models import StudentPreferences, GroupPreferences
+from people.models import UserDepartmentSettings, StudentPreferences, \
+    GroupPreferences, PreferredLinks
 
 
 
@@ -113,8 +113,25 @@ class GroupPreferencesResource(resources.ModelResource):
                   "free_half_day_weight")
 
 
+class PreferredLinksResource(resources.ModelResource):
+    links = fields.Field(column_name='links',
+                         attribute='links',
+                         widget=ManyToManyWidget('base.Enrichedlink',
+                                                 field='concatenated',
+                                                 separator='|'))
+    user = fields.Field(column_name='user',
+                        attribute='user',
+                        widget=ForeignKeyWidget('people.User', 'username'))
+    class Meta:
+        model = PreferredLinks
+        fields = ('user', 'links')
+
+class PreferredLinksAdmin(admin.ModelAdmin):
+    pass
+        
 admin.site.register(FullStaff, UserModelAdmin)
 admin.site.register(SupplyStaff, UserModelAdmin)
 admin.site.register(BIATOS, UserModelAdmin)
 admin.site.register(Student, UserModelAdmin)
 admin.site.register(User, UserModelAdmin)
+admin.site.register(PreferredLinks, PreferredLinksAdmin)
