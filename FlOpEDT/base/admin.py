@@ -117,9 +117,9 @@ class CoursPlaceResource(resources.ModelResource):
                              attribute='course__module__display',
                              widget=ForeignKeyWidget(ModuleDisplay,
                                                      'color_txt'))
-    url = fields.Field(column_name='url',
-                       attribute='additional__link',
-                       widget=ForeignKeyWidget(EnrichedLink, 'url'))
+    link = fields.Field(column_name='link',
+                       attribute='additional',
+                       widget=ForeignKeyWidget(EnrichedLink, 'concatenated'))
     allow_visio = fields.Field(column_name='allow_visio',
                                attribute='course__additional',
                                widget=ForeignKeyWidget(
@@ -133,7 +133,7 @@ class CoursPlaceResource(resources.ModelResource):
         model = ScheduledCourse
         fields = ('id', 'no', 'groups', 'promo', 'color_bg', 'color_txt',
                   'module', 'coursetype', 'day', 'start_time',
-                  'week', 'room', 'prof', 'room_type', 'url', 'allow_visio',
+                  'week', 'room', 'prof', 'room_type', 'link', 'allow_visio',
                   'graded')
 
 
@@ -179,15 +179,15 @@ class CoursPlaceResourceCosmo(resources.ModelResource):
     color_txt = fields.Field(column_name='color_txt',
                              attribute='tutor__display',
                              widget=ForeignKeyWidget(TutorDisplay, 'color_txt'))
-    url = fields.Field(column_name='url',
+    link = fields.Field(column_name='link',
                        attribute='additional',
                        widget=ForeignKeyWidget(ScheduledCourseAdditional,
-                                               'url'))
+                                               'concatenated'))
 
     class Meta:
         model = ScheduledCourse
         fields = ('id', 'no', 'groups', 'promo', 'color_bg', 'color_txt',
-                  'module', 'day', 'start_time', 'week', 'room', 'prof', 'url')
+                  'module', 'day', 'start_time', 'week', 'room', 'prof', 'link')
 
 
 class TutorCoursesResource(CoursPlaceResource):
