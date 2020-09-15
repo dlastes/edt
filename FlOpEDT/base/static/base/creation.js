@@ -2035,6 +2035,52 @@ function translate_group_lunch_constraints(d) {
   return ret ;
 }
 
+/*--------------------
+   ------ VISIO ------
+   --------------------*/
+function fetch_preferred_links() {
+  show_loader(true);
+  $.ajax({
+    type: "GET", //rest Type
+    dataType: 'text',
+    url: url_preferred_links,
+    async: true,
+    contentType: "text/csv",
+    success: function (msg) {
+      console.log(msg);
+      d3.csvParse(msg, translate_preferred_links);
+      show_loader(false);
+    },
+    error: function (xhr, error) {
+      console.log("error");
+      console.log(xhr);
+      console.log(error);
+      console.log(xhr.responseText);
+      show_loader(false);
+    }
+  });
+
+}
+
+function translate_preferred_links(d) {
+  // split the many links first
+  let links = d.links.split('|') ;
+  let pref = {
+    'user': d.user,
+    'links' : []
+  } ;
+  for(let i = 0 ; i < links.length ; i++) {
+    //then separate url and description
+    let link = links[i].split(' ');
+    pref.links.push({
+      'id': link.shift(),
+      'url': link.shift(),
+      'desc': link.join(' ')
+    }) ;
+  }
+  preferred_links.push(pref) ;
+}
+
 
 
 /*--------------------

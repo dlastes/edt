@@ -1026,3 +1026,5 @@ var colors = {} ;
 var lunch_constraint = {} ;
 lunch_constraint['groups'] = {};
 lunch_constraint['tutors'] = {};
+
+var preferred_links = [];
