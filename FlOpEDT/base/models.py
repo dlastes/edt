@@ -411,6 +411,9 @@ class ScheduledCourseAdditional(models.Model):
 class EnrichedLink(models.Model):
     url = models.URLField()
     description = models.CharField(max_length=100, null=True, default=None, blank=True)
+    @property
+    def concatenated(self):
+        return self.url + ' ' + description
 
 # </editor-fold desc="COURSES">
 
