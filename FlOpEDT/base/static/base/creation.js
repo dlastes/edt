@@ -1997,7 +1997,6 @@ function fetch_lunch_constraints() {
     async: true,
     contentType: "text/csv",
     success: function (msg) {
-      console.log(msg);
       lunch_constraint.groups = d3.csvParse(
         msg,
         translate_group_lunch_constraints);
@@ -2064,6 +2063,7 @@ function select_entry_cm() {
     fid: fake_id,
     content: "Salle"
   }];
+  update_change_cm_nlin() ;
 }
 
 

@@ -273,10 +273,8 @@ function select_room_change() {
     room_tutor_change.proposal.push({ fid: fake_id, content: "+" });
   }
 
-  room_tutor_change.cm_settings.nlin
-    = Math.ceil(room_tutor_change.proposal.length
-      / room_tutor_change.cm_settings.ncol);
-
+  update_change_cm_nlin() ;
+  
   if (level > 0 || c.room == "" ||
     occupied_rooms.indexOf(c.room) != -1) {
     return true;
@@ -323,6 +321,12 @@ function fetch_all_tutors() {
   }
 }
 
+// update number of lines in the context menu
+function update_change_cm_nlin() {
+  room_tutor_change.cm_settings.nlin = Math.ceil(
+    room_tutor_change.proposal.length / room_tutor_change.cm_settings.ncol
+  );
+}
 
 
 function select_tutor_module_change() {
@@ -353,7 +357,7 @@ function select_tutor_module_change() {
 
   room_tutor_change.proposal.push({ fid: fake_id, content: "+" });
 
-  room_tutor_change.cm_settings.nlin = Math.ceil(room_tutor_change.proposal.length / room_tutor_change.cm_settings.ncol);
+  update_change_cm_nlin() ;
 
 }
 
@@ -383,7 +387,7 @@ function select_tutor_filters_change() {
     return { fid: fake_id + t, content: t };
   });
 
-  room_tutor_change.cm_settings.nlin = Math.ceil(room_tutor_change.proposal.length / room_tutor_change.cm_settings.ncol);
+  update_change_cm_nlin() ;
 
 }
 
@@ -411,10 +415,7 @@ function select_salarie_change() {
     });
   }
 
-  room_tutor_change.cm_settings.nlin
-    = Math.ceil(room_tutor_change.proposal.length
-      / room_tutor_change.cm_settings.ncol);
-
+  update_change_cm_nlin() ;
 
   var fake_id = new Date();
   fake_id = fake_id.getMilliseconds() + "-" + tache.id_cours;
