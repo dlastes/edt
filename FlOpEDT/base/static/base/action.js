@@ -1814,6 +1814,32 @@ function apply_stype() {
 }
 
 
+/*--------------------
+   ------ VISIO -------
+   --------------------*/
+function select_pref_links_change() {
+  room_tutor_change.cm_settings = pref_links_cm_settings;
+
+
+  let user_links = preferred_links.filter(function(l){
+    return l.user == user.name ;
+  });
+
+  if (user_links.length == 0) {
+    console.log('Pas de lien...');
+  } else {
+    room_tutor_change.proposal = user_links[0].links ;
+    let fake_id = new Date();
+    fake_id = fake_id.getMilliseconds();
+    room_tutor_change.proposal.forEach(function (t) {
+      t.content = t.desc ;
+      t.fid = fake_id ;
+    });
+  }
+  update_change_cm_nlin() ;
+
+}
+
 
 /*--------------------
    ------ ALL -------
