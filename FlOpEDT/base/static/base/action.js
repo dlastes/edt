@@ -1919,14 +1919,10 @@ function show_detailed_courses(cours) {
   var details = svg.get_dom("dg").append("g")
     .attr("id", "course_details");
 
-  var width = grid_width() / 4;
-  var height = grid_height() / 3;
-  var pos_x = placement_details_x(cours);
-  var pos_y = placement_details_y(cours);
   var strokeColor;
   var strokeWidth;
 
-  if (cours.course_type == "CTRL") {
+  if (cours.graded) {
     strokeColor = "red";
     strokeWidth = 4;
   }
@@ -1935,12 +1931,21 @@ function show_detailed_courses(cours) {
     strokeWidth = 2;
   }
 
+  let infos = [
+    {'txt':modules_info[cours.mod].name, 'url':modules_info[cours.mod].url},
+    {'txt':cours.room},
+    {'txt':cours.course_type},
+    {'txt':tutors_info[cours.prof].full_name},
+    {'txt':tutors_info[cours.prof].email, 'url': url_contact + cours.prof}
+  ];
+  nb_detailed_infos = infos.length ;
+
   details
     .append("rect")
-    .attr("x", pos_x)
-    .attr("y", pos_y)
-    .attr("width", width)
-    .attr("height", height)
+    .attr("x", detail_wdw_x(cours))
+    .attr("y", detail_wdw_y(cours))
+    .attr("width", detail_wdw_width())
+    .attr("height", detail_wdw_height())
     .attr("rx", 15)
     .attr("ry", 15)
     .attr("fill", cours.color_bg)
@@ -1948,48 +1953,23 @@ function show_detailed_courses(cours) {
     .attr("stroke-width", strokeWidth)
     .on("click", remove_details);
 
-  details
-    .append("a")
-    .attr("xlink:href", modules_info[cours.mod].url)
-    .attr("target", "_blank")
-    .append("text")
-    .text(modules_info[cours.mod].name)
-    .attr("fill", cours.color_txt)
-    .attr("style", "text-decoration:underline")
-    .attr("x", pos_x + width / 2)
-    .attr("y", pos_y + height / 6);
-
-  details
-    .append("text")
-    .text(cours.room)
-    .attr("fill", cours.color_txt)
-    .attr("x", pos_x + width / 2)
-    .attr("y", pos_y + height / 6 * 2);
-
-  details
-    .append("text")
-    .text(cours.course_type)
-    .attr("fill", cours.color_txt)
-    .attr("x", pos_x + width / 2)
-    .attr("y", pos_y + height / 6 * 3);
-
-  details
-    .append("text")
-    .text(tutors_info[cours.prof].full_name)
-    .attr("fill", cours.color_txt)
-    .attr("x", pos_x + width / 2)
-    .attr("y", pos_y + height / 6 * 4);
-
-  details
-    .append("a")
-    .attr("xlink:href", url_contact + cours.prof)
-    .attr("target", "_blank")
-    .append("text")
-    .text(tutors_info[cours.prof].email)
-    .attr("fill", cours.color_txt)
-    .attr("style", "text-decoration:underline")
-    .attr("x", pos_x + width / 2)
-    .attr("y", pos_y + height / 6 * 5);
+  for(let i = 0 ; i < infos.length ; i++) {
+    let onto = details ;
+    if (typeof infos[i].url !== 'undefined') {
+      onto = details
+        .append('a')
+        .attr("xlink:href", infos[i].url)
+        .attr("target", "_blank") 
+        .attr("style", "text-decoration:underline") ;
+    }
+    onto
+      .append('text')
+      .text(infos[i].txt)
+      .attr("fill", cours.color_txt)
+      .attr("x", detail_txt_x(cours))
+      .attr("y", detail_txt_y(cours, i));
+  }
+  
 }
 
 function remove_details() {
