@@ -47,7 +47,7 @@ from FlOpEDT.decorators import dept_admin_required, tutor_required
 from FlOpEDT.settings.base import COSMO_MODE
 
 from people.models import Tutor, UserDepartmentSettings, User, \
-    NotificationsPreferences
+    NotificationsPreferences, PreferredLinks
 
 from displayweb.admin import BreakingNewsResource
 from displayweb.models import BreakingNews
@@ -63,7 +63,8 @@ from base.forms import ContactForm, PerfectDayForm, ModuleDescriptionForm
 from base.models import Course, UserPreference, ScheduledCourse, EdtVersion, \
     CourseModification, Day, Time, Room, RoomType, RoomSort, \
     Regen, RoomPreference, Department, TimeGeneralSettings, CoursePreference, \
-    TrainingProgramme, CourseType, Module, Group
+    TrainingProgramme, CourseType, Module, Group, EnrichedLink, \
+    ScheduledCourseAdditional
 import base.queries as queries
 from base.weeks import *
 
@@ -1108,6 +1109,23 @@ def clean_change(year, week, old_version, change, work_copy=0, initiator=None, a
         ret['sched'].save()
         if work_copy == 0:
             ret['log'].save()
+
+    # outside the log for now
+    if change['id_visio'] > -1:
+        try:
+            new_visio = EnrichedLink.objects.get(id=change['id_visio'])
+            if apply:
+                additional, created = \
+                    ScheduledCourseAdditional.objects.get_or_create(
+                        scheduled_course = sched_course
+                        )
+                additional.link = new_visio
+                additional.save()
+        except EnrichedLink.DoesNotExist:
+            raise Exception( 
+                f"Problème : visio avec if {change['id_visio']} inconnue"
+            )
+
 
     return ret
 
