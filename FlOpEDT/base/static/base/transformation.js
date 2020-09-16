@@ -529,7 +529,8 @@ function nb_minutes_in_grid() {
   var minutes = bknews.nb_rows * bknews.time_height
     + nbRows * (t.lunch_break_start_time - t.day_start_time
       + t.day_finish_time - t.lunch_break_finish_time);
-  if (t.lunch_break_finish_time != t.lunch_break_start_time) {
+  if (t.lunch_break_finish_time != t.lunch_break_start_time
+     || bknews.nb_rows > 0) {
     minutes += 2 * bknews.time_margin;
   }
   return minutes;
@@ -713,8 +714,10 @@ function cours_reverse_y(y) {
   let i = 0 ;
   let break_finish = break_start + bknews_h();
 
-  // nothing during lunch break
-  if (y > break_start && y < break_finish) {
+  // nothing during lunch break or outside
+  if (y > break_start && y < break_finish
+      || y < 0
+      || y > grid_height()) {
     return "" ;
   }
 
