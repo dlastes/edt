@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-09-15 13:17+0000\n"
+"POT-Creation-Date: 2020-09-16 16:27+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -58,20 +58,19 @@ msgstr "Semaine type"
 msgid "Update my default week"
 msgstr "Redéfinir ma semaine type"
 
-#: base/templates/base/show-stype.html:112
 #: base/templates/base/show-stype.html:137
 msgid "button_save"
 msgstr "Sauvegarder"
 
 #: base/templates/base/show-stype.html:121
-msgid "My favorite rooms"
-msgstr "Mes préférences de salles"
+msgid "My videoconf links"
+msgstr "Mes visios"
 
 #: base/templates/base/show-stype.html:122
-msgid "Select my favorite rooms"
-msgstr "Choisir mes salles préférées"
+msgid "Create a link"
+msgstr "Créer un lien visio"
 
-#: base/templates/base/show-stype.html:124
+#: base/templates/base/show-stype.html:147
 msgid "button_change"
 msgstr "Modifier"
 
@@ -93,17 +92,37 @@ msgstr "Idéalement"
 msgid "Maximum"
 msgstr "Maximum"
 
-#: base/templates/base/visio.html:30
-msgid "Choose my video conference rooms"
-msgstr "Mes liens visio"
+#: base/templates/base/show-stype.html:144
+msgid "My favorite rooms"
+msgstr "Mes préférences de salles"
 
-#: base/templates/base/visio.html:36 base/templates/base/visio.html:48
+#: base/templates/base/show-stype.html:145
+msgid "Select my favorite rooms"
+msgstr "Choisir mes salles préférées"
+
+#: base/templates/base/visio.html:38
 msgid "Send"
 msgstr "Envoyer"
 
-#: base/templates/base/visio.html:42
-msgid "Create a video conference link"
-msgstr "Créer un lien visio"
+#: base/views.py:1754
+msgid "Not authorized. New link then."
+msgstr "Non autorisé. Création d'un nouveau lien."
+
+#: base/views.py:1757
+msgid "Unknown link. New link then."
+msgstr "Lien inconnu. Création d'un nouveau lien."
+
+#: base/views.py:1769
+msgid "Created"
+msgstr "Créé"
+
+#: base/views.py:1769
+msgid "Modified"
+msgstr "Modifié"
+
+#: base/views.py:1772
+msgid "Tutor does not exist"
+msgstr "L'utilisateur n'existe pas."
 
 #: base/weeks.py:34
 msgid "Mon."
@@ -256,6 +275,9 @@ msgstr "Déconnexion"
 #: templates/base.html:110
 msgid "Signed in as "
 msgstr "Connecté·e sous "
+
+#~ msgid "Choose my video conference rooms"
+#~ msgstr "Mes liens visio"
 
 #~ msgid "If no tutor then training programme."
 #~ msgstr "Si pas de prof alors promo."
