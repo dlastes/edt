@@ -46,7 +46,6 @@ class NoVisio(TTConstraint):
         if not settings.VISIO_MODE:
             "Visio Mode is not activated : ignore NoVisio constraint"
             return
-        visio = ttmodel.wdb.visio_room
         considered_groups = considered_basic_groups(self, ttmodel)
         days = days_filter(ttmodel.wdb.days, week=week)
         if self.weekdays:
@@ -62,7 +61,7 @@ class NoVisio(TTConstraint):
                                                   - ttmodel.wdb.visio_courses
 
             ttmodel.add_constraint(
-                ttmodel.sum(ttmodel.TTrooms[sl,c,visio]
+                ttmodel.sum(ttmodel.TTrooms[sl,c,None]
                             for c in considered_group_courses
                             for sl in slots_filter(ttmodel.wdb.compatible_slots[c], day_in=days)),
                 '==', 0, Constraint(constraint_type=ConstraintType.VISIO, groups=group))
