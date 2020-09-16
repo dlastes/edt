@@ -25,7 +25,7 @@
 
 from django import forms
 from people.models import Tutor, FullStaff
-from base.models import Module
+from base.models import Module, EnrichedLink
 
 
 class ContactForm(forms.Form):
@@ -79,3 +79,9 @@ class ModuleDescriptionForm(forms.ModelForm):
     class Meta:
         model = Module
         fields = ['description']
+
+
+class EnrichedLinkForm(forms.ModelForm):
+    class Meta:
+        model = EnrichedLink
+        fields = '__all__'
