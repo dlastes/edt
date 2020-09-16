@@ -2043,7 +2043,7 @@ function fetch_preferred_links() {
   $.ajax({
     type: "GET", //rest Type
     dataType: 'text',
-    url: url_preferred_links,
+    url: url_fetch_preferred_links,
     async: true,
     contentType: "text/csv",
     success: function (msg) {

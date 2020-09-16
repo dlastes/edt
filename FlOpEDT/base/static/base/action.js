@@ -1826,11 +1826,13 @@ function select_pref_links_change() {
 
 
   let user_links = preferred_links.find(function(l){
-    return l.user == user.name ;
+    return l.user == pending.wanted_course.prof ;
   });
 
   if (typeof user_links === 'undefined') {
     console.log('Pas de lien...');
+    room_tutor_change.proposal = [] ;
+    window.location.href = url_change_preferred_links + pending.wanted_course.prof ;
   } else {
     room_tutor_change.proposal = user_links.links ;
     let fake_id = new Date();
