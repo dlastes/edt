@@ -40,6 +40,9 @@ urlpatterns = [
     # directly reachable by users
     # ----------------------------
     re_path(r'room-preference/(?P<tutor>\w{2,8})?', views.room_preference, name='room-pref'),
+    re_path(r'visio-preference/(?P<tutor>\w{1,8})?(/?P<id>\d{1,8})?',
+            views.visio_preference,
+            name='visio-pref'),
 
     url(r'^preferences$', views.preferences, name="preferences"),
     url(r'^semaine-type$', views.stype, name="stype"),

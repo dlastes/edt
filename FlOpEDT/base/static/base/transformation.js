@@ -529,7 +529,8 @@ function nb_minutes_in_grid() {
   var minutes = bknews.nb_rows * bknews.time_height
     + nbRows * (t.lunch_break_start_time - t.day_start_time
       + t.day_finish_time - t.lunch_break_finish_time);
-  if (t.lunch_break_finish_time != t.lunch_break_start_time) {
+  if (t.lunch_break_finish_time != t.lunch_break_start_time
+     || bknews.nb_rows > 0) {
     minutes += 2 * bknews.time_margin;
   }
   return minutes;
@@ -713,8 +714,10 @@ function cours_reverse_y(y) {
   let i = 0 ;
   let break_finish = break_start + bknews_h();
 
-  // nothing during lunch break
-  if (y > break_start && y < break_finish) {
+  // nothing during lunch break or outside
+  if (y > break_start && y < break_finish
+      || y < 0
+      || y > grid_height()) {
     return "" ;
   }
 
@@ -791,7 +794,7 @@ function cours_fill(c) {
   return (typeof coco === 'undefined')?"white":coco.color_bg;
 }
 function is_exam(c) {
-  return false;
+  return c.graded;
 }
 
 function cours_txt_weight(c) {
@@ -817,7 +820,15 @@ function cours_txt_bot_y(c) {
   return cours_y(c) + .75 * cours_height(c);
 }
 function cours_txt_bot_txt(c) {
-  return c.room;
+  if (c.room != '' && c.id_visio != -1) {
+    console.log(c, 'Both on site and remote?');
+  } else {
+    if (c.id_visio > -1) {
+      return 'Visio' ;
+    } else {
+      return c.room ;
+    }
+  }
 }
 function cours_opac(c) {
   return (c.display || !sel_popup.active_filter) ? 1 : opac;
@@ -861,22 +872,35 @@ function cm_chg_bg_y() {
 ///////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
 
-
-function placement_details_x(cours) {
-  if (cours_x(cours) <= grid_width() / 2) {
-    return cours_x(cours) + .5 * cours_width(cours);
-  } else {
-    return cours_x(cours) + .5 * cours_width(cours) - grid_width() / 5; //grid_width()/5 = taille largeur fenetre des details
-  }
+function detail_wdw_width() {
+  return .25 * grid_width() ;
 }
-function placement_details_y(cours) {
-
-  if (cours_y(cours) <= grid_height() / 2) {
-    return cours_y(cours) + .5 * cours_height(cours);
-  } else {
-    return cours_y(cours) + .5 * cours_height(cours) - grid_height() / 3; //grid_heigth()/3 = taille hauteur fenetre des details
-  }
+function detail_wdw_height() {
+  return .3 * grid_height() ;
 }
+function detail_wdw_x(cours) {
+  let ret = cours_x(cours) + .5 * cours_width(cours) ;
+  if (cours_x(cours) > .5 * grid_width()) {
+    ret -=  detail_wdw_width();
+  }
+  return ret ;
+}
+function detail_wdw_y(cours) {
+  let ret = cours_y(cours) + .5 * cours_height(cours) ;
+  if (cours_y(cours) > .5 * grid_height()) {
+    ret -= detail_wdw_height(); 
+  }
+  return ret ;
+}
+function detail_txt_y(cours, i_info) {
+  return detail_wdw_y(cours)
+    + (i_info + 1) * detail_wdw_height() / (nb_detailed_infos + 1) ;
+}
+function detail_txt_x(cours) {
+  return detail_wdw_x(cours) + .5 * detail_wdw_width() ;
+}
+
+
 
 ///////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
