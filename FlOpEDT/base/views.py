@@ -1735,10 +1735,11 @@ def send_email_proposal(req, **kwargs):
 # VISIO
 # ---------
 @tutor_required
-def visio_preference(req, tutor, id=None, **kwargs):
-    entry = req.method != 'POST'
+def visio_preference(req, tutor=None, id=None, **kwargs):
     ack = ''
-
+    if tutor is None:
+        tutor = req.user.username
+    
     if id is None:
         instance = None
     else:
