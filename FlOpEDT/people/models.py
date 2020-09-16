@@ -264,13 +264,18 @@ class GroupPreferences(Preferences):
 
 
 class NotificationsPreferences(models.Model):
-    user = models.OneToOneField('User', on_delete=models.CASCADE, related_name='notifications_preference')
+    user = models.OneToOneField('User',
+                                on_delete=models.CASCADE,
+                                related_name='notifications_preference')
     nb_of_notified_weeks = models.PositiveSmallIntegerField(default=0)
 
 
 class PreferredLinks(models.Model):
-    user = models.OneToOneField('User', on_delete=models.CASCADE, related_name='preferred_links')
-    links = models.ManyToManyField('base.EnrichedLink', related_name='preffered_set')
+    user = models.OneToOneField('User',
+                                on_delete=models.CASCADE,
+                                related_name='preferred_links')
+    links = models.ManyToManyField('base.EnrichedLink',
+                                   related_name='preffered_set')
 
     def __str__(self):
         return self.user.username + ' : ' + \
