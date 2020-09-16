@@ -56,7 +56,7 @@ class Slot:
                f"à {self.end_time//60}h{self.end_time%60 if self.end_time%60!=0 else ''} "
 
     def has_same_day(self, other):
-        if type(other) == type(self):
+        if type(other) in [Slot, CourseSlot]:
             return self.day == other.day
         elif type(other) == ScheduledCourse:
             return self.day.week == other.course.week and self.day.day == other.day
