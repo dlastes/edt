@@ -538,7 +538,8 @@ function go_cm_room_tutor_change() {
     tut_cm_room_g
       .append("rect")
       .attr("class", "cm-chg-rec")
-      .merge(tut_cm_room_dat.select(".cm-chg-rec"))
+    // never updated
+    //      .merge(tut_cm_room_dat.select(".cm-chg-rec"))
       .attr("x", cm_chg_but_x)
       .attr("y", cm_chg_but_y)
       .attr("width", cm_chg_but_width)
@@ -550,7 +551,8 @@ function go_cm_room_tutor_change() {
     tut_cm_room_g
       .append("text")
       .attr("class", "cm-chg-bt")
-      .merge(tut_cm_room_dat.select(".cm-chg-bt"))
+    // never updated
+    //     .merge(tut_cm_room_dat.select(".cm-chg-bt"))
       .attr("x", cm_chg_but_txt_x)
       .attr("y", cm_chg_but_txt_y)
       .attr("fill", cm_chg_but_txt_fill)
