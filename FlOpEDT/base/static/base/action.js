@@ -1940,7 +1940,7 @@ function show_detailed_courses(cours) {
   var strokeColor;
   var strokeWidth;
 
-  if (cours.graded) {
+  if (is_exam(cours)) {
     strokeColor = "red";
     strokeWidth = 4;
   }

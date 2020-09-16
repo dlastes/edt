@@ -794,7 +794,7 @@ function cours_fill(c) {
   return (typeof coco === 'undefined')?"white":coco.color_bg;
 }
 function is_exam(c) {
-  return false;
+  return c.graded;
 }
 
 function cours_txt_weight(c) {
