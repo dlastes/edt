@@ -286,7 +286,10 @@ function select_room_change() {
 
 
 function confirm_room_change(d) {
-  Object.assign(pending.wanted_course, { room: d.content });
+  Object.assign(
+    pending.wanted_course,
+    {room: d.content, id_visio: -1}
+  );
 
   room_tutor_change.proposal = [];
   check_pending_course();
@@ -861,7 +864,7 @@ function compute_changes(changes, conc_tutors, gps) {
       // } else 
 
 
-      if (cur_course.room == "") {
+      if (cur_course.room == "" && cur_course.id_visio == -1) {
         splash_case = {
           id: "def-room",
           but: butOK,
@@ -907,7 +910,8 @@ function compute_changes(changes, conc_tutors, gps) {
         day: cur_course.day,
         start: cur_course.start,
         room: cur_course.room,
-        tutor: cur_course.prof
+        tutor: cur_course.prof,
+        id_visio: cur_course.id_visio
       };
 
 
@@ -1821,14 +1825,14 @@ function select_pref_links_change() {
   room_tutor_change.cm_settings = pref_links_cm_settings;
 
 
-  let user_links = preferred_links.filter(function(l){
+  let user_links = preferred_links.find(function(l){
     return l.user == user.name ;
   });
 
-  if (user_links.length == 0) {
+  if (typeof user_links === 'undefined') {
     console.log('Pas de lien...');
   } else {
-    room_tutor_change.proposal = user_links[0].links ;
+    room_tutor_change.proposal = user_links.links ;
     let fake_id = new Date();
     fake_id = fake_id.getMilliseconds();
     room_tutor_change.proposal.forEach(function (t) {
@@ -1840,6 +1844,15 @@ function select_pref_links_change() {
 
 }
 
+function confirm_pref_links_change(d) {
+  Object.assign(
+    pending.wanted_course,
+    { id_visio: d.id, room: '' }
+  );
+
+  room_tutor_change.proposal = [];
+  check_pending_course();
+}
 
 /*--------------------
    ------ ALL -------
@@ -1854,7 +1867,8 @@ function add_bouge(pending) {
       day: pending.init_course.day,
       start: pending.init_course.start,
       room: pending.init_course.room,
-      prof: pending.init_course.prof
+      prof: pending.init_course.prof,
+      id_visio: pending.init_course.id_visio
     };
     cours.forEach(function(c) {
       if (c.id_course == pending.wanted_course.id_course) {
@@ -1862,6 +1876,7 @@ function add_bouge(pending) {
         c.start = pending.wanted_course.start ;
         c.room = pending.wanted_course.room ;
         c.prof = pending.wanted_course.prof ;
+        id_visio = pending.wanted_course.id_visio ;
       }
     });
     console.log(cours_bouge[pending.init_course.id_course]);
@@ -1872,7 +1887,8 @@ function has_changed(cb, c) {
   return cb.day != c.day
     || cb.start != c.start
     || cb.room != c.room
-    || cb.prof != c.prof;
+    || cb.prof != c.prof
+    || cb.id_visio != c.id_visio;
 }
 
 
