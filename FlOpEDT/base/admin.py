@@ -117,9 +117,14 @@ class CoursPlaceResource(resources.ModelResource):
                              attribute='course__module__display',
                              widget=ForeignKeyWidget(ModuleDisplay,
                                                      'color_txt'))
-    link = fields.Field(column_name='link',
-                       attribute='additional',
-                       widget=ForeignKeyWidget(EnrichedLink, 'concatenated'))
+    id_visio = fields.Field(column_name='id_visio',
+                            attribute='additional',
+                            widget=ForeignKeyWidget(ScheduledCourseAdditional,
+                                                    'id'))
+    comment = fields.Field(column_name='comment',
+                           attribute='additional',
+                           widget=ForeignKeyWidget(ScheduledCourseAdditional,
+                                                   'comment'))
     allow_visio = fields.Field(column_name='allow_visio',
                                attribute='course__additional',
                                widget=ForeignKeyWidget(
@@ -133,8 +138,8 @@ class CoursPlaceResource(resources.ModelResource):
         model = ScheduledCourse
         fields = ('id', 'no', 'groups', 'promo', 'color_bg', 'color_txt',
                   'module', 'coursetype', 'day', 'start_time',
-                  'week', 'room', 'prof', 'room_type', 'link', 'allow_visio',
-                  'graded')
+                  'week', 'room', 'prof', 'room_type',
+                  'id_visio', 'comment', 'allow_visio', 'graded')
 
 
 class CoursPlaceResourceCosmo(resources.ModelResource):
@@ -179,15 +184,20 @@ class CoursPlaceResourceCosmo(resources.ModelResource):
     color_txt = fields.Field(column_name='color_txt',
                              attribute='tutor__display',
                              widget=ForeignKeyWidget(TutorDisplay, 'color_txt'))
-    link = fields.Field(column_name='link',
-                       attribute='additional',
-                       widget=ForeignKeyWidget(ScheduledCourseAdditional,
-                                               'concatenated'))
+    id_visio = fields.Field(column_name='id_visio',
+                            attribute='additional',
+                            widget=ForeignKeyWidget(ScheduledCourseAdditional,
+                                                    'id'))
+    comment = fields.Field(column_name='comment',
+                           attribute='additional',
+                           widget=ForeignKeyWidget(ScheduledCourseAdditional,
+                                                   'comment'))
 
     class Meta:
         model = ScheduledCourse
         fields = ('id', 'no', 'groups', 'promo', 'color_bg', 'color_txt',
-                  'module', 'day', 'start_time', 'week', 'room', 'prof', 'link')
+                  'module', 'day', 'start_time', 'week', 'room', 'prof',
+                  'id_visio', 'comment')
 
 
 class TutorCoursesResource(CoursPlaceResource):
