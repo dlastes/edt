@@ -457,11 +457,11 @@ class WeeksDatabase(object):
 
         for course_additional in CourseAdditional.objects.filter(course__in=self.courses):
             vp = course_additional.visio_preference_value
-            if vp.value == 0:
-                no_visio_courses.add(vp.course)
-            elif vp.value == 8:
-                visio_courses.add(vp.course)
+            if vp == 0:
+                no_visio_courses.add(course_additional.course)
+            elif vp == 8:
+                visio_courses.add(course_additional.course)
             else:
-                visio_ponderation[vp.course] = vp.value / 4
+                visio_ponderation[course_additional.course] = vp / 4
 
         return visio_courses, no_visio_courses, visio_ponderation
