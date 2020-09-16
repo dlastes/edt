@@ -118,10 +118,10 @@
 </div>
 <div class='stype-container'>
   <fieldset>
-    <legend>{% trans "My favorite rooms" %}</legend>
-    <p>{% trans "Select my favorite rooms" %}</p>
+    <legend>{% trans "My videoconf links" %}</legend>
+    <p>{% trans "Create a link" %}</p>
     <br/>
-    <button onclick="window.location.href = '{% url 'base:room-pref' department %}';">{% trans "button_change" %}</button>
+    <button onclick="window.location.href = '{% url 'base:visio-pref' department %}';">{% trans "button_change" %}</button>
   </fieldset>
   <fieldset>
     <legend>{% trans "My ideal day" %}</legend>
@@ -140,6 +140,12 @@
   <br/>
   <br/>
   {% include 'base/notification.html' %}
+  <fieldset>
+    <legend>{% trans "My favorite rooms" %}</legend>
+    <p>{% trans "Select my favorite rooms" %}</p>
+    <br/>
+    <button onclick="window.location.href = '{% url 'base:room-pref' department %}';">{% trans "button_change" %}</button>
+  </fieldset>
 </div>
 </body>
 <script type='text/javascript' src="{% static 'base/helpers.js' %}"></script>
