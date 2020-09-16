@@ -415,6 +415,11 @@ class ScheduledCourseAdditional(models.Model):
         max_length=100,
         null=True, default=None, blank=True)
 
+    def __str__(self):
+        return '{' + str(self.scheduled_course) + '}' \
+            + '[' + self.link.description + ']' \
+            + '(' + self.comment + ')'
+
 
 class EnrichedLink(models.Model):
     url = models.URLField()
