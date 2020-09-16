@@ -2072,11 +2072,15 @@ function translate_preferred_links(d) {
   for(let i = 0 ; i < links.length ; i++) {
     //then separate url and description
     let link = links[i].split(' ');
+    let l_id = +link.shift() ;
+    let l_url = link.shift() ;
+    let l_desc = link.join(' ');
     pref.links.push({
-      'id': link.shift(),
-      'url': link.shift(),
-      'desc': link.join(' ')
+      'id': l_id,
+      'url': l_url,
+      'desc': l_desc 
     }) ;
+    preferred_links_by_id[String(l_id)] = {'url': l_url, 'desc': l_desc};
   }
   preferred_links.push(pref) ;
 }
