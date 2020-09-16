@@ -713,7 +713,7 @@ function translate_cours_pl_from_csv(d, result) {
       display: true,
       id_visio: d.room==''?(d.id_visio==''?-1:+d.id_visio):-1,
       comment: d.comment,
-      graded: d.graded==''?false:true
+      graded: (d.graded=='' || d.graded=='False' || d.graded=='false')?false:true
     });
   }
 }
