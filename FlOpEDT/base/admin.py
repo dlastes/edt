@@ -118,8 +118,8 @@ class CoursPlaceResource(resources.ModelResource):
                              widget=ForeignKeyWidget(ModuleDisplay,
                                                      'color_txt'))
     id_visio = fields.Field(column_name='id_visio',
-                            attribute='additional',
-                            widget=ForeignKeyWidget(ScheduledCourseAdditional,
+                            attribute='additional__link',
+                            widget=ForeignKeyWidget(EnrichedLink,
                                                     'id'))
     comment = fields.Field(column_name='comment',
                            attribute='additional',
@@ -185,8 +185,8 @@ class CoursPlaceResourceCosmo(resources.ModelResource):
                              attribute='tutor__display',
                              widget=ForeignKeyWidget(TutorDisplay, 'color_txt'))
     id_visio = fields.Field(column_name='id_visio',
-                            attribute='additional',
-                            widget=ForeignKeyWidget(ScheduledCourseAdditional,
+                            attribute='additional__link',
+                            widget=ForeignKeyWidget(EnrichedLink,
                                                     'id'))
     comment = fields.Field(column_name='comment',
                            attribute='additional',
