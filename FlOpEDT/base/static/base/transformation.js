@@ -817,7 +817,15 @@ function cours_txt_bot_y(c) {
   return cours_y(c) + .75 * cours_height(c);
 }
 function cours_txt_bot_txt(c) {
-  return c.room;
+  if (c.room != '' && c.id_visio != -1) {
+    console.log(c, 'Both on site and remote?');
+  } else {
+    if (c.id_visio > -1) {
+      return 'Visio' ;
+    } else {
+      return c.room ;
+    }
+  }
 }
 function cours_opac(c) {
   return (c.display || !sel_popup.active_filter) ? 1 : opac;

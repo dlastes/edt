@@ -1931,10 +1931,20 @@ function show_detailed_courses(cours) {
     strokeWidth = 2;
   }
 
+  let room_info = {'txt': cours.room} ;
+  if (cours.id_visio > -1) {
+    let visio_link = preferred_links_by_id[String(cours.id_visio)] ;
+    if (typeof visio_link !== 'undefined') {
+      room_info.txt = visio_link.desc ;
+      room_info.url = visio_link.url ;
+    }
+  }
+  
+  
   let infos = [
     {'txt':modules_info[cours.mod].name, 'url':modules_info[cours.mod].url},
-    {'txt':cours.room},
-    {'txt':cours.course_type},
+    room_info,
+    {'txt':cours.comment},
     {'txt':tutors_info[cours.prof].full_name},
     {'txt':tutors_info[cours.prof].email, 'url': url_contact + cours.prof}
   ];
