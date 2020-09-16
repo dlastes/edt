@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-09-16 16:27+0000\n"
+"POT-Creation-Date: 2020-09-16 16:46+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -70,6 +70,7 @@ msgstr "Mes visios"
 msgid "Create a link"
 msgstr "Créer un lien visio"
 
+#: base/templates/base/show-stype.html:124
 #: base/templates/base/show-stype.html:147
 msgid "button_change"
 msgstr "Modifier"
@@ -100,27 +101,31 @@ msgstr "Mes préférences de salles"
 msgid "Select my favorite rooms"
 msgstr "Choisir mes salles préférées"
 
+#: base/templates/base/visio.html:31
+msgid "Create or modify a link"
+msgstr "Créer ou modifier un lien"
+
 #: base/templates/base/visio.html:38
 msgid "Send"
 msgstr "Envoyer"
 
-#: base/views.py:1754
+#: base/views.py:1753
 msgid "Not authorized. New link then."
 msgstr "Non autorisé. Création d'un nouveau lien."
 
-#: base/views.py:1757
+#: base/views.py:1756
 msgid "Unknown link. New link then."
 msgstr "Lien inconnu. Création d'un nouveau lien."
 
-#: base/views.py:1769
+#: base/views.py:1768
 msgid "Created"
 msgstr "Créé"
 
-#: base/views.py:1769
+#: base/views.py:1768
 msgid "Modified"
 msgstr "Modifié"
 
-#: base/views.py:1772
+#: base/views.py:1771
 msgid "Tutor does not exist"
 msgstr "L'utilisateur n'existe pas."
 
