@@ -1059,9 +1059,7 @@ class TTModel(object):
                                              work_copy=target_work_copy)
 
                         for rg in self.wdb.course_rg_compat[c]:
-                            if rg is None:
-                                break
-                            elif self.get_var_value(self.TTrooms[(sl, c, rg)]) == 1:
+                            if self.get_var_value(self.TTrooms[(sl, c, rg)]) == 1:
                                 cp.room = rg
                                 break
                         cp.save()
