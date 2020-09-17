@@ -222,6 +222,7 @@ create_selections();
 
 fetch_dispos_type();
 
+fetch_preferred_links();
 
 
 d3.json(rooms_fi,

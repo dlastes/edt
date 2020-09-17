@@ -273,10 +273,8 @@ function select_room_change() {
     room_tutor_change.proposal.push({ fid: fake_id, content: "+" });
   }
 
-  room_tutor_change.cm_settings.nlin
-    = Math.ceil(room_tutor_change.proposal.length
-      / room_tutor_change.cm_settings.ncol);
-
+  update_change_cm_nlin() ;
+  
   if (level > 0 || c.room == "" ||
     occupied_rooms.indexOf(c.room) != -1) {
     return true;
@@ -288,7 +286,10 @@ function select_room_change() {
 
 
 function confirm_room_change(d) {
-  Object.assign(pending.wanted_course, { room: d.content });
+  Object.assign(
+    pending.wanted_course,
+    {room: d.content, id_visio: -1}
+  );
 
   room_tutor_change.proposal = [];
   check_pending_course();
@@ -323,6 +324,12 @@ function fetch_all_tutors() {
   }
 }
 
+// update number of lines in the context menu
+function update_change_cm_nlin() {
+  room_tutor_change.cm_settings.nlin = Math.ceil(
+    room_tutor_change.proposal.length / room_tutor_change.cm_settings.ncol
+  );
+}
 
 
 function select_tutor_module_change() {
@@ -353,7 +360,7 @@ function select_tutor_module_change() {
 
   room_tutor_change.proposal.push({ fid: fake_id, content: "+" });
 
-  room_tutor_change.cm_settings.nlin = Math.ceil(room_tutor_change.proposal.length / room_tutor_change.cm_settings.ncol);
+  update_change_cm_nlin() ;
 
 }
 
@@ -383,7 +390,7 @@ function select_tutor_filters_change() {
     return { fid: fake_id + t, content: t };
   });
 
-  room_tutor_change.cm_settings.nlin = Math.ceil(room_tutor_change.proposal.length / room_tutor_change.cm_settings.ncol);
+  update_change_cm_nlin() ;
 
 }
 
@@ -411,10 +418,7 @@ function select_salarie_change() {
     });
   }
 
-  room_tutor_change.cm_settings.nlin
-    = Math.ceil(room_tutor_change.proposal.length
-      / room_tutor_change.cm_settings.ncol);
-
+  update_change_cm_nlin() ;
 
   var fake_id = new Date();
   fake_id = fake_id.getMilliseconds() + "-" + tache.id_cours;
@@ -534,7 +538,8 @@ function go_cm_room_tutor_change() {
     tut_cm_room_g
       .append("rect")
       .attr("class", "cm-chg-rec")
-      .merge(tut_cm_room_dat.select(".cm-chg-rec"))
+    // never updated
+    //      .merge(tut_cm_room_dat.select(".cm-chg-rec"))
       .attr("x", cm_chg_but_x)
       .attr("y", cm_chg_but_y)
       .attr("width", cm_chg_but_width)
@@ -546,7 +551,8 @@ function go_cm_room_tutor_change() {
     tut_cm_room_g
       .append("text")
       .attr("class", "cm-chg-bt")
-      .merge(tut_cm_room_dat.select(".cm-chg-bt"))
+    // never updated
+    //     .merge(tut_cm_room_dat.select(".cm-chg-bt"))
       .attr("x", cm_chg_but_txt_x)
       .attr("y", cm_chg_but_txt_y)
       .attr("fill", cm_chg_but_txt_fill)
@@ -860,7 +866,7 @@ function compute_changes(changes, conc_tutors, gps) {
       // } else 
 
 
-      if (cur_course.room == "") {
+      if (cur_course.room == "" && cur_course.id_visio == -1) {
         splash_case = {
           id: "def-room",
           but: butOK,
@@ -906,7 +912,8 @@ function compute_changes(changes, conc_tutors, gps) {
         day: cur_course.day,
         start: cur_course.start,
         room: cur_course.room,
-        tutor: cur_course.prof
+        tutor: cur_course.prof,
+        id_visio: cur_course.id_visio
       };
 
 
@@ -1813,6 +1820,43 @@ function apply_stype() {
 }
 
 
+/*--------------------
+   ------ VISIO -------
+   --------------------*/
+function select_pref_links_change() {
+  room_tutor_change.cm_settings = pref_links_cm_settings;
+
+
+  let user_links = preferred_links.find(function(l){
+    return l.user == pending.wanted_course.prof ;
+  });
+
+  if (typeof user_links === 'undefined') {
+    console.log('Pas de lien...');
+    room_tutor_change.proposal = [] ;
+    window.location.href = url_change_preferred_links + pending.wanted_course.prof ;
+  } else {
+    room_tutor_change.proposal = user_links.links ;
+    let fake_id = new Date();
+    fake_id = fake_id.getMilliseconds();
+    room_tutor_change.proposal.forEach(function (t) {
+      t.content = t.desc ;
+      t.fid = fake_id ;
+    });
+  }
+  update_change_cm_nlin() ;
+
+}
+
+function confirm_pref_links_change(d) {
+  Object.assign(
+    pending.wanted_course,
+    { id_visio: d.id, room: '' }
+  );
+
+  room_tutor_change.proposal = [];
+  check_pending_course();
+}
 
 /*--------------------
    ------ ALL -------
@@ -1827,7 +1871,8 @@ function add_bouge(pending) {
       day: pending.init_course.day,
       start: pending.init_course.start,
       room: pending.init_course.room,
-      prof: pending.init_course.prof
+      prof: pending.init_course.prof,
+      id_visio: pending.init_course.id_visio
     };
     cours.forEach(function(c) {
       if (c.id_course == pending.wanted_course.id_course) {
@@ -1835,6 +1880,7 @@ function add_bouge(pending) {
         c.start = pending.wanted_course.start ;
         c.room = pending.wanted_course.room ;
         c.prof = pending.wanted_course.prof ;
+        id_visio = pending.wanted_course.id_visio ;
       }
     });
     console.log(cours_bouge[pending.init_course.id_course]);
@@ -1845,7 +1891,8 @@ function has_changed(cb, c) {
   return cb.day != c.day
     || cb.start != c.start
     || cb.room != c.room
-    || cb.prof != c.prof;
+    || cb.prof != c.prof
+    || cb.id_visio != c.id_visio;
 }
 
 
@@ -1892,14 +1939,10 @@ function show_detailed_courses(cours) {
   var details = svg.get_dom("dg").append("g")
     .attr("id", "course_details");
 
-  var width = grid_width() / 4;
-  var height = grid_height() / 3;
-  var pos_x = placement_details_x(cours);
-  var pos_y = placement_details_y(cours);
   var strokeColor;
   var strokeWidth;
 
-  if (cours.course_type == "CTRL") {
+  if (is_exam(cours)) {
     strokeColor = "red";
     strokeWidth = 4;
   }
@@ -1908,12 +1951,31 @@ function show_detailed_courses(cours) {
     strokeWidth = 2;
   }
 
+  let room_info = {'txt': cours.room} ;
+  if (cours.id_visio > -1) {
+    let visio_link = preferred_links_by_id[String(cours.id_visio)] ;
+    if (typeof visio_link !== 'undefined') {
+      room_info.txt = visio_link.desc ;
+      room_info.url = visio_link.url ;
+    }
+  }
+  
+  
+  let infos = [
+    {'txt':modules_info[cours.mod].name, 'url':modules_info[cours.mod].url},
+    room_info,
+    {'txt':cours.comment},
+    {'txt':tutors_info[cours.prof].full_name},
+    {'txt':tutors_info[cours.prof].email, 'url': url_contact + cours.prof}
+  ];
+  nb_detailed_infos = infos.length ;
+
   details
     .append("rect")
-    .attr("x", pos_x)
-    .attr("y", pos_y)
-    .attr("width", width)
-    .attr("height", height)
+    .attr("x", detail_wdw_x(cours))
+    .attr("y", detail_wdw_y(cours))
+    .attr("width", detail_wdw_width())
+    .attr("height", detail_wdw_height())
     .attr("rx", 15)
     .attr("ry", 15)
     .attr("fill", cours.color_bg)
@@ -1921,48 +1983,23 @@ function show_detailed_courses(cours) {
     .attr("stroke-width", strokeWidth)
     .on("click", remove_details);
 
-  details
-    .append("a")
-    .attr("xlink:href", modules_info[cours.mod].url)
-    .attr("target", "_blank")
-    .append("text")
-    .text(modules_info[cours.mod].name)
-    .attr("fill", cours.color_txt)
-    .attr("style", "text-decoration:underline")
-    .attr("x", pos_x + width / 2)
-    .attr("y", pos_y + height / 6);
-
-  details
-    .append("text")
-    .text(cours.room)
-    .attr("fill", cours.color_txt)
-    .attr("x", pos_x + width / 2)
-    .attr("y", pos_y + height / 6 * 2);
-
-  details
-    .append("text")
-    .text(cours.course_type)
-    .attr("fill", cours.color_txt)
-    .attr("x", pos_x + width / 2)
-    .attr("y", pos_y + height / 6 * 3);
-
-  details
-    .append("text")
-    .text(tutors_info[cours.prof].full_name)
-    .attr("fill", cours.color_txt)
-    .attr("x", pos_x + width / 2)
-    .attr("y", pos_y + height / 6 * 4);
-
-  details
-    .append("a")
-    .attr("xlink:href", url_contact + cours.prof)
-    .attr("target", "_blank")
-    .append("text")
-    .text(tutors_info[cours.prof].email)
-    .attr("fill", cours.color_txt)
-    .attr("style", "text-decoration:underline")
-    .attr("x", pos_x + width / 2)
-    .attr("y", pos_y + height / 6 * 5);
+  for(let i = 0 ; i < infos.length ; i++) {
+    let onto = details ;
+    if (typeof infos[i].url !== 'undefined') {
+      onto = details
+        .append('a')
+        .attr("xlink:href", infos[i].url)
+        .attr("target", "_blank") 
+        .attr("style", "text-decoration:underline") ;
+    }
+    onto
+      .append('text')
+      .text(infos[i].txt)
+      .attr("fill", cours.color_txt)
+      .attr("x", detail_txt_x(cours))
+      .attr("y", detail_txt_y(cours, i));
+  }
+  
 }
 
 function remove_details() {

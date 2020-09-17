@@ -710,7 +710,10 @@ function translate_cours_pl_from_csv(d, result) {
       room_type: d.room_type,
       color_bg: d.color_bg,
       color_txt: d.color_txt,
-      display: true
+      display: true,
+      id_visio: d.room==''?(d.id_visio==''?-1:+d.id_visio):-1,
+      comment: d.comment,
+      graded: (d.graded=='' || d.graded=='False' || d.graded=='false')?false:true
     });
   }
 }

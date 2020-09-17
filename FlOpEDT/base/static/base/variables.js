@@ -899,6 +899,18 @@ var tutor_cm_settings =
   nlin: 4,
   txt_intro: { 'default': "Ordre alphabétique :" }
 };
+var pref_links_cm_settings =
+{
+  type: 'preferred_links',
+  w: 200,
+  h: 18,
+  fs: 10,
+  mx: 5,
+  my: 3,
+  ncol: 1,
+  nlin: 0,
+  txt_intro: { 'default': "Quel lien pour la visio ?" }
+};
 // rooms
 // level=0: the proposed rooms are available and of the same type
 //       1: the proposed rooms are available
@@ -1026,3 +1038,8 @@ var colors = {} ;
 var lunch_constraint = {} ;
 lunch_constraint['groups'] = {};
 lunch_constraint['tutors'] = {};
+
+var preferred_links = [];
+var preferred_links_by_id = {};
+
+var nb_detailed_infos ;

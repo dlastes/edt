@@ -25,7 +25,7 @@
 
 from django import forms
 from people.models import Tutor, FullStaff
-from base.models import Module
+from base.models import Module, EnrichedLink
 
 
 class ContactForm(forms.Form):
@@ -53,10 +53,18 @@ class ContactForm(forms.Form):
 class PerfectDayForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(PerfectDayForm, self).__init__(*args, **kwargs)
-        self.fields['pref_hours_per_day'] = forms.IntegerField(label="Idéalement", min_value=1, max_value=9,
-                                                               required=False, initial=4)
-        self.fields['max_hours_per_day'] = forms.IntegerField(label="Maximum", min_value=1, max_value=9,
-                                                              required=False, initial=6)
+        self.fields['pref_hours_per_day'] =\
+            forms.IntegerField(label="Idéalement",
+                               min_value=1,
+                               max_value=9,
+                               required=False,
+                               initial=4)
+        self.fields['max_hours_per_day'] = \
+            forms.IntegerField(label="Maximum",
+                               min_value=1,
+                               max_value=9,
+                               required=False,
+                               initial=6)
 
 
 class ModuleDescriptionForm(forms.ModelForm):
@@ -71,3 +79,9 @@ class ModuleDescriptionForm(forms.ModelForm):
     class Meta:
         model = Module
         fields = ['description']
+
+
+class EnrichedLinkForm(forms.ModelForm):
+    class Meta:
+        model = EnrichedLink
+        fields = '__all__'
