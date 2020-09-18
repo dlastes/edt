@@ -2047,7 +2047,6 @@ function fetch_preferred_links() {
     async: true,
     contentType: "text/csv",
     success: function (msg) {
-      console.log(msg);
       d3.csvParse(msg, translate_preferred_links);
       show_loader(false);
     },
