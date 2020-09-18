@@ -130,16 +130,13 @@ class CoursPlaceResource(resources.ModelResource):
                                widget=ForeignKeyWidget(
                                    CourseAdditional,
                                    'visio_preference_value'))
-    graded = fields.Field(column_name='graded',
-                          attribute='course__additional',
-                          widget=ForeignKeyWidget(CourseAdditional, 'graded'))
 
     class Meta:
         model = ScheduledCourse
         fields = ('id', 'no', 'groups', 'promo', 'color_bg', 'color_txt',
                   'module', 'coursetype', 'day', 'start_time',
                   'week', 'room', 'prof', 'room_type',
-                  'id_visio', 'comment', 'allow_visio', 'graded')
+                  'id_visio', 'comment', 'allow_visio', 'is_graded')
 
 
 class CoursPlaceResourceCosmo(resources.ModelResource):
@@ -278,15 +275,12 @@ class CoursResource(resources.ModelResource):
                                    CourseAdditional,
                                    'visio_preference_value'
                                ))
-    graded = fields.Field(column_name='graded',
-                          attribute='additional',
-                          widget=ForeignKeyWidget(CourseAdditional, 'graded'))
 
     class Meta:
         model = Course
         fields = ('id', 'no', 'tutor_name', 'groups', 'promo', 'module',
                   'coursetype', 'color_bg', 'color_txt', 'prof', 'room_type',
-                  'allow_visio','graded')
+                  'allow_visio','is_graded')
 
 
 class SemaineAnResource(resources.ModelResource):
