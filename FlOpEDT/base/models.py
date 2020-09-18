@@ -313,6 +313,7 @@ class CourseType(models.Model):
     group_types = models.ManyToManyField(GroupType,
                                          blank=True,
                                          related_name="compatible_course_types")
+    graded = models.BooleanField(verbose_name='noté ?', default=False)
 
     def __str__(self):
         return self.name
@@ -359,12 +360,19 @@ class Course(models.Model):
                and self.groups == other.groups \
                and self.module == other.module
 
+    @property
+    def is_graded(self):
+        if CourseAdditional.objects.filter(course=self).exists():
+            return self.additional.graded
+        else:
+            return self.type.graded
+
 
 class CourseAdditional(models.Model):
     course = models.OneToOneField('Course', on_delete=models.CASCADE, related_name='additional')
     graded = models.BooleanField(verbose_name='noté ?', default=False)
     visio_preference_value = models.SmallIntegerField(validators=[MinValueValidator(0), MaxValueValidator(8)],
-                                                      default=8)
+                                                      default=1)
 
 
 class CoursePossibleTutors(models.Model):
