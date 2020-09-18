@@ -131,7 +131,7 @@ class CoursPlaceResource(resources.ModelResource):
                                    CourseAdditional,
                                    'visio_preference_value'))
     is_graded = fields.Field(column_name='graded',
-                             attribute='is_graded')
+                             attribute='course__is_graded')
 
     class Meta:
         model = ScheduledCourse
@@ -192,7 +192,7 @@ class CoursPlaceResourceCosmo(resources.ModelResource):
                            widget=ForeignKeyWidget(ScheduledCourseAdditional,
                                                    'comment'))
     is_graded = fields.Field(column_name='graded',
-                             attribute='is_graded')
+                             attribute='course__is_graded')
 
     class Meta:
         model = ScheduledCourse
