@@ -364,7 +364,7 @@ class CourseAdditional(models.Model):
     course = models.OneToOneField('Course', on_delete=models.CASCADE, related_name='additional')
     graded = models.BooleanField(verbose_name='noté ?', default=False)
     visio_preference_value = models.SmallIntegerField(validators=[MinValueValidator(0), MaxValueValidator(8)],
-                                                      default=8)
+                                                      default=1)
 
 
 class CoursePossibleTutors(models.Model):
