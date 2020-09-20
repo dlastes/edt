@@ -328,7 +328,7 @@ class TTModel(object):
                 expr = 1000 * physical_presence[g][d, apm] \
                        - self.sum(self.TTrooms[sl, c, r]
                                   for c in self.wdb.courses_for_basic_group[g]
-                                  for r in self.wdb.course_rg_compat[c] if r is not None
+                                  for r in self.wdb.course_rg_compat[c] - {None}
                                   for sl in slots_filter(self.wdb.compatible_slots[c], day=d, apm=apm))
                 self.add_constraint(expr, '<=', 999,
                                     Constraint(constraint_type=ConstraintType.VISIO, groups=g, days=d))
@@ -624,7 +624,7 @@ class TTModel(object):
                         self.add_constraint(self.sum(self.TTrooms[(s_sl, c, room)]
                                                      for s_sl in slots_filter(self.wdb.courses_slots, simultaneous_to=sl)
                                                      for c in self.wdb.compatible_courses[s_sl]
-                                                     for room in self.wdb.course_rg_compat[c]
+                                                     for room in self.wdb.course_rg_compat[c] - {None}
                                                      if r in room.and_subrooms()),
                                             '==', 0,
                                             Constraint(constraint_type=ConstraintType.CORE_ROOMS,
