@@ -972,6 +972,11 @@ function update_selection() {
       return d.name == c.prof ;
     });
     var roo = rooms_sel.all.find(function(d) {
+      // visio room
+      if (c.room == '') {
+        return true ;
+      }
+      // physical room
       if (c.room in rooms.roomgroups) {
         return rooms.roomgroups[c.room].includes(d.name) ;
       } else {
