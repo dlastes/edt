@@ -417,7 +417,7 @@ class ScheduledCourseAdditional(models.Model):
     link = models.ForeignKey(
         'EnrichedLink',
         blank=True, null=True, default=None,
-        related_name='additionnal',
+        related_name='additional',
         on_delete=models.SET_NULL)
     comment = models.CharField(
         max_length=100,
