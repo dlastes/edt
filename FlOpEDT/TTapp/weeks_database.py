@@ -191,10 +191,7 @@ class WeeksDatabase(object):
         fixed_courses_for_avail_slot = {}
         for sl in self.availability_slots:
             fixed_courses_for_avail_slot[sl] = set(fc for fc in fixed_courses
-                                                   if fc.start_time < sl.end_time
-                                                   and sl.start_time < fc.end_time
-                                                   and fc.day == sl.day.day
-                                                   and fc.course.week == sl.day.week)
+                                                   if sl.is_simultaneous_to(fc))
 
         other_departments_courses = Course.objects.filter(
             week__in=self.weeks, year=self.year) \
@@ -391,7 +388,7 @@ class WeeksDatabase(object):
 
         fixed_courses_for_tutor = {}
         for i in instructors:
-            fixed_courses_for_tutor[i] = set(self.fixed_courses.filter(tutor=i))
+            fixed_courses_for_tutor[i] = set(self.fixed_courses.filter(Q(tutor=i) | Q(course__supp_tutor=i)))
 
         other_departments_courses_for_tutor = {}
         for i in instructors:
