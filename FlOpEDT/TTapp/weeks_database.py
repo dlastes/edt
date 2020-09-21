@@ -44,7 +44,7 @@ from base.timing import Time, Day
 
 import base.queries as queries
 
-from people.models import Tutor
+from people.models import Tutor, PhysicalPresence
 
 
 from TTapp.slots import Slot, CourseSlot, slots_filter, days_filter
@@ -89,7 +89,8 @@ class WeeksDatabase(object):
         self.instructors, self.courses_for_tutor, self.courses_for_supp_tutor, self.availabilities, \
             self.fixed_courses_for_tutor, \
             self.other_departments_courses_for_tutor, self.other_departments_scheduled_courses_for_supp_tutor, \
-            self.other_departments_scheduled_courses_for_tutor = self.users_init()
+            self.other_departments_scheduled_courses_for_tutor, \
+            self.physical_presence_days_for_tutor = self.users_init()
         self.possible_tutors, self.possible_modules, self.possible_courses = self.possible_courses_tutor_init()
 
     def days_init(self):
@@ -404,10 +405,20 @@ class WeeksDatabase(object):
             other_departments_scheduled_courses_for_tutor[i] = set(self.other_departments_sched_courses
                                                                    .filter(course__tutor=i))
 
+        physical_presence_days_for_tutor = {}
+        for i in instructors:
+            physical_presence_days_for_tutor[i] = {}
+            for w in self.weeks:
+                physical_presence_days_for_tutor[i][w] = []
+                if PhysicalPresence.objects.filter(user=i, week=w, year=self.year).exists():
+                    for pp in i.physical_presences.filter(week=w, year=self.year):
+                        physical_presence_days_for_tutor[i][w].append(pp.day)
+
         return instructors, courses_for_tutor, courses_for_supp_tutor, availabilities, \
-               fixed_courses_for_tutor, other_departments_courses_for_tutor, \
-               other_departments_scheduled_courses_for_supp_tutor, \
-               other_departments_scheduled_courses_for_tutor
+            fixed_courses_for_tutor, other_departments_courses_for_tutor, \
+            other_departments_scheduled_courses_for_supp_tutor, \
+            other_departments_scheduled_courses_for_tutor, \
+            physical_presence_days_for_tutor
 
     def possible_courses_tutor_init(self):
         possible_tutors = {}
