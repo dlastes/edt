@@ -1,5 +1,29 @@
 # -*- coding: utf-8 -*-
 
+# This file is part of the FlOpEDT/FlOpScheduler project.
+# Copyright (c) 2017
+# Authors: Iulian Ober, Paul Renaud-Goud, Pablo Seban, et al.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public
+# License along with this program. If not, see
+# <http://www.gnu.org/licenses/>.
+#
+# You can be released from the requirements of the license by purchasing
+# a commercial license. Buying such a license is mandatory as soon as
+# you develop activities involving the FlOpEDT/FlOpScheduler software
+# without disclosing the source code of your own applications.
+
+import logging
 
 from django.shortcuts import render
 from django.http import Http404, HttpResponse
@@ -14,6 +38,9 @@ from people.models import Tutor, GroupPreferences, StudentPreferences, Student,\
     NotificationsPreferences, PreferredLinks
 from people.admin import TutorResource, GroupPreferencesResource, \
     StudentPreferencesResource, PreferredLinksResource
+
+
+logger = logging.getLogger(__name__)
 
 
 def redirect_add_people_kind(req, kind):
@@ -68,7 +95,7 @@ def fetch_preferences_students(req):
 @login_required
 def student_preferences(req):
     if req.method=='POST' :
-        print(req)
+        logger.info(f'REQ: student preferences {req}')
         if req.user.is_authenticated and req.user.is_student:
             user = req.user
             morning_weight = req.POST['morning_evening']
@@ -113,12 +140,11 @@ def student_preferences(req):
         else:
             # Make a decorator instead
             raise Http404("Who are you?")
-        
 
 
 def create_user(req):
-    print(req.user)
-    print(req.user.is_authenticated and req.user.has_department_perm(req.department))
+    logger.info(f'REQ: create user {req.user}')
+    logger.info(f'has dpt perm: {req.has_department_perm}')
     return TemplateResponse(req, 'people/login_create.html')
 
 
