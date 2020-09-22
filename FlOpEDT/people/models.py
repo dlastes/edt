@@ -27,6 +27,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from base.models import Department
+from base.timing import Day
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 # Create your models here.
 
@@ -280,3 +282,13 @@ class PreferredLinks(models.Model):
     def __str__(self):
         return self.user.username + ' : ' + \
             ' ; '.join([str(l) for l in self.links.all()])
+
+
+class PhysicalPresence(models.Model):
+    user = models.ForeignKey('people.User', on_delete=models.CASCADE, related_name='physical_presences')
+    day = models.CharField(max_length=2, choices=Day.CHOICES, default=Day.MONDAY)
+    week = models.PositiveSmallIntegerField(validators=[MinValueValidator(0), MaxValueValidator(53)])
+    year = models.PositiveSmallIntegerField()
+
+    def __str__(self):
+        return f"{self.user.username} is present {self.day} of week {self.week}-{self.year}"
