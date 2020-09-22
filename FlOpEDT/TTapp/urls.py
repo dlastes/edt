@@ -6,16 +6,16 @@ import TTapp.views
 app_name="TTapp"
 
 urlpatterns = [
-    path('side_panel/<str:dept>/<int:year>/<int:week>',
+    path('side_panel/<int:year>/<int:week>',
          TTapp.views.available_work_copies,
          name="available_work_copies"),
-    path('check_swap/<str:dept>/<int:year>/<int:week>/<int:work_copy>',
+    path('check_swap/<int:year>/<int:week>/<int:work_copy>',
          TTapp.views.check_swap,
          name="check_swap"),
-    path('swap/<str:dept>/<int:year>/<int:week>/<int:work_copy>',
+    path('swap/<int:year>/<int:week>/<int:work_copy>',
          TTapp.views.swap,
          name="swap"),
-    path('reassign_rooms/<str:dept>/<int:year>/<int:week>/<int:work_copy>',
+    path('reassign_rooms/<int:year>/<int:week>/<int:work_copy>',
          TTapp.views.reassign_rooms,
          name="reassign_rooms"),
     path('fetch_group_lunch',

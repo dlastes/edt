@@ -64,7 +64,7 @@ urlpatterns = [
 #    url(r'^api-auth/', include('rest_framework.urls')),
     url(r'^configuration/', include('configuration.urls')),
 #    url(r'^importation/(?P<department>[a-zA-Z]\w{0,6})/', include('importation.urls')),
-    url('ttapp/', include('TTapp.urls')),
+    url('ttapp/(?P<department>[a-zA-Z]\w{0,6})/', include('TTapp.urls')),
     url(r'^$', views.index, name='index'),
     url('game/', include('easter_egg.urls')),
     url(r'^flopeditor/', include('flopeditor.urls')),
