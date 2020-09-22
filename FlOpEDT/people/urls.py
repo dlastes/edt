@@ -112,7 +112,7 @@ urlpatterns = [
     url(r'^fetch_preferences_students/$',
         views.fetch_preferences_students,
         name="fetch_preferences_students"),
-    path('fetch_preferred_links',
+    path('fetch_preferred_links/<str:department>',
          views.fetch_preferred_links,
          name='fetch_preferred_links'),
     url(r'^student_preferences/$',

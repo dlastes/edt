@@ -148,7 +148,7 @@ def create_user(req):
     return TemplateResponse(req, 'people/login_create.html')
 
 
-def fetch_preferred_links(req):
+def fetch_preferred_links(req, **kwargs):
     pref = PreferredLinks.objects\
                          .prefetch_related('user__departments')\
                          .filter(user__departments=req.department)
