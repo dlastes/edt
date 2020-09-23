@@ -133,6 +133,16 @@ WeekDays.prototype.get_days_between = function(first_ref, last_ref) {
   });
 };
 
+WeekDays.prototype.get_changes_physical_presence = function() {
+  let changes = [] ;
+  this.forEach(function(d) {
+    if (d.init_force_here != d.force_here) {
+      changes.push({'day':d.ref, 'force_here':d.force_here});
+    }
+  });
+  return changes ;
+};
+
 
 // Name and date of the days above the grid
 function WeekDayHeader(
@@ -151,7 +161,7 @@ WeekDayHeader.prototype.data = function () {
   return this.mix.days.data();
 };
 
-WeekDayHeader.prototype.update = function (quick, half_day_rect) {
+WeekDayHeader.prototype.update = function (quick) {
   var t = get_transition(quick);
 
   var day_scale = this.layout
@@ -233,6 +243,49 @@ WeekDayHeader.prototype.fetch_physical_presence = function() {
   });
 
 };
+
+WeekDayHeader.prototype.send_change_physical_presence = function () {
+  let cur_week = wdw_weeks.get_selected();
+  let sent_data = {};
+  sent_data['changes'] = JSON.stringify(
+    this.mix.days.get_changes_physical_presence()
+  );
+  console.log(sent_data['changes']);
+  console.log(this.mix.days.get_changes_physical_presence());
+
+  show_loader(true);
+  $.ajax({
+    url: this.url_change_physical_presence + cur_week.url() + "/" + user.name,
+    type: 'POST',
+    data: sent_data,
+    dataType: 'json',
+    success: function (msg) {
+      console.log(msg);
+      ack.list.push({
+        'status': 'OK',
+        'more': ""
+      }) ;
+      ack.ongoing = ack.ongoing.filter(function(o){
+        return o != 'presence' ;
+      });
+      go_ack_msg();
+      show_loader(false);
+    },
+    error: function (msg) {
+      aaaa = msg;
+      ack.list.push({
+        'status': 'KO',
+        'more': ""
+      }) ;
+      ack.ongoing = ack.ongoing.filter(function(o){
+        return o != 'presence' ;
+      });
+      go_ack_msg();
+      show_loader(false);
+    }
+  });
+} ;
+
 
 
 // Private class
