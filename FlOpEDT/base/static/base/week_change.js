@@ -601,6 +601,8 @@ function fetch_cours() {
 
         week_days = new WeekDays(JSON.parse(req.getResponseHeader('days').replace(/'/g, '"')));
         days_header.mix.days = week_days;
+        days_header.fetch_physical_presence() ;
+
 
         tutors.pl = [];
         modules.pl = [];
