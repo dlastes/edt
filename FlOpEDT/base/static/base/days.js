@@ -173,13 +173,16 @@ WeekDayHeader.prototype.update = function (quick) {
     .enter()
     .append("g")
     .attr("class", "gridsckd");
+  
 
   day_sc_g
     .append("text")
     .attr("class", "txt_scl")
+    .on('click', this.mix.gsckd_click)
     .merge(day_scale.select(".txt_scl"))
     .transition(t)
     .text(this.mix.gsckd_txt)
+    .attr("fill", this.mix.gsckd_txt_color)
     .attr("x", this.mix.gsckd_x)
     .attr("y", this.mix.gsckd_y);
 
@@ -307,6 +310,15 @@ function WeekDayMix(par, days, header) {
   this.gsckd_txt = function (d) {
     return d.name + " " + d.date;
   };
+  this.gsckd_txt_color = function(d) {
+    return d.force_here?'green':'darkslateblue';
+  };
+  this.gsckd_click = function(d) {
+    if (ckbox['dis-mod'].cked) {
+      d.force_here = !d.force_here ;
+      this.header.update(true);
+    }
+  } ;
   this.grid_day_am_x = function (d) {
     return d.num * (rootgp_width * labgp.width +
       dim_dispo.plot * (dim_dispo.width + dim_dispo.right));
