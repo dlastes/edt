@@ -779,7 +779,9 @@ var ack = {
   predefined: {
     KO: "C'est un échec cuisant. Trouvez un·e responsable d'emploi du temps et faites-lui part de vos problèmes.",
     OK: "La modification s'est déroulée sans accroc."
-  }
+  },
+  list: [],
+  ongoing: []
 };
 
 
