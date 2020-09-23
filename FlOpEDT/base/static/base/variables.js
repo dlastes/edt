@@ -173,7 +173,7 @@ file_fetch.department.callback = function () {
 var slot_case = false; //true ;
 
 // current number of rows
-var nbRows;
+var nbRows = 1;
 // last positive number of rows (when filtering by group)
 var pos_nbRows = 0;
 
