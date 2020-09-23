@@ -1861,7 +1861,7 @@ function create_stype() {
     .attr("but", "dis")
     .on("mouseover", but_bold)
     .on("mouseout", but_back)
-    .on("click", send_dis_change)
+    .on("click", send_pref_pres_change)
     .attr("cursor", "pointer");
 
   dis_but

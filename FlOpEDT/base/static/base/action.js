@@ -1625,6 +1625,12 @@ function send_dis_change() {
 
 
 
+function send_pref_pres_change() {
+  ack.ongoing = ['preference', 'presence'] ;
+  send_dis_change() ;
+  days_header.send_change_physical_presence() ;
+}
+
 
 function edt_change_ack(msg) {
   if (msg.status == "OK") {
