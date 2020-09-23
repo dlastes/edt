@@ -170,3 +170,46 @@ def fetch_physical_presence(req, year, week, **kwargs):
                             content_type='text/csv')
     return response
 
+
+@tutor_or_superuser_required
+def change_physical_presence(req, year, week, user):
+    bad_response = {'status': 'KO'}
+
+    if not req.is_department_admin and req.user.username != user:
+        bad_response['more'] = _(f'Not allowed')
+        return JsonResponse(bad_response)
+
+    try:
+        user = User.objects.get(username=user)
+    except User.DoesNotExist:
+        bad_response['more'] = _(f'No such user as {user}')
+        return JsonResponse(bad_response)
+
+    
+    good_response = {'status': 'OK', 'more': ''}
+
+    changes = json.loads(req.POST.get('changes', '{}'))
+    logger.info("List of changes")
+    for change in changes:
+        logger.info(change)
+
+    # Default week at None
+    if week == 0 or year == 0:
+        week = None
+        year = None
+
+    for change in changes:
+        logger.info(f"Change {change}")
+        if not change['force_here']:
+            PhysicalPresence.objects.filter(week=week,
+                                            year=year,
+                                            day=change['day'],
+                                            user=user).delete()
+        else:
+            PhysicalPresence.objects.create(week=week,
+                                            year=year,
+                                            day=change['day'],
+                                            user=user)
+
+    return JsonResponse(good_response)
+
