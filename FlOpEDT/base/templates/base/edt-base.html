@@ -83,6 +83,10 @@
   var url_group_lunch = "{% url 'TTapp:fetch_group_lunch' department %}" ;
   var url_fetch_preferred_links = "{% url 'people:fetch_preferred_links' department %}" ;
   var url_change_preferred_links = "{% url 'base:visio-pref' department %}" ;
+  var url_fetch_physical_presence = "{% url 'people:fetch_physical_presence' department 0 0 %}" ;
+  url_fetch_physical_presence = url_fetch_physical_presence.slice(0, -3) ;
+  var url_change_physical_presence = "{% url 'people:change_physical_presence' 0 0 '.' %}" ;
+  url_change_physical_presence = url_change_physical_presence.slice(0, -5) ;
 
     var department = "{{ dept }}" ;
     var week_year_list = {{ all_weeks| safe }};
