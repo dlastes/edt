@@ -23,21 +23,24 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
+import json
 import logging
 
-from django.shortcuts import render
-from django.http import Http404, HttpResponse
-from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
-from django.template.response import TemplateResponse
 from django.core.exceptions import ObjectDoesNotExist
+from django.http import Http404, HttpResponse, JsonResponse
+from django.shortcuts import redirect, render
+from django.template.response import TemplateResponse
+from django.utils.translation import gettext as _
+
+from FlOpEDT.decorators import tutor_or_superuser_required
 
 import base.queries as queries
 
 from people.models import Tutor, GroupPreferences, StudentPreferences, Student,\
-    NotificationsPreferences, PreferredLinks
+    NotificationsPreferences, PreferredLinks, PhysicalPresence, User
 from people.admin import TutorResource, GroupPreferencesResource, \
-    StudentPreferencesResource, PreferredLinksResource
+    StudentPreferencesResource, PreferredLinksResource, PhysicalPresenceResource
 
 
 logger = logging.getLogger(__name__)
@@ -157,3 +160,13 @@ def fetch_preferred_links(req, **kwargs):
                             content_type='text/csv')
     return response
     
+
+def fetch_physical_presence(req, year, week, **kwargs):
+    presence = PhysicalPresence.objects.filter(user__departments=req.department,
+                                               year=year,
+                                               week=week)
+    dataset = PhysicalPresenceResource().export(presence)
+    response = HttpResponse(dataset.csv,
+                            content_type='text/csv')
+    return response
+
