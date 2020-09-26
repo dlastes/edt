@@ -1553,8 +1553,10 @@ function send_dis_change() {
   var nbDispos = 0;
 
   if (user.dispos_bu.length == 0) {
-    ack.status = 'OK';
-    ack.more = "Rien à signaler.";
+    ack.list.push({
+      'status': 'OK',
+      'more': "Rien à signaler."
+    });
     go_ack_msg();
     return;
   }
@@ -1570,8 +1572,10 @@ function send_dis_change() {
 
   if (changes.length == 0) {
     console.log('no change here');
-    ack.status = 'OK';
-    ack.more = "Rien à signaler.";
+    ack.list.push({
+      'status': 'OK',
+      'more': "Rien à signaler."
+    });
     go_ack_msg();
   } else {
 
@@ -1591,16 +1595,26 @@ function send_dis_change() {
       dataType: 'json',
       success: function (msg) {
         show_loader(false);
-        ack.status = 'OK';
-        ack.more = "";
+        ack.list.push({
+          'status': 'OK',
+          'more': ""
+        }) ;
+        ack.ongoing = ack.ongoing.filter(function(o){
+          return o != 'preference' ;
+        });
         go_ack_msg();
         filled_dispos = nbDispos;
         go_alarm_pref();
       },
       error: function (msg) {
         show_loader(false);
-        ack.status = 'KO';
-        ack.more = "";
+        ack.list.push({
+          'status': 'KO',
+          'more': ""
+        }) ;
+        ack.ongoing = ack.ongoing.filter(function(o){
+          return o != 'preference' ;
+        });
         go_ack_msg();
       }
     });
@@ -1610,6 +1624,12 @@ function send_dis_change() {
 }
 
 
+
+function send_pref_pres_change() {
+  ack.ongoing = ['preference', 'presence'] ;
+  send_dis_change() ;
+  days_header.send_change_physical_presence() ;
+}
 
 
 function edt_change_ack(msg) {

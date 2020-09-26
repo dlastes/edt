@@ -115,7 +115,10 @@ wdw_weeks.add_full_weeks(week_year_list);
 var week_banner = new WeekBanner(svg, "wg", "wg-fg", "wg-bg", wdw_weeks, dsp_weeks);
 week_banner.spawn();
 
-var days_header = new WeekDayHeader(svg, "edt-fg", week_days, true, null);
+var days_header = new WeekDayHeader(
+  svg, "edt-fg", week_days, true, null,
+  url_fetch_physical_presence, url_change_physical_presence
+);
 
 var hours_header = new HourHeader(svg, "edt-fg", hours);
 

@@ -1188,21 +1188,49 @@ function go_courses(quick) {
 
 // update acknowledgment message
 function go_ack_msg() {
-  var btn_txt = "Super";
-  if (ack.status == 'KO') {
-    btn_txt = "Ok";
-  }
-  var com_txt = ack.more;
-  if (com_txt == '') {
-    com_txt = ack.predefined[ack.status];
-  }
-  var splash_ack = {
-    id: "ack-edt-mod",
-    but: { list: [{ txt: btn_txt, click: function (d) { } }] },
-    com: { list: [{ txt: com_txt }] }
-  };
-  splash(splash_ack);
+  if (ack.ongoing.length == 0) {
+    
+    let btn_txt = "Super";
+    let ack_list = typeof ack.list !== 'undefined' ;
+    let com_list = [] ;
 
+    if (ack_list) {
+      if(typeof ack.list.find(function(a) { return a.status == 'KO'; })
+         === 'undefined') {
+        ack.status = 'OK' ;
+      } else {
+        ack.status = 'KO' ;
+      }
+    }
+    
+    if (ack.status == 'KO') {
+      btn_txt = "Ok";
+    }
+
+    if (ack_list) {
+      ack.list.filter(function(a) {
+        return a.status == 'KO' ;
+      }).map(function(a) {
+        return {'txt': a.more} ;
+      });
+    } else {
+      if (ack.more != '') {
+        com_list.append(ack.more);
+      }
+    }
+    
+    if (com_list.length == 0) {
+      com_list.push({txt: ack.predefined[ack.status]});
+    }
+    var splash_ack = {
+      id: "ack-edt-mod",
+      but: { list: [{ txt: btn_txt, click: function (d) {
+        ack.list = [] ;
+      } }] },
+      com: { list: com_list }
+    };
+    splash(splash_ack);
+  }
 }
 
 
