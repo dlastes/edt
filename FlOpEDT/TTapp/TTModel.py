@@ -278,7 +278,7 @@ class TTModel(object):
             for d in self.wdb.days:
                 forced_IBD[(i, d)] = 0
                 if d.day in self.wdb.physical_presence_days_for_tutor[i][d.week]:
-                    forced_IBD[(i, d)] = 0
+                    forced_IBD[(i, d)] = 1
                 if settings.COSMO_MODE:
                     if self.wdb.sched_courses.filter(day=d.day, course__week=d.week,
                                                      course__suspens=False,
