@@ -441,6 +441,18 @@ class EnrichedLink(models.Model):
     def __str__(self):
         return self.description + ' -> ' + self.url
 
+
+class GroupPreferredLinks(models.Model):
+    group = models.OneToOneField('Group',
+                                 on_delete=models.CASCADE,
+                                 related_name='preferred_links')
+    links = models.ManyToManyField('EnrichedLink',
+                                   related_name='group_set')
+
+    def __str__(self):
+        return self.group.full_name + ' : ' + \
+            ' ; '.join([str(l) for l in self.links.all()])
+
 # </editor-fold desc="COURSES">
 
 # <editor-fold desc="PREFERENCES">
