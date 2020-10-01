@@ -48,7 +48,7 @@ from FlOpEDT.decorators import dept_admin_required, tutor_required
 from FlOpEDT.settings.base import COSMO_MODE
 
 from people.models import Tutor, UserDepartmentSettings, User, \
-    NotificationsPreferences, PreferredLinks
+    NotificationsPreferences, UserPreferredLinks
 
 from displayweb.admin import BreakingNewsResource
 from displayweb.models import BreakingNews
@@ -1746,7 +1746,7 @@ def visio_preference(req, tutor=None, id=None, **kwargs):
         try:
             instance = EnrichedLink.objects.get(id=id)
             if not req.user.has_department_perm(req.department, admin=True):
-                pref, created = PreferredLinks.objects\
+                pref, created = UserPreferredLinks.objects\
                                               .get_or_create(user=req.user)
                 if created or instance not in pref.links.all():
                     instance = None
@@ -1761,7 +1761,7 @@ def visio_preference(req, tutor=None, id=None, **kwargs):
 
         try:
             user = User.objects.get(username=tutor)
-            pref, created = PreferredLinks.objects\
+            pref, created = UserPreferredLinks.objects\
                                           .get_or_create(user=user)
             if created or link not in pref.links.all():
                 pref.links.add(link) 

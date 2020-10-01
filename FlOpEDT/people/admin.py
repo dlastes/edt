@@ -33,7 +33,7 @@ from import_export import resources, fields
 from base.admin import DepartmentModelAdminMixin
 
 from people.models import User, Tutor, FullStaff, SupplyStaff, BIATOS, Student,\
-    UserDepartmentSettings, StudentPreferences, GroupPreferences, PreferredLinks,\
+    UserDepartmentSettings, StudentPreferences, GroupPreferences, UserPreferredLinks,\
     PhysicalPresence
 
 
@@ -136,7 +136,7 @@ class GroupPreferencesResource(resources.ModelResource):
                   "free_half_day_weight")
 
 
-class PreferredLinksResource(resources.ModelResource):
+class UserPreferredLinksResource(resources.ModelResource):
     links = fields.Field(column_name='links',
                          attribute='links',
                          widget=ManyToManyWidget('base.Enrichedlink',
@@ -146,11 +146,11 @@ class PreferredLinksResource(resources.ModelResource):
                         attribute='user',
                         widget=ForeignKeyWidget('people.User', 'username'))
     class Meta:
-        model = PreferredLinks
+        model = UserPreferredLinks
         fields = ('user', 'links')
 
 
-class PreferredLinksAdmin(admin.ModelAdmin):
+class UserPreferredLinksAdmin(admin.ModelAdmin):
     pass
 
 
@@ -170,4 +170,4 @@ admin.site.register(SupplyStaff, UserModelAdmin)
 admin.site.register(BIATOS, UserModelAdmin)
 admin.site.register(Student, UserModelAdmin)
 admin.site.register(User, UserModelAdmin)
-admin.site.register(PreferredLinks, PreferredLinksAdmin)
+admin.site.register(UserPreferredLinks, UserPreferredLinksAdmin)
