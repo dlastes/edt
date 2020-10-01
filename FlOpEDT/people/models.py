@@ -272,24 +272,12 @@ class NotificationsPreferences(models.Model):
     nb_of_notified_weeks = models.PositiveSmallIntegerField(default=0)
 
 
-class PreferredLinks(models.Model):
+class UserPreferredLinks(models.Model):
     user = models.OneToOneField('User',
                                 on_delete=models.CASCADE,
                                 related_name='preferred_links')
     links = models.ManyToManyField('base.EnrichedLink',
-                                   related_name='ex_user_set')
-
-    def __str__(self):
-        return self.user.username + ' : ' + \
-            ' ; '.join([str(l) for l in self.links.all()])
-
-
-class UserPreferredLinks(models.Model):
-    user = models.OneToOneField('User',
-                                on_delete=models.CASCADE,
-                                related_name='new_preferred_links')
-    links = models.ManyToManyField('base.EnrichedLink',
-                                   related_name='new_user_set')
+                                   related_name='user_set')
 
     def __str__(self):
         return self.user.username + ' : ' + \
