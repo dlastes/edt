@@ -38,9 +38,9 @@ from FlOpEDT.decorators import tutor_or_superuser_required
 import base.queries as queries
 
 from people.models import Tutor, GroupPreferences, StudentPreferences, Student,\
-    NotificationsPreferences, PreferredLinks, PhysicalPresence, User
+    NotificationsPreferences, UserPreferredLinks, PhysicalPresence, User
 from people.admin import TutorResource, GroupPreferencesResource, \
-    StudentPreferencesResource, PreferredLinksResource, PhysicalPresenceResource
+    StudentPreferencesResource, UserPreferredLinksResource, PhysicalPresenceResource
 
 
 logger = logging.getLogger(__name__)
@@ -152,10 +152,10 @@ def create_user(req):
 
 
 def fetch_preferred_links(req, **kwargs):
-    pref = PreferredLinks.objects\
+    pref = UserPreferredLinks.objects\
                          .prefetch_related('user__departments')\
                          .filter(user__departments=req.department)
-    dataset = PreferredLinksResource().export(pref)
+    dataset = UserPreferredLinksResource().export(pref)
     response = HttpResponse(dataset.csv,
                             content_type='text/csv')
     return response
