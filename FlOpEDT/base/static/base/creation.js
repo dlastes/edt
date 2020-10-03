@@ -2078,10 +2078,15 @@ function fetch_preferred_links() {
       show_loader(false);
     }
   });
+  show_loader(true);
+  $.ajax({
+    type: "GET", //rest Type
+    dataType: 'text',
+    url: url_fetch_group_preferred_links,
     async: true,
     contentType: "text/csv",
     success: function (msg) {
-      d3.csvParse(msg, translate_preferred_links);
+      d3.csvParse(msg, translate_group_preferred_links);
       show_loader(false);
     },
     error: function (xhr, error) {
@@ -2098,6 +2103,8 @@ function fetch_preferred_links() {
 function translate_user_preferred_links(d) {
   preferred_links.users[d.user] = translate_links(d.links) ;
 }
+function translate_group_preferred_links(d) {
+  preferred_links.groups[d.group] = translate_links(d.links) ;
 }
 
 
