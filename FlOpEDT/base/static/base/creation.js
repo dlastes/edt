@@ -2038,12 +2038,46 @@ function translate_group_lunch_constraints(d) {
 /*--------------------
    ------ VISIO ------
    --------------------*/
+function translate_links(links_str) {
+  // split the many links first
+  let links_tab = links_str.split('|') ;
+  let links = [] ;
+  for(let i = 0 ; i < links_tab.length ; i++) {
+    //then separate url and description
+    let link = links_tab[i].split(' ');
+    let l_id = +link.shift() ;
+    let l_url = link.shift() ;
+    let l_desc = link.join(' ');
+    links.push({
+      'id': l_id,
+      'url': l_url,
+      'desc': l_desc 
+    }) ;
+    links_by_id[String(l_id)] = {'url': l_url, 'desc': l_desc};
+  }
+  return links ;
+}
+
 function fetch_preferred_links() {
   show_loader(true);
   $.ajax({
     type: "GET", //rest Type
     dataType: 'text',
-    url: url_fetch_preferred_links,
+    url: url_fetch_user_preferred_links,
+    async: true,
+    contentType: "text/csv",
+    success: function (msg) {
+      d3.csvParse(msg, translate_user_preferred_links);
+      show_loader(false);
+    },
+    error: function (xhr, error) {
+      console.log("error");
+      console.log(xhr);
+      console.log(error);
+      console.log(xhr.responseText);
+      show_loader(false);
+    }
+  });
     async: true,
     contentType: "text/csv",
     success: function (msg) {
@@ -2061,27 +2095,9 @@ function fetch_preferred_links() {
 
 }
 
-function translate_preferred_links(d) {
-  // split the many links first
-  let links = d.links.split('|') ;
-  let pref = {
-    'user': d.user,
-    'links' : []
-  } ;
-  for(let i = 0 ; i < links.length ; i++) {
-    //then separate url and description
-    let link = links[i].split(' ');
-    let l_id = +link.shift() ;
-    let l_url = link.shift() ;
-    let l_desc = link.join(' ');
-    pref.links.push({
-      'id': l_id,
-      'url': l_url,
-      'desc': l_desc 
-    }) ;
-    preferred_links_by_id[String(l_id)] = {'url': l_url, 'desc': l_desc};
-  }
-  preferred_links.push(pref) ;
+function translate_user_preferred_links(d) {
+  preferred_links.users[d.user] = translate_links(d.links) ;
+}
 }
 
 

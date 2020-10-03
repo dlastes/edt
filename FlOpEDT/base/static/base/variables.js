@@ -1041,7 +1041,7 @@ var lunch_constraint = {} ;
 lunch_constraint['groups'] = {};
 lunch_constraint['tutors'] = {};
 
-var preferred_links = [];
-var preferred_links_by_id = {};
+var preferred_links = {users: {}, groups: {}};
+var links_by_id = {};
 
 var nb_detailed_infos ;
