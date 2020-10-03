@@ -401,7 +401,7 @@ class GroupPreferredLinksResource(resources.ModelResource):
                          widget=ForeignKeyWidget('base.Group', 'full_name'))
     class Meta:
         model = GroupPreferredLinks
-        fields = ('user', 'links')
+        fields = ('group', 'links')
 
 
 # </editor-fold desc="RESOURCES">
