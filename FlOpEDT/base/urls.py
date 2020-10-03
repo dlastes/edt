@@ -88,6 +88,9 @@ urlpatterns = [
     url(r'^fetch_tutors/(?P<year>\d+)/(?P<week>\d+)$', views.fetch_tutor, name="fetch_tutor"),
     url(r'^fetch_all_modules_with_desc$', views.fetch_all_modules_with_desc, name="fetch_all_modules_with_desc"),
     url(r'^fetch_all_dispos$', views.fetch_all_dispos, name="fetch_all_dispos"),
+    path('fetch_group_preferred_links',
+         views.fetch_group_preferred_links,
+         name='fetch_group_preferred_links'),
 
     # statistics
     # ---------------------------------
