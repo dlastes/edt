@@ -647,7 +647,8 @@ class TTModel(object):
                                             for c in group_courses_except_visio_and_no_visio_ones
                                             for sl in self.wdb.compatible_slots[c])
                                    )
-        # visio-courses are preferentially in Visio room
+
+        # visio-courses are preferentially in Visio
         for bg in self.wdb.basic_groups:
             group_visio_courses= \
                 self.wdb.courses_for_basic_group[bg] & self.wdb.visio_courses
@@ -659,6 +660,15 @@ class TTModel(object):
                                             for sl in self.wdb.compatible_slots[c])
                                    )
 
+        # No visio_course have (strongly) preferentially a room
+        for bg in self.wdb.basic_groups:
+            group_no_visio_courses = self.wdb.courses_for_basic_group[bg] & self.wdb.no_visio_courses
+            self.add_to_group_cost(bg,
+                                   2 * self.min_visio *
+                                   self.sum(self.TTrooms[(sl, c, None)] * self.wdb.visio_ponderation[c]
+                                            for c in group_no_visio_courses
+                                            for sl in self.wdb.compatible_slots[c])
+                                   )
 
     def add_dependency_constraints(self, weight=None):
         """
