@@ -670,6 +670,9 @@ var side_courses = [];
 var dragListener;
 var drag_popup;
 
+var cur_over = null;
+var slots_over = null;
+
 // helper for the d&d
 var drag = {
   sel: [],
@@ -1041,7 +1044,7 @@ var lunch_constraint = {} ;
 lunch_constraint['groups'] = {};
 lunch_constraint['tutors'] = {};
 
-var preferred_links = [];
-var preferred_links_by_id = {};
+var preferred_links = {users: {}, groups: {}};
+var links_by_id = {};
 
 var nb_detailed_infos ;

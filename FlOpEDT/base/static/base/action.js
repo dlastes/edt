@@ -1846,20 +1846,20 @@ function apply_stype() {
 /*--------------------
    ------ VISIO -------
    --------------------*/
+
+// user's links for now
 function select_pref_links_change() {
   room_tutor_change.cm_settings = pref_links_cm_settings;
 
 
-  let user_links = preferred_links.find(function(l){
-    return l.user == pending.wanted_course.prof ;
-  });
-
-  if (typeof user_links === 'undefined') {
+  if (!Object.keys(preferred_links.users).includes(pending.wanted_course.prof)) {
     console.log('Pas de lien...');
     room_tutor_change.proposal = [] ;
-    window.location.href = url_change_preferred_links + pending.wanted_course.prof ;
+    window.location.href =
+      url_change_preferred_links + pending.wanted_course.prof ;
   } else {
-    room_tutor_change.proposal = user_links.links ;
+    room_tutor_change.proposal =
+      preferred_links.users[pending.wanted_course.prof] ;
     let fake_id = new Date();
     fake_id = fake_id.getMilliseconds();
     room_tutor_change.proposal.forEach(function (t) {
@@ -1976,7 +1976,7 @@ function show_detailed_courses(cours) {
 
   let room_info = {'txt': cours.room} ;
   if (cours.id_visio > -1) {
-    let visio_link = preferred_links_by_id[String(cours.id_visio)] ;
+    let visio_link = links_by_id[String(cours.id_visio)] ;
     if (typeof visio_link !== 'undefined') {
       room_info.txt = visio_link.desc ;
       room_info.url = visio_link.url ;

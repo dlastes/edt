@@ -914,10 +914,37 @@ function translate_quote_from_csv(d) {
    ------ COURSES ------
   ----------------------*/
 
+function run_course_drag(d) {
+  if (ckbox["edt-mod"].cked && fetch.done) {
+
+    // get the time interval, whatever the group
+    cur_over = which_slot(
+      drag.x + parseInt(drag.sel.select("rect").attr("x")),
+      drag.y + parseInt(drag.sel.select("rect").attr("y")),
+      d);
+    //console.log(cur_over.day, cur_over.start_time);
+
+    data_slot_grid.forEach(function (s) {
+      s.display = false;
+    });
+    if (!is_garbage(cur_over)) {
+      slots_over = data_slot_grid.filter(function (c) {
+        return c.day == cur_over.day
+          && c.start == cur_over.start_time;
+      });
+      slots_over.forEach(function (s) {
+        s.display = true;
+      });
+    }
+    go_grid(true);
+
+    drag.x += d3.event.dx;
+    drag.y += d3.event.dy;
+    drag.sel.attr("transform", "translate(" + drag.x + "," + drag.y + ")");
+  }
+}
 
 function def_drag() {
-  var cur_over = null;
-  var slots_over = null;
   dragListener = d3.drag()
     .on("start", function (c) {
       cancel_cm_adv_preferences();
@@ -947,39 +974,12 @@ function def_drag() {
         });
 
         pending.prepare_dragndrop(c);
+
+        run_course_drag(c);
       }
     })
-    .on("drag", function (d) {
-      if (ckbox["edt-mod"].cked && fetch.done) {
-
-        // get the time interval, whatever the group
-        cur_over = which_slot(
-          drag.x + parseInt(drag.sel.select("rect").attr("x")),
-          drag.y + parseInt(drag.sel.select("rect").attr("y")),
-          d);
-        //console.log(cur_over.day, cur_over.start_time);
-
-        data_slot_grid.forEach(function (s) {
-          s.display = false;
-        });
-        if (!is_garbage(cur_over)) {
-          slots_over = data_slot_grid.filter(function (c) {
-            return c.day == cur_over.day
-              && c.start == cur_over.start_time;
-          });
-          slots_over.forEach(function (s) {
-            s.display = true;
-          });
-        }
-        go_grid(true);
-
-        drag.x += d3.event.dx;
-        drag.y += d3.event.dy;
-        drag.sel.attr("transform", "translate(" + drag.x + "," + drag.y + ")");
-      }
-    })
+    .on("drag", run_course_drag)
     .on("end", function (d) {
-
       // click => end. So if real drag
       if (drag.sel.length != 0) {
 
@@ -2038,16 +2038,55 @@ function translate_group_lunch_constraints(d) {
 /*--------------------
    ------ VISIO ------
    --------------------*/
+function translate_links(links_str) {
+  // split the many links first
+  let links_tab = links_str.split('|') ;
+  let links = [] ;
+  for(let i = 0 ; i < links_tab.length ; i++) {
+    //then separate url and description
+    let link = links_tab[i].split(' ');
+    let l_id = +link.shift() ;
+    let l_url = link.shift() ;
+    let l_desc = link.join(' ');
+    links.push({
+      'id': l_id,
+      'url': l_url,
+      'desc': l_desc 
+    }) ;
+    links_by_id[String(l_id)] = {'url': l_url, 'desc': l_desc};
+  }
+  return links ;
+}
+
 function fetch_preferred_links() {
   show_loader(true);
   $.ajax({
     type: "GET", //rest Type
     dataType: 'text',
-    url: url_fetch_preferred_links,
+    url: url_fetch_user_preferred_links,
     async: true,
     contentType: "text/csv",
     success: function (msg) {
-      d3.csvParse(msg, translate_preferred_links);
+      d3.csvParse(msg, translate_user_preferred_links);
+      show_loader(false);
+    },
+    error: function (xhr, error) {
+      console.log("error");
+      console.log(xhr);
+      console.log(error);
+      console.log(xhr.responseText);
+      show_loader(false);
+    }
+  });
+  show_loader(true);
+  $.ajax({
+    type: "GET", //rest Type
+    dataType: 'text',
+    url: url_fetch_group_preferred_links,
+    async: true,
+    contentType: "text/csv",
+    success: function (msg) {
+      d3.csvParse(msg, translate_group_preferred_links);
       show_loader(false);
     },
     error: function (xhr, error) {
@@ -2061,27 +2100,11 @@ function fetch_preferred_links() {
 
 }
 
-function translate_preferred_links(d) {
-  // split the many links first
-  let links = d.links.split('|') ;
-  let pref = {
-    'user': d.user,
-    'links' : []
-  } ;
-  for(let i = 0 ; i < links.length ; i++) {
-    //then separate url and description
-    let link = links[i].split(' ');
-    let l_id = +link.shift() ;
-    let l_url = link.shift() ;
-    let l_desc = link.join(' ');
-    pref.links.push({
-      'id': l_id,
-      'url': l_url,
-      'desc': l_desc 
-    }) ;
-    preferred_links_by_id[String(l_id)] = {'url': l_url, 'desc': l_desc};
-  }
-  preferred_links.push(pref) ;
+function translate_user_preferred_links(d) {
+  preferred_links.users[d.user] = translate_links(d.links) ;
+}
+function translate_group_preferred_links(d) {
+  preferred_links.groups[d.group] = translate_links(d.links) ;
 }
 
 

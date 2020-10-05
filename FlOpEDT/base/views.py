@@ -57,7 +57,8 @@ from base.admin import CoursResource, DispoResource, VersionResource, \
     CoursPlaceResource, UnavailableRoomsResource, TutorCoursesResource, \
     CoursePreferenceResource, MultiDepartmentTutorResource, \
     SharedRoomsResource, RoomPreferenceResource, ModuleRessource, \
-    TutorRessource, ModuleDescriptionResource, AllDispoResource
+    TutorRessource, ModuleDescriptionResource, AllDispoResource, \
+    GroupPreferredLinksResource
 if COSMO_MODE:
     from base.admin import CoursPlaceResourceCosmo
 from base.forms import ContactForm, PerfectDayForm, ModuleDescriptionForm, \
@@ -66,7 +67,7 @@ from base.models import Course, UserPreference, ScheduledCourse, EdtVersion, \
     CourseModification, Day, Time, Room, RoomType, RoomSort, \
     Regen, RoomPreference, Department, TimeGeneralSettings, CoursePreference, \
     TrainingProgramme, CourseType, Module, Group, EnrichedLink, \
-    ScheduledCourseAdditional
+    ScheduledCourseAdditional, GroupPreferredLinks
 import base.queries as queries
 from base.weeks import *
 
@@ -1778,6 +1779,16 @@ def visio_preference(req, tutor=None, id=None, **kwargs):
                             {'form': form,
                              'ack': ack
                             })
+
+def fetch_group_preferred_links(req, **kwargs):
+    pref = GroupPreferredLinks.objects\
+                         .select_related('group__train_prog__department')\
+                         .filter(group__train_prog__department=req.department)
+    dataset = GroupPreferredLinksResource().export(pref)
+    response = HttpResponse(dataset.csv,
+                            content_type='text/csv')
+    return response
+    
 
 # </editor-fold desc="VISIO">
 
