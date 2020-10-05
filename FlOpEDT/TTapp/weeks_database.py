@@ -254,10 +254,10 @@ class WeeksDatabase(object):
                     [(c, rg) for c in self.courses if rg in course_rg_compat[c]])
                      # self.courses.filter(room_type__in=rg.types.all())])
         if settings.VISIO_MODE:
-            # All courses can have no room (except no-visio ones)
+            # All courses can have no room (except no-visio ones?)
             for c in set(self.courses):
-                if c not in self.no_visio_courses:
-                    course_rg_compat[c].add(None)
+                # if c not in self.no_visio_courses:
+                course_rg_compat[c].add(None)
         fixed_courses_for_room = {}
         for r in basic_rooms:
             fixed_courses_for_room[r] = set()
