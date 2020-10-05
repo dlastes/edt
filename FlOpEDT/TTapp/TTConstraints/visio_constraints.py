@@ -37,10 +37,10 @@ from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 
-
 class NoVisio(TTConstraint):
     weekdays = ArrayField(models.CharField(max_length=2, choices=Day.CHOICES), blank=True, null=True)
     groups = models.ManyToManyField('base.Group', blank=True, related_name='no_visio')
+    course_types = models.ManyToManyField('base.CourseType', blank=True, related_name='no_visio')
 
     def enrich_model(self, ttmodel, week, ponderation=1000000):
         if not settings.VISIO_MODE:
@@ -53,12 +53,14 @@ class NoVisio(TTConstraint):
         for group in considered_groups:
             # Si contrainte forte, AUCUN cours en visio, sinon seulement ceux non-indiqués Visio
             if self.weight is None:
-                considered_group_courses = ttmodel.wdb.courses_for_basic_group[group] \
-                                                  - ttmodel.wdb.no_visio_courses
+                considered_group_courses = ttmodel.wdb.courses_for_basic_group[group]
             else:
                 considered_group_courses = ttmodel.wdb.courses_for_basic_group[group] \
-                                                  - ttmodel.wdb.no_visio_courses \
                                                   - ttmodel.wdb.visio_courses
+
+            if self.course_types.exists():
+                considered_group_courses = set(c for c in considered_group_courses
+                                               if c.type in self.course_types.all())
 
             ttmodel.add_constraint(
                 ttmodel.sum(ttmodel.TTrooms[sl, c, None]
@@ -72,11 +74,62 @@ class NoVisio(TTConstraint):
             " (sauf demande expresse)"
         if self.weekdays:
             text += " les " + ', '.join([wd for wd in self.weekdays])
+        if self.course_types.exists():
+            text += ' pour les cours de type ' + ', '.join([t.name for t in self.course_types.all()])
         if self.groups.exists():
             text += ' pour les groupes ' + ', '.join([group.name for group in self.groups.all()])
         else:
             text += " pour tous les groupes"
+        if self.train_progs.exists():
+            text += ' de ' + ', '.join([train_prog.abbrev for train_prog in self.train_progs.all()])
+        else:
+            text += " de toutes les promos."
+        return text
 
+
+class VisioOnly(TTConstraint):
+    weekdays = ArrayField(models.CharField(max_length=2, choices=Day.CHOICES), blank=True, null=True)
+    groups = models.ManyToManyField('base.Group', blank=True, related_name='visio_only')
+    course_types = models.ManyToManyField('base.CourseType', blank=True, related_name='visio_only')
+
+    def enrich_model(self, ttmodel, week, ponderation=100):
+        if not settings.VISIO_MODE:
+            print("Visio Mode is not activated : ignore VisioOnly constraint")
+            return
+        considered_groups = considered_basic_groups(self, ttmodel)
+        days = days_filter(ttmodel.wdb.days, week=week)
+        if self.weekdays:
+            days = days_filter(days, day_in=self.weekdays)
+        for group in considered_groups:
+            # Si contrainte forte, Tous les cours en visio, sinon seulement ceux non-indiqués présentiels
+            if self.weight is None:
+                considered_group_courses = ttmodel.wdb.courses_for_basic_group[group]
+            else:
+                considered_group_courses = ttmodel.wdb.courses_for_basic_group[group] \
+                                           - ttmodel.wdb.no_visio_courses
+            if self.course_types.exists():
+                considered_group_courses = set(c for c in considered_group_courses
+                                               if c.type in self.course_types.all())
+
+            ttmodel.add_constraint(
+                ttmodel.sum(ttmodel.TTrooms[sl, c, r]
+                            for c in considered_group_courses
+                            for r in ttmodel.wdb.course_rg_compat[c] - {None}
+                            for sl in slots_filter(ttmodel.wdb.compatible_slots[c], day_in=days)),
+                '==', 0, Constraint(constraint_type=ConstraintType.VISIO, groups=group))
+
+    def one_line_description(self):
+        text = "Tout en visio"
+        if self.weight is not None:
+            " (sauf demande expresse)"
+        if self.weekdays:
+            text += " les " + ', '.join([wd for wd in self.weekdays])
+        if self.course_types.exists():
+            text += ' pour les cours de type ' + ', '.join([t.name for t in self.course_types.all()])
+        if self.groups.exists():
+            text += ' pour les groupes ' + ', '.join([group.name for group in self.groups.all()])
+        else:
+            text += " pour tous les groupes"
         if self.train_progs.exists():
             text += ' de ' + ', '.join([train_prog.abbrev for train_prog in self.train_progs.all()])
         else:
@@ -136,13 +189,13 @@ class BoundVisioHalfDays(TTConstraint):
         for g in considered_groups:
             # at most nb_max half-days of visio-courses for each group
             ttmodel.add_constraint(
-                ttmodel.sum(ttmodel.GBHD[g, d,apm] - ttmodel.physical_presence[g][d,apm]
+                ttmodel.sum(ttmodel.GBHD[g, d, apm] - ttmodel.physical_presence[g][d, apm]
                             for (d, apm) in ttmodel.physical_presence[g]),
                 '<=', self.nb_max, Constraint(constraint_type=ConstraintType.VISIO))
 
             # at least n_min half-days of physical-presence for each group
             ttmodel.add_constraint(
-                ttmodel.sum(ttmodel.physical_presence[g][d,apm]
+                ttmodel.sum(ttmodel.physical_presence[g][d, apm]
                             for (d, apm) in ttmodel.physical_presence[g]),
                 '<=', total_nb_half_days - self.nb_min, Constraint(constraint_type=ConstraintType.VISIO))
 
