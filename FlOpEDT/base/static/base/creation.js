@@ -914,10 +914,37 @@ function translate_quote_from_csv(d) {
    ------ COURSES ------
   ----------------------*/
 
+function run_course_drag(d) {
+  if (ckbox["edt-mod"].cked && fetch.done) {
+
+    // get the time interval, whatever the group
+    cur_over = which_slot(
+      drag.x + parseInt(drag.sel.select("rect").attr("x")),
+      drag.y + parseInt(drag.sel.select("rect").attr("y")),
+      d);
+    //console.log(cur_over.day, cur_over.start_time);
+
+    data_slot_grid.forEach(function (s) {
+      s.display = false;
+    });
+    if (!is_garbage(cur_over)) {
+      slots_over = data_slot_grid.filter(function (c) {
+        return c.day == cur_over.day
+          && c.start == cur_over.start_time;
+      });
+      slots_over.forEach(function (s) {
+        s.display = true;
+      });
+    }
+    go_grid(true);
+
+    drag.x += d3.event.dx;
+    drag.y += d3.event.dy;
+    drag.sel.attr("transform", "translate(" + drag.x + "," + drag.y + ")");
+  }
+}
 
 function def_drag() {
-  var cur_over = null;
-  var slots_over = null;
   dragListener = d3.drag()
     .on("start", function (c) {
       cancel_cm_adv_preferences();
@@ -947,39 +974,12 @@ function def_drag() {
         });
 
         pending.prepare_dragndrop(c);
+
+        run_course_drag(c);
       }
     })
-    .on("drag", function (d) {
-      if (ckbox["edt-mod"].cked && fetch.done) {
-
-        // get the time interval, whatever the group
-        cur_over = which_slot(
-          drag.x + parseInt(drag.sel.select("rect").attr("x")),
-          drag.y + parseInt(drag.sel.select("rect").attr("y")),
-          d);
-        //console.log(cur_over.day, cur_over.start_time);
-
-        data_slot_grid.forEach(function (s) {
-          s.display = false;
-        });
-        if (!is_garbage(cur_over)) {
-          slots_over = data_slot_grid.filter(function (c) {
-            return c.day == cur_over.day
-              && c.start == cur_over.start_time;
-          });
-          slots_over.forEach(function (s) {
-            s.display = true;
-          });
-        }
-        go_grid(true);
-
-        drag.x += d3.event.dx;
-        drag.y += d3.event.dy;
-        drag.sel.attr("transform", "translate(" + drag.x + "," + drag.y + ")");
-      }
-    })
+    .on("drag", run_course_drag)
     .on("end", function (d) {
-
       // click => end. So if real drag
       if (drag.sel.length != 0) {
 

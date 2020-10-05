@@ -670,6 +670,9 @@ var side_courses = [];
 var dragListener;
 var drag_popup;
 
+var cur_over = null;
+var slots_over = null;
+
 // helper for the d&d
 var drag = {
   sel: [],
