@@ -1022,6 +1022,7 @@ function fetch_room_preferences() {
       }
       show_loader(false);
       fetch.ongoing_un_rooms = false;
+      fetch_ended(false);
     },
     error: function (msg) {
       console.log("error");
@@ -1113,6 +1114,8 @@ function fetch_all(first, fetch_work_copies) {
   if (!fetch.course_saved) {
     fetch.ongoing_cours_pp = true;
     fetch.ongoing_cours_pl = true;
+    fetch.ongoing_bknews = true;
+    fetch_ongoing_colors = true;
   }
   if (!fetch.pref_saved &&
     (ckbox["dis-mod"].cked
@@ -1122,8 +1125,6 @@ function fetch_all(first, fetch_work_copies) {
   if (ckbox["edt-mod"].cked) {
     fetch.ongoing_un_rooms = true;
   }
-  fetch.ongoing_bknews = true;
-  fetch_ongoing_colors = true;
 
   fetch_version();
 
