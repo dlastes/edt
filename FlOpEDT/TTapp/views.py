@@ -64,6 +64,13 @@ def swap(req, department, year, week, work_copy):
     return JsonResponse(MyTTUtils.swap_version(department, week, year, work_copy))
 
 
+def delete_work_copy(req, department, year, week, work_copy):
+    '''
+    Delete scheduled courses with work copy work_copy
+    '''
+    return JsonResponse(MyTTUtils.delete_work_copy(department, week, year, work_copy), safe=False)
+
+
 def reassign_rooms(req, department, year, week, work_copy):
     '''
     Reassign rooms of scheduled courses with work copy work_copy

@@ -361,6 +361,35 @@ def basic_swap_version(department, week, year, copy_a, copy_b=0):
                                    copy_b))
 
 
+def basic_delete_work_copy(department, week, year, work_copy):
+
+    result = {'status': 'OK', 'more': ''}
+
+    scheduled_courses_params = {
+        'course__module__train_prog__department': department,
+        'course__week': week,
+        'course__year': year,
+        'work_copy': work_copy
+    }
+
+    try:
+        sc_to_delete = ScheduledCourse \
+                     .objects \
+                     .filter(**scheduled_courses_params)
+    except KeyError:
+        result['status'] = 'KO'
+        result['more'] = 'No scheduled courses'
+        return result
+
+    sc_to_delete.delete()
+
+    cache.delete(get_key_course_pl(department.abbrev,
+                                   year,
+                                   week,
+                                   work_copy))
+    return result
+
+
 def add_generic_constraints_to_database(department):
     # first objective  => minimise use of unpreferred slots for teachers
     # ponderation MIN_UPS_I

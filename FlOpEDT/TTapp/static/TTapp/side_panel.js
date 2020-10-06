@@ -151,6 +151,29 @@ function check_swap_with_copy_0() {
   });
 }
 
+// delete work_copy and reload
+function delete_work_copy() {
+  var cur_week = wdw_weeks.get_selected();
+
+  show_loader(true);
+  $.ajax({
+    type: "GET",
+    dataType: 'json',
+    url: url_delete_work_copy + cur_week.url() + '/' + num_copie,
+    async: true,
+    success: function (msg) {
+      format_acks(msg, 'delete');
+      fetch_all(false, true);
+      show_loader(false);
+    },
+    error: function (msg) {
+      ack_side_panel['delete'].txt = 'Problème côté serveur';
+      console.log("error");
+      show_loader(false);
+    }
+  });
+}
+
 
 // reassign rooms and reload
 function reassign_rooms() {
@@ -179,6 +202,7 @@ function reassign_rooms() {
 var ack_side_panel = {
   'swap': { id: 'swap' },
   'check-swap': { id: 'check-swap' }
+  'delete':{id:'delete'},
 };
 for (key in ack_side_panel) {
   ack_side_panel[key].id = '#ack-' + ack_side_panel[key].id;
