@@ -201,7 +201,7 @@ function reassign_rooms() {
 
 var ack_side_panel = {
   'swap': { id: 'swap' },
-  'check-swap': { id: 'check-swap' }
+  'check-swap': { id: 'check-swap' },
   'delete':{id:'delete'},
 };
 for (key in ack_side_panel) {
