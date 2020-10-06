@@ -3,7 +3,7 @@ from django.urls import path
 
 import TTapp.views
 
-app_name="TTapp"
+app_name = "TTapp"
 
 urlpatterns = [
     path('side_panel/<int:year>/<int:week>',
@@ -15,6 +15,9 @@ urlpatterns = [
     path('swap/<int:year>/<int:week>/<int:work_copy>',
          TTapp.views.swap,
          name="swap"),
+    path('delete_work_copy/<int:year>/<int:week>/<int:work_copy>',
+         TTapp.views.delete_work_copy,
+         name="delete_work_copy"),
     path('reassign_rooms/<int:year>/<int:week>/<int:work_copy>',
          TTapp.views.reassign_rooms,
          name="reassign_rooms"),
