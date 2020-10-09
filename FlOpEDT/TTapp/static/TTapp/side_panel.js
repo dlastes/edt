@@ -154,24 +154,31 @@ function check_swap_with_copy_0() {
 // delete work_copy and reload
 function delete_work_copy() {
   var cur_week = wdw_weeks.get_selected();
+  let ok = true;
 
-  show_loader(true);
-  $.ajax({
-    type: "GET",
-    dataType: 'json',
-    url: url_delete_work_copy + cur_week.url() + '/' + num_copie,
-    async: true,
-    success: function (msg) {
-      format_acks(msg, 'delete');
-      fetch_all(false, true);
-      show_loader(false);
-    },
-    error: function (msg) {
-      ack_side_panel['delete'].txt = 'Problème côté serveur';
-      console.log("error");
-      show_loader(false);
-    }
-  });
+  if (num_copie==0){
+    ok = confirm("Êtes-vous sûr de vouloir supprimer la copie visible?")
+  }
+
+  if (ok){
+    show_loader(true);
+    $.ajax({
+      type: "GET",
+      dataType: 'json',
+      url: url_delete_work_copy + cur_week.url() + '/' + num_copie,
+      async: true,
+      success: function (msg) {
+        format_acks(msg, 'delete');
+        fetch_all(false, true);
+        show_loader(false);
+      },
+      error: function (msg) {
+        ack_side_panel['delete'].txt = 'Problème côté serveur';
+        console.log("error");
+        show_loader(false);
+      }
+    });
+  }
 }
 
 

@@ -145,6 +145,9 @@ class LimitGroupsPhysicalPresence(TTConstraint):
     weekdays = ArrayField(models.CharField(max_length=2, choices=Day.CHOICES), blank=True, null=True)
 
     def enrich_model(self, ttmodel, week, ponderation=1):
+        if not settings.VISIO_MODE:
+            print("Visio Mode is not activated : ignore VisioOnly constraint")
+            return
         if self.train_progs.exists():
             considered_basic_groups = set(
                 ttmodel.wdb.basic_groups.filter(train_prog__in=self.train_progs.all()))
