@@ -229,8 +229,10 @@ WeekDayHeader.prototype.fetch_physical_presence = function() {
       var sel_week = wdw_weeks.get_selected();
       if (Week.compare(exp_week, sel_week) == 0) {
         d3.csvParse(msg,  function(pres) {
-          days_header.mix.days.day_by_ref(pres.day).force_here = true ;
-          days_header.mix.days.day_by_ref(pres.day).init_force_here = true ;
+          if (pres.user == user.name) {
+            days_header.mix.days.day_by_ref(pres.day).force_here = true ;
+            days_header.mix.days.day_by_ref(pres.day).init_force_here = true ;
+          }
         });
       }
       this.update(true) ;
