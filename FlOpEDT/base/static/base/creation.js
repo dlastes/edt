@@ -2163,7 +2163,7 @@ function def_cm_change() {
       select_tutor_module_change();
     } else {
       pending.pass.tutor = true ;
-      select_pref_links_change();
+      select_pref_link_types_change();
     }
     go_cm_room_tutor_change();
   };
@@ -2200,6 +2200,15 @@ function def_cm_change() {
     go_cm_room_tutor_change();
   };
   
+  pref_link_types_cm_settings.click = function (d) {
+    context_menu.room_tutor_hold = true;
+    if (d.content == 'Groupe') {
+      select_pref_links_change('groups');
+    } else {
+      select_pref_links_change('users');
+    }
+    go_cm_room_tutor_change();
+  };
 
   for (var level = 0; level < room_cm_settings.length; level++) {
     room_cm_settings[level].click = function (d) {
