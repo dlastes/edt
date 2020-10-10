@@ -863,6 +863,12 @@ class TTModel(object):
                                              (avail_time / 60,
                                               teaching_duration / 60,
                                               week))
+            # Add fixed_courses constraint
+            for sl in self.wdb.availability_slots:
+                fixed_courses = self.wdb.fixed_courses_for_tutor[i] & self.wdb.fixed_courses_for_avail_slot[sl]
+
+                if fixed_courses:
+                    avail_instr[i][sl] = 0
 
         return avail_instr, avail_at_school_instr, unp_slot_cost
 
@@ -990,8 +996,10 @@ class TTModel(object):
                 other_dep_sched_courses = ((self.wdb.other_departments_scheduled_courses_for_tutor[i]
                                       | self.wdb.other_departments_scheduled_courses_for_supp_tutor[i])
                                      & self.wdb.other_departments_sched_courses_for_avail_slot[sl])
+
                 if other_dep_sched_courses:
                     self.avail_instr[i][sl] = 0
+
 
     def add_specific_constraints(self):
         """
