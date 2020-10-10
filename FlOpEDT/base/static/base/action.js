@@ -1847,6 +1847,10 @@ function apply_stype() {
    ------ VISIO -------
    --------------------*/
 
+function gp_training_prog_to_str (c) {
+  return set_promos[c.promo] + '-' + c.group ;
+}
+
 // user's links for now
 function select_pref_links_change() {
   room_tutor_change.cm_settings = pref_links_cm_settings;
