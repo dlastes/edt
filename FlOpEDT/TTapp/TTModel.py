@@ -133,10 +133,12 @@ class TTModel(object):
         self.department = Department.objects.get(abbrev=department_abbrev)
         if train_prog is None:
             train_prog = TrainingProgramme.objects.filter(department=self.department)
-        try:
-            _ = iter(train_prog)
-        except TypeError:
-            train_prog = TrainingProgramme.objects.filter(id=train_prog.id)
+        else:
+            try:
+                _ = iter(train_prog)
+            except TypeError:
+                train_prog = TrainingProgramme.objects.filter(id=train_prog.id)
+            print('Will modify only courses of training programme(s) ', self.train_prog)
         self.train_prog = train_prog
         self.stabilize_work_copy = stabilize_work_copy
         self.obj = self.lin_expr()
@@ -468,8 +470,6 @@ class TTModel(object):
             self.warnings[key] = [warning]
 
     def add_stabilization_constraints(self):
-        if len(self.train_prog) < TrainingProgramme.objects.count():
-            print('Will modify only courses of training programme(s)', self.train_prog)
 
         # maximize stability
         if self.stabilize_work_copy is not None:
