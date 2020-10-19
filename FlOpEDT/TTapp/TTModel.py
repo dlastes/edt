@@ -1100,86 +1100,6 @@ class TTModel(object):
                                  tutor=fc.tutor)
             cp.save()
 
-    # Some extra Utils
-
-    def solution_files_prefix(self):
-        return f"flopmodel_{self.department.abbrev}_{'_'.join(str(w) for w in self.weeks)}"
-
-    def all_counted_solution_files(self):
-        solution_file_pattern = f"{self.solution_files_prefix()}_*.sol"
-        result = []
-        for root, dirs, files in os.walk(solution_files_path):
-            for name in files:
-                if fnmatch.fnmatch(name, solution_file_pattern):
-                    result.append(os.path.join(root, name))
-        result.sort(key=lambda filename: int(filename.split('_')[-1].split('.')[0]))
-        return result
-
-    def last_counted_solution_filename(self):
-        return self.all_counted_solution_files()[-1]
-
-    def delete_solution_files(self, all=False):
-        solution_files = self.all_counted_solution_files()
-        for f in solution_files[:-1]:
-            os.remove(f)
-        if all:
-            os.remove(solution_files[-1])
-
-    @staticmethod
-    def read_solution_file(filename):
-        result = {}
-        with open(filename) as f:
-            for l in f.readlines()[2:]:
-                r = l.strip().split(" ")
-                try:
-                    result[r[0]] = float(r[1])
-                except ValueError as e:
-                    print(e, l)
-                    continue
-        return result
-
-    def add_tt_to_db_from_file(self, filename=None, target_work_copy=None):
-        if filename is None:
-            filename = self.last_counted_solution_filename()
-        if target_work_copy is None:
-            target_work_copy = self.choose_free_work_copy()
-        close_old_connections()
-        # remove target working copy
-        ScheduledCourse.objects \
-            .filter(course__module__train_prog__department=self.department,
-                    course__week__in=self.weeks,
-                    course__year=self.year,
-                    work_copy=target_work_copy) \
-            .delete()
-
-        solution_file_values = self.read_solution_file(filename)
-
-        for c in self.wdb.courses:
-            for sl in self.wdb.compatible_slots[c]:
-                for i in self.wdb.possible_tutors[c]:
-                    # Ce test ne marche pas !
-                    if solution_file_values[self.TTinstructors[(sl, c, i)].getName()] == 1 :
-                        cp = ScheduledCourse(course=c,
-                                             tutor=i,
-                                             start_time=sl.start_time,
-                                             day=sl.day.day,
-                                             work_copy=target_work_copy)
-
-                        for rg in self.wdb.course_rg_compat[c]:
-                            if solution_file_values[self.TTrooms[(sl, c, rg)].getName()] == 1:
-                                cp.room = rg
-                                break
-                        cp.save()
-
-        for fc in self.wdb.fixed_courses:
-            cp = ScheduledCourse(course=fc.course,
-                                 start_time=fc.start_time,
-                                 day=fc.day,
-                                 room=fc.room,
-                                 work_copy=target_work_copy,
-                                 tutor=fc.tutor)
-            cp.save()
-
         # # On enregistre les coûts dans la BDD
         TutorCost.objects.filter(department=self.department,
                                  week__in=self.wdb.weeks,
@@ -1223,6 +1143,85 @@ class TTModel(object):
                                work_copy=target_work_copy,
                                value=self.get_expr_value(self.cost_G[g][week]))
                 cg.save()
+
+    # Some extra Utils
+
+    def solution_files_prefix(self):
+        return f"flopmodel_{self.department.abbrev}_{'_'.join(str(w) for w in self.weeks)}"
+
+    def all_counted_solution_files(self):
+        solution_file_pattern = f"{self.solution_files_prefix()}_*.sol"
+        result = []
+        for root, dirs, files in os.walk(solution_files_path):
+            for name in files:
+                if fnmatch.fnmatch(name, solution_file_pattern):
+                    result.append(os.path.join(root, name))
+        result.sort(key=lambda filename: int(filename.split('_')[-1].split('.')[0]))
+        return result
+
+    def last_counted_solution_filename(self):
+        return self.all_counted_solution_files()[-1]
+
+    def delete_solution_files(self, all=False):
+        solution_files = self.all_counted_solution_files()
+        for f in solution_files[:-1]:
+            os.remove(f)
+        if all:
+            os.remove(solution_files[-1])
+
+    @staticmethod
+    def read_solution_file(filename):
+        one_vars = set()
+        with open(filename) as f:
+            lines = f.readlines()
+            print(lines[1])
+            for line in lines[2:]:
+                r = line.strip().split(" ")
+                if int(r[1]) == 1:
+                    one_vars.add(r[0])
+        return one_vars
+
+    def add_tt_to_db_from_file(self, filename=None, target_work_copy=None):
+        if filename is None:
+            filename = self.last_counted_solution_filename()
+        if target_work_copy is None:
+            target_work_copy = self.choose_free_work_copy()
+        close_old_connections()
+        # remove target working copy
+        ScheduledCourse.objects \
+            .filter(course__module__train_prog__department=self.department,
+                    course__week__in=self.weeks,
+                    course__year=self.year,
+                    work_copy=target_work_copy) \
+            .delete()
+
+        print("Added work copy #%g" % target_work_copy)
+        solution_file_one_vars_set = self.read_solution_file(filename)
+
+        for c in self.wdb.courses:
+            for sl in self.wdb.compatible_slots[c]:
+                for i in self.wdb.possible_tutors[c]:
+                    if self.TTinstructors[(sl, c, i)].getName() in solution_file_one_vars_set:
+                        cp = ScheduledCourse(course=c,
+                                             tutor=i,
+                                             start_time=sl.start_time,
+                                             day=sl.day.day,
+                                             work_copy=target_work_copy)
+
+                        for rg in self.wdb.course_rg_compat[c]:
+                            if self.TTrooms[(sl, c, rg)].getName() in solution_file_one_vars_set:
+                                cp.room = rg
+                                break
+                        cp.save()
+
+        for fc in self.wdb.fixed_courses:
+            cp = ScheduledCourse(course=fc.course,
+                                 start_time=fc.start_time,
+                                 day=fc.day,
+                                 room=fc.room,
+                                 work_copy=target_work_copy,
+                                 tutor=fc.tutor)
+            cp.save()
 
     def choose_free_work_copy(self):
         local_max_wc = ScheduledCourse \
@@ -1329,7 +1328,7 @@ class TTModel(object):
             self.add_tt_to_db(target_work_copy)
             # for week in self.weeks:
                 # reassign_rooms(self.department, week, self.year, target_work_copy)
-            print("Stored with work_copy = #%g" % target_work_copy)
+            print("Added work copy N°%g" % target_work_copy)
             return target_work_copy
 
     def find_same_course_slot_in_other_week(self, slot, week):
