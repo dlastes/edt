@@ -1164,10 +1164,11 @@ class TTModel(object):
 
     def delete_solution_files(self, all=False):
         solution_files = self.all_counted_solution_files()
-        for f in solution_files[:-1]:
-            os.remove(f)
-        if all:
-            os.remove(solution_files[-1])
+        if solution_files:
+            for f in solution_files[:-1]:
+                os.remove(f)
+            if all:
+                os.remove(solution_files[-1])
 
     @staticmethod
     def read_solution_file(filename):
