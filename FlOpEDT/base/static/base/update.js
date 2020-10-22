@@ -62,7 +62,7 @@ function go_pref(quick) {
     .data(
       user.dispos,
       function (d) {
-        return [d.day, d.start_time, d.duration, d.value, d.selected].join('-');
+        return [d.day, d.start_time].join('-');
       });
 
   datdi = dat
@@ -76,7 +76,10 @@ function go_pref(quick) {
 
   var datdisi = datdi
     .append("g")
-    .attr("class", "dispo-si")
+    .attr("class", "dispo-si");
+
+  datdisi
+    .merge(dat.select(".dispo-si"))
     .on("mousedown", function(d) { pref_selection.start = d; })
     .on("mouseover", update_pref_selection)
     .on("mouseup", apply_change_simple_pref);
