@@ -23,6 +23,8 @@
 # a commercial license. Buying such a license is mandatory as soon as
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
+import os, fnmatch, re
+
 from django.core.mail import EmailMessage
 from pulp import LpVariable, LpConstraint, LpBinary, LpConstraintEQ, \
     LpConstraintGE, LpConstraintLE, LpAffineExpression, LpProblem, LpStatus, \
@@ -75,7 +77,7 @@ logger = logging.getLogger(__name__)
 pattern = r".+: (.|\s)+ (=|>=|<=) \d*"
 GUROBI = 'GUROBI'
 GUROBI_NAME = 'GUROBI_CMD'
-
+solution_files_path = "misc/logs/solutions"
 
 class TTModel(object):
     def __init__(self, department_abbrev, week_year_list,
@@ -94,21 +96,7 @@ class TTModel(object):
                  keep_many_solution_files=False,
                  min_visio=0.5):
         # beg_file = os.path.join('logs',"FlOpTT")
-        self.model = LpProblem("FlOpTT", LpMinimize)
-        self.min_ups_i = min_nps_i
-        self.min_bhd_g = min_bhd_g
-        self.min_bd_i = min_bd_i
-        self.min_bhd_i = min_bhd_i
-        self.min_ups_c = min_nps_c
-        self.max_stab = max_stab
-        self.lim_ld = lim_ld
-        self.core_only = core_only
-        self.send_mails = send_mails
-        self.slots_step = slots_step
-        self.keep_many_solution_files = keep_many_solution_files
-        self.min_visio = min_visio
-        self.var_nb = 0
-        self.constraintManager = ConstraintManager()
+        self.department = Department.objects.get(abbrev=department_abbrev)
 
         # Split week_year_list into weeks (list), and year (int)
         # week_year should be a list of {'week': week, 'year': year}
@@ -124,13 +112,29 @@ class TTModel(object):
 
         self.weeks = weeks
         self.year = year
+
+        self.model = LpProblem(self.solution_files_prefix(), LpMinimize)
+        self.min_ups_i = min_nps_i
+        self.min_bhd_g = min_bhd_g
+        self.min_bd_i = min_bd_i
+        self.min_bhd_i = min_bhd_i
+        self.min_ups_c = min_nps_c
+        self.max_stab = max_stab
+        self.lim_ld = lim_ld
+        self.core_only = core_only
+        self.send_mails = send_mails
+        self.slots_step = slots_step
+        self.keep_many_solution_files = keep_many_solution_files
+        self.min_visio = min_visio
+        self.var_nb = 0
+        self.constraintManager = ConstraintManager()
+
         print("\nLet's start weeks #%s" % weeks)
 
         print("Initialisation...")
         a = datetime.datetime.now()
         self.warnings = {}
 
-        self.department = Department.objects.get(abbrev=department_abbrev)
         if train_prog is None:
             train_prog = TrainingProgramme.objects.filter(department=self.department)
         else:
@@ -138,7 +142,7 @@ class TTModel(object):
                 _ = iter(train_prog)
             except TypeError:
                 train_prog = TrainingProgramme.objects.filter(id=train_prog.id)
-            print('Will modify only courses of training programme(s) ', self.train_prog)
+            print('Will modify only courses of training programme(s) ', train_prog)
         self.train_prog = train_prog
         self.stabilize_work_copy = stabilize_work_copy
         self.obj = self.lin_expr()
@@ -1109,6 +1113,7 @@ class TTModel(object):
                                  week__in=self.wdb.weeks,
                                  year=self.wdb.year,
                                  work_copy=target_work_copy).delete()
+
         for week in self.weeks:
             for i in self.wdb.instructors:
                 tc = TutorCost(department=self.department,
@@ -1120,7 +1125,7 @@ class TTModel(object):
                 tc.save()
 
             for g in self.wdb.basic_groups:
-                DJL=0
+                DJL = 0
                 if Time.PM in self.possible_apms:
                     DJL += self.get_expr_value(self.FHD_G[Time.PM][g][week])
                 if Time.AM in self.possible_apms:
@@ -1130,7 +1135,7 @@ class TTModel(object):
                                         year=self.wdb.year,
                                         week=week,
                                         work_copy=target_work_copy,
-                                        DJL= DJL)
+                                        DJL=DJL)
                 djlg.save()
                 cg = GroupCost(group=g,
                                year=self.wdb.year,
@@ -1139,13 +1144,107 @@ class TTModel(object):
                                value=self.get_expr_value(self.cost_G[g][week]))
                 cg.save()
 
+    # Some extra Utils
+
+    def solution_files_prefix(self):
+        return f"flopmodel_{self.department.abbrev}_{'_'.join(str(w) for w in self.weeks)}"
+
+    def all_counted_solution_files(self):
+        solution_file_pattern = f"{self.solution_files_prefix()}_*.sol"
+        result = []
+        for root, dirs, files in os.walk(solution_files_path):
+            for name in files:
+                if fnmatch.fnmatch(name, solution_file_pattern):
+                    result.append(os.path.join(root, name))
+        result.sort(key=lambda filename: int(filename.split('_')[-1].split('.')[0]))
+        return result
+
+    def last_counted_solution_filename(self):
+        return self.all_counted_solution_files()[-1]
+
+    def delete_solution_files(self, all=False):
+        solution_files = self.all_counted_solution_files()
+        if solution_files:
+            for f in solution_files[:-1]:
+                os.remove(f)
+            if all:
+                os.remove(solution_files[-1])
+
+    @staticmethod
+    def read_solution_file(filename):
+        one_vars = set()
+        with open(filename) as f:
+            lines = f.readlines()
+            print(lines[1])
+            for line in lines[2:]:
+                r = line.strip().split(" ")
+                if int(r[1]) == 1:
+                    one_vars.add(r[0])
+        return one_vars
+
+    def add_tt_to_db_from_file(self, filename=None, target_work_copy=None):
+        if filename is None:
+            filename = self.last_counted_solution_filename()
+        if target_work_copy is None:
+            target_work_copy = self.choose_free_work_copy()
+        close_old_connections()
+        # remove target working copy
+        ScheduledCourse.objects \
+            .filter(course__module__train_prog__department=self.department,
+                    course__week__in=self.weeks,
+                    course__year=self.year,
+                    work_copy=target_work_copy) \
+            .delete()
+
+        print("Added work copy #%g" % target_work_copy)
+        solution_file_one_vars_set = self.read_solution_file(filename)
+
+        for c in self.wdb.courses:
+            for sl in self.wdb.compatible_slots[c]:
+                for i in self.wdb.possible_tutors[c]:
+                    if self.TTinstructors[(sl, c, i)].getName() in solution_file_one_vars_set:
+                        cp = ScheduledCourse(course=c,
+                                             tutor=i,
+                                             start_time=sl.start_time,
+                                             day=sl.day.day,
+                                             work_copy=target_work_copy)
+
+                        for rg in self.wdb.course_rg_compat[c]:
+                            if self.TTrooms[(sl, c, rg)].getName() in solution_file_one_vars_set:
+                                cp.room = rg
+                                break
+                        cp.save()
+
+        for fc in self.wdb.fixed_courses:
+            cp = ScheduledCourse(course=fc.course,
+                                 start_time=fc.start_time,
+                                 day=fc.day,
+                                 room=fc.room,
+                                 work_copy=target_work_copy,
+                                 tutor=fc.tutor)
+            cp.save()
+
+    def choose_free_work_copy(self):
+        local_max_wc = ScheduledCourse \
+            .objects \
+            .filter(
+            course__module__train_prog__department=self.department,
+            course__week__in=self.weeks,
+            course__year=self.year) \
+            .aggregate(Max('work_copy'))['work_copy__max']
+
+        if local_max_wc is None:
+            local_max_wc = -1
+
+        return local_max_wc + 1
+
     def write_infaisability(self, write_iis=True, write_analysis=True):
         file_path = "misc/logs/iis"
         filename_suffixe = "_%s_%s" % (self.department.abbrev, self.weeks)
         iis_filename = "%s/IIS%s.ilp" % (file_path, filename_suffixe)
         if write_iis:
             from gurobipy import read
-            lp = "FlOpTT-pulp.lp"
+            lp = f"{self.solution_files_prefix()}-pulp.lp"
             m = read(lp)
             m.computeIIS()
             m.write(iis_filename)
@@ -1159,6 +1258,7 @@ class TTModel(object):
         if 'gurobi' in solver.lower() and hasattr(pulp, GUROBI_NAME):
             # ignore SIGINT while solver is running
             # => SIGINT is still delivered to the solver, which is what we want
+            self.delete_solution_files(all=True)
             signal.signal(signal.SIGINT, signal.SIG_IGN)
             solver = GUROBI_NAME
             options = [("Presolve", presolve),
@@ -1169,7 +1269,7 @@ class TTModel(object):
                 options.append(("Threads",threads))
             if self.keep_many_solution_files:
                 options.append(('SolFiles',
-                                f"misc/logs/solutions/flopmodel_{self.department.abbrev}_{self.weeks}"))
+                                f"{solution_files_path}/{self.solution_files_prefix()}"))
             result = self.model.solve(GUROBI_CMD(keepFiles=1,
                                                  msg=True,
                                                  options=options))
@@ -1193,7 +1293,7 @@ class TTModel(object):
             return self.get_obj_coeffs()
 
         else:
-            print('lpfile has been saved in FlOpTT-pulp.lp')
+            print(f'lpfile has been saved in {self.solution_files_prefix()}-pulp.lp')
             return None
 
     def solve(self, time_limit=None, target_work_copy=None, solver=GUROBI_NAME, threads=None):
@@ -1215,22 +1315,6 @@ class TTModel(object):
         """
         print("\nLet's solve weeks #%s" % self.weeks)
 
-        if target_work_copy is None:
-            local_max_wc = ScheduledCourse \
-                .objects \
-                .filter(
-                course__module__train_prog__department=self.department,
-                course__week__in=self.weeks,
-                course__year=self.year) \
-                .aggregate(Max('work_copy'))['work_copy__max']
-
-            if local_max_wc is None:
-                local_max_wc = -1
-
-            target_work_copy = local_max_wc + 1
-
-        print("Will be stored with work_copy = #%g" % target_work_copy)
-
         print("Optimization started at", \
               datetime.datetime.today().strftime('%Hh%M'))
         result = self.optimize(time_limit, solver, threads=threads)
@@ -1238,9 +1322,14 @@ class TTModel(object):
               datetime.datetime.today().strftime('%Hh%M'))
 
         if result is not None:
+
+            if target_work_copy is None:
+                target_work_copy = self.choose_free_work_copy()
+
             self.add_tt_to_db(target_work_copy)
             # for week in self.weeks:
                 # reassign_rooms(self.department, week, self.year, target_work_copy)
+            print("Added work copy N°%g" % target_work_copy)
             return target_work_copy
 
     def find_same_course_slot_in_other_week(self, slot, week):
@@ -1274,11 +1363,11 @@ def get_constraints(department, week=None, year=None, train_prog=None, is_active
     # Look up the TTConstraint subclasses records to update
     from TTapp.TTConstraint import TTConstraint, all_subclasses
     types = all_subclasses(TTConstraint)
-    for type in types:
-        queryset = type.objects.filter(query)
+    for t in types:
+        queryset = t.objects.filter(query)
 
         # Get prefetch  attributes list for the current type
-        atributes = type.get_viewmodel_prefetch_attributes()
+        atributes = t.get_viewmodel_prefetch_attributes()
         if atributes:
             queryset = queryset.prefetch_related(*atributes)
 
