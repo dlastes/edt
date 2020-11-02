@@ -66,7 +66,7 @@ class NoVisio(TTConstraint):
                 ttmodel.sum(ttmodel.TTrooms[sl, c, None]
                             for c in considered_group_courses
                             for sl in slots_filter(ttmodel.wdb.compatible_slots[c], day_in=days)),
-                '==', 0, Constraint(constraint_type=ConstraintType.VISIO, groups=group))
+                '==', 0, Constraint(constraint_type=ConstraintType.NO_VISIO, groups=group))
 
     def one_line_description(self):
         text = "Pas de visio"
@@ -116,7 +116,7 @@ class VisioOnly(TTConstraint):
                             for c in considered_group_courses
                             for r in ttmodel.wdb.course_rg_compat[c] - {None}
                             for sl in slots_filter(ttmodel.wdb.compatible_slots[c], day_in=days)),
-                '==', 0, Constraint(constraint_type=ConstraintType.VISIO, groups=group))
+                '==', 0, Constraint(constraint_type=ConstraintType.VISIO_ONLY, groups=group))
 
     def one_line_description(self):
         text = "Tout en visio"
@@ -163,7 +163,7 @@ class LimitGroupsPhysicalPresence(TTConstraint):
                 ttmodel.add_constraint(
                     ttmodel.sum(ttmodel.physical_presence[g][d, apm] for g in ttmodel.wdb.basic_groups),
                     '<=', nb_of_basic_groups * proportion,
-                    Constraint(constraint_type=ConstraintType.VISIO))
+                    Constraint(constraint_type=ConstraintType.VISIO_LIMIT_GROUP_PRESENCE))
 
     def one_line_description(self):
         text = "Pas plus de " + str(self.percentage) + "% des groupes"
@@ -194,13 +194,13 @@ class BoundVisioHalfDays(TTConstraint):
             ttmodel.add_constraint(
                 ttmodel.sum(ttmodel.GBHD[g, d, apm] - ttmodel.physical_presence[g][d, apm]
                             for (d, apm) in ttmodel.physical_presence[g]),
-                '<=', self.nb_max, Constraint(constraint_type=ConstraintType.VISIO))
+                '<=', self.nb_max, Constraint(constraint_type=ConstraintType.BOUND_VISIO_MAX))
 
             # at least n_min half-days of physical-presence for each group
             ttmodel.add_constraint(
                 ttmodel.sum(ttmodel.physical_presence[g][d, apm]
                             for (d, apm) in ttmodel.physical_presence[g]),
-                '<=', total_nb_half_days - self.nb_min, Constraint(constraint_type=ConstraintType.VISIO))
+                '<=', total_nb_half_days - self.nb_min, Constraint(constraint_type=ConstraintType.BOUND_VISIO_MIN))
 
     def one_line_description(self):
         text = f"Au moins {self.nb_min} et au plus {self.nb_max} demie_journées de visio"
