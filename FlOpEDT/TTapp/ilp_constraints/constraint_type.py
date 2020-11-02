@@ -63,6 +63,14 @@ class ConstraintType(Enum):
     PROFESSEUR_A_DEJA_COURS_EN_AUTRE_DEPARTEMENT = "Le professeur a déjà un cours dans un autre département"
     PROFESSEUR_A_DEJA_COURS_EN_AUTRE_DEPARTEMENT_IBD = "Le professeur a déjà un cours dans un autre département IBD"
 
+    # Visio
+    VISIO = "Visio"
+    BOUND_VISIO_MAX = "BOUND_VISIO_MAX"
+    BOUND_VISIO_MIN = "BOUND_VISIO_MIN"
+    NO_VISIO = "NO_VISIO"
+    VISIO_ONLY = "VISIO_ONLY"
+    VISIO_LIMIT_GROUP_PRESENCE = "VISIO_LIMIT_GROUP_PRESENCE"
+
     # From iut
     BOUND_HOURS_PER_DAY = "Bound_hours per day"
     PAS_COURS_JEUDI_APREM = "Pas_de_cours_le_jeudi_aprem"
@@ -101,7 +109,6 @@ class ConstraintType(Enum):
     TECH_MARDI_APREM = "Tech le mardi aprem"
     PAS_PLUS_5_CRENEAU = "Pas_plus_de_5_creneau"
     G1_G2_COURS_MEME_JOUR = "G1 et G2 ont cours le meme jour"
-    VISIO = "Visio"
 
     # From TTApp/models
     MAX_HOURS = "Max hours"
