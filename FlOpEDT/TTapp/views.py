@@ -71,6 +71,20 @@ def delete_work_copy(req, department, year, week, work_copy):
     return JsonResponse(MyTTUtils.delete_work_copy(department, week, year, work_copy), safe=False)
 
 
+def delete_all_unused_work_copies(req, department, year, week):
+    '''
+    Delete scheduled courses with work copy work_copy
+    '''
+    return JsonResponse(MyTTUtils.delete_all_unused_work_copies(department, week, year), safe=False)
+
+
+def duplicate_work_copy(req, department, year, week, work_copy):
+    '''
+    Duplicate scheduled courses with work copy work_copy in the first work_copy available
+    '''
+    return JsonResponse(MyTTUtils.duplicate_work_copy(department, week, year, work_copy), safe=False)
+
+
 def reassign_rooms(req, department, year, week, work_copy):
     '''
     Reassign rooms of scheduled courses with work copy work_copy
