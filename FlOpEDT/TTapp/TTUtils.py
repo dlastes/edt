@@ -389,6 +389,38 @@ def basic_delete_work_copy(department, week, year, work_copy):
                                    work_copy))
     return result
 
+def basic_duplicate_work_copy(department, week, year, work_copy):
+
+    result = {'status': 'OK', 'more': ''}
+
+    scheduled_courses_params = {
+        'course__module__train_prog__department': department,
+        'course__week': week,
+        'course__year': year
+    }
+    local_max_wc = ScheduledCourse \
+        .objects \
+        .filter(**scheduled_courses_params) \
+        .aggregate(Max('work_copy'))['work_copy__max']
+    target_work_copy = local_max_wc + 1
+
+    try:
+        sc_to_duplicate = ScheduledCourse \
+                            .objects \
+                            .filter(**scheduled_courses_params, work_copy=work_copy)
+    except KeyError:
+        result['status'] = 'KO'
+        result['more'] = 'No scheduled courses'
+        return result
+
+    for sc in sc_to_duplicate:
+        sc.pk = None
+        sc.work_copy = target_work_copy
+        sc.save()
+        result['status'] = f'Duplicated to copy #{target_work_copy}'
+
+    return result
+
 
 def add_generic_constraints_to_database(department):
     # first objective  => minimise use of unpreferred slots for teachers
