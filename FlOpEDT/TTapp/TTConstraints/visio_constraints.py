@@ -41,6 +41,8 @@ class NoVisio(TTConstraint):
     weekdays = ArrayField(models.CharField(max_length=2, choices=Day.CHOICES), blank=True, null=True)
     groups = models.ManyToManyField('base.Group', blank=True, related_name='no_visio')
     course_types = models.ManyToManyField('base.CourseType', blank=True, related_name='no_visio')
+    modules = models.ManyToManyField('base.Module', blank=True, related_name='no_visio')
+
 
     def enrich_model(self, ttmodel, week, ponderation=1000000):
         if not settings.VISIO_MODE:
@@ -61,6 +63,9 @@ class NoVisio(TTConstraint):
             if self.course_types.exists():
                 considered_group_courses = set(c for c in considered_group_courses
                                                if c.type in self.course_types.all())
+            if self.modules.exists():
+                considered_group_courses = set(c for c in considered_group_courses
+                                               if c.module in self.modules.all())
 
             ttmodel.add_constraint(
                 ttmodel.sum(ttmodel.TTrooms[sl, c, None]
@@ -91,6 +96,7 @@ class VisioOnly(TTConstraint):
     weekdays = ArrayField(models.CharField(max_length=2, choices=Day.CHOICES), blank=True, null=True)
     groups = models.ManyToManyField('base.Group', blank=True, related_name='visio_only')
     course_types = models.ManyToManyField('base.CourseType', blank=True, related_name='visio_only')
+    modules = models.ManyToManyField('base.Module', blank=True, related_name='visio_only')
 
     def enrich_model(self, ttmodel, week, ponderation=100):
         if not settings.VISIO_MODE:
@@ -110,6 +116,9 @@ class VisioOnly(TTConstraint):
             if self.course_types.exists():
                 considered_group_courses = set(c for c in considered_group_courses
                                                if c.type in self.course_types.all())
+            if self.modules.exists():
+                considered_group_courses = set(c for c in considered_group_courses
+                                               if c.module in self.modules.all())
 
             ttmodel.add_constraint(
                 ttmodel.sum(ttmodel.TTrooms[sl, c, r]
