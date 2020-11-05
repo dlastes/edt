@@ -81,6 +81,8 @@ class NoVisio(TTConstraint):
             text += " les " + ', '.join([wd for wd in self.weekdays])
         if self.course_types.exists():
             text += ' pour les cours de type ' + ', '.join([t.name for t in self.course_types.all()])
+        if self.modules.exists():
+            text += ' en ' + ', '.join([module.abbrev for module in self.modules.all()])
         if self.groups.exists():
             text += ' pour les groupes ' + ', '.join([group.name for group in self.groups.all()])
         else:
@@ -135,6 +137,8 @@ class VisioOnly(TTConstraint):
             text += " les " + ', '.join([wd for wd in self.weekdays])
         if self.course_types.exists():
             text += ' pour les cours de type ' + ', '.join([t.name for t in self.course_types.all()])
+        if self.modules.exists():
+            text += ' en ' + ', '.join([module.abbrev for module in self.modules.all()])
         if self.groups.exists():
             text += ' pour les groupes ' + ', '.join([group.name for group in self.groups.all()])
         else:
