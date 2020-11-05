@@ -53,7 +53,8 @@ class NoVisio(TTConstraint):
         if self.weekdays:
             days = days_filter(days, day_in=self.weekdays)
         for group in considered_groups:
-            # Si contrainte forte, AUCUN cours en visio, sinon seulement ceux non-indiqués Visio
+            # Si contrainte forte, AUCUN cours en visio
+            # Sinon un poids LOURD pour chaque cours mis en Visio (sauf ceux indiqués Visio!)
             if self.weight is None:
                 considered_group_courses = ttmodel.wdb.courses_for_basic_group[group]
             else:
@@ -66,12 +67,16 @@ class NoVisio(TTConstraint):
             if self.modules.exists():
                 considered_group_courses = set(c for c in considered_group_courses
                                                if c.module in self.modules.all())
-
-            ttmodel.add_constraint(
-                ttmodel.sum(ttmodel.TTrooms[sl, c, None]
-                            for c in considered_group_courses
-                            for sl in slots_filter(ttmodel.wdb.compatible_slots[c], day_in=days)),
-                '==', 0, Constraint(constraint_type=ConstraintType.NO_VISIO, groups=group))
+            relevant_sum = ttmodel.sum(ttmodel.TTrooms[sl, c, None]
+                                       for c in considered_group_courses
+                                       for sl in slots_filter(ttmodel.wdb.compatible_slots[c], day_in=days))
+            if self.weight is None:
+                ttmodel.add_constraint(relevant_sum,
+                                       '==',
+                                       0,
+                                       Constraint(constraint_type=ConstraintType.NO_VISIO, groups=group))
+            else:
+                ttmodel.add_to_group_cost(group, self.weight * ponderation * relevant_sum)
 
     def one_line_description(self):
         text = "Pas de visio"
@@ -100,7 +105,7 @@ class VisioOnly(TTConstraint):
     course_types = models.ManyToManyField('base.CourseType', blank=True, related_name='visio_only')
     modules = models.ManyToManyField('base.Module', blank=True, related_name='visio_only')
 
-    def enrich_model(self, ttmodel, week, ponderation=100):
+    def enrich_model(self, ttmodel, week, ponderation=1000000):
         if not settings.VISIO_MODE:
             print("Visio Mode is not activated : ignore VisioOnly constraint")
             return
@@ -109,7 +114,8 @@ class VisioOnly(TTConstraint):
         if self.weekdays:
             days = days_filter(days, day_in=self.weekdays)
         for group in considered_groups:
-            # Si contrainte forte, Tous les cours en visio, sinon seulement ceux non-indiqués présentiels
+            # Si contrainte forte, Tous les cours en visio,
+            # Sinon un poids LOURD pour chaque cours mis en Présentiel (sauf ceux indiqués no Visio!)
             if self.weight is None:
                 considered_group_courses = ttmodel.wdb.courses_for_basic_group[group]
             else:
@@ -121,13 +127,18 @@ class VisioOnly(TTConstraint):
             if self.modules.exists():
                 considered_group_courses = set(c for c in considered_group_courses
                                                if c.module in self.modules.all())
+            relevant_sum = ttmodel.sum(ttmodel.TTrooms[sl, c, r]
+                                       for c in considered_group_courses
+                                       for r in ttmodel.wdb.course_rg_compat[c] - {None}
+                                       for sl in slots_filter(ttmodel.wdb.compatible_slots[c], day_in=days))
+            if self.weight is None:
+                ttmodel.add_constraint(relevant_sum,
+                                       '==',
+                                       0,
+                                       Constraint(constraint_type=ConstraintType.VISIO_ONLY, groups=group))
+            else:
+                ttmodel.add_to_group_cost(group, self.weight * ponderation * relevant_sum)
 
-            ttmodel.add_constraint(
-                ttmodel.sum(ttmodel.TTrooms[sl, c, r]
-                            for c in considered_group_courses
-                            for r in ttmodel.wdb.course_rg_compat[c] - {None}
-                            for sl in slots_filter(ttmodel.wdb.compatible_slots[c], day_in=days)),
-                '==', 0, Constraint(constraint_type=ConstraintType.VISIO_ONLY, groups=group))
 
     def one_line_description(self):
         text = "Tout en visio"
