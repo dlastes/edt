@@ -28,7 +28,7 @@ import functools
 
 
 from TTapp.TTUtils import basic_reassign_rooms, basic_swap_version, \
-    basic_delete_work_copy
+    basic_delete_work_copy, basic_duplicate_work_copy, basic_delete_all_unused_work_copies
 from base.models import ScheduledCourse, Department
 from people.models import Tutor
 #from TTapp.forms import *
@@ -69,7 +69,6 @@ def print_differences(week, year, old_copy, new_copy, tutors=Tutor.objects.all()
 @resolve_department
 def reassign_rooms(department, week, year, target_work_copy):
     result = {'status':'OK', 'more':''}
-    from TTapp.TTUtils import basic_reassign_rooms
     basic_reassign_rooms(department, week, year, target_work_copy)
     return result
 
@@ -77,7 +76,6 @@ def reassign_rooms(department, week, year, target_work_copy):
 @resolve_department
 def swap_version(department, week, year, copy_a, copy_b=0):
     result = {'status':'OK', 'more':''}
-    from TTapp.TTUtils import basic_swap_version, get_conflicts
     basic_swap_version(department, week, year, copy_a, copy_b)
     return result
 
@@ -85,3 +83,13 @@ def swap_version(department, week, year, copy_a, copy_b=0):
 @resolve_department
 def delete_work_copy(department, week, year, work_copy):
     return basic_delete_work_copy(department, week, year, work_copy)
+
+
+@resolve_department
+def delete_all_unused_work_copies(department, week, year):
+    return basic_delete_all_unused_work_copies(department, week, year)
+
+
+@resolve_department
+def duplicate_work_copy(department, week, year, work_copy):
+    return basic_duplicate_work_copy(department, week, year, work_copy)
