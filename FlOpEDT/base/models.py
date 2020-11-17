@@ -436,10 +436,13 @@ class EnrichedLink(models.Model):
 
     @property
     def concatenated(self):
-        return ' '.join([str(self.id), self.url, self.description])
+        return ' '.join([str(self.id),
+                         self.url if self.url is not None else '',
+                         self.description])
 
     def __str__(self):
-        return self.description + ' -> ' + self.url
+        return self.description + ' -> ' \
+            + self.url if self.url is not None else ''
 
 
 class GroupPreferredLinks(models.Model):
