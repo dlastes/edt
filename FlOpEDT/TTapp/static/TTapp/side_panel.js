@@ -181,7 +181,7 @@ function delete_work_copy() {
   }
 }
 
-// delete work_copy and reload
+// duplicate work_copy and reload
 function duplicate_work_copy() {
   var cur_week = wdw_weeks.get_selected();
   let ok = true;
@@ -207,7 +207,7 @@ function duplicate_work_copy() {
   }
 }
 
-// delete work_copy and reload
+// delete all unused work_copies and reload
 function delete_all_unused_work_copies() {
   var cur_week = wdw_weeks.get_selected();
   let ok = true;
