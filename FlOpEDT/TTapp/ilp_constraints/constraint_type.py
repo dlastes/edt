@@ -50,6 +50,7 @@ class ConstraintType(Enum):
     COURS_DOIT_AVOIR_PROFESSEUR = "Le cours doit avoir un professeur"
     PROFESSEUR_NE_PEUT_DONNER_2_COURS_EN_MEME_TEMPS = "Le professeur ne peut pas donner 2 cours en même temps"
     CORE_ROOMS = "Core rooms"
+    SUPP_TUTOR = "Supp tutor"
 
     # SPECIFIC
     PAS_DE_COURS_DE_DEMI_JOURNEE = "Pas de cours de demi-journée"
