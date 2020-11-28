@@ -65,7 +65,10 @@ class SimultaneousCourses(TTConstraint):
 
     def enrich_model(self, ttmodel, week, ponderation=1):
         course_types = set(c.type for c in self.courses.all())
-        nb_courses = self.courses.count()
+        relevant_courses = list(c for c in self.courses.all() if c.week in ttmodel.weeks)
+        nb_courses = len(relevant_courses)
+        if nb_courses < 2:
+            return
         possible_start_times = set()
         for t in course_types:
             possible_start_times |= set(t.coursestarttimeconstraint_set.all()[0].allowed_start_times)
@@ -73,16 +76,16 @@ class SimultaneousCourses(TTConstraint):
             for st in possible_start_times:
                 check_var = ttmodel.add_var("check_var")
                 expr = ttmodel.lin_expr()
-                for c in self.courses.all():
+                for c in relevant_courses:
                     possible_slots = slots_filter(ttmodel.wdb.compatible_slots[c], start_time=st, day=day)
                     for sl in possible_slots:
                         expr += ttmodel.TT[(sl, c)]
                 ttmodel.add_constraint(nb_courses * check_var - expr, '==', 0,
                                        Constraint(constraint_type=ConstraintType.SIMULTANEOUS_COURSES,
-                                                  courses=list(self.courses.all())))
+                                                  courses=relevant_courses))
                 ttmodel.add_constraint(expr - check_var, '>=', 0,
                                        Constraint(constraint_type=ConstraintType.SIMULTANEOUS_COURSES,
-                                       courses=list(self.courses.all())))
+                                       courses=relevant_courses))
 
     def get_viewmodel(self):
         view_model = super().get_viewmodel()
