@@ -619,8 +619,8 @@ def check_courses_sheet(database):
             result.append(f"L'heure de début du cours '{id_}' dans '{courses_sheet}' n'est pas dans la journée")
         if flag_start_in_lunch_break:
             result.append(f"L'heure de début du cours '{id_}' dans '{courses_sheet}' est dans la pause méridienne")
-        if flag_finish_not_in_day:
-            result.append(f"L'heure de fin du cours '{id_}' dans '{courses_sheet}' n'est pas dans la journée")
+        # if flag_finish_not_in_day:
+        #     result.append(f"L'heure de fin du cours '{id_}' dans '{courses_sheet}' n'est pas dans la journée")
         if flag_finish_in_lunch_break:
             result.append(f"L'heure de fin du cours '{id_}' dans '{courses_sheet}' est dans la pause méridienne")
     return result
