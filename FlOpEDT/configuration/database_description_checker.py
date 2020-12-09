@@ -401,6 +401,7 @@ def check_settings_sheet(database):
     else:
         sane = True
         if not day_start_time < day_finish_time:
+
             result.append(f"Les horaires de début et de fin de journée dans '{settings_sheet}' sont incohérents")
             sane = False
         if not lunch_break_start_time <= lunch_break_finish_time:
@@ -440,16 +441,8 @@ def check_settings_sheet(database):
             result.append(f"Le début de la période '{id_}' dans '{settings_sheet}' est invalide")
         elif finish < 0:
             result.append(f"La fin de la période '{id_}' dans '{settings_sheet}' est invalide")
-        else:
-            # week 33 is around mid-august and years have 52 weeks
-            if start > 33:
-                start = start - 52
-            if finish > 33:
-                finish = finish - 52
-            if not (start < finish):
-                result.append(f"Il semblerait que la période '{id_}' dans '{settings_sheet}' finisse avant son début")
-            elif not id_.startswith(':INVALID:'):
-                valid_periods.append((id_, start, finish))
+        elif not id_.startswith(':INVALID:'):
+            valid_periods.append((id_, start, finish))
     # result.extend(check_non_overlapping_periods(valid_periods))
 
     return result
@@ -626,8 +619,8 @@ def check_courses_sheet(database):
             result.append(f"L'heure de début du cours '{id_}' dans '{courses_sheet}' n'est pas dans la journée")
         if flag_start_in_lunch_break:
             result.append(f"L'heure de début du cours '{id_}' dans '{courses_sheet}' est dans la pause méridienne")
-        if flag_finish_not_in_day:
-            result.append(f"L'heure de fin du cours '{id_}' dans '{courses_sheet}' n'est pas dans la journée")
+        # if flag_finish_not_in_day:
+        #     result.append(f"L'heure de fin du cours '{id_}' dans '{courses_sheet}' n'est pas dans la journée")
         if flag_finish_in_lunch_break:
             result.append(f"L'heure de fin du cours '{id_}' dans '{courses_sheet}' est dans la pause méridienne")
     return result

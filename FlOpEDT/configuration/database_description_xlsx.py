@@ -282,6 +282,8 @@ def parse_settings(sheet):
         val = parse_time(sheet, row + 2, col + 1)
         if val == None:
             val = -1
+        if val <= result['day_start_time']:
+            val += 24 * 60
         result['day_finish_time'] = val
         val = parse_time(sheet, row + 3, col + 1)
         if val == None:
