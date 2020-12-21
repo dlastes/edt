@@ -387,7 +387,6 @@ def user_notifications_pref_changes(req, username=None, *args, **kwargs):
     return redirect('base:preferences', req.department)
 
 
-@dept_admin_required
 def aide(req, **kwargs):
     return TemplateResponse(req, 'base/aide.html')
 
