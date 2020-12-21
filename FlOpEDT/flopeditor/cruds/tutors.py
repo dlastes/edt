@@ -275,6 +275,7 @@ def create(request, entries):
                     email=entries['new_values'][i][4],
                     position=entries['new_values'][i][5],
                     employer=entries['new_values'][i][6],
+                    is_tutor=True,
                     rights=list_to_user_rights(entries['new_values'][i][7]))
             elif entries['new_values'][i][3] == TUTOR_CHOICES_DICT[Tutor.FULL_STAFF]:
                 tutor = FullStaff.objects.create(
@@ -283,6 +284,7 @@ def create(request, entries):
                     last_name=entries['new_values'][i][2],
                     status=Tutor.FULL_STAFF,
                     email=entries['new_values'][i][4],
+                    is_tutor=True,
                     rights=list_to_user_rights(entries['new_values'][i][7]))
             elif entries['new_values'][i][3] == TUTOR_CHOICES_DICT[Tutor.BIATOS]:
                 tutor = BIATOS.objects.create(
