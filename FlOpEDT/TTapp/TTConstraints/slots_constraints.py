@@ -33,6 +33,7 @@ from base.timing import french_format
 from TTapp.ilp_constraints.constraint_type import ConstraintType
 from TTapp.ilp_constraints.constraint import Constraint
 from TTapp.slots import days_filter, slots_filter
+from base.timing import Day
 from TTapp.TTConstraint import TTConstraint
 
 
@@ -128,19 +129,26 @@ class LimitedStartTimeChoices(TTConstraint):
                                     blank=True,
                                     default=None,
                                     on_delete=models.CASCADE)
+    possible_week_days = ArrayField(models.CharField(max_length=2, choices=Day.CHOICES), blank=True, null=True)
     possible_start_times = ArrayField(models.PositiveSmallIntegerField())
 
     def enrich_model(self, ttmodel, week, ponderation=1.):
         fc = self.get_courses_queryset_by_attributes(ttmodel, week)
         pst = self.possible_start_times
+        if self.possible_week_days is None:
+            pwd = list(c[0] for c in Day.CHOICES)
+        else:
+            pwd = self.possible_week_days
         if self.tutor is None:
             relevant_sum = ttmodel.sum(ttmodel.TT[(sl, c)]
                                        for c in fc
-                                       for sl in ttmodel.wdb.compatible_slots[c] if sl.start_time not in pst)
+                                       for sl in ttmodel.wdb.compatible_slots[c] if (sl.start_time not in pst or
+                                                                                     sl.day.day not in pwd))
         else:
             relevant_sum = ttmodel.sum(ttmodel.TTinstructors[(sl, c, self.tutor)]
                                        for c in fc
-                                       for sl in ttmodel.wdb.compatible_slots[c] if sl.start_time not in pst)
+                                       for sl in ttmodel.wdb.compatible_slots[c] if (sl.start_time not in pst or
+                                                                                     sl.day.day not in pwd))
         if self.weight is not None:
             ttmodel.obj += self.local_weight() * ponderation * relevant_sum
         else:
