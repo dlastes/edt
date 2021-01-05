@@ -671,7 +671,7 @@ class TTModel(object):
         for bg in self.wdb.basic_groups:
             group_no_visio_courses = self.wdb.courses_for_basic_group[bg] & self.wdb.no_visio_courses
             self.add_to_group_cost(bg,
-                                   2 * self.min_visio *
+                                   10 * self.min_visio *
                                    self.sum(self.TTrooms[(sl, c, None)] * self.wdb.visio_ponderation[c]
                                             for c in group_no_visio_courses
                                             for sl in self.wdb.compatible_slots[c])
