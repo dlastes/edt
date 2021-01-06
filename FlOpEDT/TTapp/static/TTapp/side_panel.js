@@ -263,6 +263,7 @@ var ack_side_panel = {
   'swap': { id: 'swap' },
   'check-swap': { id: 'check-swap' },
   'delete':{id:'delete'},
+  'delete_all_unused':{id: 'delete_all_unused'}
 };
 for (key in ack_side_panel) {
   ack_side_panel[key].id = '#ack-' + ack_side_panel[key].id;
