@@ -152,7 +152,7 @@ class TTModel(object):
         self.TT, self.TTrooms, self.TTinstructors = self.TT_vars_init()
         self.IBD, self.IBD_GTE, self.IBHD, self.GBHD, self.IBS, self.forced_IBD = self.busy_vars_init()
         if settings.VISIO_MODE:
-            self.physical_presence = self.visio_vars_init()
+            self.physical_presence, self.has_visio = self.visio_vars_init()
         self.avail_instr, self.avail_at_school_instr, self.unp_slot_cost \
             = self.compute_non_preferred_slots_cost()
         self.unp_slot_cost_course, self.avail_course \
@@ -361,7 +361,7 @@ class TTModel(object):
                 self.add_constraint(expr, '>=', 0,
                                     Constraint(constraint_type=ConstraintType.VISIO, groups=g, days=d))
 
-        return physical_presence
+        return physical_presence, has_visio
 
     def add_var(self, name=''):
         """
