@@ -331,7 +331,7 @@ class TTModel(object):
 
     def visio_vars_init(self):
         physical_presence = {g: {(d, apm): self.add_var()
-                                 for d in self.wdb.days for apm in [Time.AM, Time.PM]}
+                                for d in self.wdb.days for apm in [Time.AM, Time.PM]}
                              for g in self.wdb.basic_groups}
 
         for g in self.wdb.basic_groups:
@@ -340,6 +340,21 @@ class TTModel(object):
                        - self.sum(self.TTrooms[sl, c, r]
                                   for c in self.wdb.courses_for_basic_group[g]
                                   for r in self.wdb.course_rg_compat[c] - {None}
+                                  for sl in slots_filter(self.wdb.compatible_slots[c], day=d, apm=apm))
+                self.add_constraint(expr, '<=', 999,
+                                    Constraint(constraint_type=ConstraintType.VISIO, groups=g, days=d))
+                self.add_constraint(expr, '>=', 0,
+                                    Constraint(constraint_type=ConstraintType.VISIO, groups=g, days=d))
+
+        has_visio = {g: {(d, apm): self.add_var()
+                         for d in self.wdb.days for apm in [Time.AM, Time.PM]}
+                     for g in self.wdb.basic_groups}
+
+        for g in self.wdb.basic_groups:
+            for (d, apm) in has_visio[g]:
+                expr = 1000 * has_visio[g][d, apm] \
+                       - self.sum(self.TTrooms[sl, c, None]
+                                  for c in self.wdb.courses_for_basic_group[g]
                                   for sl in slots_filter(self.wdb.compatible_slots[c], day=d, apm=apm))
                 self.add_constraint(expr, '<=', 999,
                                     Constraint(constraint_type=ConstraintType.VISIO, groups=g, days=d))
