@@ -254,7 +254,7 @@ def ReadPlanifWeek(department, book, feuille, week, year, courses_to_stabilize=N
             raise Exception(f"Exception ligne {row}, semaine {week} de {feuille}: {e} \n")
 
 
-def extract_period(department, book, period, year, stabilize_courses=False):
+def extract_period(department, book, period, year, stabilize_courses=False, starting_week=-1, ending_week=53):
     if stabilize_courses:
         courses_to_stabilize = {}
         print("Courses will be stabilized through weeks for period", period)
@@ -263,7 +263,9 @@ def extract_period(department, book, period, year, stabilize_courses=False):
     if period.starting_week < period.ending_week:
         if period.ending_week < 31:
             year += 1
-        for week in range(period.starting_week, period.ending_week + 1):
+        start = max(period.starting_week, starting_week)
+        end = min(period.ending_week, ending_week)
+        for week in range(start, end + 1):
             ReadPlanifWeek(department, book, period.name, week, year, courses_to_stabilize)
             print(week, year)
 
