@@ -848,8 +848,8 @@ class TTModel(object):
                     if maximum == 0:
                         for availability_slot in week_availability_slots:
                             unp_slot_cost[i][availability_slot] = 0
-                            avail_at_school_instr[i][availability_slot] = 1
-                            avail_instr[i][availability_slot] = 1
+                            avail_at_school_instr[i][availability_slot] = 0
+                            avail_instr[i][availability_slot] = 0
                         continue
 
                     non_prefered_duration = max(1, sum(a.duration
