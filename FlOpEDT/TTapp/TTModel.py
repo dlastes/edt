@@ -819,10 +819,6 @@ class TTModel(object):
 
                 else:
                     avail_time = sum(a.duration for a in week_tutor_availabilities if a.value >= 1)
-                    maximum = max([a.value for a in week_tutor_availabilities])
-                    non_prefered_duration = max(1, sum(a.duration
-                                                       for a in week_tutor_availabilities if
-                                                       1 <= a.value <= maximum - 1))
 
                     if avail_time < teaching_duration:
                         self.add_warning(i, "%g available hours < %g courses hours week %g" %
@@ -848,16 +844,21 @@ class TTModel(object):
                                          (avail_time / 60,
                                           teaching_duration / 60,
                                           week))
-
-                    average_value = sum(a.duration * a.value
-                                        for a in week_tutor_availabilities
-                                        if 1 <= a.value <= maximum - 1) / non_prefered_duration
-                    if average_value == maximum:
+                    maximum = max([a.value for a in week_tutor_availabilities])
+                    if maximum == 0:
                         for availability_slot in week_availability_slots:
                             unp_slot_cost[i][availability_slot] = 0
                             avail_at_school_instr[i][availability_slot] = 1
                             avail_instr[i][availability_slot] = 1
                         continue
+
+                    non_prefered_duration = max(1, sum(a.duration
+                                                       for a in week_tutor_availabilities if
+                                                       1 <= a.value <= maximum - 1))
+                    average_value = sum(a.duration * a.value
+                                        for a in week_tutor_availabilities
+                                        if 1 <= a.value <= maximum - 1) / non_prefered_duration
+
                     for availability_slot in week_availability_slots:
                         avail = set(a for a in week_tutor_availabilities
                                     if a.start_time < availability_slot.end_time
@@ -868,24 +869,25 @@ class TTModel(object):
                             unp_slot_cost[i][availability_slot] = 0
                             avail_at_school_instr[i][availability_slot] = 1
                             avail_instr[i][availability_slot] = 1
+                            continue
+                            
+                        minimum = min(a.value for a in avail)
+                        if minimum == 0:
+                            unp_slot_cost[i][availability_slot] = 0
+                            avail_at_school_instr[i][availability_slot] = 0
+                            avail_instr[i][availability_slot] = 0
+                        elif minimum == 1:
+                            unp_slot_cost[i][availability_slot] = 1
+                            avail_at_school_instr[i][availability_slot] = 0
+                            avail_instr[i][availability_slot] = 1
                         else:
-                            minimum = min(a.value for a in avail)
-                            if minimum == 0:
+                            avail_at_school_instr[i][availability_slot] = 1
+                            avail_instr[i][availability_slot] = 1
+                            value = minimum
+                            if value == maximum:
                                 unp_slot_cost[i][availability_slot] = 0
-                                avail_at_school_instr[i][availability_slot] = 0
-                                avail_instr[i][availability_slot] = 0
-                            elif minimum == 1:
-                                unp_slot_cost[i][availability_slot] = 1
-                                avail_at_school_instr[i][availability_slot] = 0
-                                avail_instr[i][availability_slot] = 1
                             else:
-                                avail_at_school_instr[i][availability_slot] = 1
-                                avail_instr[i][availability_slot] = 1
-                                value = minimum
-                                if value == maximum:
-                                    unp_slot_cost[i][availability_slot] = 0
-                                else:
-                                    unp_slot_cost[i][availability_slot] = (value - maximum) / (average_value - maximum)
+                                unp_slot_cost[i][availability_slot] = (value - maximum) / (average_value - maximum)
 
             # Add fixed_courses constraint
             for sl in self.wdb.availability_slots:
