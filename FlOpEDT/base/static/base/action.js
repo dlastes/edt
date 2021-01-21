@@ -1840,8 +1840,6 @@ function apply_stype() {
         duration:user.dispos_type[d].duration,
         value:user.dispos_type[d].value});
 
-      console.log(user.dispos[d]);
-      console.log(user.dispos_type[d]);
     }
     create_dispos_user_data();
     
