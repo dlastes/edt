@@ -1829,14 +1829,22 @@ function splash(splash_ds) {
 
 function apply_stype() {
   if (ckbox["dis-mod"].cked) {
+    user.dispos = new Array(user.dispos_type.length);
+    dispos[user.name] = {} ;
     for (let d = 0; d < user.dispos.length; d++) {
-      user.dispos[d].day = user.dispos_type[d].day;
-      user.dispos[d].hour = user.dispos_type[d].hour;
-      user.dispos[d].value = user.dispos_type[d].value;
-      user.dispos[d].off = user.dispos_type[d].off;
-      dispos[user.name][user.dispos[d].day][user.dispos[d].hour]
-        = user.dispos[d].value;
+      if (typeof dispos[user.name][user.dispos_type[d].day] === 'undefined') {
+        dispos[user.name][user.dispos_type[d].day] = [] ;
+      }
+      dispos[user.name][user.dispos_type[d].day].push({
+        start_time:user.dispos_type[d].start_time,
+        duration:user.dispos_type[d].duration,
+        value:user.dispos_type[d].value});
+
+      console.log(user.dispos[d]);
+      console.log(user.dispos_type[d]);
     }
+    create_dispos_user_data();
+    
     go_pref(true);
     send_dis_change();
   }

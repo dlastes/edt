@@ -62,7 +62,7 @@ function go_pref(quick) {
     .data(
       user.dispos,
       function (d) {
-        return [d.day, d.start_time].join('-');
+        return [d.day, d.start_time, d.duration, d.value].join('-');
       });
 
   datdi = dat
