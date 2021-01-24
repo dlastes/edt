@@ -148,7 +148,7 @@ class TTModel(object):
         self.obj = self.lin_expr()
         self.wdb = self.wdb_init()
         self.possible_apms = self.wdb.possible_apms
-        self.cost_I, self.FHD_G, self.cost_G, self.cost_SL = self.costs_init()
+        self.cost_I, self.FHD_G, self.cost_G, self.cost_SL, self.generic_cost = self.costs_init()
         self.TT, self.TTrooms, self.TTinstructors = self.TT_vars_init()
         self.IBD, self.IBD_GTE, self.IBHD, self.GBHD, self.IBS, self.forced_IBD = self.busy_vars_init()
         if settings.VISIO_MODE:
@@ -177,8 +177,6 @@ class TTModel(object):
             for key, key_warnings in self.warnings.items():
                 print("%s : %s" % (key, ", ".join([str(x) for x in key_warnings])))
 
-        self.update_objective()
-
         if settings.DEBUG:
             self.model.writeLP('FlOpEDT.lp')
 
@@ -206,7 +204,10 @@ class TTModel(object):
         cost_SL = dict(
             list(zip(self.wdb.courses_slots,
                      [self.lin_expr() for _ in self.wdb.courses_slots])))
-        return cost_I, FHD_G, cost_G, cost_SL
+
+        generic_cost = {week: self.lin_expr() for week in self.weeks + [None]}
+
+        return cost_I, FHD_G, cost_G, cost_SL, generic_cost
 
     def TT_vars_init(self):
         TT = {}
@@ -482,6 +483,9 @@ class TTModel(object):
     def add_to_group_cost(self, group, cost, week=None):
         self.cost_G[group][week] += cost
 
+    def add_to_generic_cost(self, cost, week=None):
+        self.generic_cost[week] += cost
+
     def add_warning(self, key, warning):
         if key in self.warnings:
             self.warnings[key].append(warning)
@@ -722,7 +726,7 @@ class TTModel(object):
                                 or (p.successive and not sl2.is_successor_of(sl1)):
                             conj_var = self.add_conjunct(self.TT[(sl1, c1)],
                                                          self.TT[(sl2, c2)])
-                            self.obj += conj_var * weight
+                            self.add_to_generic_cost(conj_var * weight)
 
                     # if p.successive and sl2.is_successor_of(sl1):
                     #     for rg1 in self.wdb.rooms_for_type[c1.room_type]:
@@ -1042,11 +1046,13 @@ class TTModel(object):
                 constr.enrich_model(self, week)
 
     def update_objective(self):
+        self.obj = self.lin_expr()
         for week in self.weeks + [None]:
             for i in self.wdb.instructors:
                 self.obj += self.cost_I[i][week]
             for g in self.wdb.basic_groups:
                 self.obj += self.cost_G[g][week]
+            self.obj += self.generic_cost[week]
         for sl in self.wdb.courses_slots:
             self.obj += self.cost_SL[sl]
         self.set_objective(self.obj)
@@ -1336,6 +1342,8 @@ class TTModel(object):
         Returns the number of the work copy
         """
         print("\nLet's solve weeks #%s" % self.weeks)
+
+        self.update_objective()
 
         print("Optimization started at", \
               datetime.datetime.today().strftime('%Hh%M'))
