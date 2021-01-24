@@ -99,7 +99,7 @@ class LimitTimePerPeriod(TTConstraint):
                                 'limit course type per period',
                                 expr,
                                 int(self.max_hours * 60) + 1, 3600*24)
-                ttmodel.obj += self.local_weight() * ponderation * var
+                ttmodel.add_to_generic_cost(self.local_weight() * ponderation * var, week=week)
             else:
                 ttmodel.add_constraint(expr, '<=', self.max_hours*60,
                                        Constraint(constraint_type=ConstraintType.MAX_HOURS,

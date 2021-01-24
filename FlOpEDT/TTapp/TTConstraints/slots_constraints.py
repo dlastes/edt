@@ -150,7 +150,7 @@ class LimitedStartTimeChoices(TTConstraint):
                                        for sl in ttmodel.wdb.compatible_slots[c] if (sl.start_time not in pst or
                                                                                      sl.day.day not in pwd))
         if self.weight is not None:
-            ttmodel.obj += self.local_weight() * ponderation * relevant_sum
+            ttmodel.add_to_generic_cost(self.local_weight() * ponderation * relevant_sum, week=week)
         else:
             ttmodel.add_constraint(relevant_sum, '==', 0,
                                    Constraint(constraint_type=ConstraintType.LIMITED_START_TIME_CHOICES,
@@ -215,7 +215,7 @@ class AvoidBothTimes(TTConstraint):
                             conj_var = ttmodel.add_conjunct(
                                 ttmodel.TT[(sl1, c1)],
                                 ttmodel.TT[(sl2, c2)])
-                            ttmodel.obj += self.local_weight() * ponderation * conj_var
+                            ttmodel.add_to_generic_cost(self.local_weight() * ponderation * conj_var, week=week)
                         else:
                             ttmodel.add_constraint(ttmodel.TT[(sl1, c1)]
                                                    + ttmodel.TT[(sl2, c2)],

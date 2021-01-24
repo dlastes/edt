@@ -110,7 +110,7 @@ class MinHalfDaysHelperModule(MinHalfDaysHelperBase):
 
 
     def add_cost(self, cost):
-        self.ttmodel.obj += cost
+        self.ttmodel.add_to_generic_cost(cost)
 
 
     def enrich_model(self, module=None):
