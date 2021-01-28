@@ -29,6 +29,8 @@ from TTapp.helpers.minhalfdays import MinHalfDaysHelperGroup
 
 from TTapp.slots import slots_filter
 from TTapp.TTConstraint import TTConstraint
+from people.models import GroupPreferences
+
 
 def considered_basic_groups(group_ttconstraint, ttmodel):
     if group_ttconstraint.train_progs.exists():
@@ -93,7 +95,7 @@ class MinNonPreferedTrainProgsSlot(TTConstraint):
         for train_prog in train_progs:
             basic_groups = ttmodel.wdb.basic_groups.filter(train_prog=train_prog)
             for g in basic_groups:
-                g_pref = g.preferences
+                g_pref, created = GroupPreferences.objects.get_or_create(group=g)
                 g_pref.calculate_fields()
                 morning_weight = 2 * g_pref.get_morning_weight()
                 evening_weight = 2 * g_pref.get_evening_weight()

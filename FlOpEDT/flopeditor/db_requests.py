@@ -165,7 +165,7 @@ def get_is_iut(request):
     user = User.objects.get(username=request.user)
     if user.is_tutor:
         tutor = Tutor.objects.get(username=request.user)
-        if user.status == Tutor.FULL_STAFF:
+        if tutor.status == Tutor.FULL_STAFF:
             try:
                 fullstaff = FullStaff.objects.get(username=request.user)
                 return fullstaff.is_iut
