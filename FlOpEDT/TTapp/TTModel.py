@@ -300,8 +300,7 @@ class TTModel(object):
 
             for i in self.wdb.instructors:
                 for j in range(1, max_days + 1):
-                    IBD_GTE[week][j][i] = self.add_floor(str(i) + str(j),
-                                                         self.sum(IBD[(i, d)]
+                    IBD_GTE[week][j][i] = self.add_floor(self.sum(IBD[(i, d)]
                                                                   for d in days_filter(self.wdb.days, week=week)),
                                                          j,
                                                          max_days)
@@ -373,7 +372,7 @@ class TTModel(object):
         self.var_nb += 1
 
         # return LpVariable(countedname, cat=LpBinary)
-        return LpVariable(self.var_nb, cat=LpBinary)
+        return LpVariable(str(self.var_nb), cat=LpBinary)
 
     def add_constraint(self, expr, relation, value, constraint=Constraint()):
         constraint_id = self.constraintManager.get_nb_constraints()
@@ -454,12 +453,12 @@ class TTModel(object):
                             Constraint(constraint_type=ConstraintType.CONJONCTION))
         return l_conj_var
 
-    def add_floor(self, name, expr, floor, bound):
+    def add_floor(self, expr, floor, bound):
         """
         Add a variable that equals 1 if expr >= floor, if integer expr is
         known to be within [0, bound]
         """
-        l_floor = self.add_var("FLOOR %s %d" % (name, floor))
+        l_floor = self.add_var()
         self.add_constraint(expr - l_floor * floor, '>=', 0,
                             Constraint(constraint_type=ConstraintType.SEUIL))
         self.add_constraint(l_floor * bound - expr, '>=', 1 - floor,

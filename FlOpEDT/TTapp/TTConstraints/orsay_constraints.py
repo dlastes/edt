@@ -75,12 +75,10 @@ class GroupsLunchBreak(TTConstraint):
                         ttmodel.sum(ttmodel.TT[sl, c] for c in considered_courses
                                     for sl in slots_filter(ttmodel.wdb.compatible_slots[c],
                                                            simultaneous_to=local_slot))
-                    slot_vars[group, local_slot] = ttmodel.add_floor(name='',
-                                                                     expr=undesired_scheduled_courses,
+                    slot_vars[group, local_slot] = ttmodel.add_floor(expr=undesired_scheduled_courses,
                                                                      floor=1,
                                                                      bound=len(considered_courses))
-                not_ok = ttmodel.add_floor(name='',
-                                           expr=ttmodel.sum(slot_vars[group, sl] for sl in local_slots),
+                not_ok = ttmodel.add_floor(expr=ttmodel.sum(slot_vars[group, sl] for sl in local_slots),
                                            floor=slots_nb,
                                            bound=2 * slots_nb)
 
@@ -166,12 +164,10 @@ class TutorsLunchBreak(TTConstraint):
                                 and local_slot.start_time < sc.end_time)
                         other_dep_undesired_sc_nb = len(other_dep_undesired_scheduled_courses)
                     undesired_expression = undesired_scheduled_courses + other_dep_undesired_sc_nb * ttmodel.one_var
-                    slot_vars[tutor, local_slot] = ttmodel.add_floor(name='',
-                                                                     expr=undesired_expression,
+                    slot_vars[tutor, local_slot] = ttmodel.add_floor(expr=undesired_expression,
                                                                      floor=1,
                                                                      bound=len(considered_courses))
-                not_ok = ttmodel.add_floor(name='',
-                                           expr=ttmodel.sum(slot_vars[tutor, sl] for sl in local_slots),
+                not_ok = ttmodel.add_floor(expr=ttmodel.sum(slot_vars[tutor, sl] for sl in local_slots),
                                            floor=slots_nb,
                                            bound=2 * slots_nb)
 
@@ -236,8 +232,8 @@ class BreakAroundCourseType(TTConstraint):
                     amphi_slot2 = ttmodel.sum(ttmodel.TT[slot2, c]
                                               for slot2 in successive_slots
                                               for c in amphis & ttmodel.wdb.compatible_courses[slot2])
-                    a1o2 = ttmodel.add_floor(name='', expr=amphi_slot1+other_slot2, floor=2, bound=2)
-                    o1a2 = ttmodel.add_floor(name='', expr=amphi_slot2+other_slot1, floor=2, bound=2)
+                    a1o2 = ttmodel.add_floor(expr=amphi_slot1+other_slot2, floor=2, bound=2)
+                    o1a2 = ttmodel.add_floor(expr=amphi_slot2+other_slot1, floor=2, bound=2)
                     broken_breaks += a1o2 + o1a2
 
             if self.weight is None:
