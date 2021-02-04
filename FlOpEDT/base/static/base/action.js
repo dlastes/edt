@@ -1647,7 +1647,7 @@ function edt_change_ack(msg) {
     var splash_disclaimer = {
       id: "failed-edt-mod",
       but: { list: [{ txt: "Zut. Ok.", click: function (d) { } }] },
-      com: { list: [{ txt: ack.edt }] }
+      com: { list: [{ txt: ack.more }] }
     };
     splash(splash_disclaimer);
   }
