@@ -342,9 +342,11 @@ class TTModel(object):
                                   for r in self.wdb.course_rg_compat[c] - {None}
                                   for sl in slots_filter(self.wdb.compatible_slots[c], day=d, apm=apm))
                 self.add_constraint(expr, '<=', 999,
-                                    Constraint(constraint_type=ConstraintType.VISIO, groups=g, days=d))
+                                    Constraint(constraint_type=ConstraintType.PHYSICAL_PRESENCE, groups=g,
+                                               days=d, apm=apm))
                 self.add_constraint(expr, '>=', 0,
-                                    Constraint(constraint_type=ConstraintType.VISIO, groups=g, days=d))
+                                    Constraint(constraint_type=ConstraintType.PHYSICAL_PRESENCE, groups=g,
+                                               days=d, apm=apm))
 
         has_visio = {g: {(d, apm): self.add_var()
                          for d in self.wdb.days for apm in [Time.AM, Time.PM]}
@@ -357,9 +359,9 @@ class TTModel(object):
                                   for c in self.wdb.courses_for_basic_group[g]
                                   for sl in slots_filter(self.wdb.compatible_slots[c], day=d, apm=apm))
                 self.add_constraint(expr, '<=', 999,
-                                    Constraint(constraint_type=ConstraintType.VISIO, groups=g, days=d))
+                                    Constraint(constraint_type=ConstraintType.HAS_VISIO, groups=g, days=d, apm=apm))
                 self.add_constraint(expr, '>=', 0,
-                                    Constraint(constraint_type=ConstraintType.VISIO, groups=g, days=d))
+                                    Constraint(constraint_type=ConstraintType.HAS_VISIO, groups=g, days=d, apm=apm))
 
         return physical_presence, has_visio
 
