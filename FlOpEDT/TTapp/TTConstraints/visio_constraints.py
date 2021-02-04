@@ -216,17 +216,18 @@ class BoundPhysicalPresenceHalfDays(TTConstraint):
         considered_groups = considered_basic_groups(self, ttmodel)
         total_nb_half_days = len(ttmodel.wdb.days) * 2
         for g in considered_groups:
-            # at most nb_max half-days of visio-courses for each group
-            ttmodel.add_constraint(
+            physical_presence_half_days_number = \
                 ttmodel.sum(ttmodel.physical_presence[g][d, apm]
-                            for (d, apm) in ttmodel.physical_presence[g]),
-                '>=', self.nb_min, Constraint(constraint_type=ConstraintType.BOUND_VISIO_MAX))
+                            for (d, apm) in ttmodel.physical_presence[g])
+            
+            # at least nb_min half-days of physical-presence for each group
+            ttmodel.add_constraint(
+                physical_presence_half_days_number, '>=', self.nb_min,
+                Constraint(constraint_type=ConstraintType.BOUND_VISIO_MAX))
 
-            # at least n_min half-days of physical-presence for each group
-            ttmodel.add_constraint(
-                ttmodel.sum(ttmodel.physical_presence[g][d, apm]
-                            for (d, apm) in ttmodel.physical_presence[g]),
-                '<=', self.nb_max, Constraint(constraint_type=ConstraintType.BOUND_VISIO_MIN))
+            # at most nb_max half-days of physical presence for each group
+            ttmodel.add_constraint(physical_presence_half_days_number, '<=', self.nb_max,
+                                   Constraint(constraint_type=ConstraintType.BOUND_VISIO_MIN))
 
     def one_line_description(self):
         text = f"Au moins {self.nb_min} et au plus {self.nb_max} demie_journées de présentiel"
