@@ -225,7 +225,7 @@ class BoundPhysicalPresenceHalfDays(TTConstraint):
                 # at least nb_min half-days of physical-presence for each group
                 ttmodel.add_constraint(
                     physical_presence_half_days_number[g], '>=', self.nb_min,
-                    Constraint(constraint_type=ConstraintType.MIN_PHYSICAL_HALF_DAYS_MIN))
+                    Constraint(constraint_type=ConstraintType.MIN_PHYSICAL_HALF_DAYS))
 
                 # at most nb_max half-days of physical presence for each group
                 ttmodel.add_constraint(physical_presence_half_days_number[g], '<=', self.nb_max,
