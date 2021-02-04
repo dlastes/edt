@@ -215,19 +215,29 @@ class BoundPhysicalPresenceHalfDays(TTConstraint):
             return
         considered_groups = considered_basic_groups(self, ttmodel)
         total_nb_half_days = len(ttmodel.wdb.days) * 2
+        physical_presence_half_days_number = {}
         for g in considered_groups:
-            physical_presence_half_days_number = \
+            physical_presence_half_days_number[g] = \
                 ttmodel.sum(ttmodel.physical_presence[g][d, apm]
                             for (d, apm) in ttmodel.physical_presence[g])
-            
-            # at least nb_min half-days of physical-presence for each group
-            ttmodel.add_constraint(
-                physical_presence_half_days_number, '>=', self.nb_min,
-                Constraint(constraint_type=ConstraintType.BOUND_VISIO_MAX))
+        if self.weight is None:
+            for g in considered_groups:
+                # at least nb_min half-days of physical-presence for each group
+                ttmodel.add_constraint(
+                    physical_presence_half_days_number[g], '>=', self.nb_min,
+                    Constraint(constraint_type=ConstraintType.MIN_PHYSICAL_HALF_DAYS_MIN))
 
-            # at most nb_max half-days of physical presence for each group
-            ttmodel.add_constraint(physical_presence_half_days_number, '<=', self.nb_max,
-                                   Constraint(constraint_type=ConstraintType.BOUND_VISIO_MIN))
+                # at most nb_max half-days of physical presence for each group
+                ttmodel.add_constraint(physical_presence_half_days_number[g], '<=', self.nb_max,
+                                       Constraint(constraint_type=ConstraintType.MAX_PHYSICAL_HALF_DAYS))
+        else:
+            for g in considered_groups:
+                cost = ponderation * self.weight * \
+                       (ttmodel.UN - ttmodel.add_floor(physical_presence_half_days_number[g],
+                                                       self.nb_min, total_nb_half_days)
+                        + ttmodel.add_floor(physical_presence_half_days_number[g],
+                                            self.nb_max, total_nb_half_days))
+                ttmodel.add_to_group_cost(g, cost, week)
 
     def one_line_description(self):
         text = f"Au moins {self.nb_min} et au plus {self.nb_max} demie_journées de présentiel"
