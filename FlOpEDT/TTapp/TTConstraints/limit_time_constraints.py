@@ -210,7 +210,11 @@ class LimitModulesTimePerPeriod(LimitTimePerPeriod):
     def get_viewmodel(self):
         view_model = super().get_viewmodel()
 
-        type_value = self.course_type.name
+        if self.course_type is not None:
+            type_value = self.course_type.name
+        else:
+            type_value = 'Any'
+
 
         if self.modules.exists():
             module_value = ', '.join([module.abbrev for module in self.modules.all()])
