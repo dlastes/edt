@@ -34,15 +34,19 @@ from people.models import GroupPreferences
 
 def considered_basic_groups(group_ttconstraint, ttmodel):
     if group_ttconstraint.train_progs.exists():
-        considered_basic_groups = set(ttmodel.wdb.basic_groups.filter(train_prog__in=group_ttconstraint.train_progs.all()))
+        ttmodel_basic_groups = set(ttmodel.wdb.basic_groups.filter(train_prog__in=group_ttconstraint.train_progs.all()))
     else:
-        considered_basic_groups = set(ttmodel.wdb.basic_groups)
+        ttmodel_basic_groups = set(ttmodel.wdb.basic_groups)
     if group_ttconstraint.groups.exists():
         basic_groups = set()
         for g in group_ttconstraint.groups.all():
             basic_groups |= g.basic_groups()
-        considered_basic_groups &= basic_groups
-    return considered_basic_groups
+        ttmodel_basic_groups &= basic_groups
+    basic_groups_to_consider = set()
+    for g in ttmodel_basic_groups:
+        if ttmodel.wdb.courses_for_basic_group[g]:
+            basic_groups_to_consider.add(g)
+    return basic_groups_to_consider
 
 
 class MinGroupsHalfDays(TTConstraint):
