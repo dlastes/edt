@@ -4,8 +4,10 @@ from people.models import Tutor
 from base.models import Group, Room
 import base.queries as queries
 
+
 def index(request, **kwargs):
-    tutor_list = Tutor.objects.filter(is_active=True, is_tutor=True)\
+    tutor_list = Tutor.objects.filter(is_active=True, is_tutor=True,
+                                      departments=request.department)\
                               .prefetch_related('departments')\
                               .order_by('username')
     group_list = Group.objects.filter(
