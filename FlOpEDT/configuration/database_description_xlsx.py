@@ -208,8 +208,8 @@ def parse_people(sheet):
             continue
         if id_ in result:
             id_ = ':INVALID:DUPLICATE:{0:s}'.format(cell_name(row, col))
-        result[id_] = {'first_name': parse_string(sheet, row, col + 1),
-                       'last_name': parse_string(sheet, row, col + 2),
+        result[id_] = {'last_name': parse_string(sheet, row, col + 2),
+                       'first_name': parse_string(sheet, row, col + 1),
                        'email': parse_string(sheet, row, col + 3),
                        'status': parse_string(sheet, row, col + 4),
                        'employer': parse_string(sheet, row, col + 5)}

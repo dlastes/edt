@@ -70,7 +70,7 @@ class WeeksDatabase(object):
         self.year = year
         self.slots_step = slots_step
         self.possible_apms=set()
-        self.days, self.day_after, self.holidays, self.training_half_days = self.days_init()
+        self.days, self.day_after, self.holidays, self.training_half_days, self.day_before = self.days_init()
         self.courses_slots, self.availability_slots, \
             self.first_hour_slots, self.last_hour_slots = self.slots_init()
         self.course_types, self.courses, self.courses_by_week, \
@@ -116,9 +116,17 @@ class WeeksDatabase(object):
                 day_after[day] = days[i + 1]
             except IndexError:
                 day_after[day] = None
+
+        day_before = {}
+        for i, day in enumerate(days):
+            if i == 0:
+                day_before[day] = None
+            else:
+                day_before[day] = days[i-1]
+
         days = set(days)
 
-        return days, day_after, holidays, training_half_days
+        return days, day_after, holidays, training_half_days, day_before
 
     def slots_init(self):
         # SLOTS
