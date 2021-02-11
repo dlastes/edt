@@ -44,7 +44,7 @@ from TTapp.TTConstraints.rooms_constraints import LimitedRoomChoices
 from TTapp.TTConstraints.limit_time_constraints import LimitModulesTimePerPeriod, \
     LimitGroupsTimePerPeriod, LimitTutorsTimePerPeriod, LimitTimePerPeriod
 from TTapp.TTConstraints.orsay_constraints import GroupsLunchBreak, BreakAroundCourseType, TutorsLunchBreak
-from TTapp.TTConstraints.visio_constraints import NoVisio, BoundVisioHalfDays, LimitGroupsPhysicalPresence, VisioOnly
+from TTapp.TTConstraints.visio_constraints import NoVisio, BoundPhysicalPresenceHalfDays, LimitGroupsPhysicalPresence, VisioOnly
 
 #
 #   CustomConstraint

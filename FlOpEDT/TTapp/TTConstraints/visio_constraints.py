@@ -170,7 +170,7 @@ class LimitGroupsPhysicalPresence(TTConstraint):
 
     def enrich_model(self, ttmodel, week, ponderation=1):
         if not settings.VISIO_MODE:
-            print("Visio Mode is not activated : ignore VisioOnly constraint")
+            print("Visio Mode is not activated : ignore LimitGroupsPhysicalPresence constraint")
             return
         if self.train_progs.exists():
             considered_basic_groups = set(
@@ -201,33 +201,47 @@ class LimitGroupsPhysicalPresence(TTConstraint):
         return text
 
 
-class BoundVisioHalfDays(TTConstraint):
+class BoundPhysicalPresenceHalfDays(TTConstraint):
     """
-    at most a given proportion of basic groups are present each half-day
+    Bound the number of Half-Days of physical presence
     """
-    nb_max = models.PositiveSmallIntegerField(validators=[MinValueValidator(0), MaxValueValidator(14)])
+    nb_max = models.PositiveSmallIntegerField(validators=[MinValueValidator(0), MaxValueValidator(14)], default=14)
     nb_min = models.PositiveSmallIntegerField(validators=[MinValueValidator(0), MaxValueValidator(14)], default=0)
-    groups = models.ManyToManyField('base.Group', blank=True, related_name='bound_visio_half_days')
-
+    groups = models.ManyToManyField('base.Group', blank=True, related_name='bound_physical_presence_half_days')
 
     def enrich_model(self, ttmodel, week, ponderation=1):
+        if not settings.VISIO_MODE:
+            print("Visio Mode is not activated : ignore BoundPhysicalPresenceHalfDays constraint")
+            return
         considered_groups = considered_basic_groups(self, ttmodel)
         total_nb_half_days = len(ttmodel.wdb.days) * 2
+        physical_presence_half_days_number = {}
         for g in considered_groups:
-            # at most nb_max half-days of visio-courses for each group
-            ttmodel.add_constraint(
-                ttmodel.sum(ttmodel.GBHD[g, d, apm] - ttmodel.physical_presence[g][d, apm]
-                            for (d, apm) in ttmodel.physical_presence[g]),
-                '<=', self.nb_max, Constraint(constraint_type=ConstraintType.BOUND_VISIO_MAX))
-
-            # at least n_min half-days of physical-presence for each group
-            ttmodel.add_constraint(
+            physical_presence_half_days_number[g] = \
                 ttmodel.sum(ttmodel.physical_presence[g][d, apm]
-                            for (d, apm) in ttmodel.physical_presence[g]),
-                '<=', total_nb_half_days - self.nb_min, Constraint(constraint_type=ConstraintType.BOUND_VISIO_MIN))
+                            for (d, apm) in ttmodel.physical_presence[g])
+        if self.weight is None:
+            for g in considered_groups:
+                # at least nb_min half-days of physical-presence for each group
+                ttmodel.add_constraint(
+                    physical_presence_half_days_number[g], '>=', self.nb_min,
+                    Constraint(constraint_type=ConstraintType.MIN_PHYSICAL_HALF_DAYS, groups=g, weeks=week))
+
+                # at most nb_max half-days of physical presence for each group
+                ttmodel.add_constraint(physical_presence_half_days_number[g], '<=', self.nb_max,
+                                       Constraint(constraint_type=ConstraintType.MAX_PHYSICAL_HALF_DAYS,
+                                                  groups=g, weeks=week))
+        else:
+            for g in considered_groups:
+                cost = ponderation * self.weight * \
+                       (ttmodel.UN - ttmodel.add_floor(physical_presence_half_days_number[g],
+                                                       self.nb_min, total_nb_half_days)
+                        + ttmodel.add_floor(physical_presence_half_days_number[g],
+                                            self.nb_max, total_nb_half_days))
+                ttmodel.add_to_group_cost(g, cost, week)
 
     def one_line_description(self):
-        text = f"Au moins {self.nb_min} et au plus {self.nb_max} demie_journées de visio"
+        text = f"Au moins {self.nb_min} et au plus {self.nb_max} demie_journées de présentiel"
         if self.groups.exists():
             text += ' pour les groupes ' + ', '.join([group.name for group in self.groups.all()])
         else:
