@@ -49,10 +49,9 @@ def assign_tutor_color(department=None):
                               all_tutors.count())
     for tut, col in zip(all_tutors, color_set):
         td, created = TutorDisplay.objects.get_or_create(tutor=tut)
-        if created:
-            td.color_bg = col
-            td.color_txt = compute_luminance(col)
-            td.save()
+        td.color_bg = col
+        td.color_txt = compute_luminance(col)
+        td.save()
         
     
 
