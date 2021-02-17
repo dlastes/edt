@@ -50,6 +50,7 @@ class ConstraintType(Enum):
     COURS_DOIT_AVOIR_PROFESSEUR = "Le cours doit avoir un professeur"
     PROFESSEUR_NE_PEUT_DONNER_2_COURS_EN_MEME_TEMPS = "Le professeur ne peut pas donner 2 cours en même temps"
     CORE_ROOMS = "Core rooms"
+    SUPP_TUTOR = "Supp tutor"
 
     # SPECIFIC
     PAS_DE_COURS_DE_DEMI_JOURNEE = "Pas de cours de demi-journée"
@@ -62,6 +63,19 @@ class ConstraintType(Enum):
     DEPARTEMENT_BLOQUE_SLOT = "Les autres départements bloquent le slot"
     PROFESSEUR_A_DEJA_COURS_EN_AUTRE_DEPARTEMENT = "Le professeur a déjà un cours dans un autre département"
     PROFESSEUR_A_DEJA_COURS_EN_AUTRE_DEPARTEMENT_IBD = "Le professeur a déjà un cours dans un autre département IBD"
+
+    # Visio
+    VISIO = "Visio"
+    MIN_PHYSICAL_HALF_DAYS = "MIN_PHYSICAL_HALF_DAYS"
+    MAX_PHYSICAL_HALF_DAYS = "MAX_PHYSICAL_HALF_DAYS"
+    NO_VISIO = "NO_VISIO"
+    VISIO_ONLY = "VISIO_ONLY"
+    VISIO_LIMIT_GROUP_PRESENCE = "VISIO_LIMIT_GROUP_PRESENCE"
+    NO_VISIO_FOR_ALL_HALF_DAY = "NO_VISIO_FOR_ALL_HALF_DAY"
+    NO_VISIO_FOR_ALL_DAY = "NO_VISIO_FOR_ALL_DAY"
+    PHYSICAL_PRESENCE = "PHYSICAL_PRESENCE"
+    HAS_VISIO = "HAS_VISIO"
+
 
     # From iut
     BOUND_HOURS_PER_DAY = "Bound_hours per day"
@@ -105,8 +119,10 @@ class ConstraintType(Enum):
     # From TTApp/models
     MAX_HOURS = "Max hours"
     STABILIZE_ENRICH_MODEL = "Stabilize : enrich model"
+    STABILIZE_THROUGH_WEEKS = "Stabilization through weeks"
     SIMULTANEOUS_COURSES = "Simultaneous courses"
     LIMITED_ROOM_CHOICES = "LIMITED_ROOM_CHOICES"
+    LIMITED_START_TIME_CHOICES = "LIMITED_START_TIME_CHOICES"
     LowerBoundBusyDays = "LowerBoundBusyDays"
     LUNCH_BREAK = "Lunch Breaks"
     BREAK_AROUND_COURSE = "Break around course"

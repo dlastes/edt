@@ -110,7 +110,7 @@ class MinHalfDaysHelperModule(MinHalfDaysHelperBase):
 
 
     def add_cost(self, cost):
-        self.ttmodel.obj += cost
+        self.ttmodel.add_to_generic_cost(cost)
 
 
     def enrich_model(self, module=None):
@@ -137,7 +137,10 @@ class MinHalfDaysHelperGroup(MinHalfDaysHelperBase):
 
 
     def add_cost(self, cost):
-        self.ttmodel.add_to_group_cost(self.group, cost, self.week)
+        g_pref = self.group.preferences
+        g_pref.calculate_fields()
+        free_half_day_weight = 2 * g_pref.get_free_half_day_weight()
+        self.ttmodel.add_to_group_cost(self.group, free_half_day_weight * cost, self.week)
 
 
     def enrich_model(self, group=None):

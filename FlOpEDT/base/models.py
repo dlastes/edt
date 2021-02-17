@@ -69,6 +69,7 @@ class GroupType(models.Model):
 
 
 class Group(models.Model):
+    # should not include "-" nor "|"
     name = models.CharField(max_length=10)
     train_prog = models.ForeignKey(
         'TrainingProgramme', on_delete=models.CASCADE)
@@ -79,6 +80,7 @@ class Group(models.Model):
                                            blank=True,
                                            related_name="children_groups")
 
+    @property
     def full_name(self):
         return self.train_prog.abbrev + "-" + self.name
 
@@ -275,7 +277,7 @@ class Module(models.Model):
     train_prog = models.ForeignKey(
         'TrainingProgramme', on_delete=models.CASCADE)
     period = models.ForeignKey('Period', on_delete=models.CASCADE)
-    url = models.CharField(max_length=200, null=True, blank=True, default=None)
+    url = models.URLField(null=True, blank=True, default=None)
     description = models.TextField(null=True, blank=True, default=None)
 
     def __str__(self):
@@ -312,6 +314,7 @@ class CourseType(models.Model):
     group_types = models.ManyToManyField(GroupType,
                                          blank=True,
                                          related_name="compatible_course_types")
+    graded = models.BooleanField(verbose_name='noté ?', default=False)
 
     def __str__(self):
         return self.name
@@ -361,6 +364,20 @@ class Course(models.Model):
     def get_week(self):
         return self.week
 
+    @property
+    def is_graded(self):
+        if CourseAdditional.objects.filter(course=self).exists():
+            return self.additional.graded
+        else:
+            return self.type.graded
+
+
+class CourseAdditional(models.Model):
+    course = models.OneToOneField('Course', on_delete=models.CASCADE, related_name='additional')
+    graded = models.BooleanField(verbose_name='noté ?', default=False)
+    visio_preference_value = models.SmallIntegerField(validators=[MinValueValidator(0), MaxValueValidator(8)],
+                                                      default=1)
+
 
 class CoursePossibleTutors(models.Model):
     course = models.OneToOneField('Course', on_delete=models.CASCADE)
@@ -375,7 +392,7 @@ class ScheduledCourse(models.Model):
     # in minutes from 12AM
     start_time = models.PositiveSmallIntegerField()
     room = models.ForeignKey(
-        'Room', blank=True, null=True, on_delete=models.CASCADE)
+        'Room', blank=True, null=True, on_delete=models.SET_NULL)
     no = models.PositiveSmallIntegerField(null=True, blank=True)
     noprec = models.BooleanField(
         verbose_name='vrai si on ne veut pas garder la salle', default=True)
@@ -395,6 +412,55 @@ class ScheduledCourse(models.Model):
     def end_time(self):
         return self.start_time + self.course.type.duration
 
+
+class ScheduledCourseAdditional(models.Model):
+    scheduled_course = models.OneToOneField(
+        'ScheduledCourse',
+        on_delete=models.CASCADE,
+        related_name='additional')
+    link = models.ForeignKey(
+        'EnrichedLink',
+        blank=True, null=True, default=None,
+        related_name='additional',
+        on_delete=models.SET_NULL)
+    comment = models.CharField(
+        max_length=100,
+        null=True, default=None, blank=True)
+
+    def __str__(self):
+        return '{' + str(self.scheduled_course) + '}' \
+            + '[' + str(self.link.description) + ']' \
+            + '(' + str(self.comment) + ')'
+
+
+class EnrichedLink(models.Model):
+    url = models.URLField()
+    description = models.CharField(max_length=100,
+                                   null=True, default=None, blank=True)
+
+    @property
+    def concatenated(self):
+        return ' '.join(
+            [str(self.id),
+             self.url,
+             self.description if self.description is not None else '']
+        )
+
+    def __str__(self):
+        return (self.description if self.description is not None else '') \
+            + ' -> ' + self.url 
+
+
+class GroupPreferredLinks(models.Model):
+    group = models.OneToOneField('Group',
+                                 on_delete=models.CASCADE,
+                                 related_name='preferred_links')
+    links = models.ManyToManyField('EnrichedLink',
+                                   related_name='group_set')
+
+    def __str__(self):
+        return self.group.full_name + ' : ' + \
+            ' ; '.join([str(l) for l in self.links.all()])
 
 # </editor-fold desc="COURSES">
 

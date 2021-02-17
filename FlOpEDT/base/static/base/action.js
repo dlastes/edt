@@ -200,10 +200,13 @@ function select_room_change() {
 
     var occupied_rooms = [];
     for (let i = 0; i < concurrent_courses.length; i++) {
-      busy_rooms = rooms.roomgroups[concurrent_courses[i].room];
-      for (j = 0; j < busy_rooms.length; j++) {
-        if (occupied_rooms.indexOf(busy_rooms[j]) == -1) {
-          occupied_rooms.push(busy_rooms[j]);
+      // for real rooms
+      if (concurrent_courses[i].room != '') {
+        busy_rooms = rooms.roomgroups[concurrent_courses[i].room];
+        for (j = 0; j < busy_rooms.length; j++) {
+          if (occupied_rooms.indexOf(busy_rooms[j]) == -1) {
+            occupied_rooms.push(busy_rooms[j]);
+          }
         }
       }
     }
@@ -273,10 +276,8 @@ function select_room_change() {
     room_tutor_change.proposal.push({ fid: fake_id, content: "+" });
   }
 
-  room_tutor_change.cm_settings.nlin
-    = Math.ceil(room_tutor_change.proposal.length
-      / room_tutor_change.cm_settings.ncol);
-
+  update_change_cm_nlin() ;
+  
   if (level > 0 || c.room == "" ||
     occupied_rooms.indexOf(c.room) != -1) {
     return true;
@@ -288,7 +289,10 @@ function select_room_change() {
 
 
 function confirm_room_change(d) {
-  Object.assign(pending.wanted_course, { room: d.content });
+  Object.assign(
+    pending.wanted_course,
+    {room: d.content, id_visio: -1}
+  );
 
   room_tutor_change.proposal = [];
   check_pending_course();
@@ -326,6 +330,12 @@ function fetch_all_tutors() {
   }
 }
 
+// update number of lines in the context menu
+function update_change_cm_nlin() {
+  room_tutor_change.cm_settings.nlin = Math.ceil(
+    room_tutor_change.proposal.length / room_tutor_change.cm_settings.ncol
+  );
+}
 
 
 function select_tutor_module_change() {
@@ -356,7 +366,7 @@ function select_tutor_module_change() {
 
   room_tutor_change.proposal.push({ fid: fake_id, content: "+" });
 
-  room_tutor_change.cm_settings.nlin = Math.ceil(room_tutor_change.proposal.length / room_tutor_change.cm_settings.ncol);
+  update_change_cm_nlin() ;
 
 }
 
@@ -386,7 +396,7 @@ function select_tutor_filters_change() {
     return { fid: fake_id + t, content: t };
   });
 
-  room_tutor_change.cm_settings.nlin = Math.ceil(room_tutor_change.proposal.length / room_tutor_change.cm_settings.ncol);
+  update_change_cm_nlin() ;
 
 }
 
@@ -414,10 +424,7 @@ function select_salarie_change() {
     });
   }
 
-  room_tutor_change.cm_settings.nlin
-    = Math.ceil(room_tutor_change.proposal.length
-      / room_tutor_change.cm_settings.ncol);
-
+  update_change_cm_nlin() ;
 
   var fake_id = new Date();
   fake_id = fake_id.getMilliseconds() + "-" + tache.id_cours;
@@ -537,7 +544,8 @@ function go_cm_room_tutor_change() {
     tut_cm_room_g
       .append("rect")
       .attr("class", "cm-chg-rec")
-      .merge(tut_cm_room_dat.select(".cm-chg-rec"))
+    // never updated
+    //      .merge(tut_cm_room_dat.select(".cm-chg-rec"))
       .attr("x", cm_chg_but_x)
       .attr("y", cm_chg_but_y)
       .attr("width", cm_chg_but_width)
@@ -549,7 +557,8 @@ function go_cm_room_tutor_change() {
     tut_cm_room_g
       .append("text")
       .attr("class", "cm-chg-bt")
-      .merge(tut_cm_room_dat.select(".cm-chg-bt"))
+    // never updated
+    //     .merge(tut_cm_room_dat.select(".cm-chg-bt"))
       .attr("x", cm_chg_but_txt_x)
       .attr("y", cm_chg_but_txt_y)
       .attr("fill", cm_chg_but_txt_fill)
@@ -693,6 +702,7 @@ function apply_ckbox(dk) {
     }
 
     if (dk == "dis-mod") {
+
       if (ckbox[dk].cked) {
         //create_dispos_user_data();
         //ckbox["dis-mod"].disp = true;
@@ -723,10 +733,20 @@ function apply_ckbox(dk) {
             user.name = logged_usr.name;
           }
         }
-        create_dispos_user_data();
-        go_edt(false);
-        create_pref_modes();
       } else {
+
+        // close back lunck break
+        let bus = [
+          "day_start_time", "day_finish_time",
+          "lunch_break_start_time", "lunch_break_finish_time"
+        ] ;
+        for (let i = 0 ; i < bus.length ; i ++) {
+          if (typeof time_settings.time.bu[bus[i]] !== 'undefined') {
+            time_settings.time[bus[i]] = time_settings.time.bu[bus[i]] ;
+          }
+        }
+        time_settings.time.bu = {} ;
+        
         user.dispos = [];
         //ckbox["dis-mod"].disp = false;
         svg.get_dom("stg").attr("visibility", "hidden");
@@ -852,7 +872,7 @@ function compute_changes(changes, conc_tutors, gps) {
       // } else 
 
 
-      if (cur_course.room == "") {
+      if (cur_course.room == "" && cur_course.id_visio == -1) {
         splash_case = {
           id: "def-room",
           but: butOK,
@@ -898,7 +918,8 @@ function compute_changes(changes, conc_tutors, gps) {
         day: cur_course.day,
         start: cur_course.start,
         room: cur_course.room,
-        tutor: cur_course.prof
+        tutor: cur_course.prof,
+        id_visio: cur_course.id_visio
       };
 
 
@@ -1219,6 +1240,7 @@ function check_constraints_tutor(tutor) {
 
 
 function min_to_hm_txt(minutes) {
+  minutes = Math.round(minutes);
   var h = Math.floor(minutes / 60);
   var m = minutes - h * 60;
   var mt = '';
@@ -1534,8 +1556,10 @@ function send_dis_change() {
   var nbDispos = 0;
 
   if (user.dispos_bu.length == 0) {
-    ack.status = 'OK';
-    ack.more = "Rien à signaler.";
+    ack.list.push({
+      'status': 'OK',
+      'more': "Rien à signaler."
+    });
     go_ack_msg();
     return;
   }
@@ -1551,8 +1575,10 @@ function send_dis_change() {
 
   if (changes.length == 0) {
     console.log('no change here');
-    ack.status = 'OK';
-    ack.more = "Rien à signaler.";
+    ack.list.push({
+      'status': 'OK',
+      'more': "Rien à signaler."
+    });
     go_ack_msg();
   } else {
 
@@ -1572,16 +1598,26 @@ function send_dis_change() {
       dataType: 'json',
       success: function (msg) {
         show_loader(false);
-        ack.status = 'OK';
-        ack.more = "";
+        ack.list.push({
+          'status': 'OK',
+          'more': ""
+        }) ;
+        ack.ongoing = ack.ongoing.filter(function(o){
+          return o != 'preference' ;
+        });
         go_ack_msg();
         filled_dispos = nbDispos;
         go_alarm_pref();
       },
       error: function (msg) {
         show_loader(false);
-        ack.status = 'KO';
-        ack.more = "";
+        ack.list.push({
+          'status': 'KO',
+          'more': ""
+        }) ;
+        ack.ongoing = ack.ongoing.filter(function(o){
+          return o != 'preference' ;
+        });
         go_ack_msg();
       }
     });
@@ -1591,6 +1627,12 @@ function send_dis_change() {
 }
 
 
+
+function send_pref_pres_change() {
+  ack.ongoing = ['preference', 'presence'] ;
+  send_dis_change() ;
+  days_header.send_change_physical_presence() ;
+}
 
 
 function edt_change_ack(msg) {
@@ -1608,7 +1650,7 @@ function edt_change_ack(msg) {
     var splash_disclaimer = {
       id: "failed-edt-mod",
       but: { list: [{ txt: "Zut. Ok.", click: function (d) { } }] },
-      com: { list: [{ txt: ack.edt }] }
+      com: { list: [{ txt: ack.more }] }
     };
     splash(splash_disclaimer);
   }
@@ -1790,20 +1832,95 @@ function splash(splash_ds) {
 
 function apply_stype() {
   if (ckbox["dis-mod"].cked) {
+    user.dispos = new Array(user.dispos_type.length);
+    dispos[user.name] = {} ;
     for (let d = 0; d < user.dispos.length; d++) {
-      user.dispos[d].day = user.dispos_type[d].day;
-      user.dispos[d].hour = user.dispos_type[d].hour;
-      user.dispos[d].value = user.dispos_type[d].value;
-      user.dispos[d].off = user.dispos_type[d].off;
-      dispos[user.name][user.dispos[d].day][user.dispos[d].hour]
-        = user.dispos[d].value;
+      if (typeof dispos[user.name][user.dispos_type[d].day] === 'undefined') {
+        dispos[user.name][user.dispos_type[d].day] = [] ;
+      }
+      dispos[user.name][user.dispos_type[d].day].push({
+        start_time:user.dispos_type[d].start_time,
+        duration:user.dispos_type[d].duration,
+        value:user.dispos_type[d].value});
+
     }
+    create_dispos_user_data();
+    
     go_pref(true);
     send_dis_change();
   }
 }
 
 
+/*--------------------
+   ------ VISIO -------
+   --------------------*/
+
+function gp_training_prog_to_str (c) {
+  return set_promos[c.promo] + '-' + c.group ;
+}
+
+// user's links for now
+function select_pref_links_change() {
+  room_tutor_change.cm_settings = pref_links_cm_settings;
+
+  room_tutor_change.proposal = [] ;
+
+  let key, pref_links;
+  ["users", "groups"].forEach(function(link_type) {
+    switch(link_type) {
+    case 'users':
+      key = pending.wanted_course.prof ;
+      pref_links = preferred_links.users ;
+      break;
+    case 'groups':
+      key = gp_training_prog_to_str(pending.wanted_course) ;
+      pref_links = preferred_links.groups ;
+      break;
+    default:
+      console.log('Unknonwn type of link!');
+      return ;
+    }
+    
+    if (Object.keys(pref_links).includes(key)) {
+      room_tutor_change.proposal =
+        room_tutor_change.proposal.concat(
+          pref_links[key].map(function(l) {
+            l.type = link_type ;
+            return l;
+          })
+        ) ;
+      let fake_id = new Date();
+      fake_id = fake_id.getMilliseconds();
+      room_tutor_change.proposal.forEach(function (t) {
+        t.content = t.desc ;
+        t.fid = fake_id ;
+      });
+    }
+
+  });
+
+  if (room_tutor_change.proposal.length == 0) {
+    console.log('Pas de lien...');
+    window.location.href =
+      url_change_preferred_links + pending.wanted_course.prof ;
+  }
+  
+  
+  update_change_cm_nlin() ;
+
+}
+
+
+function confirm_pref_links_change(d) {
+  Object.assign(
+    pending.wanted_course,
+    { id_visio: d.id, room: '' }
+  );
+
+  room_tutor_change.proposal = [];
+  check_pending_course();
+}
 
 /*--------------------
    ------ ALL -------
@@ -1818,7 +1935,8 @@ function add_bouge(pending) {
       day: pending.init_course.day,
       start: pending.init_course.start,
       room: pending.init_course.room,
-      prof: pending.init_course.prof
+      prof: pending.init_course.prof,
+      id_visio: pending.init_course.id_visio
     };
     cours.forEach(function(c) {
       if (c.id_course == pending.wanted_course.id_course) {
@@ -1826,6 +1944,7 @@ function add_bouge(pending) {
         c.start = pending.wanted_course.start ;
         c.room = pending.wanted_course.room ;
         c.prof = pending.wanted_course.prof ;
+        id_visio = pending.wanted_course.id_visio ;
       }
     });
     console.log(cours_bouge[pending.init_course.id_course]);
@@ -1836,7 +1955,8 @@ function has_changed(cb, c) {
   return cb.day != c.day
     || cb.start != c.start
     || cb.room != c.room
-    || cb.prof != c.prof;
+    || cb.prof != c.prof
+    || cb.id_visio != c.id_visio;
 }
 
 
@@ -1883,14 +2003,10 @@ function show_detailed_courses(cours) {
   var details = svg.get_dom("dg").append("g")
     .attr("id", "course_details");
 
-  var width = grid_width() / 4;
-  var height = grid_height() / 3;
-  var pos_x = placement_details_x(cours);
-  var pos_y = placement_details_y(cours);
   var strokeColor;
   var strokeWidth;
 
-  if (cours.course_type == "CTRL") {
+  if (is_exam(cours)) {
     strokeColor = "red";
     strokeWidth = 4;
   }
@@ -1899,12 +2015,31 @@ function show_detailed_courses(cours) {
     strokeWidth = 2;
   }
 
+  let room_info = {'txt': cours.room} ;
+  if (cours.id_visio > -1) {
+    let visio_link = links_by_id[String(cours.id_visio)] ;
+    if (typeof visio_link !== 'undefined') {
+      room_info.txt = visio_link.desc ;
+      room_info.url = visio_link.url ;
+    }
+  }
+  
+  
+  let infos = [
+    {'txt':modules_info[cours.mod].name, 'url':modules_info[cours.mod].url},
+    room_info,
+    {'txt':cours.comment},
+    {'txt':tutors_info[cours.prof].full_name},
+    {'txt':tutors_info[cours.prof].email, 'url': url_contact + cours.prof}
+  ];
+  nb_detailed_infos = infos.length ;
+
   details
     .append("rect")
-    .attr("x", pos_x)
-    .attr("y", pos_y)
-    .attr("width", width)
-    .attr("height", height)
+    .attr("x", detail_wdw_x(cours))
+    .attr("y", detail_wdw_y(cours))
+    .attr("width", detail_wdw_width())
+    .attr("height", detail_wdw_height())
     .attr("rx", 15)
     .attr("ry", 15)
     .attr("fill", cours.color_bg)
@@ -1912,48 +2047,23 @@ function show_detailed_courses(cours) {
     .attr("stroke-width", strokeWidth)
     .on("click", remove_details);
 
-  details
-    .append("a")
-    .attr("xlink:href", modules_info[cours.mod].url)
-    .attr("target", "_blank")
-    .append("text")
-    .text(modules_info[cours.mod].name)
-    .attr("fill", cours.color_txt)
-    .attr("style", "text-decoration:underline")
-    .attr("x", pos_x + width / 2)
-    .attr("y", pos_y + height / 6);
-
-  details
-    .append("text")
-    .text(cours.room)
-    .attr("fill", cours.color_txt)
-    .attr("x", pos_x + width / 2)
-    .attr("y", pos_y + height / 6 * 2);
-
-  details
-    .append("text")
-    .text(cours.course_type)
-    .attr("fill", cours.color_txt)
-    .attr("x", pos_x + width / 2)
-    .attr("y", pos_y + height / 6 * 3);
-
-  details
-    .append("text")
-    .text(tutors_info[cours.prof].full_name)
-    .attr("fill", cours.color_txt)
-    .attr("x", pos_x + width / 2)
-    .attr("y", pos_y + height / 6 * 4);
-
-  details
-    .append("a")
-    .attr("xlink:href", url_contact + cours.prof)
-    .attr("target", "_blank")
-    .append("text")
-    .text(tutors_info[cours.prof].email)
-    .attr("fill", cours.color_txt)
-    .attr("style", "text-decoration:underline")
-    .attr("x", pos_x + width / 2)
-    .attr("y", pos_y + height / 6 * 5);
+  for(let i = 0 ; i < infos.length ; i++) {
+    let onto = details ;
+    if (typeof infos[i].url !== 'undefined') {
+      onto = details
+        .append('a')
+        .attr("xlink:href", infos[i].url)
+        .attr("target", "_blank") 
+        .attr("style", "text-decoration:underline") ;
+    }
+    onto
+      .append('text')
+      .text(infos[i].txt)
+      .attr("fill", cours.color_txt)
+      .attr("x", detail_txt_x(cours))
+      .attr("y", detail_txt_y(cours, i));
+  }
+  
 }
 
 function remove_details() {

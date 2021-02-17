@@ -27,7 +27,10 @@ function send_form(form) {
                     }
                     $("#error_"+form+" p").html(tmp);
                 } else {
-                    $("#error_"+form+" p").text(data.data);
+                    var obj = $("#error_"+form+" p").text(data.data);
+                    // FIXME : la ligne suivante doit pouvoir être amélioré avec `white-space: pre-line;` dans les css
+                    //  Cf https://stackoverflow.com/questions/4535888/jquery-text-and-newlines
+                    obj.html(obj.html().replace(/\n/g,'<br/>'));
                 }
                 var option = {value:data.dept_abbrev, text:data.dept_fullname} ;
                 if (form == 'config') {

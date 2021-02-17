@@ -38,7 +38,7 @@
 }
 /* jours de la semaine */
 .txt_scl {
-    fill:darkslateblue;
+/*    fill:darkslateblue;*/
     font-size:20px;
     font-weight:bold;
 }
@@ -96,10 +96,6 @@ g[class^="gp-but-"] {
 }
 
 /* .dispo { */
-/*     cursor: pointer; */
-/* } */
-
-/* .cours { */
 /*     cursor: pointer; */
 /* } */
 

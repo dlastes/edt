@@ -62,7 +62,7 @@ function go_pref(quick) {
     .data(
       user.dispos,
       function (d) {
-        return [d.day, d.start_time, d.duration, d.value, d.selected].join('-');
+        return [d.day, d.start_time, d.duration, d.value].join('-');
       });
 
   datdi = dat
@@ -76,7 +76,10 @@ function go_pref(quick) {
 
   var datdisi = datdi
     .append("g")
-    .attr("class", "dispo-si")
+    .attr("class", "dispo-si");
+
+  datdisi
+    .merge(dat.select(".dispo-si"))
     .on("mousedown", function(d) { pref_selection.start = d; })
     .on("mouseover", update_pref_selection)
     .on("mouseup", apply_change_simple_pref);
@@ -236,7 +239,7 @@ function go_smiley(top, mid, t) {
       return tete_str(rc(d));
     })
     .attr("fill", function (d) {
-      return smi_fill(rc(d));
+      return smi_fill(availability_content(d));
     });
 
   datsmi
@@ -250,7 +253,7 @@ function go_smiley(top, mid, t) {
       return oeil_r(rc(d));
     })
     .attr("stroke-width", function (d) {
-      return trait_vis_strw(rc(d));
+      return eye_str_width(d);
     });
 
   datsmi
@@ -264,7 +267,7 @@ function go_smiley(top, mid, t) {
       return oeil_r(rc(d));
     })
     .attr("stroke-width", function (d) {
-      return trait_vis_strw(rc(d));
+      return eye_str_width(d);
     });
 
 
@@ -285,7 +288,7 @@ function go_smiley(top, mid, t) {
       return sourcil_ext_y(rc(d));
     })
     .attr("stroke-width", function (d) {
-      return trait_vis_strw(rc(d));
+      return brow_str_width(d);
     });
 
   datsmi
@@ -305,7 +308,7 @@ function go_smiley(top, mid, t) {
       return sourcil_ext_y(rc(d));
     })
     .attr("stroke-width", function (d) {
-      return trait_vis_strw(rc(d));
+      return brow_str_width(d);
     });
 
   datsmi
@@ -330,9 +333,56 @@ function go_smiley(top, mid, t) {
     })
     .attr("fill", "none")
     .attr("stroke-width", function (d) {
-      return trait_vis_strw(rc(d));
+      return mouth_str_width(d);
     });
 
+  datsmi
+    .append("path")
+    .attr("st", "hpr")
+    .attr("fill", hp_fill)
+    .merge(top.select("[st=hpr]"))
+    .attr("d", path_hpr)
+    .attr("stroke-width", hp_stroke_width);
+
+  datsmi
+    .append("path")
+    .attr("st", "hpl")
+    .attr("fill", hp_fill)
+    .merge(top.select("[st=hpl]"))
+    .attr("d", path_hpl)
+    .attr("stroke-width", hp_stroke_width);
+
+  datsmi
+    .append("path")
+    .attr("st", "hpt")
+    .attr("fill", "none")
+    .merge(top.select("[st=hpt]"))
+    .attr("d", path_hpt)
+    .attr("stroke-width", hp_stroke_width);
+
+  datsmi
+    .append("rect")
+    .attr("st", "hpm")
+    .merge(top.select("[st=hpm]"))
+    .attr("x", -.5 * smiley.headphone.mouth_w * smiley.tete)
+    .attr("y", .5 * smiley.headphone.mouth_h * smiley.tete)
+    .attr("rx", 2)
+    .attr("width", hp_mouth_w)
+    .attr("height", smiley.headphone.mouth_h * smiley.tete)
+    .attr("fill", "black")
+    .attr("stroke", "none");
+
+  datsmi
+    .append("line")
+    .attr("st", "hpmr")
+    .merge(top.select("[st=hpmr]"))
+    .attr("x1", .45 * smiley.headphone.mouth_w * smiley.tete)
+    .attr("y1", smiley.headphone.mouth_h * smiley.tete)
+    .attr("x2", smiley.tete)
+    .attr("y2", 0)
+    .attr("stroke", "black")
+    .attr("stroke-width", hp_mouth_sw);
+  
 
 }
 
@@ -371,7 +421,7 @@ function go_cm_advanced_pref(quick) {
     .attr("width", dispo_all_w)
     .attr("height", dispo_all_h)
     .attr("fill", function (d) {
-      return smi_fill(d.off / par_dispos.nmax);
+      return smi_fill(d.off);
     })
     .attr("stroke", "darkslategrey")
     .attr("stroke-width", 2);
@@ -387,8 +437,13 @@ function go_cm_advanced_pref(quick) {
 function go_alarm_pref() {
 
   var dig = svg.get_dom("dig");
-  dig
 
+  // escape if there is no alarm 
+  if (typeof dig === 'undefined') {
+    return ;
+  }
+  
+  dig
     .select(".disp-info").select(".disp-required")
     .text(txt_reqDispos)
     .attr("x", menus.x + menus.mx - 5)
@@ -920,6 +975,11 @@ function update_selection() {
       return d.name == c.prof ;
     });
     var roo = rooms_sel.all.find(function(d) {
+      // visio room
+      if (c.room == '') {
+        return true ;
+      }
+      // physical room
       if (c.room in rooms.roomgroups) {
         return rooms.roomgroups[c.room].includes(d.name) ;
       } else {
@@ -1023,6 +1083,9 @@ function go_courses(quick) {
     .attr("class", "crect")
     .attr("x", cours_x)
     .attr("y", cours_y)
+  // rx and ry regular attributes...
+    .attr("rx", 3)
+    .attr("ry", 3)
     .attr("width", 0)
     .merge(cg.select("rect"))
     .attr("fill", cours_fill)
@@ -1042,7 +1105,7 @@ function go_courses(quick) {
         lDis = par_dispos.nmax;
       }
 
-      return smi_fill(lDis / par_dispos.nmax);
+      return smi_fill(lDis);
     });
   } else {
     d3.selectAll("rect.crect").attr("fill", cours_fill);
@@ -1128,21 +1191,49 @@ function go_courses(quick) {
 
 // update acknowledgment message
 function go_ack_msg() {
-  var btn_txt = "Super";
-  if (ack.status == 'KO') {
-    btn_txt = "Ok";
-  }
-  var com_txt = ack.more;
-  if (com_txt == '') {
-    com_txt = ack.predefined[ack.status];
-  }
-  var splash_ack = {
-    id: "ack-edt-mod",
-    but: { list: [{ txt: btn_txt, click: function (d) { } }] },
-    com: { list: [{ txt: com_txt }] }
-  };
-  splash(splash_ack);
+  if (ack.ongoing.length == 0) {
+    
+    let btn_txt = "Super";
+    let ack_list = typeof ack.list !== 'undefined' ;
+    let com_list = [] ;
 
+    if (ack_list) {
+      if(typeof ack.list.find(function(a) { return a.status == 'KO'; })
+         === 'undefined') {
+        ack.status = 'OK' ;
+      } else {
+        ack.status = 'KO' ;
+      }
+    }
+    
+    if (ack.status == 'KO') {
+      btn_txt = "Ok";
+    }
+
+    if (ack_list) {
+      ack.list.filter(function(a) {
+        return a.status == 'KO' ;
+      }).map(function(a) {
+        return {'txt': a.more} ;
+      });
+    } else {
+      if (ack.more != '') {
+        com_list.append(ack.more);
+      }
+    }
+    
+    if (com_list.length == 0) {
+      com_list.push({txt: ack.predefined[ack.status]});
+    }
+    var splash_ack = {
+      id: "ack-edt-mod",
+      but: { list: [{ txt: btn_txt, click: function (d) {
+        ack.list = [] ;
+      } }] },
+      com: { list: com_list }
+    };
+    splash(splash_ack);
+  }
 }
 
 

@@ -25,26 +25,66 @@
 function Hours(settings) {
   // side time scale: list of {h: int, hd:('am'|'pm')}
   this.data = [];
-  var stime = Math.floor(settings.day_start_time / 60);
-  if (stime * 60 < settings.day_start_time) {
-    stime++;
-  }
+  this.settings = settings ;
+
+  this.add_time = function(t) {
+    t = +t ;
+    let to_push = { min: t, hd: 'am' } ;
+    if (t > this.settings.lunch_break_start_time) {
+      if (t < this.settings.lunch_break_finish_time) {
+        return ;
+      }
+      to_push.hd = 'pm' ;
+    }
+    let already = this.data.filter(function(t) {
+      return (t.hd == to_push.hd
+              && to_push.min - t.min < 10
+              && t.min - to_push.min < 10);
+    });
+    if (already.length == 0) {
+      this.data.push(to_push);
+      if (t == this.settings.lunch_break_start_time
+          && t == this.settings.lunch_break_finish_time) {
+        this.data.push({min:t, hd: 'pm'}) ;
+      }
+    }
+  } ;
+
+  this.clear = function() {
+    this.data = [] ;
+  } ;
+
+  this.add_times = function(time_list) {
+    for (let i = 0 ; i < time_list.length ; i++) {
+      this.add_time(time_list[i]);
+    }
+  } ;
+  
+  var stime = Math.ceil(settings.day_start_time / 60);
   while (stime * 60 <= settings.day_finish_time) {
-    if (stime * 60 <= settings.lunch_break_start_time) {
-      this.data.push({ h: stime, hd: 'am' });
-    }
-    if (stime * 60 >= settings.lunch_break_finish_time) {
-      this.data.push({ h: stime, hd: 'pm' });
-    }
+    this.add_time(stime * 60) ;
     stime++;
   }
-  this.settings = settings;
+  
+  if (settings.lunch_break_finish_time !=
+      settings.lunch_break_start_time) {
+    this.add_time(settings.lunch_break_start_time) ;
+    this.add_time(settings.lunch_break_finish_time) ;
+  }
+
+  if (settings.day_start_time % 60 != 0) {
+    this.add_time(settings.day_start_time);
+  }
+  if (settings.day_finish_time % 60 != 0) {
+    this.add_time(settings.day_finish_time);
+  }
+  
 }
 
 
 // Hour labels to the left of the grid
 function HourHeader(svg, layout_name, hours) {
-  this.layout = svg.get_dom(layout_name);
+  this.layout = svg.get_dom(layout_name).append("g").attr("class", "hour-scale");
   this.hours = hours;
   this.mix = new HourMix(this.hours.settings);
   hard_bind(this.mix);
@@ -85,7 +125,7 @@ HourHeader.prototype.update = function (quick) {
 
   hour_bar.exit().remove();
 
-  var hour_scale = svg.get_dom("edt-fg")
+  var hour_scale = this.layout
     .selectAll(".gridsckh")
     .data(this.hours.data);
 
@@ -117,6 +157,54 @@ HourHeader.prototype.update = function (quick) {
 
 };
 
+HourHeader.prototype.create_indicator = function() {
+
+  var hour_scale = this.layout
+    .append("rect")
+    .attr("x", -40)
+    .attr("y", 0)
+    .attr("width", 40)
+    .attr("height", grid_height())
+    .attr("fill", "white");
+
+  this.layout.append("text")
+    .attr("id", "exact-time-txt")
+    .attr("x", -20)
+    .attr("y", -20);
+
+  this.layout.append("line")
+    .attr("id", "exact-time-line")
+    .attr("x1", 0)
+    .attr("x2", 0)
+    .attr("y1", 0)
+    .attr("y2", 0);
+
+  this.layout
+    .on('mouseenter', function() {
+      d3.select("#exact-time-line")
+        .attr("stroke", "black")
+        .attr("stroke-width", 2)
+        .attr("x2", grid_width());
+    })
+    .on('mousemove', function() {
+      let m = d3.mouse(this) ;
+      let computed_time = cours_reverse_y(m[1]);
+      d3.select("#exact-time-txt").text(computed_time) ;
+      d3.select("#exact-time-line")
+        .attr("y1", m[1])
+        .attr("y2", m[1]);
+    })
+    .on('mouseleave', function() {
+      d3.select("#exact-time-txt").text("");
+      d3.select("#exact-time-line")
+        .attr("stroke-width", 0);
+    });
+} ;
+
+// HourHeader.prototype.indicate_time = function () {
+
+// } ;
+
 
 // Display parameters and functions
 function HourMix(settings) {
@@ -128,7 +216,7 @@ function HourMix(settings) {
     return -5;
   };
   this.gsckh_y = function (d) {
-    var ret = (d.h * 60 - this.settings.day_start_time) * nbRows * scale;
+    var ret = (d.min - this.settings.day_start_time) * nbRows * scale;
     if (d.hd == 'pm') {
       ret += bknews_h()
         - (this.settings.lunch_break_finish_time
@@ -137,11 +225,12 @@ function HourMix(settings) {
     return ret;
   };
   this.gsckh_txt = function (d) {
-    var ret = d.h;
-    if (ret >= 24) {
-      ret -= 24;
+    let m = d.min;
+    if (m >= 24*60) {
+      m -= 24*60;
     }
-    ret += "h";
-    return ret;
+    let h = Math.floor(m / 60) ;
+    m = m - h * 60 ;
+    return h + "h" + m.toString().padStart(2, "0");
   };
 }

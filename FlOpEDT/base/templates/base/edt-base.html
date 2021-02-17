@@ -69,6 +69,12 @@
     url_work_copies = url_work_copies.slice(0, -3);
     var url_check_swap = "{% url 'TTapp:check_swap' department 0 0 0 %}" ;
     url_check_swap = url_check_swap.slice(0, -5) ;
+    var url_delete_work_copy = "{% url 'TTapp:delete_work_copy' department 0 0 0 %}" ;
+    url_delete_work_copy = url_delete_work_copy.slice(0, -5) ;
+    var url_duplicate_work_copy = "{% url 'TTapp:duplicate_work_copy' department 0 0 0 %}" ;
+    url_duplicate_work_copy = url_duplicate_work_copy.slice(0, -5) ;
+    var url_delete_all_unused_work_copies = "{% url 'TTapp:delete_all_unused_work_copies' department 0 0 %}" ;
+    url_delete_all_unused_work_copies = url_delete_all_unused_work_copies.slice(0, -3) ;
     var url_swap = "{% url 'TTapp:swap' department 0 0 0 %}" ;
     url_swap = url_swap.slice(0, -5) ;
     var url_reassign_rooms = "{% url 'TTapp:reassign_rooms' department 0 0 0 %}" ;
@@ -79,13 +85,22 @@
     url_fetch_shared_rooms = url_fetch_shared_rooms.slice(0, -3) ;
     var url_mail_auto = "{% url "base:email-proposal" department %}";
     var url_game = "{% url 'easter_egg:start_game' %}" ;
-  var url_colors = "{% url 'displayweb:fetch_colors' %}" ;
+  var url_colors = "{% url 'displayweb:fetch_colors' department %}" ;
+  var url_group_lunch = "{% url 'TTapp:fetch_group_lunch' department %}" ;
+  var url_fetch_user_preferred_links = "{% url 'people:fetch_user_preferred_links' department %}" ;
+  var url_fetch_group_preferred_links = "{% url 'base:fetch_group_preferred_links' department %}" ;
+  var url_change_preferred_links = "{% url 'base:visio-pref' department %}" ;
+  var url_fetch_physical_presence = "{% url 'people:fetch_physical_presence' department 0 0 %}" ;
+  url_fetch_physical_presence = url_fetch_physical_presence.slice(0, -3) ;
+  var url_change_physical_presence = "{% url 'people:change_physical_presence' 0 0 '.' %}" ;
+  url_change_physical_presence = url_change_physical_presence.slice(0, -5) ;
 
     var department = "{{ dept }}" ;
     var week_year_list = {{ all_weeks| safe }};
     var week_init = +"{{ week }}";
     var year_init = +"{{ year }}";
-    var time_settings = {{ time_settings | safe }} ;
+  var time_settings = {{ time_settings | safe }} ;
+  time_settings.time.bu = {} ;
     var days = {{ days | safe }} ;
   var csrftoken = '{{ csrf_token }}';
   if(!jQuery.fn.jquery.startsWith("1")){

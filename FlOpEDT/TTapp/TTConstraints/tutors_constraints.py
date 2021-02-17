@@ -132,7 +132,12 @@ class MinimizeBusyDays(TTConstraint):
         if ponderation is None:
             ponderation = ttmodel.min_bd_i
 
-        for tutor in self.tutors.all():
+        if self.tutors.exists():
+            tutors = set(t for t in ttmodel.wdb.instructors if t in self.tutors.all())
+        else:
+            tutors = set(ttmodel.wdb.instructors)
+
+        for tutor in tutors:
             slot_by_day_cost = 0
             # need to be sorted
             courses_hours = sum(c.type.duration
@@ -157,6 +162,8 @@ class MinimizeBusyDays(TTConstraint):
 
         if self.tutors.exists():
             details.update({'tutors': ', '.join([tutor.username for tutor in self.tutors.all()])})
+        else:
+            details.update({'tutors': 'All'})
 
         return view_model
 
@@ -181,10 +188,20 @@ class RespectBoundPerDay(TTConstraint):
         Minimize the number of busy days for tutor with cost
         (if it does not overcome the bound expressed in pref_hours_per_day)
         """
-        for tutor in self.tutors.all():
+        if self.tutors.exists():
+            tutors = set(t for t in ttmodel.wdb.instructors if t in self.tutors.all())
+        else:
+            tutors = set(ttmodel.wdb.instructors)
+
+        for tutor in tutors:
             for d in days_filter(ttmodel.wdb.days, week=week):
-                ttmodel.add_constraint(ttmodel.sum(ttmodel.IBS[tutor, sl] * sl.duration / 60
-                                                   for sl in slots_filter(ttmodel.wdb.availability_slots, day=d)),
+                ttmodel.add_constraint(ttmodel.sum(ttmodel.TTinstructors[sl, c, tutor] * sl.duration / 60
+                                                   for c in ttmodel.wdb.courses_for_tutor[tutor]
+                                                   for sl in slots_filter(ttmodel.wdb.compatible_slots[c], day=d)
+                                                   )
+                                       + sum(sc.course.type.duration
+                                             for sc in ttmodel.wdb.other_departments_scheduled_courses_for_tutor[tutor]
+                                             if sc.course.week == week and sc.day == d.day) / 60,
                                        '<=',
                                        tutor.max_hours_per_day,
                                        Constraint(constraint_type=ConstraintType.BOUND_HOURS_PER_DAY,
@@ -197,7 +214,8 @@ class RespectBoundPerDay(TTConstraint):
 
         if self.tutors.exists():
             details.update({'tutors': ', '.join([tutor.username for tutor in self.tutors.all()])})
-
+        else:
+            details.update({'tutors': 'All'})
         return view_model
 
     def one_line_description(self):

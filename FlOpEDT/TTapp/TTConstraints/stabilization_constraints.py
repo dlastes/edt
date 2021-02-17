@@ -88,18 +88,18 @@ class Stabilize(TTConstraint):
                     for g in c.groups.all():
                         if not sched_courses.filter(course__groups=g,
                                                     day=sl.day):
-                            ttmodel.obj += ponderation * ttmodel.TT[(sl, c)]
+                            ttmodel.add_to_generic_cost(ponderation * ttmodel.TT[(sl, c)], week=week)
                 for i in ttmodel.wdb.instructors:
                     for c in ttmodel.wdb.possible_courses[i] & ttmodel.wdb.compatible_courses[sl]:
                         if not sched_courses.filter(start_time__lt=sl.end_time,
                                                     start_time__gt=sl.start_time - F('course__type__duration'),
                                                     day=sl.day,
                                                     tutor=i):
-                            ttmodel.obj += ponderation * ttmodel.TTinstructors[(sl, c, i)]
+                            ttmodel.add_to_generic_cost(ponderation * ttmodel.TTinstructors[(sl, c, i)], week=week)
                             # nb_changements_I[c.tutor]+=ttmodel.TT[(sl,c)]
                         if not sched_courses.filter(tutor=i,
                                                     day=sl.day):
-                            ttmodel.obj += ponderation * ttmodel.TTinstructors[(sl, c, i)]
+                            ttmodel.add_to_generic_cost(ponderation * ttmodel.TTinstructors[(sl, c, i)], week=week)
                             # nb_changements_I[i]+=ttmodel.TT[(sl,c)]
 
         else:
@@ -115,8 +115,8 @@ class Stabilize(TTConstraint):
             #                        end_time=sched_c.end_time,
             #                        day=sched_c.day)
             #     if self.weight is not None:
-            #         ttmodel.obj -= self.local_weight() \
-            #                        * ponderation * ttmodel.TT[(chosen_slot, c)]
+            #         ttmodel.add_to_generic_cost(-self.local_weight() \
+            #                        * ponderation * ttmodel.TT[(chosen_slot, c)], week=week)
             #
             #     else:
             #         for slot in ttmodel.wdb.compatible_slots[c]:
@@ -143,3 +143,28 @@ class Stabilize(TTConstraint):
             text += ' du groupe ' + str(self.group)
         text += ': copie ' + str(self.work_copy)
         return text
+
+
+class StabilizationThroughWeeks(TTConstraint):
+    courses = models.ManyToManyField('base.Course')
+
+    def enrich_model(self, ttmodel, week, ponderation=1):
+        if week != ttmodel.weeks[0]:
+            return
+        ttmodel_courses_id = [c.id for c in ttmodel.wdb.courses]
+        courses = self.courses.filter(id__in=ttmodel_courses_id)
+        weeks = [c.week for c in courses.distinct('week')]
+        courses_data = [{'week': w, 'courses': courses.filter(week=w)} for w in weeks]
+        courses_data = [c for c in courses_data if len(c['courses']) != 0]
+        courses_data.sort(key=lambda c: len(c['courses']))
+        for i in range(len(courses_data)-1):
+            for sl0 in ttmodel.wdb.compatible_slots[courses_data[i]['courses'][0]]:
+                sl1 = ttmodel.find_same_course_slot_in_other_week(sl0, courses_data[i+1]['week'])
+                ttmodel.add_constraint(
+                    2 * ttmodel.sum(ttmodel.TT[sl0, c0] for c0 in courses_data[i]['courses'])
+                    - ttmodel.sum(ttmodel.TT[sl1, c1] for c1 in courses_data[i+1]['courses']),
+                    '<=',
+                    1, Constraint(constraint_type=ConstraintType.STABILIZE_THROUGH_WEEKS))
+
+    def one_line_description(self):
+        return "Stabilization through weeks"

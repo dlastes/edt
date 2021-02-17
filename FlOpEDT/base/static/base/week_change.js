@@ -72,6 +72,9 @@ function fetch_tutor_preferences() {
         fetch.pref_saved = true;
         if (ckbox["dis-mod"].cked) {
           create_dispos_user_data();
+          open_lunch() ;
+          go_edt(false);
+          create_pref_modes();
         }
 
         fetch_ended(false);
@@ -108,6 +111,41 @@ function translate_dispos_from_csv(d) {
 }
 
 
+// if there exist tutor preferences that would be cut 
+function open_lunch() {
+  let t = time_settings.time ;
+  if (Object.keys(t.bu).length > 0) {
+    return ;
+  }
+  let during_lunch = user.dispos.filter(function(d){
+    return !(d.start_time + d.duration <= t.lunch_break_start_time
+             || d.start_time >= t.lunch_break_finish_time) ;
+  });
+  if (during_lunch.length > 0) {
+    t.bu.lunch_break_finish_time = t.lunch_break_finish_time ;
+    t.lunch_break_finish_time = t.lunch_break_start_time ;
+  }
+  let min_start = t.day_start_time ;
+  user.dispos.forEach(function(d){
+    if (d.start_time < min_start) {
+      min_start = d.start_time ;
+    }
+  });
+  if (min_start < t.day_start_time) {
+    t.bu.day_start_time = t.day_start_time ;
+    t.day_start_time = min_start ;
+  }
+  let max_finish = t.day_finish_time ;
+  user.dispos.forEach(function(d){
+    if (d.start_time + d.duration > max_finish) {
+      max_finish = d.start_time + d.duration ;
+    }
+  });
+  if (max_finish > t.day_finish_time) {
+    t.bu.day_finish_time = t.day_finish_time ;
+    t.day_finish_time = max_finish ;
+  }
+}
 
 
 // fetch the moments where a tutor teaches in another departement
@@ -304,7 +342,7 @@ function create_dispos_user_data() {
     sort_preferences(dispos);
   }
 
-  week_days.forEach(function (day) {
+  week_days.day_list.forEach(function (day) {
     pref_list = dispos[user.name][day.ref];
     for (var k = 0; k < pref_list.length; k++) {
       d2p = {
@@ -317,7 +355,12 @@ function create_dispos_user_data() {
       user.dispos_bu.push(d2p);
       if (pref_list[k].value < 0) {
         if (!pref_only) {
-          pref_list[k].value = get_dispos_type(d2p).value;
+          let default_pref = get_dispos_type(d2p);
+          if (default_pref != null) {
+            pref_list[k].value = default_pref.value;
+          } else {
+            pref_list[k].value = 0 ;
+          }
         } else {
           pref_list[k].value = par_dispos.nmax;
         }
@@ -565,6 +608,8 @@ function fetch_cours() {
 
         week_days = new WeekDays(JSON.parse(req.getResponseHeader('days').replace(/'/g, '"')));
         days_header.mix.days = week_days;
+        days_header.fetch_physical_presence() ;
+
 
         tutors.pl = [];
         modules.pl = [];
@@ -674,7 +719,10 @@ function translate_cours_pl_from_csv(d, result) {
       room_type: d.room_type,
       color_bg: d.color_bg,
       color_txt: d.color_txt,
-      display: true
+      display: true,
+      id_visio: d.room==''?(d.id_visio==''?-1:+d.id_visio):-1,
+      comment: d.comment,
+      graded: (d.graded=='' || d.graded=='False' || d.graded=='false')?false:true
     });
   }
 }
@@ -981,6 +1029,7 @@ function fetch_room_preferences() {
       }
       show_loader(false);
       fetch.ongoing_un_rooms = false;
+      fetch_ended(false);
     },
     error: function (msg) {
       console.log("error");
@@ -1072,6 +1121,8 @@ function fetch_all(first, fetch_work_copies) {
   if (!fetch.course_saved) {
     fetch.ongoing_cours_pp = true;
     fetch.ongoing_cours_pl = true;
+    fetch.ongoing_bknews = true;
+    fetch_ongoing_colors = true;
   }
   if (!fetch.pref_saved &&
     (ckbox["dis-mod"].cked
@@ -1081,8 +1132,6 @@ function fetch_all(first, fetch_work_copies) {
   if (ckbox["edt-mod"].cked) {
     fetch.ongoing_un_rooms = true;
   }
-  fetch.ongoing_bknews = true;
-  fetch_ongoing_colors = true;
 
   fetch_version();
 

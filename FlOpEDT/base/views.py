@@ -40,13 +40,15 @@ from django.db.models import Sum
 from django.http import HttpResponse, Http404, JsonResponse, HttpRequest
 from django.template.response import TemplateResponse
 from django.urls import reverse
+from django.utils.translation import gettext as _
 from django.views.decorators.cache import cache_page
 from django.views.generic import RedirectView
 
 from FlOpEDT.decorators import dept_admin_required, tutor_required
 from FlOpEDT.settings.base import COSMO_MODE
 
-from people.models import Tutor, UserDepartmentSettings, User, NotificationsPreferences
+from people.models import Tutor, UserDepartmentSettings, User, \
+    NotificationsPreferences, UserPreferredLinks
 
 from displayweb.admin import BreakingNewsResource
 from displayweb.models import BreakingNews
@@ -55,14 +57,17 @@ from base.admin import CoursResource, DispoResource, VersionResource, \
     CoursPlaceResource, UnavailableRoomsResource, TutorCoursesResource, \
     CoursePreferenceResource, MultiDepartmentTutorResource, \
     SharedRoomsResource, RoomPreferenceResource, ModuleRessource, \
-    TutorRessource, ModuleDescriptionResource
+    TutorRessource, ModuleDescriptionResource, AllDispoResource, \
+    GroupPreferredLinksResource
 if COSMO_MODE:
     from base.admin import CoursPlaceResourceCosmo
-from base.forms import ContactForm, PerfectDayForm, ModuleDescriptionForm
+from base.forms import ContactForm, PerfectDayForm, ModuleDescriptionForm, \
+    EnrichedLinkForm
 from base.models import Course, UserPreference, ScheduledCourse, EdtVersion, \
     CourseModification, Day, Time, Room, RoomType, RoomSort, \
     Regen, RoomPreference, Department, TimeGeneralSettings, CoursePreference, \
-    TrainingProgramme, CourseType, Module, Group
+    TrainingProgramme, CourseType, Module, Group, EnrichedLink, \
+    ScheduledCourseAdditional, GroupPreferredLinks
 import base.queries as queries
 from base.weeks import *
 
@@ -382,7 +387,6 @@ def user_notifications_pref_changes(req, username=None, *args, **kwargs):
     return redirect('base:preferences', req.department)
 
 
-@dept_admin_required
 def aide(req, **kwargs):
     return TemplateResponse(req, 'base/aide.html')
 
@@ -607,6 +611,12 @@ def fetch_dispos(req, year, week, **kwargs):
 
     cache.set(cache_key, response)
     return response
+
+
+@dept_admin_required
+def fetch_all_dispos(req, **kwargs):
+    dataset = AllDispoResource().export(UserPreference.objects.all())
+    return HttpResponse(dataset.json, content_type='application/force-download')
 
 
 def fetch_course_default_week(req, train_prog, course_type, **kwargs):
@@ -1043,6 +1053,23 @@ def clean_change(year, week, old_version, change, work_copy=0, initiator=None, a
         ret['sched'].save()
         if work_copy == 0:
             ret['log'].save()
+
+    # outside the log for now
+    if change['id_visio'] > -1:
+        try:
+            new_visio = EnrichedLink.objects.get(id=change['id_visio'])
+            if apply:
+                additional, created = \
+                    ScheduledCourseAdditional.objects.get_or_create(
+                        scheduled_course = sched_course
+                        )
+                additional.link = new_visio
+                additional.save()
+        except EnrichedLink.DoesNotExist:
+            raise Exception( 
+                f"Problème : visio avec if {change['id_visio']} inconnue"
+            )
+
 
     return ret
 
@@ -1641,6 +1668,75 @@ def send_email_proposal(req, **kwargs):
 
 # </editor-fold desc="EMAILS">
 
+
+
+
+
+# <editor-fold desc="VISIO">
+# ---------
+# VISIO
+# ---------
+@tutor_required
+def visio_preference(req, tutor=None, id=None, **kwargs):
+    ack = ''
+    if tutor is None:
+        tutor = req.user.username
+    
+    if id is None:
+        instance = None
+    else:
+        try:
+            instance = EnrichedLink.objects.get(id=id)
+            if not req.user.has_department_perm(req.department, admin=True):
+                pref, created = UserPreferredLinks.objects\
+                                              .get_or_create(user=req.user)
+                if created or instance not in pref.links.all():
+                    instance = None
+                    ack = _('Not authorized. New link then.')
+        except EnrichedLink.DoesNotExist:
+            instance = None
+            ack = _('Unknown link. New link then.')
+
+    if req.method == 'POST':
+        form = EnrichedLinkForm(req.POST, instance=instance)
+        link = form.save()
+
+        try:
+            user = User.objects.get(username=tutor)
+            pref, created = UserPreferredLinks.objects\
+                                          .get_or_create(user=user)
+            if created or link not in pref.links.all():
+                pref.links.add(link) 
+                ack = _('Created') if instance is None else _('Modified')
+                ack += ': ' + str(link)
+        except User.DoesNotExist:
+            ack = _('Tutor does not exist')
+    
+    else:
+        form = EnrichedLinkForm(instance=instance)
+        
+
+    return TemplateResponse(req, 'base/visio.html',
+                            {'form': form,
+                             'ack': ack
+                            })
+
+def fetch_group_preferred_links(req, **kwargs):
+    pref = GroupPreferredLinks.objects\
+                         .select_related('group__train_prog__department')\
+                         .filter(group__train_prog__department=req.department)
+    dataset = GroupPreferredLinksResource().export(pref)
+    response = HttpResponse(dataset.csv,
+                            content_type='text/csv')
+    return response
+    
+
+# </editor-fold desc="VISIO">
+
+
+
+
+
 # <editor-fold desc="HELPERS">
 # ---------
 # HELPERS
@@ -1649,7 +1745,7 @@ def send_email_proposal(req, **kwargs):
 def module_description(req, module, **kwargs):
 
     if req.method == 'POST':
-        form = ModuleDescriptionForm(req.department, module, req.POST)
+        form = ModuleDescriptionForm(module, req.department, req.POST)
         if form.is_valid():
             description = form.cleaned_data['description']
             m = Module.objects.get(train_prog__department=req.department, abbrev=module)
@@ -1657,9 +1753,9 @@ def module_description(req, module, **kwargs):
             m.save()
             return all_modules_with_desc(req)
         else:
-            form = ModuleDescriptionForm(module, req.POST)
+            form = ModuleDescriptionForm(module, req.department, req.POST)
     else:
-        form = ModuleDescriptionForm(module)
+        form = ModuleDescriptionForm(module, req.department)
     return TemplateResponse(req, 'base/module_description.html',
                             {'form': form,
                              'req': req,

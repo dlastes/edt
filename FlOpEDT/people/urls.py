@@ -112,9 +112,18 @@ urlpatterns = [
     url(r'^fetch_preferences_students/$',
         views.fetch_preferences_students,
         name="fetch_preferences_students"),
+    path('fetch_user_preferred_links/<str:department>',
+         views.fetch_user_preferred_links,
+         name='fetch_user_preferred_links'),
     url(r'^student_preferences/$',
         views.student_preferences,
         name="student_preferences"),
     path('create-user', views.create_user, name="create_user"),
     path('profile/', RedirectView.as_view(pattern_name="index", permanent=False)),
+    path('fetch_physical_presence/<str:department>/<int:year>/<int:week>',
+         views.fetch_physical_presence,
+         name='fetch_physical_presence'),
+    path('change_physical_presence/<int:year>/<int:week>/<str:user>',
+         views.change_physical_presence,
+         name='change_physical_presence')
     ]

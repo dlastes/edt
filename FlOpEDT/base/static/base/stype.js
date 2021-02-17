@@ -59,7 +59,7 @@ var dd_selections = {
 
 
 
-smiley.tete = 13;
+smiley.tete = 8;
 
 dim_dispo.width = 80;
 dim_dispo.height = 500;
@@ -74,6 +74,7 @@ pref_selection.choice.h = 35;
 ckbox["dis-mod"].cked = true;
 
 pref_only = true;
+var pref_fetched = false ;
 
 svg = new Svg(dsp_svg.layout_tree, false);
 svg.create_container(true);
@@ -102,7 +103,9 @@ hard_bind(days_header.mix);
 
 var hours_header = new HourHeader(svg, "edt-fg", hours);
 
+var labgp = {width: 0};
 
+hours_header.create_indicator();
 
 go_days(true, false);
 create_pref_modes(pref_only);
@@ -214,6 +217,8 @@ function fetch_pref_only() {
       user.dispos_type = [];
       user.dispos_type = d3.csvParse(msg, translate_pref_from_csv);
       create_dispos_user_data();
+      pref_fetched = true ;
+      arrange_stype_layout() ;
       go_pref(true);
       show_loader(false);
     },
@@ -230,6 +235,31 @@ function fetch_pref_only() {
 }
 
 
+function arrange_stype_layout() {
+  open_lunch() ;
+  hours_header.update() ;
+  svg.get_dom('pmg').attr("transform", "translate(" + pmg_x() + ", 0)") ;
+  let max_time = time_settings.time.day_finish_time ;
+  user.dispos.forEach(function(d) {
+    let end = d.start_time + d.duration ;
+    if (end > max_time) {
+      max_time = end ;
+    }
+  });
+  d3.select("#edt-main")
+    .attr(
+      "height",
+      dispo_y({start_time: max_time}) + dsp_svg.margin.bot + dsp_svg.margin.top
+    )
+    .attr(
+      "width",
+      dsp_svg.margin.left
+        + pmg_x()
+        + pref_mode_choice_trans_x()
+        + pref_selection.choice.w
+        + pref_selection.marx
+    );
+}
 
 
 

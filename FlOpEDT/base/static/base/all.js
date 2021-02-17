@@ -115,7 +115,10 @@ wdw_weeks.add_full_weeks(week_year_list);
 var week_banner = new WeekBanner(svg, "wg", "wg-fg", "wg-bg", wdw_weeks, dsp_weeks);
 week_banner.spawn();
 
-var days_header = new WeekDayHeader(svg, "edt-fg", week_days, true, null);
+var days_header = new WeekDayHeader(
+  svg, "edt-fg", week_days, true, null,
+  url_fetch_physical_presence, url_change_physical_presence
+);
 
 var hours_header = new HourHeader(svg, "edt-fg", hours);
 
@@ -171,6 +174,28 @@ file_fetch.groups.callback = function () {
 
   fetch.groups_ok = true;
   create_grid_data();
+
+  if (nbRows > 1) {
+    hours_header.hours.clear() ;
+    hours_header.hours.add_times(Object.keys(rev_constraints));
+    hours_header.hours.add_times(
+      Object.keys(rev_constraints).map(function(r){
+        return +r + rev_constraints[r];
+      }));
+    let t = time_settings.time ;
+    hours_header.hours.add_times([
+      t.day_start_time,
+      t.lunch_break_start_time,
+      t.lunch_break_finish_time,
+      t.day_finish_time
+    ]);
+  }
+
+  //need set_promos
+  fetch_lunch_constraints();
+
+  //need nbRows
+  hours_header.create_indicator();
 };
 
 
@@ -200,6 +225,7 @@ create_selections();
 
 fetch_dispos_type();
 
+fetch_preferred_links();
 
 
 d3.json(rooms_fi,

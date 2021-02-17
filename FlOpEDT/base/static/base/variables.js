@@ -132,6 +132,7 @@ file_fetch.rooms.callback = function () {
   room_names = Object.keys(rooms.roomgroups).filter(function(k){
     return rooms.roomgroups[k].length == 1 ;
   });
+  room_names.sort(function comp(a, b) { return a.localeCompare(b) ; }) ;
   swap_data(room_names, rooms_sel, "room");
 };
 
@@ -172,7 +173,7 @@ file_fetch.department.callback = function () {
 var slot_case = false; //true ;
 
 // current number of rows
-var nbRows;
+var nbRows = 1;
 // last positive number of rows (when filtering by group)
 var pos_nbRows = 0;
 
@@ -243,7 +244,7 @@ var par_dispos = {
 
 // parameters for the smileys
 var smiley = {
-  tete: 10,
+  tete: 5,
   oeil_x: .35,
   oeil_y: -.35,
   oeil_max: .08,
@@ -252,6 +253,13 @@ var smiley = {
   bouche_haut_y: -.1,
   bouche_bas_y: .6,
   sourcil: .4,
+  headphone: {
+    ear: .5,
+    top: 1.02,
+    mouth_y: .2,
+    mouth_w: 1,
+    mouth_h: .4
+  },
   init_x: 0,
   init_y: -180,
   max_r: 1,
@@ -662,6 +670,9 @@ var side_courses = [];
 var dragListener;
 var drag_popup;
 
+var cur_over = null;
+var slots_over = null;
+
 // helper for the d&d
 var drag = {
   sel: [],
@@ -771,7 +782,9 @@ var ack = {
   predefined: {
     KO: "C'est un échec cuisant. Trouvez un·e responsable d'emploi du temps et faites-lui part de vos problèmes.",
     OK: "La modification s'est déroulée sans accroc."
-  }
+  },
+  list: [],
+  ongoing: []
 };
 
 
@@ -890,6 +903,30 @@ var tutor_cm_settings =
   ncol: 3,
   nlin: 4,
   txt_intro: { 'default': "Ordre alphabétique :" }
+};
+var pref_links_cm_settings =
+{
+  type: 'preferred_links',
+  w: 200,
+  h: 18,
+  fs: 10,
+  mx: 5,
+  my: 3,
+  ncol: 1,
+  nlin: 0,
+  txt_intro: { 'default': "Quel lien pour la visio ?" }
+};
+var pref_link_types_cm_settings =
+{
+  type: 'preferred_link_types',
+  w: 120,
+  h: 18,
+  fs: 10,
+  mx: 5,
+  my: 3,
+  ncol: 1,
+  nlin: 0,
+  txt_intro: { 'default': "Relatif à qui ?" }
 };
 // rooms
 // level=0: the proposed rooms are available and of the same type
@@ -1013,3 +1050,13 @@ var tutors_info = {};
 // cosmo mode: tutor_username -> {color_bg: color, color_txt: color}
 // tutor mode: module_abbrev -> {color_bg: color, color_txt: color}
 var colors = {} ;
+
+
+var lunch_constraint = {} ;
+lunch_constraint['groups'] = {};
+lunch_constraint['tutors'] = {};
+
+var preferred_links = {users: {}, groups: {}};
+var links_by_id = {};
+
+var nb_detailed_infos ;

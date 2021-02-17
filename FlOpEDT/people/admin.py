@@ -1,17 +1,40 @@
 # -*- coding: utf-8 -*-
 
+# This file is part of the FlOpEDT/FlOpScheduler project.
+# Copyright (c) 2017
+# Authors: Iulian Ober, Paul Renaud-Goud, Pablo Seban, et al.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public
+# License along with this program. If not, see
+# <http://www.gnu.org/licenses/>.
+#
+# You can be released from the requirements of the license by purchasing
+# a commercial license. Buying such a license is mandatory as soon as
+# you develop activities involving the FlOpEDT/FlOpScheduler software
+# without disclosing the source code of your own applications.
+
 
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from import_export.widgets import ForeignKeyWidget
+from import_export.widgets import ForeignKeyWidget, ManyToManyWidget
 from import_export import resources, fields
 
 from base.admin import DepartmentModelAdminMixin
 
-from people.models import User, Tutor, FullStaff, SupplyStaff, BIATOS, Student
-from people.models import UserDepartmentSettings
-from people.models import StudentPreferences, GroupPreferences
+from people.models import User, Tutor, FullStaff, SupplyStaff, BIATOS, Student,\
+    UserDepartmentSettings, StudentPreferences, GroupPreferences, UserPreferredLinks,\
+    PhysicalPresence
 
 
 
@@ -113,8 +136,38 @@ class GroupPreferencesResource(resources.ModelResource):
                   "free_half_day_weight")
 
 
+class UserPreferredLinksResource(resources.ModelResource):
+    links = fields.Field(column_name='links',
+                         attribute='links',
+                         widget=ManyToManyWidget('base.Enrichedlink',
+                                                 field='concatenated',
+                                                 separator='|'))
+    user = fields.Field(column_name='user',
+                        attribute='user',
+                        widget=ForeignKeyWidget('people.User', 'username'))
+    class Meta:
+        model = UserPreferredLinks
+        fields = ('user', 'links')
+
+
+class UserPreferredLinksAdmin(admin.ModelAdmin):
+    pass
+
+
+class PhysicalPresenceResource(resources.ModelResource):
+    user = fields.Field(column_name='user',
+                        attribute='user',
+                        widget=ForeignKeyWidget('people.User', 'username'))
+
+    class Meta:
+        model = PhysicalPresence
+        fields = ('user', 'day', 'week', 'year')
+    
+
+
 admin.site.register(FullStaff, UserModelAdmin)
 admin.site.register(SupplyStaff, UserModelAdmin)
 admin.site.register(BIATOS, UserModelAdmin)
 admin.site.register(Student, UserModelAdmin)
 admin.site.register(User, UserModelAdmin)
+admin.site.register(UserPreferredLinks, UserPreferredLinksAdmin)

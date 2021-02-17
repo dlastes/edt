@@ -27,6 +27,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from base.models import Department
+from base.timing import Day
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 # Create your models here.
 
@@ -229,13 +231,13 @@ class Preferences(models.Model):
 
 class StudentPreferences(Preferences):
     student = models.OneToOneField('people.Student',
-                                   related_name='studentPreferences',
+                                   related_name='preferences',
                                    on_delete=models.CASCADE)
 
 
 class GroupPreferences(Preferences):
     group = models.OneToOneField('base.Group',
-                                 related_name='groupPreferences',
+                                 related_name='preferences',
                                  on_delete=models.CASCADE)
 
     def calculate_fields(self):
@@ -248,8 +250,8 @@ class GroupPreferences(Preferences):
         local_free_half_day_weight = 0
         nb_student_prefs = len(students_preferences)
         if nb_student_prefs == 0:
-            self.morning_weight = 1
-            self.free_half_day_weight = 1
+            self.morning_weight = 0.5
+            self.free_half_day_weight = 0.5
 
         else:
             # To range the table
@@ -260,8 +262,33 @@ class GroupPreferences(Preferences):
             # To calculate the average of each attributs
             self.morning_weight = local_morning_weight/nb_student_prefs
             self.free_half_day_weight = local_free_half_day_weight/nb_student_prefs
+            self.save()
 
 
 class NotificationsPreferences(models.Model):
-    user = models.OneToOneField('User', on_delete=models.CASCADE, related_name='notifications_preference')
+    user = models.OneToOneField('User',
+                                on_delete=models.CASCADE,
+                                related_name='notifications_preference')
     nb_of_notified_weeks = models.PositiveSmallIntegerField(default=0)
+
+
+class UserPreferredLinks(models.Model):
+    user = models.OneToOneField('User',
+                                on_delete=models.CASCADE,
+                                related_name='preferred_links')
+    links = models.ManyToManyField('base.EnrichedLink',
+                                   related_name='user_set')
+
+    def __str__(self):
+        return self.user.username + ' : ' + \
+            ' ; '.join([str(l) for l in self.links.all()])
+
+
+class PhysicalPresence(models.Model):
+    user = models.ForeignKey('people.User', on_delete=models.CASCADE, related_name='physical_presences')
+    day = models.CharField(max_length=2, choices=Day.CHOICES, default=Day.MONDAY)
+    week = models.PositiveSmallIntegerField(validators=[MinValueValidator(0), MaxValueValidator(53)])
+    year = models.PositiveSmallIntegerField()
+
+    def __str__(self):
+        return f"{self.user.username} is present {self.day} of week {self.week}-{self.year}"

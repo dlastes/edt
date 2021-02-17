@@ -31,20 +31,20 @@ from pulp import LpVariable, LpConstraint, LpBinary, LpConstraintEQ, \
 import pulp
 from pulp import GUROBI_CMD
 
-from FlOpEDT.settings.base import COSMO_MODE
+from django.conf import settings
 
 from base.models import Group, \
     Room, RoomSort, RoomType, RoomPreference, \
     Course, ScheduledCourse, UserPreference, CoursePreference, \
     Department, Module, TrainingProgramme, CourseType, \
     Dependency, TutorCost, GroupFreeHalfDay, GroupCost, Holiday, TrainingHalfDay, \
-    CourseStartTimeConstraint, TimeGeneralSettings, ModulePossibleTutors, CoursePossibleTutors
+    CourseStartTimeConstraint, TimeGeneralSettings, ModulePossibleTutors, CoursePossibleTutors, CourseAdditional
 
 from base.timing import Time, Day
 
 import base.queries as queries
 
-from people.models import Tutor
+from people.models import Tutor, PhysicalPresence
 
 
 from TTapp.slots import Slot, CourseSlot, slots_filter, days_filter
@@ -71,22 +71,26 @@ class WeeksDatabase(object):
         self.slots_step = slots_step
         self.possible_apms=set()
         self.days, self.day_after, self.holidays, self.training_half_days = self.days_init()
-        self.courses_slots, self.availability_slots = self.slots_init()
+        self.courses_slots, self.availability_slots, \
+            self.first_hour_slots, self.last_hour_slots = self.slots_init()
         self.course_types, self.courses, self.courses_by_week, \
-        self.sched_courses, self.fixed_courses, self.fixed_courses_for_avail_slot, \
-        self.other_departments_courses, self.other_departments_sched_courses, \
-        self.other_departments_sched_courses_for_avail_slot, \
-        self.courses_availabilities, self.modules, self.dependencies = self.courses_init()
+            self.sched_courses, self.fixed_courses, self.fixed_courses_for_avail_slot, \
+            self.other_departments_courses, self.other_departments_sched_courses, \
+            self.other_departments_sched_courses_for_avail_slot, \
+            self.courses_availabilities, self.modules, self.dependencies = self.courses_init()
+        if settings.VISIO_MODE:
+            self.visio_courses, self.no_visio_courses, self.visio_ponderation = self.visio_init()
         self.room_types, self.rooms, self.basic_rooms, self.room_prefs, self.rooms_for_type, \
-        self.room_course_compat, self.course_rg_compat, self.fixed_courses_for_room, \
-        self.other_departments_sched_courses_for_room = self.rooms_init()
+            self.room_course_compat, self.course_rg_compat, self.fixed_courses_for_room, \
+            self.other_departments_sched_courses_for_room = self.rooms_init()
         self.compatible_slots, self.compatible_courses = self.compatibilities_init()
         self.groups, self.basic_groups, self.all_groups_of, self.basic_groups_of, self.courses_for_group, \
-        self.courses_for_basic_group = self.groups_init()
+            self.courses_for_basic_group = self.groups_init()
         self.instructors, self.courses_for_tutor, self.courses_for_supp_tutor, self.availabilities, \
-        self.fixed_courses_for_tutor, \
-        self.other_departments_courses_for_tutor, self.other_departments_scheduled_courses_for_supp_tutor, \
-        self.other_departments_scheduled_courses_for_tutor = self.users_init()
+            self.fixed_courses_for_tutor, \
+            self.other_departments_courses_for_tutor, self.other_departments_scheduled_courses_for_supp_tutor, \
+            self.other_departments_scheduled_courses_for_tutor, \
+            self.physical_presence_days_for_tutor = self.users_init()
         self.possible_tutors, self.possible_modules, self.possible_courses = self.possible_courses_tutor_init()
 
     def days_init(self):
@@ -123,10 +127,11 @@ class WeeksDatabase(object):
         courses_slots = set()
         for cc in CourseStartTimeConstraint.objects.filter(Q(course_type__department=self.department)
                                                            | Q(course_type=None)):
+            start_times = cc.allowed_start_times
             if self.slots_step is None:
                 courses_slots |= set(CourseSlot(d, start_time, cc.course_type)
                              for d in self.days
-                             for start_time in cc.allowed_start_times)
+                             for start_time in start_times)
             else:
                 courses_slots |= set(CourseSlot(d, start_time, cc.course_type)
                                      for d in self.days
@@ -155,7 +160,11 @@ class WeeksDatabase(object):
                               for i in range(len(start_times))}
         print('Ok' + f' : {len(courses_slots)} courses_slots and {len(availability_slots)} availability_slots created!')
 
-        return courses_slots, availability_slots
+        first_hour_slots = {slot for slot in availability_slots if slot.start_time < start_times[0] + 60}
+
+        last_hour_slots = {slot for slot in availability_slots if slot.end_time > end_times[-1] - 60}
+
+        return courses_slots, availability_slots, first_hour_slots, last_hour_slots
 
     def courses_init(self):
         # COURSES
@@ -183,10 +192,7 @@ class WeeksDatabase(object):
         fixed_courses_for_avail_slot = {}
         for sl in self.availability_slots:
             fixed_courses_for_avail_slot[sl] = set(fc for fc in fixed_courses
-                                                   if fc.start_time < sl.end_time
-                                                   and sl.start_time < fc.end_time
-                                                   and fc.day == sl.day.day
-                                                   and fc.course.week == sl.day.week)
+                                                   if sl.is_simultaneous_to(fc))
 
         other_departments_courses = Course.objects.filter(
             week__in=self.weeks, year=self.year) \
@@ -234,20 +240,24 @@ class WeeksDatabase(object):
         for r in basic_rooms:
             rooms |= r.and_overrooms()
 
-        # for each Room, first build the list of courses that may use it
+        course_rg_compat = {}
+        for c in self.courses:
+            course_rg_compat[c] = set(c.room_type.members.all())
+
+        # for each Room, build the list of courses that may use it
         room_course_compat = {}
         for r in basic_rooms:
             # print "compat for ", r
             room_course_compat[r] = []
             for rg in r.and_overrooms():
                 room_course_compat[r].extend(
-                    [(c, rg) for c in
-                     self.courses.filter(room_type__in=rg.types.all())])
-
-        course_rg_compat = {}
-        for c in self.courses:
-            course_rg_compat[c] = c.room_type.members.all()
-
+                    [(c, rg) for c in self.courses if rg in course_rg_compat[c]])
+                     # self.courses.filter(room_type__in=rg.types.all())])
+        if settings.VISIO_MODE:
+            # All courses can have no room (except no-visio ones?)
+            for c in set(self.courses):
+                # if c not in self.no_visio_courses:
+                course_rg_compat[c].add(None)
         fixed_courses_for_room = {}
         for r in basic_rooms:
             fixed_courses_for_room[r] = set()
@@ -267,7 +277,7 @@ class WeeksDatabase(object):
         # COMPATIBILITY
         # Slots and courses are compatible if they have the same type
         # OR if slot type is None and they have the same duration
-        if not COSMO_MODE:
+        if not settings.COSMO_MODE:
             compatible_slots = {}
             for c in self.courses:
                 compatible_slots[c] = set(slot for slot in self.courses_slots
@@ -379,7 +389,7 @@ class WeeksDatabase(object):
 
         fixed_courses_for_tutor = {}
         for i in instructors:
-            fixed_courses_for_tutor[i] = set(self.fixed_courses.filter(tutor=i))
+            fixed_courses_for_tutor[i] = set(self.fixed_courses.filter(Q(tutor=i) | Q(course__supp_tutor=i)))
 
         other_departments_courses_for_tutor = {}
         for i in instructors:
@@ -395,10 +405,20 @@ class WeeksDatabase(object):
             other_departments_scheduled_courses_for_tutor[i] = set(self.other_departments_sched_courses
                                                                    .filter(course__tutor=i))
 
+        physical_presence_days_for_tutor = {}
+        for i in instructors:
+            physical_presence_days_for_tutor[i] = {}
+            for w in self.weeks:
+                physical_presence_days_for_tutor[i][w] = []
+                if PhysicalPresence.objects.filter(user=i, week=w, year=self.year).exists():
+                    for pp in i.physical_presences.filter(week=w, year=self.year):
+                        physical_presence_days_for_tutor[i][w].append(pp.day)
+
         return instructors, courses_for_tutor, courses_for_supp_tutor, availabilities, \
-               fixed_courses_for_tutor, other_departments_courses_for_tutor, \
-               other_departments_scheduled_courses_for_supp_tutor, \
-               other_departments_scheduled_courses_for_tutor
+            fixed_courses_for_tutor, other_departments_courses_for_tutor, \
+            other_departments_scheduled_courses_for_supp_tutor, \
+            other_departments_scheduled_courses_for_tutor, \
+            physical_presence_days_for_tutor
 
     def possible_courses_tutor_init(self):
         possible_tutors = {}
@@ -436,3 +456,20 @@ class WeeksDatabase(object):
             possible_courses[i] = set(c for c in self.courses if i in possible_tutors[c])
 
         return possible_tutors, possible_modules, possible_courses
+
+    def visio_init(self):
+
+        visio_courses = set()
+        no_visio_courses = set()
+        visio_ponderation = {c: 1 for c in self.courses}
+
+        for course_additional in CourseAdditional.objects.filter(course__in=self.courses):
+            vp = course_additional.visio_preference_value
+            if vp == 0:
+                no_visio_courses.add(course_additional.course)
+            elif vp == 8:
+                visio_courses.add(course_additional.course)
+            else:
+                visio_ponderation[course_additional.course] = vp / 4
+
+        return visio_courses, no_visio_courses, visio_ponderation

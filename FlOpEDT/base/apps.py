@@ -26,5 +26,8 @@
 from django.apps import AppConfig
 
 
-class ModifConfig(AppConfig):
+class BaseConfig(AppConfig):
     name = 'base'
+
+    def ready(self):
+        import base.signals

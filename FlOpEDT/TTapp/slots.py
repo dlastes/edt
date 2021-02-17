@@ -24,6 +24,7 @@
 # without disclosing the source code of your own applications.
 from base.models import TimeGeneralSettings
 from base.timing import Time, days_index
+from base.models import ScheduledCourse
 
 slot_pause = 30
 
@@ -54,22 +55,38 @@ class Slot:
         return f"{self.day} de {self.start_time//60}h{self.start_time%60 if self.start_time%60!=0 else ''} " \
                f"à {self.end_time//60}h{self.end_time%60 if self.end_time%60!=0 else ''} "
 
+    def has_same_day(self, other):
+        if type(other) in [Slot, CourseSlot]:
+            return self.day == other.day
+        elif type(other) == ScheduledCourse:
+            return self.day.week == other.course.week and self.day.day == other.day
+        else:
+            raise TypeError("A slot can only have same day than a ScheduledCourse or another slot")
+
+    def has_previous_day_than(self, other):
+        if type(other) == type(self):
+            return self.day.week > other.day.week \
+                or self.day.week == other.day.week and days_index[self.day.day] > days_index[other.day.day]
+        elif type(other) == ScheduledCourse:
+            return self.day.week > other.course.week \
+                or self.day.week == other.course.week and days_index[self.day.day] > days_index[other.day]
+        else:
+            raise TypeError("A slot can only have previous day than a ScheduledCourse or another slot")
+
     def is_simultaneous_to(self, other):
-        if self.day == other.day and self.start_time < other.end_time and other.start_time < self.end_time:
+        if self.has_same_day(other) and self.start_time < other.end_time and other.start_time < self.end_time:
             return True
         else:
             return False
 
     def is_after(self, other):
-        if self.day.week > other.day.week \
-                or self.day.week == other.day.week and days_index[self.day.day] > days_index[other.day.day] \
-                or self.day == other.day and self.start_time >= other.end_time:
+        if self.has_previous_day_than(other) or self.has_same_day(other) and self.start_time >= other.end_time:
             return True
         else:
             return False
 
     def is_successor_of(self, other):
-        if self.day == other.day and other.end_time <= self.start_time <= other.end_time + slot_pause:
+        if self.has_same_day(other) and other.end_time <= self.start_time <= other.end_time + slot_pause:
             return True
         else:
             return False
@@ -83,6 +100,9 @@ class Slot:
     def get_day(self):
         return self.day
 
+    def same_through_weeks(self, other):
+        return self.day.day == other.day.day and self.start_time == other.start_time and self.end_time == other.end_time
+
 
 class CourseSlot(Slot):
     def __init__(self, day, start_time, course_type=None):
@@ -92,6 +112,10 @@ class CourseSlot(Slot):
             duration = basic_slot_duration
         Slot.__init__(self, day, start_time, start_time+duration)
         self.course_type = course_type
+
+    def same_through_weeks(self, other):
+        return self.day.day == other.day.day and self.start_time == other.start_time and self.course_type == other.course_type
+
 
     @property
     def duration(self):
@@ -123,7 +147,7 @@ class CourseSlot(Slot):
 
 def slots_filter(slot_set, day=None, apm=None, course_type=None, start_time=None, week_day=None,
                  simultaneous_to=None, week=None, is_after=None, starts_after=None, starts_before=None,
-                 ends_before=None, ends_after=None, day_in=None):
+                 ends_before=None, ends_after=None, day_in=None, same=None):
     slots = slot_set
     if week is not None:
         slots = set(sl for sl in slots if sl.day.week == week)
@@ -151,6 +175,8 @@ def slots_filter(slot_set, day=None, apm=None, course_type=None, start_time=None
         slots = set(sl for sl in slots if sl.end_time >= ends_after)
     if start_time is not None:
         slots = set(sl for sl in slots if sl.start_time == start_time)
+    if same is not None:
+        slots = set(sl for sl in slots if sl.same_through_weeks(same))
     return slots
 
 

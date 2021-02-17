@@ -30,39 +30,69 @@ from base.models import ScheduledCourse
 
 from TTapp.TTUtils import get_conflicts
 
+from TTapp.admin import GroupsLunchBreakResource
+from TTapp.TTConstraints.orsay_constraints import GroupsLunchBreak
+
 from MyFlOp import MyTTUtils
 
             
-def available_work_copies(req, dept, year, week):
+def available_work_copies(req, department, year, week):
     '''
     Send the content of the side panel.
     '''
-    copies = list(ScheduledCourse.objects.filter(course__year=year, course__week=week, course__type__department__abbrev=dept).distinct('work_copy').values_list('work_copy'))
+    copies = list(ScheduledCourse.objects.filter(course__year=year, course__week=week, course__type__department__abbrev=department).distinct('work_copy').values_list('work_copy'))
     copies = [n for (n,) in copies]
     copies.sort()
     return JsonResponse({'copies': copies})
 
 
-def check_swap(req, dept, year, week, work_copy):
+def check_swap(req, department, year, week, work_copy):
     '''
     Check whether the swap between scheduled courses with work copy
     work_copy and scheduled courses with work copy 0 is feasible
     against the scheduled courses in other departments
     '''
-    print(dept, week, year, work_copy)
-    return JsonResponse(get_conflicts(dept, week, year, work_copy))
+    print(department, week, year, work_copy)
+    return JsonResponse(get_conflicts(department, week, year, work_copy))
 
 
-def swap(req, dept, year, week, work_copy):
+def swap(req, department, year, week, work_copy):
     '''
     Swap scheduled courses with work copy work_copy
     against scheduled courses with work copy 0
     '''
-    return JsonResponse(MyTTUtils.swap_version(dept, week, year, work_copy))
+    return JsonResponse(MyTTUtils.swap_version(department, week, year, work_copy))
 
 
-def reassign_rooms(req, dept, year, week, work_copy):
+def delete_work_copy(req, department, year, week, work_copy):
+    '''
+    Delete scheduled courses with work copy work_copy
+    '''
+    return JsonResponse(MyTTUtils.delete_work_copy(department, week, year, work_copy), safe=False)
+
+
+def delete_all_unused_work_copies(req, department, year, week):
+    '''
+    Delete scheduled courses with work copy work_copy
+    '''
+    return JsonResponse(MyTTUtils.delete_all_unused_work_copies(department, week, year), safe=False)
+
+
+def duplicate_work_copy(req, department, year, week, work_copy):
+    '''
+    Duplicate scheduled courses with work copy work_copy in the first work_copy available
+    '''
+    return JsonResponse(MyTTUtils.duplicate_work_copy(department, week, year, work_copy), safe=False)
+
+
+def reassign_rooms(req, department, year, week, work_copy):
     '''
     Reassign rooms of scheduled courses with work copy work_copy
     '''
-    return JsonResponse(MyTTUtils.reassign_rooms(dept, week, year, work_copy))
+    return JsonResponse(MyTTUtils.reassign_rooms(department, week, year, work_copy))
+
+
+def fetch_group_lunch(req, **kwargs):
+    dataset = GroupsLunchBreakResource().export(
+        GroupsLunchBreak.objects.filter(department=req.department))
+    return HttpResponse(dataset.csv)

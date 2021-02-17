@@ -34,6 +34,8 @@ function Day(day = {
   var sp = day.date.split('/');
   this.day = +sp[0];
   this.month = +sp[1];
+  this.force_here = false;
+  this.init_force_here = false;
 }
 
 // maximum number of days in a month
@@ -79,6 +81,16 @@ WeekDays.prototype.day_by_num = function (num) {
   });
 };
 
+WeekDays.prototype.last_day = function () {
+  return this.day_by_num(
+    this.day_list.reduce(
+      function(a, b) {
+        return {num: Math.max(a.num, b.num)} ;
+      }
+    ).num
+  );
+};
+
 WeekDays.prototype.data = function () {
   return this.day_list;
 };
@@ -121,12 +133,27 @@ WeekDays.prototype.get_days_between = function(first_ref, last_ref) {
   });
 };
 
+WeekDays.prototype.get_changes_physical_presence = function() {
+  let changes = [] ;
+  this.forEach(function(d) {
+    if (d.init_force_here != d.force_here) {
+      changes.push({'day':d.ref, 'force_here':d.force_here});
+    }
+  });
+  return changes ;
+};
+
 
 // Name and date of the days above the grid
-function WeekDayHeader(svg, layout_name, days, half_day_rect, par) {
+function WeekDayHeader(
+  svg, layout_name, days, half_day_rect, par, fetch_physical_presence_base_url,
+  change_physical_presence
+) {
   this.layout = svg.get_dom(layout_name);
-  this.mix = new WeekDayMix(par, days);
+  this.mix = new WeekDayMix(par, days, this);
   this.half_day_rect = half_day_rect;
+  this.url_fetch_physical_presence = fetch_physical_presence_base_url ;
+  this.url_change_physical_presence = change_physical_presence ;
   hard_bind(this.mix);
 }
 
@@ -134,7 +161,7 @@ WeekDayHeader.prototype.data = function () {
   return this.mix.days.data();
 };
 
-WeekDayHeader.prototype.update = function (quick, half_day_rect) {
+WeekDayHeader.prototype.update = function (quick) {
   var t = get_transition(quick);
 
   var day_scale = this.layout
@@ -146,13 +173,16 @@ WeekDayHeader.prototype.update = function (quick, half_day_rect) {
     .enter()
     .append("g")
     .attr("class", "gridsckd");
+  
 
   day_sc_g
     .append("text")
     .attr("class", "txt_scl")
+    .on('click', this.mix.gsckd_click)
     .merge(day_scale.select(".txt_scl"))
     .transition(t)
     .text(this.mix.gsckd_txt)
+    .attr("fill", this.mix.gsckd_txt_color)
     .attr("x", this.mix.gsckd_x)
     .attr("y", this.mix.gsckd_y);
 
@@ -181,12 +211,94 @@ WeekDayHeader.prototype.update = function (quick, half_day_rect) {
   day_scale.exit().remove();
 };
 
+WeekDayHeader.prototype.fetch_physical_presence = function() {
+  var exp_week = wdw_weeks.get_selected();
+  // let mix = this.mix ;
+  // let url = ;
+  // let me = this ;
+
+  show_loader(true);
+  $.ajax({
+    type: "GET", //rest Type
+    dataType: 'text',
+    url: this.url_fetch_physical_presence + exp_week.url(),
+    async: true,
+    contentType: "text/csv",
+    context: this,
+    success: function (msg) {
+      var sel_week = wdw_weeks.get_selected();
+      if (Week.compare(exp_week, sel_week) == 0) {
+        d3.csvParse(msg,  function(pres) {
+          if (pres.user == user.name) {
+            days_header.mix.days.day_by_ref(pres.day).force_here = true ;
+            days_header.mix.days.day_by_ref(pres.day).init_force_here = true ;
+          }
+        });
+      }
+      this.update(true) ;
+      show_loader(false);
+    },
+    error: function (xhr, error) {
+      console.log("error");
+      console.log(xhr);
+      console.log(error);
+      console.log(xhr.responseText);
+      show_loader(false);
+    }
+  });
+
+};
+
+WeekDayHeader.prototype.send_change_physical_presence = function () {
+  let cur_week = wdw_weeks.get_selected();
+  let sent_data = {};
+  sent_data['changes'] = JSON.stringify(
+    this.mix.days.get_changes_physical_presence()
+  );
+  console.log(sent_data['changes']);
+  console.log(this.mix.days.get_changes_physical_presence());
+
+  show_loader(true);
+  $.ajax({
+    url: this.url_change_physical_presence + cur_week.url() + "/" + user.name,
+    type: 'POST',
+    data: sent_data,
+    dataType: 'json',
+    success: function (msg) {
+      console.log(msg);
+      ack.list.push({
+        'status': 'OK',
+        'more': ""
+      }) ;
+      ack.ongoing = ack.ongoing.filter(function(o){
+        return o != 'presence' ;
+      });
+      go_ack_msg();
+      show_loader(false);
+    },
+    error: function (msg) {
+      aaaa = msg;
+      ack.list.push({
+        'status': 'KO',
+        'more': ""
+      }) ;
+      ack.ongoing = ack.ongoing.filter(function(o){
+        return o != 'presence' ;
+      });
+      go_ack_msg();
+      show_loader(false);
+    }
+  });
+} ;
+
+
 
 // Private class
 // Display parameters and functions
-function WeekDayMix(par, days) {
+function WeekDayMix(par, days, header) {
   Object.assign(this, par);
   this.days = days;
+  this.header = header ;
 
   // put it here, even if it's not useful for now
   this.gsckd_x = function (d, i) {
@@ -200,6 +312,15 @@ function WeekDayMix(par, days) {
   this.gsckd_txt = function (d) {
     return d.name + " " + d.date;
   };
+  this.gsckd_txt_color = function(d) {
+    return d.force_here?'green':'darkslateblue';
+  };
+  this.gsckd_click = function(d) {
+    if (ckbox['dis-mod'].cked) {
+      d.force_here = !d.force_here ;
+      this.header.update(true);
+    }
+  } ;
   this.grid_day_am_x = function (d) {
     return d.num * (rootgp_width * labgp.width +
       dim_dispo.plot * (dim_dispo.width + dim_dispo.right));

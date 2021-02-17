@@ -151,6 +151,89 @@ function check_swap_with_copy_0() {
   });
 }
 
+// delete work_copy and reload
+function delete_work_copy() {
+  var cur_week = wdw_weeks.get_selected();
+  let ok = true;
+
+  if (num_copie==0){
+    ok = confirm("Êtes-vous sûr de vouloir supprimer la copie visible?")
+  }
+
+  if (ok){
+    show_loader(true);
+    $.ajax({
+      type: "GET",
+      dataType: 'json',
+      url: url_delete_work_copy + cur_week.url() + '/' + num_copie,
+      async: true,
+      success: function (msg) {
+        format_acks(msg, 'delete');
+        fetch_all(false, true);
+        show_loader(false);
+      },
+      error: function (msg) {
+        ack_side_panel['delete'].txt = 'Problème côté serveur';
+        console.log("error");
+        show_loader(false);
+      }
+    });
+  }
+}
+
+// duplicate work_copy and reload
+function duplicate_work_copy() {
+  var cur_week = wdw_weeks.get_selected();
+  let ok = true;
+
+  if (ok){
+    show_loader(true);
+    $.ajax({
+      type: "GET",
+      dataType: 'json',
+      url: url_duplicate_work_copy + cur_week.url() + '/' + num_copie,
+      async: true,
+      success: function (msg) {
+        format_acks(msg, 'duplicate');
+        fetch_all(false, true);
+        show_loader(false);
+      },
+      error: function (msg) {
+        ack_side_panel['duplicate'].txt = 'Problème côté serveur';
+        console.log("error");
+        show_loader(false);
+      }
+    });
+  }
+}
+
+// delete all unused work_copies and reload
+function delete_all_unused_work_copies() {
+  var cur_week = wdw_weeks.get_selected();
+  let ok = true;
+  ok = confirm("Êtes-vous sûr de vouloir supprimer toutes les copies sauf la 0?");
+
+  if (ok){
+    show_loader(true);
+    $.ajax({
+      type: "GET",
+      dataType: 'json',
+      url: url_delete_all_unused_work_copies + cur_week.url(),
+      async: true,
+      success: function (msg) {
+        format_acks(msg, 'delete_all_unused');
+        fetch_all(false, true);
+        show_loader(false);
+      },
+      error: function (msg) {
+        ack_side_panel['delete_all_unused'].txt = 'Problème côté serveur';
+        console.log("error");
+        show_loader(false);
+      }
+    });
+  }
+}
+
 
 // reassign rooms and reload
 function reassign_rooms() {
@@ -178,7 +261,10 @@ function reassign_rooms() {
 
 var ack_side_panel = {
   'swap': { id: 'swap' },
-  'check-swap': { id: 'check-swap' }
+  'check-swap': { id: 'check-swap' },
+  'delete':{id:'delete'},
+  'delete_all_unused':{id: 'delete_all_unused'},
+  'duplicate': {id: 'duplicate'}
 };
 for (key in ack_side_panel) {
   ack_side_panel[key].id = '#ack-' + ack_side_panel[key].id;

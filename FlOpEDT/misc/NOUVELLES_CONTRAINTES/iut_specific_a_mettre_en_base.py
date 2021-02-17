@@ -26,8 +26,8 @@
 # without disclosing the source code of your own applications.
 
 
-from TTapp.models import LimitCourseTypeTimePerPeriod, LimitModulesCourseTypeTimePerPeriod, \
-    LimitGroupsCourseTypeTimePerPeriod,\
+from TTapp.models import LimitTimePerPeriod, LimitModulesTimePerPeriod, \
+    LimitGroupsTimePerPeriod,\
     MinGroupsHalfDays, MinTutorsHalfDays, MinModulesHalfDays,\
     max_weight
 from base.models import TrainingProgramme, CourseType, Module, Department, Group
@@ -61,19 +61,19 @@ def add_common_constraints():
 
         pas_plus_de_2_exams_par_jour = True
         if pas_plus_de_2_exams_par_jour:
-            L, created = LimitGroupsCourseTypeTimePerPeriod.objects.get_or_create(max_hours=3,
-                                                   course_type=DS,
-                                                   period=LimitCourseTypeTimePerPeriod.FULL_DAY,
-                                                   department=department)
+            L, created = LimitGroupsTimePerPeriod.objects.get_or_create(max_hours=3,
+                                                                        course_type=DS,
+                                                                        period=LimitTimePerPeriod.FULL_DAY,
+                                                                        department=department)
             L.save()
 
         pas_plus_de_2_amphis_par_demi_journee = True
 
         if pas_plus_de_2_amphis_par_demi_journee:
-            L, created = LimitGroupsCourseTypeTimePerPeriod.objects.get_or_create(max_hours=3,
-                                             course_type=CM,
-                                             period=LimitCourseTypeTimePerPeriod.HALF_DAY,
-                                             department=department)
+            L, created = LimitGroupsTimePerPeriod.objects.get_or_create(max_hours=3,
+                                                                        course_type=CM,
+                                                                        period=LimitTimePerPeriod.HALF_DAY,
+                                                                        department=department)
             L.save()
 
         # Pas plus d'un amphi par matière et par jour
@@ -81,10 +81,10 @@ def add_common_constraints():
         if abbrev in ['RT', 'CS', 'GIM']:
             un_amphi_par_matiere_par_jour = False
         if un_amphi_par_matiere_par_jour:
-            L, created = LimitModulesCourseTypeTimePerPeriod.objects.get_or_create(max_hours=2,
-                                             course_type=CM,
-                                             period=LimitCourseTypeTimePerPeriod.FULL_DAY,
-                                             department=department)
+            L, created = LimitModulesTimePerPeriod.objects.get_or_create(max_hours=2,
+                                                                         course_type=CM,
+                                                                         period=LimitTimePerPeriod.FULL_DAY,
+                                                                         department=department)
             L.save()
 
         # Pas plus de 1 examens par demi-journée !
@@ -92,10 +92,10 @@ def add_common_constraints():
         if abbrev in ['INFO', 'CS', 'GIM']:
             pas_plus_de_1_exam_par_demie_journee = False
         if pas_plus_de_1_exam_par_demie_journee:
-            L, created = LimitGroupsCourseTypeTimePerPeriod.objects.get_or_create(max_hours=2,
-                                             course_type=DS,
-                                             period=LimitCourseTypeTimePerPeriod.HALF_DAY,
-                                             department=department)
+            L, created = LimitGroupsTimePerPeriod.objects.get_or_create(max_hours=2,
+                                                                        course_type=DS,
+                                                                        period=LimitTimePerPeriod.HALF_DAY,
+                                                                        department=department)
             L.save()
 
 def add_info_constraints():

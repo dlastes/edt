@@ -26,16 +26,20 @@
 # without disclosing the source code of your own applications.
 
 from base.models import ScheduledCourse, RoomPreference, EdtVersion, Department, CourseStartTimeConstraint,\
-    TimeGeneralSettings, Room, CourseModification
+    TimeGeneralSettings, Room, CourseModification, UserPreference
 from base.timing import str_slot
 from django.db.models import Count, Max, Q, F
 from TTapp.models import MinNonPreferedTrainProgsSlot, MinNonPreferedTutorsSlot, max_weight
 from TTapp.slots import slot_pause
 from base.views import get_key_course_pl, get_key_course_pp
 from django.core.cache import cache
+from people.models import Tutor
+import json
+
 
 def basic_reassign_rooms(department, week, year, target_work_copy):
     minimize_moves(department, week, year, target_work_copy)
+
 
 def minimize_moves(department, week, year, target_work_copy):
     """
@@ -69,20 +73,20 @@ def minimize_moves(department, week, year, target_work_copy):
             for CP in nsl:
                 precedent = ScheduledCourse \
                     .objects \
-                    .filter(start_time__lte=st - F('course__type__duration'),
-                            start_time__gt=st - F('course__type__duration') - slot_pause,
+                    .filter(start_time__lte = st - F('course__type__duration'),
+                            start_time__gt = st - F('course__type__duration') - slot_pause,
                             day=day,
-                            course__room_type=CP.course.room_type,
-                            course__tutor=CP.course.tutor,
+                            # course__room_type=CP.course.room_type,
+                            course__groups__in=CP.course.groups.all(),
                             **scheduled_courses_params)
                 if len(precedent) == 0:
                     precedent = ScheduledCourse \
                         .objects \
-                        .filter(start_time__lte = st - F('course__type__duration'),
-                                start_time__gt = st - F('course__type__duration') - slot_pause,
+                        .filter(start_time__lte=st - F('course__type__duration'),
+                                start_time__gt=st - F('course__type__duration') - slot_pause,
                                 day=day,
-                                course__room_type=CP.course.room_type,
-                                course__groups__in=CP.course.groups.all(),
+                                # course__room_type=CP.course.room_type,
+                                course__tutor=CP.course.tutor,
                                 **scheduled_courses_params)
                     if len(precedent) == 0:
                         continue
@@ -96,7 +100,7 @@ def minimize_moves(department, week, year, target_work_copy):
                             **scheduled_courses_params)
                 # test if lucky
                 if cp_using_prec.count() == 1 and cp_using_prec[0] == CP:
-                    # print "lucky, no change needed"
+                    print (CP, ": lucky, no change needed")
                     continue
                 # test if precedent.room is available
                 prec_is_unavailable = False
@@ -124,7 +128,7 @@ def minimize_moves(department, week, year, target_work_copy):
                     # print "assigned", CP
                 elif cp_using_prec.count() == 1:
                     sib = cp_using_prec[0]
-                    if sib.course.room_type == CP.course.room_type and sib.course:
+                    if CP.room in sib.course.room_type.members.all() and sib.course:
                             r = CP.room
                             CP.room = precedent.room
                             sib.room = r
@@ -357,6 +361,87 @@ def basic_swap_version(department, week, year, copy_a, copy_b=0):
                                    copy_b))
 
 
+def basic_delete_work_copy(department, week, year, work_copy):
+
+    result = {'status': 'OK', 'more': ''}
+
+    scheduled_courses_params = {
+        'course__module__train_prog__department': department,
+        'course__week': week,
+        'course__year': year,
+        'work_copy': work_copy
+    }
+
+    try:
+        sc_to_delete = ScheduledCourse \
+                     .objects \
+                     .filter(**scheduled_courses_params)
+    except KeyError:
+        result['status'] = 'KO'
+        result['more'] = 'No scheduled courses in wc #%g' % work_copy
+        return result
+
+    sc_to_delete.delete()
+
+    cache.delete(get_key_course_pl(department.abbrev,
+                                   year,
+                                   week,
+                                   work_copy))
+    return result
+
+
+def basic_delete_all_unused_work_copies(department, week, year):
+    result = {'status': 'OK', 'more': ''}
+    scheduled_courses_params = {
+        'course__module__train_prog__department': department,
+        'course__week': week,
+        'course__year': year
+    }
+    work_copies = set(sc.work_copy
+                      for sc in ScheduledCourse.objects.filter(**scheduled_courses_params)
+                      .exclude(work_copy=0)
+                      .distinct("work_copy"))
+    for wc in work_copies:
+        result = basic_delete_work_copy(department, week, year, wc)
+        if result["status"] == "KO":
+            return result
+
+    return result
+
+
+def basic_duplicate_work_copy(department, week, year, work_copy):
+
+    result = {'status': 'OK', 'more': ''}
+
+    scheduled_courses_params = {
+        'course__module__train_prog__department': department,
+        'course__week': week,
+        'course__year': year
+    }
+    local_max_wc = ScheduledCourse \
+        .objects \
+        .filter(**scheduled_courses_params) \
+        .aggregate(Max('work_copy'))['work_copy__max']
+    target_work_copy = local_max_wc + 1
+
+    try:
+        sc_to_duplicate = ScheduledCourse \
+                            .objects \
+                            .filter(**scheduled_courses_params, work_copy=work_copy)
+    except KeyError:
+        result['status'] = 'KO'
+        result['more'] = 'No scheduled courses'
+        return result
+
+    for sc in sc_to_duplicate:
+        sc.pk = None
+        sc.work_copy = target_work_copy
+        sc.save()
+        result['status'] = f'Duplicated to copy #{target_work_copy}'
+
+    return result
+
+
 def add_generic_constraints_to_database(department):
     # first objective  => minimise use of unpreferred slots for teachers
     # ponderation MIN_UPS_I
@@ -370,3 +455,33 @@ def add_generic_constraints_to_database(department):
     M, created = MinNonPreferedTrainProgsSlot.objects.get_or_create(weight=max_weight, department=department)
     M.save()
 
+
+def int_or_none(value):
+    if value == "":
+        return
+    else:
+        return value
+
+
+def load_dispos(json_filename):
+    data = json.loads(open(json_filename, 'r').read())
+    exceptions = set()
+    for dispo in data:
+        try:
+            tutor = Tutor.objects.get(username=dispo['prof'])
+        except Tutor.DoesNotExist:
+            exceptions.add(dispo['prof'])
+            continue
+        U, created = UserPreference.objects.get_or_create(
+            user=tutor,
+            week=int_or_none(dispo["week"]),
+            year=int_or_none(dispo["year"]),
+            day=dispo['day'],
+            start_time=dispo['start_time'],
+            duration=dispo['duration']
+        )
+        U.value = dispo['value']
+        U.save()
+
+    if exceptions:
+        print("The following tutor do not exist:", exceptions)

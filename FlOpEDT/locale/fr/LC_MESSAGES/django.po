@@ -3,12 +3,11 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-13 17:31+0200\n"
+"POT-Creation-Date: 2020-09-16 16:46+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,89 +17,117 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: FlOpEDT/settings/base.py:149
+#: FlOpEDT/settings/base.py:150
 msgid "French"
 msgstr "Français"
 
-#: FlOpEDT/settings/base.py:150
+#: FlOpEDT/settings/base.py:151
 msgid "English"
 msgstr "Anglais"
 
-#: TTapp/models.py:857
-msgid "If no tutor then training programme."
-msgstr "Si pas de prof alors promo."
-
-#: TTapp/models.py:860
-msgid "If no training programme then tutor."
-msgstr "Si pas de promo alors prof."
-
-#: base/templates/base/show-stype.html:94
+#: base/templates/base/show-stype.html:95
 msgid "Weeks"
 msgstr "Semaines particulières"
 
-#: base/templates/base/show-stype.html:95
+#: base/templates/base/show-stype.html:96
 msgid "Set default week"
 msgstr "Appliquer la configuration ci-contre"
 
-#: base/templates/base/show-stype.html:96
+#: base/templates/base/show-stype.html:97
 msgid "from week"
 msgstr "de la semaine"
 
-#: base/templates/base/show-stype.html:97
-#: base/templates/base/show-stype.html:100
+#: base/templates/base/show-stype.html:98
+#: base/templates/base/show-stype.html:101
 msgid "year"
 msgstr "année"
 
-#: base/templates/base/show-stype.html:99
+#: base/templates/base/show-stype.html:100
 msgid "until week"
 msgstr "à la semaine"
 
-#: base/templates/base/show-stype.html:102
+#: base/templates/base/show-stype.html:103
 msgid "button_apply"
 msgstr "Appliquer"
 
-#: base/templates/base/show-stype.html:107
+#: base/templates/base/show-stype.html:108
 msgid "Default week"
 msgstr "Semaine type"
 
-#: base/templates/base/show-stype.html:109
+#: base/templates/base/show-stype.html:110
 msgid "Update my default week"
 msgstr "Redéfinir ma semaine type"
 
-#: base/templates/base/show-stype.html:111
-#: base/templates/base/show-stype.html:136
+#: base/templates/base/show-stype.html:137
 msgid "button_save"
 msgstr "Sauvegarder"
 
-#: base/templates/base/show-stype.html:120
-msgid "My favorite rooms"
-msgstr "Mes préférences de salles"
-
 #: base/templates/base/show-stype.html:121
-msgid "Select my favorite rooms"
-msgstr "Choisir mes salles préférées"
+msgid "My videoconf links"
+msgstr "Mes visios"
 
-#: base/templates/base/show-stype.html:123
+#: base/templates/base/show-stype.html:122
+msgid "Create a link"
+msgstr "Créer un lien visio"
+
+#: base/templates/base/show-stype.html:124
+#: base/templates/base/show-stype.html:147
 msgid "button_change"
 msgstr "Modifier"
 
-#: base/templates/base/show-stype.html:126
+#: base/templates/base/show-stype.html:127
 msgid "My ideal day"
 msgstr "Ma journée idéale"
 
-#: base/templates/base/show-stype.html:129
+#: base/templates/base/show-stype.html:130
 msgid ""
 "This is the total number of teaching hours I would like to give every day:"
 msgstr ""
 "Chaque jour, voici le nombre d'heures de cours que je souhaite donner :"
 
-#: base/templates/base/show-stype.html:131
-msgid "Peferred"
+#: base/templates/base/show-stype.html:132
+msgid "Preferred"
 msgstr "Idéalement"
 
-#: base/templates/base/show-stype.html:133
+#: base/templates/base/show-stype.html:134
 msgid "Maximum"
 msgstr "Maximum"
+
+#: base/templates/base/show-stype.html:144
+msgid "My favorite rooms"
+msgstr "Mes préférences de salles"
+
+#: base/templates/base/show-stype.html:145
+msgid "Select my favorite rooms"
+msgstr "Choisir mes salles préférées"
+
+#: base/templates/base/visio.html:31
+msgid "Create or modify a link"
+msgstr "Créer ou modifier un lien"
+
+#: base/templates/base/visio.html:38
+msgid "Send"
+msgstr "Envoyer"
+
+#: base/views.py:1753
+msgid "Not authorized. New link then."
+msgstr "Non autorisé. Création d'un nouveau lien."
+
+#: base/views.py:1756
+msgid "Unknown link. New link then."
+msgstr "Lien inconnu. Création d'un nouveau lien."
+
+#: base/views.py:1768
+msgid "Created"
+msgstr "Créé"
+
+#: base/views.py:1768
+msgid "Modified"
+msgstr "Modifié"
+
+#: base/views.py:1771
+msgid "Tutor does not exist"
+msgstr "L'utilisateur n'existe pas."
 
 #: base/weeks.py:34
 msgid "Mon."
@@ -253,3 +280,12 @@ msgstr "Déconnexion"
 #: templates/base.html:110
 msgid "Signed in as "
 msgstr "Connecté·e sous "
+
+#~ msgid "Choose my video conference rooms"
+#~ msgstr "Mes liens visio"
+
+#~ msgid "If no tutor then training programme."
+#~ msgstr "Si pas de prof alors promo."
+
+#~ msgid "If no training programme then tutor."
+#~ msgstr "Si pas de promo alors prof."

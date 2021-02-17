@@ -65,6 +65,7 @@
     var url_login = "{% url 'people:login' %}";
     var current_year = "{{ current_year }}" ;
     var time_settings = {{ time_settings | safe }} ;
+    time_settings.time.bu = {} ;
     var days = {{ days | safe }} ;
     var csrftoken = '{{ csrf_token }}';
 
@@ -84,8 +85,8 @@
   </script>
 <body>
 <div  id="tools-main" style="width: 100%; overflow: hidden;">
-    <div id="svg" style="width: 900px; float: left;"></div>
-    <div style="margin-left: 700px;">
+  <div id="svg" style="float: left; margin: auto 40px 20px auto;"></div>
+    <div style="margin: 100px;">
         <form style="white-space: nowrap;" name="app" action="javascript:apply_stype_from_button(false)" id="form-nweek">
             </br>
             <fieldset>
@@ -115,10 +116,10 @@
 </div>
 <div class='stype-container'>
   <fieldset>
-    <legend>{% trans "My favorite rooms" %}</legend>
-    <p>{% trans "Select my favorite rooms" %}</p>
+    <legend>{% trans "My videoconf links" %}</legend>
+    <p>{% trans "Create a link" %}</p>
     <br/>
-    <button onclick="window.location.href = '{% url 'base:room-pref' department %}';">{% trans "button_change" %}</button>
+    <button onclick="window.location.href = '{% url 'base:visio-pref' department %}';">{% trans "button_change" %}</button>
   </fieldset>
   <fieldset>
     <legend>{% trans "My ideal day" %}</legend>
@@ -126,9 +127,9 @@
       {% csrf_token %}
       <p>{% trans "This is the total number of teaching hours I would like to give every day:" %}</p>
 
-      {% trans "Peferred" %} <input id="user_pref_hours_per_day" type="number" name="user_pref_hours" style="width: 30px" min="1" max="9" value="{{ usr_pref_hours }}">
+      {% trans "Preferred" %} <input id="user_pref_hours_per_day" type="number" name="user_pref_hours" style="width: 30px" min="1" max="12" value="{{ usr_pref_hours }}">
       <br/>
-      {% trans "Maximum" %} <input id="user_max_hours_per_day" type="number" name="user_max_hours" style="width: 30px" min="1" max="9" value="{{ usr_max_hours }}">
+      {% trans "Maximum" %} <input id="user_max_hours_per_day" type="number" name="user_max_hours" style="width: 30px" min="1" max="12" value="{{ usr_max_hours }}">
       <br/>
       <br/>
       <input type="submit" name="save_perfect_day" value="{% trans "button_save" %}">
@@ -137,6 +138,12 @@
   <br/>
   <br/>
   {% include 'base/notification.html' %}
+  <fieldset>
+    <legend>{% trans "My favorite rooms" %}</legend>
+    <p>{% trans "Select my favorite rooms" %}</p>
+    <br/>
+    <button onclick="window.location.href = '{% url 'base:room-pref' department %}';">{% trans "button_change" %}</button>
+  </fieldset>
 </div>
 </body>
 <script type='text/javascript' src="{% static 'base/helpers.js' %}"></script>
