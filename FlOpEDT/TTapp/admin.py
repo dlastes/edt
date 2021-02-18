@@ -39,7 +39,7 @@ from TTapp.models import \
     CustomConstraint, SimultaneousCourses, MinimizeBusyDays, RespectBoundPerDay,\
     AvoidBothTimes, LimitedRoomChoices, LimitedStartTimeChoices, \
     LimitTutorsTimePerPeriod, LimitGroupsTimePerPeriod, LowerBoundBusyDays, GroupsLunchBreak, BreakAroundCourseType, \
-    NoVisio, LimitGroupsPhysicalPresence, BoundPhysicalPresenceHalfDays, TutorsLunchBreak, VisioOnly
+    NoVisio, LimitGroupsPhysicalPresence, BoundPhysicalPresenceHalfDays, TutorsLunchBreak, VisioOnly, NoCourseOnDay
 
 from TTapp.TTConstraints.orsay_constraints import GroupsLunchBreak
 
@@ -318,7 +318,7 @@ class TutorsLunchBreakAdmin(DepartmentModelAdmin):
                    ('tutors', DropdownFilterRel),
                    )
 
-class AmphiBreakAdmin(DepartmentModelAdmin):
+class BreakAroundCourseTypeAdmin(DepartmentModelAdmin):
     list_display = ('week', 'year', 'comment',
                     'weight',
                     'is_active')
@@ -377,7 +377,6 @@ class LimitGroupsPhysicalPresenceAdmin(DepartmentModelAdmin):
                    )
 
 
-
 class GroupsLunchBreakResource(resources.ModelResource):
     groups = fields.Field(
         column_name='groups',
@@ -388,6 +387,20 @@ class GroupsLunchBreakResource(resources.ModelResource):
         model = GroupsLunchBreak
         fields = ('start_time', 'end_time', 'lunch_length', 'groups')
 
+
+class NoCourseOnDayAdmin(DepartmentModelAdmin):
+    list_display = ('week',
+                    'year',
+                    'weekday',
+                    'comment',
+                    'weight',
+                    'is_active')
+    ordering = ()
+    list_filter = (('week', DropdownFilterAll),
+                   ('year', DropdownFilterAll),
+                   ('train_progs', DropdownFilterRel),
+                   ('groups', DropdownFilterRel),
+                   )
 
     
 admin.site.register(CustomConstraint, CustomConstraintAdmin)
@@ -409,7 +422,9 @@ admin.site.register(LimitTutorsTimePerPeriod, LimitTutorsTimePerPeriodAdmin)
 admin.site.register(LowerBoundBusyDays, LowerBoundBusyDaysAdmin)
 admin.site.register(GroupsLunchBreak, GroupsLunchBreakAdmin)
 admin.site.register(TutorsLunchBreak, TutorsLunchBreakAdmin)
-admin.site.register(BreakAroundCourseType, AmphiBreakAdmin)
+admin.site.register(BreakAroundCourseType, BreakAroundCourseTypeAdmin)
+admin.site.register(NoCourseOnDay, NoCourseOnDayAdmin)
+
 if settings.VISIO_MODE:
     admin.site.register(NoVisio, NoVisioAdmin)
     admin.site.register(VisioOnly, VisioOnlyAdmin)

@@ -24,12 +24,17 @@
 # without disclosing the source code of your own applications.
 
 from django.db import models
+from django.contrib.postgres.fields import ArrayField
+from base.timing import Day
 
 from TTapp.helpers.minhalfdays import MinHalfDaysHelperGroup
 
 from TTapp.slots import slots_filter
 from TTapp.TTConstraint import TTConstraint
 from people.models import GroupPreferences
+
+from TTapp.ilp_constraints.constraint_type import ConstraintType
+from TTapp.ilp_constraints.constraint import Constraint
 
 
 def considered_basic_groups(group_ttconstraint, ttmodel):
@@ -127,4 +132,44 @@ class MinNonPreferedTrainProgsSlot(TTConstraint):
             text += ' des groupes de ' + ', '.join([train_prog.abbrev for train_prog in self.train_progs.all()])
         else:
             text += ' de toutes les promos.'
+        return text
+
+
+class NoCourseOnDay(TTConstraint):
+    FULL_DAY = 'fd'
+    AM = 'AM'
+    PM = 'PM'
+    PERIOD_CHOICES = ((FULL_DAY, 'Full day'), (AM, 'AM'), (PM, 'PM'))
+    period = models.CharField(max_length=2, choices=PERIOD_CHOICES)
+    groups = models.ManyToManyField('base.Group', blank=True)
+    weekday = models.CharField(max_length=2, choices=Day.CHOICES)
+
+    def enrich_model(self, ttmodel, week, ponderation=1):
+        considered_courses = set(c for c in ttmodel.wbd.courses_for_basic_group[g]
+                                 for g in considered_basic_groups(self, ttmodel))
+        if self.period == self.FULL_DAY:
+            considered_slots = slots_filter(ttmodel.wdb.courses_slots,
+                                            week_day=self.weekday, week=week)
+        else:
+            considered_slots = slots_filter(ttmodel.wdb.courses_slots,
+                                            week_day=self.weekday, apm=self.period, week=week)
+        considered_sum = ttmodel.sum(ttmodel.TT[(sl, c)]
+                                               for c in considered_courses
+                                               for sl in considered_slots & ttmodel.wdb.compatible_slots[c]
+                                               )
+        if self.weight is None:
+            ttmodel.add_constraint(considered_sum,
+                                   '==', 0,
+                                   Constraint(constraint_type=ConstraintType.NO_COURSE_ON_DAY, weeks=week))
+        else:
+            ttmodel.add_to_generic_cost(considered_sum, week)
+
+    def one_line_description(self):
+        text = f"Aucun cours le {self.weekday}"
+        if self.period != self.FULL_DAY:
+            text += f" ({self.period})"
+        if self.groups.exists():
+            text += ' pour les groupes ' + ', '.join([group.name for group in self.groups.all()])
+        if self.train_progs.exists():
+            text += ' en ' + ', '.join([train_prog.abbrev for train_prog in self.train_progs.all()])
         return text

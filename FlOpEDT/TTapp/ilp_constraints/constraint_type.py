@@ -126,6 +126,7 @@ class ConstraintType(Enum):
     LowerBoundBusyDays = "LowerBoundBusyDays"
     LUNCH_BREAK = "Lunch Breaks"
     BREAK_AROUND_COURSE = "Break around course"
+    NO_COURSE_ON_DAY = "No Course on day"
 
     # From minhalfdays
     MIN_HALF_DAYS_LIMIT = "Min Half Days limit"

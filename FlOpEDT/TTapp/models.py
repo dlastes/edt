@@ -35,7 +35,7 @@ from django.db import models
 
 from TTapp.TTConstraint import TTConstraint, max_weight
 from TTapp.TTConstraints.stabilization_constraints import Stabilize, StabilizationThroughWeeks
-from TTapp.TTConstraints.groups_constraints import MinGroupsHalfDays, MinNonPreferedTrainProgsSlot
+from TTapp.TTConstraints.groups_constraints import MinGroupsHalfDays, MinNonPreferedTrainProgsSlot, NoCourseOnDay
 from TTapp.TTConstraints.tutors_constraints import MinTutorsHalfDays, MinNonPreferedTutorsSlot, \
     MinimizeBusyDays, RespectBoundPerDay, LowerBoundBusyDays
 from TTapp.TTConstraints.modules_constraints import MinModulesHalfDays
