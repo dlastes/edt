@@ -10,5 +10,5 @@ urlpatterns = [
     path(r'tutor/<int:tutor_id>.ics', TutorEventFeed(), name="tutor"),
     path(r'room/<int:room_id>.ics', RoomEventFeed(), name="room"),
     path(r'group/<int:group_id>.ics', GroupEventFeed(), name="group"),
-    path(r'regen/<slug:department>.ics', RegenFeed(), name="regen"),
+    path(r'regen/<int:dep_id>.ics', RegenFeed(), name="regen"),
 ]

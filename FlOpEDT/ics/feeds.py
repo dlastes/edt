@@ -128,18 +128,20 @@ class RegenFeed(ICalFeed):
     product_id = 'flop'
     timezone = 'Europe/Paris'
     # TODO !
-    # def get_object(self, request, department, dep_abbrev):
-    #     dep = Department.objects.get(abbrev=dep_abbrev)
-    #     return dep
-    #
-    # def items(self, departments):
-    #     return Regen.objects.filter(departments__in=departments, work_copy=0).order_by('-year','-week')
+
+    def get_object(self, request, department, dep_id):
+        dep = Department.objects.get(id=dep_id)
+        return [dep]
+
+    def items(self, departments):
+        return Regen.objects.filter(department__in=departments)\
+            .exclude(full=False, stabilize=False).order_by('-year','-week')
 
     def item_title(self, regen):
-        return f'{regen}'
+        return f"flop!EDT - {regen.department.abbrev} : {regen.strplus()}"
 
     def item_description(self, regen):
-        return regen.strplus()
+        return self.item_title(regen)
 
     def item_start_datetime(self, regen):
         begin = datetime.combine(
@@ -151,7 +153,7 @@ class RegenFeed(ICalFeed):
     def item_end_datetime(self, regen):
         end = datetime.combine(
             Week(regen.year, regen.week)\
-            .day(6),
+            .day(len(regen.department.timegeneralsettings.days)),
             datetime.min.time())
         return end
 

@@ -743,8 +743,7 @@ class Regen(models.Model):
         return pre
 
     def strplus(self):
-        ret = f"Semaine {self.week} ({self.year}) : "
-
+        ret = ""
         if self.full:
             ret += f'Génération complète le ' + \
                    f'{self.fday}/{self.fmonth}/{self.fyear}'

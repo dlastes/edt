@@ -81,10 +81,10 @@
     <ul>
       <table>
         <tr><th>Departement</th><th>Adresse</th></tr>
-        {% for d in departments %}
+        {% for d in deps %}
         <tr>
-          <td>{{ d }}</td>
-          <td><a href="{% url "ics:regen" department d.abbrev%}">{{ requi }}{% url "ics:regen" department d.abbrev %}</a></td>
+          <td>{{ d.abbrev }}</td>
+          <td><a href="{% url "ics:regen" department d.id%}">{{ requi }}{% url "ics:regen" department d.id %}</a></td>
         </tr>
         {% endfor %}
       </table>
