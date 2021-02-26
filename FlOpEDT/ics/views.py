@@ -12,8 +12,7 @@ def index(request, **kwargs):
                               .order_by('username')
     group_list = Group.objects.filter(
         basic=True,
-        train_prog__department=request.department
-    )\
+        train_prog__department=request.department)\
                               .select_related('train_prog__department')\
                               .order_by('train_prog__abbrev', 'name')
     room_list = [{'name':n.name, 'id':n.id}

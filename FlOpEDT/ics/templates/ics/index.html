@@ -84,7 +84,7 @@
         {% for d in departments %}
         <tr>
           <td>{{ d }}</td>
-          <td><a href="{% url "ics:regen" d %}">{{ requi }}{% url "ics:regen" d %}</a></td>
+          <td><a href="{% url "ics:regen" department d.abbrev%}">{{ requi }}{% url "ics:regen" department d.abbrev %}</a></td>
         </tr>
         {% endfor %}
       </table>

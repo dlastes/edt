@@ -6,7 +6,7 @@ from django_ical.views import ICalFeed
 
 from django.core.exceptions import ObjectDoesNotExist
 
-from base.models import ScheduledCourse, Room, Group, Day
+from base.models import ScheduledCourse, Room, Group, Day, Department, Regen
 from people.models import Tutor
 
 
@@ -16,6 +16,7 @@ def str_groups(c):
                         for g in groups])
     plural = len(groups) > 1
     return gp_str, plural
+
 
 class EventFeed(ICalFeed):
     """
@@ -80,6 +81,7 @@ class TutorEventFeed(EventFeed):
                 f'- {location}'
         )
 
+
 class RoomEventFeed(EventFeed):
     def get_object(self, request, department, room_id):
         return Room.objects.get(id=room_id).and_subrooms()
@@ -121,42 +123,36 @@ class GroupEventFeed(EventFeed):
 
 class RegenFeed(ICalFeed):
     """
-    A simple event calender
+    A simple regen calender : one event per regeneration
     """
     product_id = 'flop'
     timezone = 'Europe/Paris'
+    # TODO !
+    # def get_object(self, request, department, dep_abbrev):
+    #     dep = Department.objects.get(abbrev=dep_abbrev)
+    #     return dep
+    #
+    # def items(self, departments):
+    #     return Regen.objects.filter(departments__in=departments, work_copy=0).order_by('-year','-week')
 
     def item_title(self, regen):
-        course = scourse.course
-        gp_str, plural = str_groups(course)
-        return (f'{course.module.abbrev} {course.type.name} - ' + gp_str)
+        return f'{regen}'
 
-    def item_description(self, scourse):
-        location = scourse.room.name if scourse.room is not None else ''
-        course = scourse.course
-        tutor = scourse.tutor
-        ret = f'Cours : {course.module.abbrev} {course.type.name}\n'
-        gp_str, plural = str_groups(course)
-        ret += 'Groupe'
-        if plural:
-            ret += 's'
-        ret += ' : '
-        ret += gp_str
-        ret += f'\nEnseignant·e : {tutor}\n'
-        ret += f'Salle : {location}'
-        return ret
+    def item_description(self, regen):
+        return regen.strplus()
 
-    def item_start_datetime(self, scourse):
-        course = scourse.course
+    def item_start_datetime(self, regen):
         begin = datetime.combine(
-            Week(course.year, course.week)\
-            .day(self.days.index(scourse.day)),
-            datetime.min.time()) \
-            + timedelta(minutes=scourse.start_time)
+            Week(regen.year, regen.week)\
+            .day(0),
+            datetime.min.time())
         return begin
 
-    def item_end_datetime(self, scourse):
-        end = self.item_start_datetime(scourse) + timedelta(minutes=scourse.course.type.duration)
+    def item_end_datetime(self, regen):
+        end = datetime.combine(
+            Week(regen.year, regen.week)\
+            .day(6),
+            datetime.min.time())
         return end
 
     def item_link(self, s):
