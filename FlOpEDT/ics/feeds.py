@@ -117,3 +117,47 @@ class GroupEventFeed(EventFeed):
                 f'- {scourse.tutor.username} '
                 f'- {location}'
         )
+
+
+class RegenFeed(ICalFeed):
+    """
+    A simple event calender
+    """
+    product_id = 'flop'
+    timezone = 'Europe/Paris'
+
+    def item_title(self, regen):
+        course = scourse.course
+        gp_str, plural = str_groups(course)
+        return (f'{course.module.abbrev} {course.type.name} - ' + gp_str)
+
+    def item_description(self, scourse):
+        location = scourse.room.name if scourse.room is not None else ''
+        course = scourse.course
+        tutor = scourse.tutor
+        ret = f'Cours : {course.module.abbrev} {course.type.name}\n'
+        gp_str, plural = str_groups(course)
+        ret += 'Groupe'
+        if plural:
+            ret += 's'
+        ret += ' : '
+        ret += gp_str
+        ret += f'\nEnseignant·e : {tutor}\n'
+        ret += f'Salle : {location}'
+        return ret
+
+    def item_start_datetime(self, scourse):
+        course = scourse.course
+        begin = datetime.combine(
+            Week(course.year, course.week)\
+            .day(self.days.index(scourse.day)),
+            datetime.min.time()) \
+            + timedelta(minutes=scourse.start_time)
+        return begin
+
+    def item_end_datetime(self, scourse):
+        end = self.item_start_datetime(scourse) + timedelta(minutes=scourse.course.type.duration)
+        return end
+
+    def item_link(self, s):
+        return str(s.id)

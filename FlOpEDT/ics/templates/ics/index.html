@@ -77,5 +77,18 @@
       </table>
     </ul>
 
+    <h2>Regénérations</h2>
+    <ul>
+      <table>
+        <tr><th>Departement</th><th>Adresse</th></tr>
+        {% for d in departments %}
+        <tr>
+          <td>{{ d }}</td>
+          <td><a href="{% url "ics:regen" d %}">{{ requi }}{% url "ics:regen" d %}</a></td>
+        </tr>
+        {% endfor %}
+      </table>
+    </ul>
+
 </div>
 {% endblock %}
