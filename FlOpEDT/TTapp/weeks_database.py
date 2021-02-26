@@ -105,10 +105,11 @@ class WeeksDatabase(object):
                 for week in self.weeks
                 for day in TimeGeneralSettings.objects.get(department=self.department).days]
 
-        for hd in holidays:
-            for day in days:
-                if day.day == hd.day and day.week == hd.week:
-                    days.remove(day)
+        if not settings.COSMO_MODE:
+            for hd in holidays:
+                for day in days:
+                    if day.day == hd.day and day.week == hd.week:
+                        days.remove(day)
 
         day_after = {}
         for i, day in enumerate(days):
