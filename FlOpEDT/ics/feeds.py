@@ -144,17 +144,11 @@ class RegenFeed(ICalFeed):
         return self.item_title(regen)
 
     def item_start_datetime(self, regen):
-        begin = datetime.combine(
-            Week(regen.year, regen.week)\
-            .day(0),
-            datetime.min.time())
+        begin = Week(regen.year, regen.week).day(0)
         return begin
 
     def item_end_datetime(self, regen):
-        end = datetime.combine(
-            Week(regen.year, regen.week)\
-            .day(len(regen.department.timegeneralsettings.days)),
-            datetime.min.time())
+        end = Week(regen.year, regen.week).day(len(regen.department.timegeneralsettings.days))
         return end
 
     def item_link(self, s):
