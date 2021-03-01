@@ -147,7 +147,7 @@ class NoCourseOnDay(TTConstraint):
 
     def enrich_model(self, ttmodel, week, ponderation=1):
         considered_courses = set(c for g in considered_basic_groups(self, ttmodel)
-                                 for c in ttmodel.wbd.courses_for_basic_group[g])
+                                 for c in ttmodel.wdb.courses_for_basic_group[g])
         if self.course_types.exists():
             considered_courses = set(c for c in considered_courses
                                      if c.type in self.course_types.all())
@@ -165,7 +165,7 @@ class NoCourseOnDay(TTConstraint):
                                    '==', 0,
                                    Constraint(constraint_type=ConstraintType.NO_COURSE_ON_DAY, weeks=week))
         else:
-            ttmodel.add_to_generic_cost(considered_sum, week)
+            ttmodel.add_to_generic_cost(self.local_weight() * ponderation * considered_sum, week)
 
     def one_line_description(self):
         text = f"Aucun cours le {self.weekday}"
