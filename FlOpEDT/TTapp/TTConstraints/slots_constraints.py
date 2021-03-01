@@ -198,7 +198,7 @@ class ConsiderDepencies(TTConstraint):
             text += ' pour les modules ' + ', '.join([module.abbrev for module in self.modules.all()])
         return text
 
-    def enrich_model(self, ttmodel, week, ponderation=1):
+    def enrich_model(self, ttmodel, week, ponderation=10):
         if self.train_progs.exists():
             train_progs = set(tp for tp in self.train_progs.all() if tp in ttmodel.train_prog)
         else:
