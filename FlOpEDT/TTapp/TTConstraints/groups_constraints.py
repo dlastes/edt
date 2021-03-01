@@ -141,12 +141,16 @@ class NoCourseOnDay(TTConstraint):
     PM = 'PM'
     PERIOD_CHOICES = ((FULL_DAY, 'Full day'), (AM, 'AM'), (PM, 'PM'))
     period = models.CharField(max_length=2, choices=PERIOD_CHOICES)
+    course_types = models.ManyToManyField('base.CourseType', blank=True, related_name='no_course_on_days')
     groups = models.ManyToManyField('base.Group', blank=True)
     weekday = models.CharField(max_length=2, choices=Day.CHOICES)
 
     def enrich_model(self, ttmodel, week, ponderation=1):
-        considered_courses = set(c for c in ttmodel.wbd.courses_for_basic_group[g]
-                                 for g in considered_basic_groups(self, ttmodel))
+        considered_courses = set(c for g in considered_basic_groups(self, ttmodel)
+                                 for c in ttmodel.wbd.courses_for_basic_group[g])
+        if self.course_types.exists():
+            considered_courses = set(c for c in considered_courses
+                                     if c.type in self.course_types.all())
         if self.period == self.FULL_DAY:
             considered_slots = slots_filter(ttmodel.wdb.courses_slots,
                                             week_day=self.weekday, week=week)
@@ -154,9 +158,8 @@ class NoCourseOnDay(TTConstraint):
             considered_slots = slots_filter(ttmodel.wdb.courses_slots,
                                             week_day=self.weekday, apm=self.period, week=week)
         considered_sum = ttmodel.sum(ttmodel.TT[(sl, c)]
-                                               for c in considered_courses
-                                               for sl in considered_slots & ttmodel.wdb.compatible_slots[c]
-                                               )
+                                     for c in considered_courses
+                                     for sl in considered_slots & ttmodel.wdb.compatible_slots[c])
         if self.weight is None:
             ttmodel.add_constraint(considered_sum,
                                    '==', 0,
@@ -168,6 +171,8 @@ class NoCourseOnDay(TTConstraint):
         text = f"Aucun cours le {self.weekday}"
         if self.period != self.FULL_DAY:
             text += f" ({self.period})"
+        if self.course_types.exists():
+            text += f" pour les cours de type" + ', '.join([t.name for t in self.course_types.all()])
         if self.groups.exists():
             text += ' pour les groupes ' + ', '.join([group.name for group in self.groups.all()])
         if self.train_progs.exists():
