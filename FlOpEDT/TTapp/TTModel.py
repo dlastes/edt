@@ -697,48 +697,6 @@ class TTModel(object):
                                             for sl in self.wdb.compatible_slots[c])
                                    )
 
-    def add_dependency_constraints(self, weight=None):
-        """
-        Add the constraints of dependency saved on the DB:
-        -include dependencies
-        -include non same-day constraint
-        -include simultaneity (double dependency)
-        If there is a weight, it's a preference, else it's a constraint...
-        """
-        print('adding dependency constraints')
-        for p in self.wdb.dependencies:
-            c1 = p.course1
-            c2 = p.course2
-            if c1 == c2:
-                print("Warning: %s is declared depend on itself" % c1)
-                continue
-            for sl1 in self.wdb.compatible_slots[c1]:
-                if not weight:
-                    self.add_constraint(1000000 * self.TT[(sl1, c1)] +
-                                        self.sum(self.TT[(sl2, c2)] for sl2 in self.wdb.compatible_slots[c2]
-                                                 if not sl2.is_after(sl1)
-                                                 or (p.ND and (sl2.day == sl1.day))
-                                                 or (p.successive and not sl2.is_successor_of(sl1))),
-                                        '<=', 1000000, DependencyConstraint(c1, c2, sl1))
-                else:
-                    for sl2 in self.wdb.compatible_slots[c2]:
-                        if not sl2.is_after(sl1) \
-                                or (p.ND and (sl2.day == sl1.day)) \
-                                or (p.successive and not sl2.is_successor_of(sl1)):
-                            conj_var = self.add_conjunct(self.TT[(sl1, c1)],
-                                                         self.TT[(sl2, c2)])
-                            self.add_to_generic_cost(conj_var * weight)
-
-                    # if p.successive and sl2.is_successor_of(sl1):
-                    #     for rg1 in self.wdb.rooms_for_type[c1.room_type]:
-                    #         for rg2 in self.wdb.rooms_for_type[c2.room_type].exclude(id=rg1.id):
-                    #             self.add_constraint(self.TTrooms[(sl1, c1, rg1)]
-                    #                                 + self.TTrooms[(sl2, c2, rg2)], '<=', 1,
-                    #                                 constraint_type=ConstraintType.DEPENDANCE_SALLE,
-                    #                                 courses=[c1, c2],
-                    #                                 slots=[sl1, sl2],
-                    #                                 rooms=[rg1, rg2])
-
 
     def send_unitary_lack_of_availability_mail(self, tutor, week, available_hours, teaching_hours,
                                                prefix="[flop!EDT] "):
@@ -1062,8 +1020,6 @@ class TTModel(object):
         self.add_stabilization_constraints()
 
         self.add_core_constraints()
-
-        self.add_dependency_constraints()
 
         # Has to be before add_rooms_constraints and add_instructors_constraints
         # because it contains rooms/instructors availability modification...
