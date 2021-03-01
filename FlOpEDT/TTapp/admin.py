@@ -39,7 +39,8 @@ from TTapp.models import \
     CustomConstraint, SimultaneousCourses, MinimizeBusyDays, RespectBoundPerDay,\
     AvoidBothTimes, LimitedRoomChoices, LimitedStartTimeChoices, \
     LimitTutorsTimePerPeriod, LimitGroupsTimePerPeriod, LowerBoundBusyDays, GroupsLunchBreak, BreakAroundCourseType, \
-    NoVisio, LimitGroupsPhysicalPresence, BoundPhysicalPresenceHalfDays, TutorsLunchBreak, VisioOnly, NoCourseOnDay
+    NoVisio, LimitGroupsPhysicalPresence, BoundPhysicalPresenceHalfDays, TutorsLunchBreak, VisioOnly, NoCourseOnDay, \
+    ConsiderDepencies
 
 from TTapp.TTConstraints.orsay_constraints import GroupsLunchBreak
 
@@ -402,7 +403,22 @@ class NoCourseOnDayAdmin(DepartmentModelAdmin):
                    ('groups', DropdownFilterRel),
                    )
 
-    
+
+class ConsiderDepenciesAdmin(DepartmentModelAdmin):
+    list_display = ('week',
+                    'year',
+                    'comment',
+                    'weight',
+                    'is_active')
+    ordering = ()
+    list_filter = (('week', DropdownFilterAll),
+                   ('year', DropdownFilterAll),
+                   ('train_progs', DropdownFilterRel),
+                   ('modules', DropdownFilterRel),
+                   )
+
+
+admin.site.register(ConsiderDepencies, ConsiderDepenciesAdmin)
 admin.site.register(CustomConstraint, CustomConstraintAdmin)
 admin.site.register(Stabilize, StabilizeAdmin)
 admin.site.register(MinGroupsHalfDays, MinGroupsHalfDaysAdmin)
