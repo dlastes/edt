@@ -22,7 +22,7 @@
 <!-- without disclosing the source code of your own applications.          -->
 
 <fieldset>
-  <legend><b>Notifications</b></legend>
+  <legend>Notifications</legend>
   <form action='{% url "base:user_notifications_pref_changes" department user.username %}'  method='POST' id="form-notifications" >
     {% csrf_token %}
     <p>Je souhaite être notifié⋅e des modifications pour les

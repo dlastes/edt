@@ -18,6 +18,9 @@ function txt_morning_half(val, id) {
     case "1":
         return 'Commencer le plus tard possible mais finir tard';
         break;
+    default:
+        return "essai";
+        break;
     }
   } 
   if (id == 'free_half_day'){
@@ -37,6 +40,9 @@ function txt_morning_half(val, id) {
     case "1":
         return 'Avoir des journées chargées mais aussi des demi-journées libérées';
         break;
+    default:
+        return "essai";
+        break;
     }
   }
   if (id == 'hole'){
@@ -55,13 +61,13 @@ function txt_morning_half(val, id) {
   if (id == 'selfeat'){
     switch (val) {
     case "0":
-        return 'Manger tôt';
+        return 'Manger plus tôt';
         break;
     case "0.3":
         return 'Indifférent';
         break;
     case "0.6":
-        return 'Manger tard';
+        return 'Manger plus tard';
         break;
     }
   }

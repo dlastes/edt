@@ -34,39 +34,43 @@
 {% block content %}
 
 </br></br></br>
-<fieldset class="twofieldset" style="">
-  <legend><b>Préférences pour votre groupe</b></legend>
-</br>
+<fieldset class="twofieldset" id="field1">
+  <legend>Préférences pour votre groupe</legend>
+    </br>
   <div>Vous préférez :</div>
-  </br>
+    </br>
   <form action="{% url 'people:student_preferences' %}" method="post" id="form_pref">
   {% csrf_token %}
     <div>
-        <input type="range" id="morning" name="morning_evening" min="0" max="1" step="0.25" value="{{ morning }}"/>
-        <output name="result" value="{{ morning }}"></output>
+      <input type="range" id="morning" name="morning_evening" min="0" max="1" step="0.25" value="{{ morning }}"/>
+      <output name="result" value="{{ morning }}"></output>
     </div>
-  </br>
+      </br>
     <div>
-        <input type="range" id="free_half_day" name="light_free" min="0" max="1" step="0.25" value="{{ free_half_day }}"/>
-        <output name="resultdeux"></output>
+      <input type="range" id="free_half_day" name="light_free" min="0" max="1" step="0.25" value="{{ free_half_day }}"/>
+      <output name="resultdeux"></output>
     </div>
-  </br>
+      </br>
     <div>
-        <input type="range" id="hole" name="hole_nothole" min="0" max="0.6" step="0.3" value="{{ hole }}"/>
-        <output name="resulthole"></output>
-    </div><br/>
+      <input type="range" id="hole" name="hole_nothole" min="0" max="0.6" step="0.3" value="{{ hole }}"/>
+      <output name="resulthole"></output>
+    </div>
+      <br/>
     <div>
-        <input type="range" id="selfeat" name="eat" min="0" max="0.6" step="0.3" value="{{ selfeat }}"/>
-        <output name="resulteat"></output>
-    </div><br/>
-  <button type="submit" form="form_pref" value="Submit">Valider</button>
-</form>
+      <input type="range" id="selfeat" name="eat" min="0" max="0.6" step="0.3" value="{{ selfeat }}"/>
+      <output name="resulteat"></output>
+    </div>
+      <br/>
+    <button type="submit" form="form_pref" value="Submit">Valider</button>
+  </form>
 </fieldset>
 <fieldset class="twofieldset">
-    <legend><b>Préférences demi-journée libre</b></legend>
-    azerazerazeraezraeraerzera
-</fieldset><br/>
-<br/>
+    <legend>Préférences demi-journée libre</legend>
+      <br/>
+    <div>Vous préférez :</div>
+    <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+</fieldset>
+  <br/><br/>
 {% include 'base/notification.html' %}
 <link rel="stylesheet" type="text/css" href="{% static 'people/student_preferences.css' %}"/>
 <script src="{% static 'people/student_preferences.js' %}"></script>

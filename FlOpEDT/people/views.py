@@ -124,7 +124,7 @@ def student_preferences(req):
             if group_pref is not None:
                 group_pref.calculate_fields()
                 group_pref.save()
-            return redirect("base:edt", department=req.department)
+            return redirect("people:student_preferences")
         else:
             raise Http404("Who are you?")
     else:

@@ -1,13 +1,21 @@
+#field1{
+	float:left;
+	margin-right:10px;
+}
 .twofieldset {
-	display: inline;
 	width:46.35%;
+	height: 300px;
 }
 
 fieldset{
 	border: 5px groove;
 }
 legend {
-	background-color: black;
+	font-weight: bold;
+	border-radius: 100px 10px / 120px;
+	box-shadow: 10px 5px 5px rgba(0,0,0,0.4) ;
+
+	background-color: #6E6E6E;
 	color: white;
 	padding: 5px 10px;
 }
