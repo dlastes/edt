@@ -35,6 +35,7 @@ from TTapp.ilp_constraints.constraint import Constraint
 from TTapp.slots import days_filter, slots_filter
 from base.timing import Day
 from TTapp.TTConstraint import TTConstraint
+from TTapp.ilp_constraints.constraints.dependencyConstraint import DependencyConstraint
 
 
 class SimultaneousCourses(TTConstraint):
@@ -179,7 +180,61 @@ class LimitedStartTimeChoices(TTConstraint):
 
 
 
+class ConsiderDepencies(TTConstraint):
+    """
+    Transform the constraints of dependency saved on the DB in model constraints:
+    -include dependencies and successiveness
+    -include non same-day constraint
+    -include simultaneity (double dependency)
+    If there is a weight, it's a preference, else it's a constraint...
+    """
+    modules = models.ManyToManyField('base.Module', blank=True)
+
+    def one_line_description(self):
+        text = f"Prend en compte les précédences enregistrées en base."
+        if self.train_progs.exists():
+            text += ' des promos ' + ', '.join([train_prog.abbrev for train_prog in self.train_progs.all()])
+        if self.modules.exists():
+            text += ' pour les modules ' + ', '.join([module.abbrev for module in self.modules.all()])
+        return text
+
+    def enrich_model(self, ttmodel, week, ponderation=10):
+        if self.train_progs.exists():
+            train_progs = set(tp for tp in self.train_progs.all() if tp in ttmodel.train_prog)
+        else:
+            train_progs = set(ttmodel.train_prog)
+        considered_modules = set(ttmodel.wdb.modules)
+        if self.modules.exists():
+            considered_modules &= set(self.modules.all())
+
+        for p in ttmodel.wdb.dependencies:
+            c1 = p.course1
+            c2 = p.course2
+            if (c1.module not in considered_modules and c2.module not in considered_modules) or \
+                    (c1.module.train_prog not in train_progs and c2.module.train_prog not in train_progs):
+                continue
+            if c1 == c2:
+                ttmodel.add_warning(None, "Warning: %s is declared depend on itself" % c1)
+                continue
+            for sl1 in ttmodel.wdb.compatible_slots[c1]:
+                if not self.weight:
+                    ttmodel.add_constraint(1000000 * ttmodel.TT[(sl1, c1)] +
+                                           ttmodel.sum(ttmodel.TT[(sl2, c2)] for sl2 in ttmodel.wdb.compatible_slots[c2]
+                                                       if not sl2.is_after(sl1)
+                                                       or (p.ND and (sl2.day == sl1.day))
+                                                       or (p.successive and not sl2.is_successor_of(sl1))),
+                                           '<=', 1000000, DependencyConstraint(c1, c2, sl1))
+                else:
+                    for sl2 in ttmodel.wdb.compatible_slots[c2]:
+                        if not sl2.is_after(sl1) \
+                                or (p.ND and (sl2.day == sl1.day)) \
+                                or (p.successive and not sl2.is_successor_of(sl1)):
+                            conj_var = ttmodel.add_conjunct(ttmodel.TT[(sl1, c1)],
+                                                            ttmodel.TT[(sl2, c2)])
+                            ttmodel.add_to_generic_cost(conj_var * self.local_weight() * ponderation)
+
 # Ex TTConstraints that have to be re-written.....
+
 
 class AvoidBothTimes(TTConstraint):
     """

@@ -747,13 +747,12 @@ class Regen(models.Model):
         return pre
 
     def strplus(self):
-        ret = f"Semaine {self.week} ({self.year}) : "
-
+        ret = ""
         if self.full:
-            ret += f'Génération complète le ' + \
+            ret += f'Re-génération complète prévue le ' + \
                    f'{self.fday}/{self.fmonth}/{self.fyear}'
         elif self.stabilize:
-            ret += 'Génération stabilisée le ' + \
+            ret += 'Génération stabilisée prévue le ' + \
                    f'{self.sday}/{self.smonth}/{self.syear}'
         else:
             ret += "Pas de (re-)génération prévue"
