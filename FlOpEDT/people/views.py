@@ -166,18 +166,18 @@ def student_preferences(req):
             hole_txt=""
             if hole == 0:
                 hole_txt = 'Ne pas avoir de trous entre deux cours'
-            if hole == 0.3:
+            if hole == 0.5:
                 hole_txt = 'Indifférent'
-            if hole == 0.6:
+            if hole == 1:
                 hole_txt = 'Avoir des trous entre deux cours'
 
             eat = student_pref.eat_weight
             eat_txt=""
             if eat == 0:
                 eat_txt = 'Manger plus tôt'
-            if eat == 0.3:
+            if eat == 0.5:
                 eat_txt = 'Indifférent'
-            if eat == 0.6:
+            if eat == 1:
                 eat_txt = 'Manger plus tard'
 
             return TemplateResponse(
@@ -197,7 +197,6 @@ def student_preferences(req):
         else:
             # Make a decorator instead
             raise Http404("Who are you?")
-
 
 def create_user(req):
     logger.info(f'REQ: create user {req.user}')

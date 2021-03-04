@@ -44,10 +44,10 @@ function txt_morning_half(val, id) {
     case "0":
         return 'Ne pas avoir de trous entre deux cours';
         break;
-    case "0.3":
+    case "0.5":
         return 'Indifférent';
         break;
-    case "0.6":
+    case "1":
         return 'Avoir des trous entre deux cours';
         break;
     }
@@ -57,10 +57,10 @@ function txt_morning_half(val, id) {
     case "0":
         return 'Manger plus tôt';
         break;
-    case "0.3":
+    case "0.5":
         return 'Indifférent';
         break;
-    case "0.6":
+    case "1":
         return 'Manger plus tard';
         break;
     }

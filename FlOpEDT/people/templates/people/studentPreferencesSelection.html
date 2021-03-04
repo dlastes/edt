@@ -37,7 +37,7 @@
 <fieldset class="twofieldset" id="field1">
   <legend>Préférences pour votre groupe</legend>
     </br>
-  <div>Vous préférez :</div>
+  <div><u>Vous préférez :</u></div>
     </br>
   <form action="{% url 'people:student_preferences' %}" method="post" id="form_pref">
   {% csrf_token %}
@@ -52,12 +52,13 @@
     </div>
       </br>
     <div>
-      <input type="range" id="hole" name="hole_nothole" min="0" max="0.6" step="0.3" value="{{ hole }}"/>
+      <input type="range" id="hole" name="hole_nothole" min="0" max="1" step="0.5" value="{{ hole }}"/>
       <output name="resulthole">{{ hole_txt }}</output>
     </div>
       <br/>
     <div>
-      <input type="range" id="selfeat" name="eat" min="0" max="0.6" step="0.3" value="{{ selfeat }}"/>
+      <input type="range" id="selfeat" name="eat" min="0" max="1" step="0.5" 
+      value="{{ selfeat }}"/>
       <output name="resulteat">{{ eat_txt }}</output>
     </div>
       <br/>
@@ -67,7 +68,7 @@
 <fieldset class="twofieldset">
     <legend>Préférences demi-journée libre</legend>
       <br/>
-    <div>Vous préférez :</div>
+    <div><u>Vous préférez :</u></div>
 
 </fieldset>
   <br/><br/>
