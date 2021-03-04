@@ -43,22 +43,22 @@
   {% csrf_token %}
     <div>
       <input type="range" id="morning" name="morning_evening" min="0" max="1" step="0.25" value="{{ morning }}"/>
-      <output name="result" value="{{ morning }}"></output>
+      <output name="result">{{ morning_txt }}</output>
     </div>
       </br>
     <div>
       <input type="range" id="free_half_day" name="light_free" min="0" max="1" step="0.25" value="{{ free_half_day }}"/>
-      <output name="resultdeux"></output>
+      <output name="resultdeux">{{ free_half_day_txt }}</output>
     </div>
       </br>
     <div>
       <input type="range" id="hole" name="hole_nothole" min="0" max="0.6" step="0.3" value="{{ hole }}"/>
-      <output name="resulthole"></output>
+      <output name="resulthole">{{ hole_txt }}</output>
     </div>
       <br/>
     <div>
       <input type="range" id="selfeat" name="eat" min="0" max="0.6" step="0.3" value="{{ selfeat }}"/>
-      <output name="resulteat"></output>
+      <output name="resulteat">{{ eat_txt }}</output>
     </div>
       <br/>
     <button type="submit" form="form_pref" value="Submit">Valider</button>
@@ -68,7 +68,7 @@
     <legend>Préférences demi-journée libre</legend>
       <br/>
     <div>Vous préférez :</div>
-    <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
 </fieldset>
   <br/><br/>
 {% include 'base/notification.html' %}

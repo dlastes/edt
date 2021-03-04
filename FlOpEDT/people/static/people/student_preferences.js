@@ -18,9 +18,6 @@ function txt_morning_half(val, id) {
     case "1":
         return 'Commencer le plus tard possible mais finir tard';
         break;
-    default:
-        return "essai";
-        break;
     }
   } 
   if (id == 'free_half_day'){
@@ -39,9 +36,6 @@ function txt_morning_half(val, id) {
         break;
     case "1":
         return 'Avoir des journées chargées mais aussi des demi-journées libérées';
-        break;
-    default:
-        return "essai";
         break;
     }
   }
