@@ -103,6 +103,8 @@ def student_preferences(req):
             user = req.user
             morning_weight = req.POST['morning_evening']
             free_half_day_weight = req.POST['light_free']
+            hole_weight = req.POST['hole_nothole']
+            eat_weight = req.POST['eat']
 
             student = Student.objects.get(username=user.username)
             student_pref, created = StudentPreferences.objects.get_or_create(student=student)
@@ -110,6 +112,9 @@ def student_preferences(req):
                 student_pref.save()
             student_pref.morning_weight = morning_weight
             student_pref.free_half_day_weight = free_half_day_weight
+            student_pref.hole_weight = hole_weight
+            student_pref.eat_weight = eat_weight
+
             student_pref.save()
             group_pref = None
             for group in student.belong_to.all() :
@@ -130,13 +135,18 @@ def student_preferences(req):
             except ObjectDoesNotExist:
                 student_pref = StudentPreferences(student=student)
                 student_pref.save()
+
             morning = student_pref.morning_weight
             free_half_day = student_pref.free_half_day_weight
+            hole = student_pref.hole_weight
+            eat = student_pref.eat_weight
             return TemplateResponse(
                 req,
                 'people/studentPreferencesSelection.html',
                 {'morning': morning,
                  'free_half_day': free_half_day,
+                 'hole': hole,
+                 'selfeat': eat,
                  'user_notifications_pref':
                  queries.get_notification_preference(req.user)
                 })

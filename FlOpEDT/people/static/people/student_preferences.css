@@ -1,1 +1,13 @@
+.twofieldset {
+	display: inline;
+	width:46.35%;
+}
 
+fieldset{
+	border: 5px groove;
+}
+legend {
+	background-color: black;
+	color: white;
+	padding: 5px 10px;
+}
