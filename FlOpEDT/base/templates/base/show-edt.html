@@ -24,6 +24,7 @@
 {% extends "base/edt-base.html" %}
 
 {% load static %}
+{% load i18n %}
 
 {% block script_variable %}
 <script>
@@ -46,24 +47,24 @@
       </select>
     </p>
     <p onclick="check_swap_with_copy_0()" class="btn_panel">
-      Vérifier élection
+      {% trans "Check election" %}
     </p>
     <p id="ack-check-swap"></p>
     <p onclick="swap_with_copy_0()" class="btn_panel">
-      Élire cette copie
+      {% trans "Elect this copy" %}
     </p>
     <p id="ack-swap"></p>
     <p onclick="duplicate_work_copy()" class="btn_panel">
-        Dupliquer cette copie
+        {% trans "Duplicate this copy" %}
     </p>
     <p id="ack-duplicate"></p>
     <p onclick="delete_work_copy()" class="btn_panel">
-      Supprimer cette copie
+      {% trans "Delete this copy" %}
     </p>
     <p id="ack-delete"></p>
     <p onclick="delete_all_unused_work_copies()" class="btn_panel">
-        Supprimer toutes les copies sauf la 0
+        {% trans "Delete all copies except the 0" %}
     </p>
     <p id="ack-delete-all-unused"></p>
-    <p onclick="reassign_rooms()" class="btn_panel">Réassigner les salles</p>
+    <p onclick="reassign_rooms()" class="btn_panel">{% trans "Reassign rooms" %}</p>
 {% endblock%}

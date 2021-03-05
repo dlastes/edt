@@ -25,7 +25,7 @@
 
 {% csrf_token %}
 
-
+{% load i18n %}
 
 {% block title %} EDT {% endblock %}
 {% block content %}
@@ -76,18 +76,18 @@
 <!--      <div id="svg" style="width: 680px; float: left;"></div> -->
       <div style="float: left; width=100px;"> <!--margin-left: 700px;">-->
 	<fieldset>
-	  <legend>Quand ?</legend>
+	  <legend>{% trans "When ?" %}</legend>
 	  <form onchange="is_orph();">
-	    <input type="radio" id="canceled" name="when">Cours annulé</input><br/>
-	    <input type="radio" id="pending" name="when">Cours en attente</input><br/>
-	    <input type="radio" id="scheduled" name="when">Cours placé en semaine <select id="orig_date"></select></input>
+	    <input type="radio" id="canceled" name="when">{% trans "Cancelled class" %}</input><br/>
+	    <input type="radio" id="pending" name="when">{% trans "Pending classes" %}</input><br/>
+	    <input type="radio" id="scheduled" name="when">{% trans "Class placed during the week" %}<select id="orig_date"></select></input>
 	  </form>
 	</fieldset>
       </div>
       <div style="float: left; width=100px;">
 	<fieldset>
-	  <legend>Quoi ?</legend>
-	  <div class="msg-sem">(Merci de remplir les informations sur la date)</div><br/>
+	  <legend> {% trans "Why ?" %}</legend>
+	  <div class="msg-sem">{% trans "(Please fill in the date information)" %}</div><br/>
 	  <div  class="div-filt"></div>
 <!--	  <span class="crit"> Module : <select id="mod" class="dd-filt"></select></span>
 	  <span class="crit"> Enseignant : <select id="prof" class="dd-filt"></select></span>
@@ -95,13 +95,13 @@
 -->
 	</fieldset>
 	<fieldset>
-	  <legend>Propositions</legend>
+	  <legend>{% trans " Proposals" %}</legend>
 	  <div class="cours"></div>
 	</fieldset>
       </div>
       <div style="float: left; width=100px;">
 	<fieldset>
-	  <legend>Comment ?</legend>
+	  <legend>{% trans " How ?" %}</legend>
 	  <div class="div-aim"></div>
 	</fieldset>
 	  <div class="val" style="float: right">
