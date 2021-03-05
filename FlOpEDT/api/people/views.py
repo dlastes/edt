@@ -121,7 +121,7 @@ class TutorFilterSet(filters.FilterSet):
         fields = ['dept']
 
 
-class TutorUsernameViewSet(viewsets.ModelViewSet):
+class TutorUsernameViewSet(viewsets.ReadOnlyModelViewSet):
     """
     ViewSet to see all the tutors
 
