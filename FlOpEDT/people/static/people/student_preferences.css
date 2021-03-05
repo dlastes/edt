@@ -2,14 +2,16 @@
 	float:left;
 	margin-right:10px;
 }
+
 .twofieldset {
-	width:46.35%;
+	width: 47.8%;
 	height: 300px;
 }
 
 fieldset{
 	border: 5px groove;
 }
+
 legend {
 	font-weight: bold;
 	border-radius: 100px 10px / 120px;
@@ -18,4 +20,9 @@ legend {
 	background-color: #6E6E6E;
 	color: white;
 	padding: 5px 10px;
+}
+
+.centerbutton{
+	display:block;
+	margin:auto;
 }
