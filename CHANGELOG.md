@@ -34,11 +34,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 that explain the infaisability by the solver of a set of constraints
 - Availability slots in TTModel to optimize resources
 - Allow parametrized repartition between tutors on a given Module
+- the API handles the identification for the modification requests
 
 ### Changed
 - front-end: dispatch week/day management in js files
 - back-end refactoring: all model attributes in english
 - Selection of multiple weeks possible with the solve board
+- cleaned the API and optimized th requests for the mobile applicaton
 
 ### TBD
 - right permissions in TTapp/views
