@@ -1,5 +1,7 @@
 // Text for morning preferences
 // Text for preferences concerning day length
+// Text for hole preferences, if you want or not between courses
+// Text for preferences concerning if you want to eat early or late
 function txt_morning_half(val, id) {
   if (id == 'morning') {
     switch (val) {
@@ -110,8 +112,8 @@ for (var i = 0; i < 5; i++) {
     .attr("width", 110)
     .attr("height", 95)
     .attr("x", x)
-    .attr("y", 105)
-    .text("blablabl");
+    .attr("y", 105);
+    
 
     id += 2;
     x += 110;
@@ -151,3 +153,73 @@ for (var j = 0; j < 3; j++) {
     line +=  95;
 }
 
+let tableau = new Object();
+tableau.color = [{"name":"vert","color":"green"},
+                {"name":"rouge","color":"red"}];
+
+tableau.cells = [{"x":0,"y":0, "p":"vert"},
+              {"x":0,"y":1, "p":"vert"},
+              {"x":0,"y":2, "p":"vert"},
+              {"x":0,"y":3, "p":"vert"},
+              {"x":0,"y":4, "p":"vert"},
+              {"x":1,"y":0, "p":"vert"},
+              {"x":1,"y":1, "p":"vert"},
+              {"x":1,"y":2, "p":"vert"},
+              {"x":1,"y":3, "p":"vert"},
+              {"x":1,"y":4, "p":"vert"}
+             ];
+
+// create a Map to store color informations
+let color = new Map();
+let turns = new Array();
+
+for (var z=0; z<tableau.color.length; z++ ) {
+  color.set( tableau.color[z].name , tableau.color[z] );
+  turns[z] = tableau.color[z].name;
+}
+turns[z] = "n";
+
+// returns the center x coordinate
+function move_x(m) {
+    return m.x * len_square + len_square/2 ;
+}
+// returns the center y coordinate
+function move_y(m) {
+    return m.y * len_square + len_square/2 ;
+}
+
+// returns the color used
+function move_color(m) {
+  let colorName = m.p;
+  if ( color.has(colorName) ) {
+    return color.get(colorName).color;
+  } /*else {
+    return defaultColor;
+  }*/
+}
+// propose another color for this move
+function move_click(m) {
+    let actual_color = turns.indexOf(m.p);
+    m.p = turns[ (actual_color+1) % turns.length ];
+    display_move() ;
+   }
+
+function display_move() {
+  let moves = 
+  d3.select("svg#grille")
+    .selectAll("rect")
+    .data(tableau.cells);
+
+  let new_moves = moves
+    .enter()
+    .append("rect")
+    .attr("cx", move_x)
+    .attr("cy", move_y)
+    .on("click",move_click);
+
+  new_moves
+    .merge(moves)
+    .attr("fill", move_color);
+
+}
+display_move();

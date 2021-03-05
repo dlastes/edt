@@ -196,7 +196,6 @@ def student_preferences(req):
                  'hole_txt': hole_txt,
                  'selfeat': eat,
                  'eat_txt': eat_txt,
-                 'free_half_day_choice': day,
                  'user_notifications_pref':
                  queries.get_notification_preference(req.user)
                 })
