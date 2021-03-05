@@ -94,6 +94,7 @@ class BreakingNewsViewSet(viewsets.ModelViewSet):
     Can be filtered as wanted with every field of a BreakingNews object.
     """
     permission_classes = [IsTutorOrReadOnly]
+
     queryset = dwm.BreakingNews.objects.all()
     serializer_class = serializers.BreakingNewsSerializer
 
@@ -106,6 +107,8 @@ class ModuleDisplaysViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with every field of a ModuleDisplay object.
     """
+    permission_classes = [IsTutorOrReadOnly]
+
     queryset = dwm.ModuleDisplay.objects.all()
     serializer_class = serializers.ModuleDisplaysSerializer
 
@@ -130,6 +133,8 @@ class GroupDisplaysViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with every field of a GroupDisplay object.
     """
+    permission_classes = [IsTutorOrReadOnly]
+
     queryset = dwm.GroupDisplay.objects.all()
     serializer_class = serializers.GroupDisplaysSerializer
     filterset_fields = '__all__'

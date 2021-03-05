@@ -34,6 +34,7 @@ from django.views.generic import TemplateView
 from django.conf import settings
 from django.utils.decorators import method_decorator
 from api.shared.params import week_param, year_param, dept_param
+from api.permissions import IsTutorOrReadOnly, IsAdminUserOrReadOnly
 
 # ------------
 # -- GROUPS --
@@ -46,6 +47,8 @@ class DepartmentViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with every field of a Department object.
     """
+    permission_classes = [IsTutorOrReadOnly]
+
     queryset = bm.Department.objects.all()
     serializer_class = serializers.DepartmentSerializer
 
@@ -56,6 +59,8 @@ class GroupTypesViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with every field of a GroupType object.
     """
+    permission_classes = [IsTutorOrReadOnly]
+
     queryset = bm.GroupType.objects.all()
     serializer_class = serializers.GroupTypesSerializer
 
@@ -149,6 +154,8 @@ class RoomTypesViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with every field of a RoomTypes object.
     """
+    permission_classes = [IsTutorOrReadOnly]
+
     queryset = bm.RoomType.objects.all()
     serializer_class = serializers.RoomTypesSerializer
     filterset_fields = '__all__'
@@ -160,12 +167,15 @@ class RoomViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with every field of a Room object.
     """
+    permission_classes = [IsTutorOrReadOnly]
+
     queryset = bm.Room.objects.all()
     serializer_class = serializers.RoomSerializer
     filterset_fields = '__all__'
 
 
 class RoomFilterSet(filters.FilterSet):
+
     dept = filters.CharFilter(field_name='departments__abbrev', required=True)
 
     class Meta:
@@ -179,6 +189,8 @@ class RoomNameViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with every field of a Room object.
     """
+    permission_classes = [IsTutorOrReadOnly]
+
     queryset = bm.Room.objects.all()
     serializer_class = serializers.RoomNameSerializer
     filter_class = RoomFilterSet
@@ -190,6 +202,8 @@ class RoomViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with parameter="dept"[required] of a Room object, with the function RoomsFilterSet
     """
+    permission_classes = [IsAdminOrReadOnly]
+
     queryset = bm.Room.objects.all()
     serializer_class = serializers.RoomSerializer
     filter_class = RoomFilterSet
@@ -203,6 +217,7 @@ class RoomSortsViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with every field of a RoomSort object.
     """
+    permission_classes = [IsAdminUserOrReadOnly]
     queryset = bm.RoomSort.objects.all()
     serializer_class = serializers.RoomSortsSerializer
 
@@ -262,6 +277,8 @@ class ModuleFullViewSet(viewsets.ModelViewSet):
 
     can also be filtered with a department.
     """
+    permission_classes = [IsTutorOrReadOnly]
+
     queryset = bm.Module.objects.all()
     serializer_class = serializers.ModuleFullSerializer
     filterset_fields = '__all__'
@@ -287,6 +304,8 @@ class CourseTypeViewSet(viewsets.ModelViewSet):
 
     filterset_fields = '__all__'
 
+    permission_classes = [IsTutorOrReadOnly]
+
 
 class CourseTypeNameViewSet(viewsets.ModelViewSet):
     """
@@ -300,6 +319,8 @@ class CourseTypeNameViewSet(viewsets.ModelViewSet):
 
     filterset_fields = '__all__'
 
+    permission_classes = [IsTutorOrReadOnly]
+
 
 class CoursesViewSet(viewsets.ModelViewSet):
     """
@@ -312,6 +333,8 @@ class CoursesViewSet(viewsets.ModelViewSet):
 
     filterset_fields = '__all__'
 
+    permission_classes = [IsTutorOrReadOnly]
+
 # -----------------
 # - MODIFICATIONS -
 # -----------------
@@ -322,6 +345,7 @@ class EdtVersionsViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with every field of a EDTVersion object.
     """
+
     queryset = bm.EdtVersion.objects.all()
     serializer_class = serializers.EdtVersionSerializer
 
@@ -338,6 +362,8 @@ class CourseModificationsViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.CourseModificationsSerializer
 
     filterset_fields = '__all__'
+
+    permission_classes = [IsAdminUserOrReadOnly]
 
 
 # -----------

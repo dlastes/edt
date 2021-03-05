@@ -35,6 +35,8 @@ from drf_yasg import openapi
 from api.preferences import serializers
 from api.shared.params import week_param, year_param, user_param, dept_param
 
+from api.permissions import IsTutorOrReadOnly, IsAdminOrReadOnly
+
 # -----------------
 # -- PREFERENCES --
 # -----------------

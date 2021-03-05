@@ -111,6 +111,7 @@ class StudentsViewSet(viewsets.ModelViewSet):
 
 
 class TutorFilterSet(filters.FilterSet):
+    permission_classes = [IsTutorOrReadOnly]
     dept = filters.CharFilter(field_name='departments__abbrev', required=True)
 
     class Meta:
@@ -124,7 +125,7 @@ class TutorUsernameViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with every field of a Tutor object.
     """
-    permission_classes = [IsTutorOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
 
     queryset = pm.Tutor.objects.all()
     serializer_class = serializers.TutorUsernameSerializer

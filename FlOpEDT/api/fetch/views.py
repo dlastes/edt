@@ -35,9 +35,10 @@ import displayweb.models as dwm
 
 from api.fetch import serializers
 from api.shared.params import dept_param, week_param, year_param, user_param
-from api.permissions import IsTutorOrReadOnly
+from api.permissions import IsTutorOrReadOnly, ISAdminOrReadOnly
 
 class ScheduledCourseFilterSet(filters.FilterSet):
+    permission_classes = [IsTutorOrReadOnly]
     dept = filters.CharFilter(field_name='course__module__train_prog__department__abbrev', required=True)
     # makes the fields required
     week = filters.NumberFilter(field_name='course__week', required=True)
@@ -58,6 +59,7 @@ class ScheduledCoursesViewSet(viewsets.ModelViewSet):
     as wanted with week, year and work_copy (0 by default).
     Request needs a department filter.
     """
+    permission_classes = [IsTutorOrReadOnly]
     queryset = bm.ScheduledCourse.objects.all()
     serializer_class = serializers.ScheduledCoursesSerializer
     filter_class = ScheduledCourseFilterSet
@@ -125,6 +127,7 @@ class AvailabilitiesViewSet(viewsets.ModelViewSet):
 
     Result can be filtered as wanted with week, year and department fields.
     """
+    permission_classes = [IsTutorOrReadOnly]
     serializer_class = serializers.AvailabilitiesSerializer
 
     def get_queryset(self):
@@ -189,6 +192,7 @@ class CourseTypeDefaultWeekViewSet(viewsets.ModelViewSet):
 
 
 class AllVersionsFilterSet(filters.FilterSet):
+    permission_classes = [ISAdminOrReadOnly]
     dept = filters.CharFilter(field_name='department__abbrev')
 
     class Meta:
@@ -203,6 +207,8 @@ class AllVersionsViewSet(viewsets.ModelViewSet):
     Result can be filtered as wanted with the department
     by using the function AllVersionsFilterSet
     """
+    permission_classes = [ISAdminOrReadOnly]
+
     queryset = bm.EdtVersion.objects.all()
     serializer_class = serializers.AllVersionsSerializer
     filter_class = AllVersionsFilterSet
@@ -214,6 +220,8 @@ class DepartmentsViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with every field of a Department object.
     """
+    permission_classes = [IsTutorOrReadOnly]
+
     queryset = bm.Department.objects.all()
     serializer_class = serializers.DepartmentAbbrevSerializer
 
@@ -221,6 +229,7 @@ class DepartmentsViewSet(viewsets.ModelViewSet):
 
 
 class TutorCoursesFilterSet(filters.FilterSet):
+    permission_classes = [IsTutorOrReadOnly]
     tutor_name = filters.CharFilter(field_name='user__departments__train_pro__module__module__tutor__username',
                                     required=True)
     year = filters.CharFilter(field_name='user__departments__train_pro__module__module__year')
@@ -239,6 +248,8 @@ class TutorCoursesViewSet(viewsets.ModelViewSet):
     Result needs to be filtered by the username of a tutor.
     Filtering is also possible with week, department and year.
     """
+    permission_classes = [IsTutorOrReadOnly]
+
     serializer_class = serializers.TutorCourses_Serializer
     queryset = pm.UserDepartmentSettings.objects.all()
     filter_class = TutorCoursesFilterSet
@@ -255,6 +266,8 @@ class ExtraSchedCoursesViewSet(viewsets.ModelViewSet):
 
     Result can be filtered with year and week
     """
+    permission_classes = [IsTutorOrReadOnly]
+
     serializer_class = serializers.ExtraScheduledCoursesSerializer
     permission_classes = [IsTutorOrReadOnly]
 
@@ -288,6 +301,7 @@ class ExtraSchedCoursesViewSet(viewsets.ModelViewSet):
 
 
 class BKNewsFilterSet(filters.FilterSet):
+    permission_classes = [IsTutorOrReadOnly]
     dept = filters.CharFilter(field_name='department__abbrev', required=True)
     # makes the fields required
     week = filters.NumberFilter(field_name='week', required=True)
@@ -304,6 +318,8 @@ class BKNewsViewSet(viewsets.ModelViewSet):
 
     Result needs to be filtered by the department,the week and the year.
     """
+    permission_classes = [IsTutorOrReadOnly]
+
     queryset = dwm.BreakingNews.objects.all()
     serializer_class = serializers.BKNewsSerializer
     filter_class = BKNewsFilterSet
