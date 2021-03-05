@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-09-16 16:46+0000\n"
+"POT-Creation-Date: 2021-03-05 11:57+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -24,6 +24,10 @@ msgstr "Français"
 #: FlOpEDT/settings/base.py:151
 msgid "English"
 msgstr "Anglais"
+
+#: FlOpEDT/settings/base.py:152
+msgid "Spanish"
+msgstr ""
 
 #: base/templates/base/show-stype.html:95
 msgid "Weeks"
@@ -58,6 +62,7 @@ msgstr "Semaine type"
 msgid "Update my default week"
 msgstr "Redéfinir ma semaine type"
 
+#: base/templates/base/show-stype.html:112
 #: base/templates/base/show-stype.html:137
 msgid "button_save"
 msgstr "Sauvegarder"
@@ -161,7 +166,7 @@ msgstr "Dim."
 msgid "Forgot password?"
 msgstr "Mot de passe perdu ?"
 
-#: people/templates/people/login.html:58 templates/base.html:106
+#: people/templates/people/login.html:58 templates/base.html:108
 msgid "Sign in"
 msgstr "Se connecter"
 
@@ -192,6 +197,15 @@ msgstr "BIATS"
 #: people/templates/people/login.html:86
 msgid "Create"
 msgstr "Créer"
+
+#: people/views.py:179
+msgid "Not allowed"
+msgstr ""
+
+#: people/views.py:185
+#, python-brace-format
+msgid "No such user as {user}"
+msgstr ""
 
 #: quote/forms.py:41
 msgid "Quote "
@@ -225,59 +239,59 @@ msgstr "En-tête "
 msgid "Category "
 msgstr "Catégorie "
 
-#: templates/base.html:51
+#: templates/base.html:53
 msgid "Schedule_title"
 msgstr "Emplois du temps"
 
-#: templates/base.html:80
+#: templates/base.html:82
 msgid "Schedule_banner"
 msgstr "Consulter"
 
-#: templates/base.html:82
+#: templates/base.html:84
 msgid "Move/Cancel"
 msgstr "Décaler/Annuler"
 
-#: templates/base.html:84
+#: templates/base.html:86
 msgid "Preferences"
 msgstr "Préférences"
 
-#: templates/base.html:85
+#: templates/base.html:87
 msgid "iCal"
 msgstr "iCal"
 
-#: templates/base.html:86
+#: templates/base.html:88
 msgid "Help"
 msgstr "Aide"
 
-#: templates/base.html:87
+#: templates/base.html:89
 msgid "Messages"
 msgstr "Contact"
 
-#: templates/base.html:88
+#: templates/base.html:90
 msgid "Modules"
 msgstr "Modules"
 
-#: templates/base.html:90
+#: templates/base.html:92
 msgid "Generate"
 msgstr "Générer"
 
-#: templates/base.html:91
+#: templates/base.html:93
 msgid "Statistics"
 msgstr "Statistiques"
 
-#: templates/base.html:92
+#: templates/base.html:94
 msgid "Import"
 msgstr "Importer"
 
-#: templates/base.html:93
+#: templates/base.html:95
 msgid "Admin"
 msgstr ""
 
-#: templates/base.html:99 templates/base.html:101 templates/base.html:103
+#: templates/base.html:101 templates/base.html:103 templates/base.html:105
 msgid "Sign out"
 msgstr "Déconnexion"
 
-#: templates/base.html:110
+#: templates/base.html:112
 msgid "Signed in as "
 msgstr "Connecté·e sous "
 
