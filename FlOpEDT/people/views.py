@@ -41,7 +41,7 @@ from people.models import Tutor, GroupPreferences, StudentPreferences, Student,\
     NotificationsPreferences, UserPreferredLinks, PhysicalPresence, User
 from people.admin import TutorResource, GroupPreferencesResource, \
     StudentPreferencesResource, UserPreferredLinksResource, PhysicalPresenceResource
-
+from base.models import TimeGeneralSettings, Department
 
 logger = logging.getLogger(__name__)
 
@@ -180,6 +180,10 @@ def student_preferences(req):
             if eat == 1:
                 eat_txt = 'Manger plus tard'
 
+            jour = Department.objects.get(abbrev='INFO')
+
+
+
             return TemplateResponse(
                 req,
                 'people/studentPreferencesSelection.html',
@@ -191,6 +195,7 @@ def student_preferences(req):
                  'hole_txt': hole_txt,
                  'selfeat': eat,
                  'eat_txt': eat_txt,
+                 'demi_jour': jour,
                  'user_notifications_pref':
                  queries.get_notification_preference(req.user)
                 })

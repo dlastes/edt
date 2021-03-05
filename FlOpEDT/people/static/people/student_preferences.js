@@ -84,3 +84,62 @@ $(function() {
         $(document).ready(update_comment(id));
     });
 });
+
+let len_square = 70;
+let x=70;
+
+for (var i = 0; i < 5; i++) {
+ 
+    d3.select("svg#grille")
+    .append("rect")
+    .attr("fill", "#00CC00")
+    .attr("width", 110)
+    .attr("height", 95)
+    .attr("x", x)
+    .attr("y", 10);
+
+     d3.select("svg#grille")
+    .append("rect")
+    .attr("fill", "#00CC00")
+    .attr("width", 110)
+    .attr("height", 95)
+    .attr("x", x)
+    .attr("y", 105);
+
+    x += 110;
+}
+
+
+for (var i = 0; i < 6; i++) {
+ 
+
+    d3.select("svg#grille")
+    .append("line")
+    .attr("stroke", "black")
+    .attr("stroke-width", 2)
+    .attr("x1", len_square*1)
+    .attr("y1", 10)
+    .attr("x2", len_square*1)
+    .attr("y2", 200);
+
+    len_square +=  110;
+
+}
+
+let trait = 10;
+
+for (var j = 0; j < 3; j++) {
+
+    d3.select("svg#grille")
+    .append("line")
+    .attr("stroke", "black")
+    .attr("stroke-width", 2)
+    .attr("x1", 70)
+    .attr("y1", trait)
+    .attr("x2", 620)
+    .attr("y2", trait);
+
+
+    trait +=  95;
+}
+
