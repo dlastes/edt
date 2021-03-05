@@ -50,7 +50,7 @@ class ScheduledCourseFilterSet(filters.FilterSet):
         fields = ['dept', 'week', 'year']
 
 
-class ScheduledCoursesViewSet(viewsets.ModelViewSet):
+class ScheduledCoursesViewSet(viewsets.ReadOnlyModelViewSet):
     """
     ViewSet to see all the scheduled courses
 
