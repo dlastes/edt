@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.3.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-05 09:28+0000\n"
+"POT-Creation-Date: 2021-03-05 10:52+0000\n"
 "PO-Revision-Date: 2020-04-05 18:44+0200\n"
 "Last-Translator: Benoît Roche (benoit.roche@esrf.fr)\n"
 "Language-Team: none\n"
@@ -91,6 +91,10 @@ msgstr ""
 msgid "Some Tutorial Videos"
 msgstr ""
 
+#: base/templates/base/contact.html:34 base/templates/base/visio.html:38
+msgid "Send"
+msgstr "Envoyer"
+
 #: base/templates/base/departments.html:15
 msgid "Please choose your department : "
 msgstr ""
@@ -129,7 +133,7 @@ msgstr ""
 
 #: base/templates/base/show-decale.html:79
 msgid "When ?"
-msgstr ""
+msgstr "QUand ?"
 
 #: base/templates/base/show-decale.html:81
 msgid "Cancelled class"
@@ -145,7 +149,7 @@ msgstr ""
 
 #: base/templates/base/show-decale.html:89
 msgid "Why ?"
-msgstr ""
+msgstr "Pourquoi ?"
 
 #: base/templates/base/show-decale.html:90
 msgid "(Please fill in the date information)"
@@ -164,7 +168,9 @@ msgid "Check election"
 msgstr "Vérifier élection"
 
 #: base/templates/base/show-edt.html:54
-msgid "Élect this copy"
+#, fuzzy
+#| msgid "Élect this copy"
+msgid "Elect this copy"
 msgstr "Élire cette copie"
 
 #: base/templates/base/show-edt.html:58
@@ -288,30 +294,6 @@ msgstr ""
 #: base/templates/base/visio.html:31
 msgid "Create or modify a link"
 msgstr "Créer ou modifier un lien"
-
-#: base/templates/base/visio.html:38
-msgid "Send"
-msgstr "Envoyer"
-
-#: base/views.py:1753
-msgid "Not authorized. New link then."
-msgstr ""
-
-#: base/views.py:1756
-msgid "Unknown link. New link then."
-msgstr ""
-
-#: base/views.py:1768
-msgid "Created"
-msgstr ""
-
-#: base/views.py:1768
-msgid "Modified"
-msgstr ""
-
-#: base/views.py:1771
-msgid "Tutor does not exist"
-msgstr ""
 
 #: base/views.py:1753
 msgid "Not authorized. New link then."

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-05 09:15+0000\n"
+"POT-Creation-Date: 2021-03-05 10:52+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -103,6 +103,10 @@ msgstr ""
 msgid "Some Tutorial Videos"
 msgstr "Quelques Tutos Vidéos"
 
+#: base/templates/base/contact.html:34 base/templates/base/visio.html:38
+msgid "Send"
+msgstr "Envoyer"
+
 #: base/templates/base/departments.html:15
 msgid "Please choose your department : "
 msgstr "Veuillez choisir votre département :"
@@ -182,12 +186,11 @@ msgstr "Comment ?"
 
 #: base/templates/base/show-edt.html:50
 msgid "Check election"
-msgstr "Vérifier élection
-"
+msgstr "Vérifier élection"
 
 #: base/templates/base/show-edt.html:54
-msgid "Élect this copy"
-msgstr "Élire cette copie"
+msgid "Elect this copy"
+msgstr "Elire cette copie"
 
 #: base/templates/base/show-edt.html:58
 msgid "Duplicate this copy"
@@ -296,7 +299,7 @@ msgstr "Tranformation en : "
 #: base/templates/base/show-stype.html:177
 #: base/templates/base/show-stype.html:183
 msgid "Types of classes"
-msgstr "Tyoe de cours"
+msgstr "Type de cours"
 
 #: base/templates/base/show-stype.html:190
 msgid "Rooms"
@@ -313,10 +316,6 @@ msgstr "Nombre de cours donnés par professeur"
 #: base/templates/base/visio.html:31
 msgid "Create or modify a link"
 msgstr "Créer ou modifier un lien"
-
-#: base/templates/base/visio.html:38
-msgid "Send"
-msgstr "Envoyer"
 
 #: base/views.py:1753
 msgid "Not authorized. New link then."
