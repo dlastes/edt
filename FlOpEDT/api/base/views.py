@@ -34,9 +34,8 @@ from django.views.generic import TemplateView
 from django.conf import settings
 from django.utils.decorators import method_decorator
 from api.shared.params import week_param, year_param, dept_param
-from api.permissions import IsTutorOrReadOnly, IsAdminUserOrReadOnly
 
-from api.permissions import IsTutorOrReadOnly, IsAdminUserOrReadOnly
+from api.permissions import IsTutorOrReadOnly, IsAdminOrReadOnly
 
 # ------------
 # -- GROUPS --
@@ -81,7 +80,7 @@ class GroupsViewSet(viewsets.ReadOnlyModelViewSet):
 
     Can be filtered as wanted with parameter="dept"[required] of a Group object, with the function GroupsFilterSet
     """
-    permission_classes = [IsAdminUserOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
     serializer_class = serializers.GroupsSerializer
     queryset = bm.Group.objects.all()
     filter_class = GroupsFilterSet
@@ -219,7 +218,7 @@ class RoomSortsViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with every field of a RoomSort object.
     """
-    permission_classes = [IsAdminUserOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
     queryset = bm.RoomSort.objects.all()
     serializer_class = serializers.RoomSortsSerializer
 
@@ -365,7 +364,7 @@ class CourseModificationsViewSet(viewsets.ModelViewSet):
 
     filterset_fields = '__all__'
 
-    permission_classes = [IsAdminUserOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
 
 
 # -----------

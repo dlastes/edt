@@ -38,7 +38,7 @@ class IsStudentOrReadOnly(BasePermission):
 
 
 # This permission allow only admins to use the POST, PUT, PATCH and DELETE methods. GET method can be use by everyone
-class IsAdminUserOrReadOnly(BasePermission):
+class IsAdminOrReadOnly(BasePermission):
 	message = 'POST, PUT, PATCH and DELETE methods reserved for admin'
 
 	def has_permission(self, request, view):

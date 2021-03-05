@@ -32,7 +32,7 @@ import base.models as bm
 from api.people import serializers
 from api.shared.params import week_param, year_param
 
-from api.permissions import IsTutorOrReadOnly, IsAdminUserOrReadOnly
+from api.permissions import IsTutorOrReadOnly, IsAdminOrReadOnly
 
 
 class UsersViewSet(viewsets.ReadOnlyModelViewSet):

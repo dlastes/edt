@@ -35,7 +35,7 @@ import displayweb.models as dwm
 
 from api.fetch import serializers
 from api.shared.params import dept_param, week_param, year_param, user_param
-from api.permissions import IsTutorOrReadOnly, ISAdminOrReadOnly
+from api.permissions import IsTutorOrReadOnly, IsAdminOrReadOnly
 
 class ScheduledCourseFilterSet(filters.FilterSet):
     permission_classes = [IsTutorOrReadOnly]
@@ -192,7 +192,7 @@ class CourseTypeDefaultWeekViewSet(viewsets.ModelViewSet):
 
 
 class AllVersionsFilterSet(filters.FilterSet):
-    permission_classes = [ISAdminOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
     dept = filters.CharFilter(field_name='department__abbrev')
 
     class Meta:
@@ -207,7 +207,7 @@ class AllVersionsViewSet(viewsets.ModelViewSet):
     Result can be filtered as wanted with the department
     by using the function AllVersionsFilterSet
     """
-    permission_classes = [ISAdminOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
 
     queryset = bm.EdtVersion.objects.all()
     serializer_class = serializers.AllVersionsSerializer
