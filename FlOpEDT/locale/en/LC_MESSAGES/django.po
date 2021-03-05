@@ -307,18 +307,6 @@ msgstr ""
 msgid "Unknown link. New link then."
 msgstr ""
 
-#: base/views.py:1768
-msgid "Created"
-msgstr ""
-
-#: base/views.py:1768
-msgid "Modified"
-msgstr ""
-
-#: base/views.py:1771
-msgid "Tutor does not exist"
-msgstr ""
-
 #: base/templates/base/visio.html:31
 msgid "Create or modify a link"
 msgstr ""
@@ -329,6 +317,18 @@ msgstr ""
 
 #: base/views.py:1753
 msgid "Not authorized. New link then."
+msgstr ""
+
+#: base/views.py:1768
+msgid "Created"
+msgstr ""
+
+#: base/views.py:1768
+msgid "Modified"
+msgstr ""
+
+#: base/views.py:1771
+msgid "Tutor does not exist"
 msgstr ""
 
 #: base/weeks.py:34

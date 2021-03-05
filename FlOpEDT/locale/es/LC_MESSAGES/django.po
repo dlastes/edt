@@ -1,0 +1,299 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-03-05 11:57+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: FlOpEDT/settings/base.py:150
+msgid "French"
+msgstr "Francés"
+
+#: FlOpEDT/settings/base.py:151
+msgid "English"
+msgstr "Inglés"
+
+#: FlOpEDT/settings/base.py:152
+msgid "Spanish"
+msgstr ""
+
+#: base/templates/base/show-stype.html:95
+msgid "Weeks"
+msgstr "Semanas"
+
+#: base/templates/base/show-stype.html:96
+msgid "Set default week"
+msgstr "Configurar semana predeterminada"
+
+#: base/templates/base/show-stype.html:97
+msgid "from week"
+msgstr "Desde semana"
+
+#: base/templates/base/show-stype.html:98
+#: base/templates/base/show-stype.html:101
+msgid "year"
+msgstr "años"
+
+#: base/templates/base/show-stype.html:100
+msgid "until week"
+msgstr "hasta la semana"
+
+#: base/templates/base/show-stype.html:103
+msgid "button_apply"
+msgstr "Applicar"
+
+#: base/templates/base/show-stype.html:108
+msgid "Default week"
+msgstr "Semanas predeterminada"
+
+#: base/templates/base/show-stype.html:110
+msgid "Update my default week"
+msgstr "Actualizar mi semana predeterminada"
+
+#: base/templates/base/show-stype.html:112
+#: base/templates/base/show-stype.html:137
+msgid "button_save"
+msgstr "Guardar"
+
+#: base/templates/base/show-stype.html:121
+msgid "My videoconf links"
+msgstr "Mi enlace de clase"
+
+#: base/templates/base/show-stype.html:122
+msgid "Create a link"
+msgstr "Crear un enlace"
+
+#: base/templates/base/show-stype.html:124
+#: base/templates/base/show-stype.html:147
+msgid "button_change"
+msgstr "Cambiar"
+
+#: base/templates/base/show-stype.html:127
+msgid "My ideal day"
+msgstr "Mis días preferidos"
+
+#: base/templates/base/show-stype.html:130
+msgid ""
+"This is the total number of teaching hours I would like to give every day:"
+msgstr "Eso es el total de horas de educación que quiero hacer todos los días"
+
+#: base/templates/base/show-stype.html:132
+msgid "Preferred"
+msgstr "Favorito"
+
+#: base/templates/base/show-stype.html:134
+msgid "Maximum"
+msgstr "Maximum"
+
+#: base/templates/base/show-stype.html:144
+msgid "My favorite rooms"
+msgstr "Mi aula favorita"
+
+#: base/templates/base/show-stype.html:145
+msgid "Select my favorite rooms"
+msgstr "Elegir mi aula favorita"
+
+#: base/templates/base/visio.html:31
+msgid "Create or modify a link"
+msgstr "Creer o cambiar un enlace"
+
+#: base/templates/base/visio.html:38
+msgid "Send"
+msgstr "Mandar"
+
+#: base/views.py:1753
+msgid "Not authorized. New link then."
+msgstr "No tienes autorización. Nuevo enlace creado"
+
+#: base/views.py:1756
+msgid "Unknown link. New link then."
+msgstr "Enlace desconocido. Nuevo enlace creado"
+
+#: base/views.py:1768
+msgid "Created"
+msgstr "Creado"
+
+#: base/views.py:1768
+msgid "Modified"
+msgstr "Cambiado"
+
+#: base/views.py:1771
+msgid "Tutor does not exist"
+msgstr "Tutor no existe"
+
+#: base/weeks.py:34
+msgid "Mon."
+msgstr "Lun."
+
+#: base/weeks.py:35
+msgid "Tue."
+msgstr "Mar."
+
+#: base/weeks.py:36
+msgid "Wed."
+msgstr "Mie."
+
+#: base/weeks.py:37
+msgid "Thu."
+msgstr "Jue."
+
+#: base/weeks.py:38
+msgid "Fri."
+msgstr "Vie."
+
+#: base/weeks.py:39
+msgid "Sat."
+msgstr "Sab."
+
+#: base/weeks.py:40
+msgid "Sun."
+msgstr "Dom."
+
+#: people/templates/people/login.html:55
+msgid "Forgot password?"
+msgstr "¿Has olvidado tu contraseña?"
+
+#: people/templates/people/login.html:58 templates/base.html:108
+msgid "Sign in"
+msgstr "Iniciar sesión"
+
+#: people/templates/people/login.html:79
+msgid "Sign up"
+msgstr "Inscribirse"
+
+#: people/templates/people/login.html:80
+msgid "I am"
+msgstr "Soy"
+
+#: people/templates/people/login.html:82
+msgid "A student"
+msgstr "Un·a estudiante"
+
+#: people/templates/people/login.html:83
+msgid "A teacher"
+msgstr "Un·a profesor·a permanente"
+
+#: people/templates/people/login.html:84
+msgid "A temporary teacher"
+msgstr "Un profesor temporal"
+
+#: people/templates/people/login.html:85
+msgid "A tech or administrative staff"
+msgstr "Personal técnico o administrativo"
+
+#: people/templates/people/login.html:86
+msgid "Create"
+msgstr "Crear"
+
+#: people/views.py:179
+msgid "Not allowed"
+msgstr "No permitido"
+
+#: people/views.py:185
+#, python-brace-format
+msgid "No such user as {user}"
+msgstr "El usuario {user} no existe"
+
+#: quote/forms.py:41
+msgid "Quote "
+msgstr "Cita"
+
+#: quote/forms.py:42
+msgid "Last name "
+msgstr "Apelido"
+
+#: quote/forms.py:43
+msgid "First name "
+msgstr "Nombre"
+
+#: quote/forms.py:44
+msgid "Nickname "
+msgstr "Apodo"
+
+#: quote/forms.py:45
+msgid "Author description "
+msgstr "Descripción del autor"
+
+#: quote/forms.py:46
+msgid "Date "
+msgstr "Fecha"
+
+#: quote/forms.py:47
+msgid "Header "
+msgstr "Título"
+
+#: quote/forms.py:48
+msgid "Category "
+msgstr "Categoría"
+
+#: templates/base.html:53
+msgid "Schedule_title"
+msgstr "Horario"
+
+#: templates/base.html:82
+msgid "Schedule_banner"
+msgstr "Horario"
+
+#: templates/base.html:84
+msgid "Move/Cancel"
+msgstr "Mover/Cancelar"
+
+#: templates/base.html:86
+msgid "Preferences"
+msgstr "Preferencias "
+
+#: templates/base.html:87
+msgid "iCal"
+msgstr "iCal"
+
+#: templates/base.html:88
+msgid "Help"
+msgstr "Ayuda"
+
+#: templates/base.html:89
+msgid "Messages"
+msgstr "Mensajes"
+
+#: templates/base.html:90
+msgid "Modules"
+msgstr "Módulos"
+
+#: templates/base.html:92
+msgid "Generate"
+msgstr "Generar"
+
+#: templates/base.html:93
+msgid "Statistics"
+msgstr "Estadísticas "
+
+#: templates/base.html:94
+msgid "Import"
+msgstr "Importar"
+
+#: templates/base.html:95
+msgid "Admin"
+msgstr "Admin"
+
+#: templates/base.html:101 templates/base.html:103 templates/base.html:105
+msgid "Sign out"
+msgstr "Cerrar sesión"
+
+#: templates/base.html:112
+msgid "Signed in as "
+msgstr "Iniciar sesión como"
+
+#~ msgid "Rooms"
+#~ msgstr "Aulas"
