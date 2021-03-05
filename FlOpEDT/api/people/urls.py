@@ -29,7 +29,7 @@ routerPeople = routers.SimpleRouter()
 
 routerPeople.register(r'users', views.UsersViewSet)
 routerPeople.register(r'userdepartmentsettings', views.UserDepartmentSettingsViewSet)
-#routerPeople.register(r'tutor/username', views.TutorUsernameViewSet, basename='tutor_username')
+routerPeople.register(r'tutor/username', views.TutorUsernameViewSet, basename='tutor_username')
 routerPeople.register(r'tutor', views.TutorViewSet, basename='tutor')
 routerPeople.register(r'supplystaff', views.SupplyStaffsViewSet)
 routerPeople.register(r'students', views.StudentsViewSet)
