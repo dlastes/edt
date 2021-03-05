@@ -155,7 +155,7 @@ class RoomTypesViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with every field of a RoomTypes object.
     """
-    permission_classes = [IsTutorOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
 
     queryset = bm.RoomType.objects.all()
     serializer_class = serializers.RoomTypesSerializer
@@ -168,7 +168,7 @@ class RoomViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with every field of a Room object.
     """
-    permission_classes = [IsTutorOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
 
     queryset = bm.Room.objects.all()
     serializer_class = serializers.RoomSerializer
@@ -176,6 +176,8 @@ class RoomViewSet(viewsets.ModelViewSet):
 
 
 class RoomFilterSet(filters.FilterSet):
+
+    permission_classes = [IsAdminOrReadOnly]
 
     dept = filters.CharFilter(field_name='departments__abbrev', required=True)
 
@@ -190,7 +192,7 @@ class RoomNameViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with every field of a Room object.
     """
-    permission_classes = [IsTutorOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
 
     queryset = bm.Room.objects.all()
     serializer_class = serializers.RoomNameSerializer
