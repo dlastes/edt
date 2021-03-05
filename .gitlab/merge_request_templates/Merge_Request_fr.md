@@ -12,6 +12,26 @@ Merci de vérifier is votre Merge Request (MR) satisfait bien aux conditions sui
 - [ ] Nous n'avons pas ajouté d'affichage dans les consoles (ni dans celle de django (avec `print`), ni dans celle du navigateur (avec des `console.log`))
 
 
+## Nouvelles dépendances
+
+### Des dépendances nouvelles ont-elles été ajoutées ?
+
+- [ ] Oui
+- [ ] Non
+
+Si oui, lesquelles ?
+
+### Licences
+
+Si de nouvelles dépendances ont été ajoutées, leurs licences sont compatibles avec une inclusion dans un logiciel sous AGPL.
+
+- [ ] Tout à fait
+- [ ] J'ai regardé, mais j'ai un doute. Franchement, les licences, c'est compliqué.
+- [ ] Non, mais il existe une alternative.
+
+Si non, quelle(s) alternative(s) ?
+
+
 ## Type de Merge Request
 
 <!-- Merci de ne faire que des MR à type unique ; soumettre plusieurs MRs au besoin. --> 
