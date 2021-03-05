@@ -25,7 +25,7 @@
 
 {% csrf_token %}
 
-
+{% load i18n %}
 
 {% block title %} EDT {% endblock %}
 {% block content %}
@@ -78,9 +78,9 @@
 	<fieldset>
 	  <legend>Quand ?</legend>
 	  <form onchange="is_orph();">
-	    <input type="radio" id="canceled" name="when">Cours annulé</input><br/>
-	    <input type="radio" id="pending" name="when">Cours en attente</input><br/>
-	    <input type="radio" id="scheduled" name="when">Cours placé en semaine <select id="orig_date"></select></input>
+	    <input type="radio" id="canceled" name="when">{% trans "Cancelled class" %}</input><br/>
+	    <input type="radio" id="pending" name="when">{% trans "Pending classes" %}</input><br/>
+	    <input type="radio" id="scheduled" name="when">{% trans "Class placed during the week" %}<select id="orig_date"></select></input>
 	  </form>
 	</fieldset>
       </div>
@@ -101,7 +101,7 @@
       </div>
       <div style="float: left; width=100px;">
 	<fieldset>
-	  <legend>Comment ?</legend>
+	  <legend>{% trans " How ?" %}</legend>
 	  <div class="div-aim"></div>
 	</fieldset>
 	  <div class="val" style="float: right">

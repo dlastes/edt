@@ -23,7 +23,7 @@
 
 {% extends "base.html" %}
 {% load static %}
-
+{% load i18n %}
 {% block title %} EDT {% endblock %}
 
 {% block content %}
@@ -32,7 +32,7 @@
 
 {% if user.is_tutor %}
 <div class="description-container">
-    <h1>Modification de la description du module {{ module }}.</h1>
+    <h1>{% trans "Modification of the module description."%}{{ module }}</h1>
     <form method="post" novalidate>
         {% csrf_token %}
         <table cellpadding="10">
