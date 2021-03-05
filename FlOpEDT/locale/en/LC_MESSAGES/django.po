@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.3.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-05 08:10+0000\n"
+"POT-Creation-Date: 2021-03-05 09:15+0000\n"
 "PO-Revision-Date: 2020-04-05 18:44+0200\n"
 "Last-Translator: Benoît Roche (benoit.roche@esrf.fr)\n"
 "Language-Team: none\n"
@@ -99,6 +99,10 @@ msgstr ""
 msgid "Modification of the module description."
 msgstr ""
 
+#: base/templates/base/module_description.html:41
+msgid "Modify"
+msgstr ""
+
 #: base/templates/base/notification.html:29
 msgid "I wish to be notified of changes for the"
 msgstr ""
@@ -123,6 +127,10 @@ msgstr ""
 msgid "(Ranking your favorite rooms, which may contain ties.)"
 msgstr ""
 
+#: base/templates/base/show-decale.html:79
+msgid "When ?"
+msgstr ""
+
 #: base/templates/base/show-decale.html:81
 msgid "Cancelled class"
 msgstr ""
@@ -133,6 +141,18 @@ msgstr ""
 
 #: base/templates/base/show-decale.html:83
 msgid "Class placed during the week"
+msgstr ""
+
+#: base/templates/base/show-decale.html:89
+msgid "Why ?"
+msgstr ""
+
+#: base/templates/base/show-decale.html:90
+msgid "(Please fill in the date information)"
+msgstr ""
+
+#: base/templates/base/show-decale.html:98
+msgid " Proposals"
 msgstr ""
 
 #: base/templates/base/show-decale.html:104
@@ -257,11 +277,11 @@ msgstr "Types de cours"
 msgid "Rooms"
 msgstr "CLasses"
 
-#: base/templates/base/statistics.html:104
+#: base/templates/base/statistics.html:105
 msgid "Number of days of innocuousness per room"
 msgstr ""
 
-#: base/templates/base/statistics.html:105
+#: base/templates/base/statistics.html:106
 msgid "Number of classes given per teacher"
 msgstr ""
 

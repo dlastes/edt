@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-05 08:10+0000\n"
+"POT-Creation-Date: 2021-03-05 09:15+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -113,6 +113,12 @@ msgstr "Veuillez choisir votre département :"
 msgid "Modification of the module description."
 msgstr "Modification de la description du module"
 
+#: base/templates/base/module_description.html:41
+#, fuzzy
+#| msgid "Modified"
+msgid "Modify"
+msgstr "Modifié"
+
 #: base/templates/base/notification.html:29
 #, fuzzy
 msgid "I wish to be notified of changes for the"
@@ -142,6 +148,10 @@ msgstr "Mes préférences de salles"
 msgid "(Ranking your favorite rooms, which may contain ties.)"
 msgstr "(Classement de vos salles préférées, pouvant contenir des égalités.)"
 
+#: base/templates/base/show-decale.html:79
+msgid "When ?"
+msgstr "Quand ?"
+
 #: base/templates/base/show-decale.html:81
 msgid "Cancelled class"
 msgstr "Cours annulé"
@@ -154,33 +164,46 @@ msgstr "Cours en attente"
 msgid "Class placed during the week"
 msgstr "Cours placé en semaine"
 
+#: base/templates/base/show-decale.html:89
+msgid "Why ?"
+msgstr "Pourquoi ?"
+
+#: base/templates/base/show-decale.html:90
+msgid "(Please fill in the date information)"
+msgstr "(Merci de remplir les informations sur la date)"
+
+#: base/templates/base/show-decale.html:98
+msgid " Proposals"
+msgstr "Propositions"
+
 #: base/templates/base/show-decale.html:104
 msgid " How ?"
 msgstr "Comment ?"
 
 #: base/templates/base/show-edt.html:50
 msgid "Check election"
-msgstr ""
+msgstr "Vérifier élection
+"
 
 #: base/templates/base/show-edt.html:54
 msgid "Élect this copy"
-msgstr ""
+msgstr "Élire cette copie"
 
 #: base/templates/base/show-edt.html:58
 msgid "Duplicate this copy"
-msgstr ""
+msgstr "Dupliquer cette copie"
 
 #: base/templates/base/show-edt.html:62
 msgid "Delete this copy"
-msgstr ""
+msgstr "Supprimer cette copie"
 
 #: base/templates/base/show-edt.html:66
 msgid "Delete all copies except the 0"
-msgstr ""
+msgstr "Supprimer toutes les copies sauf la 0"
 
 #: base/templates/base/show-edt.html:69
 msgid "Reassign rooms"
-msgstr ""
+msgstr "Réassigner les salles"
 
 #: base/templates/base/show-stype.html:95
 msgid "Weeks"
@@ -279,11 +302,11 @@ msgstr "Tyoe de cours"
 msgid "Rooms"
 msgstr "Classe"
 
-#: base/templates/base/statistics.html:104
+#: base/templates/base/statistics.html:105
 msgid "Number of days of innocuousness per room"
 msgstr "Nombre de jours d'innocupation par salle"
 
-#: base/templates/base/statistics.html:105
+#: base/templates/base/statistics.html:106
 msgid "Number of classes given per teacher"
 msgstr "Nombre de cours donnés par professeur"
 
