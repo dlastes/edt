@@ -36,6 +36,8 @@ from django.utils.decorators import method_decorator
 from api.shared.params import week_param, year_param, dept_param
 from api.permissions import IsTutorOrReadOnly, IsAdminUserOrReadOnly
 
+from api.permissions import IsTutorOrReadOnly, IsAdminUserOrReadOnly
+
 # ------------
 # -- GROUPS --
 # ------------
@@ -53,7 +55,7 @@ class DepartmentViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.DepartmentSerializer
 
 
-class GroupTypesViewSet(viewsets.ModelViewSet):
+class GroupTypesViewSet(viewsets.ReadOnlyModelViewSet):
     """
     ViewSet to see all the group types
 
@@ -73,7 +75,7 @@ class GroupsFilterSet(filters.FilterSet):
         fields = ['dept']
 
 
-class GroupsViewSet(viewsets.ModelViewSet):
+class GroupsViewSet(viewsets.ReadOnlyModelViewSet):
     """
     ViewSet to see all the groups
 
@@ -520,7 +522,7 @@ class TrainingProgrammeNameViewSet(viewsets.ModelViewSet):
     filterset_class = TrainingProgrammeFilterSet
 
 
-class TrainingProgrammeViewSet(viewsets.ModelViewSet):
+class TrainingProgrammeViewSet(viewsets.ReadOnlyModelViewSet):
     """
     ViewSet to see all the training programs
     """

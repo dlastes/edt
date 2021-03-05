@@ -32,8 +32,10 @@ import base.models as bm
 from api.people import serializers
 from api.shared.params import week_param, year_param
 
+from api.permissions import IsTutorOrReadOnly, IsAdminUserOrReadOnly
 
-class UsersViewSet(viewsets.ModelViewSet):
+
+class UsersViewSet(viewsets.ReadOnlyModelViewSet):
     """
     ViewSet to see all the users
 
@@ -45,7 +47,7 @@ class UsersViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.UsersSerializer
 
 
-class UserDepartmentSettingsViewSet(viewsets.ModelViewSet):
+class UserDepartmentSettingsViewSet(viewsets.ReadOnlyModelViewSet):
     """
     ViewSet to see all the user department settings
     which shows the combination of the user and the department
@@ -56,7 +58,7 @@ class UserDepartmentSettingsViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.UserDepartmentSettingsSerializer
 
 
-class SupplyStaffsViewSet(viewsets.ModelViewSet):
+class SupplyStaffsViewSet(viewsets.ReadOnlyModelViewSet):
     """
     ViewSet to see all the supply staff
 
@@ -66,7 +68,7 @@ class SupplyStaffsViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.SupplyStaffsSerializer
 
 
-class StudentsViewSet(viewsets.ModelViewSet):
+class StudentsViewSet(viewsets.ReadOnlyModelViewSet):
     """
     ViewSet to see all the students
 
@@ -137,7 +139,7 @@ class TutorUsernameViewSet(viewsets.ModelViewSet):
                       operation_description="Active tutors",
                       manual_parameters=[week_param(), year_param()])
                   )
-class TutorViewSet(viewsets.ModelViewSet):
+class TutorViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         # Getting all the filters
         week = self.request.query_params.get('week', None)

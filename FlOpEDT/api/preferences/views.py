@@ -35,6 +35,7 @@ from drf_yasg import openapi
 from api.preferences import serializers
 from api.shared.params import week_param, year_param, user_param, dept_param
 
+
 from api.permissions import IsTutorOrReadOnly, IsAdminOrReadOnly
 
 # -----------------
@@ -48,7 +49,7 @@ class CoursePreferencesViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with every field of a CoursePreference object.
     """
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsTutor,)
     queryset = bm.CoursePreference.objects.all()
     serializer_class = serializers.CoursePreferencesSerializer
 
