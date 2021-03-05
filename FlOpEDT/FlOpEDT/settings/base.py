@@ -149,6 +149,7 @@ AUTH_USER_MODEL = 'people.User'
 LANGUAGES = [
   ('fr', _('French')),
   ('en', _('English')),
+  ('es', _('Spanish')),
 ]
 
 # Folder which contains traduction files
