@@ -590,19 +590,19 @@ if (cosmo) {
 } else {
   sel_popup.available = [{
     type: "group",
-    buttxt: "Groupes"
+    buttxt: gettext('Groups')
   },
   {
     type: "tutor",
-    buttxt: "Profs"
+    buttxt: gettext('Teachers')
   },
   {
     type: "module",
-    buttxt: "Modules"
+    buttxt: gettext('Modules')
   },
   {
     type: "room",
-    buttxt: "Salles"
+    buttxt: gettext('Rooms')
   }];
 }
 sel_popup.available.forEach(function (f) {

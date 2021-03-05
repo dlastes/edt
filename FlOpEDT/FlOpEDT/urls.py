@@ -42,8 +42,17 @@ from django.conf import settings
 from django.urls import path
 from django.contrib import admin
 from django.views.generic import RedirectView
+from django.views.i18n import JavaScriptCatalog
 
 from base import views
+
+
+js_info_dict = {
+    'packages': ('languages', )
+}
+
+
+
 
 urlpatterns = [
 
@@ -68,7 +77,9 @@ urlpatterns = [
     url(r'^$', views.index, name='index'),
     url('game/', include('easter_egg.urls')),
     url(r'^flopeditor/', include('flopeditor.urls')),
-    url(r'^display/(?P<department>[a-zA-Z]\w{0,6})/', include('displayweb.urls'))
+    url(r'^display/(?P<department>[a-zA-Z]\w{0,6})/', include('displayweb.urls')),
+    path('jsi18n/', JavaScriptCatalog.as_view(), name='javascript-catalog'),
+
 ]
 
 if settings.DEBUG:
