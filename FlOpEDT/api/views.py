@@ -36,6 +36,7 @@ import displayweb.models as dwm
 import quote.models as qm
 from api import serializers
 from api.shared.params import week_param, year_param, dept_param
+from api.permissions import IsTutorOrReadOnly
 
 # ----------
 # -- QUOTE -
@@ -79,6 +80,8 @@ class RandomQuoteViewSet(viewsets.ViewSet):
             return Response(str(qm.Quote.objects.get(id=chosen_id)))
         return Response('')
 
+        permission_classes = [IsTutorOrReadOnly]
+
 
 # ---------------
 # -- DISPLAYWEB -
@@ -90,6 +93,7 @@ class BreakingNewsViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with every field of a BreakingNews object.
     """
+    permission_classes = [IsTutorOrReadOnly]
     queryset = dwm.BreakingNews.objects.all()
     serializer_class = serializers.BreakingNewsSerializer
 
@@ -181,6 +185,7 @@ class WeekInfoViewSet(viewsets.ViewSet):
     proposed number of available slots
     (not cached)
     """
+    permission_classes = [IsTutorOrReadOnly]
 
     def list(self, request, format=None):
         week = int(request.query_params.get('week'))

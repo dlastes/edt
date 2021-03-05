@@ -35,7 +35,7 @@ import displayweb.models as dwm
 
 from api.fetch import serializers
 from api.shared.params import dept_param, week_param, year_param, user_param
-
+from api.permissions import IsTutorOrReadOnly
 
 class ScheduledCourseFilterSet(filters.FilterSet):
     dept = filters.CharFilter(field_name='course__module__train_prog__department__abbrev', required=True)
@@ -50,7 +50,7 @@ class ScheduledCourseFilterSet(filters.FilterSet):
         fields = ['dept', 'week', 'year']
 
 
-class ScheduledCoursesViewSet(viewsets.ReadOnlyModelViewSet):
+class ScheduledCoursesViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the scheduled courses
 
@@ -80,7 +80,7 @@ class UnscheduledCoursesViewSet(viewsets.ModelViewSet):
 
     Result can be filtered as wanted with week, year, work_copy and department fields.
     """
-
+    permission_classes = [IsTutorOrReadOnly]
     serializer_class = serializers.UnscheduledCoursesSerializer
 
     def get_queryset(self):
@@ -256,6 +256,7 @@ class ExtraSchedCoursesViewSet(viewsets.ModelViewSet):
     Result can be filtered with year and week
     """
     serializer_class = serializers.ExtraScheduledCoursesSerializer
+    permission_classes = [IsTutorOrReadOnly]
 
     def get_queryset(self):
         qs = bm.ScheduledCourse.objects.all()
@@ -321,6 +322,7 @@ class UnavailableRoomViewSet(viewsets.ViewSet):
 
     Each result contains room name, day, start_time, duration, and value (unavailable => 0)
     """
+    permission_classes = [IsTutorOrReadOnly]
 
     def list(self, req, format=None):
 

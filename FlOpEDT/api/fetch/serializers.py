@@ -61,13 +61,12 @@ class Module_SC_Serializer(serializers.Serializer):
 
 
 class Group_SC_Serializer(serializers.Serializer):
-    id = serializers.IntegerField()
     train_prog = serializers.CharField()
     name = serializers.CharField()
 
     class Meta:
         model = bm.Group
-        fields = ['id', 'name', 'train_prog']
+        fields = ['name', 'train_prog']
 
 
 class Course_SC_Serializer(serializers.Serializer):
@@ -77,12 +76,12 @@ class Course_SC_Serializer(serializers.Serializer):
     room_type = serializers.CharField()
     week = serializers.IntegerField()
     year = serializers.IntegerField()
-    groups = Group_SC_Serializer(many=True)
+    group = Group_SC_Serializer()
     module = Module_SC_Serializer()
 
     class Meta:
         model = bm.Course
-        fields = ['id', 'type', 'tutor', 'room_type', 'week', 'year', 'module', 'groups' ]
+        fields = ['id', 'type', 'tutor', 'room_type', 'week', 'year', 'module', 'group', ]
 
 
 class ScheduledCoursesSerializer(serializers.Serializer):
@@ -96,7 +95,7 @@ class ScheduledCoursesSerializer(serializers.Serializer):
     # Mise en forme des données
     class Meta:
         model = bm.ScheduledCourse
-        fields = ['id', 'room', 'start_time', 'day', 'course', 'groups' ]
+        fields = ['id', 'room', 'start_time', 'day', 'course']
 
 #                             -------------------------------                           #
 #                             ----UnscheduledCourses (PP)----                           #
@@ -144,12 +143,12 @@ class UnscheduledCoursesSerializer(serializers.Serializer):
     tutor = serializers.CharField()
     room_type = serializers.CharField()
     module = ModuleCours_PP_Serializer()
-    groups = Group_PP_Serializer(many=True)
+    group = Group_PP_Serializer()
     type = CourseType_PP_Serializer()
 
     class Meta:
         model = bm.Course
-        fields = ['id', 'tutor', 'room_type', 'module', 'groups', ]
+        fields = ['id', 'tutor', 'room_type', 'module', 'group', ]
 
 
 #                                ---------------------------                            #
@@ -288,12 +287,12 @@ class Course_TC_Serializer(serializers.Serializer):
     room_type = serializers.CharField()
     week = serializers.IntegerField()
     year = serializers.IntegerField()
-    groups = Group_SC_Serializer(many=True)
+    group = Group_SC_Serializer()
     module = Module_SC_Serializer()
 
     class Meta:
         model = bm.Course
-        fields = ['id', 'type', 'tutor', 'room_type', 'week', 'year', 'module', 'groups']
+        fields = ['id', 'type', 'tutor', 'room_type', 'week', 'year', 'module', 'group']
 
 
 class TutorCourses_Serializer(serializers.Serializer):

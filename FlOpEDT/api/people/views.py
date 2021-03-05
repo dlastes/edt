@@ -39,6 +39,7 @@ class UsersViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with every field of a User object.
     """
+    permission_classes = [IsTutorOrReadOnly]
     permission_classes = (IsAuthenticated,)
     queryset = pm.User.objects.all()
     serializer_class = serializers.UsersSerializer
@@ -123,6 +124,8 @@ class TutorUsernameViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with every field of a Tutor object.
     """
+    permission_classes = [IsTutorOrReadOnly]
+
     queryset = pm.Tutor.objects.all()
     serializer_class = serializers.TutorUsernameSerializer
     filter_class = TutorFilterSet
@@ -152,3 +155,4 @@ class TutorViewSet(viewsets.ModelViewSet):
 
     serializer_class = serializers.TutorSerializer
     filter_class = TutorFilterSet
+    permission_classes = [IsTutorOrReadOnly]
