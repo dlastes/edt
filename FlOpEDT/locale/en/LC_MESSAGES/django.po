@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.3.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-09-15 13:05+0000\n"
+"POT-Creation-Date: 2021-03-05 09:28+0000\n"
 "PO-Revision-Date: 2020-04-05 18:44+0200\n"
 "Last-Translator: Benoît Roche (benoit.roche@esrf.fr)\n"
 "Language-Team: none\n"
@@ -65,14 +65,15 @@ msgid "button_save"
 msgstr "Save"
 
 #: base/templates/base/show-stype.html:121
-msgid "My favorite rooms"
+msgid "My videoconf links"
 msgstr ""
 
 #: base/templates/base/show-stype.html:122
-msgid "Select my favorite rooms"
+msgid "Create a link"
 msgstr ""
 
 #: base/templates/base/show-stype.html:124
+#: base/templates/base/show-stype.html:147
 msgid "button_change"
 msgstr "Change"
 
@@ -86,19 +87,47 @@ msgid ""
 msgstr ""
 
 #: base/templates/base/show-stype.html:132
-msgid "Peferred"
+msgid "Preferred"
 msgstr ""
 
 #: base/templates/base/show-stype.html:134
 msgid "Maximum"
 msgstr ""
 
-#: base/templates/base/visio.html:30
-msgid "My video conference rooms"
+#: base/templates/base/show-stype.html:144
+msgid "My favorite rooms"
 msgstr ""
 
-#: base/templates/base/visio.html:36
+#: base/templates/base/show-stype.html:145
+msgid "Select my favorite rooms"
+msgstr ""
+
+#: base/templates/base/visio.html:31
+msgid "Create or modify a link"
+msgstr ""
+
+#: base/templates/base/visio.html:38
 msgid "Send"
+msgstr ""
+
+#: base/views.py:1753
+msgid "Not authorized. New link then."
+msgstr ""
+
+#: base/views.py:1756
+msgid "Unknown link. New link then."
+msgstr ""
+
+#: base/views.py:1768
+msgid "Created"
+msgstr ""
+
+#: base/views.py:1768
+msgid "Modified"
+msgstr ""
+
+#: base/views.py:1771
+msgid "Tutor does not exist"
 msgstr ""
 
 #: base/weeks.py:34
@@ -163,6 +192,15 @@ msgstr ""
 
 #: people/templates/people/login.html:86
 msgid "Create"
+msgstr ""
+
+#: people/views.py:179
+msgid "Not allowed"
+msgstr ""
+
+#: people/views.py:185
+#, python-brace-format
+msgid "No such user as {user}"
 msgstr ""
 
 #: quote/forms.py:41
