@@ -6,9 +6,9 @@ Merci de vérifier is votre Merge Request (MR) satisfait bien aux conditions sui
 - [ ] Nous avons ajouté nos noms dans le fichier `AUTHORS.md`
 - [ ] Nous avons ajouté quelques mots d'anglais dans le `CHANGELOG.md` pour résumer notre travail
 - [ ] Si nous avons utilisé de nouveaux modules python, nous les avons ajouté dans le fichier `requirements.txt`
-- [ ] Nous avons effectué quelques tests (et les avons éventuellement ajouté au dépôt)
+- [ ] Nous avons effectué quelques tests (et les avons éventuellement ajoutés au dépôt)
 - [ ] Nous avons ajouté, modifié et revu la documentation, si nécessaire. On peut effectuer une MR sur la page wiki de FlOpEDT, comme expliqué ici : https://stackoverflow.com/a/38537453
-- [ ] Nous n'avons pas ajouté d'affichage dans les consoles (ni dans celle de django (avec `print`), ni dans celle du mavigateur (avec des `console.log`))
+- [ ] Nous n'avons pas ajouté d'affichage dans les consoles (ni dans celle de django (avec `print`), ni dans celle du navigateur (avec des `console.log`))
 
 
 ## Type de Merge Request
