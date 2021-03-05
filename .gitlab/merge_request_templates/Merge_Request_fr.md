@@ -3,6 +3,7 @@
 ## Liste des choses à vérifier
 
 Merci de vérifier is votre Merge Request (MR) satisfait bien aux conditions suivantes (mettre un 'x' pour cocher la case) :
+- [ ] Le code et les commentaires sont en anglais
 - [ ] Nous avons ajouté nos noms dans le fichier `AUTHORS.md`
 - [ ] Nous avons ajouté quelques mots d'anglais dans le `CHANGELOG.md` pour résumer notre travail
 - [ ] Si nous avons utilisé de nouveaux modules python, nous les avons ajouté dans le fichier `requirements.txt`
