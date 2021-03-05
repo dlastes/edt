@@ -216,6 +216,8 @@ class Preferences(models.Model):
         default=.3, blank=True, max_digits=3, decimal_places=2)
     eat_weight = models.DecimalField(
         default=.3, blank=True, max_digits=3, decimal_places=2)
+    free_half_day_choice_id = models.IntegerField(default=1, blank=True)
+    
     def get_morning_weight(self):
         return float(self.morning_weight)
 

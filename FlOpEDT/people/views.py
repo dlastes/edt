@@ -136,6 +136,7 @@ def student_preferences(req):
                 student_pref = StudentPreferences(student=student)
                 student_pref.save()
 
+            #To display the correct text once we validate the form without move the input
             morning = student_pref.morning_weight
             morning_txt=""
             if morning == 0:
@@ -180,7 +181,7 @@ def student_preferences(req):
             if eat == 1:
                 eat_txt = 'Manger plus tard'
 
-            jour = Department.objects.get(abbrev='INFO')
+            day = Department.objects.get(abbrev='INFO')
 
 
 
@@ -195,7 +196,7 @@ def student_preferences(req):
                  'hole_txt': hole_txt,
                  'selfeat': eat,
                  'eat_txt': eat_txt,
-                 'demi_jour': jour,
+                 'free_half_day_choice': day,
                  'user_notifications_pref':
                  queries.get_notification_preference(req.user)
                 })

@@ -36,51 +36,54 @@
 
 </br></br></br>
 
-<fieldset class="twofieldset" id="field1">
-  <legend>Préférences pour votre groupe</legend>
-    </br>
-  <div><u>Vous préférez :</u></div>
-    </br>
-  <form action="{% url 'people:student_preferences' %}" method="post" id="form_pref">
+<form action="{% url 'people:student_preferences' %}" method="post" id="form_pref">
   {% csrf_token %}
-    <div>
-      <input type="range" id="morning" name="morning_evening" min="0" max="1" step="0.25" value="{{ morning|stringformat:'.2f' }}"/>
-      <output name="result">{{ morning_txt }}</output>
-    </div>
+  <fieldset class="twofieldset" id="field1">
+    <legend>Préférences pour votre groupe</legend>
       </br>
-    <div>
-      <input type="range" id="free_half_day" name="light_free" min="0" max="1" step="0.25" value="{{ free_half_day|stringformat:'.2f' }}"/>
-      <output name="resultdeux">{{ free_half_day_txt }}</output>
-    </div>
-      </br>
-    <div>
-      <input type="range" id="hole" name="hole_nothole" min="0" max="1" step="0.5" value="{{ hole|stringformat:'.2f' }}"/>
-      <output name="resulthole">{{ hole_txt }}</output>
-    </div>
-      <br/>
-    <div>
-      <input type="range" id="selfeat" name="eat" min="0" max="1" step="0.5" 
-      value="{{ selfeat|stringformat:'.2f' }}"/>
-      <output name="resulteat">{{ eat_txt }}</output>
-    </div>
-      <br/><br/>
-    <button type="submit" form="form_pref" value="Submit">Valider</button>
-  </form>
-</fieldset>
-
-<fieldset class="twofieldset">
-    <legend>Préférences demi-journée libre</legend>
-      <br/>
     <div><u>Vous préférez :</u></div>
       </br>
-      
-        <svg id="grille" width='900' height='280'>
-                  
-        </svg>
-      
-</fieldset>
+    
+      <div>
+        <input type="range" id="morning" name="morning_evening" min="0" max="1" step="0.25" value="{{ morning|stringformat:'.2f' }}"/>
+        <output name="result">{{ morning_txt }}</output>
+      </div>
+        </br>
+      <div>
+        <input type="range" id="free_half_day" name="light_free" min="0" max="1" step="0.25" value="{{ free_half_day|stringformat:'.2f' }}"/>
+        <output name="resultdeux">{{ free_half_day_txt }}</output>
+      </div>
+        </br>
+      <div>
+        <input type="range" id="hole" name="hole_nothole" min="0" max="1" step="0.5" value="{{ hole|stringformat:'.2f' }}"/>
+        <output name="resulthole">{{ hole_txt }}</output>
+      </div>
+        <br/>
+      <div>
+        <input type="range" id="selfeat" name="eat" min="0" max="1" step="0.5" 
+        value="{{ selfeat|stringformat:'.2f' }}"/>
+        <output name="resulteat">{{ eat_txt }}</output>
+      </div>
+        <br/><br/>
+      <button type="submit" form="form_pref" value="Submit">Valider</button>
+  </fieldset>
 
-  <br/><br/>
+  <fieldset class="twofieldset">
+      <legend>Préférences demi-journée libre</legend>
+        <br/>
+      <div><u>Vous préférez :</u></div>    
+        <div>
+          <svg id="grille" width='900' height='210'>
+                    
+          </svg>
+        </div>
+        <button class="rightbutton" type="submit" form="form_pref" value="Submit">Valider</button>
+  </fieldset>
+
+</form>
+
+
+<br/><br/>
 {% include 'base/notification.html' %}
 
 <link rel="stylesheet" type="text/css" href="{% static 'people/student_preferences.css' %}"/>

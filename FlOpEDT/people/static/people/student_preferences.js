@@ -85,14 +85,19 @@ $(function() {
     });
 });
 
-let len_square = 70;
-let x=70;
+
+
+//Creation of the little board
+let len_square = 180;
+let x=180;
+let id=0;
 
 for (var i = 0; i < 5; i++) {
  
     d3.select("svg#grille")
     .append("rect")
-    .attr("fill", "#00CC00")
+    .attr("id", id+1)
+    .attr("fill", "green" )
     .attr("width", 110)
     .attr("height", 95)
     .attr("x", x)
@@ -100,12 +105,15 @@ for (var i = 0; i < 5; i++) {
 
      d3.select("svg#grille")
     .append("rect")
-    .attr("fill", "#00CC00")
+    .attr("id", id+2)
+    .attr("fill", "green")
     .attr("width", 110)
     .attr("height", 95)
     .attr("x", x)
-    .attr("y", 105);
+    .attr("y", 105)
+    .text("blablabl");
 
+    id += 2;
     x += 110;
 }
 
@@ -126,7 +134,7 @@ for (var i = 0; i < 6; i++) {
 
 }
 
-let trait = 10;
+let line = 10;
 
 for (var j = 0; j < 3; j++) {
 
@@ -134,12 +142,12 @@ for (var j = 0; j < 3; j++) {
     .append("line")
     .attr("stroke", "black")
     .attr("stroke-width", 2)
-    .attr("x1", 70)
-    .attr("y1", trait)
-    .attr("x2", 620)
-    .attr("y2", trait);
+    .attr("x1", 180)
+    .attr("y1", line)
+    .attr("x2", 730)
+    .attr("y2", line);
 
 
-    trait +=  95;
+    line +=  95;
 }
 
