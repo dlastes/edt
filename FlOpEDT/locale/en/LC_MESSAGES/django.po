@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.3.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-05 09:15+0000\n"
+"POT-Creation-Date: 2021-03-05 09:28+0000\n"
 "PO-Revision-Date: 2020-04-05 18:44+0200\n"
 "Last-Translator: Benoît Roche (benoit.roche@esrf.fr)\n"
 "Language-Team: none\n"
@@ -292,6 +292,26 @@ msgstr "Créer ou modifier un lien"
 #: base/templates/base/visio.html:38
 msgid "Send"
 msgstr "Envoyer"
+
+#: base/views.py:1753
+msgid "Not authorized. New link then."
+msgstr ""
+
+#: base/views.py:1756
+msgid "Unknown link. New link then."
+msgstr ""
+
+#: base/views.py:1768
+msgid "Created"
+msgstr ""
+
+#: base/views.py:1768
+msgid "Modified"
+msgstr ""
+
+#: base/views.py:1771
+msgid "Tutor does not exist"
+msgstr ""
 
 #: base/views.py:1753
 msgid "Not authorized. New link then."
