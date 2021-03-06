@@ -36,7 +36,7 @@ import displayweb.models as dwm
 import quote.models as qm
 from api import serializers
 from api.shared.params import week_param, year_param, dept_param
-from api.permissions import IsTutorOrReadOnly
+from api.permissions import IsTutorOrReadOnly, IsAdminOrReadOnly
 
 # ----------
 # -- QUOTE -
@@ -63,6 +63,7 @@ class QuoteViewSet(viewsets.ModelViewSet):
     """
     queryset = qm.Quote.objects.all()
     serializer_class = serializers.QuoteSerializer
+    permission_classes = [IsAdminOrReadOnly]
 
     filterset_fields = '__all__'
 
@@ -80,7 +81,7 @@ class RandomQuoteViewSet(viewsets.ViewSet):
             return Response(str(qm.Quote.objects.get(id=chosen_id)))
         return Response('')
 
-        permission_classes = [IsTutorOrReadOnly]
+        permission_classes = [IsAdminOrReadOnly]
 
 
 # ---------------
@@ -93,7 +94,7 @@ class BreakingNewsViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with every field of a BreakingNews object.
     """
-    permission_classes = [IsTutorOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
 
     queryset = dwm.BreakingNews.objects.all()
     serializer_class = serializers.BreakingNewsSerializer
@@ -107,7 +108,7 @@ class ModuleDisplaysViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with every field of a ModuleDisplay object.
     """
-    permission_classes = [IsTutorOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
 
     queryset = dwm.ModuleDisplay.objects.all()
     serializer_class = serializers.ModuleDisplaysSerializer
@@ -121,6 +122,7 @@ class TrainingProgrammeDisplaysViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with every field of a TrainingProgrammeDisplay object.
     """
+    permission_classes = [IsAdminOrReadOnly]
     queryset = dwm.TrainingProgrammeDisplay.objects.all()
     serializer_class = serializers.TrainingProgrammeDisplaysSerializer
 
@@ -133,7 +135,7 @@ class GroupDisplaysViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with every field of a GroupDisplay object.
     """
-    permission_classes = [IsTutorOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
 
     queryset = dwm.GroupDisplay.objects.all()
     serializer_class = serializers.GroupDisplaysSerializer
@@ -190,7 +192,7 @@ class WeekInfoViewSet(viewsets.ViewSet):
     proposed number of available slots
     (not cached)
     """
-    permission_classes = [IsTutorOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
 
     def list(self, request, format=None):
         week = int(request.query_params.get('week'))

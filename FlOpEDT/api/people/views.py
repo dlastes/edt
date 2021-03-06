@@ -35,45 +35,47 @@ from api.shared.params import week_param, year_param
 from api.permissions import IsTutorOrReadOnly, IsAdminOrReadOnly
 
 
-class UsersViewSet(viewsets.ReadOnlyModelViewSet):
+class UsersViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the users
 
     Can be filtered as wanted with every field of a User object.
     """
-    permission_classes = [IsTutorOrReadOnly]
-    permission_classes = (IsAuthenticated,)
+    permission_classes = [IsAdminOrReadOnly]
     queryset = pm.User.objects.all()
     serializer_class = serializers.UsersSerializer
 
 
-class UserDepartmentSettingsViewSet(viewsets.ReadOnlyModelViewSet):
+class UserDepartmentSettingsViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the user department settings
     which shows the combination of the user and the department
 
     Can be filtered as wanted with every field of a User Department object.
     """
+    permission_classes = [IsAdminOrReadOnly]
     queryset = pm.UserDepartmentSettings.objects.all()
     serializer_class = serializers.UserDepartmentSettingsSerializer
 
 
-class SupplyStaffsViewSet(viewsets.ReadOnlyModelViewSet):
+class SupplyStaffsViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the supply staff
 
     Can be filtered as wanted with every field of a Supply Staff object.
     """
+    permission_classes = [IsAdminOrReadOnly]
     queryset = pm.SupplyStaff.objects.all()
     serializer_class = serializers.SupplyStaffsSerializer
 
 
-class StudentsViewSet(viewsets.ReadOnlyModelViewSet):
+class StudentsViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the students
 
     Can be filtered as wanted with every field of a Student object.
     """
+    permission_classes = [IsAdminOrReadOnly]
     queryset = pm.Student.objects.all()
     serializer_class = serializers.StudentsSerializer
 
@@ -139,7 +141,7 @@ class TutorUsernameViewSet(viewsets.ReadOnlyModelViewSet):
                       operation_description="Active tutors",
                       manual_parameters=[week_param(), year_param()])
                   )
-class TutorViewSet(viewsets.ReadOnlyModelViewSet):
+class TutorViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         # Getting all the filters
         week = self.request.query_params.get('week', None)
@@ -158,4 +160,4 @@ class TutorViewSet(viewsets.ReadOnlyModelViewSet):
 
     serializer_class = serializers.TutorSerializer
     filter_class = TutorFilterSet
-    permission_classes = [IsTutorOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]

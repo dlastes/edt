@@ -48,19 +48,19 @@ class DepartmentViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with every field of a Department object.
     """
-    permission_classes = [IsTutorOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
 
     queryset = bm.Department.objects.all()
     serializer_class = serializers.DepartmentSerializer
 
 
-class GroupTypesViewSet(viewsets.ReadOnlyModelViewSet):
+class GroupTypesViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the group types
 
     Can be filtered as wanted with every field of a GroupType object.
     """
-    permission_classes = [IsTutorOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
 
     queryset = bm.GroupType.objects.all()
     serializer_class = serializers.GroupTypesSerializer
@@ -74,7 +74,7 @@ class GroupsFilterSet(filters.FilterSet):
         fields = ['dept']
 
 
-class GroupsViewSet(viewsets.ReadOnlyModelViewSet):
+class GroupsViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the groups
 
@@ -246,7 +246,7 @@ class ModuleViewSet(viewsets.ModelViewSet):
     TODO: (Header for list)
 
     """
-    permission_classes = [IsTutorOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
     
     queryset = bm.Module.objects.all()
     serializer_class = serializers.ModuleSerializer
@@ -280,7 +280,7 @@ class ModuleFullViewSet(viewsets.ModelViewSet):
 
     can also be filtered with a department.
     """
-    permission_classes = [IsTutorOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
 
     queryset = bm.Module.objects.all()
     serializer_class = serializers.ModuleFullSerializer
@@ -307,7 +307,7 @@ class CourseTypeViewSet(viewsets.ModelViewSet):
 
     filterset_fields = '__all__'
 
-    permission_classes = [IsTutorOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
 
 
 class CourseTypeNameViewSet(viewsets.ModelViewSet):
@@ -322,7 +322,7 @@ class CourseTypeNameViewSet(viewsets.ModelViewSet):
 
     filterset_fields = '__all__'
 
-    permission_classes = [IsTutorOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
 
 
 class CoursesViewSet(viewsets.ModelViewSet):
@@ -336,7 +336,7 @@ class CoursesViewSet(viewsets.ModelViewSet):
 
     filterset_fields = '__all__'
 
-    permission_classes = [IsTutorOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
 
 # -----------------
 # - MODIFICATIONS -
@@ -514,19 +514,21 @@ class TrainingProgrammeFilterSet(filters.FilterSet):
         fields = ['dept']
 
 
-class TrainingProgrammeNameViewSet(viewsets.ModelViewSet):
+class TrainingProgrammeNameViewSet(viewsets.ReadOnlyModelViewSet):
     """
     ViewSet to see all the training programs
     """
+    permission_classes = [IsAdminOrReadOnly]
     queryset = bm.TrainingProgramme.objects.all()
     serializer_class = serializers.TrainingProgrammeNameSerializer
     filterset_class = TrainingProgrammeFilterSet
 
 
-class TrainingProgrammeViewSet(viewsets.ReadOnlyModelViewSet):
+class TrainingProgrammeViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the training programs
     """
+    permission_classes = [IsAdminOrReadOnly]
     queryset = bm.TrainingProgramme.objects.all()
     serializer_class = serializers.TrainingProgrammeSerializer
     filterset_class = TrainingProgrammeFilterSet

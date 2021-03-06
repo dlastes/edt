@@ -14,7 +14,7 @@ class IsTutor(BasePermission):
     def has_permission(self, request, view):
         if request.method in SAFE_METHODS:
             return True
-        return bool(request.user.is_authenticated and request.user.is_tutor)	
+        return bool(request.user.is_authenticated and (request.user.is_tutor or request.user.is_staff))	
 
 
 # This permission allow only tutors to use the POST, PUT, PATCH and DELETE methods. GET method can be use by everyone
@@ -24,7 +24,7 @@ class IsTutorOrReadOnly(BasePermission):
     def has_permission(self, request, view):
         if request.method in SAFE_METHODS:
             return True
-        return bool(request.user.is_authenticated and request.user.is_tutor)
+        return bool(request.user.is_authenticated and (request.user.is_tutor or request.user.is_staff))
 
 
 # This permission allow only students to use the POST, PUT, PATCH and DELETE methods. GET method can be use by everyone
@@ -34,7 +34,7 @@ class IsStudentOrReadOnly(BasePermission):
 	def has_permission(self, request, view):
 		if request.method in SAFE_METHODS:
 			return True
-		return bool(request.user.is_authenticated and request.user.is_student)
+		return bool(request.user.is_authenticated and (request.user.is_tutor or request.user.is_staff))
 
 
 # This permission allow only admins to use the POST, PUT, PATCH and DELETE methods. GET method can be use by everyone
@@ -44,4 +44,4 @@ class IsAdminOrReadOnly(BasePermission):
 	def has_permission(self, request, view):
 		if request.method in SAFE_METHODS:
 			return True
-		return bool(request.user.is_authenticated and request.user.is_superuser)
+		return bool(request.user.is_authenticated and request.user.is_staff)

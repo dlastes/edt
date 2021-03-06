@@ -38,8 +38,12 @@ from api.shared.params import dept_param, week_param, year_param, user_param
 from api.permissions import IsTutorOrReadOnly, IsAdminOrReadOnly
 
 class ScheduledCourseFilterSet(filters.FilterSet):
-    permission_classes = [IsTutorOrReadOnly]
     dept = filters.CharFilter(field_name='course__module__train_prog__department__abbrev', required=True)
+    # by promo and groups
+    train_prog = filters.CharFilter(field_name='course__module__train_prog__abbrev')
+    # group or tutor
+    group = filters.CharFilter(field_name='course__groups__name')
+    tutor_name = filters.CharFilter(field_name='course__tutor__username')
     # makes the fields required
     week = filters.NumberFilter(field_name='course__week', required=True)
     year = filters.NumberFilter(field_name='course__year', required=True)
@@ -51,7 +55,7 @@ class ScheduledCourseFilterSet(filters.FilterSet):
         fields = ['dept', 'week', 'year']
 
 
-class ScheduledCoursesViewSet(viewsets.ModelViewSet):
+class ScheduledCoursesViewSet(viewsets.ReadOnlyModelViewSet):
     """
     ViewSet to see all the scheduled courses
 
@@ -59,7 +63,7 @@ class ScheduledCoursesViewSet(viewsets.ModelViewSet):
     as wanted with week, year and work_copy (0 by default).
     Request needs a department filter.
     """
-    permission_classes = [IsTutorOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
     queryset = bm.ScheduledCourse.objects.all()
     serializer_class = serializers.ScheduledCoursesSerializer
     filter_class = ScheduledCourseFilterSet
@@ -76,13 +80,13 @@ class ScheduledCoursesViewSet(viewsets.ModelViewSet):
                                             description="N° of work copy",
                                             type=openapi.TYPE_INTEGER), ])
                   )
-class UnscheduledCoursesViewSet(viewsets.ModelViewSet):
+class UnscheduledCoursesViewSet(viewsets.ReadOnlyModelViewSet):
     """
     ViewSet to see all the unscheduled courses
 
     Result can be filtered as wanted with week, year, work_copy and department fields.
     """
-    permission_classes = [IsTutorOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
     serializer_class = serializers.UnscheduledCoursesSerializer
 
     def get_queryset(self):
@@ -121,13 +125,13 @@ class UnscheduledCoursesViewSet(viewsets.ModelViewSet):
                   decorator=swagger_auto_schema(
                       manual_parameters=[week_param(), year_param(), dept_param()])
                   )
-class AvailabilitiesViewSet(viewsets.ModelViewSet):
+class AvailabilitiesViewSet(viewsets.ReadOnlyModelViewSet):
     """
     ViewSet to see all the availabilities of the tutors.
 
     Result can be filtered as wanted with week, year and department fields.
     """
-    permission_classes = [IsTutorOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
     serializer_class = serializers.AvailabilitiesSerializer
 
     def get_queryset(self):
@@ -164,12 +168,13 @@ class AvailabilitiesViewSet(viewsets.ModelViewSet):
                           dept_param()
                       ])
                   )
-class CourseTypeDefaultWeekViewSet(viewsets.ModelViewSet):
+class CourseTypeDefaultWeekViewSet(viewsets.ReadOnlyModelViewSet):
     """
     ViewSet to see all the Preferences of a given course type in a training program
 
     Result can be filtered as wanted with the training program and the course type
     """
+    permission_classes = [IsAdminOrReadOnly]
     serializer_class = serializers.CourseTypeDefaultWeekSerializer
 
     def get_queryset(self):
@@ -220,7 +225,7 @@ class DepartmentsViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with every field of a Department object.
     """
-    permission_classes = [IsTutorOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
 
     queryset = bm.Department.objects.all()
     serializer_class = serializers.DepartmentAbbrevSerializer
@@ -229,11 +234,10 @@ class DepartmentsViewSet(viewsets.ModelViewSet):
 
 
 class TutorCoursesFilterSet(filters.FilterSet):
-    permission_classes = [IsTutorOrReadOnly]
-    tutor_name = filters.CharFilter(field_name='user__departments__train_pro__module__module__tutor__username',
+    tutor_name = filters.CharFilter(field_name='user__departments__train_prog__module__module__tutor__username',
                                     required=True)
-    year = filters.CharFilter(field_name='user__departments__train_pro__module__module__year')
-    week = filters.CharFilter(field_name='user__departments__train_pro__module__module__week')
+    year = filters.CharFilter(field_name='user__departments__train_prog__module__module__year')
+    week = filters.CharFilter(field_name='user__departments__train_prog__module__module__week')
     dept = filters.CharFilter(field_name='user__departments__abbrev')
 
     class Meta:
@@ -241,14 +245,14 @@ class TutorCoursesFilterSet(filters.FilterSet):
         fields = ['tutor_name', 'year', 'week', 'dept']
 
 
-class TutorCoursesViewSet(viewsets.ModelViewSet):
+class TutorCoursesViewSet(viewsets.ReadOnlyModelViewSet):
     """
     ViewSet to see all the courses of a tutor
 
     Result needs to be filtered by the username of a tutor.
     Filtering is also possible with week, department and year.
     """
-    permission_classes = [IsTutorOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
 
     serializer_class = serializers.TutorCourses_Serializer
     queryset = pm.UserDepartmentSettings.objects.all()
@@ -260,13 +264,13 @@ class TutorCoursesViewSet(viewsets.ModelViewSet):
                       manual_parameters=[week_param(), year_param(), user_param(required=True),
                                          dept_param(required=True)])
                   )
-class ExtraSchedCoursesViewSet(viewsets.ModelViewSet):
+class ExtraSchedCoursesViewSet(viewsets.ReadOnlyModelViewSet):
     """
     ViewSet to see all the Scheduled courses of a tutor in an other department
 
     Result can be filtered with year and week
     """
-    permission_classes = [IsTutorOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
 
     serializer_class = serializers.ExtraScheduledCoursesSerializer
     permission_classes = [IsTutorOrReadOnly]
@@ -318,7 +322,7 @@ class BKNewsViewSet(viewsets.ModelViewSet):
 
     Result needs to be filtered by the department,the week and the year.
     """
-    permission_classes = [IsTutorOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
 
     queryset = dwm.BreakingNews.objects.all()
     serializer_class = serializers.BKNewsSerializer
@@ -338,7 +342,7 @@ class UnavailableRoomViewSet(viewsets.ViewSet):
 
     Each result contains room name, day, start_time, duration, and value (unavailable => 0)
     """
-    permission_classes = [IsTutorOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
 
     def list(self, req, format=None):
 
