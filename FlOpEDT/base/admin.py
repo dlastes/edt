@@ -688,8 +688,9 @@ class DispoAdmin(DepartmentModelAdmin):
 
 
 class RegenAdmin(DepartmentModelAdmin):
-    list_display = ('year', 'week', 'full', 'fday', 'fmonth', 'fyear',
-                    'stabilize', 'sday', 'smonth', 'syear',)
+    list_display = ('year', 'week',
+                    'full', 'fdate',
+                    'stabilize', 'sdate',)
     ordering = ('-year', '-week')
 
 
