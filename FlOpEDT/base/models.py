@@ -717,10 +717,10 @@ class Regen(models.Model):
     year = models.PositiveSmallIntegerField()
     full = models.BooleanField(verbose_name='Complète',
                                default=True)
-    fdate = models.DateField(verbose_name='Date', null=True)
+    fdate = models.DateField(verbose_name='Regénération complète le', null=True, blank=True)
     stabilize = models.BooleanField(verbose_name='Stabilisée',
                                     default=False)
-    sdate = models.DateField(verbose_name='Date', null=True)
+    sdate = models.DateField(verbose_name='Regénération stabilisée le', null=True, blank=True)
 
     def __str__(self):
         pre = ''
