@@ -1244,9 +1244,7 @@ function go_regen(s) {
     var txt = "";
     var elements = s.split(/,| /);
     var regen_id = elements[elements.length - 1];
-    if (elements.length % 2 != 1 && elements.length > 1) {
-      txt = "";
-    } else if (elements[0] == 'N') {
+    if (elements[0] == 'N') {
       txt = "Pas de (re)génération prévue";
     } else if (elements[0] == 'C') {
       total_regen = true;
