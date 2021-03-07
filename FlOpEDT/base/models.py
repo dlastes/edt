@@ -727,7 +727,7 @@ class Regen(models.Model):
         if self.full:
             pre = f'C,{self.fdate.strftime("%d/%m/%y")}'
         if self.stabilize:
-            pre = f'S,{self.sdate}'
+            pre = f'S,{self.sdate.strftime("%d/%m/%y")}'
         if not self.full and not self.stabilize:
             pre = 'N'
         pre += f",{self.id}"
@@ -737,10 +737,10 @@ class Regen(models.Model):
         ret = ""
         if self.full:
             ret += f'Re-génération complète prévue le ' + \
-                   f'{self.fdate}'
+                   f'{self.fdate.strftime("%d/%m/%y")}'
         elif self.stabilize:
             ret += 'Génération stabilisée prévue le ' + \
-                   f'{self.sdate}'
+                   f'{self.sdate.strftime("%d/%m/%y")}'
         else:
             ret += "Pas de (re-)génération prévue"
 
