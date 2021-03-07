@@ -1243,6 +1243,7 @@ function go_regen(s) {
     total_regen = false;
     var txt = "";
     var elements = s.split(/,| /);
+    var regen_id = elements[elements.length - 1];
     if (elements.length % 2 != 0 && elements.length > 1) {
       txt = "";
     } else if (elements[0] == 'N') {
@@ -1263,9 +1264,8 @@ function go_regen(s) {
 
     svg.get_dom("vg").select(".ack-reg").select("text")
       .text(ack.regen);
-
+    svg.get_dom("vg").select(".ack-reg").attr('href', '/admin/base/regen/'+regen_id)
   }
-
   svg.get_dom("vg").select(".ack-reg").select("text")
     .transition(d3.transition())
     .attr("x", grid_width())

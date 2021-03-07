@@ -740,6 +740,7 @@ class Regen(models.Model):
             pre = f'S,{self.sday}/{self.smonth}/{self.syear}'
         if not self.full and not self.stabilize:
             pre = 'N'
+        pre += f",{self.id}"
         return pre
 
     def strplus(self):
