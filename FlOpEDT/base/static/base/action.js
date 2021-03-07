@@ -1647,7 +1647,7 @@ function edt_change_ack(msg) {
     var splash_disclaimer = {
       id: "failed-edt-mod",
       but: { list: [{ txt: "Zut. Ok.", click: function (d) { } }] },
-      com: { list: [{ txt: ack.edt }] }
+      com: { list: [{ txt: ack.more }] }
     };
     splash(splash_disclaimer);
   }
@@ -1858,68 +1858,56 @@ function gp_training_prog_to_str (c) {
 }
 
 // user's links for now
-function select_pref_links_change(link_type) {
+function select_pref_links_change() {
   room_tutor_change.cm_settings = pref_links_cm_settings;
 
+  room_tutor_change.proposal = [] ;
+
   let key, pref_links;
-  switch(link_type) {
-  case 'users':
-    key = pending.wanted_course.prof ;
-    pref_links = preferred_links.users ;
-    break;
-  case 'groups':
-    key = gp_training_prog_to_str(pending.wanted_course) ;
-    pref_links = preferred_links.groups ;
-    break;
-  default:
-    console.log('Unknonwn type of link!');
-    return ;
-  }
-
-  if (!Object.keys(pref_links).includes(key)) {
-    console.log('Pas de lien...');
-    room_tutor_change.proposal = [] ;
-    window.location.href =
-      url_change_preferred_links + key ;
-  } else {
-    room_tutor_change.proposal = pref_links[key] ;
-    let fake_id = new Date();
-    fake_id = fake_id.getMilliseconds();
-    room_tutor_change.proposal.forEach(function (t) {
-      t.content = t.desc ;
-      t.fid = fake_id ;
-    });
-  }
-  update_change_cm_nlin() ;
-
-}
-
-// user's links for now
-function select_pref_link_types_change(link_type) {
-  room_tutor_change.cm_settings = pref_link_types_cm_settings;
-
-  var fake_id = new Date();
-  fake_id = fake_id.getMilliseconds() + "-" + pending.wanted_course.id_course;
-  room_tutor_change.proposal = [
-    {
-      fid: fake_id,
-      content: "Prof"
+  ["users", "groups"].forEach(function(link_type) {
+    switch(link_type) {
+    case 'users':
+      key = pending.wanted_course.prof ;
+      pref_links = preferred_links.users ;
+      break;
+    case 'groups':
+      key = gp_training_prog_to_str(pending.wanted_course) ;
+      pref_links = preferred_links.groups ;
+      break;
+    default:
+      console.log('Unknonwn type of link!');
+      return ;
     }
-  ];
+    
+    if (Object.keys(pref_links).includes(key)) {
+      room_tutor_change.proposal =
+        room_tutor_change.proposal.concat(
+          pref_links[key].map(function(l) {
+            l.type = link_type ;
+            return l;
+          })
+        ) ;
+      let fake_id = new Date();
+      fake_id = fake_id.getMilliseconds();
+      room_tutor_change.proposal.forEach(function (t) {
+        t.content = t.desc ;
+        t.fid = fake_id ;
+      });
+    }
 
-  if (Object.keys(preferred_links.groups).includes(
-    gp_training_prog_to_str(pending.wanted_course))) {
-    room_tutor_change.proposal.push(
-      {
-        fid: fake_id,
-        content: "Groupe"
-      }
-    );
+  });
+
+  if (room_tutor_change.proposal.length == 0) {
+    console.log('Pas de lien...');
+    window.location.href =
+      url_change_preferred_links + pending.wanted_course.prof ;
   }
+  
   
   update_change_cm_nlin() ;
 
 }
+
 
 function confirm_pref_links_change(d) {
   Object.assign(
