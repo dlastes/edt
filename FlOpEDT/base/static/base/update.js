@@ -1262,7 +1262,9 @@ function go_regen(s) {
 
     svg.get_dom("vg").select(".ack-reg").select("text")
       .text(ack.regen);
-    svg.get_dom("vg").select(".ack-reg").attr('href', '/admin/base/regen/'+regen_id)
+    svg.get_dom("vg").select(".ack-reg")
+        .attr('href', '/admin/base/regen/'+regen_id)
+        .attr('target', "_blank");
   }
   svg.get_dom("vg").select(".ack-reg").select("text")
     .transition(d3.transition())
