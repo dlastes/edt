@@ -717,27 +717,17 @@ class Regen(models.Model):
     year = models.PositiveSmallIntegerField()
     full = models.BooleanField(verbose_name='Complète',
                                default=True)
-    fday = models.PositiveSmallIntegerField(verbose_name='Jour',
-                                            default=1)
-    fmonth = models.PositiveSmallIntegerField(verbose_name='Mois',
-                                              default=1)
-    fyear = models.PositiveSmallIntegerField(verbose_name='Année',
-                                             default=1)
+    fdate = models.DateField(verbose_name='Date', null=True)
     stabilize = models.BooleanField(verbose_name='Stabilisée',
                                     default=False)
-    sday = models.PositiveSmallIntegerField(verbose_name='Jour',
-                                            default=1)
-    smonth = models.PositiveSmallIntegerField(verbose_name='Mois',
-                                              default=1)
-    syear = models.PositiveSmallIntegerField(verbose_name='Année',
-                                             default=1)
+    sdate = models.DateField(verbose_name='Date', null=True)
 
     def __str__(self):
         pre = ''
         if self.full:
-            pre = f'C,{self.fday}/{self.fmonth}/{self.fyear}'
+            pre = f'C,{self.fdate.strftime("%d/%m/%y")}'
         if self.stabilize:
-            pre = f'S,{self.sday}/{self.smonth}/{self.syear}'
+            pre = f'S,{self.sdate}'
         if not self.full and not self.stabilize:
             pre = 'N'
         pre += f",{self.id}"
@@ -747,10 +737,10 @@ class Regen(models.Model):
         ret = ""
         if self.full:
             ret += f'Re-génération complète prévue le ' + \
-                   f'{self.fday}/{self.fmonth}/{self.fyear}'
+                   f'{self.fdate}'
         elif self.stabilize:
             ret += 'Génération stabilisée prévue le ' + \
-                   f'{self.sday}/{self.smonth}/{self.syear}'
+                   f'{self.sdate}'
         else:
             ret += "Pas de (re-)génération prévue"
 
