@@ -820,7 +820,7 @@ function create_menus() {
 
 function create_regen() {
   svg.get_dom("vg")
-    .append("g")
+    .append("a")
     .attr("class", "ack-reg")
     .append("text");
 }
