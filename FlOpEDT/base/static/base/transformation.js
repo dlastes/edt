@@ -998,8 +998,18 @@ function cm_chg_but_fill(d) {
     ret = "steelblue";
   } else if (['tutor_module', 'tutor', 'room'].includes(room_tutor_change.cm_settings.type)) {
     ret = smi_fill(cm_chg_but_pref(d));
+  } else if (room_tutor_change.cm_settings.type == "preferred_links") {
+    ret = visio_btn_fill(d);
   }
   return ret;
+}
+
+function visio_btn_fill(d) {
+  let ret = "steelblue";
+  if (d.type == "users") {
+    ret = "green";
+  }
+  return ret ;
 }
 
 function cm_chg_but_txt_fill(d) {

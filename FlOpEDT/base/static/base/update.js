@@ -62,7 +62,7 @@ function go_pref(quick) {
     .data(
       user.dispos,
       function (d) {
-        return [d.day, d.start_time].join('-');
+        return [d.day, d.start_time, d.duration, d.value].join('-');
       });
 
   datdi = dat
@@ -1243,9 +1243,8 @@ function go_regen(s) {
     total_regen = false;
     var txt = "";
     var elements = s.split(/,| /);
-    if (elements.length % 2 != 0 && elements.length > 1) {
-      txt = "";
-    } else if (elements[0] == 'N') {
+    var regen_id = elements[elements.length - 1];
+    if (elements[0] == 'N') {
       txt = "Pas de (re)génération prévue";
     } else if (elements[0] == 'C') {
       total_regen = true;
@@ -1263,9 +1262,10 @@ function go_regen(s) {
 
     svg.get_dom("vg").select(".ack-reg").select("text")
       .text(ack.regen);
-
+    svg.get_dom("vg").select(".ack-reg")
+        .attr('href', '/admin/base/regen/'+regen_id)
+        .attr('target', "_blank");
   }
-
   svg.get_dom("vg").select(".ack-reg").select("text")
     .transition(d3.transition())
     .attr("x", grid_width())

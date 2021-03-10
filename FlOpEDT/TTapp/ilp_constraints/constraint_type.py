@@ -50,6 +50,7 @@ class ConstraintType(Enum):
     COURS_DOIT_AVOIR_PROFESSEUR = "Le cours doit avoir un professeur"
     PROFESSEUR_NE_PEUT_DONNER_2_COURS_EN_MEME_TEMPS = "Le professeur ne peut pas donner 2 cours en même temps"
     CORE_ROOMS = "Core rooms"
+    SUPP_TUTOR = "Supp tutor"
 
     # SPECIFIC
     PAS_DE_COURS_DE_DEMI_JOURNEE = "Pas de cours de demi-journée"
@@ -65,13 +66,16 @@ class ConstraintType(Enum):
 
     # Visio
     VISIO = "Visio"
-    BOUND_VISIO_MAX = "BOUND_VISIO_MAX"
-    BOUND_VISIO_MIN = "BOUND_VISIO_MIN"
+    MIN_PHYSICAL_HALF_DAYS = "MIN_PHYSICAL_HALF_DAYS"
+    MAX_PHYSICAL_HALF_DAYS = "MAX_PHYSICAL_HALF_DAYS"
     NO_VISIO = "NO_VISIO"
     VISIO_ONLY = "VISIO_ONLY"
     VISIO_LIMIT_GROUP_PRESENCE = "VISIO_LIMIT_GROUP_PRESENCE"
     NO_VISIO_FOR_ALL_HALF_DAY = "NO_VISIO_FOR_ALL_HALF_DAY"
     NO_VISIO_FOR_ALL_DAY = "NO_VISIO_FOR_ALL_DAY"
+    PHYSICAL_PRESENCE = "PHYSICAL_PRESENCE"
+    HAS_VISIO = "HAS_VISIO"
+
 
     # From iut
     BOUND_HOURS_PER_DAY = "Bound_hours per day"
@@ -122,6 +126,7 @@ class ConstraintType(Enum):
     LowerBoundBusyDays = "LowerBoundBusyDays"
     LUNCH_BREAK = "Lunch Breaks"
     BREAK_AROUND_COURSE = "Break around course"
+    NO_COURSE_ON_DAY = "No Course on day"
 
     # From minhalfdays
     MIN_HALF_DAYS_LIMIT = "Min Half Days limit"

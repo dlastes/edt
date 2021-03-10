@@ -83,9 +83,7 @@ def jours_max_consecutifs(ttmodel, salarie, jours_max=6, contrainte=False):
                                                                                                       salarie.username, day))
         else:
             ttmodel.add_to_inst_cost(salarie,
-                                     ttmodel.add_floor("%s jours consécutifs après %s < %s" % (salarie.username, day,
-                                                                                               jours_max),
-                                                       expr, jours_max, len(ttmodel.wdb.weeks) * 7))
+                                     ttmodel.add_floor(expr, jours_max, len(ttmodel.wdb.weeks) * 7))
 
 
 def jours_de_repos_par_semaine(ttmodel, salarie, jours_min=2):
@@ -147,7 +145,7 @@ def si_module_a_alors_pas_autres_modules(ttmodel, module_a, autres_modules, sala
         heures_de_autres = ttmodel.sum(ttmodel.TTinstructors[sl, c, salarie]
                                        for c in ttmodel.wdb.possible_courses[salarie] if c.module in autres_modules
                                        for sl in slots_filter(ttmodel.wdb.compatible_slots[c], day=day))
-        salarie_fait_du_a = ttmodel.add_floor(f"{salarie} en {module_a} {day}",heures_de_a, floor=1, bound=1000)
+        salarie_fait_du_a = ttmodel.add_floor(heures_de_a, floor=1, bound=1000)
         ttmodel.add_constraint(1000 * salarie_fait_du_a + heures_de_autres, '<=', 1000)
 
 

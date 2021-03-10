@@ -820,7 +820,7 @@ function create_menus() {
 
 function create_regen() {
   svg.get_dom("vg")
-    .append("g")
+    .append("a")
     .attr("class", "ack-reg")
     .append("text");
 }
@@ -2163,7 +2163,7 @@ function def_cm_change() {
       select_tutor_module_change();
     } else {
       pending.pass.tutor = true ;
-      select_pref_link_types_change();
+      select_pref_links_change();
     }
     go_cm_room_tutor_change();
   };

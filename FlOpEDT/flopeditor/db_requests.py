@@ -32,7 +32,7 @@ to manage a department statistics for FlOpEDT.
 
 
 from base.models import Department, TimeGeneralSettings, Day
-from people.models import Tutor, UserDepartmentSettings, SupplyStaff, FullStaff, BIATOS
+from people.models import User, Tutor, UserDepartmentSettings, SupplyStaff, FullStaff, BIATOS
 
 TUTOR_CHOICES_LIST = ["Permanent", "Vacataire", "Biatos"]
 
@@ -118,8 +118,13 @@ def get_status_of_user(request):
     :rtype:  string employer if supply_staff else None
 
     """
-    tutor = Tutor.objects.get(username=request.user)
-    return get_status_of_tutor(tutor)
+    user = User.objects.get(username=request.user)
+    if user.is_tutor:
+        tutor = Tutor.objects.get(username=request.user)
+        return get_status_of_tutor(tutor)
+    else:
+        return None, None, None
+
 
 def get_status_of_tutor(tutor):
     """
@@ -157,15 +162,18 @@ def get_is_iut(request):
 
 
     """
-    tutor = Tutor.objects.get(username=request.user)
-    if tutor.status == Tutor.FULL_STAFF:
-        try:
-            fullstaff = FullStaff.objects.get(username=request.user)
-            return fullstaff.is_iut
-        except FullStaff.DoesNotExist:
-            pass
+    user = User.objects.get(username=request.user)
+    if user.is_tutor:
+        tutor = Tutor.objects.get(username=request.user)
+        if tutor.status == Tutor.FULL_STAFF:
+            try:
+                fullstaff = FullStaff.objects.get(username=request.user)
+                return fullstaff.is_iut
+            except FullStaff.DoesNotExist:
+                pass
 
     return None
+
 
 def update_user_in_database(request):
     """

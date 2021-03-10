@@ -6,7 +6,7 @@ from django_ical.views import ICalFeed
 
 from django.core.exceptions import ObjectDoesNotExist
 
-from base.models import ScheduledCourse, Room, Group, Day
+from base.models import ScheduledCourse, Room, Group, Day, Department, Regen
 from people.models import Tutor
 
 
@@ -16,6 +16,7 @@ def str_groups(c):
                         for g in groups])
     plural = len(groups) > 1
     return gp_str, plural
+
 
 class EventFeed(ICalFeed):
     """
@@ -80,6 +81,7 @@ class TutorEventFeed(EventFeed):
                 f'- {location}'
         )
 
+
 class RoomEventFeed(EventFeed):
     def get_object(self, request, department, room_id):
         return Room.objects.get(id=room_id).and_subrooms()
@@ -117,3 +119,37 @@ class GroupEventFeed(EventFeed):
                 f'- {scourse.tutor.username} '
                 f'- {location}'
         )
+
+
+class RegenFeed(ICalFeed):
+    """
+    A simple regen calender : one event per regeneration
+    """
+    product_id = 'flop'
+    timezone = 'Europe/Paris'
+    # TODO !
+
+    def get_object(self, request, department, dep_id):
+        dep = Department.objects.get(id=dep_id)
+        return [dep]
+
+    def items(self, departments):
+        return Regen.objects.filter(department__in=departments)\
+            .exclude(full=False, stabilize=False).order_by('-year','-week')
+
+    def item_title(self, regen):
+        return f"flop!EDT - {regen.department.abbrev} : {regen.strplus()}"
+
+    def item_description(self, regen):
+        return self.item_title(regen)
+
+    def item_start_datetime(self, regen):
+        begin = Week(regen.year, regen.week).day(0)
+        return begin
+
+    def item_end_datetime(self, regen):
+        end = Week(regen.year, regen.week).day(len(regen.department.timegeneralsettings.days))
+        return end
+
+    def item_link(self, s):
+        return str(s.id)

@@ -33,7 +33,9 @@ from base.timing import french_format
 from TTapp.ilp_constraints.constraint_type import ConstraintType
 from TTapp.ilp_constraints.constraint import Constraint
 from TTapp.slots import days_filter, slots_filter
+from base.timing import Day
 from TTapp.TTConstraint import TTConstraint
+from TTapp.ilp_constraints.constraints.dependencyConstraint import DependencyConstraint
 
 
 class SimultaneousCourses(TTConstraint):
@@ -65,7 +67,10 @@ class SimultaneousCourses(TTConstraint):
 
     def enrich_model(self, ttmodel, week, ponderation=1):
         course_types = set(c.type for c in self.courses.all())
-        nb_courses = self.courses.count()
+        relevant_courses = list(c for c in self.courses.all() if c.week in ttmodel.weeks)
+        nb_courses = len(relevant_courses)
+        if nb_courses < 2:
+            return
         possible_start_times = set()
         for t in course_types:
             possible_start_times |= set(t.coursestarttimeconstraint_set.all()[0].allowed_start_times)
@@ -73,16 +78,16 @@ class SimultaneousCourses(TTConstraint):
             for st in possible_start_times:
                 check_var = ttmodel.add_var("check_var")
                 expr = ttmodel.lin_expr()
-                for c in self.courses.all():
+                for c in relevant_courses:
                     possible_slots = slots_filter(ttmodel.wdb.compatible_slots[c], start_time=st, day=day)
                     for sl in possible_slots:
                         expr += ttmodel.TT[(sl, c)]
                 ttmodel.add_constraint(nb_courses * check_var - expr, '==', 0,
                                        Constraint(constraint_type=ConstraintType.SIMULTANEOUS_COURSES,
-                                                  courses=list(self.courses.all())))
+                                                  courses=relevant_courses))
                 ttmodel.add_constraint(expr - check_var, '>=', 0,
                                        Constraint(constraint_type=ConstraintType.SIMULTANEOUS_COURSES,
-                                       courses=list(self.courses.all())))
+                                       courses=relevant_courses))
 
     def get_viewmodel(self):
         view_model = super().get_viewmodel()
@@ -125,21 +130,28 @@ class LimitedStartTimeChoices(TTConstraint):
                                     blank=True,
                                     default=None,
                                     on_delete=models.CASCADE)
+    possible_week_days = ArrayField(models.CharField(max_length=2, choices=Day.CHOICES), blank=True, null=True)
     possible_start_times = ArrayField(models.PositiveSmallIntegerField())
 
     def enrich_model(self, ttmodel, week, ponderation=1.):
         fc = self.get_courses_queryset_by_attributes(ttmodel, week)
         pst = self.possible_start_times
+        if self.possible_week_days is None:
+            pwd = list(c[0] for c in Day.CHOICES)
+        else:
+            pwd = self.possible_week_days
         if self.tutor is None:
             relevant_sum = ttmodel.sum(ttmodel.TT[(sl, c)]
                                        for c in fc
-                                       for sl in ttmodel.wdb.compatible_slots[c] if sl.start_time not in pst)
+                                       for sl in ttmodel.wdb.compatible_slots[c] if (sl.start_time not in pst or
+                                                                                     sl.day.day not in pwd))
         else:
             relevant_sum = ttmodel.sum(ttmodel.TTinstructors[(sl, c, self.tutor)]
                                        for c in fc
-                                       for sl in ttmodel.wdb.compatible_slots[c] if sl.start_time not in pst)
+                                       for sl in ttmodel.wdb.compatible_slots[c] if (sl.start_time not in pst or
+                                                                                     sl.day.day not in pwd))
         if self.weight is not None:
-            ttmodel.obj += self.local_weight() * ponderation * relevant_sum
+            ttmodel.add_to_generic_cost(self.local_weight() * ponderation * relevant_sum, week=week)
         else:
             ttmodel.add_constraint(relevant_sum, '==', 0,
                                    Constraint(constraint_type=ConstraintType.LIMITED_START_TIME_CHOICES,
@@ -168,7 +180,61 @@ class LimitedStartTimeChoices(TTConstraint):
 
 
 
+class ConsiderDepencies(TTConstraint):
+    """
+    Transform the constraints of dependency saved on the DB in model constraints:
+    -include dependencies and successiveness
+    -include non same-day constraint
+    -include simultaneity (double dependency)
+    If there is a weight, it's a preference, else it's a constraint...
+    """
+    modules = models.ManyToManyField('base.Module', blank=True)
+
+    def one_line_description(self):
+        text = f"Prend en compte les précédences enregistrées en base."
+        if self.train_progs.exists():
+            text += ' des promos ' + ', '.join([train_prog.abbrev for train_prog in self.train_progs.all()])
+        if self.modules.exists():
+            text += ' pour les modules ' + ', '.join([module.abbrev for module in self.modules.all()])
+        return text
+
+    def enrich_model(self, ttmodel, week, ponderation=10):
+        if self.train_progs.exists():
+            train_progs = set(tp for tp in self.train_progs.all() if tp in ttmodel.train_prog)
+        else:
+            train_progs = set(ttmodel.train_prog)
+        considered_modules = set(ttmodel.wdb.modules)
+        if self.modules.exists():
+            considered_modules &= set(self.modules.all())
+
+        for p in ttmodel.wdb.dependencies:
+            c1 = p.course1
+            c2 = p.course2
+            if (c1.module not in considered_modules and c2.module not in considered_modules) or \
+                    (c1.module.train_prog not in train_progs and c2.module.train_prog not in train_progs):
+                continue
+            if c1 == c2:
+                ttmodel.add_warning(None, "Warning: %s is declared depend on itself" % c1)
+                continue
+            for sl1 in ttmodel.wdb.compatible_slots[c1]:
+                if not self.weight:
+                    ttmodel.add_constraint(1000000 * ttmodel.TT[(sl1, c1)] +
+                                           ttmodel.sum(ttmodel.TT[(sl2, c2)] for sl2 in ttmodel.wdb.compatible_slots[c2]
+                                                       if not sl2.is_after(sl1)
+                                                       or (p.ND and (sl2.day == sl1.day))
+                                                       or (p.successive and not sl2.is_successor_of(sl1))),
+                                           '<=', 1000000, DependencyConstraint(c1, c2, sl1))
+                else:
+                    for sl2 in ttmodel.wdb.compatible_slots[c2]:
+                        if not sl2.is_after(sl1) \
+                                or (p.ND and (sl2.day == sl1.day)) \
+                                or (p.successive and not sl2.is_successor_of(sl1)):
+                            conj_var = ttmodel.add_conjunct(ttmodel.TT[(sl1, c1)],
+                                                            ttmodel.TT[(sl2, c2)])
+                            ttmodel.add_to_generic_cost(conj_var * self.local_weight() * ponderation)
+
 # Ex TTConstraints that have to be re-written.....
+
 
 class AvoidBothTimes(TTConstraint):
     """
@@ -204,7 +270,7 @@ class AvoidBothTimes(TTConstraint):
                             conj_var = ttmodel.add_conjunct(
                                 ttmodel.TT[(sl1, c1)],
                                 ttmodel.TT[(sl2, c2)])
-                            ttmodel.obj += self.local_weight() * ponderation * conj_var
+                            ttmodel.add_to_generic_cost(self.local_weight() * ponderation * conj_var, week=week)
                         else:
                             ttmodel.add_constraint(ttmodel.TT[(sl1, c1)]
                                                    + ttmodel.TT[(sl2, c2)],

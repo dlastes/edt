@@ -75,7 +75,7 @@ class LimitedRoomChoices(TTConstraint):
                                    for sl in ttmodel.wdb.compatible_slots[c]
                                    for rg in ttmodel.wdb.course_rg_compat[c] if rg not in possible_rooms)
         if self.weight is not None:
-            ttmodel.obj += self.local_weight() * ponderation * relevant_sum
+            ttmodel.add_to_generic_cost(self.local_weight() * ponderation * relevant_sum, week=week)
         else:
             ttmodel.add_constraint(relevant_sum, '==', 0,
                                    Constraint(constraint_type=ConstraintType.LIMITED_ROOM_CHOICES,

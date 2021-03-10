@@ -39,16 +39,19 @@ import json
 import os
 
 
-def assign_tutor_color():
+def assign_tutor_color(department=None):
     all_tutors = Tutor.objects.all()
+    if department is not None:
+        all_tutors = all_tutors.filter(departments=department)
     color_set = get_color_set(os.path.join(settings.BASE_DIR,
                                            'misc',
                                            'colors.json'),
                               all_tutors.count())
     for tut, col in zip(all_tutors, color_set):
-        TutorDisplay(tutor=tut,
-                     color_bg=col,
-                     color_txt=compute_luminance(col)).save()
+        td, created = TutorDisplay.objects.get_or_create(tutor=tut)
+        td.color_bg = col
+        td.color_txt = compute_luminance(col)
+        td.save()
         
     
 

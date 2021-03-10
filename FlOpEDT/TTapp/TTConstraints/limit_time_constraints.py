@@ -95,11 +95,9 @@ class LimitTimePerPeriod(TTConstraint):
             expr = self.build_period_expression(ttmodel, day, period, considered_courses, tutor)
 
             if self.weight is not None:
-                var = ttmodel.add_floor(
-                                'limit course type per period',
-                                expr,
-                                int(self.max_hours * 60) + 1, 3600*24)
-                ttmodel.obj += self.local_weight() * ponderation * var
+                var = ttmodel.add_floor(expr,
+                                        int(self.max_hours * 60) + 1, 3600*24)
+                ttmodel.add_to_generic_cost(self.local_weight() * ponderation * var, week=week)
             else:
                 ttmodel.add_constraint(expr, '<=', self.max_hours*60,
                                        Constraint(constraint_type=ConstraintType.MAX_HOURS,
@@ -212,7 +210,11 @@ class LimitModulesTimePerPeriod(LimitTimePerPeriod):
     def get_viewmodel(self):
         view_model = super().get_viewmodel()
 
-        type_value = self.course_type.name
+        if self.course_type is not None:
+            type_value = self.course_type.name
+        else:
+            type_value = 'Any'
+
 
         if self.modules.exists():
             module_value = ', '.join([module.abbrev for module in self.modules.all()])
