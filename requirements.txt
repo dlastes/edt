@@ -27,4 +27,3 @@ django-debug-toolbar
 django-filter
 drf-yasg
 django-cors-headers
-corsheader
