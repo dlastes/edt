@@ -35,6 +35,8 @@ from django.conf import settings
 from django.utils.decorators import method_decorator
 from api.shared.params import week_param, year_param, dept_param
 
+from api.permissions import IsTutorOrReadOnly, IsAdminOrReadOnly
+
 # ------------
 # -- GROUPS --
 # ------------
@@ -46,6 +48,8 @@ class DepartmentViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with every field of a Department object.
     """
+    permission_classes = [IsAdminOrReadOnly]
+
     queryset = bm.Department.objects.all()
     serializer_class = serializers.DepartmentSerializer
 
@@ -56,6 +60,8 @@ class GroupTypesViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with every field of a GroupType object.
     """
+    permission_classes = [IsAdminOrReadOnly]
+
     queryset = bm.GroupType.objects.all()
     serializer_class = serializers.GroupTypesSerializer
 
@@ -74,6 +80,7 @@ class GroupsViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with parameter="dept"[required] of a Group object, with the function GroupsFilterSet
     """
+    permission_classes = [IsAdminOrReadOnly]
     serializer_class = serializers.GroupsSerializer
     queryset = bm.Group.objects.all()
     filter_class = GroupsFilterSet
@@ -148,6 +155,8 @@ class RoomTypesViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with every field of a RoomTypes object.
     """
+    permission_classes = [IsAdminOrReadOnly]
+
     queryset = bm.RoomType.objects.all()
     serializer_class = serializers.RoomTypesSerializer
     filterset_fields = '__all__'
@@ -159,12 +168,17 @@ class RoomViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with every field of a Room object.
     """
+    permission_classes = [IsAdminOrReadOnly]
+
     queryset = bm.Room.objects.all()
     serializer_class = serializers.RoomSerializer
     filterset_fields = '__all__'
 
 
 class RoomFilterSet(filters.FilterSet):
+
+    permission_classes = [IsAdminOrReadOnly]
+
     dept = filters.CharFilter(field_name='departments__abbrev', required=True)
 
     class Meta:
@@ -178,6 +192,8 @@ class RoomNameViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with every field of a Room object.
     """
+    permission_classes = [IsAdminOrReadOnly]
+
     queryset = bm.Room.objects.all()
     serializer_class = serializers.RoomNameSerializer
     filter_class = RoomFilterSet
@@ -189,6 +205,8 @@ class RoomViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with parameter="dept"[required] of a Room object, with the function RoomsFilterSet
     """
+    permission_classes = [IsAdminOrReadOnly]
+
     queryset = bm.Room.objects.all()
     serializer_class = serializers.RoomSerializer
     filter_class = RoomFilterSet
@@ -202,6 +220,7 @@ class RoomSortsViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with every field of a RoomSort object.
     """
+    permission_classes = [IsAdminOrReadOnly]
     queryset = bm.RoomSort.objects.all()
     serializer_class = serializers.RoomSortsSerializer
 
@@ -227,6 +246,8 @@ class ModuleViewSet(viewsets.ModelViewSet):
     TODO: (Header for list)
 
     """
+    permission_classes = [IsAdminOrReadOnly]
+    
     queryset = bm.Module.objects.all()
     serializer_class = serializers.ModuleSerializer
     filterset_fields = '__all__'
@@ -259,6 +280,8 @@ class ModuleFullViewSet(viewsets.ModelViewSet):
 
     can also be filtered with a department.
     """
+    permission_classes = [IsAdminOrReadOnly]
+
     queryset = bm.Module.objects.all()
     serializer_class = serializers.ModuleFullSerializer
     filterset_fields = '__all__'
@@ -284,6 +307,8 @@ class CourseTypeViewSet(viewsets.ModelViewSet):
 
     filterset_fields = '__all__'
 
+    permission_classes = [IsAdminOrReadOnly]
+
 
 class CourseTypeNameViewSet(viewsets.ModelViewSet):
     """
@@ -297,6 +322,8 @@ class CourseTypeNameViewSet(viewsets.ModelViewSet):
 
     filterset_fields = '__all__'
 
+    permission_classes = [IsAdminOrReadOnly]
+
 
 class CoursesViewSet(viewsets.ModelViewSet):
     """
@@ -309,6 +336,8 @@ class CoursesViewSet(viewsets.ModelViewSet):
 
     filterset_fields = '__all__'
 
+    permission_classes = [IsAdminOrReadOnly]
+
 # -----------------
 # - MODIFICATIONS -
 # -----------------
@@ -319,6 +348,7 @@ class EdtVersionsViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with every field of a EDTVersion object.
     """
+
     queryset = bm.EdtVersion.objects.all()
     serializer_class = serializers.EdtVersionSerializer
 
@@ -335,6 +365,8 @@ class CourseModificationsViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.CourseModificationsSerializer
 
     filterset_fields = '__all__'
+
+    permission_classes = [IsAdminOrReadOnly]
 
 
 # -----------
@@ -482,10 +514,11 @@ class TrainingProgrammeFilterSet(filters.FilterSet):
         fields = ['dept']
 
 
-class TrainingProgrammeNameViewSet(viewsets.ModelViewSet):
+class TrainingProgrammeNameViewSet(viewsets.ReadOnlyModelViewSet):
     """
     ViewSet to see all the training programs
     """
+    permission_classes = [IsAdminOrReadOnly]
     queryset = bm.TrainingProgramme.objects.all()
     serializer_class = serializers.TrainingProgrammeNameSerializer
     filterset_class = TrainingProgrammeFilterSet
@@ -495,6 +528,7 @@ class TrainingProgrammeViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the training programs
     """
+    permission_classes = [IsAdminOrReadOnly]
     queryset = bm.TrainingProgramme.objects.all()
     serializer_class = serializers.TrainingProgrammeSerializer
     filterset_class = TrainingProgrammeFilterSet

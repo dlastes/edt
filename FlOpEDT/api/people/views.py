@@ -32,6 +32,8 @@ import base.models as bm
 from api.people import serializers
 from api.shared.params import week_param, year_param
 
+from api.permissions import IsTutorOrReadOnly, IsAdminOrReadOnly
+
 
 class UsersViewSet(viewsets.ModelViewSet):
     """
@@ -39,7 +41,7 @@ class UsersViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with every field of a User object.
     """
-    permission_classes = (IsAuthenticated,)
+    permission_classes = [IsAdminOrReadOnly]
     queryset = pm.User.objects.all()
     serializer_class = serializers.UsersSerializer
 
@@ -51,6 +53,7 @@ class UserDepartmentSettingsViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with every field of a User Department object.
     """
+    permission_classes = [IsAdminOrReadOnly]
     queryset = pm.UserDepartmentSettings.objects.all()
     serializer_class = serializers.UserDepartmentSettingsSerializer
 
@@ -61,6 +64,7 @@ class SupplyStaffsViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with every field of a Supply Staff object.
     """
+    permission_classes = [IsAdminOrReadOnly]
     queryset = pm.SupplyStaff.objects.all()
     serializer_class = serializers.SupplyStaffsSerializer
 
@@ -71,6 +75,7 @@ class StudentsViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with every field of a Student object.
     """
+    permission_classes = [IsAdminOrReadOnly]
     queryset = pm.Student.objects.all()
     serializer_class = serializers.StudentsSerializer
 
@@ -110,6 +115,7 @@ class StudentsViewSet(viewsets.ModelViewSet):
 
 
 class TutorFilterSet(filters.FilterSet):
+    permission_classes = [IsTutorOrReadOnly]
     dept = filters.CharFilter(field_name='departments__abbrev', required=True)
 
     class Meta:
@@ -117,12 +123,14 @@ class TutorFilterSet(filters.FilterSet):
         fields = ['dept']
 
 
-class TutorUsernameViewSet(viewsets.ModelViewSet):
+class TutorUsernameViewSet(viewsets.ReadOnlyModelViewSet):
     """
     ViewSet to see all the tutors
 
     Can be filtered as wanted with every field of a Tutor object.
     """
+    permission_classes = [IsAdminOrReadOnly]
+
     queryset = pm.Tutor.objects.all()
     serializer_class = serializers.TutorUsernameSerializer
     filter_class = TutorFilterSet
@@ -152,3 +160,4 @@ class TutorViewSet(viewsets.ModelViewSet):
 
     serializer_class = serializers.TutorSerializer
     filter_class = TutorFilterSet
+    permission_classes = [IsAdminOrReadOnly]

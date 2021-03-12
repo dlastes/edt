@@ -53,20 +53,22 @@ class ModuleDisplay_SC_Serializer(serializers.Serializer):
 
 class Module_SC_Serializer(serializers.Serializer):
     name = serializers.CharField()
+    abbrev = serializers.CharField()
     display = ModuleDisplay_SC_Serializer()
 
     class Meta:
         model = bm.Module
-        fields = ['name', 'display']
+        fields = ['name', 'abbrev', 'display']
 
 
 class Group_SC_Serializer(serializers.Serializer):
+    id = serializers.IntegerField()
     train_prog = serializers.CharField()
     name = serializers.CharField()
 
     class Meta:
         model = bm.Group
-        fields = ['name', 'train_prog']
+        fields = ['id', 'name', 'train_prog']
 
 
 class Course_SC_Serializer(serializers.Serializer):
@@ -76,12 +78,12 @@ class Course_SC_Serializer(serializers.Serializer):
     room_type = serializers.CharField()
     week = serializers.IntegerField()
     year = serializers.IntegerField()
-    group = Group_SC_Serializer()
+    groups = Group_SC_Serializer(many=True)
     module = Module_SC_Serializer()
 
     class Meta:
         model = bm.Course
-        fields = ['id', 'type', 'tutor', 'room_type', 'week', 'year', 'module', 'group', ]
+        fields = ['id', 'type', 'tutor', 'room_type', 'week', 'year', 'module', 'groups', ]
 
 
 class ScheduledCoursesSerializer(serializers.Serializer):
@@ -112,12 +114,13 @@ class ModuleDisplay_PP_Serializer(serializers.Serializer):
 
 
 class Group_PP_Serializer(serializers.Serializer):
+    id = serializers.IntegerField()
     name = serializers.CharField()
     train_prog = serializers.CharField()
 
     class Meta:
         model = bm.Group
-        fields = ['name', 'train_prog']
+        fields = ['id', 'name', 'train_prog']
 
 
 class ModuleCours_PP_Serializer(serializers.Serializer):
@@ -143,12 +146,12 @@ class UnscheduledCoursesSerializer(serializers.Serializer):
     tutor = serializers.CharField()
     room_type = serializers.CharField()
     module = ModuleCours_PP_Serializer()
-    group = Group_PP_Serializer()
+    groups = Group_PP_Serializer()
     type = CourseType_PP_Serializer()
 
     class Meta:
         model = bm.Course
-        fields = ['id', 'tutor', 'room_type', 'module', 'group', ]
+        fields = ['id', 'tutor', 'room_type', 'module', 'groups', ]
 
 
 #                                ---------------------------                            #
@@ -287,12 +290,12 @@ class Course_TC_Serializer(serializers.Serializer):
     room_type = serializers.CharField()
     week = serializers.IntegerField()
     year = serializers.IntegerField()
-    group = Group_SC_Serializer()
+    groups = Group_SC_Serializer()
     module = Module_SC_Serializer()
 
     class Meta:
         model = bm.Course
-        fields = ['id', 'type', 'tutor', 'room_type', 'week', 'year', 'module', 'group']
+        fields = ['id', 'type', 'tutor', 'room_type', 'week', 'year', 'module', 'groups']
 
 
 class TutorCourses_Serializer(serializers.Serializer):

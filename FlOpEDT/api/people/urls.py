@@ -33,4 +33,4 @@ routerPeople.register(r'tutor/username', views.TutorUsernameViewSet, basename='t
 routerPeople.register(r'tutor', views.TutorViewSet, basename='tutor')
 routerPeople.register(r'supplystaff', views.SupplyStaffsViewSet)
 routerPeople.register(r'students', views.StudentsViewSet)
-routerPeople.register(r'coursepreferences', views_preferences.CoursePreferencesViewSet)
+#routerPeople.register(r'coursepreferences', views_preferences.CoursePreferencesViewSet)
