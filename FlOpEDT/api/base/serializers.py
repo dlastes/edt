@@ -66,33 +66,6 @@ class TimeGeneralSettingsSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-# -----------
-# -- ROOMS --
-# -----------
-class RoomTypesSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = bm.RoomType
-        fields = '__all__'
-
-
-class RoomSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = bm.Room
-        fields = '__all__'  # ['id', 'name', 'subroom_of', 'departments']
-
-
-class RoomNameSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = bm.Room
-        fields = ['name']
-
-
-class RoomSortsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = bm.RoomSort
-        fields = '__all__'
-
-
 # -----------------
 # - MODIFICATIONS -
 # -----------------
