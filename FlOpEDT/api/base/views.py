@@ -54,37 +54,6 @@ class DepartmentViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.DepartmentSerializer
 
 
-class GroupTypesViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet to see all the group types
-
-    Can be filtered as wanted with every field of a GroupType object.
-    """
-    permission_classes = [IsAdminOrReadOnly]
-
-    queryset = bm.GroupType.objects.all()
-    serializer_class = serializers.GroupTypesSerializer
-
-
-class GroupsFilterSet(filters.FilterSet):
-    dept = filters.CharFilter(field_name='train_prog__department__abbrev', required=True)
-
-    class Meta:
-        model = bm.Group
-        fields = ['dept']
-
-
-class GroupsViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet to see all the groups
-
-    Can be filtered as wanted with parameter="dept"[required] of a Group object, with the function GroupsFilterSet
-    """
-    permission_classes = [IsAdminOrReadOnly]
-    serializer_class = serializers.GroupsSerializer
-    queryset = bm.Group.objects.all()
-    filter_class = GroupsFilterSet
-
 
 # ------------
 # -- TIMING --

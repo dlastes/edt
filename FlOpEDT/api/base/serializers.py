@@ -26,32 +26,15 @@ import people.models as pm
 from rest_framework import serializers
 
 
-# ------------
-# -- GROUPS --
-# ------------
-
-
-class DepartmentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = bm.Department
-        fields = '__all__'
-
-
 class TrainingProgramsSerializer(serializers.ModelSerializer):
     class Meta:
         model = bm.TrainingProgramme
         fields = '__all__'
 
 
-class GroupTypesSerializer(serializers.ModelSerializer):
+class DepartmentSerializer(serializers.ModelSerializer):
     class Meta:
-        model = bm.GroupType
-        fields = '__all__'
-
-
-class GroupsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = bm.Group
+        model = bm.Department
         fields = '__all__'
 
 
@@ -110,9 +93,6 @@ class RoomSortsSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-# -------------
-# -- COURSES --
-# -------------
 # -----------------
 # - MODIFICATIONS -
 # -----------------
