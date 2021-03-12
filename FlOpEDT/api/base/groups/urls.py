@@ -24,4 +24,4 @@
 routerGroups = routers.SimpleRouter()
 
 routerGroups.register(r'types', views.GroupTypesViewSet)
-routerGroups.register(r'groups', views.GroupsViewSet, basename="groups")
+routerGroups.register(r'groups', views.GroupViewSet, basename="groups")

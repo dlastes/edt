@@ -27,6 +27,7 @@ from api.permissions import IsTutorOrReadOnly, IsAdminOrReadOnly
 from api.base.groups import serializers
 
 from rest_framework import viewsets
+from rest_framework.decorators import action
 
 import django_filters.rest_framework as filters
 
@@ -50,14 +51,24 @@ class GroupsFilterSet(filters.FilterSet):
         fields = ['dept']
 
 
-class GroupsViewSet(viewsets.ModelViewSet):
+class GroupViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the groups
 
     Can be filtered as wanted with parameter="dept"[required] of a Group object, with the function GroupsFilterSet
     """
-    permission_classes = [IsAdminOrReadOnly]
-    serializer_class = serializers.GroupsSerializer
+    serializer_class = serializers.GroupSerializer
     queryset = bm.Group.objects.all()
     filter_class = GroupsFilterSet
 
+    @action(detail=False, methods=['GET'])
+    def tree(self, req):
+        groups_filtered = GroupsFilterSet(data=req.query_params)
+        if not groups_filtered.is_valid():
+            return HttpResponse("KO")
+        department = groups_filtered.data.get('dept')
+
+        groups = queries.get_groups(department)
+        # groups_serialized = serializers.GroupTreeSerializer(data=groups, many=True)
+
+        return JsonResponse(groups, safe=False)
