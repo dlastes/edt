@@ -113,96 +113,6 @@ class RoomSortsSerializer(serializers.ModelSerializer):
 # -------------
 # -- COURSES --
 # -------------
-class TrainingPrograms_M_Serializer(serializers.Serializer):
-    abbrev = serializers.CharField()
-
-    class Meta:
-        model = bm.TrainingProgramme
-        fields = ['abbrev', ]
-
-
-class Period_M_Serializer(serializers.ModelSerializer):
-    class Meta:
-        model = bm.Period
-        fields = ['starting_week', 'ending_week', 'name']
-
-
-class ModuleFullSerializer(serializers.ModelSerializer):
-    train_prog = TrainingProgramsSerializer()
-    period = Period_M_Serializer()
-
-    class Meta:
-        model = bm.Module
-        fields = ['name', 'abbrev', 'head', 'ppn', 'url', 'train_prog', 'period']
-
-
-class ModuleSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = bm.Module
-        fields = ['name', 'abbrev', 'url']
-
-
-class Department_Name_Serializer(serializers.Serializer):
-    name = serializers.CharField()
-
-    class Meta:
-        model = bm.Department
-        fields = ['name']
-
-
-class CourseType_C_Serializer(serializers.Serializer):
-    department = Department_Name_Serializer()
-    name = serializers.CharField()
-
-    class Meta:
-        model = bm.CourseType
-        fields = ['name', 'department']
-
-
-class RoomType_C_Serializer(serializers.Serializer):
-    name = serializers.CharField()
-
-    class Meta:
-        model = bm.RoomType
-        fields = ['name']
-
-
-class Group_C_Serializer(serializers.Serializer):
-    name = serializers.CharField()
-
-    class Meta:
-        model = bm.Group
-        fields = ['name']
-
-
-class Module_C_Serializer(serializers.Serializer):
-    abbrev = serializers.CharField()
-
-    class Meta:
-        model = bm.Module
-        fields = ['abbrev']
-
-
-class CoursesSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
-    week = serializers.IntegerField()
-    year = serializers.IntegerField()
-    no = serializers.IntegerField()
-    type = CourseType_C_Serializer()
-    room_type = RoomType_C_Serializer()
-    tutor = serializers.CharField()
-    supp_tutor = serializers.CharField()
-    group = Group_C_Serializer()
-    module = Module_C_Serializer()
-    modulesupp = Module_C_Serializer()
-
-    class Meta:
-        model = bm.Course
-        fields = ['id', 'week', 'year', 'no', 'department', 'type',
-                  'room_type', 'tutor', 'supp_tutor', 'group', 'module', 'modulesupp']
-
-
-
 # -----------------
 # - MODIFICATIONS -
 # -----------------
@@ -244,21 +154,6 @@ class GroupFreeHalfDaysSerializer(serializers.ModelSerializer):
 #                                  --------------------                                 #
 #                                  ----Course Types----                                 #
 #                                  --------------------                                 #
-
-class CourseTypeSerializer(serializers.ModelSerializer):
-    name = serializers.CharField()
-
-    class Meta:
-        model = bm.CourseType
-        fields = ['name', 'duration']
-
-
-class CourseTypeNameSerializer(serializers.ModelSerializer):
-    name = serializers.CharField()
-
-    class Meta:
-        model = bm.CourseType
-        fields = ['name']
 
 # ----------
 # -- MISC --
