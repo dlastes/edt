@@ -27,11 +27,11 @@ msgstr "Anglais"
 
 #: FlOpEDT/settings/base.py:152
 msgid "Spanish"
-msgstr ""
+msgstr "Espagnol"
 
 #: base/templates/base/aide.html:34
 msgid "Room modification"
-msgstr ""
+msgstr "Modification de salle"
 
 #: base/templates/base/aide.html:35
 msgid ""
@@ -407,12 +407,12 @@ msgstr "Créer"
 
 #: people/views.py:179
 msgid "Not allowed"
-msgstr ""
+msgstr "Non autorisé"
 
 #: people/views.py:185
 #, python-brace-format
 msgid "No such user as {user}"
-msgstr ""
+msgstr "Aucun utilisateur {user}"
 
 #: quote/forms.py:41
 msgid "Quote "
@@ -492,7 +492,7 @@ msgstr "Importer"
 
 #: templates/base.html:95
 msgid "Admin"
-msgstr ""
+msgstr "Admin"
 
 #: templates/base.html:101 templates/base.html:103 templates/base.html:105
 msgid "Sign out"

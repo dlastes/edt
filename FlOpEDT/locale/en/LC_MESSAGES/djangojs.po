@@ -30,16 +30,16 @@ msgstr ""
 
 #: base/static/base/variables.js:593
 msgid "Groups"
-msgstr "Grupos"
+msgstr ""
 
 #: base/static/base/variables.js:597
 msgid "Teachers"
-msgstr "Profes"
+msgstr ""
 
 #: base/static/base/variables.js:601
 msgid "Modules"
-msgstr "Modulos"
+msgstr ""
 
 #: base/static/base/variables.js:605
 msgid "Rooms"
-msgstr "Aulas"
+msgstr ""

@@ -16,30 +16,30 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #: base/static/base/action.js:769
 msgid "The schedule shall be fully regenerated (see downside to the right)."
-msgstr ""
+msgstr "L'emploi du temps va être regénéré totalement (cf. en bas à droite)."
 
 #: base/static/base/action.js:770
 msgid ""
 "Just update your availabilities : they will be considered for the next "
 "generation."
-msgstr ""
+msgstr "Contentez-vous de mettre à jour vos disponibilités : elles seront prises en compte lors de la regénération."
 
 #: base/static/base/variables.js:593
 msgid "Groups"
-msgstr "Grupos"
+msgstr "Groupes"
 
 #: base/static/base/variables.js:597
 msgid "Teachers"
-msgstr "Profes"
+msgstr "Profs"
 
 #: base/static/base/variables.js:601
 msgid "Modules"
-msgstr "Modulos"
+msgstr "Modules"
 
 #: base/static/base/variables.js:605
 msgid "Rooms"
-msgstr "Aulas"
+msgstr "Salles"
