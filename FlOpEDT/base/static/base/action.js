@@ -766,8 +766,8 @@ function apply_ckbox(dk) {
             but: { list: [{ txt: "Ok", click: function (d) { } }] },
             com: {
               list: [{ txt: "Avis", ftsi: 23 }, { txt: "" },
-                { txt: "L'emploi du temps va être regénéré totalement (cf. en bas à droite)." },
-                { txt: "Contentez-vous de mettre à jour vos disponibilités : elles seront prises en compte lors de la regénération." }]
+                { txt: gettext("The schedule shall be fully regenerated (see downside to the right).") },
+                { txt: gettext("Just update your availabilities : they will be considered for the next generation.")}]
             }
           };
           splash(splash_disclaimer);
