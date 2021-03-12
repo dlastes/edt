@@ -64,7 +64,6 @@ INSTALLED_APPS = [
     'quote',
     'people',
     'solve_board',
-    'synchro',
     'ics',
     'displayweb',
     'configuration',

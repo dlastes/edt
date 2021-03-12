@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-12 16:25+0100\n"
+"POT-Creation-Date: 2021-03-12 17:14+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,17 +18,55 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: FlOpEDT/settings/base.py:150
+#: FlOpEDT/settings/base.py:149
 msgid "French"
 msgstr "Francés"
 
-#: FlOpEDT/settings/base.py:151
+#: FlOpEDT/settings/base.py:150
 msgid "English"
 msgstr "Inglés"
 
-#: FlOpEDT/settings/base.py:152
+#: FlOpEDT/settings/base.py:151
 msgid "Spanish"
 msgstr ""
+
+#: base/forms.py:33
+msgid "Your e-mail address :"
+msgstr ""
+
+#: base/forms.py:36
+msgid "Recipient :"
+msgstr ""
+
+#: base/forms.py:38
+msgid "Pseudo : 4 characters max"
+msgstr ""
+
+#: base/forms.py:40
+msgid "Subject of the e-mail :"
+msgstr ""
+
+#: base/forms.py:42
+msgid "100 characters max"
+msgstr ""
+
+#: base/forms.py:43
+msgid "Body of the message :"
+msgstr ""
+
+#: base/forms.py:50
+#, fuzzy
+#| msgid "Tutor does not exist"
+msgid "This person doesn't exist."
+msgstr "Tutor no existe"
+
+#: base/forms.py:58
+msgid "Ideally"
+msgstr ""
+
+#: base/forms.py:64 base/templates/base/show-stype.html:134
+msgid "Maximum"
+msgstr "Maximum"
 
 #: base/templates/base/aide.html:34
 msgid "Room modification"
@@ -267,10 +305,6 @@ msgstr "Eso es el total de horas de educación que quiero hacer todos los días"
 msgid "Preferred"
 msgstr "Favorito"
 
-#: base/templates/base/show-stype.html:134
-msgid "Maximum"
-msgstr "Maximum"
-
 #: base/templates/base/show-stype.html:144
 msgid "My favorite rooms"
 msgstr "Mi aula favorita"
@@ -295,7 +329,7 @@ msgstr ""
 msgid "Types of classes"
 msgstr ""
 
-#: base/templates/base/show-stype.html:190
+#: base/templates/base/show-stype.html:190 ics/templates/ics/index.html:68
 msgid "Rooms"
 msgstr "Aulas"
 
@@ -358,6 +392,69 @@ msgstr "Sab."
 #: base/weeks.py:40
 msgid "Sun."
 msgstr "Dom."
+
+#: ics/templates/ics/index.html:35
+msgid "iCal Subscription"
+msgstr ""
+
+#: ics/templates/ics/index.html:36
+msgid ""
+"Copy the corresponding link of the calendar you would like to add to your "
+"calendar manager."
+msgstr ""
+
+#: ics/templates/ics/index.html:38
+msgid "Groups"
+msgstr ""
+
+#: ics/templates/ics/index.html:41
+msgid "Training program"
+msgstr ""
+
+#: ics/templates/ics/index.html:41
+msgid "Group"
+msgstr ""
+
+#: ics/templates/ics/index.html:52
+msgid "Tutors"
+msgstr ""
+
+#: ics/templates/ics/index.html:55
+msgid "Pseudo"
+msgstr ""
+
+#: ics/templates/ics/index.html:55
+#, fuzzy
+#| msgid "First name "
+msgid "First name"
+msgstr "Nombre"
+
+#: ics/templates/ics/index.html:55
+#, fuzzy
+#| msgid "Last name "
+msgid "Last lame"
+msgstr "Apelido"
+
+#: ics/templates/ics/index.html:55
+msgid "Department(s)"
+msgstr ""
+
+#: ics/templates/ics/index.html:55 ics/templates/ics/index.html:71
+#: ics/templates/ics/index.html:84
+msgid "Address"
+msgstr ""
+
+#: ics/templates/ics/index.html:71
+msgid "Name"
+msgstr ""
+
+#: ics/templates/ics/index.html:81
+msgid "Planned generations"
+msgstr ""
+
+#: ics/templates/ics/index.html:84
+msgid "Department"
+msgstr ""
 
 #: people/templates/people/login.html:55
 msgid "Forgot password?"
@@ -438,6 +535,12 @@ msgstr "Categoría"
 
 #: templates/base.html:53
 msgid "Schedule_title"
+msgstr "Horario"
+
+#: templates/base.html:66
+#, fuzzy
+#| msgid "Schedule_banner"
+msgid "Scheduler"
 msgstr "Horario"
 
 #: templates/base.html:82

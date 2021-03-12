@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-12 16:31+0100\n"
+"POT-Creation-Date: 2021-03-12 17:15+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -54,6 +54,22 @@ msgstr ""
 
 #: base/static/base/transformation.js:280
 msgid ". It's perfect."
+msgstr ""
+
+#: base/static/base/update.js:1249
+msgid "No regeneration planned"
+msgstr ""
+
+#: base/static/base/update.js:1253
+msgid "Full (minor) generation planned on "
+msgstr ""
+
+#: base/static/base/update.js:1256
+msgid "Full generation planned (probably on "
+msgstr ""
+
+#: base/static/base/update.js:1259
+msgid "Minor generation planned (probably on "
 msgstr ""
 
 #: base/static/base/variables.js:593

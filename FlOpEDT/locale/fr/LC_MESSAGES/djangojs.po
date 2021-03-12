@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-12 16:31+0100\n"
+"POT-Creation-Date: 2021-03-12 17:15+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -38,7 +38,7 @@ msgstr "Dispos souhaitées :"
 
 #: base/static/base/transformation.js:267
 msgid " slots."
-msgstr ""
+msgstr " créneaux."
 
 #: base/static/base/transformation.js:269
 msgid "No course for you this week"
@@ -59,6 +59,22 @@ msgstr "Vous en proposez"
 #: base/static/base/transformation.js:280
 msgid ". It's perfect."
 msgstr ". C'est parfait."
+
+#: base/static/base/update.js:1249
+msgid "No regeneration planned"
+msgstr "Pas de (re)génération prévue"
+
+#: base/static/base/update.js:1253
+msgid "Full (minor) generation planned on "
+msgstr "Regénération totale (mineure) le"
+
+#: base/static/base/update.js:1256
+msgid "Full generation planned (probably on "
+msgstr "Regénération totale prévue (probablement le"
+
+#: base/static/base/update.js:1259
+msgid "Minor generation planned (probably on "
+msgstr "Regénération mineure prévue (probablement le"
 
 #: base/static/base/variables.js:593
 msgid "Groups"
