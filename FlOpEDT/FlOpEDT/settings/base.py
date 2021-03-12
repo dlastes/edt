@@ -231,7 +231,7 @@ SHELL_PLUS_MODEL_IMPORTS_RESOLVER = 'django_extensions.collision_resolvers.AppLa
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS','93.5.151.246').split(',')
 
 CORS_ALLOW_ALL_ORIGINS = True
-CORS_ORIGIN_ALLOW_ALL = True
+
 ALLOWED_HOSTS=['*']
 
 COSMO_MODE = False
