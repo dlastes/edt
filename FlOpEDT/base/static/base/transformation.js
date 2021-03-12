@@ -264,9 +264,9 @@ function cross_d_y(d) {
 function txt_reqDispos() {
   var ret = "";
   if (required_dispos > 0) {
-    ret += "Dispos souhaitées : " + required_dispos + " créneaux.";
+    ret += gettext("Required availabilities :") + required_dispos + gettext(" slots.");
   } else if (required_dispos == 0) {
-    ret += "Vous n'intervenez pas cette semaine.";
+    ret += gettext("No course for you this week");
   }
   return ret;
 }
@@ -275,9 +275,9 @@ function txt_filDispos() {
   var ret = "";
   if (required_dispos > 0) {
     if (filled_dispos < required_dispos) {
-      ret += "Vous en avez " + filled_dispos + ". Merci d'en rajouter.";
+      ret += gettext("You got ") + filled_dispos + gettext(". Thank you for adding some.");
     } else {
-      ret += "Vous en proposez " + filled_dispos + ". C'est parfait.";
+      ret += gettext("You propose ") + filled_dispos + gettext(". It's perfect.");
     }
   } else if (required_dispos == 0) {
     //ret += "Pas de problème." // pas de cours => pas de message ;-) 

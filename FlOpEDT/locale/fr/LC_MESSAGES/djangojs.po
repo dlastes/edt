@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-12 11:05+0100\n"
+"POT-Creation-Date: 2021-03-12 16:31+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -26,7 +26,39 @@ msgstr "L'emploi du temps va être regénéré totalement (cf. en bas à droite)
 msgid ""
 "Just update your availabilities : they will be considered for the next "
 "generation."
-msgstr "Contentez-vous de mettre à jour vos disponibilités : elles seront prises en compte lors de la regénération."
+msgstr ""
+"Contentez-vous de mettre à jour vos disponibilités : elles seront prises en "
+"compte lors de la regénération."
+
+#: base/static/base/transformation.js:267
+#, fuzzy
+#| msgid "Required availabilities"
+msgid "Required availabilities :"
+msgstr "Dispos souhaitées :"
+
+#: base/static/base/transformation.js:267
+msgid " slots."
+msgstr ""
+
+#: base/static/base/transformation.js:269
+msgid "No course for you this week"
+msgstr "Vous n'intervenez pas cette semaine."
+
+#: base/static/base/transformation.js:278
+msgid "You got "
+msgstr "Vous avez "
+
+#: base/static/base/transformation.js:278
+msgid ". Thank you for adding some."
+msgstr ". Merci d'en ajouter "
+
+#: base/static/base/transformation.js:280
+msgid "You propose "
+msgstr "Vous en proposez"
+
+#: base/static/base/transformation.js:280
+msgid ". It's perfect."
+msgstr ". C'est parfait."
 
 #: base/static/base/variables.js:593
 msgid "Groups"
