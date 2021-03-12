@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-12 17:15+0100\n"
+"POT-Creation-Date: 2021-03-12 22:32+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -26,6 +26,42 @@ msgstr ""
 msgid ""
 "Just update your availabilities : they will be considered for the next "
 "generation."
+msgstr ""
+
+#: base/static/base/creation.js:803
+msgid "Courses :"
+msgstr ""
+
+#: base/static/base/creation.js:810
+msgid "Avail :"
+msgstr ""
+
+#: base/static/base/decale.js:35
+msgid "Module    "
+msgstr ""
+
+#: base/static/base/decale.js:36
+msgid "Teacher    "
+msgstr ""
+
+#: base/static/base/decale.js:37
+msgid "Group    "
+msgstr ""
+
+#: base/static/base/decale.js:322
+msgid "Definitely cancel"
+msgstr ""
+
+#: base/static/base/decale.js:334
+msgid "Put on hold"
+msgstr ""
+
+#: base/static/base/decale.js:351
+msgid "Move to week "
+msgstr ""
+
+#: base/static/base/decale.js:361
+msgid "by "
 msgstr ""
 
 #: base/static/base/transformation.js:267
@@ -70,6 +106,10 @@ msgstr ""
 
 #: base/static/base/update.js:1259
 msgid "Minor generation planned (probably on "
+msgstr ""
+
+#: base/static/base/variables.js:468 base/static/base/variables.js:476
+msgid "Modify"
 msgstr ""
 
 #: base/static/base/variables.js:593

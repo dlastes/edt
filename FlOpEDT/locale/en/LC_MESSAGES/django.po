@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.3.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-12 17:14+0100\n"
+"POT-Creation-Date: 2021-03-12 23:01+0100\n"
 "PO-Revision-Date: 2020-04-05 18:44+0200\n"
 "Last-Translator: Benoît Roche (benoit.roche@esrf.fr)\n"
 "Language-Team: none\n"
@@ -184,7 +184,7 @@ msgid "Pending classes"
 msgstr ""
 
 #: base/templates/base/show-decale.html:83
-msgid "Class placed during the week"
+msgid "Course scheduled on week"
 msgstr ""
 
 #: base/templates/base/show-decale.html:89
@@ -377,6 +377,117 @@ msgstr ""
 msgid "Sun."
 msgstr ""
 
+#: configuration/templates/configuration/configuration.html:11
+msgid ""
+"Step 1 - Database configuration (teachers, groups, rooms, course types, etc.)"
+msgstr ""
+
+#: configuration/templates/configuration/configuration.html:12
+msgid "Option A: Using a spreadsheet file"
+msgstr ""
+
+#: configuration/templates/configuration/configuration.html:14
+msgid "Configuration file canvas"
+msgstr ""
+
+#: configuration/templates/configuration/configuration.html:15
+#: configuration/templates/configuration/configuration.html:50
+msgid "Download and then complete the file below."
+msgstr ""
+
+#: configuration/templates/configuration/configuration.html:16
+msgid "Click to download the configuration file"
+msgstr ""
+
+#: configuration/templates/configuration/configuration.html:17
+#: configuration/templates/configuration/configuration.html:58
+msgid "Download"
+msgstr ""
+
+#: configuration/templates/configuration/configuration.html:21
+msgid "Configuration file completed"
+msgstr ""
+
+#: configuration/templates/configuration/configuration.html:22
+msgid "Upload the completed configuration file."
+msgstr ""
+
+#: configuration/templates/configuration/configuration.html:23
+#: configuration/templates/configuration/configuration.html:65
+msgid "Only xlsx format is accepted."
+msgstr ""
+
+#: configuration/templates/configuration/configuration.html:27
+#: ics/templates/ics/index.html:84
+msgid "Department"
+msgstr ""
+
+#: configuration/templates/configuration/configuration.html:28
+#: people/templates/people/login.html:86
+msgid "Create"
+msgstr ""
+
+#: configuration/templates/configuration/configuration.html:29
+msgid "Edit"
+msgstr ""
+
+#: configuration/templates/configuration/configuration.html:32
+#: configuration/templates/configuration/configuration.html:76
+#: templates/base.html:94
+msgid "Import"
+msgstr ""
+
+#: configuration/templates/configuration/configuration.html:37
+#: configuration/templates/configuration/configuration.html:79
+msgid "Verdict :"
+msgstr ""
+
+#: configuration/templates/configuration/configuration.html:41
+msgid "Option B: With Flopeditor"
+msgstr ""
+
+#: configuration/templates/configuration/configuration.html:43
+msgid "Click here"
+msgstr ""
+
+#: configuration/templates/configuration/configuration.html:43
+msgid " to go to Flopeditor."
+msgstr ""
+
+#: configuration/templates/configuration/configuration.html:44
+msgid "If you need help, you can consult the Flopeditor documentation on "
+msgstr ""
+
+#: configuration/templates/configuration/configuration.html:44
+msgid "this page."
+msgstr ""
+
+#: configuration/templates/configuration/configuration.html:47
+msgid ""
+"Step 2 - Plan the lessons (which lesson in which week, which teacher gives "
+"which lesson)"
+msgstr ""
+
+#: configuration/templates/configuration/configuration.html:49
+msgid "Template for the planning file from the configuration file"
+msgstr ""
+
+#: configuration/templates/configuration/configuration.html:51
+msgid "Click to download the planning file outline"
+msgstr ""
+
+#: configuration/templates/configuration/configuration.html:63
+msgid "Completed planning file"
+msgstr ""
+
+#: configuration/templates/configuration/configuration.html:64
+msgid "Upload the completed planning file."
+msgstr ""
+
+#: configuration/templates/configuration/configuration.html:75
+msgid "Stabilization ?"
+msgstr ""
+
 #: ics/templates/ics/index.html:35
 msgid "iCal Subscription"
 msgstr ""
@@ -432,10 +543,6 @@ msgstr ""
 msgid "Planned generations"
 msgstr ""
 
-#: ics/templates/ics/index.html:84
-msgid "Department"
-msgstr ""
-
 #: people/templates/people/login.html:55
 msgid "Forgot password?"
 msgstr ""
@@ -466,10 +573,6 @@ msgstr ""
 
 #: people/templates/people/login.html:85
 msgid "A tech or administrative staff"
-msgstr ""
-
-#: people/templates/people/login.html:86
-msgid "Create"
 msgstr ""
 
 #: people/views.py:179
@@ -518,10 +621,8 @@ msgid "Schedule_title"
 msgstr "Schedule"
 
 #: templates/base.html:66
-#, fuzzy
-#| msgid "Schedule_banner"
 msgid "Scheduler"
-msgstr "Schedule "
+msgstr ""
 
 #: templates/base.html:82
 msgid "Schedule_banner"
@@ -557,10 +658,6 @@ msgstr ""
 
 #: templates/base.html:93
 msgid "Statistics"
-msgstr ""
-
-#: templates/base.html:94
-msgid "Import"
 msgstr ""
 
 #: templates/base.html:95

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-12 17:14+0100\n"
+"POT-Creation-Date: 2021-03-12 23:01+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -209,7 +209,7 @@ msgid "Pending classes"
 msgstr "Cours en attente"
 
 #: base/templates/base/show-decale.html:83
-msgid "Class placed during the week"
+msgid "Course scheduled on week"
 msgstr "Cours placé en semaine"
 
 #: base/templates/base/show-decale.html:89
@@ -405,35 +405,157 @@ msgstr "Sam."
 msgid "Sun."
 msgstr "Dim."
 
+#: configuration/templates/configuration/configuration.html:11
+msgid ""
+"Step 1 - Database configuration (teachers, groups, rooms, course types, etc.)"
+msgstr ""
+"Étape 1 - Configuration de la base de données (profs, groupes, salles, types "
+"de cours, etc.)"
+
+#: configuration/templates/configuration/configuration.html:12
+msgid "Option A: Using a spreadsheet file"
+msgstr "Option A : En utilisant un fichier tableur"
+
+#: configuration/templates/configuration/configuration.html:14
+msgid "Configuration file canvas"
+msgstr "Canevas du fichier de configuration"
+
+#: configuration/templates/configuration/configuration.html:15
+#: configuration/templates/configuration/configuration.html:50
+msgid "Download and then complete the file below."
+msgstr "Téléchargez puis remplissez le fichier ci-dessous."
+
+#: configuration/templates/configuration/configuration.html:16
+msgid "Click to download the configuration file"
+msgstr "Cliquez pour télécharger le fichier de configuration"
+
+#: configuration/templates/configuration/configuration.html:17
+#: configuration/templates/configuration/configuration.html:58
+msgid "Download"
+msgstr "Télécharger"
+
+#: configuration/templates/configuration/configuration.html:21
+msgid "Configuration file completed"
+msgstr "Fichier de configuration complété"
+
+#: configuration/templates/configuration/configuration.html:22
+msgid "Upload the completed configuration file."
+msgstr "Téléversez le fichier de configuration rempli."
+
+#: configuration/templates/configuration/configuration.html:23
+#: configuration/templates/configuration/configuration.html:65
+msgid "Only xlsx format is accepted."
+msgstr "Seul le format xlsx est accepté."
+
+#: configuration/templates/configuration/configuration.html:27
+#: ics/templates/ics/index.html:84
+msgid "Department"
+msgstr "Département"
+
+#: configuration/templates/configuration/configuration.html:28
+#: people/templates/people/login.html:86
+msgid "Create"
+msgstr "Créer"
+
+#: configuration/templates/configuration/configuration.html:29
+msgid "Edit"
+msgstr "Modifier"
+
+#: configuration/templates/configuration/configuration.html:32
+#: configuration/templates/configuration/configuration.html:76
+#: templates/base.html:94
+msgid "Import"
+msgstr "Importer"
+
+#: configuration/templates/configuration/configuration.html:37
+#: configuration/templates/configuration/configuration.html:79
+msgid "Verdict :"
+msgstr "Verdict :"
+
+#: configuration/templates/configuration/configuration.html:41
+msgid "Option B: With Flopeditor"
+msgstr "Option B : Avec Flopeditor"
+
+#: configuration/templates/configuration/configuration.html:43
+#, fuzzy
+#| msgid "Click on"
+msgid "Click here"
+msgstr "Click sur"
+
+#: configuration/templates/configuration/configuration.html:43
+msgid " to go to Flopeditor."
+msgstr "pour vous rendre sur Flopeditor."
+
+#: configuration/templates/configuration/configuration.html:44
+msgid "If you need help, you can consult the Flopeditor documentation on "
+msgstr ""
+"Si vous avez besoin d'aide, vous pouvez consulter la documentation de "
+"Flopeditor sur "
+
+#: configuration/templates/configuration/configuration.html:44
+msgid "this page."
+msgstr "cette page."
+
+#: configuration/templates/configuration/configuration.html:47
+msgid ""
+"Step 2 - Plan the lessons (which lesson in which week, which teacher gives "
+"which lesson)"
+msgstr ""
+"Étape 2 - Planifier les cours (quel cours dans quelle semaine, quel prof "
+"donne quel cours)"
+
+#: configuration/templates/configuration/configuration.html:49
+msgid "Template for the planning file from the configuration file"
+msgstr ""
+"Canevas du fichier de planification à partir du fichier de configuration"
+
+#: configuration/templates/configuration/configuration.html:51
+msgid "Click to download the planning file outline"
+msgstr "Cliquez pour télécharger le canevas du fichier de planification"
+
+#: configuration/templates/configuration/configuration.html:63
+msgid "Completed planning file"
+msgstr "Fichier de planification des cours complété"
+
+#: configuration/templates/configuration/configuration.html:64
+msgid "Upload the completed planning file."
+msgstr "Téléversez le fichier de planification rempli."
+
+#: configuration/templates/configuration/configuration.html:75
+msgid "Stabilization ?"
+msgstr "Stabilisation ?"
+
 #: ics/templates/ics/index.html:35
 msgid "iCal Subscription"
-msgstr ""
+msgstr "Abonnement iCal"
 
 #: ics/templates/ics/index.html:36
 msgid ""
 "Copy the corresponding link of the calendar you would like to add to your "
 "calendar manager."
 msgstr ""
+"Copiez le lien du calendrier qui vous intéresse, et importer le dans votre "
+"gestionnaire d'agenda préféré."
 
 #: ics/templates/ics/index.html:38
 msgid "Groups"
-msgstr ""
+msgstr "Groupes"
 
 #: ics/templates/ics/index.html:41
 msgid "Training program"
-msgstr ""
+msgstr "Promotion"
 
 #: ics/templates/ics/index.html:41
 msgid "Group"
-msgstr ""
+msgstr "Groupe"
 
 #: ics/templates/ics/index.html:52
 msgid "Tutors"
-msgstr ""
+msgstr "Enseignant⋅e⋅s"
 
 #: ics/templates/ics/index.html:55
 msgid "Pseudo"
-msgstr ""
+msgstr "Pseudo"
 
 #: ics/templates/ics/index.html:55
 #, fuzzy
@@ -449,24 +571,20 @@ msgstr "Nom "
 
 #: ics/templates/ics/index.html:55
 msgid "Department(s)"
-msgstr ""
+msgstr "Départements"
 
 #: ics/templates/ics/index.html:55 ics/templates/ics/index.html:71
 #: ics/templates/ics/index.html:84
 msgid "Address"
-msgstr ""
+msgstr "Adresse"
 
 #: ics/templates/ics/index.html:71
 msgid "Name"
-msgstr ""
+msgstr "Nom"
 
 #: ics/templates/ics/index.html:81
 msgid "Planned generations"
-msgstr ""
-
-#: ics/templates/ics/index.html:84
-msgid "Department"
-msgstr ""
+msgstr "Générations prévues"
 
 #: people/templates/people/login.html:55
 msgid "Forgot password?"
@@ -499,10 +617,6 @@ msgstr "Vacataire"
 #: people/templates/people/login.html:85
 msgid "A tech or administrative staff"
 msgstr "BIATS"
-
-#: people/templates/people/login.html:86
-msgid "Create"
-msgstr "Créer"
 
 #: people/views.py:179
 msgid "Not allowed"
@@ -550,10 +664,8 @@ msgid "Schedule_title"
 msgstr "Emplois du temps"
 
 #: templates/base.html:66
-#, fuzzy
-#| msgid "Schedule_banner"
 msgid "Scheduler"
-msgstr "Consulter"
+msgstr "EDT"
 
 #: templates/base.html:82
 msgid "Schedule_banner"
@@ -591,10 +703,6 @@ msgstr "Générer"
 msgid "Statistics"
 msgstr "Statistiques"
 
-#: templates/base.html:94
-msgid "Import"
-msgstr "Importer"
-
 #: templates/base.html:95
 msgid "Admin"
 msgstr "Admin"
@@ -606,6 +714,9 @@ msgstr "Déconnexion"
 #: templates/base.html:112
 msgid "Signed in as "
 msgstr "Connecté·e sous "
+
+#~ msgid "Class placed during the week"
+#~ msgstr "Cours placé en semaine"
 
 #, fuzzy
 #~| msgid "Preferences"

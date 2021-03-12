@@ -32,9 +32,9 @@ var filtered = {
   week: week_init,
   year: year_init,
   mod_prof_gp: [
-    { title: 'Module    ', id: 'fil-mod', get: 'm', arr: [default_dd], val: default_dd },
-    { title: 'Enseignant·e    ', id: 'fil-prof', get: 'p', arr: [default_dd], val: default_dd },
-    { title: 'Groupe    ', id: 'fil-gp', get: 'g', arr: [default_dd], val: default_dd }],
+    { title: gettext('Module    '), id: 'fil-mod', get: 'm', arr: [default_dd], val: default_dd },
+    { title: gettext("Teacher    "), id: 'fil-prof', get: 'p', arr: [default_dd], val: default_dd },
+    { title: gettext('Group    '), id: 'fil-gp', get: 'g', arr: [default_dd], val: default_dd }],
   //[,[default_dd],[default_dd]],
   chosen: [0, 0, 0]
 };
@@ -319,7 +319,7 @@ function create_dd() {
 
   di.append("label")
     .attr("for", "cancel")
-    .text("Annuler définitivement");
+    .text(gettext("Definitely cancel"));
 
   di.append("br");
 
@@ -331,7 +331,7 @@ function create_dd() {
 
   di.append("label")
     .attr("for", "pend")
-    .text("Mettre le(s) cours en attente");
+    .text(gettext("Put on hold"));
 
 
 
@@ -348,7 +348,7 @@ function create_dd() {
 
   rad
     .append("span")
-    .text("À opérer en week  ")
+    .text(gettext("Move to week "))
     //
     //    rad
     .append("select")
@@ -358,7 +358,7 @@ function create_dd() {
   rad
     .append("span")
     .attr("class", "crit")
-    .text("par  ")
+    .text(gettext("by "))
     .append("select")
     .attr("id", "aim_prof")
     .on("change", function (d) { choose_aim('p'); });
