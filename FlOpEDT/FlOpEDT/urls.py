@@ -68,7 +68,6 @@ urlpatterns = [
     url(r'^citations/', include('quote.urls')),
     url(r'^edt/(?P<department>[a-zA-Z]\w{0,6})/', include('base.urls')),    
     url(r'^solve-board/(?P<department>[a-zA-Z]\w{0,6})/', include('solve_board.urls')),    
-    url(r'^ical/(?P<department>[a-zA-Z]\w{0,6})/', include('synchro.urls')),
     url(r'^ics/(?P<department>[a-zA-Z]\w{0,6})/', include('ics.urls')),
 #    url(r'^api-auth/', include('rest_framework.urls')),
     url(r'^configuration/', include('configuration.urls')),
