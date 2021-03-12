@@ -30,6 +30,7 @@ import base.models as bm
 
 from django.utils.decorators import method_decorator
 from api.shared.params import week_param, year_param, dept_param
+from api.shared.views_set import ListGenericViewSet
 
 from api.permissions import IsTutorOrReadOnly, IsAdminOrReadOnly
 
@@ -76,7 +77,7 @@ class ModuleViewSet(viewsets.ModelViewSet):
             return bm.Module.objects.filter(train_prog__department__abbrev=abbrev)
 
 
-class ModuleFullViewSet(viewsets.ModelViewSet):
+class ModuleFullViewSet(ListGenericViewSet):
     """
     ViewSet to see all the modules that have a Scheduled course in a given week/year couple.
 
