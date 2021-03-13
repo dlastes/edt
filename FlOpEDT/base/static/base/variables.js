@@ -120,18 +120,16 @@ var file_fetch =
 {
   groups: { done: false, data: null, callback: null },
   constraints: { done: false, data: null, callback: null },
-  rooms: { done: false, data: null, callback: null },
-  department: { done: false, data: null, callback: null },
+  rooms: { done: false, data: null, callback: null }
 };
 
 function main(name, data) {
   file_fetch[name].data = data;
   file_fetch[name].done = true;
   if (file_fetch.groups.done && file_fetch.constraints.done
-    && file_fetch.rooms.done && file_fetch.department.done) {
+    && file_fetch.rooms.done) {
     file_fetch.constraints.callback();
     file_fetch.rooms.callback();
-    file_fetch.department.callback();
     file_fetch.groups.callback();
   }
 }
@@ -166,11 +164,6 @@ file_fetch.constraints.callback = function () {
 
   fetch.constraints_ok = true;
   create_grid_data();
-};
-
-file_fetch.department.callback = function () {
-  departments.data = this.data;
-  //create_dept_redirection();
 };
 
 
@@ -825,15 +818,6 @@ var stbut = {
 /*--------------------
    ------ ALL -------
   --------------------*/
-
-var departments = {
-  data: [],
-  marh: 10,
-  topx: sel_popup.selx + sel_popup.selw + 50,
-  topy: sel_popup.sely - sel_popup.selh - sel_popup.selmy,
-  w: 35,
-  h: sel_popup.selh
-};
 
 // version number of the schedule
 var version;

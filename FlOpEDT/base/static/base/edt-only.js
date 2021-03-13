@@ -242,9 +242,6 @@ d3.json(build_url(rooms_fi, context_dept),
 d3.json(build_url(constraints_fi, context_dept),
   function (d) { main('constraints', d); });
 
-d3.json(departments_fi,
-  function (d) { main('department', d); });
-
 d3.json(build_url(groupes_fi, context_dept),
   function (d) { main('groups', d); });
 
