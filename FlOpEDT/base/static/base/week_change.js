@@ -586,10 +586,10 @@ function fetch_cours() {
   ack.more = "";
 
   var exp_week = wdw_weeks.get_selected();
-  let context = {work_copy: num_copie, dept: department};
-  exp_week.add_to_context(context);
 
   cours_bouge = {};
+
+  show_loader(true);
 
   // Week days
   $.ajax({
@@ -608,10 +608,12 @@ function fetch_cours() {
     }
   });
 
-  show_loader(true);
   $.ajax({
     type: "GET", //rest Type
     dataType: 'text',
+    accepts: {
+      text: 'application/json'
+    },
     url: build_url(
       url_cours_pl,
       context_dept,
@@ -619,7 +621,6 @@ function fetch_cours() {
       {'work_copy': num_copie}
     ),
     async: true,
-    contentType: "text/csv",
     success: function (msg, ts, req) {
 
       const parsed_msg = JSON.parse(msg);
@@ -740,48 +741,6 @@ function translate_cours_pl_from_json(d, result) {
     });
   }
 }
-
-
-function translate_cours_pl_from_csv(d, result) {
-  var ind = tutors.pl.indexOf(d.prof_name);
-  if (ind == -1) {
-    tutors.pl.push(d.prof_name);
-  }
-  if (modules.pl.indexOf(d.module) == -1) {
-    modules.pl.push(d.module);
-  }
-  if (salles.pl.indexOf(d.room) == -1) {
-    salles.pl.push(d.room);
-  }
-
-  // multiple groups
-  let groups = d.gpe_name.split("|");
-
-  for (let i = 0 ; i < groups.length ; i++) {
-    result.push({
-      id_course: +d.id_course,
-      no_course: +d.num_course,
-      prof: d.prof_name,
-      //        prof_full_name: d.prof_first_name + " " + d.prof_last_name,
-      group: translate_gp_name(groups[i]),
-      promo: set_promos.indexOf(d.gpe_promo),
-      mod: d.module,
-      c_type: d.coursetype,
-      day: d.day,
-      start: +d.start_time,
-      duration: constraints[d.coursetype].duration,
-      room: d.room,
-      room_type: d.room_type,
-      color_bg: d.color_bg,
-      color_txt: d.color_txt,
-      display: true,
-      id_visio: d.room==''?(d.id_visio==''?-1:+d.id_visio):-1,
-      comment: d.comment,
-      graded: (d.graded=='' || d.graded=='False' || d.graded=='false')?false:true
-    });
-  }
-}
-
 
 function translate_cours_pp_from_json(d, result) {
   if (tutors.pp.indexOf(d.tutor) === -1) {
