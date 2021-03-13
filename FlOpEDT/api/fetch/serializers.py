@@ -146,7 +146,7 @@ class UnscheduledCoursesSerializer(serializers.Serializer):
     tutor = serializers.CharField()
     room_type = serializers.CharField()
     module = ModuleCours_PP_Serializer()
-    groups = Group_PP_Serializer()
+    groups = Group_PP_Serializer(many=True)
     type = CourseType_PP_Serializer()
 
     class Meta:
