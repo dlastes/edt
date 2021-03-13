@@ -612,10 +612,17 @@ function fetch_cours() {
   $.ajax({
     type: "GET", //rest Type
     dataType: 'text',
-    url: url_cours_pl + exp_week.url() + "/" + num_copie,
+    url: build_url(
+      url_cours_pl,
+      context_dept,
+      exp_week.as_context(),
+      {'work_copy': num_copie}
+    ),
     async: true,
     contentType: "text/csv",
     success: function (msg, ts, req) {
+
+      const parsed_msg = JSON.parse(msg);
 
       go_regen(null);
       go_alarm_pref();
@@ -628,13 +635,10 @@ function fetch_cours() {
         salles.pl = [];
 
         cours_pl = [] ;
-        d3.csvParse(
-          msg,
-          function(d) {
-            translate_cours_pl_from_csv(d, cours_pl);
-          }
-        );
 
+        parsed_msg.forEach(function(sched_course) {
+          translate_cours_pl_from_json(sched_course, cours_pl);
+        });
 
         fetch.ongoing_cours_pl = false;
         fetch_ended(false);
@@ -696,6 +700,40 @@ function fetch_cours() {
     }
   });
 
+}
+
+function translate_cours_pl_from_json(d, result) {
+  if (tutors.pl.indexOf(d.course.tutor) === -1) {
+    tutors.pl.push(d.course.tutor);
+  }
+  if (modules.pl.indexOf(d.course.module.abbrev) === -1) {
+    modules.pl.push(d.course.module.abbrev);
+  }
+  if (salles.pl.indexOf(d.room) === -1) {
+    salles.pl.push(d.room);
+  }
+  for (let i = 0 ; i < d.course.groups.length ; i++)
+  {
+    result.push({
+      id_course: +d.course.id,
+      no_course: +d.course.id,
+      prof: d.course.tutor,
+      //        prof_full_name: d.prof_first_name + " " + d.prof_last_name,
+      group: translate_gp_name(d.course.groups[i].name),
+      promo: set_promos.indexOf(d.course.groups[i].train_prog),
+      mod: d.course.module.abbrev,
+      c_type: d.course.type,
+      day: d.day,
+      start: +d.start_time,
+      duration: constraints[d.course.type].duration,
+      room: d.room,
+      room_type: d.course.room_type,
+      color_bg: d.course.module.display.color_bg,
+      color_txt: d.course.module.display.color_txt,
+      display: true,
+      id_visio: d.room==''?(d.id_visio==''?-1:+d.id_visio):-1,
+    });
+  }
 }
 
 

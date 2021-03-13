@@ -54,8 +54,7 @@
     var url_login = "{% url "people:login" %}";
     var url_edt = "{% url "base:edt" department %}";
 
-    var url_cours_pl = "{% url "base:fetch_cours_pl" department 0 0 0 %}";
-    url_cours_pl = url_cours_pl.slice(0, -5);
+  var url_cours_pl = "{% url 'api:fetch:scheduledcourses-list' %}";
 
     var url_unavailable_rooms = "{% url 'api:fetch:unavailablerooms-list' %}";
 
