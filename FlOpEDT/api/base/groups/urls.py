@@ -28,4 +28,4 @@ from api.base.groups import views
 routerGroups = routers.SimpleRouter()
 
 routerGroups.register(r'types', views.GroupTypesViewSet)
-routerGroups.register(r'groups', views.GroupViewSet, basename="groups")
+routerGroups.register(r'groups', views.GroupViewSet, basename="group")
