@@ -22,7 +22,7 @@
 <!-- without disclosing the source code of your own applications.          -->
 
 {% extends "base.html" %}
-
+{% load i18n %}
 {% block title %} EDT {% endblock %}
 {% block content %}
 <font color="black">
@@ -31,7 +31,7 @@
   <table cellpadding="10">
     {{ form }}
   </table>
-  <button type="submit">Envoyer</button>
+  <button type="submit">{%trans "Send" %}</button>
   <div> {{ ack }} </div>
   <div> <br/><br/> </div>
 </form>

@@ -26,6 +26,7 @@
 {% csrf_token %}
 
 {% block title %} Statistics {% endblock %}
+{% load i18n %}
 
 {% block content %}
 
@@ -101,8 +102,8 @@
 
 <div id="statistics">
     <select id="select_statistic">
-        <option value="room_activity">Nombre de jours d'innocupation par salle</option>
-        <option value="tutor_hours">Nombre de cours donnés par professeur</option>
+        <option value="room_activity"> {% trans "Number of days of innocuousness per room" %}</option>
+        <option value="tutor_hours">{% trans "Number of classes given per teacher" %}</option>
     </select>
 
     <table></table>

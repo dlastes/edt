@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-09-16 16:46+0000\n"
+"POT-Creation-Date: 2021-03-13 12:09+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,13 +17,240 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: FlOpEDT/settings/base.py:150
+#: FlOpEDT/settings/base.py:149
 msgid "French"
 msgstr "Français"
 
-#: FlOpEDT/settings/base.py:151
+#: FlOpEDT/settings/base.py:150
 msgid "English"
 msgstr "Anglais"
+
+#: FlOpEDT/settings/base.py:151
+msgid "Spanish"
+msgstr "Espagnol"
+
+#: base/forms.py:33
+msgid "Your e-mail address :"
+msgstr "Votre adresse mail :"
+
+#: base/forms.py:36
+msgid "Recipient :"
+msgstr "Destinataire :"
+
+#: base/forms.py:38
+msgid "Pseudo : 4 characters max"
+msgstr "Pseudo : 4 caractères max"
+
+#: base/forms.py:40
+msgid "Subject of the e-mail :"
+msgstr "Sujet du mail"
+
+#: base/forms.py:42
+#, fuzzy
+#| msgid "100 charactrs max"
+msgid "100 characters max"
+msgstr "100 caractères max"
+
+#: base/forms.py:43
+msgid "Body of the message :"
+msgstr "Corps du message :"
+
+#: base/forms.py:50
+#, fuzzy
+#| msgid "Tutor does not exist"
+msgid "This person doesn't exist."
+msgstr "Cette personne n'existe pas."
+
+#: base/forms.py:58
+msgid "Ideally"
+msgstr "Idéalement"
+
+#: base/forms.py:64 base/templates/base/show-stype.html:134
+msgid "Maximum"
+msgstr "Maximum"
+
+#: base/templates/base/aide.html:34
+msgid "Room modification"
+msgstr "Modification de salle"
+
+#: base/templates/base/aide.html:35
+msgid ""
+"Right click on the course in question, the available rooms appear. Click on "
+"+ to choose a room that is not available for this course. Don't forget to "
+"validate any changes."
+msgstr ""
+"Cliquer droit sur le cours en question, les salles disponibles apparaissent. "
+"Cliquer sur + pour choisir une salle non prévue pour ce cours. Ne pas "
+"oublier de valider tout changement."
+
+#: base/templates/base/aide.html:38
+#, fuzzy
+#| msgid "Create a link"
+msgid "Create an account"
+msgstr "Créer un compte"
+
+#: base/templates/base/aide.html:39
+msgid "Here"
+msgstr "Ici"
+
+#: base/templates/base/aide.html:42
+msgid "Modification of an account"
+msgstr "Modifier un compte"
+
+#: base/templates/base/aide.html:43
+msgid "Click on his nickname (his initials) at the top right of the page."
+msgstr "Cliquer sur son pseudo (ses initiales) en haut à droite de la page."
+
+#: base/templates/base/aide.html:45
+#, fuzzy
+#| msgid "Forgot password?"
+msgid "Change password"
+msgstr "Mot de passe perdu ?"
+
+#: base/templates/base/aide.html:46 base/templates/base/aide.html:49
+msgid "Click on"
+msgstr "Click sur"
+
+#: base/templates/base/aide.html:46 base/templates/base/aide.html:49
+msgid "this link"
+msgstr "ce lien"
+
+#: base/templates/base/aide.html:46
+#, fuzzy
+#| msgid "Forgot password?"
+msgid "to change your password."
+msgstr "Mot de passe perdu ?"
+
+#: base/templates/base/aide.html:48
+msgid "Password reminder"
+msgstr "Rappel du mot de passe"
+
+#: base/templates/base/aide.html:49
+#, fuzzy
+msgid "for a password reminder, or via 'Login' at the top of the page."
+msgstr "pour un rappel de mot de passe, ou via 'Se connecter' en haut de page."
+
+#: base/templates/base/aide.html:51
+msgid "How availability entry work"
+msgstr "Fonctionnement de la saisie des disponibilités"
+
+#: base/templates/base/aide.html:52
+msgid ""
+"When generating the schedule for a given week, if no availability is entered "
+"for that week, the typical week defines the availability."
+msgstr ""
+" Au moment de la génération de l'emploi du temps d'une semaine donnée, si "
+"aucune disponibilité n'est renseignée pour cette semaine, la semaine type "
+"définit les disponibilités."
+
+#: base/templates/base/aide.html:54
+msgid "Some Tutorial Videos"
+msgstr "Quelques Tutos Vidéos"
+
+#: base/templates/base/contact.html:34 base/templates/base/visio.html:38
+msgid "Send"
+msgstr "Envoyer"
+
+#: base/templates/base/departments.html:15
+msgid "Please choose your department : "
+msgstr "Veuillez choisir votre département :"
+
+#: base/templates/base/module_description.html:35
+#, fuzzy
+#| msgid "Modification of an account"
+msgid "Modification of the module description."
+msgstr "Modification de la description du module"
+
+#: base/templates/base/module_description.html:41
+#, fuzzy
+#| msgid "Modified"
+msgid "Modify"
+msgstr "Modifié"
+
+#: base/templates/base/notification.html:29
+#, fuzzy
+msgid "I wish to be notified of changes for the"
+msgstr "Je souhaite être notifié⋅e des modifications pour les"
+
+#: base/templates/base/notification.html:32
+#, fuzzy
+#| msgid "the next few weeks."
+msgid "next weeks."
+msgstr "prochaines semaines."
+
+#: base/templates/base/notification.html:33
+msgid "(0 if no notification, 1 for the next 7 days, etc.)"
+msgstr "(0 si aucune notification, 1 pour les 7 prochains jours, etc.)"
+
+#: base/templates/base/notification.html:35
+msgid "Save"
+msgstr "Enregistrer"
+
+#: base/templates/base/room_preference.html:14
+#, fuzzy
+#| msgid "My favorite rooms"
+msgid "Favorite room"
+msgstr "Mes préférences de salles"
+
+#: base/templates/base/room_preference.html:15
+msgid "(Ranking your favorite rooms, which may contain ties.)"
+msgstr "(Classement de vos salles préférées, pouvant contenir des égalités.)"
+
+#: base/templates/base/show-decale.html:79
+msgid "When ?"
+msgstr "Quand ?"
+
+#: base/templates/base/show-decale.html:81
+msgid "Cancelled class"
+msgstr "Cours annulé"
+
+#: base/templates/base/show-decale.html:82
+msgid "Pending classes"
+msgstr "Cours en attente"
+
+#: base/templates/base/show-decale.html:83
+msgid "Course scheduled on week"
+msgstr "Cours placé en semaine"
+
+#: base/templates/base/show-decale.html:89
+msgid "Why ?"
+msgstr "Pourquoi ?"
+
+#: base/templates/base/show-decale.html:90
+msgid "(Please fill in the date information)"
+msgstr "(Merci de remplir les informations sur la date)"
+
+#: base/templates/base/show-decale.html:98
+msgid " Proposals"
+msgstr "Propositions"
+
+#: base/templates/base/show-decale.html:104
+msgid " How ?"
+msgstr "Comment ?"
+
+#: base/templates/base/show-edt.html:50
+msgid "Check election"
+msgstr "Vérifier élection"
+
+#: base/templates/base/show-edt.html:54
+msgid "Elect this copy"
+msgstr "Elire cette copie"
+
+#: base/templates/base/show-edt.html:58
+msgid "Duplicate this copy"
+msgstr "Dupliquer cette copie"
+
+#: base/templates/base/show-edt.html:62
+msgid "Delete this copy"
+msgstr "Supprimer cette copie"
+
+#: base/templates/base/show-edt.html:66
+msgid "Delete all copies except the 0"
+msgstr "Supprimer toutes les copies sauf la 0"
+
+#: base/templates/base/show-edt.html:69
+msgid "Reassign rooms"
+msgstr "Réassigner les salles"
 
 #: base/templates/base/show-stype.html:95
 msgid "Weeks"
@@ -58,6 +285,7 @@ msgstr "Semaine type"
 msgid "Update my default week"
 msgstr "Redéfinir ma semaine type"
 
+#: base/templates/base/show-stype.html:112
 #: base/templates/base/show-stype.html:137
 msgid "button_save"
 msgstr "Sauvegarder"
@@ -89,10 +317,6 @@ msgstr ""
 msgid "Preferred"
 msgstr "Idéalement"
 
-#: base/templates/base/show-stype.html:134
-msgid "Maximum"
-msgstr "Maximum"
-
 #: base/templates/base/show-stype.html:144
 msgid "My favorite rooms"
 msgstr "Mes préférences de salles"
@@ -101,13 +325,37 @@ msgstr "Mes préférences de salles"
 msgid "Select my favorite rooms"
 msgstr "Choisir mes salles préférées"
 
+#: base/templates/base/show-stype.html:170
+#, fuzzy
+#| msgid "A teacher"
+msgid "Teachers"
+msgstr "Enseignant·e permanent·e"
+
+#: base/templates/base/show-stype.html:171
+#: base/templates/base/show-stype.html:191
+msgid "Transformation in : "
+msgstr "Tranformation en : "
+
+#: base/templates/base/show-stype.html:177
+#: base/templates/base/show-stype.html:183
+msgid "Types of classes"
+msgstr "Type de cours"
+
+#: base/templates/base/show-stype.html:190 ics/templates/ics/index.html:68
+msgid "Rooms"
+msgstr "Classe"
+
+#: base/templates/base/statistics.html:105
+msgid "Number of days of innocuousness per room"
+msgstr "Nombre de jours d'innocupation par salle"
+
+#: base/templates/base/statistics.html:106
+msgid "Number of classes given per teacher"
+msgstr "Nombre de cours donnés par professeur"
+
 #: base/templates/base/visio.html:31
 msgid "Create or modify a link"
 msgstr "Créer ou modifier un lien"
-
-#: base/templates/base/visio.html:38
-msgid "Send"
-msgstr "Envoyer"
 
 #: base/views.py:1753
 msgid "Not authorized. New link then."
@@ -157,11 +405,192 @@ msgstr "Sam."
 msgid "Sun."
 msgstr "Dim."
 
+#: configuration/templates/configuration/configuration.html:11
+msgid ""
+"Step 1 - Database configuration (teachers, groups, rooms, course types, etc.)"
+msgstr ""
+"Étape 1 - Configuration de la base de données (profs, groupes, salles, types "
+"de cours, etc.)"
+
+#: configuration/templates/configuration/configuration.html:12
+msgid "Option A: Using a spreadsheet file"
+msgstr "Option A : En utilisant un fichier tableur"
+
+#: configuration/templates/configuration/configuration.html:14
+msgid "Configuration file canvas"
+msgstr "Canevas du fichier de configuration"
+
+#: configuration/templates/configuration/configuration.html:15
+#: configuration/templates/configuration/configuration.html:50
+msgid "Download and then complete the file below."
+msgstr "Téléchargez puis remplissez le fichier ci-dessous."
+
+#: configuration/templates/configuration/configuration.html:16
+msgid "Click to download the configuration file"
+msgstr "Cliquez pour télécharger le fichier de configuration"
+
+#: configuration/templates/configuration/configuration.html:17
+#: configuration/templates/configuration/configuration.html:58
+msgid "Download"
+msgstr "Télécharger"
+
+#: configuration/templates/configuration/configuration.html:21
+msgid "Configuration file completed"
+msgstr "Fichier de configuration complété"
+
+#: configuration/templates/configuration/configuration.html:22
+msgid "Upload the completed configuration file."
+msgstr "Téléversez le fichier de configuration rempli."
+
+#: configuration/templates/configuration/configuration.html:23
+#: configuration/templates/configuration/configuration.html:65
+msgid "Only xlsx format is accepted."
+msgstr "Seul le format xlsx est accepté."
+
+#: configuration/templates/configuration/configuration.html:27
+#: ics/templates/ics/index.html:84
+msgid "Department"
+msgstr "Département"
+
+#: configuration/templates/configuration/configuration.html:28
+#: people/templates/people/login.html:86
+msgid "Create"
+msgstr "Créer"
+
+#: configuration/templates/configuration/configuration.html:29
+msgid "Edit"
+msgstr "Modifier"
+
+#: configuration/templates/configuration/configuration.html:32
+#: configuration/templates/configuration/configuration.html:76
+#: templates/base.html:94
+msgid "Import"
+msgstr "Importer"
+
+#: configuration/templates/configuration/configuration.html:37
+#: configuration/templates/configuration/configuration.html:79
+msgid "Verdict :"
+msgstr "Verdict :"
+
+#: configuration/templates/configuration/configuration.html:41
+msgid "Option B: With Flopeditor"
+msgstr "Option B : Avec Flopeditor"
+
+#: configuration/templates/configuration/configuration.html:43
+#, fuzzy
+#| msgid "Click on"
+msgid "Click here"
+msgstr "Click sur"
+
+#: configuration/templates/configuration/configuration.html:43
+msgid " to go to Flopeditor."
+msgstr "pour vous rendre sur Flopeditor."
+
+#: configuration/templates/configuration/configuration.html:44
+msgid "If you need help, you can consult the Flopeditor documentation on "
+msgstr ""
+"Si vous avez besoin d'aide, vous pouvez consulter la documentation de "
+"Flopeditor sur "
+
+#: configuration/templates/configuration/configuration.html:44
+msgid "this page."
+msgstr "cette page."
+
+#: configuration/templates/configuration/configuration.html:47
+msgid ""
+"Step 2 - Plan the lessons (which lesson in which week, which teacher gives "
+"which lesson)"
+msgstr ""
+"Étape 2 - Planifier les cours (quel cours dans quelle semaine, quel prof "
+"donne quel cours)"
+
+#: configuration/templates/configuration/configuration.html:49
+msgid "Template for the planning file from the configuration file"
+msgstr ""
+"Canevas du fichier de planification à partir du fichier de configuration"
+
+#: configuration/templates/configuration/configuration.html:51
+msgid "Click to download the planning file outline"
+msgstr "Cliquez pour télécharger le canevas du fichier de planification"
+
+#: configuration/templates/configuration/configuration.html:63
+msgid "Completed planning file"
+msgstr "Fichier de planification des cours complété"
+
+#: configuration/templates/configuration/configuration.html:64
+msgid "Upload the completed planning file."
+msgstr "Téléversez le fichier de planification rempli."
+
+#: configuration/templates/configuration/configuration.html:75
+msgid "Stabilization ?"
+msgstr "Stabilisation ?"
+
+#: ics/templates/ics/index.html:35
+msgid "iCal Subscription"
+msgstr "Abonnement iCal"
+
+#: ics/templates/ics/index.html:36
+msgid ""
+"Copy the corresponding link of the calendar you would like to add to your "
+"calendar manager."
+msgstr ""
+"Copiez le lien du calendrier qui vous intéresse, et importer le dans votre "
+"gestionnaire d'agenda préféré."
+
+#: ics/templates/ics/index.html:38
+msgid "Groups"
+msgstr "Groupes"
+
+#: ics/templates/ics/index.html:41
+msgid "Training program"
+msgstr "Promotion"
+
+#: ics/templates/ics/index.html:41
+msgid "Group"
+msgstr "Groupe"
+
+#: ics/templates/ics/index.html:52
+msgid "Tutors"
+msgstr "Enseignant⋅e⋅s"
+
+#: ics/templates/ics/index.html:55
+msgid "Pseudo"
+msgstr "Pseudo"
+
+#: ics/templates/ics/index.html:55
+#, fuzzy
+#| msgid "First name "
+msgid "First name"
+msgstr "Prénom "
+
+#: ics/templates/ics/index.html:55
+#, fuzzy
+#| msgid "Last name "
+msgid "Last lame"
+msgstr "Nom "
+
+#: ics/templates/ics/index.html:55
+msgid "Department(s)"
+msgstr "Départements"
+
+#: ics/templates/ics/index.html:55 ics/templates/ics/index.html:71
+#: ics/templates/ics/index.html:84
+msgid "Address"
+msgstr "Adresse"
+
+#: ics/templates/ics/index.html:71
+msgid "Name"
+msgstr "Nom"
+
+#: ics/templates/ics/index.html:81
+msgid "Planned generations"
+msgstr "Générations prévues"
+
 #: people/templates/people/login.html:55
 msgid "Forgot password?"
 msgstr "Mot de passe perdu ?"
 
-#: people/templates/people/login.html:58 templates/base.html:106
+#: people/templates/people/login.html:58 templates/base.html:108
 msgid "Sign in"
 msgstr "Se connecter"
 
@@ -189,9 +618,14 @@ msgstr "Vacataire"
 msgid "A tech or administrative staff"
 msgstr "BIATS"
 
-#: people/templates/people/login.html:86
-msgid "Create"
-msgstr "Créer"
+#: people/views.py:179
+msgid "Not allowed"
+msgstr "Non autorisé"
+
+#: people/views.py:185
+#, python-brace-format
+msgid "No such user as {user}"
+msgstr "Aucun utilisateur {user}"
 
 #: quote/forms.py:41
 msgid "Quote "
@@ -225,61 +659,72 @@ msgstr "En-tête "
 msgid "Category "
 msgstr "Catégorie "
 
-#: templates/base.html:51
+#: templates/base.html:53
 msgid "Schedule_title"
 msgstr "Emplois du temps"
 
-#: templates/base.html:80
+#: templates/base.html:66
+msgid "Scheduler"
+msgstr "EDT"
+
+#: templates/base.html:82
 msgid "Schedule_banner"
 msgstr "Consulter"
 
-#: templates/base.html:82
+#: templates/base.html:84
 msgid "Move/Cancel"
 msgstr "Décaler/Annuler"
 
-#: templates/base.html:84
+#: templates/base.html:86
 msgid "Preferences"
 msgstr "Préférences"
 
-#: templates/base.html:85
+#: templates/base.html:87
 msgid "iCal"
 msgstr "iCal"
 
-#: templates/base.html:86
+#: templates/base.html:88
 msgid "Help"
 msgstr "Aide"
 
-#: templates/base.html:87
+#: templates/base.html:89
 msgid "Messages"
 msgstr "Contact"
 
-#: templates/base.html:88
+#: templates/base.html:90
 msgid "Modules"
 msgstr "Modules"
 
-#: templates/base.html:90
+#: templates/base.html:92
 msgid "Generate"
 msgstr "Générer"
 
-#: templates/base.html:91
+#: templates/base.html:93
 msgid "Statistics"
 msgstr "Statistiques"
 
-#: templates/base.html:92
-msgid "Import"
-msgstr "Importer"
-
-#: templates/base.html:93
+#: templates/base.html:95
 msgid "Admin"
-msgstr ""
+msgstr "Admin"
 
-#: templates/base.html:99 templates/base.html:101 templates/base.html:103
+#: templates/base.html:101 templates/base.html:103 templates/base.html:105
 msgid "Sign out"
 msgstr "Déconnexion"
 
-#: templates/base.html:110
+#: templates/base.html:112
 msgid "Signed in as "
 msgstr "Connecté·e sous "
+
+#~ msgid "schedule"
+#~ msgstr "edt"
+
+#~ msgid "Class placed during the week"
+#~ msgstr "Cours placé en semaine"
+
+#, fuzzy
+#~| msgid "Preferences"
+#~ msgid "Room preferences"
+#~ msgstr "Préférences"
 
 #~ msgid "Choose my video conference rooms"
 #~ msgstr "Mes liens visio"
