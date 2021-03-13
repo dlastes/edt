@@ -56,8 +56,7 @@
     var url_cours_pl = "{% url "base:fetch_cours_pl" department 0 0 0 %}";
     url_cours_pl = url_cours_pl.slice(0, -5);
 
-    var url_unavailable_rooms = "{% url "api:fetch:unavailablerooms-list"%}";
-    url_unavailable_rooms = url_unavailable_rooms.slice(0,-3);
+    var url_unavailable_rooms = "{% url 'api:fetch:unavailablerooms-list' %}";
 
     var url_edt_changes = "{% url "base:edt_changes" department %}";
     var url_user_pref_changes = "{% url "base:user_pref_changes" department 0 0 '.' %}";

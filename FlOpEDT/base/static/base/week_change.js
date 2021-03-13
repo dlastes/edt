@@ -1018,7 +1018,7 @@ function fetch_room_preferences() {
   $.ajax({
     type: "GET", //rest Type
     dataType: 'text',
-    url: url_unavailable_rooms + exp_week.url(),
+    url: build_url(url_unavailable_rooms, context_dept, exp_week.as_context()),
     async: true,
     contentType: "text/csv",
     success: function (msg, ts, req) {
