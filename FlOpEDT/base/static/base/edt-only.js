@@ -43,8 +43,8 @@ dsp_svg.margin = {
 dsp_svg.h = tv_svg_h - dsp_svg.margin.top - dsp_svg.margin.bot;
 dsp_svg.w = tv_svg_w - dsp_svg.margin.left - dsp_svg.margin.right;
 
-var week = week_init;
-var year = year_init;
+let week = week_init;
+let year = year_init;
 
 // filter the right bknews
 
@@ -167,21 +167,28 @@ function fetch_cours_light() {
   $.ajax({
     type: "GET", //rest Type
     dataType: 'text',
-    url: url_cours_pl + year_att + "/" + week_att + "/0",
+    accepts: {
+      text: 'application/json'
+    },
+    url: build_url(
+      url_cours_pl,
+      context_dept,
+      {'week': week, 'year': year, 'work_copy': 0}
+    ),
     async: false,
     contentType: "text/csv",
     success: function (msg, ts, req) {
+
+      const parsed_msg = JSON.parse(msg);
 
       tutors.pl = [];
       modules.pl = [];
       salles.pl = [];
 
       cours_pl = [] ;
-      d3.csvParse(
-        msg,
-        function(d) {
-          translate_cours_pl_from_csv(d, cours_pl) ;
-        });
+      parsed_msg.forEach(function(sched_course) {
+        translate_cours_pl_from_json(sched_course, cours_pl);
+      });
 
       fetch.ongoing_cours_pl = false;
       fetch_ended(true);
