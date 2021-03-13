@@ -465,7 +465,7 @@ var ckbox = [];
 ckbox["edt-mod"] = {
   menu: "edt-mod",
   cked: false,
-  txt: "Modifier",
+  txt: gettext("Modify"),
   disp: true,
   en: true
 };
@@ -473,7 +473,7 @@ ckbox["edt-mod"] = {
 ckbox["dis-mod"] = {
   menu: "dis-mod",
   cked: false,
-  txt: "Modifier",
+  txt: gettext("Modify"),
   disp: true,
   en: true
 };
@@ -590,19 +590,19 @@ if (cosmo) {
 } else {
   sel_popup.available = [{
     type: "group",
-    buttxt: "Groupes"
+    buttxt: gettext('Groups')
   },
   {
     type: "tutor",
-    buttxt: "Profs"
+    buttxt: gettext('Teachers')
   },
   {
     type: "module",
-    buttxt: "Modules"
+    buttxt: gettext('Modules')
   },
   {
     type: "room",
-    buttxt: "Salles"
+    buttxt: gettext('Rooms')
   }];
 }
 sel_popup.available.forEach(function (f) {

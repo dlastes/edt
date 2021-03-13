@@ -800,14 +800,14 @@ function create_menus() {
     .attr("x", menus.mx)
     .attr("y", menus.h - 10)
     .attr("fill", "black")
-    .text("Cours :");
+    .text(gettext("Courses :"));
 
   svg.get_dom("meg")
     .append("text")
     .attr("x", menus.mx + menus.dx)
     .attr("y", menus.h - 10)
     .attr("fill", "black")
-    .text("Dispos :");
+    .text(gettext("Avail :"));
 
   go_menus();
 }

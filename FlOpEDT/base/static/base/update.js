@@ -1245,17 +1245,17 @@ function go_regen(s) {
     var elements = s.split(/,| /);
     var regen_id = elements[elements.length - 1];
     if (elements[0] == 'N') {
-      txt = "Pas de (re)génération prévue";
+      txt = gettext("No regeneration planned");
     } else if (elements[0] == 'C') {
-      total_regen = true;
+      var total_regen = true;
       if (elements.length > 2 && elements[2] == 'S') {
-        txt = "Regénération totale (mineure) le " + elements[1] +
+        txt = gettext("Full (minor) generation planned on ") + elements[1] +
           "(" + elements[3] + ")";
       } else {
-        txt = "Regénération totale prévue (probablement le " + elements[1] + ")";
+        txt = gettext("Full generation planned (probably on ") + elements[1] + ")";
       }
     } else if (elements[0] == 'S') {
-      txt = "Regénération mineure prévue (probablement le " + elements[1] + ")";
+      txt = gettext("Minor generation planned (probably on ") + elements[1] + ")";
     }
 
     ack.regen = txt;
