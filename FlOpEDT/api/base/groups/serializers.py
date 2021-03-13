@@ -31,7 +31,7 @@ class GroupTypesSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class GroupsSerializer(serializers.ModelSerializer):
+class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = bm.Group
         fields = '__all__'
