@@ -228,7 +228,7 @@ fetch_dispos_type();
 fetch_preferred_links();
 
 
-d3.json(rooms_fi,
+d3.json(build_url(rooms_fi, context_dept),
   function (d) { main('rooms', d); });
 
 d3.json(constraints_fi,
@@ -237,7 +237,7 @@ d3.json(constraints_fi,
 d3.json(departments_fi,
   function (d) { main('department', d); });
 
-d3.json(groupes_fi,
+d3.json(build_url(groupes_fi, context_dept),
   function (d) { main('groups', d); });
 
 
