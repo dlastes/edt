@@ -239,7 +239,7 @@ function fetch_bknews_light(first) {
 d3.json(build_url(rooms_fi, context_dept),
   function (d) { main('rooms', d); });
 
-d3.json(constraints_fi,
+d3.json(build_url(constraints_fi, context_dept),
   function (d) { main('constraints', d); });
 
 d3.json(departments_fi,
