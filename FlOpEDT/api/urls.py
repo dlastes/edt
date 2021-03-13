@@ -35,7 +35,9 @@ import api.base.views as views_base
 import api.fetch.views as views_fetch
 from api import views
 from api.TTapp.urls import routerTTapp
-from api.base.urls import routerBase, routerRooms, routerGroups
+from api.base.urls import routerBase
+from api.base.rooms import routerRooms
+from api.base.groups import routerGroups
 from api.base.courses.urls import routerCourses
 from api.fetch.urls import routerFetch
 from api.people.urls import routerPeople
@@ -96,10 +98,12 @@ urlpatterns = [
     path('api-token-auth/', obtain_auth_token, name='api_token_auth'),
     url('doc/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('preferences/', include(routerPreferences.urls)),
-    path('rooms/', include(routerRooms.urls)),
+    path('rooms/',
+         include(routerRooms.urls, 'api'), namespace = 'rooms'),
     path('courses/',
-         include((routerCourses.urls, 'api'), namespace='course')),
-    path('groups/', include(routerGroups.urls)),
+         include((routerCourses.urls, 'api'), namespace = 'course')),
+    path('groups/',
+         include(routerGroups.urls, 'api'), namespace = 'groups'),
     path('extra/',
          include((routerExtra.urls, 'api'), namespace='extra')),
 ]
