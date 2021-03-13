@@ -39,6 +39,12 @@ Week.prototype.add_to_context = function(context) {
   context['week'] = this.week ;
   context['year'] = this.year ;
 };
+Week.prototype.as_context = function() {
+  return {
+    'week': this.week,
+    'year': this.year
+  };
+};
 
 // comparison function
 Week.compare = function (week_a, week_b) {
