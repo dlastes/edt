@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-13 15:37+0100\n"
+"POT-Creation-Date: 2021-03-13 15:44+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -548,6 +548,11 @@ msgstr "Promotion"
 #: ics/templates/ics/index.html:41
 msgid "Group"
 msgstr "Groupe"
+
+#: ics/templates/ics/index.html:46 ics/templates/ics/index.html:62
+#: ics/templates/ics/index.html:75 ics/templates/ics/index.html:88
+msgid "Copy this link"
+msgstr "Copier ce lien"
 
 #: ics/templates/ics/index.html:52
 msgid "Tutors"
