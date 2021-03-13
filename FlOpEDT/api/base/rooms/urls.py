@@ -29,5 +29,6 @@ routerRooms = routers.SimpleRouter()
 routerRooms.register(r'types', views.RoomTypesViewSet)
 routerRooms.register(r'names', views.RoomNameViewSet)
 routerRooms.register(r'room', views.RoomViewSet)
+routerRooms.register(r'all', views.RoomAllViewSet, basename='all')
 routerRooms.register(r'sorts', views.RoomSortsViewSet)
 

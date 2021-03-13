@@ -85,6 +85,23 @@ class RoomNameViewSet(viewsets.ModelViewSet):
     filter_class = RoomFilterSet
 
 
+@method_decorator(name='list',
+                  decorator=swagger_auto_schema(
+                      manual_parameters=[dept_param()])
+                  )
+class RoomAllViewSet(viewsets.ViewSet):
+    queryset = bm.Room.objects.all()
+    filter_class = RoomFilterSet
+
+    def list(self, req):
+        room_filtered = RoomFilterSet(data=req.query_params)
+        if not room_filtered.is_valid():
+            return HttpResponse(room_filtered.errors)
+        department = room_filtered.data.get('dept')
+        rooms = queries.get_room_types_groups(department)
+        return JsonResponse(rooms, safe=False)
+
+
 class RoomSortsViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the room sorts.
