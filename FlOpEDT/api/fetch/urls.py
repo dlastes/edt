@@ -40,3 +40,4 @@ routerFetch.register(r'extrasched', views.ExtraSchedCoursesViewSet, basename='ex
 routerFetch.register(r'bknews', views.BKNewsViewSet, basename='BKNews')
 routerFetch.register(r'unavailableroom', views.UnavailableRoomViewSet, basename="unavailablerooms")
 routerFetch.register(r'constraints', views.ConstraintsQueriesViewSet, basename="constraints")
+routerFetch.register(r'weekdays', views.WeekDaysViewSet, basename="weekdays")

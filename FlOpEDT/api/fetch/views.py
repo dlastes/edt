@@ -25,6 +25,7 @@ import django_filters.rest_framework as filters
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import viewsets
+from rest_framework import exceptions
 from rest_framework.response import Response
 from rest_framework.decorators import action
 
@@ -32,7 +33,7 @@ from django.http import HttpResponse, JsonResponse
 from django.utils.decorators import method_decorator
 
 import base.models as bm
-from base import queries
+from base import queries, weeks
 import people.models as pm
 import displayweb.models as dwm
 
@@ -399,3 +400,28 @@ class ConstraintsQueriesViewSet(viewsets.ViewSet):
 
         constraints = queries.get_coursetype_constraints(department)
         return JsonResponse(constraints, safe=False)
+
+
+@method_decorator(name='list',
+                  decorator=swagger_auto_schema(
+                      manual_parameters=[
+                          week_param(required=True),
+                          year_param(required=True),
+                          dept_param(required=True)
+                      ]
+                  ),
+                  )
+class WeekDaysViewSet(viewsets.ViewSet):
+
+    def list(self, req):
+        week = int(req.query_params.get('week'))
+        year = int(req.query_params.get('year'))
+        try:
+            department = bm.Department.objects.get(
+                abbrev=req.query_params.get('dept', None)
+            )
+        except bm.Department.DoesNotExist:
+            raise exceptions.NotFound(detail='Department not found')
+
+        data = weeks.num_all_days(year, week, department)
+        return JsonResponse(data, safe=False)
