@@ -38,7 +38,8 @@ import people.models as pm
 import displayweb.models as dwm
 
 from api.fetch import serializers
-from api.shared.params import dept_param, week_param, year_param, user_param
+from api.shared.params import dept_param, week_param, year_param, user_param, \
+    work_copy_param
 from api.permissions import IsTutorOrReadOnly, IsAdminOrReadOnly
 
 class ScheduledCourseFilterSet(filters.FilterSet):
@@ -79,10 +80,8 @@ class ScheduledCoursesViewSet(viewsets.ReadOnlyModelViewSet):
                           week_param(),
                           year_param(),
                           dept_param(),
-                          openapi.Parameter('work_copy',
-                                            openapi.IN_QUERY,
-                                            description="N° of work copy",
-                                            type=openapi.TYPE_INTEGER), ])
+                          work_copy_param()
+                      ])
                   )
 class UnscheduledCoursesViewSet(viewsets.ReadOnlyModelViewSet):
     """

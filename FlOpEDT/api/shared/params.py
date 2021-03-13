@@ -55,3 +55,11 @@ def dept_param(**kwargs):
                              type=openapi.TYPE_STRING,
                              **kwargs)
 
+
+def work_copy_param(**kwargs):
+    return openapi.Parameter('work_copy',
+                             openapi.IN_QUERY,
+                             description="N° of work copy",
+                             type=openapi.TYPE_INTEGER,
+                             **kwargs)
+
