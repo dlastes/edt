@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-12 23:01+0100\n"
+"POT-Creation-Date: 2021-03-13 12:09+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -693,3 +693,8 @@ msgstr "Cerrar sesión"
 #: templates/base.html:112
 msgid "Signed in as "
 msgstr "Iniciar sesión como"
+
+#, fuzzy
+#~| msgid "Schedule_banner"
+#~ msgid "schedule"
+#~ msgstr "Horario"
