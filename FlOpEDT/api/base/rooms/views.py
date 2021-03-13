@@ -33,6 +33,8 @@ from base import queries
 
 from api.base.rooms import serializers
 from api.shared.params import dept_param
+from api.permissions import IsTutorOrReadOnly, IsAdminOrReadOnly
+
 
 
 class RoomTypesViewSet(viewsets.ModelViewSet):

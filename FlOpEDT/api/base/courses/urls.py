@@ -23,7 +23,7 @@
 
 from rest_framework import routers
 
-from api.base import views
+from api.base.courses import views
 
 routerCourses = routers.SimpleRouter()
 

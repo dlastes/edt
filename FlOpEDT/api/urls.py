@@ -36,8 +36,8 @@ import api.fetch.views as views_fetch
 from api import views
 from api.TTapp.urls import routerTTapp
 from api.base.urls import routerBase
-from api.base.rooms import routerRooms
-from api.base.groups import routerGroups
+from api.base.rooms.urls import routerRooms
+from api.base.groups.urls import routerGroups
 from api.base.courses.urls import routerCourses
 from api.fetch.urls import routerFetch
 from api.people.urls import routerPeople
