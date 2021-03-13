@@ -26,12 +26,6 @@ import people.models as pm
 from rest_framework import serializers
 
 
-class TrainingProgramsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = bm.TrainingProgramme
-        fields = '__all__'
-
-
 class DepartmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = bm.Department
@@ -160,3 +154,9 @@ class TrainingProgrammeSerializer(serializers.ModelSerializer):
     class Meta:
         model = bm.TrainingProgramme
         fields = ['abbrev', 'name']
+
+
+class TrainingProgramsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = bm.TrainingProgramme
+        fields = '__all__'
