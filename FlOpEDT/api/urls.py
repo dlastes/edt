@@ -99,11 +99,11 @@ urlpatterns = [
     url('doc/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('preferences/', include(routerPreferences.urls)),
     path('rooms/',
-         include(routerRooms.urls, 'api'), namespace = 'rooms'),
+         include((routerRooms.urls, 'api'), namespace = 'rooms')),
     path('courses/',
          include((routerCourses.urls, 'api'), namespace = 'course')),
     path('groups/',
-         include(routerGroups.urls, 'api'), namespace = 'groups'),
+         include((routerGroups.urls, 'api'), namespace = 'groups')),
     path('extra/',
          include((routerExtra.urls, 'api'), namespace='extra')),
 ]
