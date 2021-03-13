@@ -34,6 +34,8 @@ from django.db import models
 from base.timing import hhmm, str_slot, Day, Time
 import base.weeks
 
+from django.utils.translation import gettext as _
+
 
 
 # <editor-fold desc="GROUPS">
@@ -75,7 +77,7 @@ class Group(models.Model):
         'TrainingProgramme', on_delete=models.CASCADE)
     type = models.ForeignKey('GroupType', on_delete=models.CASCADE)
     size = models.PositiveSmallIntegerField()
-    basic = models.BooleanField(verbose_name='Basic group?', default=False)
+    basic = models.BooleanField(verbose_name=_('Basic group?'), default=False)
     parent_groups = models.ManyToManyField('self', symmetrical=False,
                                            blank=True,
                                            related_name="children_groups")
@@ -142,7 +144,7 @@ class Holiday(models.Model):
 
 class TrainingHalfDay(models.Model):
     apm = models.CharField(max_length=2, choices=Time.HALF_DAY_CHOICES,
-                           verbose_name="Demi-journée", null=True, default=None, blank=True)
+                           verbose_name=_("Half day"), null=True, default=None, blank=True)
     day = models.CharField(
         max_length=2, choices=Day.CHOICES, default=Day.MONDAY)
     week = models.PositiveSmallIntegerField(
@@ -266,7 +268,7 @@ class RoomSort(models.Model):
 
 class Module(models.Model):
     name = models.CharField(max_length=100, null=True)
-    abbrev = models.CharField(max_length=10, verbose_name='Intitulé abbrégé')
+    abbrev = models.CharField(max_length=10, verbose_name=_('Abbreviation'))
     head = models.ForeignKey('people.Tutor',
                              null=True,
                              default=None,
@@ -313,7 +315,7 @@ class CourseType(models.Model):
     group_types = models.ManyToManyField(GroupType,
                                          blank=True,
                                          related_name="compatible_course_types")
-    graded = models.BooleanField(verbose_name='noté ?', default=False)
+    graded = models.BooleanField(verbose_name=_('graded?'), default=False)
 
     def __str__(self):
         return self.name
@@ -341,7 +343,7 @@ class Course(models.Model):
         validators=[MinValueValidator(0), MaxValueValidator(53)],
         null=True, blank=True)
     year = models.PositiveSmallIntegerField()
-    suspens = models.BooleanField(verbose_name='En suspens?', default=False)
+    suspens = models.BooleanField(verbose_name=_('Suspens?'), default=False)
     show_id = False
 
     def __str__(self):
@@ -370,7 +372,7 @@ class Course(models.Model):
 
 class CourseAdditional(models.Model):
     course = models.OneToOneField('Course', on_delete=models.CASCADE, related_name='additional')
-    graded = models.BooleanField(verbose_name='noté ?', default=False)
+    graded = models.BooleanField(verbose_name=_('Graded?'), default=False)
     visio_preference_value = models.SmallIntegerField(validators=[MinValueValidator(0), MaxValueValidator(8)],
                                                       default=1)
 
@@ -694,8 +696,8 @@ class Dependency(models.Model):
         'Course', related_name='first_course', on_delete=models.CASCADE)
     course2 = models.ForeignKey(
         'Course', related_name='second_course', on_delete=models.CASCADE)
-    successive = models.BooleanField(verbose_name='Successifs?', default=False)
-    ND = models.BooleanField(verbose_name='Jours differents', default=False)
+    successive = models.BooleanField(verbose_name=_('Successives?'), default=False)
+    ND = models.BooleanField(verbose_name=_('On different days'), default=False)
 
     def __str__(self):
         return f"{self.course1} avant {self.course2}"
@@ -715,22 +717,26 @@ class Regen(models.Model):
     week = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(53)])
     year = models.PositiveSmallIntegerField()
-    full = models.BooleanField(verbose_name='Complète',
+    full = models.BooleanField(verbose_name=_('Full'),
                                default=True)
-    fdate = models.DateField(verbose_name='Regénération complète le', null=True, blank=True)
-    stabilize = models.BooleanField(verbose_name='Stabilisée',
+    fdate = models.DateField(verbose_name=_('Full generation date'), null=True, blank=True)
+    stabilize = models.BooleanField(verbose_name=_('Stabilized'),
                                     default=False)
-    sdate = models.DateField(verbose_name='Regénération stabilisée le', null=True, blank=True)
+    sdate = models.DateField(verbose_name=_('Partial generation date' ), null=True, blank=True)
 
     def __str__(self):
         pre = ''
         if self.full:
-            pre = f'C,{self.fdate.strftime("%d/%m/%y")}'
+            pre += 'C, '
+            if self.fdate is not None:
+                pre += f'{self.fdate.strftime("%d/%m/%y")}, '
         if self.stabilize:
-            pre = f'S,{self.sdate.strftime("%d/%m/%y")}'
+            pre += 'S, '
+            if self.sdate is not None:
+                pre += f'{self.sdate.strftime("%d/%m/%y")}, '
         if not self.full and not self.stabilize:
-            pre = 'N'
-        pre += f",{self.id}"
+            pre = 'N, '
+        pre += f"{self.id}"
         return pre
 
     def strplus(self):
