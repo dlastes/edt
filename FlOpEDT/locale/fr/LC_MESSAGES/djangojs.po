@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-13 15:37+0100\n"
+"POT-Creation-Date: 2021-03-13 23:12+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -73,33 +73,31 @@ msgid "by "
 msgstr ""
 
 #: base/static/base/transformation.js:267
-#, fuzzy
-#| msgid "Required availabilities"
-msgid "Required availabilities :"
-msgstr "Dispos souhaitées :"
-
-#: base/static/base/transformation.js:267
-msgid " slots."
-msgstr " créneaux."
+msgid "You have to do :  "
+msgstr ""
 
 #: base/static/base/transformation.js:269
-msgid "No course for you this week"
+#, fuzzy
+#| msgid "No course for you this week"
+msgid "No course for you this week."
 msgstr "Vous n'intervenez pas cette semaine."
 
-#: base/static/base/transformation.js:278
-msgid "You got "
-msgstr "Vous avez "
-
-#: base/static/base/transformation.js:278
-msgid ". Thank you for adding some."
-msgstr ". Merci d'en ajouter "
-
-#: base/static/base/transformation.js:280
-msgid "You propose "
+#: base/static/base/transformation.js:277
+#, fuzzy
+#| msgid "You propose "
+msgid "You propose   "
 msgstr "Vous en proposez"
 
-#: base/static/base/transformation.js:280
-msgid ". It's perfect."
+#: base/static/base/transformation.js:279
+#, fuzzy
+#| msgid ". Thank you for adding some."
+msgid "Thank you for adding some."
+msgstr ". Merci d'en ajouter "
+
+#: base/static/base/transformation.js:281
+#, fuzzy
+#| msgid ". It's perfect."
+msgid "It's perfect."
 msgstr ". C'est parfait."
 
 #: base/static/base/update.js:1248
@@ -137,3 +135,14 @@ msgstr "Modules"
 #: base/static/base/variables.js:605
 msgid "Rooms"
 msgstr "Salles"
+
+#, fuzzy
+#~| msgid "Required availabilities"
+#~ msgid "Required availabilities :"
+#~ msgstr "Dispos souhaitées :"
+
+#~ msgid " slots."
+#~ msgstr " créneaux."
+
+#~ msgid "You got "
+#~ msgstr "Vous avez "

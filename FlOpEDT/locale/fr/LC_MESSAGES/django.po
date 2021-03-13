@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-13 15:44+0100\n"
+"POT-Creation-Date: 2021-03-13 23:12+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -68,6 +68,62 @@ msgstr "Idéalement"
 #: base/forms.py:64 base/templates/base/show-stype.html:134
 msgid "Maximum"
 msgstr "Maximum"
+
+#: base/models.py:80
+msgid "Basic group?"
+msgstr ""
+
+#: base/models.py:147
+#, fuzzy
+#| msgid "My ideal day"
+msgid "Half day"
+msgstr "Ma journée idéale"
+
+#: base/models.py:271
+msgid "Abbreviation"
+msgstr ""
+
+#: base/models.py:318
+msgid "graded?"
+msgstr ""
+
+#: base/models.py:346
+msgid "Suspens?"
+msgstr ""
+
+#: base/models.py:375
+msgid "Graded?"
+msgstr ""
+
+#: base/models.py:699
+msgid "Successives?"
+msgstr ""
+
+#: base/models.py:700
+msgid "On different days"
+msgstr ""
+
+#: base/models.py:720
+msgid "Full"
+msgstr ""
+
+#: base/models.py:722
+#, fuzzy
+#| msgid "Planned generations"
+msgid "Full generation date"
+msgstr "Générations prévues"
+
+#: base/models.py:723
+#, fuzzy
+#| msgid "Stabilization ?"
+msgid "Stabilized"
+msgstr "Stabilisation ?"
+
+#: base/models.py:725
+#, fuzzy
+#| msgid "Planned generations"
+msgid "Partial generation date"
+msgstr "Générations prévues"
 
 #: base/templates/base/aide.html:34
 msgid "Room modification"
@@ -357,23 +413,23 @@ msgstr "Nombre de cours donnés par professeur"
 msgid "Create or modify a link"
 msgstr "Créer ou modifier un lien"
 
-#: base/views.py:1753
+#: base/views.py:1751
 msgid "Not authorized. New link then."
 msgstr "Non autorisé. Création d'un nouveau lien."
 
-#: base/views.py:1756
+#: base/views.py:1754
 msgid "Unknown link. New link then."
 msgstr "Lien inconnu. Création d'un nouveau lien."
 
-#: base/views.py:1768
+#: base/views.py:1766
 msgid "Created"
 msgstr "Créé"
 
-#: base/views.py:1768
+#: base/views.py:1766
 msgid "Modified"
 msgstr "Modifié"
 
-#: base/views.py:1771
+#: base/views.py:1769
 msgid "Tutor does not exist"
 msgstr "L'utilisateur n'existe pas."
 
