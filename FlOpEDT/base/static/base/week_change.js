@@ -664,9 +664,16 @@ function fetch_cours() {
   $.ajax({
     type: "GET", //rest Type
     dataType: 'text',
-    url: build_url(url_cours_pp, context),
+    accepts: {
+      text: 'application/json'
+    },
+    url: build_url(
+      url_cours_pp,
+      context_dept,
+      exp_week.as_context(),
+      {'work_copy': num_copie}
+    ),
     async: true,
-    contentType: "text/csv",
     success: function (msg, ts, req) {
       console.log(msg);
 
@@ -680,12 +687,10 @@ function fetch_cours() {
         // console.log(exp_week,num_copie);
 
         cours_pp = [] ;
-        d3.csvParse(
-          msg,
-          function(d) {
-            translate_cours_pp_from_csv(d, cours_pp);
-          }
-        );
+        parsed_msg.forEach(function(sched_course) {
+          translate_cours_pp_from_json(sched_course, cours_pp);
+        });
+
 
         go_grid(true);
 
@@ -778,41 +783,37 @@ function translate_cours_pl_from_csv(d, result) {
 }
 
 
-function translate_cours_pp_from_csv(d, result) {
-  if (tutors.pp.indexOf(d.prof) == -1) {
-    tutors.pp.push(d.prof);
+function translate_cours_pp_from_json(d, result) {
+  if (tutors.pp.indexOf(d.tutor) === -1) {
+    tutors.pp.push(d.tutor);
   }
-  if (modules.pp.indexOf(d.module) == -1) {
-    modules.pp.push(d.module);
+  if (modules.pp.indexOf(d.module.abbrev) === -1) {
+    modules.pp.push(d.module.abbrev);
   }
-  if (salles.pp.indexOf(d.room) == -1) {
+  if (salles.pp.indexOf(d.room) === -1) {
     salles.pp.push(d.room);
   }
-
-  // multiple groups
-  let groups = d.groups.split("|");
-
-  for (let i = 0 ; i < groups.length ; i++) {
+  for (let i = 0 ; i < d.groups.length ; i++)
+  {
     result.push({
       id_course: +d.id,
       no_course: +d.no,
-      prof: d.prof,
-      group: translate_gp_name(groups[i]),
-      promo: set_promos.indexOf(d.promo),
-      mod: d.module,
-      c_type: d.coursetype,
+      prof: d.tutor,
+      group: translate_gp_name(d.groups[i].name),
+      promo: set_promos.indexOf(d.groups[i].train_prog),
+      mod: d.module.abbrev,
+      c_type: d.type.name,
       day: garbage.day,
       start: garbage.start,
-      duration: constraints[d.coursetype].duration,
+      duration: constraints[d.type.name].duration,
       room: "",
       room_type: d.room_type,
-      color_bg: d.color_bg,
-      color_txt: d.color_txt,
+      color_bg: d.module.display.color_bg,
+      color_txt: d.module.display.color_txt,
       display: true
     });
   }
 }
-
 
 
 // insert the given week in the side weeks
