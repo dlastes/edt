@@ -53,7 +53,7 @@ class ScheduledCourseFilterSet(filters.FilterSet):
     week = filters.NumberFilter(field_name='course__week', required=True)
     year = filters.NumberFilter(field_name='course__year', required=True)
 
-    # num_copy = filters.NumberFilter(field_name='num_copy')
+    work_copy = filters.NumberFilter(field_name='work_copy')
 
     class Meta:
         model = bm.ScheduledCourse
