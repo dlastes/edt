@@ -22,6 +22,7 @@
 <!-- without disclosing the source code of your own applications.          -->
 
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %} EDT {% endblock %}
 {% block content %}
@@ -31,60 +32,60 @@
 
 <div id="tools-main" style="padding:10px;">
 
-    <h2>Abonnement iCal</h2>
-    <p>Copiez le lien correspondant au calendrier auquel vous souhaitez vous abonner pour l'ajouter dans votre gestionnaire d'agenda.</p>
+    <h2>{% trans "iCal Subscription" %}</h2>
+    <p>{% trans "Copy the corresponding link of the calendar you would like to add to your calendar manager." %}</p>
     
-    <h2>Groupes</h2>
+    <h2>{% trans "Groups" %}</h2>
     <ul>
       <table>
-        <th>Promo</th><th>Groupe</th>
+        <th>{% trans "Training program" %}</th><th>{% trans "Group" %}</th>
         {% for g in groups %}
         <tr>
           <td>{{ g.train_prog.abbrev }}</td>
           <td>{{ g.name }}</td>
-          <td><a href="{% url "ics:group" department g.id %}">{{ requi }}{% url "ics:group" department g.id %}</a></td>
+          <td><a href="{% url "ics:group" department g.id %}">{% trans "Copy this link" %} - {{ g.name }}</a></td>
         </tr>
       {% endfor %}
       </table>
     </ul>
     
-    <h2>Enseignants</h2>
+    <h2>{% trans "Tutors" %}</h2>
     <ul>
       <table>
-        <tr><th>Pseudo</th><th>Prénom</th><th>Nom</th><th>Département(s)</th><th>Adresse</th></tr>
+        <tr><th>{% trans "Pseudo" %}</th><th>{% trans "First name" %}</th><th>{%  trans "Last lame" %}</th><th>{% trans "Department(s)" %}</th><th>{% trans "Address" %}</th></tr>
 	{% for e in tutors %}
 	<tr>
           <td>{{ e.username }}</td>
           <td>{{ e.first_name }}</td>
           <td>{{ e.last_name }}</td>
           <td>{{ e.departments.all | join:", " }}</td>
-          <td><a href="{% url "ics:tutor" department e.id %}">{{ requi }}{% url "ics:tutor" department e.id %}</a></td>
+          <td><a href="{% url "ics:tutor" department e.id %}">{% trans "Copy this link" %} - {{ e.username }}</a></td>
         </tr>
 	{% endfor %}
       </table>
     </ul>
 	
-    <h2>Salles</h2>
+    <h2>{% trans "Rooms" %}</h2>
     <ul>
       <table>
-        <tr><th>Nom</th><th>Adresse</th></tr>
+        <tr><th>{% trans "Name" %}</th><th>{% trans "Address" %}</th></tr>
         {% for s in rooms %}
         <tr>
           <td>{{ s.name }}</td>
-          <td><a href="{% url "ics:room" department s.id %}">{{ requi }}{% url "ics:room" department s.id %}</a></td>
+          <td><a href="{% url "ics:room" department s.id %}">{% trans "Copy this link" %} - {{ s.name }}</a></td>
         </tr>
         {% endfor %}
       </table>
     </ul>
 
-    <h2>Regénérations</h2>
+    <h2>{% trans "Planned generations" %}</h2>
     <ul>
       <table>
-        <tr><th>Departement</th><th>Adresse</th></tr>
+        <tr><th>{% trans "Department" %}</th><th>{% trans "Address" %}</th></tr>
         {% for d in deps %}
         <tr>
           <td>{{ d.abbrev }}</td>
-          <td><a href="{% url "ics:regen" department d.id%}">{{ requi }}{% url "ics:regen" department d.id %}</a></td>
+          <td><a href="{% url "ics:regen" department d.id%}">{% trans "Copy this link" %} - {{ d.abbrev }}</a></td>
         </tr>
         {% endfor %}
       </table>

@@ -1,8 +1,7 @@
 {% extends "base.html" %}
 
 {% csrf_token %}
-
-
+{% load i18n %}
 
 {% block title %} EDT {% endblock %}
 
@@ -12,8 +11,8 @@
 <html>
   <body>
     <div id="main-container">
-      <h1>Mes préférences de salles</h1>
-      <p>(Classement de vos salles préférées, pouvant contenir des égalités.)</p>
+      <h1>{% trans "Favorite room" %}</h1>
+      <p>{% trans "(Ranking your favorite rooms, which may contain ties.)" %}</p>
       
       <div id="rooms-table" class="rooms-container">
         {% for roomtype, pref in pref_tmpl.items %}

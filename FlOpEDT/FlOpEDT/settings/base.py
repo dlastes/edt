@@ -64,7 +64,6 @@ INSTALLED_APPS = [
     'quote',
     'people',
     'solve_board',
-    'synchro',
     'ics',
     'displayweb',
     'configuration',
@@ -149,6 +148,7 @@ AUTH_USER_MODEL = 'people.User'
 LANGUAGES = [
   ('fr', _('French')),
   ('en', _('English')),
+  ('es', _('Spanish')),
 ]
 
 # Folder which contains traduction files

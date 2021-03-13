@@ -39,11 +39,21 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 from django.conf import settings
-from django.urls import path
+from django.urls import path, re_path
 from django.contrib import admin
 from django.views.generic import RedirectView
+from django.views.i18n import JavaScriptCatalog
+from django.conf.urls.i18n import i18n_patterns
+from django.utils.translation import gettext as _
+
 
 from base import views
+
+
+js_info_dict = {
+    'packages': ('languages', )
+}
+
 
 urlpatterns = [
 
@@ -52,24 +62,24 @@ urlpatterns = [
     url(views.fav_regexp,
         views.favicon,
         name="favicon"),
-
-    url(r'^admin$', RedirectView.as_view(url='/admin/')),
-    url(r'^admin/', admin.site.urls),
-    url(r'^accounts/', include('people.urls')),
-    url(r'^citations/', include('quote.urls')),
-    url(r'^edt/(?P<department>[a-zA-Z]\w{0,6})/', include('base.urls')),    
-    url(r'^solve-board/(?P<department>[a-zA-Z]\w{0,6})/', include('solve_board.urls')),    
-    url(r'^ical/(?P<department>[a-zA-Z]\w{0,6})/', include('synchro.urls')),
-    url(r'^ics/(?P<department>[a-zA-Z]\w{0,6})/', include('ics.urls')),
-#    url(r'^api-auth/', include('rest_framework.urls')),
-    url(r'^configuration/', include('configuration.urls')),
-#    url(r'^importation/(?P<department>[a-zA-Z]\w{0,6})/', include('importation.urls')),
-    url('ttapp/(?P<department>[a-zA-Z]\w{0,6})/', include('TTapp.urls')),
-    url(r'^$', views.index, name='index'),
-    url('game/', include('easter_egg.urls')),
-    url(r'^flopeditor/', include('flopeditor.urls')),
-    url(r'^display/(?P<department>[a-zA-Z]\w{0,6})/', include('displayweb.urls'))
+    path('jsi18n/', JavaScriptCatalog.as_view(), name='javascript-catalog'),
+    re_path(r'^$', views.index, name='index')
 ]
+
+urlpatterns += i18n_patterns(
+    re_path(r'^admin$', RedirectView.as_view(url='/admin/')),
+    re_path(r'^admin/', admin.site.urls),
+    re_path(r'^accounts/', include('people.urls')),
+    re_path(r'^citations/', include('quote.urls')),
+    re_path(r'^edt/(?P<department>[a-zA-Z]\w{0,6})/', include('base.urls')),
+    re_path(r'^solve-board/(?P<department>[a-zA-Z]\w{0,6})/', include('solve_board.urls')),
+    re_path(r'^ics/(?P<department>[a-zA-Z]\w{0,6})/', include('ics.urls')),
+    re_path(r'^configuration/', include('configuration.urls')),
+    re_path(r'^ttapp/(?P<department>[a-zA-Z]\w{0,6})/', include('TTapp.urls')),
+    re_path(r'^game/', include('easter_egg.urls')),
+    re_path(r'^flopeditor/', include('flopeditor.urls')),
+    re_path(r'^display/(?P<department>[a-zA-Z]\w{0,6})/', include('displayweb.urls'))
+)
 
 if settings.DEBUG:
     import debug_toolbar
