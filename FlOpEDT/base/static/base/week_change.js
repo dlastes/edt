@@ -591,6 +591,23 @@ function fetch_cours() {
 
   cours_bouge = {};
 
+  // Week days
+  $.ajax({
+    type: "GET",
+    dataType: 'text',
+    url: build_url(url_weekdays, context_dept, exp_week.as_context()),
+    async: true,
+    contentType: "application/json",
+    success: function(msg, ts, req) {
+      var sel_week = wdw_weeks.get_selected();
+      if (Week.compare(exp_week, sel_week) === 0) {
+        week_days = new WeekDays(JSON.parse(msg));
+        days_header.mix.days = week_days;
+        days_header.fetch_physical_presence() ;
+      }
+    }
+  });
+
   show_loader(true);
   $.ajax({
     type: "GET", //rest Type
@@ -605,11 +622,6 @@ function fetch_cours() {
 
       var sel_week = wdw_weeks.get_selected();
       if (Week.compare(exp_week, sel_week) == 0) {
-
-        week_days = new WeekDays(JSON.parse(req.getResponseHeader('days').replace(/'/g, '"')));
-        days_header.mix.days = week_days;
-        days_header.fetch_physical_presence() ;
-
 
         tutors.pl = [];
         modules.pl = [];

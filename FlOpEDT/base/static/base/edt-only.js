@@ -171,7 +171,6 @@ function fetch_cours_light() {
     async: false,
     contentType: "text/csv",
     success: function (msg, ts, req) {
-      days = JSON.parse(req.getResponseHeader('days').replace(/'/g, '"'));
 
       tutors.pl = [];
       modules.pl = [];
