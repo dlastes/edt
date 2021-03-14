@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.3.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-14 14:03+0100\n"
+"POT-Creation-Date: 2021-03-14 20:37+0100\n"
 "PO-Revision-Date: 2020-04-05 18:44+0200\n"
 "Last-Translator: Benoît Roche (benoit.roche@esrf.fr)\n"
 "Language-Team: none\n"
@@ -738,7 +738,7 @@ msgid "Schedule_title"
 msgstr "Schedule"
 
 #: templates/base.html:66
-msgid "Scheduler"
+msgid "<span id=flopGreen >flop</span>!<span id=EDTRed >Scheduler</span>"
 msgstr ""
 
 #: templates/base.html:82

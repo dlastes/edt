@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-14 14:03+0100\n"
+"POT-Creation-Date: 2021-03-14 20:37+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -760,10 +760,8 @@ msgid "Schedule_title"
 msgstr "Horario"
 
 #: templates/base.html:66
-#, fuzzy
-#| msgid "Schedule_banner"
-msgid "Scheduler"
-msgstr "Horario"
+msgid "<span id=flopGreen >flop</span>!<span id=EDTRed >Scheduler</span>"
+msgstr ""
 
 #: templates/base.html:82
 msgid "Schedule_banner"
@@ -812,6 +810,11 @@ msgstr "Cerrar sesión"
 #: templates/base.html:112
 msgid "Signed in as "
 msgstr "Iniciar sesión como"
+
+#, fuzzy
+#~| msgid "Schedule_banner"
+#~ msgid "Scheduler"
+#~ msgstr "Horario"
 
 #, fuzzy
 #~| msgid "Schedule_banner"

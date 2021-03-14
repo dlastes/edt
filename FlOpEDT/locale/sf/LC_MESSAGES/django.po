@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-14 14:03+0100\n"
+"POT-Creation-Date: 2021-03-14 20:37+0100\n"
 "PO-Revision-Date: 2021-03-14 13:02+0000\n"
 "Last-Translator: b'prenom_de_QTF nom_de_QTF <QTF@mail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -287,7 +287,8 @@ msgstr "Préférences de salles"
 
 #: base/templates/base/room_preference.html:15
 msgid "(Ranking your favorite rooms, which may contain ties.)"
-msgstr "(Classement de vos salles préférées, pouvant schtroumpfer des égalités.)"
+msgstr ""
+"(Classement de vos salles préférées, pouvant schtroumpfer des égalités.)"
 
 #: base/templates/base/show-decale.html:79
 msgid "When ?"
@@ -500,8 +501,8 @@ msgstr "Dim."
 msgid ""
 "Step 1 - Database configuration (teachers, groups, rooms, course types, etc.)"
 msgstr ""
-"Étape 1 - Configuration de la base de schtroumpfs (profs, groupes, salles, types "
-"de cours, etc.)"
+"Étape 1 - Configuration de la base de schtroumpfs (profs, groupes, salles, "
+"types de cours, etc.)"
 
 #: configuration/templates/configuration/configuration.html:12
 msgid "Option A: Using a spreadsheet file"
@@ -623,8 +624,8 @@ msgid ""
 "Copy the corresponding link of the calendar you would like to add to your "
 "calendar manager."
 msgstr ""
-"Copiez le lien du schtroumpf qui vous intéresse, et schtroumpfez-le dans votre "
-"gestionnaire d'agenda préféré."
+"Copiez le lien du schtroumpf qui vous intéresse, et schtroumpfez-le dans "
+"votre gestionnaire d'agenda préféré."
 
 #: ics/templates/ics/index.html:38
 msgid "Groups"
@@ -754,8 +755,8 @@ msgid "Schedule_title"
 msgstr "Schtroumpf du temps"
 
 #: templates/base.html:66
-msgid "Scheduler"
-msgstr "Schtroumpf"
+msgid "<span id=flopGreen >flop</span>!<span id=EDTRed >Scheduler</span>"
+msgstr "<span id=flopGreen >flop</span>!<span id=EDTRed >Schtroumpf</span>"
 
 #: templates/base.html:82
 msgid "Schedule_banner"
@@ -804,6 +805,9 @@ msgstr "Déconnexion"
 #: templates/base.html:112
 msgid "Signed in as "
 msgstr "Connecté·e sous "
+
+#~ msgid "Scheduler"
+#~ msgstr "Schtroumpf"
 
 #~ msgid "schedule"
 #~ msgstr "edt"

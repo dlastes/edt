@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-14 14:03+0100\n"
+"POT-Creation-Date: 2021-03-14 20:37+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -66,8 +66,36 @@ msgstr "Déplacer en semaine "
 msgid "by "
 msgstr "par "
 
+#: base/static/base/logo.js:84
+msgid ""
+"Schedule manager <span id=\"flopGreen\">fl</span>exible and <span id="
+"\"flopGreen\">op</span>enSource"
+msgstr ""
+"Gestionnaire de schtroumpf <span id=\"flopGreen\">fl</span>exible et <span "
+"id=\"flopGreen\">op</span>enSource"
+
+#: base/static/base/logo.js:85
+msgid ""
+"\"Who want to manage the <span id=\"flopRed\">schedules</span> this year?"
+"\" ... <span id=\"flopGreen\">flop</span> !"
+msgstr ""
+"Qui veut gérer les schtroumpfs cette année ? ...  ... <span id=\"flopGreen"
+"\">flop</span> !"
+
+#: base/static/base/logo.js:86
+msgid "And your schedules will <span id=\"flopRedDel\">flop</span> hit!"
+msgstr ""
+"Et votre emploi du temps fera un <span id=\"flopRedDel\">flop</span> "
+"schtroumpf !"
+
+#: base/static/base/logo.js:87
+msgid "And even your logo will be on time..."
+msgstr "Et même votre logo sera schtroumpfement à l'heure..."
+
 #: base/static/base/transformation.js:267
-msgid "You have to do :  "
+#, fuzzy
+#| msgid "You have to do :  "
+msgid "You have to do  "
 msgstr "Vous devez faire :  "
 
 #: base/static/base/transformation.js:269

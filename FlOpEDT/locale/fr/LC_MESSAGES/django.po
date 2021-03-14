@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-14 14:03+0100\n"
+"POT-Creation-Date: 2021-03-14 20:37+0100\n"
 "PO-Revision-Date: 2021-03-14 13:02+0000\n"
 "Last-Translator: b'prenom_de_QTF nom_de_QTF <QTF@mail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -754,8 +754,8 @@ msgid "Schedule_title"
 msgstr "Emplois du temps"
 
 #: templates/base.html:66
-msgid "Scheduler"
-msgstr "EDT"
+msgid "<span id=flopGreen >flop</span>!<span id=EDTRed >Scheduler</span>"
+msgstr "<span id=flopGreen >flop</span>!<span id=EDTRed >EDT</span>"
 
 #: templates/base.html:82
 msgid "Schedule_banner"
@@ -804,6 +804,9 @@ msgstr "Déconnexion"
 #: templates/base.html:112
 msgid "Signed in as "
 msgstr "Connecté·e sous "
+
+#~ msgid "Scheduler"
+#~ msgstr "EDT"
 
 #~ msgid "schedule"
 #~ msgstr "edt"
