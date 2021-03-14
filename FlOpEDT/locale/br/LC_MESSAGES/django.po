@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-14 22:28+0100\n"
+"POT-Creation-Date: 2021-03-14 22:38+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -755,7 +755,7 @@ msgstr ""
 
 #: solve_board/templates/solve_board/main-board.html:61
 msgid ""
-"All words appearing in bolded - with no weight - will be considered "
+"All constraints appearing in bolded - with no weight - will be considered "
 "mandatory, the other ones will considered as preferences."
 msgstr ""
 

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-14 22:28+0100\n"
+"POT-Creation-Date: 2021-03-14 22:38+0100\n"
 "PO-Revision-Date: 2021-03-14 13:02+0000\n"
 "Last-Translator: b'prenom_de_QTF nom_de_QTF <QTF@mail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -242,11 +242,11 @@ msgstr "pour un rappel de mot de passe, ou via 'Se connecter' en haut de page."
 
 #: base/templates/base/help.html:51
 msgid "Direct link to a particular group"
-msgstr ""
+msgstr "Lien direct vers l'EDT d'un groupe spécifique"
 
 #: base/templates/base/help.html:52
 msgid "Add \"?promo=INFO1&gp=1A\" at the end of the url, for example "
-msgstr ""
+msgstr "Ajouter \"?promo=INFO1&gp=1A\" à la fin de l'url, par exemple "
 
 #: base/templates/base/help.html:54
 msgid "How availability entry work"
@@ -765,13 +765,20 @@ msgstr "Consulter"
 
 #: solve_board/templates/solve_board/main-board.html:60
 msgid "Constraints"
-msgstr ""
+msgstr "Contraintes"
 
 #: solve_board/templates/solve_board/main-board.html:61
+#, fuzzy
+#| msgid ""
+#| "All words appearing in bolded - with no weight - will be considered "
+#| "mandatory, the other ones will considered as preferences."
 msgid ""
-"All words appearing in bolded - with no weight - will be considered "
+"All constraints appearing in bolded - with no weight - will be considered "
 "mandatory, the other ones will considered as preferences."
 msgstr ""
+"Les contraintes apparaissant en gras - avec un poids non défini - seront "
+"prises en compte de manièreobligatoire, les autres seront utilisées dans la "
+"résolution comme des préférences."
 
 #: solve_board/templates/solve_board/main-board.html:66
 #, fuzzy
@@ -799,15 +806,15 @@ msgstr "Stabilisation ?"
 
 #: solve_board/templates/solve_board/main-board.html:83
 msgid "Solver"
-msgstr ""
+msgstr "Solveur"
 
 #: solve_board/templates/solve_board/main-board.html:94
 msgid "Maximum time limit for resolution (minuts)"
-msgstr ""
+msgstr "Durée limite de résolution (minutes)"
 
 #: solve_board/templates/solve_board/main-board.html:100
 msgid "Unlimited"
-msgstr ""
+msgstr "Illimité"
 
 #: templates/base.html:53
 msgid "Schedule_title"
