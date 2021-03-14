@@ -623,7 +623,7 @@ msgid ""
 "Copy the corresponding link of the calendar you would like to add to your "
 "calendar manager."
 msgstr ""
-"Copiez le lien du calendrier qui vous intéresse, et importer le dans votre "
+"Copiez le lien du calendrier qui vous intéresse, et importez-le dans votre "
 "gestionnaire d'agenda préféré."
 
 #: ics/templates/ics/index.html:38

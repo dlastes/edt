@@ -27,8 +27,8 @@ msgid ""
 "Just update your availabilities : they will be considered for the next "
 "generation."
 msgstr ""
-"Contentez-vous de mettre à jour vos disponibilités : elles seront prises en "
-"compte lors de la regénération."
+"Contentez-vous de mettre à jour vos schtroumpfs : elles seront prises en "
+"schtroumpf lors de la regénération."
 
 #: base/static/base/creation.js:808
 msgid "Courses :"
@@ -52,7 +52,7 @@ msgstr "Groupe    "
 
 #: base/static/base/decale.js:322
 msgid "Definitely cancel"
-msgstr "Annuler définitivement"
+msgstr "Schtroumpfer définitivement"
 
 #: base/static/base/decale.js:334
 msgid "Put on hold"
@@ -74,17 +74,17 @@ msgstr "Vous devez faire :  "
 #, fuzzy
 #| msgid "No course for you this week"
 msgid "No course for you this week."
-msgstr "Vous n'intervenez pas cette semaine."
+msgstr "Vous n'intervenez pas cette schtroumpf."
 
 #: base/static/base/transformation.js:277
 #, fuzzy
 #| msgid "You propose "
 msgid "You propose   "
-msgstr "Vous en proposez    "
+msgstr "Vous en schtroumpfez    "
 
 #: base/static/base/transformation.js:290
 msgid "Maybe you should free up more..."
-msgstr "Il faudrait peut-être en rajouter..."
+msgstr "Il faudrait peut-être en schtroumpfer..."
 
 #: base/static/base/transformation.js:292
 msgid "It's Ok."

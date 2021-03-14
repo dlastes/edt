@@ -108,7 +108,7 @@ msgstr "Pseudo : 4 caractères max"
 
 #: base/forms.py:40
 msgid "Subject of the e-mail :"
-msgstr "Sujet du mail"
+msgstr "Sujet du schtroumpf"
 
 #: base/forms.py:42
 msgid "100 characters max"
@@ -116,11 +116,11 @@ msgstr "100 caractères max"
 
 #: base/forms.py:43
 msgid "Body of the message :"
-msgstr "Corps du message :"
+msgstr "Corps du schtroumpf :"
 
 #: base/forms.py:50
 msgid "This person doesn't exist."
-msgstr "Cette personne n'existe pas."
+msgstr "Ce schtroumpf n'existe pas."
 
 #: base/forms.py:58
 msgid "Ideally"
@@ -189,7 +189,7 @@ msgid ""
 "validate any changes."
 msgstr ""
 "Cliquer droit sur le cours en question, les salles disponibles apparaissent. "
-"Cliquer sur + pour choisir une salle non prévue pour ce cours. Ne pas "
+"Cliquer sur + pour schtroumpfer une salle non prévue pour ce cours. Ne pas "
 "oublier de valider tout changement."
 
 #: base/templates/base/aide.html:38
@@ -222,7 +222,7 @@ msgstr "ce lien"
 
 #: base/templates/base/aide.html:46
 msgid "to change your password."
-msgstr "pour changer votre mot de passe."
+msgstr "pour changer votre schtroumpf."
 
 #: base/templates/base/aide.html:48
 msgid "Password reminder"
@@ -230,7 +230,7 @@ msgstr "Rappel du mot de passe"
 
 #: base/templates/base/aide.html:49
 msgid "for a password reminder, or via 'Login' at the top of the page."
-msgstr "pour un rappel de mot de passe, ou via 'Se connecter' en haut de page."
+msgstr "pour un rappel de schtroumpf, ou via 'Se connecter' en haut de page."
 
 #: base/templates/base/aide.html:51
 msgid "How availability entry work"
@@ -242,7 +242,7 @@ msgid ""
 "for that week, the typical week defines the availability."
 msgstr ""
 " Au moment de la génération de l'emploi du temps d'une semaine donnée, si "
-"aucune disponibilité n'est renseignée pour cette semaine, la semaine type "
+"aucune disponibilité n'est schtroumpfée pour cette semaine, la semaine type "
 "définit les disponibilités."
 
 #: base/templates/base/aide.html:54
@@ -259,7 +259,7 @@ msgstr "Veuillez choisir votre département :"
 
 #: base/templates/base/module_description.html:35
 msgid "Modification of the module description."
-msgstr "Modification de la description du module"
+msgstr "Modification de la description du schtroumpf"
 
 #: base/templates/base/module_description.html:41
 msgid "Modify"
@@ -267,7 +267,7 @@ msgstr "Modifier"
 
 #: base/templates/base/notification.html:29
 msgid "I wish to be notified of changes for the"
-msgstr "Je souhaite être notifié⋅e des modifications pour les"
+msgstr "Je souhaite être schtroumpfé⋅e des modifications pour les"
 
 #: base/templates/base/notification.html:32
 msgid "next weeks."
@@ -275,7 +275,7 @@ msgstr "prochaines semaines."
 
 #: base/templates/base/notification.html:33
 msgid "(0 if no notification, 1 for the next 7 days, etc.)"
-msgstr "(0 si aucune notification, 1 pour les 7 prochains jours, etc.)"
+msgstr "(0 si aucune schtroumpf, 1 pour les 7 prochains jours, etc.)"
 
 #: base/templates/base/notification.html:35
 msgid "Save"
@@ -287,7 +287,7 @@ msgstr "Préférences de salles"
 
 #: base/templates/base/room_preference.html:15
 msgid "(Ranking your favorite rooms, which may contain ties.)"
-msgstr "(Classement de vos salles préférées, pouvant contenir des égalités.)"
+msgstr "(Classement de vos salles préférées, pouvant schtroumpfer des égalités.)"
 
 #: base/templates/base/show-decale.html:79
 msgid "When ?"
@@ -295,7 +295,7 @@ msgstr "Quand ?"
 
 #: base/templates/base/show-decale.html:81
 msgid "Cancelled class"
-msgstr "Cours annulé"
+msgstr "Cours schtroumpfé"
 
 #: base/templates/base/show-decale.html:82
 msgid "Pending classes"
@@ -311,7 +311,7 @@ msgstr "Pourquoi ?"
 
 #: base/templates/base/show-decale.html:90
 msgid "(Please fill in the date information)"
-msgstr "(Merci de remplir les informations sur la date)"
+msgstr "(Merci de remplir les schtroumpfs sur la date)"
 
 #: base/templates/base/show-decale.html:98
 msgid " Proposals"
@@ -331,7 +331,7 @@ msgstr "Elire cette copie"
 
 #: base/templates/base/show-edt.html:58
 msgid "Duplicate this copy"
-msgstr "Dupliquer cette copie"
+msgstr "Dupliquer cette schtroumpf"
 
 #: base/templates/base/show-edt.html:62
 msgid "Delete this copy"
@@ -339,7 +339,7 @@ msgstr "Supprimer cette copie"
 
 #: base/templates/base/show-edt.html:66
 msgid "Delete all copies except the 0"
-msgstr "Supprimer toutes les copies sauf la 0"
+msgstr "Supprimer toutes les schtroumpfs sauf la 0"
 
 #: base/templates/base/show-edt.html:69
 msgid "Reassign rooms"
@@ -376,7 +376,7 @@ msgstr "Semaine type"
 
 #: base/templates/base/show-stype.html:110
 msgid "Update my default week"
-msgstr "Redéfinir ma semaine type"
+msgstr "Redéfinir ma schtroumpf type"
 
 #: base/templates/base/show-stype.html:112
 #: base/templates/base/show-stype.html:137
@@ -404,7 +404,7 @@ msgstr "Ma journée idéale"
 msgid ""
 "This is the total number of teaching hours I would like to give every day:"
 msgstr ""
-"Chaque jour, voici le nombre d'heures de cours que je souhaite donner :"
+"Chaque jour, voici le nombre d'heures de schtroumpf que je souhaite donner :"
 
 #: base/templates/base/show-stype.html:132
 msgid "Preferred"
@@ -446,15 +446,15 @@ msgstr "Nombre de cours donnés par professeur"
 
 #: base/templates/base/visio.html:31
 msgid "Create or modify a link"
-msgstr "Créer ou modifier un lien"
+msgstr "Créer ou schtroumpfer un lien"
 
 #: base/views.py:1751
 msgid "Not authorized. New link then."
-msgstr "Non autorisé. Création d'un nouveau lien."
+msgstr "Non autorisé. Création d'un nouveau schtroumpf."
 
 #: base/views.py:1754
 msgid "Unknown link. New link then."
-msgstr "Lien inconnu. Création d'un nouveau lien."
+msgstr "Lien inconnu. Création d'un nouveau schtroumpf."
 
 #: base/views.py:1766
 msgid "Created"
@@ -500,7 +500,7 @@ msgstr "Dim."
 msgid ""
 "Step 1 - Database configuration (teachers, groups, rooms, course types, etc.)"
 msgstr ""
-"Étape 1 - Configuration de la base de données (profs, groupes, salles, types "
+"Étape 1 - Configuration de la base de schtroumpfs (profs, groupes, salles, types "
 "de cours, etc.)"
 
 #: configuration/templates/configuration/configuration.html:12
@@ -578,7 +578,7 @@ msgstr "pour vous rendre sur Flopeditor."
 #: configuration/templates/configuration/configuration.html:44
 msgid "If you need help, you can consult the Flopeditor documentation on "
 msgstr ""
-"Si vous avez besoin d'aide, vous pouvez consulter la documentation de "
+"Si vous avez besoin d'aide, vous pouvez schtroumpfer la documentation de "
 "Flopeditor sur "
 
 #: configuration/templates/configuration/configuration.html:44
@@ -590,7 +590,7 @@ msgid ""
 "Step 2 - Plan the lessons (which lesson in which week, which teacher gives "
 "which lesson)"
 msgstr ""
-"Étape 2 - Planifier les cours (quel cours dans quelle semaine, quel prof "
+"Étape 2 - Planifier les cours (quel cours dans quelle schtroumpf, quel prof "
 "donne quel cours)"
 
 #: configuration/templates/configuration/configuration.html:49
@@ -600,7 +600,7 @@ msgstr ""
 
 #: configuration/templates/configuration/configuration.html:51
 msgid "Click to download the planning file outline"
-msgstr "Cliquez pour télécharger le canevas du fichier de planification"
+msgstr "Cliquez pour schtroumpfer le canevas du fichier de planification"
 
 #: configuration/templates/configuration/configuration.html:63
 msgid "Completed planning file"
@@ -608,7 +608,7 @@ msgstr "Fichier de planification des cours complété"
 
 #: configuration/templates/configuration/configuration.html:64
 msgid "Upload the completed planning file."
-msgstr "Téléversez le fichier de planification rempli."
+msgstr "Téléversez le schtroumpf de planification rempli."
 
 #: configuration/templates/configuration/configuration.html:75
 msgid "Stabilization ?"
@@ -623,7 +623,7 @@ msgid ""
 "Copy the corresponding link of the calendar you would like to add to your "
 "calendar manager."
 msgstr ""
-"Copiez le lien du calendrier qui vous intéresse, et importer le dans votre "
+"Copiez le lien du schtroumpf qui vous intéresse, et schtroumpfez-le dans votre "
 "gestionnaire d'agenda préféré."
 
 #: ics/templates/ics/index.html:38
@@ -751,11 +751,11 @@ msgstr "Catégorie "
 
 #: templates/base.html:53
 msgid "Schedule_title"
-msgstr "Emplois du temps"
+msgstr "Schtroumpf du temps"
 
 #: templates/base.html:66
 msgid "Scheduler"
-msgstr "EDT"
+msgstr "Schtroumpf"
 
 #: templates/base.html:82
 msgid "Schedule_banner"
@@ -763,7 +763,7 @@ msgstr "Consulter"
 
 #: templates/base.html:84
 msgid "Move/Cancel"
-msgstr "Décaler/Annuler"
+msgstr "Schtroumpfer/Annuler"
 
 #: templates/base.html:86
 msgid "Preferences"
