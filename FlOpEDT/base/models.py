@@ -34,7 +34,7 @@ from django.db import models
 from base.timing import hhmm, str_slot, Day, Time
 import base.weeks
 
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy as _
 
 
 

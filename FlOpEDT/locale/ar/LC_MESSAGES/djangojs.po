@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-14 20:37+0100\n"
+"POT-Creation-Date: 2021-03-14 22:27+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -74,11 +74,11 @@ msgstr ""
 #: base/static/base/logo.js:85
 msgid ""
 "\"Who want to manage the <span id=\"flopRed\">schedules</span> this year?"
-"\" ... <span id=\"flopGreen\">flop</span> !"
+"\" ...  ... <span id=\"flopGreen\">flop</span> !"
 msgstr ""
 
 #: base/static/base/logo.js:86
-msgid "And your schedules will <span id=\"flopRedDel\">flop</span> hit!"
+msgid "And your schedules will <span id=\"flopRedDel\">flop</span> be a hit!"
 msgstr ""
 
 #: base/static/base/logo.js:87

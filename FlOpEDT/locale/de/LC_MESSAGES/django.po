@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-14 20:37+0100\n"
+"POT-Creation-Date: 2021-03-14 22:28+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -178,77 +178,85 @@ msgstr ""
 msgid "Partial generation date"
 msgstr ""
 
-#: base/templates/base/aide.html:34
-msgid "Room modification"
-msgstr ""
-
-#: base/templates/base/aide.html:35
-msgid ""
-"Right click on the course in question, the available rooms appear. Click on "
-"+ to choose a room that is not available for this course. Don't forget to "
-"validate any changes."
-msgstr ""
-
-#: base/templates/base/aide.html:38
-msgid "Create an account"
-msgstr ""
-
-#: base/templates/base/aide.html:39
-msgid "Here"
-msgstr ""
-
-#: base/templates/base/aide.html:42
-msgid "Modification of an account"
-msgstr ""
-
-#: base/templates/base/aide.html:43
-msgid "Click on his nickname (his initials) at the top right of the page."
-msgstr ""
-
-#: base/templates/base/aide.html:45
-msgid "Change password"
-msgstr ""
-
-#: base/templates/base/aide.html:46 base/templates/base/aide.html:49
-msgid "Click on"
-msgstr ""
-
-#: base/templates/base/aide.html:46 base/templates/base/aide.html:49
-msgid "this link"
-msgstr ""
-
-#: base/templates/base/aide.html:46
-msgid "to change your password."
-msgstr ""
-
-#: base/templates/base/aide.html:48
-msgid "Password reminder"
-msgstr ""
-
-#: base/templates/base/aide.html:49
-msgid "for a password reminder, or via 'Login' at the top of the page."
-msgstr ""
-
-#: base/templates/base/aide.html:51
-msgid "How availability entry work"
-msgstr ""
-
-#: base/templates/base/aide.html:52
-msgid ""
-"When generating the schedule for a given week, if no availability is entered "
-"for that week, the typical week defines the availability."
-msgstr ""
-
-#: base/templates/base/aide.html:54
-msgid "Some Tutorial Videos"
-msgstr ""
-
 #: base/templates/base/contact.html:34 base/templates/base/visio.html:38
 msgid "Send"
 msgstr ""
 
 #: base/templates/base/departments.html:15
 msgid "Please choose your department : "
+msgstr ""
+
+#: base/templates/base/help.html:34
+msgid "Room modification"
+msgstr ""
+
+#: base/templates/base/help.html:35
+msgid ""
+"Right click on the course in question, the available rooms appear. Click on "
+"+ to choose a room that is not available for this course. Don't forget to "
+"validate any changes."
+msgstr ""
+
+#: base/templates/base/help.html:38
+msgid "Create an account"
+msgstr ""
+
+#: base/templates/base/help.html:39
+msgid "Here"
+msgstr ""
+
+#: base/templates/base/help.html:42
+msgid "Modification of an account"
+msgstr ""
+
+#: base/templates/base/help.html:43
+msgid "Click on his nickname (his initials) at the top right of the page."
+msgstr ""
+
+#: base/templates/base/help.html:45
+msgid "Change password"
+msgstr ""
+
+#: base/templates/base/help.html:46 base/templates/base/help.html:49
+msgid "Click on"
+msgstr ""
+
+#: base/templates/base/help.html:46 base/templates/base/help.html:49
+msgid "this link"
+msgstr ""
+
+#: base/templates/base/help.html:46
+msgid "to change your password."
+msgstr ""
+
+#: base/templates/base/help.html:48
+msgid "Password reminder"
+msgstr ""
+
+#: base/templates/base/help.html:49
+msgid "for a password reminder, or via 'Login' at the top of the page."
+msgstr ""
+
+#: base/templates/base/help.html:51
+msgid "Direct link to a particular group"
+msgstr ""
+
+#: base/templates/base/help.html:52
+msgid "Add \"?promo=INFO1&gp=1A\" at the end of the url, for example "
+msgstr ""
+
+#: base/templates/base/help.html:54
+msgid "How availability entry work"
+msgstr ""
+
+#: base/templates/base/help.html:55
+msgid ""
+"When generating the schedule for a given week, if no availability is entered "
+"for that week, the typical week defines the availability."
+msgstr ""
+
+#: base/templates/base/help.html:57
+msgid "Some Tutorial Videos"
 msgstr ""
 
 #: base/templates/base/module_description.html:35
@@ -731,6 +739,48 @@ msgstr ""
 
 #: quote/forms.py:48
 msgid "Category "
+msgstr ""
+
+#: solve_board/templates/solve_board/main-board.html:32
+msgid "Schedule Generation"
+msgstr ""
+
+#: solve_board/templates/solve_board/main-board.html:60
+msgid "Constraints"
+msgstr ""
+
+#: solve_board/templates/solve_board/main-board.html:61
+msgid ""
+"All words appearing in bolded - with no weight - will be considered "
+"mandatory, the other ones will considered as preferences."
+msgstr ""
+
+#: solve_board/templates/solve_board/main-board.html:66
+msgid "Configuration"
+msgstr ""
+
+#: solve_board/templates/solve_board/main-board.html:70
+msgid "Week⋅s"
+msgstr ""
+
+#: solve_board/templates/solve_board/main-board.html:74
+msgid "Training Program"
+msgstr ""
+
+#: solve_board/templates/solve_board/main-board.html:78
+msgid "Stabilization"
+msgstr ""
+
+#: solve_board/templates/solve_board/main-board.html:83
+msgid "Solver"
+msgstr ""
+
+#: solve_board/templates/solve_board/main-board.html:94
+msgid "Maximum time limit for resolution (minuts)"
+msgstr ""
+
+#: solve_board/templates/solve_board/main-board.html:100
+msgid "Unlimited"
 msgstr ""
 
 #: templates/base.html:53
