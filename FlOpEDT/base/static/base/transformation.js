@@ -264,7 +264,7 @@ function cross_d_y(d) {
 function txt_reqDispos() {
   var ret = "";
   if (required_dispos > 0) {
-    ret += gettext("You have to do :  ") + min_to_hm_txt(required_dispos) + ".";
+    ret += gettext("You have to do  ") + min_to_hm_txt(required_dispos) + ".";
   } else if (required_dispos == 0) {
     ret += gettext("No course for you this week.");
   }
