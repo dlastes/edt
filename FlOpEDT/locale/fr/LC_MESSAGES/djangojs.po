@@ -67,8 +67,8 @@ msgid "by "
 msgstr "par "
 
 #: base/static/base/transformation.js:267
-msgid "You have to do :  "
-msgstr "Vous devez faire :  "
+msgid "You have to do  "
+msgstr "Vous devez faire  "
 
 #: base/static/base/transformation.js:269
 #, fuzzy
@@ -77,8 +77,6 @@ msgid "No course for you this week."
 msgstr "Vous n'intervenez pas cette semaine."
 
 #: base/static/base/transformation.js:277
-#, fuzzy
-#| msgid "You propose "
 msgid "You propose   "
 msgstr "Vous en proposez    "
 
