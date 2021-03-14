@@ -264,9 +264,9 @@ function cross_d_y(d) {
 function txt_reqDispos() {
   var ret = "";
   if (required_dispos > 0) {
-    ret += "Dispos souhaitées : " + required_dispos + " créneaux.";
+    ret += gettext("You have to do  ") + min_to_hm_txt(required_dispos) + ".";
   } else if (required_dispos == 0) {
-    ret += "Vous n'intervenez pas cette semaine.";
+    ret += gettext("No course for you this week.");
   }
   return ret;
 }
@@ -274,17 +274,30 @@ function txt_reqDispos() {
 function txt_filDispos() {
   var ret = "";
   if (required_dispos > 0) {
-    if (filled_dispos < required_dispos) {
-      ret += "Vous en avez " + filled_dispos + ". Merci d'en rajouter.";
-    } else {
-      ret += "Vous en proposez " + filled_dispos + ". C'est parfait.";
-    }
+    ret += gettext("You propose   ") + min_to_hm_txt(filled_dispos) + ". "
   } else if (required_dispos == 0) {
     //ret += "Pas de problème." // pas de cours => pas de message ;-) 
   }
   return ret;
 }
 
+
+function txt_comDispos() {
+  var ret = "";
+  if (required_dispos > 0) {
+    if (filled_dispos >= required_dispos) {
+      if (filled_dispos < 2 * required_dispos) {
+        ret += gettext("Maybe you should free up more...");
+      } else {
+        ret += gettext("It's Ok.");
+      }
+    }
+    else {
+      ret += gettext("Thank you for adding some.");
+    }
+  }
+  return ret;
+}
 
 function pref_opacity(d) {
   return pref_selection.start !== null && d.selected?opac:1;

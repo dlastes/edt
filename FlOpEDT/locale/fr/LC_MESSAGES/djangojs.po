@@ -1,0 +1,147 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-03-14 14:03+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: base/static/base/action.js:769
+msgid "The schedule shall be fully regenerated (see downside to the right)."
+msgstr "L'emploi du temps va être regénéré totalement (cf. en bas à droite)."
+
+#: base/static/base/action.js:770
+msgid ""
+"Just update your availabilities : they will be considered for the next "
+"generation."
+msgstr ""
+"Contentez-vous de mettre à jour vos disponibilités : elles seront prises en "
+"compte lors de la regénération."
+
+#: base/static/base/creation.js:808
+msgid "Courses :"
+msgstr "Cours :"
+
+#: base/static/base/creation.js:815
+msgid "Avail :"
+msgstr "Dispos :"
+
+#: base/static/base/decale.js:35
+msgid "Module    "
+msgstr "Module    "
+
+#: base/static/base/decale.js:36
+msgid "Teacher    "
+msgstr "Prof    "
+
+#: base/static/base/decale.js:37
+msgid "Group    "
+msgstr "Groupe    "
+
+#: base/static/base/decale.js:322
+msgid "Definitely cancel"
+msgstr "Annuler définitivement"
+
+#: base/static/base/decale.js:334
+msgid "Put on hold"
+msgstr "Mettre en attente"
+
+#: base/static/base/decale.js:351
+msgid "Move to week "
+msgstr "Déplacer en semaine "
+
+#: base/static/base/decale.js:361
+msgid "by "
+msgstr "par "
+
+#: base/static/base/transformation.js:267
+msgid "You have to do  "
+msgstr "Vous devez faire  "
+
+#: base/static/base/transformation.js:269
+#, fuzzy
+#| msgid "No course for you this week"
+msgid "No course for you this week."
+msgstr "Vous n'intervenez pas cette semaine."
+
+#: base/static/base/transformation.js:277
+msgid "You propose   "
+msgstr "Vous en proposez    "
+
+#: base/static/base/transformation.js:290
+msgid "Maybe you should free up more..."
+msgstr "Il faudrait peut-être en rajouter..."
+
+#: base/static/base/transformation.js:292
+msgid "It's Ok."
+msgstr "C'est parfait"
+
+#: base/static/base/transformation.js:296
+#, fuzzy
+#| msgid ". Thank you for adding some."
+msgid "Thank you for adding some."
+msgstr ". Merci d'en ajouter "
+
+#: base/static/base/update.js:1280
+msgid "No regeneration planned"
+msgstr "Pas de (re)génération prévue"
+
+#: base/static/base/update.js:1284
+msgid "Full (minor) generation planned on "
+msgstr "Regénération totale (mineure) le"
+
+#: base/static/base/update.js:1287
+msgid "Full generation planned (probably on "
+msgstr "Regénération totale prévue (probablement le"
+
+#: base/static/base/update.js:1290
+msgid "Minor generation planned (probably on "
+msgstr "Regénération mineure prévue (probablement le"
+
+#: base/static/base/variables.js:468 base/static/base/variables.js:476
+msgid "Modify"
+msgstr "Modifier"
+
+#: base/static/base/variables.js:593
+msgid "Groups"
+msgstr "Groupes"
+
+#: base/static/base/variables.js:597
+msgid "Teachers"
+msgstr "Profs"
+
+#: base/static/base/variables.js:601
+msgid "Modules"
+msgstr "Modules"
+
+#: base/static/base/variables.js:605
+msgid "Rooms"
+msgstr "Salles"
+
+#, fuzzy
+#~| msgid ". It's perfect."
+#~ msgid "It's perfect."
+#~ msgstr ". C'est parfait."
+
+#, fuzzy
+#~| msgid "Required availabilities"
+#~ msgid "Required availabilities :"
+#~ msgstr "Dispos souhaitées :"
+
+#~ msgid " slots."
+#~ msgstr " créneaux."
+
+#~ msgid "You got "
+#~ msgstr "Vous avez "

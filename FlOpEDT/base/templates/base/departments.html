@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
-
+{% load i18n %}
 {% block content %}
 
 {% if departments %}
@@ -12,7 +12,7 @@ function goTo(url){
 <div class="dept_container">
     <div class="dept_list">
         <p>
-            Veuillez choisir votre département :
+            {% trans "Please choose your department : " %}
         </p>
         <ul>
             {% for department in departments %}

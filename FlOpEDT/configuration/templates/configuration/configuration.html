@@ -2,66 +2,67 @@
 
 {% block title %} EDT {% endblock %}
 {% block content %}
-{% load static %}
+    {% load static %}
+    {% load i18n %}
     <link rel="stylesheet" href="{% static 'configuration/style.css' %}"/>
     <script>
         var departements = {{ departements|safe }};
     </script>
-    <h1>Étape 1 - Configuration de la base de données (profs, groupes, salles, types de cours, etc.)</h1>
-    <h2>Option A : En utilisant un fichier tableur </h2>
+    <h1>{% trans "Step 1 - Database configuration (teachers, groups, rooms, course types, etc.)" %}</h1>
+    <h2>{% trans "Option A: Using a spreadsheet file" %}</h2>
     <div class="step">
-        <h3>Canevas du fichier de configuration</h3>
-        <p>Téléchargez puis remplissez le fichier ci-dessous.</p>
-            Cliquez pour télécharger le fichier de configuration
-            <a href="{% url "configuration:dl_config" %}"><button id="btn_config_1">Télécharger</button></a>
+        <h3>{% trans "Configuration file canvas" %}</h3>
+        <p>{% trans "Download and then complete the file below." %}</p>
+            {% trans "Click to download the configuration file" %}
+            <a href="{% url "configuration:dl_config" %}"><button id="btn_config_1">{% trans "Download"%}</button></a>
     </div>
 
     <div class="step">
-        <h3>Fichier de configuration complété</h3>
-        <p>Téléversez le fichier de configuration rempli.<br>
-        Seul le format xlsx est accepté.</p>
+        <h3>{% trans "Configuration file completed" %}</h3>
+        <p>{% trans "Upload the completed configuration file." %}<br>
+        {% trans "Only xlsx format is accepted."%}</p>
         <form action="{% url "configuration:ul_config" %}" method="post" enctype="multipart/form-data" id="config">
                 {% csrf_token %}
             <fieldset>
-                <label>Département</label><br>
-                <input type="radio" name="radio_creations" value="1" required><span>Créer</span>
-                <input type="radio" name="radio_creations" value="2" required><span>Modifier</span><br>
+                <label>{% trans "Department" %}</label><br>
+                <input type="radio" name="radio_creations" value="1" required><span>{% trans "Create" %}</span>
+                <input type="radio" name="radio_creations" value="2" required><span>{% trans "Edit" %}</span><br>
                 <div id="depart_choice"></div>
                 {{ form_config }}
-                <input type="submit" value="Importer">
+                <input type="submit" value={% trans "Import" %}>
             </fieldset>
         </form>
 
         <div id="error_config">
-          <h4>Verdict :</h4>
+          <h4>{% trans "Verdict :"%}</h4>
           <p></p>
         </div>
     </div>
-    <h2>Option B : Avec Flopeditor </h2>
+    <h2>{% trans "Option B: With Flopeditor" %}</h2>
     <div class="step">
-      <p><a href="{% url 'flopeditor:flopeditor-home' %}">Cliquez ici</a> pour vous rendre sur Flopeditor. <br>
-      Si vous avez besoin d'aide, vous pouvez consulter la documentation de Flopeditor <a href="{% url 'flopeditor:flopeditor-help' %}">sur cette page</a>.</p>
+      <p><a href="{% url 'flopeditor:flopeditor-home' %}">{% trans "Click here" %}</a> {% trans " to go to Flopeditor."%} <br>
+      {% trans "If you need help, you can consult the Flopeditor documentation on " %} <a href="{% url 'flopeditor:flopeditor-help' %}">{% trans "this page." %}</a>.</p>
     </div>
 
-    <h1>Étape 2 - Planifier les cours (quel cours dans quelle semaine, quel prof donne quel cours)</h1>
+    <h1>{% trans "Step 2 - Plan the lessons (which lesson in which week, which teacher gives which lesson)" %}</h1>
     <div class="step">
-    <h3>Canevas du fichier de planification à partir du fichier de configuration</h3>
-        <p>Téléchargez puis remplissez le fichier ci-dessous.</p>
-            Cliquez pour télécharger le canevas du fichier de planification
+    <h3>{% trans "Template for the planning file from the configuration file" %}</h3>
+        <p>{% trans "Download and then complete the file below." %}</p>
+        {% trans "Click to download the planning file outline" %}
         <form action="{% url "configuration:dl_planif" %}">
         <select name="departement"  id="dropdown_dpt_1">
             {% for depart in departements %}
                 <option value={{ depart.abbrev }} >{{ depart.name }}</option>
             {% endfor %}
         </select>
-        <input id="btn_dl_planif" type="submit" value="Télécharger">
+        <input id="btn_dl_planif" type="submit" value={% trans "Download" %}>
         </form>
     </div>
 
     <div class="step">
-        <h3>Fichier de planification des cours complété</h3>
-        <p>Téléversez le fichier de planification rempli.<br>
-        Seul le format xlsx est accepté.</p>
+        <h3>{% trans "Completed planning file" %}</h3>
+        <p>{% trans "Upload the completed planning file." %}<br>
+            {% trans "Only xlsx format is accepted." %}</p>
 <!--        <form action="/configuration/import_planif_file/" method="post" enctype="multipart/form-data" id="config_2">-->
         <form action="{% url "configuration:ul_planif" %}" method="post" enctype="multipart/form-data" id="planif">
             {% csrf_token %}
@@ -71,11 +72,11 @@
                 {% endfor %}
             </select>
             {{ form_planif }}
-            <span>Stabilisation ?</span> <input type="checkbox" name="stabilize"/>
-            <input type="submit" value="Importer">
+            <span>{% trans "Stabilization ?" %}</span> <input type="checkbox" name="stabilize"/>
+            <input type="submit" value={% trans "Import" %}>
         </form>
         <div id="error_planif">
-          <h4>Verdict :</h4>
+          <h4>{% trans "Verdict :" %}</h4>
           <p></p>
         </div>
     </div>
