@@ -205,7 +205,24 @@ function go_pref(quick) {
 
   go_cm_advanced_pref(quick);
 
+  go_alarm_pref() ;
+}
 
+
+// recompute the total duration of availability
+function compare_required_filled_pref() {
+  if (user.dispos.length > 0) {
+    filled_dispos = user.dispos.reduce(
+      function(accu, pref) {
+        let r = accu ;
+        if (pref.value > 0) {
+          r += pref.duration ;
+        }
+        return r ;
+      },
+      0
+    ) ;
+  }
 }
 
 
@@ -436,6 +453,9 @@ function go_cm_advanced_pref(quick) {
 // check and inform whenever there is not enough available slots
 function go_alarm_pref() {
 
+  compare_required_filled_pref() ;
+
+
   var dig = svg.get_dom("dig");
 
   // escape if there is no alarm 
@@ -453,10 +473,19 @@ function go_alarm_pref() {
     .text(txt_filDispos)
     .attr("x", menus.x + menus.mx - 5)
     .attr("y", did.tly + valid.h * 1.5 + valid.margin_h);
+  dig
+    .select(".disp-info").select(".disp-comm")
+    .text(txt_comDispos)
+    .attr("x", menus.x + menus.mx - 5)
+    .attr("y", did.tly + valid.h * 1.5 + 2 * valid.margin_h);
+
 
   if (required_dispos > filled_dispos) {
     dig
       .select(".disp-info").select(".disp-filled")
+      .attr("font-weight", "bold").attr("fill", "red");
+    dig
+      .select(".disp-info").select(".disp-comm")
       .attr("font-weight", "bold").attr("fill", "red");
     dig
       .select(".disp-info").select(".disp-required")
@@ -464,6 +493,9 @@ function go_alarm_pref() {
   } else {
     dig
       .select(".disp-info").select(".disp-filled")
+      .attr("font-weight", "normal").attr("fill", "black");
+    dig
+      .select(".disp-info").select(".disp-comm")
       .attr("font-weight", "normal").attr("fill", "black");
     dig
       .select(".disp-info").select(".disp-required")

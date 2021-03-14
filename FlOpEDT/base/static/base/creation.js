@@ -62,6 +62,11 @@ function create_alarm_dispos() {
     .append("text")
     .attr("class", "disp-filled")
     .text(txt_filDispos);
+
+  di
+    .append("text")
+    .attr("class", "disp-comm")
+    .text(txt_comDispos);
 }
 
 

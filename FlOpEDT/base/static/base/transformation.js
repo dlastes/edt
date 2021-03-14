@@ -275,17 +275,29 @@ function txt_filDispos() {
   var ret = "";
   if (required_dispos > 0) {
     ret += gettext("You propose   ") + min_to_hm_txt(filled_dispos) + ". "
-    if (filled_dispos < required_dispos) {
-      ret += gettext("Thank you for adding some.");
-    } else {
-      ret += gettext("It's perfect.");
-    }
   } else if (required_dispos == 0) {
     //ret += "Pas de problème." // pas de cours => pas de message ;-) 
   }
   return ret;
 }
 
+
+function txt_comDispos() {
+  var ret = "";
+  if (required_dispos > 0) {
+    if (filled_dispos >= required_dispos) {
+      if (filled_dispos < 2 * required_dispos) {
+        ret += gettext("Maybe you should free up more...");
+      } else {
+        ret += gettext("It's Ok.");
+      }
+    }
+    else {
+      ret += gettext("Thank you for adding some.");
+    }
+  }
+  return ret;
+}
 
 function pref_opacity(d) {
   return pref_selection.start !== null && d.selected?opac:1;

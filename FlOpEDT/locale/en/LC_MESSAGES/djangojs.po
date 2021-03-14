@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-13 23:12+0100\n"
+"POT-Creation-Date: 2021-03-14 01:20+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -28,11 +28,11 @@ msgid ""
 "generation."
 msgstr ""
 
-#: base/static/base/creation.js:803
+#: base/static/base/creation.js:808
 msgid "Courses :"
 msgstr ""
 
-#: base/static/base/creation.js:810
+#: base/static/base/creation.js:815
 msgid "Avail :"
 msgstr ""
 
@@ -76,27 +76,31 @@ msgstr ""
 msgid "You propose   "
 msgstr ""
 
-#: base/static/base/transformation.js:279
+#: base/static/base/transformation.js:290
+msgid "Maybe you should free up more..."
+msgstr ""
+
+#: base/static/base/transformation.js:292
+msgid "It's Ok."
+msgstr ""
+
+#: base/static/base/transformation.js:296
 msgid "Thank you for adding some."
 msgstr ""
 
-#: base/static/base/transformation.js:281
-msgid "It's perfect."
-msgstr ""
-
-#: base/static/base/update.js:1248
+#: base/static/base/update.js:1280
 msgid "No regeneration planned"
 msgstr ""
 
-#: base/static/base/update.js:1252
+#: base/static/base/update.js:1284
 msgid "Full (minor) generation planned on "
 msgstr ""
 
-#: base/static/base/update.js:1255
+#: base/static/base/update.js:1287
 msgid "Full generation planned (probably on "
 msgstr ""
 
-#: base/static/base/update.js:1258
+#: base/static/base/update.js:1290
 msgid "Minor generation planned (probably on "
 msgstr ""
 

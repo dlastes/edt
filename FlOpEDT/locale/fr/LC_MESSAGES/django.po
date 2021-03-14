@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-13 23:12+0100\n"
+"POT-Creation-Date: 2021-03-14 01:20+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -71,7 +71,7 @@ msgstr "Maximum"
 
 #: base/models.py:80
 msgid "Basic group?"
-msgstr ""
+msgstr "Groupe basique?"
 
 #: base/models.py:147
 #, fuzzy
@@ -81,37 +81,37 @@ msgstr "Ma journée idéale"
 
 #: base/models.py:271
 msgid "Abbreviation"
-msgstr ""
+msgstr "Abbréviation"
 
 #: base/models.py:318
 msgid "graded?"
-msgstr ""
+msgstr "Noté ?"
 
 #: base/models.py:346
 msgid "Suspens?"
-msgstr ""
+msgstr "En suspens?"
 
 #: base/models.py:375
 msgid "Graded?"
-msgstr ""
+msgstr "Noté ?"
 
 #: base/models.py:699
 msgid "Successives?"
-msgstr ""
+msgstr "Successifs ?"
 
 #: base/models.py:700
 msgid "On different days"
-msgstr ""
+msgstr "Des jours différents"
 
 #: base/models.py:720
 msgid "Full"
-msgstr ""
+msgstr "Totale"
 
 #: base/models.py:722
 #, fuzzy
 #| msgid "Planned generations"
 msgid "Full generation date"
-msgstr "Générations prévues"
+msgstr "Date de regénération"
 
 #: base/models.py:723
 #, fuzzy
@@ -123,7 +123,7 @@ msgstr "Stabilisation ?"
 #, fuzzy
 #| msgid "Planned generations"
 msgid "Partial generation date"
-msgstr "Générations prévues"
+msgstr "Date de regénération partielle"
 
 #: base/templates/base/aide.html:34
 msgid "Room modification"
