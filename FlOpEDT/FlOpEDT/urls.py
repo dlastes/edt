@@ -66,6 +66,12 @@ urlpatterns = [
     re_path(r'^$', views.index, name='index')
 ]
 
+if 'rosetta' in settings.INSTALLED_APPS:
+    urlpatterns += [
+        re_path(r'^rosetta/', include('rosetta.urls'))
+    ]
+
+
 urlpatterns += i18n_patterns(
     re_path(r'^admin$', RedirectView.as_view(url='/admin/')),
     re_path(r'^admin/', admin.site.urls),
