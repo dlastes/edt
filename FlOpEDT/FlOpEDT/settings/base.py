@@ -68,8 +68,9 @@ INSTALLED_APPS = [
     'displayweb',
     'configuration',
     'easter_egg',
-    'MyFlOp'
-#    'importation'
+    'MyFlOp',
+    # 'importation'
+    # 'rosetta'
 ]
 
 MIDDLEWARE = [
@@ -149,6 +150,22 @@ LANGUAGES = [
   ('fr', _('French')),
   ('en', _('English')),
   ('es', _('Spanish')),
+    ('ar', _('Arabic')),
+    ('eu', _('Basque')),
+    ('br', _('Breton')),
+    ('ca', _('Catalan')),
+    ('co', _('Corsican')),
+    ('da', _('Danish')),
+    ('de', _('German')),
+    ('nl', _('Dutch')),
+    ('el', _('Greek')),
+    ('it', _('Italian')),
+    ('la', _('Latin')),
+    ('no', _('Norwegian')),
+    ('pt', _('Portuguese')),
+    ('sv', _('Swedish')),
+    ('zh', _('Chinese')),
+    ('sf', _('Smurf'))
 ]
 
 # Folder which contains traduction files
