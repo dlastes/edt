@@ -1,22 +1,21 @@
-# Translation file for FlOpEDT/FlOpScheduler project.
-# Copyright (C) 2017
-# This file is distributed under the same license as the FlOpEDT/FlOpScheduler project.
-# Authors: Iulian Ober, Paul Renaud-Goud, Pablo Seban, et al.
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#
+#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: 0.3.0\n"
+"Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-03-14 14:03+0100\n"
-"PO-Revision-Date: 2020-04-05 18:44+0200\n"
-"Last-Translator: Benoît Roche (benoit.roche@esrf.fr)\n"
-"Language-Team: none\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: FlOpEDT/settings/base.py:150
 msgid "French"
@@ -362,7 +361,7 @@ msgstr ""
 
 #: base/templates/base/show-stype.html:103
 msgid "button_apply"
-msgstr "Apply"
+msgstr ""
 
 #: base/templates/base/show-stype.html:108
 msgid "Default week"
@@ -375,7 +374,7 @@ msgstr ""
 #: base/templates/base/show-stype.html:112
 #: base/templates/base/show-stype.html:137
 msgid "button_save"
-msgstr "Save"
+msgstr ""
 
 #: base/templates/base/show-stype.html:121
 msgid "My videoconf links"
@@ -388,7 +387,7 @@ msgstr ""
 #: base/templates/base/show-stype.html:124
 #: base/templates/base/show-stype.html:147
 msgid "button_change"
-msgstr "Change"
+msgstr ""
 
 #: base/templates/base/show-stype.html:127
 msgid "My ideal day"
@@ -735,7 +734,7 @@ msgstr ""
 
 #: templates/base.html:53
 msgid "Schedule_title"
-msgstr "Schedule"
+msgstr ""
 
 #: templates/base.html:66
 msgid "Scheduler"
@@ -743,7 +742,7 @@ msgstr ""
 
 #: templates/base.html:82
 msgid "Schedule_banner"
-msgstr "Schedule "
+msgstr ""
 
 #: templates/base.html:84
 msgid "Move/Cancel"

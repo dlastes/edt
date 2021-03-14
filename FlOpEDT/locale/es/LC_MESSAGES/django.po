@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-14 01:20+0100\n"
+"POT-Creation-Date: 2021-03-14 14:03+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,16 +18,80 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: FlOpEDT/settings/base.py:149
+#: FlOpEDT/settings/base.py:150
 msgid "French"
 msgstr "Francés"
 
-#: FlOpEDT/settings/base.py:150
+#: FlOpEDT/settings/base.py:151
 msgid "English"
 msgstr "Inglés"
 
-#: FlOpEDT/settings/base.py:151
+#: FlOpEDT/settings/base.py:152
 msgid "Spanish"
+msgstr ""
+
+#: FlOpEDT/settings/base.py:153
+msgid "Arabic"
+msgstr ""
+
+#: FlOpEDT/settings/base.py:154
+msgid "Basque"
+msgstr ""
+
+#: FlOpEDT/settings/base.py:155
+msgid "Breton"
+msgstr ""
+
+#: FlOpEDT/settings/base.py:156
+msgid "Catalan"
+msgstr ""
+
+#: FlOpEDT/settings/base.py:157
+msgid "Corsican"
+msgstr ""
+
+#: FlOpEDT/settings/base.py:158
+msgid "Danish"
+msgstr ""
+
+#: FlOpEDT/settings/base.py:159
+msgid "German"
+msgstr ""
+
+#: FlOpEDT/settings/base.py:160
+msgid "Dutch"
+msgstr ""
+
+#: FlOpEDT/settings/base.py:161
+msgid "Greek"
+msgstr ""
+
+#: FlOpEDT/settings/base.py:162
+msgid "Italian"
+msgstr ""
+
+#: FlOpEDT/settings/base.py:163
+msgid "Latin"
+msgstr ""
+
+#: FlOpEDT/settings/base.py:164
+msgid "Norwegian"
+msgstr ""
+
+#: FlOpEDT/settings/base.py:165
+msgid "Portuguese"
+msgstr ""
+
+#: FlOpEDT/settings/base.py:166
+msgid "Swedish"
+msgstr ""
+
+#: FlOpEDT/settings/base.py:167
+msgid "Chinese"
+msgstr ""
+
+#: FlOpEDT/settings/base.py:168
+msgid "Smurf"
 msgstr ""
 
 #: base/forms.py:33
