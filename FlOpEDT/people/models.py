@@ -213,10 +213,10 @@ class Preferences(models.Model):
     free_half_day_weight = models.DecimalField(
         default=.5, blank=True, max_digits=3, decimal_places=2)
     hole_weight = models.DecimalField(
-        default=.3, blank=True, max_digits=3, decimal_places=2)
+        default=.5, blank=True, max_digits=3, decimal_places=2)
     eat_weight = models.DecimalField(
-        default=.3, blank=True, max_digits=3, decimal_places=2)
-    
+        default=.5, blank=True, max_digits=3, decimal_places=2)
+
     def get_morning_weight(self):
         return float(self.morning_weight)
 

@@ -12,7 +12,7 @@ function txt_morning_half(val, id) {
         return 'Ne pas commencer trop tard et ne pas finir trop tard';
         break;
     case "0.5":
-        return 'Ni trop tôt ni trop tard';
+        return 'Indifférent';
         break;
     case "0.75":
         return 'Ne pas commencer trop tôt et finir plus tard';
@@ -31,7 +31,7 @@ function txt_morning_half(val, id) {
         return 'Avoir plus de journées allégées que de demi-journées libérées';
         break;
     case "0.5":
-        return 'Avoir des semaines équilibrées';
+        return 'Indifférent';
         break;
     case "0.75":
         return 'Avoir plus de demi-journées libérées que de journées allégées';
@@ -87,70 +87,58 @@ $(function() {
     });
 });
 
-
+let grille = d3.select("svg#grille");
 
 //Creation of the little board
-let len_square = 180;
-let x=180;
+let len_square = 95;
 let id=0;
+let y_start = 5;
+let x_start = 5;
 
 for (var i = 0; i < 5; i++) {
  
-    d3.select("svg#grille")
+    grille
     .append("rect")
     .attr("id", id+1)
     .attr("fill", "green" )
-    .attr("width", 110)
-    .attr("height", 95)
-    .attr("x", x)
-    .attr("y", 10);
+    .attr("width", len_square)
+    .attr("height", len_square)
+    .attr("x", x_start + i*len_square)
+    .attr("y", y_start);
 
      d3.select("svg#grille")
     .append("rect")
     .attr("id", id+2)
     .attr("fill", "green")
-    .attr("width", 110)
-    .attr("height", 95)
-    .attr("x", x)
-    .attr("y", 105);
-    
-
+    .attr("width", len_square)
+    .attr("height", len_square)
+    .attr("x", x_start + i*len_square)
+    .attr("y", y_start + len_square);
     id += 2;
-    x += 110;
 }
 
 
-for (var i = 0; i < 6; i++) {
- 
-
+for (let i = 0; i < 6; i++) {
     d3.select("svg#grille")
     .append("line")
     .attr("stroke", "black")
     .attr("stroke-width", 2)
-    .attr("x1", len_square*1)
-    .attr("y1", 10)
-    .attr("x2", len_square*1)
-    .attr("y2", 200);
-
-    len_square +=  110;
-
+    .attr("x1", x_start + i * len_square)
+    .attr("y1", y_start)
+    .attr("x2", x_start + i * len_square)
+    .attr("y2", y_start + 2 * len_square);
 }
 
-let line = 10;
 
-for (var j = 0; j < 3; j++) {
-
+for (let i = 0; i < 3; i++) {
     d3.select("svg#grille")
     .append("line")
     .attr("stroke", "black")
     .attr("stroke-width", 2)
-    .attr("x1", 180)
-    .attr("y1", line)
-    .attr("x2", 730)
-    .attr("y2", line);
-
-
-    line +=  95;
+    .attr("x1", x_start)
+    .attr("y1", y_start + i * len_square)
+    .attr("x2", x_start + 5 * len_square)
+    .attr("y2", y_start + i * len_square);
 }
 
 let tableau = new Object();

@@ -8,6 +8,11 @@
 	height: 300px;
 }
 
+#grille {
+	width: 485px;
+	height: 200px;
+}
+
 
 fieldset{
 	border: 5px groove;
@@ -30,6 +35,6 @@ legend {
 
 .rightbutton{
 	float:right; 
-	margin-right: 50px;
+	margin-right: 10px;
 }
 
