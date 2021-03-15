@@ -81,10 +81,11 @@ var logo = {
 
 
 var headlines = [
-  gettext("Schedule manager <span id=\"flopGreen\">fl</span>exible and <span id=\"flopGreen\">op</span>enSource"),
-  gettext("\"Who want to manage the <span id=\"flopRed\">schedules</span> this year?\" ...  ... <span id=\"flopGreen\">flop</span> !"),
-  gettext("And your schedules will <span id=\"flopRedDel\">flop</span> be a hit!"),
-  gettext("And even your logo will be on time...")
+    gettext("Schedule manager <span id=\"flopGreen\">fl</span>exible and <span id=\"flopGreen\">op</span>enSource"),
+    gettext("\"Who want to manage the <span id=\"flopRed\">schedules</span> this year?\" ...  ... <span id=\"flopGreen\">flop</span> !"),
+    gettext("And your schedules will <span id=\"flopRedDel\">flop</span> be a hit!"),
+    gettext("And even your logo will be on time..."),
+    gettext("Everybody do the <span id=\"flopGreen\">flop</span>!")
 ];
 
 
