@@ -26,11 +26,12 @@
 {% extends "base.html" %}
 
 {% load static %}
+{% load i18n %}
 
 <script href="https://code.jquery.com/jquery-3.3.1.js"></script>
 
 
-{% block title %} EDT {% endblock %}
+{% block title %} {% trans "Student Preferences" %} {% endblock %}
 
 {% block content %}
 
@@ -38,17 +39,17 @@
 
 <form action="{% url 'people:student_preferences' %}" method="post" id="form_pref">
   {% csrf_token %}
-  <fieldset class="twofieldset" id="field1">
-    <legend>Préférences pour votre groupe</legend>
+  <fieldset>
+    <legend>{% trans "Preferences for your group" %}</legend>
       </br>
-      <div><b> Plutôt du matin ou du soir?</b></div>
+      <div><b> {% trans "Morning or evening?" %}</b></div>
       <div>
 
         <input type="range" id="morning" name="morning_evening" min="0" max="1" step="0.25" value="{{ morning|stringformat:'.2f' }}"/>
         <output name="result">{{ morning_txt }}</output>
       </div>
         </br>
-      <div><b>Journées chargées VS demie-journées libérées</b></div>
+      <div><b>{% trans "Busy days VS Free half-days" %}</b></div>
 
       <div>
 
@@ -56,13 +57,13 @@
         <output name="resultdeux">{{ free_half_day_txt }}</output>
       </div>
         </br>
-      <div><b>Et les trous ?</b></div>
+      <div><b>{% trans "Holes?" %}</b></div>
       <div>
         <input type="range" id="hole" name="hole_nothole" min="0" max="1" step="0.5" value="{{ hole|stringformat:'.2f' }}"/>
         <output name="resulthole">{{ hole_txt }}</output>
       </div>
         <br/>
-      <div><b>Manger tôt ou tard ?</b></div>
+      <div><b>{% trans "Eat early or late?" %}</b></div>
 
       <div>
         <input type="range" id="selfeat" name="eat" min="0" max="1" step="0.5"
@@ -73,17 +74,19 @@
       <button type="submit" form="form_pref" value="Submit">Valider</button>
   </fieldset>
 
-  <fieldset class="twofieldset">
+{% comment %}
+    <fieldset class="twofieldset">
       <legend>Préférences demi-journée libre</legend>
         <br/>
       <div>Indiquez <b>en rouge</b> les demies-journées pour lesquels avoir cours est <b>moins souhaitable</b>...</div>
         <div align="center">
           <svg id="grille">
-                    
+
           </svg>
         </div>
         <button class="rightbutton" type="submit" form="form_pref" value="Submit">Valider</button>
-  </fieldset>
+    </fieldset>
+ {% endcomment %}
 
 </form>
 
