@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-14 22:27+0100\n"
+"POT-Creation-Date: 2021-03-15 22:17+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -75,9 +75,13 @@ msgstr ""
 "id=\"flopGreen\">op</span>enSource"
 
 #: base/static/base/logo.js:85
+#, fuzzy
+#| msgid ""
+#| "\"Who want to manage the <span id=\"flopRed\">schedules</span> this year?"
+#| "\" ...  ... <span id=\"flopGreen\">flop</span> !"
 msgid ""
-"\"Who want to manage the <span id=\"flopRed\">schedules</span> this year?"
-"\" ...  ... <span id=\"flopGreen\">flop</span> !"
+"\"Who want to manage schedules this year?\" ...  ... <span id=\"flopGreen"
+"\">flop</span>!"
 msgstr ""
 "Qui veut gérer les schtroumpfs cette année ? ...  ... <span id=\"flopGreen"
 "\">flop</span> !"
@@ -91,8 +95,54 @@ msgstr ""
 "schtroumpf !"
 
 #: base/static/base/logo.js:87
-msgid "And even your logo will be on time..."
+#, fuzzy
+#| msgid "And even your logo will be on time..."
+msgid "Even your logo will be on time..."
 msgstr "Et même votre logo sera schtroumpfement à l'heure..."
+
+#: base/static/base/logo.js:88
+#, fuzzy
+#| msgid "And your schedules will <span id=\"flopRedDel\">flop</span> hit!"
+msgid "Everybody do the <span id=\"flopGreen\">flop</span>!"
+msgstr ""
+"Et votre emploi du temps fera un <span id=\"flopRedDel\">flop</span> "
+"schtroumpf !"
+
+#: base/static/base/logo.js:89
+#, fuzzy
+#| msgid ""
+#| "\"Who want to manage the <span id=\"flopRed\">schedules</span> this year?"
+#| "\" ...  ... <span id=\"flopGreen\">flop</span> !"
+msgid ""
+"You got to make the schedules? Don't flip out: <span id=\"flopGreen\">flop</"
+"span> it!"
+msgstr ""
+"Qui veut gérer les schtroumpfs cette année ? ...  ... <span id=\"flopGreen"
+"\">flop</span> !"
+
+#: base/static/base/logo.js:90
+msgid "To flop or not to flop, that is the question (for your schedules)"
+msgstr ""
+
+#: base/static/base/logo.js:91
+msgid "flop!Scheduler != flop "
+msgstr ""
+
+#: base/static/base/logo.js:92
+#, fuzzy
+#| msgid "And your schedules will <span id=\"flopRedDel\">flop</span> hit!"
+msgid "Just <span id=\"flopGreen\">flop</span> it."
+msgstr ""
+"Et votre emploi du temps fera un <span id=\"flopRedDel\">flop</span> "
+"schtroumpf !"
+
+#: base/static/base/logo.js:93
+msgid "Schedule... khhh... I am your flop!"
+msgstr ""
+
+#: base/static/base/logo.js:94
+msgid "What else?"
+msgstr ""
 
 #: base/static/base/transformation.js:267
 #, fuzzy
@@ -161,6 +211,28 @@ msgstr "Modules"
 #: base/static/base/variables.js:605
 msgid "Rooms"
 msgstr "Salles"
+
+#, fuzzy
+#~| msgid ""
+#~| "Schedule manager <span id=\"flopGreen\">fl</span>exible and <span id="
+#~| "\"flopGreen\">op</span>enSource"
+#~ msgid ""
+#~ "<span id=\"flopGreen\">flop</span>!<span id=\"flopRed\">Scheduler</"
+#~ "span>) != flop "
+#~ msgstr ""
+#~ "Gestionnaire de schtroumpf <span id=\"flopGreen\">fl</span>exible et "
+#~ "<span id=\"flopGreen\">op</span>enSource"
+
+#, fuzzy
+#~| msgid ""
+#~| "\"Who want to manage the <span id=\"flopRed\">schedules</span> this year?"
+#~| "\" ...  ... <span id=\"flopGreen\">flop</span> !"
+#~ msgid ""
+#~ "<span id=\"flopRed\">Schedule</span>... I am your <span id=\"flopGreen"
+#~ "\">flop</span>!"
+#~ msgstr ""
+#~ "Qui veut gérer les schtroumpfs cette année ? ...  ... <span id=\"flopGreen"
+#~ "\">flop</span> !"
 
 #, fuzzy
 #~| msgid "Avail :"
