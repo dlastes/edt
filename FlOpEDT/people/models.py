@@ -212,6 +212,10 @@ class Preferences(models.Model):
         default=.5, blank=True, max_digits=3, decimal_places=2)
     free_half_day_weight = models.DecimalField(
         default=.5, blank=True, max_digits=3, decimal_places=2)
+    hole_weight = models.DecimalField(
+        default=.5, blank=True, max_digits=3, decimal_places=2)
+    eat_weight = models.DecimalField(
+        default=.5, blank=True, max_digits=3, decimal_places=2)
 
     def get_morning_weight(self):
         return float(self.morning_weight)
@@ -248,20 +252,26 @@ class GroupPreferences(Preferences):
         # To initialise variables and getting the divider to get the average
         local_morning_weight = 0
         local_free_half_day_weight = 0
+        local_hole_weight = 0
+        local_eat_weight = 0
         nb_student_prefs = len(students_preferences)
         if nb_student_prefs == 0:
             self.morning_weight = 0.5
             self.free_half_day_weight = 0.5
-
+            self.hole_weight = 0.5
+            self.eat_weight = 0.5
         else:
             # To range the table
             for student_pref in students_preferences:
                 local_morning_weight += student_pref.morning_weight
                 local_free_half_day_weight += student_pref.free_half_day_weight
-
+                local_hole_weight += student_pref.hole_weight
+                local_eat_weight += student_pref.eat_weight
             # To calculate the average of each attributs
             self.morning_weight = local_morning_weight/nb_student_prefs
             self.free_half_day_weight = local_free_half_day_weight/nb_student_prefs
+            self.hole_weight = local_hole_weight/nb_student_prefs
+            self.eat_weight = local_eat_weight/nb_student_prefs
             self.save()
 
 
