@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-14 14:03+0100\n"
+"POT-Creation-Date: 2021-03-14 22:38+0100\n"
 "PO-Revision-Date: 2021-03-14 13:02+0000\n"
 "Last-Translator: b'prenom_de_QTF nom_de_QTF <QTF@mail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -178,11 +178,19 @@ msgstr "Stabilisée"
 msgid "Partial generation date"
 msgstr "Date de regénération partielle"
 
-#: base/templates/base/aide.html:34
+#: base/templates/base/contact.html:34 base/templates/base/visio.html:38
+msgid "Send"
+msgstr "Envoyer"
+
+#: base/templates/base/departments.html:15
+msgid "Please choose your department : "
+msgstr "Veuillez choisir votre département :"
+
+#: base/templates/base/help.html:34
 msgid "Room modification"
 msgstr "Modification de salle"
 
-#: base/templates/base/aide.html:35
+#: base/templates/base/help.html:35
 msgid ""
 "Right click on the course in question, the available rooms appear. Click on "
 "+ to choose a room that is not available for this course. Don't forget to "
@@ -192,51 +200,59 @@ msgstr ""
 "Cliquer sur + pour choisir une salle non prévue pour ce cours. Ne pas "
 "oublier de valider tout changement."
 
-#: base/templates/base/aide.html:38
+#: base/templates/base/help.html:38
 msgid "Create an account"
 msgstr "Créer un compte"
 
-#: base/templates/base/aide.html:39
+#: base/templates/base/help.html:39
 msgid "Here"
 msgstr "Ici"
 
-#: base/templates/base/aide.html:42
+#: base/templates/base/help.html:42
 msgid "Modification of an account"
 msgstr "Modifier un compte"
 
-#: base/templates/base/aide.html:43
+#: base/templates/base/help.html:43
 msgid "Click on his nickname (his initials) at the top right of the page."
 msgstr "Cliquer sur son pseudo (ses initiales) en haut à droite de la page."
 
-#: base/templates/base/aide.html:45
+#: base/templates/base/help.html:45
 msgid "Change password"
 msgstr "Mot de passe perdu ?"
 
-#: base/templates/base/aide.html:46 base/templates/base/aide.html:49
+#: base/templates/base/help.html:46 base/templates/base/help.html:49
 msgid "Click on"
 msgstr "Click sur"
 
-#: base/templates/base/aide.html:46 base/templates/base/aide.html:49
+#: base/templates/base/help.html:46 base/templates/base/help.html:49
 msgid "this link"
 msgstr "ce lien"
 
-#: base/templates/base/aide.html:46
+#: base/templates/base/help.html:46
 msgid "to change your password."
 msgstr "pour changer votre mot de passe."
 
-#: base/templates/base/aide.html:48
+#: base/templates/base/help.html:48
 msgid "Password reminder"
 msgstr "Rappel du mot de passe"
 
-#: base/templates/base/aide.html:49
+#: base/templates/base/help.html:49
 msgid "for a password reminder, or via 'Login' at the top of the page."
 msgstr "pour un rappel de mot de passe, ou via 'Se connecter' en haut de page."
 
-#: base/templates/base/aide.html:51
+#: base/templates/base/help.html:51
+msgid "Direct link to a particular group"
+msgstr "Lien direct vers l'EDT d'un groupe spécifique"
+
+#: base/templates/base/help.html:52
+msgid "Add \"?promo=INFO1&gp=1A\" at the end of the url, for example "
+msgstr "Ajouter \"?promo=INFO1&gp=1A\" à la fin de l'url, par exemple "
+
+#: base/templates/base/help.html:54
 msgid "How availability entry work"
 msgstr "Fonctionnement de la saisie des disponibilités"
 
-#: base/templates/base/aide.html:52
+#: base/templates/base/help.html:55
 msgid ""
 "When generating the schedule for a given week, if no availability is entered "
 "for that week, the typical week defines the availability."
@@ -245,17 +261,9 @@ msgstr ""
 "aucune disponibilité n'est renseignée pour cette semaine, la semaine type "
 "définit les disponibilités."
 
-#: base/templates/base/aide.html:54
+#: base/templates/base/help.html:57
 msgid "Some Tutorial Videos"
 msgstr "Quelques Tutos Vidéos"
-
-#: base/templates/base/contact.html:34 base/templates/base/visio.html:38
-msgid "Send"
-msgstr "Envoyer"
-
-#: base/templates/base/departments.html:15
-msgid "Please choose your department : "
-msgstr "Veuillez choisir votre département :"
 
 #: base/templates/base/module_description.html:35
 msgid "Modification of the module description."
@@ -749,13 +757,72 @@ msgstr "En-tête "
 msgid "Category "
 msgstr "Catégorie "
 
+#: solve_board/templates/solve_board/main-board.html:32
+#, fuzzy
+#| msgid "Schedule_banner"
+msgid "Schedule Generation"
+msgstr "Consulter"
+
+#: solve_board/templates/solve_board/main-board.html:60
+msgid "Constraints"
+msgstr "Contraintes"
+
+#: solve_board/templates/solve_board/main-board.html:61
+#, fuzzy
+#| msgid ""
+#| "All words appearing in bolded - with no weight - will be considered "
+#| "mandatory, the other ones will considered as preferences."
+msgid ""
+"All constraints appearing in bolded - with no weight - will be considered "
+"mandatory, the other ones will considered as preferences."
+msgstr ""
+"Les contraintes apparaissant en gras - avec un poids non défini - seront "
+"prises en compte de manièreobligatoire, les autres seront utilisées dans la "
+"résolution comme des préférences."
+
+#: solve_board/templates/solve_board/main-board.html:66
+#, fuzzy
+#| msgid "Configuration file canvas"
+msgid "Configuration"
+msgstr "Canevas du fichier de configuration"
+
+#: solve_board/templates/solve_board/main-board.html:70
+#, fuzzy
+#| msgid "Weeks"
+msgid "Week⋅s"
+msgstr "Semaines particulières"
+
+#: solve_board/templates/solve_board/main-board.html:74
+#, fuzzy
+#| msgid "Training program"
+msgid "Training Program"
+msgstr "Promotion"
+
+#: solve_board/templates/solve_board/main-board.html:78
+#, fuzzy
+#| msgid "Stabilization ?"
+msgid "Stabilization"
+msgstr "Stabilisation ?"
+
+#: solve_board/templates/solve_board/main-board.html:83
+msgid "Solver"
+msgstr "Solveur"
+
+#: solve_board/templates/solve_board/main-board.html:94
+msgid "Maximum time limit for resolution (minuts)"
+msgstr "Durée limite de résolution (minutes)"
+
+#: solve_board/templates/solve_board/main-board.html:100
+msgid "Unlimited"
+msgstr "Illimité"
+
 #: templates/base.html:53
 msgid "Schedule_title"
 msgstr "Emplois du temps"
 
 #: templates/base.html:66
-msgid "Scheduler"
-msgstr "EDT"
+msgid "<span id=flopGreen >flop</span>!<span id=EDTRed >Scheduler</span>"
+msgstr "<span id=flopGreen >flop</span>!<span id=EDTRed >EDT</span>"
 
 #: templates/base.html:82
 msgid "Schedule_banner"
@@ -804,6 +871,9 @@ msgstr "Déconnexion"
 #: templates/base.html:112
 msgid "Signed in as "
 msgstr "Connecté·e sous "
+
+#~ msgid "Scheduler"
+#~ msgstr "EDT"
 
 #~ msgid "schedule"
 #~ msgstr "edt"

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-14 14:03+0100\n"
+"POT-Creation-Date: 2021-03-15 22:17+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -70,8 +70,58 @@ msgstr ""
 msgid "by "
 msgstr ""
 
+#: base/static/base/logo.js:84
+msgid ""
+"Schedule manager <span id=\"flopGreen\">fl</span>exible and <span id="
+"\"flopGreen\">op</span>enSource"
+msgstr ""
+
+#: base/static/base/logo.js:85
+msgid ""
+"\"Who want to manage schedules this year?\" ...  ... <span id=\"flopGreen"
+"\">flop</span>!"
+msgstr ""
+
+#: base/static/base/logo.js:86
+msgid "And your schedules will <span id=\"flopRedDel\">flop</span> be a hit!"
+msgstr ""
+
+#: base/static/base/logo.js:87
+msgid "Even your logo will be on time..."
+msgstr ""
+
+#: base/static/base/logo.js:88
+msgid "Everybody do the <span id=\"flopGreen\">flop</span>!"
+msgstr ""
+
+#: base/static/base/logo.js:89
+msgid ""
+"You got to make the schedules? Don't flip out: <span id=\"flopGreen\">flop</"
+"span> it!"
+msgstr ""
+
+#: base/static/base/logo.js:90
+msgid "To flop or not to flop, that is the question (for your schedules)"
+msgstr ""
+
+#: base/static/base/logo.js:91
+msgid "flop!Scheduler != flop "
+msgstr ""
+
+#: base/static/base/logo.js:92
+msgid "Just <span id=\"flopGreen\">flop</span> it."
+msgstr ""
+
+#: base/static/base/logo.js:93
+msgid "Schedule... khhh... I am your flop!"
+msgstr ""
+
+#: base/static/base/logo.js:94
+msgid "What else?"
+msgstr ""
+
 #: base/static/base/transformation.js:267
-msgid "You have to do :  "
+msgid "You have to do  "
 msgstr ""
 
 #: base/static/base/transformation.js:269

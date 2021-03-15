@@ -44,7 +44,7 @@ from django.contrib import admin
 from django.views.generic import RedirectView
 from django.views.i18n import JavaScriptCatalog
 from django.conf.urls.i18n import i18n_patterns
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy as _
 
 
 from base import views
