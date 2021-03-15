@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-14 22:38+0100\n"
+"POT-Creation-Date: 2021-03-15 23:24+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -283,7 +283,7 @@ msgstr ""
 msgid "(0 if no notification, 1 for the next 7 days, etc.)"
 msgstr ""
 
-#: base/templates/base/notification.html:35
+#: base/templates/base/notification.html:36
 msgid "Save"
 msgstr ""
 
@@ -704,11 +704,35 @@ msgstr ""
 msgid "A tech or administrative staff"
 msgstr ""
 
-#: people/views.py:179
+#: people/templates/people/studentPreferencesSelection.html:34
+msgid "Student Preferences"
+msgstr ""
+
+#: people/templates/people/studentPreferencesSelection.html:43
+msgid "Preferences for your group"
+msgstr ""
+
+#: people/templates/people/studentPreferencesSelection.html:45
+msgid "Morning or evening?"
+msgstr ""
+
+#: people/templates/people/studentPreferencesSelection.html:52
+msgid "Busy days VS Free half-days"
+msgstr ""
+
+#: people/templates/people/studentPreferencesSelection.html:60
+msgid "Holes?"
+msgstr ""
+
+#: people/templates/people/studentPreferencesSelection.html:66
+msgid "Eat early or late?"
+msgstr ""
+
+#: people/views.py:237
 msgid "Not allowed"
 msgstr ""
 
-#: people/views.py:185
+#: people/views.py:243
 #, python-brace-format
 msgid "No such user as {user}"
 msgstr ""
