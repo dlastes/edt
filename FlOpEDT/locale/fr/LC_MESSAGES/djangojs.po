@@ -189,7 +189,7 @@ msgstr "Commencer tôt pour finir tôt"
 
 #: people/static/people/student_preferences.js:12
 msgid "Do not start late, so as not to end up too late"
-msgstr "Ne pas commencert tard, pour ne pas finir tard"
+msgstr "Ne pas commencer tard, pour ne pas finir tard"
 
 #: people/static/people/student_preferences.js:15
 #: people/static/people/student_preferences.js:34
