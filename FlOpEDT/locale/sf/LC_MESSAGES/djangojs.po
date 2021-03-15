@@ -75,10 +75,6 @@ msgstr ""
 "id=\"flopGreen\">op</span>enSource"
 
 #: base/static/base/logo.js:85
-#, fuzzy
-#| msgid ""
-#| "\"Who want to manage the <span id=\"flopRed\">schedules</span> this year?"
-#| "\" ...  ... <span id=\"flopGreen\">flop</span> !"
 msgid ""
 "\"Who want to manage schedules this year?\" ...  ... <span id=\"flopGreen"
 "\">flop</span>!"
@@ -87,78 +83,58 @@ msgstr ""
 "\">flop</span> !"
 
 #: base/static/base/logo.js:86
-#, fuzzy
-#| msgid "And your schedules will <span id=\"flopRedDel\">flop</span> hit!"
 msgid "And your schedules will <span id=\"flopRedDel\">flop</span> be a hit!"
 msgstr ""
 "Et votre emploi du temps fera un <span id=\"flopRedDel\">flop</span> "
 "schtroumpf !"
 
 #: base/static/base/logo.js:87
-#, fuzzy
-#| msgid "And even your logo will be on time..."
 msgid "Even your logo will be on time..."
 msgstr "Et même votre logo sera schtroumpfement à l'heure..."
 
 #: base/static/base/logo.js:88
-#, fuzzy
-#| msgid "And your schedules will <span id=\"flopRedDel\">flop</span> hit!"
 msgid "Everybody do the <span id=\"flopGreen\">flop</span>!"
-msgstr ""
-"Et votre emploi du temps fera un <span id=\"flopRedDel\">flop</span> "
-"schtroumpf !"
+msgstr "Everybody do the <span id=\"flopGreen\">flop</span>!"
+
 
 #: base/static/base/logo.js:89
-#, fuzzy
-#| msgid ""
-#| "\"Who want to manage the <span id=\"flopRed\">schedules</span> this year?"
-#| "\" ...  ... <span id=\"flopGreen\">flop</span> !"
 msgid ""
 "You got to make the schedules? Don't flip out: <span id=\"flopGreen\">flop</"
 "span> it!"
 msgstr ""
-"Qui veut gérer les schtroumpfs cette année ? ...  ... <span id=\"flopGreen"
-"\">flop</span> !"
+"C'est à vous de schtroumpfer les <span id=\"flopRed\">EDT</span>? Ne flippez pas : "
+"<span id=\"flopGreen\">flop</span>ez!"
 
 #: base/static/base/logo.js:90
 msgid "To flop or not to flop, that is the question (for your schedules)"
-msgstr ""
+msgstr "To flop or not to flop, telle est la schtroumpf (pour tes EDT)"
 
 #: base/static/base/logo.js:91
 msgid "flop!Scheduler != flop "
-msgstr ""
+msgstr "flop!Scheduler != flop"
 
 #: base/static/base/logo.js:92
-#, fuzzy
-#| msgid "And your schedules will <span id=\"flopRedDel\">flop</span> hit!"
-msgid "Just <span id=\"flopGreen\">flop</span> it."
-msgstr ""
-"Et votre emploi du temps fera un <span id=\"flopRedDel\">flop</span> "
-"schtroumpf !"
+msgid "Just flop it!"
+msgstr "Just flop it!"
 
 #: base/static/base/logo.js:93
 msgid "Schedule... khhh... I am your flop!"
-msgstr ""
+msgstr "EDT... khhh... I am your flop!"
 
 #: base/static/base/logo.js:94
 msgid "What else?"
-msgstr ""
+msgstr "What else?"
 
 #: base/static/base/transformation.js:267
-#, fuzzy
-#| msgid "You have to do :  "
+
 msgid "You have to do  "
 msgstr "Vous devez faire :  "
 
 #: base/static/base/transformation.js:269
-#, fuzzy
-#| msgid "No course for you this week"
 msgid "No course for you this week."
 msgstr "Vous n'intervenez pas cette schtroumpf."
 
 #: base/static/base/transformation.js:277
-#, fuzzy
-#| msgid "You propose "
 msgid "You propose   "
 msgstr "Vous en schtroumpfez    "
 
@@ -171,10 +147,8 @@ msgid "It's Ok."
 msgstr "C'est parfait"
 
 #: base/static/base/transformation.js:296
-#, fuzzy
-#| msgid ". Thank you for adding some."
 msgid "Thank you for adding some."
-msgstr ". Merci d'en ajouter "
+msgstr "Merci d'en ajouter. "
 
 #: base/static/base/update.js:1280
 msgid "No regeneration planned"
