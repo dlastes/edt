@@ -6,19 +6,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ## [Unreleased]
 
 ### Added
-- New student preferences design
-- Preferences for half days
-- More preferences 
-- Ability to save preferences
-
-### Changed
-
-### TBD
-- Modification proposal: id for modification bunch, modification
-  applicability, email notification
-- Room preferences: user interface improvement, room exclusion
-
-### Added
 - Enable courses with multiple groups
 - New app flopeditor: save initial data through graphical interface
   - Departments
@@ -40,6 +27,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 that explain the infaisability by the solver of a set of constraints
 - Availability slots in TTModel to optimize resources
 - Allow parametrized repartition between tutors on a given Module
+- New student preferences design, attributes and beahavior
 
 ### Changed
 - front-end: dispatch week/day management in js files
@@ -48,6 +36,9 @@ that explain the infaisability by the solver of a set of constraints
 
 ### TBD
 - right permissions in TTapp/views
+- Modification proposal: id for modification bunch, modification
+  applicability, email notification
+- Room preferences: user interface improvement, room exclusion
 
 ## [0.3.0] - 2019-11-07
 ### Added
