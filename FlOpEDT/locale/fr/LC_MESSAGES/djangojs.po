@@ -125,7 +125,7 @@ msgstr "To flop or not to flop, telle est la question (pour tes EDT)"
 
 #: base/static/base/logo.js:91
 msgid "flop!Scheduler != flop "
-msgstr "flop!Scheduler != flop"
+msgstr "flop!EDT != flop"
 
 #: base/static/base/logo.js:92
 msgid "Just <span id=\"flopGreen\">flop</span> it."
