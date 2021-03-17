@@ -807,7 +807,7 @@ function create_menus() {
     .attr("x", menus.mx + menus.dx)
     .attr("y", menus.h - 10)
     .attr("fill", "black")
-    .text(gettext('Available :'));
+    .text(gettext('DispoAvailable'));
 
   go_menus();
 }
