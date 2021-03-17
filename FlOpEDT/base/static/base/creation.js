@@ -62,6 +62,11 @@ function create_alarm_dispos() {
     .append("text")
     .attr("class", "disp-filled")
     .text(txt_filDispos);
+
+  di
+    .append("text")
+    .attr("class", "disp-comm")
+    .text(txt_comDispos);
 }
 
 
@@ -800,14 +805,14 @@ function create_menus() {
     .attr("x", menus.mx)
     .attr("y", menus.h - 10)
     .attr("fill", "black")
-    .text(gettext('Classes :'));
+    .text(gettext("Courses :"));
 
   svg.get_dom("meg")
     .append("text")
     .attr("x", menus.mx + menus.dx)
     .attr("y", menus.h - 10)
     .attr("fill", "black")
-    .text(gettext('DispoAvailable'));
+    .text(gettext("Avail :"));
 
   go_menus();
 }
@@ -820,7 +825,7 @@ function create_menus() {
 
 function create_regen() {
   svg.get_dom("vg")
-    .append("g")
+    .append("a")
     .attr("class", "ack-reg")
     .append("text");
 }

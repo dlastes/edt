@@ -388,13 +388,13 @@ def user_notifications_pref_changes(req, username=None, *args, **kwargs):
 
 
 def aide(req, **kwargs):
-    return TemplateResponse(req, 'base/aide.html')
+    return TemplateResponse(req, 'base/help.html')
 
 
 @login_required
 def decale(req, **kwargs):
     if req.method != 'GET':
-        return TemplateResponse(req, 'base/aide.html', {})
+        return TemplateResponse(req, 'base/help.html', {})
 
     week_init = req.GET.get('s', '-1')
     year_init = req.GET.get('a', '-1')
@@ -890,14 +890,13 @@ def fetch_week_infos(req, year, week, **kwargs):
 
 def pref_requirements(department, tutor, year, week):
     """
-    Return a pair (filled, required): number of preferences
-    that have been proposed VS required number of prefs, according
-    to local policy
+    Return a pair (filled, required): total time of preferences
+    that have been proposed VS total course time that has to be done
     """
-    nb_courses = Course.objects.filter(tutor=tutor,
+    courses = Course.objects.filter(tutor=tutor,
                                        week=week,
-                                       year=year) \
-        .count()
+                                       year=year)
+    total_course_time = sum(c.type.duration for c in courses)
     week_av = UserPreference \
         .objects \
         .filter(user=tutor,
@@ -910,14 +909,13 @@ def pref_requirements(department, tutor, year, week):
             .filter(user=tutor,
                     week=None,
                     value__gte=1,
-                    day__in=queries.get_working_days(department)) \
-            .count()
+                    day__in=queries.get_working_days(department))
     else:
         filled = week_av \
             .filter(value__gte=1,
-                    day__in=queries.get_working_days(department)) \
-            .count()
-    return filled, 2 * nb_courses
+                    day__in=queries.get_working_days(department))
+    filled_total_time = sum(f.duration for f in filled)
+    return filled_total_time, total_course_time
 
 
 @cache_page(15 * 60)

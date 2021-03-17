@@ -205,7 +205,24 @@ function go_pref(quick) {
 
   go_cm_advanced_pref(quick);
 
+  go_alarm_pref() ;
+}
 
+
+// recompute the total duration of availability
+function compare_required_filled_pref() {
+  if (user.dispos.length > 0) {
+    filled_dispos = user.dispos.reduce(
+      function(accu, pref) {
+        let r = accu ;
+        if (pref.value > 0) {
+          r += pref.duration ;
+        }
+        return r ;
+      },
+      0
+    ) ;
+  }
 }
 
 
@@ -436,6 +453,9 @@ function go_cm_advanced_pref(quick) {
 // check and inform whenever there is not enough available slots
 function go_alarm_pref() {
 
+  compare_required_filled_pref() ;
+
+
   var dig = svg.get_dom("dig");
 
   // escape if there is no alarm 
@@ -453,10 +473,19 @@ function go_alarm_pref() {
     .text(txt_filDispos)
     .attr("x", menus.x + menus.mx - 5)
     .attr("y", did.tly + valid.h * 1.5 + valid.margin_h);
+  dig
+    .select(".disp-info").select(".disp-comm")
+    .text(txt_comDispos)
+    .attr("x", menus.x + menus.mx - 5)
+    .attr("y", did.tly + valid.h * 1.5 + 2 * valid.margin_h);
+
 
   if (required_dispos > filled_dispos) {
     dig
       .select(".disp-info").select(".disp-filled")
+      .attr("font-weight", "bold").attr("fill", "red");
+    dig
+      .select(".disp-info").select(".disp-comm")
       .attr("font-weight", "bold").attr("fill", "red");
     dig
       .select(".disp-info").select(".disp-required")
@@ -464,6 +493,9 @@ function go_alarm_pref() {
   } else {
     dig
       .select(".disp-info").select(".disp-filled")
+      .attr("font-weight", "normal").attr("fill", "black");
+    dig
+      .select(".disp-info").select(".disp-comm")
       .attr("font-weight", "normal").attr("fill", "black");
     dig
       .select(".disp-info").select(".disp-required")
@@ -1243,29 +1275,29 @@ function go_regen(s) {
     total_regen = false;
     var txt = "";
     var elements = s.split(/,| /);
-    if (elements.length % 2 != 0 && elements.length > 1) {
-      txt = "";
-    } else if (elements[0] == 'N') {
+    var regen_id = elements[elements.length - 1];
+    if (elements[0] == 'N') {
       txt = gettext('No planned re-generation');
     } else if (elements[0] == 'C') {
-      total_regen = true;
+      var total_regen = true;
       if (elements.length > 2 && elements[2] == 'S') {
-        txt = "Regénération totale (mineure) le " + elements[1] +
+        txt = gettext("Full (minor) generation planned on ") + elements[1] +
           "(" + elements[3] + ")";
       } else {
-        txt = "Regénération totale prévue (probablement le " + elements[1] + ")";
+        txt = gettext("Full generation planned (probably on ") + elements[1] + ")";
       }
     } else if (elements[0] == 'S') {
-      txt = "Regénération mineure prévue (probablement le " + elements[1] + ")";
+      txt = gettext("Minor generation planned (probably on ") + elements[1] + ")";
     }
 
     ack.regen = txt;
 
     svg.get_dom("vg").select(".ack-reg").select("text")
       .text(ack.regen);
-
+    svg.get_dom("vg").select(".ack-reg")
+        .attr('href', '/admin/base/regen/'+regen_id)
+        .attr('target', "_blank");
   }
-
   svg.get_dom("vg").select(".ack-reg").select("text")
     .transition(d3.transition())
     .attr("x", grid_width())

@@ -26,13 +26,15 @@
   <legend>Notifications</legend>
   <form action='{% url "base:user_notifications_pref_changes" department user.username %}'  method='POST' id="form-notifications" >
     {% csrf_token %}
-    <p>{% trans "I wish to be notified of changes for the" %}
+    <p style="text-align: center;">{% trans "I wish to be notified of changes for the" %}
       <input id="user_notifications_pref" type="number" name="user_notifications_pref" style="width: 30px" min="0" max="52"
              value="{{ user_notifications_pref }}">
       {%trans "next weeks." %}<br>
       {% trans "(0 if no notification, 1 for the next 7 days, etc.)" %} 
     </p>
-    <input type="submit" name="save_notifications_pref" value={% trans "Save" %}>
-                </br>
+    <button class="centerbutton" type="submit" name="save_notifications_pref" value="Sauvegarder">
+        {% trans "Save" %}
+    </button>
+      </br>
   </form>
 </fieldset>

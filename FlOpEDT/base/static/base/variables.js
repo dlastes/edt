@@ -465,7 +465,7 @@ var ckbox = [];
 ckbox["edt-mod"] = {
   menu: "edt-mod",
   cked: false,
-  txt: "Modifier",
+  txt: gettext("Modify"),
   disp: true,
   en: true
 };
@@ -473,7 +473,7 @@ ckbox["edt-mod"] = {
 ckbox["dis-mod"] = {
   menu: "dis-mod",
   cked: false,
-  txt: "Modifier",
+  txt: gettext("Modify"),
   disp: true,
   en: true
 };

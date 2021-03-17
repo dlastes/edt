@@ -1,0 +1,288 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-03-15 23:24+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: base/static/base/action.js:769
+msgid "The schedule shall be fully regenerated (see downside to the right)."
+msgstr "L'emploi du temps va être regénéré totalement (cf. en bas à droite)."
+
+#: base/static/base/action.js:770
+msgid ""
+"Just update your availabilities : they will be considered for the next "
+"generation."
+msgstr ""
+"Contentez-vous de mettre à jour vos schtroumpfs : elles seront prises en "
+"schtroumpf lors de la regénération."
+
+#: base/static/base/creation.js:808
+msgid "Courses :"
+msgstr "Cours :"
+
+#: base/static/base/creation.js:815
+msgid "Avail :"
+msgstr "Dispos :"
+
+#: base/static/base/decale.js:35
+msgid "Module    "
+msgstr "Module    "
+
+#: base/static/base/decale.js:36
+msgid "Teacher    "
+msgstr "Prof    "
+
+#: base/static/base/decale.js:37
+msgid "Group    "
+msgstr "Groupe    "
+
+#: base/static/base/decale.js:322
+msgid "Definitely cancel"
+msgstr "Schtroumpfer définitivement"
+
+#: base/static/base/decale.js:334
+msgid "Put on hold"
+msgstr "Mettre en attente"
+
+#: base/static/base/decale.js:351
+msgid "Move to week "
+msgstr "Déplacer en semaine "
+
+#: base/static/base/decale.js:361
+msgid "by "
+msgstr "par "
+
+#: base/static/base/logo.js:84
+msgid ""
+"Schedule manager <span id=\"flopGreen\">fl</span>exible and <span id="
+"\"flopGreen\">op</span>enSource"
+msgstr ""
+"Gestionnaire de schtroumpf <span id=\"flopGreen\">fl</span>exible et <span "
+"id=\"flopGreen\">op</span>enSource"
+
+#: base/static/base/logo.js:85
+msgid ""
+"\"Who want to manage schedules this year?\" ...  ... <span id=\"flopGreen"
+"\">flop</span>!"
+msgstr ""
+"Qui veut gérer les schtroumpfs cette année ? ...  ... <span id=\"flopGreen"
+"\">flop</span> !"
+
+#: base/static/base/logo.js:86
+msgid "And your schedules will <span id=\"flopRedDel\">flop</span> be a hit!"
+msgstr ""
+"Et votre emploi du temps fera un <span id=\"flopRedDel\">flop</span> "
+"schtroumpf !"
+
+#: base/static/base/logo.js:87
+msgid "Even your logo will be on time..."
+msgstr "Et même votre logo sera schtroumpfement à l'heure..."
+
+#: base/static/base/logo.js:88
+msgid "Everybody do the <span id=\"flopGreen\">flop</span>!"
+msgstr "Everybody do the <span id=\"flopGreen\">flop</span>!"
+
+#: base/static/base/logo.js:89
+msgid ""
+"You got to make the schedules? Don't flip out: <span id=\"flopGreen\">flop</"
+"span> it!"
+msgstr ""
+"C'est à vous de schtroumpfer les <span id=\"flopRed\">EDT</span>? Ne flippez "
+"pas : <span id=\"flopGreen\">flop</span>ez!"
+
+#: base/static/base/logo.js:90
+msgid "To flop or not to flop, that is the question (for your schedules)"
+msgstr "To flop or not to flop, telle est la schtroumpf (pour tes EDT)"
+
+#: base/static/base/logo.js:91
+msgid "flop!Scheduler != flop "
+msgstr "flop!Scheduler != flop"
+
+#: base/static/base/logo.js:92
+#, fuzzy
+#| msgid "Everybody do the <span id=\"flopGreen\">flop</span>!"
+msgid "Just <span id=\"flopGreen\">flop</span> it."
+msgstr "Everybody do the <span id=\"flopGreen\">flop</span>!"
+
+#: base/static/base/logo.js:93
+msgid "Schedule... khhh... I am your flop!"
+msgstr "EDT... khhh... I am your flop!"
+
+#: base/static/base/logo.js:94
+msgid "What else?"
+msgstr "What else?"
+
+#: base/static/base/transformation.js:267
+msgid "You have to do  "
+msgstr "Vous devez faire :  "
+
+#: base/static/base/transformation.js:269
+msgid "No course for you this week."
+msgstr "Vous n'intervenez pas cette schtroumpf."
+
+#: base/static/base/transformation.js:277
+msgid "You propose   "
+msgstr "Vous en schtroumpfez    "
+
+#: base/static/base/transformation.js:290
+msgid "Maybe you should free up more..."
+msgstr "Il faudrait peut-être en schtroumpfer..."
+
+#: base/static/base/transformation.js:292
+msgid "It's Ok."
+msgstr "C'est parfait"
+
+#: base/static/base/transformation.js:296
+msgid "Thank you for adding some."
+msgstr "Merci d'en ajouter. "
+
+#: base/static/base/update.js:1280
+msgid "No regeneration planned"
+msgstr "Pas de (re)génération prévue"
+
+#: base/static/base/update.js:1284
+msgid "Full (minor) generation planned on "
+msgstr "Regénération totale (mineure) le"
+
+#: base/static/base/update.js:1287
+msgid "Full generation planned (probably on "
+msgstr "Regénération totale prévue (probablement le"
+
+#: base/static/base/update.js:1290
+msgid "Minor generation planned (probably on "
+msgstr "Regénération mineure prévue (probablement le"
+
+#: base/static/base/variables.js:468 base/static/base/variables.js:476
+msgid "Modify"
+msgstr "Modifier"
+
+#: base/static/base/variables.js:593
+msgid "Groups"
+msgstr "Groupes"
+
+#: base/static/base/variables.js:597
+msgid "Teachers"
+msgstr "Profs"
+
+#: base/static/base/variables.js:601
+msgid "Modules"
+msgstr "Modules"
+
+#: base/static/base/variables.js:605
+msgid "Rooms"
+msgstr "Salles"
+
+#: people/static/people/student_preferences.js:9
+msgid "Start early in order to end up early"
+msgstr ""
+
+#: people/static/people/student_preferences.js:12
+msgid "Do not start late, so as not to end up too late"
+msgstr ""
+
+#: people/static/people/student_preferences.js:15
+#: people/static/people/student_preferences.js:34
+#: people/static/people/student_preferences.js:50
+#: people/static/people/student_preferences.js:63
+msgid "Indifferent"
+msgstr ""
+
+#: people/static/people/student_preferences.js:18
+msgid "Do not start early, even if I don't end up early"
+msgstr ""
+
+#: people/static/people/student_preferences.js:21
+msgid "Start late, even if I end up late"
+msgstr ""
+
+#: people/static/people/student_preferences.js:28
+msgid "Have light days"
+msgstr ""
+
+#: people/static/people/student_preferences.js:31
+msgid "Have light days more than free half-days"
+msgstr ""
+
+#: people/static/people/student_preferences.js:37
+msgid "Have free half-days more than light days."
+msgstr ""
+
+#: people/static/people/student_preferences.js:40
+msgid "Have free half-days."
+msgstr ""
+
+#: people/static/people/student_preferences.js:47
+msgid "Avoid holes between courses"
+msgstr ""
+
+#: people/static/people/student_preferences.js:53
+msgid "Promote holes between courses"
+msgstr ""
+
+#: people/static/people/student_preferences.js:60
+msgid "Eat early"
+msgstr ""
+
+#: people/static/people/student_preferences.js:66
+msgid "Eat late"
+msgstr ""
+
+#~ msgid "Just flop it!"
+#~ msgstr "Just flop it!"
+
+#, fuzzy
+#~| msgid ""
+#~| "Schedule manager <span id=\"flopGreen\">fl</span>exible and <span id="
+#~| "\"flopGreen\">op</span>enSource"
+#~ msgid ""
+#~ "<span id=\"flopGreen\">flop</span>!<span id=\"flopRed\">Scheduler</"
+#~ "span>) != flop "
+#~ msgstr ""
+#~ "Gestionnaire de schtroumpf <span id=\"flopGreen\">fl</span>exible et "
+#~ "<span id=\"flopGreen\">op</span>enSource"
+
+#, fuzzy
+#~| msgid ""
+#~| "\"Who want to manage the <span id=\"flopRed\">schedules</span> this year?"
+#~| "\" ...  ... <span id=\"flopGreen\">flop</span> !"
+#~ msgid ""
+#~ "<span id=\"flopRed\">Schedule</span>... I am your <span id=\"flopGreen"
+#~ "\">flop</span>!"
+#~ msgstr ""
+#~ "Qui veut gérer les schtroumpfs cette année ? ...  ... <span id=\"flopGreen"
+#~ "\">flop</span> !"
+
+#, fuzzy
+#~| msgid "Avail :"
+#~ msgid "Available %s"
+#~ msgstr "Dispos :"
+
+#, fuzzy
+#~| msgid ". It's perfect."
+#~ msgid "It's perfect."
+#~ msgstr ". C'est parfait."
+
+#, fuzzy
+#~| msgid "Required availabilities"
+#~ msgid "Required availabilities :"
+#~ msgstr "Dispos souhaitées :"
+
+#~ msgid " slots."
+#~ msgstr " créneaux."
+
+#~ msgid "You got "
+#~ msgstr "Vous avez "
