@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-15 23:24+0100\n"
+"POT-Creation-Date: 2021-03-17 20:18+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -37,6 +37,24 @@ msgstr "Cours :"
 #: base/static/base/creation.js:815
 msgid "Avail :"
 msgstr "Dispos :"
+
+#: base/static/base/creation.js:1765
+msgid "Validate timetable"
+msgstr ""
+
+#: base/static/base/creation.js:1888
+#, fuzzy
+#| msgid "Required availabilities"
+msgid "Validate availabilities"
+msgstr "Dispos souhaitées :"
+
+#: base/static/base/creation.js:1918
+msgid "Apply"
+msgstr ""
+
+#: base/static/base/creation.js:1926
+msgid "tipical week"
+msgstr ""
 
 #: base/static/base/decale.js:35
 msgid "Module    "
@@ -126,6 +144,24 @@ msgstr "EDT... khhh... I am your flop!"
 msgid "What else?"
 msgstr "What else?"
 
+#: base/static/base/room_preference.js:30
+msgid "Successful operation"
+msgstr ""
+
+#: base/static/base/room_preference.js:33
+msgid "It's a fail. "
+msgstr ""
+
+#: base/static/base/statistics.js:80 base/static/base/variables.js:957
+#, fuzzy
+#| msgid "Rooms"
+msgid "Room"
+msgstr "Salles"
+
+#: base/static/base/statistics.js:81
+msgid "Number of days"
+msgstr ""
+
 #: base/static/base/transformation.js:267
 msgid "You have to do  "
 msgstr "Vous devez faire :  "
@@ -151,7 +187,9 @@ msgid "Thank you for adding some."
 msgstr "Merci d'en ajouter. "
 
 #: base/static/base/update.js:1280
-msgid "No regeneration planned"
+#, fuzzy
+#| msgid "No regeneration planned"
+msgid "No planned re-generation"
 msgstr "Pas de (re)génération prévue"
 
 #: base/static/base/update.js:1284
@@ -170,6 +208,18 @@ msgstr "Regénération mineure prévue (probablement le"
 msgid "Modify"
 msgstr "Modifier"
 
+#: base/static/base/variables.js:580
+msgid "Filters"
+msgstr ""
+
+#: base/static/base/variables.js:584
+msgid "Employees"
+msgstr ""
+
+#: base/static/base/variables.js:588
+msgid "Posts"
+msgstr ""
+
 #: base/static/base/variables.js:593
 msgid "Groups"
 msgstr "Groupes"
@@ -185,6 +235,74 @@ msgstr "Modules"
 #: base/static/base/variables.js:605
 msgid "Rooms"
 msgstr "Salles"
+
+#: base/static/base/variables.js:783
+msgid "KO"
+msgstr ""
+
+#: base/static/base/variables.js:784
+msgid "OK"
+msgstr ""
+
+#: base/static/base/variables.js:866
+msgid "What to change ?"
+msgstr ""
+
+#: base/static/base/variables.js:879
+#, fuzzy
+#| msgid "Module    "
+msgid "Module teacher ?"
+msgstr "Module    "
+
+#: base/static/base/variables.js:892 base/static/base/variables.js:905
+msgid "Alphabetical order"
+msgstr ""
+
+#: base/static/base/variables.js:917
+msgid "Virtual classroom link ?"
+msgstr ""
+
+#: base/static/base/variables.js:929
+msgid "Relating to who ?"
+msgstr ""
+
+#: base/static/base/variables.js:940
+msgid "No room available"
+msgstr ""
+
+#: base/static/base/variables.js:941
+#, fuzzy
+#| msgid "Avail :"
+msgid "Room available"
+msgstr "Dispos :"
+
+#: base/static/base/variables.js:942
+msgid "Rooms available"
+msgstr ""
+
+#: base/static/base/variables.js:948
+msgid "No room available (any type)"
+msgstr ""
+
+#: base/static/base/variables.js:949
+msgid "Room available (any type)"
+msgstr ""
+
+#: base/static/base/variables.js:950
+msgid "Rooms available (any type)"
+msgstr ""
+
+#: base/static/base/variables.js:956
+msgid "No room"
+msgstr ""
+
+#: base/static/base/variables.js:958
+msgid "Every rooms"
+msgstr ""
+
+#: base/static/base/variables.js:981
+msgid "Who should do it ?"
+msgstr ""
 
 #: people/static/people/student_preferences.js:9
 msgid "Start early in order to end up early"
@@ -267,19 +385,9 @@ msgstr ""
 #~ "\">flop</span> !"
 
 #, fuzzy
-#~| msgid "Avail :"
-#~ msgid "Available %s"
-#~ msgstr "Dispos :"
-
-#, fuzzy
 #~| msgid ". It's perfect."
 #~ msgid "It's perfect."
 #~ msgstr ". C'est parfait."
-
-#, fuzzy
-#~| msgid "Required availabilities"
-#~ msgid "Required availabilities :"
-#~ msgstr "Dispos souhaitées :"
 
 #~ msgid " slots."
 #~ msgstr " créneaux."

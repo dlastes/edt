@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-17 15:17+0000\n"
+"POT-Creation-Date: 2021-03-17 20:18+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,94 +17,6 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-
-#: base/static/base/creation.js:803
-msgid "Classes :"
-msgstr "Cursos :"
-
-#: base/static/base/creation.js:810
-#, fuzzy
-#| msgid "Room available"
-msgid "DispoAvailable"
-msgstr "Disponibilades :"
-
-#: base/static/base/creation.js:1760
-msgid "Validate timetable"
-msgstr "Validar el horario"
-
-#: base/static/base/creation.js:1883
-msgid "Validate availabilities"
-msgstr "Confirmar las disponibilidades "
-
-#: base/static/base/creation.js:1913
-msgid "Apply"
-msgstr "Applicar"
-
-#: base/static/base/creation.js:1921
-msgid "tipical week"
-msgstr "semanas típicas"
-
-#: base/static/base/logo.js:84
-msgid "Schedule manager"
-msgstr "Administrator de horario"
-
-#: base/static/base/logo.js:86
-msgid "Who wants to do <span id=\"flopRed\">EDT</span> this year ?"
-msgstr "¿Quién quiere hacer los <span id=\"flopRed\">EDT</span> este año?"
-
-#: base/static/base/logo.js:88
-msgid "And your timetable will be a "
-msgstr "Y su horario será un "
-
-#: base/static/base/logo.js:89
-msgid "hit"
-msgstr "golpe"
-
-#: base/static/base/logo.js:90
-msgid "And even your logo will be on time"
-msgstr "E incluso tu logo llegará a tiempo"
-
-#: base/static/base/room_preference.js:30
-msgid "Successful operation"
-msgstr "Operación exitosa"
-
-#: base/static/base/room_preference.js:33
-msgid "It's a fail. "
-msgstr "Es un fracaso."
-
-#: base/static/base/statistics.js:80 base/static/base/variables.js:957
-#, fuzzy
-#| msgid "Rooms"
-msgid "Room"
-msgstr "Aulas"
-
-#: base/static/base/statistics.js:81
-msgid "Number of days"
-msgstr "número de días"
-
-#: base/static/base/update.js:1249
-msgid "No planned re-generation"
-msgstr "No hay planeado regeneración"
-
-#: base/static/base/variables.js:580
-msgid "Filters"
-msgstr "Filtros"
-
-#: base/static/base/variables.js:584
-msgid "Employees"
-msgstr "Empleado·a·s"
-
-#: base/static/base/variables.js:588
-msgid "Posts"
-msgstr "Puestos"
-
-#: base/static/base/variables.js:593
-msgid "Groups"
-msgstr "Groupos"
-
-#: base/static/base/variables.js:597
-msgid "Teachers"
-msgstr "Profesores"
 
 #: base/static/base/action.js:769
 msgid "The schedule shall be fully regenerated (see downside to the right)."
@@ -124,23 +36,33 @@ msgstr ""
 msgid "Avail :"
 msgstr ""
 
+#: base/static/base/creation.js:1765
+msgid "Validate timetable"
+msgstr "Validar el horario"
+
+#: base/static/base/creation.js:1888
+msgid "Validate availabilities"
+msgstr "Confirmar las disponibilidades "
+
+#: base/static/base/creation.js:1918
+msgid "Apply"
+msgstr "Applicar"
+
+#: base/static/base/creation.js:1926
+msgid "tipical week"
+msgstr "semanas típicas"
+
 #: base/static/base/decale.js:35
-#, fuzzy
-#| msgid "Modules"
 msgid "Module    "
-msgstr "Modulos"
+msgstr "Modulo   "
 
 #: base/static/base/decale.js:36
-#, fuzzy
-#| msgid "Teachers"
 msgid "Teacher    "
-msgstr "Profes"
+msgstr "Profesor    "
 
 #: base/static/base/decale.js:37
-#, fuzzy
-#| msgid "Groups"
 msgid "Group    "
-msgstr "Grupos"
+msgstr "Grupo   "
 
 #: base/static/base/decale.js:322
 msgid "Definitely cancel"
@@ -208,6 +130,24 @@ msgstr ""
 msgid "What else?"
 msgstr ""
 
+#: base/static/base/room_preference.js:30
+msgid "Successful operation"
+msgstr "Operación exitosa"
+
+#: base/static/base/room_preference.js:33
+msgid "It's a fail. "
+msgstr "Es un fracaso."
+
+#: base/static/base/statistics.js:80 base/static/base/variables.js:957
+#, fuzzy
+#| msgid "Rooms"
+msgid "Room"
+msgstr "Aulas"
+
+#: base/static/base/statistics.js:81
+msgid "Number of days"
+msgstr "número de días"
+
 #: base/static/base/transformation.js:267
 msgid "You have to do  "
 msgstr ""
@@ -233,8 +173,8 @@ msgid "Thank you for adding some."
 msgstr ""
 
 #: base/static/base/update.js:1280
-msgid "No regeneration planned"
-msgstr ""
+msgid "No planned re-generation"
+msgstr "No hay planeado regeneración"
 
 #: base/static/base/update.js:1284
 msgid "Full (minor) generation planned on "
@@ -251,6 +191,18 @@ msgstr ""
 #: base/static/base/variables.js:468 base/static/base/variables.js:476
 msgid "Modify"
 msgstr ""
+
+#: base/static/base/variables.js:580
+msgid "Filters"
+msgstr "Filtros"
+
+#: base/static/base/variables.js:584
+msgid "Employees"
+msgstr "Empleado·a·s"
+
+#: base/static/base/variables.js:588
+msgid "Posts"
+msgstr "Puestos"
 
 #: base/static/base/variables.js:593
 msgid "Groups"
@@ -386,3 +338,26 @@ msgstr ""
 #: people/static/people/student_preferences.js:66
 msgid "Eat late"
 msgstr ""
+
+#~ msgid "Classes :"
+#~ msgstr "Cursos :"
+
+#, fuzzy
+#~| msgid "Room available"
+#~ msgid "DispoAvailable"
+#~ msgstr "Disponibilades :"
+
+#~ msgid "Schedule manager"
+#~ msgstr "Administrator de horario"
+
+#~ msgid "Who wants to do <span id=\"flopRed\">EDT</span> this year ?"
+#~ msgstr "¿Quién quiere hacer los <span id=\"flopRed\">EDT</span> este año?"
+
+#~ msgid "And your timetable will be a "
+#~ msgstr "Y su horario será un "
+
+#~ msgid "hit"
+#~ msgstr "golpe"
+
+#~ msgid "And even your logo will be on time"
+#~ msgstr "E incluso tu logo llegará a tiempo"
