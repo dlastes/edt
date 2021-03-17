@@ -20,160 +20,156 @@ msgstr ""
 
 #: base/static/base/creation.js:803
 msgid "Classes :"
-msgstr "Cursos :"
+msgstr ""
 
 #: base/static/base/creation.js:810
-#, fuzzy
-#| msgid "Room available"
 msgid "Available :"
-msgstr "Aula disponible"
+msgstr ""
 
 #: base/static/base/creation.js:1760
 msgid "Validate timetable"
-msgstr "Validar el horario"
+msgstr ""
 
 #: base/static/base/creation.js:1883
 msgid "Validate availabilities"
-msgstr "Confirmar las disponibilidades "
+msgstr ""
 
 #: base/static/base/creation.js:1913
 msgid "Apply"
-msgstr "Applicar"
+msgstr ""
 
 #: base/static/base/creation.js:1921
 msgid "tipical week"
-msgstr "semanas típicas"
+msgstr ""
 
 #: base/static/base/logo.js:84
 msgid "Schedule manager"
-msgstr "Administrator de horario"
+msgstr ""
 
 #: base/static/base/logo.js:86
 msgid "Who wants to do <span id=\"flopRed\">EDT</span> this year ?"
-msgstr "¿Quién quiere hacer los <span id=\"flopRed\">EDT</span> este año?"
+msgstr ""
 
 #: base/static/base/logo.js:88
 msgid "And your timetable will be a "
-msgstr "Y su horario será un "
+msgstr ""
 
 #: base/static/base/logo.js:89
 msgid "hit"
-msgstr "golpe"
+msgstr ""
 
 #: base/static/base/logo.js:90
 msgid "And even your logo will be on time"
-msgstr "E incluso tu logo llegará a tiempo"
+msgstr ""
 
 #: base/static/base/room_preference.js:30
 msgid "Successful operation"
-msgstr "Operación exitosa"
+msgstr ""
 
 #: base/static/base/room_preference.js:33
 msgid "It's a fail. "
-msgstr "Es un fracaso."
+msgstr ""
 
 #: base/static/base/statistics.js:80 base/static/base/variables.js:957
-#, fuzzy
-#| msgid "Rooms"
 msgid "Room"
-msgstr "Aulas"
+msgstr ""
 
 #: base/static/base/statistics.js:81
 msgid "Number of days"
-msgstr "número de días"
+msgstr ""
 
 #: base/static/base/update.js:1249
 msgid "No planned re-generation"
-msgstr "No hay planeado regeneración"
+msgstr ""
 
 #: base/static/base/variables.js:580
 msgid "Filters"
-msgstr "Filtros"
+msgstr ""
 
 #: base/static/base/variables.js:584
 msgid "Employees"
-msgstr "Empleado·a·s"
+msgstr ""
 
 #: base/static/base/variables.js:588
 msgid "Posts"
-msgstr "Puestos"
+msgstr ""
 
 #: base/static/base/variables.js:593
 msgid "Groups"
-msgstr "Groupos"
+msgstr ""
 
 #: base/static/base/variables.js:597
 msgid "Teachers"
-msgstr "Profesores"
+msgstr ""
 
 #: base/static/base/variables.js:601
 msgid "Modules"
-msgstr "Modulos"
+msgstr ""
 
 #: base/static/base/variables.js:605
 msgid "Rooms"
-msgstr "Aulas"
+msgstr ""
 
 #: base/static/base/variables.js:783
 msgid "KO"
-msgstr "Es un fracaso. Habla de tus problemas con tu responsable."
+msgstr "It's a fail. Find a manager et share your problems with him."
 
 #: base/static/base/variables.js:784
 msgid "OK"
-msgstr "Modificación hecha"
+msgstr "Modification done."
 
 #: base/static/base/variables.js:866
 msgid "What to change ?"
-msgstr "¿Que cambiar?"
+msgstr ""
 
 #: base/static/base/variables.js:879
 msgid "Module teacher ?"
-msgstr "Profesor del modulo"
+msgstr ""
 
 #: base/static/base/variables.js:892 base/static/base/variables.js:905
 msgid "Alphabetical order"
-msgstr "Orden alfabetico"
+msgstr ""
 
 #: base/static/base/variables.js:917
 msgid "Virtual classroom link ?"
-msgstr "¿Enlace de aula virtual? "
+msgstr ""
 
 #: base/static/base/variables.js:929
 msgid "Relating to who ?"
-msgstr "¿Relacionado con quién? "
+msgstr ""
 
 #: base/static/base/variables.js:940
 msgid "No room available"
-msgstr "No hay aula disponible"
+msgstr ""
 
 #: base/static/base/variables.js:941
 msgid "Room available"
-msgstr "Aula disponible"
+msgstr ""
 
 #: base/static/base/variables.js:942
 msgid "Rooms available"
-msgstr "Aulas disponible"
+msgstr ""
 
 #: base/static/base/variables.js:948
 msgid "No room available (any type)"
-msgstr "No hay aula disponible (todo tipo)"
+msgstr ""
 
 #: base/static/base/variables.js:949
 msgid "Room available (any type)"
-msgstr "Aula disponible (todo tipo)"
+msgstr ""
 
 #: base/static/base/variables.js:950
 msgid "Rooms available (any type)"
-msgstr "Aulas disponibles (todo tipo)"
+msgstr ""
 
 #: base/static/base/variables.js:956
 msgid "No room"
-msgstr "No aula"
+msgstr ""
 
 #: base/static/base/variables.js:958
 msgid "Every rooms"
-msgstr "Todas las aulas"
+msgstr ""
 
 #: base/static/base/variables.js:981
 msgid "Who should do it ?"
-msgstr "¿Quién lo hace ?"
+msgstr ""

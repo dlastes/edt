@@ -577,15 +577,15 @@ var sel_popup = {
 if (cosmo) {
   sel_popup.available = [{
     type: "group",
-    buttxt: "Filtre"
+    buttxt: gettext('Filters')
   },
   {
     type: "tutor",
-    buttxt: "Salarié·e·s"
+    buttxt: gettext('Employees')
   },
   {
     type: "module",
-    buttxt: "Postes"
+    buttxt: gettext('Posts')
   }];
 } else {
   sel_popup.available = [{
@@ -780,8 +780,8 @@ var ack = {
   pref: "",
   status: "OK",
   predefined: {
-    KO: "C'est un échec cuisant. Trouvez un·e responsable d'emploi du temps et faites-lui part de vos problèmes.",
-    OK: "La modification s'est déroulée sans accroc."
+    KO: gettext('KO'),
+    OK: gettext('OK')
   },
   list: [],
   ongoing: []
@@ -863,7 +863,7 @@ var entry_cm_settings =
   my: 3,
   ncol: 1,
   nlin: 2,
-  txt_intro: { 'default': "Quoi changer ?" }
+  txt_intro: { 'default': gettext('What to change ?') }
 };
 // list of tutors in the module of the selected course
 var tutor_module_cm_settings =
@@ -876,7 +876,7 @@ var tutor_module_cm_settings =
   my: 3,
   ncol: 3,
   nlin: 0,
-  txt_intro: { 'default': "Profs du module ?" }
+  txt_intro: { 'default': gettext('Module teacher ?') }
 };
 // all tutors in batches
 var tutor_filters_cm_settings =
@@ -889,7 +889,7 @@ var tutor_filters_cm_settings =
   my: 3,
   ncol: 1,
   nlin: 0,
-  txt_intro: { 'default': "Ordre alphabétique :" }
+  txt_intro: { 'default': gettext('Alphabetical order') }
 };
 // some tutors
 var tutor_cm_settings =
@@ -902,7 +902,7 @@ var tutor_cm_settings =
   my: 3,
   ncol: 3,
   nlin: 4,
-  txt_intro: { 'default': "Ordre alphabétique :" }
+  txt_intro: { 'default': gettext('Alphabetical order') }
 };
 var pref_links_cm_settings =
 {
@@ -914,7 +914,7 @@ var pref_links_cm_settings =
   my: 3,
   ncol: 1,
   nlin: 0,
-  txt_intro: { 'default': "Quel lien pour la visio ?" }
+  txt_intro: { 'default': gettext('Virtual classroom link ?') }
 };
 var pref_link_types_cm_settings =
 {
@@ -926,7 +926,7 @@ var pref_link_types_cm_settings =
   my: 3,
   ncol: 1,
   nlin: 0,
-  txt_intro: { 'default': "Relatif à qui ?" }
+  txt_intro: { 'default': gettext('Relating to who ?') }
 };
 // rooms
 // level=0: the proposed rooms are available and of the same type
@@ -937,25 +937,25 @@ var room_cm_settings =
   [{
     type: 'room_available',
     txt_intro: {
-      '0': "Aucune salle disponible",
-      '1': "Salle disponible",
-      'default': "Salles disponibles"
+      '0': gettext('No room available'),
+      '1': gettext('Room available'),
+      'default': gettext('Rooms available')
     }
   },
   {
     type: 'room_available_same_type',
     txt_intro: {
-      '0': "Aucune salle disponible (tout type)",
-      '1': "Salle disponible (tout type)",
-      'default': "Salles disponibles (tout type)"
+       '0': gettext('No room available (any type)'),
+      '1': gettext('Room available (any type)'),
+      'default': gettext('Rooms available (any type)')
     }
   },
   {
     type: 'room',
     txt_intro: {
-      '0': "Aucune salle",
-      '1': "Salle",
-      'default': "Toutes les salles"
+      '0': gettext('No room'),
+      '1': gettext('Room'),
+      'default': gettext('Every rooms')
     }
   }];
 for (var l = 0; l < room_cm_settings.length; l++) {
@@ -978,7 +978,7 @@ var salarie_cm_settings = {
   my: 3,
   ncol: 3,
   nlin: 0,
-  txt_intro: {'default':"Qui s'y colle ?"}
+  txt_intro: {'default':gettext('Who should do it ?')}
 };
 
 // level=0: salaries qui ont le même poste dans la semaine

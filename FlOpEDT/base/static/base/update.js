@@ -1246,7 +1246,7 @@ function go_regen(s) {
     if (elements.length % 2 != 0 && elements.length > 1) {
       txt = "";
     } else if (elements[0] == 'N') {
-      txt = "Pas de (re)génération prévue";
+      txt = gettext('No planned re-generation');
     } else if (elements[0] == 'C') {
       total_regen = true;
       if (elements.length > 2 && elements[2] == 'S') {

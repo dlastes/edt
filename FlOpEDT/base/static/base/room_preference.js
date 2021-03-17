@@ -27,10 +27,10 @@ function exporter() {
     data: sent_data,
     dataType: 'json',
     success: function (msg) {
-      $("#ack").text("Opération réussie.");
+      $("#ack").text(gettext('Successful operation'));
     },
     error: function (msg) {
-      $("#ack").text("C'est un échec. " + msg);
+      $("#ack").text(gettext("It's a fail. ") + msg);
     }
   });
 

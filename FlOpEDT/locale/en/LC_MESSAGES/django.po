@@ -307,17 +307,7 @@ msgstr ""
 msgid "Unknown link. New link then."
 msgstr ""
 
-#: base/templates/base/visio.html:31
-msgid "Create or modify a link"
-msgstr ""
 
-#: base/templates/base/visio.html:38
-msgid "Send"
-msgstr ""
-
-#: base/views.py:1753
-msgid "Not authorized. New link then."
-msgstr ""
 
 #: base/views.py:1768
 msgid "Created"
