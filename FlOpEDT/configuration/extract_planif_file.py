@@ -325,3 +325,14 @@ def extract_planif_from_week(week, year, department, bookname=None):
 
     else:
         print("Are you sure of year value?")
+
+
+def extract_planif_weeks(week_year_list, department, bookname=None):
+    if bookname is None:
+        bookname = 'media/configuration/planif_file_'+department.abbrev+'.xlsx'
+    book = load_workbook(filename=bookname, data_only=True)
+    for period in Period.objects.filter(department=department):
+        for s in week_year_list:
+            w = s['week']
+            y = s['year']
+            ReadPlanifWeek(department, book, period.name, w, y)
