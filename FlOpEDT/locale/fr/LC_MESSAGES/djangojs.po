@@ -217,7 +217,7 @@ msgstr "Groupes"
 
 #: base/static/base/variables.js:597
 msgid "Teachers"
-msgstr "Enseignants"
+msgstr "Profs"
 
 #: base/static/base/variables.js:601
 msgid "Modules"
@@ -230,7 +230,7 @@ msgstr "Salles"
 #: base/static/base/variables.js:783
 msgid "KO"
 msgstr ""
-"C'est un échec cuisant. Trouvez un·e responsable d'emploi du temps et faites "
+"C'est un échec cuisant. Trouvez un·e responsable de flop!EDT et faites "
 "lui part de vos problèmes."
 
 #: base/static/base/variables.js:784
@@ -243,7 +243,7 @@ msgstr "Que changer ?"
 
 #: base/static/base/variables.js:879
 msgid "Module teacher ?"
-msgstr "Enseignant du module ?"
+msgstr "Enseignant⋅e du module ?"
 
 #: base/static/base/variables.js:892 base/static/base/variables.js:905
 msgid "Alphabetical order"
@@ -271,15 +271,15 @@ msgstr "Salles disponibles"
 
 #: base/static/base/variables.js:948
 msgid "No room available (any type)"
-msgstr "Aucune salle disponible (tout type)"
+msgstr "Aucune salle disponible (tous types)"
 
 #: base/static/base/variables.js:949
 msgid "Room available (any type)"
-msgstr "Salle disponible (tout type)"
+msgstr "Salle disponible (tous types)"
 
 #: base/static/base/variables.js:950
 msgid "Rooms available (any type)"
-msgstr "Salles disponibles (tout type)"
+msgstr "Salles disponibles (tous types)"
 
 #: base/static/base/variables.js:956
 msgid "No room"
