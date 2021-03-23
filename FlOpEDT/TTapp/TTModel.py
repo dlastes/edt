@@ -749,10 +749,8 @@ class TTModel(object):
         avail_at_school_instr = {}
         unp_slot_cost = {}
 
-        holidays = [h.day for h in self.wdb.holidays]
-
         if self.wdb.holidays:
-            self.add_warning(None, "%s are holidays" % holidays)
+            self.add_warning(None, "%s are holidays" % self.wdb.holidays)
 
         for i in self.wdb.instructors:
             avail_instr[i] = {}
@@ -766,10 +764,11 @@ class TTModel(object):
                                                                   for c in
                                                                   self.wdb.other_departments_courses_for_tutor[i]
                                                                   if c.week == week)
-
-                if not settings.COSMO_MODE and days_filter(self.wdb.holidays, week=week):
+                week_holidays = days_filter(self.wdb.holidays, week=week)
+                if not settings.COSMO_MODE and week_holidays:
                     week_tutor_availabilities = set(
-                        a for a in self.wdb.availabilities[i][week] if a.day not in holidays)
+                        a for a in self.wdb.availabilities[i][week]
+                        if days_filter(self.wdb.holidays, day=a.day))
                 else:
                     week_tutor_availabilities = self.wdb.availabilities[i][week]
 

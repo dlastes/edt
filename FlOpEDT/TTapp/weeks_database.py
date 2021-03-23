@@ -94,7 +94,6 @@ class WeeksDatabase(object):
         self.possible_tutors, self.possible_modules, self.possible_courses = self.possible_courses_tutor_init()
 
     def days_init(self):
-        holidays = Holiday.objects.filter(week__in=self.weeks, year=self.year)
 
         training_half_days = TrainingHalfDay.objects.filter(
             week__in=self.weeks,
@@ -105,11 +104,12 @@ class WeeksDatabase(object):
                 for week in self.weeks
                 for day in TimeGeneralSettings.objects.get(department=self.department).days]
 
+        database_holidays = Holiday.objects.filter(week__in=self.weeks, year=self.year)
+        holidays = set(d for d in days if database_holidays.filter(day=d.day, week=d.week).exists())
+
         if not settings.COSMO_MODE:
             for hd in holidays:
-                for day in days:
-                    if day.day == hd.day and day.week == hd.week:
-                        days.remove(day)
+                days.remove(hd)
 
         day_after = {}
         for i, day in enumerate(days):
