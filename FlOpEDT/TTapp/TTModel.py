@@ -764,11 +764,11 @@ class TTModel(object):
                                                                   for c in
                                                                   self.wdb.other_departments_courses_for_tutor[i]
                                                                   if c.week == week)
-                week_holidays = days_filter(self.wdb.holidays, week=week)
+                week_holidays = [d.day for d in days_filter(self.wdb.holidays, week=week)]
                 if not settings.COSMO_MODE and week_holidays:
                     week_tutor_availabilities = set(
                         a for a in self.wdb.availabilities[i][week]
-                        if days_filter(self.wdb.holidays, day=a.day))
+                        if a.day not in week_holidays)
                 else:
                     week_tutor_availabilities = self.wdb.availabilities[i][week]
 
