@@ -1210,6 +1210,8 @@ class TTModel(object):
             cp.save()
 
     def choose_free_work_copy(self):
+        close_old_connections()
+
         local_max_wc = ScheduledCourse \
             .objects \
             .filter(
