@@ -707,7 +707,7 @@ msgstr "Étudiant·e"
 
 #: people/templates/people/login.html:83
 msgid "A teacher"
-msgstr "Enseignant·e permanent·e"
+msgstr "Schtroumpf permanent·e"
 
 #: people/templates/people/login.html:84
 msgid "A temporary teacher"
@@ -725,23 +725,23 @@ msgstr "Préférences"
 
 #: people/templates/people/studentPreferencesSelection.html:43
 msgid "Preferences for your group"
-msgstr ""
+msgstr "Schtroumpfs de votre groupe"
 
 #: people/templates/people/studentPreferencesSelection.html:45
 msgid "Morning or evening?"
-msgstr ""
+msgstr "Plutôt du matin ou schtroumpf"
 
 #: people/templates/people/studentPreferencesSelection.html:52
 msgid "Busy days VS Free half-days"
-msgstr ""
+msgstr "Journées schtroumpfs ou demie-journées schtroumpfs ?"
 
 #: people/templates/people/studentPreferencesSelection.html:60
 msgid "Holes?"
-msgstr ""
+msgstr "Et les trous ?"
 
 #: people/templates/people/studentPreferencesSelection.html:66
 msgid "Eat early or late?"
-msgstr ""
+msgstr "Schtroumpfer tôt ou tard ?"
 
 #: people/views.py:237
 msgid "Not allowed"
@@ -826,15 +826,15 @@ msgstr "Stabilisation ?"
 
 #: solve_board/templates/solve_board/main-board.html:83
 msgid "Solver"
-msgstr ""
+msgstr "Schtroumpf"
 
 #: solve_board/templates/solve_board/main-board.html:94
 msgid "Maximum time limit for resolution (minuts)"
-msgstr ""
+msgstr "Durée limite (en schtroumpfs)"
 
 #: solve_board/templates/solve_board/main-board.html:100
 msgid "Unlimited"
-msgstr ""
+msgstr "Illimité"
 
 #: templates/base.html:53
 msgid "Schedule_title"
