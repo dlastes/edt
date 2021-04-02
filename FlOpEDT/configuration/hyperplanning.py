@@ -135,7 +135,8 @@ def extractPeople(IHpSvcWEnseignants): #Fini
         teacherSubDictionary["status"] = "temp" # Pas necessaire
         teacherSubDictionary["employer"] = "temp" # Pas necessaire
         teacherID = IHpSvcWEnseignants.service.IdentifiantCASEnseignant(i)
-        teacherDictionary[teacherID] = teacherSubDictionary
+        if teacherID != None:
+            teacherDictionary[teacherID] = teacherSubDictionary
     return teacherDictionary
 
 
@@ -237,7 +238,7 @@ def extractGroups(IHpSvcWPromotions,IHpSvcWTDOptions): #Fini mais pas satisfait!
     for i in tqdm(promKeys,"Groups1 - Extracting : ", bar_format='{l_bar}{bar:15}{r_bar}{bar:-10b}'):
         promName = IHpSvcWPromotions.service.NomPromotion(i)
         groupID = (promName,promName)
-        groupDictionary[groupID] = {"group_type":None,"parent":None}
+        groupDictionary[groupID] = {"group_type":None,"parent":set()}
     
     for i in tqdm(tdOptionsKeys,"Groups2 - Extracting : ", bar_format='{l_bar}{bar:15}{r_bar}{bar:-10b}'):
         tdOptionName = IHpSvcWTDOptions.service.NomTDOption(i)
