@@ -52,7 +52,7 @@ media_dir = 'media/configuration'
 logger = logging.getLogger('base')
 
 @transaction.atomic
-def extract_database_file(department_name=None, department_abbrev=None, bookname=None):
+def extract_database_file(department_name=None, department_abbrev=None, bookname=None, book=None):
 
     # Test department existence
     department, created = Department.objects.get_or_create(name=department_name, abbrev=department_abbrev)
@@ -66,12 +66,13 @@ def extract_database_file(department_name=None, department_abbrev=None, bookname
     if not created:
         logger.info(f"Department with abbrev {department_abbrev} and name {department_name} already exists. "
                     f"It will be updated")
-    if bookname is None:
-        bookname = f"{media_dir}/database_file_{department_abbrev}.xlsx"
-
-    book = database_description_load_xlsx_file(bookname)
     if book is None:
-        raise Exception("Database file could not be loaded.")
+        if bookname is None:
+            bookname = f"{media_dir}/database_file_{department_abbrev}.xlsx"
+
+        book = database_description_load_xlsx_file(bookname)
+        if book is None:
+            raise Exception("Database file could not be loaded.")
 
     check = database_description_check(book)
     if len(check) > 0:
