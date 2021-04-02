@@ -131,7 +131,11 @@ def extractPeople(IHpSvcWEnseignants): #Fini
         teacherSubDictionary = {}
         teacherSubDictionary["first_name"] = IHpSvcWEnseignants.service.PrenomEnseignant(i)
         teacherSubDictionary["last_name"] = IHpSvcWEnseignants.service.NomEnseignant(i)
-        teacherSubDictionary["email"] = IHpSvcWEnseignants.service.EMailEnseignant(i)
+        email = IHpSvcWEnseignants.service.EMailEnseignant(i)
+        if email is None:
+            teacherSubDictionary["email"] = 'fake@flopedt.org'
+        else:
+            teacherSubDictionary["email"] = email
         teacherSubDictionary["status"] = "temp" # Pas necessaire
         teacherSubDictionary["employer"] = "temp" # Pas necessaire
         teacherID = IHpSvcWEnseignants.service.IdentifiantCASEnseignant(i)
