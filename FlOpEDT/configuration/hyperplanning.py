@@ -355,11 +355,4 @@ def filldico(username,password,lPrefixeWsdl):
     
     book = demanderModifEventuelles(book)
     
-    return book 
-
-    
-if __name__ == "__main__":
-    nomUtilisateur   = "lkosinsk"
-    motDePasse        = "KO59lu21&*"
-    lien     = 'https://edt.ens2m.fr/hpsw/2019-2020/wsdl/'
-    print(filldico(nomUtilisateur,motDePasse,lien))
+    return book
