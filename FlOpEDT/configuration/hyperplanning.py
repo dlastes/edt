@@ -139,7 +139,7 @@ def extractPeople(IHpSvcWEnseignants): #Fini
     return teacherDictionary
 
 
-def extractModules(IHpSvcWMatieres,IHpSvcWCours,IHpSvcWTDOption,IHpSvcWPromotions,validCourseKeys): #Devrait bien avoir un moyen plus simple de faire ça...
+def extractModules(IHpSvcWMatieres,IHpSvcWCours,IHpSvcWTDOption,IHpSvcWPromotions,validCourseKeys,firstPeriod): #Devrait bien avoir un moyen plus simple de faire ça...
     listCoursesKeys = validCourseKeys    
     tempDictNameOfModules = {} #Cle -> Nom
     moduleDictionary = {}
@@ -153,6 +153,8 @@ def extractModules(IHpSvcWMatieres,IHpSvcWCours,IHpSvcWTDOption,IHpSvcWPromotion
             
         courseTDOpt = IHpSvcWCours.service.TDOptionsDuCours(i)
         courseProm = IHpSvcWCours.service.PromotionsDuCours(i)
+        courseOwner = IHpSvcWMatieres.service.ProprietaireMatiere(IHpSvcWCours.service.MatiereCours(i))
+        
         for j in courseTDOpt: 
             promOfTDOpt = IHpSvcWTDOption.service.PromotionTDOption(j)
             if promOfTDOpt not in courseProm:
@@ -162,15 +164,15 @@ def extractModules(IHpSvcWMatieres,IHpSvcWCours,IHpSvcWTDOption,IHpSvcWPromotion
             if moduleName in moduleDictionary.keys():
                 if moduleDictionary[moduleName] == None:
                     advancedModuleName = moduleName+"_"+promName
-                    moduleDictionary[advancedModuleName] = {'short':moduleName,'PPN':'Code PPN','name':moduleName,'promotion':promName,'period':None,'responsable':None}
+                    moduleDictionary[advancedModuleName] = {'short':moduleName,'PPN':'Code PPN','name':moduleName,'promotion':promName,'period':firstPeriod,'responsable':courseOwner}
                 elif moduleDictionary[moduleName]['promotion'] != promName:
                     advancedModuleName = moduleName+"_"+promName
-                    moduleDictionary[advancedModuleName] = {'short':moduleName,'PPN':'Code PPN','name':moduleName,'promotion':promName,'period':None,'responsable':None}
+                    moduleDictionary[advancedModuleName] = {'short':moduleName,'PPN':'Code PPN','name':moduleName,'promotion':promName,'period':firstPeriod,'responsable':courseOwner}
                     advancedOldModuleName = moduleName+"_"+moduleDictionary[moduleName]["promotion"]
                     moduleDictionary[advancedOldModuleName] = moduleDictionary.pop(moduleName)
                     moduleDictionary[moduleName] = None
             else:
-                moduleDictionary[moduleName] = {'short':moduleName,'PPN':'Code PPN','name':moduleName,'promotion':promName,'period':None,'responsable':None}
+                moduleDictionary[moduleName] = {'short':moduleName,'PPN':'Code PPN','name':moduleName,'promotion':promName,'period':firstPeriod,'responsable':courseOwner}
     cleanDictionary(moduleDictionary)
     return moduleDictionary
 
@@ -239,8 +241,10 @@ def extractGroups(IHpSvcWPromotions,IHpSvcWTDOptions): #Fini mais pas satisfait!
     
     for i in tqdm(tdOptionsKeys,"Groups2 - Extracting : ", bar_format='{l_bar}{bar:15}{r_bar}{bar:-10b}'):
         tdOptionName = IHpSvcWTDOptions.service.NomTDOption(i)
-        belongTo = IHpSvcWPromotions.service.NomPromotion(IHpSvcWTDOptions.service.PromotionTDOption(i))
-        groupID = (tdOptionName,belongTo)
+        belongTo = set()
+        belongTo.add(IHpSvcWPromotions.service.NomPromotion(IHpSvcWTDOptions.service.PromotionTDOption(i)))
+        groupID = (tdOptionName,IHpSvcWPromotions.service.NomPromotion(IHpSvcWTDOptions.service.PromotionTDOption(i)))  #A modifier
+
         groupDictionary[groupID] = {"group_type":None,"parent":belongTo}
 
     return groupDictionary
@@ -328,7 +332,7 @@ def filldico(username,password,lPrefixeWsdl):
 
     people = extractPeople(peopleService)
     
-    modules = extractModules(moduleService,courseService,tdOptionService,promService,validCoursesKeys)
+    modules = extractModules(moduleService,courseService,tdOptionService,promService,validCoursesKeys,list(periodes.keys())[0]) #Pas beau
     
     courses = extractCoursesSettings(courseService, validCoursesKeys)
 
@@ -356,3 +360,5 @@ def filldico(username,password,lPrefixeWsdl):
     book = demanderModifEventuelles(book)
     
     return book
+
+print(filldico("lkosinsk","KO59lu21&*",'https://edt.ens2m.fr/hpsw/2019-2020/wsdl/'))
