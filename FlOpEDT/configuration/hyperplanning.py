@@ -360,5 +360,3 @@ def filldico(username,password,lPrefixeWsdl):
     book = demanderModifEventuelles(book)
     
     return book
-
-print(filldico("lkosinsk","KO59lu21&*",'https://edt.ens2m.fr/hpsw/2019-2020/wsdl/'))
