@@ -129,13 +129,13 @@ def extractPeople(IHpSvcWEnseignants): #Fini
     teacherDictionary = {}
     for i in tqdm(listTeachersKeys,"Teacher - Extracting : ", bar_format='{l_bar}{bar:15}{r_bar}{bar:-10b}'):
         teacherSubDictionary = {}
-        teacherSubDictionary["prenom"] = IHpSvcWEnseignants.service.PrenomEnseignant(i)
-        teacherSubDictionary["nom"] = IHpSvcWEnseignants.service.NomEnseignant(i)
+        teacherSubDictionary["first_name"] = IHpSvcWEnseignants.service.PrenomEnseignant(i)
+        teacherSubDictionary["last_name"] = IHpSvcWEnseignants.service.NomEnseignant(i)
         teacherSubDictionary["email"] = IHpSvcWEnseignants.service.EMailEnseignant(i)
         teacherSubDictionary["status"] = "temp" # Pas necessaire
         teacherSubDictionary["employer"] = "temp" # Pas necessaire
         teacherID = IHpSvcWEnseignants.service.IdentifiantCASEnseignant(i)
-        if teacherID != None:
+        if teacherID != None:   #A modifier
             teacherDictionary[teacherID] = teacherSubDictionary
     return teacherDictionary
 
