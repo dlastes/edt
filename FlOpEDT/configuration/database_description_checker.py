@@ -323,7 +323,7 @@ def check_groups(groups):
                 result.append(f"D: group '{id_}' in promotion '{promotion}' doesn't have the expected keys")
             else:
                 result.extend(check_type(promotion, str, f"promotion for group '{id_}'"))
-                result.extend(check_type(group['group_type'], str, f"group type of group '{id_}'"))
+                # result.extend(check_type(group['group_type'], str, f"group type of group '{id_}'"))
                 if isinstance(group['parent'], set):
                     if len(group['parent']) > 1:
                         result.append(f"D: group '{id_}' should have at most one parent")

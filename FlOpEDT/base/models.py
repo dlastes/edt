@@ -75,7 +75,7 @@ class Group(models.Model):
     name = models.CharField(max_length=10)
     train_prog = models.ForeignKey(
         'TrainingProgramme', on_delete=models.CASCADE)
-    type = models.ForeignKey('GroupType', on_delete=models.CASCADE)
+    type = models.ForeignKey('GroupType', on_delete=models.CASCADE, null=True)
     size = models.PositiveSmallIntegerField()
     basic = models.BooleanField(verbose_name=_('Basic group?'), default=False)
     parent_groups = models.ManyToManyField('self', symmetrical=False,
