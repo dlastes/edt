@@ -562,8 +562,8 @@ def check_modules_sheet(database):
             result.append(f"La promotion du module '{id_}' dans '{modules_sheet}' est invalide")
         if not module['period'] in database['settings']['periods'].keys() and not id_.startswith(':INVALID:'):
             result.append(f"La période du module '{id_}' dans '{modules_sheet}' est invalide")
-        if not module['responsable'] in database['people'].keys() and not id_.startswith(':INVALID:'):
-            result.append(f"La personne responsable du module '{id_}' dans '{modules_sheet}' est invalide")
+        # if not module['responsable'] in database['people'].keys() and not id_.startswith(':INVALID:'):
+        #     result.append(f"La personne responsable du module '{id_}' dans '{modules_sheet}' est invalide")
 
     return result
 
