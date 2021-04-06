@@ -1,6 +1,6 @@
 # Coucou! Ici on cree un liste de cours à partir d'hyperplanning pour les mettre dans flOp
 
-from import_hyperplanning import *
+from hyperplanning import *
 
 def create_course_set_from_hp(username,password,lPrefixeWsdl):
     # Initialisation et connexion
@@ -10,6 +10,9 @@ def create_course_set_from_hp(username,password,lPrefixeWsdl):
     adminService = Client(lPrefixeWsdl + 'IHpSvcWAdmin', transport=Transport(session=session))
     courseService = Client(lPrefixeWsdl + 'IHpSvcWCours',transport=Transport(session=session))
     peopleService = Client(lPrefixeWsdl + 'IHpSvcWEnseignants', transport=Transport(session=session))
+    promService = Client(lPrefixeWsdl + 'IHpSvcWPromotions', transport=Transport(session=session))
+    tdOptService = Client(lPrefixeWsdl + 'IHpSvcWTDOptions', transport=Transport(session=session))
+    moduleService = Client(lPrefixeWsdl + 'IHpSvcWMatieres', transport=Transport(session=session))
     
     # Verification des identifiants
     try:
@@ -18,37 +21,61 @@ def create_course_set_from_hp(username,password,lPrefixeWsdl):
         print('Connection failed: either your username/password combination is wrong or your connection is down. Maybe both')
         return None
 
-    validCourseKeys = getValidCourseKeys(courseService,200)
+    validCourseKeys = getValidCourseKeys(courseService,5000)
 
-    coursesSet = set()
+    coursesList = []
 
     for i in tqdm(validCourseKeys,"Courses - Extracting : ", bar_format='{l_bar}{bar:15}{r_bar}{bar:-10b}'):
-        typeDeCours =  courseService.service.TypeCours(i)+"_"+str(courseService.service.DureeCours(i))+"m"
-        roomType = 'all'
-        
-        listOfTeachers = courseService.service.EnseignantsDuCours(i)
-        if len(listOfTeachers) == 0:
-            tutor = None
-            supp_tutor = None
-        elif len(listOfTeachers) == 1:
-            tutor = peopleService.service.IdentifiantCASEnseignant(listOfTeachers[0])
-        else:
-            tutor = None
-            supp_tutor = set()
-            for j in listOfTeachers:
-                supp_tutor.add(peopleService.service.IdentifiantCASEnseignant(j))
-            
-        no = 0
-            
+        # type
+        courseType =  courseService.service.TypeCours(i)+"_"+str(round(courseService.service.DureeCours(i)*24*60))+"m"
 
+        # room_type
+        roomType = 'all'  # Temporaire
+
+        # number
+        courseNumber = 0
+
+        # tutor and supp_tutor        
+        listOfTutors = courseService.service.EnseignantsDuCours(i)
+        courseTutor = None
+        courseSuppTutor = set()
+        if len(listOfTutors) == 1:
+            courseTutor = peopleService.service.IdentifiantCASEnseignant(listOfTutors[0])
+        elif len(listOfTutors)>1:
+            for j in listOfTutors:
+                courseSuppTutor.add(peopleService.service.IdentifiantCASEnseignant(j))
+                        
+        # groups
         listOfCourseProms = courseService.service.PromotionsDuCours(i)
         listOfCourseTDOpt = courseService.service.TDOptionsDuCours(i)
-        
-        
+        courseGroups = set()        
+        for j in listOfCourseProms:
+            courseGroups.add(promService.service.NomPromotion(j))
+        for j in listOfCourseTDOpt:
+            courseGroups.add(tdOptService.service.NomTDOption(j))
 
-    
-if __name__ == "__main__":
-    nomUtilisateur   = "lkosinsk"
-    motDePasse        = "KO59lu21&*"
-    lien                      = 'https://edt.ens2m.fr/hpsw/2019-2020/wsdl/'
-    print(create_course_set_from_hp(nomUtilisateur,motDePasse,lien))
+        # module
+        courseModule = moduleService.service.LibelleMatiere(courseService.service.MatiereCours(i))
+
+        # week and year
+        courseWeek = None
+        hpWeek = courseService.service.DomaineCours(i)
+        if len(hpWeek)>0:
+            hpWeek = hpWeek[0]
+            courseWeek = courseService.service.SemaineEnSemaineCalendaire(hpWeek)
+            courseYear = str(courseService.service.SemaineEnDate(hpWeek))[0:4]
+
+        course = {"type" : courseType,
+                        "room_type" : roomType,
+                        "no" : courseNumber,
+                        "tutor" : courseTutor,
+                        "supp_tutor" : courseSuppTutor,
+                        "groups" : courseGroups,
+                        "module" : courseModule,
+                        "week" : courseWeek,
+                        "year" : courseYear}
+
+        if  courseWeek != None: # Modifier
+            coursesList.append(course)
+    return coursesList
+
