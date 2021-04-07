@@ -65,6 +65,7 @@ class GroupViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.GroupSerializer
     queryset = bm.Group.objects.all()
     filter_class = GroupsFilterSet
+    permission_classes = [IsAdminOrReadOnly]
 
     @action(detail=False, methods=['GET'])
     def tree(self, req):

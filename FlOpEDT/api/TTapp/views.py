@@ -25,6 +25,7 @@ import TTapp.models as ttm
 from rest_framework import viewsets
 import django_filters.rest_framework as filters
 from api.TTapp import serializers
+from api.permissions import IsTutorOrReadOnly, IsAdminOrReadOnly
 
 # ---------------
 # ---- TTAPP ----
@@ -39,6 +40,7 @@ class TTCustomConstraintsViewSet(viewsets.ModelViewSet):
     """
     queryset = ttm.CustomConstraint.objects.all()
     serializer_class = serializers.TTCustomConstraintsSerializer
+    permission_classes = [IsAdminOrReadOnly]
 
     filterset_fields = '__all__'
 
@@ -51,6 +53,7 @@ class TTLimitCourseTypeTimePerPeriodsViewSet(viewsets.ModelViewSet):
     """
     queryset = ttm.LimitCourseTypeTimePerPeriod.objects.all()
     serializer_class = serializers.TTLimitCourseTypeTimePerPeriodsSerializer
+    permission_classes = [IsAdminOrReadOnly]
 
     filterset_fields = '__all__'
 
@@ -63,6 +66,7 @@ class TTReasonableDaysViewSet(viewsets.ModelViewSet):
     """
     queryset = ttm.ReasonableDays.objects.all()
     serializer_class = serializers.TTReasonableDayssSerializer
+    permission_classes = [IsAdminOrReadOnly]
 
     filterset_fields = '__all__'
 
@@ -87,6 +91,7 @@ class TTStabilizeViewSet(viewsets.ModelViewSet):
     """
     queryset = ttm.Stabilize.objects.all()
     serializer_class = serializers.TTStabilizeSerializer
+    permission_classes = [IsAdminOrReadOnly]
 
     filterset_class = TTStabilizeFilter
 
@@ -99,6 +104,7 @@ class TTMinHalfDaysViewSet(viewsets.ModelViewSet):
     """
     queryset = ttm.MinHalfDays.objects.all()
     serializer_class = serializers.TTMinHalfDaysSerializer
+    permission_classes = [IsAdminOrReadOnly]
 
     filterset_fields = '__all__'
 
@@ -111,6 +117,7 @@ class TTMinNonPreferedSlotsViewSet(viewsets.ModelViewSet):
     """
     queryset = ttm.MinNonPreferedSlot.objects.all()
     serializer_class = serializers.TTMinNonPreferedSlotsSerializer
+    permission_classes = [IsAdminOrReadOnly]
 
     filterset_fields = '__all__'
 
@@ -123,6 +130,7 @@ class TTAvoidBothTimesViewSet(viewsets.ModelViewSet):
     """
     queryset = ttm.AvoidBothTimes.objects.all()
     serializer_class = serializers.TTAvoidBothTimesSerializer
+    permission_classes = [IsAdminOrReadOnly]
 
     filterset_fields = '__all__'
 
@@ -135,6 +143,7 @@ class TTSimultaneousCoursesViewSet(viewsets.ModelViewSet):
     """
     queryset = ttm.SimultaneousCourses.objects.all()
     serializer_class = serializers.TTSimultaneousCoursesSerializer
+    permission_classes = [IsAdminOrReadOnly]
 
     filterset_fields = '__all__'
 
@@ -159,6 +168,7 @@ class TTLimitedStartTimeChoicesViewSet(viewsets.ModelViewSet):
     """
     queryset = ttm.LimitedStartTimeChoices.objects.all()
     serializer_class = serializers.TTLimitedStartTimeChoicesSerializer
+    permission_classes = [IsAdminOrReadOnly]
 
     filterset_class = TTLimitedFilter
 
@@ -171,5 +181,6 @@ class TTLimitedRoomChoicesViewSet(viewsets.ModelViewSet):
     """
     queryset = ttm.LimitedRoomChoices.objects.all()
     serializer_class = serializers.TTLimitedRoomChoicesSerializer
+    permission_classes = [IsAdminOrReadOnly]
 
     filterset_fields = '__all__'

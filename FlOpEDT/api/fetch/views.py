@@ -388,6 +388,7 @@ class ConstraintsQueriesViewSet(viewsets.ViewSet):
     """
     Return course type constraints for a given department
     """
+    permission_classes = [IsAdminOrReadOnly]
 
     def list(self, req):
         try:
@@ -411,6 +412,7 @@ class ConstraintsQueriesViewSet(viewsets.ViewSet):
                   ),
                   )
 class WeekDaysViewSet(viewsets.ViewSet):
+    permission_classes = [IsAdminOrReadOnly]
 
     def list(self, req):
         week = int(req.query_params.get('week'))

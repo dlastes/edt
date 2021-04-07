@@ -49,7 +49,8 @@ class CoursePreferencesViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with every field of a CoursePreference object.
     """
-    permission_classes = (IsTutor,)
+    permission_classes = [IsAdminOrReadOnly]
+    # permission_classes = (IsTutor,)
     queryset = bm.CoursePreference.objects.all()
     serializer_class = serializers.CoursePreferencesSerializer
 
@@ -70,7 +71,9 @@ class UserPreferenceViewSet(viewsets.ModelViewSet):
     - read parameters
     - build queryset
     '''
+    permission_classes = [IsAdminOrReadOnly]
 
+    
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.params = {}
@@ -111,7 +114,8 @@ class UserPreferenceViewSet(viewsets.ModelViewSet):
     )
 )
 class UserPreferenceDefaultViewSet(UserPreferenceViewSet):
-    permission_classes = [IsTutor]
+    permission_classes = [IsAdminOrReadOnly]
+    # permission_classes = [IsTutor]
     def get_queryset(self):
         self.set_default_params()
         return super().get_queryset()
@@ -128,7 +132,8 @@ class UserPreferenceDefaultViewSet(UserPreferenceViewSet):
     )
 )
 class UserPreferenceSingularViewSet(UserPreferenceViewSet):
-    permission_classes = [IsTutor]
+    permission_classes = [IsAdminOrReadOnly]
+    # permission_classes = [IsTutor]
     def get_queryset(self):
         self.set_singular_params()
         return super().get_queryset()
@@ -155,7 +160,8 @@ class UserPreferenceActualViewSet(UserPreferenceViewSet):
 
     Also can be filtered with dept and user
     """
-    permission_classes = [IsTutor]
+    permission_classes = [IsAdminOrReadOnly]
+    # permission_classes = [IsTutor]
 
     def get_queryset(self):
         # set initial parameters
@@ -219,7 +225,8 @@ class RoomPreferenceDefaultViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with every field of a Room object.
     """
-    permission_classes = [IsTutor]
+    permission_classes = [IsAdminOrReadOnly]
+    # permission_classes = [IsTutor]
     filter_class = RoomPreferenceDefaultFilterSet
     queryset = bm.RoomPreference.objects.filter(week=None)
     serializer_class = serializers.RoomPreferencesSerializer
@@ -234,7 +241,8 @@ class RoomPreferenceSingularFilterSet(filters.FilterSet):
 
 
 class RoomPreferenceSingularViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsTutor]
+    permission_classes = [IsAdminOrReadOnly]
+    # permission_classes = [IsTutor]
     filter_class = RoomPreferenceSingularFilterSet
     queryset = bm.RoomPreference.objects.filter()
     serializer_class = serializers.RoomPreferencesSerializer

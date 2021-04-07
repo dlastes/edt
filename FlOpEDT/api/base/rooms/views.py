@@ -94,6 +94,7 @@ class RoomNameViewSet(viewsets.ModelViewSet):
 class RoomAllViewSet(viewsets.ViewSet):
     queryset = bm.Room.objects.all()
     filter_class = RoomFilterSet
+    permission_classes = [IsAdminOrReadOnly]
 
     def list(self, req):
         room_filtered = RoomFilterSet(data=req.query_params)

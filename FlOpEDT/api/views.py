@@ -49,6 +49,7 @@ class QuoteTypeViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with every field of a QuoteType object.
     """
+    permission_classes = [IsAdminOrReadOnly]
     queryset = qm.QuoteType.objects.all()
     serializer_class = serializers.QuoteTypeSerializer
 
@@ -69,6 +70,7 @@ class QuoteViewSet(viewsets.ModelViewSet):
 
 
 class RandomQuoteViewSet(viewsets.ViewSet):
+    permission_classes = [IsAdminOrReadOnly]
     def list(self, request, format=None):
         """
         Return a random quote
