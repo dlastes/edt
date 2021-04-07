@@ -628,6 +628,27 @@ function go_grid(quick) {
     .attr("width", grid_width());
 
 
+  if (plot_constraint_lines) {
+    let constraint_d = svg.get_dom("edt-fg").selectAll(".cst")
+      .data(
+        Object.keys(rev_constraints).map(function(c){return +c ;})
+      );
+    
+    let constraint_g = constraint_d
+      .enter()
+      .append("line")
+      .attr("class", "cst");
+    
+    constraint_g
+      .merge(constraint_d)
+      .attr("stroke", "black")
+      .attr("stroke-width", 2)
+      .attr("x1", 0)
+      .attr("y1", constraint_y)
+      .attr("x2", grid_width())
+      .attr("y2", constraint_y);
+  }
+
 
   var grid = fg.selectAll(".grids")
     .data(
@@ -864,7 +885,7 @@ function go_gp_buttons() {
   for (var p = 0; p < set_promos.length; p++) {
     var cont = svg.get_dom("selg")
       .select(".sel-pop-g#" + popup_type_id("group"))
-      .selectAll(".gp-but-" + set_promos[p] + "P")
+      .selectAll("[train_prog=" + set_promos[p] + "]")
       .data(Object.keys(groups[p]).map(function (k) {
         return groups[p][k];
       }));
@@ -872,7 +893,7 @@ function go_gp_buttons() {
     var contg = cont
       .enter()
       .append("g")
-      .attr("class", "gp-but-" + set_promos[p] + "P")
+      .attr("train_prog", set_promos[p])
       .attr("transform", function (gp) {
         return "translate(" + (root_gp[gp.promo].butx) + ","
           + (root_gp[gp.promo].buty) + ")";
