@@ -53,7 +53,7 @@ class Department(models.Model):
 
 class TrainingProgramme(models.Model):
     name = models.CharField(max_length=50)
-    abbrev = models.CharField(max_length=5)
+    abbrev = models.CharField(max_length=50)
     department = models.ForeignKey(
         Department, on_delete=models.CASCADE, null=True)
 
@@ -72,7 +72,7 @@ class GroupType(models.Model):
 
 class Group(models.Model):
     # should not include "-" nor "|"
-    name = models.CharField(max_length=10)
+    name = models.CharField(max_length=100)
     train_prog = models.ForeignKey(
         'TrainingProgramme', on_delete=models.CASCADE)
     type = models.ForeignKey('GroupType', on_delete=models.CASCADE, null=True)
@@ -202,7 +202,7 @@ class RoomType(models.Model):
 
 
 class Room(models.Model):
-    name = models.CharField(max_length=20)
+    name = models.CharField(max_length=50)
     types = models.ManyToManyField(RoomType,
                                    blank=True,
                                    related_name="members")
@@ -268,7 +268,7 @@ class RoomSort(models.Model):
 
 class Module(models.Model):
     name = models.CharField(max_length=100, null=True)
-    abbrev = models.CharField(max_length=10, verbose_name=_('Abbreviation'))
+    abbrev = models.CharField(max_length=100, verbose_name=_('Abbreviation'))
     head = models.ForeignKey('people.Tutor',
                              null=True,
                              default=None,
