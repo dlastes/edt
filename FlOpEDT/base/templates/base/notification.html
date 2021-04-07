@@ -20,18 +20,21 @@
 <!-- a commercial license. Buying such a license is mandatory as soon as   -->
 <!-- you develop activities involving the FlOpEDT/FlOpScheduler software   -->
 <!-- without disclosing the source code of your own applications.          -->
+{% load i18n %}
 
 <fieldset>
   <legend>Notifications</legend>
   <form action='{% url "base:user_notifications_pref_changes" department user.username %}'  method='POST' id="form-notifications" >
     {% csrf_token %}
-    <p>Je souhaite être notifié⋅e des modifications pour les
+    <p style="text-align: center;">{% trans "I wish to be notified of changes for the" %}
       <input id="user_notifications_pref" type="number" name="user_notifications_pref" style="width: 30px" min="0" max="52"
              value="{{ user_notifications_pref }}">
-      prochaines semaines.<br>
-      (0 si aucune notification, 1 pour les 7 prochains jours, etc.)
+      {%trans "next weeks." %}<br>
+      {% trans "(0 if no notification, 1 for the next 7 days, etc.)" %} 
     </p>
-    <input type="submit" name="save_notifications_pref" value="Sauvegarder">
-                </br>
+    <button class="centerbutton" type="submit" name="save_notifications_pref" value="Sauvegarder">
+        {% trans "Save" %}
+    </button>
+      </br>
   </form>
 </fieldset>

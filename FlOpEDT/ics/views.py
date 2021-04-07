@@ -19,10 +19,11 @@ def index(request, **kwargs):
                  for n in queries.get_rooms(request.department.abbrev, basic=True).order_by('name')]
     deps = Department.objects.all()
     # We consider suffix length to avoid ics link representation
-    suffix_length = len(request.department.abbrev) + 6
+    # suffix_length = len(request.department.abbrev) + 9
     context = {'tutors': tutor_list,
                'groups': group_list,
                'rooms': room_list,
                'deps': deps,
-               'requi': request.build_absolute_uri()[:-suffix_length]}
+               # 'requi': request.build_absolute_uri()[:-suffix_length]
+               }
     return render(request, 'ics/index.html', context=context)

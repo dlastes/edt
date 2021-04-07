@@ -112,6 +112,9 @@ class Day(object):
         # return self.nom[:3]
         return self.day + '_s' + str(self.week)
 
+    def __repr__(self):
+        return self.day + '_s' + str(self.week)
+
 
 days_list = [c[0] for c in Day.CHOICES]
 days_index = {}

@@ -22,12 +22,14 @@
 <!-- without disclosing the source code of your own applications.          -->
 
 {% extends "base.html" %}
+{% load i18n %}
+
 {% load static %}
 
 {% csrf_token %}
 
 
-{% block title %} Génération {% endblock %}
+{% block title %} {% trans "Schedule Generation" %} {% endblock %}
 {% block content %}
   <link rel="stylesheet" href="{% static "base/header.css" %}"/>
   <link rel="stylesheet" href="{% static "solve_board/solve.css" %}"/>
@@ -55,30 +57,30 @@
 
   <div class="solver">
     <div id="constraints">
-        <div class="header"><span>Contraintes</span></div>
-        <div class="remarks">(*) Les contraintes apparaissant en gras - avec un poids non défini - seront prises en compte de manière obligatoire, les autres seront utilisées dans la résolution comme des préférences.</div>
+        <div class="header"><span>{% trans "Constraints" %}</span></div>
+        <div class="remarks">(*) {% trans "All constraints appearing in bolded - with no weight - will be considered mandatory, the other ones will considered as preferences." %}</div>
         <div id="constraints_list"></div>
     </div>   
     <div id="settings" class="settings">
       <div class="header">
-        <span>Configuration</span>
+        <span>{% trans "Configuration" %}</span>
         <input type="button" id="launch" name="action" value="Go"/>
       </div>
       <div>
-        <label for="opti_date">Semaine·s : </label>
+        <label for="opti_date">{% trans "Week⋅s" %} :</label>
         <select multiple="" size="10" id="opti_date"></select>
       </div>
       <div>
-        <label for="opti_train_prog">Promotion : </label>
+        <label for="opti_train_prog">{% trans "Training Program" %} : </label>
         <select id="opti_train_prog"></select>
       </div>
       <div id="stabilize">
-        <label for="stabilize_selector">Stabilisation : </label>
+        <label for="stabilize_selector">{% trans "Stabilization" %} : </label>
         <select id="stabilize_selector"></select>
       </div>
       <div>
         {% if solvers|length > 1 %}  
-          <label for="solver">Solveur :</label>
+          <label for="solver">{% trans "Solver" %} :</label>
           <select id="solver">
             {% for key, name in solvers %}
               <option value="{{ key }}">{{ name }}</option>
@@ -89,13 +91,13 @@
         {% endif %}
       </div>
       <div>
-        <label for="limit">Durée de résolution maximale (minutes):</label>
+        <label for="limit">{% trans "Maximum time limit for resolution (minuts)" %} :</label>
         <select id="limit">
           <option value="300" selected>5</option>
           <option value="600">10</option>
           <option value="1800">30</option>
           <option value="3600">60</option>
-          <option value="0">Illimité</option>
+          <option value="0">{% trans "Unlimited" %}</option>
         </select>
       </div>
     </div>

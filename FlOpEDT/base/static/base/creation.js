@@ -62,6 +62,11 @@ function create_alarm_dispos() {
     .append("text")
     .attr("class", "disp-filled")
     .text(txt_filDispos);
+
+  di
+    .append("text")
+    .attr("class", "disp-comm")
+    .text(txt_comDispos);
 }
 
 
@@ -800,14 +805,14 @@ function create_menus() {
     .attr("x", menus.mx)
     .attr("y", menus.h - 10)
     .attr("fill", "black")
-    .text("Cours :");
+    .text(gettext("Courses :"));
 
   svg.get_dom("meg")
     .append("text")
     .attr("x", menus.mx + menus.dx)
     .attr("y", menus.h - 10)
     .attr("fill", "black")
-    .text("Dispos :");
+    .text(gettext("Avail :"));
 
   go_menus();
 }
@@ -820,7 +825,7 @@ function create_menus() {
 
 function create_regen() {
   svg.get_dom("vg")
-    .append("g")
+    .append("a")
     .attr("class", "ack-reg")
     .append("text");
 }
@@ -1748,7 +1753,7 @@ function create_val_but() {
     .append("text")
     .attr("class", "menu-btn")
     .attr("fill", "white")
-    .text("Valider EdT")
+    .text(gettext('Validate timetable'))
     .attr("x", menus.x + menus.mx + .5 * valid.w)
     .attr("y", did.tly + .5 * valid.h);
 
@@ -1871,7 +1876,7 @@ function create_stype() {
     .append("text")
     .attr("fill", "white")
     .attr("class", "menu-btn")
-    .text("Valider disponibilités")
+    .text(gettext('Validate availabilities'))
     .attr("x", did.tlx + .5 * valid.w)
     .attr("y", did.tly + .5 * valid.h);
 
@@ -1901,7 +1906,7 @@ function create_stype() {
     .attr("fill", "white")
     .attr("x", dispot_but_txt_x)
     .attr("y", dispot_but_txt_y("app") - 10)
-    .text("Appliquer");
+    .text(gettext('Apply'));
 
   stap_but
     .append("text")
@@ -1909,7 +1914,7 @@ function create_stype() {
     .attr("fill", "white")
     .attr("x", dispot_but_txt_x)
     .attr("y", dispot_but_txt_y("app") + 10)
-    .text("semaine type");
+    .text(gettext('tipical week'));
 
 }
 

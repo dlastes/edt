@@ -388,13 +388,13 @@ def user_notifications_pref_changes(req, username=None, *args, **kwargs):
 
 
 def aide(req, **kwargs):
-    return TemplateResponse(req, 'base/aide.html')
+    return TemplateResponse(req, 'base/help.html')
 
 
 @login_required
 def decale(req, **kwargs):
     if req.method != 'GET':
-        return TemplateResponse(req, 'base/aide.html', {})
+        return TemplateResponse(req, 'base/help.html', {})
 
     week_init = req.GET.get('s', '-1')
     year_init = req.GET.get('a', '-1')

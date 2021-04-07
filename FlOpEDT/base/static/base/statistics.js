@@ -77,8 +77,8 @@ function displayRoomActivity(data) {
 
   // Insert header 
   header = container.append('tr');
-  header.append('th').text('Salle');
-  header.append('th').text('Nombre de jours');
+  header.append('th').text(gettext('Room'));
+  header.append('th').text(gettext('Number of days'));
 
   rooms = container.selectAll('tr')
     .data(data.room_activity)

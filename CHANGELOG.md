@@ -5,13 +5,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased]
 
-### Changed
-
-### TBD
-- Modification proposal: id for modification bunch, modification
-  applicability, email notification
-- Room preferences: user interface improvement, room exclusion
-
 ### Added
 - Enable courses with multiple groups
 - New app flopeditor: save initial data through graphical interface
@@ -29,12 +22,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Modification proposal sent via email
 - A tutor can choose her/his favorite rooms
 - Module description
-- Enabled text translation
+- Enabled text translation, with english, french and spanish version
 - TTApp/ilp_constraints : contains all code + documentation allowing to write files in logs/ 
 that explain the infaisability by the solver of a set of constraints
 - Availability slots in TTModel to optimize resources
 - Allow parametrized repartition between tutors on a given Module
 - the API handles the identification for the modification requests
+- New student preferences design, attributes and behavior
 
 ### Changed
 - front-end: dispatch week/day management in js files
@@ -44,6 +38,9 @@ that explain the infaisability by the solver of a set of constraints
 
 ### TBD
 - right permissions in TTapp/views
+- Modification proposal: id for modification bunch, modification
+  applicability, email notification
+- Room preferences: user interface improvement, room exclusion
 
 ## [0.3.0] - 2019-11-07
 ### Added
