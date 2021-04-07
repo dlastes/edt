@@ -101,7 +101,7 @@ class UnscheduledCoursesViewSet(viewsets.ReadOnlyModelViewSet):
         year = self.request.query_params.get('year', None)
         week = self.request.query_params.get('week', None)
         work_copy = self.request.query_params.get('work_copy', 0)
-        department = self.request.query_params.get('department', None)
+        department = self.request.query_params.get('dept', None)
 
         # Filtering different querysets
         if year is not None:

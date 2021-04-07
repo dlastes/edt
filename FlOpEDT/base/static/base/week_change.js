@@ -676,7 +676,7 @@ function fetch_cours() {
     ),
     async: true,
     success: function (msg, ts, req) {
-      console.log(msg);
+      msg = JSON.parse(msg) ;
 
       var sel_week = wdw_weeks.get_selected();
       if (Week.compare(exp_week, sel_week) == 0) {
@@ -688,7 +688,7 @@ function fetch_cours() {
         // console.log(exp_week,num_copie);
 
         cours_pp = [] ;
-        parsed_msg.forEach(function(sched_course) {
+        msg.forEach(function(sched_course) {
           translate_cours_pp_from_json(sched_course, cours_pp);
         });
 
