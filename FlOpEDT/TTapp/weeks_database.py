@@ -177,10 +177,10 @@ class WeeksDatabase(object):
 
     def courses_init(self):
         # COURSES
-        course_types = CourseType.objects.filter(department=self.department)
-
         courses = Course.objects.filter(week__in=self.weeks, year=self.year, module__train_prog__in=self.train_prog)\
             .select_related('module')
+
+        course_types = set(c.type for c in courses)
 
         courses_by_week = {week: set(courses.filter(week=week)) for week in self.weeks}
 
