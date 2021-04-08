@@ -52,8 +52,8 @@ media_dir = 'media/configuration'
 logger = logging.getLogger('base')
 
 @transaction.atomic
-def extract_database_file(department_name=None, department_abbrev=None, bookname=None, book=None):
-
+def extract_database_file(department_name=None, department_abbrev=None, bookname=None, book=None,
+                          fill_default_preferences=True):
     # Test department existence
     department, created = Department.objects.get_or_create(name=department_name, abbrev=department_abbrev)
     if created:
@@ -66,6 +66,7 @@ def extract_database_file(department_name=None, department_abbrev=None, bookname
     if not created:
         logger.info(f"Department with abbrev {department_abbrev} and name {department_name} already exists. "
                     f"It will be updated")
+        
     if book is None:
         if bookname is None:
             bookname = f"{media_dir}/database_file_{department_abbrev}.xlsx"
@@ -79,13 +80,13 @@ def extract_database_file(department_name=None, department_abbrev=None, bookname
         raise Exception('\n'.join(check))
 
     settings_extract(department, book['settings'])
-    people_extract(department, book['people'])
+    people_extract(department, book['people'], fill_default_preferences)
     rooms_extract(department, book['room_groups'], book['room_categories'], book['rooms'])
     groups_extract(department, book['promotions'], book['group_types'], book['groups'])
     modules_extract(department, book['modules'])
     courses_extract(department, book['courses'])
 
-def people_extract(department, people):
+def people_extract(department, people, fill_default_preferences):
 
     logger.info("People extraction : start")
     for id_, person in people.items():
@@ -112,7 +113,8 @@ def people_extract(department, people):
                 tutor.save()
 
                 UserDepartmentSettings.objects.create(department=department, user=tutor)
-                fill_default_user_preferences(tutor, dept=department)
+                if fill_default_preferences:
+                    fill_default_user_preferences(tutor, dept=department)
 
             except IntegrityError as ie :
                 logger.warning("A constraint has not been respected while creating the Professor : \n", ie)
