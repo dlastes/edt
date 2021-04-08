@@ -135,8 +135,9 @@ class WeeksDatabase(object):
         print('Slot tools definition', end=', ')
         tgs = TimeGeneralSettings.objects.get(department=self.department)
         courses_slots = set()
-        for cc in CourseStartTimeConstraint.objects.filter(Q(course_type__in=self.course_types)
-                                                           | Q(course_type=None)):
+        filtered_cstc = CourseStartTimeConstraint.objects.filter(Q(course_type__in=self.course_types)
+                                                                 | Q(course_type=None))
+        for cc in filtered_cstc:
             start_times = cc.allowed_start_times
             if self.slots_step is None:
                 courses_slots |= set(CourseSlot(d, start_time, cc.course_type)
@@ -151,9 +152,8 @@ class WeeksDatabase(object):
             self.possible_apms.add(slot.apm)
 
         dayly_availability_slots= set()
-        for ct in self.department.coursetype_set.all():
-            for cst in ct.coursestarttimeconstraint_set.all():
-                dayly_availability_slots |= set(cst.allowed_start_times)
+        for cst in filtered_cstc:
+            dayly_availability_slots |= set(cst.allowed_start_times)
         dayly_availability_slots.add(tgs.day_finish_time)
         dayly_availability_slots = list(dayly_availability_slots)
         dayly_availability_slots.sort()
