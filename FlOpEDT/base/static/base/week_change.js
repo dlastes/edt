@@ -1229,6 +1229,9 @@ function fetch_ended(light) {
     }
 
     clean_prof_displayed(light);
+
+    hide_idle_groups() ;
+    
   }
 
   if (fetch.course_saved &&
@@ -1241,6 +1244,22 @@ function fetch_ended(light) {
     go_edt(false);
 
   }
+}
+
+function hide_idle_groups() {
+  for(let ip = 0 ; ip < set_promos.length ; ip++) {
+    for(let ig = 0 ; ig < groups[ip].length ; ig ++) {
+      const found = cours.find(function(c) {
+        return (c.group == groups[ip][ig].name
+                && c.promo == groups[ip][ig].promo) ;
+      }) ;
+      if (typeof found === 'undefined') {
+        groups[ip][ig].display = false ;
+      }
+    }
+  }
+  update_all_groups();
+  go_gp_buttons();
 }
 
 // - store old data in old
