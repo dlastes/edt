@@ -1248,13 +1248,14 @@ function fetch_ended(light) {
 
 function hide_idle_groups() {
   for(let ip = 0 ; ip < set_promos.length ; ip++) {
-    for(let ig = 0 ; ig < groups[ip].length ; ig ++) {
+    let group_names = Object.keys(groups[ip]);
+    for(let ig = 0 ; ig < group_names.length ; ig ++) {
       const found = cours.find(function(c) {
-        return (c.group == groups[ip][ig].name
-                && c.promo == groups[ip][ig].promo) ;
+        return (c.group == groups[ip][group_names[ig]].name
+                && c.promo == groups[ip][group_names[ig]].promo) ;
       }) ;
       if (typeof found === 'undefined') {
-        groups[ip][ig].display = false ;
+        groups[ip][group_names[ig]].display = false ;
       }
     }
   }
