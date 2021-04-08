@@ -372,7 +372,8 @@ def filldico(username,password,lPrefixeWsdl):
     return book
 
 
-def create_course_set_from_hp(username, password, lPrefixeWsdl):
+def create_course_list_from_hp(username, password, lPrefixeWsdl,
+                               remove_courses_with_no_group=True):
     # Initialisation et connexion
     session = Session()
     session.auth = HTTPBasicAuth(username, password)
@@ -450,7 +451,19 @@ def create_course_set_from_hp(username, password, lPrefixeWsdl):
         if courseWeek != None:  # Modifier
             coursesList.append(course)
 
+    if remove_courses_with_no_group:
+        coursesList = remove_courses_without_group(coursesList)
+
     return coursesList
+
+
+def remove_courses_without_group(listOfCourses):
+    numberOfCourses = len(listOfCourses)
+    for i in range(numberOfCourses - 1, -1, -1):
+        if listOfCourses[i]['groups'] == set():
+            listOfCourses.pop(i)
+    return listOfCourses
+
 
 @transaction.atomic
 def extract_courses_from_book(courses_book, department, assign_colors=True):
