@@ -244,9 +244,9 @@ def get_room_types_groups(department_abbrev):
 
     return {'roomtypes': {str(rt): list(set(
         [room.name for room in rt.members.all()]
-    )) for rt in RoomType.objects.filter(department=dept)},
+    )) for rt in RoomType.objects.prefetch_related('members').filter(department=dept)},
             'roomgroups': {room.name: [sub.name for sub in room.and_subrooms()] \
-                           for room in Room.objects.filter(departments=dept)}
+                           for room in Room.objects.prefetch_related('subrooms', 'subrooms__subrooms').filter(departments=dept)}
             }
 
 
