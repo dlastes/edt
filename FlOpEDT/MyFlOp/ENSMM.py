@@ -10,7 +10,7 @@ from misc.assign_colors import assign_module_color
 
 
 def global_extraction(abbrev='ENSMM', name='ENSMM', delete_groups=True):
-    extract_database_file(abbrev, name, book=database_ENSMM)
+    extract_database_file(abbrev, name, book=database_ENSMM, fill_default_preferences=False)
     dep = Department.objects.get(abbrev=abbrev)
     optimize_settings(dep)
     for t in Tutor.objects.filter(departments=dep):
@@ -25,13 +25,14 @@ def global_extraction(abbrev='ENSMM', name='ENSMM', delete_groups=True):
         remove_slash_groups(dep)
         g, tp = useless_groups_and_train_progs(dep)
         delete_useless_groups(g, tp)
+    dep = Department.objects.get(abbrev=abbrev)
     assign_module_color(dep, overwrite=True)
 
 
 def find_group_architecture(dep):
     result = {}
     for tp in TrainingProgramme.objects.filter(department=dep):
-        result[tp.name]={}
+        result[tp.name] = {}
         G = Group.objects.filter(train_prog=tp)
         for g in G:
             result[tp.name][g.name] = set()
@@ -48,7 +49,6 @@ def find_group_architecture(dep):
 def apply_group_architecture(group_architecture_dict):
     d = group_architecture_dict
     for tp in d:
-        tpg = Group.objects.get(train_prog__name=tp, name=tp)
         for g in d[tp]:
             G = Group.objects.get(train_prog__name=tp, name=g)
             for g2 in d[tp][g]:
@@ -56,6 +56,8 @@ def apply_group_architecture(group_architecture_dict):
                 for pg in G2.parent_groups.all():
                     G2.parent_groups.remove(pg)
                 G2.parent_groups.add(G)
+                G.basic=False
+                G.save()
 
 
 def useless_groups_and_train_progs(dep):
@@ -104,10 +106,9 @@ def optimize_settings(dep):
             cst.allowed_start_times = l
             cst.save()
     RT, created = RoomType.objects.get_or_create(name='None', department=dep)
-    if created:
-        C = Course.objects.filter(type__department=dep)
-        for i, c in enumerate(C):
-            if i % 10 != 0:
-                c.room_type = RT
-                c.save()
+    C = Course.objects.filter(type__department=dep)
+    for i, c in enumerate(C):
+        if i % 10 != 0:
+            c.room_type = RT
+            c.save()
 
