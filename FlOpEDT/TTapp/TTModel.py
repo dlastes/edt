@@ -146,17 +146,34 @@ class TTModel(object):
         self.train_prog = train_prog
         self.stabilize_work_copy = stabilize_work_copy
         self.obj = self.lin_expr()
+        start = datetime.datetime.now()
         self.wdb = self.wdb_init()
+        print('-->', datetime.datetime.now() - start)
+        print('apms and costs')
+        start = datetime.datetime.now()
         self.possible_apms = self.wdb.possible_apms
         self.cost_I, self.FHD_G, self.cost_G, self.cost_SL, self.generic_cost = self.costs_init()
+        print('-->', datetime.datetime.now() - start)
+        print('TT_init')
+        start = datetime.datetime.now()
         self.TT, self.TTrooms, self.TTinstructors = self.TT_vars_init()
+        print('-->', datetime.datetime.now() - start)
+        print('Busy_init')
+        start = datetime.datetime.now()
         self.IBD, self.IBD_GTE, self.IBHD, self.GBHD, self.IBS, self.forced_IBD = self.busy_vars_init()
+        print('-->', datetime.datetime.now() - start)
         if settings.VISIO_MODE:
+            print('Visio_init')
+            start = datetime.datetime.now()
             self.physical_presence, self.has_visio = self.visio_vars_init()
+            print('-->', datetime.datetime.now() - start)
+        print('Avail_init')
+        start = datetime.datetime.now()
         self.avail_instr, self.avail_at_school_instr, self.unp_slot_cost \
             = self.compute_non_preferred_slots_cost()
         self.unp_slot_cost_course, self.avail_course \
             = self.compute_non_preferred_slots_cost_course()
+        print('-->', datetime.datetime.now() - start)
         self.avail_room = self.compute_avail_room()
         print('Ok', datetime.datetime.now()-a)
         self.one_var = self.add_var()
