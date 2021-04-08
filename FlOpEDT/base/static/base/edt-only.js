@@ -130,7 +130,7 @@ file_fetch.groups.callback = function () {
   fetch_cours_light();
   fetch_bknews_light();
   //adapt_labgp(true);
-  fetch.groups_ok = true;
+  fetch_status.groups_ok = true;
   //go_edt(true);
   create_grid_data();
 
@@ -155,10 +155,10 @@ file_fetch.groups.callback = function () {
 
 
 function fetch_cours_light() {
-  fetch.ongoing_cours_pl = true;
-  fetch.cours_ok = false;
+  fetch_status.ongoing_cours_pl = true;
+  fetch_status.cours_ok = false;
 
-  fetch.done = false;
+  fetch_status.done = false;
   ack.edt = "";
 
   var week_att = week;
@@ -184,7 +184,7 @@ function fetch_cours_light() {
           translate_cours_pl_from_csv(d, cours_pl) ;
         });
 
-      fetch.ongoing_cours_pl = false;
+      fetch_status.ongoing_cours_pl = false;
       fetch_ended(true);
     },
     error: function (msg) {
@@ -196,7 +196,7 @@ function fetch_cours_light() {
 }
 
 function fetch_bknews_light(first) {
-  fetch.ongoing_bknews = true;
+  fetch_status.ongoing_bknews = true;
   var exp_week = new Week(year, week);
 
   $.ajax({
@@ -220,7 +220,7 @@ function fetch_bknews_light(first) {
         }
         bknews.nb_rows = max_y + 1;
 
-        fetch.ongoing_bknews = false;
+        fetch_status.ongoing_bknews = false;
         fetch_ended(true);
       }
 

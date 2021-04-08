@@ -154,7 +154,7 @@ file_fetch.constraints.callback = function () {
   rev_constraints[garbage.start.toString()] = garbage.duration;
 
 
-  fetch.constraints_ok = true;
+  fetch_status.constraints_ok = true;
   create_grid_data();
 };
 
@@ -190,7 +190,7 @@ var opac = .4;
 
 
 // status of fetching (cours_pl : cours placés, cours_pp : cours pas placés)
-var fetch = {
+var fetch_status = {
   ongoing_cours_pl: false,
   ongoing_dispos: false,
   ongoing_cours_pp: false,

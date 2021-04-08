@@ -394,13 +394,13 @@ WeekBanner.prototype.week_right = function () {
 
 // go to selected week
 // Not sure ok even if user is quick (cf fetch_cours)
-WeekBanner.prototype.apply_wk_change = function (d, i) { //if(fetch.done) {
+WeekBanner.prototype.apply_wk_change = function (d, i) { //if(fetch_status.done) {
   this.mix.weeks.change_selection(i);
   dispos = {};
   user.dispos = [];
 
-  fetch.course_saved = false;
-  fetch.pref_saved = false;
+  fetch_status.course_saved = false;
+  fetch_status.pref_saved = false;
   fetch_all(false, true);
 
   this.update(false);

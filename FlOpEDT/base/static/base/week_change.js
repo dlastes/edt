@@ -48,7 +48,7 @@
 function fetch_tutor_preferences() {
 
 
-  fetch.ongoing_dispos = true;
+  fetch_status.ongoing_dispos = true;
 
   var exp_week = wdw_weeks.get_selected();
 
@@ -66,8 +66,8 @@ function fetch_tutor_preferences() {
         //user.dispos = [];
         d3.csvParse(msg, translate_dispos_from_csv);
         sort_preferences(dispos);
-        fetch.ongoing_dispos = false;
-        fetch.pref_saved = true;
+        fetch_status.ongoing_dispos = false;
+        fetch_status.pref_saved = true;
         if (ckbox["dis-mod"].cked) {
           create_dispos_user_data();
           open_lunch() ;
@@ -421,7 +421,7 @@ function fetch_colors() {
         colors = {} ;
         d3.csvParse(msg, translate_colors_from_csv);
 
-        fetch.ongoing_colors = false;
+        fetch_status.ongoing_colors = false;
         fetch_ended(false);
       }
       show_loader(false);
@@ -452,7 +452,7 @@ function ping_colors() {
   ------ BKNEWS -------
   --------------------*/
 function fetch_bknews(first) {
-  fetch.ongoing_bknews = true;
+  fetch_status.ongoing_bknews = true;
 
   var exp_week = wdw_weeks.get_selected();
 
@@ -504,7 +504,7 @@ function fetch_bknews(first) {
 
 
 
-        fetch.ongoing_bknews = false;
+        fetch_status.ongoing_bknews = false;
         fetch_ended(false);
       }
       show_loader(false);
@@ -571,10 +571,10 @@ function adapt_labgp(first) {
   --------------------*/
 
 function fetch_cours() {
-  fetch.ongoing_cours_pp = true;
-  fetch.ongoing_cours_pl = true;
+  fetch_status.ongoing_cours_pp = true;
+  fetch_status.ongoing_cours_pl = true;
 
-  fetch.course_saved = false;
+  fetch_status.course_saved = false;
 
   var garbage_plot;
 
@@ -617,7 +617,7 @@ function fetch_cours() {
         );
 
 
-        fetch.ongoing_cours_pl = false;
+        fetch_status.ongoing_cours_pl = false;
         fetch_ended(false);
       }
       show_loader(false);
@@ -666,7 +666,7 @@ function fetch_cours() {
 
         go_grid(true);
 
-        fetch.ongoing_cours_pp = false;
+        fetch_status.ongoing_cours_pp = false;
         fetch_ended(false);
         show_loader(false);
       }
@@ -1003,7 +1003,7 @@ function fetch_room_preferences_unavailability() {
 
 // fetch room preferences
 function fetch_room_preferences() {
-  fetch.ongoing_un_rooms = true;
+  fetch_status.ongoing_un_rooms = true;
 
   var exp_week = wdw_weeks.get_selected();
 
@@ -1021,7 +1021,7 @@ function fetch_room_preferences() {
         d3.csvParse(msg, translate_unavailable_rooms);
       }
       show_loader(false);
-      fetch.ongoing_un_rooms = false;
+      fetch_status.ongoing_un_rooms = false;
       fetch_ended(false);
     },
     error: function (msg) {
@@ -1109,32 +1109,32 @@ function translate_extra_pref_room_from_csv(d) {
    --------------------*/
 
 function fetch_all(first, fetch_work_copies) {
-  fetch.done = false;
+  fetch_status.done = false;
 
-  if (!fetch.course_saved) {
-    fetch.ongoing_cours_pp = true;
-    fetch.ongoing_cours_pl = true;
-    fetch.ongoing_bknews = true;
+  if (!fetch_status.course_saved) {
+    fetch_status.ongoing_cours_pp = true;
+    fetch_status.ongoing_cours_pl = true;
+    fetch_status.ongoing_bknews = true;
     fetch_ongoing_colors = true;
   }
-  if (!fetch.pref_saved &&
+  if (!fetch_status.pref_saved &&
     (ckbox["dis-mod"].cked
       || ckbox["edt-mod"].cked)) {
-    fetch.ongoing_dispos = true;
+    fetch_status.ongoing_dispos = true;
   }
   if (ckbox["edt-mod"].cked) {
-    fetch.ongoing_un_rooms = true;
+    fetch_status.ongoing_un_rooms = true;
   }
 
   fetch_version();
 
-  if (!fetch.course_saved) {
+  if (!fetch_status.course_saved) {
     fetch_module();
     fetch_tutor();
     fetch_cours();
     fetch_colors();
   }
-  if (!fetch.pref_saved &&
+  if (!fetch_status.pref_saved &&
     (ckbox["dis-mod"].cked
       || ckbox["edt-mod"].cked)) {
     fetch_tutor_preferences();
@@ -1191,11 +1191,11 @@ function translate_version_from_csv(d) {
 
 
 function fetch_ended(light) {
-  if (!fetch.ongoing_cours_pl &&
-    !fetch.ongoing_cours_pp &&
-    !fetch.course_saved) {
+  if (!fetch_status.ongoing_cours_pl &&
+    !fetch_status.ongoing_cours_pp &&
+    !fetch_status.course_saved) {
 
-    fetch.course_saved = true;
+    fetch_status.course_saved = true;
 
     cours = cours_pl.concat(cours_pp);
 
@@ -1231,13 +1231,13 @@ function fetch_ended(light) {
     clean_prof_displayed(light);
   }
 
-  if (fetch.course_saved &&
-    !fetch.ongoing_dispos &&
-    !fetch.ongoing_un_rooms &&
-    !fetch.ongoing_bknews &&
-    !fetch.ongoing_colors) {
+  if (fetch_status.course_saved &&
+    !fetch_status.ongoing_dispos &&
+    !fetch_status.ongoing_un_rooms &&
+    !fetch_status.ongoing_bknews &&
+    !fetch_status.ongoing_colors) {
     ping_colors();
-    fetch.done = true;
+    fetch_status.done = true;
     go_edt(false);
 
   }
