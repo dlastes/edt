@@ -99,7 +99,7 @@ class UserPreferenceViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         self.set_common_params()
-        return bm.UserPreference.objects.filter(**self.params) \
+        return bm.UserPreference.objects.select_related('user').filter(**self.params) \
             .order_by('user__username')
 
 
