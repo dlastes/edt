@@ -105,7 +105,8 @@ def optimize_settings(dep):
             cst.save()
     RT, created = RoomType.objects.get_or_create(name='None', department=dep)
     if created:
-        for i, c in enumerate(Course.objects.filter(type__department=dep)):
+        C = Course.objects.filter(type__department=dep)
+        for i, c in enumerate(C):
             if i % 10 != 0:
                 c.room_type = RT
                 c.save()
