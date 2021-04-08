@@ -168,11 +168,11 @@ file_fetch.groups.callback = function () {
 
   go_promo_gp_init();
 
-  fetch.course_saved = false;
+  fetch_status.course_saved = false;
   fetch_all(true, false);
 
 
-  fetch.groups_ok = true;
+  fetch_status.groups_ok = true;
   create_grid_data();
 
   if (nbRows > 1) {

@@ -139,7 +139,7 @@ function add_slot_grid_data(c) {
 
 
 function create_grid_data() {
-  if (fetch.constraints_ok && fetch.groups_ok) {
+  if (fetch_status.constraints_ok && fetch_status.groups_ok) {
     for (let p = 0; p < set_promos.length; p++) {
       compute_promo_leaves(root_gp[p].gp);
     }
@@ -225,7 +225,7 @@ function create_but_scale() {
 function def_drag_sca() {
   drag_listener_hs = d3.drag()
     .on("start", function (c) {
-      if (fetch.done) {
+      if (fetch_status.done) {
         drag.sel = d3.select(this);
         drag.x = 0;
         drag.y = 0;
@@ -250,7 +250,7 @@ function def_drag_sca() {
       }
     })
     .on("drag", function (c) {
-      if (fetch.done) {
+      if (fetch_status.done) {
         drag.x += d3.event.dx;
         if (drag.x + drag.init > 0) {
           drag.sel.attr("transform", "translate(" + drag.x + "," + drag.y + ")");
@@ -261,7 +261,7 @@ function def_drag_sca() {
       }
     })
     .on("end", function (c) {
-      if (fetch.done) {
+      if (fetch_status.done) {
         if (drag.x + drag.init <= 0) {
           drag.x = -drag.init;
         }
@@ -280,7 +280,7 @@ function def_drag_sca() {
 
   drag_listener_vs = d3.drag()
     .on("start", function (c) {
-      if (fetch.done) {
+      if (fetch_status.done) {
         drag.sel = d3.select(this);
         drag.x = 0;
         drag.y = 0;
@@ -304,7 +304,7 @@ function def_drag_sca() {
       }
     })
     .on("drag", function (c) {
-      if (fetch.done) {
+      if (fetch_status.done) {
         drag.y += d3.event.dy;
         if (drag.init + drag.y >= 0) {
           drag.sel.attr("transform",
@@ -314,7 +314,7 @@ function def_drag_sca() {
       }
     })
     .on("end", function (c) {
-      if (fetch.done) {
+      if (fetch_status.done) {
         if (drag.init + drag.y < 0) {
           drag.y = -(drag.init);
         }
@@ -911,7 +911,7 @@ function translate_quote_from_csv(d) {
   ----------------------*/
 
 function run_course_drag(d) {
-  if (ckbox["edt-mod"].cked && fetch.done) {
+  if (ckbox["edt-mod"].cked && fetch_status.done) {
 
     // get the time interval, whatever the group
     cur_over = which_slot(
@@ -945,7 +945,7 @@ function def_drag() {
     .on("start", function (c) {
       cancel_cm_adv_preferences();
       cancel_cm_room_tutor_change();
-      if (ckbox["edt-mod"].cked && fetch.done) {
+      if (ckbox["edt-mod"].cked && fetch_status.done) {
 
         // compute available slots for this course
         pending.prepare_modif(c);
@@ -984,7 +984,7 @@ function def_drag() {
           svg.get_dom("edt-mg").node().appendChild(n);
         });
 
-        if (cur_over != null && ckbox["edt-mod"].cked && fetch.done) {
+        if (cur_over != null && ckbox["edt-mod"].cked && fetch_status.done) {
 
           data_slot_grid = [];
 

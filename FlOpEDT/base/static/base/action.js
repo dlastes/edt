@@ -628,7 +628,7 @@ function set_all_groups_display(isDisplayed) {
 // start == true iff a particular group is chosen by a GET request
 // go_button == true iff the group buttons are to be updated
 function apply_gp_display(gp, start, go_button) {
-  if (fetch.done || start) {
+  if (fetch_status.done || start) {
     if (is_no_hidden_grp) {
       set_all_groups_display(false);
       gp.display = true;
@@ -647,7 +647,7 @@ function apply_gp_display(gp, start, go_button) {
       go_gp_buttons();
     }
   }
-  if (fetch.done) {
+  if (fetch_status.done) {
     go_edt();
   }
 }
@@ -693,7 +693,7 @@ function propagate_display_up(gp, b) {
 
 // apply the updates resulting from a change in a checkbox
 function apply_ckbox(dk) {
-  if (ckbox[dk].en && fetch.done) {
+  if (ckbox[dk].en && fetch_status.done) {
 
     if (ckbox[dk].cked) {
       ckbox[dk].cked = false;
@@ -2071,7 +2071,7 @@ function remove_details() {
 }
 
 function apply_selection_display(choice) {
-  if (fetch.done) {
+  if (fetch_status.done) {
 
     var sel_list = choice.panel.list;
 
@@ -2124,7 +2124,7 @@ function apply_selection_display_all(p) {
   var sel_list = [];
 
   if (p.type != "tutor"
-    || (fetch.done
+    || (fetch_status.done
       && (!logged_usr.dispo_all_change
         || !ckbox["dis-mod"].cked))) {
     p.list.forEach(function (d) {
