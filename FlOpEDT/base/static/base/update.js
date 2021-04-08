@@ -885,7 +885,7 @@ function go_gp_buttons() {
   for (var p = 0; p < set_promos.length; p++) {
     var cont = svg.get_dom("selg")
       .select(".sel-pop-g#" + popup_type_id("group"))
-      .selectAll("[train_prog=" + set_promos[p] + "]")
+      .selectAll('[train_prog="' + set_promos[p] + '"]')
       .data(Object.keys(groups[p]).map(function (k) {
         return groups[p][k];
       }));

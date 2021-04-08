@@ -71,13 +71,14 @@ class WeeksDatabase(object):
         self.slots_step = slots_step
         self.possible_apms=set()
         self.days, self.day_after, self.holidays, self.training_half_days, self.day_before = self.days_init()
+        self.course_types, self.courses, self.courses_by_week, \
+            self.sched_courses, self.fixed_courses, \
+            self.other_departments_courses, self.other_departments_sched_courses, \
+            self.courses_availabilities, self.modules, self.dependencies = self.courses_init()
         self.courses_slots, self.availability_slots, \
             self.first_hour_slots, self.last_hour_slots = self.slots_init()
-        self.course_types, self.courses, self.courses_by_week, \
-            self.sched_courses, self.fixed_courses, self.fixed_courses_for_avail_slot, \
-            self.other_departments_courses, self.other_departments_sched_courses, \
-            self.other_departments_sched_courses_for_avail_slot, \
-            self.courses_availabilities, self.modules, self.dependencies = self.courses_init()
+        self.fixed_courses_for_avail_slot, self.other_departments_sched_courses_for_avail_slot = \
+            self.courses_for_avail_slot_init()
         if settings.VISIO_MODE:
             self.visio_courses, self.no_visio_courses, self.visio_ponderation = self.visio_init()
         self.room_types, self.rooms, self.basic_rooms, self.room_prefs, self.rooms_for_type, \
@@ -134,8 +135,9 @@ class WeeksDatabase(object):
         print('Slot tools definition', end=', ')
         tgs = TimeGeneralSettings.objects.get(department=self.department)
         courses_slots = set()
-        for cc in CourseStartTimeConstraint.objects.filter(Q(course_type__department=self.department)
-                                                           | Q(course_type=None)):
+        filtered_cstc = CourseStartTimeConstraint.objects.filter(Q(course_type__in=self.course_types)
+                                                                 | Q(course_type=None))
+        for cc in filtered_cstc:
             start_times = cc.allowed_start_times
             if self.slots_step is None:
                 courses_slots |= set(CourseSlot(d, start_time, cc.course_type)
@@ -150,9 +152,8 @@ class WeeksDatabase(object):
             self.possible_apms.add(slot.apm)
 
         dayly_availability_slots= set()
-        for ct in self.department.coursetype_set.all():
-            for cst in ct.coursestarttimeconstraint_set.all():
-                dayly_availability_slots |= set(cst.allowed_start_times)
+        for cst in filtered_cstc:
+            dayly_availability_slots |= set(cst.allowed_start_times)
         dayly_availability_slots.add(tgs.day_finish_time)
         dayly_availability_slots = list(dayly_availability_slots)
         dayly_availability_slots.sort()
@@ -177,10 +178,10 @@ class WeeksDatabase(object):
 
     def courses_init(self):
         # COURSES
-        course_types = CourseType.objects.filter(department=self.department)
-
         courses = Course.objects.filter(week__in=self.weeks, year=self.year, module__train_prog__in=self.train_prog)\
             .select_related('module')
+
+        course_types = set(c.type for c in courses)
 
         courses_by_week = {week: set(courses.filter(week=week)) for week in self.weeks}
 
@@ -198,11 +199,6 @@ class WeeksDatabase(object):
                     work_copy=0) \
             .exclude(course__module__train_prog__in=self.train_prog)
 
-        fixed_courses_for_avail_slot = {}
-        for sl in self.availability_slots:
-            fixed_courses_for_avail_slot[sl] = set(fc for fc in fixed_courses
-                                                   if sl.is_simultaneous_to(fc))
-
         other_departments_courses = Course.objects.filter(
             week__in=self.weeks, year=self.year) \
             .exclude(type__department=self.department)
@@ -211,13 +207,6 @@ class WeeksDatabase(object):
             .objects \
             .filter(course__in=other_departments_courses,
                     work_copy=0)
-
-        other_departments_sched_courses_for_avail_slot = {}
-        for sl in self.availability_slots:
-            other_departments_sched_courses_for_avail_slot[sl] = \
-                set(fc for fc in other_departments_sched_courses
-                    if fc.start_time < sl.end_time and sl.start_time < fc.end_time
-                    and fc.day == sl.day.day and fc.course.week == sl.day.week)
 
         courses_availabilities = CoursePreference.objects \
             .filter(Q(week__in=self.weeks, year=self.year) | Q(week=None),
@@ -233,10 +222,23 @@ class WeeksDatabase(object):
             course1__module__train_prog__in=self.train_prog)
 
         return course_types, courses, courses_by_week, sched_courses, fixed_courses, \
-               fixed_courses_for_avail_slot, \
                other_departments_courses, other_departments_sched_courses, \
-               other_departments_sched_courses_for_avail_slot, \
                courses_availabilities, modules, dependencies
+
+    def courses_for_avail_slot_init(self):
+        fixed_courses_for_avail_slot = {}
+        for sl in self.availability_slots:
+            fixed_courses_for_avail_slot[sl] = set(fc for fc in self.fixed_courses
+                                                   if sl.is_simultaneous_to(fc))
+
+        other_departments_sched_courses_for_avail_slot = {}
+        for sl in self.availability_slots:
+            other_departments_sched_courses_for_avail_slot[sl] = \
+                set(fc for fc in self.other_departments_sched_courses
+                    if fc.start_time < sl.end_time and sl.start_time < fc.end_time
+                    and fc.day == sl.day.day and fc.course.week == sl.day.week)
+
+        return fixed_courses_for_avail_slot, other_departments_sched_courses_for_avail_slot
 
     def rooms_init(self):
         # ROOMS
