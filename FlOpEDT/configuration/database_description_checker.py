@@ -323,7 +323,7 @@ def check_groups(groups):
                 result.append(f"D: group '{id_}' in promotion '{promotion}' doesn't have the expected keys")
             else:
                 result.extend(check_type(promotion, str, f"promotion for group '{id_}'"))
-                # result.extend(check_type(group['group_type'], str, f"group type of group '{id_}'"))
+                result.extend(check_type(group['group_type'], str, f"group type of group '{id_}'"))
                 if isinstance(group['parent'], set):
                     if len(group['parent']) > 1:
                         result.append(f"D: group '{id_}' should have at most one parent")
@@ -562,8 +562,8 @@ def check_modules_sheet(database):
             result.append(f"La promotion du module '{id_}' dans '{modules_sheet}' est invalide")
         if not module['period'] in database['settings']['periods'].keys() and not id_.startswith(':INVALID:'):
             result.append(f"La période du module '{id_}' dans '{modules_sheet}' est invalide")
-        # if not module['responsable'] in database['people'].keys() and not id_.startswith(':INVALID:'):
-        #     result.append(f"La personne responsable du module '{id_}' dans '{modules_sheet}' est invalide")
+        if not module['responsable'] in database['people'].keys() and not id_.startswith(':INVALID:'):
+            result.append(f"La personne responsable du module '{id_}' dans '{modules_sheet}' est invalide")
 
     return result
 
