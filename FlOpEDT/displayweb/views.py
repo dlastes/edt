@@ -19,10 +19,10 @@ def fetch_rectangle_colors(req, **kwargs):
     work_copy = int(req.GET.get('work_copy', '0'))
     filters = {}
     if COSMO_MODE:
-        Display = TutorDisplay.objects
+        Display = TutorDisplay.objects.select_related('tutor')
         Resource = TutorDisplayResource
     else:
-        Display = ModuleDisplay.objects
+        Display = ModuleDisplay.objects.select_related('module')
         Resource = ModuleDisplayResource
     if week is None or year is None:
         if COSMO_MODE:
