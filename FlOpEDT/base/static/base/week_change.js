@@ -1259,6 +1259,10 @@ function hide_idle_groups() {
       }
     }
   }
+
+  are_all_groups_hidden(); // all hidden => all displayed
+  check_hidden_groups();
+  
   update_all_groups();
   go_gp_buttons();
 }
