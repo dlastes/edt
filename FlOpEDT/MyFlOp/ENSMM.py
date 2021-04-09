@@ -33,16 +33,20 @@ def find_group_architecture(dep):
     result = {}
     for tp in TrainingProgramme.objects.filter(department=dep):
         result[tp.name] = {}
-        G = Group.objects.filter(train_prog=tp)
-        for g in G:
-            result[tp.name][g.name] = set()
-            for g2 in G.exclude(id=g.id):
-                if g2.name.startswith(g.name):
-                    result[tp.name][g.name].add(g2.name)
-            if not result[tp.name][g.name]:
-                result[tp.name].pop(g.name)
-        if not result[tp.name]:
-            result.pop(tp.name)
+        if 'MECA' in tp.name:
+            i = tp.name[-1]
+            result[tp.name][f'MECA{i}-TD1'] = {f'MECA{i}-TP1', f'MECA{i}-TP2'}
+        else:
+            G = Group.objects.filter(train_prog=tp)
+            for g in G:
+                result[tp.name][g.name] = set()
+                for g2 in G.exclude(id=g.id):
+                    if g2.name.startswith(g.name):
+                        result[tp.name][g.name].add(g2.name)
+                if not result[tp.name][g.name]:
+                    result[tp.name].pop(g.name)
+            if not result[tp.name]:
+                result.pop(tp.name)
     return result
 
 
@@ -56,9 +60,22 @@ def apply_group_architecture(group_architecture_dict):
                 for pg in G2.parent_groups.all():
                     G2.parent_groups.remove(pg)
                 G2.parent_groups.add(G)
-                G.basic=False
+                G.basic = False
                 G.save()
-
+    for g in Group.objects.filter(name__contains='Réunion'):
+        o_g = g.parent_groups.all()[0]
+        for c in Course.objects.filter(groups=g):
+            c.groups.remove(g)
+            c.groups.add(o_g)
+        g.delete()
+    produit = Group.objects.get(name__contains='PROD')
+    systeme = Group.objects.get(name__contains='SYST')
+    for g in Group.objects.filter(name__in=['VS1', 'VS2']):
+        g.parent_groups.remove(g.parent_groups.all()[0])
+        g.parent_groups.add(systeme)
+    for g in Group.objects.filter(name__in=['VP1', 'VP2']):
+        g.parent_groups.remove(g.parent_groups.all()[0])
+        g.parent_groups.add(produit)
 
 def useless_groups_and_train_progs(dep):
     groups = set()
