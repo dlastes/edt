@@ -29,6 +29,7 @@ import importlib
 from TTapp.TTModel import TTModel, GUROBI_NAME
 
 from MyFlOp.MyTTUtils import print_differences
+from MyFlOp.ensmm_specific_constraints import add_ensmm_specific_constraints
 
 
 class MyTTModel(TTModel):
@@ -75,6 +76,7 @@ class MyTTModel(TTModel):
         If you shall add more specific ones, you may write it down here.
         """
         TTModel.add_specific_constraints(self)
+        add_ensmm_specific_constraints(self)
 
     def solve(self, time_limit=None, target_work_copy=None,
               solver=GUROBI_NAME, threads=None):
