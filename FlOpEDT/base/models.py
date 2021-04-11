@@ -191,7 +191,7 @@ class Mode(models.Model):
     department = models.OneToOneField(Department,
                                       on_delete=models.CASCADE)
     cosmo = models.BooleanField(default=False)
-    visio = models.BooleanField(default=False)
+    visio = models.BooleanField(default=True)
 
 
 @receiver(post_save, sender=Department)
