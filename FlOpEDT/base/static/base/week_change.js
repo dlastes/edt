@@ -151,13 +151,15 @@ function open_lunch() {
 // fetch the moments where a tutor teaches in another departement
 function fetch_tutor_extra_unavailability() {
 
-  var exp_week = wdw_weeks.get_selected();
+  let exp_week = wdw_weeks.get_selected();
 
   show_loader(true);
   $.ajax({
     type: "GET", //rest Type
     dataType: 'text',
-    url: url_fetch_extra_sched + exp_week.url(),
+    url: build_url(
+      url_fetch_extra_sched, context_dept, exp_week.as_context(),
+      {'username': user.name}),
     async: true,
     contentType: "text/csv",
     success: function (msg) {

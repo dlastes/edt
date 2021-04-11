@@ -78,7 +78,7 @@
     url_swap = url_swap.slice(0, -5) ;
     var url_reassign_rooms = "{% url 'TTapp:reassign_rooms' department 0 0 0 %}" ;
     url_reassign_rooms = url_reassign_rooms.slice(0, -5) ;
-    var url_fetch_extra_sched = "{% url 'api:fetch:extrasched-list' %}?dept={{ dept }}&week={{ week }}&year={{ year }}&username={{ name_usr }}" ;
+    var url_fetch_extra_sched = "{% url 'api:fetch:extrasched-list' %}" ;
     {% comment %} url_fetch_extra_sched = url_fetch_extra_sched.slice(0, -3) ; {% endcomment %}
     var url_fetch_shared_rooms = "{% url 'base:fetch_shared_rooms' department 0 0 %}" ;
     url_fetch_shared_rooms = url_fetch_shared_rooms.slice(0, -3) ;
