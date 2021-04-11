@@ -279,7 +279,6 @@ class ExtraSchedCoursesViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsTutorOrReadOnly]
 
     def get_queryset(self):
-        qs = bm.ScheduledCourse.objects.all()
         qs_esc = bm.ScheduledCourse.objects.all()
         # Getting all the filters
         user = self.request.query_params.get('username', None)
@@ -295,16 +294,17 @@ class ExtraSchedCoursesViewSet(viewsets.ReadOnlyModelViewSet):
 
         if week is not None:
             qs_esc = qs_esc.filter(course__week=week)
-            qs = qs.filter(course__week=week)
         if year is not None:
             qs_esc = qs_esc.filter(course__year=year)
-            qs = qs.filter(course__year=year)
 
         # Getting all the needed data
-        qs.filter(course__tutor__username=user, course__module__train_prog__department__abbrev=dept)
-        qs_esc.filter(course__tutor__username=user).exclude(pk__in=qs)
 
-        return qs_esc
+        return qs_esc.filter(course__tutor__username=user)\
+                     .exclude(course__module__train_prog__department__abbrev=dept)\
+                     .select_related('course__tutor',
+                                     'course__type__department',
+                                     'course__module__train_prog__department')
+
 
 
 class BKNewsFilterSet(filters.FilterSet):
