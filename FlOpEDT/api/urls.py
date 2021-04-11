@@ -88,7 +88,7 @@ urlpatterns = [
     url(r'^$', views_base.LoginView.as_view()),
     url(r'^logout/$', views_base.LogoutView.as_view()),
     url(r'^backoffice/$', login_required(TemplateView.as_view(template_name='logout.html'))),
-    #path('base/', include((routerBase.urls, 'api'), namespace='base')),
+    path('base/', include((routerBase.urls, 'api'), namespace='base')),
     path('user/', include(routerPeople.urls)),
     path('display/', include(routerDisplayweb.urls)),
     path('ttapp/', include(routerTTapp.urls)),
