@@ -766,7 +766,7 @@ function go_grid(quick) {
 // display day names, and a rectangle per half day
 // if half_day_rect is true
 // layer: fg
-// data: days, time_settings.time, side_time
+// data: days, department_settings.time, side_time
 // class: gridsckd, txt_scl, day_am,
 //        gridsckhb, gridsckhlam, gridsckhlpm
 //        gridsckh, gridsckhl

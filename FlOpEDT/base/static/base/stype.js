@@ -239,7 +239,7 @@ function arrange_stype_layout() {
   open_lunch() ;
   hours_header.update() ;
   svg.get_dom('pmg').attr("transform", "translate(" + pmg_x() + ", 0)") ;
-  let max_time = time_settings.time.day_finish_time ;
+  let max_time = department_settings.time.day_finish_time ;
   user.dispos.forEach(function(d) {
     let end = d.start_time + d.duration ;
     if (end > max_time) {
@@ -288,7 +288,7 @@ function dispo_h(d) {
 function gsclb_y() {
   return dispo_y({
     start_time:
-      time_settings.time.lunch_break_start_time
+      department_settings.time.lunch_break_start_time
   });
 }
 function gsclb_x() {

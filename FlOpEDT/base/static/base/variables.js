@@ -76,7 +76,7 @@ const context_dept = {dept: department} ;
 var week_days = new WeekDays(days);
 
 // for y-axis
-var hours = new Hours(time_settings.time);
+var hours = new Hours(department_settings.time);
 
 
 /*-------------------------
@@ -389,7 +389,7 @@ var data_grid_scale_row = [];
 
 // Garbage parameters
 var garbage = {
-  start: time_settings.time.day_finish_time,
+  start: department_settings.time.day_finish_time,
   duration: 90,
   day: week_days.day_by_num(week_days.nb_days() - 2).ref
 };
@@ -809,10 +809,10 @@ var did = {
   tly: -180,
   shift_s: 20
 };
-did.scale = did.h / (time_settings.time.day_finish_time
-  - time_settings.time.lunch_break_finish_time
-  + time_settings.time.lunch_break_start_time
-  - time_settings.time.day_start_time);
+did.scale = did.h / (department_settings.time.day_finish_time
+  - department_settings.time.lunch_break_finish_time
+  + department_settings.time.lunch_break_start_time
+  - department_settings.time.day_start_time);
 var stbut = {
   w: 104,
   h: 60

@@ -113,7 +113,7 @@ function translate_dispos_from_csv(d) {
 
 // if there exist tutor preferences that would be cut 
 function open_lunch() {
-  let t = time_settings.time ;
+  let t = department_settings.time ;
   if (Object.keys(t.bu).length > 0) {
     return ;
   }
@@ -229,7 +229,7 @@ function sort_preferences(pref) {
 // pref: {start_time, duration, value}
 // list: list of pref
 function insert_interval(pref, list) {
-  var ts = time_settings.time;
+  var ts = department_settings.time;
 
   // starts too early or finishes too late
   if (pref.start_time < ts.day_start_time) {
@@ -331,7 +331,7 @@ function fill_missing_preferences(tutor, ts) {
 function create_dispos_user_data() {
 
   var d, j, k, d2p, pref_list;
-  var ts = time_settings.time;
+  var ts = department_settings.time;
 
   user.dispos = [];
   user.dispos_bu = [];
