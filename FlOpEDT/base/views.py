@@ -884,7 +884,7 @@ def fetch_flat_rooms(req, **kwargs):
     """
     Return rooms for a given department
     """
-    return JsonResponse([room.name for room in queries.get_rooms(req.department.abbrev, basic=True)],
+    return JsonResponse([{'room':room.name} for room in queries.get_rooms(req.department.abbrev, basic=True)],
                         safe=False)
 
 
