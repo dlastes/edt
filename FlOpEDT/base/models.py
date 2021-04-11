@@ -184,6 +184,12 @@ class TimeGeneralSettings(models.Model):
             f"{hhmm(self.day_finish_time)};" + \
             f" Days: {self.days}"
 
+
+class DepartmentMode(models.Model):
+    department = models.OneToOneField(Department, on_delete=models.CASCADE)
+    cosmo = models.BooleanField(default=False)
+    visio = models.BooleanField(default=False)
+
 # </editor-fold>
 
 # <editor-fold desc="ROOMS">
