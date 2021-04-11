@@ -101,16 +101,24 @@ function set_perfect_day() {
 
 // save the default values of the dd lists when filled
 function dd_fetch_ended() {
-  if (mode == 'tutor' && dd_selections['tutor'].filled) {
+  const unfilled = Object.values(dd_selections).find(function(d){
+    return !d.filled ;
+  });
+  if (typeof unfilled !== 'undefined') {
+    // wait for everyone
+    return ;
+  }
+  
+  if (mode == 'tutor') {
     // select logged user if present
     var me = $(dd_selections['tutor'].id + " option[value='" + logged_usr.name + "']");
     if (typeof me !== 'undefined') {
       me.prop('selected', true);
     }
     fetch_selected();
-  } else if (mode == 'course' && dd_selections['type'].filled && dd_selections['prog'].filled) {
+  } else if (mode == 'course') {
     fetch_selected();
-  } else if (mode == 'room' && dd_selections['room'].filled) {
+  } else if (mode == 'room') {
     fetch_selected();
   }
 }
