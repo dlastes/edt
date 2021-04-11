@@ -286,7 +286,7 @@ class TTModel(object):
                 forced_IBD[(i, d)] = 0
                 if d.day in self.wdb.physical_presence_days_for_tutor[i][d.week]:
                     forced_IBD[(i, d)] = 1
-                if settings.COSMO_MODE:
+                if self.department.mode.cosmo:
                     if self.wdb.sched_courses.filter(day=d.day, course__week=d.week,
                                                      course__suspens=False,
                                                      course__tutor=i).exists():
@@ -765,7 +765,7 @@ class TTModel(object):
                                                                   self.wdb.other_departments_courses_for_tutor[i]
                                                                   if c.week == week)
                 week_holidays = [d.day for d in days_filter(self.wdb.holidays, week=week)]
-                if not settings.COSMO_MODE and week_holidays:
+                if not self.department.mode.cosmo and week_holidays:
                     week_tutor_availabilities = set(
                         a for a in self.wdb.availabilities[i][week]
                         if a.day not in week_holidays)

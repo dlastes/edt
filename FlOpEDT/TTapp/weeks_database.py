@@ -107,7 +107,7 @@ class WeeksDatabase(object):
         database_holidays = Holiday.objects.filter(week__in=self.weeks, year=self.year)
         holidays = set(d for d in days if database_holidays.filter(day=d.day, week=d.week).exists())
 
-        if not settings.COSMO_MODE:
+        if not self.department.mode.cosmo:
             for hd in holidays:
                 days.remove(hd)
 
@@ -286,7 +286,7 @@ class WeeksDatabase(object):
         # COMPATIBILITY
         # Slots and courses are compatible if they have the same type
         # OR if slot type is None and they have the same duration
-        if not settings.COSMO_MODE:
+        if not self.department.mode.cosmo:
             compatible_slots = {}
             for c in self.courses:
                 compatible_slots[c] = set(slot for slot in self.courses_slots
