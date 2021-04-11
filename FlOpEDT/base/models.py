@@ -187,8 +187,9 @@ class TimeGeneralSettings(models.Model):
             f" Days: {self.days}"
 
 
-class DepartmentMode(models.Model):
-    department = models.OneToOneField(Department, on_delete=models.CASCADE)
+class Mode(models.Model):
+    department = models.OneToOneField(Department,
+                                      on_delete=models.CASCADE)
     cosmo = models.BooleanField(default=False)
     visio = models.BooleanField(default=False)
 
