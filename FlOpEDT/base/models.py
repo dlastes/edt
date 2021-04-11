@@ -29,9 +29,11 @@ from colorfield.fields import ColorField
 from django.contrib.auth.models import AbstractUser
 from django.contrib.postgres.fields import ArrayField
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.db.models.signals import post_save
 from django.db import models
+from django.dispatch import receiver
 
-from base.timing import hhmm, str_slot, Day, Time
+from base.timing import hhmm, str_slot, Day, Time, days_list
 import base.weeks
 
 from django.utils.translation import gettext_lazy as _
@@ -190,6 +192,22 @@ class DepartmentMode(models.Model):
     cosmo = models.BooleanField(default=False)
     visio = models.BooleanField(default=False)
 
+
+@receiver(post_save, sender=Department)
+def create_department_related(sender, instance, created, raw, **kwargs):
+    if not created or raw:
+        return
+
+    DepartmentMode.objects.create(department=instance)
+    TimeGeneralSettings.objects.create(
+        department=instance,
+        day_start_time=6*60,
+        day_finish_time=20*60,
+        lunch_break_start_time=13*60,
+        lunch_break_finish_time=13*60, 
+        days=days_list 
+    )
+    
 # </editor-fold>
 
 # <editor-fold desc="ROOMS">
