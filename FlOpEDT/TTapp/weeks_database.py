@@ -78,7 +78,7 @@ class WeeksDatabase(object):
             self.other_departments_courses, self.other_departments_sched_courses, \
             self.other_departments_sched_courses_for_avail_slot, \
             self.courses_availabilities, self.modules, self.dependencies = self.courses_init()
-        if settings.VISIO_MODE:
+        if self.department.mode.visio:
             self.visio_courses, self.no_visio_courses, self.visio_ponderation = self.visio_init()
         self.room_types, self.rooms, self.basic_rooms, self.room_prefs, self.rooms_for_type, \
             self.room_course_compat, self.course_rg_compat, self.fixed_courses_for_room, \
@@ -262,7 +262,7 @@ class WeeksDatabase(object):
                 room_course_compat[r].extend(
                     [(c, rg) for c in self.courses if rg in course_rg_compat[c]])
                      # self.courses.filter(room_type__in=rg.types.all())])
-        if settings.VISIO_MODE:
+        if self.department.mode.visio:
             # All courses can have no room (except no-visio ones?)
             for c in set(self.courses):
                 # if c not in self.no_visio_courses:

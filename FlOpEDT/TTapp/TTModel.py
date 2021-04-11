@@ -151,7 +151,7 @@ class TTModel(object):
         self.cost_I, self.FHD_G, self.cost_G, self.cost_SL, self.generic_cost = self.costs_init()
         self.TT, self.TTrooms, self.TTinstructors = self.TT_vars_init()
         self.IBD, self.IBD_GTE, self.IBHD, self.GBHD, self.IBS, self.forced_IBD = self.busy_vars_init()
-        if settings.VISIO_MODE:
+        if self.department.mode.visio:
             self.physical_presence, self.has_visio = self.visio_vars_init()
         self.avail_instr, self.avail_at_school_instr, self.unp_slot_cost \
             = self.compute_non_preferred_slots_cost()
@@ -598,7 +598,7 @@ class TTModel(object):
                                     Constraint(constraint_type=ConstraintType.SUPP_TUTOR,
                                                instructors=i, slots=sl))
 
-                if settings.VISIO_MODE:
+                if self.department.mode.visio:
                     # avail_at_school_instr consideration...
                     relevant_courses = set(c for c in self.wdb.possible_courses[i]
                                            if None in self.wdb.course_rg_compat[c])
@@ -1031,7 +1031,7 @@ class TTModel(object):
         if self.core_only:
             return
 
-        if settings.VISIO_MODE:
+        if self.department.mode.visio:
             self.add_visio_room_constraints()
 
         self.add_slot_preferences()
