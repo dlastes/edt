@@ -32,7 +32,7 @@ routerFetch.register(r'scheduledcourses', views.ScheduledCoursesViewSet, basenam
 routerFetch.register(r'unscheduledcourses', views.UnscheduledCoursesViewSet, basename='unscheduledcourses')
 #routerFetch.register(r'availabilities', views.AvailabilitiesViewSet, basename='availabilities')
 routerFetch.register(r'dweek', views_preferences.UserPreferenceDefaultViewSet, basename='dweek')
-#routerFetch.register(r'coursedefweek', views.CourseTypeDefaultWeekViewSet, basename='coursedefweek')
+routerFetch.register(r'coursedefweek', views.CourseTypeDefaultWeekViewSet, basename='coursedefweek')
 #routerFetch.register(r'allversions', views.AllVersionsViewSet)
 routerFetch.register(r'alldepts', views.DepartmentsViewSet)
 #routerFetch.register(r'tutorcourses', views.TutorCoursesViewSet, basename='tutorcourses')

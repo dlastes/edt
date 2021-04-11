@@ -198,12 +198,13 @@ class CourseTypeDefaultWeekViewSet(viewsets.ReadOnlyModelViewSet):
 
         # Filtering
         if department is not None:
-            qs = qs.filter(train_prog__department=department)
+            qs = qs.select_related('train_prog__department')\
+                   .filter(train_prog__department__abbrev=department)
         if train_prog is not None:
             qs = qs.filter(train_prog__abbrev=train_prog)
         if course_type is not None:
             qs = qs.filter(course_type__name=course_type)
-        return qs
+        return qs.select_related('course_type', 'train_prog')
 
 
 class AllVersionsFilterSet(filters.FilterSet):
