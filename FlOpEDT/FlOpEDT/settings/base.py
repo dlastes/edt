@@ -246,5 +246,4 @@ SHELL_PLUS_MODEL_IMPORTS_RESOLVER = 'django_extensions.collision_resolvers.AppLa
 
 CORS_ALLOW_ALL_ORIGINS = True
 
-COSMO_MODE = False
 VISIO_MODE = False

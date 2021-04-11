@@ -45,7 +45,6 @@ from django.views.decorators.cache import cache_page
 from django.views.generic import RedirectView
 
 from FlOpEDT.decorators import dept_admin_required, tutor_required
-from FlOpEDT.settings.base import COSMO_MODE
 
 from people.models import Tutor, UserDepartmentSettings, User, \
     NotificationsPreferences, UserPreferredLinks
@@ -58,9 +57,7 @@ from base.admin import CoursResource, DispoResource, VersionResource, \
     CoursePreferenceResource, MultiDepartmentTutorResource, \
     SharedRoomsResource, RoomPreferenceResource, ModuleRessource, \
     TutorRessource, ModuleDescriptionResource, AllDispoResource, \
-    GroupPreferredLinksResource
-if COSMO_MODE:
-    from base.admin import CoursPlaceResourceCosmo
+    GroupPreferredLinksResource, CoursPlaceResourceCosmo
 from base.forms import ContactForm, PerfectDayForm, ModuleDescriptionForm, \
     EnrichedLinkForm
 from base.models import Course, UserPreference, ScheduledCourse, EdtVersion, \
@@ -454,7 +451,7 @@ def fetch_cours_pl(req, year, week, num_copy, **kwargs):
             version = queries.get_edt_version(department=department,
                                               week=week,
                                               year=year, create=True)
-        if COSMO_MODE:
+        if department.mode.cosmo:
             dataset = CoursPlaceResourceCosmo()
         else:
             dataset = CoursPlaceResource()
@@ -566,7 +563,7 @@ def fetch_dispos(req, year, week, **kwargs):
         .distinct('tutor') \
         .values_list('tutor')
 
-    if COSMO_MODE:
+    if department.mode.cosmo:
         busy_inst_after = ScheduledCourse.objects.filter(course__week=week,
                                                          course__year=year,
                                                          course__module__train_prog__department=department) \
