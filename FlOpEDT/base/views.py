@@ -963,7 +963,7 @@ def fetch_extra_sched(req, year, week, **kwargs):
 def fetch_shared_rooms(req, year, week, **kwargs):
     # which room groups are shared among departments
     shared_rooms = []
-    for rg in Room.objects.all():
+    for rg in Room.objects.all().prefetch_related('types__department'):
         depts = set() 
         for rt in rg.types.all(): 
             depts.add(rt.department) 
@@ -978,6 +978,8 @@ def fetch_shared_rooms(req, year, week, **kwargs):
                     work_copy=0,
                     room__in=shared_rooms,
                 ) \
+                .select_related('course__room_type__department', 'room',
+                                'course__type__department')\
                 .exclude(course__room_type__department=req.department)
     dataset = SharedRoomsResource().export(courses)
     return HttpResponse(dataset.csv, content_type='text/csv')
