@@ -161,7 +161,6 @@ def edt(req, year=None, week=None, splash_id=0, **kwargs):
                                 'department_settings': queries.get_department_settings(req.department),
                                 'days': num_all_days(year, week, req.department),
                                 'dept': req.department.abbrev,
-                                'cosmo': COSMO_MODE,
                             })
 
 
@@ -208,7 +207,6 @@ def edt_light(req, year=None, week=None, **kwargs):
                                 'tv_gp_s': gp_s,
                                 'tv_gp_w': gp_w,
                                 'tv_svg_top_m': svg_top_m,
-                                'cosmo': COSMO_MODE,
                             })
 
 
@@ -239,7 +237,6 @@ def stype(req, *args, **kwargs):
                                  'current_year': current_year,
                                  'department_settings': queries.get_department_settings(req.department),
                                  'days': num_all_days(1, 1, req.department),
-                                 'cosmo': COSMO_MODE,
                                  })
     elif req.method == 'POST':
         if 'apply' in list(req.POST.keys()):
