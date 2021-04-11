@@ -441,9 +441,8 @@ admin.site.register(TutorsLunchBreak, TutorsLunchBreakAdmin)
 admin.site.register(BreakAroundCourseType, BreakAroundCourseTypeAdmin)
 admin.site.register(NoCourseOnDay, NoCourseOnDayAdmin)
 
-if settings.VISIO_MODE:
-    admin.site.register(NoVisio, NoVisioAdmin)
-    admin.site.register(VisioOnly, VisioOnlyAdmin)
-    admin.site.register(BoundPhysicalPresenceHalfDays, BoundPhysicalPresenceHalfDaysAdmin)
-    admin.site.register(LimitGroupsPhysicalPresence, LimitGroupsPhysicalPresenceAdmin)
+admin.site.register(NoVisio, NoVisioAdmin)
+admin.site.register(VisioOnly, VisioOnlyAdmin)
+admin.site.register(BoundPhysicalPresenceHalfDays, BoundPhysicalPresenceHalfDaysAdmin)
+admin.site.register(LimitGroupsPhysicalPresence, LimitGroupsPhysicalPresenceAdmin)
 
