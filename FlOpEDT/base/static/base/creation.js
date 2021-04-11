@@ -1275,7 +1275,7 @@ function check_course() {
     return ret;
   }
 
-  if (cosmo) {
+  if (department_settings.mode.cosmo) {
     pending.pass.room = true;
   }
 

@@ -580,7 +580,7 @@ var sel_popup = {
   but: [],
   active_filter: false
 };
-if (cosmo) {
+if (department_settings.mode.cosmo) {
   sel_popup.available = [{
     type: "group",
     buttxt: gettext('Filters')

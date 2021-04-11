@@ -1070,7 +1070,7 @@ function update_active() {
 
   sel_popup.active_filter = tut_av.active || mod_av.active;
 
-  if (!cosmo) {
+  if (!department_settings.mode.cosmo) {
     var room_av = sel_popup.get_available("room");
     room_av.active = rooms_sel.all.filter(function (d) {
       return d.display;
@@ -1109,13 +1109,13 @@ function go_courses(quick) {
     .on("contextmenu", function (d) {
       if (ckbox["edt-mod"].cked) {
         d3.event.preventDefault();
-        if (!cosmo) {
+        if (!department_settings.mode.cosmo) {
           room_tutor_change.cm_settings = entry_cm_settings;
         }
         pending.prepare_modif(d);
         compute_cm_room_tutor_direction();
         //select_room_change(d);
-        if (!cosmo) {
+        if (!department_settings.mode.cosmo) {
           select_entry_cm();
         } else {
           salarie_cm_level = 0;
@@ -1201,7 +1201,7 @@ function go_courses(quick) {
     .text(cours_txt_mid_txt);
 
 
-  if (!cosmo) {
+  if (!department_settings.mode.cosmo) {
     incg
       .append("text")
       .attr("st", "m")

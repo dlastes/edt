@@ -1161,7 +1161,7 @@ function fetch_all(first, fetch_work_copies) {
   if (ckbox["edt-mod"].cked) {
     fetch_tutor_extra_unavailability();
     fetch_room_preferences_unavailability();
-    if (cosmo) {
+    if (department_settings.mode.cosmo) {
       fetch_side_weeks();
     }
   }

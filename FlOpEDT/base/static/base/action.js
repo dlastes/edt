@@ -83,7 +83,7 @@ function apply_change_simple_pref(d) {
         d.value = Math.floor(d.value / (par_dispos.nmax / 2)) * par_dispos.nmax / 2;
       }
       d.value = (d.value + par_dispos.nmax / 2) % (3 * par_dispos.nmax / 2);
-      if (cosmo && d.value == 0) {
+      if (department_settings.mode.cosmo && d.value == 0) {
         d.value++;
       }
       update_pref_interval(user.name, d.day, d.start_time, d.duration, d.value);
@@ -1331,7 +1331,7 @@ function confirm_change() {
     ack.more = "Rien à signaler.";
     go_ack_msg();
   } else {
-    if (!cosmo) {
+    if (!department_settings.mode.cosmo) {
       confirm_contact_all(changes, conc_tutors, gps);
     } else {
       confirm_law_constraints(changes, conc_tutors, gps);

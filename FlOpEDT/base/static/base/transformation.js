@@ -795,7 +795,7 @@ function cours_txt_x(c) {
 }
 function get_color(c){
 //  console.log(c);
-  let key = cosmo?c.prof:c.mod;
+  let key = department_settings.mode.cosmo?c.prof:c.mod;
   return colors[key];
 }
 function cours_txt_fill(c) {
