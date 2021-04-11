@@ -74,7 +74,6 @@ class Group_SC_Serializer(serializers.Serializer):
 class Course_SC_Serializer(serializers.Serializer):
     id = serializers.IntegerField()
     type = serializers.CharField()
-    tutor = serializers.CharField()
     room_type = serializers.CharField()
     week = serializers.IntegerField()
     year = serializers.IntegerField()
@@ -83,7 +82,7 @@ class Course_SC_Serializer(serializers.Serializer):
 
     class Meta:
         model = bm.Course
-        fields = ['id', 'type', 'tutor', 'room_type', 'week', 'year', 'module', 'groups', ]
+        fields = ['id', 'type', 'room_type', 'week', 'year', 'module', 'groups', ]
 
 
 class ScheduledCoursesSerializer(serializers.Serializer):
@@ -93,11 +92,12 @@ class ScheduledCoursesSerializer(serializers.Serializer):
     start_time = serializers.IntegerField()
     day = serializers.CharField()
     course = Course_SC_Serializer()
+    tutor = serializers.CharField(source='tutor.username')
 
     # Mise en forme des données
     class Meta:
         model = bm.ScheduledCourse
-        fields = ['id', 'room', 'start_time', 'day', 'course']
+        fields = ['id', 'tutor', 'room', 'start_time', 'day', 'course']
 
 #                             -------------------------------                           #
 #                             ----UnscheduledCourses (PP)----                           #
