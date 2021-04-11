@@ -48,7 +48,7 @@ class ScheduledCourseFilterSet(filters.FilterSet):
     train_prog = filters.CharFilter(field_name='course__module__train_prog__abbrev')
     # group or tutor
     group = filters.CharFilter(field_name='course__groups__name')
-    tutor_name = filters.CharFilter(field_name='course__tutor__username')
+    tutor_name = filters.CharFilter(field_name='tutor__username')
     # makes the fields required
     week = filters.NumberFilter(field_name='course__week', required=True)
     year = filters.NumberFilter(field_name='course__year', required=True)
@@ -69,7 +69,14 @@ class ScheduledCoursesViewSet(viewsets.ReadOnlyModelViewSet):
     Request needs a department filter.
     """
     permission_classes = [IsAdminOrReadOnly]
-    queryset = bm.ScheduledCourse.objects.all()
+    queryset = bm.ScheduledCourse.objects.all()\
+                                         .select_related('course__module__train_prog__department',
+                                                         'tutor',
+                                                         'course__type',
+                                                         'course__room_type',
+                                                         'course__module__display')\
+                                         .prefetch_related('course__groups__train_prog',
+                                                           'room')
     serializer_class = serializers.ScheduledCoursesSerializer
     filter_class = ScheduledCourseFilterSet
 
