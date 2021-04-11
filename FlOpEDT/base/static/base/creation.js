@@ -149,7 +149,7 @@ function create_grid_data() {
       for (let s = 0; s < Object.keys(rev_constraints).length; s++) {
         for (let r = 0; r < set_rows.length; r++) {
           var start = Object.keys(rev_constraints)[s];
-          if (start < time_settings.time.day_finish_time) {
+          if (start < department_settings.time.day_finish_time) {
             var gscp = {
               row: r,
               start: start,
@@ -1650,7 +1650,7 @@ function which_slot(x, y, c) {
 
 // date {day, start_time}
 function is_garbage(date) {
-  var t = time_settings.time;
+  var t = department_settings.time;
   return (date.start_time < t.day_start_time
     || date.start_time >= t.day_finish_time);
 }
@@ -1676,7 +1676,7 @@ function indexOf_constraints(c, y) {
       };
     }
   );
-  var t = time_settings.time;
+  var t = department_settings.time;
 
   var after = false;
   var i = 0;

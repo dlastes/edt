@@ -158,7 +158,7 @@ def edt(req, year=None, week=None, splash_id=0, **kwargs):
                                 'name_usr': name_usr,
                                 'rights_usr': rights_usr,
                                 'splash_id': splash_id,
-                                'time_settings': queries.get_time_settings(req.department),
+                                'department_settings': queries.get_department_settings(req.department),
                                 'days': num_all_days(year, week, req.department),
                                 'dept': req.department.abbrev,
                                 'cosmo': COSMO_MODE,
@@ -200,7 +200,7 @@ def edt_light(req, year=None, week=None, **kwargs):
                                 'name_usr': '',
                                 'rights_usr': 0,
                                 'splash_id': 0,
-                                'time_settings': queries.get_time_settings(req.department),
+                                'department_settings': queries.get_department_settings(req.department),
                                 'days': num_all_days(year, week, req.department),
                                 'dept': req.department.abbrev,
                                 'tv_svg_h': svg_h,
@@ -237,7 +237,7 @@ def stype(req, *args, **kwargs):
                                  'user_notifications_pref': user_notifications_pref,
                                  'err': err,
                                  'current_year': current_year,
-                                 'time_settings': queries.get_time_settings(req.department),
+                                 'department_settings': queries.get_department_settings(req.department),
                                  'days': num_all_days(1, 1, req.department),
                                  'cosmo': COSMO_MODE,
                                  })
@@ -273,7 +273,7 @@ def stype(req, *args, **kwargs):
                                  'user_notifications_pref': user_notifications_pref,
                                  'err': err,
                                  'current_year': current_year,
-                                 'time_settings': queries.get_time_settings(req.department),
+                                 'department_settings': queries.get_department_settings(req.department),
                                  'days': num_all_days(1, 1, req.department)
                                  })
 

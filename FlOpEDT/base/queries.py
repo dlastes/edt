@@ -294,7 +294,7 @@ def get_coursetype_constraints(department_abbrev):
     return dic
 
 
-def get_time_settings(dept):
+def get_department_settings(dept):
     """
     :return: time general settings
     """

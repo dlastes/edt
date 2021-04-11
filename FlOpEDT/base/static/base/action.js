@@ -741,11 +741,11 @@ function apply_ckbox(dk) {
           "lunch_break_start_time", "lunch_break_finish_time"
         ] ;
         for (let i = 0 ; i < bus.length ; i ++) {
-          if (typeof time_settings.time.bu[bus[i]] !== 'undefined') {
-            time_settings.time[bus[i]] = time_settings.time.bu[bus[i]] ;
+          if (typeof department_settings.time.bu[bus[i]] !== 'undefined') {
+            department_settings.time[bus[i]] = department_settings.time.bu[bus[i]] ;
           }
         }
-        time_settings.time.bu = {} ;
+        department_settings.time.bu = {} ;
         
         user.dispos = [];
         //ckbox["dis-mod"].disp = false;

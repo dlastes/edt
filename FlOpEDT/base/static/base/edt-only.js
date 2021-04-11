@@ -141,7 +141,7 @@ file_fetch.groups.callback = function () {
       Object.keys(rev_constraints).map(function(r){
         return +r + rev_constraints[r];
       }));
-    let t = time_settings.time ;
+    let t = department_settings.time ;
     hours_header.hours.add_times([
       t.day_start_time,
       t.lunch_break_start_time,
