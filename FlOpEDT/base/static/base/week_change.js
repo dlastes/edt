@@ -740,12 +740,19 @@ function translate_cours_pl_from_json(d, result) {
       id_visio: d.room==''?(d.id_visio==''?-1:+d.id_visio):-1,
     } ;
 
-    if (department_settings.mode.cosmo) {
-      new_course.color_bg = d.course.module.display.color_bg ;
-      new_course.color_txt = d.course.module.display.color_txt ;
+    new_course.color_bg = 'white' ;
+    new_course.color_txt = 'black' ;
+
+    if (!department_settings.mode.cosmo) {
+      if(d.course.module !== null && d.course.module.display !== null) {
+        new_course.color_bg = d.course.module.display.color_bg ;
+        new_course.color_txt = d.course.module.display.color_txt ;
+      }
     } else {
-      new_course.color_bg = d.tutor.display.color_bg ;
-      new_course.color_txt = d.tutor.display.color_txt ;
+      if(d.tutor !== null && d.tutor.display !== null) {
+        new_course.color_bg = d.tutor.display.color_bg ;
+        new_course.color_txt = d.tutor.display.color_txt ;
+      }
     }
 
     result.push(new_course);
