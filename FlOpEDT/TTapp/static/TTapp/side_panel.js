@@ -79,8 +79,6 @@ function update_work_copy_numbers(copies) {
     dd.removeChild(dd.firstChild);
   }
 
-  console.log(copies);
-
   // add new copy numbers
   var option;
   for (var i = 0; i < copies.length; i++) {
