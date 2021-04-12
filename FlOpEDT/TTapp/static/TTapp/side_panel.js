@@ -76,12 +76,26 @@ function update_work_copy_numbers(copies) {
     dd.removeChild(dd.firstChild);
   }
 
+  console.log(copies);
+
   // add new copy numbers
   var option;
   for (var i = 0; i < copies.length; i++) {
     option = { value: copies[i], text: copies[i] };
     $('#dd_work_copy').append($('<option>', option));
   }
+
+  if (copies.length == 0) {
+      num_copie = 0 ;
+  } else {
+    let inum_copie = copies.indexOf(num_copie) ;
+    if (inum_copie == -1) {
+      inum_copie ++ ;
+    }
+    num_copie = copies[inum_copie] ;
+    $('#dd_work_copy').val(num_copie) ;
+  }
+  
 }
 
 // close the side panel
