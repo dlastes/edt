@@ -199,7 +199,7 @@ def create_department_related(sender, instance, created, raw, **kwargs):
     if not created or raw:
         return
 
-    DepartmentMode.objects.create(department=instance)
+    Mode.objects.create(department=instance)
     TimeGeneralSettings.objects.create(
         department=instance,
         day_start_time=6*60,
