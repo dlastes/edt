@@ -711,9 +711,6 @@ function fetch_cours() {
 }
 
 function translate_cours_pl_from_json(d, result) {
-  if (tutors.pl.indexOf(d.course.tutor) === -1) {
-    tutors.pl.push(d.course.tutor);
-  }
   if (modules.pl.indexOf(d.course.module.abbrev) === -1) {
     modules.pl.push(d.course.module.abbrev);
   }
@@ -757,6 +754,10 @@ function translate_cours_pl_from_json(d, result) {
       }
     }
 
+    if (new_course.prof != '?' &&
+        tutors.pl.indexOf(new_course.prof) === -1) {
+      tutors.pl.push(d.course.tutor);
+    }
     result.push(new_course);
   }
 }
