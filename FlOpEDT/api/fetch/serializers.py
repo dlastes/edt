@@ -146,7 +146,7 @@ class ScheduledCoursesCosmoSerializer(serializers.Serializer):
     start_time = serializers.IntegerField()
     day = serializers.CharField()
     course = CourseCosmo_SC_Serializer()
-    tutor = TutorCosmoSerializer(source='course.tutor')
+    tutor = TutorCosmoSerializer()
 
     # Mise en forme des données
     class Meta:
