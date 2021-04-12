@@ -71,15 +71,24 @@ class ScheduledCoursesViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAdminOrReadOnly]
     queryset = bm.ScheduledCourse.objects.all()\
                                          .select_related('course__module__train_prog__department',
-                                                         'tutor',
+                                                         'tutor__display',
                                                          'course__type',
                                                          'course__room_type',
                                                          'course__module__display')\
                                          .prefetch_related('course__groups__train_prog',
                                                            'room')
-    serializer_class = serializers.ScheduledCoursesSerializer
+    #serializer_class = serializers.ScheduledCoursesSerializer
     filter_class = ScheduledCourseFilterSet
 
+    def get_serializer_class(self):
+        department = bm.Department.objects.get(
+            abbrev=self.request.query_params.get('dept', None)
+        )
+        if department.mode.cosmo:
+            return serializers.ScheduledCoursesCosmoSerializer
+        else:
+            return serializers.ScheduledCoursesSerializer
+    
 
 @method_decorator(name='list',
                   decorator=swagger_auto_schema(
