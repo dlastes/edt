@@ -893,14 +893,20 @@ function side_week_rcv(side_week) {
 // fetches courses of the weeks before and after the current week
 function fetch_side_weeks() {
 
-  var needed_weeks = which_side_weeks();
+  // shunt it for now
+  var needed_weeks = [] ; // which_side_weeks();
 
   for (var i = 0; i < needed_weeks.data.length; i++) {
     console.log(url_cours_pl + needed_weeks.data[i].url() + "/" + 0);
     $.ajax({
       type: "GET", //rest Type
       dataType: 'text',
-      url: url_cours_pl + needed_weeks.data[i].url() + "/" + 0,
+      url: build_url(
+        url_cours_pl,
+        context_dept,
+        needed_weeks.data[i].as_context(),
+        {'work_copy': num_copie}
+      ),
       async: true,
       contentType: "text/csv",
       success: side_week_rcv(needed_weeks.data[i]),
