@@ -1146,6 +1146,13 @@ function translate_extra_pref_room_from_csv(d) {
    --------------------*/
 
 function fetch_all(first, fetch_work_copies) {
+
+  if (is_side_panel_open && fetch_work_copies) {
+    fetch_work_copy_numbers(true, first);
+    return ;
+  }
+
+
   fetch_status.done = false;
 
   if (!fetch_status.course_saved) {
@@ -1185,9 +1192,6 @@ function fetch_all(first, fetch_work_copies) {
   }
   fetch_bknews(first);
 
-  if (is_side_panel_open && fetch_work_copies) {
-    fetch_work_copy_numbers();
-  }
 }
 
 
