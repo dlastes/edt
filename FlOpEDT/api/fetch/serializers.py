@@ -99,6 +99,60 @@ class ScheduledCoursesSerializer(serializers.Serializer):
         model = bm.ScheduledCourse
         fields = ['id', 'tutor', 'room', 'start_time', 'day', 'course']
 
+
+
+class ModuleCosmo_SC_Serializer(serializers.Serializer):
+    name = serializers.CharField()
+    abbrev = serializers.CharField()
+
+    class Meta:
+        model = bm.Module
+        fields = ['name', 'abbrev']
+
+class CourseCosmo_SC_Serializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    type = serializers.CharField()
+    room_type = serializers.CharField()
+    week = serializers.IntegerField()
+    year = serializers.IntegerField()
+    groups = Group_SC_Serializer(many=True)
+    module = ModuleCosmo_SC_Serializer()
+
+    class Meta:
+        model = bm.Course
+        fields = ['id', 'type', 'room_type', 'week', 'year', 'module', 'groups', ]
+        
+
+class TutorDisplay_SC_Serializer(serializers.Serializer):
+    color_bg = serializers.CharField()
+    color_txt = serializers.CharField()
+
+    class Meta:
+        model = dwm.TutorDisplay
+        fields = ['color_bg', 'color_txt']
+
+class TutorCosmoSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    display = serializers.CharField()
+
+    class Meta:
+        model = pm.Tutor
+        fields = ['username', 'display']
+
+class ScheduledCoursesCosmoSerializer(serializers.Serializer):
+    # Spécification des champs voulus
+    id = serializers.IntegerField()
+    room = serializers.CharField()
+    start_time = serializers.IntegerField()
+    day = serializers.CharField()
+    course = CourseCosmo_SC_Serializer()
+    tutor = TutorCosmoSerializer(source='course.tutor')
+
+    # Mise en forme des données
+    class Meta:
+        model = bm.ScheduledCourse
+        fields = ['id', 'tutor', 'room', 'start_time', 'day', 'course']
+
 #                             -------------------------------                           #
 #                             ----UnscheduledCourses (PP)----                           #
 #                             -------------------------------                           #
