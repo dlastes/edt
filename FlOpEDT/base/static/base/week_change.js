@@ -756,7 +756,7 @@ function translate_cours_pl_from_json(d, result) {
 
     if (new_course.prof != '?' &&
         tutors.pl.indexOf(new_course.prof) === -1) {
-      tutors.pl.push(d.course.tutor);
+      tutors.pl.push(new_course.prof);
     }
     result.push(new_course);
   }
