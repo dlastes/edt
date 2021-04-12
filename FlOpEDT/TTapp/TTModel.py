@@ -162,7 +162,7 @@ class TTModel(object):
         start = datetime.datetime.now()
         self.IBD, self.IBD_GTE, self.IBHD, self.GBHD, self.IBS, self.forced_IBD = self.busy_vars_init()
         print('-->', datetime.datetime.now() - start)
-        if settings.VISIO_MODE:
+        if self.department.mode.visio:
             print('Visio_init')
             start = datetime.datetime.now()
             self.physical_presence, self.has_visio = self.visio_vars_init()
@@ -303,7 +303,7 @@ class TTModel(object):
                 forced_IBD[(i, d)] = 0
                 if d.day in self.wdb.physical_presence_days_for_tutor[i][d.week]:
                     forced_IBD[(i, d)] = 1
-                if settings.COSMO_MODE:
+                if self.department.mode.cosmo:
                     if self.wdb.sched_courses.filter(day=d.day, course__week=d.week,
                                                      course__suspens=False,
                                                      course__tutor=i).exists():
@@ -615,7 +615,7 @@ class TTModel(object):
                                     Constraint(constraint_type=ConstraintType.SUPP_TUTOR,
                                                instructors=i, slots=sl))
 
-                if settings.VISIO_MODE:
+                if self.department.mode.visio:
                     # avail_at_school_instr consideration...
                     relevant_courses = set(c for c in self.wdb.possible_courses[i]
                                            if None in self.wdb.course_rg_compat[c])
@@ -782,7 +782,7 @@ class TTModel(object):
                                                                   self.wdb.other_departments_courses_for_tutor[i]
                                                                   if c.week == week)
                 week_holidays = [d.day for d in days_filter(self.wdb.holidays, week=week)]
-                if not settings.COSMO_MODE and week_holidays:
+                if not self.department.mode.cosmo and week_holidays:
                     week_tutor_availabilities = set(
                         a for a in self.wdb.availabilities[i][week]
                         if a.day not in week_holidays)
@@ -1048,7 +1048,7 @@ class TTModel(object):
         if self.core_only:
             return
 
-        if settings.VISIO_MODE:
+        if self.department.mode.visio:
             self.add_visio_room_constraints()
 
         self.add_slot_preferences()
