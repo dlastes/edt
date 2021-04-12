@@ -133,7 +133,7 @@ class TutorDisplay_SC_Serializer(serializers.Serializer):
 
 class TutorCosmoSerializer(serializers.Serializer):
     username = serializers.CharField()
-    display = serializers.CharField()
+    display = TutorDisplay_SC_Serializer()
 
     class Meta:
         model = pm.Tutor
