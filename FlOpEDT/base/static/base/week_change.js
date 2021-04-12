@@ -722,10 +722,10 @@ function translate_cours_pl_from_json(d, result) {
   }
   for (let i = 0 ; i < d.course.groups.length ; i++)
   {
-    result.push({
+    let new_course = {
       id_course: +d.course.id,
       no_course: +d.course.id,
-      prof: d.course.tutor,
+      prof: d.tutor,
       //        prof_full_name: d.prof_first_name + " " + d.prof_last_name,
       group: translate_gp_name(d.course.groups[i].name),
       promo: set_promos.indexOf(d.course.groups[i].train_prog),
@@ -736,11 +736,26 @@ function translate_cours_pl_from_json(d, result) {
       duration: constraints[d.course.type].duration,
       room: d.room,
       room_type: d.course.room_type,
-      color_bg: d.course.module.display.color_bg,
-      color_txt: d.course.module.display.color_txt,
       display: true,
       id_visio: d.room==''?(d.id_visio==''?-1:+d.id_visio):-1,
-    });
+    } ;
+
+    new_course.color_bg = 'white' ;
+    new_course.color_txt = 'black' ;
+
+    if (!department_settings.mode.cosmo) {
+      if(d.course.module !== null && d.course.module.display !== null) {
+        new_course.color_bg = d.course.module.display.color_bg ;
+        new_course.color_txt = d.course.module.display.color_txt ;
+      }
+    } else {
+      if(d.tutor !== null && d.tutor.display !== null) {
+        new_course.color_bg = d.tutor.display.color_bg ;
+        new_course.color_txt = d.tutor.display.color_txt ;
+      }
+    }
+
+    result.push(new_course);
   }
 }
 
