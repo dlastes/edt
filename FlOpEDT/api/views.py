@@ -154,10 +154,10 @@ def pref_requirements(department, tutor, year, week):
     that have been proposed VS required number of prefs, according
     to local policy
     """
-    nb_courses = bm.Course.objects.filter(tutor=tutor,
-                                          week=week,
-                                          year=year) \
-        .count()
+    courses_time =sum(c.type.duration for c in
+                      bm.Course.objects.filter(tutor=tutor,
+                                               week=week,
+                                               year=year))
     week_av = bm.UserPreference \
         .objects \
         .filter(user=tutor,
@@ -165,19 +165,16 @@ def pref_requirements(department, tutor, year, week):
                 year=year,
                 day__in=queries.get_working_days(department))
     if not week_av.exists():
-        filled = bm.UserPreference \
+        week_av = bm.UserPreference \
             .objects \
             .filter(user=tutor,
                     week=None,
-                    value__gte=1,
-                    day__in=queries.get_working_days(department)) \
-            .count()
-    else:
-        filled = week_av \
-            .filter(value__gte=1,
-                    day__in=queries.get_working_days(department)) \
-            .count()
-    return filled, 2 * nb_courses
+                    day__in=queries.get_working_days(department))
+    filled = sum(a.duration for a in
+                 week_av.filter(value__gte=1,
+                                day__in=queries.get_working_days(department))
+                 )
+    return filled, courses_time
 
 
 @method_decorator(name='list',
