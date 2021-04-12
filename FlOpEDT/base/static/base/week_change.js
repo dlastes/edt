@@ -722,10 +722,10 @@ function translate_cours_pl_from_json(d, result) {
   }
   for (let i = 0 ; i < d.course.groups.length ; i++)
   {
-    result.push({
+    let new_course = {
       id_course: +d.course.id,
       no_course: +d.course.id,
-      prof: d.course.tutor,
+      prof: d.tutor,
       //        prof_full_name: d.prof_first_name + " " + d.prof_last_name,
       group: translate_gp_name(d.course.groups[i].name),
       promo: set_promos.indexOf(d.course.groups[i].train_prog),
