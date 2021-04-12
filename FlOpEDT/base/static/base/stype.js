@@ -157,7 +157,8 @@ function course_type_prog_name(prog, ctype) {
 
 
 function translate_course_preferences_from_csv(d) {
-  var pseudo_tutor = course_type_prog_name(d.train_prog, d.type_name);
+  var pseudo_tutor = course_type_prog_name(d.train_prog, d.course_type);
+
   if (Object.keys(dispos).indexOf(pseudo_tutor) == -1) {
     dispos[pseudo_tutor] = {};
     week_days.forEach(function (day) {
