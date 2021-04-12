@@ -45,11 +45,11 @@ function openNav() {
   });
 
   // fetch the copy numbers
-  fetch_work_copy_numbers();
+  fetch_work_copy_numbers(false);
 }
 
 // Fetch the available work copy numbers for the current week
-function fetch_work_copy_numbers() {
+function fetch_work_copy_numbers(fetch_all_callback, fetch_all_callback_arg) {
   var cur_week = wdw_weeks.get_selected();
 
   $.ajax({
@@ -60,6 +60,9 @@ function fetch_work_copy_numbers() {
     contentType: "application/json; charset=utf-8",
     success: function (msg) {
       update_work_copy_numbers(msg.copies);
+      if (fetch_all_callback) {
+        fetch_all(fetch_all_callback_arg, false);
+      }
     },
     error: function (msg) {
       console.log("error");
