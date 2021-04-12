@@ -92,7 +92,7 @@ class ScheduledCoursesSerializer(serializers.Serializer):
     start_time = serializers.IntegerField()
     day = serializers.CharField()
     course = Course_SC_Serializer()
-    tutor = serializers.CharField(source='tutor.username')
+    tutor = serializers.CharField(source='tutor.username', allow_null=True)
 
     # Mise en forme des données
     class Meta:
