@@ -45,6 +45,9 @@ class NoVisio(TTConstraint):
 
 
     def enrich_model(self, ttmodel, week, ponderation=1000000):
+        if not settings.VISIO_MODE:
+            print("Visio Mode is not activated : ignore NoVisio constraint")
+            return
         considered_groups = considered_basic_groups(self, ttmodel)
         days = days_filter(ttmodel.wdb.days, week=week)
         if self.weekdays:
@@ -103,6 +106,9 @@ class VisioOnly(TTConstraint):
     modules = models.ManyToManyField('base.Module', blank=True, related_name='visio_only')
 
     def enrich_model(self, ttmodel, week, ponderation=1000000):
+        if not settings.VISIO_MODE:
+            print("Visio Mode is not activated : ignore VisioOnly constraint")
+            return
         considered_groups = considered_basic_groups(self, ttmodel)
         days = days_filter(ttmodel.wdb.days, week=week)
         if self.weekdays:
@@ -163,6 +169,9 @@ class LimitGroupsPhysicalPresence(TTConstraint):
     weekdays = ArrayField(models.CharField(max_length=2, choices=Day.CHOICES), blank=True, null=True)
 
     def enrich_model(self, ttmodel, week, ponderation=1000):
+        if not settings.VISIO_MODE:
+            print("Visio Mode is not activated : ignore LimitGroupsPhysicalPresence constraint")
+            return
         if self.train_progs.exists():
             considered_basic_groups = set(
                 ttmodel.wdb.basic_groups.filter(train_prog__in=self.train_progs.all()))
@@ -209,6 +218,9 @@ class BoundPhysicalPresenceHalfDays(TTConstraint):
     groups = models.ManyToManyField('base.Group', blank=True, related_name='bound_physical_presence_half_days')
 
     def enrich_model(self, ttmodel, week, ponderation=1):
+        if not settings.VISIO_MODE:
+            print("Visio Mode is not activated : ignore BoundPhysicalPresenceHalfDays constraint")
+            return
         considered_groups = considered_basic_groups(self, ttmodel)
         total_nb_half_days = len(ttmodel.wdb.days) * 2
         physical_presence_half_days_number = {}
