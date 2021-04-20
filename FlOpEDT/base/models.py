@@ -202,7 +202,7 @@ def create_department_related(sender, instance, created, raw, **kwargs):
     Mode.objects.create(department=instance)
     TimeGeneralSettings.objects.create(
         department=instance,
-        day_start_time=6*60,
+        day_start_time=8*60,
         day_finish_time=20*60,
         lunch_break_start_time=13*60,
         lunch_break_finish_time=13*60, 
