@@ -625,11 +625,24 @@ class CourseModification(models.Model):
             cur_tutor_name = sched_course.tutor.username if sched_course.tutor is not None else "personne"
             changed += al + f'Prof : {tutor_old_name} -> {cur_tutor_name}'
 
-        room_old_name = self.room_old.name if self.room_old is not None else "nulle part"
+        if self.room_old is None:
+            if self.room_old_is_visio:
+                room_old_name = "visio"
+            else:
+                room_old_name = "nulle part"
+        else:
+            room_old_name = self.room_old.name
+
         if sched_course.room == self.room_old:
             same += f', en {room_old_name}'
         else:
-            cur_room_name = sched_course.room.name if sched_course.room.name is not None else "nulle part"
+            if sched_course.room is None:
+                if ScheduledCourseAdditional.objects.filter(scheduled_course=sched_course).exists():
+                    cur_room_name = "visio"
+                else:
+                    cur_room_name = "nulle part"
+            else:
+                cur_room_name = sched_course.room.name
             changed += al + f'Salle : {room_old_name} -> {cur_room_name}'
 
         day_list = base.weeks.num_all_days(
