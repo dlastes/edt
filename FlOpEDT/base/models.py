@@ -594,6 +594,7 @@ class CourseModification(models.Model):
     old_year = models.PositiveSmallIntegerField(null=True)
     room_old = models.ForeignKey(
         'Room', blank=True, null=True, on_delete=models.CASCADE)
+    room_old_is_visio = models.BooleanField(default=False)
     day_old = models.CharField(
         max_length=2, choices=Day.CHOICES, default=None, null=True)
     start_time_old = models.PositiveSmallIntegerField(default=None, null=True)
