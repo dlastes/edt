@@ -1010,7 +1010,7 @@ def clean_change(year, week, old_version, change, work_copy=0, initiator=None, a
     if tutor_old is None:
         tutor_old = sched_course.course.tutor
         sched_course.tutor = tutor_old
-        
+
     course_log = CourseModification(course=course,
                                     old_week=week,
                                     old_year=year,
@@ -1028,7 +1028,7 @@ def clean_change(year, week, old_version, change, work_copy=0, initiator=None, a
     # Rooms
     try:
         new_room = Room.objects.get(name=change['room']) \
-            if change['room'] != '' else None
+            if change['room'] is not None else None
         ret['sched'].room = new_room
     except Room.DoesNotExist:
         raise Exception(f"Problème : salle {change['room']} inconnue")

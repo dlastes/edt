@@ -103,11 +103,13 @@ function translate_dispos_from_csv(d) {
       dispos[d.user][day.ref] = [];
     });
   }
-  dispos[d.user][d.day].push({
-    start_time: +d.start_time,
-    duration: +d.duration,
-    value: +d.value
-  });
+  if(Object.keys(week_days.day_dict).includes(d.day)) {
+    dispos[d.user][d.day].push({
+      start_time: +d.start_time,
+      duration: +d.duration,
+      value: +d.value
+    });
+  }
 }
 
 
@@ -469,6 +471,7 @@ function fetch_bknews(first) {
     url: build_url(url_bknews, context),
     async: true,
     contentType: "text/csv",
+    headers: {Accept: 'text/csv'},
     success: function (msg) {
       bknews.cont = d3.csvParse(
         msg,
@@ -733,7 +736,7 @@ function translate_cours_pl_from_json(d, result) {
       room: d.room,
       room_type: d.course.room_type,
       display: true,
-      id_visio: d.room==''?(d.id_visio==''?-1:+d.id_visio):-1,
+      id_visio: d.room===null?(d.id_visio===null?-1:+d.id_visio):-1,
     } ;
 
     new_course.color_bg = 'white' ;

@@ -201,7 +201,7 @@ function select_room_change() {
     var occupied_rooms = [];
     for (let i = 0; i < concurrent_courses.length; i++) {
       // for real rooms
-      if (concurrent_courses[i].room != '') {
+      if (concurrent_courses[i].room != null) {
         busy_rooms = rooms.roomgroups[concurrent_courses[i].room];
         for (j = 0; j < busy_rooms.length; j++) {
           if (occupied_rooms.indexOf(busy_rooms[j]) == -1) {
@@ -704,6 +704,11 @@ function apply_ckbox(dk) {
     if (dk == "dis-mod") {
 
       if (ckbox[dk].cked) {
+
+        if(user.name == '') {
+          window.location.href = $('#sign_in').attr('href');
+        }
+        
         //create_dispos_user_data();
         //ckbox["dis-mod"].disp = true;
         svg.get_dom("stg").attr("visibility", "visible");
@@ -1915,7 +1920,7 @@ function select_pref_links_change() {
 function confirm_pref_links_change(d) {
   Object.assign(
     pending.wanted_course,
-    { id_visio: d.id, room: '' }
+    { id_visio: d.id, room: null }
   );
 
   room_tutor_change.proposal = [];
