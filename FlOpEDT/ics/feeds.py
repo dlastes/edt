@@ -9,6 +9,9 @@ from django.core.exceptions import ObjectDoesNotExist
 from base.models import ScheduledCourse, Room, Group, Day, Department, Regen
 from people.models import Tutor
 
+from django.http import HttpResponse, Http404
+from django.utils.http import http_date
+from calendar import timegm
 
 def str_groups(c):
     groups = c.groups.all()
@@ -25,6 +28,11 @@ class EventFeed(ICalFeed):
     product_id = 'flop'
     timezone = 'Europe/Paris'
     days = [abbrev for abbrev,_ in Day.CHOICES]
+
+    def __call__(self, request, *args, **kwargs):
+        response = super().__call__(self, request, *args, **kwargs)
+        response["content_type"] = "text/calendar"
+        return response
 
     def item_title(self, scourse):
         course = scourse.course
