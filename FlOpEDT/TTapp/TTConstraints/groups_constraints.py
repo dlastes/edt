@@ -58,7 +58,7 @@ class MinGroupsHalfDays(TTConstraint):
     """
     All courses will fit in a minimum of half days
     """
-    groups = models.ManyToManyField('base.Group', blank=True)
+    groups = models.ManyToManyField('base.StructuralGroup', blank=True)
 
     def enrich_model(self, ttmodel, week, ponderation=1):
         helper = MinHalfDaysHelperGroup(ttmodel, self, week, ponderation)
@@ -142,7 +142,7 @@ class NoCourseOnDay(TTConstraint):
     PERIOD_CHOICES = ((FULL_DAY, 'Full day'), (AM, 'AM'), (PM, 'PM'))
     period = models.CharField(max_length=2, choices=PERIOD_CHOICES)
     course_types = models.ManyToManyField('base.CourseType', blank=True, related_name='no_course_on_days')
-    groups = models.ManyToManyField('base.Group', blank=True)
+    groups = models.ManyToManyField('base.StructuralGroup', blank=True)
     weekday = models.CharField(max_length=2, choices=Day.CHOICES)
 
     def enrich_model(self, ttmodel, week, ponderation=1):

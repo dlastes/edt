@@ -52,7 +52,7 @@ class GroupsFilterSet(filters.FilterSet):
     dept = filters.CharFilter(field_name='train_prog__department__abbrev', required=True)
 
     class Meta:
-        model = bm.Group
+        model = bm.StructuralGroup
         fields = ['dept']
 
 
@@ -63,7 +63,7 @@ class GroupViewSet(viewsets.ModelViewSet):
     Can be filtered as wanted with parameter="dept"[required] of a Group object, with the function GroupsFilterSet
     """
     serializer_class = serializers.GroupSerializer
-    queryset = bm.Group.objects.all()
+    queryset = bm.StructuralGroup.objects.all()
     filter_class = GroupsFilterSet
     permission_classes = [IsAdminOrReadOnly]
 
