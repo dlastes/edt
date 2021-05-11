@@ -72,30 +72,6 @@ class GroupType(models.Model):
         return self.name
 
 
-# class StructuralGroup(models.Model):
-#     # should not include "-" nor "|"
-#     name = models.CharField(max_length=100)
-#     train_prog = models.ForeignKey(
-#         'TrainingProgramme', on_delete=models.CASCADE)
-#     type = models.ForeignKey('GroupType', on_delete=models.CASCADE, null=True)
-#     size = models.PositiveSmallIntegerField()
-#     basic = models.BooleanField(verbose_name=_('Basic group?'), default=False)
-#     parent_groups = models.ManyToManyField('self', symmetrical=False,
-#                                            blank=True,
-#                                            related_name="children_groups")
-#
-#     @property
-#     def full_name(self):
-#         return self.train_prog.abbrev + "-" + self.name
-#
-#     def __str__(self):
-#         return self.name
-
-
-###############################################################################
-# Debut ma zone de travail
-###############################################################################
-
 class GenericGroup(models.Model):
     # should not include "-" nor "|"
     name = models.CharField(max_length=100)
@@ -162,8 +138,8 @@ class TransversalGroup(GenericGroup):
     conflicting_groups = models.ManyToManyField("StructuralGroup", symmetrical=True,
                                                 blank=True)
                                                 
-    parallel_groups = models.ManyToManyField('self',symmetrical=True,
-                                                blank=True)
+    parallel_groups = models.ManyToManyField('self', symmetrical=True,
+                                             blank=True)
     
     
 ###############################################################################
