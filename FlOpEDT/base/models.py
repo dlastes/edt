@@ -126,6 +126,87 @@ class Group(models.Model):
         """
         return {self} | self.descendants_groups() | self.ancestor_groups()
 
+###############################################################################
+# Debut ma zone de travail
+###############################################################################
+
+class GenericGroup(models.Model):   # La base de tous les groups
+    # should not include "-" nor "|"
+    name = models.CharField(max_length=100)
+    train_prog = models.ForeignKey(
+        'TrainingProgramme', on_delete=models.CASCADE)
+    type = models.ForeignKey('GroupType', on_delete=models.CASCADE, null=True)
+    size = models.PositiveSmallIntegerField()
+    basic = models.BooleanField(verbose_name=_('Basic group?'), default=False)
+
+    @property
+    def full_name(self):
+        return self.train_prog.abbrev + "-" + self.name
+
+    def __str__(self):
+        return self.name
+
+    def ancestor_groups(self):
+        """
+        :return: the set of all Groupe containing self (self not included)
+        """
+        ancestors = set(self.parent_groups.all())
+
+        for gp in self.parent_groups.all():
+
+            for new_gp in gp.ancestor_groups():
+                ancestors.add(new_gp)
+
+        return ancestors
+
+    def descendants_groups(self):   # Je ne sais pas si je le laisse: un groupe transversal est toujours une feuille nan?  A discuter
+        """
+        :return: the set of all Groupe contained by self (self not included)
+        """
+       descendants = set()
+
+        for gp in Group.objects.filter(train_prog=self.train_prog):
+            if self in gp.ancestor_groups():
+                descendants.add(gp)
+
+        return descendants
+
+    def basic_groups(self):
+        s = set(g for g in self.descendants_groups() | {self} if g.basic)
+        return s
+
+    def connected_groups(self):
+        """
+        :return: the set of all Groupe that have a non empty intersection with self (self included)
+        """
+        return {self} | self.descendants_groups() | self.ancestor_groups()
+
+
+
+class StructuralGroup(GenericGroup):
+    basic = models.BooleanField(verbose_name=_('Basic group?'), default=False)
+    parent_groups = models.ManyToManyField('self', symmetrical=False,
+                                           blank=True,
+                                           related_name="children_groups")
+
+    @property
+    def temp():
+        return 0
+
+
+
+class TransversalGroup(GenericGroup):
+    conflicting_groups = models.ManyToManyField("StructuralGroup", symmetrical=True,
+                                                blank=True)
+                                                
+    parallel_groups = models.ManyToManyField('self',symmetrical=True,
+                                                blank=True)
+    
+    
+###############################################################################
+# Fin ma zone de travail
+###############################################################################
+
 
 # </editor-fold desc="GROUPS">
 
