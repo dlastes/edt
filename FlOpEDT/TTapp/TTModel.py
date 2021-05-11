@@ -80,7 +80,7 @@ GUROBI_NAME = 'GUROBI_CMD'
 solution_files_path = "misc/logs/solutions"
 
 class TTModel(object):
-    def __init__(self, department_abbrev, week_year_list,
+    def __init__(self, department_abbrev, weeks,
                  train_prog=None,
                  stabilize_work_copy=None,
                  min_nps_i=1.,
@@ -97,21 +97,7 @@ class TTModel(object):
                  min_visio=0.5):
         # beg_file = os.path.join('logs',"FlOpTT")
         self.department = Department.objects.get(abbrev=department_abbrev)
-
-        # Split week_year_list into weeks (list), and year (int)
-        # week_year should be a list of {'week': week, 'year': year}
-        year = None
-        weeks = []
-        for week_year in week_year_list:
-            y = week_year['year']
-            w = week_year['week']
-            if year is None: year = y
-            weeks.append(w)
-            if year != y:
-              raise Exception("Multiple week selection only support same year")
-
         self.weeks = weeks
-        self.year = year
 
         # Create the PuLP model, giving the name of the lp file
         self.model = LpProblem(self.solution_files_prefix(), LpMinimize)
@@ -182,7 +168,7 @@ class TTModel(object):
             self.send_lack_of_availability_mail()
 
     def wdb_init(self):
-        wdb = WeeksDatabase(self.department, self.weeks, self.year, self.train_prog, self.slots_step)
+        wdb = WeeksDatabase(self.department, self.weeks, self.train_prog, self.slots_step)
         return wdb
 
     def costs_init(self):
@@ -1318,7 +1304,7 @@ class TTModel(object):
         return other_slots.pop()
 
 
-def get_constraints(department, week=None, year=None, train_prog=None, is_active=None):
+def get_constraints(department, week=None, train_prog=None, is_active=None):
     #
     #  Return constraints corresponding to the specific filters
     #
@@ -1327,17 +1313,14 @@ def get_constraints(department, week=None, year=None, train_prog=None, is_active
     if is_active:
         query &= Q(is_active=is_active)
 
-    if week and not year:
-        logger.warning(f"Unable to filter constraint for weeks {week} without specifing year")
-        return
     elif train_prog:
         query &= \
-            Q(train_progs__abbrev=train_prog) & Q(week__isnull=True) & Q(year__isnull=True) | \
-            Q(train_progs__abbrev=train_prog) & Q(week=week) & Q(year=year) | \
-            Q(train_progs__isnull=True) & Q(week=week) & Q(year=year) | \
-            Q(train_progs__isnull=True) & Q(week__isnull=True) & Q(year__isnull=True)
+            Q(train_progs__abbrev=train_prog) & Q(weeks__isnull=True) | \
+            Q(train_progs__abbrev=train_prog) & Q(weeks=week) | \
+            Q(train_progs__isnull=True) & Q(weeks=week) | \
+            Q(train_progs__isnull=True) & Q(weeks__isnull=True) & Q(year__isnull=True)
     else:
-        query &= Q(week=week) & Q(year=year) | Q(week__isnull=True) & Q(year__isnull=True)
+        query &= Q(week=week) | Q(week__isnull=True)
 
     # Look up the TTConstraint subclasses records to update
     from TTapp.TTConstraint import TTConstraint, all_subclasses

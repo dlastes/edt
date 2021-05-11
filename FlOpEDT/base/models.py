@@ -169,6 +169,11 @@ class Period(models.Model):
         return f"Period {self.name}: {self.department}, {self.starting_week} -> {self.ending_week}"
 
 
+class Week(models.Model):
+    nb = models.PositiveSmallIntegerField(validators=[MinValueValidator(0), MaxValueValidator(53)])
+    year = models.PositiveSmallIntegerField()
+
+
 class TimeGeneralSettings(models.Model):
     department = models.OneToOneField(Department, on_delete=models.CASCADE)
     day_start_time = models.PositiveSmallIntegerField()
