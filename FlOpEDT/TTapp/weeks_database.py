@@ -63,11 +63,10 @@ GUROBI_NAME = 'GUROBI_CMD'
 
 
 class WeeksDatabase(object):
-    def __init__(self, department, weeks, year, train_prog, slots_step=None):
+    def __init__(self, department, weeks, train_prog, slots_step=None):
         self.train_prog = train_prog
         self.department = department
         self.weeks = weeks
-        self.year = year
         self.slots_step = slots_step
         self.possible_apms=set()
         self.days, self.day_after, self.holidays, self.training_half_days, self.day_before = self.days_init()
