@@ -45,14 +45,23 @@ class Dependency(TTConstraint):
         possible_tutors_1 = set()
         if self.course1.tutor is not None:
             possible_tutors_1.add(self.course1.tutor)
+        elif self.course1.supp_tutor is not None:
+            possible_tutors_1.add(self.course1.supp_tutor)
+        else:
+            return False
 
         possible_tutors_2 = set()
         if self.course2.tutor is not None:
             possible_tutors_2.add(self.course2.tutor)
+        elif self.course2.supp_tutor is not None:
+            possible_tutors_2.add(self.course2.supp_tutor)
+        else:
+            return False
 
         # Attention, ça ne marche que si TOUS les utilisateurs ont tous mis des prefs de la  semaine
-        # OU tous mis des prefs que sur la semaine type
+        # Léo: Pourquoi ?
         D1 = UserPreference.objects.filter(user__in=possible_tutors_1, week=week, value__gte=1)
+        # OU tous mis des prefs que sur la semaine type
         if not D1:
             D1 = UserPreference.objects.filter(user__in=possible_tutors_1, week=None, value__gte=1)
 
@@ -60,6 +69,7 @@ class Dependency(TTConstraint):
         # Attention, ces préférences me permettent-elles d'assurer le course2
         if not D2:
             D2 = UserPreference.objects.filter(user__in=possible_tutors_2, week=None, value__gte=1)
-
-        if all([d2 < d1 for d2 in D2 for d1 in D1]):
+        if D1 and D2:
+            return all([d2 < d1 for d2 in D2 for d1 in D1])
+        else:
             return False

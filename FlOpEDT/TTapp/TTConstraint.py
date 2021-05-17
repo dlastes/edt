@@ -28,6 +28,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.translation import gettext_lazy as _
 
 from django.db import models
+
 max_weight = 8
 
 

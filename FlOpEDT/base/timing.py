@@ -103,6 +103,11 @@ class Day(object):
                (WEDNESDAY, "wednesday"), (THURSDAY, "thursday"),
                (FRIDAY, "friday"), (SATURDAY, "saturday"),
                (SUNDAY, "sunday"))
+    order = [
+        MONDAY, TUESDAY, WEDNESDAY,
+        THURSDAY, FRIDAY, SATURDAY,
+        SUNDAY,
+        ]
 
     def __init__(self, day, week):
         self.day = day
@@ -114,7 +119,41 @@ class Day(object):
 
     def __repr__(self):
         return self.day + '_s' + str(self.week)
+    
+    ### COMPARISONS ###
+    def __le__(self, other):
+        return self < other or self == other
 
+
+    def __lt__(self, other):
+        if isinstance(other, Day):
+            return Day.order.index(self.day) < Day.order.index(other.day)
+        else :
+            raise NotImplementedError
+    
+
+    def __eq__(self, other):
+        if isinstance(other, Day):
+            return self.day == other.day
+        else :
+            raise NotImplementedError
+    
+
+    def __ge__(self, other):
+        return self > other or self == other
+    
+    
+    def __gt__(self, other):
+        if isinstance(other, Day):
+            return Day.order.index(self.day) > Day.order.index(other.day)
+        else :
+            raise NotImplementedError
+    
+    
+    def __ne__(self, other):
+        return not self == other
+
+    ### COMPARISONS ###
 
 days_list = [c[0] for c in Day.CHOICES]
 days_index = {}
