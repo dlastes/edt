@@ -22,7 +22,7 @@
 # a commercial license. Buying such a license is mandatory as soon as
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
-from FlOpEDT.base.models import UserPreference
+from base.models import UserPreference
 from base.models import TimeGeneralSettings
 from base.timing import Time, days_index
 from base.models import ScheduledCourse

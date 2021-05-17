@@ -520,45 +520,6 @@ class UserPreference(models.Model):
         return self.start_time + self.duration
 
     
-    ### COMPARISONS ###
-    # Comparisons between UserPreferences are made upon
-    # their object Day from:
-    # /home/lampior/FlOpEDT/FlOpEDT/base/timing.py
-
-    
-    def __le__(self, other):
-        return self < other or self == other   
-
-
-    def __lt__(self, other):
-        if isinstance(other, UserPreference):
-            return self.day < other.day
-        else :
-            raise NotImplementedError
-
-
-    def __eq__(self, other):
-        if isinstance(other, UserPreference):
-            return self.day == other.day
-        else :
-            raise NotImplementedError
-
-
-    def __ge__(self, other):
-        return self > other or self == other
-
-
-    def __gt__(self, other):
-        if isinstance(other, UserPreference):
-            return self.day > other.day
-        else :
-            raise NotImplementedError
-
-
-    def __ne__(self, other):
-        return not self == other
-
-    ### COMPARISONS ###
 
 
 class CoursePreference(models.Model):
