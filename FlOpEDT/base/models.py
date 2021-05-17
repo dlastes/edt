@@ -96,8 +96,6 @@ class StructuralGroup(GenericGroup):
     parent_groups = models.ManyToManyField('self', symmetrical=False,
                                            blank=True,
                                            related_name="children_groups")
-    basic = models.BooleanField(verbose_name=_('Basic group?'), default=False)
-
     def ancestor_groups(self):
         """
         :return: the set of all Groupe containing self (self not included)
