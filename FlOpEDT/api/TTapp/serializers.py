@@ -22,13 +22,16 @@
 # without disclosing the source code of your own applications.
 
 import TTapp.models as ttm
+import TTapp.TTConstraint as ttc
+import TTapp.TTConstraints.tutors_constraints as ttt
+import TTapp.TTConstraints.rooms_constraints as ttr
 from rest_framework import serializers
 
 # ---------------
 # ---- TTAPP ----
 # ---------------
 
-
+""" 
 class TTCustomConstraintsSerializer(serializers.ModelSerializer):
     class Meta:
         model = ttm.CustomConstraint
@@ -86,4 +89,52 @@ class TTLimitedStartTimeChoicesSerializer(serializers.ModelSerializer):
 class TTLimitedRoomChoicesSerializer(serializers.ModelSerializer):
     class Meta:
         model = ttm.LimitedRoomChoices
+        fields = '__all__' """
+
+class TTConstraintSerializer(serializers.ModelSerializer):
+    #id = serializers.IntegerField()
+    name = serializers.SerializerMethodField()
+    #weight = serializers.IntegerField()
+    #is_active = serializers.BooleanField()
+    #comment = serializers.CharField()
+    #last_modification = serializers.DateField()
+    #week = serializers.IntegerField()
+    #year = serializers.IntegerField()
+    parameters = serializers.SerializerMethodField()
+
+    class Meta:
+        abstract = True
+        model = ttc.TTConstraint
         fields = '__all__'
+    
+    def get_name(self, obj):
+        fields = obj._meta.get_fields()
+        return(obj.__class__.__name__)
+
+    def get_parameters(self , obj):
+        list = []
+        for i in obj._meta.get_fields():
+            if (i.name not in self.Meta.fields):
+                parameters = {}
+
+                parameters["name"] = i.name
+
+                tabtype = str(type(i)).split(".")
+                print(tabtype)
+
+                parameters["type"] = tabtype[-1][:-2]
+                parameters["required"] = i.null
+                list.append(parameters)
+
+        return(list)
+
+class TTMinTutorsHalfDaysSerializer(TTConstraintSerializer):
+    class Meta:
+        model = ttt.MinTutorsHalfDays
+        fields = ['id', 'name', 'weight', 'is_active', 'comment', 'week', 'year', 'parameters']
+
+class LimitedRoomChoicesSerializer(TTConstraintSerializer):
+
+    class Meta:
+        model = ttr.LimitedRoomChoices
+        fields = ['id', 'name', 'weight', 'is_active', 'comment', 'week', 'year', 'parameters']

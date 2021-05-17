@@ -21,7 +21,7 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 from rest_framework import routers
-
+from api.TTapp import views
 # from api.TTapp import views
 
 routerTTapp = routers.SimpleRouter()
@@ -36,3 +36,6 @@ routerTTapp = routers.SimpleRouter()
 # routerTTapp.register(r'simultaneouscourses', views.TTSimultaneousCoursesViewSet)
 # routerTTapp.register(r'limitedstarttimechoices', views.TTLimitedStartTimeChoicesViewSet) # TODO: Fix
 # routerTTapp.register(r'limitedroomchoices', views.TTLimitedRoomChoicesViewSet)
+routerTTapp.register(r'mintutorhalfdays', views.TTMinTutorsHalfDaysViewSet)
+routerTTapp.register(r'minnonpreferedtutorslot', views.TTMinNonPreferedTutorsSlotViewSet)
+routerTTapp.register(r'limitedroomchoices', views.TTLimitedRoomChoicesViewSet)

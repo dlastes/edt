@@ -25,6 +25,7 @@ from rest_framework import serializers
 import base.models as bm
 import displayweb.models as dwm
 import people.models as pm
+import TTapp.TTConstraint as tt
 
 
 #    --------------------------------------------------------------------------------
@@ -433,7 +434,19 @@ class BKNewsSerializer(serializers.ModelSerializer):
 #                                  -------------------                                  #
 #                                  ----Constraints----                                  #
 #                                  -------------------                                  #
+class TTConstraintSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    weight = serializers.IntegerField()
+    is_active = serializers.BooleanField()
+    comment = serializers.CharField()
+    last_modification = serializers.DateField()
+    week = serializers.IntegerField()
+    year = serializers.IntegerField()
 
+    class Meta:
+        model = tt.TTConstraint
+        fields = ['id', 'name', 'weight', 'is_active', 'comment', 'last_modification','week','year']
 #                                   ------------------                                  #
 #                                   ----Week infos----                                  #
 #                                   ------------------                                  #

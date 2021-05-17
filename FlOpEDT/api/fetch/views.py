@@ -37,6 +37,8 @@ from base import queries, weeks
 import people.models as pm
 import displayweb.models as dwm
 
+import TTapp.TTConstraint as tt
+
 from api.fetch import serializers
 from api.shared.params import dept_param, week_param, year_param, user_param, \
     work_copy_param
@@ -443,3 +445,15 @@ class WeekDaysViewSet(viewsets.ViewSet):
 
         data = weeks.num_all_days(year, week, department)
         return JsonResponse(data, safe=False)
+
+"""
+class TTConstraintViewSet(viewsets.ModelViewSet):
+    
+    ViewSet to see all the TTConstraints
+    
+    
+
+    permission_classes = [IsAdminOrReadOnly]
+    queryset = tt.TTConstraint.objects.all()
+    serializer_class = serializers.TTConstraintSerializer
+"""
