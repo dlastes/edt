@@ -821,9 +821,7 @@ class TTModel(object):
 
                     for availability_slot in week_availability_slots:
                         avail = set(a for a in week_tutor_availabilities
-                                    if a.start_time < availability_slot.end_time
-                                    and availability_slot.start_time < a.start_time + a.duration
-                                    and a.day == availability_slot.day.day)
+                                    if availability_slot.is_simultaneous_to(a))
                         if not avail:
                             print(f"availability pbm for {i} availability_slot {availability_slot}")
                             unp_slot_cost[i][availability_slot] = 0
@@ -895,9 +893,7 @@ class TTModel(object):
                         for availability_slot in week_availability_slots:
                             try:
                                 avail = set(a for a in courses_avail
-                                            if a.start_time < availability_slot.end_time
-                                            and availability_slot.start_time < a.start_time + a.duration
-                                            and a.day == availability_slot.day.day)
+                                            if availability_slot.is_simultaneous_to(a))
 
                                 if avail:
                                     minimum = min(a.value for a in avail)
