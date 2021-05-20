@@ -48,23 +48,38 @@ class GroupTypesViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.GroupTypesSerializer
 
 
-class GroupsFilterSet(filters.FilterSet):
+"""class GenericGroupsFilterSet(filters.FilterSet):  # A supprimer
     dept = filters.CharFilter(field_name='train_prog__department__abbrev', required=True)
 
     class Meta:
         model = bm.Group
+        fields = ['dept']"""
+
+# Creer class StructuralGroupFilterSet
+class StructuralGroupsFilterSet(filters.FilterSet):
+    dept = filters.CharFilter(field_name='train_prog__department__abbrev',required=True)
+
+    class Meta:
+        model = bm.StructuralGroup
+        fields = ['dept']
+        
+# Creer class TransversalGroupFilterSet
+class TransversalGroupsFilterSet(filters.FilterSet):
+    dept = filters.CharFilter(field_name='train_prog__department__abbrev',required=True)
+    
+    class Meta:
+        model = bm.TransversalGroup
         fields = ['dept']
 
-
-class GroupViewSet(viewsets.ModelViewSet):
+class StructuralGroupViewSet(viewsets.ModelViewSet):
     """
     ViewSet to see all the groups
 
     Can be filtered as wanted with parameter="dept"[required] of a Group object, with the function GroupsFilterSet
     """
-    serializer_class = serializers.GroupSerializer
-    queryset = bm.Group.objects.all()
-    filter_class = GroupsFilterSet
+    serializer_class = serializers.StructuralGroupSerializer
+    queryset = bm.StructuralGroup.objects.all()
+    filter_class = StructuralGroupsFilterSet
     permission_classes = [IsAdminOrReadOnly]
 
     @action(detail=False, methods=['GET'])
@@ -78,3 +93,11 @@ class GroupViewSet(viewsets.ModelViewSet):
         # groups_serialized = serializers.GroupTreeSerializer(data=groups, many=True)
 
         return JsonResponse(groups, safe=False)
+
+
+
+class TransversalGroupViewSet(viewsets.ModelViewSet):
+    serializer_class = serializers.TransversalGroupSerializer
+    queryset = bm.TransversalGroup.objects.all()
+    filter_class = TransversalGroupsFilterSet
+    permission_classes = [IsAdminOrReadOnly]
