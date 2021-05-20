@@ -21,11 +21,17 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
+from django.db.models import query
+from rest_framework.utils.serializer_helpers import ReturnDict
 import TTapp.models as ttm
+import TTapp.TTConstraint as ttc
 import TTapp.TTConstraints.tutors_constraints as ttt
 import TTapp.TTConstraints.rooms_constraints as ttr
+import TTapp.TTConstraints.visio_constraints as ttv
 
+from itertools import chain
 from rest_framework import viewsets
+from rest_framework.response import Response
 import django_filters.rest_framework as filters
 from api.TTapp import serializers
 from api.permissions import IsTutorOrReadOnly, IsAdminOrReadOnly
@@ -208,3 +214,51 @@ class TTLimitedRoomChoicesViewSet(viewsets.ModelViewSet):
     serializer_class =serializers.LimitedRoomChoicesSerializer
     permission_classes = [IsAdminOrReadOnly]
     filterset_fields = '__all__'
+
+"""
+class TTNoVisioViewSet(viewsets.ModelViewSet):
+
+    queryset = ttv.NoVisio.objects.all()
+    serializer_class =serializers.NoVisioSerializer
+    permission_classes = [IsAdminOrReadOnly]
+    filterset_fields = '__all__' 
+"""
+
+class TTConstraintViewSet(viewsets.ViewSet):
+    """
+    constraintlist = ttc.TTConstraint.__subclasses__()
+    for constraint in constraintlist :
+        if (constraint._meta.abstract == False):
+            queryset = constraint.objects.all()
+    """
+  
+    permission_classes = [IsAdminOrReadOnly]
+    filterset_fields = '__all__' 
+
+    def list(self, request):
+        
+        data = list()
+        constraintlist = ttc.TTConstraint.__subclasses__()
+
+        for constraint in constraintlist :
+
+            if (constraint._meta.abstract == False):
+                queryset = constraint.objects.all()
+
+                for object in queryset:
+                    serializer = serializers.LimitedRoomChoicesSerializer(object)
+                    data.append(serializer.data)
+
+        return Response(data)
+        """
+        q1 = ttt.MinNonPreferedTutorsSlot.objects.all()
+        q2 = ttt.MinTutorsHalfDays.objects.all()
+        data = list()
+
+        for query in q1:
+            print(query)
+            serializer = serializers.LimitedRoomChoicesSerializer(query)
+            data.append(serializer.data)
+
+        return Response(data)
+        """
