@@ -30,7 +30,7 @@ from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.datavalidation import DataValidation
 
-from base.models import Group, Module, Period, CourseType, RoomType
+from base.models import StructuralGroup, Module, Period, CourseType, RoomType
 from people.models import Tutor
 
 from copy import copy
@@ -184,7 +184,7 @@ def make_planif_file(department, empty_bookname=default_empty_bookname, target_r
         for mod in Module.objects.filter(period=p):
             logger.info(f"Module {mod}")
             for ct in CT:
-                groups = Group.objects.filter(type__in=ct.group_types.all(), train_prog=mod.train_prog)
+                groups = StructuralGroup.objects.filter(type__in=ct.group_types.all(), train_prog=mod.train_prog)
                 nb_groups = groups.count()
                 append_row(sheet, empty_rows, 2, rank, cols)
                 sheet.cell(row=rank, column=1).value = mod.abbrev

@@ -33,7 +33,7 @@ from pulp import LpVariable, LpConstraint, LpBinary, LpConstraintEQ, \
 import pulp
 from pulp import GUROBI_CMD
 
-from base.models import Group, \
+from base.models import StructuralGroup, \
     Room, RoomSort, RoomType, RoomPreference, \
     Course, ScheduledCourse, UserPreference, CoursePreference, \
     Department, Module, TrainingProgramme, CourseType, \

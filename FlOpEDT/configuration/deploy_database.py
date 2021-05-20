@@ -34,7 +34,7 @@ from random import choice
 from displayweb.models import TrainingProgrammeDisplay
 
 from base.models import RoomType, Room, TrainingProgramme,\
-    Group, Module, GroupType, Period, Time, Day, CourseType, \
+    StructuralGroup, Module, GroupType, Period, Time, Day, CourseType, \
     Department, CourseStartTimeConstraint, TimeGeneralSettings, UserPreference, CoursePreference
 
 from people.models import FullStaff, SupplyStaff, Tutor, UserDepartmentSettings
@@ -229,8 +229,8 @@ def groups_extract(department, promotions, group_types, groups):
     # first loop on groups just to create them - it's too early to set the parents
     for (promotion_id, id_), group in groups.items():
 
-        verif = Group.objects.filter(name=id_, train_prog__abbrev=promotion_id,
-                                     train_prog__department=department)
+        verif = StructuralGroup.objects.filter(name=id_, train_prog__abbrev=promotion_id,
+                                               train_prog__department=department)
 
         if not verif.exists():
 
@@ -239,7 +239,7 @@ def groups_extract(department, promotions, group_types, groups):
                 promotion = TrainingProgramme.objects.get(abbrev=promotion_id,
                                                           department=department)
                 groupType = GroupType.objects.get(name=group['group_type'], department=department)
-                group = Group(name=id_, size=0, train_prog=promotion, type=groupType)
+                group = StructuralGroup(name=id_, size=0, train_prog=promotion, type=groupType)
                 group.save()
 
             except IntegrityError as ie:
@@ -252,16 +252,16 @@ def groups_extract(department, promotions, group_types, groups):
 
         for parent in group['parent']:
 
-            parent_group = Group.objects.get(name=parent, train_prog__abbrev=promotion_id, train_prog__department=department)
-            group = Group.objects.get(name=id_, train_prog__abbrev=promotion_id, train_prog__department=department)
+            parent_group = StructuralGroup.objects.get(name=parent, train_prog__abbrev=promotion_id, train_prog__department=department)
+            group = StructuralGroup.objects.get(name=id_, train_prog__abbrev=promotion_id, train_prog__department=department)
             group.parent_groups.add(parent_group)
             group.save()
 
-    for g in Group.objects.all():
+    for g in StructuralGroup.objects.all():
 
         isbasic = True
 
-        for g1 in Group.objects.all():
+        for g1 in StructuralGroup.objects.all():
             if g in g1.parent_groups.all():
                 isbasic = False
                 break

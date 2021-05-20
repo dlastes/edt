@@ -63,7 +63,7 @@ from base.forms import ContactForm, PerfectDayForm, ModuleDescriptionForm, \
 from base.models import Course, UserPreference, ScheduledCourse, EdtVersion, \
     CourseModification, Day, Time, Room, RoomType, RoomSort, \
     Regen, RoomPreference, Department, TimeGeneralSettings, CoursePreference, \
-    TrainingProgramme, CourseType, Module, Group, EnrichedLink, \
+    TrainingProgramme, CourseType, Module, StructuralGroup, EnrichedLink, \
     ScheduledCourseAdditional, GroupPreferredLinks
 import base.queries as queries
 from base.weeks import *
@@ -751,7 +751,7 @@ def fetch_decale(req, **kwargs):
 
     try:
         print(group_name, training_programme)
-        group = Group.objects.get(
+        group = StructuralGroup.objects.get(
             name=group_name,
             train_prog__abbrev=training_programme,
             train_prog__department=req.department

@@ -194,7 +194,7 @@ class BIATOS(Tutor):
 
 
 class Student(User):  # for now: representative
-    belong_to = models.ManyToManyField('base.Group',
+    belong_to = models.ManyToManyField('base.StructuralGroup',
                                        blank=True)
 
     def __str__(self):
@@ -240,7 +240,7 @@ class StudentPreferences(Preferences):
 
 
 class GroupPreferences(Preferences):
-    group = models.OneToOneField('base.Group',
+    group = models.OneToOneField('base.StructuralGroup',
                                  related_name='preferences',
                                  on_delete=models.CASCADE)
 

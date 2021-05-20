@@ -33,7 +33,7 @@ from pulp import GUROBI_CMD
 
 from django.conf import settings
 
-from base.models import Group, \
+from base.models import StructuralGroup, \
     Room, RoomSort, RoomType, RoomPreference, \
     Course, ScheduledCourse, UserPreference, CoursePreference, \
     Department, Module, TrainingProgramme, CourseType, \
@@ -334,7 +334,7 @@ class WeeksDatabase(object):
 
     def groups_init(self):
         # GROUPS
-        groups = Group.objects.filter(train_prog__in=self.train_prog)
+        groups = StructuralGroup.objects.filter(train_prog__in=self.train_prog)
 
         basic_groups = groups.filter(basic=True)
         #  ,

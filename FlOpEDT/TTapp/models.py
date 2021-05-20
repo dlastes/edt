@@ -79,7 +79,7 @@ class CustomConstraint(TTConstraint):
                     max_length=200,
                     null=False,
                     blank=False)
-    groups = models.ManyToManyField('base.Group', blank=True)
+    groups = models.ManyToManyField('base.StructuralGroup', blank=True)
     tutors = models.ManyToManyField('people.Tutor', blank=True)
     modules = models.ManyToManyField('base.Module', blank=True)
 

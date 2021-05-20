@@ -10,7 +10,7 @@ from functools import reduce # Pour le pgcd d'une liste
 from tqdm import tqdm # Affichage de la barre sympa
 
 from django.db import transaction
-from base.models import CourseType, RoomType, Group, Module, Course
+from base.models import CourseType, RoomType, StructuralGroup, Module, Course
 from people.models import Tutor
 from misc.assign_colors import assign_module_color
 
@@ -470,7 +470,7 @@ def extract_courses_from_book(courses_book, department, assign_colors=True):
     for c in courses_book:
         if not c['groups']:
             continue
-        groups = Group.objects.filter(name__in=c['groups'], train_prog__department=department)
+        groups = StructuralGroup.objects.filter(name__in=c['groups'], train_prog__department=department)
         ct = CourseType.objects.get(name=c['type'], department=department)
         rt = RoomType.objects.get(name=c['room_type'], department=department)
         if c['tutor']:

@@ -33,7 +33,7 @@ class GroupTypesSerializer(serializers.ModelSerializer):
 
 class StructuralGroupSerializer(serializers.ModelSerializer):
     class Meta:
-        model = bm.StructuralGroup #J'ai modifié ici
+        model = bm.StructuralGroup
         fields = '__all__'
 
 # J'ai crée en dessous

@@ -77,9 +77,11 @@ class StructuralGroupViewSet(viewsets.ModelViewSet):
 
     Can be filtered as wanted with parameter="dept"[required] of a Group object, with the function GroupsFilterSet
     """
+
     serializer_class = serializers.StructuralGroupSerializer
     queryset = bm.StructuralGroup.objects.all()
     filter_class = StructuralGroupsFilterSet
+
     permission_classes = [IsAdminOrReadOnly]
 
     @action(detail=False, methods=['GET'])

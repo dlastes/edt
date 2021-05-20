@@ -69,7 +69,7 @@ class NoCourseOnDay(TTConstraint):
 
 
 class NoGroupCourseOnDay(NoCourseOnDay):
-    groups = models.ManyToManyField('base.Group', blank=True)
+    groups = models.ManyToManyField('base.StructuralGroup', blank=True)
     course_types = models.ManyToManyField('base.CourseType', blank=True, related_name='no_course_on_days')
 
     def considered_courses(self, ttmodel):

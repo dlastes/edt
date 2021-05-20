@@ -1,4 +1,4 @@
-from base.models import Course, TrainingProgramme, Group, Department, \
+from base.models import Course, TrainingProgramme, StructuralGroup, Department, \
     TimeGeneralSettings, CourseType, RoomType, CourseStartTimeConstraint
 from people.models import Tutor
 from people.tutor import fill_default_user_preferences
@@ -37,7 +37,7 @@ def find_group_architecture(dep):
             i = tp.name[-1]
             result[tp.name][f'MECA{i}-TD1'] = {f'MECA{i}-TP1', f'MECA{i}-TP2'}
         else:
-            G = Group.objects.filter(train_prog=tp)
+            G = StructuralGroup.objects.filter(train_prog=tp)
             for g in G:
                 result[tp.name][g.name] = set()
                 for g2 in G.exclude(id=g.id):
@@ -54,33 +54,33 @@ def apply_group_architecture(group_architecture_dict):
     d = group_architecture_dict
     for tp in d:
         for g in d[tp]:
-            G = Group.objects.get(train_prog__name=tp, name=g)
+            G = StructuralGroup.objects.get(train_prog__name=tp, name=g)
             for g2 in d[tp][g]:
-                G2 = Group.objects.get(train_prog__name=tp, name=g2)
+                G2 = StructuralGroup.objects.get(train_prog__name=tp, name=g2)
                 for pg in G2.parent_groups.all():
                     G2.parent_groups.remove(pg)
                 G2.parent_groups.add(G)
                 G.basic = False
                 G.save()
-    for g in Group.objects.filter(name__contains='Réunion'):
+    for g in StructuralGroup.objects.filter(name__contains='Réunion'):
         o_g = g.parent_groups.all()[0]
         for c in Course.objects.filter(groups=g):
             c.groups.remove(g)
             c.groups.add(o_g)
         g.delete()
-    produit = Group.objects.get(name__contains='PROD')
-    systeme = Group.objects.get(name__contains='SYST')
-    for g in Group.objects.filter(name__in=['VS1', 'VS2']):
+    produit = StructuralGroup.objects.get(name__contains='PROD')
+    systeme = StructuralGroup.objects.get(name__contains='SYST')
+    for g in StructuralGroup.objects.filter(name__in=['VS1', 'VS2']):
         g.parent_groups.remove(g.parent_groups.all()[0])
         g.parent_groups.add(systeme)
-    for g in Group.objects.filter(name__in=['VP1', 'VP2']):
+    for g in StructuralGroup.objects.filter(name__in=['VP1', 'VP2']):
         g.parent_groups.remove(g.parent_groups.all()[0])
         g.parent_groups.add(produit)
 
 def useless_groups_and_train_progs(dep):
     groups = set()
     train_progs = set()
-    G = Group.objects.filter(train_prog__department=dep)
+    G = StructuralGroup.objects.filter(train_prog__department=dep)
     C = Course.objects.filter(type__department=dep)
     for g in G:
         cg = C.filter(groups__in={g} | g.descendants_groups())
@@ -100,10 +100,10 @@ def delete_useless_groups(useless_groups, useless_train_progs):
 
 
 def remove_slash_groups(dep):
-    slash_groups = Group.objects.filter(name__contains='/', train_prog__department=dep)
+    slash_groups = StructuralGroup.objects.filter(name__contains='/', train_prog__department=dep)
     for g in slash_groups:
         names = g.name.split('/')
-        groups = Group.objects.filter(name__in=names)
+        groups = StructuralGroup.objects.filter(name__in=names)
         for c in Course.objects.filter(groups=g):
             c.groups.remove(g)
             for group in groups:
