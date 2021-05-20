@@ -31,9 +31,15 @@ class GroupTypesSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class GroupSerializer(serializers.ModelSerializer):
+class StructuralGroupSerializer(serializers.ModelSerializer):
     class Meta:
-        model = bm.Group
+        model = bm.StructuralGroup #J'ai modifié ici
         fields = '__all__'
 
+# J'ai crée en dessous
+class TransversalGroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = bm.TransversalGroup
+        fields = '__all__'
+# J'ai crée au dessus
 
