@@ -86,7 +86,7 @@ class StructuralGroupViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['GET'])
     def tree(self, req):
-        groups_filtered = GroupsFilterSet(data=req.query_params)
+        groups_filtered = StructuralGroupsFilterSet(data=req.query_params)
         if not groups_filtered.is_valid():
             return HttpResponse("KO")
         department = groups_filtered.data.get('dept')
@@ -103,3 +103,8 @@ class TransversalGroupViewSet(viewsets.ModelViewSet):
     queryset = bm.TransversalGroup.objects.all()
     filter_class = TransversalGroupsFilterSet
     permission_classes = [IsAdminOrReadOnly]
+
+    def get_queryset(self):
+        abbrev=self.request.query_params.get('dept', None)
+        return self.queryset.filter(train_prog__department__abbrev=abbrev)
+        
