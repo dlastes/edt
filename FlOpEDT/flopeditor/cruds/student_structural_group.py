@@ -30,8 +30,8 @@ This module is used to create, read, update and/or delete a group type
 """
 
 from django.http import JsonResponse
-from base.models import StructuralGroup, TrainingProgramme, GroupType
-from flopeditor.validator import OK_RESPONSE, ERROR_RESPONSE, validate_student_groups_values
+from base.models import StructuralGroup, TrainingProgramme, GroupType, TransversalGroup
+from flopeditor.validator import OK_RESPONSE, ERROR_RESPONSE, validate_student_structural_groups_values
 
 
 def read(department):
@@ -122,9 +122,9 @@ def create(entries, department):
                 new_parents.append(StructuralGroup.objects.get(
                     name=group_name, train_prog=train))
 
-            if validate_student_groups_values(entries['new_values'][i], entries):
-                if StructuralGroup.objects.filter(name=new_name, train_prog=train):
-                    entries['result'].append([
+            if validate_student_structural_groups_values(entries['new_values'][i], entries):
+                if TransversalGroup.objects.filter(name=new_name, train_prog=train).exists() \
+                        or StructuralGroup.objects.filter(name=new_name, train_prog=train).exists():                    entries['result'].append([
                         ERROR_RESPONSE,
                         "un groupe de ce nom existe déjà dans cette promo."
                     ])
@@ -170,7 +170,7 @@ def update(entries, department):
         return entries
 
     for i in range(len(entries['old_values'])):
-        if not validate_student_groups_values(entries['new_values'][i], entries):
+        if not validate_student_structural_groups_values(entries['new_values'][i], entries):
             return entries
 
         old_name = entries['old_values'][i][0]
