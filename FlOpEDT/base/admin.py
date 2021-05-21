@@ -33,7 +33,7 @@ from django.contrib import admin
 import django.contrib.auth as auth
 
 from people.models import Tutor, User
-from base.models import Day, Room, Module, Course, StructuralGroup, \
+from base.models import Day, Room, Module, Course, StructuralGroup, TransversalGroup, \
     UserPreference, Time, ScheduledCourse, EdtVersion, CourseModification, \
     TrainingProgramme,  \
     Regen, Holiday, TrainingHalfDay, \
@@ -539,13 +539,19 @@ class TrainingHalfDayAdmin(DepartmentModelAdmin):
     ordering = ('-year', '-week', 'train_prog', 'day')
 
 
-class GroupAdmin(DepartmentModelAdmin):
+class StructuralGroupAdmin(DepartmentModelAdmin):
     list_display = ('name', 'type', 'size', 'train_prog')
     filter_horizontal = ('parent_groups',)
     ordering = ('size',)
     list_filter = (('train_prog', DropdownFilterRel),
                    )
 
+
+class TransversalGroupAdmin(DepartmentModelAdmin):
+    list_display = ('name', 'size', 'train_prog')
+    ordering = ('size',)
+    list_filter = (('train_prog', DropdownFilterRel),
+                   )
 
 # class RoomInline(admin.TabularInline):
 #     model = RoomGroup.subroom_of.through
@@ -708,7 +714,8 @@ admin.site.unregister(auth.models.Group)
 
 admin.site.register(Holiday, HolidayAdmin)
 admin.site.register(TrainingHalfDay, TrainingHalfDayAdmin)
-admin.site.register(StructuralGroup, GroupAdmin)
+admin.site.register(StructuralGroup, StructuralGroupAdmin)
+admin.site.register(TransversalGroup, TransversalGroupAdmin)
 admin.site.register(Room, RoomAdmin)
 admin.site.register(RoomPreference, RoomPreferenceAdmin)
 admin.site.register(RoomSort, RoomSortAdmin)
