@@ -96,6 +96,7 @@ class StructuralGroup(GenericGroup):
     parent_groups = models.ManyToManyField('self', symmetrical=False,
                                            blank=True,
                                            related_name="children_groups")
+
     def ancestor_groups(self):
         """
         :return: the set of all Groupe containing self (self not included)
@@ -133,17 +134,11 @@ class StructuralGroup(GenericGroup):
 
 
 class TransversalGroup(GenericGroup):
-    conflicting_groups = models.ManyToManyField("StructuralGroup", symmetrical=True,
+    conflicting_groups = models.ManyToManyField("base.StructuralGroup", symmetrical=True,
                                                 blank=True)
                                                 
     parallel_groups = models.ManyToManyField('self', symmetrical=True,
                                              blank=True)
-    
-    
-###############################################################################
-# Fin ma zone de travail
-###############################################################################
-
 
 # </editor-fold desc="GROUPS">
 

@@ -379,15 +379,14 @@ def parse_groups(sheet):
         group_types.add(id_)
         row = row + 1
 
-    structral_groups = dict()
+    structural_groups = dict()
     row = row_grp + 1
-    while row < row_trans_grp:
-
+    while row < row_trans_grp-4:
         id_ = parse_string(sheet, row, col_grp)
         if id_ == '':
-            row = row + 1
+            row += 1
             continue
-        if id_ in structral_groups:
+        if id_ in structural_groups:
             id_ = ':INVALID:DUPLICATE:{0:s}'.format(cell_name(row, col_prom))
         promotion = parse_string(sheet, row, col_grp + 1)
         group_type = parse_string(sheet, row, col_grp + 2)
@@ -396,8 +395,8 @@ def parse_groups(sheet):
             parent = set()
         else:
             parent = {parent_}
-        structral_groups[promotion, id_] = {'group_type' : group_type,
-                                            'parent' : parent}
+        structural_groups[promotion, id_] = {'group_type' : group_type,
+                                             'parent' : parent}
         row = row + 1
 
     transversal_groups = dict()
@@ -406,21 +405,21 @@ def parse_groups(sheet):
 
         id_ = parse_string(sheet, row, col_grp)
         if id_ == '':
-            row = row + 1
+            row += 1
             continue
-        if id_ in set(structral_groups)|set(transversal_groups):
+        if id_ in set(structural_groups) | set(transversal_groups):
             id_ = ':INVALID:DUPLICATE:{0:s}'.format(cell_name(row, col_prom))
         promotion = parse_string(sheet, row, col_trans_grp + 1)
-        row_trans, col_trans = find_marker_cell(sheet, 'Transversal à quels groupes structuraux?')
-        row_par, col_par = find_marker_cell(sheet, 'Parallèle à quels groupes transversaux?')
-        transversal_to = parse_string_set_dictionary(sheet, row, col_trans, REASONABLE)
-        parallel_to = parse_string_set_dictionary(sheet, row, col_par, REASONABLE)
+        row_trans, col_trans = find_marker_cell(sheet, 'Transversal à quels groupes structuraux ?')
+        row_par, col_par = find_marker_cell(sheet, 'Parallèle à quels groupes transversaux ?')
+        transversal_to = parse_string_set_in_line(sheet, row, col_trans)
+        parallel_to = parse_string_set_in_line(sheet, row, col_par)
 
-        structral_groups[promotion, id_] = {'transversal_to': transversal_to,
-                                            'parallel_to': parallel_to}
+        transversal_groups[promotion, id_] = {'transversal_to': transversal_to,
+                                             'parallel_to': parallel_to}
         row = row + 1
 
-    return promotions, group_types, structral_groups, transversal_groups
+    return promotions, group_types, structural_groups, transversal_groups
 
 
 #################################################

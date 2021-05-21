@@ -291,19 +291,21 @@ def groups_extract(department, promotions, group_types, groups, transversal_grou
     # second loop, set the relatives
 
     for (promotion_id, id_), transversal_group in transversal_groups.items():
-        transversal_group = TransversalGroup.objects.get(name=id_, train_prog__abbrev=promotion_id,
-                                                         train_prog__department=department)
+        t_g = TransversalGroup.objects.get(name=id_, train_prog__abbrev=promotion_id,
+                                           train_prog__department=department)
 
         for group in transversal_group['transversal_to']:
-            conflicting_group = StructuralGroup.objects.get(name=group, train_prog__abbrev=promotion_id, train_prog__department=department)
-            transversal_group.conflicting_groups.add(conflicting_group)
-            transversal_group.save()
+            conflicting_group = StructuralGroup.objects.get(name=group, train_prog__abbrev=promotion_id,
+                                                            train_prog__department=department)
+            t_g.conflicting_groups.add(conflicting_group)
+            t_g.save()
 
         for group in transversal_group['parallel_to']:
 
-            parallel_group = TransversalGroup.objects.get(name=group, train_prog__abbrev=promotion_id, train_prog__department=department)
-            transversal_group.parallel_groups.add(parallel_group)
-            transversal_group.save()
+            parallel_group = TransversalGroup.objects.get(name=group, train_prog__abbrev=promotion_id,
+                                                          train_prog__department=department)
+            t_g.parallel_groups.add(parallel_group)
+            t_g.save()
 
     logger.info('Groups extraction : finish')
 
