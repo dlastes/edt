@@ -60,7 +60,7 @@ class Slot:
         if isinstance(other, (Slot, CourseSlot)):
             return self.day == other.day
         elif isinstance(other, (ScheduledCourse, UserPreference)):
-            return self.day.week == other.course.week and self.day.day == other.day
+            return self.day.week == other.week and self.day.day == other.day
         else:
             raise TypeError("A slot can only have "
             "same day than a ScheduledCourse or UserPreference or another slot")
@@ -89,10 +89,7 @@ class Slot:
             return False
 
     def is_successor_of(self, other):
-        if self.has_same_day(other) and other.end_time <= self.start_time <= other.end_time + slot_pause:
-            return True
-        else:
-            return False
+        return self.has_same_day(other) and other.end_time <= self.start_time <= other.end_time + slot_pause
 
     def __lt__(self, other):
         return other.is_after(self) and not self.is_after(other)

@@ -24,6 +24,7 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
+from django.core.checks.messages import Error
 from colorfield.fields import ColorField
 
 from django.contrib.auth.models import AbstractUser
@@ -519,7 +520,58 @@ class UserPreference(models.Model):
     def end_time(self):
         return self.start_time + self.duration
 
+    def __lt__(self, other):
+        if isinstance(other, UserPreference):
+            index_day_self = days_index[self.day]
+            index_day_other = days_index[other.day]
+            if self.week and other.week:
+                if self.week != other.week:
+                    return self.week < other.week
+                else:
+                    if index_day_self != index_day_other:
+                        return index_day_self < index_day_other
+                    else:
+                        return other.start_time > self.start_time + self.duration
+            else:
+                return index_day_self < index_day_other  
+        else:
+            raise NotImplementedError
+
+    def __gt__(self,other):
+        if isinstance(other, UserPreference):
+            index_day_self = days_index[self.day]
+            index_day_other = days_index[other.day]
+            if self.week and other.week:
+                if self.week != other.week:
+                    return self.week > other.week
+                else:
+                    if index_day_self != index_day_other:
+                        return index_day_self > index_day_other
+                    else:
+                        return other.start_time > self.start_time + self.duration
+            else:
+                return index_day_self > index_day_other  
+        else:
+            raise NotImplementedError
+
+    def __eq__(self, other):
+        if isinstance(other, UserPreference):
+            return ((((self.week and other.week) and self.week == other.week) or not self.week or not other.week)
+                and days_index[self.day] == days_index[other.day] and self.start_time == other.start_time)
+        else:
+            raise NotImplementedError
     
+    def same_day(self, other):
+        if isinstance(other, UserPreference):
+            return days_index[self.day] == days_index[other.day]
+        else:
+            raise ValueError
+
+    def is_successor_of(self, other):
+        if isinstance(other, UserPreference):
+            return self.same_day(other) and other.end_time <= self.start_time <= other.end_time + 30 #slot_pause
+        else:
+            raise ValueError
 
 
 class CoursePreference(models.Model):

@@ -130,6 +130,8 @@ class WeeksDatabase(object):
 
         return days, day_after, holidays, training_half_days, day_before
 
+    #cstc = course start time constraint
+    #a partir de tous les cstc et elle génère des slots
     def slots_init(self):
         # SLOTS
         print('Slot tools definition', end=', ')
