@@ -2,14 +2,17 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
-from base.models import Week
 
 
 def move_week_year_to_week_tmp(apps, schema_editor):
-    considered_classes = apps.get_model('base', '')
-    for cc in considered_classes:
-        for o in cc.objects.exclude(week=None):
-            w=Week.objects.get(nb=o.week, year=o.year)
+    class_names = ['Course', 'CoursePreference', 'EdtVersion', 'GroupCost',
+                   'GroupFreeHalfDay', 'Holiday', 'ModuleTutorRepartition', 'Regen', 'RoomPreference',
+                   'TrainingHalfDay', 'TutorCost', 'UserPreference']
+    Week = apps.get_model('base', "Week")
+    for class_name in class_names:
+        considered_class = apps.get_model('base', class_name)
+        for o in considered_class.objects.exclude(week=None):
+            w = Week.objects.get(nb=o.week, year=o.year)
             o.week_tmp = w
             o.save()
     CM = apps.get_model('base', 'CourseModification')

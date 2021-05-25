@@ -106,7 +106,7 @@ class Group(models.Model):
 
     def descendants_groups(self):
         """
-        :return: the set of all Groupe contained by self (self not included)
+        :return: the set of all Groupe containe by self (self not included)
         """
         descendants = set()
 

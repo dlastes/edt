@@ -6,14 +6,14 @@ from django.db import migrations, models
 
 def add_all_weeks(apps, schema_editor):
     Week = apps.get_model('base', 'Week')
-    for y in range(20, 51):
+    for y in range(10, 51):
         year = 2000+y
         if y in {20, 26, 32, 37, 48}:
             final_week = 53
         else:
             final_week = 52
-        for w_nb in range(1,final_week+1):
-            Week.objects.create(nb=w_nb, year=year)
+        for w_nb in range(1, final_week+1):
+            Week.objects.get_or_create(nb=w_nb, year=year)
 
 
 class Migration(migrations.Migration):
