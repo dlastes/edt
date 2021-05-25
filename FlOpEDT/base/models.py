@@ -169,6 +169,9 @@ class Week(models.Model):
     nb = models.PositiveSmallIntegerField(validators=[MinValueValidator(0), MaxValueValidator(53)])
     year = models.PositiveSmallIntegerField()
 
+    def __str__(self):
+        return f"{self.nb}-{self.year}"
+
 
 class TimeGeneralSettings(models.Model):
     department = models.OneToOneField(Department, on_delete=models.CASCADE)
