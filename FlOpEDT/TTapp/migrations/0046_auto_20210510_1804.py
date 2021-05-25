@@ -2,15 +2,19 @@
 
 from django.db import migrations, models
 from TTapp.TTConstraint import all_subclasses, TTConstraint
-from base.models import Week
+
 
 def from_week_year_to_weeks(apps, schema_editor):
     all_ttconstraint_classes = all_subclasses(TTConstraint)
-    for cl in all_ttconstraint_classes:
+    Week = apps.get_model('base', "Week")
+    for ttc_c in all_ttconstraint_classes:
+        class_name = ttc_c._meta.object_name
+        cl = apps.get_model('TTapp', class_name)
         all_o = cl.objects.exclude(week=None)
         for o in all_o:
             w = Week.objects.get(nb=o.week, year=o.year)
             o.weeks.add(w)
+
 
 class Migration(migrations.Migration):
 
