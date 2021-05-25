@@ -45,7 +45,8 @@ from base.timing import Time
 
 from people.models import Tutor
 
-from TTapp.models import MinNonPreferedTutorsSlot, Stabilize, MinNonPreferedTrainProgsSlot
+from TTapp.models import MinNonPreferedTutorsSlot, Stabilize, MinNonPreferedTrainProgsSlot, NoSimultaneousGroupCourses
+from TTapp.TTConstraint import max_weight
 
 from TTapp.slots import slots_filter, days_filter
 
@@ -520,14 +521,9 @@ class TTModel(object):
 
         # constraint : only one course on simultaneous slots
         print('Simultaneous slots constraints for groups')
-        for sl in self.wdb.availability_slots:
-            for bg in self.wdb.basic_groups:
-                self.add_constraint(self.sum(self.TT[(sl2, c2)]
-                                             for sl2 in slots_filter(self.wdb.courses_slots,
-                                                                     simultaneous_to=sl)
-                                             for c2 in self.wdb.courses_for_basic_group[bg]
-                                             & self.wdb.compatible_courses[sl2]),
-                                    '<=', 1, SimulSlotGroupConstraint(sl, bg))
+        M, created = NoSimultaneousGroupCourses.objects.get_or_create(weight=max_weight, department=self.department)
+        if created:
+            M.save()
 
         # a course is scheduled once and only once
         for c in self.wdb.courses:
@@ -934,7 +930,6 @@ class TTModel(object):
          Add the constraints derived from the slot preferences expressed on the database
          """
         print("adding slot preferences")
-        from TTapp.TTConstraint import max_weight
         # first objective  => minimise use of unpreferred slots for teachers
         # ponderation MIN_UPS_I
 
