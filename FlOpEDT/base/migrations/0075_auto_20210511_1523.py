@@ -12,12 +12,12 @@ def move_week_year_to_week_tmp(apps, schema_editor):
     for class_name in class_names:
         considered_class = apps.get_model('base', class_name)
         for o in considered_class.objects.exclude(week=None):
-            w = Week.objects.get(nb=o.week, year=o.year)
+            w, created = Week.objects.get_or_create(nb=o.week, year=o.year)
             o.week_tmp = w
             o.save()
     CM = apps.get_model('base', 'CourseModification')
     for o in CM.objects.exclude(old_week=None):
-        w = Week.objects.get(nb=o.old_week, year=o.old_year)
+        w, created = Week.objects.get_or_create(nb=o.old_week, year=o.old_year)
         o.old_week_tmp = w
         o.save()
 
