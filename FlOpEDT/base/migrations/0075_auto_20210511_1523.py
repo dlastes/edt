@@ -49,6 +49,10 @@ class Migration(migrations.Migration):
             name='week_tmp',
             field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='base.Week'),
         ),
+        migrations.AlterUniqueTogether(
+            name='edtversion',
+            unique_together={('department', 'week_tmp')},
+        ),
         migrations.AddField(
             model_name='groupcost',
             name='week_tmp',
