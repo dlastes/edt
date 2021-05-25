@@ -59,10 +59,6 @@ class Migration(migrations.Migration):
             model_name='userpreference',
             name='year',
         ),
-        migrations.AlterUniqueTogether(
-            name='edtversion',
-            unique_together={('department', 'week')},
-        ),
         migrations.RemoveField(
             model_name='edtversion',
             name='year',
@@ -114,10 +110,6 @@ class Migration(migrations.Migration):
         migrations.RemoveField(
             model_name='userpreference',
             name='week',
-        ),
-        migrations.AlterUniqueTogether(
-            name='edtversion',
-            unique_together={('department', 'week')},
         ),
         migrations.RemoveField(
             model_name='edtversion',
