@@ -172,6 +172,29 @@ class Week(models.Model):
     def __str__(self):
         return f"{self.nb}-{self.year}"
 
+    def __eq__(self, other):
+        if isinstance(other, Week):
+            return self.nb == other.nb and self.year == other.year
+        else:
+            return False
+
+    def __lt__(self, other):
+        if isinstance(other, Week):
+            return self.year < other.year or (self.year == other.year and self.nb < other.nb)
+        else:
+            return False
+
+    def __gt__(self, other):
+        if isinstance(other, Week):
+            return self.year > other.year or (self.year == other.year and self.nb > other.nb)
+        else:
+            return False
+
+    def __le__(self, other):
+        return self == other or self < other
+
+    def __ge__(self, other):
+        return self == other or self > other
 
 class TimeGeneralSettings(models.Model):
     department = models.OneToOneField(Department, on_delete=models.CASCADE)
