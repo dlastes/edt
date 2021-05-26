@@ -446,14 +446,50 @@ class WeekDaysViewSet(viewsets.ViewSet):
         data = weeks.num_all_days(year, week, department)
         return JsonResponse(data, safe=False)
 
-"""
-class TTConstraintViewSet(viewsets.ModelViewSet):
-    
-    ViewSet to see all the TTConstraints
-    
-    
-
+class IDTutorViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAdminOrReadOnly]
-    queryset = tt.TTConstraint.objects.all()
-    serializer_class = serializers.TTConstraintSerializer
-"""
+
+    queryset = pm.Tutor.objects.all()
+    serializer_class = serializers.IDTutorSerializer
+
+class IDTrainProgViewSet(viewsets.ReadOnlyModelViewSet):
+    permission_classes = [IsAdminOrReadOnly]
+
+    queryset = bm.TrainingProgramme.objects.all()
+    serializer_class = serializers.IDTrainProgSerializer
+    
+class IDModuleViewSet(viewsets.ReadOnlyModelViewSet):
+    permission_classes = [IsAdminOrReadOnly]
+
+    queryset = bm.Module.objects.all()
+    serializer_class = serializers.IDModuleSerializer
+
+class IDCourseTypeViewSet(viewsets.ReadOnlyModelViewSet):
+    permission_classes = [IsAdminOrReadOnly]
+
+    queryset = bm.CourseType.objects.all()
+    serializer_class = serializers.IDCourseTypeSerializer
+
+class IDGroupViewSet(viewsets.ReadOnlyModelViewSet):
+    permission_classes = [IsAdminOrReadOnly]
+
+    queryset = bm.Group.objects.all()
+    serializer_class = serializers.IDGroupSerializer
+
+class IDGroupTypeViewSet(viewsets.ReadOnlyModelViewSet):
+    permission_classes = [IsAdminOrReadOnly]
+
+    queryset = bm.GroupType.objects.all()
+    serializer_class = serializers.IDGroupTypeSerializer
+
+class IDRoomViewSet(viewsets.ReadOnlyModelViewSet):
+    permission_classes = [IsAdminOrReadOnly]
+
+    queryset = bm.Room.objects.all()
+    serializer_class = serializers.IDRoomSerializer
+
+class IDRoomTypeViewSet(viewsets.ReadOnlyModelViewSet):
+    permission_classes = [IsAdminOrReadOnly]
+
+    queryset = bm.RoomType.objects.all()
+    serializer_class = serializers.IDRoomTypeSerializer

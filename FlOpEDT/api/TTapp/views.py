@@ -22,6 +22,7 @@
 # without disclosing the source code of your own applications.
 
 from django.db.models import query
+from django.db.models.fields.related import ForeignKey, ManyToManyField
 from rest_framework.utils.serializer_helpers import ReturnDict
 import TTapp.models as ttm
 import TTapp.TTConstraint as ttc
@@ -225,40 +226,24 @@ class TTNoVisioViewSet(viewsets.ModelViewSet):
 """
 
 class TTConstraintViewSet(viewsets.ViewSet):
-    """
-    constraintlist = ttc.TTConstraint.__subclasses__()
-    for constraint in constraintlist :
-        if (constraint._meta.abstract == False):
-            queryset = constraint.objects.all()
-    """
-  
     permission_classes = [IsAdminOrReadOnly]
     filterset_fields = '__all__' 
 
     def list(self, request):
-        
         data = list()
+        fieldlist = list()
         constraintlist = ttc.TTConstraint.__subclasses__()
 
         for constraint in constraintlist :
 
             if (constraint._meta.abstract == False):
-                queryset = constraint.objects.all()
+
+                queryset = constraint.objects.all()\
+                                             .select_related('department')
 
                 for object in queryset:
-                    serializer = serializers.LimitedRoomChoicesSerializer(object)
+                    serializer = serializers.TTMinTutorsHalfDaysSerializer(object)
                     data.append(serializer.data)
 
         return Response(data)
-        """
-        q1 = ttt.MinNonPreferedTutorsSlot.objects.all()
-        q2 = ttt.MinTutorsHalfDays.objects.all()
-        data = list()
-
-        for query in q1:
-            print(query)
-            serializer = serializers.LimitedRoomChoicesSerializer(query)
-            data.append(serializer.data)
-
-        return Response(data)
-        """
+ 

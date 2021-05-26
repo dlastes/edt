@@ -99,69 +99,76 @@ class TTConstraintSerializer(serializers.ModelSerializer):
     #is_active = serializers.BooleanField()
     #comment = serializers.CharField()
     #last_modification = serializers.DateField()
-    #week = serializers.IntegerField()
-    #year = serializers.IntegerField()
+    weeks = serializers.SerializerMethodField()
+    week = serializers.HiddenField(default = 0)
+    year = serializers.HiddenField(default = 0)
     parameters = serializers.SerializerMethodField()
 
     class Meta:
         abstract = True
         model = ttc.TTConstraint
         fields = '__all__'
-    
+
     def get_name(self, obj):
-        fields = obj._meta.get_fields()
         return(obj.__class__.__name__)
 
-    def get_parameters(self , obj):
+    def get_weeks(self, obj):
+        weeklist = []
+        week = {}
+        week["nb"] = getattr(obj, "week")
+        week["year"] = getattr(obj, "year")
+        weeklist.append(week)
+        return(weeklist)
+
+
+    def get_parameters(self, obj):
         paramlist = []
-        for i in obj._meta.get_fields():
-            if (i.name not in self.Meta.fields):
+        fields = self.Meta.fields
+        department = obj.department
+
+        if("year" not in fields and "week" not in fields):
+            fields.append("year") 
+            fields.append("week")
+
+        for field in obj._meta.get_fields():
+            if(field.name not in fields):
                 parameters = {}
                 id_list = []
                 acceptable = []
                 acceptablelist = list()
-                parameters["name"] = i.name
-                
-                if(not i.many_to_one and not i.many_to_many):
-                    typename = type(i).__name__
+
+                if(not field.many_to_one and not field.many_to_many):
+                    typename = type(field).__name__
                 else :
-                    typename = i.related_model.__name__
-                    mod = i.related_model
-                    
-                    department = getattr(obj,"department")
+                    typename = str(field.related_model)[8:-2] 
+                    mod = field.related_model
 
-                    if(i.name == "tutors"):
-                        acceptablelist = list(mod.objects.values("id","departments"))
-                        
-                        for id in acceptablelist:
-                            if(id["departments"] == department.id ) :
-                                acceptable.append(id["id"])
+                    if(field.name == "tutors"):
+                        acceptablelist = list(mod.objects.values("id","departments").filter(departments=department.id))
 
-                    elif(i.name == "train_progs"):
-                        acceptablelist = list(mod.objects.values("id","department"))
-                        for id in acceptablelist:
-                            if(id["department"] == department.id):
-                                acceptable.append(id["id"])
+                    elif(field.name == "train_progs"):
+                        acceptablelist = list(mod.objects.values("id","department").filter(department=department.id))
 
                     else:
                         acceptablelist = list(mod.objects.values("id"))
-                        for id in acceptablelist:
-                            acceptable.append(id["id"])
-
+                        
                     for id in acceptablelist:
                         acceptable.append(id["id"])
 
-                    if(i.many_to_one):
-                        if( str(getattr(obj,i.name)) != "None"):
-                            id_list.append(getattr(obj,i.name).id)
+                    attr = getattr(obj,field.name)
 
-                    if(i.many_to_many):
-                        idlist = list(getattr(obj,i.name).values("id"))
-                        for id in idlist:
+                    if(field.many_to_one):
+                        if( str(attr) != "None"):
+                            id_list.append(attr.id)
+
+                    if(field.many_to_many):
+                        listattr = list(attr.values("id"))
+                        for id in listattr:
                             id_list.append(id["id"])
 
+                parameters["name"] = field.name
                 parameters["type"] = typename
-                parameters["required"] = not i.blank
+                parameters["required"] = not field.blank
                 parameters["id_list"] = id_list
                 parameters["acceptable"] = acceptable
                 
@@ -172,14 +179,14 @@ class TTConstraintSerializer(serializers.ModelSerializer):
 class TTMinTutorsHalfDaysSerializer(TTConstraintSerializer):
     class Meta:
         model = ttt.MinTutorsHalfDays
-        fields = ['id', 'name', 'weight', 'is_active', 'comment', 'week', 'year', 'parameters']
+        fields = ['id', 'name', 'weight', 'is_active', 'comment', 'weeks', 'parameters']
 
 class LimitedRoomChoicesSerializer(TTConstraintSerializer):
     class Meta:
         model = ttr.LimitedRoomChoices
-        fields = ['id', 'name', 'weight', 'is_active', 'comment', 'week', 'year', 'parameters']
+        fields = ['id', 'name', 'weight', 'is_active', 'comment', 'weeks', 'parameters']
 
 class NoVisioSerializer(TTConstraintSerializer):
     class Meta:
         model = ttv.NoVisio
-        fields = ['id', 'name', 'weight', 'is_active', 'comment', 'week', 'year', 'parameters']
+        fields = ['id', 'name', 'weight', 'is_active', 'comment', 'weeks', 'parameters']

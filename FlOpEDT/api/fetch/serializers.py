@@ -434,19 +434,52 @@ class BKNewsSerializer(serializers.ModelSerializer):
 #                                  -------------------                                  #
 #                                  ----Constraints----                                  #
 #                                  -------------------                                  #
-class TTConstraintSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField()
-    name = serializers.CharField()
-    weight = serializers.IntegerField()
-    is_active = serializers.BooleanField()
-    comment = serializers.CharField()
-    last_modification = serializers.DateField()
-    week = serializers.IntegerField()
-    year = serializers.IntegerField()
 
-    class Meta:
-        model = tt.TTConstraint
-        fields = ['id', 'name', 'weight', 'is_active', 'comment', 'last_modification','week','year']
 #                                   ------------------                                  #
 #                                   ----Week infos----                                  #
 #                                   ------------------                                  #
+
+class IDTutorSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+
+    def get_name(self, obj):
+        return obj.username
+
+    class Meta:
+        model = pm.Tutor
+        fields = ['id', 'name']
+
+class IDTrainProgSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = bm.TrainingProgramme
+        fields = ['id', 'name']
+        
+class IDModuleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = bm.Module
+        fields = ['id', 'name']
+
+class IDCourseTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = bm.CourseType
+        fields = ['id', 'name']
+
+class IDGroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = bm.Group
+        fields = ['id', 'name'] 
+
+class IDGroupTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = bm.GroupType
+        fields = ['id', 'name'] 
+
+class IDRoomSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = bm.Room
+        fields = ['id', 'name']
+
+class IDRoomTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = bm.RoomType
+        fields = ['id', 'name']
