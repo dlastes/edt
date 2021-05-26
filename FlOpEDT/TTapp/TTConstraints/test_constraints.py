@@ -100,12 +100,15 @@ class Precedence(TTConstraint):
 class Partition(object):
 
     operations = {
-        "up_tutor" : lambda slot1, slot2 : (slot1["data"]["type"] == slot2["data"]["type"] == "UserPreference" and
-                                            slot1["data"]["tutor"] == slot2["data"]["tutor"]),
-        "up_value" : lambda slot1, slot2 : (slot1["data"]["type"] == slot2["data"]["type"] == "UserPreference" and
-                                            slot1["data"]["value"] == slot2["data"]["value"]),         
+        #checks if slots have the same tutor 
+        "up_tutor" : lambda slot1, slot2 : slot1["data"]["tutor"] == slot2["data"]["tutor"],
+        #checks if slots have the same value
+        "up_value" : lambda slot1, slot2 : slot1["data"]["value"] == slot2["data"]["value"],
+        #checks if slots have the same week
+        "up_week" : lambda slot1, slot2 : slot1["data"]["week"] == slot2["data"]["week"],
+        #checks if slots types are UserPreference      
         "user_pref": lambda slot1, slot2 : slot1["data"]["type"] == slot2["data"]["type"] == "UserPreference",
-        "no_check" : lambda slot1, slot2 : True,
+        #"no_check" : lambda slot1, slot2 : True,
     }
     courses_break = 20
     def __init__(self, slots = None, week = None):
@@ -124,16 +127,23 @@ class Partition(object):
                         "data" : { 
                             "type" : "UserPreference",
                             "tutor" : up.user,
-                            "value" : up.value
+                            "value" : up.value,
+                            "week" : up.week
                         }
                     }
                     self.partitions[up.day].append(slot)
           elif isinstance(slots, Partition):
-              self.partitions = slots.partitions
+              self.partitions = dict()
+              for key, value in slots.partitions.items():
+                  self.partitions[key] = []
+                  for slot in value:
+                      self.partitions[key].append(slot)
         self.week = week
 
-    #returns a new instance of Partition with the longest slots in it
-    def clean(self, method):
+    #returns a new instance of Partition with the longest slots in it while checking datas
+    #through the "method" function passed as an argument
+    def clean(self, methods):
+        print(methods)
         new_partition = Partition(week=self.week)
         for day, slots in self.partitions.items():
             i = 1
@@ -144,7 +154,7 @@ class Partition(object):
                   if (new_partition.partitions[day][j]["start"] +
                           new_partition.partitions[day][j]["duration"] +
                           Partition.courses_break < slots[i]["start"] or
-                          not Partition.operations[method](slots[i], new_partition.partitions[day][j])):
+                          not self.all_conditions(slots[i], new_partition.partitions[day][j], methods)):
                       new_partition.partitions[day].append(slots[i])
                       j+=1
                   else:
@@ -157,3 +167,10 @@ class Partition(object):
                       new_partition.partitions[day][j]["duration"] = new_duration 
                   i+=1
         return new_partition
+
+    #checks if all conditions are true
+    def all_conditions(self, slot1, slot2, methods):
+        for method in methods:
+            if not Partition.operations[method](slot1, slot2):
+                return False
+        return True
