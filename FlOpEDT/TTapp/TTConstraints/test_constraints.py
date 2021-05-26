@@ -30,6 +30,7 @@ from TTapp.TTConstraint import TTConstraint
 from TTapp.ilp_constraints.constraint import Constraint
 from django.utils.translation import gettext_lazy as _
 from base.models import UserPreference
+from base.timing import Day, days_list, days_index
 
 # Vérifier que le cours deux peut être mis après le cours 1
 ## Vérifier la disponibilité des tutors
@@ -50,8 +51,6 @@ class Precedence(TTConstraint):
 
     def pre_analysis(self, week):
         #Besoin du nombre de cours de chaque à poser
-        nb_required_1 = 1
-        nb_required_2 = 1
 
         possible_tutors_1 = set()
         if self.course1.tutor is not None:
@@ -91,13 +90,70 @@ class Precedence(TTConstraint):
                 D1 = [d1 for d1 in D1 for d2 in D2 if not d1.same_day(d2)]
                 D2 = [d2 for d2 in D2 for d1 in D1 if not d2.same_day(d1)]
                 
-            #Of récupère le nombre de possibilitées
-            nb_possible_1 = len(D1)
-            nb_possible_2 = len(D2)
-
             #All contradictoire avec same_day ? (voir comparaison des UserPreferences)
-            return all([d2 > d1 for d2 in D2 for d1 in D1]
-                    and nb_possible_1 > nb_required_1 and nb_possible_2 > nb_required_2)
+            return all([d2 > d1 for d2 in D2 for d1 in D1])
         else:
             #Certains utilisateurs n'ont aucunes préférences de renseignées.
             return False
+
+
+class Partition(object):
+
+    operations = {
+        "up_tutor" : lambda slot1, slot2 : (slot1["data"]["type"] == slot2["data"]["type"] == "UserPreference" and
+                                            slot1["data"]["tutor"] == slot2["data"]["tutor"]),
+        "up_value" : lambda slot1, slot2 : (slot1["data"]["type"] == slot2["data"]["type"] == "UserPreference" and
+                                            slot1["data"]["value"] == slot2["data"]["value"]),         
+        "user_pref": lambda slot1, slot2 : slot1["data"]["type"] == slot2["data"]["type"] == "UserPreference",
+        "no_check" : lambda slot1, slot2 : True,
+    }
+    courses_break = 20
+    def __init__(self, slots = None, week = None):
+        self.partitions = {Day.MONDAY: [], Day.TUESDAY: [], Day.WEDNESDAY: [],
+                            Day.THURSDAY: [], Day.FRIDAY: [], Day.SATURDAY: [],
+                            Day.SUNDAY: []}
+        #self.partitions = [[], [], [], [], [], [], []]
+                        
+        if slots != None:
+          if isinstance(slots, list):
+            for up in slots:
+                if isinstance(up, UserPreference):
+                    slot = {
+                        "start" : up.start_time,
+                        "duration" : up.duration,
+                        "data" : { 
+                            "type" : "UserPreference",
+                            "tutor" : up.user,
+                            "value" : up.value
+                        }
+                    }
+                    self.partitions[up.day].append(slot)
+          elif isinstance(slots, Partition):
+              self.partitions = slots.partitions
+        self.week = week
+
+    #returns a new instance of Partition with the longest slots in it
+    def clean(self, method):
+        new_partition = Partition(week=self.week)
+        for day, slots in self.partitions.items():
+            i = 1
+            j = 0
+            if slots:
+              new_partition.partitions[day].append(slots[0])
+              while(i < len(slots)):
+                  if (new_partition.partitions[day][j]["start"] +
+                          new_partition.partitions[day][j]["duration"] +
+                          Partition.courses_break < slots[i]["start"] or
+                          not Partition.operations[method](slots[i], new_partition.partitions[day][j])):
+                      new_partition.partitions[day].append(slots[i])
+                      j+=1
+                  else:
+                      if (new_partition.partitions[day][j]["start"] + new_partition.partitions[day][j]["duration"] + Partition.courses_break 
+                          == slots[i]["start"]):
+                          new_duration = new_partition.partitions[day][j]["duration"] + slots[i]["duration"]
+                      #Pourrait être un else
+                      elif new_partition.partitions[day][j]["start"] + new_partition.partitions[day][j]["duration"] + Partition.courses_break > slots[i]["start"]:
+                          new_duration = slots[i]["duration"] + slots[i]["start"] - new_partition.partitions[day][j]["start"]
+                      new_partition.partitions[day][j]["duration"] = new_duration 
+                  i+=1
+        return new_partition
