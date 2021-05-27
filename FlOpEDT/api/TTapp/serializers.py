@@ -100,8 +100,6 @@ class TTConstraintSerializer(serializers.ModelSerializer):
     #comment = serializers.CharField()
     #last_modification = serializers.DateField()
     weeks = serializers.SerializerMethodField()
-    week = serializers.HiddenField(default = 0)
-    year = serializers.HiddenField(default = 0)
     parameters = serializers.SerializerMethodField()
 
     class Meta:
@@ -114,10 +112,12 @@ class TTConstraintSerializer(serializers.ModelSerializer):
 
     def get_weeks(self, obj):
         weeklist = []
-        week = {}
-        week["nb"] = getattr(obj, "week")
-        week["year"] = getattr(obj, "year")
-        weeklist.append(week)
+        dict = {}
+        weeks = getattr(obj, "weeks").values("nb", "year")
+
+        for i in weeks:
+            weeklist.append(i)
+
         return(weeklist)
 
 
@@ -125,10 +125,6 @@ class TTConstraintSerializer(serializers.ModelSerializer):
         paramlist = []
         fields = self.Meta.fields
         department = obj.department
-
-        if("year" not in fields and "week" not in fields):
-            fields.append("year") 
-            fields.append("week")
 
         for field in obj._meta.get_fields():
             if(field.name not in fields):
@@ -142,16 +138,16 @@ class TTConstraintSerializer(serializers.ModelSerializer):
                 else :
                     typename = str(field.related_model)[8:-2] 
                     mod = field.related_model
+                    
+                    if(field.name == "tutors" and str(department) != "None"):
+                        acceptablelist = mod.objects.values("id","departments").filter(departments=department.id)
 
-                    if(field.name == "tutors"):
-                        acceptablelist = list(mod.objects.values("id","departments").filter(departments=department.id))
-
-                    elif(field.name == "train_progs"):
-                        acceptablelist = list(mod.objects.values("id","department").filter(department=department.id))
+                    elif(field.name == "train_progs" and str(department) != "None"):
+                        acceptablelist = mod.objects.values("id","department").filter(department=department.id)
 
                     else:
-                        acceptablelist = list(mod.objects.values("id"))
-                        
+                        acceptablelist = mod.objects.values("id")
+
                     for id in acceptablelist:
                         acceptable.append(id["id"])
 
@@ -162,7 +158,7 @@ class TTConstraintSerializer(serializers.ModelSerializer):
                             id_list.append(attr.id)
 
                     if(field.many_to_many):
-                        listattr = list(attr.values("id"))
+                        listattr = attr.values("id")
                         for id in listattr:
                             id_list.append(id["id"])
 
@@ -171,7 +167,7 @@ class TTConstraintSerializer(serializers.ModelSerializer):
                 parameters["required"] = not field.blank
                 parameters["id_list"] = id_list
                 parameters["acceptable"] = acceptable
-                
+
                 paramlist.append(parameters)
 
         return(paramlist)
@@ -179,14 +175,10 @@ class TTConstraintSerializer(serializers.ModelSerializer):
 class TTMinTutorsHalfDaysSerializer(TTConstraintSerializer):
     class Meta:
         model = ttt.MinTutorsHalfDays
-        fields = ['id', 'name', 'weight', 'is_active', 'comment', 'weeks', 'parameters']
+        fields = ['id', 'name', 'weight', 'is_active', 'comment', "modified_at", 'weeks', 'parameters']
 
 class LimitedRoomChoicesSerializer(TTConstraintSerializer):
     class Meta:
         model = ttr.LimitedRoomChoices
-        fields = ['id', 'name', 'weight', 'is_active', 'comment', 'weeks', 'parameters']
+        fields = ['id', 'name', 'weight', 'is_active', 'comment', "modified_at", 'weeks', 'parameters']
 
-class NoVisioSerializer(TTConstraintSerializer):
-    class Meta:
-        model = ttv.NoVisio
-        fields = ['id', 'name', 'weight', 'is_active', 'comment', 'weeks', 'parameters']

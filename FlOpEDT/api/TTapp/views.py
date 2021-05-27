@@ -21,8 +21,11 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
+from api.shared.params import week_param, year_param
 from django.db.models import query
 from django.db.models.fields.related import ForeignKey, ManyToManyField
+from django.utils.decorators import method_decorator
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework.utils.serializer_helpers import ReturnDict
 import TTapp.models as ttm
 import TTapp.TTConstraint as ttc
@@ -216,30 +219,34 @@ class TTLimitedRoomChoicesViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminOrReadOnly]
     filterset_fields = '__all__'
 
-"""
-class TTNoVisioViewSet(viewsets.ModelViewSet):
-
-    queryset = ttv.NoVisio.objects.all()
-    serializer_class =serializers.NoVisioSerializer
-    permission_classes = [IsAdminOrReadOnly]
-    filterset_fields = '__all__' 
-"""
-
+@method_decorator(name='list',
+                  decorator=swagger_auto_schema(
+                      operation_description="Active constraint",
+                      manual_parameters=[week_param(), year_param()])
+                  )
 class TTConstraintViewSet(viewsets.ViewSet):
     permission_classes = [IsAdminOrReadOnly]
     filterset_fields = '__all__' 
 
     def list(self, request):
+        # Getting all the filters
+        week = self.request.query_params.get('week', None)
+        year = self.request.query_params.get('year', None)
+
         data = list()
-        fieldlist = list()
         constraintlist = ttc.TTConstraint.__subclasses__()
 
         for constraint in constraintlist :
 
             if (constraint._meta.abstract == False):
+                if week is not None and year is not None:
+                    queryset = constraint.objects.filter(
+                        weeks__nb=week,
+                        weeks__year=year)
 
-                queryset = constraint.objects.all()\
-                                             .select_related('department')
+                else:
+                    queryset = constraint.objects.all()\
+                                                .select_related('department')
 
                 for object in queryset:
                     serializer = serializers.TTMinTutorsHalfDaysSerializer(object)
