@@ -133,34 +133,29 @@ class Partition(object):
                     }
                     self.partitions[up.day].append(slot)
           elif isinstance(slots, Partition):
-              self.partitions = dict()
-              for key, value in slots.partitions.items():
-                  self.partitions[key] = []
-                  for slot in value:
-                      self.partitions[key].append(slot)
+              self.partitions = slots.partitions
         self.week = week
 
     #returns a new instance of Partition with the longest slots in it while checking datas
     #through the "method" function passed as an argument
     def clean(self, methods):
-        print(methods)
         new_partition = Partition(week=self.week)
         for day, slots in self.partitions.items():
             i = 1
             j = 0
             if slots:
-              new_partition.partitions[day].append(slots[0])
+              new_partition.partitions[day].append(slots[0].copy())
               while(i < len(slots)):
                   if (new_partition.partitions[day][j]["start"] +
                           new_partition.partitions[day][j]["duration"] +
                           Partition.courses_break < slots[i]["start"] or
                           not self.all_conditions(slots[i], new_partition.partitions[day][j], methods)):
-                      new_partition.partitions[day].append(slots[i])
+                      new_partition.partitions[day].append(slots[i].copy())
                       j+=1
                   else:
                       if (new_partition.partitions[day][j]["start"] + new_partition.partitions[day][j]["duration"] + Partition.courses_break 
                           == slots[i]["start"]):
-                          new_duration = new_partition.partitions[day][j]["duration"] + slots[i]["duration"]
+                          new_duration = new_partition.partitions[day][j]["duration"] + slots[i]["duration"] + Partition.courses_break
                       #Pourrait être un else
                       elif new_partition.partitions[day][j]["start"] + new_partition.partitions[day][j]["duration"] + Partition.courses_break > slots[i]["start"]:
                           new_duration = slots[i]["duration"] + slots[i]["start"] - new_partition.partitions[day][j]["start"]
