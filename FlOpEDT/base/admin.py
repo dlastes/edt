@@ -532,7 +532,7 @@ class HolidayAdmin(MyModelAdmin):
     ordering = ( '-week', 'day')
     list_filter = (
         ('day', DropdownFilterSimple),
-        ('week', DropdownFilterAll),
+        ('week__nb', DropdownFilterAll),
     )
 
 
@@ -565,7 +565,7 @@ class RoomPreferenceAdmin(DepartmentModelAdmin):
     ordering = ('-week', 'day', 'start_time')
     list_filter = (
         ('room', DropdownFilterRel),
-        ('week', DropdownFilterAll),
+        ('week__nb', DropdownFilterAll),
     )
 
 
@@ -593,7 +593,7 @@ class CourseAdmin(DepartmentModelAdmin):
     ordering = ('week', 'module', 'type', 'no', 'groups', 'tutor')
     list_filter = (
         ('tutor', DropdownFilterRel),
-        ('week', DropdownFilterAll),
+        ('week__nb', DropdownFilterAll),
         ('type', DropdownFilterRel),
         ('groups', DropdownFilterRel),
     )
@@ -618,14 +618,14 @@ class CoursPlaceAdmin(DepartmentModelAdmin):
     ordering = ('day', 'start_time', 'course', 'room')
     list_filter = (
         ('course__tutor', DropdownFilterRel),
-        ('course__week', DropdownFilterAll),)
+        ('course__week__nb', DropdownFilterAll),)
 
 
 class CoursePreferenceAdmin(DepartmentModelAdmin):
     list_display = ('course_type', 'train_prog', 'day', 'start_time',
                     'duration', 'value', 'week')
     ordering = ('-week',)
-    list_filter = (('week', DropdownFilterAll),
+    list_filter = (('week__nb', DropdownFilterAll),
                    ('train_prog', DropdownFilterRel),
                    )
 
@@ -644,7 +644,7 @@ class DependencyAdmin(DepartmentModelAdmin):
     course1_an.admin_order_field = 'course1__week__year'
 
     list_display = ('course1', 'course2', 'successive', 'ND')
-    list_filter = (('course1__week', DropdownFilterAll),
+    list_filter = (('course1__week__nb', DropdownFilterAll),
                    )
 
 
@@ -667,7 +667,7 @@ class CourseModificationAdmin(DepartmentModelAdmin):
                     'start_time_old', 'updated_at', 'initiator'
                     )
     list_filter = (('initiator', DropdownFilterRel),
-                   ('course__week', DropdownFilterAll),)
+                   ('course__week__nb', DropdownFilterAll),)
     ordering = ('-updated_at', 'old_week')
 
 
@@ -676,7 +676,7 @@ class DispoAdmin(DepartmentModelAdmin):
                     'week',)
     ordering = ('user', 'week', 'day', 'start_time', 'value')
     list_filter = (('start_time', DropdownFilterAll),
-                   ('week', DropdownFilterAll),
+                   ('week__nb', DropdownFilterAll),
                    ('user', DropdownFilterRel),
                    )
 
