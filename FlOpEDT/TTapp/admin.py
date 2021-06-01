@@ -41,7 +41,8 @@ from TTapp.models import \
     LimitTutorsTimePerPeriod, LimitGroupsTimePerPeriod, LowerBoundBusyDays, GroupsLunchBreak, BreakAroundCourseType, \
     NoVisio, LimitGroupsPhysicalPresence, BoundPhysicalPresenceHalfDays, TutorsLunchBreak, VisioOnly, \
     NoTutorCourseOnDay, NoGroupCourseOnDay, \
-    ConsiderDepencies, Curfew
+    ConsiderDepencies, Curfew, NoSimultaneousGroupCourses, ScheduleAllCourses, AssignAllCourses, \
+    ConsiderTutorsUnavailability
 
 
 from TTapp.TTConstraints.orsay_constraints import GroupsLunchBreak
@@ -52,6 +53,15 @@ from FlOpEDT.filters import DropdownFilterAll, DropdownFilterRel, \
     DropdownFilterCho
 from django.conf import settings
 
+
+class BasicConstraintAdmin(DepartmentModelAdmin):
+    list_display = ('week', 'year', 'comment',
+                    'weight',
+                    'is_active')
+    ordering = ()
+    list_filter = (('week', DropdownFilterAll),
+                   ('year', DropdownFilterAll),
+                   )
 
 class CustomConstraintAdmin(DepartmentModelAdmin):
     list_display = ('class_name', 
@@ -458,4 +468,8 @@ admin.site.register(NoVisio, NoVisioAdmin)
 admin.site.register(VisioOnly, VisioOnlyAdmin)
 admin.site.register(BoundPhysicalPresenceHalfDays, BoundPhysicalPresenceHalfDaysAdmin)
 admin.site.register(LimitGroupsPhysicalPresence, LimitGroupsPhysicalPresenceAdmin)
+admin.site.register(NoSimultaneousGroupCourses, BasicConstraintAdmin)
+admin.site.register(ScheduleAllCourses, BasicConstraintAdmin)
+admin.site.register(AssignAllCourses, BasicConstraintAdmin)
+admin.site.register(ConsiderTutorsUnavailability, BasicConstraintAdmin)
 
