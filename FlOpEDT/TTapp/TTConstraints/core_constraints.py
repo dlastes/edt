@@ -59,7 +59,15 @@ class NoSimultaneousGroupCourses(TTConstraint):
                     ttmodel.add_to_group_cost(bg, self.local_weight() * ponderation * two_courses, week)
 
     def one_line_description(self):
-        pass
+        text = f"Les cours "
+        if self.groups.exists():
+            text += ' des groupes ' + ', '.join([group.name for group in self.groups.all()])
+        else:
+            text += " de chaque groupe"
+        if self.train_progs.exists():
+            text += ' de ' + ', '.join([train_prog.abbrev for train_prog in self.train_progs.all()])
+        text += " ne peuvent pas être simultanés"
+        return text
 
     def __str__(self):
         return _("No simultaneous courses for one group")
@@ -97,7 +105,18 @@ class ScheduleAllCourses(TTConstraint):
                 ttmodel.add_to_generic_cost((1-not_scheduled) * self.local_weight() * ponderation, week)
 
     def one_line_description(self):
-        pass
+        text = f"Planifie tous les cours "
+        if self.groups.exists():
+            text += ' des groupes ' + ', '.join([group.name for group in self.groups.all()])
+        if self.train_progs.exists():
+            text += ' de ' + ', '.join([train_prog.abbrev for train_prog in self.train_progs.all()])
+        if self.modules.exists():
+            text += ' de : ' + ', '.join([str(module) for module in self.modules.all()])
+        if self.course_types.exists():
+            text += f" de type" + ', '.join([t.name for t in self.course_types.all()])
+        if self.tutors.exists():
+            text += ' de ' + ', '.join([tutor.username for tutor in self.tutors.all()])
+        return text
 
     def __str__(self):
         return _("Schedule once every considered course")
