@@ -80,7 +80,7 @@ def create_first_department():
 
 def get_edt_version(department, week, year, create=False):
 
-    params = {'week': week, 'year': year, 'department': department}
+    params = {'week__nb': week, 'week__year': year, 'department': department}
 
     if create:
         try:

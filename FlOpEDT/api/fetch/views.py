@@ -52,8 +52,8 @@ class ScheduledCourseFilterSet(filters.FilterSet):
     group = filters.CharFilter(field_name='course__groups__name')
     tutor_name = filters.CharFilter(field_name='tutor__username')
     # makes the fields required
-    week = filters.NumberFilter(field_name='course__week', required=True)
-    year = filters.NumberFilter(field_name='course__year', required=True)
+    week = filters.NumberFilter(field_name='course__week__nb', required=True)
+    year = filters.NumberFilter(field_name='course__week__year', required=True)
 
     work_copy = filters.NumberFilter(field_name='work_copy')
 
@@ -123,10 +123,10 @@ class UnscheduledCoursesViewSet(viewsets.ReadOnlyModelViewSet):
 
         # Filtering different querysets
         if year is not None:
-            queryset_course = queryset_course.filter(year=year)
+            queryset_course = queryset_course.filter(week__year=year)
 
         if week is not None:
-            queryset_course = queryset_course.filter(week=week)
+            queryset_course = queryset_course.filter(week__nb=week)
 
         queryset_sc = queryset_sc.filter(work_copy=work_copy)
         if department is not None:
@@ -166,9 +166,9 @@ class AvailabilitiesViewSet(viewsets.ReadOnlyModelViewSet):
 
         # Filtering
         if week is not None:
-            qs = qs.filter(week=week)
+            qs = qs.filter(week__nb=week)
         if year is not None:
-            qs = qs.filter(year=year)
+            qs = qs.filter(week__year=year)
         if dept is not None:
             qs = qs.filter(user__departments__abbrev=dept)
 
@@ -312,9 +312,9 @@ class ExtraSchedCoursesViewSet(viewsets.ReadOnlyModelViewSet):
             return None
 
         if week is not None:
-            qs_esc = qs_esc.filter(course__week=week)
+            qs_esc = qs_esc.filter(course__week__nb=week)
         if year is not None:
-            qs_esc = qs_esc.filter(course__year=year)
+            qs_esc = qs_esc.filter(course__week__year=year)
 
         # Getting all the needed data
 
@@ -387,8 +387,8 @@ class UnavailableRoomViewSet(viewsets.ViewSet):
         #     return cached
 
         dataset = bm.RoomPreference.objects.filter(room__departments__abbrev=department,
-                                                   week=week,
-                                                   year=year,
+                                                   week__nb=week,
+                                                   week__year=year,
                                                    value=0)
 
         # cache.set(cache_key, response)7

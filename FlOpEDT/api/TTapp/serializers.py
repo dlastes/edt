@@ -21,6 +21,7 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
+from base.models import Week
 import TTapp.models as ttm
 import TTapp.TTConstraint as ttc
 import TTapp.TTConstraints.tutors_constraints as ttt
@@ -93,12 +94,7 @@ class TTLimitedRoomChoicesSerializer(serializers.ModelSerializer):
         fields = '__all__' """
 
 class TTConstraintSerializer(serializers.ModelSerializer):
-    #id = serializers.IntegerField()
     name = serializers.SerializerMethodField()
-    #weight = serializers.IntegerField()
-    #is_active = serializers.BooleanField()
-    #comment = serializers.CharField()
-    #last_modification = serializers.DateField()
     weeks = serializers.SerializerMethodField()
     parameters = serializers.SerializerMethodField()
 
@@ -112,7 +108,6 @@ class TTConstraintSerializer(serializers.ModelSerializer):
 
     def get_weeks(self, obj):
         weeklist = []
-        dict = {}
         weeks = getattr(obj, "weeks").values("nb", "year")
 
         for i in weeks:

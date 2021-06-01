@@ -21,7 +21,7 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from api.shared.params import week_param, year_param
+from api.shared.params import dept_param, week_param, year_param
 from django.db.models import query
 from django.db.models.fields.related import ForeignKey, ManyToManyField
 from django.utils.decorators import method_decorator
@@ -198,31 +198,11 @@ class TTLimitedRoomChoicesViewSet(viewsets.ModelViewSet):
 
     filterset_fields = '__all__'
  """
-class TTMinTutorsHalfDaysViewSet(viewsets.ModelViewSet):
-
-    queryset = ttt.MinTutorsHalfDays.objects.all()
-    serializer_class =serializers.TTMinTutorsHalfDaysSerializer
-    permission_classes = [IsAdminOrReadOnly]
-    filterset_fields = '__all__'
-
-class TTMinNonPreferedTutorsSlotViewSet(viewsets.ModelViewSet):
-
-    queryset = ttt.MinNonPreferedTutorsSlot.objects.all()
-    serializer_class =serializers.TTMinTutorsHalfDaysSerializer
-    permission_classes = [IsAdminOrReadOnly]
-    filterset_fields = '__all__'
-
-class TTLimitedRoomChoicesViewSet(viewsets.ModelViewSet):
-
-    queryset = ttr.LimitedRoomChoices.objects.all()
-    serializer_class =serializers.LimitedRoomChoicesSerializer
-    permission_classes = [IsAdminOrReadOnly]
-    filterset_fields = '__all__'
 
 @method_decorator(name='list',
                   decorator=swagger_auto_schema(
                       operation_description="Active constraint",
-                      manual_parameters=[week_param(), year_param()])
+                      manual_parameters=[week_param(), year_param(), dept_param()])
                   )
 class TTConstraintViewSet(viewsets.ViewSet):
     permission_classes = [IsAdminOrReadOnly]
@@ -232,21 +212,23 @@ class TTConstraintViewSet(viewsets.ViewSet):
         # Getting all the filters
         week = self.request.query_params.get('week', None)
         year = self.request.query_params.get('year', None)
-
+        dept = self.request.query_params.get('dept', None)
         data = list()
         constraintlist = ttc.TTConstraint.__subclasses__()
 
         for constraint in constraintlist :
 
             if (constraint._meta.abstract == False):
-                if week is not None and year is not None:
-                    queryset = constraint.objects.filter(
-                        weeks__nb=week,
-                        weeks__year=year)
+                queryset = constraint.objects.all().select_related('department')
 
-                else:
-                    queryset = constraint.objects.all()\
-                                                .select_related('department')
+                if week is not None:
+                    queryset = queryset.filter(weeks__nb = week)
+
+                if year is not None:
+                    queryset = queryset.filter(weeks__year=year)
+                
+                if dept is not None:
+                    queryset = queryset.filter(department__abbrev=dept)
 
                 for object in queryset:
                     serializer = serializers.TTMinTutorsHalfDaysSerializer(object)

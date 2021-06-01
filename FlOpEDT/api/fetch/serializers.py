@@ -25,7 +25,6 @@ from rest_framework import serializers
 import base.models as bm
 import displayweb.models as dwm
 import people.models as pm
-import TTapp.TTConstraint as tt
 
 
 #    --------------------------------------------------------------------------------
@@ -76,11 +75,24 @@ class Course_SC_Serializer(serializers.Serializer):
     id = serializers.IntegerField()
     type = serializers.CharField()
     room_type = serializers.CharField()
-    week = serializers.IntegerField()
-    year = serializers.IntegerField()
+    week = serializers.SerializerMethodField()
+    year = serializers.SerializerMethodField()
     groups = Group_SC_Serializer(many=True)
     module = Module_SC_Serializer()
     is_graded = serializers.BooleanField()
+
+    def get_week(self, obj):
+        if(obj.week is not None):
+            return (obj.week.nb)
+        else:
+            return
+
+    def get_year(self, obj):
+        if(obj.week is not None):
+            return (obj.week.year)
+        else:
+            return
+
 
     class Meta:
         model = bm.Course
@@ -117,10 +129,23 @@ class CourseCosmo_SC_Serializer(serializers.Serializer):
     id = serializers.IntegerField()
     type = serializers.CharField()
     room_type = serializers.CharField()
-    week = serializers.IntegerField()
-    year = serializers.IntegerField()
+    week = serializers.SerializerMethodField()
+    year = serializers.SerializerMethodField()
     groups = Group_SC_Serializer(many=True)
     module = ModuleCosmo_SC_Serializer()
+
+    def get_week(self, obj):
+        if(obj.week is not None):
+            return (obj.week.nb)
+        else:
+            return
+
+    def get_year(self, obj):
+        if(obj.week is not None):
+            return (obj.week.year)
+        else:
+            return
+
 
     class Meta:
         model = bm.Course
@@ -310,10 +335,22 @@ class DepartmentAbbrevSerializer(serializers.Serializer):
 
 class AllVersionsSerializer(serializers.ModelSerializer):
     # Spécification des champs voulus
-    year = serializers.IntegerField()
-    week = serializers.IntegerField()
+    year = serializers.SerializerMethodField()
+    week = serializers.SerializerMethodField()
     version = serializers.IntegerField()
     department = DepartmentAbbrevSerializer()
+
+    def get_week(self, obj):
+        if(obj.week is not None):
+            return (obj.week.nb)
+        else:
+            return
+
+    def get_year(self, obj):
+        if(obj.week is not None):
+            return (obj.week.year)
+        else:
+            return
 
     # Mise en forme des données
     class Meta:
@@ -347,10 +384,23 @@ class Course_TC_Serializer(serializers.Serializer):
     type = CourseType_TC_Serializer()
     tutor = serializers.CharField()
     room_type = serializers.CharField()
-    week = serializers.IntegerField()
-    year = serializers.IntegerField()
+    week = serializers.SerializerMethodField()
+    year = serializers.SerializerMethodField()
     groups = Group_SC_Serializer()
     module = Module_SC_Serializer()
+
+    def get_week(self, obj):
+        if(obj.week is not None):
+            return (obj.week.nb)
+        else:
+            return
+
+    def get_year(self, obj):
+        if(obj.week is not None):
+            return (obj.week.year)
+        else:
+            return
+
 
     class Meta:
         model = bm.Course
