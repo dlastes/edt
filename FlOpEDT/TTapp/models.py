@@ -34,6 +34,7 @@ from django.db import models
 # Import constraints from other files
 
 from TTapp.TTConstraint import TTConstraint, max_weight
+from TTapp.TTConstraints.core_constraints import ScheduleAllCourses, NoSimultaneousGroupCourses
 from TTapp.TTConstraints.stabilization_constraints import Stabilize, StabilizationThroughWeeks
 from TTapp.TTConstraints.groups_constraints import MinGroupsHalfDays, MinNonPreferedTrainProgsSlot
 from TTapp.TTConstraints.no_course_constraints import NoGroupCourseOnDay, NoTutorCourseOnDay
