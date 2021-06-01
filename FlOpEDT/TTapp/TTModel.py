@@ -46,7 +46,7 @@ from base.timing import Time
 from people.models import Tutor
 
 from TTapp.models import MinNonPreferedTutorsSlot, Stabilize, MinNonPreferedTrainProgsSlot, \
-    NoSimultaneousGroupCourses, ScheduleAllCourses
+    NoSimultaneousGroupCourses, ScheduleAllCourses, AssignAllCourses, ConsiderTutorsUnavailability
 from TTapp.TTConstraint import max_weight
 
 from TTapp.slots import slots_filter, days_filter
@@ -536,41 +536,23 @@ class TTModel(object):
         if not ScheduleAllCourses.objects.filter(department=self.department).exists():
             ScheduleAllCourses.objects.create(department=self.department)
 
-
     def add_instructors_constraints(self):
         print("adding instructors constraints")
 
         # Each course is assigned to a unique tutor
-        for c in self.wdb.courses:
-            for sl in self.wdb.compatible_slots[c]:
-                self.add_constraint(self.sum(self.TTinstructors[(sl, c, i)]
-                                             for i in self.wdb.possible_tutors[c]) - self.TT[sl, c],
-                                    '==', 0,
-                                    InstructorConstraint(constraint_type=ConstraintType.COURS_DOIT_AVOIR_PROFESSEUR,
-                                    slot=sl, course=c))
+        if not AssignAllCourses.objects.filter(department=self.department).exists():
+            AssignAllCourses.objects.create(department=self.department)
 
         if self.core_only:
             return
+
+        if not ConsiderTutorsUnavailability.objects.filter(department=self.department).exists():
+            ConsiderTutorsUnavailability.objects.create(department=self.department)
 
         for i in self.wdb.instructors:
             if i.username == '---':
                 continue
             for sl in self.wdb.availability_slots:
-                # a course is assigned to a tutor only if s⋅he is available
-                self.add_constraint(self.sum(self.TTinstructors[(sl2, c2, i)]
-                                             for sl2 in slots_filter(self.wdb.courses_slots, simultaneous_to=sl)
-                                             for c2 in self.wdb.possible_courses[i] & self.wdb.compatible_courses[sl2]),
-                                    '<=', self.avail_instr[i][sl],
-                                    SlotInstructorConstraint(sl, i))
-
-                self.add_constraint(self.sum(self.TT[(sl2, c2)]
-                                             for sl2 in slots_filter(self.wdb.courses_slots, simultaneous_to=sl)
-                                             for c2 in self.wdb.courses_for_supp_tutor[i]
-                                             & self.wdb.compatible_courses[sl2]),
-                                    '<=', self.avail_instr[i][sl],
-                                    Constraint(constraint_type=ConstraintType.SUPP_TUTOR,
-                                               instructors=i, slots=sl))
-
                 if self.department.mode.visio:
                     # avail_at_school_instr consideration...
                     relevant_courses = set(c for c in self.wdb.possible_courses[i]
