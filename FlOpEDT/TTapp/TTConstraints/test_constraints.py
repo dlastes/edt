@@ -98,85 +98,79 @@ class Precedence(TTConstraint):
 
 
 
+class TimeInterval(object):
+
+    #date_start, date_end : datetime
+    def __init__(self, date_start, date_end):
+        self.start = date_start
+        self.end = date_end
+
+    def __str__(self):
+        return f'//intervalle: {self.start} ---> {self.end} //'
+
+    def __repr__(self):
+        return f'//intervalle: {self.start} ---> {self.end} //'
+
+    def __eq__(self, other):
+      return isinstance(other, TimeInterval) and self.start == other.start and self.end == other.end
+      
+    @property
+    def duration(self):
+      #datetime1 - datetime2 = timedelta
+      return abs(self.start - self.end).total_seconds()//60
+
 class Partition(object):
-    #Mettre un start_time des jours, et un end_time des jours ?
-    def __init__(self, type, depart, day_start_time, day_end_time, fin = None, start_time = None, end_time = None):
-        self.partitions = []
+    #date_start, date_end : datetime
+    #day_start_time, day_end_time : int
+    def __init__(self, type, date_start, date_end, day_start_time, day_end_time):
+        self.intervals = []
         self.type = type
         self.day_start_time = day_start_time
         self.day_end_time = day_end_time
-        self.partitions.append({
-                            "day_start" : depart,
-                            "data" : { 
-                                "free" : True
-                            }
-                        })
-        if fin:
-            self.partitions[0]["day_end"] = fin
-        else:
-            self.partitions[0]["day_end"] = depart
-        if start_time:
-            self.partitions[0]["start_time"] = start_time
-        else:
-            self.partitions[0]["start_time"] = self.day_start_time
-        
-        if end_time:
-            self.partitions[0]["end_time"] = end_time
-        else:
-            self.partitions[0]["end_time"] = self.day_end_time
+        self.intervals.append((TimeInterval(date_start, date_end), []))
 
     @property
     def day_duration(self):
-        return self.day_end_time - self.day_start_time
+        return (self.day_end_time - self.day_start_time)
 
     @property
-    def nb_slots(self):
-      return len(self.partitions)
+    def nb_intervals(self):
+      return len(self.intervals)
 
     @property
     def duration(self):
-        #computes number of minutes for all weeks from the one of day_start to the one of day_end included
-        nb_min_weeks = (self.partitions[0]["day_start"].week.nb - self.partitions[self.nb_slots - 1]["day_end"].week.nb + 1) * self.day_duration * 5
-        #computes number of minutes from the start of any days to the start of the partition
-        nb_min_from_start_day = self.partitions[0]["start_time"] - self.day_start_time
-        
-        #computes number of minutes from the end of a partition to the end of any days
-        nb_min_to_end_day = self.day_end_time - self.partitions[self.nb_slots-1]["end_time"]
-        
-        #computes number of minutes by days from monday to day_start
-        nb_min_from_day_week = self.day_duration * days_index[self.partitions[0]["day_start"].day]
+        return abs(self.intervals[len(self.intervals)-1][0].end - self.intervals[0][0].start).total_seconds()//60
 
-        #computes number of minutes by days from day_end to friday
-        nb_min_to_end_week = self.day_duration * (4 - days_index[self.partitions[self.nb_slots-1]["day_end"].day])
-
-        return nb_min_weeks - nb_min_from_start_day - nb_min_to_end_day - nb_min_from_day_week  - nb_min_to_end_week
-
-    def add_slot(self):
-        pass
-'''
-    def get_slot_from_time(self, day, start_time, duration = None):
+    def add_slot(self, interval, data):
         i = 0
-        if day.week:
-            while i < len(self.partitions) and self.partitions[i]["day_start"].week > day.week:
-                i+=1
-        else:
-            return None
-        while (i < len(self.partitions)
-                and (self.partitions[i]["day_start"].day < day.day
-                        and self.partitions[i]["day_start"].day > day.day)
-                        ):
+        while self.intervals[i][0].end <= interval.start:
             i+=1
+        
+        while i < len(self.intervals) and interval.end > self.intervals[i][0].start:
+            #IF WE ALREADY HAVE THE SAME INTERVAL WE APPEND THE DATA
+            if self.intervals[i][0] == interval:
+                self.intervals[i][1].append(data)
+                i+=1
+            #IF WE ARE INSIDE AN EXISTING INTERVAL
+            elif self.intervals[i][0].start <= interval.start and self.intervals[i][0].end >= interval.end:
+                new_part = 1
+                if self.intervals[i][0].end != interval.end:
+                    self.intervals.insert(i+1, (TimeInterval(interval.end, self.intervals[i][0].end), self.intervals[i][1].copy()))
+                    self.intervals[i][0].end = interval.end
+                if self.intervals[i][0].start != interval.start:
+                    self.intervals[i][0].end = interval.start
+                    self.intervals.insert(i+1, (TimeInterval(interval.start, interval.end), self.intervals[i][1][:].append(data)))
+                    new_part += 1
+                else:
+                    self.intervals[i][1].append(data)
+                i += new_part
+            #ELSE WE ARE IN BETWEEN TWO INTERVALS
+            else:
+                self.intervals[i][0].end = interval.start
+                self.intervals.insert(i+1, (TimeInterval(interval.start, self.intervals[i+1][0].start), self.intervals[i][1][:].append(data)))
+                interval.start = self.intervals[i+1][0].end
+                i+=2
 
-
-        return self.partitions[i]
-
-    def merge_partition(self, other):
-      pass
-
-    @classmethod
-    def merge_partition(cls, part1, part2):
-      pass
-'''
 
 
 '''

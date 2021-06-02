@@ -127,7 +127,7 @@ class ScheduleAllCourses(TTConstraint):
 
 class AssignAllCourses(TTConstraint):
     """
-    The considered courses are scheduled, and only once
+    The considered courses are assigned to a tutor
     """
     modules = models.ManyToManyField('base.Module', blank=True)
     groups = models.ManyToManyField('base.Group',
