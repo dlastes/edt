@@ -36,10 +36,24 @@ class StructuralGroupSerializer(serializers.ModelSerializer):
         model = bm.StructuralGroup
         fields = '__all__'
 
-# J'ai crée en dessous
+# STAGE J'ai crée en dessous
+
+class StructuralShortSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = bm.StructuralGroup
+        fields = ('name',)
+
+
 class TransversalGroupSerializer(serializers.ModelSerializer):
+    train_prog = serializers.CharField(source="train_prog.abbrev")
+    conflicting_groups = StructuralShortSerializer(many=True)  #serializers.CharField(source="conflicting_groups.name",many=True)
+#    parallel_groups = serializers.CharField(source="parallel_groups.name",many=True)
+    
     class Meta:
         model = bm.TransversalGroup
         fields = '__all__'
+
+
+        
 # J'ai crée au dessus
 

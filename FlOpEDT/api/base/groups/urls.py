@@ -29,7 +29,6 @@ routerGroups = routers.SimpleRouter()
 
 routerGroups.register(r'types', views.GroupTypesViewSet)
 
-# Euh... ?
 #routerGroups.register(r'groups', views.GroupViewSet, basename="group")
-routerGroups.register(r'structural-groups', views.StructuralGroupViewSet, basename="group")
-routerGroups.register(r'transversal-groups', views.TransversalGroupViewSet, basename="group")
+routerGroups.register(r'structural', views.StructuralGroupViewSet, basename="structural")
+routerGroups.register(r'transversal', views.TransversalGroupViewSet, basename="transversal")

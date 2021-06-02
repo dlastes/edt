@@ -134,8 +134,7 @@ class StructuralGroup(GenericGroup):
 
 
 class TransversalGroup(GenericGroup):
-    conflicting_groups = models.ManyToManyField("base.StructuralGroup", symmetrical=True,
-                                                blank=True)
+    conflicting_groups = models.ManyToManyField("base.StructuralGroup", blank=True)
                                                 
     parallel_groups = models.ManyToManyField('self', symmetrical=True,
                                              blank=True)

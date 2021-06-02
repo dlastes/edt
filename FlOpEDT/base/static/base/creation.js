@@ -429,7 +429,7 @@ function go_promo_gp_init(button_available) {
 }
 
 
-function create_groups(data_groups) {
+function create_structural_groups(data_groups) {
   var root;
 
   extract_all_groups_structure(data_groups);
@@ -459,6 +459,68 @@ function create_groups(data_groups) {
 
   set_butgp();
 }
+
+
+
+/* STAGE! Fonction pour creer les groupes transversaux */
+function create_transversal_groups(data_groups) {
+	var nb_promos = groups.length;
+	for (let nprom =0; nprom<nb_promos; nprom++){
+		groups[nprom]["transversal"] = {};
+	}
+
+
+  var nb_groups = data_groups.length;
+  
+  // Première passe: creation de groupe avec remplissage de conflicting_groups
+  for (let ngrp = 0; ngrp < nb_groups; ngrp++) {
+  	group_prom = set_promos.indexOf(data_groups[ngrp]['train_prog']);
+  	
+  	// Si group_prom vaut -1, cela veut dire qu'il n'y a pas de promotions avec une abbreviation correspondante à ce que l'on cherche, donc on invalide le groupe en question
+  	if (group_prom == -1) {
+  		console.log("The group named "+data_groups[ngrp]['name']+" has invalid training program.")
+  		
+  	// Si tout se passe bien, on commence à créer le groupe en question	
+  	} else {  	
+  		var gr = {
+  			name: data_groups[ngrp]['name'],
+  			promo: group_prom,
+  			display: true,
+  			x: 0,
+    		maxx: 0,
+    		width: 0,
+    		est: 0,
+    		lft: 0,
+    		conflicting_groups: [],  	// conflicting_groups est une liste contenant des structural_groups!
+    		parallel_groups: [], 			// parallel_groups lui contient une liste de transversal_groups avec lequels il peut avoir cours en parallèle (hence the name)
+  		}
+  		
+  		
+  		// Ici on veut trouver les objets js qui correspondent aux groupes conflictuels du groupe en question. ça va être fun
+  		var nb_conflict_groups = data_groups[ngrp]["conflicting_groups"].length;
+  		for (let conflict_group_nb = 0; conflict_group_nb < nb_conflict_groups; conflict_group_nb++) {
+  			if (data_groups[ngrp]["conflicting_groups"][conflict_group_nb].name in groups[group_prom]["structural"]) {
+  				gr["conflicting_groups"].push(groups[group_prom]["structural"][data_groups[ngrp]["conflicting_groups"][conflict_group_nb].name]);
+  			}
+  		}
+  		groups[group_prom]["transversal"][gr.name]=gr;
+  	}
+  } 
+  
+  // Seconde passe: On complete les groupes déjà créé en leur ajoutant les groupes transversaux avec lequels ils sont en parallèle? 
+  // On fait ça en un second temps car il faut que tout les groupes transversaux soient en place pour faire avancer le schmilblick
+  for (let ngrp = 0; ngrp < nb_groups; ngrp++) {
+  	group_prom = set_promos.indexOf(data_groups[ngrp]['train_prog']);
+  	if (group_prom != -1) {
+  		nb_para_groups = data_groups[ngrp]["parallel_groups"].length;
+  		for (let n_pargrp; n_pargrp < nb_para_groups; n_pargrp++) {
+  			groups[group_prom]["transversal"][data_groups[ngrp]["name"]]["parallel_groups"].push(groups[group_prom]["transversal"][data_groups[ngrp]["parallel_groups"][n_pargrp]]);
+  		}
+  	}
+  }
+}
+/* FIN DE ZONE DE STAGE! */
+
 
 
 function extract_all_groups_structure(r) {
@@ -514,7 +576,7 @@ function extract_groups_structure(r, npro, nrow) {
 
 
     // promo number should be unique
-    groups[npro] = [];
+    groups[npro] = {"structural":{}};
     root_gp[npro] = {};
 
 
@@ -548,7 +610,7 @@ function extract_groups_structure(r, npro, nrow) {
       extract_groups_structure(r.children[i], npro, nrow);
     }
   }
-  groups[npro][gr.name] = gr;
+  groups[npro]["structural"][gr.name] = gr;
 }
 
 
@@ -569,7 +631,7 @@ function create_static_att_groups(node) {
 
   if (node.children.length != 0) {
     for (var i = 0; i < node.children.length; i++) {
-      child = groups[node.promo][node.children[i]];
+      child = groups[node.promo]["structural"][node.children[i]];
       child.by = node.by + node.buth;
       create_static_att_groups(child);
     }
@@ -599,7 +661,7 @@ function compute_promo_est_n_wh(node) {
     }
   } else {
     for (var i = 0; i < node.children.length; i++) {
-      child = groups[node.promo][node.children[i]];
+      child = groups[node.promo]["structural"][node.children[i]];
       child.est = node.est + node.width;
       if (!child.display) {
         child.width = 0;
@@ -621,7 +683,7 @@ function compute_promo_lft(node) {
   var child;
   var eaten = 0;
   for (var i = node.children.length - 1; i >= 0; i--) {
-    child = groups[node.promo][node.children[i]];
+    child = groups[node.promo]["structural"][node.children[i]];
     child.lft = node.lft - eaten;
     compute_promo_lft(child);
     eaten += child.width;
@@ -648,7 +710,7 @@ function compute_promo_lmx(node) {
     var lastmax = node.x;
     var lastmin = -1;
     for (var i = 0; i < node.children.length; i++) {
-      child = groups[node.promo][node.children[i]];
+      child = groups[node.promo]["structural"][node.children[i]];
       if (child.display) {
         if (child.x < lastmax) {
           child.x = lastmax;
@@ -767,7 +829,7 @@ function compute_promo_leaves(node) {
   }
 
   for (var i = 0; i < node.children.length; i++) {
-    child = groups[node.promo][node.children[i]];
+    child = groups[node.promo]["structural"][node.children[i]];
     compute_promo_leaves(child);
   }
 }

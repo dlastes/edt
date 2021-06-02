@@ -1,5 +1,3 @@
-# Petite note: je me suis rendu compte qu'à la fin qu'en anglais, dictionnaire c'est dictionary et non dictionary (difference avec les n)
-
 # Imports des modules
 from requests import Session # API HP
 from requests.auth import HTTPBasicAuth # API HP
