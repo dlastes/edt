@@ -97,6 +97,89 @@ class Precedence(TTConstraint):
             return False
 
 
+
+class Partition(object):
+    #Mettre un start_time des jours, et un end_time des jours ?
+    def __init__(self, type, depart, day_start_time, day_end_time, fin = None, start_time = None, end_time = None):
+        self.partitions = []
+        self.type = type
+        self.day_start_time = day_start_time
+        self.day_end_time = day_end_time
+        self.partitions.append({
+                            "day_start" : depart,
+                            "data" : { 
+                                "free" : True
+                            }
+                        })
+        if fin:
+            self.partitions[0]["day_end"] = fin
+        else:
+            self.partitions[0]["day_end"] = depart
+        if start_time:
+            self.partitions[0]["start_time"] = start_time
+        else:
+            self.partitions[0]["start_time"] = self.day_start_time
+        
+        if end_time:
+            self.partitions[0]["end_time"] = end_time
+        else:
+            self.partitions[0]["end_time"] = self.day_end_time
+
+    @property
+    def day_duration(self):
+        return self.day_end_time - self.day_start_time
+
+    @property
+    def nb_slots(self):
+      return len(self.partitions)
+
+    @property
+    def duration(self):
+        #computes number of minutes for all weeks from the one of day_start to the one of day_end included
+        nb_min_weeks = (self.partitions[0]["day_start"].week.nb - self.partitions[self.nb_slots - 1]["day_end"].week.nb + 1) * self.day_duration * 5
+        #computes number of minutes from the start of any days to the start of the partition
+        nb_min_from_start_day = self.partitions[0]["start_time"] - self.day_start_time
+        
+        #computes number of minutes from the end of a partition to the end of any days
+        nb_min_to_end_day = self.day_end_time - self.partitions[self.nb_slots-1]["end_time"]
+        
+        #computes number of minutes by days from monday to day_start
+        nb_min_from_day_week = self.day_duration * days_index[self.partitions[0]["day_start"].day]
+
+        #computes number of minutes by days from day_end to friday
+        nb_min_to_end_week = self.day_duration * (4 - days_index[self.partitions[self.nb_slots-1]["day_end"].day])
+
+        return nb_min_weeks - nb_min_from_start_day - nb_min_to_end_day - nb_min_from_day_week  - nb_min_to_end_week
+
+    def add_slot(self):
+        pass
+'''
+    def get_slot_from_time(self, day, start_time, duration = None):
+        i = 0
+        if day.week:
+            while i < len(self.partitions) and self.partitions[i]["day_start"].week > day.week:
+                i+=1
+        else:
+            return None
+        while (i < len(self.partitions)
+                and (self.partitions[i]["day_start"].day < day.day
+                        and self.partitions[i]["day_start"].day > day.day)
+                        ):
+            i+=1
+
+
+        return self.partitions[i]
+
+    def merge_partition(self, other):
+      pass
+
+    @classmethod
+    def merge_partition(cls, part1, part2):
+      pass
+'''
+
+
+'''
 class Partition(object):
 
     operations = {
@@ -169,3 +252,4 @@ class Partition(object):
             if not Partition.operations[method](slot1, slot2):
                 return False
         return True
+'''
