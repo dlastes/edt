@@ -118,7 +118,6 @@ class TimeInterval(object):
     def duration(self):
       #datetime1 - datetime2 = timedelta
       return abs(self.start - self.end).total_seconds()//60
-
 class Partition(object):
     #date_start, date_end : datetime
     #day_start_time, day_end_time : int
@@ -149,7 +148,7 @@ class Partition(object):
         while i < len(self.intervals) and interval.end > self.intervals[i][0].start:
             #IF WE ALREADY HAVE THE SAME INTERVAL WE APPEND THE DATA
             if self.intervals[i][0] == interval:
-                self.intervals[i][1].append(data)
+                self.intervals[i][1].append(data.copy())
                 i += 1
             #IF WE ARE INSIDE AN EXISTING INTERVAL
             elif self.intervals[i][0].start <= interval.start and self.intervals[i][0].end >= interval.end:
@@ -160,7 +159,7 @@ class Partition(object):
                 if self.intervals[i][0].start != interval.start:
                     self.intervals[i][0].end = interval.start
                     self.intervals.insert(i+1, (TimeInterval(interval.start, interval.end),
-                                                self.intervals[i][1][:]+[data]))
+                                                self.intervals[i][1][:]+[data.copy()]))
                     new_part += 1
                 else:
                     self.intervals[i][1].append(data)
@@ -169,10 +168,9 @@ class Partition(object):
             else:
                 self.intervals[i][0].end = interval.start
                 self.intervals.insert(i+1, (TimeInterval(interval.start, self.intervals[i+1][0].start),
-                                            self.intervals[i][1][:]+[data]))
+                                            self.intervals[i][1][:]+[data.copy()]))
                 interval.start = self.intervals[i+1][0].end
                 i += 2
-
 
 
 '''
