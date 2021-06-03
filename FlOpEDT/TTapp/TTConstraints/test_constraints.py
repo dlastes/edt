@@ -144,13 +144,13 @@ class Partition(object):
     def add_slot(self, interval, data):
         i = 0
         while self.intervals[i][0].end <= interval.start:
-            i+=1
+            i += 1
         
         while i < len(self.intervals) and interval.end > self.intervals[i][0].start:
             #IF WE ALREADY HAVE THE SAME INTERVAL WE APPEND THE DATA
             if self.intervals[i][0] == interval:
                 self.intervals[i][1].append(data)
-                i+=1
+                i += 1
             #IF WE ARE INSIDE AN EXISTING INTERVAL
             elif self.intervals[i][0].start <= interval.start and self.intervals[i][0].end >= interval.end:
                 new_part = 1
@@ -159,7 +159,8 @@ class Partition(object):
                     self.intervals[i][0].end = interval.end
                 if self.intervals[i][0].start != interval.start:
                     self.intervals[i][0].end = interval.start
-                    self.intervals.insert(i+1, (TimeInterval(interval.start, interval.end), self.intervals[i][1][:].append(data)))
+                    self.intervals.insert(i+1, (TimeInterval(interval.start, interval.end),
+                                                self.intervals[i][1][:]+[data]))
                     new_part += 1
                 else:
                     self.intervals[i][1].append(data)
@@ -167,9 +168,10 @@ class Partition(object):
             #ELSE WE ARE IN BETWEEN TWO INTERVALS
             else:
                 self.intervals[i][0].end = interval.start
-                self.intervals.insert(i+1, (TimeInterval(interval.start, self.intervals[i+1][0].start), self.intervals[i][1][:].append(data)))
+                self.intervals.insert(i+1, (TimeInterval(interval.start, self.intervals[i+1][0].start),
+                                            self.intervals[i][1][:]+[data]))
                 interval.start = self.intervals[i+1][0].end
-                i+=2
+                i += 2
 
 
 
