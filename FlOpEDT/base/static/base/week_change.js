@@ -1298,14 +1298,14 @@ function fetch_ended(light) {
 
 function hide_idle_groups() {
   for(let ip = 0 ; ip < set_promos.length ; ip++) {
-    let group_names = Object.keys(groups[ip]);
+    let group_names = Object.keys(groups[ip]["structural"]);
     for(let ig = 0 ; ig < group_names.length ; ig ++) {
       const found = cours.find(function(c) {
-        return (c.group == groups[ip][group_names[ig]].name
-                && c.promo == groups[ip][group_names[ig]].promo) ;
+        return (c.group == groups[ip]["structural"][group_names[ig]].name
+                && c.promo == groups[ip]["structural"][group_names[ig]].promo) ;
       }) ;
       if (typeof found === 'undefined') {
-        groups[ip][group_names[ig]].display = false ;
+        groups[ip]["structural"][group_names[ig]].display = false ;
       }
     }
   }

@@ -593,8 +593,8 @@ var is_no_hidden_grp = true;
 function check_hidden_groups() {
   is_no_hidden_grp = true;
   for (let a in groups) {
-    for (let g in groups[a]) {
-      if (groups[a][g].display == false) {
+    for (let g in groups[a]["structural"]) {
+      if (groups[a]["structural"][g].display == false) {
         is_no_hidden_grp = false;
         return;
       }
@@ -606,8 +606,8 @@ function are_all_groups_hidden() {
   // if all groups are hidden
   // all groups are automatically displayed
   for (let a in groups) {
-    for (let g in groups[a]) {
-      if (groups[a][g].display == true) {
+    for (let g in groups[a]["structural"]) {
+      if (groups[a]["structural"][g].display == true) {
         return;
       }
     }
@@ -617,8 +617,8 @@ function are_all_groups_hidden() {
 
 function set_all_groups_display(isDisplayed) {
   for (let a in groups) {
-    for (let g in groups[a]) {
-      groups[a][g].display = isDisplayed;
+    for (let g in groups[a]["structural"]) {
+      groups[a]["structural"][g].display = isDisplayed;
     }
   }
 }
@@ -658,7 +658,7 @@ function apply_gp_display(gp, start, go_button) {
 function propagate_display_down(gp, b) {
   gp.display = b;
   for (let i = 0; i < gp.children.length; i++) {
-    propagate_display_down(groups[gp.promo][gp.children[i]], b);
+    propagate_display_down(groups[gp.promo]["structural"][gp.children[i]], b);
   }
 }
 
@@ -668,19 +668,19 @@ function propagate_display_up(gp, b) {
   gp.display = b;
   if (gp.parent != null) {
     if (b) { // ancestors should be displayed too 
-      propagate_display_up(groups[gp.promo][gp.parent], true);
+      propagate_display_up(groups[gp.promo]["structural"][gp.parent], true);
     } else { // is there any sibling still displayed?
       var i = 0;
       var hidden_child = true;
-      while (hidden_child && i < groups[gp.promo][gp.parent].children.length) {
-        if (groups[gp.promo][groups[gp.promo][gp.parent].children[i]].display) {
+      while (hidden_child && i < groups[gp.promo]["structural"][gp.parent].children.length) {
+        if (groups[gp.promo]["structural"][groups[gp.promo]["structural"][gp.parent].children[i]].display) {
           hidden_child = false;
         } else {
           i += 1;
         }
       }
       if (hidden_child) {
-        propagate_display_up(groups[gp.promo][gp.parent], false);
+        propagate_display_up(groups[gp.promo]["structural"][gp.parent], false);
       }
     }
   }
@@ -909,7 +909,7 @@ function compute_changes(changes, conc_tutors, gps) {
       }
 
       // add group if never seen
-      gp_changed = groups[cur_course.promo][cur_course.group];
+      gp_changed = groups[cur_course.promo]["structural"][cur_course.group];
       gp_named = set_promos[gp_changed.promo] + gp_changed.name;
       if (gps.indexOf(gp_named) == -1) {
         gps.push(gp_named);

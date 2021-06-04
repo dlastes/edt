@@ -422,7 +422,7 @@ var quote = "";
   ------- GROUPS -------
   ----------------------*/
 
-// 2D data about groups [id_promo][group_subname] -> Group
+// 2D data about groups [id_promo]["structural"][group_subname] -> Group
 var groups = [];
 
 

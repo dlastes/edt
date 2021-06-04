@@ -54,14 +54,16 @@ def read(department):
     values = []
     train_prog_choices = [tp.abbrev for tp in training_programmes]
     type_choices = [type_choice.name for type_choice in group_types]
-    parallel_groups_choices = [g.name for g in transversal_groups]
+    parallel_groups_choices = [g.name for g in transversal_groups]    #STAGE Empêcher de mettre le groupe en parallèle avec lui même (je ne sais pas si c'est ici)
     conflicting_groups_choices = [g.name for g in structural_groups]
     for group in transversal_groups:
         parallel_groups = [p.name for p in group.parallel_groups.all()]
         conflicting_groups = [c.name for c in group.conflicting_groups.all()]
+        
         values.append((group.name, group.train_prog.abbrev,
-                       conflicting_groups, parallel_groups, group.type.name, group.size))
-
+                       conflicting_groups, parallel_groups, 
+                       group.type.name if group.type is not None else None, group.size))
+		
     return JsonResponse({
         "columns":  [{
             'name': 'Nom',

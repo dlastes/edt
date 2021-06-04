@@ -418,12 +418,12 @@ function go_promo_gp_init(button_available) {
     if (gp_init == "") {
       gp_init = root_gp[promo_init].gp.name;
     }
-    if (Object.keys(groups[promo_init]).map(function (g) { return groups[promo_init][g].name; }).indexOf(gp_init) != -1) {
-      apply_gp_display(groups[promo_init][gp_init], true, button_available);
+    if (Object.keys(groups[promo_init]["structural"]).map(function (g) { return groups[promo_init]["structural"][g].name; }).indexOf(gp_init) != -1) {
+      apply_gp_display(groups[promo_init]["structural"][gp_init], true, button_available);
     }
   } else if (gp_init != "") {
-    if (Object.keys(groups[0]).map(function (g) { return groups[0][g].name; }).indexOf(gp_init) != -1) {
-      apply_gp_display(groups[0][gp_init], true, button_available);
+    if (Object.keys(groups[0]["structural"]).map(function (g) { return groups[0]["structural"][g].name; }).indexOf(gp_init) != -1) {
+      apply_gp_display(groups[0]["structural"][gp_init], true, button_available);
     }
   }
 }
@@ -450,14 +450,16 @@ function create_structural_groups(data_groups) {
     }
   }
   for (let p = 0; p < set_promos.length; p++) {
-    var keys = Object.keys(groups[p]);
+    var keys = Object.keys(groups[p]["structural"]);
     for (let g = 0; g < keys.length; g++) {
-      groups[p][keys[g]].bx = groups[p][keys[g]].x;
-      groups[p][keys[g]].bw = groups[p][keys[g]].width;
+      groups[p]["structural"][keys[g]].bx = groups[p]["structural"][keys[g]].x;
+      groups[p]["structural"][keys[g]].bw = groups[p]["structural"][keys[g]].width;
     }
   }
-
+	
+  console.log(groups[0]["structural"].display)
   set_butgp();
+  console.log(groups[0]["structural"].display)
 }
 
 
@@ -1192,10 +1194,10 @@ function gp_courses(target_course) {
         && (
           c.group == target_course.group
           ||
-          groups[target_course.promo][target_course.group]
+          groups[target_course.promo]["structural"][target_course.group]
             .ancetres.indexOf(c.group) > -1
           ||
-          groups[target_course.promo][target_course.group]
+          groups[target_course.promo]["structural"][target_course.group]
             .descendants.indexOf(c.group) > -1
         )
     ) ;
@@ -1422,8 +1424,8 @@ function check_busy_group(issues, possible_conflicts) {
     conflicts = possible_conflicts.filter(function (c) {
       return (
         (c.group == wanted.group
-         || groups[wanted.promo][wanted.group].ancetres.indexOf(c.group) > -1
-         || groups[wanted.promo][wanted.group].descendants.indexOf(c.group) > -1
+         || groups[wanted.promo]["structural"][wanted.group].ancetres.indexOf(c.group) > -1
+         || groups[wanted.promo]["structural"][wanted.group].descendants.indexOf(c.group) > -1
         )
           && c.promo == wanted.promo
       );
