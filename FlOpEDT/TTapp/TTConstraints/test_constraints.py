@@ -24,6 +24,7 @@
 # without disclosing the source code of your own applications.
 
 
+from FlOpEDT.base.timing import Time
 from django.db import models
 
 from TTapp.TTConstraint import TTConstraint
@@ -31,6 +32,7 @@ from TTapp.ilp_constraints.constraint import Constraint
 from django.utils.translation import gettext_lazy as _
 from base.models import UserPreference
 from base.timing import Day, days_list, days_index
+from datetime import date, time, datetime
 
 # Vérifier que le cours deux peut être mis après le cours 1
 ## Vérifier la disponibilité des tutors
@@ -118,6 +120,32 @@ class TimeInterval(object):
     def duration(self):
       #datetime1 - datetime2 = timedelta
       return abs(self.start - self.end).total_seconds()//60
+
+
+    @staticmethod
+    def first_day_first_week(day):
+        i = 1
+        first = datetime(day.week.year, 1, i)
+        while first.weekday() != 0:
+            i+=1
+            first = datetime(day.week.year, 1, i)
+        return i - 1
+    
+    #Build a TimeInterval from a Flop-based day date type
+    @staticmethod
+    def from_flop_date(day, start_time, duration = None, end_time = None):
+        if not duration and not end_time:
+            return None
+        nb_leap_year = day.week.year // 4 - day.week.year // 100 + day.week.year // 400
+
+        day_date = date.fromordinal((day.week.year-1) * 365 + (day.week.nb-1)*7 + days_index[day.day] + 1 + nb_leap_year + TimeInterval.first_day_first_week(day))
+        
+        if not end_time:
+            end_time = start_time + duration
+        time_start = time(start_time//60, start_time%60)
+        time_end = time(end_time//60, end_time%60)
+        return TimeInterval(datetime.combine(day_date, time_start), datetime.combine(day_date, time_end))
+
 class Partition(object):
     #date_start, date_end : datetime
     #day_start_time, day_end_time : int
