@@ -127,8 +127,12 @@ class TimeInterval(object):
 
     #date_start, date_end : datetime
     def __init__(self, date_start, date_end):
-        self.start = date_start
-        self.end = date_end
+        if date_start > date_end:
+            self.start = date_end
+            self.end = date_start
+        else:
+            self.start = date_start
+            self.end = date_end
 
     def __str__(self):
         return f'//intervalle: {self.start} ---> {self.end} //'
@@ -137,8 +141,28 @@ class TimeInterval(object):
         return f'//intervalle: {self.start} ---> {self.end} //'
 
     def __eq__(self, other):
-      return isinstance(other, TimeInterval) and self.start == other.start and self.end == other.end
-      
+        return isinstance(other, TimeInterval) and self.start == other.start and self.end == other.end
+
+    #An interval is considered less than another one if
+    #it ends before or at the same time the other one starts
+    def __lt__(self, other):
+        return isinstance(other, TimeInterval) and self.end <= other.start
+
+    #An interval is considered greater than another one if
+    #it starts after or at the same time the other one ends
+    def __gt__(self, other):
+        return isinstance(other, TimeInterval) and self.start >= other.end
+    
+    #An interval is considered greater or equal to another one if
+    #it starts and ends after or at the same moment
+    def __ge__(self, other):
+        return isinstance(other, TimeInterval) and self.start >= other.start and self.end >= other.end
+
+    #An interval is considered less or equal to another one if
+    #it starts and ends before or at the same moment
+    def __le__(self, other):
+        return isinstance(other, TimeInterval) and self.start <= other.start and self.end <= other.end
+
     @property
     def duration(self):
       #datetime1 - datetime2 = timedelta
