@@ -36,6 +36,7 @@ from TTapp.ilp_constraints.constraints.courseConstraint import CourseConstraint
 from django.utils.translation import gettext as _
 from TTapp.slots import slots_filter
 from TTapp.TTConstraints.groups_constraints import considered_basic_groups
+from base.models import Course
 
 
 class NoSimultaneousGroupCourses(TTConstraint):
@@ -43,6 +44,9 @@ class NoSimultaneousGroupCourses(TTConstraint):
     Only one course for each considered group on simultaneous slots
     """
     groups = models.ManyToManyField('base.Group', blank=True)
+
+    def pre_analyse(self, week):
+        pass
 
     def enrich_model(self, ttmodel, week, ponderation=1):
         relevant_slots = slots_filter(ttmodel.wdb.availability_slots, week=week)
@@ -86,6 +90,22 @@ class ScheduleAllCourses(TTConstraint):
     tutors = models.ManyToManyField('people.Tutor', blank=True)
     course_types = models.ManyToManyField('base.CourseType', blank=True)
 
+    #Checks that the number of courses to scheduled if less than
+    #the number of slots available
+    def pre_analyse(self, week):
+        considered_courses = set(c for c in Course.objects.all() if c.week == week)
+
+        #TODO: WHERE IS THE NUMBER OF SLOTS AVAILABLE IN A WEEK ?
+        max_slots_nb = 1
+        if self.modules.exists():
+            considered_courses = set(c for c in considered_courses if c.module in self.modules.all())
+        if self.tutors.exists():
+            considered_courses = set(c for c in considered_courses if c.tutor in self.tutors.all())
+        if self.course_types.exists():
+            considered_courses = set(c for c in considered_courses if c.type in self.course_types.all())
+
+        return max_slots_nb >= len(considered_courses)
+                                
     def enrich_model(self, ttmodel, week, ponderation=1):
         relevant_basic_groups = considered_basic_groups(self, ttmodel)
         considered_courses = set(c for bg in relevant_basic_groups
@@ -138,7 +158,6 @@ class AssignAllCourses(TTConstraint):
         relevant_basic_groups = considered_basic_groups(self, ttmodel)
         considered_courses = set(c for bg in relevant_basic_groups
                                  for c in ttmodel.wdb.courses_for_basic_group[bg])
-        max_slots_nb = len(ttmodel.wdb.courses_slots)
         if self.modules.exists():
             considered_courses = set(c for c in considered_courses if c.module in self.modules.all())
         if self.course_types.exists():
