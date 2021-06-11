@@ -25,7 +25,7 @@
  helpers for time management
  ---------------------------
 """
-
+from datetime import date, time, datetime
 from enum import Enum
 
 
@@ -82,12 +82,76 @@ def str_to_min(time_string):
     return int(hours_minutes[0]) * 60 + int(hours_minutes[1])
 
 
+##############################################################
+###TRANSLATION METHODS BETWEEN FLOPDATES AND PYTHON'S DATES###
+
+#Returns the index of the first monday of the given year.
+#Argument "day" being a flop_day type
+def first_day_first_week(day):
+    i = 1
+    first = datetime(day.week.year, 1, i)
+    while first.weekday() != 0:
+        i+=1
+        first = datetime(day.week.year, 1, i)
+    return i - 1
+
+#Takes a day (with week and year) and a starting time
+#and returns the datetime object corresponding
+def flopdate_to_datetime(day, time):
+    day_date = flopday_to_date(day)
+    time_day = floptime_to_time(time)
+    return datetime.combine(day_date, time_day)
+
+##Takes a day (with week and year)
+#and returns the date object corresponding
+def flopday_to_date(day):
+    nb_leap_year = day.week.year // 4 - day.week.year // 100 + day.week.year // 400
+    return date.fromordinal((day.week.year-1) * 365 + (day.week.nb-1)*7 + days_index[day.day] + 1 + nb_leap_year + first_day_first_week(day))
+
+#Takes a starting time
+#and returns the time object corresponding
+def floptime_to_time(time_minutes):
+    return time(time_minutes//60, time_minutes%60)
+
+###TRANSLATION METHODS BETWEEN FLOPDATES AND PYTHON'S DATES###
+##############################################################
+
 # will not be used
 # TO BE DELETED at the end
 class Time:
     AM = 'AM'
     PM = 'PM'
     HALF_DAY_CHOICES = ((AM, 'AM'), (PM, 'PM'))
+
+class TimeInterval(object):
+
+    #date_start, date_end : datetime
+    def __init__(self, date_start, date_end):
+        self.start = date_start
+        self.end = date_end
+
+    def __str__(self):
+        return f'//intervalle: {self.start} ---> {self.end} //'
+
+    def __repr__(self):
+        return f'//intervalle: {self.start} ---> {self.end} //'
+
+    def __eq__(self, other):
+      return isinstance(other, TimeInterval) and self.start == other.start and self.end == other.end
+      
+    @property
+    def duration(self):
+      #datetime1 - datetime2 = timedelta
+      return abs(self.start - self.end).total_seconds()//60
+    
+    #Build a TimeInterval from a Flop-based day date type
+    @staticmethod
+    def from_flop_date(day, start_time, duration = None, end_time = None):
+        if not duration and not end_time:
+            return None
+        if not end_time:
+            end_time = start_time + duration
+        return TimeInterval(flopdate_to_datetime(day, start_time), flopdate_to_datetime(day, end_time))
 
 
 class Day(object):
@@ -138,7 +202,6 @@ class Day(object):
 
   def __ge__(self, other):
       return self == other or self > other
-    
     
 
 days_list = [c[0] for c in Day.CHOICES]

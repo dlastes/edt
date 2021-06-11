@@ -31,8 +31,8 @@ from TTapp.TTConstraint import TTConstraint
 from TTapp.ilp_constraints.constraint import Constraint
 from django.utils.translation import gettext_lazy as _
 from base.models import UserPreference
-from base.timing import Day, days_list, days_index
-from datetime import date, time, datetime
+from base.timing import TimeInterval
+
 
 # Vérifier que le cours deux peut être mis après le cours 1
 ## Vérifier la disponibilité des tutors
@@ -98,54 +98,6 @@ class Precedence(TTConstraint):
             #Certains utilisateurs n'ont aucunes préférences de renseignées.
             return False
 
-
-
-class TimeInterval(object):
-
-    #date_start, date_end : datetime
-    def __init__(self, date_start, date_end):
-        self.start = date_start
-        self.end = date_end
-
-    def __str__(self):
-        return f'//intervalle: {self.start} ---> {self.end} //'
-
-    def __repr__(self):
-        return f'//intervalle: {self.start} ---> {self.end} //'
-
-    def __eq__(self, other):
-      return isinstance(other, TimeInterval) and self.start == other.start and self.end == other.end
-      
-    @property
-    def duration(self):
-      #datetime1 - datetime2 = timedelta
-      return abs(self.start - self.end).total_seconds()//60
-
-
-    @staticmethod
-    def first_day_first_week(day):
-        i = 1
-        first = datetime(day.week.year, 1, i)
-        while first.weekday() != 0:
-            i+=1
-            first = datetime(day.week.year, 1, i)
-        return i - 1
-    
-    #Build a TimeInterval from a Flop-based day date type
-    @staticmethod
-    def from_flop_date(day, start_time, duration = None, end_time = None):
-        if not duration and not end_time:
-            return None
-        nb_leap_year = day.week.year // 4 - day.week.year // 100 + day.week.year // 400
-
-        day_date = date.fromordinal((day.week.year-1) * 365 + (day.week.nb-1)*7 + days_index[day.day] + 1 + nb_leap_year + TimeInterval.first_day_first_week(day))
-        
-        if not end_time:
-            end_time = start_time + duration
-        time_start = time(start_time//60, start_time%60)
-        time_end = time(end_time//60, end_time%60)
-        return TimeInterval(datetime.combine(day_date, time_start), datetime.combine(day_date, time_end))
-
 class Partition(object):
     #date_start, date_end : datetime
     #day_start_time, day_end_time : int
@@ -199,79 +151,3 @@ class Partition(object):
                                             self.intervals[i][1][:]+[data.copy()]))
                 interval.start = self.intervals[i+1][0].end
                 i += 2
-
-
-'''
-class Partition(object):
-
-    operations = {
-        #checks if slots have the same tutor 
-        "up_tutor" : lambda slot1, slot2 : slot1["data"]["tutor"] == slot2["data"]["tutor"],
-        #checks if slots have the same value
-        "up_value" : lambda slot1, slot2 : slot1["data"]["value"] == slot2["data"]["value"],
-        #checks if slots have the same week
-        "up_week" : lambda slot1, slot2 : slot1["data"]["week"] == slot2["data"]["week"],
-        #checks if slots types are UserPreference      
-        "user_pref": lambda slot1, slot2 : slot1["data"]["type"] == slot2["data"]["type"] == "UserPreference",
-        #"no_check" : lambda slot1, slot2 : True,
-    }
-    courses_break = 20
-    def __init__(self, slots = None, week = None):
-        self.partitions = {Day.MONDAY: [], Day.TUESDAY: [], Day.WEDNESDAY: [],
-                            Day.THURSDAY: [], Day.FRIDAY: [], Day.SATURDAY: [],
-                            Day.SUNDAY: []}
-        #self.partitions = [[], [], [], [], [], [], []]
-                        
-        if slots != None:
-          if isinstance(slots, list):
-            for up in slots:
-                if isinstance(up, UserPreference):
-                    slot = {
-                        "start" : up.start_time,
-                        "duration" : up.duration,
-                        "data" : { 
-                            "type" : "UserPreference",
-                            "tutor" : up.user,
-                            "value" : up.value,
-                            "week" : up.week
-                        }
-                    }
-                    self.partitions[up.day].append(slot)
-          elif isinstance(slots, Partition):
-              self.partitions = slots.partitions
-        self.week = week
-
-    #returns a new instance of Partition with the longest slots in it while checking datas
-    #through the "method" function passed as an argument
-    def clean(self, methods):
-        new_partition = Partition(week=self.week)
-        for day, slots in self.partitions.items():
-            i = 1
-            j = 0
-            if slots:
-              new_partition.partitions[day].append(slots[0].copy())
-              while(i < len(slots)):
-                  if (new_partition.partitions[day][j]["start"] +
-                          new_partition.partitions[day][j]["duration"] +
-                          Partition.courses_break < slots[i]["start"] or
-                          not self.all_conditions(slots[i], new_partition.partitions[day][j], methods)):
-                      new_partition.partitions[day].append(slots[i].copy())
-                      j+=1
-                  else:
-                      if (new_partition.partitions[day][j]["start"] + new_partition.partitions[day][j]["duration"] + Partition.courses_break 
-                          == slots[i]["start"]):
-                          new_duration = new_partition.partitions[day][j]["duration"] + slots[i]["duration"] + Partition.courses_break
-                      #Pourrait être un else
-                      elif new_partition.partitions[day][j]["start"] + new_partition.partitions[day][j]["duration"] + Partition.courses_break > slots[i]["start"]:
-                          new_duration = slots[i]["duration"] + slots[i]["start"] - new_partition.partitions[day][j]["start"]
-                      new_partition.partitions[day][j]["duration"] = new_duration 
-                  i+=1
-        return new_partition
-
-    #checks if all conditions are true
-    def all_conditions(self, slot1, slot2, methods):
-        for method in methods:
-            if not Partition.operations[method](slot1, slot2):
-                return False
-        return True
-'''
