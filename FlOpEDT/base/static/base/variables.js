@@ -134,6 +134,14 @@ function main(name, data) {
     file_fetch.groups.callback();
     file_fetch.transversal_groups.callback();
   }
+  // callback all when all received
+  if (!Object.keys(file_fetch).some(function(att){
+    return !file_fetch[att].done ;
+  })) {
+    Object.keys(file_fetch).forEach(function(att){
+      file_fetch[att].callback() ;
+    });
+  }
 }
 
 file_fetch.rooms.callback = function () {

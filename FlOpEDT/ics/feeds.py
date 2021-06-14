@@ -9,6 +9,9 @@ from django.core.exceptions import ObjectDoesNotExist
 from base.models import ScheduledCourse, Room, StructuralGroup, Day, Department, Regen
 from people.models import Tutor
 
+from django.http import HttpResponse, Http404
+from django.utils.http import http_date
+from calendar import timegm
 
 def str_groups(c):
     groups = c.groups.all()
