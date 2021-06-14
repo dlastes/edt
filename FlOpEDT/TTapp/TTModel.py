@@ -545,6 +545,14 @@ class TTModel(object):
                                              for c2 in self.wdb.courses_for_basic_group[bg]
                                              & self.wdb.compatible_courses[sl2]),
                                     '<=', 1, SimulSlotGroupConstraint(sl, bg))
+            for tg in self.wdb.transversal_groups:
+                self.add_constraint(self.sum(self.TT[(sl2, c2)]
+                                             for sl2 in slots_filter(self.wdb.courses_slots,
+                                                                     simultaneous_to=sl)
+                                             for c2 in self.wdb.courses_for_basic_group[bg]
+                                             & self.wdb.compatible_courses[sl2]),
+                                    '<=', 1, SimulSlotGroupConstraint(sl, bg))
+
 
         # a course is scheduled once and only once
         for c in self.wdb.courses:
