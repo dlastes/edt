@@ -646,7 +646,7 @@ class CourseModification(models.Model):
             changed += al + f'Salle : {room_old_name} -> {cur_room_name}'
 
         day_list = base.weeks.num_all_days(
-            course.week, department)
+            course.week.year, course.week.nb, department)
         if sched_course.day == self.day_old \
            and sched_course.start_time == self.start_time_old:
             for d in day_list:
