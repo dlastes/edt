@@ -24,6 +24,7 @@
 # without disclosing the source code of your own applications.
 
 
+from FlOpEDT.TTapp.weeks_database import WeeksDatabase
 from django.db import models
 
 from TTapp.TTConstraint import TTConstraint
@@ -36,7 +37,7 @@ from TTapp.ilp_constraints.constraints.courseConstraint import CourseConstraint
 from django.utils.translation import gettext as _
 from TTapp.slots import slots_filter
 from TTapp.TTConstraints.groups_constraints import considered_basic_groups
-from base.models import Course
+from base.models import Course, TrainingProgramme
 
 
 class NoSimultaneousGroupCourses(TTConstraint):
@@ -46,7 +47,13 @@ class NoSimultaneousGroupCourses(TTConstraint):
     groups = models.ManyToManyField('base.Group', blank=True)
 
     def pre_analyse(self, week):
-        pass
+        wdb = WeeksDatabase(self.department, week, self.year, TrainingProgramme.objects.filter(department=self.department))
+        nb_slots_max = len(wdb.courses_slots)
+        for gp in self.groups:
+            considered_courses = set(c for c in Course.objects.all() if c.week == week and gp in c.groups)
+            if len(considered_courses) > nb_slots_max:
+                return False
+        return True
 
     def enrich_model(self, ttmodel, week, ponderation=1):
         relevant_slots = slots_filter(ttmodel.wdb.availability_slots, week=week)
@@ -93,18 +100,21 @@ class ScheduleAllCourses(TTConstraint):
     #Checks that the number of courses to scheduled if less than
     #the number of slots available
     def pre_analyse(self, week):
+        wdb = WeeksDatabase(self.department, week, self.year, TrainingProgramme.objects.filter(department=self.department))
+#        considered_courses = set(c for bg in self.groups #not basics
+#                                 for c in wdb.courses_for_basic_group[bg])
         considered_courses = set(c for c in Course.objects.all() if c.week == week)
-
-        #TODO: WHERE IS THE NUMBER OF SLOTS AVAILABLE IN A WEEK ?
-        max_slots_nb = 1
+        nb_slots_max = len(wdb.courses_slots)
         if self.modules.exists():
             considered_courses = set(c for c in considered_courses if c.module in self.modules.all())
         if self.tutors.exists():
             considered_courses = set(c for c in considered_courses if c.tutor in self.tutors.all())
         if self.course_types.exists():
             considered_courses = set(c for c in considered_courses if c.type in self.course_types.all())
-
-        return max_slots_nb >= len(considered_courses)
+        if self.groups.exists():
+            considered_courses = set(c for c in considered_courses if considered_courses.intersection(self.groups))
+        
+        return nb_slots_max >= len(considered_courses)
                                 
     def enrich_model(self, ttmodel, week, ponderation=1):
         relevant_basic_groups = considered_basic_groups(self, ttmodel)
