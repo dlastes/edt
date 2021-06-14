@@ -201,10 +201,14 @@ class TTLimitedRoomChoicesViewSet(viewsets.ModelViewSet):
 
 @method_decorator(name='list',
                   decorator=swagger_auto_schema(
-                      operation_description="Active constraint",
                       manual_parameters=[week_param(), year_param(), dept_param()])
                   )
 class TTConstraintViewSet(viewsets.ViewSet):
+    """
+    ViewSet to see all the constraints and their parameters
+    
+    Result can be filtered by week, year and dept
+    """
     permission_classes = [IsAdminOrReadOnly]
     filterset_fields = '__all__' 
 
@@ -235,4 +239,3 @@ class TTConstraintViewSet(viewsets.ViewSet):
                     data.append(serializer.data)
 
         return Response(data)
- 
