@@ -55,13 +55,11 @@ from django.conf import settings
 
 
 class BasicConstraintAdmin(DepartmentModelAdmin):
-    list_display = ('week', 'year', 'comment',
+    list_display = ('comment',
                     'weight',
                     'is_active')
     ordering = ()
-    list_filter = (('week', DropdownFilterAll),
-                   ('year', DropdownFilterAll),
-                   )
+    list_filter = ()
 
 class CustomConstraintAdmin(DepartmentModelAdmin):
     list_display = ('class_name',
