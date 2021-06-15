@@ -33,7 +33,7 @@ from pulp import LpVariable, LpConstraint, LpBinary, LpConstraintEQ, \
 import pulp
 from pulp import GUROBI_CMD
 
-from base.models import Group, \
+from base.models import StructuralGroup, \
     Room, RoomSort, RoomType, RoomPreference, \
     Course, ScheduledCourse, UserPreference, CoursePreference, \
     Department, Module, TrainingProgramme, CourseType, \
@@ -137,17 +137,34 @@ class TTModel(object):
         self.train_prog = train_prog
         self.stabilize_work_copy = stabilize_work_copy
         self.obj = self.lin_expr()
+        start = datetime.datetime.now()
         self.wdb = self.wdb_init()
+        print('-->', datetime.datetime.now() - start)
+        print('apms and costs')
+        start = datetime.datetime.now()
         self.possible_apms = self.wdb.possible_apms
         self.cost_I, self.FHD_G, self.cost_G, self.cost_SL, self.generic_cost = self.costs_init()
+        print('-->', datetime.datetime.now() - start)
+        print('TT_init')
+        start = datetime.datetime.now()
         self.TT, self.TTrooms, self.TTinstructors = self.TT_vars_init()
+        print('-->', datetime.datetime.now() - start)
+        print('Busy_init')
+        start = datetime.datetime.now()
         self.IBD, self.IBD_GTE, self.IBHD, self.GBHD, self.IBS, self.forced_IBD = self.busy_vars_init()
+        print('-->', datetime.datetime.now() - start)
         if self.department.mode.visio:
+            print('Visio_init')
+            start = datetime.datetime.now()
             self.physical_presence, self.has_visio = self.visio_vars_init()
+            print('-->', datetime.datetime.now() - start)
+        print('Avail_init')
+        start = datetime.datetime.now()
         self.avail_instr, self.avail_at_school_instr, self.unp_slot_cost \
             = self.compute_non_preferred_slots_cost()
         self.unp_slot_cost_course, self.avail_course \
             = self.compute_non_preferred_slots_cost_course()
+        print('-->', datetime.datetime.now() - start)
         self.avail_room = self.compute_avail_room()
         print('Ok', datetime.datetime.now()-a)
         self.one_var = self.add_var()
@@ -508,8 +525,8 @@ class TTModel(object):
 
         print("adding core constraints")
 
-        # constraint : only one course on simultaneous slots
-        print('Simultaneous slots constraints for groups')
+        # constraint : only one course per basic group on simultaneous slots
+        # (and None if transversal ones)
         if not ScheduleAllCourses.objects.filter(department=self.department).exists():
             NoSimultaneousGroupCourses.objects.create(department=self.department)
 

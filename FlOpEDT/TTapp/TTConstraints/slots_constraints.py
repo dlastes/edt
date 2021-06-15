@@ -120,7 +120,7 @@ class LimitedStartTimeChoices(TTConstraint):
                               blank=True,
                               default=None,
                               on_delete=models.CASCADE)
-    group = models.ForeignKey('base.Group',
+    group = models.ForeignKey('base.StructuralGroup',
                               null=True,
                               blank=True,
                               default=None,
@@ -244,7 +244,7 @@ class AvoidBothTimes(TTConstraint):
     """
     time1 = models.PositiveSmallIntegerField()
     time2 = models.PositiveSmallIntegerField()
-    group = models.ForeignKey('base.Group', null=True, on_delete=models.CASCADE)
+    group = models.ForeignKey('base.StructuralGroup', null=True, on_delete=models.CASCADE)
     tutor = models.ForeignKey('people.Tutor',
                               null=True,
                               default=None,

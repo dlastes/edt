@@ -48,7 +48,7 @@ class NoSimultaneousGroupCourses(TTConstraint):
     """
     Only one course for each considered group on simultaneous slots
     """
-    groups = models.ManyToManyField('base.Group', blank=True)
+    groups = models.ManyToManyField('base.StructuralGroup', blank=True)
 
     def pre_analyse(self, week):
         considered_basic_groups = pre_analysis_considered_basic_groups(self)
@@ -78,19 +78,45 @@ class NoSimultaneousGroupCourses(TTConstraint):
     def enrich_model(self, ttmodel, week, ponderation=1):
         relevant_slots = slots_filter(ttmodel.wdb.availability_slots, week=week)
         relevant_basic_groups = considered_basic_groups(self, ttmodel)
+        n_tg = ttmodel.wdb.transversal_groups.count()
         for sl in relevant_slots:
             for bg in relevant_basic_groups:
-                relevant_sum = ttmodel.sum(ttmodel.TT[(sl2, c2)]
-                                           for sl2 in slots_filter(ttmodel.wdb.courses_slots,
-                                                                   simultaneous_to=sl)
-                                           for c2 in ttmodel.wdb.courses_for_basic_group[bg]
-                                           & ttmodel.wdb.compatible_courses[sl2])
+                relevant_sum = n_tg * ttmodel.sum(ttmodel.TT[(sl2, c2)]
+                                               for sl2 in slots_filter(ttmodel.wdb.courses_slots,
+                                                                       simultaneous_to=sl)
+                                                    for c2 in ttmodel.wdb.courses_for_basic_group[bg]
+                                                    & ttmodel.wdb.compatible_courses[sl2]) \
+                               + ttmodel.sum(ttmodel.TT[(sl2, c2)]
+                                               for tg in ttmodel.wdb.transversal_groups_of[bg]
+                                               for sl2 in slots_filter(ttmodel.wdb.courses_slots,
+                                                                       simultaneous_to=sl)
+                                               for c2 in ttmodel.wdb.courses_for_group[tg]
+                                               & ttmodel.wdb.compatible_courses[sl2])
                 if self.weight is None:
                     ttmodel.add_constraint(relevant_sum,
-                                           '<=', 1, SimulSlotGroupConstraint(sl, bg))
+                                           '<=', n_tg, SimulSlotGroupConstraint(sl, bg))
                 else:
-                    two_courses = ttmodel.add_floor(relevant_sum, 2, len(relevant_slots))
+                    two_courses = ttmodel.add_floor(relevant_sum, n_tg + 1, n_tg * len(relevant_slots))
                     ttmodel.add_to_group_cost(bg, self.local_weight() * ponderation * two_courses, week)
+
+            for tg in ttmodel.wdb.transversal_groups:
+                relevant_sum_for_tg = ttmodel.sum(ttmodel.TT[(sl2, c2)]
+                                                  for sl2 in slots_filter(ttmodel.wdb.courses_slots,
+                                                                          simultaneous_to=sl)
+                                                  for c2 in ttmodel.wdb.courses_for_group[tg]
+                                                  & ttmodel.wdb.compatible_courses[sl2]) \
+                                      + ttmodel.sum(ttmodel.TT[(sl2, c2)]
+                                                    for tg2 in ttmodel.wdb.not_parallel_transversal_groups[tg]
+                                                    for sl2 in slots_filter(ttmodel.wdb.courses_slots,
+                                                                            simultaneous_to=sl)
+                                                    for c2 in ttmodel.wdb.courses_for_group[tg2]
+                                                    & ttmodel.wdb.compatible_courses[sl2])
+                if self.weight is None:
+                    ttmodel.add_constraint(relevant_sum_for_tg,
+                                           '<=', 1, SimulSlotGroupConstraint(sl, tg))
+                else:
+                    two_courses = ttmodel.add_floor(relevant_sum_for_tg, 2, len(relevant_slots))
+                    ttmodel.add_to_global_cost(self.local_weight() * ponderation * two_courses, week)
 
     def one_line_description(self):
         text = f"Les cours "
@@ -112,7 +138,7 @@ class ScheduleAllCourses(TTConstraint):
     The considered courses are scheduled, and only once
     """
     modules = models.ManyToManyField('base.Module', blank=True)
-    groups = models.ManyToManyField('base.Group',
+    groups = models.ManyToManyField('base.StructuralGroup',
                                     blank=True)
     tutors = models.ManyToManyField('people.Tutor', blank=True)
     course_types = models.ManyToManyField('base.CourseType', blank=True)
@@ -180,7 +206,7 @@ class AssignAllCourses(TTConstraint):
     The considered courses are assigned to a tutor
     """
     modules = models.ManyToManyField('base.Module', blank=True)
-    groups = models.ManyToManyField('base.Group',
+    groups = models.ManyToManyField('base.StructuralGroup',
                                     blank=True)
     course_types = models.ManyToManyField('base.CourseType', blank=True)
 

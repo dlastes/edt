@@ -370,7 +370,7 @@ class GroupsLunchBreakResource(resources.ModelResource):
     groups = fields.Field(
         column_name='groups',
         attribute='groups',
-        widget=ManyToManyWidget('base.Group', field='full_name', separator='|'))
+        widget=ManyToManyWidget('base.StructuralGroup', field='full_name', separator='|'))
 
     class Meta:
         model = GroupsLunchBreak

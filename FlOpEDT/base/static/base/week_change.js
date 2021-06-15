@@ -1281,6 +1281,9 @@ function fetch_ended(light) {
     }
 
     clean_prof_displayed(light);
+
+    hide_idle_groups() ;
+    
   }
 
   if (fetch_status.course_saved &&
@@ -1293,6 +1296,27 @@ function fetch_ended(light) {
     go_edt(false);
 
   }
+}
+
+function hide_idle_groups() {
+  for(let ip = 0 ; ip < set_promos.length ; ip++) {
+    let group_names = Object.keys(groups[ip]["structural"]);
+    for(let ig = 0 ; ig < group_names.length ; ig ++) {
+      const found = cours.find(function(c) {
+        return (c.group == groups[ip]["structural"][group_names[ig]].name
+                && c.promo == groups[ip]["structural"][group_names[ig]].promo) ;
+      }) ;
+      if (typeof found === 'undefined') {
+        groups[ip]["structural"][group_names[ig]].display = false ;
+      }
+    }
+  }
+
+  are_all_groups_hidden(); // all hidden => all displayed
+  check_hidden_groups();
+  
+  update_all_groups();
+  go_gp_buttons();
 }
 
 // - store old data in old

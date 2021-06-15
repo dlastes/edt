@@ -33,7 +33,7 @@ from django.contrib import admin
 import django.contrib.auth as auth
 
 from people.models import Tutor, User
-from base.models import Day, Room, Module, Course, Group, \
+from base.models import Day, Room, Module, Course, StructuralGroup, TransversalGroup, \
     UserPreference, Time, ScheduledCourse, EdtVersion, CourseModification, \
     TrainingProgramme,  \
     Regen, Holiday, TrainingHalfDay, \
@@ -84,7 +84,7 @@ class CoursPlaceResource(resources.ModelResource):
     #                               widget=ForeignKeyWidget(Tutor, 'last_name'))
     groups = fields.Field(column_name='gpe_name',
                           attribute='course__groups',
-                          widget=ManyToManyWidget(Group, field='name',
+                          widget=ManyToManyWidget(StructuralGroup, field='name',
                                                   separator='|'))
     promo = fields.Field(column_name='gpe_promo',
                          attribute='course__module__train_prog',
@@ -158,7 +158,7 @@ class CoursPlaceResourceCosmo(resources.ModelResource):
     #                               widget=ForeignKeyWidget(Tutor, 'last_name'))
     groups = fields.Field(column_name='gpe_name',
                           attribute='course__groups',
-                          widget=ManyToManyWidget(Group, field='name',
+                          widget=ManyToManyWidget(StructuralGroup, field='name',
                                                   separator='|'))
     promo = fields.Field(column_name='gpe_promo',
                          attribute='course__module__train_prog',
@@ -259,7 +259,7 @@ class CoursResource(resources.ModelResource):
                             attribute='course__type__duration')
     groups = fields.Field(column_name='groups',
                          attribute='groups',
-                         widget=ManyToManyWidget(Group, field='name',
+                         widget=ManyToManyWidget(StructuralGroup, field='name',
                                                  separator='|'))
     color_bg = fields.Field(column_name='color_bg',
                             attribute='module__display',
@@ -541,13 +541,19 @@ class TrainingHalfDayAdmin(DepartmentModelAdmin):
     ordering = ('-week', 'train_prog', 'day')
 
 
-class GroupAdmin(DepartmentModelAdmin):
+class StructuralGroupAdmin(DepartmentModelAdmin):
     list_display = ('name', 'type', 'size', 'train_prog')
     filter_horizontal = ('parent_groups',)
     ordering = ('size',)
     list_filter = (('train_prog', DropdownFilterRel),
                    )
 
+
+class TransversalGroupAdmin(DepartmentModelAdmin):
+    list_display = ('name', 'size', 'train_prog')
+    ordering = ('size',)
+    list_filter = (('train_prog', DropdownFilterRel),
+                   )
 
 # class RoomInline(admin.TabularInline):
 #     model = RoomGroup.subroom_of.through
@@ -704,7 +710,8 @@ admin.site.unregister(auth.models.Group)
 
 admin.site.register(Holiday, HolidayAdmin)
 admin.site.register(TrainingHalfDay, TrainingHalfDayAdmin)
-admin.site.register(Group, GroupAdmin)
+admin.site.register(StructuralGroup, StructuralGroupAdmin)
+admin.site.register(TransversalGroup, TransversalGroupAdmin)
 admin.site.register(Room, RoomAdmin)
 admin.site.register(RoomPreference, RoomPreferenceAdmin)
 admin.site.register(RoomSort, RoomSortAdmin)

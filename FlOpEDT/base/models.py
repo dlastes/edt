@@ -73,17 +73,13 @@ class GroupType(models.Model):
         return self.name
 
 
-class Group(models.Model):
+class GenericGroup(models.Model):
     # should not include "-" nor "|"
     name = models.CharField(max_length=100)
     train_prog = models.ForeignKey(
         'TrainingProgramme', on_delete=models.CASCADE)
     type = models.ForeignKey('GroupType', on_delete=models.CASCADE, null=True)
     size = models.PositiveSmallIntegerField()
-    basic = models.BooleanField(verbose_name=_('Basic group?'), default=False)
-    parent_groups = models.ManyToManyField('self', symmetrical=False,
-                                           blank=True,
-                                           related_name="children_groups")
 
     @property
     def full_name(self):
@@ -91,6 +87,16 @@ class Group(models.Model):
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        abstract = True
+
+
+class StructuralGroup(GenericGroup):
+    basic = models.BooleanField(verbose_name=_('Basic group?'), default=False)
+    parent_groups = models.ManyToManyField('self', symmetrical=False,
+                                           blank=True,
+                                           related_name="children_groups")
 
     def ancestor_groups(self):
         """
@@ -111,7 +117,7 @@ class Group(models.Model):
         """
         descendants = set()
 
-        for gp in Group.objects.filter(train_prog=self.train_prog):
+        for gp in StructuralGroup.objects.filter(train_prog=self.train_prog):
             if self in gp.ancestor_groups():
                 descendants.add(gp)
 
@@ -127,6 +133,12 @@ class Group(models.Model):
         """
         return {self} | self.descendants_groups() | self.ancestor_groups()
 
+
+class TransversalGroup(GenericGroup):
+    conflicting_groups = models.ManyToManyField("base.StructuralGroup", blank=True)
+                                                
+    parallel_groups = models.ManyToManyField('self', symmetrical=True,
+                                             blank=True)
 
 # </editor-fold desc="GROUPS">
 
@@ -383,7 +395,7 @@ class Course(models.Model):
     supp_tutor = models.ManyToManyField('people.Tutor',
                                         related_name='courses_as_supp',
                                         blank=True)
-    groups = models.ManyToManyField('Group', related_name='courses')
+    groups = models.ManyToManyField('base.StructuralGroup', related_name='courses')
     module = models.ForeignKey(
         'Module', related_name='courses', on_delete=models.CASCADE)
     modulesupp = models.ForeignKey('Module', related_name='modulesupp',
@@ -502,7 +514,7 @@ class EnrichedLink(models.Model):
 
 
 class GroupPreferredLinks(models.Model):
-    group = models.OneToOneField('Group',
+    group = models.OneToOneField('base.StructuralGroup',
                                  on_delete=models.CASCADE,
                                  related_name='preferred_links')
     links = models.ManyToManyField('EnrichedLink',
@@ -759,7 +771,7 @@ class TutorCost(models.Model):
 
 class GroupCost(models.Model):
     week = models.ForeignKey('Week', on_delete=models.CASCADE, null=True, blank=True)
-    group = models.ForeignKey('Group', on_delete=models.CASCADE)
+    group = models.ForeignKey('StructuralGroup', on_delete=models.CASCADE)
     value = models.FloatField()
     work_copy = models.PositiveSmallIntegerField(default=0)
 
@@ -769,7 +781,7 @@ class GroupCost(models.Model):
 
 class GroupFreeHalfDay(models.Model):
     week = models.ForeignKey('Week', on_delete=models.CASCADE, null=True, blank=True)
-    group = models.ForeignKey('Group', on_delete=models.CASCADE)
+    group = models.ForeignKey('StructuralGroup', on_delete=models.CASCADE)
     DJL = models.PositiveSmallIntegerField()
     work_copy = models.PositiveSmallIntegerField(default=0)
 

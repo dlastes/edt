@@ -67,7 +67,7 @@ class Group_SC_Serializer(serializers.Serializer):
     name = serializers.CharField()
 
     class Meta:
-        model = bm.Group
+        model = bm.StructuralGroup
         fields = ['id', 'name', 'train_prog']
 
 
@@ -176,7 +176,7 @@ class Group_PP_Serializer(serializers.Serializer):
     train_prog = serializers.CharField()
 
     class Meta:
-        model = bm.Group
+        model = bm.StructuralGroup
         fields = ['id', 'name', 'train_prog']
 
 

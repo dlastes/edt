@@ -80,7 +80,7 @@ class MinGroupsHalfDays(TTConstraint):
     """
     All courses will fit in a minimum of half days
     """
-    groups = models.ManyToManyField('base.Group', blank=True)
+    groups = models.ManyToManyField('base.StructuralGroup', blank=True)
 
     def enrich_model(self, ttmodel, week, ponderation=1):
         helper = MinHalfDaysHelperGroup(ttmodel, self, week, ponderation)

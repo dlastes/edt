@@ -374,7 +374,7 @@ def department_room_types(request, department_abbrev):
 
 
 @tutor_or_superuser_required
-def department_student_groups(request, department_abbrev):
+def department_student_structural_groups(request, department_abbrev):
     """Student groups view of FlopEditor.
 
     :param request:           Client request.
@@ -387,7 +387,25 @@ def department_student_groups(request, department_abbrev):
     """
     return crud_view(request,
                      department_abbrev,
-                     "flopeditor/student_groups.html",
+                     "flopeditor/student_structural_groups.html",
+                     "Groupes d'élèves")
+
+
+@tutor_or_superuser_required
+def department_student_transversal_groups(request, department_abbrev):
+    """Student groups view of FlopEditor.
+
+    :param request:           Client request.
+    :param department_abbrev: Department abbreviation.
+    :type request:            django.http.HttpRequest
+    :type department_abbrev:  str
+    :return: Page rendered from the template of FlopEditor.
+    :rtype:  django.http.HttpResponse
+
+    """
+    return crud_view(request,
+                     department_abbrev,
+                     "flopeditor/student_transversal_groups.html",
                      "Groupes d'élèves")
 
 

@@ -19,7 +19,7 @@ def add_all_weeks(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('base', '0073_auto_20210426_1544'),
+        ('base', '0073_auto_20210511_1217'),
     ]
 
     operations = [

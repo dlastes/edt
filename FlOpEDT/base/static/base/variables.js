@@ -119,6 +119,7 @@ function cancel_cm_room_tutor_change() {
 var file_fetch =
 {
   groups: { done: false, data: null, callback: null },
+  transversal_groups: { done: false, data: null, callback: null }, 
   constraints: { done: false, data: null, callback: null },
   rooms: { done: false, data: null, callback: null }
 };
@@ -126,7 +127,13 @@ var file_fetch =
 function main(name, data) {
   file_fetch[name].data = data;
   file_fetch[name].done = true;
-
+  if (file_fetch.groups.done && file_fetch.constraints.done
+    && file_fetch.rooms.done && file_fetch.transversal_groups.done) {
+    file_fetch.constraints.callback();
+    file_fetch.rooms.callback();
+    file_fetch.groups.callback();
+    file_fetch.transversal_groups.callback();
+  }
   // callback all when all received
   if (!Object.keys(file_fetch).some(function(att){
     return !file_fetch[att].done ;
@@ -168,6 +175,7 @@ file_fetch.constraints.callback = function () {
   fetch_status.constraints_ok = true;
   create_grid_data();
 };
+
 
 
 
@@ -422,7 +430,7 @@ var quote = "";
   ------- GROUPS -------
   ----------------------*/
 
-// 2D data about groups [id_promo][group_subname] -> Group
+// 2D data about groups [id_promo]["structural"][group_subname] -> Group
 var groups = [];
 
 
