@@ -357,7 +357,7 @@ class WeeksDatabase(object):
         for tg in transversal_groups:
             conflicting_basic_groups[tg] = set()
             for cg in tg.conflicting_groups.all():
-                
+
 
         courses_for_group = {}
         for g in all_groups:
