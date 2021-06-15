@@ -89,6 +89,10 @@ if __name__ == "__main__":
         moduleDictionary = get_module_dictionary(services)
         validCourseKeys = get_valid_course_keys(services)
         teacherAssignation = assign_teachers_to_modules(session,validCourseKeys,teacherDictionary,promDictionary,moduleDictionary)
+
+        print("\n\n")
+        print(teacherAssignation)
+        print("\n\n")
         
         for i in teacherAssignation.keys(): #Modules
             print(i)
