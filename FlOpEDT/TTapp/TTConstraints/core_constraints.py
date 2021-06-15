@@ -24,7 +24,7 @@
 # without disclosing the source code of your own applications.
 
 
-from FlOpEDT.TTapp.weeks_database import WeeksDatabase
+from TTapp.weeks_database import WeeksDatabase
 from django.db import models
 
 from TTapp.TTConstraint import TTConstraint
