@@ -7,6 +7,7 @@ from MyFlOp.database_ENSMM import database_ENSMM
 from MyFlOp.cours_ENSMM import cours_ENSMM
 from configuration.hyperplanning import extract_courses_from_book
 from misc.assign_colors import assign_module_color
+from django.db import transaction
 
 
 def global_extraction(abbrev='ENSMM', name='ENSMM', delete_groups=True):
