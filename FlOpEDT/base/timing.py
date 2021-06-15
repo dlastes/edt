@@ -82,8 +82,8 @@ def str_to_min(time_string):
     return int(hours_minutes[0]) * 60 + int(hours_minutes[1])
 
 
-##############################################################
-###TRANSLATION METHODS BETWEEN FLOPDATES AND PYTHON'S DATES###
+################################################################
+###TRANSLATION FUNCTIONS BETWEEN FLOPDATES AND PYTHON'S DATES###
 
 #Returns the index of the first monday of the given year.
 #Argument "day" being a flop_day type
@@ -113,8 +113,8 @@ def flopday_to_date(day):
 def floptime_to_time(time_minutes):
     return time(time_minutes//60, time_minutes%60)
 
-###TRANSLATION METHODS BETWEEN FLOPDATES AND PYTHON'S DATES###
-##############################################################
+###TRANSLATION FUNCTIONS BETWEEN FLOPDATES AND PYTHON'S DATES###
+################################################################
 
 # will not be used
 # TO BE DELETED at the end
