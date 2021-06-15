@@ -45,7 +45,9 @@ from base.timing import Time
 
 from people.models import Tutor
 
-from TTapp.models import MinNonPreferedTutorsSlot, Stabilize, MinNonPreferedTrainProgsSlot
+from TTapp.models import MinNonPreferedTutorsSlot, Stabilize, MinNonPreferedTrainProgsSlot, \
+    NoSimultaneousGroupCourses, ScheduleAllCourses, AssignAllCourses, ConsiderTutorsUnavailability
+from TTapp.TTConstraint import max_weight
 
 from TTapp.slots import slots_filter, days_filter
 
@@ -66,12 +68,13 @@ import logging
 from TTapp.ilp_constraints.constraintManager import ConstraintManager
 from TTapp.ilp_constraints.constraint import Constraint
 from TTapp.ilp_constraints.constraint_type import ConstraintType
+from TTapp.ilp_constraints.constraints.courseConstraint import CourseConstraint
+
 
 from TTapp.ilp_constraints.constraints.dependencyConstraint import DependencyConstraint
 from TTapp.ilp_constraints.constraints.instructorConstraint import InstructorConstraint
 from TTapp.ilp_constraints.constraints.simulSlotGroupConstraint import SimulSlotGroupConstraint
 from TTapp.ilp_constraints.constraints.slotInstructorConstraint import SlotInstructorConstraint
-from TTapp.ilp_constraints.constraints.courseConstraint import CourseConstraint
 
 logger = logging.getLogger(__name__)
 pattern = r".+: (.|\s)+ (=|>=|<=) \d*"
@@ -79,8 +82,9 @@ GUROBI = 'GUROBI'
 GUROBI_NAME = 'GUROBI_CMD'
 solution_files_path = "misc/logs/solutions"
 
+
 class TTModel(object):
-    def __init__(self, department_abbrev, week_year_list,
+    def __init__(self, department_abbrev, weeks,
                  train_prog=None,
                  stabilize_work_copy=None,
                  min_nps_i=1.,
@@ -97,21 +101,7 @@ class TTModel(object):
                  min_visio=0.5):
         # beg_file = os.path.join('logs',"FlOpTT")
         self.department = Department.objects.get(abbrev=department_abbrev)
-
-        # Split week_year_list into weeks (list), and year (int)
-        # week_year should be a list of {'week': week, 'year': year}
-        year = None
-        weeks = []
-        for week_year in week_year_list:
-            y = week_year['year']
-            w = week_year['week']
-            if year is None: year = y
-            weeks.append(w)
-            if year != y:
-              raise Exception("Multiple week selection only support same year")
-
         self.weeks = weeks
-        self.year = year
 
         # Create the PuLP model, giving the name of the lp file
         self.model = LpProblem(self.solution_files_prefix(), LpMinimize)
@@ -199,7 +189,7 @@ class TTModel(object):
             self.send_lack_of_availability_mail()
 
     def wdb_init(self):
-        wdb = WeeksDatabase(self.department, self.weeks, self.year, self.train_prog, self.slots_step)
+        wdb = WeeksDatabase(self.department, self.weeks, self.train_prog, self.slots_step)
         return wdb
 
     def costs_init(self):
@@ -537,93 +527,35 @@ class TTModel(object):
 
         # constraint : only one course per basic group on simultaneous slots
         # (and None if transversal ones)
-        print('Simultaneous slots constraints for groups')
-        n_tg = self.wdb.transversal_groups.count()
-        for sl in self.wdb.availability_slots:
-            for bg in self.wdb.basic_groups:
-                self.add_constraint(n_tg * self.sum(self.TT[(sl2, c2)]
-                                                    for sl2 in slots_filter(self.wdb.courses_slots,
-                                                                            simultaneous_to=sl)
-                                                    for c2 in self.wdb.courses_for_basic_group[bg]
-                                                    & self.wdb.compatible_courses[sl2])
-                                    + self.sum(self.TT[(sl2, c2)]
-                                               for tg in self.wdb.transversal_groups_of[bg]
-                                               for sl2 in slots_filter(self.wdb.courses_slots,
-                                                                       simultaneous_to=sl)
-                                               for c2 in self.wdb.courses_for_group[tg]
-                                               & self.wdb.compatible_courses[sl2]),
-                                    '<=', n_tg, SimulSlotGroupConstraint(sl, bg))
+        if not ScheduleAllCourses.objects.filter(department=self.department).exists():
+            NoSimultaneousGroupCourses.objects.create(department=self.department)
 
-        for sl in self.wdb.availability_slots:
-            for tg in self.wdb.transversal_groups:
-                self.add_constraint(self.sum(self.TT[(sl2, c2)]
-                                                    for sl2 in slots_filter(self.wdb.courses_slots,
-                                                                            simultaneous_to=sl)
-                                                    for c2 in self.wdb.courses_for_group[tg]
-                                                    & self.wdb.compatible_courses[sl2])
-                                    + self.sum(self.TT[(sl2, c2)]
-                                               for tg2 in self.wdb.not_parallel_transversal_groups[tg]
-                                               for sl2 in slots_filter(self.wdb.courses_slots,
-                                                                       simultaneous_to=sl)
-                                               for c2 in self.wdb.courses_for_group[tg2]
-                                               & self.wdb.compatible_courses[sl2]),
-                                    '<=', 1, SimulSlotGroupConstraint(sl, tg))
-
-        # a course is scheduled once and only once
+        # a course is scheduled at most once
         for c in self.wdb.courses:
-            self.add_constraint(self.sum([self.TT[(sl, c)] for sl in self.wdb.compatible_slots[c]]), '==', 1,
+            self.add_constraint(self.sum([self.TT[(sl, c)] for sl in self.wdb.compatible_slots[c]]), '<=', 1,
                                 CourseConstraint(c))
 
-        # # Training half day TODO: Delete usage because redundant with NoCourseOnDay ?
-        # for training_half_day in self.wdb.training_half_days:
-        #     training_slots = slots_filter(self.wdb.courses_slots, week_day=training_half_day.day, week=training_half_day.week)
-        #     if training_half_day.apm is not None:
-        #         training_slots = slots_filter(training_slots, apm=training_half_day.apm)
-        #     training_progs = self.train_prog
-        #     if training_half_day.train_prog is not None:
-        #         training_progs = [training_half_day.train_prog]
-        #     # , "no_course_on_%s_%s_%g" % (training_half_day.day, training_half_day.apm, self.constraint_nb)
-        #     self.add_constraint(self.sum(self.TT[(sl, c)] for sl in training_slots
-        #                                  for c in self.wdb.compatible_courses[sl]
-        #                                  & set(self.wdb.courses.filter(module__train_prog__in=training_progs))),
-        #                         '==', 0,
-        #                         Constraint(constraint_type=ConstraintType.PAS_DE_COURS_DE_DEMI_JOURNEE,
-        #                         days=training_half_day.day, apm=training_half_day.apm))
+        # constraint : courses are scheduled only once
+        if not ScheduleAllCourses.objects.filter(department=self.department).exists():
+            ScheduleAllCourses.objects.create(department=self.department)
 
     def add_instructors_constraints(self):
         print("adding instructors constraints")
 
         # Each course is assigned to a unique tutor
-        for c in self.wdb.courses:
-            for sl in self.wdb.compatible_slots[c]:
-                self.add_constraint(self.sum(self.TTinstructors[(sl, c, i)]
-                                             for i in self.wdb.possible_tutors[c]) - self.TT[sl, c],
-                                    '==', 0,
-                                    InstructorConstraint(constraint_type=ConstraintType.COURS_DOIT_AVOIR_PROFESSEUR,
-                                    slot=sl, course=c))
+        if not AssignAllCourses.objects.filter(department=self.department).exists():
+            AssignAllCourses.objects.create(department=self.department)
 
         if self.core_only:
             return
+
+        if not ConsiderTutorsUnavailability.objects.filter(department=self.department).exists():
+            ConsiderTutorsUnavailability.objects.create(department=self.department)
 
         for i in self.wdb.instructors:
             if i.username == '---':
                 continue
             for sl in self.wdb.availability_slots:
-                # a course is assigned to a tutor only if s⋅he is available
-                self.add_constraint(self.sum(self.TTinstructors[(sl2, c2, i)]
-                                             for sl2 in slots_filter(self.wdb.courses_slots, simultaneous_to=sl)
-                                             for c2 in self.wdb.possible_courses[i] & self.wdb.compatible_courses[sl2]),
-                                    '<=', self.avail_instr[i][sl],
-                                    SlotInstructorConstraint(sl, i))
-
-                self.add_constraint(self.sum(self.TT[(sl2, c2)]
-                                             for sl2 in slots_filter(self.wdb.courses_slots, simultaneous_to=sl)
-                                             for c2 in self.wdb.courses_for_supp_tutor[i]
-                                             & self.wdb.compatible_courses[sl2]),
-                                    '<=', self.avail_instr[i][sl],
-                                    Constraint(constraint_type=ConstraintType.SUPP_TUTOR,
-                                               instructors=i, slots=sl))
-
                 if self.department.mode.visio:
                     # avail_at_school_instr consideration...
                     relevant_courses = set(c for c in self.wdb.possible_courses[i]
@@ -637,8 +569,7 @@ class TTModel(object):
                     )
 
         for mtr in ModuleTutorRepartition.objects.filter(module__in=self.wdb.modules,
-                                                         week__in=self.weeks,
-                                                         year=self.year):
+                                                         week__in=self.weeks):
             self.add_constraint(
                 self.sum(self.TTinstructors[sl, c, mtr.tutor]
                          for c in set(c for c in self.wdb.courses if c.module == mtr.module
@@ -849,9 +780,7 @@ class TTModel(object):
 
                     for availability_slot in week_availability_slots:
                         avail = set(a for a in week_tutor_availabilities
-                                    if a.start_time < availability_slot.end_time
-                                    and availability_slot.start_time < a.start_time + a.duration
-                                    and a.day == availability_slot.day.day)
+                                    if availability_slot.is_simultaneous_to(a))
                         if not avail:
                             print(f"availability pbm for {i} availability_slot {availability_slot}")
                             unp_slot_cost[i][availability_slot] = 0
@@ -923,9 +852,7 @@ class TTModel(object):
                         for availability_slot in week_availability_slots:
                             try:
                                 avail = set(a for a in courses_avail
-                                            if a.start_time < availability_slot.end_time
-                                            and availability_slot.start_time < a.start_time + a.duration
-                                            and a.day == availability_slot.day.day)
+                                            if availability_slot.is_simultaneous_to(a))
 
                                 if avail:
                                     minimum = min(a.value for a in avail)
@@ -961,7 +888,6 @@ class TTModel(object):
                         start_time__gt=sl.start_time - F('duration'),
                         day=sl.day.day,
                         week=sl.day.week,
-                        year=self.year,
                         room=room, value=0).exists():
                     avail_room[room][sl] = 0
                 else:
@@ -974,19 +900,16 @@ class TTModel(object):
          Add the constraints derived from the slot preferences expressed on the database
          """
         print("adding slot preferences")
-        from TTapp.TTConstraint import max_weight
         # first objective  => minimise use of unpreferred slots for teachers
         # ponderation MIN_UPS_I
+        if not MinNonPreferedTutorsSlot.objects.filter(department=self.department).exists():
+            M = MinNonPreferedTutorsSlot.objects.create(weight=max_weight, department=self.department)
 
-        M, created = MinNonPreferedTutorsSlot.objects.get_or_create(weight=max_weight, department=self.department)
-        if created:
-            M.save()
 
         # second objective  => minimise use of unpreferred slots for courses
         # ponderation MIN_UPS_C
-        M, created = MinNonPreferedTrainProgsSlot.objects.get_or_create(weight=max_weight, department=self.department)
-        if created:
-            M.save()
+        if not MinNonPreferedTrainProgsSlot.objects.filter(department=self.department).exists():
+            M = MinNonPreferedTrainProgsSlot.objects.create(weight=max_weight, department=self.department)
 
     def add_other_departments_constraints(self):
         """
@@ -1024,7 +947,6 @@ class TTModel(object):
             for constr in get_constraints(
                     self.department,
                     week=week,
-                    year=self.year,
                     # train_prog=promo,
                     is_active=True):
                 constr.enrich_model(self, week)
@@ -1071,7 +993,6 @@ class TTModel(object):
         ScheduledCourse.objects \
             .filter(course__module__train_prog__department=self.department,
                     course__week__in=self.weeks,
-                    course__year=self.year,
                     work_copy=target_work_copy) \
             .delete()
 
@@ -1118,22 +1039,18 @@ class TTModel(object):
         # # On enregistre les coûts dans la BDD
         TutorCost.objects.filter(department=self.department,
                                  week__in=self.wdb.weeks,
-                                 year=self.wdb.year,
                                  work_copy=target_work_copy).delete()
         GroupFreeHalfDay.objects.filter(group__train_prog__department=self.department,
                                         week__in=self.wdb.weeks,
-                                        year=self.wdb.year,
                                         work_copy=target_work_copy).delete()
         GroupCost.objects.filter(group__train_prog__department=self.department,
                                  week__in=self.wdb.weeks,
-                                 year=self.wdb.year,
                                  work_copy=target_work_copy).delete()
 
         for week in self.weeks:
             for i in self.wdb.instructors:
                 tc = TutorCost(department=self.department,
                                tutor=i,
-                               year=self.wdb.year,
                                week=week,
                                value=self.get_expr_value(self.cost_I[i][week]),
                                work_copy=target_work_copy)
@@ -1147,13 +1064,11 @@ class TTModel(object):
                     DJL += 0.01 * self.get_expr_value(self.FHD_G[Time.AM][g][week])
 
                 djlg = GroupFreeHalfDay(group=g,
-                                        year=self.wdb.year,
                                         week=week,
                                         work_copy=target_work_copy,
                                         DJL=DJL)
                 djlg.save()
                 cg = GroupCost(group=g,
-                               year=self.wdb.year,
                                week=week,
                                work_copy=target_work_copy,
                                value=self.get_expr_value(self.cost_G[g][week]))
@@ -1207,7 +1122,6 @@ class TTModel(object):
         ScheduledCourse.objects \
             .filter(course__module__train_prog__department=self.department,
                     course__week__in=self.weeks,
-                    course__year=self.year,
                     work_copy=target_work_copy) \
             .delete()
 
@@ -1246,8 +1160,7 @@ class TTModel(object):
             .objects \
             .filter(
             course__module__train_prog__department=self.department,
-            course__week__in=self.weeks,
-            course__year=self.year) \
+            course__week__in=self.weeks) \
             .aggregate(Max('work_copy'))['work_copy__max']
 
         if local_max_wc is None:
@@ -1320,7 +1233,7 @@ class TTModel(object):
         is reached.
 
         If stabilize_work_copy is None: does not move the scheduled courses
-        whose year group is not in train_prog and fetches from the remote database
+        whose group is not in train_prog and fetches from the remote database
         these scheduled courses with work copy 0.
 
         If target_work_copy is given, stores the resulting schedule under this
@@ -1347,7 +1260,7 @@ class TTModel(object):
 
             self.add_tt_to_db(target_work_copy)
             # for week in self.weeks:
-                # reassign_rooms(self.department, week, self.year, target_work_copy)
+                # reassign_rooms(self.department, week, target_work_copy)
             print("Added work copy N°%g" % target_work_copy)
             return target_work_copy
 
@@ -1358,7 +1271,7 @@ class TTModel(object):
         return other_slots.pop()
 
 
-def get_constraints(department, week=None, year=None, train_prog=None, is_active=None):
+def get_constraints(department, week=None, train_prog=None, is_active=None):
     #
     #  Return constraints corresponding to the specific filters
     #
@@ -1367,17 +1280,14 @@ def get_constraints(department, week=None, year=None, train_prog=None, is_active
     if is_active:
         query &= Q(is_active=is_active)
 
-    if week and not year:
-        logger.warning(f"Unable to filter constraint for weeks {week} without specifing year")
-        return
     elif train_prog:
         query &= \
-            Q(train_progs__abbrev=train_prog) & Q(week__isnull=True) & Q(year__isnull=True) | \
-            Q(train_progs__abbrev=train_prog) & Q(week=week) & Q(year=year) | \
-            Q(train_progs__isnull=True) & Q(week=week) & Q(year=year) | \
-            Q(train_progs__isnull=True) & Q(week__isnull=True) & Q(year__isnull=True)
+            Q(train_progs__abbrev=train_prog) & Q(weeks__isnull=True) | \
+            Q(train_progs__abbrev=train_prog) & Q(weeks=week) | \
+            Q(train_progs__isnull=True) & Q(weeks=week) | \
+            Q(train_progs__isnull=True) & Q(weeks__isnull=True)
     else:
-        query &= Q(week=week) & Q(year=year) | Q(week__isnull=True) & Q(year__isnull=True)
+        query &= Q(week=week) | Q(week__isnull=True)
 
     # Look up the TTConstraint subclasses records to update
     from TTapp.TTConstraint import TTConstraint, all_subclasses
