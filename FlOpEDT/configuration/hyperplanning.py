@@ -52,7 +52,7 @@ def inputTime(message=""): #Au format HH:mm
     return ans
 
 
-def cleanDictionary(dictionary): #Nettoie un dictionnaire des clés menant vers None
+def cleanDictionary(dictionary):
     keysToDelete = []
     for i in dictionary:
         if dictionary[i]==None:
@@ -105,8 +105,15 @@ def creerPauseMeridienne():
     return debutPause, finPause
 
 
+def switchStructuralToTransversal(dico):
+    for i in dico["groups"].keys():
+        if inputBool("Is the group "+i[1]+" from the prom "+i[0]+" is a transversal group?"):
+            dico["groups"].pop(i)
+            dico["transversal_groups"][i] = {"transversal_to":None,"parallel_to":None}
+
+
 def getValidCourseKeys(IHpSvcWCours,breakLevel=-1): # Certainement possible d'accelerer tout ça, mais les fonctions de l'API ne fonctionnent pas...
-    listCoursesKeys = IHpSvcWCours.service.TousLesCours()#[0:breakLevel]
+    listCoursesKeys = IHpSvcWCours.service.TousLesCours()
     if len(listCoursesKeys)>breakLevel:
         listCoursesKeys = listCoursesKeys[0:breakLevel]
 
@@ -276,7 +283,6 @@ def demanderModifEventuelles(dico):
         if inputBool("La distance minimale entre 2 cours sera de "+str(dico['settings']['default_preference_duration'])+" minutes. Modifier? : "):
             dico['settings']['default_preference_duration'] = inputInt("Quelle est la précision de plaçage de cours? (en minutes) : ")
 
-        # Modifier
         messageJours = "Les jours de cours sont actuellement:"
         dicoJours = {"m":"Lundi","tu":"Mardi","w":"Mercredi","th":"Jeudi","f":"Vendredi","sa":"Samedi","su":"Dimanche"}
         for i in ["m","tu","w","th","f","sa","su"]:            
@@ -286,10 +292,11 @@ def demanderModifEventuelles(dico):
         if inputBool(messageJours):
             dico['settings']['days'] = creerJoursSemaine()
 
-        return dico    
-    else:
-        return dico
+        if inputBool("There is currently no defined transversal groups. Do you want to turn some structural groups into transversal one?"):  #Aille l'anglais
+            switchStructuralToTransversal(dico)
 
+    return dico
+    
 
 #Fonction principale
 def filldico(username,password,lPrefixeWsdl):
@@ -330,7 +337,7 @@ def filldico(username,password,lPrefixeWsdl):
     periodes = creerPeriodes()
     
     # Tout le tralala
-    NOMBRE_DE_COURS_MAX = -1 # Utiliser pour accelerer les test. -1 si pas de limites.
+    NOMBRE_DE_COURS_MAX = 50 # Utiliser pour accelerer les test. -1 si pas de limites.
     
     validCoursesKeys = getValidCourseKeys(courseService,NOMBRE_DE_COURS_MAX)
     
@@ -442,6 +449,7 @@ def create_course_list_from_hp(username, password, lPrefixeWsdl,
                   "tutor": courseTutor,
                   "supp_tutor": courseSuppTutor,
                   "groups": courseGroups,
+                  "transversal_groups": {},
                   "module": courseModule,
                   "week": courseWeek,
                   "year": courseYear}
