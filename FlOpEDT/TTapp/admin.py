@@ -39,8 +39,10 @@ from TTapp.models import \
     CustomConstraint, SimultaneousCourses, MinimizeBusyDays, RespectBoundPerDay,\
     AvoidBothTimes, LimitedRoomChoices, LimitedStartTimeChoices, \
     LimitTutorsTimePerPeriod, LimitGroupsTimePerPeriod, LowerBoundBusyDays, GroupsLunchBreak, BreakAroundCourseType, \
-    NoVisio, LimitGroupsPhysicalPresence, BoundPhysicalPresenceHalfDays, TutorsLunchBreak, VisioOnly, NoCourseOnDay, \
-    ConsiderDepencies
+    NoVisio, LimitGroupsPhysicalPresence, BoundPhysicalPresenceHalfDays, TutorsLunchBreak, VisioOnly, \
+    NoTutorCourseOnDay, NoGroupCourseOnDay, \
+    ConsiderDepencies, Curfew
+
 
 from TTapp.TTConstraints.orsay_constraints import GroupsLunchBreak
 
@@ -343,6 +345,17 @@ class NoVisioAdmin(DepartmentModelAdmin):
                    )
 
 
+class CurfewAdmin(DepartmentModelAdmin):
+    list_display = ('week', 'year', 'comment',
+                    'weight',
+                    'is_active')
+    ordering = ()
+    list_filter = (('week', DropdownFilterAll),
+                   ('year', DropdownFilterAll),
+                   ('train_progs', DropdownFilterRel),
+                   )
+
+
 class VisioOnlyAdmin(DepartmentModelAdmin):
     list_display = ('week', 'year', 'comment',
                     'weight',
@@ -400,7 +413,6 @@ class NoCourseOnDayAdmin(DepartmentModelAdmin):
     list_filter = (('week', DropdownFilterAll),
                    ('year', DropdownFilterAll),
                    ('train_progs', DropdownFilterRel),
-                   ('groups', DropdownFilterRel),
                    )
 
 
@@ -439,8 +451,9 @@ admin.site.register(LowerBoundBusyDays, LowerBoundBusyDaysAdmin)
 admin.site.register(GroupsLunchBreak, GroupsLunchBreakAdmin)
 admin.site.register(TutorsLunchBreak, TutorsLunchBreakAdmin)
 admin.site.register(BreakAroundCourseType, BreakAroundCourseTypeAdmin)
-admin.site.register(NoCourseOnDay, NoCourseOnDayAdmin)
-
+admin.site.register(NoGroupCourseOnDay, NoCourseOnDayAdmin)
+admin.site.register(NoTutorCourseOnDay, NoCourseOnDayAdmin)
+admin.site.register(Curfew, CurfewAdmin)
 admin.site.register(NoVisio, NoVisioAdmin)
 admin.site.register(VisioOnly, VisioOnlyAdmin)
 admin.site.register(BoundPhysicalPresenceHalfDays, BoundPhysicalPresenceHalfDaysAdmin)
