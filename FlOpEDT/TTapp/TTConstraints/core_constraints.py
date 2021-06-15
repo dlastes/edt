@@ -24,6 +24,8 @@
 # without disclosing the source code of your own applications.
 
 
+from FlOpEDT.base.models import TimeGeneralSettings
+from FlOpEDT.TTapp.TTConstraints.test import flopdate_to_datetime
 from TTapp.weeks_database import WeeksDatabase
 from django.db import models
 
@@ -36,9 +38,11 @@ from TTapp.ilp_constraints.constraints.simulSlotGroupConstraint import SimulSlot
 from TTapp.ilp_constraints.constraints.courseConstraint import CourseConstraint
 from django.utils.translation import gettext as _
 from TTapp.slots import slots_filter
-from TTapp.TTConstraints.groups_constraints import considered_basic_groups
+from TTapp.TTConstraints.groups_constraints import considered_basic_groups, pre_analysis_considered_basic_groups
 from base.models import Course, TrainingProgramme
-
+from base.partition import Partition
+from base.timing import Day, flopdate_to_datetime
+from datetime import datetime
 
 class NoSimultaneousGroupCourses(TTConstraint):
     """
@@ -47,11 +51,27 @@ class NoSimultaneousGroupCourses(TTConstraint):
     groups = models.ManyToManyField('base.StructuralGroup', blank=True)
 
     def pre_analyse(self, week):
-        wdb = WeeksDatabase(self.department, week, self.year, TrainingProgramme.objects.filter(department=self.department))
-        nb_slots_max = len(wdb.courses_slots)
-        for gp in self.groups:
-            considered_courses = set(c for c in Course.objects.all() if c.week == week and gp in c.groups)
-            if len(considered_courses) > nb_slots_max:
+        considered_basic_groups = pre_analysis_considered_basic_groups(self)
+        group_partitions = []
+        for bg in considered_basic_groups:
+            time_settings = TimeGeneralSettings.objects.filter(department = bg.type.department)
+            day_start_week = Day(time_settings.days[0], week)
+            day_end_week = Day(time_settings.days[len(time_settings.days)-1], week)
+            start_week = flopdate_to_datetime(day_start_week, time_settings.day_start_time)
+            end_week = flopdate_to_datetime(day_end_week, time_settings.day_finish_time)
+            group_partitions.append(Partition
+            (
+                "GroupPartition",
+                start_week,
+                end_week,
+                time_settings.day_start_time,
+                time_settings.day_finish_time
+            ))
+        for gp in considered_basic_groups:
+            considered_courses = set(c for c in Course.objects.all() if c.week == week and gp.ancestor_groups() & set(c.groups.all()))
+            #considérer la longueur du temps des cours plutôt que le nb de cours
+            course_time_needed = sum(c.type.duration for c in considered_courses)
+            if course_time_needed > 1:
                 return False
         return True
 
