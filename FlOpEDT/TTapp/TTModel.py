@@ -553,7 +553,7 @@ class TTModel(object):
                                                for c2 in self.wdb.courses_for_group[tg]
                                                & self.wdb.compatible_courses[sl2]),
                                     '<=', n_tg, SimulSlotGroupConstraint(sl, bg))
-                
+
         for sl in self.wdb.availability_slots:
             for tg in self.wdb.transversal_groups:
                 self.add_constraint(self.sum(self.TT[(sl2, c2)]
