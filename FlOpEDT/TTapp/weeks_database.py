@@ -348,16 +348,16 @@ class WeeksDatabase(object):
 
         basic_groups_of = {}
         for g in groups:
-            basic_groups_of[g] = []
+            basic_groups_of[g] = set()
             for bg in basic_groups:
                 if g in all_groups_of[bg]:
-                    basic_groups_of[g].append(bg)
+                    basic_groups_of[g].add(bg)
 
         conflicting_basic_groups = {}
         for tg in transversal_groups:
             conflicting_basic_groups[tg] = set()
             for cg in tg.conflicting_groups.all():
-
+                conflicting_basic_groups[tg] |= basic_groups_of[cg]
 
         courses_for_group = {}
         for g in all_groups:

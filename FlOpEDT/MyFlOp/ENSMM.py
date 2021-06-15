@@ -1,5 +1,5 @@
 from base.models import Course, TrainingProgramme, StructuralGroup, Department, \
-    TimeGeneralSettings, CourseType, RoomType, CourseStartTimeConstraint
+    TimeGeneralSettings, CourseType, RoomType, CourseStartTimeConstraint, TransversalGroup
 from people.models import Tutor
 from people.tutor import fill_default_user_preferences
 from configuration.deploy_database import extract_database_file
@@ -128,4 +128,18 @@ def optimize_settings(dep):
         if i % 10 != 0:
             c.room_type = RT
             c.save()
+
+
+@transaction.atomic
+def convert_to_transversal(name_and_tp_groups_list):
+    for name, tp in name_and_tp_groups_list:
+        TP = TrainingProgramme.objects.get(abbrev=tp)
+        group_to_convert = StructuralGroup.objects.get(train_prog=TP, name=name)
+        Courses = Course.objects.filter(groups=group_to_convert)
+        new_group = TransversalGroup.objects.create(name=name, train_prog=TP,
+                                                    type=group_to_convert.type,
+                                                    size=group_to_convert.size)
+        group_to_convert.delete()
+        for c in Courses:
+            c.groups.add(new_group)
 
