@@ -26,7 +26,7 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 from base.timing import Day
-from base.models import Group
+from base.models import StructuralGroup
 from TTapp.helpers.minhalfdays import MinHalfDaysHelperGroup
 
 from TTapp.slots import slots_filter
@@ -40,9 +40,9 @@ from django.utils.translation import gettext as _
 
 def pre_analysis_considered_basic_groups(group_ttconstraint):
     if group_ttconstraint.train_progs.exists():
-        basic_groups = set(Group.objects.filter(train_prog__in=group_ttconstraint.train_progs.all(), basic=True))
+        basic_groups = set(StructuralGroup.objects.filter(train_prog__in=group_ttconstraint.train_progs.all(), basic=True))
     else:
-        basic_groups = set(Group.objects.filter(train_prog__department=group_ttconstraint.department, basic=True))
+        basic_groups = set(StructuralGroup.objects.filter(train_prog__department=group_ttconstraint.department, basic=True))
     
     if group_ttconstraint.groups.exists():
         basic_groups_constraint = set()

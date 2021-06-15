@@ -1,4 +1,5 @@
 from base.timing import TimeInterval
+from datetime import datetime, timedelta
 
 class Partition(object):
     #date_start, date_end : datetime
@@ -14,6 +15,24 @@ class Partition(object):
                 []
             )
                             )
+        self.add_night_time()
+
+    def add_night_time(self):
+        day = self.intervals[0][0].start
+        end_hours = self.day_end_time//60
+        end_minutes = self.day_end_time%60
+        start_hours = self.day_start_time//60
+        start_minutes = self.day_start_time%60
+        
+        while day < self.intervals[len(self.intervals)-1][0].end:
+            self.add_slot(
+                TimeInterval(
+                    datetime(day.year, day.month, day.day, end_hours, end_minutes, 0),
+                    datetime(day.year, day.month, (day + timedelta(days = 1)).day, start_hours, start_minutes, 0)
+                ),
+                {'night_time' : True},
+                forbiden=True)
+            day = day + timedelta(days = 1)
 
     @property
     def day_duration(self):
@@ -30,7 +49,6 @@ class Partition(object):
 
     def add_slot(self, interval, data, available = False, forbiden = False):
         i = 0
-
         #Check if we are in the interval range
         if (interval.start >= self.intervals[len(self.intervals)-1][0].end
                 or interval.end <= self.intervals[0][0].start):
@@ -74,13 +92,21 @@ class Partition(object):
                 i += new_part
             #ELSE WE ARE IN BETWEEN TWO OR MORE INTERVALS
             else:
-                self.intervals[i][0].end = interval.start
-                self.intervals.insert(i+1, (TimeInterval(interval.start, self.intervals[i+1][0].start),
-                                            {
-                                                "available" : self.intervals[i][1]["available"] or available,
-                                                "forbiden" : forbiden or self.intervals[i][1]["forbiden"]
-                                            },
-                                            self.intervals[i][2][:]+[data.copy()]))
-                interval.start = self.intervals[i+1][0].end
-                i += 2
+                if self.intervals[i][0].end > interval.start:
+                    self.intervals[i][0].end = interval.start
+                    self.intervals.insert(i+1, (TimeInterval(interval.start, self.intervals[i+1][0].start),
+                                                {
+                                                    "available" : self.intervals[i][1]["available"] or available,
+                                                    "forbiden" : forbiden or self.intervals[i][1]["forbiden"]
+                                                },
+                                                self.intervals[i][2][:]+[data.copy()]))
+                    i += 2
+                else:
+                    self.intervals[i][2].append(data)
+                    #check changes of availability of access#
+                    self.intervals[i][1]["available"] = self.intervals[i][1]["available"] or available
+                    self.intervals[i][1]["forbiden"] = forbiden or self.intervals[i][1]["forbiden"]
+                    #check changes of availability of access#
+                    i += 1
+                interval.start = self.intervals[i][0].start
         return True
