@@ -535,24 +535,39 @@ class TTModel(object):
 
         print("adding core constraints")
 
-        # constraint : only one course on simultaneous slots
+        # constraint : only one course per basic group on simultaneous slots
+        # (and None if transversal ones)
         print('Simultaneous slots constraints for groups')
+        n_tg = self.wdb.transversal_groups.count()
         for sl in self.wdb.availability_slots:
             for bg in self.wdb.basic_groups:
-                self.add_constraint(self.sum(self.TT[(sl2, c2)]
-                                             for sl2 in slots_filter(self.wdb.courses_slots,
-                                                                     simultaneous_to=sl)
-                                             for c2 in self.wdb.courses_for_basic_group[bg]
-                                             & self.wdb.compatible_courses[sl2]),
-                                    '<=', 1, SimulSlotGroupConstraint(sl, bg))
+                self.add_constraint(n_tg * self.sum(self.TT[(sl2, c2)]
+                                                    for sl2 in slots_filter(self.wdb.courses_slots,
+                                                                            simultaneous_to=sl)
+                                                    for c2 in self.wdb.courses_for_basic_group[bg]
+                                                    & self.wdb.compatible_courses[sl2])
+                                    + self.sum(self.TT[(sl2, c2)]
+                                               for tg in self.wdb.transversal_groups_of[bg]
+                                               for sl2 in slots_filter(self.wdb.courses_slots,
+                                                                       simultaneous_to=sl)
+                                               for c2 in self.wdb.courses_for_group[tg]
+                                               & self.wdb.compatible_courses[sl2]),
+                                    '<=', n_tg, SimulSlotGroupConstraint(sl, bg))
+                
+        for sl in self.wdb.availability_slots:
             for tg in self.wdb.transversal_groups:
                 self.add_constraint(self.sum(self.TT[(sl2, c2)]
-                                             for sl2 in slots_filter(self.wdb.courses_slots,
-                                                                     simultaneous_to=sl)
-                                             for c2 in self.wdb.courses_for_basic_group[bg]
-                                             & self.wdb.compatible_courses[sl2]),
-                                    '<=', 1, SimulSlotGroupConstraint(sl, bg))
-
+                                                    for sl2 in slots_filter(self.wdb.courses_slots,
+                                                                            simultaneous_to=sl)
+                                                    for c2 in self.wdb.courses_for_group[tg]
+                                                    & self.wdb.compatible_courses[sl2])
+                                    + self.sum(self.TT[(sl2, c2)]
+                                               for tg2 in self.wdb.not_parallel_transversal_groups[tg]
+                                               for sl2 in slots_filter(self.wdb.courses_slots,
+                                                                       simultaneous_to=sl)
+                                               for c2 in self.wdb.courses_for_group[tg2]
+                                               & self.wdb.compatible_courses[sl2]),
+                                    '<=', 1, SimulSlotGroupConstraint(sl, tg))
 
         # a course is scheduled once and only once
         for c in self.wdb.courses:
