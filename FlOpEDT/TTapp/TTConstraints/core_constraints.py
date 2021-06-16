@@ -24,8 +24,7 @@
 # without disclosing the source code of your own applications.
 
 
-from FlOpEDT.base.models import TimeGeneralSettings
-from FlOpEDT.TTapp.TTConstraints.test import flopdate_to_datetime
+from base.models import TimeGeneralSettings
 from TTapp.weeks_database import WeeksDatabase
 from django.db import models
 
