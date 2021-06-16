@@ -119,8 +119,12 @@ class TTConstraintSerializer(serializers.ModelSerializer):
 
     def get_parameters(self, obj):
         paramlist = []
+
         fields = self.Meta.fields
+        print(fields)
+
         department = obj.department
+        train_progs = getattr(obj, "train_progs").values("id")
 
         for field in obj._meta.get_fields():
             if(field.name not in fields):
@@ -135,22 +139,29 @@ class TTConstraintSerializer(serializers.ModelSerializer):
                     typename = type(field).__name__
                 else :
                     mod = field.related_model
-                    typename = str(mod)[8:-2] 
-                    
-                    if(field.name == "tutors" and str(department) != "None"):
-                        acceptablelist = mod.objects.values("id").filter(departments=department.id)
+                    typename = str(mod)[8:-2]
+                    acceptablelist = mod.objects.values("id")
 
-                    elif(field.name == "train_progs" and str(department) != "None"):
-                        acceptablelist = mod.objects.values("id").filter(department=department.id)
+                    if (str(department) != "None"):
+                        
+                        if(field.name == "tutors"):
+                            acceptablelist = acceptablelist.filter(departments=department.id)
 
-                    elif(field.name == "modules" and str(department) != "None"):
-                        acceptablelist = mod.objects.values("id").filter(train_prog__department=department.id)
+                        elif(field.name == "train_progs"):
+                            acceptablelist = acceptablelist.filter(department=department.id)
+                        
+                        elif(field.name == "modules"):
+                            acceptablelist = acceptablelist.filter(train_prog__department=department.id)
 
-                    elif(field.name == "groups" and str(department) != "None"):
-                        acceptablelist = mod.objects.values("id").filter(train_prog__department=department.id)
+                        elif(field.name == "groups"):
+                            acceptablelist = acceptablelist.filter(train_prog__department=department.id)
 
-                    else:
-                        acceptablelist = mod.objects.values("id")
+                    if (len(train_progs) != 0):
+                        if(field.name == "modules"):
+                            acceptablelist = acceptablelist.filter(train_prog__in=train_progs)
+
+                        elif(field.name == "groups"):
+                            acceptablelist = acceptablelist.filter(train_prog__in=train_progs)
 
                     for id in acceptablelist:
                         acceptable.append(id["id"])
@@ -192,8 +203,7 @@ class TTMinTutorsHalfDaysSerializer(TTConstraintSerializer):
         model = ttt.MinTutorsHalfDays
         fields = ['id', 'name', 'weight', 'is_active', 'comment', "modified_at", 'weeks', 'parameters']
 
-class LimitedRoomChoicesSerializer(TTConstraintSerializer):
+class TTMinModulesHalfDaysSerializer(serializers.ModelSerializer):
     class Meta:
-        model = ttr.LimitedRoomChoices
-        fields = ['id', 'name', 'weight', 'is_active', 'comment', "modified_at", 'weeks', 'parameters']
-
+        model = ttm.MinModulesHalfDays
+        fields = '__all__'

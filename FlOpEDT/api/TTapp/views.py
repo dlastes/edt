@@ -239,3 +239,10 @@ class TTConstraintViewSet(viewsets.ViewSet):
                     data.append(serializer.data)
 
         return Response(data)
+
+class TTMinModulesHalfDaysViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAdminOrReadOnly]
+    filterset_fields = '__all__' 
+
+    serializer_class = serializers.TTMinModulesHalfDaysSerializer
+    queryset = ttm.MinModulesHalfDays.objects.all()
