@@ -50,27 +50,30 @@ class NoSimultaneousGroupCourses(TTConstraint):
     groups = models.ManyToManyField('base.StructuralGroup', blank=True)
 
     def pre_analyse(self, week):
+
         considered_basic_groups = pre_analysis_considered_basic_groups(self)
-        group_partitions = []
+
         for bg in considered_basic_groups:
+
             time_settings = TimeGeneralSettings.objects.filter(department = bg.type.department)
             day_start_week = Day(time_settings.days[0], week)
             day_end_week = Day(time_settings.days[len(time_settings.days)-1], week)
             start_week = flopdate_to_datetime(day_start_week, time_settings.day_start_time)
             end_week = flopdate_to_datetime(day_end_week, time_settings.day_finish_time)
-            group_partitions.append(Partition
-            (
+
+            group_partition = Partition(
                 "GroupPartition",
                 start_week,
                 end_week,
                 time_settings.day_start_time,
                 time_settings.day_finish_time
-            ))
-        for gp in considered_basic_groups:
-            considered_courses = set(c for c in Course.objects.all() if c.week == week and gp.ancestor_groups() & set(c.groups.all()))
+            )
+
+            considered_courses = set(c for c in Course.objects.all() if c.week == week and bg.ancestor_groups() & set(c.groups.all()))
+
             #considérer la longueur du temps des cours plutôt que le nb de cours
             course_time_needed = sum(c.type.duration for c in considered_courses)
-            if course_time_needed > 1:
+            if course_time_needed > group_partition.available_duration:
                 return False
         return True
 

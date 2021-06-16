@@ -12,7 +12,7 @@ class Partition(object):
         self.intervals.append(
             (TimeInterval(date_start, date_end),
                 {"available" : False, "forbiden" : False}))
-        self.add_night_time()
+        #self.add_night_time()
 
     def add_night_time(self):
         #First element of the list of tuples, and the first element of the tuple ie the TimeInterval
@@ -43,6 +43,14 @@ class Partition(object):
     def duration(self):
         return abs(self.intervals[len(self.intervals)-1][0].end - self.intervals[0][0].start).total_seconds()//60
 
+    @property
+    def available_duration(self):
+        avail_duration = 0
+        for interval in self.intervals:
+            if interval[1]["available"] and not interval[1]["forbiden"]:
+                avail_duration += interval[0].duration
+        return avail_duration
+
     def add_data(self, data_type, data, interval_index):
         if "available" in data:
             self.intervals[interval_index][1]["available"] = self.intervals[interval_index][1]["available"] or data["available"]
@@ -59,9 +67,6 @@ class Partition(object):
     #data_type can be:
     #   - "user_preference" : with key "tutor", "value" and "available"
     #   - "night_time" : with keys "value" and "forbiden"
-    #
-    #interval : TimeInterval
-    #data : dict() with keys according to data_type
     def add_slot(self, interval, data_type, data):
         i = 0
         #Check if we are in the interval range
@@ -75,32 +80,32 @@ class Partition(object):
         while i < len(self.intervals) and interval.end > self.intervals[i][0].start:
             #IF WE ALREADY HAVE THE SAME INTERVAL WE APPEND THE DATA
             if self.intervals[i][0] == interval:
-                self.add_data(data_type, data, i)
+                self.add_data(data_type, copy.deepcopy(data), i)
                 i += 1
             #IF WE ARE INSIDE AN EXISTING INTERVAL
             elif self.intervals[i][0].start <= interval.start and self.intervals[i][0].end >= interval.end:
                 new_part = 1
                 if self.intervals[i][0].end != interval.end:
                     self.intervals.insert(i+1, (TimeInterval(interval.end, self.intervals[i][0].end),
-                                                            self.intervals[i][1].copy()))
+                                                            copy.deepcopy(self.intervals[i][1])))
                     self.intervals[i][0].end = interval.end
                 if self.intervals[i][0].start != interval.start:
                     self.intervals[i][0].end = interval.start
-                    self.intervals.insert(i+1, (TimeInterval(interval.start, interval.end),self.intervals[i][1].copy()))
-                    self.add_data(data_type, data, i+1)
+                    self.intervals.insert(i+1, (TimeInterval(interval.start, interval.end), copy.deepcopy(self.intervals[i][1])))
+                    self.add_data(data_type, copy.deepcopy(data), i+1)
                     new_part += 1
                 else:
-                    self.add_data(data_type, data, i)
+                    self.add_data(data_type, copy.deepcopy(data), i)
                 i += new_part
             #ELSE WE ARE IN BETWEEN TWO OR MORE INTERVALS
             else:
                 if self.intervals[i][0].end > interval.start:
                     self.intervals[i][0].end = interval.start
-                    self.intervals.insert(i+1, (TimeInterval(interval.start, interval.end),self.intervals[i][1].copy()))
-                    self.add_data(data_type, data, i+1)
+                    self.intervals.insert(i+1, (TimeInterval(interval.start, self.intervals[i+1][0].start), copy.deepcopy(self.intervals[i][1])))
+                    self.add_data(data_type, copy.deepcopy(data), i+1)
                     i += 2
                 else:
-                    self.add_data(data_type, data, i)
+                    self.add_data(data_type, copy.deepcopy(data), i)
                     i += 1
                 interval.start = self.intervals[i][0].start
         return True
