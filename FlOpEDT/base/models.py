@@ -100,7 +100,7 @@ class StructuralGroup(GenericGroup):
 
     def ancestor_groups(self):
         """
-        :return: the set of all Groupe containing self (self not included)
+        :return: the set of all StructuralGroup containing self (self not included)
         """
         ancestors = set(self.parent_groups.all())
 
@@ -111,9 +111,16 @@ class StructuralGroup(GenericGroup):
 
         return ancestors
 
+    def and_ancestors(self):
+        """
+        :return: the set of all StructuralGroup containing self (self included)
+        """
+        return {self} | self.ancestor_groups()
+
+
     def descendants_groups(self):
         """
-        :return: the set of all Groupe containe by self (self not included)
+        :return: the set of all StructuralGroup contained by self (self not included)
         """
         descendants = set()
 
@@ -129,7 +136,7 @@ class StructuralGroup(GenericGroup):
 
     def connected_groups(self):
         """
-        :return: the set of all Groupe that have a non empty intersection with self (self included)
+        :return: the set of all StructuralGroup that have a non empty intersection with self (self included)
         """
         return {self} | self.descendants_groups() | self.ancestor_groups()
 
