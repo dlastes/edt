@@ -41,7 +41,6 @@ from TTapp.TTConstraints.groups_constraints import considered_basic_groups, pre_
 from base.models import Course, TrainingProgramme
 from base.partition import Partition
 from base.timing import Day, flopdate_to_datetime
-from datetime import datetime
 
 class NoSimultaneousGroupCourses(TTConstraint):
     """
@@ -68,7 +67,8 @@ class NoSimultaneousGroupCourses(TTConstraint):
                 time_settings.day_start_time,
                 time_settings.day_finish_time
             )
-
+            group_partition.add_lunch_break(time_settings.lunch_break_start_time, time_settings.lunch_break_finish_time)
+            group_partition.add_week_end(time_settings.days)
             considered_courses = set(c for c in Course.objects.all() if c.week == week and bg.ancestor_groups() & set(c.groups.all()))
 
             #considérer la longueur du temps des cours plutôt que le nb de cours
