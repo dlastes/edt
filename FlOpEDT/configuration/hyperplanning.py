@@ -106,11 +106,13 @@ def creerPauseMeridienne():
 
 
 def switchStructuralToTransversal(dico):
+    keys_to_remove = []
     for i in dico["groups"].keys():
-        if inputBool("Is the group "+i[1]+" from the prom "+i[0]+" is a transversal group?"):
-            dico["groups"].pop(i)
+        if inputBool("Is the group "+i[0]+" from the prom "+i[1]+" is a transversal group?"):
+            keys_to_remove.append(i)
             dico["transversal_groups"][i] = {"transversal_to":None,"parallel_to":None}
-
+    for i in keys_to_remove:
+        dico["groups"].pop(i)
 
 def getValidCourseKeys(IHpSvcWCours,breakLevel=-1): # Certainement possible d'accelerer tout ça, mais les fonctions de l'API ne fonctionnent pas...
     listCoursesKeys = IHpSvcWCours.service.TousLesCours()
@@ -337,7 +339,7 @@ def filldico(username,password,lPrefixeWsdl):
     periodes = creerPeriodes()
     
     # Tout le tralala
-    NOMBRE_DE_COURS_MAX = 50 # Utiliser pour accelerer les test. -1 si pas de limites.
+    NOMBRE_DE_COURS_MAX = inputInt("How many courses do you want to look through? -1 for every courses") # Utiliser pour accelerer les test. -1 si pas de limites.
     
     validCoursesKeys = getValidCourseKeys(courseService,NOMBRE_DE_COURS_MAX)
     
@@ -370,7 +372,8 @@ def filldico(username,password,lPrefixeWsdl):
             'settings' : settings,
             'promotions': promotions,
             'group_types' : group_types,
-            'groups' : groups }
+            'groups' : groups,
+            'transversal_groups': {} }
     
     book = demanderModifEventuelles(book)
     
