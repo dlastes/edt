@@ -95,22 +95,6 @@ class StructuralGroup(GenericGroup):
                                            related_name="children_groups")
     generic = models.OneToOneField('GenericGroup', on_delete=models.CASCADE, parent_link=True)
 
-    @property
-    def name(self):
-        return self.generic.name
-
-    @property
-    def train_prog(self):
-        return self.generic.train_prog
-
-    @property
-    def type(self):
-        return self.generic.type
-
-    @property
-    def size(self):
-        return self.generic.size
-
     def ancestor_groups(self):
         """
         :return: the set of all Groupe containing self (self not included)
@@ -153,22 +137,6 @@ class TransversalGroup(GenericGroup):
     parallel_groups = models.ManyToManyField('self', symmetrical=True,
                                              blank=True)
     generic = models.OneToOneField('GenericGroup', on_delete=models.CASCADE, parent_link=True)
-
-    @property
-    def name(self):
-        return self.generic.name
-
-    @property
-    def train_prog(self):
-        return self.generic.train_prog
-
-    @property
-    def type(self):
-        return self.generic.type
-
-    @property
-    def size(self):
-        return self.generic.size
 
 
 # </editor-fold desc="GROUPS">
