@@ -8,7 +8,7 @@ from functools import reduce # Pour le pgcd d'une liste
 from tqdm import tqdm # Affichage de la barre sympa
 
 from django.db import transaction
-from base.models import CourseType, RoomType, StructuralGroup, Module, Course
+from base.models import CourseType, RoomType, StructuralGroup, TransversalGroup, Module, Course
 from people.models import Tutor
 from misc.assign_colors import assign_module_color
 
@@ -108,7 +108,7 @@ def creerPauseMeridienne():
 def switchStructuralToTransversal(dico):
     keys_to_remove = []
     for i in dico["groups"].keys():
-        if inputBool("Is the group "+i[0]+" from the prom "+i[1]+" is a transversal group?"):
+        if inputBool("Is the group "+i[1]+" from the prom "+i[0]+" is a transversal group?"):
             keys_to_remove.append(i)
             dico["transversal_groups"][i] = {"transversal_to":None,"parallel_to":None}
     for i in keys_to_remove:
@@ -160,6 +160,7 @@ def extractModules(IHpSvcWMatieres,IHpSvcWCours,IHpSvcWTDOption,IHpSvcWPromotion
     listCoursesKeys = validCourseKeys    
     tempDictNameOfModules = {} #Cle -> Nom
     moduleDictionary = {}
+    
     for i in tqdm(listCoursesKeys,"Modules - Extracting : ", bar_format='{l_bar}{bar:15}{r_bar}{bar:-10b}'):
         moduleKey = IHpSvcWCours.service.MatiereCours(i)
         if moduleKey not in tempDictNameOfModules.keys():
@@ -170,7 +171,7 @@ def extractModules(IHpSvcWMatieres,IHpSvcWCours,IHpSvcWTDOption,IHpSvcWPromotion
             
         courseTDOpt = IHpSvcWCours.service.TDOptionsDuCours(i)
         courseProm = IHpSvcWCours.service.PromotionsDuCours(i)
-        courseOwner = IHpSvcWMatieres.service.ProprietaireMatiere(IHpSvcWCours.service.MatiereCours(i))
+        courseOwner = None     #IHpSvcWMatieres.service.ProprietaireMatiere(IHpSvcWCours.service.MatiereCours(i)) <- renvoi nom+prenom au lieu de l'identifiant cas
         
         for j in courseTDOpt: 
             promOfTDOpt = IHpSvcWTDOption.service.PromotionTDOption(j)
@@ -260,7 +261,7 @@ def extractGroups(IHpSvcWPromotions,IHpSvcWTDOptions): #Fini mais pas satisfait!
         tdOptionName = IHpSvcWTDOptions.service.NomTDOption(i)
         belongTo = set()
         belongTo.add(IHpSvcWPromotions.service.NomPromotion(IHpSvcWTDOptions.service.PromotionTDOption(i)))
-        groupID = (tdOptionName,IHpSvcWPromotions.service.NomPromotion(IHpSvcWTDOptions.service.PromotionTDOption(i)))  #A modifier
+        groupID = (IHpSvcWPromotions.service.NomPromotion(IHpSvcWTDOptions.service.PromotionTDOption(i)),tdOptionName)  #A modifier
 
         groupDictionary[groupID] = {"group_type":None,"parent":belongTo}
 
@@ -479,7 +480,9 @@ def extract_courses_from_book(courses_book, department, assign_colors=True):
     for c in courses_book:
         if not c['groups']:
             continue
-        groups = StructuralGroup.objects.filter(name__in=c['groups'], train_prog__department=department)
+        sgroups = list(StructuralGroup.objects.filter(name__in=c['groups'], train_prog__department=department))
+        tgroups = list(TransversalGroup.objects.filter(name__in=c['groups'], train_prog__department=department))
+        groups = list(StructuralGroup.objects.filter(name__in=c['groups'], train_prog__department=department))+list(TransversalGroup.objects.filter(name__in=c['groups'], train_prog__department=department))
         ct = CourseType.objects.get(name=c['type'], department=department)
         rt = RoomType.objects.get(name=c['room_type'], department=department)
         if c['tutor']:
@@ -490,8 +493,10 @@ def extract_courses_from_book(courses_book, department, assign_colors=True):
         mod = Module.objects.get(name = c['module'], train_prog=groups[0].train_prog)
         new_course = Course(type=ct, room_type=rt, tutor=tut, module=mod, week=c['week'], year=c['year'])
         new_course.save()
-        for g in groups:
-            new_course.groups.add(g)
+        for sg in sgroups:  #structural groups
+            new_course.groups.add(sg)
+        for tg in tgroups:  #transversal groups
+            new_course.transversalgroups.add(tg)
         for t in supp_tuts:
             new_course.supp_tutor.add(t)
     if assign_colors:

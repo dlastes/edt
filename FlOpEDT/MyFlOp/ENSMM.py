@@ -19,7 +19,7 @@ def global_extraction(abbrev='ENSMM', name='ENSMM', delete_groups=True):
     extract_courses_from_book(cours_ENSMM, dep, assign_colors=False)
     C = Course.objects.filter(type__department=dep)
     for c in C:
-        c.year += 1
+        #c.year += 1
         c.save()
     apply_group_architecture(find_group_architecture(dep))
     if delete_groups:
@@ -134,7 +134,7 @@ def optimize_settings(dep):
 
 @transaction.atomic
 def convert_to_transversal(name_and_tp_groups_list):
-    for name, tp in name_and_tp_groups_list:
+    for tp, name in name_and_tp_groups_list:
         TP = TrainingProgramme.objects.get(abbrev=tp)
         group_to_convert = StructuralGroup.objects.get(train_prog=TP, name=name)
         Courses = Course.objects.filter(groups=group_to_convert)
