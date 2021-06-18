@@ -21,7 +21,7 @@ def global_extraction(abbrev='ENSMM', name='ENSMM', delete_groups=True):
     for c in C:
         #c.year += 1
         c.save()
-    apply_group_architecture(find_group_architecture(dep))
+    #apply_group_architecture(find_group_architecture(dep))
     if delete_groups:
         remove_slash_groups(dep)
         g, tp = useless_groups_and_train_progs(dep)
@@ -110,7 +110,7 @@ def remove_slash_groups(dep):
             c.groups.remove(g)
             for group in groups:
                 c.groups.add(group)
-        g.train_prog.delete()
+        g.delete()
 
 
 def optimize_settings(dep):
@@ -143,5 +143,5 @@ def convert_to_transversal(name_and_tp_groups_list):
                                                     size=group_to_convert.size)
         group_to_convert.delete()
         for c in Courses:
-            c.groups.add(new_group)
+            c.transversalgroups.add(new_group)
 
