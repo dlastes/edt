@@ -16,17 +16,17 @@ def global_extraction(abbrev='ENSMM', name='ENSMM', delete_groups=True):
     optimize_settings(dep)
     for t in Tutor.objects.filter(departments=dep):
         fill_default_user_preferences(t, dep)
-    extract_courses_from_book(cours_ENSMM, dep, assign_colors=False)
-    C = Course.objects.filter(type__department=dep)
-    for c in C:
-        #c.year += 1
-        c.save()
-    #apply_group_architecture(find_group_architecture(dep))
+    extract_courses_from_book(cours_ENSMM, dep)
+    # C = Course.objects.filter(type__department=dep)
+    # for c in C:
+    #     c.year += 1
+    #     c.save()
+    # apply_group_architecture(find_group_architecture(dep))
     if delete_groups:
         remove_slash_groups(dep)
         g, tp = useless_groups_and_train_progs(dep)
         # delete_useless_groups(g, tp)
-    convert_to_transversal(database_ENSMM['transversal_groups'].keys())
+    # convert_to_transversal(database_ENSMM['transversal_groups'].keys())
     dep = Department.objects.get(abbrev=abbrev)
     assign_module_color(dep, overwrite=True)
 
