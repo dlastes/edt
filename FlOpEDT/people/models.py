@@ -194,8 +194,8 @@ class BIATOS(Tutor):
 
 
 class Student(User):  # for now: representative
-    belong_to = models.ManyToManyField('base.StructuralGroup',
-                                       blank=True)
+    belong_to = models.ManyToManyField('base.GenericGroup',
+                                               blank=True)
 
     def __str__(self):
         return str(self.username)
@@ -246,8 +246,7 @@ class GroupPreferences(Preferences):
 
     def calculate_fields(self):
         # To pull students from the group
-        students_preferences = StudentPreferences.objects.filter(
-            student__belong_to=self.group)
+        students_preferences = StudentPreferences.objects.filter(student__belong_to=self.group)
 
         # To initialise variables and getting the divider to get the average
         local_morning_weight = 0

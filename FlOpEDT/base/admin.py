@@ -543,19 +543,19 @@ class TrainingHalfDayAdmin(DepartmentModelAdmin):
 
 
 class StructuralGroupAdmin(DepartmentModelAdmin):
-    list_display = ('name', 'type', 'size', 'train_prog')
-    filter_horizontal = ('parent_groups',)
-    ordering = ('size',)
-    list_filter = (('train_prog', DropdownFilterRel),
-                   )
-
+    # list_display = ('name', 'type', 'size', 'train_prog')
+    # filter_horizontal = ('parent_groups',)
+    # ordering = ('size',)
+    # list_filter = (('train_prog', DropdownFilterRel),
+    #                )
+    pass
 
 class TransversalGroupAdmin(DepartmentModelAdmin):
-    list_display = ('name', 'size', 'train_prog')
-    ordering = ('size',)
-    list_filter = (('train_prog', DropdownFilterRel),
-                   )
-
+#     list_display = ('name', 'size', 'train_prog')
+#     ordering = ('size',)
+#     list_filter = (('train_prog', DropdownFilterRel),
+#                    )
+    pass
 # class RoomInline(admin.TabularInline):
 #     model = RoomGroup.subroom_of.through
 #     show_change_link = False
@@ -604,7 +604,7 @@ class CourseAdmin(DepartmentModelAdmin):
         ('year', DropdownFilterAll),
         ('week', DropdownFilterAll),
         ('type', DropdownFilterRel),
-        ('groups', DropdownFilterRel),
+        #('groups', DropdownFilterRel),
     )
 
 

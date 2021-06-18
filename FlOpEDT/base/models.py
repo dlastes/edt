@@ -87,15 +87,29 @@ class GenericGroup(models.Model):
     def __str__(self):
         return self.name
 
-    class Meta:
-        abstract = True
 
-
-class StructuralGroup(GenericGroup):
+class StructuralGroup(models.Model):
     basic = models.BooleanField(verbose_name=_('Basic group?'), default=False)
     parent_groups = models.ManyToManyField('self', symmetrical=False,
                                            blank=True,
                                            related_name="children_groups")
+    generic = models.OneToOneField('GenericGroup', on_delete=models.CASCADE, parent_link=True)
+
+    @property
+    def name(self):
+        return self.generic.name
+
+    @property
+    def train_prog(self):
+        return self.generic.train_prog
+
+    @property
+    def type(self):
+        return self.generic.type
+
+    @property
+    def size(self):
+        return self.generic.size
 
     def ancestor_groups(self):
         """
@@ -135,9 +149,27 @@ class StructuralGroup(GenericGroup):
 
 class TransversalGroup(GenericGroup):
     conflicting_groups = models.ManyToManyField("base.StructuralGroup", blank=True)
-                                                
+
     parallel_groups = models.ManyToManyField('self', symmetrical=True,
                                              blank=True)
+    generic = models.OneToOneField('GenericGroup', on_delete=models.CASCADE, parent_link=True)
+
+    @property
+    def name(self):
+        return self.generic.name
+
+    @property
+    def train_prog(self):
+        return self.generic.train_prog
+
+    @property
+    def type(self):
+        return self.generic.type
+
+    @property
+    def size(self):
+        return self.generic.size
+
 
 # </editor-fold desc="GROUPS">
 
@@ -372,8 +404,7 @@ class Course(models.Model):
     supp_tutor = models.ManyToManyField('people.Tutor',
                                         related_name='courses_as_supp',
                                         blank=True)
-    groups = models.ManyToManyField('base.StructuralGroup', related_name='courses',blank=True)				#STAGE Modifié ici!
-    transversalgroups = models.ManyToManyField('base.TransversalGroup', related_name='courses',blank=True)  #STAGE Modifié ici aussi!
+    groups = models.ManyToManyField('base.GenericGroup', related_name='courses', blank=True)
     module = models.ForeignKey(
         'Module', related_name='courses', on_delete=models.CASCADE)
     modulesupp = models.ForeignKey('Module', related_name='modulesupp',
