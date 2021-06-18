@@ -8,7 +8,7 @@ from functools import reduce # Pour le pgcd d'une liste
 from tqdm import tqdm # Affichage de la barre sympa
 
 from django.db import transaction
-from base.models import CourseType, RoomType, StructuralGroup, TransversalGroup, Module, Course
+from base.models import CourseType, RoomType, StructuralGroup, TransversalGroup, Module, Course, GenericGroup
 from people.models import Tutor
 from misc.assign_colors import assign_module_color
 
@@ -480,23 +480,19 @@ def extract_courses_from_book(courses_book, department, assign_colors=True):
     for c in courses_book:
         if not c['groups']:
             continue
-        sgroups = list(StructuralGroup.objects.filter(name__in=c['groups'], train_prog__department=department))
-        tgroups = list(TransversalGroup.objects.filter(name__in=c['groups'], train_prog__department=department))
-        groups = list(StructuralGroup.objects.filter(name__in=c['groups'], train_prog__department=department))+list(TransversalGroup.objects.filter(name__in=c['groups'], train_prog__department=department))
+        groups = GenericGroup.objects.filter(name__in=c['groups'], train_prog__department=department)
         ct = CourseType.objects.get(name=c['type'], department=department)
         rt = RoomType.objects.get(name=c['room_type'], department=department)
         if c['tutor']:
             tut = Tutor.objects.get(username=c['tutor'])
         else:
             tut = None
-        supp_tuts = Tutor.objects.filter(username__in = c['supp_tutor'])
+        supp_tuts = Tutor.objects.filter(username__in=c['supp_tutor'])
         mod = Module.objects.get(name = c['module'], train_prog=groups[0].train_prog)
         new_course = Course(type=ct, room_type=rt, tutor=tut, module=mod, week=c['week'], year=c['year'])
         new_course.save()
-        for sg in sgroups:  #structural groups
-            new_course.groups.add(sg)
-        for tg in tgroups:  #transversal groups
-            new_course.transversalgroups.add(tg)
+        for g in groups:
+            new_course.groups.add(g)
         for t in supp_tuts:
             new_course.supp_tutor.add(t)
     if assign_colors:
