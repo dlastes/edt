@@ -29,7 +29,7 @@ import sys
 from openpyxl import *
 
 from base.weeks import actual_year
-from base.models import StructuralGroup, Module, Course, CourseType, RoomType,\
+from base.models import GenericGroup, Module, Course, CourseType, RoomType,\
     TrainingProgramme, Dependency, Period, Department, CoursePossibleTutors, ModuleTutorRepartition, CourseAdditional
 from people.models import Tutor, UserDepartmentSettings
 from people.tutor import fill_default_user_preferences
@@ -183,7 +183,7 @@ def ReadPlanifWeek(department, book, feuille, week, year, courses_to_stabilize=N
                 grps = grps.replace('\xa0', '').replace(' ', '').replace(',', ';').split(';')
             groups = [str(g) for g in grps]
 
-            GROUPS = list(StructuralGroup.objects.filter(name__in=groups, train_prog=PROMO))
+            GROUPS = list(GenericGroup.objects.filter(name__in=groups, train_prog=PROMO))
 
             N=int(N)
 
@@ -220,9 +220,14 @@ def ReadPlanifWeek(department, book, feuille, week, year, courses_to_stabilize=N
                     course_type = after_type[s:]
                     relevant_groups = set()
                     for g in GROUPS:
+                        try:
+                            g = g.structuralgroup
+                        except:
+                            relevant_groups |= {g}
+                            continue
                         relevant_groups |= g.ancestor_groups() | {g} | g.descendants_groups()
                     courses = Course.objects.filter(type__name=course_type, module=MODULE, week=week, year=year,
-                                                    groups__in = relevant_groups)
+                                                    groups__generic__in=relevant_groups)
                     for course in courses[:n]:
                         P = Dependency(course1=course, course2=C)
                         P.save()

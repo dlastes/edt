@@ -46,22 +46,6 @@ class Migration(migrations.Migration):
             preserve_default=False,
         ),
         migrations.RunPython(create_and_add_generic_groups),
-        migrations.RemoveField(
-            model_name='structuralgroup',
-            name='name',
-        ),
-        migrations.RemoveField(
-            model_name='structuralgroup',
-            name='size',
-        ),
-        migrations.RemoveField(
-            model_name='structuralgroup',
-            name='train_prog',
-        ),
-        migrations.RemoveField(
-            model_name='structuralgroup',
-            name='type',
-        ),
         migrations.AddField(
             model_name='course',
             name='generic_groups',

@@ -88,7 +88,7 @@ class GenericGroup(models.Model):
         return self.name
 
 
-class StructuralGroup(models.Model):
+class StructuralGroup(GenericGroup):
     basic = models.BooleanField(verbose_name=_('Basic group?'), default=False)
     parent_groups = models.ManyToManyField('self', symmetrical=False,
                                            blank=True,
