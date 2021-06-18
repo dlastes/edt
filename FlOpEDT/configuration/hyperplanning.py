@@ -476,7 +476,7 @@ def remove_courses_without_group(listOfCourses):
 
 
 @transaction.atomic
-def extract_courses_from_book(courses_book, department, assign_colors=True):
+def extract_courses_from_book(courses_book, department):
     for c in courses_book:
         if not c['groups']:
             continue
@@ -495,6 +495,4 @@ def extract_courses_from_book(courses_book, department, assign_colors=True):
             new_course.groups.add(g)
         for t in supp_tuts:
             new_course.supp_tutor.add(t)
-    if assign_colors:
-        assign_module_color(department)
     print("Course extraction done")
