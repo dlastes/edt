@@ -87,6 +87,13 @@ class GenericGroup(models.Model):
     def __str__(self):
         return self.name
 
+    def ancestor_groups(self):
+        return set()
+
+    def descendants_groups(self):
+        return set()
+
+
 
 class StructuralGroup(GenericGroup):
     basic = models.BooleanField(verbose_name=_('Basic group?'), default=False)
