@@ -140,6 +140,10 @@ class Tutor(User):
     class Meta:
         verbose_name = 'Tutor'
 
+    def save(self, *args, **kwargs):
+        self.is_tutor = True
+        super(Tutor, self).save(*args, **kwargs)
+
 
 class FullStaff(Tutor):
     is_iut = models.BooleanField(default=True)
