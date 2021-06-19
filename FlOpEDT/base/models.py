@@ -93,7 +93,19 @@ class GenericGroup(models.Model):
     def descendants_groups(self):
         return set()
 
+    @property
+    def is_structural(self):
+        if hasattr(self, "basic"):
+            return True
+        else:
+            return False
 
+    @property
+    def is_transversal(self):
+        if hasattr(self, "parallel_groups"):
+            return True
+        else:
+            return False
 
 class StructuralGroup(GenericGroup):
     basic = models.BooleanField(verbose_name=_('Basic group?'), default=False)
