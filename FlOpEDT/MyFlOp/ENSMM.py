@@ -21,12 +21,12 @@ def global_extraction(abbrev='ENSMM', name='ENSMM', delete_groups=True):
     # for c in C:
     #     c.year += 1
     #     c.save()
-    # apply_group_architecture(find_group_architecture(dep))
     if delete_groups:
         remove_slash_groups(dep)
         g, tp = useless_groups_and_train_progs(dep)
-        # delete_useless_groups(g, tp)
-    # convert_to_transversal(database_ENSMM['transversal_groups'].keys())
+        delete_useless_groups(g, tp)
+    apply_group_architecture(find_group_architecture(dep))
+    convert_to_transversal(database_ENSMM['transversal_groups'].keys())
     dep = Department.objects.get(abbrev=abbrev)
     assign_module_color(dep, overwrite=True)
 
@@ -56,7 +56,11 @@ def apply_group_architecture(group_architecture_dict):
     d = group_architecture_dict
     for tp in d:
         for g in d[tp]:
-            G = StructuralGroup.objects.get(train_prog__name=tp, name=g)
+            try:
+                G = StructuralGroup.objects.get(train_prog__name=tp, name=g)
+            except StructuralGroup.DoesNotExist:
+                print(f"pbm avec {tp} - {g} (qui n'existe pas...)")
+                continue
             for g2 in d[tp][g]:
                 G2 = StructuralGroup.objects.get(train_prog__name=tp, name=g2)
                 for pg in G2.parent_groups.all():
@@ -78,6 +82,7 @@ def apply_group_architecture(group_architecture_dict):
     for g in StructuralGroup.objects.filter(name__in=['VP1', 'VP2']):
         g.parent_groups.remove(g.parent_groups.all()[0])
         g.parent_groups.add(produit)
+
 
 def useless_groups_and_train_progs(dep):
     groups = set()
@@ -110,7 +115,7 @@ def remove_slash_groups(dep):
             c.groups.remove(g)
             for group in groups:
                 c.groups.add(group)
-        g.delete()
+        g.train_prog.delete()
 
 
 def optimize_settings(dep):
@@ -136,12 +141,14 @@ def optimize_settings(dep):
 def convert_to_transversal(name_and_tp_groups_list):
     for tp, name in name_and_tp_groups_list:
         TP = TrainingProgramme.objects.get(abbrev=tp)
-        group_to_convert = StructuralGroup.objects.get(train_prog=TP, name=name)
-        Courses = Course.objects.filter(groups=group_to_convert)
-        new_group = TransversalGroup.objects.create(name=name, train_prog=TP,
-                                                    type=group_to_convert.type,
-                                                    size=group_to_convert.size)
-        group_to_convert.delete()
-        for c in Courses:
-            c.transversalgroups.add(new_group)
+        if StructuralGroup.objects.filter(train_prog=TP, name=name).exists():
+            print(f"pbm avec {tp} - {name} (qui n'existe pas...)")
+            group_to_convert = StructuralGroup.objects.get(train_prog=TP, name=name)
+            Courses = Course.objects.filter(groups=group_to_convert)
+            new_group = TransversalGroup.objects.create(name=name, train_prog=TP,
+                                                        type=group_to_convert.type,
+                                                        size=group_to_convert.size)
+            group_to_convert.delete()
+            for c in Courses:
+                c.transversalgroups.add(new_group)
 
