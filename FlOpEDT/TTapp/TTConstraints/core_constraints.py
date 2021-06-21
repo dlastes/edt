@@ -70,11 +70,21 @@ class NoSimultaneousGroupCourses(TTConstraint):
             group_partition.add_lunch_break(time_settings.lunch_break_start_time, time_settings.lunch_break_finish_time)
             group_partition.add_week_end(time_settings.days)
             considered_courses = set(c for c in Course.objects.all() if c.week == week and bg.ancestor_groups() & set(c.groups.all()))
+            course_dict = dict()
+            for c in considered_courses:
+                if c.type.duration in course_dict:
+                    course_dict[c.type.duration] += 1
+                else:
+                    course_dict[c.type.duration] = 1 
 
             #considérer la longueur du temps des cours plutôt que le nb de cours
             course_time_needed = sum(c.type.duration for c in considered_courses)
             if course_time_needed > group_partition.available_duration:
                 return False
+            else:
+                for duration, nb_courses in course_dict.items():
+                    if group_partition.nb_slots_of_duration(duration) < nb_courses:
+                        return False
         return True
 
     def enrich_model(self, ttmodel, week, ponderation=1):
