@@ -80,6 +80,9 @@ class GenericGroup(models.Model):
     type = models.ForeignKey('GroupType', on_delete=models.CASCADE, null=True)
     size = models.PositiveSmallIntegerField()
 
+    class Meta:
+        unique_together = (("name", "train_prog"),)
+
     @property
     def full_name(self):
         return self.train_prog.abbrev + "-" + self.name
@@ -88,23 +91,29 @@ class GenericGroup(models.Model):
         return self.name
 
     def ancestor_groups(self):
+        if self.is_structural:
+            return self.structuralgroup.ancestor_groups()
         return set()
 
     def descendants_groups(self):
+        if self.is_structural:
+            return self.structuralgroup.descendants_groups()
         return set()
 
     @property
     def is_structural(self):
-        if hasattr(self, "basic"):
+        try:
+            self.structuralgroup
             return True
-        else:
+        except:
             return False
 
     @property
     def is_transversal(self):
-        if hasattr(self, "parallel_groups"):
+        try:
+            self.transversalgroup
             return True
-        else:
+        except:
             return False
 
 class StructuralGroup(GenericGroup):
