@@ -69,7 +69,7 @@ class NoSimultaneousGroupCourses(TTConstraint):
             )
             group_partition.add_lunch_break(time_settings.lunch_break_start_time, time_settings.lunch_break_finish_time)
             group_partition.add_week_end(time_settings.days)
-            considered_courses = set(c for c in Course.objects.all() if c.week == week and bg.ancestor_groups() & set(c.groups.all()))
+            considered_courses = set(c for c in Course.objects.filter(week=week, groups__in=bg.and_ancestors()))
             course_dict = dict()
             for c in considered_courses:
                 if c.type.duration in course_dict:
