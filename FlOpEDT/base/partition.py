@@ -85,6 +85,17 @@ class Partition(object):
                 {"forbiden" : True, "night_time": True})
             day = day + timedelta(days = 1)
 
+    def nb_slots_of_duration(self, duration):
+        current_duration = 0
+        nb_slots = 0
+        for interval in self.intervals:
+            if interval[1]["available"] and not interval[1]["forbiden"]:
+                current_duration += interval[0].duration
+            else:
+                nb_slots += current_duration//duration
+                current_duration = 0
+        return int(nb_slots)
+
     @property
     def day_duration(self):
         return (self.day_end_time - self.day_start_time)
