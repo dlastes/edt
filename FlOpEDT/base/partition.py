@@ -70,7 +70,12 @@ class Partition(object):
         end_minutes = self.day_end_time%60
         start_hours = self.day_start_time//60
         start_minutes = self.day_start_time%60
-        
+        if self.intervals[0][0].start.hour < start_hours or (self.intervals[0][0].start.hour == start_hours
+                                                            and self.intervals[0][0].start.minute < start_minutes):
+            self.add_slot(TimeInterval(
+                datetime(day.year, day.month, day.day, 0, 0, 0),
+                datetime(day.year, day.month, day.day, start_hours, start_minutes)
+                ), "night_time", {"forbiden" : True, "night_time" : True})
         while day < self.intervals[len(self.intervals)-1][0].end:
             self.add_slot(
                 TimeInterval(
@@ -139,6 +144,10 @@ class Partition(object):
         while i < len(self.intervals) and interval.end > self.intervals[i][0].start:
             if(interval.start == self.intervals[i][0].end):
                 i+=1
+            if i == 0 and self.intervals[i][0].start > interval.start:
+                interval.start = self.intervals[i][0].start
+            if i == len(self.intervals)-1 and self.intervals[i][0].end < interval.end:
+                interval.end = self.intervals[i][0].end
             #IF WE ALREADY HAVE THE SAME INTERVAL WE APPEND THE DATA
             if self.intervals[i][0] == interval:
                 self.add_data(data_type, copy.deepcopy(data), i)
