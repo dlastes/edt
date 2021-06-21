@@ -511,7 +511,7 @@ function create_transversal_groups(data_groups) {
   
   // Seconde passe: On complete les groupes déjà créé en leur ajoutant les groupes transversaux avec lequels ils sont en parallèle? 
   // On fait ça en un second temps car il faut que tout les groupes transversaux soient en place pour faire avancer le schmilblick
-  for (let ngrp = 0; ngrp < nb_groups; ngrp++) {
+  for (let ngrp = 0; ngrp < nb_groups; ngrp++){
   	group_prom = set_promos.indexOf(data_groups[ngrp]['train_prog']);
   	if (group_prom != -1) {
   		nb_para_groups = data_groups[ngrp]["parallel_groups"].length;
