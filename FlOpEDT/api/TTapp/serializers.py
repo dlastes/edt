@@ -121,7 +121,6 @@ class TTConstraintSerializer(serializers.ModelSerializer):
         paramlist = []
 
         fields = self.Meta.fields
-        print(fields)
 
         department = obj.department
         train_progs = getattr(obj, "train_progs").values("id")
@@ -138,10 +137,13 @@ class TTConstraintSerializer(serializers.ModelSerializer):
                 if(not field.many_to_one and not field.many_to_many):
                     typename = type(field).__name__
                 else :
+                    #Récupère le modele en relation avec un ManyToManyField ou un ForeignKey
                     mod = field.related_model
+
                     typename = str(mod)[8:-2]
                     acceptablelist = mod.objects.values("id")
 
+                    #Filtre les ID dans acceptable list en fonction du department
                     if (str(department) != "None"):
                         
                         if(field.name == "tutors"):
@@ -156,6 +158,7 @@ class TTConstraintSerializer(serializers.ModelSerializer):
                         elif(field.name == "groups"):
                             acceptablelist = acceptablelist.filter(train_prog__department=department.id)
 
+                    #Filtre les ID dans acceptable list en fonction des train_progs
                     if (len(train_progs) != 0):
                         if(field.name == "modules"):
                             acceptablelist = acceptablelist.filter(train_prog__in=train_progs)
@@ -163,6 +166,7 @@ class TTConstraintSerializer(serializers.ModelSerializer):
                         elif(field.name == "groups"):
                             acceptablelist = acceptablelist.filter(train_prog__in=train_progs)
 
+                    #Tout les ID possibles si pas de train_progs ou de department
                     for id in acceptablelist:
                         acceptable.append(id["id"])
 
@@ -183,6 +187,7 @@ class TTConstraintSerializer(serializers.ModelSerializer):
                     typename = type(field.base_field).__name__  
 
                 if( len(id_list)>(len(acceptable)*(3/4)) ):
+                    #Permet de récupérer les ID qui ne sont pas selectionné
                     id_list = list(set(acceptable) - set(id_list)) + list(set(id_list) - set(acceptable))
                     allexcept = True    
 
@@ -198,12 +203,7 @@ class TTConstraintSerializer(serializers.ModelSerializer):
 
         return(paramlist)
 
-class TTMinTutorsHalfDaysSerializer(TTConstraintSerializer):
+class ConstraintSerializer(TTConstraintSerializer):
     class Meta:
         model = ttt.MinTutorsHalfDays
         fields = ['id', 'name', 'weight', 'is_active', 'comment', "modified_at", 'weeks', 'parameters']
-
-class TTMinModulesHalfDaysSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ttm.MinModulesHalfDays
-        fields = '__all__'

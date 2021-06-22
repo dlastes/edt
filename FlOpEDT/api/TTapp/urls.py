@@ -36,4 +36,3 @@ routerTTapp = routers.SimpleRouter()
 # routerTTapp.register(r'simultaneouscourses', views.TTSimultaneousCoursesViewSet)
 # routerTTapp.register(r'limitedstarttimechoices', views.TTLimitedStartTimeChoicesViewSet) # TODO: Fix
 routerTTapp.register(r'constraint', views.TTConstraintViewSet, basename = "constraint")
-routerTTapp.register(r'minmoduleshalfdays', views.TTMinModulesHalfDaysViewSet, basename = 'minmoduleshalfdays')

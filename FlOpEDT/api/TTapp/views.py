@@ -21,19 +21,21 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
+from rest_framework.views import APIView
 from api.shared.params import dept_param, week_param, year_param
 from django.db.models import query
 from django.db.models.fields.related import ForeignKey, ManyToManyField
 from django.utils.decorators import method_decorator
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.utils.serializer_helpers import ReturnDict
+from django.apps import apps
 import TTapp.models as ttm
 import TTapp.TTConstraint as ttc
 import TTapp.TTConstraints.tutors_constraints as ttt
 import TTapp.TTConstraints.rooms_constraints as ttr
 import TTapp.TTConstraints.visio_constraints as ttv
 
-from itertools import chain
+from drf_yasg import openapi
 from rest_framework import viewsets
 from rest_framework.response import Response
 import django_filters.rest_framework as filters
@@ -203,6 +205,15 @@ class TTLimitedRoomChoicesViewSet(viewsets.ModelViewSet):
                   decorator=swagger_auto_schema(
                       manual_parameters=[week_param(), year_param(), dept_param()])
                   )
+@method_decorator(name='retrieve',
+                  decorator=swagger_auto_schema(
+                      manual_parameters=[
+                            openapi.Parameter('name',
+                                            openapi.IN_QUERY,
+                                            description="Name of constraint",
+                                            type=openapi.TYPE_STRING, required = True),
+                      ])
+                  )
 class TTConstraintViewSet(viewsets.ViewSet):
     """
     ViewSet to see all the constraints and their parameters
@@ -211,6 +222,8 @@ class TTConstraintViewSet(viewsets.ViewSet):
     """
     permission_classes = [IsAdminOrReadOnly]
     filterset_fields = '__all__' 
+    serializer_class = serializers.ConstraintSerializer
+
 
     def list(self, request):
         # Getting all the filters
@@ -235,14 +248,17 @@ class TTConstraintViewSet(viewsets.ViewSet):
                     queryset = queryset.filter(department__abbrev=dept)
 
                 for object in queryset:
-                    serializer = serializers.TTMinTutorsHalfDaysSerializer(object)
+                    serializer = serializers.ConstraintSerializer(object)
                     data.append(serializer.data)
 
         return Response(data)
 
-class TTMinModulesHalfDaysViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAdminOrReadOnly]
-    filterset_fields = '__all__' 
+    def retrieve(self, request, pk):
+        name = request.query_params.get('name', None)
+        #Obtenir la contrainte à partir du nom
+        constraint = apps.get_model('TTapp', name)
 
-    serializer_class = serializers.TTMinModulesHalfDaysSerializer
-    queryset = ttm.MinModulesHalfDays.objects.all()
+        instance = constraint.objects.get(pk=pk)
+        serializer = serializers.ConstraintSerializer(instance)
+
+        return Response(serializer.data)
