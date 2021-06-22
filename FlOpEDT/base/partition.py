@@ -5,7 +5,7 @@ import copy
 class Partition(object):
     #date_start, date_end : datetime
     #day_start_time, day_end_time : int
-    def __init__(self, type, date_start, date_end, day_start_time, day_end_time):
+    def __init__(self, type, date_start, date_end, day_start_time = None, day_end_time = None):
         self.intervals = []
         self.type = type
         self.day_start_time = day_start_time
@@ -13,7 +13,8 @@ class Partition(object):
         self.intervals.append(
             (TimeInterval(date_start, date_end),
                 {"available" : False, "forbiden" : False}))
-        self.add_night_time()
+        if day_start_time and day_end_time:
+            self.add_night_time(day_start_time, day_end_time)
 
     def add_lunch_break(self, start_time, end_time):
         day = self.intervals[0][0].start
@@ -63,13 +64,13 @@ class Partition(object):
         return True
 
 
-    def add_night_time(self):
+    def add_night_time(self, day_start_time ,day_end_time):
         #First element of the list of tuples, and the first element of the tuple ie the TimeInterval
         day = self.intervals[0][0].start
-        end_hours = self.day_end_time//60
-        end_minutes = self.day_end_time%60
-        start_hours = self.day_start_time//60
-        start_minutes = self.day_start_time%60
+        end_hours = day_end_time//60
+        end_minutes = day_end_time%60
+        start_hours = day_start_time//60
+        start_minutes = day_start_time%60
         if self.intervals[0][0].start.hour < start_hours or (self.intervals[0][0].start.hour == start_hours
                                                             and self.intervals[0][0].start.minute < start_minutes):
             self.add_slot(TimeInterval(
@@ -129,13 +130,19 @@ class Partition(object):
             self.intervals[interval_index][1]["available"] = self.intervals[interval_index][1]["available"] or data["available"]
         if "forbiden" in data:
             self.intervals[interval_index][1]["forbiden"] = self.intervals[interval_index][1]["forbiden"] or data["forbiden"]
-        if not data_type in self.intervals[interval_index][1]:
+        if not data_type in self.intervals[interval_index][1] and data_type != "all":
             self.intervals[interval_index][1][data_type] = dict()
         if data_type == "user_preference":
             self.intervals[interval_index][1][data_type][data["tutor"]] = data["value"]
-        elif data_type == "night_time" or "lunch_break" or "week_end":
+        elif data_type == "night_time" or data_type == "lunch_break" or data_type == "week_end":
             self.intervals[interval_index][1][data_type] = data[data_type]
-            
+        elif data_type == "all":
+            for key, value in data.items():
+                if key != "available" and key != "forbiden":
+                    self.intervals[interval_index][1][key] = value
+    
+    #Checks if several consecutive interval have the same data
+    #and if so merge them
     def clear_merge(self):
         length = len(self.intervals)-1
         i = 0
@@ -146,6 +153,21 @@ class Partition(object):
                 length-=1
             else:
                 i+=1
+
+    #Add all intervals from the other partition to
+    #the self one
+    def add_partition(self, other):
+        if isinstance(other, Partition):
+            for interval in other.intervals:
+                self.add_slot(interval[0], "all", interval[1])
+
+    #Add all intervals with key in the data from the other partition to
+    #the self one
+    def add_partition_data_type(self, other, key):
+        if isinstance(other, Partition):
+            for interval in other.intervals:
+                if key in interval[1]:
+                    self.add_slot(interval[0], "all", interval[1])
 
     #data_type can be:
     #   - "user_preference" : with key "tutor" and "available"
