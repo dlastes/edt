@@ -410,8 +410,8 @@ def parse_groups(sheet):
         if id_ in set(structural_groups) | set(transversal_groups):
             id_ = ':INVALID:DUPLICATE:{0:s}'.format(cell_name(row, col_prom))
         promotion = parse_string(sheet, row, col_trans_grp + 1)
-        row_trans, col_trans = find_marker_cell(sheet, 'Transversal à quels groupes structuraux ?')
-        row_par, col_par = find_marker_cell(sheet, 'Parallèle à quels groupes transversaux ?')
+        row_trans, col_trans = find_marker_cell(sheet, 'Groupes structuraux en conflit')
+        row_par, col_par = find_marker_cell(sheet, 'Groupes transversaux parallèles')
         transversal_to = parse_string_set_in_line(sheet, row, col_trans)
         parallel_to = parse_string_set_in_line(sheet, row, col_par)
 
