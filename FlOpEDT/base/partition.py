@@ -136,6 +136,16 @@ class Partition(object):
         elif data_type == "night_time" or "lunch_break" or "week_end":
             self.intervals[interval_index][1][data_type] = data[data_type]
             
+    def clear_merge(self):
+        length = len(self.intervals)-1
+        i = 0
+        while i < length:
+            if self.intervals[i][1] == self.intervals[i+1][1]:
+                self.intervals[i][0].end = self.intervals[i+1][0].end
+                self.intervals.remove(self.intervals[i+1])
+                length-=1
+            else:
+                i+=1
 
     #data_type can be:
     #   - "user_preference" : with key "tutor" and "available"
