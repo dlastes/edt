@@ -24,6 +24,7 @@
 # without disclosing the source code of your own applications.
 
 
+from FlOpEDT.TTapp.TTConstraints.test import TimeInterval, UserPreference
 from base.models import TimeGeneralSettings
 from TTapp.weeks_database import WeeksDatabase
 from django.db import models
@@ -267,6 +268,51 @@ class AssignAllCourses(TTConstraint):
 
 class ConsiderTutorsUnavailability(TTConstraint):
     tutors = models.ManyToManyField('people.Tutor', blank=True)
+
+
+    def pre_analyse(self, week):
+        if self.tutors:
+            for tutor in self.tutors:
+                courses = Course.objects.filter(tutor = tutor, week = week)
+                courses_type = set()
+                tutor_partition = Partition("UserPreference", flopdate_to_datetime(Day('m', week), 0), flopdate_to_datetime(Day('su', week)))
+                user_preferences = UserPreference.objects.filter(user = tutor, week = week)
+                for up in user_preferences:
+                    tutor_partition.add_slot(
+                        TimeInterval(flopdate_to_datetime(up.day, up.start_time),
+                        flopdate_to_datetime(up.day, up.end_time)),
+                        "user_preference",
+                        {"value" : up.value, "available" : True, "tutor" : up.user.username}
+                    )
+                if tutor_partition.available_duration < sum(c.type.duration for c in courses):
+                    return False
+                elif courses.exists():
+                    courses_type = []
+                    for course in courses:
+                        if not course.type in courses_type:
+                            courses_type[course.type.name] = [course]
+                        else:
+                            courses_type[course.type.name].append(course)
+
+                    for course_type, course_list in courses_type.items():
+                        time_settings = TimeGeneralSettings.objects.get(department = course_list[0].type.department)
+                        day_start_week = Day(time_settings.days[0], week)
+                        day_end_week = Day(time_settings.days[len(time_settings.days)-1], week)
+                        start_week = flopdate_to_datetime(day_start_week, time_settings.day_start_time)
+                        end_week = flopdate_to_datetime(day_end_week, time_settings.day_finish_time)
+                        course_partition = Partition(
+                                course_type.name,
+                                start_week,
+                                end_week,
+                                time_settings.day_start_time,
+                                time_settings.day_finish_time
+                            )
+                        course_partition.add_lunch_break(time_settings.lunch_break_start_time, time_settings.lunch_break_finish_time)
+                        course_partition.add_week_end(time_settings.days)
+                        course_partition.add_partition_data_type(tutor_partition, "user_preference")
+                        if course_partition.available_duration < len(course_list)*course_list[0].type.duration:
+                            return False
+        return True
 
     def enrich_model(self, ttmodel, week, ponderation=1):
         considered_tutors = set(ttmodel.wdb.instructors)
