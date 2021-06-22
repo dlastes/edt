@@ -139,8 +139,8 @@ class TTConstraintSerializer(serializers.ModelSerializer):
                 else :
                     #Récupère le modele en relation avec un ManyToManyField ou un ForeignKey
                     mod = field.related_model
-
-                    typename = str(mod)[8:-2]
+                    typenamesplit= str(mod)[8:-2].split(".")
+                    typename = typenamesplit[0]+"."+typenamesplit[2]
                     acceptablelist = mod.objects.values("id")
 
                     #Filtre les ID dans acceptable list en fonction du department
