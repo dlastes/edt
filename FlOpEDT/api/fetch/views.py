@@ -32,6 +32,8 @@ from rest_framework.decorators import action
 from django.http import HttpResponse, JsonResponse
 from django.utils.decorators import method_decorator
 
+from django.apps import apps
+
 import base.models as bm
 from base import queries, weeks
 import people.models as pm
@@ -643,3 +645,54 @@ class IDRoomTypeViewSet(viewsets.ReadOnlyModelViewSet):
             queryset = queryset.filter(department__abbrev = dept)
 
         return(queryset)
+
+@method_decorator(name='list',
+                  decorator=swagger_auto_schema(
+                      manual_parameters=[
+                          dept_param(required=False)
+                      ]
+                  ),
+                  )
+class ParameterViewSet(viewsets.ViewSet):
+    permission_classes = [IsAdminOrReadOnly]
+    filterset_fields = '__all__' 
+    
+    def list(self, request):
+        data = {}
+        data["people"] = {}
+        data["people"]["Tutor"] = list()
+        data["base"] = {}
+
+        base_types =["TrainingProgramme","Module","CourseType","Group","GroupType","Room","RoomType"]
+
+        qtutor = pm.Tutor.objects.all()
+
+        dept = self.request.query_params.get('dept', None)
+
+        if(dept is not None):
+            qtutor = qtutor.filter(departments__abbrev = dept)
+
+        for object in qtutor:
+            serializer = serializers.IDTutorSerializer(object)
+            data["people"]["Tutor"].append(serializer.data)
+
+        for typename in base_types:
+            model = apps.get_model("base",typename)
+            data["base"][typename] = list()
+            queryset = model.objects.all()
+
+            if(dept is not None):
+                if (typename is "Room"):
+                    queryset = queryset.filter(departments__abbrev = dept)
+
+                if (typename in ["Group","Module"]):
+                    queryset = queryset.filter(train_prog__department__abbrev = dept)
+
+                if (typename in ["TrainingProgramme","CourseType","GroupType","RoomType"]):
+                    queryset = queryset.filter(department__abbrev = dept)
+
+            for object in queryset:
+                serializer = serializers.IDRoomSerializer(object)
+                data["base"][typename].append(serializer.data)
+
+        return Response(data)
