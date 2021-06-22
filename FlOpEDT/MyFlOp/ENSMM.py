@@ -11,7 +11,11 @@ from django.db import transaction
 
 
 def global_extraction(abbrev='ENSMM', name='ENSMM', delete_groups=True):
-    extract_database_file(abbrev, name, book=database_ENSMM, fill_default_preferences=False)
+    #Modif du book
+    book = database_ENSMM
+    append_conflicting_and_parallel_groups(book["groups"],book["transversal_groups"])
+    
+    extract_database_file(abbrev, name, book, fill_default_preferences=False)
     dep = Department.objects.get(abbrev=abbrev)
     optimize_settings(dep)
     for t in Tutor.objects.filter(departments=dep):
@@ -26,10 +30,10 @@ def global_extraction(abbrev='ENSMM', name='ENSMM', delete_groups=True):
         g, tp = useless_groups_and_train_progs(dep)
         delete_useless_groups(g, tp)
     apply_group_architecture(find_group_architecture(dep))
-    convert_to_transversal(database_ENSMM['transversal_groups'].keys())
+    #convert_to_transversal(database_ENSMM['transversal_groups'].keys())
     dep = Department.objects.get(abbrev=abbrev)
     assign_module_color(dep, overwrite=True)
-
+    #APPELLER LE SCRIPT POUR DEF LES GROUPES CONFLICT ET PARA
 
 def find_group_architecture(dep):
     result = {}
@@ -142,7 +146,6 @@ def convert_to_transversal(name_and_tp_groups_list):
     for tp, name in name_and_tp_groups_list:
         TP = TrainingProgramme.objects.get(abbrev=tp)
         if StructuralGroup.objects.filter(train_prog=TP, name=name).exists():
-            print(f"pbm avec {tp} - {name} (qui n'existe pas...)")
             group_to_convert = StructuralGroup.objects.get(train_prog=TP, name=name)
             Courses = Course.objects.filter(groups=group_to_convert)
             new_group = TransversalGroup.objects.create(name=name, train_prog=TP,
@@ -151,4 +154,25 @@ def convert_to_transversal(name_and_tp_groups_list):
             group_to_convert.delete()
             for c in Courses:
                 c.transversalgroups.add(new_group)
+        else:
+            print(f"pbm avec {tp} - {name} (qui n'existe pas...)")
+            
 
+#script conflict et para
+def append_conflicting_and_parallel_groups(sgdict,tgdict):
+    transversal_prom = {}
+    structural_prom = {}
+    
+    for tp,gp in tgdict.keys():
+        if tp not in transversal_prom.keys(): transversal_prom[tp]=[]
+        transversal_prom[tp].append(gp)
+        
+    for tp,gp in sgdict.keys():
+        if tp not in structural_prom.keys(): structural_prom[tp]=[]
+        structural_prom[tp].append(gp)
+        
+    for tp,gp in tgdict.keys(): #On complète
+        sgdict[(tp,gp)]['transversal_to'] = structural_prom[tp]
+        sgdict[(tp,gp)]['parallel_to'] = transversal_prom[tp]
+        
+        
