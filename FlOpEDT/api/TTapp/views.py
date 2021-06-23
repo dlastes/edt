@@ -262,3 +262,8 @@ class TTConstraintViewSet(viewsets.ViewSet):
         serializer = serializers.ConstraintSerializer(instance)
 
         return Response(serializer.data)
+
+class NoVisioViewSet(viewsets.ModelViewSet):
+    queryset = ttv.NoVisio.objects.all()
+    serializer_class = serializers.NoVisioSerializer
+    permission_classes = [IsAdminOrReadOnly]
