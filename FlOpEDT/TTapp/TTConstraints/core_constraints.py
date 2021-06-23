@@ -26,7 +26,6 @@
 
 from FlOpEDT.TTapp.TTConstraints.test import TimeInterval, UserPreference
 from base.models import TimeGeneralSettings
-from TTapp.weeks_database import WeeksDatabase
 from django.db import models
 
 from TTapp.TTConstraint import TTConstraint
@@ -39,7 +38,7 @@ from TTapp.ilp_constraints.constraints.courseConstraint import CourseConstraint
 from django.utils.translation import gettext as _
 from TTapp.slots import slots_filter
 from TTapp.TTConstraints.groups_constraints import considered_basic_groups, pre_analysis_considered_basic_groups
-from base.models import Course, TrainingProgramme
+from base.models import Course
 from base.partition import Partition
 from base.timing import Day, flopdate_to_datetime
 
@@ -159,21 +158,31 @@ class ScheduleAllCourses(TTConstraint):
     #Checks that the number of courses to scheduled if less than
     #the number of slots available
     def pre_analyse(self, week):
-        wdb = WeeksDatabase(self.department, week, self.year, TrainingProgramme.objects.filter(department=self.department))
-#        considered_courses = set(c for bg in self.groups #not basics
-#                                 for c in wdb.courses_for_basic_group[bg])
-        considered_courses = set(c for c in Course.objects.all() if c.week == week)
-        nb_slots_max = len(wdb.courses_slots)
-        if self.modules.exists():
-            considered_courses = set(c for c in considered_courses if c.module in self.modules.all())
+        considered_courses = Course.objects.filter(week = week)
+        considered_week_partition = Partition("None", flopdate_to_datetime(Day("m", week), 0), flopdate_to_datetime(Day("su", week), 23*60+59))
         if self.tutors.exists():
             considered_courses = set(c for c in considered_courses if c.tutor in self.tutors.all())
+            for tutor in self.tutors:
+                userpreferences = UserPreference.objects.filter(user = tutor)
+                for up in userpreferences:
+                    considered_week_partition.add_slot(
+                            TimeInterval(flopdate_to_datetime(up.day, up.start_time),
+                            flopdate_to_datetime(up.day, up.end_time)),
+                            "user_preference",
+                            {"value" : up.value, "available" : True, "tutor" : up.user.username}
+                        )
+                if considered_week_partition.available_duration < sum(c.type.duration for c in considered_courses if c.tutor == tutor):
+                    return False
+        if self.modules.exists():
+            considered_courses = set(c for c in considered_courses if c.module in self.modules.all())        
+
         if self.course_types.exists():
             considered_courses = set(c for c in considered_courses if c.type in self.course_types.all())
         if self.groups.exists():
             considered_courses = set(c for c in considered_courses if considered_courses.intersection(self.groups))
         
-        return nb_slots_max >= len(considered_courses)
+
+        return considered_week_partition.available_duration >= sum(c.type.duration for c in considered_courses)
                                 
     def enrich_model(self, ttmodel, week, ponderation=1):
         relevant_basic_groups = considered_basic_groups(self, ttmodel)
@@ -287,7 +296,7 @@ class ConsiderTutorsUnavailability(TTConstraint):
                 if tutor_partition.available_duration < sum(c.type.duration for c in courses):
                     return False
                 elif courses.exists():
-                    courses_type = []
+                    courses_type = dict()
                     for course in courses:
                         if not course.type in courses_type:
                             courses_type[course.type.name] = [course]
