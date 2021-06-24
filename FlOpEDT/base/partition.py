@@ -37,7 +37,7 @@ class Partition(object):
         self.day_end_time = day_end_time
         self.intervals.append(
             (TimeInterval(date_start, date_end),
-                {"available" : False, "forbiden" : False}))
+                {"available" : False, "forbidden" : False}))
         if day_start_time and day_end_time:
             self.add_night_time(day_start_time, day_end_time)
 
@@ -55,7 +55,7 @@ class Partition(object):
                     datetime(day.year, day.month, day.day, start_hours, start_minutes, 0),
                     datetime(day.year, day.month, day.day, end_hours, end_minutes, 0)
                 ), "lunch_break",
-                {"forbiden" : True, "lunch_break": True})
+                {"forbidden" : True, "lunch_break": True})
             day = day + timedelta(days = 1)
         return True
 
@@ -82,7 +82,7 @@ class Partition(object):
                         datetime(day.year, day.month, day.day, 0, 0, 0),
                         datetime(day.year, day.month, (day + timedelta(days = number_of_day_week_end+1)).day, 0, 0, 0)
                     ), "week_end",
-                    {"forbiden" : True, "week_end": True})
+                    {"forbidden" : True, "week_end": True})
                 day = day + timedelta(days = number_of_day_week_end)
             else:
                 day = day + timedelta(days = 1)
@@ -101,21 +101,21 @@ class Partition(object):
             self.add_slot(TimeInterval(
                 datetime(day.year, day.month, day.day, 0, 0, 0),
                 datetime(day.year, day.month, day.day, start_hours, start_minutes)
-                ), "night_time", {"forbiden" : True, "night_time" : True})
+                ), "night_time", {"forbidden" : True, "night_time" : True})
         while day < self.intervals[len(self.intervals)-1][0].end:
             self.add_slot(
                 TimeInterval(
                     datetime(day.year, day.month, day.day, end_hours, end_minutes, 0),
                     datetime(day.year, day.month, (day + timedelta(days = 1)).day, start_hours, start_minutes, 0)
                 ), "night_time",
-                {"forbiden" : True, "night_time": True})
+                {"forbidden" : True, "night_time": True})
             day = day + timedelta(days = 1)
 
     def nb_slots_of_duration(self, duration):
         current_duration = 0
         nb_slots = 0
         for interval in self.intervals:
-            if interval[1]["available"] and not interval[1]["forbiden"]:
+            if interval[1]["available"] and not interval[1]["forbidden"]:
                 current_duration += interval[0].duration
             else:
                 nb_slots += current_duration//duration
@@ -138,23 +138,23 @@ class Partition(object):
     def available_duration(self):
         avail_duration = 0
         for interval in self.intervals:
-            if interval[1]["available"] and not interval[1]["forbiden"]:
+            if interval[1]["available"] and not interval[1]["forbidden"]:
                 avail_duration += interval[0].duration
         return avail_duration
 
     @property
-    def not_forbiden_duration(self):
+    def not_forbidden_duration(self):
         not_forbid = 0
         for interval in self.intervals:
-            if not interval[1]["forbiden"]:
+            if not interval[1]["forbidden"]:
                 not_forbid += interval[0].duration
         return not_forbid
 
     def add_data(self, data_type, data, interval_index):
         if "available" in data:
             self.intervals[interval_index][1]["available"] = self.intervals[interval_index][1]["available"] or data["available"]
-        if "forbiden" in data:
-            self.intervals[interval_index][1]["forbiden"] = self.intervals[interval_index][1]["forbiden"] or data["forbiden"]
+        if "forbidden" in data:
+            self.intervals[interval_index][1]["forbidden"] = self.intervals[interval_index][1]["forbidden"] or data["forbidden"]
         if not data_type in self.intervals[interval_index][1] and data_type != "all":
             self.intervals[interval_index][1][data_type] = dict()
         if data_type == "user_preference":
@@ -163,7 +163,7 @@ class Partition(object):
             self.intervals[interval_index][1][data_type] = data[data_type]
         elif data_type == "all":
             for key, value in data.items():
-                if key != "available" and key != "forbiden":
+                if key != "available" and key != "forbidden":
                     self.intervals[interval_index][1][key] = value
     
     #Checks if several consecutive interval have the same data
@@ -196,9 +196,9 @@ class Partition(object):
 
     #data_type can be:
     #   - "user_preference" : with key "tutor" and "available"
-    #   - "night_time" : with key "night_time" and "forbiden"
-    #   - "lunch_break" : with key "lunch_break" and "forbiden"
-    #   - "week_end" : with key "week_end" and "forbiden"
+    #   - "night_time" : with key "night_time" and "forbidden"
+    #   - "lunch_break" : with key "lunch_break" and "forbidden"
+    #   - "week_end" : with key "week_end" and "forbidden"
     def add_slot(self, interval, data_type, data):
         i = 0
         #Check if we are in the interval range
