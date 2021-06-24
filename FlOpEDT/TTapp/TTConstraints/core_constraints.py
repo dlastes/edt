@@ -38,7 +38,7 @@ from TTapp.ilp_constraints.constraints.courseConstraint import CourseConstraint
 from django.utils.translation import gettext as _
 from TTapp.slots import slots_filter
 from TTapp.TTConstraints.groups_constraints import considered_basic_groups, pre_analysis_considered_basic_groups
-from base.models import Course
+from base.models import Course, ScheduledCourse
 from base.partition import Partition
 from base.timing import Day, flopdate_to_datetime
 
@@ -77,7 +77,6 @@ class NoSimultaneousGroupCourses(TTConstraint):
                 else:
                     course_dict[c.type.duration] = 1 
 
-            #considérer la longueur du temps des cours plutôt que le nb de cours
             course_time_needed = sum(c.type.duration for c in considered_courses)
             if course_time_needed > group_partition.available_duration:
                 return False
@@ -165,9 +164,10 @@ class ScheduleAllCourses(TTConstraint):
             for tutor in self.tutors:
                 userpreferences = UserPreference.objects.filter(user = tutor)
                 for up in userpreferences:
+                    up_day = Day(up.day, up.week)
                     considered_week_partition.add_slot(
-                            TimeInterval(flopdate_to_datetime(up.day, up.start_time),
-                            flopdate_to_datetime(up.day, up.end_time)),
+                            TimeInterval(flopdate_to_datetime(up_day, up.start_time),
+                            flopdate_to_datetime(up_day, up.end_time)),
                             "user_preference",
                             {"value" : up.value, "available" : True, "tutor" : up.user.username}
                         )
@@ -284,12 +284,13 @@ class ConsiderTutorsUnavailability(TTConstraint):
             for tutor in self.tutors:
                 courses = Course.objects.filter(tutor = tutor, week = week)
                 courses_type = set()
-                tutor_partition = Partition("UserPreference", flopdate_to_datetime(Day('m', week), 0), flopdate_to_datetime(Day('su', week)))
+                tutor_partition = Partition("UserPreference", flopdate_to_datetime(Day('m', week), 0), flopdate_to_datetime(Day('su', week), 23*60+59))
                 user_preferences = UserPreference.objects.filter(user = tutor, week = week)
                 for up in user_preferences:
+                    up_day = Day(up.day, up.week)
                     tutor_partition.add_slot(
-                        TimeInterval(flopdate_to_datetime(up.day, up.start_time),
-                        flopdate_to_datetime(up.day, up.end_time)),
+                        TimeInterval(flopdate_to_datetime(up_day, up.start_time),
+                        flopdate_to_datetime(up_day, up.end_time)),
                         "user_preference",
                         {"value" : up.value, "available" : True, "tutor" : up.user.username}
                     )
@@ -304,6 +305,7 @@ class ConsiderTutorsUnavailability(TTConstraint):
                             courses_type[course.type.name].append(course)
 
                     for course_type, course_list in courses_type.items():
+                        other_departments_sched_courses = ScheduledCourse.objects.filter(tutor = tutor, week = week ,work_copy=0).exclude(type__department=course_list[0].type.department)
                         time_settings = TimeGeneralSettings.objects.get(department = course_list[0].type.department)
                         day_start_week = Day(time_settings.days[0], week)
                         day_end_week = Day(time_settings.days[len(time_settings.days)-1], week)
@@ -316,11 +318,21 @@ class ConsiderTutorsUnavailability(TTConstraint):
                                 time_settings.day_start_time,
                                 time_settings.day_finish_time
                             )
+                        for sc_course in other_departments_sched_courses:
+                            course_partition.add_slot(
+                                TimeInterval(
+                                    flopdate_to_datetime(Day(sc_course.day, week), sc_course.start_time),
+                                    flopdate_to_datetime(Day(sc_course.day, week), sc_course.end_time)
+                                ),
+                                "all",
+                                {"scheduled_course" : sc_course.tutor.username, "forbidden" : True}
+                            )
                         course_partition.add_lunch_break(time_settings.lunch_break_start_time, time_settings.lunch_break_finish_time)
                         course_partition.add_week_end(time_settings.days)
                         course_partition.add_partition_data_type(tutor_partition, "user_preference")
-                        if course_partition.available_duration < len(course_list)*course_list[0].type.duration:
+                        if course_partition.available_duration < (len(course_list)-len(other_departments_sched_courses))*course_list[0].type.duration:
                             return False
+                        
         return True
 
     def enrich_model(self, ttmodel, week, ponderation=1):
