@@ -330,7 +330,7 @@ class ConsiderTutorsUnavailability(TTConstraint):
                         course_partition.add_lunch_break(time_settings.lunch_break_start_time, time_settings.lunch_break_finish_time)
                         course_partition.add_week_end(time_settings.days)
                         course_partition.add_partition_data_type(tutor_partition, "user_preference")
-                        if course_partition.available_duration < (len(course_list)-len(other_departments_sched_courses))*course_list[0].type.duration:
+                        if course_partition.available_duration < len(course_list)*course_list[0].type.duration:
                             return False
                         
         return True
