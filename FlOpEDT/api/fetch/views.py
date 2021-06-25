@@ -660,14 +660,14 @@ class ParameterViewSet(viewsets.ViewSet):
     def list(self, request):
         data = {}
         data["people"] = {}
-        data["people"]["Tutor"] = list()
         data["base"] = {}
+        data["people"]["Tutor"] = list()
+
+        dept = self.request.query_params.get('dept', None)
 
         base_types =["TrainingProgramme","Module","CourseType","Group","GroupType","Room","RoomType"]
 
         qtutor = pm.Tutor.objects.all()
-
-        dept = self.request.query_params.get('dept', None)
 
         if(dept is not None):
             qtutor = qtutor.filter(departments__abbrev = dept)
@@ -682,7 +682,7 @@ class ParameterViewSet(viewsets.ViewSet):
             queryset = model.objects.all()
 
             if(dept is not None):
-                if (typename is "Room"):
+                if (typename == "Room"):
                     queryset = queryset.filter(departments__abbrev = dept)
 
                 if (typename in ["Group","Module"]):
