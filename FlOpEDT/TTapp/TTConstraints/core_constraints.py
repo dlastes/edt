@@ -24,7 +24,7 @@
 # without disclosing the source code of your own applications.
 
 
-from FlOpEDT.TTapp.TTConstraints.test import TimeInterval, UserPreference
+from base.timing import TimeInterval
 from base.models import TimeGeneralSettings
 from django.db import models
 
@@ -38,7 +38,7 @@ from TTapp.ilp_constraints.constraints.courseConstraint import CourseConstraint
 from django.utils.translation import gettext as _
 from TTapp.slots import slots_filter
 from TTapp.TTConstraints.groups_constraints import considered_basic_groups, pre_analysis_considered_basic_groups
-from base.models import Course, ScheduledCourse
+from base.models import Course, ScheduledCourse, UserPreference
 from base.partition import Partition
 from base.timing import Day, flopdate_to_datetime
 
