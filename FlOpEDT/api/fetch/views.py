@@ -383,7 +383,7 @@ class UnavailableRoomViewSet(viewsets.ViewSet):
         # To be done later
         # ----------------
         #
-        # cache_key = get_key_unavailable_rooms(department.abbrev, year, week)
+        # cache_key = get_key_unavailable_rooms(department.abbrev, week)
         # cached = cache.get(cache_key)
         # if cached is not None:
         #     return cached
