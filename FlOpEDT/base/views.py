@@ -1314,14 +1314,13 @@ def preferences_changes(req, year, week, helper_pref):
     # Default week at None
     if week == 0 or year == 0:
         week = None
-        year = None
+    else:
+        week = Week.objects.get_or_create(nb=week, year=year)
 
-    if not helper_pref.filter().filter(
-            week=week,
-            year=year).exists():
+        
+    if not helper_pref.filter().filter(week=week).exists():
         for pref in helper_pref.filter().filter(week=None):
             new_dispo = helper_pref.generate(week,
-                                             year,
                                              pref.day,
                                              pref.start_time,
                                              pref.duration,
