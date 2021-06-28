@@ -32,6 +32,8 @@ from django.db.models.fields import related as related_fields
 from django.contrib import admin
 import django.contrib.auth as auth
 
+from django.utils.translation import gettext_lazy as _
+
 from people.models import Tutor, User
 from base.models import Day, Room, Module, Course, Group, \
     UserPreference, Time, ScheduledCourse, EdtVersion, CourseModification, \
@@ -601,24 +603,20 @@ class CourseAdmin(DepartmentModelAdmin):
 
 class CoursPlaceAdmin(DepartmentModelAdmin):
 
-    def week_course(o):
-        return str(o.course.week.nb)
+    def course_week(o):
+        return str(o.course.week.disp)
 
-    week_course.short_description = 'week'
-    week_course.admin_order_field = 'course__week__nb'
+    course_week.short_description = _('Week')
+    course_week.admin_order_field = 'course__week'
 
-    def course_year(o):
-        return str(o.course.week.year)
-
-    course_year.short_description = 'Année'
-    course_year.admin_order_field = 'course__week__year'
-
-    list_display = (week_course, course_year, 'course', 'day', 'start_time',
+    list_display = (course_week, 'course', 'day', 'start_time',
                     'room')
-    ordering = ('day', 'start_time', 'course', 'room')
+    ordering = ('-course__week', 'day', 'start_time', 'course', 'room')
     list_filter = (
         ('course__tutor', DropdownFilterRel),
-        ('course__week__nb', DropdownFilterAll),)
+        ('course__week__nb', DropdownFilterAll),
+        ('course__week__year', DropdownFilterAll),
+    )
 
 
 class CoursePreferenceAdmin(DepartmentModelAdmin):
@@ -632,51 +630,42 @@ class CoursePreferenceAdmin(DepartmentModelAdmin):
 
 class DependencyAdmin(DepartmentModelAdmin):
     def course1_week(o):
-        return str(o.course.week.nb)
+        return str(o.course1.week.disp)
+    
+    course1_week.short_description = _('Week')
+    course1_week.admin_order_field = 'course1__week'
 
-    course1_week.short_description = 'Week'
-    course1_week.admin_order_field = 'course1__week__nb'
-
-    def course1_an(o):
-        return str(o.course.week.year)
-
-    course1_an.short_description = 'Année'
-    course1_an.admin_order_field = 'course1__week__year'
-
-    list_display = ('course1', 'course2', 'successive', 'ND')
+    ordering = ('-course1__week',)
+    list_display = (course1_week, 'course2', 'successive', 'ND', )
     list_filter = (('course1__week__nb', DropdownFilterAll),
-                   )
+                   ('course1__week__year', DropdownFilterAll))
 
 
 class CourseModificationAdmin(DepartmentModelAdmin):
-    def week_course(o):
-        return str(o.course.week.nb)
+    def course_week(o):
+        return str(o.course.week.disp)
 
-    week_course.short_description = 'Week'
-    week_course.admin_order_field = 'course__week__nb'
+    course_week.short_description = _('Week')
+    course_week.admin_order_field = 'course__week'
 
-    def course_year(o):
-        return str(o.course.week.year)
-
-    course_year.short_description = 'Année'
-    course_year.admin_order_field = 'course__week__year'
-
-    list_display = ('course', week_course, course_year,
+    list_display = ('course', course_week,
                     'tutor_old',
                     'version_old', 'room_old', 'day_old',
                     'start_time_old', 'updated_at', 'initiator'
                     )
     list_filter = (('initiator', DropdownFilterRel),
-                   ('course__week__nb', DropdownFilterAll),)
-    ordering = ('-updated_at', 'old_week')
+                   ('course__week__nb', DropdownFilterAll),
+                   ('course__week__year', DropdownFilterAll),)
+    ordering = ('-updated_at', '-old_week')
 
 
 class DispoAdmin(DepartmentModelAdmin):
     list_display = ('user', 'day', 'start_time', 'duration', 'value',
                     'week',)
-    ordering = ('user', 'week', 'day', 'start_time', 'value')
+    ordering = ('user', '-week', 'day', 'start_time', 'value')
     list_filter = (('start_time', DropdownFilterAll),
                    ('week__nb', DropdownFilterAll),
+                   ('week__year', DropdownFilterAll),
                    ('user', DropdownFilterRel),
                    )
 

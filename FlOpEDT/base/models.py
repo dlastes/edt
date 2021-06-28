@@ -166,7 +166,9 @@ class Period(models.Model):
 
 
 class Week(models.Model):
-    nb = models.PositiveSmallIntegerField(validators=[MinValueValidator(0), MaxValueValidator(53)])
+    nb = models.PositiveSmallIntegerField(validators=[MinValueValidator(0),
+                                                      MaxValueValidator(53)],
+                                          verbose_name=_('Week number'))
     year = models.PositiveSmallIntegerField()
 
     def __str__(self):
