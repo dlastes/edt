@@ -810,8 +810,8 @@ def fetch_shared_rooms(req, year, week, **kwargs):
     # courses in any shared room
     courses = ScheduledCourse.objects \
                 .filter(
-                    course__week=week,
-                    course__year=year,
+                    course__week__nb=week,
+                    course__week__year=year,
                     work_copy=0,
                     room__in=shared_rooms,
                 ) \
