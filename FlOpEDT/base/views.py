@@ -1020,10 +1020,9 @@ class HelperUserPreference():
     def filter(self):
         return UserPreference.objects.filter(user=self.tutor)
 
-    def generate(self, week, year, day, start_time, duration, value):
+    def generate(self, week, day, start_time, duration, value):
         return UserPreference(user=self.tutor,
                               week=week,
-                              year=year,
                               day=day,
                               start_time=start_time,
                               duration=duration,
@@ -1039,11 +1038,10 @@ class HelperCoursePreference():
         return CoursePreference.objects.filter(train_prog=self.training_programme,
                                                course_type=self.course_type)
 
-    def generate(self, week, year, day, start_time, duration, value):
+    def generate(self, week, day, start_time, duration, value):
         return CoursePreference(train_prog=self.training_programme,
                                 course_type=self.course_type,
                                 week=week,
-                                year=year,
                                 day=day,
                                 start_time=start_time,
                                 duration=duration,
@@ -1057,10 +1055,9 @@ class HelperRoomPreference():
     def filter(self):
         return RoomPreference.objects.filter(room=self.room)
 
-    def generate(self, week, year, day, start_time, duration, value):
+    def generate(self, week, day, start_time, duration, value):
         return RoomPreference(room=self.room,
                               week=week,
-                              year=year,
                               day=day,
                               start_time=start_time,
                               duration=duration,
@@ -1156,14 +1153,13 @@ def preferences_changes(req, year, week, helper_pref):
     # Default week at None
     if week == 0 or year == 0:
         week = None
-        year = None
+    else:
+        week, created = Week.objects.get_or_create(nb=week, year=year)
 
-    if not helper_pref.filter().filter(
-            week=week,
-            year=year).exists():
+        
+    if not helper_pref.filter().filter(week=week).exists():
         for pref in helper_pref.filter().filter(week=None):
             new_dispo = helper_pref.generate(week,
-                                             year,
                                              pref.day,
                                              pref.start_time,
                                              pref.duration,
@@ -1174,11 +1170,9 @@ def preferences_changes(req, year, week, helper_pref):
     for a in changes:
         logger.info(f"Change {a}")
         helper_pref.filter().filter(week=week,
-                                    year=year,
                                     day=a['day']).delete()
         for pref in a['val_inter']:
             new_dispo = helper_pref.generate(week,
-                                             year,
                                              a['day'],
                                              pref['start_time'],
                                              pref['duration'],
@@ -1230,18 +1224,7 @@ def user_preferences_changes(req, year, week, username, **kwargs):
             = 'Non autorisé, réclamez plus de droits.'
         return JsonResponse(response)
 
-    # print(q)
-    response = preferences_changes(req, year, week, HelperUserPreference(tutor))
-
-    if week is not None and year is not None:
-        # invalidate merely the keys where the tutor has courses:
-        # bad idea if the courses have not been generated yet
-        # for c in Course.objects.filter(week=week,
-        #                               year=year).distinct('module__train_prog__department'):
-        for dep in Department.objects.all():
-            cache.delete(get_key_preferences_tutor(dep.abbrev, year, week))
-
-    return response
+    return preferences_changes(req, year, week, HelperUserPreference(tutor))
 
 
 @dept_admin_required
