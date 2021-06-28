@@ -528,18 +528,17 @@ class DepartmentModelAdmin(DepartmentModelAdminMixin, MyModelAdmin):
 
 
 class HolidayAdmin(MyModelAdmin):
-    list_display = ('day', 'week', 'year')
-    ordering = ('-year', '-week', 'day')
+    list_display = ('day', 'week', )
+    ordering = ( '-week', 'day')
     list_filter = (
         ('day', DropdownFilterSimple),
-        ('year', DropdownFilterAll),
-        ('week', DropdownFilterAll),
+        ('week__nb', DropdownFilterAll),
     )
 
 
 class TrainingHalfDayAdmin(DepartmentModelAdmin):
-    list_display = ('train_prog', 'day', 'week', 'year', 'apm')
-    ordering = ('-year', '-week', 'train_prog', 'day')
+    list_display = ('train_prog', 'day', 'week', 'apm')
+    ordering = ('-week', 'train_prog', 'day')
 
 
 class GroupAdmin(DepartmentModelAdmin):
@@ -561,13 +560,12 @@ class RoomAdmin(DepartmentModelAdmin):
 
 
 class RoomPreferenceAdmin(DepartmentModelAdmin):
-    list_display = ('room', 'week', 'year', 'day', 'start_time',
+    list_display = ('room', 'week', 'day', 'start_time',
                     'duration', 'value')
-    ordering = ('-year', '-week', 'day', 'start_time')
+    ordering = ('-week', 'day', 'start_time')
     list_filter = (
         ('room', DropdownFilterRel),
-        ('year', DropdownFilterAll),
-        ('week', DropdownFilterAll),
+        ('week__nb', DropdownFilterAll),
     )
 
 
@@ -591,12 +589,11 @@ class ModuleAdmin(DepartmentModelAdmin):
 
 
 class CourseAdmin(DepartmentModelAdmin):
-    list_display = ('module', 'type', 'tutor', 'week', 'year')
-    ordering = ('year', 'week', 'module', 'type', 'no', 'groups', 'tutor')
+    list_display = ('module', 'type', 'tutor', 'week')
+    ordering = ('week', 'module', 'type', 'no', 'groups', 'tutor')
     list_filter = (
         ('tutor', DropdownFilterRel),
-        ('year', DropdownFilterAll),
-        ('week', DropdownFilterAll),
+        ('week__nb', DropdownFilterAll),
         ('type', DropdownFilterRel),
         ('groups', DropdownFilterRel),
     )
@@ -605,67 +602,64 @@ class CourseAdmin(DepartmentModelAdmin):
 class CoursPlaceAdmin(DepartmentModelAdmin):
 
     def week_course(o):
-        return str(o.course.week)
+        return str(o.course.week.nb)
 
     week_course.short_description = 'week'
-    week_course.admin_order_field = 'course__week'
+    week_course.admin_order_field = 'course__week__nb'
 
     def course_year(o):
-        return str(o.course.year)
+        return str(o.course.week.year)
 
     course_year.short_description = 'Année'
-    course_year.admin_order_field = 'course__year'
+    course_year.admin_order_field = 'course__week__year'
 
     list_display = (week_course, course_year, 'course', 'day', 'start_time',
                     'room')
     ordering = ('day', 'start_time', 'course', 'room')
     list_filter = (
         ('course__tutor', DropdownFilterRel),
-        ('course__year', DropdownFilterAll),
-        ('course__week', DropdownFilterAll),)
+        ('course__week__nb', DropdownFilterAll),)
 
 
 class CoursePreferenceAdmin(DepartmentModelAdmin):
     list_display = ('course_type', 'train_prog', 'day', 'start_time',
-                    'duration', 'value', 'week', 'year')
-    ordering = ('-year', '-week')
-    list_filter = (('week', DropdownFilterAll),
-                   ('year', DropdownFilterAll),
+                    'duration', 'value', 'week')
+    ordering = ('-week',)
+    list_filter = (('week__nb', DropdownFilterAll),
                    ('train_prog', DropdownFilterRel),
                    )
 
 
 class DependencyAdmin(DepartmentModelAdmin):
     def course1_week(o):
-        return str(o.course.week)
+        return str(o.course.week.nb)
 
     course1_week.short_description = 'Week'
-    course1_week.admin_order_field = 'course1__week'
+    course1_week.admin_order_field = 'course1__week__nb'
 
     def course1_an(o):
-        return str(o.course.an)
+        return str(o.course.week.year)
 
     course1_an.short_description = 'Année'
-    course1_an.admin_order_field = 'course1__year'
+    course1_an.admin_order_field = 'course1__week__year'
 
     list_display = ('course1', 'course2', 'successive', 'ND')
-    list_filter = (('course1__year', DropdownFilterAll),
-                   ('course1__week', DropdownFilterAll),
+    list_filter = (('course1__week__nb', DropdownFilterAll),
                    )
 
 
 class CourseModificationAdmin(DepartmentModelAdmin):
     def week_course(o):
-        return str(o.course.week)
+        return str(o.course.week.nb)
 
     week_course.short_description = 'Week'
-    week_course.admin_order_field = 'course__week'
+    week_course.admin_order_field = 'course__week__nb'
 
     def course_year(o):
-        return str(o.course.year)
+        return str(o.course.week.year)
 
     course_year.short_description = 'Année'
-    course_year.admin_order_field = 'course__year'
+    course_year.admin_order_field = 'course__week__year'
 
     list_display = ('course', week_course, course_year,
                     'tutor_old',
@@ -673,26 +667,25 @@ class CourseModificationAdmin(DepartmentModelAdmin):
                     'start_time_old', 'updated_at', 'initiator'
                     )
     list_filter = (('initiator', DropdownFilterRel),
-                   ('course__year', DropdownFilterAll),
-                   ('course__week', DropdownFilterAll),)
-    ordering = ('-updated_at', 'old_year', 'old_week')
+                   ('course__week__nb', DropdownFilterAll),)
+    ordering = ('-updated_at', 'old_week')
 
 
 class DispoAdmin(DepartmentModelAdmin):
     list_display = ('user', 'day', 'start_time', 'duration', 'value',
-                    'week', 'year')
-    ordering = ('user', 'year', 'week', 'day', 'start_time', 'value')
+                    'week',)
+    ordering = ('user', 'week', 'day', 'start_time', 'value')
     list_filter = (('start_time', DropdownFilterAll),
-                   ('week', DropdownFilterAll),
+                   ('week__nb', DropdownFilterAll),
                    ('user', DropdownFilterRel),
                    )
 
 
 class RegenAdmin(DepartmentModelAdmin):
-    list_display = ('year', 'week',
+    list_display = ('week',
                     'full', 'fdate',
                     'stabilize', 'sdate',)
-    ordering = ('-year', '-week')
+    ordering = ('-week', )
 
 
 class EnrichedLinkAdmin(MyModelAdmin):
