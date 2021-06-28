@@ -936,7 +936,7 @@ def edt_changes(req, **kwargs):
     try:
         week = json.loads(req.POST.get('week'))
         year = json.loads(req.POST.get('year'))
-        week = Week.objects.get(week=week, year=year)
+        week = Week.objects.get(nb=week, year=year)
         work_copy = json.loads(req.POST.get('work_copy'))
         old_version = json.loads(req.POST.get('version'))
         department = req.department
@@ -984,7 +984,7 @@ def edt_changes(req, **kwargs):
                 return JsonResponse(bad_response)
 
             if work_copy == 0:
-                edt_version = EdtVersion.objects.get(week=week, year=year, department=department)
+                edt_version = EdtVersion.objects.get(week=week, department=department)
                 edt_version.version += 1
                 edt_version.save()
 
