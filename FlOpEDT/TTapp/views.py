@@ -26,7 +26,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 
-from base.models import ScheduledCourse
+from base.models import ScheduledCourse, Week
 
 from TTapp.TTUtils import get_conflicts
 
@@ -55,7 +55,8 @@ def check_swap(req, department, year, week, work_copy):
     against the scheduled courses in other departments
     '''
     print(department, week, year, work_copy)
-    return JsonResponse(get_conflicts(department, week, year, work_copy))
+    week_o = Week.objects.get(nb=week, year=year)
+    return JsonResponse(get_conflicts(department, week_o, work_copy))
 
 
 def swap(req, department, year, week, work_copy):
