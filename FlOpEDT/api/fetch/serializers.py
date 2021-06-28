@@ -533,10 +533,3 @@ class IDRoomTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = bm.RoomType
         fields = ['id', 'name']
-
-class ParameterSerializer(serializers.Serializer):
-    people = serializers.SerializerMethodField()
-
-    def get_people(self, obj):
-        tutor = IDTutorSerializer
-        return(tutor)

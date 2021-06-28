@@ -143,6 +143,12 @@ class TTConstraintSerializer(serializers.ModelSerializer):
                     if(validators is not empty):
                         for i in validators:
                             acceptable.append(i.limit_value)
+                    
+                    if(type(field)==ArrayField):
+                        multiple = True 
+                        typename = type(field.base_field).__name__  
+                        #Récupère les choices de l'arrayfield dans acceptable
+                        acceptable = field.base_field.choices
 
                 else :
                     #Récupère le modele en relation avec un ManyToManyField ou un ForeignKey
@@ -189,12 +195,6 @@ class TTConstraintSerializer(serializers.ModelSerializer):
                         listattr = attr.values("id")
                         for id in listattr:
                             id_list.append(id["id"])
-
-                if(type(field)==ArrayField):
-                    multiple = True 
-                    typename = type(field.base_field).__name__  
-                    #Récupère les choices de l'arrayfield dans acceptable
-                    acceptable = field.base_field.choices
 
                 if( len(id_list)>(len(acceptable)*(3/4)) ):
                     #Permet de récupérer les ID qui ne sont pas selectionné
