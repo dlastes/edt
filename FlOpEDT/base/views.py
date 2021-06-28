@@ -1388,18 +1388,7 @@ def user_preferences_changes(req, year, week, username, **kwargs):
             = 'Non autorisé, réclamez plus de droits.'
         return JsonResponse(response)
 
-    # print(q)
-    response = preferences_changes(req, year, week, HelperUserPreference(tutor))
-
-    if week is not None and year is not None:
-        # invalidate merely the keys where the tutor has courses:
-        # bad idea if the courses have not been generated yet
-        # for c in Course.objects.filter(week=week,
-        #                               year=year).distinct('module__train_prog__department'):
-        for dep in Department.objects.all():
-            cache.delete(get_key_preferences_tutor(dep.abbrev, year, week))
-
-    return response
+    return preferences_changes(req, year, week, HelperUserPreference(tutor))
 
 
 @dept_admin_required
