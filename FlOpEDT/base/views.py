@@ -64,7 +64,7 @@ from base.models import Course, UserPreference, ScheduledCourse, EdtVersion, \
     CourseModification, Day, Time, Room, RoomType, RoomSort, \
     Regen, RoomPreference, Department, TimeGeneralSettings, CoursePreference, \
     TrainingProgramme, CourseType, Module, Group, EnrichedLink, \
-    ScheduledCourseAdditional, GroupPreferredLinks
+    ScheduledCourseAdditional, GroupPreferredLinks, Week
 import base.queries as queries
 from base.weeks import *
 
@@ -425,94 +425,6 @@ def all_modules_with_desc(req, **kwargs):
 # ----------
 
 
-def fetch_cours_pl(req, year, week, num_copy, **kwargs):
-    logger.info(f'REQ: fetch sched courses: {req}')
-
-    try:
-        week = int(week)
-        year = int(year)
-        num_copy = int(num_copy)
-        department = req.department
-    except:
-        return HttpResponse("KO")
-
-    logger.info(f"D{department} W{week} Y{year} N{num_copy}")
-
-    cache_key = get_key_course_pl(department.abbrev, year, week, num_copy)
-    cached = cache.get(cache_key)
-    if cached is not None:
-        return cached
-
-    ok = False
-    version = 0
-    dataset = None
-    while not ok:
-        if num_copy == 0:
-            version = queries.get_edt_version(department=department,
-                                              week=week,
-                                              year=year, create=True)
-        if department.mode.cosmo:
-            dataset = CoursPlaceResourceCosmo()
-        else:
-            dataset = CoursPlaceResource()
-        dataset = dataset.export(queries.get_scheduled_courses(
-            department=department,
-            week=week,
-            year=year,
-            num_copy=num_copy)
-        )
-        ok = num_copy != 0 \
-             or (version == queries \
-                 .get_edt_version(
-            department=department,
-            week=week,
-            year=year))
-
-    if dataset is None:
-        raise Http404("What are you trying to do?")
-
-    response = HttpResponse(dataset.csv, content_type='text/csv')
-    response['week'] = week
-    response['year'] = year
-    response['days'] = str(num_all_days(year, week, req.department))
-    response['num_copy'] = num_copy
-
-    cached = cache.set(cache_key, response)
-    return response
-
-
-def fetch_cours_pp(req, week, year, num_copy, **kwargs):
-    logger.info(f"REQ: unscheduled courses; {req}")
-
-    try:
-        week = int(week)
-        year = int(year)
-        num_copy = int(num_copy)
-        department = req.department
-    except ValueError:
-        return HttpResponse("KO")
-
-    logger.info(f"D{department} W{week} Y{year} N{num_copy}")
-
-    cache_key = get_key_course_pp(department.abbrev, year, week, num_copy)
-    cached = cache.get(cache_key)
-    if cached is not None:
-        return cached
-
-    dataset = CoursResource() \
-        .export(
-            queries.get_unscheduled_courses(department, week, year, num_copy)
-        )
-
-
-    response = HttpResponse(dataset.csv, content_type='text/csv')
-    response['week'] = week
-    response['year'] = year
-
-    cache.set(cache_key, response)
-    return response
-
-
 def fetch_module(req, year, week, **kwargs):
     department = req.department
     module = Course.objects.filter(module__train_prog__department=department,
@@ -535,75 +447,6 @@ def fetch_tutor(req, year, week, **kwargs):
     response = HttpResponse(dataset.csv, content_type='text/csv')
     response['week'] = week
     response['year'] = year
-    return response
-
-
-# @login_required
-def fetch_dispos(req, year, week, **kwargs):
-    logger.info(f"REQ: fetch dispos; {req}")
-    if not req.user.is_authenticated:
-        return HttpResponse("Pas connecte", status=401)
-
-    try:
-        week = int(week)
-        year = int(year)
-        department = req.department
-    except ValueError:
-        return HttpResponse("KO")
-
-    cache_key = get_key_preferences_tutor(department.abbrev, year, week)
-    cached = cache.get(cache_key)
-    if cached is not None:
-        return cached
-
-    busy_inst_init = Course.objects.filter(week=week,
-                                           year=year,
-                                           module__train_prog__department=department) \
-        .select_related('module__train_prog__department') \
-        .distinct('tutor') \
-        .values_list('tutor')
-
-    if department.mode.cosmo:
-        busy_inst_after = ScheduledCourse.objects.filter(course__week=week,
-                                                         course__year=year,
-                                                         course__module__train_prog__department=department) \
-            .distinct('tutor') \
-            .values_list('tutor')
-    else:
-        busy_inst_after = []
-
-    busy_inst = chain(busy_inst_init, busy_inst_after)
-    busy_inst = list(chain(busy_inst,
-                           [req.user]))
-
-    working_days = queries.get_working_days(department)
-
-    week_avail = UserPreference.objects \
-        .filter(week=week,
-                year=year,
-                user__in=busy_inst,
-                day__in=working_days) \
-        .select_related('user')
-
-    default_avail = UserPreference.objects \
-        .exclude(user__in \
-                     =week_avail \
-                 .distinct('user') \
-                 .values_list('user')) \
-        .filter(week=None,
-                user__in=busy_inst,
-                day__in=working_days) \
-        .select_related('user')
-
-    dataset = DispoResource() \
-        .export(list(chain(week_avail,
-                           default_avail)))  # all())#
-    response = HttpResponse(dataset.csv,
-                            content_type='text/csv')
-    response['week'] = week
-    response['year'] = year
-
-    cache.set(cache_key, response)
     return response
 
 
@@ -667,7 +510,7 @@ def fetch_unavailable_rooms(req, year, week, **kwargs):
     # To be done later
     # ----------------
     #
-    # cache_key = get_key_unavailable_rooms(department.abbrev, year, week)
+    # cache_key = get_key_unavailable_rooms(department.abbrev, week)
     # cached = cache.get(cache_key)
     # if cached is not None:
     #     return cached
@@ -994,7 +837,7 @@ def fetch_all_modules_with_desc(req, **kwargs):
 # CHANGERS
 # ----------
 
-def clean_change(year, week, old_version, change, work_copy=0, initiator=None, apply=False):
+def clean_change(week, old_version, change, work_copy=0, initiator=None, apply=False):
     
     scheduled_before = True
     course = Course.objects.get(id=change['id'])
@@ -1013,7 +856,6 @@ def clean_change(year, week, old_version, change, work_copy=0, initiator=None, a
 
     course_log = CourseModification(course=course,
                                     old_week=week,
-                                    old_year=year,
                                     room_old=sched_course.room if scheduled_before else None,
                                     day_old=sched_course.day if scheduled_before else None,
                                     start_time_old=sched_course.start_time if scheduled_before else None,
@@ -1094,6 +936,7 @@ def edt_changes(req, **kwargs):
     try:
         week = json.loads(req.POST.get('week'))
         year = json.loads(req.POST.get('year'))
+        week = Week.objects.get(week=week, year=year)
         work_copy = json.loads(req.POST.get('work_copy'))
         old_version = json.loads(req.POST.get('version'))
         department = req.department
@@ -1108,13 +951,12 @@ def edt_changes(req, **kwargs):
 
     msg = ''
 
-    logger.info(f"REQ: edt change; W{week} Y{year} WC{work_copy} V{old_version} "
+    logger.info(f"REQ: edt change; W{week} WC{work_copy} V{old_version} "
                 f"by {initiator.username}")
     logger.info(recv_changes)
     # logger.info(req.POST)
 
-    version = EdtVersion.objects.filter(week=week,
-                                        year=year).aggregate(Sum('version'))['version__sum']
+    version = EdtVersion.objects.filter(week=week).aggregate(Sum('version'))['version__sum']
 
     logger.info(f'Versions: incoming {old_version}, currently {version}')
 
@@ -1123,12 +965,12 @@ def edt_changes(req, **kwargs):
             edt_versions = EdtVersion \
                 .objects \
                 .select_for_update() \
-                .filter(week=week, year=year)
+                .filter(week=week)
 
         with transaction.atomic():
             try:
                 for change in recv_changes:
-                    new_courses = clean_change(year, week, old_version, change, work_copy=work_copy,
+                    new_courses = clean_change(week, old_version, change, work_copy=work_copy,
                                                initiator=initiator, apply=True)
                     if work_copy == 0:
                         same, changed = new_courses['log'].strs_course_changes()
@@ -1146,8 +988,8 @@ def edt_changes(req, **kwargs):
                 edt_version.version += 1
                 edt_version.save()
 
-            cache.delete(get_key_course_pl(department.abbrev, year, week, work_copy))
-            cache.delete(get_key_course_pp(department.abbrev, year, week, work_copy))
+            cache.delete(get_key_course_pl(department.abbrev, week, work_copy))
+            cache.delete(get_key_course_pp(department.abbrev, week, work_copy))
 
         if work_copy == 0:
             subject = '[Modif sur tierce] ' + initiator.username + ' a déplacé '
@@ -1472,17 +1314,17 @@ def decale_changes(req, **kwargs):
 
     new_assignment = json.loads(req.POST.get('new', {}))
     change_list = json.loads(req.POST.get('liste', []))
-    new_week = new_assignment['ns']
+    new_week_nb = new_assignment['ns']
     new_year = new_assignment['na']
+    new_week = Week.objects.get(nb=new_week_nb, year=new_year)
 
     for c in change_list:
         changing_course = Course.objects.get(id=c['i'])
         old_week = changing_course.week
-        old_year = changing_course.year
 
         edt_versions = EdtVersion.objects.select_for_update().filter(
-            (Q(week=old_week) & Q(year=old_year))
-            | (Q(week=new_week) & Q(year=new_year)), department=req.department)
+            Q(week=old_week) | Q(week=new_week),
+            department=req.department)
 
         with transaction.atomic():
             # was the course was scheduled before?
@@ -1492,23 +1334,20 @@ def decale_changes(req, **kwargs):
                     .get(course=changing_course,
                          work_copy=0)
                 cache.delete(get_key_course_pl(req.department.abbrev,
-                                               old_year,
                                                old_week,
                                                scheduled_course.work_copy))
                 scheduled_course.delete()
-                ev = EdtVersion.objects.get(year=old_year, week=old_week, department=req.department)
+                ev = EdtVersion.objects.get(week=old_week, department=req.department)
                 ev.version += 1
                 ev.save()
             else:
                 cache.delete(get_key_course_pp(req.department.abbrev,
-                                               old_year,
                                                old_week,
                                                0))
                 # note: add work_copy in Cours might be of interest
 
             pm = CourseModification(course=changing_course,
                                     old_week=old_week,
-                                    old_year=old_year,
                                     tutor_old=changing_course.tutor,
                                     version_old=0,
                                     initiator=req.user.tutor)
@@ -1521,15 +1360,12 @@ def decale_changes(req, **kwargs):
                     username=new_assignment['np']
                 )
             cache.delete(get_key_course_pp(req.department.abbrev,
-                                           new_year,
                                            new_week,
                                            0))
             cache.delete(get_key_preferences_tutor(req.department.abbrev,
-                                                   new_year,
                                                    new_week))
             changing_course.save()
             ev, _ = EdtVersion.objects.update_or_create(
-                year=new_year,
                 week=new_week,
                 department=req.department)
             ev.version += 1
@@ -1812,32 +1648,32 @@ def filt_g(r, group):
 
 def filt_sa(department, week, year):
     return Course.objects.filter(module__train_prog__department=department,
-                                 week=week,
-                                 year=year)
+                                 week__nb=week,
+                                 week__year=year)
 
 
-def get_key_course_pl(department_abbrev, year, week, num_copy):
-    if year is None or week is None or num_copy is None:
+def get_key_course_pl(department_abbrev, week, num_copy):
+    if  week is None or num_copy is None:
         return ''
-    return f'CPL-D{department_abbrev}-Y{year}-W{week}-C{num_copy}'
+    return f'CPL-D{department_abbrev}-W{week}-C{num_copy}'
 
 
-def get_key_course_pp(department_abbrev, year, week, num_copy):
-    if year is None or week is None or num_copy is None:
+def get_key_course_pp(department_abbrev, week, num_copy):
+    if week is None or num_copy is None:
         return ''
-    return f'CPP-D{department_abbrev}-Y{year}-W{week}-C{num_copy}'
+    return f'CPP-D{department_abbrev}-W{week}-C{num_copy}'
 
 
-def get_key_preferences_tutor(department_abbrev, year, week):
-    if year is None or week is None:
+def get_key_preferences_tutor(department_abbrev, week):
+    if week is None:
         return ''
-    return f'PREFT-D{department_abbrev}-Y{year}-W{week}'
+    return f'PREFT-D{department_abbrev}-W{week}'
 
 
-def get_key_unavailable_rooms(department_abbrev, year, week):
-    if year is None or week is None:
+def get_key_unavailable_rooms(department_abbrev, week):
+    if week is None:
         return ''
-    return f'UNAVR-D{department_abbrev}-Y{year}-W{week}'
+    return f'UNAVR-D{department_abbrev}-W{week}'
 
 
 def get_key_all_tutors(department_abbrev):
