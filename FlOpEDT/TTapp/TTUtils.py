@@ -395,7 +395,6 @@ def basic_delete_all_unused_work_copies(department, week):
 def basic_duplicate_work_copy(department, week, work_copy):
 
     result = {'status': 'OK', 'more': ''}
-
     scheduled_courses_params = {
         'course__module__train_prog__department': department,
         'course__week': week,
@@ -419,7 +418,7 @@ def basic_duplicate_work_copy(department, week, work_copy):
         sc.pk = None
         sc.work_copy = target_work_copy
         sc.save()
-        result['status'] = f'Duplicated to copy #{target_work_copy}'
+    result['status'] = f'Duplicated to copy #{target_work_copy}'
 
     return result
 
