@@ -1178,10 +1178,9 @@ class HelperUserPreference():
     def filter(self):
         return UserPreference.objects.filter(user=self.tutor)
 
-    def generate(self, week, year, day, start_time, duration, value):
+    def generate(self, week, day, start_time, duration, value):
         return UserPreference(user=self.tutor,
                               week=week,
-                              year=year,
                               day=day,
                               start_time=start_time,
                               duration=duration,
@@ -1197,11 +1196,10 @@ class HelperCoursePreference():
         return CoursePreference.objects.filter(train_prog=self.training_programme,
                                                course_type=self.course_type)
 
-    def generate(self, week, year, day, start_time, duration, value):
+    def generate(self, week, day, start_time, duration, value):
         return CoursePreference(train_prog=self.training_programme,
                                 course_type=self.course_type,
                                 week=week,
-                                year=year,
                                 day=day,
                                 start_time=start_time,
                                 duration=duration,
@@ -1215,10 +1213,9 @@ class HelperRoomPreference():
     def filter(self):
         return RoomPreference.objects.filter(room=self.room)
 
-    def generate(self, week, year, day, start_time, duration, value):
+    def generate(self, week, day, start_time, duration, value):
         return RoomPreference(room=self.room,
                               week=week,
-                              year=year,
                               day=day,
                               start_time=start_time,
                               duration=duration,
@@ -1331,11 +1328,9 @@ def preferences_changes(req, year, week, helper_pref):
     for a in changes:
         logger.info(f"Change {a}")
         helper_pref.filter().filter(week=week,
-                                    year=year,
                                     day=a['day']).delete()
         for pref in a['val_inter']:
             new_dispo = helper_pref.generate(week,
-                                             year,
                                              a['day'],
                                              pref['start_time'],
                                              pref['duration'],
