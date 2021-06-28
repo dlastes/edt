@@ -1154,7 +1154,7 @@ def preferences_changes(req, year, week, helper_pref):
     if week == 0 or year == 0:
         week = None
     else:
-        week = Week.objects.get_or_create(nb=week, year=year)
+        week, created = Week.objects.get_or_create(nb=week, year=year)
 
         
     if not helper_pref.filter().filter(week=week).exists():
