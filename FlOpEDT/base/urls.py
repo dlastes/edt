@@ -60,7 +60,6 @@ urlpatterns = [
     # ---------------------------------
 
     # from db to screen
-    url(r'^fetch_dispos/(?P<year>\d+)/(?P<week>\d+)$', views.fetch_dispos, name="fetch_dispos"),
     path('fetch_user_default_week/<str:username>', views.fetch_user_default_week, name="fetch_user_dweek"),
     path('fetch_course_default_week/<str:train_prog>/<str:course_type>', views.fetch_course_default_week, name="fetch_course_dweek"),
     path('fetch_room_default_week/<str:room>', views.fetch_room_default_week, name="fetch_room_dweek"),
