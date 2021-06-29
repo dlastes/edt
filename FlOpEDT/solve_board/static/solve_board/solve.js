@@ -163,7 +163,7 @@ function init_dropdowns() {
         .data(week_list)
         .enter()
         .append("option")
-        .text(function (d) { return d[1]; });
+        .text(function (d) { return (d[1]); });
 
     // create drop down for training programme selection
     train_prog_list.unshift(text_all);
