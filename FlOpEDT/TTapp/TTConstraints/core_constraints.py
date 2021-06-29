@@ -158,7 +158,12 @@ class ScheduleAllCourses(TTConstraint):
     #the number of slots available
     def pre_analyse(self, week):
         considered_courses = Course.objects.filter(week = week)
-        considered_week_partition = Partition("None", flopdate_to_datetime(Day("m", week), 0), flopdate_to_datetime(Day("su", week), 23*60+59))
+        time_settings = TimeGeneralSettings.objects.get(department = self.department)
+        day_start_week = Day(time_settings.days[0], week)
+        day_end_week = Day(time_settings.days[len(time_settings.days)-1], week)
+        start_week = flopdate_to_datetime(day_start_week, time_settings.day_start_time)
+        end_week = flopdate_to_datetime(day_end_week, time_settings.day_finish_time)
+        considered_week_partition = Partition("None", start_week, end_week, time_settings.day_start_time, time_settings.day_finish_time)
         if self.tutors.exists():
             considered_courses = set(c for c in considered_courses if c.tutor in self.tutors.all())
             for tutor in self.tutors:
@@ -280,8 +285,9 @@ class ConsiderTutorsUnavailability(TTConstraint):
 
 
     def pre_analyse(self, week):
-        if self.tutors:
-            for tutor in self.tutors:
+        if self.tutors.all():
+            for tutor in self.tutors.all():
+                print(f"For tutor '{tutor}' :")
                 courses = Course.objects.filter(tutor = tutor, week = week)
                 courses_type = set()
                 tutor_partition = Partition("UserPreference", flopdate_to_datetime(Day('m', week), 0), flopdate_to_datetime(Day('su', week), 23*60+59))
@@ -294,6 +300,8 @@ class ConsiderTutorsUnavailability(TTConstraint):
                         "user_preference",
                         {"value" : up.value, "available" : True, "tutor" : up.user.username}
                     )
+                print(f"There is {tutor_partition.available_duration} minutes of available time.")
+                print(f'He or she have to lecture {len(courses)} classes for an amount of {sum(c.type.duration for c in courses)} minutes of courses.')
                 if tutor_partition.available_duration < sum(c.type.duration for c in courses):
                     return False
                 elif courses.exists():
@@ -305,14 +313,14 @@ class ConsiderTutorsUnavailability(TTConstraint):
                             courses_type[course.type.name].append(course)
 
                     for course_type, course_list in courses_type.items():
-                        other_departments_sched_courses = ScheduledCourse.objects.filter(tutor = tutor, week = week ,work_copy=0).exclude(type__department=course_list[0].type.department)
+                        other_departments_sched_courses = ScheduledCourse.objects.filter(tutor = tutor, course__week = week ,work_copy=0).exclude(course__type__department=course_list[0].type.department)
                         time_settings = TimeGeneralSettings.objects.get(department = course_list[0].type.department)
                         day_start_week = Day(time_settings.days[0], week)
                         day_end_week = Day(time_settings.days[len(time_settings.days)-1], week)
                         start_week = flopdate_to_datetime(day_start_week, time_settings.day_start_time)
                         end_week = flopdate_to_datetime(day_end_week, time_settings.day_finish_time)
                         course_partition = Partition(
-                                course_type.name,
+                                course_type,
                                 start_week,
                                 end_week,
                                 time_settings.day_start_time,
@@ -330,6 +338,9 @@ class ConsiderTutorsUnavailability(TTConstraint):
                         course_partition.add_lunch_break(time_settings.lunch_break_start_time, time_settings.lunch_break_finish_time)
                         course_partition.add_week_end(time_settings.days)
                         course_partition.add_partition_data_type(tutor_partition, "user_preference")
+                        
+                        print("Tutor has", course_partition.nb_slots_of_duration(course_list[0].type.duration), "available moments available.")
+                        print("And", len(course_list), "courses to attend")
                         if course_partition.available_duration < len(course_list)*course_list[0].type.duration:
                             return False
                         
