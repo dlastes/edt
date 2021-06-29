@@ -457,9 +457,7 @@ function create_structural_groups(data_groups) {
     }
   }
 	
-  console.log(groups[0]["structural"].display)
   set_butgp();
-  console.log(groups[0]["structural"].display)
 }
 
 
