@@ -516,7 +516,7 @@ class IDCourseTypeSerializer(serializers.ModelSerializer):
 
 class IDGroupSerializer(serializers.ModelSerializer):
     class Meta:
-        model = bm.Group
+        model = bm.GenericGroup
         fields = ['id', 'name'] 
 
 class IDGroupTypeSerializer(serializers.ModelSerializer):
