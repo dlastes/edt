@@ -41,11 +41,17 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='structuralgroup',
             name='generic',
-            field=models.OneToOneField(default=None, on_delete=django.db.models.deletion.CASCADE, parent_link=True,
+            field=models.OneToOneField(null=True, default=None, on_delete=django.db.models.deletion.CASCADE, parent_link=True,
                                        to='base.genericgroup'),
             preserve_default=False,
         ),
         migrations.RunPython(create_and_add_generic_groups),
+        migrations.AlterField(
+            model_name='structuralgroup',
+            name='generic',
+            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, parent_link=True,
+                                       to='base.genericgroup'),
+        ),
         migrations.AddField(
             model_name='course',
             name='generic_groups',
