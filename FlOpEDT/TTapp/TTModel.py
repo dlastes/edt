@@ -1348,7 +1348,7 @@ def get_constraints(department, week=None, train_prog=None, is_active=None):
             Q(train_progs__isnull=True) & Q(weeks=week) | \
             Q(train_progs__isnull=True) & Q(weeks__isnull=True)
     else:
-        query &= Q(week=week) | Q(week__isnull=True)
+        query &= Q(weeks=week) | Q(weeks__isnull=True)
 
     # Look up the TTConstraint subclasses records to update
     from TTapp.TTConstraint import TTConstraint, all_subclasses
