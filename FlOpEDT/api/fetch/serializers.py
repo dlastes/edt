@@ -65,10 +65,11 @@ class Group_SC_Serializer(serializers.Serializer):
     id = serializers.IntegerField()
     train_prog = serializers.CharField()
     name = serializers.CharField()
+    is_structural = serializers.BooleanField()
 
     class Meta:
-        model = bm.StructuralGroup
-        fields = ['id', 'name', 'train_prog']
+        model = bm.GenericGroup
+        fields = ['id', 'name', 'train_prog','is_structural']
 
 
 class Course_SC_Serializer(serializers.Serializer):
@@ -174,10 +175,11 @@ class Group_PP_Serializer(serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField()
     train_prog = serializers.CharField()
-
+    is_structural = serializers.BooleanField()
+    
     class Meta:
-        model = bm.StructuralGroup
-        fields = ['id', 'name', 'train_prog']
+        model = bm.GenericGroup
+        fields = ['id', 'name', 'train_prog','is_structural']
 
 
 class ModuleCours_PP_Serializer(serializers.Serializer):
@@ -187,7 +189,6 @@ class ModuleCours_PP_Serializer(serializers.Serializer):
     class Meta:
         model = bm.Module
         fields = ['abbrev', 'display']
-
 
 class CourseType_PP_Serializer(serializers.Serializer):
     name = serializers.CharField()

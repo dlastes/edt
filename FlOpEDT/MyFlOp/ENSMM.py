@@ -15,7 +15,7 @@ def global_extraction(abbrev='ENSMM', name='ENSMM', delete_groups=True):
     book = database_ENSMM
     append_conflicting_and_parallel_groups(book["groups"],book["transversal_groups"])
     
-    extract_database_file(abbrev, name, book, fill_default_preferences=False)
+    extract_database_file(abbrev, name, book=book, fill_default_preferences=False)
     dep = Department.objects.get(abbrev=abbrev)
     optimize_settings(dep)
     for t in Tutor.objects.filter(departments=dep):
@@ -162,17 +162,19 @@ def convert_to_transversal(name_and_tp_groups_list):
 def append_conflicting_and_parallel_groups(sgdict,tgdict):
     transversal_prom = {}
     structural_prom = {}
+
+    #LV1 LV2  - SELF
     
-    for tp,gp in tgdict.keys():
-        if tp not in transversal_prom.keys(): transversal_prom[tp]=[]
+    for tp,gp in tgdict:
+        if tp not in transversal_prom: transversal_prom[tp]=[]
         transversal_prom[tp].append(gp)
         
-    for tp,gp in sgdict.keys():
-        if tp not in structural_prom.keys(): structural_prom[tp]=[]
+    for tp,gp in sgdict:
+        if tp not in structural_prom: structural_prom[tp]=[]
         structural_prom[tp].append(gp)
         
-    for tp,gp in tgdict.keys(): #On complète
-        sgdict[(tp,gp)]['transversal_to'] = structural_prom[tp]
-        sgdict[(tp,gp)]['parallel_to'] = transversal_prom[tp]
+    for tp,gp in tgdict: #On complète
+        tgdict[(tp,gp)]['transversal_to'] = structural_prom[tp]   #REMPLACER PAR LA RACINE
+        tgdict[(tp,gp)]['parallel_to'] = transversal_prom[tp]
         
         
