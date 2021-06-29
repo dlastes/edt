@@ -7,7 +7,7 @@ def create_and_add_generic_groups(apps, schema_editor):
     GenericGroup = apps.get_model('base', 'GenericGroup')
     StructuralGroup = apps.get_model('base', 'StructuralGroup')
     for g in StructuralGroup.objects.all():
-        gg = GenericGroup.objects.create(name=g.name, size=g.size, train_prog=g.train_prog, type=g.type)
+        gg = GenericGroup.objects.create(name=g.name, size=g.size, train_prog=g.train_prog, type=g.type, id=g.id)
         g.generic = gg
         g.save()
 

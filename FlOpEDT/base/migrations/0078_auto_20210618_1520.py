@@ -8,6 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('base', '0077_auto_20210618_1420'),
+        ('people', '0028_auto_20210618_1409')
     ]
 
     operations = [
