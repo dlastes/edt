@@ -366,7 +366,7 @@ class WeeksDatabase(object):
         not_parallel_transversal_groups = {}
         for tg in transversal_groups:
             not_parallel_transversal_groups[tg] = set()
-            for tg2 in transversal_groups.objects.filter(train_prog=tg.train_prog).exclude(id=tg.id):
+            for tg2 in transversal_groups.filter(train_prog=tg.train_prog).exclude(id=tg.id):
                 if tg2 not in tg.parallel_groups.all() and conflicting_basic_groups[tg] & conflicting_basic_groups[tg2]:
                     not_parallel_transversal_groups[tg].add(tg2)
 
