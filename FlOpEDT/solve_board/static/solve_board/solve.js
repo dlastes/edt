@@ -133,7 +133,7 @@ function open_connection() {
                 "C'est ti-par.\n" + opti_timestamp + "\nSolver ok?",
             'action': "go",
             'department': department,
-            'week_year': week_year_sel,
+            'week_year_list': week_year_sel,
             'train_prog': tp,
             'constraints': constraints,
             'stabilize': stabilize_working_copy,

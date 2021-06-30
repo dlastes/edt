@@ -754,7 +754,7 @@ class TTModel(object):
                     avail_time = sum(a.duration for a in week_tutor_availabilities if a.value >= 1)
 
                     if avail_time < teaching_duration:
-                        self.add_warning(i, "%g available hours < %g courses hours week %g" %
+                        self.add_warning(i, "%g available hours < %g courses hours week %s" %
                                          (avail_time / 60, teaching_duration / 60, week))
                         # We used to forget tutor availabilities in this case...
                         # for availability_slot in week_availability_slots:
