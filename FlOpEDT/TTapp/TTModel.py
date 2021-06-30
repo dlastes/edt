@@ -773,7 +773,7 @@ class TTModel(object):
 
                     elif avail_time < 2 * teaching_duration \
                             and i.status == Tutor.FULL_STAFF:
-                        self.add_warning(i, "only %g available hours for %g courses hours week %g" %
+                        self.add_warning(i, "only %g available hours for %g courses hours week %s" %
                                          (avail_time / 60,
                                           teaching_duration / 60,
                                           week))
