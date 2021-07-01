@@ -54,7 +54,7 @@ class NoSimultaneousGroupCourses(TTConstraint):
 
         for bg in considered_basic_groups:
 
-            time_settings = TimeGeneralSettings.objects.filter(department = bg.type.department)
+            time_settings = TimeGeneralSettings.objects.get(department = bg.type.department)
             day_start_week = Day(time_settings.days[0], week)
             day_end_week = Day(time_settings.days[len(time_settings.days)-1], week)
             start_week = flopdate_to_datetime(day_start_week, time_settings.day_start_time)
@@ -78,11 +78,11 @@ class NoSimultaneousGroupCourses(TTConstraint):
                     course_dict[c.type.duration] = 1 
 
             course_time_needed = sum(c.type.duration for c in considered_courses)
-            if course_time_needed > group_partition.available_duration:
+            if course_time_needed > group_partition.not_forbidden_duration:
                 return False
             else:
                 for duration, nb_courses in course_dict.items():
-                    if group_partition.nb_slots_of_duration(duration) < nb_courses:
+                    if group_partition.nb_slots_not_forbiden_of_duration(duration) < nb_courses:
                         return False
         return True
 
@@ -166,10 +166,10 @@ class ScheduleAllCourses(TTConstraint):
         considered_week_partition = Partition("None", start_week, end_week, time_settings.day_start_time, time_settings.day_finish_time)
         if self.tutors.exists():
             considered_courses = set(c for c in considered_courses if c.tutor in self.tutors.all())
-            for tutor in self.tutors:
+            for tutor in self.tutors.all():
                 userpreferences = UserPreference.objects.filter(user = tutor)
                 for up in userpreferences:
-                    up_day = Day(up.day, up.week)
+                    up_day = Day(up.day, week)
                     considered_week_partition.add_slot(
                             TimeInterval(flopdate_to_datetime(up_day, up.start_time),
                             flopdate_to_datetime(up_day, up.end_time)),
@@ -184,7 +184,7 @@ class ScheduleAllCourses(TTConstraint):
         if self.course_types.exists():
             considered_courses = set(c for c in considered_courses if c.type in self.course_types.all())
         if self.groups.exists():
-            considered_courses = set(c for c in considered_courses if considered_courses.intersection(self.groups))
+            considered_courses = set(c for c in considered_courses if c.groups in self.groups.all())
         
 
         return considered_week_partition.available_duration >= sum(c.type.duration for c in considered_courses)
@@ -339,9 +339,9 @@ class ConsiderTutorsUnavailability(TTConstraint):
                         course_partition.add_week_end(time_settings.days)
                         course_partition.add_partition_data_type(tutor_partition, "user_preference")
                         
-                        print("Tutor has", course_partition.nb_slots_of_duration(course_list[0].type.duration), "available moments available.")
+                        print("Tutor has", course_partition.nb_slots_available_of_duration(course_list[0].type.duration), "available moments available.")
                         print("And", len(course_list), "courses to attend")
-                        if course_partition.available_duration < len(course_list)*course_list[0].type.duration:
+                        if course_partition.available_duration < len(course_list)*course_list[0].type.duration or course_partition.nb_slots_available_of_duration(course_list[0].type.duration):
                             return False
                         
         return True
