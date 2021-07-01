@@ -1,3 +1,26 @@
+<!-- This file is part of the FlOpEDT/FlOpScheduler project.               -->
+<!-- Copyright (c) 2017                                                    -->
+<!-- Authors: Iulian Ober, Paul Renaud-Goud, Pablo Seban, et al.           -->
+<!--                                                                       -->
+<!-- This program is free software: you can redistribute it and/or modify  -->
+<!-- it under the terms of the GNU Affero General Public License as        -->
+<!-- published by the Free Software Foundation, either version 3 of the    -->
+<!-- License, or (at your option) any later version.                       -->
+<!--                                                                       -->
+<!-- This program is distributed in the hope that it will be useful, but   -->
+<!-- WITHOUT ANY WARRANTY; without even the implied warranty of            -->
+<!-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU      -->
+<!-- Affero General Public License for more details.                       -->
+<!--                                                                       -->
+<!-- You should have received a copy of the GNU Affero General Public      -->
+<!-- License along with this program. If not, see                          -->
+<!-- <http://www.gnu.org/licenses/>.                                       -->
+<!--                                                                       -->
+<!-- You can be released from the requirements of the license by purchasing -->
+<!-- a commercial license. Buying such a license is mandatory as soon as   -->
+<!-- you develop activities involving the FlOpEDT/FlOpScheduler software   -->
+<!-- without disclosing the source code of your own applications.          -->
+
 {% extends "flopeditor/base.html" %}
 {% load static %}
 
@@ -11,7 +34,7 @@
 {% block main-class %}container h-100{% endblock %}
 
 {% block navbar %} {% endblock %}
-{% block content %}
+{% block content-flopeditor %}
 
 
 
@@ -53,7 +76,7 @@
       </div>
 
       {% if request.user.is_superuser %}
-      <p class="lead" style="pointer-events:auto">
+      <p class="lead" style="pointer-events:auto" color: #000000;>
           Vous pouvez aussi créer un nouveau département <button type="button" class="btn btn-secondary bmd-btn-fab bmd-btn-fab-sm mt-1" data-toggle="modal" data-target="#modal-create-department">ici</button>
       </p>
       {% endif %}
