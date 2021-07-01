@@ -2072,11 +2072,13 @@ function show_detailed_courses(cours) {
   ]; 
   
   if (overlapping_courses.length > 1) {
+    infos.push( {'txt':""} );
   	infos.push( {'txt':"Cours ayant lieu en même temps:"} );
+  	infos.push( {'txt':""} );
+
   	for (let i=1; i<overlapping_courses.length; i++) {
-  		infos.push( {'txt':'	Mod: '+overlapping_courses[i]["mod"]} );
-  		infos.push( {'txt':'  Groups: '+overlapping_courses[i]["from_transversal"]} );
-  		infos.push( {'txt':'  De: '+overlapping_courses[i]["start"]/60+"h à "+(overlapping_courses[i]["start"]+overlapping_courses[i]["duration"])/60+"h"} );
+  		infos.push( {'txt':overlapping_courses[i]["mod"] + ' - '
+              + overlapping_courses[i]["from_transversal"] + ' - ' +overlapping_courses[i]["prof"] + ' - '+overlapping_courses[i]["start"]/60+"h à "+(overlapping_courses[i]["start"]+overlapping_courses[i]["duration"])/60+"h"} );
   		infos.push( {'txt':''});
   	}
   }
