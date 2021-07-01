@@ -111,11 +111,22 @@ class Partition(object):
                 {"forbidden" : True, "night_time": True})
             day = day + timedelta(days = 1)
 
-    def nb_slots_of_duration(self, duration):
+    def nb_slots_available_of_duration(self, duration):
         current_duration = 0
         nb_slots = 0
         for interval in self.intervals:
             if interval[1]["available"] and not interval[1]["forbidden"]:
+                current_duration += interval[0].duration
+            else:
+                nb_slots += current_duration//duration
+                current_duration = 0
+        return int(nb_slots)
+
+    def nb_slots_not_forbiden_of_duration(self, duration):
+        current_duration = 0
+        nb_slots = 0
+        for interval in self.intervals:
+            if not interval[1]["forbidden"]:
                 current_duration += interval[0].duration
             else:
                 nb_slots += current_duration//duration
