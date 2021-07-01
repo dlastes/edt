@@ -33,11 +33,11 @@
 {% block content-flopeditor %}
 <div class="container justify-content-center pb-4 mb-4" style="margin-top:4%;">
   <a href="{% url 'flopeditor:flopeditor-home' %}" class="btn btn-raised btn-primary d-block mx-auto mx-sm-0" style='max-width:300px'>
-    Retour à FlopEditor
+    Retour à flop!EDITOR
   </a>
   <div class="card container">
     <div class="card-header">
-      <h1 class="text-center">Documentation de FlopEditor</h1>
+      <h1 class="text-center">Documentation de flop!EDITOR</h1>
         <h5>
           Flopeditor est une application permettant aux professeurs et autres intervenants de modifier
           tous les éléments liés à la gestion de leurs départements, de la création de
@@ -163,7 +163,7 @@
         {% if request.user.is_superuser %}
         <h3>Vous êtes superuser ! Trop bien !</h3>
         <h6>En tant que super-utillisateur de FlopEDT, vous pouvez tout faire
-        dans FlopEditor, dans tous les départements.</h6>
+        dans flop!EDITOR, dans tous les départements.</h6>
         {% elif is_admin %}
         <h3>Vous êtes responsable d'au moins un département. Vous pouvez (presque) tout faire.</h3>
         <h6>En tant que responsable d'un département de FlopEDT, vous pouvez visualiser les paramètres de tous les départements,
