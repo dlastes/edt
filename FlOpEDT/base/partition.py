@@ -122,7 +122,7 @@ class Partition(object):
                 current_duration = 0
         return int(nb_slots)
 
-    def nb_slots_not_forbiden_of_duration(self, duration):
+    def nb_slots_not_forbidden_of_duration(self, duration):
         current_duration = 0
         nb_slots = 0
         for interval in self.intervals:
