@@ -168,13 +168,9 @@ def append_conflicting_and_parallel_groups(sgdict,tgdict):
     for tp,gp in tgdict:
         if tp not in transversal_prom: transversal_prom[tp]=[]
         transversal_prom[tp].append(gp)
-        
-    for tp,gp in sgdict:
-        if tp not in structural_prom: structural_prom[tp]=[]
-        structural_prom[tp].append(gp)
-        
+
     for tp,gp in tgdict: #On complète
-        tgdict[(tp,gp)]['transversal_to'] = structural_prom[tp]   #REMPLACER PAR LA RACINE
+        tgdict[(tp,gp)]['transversal_to'] = (tp,tp)   
         tgdict[(tp,gp)]['parallel_to'] = transversal_prom[tp]
         
         
