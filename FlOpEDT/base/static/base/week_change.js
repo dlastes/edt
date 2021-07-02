@@ -783,7 +783,8 @@ function translate_cours_pl_from_json(d, result) {
 		  result.push(new_course);
 		}
 		else{
-			let conflicting_groups = groups[set_promos.indexOf(d.course.groups[i].train_prog)]["transversal"][d.course.groups[i].name]["transversal_to"];
+			let conflicting_groups = groups[set_promos.indexOf(d.course.groups[i].train_prog)]["transversal"][d.course.groups[i].name]["conflicting_groups"];
+			console.log(conflicting_groups);
 			for (let j=0 ; j < conflicting_groups.length; j++) {
 				let new_course = {
 					id_course: +d.course.id,
@@ -815,7 +816,7 @@ function translate_cours_pl_from_json(d, result) {
 		      tutors.pl.indexOf(new_course.prof) === -1) {
 		    	tutors.pl.push(new_course.prof);
 		  	}
-				result.push(new_couse);
+				result.push(new_course);
 			}
 		}
   }
@@ -1453,7 +1454,7 @@ function fetch_module() {
     url: build_url(url_module, context),
     async: true,
     success: function (msg, ts, req) {
-    	console.log(msg);
+    	//console.log(msg); STAGE!
       var sel_week = wdw_weeks.get_selected();
       if (Week.compare(exp_week, sel_week) == 0) {
         d3.csvParse(msg, translate_module_from_csv);

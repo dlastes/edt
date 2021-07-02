@@ -60,6 +60,13 @@ def cleanDictionary(dictionary):
     for i in keysToDelete:
         dictionary.pop(i)
 
+def shortenString(string,spliter="-",part=0):
+    if spliter in string:
+        newstrings = string.split(spliter)
+        if len(newstrings)-1<part:
+            return newstrings[-1]
+        return newstrings[part]
+    return string
 
 def getpSvcWDureeToMinutesInDay(pSvcWDuree): #Pour convertir le temps Hyperplanning en minute dans une journee (peu import quelle journée) et la journée
     timeInMinutes = pSvcWDuree*24*60
@@ -182,15 +189,15 @@ def extractModules(IHpSvcWMatieres,IHpSvcWCours,IHpSvcWTDOption,IHpSvcWPromotion
             if moduleName in moduleDictionary.keys():
                 if moduleDictionary[moduleName] == None:
                     advancedModuleName = moduleName+"_"+promName
-                    moduleDictionary[advancedModuleName] = {'short':moduleName,'PPN':'Code PPN','name':moduleName,'promotion':promName,'period':firstPeriod,'responsable':courseOwner}
+                    moduleDictionary[advancedModuleName] = {'short':shortenString(moduleName),'PPN':'Code PPN','name':moduleName,'promotion':promName,'period':firstPeriod,'responsable':courseOwner}
                 elif moduleDictionary[moduleName]['promotion'] != promName:
                     advancedModuleName = moduleName+"_"+promName
-                    moduleDictionary[advancedModuleName] = {'short':moduleName,'PPN':'Code PPN','name':moduleName,'promotion':promName,'period':firstPeriod,'responsable':courseOwner}
+                    moduleDictionary[advancedModuleName] = {'short':shortenString(moduleName),'PPN':'Code PPN','name':moduleName,'promotion':promName,'period':firstPeriod,'responsable':courseOwner}
                     advancedOldModuleName = moduleName+"_"+moduleDictionary[moduleName]["promotion"]
                     moduleDictionary[advancedOldModuleName] = moduleDictionary.pop(moduleName)
                     moduleDictionary[moduleName] = None
             else:
-                moduleDictionary[moduleName] = {'short':moduleName,'PPN':'Code PPN','name':moduleName,'promotion':promName,'period':firstPeriod,'responsable':courseOwner}
+                moduleDictionary[moduleName] = {'short':shortenString(moduleName),'PPN':'Code PPN','name':moduleName,'promotion':promName,'period':firstPeriod,'responsable':courseOwner}
     cleanDictionary(moduleDictionary)
     return moduleDictionary
 
