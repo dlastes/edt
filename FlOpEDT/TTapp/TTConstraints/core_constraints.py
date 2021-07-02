@@ -43,6 +43,7 @@ from base.models import Course, ScheduledCourse, UserPreference
 from base.partition import Partition
 from base.timing import Day, flopdate_to_datetime
 from people.models import Tutor
+from django.db.models import Q
 
 class NoSimultaneousGroupCourses(TTConstraint):
     """
@@ -51,6 +52,9 @@ class NoSimultaneousGroupCourses(TTConstraint):
     groups = models.ManyToManyField('base.StructuralGroup', blank=True)
 
     def pre_analyse(self, week):
+
+        jsondict = {"status" : "OK", "messages" : []}
+
         considered_basic_groups = pre_analysis_considered_basic_groups(self)
 
         for bg in considered_basic_groups:
@@ -71,21 +75,23 @@ class NoSimultaneousGroupCourses(TTConstraint):
             group_partition.add_lunch_break(time_settings.lunch_break_start_time, time_settings.lunch_break_finish_time)
             group_partition.add_week_end(time_settings.days)
             considered_courses = set(c for c in Course.objects.filter(week=week, groups__in=bg.and_ancestors()))
-            course_dict = dict()
-            for c in considered_courses:
-                if c.type.duration in course_dict:
-                    course_dict[c.type.duration] += 1
-                else:
-                    course_dict[c.type.duration] = 1 
 
             course_time_needed = sum(c.type.duration for c in considered_courses)
             if course_time_needed > group_partition.not_forbidden_duration:
-                return False
+                jsondict["status"] = "KO"
+                jsondict["messages"].append(_(f"Group {bg.name} has {group_partition.not_forbidden_duration} possibly available time but requires {course_time_needed}."))
             else:
+                course_dict = dict()
+                for c in considered_courses:
+                    if c.type.duration in course_dict:
+                        course_dict[c.type.duration] += 1
+                    else:
+                        course_dict[c.type.duration] = 1 
                 for duration, nb_courses in course_dict.items():
-                    if group_partition.nb_slots_not_forbiden_of_duration(duration) < nb_courses:
-                        return False
-        return True
+                    if group_partition.nb_slots_not_forbidden_of_duration(duration) < nb_courses:
+                        jsondict["status"] = "KO"
+                        jsondict["messages"].append(_(f"Group {bg.name} has {group_partition.nb_slots_not_forbidden_of_duration(duration)} slots possibly available but requires {nb_courses}.")) 
+        return JsonResponse(data = jsondict)
 
     def enrich_model(self, ttmodel, week, ponderation=1):
         relevant_slots = slots_filter(ttmodel.wdb.availability_slots, week=week)
@@ -297,7 +303,7 @@ class ConsiderTutorsUnavailability(TTConstraint):
 
             print(f"For tutor '{tutor}' :")
             
-            courses = Course.objects.filter(tutor = tutor, week = week)
+            courses = Course.objects.filter(Q(tutor = tutor) | Q(supp_tutor = tutor), week = week)
             courses_type = set()
             tutor_partition = Partition("UserPreference", flopdate_to_datetime(Day('m', week), 0), flopdate_to_datetime(Day('su', week), 23*60+59))
             user_preferences = UserPreference.objects.filter(user = tutor, week = week)
@@ -314,12 +320,11 @@ class ConsiderTutorsUnavailability(TTConstraint):
                     )
 
             print(f"There is {tutor_partition.available_duration} minutes of available time.")
-            print(f'He or she have to lecture {len(courses)} classes for an amount of {sum(c.type.duration for c in courses)} minutes of courses.')
+            print(f'He or she has to lecture {len(courses)} classes for an amount of {sum(c.type.duration for c in courses)} minutes of courses.')
             print("Condition:", tutor_partition.available_duration < sum(c.type.duration for c in courses))
             if tutor_partition.available_duration < sum(c.type.duration for c in courses):
-                print("Here")
-                message = f"Tutor {tutor} has {tutor_partition.available_duration} minutes of available time."
-                message += f' He or she have to lecture {len(courses)} classes for an amount of {sum(c.type.duration for c in courses)} minutes of courses.'
+                message = _(f"Tutor {tutor} has {tutor_partition.available_duration} minutes of available time.")
+                message += _(f' He or she has to lecture {len(courses)} classes for an amount of {sum(c.type.duration for c in courses)} minutes of courses.')
                 jsondict["messages"].append(message)
                 jsondict["status"] = "KO"
 
@@ -361,8 +366,8 @@ class ConsiderTutorsUnavailability(TTConstraint):
                     print("Tutor has", course_partition.nb_slots_available_of_duration(course_list[0].type.duration), "available moments available.")
                     print("And", len(course_list), "courses to attend")
                     if course_partition.available_duration < len(course_list)*course_list[0].type.duration or course_partition.nb_slots_available_of_duration(course_list[0].type.duration) < len(course_list):
-                        message = f"Tutor {tutor} has {course_partition.nb_slots_available_of_duration(course_list[0].type.duration)} available slots of {course_list[0].type.duration} mins "
-                        message += f'and {len(course_list)} courses that long to attend.'
+                        message = _(f"Tutor {tutor} has {course_partition.nb_slots_available_of_duration(course_list[0].type.duration)} available slots of {course_list[0].type.duration} mins ")
+                        message += _(f'and {len(course_list)} courses that long to attend.')
                         jsondict["messages"].append(message)
                         jsondict["status"] = "KO"
         return JsonResponse(jsondict)
