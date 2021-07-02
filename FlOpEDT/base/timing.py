@@ -203,12 +203,6 @@ class Day(object):
   def __repr__(self):
       return self.day + '_s' + str(self.week)
 
-  def __eq__(self, other):
-      if isinstance(other, Day):
-          return self.day == other.day
-      else:
-          return False
-
   def __lt__(self, other):
       if isinstance(other, Day):
           return days_index(self.day) < days_index(other.day)

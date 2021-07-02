@@ -617,7 +617,7 @@ class UserPreference(models.Model):
         else:
             raise NotImplementedError
 
-    def __eq__(self, other):
+    def is_same(self, other):
         if isinstance(other, UserPreference):
             return ((((self.week and other.week) and self.week == other.week) or not self.week or not other.week)
                 and days_index[self.day] == days_index[other.day] and self.start_time == other.start_time)
