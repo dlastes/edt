@@ -387,12 +387,12 @@ def department_student_structural_groups(request, department_abbrev):
     return crud_view(request,
                      department_abbrev,
                      "flopeditor/student_structural_groups.html",
-                     "Groupes d'élèves")
+                     "Groupes structuraux")
 
 
 @tutor_or_superuser_required
 def department_student_transversal_groups(request, department_abbrev):
-    """Student groups view of FlopEditor.
+    """Student groups view of flop!EDITOR.
 
     :param request:           Client request.
     :param department_abbrev: Department abbreviation.
@@ -405,7 +405,7 @@ def department_student_transversal_groups(request, department_abbrev):
     return crud_view(request,
                      department_abbrev,
                      "flopeditor/student_transversal_groups.html",
-                     "Groupes d'élèves")
+                     "Groupes transversaux")
 
 
 @tutor_or_superuser_required
