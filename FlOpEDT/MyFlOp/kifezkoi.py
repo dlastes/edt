@@ -41,21 +41,26 @@ def assign_teachers_to_modules(session,courseKeys,teacherDictionary,promDictiona
     dictionaryOfAssignedTeacher = {}
     for i in tqdm(courseKeys,"Processing         ", bar_format='{l_bar}{bar:15}{r_bar}{bar:-10b}'):
         courseModule = moduleDictionary[services["courses"].MatiereCours(i)]
+        courseType = services["courses"].TypeCours(i)+"_"+str(round(services["courses"].DureeCours(i)*24*60))+"m"
         courseTeachers = [teacherDictionary[j] for j in services["courses"].EnseignantsDuCours(i)]
         courseProms = [promDictionary[j] for j in services["courses"].PromotionsDuCours(i)]
         courseGroups =[promDictionary[j] for j in services["courses"].TDOptionsDuCours(i)]
         courseProms = courseProms+courseGroups
 
-        if courseModule not in dictionaryOfAssignedTeacher.keys():
-            dictionaryOfAssignedTeacher[courseModule] = {}
 
         for j in courseProms:
-            if j not in dictionaryOfAssignedTeacher[courseModule].keys():
-                dictionaryOfAssignedTeacher[courseModule][j] = []
+            if j not in dictionaryOfAssignedTeacher.keys():
+                dictionaryOfAssignedTeacher[j] = {}
+
+            if courseModule not in dictionaryOfAssignedTeacher[j].keys():
+                dictionaryOfAssignedTeacher[j][courseModule] = {}
+                
+            if courseType not in dictionaryOfAssignedTeacher[j][courseModule].keys():
+                dictionaryOfAssignedTeacher[j][courseModule][courseType] = []
 
             for k in courseTeachers:
-                if k not in dictionaryOfAssignedTeacher[courseModule][j]:
-                    dictionaryOfAssignedTeacher[courseModule][j].append(k)
+                if k not in dictionaryOfAssignedTeacher[j][courseModule][courseType]:
+                    dictionaryOfAssignedTeacher[j][courseModule][courseType].append(k)
 
     return dictionaryOfAssignedTeacher
         
@@ -94,11 +99,13 @@ if __name__ == "__main__":
         print(teacherAssignation)
         print("\n\n")
         
-        for i in teacherAssignation.keys(): #Modules
+        for i in teacherAssignation: #Proms
             print(i)
-            for j in teacherAssignation[i].keys(): #Proms
+            for j in teacherAssignation[i]: #Module
                 print("    "+j)
-                for k in teacherAssignation[i][j]: #Profs
+                for k in teacherAssignation[i][j]: #Type
                     print("        "+k)
+                    for l in teacherAssignation[i][j][k]: #Prof
+                        print("            "+l)
                 print("")
             print("")
