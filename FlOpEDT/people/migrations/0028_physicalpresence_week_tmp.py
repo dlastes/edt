@@ -2,11 +2,11 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
-from base.models import Week
 
 
 def move_week_year_to_week_tmp(apps, schema_editor):
     CM = apps.get_model('people', 'PhysicalPresence')
+    Week = apps.get_model('base', 'Week')
     for o in CM.objects.exclude(week=None):
         w = Week.objects.get(nb=o.week, year=o.year)
         o.week_tmp = w

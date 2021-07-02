@@ -8,7 +8,7 @@ from functools import reduce # Pour le pgcd d'une liste
 from tqdm import tqdm # Affichage de la barre sympa
 
 from django.db import transaction
-from base.models import CourseType, RoomType, StructuralGroup, Module, Course
+from base.models import CourseType, RoomType, StructuralGroup, TransversalGroup, Module, Course, GenericGroup, Week
 from people.models import Tutor
 from misc.assign_colors import assign_module_color
 
@@ -106,11 +106,13 @@ def creerPauseMeridienne():
 
 
 def switchStructuralToTransversal(dico):
+    keys_to_remove = []
     for i in dico["groups"].keys():
         if inputBool("Is the group "+i[1]+" from the prom "+i[0]+" is a transversal group?"):
-            dico["groups"].pop(i)
+            keys_to_remove.append(i)
             dico["transversal_groups"][i] = {"transversal_to":None,"parallel_to":None}
-
+    for i in keys_to_remove:
+        dico["groups"].pop(i)
 
 def getValidCourseKeys(IHpSvcWCours,breakLevel=-1): # Certainement possible d'accelerer tout ça, mais les fonctions de l'API ne fonctionnent pas...
     listCoursesKeys = IHpSvcWCours.service.TousLesCours()
@@ -158,6 +160,7 @@ def extractModules(IHpSvcWMatieres,IHpSvcWCours,IHpSvcWTDOption,IHpSvcWPromotion
     listCoursesKeys = validCourseKeys    
     tempDictNameOfModules = {} #Cle -> Nom
     moduleDictionary = {}
+    
     for i in tqdm(listCoursesKeys,"Modules - Extracting : ", bar_format='{l_bar}{bar:15}{r_bar}{bar:-10b}'):
         moduleKey = IHpSvcWCours.service.MatiereCours(i)
         if moduleKey not in tempDictNameOfModules.keys():
@@ -168,7 +171,7 @@ def extractModules(IHpSvcWMatieres,IHpSvcWCours,IHpSvcWTDOption,IHpSvcWPromotion
             
         courseTDOpt = IHpSvcWCours.service.TDOptionsDuCours(i)
         courseProm = IHpSvcWCours.service.PromotionsDuCours(i)
-        courseOwner = IHpSvcWMatieres.service.ProprietaireMatiere(IHpSvcWCours.service.MatiereCours(i))
+        courseOwner = None     #IHpSvcWMatieres.service.ProprietaireMatiere(IHpSvcWCours.service.MatiereCours(i)) <- renvoi nom+prenom au lieu de l'identifiant cas
         
         for j in courseTDOpt: 
             promOfTDOpt = IHpSvcWTDOption.service.PromotionTDOption(j)
@@ -258,7 +261,7 @@ def extractGroups(IHpSvcWPromotions,IHpSvcWTDOptions): #Fini mais pas satisfait!
         tdOptionName = IHpSvcWTDOptions.service.NomTDOption(i)
         belongTo = set()
         belongTo.add(IHpSvcWPromotions.service.NomPromotion(IHpSvcWTDOptions.service.PromotionTDOption(i)))
-        groupID = (tdOptionName,IHpSvcWPromotions.service.NomPromotion(IHpSvcWTDOptions.service.PromotionTDOption(i)))  #A modifier
+        groupID = (IHpSvcWPromotions.service.NomPromotion(IHpSvcWTDOptions.service.PromotionTDOption(i)),tdOptionName)  #A modifier
 
         groupDictionary[groupID] = {"group_type":None,"parent":belongTo}
 
@@ -337,7 +340,7 @@ def filldico(username,password,lPrefixeWsdl):
     periodes = creerPeriodes()
     
     # Tout le tralala
-    NOMBRE_DE_COURS_MAX = 50 # Utiliser pour accelerer les test. -1 si pas de limites.
+    NOMBRE_DE_COURS_MAX = inputInt("How many courses do you want to look through? -1 for every courses") # Utiliser pour accelerer les test. -1 si pas de limites.
     
     validCoursesKeys = getValidCourseKeys(courseService,NOMBRE_DE_COURS_MAX)
     
@@ -370,7 +373,8 @@ def filldico(username,password,lPrefixeWsdl):
             'settings' : settings,
             'promotions': promotions,
             'group_types' : group_types,
-            'groups' : groups }
+            'groups' : groups,
+            'transversal_groups': {} }
     
     book = demanderModifEventuelles(book)
     
@@ -472,25 +476,24 @@ def remove_courses_without_group(listOfCourses):
 
 
 @transaction.atomic
-def extract_courses_from_book(courses_book, department, assign_colors=True):
+def extract_courses_from_book(courses_book, department):
     for c in courses_book:
         if not c['groups']:
             continue
-        groups = StructuralGroup.objects.filter(name__in=c['groups'], train_prog__department=department)
+        groups = GenericGroup.objects.filter(name__in=c['groups'], train_prog__department=department)
         ct = CourseType.objects.get(name=c['type'], department=department)
         rt = RoomType.objects.get(name=c['room_type'], department=department)
         if c['tutor']:
             tut = Tutor.objects.get(username=c['tutor'])
         else:
             tut = None
-        supp_tuts = Tutor.objects.filter(username__in = c['supp_tutor'])
-        mod = Module.objects.get(name = c['module'], train_prog=groups[0].train_prog)
-        new_course = Course(type=ct, room_type=rt, tutor=tut, module=mod, week=c['week'], year=c['year'])
+        supp_tuts = Tutor.objects.filter(username__in=c['supp_tutor'])
+        mod = Module.objects.get(name=c['module'], train_prog=groups[0].train_prog)
+        week = Week.objects.get(nb=c['week'], year=c['year'])
+        new_course = Course(type=ct, room_type=rt, tutor=tut, module=mod, week=week)
         new_course.save()
         for g in groups:
             new_course.groups.add(g)
         for t in supp_tuts:
             new_course.supp_tutor.add(t)
-    if assign_colors:
-        assign_module_color(department)
     print("Course extraction done")

@@ -136,8 +136,7 @@ def minimize_moves(department, week, year, target_work_copy):
                             sib.save()
                         # print "swapped", CP, " with", sib
     cache.delete(get_key_course_pl(department.abbrev,
-                                   week.year,
-                                   week.nb,
+                                   week,
                                    target_work_copy))
     print("done")
 
@@ -337,20 +336,16 @@ def basic_swap_version(department, week, year, copy_a, copy_b=0):
         version_copy.save()
 
     cache.delete(get_key_course_pl(department.abbrev,
-                                   week.year,
-                                   week.nb,
+                                   week,
                                    copy_a))
     cache.delete(get_key_course_pl(department.abbrev,
-                                   week.year,
-                                   week.nb,
+                                   week,
                                    copy_b))
     cache.delete(get_key_course_pp(department.abbrev,
-                                   week.year,
-                                   week.nb,
+                                   week,
                                    copy_a))
     cache.delete(get_key_course_pp(department.abbrev,
-                                   week.year,
-                                   week.nb,
+                                   week,
                                    copy_b))
 
 
@@ -377,8 +372,7 @@ def basic_delete_work_copy(department, week, year, work_copy):
     sc_to_delete.delete()
 
     cache.delete(get_key_course_pl(department.abbrev,
-                                   week.year,
-                                   week.nb,
+                                   week,
                                    work_copy))
     return result
 
@@ -406,7 +400,6 @@ def basic_delete_all_unused_work_copies(department, week, year):
 def basic_duplicate_work_copy(department, week, year, work_copy):
 
     result = {'status': 'OK', 'more': ''}
-
     scheduled_courses_params = {
         'course__module__train_prog__department': department,
         'course__week__nb': week,
@@ -431,7 +424,7 @@ def basic_duplicate_work_copy(department, week, year, work_copy):
         sc.pk = None
         sc.work_copy = target_work_copy
         sc.save()
-        result['status'] = f'Duplicated to copy #{target_work_copy}'
+    result['status'] = f'Duplicated to copy #{target_work_copy}'
 
     return result
 

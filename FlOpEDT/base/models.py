@@ -81,6 +81,9 @@ class GenericGroup(models.Model):
     type = models.ForeignKey('GroupType', on_delete=models.CASCADE, null=True)
     size = models.PositiveSmallIntegerField()
 
+    class Meta:
+        unique_together = (("name", "train_prog"),)
+
     @property
     def full_name(self):
         return self.train_prog.abbrev + "-" + self.name
@@ -88,15 +91,38 @@ class GenericGroup(models.Model):
     def __str__(self):
         return self.name
 
-    class Meta:
-        abstract = True
+    def ancestor_groups(self):
+        if self.is_structural:
+            return self.structuralgroup.ancestor_groups()
+        return set()
 
+    def descendants_groups(self):
+        if self.is_structural:
+            return self.structuralgroup.descendants_groups()
+        return set()
+
+    @property
+    def is_structural(self):
+        try:
+            self.structuralgroup
+            return True
+        except:
+            return False
+
+    @property
+    def is_transversal(self):
+        try:
+            self.transversalgroup
+            return True
+        except:
+            return False
 
 class StructuralGroup(GenericGroup):
     basic = models.BooleanField(verbose_name=_('Basic group?'), default=False)
     parent_groups = models.ManyToManyField('self', symmetrical=False,
                                            blank=True,
                                            related_name="children_groups")
+    generic = models.OneToOneField('GenericGroup', on_delete=models.CASCADE, parent_link=True)
 
     def ancestor_groups(self):
         """
@@ -143,9 +169,11 @@ class StructuralGroup(GenericGroup):
 
 class TransversalGroup(GenericGroup):
     conflicting_groups = models.ManyToManyField("base.StructuralGroup", blank=True)
-                                                
+
     parallel_groups = models.ManyToManyField('self', symmetrical=True,
                                              blank=True)
+    generic = models.OneToOneField('GenericGroup', on_delete=models.CASCADE, parent_link=True)
+
 
 # </editor-fold desc="GROUPS">
 
@@ -186,17 +214,13 @@ class Period(models.Model):
 
 
 class Week(models.Model):
-    nb = models.PositiveSmallIntegerField(validators=[MinValueValidator(0), MaxValueValidator(53)])
+    nb = models.PositiveSmallIntegerField(validators=[MinValueValidator(0),
+                                                      MaxValueValidator(53)],
+                                          verbose_name=_('Week number'))
     year = models.PositiveSmallIntegerField()
 
     def __str__(self):
         return f"{self.nb}-{self.year}"
-
-    def __eq__(self, other):
-        if isinstance(other, Week):
-            return self.nb == other.nb and self.year == other.year
-        else:
-            return False
 
     def __lt__(self, other):
         if isinstance(other, Week):
@@ -402,7 +426,7 @@ class Course(models.Model):
     supp_tutor = models.ManyToManyField('people.Tutor',
                                         related_name='courses_as_supp',
                                         blank=True)
-    groups = models.ManyToManyField('base.StructuralGroup', related_name='courses')
+    groups = models.ManyToManyField('base.GenericGroup', related_name='courses', blank=True)
     module = models.ForeignKey(
         'Module', related_name='courses', on_delete=models.CASCADE)
     modulesupp = models.ForeignKey('Module', related_name='modulesupp',
@@ -664,8 +688,8 @@ class EdtVersion(models.Model):
     week = models.ForeignKey('Week', on_delete=models.CASCADE, null=True, blank=True)
     version = models.PositiveIntegerField(default=0)
 
-    #class Meta:
-        #unique_together = (("department", "week"),)
+    class Meta:
+        unique_together = (("department", "week"),)
 
 
 #    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -723,7 +747,7 @@ class CourseModification(models.Model):
             changed += al + f'Salle : {room_old_name} -> {cur_room_name}'
 
         day_list = base.weeks.num_all_days(
-            course.week, department)
+            course.week.year, course.week.nb, department)
         if sched_course.day == self.day_old \
            and sched_course.start_time == self.start_time_old:
             for d in day_list:

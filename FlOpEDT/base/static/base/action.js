@@ -2003,10 +2003,31 @@ function compute_cm_room_tutor_direction() {
   }
 }
 
+
+function find_overlapping_courses(reference_course) { //STAGE j'espère ne pas avoir fait de dinguerie
+	let start_time = reference_course["start"];
+	let finish_time = reference_course["start"]+reference_course["duration"];
+	let reference_group = reference_course["group"];
+	let reference_day = reference_course["day"];
+	overlapping_courses = [];
+	
+	for (let i = 0; i<cours.length ; i++) {
+		if (cours[i]["group"] != reference_group && cours[i]["day"]==reference_day ){ //STAGE && cours[i]["from_transversal"] != null on peut limiter aux cours de groupes transversaux
+			let cours_finish_time = cours[i]["start"]+cours[i]["duration"];
+			if (cours[i]["start"] < finish_time && cours_finish_time > start_time){
+				overlapping_courses.push(cours[i])
+			}
+		}
+	}
+	return overlapping_courses;
+}
+
 function show_detailed_courses(cours) {
-  remove_details();
+  remove_details(); 
   var details = svg.get_dom("dg").append("g")
     .attr("id", "course_details");
+
+	let overlapping_courses = find_overlapping_courses(cours);
 
   var strokeColor;
   var strokeWidth;
@@ -2029,14 +2050,37 @@ function show_detailed_courses(cours) {
     }
   }
   
+  let modinfoname = "Placeholder module name";
+  let modinfourl = "undefined";
+  let tutinfoname ="Placeholder tutor name";
+  let tutinfomail ="Placeholder tutor email adresse";
+  if (cours.mod in modules_info){  //STAGE
+  	modinfoname = modules_info[cours.mod].name;
+  	modinfourl = modules_info[cours.mod].url;
+	}
+	if (cours.prof in tutors_info){
+		tutinfoname = tutors_info[cours.prof].full_name;
+		tutinfomail = tutors_info[cours.prof].email;
+	}
   
   let infos = [
-    {'txt':modules_info[cours.mod].name, 'url':modules_info[cours.mod].url},
+    {'txt':modinfoname, 'url':modinfourl},
     room_info,
     {'txt':cours.comment},
-    {'txt':tutors_info[cours.prof].full_name},
-    {'txt':tutors_info[cours.prof].email, 'url': url_contact + cours.prof}
-  ];
+    {'txt':tutinfoname},
+    {'txt':tutinfomail, 'url': url_contact + cours.prof},
+  ]; 
+  
+  if (overlapping_courses.length > 0) {
+  	infos.push( {'txt':"Cours ayant lieu en même temps:"} );
+  	for (let i=0; i<overlapping_courses.length; i++) {
+  		infos.push( {'txt':'	Mod: '+overlapping_courses[i]["mod"]} );
+  		infos.push( {'txt':'  Groups: '+overlapping_courses[i]["group"]} );
+  		infos.push( {'txt':'  De: '+overlapping_courses[i]["start"]/60+"h à "+(overlapping_courses[i]["start"]+overlapping_courses[i]["duration"])/60+"h"} );
+  		infos.push( {'txt':''});
+  	}
+  }
+  
   nb_detailed_infos = infos.length ;
 
   details

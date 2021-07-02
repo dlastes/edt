@@ -832,7 +832,8 @@ function cours_txt_bot_y(c) {
 }
 function cours_txt_bot_txt(c) {
   if (c.room !== null && c.id_visio != -1) {
-    console.log(c, 'Both on site and remote?');
+    //console.log(c, 'Both on site and remote?');
+    1;
   } else {
     if (c.id_visio > -1) {
       return 'Visio' ;

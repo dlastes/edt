@@ -127,13 +127,6 @@ var file_fetch =
 function main(name, data) {
   file_fetch[name].data = data;
   file_fetch[name].done = true;
-  if (file_fetch.groups.done && file_fetch.constraints.done
-    && file_fetch.rooms.done && file_fetch.transversal_groups.done) {
-    file_fetch.constraints.callback();
-    file_fetch.rooms.callback();
-    file_fetch.groups.callback();
-    file_fetch.transversal_groups.callback();
-  }
   // callback all when all received
   if (!Object.keys(file_fetch).some(function(att){
     return !file_fetch[att].done ;
