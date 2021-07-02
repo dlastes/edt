@@ -71,14 +71,14 @@ def split_preferences(tutor, departments=None):
     weeks = UserPreference\
         .objects\
         .filter(user=tutor)\
-        .distinct('week', 'year').values('week', 'year')
+        .distinct('week').values('week')
 
     # create typical week if non existing
     if len([wy for wy in weeks
-            if wy['week'] is None and wy['year'] is None]) == 0:
+            if wy['week'] is None]) == 0:
         # QuerySet does not support append
         weeks = list(weeks)
-        weeks.append({'week': None, 'year': None})
+        weeks.append({'week': None})
     
     for week_dict in weeks:
         for d in days:

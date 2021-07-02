@@ -35,7 +35,7 @@ from base.models import Group, RoomType, Room, \
                         RoomSort, Period, CourseType, \
                         TutorCost, CourseStartTimeConstraint, \
                         TimeGeneralSettings, GroupType, CourseType, \
-                        TrainingProgramme, Course
+                        TrainingProgramme, Course, Week
 
 from displayweb.models import GroupDisplay, TrainingProgrammeDisplay, BreakingNews
 
@@ -47,6 +47,8 @@ logger = logging.getLogger(__name__)
 
 @transaction.atomic
 def create_first_department():
+
+    default_week, created = Week.objects.get_or_create(nb=None, year=None)
 
     department = Department.objects.create(name="Default Department", abbrev="default")
 
