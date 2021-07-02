@@ -527,7 +527,7 @@ class TTModel(object):
 
         # constraint : only one course per basic group on simultaneous slots
         # (and None if transversal ones)
-        if not ScheduleAllCourses.objects.filter(department=self.department).exists():
+        if not NoSimultaneousGroupCourses.objects.filter(department=self.department).exists():
             NoSimultaneousGroupCourses.objects.create(department=self.department)
 
         # a course is scheduled at most once
