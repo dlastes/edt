@@ -2012,7 +2012,7 @@ function find_overlapping_courses(reference_course) { //STAGE j'espère ne pas a
 	overlapping_courses = [];
 	
 	for (let i = 0; i<cours.length ; i++) {
-		if (cours[i]["group"] != reference_group && cours[i]["day"]==reference_day ){ //STAGE && cours[i]["from_transversal"] != null on peut limiter aux cours de groupes transversaux
+		if (cours[i]["group"] == reference_group && cours[i]["day"]==reference_day ){ //STAGE && cours[i]["from_transversal"] != null on peut limiter aux cours de groupes transversaux
 			let cours_finish_time = cours[i]["start"]+cours[i]["duration"];
 			if (cours[i]["start"] < finish_time && cours_finish_time > start_time){
 				overlapping_courses.push(cours[i])
@@ -2071,12 +2071,14 @@ function show_detailed_courses(cours) {
     {'txt':tutinfomail, 'url': url_contact + cours.prof},
   ]; 
   
-  if (overlapping_courses.length > 0) {
+  if (overlapping_courses.length > 1) {
+    infos.push( {'txt':""} );
   	infos.push( {'txt':"Cours ayant lieu en même temps:"} );
-  	for (let i=0; i<overlapping_courses.length; i++) {
-  		infos.push( {'txt':'	Mod: '+overlapping_courses[i]["mod"]} );
-  		infos.push( {'txt':'  Groups: '+overlapping_courses[i]["group"]} );
-  		infos.push( {'txt':'  De: '+overlapping_courses[i]["start"]/60+"h à "+(overlapping_courses[i]["start"]+overlapping_courses[i]["duration"])/60+"h"} );
+  	infos.push( {'txt':""} );
+
+  	for (let i=1; i<overlapping_courses.length; i++) {
+  		infos.push( {'txt':overlapping_courses[i]["mod"] + ' - '
+              + overlapping_courses[i]["from_transversal"] + ' - ' +overlapping_courses[i]["prof"] + ' - '+overlapping_courses[i]["start"]/60+"h à "+(overlapping_courses[i]["start"]+overlapping_courses[i]["duration"])/60+"h"} );
   		infos.push( {'txt':''});
   	}
   }
