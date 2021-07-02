@@ -48,8 +48,6 @@ logger = logging.getLogger(__name__)
 @transaction.atomic
 def create_first_department():
 
-    default_week, created = Week.objects.get_or_create(nb=None, year=None)
-
     department = Department.objects.create(name="Default Department", abbrev="default")
 
     T = Tutor.objects.create(username='admin', is_staff=True, is_tutor=True, is_superuser=True, rights=6)
