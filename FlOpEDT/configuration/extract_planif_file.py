@@ -29,7 +29,7 @@ import sys
 from openpyxl import *
 
 from base.weeks import actual_year
-from base.models import GenericGroup, Module, Course, CourseType, RoomType,\
+from base.models import Group, Module, Course, CourseType, RoomType,\
     TrainingProgramme, Dependency, Period, Department, CoursePossibleTutors, ModuleTutorRepartition, CourseAdditional, \
     Week
 from people.models import Tutor, UserDepartmentSettings
