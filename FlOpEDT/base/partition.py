@@ -120,6 +120,8 @@ class Partition(object):
             else:
                 nb_slots += current_duration//duration
                 current_duration = 0
+        nb_slots += current_duration//duration
+        current_duration = 0
         return int(nb_slots)
 
     def nb_slots_not_forbidden_of_duration(self, duration):
@@ -131,6 +133,8 @@ class Partition(object):
             else:
                 nb_slots += current_duration//duration
                 current_duration = 0
+        nb_slots += current_duration//duration
+        current_duration = 0
         return int(nb_slots)
 
     @property
