@@ -117,6 +117,20 @@ class GenericGroup(models.Model):
         except:
             return False
 
+    @property
+    def transversal_conflicting_groups(self):
+        """
+        :return: the set of all TransversalGroup containing self
+        """
+        return TransversalGroup.objects.filter(conflicting_groups__in = [self])
+
+    @property
+    def transversal_parallel_groups(self):
+        """
+        :return: the set of all TransversalGroup containing self
+        """
+        return TransversalGroup.objects.filter(parallel_groups__in = [self])
+
 class StructuralGroup(GenericGroup):
     basic = models.BooleanField(verbose_name=_('Basic group?'), default=False)
     parent_groups = models.ManyToManyField('self', symmetrical=False,
