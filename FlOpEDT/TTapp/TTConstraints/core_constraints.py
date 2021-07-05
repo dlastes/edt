@@ -56,9 +56,11 @@ class NoSimultaneousGroupCourses(TTConstraint):
         jsondict = {"status" : "OK", "messages" : []}
 
         considered_basic_groups = pre_analysis_considered_basic_groups(self)
-
         for bg in considered_basic_groups:
-
+            print(bg)
+        print(f"On considère {len(considered_basic_groups)} groupes.")
+        for bg in considered_basic_groups:
+            print(f"Pour le groupe {bg.name} :")
             time_settings = TimeGeneralSettings.objects.get(department = bg.type.department)
             day_start_week = Day(time_settings.days[0], week)
             day_end_week = Day(time_settings.days[len(time_settings.days)-1], week)
@@ -77,9 +79,10 @@ class NoSimultaneousGroupCourses(TTConstraint):
             considered_courses = set(c for c in Course.objects.filter(week=week, groups__in=bg.and_ancestors()))
 
             course_time_needed = sum(c.type.duration for c in considered_courses)
+            print(f"Le temps de cours à placer est de {course_time_needed} minutes et il y a {group_partition.not_forbidden_duration} minutes disponibles.")
             if course_time_needed > group_partition.not_forbidden_duration:
                 jsondict["status"] = "KO"
-                jsondict["messages"].append(_(f"Group {bg.name} has {group_partition.not_forbidden_duration} possibly available time but requires {course_time_needed}."))
+                jsondict["messages"].append(_(f"Group {bg.name} has {group_partition.not_forbidden_duration} available time but requires {course_time_needed}."))
             else:
                 course_dict = dict()
                 for c in considered_courses:
@@ -88,9 +91,10 @@ class NoSimultaneousGroupCourses(TTConstraint):
                     else:
                         course_dict[c.type.duration] = 1 
                 for duration, nb_courses in course_dict.items():
+                    print(f"Il y a {group_partition.nb_slots_not_forbidden_of_duration(duration)} créneaux pour {nb_courses} cours.")
                     if group_partition.nb_slots_not_forbidden_of_duration(duration) < nb_courses:
                         jsondict["status"] = "KO"
-                        jsondict["messages"].append(_(f"Group {bg.name} has {group_partition.nb_slots_not_forbidden_of_duration(duration)} slots possibly available but requires {nb_courses}.")) 
+                        jsondict["messages"].append(_(f"Group {bg.name} has {group_partition.nb_slots_not_forbidden_of_duration(duration)} slots available of {duration} minutes and requires {nb_courses}.")) 
         return JsonResponse(data = jsondict)
 
     def enrich_model(self, ttmodel, week, ponderation=1):
