@@ -56,8 +56,6 @@ class NoSimultaneousGroupCourses(TTConstraint):
         jsondict = {"status" : "OK", "messages" : []}
 
         considered_basic_groups = pre_analysis_considered_basic_groups(self)
-        for bg in considered_basic_groups:
-            print(bg)
         print(f"On considère {len(considered_basic_groups)} groupes.")
         for bg in considered_basic_groups:
             print(f"Pour le groupe {bg.name} :")
@@ -66,7 +64,12 @@ class NoSimultaneousGroupCourses(TTConstraint):
             day_end_week = Day(time_settings.days[len(time_settings.days)-1], week)
             start_week = flopdate_to_datetime(day_start_week, time_settings.day_start_time)
             end_week = flopdate_to_datetime(day_end_week, time_settings.day_finish_time)
+            
+            transversal_conflict_groups = bg.transversal_conflicting_groups
+            for bcg in bg.connected_groups():
+                transversal_conflict_groups.union(bcg.transversal_conflicting_groups)
 
+            print(f'Les groupes transversaux de {bg} sont {transversal_conflict_groups}.')
             group_partition = Partition(
                 "GroupPartition",
                 start_week,
@@ -77,7 +80,8 @@ class NoSimultaneousGroupCourses(TTConstraint):
             group_partition.add_lunch_break(time_settings.lunch_break_start_time, time_settings.lunch_break_finish_time)
             group_partition.add_week_end(time_settings.days)
             considered_courses = set(c for c in Course.objects.filter(week=week, groups__in=bg.and_ancestors()))
-
+            if transversal_conflict_groups:
+                considered_courses|= set(c for c in Course.objects.filter(week=week, groups__in = transversal_conflict_groups))
             course_time_needed = sum(c.type.duration for c in considered_courses)
             print(f"Le temps de cours à placer est de {course_time_needed} minutes et il y a {group_partition.not_forbidden_duration} minutes disponibles.")
             if course_time_needed > group_partition.not_forbidden_duration:
