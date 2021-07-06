@@ -117,20 +117,6 @@ class GenericGroup(models.Model):
         except:
             return False
 
-    @property
-    def transversal_conflicting_groups(self):
-        """
-        :return: the set of all TransversalGroup containing self
-        """
-        return TransversalGroup.objects.filter(conflicting_groups__in = [self])
-
-    @property
-    def transversal_parallel_groups(self):
-        """
-        :return: the set of all TransversalGroup containing self
-        """
-        return TransversalGroup.objects.filter(parallel_groups__in = [self])
-
 class StructuralGroup(GenericGroup):
     basic = models.BooleanField(verbose_name=_('Basic group?'), default=False)
     parent_groups = models.ManyToManyField('self', symmetrical=False,
@@ -180,6 +166,13 @@ class StructuralGroup(GenericGroup):
         """
         return {self} | self.descendants_groups() | self.ancestor_groups()
 
+    @property
+    def transversal_conflicting_groups(self):
+        """
+        :return: the set of all TransversalGroup containing self
+        """
+        return TransversalGroup.objects.filter(conflicting_groups__in = self.connected_groups())
+
 
 class TransversalGroup(GenericGroup):
     conflicting_groups = models.ManyToManyField("base.StructuralGroup", blank=True)
@@ -188,6 +181,8 @@ class TransversalGroup(GenericGroup):
                                              blank=True)
     generic = models.OneToOneField('GenericGroup', on_delete=models.CASCADE, parent_link=True)
 
+    def nb_of_courses(self, week):
+        return len(Course.objects.filter(week = week, groups = self))
 
 # </editor-fold desc="GROUPS">
 

@@ -26,7 +26,7 @@
 
 from django.http.response import JsonResponse
 from base.timing import TimeInterval
-from base.models import Department, TimeGeneralSettings
+from base.models import Department, TimeGeneralSettings, TransversalGroup
 from django.db import models
 
 from TTapp.TTConstraint import TTConstraint
@@ -65,11 +65,27 @@ class NoSimultaneousGroupCourses(TTConstraint):
             start_week = flopdate_to_datetime(day_start_week, time_settings.day_start_time)
             end_week = flopdate_to_datetime(day_end_week, time_settings.day_finish_time)
             
-            transversal_conflict_groups = bg.transversal_conflicting_groups
-            for bcg in bg.connected_groups():
-                transversal_conflict_groups.union(bcg.transversal_conflicting_groups)
+            ### Coloration ###
+            graph = coloration_ordered(bg)
+            ### Coloration ###
+            transversal_conflict_groups = set()
+            if graph:
 
-            print(f'Les groupes transversaux de {bg} sont {transversal_conflict_groups}.')
+                for i in range(1,graph["color_max"]+1):
+                    groups = []
+                    for summit, graph_dict in graph.items():
+                        if summit != "color_max":
+                            if graph_dict["color"] == i:
+                                groups.append(summit)
+
+                    group_to_consider = groups[0]
+                    nb_courses = groups[0].nb_of_courses(week)
+                    for gp in groups:
+                        if gp.nb_of_courses(week) > nb_courses:
+                            group_to_consider = gp
+                            nb_courses = gp.nb_of_courses(week)
+                    transversal_conflict_groups.add(group_to_consider)
+
             group_partition = Partition(
                 "GroupPartition",
                 start_week,
@@ -80,6 +96,7 @@ class NoSimultaneousGroupCourses(TTConstraint):
             group_partition.add_lunch_break(time_settings.lunch_break_start_time, time_settings.lunch_break_finish_time)
             group_partition.add_week_end(time_settings.days)
             considered_courses = set(c for c in Course.objects.filter(week=week, groups__in=bg.and_ancestors()))
+            print(f"Les groupes transversaux prix en considérations sont {transversal_conflict_groups}.")
             if transversal_conflict_groups:
                 considered_courses|= set(c for c in Course.objects.filter(week=week, groups__in = transversal_conflict_groups))
             course_time_needed = sum(c.type.duration for c in considered_courses)
@@ -435,3 +452,52 @@ class ConsiderTutorsUnavailability(TTConstraint):
 
     def __str__(self):
         return _("Consider tutors unavailability")
+
+
+
+# basic_group : StructuralGroup which is basic
+# returns : None if no TransversalGroups is found for 'basic_group' or
+# a dictionnary representing a graph of those TransversalGroups colored
+# according to this pattern:
+#   {
+#       transversal_group_1: {  
+#                               "adjacent" : [tr1, tr2, tr3...]
+#                               "color" : int
+#                            }
+#       transversal_group_2: {  
+#                               "adjacen" : [tr1, tr2, tr3...]
+#                               "color" : int
+#                            }
+#       ....
+#
+#       "color_max" : int
+# }
+def coloration_ordered(basic_group):
+    transversal_conflict_groups = basic_group.transversal_conflicting_groups
+
+    if transversal_conflict_groups:
+        graph = []
+        for tr in transversal_conflict_groups:
+            graph.append((tr, [t for t in transversal_conflict_groups if t != tr and t not in tr.parallel_groups.all()], 0))
+        print(f'Les groupes transversaux de {basic_group} sont {transversal_conflict_groups}.')
+        print(graph)
+        graph.sort(key = lambda x : -len(x[1]))
+        graph_dict = dict()
+        for summit in graph:
+            graph_dict[summit[0]] = {"adjacent": summit[1], "color" : summit[2]}
+
+        color_max = 0
+        for summit, summit_dict in graph_dict.items():
+            color_adj = set()
+            for adj in summit_dict["adjacent"]:
+                color_adj.add(graph_dict[adj]["color"])
+            i = 1
+            while i in color_adj:
+                i+=1
+            summit_dict["color"] = i
+            if i > color_max:
+                color_max = i
+        print(graph_dict)
+        graph_dict["color_max"] = color_max
+        return graph_dict
+    return None
