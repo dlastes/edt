@@ -184,6 +184,12 @@ class TransversalGroup(GenericGroup):
     def nb_of_courses(self, week):
         return len(Course.objects.filter(week = week, groups = self))
 
+    def time_of_courses(self, week):
+        t = 0
+        for c in Course.objects.filter(week=week, groups = self):
+            t += c.type.duration
+        return t
+
 # </editor-fold desc="GROUPS">
 
 
