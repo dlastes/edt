@@ -56,9 +56,7 @@ class NoSimultaneousGroupCourses(TTConstraint):
         jsondict = {"status" : "OK", "messages" : []}
 
         considered_basic_groups = pre_analysis_considered_basic_groups(self)
-        print(f"On considère {len(considered_basic_groups)} groupes.")
         for bg in considered_basic_groups:
-            print(f"Pour le groupe {bg.name} :")
 
             #Retrieving information about general time settings and creating the partition
             time_settings = TimeGeneralSettings.objects.get(department = bg.type.department)
@@ -79,35 +77,34 @@ class NoSimultaneousGroupCourses(TTConstraint):
 
             
             ### Coloration ###
-            graph = coloration_ordered(bg)
+            tuple_graph = coloration_ordered(bg)
             ### Coloration ###
 
             #We are looking for the maximum courses' time of transversal groups 
             max_courses_time_transversal = 0
-            if graph:
+            if tuple_graph:
+                graph, color_max = tuple_graph
                 for transversal_group in graph:
-                    if transversal_group != "color_max":
-                        time_courses = transversal_group.time_of_courses(week)
-                        if time_courses > max_courses_time_transversal:
-                            max_courses_time_transversal = time_courses
+                    time_courses = transversal_group.time_of_courses(week)
+                    if time_courses > max_courses_time_transversal:
+                        max_courses_time_transversal = time_courses
 
 
             #we are looking for the minimum transversal_groups we need to consider
             transversal_conflict_groups = set()
-            if graph:
-                for i in range(1,graph["color_max"]+1):
+            if tuple_graph:
+                for i in range(1,color_max+1):
                     groups = []
                     for summit, graph_dict in graph.items():
-                        if summit != "color_max":
-                            if graph_dict["color"] == i:
-                                groups.append(summit)
+                        if graph_dict["color"] == i:
+                            groups.append(summit)
 
                     group_to_consider = groups[0]
-                    nb_courses = groups[0].nb_of_courses(week)
+                    time_group_courses = groups[0].time_of_courses(week)
                     for gp in groups:
-                        if gp.nb_of_courses(week) > nb_courses:
+                        if gp.time_of_courses(week) > time_group_courses:
                             group_to_consider = gp
-                            nb_courses = gp.nb_of_courses(week)
+                            time_group_courses = gp.time_of_courses(week)
                     transversal_conflict_groups.add(group_to_consider)
 
             #Set of courses for the group and all its structural ancestors
@@ -129,15 +126,15 @@ class NoSimultaneousGroupCourses(TTConstraint):
                     jsondict["messages"].append(_(f"Group {bg.name} has {group_partition.not_forbidden_duration} available time but probably requires minimum {course_time_needed}."))
                 else:
                     #We are checking if we have enough slots for each course type
-                    #Need to improve to substract what we already checked
                     course_dict = dict()
                     for c in considered_courses:
                         if c.type.duration in course_dict:
                             course_dict[c.type.duration] += 1
                         else:
                             course_dict[c.type.duration] = 1 
+
+                            
                     for duration, nb_courses in course_dict.items():
-                        print(f"Il y a {group_partition.nb_slots_not_forbidden_of_duration(duration)} créneaux pour {nb_courses} cours.")
                         if group_partition.nb_slots_not_forbidden_of_duration(duration) < nb_courses:
                             jsondict["status"] = "KO"
                             jsondict["messages"].append(_(f"Group {bg.name} has {group_partition.nb_slots_not_forbidden_of_duration(duration)} slots available of {duration} minutes and requires {nb_courses}.")) 
@@ -482,7 +479,7 @@ class ConsiderTutorsUnavailability(TTConstraint):
 
 # basic_group : StructuralGroup which is basic
 # returns : None if no TransversalGroups is found for 'basic_group' or
-# a dictionnary representing a graph of those TransversalGroups colored
+# a tuple (dictionnary, color_max) with the dictionnary representing a graph of those TransversalGroups colored
 # according to this pattern:
 #   {
 #       transversal_group_1: {  
@@ -494,8 +491,6 @@ class ConsiderTutorsUnavailability(TTConstraint):
 #                               "color" : int
 #                            }
 #       ....
-#
-#       "color_max" : int
 # }
 def coloration_ordered(basic_group):
     transversal_conflict_groups = basic_group.transversal_conflicting_groups
@@ -504,8 +499,6 @@ def coloration_ordered(basic_group):
         graph = []
         for tr in transversal_conflict_groups:
             graph.append((tr, [t for t in transversal_conflict_groups if t != tr and t not in tr.parallel_groups.all()], 0))
-        print(f'Les groupes transversaux de {basic_group} sont {transversal_conflict_groups}.')
-        print(graph)
         graph.sort(key = lambda x : -len(x[1]))
         graph_dict = dict()
         for summit in graph:
@@ -522,7 +515,5 @@ def coloration_ordered(basic_group):
             summit_dict["color"] = i
             if i > color_max:
                 color_max = i
-        print(graph_dict)
-        graph_dict["color_max"] = color_max
-        return graph_dict
+        return graph_dict, color_max
     return None
