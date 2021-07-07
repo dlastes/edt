@@ -59,18 +59,42 @@ class NoSimultaneousGroupCourses(TTConstraint):
         print(f"On considère {len(considered_basic_groups)} groupes.")
         for bg in considered_basic_groups:
             print(f"Pour le groupe {bg.name} :")
+
+            #Retrieving information about general time settings and creating the partition
             time_settings = TimeGeneralSettings.objects.get(department = bg.type.department)
             day_start_week = Day(time_settings.days[0], week)
             day_end_week = Day(time_settings.days[len(time_settings.days)-1], week)
             start_week = flopdate_to_datetime(day_start_week, time_settings.day_start_time)
             end_week = flopdate_to_datetime(day_end_week, time_settings.day_finish_time)
+
+            group_partition = Partition(
+                "GroupPartition",
+                start_week,
+                end_week,
+                time_settings.day_start_time,
+                time_settings.day_finish_time
+            )
+            group_partition.add_lunch_break(time_settings.lunch_break_start_time, time_settings.lunch_break_finish_time)
+            group_partition.add_week_end(time_settings.days)
+
             
             ### Coloration ###
             graph = coloration_ordered(bg)
             ### Coloration ###
+
+            #We are looking for the maximum courses' time of transversal groups 
+            max_courses_time_transversal = 0
+            if graph:
+                for transversal_group in graph:
+                    if transversal_group != "color_max":
+                        time_courses = transversal_group.time_of_courses(week)
+                        if time_courses > max_courses_time_transversal:
+                            max_courses_time_transversal = time_courses
+
+
+            #we are looking for the minimum transversal_groups we need to consider
             transversal_conflict_groups = set()
             if graph:
-
                 for i in range(1,graph["color_max"]+1):
                     groups = []
                     for summit, graph_dict in graph.items():
@@ -86,36 +110,37 @@ class NoSimultaneousGroupCourses(TTConstraint):
                             nb_courses = gp.nb_of_courses(week)
                     transversal_conflict_groups.add(group_to_consider)
 
-            group_partition = Partition(
-                "GroupPartition",
-                start_week,
-                end_week,
-                time_settings.day_start_time,
-                time_settings.day_finish_time
-            )
-            group_partition.add_lunch_break(time_settings.lunch_break_start_time, time_settings.lunch_break_finish_time)
-            group_partition.add_week_end(time_settings.days)
+            #Set of courses for the group and all its structural ancestors
             considered_courses = set(c for c in Course.objects.filter(week=week, groups__in=bg.and_ancestors()))
-            print(f"Les groupes transversaux prix en considérations sont {transversal_conflict_groups}.")
-            if transversal_conflict_groups:
-                considered_courses|= set(c for c in Course.objects.filter(week=week, groups__in = transversal_conflict_groups))
-            course_time_needed = sum(c.type.duration for c in considered_courses)
-            print(f"Le temps de cours à placer est de {course_time_needed} minutes et il y a {group_partition.not_forbidden_duration} minutes disponibles.")
-            if course_time_needed > group_partition.not_forbidden_duration:
+            #Mimimum time needed in any cases
+            min_course_time_needed = sum(c.type.duration for c in considered_courses) + max_courses_time_transversal
+            if min_course_time_needed > group_partition.not_forbidden_duration:
                 jsondict["status"] = "KO"
-                jsondict["messages"].append(_(f"Group {bg.name} has {group_partition.not_forbidden_duration} available time but requires {course_time_needed}."))
+                jsondict["messages"].append(_(f"Group {bg.name} has {group_partition.not_forbidden_duration} available time but requires minimum {min_course_time_needed}."))
             else:
-                course_dict = dict()
-                for c in considered_courses:
-                    if c.type.duration in course_dict:
-                        course_dict[c.type.duration] += 1
-                    else:
-                        course_dict[c.type.duration] = 1 
-                for duration, nb_courses in course_dict.items():
-                    print(f"Il y a {group_partition.nb_slots_not_forbidden_of_duration(duration)} créneaux pour {nb_courses} cours.")
-                    if group_partition.nb_slots_not_forbidden_of_duration(duration) < nb_courses:
-                        jsondict["status"] = "KO"
-                        jsondict["messages"].append(_(f"Group {bg.name} has {group_partition.nb_slots_not_forbidden_of_duration(duration)} slots available of {duration} minutes and requires {nb_courses}.")) 
+                #If they exists we add the transversal courses to the considered_courses
+                if transversal_conflict_groups:
+                    considered_courses = considered_courses | set(c for c in Course.objects.filter(week=week, groups__in = transversal_conflict_groups))
+
+                #If we are below that amount of time we probably cannot do it.
+                course_time_needed = sum(c.type.duration for c in considered_courses)
+                if course_time_needed > group_partition.not_forbidden_duration:
+                    jsondict["status"] = "KO"
+                    jsondict["messages"].append(_(f"Group {bg.name} has {group_partition.not_forbidden_duration} available time but probably requires minimum {course_time_needed}."))
+                else:
+                    #We are checking if we have enough slots for each course type
+                    #Need to improve to substract what we already checked
+                    course_dict = dict()
+                    for c in considered_courses:
+                        if c.type.duration in course_dict:
+                            course_dict[c.type.duration] += 1
+                        else:
+                            course_dict[c.type.duration] = 1 
+                    for duration, nb_courses in course_dict.items():
+                        print(f"Il y a {group_partition.nb_slots_not_forbidden_of_duration(duration)} créneaux pour {nb_courses} cours.")
+                        if group_partition.nb_slots_not_forbidden_of_duration(duration) < nb_courses:
+                            jsondict["status"] = "KO"
+                            jsondict["messages"].append(_(f"Group {bg.name} has {group_partition.nb_slots_not_forbidden_of_duration(duration)} slots available of {duration} minutes and requires {nb_courses}.")) 
         return JsonResponse(data = jsondict)
 
     def enrich_model(self, ttmodel, week, ponderation=1):
