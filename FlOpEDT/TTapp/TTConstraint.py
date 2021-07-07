@@ -23,6 +23,9 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
+from base.partition import Partition
+from base.timing import Day, flopdate_to_datetime
+from base.models import TimeGeneralSettings
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 from django.utils.translation import gettext_lazy as _
@@ -163,3 +166,17 @@ class TTConstraint(models.Model):
             if hasattr(self, attr) and attr not in kwargs:
                 kwargs[attr] = getattr(self, attr)
         return self.get_courses_queryset_by_parameters(ttmodel, week, **kwargs)
+    
+    def get_partition_of_week(self, week, with_day_time = False):
+        if week in self.weeks:
+            time_settings = TimeGeneralSettings.objects.get(department = self.department)
+            day_start_week = Day(time_settings.days[0], week)
+            day_end_week = Day(time_settings.days[len(time_settings.days)-1], week)
+            start_week = flopdate_to_datetime(day_start_week, time_settings.day_start_time)
+            end_week = flopdate_to_datetime(day_end_week, time_settings.day_finish_time)
+            considered_week_partition = Partition("None", start_week, end_week)
+            if with_day_time:
+                considered_week_partition.add_lunch_break(time_settings.lunch_break_start_time, time_settings.lunch_break_finish_time)
+                considered_week_partition.add_night_time(time_settings.day_start_time, time_settings.day_finish_time)
+            return considered_week_partition
+        return None

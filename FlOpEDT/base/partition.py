@@ -91,6 +91,8 @@ class Partition(object):
 
     def add_night_time(self, day_start_time ,day_end_time):
         #First element of the list of tuples, and the first element of the tuple ie the TimeInterval
+        self.day_start_time = day_start_time
+        self.day_end_time = day_end_time
         day = self.intervals[0][0].start
         end_hours = day_end_time//60
         end_minutes = day_end_time%60

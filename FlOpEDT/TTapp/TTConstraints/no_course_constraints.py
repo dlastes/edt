@@ -102,11 +102,7 @@ class NoGroupCourseOnDay(NoCourseOnDay):
     #else return None ?
     def get_partition_group_constraint(self, week, group):
         time_settings = TimeGeneralSettings.objects.get(department = self.department)
-        day_start_week = Day(time_settings.days[0], week)
-        day_end_week = Day(time_settings.days[len(time_settings.days)-1], week)
-        start_week = flopdate_to_datetime(day_start_week, time_settings.day_start_time)
-        end_week = flopdate_to_datetime(day_end_week, time_settings.day_finish_time)
-        considered_week_partition = Partition("None", start_week, end_week)
+        considered_week_partition = self.get_partition_of_week(week, False)
         if group in self.groups and week in self.weeks:
             day_break = Day(self.weekday, week)
             if self.period == self.FULL_DAY:
@@ -140,11 +136,7 @@ class NoGroupCourseOnDay(NoCourseOnDay):
 
     def get_partition_type_constraint(self, week, course_type):
         time_settings = TimeGeneralSettings.objects.get(department = self.department)
-        day_start_week = Day(time_settings.days[0], week)
-        day_end_week = Day(time_settings.days[len(time_settings.days)-1], week)
-        start_week = flopdate_to_datetime(day_start_week, time_settings.day_start_time)
-        end_week = flopdate_to_datetime(day_end_week, time_settings.day_finish_time)
-        considered_week_partition = Partition("None", start_week, end_week)
+        considered_week_partition = self.get_partition_of_week(week, False)
         if course_type in self.course_types and week in self.weeks:
             day_break = Day(self.weekday, week)
             if self.period == self.FULL_DAY:
