@@ -23,8 +23,10 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
+from base.models import TimeGeneralSettings
+from base.partition import Partition
 from django.db import models
-from base.timing import Day
+from base.timing import Day, TimeInterval, flopdate_to_datetime
 from people.models import Tutor
 
 
@@ -97,6 +99,82 @@ class NoGroupCourseOnDay(NoCourseOnDay):
             text += ' en ' + ', '.join([train_prog.abbrev for train_prog in self.train_progs.all()])
         return text
 
+    #else return None ?
+    def get_partition_group_constraint(self, week, group):
+        time_settings = TimeGeneralSettings.objects.get(department = self.department)
+        day_start_week = Day(time_settings.days[0], week)
+        day_end_week = Day(time_settings.days[len(time_settings.days)-1], week)
+        start_week = flopdate_to_datetime(day_start_week, time_settings.day_start_time)
+        end_week = flopdate_to_datetime(day_end_week, time_settings.day_finish_time)
+        considered_week_partition = Partition("None", start_week, end_week)
+        if group in self.groups and week in self.weeks:
+            day_break = Day(self.weekday, week)
+            if self.period == self.FULL_DAY:
+                considered_week_partition.add_slot(
+                    TimeInterval(flopdate_to_datetime(day_break, time_settings.day_start_time), flopdate_to_datetime(day_break, time_settings.day_finish_time)),
+                    "all",
+                    { "no_course" : 
+                        { "period" : self.FULL_DAY, "entity": group },
+                        "forbidden" : True 
+                    }
+                )
+            elif self.period == self.AM:
+                considered_week_partition.add_slot(
+                    TimeInterval(flopdate_to_datetime(day_break, time_settings.day_start_time), flopdate_to_datetime(day_break, time_settings.lunch_break_start_time)),
+                    "all",
+                    { "no_course" : 
+                        { "period" : self.AM, "entity": group },
+                        "forbidden" : True 
+                    }
+                )
+            elif self.period == self.PM:
+                considered_week_partition.add_slot(
+                    TimeInterval(flopdate_to_datetime(day_break, time_settings.lunch_break_finish_time), flopdate_to_datetime(day_break, time_settings.day_finish_time)),
+                    "all",
+                    { "no_course" : 
+                        { "period" : self.PM, "entity": group },
+                        "forbidden" : True 
+                    }
+                )
+        return considered_week_partition
+
+    def get_partition_type_constraint(self, week, course_type):
+        time_settings = TimeGeneralSettings.objects.get(department = self.department)
+        day_start_week = Day(time_settings.days[0], week)
+        day_end_week = Day(time_settings.days[len(time_settings.days)-1], week)
+        start_week = flopdate_to_datetime(day_start_week, time_settings.day_start_time)
+        end_week = flopdate_to_datetime(day_end_week, time_settings.day_finish_time)
+        considered_week_partition = Partition("None", start_week, end_week)
+        if course_type in self.course_types and week in self.weeks:
+            day_break = Day(self.weekday, week)
+            if self.period == self.FULL_DAY:
+                considered_week_partition.add_slot(
+                    TimeInterval(flopdate_to_datetime(day_break, time_settings.day_start_time), flopdate_to_datetime(day_break, time_settings.day_finish_time)),
+                    "all",
+                    { "no_course" : 
+                        { "period" : self.FULL_DAY, "entity": course_type },
+                        "forbidden" : True 
+                    }
+                )
+            elif self.period == self.AM:
+                considered_week_partition.add_slot(
+                    TimeInterval(flopdate_to_datetime(day_break, time_settings.day_start_time), flopdate_to_datetime(day_break, time_settings.lunch_break_start_time)),
+                    "all",
+                    { "no_course" : 
+                        { "period" : self.AM, "entity": course_type },
+                        "forbidden" : True 
+                    }
+                )
+            elif self.period == self.PM:
+                considered_week_partition.add_slot(
+                    TimeInterval(flopdate_to_datetime(day_break, time_settings.lunch_break_finish_time), flopdate_to_datetime(day_break, time_settings.day_finish_time)),
+                    "all",
+                    { "no_course" : 
+                        { "period" : self.PM, "entity": course_type },
+                        "forbidden" : True 
+                    }
+                )
+        return considered_week_partition
 
 class NoTutorCourseOnDay(NoCourseOnDay):
     tutors = models.ManyToManyField('people.Tutor', blank=True)
