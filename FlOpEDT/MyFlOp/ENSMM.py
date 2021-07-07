@@ -4,6 +4,7 @@ from people.models import Tutor
 from base.models import ModulePossibleTutors, Module, CoursePreference, UserPreference
 from people.tutor import fill_default_user_preferences
 from configuration.deploy_database import extract_database_file
+from configuration.make_planif_file import make_planif_file
 from MyFlOp.database_ENSMM import database_ENSMM
 from MyFlOp.cours_ENSMM import cours_ENSMM
 from configuration.hyperplanning import extract_courses_from_book
@@ -14,7 +15,8 @@ from django.db import transaction
 def global_extraction(abbrev='ENSMM', name='ENSMM', delete_groups=True):
     #Modif du book
     book = database_ENSMM
-    append_conflicting_and_parallel_groups(book["groups"],book["transversal_groups"])
+    append_conflicting_and_parallel_groups(book["groups"], book["transversal_groups"])
+    define_one_period_per_train_prog(book)
     applyRoomTypes(book)
     extract_database_file(abbrev, name, book=book, fill_default_preferences=False)
     dep = Department.objects.get(abbrev=abbrev)
@@ -34,6 +36,7 @@ def global_extraction(abbrev='ENSMM', name='ENSMM', delete_groups=True):
     generate_course_preferences()
     #convert_to_transversal(database_ENSMM['transversal_groups'].keys())
     dep = Department.objects.get(abbrev=abbrev)
+    make_planif_file(dep, with_courses=True)
     assign_module_color(dep, overwrite=True)
     #APPELLER LE SCRIPT POUR DEF LES GROUPES CONFLICT ET PARA
 
@@ -218,3 +221,11 @@ def generate_course_preferences():
             for ct in CourseType.objects.all():
                 CoursePreference.objects.create(course_type=ct, train_prog = t, day = u.day,
                                                 start_time = u.start_time, duration = u.duration, value = value)
+
+
+def define_one_period_per_train_prog(book):
+    weeks = book["settings"]["periods"].pop("annee")
+    for tp in book["promotions"]:
+        book["settings"]['periods'][tp[:20]] = weeks
+    for m in book["modules"]:
+        book['modules'][m]["period"] = book["modules"][m]["promotion"][:20]
