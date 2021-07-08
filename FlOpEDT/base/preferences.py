@@ -76,8 +76,7 @@ def split_preferences(tutor, departments=None):
     weeks = [user_pref.week for user_pref in considered_user_pref]
 
     # create typical week if non existing
-    if len([wy for wy in weeks
-            if wy.nb is None and wy.year is None]) == 0:
+    if None not in weeks:
         # if database has been flushed, create all necessary weeks
         if not Week.objects.exists():
             for y in range(10, 51):
