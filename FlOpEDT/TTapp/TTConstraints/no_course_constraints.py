@@ -198,3 +198,32 @@ class NoTutorCourseOnDay(NoCourseOnDay):
         if self.train_progs.exists():
             text += ' en ' + ', '.join([train_prog.abbrev for train_prog in self.train_progs.all()])
         return text
+
+    def get_slot_constraint(self, week):
+            time_settings = self.time_settings()
+            if week in self.weeks:
+                day_break = Day(self.weekday, week)
+                if self.period == self.FULL_DAY:
+                    return(TimeInterval(flopdate_to_datetime(day_break, time_settings.day_start_time), flopdate_to_datetime(day_break, time_settings.day_finish_time)),
+                            { "no_course" : 
+                                { "period" : self.FULL_DAY, "tutors": self.tutors, "tutor_status": self.tutor_status },
+                                "forbidden" : True 
+                            }
+                        )
+                elif self.period == self.AM:
+                    return (
+                        TimeInterval(flopdate_to_datetime(day_break, time_settings.day_start_time), flopdate_to_datetime(day_break, time_settings.lunch_break_start_time)),
+                        { "no_course" : 
+                            { "period" : self.AM, "tutors": self.tutors, "tutor_status": self.tutor_status },
+                            "forbidden" : True 
+                        }
+                    )
+                elif self.period == self.PM:
+                    return (
+                        TimeInterval(flopdate_to_datetime(day_break, time_settings.lunch_break_finish_time), flopdate_to_datetime(day_break, time_settings.day_finish_time)),
+                        { "no_course" : 
+                            { "period" : self.PM, "tutors": self.tutors, "tutor_status": self.tutor_status },
+                            "forbidden" : True 
+                        }
+                    )
+            return None
