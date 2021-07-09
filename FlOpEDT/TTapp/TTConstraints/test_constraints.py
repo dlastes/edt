@@ -24,8 +24,12 @@
 # without disclosing the source code of your own applications.
 
 
+from datetime import datetime, timedelta
+from TTapp.TTConstraints.no_course_constraints import NoTutorCourseOnDay
+from base.timing import Day, TimeInterval, flopdate_to_datetime
 from django.db import models
 from django.http.response import JsonResponse
+from django.db.models import Q
 
 from TTapp.TTConstraint import TTConstraint
 from TTapp.ilp_constraints.constraint import Constraint
@@ -40,6 +44,16 @@ from base.models import UserPreference
 #if successive : vérifier que la fin du premier peut-être juste après un second
 #if ND : vérifier que le premier peut être au minimum un jour avant
 
+def find_successive_slots(course_slot1, course_slot2, course1_duration, course2_duration):
+    for cs1 in course_slot1:
+        possible_start_time = cs1.start + course1_duration
+        for cs2 in course_slot2:
+            if cs2.start <= possible_start_time and cs2.end > possible_start_time + course2_duration:
+                return True
+            if cs2.start > possible_start_time:
+                break
+    return False
+
 
 class Precedence(TTConstraint):
     course1 = models.ForeignKey('base.Course', related_name='first', on_delete=models.CASCADE)
@@ -53,6 +67,8 @@ class Precedence(TTConstraint):
     def pre_analysis(self, week):
         jsondict = {"status" : "OK", "messages" : []}
         possible_tutors_1 = set()
+        week_partition_course1 = self.get_partition_of_week(week, with_day_time=True)
+        week_partition_course2 = self.get_partition_of_week(week, with_day_time=True)
         if self.course1.tutor is not None:
             possible_tutors_1.add(self.course1.tutor)
         elif self.course1.supp_tutor is not None:
@@ -81,16 +97,76 @@ class Precedence(TTConstraint):
             
             #Si on a des préférences possibles pour les deux
             if D1 and D2:
-                if self.successive:
-                    D1 = [d1 for d1 in D1 for d2 in D2 if d2.is_successor_of(d1)]
-                    D2 = [d2 for d1 in D1 for d2 in D2 if d2.is_successor_of(d1)]
-                elif self.ND:
-                    #On réduit le nombre de préférences à celles qui ne sont pas le même jour.
-                    D1 = [d1 for d1 in D1 for d2 in D2 if not d1.same_day(d2)]
-                    D2 = [d2 for d2 in D2 for d1 in D1 if not d2.same_day(d1)]
-                    
-                #All contradictoire avec same_day ? (voir comparaison des UserPreferences)
-                return all([d2 > d1 for d2 in D2 for d1 in D1])
+                #On rajoute toutes les User_Preferences à la partition
+                no_course_tutor1 = NoTutorCourseOnDay.objects.filter(Q(tutors = possible_tutors_1) | Q(tutor_status = [pt.status for pt in possible_tutors_1]), weeks = week)
+                no_course_tutor2 = NoTutorCourseOnDay.objects.filter(Q(tutors = possible_tutors_2) | Q(tutor_status = [pt.status for pt in possible_tutors_2]), weeks = week)
+                for up in D1:
+                    up_day = Day(up.day, week)
+                    week_partition_course1.add_slot(
+                        TimeInterval(flopdate_to_datetime(up_day, up.start_time),
+                        flopdate_to_datetime(up_day, up.end_time)),
+                        "user_preference",
+                        {"value" : up.value, "available" : True, "tutor" : up.user.username}
+                    )
+                for up in D2:
+                    up_day = Day(up.day, week)
+                    week_partition_course2.add_slot(
+                        TimeInterval(flopdate_to_datetime(up_day, up.start_time),
+                        flopdate_to_datetime(up_day, up.end_time)),
+                        "user_preference",
+                        {"value" : up.value, "available" : True, "tutor" : up.user.username}
+                    )
+                
+                for cs in no_course_tutor1:
+                    slot = cs.get_slot_constraint(week)
+                    if slot:
+                        week_partition_course1.add_slot(
+                            slot[0],
+                            "all",
+                            slot[1]
+                        )
+                for cs in no_course_tutor2:
+                    slot = cs.get_slot_constraint(week)
+                    if slot:
+                        week_partition_course2.add_slot(
+                            slot[0],
+                            "all",
+                            slot[1]
+                        )
+
+                course1_slots = week_partition_course1.find_all_available_timeinterval_with_key("user_preference", self.course1.type.duration)
+                course2_slots = week_partition_course2.find_all_available_timeinterval_with_key("user_preference", self.course2.type.duration)
+                if course1_slots and course2_slots:
+                    while course2_slots[0].end < course1_slots[0].start + timedelta(hours = self.course1.type.duration/60, minutes=self.course1.type.duration%60):
+                        course2_slots.pop(0)
+                        if not course2_slots:
+                            break
+                    if course2_slots:
+                        if course1_slots[0].start + timedelta(hours = self.course1.type.duration/60, minutes=self.course1.type.duration%60) > course2_slots[0].start:
+                            course2_slots[0].start = course1_slots[0].start + timedelta(hours = self.course1.type.duration/60, minutes=self.course1.type.duration%60)
+                        if len(course2_slots) <= 1 and course2_slots[0].duration < self.course2.type.duration:
+                            jsondict["status"] = "KO"
+                            jsondict["messages"].append(_('There is no available slots for the second course after the first one.'))
+                    else:
+                        jsondict["status"] = "KO"
+                        jsondict["messages"].append(_('There is no available slots for the second course.'))
+                else:
+                    jsondict['status'] = "KO"
+                    jsondict["messages"].append(_('There is no available slots for the first or the second course.'))
+
+                if jsondict["status"] == "OK":
+                    if self.successive:
+                        if not find_successive_slots(
+                            course1_slots,
+                            course2_slots,
+                            timedelta(hours = self.course1.type.duration/60, minutes = self.course1.type.duration%60),
+                            timedelta(hours = self.course2.type.duration/60, minutes = self.course2.type.duration%60)):
+                            jsondict['status'] = "KO"
+                            jsondict["messages"].append(_('There is no available successive slots for those courses.'))
+                    if self.day_gap != 0:
+                        if not find_day_gap_slots(course1_slots, course2_slots, self.day_gap):
+                            jsondict['status'] = "KO"
+                            jsondict["messages"].append(_(f'There is no available slots for the second course after a {self.day_gap} day gap.'))
             else:
                 #Certains utilisateurs n'ont aucunes préférences de renseignées.
                 jsondict['status'] = "KO"
@@ -99,3 +175,11 @@ class Precedence(TTConstraint):
                 if not D2:
                     jsondict['messages'].append(_(f"There is no available tutor for {self.course2.full_name()}"))
         return JsonResponse(jsondict)
+
+
+def find_day_gap_slots(course_slot1, course_slot2, day_gap):
+    day_slot = course_slot1[0] + timedelta(days=day_gap) - timedelta(hours=course_slot1[0].hour, minutes=course_slot1[0].minute)
+    for cs2 in course_slot2:
+        if cs2.start > day_slot:
+            return True
+    return False
