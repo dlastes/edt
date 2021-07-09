@@ -180,3 +180,6 @@ class TTConstraint(models.Model):
                 considered_week_partition.add_night_time(time_settings.day_start_time, time_settings.day_finish_time)
             return considered_week_partition
         return None
+
+    def time_settings(self):
+        return TimeGeneralSettings.objects.get(department = self.department)
