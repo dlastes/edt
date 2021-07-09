@@ -211,6 +211,12 @@ class TimeGeneralSettings(models.Model):
 
 
 class Mode(models.Model):
+    """
+    cosmo has to be:
+     - 0 for educational mode
+     - 1 for employee cooperatives in which columns are workplaces
+     - 2 for employee cooperatives in which columns are employees
+    """
     department = models.OneToOneField(Department,
                                       on_delete=models.CASCADE)
     cosmo = models.PositiveSmallIntegerField(default=0, validators=[MaxValueValidator(2)])
