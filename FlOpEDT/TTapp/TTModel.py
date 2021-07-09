@@ -993,7 +993,8 @@ class TTModel(object):
         # because it contains rooms/instructors availability modification...
         self.add_other_departments_constraints()
 
-        self.add_rooms_constraints()
+        if not self.department.mode.cosmo:
+            self.add_rooms_constraints()
 
         self.add_instructors_constraints()
 
@@ -1041,14 +1042,15 @@ class TTModel(object):
                                              start_time=sl.start_time,
                                              day=sl.day.day,
                                              work_copy=target_work_copy)
-
-                        for rg in self.wdb.course_rg_compat[c]:
-                            if self.get_var_value(self.TTrooms[(sl, c, rg)]) == 1:
-                                cp.room = rg
-                                break
-                        cp.save()
-                        if self.department.mode.cosmo == 2:
-                            c.groups.add(corresponding_group[i])
+                        if not self.department.mode.cosmo:
+                            for rg in self.wdb.course_rg_compat[c]:
+                                if self.get_var_value(self.TTrooms[(sl, c, rg)]) == 1:
+                                    cp.room = rg
+                                    break
+                            cp.save()
+                        else:
+                            if self.department.mode.cosmo == 2:
+                                c.groups.add(corresponding_group[i])
 
         for fc in self.wdb.fixed_courses:
             cp = ScheduledCourse(course=fc.course,
