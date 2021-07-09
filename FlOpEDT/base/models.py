@@ -213,8 +213,8 @@ class TimeGeneralSettings(models.Model):
 class Mode(models.Model):
     department = models.OneToOneField(Department,
                                       on_delete=models.CASCADE)
-    cosmo = models.BooleanField(default=False)
-    visio = models.BooleanField(default=True)
+    cosmo = models.PositiveSmallIntegerField(default=0, validators=[MaxValueValidator[2]])
+    visio = models.BooleanField(default=False)
 
 
 @receiver(post_save, sender=Department)
