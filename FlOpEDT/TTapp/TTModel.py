@@ -1047,10 +1047,9 @@ class TTModel(object):
                                 if self.get_var_value(self.TTrooms[(sl, c, rg)]) == 1:
                                     cp.room = rg
                                     break
-                            cp.save()
-                        else:
-                            if self.department.mode.cosmo == 2:
-                                c.groups.add(corresponding_group[i])
+                        cp.save()
+                        if self.department.mode.cosmo == 2:
+                            c.groups.add(corresponding_group[i])
 
         for fc in self.wdb.fixed_courses:
             cp = ScheduledCourse(course=fc.course,
