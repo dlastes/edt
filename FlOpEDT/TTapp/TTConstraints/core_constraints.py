@@ -26,7 +26,7 @@
 
 from django.http.response import JsonResponse
 from base.timing import TimeInterval
-from base.models import Department, TimeGeneralSettings
+from base.models import Department, TimeGeneralSettings, TransversalGroup
 from django.db import models
 
 from TTapp.TTConstraint import TTConstraint
@@ -57,10 +57,8 @@ class NoSimultaneousGroupCourses(TTConstraint):
 
         considered_basic_groups = pre_analysis_considered_basic_groups(self)
         for bg in considered_basic_groups:
-            print(bg)
-        print(f"On considère {len(considered_basic_groups)} groupes.")
-        for bg in considered_basic_groups:
-            print(f"Pour le groupe {bg.name} :")
+
+            #Retrieving information about general time settings and creating the partition
             time_settings = TimeGeneralSettings.objects.get(department = bg.type.department)
             day_start_week = Day(time_settings.days[0], week)
             day_end_week = Day(time_settings.days[len(time_settings.days)-1], week)
@@ -76,25 +74,70 @@ class NoSimultaneousGroupCourses(TTConstraint):
             )
             group_partition.add_lunch_break(time_settings.lunch_break_start_time, time_settings.lunch_break_finish_time)
             group_partition.add_week_end(time_settings.days)
-            considered_courses = set(c for c in Course.objects.filter(week=week, groups__in=bg.and_ancestors()))
 
-            course_time_needed = sum(c.type.duration for c in considered_courses)
-            print(f"Le temps de cours à placer est de {course_time_needed} minutes et il y a {group_partition.not_forbidden_duration} minutes disponibles.")
-            if course_time_needed > group_partition.not_forbidden_duration:
+            
+            ### Coloration ###
+            tuple_graph = coloration_ordered(bg)
+            ### Coloration ###
+
+            #We are looking for the maximum courses' time of transversal groups 
+            max_courses_time_transversal = 0
+            if tuple_graph:
+                graph, color_max = tuple_graph
+                for transversal_group in graph:
+                    time_courses = transversal_group.time_of_courses(week)
+                    if time_courses > max_courses_time_transversal:
+                        max_courses_time_transversal = time_courses
+
+
+            #we are looking for the minimum transversal_groups we need to consider
+            transversal_conflict_groups = set()
+            if tuple_graph:
+                for i in range(1,color_max+1):
+                    groups = []
+                    for summit, graph_dict in graph.items():
+                        if graph_dict["color"] == i:
+                            groups.append(summit)
+
+                    group_to_consider = groups[0]
+                    time_group_courses = groups[0].time_of_courses(week)
+                    for gp in groups:
+                        if gp.time_of_courses(week) > time_group_courses:
+                            group_to_consider = gp
+                            time_group_courses = gp.time_of_courses(week)
+                    transversal_conflict_groups.add(group_to_consider)
+
+            #Set of courses for the group and all its structural ancestors
+            considered_courses = set(c for c in Course.objects.filter(week=week, groups__in=bg.and_ancestors()))
+            #Mimimum time needed in any cases
+            min_course_time_needed = sum(c.type.duration for c in considered_courses) + max_courses_time_transversal
+            if min_course_time_needed > group_partition.not_forbidden_duration:
                 jsondict["status"] = "KO"
-                jsondict["messages"].append(_(f"Group {bg.name} has {group_partition.not_forbidden_duration} available time but requires {course_time_needed}."))
+                jsondict["messages"].append(_(f"Group {bg.name} has {group_partition.not_forbidden_duration} available time but requires minimum {min_course_time_needed}."))
             else:
-                course_dict = dict()
-                for c in considered_courses:
-                    if c.type.duration in course_dict:
-                        course_dict[c.type.duration] += 1
-                    else:
-                        course_dict[c.type.duration] = 1 
-                for duration, nb_courses in course_dict.items():
-                    print(f"Il y a {group_partition.nb_slots_not_forbidden_of_duration(duration)} créneaux pour {nb_courses} cours.")
-                    if group_partition.nb_slots_not_forbidden_of_duration(duration) < nb_courses:
-                        jsondict["status"] = "KO"
-                        jsondict["messages"].append(_(f"Group {bg.name} has {group_partition.nb_slots_not_forbidden_of_duration(duration)} slots available of {duration} minutes and requires {nb_courses}.")) 
+                #If they exists we add the transversal courses to the considered_courses
+                if transversal_conflict_groups:
+                    considered_courses = considered_courses | set(c for c in Course.objects.filter(week=week, groups__in = transversal_conflict_groups))
+
+                #If we are below that amount of time we probably cannot do it.
+                course_time_needed = sum(c.type.duration for c in considered_courses)
+                if course_time_needed > group_partition.not_forbidden_duration:
+                    jsondict["status"] = "KO"
+                    jsondict["messages"].append(_(f"Group {bg.name} has {group_partition.not_forbidden_duration} available time but probably requires minimum {course_time_needed}."))
+                else:
+                    #We are checking if we have enough slots for each course type
+                    course_dict = dict()
+                    for c in considered_courses:
+                        if c.type.duration in course_dict:
+                            course_dict[c.type.duration] += 1
+                        else:
+                            course_dict[c.type.duration] = 1 
+
+                            
+                    for duration, nb_courses in course_dict.items():
+                        if group_partition.nb_slots_not_forbidden_of_duration(duration) < nb_courses:
+                            jsondict["status"] = "KO"
+                            jsondict["messages"].append(_(f"Group {bg.name} has {group_partition.nb_slots_not_forbidden_of_duration(duration)} slots available of {duration} minutes and requires {nb_courses}.")) 
         return JsonResponse(data = jsondict)
 
     def enrich_model(self, ttmodel, week, ponderation=1):
@@ -431,3 +474,46 @@ class ConsiderTutorsUnavailability(TTConstraint):
 
     def __str__(self):
         return _("Consider tutors unavailability")
+
+
+
+# basic_group : StructuralGroup which is basic
+# returns : None if no TransversalGroups is found for 'basic_group' or
+# a tuple (dictionnary, color_max) with the dictionnary representing a graph of those TransversalGroups colored
+# according to this pattern:
+#   {
+#       transversal_group_1: {  
+#                               "adjacent" : [tr1, tr2, tr3...]
+#                               "color" : int
+#                            }
+#       transversal_group_2: {  
+#                               "adjacen" : [tr1, tr2, tr3...]
+#                               "color" : int
+#                            }
+#       ....
+# }
+def coloration_ordered(basic_group):
+    transversal_conflict_groups = basic_group.transversal_conflicting_groups
+
+    if transversal_conflict_groups:
+        graph = []
+        for tr in transversal_conflict_groups:
+            graph.append((tr, [t for t in transversal_conflict_groups if t != tr and t not in tr.parallel_groups.all()], 0))
+        graph.sort(key = lambda x : -len(x[1]))
+        graph_dict = dict()
+        for summit in graph:
+            graph_dict[summit[0]] = {"adjacent": summit[1], "color" : summit[2]}
+
+        color_max = 0
+        for summit, summit_dict in graph_dict.items():
+            color_adj = set()
+            for adj in summit_dict["adjacent"]:
+                color_adj.add(graph_dict[adj]["color"])
+            i = 1
+            while i in color_adj:
+                i+=1
+            summit_dict["color"] = i
+            if i > color_max:
+                color_max = i
+        return graph_dict, color_max
+    return None

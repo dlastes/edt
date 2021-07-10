@@ -91,6 +91,8 @@ class Partition(object):
 
     def add_night_time(self, day_start_time ,day_end_time):
         #First element of the list of tuples, and the first element of the tuple ie the TimeInterval
+        self.day_start_time = day_start_time
+        self.day_end_time = day_end_time
         day = self.intervals[0][0].start
         end_hours = day_end_time//60
         end_minutes = day_end_time%60
@@ -208,6 +210,36 @@ class Partition(object):
             for interval in other.intervals:
                 if key in interval[1]:
                     self.add_slot(interval[0], "all", interval[1])
+
+    def find_first_timeinterval_with_key(self, key, duration = None):
+        start = None
+        i = 0
+        intervalle = None
+        while i < len(self.intervals) and intervalle == None:
+            if key in self.intervals[i][1]:
+                start = self.intervals[i][0].start
+                while i < len(self.intervals) and key in self.intervals[i][1]:
+                    i+=1
+                if start + timedelta(hours = duration//60, minutes=duration%60) <= self.intervals[i][0].start: 
+                    intervalle = TimeInterval(start, self.intervals[i][0].start)
+            i+=1
+        return intervalle
+
+    def find_all_available_timeinterval_with_key(self, key, duration = None):
+        start = None
+        i = 0
+        result = []
+        while i < len(self.intervals):
+            if key in self.intervals[i][1] and self.intervals[i][1]["available"] and not self.intervals[i][1]["forbidden"]:
+                current_duration = 0
+                start = self.intervals[i][0].start
+                while i < len(self.intervals) and key in self.intervals[i][1] and self.intervals[i][1]["available"] and not self.intervals[i][1]["forbidden"]:
+                    current_duration+=self.intervals[i][0].duration
+                    i+=1
+                if duration == None or current_duration > duration:
+                    result.append = TimeInterval(start, self.intervals[i][0].start)
+            i+=1
+        return result
 
     #data_type can be:
     #   - "user_preference" : with key "tutor" and "available"

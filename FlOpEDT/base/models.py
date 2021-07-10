@@ -166,6 +166,13 @@ class StructuralGroup(GenericGroup):
         """
         return {self} | self.descendants_groups() | self.ancestor_groups()
 
+    @property
+    def transversal_conflicting_groups(self):
+        """
+        :return: the set of all TransversalGroup containing self
+        """
+        return TransversalGroup.objects.filter(conflicting_groups__in = self.connected_groups())
+
 
 class TransversalGroup(GenericGroup):
     conflicting_groups = models.ManyToManyField("base.StructuralGroup", blank=True)
@@ -174,6 +181,14 @@ class TransversalGroup(GenericGroup):
                                              blank=True)
     generic = models.OneToOneField('GenericGroup', on_delete=models.CASCADE, parent_link=True)
 
+    def nb_of_courses(self, week):
+        return len(Course.objects.filter(week = week, groups = self))
+
+    def time_of_courses(self, week):
+        t = 0
+        for c in Course.objects.filter(week=week, groups = self):
+            t += c.type.duration
+        return t
 
 # </editor-fold desc="GROUPS">
 
