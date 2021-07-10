@@ -764,10 +764,6 @@ function translate_cours_pl_from_json(d, result) {
       if(d.course.module !== null && d.course.module.display !== null) {
         new_course.color_bg = d.course.module.display.color_bg ;
         new_course.color_txt = d.course.module.display.color_txt ;
-        console.log('aaa');
-        console.log(d.course.module.display.color_bg);
-        console.log(new_course.color_bg);
-        // ##### AAAAAAAH!!!
         console.log(new_course);
       }
     } else {
