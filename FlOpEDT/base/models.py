@@ -609,8 +609,8 @@ class EdtVersion(models.Model):
     week = models.ForeignKey('Week', on_delete=models.CASCADE, null=True, blank=True)
     version = models.PositiveIntegerField(default=0)
 
-    #class Meta:
-        #unique_together = (("department", "week"),)
+    class Meta:
+        unique_together = (("department", "week"),)
 
 
 #    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
