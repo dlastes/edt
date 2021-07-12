@@ -41,6 +41,44 @@ class Partition(object):
         if day_start_time and day_end_time:
             self.add_night_time(day_start_time, day_end_time)
 
+    @property
+    def nb_intervals(self):
+      return len(self.intervals)
+
+    @property
+    def duration(self):
+        return abs(self.intervals[len(self.intervals)-1][0].end - self.intervals[0][0].start).total_seconds()//60
+
+    @property
+    def available_duration(self):
+        avail_duration = 0
+        for interval in self.intervals:
+            if interval[1]["available"] and not interval[1]["forbidden"]:
+                avail_duration += interval[0].duration
+        return avail_duration
+
+    @property
+    def not_forbidden_duration(self):
+        not_forbid = 0
+        for interval in self.intervals:
+            if not interval[1]["forbidden"]:
+                not_forbid += interval[0].duration
+        return not_forbid
+    
+    @property
+    def day_duration(self):
+        return (self.day_end_time - self.day_start_time)
+
+    def __str__(self):
+        return_string = f"Partition starts at {self.intervals[0][0].start} and ends at {self.intervals[self.nb_intervals-1][0].end}\n"
+        return_string += f"It contains {self.available_duration} available minutes.\n"
+        return_string += f"The intervals are :\n"
+        for interval in self.intervals:
+            return_string += f"{interval[0]}, {interval[1]}\n"
+        return_string += "end."
+        return return_string
+
+
     def add_lunch_break(self, start_time, end_time):
         day = self.intervals[0][0].start
         end_hours = end_time//60
@@ -139,33 +177,6 @@ class Partition(object):
         current_duration = 0
         return int(nb_slots)
 
-    @property
-    def day_duration(self):
-        return (self.day_end_time - self.day_start_time)
-
-    @property
-    def nb_intervals(self):
-      return len(self.intervals)
-
-    @property
-    def duration(self):
-        return abs(self.intervals[len(self.intervals)-1][0].end - self.intervals[0][0].start).total_seconds()//60
-
-    @property
-    def available_duration(self):
-        avail_duration = 0
-        for interval in self.intervals:
-            if interval[1]["available"] and not interval[1]["forbidden"]:
-                avail_duration += interval[0].duration
-        return avail_duration
-
-    @property
-    def not_forbidden_duration(self):
-        not_forbid = 0
-        for interval in self.intervals:
-            if not interval[1]["forbidden"]:
-                not_forbid += interval[0].duration
-        return not_forbid
 
     def add_data(self, data_type, data, interval_index):
         if "available" in data:
@@ -236,8 +247,8 @@ class Partition(object):
                 while i < len(self.intervals) and key in self.intervals[i][1] and self.intervals[i][1]["available"] and not self.intervals[i][1]["forbidden"]:
                     current_duration+=self.intervals[i][0].duration
                     i+=1
-                if duration == None or current_duration > duration:
-                    result.append = TimeInterval(start, self.intervals[i][0].start)
+                if (duration == None or current_duration > duration):
+                    result.append(TimeInterval(start, self.intervals[i-1][0].end))
             i+=1
         return result
 
