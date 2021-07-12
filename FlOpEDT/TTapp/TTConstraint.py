@@ -168,7 +168,7 @@ class TTConstraint(models.Model):
         return self.get_courses_queryset_by_parameters(ttmodel, week, **kwargs)
     
     def get_partition_of_week(self, week, with_day_time = False):
-        if week in self.weeks:
+        if not self.weeks.exists() or week in self.weeks.all():
             time_settings = TimeGeneralSettings.objects.get(department = self.department)
             day_start_week = Day(time_settings.days[0], week)
             day_end_week = Day(time_settings.days[len(time_settings.days)-1], week)
