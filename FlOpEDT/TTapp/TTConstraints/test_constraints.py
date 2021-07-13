@@ -54,6 +54,27 @@ def find_successive_slots(course_slot1, course_slot2, course1_duration, course2_
                 break
     return False
 
+def tutor_and_supp(interval, required_supp, possible_tutors):
+    supp_in = False
+    tutor_in = False
+    if "user_preference" in interval[1]:
+        for tutor, value in interval[1]["user_preference"].items():
+            if tutor in required_supp and value > 0:
+                supp_in = True
+            elif tutor in possible_tutors and value > 0:
+                tutor_in = True
+            if supp_in and tutor_in:
+                break
+    return supp_in and tutor_in
+
+
+def find_day_gap_slots(course_slot1, course_slot2, day_gap):
+    day_slot = course_slot1[0] + timedelta(days=day_gap) - timedelta(hours=course_slot1[0].hour, minutes=course_slot1[0].minute)
+    for cs2 in course_slot2:
+        if cs2.start > day_slot:
+            return True
+    return False
+
 
 class Precedence(TTConstraint):
     course1 = models.ForeignKey('base.Course', related_name='first', on_delete=models.CASCADE)
@@ -69,8 +90,6 @@ class Precedence(TTConstraint):
         week_partition_course1 = self.get_partition_of_week(week, with_day_time=True)
         week_partition_course2 = self.get_partition_of_week(week, with_day_time=True)
 
-
-
         possible_tutors_1 = set()
         required_supp_1 = set()
         if self.course1.tutor is not None:
@@ -83,7 +102,7 @@ class Precedence(TTConstraint):
             jsondict['messages'].append(_(f'There is no tutor assigned to {self.course1.full_name()}'))
 
         if self.course1.supp_tutor is not None:
-            required_supp_1.add(self.course1.supp_tutor.all())
+            required_supp_1 = set(self.course1.supp_tutor.all())
 
 
         possible_tutors_2 = set()
@@ -98,7 +117,7 @@ class Precedence(TTConstraint):
             jsondict['messages'].append(_(f'There is no tutor assigned to {self.course2.full_name()}'))
 
         if self.course2.supp_tutor is not None:
-            required_supp_2.add(self.course2.supp_tutor.all())
+            required_supp_2 = set(self.course2.supp_tutor.all())
 
         print("possible_tutors_1:", possible_tutors_1)
         print("possible_tutors_2:", possible_tutors_2)
@@ -128,7 +147,7 @@ class Precedence(TTConstraint):
                         TimeInterval(flopdate_to_datetime(up_day, up.start_time),
                         flopdate_to_datetime(up_day, up.end_time)),
                         "user_preference",
-                        {"value" : up.value, "available" : True, "tutor" : up.user.username}
+                        {"value" : up.value, "available" : True, "tutor" : up.user}
                     )
                 for up in D2:
                     up_day = Day(up.day, week)
@@ -136,8 +155,45 @@ class Precedence(TTConstraint):
                         TimeInterval(flopdate_to_datetime(up_day, up.start_time),
                         flopdate_to_datetime(up_day, up.end_time)),
                         "user_preference",
-                        {"value" : up.value, "available" : True, "tutor" : up.user.username}
+                        {"value" : up.value, "available" : True, "tutor" : up.user}
                     )
+
+                if required_supp_1:
+                    RUS1 = UserPreference.objects.filter(user__in=required_supp_1, week=week, value__gte=1)
+                    if not RUS1:
+                        RUS1 = UserPreference.objects.filter(user__in=required_supp_1, week=None, value__gte=1)
+
+                    for up in RUS1:
+                        up_day = Day(up.day, week)
+                        week_partition_course1.add_slot(
+                            TimeInterval(flopdate_to_datetime(up_day, up.start_time),
+                            flopdate_to_datetime(up_day, up.end_time)),
+                            "user_preference",
+                            {"value" : up.value, "available" : True, "tutor" : up.user}
+                        )
+
+                    for interval in week_partition_course1.intervals:
+                        if not tutor_and_supp(interval, required_supp_1, possible_tutors_1):
+                            interval[1]["available"] = False
+
+
+
+                if required_supp_2:
+                    for interval in week_partition_course2.intervals:
+                        if tutor_and_supp(interval, required_supp_2, possible_tutors_2):
+                            interval[1]["available"] = False
+                    RUS2 = UserPreference.objects.filter(user__in=required_supp_2, week=week, value__gte=1)
+                    if not RUS2:
+                        RUS2 = UserPreference.objects.filter(user__in=required_supp_2, week=None, value__gte=1)
+                    for up in RUS2:
+                        up_day = Day(up.day, week)
+                        week_partition_course2.add_slot(
+                            TimeInterval(flopdate_to_datetime(up_day, up.start_time),
+                            flopdate_to_datetime(up_day, up.end_time)),
+                            "user_preference",
+                            {"value" : up.value, "available" : True, "tutor" : up.user}
+                        )
+
                 for cs in no_course_tutor1:
                     slot = cs.get_slot_constraint(week)
                     if slot:
@@ -199,11 +255,3 @@ class Precedence(TTConstraint):
                 if not D2:
                     jsondict['messages'].append(_(f"There is no available tutor for {self.course2.full_name()}"))
         return JsonResponse(jsondict)
-
-
-def find_day_gap_slots(course_slot1, course_slot2, day_gap):
-    day_slot = course_slot1[0] + timedelta(days=day_gap) - timedelta(hours=course_slot1[0].hour, minutes=course_slot1[0].minute)
-    for cs2 in course_slot2:
-        if cs2.start > day_slot:
-            return True
-    return False
