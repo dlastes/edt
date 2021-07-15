@@ -226,6 +226,6 @@ def generate_course_preferences():
 def define_one_period_per_train_prog(book):
     weeks = book["settings"]["periods"].pop("annee")
     for tp in book["promotions"]:
-        book["settings"]['periods'][tp[:20]] = weeks
+        book["settings"]['periods'][tp[:20].replace('/', '-')] = weeks
     for m in book["modules"]:
-        book['modules'][m]["period"] = book["modules"][m]["promotion"][:20]
+        book['modules'][m]["period"] = book["modules"][m]["promotion"][:20].replace('/', '-')
