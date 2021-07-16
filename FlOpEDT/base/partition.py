@@ -28,7 +28,7 @@ from datetime import datetime, timedelta
 import copy
 
 class Partition(object):
-    '''Partition class to analyse datas related by time'''
+    '''Partition class to analyse data related by time'''
     def __init__(self, type, date_start, date_end, day_start_time = None, day_end_time = None):
         '''Partition's constructor
         
