@@ -419,6 +419,7 @@ class ConsiderTutorsUnavailability(TTConstraint):
                 # For each course type we build a partition with the approriate time settings, the scheduled courses of other departments
                 # and the availabilities of the tutor and we check if the tutor has enough available time and slots.
                 for course_type, course_list in courses_type.items():
+                    start_times = CourseStartTimeConstraint.objects.get(course_type=course_type).allowed_start_times
                     other_departments_sched_courses = (ScheduledCourse.objects
                                                                     .filter(tutor = tutor, course__week = week ,work_copy=0)
                                                                     .exclude(course__type__department=course_type.department))
@@ -447,10 +448,10 @@ class ConsiderTutorsUnavailability(TTConstraint):
                     course_partition.add_week_end(time_settings.days)
                     course_partition.add_partition_data_type(tutor_partition, "user_preference")
                     
-                    print("Tutor has", course_partition.nb_slots_available_of_duration(course_type.duration), "available moments available.")
+                    print("Tutor has", course_partition.nb_slots_available_of_duration_beginning_at(course_type.duration, start_times), "available moments available.")
                     print("And", len(course_list), "courses to attend")
-                    if course_partition.available_duration < len(course_list)*course_type.duration or course_partition.nb_slots_available_of_duration(course_type.duration) < len(course_list):
-                        message = _(f"Tutor {tutor} has {course_partition.nb_slots_available_of_duration(course_type.duration)} available slots of {course_type.duration} mins ")
+                    if course_partition.available_duration < len(course_list)*course_type.duration or course_partition.nb_slots_available_of_duration_beginning_at(course_type.duration, start_times) < len(course_list):
+                        message = _(f"Tutor {tutor} has {course_partition.nb_slots_available_of_duration_beginning_at(course_type.duration, start_times)} available slots of {course_type.duration} mins ")
                         message += _(f'and {len(course_list)} courses that long to attend.')
                         jsondict["messages"].append(message)
                         jsondict["status"] = "KO"
