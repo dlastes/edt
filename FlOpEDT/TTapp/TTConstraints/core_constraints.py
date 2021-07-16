@@ -52,7 +52,16 @@ class NoSimultaneousGroupCourses(TTConstraint):
     groups = models.ManyToManyField('base.StructuralGroup', blank=True)
 
     def pre_analyse(self, week):
+        """Pre analysis of the Constraint 
+        Compare the available time of the week to the minimum required in any cases (the time of all courses + the time needed for the longest parallel group)
+        then to the probable mimimum required (the time of all courses + the time of all parallel groups that are maximums of their graph color) and then
+        checks if their is enough available slots for each course type in the week.
 
+        Parameter:
+            week (Week): the week we want to analyse the data from
+            
+        Returns:
+            JsonResponse: with status 'KO' or 'OK' and a list of messages explaining the problem"""
         jsondict = {"status" : "OK", "messages" : []}
 
         considered_basic_groups = pre_analysis_considered_basic_groups(self)
@@ -208,9 +217,16 @@ class ScheduleAllCourses(TTConstraint):
     tutors = models.ManyToManyField('people.Tutor', blank=True)
     course_types = models.ManyToManyField('base.CourseType', blank=True)
 
-    #Checks that the number of courses to scheduled if less than
-    #the number of slots available
+    
     def pre_analyse(self, week):
+        """Checks that the number of courses to scheduled if less thanthe number of slots available
+
+        Parameter:
+            week (Week): the week we want to analyse the data from
+
+        Returns:
+            JsonResponse: with status 'KO' or 'OK' and a list of messages explaining the problem
+        """
         considered_courses = Course.objects.filter(week = week)
         time_settings = TimeGeneralSettings.objects.get(department = self.department)
         day_start_week = Day(time_settings.days[0], week)
@@ -339,11 +355,25 @@ class ConsiderTutorsUnavailability(TTConstraint):
 
 
     def pre_analyse(self, week, spec_tutor = None):
-        considered_tutors = self.tutors.all()
+        """Pre analysis of the Constraint
+        For each tutor considered, checks if he or she has enough time available during the week and then
+        if he or she has enough slots for each type of courses
+        It takes in consideration the scheduled courses of other departments
+        
+        Parameters:
+            week (Week): the week we want to analyse the data from
+            spec_tutor (Tutor): the tutor we want to consider. If None, we'll consider tutors from the constraint
+
+        Returns:
+            JsonResponse: with status 'KO' or 'OK' and a list of messages explaining the problem"""
+        
         jsondict = {"status" : "OK", "messages" : []}
         if spec_tutor:
             considered_tutors = [spec_tutor]
-        elif not considered_tutors:
+        else:
+            considered_tutors = self.tutors.all()
+
+        if not considered_tutors:
             considered_tutors = Tutor.objects.filter(departments = self.department)
 
         for tutor in considered_tutors:
@@ -351,7 +381,6 @@ class ConsiderTutorsUnavailability(TTConstraint):
             print(f"For tutor '{tutor}' :")
             
             courses = Course.objects.filter(Q(tutor = tutor) | Q(supp_tutor = tutor), week = week)
-            courses_type = set()
             tutor_partition = Partition("UserPreference", flopdate_to_datetime(Day('m', week), 0), flopdate_to_datetime(Day('su', week), 23*60+59))
             user_preferences = UserPreference.objects.filter(user = tutor, week = week)
             if not user_preferences.exists():
@@ -376,16 +405,21 @@ class ConsiderTutorsUnavailability(TTConstraint):
                 jsondict["status"] = "KO"
 
             elif courses.exists():
+                # We build a dictionary with the courses' type as keys and list of courses of those types as values
                 courses_type = dict()
                 for course in courses:
                     if not course.type in courses_type:
-                        courses_type[course.type.name] = [course]
+                        courses_type[course.type] = [course]
                     else:
-                        courses_type[course.type.name].append(course)
+                        courses_type[course.type].append(course)
 
+                # For each course type we build a partition with the approriate time settings, the scheduled courses of other departments
+                # and the availabilities of the tutor and we check if the tutor has enough available time and slots.
                 for course_type, course_list in courses_type.items():
-                    other_departments_sched_courses = ScheduledCourse.objects.filter(tutor = tutor, course__week = week ,work_copy=0).exclude(course__type__department=course_list[0].type.department)
-                    time_settings = TimeGeneralSettings.objects.get(department = course_list[0].type.department)
+                    other_departments_sched_courses = (ScheduledCourse.objects
+                                                                    .filter(tutor = tutor, course__week = week ,work_copy=0)
+                                                                    .exclude(course__type__department=course_type.department))
+                    time_settings = TimeGeneralSettings.objects.get(department = course_type.department)
                     day_start_week = Day(time_settings.days[0], week)
                     day_end_week = Day(time_settings.days[len(time_settings.days)-1], week)
                     start_week = flopdate_to_datetime(day_start_week, time_settings.day_start_time)
@@ -410,10 +444,10 @@ class ConsiderTutorsUnavailability(TTConstraint):
                     course_partition.add_week_end(time_settings.days)
                     course_partition.add_partition_data_type(tutor_partition, "user_preference")
                     
-                    print("Tutor has", course_partition.nb_slots_available_of_duration(course_list[0].type.duration), "available moments available.")
+                    print("Tutor has", course_partition.nb_slots_available_of_duration(course_type.duration), "available moments available.")
                     print("And", len(course_list), "courses to attend")
-                    if course_partition.available_duration < len(course_list)*course_list[0].type.duration or course_partition.nb_slots_available_of_duration(course_list[0].type.duration) < len(course_list):
-                        message = _(f"Tutor {tutor} has {course_partition.nb_slots_available_of_duration(course_list[0].type.duration)} available slots of {course_list[0].type.duration} mins ")
+                    if course_partition.available_duration < len(course_list)*course_type.duration or course_partition.nb_slots_available_of_duration(course_type.duration) < len(course_list):
+                        message = _(f"Tutor {tutor} has {course_partition.nb_slots_available_of_duration(course_type.duration)} available slots of {course_type.duration} mins ")
                         message += _(f'and {len(course_list)} courses that long to attend.')
                         jsondict["messages"].append(message)
                         jsondict["status"] = "KO"
@@ -476,23 +510,28 @@ class ConsiderTutorsUnavailability(TTConstraint):
         return _("Consider tutors unavailability")
 
 
-
-# basic_group : StructuralGroup which is basic
-# returns : None if no TransversalGroups is found for 'basic_group' or
-# a tuple (dictionnary, color_max) with the dictionnary representing a graph of those TransversalGroups colored
-# according to this pattern:
-#   {
-#       transversal_group_1: {  
-#                               "adjacent" : [tr1, tr2, tr3...]
-#                               "color" : int
-#                            }
-#       transversal_group_2: {  
-#                               "adjacen" : [tr1, tr2, tr3...]
-#                               "color" : int
-#                            }
-#       ....
-# }
 def coloration_ordered(basic_group):
+    """ Function taking a group and returning all the transversal groups in conflict with it colored to avoid to count several times parallel ones
+
+
+    Parameter:
+        basic_group (StructuralGroup): a basic structural group
+    
+    Returns : 
+        tuple: None if no TransversalGroups is found for 'basic_group' or tuple(dictionnary, color_max) with the dictionnary
+        representing a graph of those TransversalGroups colored according to this pattern:
+            {
+                transversal_group_1: {  
+                                        "adjacent" : [tr1, tr2, tr3...]
+                                        "color" : int
+                                        }
+                transversal_group_2: {  
+                                        "adjacen" : [tr1, tr2, tr3...]
+                                        "color" : int
+                                        }
+                ....
+            }
+    """
     transversal_conflict_groups = basic_group.transversal_conflicting_groups
 
     if transversal_conflict_groups:
