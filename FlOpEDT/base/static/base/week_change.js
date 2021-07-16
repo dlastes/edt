@@ -1477,7 +1477,6 @@ function fetch_module() {
     url: build_url(url_module, context),
     async: true,
     success: function (msg, ts, req) {
-    	//console.log(msg); STAGE!
       var sel_week = wdw_weeks.get_selected();
       if (Week.compare(exp_week, sel_week) == 0) {
         d3.csvParse(msg, translate_module_from_csv);

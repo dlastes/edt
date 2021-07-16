@@ -83,12 +83,12 @@ if __name__ == "__main__":
     
     try:
         print ('Connecté à ' + services["admin"].Version())
-        connecte = True
+        connected = True
     except:
         print('Problèmes de connection: identifiants incorrect ou pb de co?')
-        connecte = False
+        connected = False
 
-    if connecte:
+    if connected:
         teacherDictionary = get_teacher_dictionary(services)
         promDictionary = get_prom_dictionary(services)
         moduleDictionary = get_module_dictionary(services)

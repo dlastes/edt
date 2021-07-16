@@ -2004,7 +2004,7 @@ function compute_cm_room_tutor_direction() {
 }
 
 
-function find_overlapping_courses(reference_course) { //STAGE j'espère ne pas avoir fait de dinguerie
+function find_overlapping_courses(reference_course) {
 	let start_time = reference_course["start"];
 	let finish_time = reference_course["start"]+reference_course["duration"];
 	let reference_group = reference_course["group"];
@@ -2012,7 +2012,7 @@ function find_overlapping_courses(reference_course) { //STAGE j'espère ne pas a
 	overlapping_courses = [];
 	
 	for (let i = 0; i<cours.length ; i++) {
-		if (cours[i]["group"] == reference_group && cours[i]["day"]==reference_day ){ //STAGE && cours[i]["from_transversal"] != null on peut limiter aux cours de groupes transversaux
+		if (cours[i]["group"] == reference_group && cours[i]["day"]==reference_day ){
 			let cours_finish_time = cours[i]["start"]+cours[i]["duration"];
 			if (cours[i]["start"] < finish_time && cours_finish_time > start_time){
 				overlapping_courses.push(cours[i])
@@ -2054,7 +2054,7 @@ function show_detailed_courses(cours) {
   let modinfourl = "undefined";
   let tutinfoname ="Placeholder tutor name";
   let tutinfomail ="Placeholder tutor email adresse";
-  if (cours.mod in modules_info){  //STAGE
+  if (cours.mod in modules_info){
   	modinfoname = modules_info[cours.mod].name;
   	modinfourl = modules_info[cours.mod].url;
 	}

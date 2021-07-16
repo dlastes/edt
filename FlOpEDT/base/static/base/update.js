@@ -1096,7 +1096,7 @@ function go_courses(quick) {
     .selectAll(".cours")
     .data(
       cours.filter(function (d) {
-        return groups[d.promo]["structural"][d.group].display; //STAGE!
+        return groups[d.promo]["structural"][d.group].display;
       }),
       function (d) { return d.group + d.id_course; }
     )

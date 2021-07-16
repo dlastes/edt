@@ -162,8 +162,6 @@ def convert_to_transversal(name_and_tp_groups_list):
         else:
             print(f"pbm avec {tp} - {name} (qui n'existe pas...)")
             
-
-#script conflict et para
 def append_conflicting_and_parallel_groups(sgdict,tgdict):
     transversal_prom = {}
     structural_prom = {}
@@ -174,7 +172,7 @@ def append_conflicting_and_parallel_groups(sgdict,tgdict):
         if tp not in transversal_prom: transversal_prom[tp]=[]
         transversal_prom[tp].append(gp)
 
-    for tp,gp in tgdict: #On complète
+    for tp,gp in tgdict:
         tgdict[(tp,gp)]['transversal_to'] = (tp,tp)   
         tgdict[(tp,gp)]['parallel_to'] = transversal_prom[tp]
 
