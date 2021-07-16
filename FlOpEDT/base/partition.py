@@ -28,9 +28,18 @@ from datetime import datetime, timedelta
 import copy
 
 class Partition(object):
-    #date_start, date_end : datetime
-    #day_start_time, day_end_time : int
+    '''Partition class to analyse datas related by time'''
     def __init__(self, type, date_start, date_end, day_start_time = None, day_end_time = None):
+        '''Partition's constructor
+        
+        Parameters:
+            type (str): the type of data the Partition is going to hold
+            date_start (datetime): the beginning of its time interval
+            date_end (datetime): the end of its time interval
+            day_start_time (int) [Optionnal]: the starting time in minutes of the schedule time each day
+            day_end_time (int) [Optionnal]: the ending time in minutes of the schedule time each day
+            
+        If one of the optionnal parameters is missing no day time will be set.'''
         self.intervals = []
         self.type = type
         self.day_start_time = day_start_time
@@ -43,14 +52,17 @@ class Partition(object):
 
     @property
     def nb_intervals(self):
-      return len(self.intervals)
+        '''The number of intervals of time the partition contains'''
+        return len(self.intervals)
 
     @property
     def duration(self):
+        '''The amount of minutes between the begining of the partition and the end'''
         return abs(self.intervals[len(self.intervals)-1][0].end - self.intervals[0][0].start).total_seconds()//60
 
     @property
     def available_duration(self):
+        '''The number of minutes available (and not forbidden) in the partition'''
         avail_duration = 0
         for interval in self.intervals:
             if interval[1]["available"] and not interval[1]["forbidden"]:
@@ -59,6 +71,7 @@ class Partition(object):
 
     @property
     def not_forbidden_duration(self):
+        '''The number of minutes not forbidden (available or not) in the partition'''
         not_forbid = 0
         for interval in self.intervals:
             if not interval[1]["forbidden"]:
@@ -67,7 +80,12 @@ class Partition(object):
     
     @property
     def day_duration(self):
-        return (self.day_end_time - self.day_start_time)
+        '''The number of minutes of day time each day
+        Returns:
+            (int): 0 if day time is not set'''
+        if self.day_start_time and self.day_end_time:
+            return (self.day_end_time - self.day_start_time)
+        return 0
 
     def __str__(self):
         return_string = f"Partition starts at {self.intervals[0][0].start} and ends at {self.intervals[self.nb_intervals-1][0].end}\n"
@@ -80,13 +98,17 @@ class Partition(object):
 
 
     def add_lunch_break(self, start_time, end_time):
+        '''Add forbidden lunch time to each day of the partition
+        
+        Parameters:
+            start_time (int): the starting time in minutes from midnight of the lunch_break
+            end_time (int): the ending time in minutes from midnight of the lunch_break'''
         day = self.intervals[0][0].start
         end_hours = end_time//60
         end_minutes = end_time%60
         start_hours = start_time//60
         start_minutes = start_time%60
 
-        #Manque le dernier jour si self.intervals[0][0].start > self.intervals[len(self.intervals)-1][0].end
         while day < self.intervals[len(self.intervals)-1][0].end:
             self.add_slot(
                 TimeInterval(
@@ -95,10 +117,22 @@ class Partition(object):
                 ), "lunch_break",
                 {"forbidden" : True, "lunch_break": True})
             day = day + timedelta(days = 1)
+        if self.intervals[0][0].start > self.intervals[len(self.intervals)-1][0].end:
+            self.add_slot(
+                TimeInterval(
+                    datetime(day.year, day.month, day.day, start_hours, start_minutes, 0),
+                    datetime(day.year, day.month, day.day, end_hours, end_minutes, 0)
+                ), "lunch_break",
+                {"forbidden" : True, "lunch_break": True})
         return True
 
-    #days_of_week must be consecutive
     def add_week_end(self, days_of_week):
+        '''Changes several days to forbidden
+        
+        Parameters:
+            days_of_week (list(str)): a list of days that are not week_end days
+            
+        days_of_week must have all days in it consecutives'''
         weekend_days = [day for day in [Day.MONDAY, Day.TUESDAY, Day.WEDNESDAY, Day.THURSDAY, Day.FRIDAY, Day.SATURDAY, Day.SUNDAY] if not (day in days_of_week)]
         weekend_indexes =  [days_index[day] for day in weekend_days]
 
@@ -127,10 +161,25 @@ class Partition(object):
         return True
 
 
-    def add_night_time(self, day_start_time ,day_end_time):
-        #First element of the list of tuples, and the first element of the tuple ie the TimeInterval
-        self.day_start_time = day_start_time
-        self.day_end_time = day_end_time
+    def add_night_time(self, day_start_time=None ,day_end_time=None):
+        """Changes time intervals to forbidden each days
+        
+        Parameters:
+            day_start_time (int) [Optionnal]: the starting time of the day in minutes since midnight
+            day_end_time (int) [Optionnal]: the ending time of the day in minutes since midnight
+            
+        If the parameters are set they are changing the value of the start and/or end time of the partition"""
+
+        if day_start_time:
+            self.day_start_time = day_start_time
+        else:
+            day_start_time = self.day_start_time
+
+        if day_end_time:
+            self.day_end_time = day_end_time
+        else:
+            day_end_time = self.day_end_time
+
         day = self.intervals[0][0].start
         end_hours = day_end_time//60
         end_minutes = day_end_time%60
@@ -151,7 +200,17 @@ class Partition(object):
                 {"forbidden" : True, "night_time": True})
             day = day + timedelta(days = 1)
 
+
+
     def nb_slots_available_of_duration(self, duration):
+        """Calculates the number of available time in the partition of minimum consecutive duration
+        
+        Parameters:
+            duration (int): the minimum duration of one slot of time
+            
+        Returns:
+            (int): the number of times it founds an available time of minimum duration"""
+
         current_duration = 0
         nb_slots = 0
         for interval in self.intervals:
@@ -165,6 +224,14 @@ class Partition(object):
         return int(nb_slots)
 
     def nb_slots_available_of_duration_beginning_at(self, duration, start_times):
+        """Calculates the number of available time in the partition of minimum consecutive duration and with specific starting times
+        
+        Parameters:
+            duration (int): the minimum duration of one slot of time
+            start_times (list(int)): the list of times in minutes from midnight when the slots can start
+            
+        Returns:
+            (int): the number of times it founds an available time of minimum duration starting at a starting time"""
         start_times.sort()
         current_duration = 0
         nb_slots = 0
@@ -187,6 +254,13 @@ class Partition(object):
 
 
     def nb_slots_not_forbidden_of_duration(self, duration):
+        """Calculates the number of time not forbidden in the partition of minimum consecutive duration
+        
+        Parameters:
+            duration (int): the minimum duration of one slot of time
+            
+        Returns:
+            (int): the number of times it founds a non forbidden slot time of minimum duration"""
         current_duration = 0
         nb_slots = 0
         for interval in self.intervals:
@@ -200,6 +274,14 @@ class Partition(object):
         return int(nb_slots)
 
     def nb_slots_not_forbidden_of_duration_beginning_at(self, duration, start_times):
+        """Calculates the number of time not forbidden in the partition of minimum consecutive duration and with specific starting times
+        
+        Parameters:
+            duration (int): the minimum duration of one slot of time
+            start_times (list(int)): the list of times in minutes from midnight when the slots can start
+            
+        Returns:
+            (int): the number of times it founds a non forbidden slot time of minimum duration starting at a starting time"""
         start_times.sort()
         current_duration = 0
         nb_slots = 0
@@ -221,6 +303,14 @@ class Partition(object):
 
 
     def add_data(self, data_type, data, interval_index):
+        '''Adds some data to an interval
+        
+        Parameters:
+            data_type (str): the type of date added
+            data (dict): a dictionary containing the data
+            interval_index (int): the index of self.intervals where we want to put the data in
+            
+        Internal method not to be called by user'''
         if "available" in data:
             self.intervals[interval_index][1]["available"] = self.intervals[interval_index][1]["available"] or data["available"]
         if "forbidden" in data:
@@ -236,9 +326,8 @@ class Partition(object):
                 if key != "available" and key != "forbidden":
                     self.intervals[interval_index][1][key] = value
     
-    #Checks if several consecutive interval have the same data
-    #and if so merge them
     def clear_merge(self):
+        '''Checks if several consecutive interval have the same data and if so merge them'''
         length = len(self.intervals)-1
         i = 0
         while i < length:
@@ -249,22 +338,28 @@ class Partition(object):
             else:
                 i+=1
 
-    #Add all intervals from the other partition to
-    #the self one
     def add_partition(self, other):
+        """Add all intervals from the other partition to the self one"""
         if isinstance(other, Partition):
             for interval in other.intervals:
                 self.add_slot(interval[0], "all", interval[1])
 
-    #Add all intervals with key in the data from the other partition to
-    #the self one
     def add_partition_data_type(self, other, key):
+        """Add all intervals with key in the data from the other partition to the self one"""
         if isinstance(other, Partition):
             for interval in other.intervals:
                 if key in interval[1]:
                     self.add_slot(interval[0], "all", interval[1])
 
     def find_first_timeinterval_with_key(self, key, duration = None):
+        """Find the first time interval in the partition with a specific key in its data
+        
+        Parameters:
+            key (any): the key searched in the data dictionary of the interval
+            duration (int) [Optionnal]: the minimum duration of the time interval we want to find
+            
+        Returns:
+            (TimeInterval): the time interval found"""
         start = None
         i = 0
         intervalle = None
@@ -279,6 +374,14 @@ class Partition(object):
         return intervalle
 
     def find_all_available_timeinterval_with_key(self, key, duration = None):
+        """Find all time intervals in the partition with a specific key in their data
+        
+        Parameters:
+            key (any): the key searched in the data dictionary of the intervals
+            duration (int) [Optionnal]: the minimum duration of the time intervals we want to find
+            
+        Returns:
+            (list(TimeInterval)): the time intervals found"""
         start = None
         i = 0
         result = []
@@ -295,6 +398,15 @@ class Partition(object):
         return result
 
     def find_all_available_timeinterval_with_key_starting_at(self, key, start_times, duration = None):
+        """Find all time intervals in the partition with a specific key in their data and with specific starting times
+        
+        Parameters:
+            key (any): the key searched in the data dictionary of the intervals
+            duration (int) [Optionnal]: the minimum duration of the time intervals we want to find
+            start_times (list(int)): the list of times in minutes from midnight when the slots can start
+            
+        Returns:
+            (list(TimeInterval)): the time intervals found"""
         start = None
         i = 0
         result = []
