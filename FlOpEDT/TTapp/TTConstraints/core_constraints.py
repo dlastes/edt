@@ -26,7 +26,7 @@
 
 from django.http.response import JsonResponse
 from base.timing import TimeInterval
-from base.models import Department, TimeGeneralSettings, TransversalGroup
+from base.models import CourseStartTimeConstraint, Department, TimeGeneralSettings, TransversalGroup
 from django.db import models
 
 from TTapp.TTConstraint import TTConstraint
@@ -84,7 +84,7 @@ class NoSimultaneousGroupCourses(TTConstraint):
             group_partition.add_lunch_break(time_settings.lunch_break_start_time, time_settings.lunch_break_finish_time)
             group_partition.add_week_end(time_settings.days)
 
-            
+            print("Group's Partition:", group_partition)
             ### Coloration ###
             tuple_graph = coloration_ordered(bg)
             ### Coloration ###
@@ -137,16 +137,19 @@ class NoSimultaneousGroupCourses(TTConstraint):
                     #We are checking if we have enough slots for each course type
                     course_dict = dict()
                     for c in considered_courses:
-                        if c.type.duration in course_dict:
-                            course_dict[c.type.duration] += 1
+                        if c.type in course_dict:
+                            course_dict[c.type] += 1
                         else:
-                            course_dict[c.type.duration] = 1 
+                            course_dict[c.type] = 1 
 
                             
-                    for duration, nb_courses in course_dict.items():
-                        if group_partition.nb_slots_not_forbidden_of_duration(duration) < nb_courses:
+                    for course_type, nb_courses in course_dict.items():
+                        start_times = CourseStartTimeConstraint.objects.get(course_type = course_type)
+                        print("Start times are :", start_times.allowed_start_times)
+                        print(f"There is {group_partition.nb_slots_not_forbidden_of_duration_beginning_at(course_type.duration, start_times.allowed_start_times)} available slots in the partition.")
+                        if group_partition.nb_slots_not_forbidden_of_duration_beginning_at(course_type.duration, start_times.allowed_start_times) < nb_courses:
                             jsondict["status"] = "KO"
-                            jsondict["messages"].append(_(f"Group {bg.name} has {group_partition.nb_slots_not_forbidden_of_duration(duration)} slots available of {duration} minutes and requires {nb_courses}.")) 
+                            jsondict["messages"].append(_(f"Group {bg.name} has {group_partition.nb_slots_not_forbidden_of_duration(course_type.duration)} slots available of {course_type.duration} minutes and requires {nb_courses}.")) 
         return JsonResponse(data = jsondict)
 
     def enrich_model(self, ttmodel, week, ponderation=1):
