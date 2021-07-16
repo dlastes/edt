@@ -113,6 +113,9 @@ def flopday_to_date(day):
 def floptime_to_time(time_minutes):
     return time(time_minutes//60, time_minutes%60)
 
+def time_to_floptime(time_data):
+    return time_data.hour*60 + time_data.minute
+
 ###TRANSLATION FUNCTIONS BETWEEN FLOPDATES AND PYTHON'S DATES###
 ################################################################
 

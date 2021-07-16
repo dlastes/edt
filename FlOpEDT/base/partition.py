@@ -23,7 +23,7 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from base.timing import TimeInterval, Day, days_index
+from base.timing import TimeInterval, Day, days_index, floptime_to_time, time_to_floptime
 from datetime import datetime, timedelta
 import copy
 
@@ -164,12 +164,54 @@ class Partition(object):
         current_duration = 0
         return int(nb_slots)
 
+    def nb_slots_available_of_duration_beginning_at(self, duration, start_times):
+        start_times.sort()
+        current_duration = 0
+        nb_slots = 0
+        for interval in self.intervals:
+            if not interval[1]["forbidden"] and not interval[1]["forbidden"]:
+                if current_duration == 0:
+                    for st in start_times:
+                        if time_to_floptime(interval[0].start.time()) <= st and time_to_floptime(interval[0].end.time()) > st:
+                            current_duration += interval[0].duration - (st - time_to_floptime(interval[0].start.time()))
+                            break
+                else:
+                    current_duration += interval[0].duration
+            else:
+                nb_slots += current_duration//duration
+                current_duration = 0
+        nb_slots += current_duration//duration
+        current_duration = 0
+        return int(nb_slots)
+
+
+
     def nb_slots_not_forbidden_of_duration(self, duration):
         current_duration = 0
         nb_slots = 0
         for interval in self.intervals:
             if not interval[1]["forbidden"]:
                 current_duration += interval[0].duration
+            else:
+                nb_slots += current_duration//duration
+                current_duration = 0
+        nb_slots += current_duration//duration
+        current_duration = 0
+        return int(nb_slots)
+
+    def nb_slots_not_forbidden_of_duration_beginning_at(self, duration, start_times):
+        start_times.sort()
+        current_duration = 0
+        nb_slots = 0
+        for interval in self.intervals:
+            if not interval[1]["forbidden"]:
+                if current_duration == 0:
+                    for st in start_times:
+                        if time_to_floptime(interval[0].start.time()) <= st and time_to_floptime(interval[0].end.time()) > st:
+                            current_duration += interval[0].duration - (st - time_to_floptime(interval[0].start.time()))
+                            break
+                else:
+                    current_duration += interval[0].duration
             else:
                 nb_slots += current_duration//duration
                 current_duration = 0
