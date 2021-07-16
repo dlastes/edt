@@ -8,59 +8,52 @@ from functools import reduce # Pour le pgcd d'une liste
 from tqdm import tqdm # Affichage de la barre sympa
 
 from django.db import transaction
-from django.utils.translation import gettext_lazy as _
 from base.models import CourseType, RoomType, StructuralGroup, TransversalGroup, Module, Course, GenericGroup, Week
 from people.models import Tutor
 from misc.assign_colors import assign_module_color
 
 
 #Functions used to check book content (dictionary extracted from hyperplanning)
-def inputBool(translateMessage=""):
+def inputBool(message=""):
     """
     Input: The message asking a yes/no question.
     Return: A boolean: True if input yes, False if input no.
     Loop while the answer is not valid.
     """
-    translatedMessage = _("(Boolean) - ")+translatedMessage+_(" (y/n)")
     while True:
-        ans = input(translatedMessage).lower()
+        ans = input("(Boolean) - (y/n) - %s" %message).lower()
         if ans in ["y","n","yes","no","o","non","oui","true","false","t","f"]:
             if ans in ["y","yes","o","oui","t","true"]: return True
             else: return False
         else:
-            errorMessage = _("( Error ) - Only answer with 'y' or 'n' ")
-            print(errorMessage)
+            print("( Error ) - Only answer with 'y' or 'n'")
 
 
-def inputInt(translatedMessage=""): 
+def inputInt(message=""): 
     """
     Input: The message asking for an integer.
     Return: An integer. If the input is a float, it's converted into an integer.
     Loop while the answer is not valid.
     """
     ans = ""
-    translatedMessage = _("(Integer) - ")+translatedMessage
     while type(ans) != int:
-        t
-        ans = input(translatedMessage)
+        ans = input("(Integer) - %s" %message)
         try:
             ans = int(float(ans))
         except:
-            errorMessage = _("( Error ) - Only answer with a integer (float will be floored)")
-            print(errorMessage)
+            print("( Error ) - Only answer with a integer (float will be floored)")
     return ans
 
 
-def inputTime(translatedMessage=""):
+def inputTime(message=""):
     """
     Input: The message asking for time in HH:mm format.
     Return: An integer representing minutes elapsed from midnight to the specific hour in a day.
     Loop while the answer is not valid.
     """ 
     ans = ""
-    translatedMessage = _("( Time  ) - ")+translatedMessage+" (HH:mm)"
     while type(ans)!= int:
-        inp = input(translatedMessage)
+        inp = input("( Time  ) - (HH:mm) - %s" %message)
         try:
             heure, minute = inp.split(":")
             heure = int(heure)
@@ -68,11 +61,9 @@ def inputTime(translatedMessage=""):
             if 0<=heure<=24 and 0<=minute<=59:
                 ans = heure*60+minute
             else:
-                errorMessage1 = _("( Error ) - Hours or minutes out of bounds ( 0<=hours<=24 and 0<=minutes<=59 )")
-                print(errorMessage1)
+                print("( Error ) - Hours or minutes out of bounds ( 0<=hours<=24 and 0<=minutes<=59 )")
         except:
-            errorMessage2 = _("( Error ) - Incorrect format (use HH:mm format)")
-            print(errorMessage2)
+            print("( Error ) - Incorrect format (use HH:mm format)")
     return ans
 
 
@@ -130,16 +121,11 @@ def createPeriods():
     Used to: Define semester
     """
     periodDictionary = dict()
-    translatedMessage1 = _("Number of periods? (semesters, trimesters, ...): ")
-    nomberOfPeriods = inputInt(translatedMessage1)
+    numberOfPeriods = inputInt("Number of periods? (semesters, trimesters, ...): ")
     for i in range(numberOfPeriods):
-        translatedMessage2 = _("Period ")
-        translatedMessage3 = _(". Name this period: ")
-        periodName = input(translatedMessage2+str(1+i)+"/"+str(numberOfPeriods)+translatedMessage3)
-        translatedMessage4 = _("First week number of the period ")
-        periodStartWeek = inputInt(translatedMessage4+periodName+": ")
-        translatedMessage5 = _("Last week number of the period ")
-        periodFinishWeek = inputInt(translatedMessage5+periodName+": ")
+        periodName = input("(String ) - Period "+str(1+i)+"/"+str(numberOfPeriods)+". Name this period: ")
+        periodStartWeek = inputInt("First week number of the period "+periodName+": ")
+        periodFinishWeek = inputInt("Last week number of the period "+periodName+": ")
         periodDictionary[periodName] = (periodStartWeek,periodFinishWeek)
     print("")
     return periodDictionary
@@ -151,11 +137,10 @@ def createSchoolDays():
     Return: A list containing day where courses can be placed
     """
     weekDays = ['m','tu','w','th','f','sa','su']
-    daysName = [_('lundi'),_('mardi'),_('mercredi'),_('jeudi'),_('vendredi'),_('samedi'),_('dimanche')]
+    daysName = ['monday','tuesdays','wednesday','thursday','friday','saturday','sunday']
     ans = []
     for i in range(len(weekDays)):
-        translatedMessage = _("Can courses be placed on ")+daysName[i]+"?"
-        possibleDay = inputBool(translatedMessage)
+        possibleDay = inputBool("Can courses be placed on "+daysName[i]+"? : ")
         if possibleDay:
             ans.append(weekDays[i])
     return ans
@@ -166,19 +151,13 @@ def createLunchBreak():
     Input: Nothing
     Return: Integers representing the start time and finish time of the lunch-break
     """
-    translatedMessage1 = _("( Hint  ) - Set the beginning of the lunch-break and the end of the lunch-break at 1 a.m if you don't want a lunch break")
-    translatedMessage2 = _("At what time should the lunch break start?")
-    translatedMessage3 = _("At what time should the lunch break end?")
-    errorMessage = _("( Error ) - The lunch-break ends before starting")
-    
-    print(translatedMessage1)
-    startTime = inputTime(translatedMessage2)
-    finishTime = inputTime(translatedMessage3)
-    while debutPause>finPause:
-        print(errorMessage)
-        startTime = inputTime(translatedMessage2)
-        finishTime = inputTime(translatedMessage3)
-        
+    print("( Hint  ) - Set the beginning of the lunch-break and the end of the lunch-break at 1 a.m if you don't want a lunch break")
+    startTime = inputTime("At what time should the lunch break start? : ")
+    finishTime = inputTime("At what time should the lunch break end? : ")
+    while startTime>finishTime:
+        print("( Error ) - The lunch-break ends before starting")
+        startTime = inputTime("At what time should the lunch break start? : ")
+        finishTime = inputTime("At what time should the lunch break end? : ")
     return startTime, finishTime
 
 
@@ -187,16 +166,15 @@ def switchStructuralToTransversal(dico):
     Input: The hyperplanning dictionary
     Return: Nothing but alter the hyperplanning dictionary with some structural groups switched to transversal groups according to user choices
     """
-    translatedMessage = [_("Is the group "),_(" from the prom "),_(" is a transversal group? ")]
     keys_to_remove = []
     for i in dico["groups"].keys():
-        if inputBool(translatedMessage[0]+i[1]+translatedMessage[1]+i[0]+translatedMessage[2]):
+        if inputBool("Is the group "+i[1]+" from the prom "+i[0]+" is a transversal group? : "):
             keys_to_remove.append(i)
             dico["transversal_groups"][i] = {"transversal_to":None,"parallel_to":None}
     for i in keys_to_remove:
         dico["groups"].pop(i)
 
-def getValidCourseKeys(IHpSvcWCours,breakLevel=-1):
+def getValidCourseKeys(IHpSvcWCours, alertList, breakLevel=-1):
     """
     Input: The Hyperplanning-API thing that deals with courses, and an Integer that define the max number of courses to take into account
     Return: Valid courses keys usable for other applications
@@ -207,10 +185,25 @@ def getValidCourseKeys(IHpSvcWCours,breakLevel=-1):
         listCoursesKeys = listCoursesKeys[0:breakLevel]
 
     validCourseKeys = []
-    for i in tqdm(listCoursesKeys,"Courses - Validating : ", bar_format='{l_bar}{bar:15}{r_bar}{bar:-10b}'):
+    numberOfDiscardedCoursesKeys = 0
+    nodcDueToNotPlaced = 0
+    nodcDueToNotChildrenOrSimple = 0
+    
+    for i in tqdm(listCoursesKeys,"(Extract) - Crs keys : ", bar_format='{l_bar}{bar:15}{r_bar}{bar:-10b}'):
         if IHpSvcWCours.service.CoursEstUnCoursFils(i) or IHpSvcWCours.service.CoursEstUnCoursSimple(i):
             if not IHpSvcWCours.service.EstCoursNonPlace(i):
                 validCourseKeys.append(i)
+            else:
+                numberOfDiscardedCoursesKeys += 1
+                nodcDueToNotPlaced += 1
+        else:
+            numberOfDiscardedCoursesKeys += 1
+            nodcDueToNotChildrenOrSimple += 1
+
+    if numberOfDiscardedCoursesKeys != 0:
+        alertList.append("( Alert ) - %s courses have been discarded"%numberOfDiscardedCoursesKeys)
+        alertList.append("( Alert ) - %s of them is because they were not placed and %s of them were not children or simple courses"%(nodcDueToNotPlaced, nodcDueToNotChildrenOrSimple))
+        
     return validCourseKeys
 
 
@@ -221,37 +214,42 @@ def extractRooms(IHpSvcWSalles):
     """
     listRoomKeys = IHpSvcWSalles.service.ToutesLesSalles()
     listRoomNames = []
-    for i in tqdm(listRoomKeys,"Room    - Extracting : ", bar_format='{l_bar}{bar:15}{r_bar}{bar:-10b}'):
+    for i in tqdm(listRoomKeys,"(Extract) - Rooms    : ", bar_format='{l_bar}{bar:15}{r_bar}{bar:-10b}'):
         listRoomNames.append(IHpSvcWSalles.service.NomSalle(i))
     return set(listRoomNames)
 
 
-def extractPeople(IHpSvcWEnseignants):
+def extractPeople(IHpSvcWEnseignants,alertList):
     """
-    Input: The Hyperplanning-API thing that deals with teachers
+    Input: The Hyperplanning-API thing that deals with teachers and the alertList
     Return: A dictionary containing teachers: First_name, last_name, email, status and employer. Can be access using the teacherID defined in the hyperplanning database
     Note: If the teacher don't have an email adress, it will be fake@flopedt.org
     """
     listTeachersKeys = IHpSvcWEnseignants.service.TousLesEnseignants()
     teacherDictionary = {}
-    for i in tqdm(listTeachersKeys,"Teacher - Extracting : ", bar_format='{l_bar}{bar:15}{r_bar}{bar:-10b}'):
+    for i in tqdm(listTeachersKeys,"(Extract) - Teachers : ", bar_format='{l_bar}{bar:15}{r_bar}{bar:-10b}'):
         teacherSubDictionary = {}
         teacherSubDictionary["first_name"] = IHpSvcWEnseignants.service.PrenomEnseignant(i)
         teacherSubDictionary["last_name"] = IHpSvcWEnseignants.service.NomEnseignant(i)
         email = IHpSvcWEnseignants.service.EMailEnseignant(i)
         if email is None:
-            teacherSubDictionary["email"] = 'fake@flopedt.org'
+            teacherSubDictionary["email"] = 'fake@flopedt.org'    
+            if (teacherSubDictionary["first_name"] != None and teacherSubDictionary["last_name"]!= None):
+                alertList.append("( Alert ) - Teacher "+teacherSubDictionary["first_name"]+" "+teacherSubDictionary["last_name"]+" does not have a valid email!")
         else:
             teacherSubDictionary["email"] = email
-        teacherSubDictionary["status"] = "temp" # Pas necessaire
-        teacherSubDictionary["employer"] = "temp" # Pas necessaire
+        teacherSubDictionary["status"] = "temp"             # Does not affect FlOp anyhow
+        teacherSubDictionary["employer"] = "temp"       # Same
         teacherID = IHpSvcWEnseignants.service.IdentifiantCASEnseignant(i)
-        if teacherID != None:   #A modifier
+        if teacherID != None:
             teacherDictionary[teacherID] = teacherSubDictionary
+        else:
+            if (teacherSubDictionary["first_name"] != None and teacherSubDictionary["last_name"]!= None):
+                alertList.append("( Alert ) - Teacher "+teacherSubDictionary["first_name"]+" "+teacherSubDictionary["last_name"]+" does not have a valid ID!")
     return teacherDictionary
 
 
-def extractModules(IHpSvcWMatieres,IHpSvcWCours,IHpSvcWTDOption,IHpSvcWPromotions,validCourseKeys,firstPeriod): #Devrait bien avoir un moyen plus simple de faire ça...
+def extractModules(IHpSvcWMatieres,IHpSvcWCours,IHpSvcWTDOption,IHpSvcWPromotions,validCourseKeys,firstPeriod):
     """
     Input: The Hyperplanning-API things that deals with modules, courses, groups and proms, valid course keys (from getValidCoursesKeys function) and the period
     Return: A dictionary containing modules: the name of the module, the short name of the module, the course promotion and the owner
@@ -261,7 +259,7 @@ def extractModules(IHpSvcWMatieres,IHpSvcWCours,IHpSvcWTDOption,IHpSvcWPromotion
     tempDictNameOfModules = {} #Cle -> Nom
     moduleDictionary = {}
     
-    for i in tqdm(listCoursesKeys,"Modules - Extracting : ", bar_format='{l_bar}{bar:15}{r_bar}{bar:-10b}'):
+    for i in tqdm(listCoursesKeys,"(Extract) - Modules  : ", bar_format='{l_bar}{bar:15}{r_bar}{bar:-10b}'):
         moduleKey = IHpSvcWCours.service.MatiereCours(i)
         if moduleKey not in tempDictNameOfModules.keys():
             moduleName = IHpSvcWMatieres.service.LibelleMatiere(moduleKey)
@@ -301,7 +299,7 @@ def extractCoursesSettings(IHpSvcWCours,validCourseKeys):
     Return: A dictionary containing courses settings: Course type, course length, course start time and group types. The key of a course_type is its type + "_" + duration in minutes
     """
     coursesSettingsDictionary = {}
-    for i in tqdm(validCourseKeys,"Courses - Extracting : ", bar_format='{l_bar}{bar:15}{r_bar}{bar:-10b}'):    #for i in validCourseKeys:
+    for i in tqdm(validCourseKeys,"(Extract) - Crs sett : ", bar_format='{l_bar}{bar:15}{r_bar}{bar:-10b}'):    #for i in validCourseKeys:
         courseType = IHpSvcWCours.service.TypeCours(i)
         courseLength = getpSvcWDureeToMinutesInDay(IHpSvcWCours.service.DureeCours(i))[0]
         courseStartTime, courseDay = getpSvcWDureeToMinutesInDay(IHpSvcWCours.service.PlaceCours(i))
@@ -323,7 +321,7 @@ def extractSettings(IHpSvcWCours,validCourseKeys):
     startTimes = set()
     finishTimes = set()
     days = set()
-    for i in tqdm(validCourseKeys,"Setting - Extracting : ", bar_format='{l_bar}{bar:15}{r_bar}{bar:-10b}'):
+    for i in tqdm(validCourseKeys,"(Extract) - Settings : ", bar_format='{l_bar}{bar:15}{r_bar}{bar:-10b}'):
         courseLength = getpSvcWDureeToMinutesInDay(IHpSvcWCours.service.DureeCours(i))[0]
         courseStartTime, courseDay = getpSvcWDureeToMinutesInDay(IHpSvcWCours.service.PlaceCours(i))
         courseFinishTime = courseStartTime+courseLength
@@ -345,7 +343,7 @@ def extractPromotions(IHpSvcWPromotions):
     """    
     promKeys = IHpSvcWPromotions.service.ToutesLesPromotions()
     promotionDictionary = {}
-    for i in tqdm(promKeys,"Proms   - Extracting : ", bar_format='{l_bar}{bar:15}{r_bar}{bar:-10b}'): 
+    for i in tqdm(promKeys,"(Extract) - Proms    : ", bar_format='{l_bar}{bar:15}{r_bar}{bar:-10b}'): 
         promName = IHpSvcWPromotions.service.NomPromotion(i)
         promotionDictionary[promName]=promName
     return promotionDictionary
@@ -357,28 +355,30 @@ def extractGroupTypes(coursesSettingsDict):
     Return: A set containing every group types
     """    
     groupTypesSet = set()
-    for i in tqdm(coursesSettingsDict,"Types   - Extracting : ", bar_format='{l_bar}{bar:15}{r_bar}{bar:-10b}'):
+    for i in tqdm(coursesSettingsDict,"(Extract) - Gr.type  : ", bar_format='{l_bar}{bar:15}{r_bar}{bar:-10b}'):
         for j in coursesSettingsDict[i]['group_types']:
             groupTypesSet.add(j)
     return groupTypesSet
 
 
 def extractGroups(IHpSvcWPromotions,IHpSvcWTDOptions):
-        """
+    """
     Input: API things that deals with proms and groups (TDOptions)
     Return: A dictionary containing every groups: key is a tuple (promName, groupName) and return its group type and the parent group
     Note: This function is not optimal
     """    
-    groupDictionary = {}
+    groupDictionary = dict()
     tdOptionsKeys = IHpSvcWTDOptions.service.TousLesTDOptions()
     promKeys = IHpSvcWPromotions.service.ToutesLesPromotions()
 
-    for i in tqdm(promKeys,"Groups1 - Extracting : ", bar_format='{l_bar}{bar:15}{r_bar}{bar:-10b}'):
+    #Groups 1 are proms groups, representing the root of the tree
+    for i in tqdm(promKeys,"(Extract) - Groups1  : ", bar_format='{l_bar}{bar:15}{r_bar}{bar:-10b}'): 
         promName = IHpSvcWPromotions.service.NomPromotion(i)
         groupID = (promName,promName)
         groupDictionary[groupID] = {"group_type":None,"parent":set()}
-    
-    for i in tqdm(tdOptionsKeys,"Groups2 - Extracting : ", bar_format='{l_bar}{bar:15}{r_bar}{bar:-10b}'):
+
+    #Groups 2 are the childrens of the first groups
+    for i in tqdm(tdOptionsKeys,"(Extract) - Groups2  : ", bar_format='{l_bar}{bar:15}{r_bar}{bar:-10b}'): 
         tdOptionName = IHpSvcWTDOptions.service.NomTDOption(i)
         belongTo = set()
         belongTo.add(IHpSvcWPromotions.service.NomPromotion(IHpSvcWTDOptions.service.PromotionTDOption(i)))
@@ -393,44 +393,35 @@ def extractGroups(IHpSvcWPromotions,IHpSvcWTDOptions):
 def verifyAndEdit(dico):
     print("\n")
     
-    translatedMessage = _("Do you wish to look through some extracted information and modify them if needed? : ")
-    if inputBool(translatedMessage):
-        translatedMessage1_1 = _("Courses will start as soon as: ")
-        translatedMessage1_2 = _(". Edit? ")
-        if inputBool(translatedMessage1_1+str(dico['settings']['day_start_time']//60)+"H"+str(dico['settings']['day_start_time']%60)+translatedMessage1_2):
-            translatedMessage1_3 = _("Courses should not start before what time? : ")
-            dico['settings']['day_start_time'] = inputTime(translatedMessage1_3)
+    if inputBool("Do you wish to look through some extracted information and modify them if needed? : "):
+        if inputBool("Courses will start as soon as: %sH%s. Edit? : " %(dico['settings']['day_start_time']//60,dico['settings']['day_start_time']%60)):
+            dico['settings']['day_start_time'] = inputTime("Courses should not start before what time? : ")
+        
+        if inputBool("Courses will end no latter than: %sH%s. Edit? : " %(dico['settings']['day_finish_time']//60,dico['settings']['day_finish_time']%60)):
+            dico['settings']['day_finish_time'] = inputTime("What time should the courses finish time not exceed? : ")
 
-        translatedMessage1_4 = _("Courses will end no latter than: ")
-        translatedMessage1_5 = _(". Edit? ")
-        if inputBool(translatedMessage1_4+str(dico['settings']['day_finish_time']//60)+"H"+str(dico['settings']['day_finish_time']%60)+translatedMessage1_5):
-            translatedMessage1_6 = _("What time should the courses finish time not exceed? : ")
-            dico['settings']['day_finish_time'] = inputTime(translatedMessage1_6)
-
-        translatedMessage2 = _("There is currently no defined lunch break. Define one? : ")
-        if inputBool(translatedMessage2):
+        print("\n")
+        if inputBool("There is currently no defined lunch break. Define one? : "):
             lunch_break_start_time, lunch_break_finish_time = createLunchBreak()
             dico['settings']['lunch_break_start_time'] = lunch_break_start_time
             dico['settings']['lunch_break_finish_time'] = lunch_break_finish_time
-            
-        translatedMessage3_1 = _("The current course placement granularity is: ")
-        translatedMessage3_2 = _(" minutes. Edit? : ")
-        if inputBool(translatedMessage3_1+str(dico['settings']['default_preference_duration'])+translatedMessage3_2):
-            translatedMessage3_3 = _("What is the course placement granularity you want? : ")
-            dico['settings']['default_preference_duration'] = inputInt(translatedMessage3_3)
+        
+        print("\n")
+        if inputBool("The current course placement granularity is: %s minutes. Edit? : " %dico['settings']['default_preference_duration']):
+            dico['settings']['default_preference_duration'] = inputInt("What course placement granularity do you want? (in minutes) : ")
 
-        translatedMessage4_1 = _("The current school days are :" )
-        translatedMessage4_2 = _(". Edit? : ")
+        dayMessage= "The current school days are :"
         dayDictionary = {"m":"Monday","tu":"Tuesday","w":"Wednesday","th":"Thursday","f":"Friday","sa":"Saturday","su":"Sunday"}
-        for i in ["m","tu","w","th","f","sa","su"]:            
-            if i in dico["settings"]["days"]: translatedMessage4_1 = translatedMessage4_1+" "+dayDictionary[i]
-        translatedMessage4_1 = translatedMessage4_1+translatedMessage4_2
+        for i in dayDictionary:            
+            if i in dico["settings"]["days"]:
+                dayMessage = dayMessage+" "+dayDictionary[i]
+        dayMessage = dayMessage+". Edit? : "
             
-        if inputBool(translatedMessage4_1):
+        if inputBool(dayMessage):
             dico['settings']['days'] = createSchoolDays()
 
-        translatedMessage5 = _("There is currently no defined transversal groups. Do you want to turn some structural groups into transversal groups? : ")
-        if inputBool(translatedMessage5): 
+        print("\n")
+        if inputBool("There is currently no defined transversal groups. Do you want to turn some structural groups into transversal groups? : "): 
             switchStructuralToTransversal(dico)
 
     return dico
@@ -475,18 +466,18 @@ def create_db_dictionary_from_hyperplanning(username,password,lPrefixeWsdl):
     periods = createPeriods()
     
     # Core
-    translatedMessage1 = _("How many courses do you want to look through? Enter -1 to look through every courses (may take a lot of time!) : ")
-    MAX_NUMBER_OF_COURSES = inputInt(translatedMessage1)
-    
-    validCoursesKeys = getValidCourseKeys(courseService,MAX_NUMBER_OF_COURSES)
-    
+    alertList = []
+        
+    MAX_NUMBER_OF_COURSES = inputInt("How many courses do you want to look through? Enter -1 to look through every courses (may take a lot of time!) : ")
+    validCoursesKeys = getValidCourseKeys(courseService, alertList, MAX_NUMBER_OF_COURSES)
+
     rooms = extractRooms(roomService)
     room_groups = {}
     room_categories = {'all':rooms.copy()}
 
-    people = extractPeople(peopleService)
+    people = extractPeople(peopleService, alertList)
     
-    modules = extractModules(moduleService,courseService,tdOptionService,promService,validCoursesKeys,list(periodes.keys())[0]) #Pas beau
+    modules = extractModules(moduleService,courseService,tdOptionService,promService,validCoursesKeys,list(periods.keys())[0]) #Pas beau
     
     courses = extractCoursesSettings(courseService, validCoursesKeys)
 
@@ -510,6 +501,9 @@ def create_db_dictionary_from_hyperplanning(username,password,lPrefixeWsdl):
             'group_types' : group_types,
             'groups' : groups,
             'transversal_groups': {} }
+
+    for i in alertList:
+        print(i)
     
     book = verifyAndEdit(book)
     
@@ -538,8 +532,7 @@ def create_course_list_from_hp(username, password, lPrefixeWsdl,
 
 
     # Core
-    translatedMessage1 = _("How many courses do you want to look through? Enter -1 to look through every courses (may take a lot of time!) : ")
-    MAX_NUMBER_OF_COURSES = inputInt(translatedMessage1)
+    MAX_NUMBER_OF_COURSES = inputInt("How many courses do you want to look through? Enter -1 to look through every courses (may take a lot of time!) : ")
     
     validCoursesKeys = getValidCourseKeys(courseService,MAX_NUMBER_OF_COURSES)
     
@@ -597,7 +590,7 @@ def create_course_list_from_hp(username, password, lPrefixeWsdl,
                   "week": courseWeek,
                   "year": courseYear}
 
-        if courseWeek != None: s
+        if courseWeek != None:
             coursesList.append(course)
 
     if remove_courses_with_no_group:
