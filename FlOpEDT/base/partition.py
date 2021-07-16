@@ -294,12 +294,50 @@ class Partition(object):
             i+=1
         return result
 
-    #data_type can be:
-    #   - "user_preference" : with key "tutor" and "available"
-    #   - "night_time" : with key "night_time" and "forbidden"
-    #   - "lunch_break" : with key "lunch_break" and "forbidden"
-    #   - "week_end" : with key "week_end" and "forbidden"
+    def find_all_available_timeinterval_with_key_starting_at(self, key, start_times, duration = None):
+        start = None
+        i = 0
+        result = []
+        while i < len(self.intervals):
+            if key in self.intervals[i][1] and self.intervals[i][1]["available"] and not self.intervals[i][1]["forbidden"]:
+                for st in start_times:
+                    if time_to_floptime(self.intervals[i][0].start.time()) <= st and time_to_floptime(self.intervals[i][0].end.time()) > st:
+                        dif = st - time_to_floptime(self.intervals[i][0].start.time())
+                        start = self.intervals[i][0].start + timedelta(hours = dif//60, minutes=dif%60)
+                        break
+                else:
+                    i+=1
+                    continue
+                current_duration = self.intervals[i][0].duration - (st - time_to_floptime(self.intervals[i][0].start.time()))
+                i+=1
+                while i < len(self.intervals) and key in self.intervals[i][1] and self.intervals[i][1]["available"] and not self.intervals[i][1]["forbidden"]:
+                    current_duration+=self.intervals[i][0].duration
+                    i+=1
+                if (duration == None or current_duration > duration):
+                    result.append(TimeInterval(start, self.intervals[i-1][0].end))
+                start = None
+            i+=1
+        return result
+
+
     def add_slot(self, interval, data_type, data):
+        """Add an interval of time with data related to it to the Partition
+        
+        Parameters:
+            interval (TimeInterval) : The interval of time we are going to add
+            data_type (str) : The type of data we are going to add
+            data (dict) : The data we are going to add
+            
+        Returns:
+            boolean: True if the interval was in the Partition time or False otherwise
+            
+            
+        Data type can be:
+            - "user_preference" : with key "tutor" and "available"
+            - "night_time" : with key "night_time" and "forbidden"
+            - "lunch_break" : with key "lunch_break" and "forbidden"
+            - "week_end" : with key "week_end" and "forbidden" 
+            - "all" : with any key in it """
         i = 0
         #Check if we are in the interval range
         if (interval.start >= self.intervals[len(self.intervals)-1][0].end

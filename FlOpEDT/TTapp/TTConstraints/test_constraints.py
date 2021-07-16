@@ -34,7 +34,7 @@ from django.db.models import Q
 from TTapp.TTConstraint import TTConstraint
 from TTapp.ilp_constraints.constraint import Constraint
 from django.utils.translation import gettext_lazy as _
-from base.models import ModulePossibleTutors, UserPreference
+from base.models import CourseStartTimeConstraint, ModulePossibleTutors, UserPreference
 
 
 # Vérifier que le cours deux peut être mis après le cours 1
@@ -89,6 +89,9 @@ class Precedence(TTConstraint):
         jsondict = {"status" : "OK", "messages" : []}
         week_partition_course1 = self.get_partition_of_week(week, with_day_time=True)
         week_partition_course2 = self.get_partition_of_week(week, with_day_time=True)
+
+        course1_start_times = CourseStartTimeConstraint.objects.get(course_type = self.course1.type).allowed_start_times
+        course2_start_times = CourseStartTimeConstraint.objects.get(course_type = self.course2.type).allowed_start_times
 
         possible_tutors_1 = set()
         required_supp_1 = set()
@@ -213,8 +216,8 @@ class Precedence(TTConstraint):
                         )
                 print("Partition for course 1:", week_partition_course1)
                 print("Partition for course 2:", week_partition_course2)
-                course1_slots = week_partition_course1.find_all_available_timeinterval_with_key("user_preference", self.course1.type.duration)
-                course2_slots = week_partition_course2.find_all_available_timeinterval_with_key("user_preference", self.course2.type.duration)
+                course1_slots = week_partition_course1.find_all_available_timeinterval_with_key_starting_at("user_preference", course1_start_times, self.course1.type.duration)
+                course2_slots = week_partition_course2.find_all_available_timeinterval_with_key_starting_at("user_preference", course2_start_times, self.course2.type.duration)
                 print("Course_slots for course 2:", course2_slots)
                 if course1_slots and course2_slots:
                     while course2_slots[0].end < course1_slots[0].start + timedelta(hours = self.course1.type.duration/60, minutes=self.course1.type.duration%60):
