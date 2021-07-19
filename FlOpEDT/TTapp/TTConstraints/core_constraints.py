@@ -54,8 +54,8 @@ class NoSimultaneousGroupCourses(TTConstraint):
     def pre_analyse(self, week):
         """Pre analysis of the Constraint 
         Compare the available time of the week to the minimum required in any cases (the time of all courses + the time needed for the longest parallel group)
-        then to the probable mimimum required (the time of all courses + the time of all parallel groups that are maximums of their graph color) and then
-        checks if their is enough available slots for each course type in the week.
+        then to the probable mimimum required (the time of all courses + the time of all parallel groups that are maximum of their graph color) and then
+        checks if there is enough available slots for each course type in the week.
 
         Parameter:
             week (Week): the week we want to analyse the data from
@@ -228,8 +228,7 @@ class ScheduleAllCourses(TTConstraint):
             week (Week): the week we want to analyse the data from
 
         Returns:
-            JsonResponse: with status 'KO' or 'OK' and a list of messages explaining the problem
-        """
+            JsonResponse: with status 'KO' or 'OK' and a list of messages explaining the problem"""
         considered_courses = Course.objects.filter(week = week)
         time_settings = TimeGeneralSettings.objects.get(department = self.department)
         day_start_week = Day(time_settings.days[0], week)
@@ -380,8 +379,6 @@ class ConsiderTutorsUnavailability(TTConstraint):
             considered_tutors = Tutor.objects.filter(departments = self.department)
 
         for tutor in considered_tutors:
-
-            print(f"For tutor '{tutor}' :")
             
             courses = Course.objects.filter(Q(tutor = tutor) | Q(supp_tutor = tutor), week = week)
             tutor_partition = Partition("UserPreference", flopdate_to_datetime(Day('m', week), 0), flopdate_to_datetime(Day('su', week), 23*60+59))
@@ -397,10 +394,7 @@ class ConsiderTutorsUnavailability(TTConstraint):
                         "user_preference",
                         {"value" : up.value, "available" : True, "tutor" : up.user.username}
                     )
-
-            print(f"There is {tutor_partition.available_duration} minutes of available time.")
-            print(f'He or she has to lecture {len(courses)} classes for an amount of {sum(c.type.duration for c in courses)} minutes of courses.')
-            print("Condition:", tutor_partition.available_duration < sum(c.type.duration for c in courses))
+                    
             if tutor_partition.available_duration < sum(c.type.duration for c in courses):
                 message = _(f"Tutor {tutor} has {tutor_partition.available_duration} minutes of available time.")
                 message += _(f' He or she has to lecture {len(courses)} classes for an amount of {sum(c.type.duration for c in courses)} minutes of courses.')
@@ -447,9 +441,7 @@ class ConsiderTutorsUnavailability(TTConstraint):
                     course_partition.add_lunch_break(time_settings.lunch_break_start_time, time_settings.lunch_break_finish_time)
                     course_partition.add_week_end(time_settings.days)
                     course_partition.add_partition_data_type(tutor_partition, "user_preference")
-                    
-                    print("Tutor has", course_partition.nb_slots_available_of_duration_beginning_at(course_type.duration, start_times), "available moments available.")
-                    print("And", len(course_list), "courses to attend")
+
                     if course_partition.available_duration < len(course_list)*course_type.duration or course_partition.nb_slots_available_of_duration_beginning_at(course_type.duration, start_times) < len(course_list):
                         message = _(f"Tutor {tutor} has {course_partition.nb_slots_available_of_duration_beginning_at(course_type.duration, start_times)} available slots of {course_type.duration} mins ")
                         message += _(f'and {len(course_list)} courses that long to attend.')
