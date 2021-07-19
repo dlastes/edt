@@ -205,25 +205,22 @@ class NoTutorCourseOnDay(NoCourseOnDay):
                 day_break = Day(self.weekday, week)
                 if self.period == self.FULL_DAY:
                     return(TimeInterval(flopdate_to_datetime(day_break, time_settings.day_start_time), flopdate_to_datetime(day_break, time_settings.day_finish_time)),
-                            { "no_course" : 
-                                { "period" : self.FULL_DAY, "tutors": self.tutors.all(), "tutor_status": self.tutor_status },
-                                "forbidden" : True 
+                            { "no_course_tutor" : 
+                                { "period" : {self.FULL_DAY}, "tutors": self.tutors.all(), "tutor_status": {self.tutor_status}  }
                             }
                         )
                 elif self.period == self.AM:
                     return (
                         TimeInterval(flopdate_to_datetime(day_break, time_settings.day_start_time), flopdate_to_datetime(day_break, time_settings.lunch_break_start_time)),
-                        { "no_course" : 
-                            { "period" : self.AM, "tutors": self.tutors.all(), "tutor_status": self.tutor_status },
-                            "forbidden" : True 
+                        { "no_course_tutor" : 
+                            { "period" : {self.AM}, "tutors": self.tutors.all(), "tutor_status": {self.tutor_status}  }
                         }
                     )
                 elif self.period == self.PM:
                     return (
                         TimeInterval(flopdate_to_datetime(day_break, time_settings.lunch_break_finish_time), flopdate_to_datetime(day_break, time_settings.day_finish_time)),
-                        { "no_course" : 
-                            { "period" : self.PM, "tutors": self.tutors.all(), "tutor_status": self.tutor_status },
-                            "forbidden" : True 
+                        { "no_course_tutor" : 
+                            { "period" : {self.PM}, "tutors": self.tutors.all(), "tutor_status": {self.tutor_status} }
                         }
                     )
             return None
