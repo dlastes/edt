@@ -300,31 +300,6 @@ class Partition(object):
         nb_slots += current_duration//duration
         current_duration = 0
         return int(nb_slots)
-
-
-    def add_data(self, data_type, data, interval_index):
-        '''Adds some data to an interval
-        
-        Parameters:
-            data_type (str): the type of date added
-            data (dict): a dictionary containing the data
-            interval_index (int): the index of self.intervals where we want to put the data in
-            
-        Internal method not to be called by user'''
-        if "available" in data:
-            self.intervals[interval_index][1]["available"] = self.intervals[interval_index][1]["available"] or data["available"]
-        if "forbidden" in data:
-            self.intervals[interval_index][1]["forbidden"] = self.intervals[interval_index][1]["forbidden"] or data["forbidden"]
-        if not data_type in self.intervals[interval_index][1] and data_type != "all":
-            self.intervals[interval_index][1][data_type] = dict()
-        if data_type == "user_preference":
-            self.intervals[interval_index][1][data_type][data["tutor"]] = data["value"]
-        elif data_type == "night_time" or data_type == "lunch_break" or data_type == "week_end":
-            self.intervals[interval_index][1][data_type] = data[data_type]
-        elif data_type == "all":
-            for key, value in data.items():
-                if key != "available" and key != "forbidden":
-                    self.intervals[interval_index][1][key] = value
     
     def clear_merge(self):
         '''Checks if several consecutive interval have the same data and if so merge them'''
@@ -445,10 +420,11 @@ class Partition(object):
             
             
         Data type can be:
-            - "user_preference" : with key "tutor" and "available"
-            - "night_time" : with key "night_time" and "forbidden"
-            - "lunch_break" : with key "lunch_break" and "forbidden"
-            - "week_end" : with key "week_end" and "forbidden" 
+            - "user_preference" : with keys "tutor" and "available"
+            - "night_time" : with keys "night_time" and "forbidden"
+            - "lunch_break" : with keys "lunch_break" and "forbidden"
+            - "week_end" : with keys "week_end" and "forbidden" 
+            - "no_course_tutor" : with keys "no_course_tutor"
             - "all" : with any key in it """
         i = 0
         #Check if we are in the interval range
@@ -499,3 +475,44 @@ class Partition(object):
                     i += 2
                     interval.start = self.intervals[i][0].start
         return True
+
+    def add_data(self, data_type, data, interval_index):
+        '''Adds some data to an interval
+        
+        Parameters:
+            data_type (str): the type of date added
+            data (dict): a dictionary containing the data
+            interval_index (int): the index of self.intervals where we want to put the data in
+            
+        Internal method not to be called by user'''
+        if "available" in data:
+            self.intervals[interval_index][1]["available"] = self.intervals[interval_index][1]["available"] or data["available"]
+        if "forbidden" in data:
+            self.intervals[interval_index][1]["forbidden"] = self.intervals[interval_index][1]["forbidden"] or data["forbidden"]
+        if not data_type in self.intervals[interval_index][1] and data_type != "all":
+            self.intervals[interval_index][1][data_type] = dict()
+        if data_type == "user_preference":
+            self.intervals[interval_index][1][data_type][data["tutor"]] = data["value"]
+        elif data_type == "night_time" or data_type == "lunch_break" or data_type == "week_end":
+            self.intervals[interval_index][1][data_type] = data[data_type]
+        elif data_type == "no_course_tutor":
+            if "period" in self.intervals[interval_index][1][data_type]:
+                for p in data[data_type]["period"]:
+                    self.intervals[interval_index][1][data_type]["period"].add(p)
+            else:
+                self.intervals[interval_index][1][data_type]["period"] = data[data_type]["period"]
+            if "tutors" in self.intervals[interval_index][1][data_type]:
+                for t in data[data_type]["tutors"]:
+                    self.intervals[interval_index][1][data_type]["tutors"].add(t)
+            else:
+                self.intervals[interval_index][1][data_type]["tutors"] = data[data_type]["tutors"]
+
+            if "tutor_status" in self.intervals[interval_index][1][data_type]:
+                for ts in data[data_type]["tutor_status"]:
+                    self.intervals[interval_index][1][data_type]["tutor_status"].add(ts)
+            else:
+                self.intervals[interval_index][1][data_type]["tutor_status"] = data[data_type]["tutor_status"]
+        elif data_type == "all":
+            for key, value in data.items():
+                if key != "available" and key != "forbidden":
+                    self.intervals[interval_index][1][key] = value
