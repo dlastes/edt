@@ -182,7 +182,7 @@ class LimitedStartTimeChoices(TTConstraint):
             text += french_format(pst) + ', '
         return text
 
-### ConsiderDepencies dependencies
+### ConsiderDependencies dependencies
 def find_successive_slots(course_slot1, course_slot2, course1_duration, course2_duration):
     for cs1 in course_slot1:
         possible_start_time = cs1.start + course1_duration
@@ -239,7 +239,7 @@ def find_day_gap_slots(course_slots1, course_slots2, day_gap):
             return True
     return False
 
-class ConsiderDepencies(TTConstraint):
+class ConsiderDependencies(TTConstraint):
     """
     Transform the constraints of dependency saved on the DB in model constraints:
     -include dependencies and successiveness

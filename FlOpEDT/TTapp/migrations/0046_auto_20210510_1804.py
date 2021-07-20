@@ -10,10 +10,10 @@ def from_week_year_to_weeks(apps, schema_editor):
     Week = apps.get_model('base', "Week")
     for ttc_c in all_ttconstraint_classes:
         class_name = ttc_c._meta.object_name
-        if class_name in ['ScheduleAllCourses', 'NoSimultaneousGroupCourses', 'ConsiderTutorsUnavailability',
-                          'AssignAllCourses']:
+        try:
+            cl = apps.get_model('TTapp', class_name)
+        except:
             continue
-        cl = apps.get_model('TTapp', class_name)
         all_o = cl.objects.exclude(Q(week=None)|Q(year=None))
         for o in all_o:
             w = Week.objects.get(nb=o.week, year=o.year)
