@@ -41,7 +41,7 @@ from TTapp.models import \
     LimitTutorsTimePerPeriod, LimitGroupsTimePerPeriod, LowerBoundBusyDays, GroupsLunchBreak, BreakAroundCourseType, \
     NoVisio, LimitGroupsPhysicalPresence, BoundPhysicalPresenceHalfDays, TutorsLunchBreak, VisioOnly, \
     NoTutorCourseOnDay, NoGroupCourseOnDay, \
-    ConsiderDepencies, Curfew, NoSimultaneousGroupCourses, ScheduleAllCourses, AssignAllCourses, \
+    ConsiderDependencies, Curfew, NoSimultaneousGroupCourses, ScheduleAllCourses, AssignAllCourses, \
     ConsiderTutorsUnavailability
 
 
@@ -388,7 +388,7 @@ class NoCourseOnDayAdmin(DepartmentModelAdmin):
                    )
 
 
-class ConsiderDepenciesAdmin(DepartmentModelAdmin):
+class ConsiderDependenciesAdmin(DepartmentModelAdmin):
     list_display = ('comment',
                     'weight',
                     'is_active')
@@ -399,7 +399,7 @@ class ConsiderDepenciesAdmin(DepartmentModelAdmin):
                    )
 
 
-admin.site.register(ConsiderDepencies, ConsiderDepenciesAdmin)
+admin.site.register(ConsiderDependencies, ConsiderDependenciesAdmin)
 admin.site.register(CustomConstraint, CustomConstraintAdmin)
 admin.site.register(Stabilize, StabilizeAdmin)
 admin.site.register(MinGroupsHalfDays, MinGroupsHalfDaysAdmin)
