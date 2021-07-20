@@ -851,6 +851,7 @@ class Dependency(models.Model):
         'Course', related_name='second_course', on_delete=models.CASCADE)
     successive = models.BooleanField(verbose_name=_('Successives?'), default=False)
     ND = models.BooleanField(verbose_name=_('On different days'), default=False)
+    day_gap = models.PositiveSmallIntegerField(verbose_name=_('Minimal day gap between courses'), default=0)
 
     def __str__(self):
         return f"{self.course1} avant {self.course2}"

@@ -35,7 +35,7 @@ import django.contrib.auth as auth
 from django.utils.translation import gettext_lazy as _
 
 from people.models import Tutor, User
-from base.models import Day, Room, Module, Course, StructuralGroup, TransversalGroup, \
+from base.models import CourseStartTimeConstraint, Day, Room, Module, Course, StructuralGroup, TransversalGroup, \
     UserPreference, Time, ScheduledCourse, EdtVersion, CourseModification, \
     TrainingProgramme,  \
     Regen, Holiday, TrainingHalfDay, \
@@ -691,6 +691,9 @@ class EnrichedLinkAdmin(MyModelAdmin):
 class GroupPreferredLinksAdmin(MyModelAdmin):
     pass
 
+class CourseStartTimeConstraintAdmin(MyModelAdmin):
+    pass
+
 # </editor-fold desc="ADMIN_MENU">
 
 
@@ -714,3 +717,4 @@ admin.site.register(UserPreference, DispoAdmin)
 admin.site.register(Regen, RegenAdmin)
 admin.site.register(EnrichedLink, EnrichedLinkAdmin)
 admin.site.register(GroupPreferredLinks, GroupPreferredLinksAdmin)
+admin.site.register(CourseStartTimeConstraint, CourseStartTimeConstraintAdmin)
