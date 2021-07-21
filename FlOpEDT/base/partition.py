@@ -23,8 +23,11 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from base.timing import TimeInterval, Day, days_index, floptime_to_time, time_to_floptime
+from TTapp.TTConstraints.no_course_constraints import NoTutorCourseOnDay
+from base.models import CourseStartTimeConstraint, ModulePossibleTutors, ScheduledCourse, TimeGeneralSettings, UserPreference
+from base.timing import TimeInterval, Day, days_index, flopdate_to_datetime, time_to_floptime
 from datetime import datetime, timedelta
+from django.db.models import Q
 import copy
 
 class Partition(object):
@@ -390,18 +393,19 @@ class Partition(object):
                 for st in start_times:
                     if time_to_floptime(self.intervals[i][0].start.time()) <= st and time_to_floptime(self.intervals[i][0].end.time()) > st:
                         dif = st - time_to_floptime(self.intervals[i][0].start.time())
-                        start = self.intervals[i][0].start + timedelta(hours = dif//60, minutes=dif%60)
+                        datetime_start = self.intervals[i][0].start + timedelta(hours = dif/60)
+                        start = st
                         break
                 else:
                     i+=1
                     continue
-                current_duration = self.intervals[i][0].duration - (st - time_to_floptime(self.intervals[i][0].start.time()))
+                current_duration = self.intervals[i][0].duration - (start - time_to_floptime(self.intervals[i][0].start.time()))
                 i+=1
                 while i < len(self.intervals) and key in self.intervals[i][1] and self.intervals[i][1]["available"] and not self.intervals[i][1]["forbidden"]:
                     current_duration+=self.intervals[i][0].duration
                     i+=1
-                if (duration == None or current_duration > duration):
-                    result.append(TimeInterval(start, self.intervals[i-1][0].end))
+                if (duration == None or current_duration >= duration):
+                    result.append(TimeInterval(datetime_start, self.intervals[i-1][0].end))
                 start = None
             i+=1
         return result
@@ -425,6 +429,7 @@ class Partition(object):
             - "lunch_break" : with keys "lunch_break" and "forbidden"
             - "week_end" : with keys "week_end" and "forbidden" 
             - "no_course_tutor" : with keys "no_course_tutor"
+            - "scheduled_course" : with key "forbidden"
             - "all" : with any key in it """
         i = 0
         #Check if we are in the interval range
@@ -489,7 +494,7 @@ class Partition(object):
             self.intervals[interval_index][1]["available"] = self.intervals[interval_index][1]["available"] or data["available"]
         if "forbidden" in data:
             self.intervals[interval_index][1]["forbidden"] = self.intervals[interval_index][1]["forbidden"] or data["forbidden"]
-        if not data_type in self.intervals[interval_index][1] and data_type != "all":
+        if not data_type in self.intervals[interval_index][1] and data_type != "all" and data_type != 'scheduled_course':
             self.intervals[interval_index][1][data_type] = dict()
         if data_type == "user_preference":
             self.intervals[interval_index][1][data_type][data["tutor"]] = data["value"]
@@ -512,7 +517,127 @@ class Partition(object):
                     self.intervals[interval_index][1][data_type]["tutor_status"].add(ts)
             else:
                 self.intervals[interval_index][1][data_type]["tutor_status"] = data[data_type]["tutor_status"]
+        elif data_type == 'scheduled_course':
+            if not data_type in self.intervals[interval_index][1]:
+                self.intervals[interval_index][1][data_type] = [data[data_type]]
+            self.intervals[interval_index][1][data_type].append(data[data_type])
         elif data_type == "all":
             for key, value in data.items():
                 if key != "available" and key != "forbidden":
                     self.intervals[interval_index][1][key] = value
+
+    @staticmethod
+    def get_partition_of_week(week, department, with_day_time = False):
+        time_settings = TimeGeneralSettings.objects.get(department = department)
+        day_start_week = Day(time_settings.days[0], week)
+        day_end_week = Day(time_settings.days[len(time_settings.days)-1], week)
+        start_week = flopdate_to_datetime(day_start_week, time_settings.day_start_time)
+        end_week = flopdate_to_datetime(day_end_week, time_settings.day_finish_time)
+        considered_week_partition = Partition("None", start_week, end_week)
+        if with_day_time:
+            considered_week_partition.add_lunch_break(time_settings.lunch_break_start_time, time_settings.lunch_break_finish_time)
+            considered_week_partition.add_night_time(time_settings.day_start_time, time_settings.day_finish_time)
+        return considered_week_partition
+
+    def add_scheduled_courses_to_partition(self, week, department, tutor = None, forbidden = False):
+        other_departments_sched_courses = self.get_other_department_scheduled_courses(week, department, tutor)
+        for sc_course in other_departments_sched_courses:
+            data = {"scheduled_course" : sc_course}
+            if forbidden:
+                data["forbidden"] = True
+            self.add_slot(
+                TimeInterval(
+                    flopdate_to_datetime(Day(sc_course.day, week), sc_course.start_time),
+                    flopdate_to_datetime(Day(sc_course.day, week), sc_course.end_time)
+                ),
+                "scheduled_course",
+                data
+            )
+
+    @staticmethod
+    def get_other_department_scheduled_courses(week, department, tutor = None, room = None):
+        if tutor:
+            return (ScheduledCourse.objects
+                        .filter(Q(tutor = tutor) | Q(course__supp_tutor = tutor), course__week = week ,work_copy=0)
+                        .exclude(course__type__department=department))
+        else:
+            return (ScheduledCourse.objects
+                        .filter(course__week = week ,work_copy=0)
+                        .exclude(course__type__department=department))
+
+    @staticmethod
+    def get_available_partition_for_course(course, week, department):
+        week_partition = Partition.get_partition_of_week(week, department, True)
+        possible_tutors_1 = set()
+        required_supp_1 = set()
+        if course.tutor is not None:
+            possible_tutors_1.add(course.tutor)
+        elif ModulePossibleTutors.objects.filter(module = course.module).exists():
+            possible_tutors_1 = set(ModulePossibleTutors.objects.get(module = course.module).possible_tutors.all())
+        else:
+            mods_possible_tutor = ModulePossibleTutors.objects.filter(module__train_prog__department = department)
+            possible_tutors_1 = set(mod.possible_tutors.all() for mod in mods_possible_tutor)
+
+        if course.supp_tutor is not None:
+            required_supp_1 = set(course.supp_tutor.all())
+
+        D1 = UserPreference.objects.filter(user__in=possible_tutors_1, week=week, value__gte=1)
+        if not D1:
+            D1 = UserPreference.objects.filter(user__in=possible_tutors_1, week=None, value__gte=1)
+        if D1:
+            # Retrieving constraints for days were tutors shouldn't be working
+            no_course_tutor1 = (NoTutorCourseOnDay.objects
+                .filter(Q(tutors__in = required_supp_1.union(possible_tutors_1))
+                    | Q(tutor_status = [pt.status for pt in required_supp_1.union(possible_tutors_1)]),
+                    weeks = week))
+            if not no_course_tutor1:
+                no_course_tutor1 = (NoTutorCourseOnDay.objects
+                .filter(Q(tutors__in = required_supp_1.union(possible_tutors_1))
+                    | Q(tutor_status = [pt.status for pt in required_supp_1.union(possible_tutors_1)]),
+                    weeks = None))
+
+            # Adding all user preferences to the partition
+            for up in D1:
+                up_day = Day(up.day, week)
+                week_partition.add_slot(
+                    TimeInterval(flopdate_to_datetime(up_day, up.start_time),
+                    flopdate_to_datetime(up_day, up.end_time)),
+                    "user_preference",
+                    {"value" : up.value, "available" : True, "tutor" : up.user}
+                )
+
+            # Retrieving no tutor course constraint slots and adding them to the partition
+            # Slots are not set to be forbidden
+            for constraint in no_course_tutor1:
+                slot = constraint.get_slot_constraint(week)
+                if slot:
+                    week_partition.add_slot(
+                        slot[0],
+                        "no_course_tutor",
+                        slot[1]
+                    )
+
+            for interval in week_partition.intervals:
+                    if not NoTutorCourseOnDay.tutor_and_supp(interval, required_supp_1, possible_tutors_1):
+                        interval[1]["available"] = False
+            
+            if required_supp_1:
+                #Retrieving and adding user preferences for the required tutors
+                RUS1 = UserPreference.objects.filter(user__in=required_supp_1, week=week, value__gte=1)
+                if not RUS1:
+                    RUS1 = UserPreference.objects.filter(user__in=required_supp_1, week=None, value__gte=1)
+
+                for up in RUS1:
+                    up_day = Day(up.day, week)
+                    week_partition.add_slot(
+                        TimeInterval(flopdate_to_datetime(up_day, up.start_time),
+                        flopdate_to_datetime(up_day, up.end_time)),
+                        "user_preference",
+                        {"value" : up.value, "available" : True, "tutor" : up.user}
+                    )
+
+                for interval in week_partition.intervals:
+                    if not NoTutorCourseOnDay.tutor_and_supp(interval, required_supp_1, possible_tutors_1):
+                        interval[1]["available"] = False
+            return week_partition   
+        return None
