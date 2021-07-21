@@ -40,7 +40,7 @@ from TTapp.ilp_constraints.constraint import Constraint
 from TTapp.slots import days_filter, slots_filter
 from TTapp.TTConstraint import TTConstraint
 from TTapp.ilp_constraints.constraints.dependencyConstraint import DependencyConstraint
-
+from django.utils.translation import gettext as _
 
 class SimultaneousCourses(TTConstraint):
     """
@@ -187,35 +187,54 @@ def find_successive_slots(course_slot1, course_slot2, course1_duration, course2_
     for cs1 in course_slot1:
         possible_start_time = cs1.start + course1_duration
         for cs2 in course_slot2:
-            if cs2.start <= possible_start_time and cs2.end > possible_start_time + course2_duration:
+            if cs2.start <= possible_start_time and cs2.end >= possible_start_time + course2_duration:
                 return True
             if cs2.start > possible_start_time:
                 break
     return False
 
-def tutor_and_supp(interval, required_supp, possible_tutors):
-    supp_in = False
+def tutor_and_supp(interval, required_supps, possible_tutors):
+    """Looking in the interval if all required_supp and at list one possible_tutors are available
+    
+    Parameters:
+        interval (tuple(TimeInterval, dict)): A partition interval
+        required_supps (list(Tutor)): A list of required tutors for that course
+        possible_tutors (list(Tutor)): A list of tutors available for the course
+        
+    Returns:
+        (boolean): Whether or not all supp_tutors and one possible_tutor are ready"""
+    supp_in = 0
     tutor_in = False
     if "user_preference" in interval[1]:
         for tutor, value in interval[1]["user_preference"].items():
-            if tutor in required_supp and value > 0:
-                supp_in = (supp_in
-                    or "no_course_tutor" not in interval[1]
-                    or tutor not in interval[1]["no_course_tutor"]["tutors"]
-                        and tutor.status not in interval[1]["no_course_tutor"]["tutor_status"])
-            elif tutor in possible_tutors and value > 0:
+            if tutor in required_supps and value > 0:
+                if ("no_course_tutor" not in interval[1]
+                    or (tutor not in interval[1]["no_course_tutor"]["tutors"]
+                        and tutor.status not in interval[1]["no_course_tutor"]["tutor_status"])):
+                    supp_in += 1
+            if tutor in possible_tutors and value > 0:
                 tutor_in = (tutor_in
                     or "no_course_tutor" not in interval[1]
                     or tutor not in interval[1]["no_course_tutor"]["tutors"]
                         and tutor.status not in interval[1]["no_course_tutor"]["tutor_status"])
-            if supp_in and tutor_in:
+            if supp_in == len(required_supps) and tutor_in:
                 break
-    return supp_in and tutor_in
+    return supp_in == len(required_supps) and tutor_in
 
 
-def find_day_gap_slots(course_slot1, course_slot2, day_gap):
-    day_slot = course_slot1[0] + timedelta(days=day_gap) - timedelta(hours=course_slot1[0].hour, minutes=course_slot1[0].minute)
-    for cs2 in course_slot2:
+def find_day_gap_slots(course_slots1, course_slots2, day_gap):
+    """This function search in the available times for each course if we can find a slot for the second course after a day gap passed
+    in the parameters.
+    
+    Parameters:
+        course_slots1 (list(TimeInterval)): The TimeIntervals (starting datetime and ending datetime) available for the first course
+        course_slots2 (list(TimeInterval)): The TimeIntervals (starting datetime and ending datetime) available for the second course
+        day_gap (int): The number of days between the two courses
+
+    Returns:
+        (boolean) : whether there is available time for the second course after the day gap or not"""
+    day_slot = course_slots1[0].start + timedelta(days=day_gap) - timedelta(hours=course_slots1[0].start.hour, minutes=course_slots1[0].start.minute)
+    for cs2 in course_slots2:
         if cs2.start > day_slot:
             return True
     return False
@@ -231,6 +250,16 @@ class ConsiderDependencies(TTConstraint):
     modules = models.ManyToManyField('base.Module', blank=True)
 
     def pre_analyse(self, week):
+        """Pre analysis of the Constraint
+        For each dependency, first checks if there is available slots for both courses taking in consideration tutor's and supp_tutor's
+        availabilities, NoTutorCourseOnDay constraints and possible start times. Then we check if we still have slots for the second one
+        starting after the first one and then if the options are True and or above 0 we check successive slots and the day gap.
+
+        Parameter:
+            week (Week): the week we want to analyse the data from
+            
+        Returns:
+            JsonResponse: with status 'KO' or 'OK' and a list of messages explaining the problem"""
         dependencies = self.considered_dependecies().filter(Q(course1__week=week) | Q(course1__week=None), Q(course2__week=week) | Q(course2__week=None))
         jsondict = {"status" : "OK", "messages" : []}   
         print(dependencies)
@@ -359,9 +388,6 @@ class ConsiderDependencies(TTConstraint):
 
                 if required_supp_2:
                     #Retrieving and adding user preferences for the required tutors
-                    for interval in week_partition_course2.intervals:
-                        if tutor_and_supp(interval, required_supp_2, possible_tutors_2):
-                            interval[1]["available"] = False
                     RUS2 = UserPreference.objects.filter(user__in=required_supp_2, week=week, value__gte=1)
                     if not RUS2:
                         RUS2 = UserPreference.objects.filter(user__in=required_supp_2, week=None, value__gte=1)
@@ -373,6 +399,9 @@ class ConsiderDependencies(TTConstraint):
                             "user_preference",
                             {"value" : up.value, "available" : True, "tutor" : up.user}
                         )
+                    for interval in week_partition_course2.intervals:
+                        if tutor_and_supp(interval, required_supp_2, possible_tutors_2):
+                            interval[1]["available"] = False
 
 
 
@@ -380,13 +409,21 @@ class ConsiderDependencies(TTConstraint):
                 course2_slots = week_partition_course2.find_all_available_timeinterval_with_key_starting_at("user_preference", course2_start_times, dependency.course2.type.duration)
 
                 if course1_slots and course2_slots:
-                    while course2_slots[0].end < course1_slots[0].start + timedelta(hours = dependency.course1.type.duration/60, minutes=dependency.course1.type.duration%60):
+
+                    if dependency.course2.tutor.username == "BM":
+                        print("Le premier créneau du cours 2 fini à", course2_slots[0].end)
+                        print("La limite est à:", course1_slots[0].start + timedelta(hours = dependency.course1.type.duration/60+dependency.course2.type.duration/60))
+                        print("Les slots avant suppression sont:", course2_slots)
+                    while course2_slots[0].end < course1_slots[0].start + timedelta(hours = dependency.course1.type.duration/60+dependency.course2.type.duration/60):
                         course2_slots.pop(0)
                         if not course2_slots:
                             break
+
+                    if dependency.course2.tutor.username == "BM":
+                        print("Les slots possible pour le deuxieme cours sont:", course2_slots)
                     if course2_slots:
-                        if course1_slots[0].start + timedelta(hours = dependency.course1.type.duration/60, minutes=dependency.course1.type.duration%60) > course2_slots[0].start:
-                            course2_slots[0].start = course1_slots[0].start + timedelta(hours = dependency.course1.type.duration/60, minutes=dependency.course1.type.duration%60)
+                        if course1_slots[0].start + timedelta(hours = dependency.course1.type.duration/60) > course2_slots[0].start:
+                            course2_slots[0].start = course1_slots[0].start + timedelta(hours = dependency.course1.type.duration/60)
                         # Here we check if the first course_slot that we might just shrank is still long enough and if it is the only
                         # one left.
                         if len(course2_slots) <= 1 and course2_slots[0].duration < dependency.course2.type.duration:
@@ -404,12 +441,16 @@ class ConsiderDependencies(TTConstraint):
                         if not find_successive_slots(
                             course1_slots,
                             course2_slots,
-                            timedelta(hours = dependency.course1.type.duration/60, minutes = dependency.course1.type.duration%60),
-                            timedelta(hours = dependency.course2.type.duration/60, minutes = dependency.course2.type.duration%60)):
+                            timedelta(hours = dependency.course1.type.duration/60),
+                            timedelta(hours = dependency.course2.type.duration/60)):
+                            if dependency.course2.tutor.username == "BM":
+                                print("No successive")
                             jsondict['status'] = "KO"
                             jsondict["messages"].append(_('There is no available successive slots for those courses.'))
                     if dependency.day_gap != 0:
                         if not find_day_gap_slots(course1_slots, course2_slots, dependency.day_gap):
+                            if dependency.course2.tutor.username == "BM":
+                                print("No day gap")
                             jsondict['status'] = "KO"
                             jsondict["messages"].append(_(f'There is no available slots for the second course after a {dependency.day_gap} day gap.'))
             else:
