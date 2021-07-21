@@ -24,6 +24,7 @@
 # without disclosing the source code of your own applications.
 
 
+from TTapp.TTConstraints.no_course_constraints import NoTutorCourseOnDay
 from django.http.response import JsonResponse
 from base.timing import TimeInterval
 from base.models import CourseStartTimeConstraint, Department, TimeGeneralSettings, TransversalGroup
@@ -68,23 +69,8 @@ class NoSimultaneousGroupCourses(TTConstraint):
         for bg in considered_basic_groups:
 
             #Retrieving information about general time settings and creating the partition
-            time_settings = TimeGeneralSettings.objects.get(department = bg.type.department)
-            day_start_week = Day(time_settings.days[0], week)
-            day_end_week = Day(time_settings.days[len(time_settings.days)-1], week)
-            start_week = flopdate_to_datetime(day_start_week, time_settings.day_start_time)
-            end_week = flopdate_to_datetime(day_end_week, time_settings.day_finish_time)
-
-            group_partition = Partition(
-                "GroupPartition",
-                start_week,
-                end_week,
-                time_settings.day_start_time,
-                time_settings.day_finish_time
-            )
-            group_partition.add_lunch_break(time_settings.lunch_break_start_time, time_settings.lunch_break_finish_time)
-            group_partition.add_week_end(time_settings.days)
-
-            print("Group's Partition:", group_partition)
+            group_partition = Partition.get_partition_of_week(week, bg.type.department, True)
+            
             ### Coloration ###
             tuple_graph = coloration_ordered(bg)
             ### Coloration ###
@@ -145,8 +131,6 @@ class NoSimultaneousGroupCourses(TTConstraint):
                             
                     for course_type, nb_courses in course_dict.items():
                         start_times = CourseStartTimeConstraint.objects.get(course_type = course_type)
-                        print("Start times are :", start_times.allowed_start_times)
-                        print(f"There is {group_partition.nb_slots_not_forbidden_of_duration_beginning_at(course_type.duration, start_times.allowed_start_times)} available slots in the partition.")
                         if group_partition.nb_slots_not_forbidden_of_duration_beginning_at(course_type.duration, start_times.allowed_start_times) < nb_courses:
                             jsondict["status"] = "KO"
                             jsondict["messages"].append(_(f"Group {bg.name} has {group_partition.nb_slots_not_forbidden_of_duration(course_type.duration)} slots available of {course_type.duration} minutes and requires {nb_courses}.")) 
@@ -222,34 +206,33 @@ class ScheduleAllCourses(TTConstraint):
 
     
     def pre_analyse(self, week):
-        """Checks that the number of courses to scheduled if less thanthe number of slots available
+        """Checks that the number of courses to scheduled if less than the number of slots available
 
         Parameter:
             week (Week): the week we want to analyse the data from
 
         Returns:
             JsonResponse: with status 'KO' or 'OK' and a list of messages explaining the problem"""
+        jsondict = {"status" : "OK", "messages" : []}
         considered_courses = Course.objects.filter(week = week)
-        time_settings = TimeGeneralSettings.objects.get(department = self.department)
-        day_start_week = Day(time_settings.days[0], week)
-        day_end_week = Day(time_settings.days[len(time_settings.days)-1], week)
-        start_week = flopdate_to_datetime(day_start_week, time_settings.day_start_time)
-        end_week = flopdate_to_datetime(day_end_week, time_settings.day_finish_time)
-        considered_week_partition = Partition("None", start_week, end_week, time_settings.day_start_time, time_settings.day_finish_time)
         if self.tutors.exists():
             considered_courses = set(c for c in considered_courses if c.tutor in self.tutors.all())
             for tutor in self.tutors.all():
-                userpreferences = UserPreference.objects.filter(user = tutor)
+                considered_week_partition = Partition.get_partition_of_week(week, self.department, True)
+                considered_week_partition.add_scheduled_courses_to_partition(week, self.department, tutor, forbidden=True)
+                userpreferences = UserPreference.objects.filter(user = tutor, value__gte=1, week = week)
                 for up in userpreferences:
-                    up_day = Day(up.day, week)
-                    considered_week_partition.add_slot(
-                            TimeInterval(flopdate_to_datetime(up_day, up.start_time),
-                            flopdate_to_datetime(up_day, up.end_time)),
-                            "user_preference",
-                            {"value" : up.value, "available" : True, "tutor" : up.user.username}
-                        )
-                if considered_week_partition.available_duration < sum(c.type.duration for c in considered_courses if c.tutor == tutor):
-                    return False
+                        up_day = Day(up.day, week)
+                        considered_week_partition.add_slot(
+                                TimeInterval(flopdate_to_datetime(up_day, up.start_time),
+                                flopdate_to_datetime(up_day, up.end_time)),
+                                "user_preference",
+                                {"value" : up.value, "available" : True, "tutor" : up.user.username}
+                            )
+                time_needed = sum(c.type.duration for c in considered_courses if c.tutor == tutor)
+                if considered_week_partition.available_duration < time_needed:
+                    jsondict["status"] = "KO"
+                    jsondict["messages"].append(_(f'Tutor {tutor} has not enough available time for his courses. He or she needs {time_needed} and got {considered_week_partition.available_duration}'))
         if self.modules.exists():
             considered_courses = set(c for c in considered_courses if c.module in self.modules.all())        
 
@@ -259,7 +242,9 @@ class ScheduleAllCourses(TTConstraint):
             considered_courses = set(c for c in considered_courses if c.groups in self.groups.all())
         
 
-        return considered_week_partition.available_duration >= sum(c.type.duration for c in considered_courses)
+        #return considered_week_partition.available_duration >= sum(c.type.duration for c in considered_courses)
+
+        return JsonResponse(jsondict)
                                 
     def enrich_model(self, ttmodel, week, ponderation=1):
         relevant_basic_groups = considered_basic_groups(self, ttmodel)
@@ -381,12 +366,11 @@ class ConsiderTutorsUnavailability(TTConstraint):
         for tutor in considered_tutors:
             
             courses = Course.objects.filter(Q(tutor = tutor) | Q(supp_tutor = tutor), week = week)
-            tutor_partition = Partition("UserPreference", flopdate_to_datetime(Day('m', week), 0), flopdate_to_datetime(Day('su', week), 23*60+59))
-            user_preferences = UserPreference.objects.filter(user = tutor, week = week)
+            tutor_partition = Partition.get_partition_of_week(week, self.department, True)
+            user_preferences = UserPreference.objects.filter(user = tutor, week = week, value__gte=1)
             if not user_preferences.exists():
-                user_preferences = UserPreference.objects.filter(user = tutor, week = None)
+                user_preferences = UserPreference.objects.filter(user = tutor, week = None, value__gte=1)
             for up in user_preferences:
-                if up.value > 0:
                     up_day = Day(up.day, week)
                     tutor_partition.add_slot(
                         TimeInterval(flopdate_to_datetime(up_day, up.start_time),
@@ -394,7 +378,24 @@ class ConsiderTutorsUnavailability(TTConstraint):
                         "user_preference",
                         {"value" : up.value, "available" : True, "tutor" : up.user.username}
                     )
-                    
+            no_course_tutor = (NoTutorCourseOnDay.objects
+                    .filter(Q(tutors = tutor)
+                        | Q(tutor_status = tutor.status),
+                        weeks = week))
+            if not no_course_tutor:
+                no_course_tutor = (NoTutorCourseOnDay.objects
+                    .filter(Q(tutors = tutor)
+                        | Q(tutor_status = tutor.status),
+                        weeks = None))
+
+            for constraint in no_course_tutor:
+                slot = constraint.get_slot_constraint(week, forbidden = True)
+                if slot:
+                    tutor_partition.add_slot(
+                        slot[0],
+                        "no_course_tutor",
+                        slot[1]
+                    )
             if tutor_partition.available_duration < sum(c.type.duration for c in courses):
                 message = _(f"Tutor {tutor} has {tutor_partition.available_duration} minutes of available time.")
                 message += _(f' He or she has to lecture {len(courses)} classes for an amount of {sum(c.type.duration for c in courses)} minutes of courses.')
@@ -414,32 +415,8 @@ class ConsiderTutorsUnavailability(TTConstraint):
                 # and the availabilities of the tutor and we check if the tutor has enough available time and slots.
                 for course_type, course_list in courses_type.items():
                     start_times = CourseStartTimeConstraint.objects.get(course_type=course_type).allowed_start_times
-                    other_departments_sched_courses = (ScheduledCourse.objects
-                                                                    .filter(tutor = tutor, course__week = week ,work_copy=0)
-                                                                    .exclude(course__type__department=course_type.department))
-                    time_settings = TimeGeneralSettings.objects.get(department = course_type.department)
-                    day_start_week = Day(time_settings.days[0], week)
-                    day_end_week = Day(time_settings.days[len(time_settings.days)-1], week)
-                    start_week = flopdate_to_datetime(day_start_week, time_settings.day_start_time)
-                    end_week = flopdate_to_datetime(day_end_week, time_settings.day_finish_time)
-                    course_partition = Partition(
-                            course_type,
-                            start_week,
-                            end_week,
-                            time_settings.day_start_time,
-                            time_settings.day_finish_time
-                        )
-                    for sc_course in other_departments_sched_courses:
-                        course_partition.add_slot(
-                            TimeInterval(
-                                flopdate_to_datetime(Day(sc_course.day, week), sc_course.start_time),
-                                flopdate_to_datetime(Day(sc_course.day, week), sc_course.end_time)
-                            ),
-                            "all",
-                            {"scheduled_course" : sc_course.tutor.username, "forbidden" : True}
-                        )
-                    course_partition.add_lunch_break(time_settings.lunch_break_start_time, time_settings.lunch_break_finish_time)
-                    course_partition.add_week_end(time_settings.days)
+                    course_partition = Partition.get_partition_of_week(week,course_type.department, True)
+                    course_partition.add_scheduled_courses_to_partition(week, course_type.department, tutor, True)
                     course_partition.add_partition_data_type(tutor_partition, "user_preference")
 
                     if course_partition.available_duration < len(course_list)*course_type.duration or course_partition.nb_slots_available_of_duration_beginning_at(course_type.duration, start_times) < len(course_list):
