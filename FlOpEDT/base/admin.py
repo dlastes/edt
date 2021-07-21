@@ -635,7 +635,7 @@ class CoursePreferenceAdmin(DepartmentModelAdmin):
 
 class DependencyAdmin(DepartmentModelAdmin):
     def course1_week(o):
-        return str(o.course1.week.disp)
+        return str(o.course1.week)
     
     course1_week.short_description = _('Week')
     course1_week.admin_order_field = 'course1__week'
