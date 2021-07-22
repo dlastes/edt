@@ -537,16 +537,18 @@ class TTModel(object):
                                 CourseConstraint(c))
 
         # constraint : courses are scheduled only once
-        ScheduleAllCourses.objects.create_or_create(department=self.department)
+        ScheduleAllCourses.objects.get_or_create(department=self.department)
 
         # Check if RespectBound constraint is in database, and add it if not
         RespectBoundPerDay.objects.get_or_create(department=self.department)
 
         # Check if MinimizeBusyDays constraint is in database, and add it if not
-        MinimizeBusyDays.objects.get_or_create(department=self.department)
+        if not MinimizeBusyDays.objects.filter(department=self.department).exists():
+            MinimizeBusyDays.objects.create(department=self.department, weight=max_weight)
 
         # Check if MinGroupsHalfDays constraint is in database, and add it if not
-        MinGroupsHalfDays.objects.get_or_create(department=self.department)
+        if not MinGroupsHalfDays.objects.filter(department=self.department).exists():
+            MinGroupsHalfDays.objects.create(department=self.department, weight=max_weight)
 
         # Check if ConsiderDependencies constraint is in database, and add it if not
         ConsiderDependencies.objects.get_or_create(department=self.department)
@@ -555,14 +557,12 @@ class TTModel(object):
         print("adding instructors constraints")
 
         # Each course is assigned to a unique tutor
-        if not AssignAllCourses.objects.filter(department=self.department).exists():
-            AssignAllCourses.objects.create(department=self.department)
+        AssignAllCourses.objects.get_or_create(department=self.department)
 
         if self.core_only:
             return
 
-        if not ConsiderTutorsUnavailability.objects.filter(department=self.department).exists():
-            ConsiderTutorsUnavailability.objects.create(department=self.department)
+        ConsiderTutorsUnavailability.objects.get_or_create(department=self.department)
 
         for i in self.wdb.instructors:
             if i.username == '---':
