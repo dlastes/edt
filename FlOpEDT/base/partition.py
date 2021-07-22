@@ -412,7 +412,8 @@ class Partition(object):
 
 
     def add_slot(self, interval, data_type, data):
-        """Add an interval of time with data related to it to the Partition
+        """Add an interval of time with data related to it to the Partition.
+        Linear complexity on the size of self.
         
         Parameters:
             interval (TimeInterval) : The interval of time we are going to add
@@ -483,12 +484,15 @@ class Partition(object):
 
     def add_data(self, data_type, data, interval_index):
         '''Adds some data to an interval
-        
+        Linear complexity on the size of the data in the data_type key.
+
         Parameters:
             data_type (str): the type of date added
             data (dict): a dictionary containing the data
             interval_index (int): the index of self.intervals where we want to put the data in
             
+        Returns:
+            (None)
         Internal method not to be called by user'''
         if "available" in data:
             self.intervals[interval_index][1]["available"] = self.intervals[interval_index][1]["available"] or data["available"]
@@ -528,6 +532,16 @@ class Partition(object):
 
     @staticmethod
     def get_partition_of_week(week, department, with_day_time = False):
+        """Considering a week and a department we built and return a partition with minimum data in it
+        Complexity on O(1)
+
+        Parameters:
+            week (Week): the week we want to consider to build the partition
+            department (Department): the department we're gonna get the TimeGeneralSettings data from
+            with_day_time (boolean): determine if the partition will contain lunch breaks and night times
+                        
+        Returns:
+            (None)"""
         time_settings = TimeGeneralSettings.objects.get(department = department)
         day_start_week = Day(time_settings.days[0], week)
         day_end_week = Day(time_settings.days[len(time_settings.days)-1], week)
@@ -540,6 +554,17 @@ class Partition(object):
         return considered_week_partition
 
     def add_scheduled_courses_to_partition(self, week, department, tutor = None, forbidden = False):
+        """Add all scheduled courses of other department to the partition.
+        Complexity on O(s*i) s being the number of scheduled courses and i being the number of interval inside the partition.
+        
+        Parameters:
+            week (Week): the week we want to consider to get the scheduled courses from
+            department (Department): the department from which we don't want any courses
+            tutor (Tutor) [Optionnal]: the tutor teaching the scheduled courses, if None takes all scheduled courses
+            forbidden (boolean) [Optionnal]: whether we want to consider all intervals as being forbidden or not
+            
+        Returns:
+            (None)"""
         other_departments_sched_courses = self.get_other_department_scheduled_courses(week, department, tutor)
         for sc_course in other_departments_sched_courses:
             data = {"scheduled_course" : sc_course}
@@ -556,6 +581,16 @@ class Partition(object):
 
     @staticmethod
     def get_other_department_scheduled_courses(week, department, tutor = None, room = None):
+        """Retrieve all scheduled courses for the other departments
+        Complexity on O(1)
+        
+        Parameters:
+            week (Week): the week we want to consider to get the scheduled courses from
+            department (Department): the department from which we don't want any courses
+            tutor (Tutor) [Optionnal]: the tutor teaching the scheduled courses, if None takes all scheduled courses
+            
+        Returns:
+            (Queryset(ScheduledCourses)): The scheduled courses we want as a queryset"""
         if tutor:
             return (ScheduledCourse.objects
                         .filter(Q(tutor = tutor) | Q(course__supp_tutor = tutor), course__week = week ,work_copy=0)
@@ -567,6 +602,18 @@ class Partition(object):
 
     @staticmethod
     def get_available_partition_for_course(course, week, department):
+        """ Build and returns a partition with all available intervals and data for a specific course.
+        Complexity on O(i) with i being the size of the partition.
+        
+        Parameters:
+            course (Course): the course we want to retrieve data for
+            week (Week): the week we want to consider
+            department (Department): the department we're gonna get the TimeGeneralSettings data from
+        
+        Returns:
+            (Partition): None if there is no tutor's availability for the course and the correct partition otherwise
+        
+        """
         week_partition = Partition.get_partition_of_week(week, department, True)
         possible_tutors_1 = set()
         required_supp_1 = set()

@@ -130,6 +130,7 @@ class NoSimultaneousGroupCourses(TTConstraint):
 
                             
                     for course_type, nb_courses in course_dict.items():
+                        #We are retrieving the possible start times for each course type and then we check how many we can put in the partition
                         start_times = CourseStartTimeConstraint.objects.get(course_type = course_type)
                         if group_partition.nb_slots_not_forbidden_of_duration_beginning_at(course_type.duration, start_times.allowed_start_times) < nb_courses:
                             jsondict["status"] = "KO"
@@ -203,48 +204,6 @@ class ScheduleAllCourses(TTConstraint):
                                     blank=True)
     tutors = models.ManyToManyField('people.Tutor', blank=True)
     course_types = models.ManyToManyField('base.CourseType', blank=True)
-
-    
-    def pre_analyse(self, week):
-        """Checks that the number of courses to scheduled if less than the number of slots available
-
-        Parameter:
-            week (Week): the week we want to analyse the data from
-
-        Returns:
-            JsonResponse: with status 'KO' or 'OK' and a list of messages explaining the problem"""
-        jsondict = {"status" : "OK", "messages" : []}
-        considered_courses = Course.objects.filter(week = week)
-        if self.tutors.exists():
-            considered_courses = set(c for c in considered_courses if c.tutor in self.tutors.all())
-            for tutor in self.tutors.all():
-                considered_week_partition = Partition.get_partition_of_week(week, self.department, True)
-                considered_week_partition.add_scheduled_courses_to_partition(week, self.department, tutor, forbidden=True)
-                userpreferences = UserPreference.objects.filter(user = tutor, value__gte=1, week = week)
-                for up in userpreferences:
-                        up_day = Day(up.day, week)
-                        considered_week_partition.add_slot(
-                                TimeInterval(flopdate_to_datetime(up_day, up.start_time),
-                                flopdate_to_datetime(up_day, up.end_time)),
-                                "user_preference",
-                                {"value" : up.value, "available" : True, "tutor" : up.user.username}
-                            )
-                time_needed = sum(c.type.duration for c in considered_courses if c.tutor == tutor)
-                if considered_week_partition.available_duration < time_needed:
-                    jsondict["status"] = "KO"
-                    jsondict["messages"].append(_(f'Tutor {tutor} has not enough available time for his courses. He or she needs {time_needed} and got {considered_week_partition.available_duration}'))
-        if self.modules.exists():
-            considered_courses = set(c for c in considered_courses if c.module in self.modules.all())        
-
-        if self.course_types.exists():
-            considered_courses = set(c for c in considered_courses if c.type in self.course_types.all())
-        if self.groups.exists():
-            considered_courses = set(c for c in considered_courses if c.groups in self.groups.all())
-        
-
-        #return considered_week_partition.available_duration >= sum(c.type.duration for c in considered_courses)
-
-        return JsonResponse(jsondict)
                                 
     def enrich_model(self, ttmodel, week, ponderation=1):
         relevant_basic_groups = considered_basic_groups(self, ttmodel)
@@ -353,7 +312,6 @@ class ConsiderTutorsUnavailability(TTConstraint):
 
         Returns:
             JsonResponse: with status 'KO' or 'OK' and a list of messages explaining the problem"""
-        
         jsondict = {"status" : "OK", "messages" : []}
         if spec_tutor:
             considered_tutors = [spec_tutor]
@@ -364,7 +322,6 @@ class ConsiderTutorsUnavailability(TTConstraint):
             considered_tutors = Tutor.objects.filter(departments = self.department)
 
         for tutor in considered_tutors:
-            
             courses = Course.objects.filter(Q(tutor = tutor) | Q(supp_tutor = tutor), week = week)
             tutor_partition = Partition.get_partition_of_week(week, self.department, True)
             user_preferences = UserPreference.objects.filter(user = tutor, week = week, value__gte=1)

@@ -183,8 +183,20 @@ class LimitedStartTimeChoices(TTConstraint):
             text += french_format(pst) + ', '
         return text
 
-### ConsiderDependencies dependencies
+################    ConsiderDependencies FUNCTIONS      ################
 def find_successive_slots(course_slot1, course_slot2, course1_duration, course2_duration):
+    '''This function returns True if it finds a slot for the second course right after one of the first one with enough
+    time duration.
+    Complexity on O(n^2): n being the number of slots for each course.
+    
+    Parameters:
+        course_slot1 (list(TimeInterval)): A list of time interval representing when the first course can be placed
+        course_slot2 (list(TimeInterval)): A list of time interval representing when the second course can be placed
+        course1_duration (timedelta): The duration of the first course
+        course2_duration (timedelta): The duration of the second course
+        
+    Returns:
+        (boolean): If we found at least one eligible slot'''
     for cs1 in course_slot1:
         possible_start_time = cs1.start + course1_duration
         for cs2 in course_slot2:
@@ -243,50 +255,55 @@ class ConsiderDependencies(TTConstraint):
             # Setting up empty partitions for both courses
             week_partition_course1 = Partition.get_available_partition_for_course(dependency.course1, week, self.department)
             week_partition_course2 = Partition.get_available_partition_for_course(dependency.course2, week, self.department)
-            # Retrieving possible start times for both courses
-            course1_start_times = CourseStartTimeConstraint.objects.get(course_type = dependency.course1.type).allowed_start_times
-            course2_start_times = CourseStartTimeConstraint.objects.get(course_type = dependency.course2.type).allowed_start_times
-            # Retrieving only TimeInterval for each course
-            course1_slots = week_partition_course1.find_all_available_timeinterval_with_key_starting_at("user_preference", course1_start_times, dependency.course1.type.duration)
-            course2_slots = week_partition_course2.find_all_available_timeinterval_with_key_starting_at("user_preference", course2_start_times, dependency.course2.type.duration)
-            if course1_slots and course2_slots:
-                while course2_slots[0].end < course1_slots[0].start + timedelta(hours = dependency.course1.type.duration/60+dependency.course2.type.duration/60):
-                    course2_slots.pop(0)
-                    if not course2_slots:
-                        break
-                if course2_slots:
-                    if course1_slots[0].start + timedelta(hours = dependency.course1.type.duration/60) > course2_slots[0].start:
-                        course2_slots[0].start = course1_slots[0].start + timedelta(hours = dependency.course1.type.duration/60)
-                    # Here we check if the first course_slot that we might just shrank is still long enough and if it is the only
-                    # one left.
-                    if len(course2_slots) <= 1 and course2_slots[0].duration < dependency.course2.type.duration:
+            if week_partition_course1 and week_partition_course2:
+                # Retrieving possible start times for both courses
+                course1_start_times = CourseStartTimeConstraint.objects.get(course_type = dependency.course1.type).allowed_start_times
+                course2_start_times = CourseStartTimeConstraint.objects.get(course_type = dependency.course2.type).allowed_start_times
+                # Retrieving only TimeInterval for each course
+                course1_slots = week_partition_course1.find_all_available_timeinterval_with_key_starting_at("user_preference", course1_start_times, dependency.course1.type.duration)
+                course2_slots = week_partition_course2.find_all_available_timeinterval_with_key_starting_at("user_preference", course2_start_times, dependency.course2.type.duration)
+                if course1_slots and course2_slots:
+                    while course2_slots[0].end < course1_slots[0].start + timedelta(hours = dependency.course1.type.duration/60+dependency.course2.type.duration/60):
+                        course2_slots.pop(0)
+                        if not course2_slots:
+                            break
+                    if course2_slots:
+                        if course1_slots[0].start + timedelta(hours = dependency.course1.type.duration/60) > course2_slots[0].start:
+                            course2_slots[0].start = course1_slots[0].start + timedelta(hours = dependency.course1.type.duration/60)
+                        # Here we check if the first course_slot that we might just shrank is still long enough and if it is the only
+                        # one left.
+                        if len(course2_slots) <= 1 and course2_slots[0].duration < dependency.course2.type.duration:
+                            jsondict["status"] = "KO"
+                            ok_so_far = False
+                            jsondict["messages"].append(_(f'There is no available slots for the second course after the first one. {dependency}'))
+                    else:
                         jsondict["status"] = "KO"
                         ok_so_far = False
-                        jsondict["messages"].append(_(f'There is no available slots for the second course after the first one. {dependency}'))
+                        jsondict["messages"].append(_(f'There is no available slots for the second course. {dependency}'))
                 else:
-                    jsondict["status"] = "KO"
+                    jsondict['status'] = "KO"
                     ok_so_far = False
-                    jsondict["messages"].append(_(f'There is no available slots for the second course. {dependency}'))
+                    jsondict["messages"].append(_(f'There is no available slots for the first or the second course. {dependency}'))
+
+                if ok_so_far:
+                    if dependency.successive:
+                        if not find_successive_slots(
+                            course1_slots,
+                            course2_slots,
+                            timedelta(hours = dependency.course1.type.duration/60),
+                            timedelta(hours = dependency.course2.type.duration/60)):
+                            jsondict['status'] = "KO"
+                            ok_so_far = False
+                            jsondict["messages"].append(_(f'There is no available successive slots for those courses. {dependency}'))
+                    if dependency.day_gap != 0:
+                        if not find_day_gap_slots(course1_slots, course2_slots, dependency.day_gap):
+                            jsondict['status'] = "KO"
+                            ok_so_far = False
+                            jsondict["messages"].append(_(f'There is no available slots for the second course after a {dependency.day_gap} day gap. {dependency}'))
             else:
                 jsondict['status'] = "KO"
                 ok_so_far = False
-                jsondict["messages"].append(_(f'There is no available slots for the first or the second course. {dependency}'))
-
-            if ok_so_far:
-                if dependency.successive:
-                    if not find_successive_slots(
-                        course1_slots,
-                        course2_slots,
-                        timedelta(hours = dependency.course1.type.duration/60),
-                        timedelta(hours = dependency.course2.type.duration/60)):
-                        jsondict['status'] = "KO"
-                        ok_so_far = False
-                        jsondict["messages"].append(_(f'There is no available successive slots for those courses. {dependency}'))
-                if dependency.day_gap != 0:
-                    if not find_day_gap_slots(course1_slots, course2_slots, dependency.day_gap):
-                        jsondict['status'] = "KO"
-                        ok_so_far = False
-                        jsondict["messages"].append(_(f'There is no available slots for the second course after a {dependency.day_gap} day gap. {dependency}'))
+                jsondict["messages"].append(_(f'One of the courses has no eligible tutor to lecture it. {dependency}'))
         return JsonResponse(jsondict)
 
     def considered_dependecies(self):
