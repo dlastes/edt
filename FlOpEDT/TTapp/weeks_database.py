@@ -164,9 +164,11 @@ class WeeksDatabase(object):
         dayly_availability_slots.sort()
         start_times = dayly_availability_slots[:-1]
         end_times = dayly_availability_slots[1:]
-        for i in range(len(end_times)):
-            if tgs.lunch_break_start_time < end_times[i] <= tgs.lunch_break_finish_time:
-                end_times[i] = tgs.lunch_break_start_time
+        if tgs.lunch_break_start_time < tgs.lunch_break_finish_time and \
+                tgs.lunch_break_start_time in start_times and \
+                tgs.lunch_break_finish_time in end_times:
+            start_times.remove(tgs.lunch_break_start_time)
+            end_times.remove(tgs.lunch_break_finish_time)
 
         availability_slots = {Slot(day=day,
                                    start_time=start_times[i],
@@ -321,7 +323,7 @@ class WeeksDatabase(object):
                     if len(slots) == 1:
                         sl = slots.pop()
                     else:
-                        raise TypeError("Many possible slots...?")
+                        raise TypeError(f"There should one and only one slot for {c}, and we have {slots}...")
                     compatible_courses[sl].add(c)
                     compatible_slots[c] = {sl}
                 else:

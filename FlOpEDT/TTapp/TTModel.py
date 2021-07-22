@@ -46,9 +46,9 @@ from base.timing import Time
 from people.models import Tutor
 
 from TTapp.models import MinNonPreferedTutorsSlot, Stabilize, MinNonPreferedTrainProgsSlot, \
-    NoSimultaneousGroupCourses, ScheduleAllCourses, AssignAllCourses, ConsiderTutorsUnavailability
+    NoSimultaneousGroupCourses, ScheduleAllCourses, AssignAllCourses, ConsiderTutorsUnavailability, \
+    MinimizeBusyDays, MinGroupsHalfDays, RespectBoundPerDay, ConsiderDependencies
 from TTapp.TTConstraint import max_weight
-
 from TTapp.slots import slots_filter, days_filter
 
 from TTapp.weeks_database import WeeksDatabase
@@ -527,8 +527,9 @@ class TTModel(object):
 
         # constraint : only one course per basic group on simultaneous slots
         # (and None if transversal ones)
-        if not NoSimultaneousGroupCourses.objects.filter(department=self.department).exists():
-            NoSimultaneousGroupCourses.objects.create(department=self.department)
+        # Do not consider it if mode.cosmo == 2!
+        if self.department.mode.cosmo != 2:
+            NoSimultaneousGroupCourses.objects.get_or_create(department=self.department)
 
         # a course is scheduled at most once
         for c in self.wdb.courses:
@@ -536,8 +537,19 @@ class TTModel(object):
                                 CourseConstraint(c))
 
         # constraint : courses are scheduled only once
-        if not ScheduleAllCourses.objects.filter(department=self.department).exists():
-            ScheduleAllCourses.objects.create(department=self.department)
+        ScheduleAllCourses.objects.create_or_create(department=self.department)
+
+        # Check if RespectBound constraint is in database, and add it if not
+        RespectBoundPerDay.objects.get_or_create(department=self.department)
+
+        # Check if MinimizeBusyDays constraint is in database, and add it if not
+        MinimizeBusyDays.objects.get_or_create(department=self.department)
+
+        # Check if MinGroupsHalfDays constraint is in database, and add it if not
+        MinGroupsHalfDays.objects.get_or_create(department=self.department)
+
+        # Check if ConsiderDependencies constraint is in database, and add it if not
+        ConsiderDependencies.objects.get_or_create(department=self.department)
 
     def add_instructors_constraints(self):
         print("adding instructors constraints")
@@ -1001,6 +1013,8 @@ class TTModel(object):
             corresponding_group = {}
             for i in self.wdb.instructors:
                 corresponding_group[i] = self.wdb.groups.get(name=i.username)
+            for c in self.wdb.courses:
+                c.groups.clear()
 
         for c in self.wdb.courses:
             for sl in self.wdb.compatible_slots[c]:
@@ -1264,7 +1278,10 @@ class TTModel(object):
         if result is not None:
 
             if target_work_copy is None:
-                target_work_copy = self.choose_free_work_copy()
+                if self.department.mode.cosmo == 2:
+                    target_work_copy =0
+                else:
+                    target_work_copy = self.choose_free_work_copy()
 
             self.add_tt_to_db(target_work_copy)
             # for week in self.weeks:
