@@ -200,7 +200,7 @@ class LimitTutorTimePerWeeks(TTConstraint):
             considered_weeks = ttmodel.weeks[i:i+self.number_of_weeks]
             for tutor in tutors:
                 total_tutor_time = ttmodel.sum(ttmodel.TTinstructors[sl, c, tutor] * sl.duration
-                                               for c in ttmodel.wdb.courses_for_tutor[tutor]
+                                               for c in ttmodel.wdb.possible_courses[tutor]
                                                for sl in slots_filter(ttmodel.wdb.compatible_slots[c],
                                                                       week_in = considered_weeks)
                                                ) \
