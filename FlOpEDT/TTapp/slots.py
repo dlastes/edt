@@ -151,7 +151,7 @@ def slots_filter(slot_set, day=None, apm=None, course_type=None, start_time=None
     slots = slot_set
     if week is not None:
         slots = set(sl for sl in slots if sl.day.week == week)
-    if week is not None:
+    if week_in is not None:
         slots = set(sl for sl in slots if sl.day.week in week_in)
     if day is not None:
         slots = set(sl for sl in slots if sl.day == day)
