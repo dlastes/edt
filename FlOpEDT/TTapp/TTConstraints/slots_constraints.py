@@ -24,6 +24,7 @@
 # without disclosing the source code of your own applications.
 
 
+from FlOpEDT.decorators import timer
 from base.partition import Partition
 from datetime import timedelta
 
@@ -237,6 +238,7 @@ class ConsiderDependencies(TTConstraint):
     """
     modules = models.ManyToManyField('base.Module', blank=True)
 
+    @timer
     def pre_analyse(self, week):
         """Pre analysis of the Constraint
         For each dependency, first checks if there is available slots for both courses taking in consideration tutor's and supp_tutor's
@@ -249,7 +251,7 @@ class ConsiderDependencies(TTConstraint):
         Returns:
             JsonResponse: with status 'KO' or 'OK' and a list of messages explaining the problem"""
         dependencies = self.considered_dependecies().filter(Q(course1__week=week) | Q(course1__week=None), Q(course2__week=week) | Q(course2__week=None))
-        jsondict = {"status" : "OK", "messages" : []}   
+        jsondict = {"status" : _("OK"), "messages" : []}   
         for dependency in dependencies:
             ok_so_far = True
             # Setting up empty partitions for both courses
@@ -273,15 +275,15 @@ class ConsiderDependencies(TTConstraint):
                         # Here we check if the first course_slot that we might just shrank is still long enough and if it is the only
                         # one left.
                         if len(course2_slots) <= 1 and course2_slots[0].duration < dependency.course2.type.duration:
-                            jsondict["status"] = "KO"
+                            jsondict["status"] = _("KO")
                             ok_so_far = False
                             jsondict["messages"].append(_(f'There is no available slots for the second course after the first one. {dependency}'))
                     else:
-                        jsondict["status"] = "KO"
+                        jsondict["status"] = _("KO")
                         ok_so_far = False
-                        jsondict["messages"].append(_(f'There is no available slots for the second course. {dependency}'))
+                        jsondict["messages"].append(_(f'There is no available slots for the second course after the first one. {dependency}'))
                 else:
-                    jsondict['status'] = "KO"
+                    jsondict['status'] = _("KO")
                     ok_so_far = False
                     jsondict["messages"].append(_(f'There is no available slots for the first or the second course. {dependency}'))
 
@@ -292,16 +294,16 @@ class ConsiderDependencies(TTConstraint):
                             course2_slots,
                             timedelta(hours = dependency.course1.type.duration/60),
                             timedelta(hours = dependency.course2.type.duration/60)):
-                            jsondict['status'] = "KO"
+                            jsondict['status'] = _("KO")
                             ok_so_far = False
                             jsondict["messages"].append(_(f'There is no available successive slots for those courses. {dependency}'))
                     if dependency.day_gap != 0:
                         if not find_day_gap_slots(course1_slots, course2_slots, dependency.day_gap):
-                            jsondict['status'] = "KO"
+                            jsondict['status'] = _("KO")
                             ok_so_far = False
                             jsondict["messages"].append(_(f'There is no available slots for the second course after a {dependency.day_gap} day gap. {dependency}'))
             else:
-                jsondict['status'] = "KO"
+                jsondict['status'] = _("KO")
                 ok_so_far = False
                 jsondict["messages"].append(_(f'One of the courses has no eligible tutor to lecture it. {dependency}'))
         return JsonResponse(jsondict)

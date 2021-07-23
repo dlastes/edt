@@ -24,6 +24,7 @@
 # without disclosing the source code of your own applications.
 
 
+from FlOpEDT.decorators import timer
 from TTapp.TTConstraints.no_course_constraints import NoTutorCourseOnDay
 from django.http.response import JsonResponse
 from base.timing import TimeInterval
@@ -40,7 +41,7 @@ from TTapp.ilp_constraints.constraints.courseConstraint import CourseConstraint
 from django.utils.translation import gettext as _
 from TTapp.slots import slots_filter
 from TTapp.TTConstraints.groups_constraints import considered_basic_groups, pre_analysis_considered_basic_groups
-from base.models import Course, ScheduledCourse, UserPreference
+from base.models import Course, UserPreference
 from base.partition import Partition
 from base.timing import Day, flopdate_to_datetime
 from people.models import Tutor
@@ -52,6 +53,7 @@ class NoSimultaneousGroupCourses(TTConstraint):
     """
     groups = models.ManyToManyField('base.StructuralGroup', blank=True)
 
+    @timer
     def pre_analyse(self, week):
         """Pre analysis of the Constraint 
         Compare the available time of the week to the minimum required in any cases (the time of all courses + the time needed for the longest parallel group)
@@ -63,7 +65,7 @@ class NoSimultaneousGroupCourses(TTConstraint):
             
         Returns:
             JsonResponse: with status 'KO' or 'OK' and a list of messages explaining the problem"""
-        jsondict = {"status" : "OK", "messages" : []}
+        jsondict = {"status" : _("OK"), "messages" : []}
 
         considered_basic_groups = pre_analysis_considered_basic_groups(self)
         for bg in considered_basic_groups:
@@ -107,7 +109,7 @@ class NoSimultaneousGroupCourses(TTConstraint):
             #Mimimum time needed in any cases
             min_course_time_needed = sum(c.type.duration for c in considered_courses) + max_courses_time_transversal
             if min_course_time_needed > group_partition.not_forbidden_duration:
-                jsondict["status"] = "KO"
+                jsondict["status"] = _("KO")
                 jsondict["messages"].append(_(f"Group {bg.name} has {group_partition.not_forbidden_duration} available time but requires minimum {min_course_time_needed}."))
             else:
                 #If they exists we add the transversal courses to the considered_courses
@@ -117,7 +119,7 @@ class NoSimultaneousGroupCourses(TTConstraint):
                 #If we are below that amount of time we probably cannot do it.
                 course_time_needed = sum(c.type.duration for c in considered_courses)
                 if course_time_needed > group_partition.not_forbidden_duration:
-                    jsondict["status"] = "KO"
+                    jsondict["status"] = _("KO")
                     jsondict["messages"].append(_(f"Group {bg.name} has {group_partition.not_forbidden_duration} available time but probably requires minimum {course_time_needed}."))
                 else:
                     #We are checking if we have enough slots for each course type
@@ -133,7 +135,7 @@ class NoSimultaneousGroupCourses(TTConstraint):
                         #We are retrieving the possible start times for each course type and then we check how many we can put in the partition
                         start_times = CourseStartTimeConstraint.objects.get(course_type = course_type)
                         if group_partition.nb_slots_not_forbidden_of_duration_beginning_at(course_type.duration, start_times.allowed_start_times) < nb_courses:
-                            jsondict["status"] = "KO"
+                            jsondict["status"] = _("KO")
                             jsondict["messages"].append(_(f"Group {bg.name} has {group_partition.nb_slots_not_forbidden_of_duration(course_type.duration)} slots available of {course_type.duration} minutes and requires {nb_courses}.")) 
         return JsonResponse(data = jsondict)
 
@@ -299,7 +301,7 @@ class AssignAllCourses(TTConstraint):
 class ConsiderTutorsUnavailability(TTConstraint):
     tutors = models.ManyToManyField('people.Tutor', blank=True)
 
-
+    @timer
     def pre_analyse(self, week, spec_tutor = None):
         """Pre analysis of the Constraint
         For each tutor considered, checks if he or she has enough time available during the week and then
@@ -312,7 +314,7 @@ class ConsiderTutorsUnavailability(TTConstraint):
 
         Returns:
             JsonResponse: with status 'KO' or 'OK' and a list of messages explaining the problem"""
-        jsondict = {"status" : "OK", "messages" : []}
+        jsondict = {"status" : _("OK"), "messages" : []}
         if spec_tutor:
             considered_tutors = [spec_tutor]
         else:
@@ -357,7 +359,7 @@ class ConsiderTutorsUnavailability(TTConstraint):
                 message = _(f"Tutor {tutor} has {tutor_partition.available_duration} minutes of available time.")
                 message += _(f' He or she has to lecture {len(courses)} classes for an amount of {sum(c.type.duration for c in courses)} minutes of courses.')
                 jsondict["messages"].append(message)
-                jsondict["status"] = "KO"
+                jsondict["status"] = _("KO")
 
             elif courses.exists():
                 # We build a dictionary with the courses' type as keys and list of courses of those types as values
@@ -380,7 +382,7 @@ class ConsiderTutorsUnavailability(TTConstraint):
                         message = _(f"Tutor {tutor} has {course_partition.nb_slots_available_of_duration_beginning_at(course_type.duration, start_times)} available slots of {course_type.duration} mins ")
                         message += _(f'and {len(course_list)} courses that long to attend.')
                         jsondict["messages"].append(message)
-                        jsondict["status"] = "KO"
+                        jsondict["status"] = _("KO")
         return JsonResponse(jsondict)
 
     def enrich_model(self, ttmodel, week, ponderation=1):
