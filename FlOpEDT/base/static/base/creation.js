@@ -461,8 +461,6 @@ function create_structural_groups(data_groups) {
 }
 
 
-
-/* STAGE! Fonction pour creer les groupes transversaux */
 function create_transversal_groups(data_groups) {
 	var nb_promos = groups.length;
 	for (let nprom =0; nprom<nb_promos; nprom++){
@@ -472,15 +470,14 @@ function create_transversal_groups(data_groups) {
 
   var nb_groups = data_groups.length;
   
-  // Première passe: creation de groupe avec remplissage de conflicting_groups
+  //First pass: create groups and fill their attribute: "conflicting_groups"
   for (let ngrp = 0; ngrp < nb_groups; ngrp++) {
   	group_prom = set_promos.indexOf(data_groups[ngrp]['train_prog']);
   	
-  	// Si group_prom vaut -1, cela veut dire qu'il n'y a pas de promotions avec une abbreviation correspondante à ce que l'on cherche, donc on invalide le groupe en question
+
   	if (group_prom == -1) {
   		console.log("The group named "+data_groups[ngrp]['name']+" has invalid training program.")
   		
-  	// Si tout se passe bien, on commence à créer le groupe en question	
   	} else {  	
   		var gr = {
   			name: data_groups[ngrp]['name'],
@@ -491,12 +488,11 @@ function create_transversal_groups(data_groups) {
     		width: 0,
     		est: 0,
     		lft: 0,
-    		conflicting_groups: [],  	// conflicting_groups est une liste contenant des structural_groups!
-    		parallel_groups: [], 			// parallel_groups lui contient une liste de transversal_groups avec lequels il peut avoir cours en parallèle (hence the name)
+    		conflicting_groups: [],
+    		parallel_groups: [],
   		}
   		
   		
-  		// Ici on veut trouver les objets js qui correspondent aux groupes conflictuels du groupe en question. ça va être fun
   		var nb_conflict_groups = data_groups[ngrp]["conflicting_groups"].length;
   		for (let conflict_group_nb = 0; conflict_group_nb < nb_conflict_groups; conflict_group_nb++) {
   			if (data_groups[ngrp]["conflicting_groups"][conflict_group_nb].name in groups[group_prom]["structural"]) {
@@ -507,8 +503,7 @@ function create_transversal_groups(data_groups) {
   	}
   } 
   
-  // Seconde passe: On complete les groupes déjà créé en leur ajoutant les groupes transversaux avec lequels ils sont en parallèle? 
-  // On fait ça en un second temps car il faut que tout les groupes transversaux soient en place pour faire avancer le schmilblick
+  // Second pass: Complete transversal groups by adding their parallel groups (which are transversal groups) 
   for (let ngrp = 0; ngrp < nb_groups; ngrp++){
   	group_prom = set_promos.indexOf(data_groups[ngrp]['train_prog']);
   	if (group_prom != -1) {
@@ -519,8 +514,6 @@ function create_transversal_groups(data_groups) {
   	}
   }
 }
-/* FIN DE ZONE DE STAGE! */
-
 
 
 function extract_all_groups_structure(r) {

@@ -199,7 +199,6 @@ file_fetch.groups.callback = function () {
 };
 
 
-/* STAGE creation de file_fetch.groups.callback */
 
 file_fetch.transversal_groups.callback = function () {
   create_transversal_groups(this.data);

@@ -1398,12 +1398,35 @@ function hide_idle_groups() {
     }
   }
 
+  for(let itrain_prog = 0 ; itrain_prog < set_promos.length ; itrain_prog++) {
+    clean_group_display(root_gp[itrain_prog].gp, itrain_prog);
+  }
+
   are_all_groups_hidden(); // all hidden => all displayed
   check_hidden_groups();
   
   update_all_groups();
   go_gp_buttons();
 }
+
+
+function clean_group_display(group, itrain_prog) {
+  let ichild ;
+  let propagate_down = false ;
+  for (ichild = 0 ; ichild < group.children.length ; ichild++) {
+    let child_group = groups[itrain_prog]["structural"][group.children[ichild]];
+    if (clean_group_display(child_group, itrain_prog)) {
+      group.display = true ;
+      propagate_down = true ;
+    }
+  }
+  if (group.display && propagate_down) {
+    propagate_display_down(group, true) ;
+  }
+
+  return group.display ;
+}
+
 
 // - store old data in old
 // - translate fetched into current (keeping display values)
@@ -1454,7 +1477,6 @@ function fetch_module() {
     url: build_url(url_module, context),
     async: true,
     success: function (msg, ts, req) {
-    	//console.log(msg); STAGE!
       var sel_week = wdw_weeks.get_selected();
       if (Week.compare(exp_week, sel_week) == 0) {
         d3.csvParse(msg, translate_module_from_csv);

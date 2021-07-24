@@ -251,7 +251,7 @@ def make_planif_file(department, empty_bookname=default_empty_bookname, target_r
                                 courses_weeks = tutor_group_courses.distinct('week')
                                 for course_week in courses_weeks:
                                     local_week = course_week.week
-                                    week_col = week_col_dict[local_week]
+                                    week_col = week_col_dict[local_week.nb]
                                     week_tutor_group_courses_nb = tutor_group_courses.filter(week=local_week).count()
                                     sheet.cell(row=rank, column=week_col).value = week_tutor_group_courses_nb
                                 rank += 1
