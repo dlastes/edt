@@ -300,7 +300,7 @@ class ModulesByBloc(TTConstraint):
                     # Choose the slot where more courses have to be assigned
                     if slot_sched_courses.count() == next_slot_sched_courses.count():
                         equal = True
-                    if slot_sched_courses.count() < next_slot_sched_courses.count():
+                    elif slot_sched_courses.count() < next_slot_sched_courses.count():
                         less_sched_courses, more_sched_courses = slot_sched_courses, next_slot_sched_courses
                         equal = False
                     else:
