@@ -271,6 +271,10 @@ class ModulesByBloc(TTConstraint):
         return text
 
     def enrich_model(self, ttmodel, week, ponderation=1):
+        if self.weight is not None:
+            print("ModulesByBloc is available only for constraint, not preference...")
+            return
+
         considered_modules = ttmodel.wdb.modules
         if self.modules.exists():
             considered_modules = set(considered_modules) & set(self.modules.all())
@@ -285,7 +289,7 @@ class ModulesByBloc(TTConstraint):
 
         for d in days_filter(ttmodel.wdb.days, week=week):
             day_slots = slots_filter(ttmodel.wdb.courses_slots, day=d)
-            day_sched_courses = ttmodel.wdb.sched_courses.filter(day=d, course__suspens=False)
+            day_sched_courses = ttmodel.wdb.sched_courses.filter(day=d.day, course__week=week, course__suspens=False)
             for m in considered_modules:
                 module_day_sched_courses = day_sched_courses.filter(course__module=m)
                 if not module_day_sched_courses.exists():
@@ -295,60 +299,39 @@ class ModulesByBloc(TTConstraint):
                     next_slot_sched_courses = module_day_sched_courses.filter(start_time=possible_start_times[i+1])
                     if not (slot_sched_courses.exists() and next_slot_sched_courses.exists()):
                         continue
-                    slot = slots_filter(day_slots, start_time=possible_start_times[i])
-                    next_slot = slots_filter(day_slots, start_time=possible_start_times[i+1])
+                    slot = slots_filter(day_slots, start_time=possible_start_times[i]).pop()
+                    next_slot = slots_filter(day_slots, start_time=possible_start_times[i+1]).pop()
                     # Choose the slot where more courses have to be assigned
                     if slot_sched_courses.count() == next_slot_sched_courses.count():
-                        equal = True
-                    elif slot_sched_courses.count() < next_slot_sched_courses.count():
-                        less_sched_courses, more_sched_courses = slot_sched_courses, next_slot_sched_courses
-                        equal = False
-                    else:
-                        more_sched_courses, less_sched_courses = slot_sched_courses, next_slot_sched_courses
-                        equal = False
-
-                    for tutor in ttmodel.wdb.possible_tutors[m]:
-                        if self.weight is None:
-                            if equal:
-                                ttmodel.add_constraint(
-                                    ttmodel.sum(ttmodel.TTinstructors[(next_slot, sc2.course, i)]
-                                                for sc2 in less_sched_courses)
-                                    - ttmodel.sum(ttmodel.TTinstructors[(slot, sc.course, i)]
-                                                  for sc in more_sched_courses),
-                                    '==',
-                                    0,
-                                    Constraint(constraint_type=ConstraintType.module_by_bloc,
-                                               instructors=tutor, days=d, modules=m))
-                            else:
-                                ttmodel.add_constraint(
-                                    2 * ttmodel.sum(ttmodel.TTinstructors[(next_slot, sc2.course, i)]
-                                                    for sc2 in less_sched_courses)
-                                    - ttmodel.sum(ttmodel.TTinstructors[(slot, sc.course, i)]
-                                                  for sc in more_sched_courses),
-                                    '<=',
-                                    1,
-                                    Constraint(constraint_type=ConstraintType.module_by_bloc,
-                                               instructors=tutor, days=d, modules=m))
-
-
-                        else:
-                            print("ModulesByBloc is available only for constraint, not preference...")
-                            return
-                            if equal:
-                                undesirable_situation = 0 # to be completed...
-                            else:
-                                # add_floor need expression to be known between 0 and bound......
-                                undesirable_situation = ttmodel.add_floor(
-                                    2 * ttmodel.sum(ttmodel.TTinstructors[(next_slot, sc2.course, i)]
-                                                for sc2 in less_sched_courses) -
-                                    ttmodel.sum(ttmodel.TTinstructors[(slot, sc.course, i)]
-                                                for sc in more_sched_courses),
-                                    1, 10)
-                            ttmodel.add_to_inst_cost(tutor,
-                                                     undesirable_situation * self.local_weight() * ponderation,
-                                                     week)
-
-
-
-
-
+                        for tutor in ttmodel.wdb.possible_tutors[m]:
+                            ttmodel.add_constraint(
+                                ttmodel.sum(ttmodel.TTinstructors[(next_slot, sc2.course, tutor)]
+                                            for sc2 in next_slot_sched_courses)
+                                - ttmodel.sum(ttmodel.TTinstructors[(slot, sc.course, tutor)]
+                                              for sc in slot_sched_courses),
+                                '==',
+                                0,
+                                Constraint(constraint_type=ConstraintType.module_by_bloc,
+                                           instructors=tutor, days=d, modules=m))
+                    elif slot_sched_courses.count() > next_slot_sched_courses.count():
+                        for tutor in ttmodel.wdb.possible_tutors[m]:
+                            ttmodel.add_constraint(
+                                2 * ttmodel.sum(ttmodel.TTinstructors[(next_slot, sc2.course, tutor)]
+                                                for sc2 in next_slot_sched_courses)
+                                - ttmodel.sum(ttmodel.TTinstructors[(slot, sc.course, tutor)]
+                                              for sc in slot_sched_courses),
+                                '<=',
+                                1,
+                                Constraint(constraint_type=ConstraintType.module_by_bloc,
+                                           instructors=tutor, days=d, modules=m))
+                    else: # slot_sched_courses.count() < next_slot_sched_courses.count()
+                        for tutor in ttmodel.wdb.possible_tutors[m]:
+                            ttmodel.add_constraint(
+                                2 * ttmodel.sum(ttmodel.TTinstructors[(slot, sc.course, tutor)]
+                                              for sc in slot_sched_courses)
+                                - ttmodel.sum(ttmodel.TTinstructors[(next_slot, sc2.course, tutor)]
+                                                for sc2 in next_slot_sched_courses),
+                                '<=',
+                                1,
+                                Constraint(constraint_type=ConstraintType.module_by_bloc,
+                                           instructors=tutor, days=d, modules=m))
