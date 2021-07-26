@@ -42,7 +42,9 @@ from TTapp.models import \
     NoVisio, LimitGroupsPhysicalPresence, BoundPhysicalPresenceHalfDays, TutorsLunchBreak, VisioOnly, \
     NoTutorCourseOnDay, NoGroupCourseOnDay, \
     ConsiderDependencies, Curfew, NoSimultaneousGroupCourses, ScheduleAllCourses, AssignAllCourses, \
-    ConsiderTutorsUnavailability, LimitHoles
+    ConsiderTutorsUnavailability, LimitHoles, \
+    Curfew, \
+    ModulesByBloc, LimitTutorTimePerWeeks
 
 
 from TTapp.TTConstraints.orsay_constraints import GroupsLunchBreak
@@ -431,4 +433,7 @@ admin.site.register(ScheduleAllCourses, BasicConstraintAdmin)
 admin.site.register(AssignAllCourses, BasicConstraintAdmin)
 admin.site.register(ConsiderTutorsUnavailability, BasicConstraintAdmin)
 admin.site.register(LimitHoles, DepartmentModelAdmin)
+admin.site.register(LimitTutorTimePerWeeks, DepartmentModelAdmin)
+admin.site.register(ModulesByBloc, DepartmentModelAdmin)
+
 
