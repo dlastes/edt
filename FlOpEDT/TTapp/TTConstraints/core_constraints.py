@@ -137,7 +137,7 @@ class NoSimultaneousGroupCourses(TTConstraint):
                         if group_partition.nb_slots_not_forbidden_of_duration_beginning_at(course_type.duration, start_times.allowed_start_times) < nb_courses:
                             jsondict["status"] = _("KO")
                             jsondict["messages"].append(_(f"Group {bg.name} has {group_partition.nb_slots_not_forbidden_of_duration(course_type.duration)} slots available of {course_type.duration} minutes and requires {nb_courses}.")) 
-        return JsonResponse(data = jsondict)
+        return jsondict
 
     def enrich_model(self, ttmodel, week, ponderation=1):
         relevant_slots = slots_filter(ttmodel.wdb.availability_slots, week=week)
@@ -383,7 +383,7 @@ class ConsiderTutorsUnavailability(TTConstraint):
                         message += _(f'and {len(course_list)} courses that long to attend.')
                         jsondict["messages"].append(message)
                         jsondict["status"] = _("KO")
-        return JsonResponse(jsondict)
+        return jsondict
 
     def enrich_model(self, ttmodel, week, ponderation=1):
         considered_tutors = set(ttmodel.wdb.instructors)

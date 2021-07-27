@@ -103,7 +103,7 @@ function open_connection() {
         + format_zero(now.getMinutes()) + "-"
         + format_zero(now.getSeconds());
 
-  open_socket();
+    open_socket();
 
     socket.onmessage = function (e) {
         var dat = JSON.parse(e.data);
@@ -334,7 +334,6 @@ function init_constraints(constraints) {
 /* 
 	Get constraints list with updated state propepety
 */
-
 function update_constraints_state() {
     var checkboxes = document.querySelectorAll("#constraints input[type=checkbox]");
     checkboxes.forEach(c => {
@@ -357,8 +356,9 @@ function get_constraints_url(train_prog, year, week) {
     return fetch_context_url_template.replace(regexp, replacer)
 }
 
+
 /*
-  Retrieve work_copies and contraints for a specific week
+  Retrieve work_copies and constraints for a specific week
   This doesn't apply if more than one week is selected
 */
 function fetch_context() {
@@ -436,6 +436,94 @@ function dispatchAction(token) {
         changeState('stopped');
 }
 
+function get_analyse_url(train_prog, year, week, constraint_type) {
+
+    let params = arguments;
+    let regexp = /(tp)\/(1111)\/(11)\/(constraint)/;
+    let replacer = (match, train_prog, year, week, constraint_type, offset, string) => {
+        return Object.values(params).join('/');
+    }
+    console.log(replacer)
+    return analyse_url_template.replace(regexp, replacer)
+}
+
+
+function launchPreanalyse(event) {
+    console.log("On Analyse !");
+    console.log(week_year_sel);
+    console.log(train_prog_sel);
+    console.log(constraints);
+    for (let week_year in week_year_sel) {
+        week = week_year.week;
+        year=week_year.year;
+        constraints.forEach((constraint, index) => { 
+            url_get = get_analyse_url(train_prog_sel, year, week, constraint.model);
+            console.log(url_get);
+            switch(constraint.model) {
+                case "ConsiderDependencies":
+                    $.ajax({
+                        type: "GET",
+                        dataType: 'json',
+                        url: url_get,
+                        async: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (result) {
+                            console.log("Les pré-analyses ont renvoyé:", result.status)
+                            console.log(result.messages);
+                        },
+                        error: function (msg) {
+                            console.log("error");
+                        },
+                        complete: function (msg) {
+                            console.log("complete");
+                        }
+                    });
+                    break;
+                case "NoSimultaneousGroupCourses":
+                    $.ajax({
+                        type: "GET",
+                        dataType: 'json',
+                        url: url_get,
+                        async: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (result) {
+                            console.log("Les pré-analyses ont renvoyé:", result.status)
+                            console.log(result.messages);
+                            
+                        },
+                        error: function (msg) {
+                            console.log("error");
+                        },
+                        complete: function (msg) {
+                            console.log("complete");
+                        }
+                    });
+                    break;
+                case "ConsiderTutorsUnavailability":
+                    $.ajax({
+                        type: "GET",
+                        dataType: 'json',
+                        url: url_get,
+                        async: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (result) {
+                            console.log("Les pré-analyses ont renvoyé:", result.status)
+                            console.log(result.messages);
+                        },
+                        error: function (msg) {
+                            console.log("error");
+                        },
+                        complete: function (msg) {
+                            console.log("complete");
+                        }
+                    });
+                break;
+            }
+            console.log(index)
+        });
+    }
+}
+
 /*
 	Main process
 */
@@ -445,10 +533,13 @@ var stabilize_select = document.querySelector("#stabilize select");
 
 time_limit_select = document.querySelector("#limit");
 txt_area = document.getElementsByTagName("textarea")[0];
-
+analyseButton = document.querySelector('#analyse');
 launchButton = document.querySelector("#launch");
 if (launchButton)
     launchButton.addEventListener("click", manageSolverProcess);
+if (analyseButton){
+    analyseButton.addEventListener("click", launchPreanalyse);
+}
 
 init_dropdowns();
 update_context_view();

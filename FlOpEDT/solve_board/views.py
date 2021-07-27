@@ -23,6 +23,8 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
+from TTapp.TTConstraints.slots_constraints import ConsiderDependencies
+from TTapp.TTConstraints.core_constraints import ConsiderTutorsUnavailability, NoSimultaneousGroupCourses
 from multiprocessing import Process
 from io import StringIO
 import os
@@ -143,6 +145,31 @@ def fetch_context(req, train_prog, year, week, **kwargs):
 
     context = get_context(req.department, year, week, train_prog)
     return HttpResponse(json.dumps(context), content_type='text/json')
+
+@dept_admin_required
+def launch_pre_analyse(req, train_prog, year, week, type, **kwargs):
+    if type == "ConsiderTutorsUnavailability":
+        if train_prog == "All":
+            constraints = ConsiderTutorsUnavailability.objects.filter(department = req.department)
+        else:
+            constraints = ConsiderTutorsUnavailability.objects.filter(train_prog = train_prog, department = req.department)
+        for constraint in constraints:
+            result = constraint.pre_analyse(week=Week.objects.get(nb= week, year =year))
+    elif type == "NoSimultaneousGroupCourses":
+        if train_prog == "All":
+            constraints = NoSimultaneousGroupCourses.objects.filter(department = req.department)
+        else:
+            constraints = NoSimultaneousGroupCourses.objects.filter(train_prog = train_prog, department = req.department)
+        for constraint in constraints:
+            result = constraint.pre_analyse(week=Week.objects.get(nb= week, year =year))
+    elif type == "ConsiderDependencies":
+        if train_prog == "All":
+            constraints = ConsiderDependencies.objects.filter(department = req.department)
+        else:
+            constraints = ConsiderDependencies.objects.filter(train_prog = train_prog, department = req.department)
+        for constraint in constraints:
+            result = constraint.pre_analyse(week=Week.objects.get(nb= week, year =year))
+    return JsonResponse(result)
 
 
 @dept_admin_required

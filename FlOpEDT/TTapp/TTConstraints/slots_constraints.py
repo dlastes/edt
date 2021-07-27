@@ -306,7 +306,7 @@ class ConsiderDependencies(TTConstraint):
                 jsondict['status'] = _("KO")
                 ok_so_far = False
                 jsondict["messages"].append(_(f'One of the courses has no eligible tutor to lecture it. {dependency}'))
-        return JsonResponse(jsondict)
+        return jsondict
 
     def considered_dependecies(self):
         """Returns the depencies that have to be considered"""
