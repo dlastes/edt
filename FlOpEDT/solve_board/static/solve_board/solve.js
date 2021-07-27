@@ -436,14 +436,13 @@ function dispatchAction(token) {
         changeState('stopped');
 }
 
-function get_analyse_url(train_prog, year, week, constraint_type) {
+function get_analyse_url(train_prog, year, week, type) {
 
     let params = arguments;
     let regexp = /(tp)\/(1111)\/(11)\/(constraint)/;
-    let replacer = (match, train_prog, year, week, constraint_type, offset, string) => {
+    let replacer = (match, train_prog, year, week, constraint, offset, string) => {
         return Object.values(params).join('/');
     }
-    console.log(replacer)
     return analyse_url_template.replace(regexp, replacer)
 }
 
@@ -453,10 +452,10 @@ function launchPreanalyse(event) {
     console.log(week_year_sel);
     console.log(train_prog_sel);
     console.log(constraints);
-    for (let week_year in week_year_sel) {
+    week_year_sel.forEach((week_year) => {
         week = week_year.week;
         year=week_year.year;
-        constraints.forEach((constraint, index) => { 
+        constraints.forEach((constraint, index) => {
             url_get = get_analyse_url(train_prog_sel, year, week, constraint.model);
             console.log(url_get);
             switch(constraint.model) {
@@ -519,9 +518,9 @@ function launchPreanalyse(event) {
                     });
                 break;
             }
-            console.log(index)
         });
-    }
+    });
+    console.log("ENDING");
 }
 
 /*
