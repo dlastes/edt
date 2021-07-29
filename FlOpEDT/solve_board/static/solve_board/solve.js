@@ -54,7 +54,7 @@ function start() {
 function stop() {
     console.log("STOOOOP");
 
-  open_socket();
+    open_socket();
   
     socket.onmessage = function (e) {
         var dat = JSON.parse(e.data);
@@ -451,72 +451,67 @@ function launchPreanalyse(event) {
     console.log("On Analyse !");
     console.log(week_year_sel);
     console.log(train_prog_sel);
-    console.log(constraints);
+    let response = [];
+    let constraint_type = "";
     week_year_sel.forEach((week_year) => {
         week = week_year.week;
         year=week_year.year;
-        constraints.forEach((constraint, index) => {
-            url_get = get_analyse_url(train_prog_sel, year, week, constraint.model);
-            console.log(url_get);
-            switch(constraint.model) {
-                case "ConsiderDependencies":
-                    $.ajax({
-                        type: "GET",
-                        dataType: 'json',
-                        url: url_get,
-                        async: true,
-                        contentType: "application/json; charset=utf-8",
-                        success: function (result) {
-                            console.log("Les pré-analyses ont renvoyé:", result.status)
-                            console.log(result.messages);
-                        },
-                        error: function (msg) {
-                            console.log("error");
-                        },
-                        complete: function (msg) {
-                            console.log("complete");
-                        }
-                    });
-                    break;
-                case "NoSimultaneousGroupCourses":
-                    $.ajax({
-                        type: "GET",
-                        dataType: 'json',
-                        url: url_get,
-                        async: true,
-                        contentType: "application/json; charset=utf-8",
-                        success: function (result) {
-                            console.log("Les pré-analyses ont renvoyé:", result.status)
-                            console.log(result.messages);
-                            
-                        },
-                        error: function (msg) {
-                            console.log("error");
-                        },
-                        complete: function (msg) {
-                            console.log("complete");
-                        }
-                    });
-                    break;
-                case "ConsiderTutorsUnavailability":
-                    $.ajax({
-                        type: "GET",
-                        dataType: 'json',
-                        url: url_get,
-                        async: true,
-                        contentType: "application/json; charset=utf-8",
-                        success: function (result) {
-                            console.log("Les pré-analyses ont renvoyé:", result.status)
-                            console.log(result.messages);
-                        },
-                        error: function (msg) {
-                            console.log("error");
-                        },
-                        complete: function (msg) {
-                            console.log("complete");
-                        }
-                    });
-                break;
+        constraint_type = "ConsiderDependencies";
+        url_get = get_analyse_url(train_prog_sel, year, week, constraint_type);
+        console.log(url_get);
+        $.ajax({
+            type: "GET",
+            dataType: 'json',
+            url: url_get,
+            async: true,
+            contentType: "application/json; charset=utf-8",
+            success: function (result) {
+                response.push(result)
+            },
+            error: function (msg) {
+                console.log("error");
+            },
+            complete: function (msg) {
+                console.log("complete");
+            }
+        });
+        constraint_type = "NoSimultaneousGroupCourses";
+        url_get = get_analyse_url(train_prog_sel, year, week, constraint_type);
+        console.log(url_get);
+        $.ajax({
+            type: "GET",
+            dataType: 'json',
+            url: url_get,
+            async: true,
+            contentType: "application/json; charset=utf-8",
+            success: function (result) {
+                response.push(result)
+            },
+            error: function (msg) {
+                console.log("error");
+            },
+            complete: function (msg) {
+                console.log("complete");
+            }
+        });
+        constraint_type = "ConsiderTutorsUnavailability";
+        url_get = get_analyse_url(train_prog_sel, year, week, constraint_type);
+        console.log(url_get);
+        $.ajax({
+            type: "GET",
+            dataType: 'json',
+            url: url_get,
+            async: true,
+            contentType: "application/json; charset=utf-8",
+            success: function (result) {
+                response.push(result)
+            },
+            error: function (msg) {
+                console.log("error");
+            },
+            complete: function (msg) {
+                console.log("complete");
+                console.log(response);
             }
         });
     });

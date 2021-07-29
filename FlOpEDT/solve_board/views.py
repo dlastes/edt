@@ -155,6 +155,9 @@ def launch_pre_analyse(req, train_prog, year, week, type, **kwargs):
             constraints = ConsiderTutorsUnavailability.objects.filter(train_prog = train_prog, department = req.department)
         for constraint in constraints:
             result = constraint.pre_analyse(week=Week.objects.get(nb= week, year =year))
+        resultat = dict()
+        resultat[type] = result
+        resultat["period"] = {"week": week, "year": year}
     elif type == "NoSimultaneousGroupCourses":
         if train_prog == "All":
             constraints = NoSimultaneousGroupCourses.objects.filter(department = req.department)
@@ -162,6 +165,9 @@ def launch_pre_analyse(req, train_prog, year, week, type, **kwargs):
             constraints = NoSimultaneousGroupCourses.objects.filter(train_prog = train_prog, department = req.department)
         for constraint in constraints:
             result = constraint.pre_analyse(week=Week.objects.get(nb= week, year =year))
+        resultat = dict()
+        resultat[type] = result
+        resultat["period"] = {"week": week, "year": year}
     elif type == "ConsiderDependencies":
         if train_prog == "All":
             constraints = ConsiderDependencies.objects.filter(department = req.department)
@@ -169,7 +175,10 @@ def launch_pre_analyse(req, train_prog, year, week, type, **kwargs):
             constraints = ConsiderDependencies.objects.filter(train_prog = train_prog, department = req.department)
         for constraint in constraints:
             result = constraint.pre_analyse(week=Week.objects.get(nb= week, year =year))
-    return JsonResponse(result)
+        resultat = dict()
+        resultat[type] = result
+        resultat["period"] = {"week": week, "year": year}
+    return JsonResponse(resultat)
 
 
 @dept_admin_required
