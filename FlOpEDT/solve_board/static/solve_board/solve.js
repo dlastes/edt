@@ -30,6 +30,7 @@ var week_year_sel, train_prog_sel, txt_area;
 
 var launchButton;
 var started = false;
+let errorPreAnalyse = [];
 
 
 function displayConsoleMessage(message){
@@ -451,7 +452,6 @@ function launchPreanalyse(event) {
     console.log("On Analyse !");
     console.log(week_year_sel);
     console.log(train_prog_sel);
-    let response = [];
     let constraint_type = "";
     week_year_sel.forEach((week_year) => {
         week = week_year.week;
@@ -466,10 +466,17 @@ function launchPreanalyse(event) {
             async: true,
             contentType: "application/json; charset=utf-8",
             success: function (result) {
-                response.push(result)
+                console.log(result);
+                result["ConsiderDependencies"].forEach((obj) => {
+                    if (obj["status"] === "KO") {
+                        errorPreAnalyse.push(obj);
+                        displayErrorAnalyse();
+                    }
+                });
+                console.log("Le tableau d'erreur contient:", errorPreAnalyse, "Et voilà");
             },
             error: function (msg) {
-                console.log("error");
+                console.log("error", msg);
             },
             complete: function (msg) {
                 console.log("complete");
@@ -485,10 +492,17 @@ function launchPreanalyse(event) {
             async: true,
             contentType: "application/json; charset=utf-8",
             success: function (result) {
-                response.push(result)
+                console.log(result)
+                result["NoSimultaneousGroupCourses"].forEach((obj) => {
+                    if (obj["status"] === "KO") {
+                        errorPreAnalyse.push(obj);
+                        displayErrorAnalyse();
+                    }
+                });
+                console.log("Le tableau d'erreur contient:", errorPreAnalyse, "Et voilà");
             },
             error: function (msg) {
-                console.log("error");
+                console.log("error", msg);
             },
             complete: function (msg) {
                 console.log("complete");
@@ -501,20 +515,42 @@ function launchPreanalyse(event) {
             type: "GET",
             dataType: 'json',
             url: url_get,
-            async: false,
+            async: true,
             contentType: "application/json; charset=utf-8",
             success: function (result) {
-                response.push(result)
+                console.log(result);
+                result["ConsiderTutorsUnavailability"].forEach((obj) => {
+                    if (obj["status"] === "KO") {
+                        errorPreAnalyse.push(obj);
+                        displayErrorAnalyse();
+                    }
+                });
+                console.log("Le tableau d'erreur contient:", errorPreAnalyse, "Et voilà");
             },
             error: function (msg) {
-                console.log("error");
+                console.log("error:", msg);
             },
             complete: function (msg) {
                 console.log("complete");
             }
         });
     });
-    console.log(response);
+}
+
+function getTextMessage(obj) {
+    messageBuilder = 'Pour la semaine ' + obj["period"]["week"] + " de " + obj["period"]["year"] + ".";
+    obj["messages"].forEach((message) => {
+        messageBuilder += "\n" + message;
+    });
+    console.log(obj);
+    return messageBuilder;
+}
+
+function displayErrorAnalyse() {
+    let messageAnalyseGroup = d3.select("#divAnalyse").selectAll(".msg_error").data(errorPreAnalyse);
+    let enter = messageAnalyseGroup.enter().append("p").attr("class", "msg_error")
+    enter.append("text").text(getTextMessage);
+    messageAnalyseGroup=messageAnalyseGroup.merge(enter);
 }
 
 /*
@@ -523,6 +559,7 @@ function launchPreanalyse(event) {
 
 var solver_select = document.querySelector("#solver");
 var stabilize_select = document.querySelector("#stabilize select");
+
 
 time_limit_select = document.querySelector("#limit");
 txt_area = document.getElementsByTagName("textarea")[0];

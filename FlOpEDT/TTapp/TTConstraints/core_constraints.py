@@ -65,7 +65,7 @@ class NoSimultaneousGroupCourses(TTConstraint):
             
         Returns:
             JsonResponse: with status 'KO' or 'OK' and a list of messages explaining the problem"""
-        jsondict = {"status" : _("OK"), "messages" : []}
+        jsondict = {"status" : _("OK"), "messages" : [], "period": { "week": week.nb, "year": week.year }}
 
         considered_basic_groups = pre_analysis_considered_basic_groups(self)
         for bg in considered_basic_groups:
@@ -314,7 +314,7 @@ class ConsiderTutorsUnavailability(TTConstraint):
 
         Returns:
             JsonResponse: with status 'KO' or 'OK' and a list of messages explaining the problem"""
-        jsondict = {"status" : _("OK"), "messages" : []}
+        jsondict = {"status" : _("OK"), "messages" : [], "period": { "week": week.nb, "year": week.year }}
         if spec_tutor:
             considered_tutors = [spec_tutor]
         else:

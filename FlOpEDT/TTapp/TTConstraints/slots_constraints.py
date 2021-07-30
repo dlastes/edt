@@ -251,7 +251,7 @@ class ConsiderDependencies(TTConstraint):
         Returns:
             JsonResponse: with status 'KO' or 'OK' and a list of messages explaining the problem"""
         dependencies = self.considered_dependecies().filter(Q(course1__week=week) | Q(course1__week=None), Q(course2__week=week) | Q(course2__week=None))
-        jsondict = {"status" : _("OK"), "messages" : []}   
+        jsondict = {"status" : _("OK"), "messages" : [], "period": { "week": week.nb, "year": week.year }}  
         for dependency in dependencies:
             ok_so_far = True
             # Setting up empty partitions for both courses
