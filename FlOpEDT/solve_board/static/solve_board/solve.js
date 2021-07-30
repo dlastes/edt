@@ -501,7 +501,7 @@ function launchPreanalyse(event) {
             type: "GET",
             dataType: 'json',
             url: url_get,
-            async: true,
+            async: false,
             contentType: "application/json; charset=utf-8",
             success: function (result) {
                 response.push(result)
@@ -511,11 +511,10 @@ function launchPreanalyse(event) {
             },
             complete: function (msg) {
                 console.log("complete");
-                console.log(response);
             }
         });
     });
-    console.log("ENDING");
+    console.log(response);
 }
 
 /*

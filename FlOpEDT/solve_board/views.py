@@ -148,36 +148,35 @@ def fetch_context(req, train_prog, year, week, **kwargs):
 
 @dept_admin_required
 def launch_pre_analyse(req, train_prog, year, week, type, **kwargs):
+    resultat = { type: [] }
+    result= dict()
     if type == "ConsiderTutorsUnavailability":
-        if train_prog == "All":
+        if train_prog == "All" or not ConsiderTutorsUnavailability.objects.filter(train_progs__in = TrainingProgramme.objects.filter(abbrev=train_prog).all(), department = req.department):
             constraints = ConsiderTutorsUnavailability.objects.filter(department = req.department)
         else:
-            constraints = ConsiderTutorsUnavailability.objects.filter(train_prog = train_prog, department = req.department)
+            constraints = ConsiderTutorsUnavailability.objects.filter(train_progs__in = TrainingProgramme.objects.filter(abbrev=train_prog).all(), department = req.department)
         for constraint in constraints:
             result = constraint.pre_analyse(week=Week.objects.get(nb= week, year =year))
-        resultat = dict()
-        resultat[type] = result
-        resultat["period"] = {"week": week, "year": year}
+            resultat[type].append(result)
+
     elif type == "NoSimultaneousGroupCourses":
-        if train_prog == "All":
+        if train_prog == "All" or not NoSimultaneousGroupCourses.objects.filter(train_progs__in = TrainingProgramme.objects.filter(abbrev=train_prog).all(), department = req.department):
             constraints = NoSimultaneousGroupCourses.objects.filter(department = req.department)
         else:
-            constraints = NoSimultaneousGroupCourses.objects.filter(train_prog = train_prog, department = req.department)
+            constraints = NoSimultaneousGroupCourses.objects.filter(train_progs__in = TrainingProgramme.objects.filter(abbrev=train_prog).all(), department = req.department)
         for constraint in constraints:
             result = constraint.pre_analyse(week=Week.objects.get(nb= week, year =year))
-        resultat = dict()
-        resultat[type] = result
-        resultat["period"] = {"week": week, "year": year}
+            resultat[type].append(result)
+
     elif type == "ConsiderDependencies":
-        if train_prog == "All":
+        if train_prog == "All" or not ConsiderDependencies.objects.filter(train_progs__in = TrainingProgramme.objects.filter(abbrev=train_prog).all(), department = req.department):
             constraints = ConsiderDependencies.objects.filter(department = req.department)
         else:
-            constraints = ConsiderDependencies.objects.filter(train_prog = train_prog, department = req.department)
+            constraints = ConsiderDependencies.objects.filter(train_progs__in = TrainingProgramme.objects.filter(abbrev=train_prog).all(), department = req.department)
         for constraint in constraints:
             result = constraint.pre_analyse(week=Week.objects.get(nb= week, year =year))
-        resultat = dict()
-        resultat[type] = result
-        resultat["period"] = {"week": week, "year": year}
+            resultat[type].append(result)
+            
     return JsonResponse(resultat)
 
 
