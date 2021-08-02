@@ -449,6 +449,7 @@ function get_analyse_url(train_prog, year, week, type) {
 
 
 function launchPreanalyse(event) {
+    errorPreAnalyse = [];
     console.log("On Analyse !");
     console.log(week_year_sel);
     console.log(train_prog_sel);
@@ -470,10 +471,9 @@ function launchPreanalyse(event) {
                 result["ConsiderDependencies"].forEach((obj) => {
                     if (obj["status"] === "KO") {
                         errorPreAnalyse.push(obj);
-                        displayErrorAnalyse();
                     }
                 });
-                console.log("Le tableau d'erreur contient:", errorPreAnalyse, "Et voilà");
+                displayErrorAnalyse();
             },
             error: function (msg) {
                 console.log("error", msg);
@@ -496,10 +496,9 @@ function launchPreanalyse(event) {
                 result["NoSimultaneousGroupCourses"].forEach((obj) => {
                     if (obj["status"] === "KO") {
                         errorPreAnalyse.push(obj);
-                        displayErrorAnalyse();
                     }
                 });
-                console.log("Le tableau d'erreur contient:", errorPreAnalyse, "Et voilà");
+                displayErrorAnalyse();
             },
             error: function (msg) {
                 console.log("error", msg);
@@ -522,10 +521,9 @@ function launchPreanalyse(event) {
                 result["ConsiderTutorsUnavailability"].forEach((obj) => {
                     if (obj["status"] === "KO") {
                         errorPreAnalyse.push(obj);
-                        displayErrorAnalyse();
                     }
                 });
-                console.log("Le tableau d'erreur contient:", errorPreAnalyse, "Et voilà");
+                displayErrorAnalyse();
             },
             error: function (msg) {
                 console.log("error:", msg);
@@ -547,10 +545,12 @@ function getTextMessage(obj) {
 }
 
 function displayErrorAnalyse() {
-    let messageAnalyseGroup = d3.select("#divAnalyse").selectAll(".msg_error").data(errorPreAnalyse);
-    let enter = messageAnalyseGroup.enter().append("p").attr("class", "msg_error")
-    enter.append("text").text(getTextMessage);
-    messageAnalyseGroup=messageAnalyseGroup.merge(enter);
+    let messageAnalyseGroup = d3.select("#divAnalyse").selectAll(".msg_error").data(errorPreAnalyse.sort(function triMessage(a, b) {
+        return a["period"]["year"] == b["period"]["year"] ? a["period"]["week"] - b["period"]["week"] : a["period"]["year"] - b["period"]["year"];
+    }));
+    let enter = messageAnalyseGroup.enter().append("p").attr("class", "msg_error");
+    messageAnalyseGroup.merge(enter).text(getTextMessage);
+    messageAnalyseGroup.exit().remove();
 }
 
 /*
