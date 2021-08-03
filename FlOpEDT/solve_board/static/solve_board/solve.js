@@ -32,6 +32,8 @@ var launchButton;
 var started = false;
 let errorPreAnalyse = [];
 
+//nb pre_analyse launch each week
+let nbPreAnalyse = 3;
 
 function displayConsoleMessage(message){
     while (message.length > 0 && message.slice(-1) == '\n') {
@@ -449,10 +451,13 @@ function get_analyse_url(train_prog, year, week, type) {
 
 
 function launchPreanalyse(event) {
+    hideFinishLabel();
+    let nbAnalyse = nbPreAnalyse * week_year_sel.length;
+    let nbDone = 0;
     errorPreAnalyse = [];
     console.log("On Analyse !");
-    console.log(week_year_sel);
-    console.log(train_prog_sel);
+    //console.log(week_year_sel);
+    //console.log(train_prog_sel);
     let constraint_type = "";
     week_year_sel.forEach((week_year) => {
         week = week_year.week;
@@ -467,7 +472,7 @@ function launchPreanalyse(event) {
             async: true,
             contentType: "application/json; charset=utf-8",
             success: function (result) {
-                console.log(result);
+                console.log("ConsiderDependencies",result);
                 result["ConsiderDependencies"].forEach((obj) => {
                     if (obj["status"] === "KO") {
                         errorPreAnalyse.push(obj);
@@ -480,6 +485,10 @@ function launchPreanalyse(event) {
             },
             complete: function (msg) {
                 console.log("complete");
+                nbDone = nbDone + 1;
+                if (nbDone == nbAnalyse) {
+                    displayFinishLabel()
+                }
             }
         });
         constraint_type = "NoSimultaneousGroupCourses";
@@ -492,7 +501,7 @@ function launchPreanalyse(event) {
             async: true,
             contentType: "application/json; charset=utf-8",
             success: function (result) {
-                console.log(result)
+                console.log("NoSimultaneous", result)
                 result["NoSimultaneousGroupCourses"].forEach((obj) => {
                     if (obj["status"] === "KO") {
                         errorPreAnalyse.push(obj);
@@ -505,6 +514,10 @@ function launchPreanalyse(event) {
             },
             complete: function (msg) {
                 console.log("complete");
+                nbDone = nbDone + 1;
+                if (nbDone == nbAnalyse) {
+                    displayFinishLabel()
+                }
             }
         });
         constraint_type = "ConsiderTutorsUnavailability";
@@ -517,7 +530,7 @@ function launchPreanalyse(event) {
             async: true,
             contentType: "application/json; charset=utf-8",
             success: function (result) {
-                console.log(result);
+                console.log("ConsiderTutor;", result);
                 result["ConsiderTutorsUnavailability"].forEach((obj) => {
                     if (obj["status"] === "KO") {
                         errorPreAnalyse.push(obj);
@@ -530,6 +543,10 @@ function launchPreanalyse(event) {
             },
             complete: function (msg) {
                 console.log("complete");
+                nbDone = nbDone + 1;
+                if (nbDone == nbAnalyse) {
+                    displayFinishLabel()
+                }
             }
         });
     });
@@ -551,6 +568,17 @@ function displayErrorAnalyse() {
     let enter = messageAnalyseGroup.enter().append("p").attr("class", "msg_error");
     messageAnalyseGroup.merge(enter).text(getTextMessage);
     messageAnalyseGroup.exit().remove();
+}
+
+function displayFinishLabel() {
+    let label = document.getElementById("completion");
+    label.style.visibility = "visible";
+    label.style.fontSize = "2em";
+    label.style.color = "red";
+}
+
+function hideFinishLabel() {
+    document.getElementById("completion").style.visibility = "hidden";
 }
 
 /*
