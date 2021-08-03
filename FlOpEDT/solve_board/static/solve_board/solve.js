@@ -587,7 +587,7 @@ function hideFinishLabel() {
 
 var solver_select = document.querySelector("#solver");
 var stabilize_select = document.querySelector("#stabilize select");
-
+document.getElementById("divAnalyse").style.overflow = "scroll";
 
 time_limit_select = document.querySelector("#limit");
 txt_area = document.getElementsByTagName("textarea")[0];
