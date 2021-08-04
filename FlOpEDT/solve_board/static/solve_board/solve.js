@@ -553,20 +553,42 @@ function launchPreanalyse(event) {
 }
 
 function getTextMessage(obj) {
-    messageBuilder = 'Pour la semaine ' + obj["period"]["week"] + " de " + obj["period"]["year"] + ".";
+    messageBuilder = "";
     obj["messages"].forEach((message) => {
         messageBuilder += "\n" + message;
     });
-    console.log(obj);
     return messageBuilder;
+}
+
+function getTextTitle(obj) {
+    return 'Pour la semaine ' + obj["period"]["week"] + " de " + obj["period"]["year"] + ":";
 }
 
 function displayErrorAnalyse() {
     let messageAnalyseGroup = d3.select("#divAnalyse").selectAll(".msg_error").data(errorPreAnalyse.sort(function triMessage(a, b) {
         return a["period"]["year"] == b["period"]["year"] ? a["period"]["week"] - b["period"]["week"] : a["period"]["year"] - b["period"]["year"];
     }));
-    let enter = messageAnalyseGroup.enter().append("p").attr("class", "msg_error");
-    messageAnalyseGroup.merge(enter).text(getTextMessage);
+    console.log("This is analyse group", d3.select("#divAnalyse").selectAll(".msg_error").data(errorPreAnalyse.sort(function triMessage(a, b) {
+        return a["period"]["year"] == b["period"]["year"] ? a["period"]["week"] - b["period"]["week"] : a["period"]["year"] - b["period"]["year"];
+    })));
+    let enter = messageAnalyseGroup.enter()
+                .append("p")
+                .attr("class", "msg_error");
+
+    enter.append("h3")
+        .attr("class", "msg_error_week")
+        .merge(messageAnalyseGroup.select(".msg_error_week"))
+        .text(getTextTitle);
+
+    console.log("this is pre analyse error", errorPreAnalyse);
+    let messages_display = enter.selectAll(".detail_analyse").data(function(d){return d["messages"]});
+    console.log("this is display", enter.selectAll(".detail_analyse").data(function(d){return d["messages"]}));
+    messages_display.enter()
+                    .append("p")
+                    .attr("class", "detail_analyse")
+                    .merge(messages_display.select(".detail_analyse"))
+                    .text(function(d){return d});
+    messages_display.exit().remove();
     messageAnalyseGroup.exit().remove();
 }
 
