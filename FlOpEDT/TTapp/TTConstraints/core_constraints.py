@@ -110,7 +110,8 @@ class NoSimultaneousGroupCourses(TTConstraint):
             min_course_time_needed = sum(c.type.duration for c in considered_courses) + max_courses_time_transversal
             if min_course_time_needed > group_partition.not_forbidden_duration:
                 jsondict["status"] = _("KO")
-                jsondict["messages"].append(_(f"Group {bg.name} has {group_partition.not_forbidden_duration} available time but requires minimum {min_course_time_needed}."))
+                jsondict["messages"].append({"str":_(f"Group {bg.name} has {group_partition.not_forbidden_duration} available time but requires minimum {min_course_time_needed}."),
+                                            "group":bg.id, "type": "NoSimultaneousGroupCourses"})
             else:
                 #If they exists we add the transversal courses to the considered_courses
                 if transversal_conflict_groups:
@@ -120,7 +121,8 @@ class NoSimultaneousGroupCourses(TTConstraint):
                 course_time_needed = sum(c.type.duration for c in considered_courses)
                 if course_time_needed > group_partition.not_forbidden_duration:
                     jsondict["status"] = _("KO")
-                    jsondict["messages"].append(_(f"Group {bg.name} has {group_partition.not_forbidden_duration} available time but probably requires minimum {course_time_needed}."))
+                    jsondict["messages"].append({"str":_(f"Group {bg.name} has {group_partition.not_forbidden_duration} available time but probably requires minimum {course_time_needed}."),
+                                                "group":bg.id, "type": "NoSimultaneousGroupCourses"})
                 else:
                     #We are checking if we have enough slots for each course type
                     course_dict = dict()
@@ -136,7 +138,8 @@ class NoSimultaneousGroupCourses(TTConstraint):
                         start_times = CourseStartTimeConstraint.objects.get(course_type = course_type)
                         if group_partition.nb_slots_not_forbidden_of_duration_beginning_at(course_type.duration, start_times.allowed_start_times) < nb_courses:
                             jsondict["status"] = _("KO")
-                            jsondict["messages"].append(_(f"Group {bg.name} has {group_partition.nb_slots_not_forbidden_of_duration(course_type.duration)} slots available of {course_type.duration} minutes and requires {nb_courses}.")) 
+                            jsondict["messages"].append({ "str": _(f"Group {bg.name} has {group_partition.nb_slots_not_forbidden_of_duration(course_type.duration)} slots available of {course_type.duration} minutes and requires {nb_courses}."),
+                                                        "group": bg.id, "type": "NoSimultaneousGroupCourses"}) 
         return jsondict
 
     def enrich_model(self, ttmodel, week, ponderation=1):
@@ -358,7 +361,7 @@ class ConsiderTutorsUnavailability(TTConstraint):
             if tutor_partition.available_duration < sum(c.type.duration for c in courses):
                 message = _(f"Tutor {tutor} has {tutor_partition.available_duration} minutes of available time.")
                 message += _(f' He or she has to lecture {len(courses)} classes for an amount of {sum(c.type.duration for c in courses)} minutes of courses.')
-                jsondict["messages"].append(message)
+                jsondict["messages"].append({ "str": message, "tutor": tutor.id, "type" : "ConsiderTutorsUnavailability"})
                 jsondict["status"] = _("KO")
 
             elif courses.exists():
@@ -381,7 +384,7 @@ class ConsiderTutorsUnavailability(TTConstraint):
                     if course_partition.available_duration < len(course_list)*course_type.duration or course_partition.nb_slots_available_of_duration_beginning_at(course_type.duration, start_times) < len(course_list):
                         message = _(f"Tutor {tutor} has {course_partition.nb_slots_available_of_duration_beginning_at(course_type.duration, start_times)} available slots of {course_type.duration} mins ")
                         message += _(f'and {len(course_list)} courses that long to attend.')
-                        jsondict["messages"].append(message)
+                        jsondict["messages"].append({"str": message, "tutor" : tutor.id, "type" : "ConsiderTutorsUnavailability"})
                         jsondict["status"] = _("KO")
         return jsondict
 

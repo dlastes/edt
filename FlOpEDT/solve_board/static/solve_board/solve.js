@@ -32,8 +32,10 @@ var launchButton;
 var started = false;
 let errorPreAnalyse = [];
 
+let analyseButton = document.querySelector('#analyse');
 //nb pre_analyse launch each week
 let nbPreAnalyse = 3;
+let firstCourse = true;
 
 function displayConsoleMessage(message){
     while (message.length > 0 && message.slice(-1) == '\n') {
@@ -455,7 +457,11 @@ function launchPreanalyse(event) {
     let nbAnalyse = nbPreAnalyse * week_year_sel.length;
     let nbDone = 0;
     errorPreAnalyse = [];
+    displayErrorAnalyse();
     console.log("On Analyse !");
+    if(week_year_sel.length !== 0){
+        analyseButton.disabled = true;
+    }
     //console.log(week_year_sel);
     //console.log(train_prog_sel);
     let constraint_type = "";
@@ -478,7 +484,7 @@ function launchPreanalyse(event) {
                         errorPreAnalyse.push(obj);
                     }
                 });
-                displayErrorAnalyse();
+                displayErrorAnalyse("ConsiderDependencies");
             },
             error: function (msg) {
                 console.log("error", msg);
@@ -487,7 +493,8 @@ function launchPreanalyse(event) {
                 console.log("complete");
                 nbDone = nbDone + 1;
                 if (nbDone == nbAnalyse) {
-                    displayFinishLabel()
+                    displayFinishLabel();
+                    analyseButton.disabled = false;
                 }
             }
         });
@@ -507,7 +514,7 @@ function launchPreanalyse(event) {
                         errorPreAnalyse.push(obj);
                     }
                 });
-                displayErrorAnalyse();
+                displayErrorAnalyse("NoSimultaneousGroupCourses");
             },
             error: function (msg) {
                 console.log("error", msg);
@@ -516,7 +523,8 @@ function launchPreanalyse(event) {
                 console.log("complete");
                 nbDone = nbDone + 1;
                 if (nbDone == nbAnalyse) {
-                    displayFinishLabel()
+                    displayFinishLabel();
+                    analyseButton.disabled = false;
                 }
             }
         });
@@ -536,7 +544,7 @@ function launchPreanalyse(event) {
                         errorPreAnalyse.push(obj);
                     }
                 });
-                displayErrorAnalyse();
+                displayErrorAnalyse("ConsiderTutorsUnavailability");
             },
             error: function (msg) {
                 console.log("error:", msg);
@@ -545,7 +553,8 @@ function launchPreanalyse(event) {
                 console.log("complete");
                 nbDone = nbDone + 1;
                 if (nbDone == nbAnalyse) {
-                    displayFinishLabel()
+                    displayFinishLabel();
+                    analyseButton.disabled = false;
                 }
             }
         });
@@ -565,12 +574,14 @@ function getTextTitle(obj) {
 }
 
 function displayErrorAnalyse() {
-    let messageAnalyseGroup = d3.select("#divAnalyse").selectAll(".msg_error").data(errorPreAnalyse.sort(function triMessage(a, b) {
+    /*let messageAnalyseGroup = d3.select("#divAnalyse").selectAll(".msg_error").data(errorPreAnalyse.sort(function triMessage(a, b) {
         return a["period"]["year"] == b["period"]["year"] ? a["period"]["week"] - b["period"]["week"] : a["period"]["year"] - b["period"]["year"];
     }));
     console.log("This is analyse group", d3.select("#divAnalyse").selectAll(".msg_error").data(errorPreAnalyse.sort(function triMessage(a, b) {
         return a["period"]["year"] == b["period"]["year"] ? a["period"]["week"] - b["period"]["week"] : a["period"]["year"] - b["period"]["year"];
-    })));
+    })));*/
+    let messageAnalyseGroup = d3.select("#divAnalyse").selectAll(".msg_error").data(errorPreAnalyse);
+    
     let enter = messageAnalyseGroup.enter()
                 .append("p")
                 .attr("class", "msg_error");
@@ -583,19 +594,55 @@ function displayErrorAnalyse() {
     console.log("this is pre analyse error", errorPreAnalyse);
     let messages_display = enter.selectAll(".detail_analyse").data(function(d){return d["messages"]});
     console.log("this is display", enter.selectAll(".detail_analyse").data(function(d){return d["messages"]}));
-    messages_display.enter()
-                    .append("p")
+    enterMessagesDisplay = messages_display.enter()
+                    .append("span")
                     .attr("class", "detail_analyse")
                     .merge(messages_display.select(".detail_analyse"))
-                    .text(function(d){return d});
+                    .text(function(d){return d["str"]});
+    enterMessagesDisplay.append("a").attr("href", hrefBuilder).text("entity");
+    console.log(firstCourse);
+    enterMessagesDisplay.append("span").text(",");
+    enterMessagesDisplay.append("a").attr("href", hrefBuilder).style("visibility", function(d){
+        switch(d["type"]) {
+            case "ConsiderDependencies":
+                return "normal";
+            case "NoSimultaneousGroupCourses":
+                return "hidden";
+            case "ConsiderTutorsUnavailability":
+                return "hidden";
+        }
+    }).text("Second Course?");
+
+    
+    enterMessagesDisplay.append("br");
     messages_display.exit().remove();
     messageAnalyseGroup.exit().remove();
+}
+
+function hrefBuilder(d) {
+    switch(d["type"]) {
+        case "ConsiderDependencies":
+            if (firstCourse) {
+                firstCourse = false;
+                return courses_id_url+d["course1"];
+            } else {
+                firstCourse = true;
+                return courses_id_url+d["course2"];
+            }
+            break;
+        case "NoSimultaneousGroupCourses":
+            return group_id_url+d["group"];
+            break;
+        case "ConsiderTutorsUnavailability":
+            return tutor_id_url+d["tutor"];
+            break
+    }
 }
 
 function displayFinishLabel() {
     let label = document.getElementById("completion");
     label.style.visibility = "visible";
-    label.style.fontSize = "2em";
+    label.style.fontSize = "1em";
     label.style.color = "red";
 }
 
@@ -613,7 +660,6 @@ document.getElementById("divAnalyse").style.overflow = "scroll";
 
 time_limit_select = document.querySelector("#limit");
 txt_area = document.getElementsByTagName("textarea")[0];
-analyseButton = document.querySelector('#analyse');
 launchButton = document.querySelector("#launch");
 if (launchButton)
     launchButton.addEventListener("click", manageSolverProcess);
