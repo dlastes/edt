@@ -251,7 +251,7 @@ class ConsiderDependencies(TTConstraint):
         Returns:
             JsonResponse: with status 'KO' or 'OK' and a list of messages explaining the problem"""
         dependencies = self.considered_dependecies().filter(Q(course1__week=week) | Q(course1__week=None), Q(course2__week=week) | Q(course2__week=None))
-        jsondict = {"status" : _("OK"), "messages" : [], "period": { "week": week.nb, "year": week.year }}  
+        jsondict = {"status" : _("OK"), "messages" : [], "period": { "week": week.nb, "year": week.year}}  
         for dependency in dependencies:
             ok_so_far = True
             # Setting up empty partitions for both courses
@@ -277,15 +277,21 @@ class ConsiderDependencies(TTConstraint):
                         if len(course2_slots) <= 1 and course2_slots[0].duration < dependency.course2.type.duration:
                             jsondict["status"] = _("KO")
                             ok_so_far = False
-                            jsondict["messages"].append(_(f'There is no available slots for the second course after the first one. {dependency}'))
+                            jsondict["messages"].append({ "str" : _(f'There is no available slots for the second course after the first one. {dependency}'),
+                                                            "course1": dependency.course1.id,
+                                                            "course2": dependency.course2.id })
                     else:
                         jsondict["status"] = _("KO")
                         ok_so_far = False
-                        jsondict["messages"].append(_(f'There is no available slots for the second course after the first one. {dependency}'))
+                        jsondict["messages"].append({ "str" : _(f'There is no available slots for the second course after the first one. {dependency}'),
+                                                            "course1": dependency.course1.id,
+                                                            "course2": dependency.course2.id })
                 else:
                     jsondict['status'] = _("KO")
                     ok_so_far = False
-                    jsondict["messages"].append(_(f'There is no available slots for the first or the second course. {dependency}'))
+                    jsondict["messages"].append({ "str": _(f'There is no available slots for the first or the second course. {dependency}'),
+                                                            "course1": dependency.course1.id,
+                                                            "course2": dependency.course2.id })
 
                 if ok_so_far:
                     if dependency.successive:
@@ -296,16 +302,22 @@ class ConsiderDependencies(TTConstraint):
                             timedelta(hours = dependency.course2.type.duration/60)):
                             jsondict['status'] = _("KO")
                             ok_so_far = False
-                            jsondict["messages"].append(_(f'There is no available successive slots for those courses. {dependency}'))
+                            jsondict["messages"].append({ "str": _(f'There is no available successive slots for those courses. {dependency}'),
+                                                            "course1": dependency.course1.id,
+                                                            "course2": dependency.course2.id })
                     if dependency.day_gap != 0:
                         if not find_day_gap_slots(course1_slots, course2_slots, dependency.day_gap):
                             jsondict['status'] = _("KO")
                             ok_so_far = False
-                            jsondict["messages"].append(_(f'There is no available slots for the second course after a {dependency.day_gap} day gap. {dependency}'))
+                            jsondict["messages"].append({ "str": _(f'There is no available slots for the second course after a {dependency.day_gap} day gap. {dependency}'),
+                                                            "course1": dependency.course1.id,
+                                                            "course2": dependency.course2.id })
             else:
                 jsondict['status'] = _("KO")
                 ok_so_far = False
-                jsondict["messages"].append(_(f'One of the courses has no eligible tutor to lecture it. {dependency}'))
+                jsondict["messages"].append({ "str": _(f'One of the courses has no eligible tutor to lecture it. {dependency}'),
+                                                            "course1": dependency.course1.id,
+                                                            "course2": dependency.course2.id })
         return jsondict
 
     def considered_dependecies(self):
