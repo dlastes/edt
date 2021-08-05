@@ -574,6 +574,7 @@ function getTextTitle(obj) {
 }
 
 function displayErrorAnalyse() {
+    // NEED TO FIX THE MERGE UPDATE WITH D3 OTHERWISE SORTING MAKING A MESS WHEN DISPLAYING
     /*let messageAnalyseGroup = d3.select("#divAnalyse").selectAll(".msg_error").data(errorPreAnalyse.sort(function triMessage(a, b) {
         return a["period"]["year"] == b["period"]["year"] ? a["period"]["week"] - b["period"]["week"] : a["period"]["year"] - b["period"]["year"];
     }));
@@ -599,24 +600,40 @@ function displayErrorAnalyse() {
                     .attr("class", "detail_analyse")
                     .merge(messages_display.select(".detail_analyse"))
                     .text(function(d){return d["str"]});
-    enterMessagesDisplay.append("a").attr("href", hrefBuilder).text("entity");
+    enterMessagesDisplay.append("a").attr("href", hrefBuilder).text(textLink);
     console.log(firstCourse);
-    enterMessagesDisplay.append("span").text(",");
-    enterMessagesDisplay.append("a").attr("href", hrefBuilder).style("visibility", function(d){
-        switch(d["type"]) {
-            case "ConsiderDependencies":
-                return "normal";
-            case "NoSimultaneousGroupCourses":
-                return "hidden";
-            case "ConsiderTutorsUnavailability":
-                return "hidden";
-        }
-    }).text("Second Course?");
+    enterMessagesDisplay.append("span").style("visibility", hiddingSecondLink).text(",");
+    enterMessagesDisplay.append("a").attr("href", hrefBuilder).style("visibility", hiddingSecondLink).text("Second Course");
 
     
     enterMessagesDisplay.append("br");
     messages_display.exit().remove();
     messageAnalyseGroup.exit().remove();
+}
+
+function textLink(d) {
+    switch(d["type"]) {
+        case "ConsiderDependencies":
+            return "First Course";
+            break;
+        case "NoSimultaneousGroupCourses":
+            return "Group";
+            break;
+        case "ConsiderTutorsUnavailability":
+            return "Tutor";
+            break
+    }
+}
+
+function hiddingSecondLink(d) {
+    switch(d["type"]) {
+        case "ConsiderDependencies":
+            return "normal";
+        case "NoSimultaneousGroupCourses":
+            return "hidden";
+        case "ConsiderTutorsUnavailability":
+            return "hidden";
+    }
 }
 
 function hrefBuilder(d) {
