@@ -1201,6 +1201,7 @@ class TTModel(object):
         return local_max_wc + 1
 
     def write_infaisability(self, write_iis=True, write_analysis=True):
+        close_old_connections()
         file_path = "misc/logs/iis"
         filename_suffixe = "_%s_%s" % (self.department.abbrev, self.weeks)
         iis_filename = "%s/IIS%s.ilp" % (file_path, filename_suffixe)

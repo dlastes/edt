@@ -275,12 +275,16 @@ class ConsiderPivots(TTConstraint):
                 all_after = ttmodel.add_floor(ttmodel.sum(ttmodel.TT[(sl2, o)]
                                                           for o in other
                                                           for sl2 in ttmodel.wdb.compatible_slots[o]
-                                                          if not sl2.is_after(sl1)),
+                                                          if not sl2.is_after(sl1)
+                                                          or (p.ND and (sl2.day == sl1.day))
+                                                          ),
                                               other_length, 2 * other_length)
                 all_before = ttmodel.add_floor(ttmodel.sum(ttmodel.TT[(sl2, o)]
                                                            for o in other
                                                            for sl2 in ttmodel.wdb.compatible_slots[o]
-                                                           if not sl1.is_after(sl2)),
+                                                           if not sl1.is_after(sl2)
+                                                           or (p.ND and (sl2.day == sl1.day))
+                                                           ),
                                                other_length, 2 * other_length)
                 if not self.weight:
                     ttmodel.add_constraint(ttmodel.TT[(sl1, pivot)] - all_after - all_before,
