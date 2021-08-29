@@ -43,7 +43,7 @@ import TTapp.TTConstraint as tt
 
 from api.fetch import serializers
 from api.shared.params import dept_param, week_param, year_param, user_param, \
-    work_copy_param
+    work_copy_param, group_param, train_prog_param, lineage_param
 from api.permissions import IsTutorOrReadOnly, IsAdminOrReadOnly
 
 class ScheduledCourseFilterSet(filters.FilterSet):
