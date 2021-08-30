@@ -247,7 +247,7 @@ class CourseTypeDefaultWeekViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         # Getting the wanted data
-        qs = bm.CoursePreference.objects.all()
+        qs = bm.CoursePreference.objects.filter(week__isnull=True)
 
         # Getting all the filters
         train_prog = self.request.query_params.get('train_prog', None)
