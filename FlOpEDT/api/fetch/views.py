@@ -152,10 +152,22 @@ class ScheduledCoursesViewSet(viewsets.ReadOnlyModelViewSet):
 
     
     def get_serializer_class(self):
-        department = bm.Department.objects.get(
-            abbrev=self.request.query_params.get('dept', None)
-        )
-        if department.mode.cosmo:
+        # get the department
+        if self.dept is None:
+            if self.tutor is not None:
+                for d in self.tutor.departments.all():
+                    uds = pm.UserDepartmentSettings.objects.get(department=d,
+                                                                user=self.tutor)
+                    if uds.is_main:
+                        self.dept = uds.department
+                        break
+
+                # no primary department
+                if self.dept is None:
+                    self.dept = self.tutor.departments.first()
+            else:
+                 self.dept = self.groups[0].train_prog.department       
+        if self.dept.mode.cosmo:
             return serializers.ScheduledCoursesCosmoSerializer
         else:
             return serializers.ScheduledCoursesSerializer
