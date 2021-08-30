@@ -47,7 +47,6 @@ from api.shared.params import dept_param, week_param, year_param, user_param, \
 from api.permissions import IsTutorOrReadOnly, IsAdminOrReadOnly
 
 class ScheduledCourseFilterSet(filters.FilterSet):
-    dept = filters.CharFilter(field_name='course__module__train_prog__department__abbrev', required=True)
     tutor_name = filters.CharFilter(field_name='tutor__username')
     # makes the fields required
     week = filters.NumberFilter(field_name='course__week__nb', required=True)
@@ -57,7 +56,7 @@ class ScheduledCourseFilterSet(filters.FilterSet):
 
     class Meta:
         model = bm.ScheduledCourse
-        fields = ['dept', 'week', 'year']
+        fields = ['week', 'year']
 
 
 @method_decorator(name='list',
@@ -66,9 +65,9 @@ class ScheduledCourseFilterSet(filters.FilterSet):
                           # in the filterset
                           week_param(required=True),
                           year_param(required=True),
-                          dept_param(required=True),
                           work_copy_param(),
                           # in the get_queryset
+                          dept_param(),
                           train_prog_param(),
                           group_param(),
                           lineage_param(),
