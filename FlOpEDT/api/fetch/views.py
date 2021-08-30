@@ -123,7 +123,8 @@ class ScheduledCoursesViewSet(viewsets.ReadOnlyModelViewSet):
                 raise exceptions.APIException(detail='Issue with the group')
             queryset = queryset.filter(course__groups__in=groups)
         else:
-            queryset = queryset.filter(course__groups__train_prog=train_prog)
+            if train_prog is not None:
+                queryset = queryset.filter(course__groups__train_prog=train_prog)
 
         return queryset
 
