@@ -8,8 +8,8 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('base', '0080_dependency_day_gap'),
-        ('TTapp', '0050_auto_20210720_0928'),
+        ('base', '0082_pivot'),
+        ('TTapp', '0050_auto_20210722_1055'),
     ]
 
     operations = [

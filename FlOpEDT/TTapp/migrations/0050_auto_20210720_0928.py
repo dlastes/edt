@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('base', '0080_dependency_day_gap'),
+        ('base', '0082_pivot'),
         ('TTapp', '0049_auto_20210705_1436'),
     ]
 
