@@ -407,31 +407,18 @@ class ConsiderTutorsUnavailability(TTConstraint):
                                                       for c2 in ttmodel.wdb.courses_for_supp_tutor[tutor]
                                                       & ttmodel.wdb.compatible_courses[sl2])
                 if self.weight is None:
-                    ttmodel.add_constraint(tutor_relevant_sum,
+                    ttmodel.add_constraint(tutor_relevant_sum + supp_tutor_relevant_sum,
                                            '<=', ttmodel.avail_instr[tutor][sl],
                                            SlotInstructorConstraint(sl, tutor))
-
-                    ttmodel.add_constraint(supp_tutor_relevant_sum,
-                                           '<=', ttmodel.avail_instr[tutor][sl],
-                                           Constraint(constraint_type=ConstraintType.SUPP_TUTOR,
-                                                      instructors=tutor, slots=sl))
                 else:
-                    ttmodel.add_constraint(tutor_relevant_sum,
+                    ttmodel.add_constraint(tutor_relevant_sum + supp_tutor_relevant_sum,
                                            '<=', 1,
                                            SlotInstructorConstraint(sl, tutor))
 
-                    ttmodel.add_constraint(supp_tutor_relevant_sum,
-                                           '<=', 1,
-                                           Constraint(constraint_type=ConstraintType.SUPP_TUTOR,
-                                                      instructors=tutor, slots=sl))
-                    tutor_undesirable_course = ttmodel.add_floor(tutor_relevant_sum,
+                    tutor_undesirable_course = ttmodel.add_floor(tutor_relevant_sum + supp_tutor_relevant_sum,
                                                                  ttmodel.avail_instr[tutor][sl] + 1,
                                                                  10000)
-                    supp_tutor_undesirable_course = ttmodel.add_floor(supp_tutor_relevant_sum,
-                                                                      ttmodel.avail_instr[tutor][sl] + 1,
-                                                                      10000)
-                    ttmodel.add_to_inst_cost(tutor, (tutor_undesirable_course + supp_tutor_undesirable_course)
-                                             * self.local_weight() * ponderation, week )
+                    ttmodel.add_to_inst_cost(tutor, tutor_undesirable_course * self.local_weight() * ponderation, week)
 
     def one_line_description(self):
         text = f"Considère les indispos"
