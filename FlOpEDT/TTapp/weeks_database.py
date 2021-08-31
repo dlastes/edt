@@ -33,7 +33,7 @@ from pulp import GUROBI_CMD
 
 from django.conf import settings
 
-from base.models import Group, \
+from base.models import StructuralGroup, TransversalGroup,\
     Room, RoomSort, RoomType, RoomPreference, \
     Course, ScheduledCourse, UserPreference, CoursePreference, \
     Department, Module, TrainingProgramme, CourseType, \
@@ -84,8 +84,10 @@ class WeeksDatabase(object):
             self.room_course_compat, self.course_rg_compat, self.fixed_courses_for_room, \
             self.other_departments_sched_courses_for_room = self.rooms_init()
         self.compatible_slots, self.compatible_courses = self.compatibilities_init()
-        self.groups, self.basic_groups, self.all_groups_of, self.basic_groups_of, self.courses_for_group, \
-            self.courses_for_basic_group = self.groups_init()
+        self.groups, self.transversal_groups, self.all_groups, self.basic_groups, self.all_groups_of, \
+            self.basic_groups_of, self.conflicting_basic_groups, self.transversal_groups_of,\
+            self.not_parallel_transversal_groups, \
+            self.courses_for_group, self.courses_for_basic_group = self.groups_init()
         self.instructors, self.courses_for_tutor, self.courses_for_supp_tutor, self.availabilities, \
             self.fixed_courses_for_tutor, \
             self.other_departments_courses_for_tutor, self.other_departments_scheduled_courses_for_supp_tutor, \
@@ -339,7 +341,9 @@ class WeeksDatabase(object):
 
     def groups_init(self):
         # GROUPS
-        groups = Group.objects.filter(train_prog__in=self.train_prog)
+        groups = StructuralGroup.objects.filter(train_prog__in=self.train_prog)
+        transversal_groups = TransversalGroup.objects.filter(train_prog__in=self.train_prog)
+        all_groups = set(groups) | set(transversal_groups)
 
         basic_groups = groups.filter(basic=True)
         #  ,
@@ -351,20 +355,43 @@ class WeeksDatabase(object):
 
         basic_groups_of = {}
         for g in groups:
-            basic_groups_of = []
+            basic_groups_of[g] = set()
             for bg in basic_groups:
                 if g in all_groups_of[bg]:
-                    basic_groups_of.append(bg)
+                    basic_groups_of[g].add(bg)
+
+        conflicting_basic_groups = {}
+        for tg in transversal_groups:
+            conflicting_basic_groups[tg] = set()
+            for cg in tg.conflicting_groups.all():
+                conflicting_basic_groups[tg] |= basic_groups_of[cg]
+
+        transversal_groups_of = {}
+        for bg in basic_groups:
+            transversal_groups_of[bg]=set()
+            for tg in transversal_groups:
+                if bg in conflicting_basic_groups[tg]:
+                    transversal_groups_of[bg].add(tg)
+
+        not_parallel_transversal_groups = {}
+        for tg in transversal_groups:
+            not_parallel_transversal_groups[tg] = set()
+            for tg2 in transversal_groups.filter(train_prog=tg.train_prog).exclude(id=tg.id):
+                if tg2 not in tg.parallel_groups.all() and conflicting_basic_groups[tg] & conflicting_basic_groups[tg2]:
+                    not_parallel_transversal_groups[tg].add(tg2)
 
         courses_for_group = {}
-        for g in groups:
+        for g in all_groups:
             courses_for_group[g] = set(self.courses.filter(groups=g))
 
         courses_for_basic_group = {}
         for bg in basic_groups:
             courses_for_basic_group[bg] = set(self.courses.filter(groups__in=all_groups_of[bg]))
 
-        return groups, basic_groups, all_groups_of, basic_groups_of, courses_for_group, courses_for_basic_group
+        return groups, transversal_groups, all_groups, \
+            basic_groups, all_groups_of, basic_groups_of, \
+            conflicting_basic_groups, transversal_groups_of, not_parallel_transversal_groups,\
+            courses_for_group, courses_for_basic_group
 
     def users_init(self):
         # USERS
