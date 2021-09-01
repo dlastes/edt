@@ -23,7 +23,7 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from base.models import UserPreference
+from base.models import UserPreference, CoursePreference
 
 from base.models import TimeGeneralSettings
 from base.timing import Time, days_index
@@ -61,22 +61,22 @@ class Slot:
     def has_same_day(self, other):
         if isinstance(other, (Slot, CourseSlot)):
             return self.day == other.day
-        elif isinstance(other, (ScheduledCourse, UserPreference)):
+        elif isinstance(other, (ScheduledCourse, UserPreference, CoursePreference)):
             return self.day.week == other.week and self.day.day == other.day
         else:
             raise TypeError("A slot can only have "
-            "same day than a ScheduledCourse or UserPreference or another slot")
+            "same day than a ScheduledCourse, UserPreference, CoursePreference or another slot")
 
     def has_previous_day_than(self, other):
         if isinstance(other, (Slot, CourseSlot)):
             return self.day.week < other.day.week \
                 or self.day.week == other.day.week and days_index[self.day.day] < days_index[other.day.day]
-        elif isinstance(other, (ScheduledCourse, UserPreference)):
+        elif isinstance(other, (ScheduledCourse, UserPreference, CoursePreference)):
             return self.day.week < other.course.week \
                 or self.day.week == other.course.week and days_index[self.day.day] < days_index[other.day]
         else:
             raise TypeError("A slot can only have "
-            "previous day than a ScheduledCourse or UserPreference or another slot")
+            "previous day than a ScheduledCourse, UserPreference, CoursePreference or another slot")
 
     def is_simultaneous_to(self, other):
         if self.has_same_day(other) and self.start_time < other.end_time and other.start_time < self.end_time:

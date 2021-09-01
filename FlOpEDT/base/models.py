@@ -604,8 +604,17 @@ class GroupPreferredLinks(models.Model):
 # -- PREFERENCES --
 # -----------------
 
+class Preference(models.Model):
 
-class UserPreference(models.Model):
+    class Meta:
+        abstract = True
+
+    @property
+    def end_time(self):
+        return self.start_time + self.duration
+
+
+class UserPreference(Preference):
     user = models.ForeignKey('people.Tutor', on_delete=models.CASCADE)
     week = models.ForeignKey('Week', on_delete=models.CASCADE, null=True, blank=True)
     day = models.CharField(
@@ -620,10 +629,6 @@ class UserPreference(models.Model):
         return f"{self.user.username}-Sem{self.week}: " + \
                f"({str_slot(self.day, self.start_time, self.duration)})" + \
                f"={self.value}"
-
-    @property
-    def end_time(self):
-        return self.start_time + self.duration
 
     def __lt__(self, other):
         if isinstance(other, UserPreference):
@@ -679,7 +684,7 @@ class UserPreference(models.Model):
             raise ValueError
 
 
-class CoursePreference(models.Model):
+class CoursePreference(Preference):
     course_type = models.ForeignKey('CourseType', on_delete=models.CASCADE)
     train_prog = models.ForeignKey(
         'TrainingProgramme', on_delete=models.CASCADE)

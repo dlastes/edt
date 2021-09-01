@@ -428,6 +428,8 @@ class WeeksDatabase(object):
                 availabilities[i][week] = set(UserPreference.objects.filter(week=week, user=i))
                 if not availabilities[i][week]:
                     availabilities[i][week] = set(UserPreference.objects.filter(week=None, user=i))
+                    for avail in availabilities[i][week]:
+                        avail.week=week
 
         fixed_courses_for_tutor = {}
         for i in instructors:

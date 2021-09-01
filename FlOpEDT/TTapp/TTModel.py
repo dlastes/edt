@@ -857,39 +857,42 @@ class TTModel(object):
                                             .filter(course_type=course_type,
                                                     train_prog=promo,
                                                     week=None))
+                        for cv in courses_avail:
+                            cv.week = week
                     if not courses_avail:
-                        # print("No course availability given for %s - %s" % (course_type, promo))
                         for availability_slot in week_availability_slots:
                             avail_course[(course_type, promo)][availability_slot] = 1
                             non_preferred_cost_course[(course_type,
                                                            promo)][availability_slot] = 0
+                            print("Course availability problem for %s - %s on availability_slot %s" % (
+                                course_type, promo, availability_slot))
+
                     else:
                         for availability_slot in week_availability_slots:
-                            try:
-                                avail = set(a for a in courses_avail
-                                            if availability_slot.is_simultaneous_to(a))
+                            avail = set(a for a in courses_avail
+                                        if availability_slot.is_simultaneous_to(a))
 
-                                if avail:
-                                    minimum = min(a.value for a in avail)
-                                    if minimum == 0:
-                                        avail_course[(course_type, promo)][availability_slot] = 0
-                                        non_preferred_cost_course[(course_type,
-                                                                       promo)][availability_slot] = 5
-                                    else:
-                                        avail_course[(course_type, promo)][availability_slot] = 1
-                                        value = minimum
-                                        non_preferred_cost_course[(course_type, promo)][availability_slot] \
-                                            = 1 - value / 8
-
+                            if avail:
+                                minimum = min(a.value for a in avail)
+                                if minimum == 0:
+                                    avail_course[(course_type, promo)][availability_slot] = 0
+                                    non_preferred_cost_course[(course_type,
+                                                                   promo)][availability_slot] = 5
                                 else:
                                     avail_course[(course_type, promo)][availability_slot] = 1
-                                    non_preferred_cost_course[(course_type, promo)][availability_slot] = 0
+                                    value = minimum
+                                    non_preferred_cost_course[(course_type, promo)][availability_slot] \
+                                        = 1 - value / 8
 
-                            except:
+                            else:
                                 avail_course[(course_type, promo)][availability_slot] = 1
                                 non_preferred_cost_course[(course_type, promo)][availability_slot] = 0
-                                print("Course availability problem for %s - %s on availability_slot %s" % (
-                                    course_type, promo, availability_slot))
+
+                            # except:
+                            #     avail_course[(course_type, promo)][availability_slot] = 1
+                            #     non_preferred_cost_course[(course_type, promo)][availability_slot] = 0
+                            #     print("Course availability problem for %s - %s on availability_slot %s" % (
+                            #         course_type, promo, availability_slot))
 
         return non_preferred_cost_course, avail_course
 
