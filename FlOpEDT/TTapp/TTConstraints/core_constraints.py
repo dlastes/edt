@@ -328,6 +328,8 @@ class ConsiderTutorsUnavailability(TTConstraint):
 
         for tutor in considered_tutors:
             courses = Course.objects.filter(Q(tutor = tutor) | Q(supp_tutor = tutor), week = week)
+            if not courses.filter(type__department=self.department):
+                continue
             tutor_partition = Partition.get_partition_of_week(week, self.department, True)
             user_preferences = UserPreference.objects.filter(user = tutor, week = week, value__gte=1)
             if not user_preferences.exists():
