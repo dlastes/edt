@@ -343,7 +343,7 @@ class TTModel(object):
             for (d, apm) in physical_presence[g]:
                 expr = 1000 * physical_presence[g][d, apm] \
                        - self.sum(self.TTrooms[sl, c, r]
-                                  for c in self.wdb.courses_for_basic_group[g]
+                                  for c in self.wdb.all_courses_for_basic_group[g]
                                   for r in self.wdb.course_rg_compat[c] - {None}
                                   for sl in slots_filter(self.wdb.compatible_slots[c], day=d, apm=apm))
                 self.add_constraint(expr, '<=', 999,
@@ -361,7 +361,7 @@ class TTModel(object):
             for (d, apm) in has_visio[g]:
                 expr = 1000 * has_visio[g][d, apm] \
                        - self.sum(self.TTrooms[sl, c, None]
-                                  for c in self.wdb.courses_for_basic_group[g]
+                                  for c in self.wdb.all_courses_for_basic_group[g]
                                   for sl in slots_filter(self.wdb.compatible_slots[c], day=d, apm=apm))
                 self.add_constraint(expr, '<=', 999,
                                     Constraint(constraint_type=ConstraintType.HAS_VISIO, groups=g, days=d, apm=apm))
@@ -639,7 +639,7 @@ class TTModel(object):
         # courses that are neither visio neither no-visio are preferentially not in Visio room
         for bg in self.wdb.basic_groups:
             group_courses_except_visio_and_no_visio_ones = \
-                self.wdb.courses_for_basic_group[bg] - self.wdb.visio_courses - self.wdb.no_visio_courses
+                self.wdb.all_courses_for_basic_group[bg] - self.wdb.visio_courses - self.wdb.no_visio_courses
             self.add_to_group_cost(bg,
                                    self.min_visio *
                                    self.sum(self.TTrooms[(sl, c, None)] * self.wdb.visio_ponderation[c]
@@ -650,7 +650,7 @@ class TTModel(object):
         # visio-courses are preferentially in Visio
         for bg in self.wdb.basic_groups:
             group_visio_courses= \
-                self.wdb.courses_for_basic_group[bg] & self.wdb.visio_courses
+                self.wdb.all_courses_for_basic_group[bg] & self.wdb.visio_courses
             self.add_to_group_cost(bg,
                                    self.min_visio *
                                    self.sum(self.TTrooms[(sl, c, room)] * self.wdb.visio_ponderation[c]
@@ -661,7 +661,7 @@ class TTModel(object):
 
         # No visio_course have (strongly) preferentially a room
         for bg in self.wdb.basic_groups:
-            group_no_visio_courses = self.wdb.courses_for_basic_group[bg] & self.wdb.no_visio_courses
+            group_no_visio_courses = self.wdb.all_courses_for_basic_group[bg] & self.wdb.no_visio_courses
             self.add_to_group_cost(bg,
                                    10 * self.min_visio *
                                    self.sum(self.TTrooms[(sl, c, None)] * self.wdb.visio_ponderation[c]

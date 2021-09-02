@@ -167,7 +167,8 @@ class NoSimultaneousGroupCourses(TTConstraint):
                     ttmodel.add_to_group_cost(bg, self.local_weight() * ponderation * two_courses, week)
 
             for tg in ttmodel.wdb.transversal_groups:
-                relevant_sum_for_tg = ttmodel.sum(ttmodel.TT[(sl2, c2)]
+                not_parallel_nb = len(ttmodel.wdb.not_parallel_transversal_groups[tg])
+                relevant_sum_for_tg = not_parallel_nb*ttmodel.sum(ttmodel.TT[(sl2, c2)]
                                                   for sl2 in slots_filter(ttmodel.wdb.courses_slots,
                                                                           simultaneous_to=sl)
                                                   for c2 in ttmodel.wdb.courses_for_group[tg]
@@ -180,7 +181,7 @@ class NoSimultaneousGroupCourses(TTConstraint):
                                                     & ttmodel.wdb.compatible_courses[sl2])
                 if self.weight is None:
                     ttmodel.add_constraint(relevant_sum_for_tg,
-                                           '<=', 1, SimulSlotGroupConstraint(sl, tg))
+                                           '<=', not_parallel_nb, SimulSlotGroupConstraint(sl, tg))
                 else:
                     two_courses = ttmodel.add_floor(relevant_sum_for_tg, 2, len(relevant_slots))
                     ttmodel.add_to_global_cost(self.local_weight() * ponderation * two_courses, week)
@@ -213,7 +214,7 @@ class ScheduleAllCourses(TTConstraint):
     def enrich_model(self, ttmodel, week, ponderation=1):
         relevant_basic_groups = considered_basic_groups(self, ttmodel)
         considered_courses = set(c for bg in relevant_basic_groups
-                                 for c in ttmodel.wdb.courses_for_basic_group[bg])
+                                 for c in ttmodel.wdb.all_courses_for_basic_group[bg])
         max_slots_nb = len(ttmodel.wdb.courses_slots)
         if self.modules.exists():
             considered_courses = set(c for c in considered_courses if c.module in self.modules.all())
@@ -261,7 +262,7 @@ class AssignAllCourses(TTConstraint):
     def enrich_model(self, ttmodel, week, ponderation=1):
         relevant_basic_groups = considered_basic_groups(self, ttmodel)
         considered_courses = set(c for bg in relevant_basic_groups
-                                 for c in ttmodel.wdb.courses_for_basic_group[bg])
+                                 for c in ttmodel.wdb.all_courses_for_basic_group[bg])
         if self.modules.exists():
             considered_courses = set(c for c in considered_courses if c.module in self.modules.all())
         if self.course_types.exists():
