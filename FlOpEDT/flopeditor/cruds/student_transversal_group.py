@@ -149,7 +149,7 @@ def create(entries, department):
                         train_prog=train,
                         type=gtype)
 
-                    for conflict in new_parallel_groups:
+                    for conflict in new_conflicting_groups:
                         group.conflicting_groups.add(conflict)
 
                     for parallel in new_parallel_groups:
@@ -200,8 +200,8 @@ def update(entries, department):
                 name=new_type_name, department=department)
 
             if (new_name != old_name or new_tp_abbrev != old_tp_abbrev) and \
-                    (TransversalGroup.objects.filter(name=new_name, train_prog=new_train).exists() \
-                    or StructuralGroup.objects.filter(name=new_name, train_prog=new_train).exists()):
+                    (TransversalGroup.objects.filter(name=new_name, train_prog=new_train).exists()
+                        or StructuralGroup.objects.filter(name=new_name, train_prog=new_train).exists()):
                 entries['result'].append([
                     ERROR_RESPONSE,
                     "un groupe de ce nom existe déjà dans cette promo."
@@ -224,7 +224,7 @@ def update(entries, department):
             for group_name in entries['new_values'][i][3]:
                 parallel = TransversalGroup.objects.get(
                     name=group_name, train_prog=new_train)
-                group.conflicting_groups.add(parallel)
+                group.parallel_groups.add(parallel)
 
             group.save()
             entries['result'].append([OK_RESPONSE])
