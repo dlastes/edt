@@ -155,7 +155,7 @@ class Partition(object):
                 self.add_slot(
                     TimeInterval(
                         datetime(day.year, day.month, day.day, 0, 0, 0),
-                        datetime(day.year, day.month, (day + timedelta(days = number_of_day_week_end+1)).day, 0, 0, 0)
+                        datetime((day + timedelta(days = number_of_day_week_end+1)).year, (day + timedelta(days = number_of_day_week_end+1)).month, (day + timedelta(days = number_of_day_week_end+1)).day, 0, 0, 0)
                     ), "week_end",
                     {"forbidden" : True, "week_end": True})
                 day = day + timedelta(days = number_of_day_week_end)
@@ -194,12 +194,11 @@ class Partition(object):
                 datetime(day.year, day.month, day.day, 0, 0, 0),
                 datetime(day.year, day.month, day.day, start_hours, start_minutes)
                 ), "night_time", {"forbidden" : True, "night_time" : True})
-        # TO BE CHECKED!!!
         while day < self.intervals[len(self.intervals)-1][0].end:
             self.add_slot(
                 TimeInterval(
                     datetime(day.year, day.month, day.day, end_hours, end_minutes, 0),
-                    datetime(day.year, day.month, (day + timedelta(days = 1)).day, start_hours, start_minutes, 0)
+                    datetime((day + timedelta(days = 1)).year, (day + timedelta(days = 1)).month, (day + timedelta(days = 1)).day, start_hours, start_minutes, 0)
                 ), "night_time",
                 {"forbidden" : True, "night_time": True})
             day = day + timedelta(days = 1)
@@ -454,7 +453,7 @@ class Partition(object):
                 self.add_data(data_type, copy.deepcopy(data), i)
                 i += 1
             #IF WE ARE INSIDE AN EXISTING INTERVAL
-            elif self.intervals[i][0].start <= interval.start and  interval.end <= self.intervals[i][0].end:
+            elif self.intervals[i][0].start <= interval.start and self.intervals[i][0].end >= interval.end:
                 new_part = 1
                 if self.intervals[i][0].end != interval.end:
                     self.intervals.insert(i+1, (TimeInterval(interval.end, self.intervals[i][0].end),
