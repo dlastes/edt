@@ -194,6 +194,7 @@ class Partition(object):
                 datetime(day.year, day.month, day.day, 0, 0, 0),
                 datetime(day.year, day.month, day.day, start_hours, start_minutes)
                 ), "night_time", {"forbidden" : True, "night_time" : True})
+        # TO BE CHECKED!!!
         while day < self.intervals[len(self.intervals)-1][0].end:
             self.add_slot(
                 TimeInterval(
@@ -453,7 +454,7 @@ class Partition(object):
                 self.add_data(data_type, copy.deepcopy(data), i)
                 i += 1
             #IF WE ARE INSIDE AN EXISTING INTERVAL
-            elif self.intervals[i][0].start <= interval.start and self.intervals[i][0].end >= interval.end:
+            elif self.intervals[i][0].start <= interval.start and  interval.end <= self.intervals[i][0].end:
                 new_part = 1
                 if self.intervals[i][0].end != interval.end:
                     self.intervals.insert(i+1, (TimeInterval(interval.end, self.intervals[i][0].end),

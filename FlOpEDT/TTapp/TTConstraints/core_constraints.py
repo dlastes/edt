@@ -136,9 +136,10 @@ class NoSimultaneousGroupCourses(TTConstraint):
                     for course_type, nb_courses in course_dict.items():
                         #We are retrieving the possible start times for each course type and then we check how many we can put in the partition
                         start_times = CourseStartTimeConstraint.objects.get(course_type = course_type)
-                        if group_partition.nb_slots_not_forbidden_of_duration_beginning_at(course_type.duration, start_times.allowed_start_times) < nb_courses:
+                        allowed_slots_nb = group_partition.nb_slots_not_forbidden_of_duration_beginning_at(course_type.duration, start_times.allowed_start_times)
+                        if allowed_slots_nb < nb_courses:
                             jsondict["status"] = _("KO")
-                            jsondict["messages"].append({ "str": _(f"Group {bg.name} has {group_partition.nb_slots_not_forbidden_of_duration(course_type.duration)} slots available of {course_type.duration} minutes and requires {nb_courses}."),
+                            jsondict["messages"].append({ "str": _(f"Group {bg.name} has {allowed_slots_nb} slots available of {course_type.duration} minutes and requires {nb_courses}."),
                                                         "group": bg.id, "type": "NoSimultaneousGroupCourses"}) 
         return jsondict
 
@@ -343,15 +344,13 @@ class ConsiderTutorsUnavailability(TTConstraint):
                         "user_preference",
                         {"value" : up.value, "available" : True, "tutor" : up.user.username}
                     )
-            no_course_tutor = (NoTutorCourseOnDay.objects
-                    .filter(Q(tutors = tutor)
-                        | Q(tutor_status = tutor.status),
-                        weeks = week))
+            no_course_tutor = NoTutorCourseOnDay.objects.filter(Q(tutors = tutor)
+                        | Q(tutor_status = tutor.status) | Q(tutors=None), department = self.department,
+                        weeks = week)
             if not no_course_tutor:
-                no_course_tutor = (NoTutorCourseOnDay.objects
-                    .filter(Q(tutors = tutor)
-                        | Q(tutor_status = tutor.status),
-                        weeks = None))
+                no_course_tutor = NoTutorCourseOnDay.objects.filter(Q(tutors = tutor)
+                        | Q(tutor_status = tutor.status) | Q(tutors=None), department = self.department,
+                        weeks = None)
 
             for constraint in no_course_tutor:
                 slot = constraint.get_slot_constraint(week, forbidden = True)
