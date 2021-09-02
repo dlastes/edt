@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.3.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-07-23 15:58+0000\n"
+"POT-Creation-Date: 2021-09-02 10:39+0000\n"
 "PO-Revision-Date: 2020-04-05 18:44+0200\n"
 "Last-Translator: Benoît Roche (benoit.roche@esrf.fr)\n"
 "Language-Team: none\n"
@@ -98,64 +98,84 @@ msgstr ""
 msgid "Is active?"
 msgstr ""
 
-#: TTapp/TTConstraints/core_constraints.py:111
+#: TTapp/TTConstraints/core_constraints.py:68
+#: TTapp/TTConstraints/core_constraints.py:321
+#: TTapp/TTConstraints/slots_constraints.py:254
+msgid "OK"
+msgstr ""
+
+#: TTapp/TTConstraints/core_constraints.py:112
+#: TTapp/TTConstraints/core_constraints.py:123
+#: TTapp/TTConstraints/core_constraints.py:140
+#: TTapp/TTConstraints/core_constraints.py:368
+#: TTapp/TTConstraints/core_constraints.py:391
+#: TTapp/TTConstraints/slots_constraints.py:278
+#: TTapp/TTConstraints/slots_constraints.py:285
+#: TTapp/TTConstraints/slots_constraints.py:292
+#: TTapp/TTConstraints/slots_constraints.py:306
+#: TTapp/TTConstraints/slots_constraints.py:314
+#: TTapp/TTConstraints/slots_constraints.py:321
+msgid "KO"
+msgstr ""
+
+#: TTapp/TTConstraints/core_constraints.py:113
 #, python-brace-format
 msgid ""
 "Group {bg.name} has {group_partition.not_forbidden_duration} available time "
 "but requires minimum {min_course_time_needed}."
 msgstr ""
 
-#: TTapp/TTConstraints/core_constraints.py:121
+#: TTapp/TTConstraints/core_constraints.py:124
 #, python-brace-format
 msgid ""
 "Group {bg.name} has {group_partition.not_forbidden_duration} available time "
 "but probably requires minimum {course_time_needed}."
 msgstr ""
 
-#: TTapp/TTConstraints/core_constraints.py:137
+#: TTapp/TTConstraints/core_constraints.py:141
 msgid ""
 "Group {bg.name} has {group_partition."
 "nb_slots_not_forbidden_of_duration(course_type.duration)} slots available of "
 "{course_type.duration} minutes and requires {nb_courses}."
 msgstr ""
 
-#: TTapp/TTConstraints/core_constraints.py:195
+#: TTapp/TTConstraints/core_constraints.py:201
 msgid "No simultaneous courses for one group"
 msgstr ""
 
-#: TTapp/TTConstraints/core_constraints.py:244
+#: TTapp/TTConstraints/core_constraints.py:250
 msgid "Schedule once every considered course"
 msgstr ""
 
-#: TTapp/TTConstraints/core_constraints.py:296
+#: TTapp/TTConstraints/core_constraints.py:302
 msgid "Each course is assigned to one tutor (max)"
 msgstr ""
 
-#: TTapp/TTConstraints/core_constraints.py:357
+#: TTapp/TTConstraints/core_constraints.py:365
 #, python-brace-format
 msgid ""
 "Tutor {tutor} has {tutor_partition.available_duration} minutes of available "
 "time."
 msgstr ""
 
-#: TTapp/TTConstraints/core_constraints.py:358
+#: TTapp/TTConstraints/core_constraints.py:366
 msgid ""
 " He or she has to lecture {len(courses)} classes for an amount of {sum(c."
 "type.duration for c in courses)} minutes of courses."
 msgstr ""
 
-#: TTapp/TTConstraints/core_constraints.py:380
+#: TTapp/TTConstraints/core_constraints.py:388
 msgid ""
 "Tutor {tutor} has {course_partition."
 "nb_slots_available_of_duration_beginning_at(course_type.duration, "
 "start_times)} available slots of {course_type.duration} mins "
 msgstr ""
 
-#: TTapp/TTConstraints/core_constraints.py:381
+#: TTapp/TTConstraints/core_constraints.py:389
 msgid "and {len(course_list)} courses that long to attend."
 msgstr ""
 
-#: TTapp/TTConstraints/core_constraints.py:440
+#: TTapp/TTConstraints/core_constraints.py:435
 msgid "Consider tutors unavailability"
 msgstr ""
 
@@ -171,73 +191,81 @@ msgstr ""
 msgid "Minimize groups non-preferred slots"
 msgstr ""
 
-#: TTapp/TTConstraints/slots_constraints.py:278
-#: TTapp/TTConstraints/slots_constraints.py:282
+#: TTapp/TTConstraints/slots_constraints.py:280
+#: TTapp/TTConstraints/slots_constraints.py:287
 #, python-brace-format
 msgid ""
 "There is no available slots for the second course after the first one. "
 "{dependency}"
 msgstr ""
 
-#: TTapp/TTConstraints/slots_constraints.py:286
+#: TTapp/TTConstraints/slots_constraints.py:294
 #, python-brace-format
 msgid ""
 "There is no available slots for the first or the second course. {dependency}"
 msgstr ""
 
-#: TTapp/TTConstraints/slots_constraints.py:297
+#: TTapp/TTConstraints/slots_constraints.py:308
 #, python-brace-format
 msgid "There is no available successive slots for those courses. {dependency}"
 msgstr ""
 
-#: TTapp/TTConstraints/slots_constraints.py:302
+#: TTapp/TTConstraints/slots_constraints.py:316
 #, python-brace-format
 msgid ""
 "There is no available slots for the second course after a {dependency."
 "day_gap} day gap. {dependency}"
 msgstr ""
 
-#: TTapp/TTConstraints/slots_constraints.py:306
+#: TTapp/TTConstraints/slots_constraints.py:323
 #, python-brace-format
 msgid "One of the courses has no eligible tutor to lecture it. {dependency}"
 msgstr ""
 
-#: TTapp/TTConstraints/test_constraints.py:84 base/models.py:879
+#: TTapp/TTConstraints/test_constraints.py:82 base/models.py:884
 msgid "Successives?"
 msgstr ""
 
-#: TTapp/TTConstraints/test_constraints.py:85 base/models.py:881
+#: TTapp/TTConstraints/test_constraints.py:83 base/models.py:886
 msgid "Minimal day gap between courses"
 msgstr ""
 
-#: TTapp/TTConstraints/test_constraints.py:262
+#: TTapp/TTConstraints/test_constraints.py:105
+msgid "There is no tutor assigned to {self.course1.full_name()}"
+msgstr ""
+
+#: TTapp/TTConstraints/test_constraints.py:120
+msgid "There is no tutor assigned to {self.course2.full_name()}"
+msgstr ""
+
+#: TTapp/TTConstraints/test_constraints.py:232
 msgid "There is no available slots for the second course after the first one."
 msgstr ""
 
-#: TTapp/TTConstraints/test_constraints.py:265
+#: TTapp/TTConstraints/test_constraints.py:235
 msgid "There is no available slots for the second course."
 msgstr ""
 
-#: TTapp/TTConstraints/test_constraints.py:268
+#: TTapp/TTConstraints/test_constraints.py:238
 msgid "There is no available slots for the first or the second course."
 msgstr ""
 
-#: TTapp/TTConstraints/test_constraints.py:278
+#: TTapp/TTConstraints/test_constraints.py:248
 msgid "There is no available successive slots for those courses."
 msgstr ""
 
-#: TTapp/TTConstraints/test_constraints.py:282
+#: TTapp/TTConstraints/test_constraints.py:252
 #, python-brace-format
 msgid ""
 "There is no available slots for the second course after a {self.day_gap} day "
 "gap."
 msgstr ""
 
-#: TTapp/TTConstraints/test_constraints.py:287
+#: TTapp/TTConstraints/test_constraints.py:257
 msgid "There is no available tutor for {self.course1.full_name()}"
 msgstr ""
 
-#: TTapp/TTConstraints/test_constraints.py:289
+#: TTapp/TTConstraints/test_constraints.py:259
 msgid "There is no available tutor for {self.course2.full_name()}"
 msgstr ""
 
@@ -321,23 +349,23 @@ msgstr ""
 msgid "Graded?"
 msgstr ""
 
-#: base/models.py:880
+#: base/models.py:885 base/models.py:896
 msgid "On different days"
 msgstr ""
 
-#: base/models.py:899
+#: base/models.py:914
 msgid "Full"
 msgstr ""
 
-#: base/models.py:901
+#: base/models.py:916
 msgid "Full generation date"
 msgstr ""
 
-#: base/models.py:902
+#: base/models.py:917
 msgid "Stabilized"
 msgstr ""
 
-#: base/models.py:904
+#: base/models.py:919
 msgid "Partial generation date"
 msgstr ""
 
@@ -405,20 +433,28 @@ msgid "Direct link to a particular group"
 msgstr ""
 
 #: base/templates/base/help.html:52
-msgid "Add \"?promo=INFO1&gp=1A\" at the end of the url, for example "
+msgid "Add \"?promo=...&gp=...\" at the end of the url, for example "
 msgstr ""
 
-#: base/templates/base/help.html:54
+#: base/templates/base/help.html:53
+msgid "To know the name of your training programme and group, check the list "
+msgstr ""
+
+#: base/templates/base/help.html:53
+msgid "here"
+msgstr ""
+
+#: base/templates/base/help.html:56
 msgid "How availability entry work"
 msgstr ""
 
-#: base/templates/base/help.html:55
+#: base/templates/base/help.html:57
 msgid ""
 "When generating the schedule for a given week, if no availability is entered "
 "for that week, the typical week defines the availability."
 msgstr ""
 
-#: base/templates/base/help.html:57
+#: base/templates/base/help.html:59
 msgid "Some Tutorial Videos"
 msgstr ""
 
@@ -939,41 +975,41 @@ msgstr ""
 msgid "Schedule Generation"
 msgstr "Schedule "
 
-#: solve_board/templates/solve_board/main-board.html:60
+#: solve_board/templates/solve_board/main-board.html:64
 msgid "Constraints"
 msgstr ""
 
-#: solve_board/templates/solve_board/main-board.html:61
+#: solve_board/templates/solve_board/main-board.html:65
 msgid ""
 "All constraints appearing in bolded - with no weight - will be considered "
 "mandatory, the other ones will considered as preferences."
 msgstr ""
 
-#: solve_board/templates/solve_board/main-board.html:66
+#: solve_board/templates/solve_board/main-board.html:70
 msgid "Configuration"
 msgstr ""
 
-#: solve_board/templates/solve_board/main-board.html:70
+#: solve_board/templates/solve_board/main-board.html:75
 msgid "Week⋅s"
 msgstr ""
 
-#: solve_board/templates/solve_board/main-board.html:74
+#: solve_board/templates/solve_board/main-board.html:79
 msgid "Training Program"
 msgstr ""
 
-#: solve_board/templates/solve_board/main-board.html:78
+#: solve_board/templates/solve_board/main-board.html:83
 msgid "Stabilization"
 msgstr ""
 
-#: solve_board/templates/solve_board/main-board.html:83
+#: solve_board/templates/solve_board/main-board.html:88
 msgid "Solver"
 msgstr ""
 
-#: solve_board/templates/solve_board/main-board.html:94
+#: solve_board/templates/solve_board/main-board.html:99
 msgid "Maximum time limit for resolution (minuts)"
 msgstr ""
 
-#: solve_board/templates/solve_board/main-board.html:100
+#: solve_board/templates/solve_board/main-board.html:105
 msgid "Unlimited"
 msgstr ""
 
