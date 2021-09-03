@@ -1024,31 +1024,23 @@ class TTModel(object):
 
         for c in self.wdb.courses:
             for sl in self.wdb.compatible_slots[c]:
-                for i in self.wdb.possible_tutors[c]:
-                    if self.get_var_value(self.TTinstructors[(sl, c, i)]) == 1:
-                        # No = len(self.wdb.sched_courses \
-                        #          .filter(course__module=c.module,
-                        #                  course__group=c.group,
-                        #                  course__week__lte=self.weeks - 1,
-                        #                  copie_travail=0))
-                        # No += len(CoursPlace.objects \
-                        #           .filter(course__module=c.module,
-                        #                   course__group=c.group,
-                        #                   course__week=self.weeks,
-                        #                   copie_travail=target_work_copy))
-                        cp = ScheduledCourse(course=c,
-                                             tutor=i,
-                                             start_time=sl.start_time,
-                                             day=sl.day.day,
-                                             work_copy=target_work_copy)
-                        if not self.department.mode.cosmo:
-                            for rg in self.wdb.course_rg_compat[c]:
-                                if self.get_var_value(self.TTrooms[(sl, c, rg)]) == 1:
-                                    cp.room = rg
-                                    break
-                        cp.save()
-                        if self.department.mode.cosmo == 2:
-                            c.groups.add(corresponding_group[i])
+                if self.get_var_value(self.TT[(sl, c)]) == 1:
+                    cp = ScheduledCourse(course=c,
+                                         start_time=sl.start_time,
+                                         day=sl.day.day,
+                                         work_copy=target_work_copy)
+                    for i in self.wdb.possible_tutors[c]:
+                        if self.get_var_value(self.TTinstructors[(sl, c, i)]) == 1:
+                            cp.tutor = i
+                            if self.department.mode.cosmo == 2:
+                                c.groups.add(corresponding_group[i])
+                            break
+                    if not self.department.mode.cosmo:
+                        for rg in self.wdb.course_rg_compat[c]:
+                            if self.get_var_value(self.TTrooms[(sl, c, rg)]) == 1:
+                                cp.room = rg
+                                break
+                    cp.save()
 
         for fc in self.wdb.fixed_courses:
             cp = ScheduledCourse(course=fc.course,
