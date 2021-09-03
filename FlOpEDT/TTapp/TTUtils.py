@@ -299,12 +299,11 @@ def get_conflicts(department, week, year, copy_a):
     return result
 
 
-def basic_swap_version(department, week, year, copy_a, copy_b=0):
+def basic_swap_version(department, week, copy_a, copy_b=0):
 
     scheduled_courses_params = {
         'course__module__train_prog__department': department,
-        'course__week__nb': week,
-        'course__week__year': year,
+        'course__week': week,
     }
 
     try:
