@@ -355,8 +355,9 @@ class ConsiderTutorsUnavailability(TTConstraint):
                 no_course_tutor = NoTutorCourseOnDay.objects.filter(Q(tutors = tutor)
                         | Q(tutor_status = tutor.status) | Q(tutors=None), department = self.department,
                         weeks = None)
-
+            forbidden_days = ""
             for constraint in no_course_tutor:
+                forbidden_days += constraint.weekday+'-'+constraint.period
                 slot = constraint.get_slot_constraint(week, forbidden = True)
                 if slot:
                     tutor_partition.add_slot(
@@ -365,7 +366,11 @@ class ConsiderTutorsUnavailability(TTConstraint):
                         slot[1]
                     )
             if tutor_partition.available_duration < sum(c.type.duration for c in courses):
-                message = _(f"Tutor {tutor} has {tutor_partition.available_duration} minutes of available time.")
+                message = _(f"Tutor {tutor} has {tutor_partition.available_duration} minutes of available time")
+                if forbidden_days:
+                    message += _(f" (considering that {forbidden_days} are forbidden).")
+                else:
+                    message += '.'
                 message += _(f' He or she has to lecture {len(courses)} classes for an amount of {sum(c.type.duration for c in courses)} minutes of courses.')
                 jsondict["messages"].append({ "str": message, "tutor": tutor.id, "type" : "ConsiderTutorsUnavailability"})
                 jsondict["status"] = _("KO")
