@@ -124,7 +124,8 @@ msgstr "KO"
 msgid ""
 "Group {bg.name} has {group_partition.not_forbidden_duration} available time "
 "but requires minimum {min_course_time_needed}."
-msgstr "Le groupe {bg.name} a {group_partition.not_forbidden_duration} "
+msgstr "Le groupe {bg.name} a {group_partition.not_forbidden_duration} minutes de "
+"temps disponible mais a besoin de {min_course_time_needed} minimum."
 
 #: TTapp/TTConstraints/core_constraints.py:125
 #, python-brace-format
