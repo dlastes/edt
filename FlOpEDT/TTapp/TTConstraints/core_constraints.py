@@ -146,7 +146,11 @@ class NoSimultaneousGroupCourses(TTConstraint):
     def enrich_model(self, ttmodel, week, ponderation=1):
         relevant_slots = slots_filter(ttmodel.wdb.availability_slots, week=week)
         relevant_basic_groups = considered_basic_groups(self, ttmodel)
-        n_tg = ttmodel.wdb.transversal_groups.count()
+        # Count the number of transversal groups
+        if ttmodel.wdb.transversal_groups.exists():
+            n_tg = ttmodel.wdb.transversal_groups.count()
+        else:
+            n_tg = 1
         for sl in relevant_slots:
             for bg in relevant_basic_groups:
                 relevant_sum = n_tg * ttmodel.sum(ttmodel.TT[(sl2, c2)]
