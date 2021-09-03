@@ -537,13 +537,16 @@ class TTModel(object):
                                 CourseConstraint(c))
 
         # constraint : courses are scheduled only once
-        ScheduleAllCourses.objects.get_or_create(department=self.department)
+        if not ScheduleAllCourses.objects.filter(department=self.department).exists():
+            ScheduleAllCourses.objects.create(department=self.department)
 
         # Check if RespectBound constraint is in database, and add it if not
-        RespectBoundPerDay.objects.get_or_create(department=self.department)
+        if not RespectBoundPerDay.objects.filter(department=self.department).exists():
+            RespectBoundPerDay.objects.create(department=self.department)
 
         # Check if ConsiderPivots constraint is in database, and add it if not
-        ConsiderPivots.objects.get_or_create(department=self.department)
+        if not ConsiderPivots.objects.filter(department=self.department).exists():
+            ConsiderPivots.objects.create(department=self.department)
 
         # Check if MinimizeBusyDays constraint is in database, and add it if not
         if not MinimizeBusyDays.objects.filter(department=self.department).exists():
@@ -554,18 +557,21 @@ class TTModel(object):
             MinGroupsHalfDays.objects.create(department=self.department, weight=max_weight)
 
         # Check if ConsiderDependencies constraint is in database, and add it if not
-        ConsiderDependencies.objects.get_or_create(department=self.department)
+        if not ConsiderDependencies.objects.filter(department=self.department).exists():
+            ConsiderDependencies.objects.create(department=self.department)
 
     def add_instructors_constraints(self):
         print("adding instructors constraints")
 
         # Each course is assigned to a unique tutor
-        AssignAllCourses.objects.get_or_create(department=self.department)
+        if not AssignAllCourses.objects.filter(department=self.department).exists():
+            AssignAllCourses.objects.create(department=self.department)
 
         if self.core_only:
             return
 
-        ConsiderTutorsUnavailability.objects.get_or_create(department=self.department)
+        if not ConsiderTutorsUnavailability.objects.filter(department=self.department).exists():
+            ConsiderTutorsUnavailability.objects.create(department=self.department)
 
         for i in self.wdb.instructors:
             if i.username == '---':
