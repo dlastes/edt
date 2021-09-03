@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-09-02 10:39+0000\n"
+"POT-Creation-Date: 2021-09-03 21:40+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -97,17 +97,18 @@ msgstr ""
 msgid "Is active?"
 msgstr ""
 
-#: TTapp/TTConstraints/core_constraints.py:68
-#: TTapp/TTConstraints/core_constraints.py:321
+#: TTapp/TTConstraints/core_constraints.py:69
+#: TTapp/TTConstraints/core_constraints.py:327
 #: TTapp/TTConstraints/slots_constraints.py:254
 msgid "OK"
 msgstr ""
 
-#: TTapp/TTConstraints/core_constraints.py:112
-#: TTapp/TTConstraints/core_constraints.py:123
-#: TTapp/TTConstraints/core_constraints.py:140
-#: TTapp/TTConstraints/core_constraints.py:368
-#: TTapp/TTConstraints/core_constraints.py:391
+#: TTapp/TTConstraints/core_constraints.py:113
+#: TTapp/TTConstraints/core_constraints.py:124
+#: TTapp/TTConstraints/core_constraints.py:142
+#: TTapp/TTConstraints/core_constraints.py:357
+#: TTapp/TTConstraints/core_constraints.py:413
+#: TTapp/TTConstraints/core_constraints.py:436
 #: TTapp/TTConstraints/slots_constraints.py:278
 #: TTapp/TTConstraints/slots_constraints.py:285
 #: TTapp/TTConstraints/slots_constraints.py:292
@@ -117,64 +118,91 @@ msgstr ""
 msgid "KO"
 msgstr ""
 
-#: TTapp/TTConstraints/core_constraints.py:113
+#: TTapp/TTConstraints/core_constraints.py:114
 #, python-brace-format
 msgid ""
 "Group {bg.name} has {group_partition.not_forbidden_duration} available time "
 "but requires minimum {min_course_time_needed}."
 msgstr ""
 
-#: TTapp/TTConstraints/core_constraints.py:124
+#: TTapp/TTConstraints/core_constraints.py:125
 #, python-brace-format
 msgid ""
 "Group {bg.name} has {group_partition.not_forbidden_duration} available time "
 "but probably requires minimum {course_time_needed}."
 msgstr ""
 
-#: TTapp/TTConstraints/core_constraints.py:141
+#: TTapp/TTConstraints/core_constraints.py:143
+#, python-brace-format
 msgid ""
-"Group {bg.name} has {group_partition."
-"nb_slots_not_forbidden_of_duration(course_type.duration)} slots available of "
-"{course_type.duration} minutes and requires {nb_courses}."
+"Group {bg.name} has {allowed_slots_nb} slots available of {course_type."
+"duration} minutes and requires {nb_courses}."
 msgstr ""
 
-#: TTapp/TTConstraints/core_constraints.py:201
+#: TTapp/TTConstraints/core_constraints.py:207
 msgid "No simultaneous courses for one group"
 msgstr ""
 
-#: TTapp/TTConstraints/core_constraints.py:250
+#: TTapp/TTConstraints/core_constraints.py:256
 msgid "Schedule once every considered course"
 msgstr ""
 
-#: TTapp/TTConstraints/core_constraints.py:302
+#: TTapp/TTConstraints/core_constraints.py:308
 msgid "Each course is assigned to one tutor (max)"
 msgstr ""
 
-#: TTapp/TTConstraints/core_constraints.py:365
+#: TTapp/TTConstraints/core_constraints.py:354
 #, python-brace-format
 msgid ""
 "Tutor {tutor} has {tutor_partition.available_duration} minutes of available "
 "time."
 msgstr ""
 
-#: TTapp/TTConstraints/core_constraints.py:366
+#: TTapp/TTConstraints/core_constraints.py:355
+#: TTapp/TTConstraints/core_constraints.py:411
 msgid ""
 " He or she has to lecture {len(courses)} classes for an amount of {sum(c."
 "type.duration for c in courses)} minutes of courses."
 msgstr ""
 
-#: TTapp/TTConstraints/core_constraints.py:388
+#: TTapp/TTConstraints/core_constraints.py:398
+#, python-brace-format
+msgid ""
+"Tutor {tutor} has {tutor_partition.available_duration} minutes of available "
+"time"
+msgstr ""
+
+#: TTapp/TTConstraints/core_constraints.py:400
+msgid " (considering that"
+msgstr ""
+
+#: TTapp/TTConstraints/core_constraints.py:402
+#, python-brace-format
+msgid " {forbidden_days} is forbidden"
+msgstr ""
+
+#: TTapp/TTConstraints/core_constraints.py:404
+#, python-brace-format
+msgid " and {holiday_text} is holiday)."
+msgstr ""
+
+#: TTapp/TTConstraints/core_constraints.py:408
+#, python-brace-format
+msgid " {holiday_text} is holiday)."
+msgstr ""
+
+#: TTapp/TTConstraints/core_constraints.py:433
 msgid ""
 "Tutor {tutor} has {course_partition."
 "nb_slots_available_of_duration_beginning_at(course_type.duration, "
 "start_times)} available slots of {course_type.duration} mins "
 msgstr ""
 
-#: TTapp/TTConstraints/core_constraints.py:389
+#: TTapp/TTConstraints/core_constraints.py:434
 msgid "and {len(course_list)} courses that long to attend."
 msgstr ""
 
-#: TTapp/TTConstraints/core_constraints.py:435
+#: TTapp/TTConstraints/core_constraints.py:480
 msgid "Consider tutors unavailability"
 msgstr ""
 
