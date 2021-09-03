@@ -431,6 +431,7 @@ class Partition(object):
             - "week_end" : with keys "week_end" and "forbidden" 
             - "no_course_tutor" : with keys "no_course_tutor"
             - "scheduled_course" : with key "forbidden"
+            - "holiday" : with key "forbidden"
             - "all" : with any key in it """
         i = 0
         #Check if we are in the interval range

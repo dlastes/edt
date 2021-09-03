@@ -41,11 +41,12 @@ from TTapp.ilp_constraints.constraints.courseConstraint import CourseConstraint
 from django.utils.translation import gettext as _
 from TTapp.slots import slots_filter
 from TTapp.TTConstraints.groups_constraints import considered_basic_groups, pre_analysis_considered_basic_groups
-from base.models import Course, UserPreference
+from base.models import Course, UserPreference, Holiday
 from base.partition import Partition
 from base.timing import Day, flopdate_to_datetime
 from people.models import Tutor
 from django.db.models import Q
+from datetime import timedelta
 
 class NoSimultaneousGroupCourses(TTConstraint):
     """
@@ -348,55 +349,91 @@ class ConsiderTutorsUnavailability(TTConstraint):
                         "user_preference",
                         {"value" : up.value, "available" : True, "tutor" : up.user.username}
                     )
-            no_course_tutor = NoTutorCourseOnDay.objects.filter(Q(tutors = tutor)
-                        | Q(tutor_status = tutor.status) | Q(tutors=None), department = self.department,
-                        weeks = week)
-            if not no_course_tutor:
-                no_course_tutor = NoTutorCourseOnDay.objects.filter(Q(tutors = tutor)
-                        | Q(tutor_status = tutor.status) | Q(tutors=None), department = self.department,
-                        weeks = None)
-            forbidden_days = ""
-            for constraint in no_course_tutor:
-                forbidden_days += constraint.weekday+'-'+constraint.period
-                slot = constraint.get_slot_constraint(week, forbidden = True)
-                if slot:
-                    tutor_partition.add_slot(
-                        slot[0],
-                        "no_course_tutor",
-                        slot[1]
-                    )
+
             if tutor_partition.available_duration < sum(c.type.duration for c in courses):
                 message = _(f"Tutor {tutor} has {tutor_partition.available_duration} minutes of available time")
-                if forbidden_days:
-                    message += _(f" (considering that {forbidden_days} are forbidden).")
-                else:
-                    message += '.'
                 message += _(f' He or she has to lecture {len(courses)} classes for an amount of {sum(c.type.duration for c in courses)} minutes of courses.')
                 jsondict["messages"].append({ "str": message, "tutor": tutor.id, "type" : "ConsiderTutorsUnavailability"})
                 jsondict["status"] = _("KO")
 
-            elif courses.exists():
-                # We build a dictionary with the courses' type as keys and list of courses of those types as values
-                courses_type = dict()
-                for course in courses:
-                    if not course.type in courses_type:
-                        courses_type[course.type] = [course]
+            else:
+                no_course_tutor = NoTutorCourseOnDay.objects.filter(Q(tutors = tutor)
+                            | Q(tutor_status = tutor.status) | Q(tutors=None), department = self.department,
+                            weeks = week)
+                if not no_course_tutor:
+                    no_course_tutor = NoTutorCourseOnDay.objects.filter(Q(tutors = tutor)
+                            | Q(tutor_status = tutor.status) | Q(tutors=None), department = self.department,
+                            weeks = None)
+                forbidden_days = ""
+                if no_course_tutor.exists():
+                    for constraint in no_course_tutor:
+                        forbidden_days += constraint.weekday+'-'+constraint.period+', '
+                        slot = constraint.get_slot_constraint(week, forbidden = True)
+                        if slot:
+                            tutor_partition.add_slot(
+                                slot[0],
+                                "no_course_tutor",
+                                slot[1]
+                            )
+                    # we remove the last ','
+                    forbidden_days=forbidden_days[:-2]
+
+                holidays = Holiday.objects.filter(week=week)
+                if holidays.exists():
+                    holiday_text=''
+                    for h in holidays:
+                        holiday_text += h.day + ', '
+                        d = Day(h.day, h.week)
+                        start = flopdate_to_datetime(d, 0)
+                        end = start + timedelta(days=1)
+                        t = TimeInterval(start, end)
+                        tutor_partition.add_slot(
+                            t,
+                            "holiday",
+                            {"forbidden" : True}
+                        )
+                    holiday_text = holiday_text[:-2]
+
+                if tutor_partition.available_duration < sum(c.type.duration for c in courses):
+                    message = _(f"Tutor {tutor} has {tutor_partition.available_duration} minutes of available time")
+                    if forbidden_days or holiday_text:
+                        message += _(f" (considering that")
+                        if forbidden_days:
+                            message +=_(f" {forbidden_days} is forbidden")
+                            if holidays:
+                                message += _(f" and {holiday_text} is holiday).")
+                            else:
+                                message += ').'
+                        else:
+                            message += _(f" {holiday_text} is holiday).")
                     else:
-                        courses_type[course.type].append(course)
+                        message += '.'
+                    message += _(f' He or she has to lecture {len(courses)} classes for an amount of {sum(c.type.duration for c in courses)} minutes of courses.')
+                    jsondict["messages"].append({ "str": message, "tutor": tutor.id, "type" : "ConsiderTutorsUnavailability"})
+                    jsondict["status"] = _("KO")
 
-                # For each course type we build a partition with the approriate time settings, the scheduled courses of other departments
-                # and the availabilities of the tutor and we check if the tutor has enough available time and slots.
-                for course_type, course_list in courses_type.items():
-                    start_times = CourseStartTimeConstraint.objects.get(course_type=course_type).allowed_start_times
-                    course_partition = Partition.get_partition_of_week(week,course_type.department, True)
-                    course_partition.add_scheduled_courses_to_partition(week, course_type.department, tutor, True)
-                    course_partition.add_partition_data_type(tutor_partition, "user_preference")
+                elif courses.exists():
+                    # We build a dictionary with the courses' type as keys and list of courses of those types as values
+                    courses_type = dict()
+                    for course in courses:
+                        if not course.type in courses_type:
+                            courses_type[course.type] = [course]
+                        else:
+                            courses_type[course.type].append(course)
 
-                    if course_partition.available_duration < len(course_list)*course_type.duration or course_partition.nb_slots_available_of_duration_beginning_at(course_type.duration, start_times) < len(course_list):
-                        message = _(f"Tutor {tutor} has {course_partition.nb_slots_available_of_duration_beginning_at(course_type.duration, start_times)} available slots of {course_type.duration} mins ")
-                        message += _(f'and {len(course_list)} courses that long to attend.')
-                        jsondict["messages"].append({"str": message, "tutor" : tutor.id, "type" : "ConsiderTutorsUnavailability"})
-                        jsondict["status"] = _("KO")
+                    # For each course type we build a partition with the approriate time settings, the scheduled courses of other departments
+                    # and the availabilities of the tutor and we check if the tutor has enough available time and slots.
+                    for course_type, course_list in courses_type.items():
+                        start_times = CourseStartTimeConstraint.objects.get(course_type=course_type).allowed_start_times
+                        course_partition = Partition.get_partition_of_week(week,course_type.department, True)
+                        course_partition.add_scheduled_courses_to_partition(week, course_type.department, tutor, True)
+                        course_partition.add_partition_data_type(tutor_partition, "user_preference")
+
+                        if course_partition.available_duration < len(course_list)*course_type.duration or course_partition.nb_slots_available_of_duration_beginning_at(course_type.duration, start_times) < len(course_list):
+                            message = _(f"Tutor {tutor} has {course_partition.nb_slots_available_of_duration_beginning_at(course_type.duration, start_times)} available slots of {course_type.duration} mins ")
+                            message += _(f'and {len(course_list)} courses that long to attend.')
+                            jsondict["messages"].append({"str": message, "tutor" : tutor.id, "type" : "ConsiderTutorsUnavailability"})
+                            jsondict["status"] = _("KO")
         return jsondict
 
     def enrich_model(self, ttmodel, week, ponderation=1):
