@@ -351,7 +351,7 @@ class ConsiderTutorsUnavailability(TTConstraint):
                     )
 
             if tutor_partition.available_duration < sum(c.type.duration for c in courses):
-                message = _(f"Tutor {tutor} has {tutor_partition.available_duration} minutes of available time")
+                message = _(f"Tutor {tutor} has {tutor_partition.available_duration} minutes of available time.")
                 message += _(f' He or she has to lecture {len(courses)} classes for an amount of {sum(c.type.duration for c in courses)} minutes of courses.')
                 jsondict["messages"].append({ "str": message, "tutor": tutor.id, "type" : "ConsiderTutorsUnavailability"})
                 jsondict["status"] = _("KO")
@@ -379,8 +379,8 @@ class ConsiderTutorsUnavailability(TTConstraint):
                     forbidden_days=forbidden_days[:-2]
 
                 holidays = Holiday.objects.filter(week=week)
+                holiday_text = ''
                 if holidays.exists():
-                    holiday_text=''
                     for h in holidays:
                         holiday_text += h.day + ', '
                         d = Day(h.day, h.week)
