@@ -900,11 +900,11 @@ function compute_changes(changes, conc_tutors, gps) {
 
       // add instructor if never seen
       if (conc_tutors.indexOf(cur_course.prof) == -1
-        && cur_course.prof != logged_usr.name) {
+        && cur_course.prof != logged_usr.name && cur_course.prof != null) {
         conc_tutors.push(cur_course.prof);
       }
       if (conc_tutors.indexOf(cb.prof) == -1
-        && cur_course.prof != logged_usr.name) {
+        && cur_course.prof != logged_usr.name && cb.prof != null) {
         conc_tutors.push(cb.prof);
       }
 
