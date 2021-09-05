@@ -2050,25 +2050,41 @@ function show_detailed_courses(cours) {
     }
   }
   
-  let modinfoname = "Placeholder module name";
-  let modinfourl = "undefined";
-  let tutinfoname ="Placeholder tutor name";
-  let tutinfomail ="Placeholder tutor email adresse";
+  let modinfo = {name: '', url: ''} ;
+  let tutinfo = {name: '', mail: ''} ;
   if (cours.mod in modules_info){
-  	modinfoname = modules_info[cours.mod].name;
-  	modinfourl = modules_info[cours.mod].url;
-	}
-	if (cours.prof in tutors_info){
-		tutinfoname = tutors_info[cours.prof].full_name;
-		tutinfomail = tutors_info[cours.prof].email;
-	}
+    modinfo.name = modules_info[cours.mod].name;
+    modinfo.url = modules_info[cours.mod].url;
+  } else {
+    if (cours.mod == null) {
+      modinfo.name = 'Pas de module';
+    } else {
+      modinfo.name = 'Module inconnu';
+    }
+  }
+  if (cours.prof in tutors_info){
+    tutinfo.name = tutors_info[cours.prof].full_name;
+    tutinfo.mail = tutors_info[cours.prof].email;
+  } else {
+    if (cours.prof == null) {
+      tutinfo.name = 'Pas de prof attitré·e';
+    } else {
+      tutinfo.name = 'Prof inconnu·e';
+    }
+  }
   
   let infos = [
-    {'txt':modinfoname, 'url':modinfourl},
+    {
+      'txt': modinfo.name,
+      'url': modinfo.url
+    },
     room_info,
-    {'txt':cours.comment},
-    {'txt':tutinfoname},
-    {'txt':tutinfomail, 'url': url_contact + cours.prof},
+    {'txt': cours.comment},
+    {'txt': tutinfo.name},
+    {
+      'txt': tutinfo.mail,
+      'url': url_contact + cours.prof
+    },
   ]; 
   
   if (overlapping_courses.length > 1) {
