@@ -900,11 +900,11 @@ function compute_changes(changes, conc_tutors, gps) {
 
       // add instructor if never seen
       if (conc_tutors.indexOf(cur_course.prof) == -1
-        && cur_course.prof != logged_usr.name) {
+        && cur_course.prof != logged_usr.name && cur_course.prof != null) {
         conc_tutors.push(cur_course.prof);
       }
       if (conc_tutors.indexOf(cb.prof) == -1
-        && cur_course.prof != logged_usr.name) {
+        && cur_course.prof != logged_usr.name && cb.prof != null) {
         conc_tutors.push(cb.prof);
       }
 
@@ -2027,7 +2027,7 @@ function show_detailed_courses(cours) {
   var details = svg.get_dom("dg").append("g")
     .attr("id", "course_details");
 
-	let overlapping_courses = find_overlapping_courses(cours);
+  let overlapping_courses = find_overlapping_courses(cours);
 
   var strokeColor;
   var strokeWidth;
@@ -2050,37 +2050,53 @@ function show_detailed_courses(cours) {
     }
   }
   
-  let modinfoname = "Placeholder module name";
-  let modinfourl = "undefined";
-  let tutinfoname ="Placeholder tutor name";
-  let tutinfomail ="Placeholder tutor email adresse";
+  let modinfo = {name: '', url: ''} ;
+  let tutinfo = {name: '', mail: ''} ;
   if (cours.mod in modules_info){
-  	modinfoname = modules_info[cours.mod].name;
-  	modinfourl = modules_info[cours.mod].url;
-	}
-	if (cours.prof in tutors_info){
-		tutinfoname = tutors_info[cours.prof].full_name;
-		tutinfomail = tutors_info[cours.prof].email;
-	}
+    modinfo.name = modules_info[cours.mod].name;
+    modinfo.url = modules_info[cours.mod].url;
+  } else {
+    if (cours.mod == null) {
+      modinfo.name = 'Pas de module';
+    } else {
+      modinfo.name = 'Module inconnu';
+    }
+  }
+  if (cours.prof in tutors_info){
+    tutinfo.name = tutors_info[cours.prof].full_name;
+    tutinfo.mail = tutors_info[cours.prof].email;
+  } else {
+    if (cours.prof == null) {
+      tutinfo.name = 'Pas de prof attitré·e';
+    } else {
+      tutinfo.name = 'Prof inconnu·e';
+    }
+  }
   
   let infos = [
-    {'txt':modinfoname, 'url':modinfourl},
+    {
+      'txt': modinfo.name,
+      'url': modinfo.url
+    },
     room_info,
-    {'txt':cours.comment},
-    {'txt':tutinfoname},
-    {'txt':tutinfomail, 'url': url_contact + cours.prof},
+    {'txt': cours.comment},
+    {'txt': tutinfo.name},
+    {
+      'txt': tutinfo.mail,
+      'url': url_contact + cours.prof
+    },
   ]; 
   
   if (overlapping_courses.length > 1) {
     infos.push( {'txt':""} );
-  	infos.push( {'txt':"Cours ayant lieu en même temps:"} );
-  	infos.push( {'txt':""} );
-
-  	for (let i=1; i<overlapping_courses.length; i++) {
-  		infos.push( {'txt':overlapping_courses[i]["mod"] + ' - '
-              + overlapping_courses[i]["from_transversal"] + ' - ' +overlapping_courses[i]["prof"] + ' - '+overlapping_courses[i]["start"]/60+"h à "+(overlapping_courses[i]["start"]+overlapping_courses[i]["duration"])/60+"h"} );
-  		infos.push( {'txt':''});
-  	}
+    infos.push( {'txt':"Cours ayant lieu en même temps:"} );
+    infos.push( {'txt':""} );
+    
+    for (let i=1; i<overlapping_courses.length; i++) {
+      infos.push( {'txt':overlapping_courses[i]["mod"] + ' - '
+                   + overlapping_courses[i]["from_transversal"] + ' - ' +overlapping_courses[i]["prof"] + ' - '+overlapping_courses[i]["start"]/60+"h à "+(overlapping_courses[i]["start"]+overlapping_courses[i]["duration"])/60+"h"} );
+      infos.push( {'txt':''});
+    }
   }
   
   nb_detailed_infos = infos.length ;

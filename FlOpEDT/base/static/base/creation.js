@@ -1363,13 +1363,15 @@ function check_course() {
 
   // tutor availability
   if (!pending.pass.tutor) {
-    
-    check_tutor_busy(ret, possible_conflicts) ;
-    
-    // tutor availability
-    if (!check_tutor_free_week(ret)) {
-      check_tutor_preferences(ret) ;
-      check_tutor_busy_other_departments(ret) ;
+
+    if (pending.wanted_course.prof != null) {
+      check_tutor_busy(ret, possible_conflicts) ;
+      
+      // tutor availability
+      if (!check_tutor_free_week(ret)) {
+        check_tutor_preferences(ret) ;
+        check_tutor_busy_other_departments(ret) ;
+      }
     }
         
     // we will ask later about room constraints

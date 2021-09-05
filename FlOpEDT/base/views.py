@@ -881,7 +881,9 @@ def clean_change(week, old_version, change, work_copy=0, initiator=None, apply=F
 
     # Tutor
     try:
-        tutor = Tutor.objects.get(username=change['tutor'])
+        tutor = change['tutor']
+        if tutor is not None:
+            tutor = Tutor.objects.get(username=tutor)
         ret['sched'].tutor = tutor
         if ret['course'].tutor is not None:
             ret['course'].tutor = tutor
