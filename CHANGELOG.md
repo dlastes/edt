@@ -49,7 +49,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - front-end: dispatch week/day management in js files
 - back-end refactoring: all model attributes in english
 - Selection of multiple weeks possible with the solve board
-- cleaned the API and optimized requests for the mobile applicaton
+- cleaned the API and optimized requests for the mobile application
 
 
 
