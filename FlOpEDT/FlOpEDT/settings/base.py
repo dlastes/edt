@@ -33,6 +33,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.10/ref/settings/
 """
 
+from django.utils.translation import gettext_lazy as _
+
 import os
 import sys
 
@@ -40,10 +42,9 @@ import sys
 BASE_DIR = os.path.dirname(os.path.dirname(
     os.path.dirname(os.path.abspath(__file__))))
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/1.10/howto/deployment/checklist/
-
+#
 # Application definition
+#
 
 INSTALLED_APPS = [
     'channels',
@@ -56,20 +57,35 @@ INSTALLED_APPS = [
     'django_extensions',
     'import_export',
     'colorfield',
+    'flopeditor',
+    'rest_framework',
+    'django_filters',
     'base',
     'TTapp',
     'quote',
     'people',
     'solve_board',
-    'synchro',
-    'ics'
+    'ics',
+    'displayweb',
+    'configuration',
+    'easter_egg',
+    'MyFlOp',
+#    'importation'
+    'api',
+    'rest_framework.authtoken',
+    'rest_auth',
+    'rest_framework_swagger',
+    'drf_yasg',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
-    #    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -96,6 +112,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'FlOpEDT.wsgi.application'
+ASGI_APPLICATION = 'FlOpEDT.routing.application'
 
 CACHES = {
    'default': {
@@ -124,32 +141,109 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-STATIC_URL = '/static/'
-
-# AUTH_USER_MODEL = 'base.User'
-
 # Internationalization
 # https://docs.djangoproject.com/en/1.10/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_L10N = True
-
 USE_TZ = True
-
 CSRF_USE_SESSION = True
-
 AUTH_USER_MODEL = 'people.User'
 
+# Available languages
+LANGUAGES = [
+  ('fr', _('French')),
+  ('en', _('English')),
+  ('es', _('Spanish')),
+    ('ar', _('Arabic')),
+    ('eu', _('Basque')),
+    ('br', _('Breton')),
+    ('ca', _('Catalan')),
+    ('co', _('Corsican')),
+    ('da', _('Danish')),
+    ('de', _('German')),
+    ('nl', _('Dutch')),
+    ('el', _('Greek')),
+    ('it', _('Italian')),
+    ('la', _('Latin')),
+    ('no', _('Norwegian')),
+    ('pt', _('Portuguese')),
+    ('sv', _('Swedish')),
+    ('zh', _('Chinese')),
+    ('sf', _('Smurf'))
+]
 
-STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, 'static'),
-    )
+# Folder which contains traduction files
+LOCALE_PATHS = (
+    os.path.join(BASE_DIR, 'locale'),
+)
 
+#
+# ASSETS Settings
+#
 
-ASGI_APPLICATION = 'FlOpEDT.routing.application'
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
+
+#
+# EMAIL SETTINGS
+#
+
+EMAIL_USE_SSL = True
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_SUBJECT_PREFIX = '[flop!EDT] '
+SERVER_EMAIL = 'no-reply@flop.edt'
+
+EMAIL_HOST = os.environ.get('EMAIL_HOST')
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+
+if 'EMAIL_PORT' in os.environ:
+    EMAIL_PORT = int(os.environ.get('EMAIL_PORT'))
+
+#
+# FLOPEDT Settings
+#
+
+CUSTOM_CONSTRAINTS_PATH = 'MyFlOp.custom_constraints'
+
+if 'ADMINS' in os.environ:
+    ADMINS = [tuple(admin.split(",")) for admin in os.environ.get('ADMINS').split(" ")]
+    MANAGERS = ADMINS
+
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+        'rest_framework_csv.renderers.CSVRenderer',
+    ],
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',  # <-- And here
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly'
+    ],
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
+}
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# LOG IN-AND-OUT
+LOGIN_REDIRECT_URL = '/backoffice/'
+LOGIN_URL = '/'
+TEMPLATE_DIRS = (
+    BASE_DIR + '/templates/',
+)
+
+SHELL_PLUS_MODEL_IMPORTS_RESOLVER = 'django_extensions.collision_resolvers.AppLabelSuffixCR'
+
+CORS_ALLOW_ALL_ORIGINS = True

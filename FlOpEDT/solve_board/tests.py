@@ -4,7 +4,7 @@
 from django.test import TestCase
 from solve_board.views import get_constraints, get_pulp_solvers, get_pulp_solvers_viewmodel
 from base import models as base
-import pulp.solvers as solver_classes
+import pulp
 
 
 from TTapp.models import *
@@ -23,15 +23,15 @@ class GetAvailableSolversTestCase(TestCase):
 
     def test_coin_cmd(self):
         solvers = get_pulp_solvers(False)
-        self.assertIn(solver_classes.COIN_CMD, solvers)
+        self.assertIn(pulp.COIN_CMD, solvers)
 
     def test_cbc_cmd(self):
         solvers = get_pulp_solvers(False)
-        self.assertIn(solver_classes.PULP_CBC_CMD, solvers)
+        self.assertIn(pulp.PULP_CBC_CMD, solvers)
 
     def test_default_available_solver(self):
         solvers = get_pulp_solvers(True)
-        self.assertIn(solver_classes.PULP_CBC_CMD, solvers)
+        self.assertIn(pulp.PULP_CBC_CMD, solvers)
 
 
 class GetConstraintsTestCase(TestCase):
@@ -45,14 +45,14 @@ class GetConstraintsTestCase(TestCase):
         self.tp2 = base.TrainingProgramme.objects.create(name="TrainingProgramme2", abbrev="tp2", department=self.department2)
         self.ct1 = base.CourseType.objects.create(name="CourseType1")
 
-        self.c_basic = LimitCourseTypePerPeriod.objects.create(limit=0, type=self.ct1, department=self.department1)
+        self.c_basic = LimitTimePerPeriod.objects.create(limit=0, type=self.ct1, department=self.department1)
 
-        self.c_2018 = LimitCourseTypePerPeriod.objects.create(train_prog=self.tp1, year=2018, limit=0, type=self.ct1, department=self.department1)
-        self.c_2018_39 = LimitCourseTypePerPeriod.objects.create(train_prog=self.tp1, year=2018, week=39, limit=0, type=self.ct1, department=self.department1)
-        self.c_2018_39_without_tp = LimitCourseTypePerPeriod.objects.create(year=2018, week=39, limit=0, type=self.ct1, department=self.department1)
+        self.c_2018 = LimitTimePerPeriod.objects.create(train_prog=self.tp1, year=2018, limit=0, type=self.ct1, department=self.department1)
+        self.c_2018_39 = LimitTimePerPeriod.objects.create(train_prog=self.tp1, year=2018, week=39, limit=0, type=self.ct1, department=self.department1)
+        self.c_2018_39_without_tp = LimitTimePerPeriod.objects.create(year=2018, week=39, limit=0, type=self.ct1, department=self.department1)
 
-        self.c_tp2 = LimitCourseTypePerPeriod.objects.create(train_prog=self.tp2, limit=0, type=self.ct1, department=self.department1)
-        self.c_2019_1 = LimitCourseTypePerPeriod.objects.create(train_prog=self.tp2, year=2019, week=1, limit=0, type=self.ct1, department=self.department1)
+        self.c_tp2 = LimitTimePerPeriod.objects.create(train_prog=self.tp2, limit=0, type=self.ct1, department=self.department1)
+        self.c_2019_1 = LimitTimePerPeriod.objects.create(train_prog=self.tp2, year=2019, week=1, limit=0, type=self.ct1, department=self.department1)
 
     def test_week_without_train_prog(self):   
         constraints = set(get_constraints(self.department1, year=2018, week=39))

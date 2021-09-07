@@ -5,17 +5,20 @@ services:
     image: postgres
     environment:
       PGDATA: /var/lib/postgresql/data/flopedt-${BRANCH:-master}
+      POSTGRES_HOST_AUTH_METHOD: trust
     ports:
       - "5445:5432"
   redis:
     image: redis:latest
+    ports:
+      - "${REDIS_PORT-6379}:6379"
   web:
     build:
       context: .
       args:
         CONFIG: development
     env_file: 
-      - ./docker/env/db.dev.env
+      - ./docker/env/db.env
       - ./docker/env/web.env
     environment:
       - DJANGO_SETTINGS_MODULE=FlOpEDT.settings.development
@@ -26,7 +29,7 @@ services:
     volumes:
       - .:/code
     ports:
-      - "8000:8000"
+      - "${PORT-80}:8000"
     depends_on:
       - db
       - redis

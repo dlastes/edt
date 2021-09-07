@@ -30,7 +30,7 @@ DEBUG = True
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'flop_database_master',
+        'NAME': 'flop_database_public_dev',
         'USER': 'flop_user',
         'PASSWORD': 'your_password',
         'HOST': '127.0.0.1',
@@ -53,6 +53,11 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },        
+        'configuration': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },        
         'django.db.backends': {
             'level': 'INFO',
             'handlers': ['console'],
@@ -68,8 +73,32 @@ CHANNEL_LAYERS = {
             "hosts": [('127.0.0.1', 6379)],
         },
     },
-    # "default": {
-    #     "BACKEND": "asgiref.inmemory.ChannelLayer",
-    #     "ROUTING": "solve_board.routing.channel_routing",
-    # },
 }
+
+# INSTALLED_APPS = INSTALLED_APPS + ['debug_toolbar']
+
+# MIDDLEWARE = MIDDLEWARE + ['debug_toolbar.middleware.DebugToolbarMiddleware']
+
+DEBUG_TOOLBAR_PANELS = [
+    'ddt_request_history.panels.request_history.RequestHistoryPanel',  # Here it is 
+    'debug_toolbar.panels.versions.VersionsPanel',
+    'debug_toolbar.panels.timer.TimerPanel',
+    'debug_toolbar.panels.settings.SettingsPanel',
+    'debug_toolbar.panels.headers.HeadersPanel',
+    'debug_toolbar.panels.request.RequestPanel',
+    'debug_toolbar.panels.sql.SQLPanel',
+    'debug_toolbar.panels.templates.TemplatesPanel',
+    'debug_toolbar.panels.staticfiles.StaticFilesPanel',
+    'debug_toolbar.panels.cache.CachePanel',
+    'debug_toolbar.panels.signals.SignalsPanel',
+    'debug_toolbar.panels.logging.LoggingPanel',
+    'debug_toolbar.panels.redirects.RedirectsPanel',
+    'debug_toolbar.panels.profiling.ProfilingPanel',
+]
+
+DEBUG_TOOLBAR_CONFIG = {
+    'RESULTS_CACHE_SIZE': 100,
+    'RESULTS_STORE_SIZE': 100,
+}
+
+INTERNAL_IPS = ['127.0.0.1']

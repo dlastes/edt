@@ -34,7 +34,7 @@ import logging
 from threading import Thread
 from django.core.exceptions import ObjectDoesNotExist
 from MyFlOp.MyTTModel import MyTTModel
-from base.models import TrainingProgramme
+from base.models import TrainingProgramme, Week
 import TTapp.models as TTClasses
 
 # from multiprocessing import Process
@@ -97,11 +97,11 @@ class SolverConsumer(WebsocketConsumer):
 
             # Start solver
             time_limit = data['time_limit'] or None
+            weeks = [Week.objects.get(nb=o['week'], year=o['year']) for o in data['week_year_list']]
 
             Solve(
                 data['department'],
-                data['week'],
-                data['year'],
+                weeks,
                 data['timestamp'],
                 data['train_prog'],
                 self,
@@ -118,6 +118,7 @@ class SolverConsumer(WebsocketConsumer):
                     'action': 'aborted'
                 }))
                 os.kill(solver_child_process, signal.SIGINT)
+                cache.delete('solver_child_process')
             else:
                 self.send(text_data=json.dumps({
                     'message': 'there is no running solver!',
@@ -133,11 +134,10 @@ def solver_subprocess_SIGINT_handler(sig, stack):
 
 
 class Solve():
-    def __init__(self, department_abbrev, week, year, timestamp, training_programme, chan, time_limit, solver, stabilize_work_copy=None):
+    def __init__(self, department_abbrev, weeks, timestamp, training_programme, chan, time_limit, solver, stabilize_work_copy=None):
         super(Solve, self).__init__()
         self.department_abbrev = department_abbrev
-        self.week = week
-        self.year = year
+        self.weeks = weeks
         self.timestamp = timestamp
         self.channel = chan
         self.time_limit = time_limit
@@ -162,7 +162,7 @@ class Solve():
                 os.dup2(wd,1)   # redirect stdout
                 os.dup2(wd,2)   # redirect stderr
                 try:
-                    t = MyTTModel(self.department_abbrev, self.week, self.year, train_prog=self.training_programme, stabilize_work_copy = self.stabilize_work_copy)
+                    t = MyTTModel(self.department_abbrev, self.weeks, train_prog=self.training_programme, stabilize_work_copy = self.stabilize_work_copy)
                     os.setpgid(os.getpid(), os.getpid())
                     signal.signal(signal.SIGINT, solver_subprocess_SIGINT_handler)
                     t.solve(time_limit=self.time_limit, solver=self.solver)

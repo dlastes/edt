@@ -24,20 +24,68 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from TTapp.TTModel import TTModel
-from TTapp.models import MinHalfDays, max_weight
+import importlib
+
+from TTapp.TTModel import TTModel, GUROBI_NAME
+
+from MyFlOp.MyTTUtils import print_differences
+
 
 class MyTTModel(TTModel):
+    def __init__(self, department_abbrev, week_year_list,
+                 train_prog=None,
+                 stabilize_work_copy=None,
+                 min_nps_i=1.,
+                 min_bhd_g=1.,
+                 min_bd_i=1.,
+                 min_bhd_i=1.,
+                 min_nps_c=1.,
+                 max_stab=5.,
+                 lim_ld=1.,
+                 core_only=False,
+                 send_mails=False,
+                 slots_step=None,
+                 keep_many_solution_files=False,
+                 min_visio=0.5):
+        """
+        If you shall change something in the database ahead of creating the
+        problem, you must write it here, before calling TTModel's constructor.
+
+        """
+        TTModel.__init__(self, department_abbrev, week_year_list,
+                         train_prog=train_prog,
+                         stabilize_work_copy=stabilize_work_copy,
+                         min_nps_i=min_nps_i,
+                         min_bhd_g=min_bhd_g,
+                         min_bd_i=min_bd_i,
+                         min_bhd_i=min_bhd_i,
+                         min_nps_c=min_nps_c,
+                         max_stab=max_stab,
+                         lim_ld=lim_ld,
+                         core_only=core_only,
+                         send_mails=send_mails,
+                         slots_step=slots_step,
+                         keep_many_solution_files=keep_many_solution_files,
+                         min_visio=min_visio)
+
     def add_specific_constraints(self):
         """
-        The specific constraints stored in the database are added by the TTModel class.
+        The speficic constraints stored in the database are added by the
+        TTModel class.
         If you shall add more specific ones, you may write it down here.
         """
         TTModel.add_specific_constraints(self)
 
-
-    def solve(self, time_limit=3600, solver='CBC', target_work_copy=None):
+    def solve(self, time_limit=None, target_work_copy=None,
+              solver=GUROBI_NAME, threads=None):
         """
-        If you shall add pre (or post) processing apps, you may write them down here.
+        If you shall add pre (or post) processing apps, you may write them down
+        here.
         """
-        TTModel.solve(self, time_limit=time_limit, solver=solver, target_work_copy=target_work_copy)
+        result = TTModel.solve(self,
+                               time_limit=time_limit,
+                               target_work_copy=target_work_copy,
+                               solver=solver,
+                               threads=None)
+        if result is not None and self.stabilize_work_copy is not None:
+            print_differences(self.weeks, self.year, self.stabilize_work_copy, target_work_copy, self.wdb.instructors)

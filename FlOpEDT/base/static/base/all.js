@@ -27,157 +27,181 @@
 
 
 
-      // {"tot":15,
-      //  "colors":[]},
-      // {"tot":16,
-      //  "colors":[]},
-      // {"tot":18,
-      //  "colors":[]},
-      // {"tot":19,
-      //  "colors":[]},
-      // {"tot":20,
-      //  "colors":[]}
+// {"tot":15,
+//  "colors":[]},
+// {"tot":16,
+//  "colors":[]},
+// {"tot":18,
+//  "colors":[]},
+// {"tot":19,
+//  "colors":[]},
+// {"tot":20,
+//  "colors":[]}
 
 
 
 
 
-var user = {nom: logged_usr.nom,
-	    dispos: [],
-	    dispos_bu: [],
-	    dispos_type: []
-	   };
-
-var margin = {
-    top: 250,     // - TOP BANNER - //
-    left:  50,
-    right:  110,
-    bot:  10,
-    but: -230
+var user = {
+  name: logged_usr.name,
+  dispos: [],
+  dispos_bu: [],
+  dispos_type: []
 };
 
 
-var bs_margin_w = 20 ;
-var bs_margin_h = 5 ;
 
-var svg = {
-    height: window.innerHeight - $("#menu-edt").height() - bs_margin_h,
-    width: window.innerWidth - bs_margin_w,
+dsp_svg.margin = {
+  top: 250,     // - TOP BANNER - //
+  left: 50,
+  right: 110,
+  bot: 10,
+  but: -200
 };
+dsp_svg.h = window.innerHeight;
+dsp_svg.w = window.innerWidth + dsp_svg.margin.left; //- 20 ;
+
+dsp_svg.cadastre = [
+  // menus ground
+  ["svg", "meg"],
+
+  // weeks ground
+  ["svg", "wg"],
+  ["wg", "wg-bg"],
+  ["wg", "wg-fg"],
+
+  // selection categories button ground
+  ["svg", "catg"],
+
+  // semaine type ground
+  ["svg", "stg"],
+
+  // dispos info ground
+  ["svg", "dig"],
+
+  // dispos info ground
+  ["svg", "pmg"],
+
+  // valider
+  ["svg", "vg"],
+
+  // background, middleground, foreground, dragground
+  ["svg", "edtg"],
+  ["edtg", "edt-bg"],
+  ["edtg", "edt-mg"],
+  ["edtg", "edt-fig"],
+  ["edtg", "edt-fg"],
+
+  // selection ground
+  ["svg", "selg"],
 
 
-var week = 42 ;
-var year = 2017;
-
-var labgp = {height: 40, width: 30, tot: 8, height_init: 40, width_init: 30, hm: 40, wm:15};
-
-dim_dispo.height = 2*labgp.height ;
+  // context menus ground
+  ["svg", "cmg"],
+  ["cmg", "cmpg"],
+  ["cmg", "cmtg"],
 
 
-
-butgp.tly = margin.but;//-margin_but.ver-6*butgp.height-80 ;
-butpr.tly = margin.but;
-
-
-modules.x=butpr.tlx+butpr_x(null,butpr.perline-2)+butpr.width+butpr.mar_x-60;
-modules.y=margin.top+gsckd_y(null)-40;
-modules.width = 170 ;
-modules.height = 0 ;
+  // drag ground
+  ["svg", "dg"]
+];
 
 
-salles.x=modules.x-1.2*modules.width ; //5*butpr.width;
-salles.y=modules.y-modules.height;//.6*butpr.height;
-salles.width = 150 ; 
-salles.height = modules.height ; 
+svg = new Svg(dsp_svg.layout_tree, false);
+svg.create_container();
+svg.create_layouts(dsp_svg.cadastre);
 
-pref_only = false ;
+wdw_weeks.add_full_weeks(week_year_list);
+var week_banner = new WeekBanner(svg, "wg", "wg-fg", "wg-bg", wdw_weeks, dsp_weeks);
+week_banner.spawn();
+
+var days_header = new WeekDayHeader(
+  svg, "edt-fg", week_days, true, null,
+  url_fetch_physical_presence, url_change_physical_presence
+);
+
+var hours_header = new HourHeader(svg, "edt-fg", hours);
+
+
+var labgp = { height: 40, width: 30, tot: 8, height_init: 40, width_init: 30, hm: 40, wm: 15 };
+
+//dim_dispo.height = 2*labgp.height ;
+
+
+
+butgp.tly = dsp_svg.margin.but;//-butgp.mar_v-6*butgp.height-80 ;
+sel_popup.tly = dsp_svg.margin.but;
+
+
+modules.x = sel_popup.selx + sel_popup.selx;
+modules.y = dsp_svg.margin.top + days_header.mix.gsckd_y() - 40;
+modules.width = 170;
+modules.height = 0;
+
+
+salles.x = modules.x - 1.2 * modules.width; //5*butpr.width;
+salles.y = modules.y - modules.height;//.6*butpr.height;
+salles.width = 150;
+salles.height = modules.height;
+
+pref_only = false;
 
 /*-------------------
   ------ BUILD ------
   -------------------*/
 
 
-function on_group_rcv(dg) {
+file_fetch.groups.callback = function () {
 
-    create_groups(dg);
+  create_groups(this.data);
 
-    go_gp_buttons();
+  create_edt_grid();
 
-    create_edt_grid();
+  create_alarm_dispos();
+  create_val_but();
+  create_regen();
+  create_quote();
 
-    create_alarm_dispos() ;
-    create_val_but() ;
-    create_regen() ;
-    create_quote() ;
-    
-    go_ack_msg();
+  //    go_ack_msg();
 
-    create_bknews();
+  create_bknews();
 
-    go_promo_gp_init() ;
-    go_gp_buttons();
+  go_promo_gp_init();
 
-
-    fetch_all(true);
-
-    if (splash_id == 1) {
-    
-	var splash_mail = {
-	    id: "mail-sent",
-	    but: {list: [{txt: "Ok", click: function(d){} }]},
-	    com: {list: [{txt: "E-mail envoyé !", ftsi: 23}]}
-	}
-	splash(splash_mail);
-
-    } else if (splash_id == 2) {
-
-	var splash_quote = {
-	    id: "quote-sent",
-	    but: {list: [{txt: "Ok", click: function(d){} }]},
-	    com: {list: [{txt: "Citation envoyée ! (en attente de modération)", ftsi: 23}]}
-	}
-	splash(splash_quote);
-
-    }
-    
-    //go_edt(true);
-}
+  fetch_status.course_saved = false;
+  fetch_all(true, false);
 
 
-function on_room_rcv(room_data) {
-    rooms = room_data;
-}
+  fetch_status.groups_ok = true;
+  create_grid_data();
+
+  if (nbRows > 1) {
+    hours_header.hours.clear() ;
+    hours_header.hours.add_times(Object.keys(rev_constraints));
+    hours_header.hours.add_times(
+      Object.keys(rev_constraints).map(function(r){
+        return +r + rev_constraints[r];
+      }));
+    let t = department_settings.time ;
+    hours_header.hours.add_times([
+      t.day_start_time,
+      t.lunch_break_start_time,
+      t.lunch_break_finish_time,
+      t.day_finish_time
+    ]);
+  }
+
+  //need set_promos
+  fetch_lunch_constraints();
+
+  //need nbRows
+  hours_header.create_indicator();
+};
 
 
 
 
 
-/*-------------------------
-  - CONTEXT MENUS HELPERS -
-  -------------------------*/
-
-function cancel_cm_adv_preferences(){
-    if(ckbox["dis-mod"].cked) {
-	if(! context_menu.dispo_hold) {
-	    data_dispo_adv_cur = [] ;
-	    go_cm_advanced_pref(true);
-	}
-	context_menu.dispo_hold = false ;
-    }
-}
-
-function cancel_cm_room_tutor_change(){
-    if(ckbox["edt-mod"].cked) {
-	if(!context_menu.room_tutor_hold) {
-	    if (room_tutor_change.course.length > 0) {
-		room_tutor_change.course = [] ;
-		room_tutor_change.proposal = [] ;
-		go_cm_room_tutor_change();
-	    }
-	}
-	context_menu.room_tutor_hold = false ;
-    }
-}
 
 
 /*---------------------
@@ -185,35 +209,48 @@ function cancel_cm_room_tutor_change(){
   ---------------------*/
 
 
-create_general_svg(false);
-create_quote()
+
+create_quote();
 
 def_drag();
 def_cm_change();
 
-create_clipweek();
+//create_clipweek();
+
+
+
 create_menus();
-create_forall_prof();
+
+create_selections();
 
 fetch_dispos_type();
 
+fetch_preferred_links();
 
 
+d3.json(build_url(rooms_fi, context_dept),
+  function (d) { main('rooms', d); });
 
-d3.json(groupes_fi,
- 	on_group_rcv);
+d3.json(build_url(constraints_fi, context_dept),
+  function (d) { main('constraints', d); });
 
-d3.json(rooms_fi,
- 	on_room_rcv);
+d3.json(build_url(groupes_fi, context_dept),
+  function (d) { main('groups', d); });
 
 
-    
 
 d3.select("body")
-    .on("click", function(d) {
-	cancel_cm_adv_preferences();
-	cancel_cm_room_tutor_change();
-    })
+  .on("click", function (d) {
+    if (splash_hold) {
+      splash_hold = false;
+      return;
+    }
+    cancel_cm_adv_preferences();
+    cancel_cm_room_tutor_change();
+  })
+  .on("mouseup", function(d) {
+    pref_selection.start = null ;
+  });
 
 
 

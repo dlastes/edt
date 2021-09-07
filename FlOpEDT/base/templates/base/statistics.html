@@ -26,6 +26,7 @@
 {% csrf_token %}
 
 {% block title %} Statistics {% endblock %}
+{% load i18n %}
 
 {% block content %}
 
@@ -81,15 +82,28 @@
         room_activity: "{% url "base:room_activity" department %}",
         tutor_hours: "{% url "base:tutor_hours" department %}",
     }
-    var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+  var csrftoken = '{{ csrf_token }}';
+  if(!jQuery.fn.jquery.startsWith("1")){
+      function csrfSafeMethod(method) {
+          // these HTTP methods do not require CSRF protection
+          return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+      }
+      $.ajaxSetup({
+          beforeSend: function(xhr, settings) {
+              if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+              }
+          }
+      });
+  }
 </script>
 
 {% endblock %}
 
 <div id="statistics">
     <select id="select_statistic">
-        <option value="room_activity">Nombre de jours d'innocupation par salle</option>
-        <option value="tutor_hours">Nombre de cours donnés par professeur</option>
+        <option value="room_activity"> {% trans "Number of days of innocuousness per room" %}</option>
+        <option value="tutor_hours">{% trans "Number of classes given per teacher" %}</option>
     </select>
 
     <table></table>

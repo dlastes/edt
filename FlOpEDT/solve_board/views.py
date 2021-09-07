@@ -23,36 +23,33 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-
-
-from base import weeks
-from base.models import TrainingProgramme, ScheduledCourse
-from base.core.period_weeks import PeriodWeeks
-from people.models import FullStaff
-from solve_board.models import SolveRun
-# from solve_board.consumers import ws_add
-from MyFlOp.MyTTModel import MyTTModel
-from TTapp.models import TTConstraint
-from TTapp.TTModel import get_constraints
+from multiprocessing import Process
+from io import StringIO
+import os
+import sys
+import json
+import pulp
 
 from django.shortcuts import render
 from django.contrib.admin.views.decorators import staff_member_required
 from django.http import Http404, JsonResponse, HttpResponse
 from django.conf import settings
 from django.db.models import Q
-
 # from channels import Group
-
-from multiprocessing import Process
-from io import StringIO
-import os
-import sys
-import json
-
 from django.template.response import TemplateResponse
-from django.conf import settings
 
-import pulp.solvers as pulp_solvers
+from FlOpEDT.decorators import dept_admin_required
+
+from base import weeks
+from base.models import TrainingProgramme, ScheduledCourse, Week
+from base.core.period_weeks import PeriodWeeks
+from people.models import FullStaff
+from MyFlOp.MyTTModel import MyTTModel
+from TTapp.models import TTConstraint
+from TTapp.TTModel import get_constraints
+
+from solve_board.models import SolveRun
+# from solve_board.consumers import ws_add
 
 # String used to specify all filter
 text_all='All'
@@ -66,8 +63,8 @@ def get_work_copies(department, week):
     work_copies = ScheduledCourse.objects \
                     .filter(
                         period_filter,
-                        cours__module__train_prog__department=department) \
-                    .values_list('copie_travail', flat=True) \
+                        course__module__train_prog__department=department) \
+                    .values_list('work_copy', flat=True) \
                     .distinct()     
     
     return list(work_copies)
@@ -76,14 +73,19 @@ def get_pulp_solvers(available=True):
     def recurse_solver_hierachy(solvers):
         for s in solvers:
             if available:
-                if s().available():
-                    yield s
+                try:
+                    if s().available():
+                        yield s
+                except pulp.PulpSolverError:
+                    # cf in pulp: pulp/apis/choco_api.py l38
+                    # CHOCO solver poorly handled
+                    pass
             else:
                 yield s
 
             yield from recurse_solver_hierachy(s.__subclasses__())
     
-    solvers = pulp_solvers.LpSolver_CMD.__subclasses__()
+    solvers = pulp.LpSolver_CMD.__subclasses__()
     return tuple(recurse_solver_hierachy(solvers))
 
 
@@ -116,7 +118,8 @@ def get_context(department, year, week, train_prog=None):
     #
     #   Get contextual datas
     #
-    params = {'week':int(week), 'year':int(year)}
+    week_object = Week.objects.get(nb=week, year=year)
+    params = {'week': week_object}
 
     # Get constraints
     if train_prog and not train_prog == text_all:
@@ -125,7 +128,7 @@ def get_context(department, year, week, train_prog=None):
     constraints = get_constraints_viewmodel(department, **params)
 
     # Get working copy list
-    work_copies = get_work_copies(department, int(week))
+    work_copies = get_work_copies(department, week_object)
 
     context = { 
         'constraints': constraints,
@@ -135,14 +138,14 @@ def get_context(department, year, week, train_prog=None):
     return context
 
 
-@staff_member_required
+@dept_admin_required
 def fetch_context(req, train_prog, year, week, **kwargs):
 
     context = get_context(req.department, year, week, train_prog)
     return HttpResponse(json.dumps(context), content_type='text/json')
 
 
-@staff_member_required
+@dept_admin_required
 def main_board(req, **kwargs):
 
     department = req.department
@@ -168,8 +171,9 @@ def main_board(req, **kwargs):
                    }
     
     # Get contextual datas (constraints, work_copies)
-    data_context = get_context(department, year=week_list[0][0], week=week_list[0][1])
-    view_context.update({ k:json.dumps(v) for k, v in data_context.items()})
+    if len(week_list) > 0:
+        data_context = get_context(department, year=week_list[0][0], week=week_list[0][1])
+        view_context.update({ k:json.dumps(v) for k, v in data_context.items()})
     
     return TemplateResponse(req, 'solve_board/main-board.html', view_context)
 

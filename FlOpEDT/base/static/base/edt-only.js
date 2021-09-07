@@ -25,175 +25,229 @@
   ---- VARIABLES ----
   -------------------*/
 
-var user = {nom: usna,
-	    dispos: [],
-	    dispos_bu: [],
-	    dispos_type: [],
-	   };
+var user = {
+  name: usna,
+  dispos: [],
+  dispos_bu: [],
+  dispos_type: [],
+};
 
-var margin = {top: tv_svg_top_m, left: 30, right: 0, bot:0};
 
-var svg = {height: tv_svg_h - margin.top - margin.bot, width: tv_svg_w - margin.left - margin.right};
+dsp_svg.margin = {
+  top: tv_svg_top_m,
+  left: 30,
+  right: 0,
+  bot: 0
+};
 
-var week = semaine_init ;
-var year = an_init;
+dsp_svg.h = tv_svg_h - dsp_svg.margin.top - dsp_svg.margin.bot;
+dsp_svg.w = tv_svg_w - dsp_svg.margin.left - dsp_svg.margin.right;
+
+let week = week_init;
+let year = year_init;
 
 // filter the right bknews
-weeks = {sel: [0], init_data: [{semaine: week, an: year}]};
+
+wdw_weeks.add_full_weeks([{ week: week, year: year }]);
+
+var days_header = new WeekDayHeader(svg, "edt-fg", week_days, true, null);
+
+var hours_header = new HourHeader(svg, "edt-fg", hours);
 
 
-var labgp = {height: tv_gp_h, width: tv_gp_w, tot: 8, height_init: 40, width_init: 30};
+var labgp = { width: tv_gp_w, tot: 8, height_init: 40, width_init: 30 };
 
-dim_dispo.height = 2*labgp.height ;
+scale = tv_gp_s;
+
+dim_dispo.height = 2 * labgp.height;
 
 dragListener = d3.drag();
 
 
-pref_only = false ;
+pref_only = false;
 
 
 /*-------------------
   ------ BUILD ------
   -------------------*/
 
+// to be cleaned!
+dsp_svg.cadastre = [
+  // menus ground
+  ["svg", "meg"],
+  // weeks ground
+  ["svg", "wg"],
+  ["wg", "wg-bg"],
+  ["wg", "wg-fg"],
+  // selection categories button ground
+  ["svg", "catg"],
+  // semaine type ground
+  ["svg", "stg"],
+  // dispos info ground
+  ["svg", "dig"],
+  // valider
+  ["svg", "vg"],
+  // background, middleground, foreground, dragground
+  ["svg", "edtg"],
+  ["edtg", "edt-bg"],
+  ["edtg", "edt-mg"],
+  ["edtg", "edt-fig"],
+  ["edtg", "edt-fg"],
+  // selection ground
+  ["svg", "selg"],
+  // context menus ground
+  ["svg", "cmg"],
+  ["cmg", "cmpg"],
+  ["cmg", "cmtg"],
+  // drag ground
+  ["svg", "dg"]
+];
 
 
-create_general_svg(true);
+
+svg = new Svg(dsp_svg.layout_tree, true);
+svg.create_container();
+svg.create_layouts(dsp_svg.cadastre);
 
 
-d3.json(groupes_fi,
- 	on_group_rcv_light);
+
+file_fetch.groups.callback = function () {
+
+  create_groups(this.data);
+
+  create_edt_grid();
+
+  //    go_promo(promo_display);
 
 
+  //update_all_groups();
 
-function on_group_rcv_light(dg) {
 
-    create_groups(dg);
+  create_bknews();
 
-//    go_promo(promo_display);
-    go_promo_gp_init();
-    update_all_groups();
+  go_promo_gp_init();
 
-    create_edt_grid();
+  fetch_cours_light();
+  fetch_bknews_light();
+  //adapt_labgp(true);
+  fetch_status.groups_ok = true;
+  //go_edt(true);
+  create_grid_data();
 
-    create_bknews();
-    
+  if (nbRows > 1) {
+    hours_header.hours.clear() ;
+    hours_header.hours.add_times(Object.keys(rev_constraints));
+    hours_header.hours.add_times(
+      Object.keys(rev_constraints).map(function(r){
+        return +r + rev_constraints[r];
+      }));
+    let t = department_settings.time ;
+    hours_header.hours.add_times([
+      t.day_start_time,
+      t.lunch_break_start_time,
+      t.lunch_break_finish_time,
+      t.day_finish_time
+    ]);
+  }
 
-    fetch_cours_light();
-    fetch_bknews_light();
-    //go_edt(true);
-}
+};
 
 
 
 function fetch_cours_light() {
-    fetch.ongoing_cours_pl  = true ;
-    fetch.cours_ok  = false;
+  fetch_status.ongoing_cours_pl = true;
+  fetch_status.cours_ok = false;
 
-    fetch.done = false ;
-    ack.edt="";
-    
-    var semaine_att = week;
-    var an_att = year;
+  fetch_status.done = false;
+  ack.edt = "";
 
-    $.ajax({
-        type: "GET", //rest Type
-        dataType: 'text',
-        url: url_cours_pl+"/"+an_att+"/"+semaine_att+"/0",
-        async: false,
-        contentType: "text/csv",
-        success: function (msg, ts, req) {
-	    version = +req.getResponseHeader('version');
+  var week_att = week;
+  var year_att = year;
 
-	    
-	    var day_arr = JSON.parse(req.getResponseHeader('jours').replace(/\'/g,'"'));
-	    for (var i =0 ; i<day_arr.length ; i++){
-	    	data_grid_scale_day[i] = data_grid_scale_day_init[i]+ " "+day_arr[i];
-	    }
-	    
-	    cours_pl = d3.csvParse(msg, translate_cours_pl_from_csv);
-	    
-	    
-	    fetch.ongoing_cours_pl=false;
-	    fetch_ended_light();
-        },
-	error: function(msg) {
-	    console.log("error");
-	}
-    });
+  $.ajax({
+    type: "GET", //rest Type
+    dataType: 'text',
+    accepts: {
+      text: 'application/json'
+    },
+    url: build_url(
+      url_cours_pl,
+      context_dept,
+      {'week': week, 'year': year, 'work_copy': 0}
+    ),
+    async: false,
+    contentType: "text/csv",
+    success: function (msg, ts, req) {
+
+      const parsed_msg = JSON.parse(msg);
+
+      tutors.pl = [];
+      modules.pl = [];
+      salles.pl = [];
+
+      cours_pl = [] ;
+      parsed_msg.forEach(function(sched_course) {
+        translate_cours_pl_from_json(sched_course, cours_pl);
+      });
+
+      fetch_status.ongoing_cours_pl = false;
+      fetch_ended(true);
+    },
+    error: function (msg) {
+      console.log("error");
+    }
+  });
 
 
 }
 
 function fetch_bknews_light(first) {
-    fetch.ongoing_bknews = true;
-    var semaine_att = week;
-    var an_att = year;
+  fetch_status.ongoing_bknews = true;
+  var exp_week = new Week(year, week);
+  let context = {dept: department};
+  exp_week.add_to_context(context);
 
-    $.ajax({
-        type: "GET", //rest Type
-        dataType: 'text',
-        url: url_bknews + an_att + "/" + semaine_att,
-        async: true,
-        contentType: "text/json",
-        success: function(msg) {
-            //console.log(msg);
+  $.ajax({
+    type: "GET", //rest Type
+    dataType: 'text',
+    url: build_url(url_bknews, context),
+    async: true,
+    contentType: "text/json",
+    success: function (msg) {
+      //console.log(msg);
 
-            bknews.cont = JSON.parse(msg) ;
+      bknews.cont = JSON.parse(msg);
 
-            if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
-                an_att == weeks.init_data[weeks.sel[0]].an) {
-		var max_y = -1 ;
-		for (var i = 0 ; i < bknews.cont.length ; i++) {
-		    if (bknews.cont[i].y > max_y) {
-			max_y = bknews.cont[i].y ;
-		    }
-		}
-		bknews.nb_rows = max_y + 1 ;
-
-		//adapt_labgp(first);
-		// if (first) {
-		//     create_but_scale();
-
-		// }
-
-		
-		
-                fetch.ongoing_bknews = false;
-                fetch_ended_light();
-            }
-        },
-        error: function(msg) {
-            console.log("error");
-            show_loader(false);
+      var sel_week = wdw_weeks.get_selected();
+      if (Week.compare(sel_week, exp_week) == 0) {
+        var max_y = -1;
+        for (var i = 0; i < bknews.cont.length; i++) {
+          if (bknews.cont[i].y > max_y) {
+            max_y = bknews.cont[i].y;
+          }
         }
-    });
+        bknews.nb_rows = max_y + 1;
+
+        fetch_status.ongoing_bknews = false;
+        fetch_ended(true);
+      }
+
+    },
+    error: function (msg) {
+      console.log("error");
+      show_loader(false);
+    }
+  });
 
 
 }
 
+d3.json(build_url(rooms_fi, context_dept),
+  function (d) { main('rooms', d); });
 
+d3.json(build_url(constraints_fi, context_dept),
+  function (d) { main('constraints', d); });
 
-function fetch_ended_light() {
-    if(!fetch.ongoing_cours_pl &&
-       !fetch.ongoing_cours_pp){
-	cours = cours_pl.concat(cours_pp);
-	clean_prof_displayed();
-	fetch.cours_ok=true;
-    }
-    
-    if (!fetch.ongoing_cours_pp &&
-	!fetch.ongoing_cours_pl &&
-	!fetch.ongoing_dispos &&
-        !fetch.ongoing_bknews){
-	fetch.done = true ;
+d3.json(build_url(groupes_fi, context_dept),
+  function (d) { main('groups', d); });
 
-	go_grid(true);
-	go_courses(true);
-	go_bknews(true);
-    }
-
-    svg_cont.append("g")
-	.attr("id","lay-final");
-
-}

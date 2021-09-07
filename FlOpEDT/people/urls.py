@@ -3,29 +3,31 @@
 # This file is part of the FlOpEDT/FlOpScheduler project.
 # Copyright (c) 2017
 # Authors: Iulian Ober, Paul Renaud-Goud, Pablo Seban, et al.
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
 # published by the Free Software Foundation, either version 3 of the
 # License, or (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful, but
 # WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 # Affero General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Affero General Public
 # License along with this program. If not, see
 # <http://www.gnu.org/licenses/>.
-# 
+#
 # You can be released from the requirements of the license by purchasing
 # a commercial license. Buying such a license is mandatory as soon as
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
+from django.urls import path
 from django.conf.urls import url, include
 from django.contrib.auth import views as auth_views
 from django.urls import reverse_lazy
+from django.views.generic.base import RedirectView
 from people.student import AddStudent, ChangeStudent
 from people.tutor import AddFullStaffTutor, AddSupplyStaffTutor, AddBIATOSTutor
 from people.tutor import ChangeFullStaffTutor, ChangeSupplyStaffTutor, ChangeBIATOSTutor
@@ -101,7 +103,27 @@ urlpatterns = [
     url(r'^change/biatos/$',
         ChangeBIATOSTutor.as_view(),
         name="change_BIATOS"),
-	url(r'^fetch_tutors/$',
+    url(r'^fetch_tutors/$',
         views.fetch_tutors,
         name="fetch_tutors"),
+    url(r'^fetch_preferences_group/$',
+        views.fetch_preferences_group,
+        name="fetch_preferences_group"),
+    url(r'^fetch_preferences_students/$',
+        views.fetch_preferences_students,
+        name="fetch_preferences_students"),
+    path('fetch_user_preferred_links/<str:department>',
+         views.fetch_user_preferred_links,
+         name='fetch_user_preferred_links'),
+    url(r'^student_preferences/$',
+        views.student_preferences,
+        name="student_preferences"),
+    path('create-user', views.create_user, name="create_user"),
+    path('profile/', RedirectView.as_view(pattern_name="index", permanent=False)),
+    path('fetch_physical_presence/<str:department>/<int:year>/<int:week>',
+         views.fetch_physical_presence,
+         name='fetch_physical_presence'),
+    path('change_physical_presence/<int:year>/<int:week>/<str:user>',
+         views.change_physical_presence,
+         name='change_physical_presence')
     ]

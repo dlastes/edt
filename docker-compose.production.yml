@@ -4,55 +4,63 @@ services:
 
   memcached:
     image: memcached
-    ports:
-      - "11211"
 
   db:
     restart: always
     image: postgres
     env_file:
+      - ./docker/env/db.env
       - ./docker/env/db.prod.env
-    expose:
-      - "5432"
+    volumes:
+      - "db-data:/var/lib/postgresql/data"
+      - "db-backup:/backup"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
 
   nginx:
     restart: always
     image: "nginx"
     ports:
-      - "80:80"
+      - "${PORT-80}:80"
     volumes:
       - ./docker/nginx/conf.d:/etc/nginx/conf.d
       - static-volume:/static
-    links:
+    depends_on:
       - web
 
   redis:
     image: redis:latest
-
+ 
   web:
-    #restart: always
+    restart: always
+    image:  localhost:5000/${COMPOSE_PROJECT_NAME:-edt_pro_web}
     build: 
       context: .
       args:
-        CONFIG: production
-    env_file: 
+        CONFIG: production    
+    env_file:
+      - ./docker/env/db.env
+      - ./docker/env/db.prod.env      
       - ./docker/env/web.env
-      - ./docker/env/db.prod.env
       - ./docker/env/web.prod.env
-      - ./docker/env/secret.env
     environment:
       - DJANGO_SETTINGS_MODULE=FlOpEDT.settings.production
       - START_SERVER=${START_SERVER:-on}
       - DJANGO_LOADDATA
       - CONFIG=production
-    expose:
-      - "8000"
     volumes:
       - static-volume:/code/FlOpEDT/static
+      - media-volume:/code/FlOpEDT/media
     depends_on:
       - db
       - redis      
+      - memcached
     entrypoint: /code/docker/script/init.sh  
 
 volumes:
+  media-volume:
   static-volume:
+  db-data:
+  db-backup:

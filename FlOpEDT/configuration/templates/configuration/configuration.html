@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %} EDT {% endblock %}
+{% block content %}
+    {% load static %}
+    {% load i18n %}
+    <link rel="stylesheet" href="{% static 'configuration/style.css' %}"/>
+    <script>
+        var departements = {{ departements|safe }};
+    </script>
+    <h1>{% trans "Step 1 - Database configuration (teachers, groups, rooms, course types, etc.)" %}</h1>
+    <h2>{% trans "Option A: Using a spreadsheet file" %}</h2>
+    <div class="step">
+        <h3>{% trans "Configuration file canvas" %}</h3>
+        <p>{% trans "Download and then complete the file below." %}</p>
+            {% trans "Click to download the configuration file" %}
+            <a href="{% url "configuration:dl_config" %}"><button id="btn_config_1">{% trans "Download"%}</button></a>
+    </div>
+
+    <div class="step">
+        <h3>{% trans "Configuration file completed" %}</h3>
+        <p>{% trans "Upload the completed configuration file." %}<br>
+        {% trans "Only xlsx format is accepted."%}</p>
+        <form action="{% url "configuration:ul_config" %}" method="post" enctype="multipart/form-data" id="config">
+                {% csrf_token %}
+            <fieldset>
+                <label>{% trans "Department" %}</label><br>
+                <input type="radio" name="radio_creations" value="1" required><span>{% trans "Create" %}</span>
+                <input type="radio" name="radio_creations" value="2" required><span>{% trans "Edit" %}</span><br>
+                <div id="depart_choice"></div>
+                {{ form_config }}
+                <input type="submit" value={% trans "Import" %}>
+            </fieldset>
+        </form>
+
+        <div id="error_config">
+          <h4>{% trans "Verdict :"%}</h4>
+          <p></p>
+        </div>
+    </div>
+    <h2>{% trans "Option B: With Flopeditor" %}</h2>
+    <div class="step">
+      <p><a href="{% url 'flopeditor:flopeditor-home' %}">{% trans "Click here" %}</a> {% trans " to go to Flopeditor."%} <br>
+      {% trans "If you need help, you can consult the Flopeditor documentation on " %} <a href="{% url 'flopeditor:flopeditor-help' %}">{% trans "this page." %}</a>.</p>
+    </div>
+
+    <h1>{% trans "Step 2 - Plan the lessons (which lesson in which week, which teacher gives which lesson)" %}</h1>
+    <div class="step">
+    <h3>{% trans "Template for the planning file from the configuration file" %}</h3>
+        <p>{% trans "Download and then complete the file below." %}</p>
+        {% trans "Click to download the planning file outline" %}
+        <form action="{% url "configuration:dl_planif" %}">
+        <select name="departement"  id="dropdown_dpt_1">
+            {% for depart in departements %}
+                <option value={{ depart.abbrev }} >{{ depart.name }}</option>
+            {% endfor %}
+        </select>
+        <input id="btn_dl_planif" type="submit" value={% trans "Download" %}>
+        </form>
+    </div>
+
+    <div class="step">
+<!--        <form action="/configuration/import_planif_file/" method="post" enctype="multipart/form-data" id="config_2">-->
+        <fieldset>
+            <legend> <h3>{% trans "Completed planning file" %}</h3> </legend>
+            <p>{% trans "Upload the completed planning file." %} ({% trans "Only xlsx format is accepted." %})</p>
+            <form action="{% url "configuration:ul_planif" %}" method="post" enctype="multipart/form-data" id="planif">
+                {% csrf_token %}
+                <select name="departement" id="dropdown_dpt_2">
+                    {% for depart in departements %}
+                        <option value={{ depart.abbrev }} >{{ depart.name }}</option>
+                    {% endfor %}
+                </select>
+                </br></br>
+                {{ form_planif }}
+                </br></br>
+                <input type="checkbox" name="from_week"/> {% trans "From week" %} <input type="number" name="week_nb" style="width: 40px" min="1" max="53">
+                {% trans "year" %} <input type="number" name="year" style="width: 60px" min="{{current_year}}" max="{{current_year|add:"1"}}">
+                {% comment %}
+                {% trans "Until week" %}
+                <input type="number" name="week_end" style="width: 40px" value="{{ date_fin.semaine }}" min="1" max="53">, {% trans "year" %}
+                <input type="number" name="year_end" style="width: 60px" value="{{ date_fin.an }}" min="{{current_year}}" max="{{current_year|add:"1"}}">
+                {% endcomment %}
+                </br></br>
+                <input type="checkbox" name="stabilize"/> <span>{% trans "Stabilization ?" %}</span>
+                </br></br>
+                <input type="submit" value={% trans "Import" %}>
+            </form>
+        </fieldset>
+        <div id="error_planif">
+          <h4>{% trans "Verdict :" %}</h4>
+          <p></p>
+        </div>
+    </div>
+
+<script type="text/javascript" src="{% static 'configuration/configuration.js' %}"></script>
+{% endblock %}

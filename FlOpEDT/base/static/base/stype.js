@@ -24,32 +24,91 @@
 
 // Redefinition of some variables
 
-var margin = {top: 50,  left: 100, right: 10, bot:10};
+dsp_svg.margin = { top: 50, left: 50, right: 10, bot: 10 };
 
-var svg = {height: 625 - margin.top - margin.bot, width: 680 - margin.left - margin.right};
+dsp_svg.h = 625 - dsp_svg.margin.top - dsp_svg.margin.bot;
+dsp_svg.w = 900 - dsp_svg.margin.left - dsp_svg.margin.right;
 
-// check ack -> ack.edt ?
+dsp_svg.cadastre = [
+  // dispos info ground
+  ["svg", "pmg"],
+  // valider
+  ["svg", "vg"],
+  // background, middleground, foreground, dragground
+  ["svg", "edtg"],
+  ["edtg", "edt-bg"],
+  ["edtg", "edt-mg"],
+  ["edtg", "edt-fg"],
+  // context menus ground
+  ["svg", "cmg"],
+  ["cmg", "cmpg"],
+  ["cmg", "cmtg"],
+  // drag ground
+  ["svg", "dg"]
+];
 
-smiley.tete = 13 ;
 
-var data_grid_scale_day = ["LUNDI","MARDI","MERCREDI","JEUDI","VENDREDI"];
+var mode = "tutor";
 
-dim_dispo.width  = 80 ;
-dim_dispo.height = 80 ;
-dim_dispo.mh = 10 ;
-dim_dispo.plot = 1 ;
-
-ckbox["dis-mod"].cked = true ;
-
-pref_only = true ;
+var dd_selections = {
+  'tutor': { value: logged_usr.name },
+  'prog': { value: '' },
+  'type': { value: '' },
+  'room': { value: '' }
+};
 
 
 
+smiley.tete = 8;
+
+dim_dispo.width = 80;
+dim_dispo.height = 500;
+dim_dispo.mh = 10;
+dim_dispo.plot = 1;
+nbRows = 1;
+scale = dim_dispo.height / nb_minutes_in_grid();
+pref_selection.choice.w = 35;
+pref_selection.choice.h = 35;
 
 
-create_general_svg_pref_only();
-create_dh_keys();
-create_lunchbar();
+ckbox["dis-mod"].cked = true;
+
+pref_only = true;
+var pref_fetched = false ;
+
+svg = new Svg(dsp_svg.layout_tree, false);
+svg.create_container(true);
+svg.create_layouts(dsp_svg.cadastre);
+
+var days_header = new WeekDayHeader(svg, "edt-fg", week_days, false, null);
+
+// overwrite functions for headers
+function WeekDayMixStype() {
+  this.gsckd_x = function (datum, i) {
+    return i * (dim_dispo.width + dim_dispo.mh)
+      + dim_dispo.width * .5;
+  };
+  this.gsckd_y = function (datum) {
+    return - 20;
+  };
+  this.gsckd_txt = function (d) {
+    return d.name;
+  };
+  this.gsckh_x = function (datum) {
+    return - dim_dispo.width;
+  };
+}
+Object.assign(days_header.mix, new WeekDayMixStype());
+hard_bind(days_header.mix);
+
+var hours_header = new HourHeader(svg, "edt-fg", hours);
+
+var labgp = {width: 0};
+
+hours_header.create_indicator();
+
+go_days(true, false);
+create_pref_modes(pref_only);
 fetch_pref_only();
 
 
@@ -57,106 +116,151 @@ fetch_pref_only();
 
 
 function create_lunchbar() {
-    fg
-	.append("line")
-	.attr("class","lunchbar")
-	.attr("stroke","black")
-	.attr("stroke-width",6)
-	.attr("x1",0)
-	.attr("y1",gsclb_y)
-	.attr("x2",gsclb_x)
-	.attr("y2",gsclb_y);
+  svg.get_dom("edt-fg")
+    .append("line")
+    .attr("class", "lunchbar")
+    .attr("stroke", "black")
+    .attr("stroke-width", 6)
+    .attr("x1", 0)
+    .attr("y1", gsclb_y)
+    .attr("x2", gsclb_x)
+    .attr("y2", gsclb_y);
 
-}
-
-function create_general_svg_pref_only() {
-    svg_cont = d3.select("body").select("[id=\"svg\"]").append("svg")
-	.attr("width",svg.width)
-	.attr("height",svg.height)
-	.attr("text-anchor","middle")
-	.append("g")
-	.attr("transform","translate("+margin.left + "," + margin.top + ")");
-
-    create_layouts_pref_only(svg_cont);
-}
-
-
-function create_layouts_pref_only(svg_cont){
-
-
-    // valider
-    vg = svg_cont.append("g")
-	.attr("id","lay-vg");
-    
-    // background, middleground, foreground, dragground
-    var edtg = svg_cont.append("g")
-        .attr("id", "lay-edtg");
-    bg = edtg.append("g")
-        .attr("id", "lay-bg");
-    mg = edtg.append("g")
-        .attr("id", "lay-mg");
-    // fig = edtg.append("g")
-    //     .attr("id", "lay-fig");
-    fg = edtg.append("g")
-        .attr("id", "lay-fg");
-
-    // context menus ground
-    var cmg = svg_cont.append("g")
-        .attr("id", "lay-cmg");
-    cmpg = cmg.append("g")
-	.attr("id", "lay-cmpg");
-    cmtg = cmg.append("g")
-	.attr("id", "lay-cmtg");
-    
-    // drag ground
-    dg = svg_cont.append("g")
-        .attr("id", "lay-dg");
-
-    
 }
 
 
 /*---------------------
   ------- DISPOS ------
   ---------------------*/
-function fetch_pref_only() {
-    show_loader(true);
-    $.ajax({
-        type: "GET", //rest Type
-        dataType: 'text',
-        url: url_fetch_stype ,
-        async: false,
-        contentType: "text/csv",
-        success: function (msg) {
-	    console.log(msg);
-	    
-	    console.log("in");
-
-	    dispos[user.nom] = new Array(nbPer);
-	    for(var i=0 ; i<nbPer ; i++) {
-		dispos[user.nom][i] = new Array(nbSl);
-		dispos[user.nom][i].fill(-1);
-	    }
-	    d3.csvParse(msg, translate_dispos_from_csv);
-	    create_dispos_user_data();
-	    fetch.dispos_ok = true ;
-	    go_pref(true);
-            show_loader(false);
-	    
-        },
-	error: function(xhr, error) {
-	    console.log("error");
-	    console.log(xhr);
-	    console.log(error);
-	    console.log(xhr.responseText);
-            show_loader(false);
-	    // window.location.href = url_login;
-	    //window.location.replace(url_login+"?next="+url_stype);
-	}
-    });
+function fetch_url() {
+  switch (mode) {
+  case 'tutor':
+    return build_url(url_user_pref_default, {user: user.name});
+  case 'course':
+    return build_url(
+      url_fetch_course_dweek,
+      {
+        dept: department,
+        train_prog: dd_selections['prog'].value,
+        course_type: dd_selections['type'].value
+      }
+    );
+  case 'room':
+    return build_url(url_fetch_room_dweek, {room: user.name});
+  }
 }
 
 
+function course_type_prog_name(prog, ctype) {
+  return prog + '--' + ctype;
+}
+
+
+function translate_course_preferences_from_csv(d) {
+  var pseudo_tutor = course_type_prog_name(d.train_prog, d.course_type);
+
+  if (Object.keys(dispos).indexOf(pseudo_tutor) == -1) {
+    dispos[pseudo_tutor] = {};
+    week_days.forEach(function (day) {
+      dispos[pseudo_tutor][day.ref] = [];
+    });
+  }
+  dispos[pseudo_tutor][d.day].push({
+    start_time: +d.start_time,
+    duration: +d.duration,
+    value: +d.value
+  });
+}
+
+
+function translate_room_preferences_from_csv(d) {
+  var i;
+  if (Object.keys(dispos).indexOf(d.room) == -1) {
+    dispos[d.room] = {};
+    week_days.forEach(function (day) {
+      dispos[d.room][day.ref] = [];
+    });
+  }
+  dispos[d.room][d.day].push({
+    start_time: +d.start_time,
+    duration: +d.duration,
+    value: +d.value,
+  });
+}
+
+
+function translate_pref_from_csv(d) {
+  switch (mode) {
+  case 'tutor':
+    return translate_dispos_from_csv(d);
+  case 'course':
+    return translate_course_preferences_from_csv(d);
+  case 'room':
+    return translate_room_preferences_from_csv(d);
+  }
+}
+
+
+
+function fetch_pref_only() {
+  show_loader(true);
+  $.ajax({
+    type: "GET",
+    headers: {Accept: 'text/csv'},
+    dataType: 'text',
+    url: fetch_url(),
+    async: false,
+    success: function (msg) {
+      console.log(msg);
+
+      console.log("in");
+      dispos = {};
+      user.dispos_type = [];
+      user.dispos_type = d3.csvParse(msg, translate_pref_from_csv);
+      create_dispos_user_data();
+      pref_fetched = true ;
+      arrange_stype_layout() ;
+      go_pref(true);
+      show_loader(false);
+    },
+    error: function (xhr, error) {
+      console.log("error");
+      console.log(xhr);
+      console.log(error);
+      console.log(xhr.responseText);
+      show_loader(false);
+      // window.location.href = url_login;
+      //window.location.replace(url_login+"?next="+url_stype);
+    }
+  });
+}
+
+
+function arrange_stype_layout() {
+  open_lunch() ;
+  hours_header.update() ;
+  svg.get_dom('pmg').attr("transform", "translate(" + pmg_x() + ", 0)") ;
+  let max_time = department_settings.time.day_finish_time ;
+  user.dispos.forEach(function(d) {
+    let end = d.start_time + d.duration ;
+    if (end > max_time) {
+      max_time = end ;
+    }
+  });
+  d3.select("#edt-main")
+    .attr(
+      "height",
+      dispo_y({start_time: max_time}) + dsp_svg.margin.bot + dsp_svg.margin.top
+    )
+    .attr(
+      "width",
+      dsp_svg.margin.left
+        + pmg_x()
+        + pref_mode_choice_trans_x()
+        + pref_selection.choice.w
+        + pref_selection.marx
+    );
+}
 
 
 
@@ -174,26 +278,22 @@ function fetch_pref_only() {
 
 
 function dispo_x(d) {
-    return d.day * (dim_dispo.width + dim_dispo.mh) ;
+  return week_days.day_by_ref(d.day).num * (dim_dispo.width + dim_dispo.mh);
 }
-function dispo_h(d){
-    return dim_dispo.height;
+function dispo_h(d) {
+  return d.duration * scale;
 }
-function gsckd_x(datum,i) {
-    return  i*(dim_dispo.width + dim_dispo.mh)
-	+ dim_dispo.width * .5;
+
+
+
+function gsclb_y() {
+  return dispo_y({
+    start_time:
+      department_settings.time.lunch_break_start_time
+  });
 }
-function gsckd_y(datum) {
-    return  - .25 * dim_dispo.height ;
-}
-function gsckh_x(datum) {
-    return - dim_dispo.width ;
-}
-function gsclb_y()  {
-    return dim_dispo.height * .5 * nbSl;
-}
-function gsclb_x()  {
-    return (dim_dispo.width + dim_dispo.mh) * nbPer - dim_dispo.mh ;
+function gsclb_x() {
+  return (dim_dispo.width + dim_dispo.mh) * week_days.nb_days() - dim_dispo.mh;
 }
 
 
@@ -202,126 +302,124 @@ function gsclb_x()  {
 
 
 d3.select("body")
-    .on("click", function(d) {
-	if(dispo_menu_appeared) {
-	    del_dispo_adv = true ;
-	    dispo_menu_appeared = false ;
-	    go_pref(true);
-	} else {
-	    if(del_dispo_adv) {
-		del_dispo_adv = false ;
-		data_dispo_adv_cur = [] ;
-		go_pref(true);
-	    }
-	}
-    })
+  .on("click", function (d) {
+    cancel_cm_adv_preferences();
+    cancel_cm_room_tutor_change();
+  });
 
 
 
-
-
-
-function rearrange_dispos(save) {
-    var changes = [] ;
-    var i =0;
-    
-    for(var j = 0 ; j<nbPer ; j++) {
-	for(var k = 0 ; k<nbSl ; k++) {
-	    if(!save ||
-	       user.dispos[i].val != user.dispos_bu[i].val) {
-		changes.push({ day: j, hour: k, val:user.dispos[i].val});
-	    }
-		i+=1;
-	}
-    }
-
-    user.dispos_bu = user.dispos.slice(0);
-    
-    return changes ;
+// compute url to send preference changes to
+// according to mode
+function send_url(year, week) {
+  switch (mode) {
+  case 'tutor':
+    return url_user_pref_changes + year + "/" + week
+      + "/" + user.name;
+  case 'course':
+    return url_course_pref_changes + year + "/" + week
+      + "/" + dd_selections['prog'].value
+      + "/" + dd_selections['type'].value;
+  case 'room':
+    return url_room_pref_changes + year + "/" + week
+      + "/" + user.name;
+  }
 }
 
 
 function apply_stype_from_button(save) {
-    console.log("app");
-//    console.log(document.forms['app']);
-    console.log();
-    var changes = rearrange_dispos();
-    var sent_data = {} ;
-    sent_data['changes'] = JSON.stringify(changes) ; 
 
-    var se_deb,an_deb,se_fin,an_fin;
-    var an, se;
-    var se_abs_max = 53;
-    var se_min, se_max;
+  var changes = [];
+  compute_pref_changes(changes);
+  var sent_data = {};
+  sent_data['changes'] = JSON.stringify(changes);
 
-    if(save){
-	se_deb = 0 ;
-	console.log(annee_courante);
-	an_deb = +annee_courante ;
-	se_fin = se_deb ;
-	an_fin = an_deb ;
+  var week_st, year_st, week_end, year_end;
+  var year, se;
+  var se_abs_max = 53;
+  var se_min, se_max;
+
+  if (save) {
+    week_st = 0;
+    console.log(current_year);
+    year_st = +current_year;
+    week_end = week_st;
+    year_end = year_st;
+  } else {
+    week_st = +document.forms['app'].elements['week_st'].value;
+    year_st = +document.forms['app'].elements['year_st'].value;
+    week_end = +document.forms['app'].elements['week_end'].value;
+    year_end = +document.forms['app'].elements['year_end'].value;
+  }
+
+
+  if (year_st < year_end ||
+    (year_st == year_end && week_st <= week_end)) {
+
+
+    if (changes.length == 0) {
+      ack.pref = "RAS";
+      document.getElementById("ack").textContent = ack.pref;
     } else {
-	se_deb = +document.forms['app'].elements['se_deb'].value ;
-	an_deb = +document.forms['app'].elements['an_deb'].value ;
-	se_fin = +document.forms['app'].elements['se_fin'].value ;
-	an_fin = +document.forms['app'].elements['an_fin'].value ;
+
+      ack.pref = "Ok ";
+      if (save) {
+        ack.pref += "semaine type";
+      } else {
+        ack.pref += "week " + week_st + " année " + year_st
+          + " à week " + week_end + " année " + year_end;
+      }
+
+
+      for (year = year_st; year <= year_end; year++) {
+        if (year == year_st) {
+          se_min = week_st;
+        } else {
+          se_min = 1;
+        }
+        if (year == year_end) {
+          se_max = week_end;
+        } else {
+          se_max = se_abs_max;
+        }
+
+        for (se = se_min; se <= se_max; se++) {
+
+          //console.log(se,year);
+          show_loader(true);
+          $.ajax({
+            url: send_url(year, se),
+            type: 'POST',
+            //			contentType: 'application/json; charset=utf-8',
+            data: sent_data, //JSON.stringify(changes),
+            dataType: 'json',
+            success: function (msg) {
+              if (msg.status != 'OK') {
+                ack.pref = msg.more;
+              }
+              document.getElementById("ack").textContent = ack.pref;
+              show_loader(false);
+            },
+            error: function (msg) {
+              ack.pref = 'Pb communication serveur';
+              document.getElementById("ack").textContent = ack.pref;
+              show_loader(false);
+            }
+          });
+        }
+      }
     }
 
+  } else {
+    ack.pref = "Problème : seconde week avant la première";
+    document.getElementById("ack").textContent = ack.pref;
+  }
 
-    if (an_deb<an_fin ||
-        (an_deb==an_fin && se_deb<=se_fin)){
 
-
-	if(changes.length==0) {
-    	    ack = "RAS";
-	} else {
-
-	    for (an=an_deb ; an<=an_fin ; an++){
-		if(an==an_deb){
-		    se_min = se_deb;
-		} else {
-		    se_min = 1;
-		}
-		if(an==an_fin){
-		    se_max = se_fin;
-		} else {
-		    se_max = se_abs_max;
-		}
-		
-		for (se=se_min ; se<=se_max ; se++) {
-
-		    //console.log(se,an);
-    		    $.ajax({
-    			url: url_dispos_changes
-			    + "?s=" + se
-			    + "&a=" + an
-			    + "&u=" + user.nom,
-			type: 'POST',
-//			contentType: 'application/json; charset=utf-8',
-			data: sent_data, //JSON.stringify(changes),
-			dataType: 'json',
-    			success: function(msg) {
-
-    			},
-    			error: function(msg){
-
-    			}
-    		    });
-		}
-	    }
-	    ack = "Ok ";
-	    if(save){
-		ack += "semaine type";
-	    } else {
-		ack += "semaine "+se_deb+" année "+an_deb
-		    +" à semaine "+se_fin+" année "+an_fin;
-	    }
-	}
-
-    } else {
-	ack = "Problème : seconde semaine avant la première";
-    }
-
-    document.getElementById("ack").textContent = ack ;
-     
 }
+
+d3.select("html")
+  .on("mouseup", function(d) {
+    pref_selection.start = null ;
+    go_pref(true);
+  });

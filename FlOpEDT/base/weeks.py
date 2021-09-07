@@ -24,9 +24,34 @@
 # Week numbers issues helper
 # ---------------------------
 
+from django.utils.translation import gettext_lazy as _
+
 import datetime
 
-annee_courante = 2018
+import base.models
+
+days_infos = {
+    'm' :{'shift': 0, 'slug': _('Mon.')},
+    'tu':{'shift': 1, 'slug': _('Tue.')},
+    'w' :{'shift': 2, 'slug': _('Wed.')},
+    'th':{'shift': 3, 'slug': _('Thu.')},
+    'f' :{'shift': 4, 'slug': _('Fri.')},
+    'sa':{'shift': 5, 'slug': _('Sat.')},
+    'su':{'shift': 6, 'slug': _('Sun.')}
+}
+
+
+def get_current_school_year():
+    now = datetime.datetime.now()
+    # TODO find a alternative way to test the swap month
+    if now.month <= 7:
+        school_year = now.year - 1
+    else:
+        school_year = now.year
+    return school_year
+
+
+current_year = actual_year = get_current_school_year()
 
 
 # monday of Week #2
@@ -47,39 +72,52 @@ def current_week():
     if now.weekday() > 4:
         now = now + datetime.timedelta(2)
     delta = now - mond
-    return {'semaine': 2 + (delta.days // 7), 'an': now.year}
+    return {'week': 2 + (delta.days // 7), 'year': now.year}
 
 
 # list of days
-def num_days(y, w):
+def num_all_days(y, w, dept):
     if w == 0:
         return []
-    cur_day = monday_w2(y) + datetime.timedelta(7 * (w - 2))
+    monday = monday_w2(y) + datetime.timedelta(7 * (w - 2))
     day_list = []
-    for d in range(5):
-        day_list.append("%02d/%02d" % (cur_day.day, cur_day.month))
-        cur_day += datetime.timedelta(1)
+    dept_day_list = base.models.TimeGeneralSettings.objects.get(department=dept).days
+    iday = 0
+    for d_ref in dept_day_list:
+        cur_day = monday + datetime.timedelta(days_infos[d_ref]['shift'])
+        day_list.append({'num':iday,
+                         'date':f"{cur_day.day:02d}/{cur_day.month:02d}",
+                         'ref':d_ref,
+                         'name':days_infos[d_ref]['slug']})
+        iday += 1
     return day_list
-
 
 # More or less working weeks
 def week_list():
     li = []
-    if annee_courante == 2017:
+    if actual_year == 2017:
         for i in list(range(36, 44)) + list(range(45, 52)):
-            li.append({'semaine': i, 'an': 2017})
+            li.append({'week': i, 'year': 2017})
         for i in list(range(2, 9)) + list(range(10, 16)) + list(range(18, 31)):
-            li.append({'semaine': i, 'an': 2018})
+            li.append({'week': i, 'year': 2018})
         return li
-    elif annee_courante == 2018:
+    elif actual_year == 2018:
         for i in list(range(36, 44)) + list(range(45, 52)):
-            li.append({'semaine': i, 'an': 2018})
+            li.append({'week': i, 'year': 2018})
         for i in list(range(2, 10)) + list(range(11, 17)) + list(range(19, 31)):
-            li.append({'semaine': i, 'an': 2019})
+            li.append({'week': i, 'year': 2019})
         return li
     else:
-        for i in list(range(36, 44)) + list(range(45, 52)):
-            li.append({'semaine': i, 'an': annee_courante})
-        for i in list(range(2, 10)) + list(range(11, 17)) + list(range(19, 31)):
-            li.append({'semaine': i, 'an': annee_courante+1})
+        # should start 1 week before the first week
+        for i in list(range(35, 53)):
+            li.append({'week': i, 'year': actual_year})
+        for i in list(range(1, 31)):
+            li.append({'week': i, 'year': actual_year+1})
         return li
+
+
+def year_by_week(week):
+    if week > 36:
+        return current_year
+    else:
+        return current_year + 1

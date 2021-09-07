@@ -32,41 +32,22 @@ maximisent la satisfaction générale.
 - Un solveur de ILP, e.g. [CBC](https://projects.coin-or.org/Cbc), [Gurobi](gurobi.com)
 - [Redis](https://redis.io) pour le cache de Django (optionnel)
 
-## Lancement de l'application dans Docker
+## Installation et lancement de l'application
+Voir le wiki du projet [ici](https://framagit.org/flopedt/FlOpEDT/-/wikis/home).
 
-Après l'installation de `docker` et `docker-compose`, lancez la
-commande suivante :
+Vous y trouverez une procédure de lancement 
+[via Docker](https://framagit.org/flopedt/FlOpEDT/-/wikis/installation-linux#installation-et-lancement-sous-docker)
+(pour un test ne nécessitant pas d'installation) et le processus
+à suivre pour une [installation de l'application](https://framagit.org/flopedt/FlOpEDT/-/wikis/installation-linux).
 
-`make start` (`make stop` pour arrêter l'application)
+Vous y trouverez également la documentation pour 
+[déployer l'application sur un serveur](https://framagit.org/flopedt/FlOpEDT/-/wikis/deploiement), 
+et pour [définir votre base de données](https://framagit.org/flopedt/FlOpEDT/-/wikis/import)
+à partir de tableurs à remplir à la main.
 
-(En cas de
 
-`ERROR: Couldn't connect to Docker daemon at http+docker://localhost - is it running?`
-
-songez à une exécution en `sudo`.)
-
-L'application sera accessible à l'adresse http://localhost:8000.
-
-Vous pouvez importer le fichier [dump.json](./dump.json) (qui est une
-base pour jouer avec l'interface) avec la commande :
-
-`make init` 
-
-Vous pourrez alors vous connecter avec l'utilisateur `MOI` et le mot
-de passe `passe`. Cet utilisateur possède les droits associés aux
-responsables des emplois du temps. Pour la vision d'une personne
-enseignante classique, utiliser l'un des autres login (En fait, tous
-les utilisateurs ont le même mot de passe `passe` !).
-
-Les paramètres de la configuration courante se trouvent dans
-`FlOpEDT/settings`. Par défaut, on utilise la configuration
-`development`. On peut spécifier une autre configuration en modifiant
-la variable d'environnement `CONFIG` comme suit :
-
-`CONFIG=production make [build|init|start|stop]`
-
-Dans cet exemple de configuration pour un environnement de production, il est nécessaire de définir la variable `SECRET_KEY=your_very_secret_key` dans le fichier `/docker/env/secret.env`.
-
+## Interface de programmation (API) REST
+Voir [la documentation dédiée](./FlOpEDT/api/README.md)
 
 ## Contributions
 - [Discuter](https://framateam.org/flopedt/)

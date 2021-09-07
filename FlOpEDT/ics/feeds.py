@@ -6,8 +6,19 @@ from django_ical.views import ICalFeed
 
 from django.core.exceptions import ObjectDoesNotExist
 
-from base.models import ScheduledCourse, Room, Group
+from base.models import ScheduledCourse, Room, Group, Day, Department, Regen
 from people.models import Tutor
+
+from django.http import HttpResponse, Http404
+from django.utils.http import http_date
+from calendar import timegm
+
+def str_groups(c):
+    groups = c.groups.all()
+    gp_str = ', '.join([f'{g.train_prog.abbrev} {g.name}'
+                        for g in groups])
+    plural = len(groups) > 1
+    return gp_str, plural
 
 
 class EventFeed(ICalFeed):
@@ -16,34 +27,40 @@ class EventFeed(ICalFeed):
     """
     product_id = 'flop'
     timezone = 'Europe/Paris'
+    days = [abbrev for abbrev,_ in Day.CHOICES]
 
     def item_title(self, scourse):
-        course = scourse.cours
-        return (f'{course.module.abbrev} {course.type.name} '
-                f'- {course.groupe.train_prog.abbrev} G{course.groupe.nom}'
-        )
+        course = scourse.course
+        gp_str, plural = str_groups(course)
+        return (f'{course.module.abbrev} {course.type.name} - ' + gp_str)
 
     def item_description(self, scourse):
         location = scourse.room.name if scourse.room is not None else ''
-        course = scourse.cours
-        tutor = course.tutor
-        return (f'Cours : {course.module.abbrev} {course.type.name}\n'
-                f'Groupe : {course.groupe.train_prog.abbrev} {course.groupe.nom}\n'
-                f'Enseignant : {tutor}\nSalle : {location}'
-        )
+        course = scourse.course
+        tutor = scourse.tutor
+        ret = f'Cours : {course.module.abbrev} {course.type.name}\n'
+        gp_str, plural = str_groups(course)
+        ret += 'Groupe'
+        if plural:
+            ret += 's'
+        ret += ' : '
+        ret += gp_str
+        ret += f'\nEnseignant·e : {tutor}\n'
+        ret += f'Salle : {location}'
+        return ret
 
     def item_start_datetime(self, scourse):
-        course = scourse.cours
+        course = scourse.course
         begin = datetime.combine(
-            Week(course.an, course.semaine)\
-            .day(scourse.creneau.jour_id-1),
+            Week(course.week.year, course.week.nb)\
+            .day(self.days.index(scourse.day)),
             datetime.min.time()) \
-            + timedelta(hours=scourse.creneau.heure.hours,
-                        minutes=scourse.creneau.heure.minutes)
+            + timedelta(minutes=scourse.start_time)
         return begin
 
     def item_end_datetime(self, scourse):
-        end = self.item_start_datetime(scourse) + timedelta(minutes=scourse.creneau.duration)
+        end = self.item_start_datetime(scourse) \
+            + timedelta(minutes=scourse.course.type.duration)
         return end
 
     def item_link(self, s):
@@ -51,58 +68,91 @@ class EventFeed(ICalFeed):
 
 
 class TutorEventFeed(EventFeed):
-    def get_object(self, request, department, tutor):
-        return Tutor.objects.get(username=tutor)
+    def get_object(self, request, department, tutor_id):
+        return Tutor.objects.get(id=tutor_id)
 
     def items(self, tutor):
-        return ScheduledCourse.objects.filter(cours__tutor=tutor, copie_travail=0).order_by('-cours__an','-cours__semaine')
+        return ScheduledCourse.objects.filter(tutor=tutor, work_copy=0)\
+                                      .order_by('-course__week__year','-course__week__nb')
 
     def item_title(self, scourse):
-        course = scourse.cours
+        course = scourse.course
         location = scourse.room.name if scourse.room is not None else ''
+        gp_str, plural = str_groups(course)
         return (f'{course.module.abbrev} {course.type.name} '
-                f'- {course.groupe.train_prog.abbrev} G{course.groupe.nom} '
+                f'- {gp_str} '
                 f'- {location}'
         )
 
+
 class RoomEventFeed(EventFeed):
-    def get_object(self, request, department, room):
-        try:
-            room_o = Room.objects.get(name=room)
-        except ObjectDoesNotExist:
-            try:
-                room_o = Room.objects.get(name=room.replace('_',' '))
-            except ObjectDoesNotExist:
-                return []
-        return room_o.subroom_of.all()
+    def get_object(self, request, department, room_id):
+        return Room.objects.get(id=room_id).and_subrooms()
 
     def items(self, room_groups):
-        return ScheduledCourse.objects.filter(room__in=room_groups, copie_travail=0).order_by('-cours__an','-cours__semaine')
+        return ScheduledCourse.objects\
+                              .filter(room__in=room_groups, work_copy=0) \
+            .order_by('-course__week__year', '-course__week__nb')
 
     def item_title(self, scourse):
-        course = scourse.cours
+        course = scourse.course
+        gp_str, plural = str_groups(course)
         return (f'{course.module.abbrev} {course.type.name} '
-                f'- {course.groupe.train_prog.abbrev} G{course.groupe.nom}'
-                f'- {course.tutor.username}'
+                f'- {gp_str} '
+                f'- {scourse.tutor.username}'
         )
 
 
 class GroupEventFeed(EventFeed):
-    def get_object(self, request, department, training_programme, group):
-        print(department, training_programme, group)
-        gp = Group.objects.get(nom=group,
-                               train_prog__abbrev=training_programme)
+    def get_object(self, request, department, group_id):
+        gp = Group.objects.get(id=group_id)
         gp_included = gp.ancestor_groups()
         gp_included.add(gp)
         return gp_included
 
     def items(self, groups):
-        return ScheduledCourse.objects.filter(cours__groupe__in=groups, copie_travail=0).order_by('-cours__an','-cours__semaine')
+        return ScheduledCourse.objects\
+                              .filter(course__groups__in=groups, work_copy=0) \
+            .order_by('-course__week__year', '-course__week__nb')
 
     def item_title(self, scourse):
-        course = scourse.cours
+        course = scourse.course
         location = scourse.room.name if scourse.room is not None else ''
         return (f'{course.module.abbrev} {course.type.name} '
-                f'- {course.tutor.username} '
+                f'- {scourse.tutor.username} '
                 f'- {location}'
         )
+
+
+class RegenFeed(ICalFeed):
+    """
+    A simple regen calender : one event per regeneration
+    """
+    product_id = 'flop'
+    timezone = 'Europe/Paris'
+    # TODO !
+
+    def get_object(self, request, department, dep_id):
+        dep = Department.objects.get(id=dep_id)
+        return [dep]
+
+    def items(self, departments):
+        return Regen.objects.filter(department__in=departments)\
+            .exclude(full=False, stabilize=False).order_by('-week__year','-week__nb')
+
+    def item_title(self, regen):
+        return f"flop!EDT - {regen.department.abbrev} : {regen.strplus()}"
+
+    def item_description(self, regen):
+        return self.item_title(regen)
+
+    def item_start_datetime(self, regen):
+        begin = Week(regen.week.year, regen.week.nb).day(0)
+        return begin
+
+    def item_end_datetime(self, regen):
+        end = Week(regen.week.year, regen.week.nb).day(len(regen.department.timegeneralsettings.days))
+        return end
+
+    def item_link(self, s):
+        return str(s.id)

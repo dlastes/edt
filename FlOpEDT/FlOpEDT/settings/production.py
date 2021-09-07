@@ -35,21 +35,27 @@ DATABASES = {
 }
 
 REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
-REDIS_BACKEND = f'redis://{REDIS_HOST}:6379/1'
+REDIS_PORT = os.environ.get('REDIS_PORT', '6379')
+REDIS_BACKEND = f'redis://{REDIS_HOST}:{REDIS_PORT}/1'
+
+CACHE_MACHINE_USE_REDIS = True
 
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [(REDIS_HOST, 6379)],
+            "hosts": [(REDIS_HOST, REDIS_PORT)],
         },
     },
 }
 
+CACHE_HOST = os.environ.get("CACHE_HOST", "localhost")
+CACHE_PORT = os.environ.get("CACHE_PORT", "11211")
+
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-        'LOCATION': f'{os.environ.get("CACHE_HOST", "localhost")}:11211',
+        'LOCATION': f'{CACHE_HOST}:{CACHE_PORT}',
     }
 }
 
@@ -91,6 +97,3 @@ ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS','localhost').split(',')
 
 SECRET_KEY = os.environ['SECRET_KEY']
 
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, "static")
-STATICFILES_DIRS = ()

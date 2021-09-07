@@ -25,25 +25,64 @@
 
 from django import forms
 from people.models import Tutor, FullStaff
+from base.models import Module, EnrichedLink
+from django.utils.translation import gettext as _
 
 
 class ContactForm(forms.Form):
-    sender = forms.EmailField(label='Votre adresse mail :')
+    sender = forms.EmailField(label=_('Your e-mail address :'),
+                              required=True)
     recipient = forms.CharField(
-        label='Destinataire :',
+        label=_('Recipient :'),
         max_length=4,
-        help_text="Acronyme : 4 caractères max")
+        help_text=_("Pseudo : 4 characters max"))
     subject = forms.CharField(
-        label='Sujet du mail :',
+        label=_('Subject of the e-mail :'),
         max_length=100,
-        help_text="100 caractères max")
-    message = forms.CharField(label='Corps du mail :',
+        help_text=_("100 characters max"))
+    message = forms.CharField(label=_('Body of the message :'),
                               max_length=2000,
                               widget=forms.Textarea())
 
     def clean_recipient(self):
         recipient = self.cleaned_data['recipient']
         if not Tutor.objects.filter(username=recipient).exists():
-            raise forms.ValidationError("Cette personne n'existe pas.")
+            raise forms.ValidationError(_("This person doesn't exist."))
         return recipient
 
+
+class PerfectDayForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        super(PerfectDayForm, self).__init__(*args, **kwargs)
+        self.fields['pref_hours_per_day'] =\
+            forms.IntegerField(label=_("Ideally"),
+                               min_value=1,
+                               max_value=9,
+                               required=False,
+                               initial=4)
+        self.fields['max_hours_per_day'] = \
+            forms.IntegerField(label=_("Maximum"),
+                               min_value=1,
+                               max_value=9,
+                               required=False,
+                               initial=6)
+
+
+class ModuleDescriptionForm(forms.ModelForm):
+
+    def __init__(self, module, dept, *args, **kwargs):
+        # first call parent's constructor
+        super(ModuleDescriptionForm, self).__init__(*args, **kwargs)
+        m = Module.objects.get(train_prog__department=dept, abbrev=module)
+        self.fields['description'].initial = m.description
+
+
+    class Meta:
+        model = Module
+        fields = ['description']
+
+
+class EnrichedLinkForm(forms.ModelForm):
+    class Meta:
+        model = EnrichedLink
+        fields = '__all__'

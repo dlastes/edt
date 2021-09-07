@@ -23,9 +23,81 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-
-
-
 from django.shortcuts import render
+from django.http import HttpResponse, JsonResponse
 
-# Create your views here.
+from base.models import ScheduledCourse, Week
+
+from TTapp.TTUtils import get_conflicts
+
+from TTapp.admin import GroupsLunchBreakResource
+from TTapp.TTConstraints.orsay_constraints import GroupsLunchBreak
+
+from MyFlOp import MyTTUtils
+
+from django.utils.translation import gettext as _
+
+            
+def available_work_copies(req, department, year, week):
+    '''
+    Send the content of the side panel.
+    '''
+    copies = list(ScheduledCourse.objects.filter(course__week__year=year, course__week__nb=week,
+                                                 course__type__department__abbrev=department).distinct('work_copy')
+                  .values_list('work_copy'))
+    copies = [n for (n,) in copies]
+    copies.sort()
+    return JsonResponse({'copies': copies})
+
+
+def check_swap(req, department, year, week, work_copy):
+    '''
+    Check whether the swap between scheduled courses with work copy
+    work_copy and scheduled courses with work copy 0 is feasible
+    against the scheduled courses in other departments
+    '''
+    print(department, week, year, work_copy)
+    week_o = Week.objects.get(nb=week, year=year)
+    return JsonResponse(get_conflicts(department, week_o, work_copy))
+
+
+def swap(req, department, year, week, work_copy):
+    '''
+    Swap scheduled courses with work copy work_copy
+    against scheduled courses with work copy 0
+    '''
+    return JsonResponse(MyTTUtils.swap_version(department, week, year, work_copy))
+
+
+def delete_work_copy(req, department, year, week, work_copy):
+    '''
+    Delete scheduled courses with work copy work_copy
+    '''
+    return JsonResponse(MyTTUtils.delete_work_copy(department, week, year, work_copy), safe=False)
+
+
+def delete_all_unused_work_copies(req, department, year, week):
+    '''
+    Delete scheduled courses with work copy work_copy
+    '''
+    return JsonResponse(MyTTUtils.delete_all_unused_work_copies(department, week, year), safe=False)
+
+
+def duplicate_work_copy(req, department, year, week, work_copy):
+    '''
+    Duplicate scheduled courses with work copy work_copy in the first work_copy available
+    '''
+    return JsonResponse(MyTTUtils.duplicate_work_copy(department, week, year, work_copy), safe=False)
+
+
+def reassign_rooms(req, department, year, week, work_copy):
+    '''
+    Reassign rooms of scheduled courses with work copy work_copy
+    '''
+    return JsonResponse(MyTTUtils.reassign_rooms(department, week, year, work_copy))
+
+
+def fetch_group_lunch(req, **kwargs):
+    dataset = GroupsLunchBreakResource().export(
+        GroupsLunchBreak.objects.filter(department=req.department))
+    return HttpResponse(dataset.csv)

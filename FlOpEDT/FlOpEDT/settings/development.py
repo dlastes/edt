@@ -36,17 +36,19 @@ DATABASES = {
 }
 
 REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
-REDIS_BACKEND = f'redis://{REDIS_HOST}:6379/1'
+REDIS_PORT = os.environ.get('REDIS_PORT', '6379')
+REDIS_BACKEND = f'redis://{REDIS_HOST}:{REDIS_PORT}/1'
+
+CACHE_MACHINE_USE_REDIS = True
 
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [(REDIS_HOST, 6379)],
+            "hosts": [(REDIS_HOST, REDIS_PORT)],
         },
     },
 }
-# "ROUTING": "solve_board.routing.channel_routing",
 
 LOGGING = {  
     'version': 1,  
@@ -83,5 +85,3 @@ SECRET_KEY = 'al0bzdna)@6&n9mfn_vlm0wl&38#xrf@h%&^^h-q783g$e&*h!'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
-ALLOWED_HOSTS = []

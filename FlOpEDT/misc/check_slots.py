@@ -1,4 +1,4 @@
-# coding: utf8
+# coding: utf-8
 # -*- coding: utf-8 -*-
 
 # This file is part of the FlOpEDT/FlOpScheduler project.
@@ -53,8 +53,8 @@ def assign_day_time_numbers():
         for si in range(len(slot_list) - 1):
             prev_sl = slot_list[si]
             next_sl = slot_list[si + 1]
-            if prev_sl.heure.hours*60 + prev_sl.heure.minutes + prev_sl.duration \
-               > next_sl.heure.hours*60 + next_sl.heure.minutes :
+            if prev_sl.hour.hours*60 + prev_sl.hour.minutes + prev_sl.duration \
+               > next_sl.hour.hours*60 + next_sl.hour.minutes :
                 raise Exception("Intersection between slot %s and %s is non empty" % prev_sl, next_sl)
 
         

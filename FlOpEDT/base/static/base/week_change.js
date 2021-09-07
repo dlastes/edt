@@ -43,117 +43,350 @@
 /*---------------------
   ------- DISPOS ------
   ---------------------*/
-function fetch_dispos() {
 
-    fetch.ongoing_dispos = true;
-
-    var semaine_att = weeks.init_data[weeks.sel[0]].semaine;
-    var an_att = weeks.init_data[weeks.sel[0]].an;
-    
-    show_loader(true);
-    $.ajax({
-        type: "GET", //rest Type
-        dataType: 'text',
-        url: url_dispos + an_att + "/" + semaine_att ,
-        async: true,
-        contentType: "text/csv",
-        success: function(msg) {
-            console.log("in");
-//            console.log(msg);
-
-            if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
-                an_att == weeks.init_data[weeks.sel[0]].an) {
-                dispos = [];
-                //user.dispos = [];
-                d3.csvParse(msg, translate_dispos_from_csv);
-
-                fetch.ongoing_dispos = false;
-                if (ckbox["dis-mod"].cked) {
-                    create_dispos_user_data();
-                }
-
-                fetch_ended();
-            }
-            show_loader(false);
+// fetch all tutor preferences
+function fetch_tutor_preferences() {
 
 
-        },
-        error: function(xhr, error) {
-            console.log("error");
-            console.log(xhr);
-            console.log(error);
-            console.log(xhr.responseText);
-            show_loader(false);
-            // window.location.href = url_login;
-            window.location.replace(url_login + "?next=" + url_edt + an_att + "/" + semaine_att);
+  fetch_status.ongoing_dispos = true;
+
+  var exp_week = wdw_weeks.get_selected();
+  let context = {dept: department};
+  exp_week.add_to_context(context);
+
+  show_loader(true);
+  $.ajax({
+    type: "GET", //rest Type
+    headers: {Accept: 'text/csv'},
+    dataType: 'text',
+    url: build_url(url_user_pref, context),
+    async: true,
+    success: function (msg) {
+      var sel_week = wdw_weeks.get_selected();
+      if (Week.compare(exp_week, sel_week) == 0) {
+        dispos = {};
+        //user.dispos = [];
+        d3.csvParse(msg, translate_dispos_from_csv);
+        sort_preferences(dispos);
+        fetch_status.ongoing_dispos = false;
+        fetch_status.pref_saved = true;
+        if (ckbox["dis-mod"].cked) {
+          create_dispos_user_data();
+          open_lunch() ;
+          go_edt(false);
+          create_pref_modes();
         }
-    });
+
+        fetch_ended(false);
+      }
+      show_loader(false);
+
+
+    },
+    error: function (xhr, error) {
+      console.log("error");
+      console.log(xhr);
+      console.log(error);
+      console.log(xhr.responseText);
+      show_loader(false);
+      // window.location.href = url_login;
+      window.location.replace(url_login + "?next=" + url_edt + exp_week.year + "/" + exp_week.week);
+    }
+  });
 }
 
 
 function translate_dispos_from_csv(d) {
-    // when merge with no-slot, take no-slot version
-    if(Object.keys(dispos).indexOf(d.prof)==-1){
-        dispos[d.prof] = new Array(nbPer);
-        for (var i = 0; i < nbPer; i++) {
-            dispos[d.prof][i] = new Array(nbSl);
-            dispos[d.prof][i].fill(-1);
-        }
+  if (Object.keys(dispos).indexOf(d.user) == -1) {
+    dispos[d.user] = {};
+    week_days.forEach(function (day) {
+      dispos[d.user][day.ref] = [];
+    });
+  }
+  if(Object.keys(week_days.day_dict).includes(d.day)) {
+    dispos[d.user][d.day].push({
+      start_time: +d.start_time,
+      duration: +d.duration,
+      value: +d.value
+    });
+  }
+}
+
+
+// if there exist tutor preferences that would be cut 
+function open_lunch() {
+  let t = department_settings.time ;
+  if (Object.keys(t.bu).length > 0) {
+    return ;
+  }
+  let during_lunch = user.dispos.filter(function(d){
+    return !(d.start_time + d.duration <= t.lunch_break_start_time
+             || d.start_time >= t.lunch_break_finish_time) ;
+  });
+  if (during_lunch.length > 0) {
+    t.bu.lunch_break_finish_time = t.lunch_break_finish_time ;
+    t.lunch_break_finish_time = t.lunch_break_start_time ;
+  }
+  let min_start = t.day_start_time ;
+  user.dispos.forEach(function(d){
+    if (d.start_time < min_start) {
+      min_start = d.start_time ;
     }
-    dispos[d.prof][+d.jour][+d.heure] = +d.valeur;
+  });
+  if (min_start < t.day_start_time) {
+    t.bu.day_start_time = t.day_start_time ;
+    t.day_start_time = min_start ;
+  }
+  let max_finish = t.day_finish_time ;
+  user.dispos.forEach(function(d){
+    if (d.start_time + d.duration > max_finish) {
+      max_finish = d.start_time + d.duration ;
+    }
+  });
+  if (max_finish > t.day_finish_time) {
+    t.bu.day_finish_time = t.day_finish_time ;
+    t.day_finish_time = max_finish ;
+  }
+}
+
+
+// fetch the moments where a tutor teaches in another departement
+function fetch_tutor_extra_unavailability() {
+
+  let exp_week = wdw_weeks.get_selected();
+
+  show_loader(true);
+  $.ajax({
+    type: "GET", //rest Type
+    dataType: 'text',
+    url: build_url(
+      url_fetch_extra_sched, context_dept, exp_week.as_context(),
+      {'username': user.name}),
+    async: true,
+    contentType: "text/csv",
+    success: function (msg) {
+      //console.log(msg);
+      var sel_week = wdw_weeks.get_selected();
+      if (Week.compare(exp_week, sel_week) == 0) {
+        extra_pref.tutors = {};
+        d3.csvParse(msg, translate_extra_pref_tut_from_csv);
+        sort_preferences(extra_pref.tutors);
+        var tutors = Object.keys(extra_pref.tutors);
+        for (i = 0; i < tutors.length; i++) {
+          var busy_days = Object.keys(extra_pref.tutors[tutors[i]]);
+          for (d = 0; d < busy_days.length; d++) {
+            fill_holes(extra_pref.tutors[tutors[i]][busy_days[d]], 1);
+          }
+        }
+      }
+      show_loader(false);
+
+    },
+    error: function (xhr, error) {
+      console.log("error");
+      console.log(xhr);
+      console.log(error);
+      console.log(xhr.responseText);
+      show_loader(false);
+      // window.location.href = url_login;
+      window.location.replace(url_login + "?next=" + url_edt + exp_week.url());
+    }
+  });
 }
 
 
 
+
+function translate_extra_pref_tut_from_csv(d) {
+  if (Object.keys(extra_pref.tutors).indexOf(d.tutor) == -1) {
+    extra_pref.tutors[d.tutor] = {};
+    for (var i = 0; i < days.length; i++) {
+      extra_pref.tutors[d.tutor][days[i].ref] = [];
+    }
+  }
+  extra_pref.tutors[d.tutor][d.day].push({
+    start_time: +d.start_time,
+    duration: +d.duration,
+    value: 0
+  });
+}
+
+
+function sort_preferences(pref) {
+  var i, d;
+  var tutors_or_rooms = Object.keys(pref);
+  for (i = 0; i < tutors_or_rooms.length; i++) {
+    week_days.forEach(function (day) {
+      pref[tutors_or_rooms[i]][day.ref].sort(
+        function (a, b) {
+          return a.start_time - b.start_time;
+        }
+      );
+    });
+  }
+}
+
+// insert a valued interval into a list of valued interval
+// (splices it and divides it if needed)
+// pref: {start_time, duration, value}
+// list: list of pref
+function insert_interval(pref, list) {
+  var ts = department_settings.time;
+
+  // starts too early or finishes too late
+  if (pref.start_time < ts.day_start_time) {
+    pref.duration -= ts.day_start_time - pref.start_time;
+    pref.start_time = ts.day_start_time;
+  }
+  if (pref.start_time + pref.duration > ts.day_finish_time) {
+    pref.duration -= pref.start_time + pref.duration - ts.day_finish_time;
+  }
+
+  // lunch break
+  if (pref.start_time < ts.lunch_break_start_time) {
+    // starts in the morning
+    if (pref.start_time + pref.duration > ts.lunch_break_start_time) {
+      if (pref.start_time + pref.duration < ts.lunch_break_finish_time) {
+        // finishes during lunch break
+        pref.duration -= pref.start_time + pref.duration - ts.lunch_break_start_time;
+      } else {
+        // cut by lunch break
+        insert_normalized_interval(
+          {
+            start_time: ts.lunch_break_finish_time,
+            duration: pref.start_time + pref.duration - ts.lunch_break_finish_time,
+            value: pref.value
+          },
+          list);
+        pref.duration = ts.lunch_break_start_time - pref.start_time;
+      }
+    }
+  } else if (pref.start_time + pref.duration < ts.lunch_break_finish_time) {
+    // fully within lunch break
+    return;
+  } else if (pref.start_time < ts.lunch_break_finish_time) {
+    // starts during lunch break
+    pref.duration -= ts.lunch_break_finish_time - pref.start_time;
+    pref.start_time = ts.lunch_break_finish_time;
+  }
+  insert_normalized_interval(pref, list);
+}
+
+// PRECOND: interval fully within the working hours
+// pref: {start_time, duration, value}
+// list: list of pref
+function insert_normalized_interval(pref, list) {
+  //    list.splice(index, nbElements, item)
+  list.push(pref);
+}
+
+
+function allocate_dispos(tutor) {
+  dispos[tutor] = {};
+  week_days.forEach(function (day) {
+    dispos[tutor][day.ref] = [];
+  });
+}
+
+// -- no slot --
+// --  begin  --
+// to change, maybe, if splitting intervals is not allowed
+// in the interface
+function fill_missing_preferences(tutor, ts) {
+  week_days.forEach(function (day) {
+    var current = ts.day_start_time;
+    var next;
+    while (current < ts.day_finish_time) {
+      if (current < ts.lunch_break_start_time) {
+        next = Math.min(
+          current + ts.def_pref_duration,
+          ts.lunch_break_start_time);
+      } else {
+        next = Math.min(
+          current + ts.def_pref_duration,
+          ts.day_finish_time);
+      }
+      insert_interval(
+        {
+          start_time: current,
+          duration: next - current,
+          value: -1
+        },
+        dispos[tutor][day.ref]
+      );
+      if (next == ts.lunch_break_start_time) {
+        next = ts.lunch_break_finish_time;
+      }
+      current = next;
+    }
+  });
+
+}
+// --   end   --
+// -- no slot --
+
+
+// -- no slot --
+// --  begin  --
+// to be cleaned: user.dispos should be avoidable
 // off: offset useful for the view. Quite unclean.
 function create_dispos_user_data() {
 
-    var d, j, k, d2p;
+  var d, j, k, d2p, pref_list;
+  var ts = department_settings.time;
 
-    user.dispos = [];
-    user.dispos_bu = [];
+  user.dispos = [];
+  user.dispos_bu = [];
 
-    var current;
+  var current;
 
-    if (dispos[user.nom] === undefined) {
-        dispos[user.nom] = new Array(nbPer);
-        for (var i = 0; i < nbPer; i++) {
-            dispos[user.nom][i] = new Array(nbSl);
-            dispos[user.nom][i].fill(-1);
+  if (dispos[user.name] === undefined) {
+    allocate_dispos(user.name);
+    fill_missing_preferences(user.name, ts);
+    sort_preferences(dispos);
+  }
+
+  week_days.day_list.forEach(function (day) {
+    pref_list = dispos[user.name][day.ref];
+    for (var k = 0; k < pref_list.length; k++) {
+      d2p = {
+        day: day.ref,
+        start_time: pref_list[k].start_time,
+        duration: pref_list[k].duration,
+        value: pref_list[k].value,
+        off: -1
+      };
+      user.dispos_bu.push(d2p);
+      if (pref_list[k].value < 0) {
+        if (!pref_only) {
+          let default_pref = get_dispos_type(d2p);
+          if (default_pref != null) {
+            pref_list[k].value = default_pref.value;
+          } else {
+            pref_list[k].value = 0 ;
+          }
+        } else {
+          pref_list[k].value = par_dispos.nmax;
         }
+      }
+
+      // different object
+      user.dispos.push({
+        day: day.ref,
+        start_time: pref_list[k].start_time,
+        duration: pref_list[k].duration,
+        value: pref_list[k].value,
+        off: -1
+      });
     }
 
+  });
 
-    for (var j = 0; j < nbPer; j++) {
-        for (var k = 0; k < nbSl; k++) {
-            //	    if(!is_free(j,k)) {
-            d2p = {
-                day: j,
-                hour: k,
-                val: dispos[user.nom][j][k],
-                off: -1
-            };
-            user.dispos_bu.push(d2p);
-            if (dispos[user.nom][j][k] < 0) {
-		if (!pref_only) {
-                    dispos[user.nom][j][k] = user.dispos_type[day_hour_2_1D(d2p)].val;
-		} else {
-		    dispos[user.nom][j][k] = par_dispos.nmax
-		}
-                //console.log(j,k,day_hour_2_1D(d2p),user.dispos_type[day_hour_2_1D(d2p)])
-            }
-            user.dispos.push({
-                day: j,
-                hour: k,
-                val: dispos[user.nom][j][k],
-                off: -1
-            });
 
-            //	    }
-        }
-    }
 
 }
+// --   end   --
+// -- no slot --
 
 
 
@@ -172,236 +405,173 @@ function create_dispos_user_data() {
 /*----------------------
   ------ MODULES -------
   ----------------------*/
-
-function mod_dd_items() {
-
-    var high_mod = relevant_modules();
-
-    var high_items = new Array();
-    var low_items = new Array();
-    modules.all.forEach(function(m) {
-        if (high_mod.has(m)) {
-            high_items.push(m);
-        } else {
-            low_items.push(m);
-        }
-    });
-
-    return high_items.concat(low_items);
-}
-
-// Create or update the filter-by-module list.
-function create_mod_dd() {
-
-    var items = mod_dd_items();
-
-    var seldd = mog
-        .selectAll("option")
-        .data(items, function(m) {
-           return m;
-        });
-
-    seldd
-        .exit()
-        .remove();
-
-    seldd
-        .order();
-
-    seldd
-        .enter()
-        .append("option")
-        .attr("value", function(d) {
-            return d;
-        })
-        .text(function(d) {
-            return d;
-        });
-
-    mog
-        .select('option[value="' + modules.sel + '"]')
-        .attr("selected", "");
-}
-
-
-/*----------------------
-  ------ SALLES -------
-  ----------------------*/
-
-function create_sal_dd() {
-
-
-    var seldd = sag
-        .selectAll("option")
-        .data(salles.all, function(d, i) {
-            return d;
-        });
-
-    seldd
-        .enter()
-        .append("option")
-        .merge(seldd.select("option"))
-        .attr("value", function(d) {
-            return d;
-        })
-        .text(function(d) {
-            return d;
-        });
-
-    seldd.exit().remove();
-
-    seldd
-        .each(function(d, i) {
-            if (d == salles.sel) {
-                d3.select(this).attr("selected", "");
-            }
-        });
-
-
-}
-
-
 /*--------------------
   ------ PROFS -------
   --------------------*/
-function create_pr_buttons() {
-    var t = d3.transition();
-    profs.sort();
+function fetch_colors() {
+  var exp_week = wdw_weeks.get_selected();
 
-    var cont =
-        prg.selectAll(".tutor-button")
-        .data(profs, function(p) {
-            return p;
-        });
+  cours_bouge = {};
 
-    var contg = cont
-        .enter()
-        .append("g")
-        .attr("class", "tutor-button")
-        .attr("transform", "translate(" + butpr.tlx + "," + butpr.tly + ")")
-        .on("click", apply_tutor_display);
+  show_loader(true);
+  $.ajax({
+    type: "GET", //rest Type
+    dataType: 'text',
+    url: url_colors + "?week=" + exp_week.week
+      + "&year=" + exp_week.year
+      + "&work_copy=" + num_copie,
+    async: true,
+    success: function (msg, ts, req) {
+      var sel_week = wdw_weeks.get_selected();
+      if (Week.compare(exp_week, sel_week) == 0) {
+        colors = {} ;
+        d3.csvParse(msg, translate_colors_from_csv);
 
-    contg
-        .append("rect")
-        .attr("class", butpr_class)
-        .attr("width", butpr.width)
-        .attr("height", butpr.height)
-        .attr("rx", 5)
-        .attr("ry", 10)
-        .merge(cont.select("rect"))
-        .attr("x", butpr_x)
-        .attr("y", butpr_y);
+        fetch_status.ongoing_colors = false;
+        fetch_ended(false);
+      }
+      show_loader(false);
+    },
+    error: function (msg) {
+      console.log("error");
+      show_loader(false);
+    }
+  });
 
-    contg
-        .append("text")
-        .attr("class", butpr_class)
-        .text(function(d) {
-            return d;
-        })
-        .merge(cont.select("text"))
-        .attr("x", butpr_txt_x)
-        .attr("y", butpr_txt_y);
-
-    cont.exit().remove();
 }
 
-
+function translate_colors_from_csv(d) {
+  colors[d.key] = {
+    color_bg: d.color_bg,
+    color_txt: d.color_txt
+  };
+}
+// touch courses to trigger color update
+function ping_colors() {
+  cours.forEach(function(c) {
+    c.color_bg = cours_fill(c) ;
+    c.color_txt = cours_txt_fill(c);
+  });
+}
 
 /*--------------------
   ------ BKNEWS -------
   --------------------*/
 function fetch_bknews(first) {
-    fetch.ongoing_bknews = true;
+  fetch_status.ongoing_bknews = true;
 
-    var semaine_att = weeks.init_data[weeks.sel[0]].semaine;
-    var an_att = weeks.init_data[weeks.sel[0]].an;
+  var exp_week = wdw_weeks.get_selected();
+  let context = {dept: department};
+  exp_week.add_to_context(context);
 
-    show_loader(true);
-    $.ajax({
-        type: "GET", //rest Type
-        dataType: 'text',
-        url: url_bknews  + an_att + "/" + semaine_att,
-        async: true,
-        contentType: "text/csv",
-//        contentType: "text/json",
-        success: function(msg) {
-	    //            bknews.cont = JSON.parse(msg) ;
-	    bknews.cont = d3.csvParse(msg,
-				      translate_bknews_from_csv);
+  show_loader(true);
+  $.ajax({
+    type: "GET", //rest Type
+    dataType: 'text',
+    url: build_url(url_bknews, context),
+    async: true,
+    contentType: "text/csv",
+    headers: {Accept: 'text/csv'},
+    success: function (msg) {
+      bknews.cont = d3.csvParse(
+        msg,
+        translate_bknews_from_csv
+      );
 
-            if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
-                an_att == weeks.init_data[weeks.sel[0]].an) {
-		var max_y = -1 ;
-		for (var i = 0 ; i < bknews.cont.length ; i++) {
-		    if (bknews.cont[i].y > max_y) {
-			max_y = bknews.cont[i].y ;
-		    }
-		}
-		bknews.nb_rows = max_y + 1 ;
-
-		adapt_labgp(first);
-		if (first) {
-		    create_but_scale();
-
-		}
-
-		
-		
-                fetch.ongoing_bknews = false;
-                fetch_ended();
-            }
-            show_loader(false);
-        },
-        error: function(msg) {
-            console.log("error");
-            show_loader(false);
+      var sel_week = wdw_weeks.get_selected();
+      if (Week.compare(exp_week, sel_week) == 0) {
+        var max_y = -1;
+        for (var i = 0; i < bknews.cont.length; i++) {
+          if (bknews.cont[i].y > max_y) {
+            max_y = bknews.cont[i].y;
+          }
         }
-    });
+        bknews.nb_rows = max_y + 1;
 
+        adapt_labgp(first);
+        if (first) {
+          create_but_scale();
+          if (splash_id == 1) {
+
+            var splash_mail = {
+              id: "mail-sent",
+              but: { list: [{ txt: "Ok", click: function (d) { splash_id = 0; } }] },
+              com: { list: [{ txt: "E-mail envoyé !", ftsi: 23 }] }
+            };
+            splash(splash_mail);
+
+          } else if (splash_id == 2) {
+
+            var splash_quote = {
+              id: "quote-sent",
+              but: { list: [{ txt: "Ok", click: function (d) { splash_id = 0; } }] },
+              com: { list: [{ txt: "Citation envoyée ! (en attente de modération)", ftsi: 23 }] }
+            };
+            splash(splash_quote);
+
+          }
+
+        }
+
+
+
+        fetch_status.ongoing_bknews = false;
+        fetch_ended(false);
+      }
+      show_loader(false);
+    },
+    error: function (msg) {
+      console.log("error");
+      show_loader(false);
+    }
+  });
 
 }
 
-function translate_bknews_from_csv(d){
-    return {
-	id: +d.id,
-	x_beg: +d.x_beg,
-	x_end: +d.x_end,
-	y: +d.y,
-	is_linked: d.is_linked,
-	fill_color: d.fill_color,
-	strk_color: d.strk_color,
-	txt: d.txt
-    }
+function translate_bknews_from_csv(d) {
+  return {
+    id: +d.id,
+    x_beg: +d.x_beg,
+    x_end: +d.x_end,
+    y: +d.y,
+    is_linked: d.is_linked,
+    fill_color: d.fill_color,
+    strk_color: d.strk_color,
+    txt: d.txt
+  };
 }
 
 
 
 function adapt_labgp(first) {
-    var expected_ext_grid_dim = svg.height - margin.top - margin.bot ;
-    var new_gp_dim;
+  var expected_ext_grid_dim = dsp_svg.h - dsp_svg.margin.top - dsp_svg.margin.bot;
+  var new_gp_dim;
 
-    if (nbRows > 0) {
-        new_gp_dim = expected_ext_grid_dim / (nb_vert_labgp_in_grid() + nbRows) ;
-        if (new_gp_dim > labgp.hm) {
-            labgp.height = new_gp_dim;
-        } else {
-            labgp.height = labgp.hm;
-        }
-    } // sinon ?
-    svg.height = svg_height() ;
-    console.log(svg.height);
-    d3.select("#edt-main").attr("height", svg.height);
+  if (nbRows > 0) {
+    // including bottom garbage
+    scale = expected_ext_grid_dim / (nb_minutes_in_grid() + garbage.duration * nbRows);
+    // if (new_gp_dim > labgp.hm) {
+    //     labgp.height = new_gp_dim;
+    // } else {
+    //     labgp.height = labgp.hm;
+    // }
+  } // sinon ?
+  dsp_svg.h = svg_height();
+  // console.log(dsp_svg.h);
+  d3.select("#edt-main").attr("height", dsp_svg.h);
 
-    if (first) {
-	expected_ext_grid_dim = svg.width - margin.left - margin.right;
-	new_gp_dim = expected_ext_grid_dim / (rootgp_width * nbPer);
-	if (new_gp_dim > labgp.wm) {
-            labgp.width = new_gp_dim;
-	} else {
-            labgp.width = labgp.wm;
-	}
-	d3.select("#edt-main").attr("width", svg.width);
+  if (first) {
+    window.scroll(0, $("#menu-edt").height());
+    expected_ext_grid_dim = dsp_svg.w - dsp_svg.margin.left - dsp_svg.margin.right;
+    new_gp_dim = expected_ext_grid_dim / (rootgp_width * week_days.nb_days());
+    if (new_gp_dim > labgp.wm) {
+      labgp.width = new_gp_dim;
+    } else {
+      labgp.width = labgp.wm;
     }
+    dsp_svg.w = svg_width();
+    d3.select("#edt-main").attr("width", dsp_svg.w);
+  }
 
 }
 
@@ -409,475 +579,858 @@ function adapt_labgp(first) {
 /*--------------------
   ------ COURS -------
   --------------------*/
+function fetch_constraint(){
+  $.ajax({
+  type: "GET",
+  dataType: 'text',
+  url: build_url(url_ttconstraint,context_dept),
+  async: true,
+  contentType: "application/json",
+  success: function(msg){
+    data = JSON.parse(msg)
+  },
+  error: function (msg) {
+    console.log("error");
+    show_loader(false);
+  }
+  })
+};
 
 function fetch_cours() {
-    fetch.ongoing_cours_pp = true;
-    fetch.ongoing_cours_pl = true;
-    
-    var garbage_plot ;
-    
-    ack.edt = "";
-    go_ack_msg(true);
+  fetch_status.ongoing_cours_pp = true;
+  fetch_status.ongoing_cours_pl = true;
 
-    var semaine_att = weeks.init_data[weeks.sel[0]].semaine;
-    var an_att = weeks.init_data[weeks.sel[0]].an;
+  fetch_status.course_saved = false;
 
-    cours_bouge = {};
-    
-    show_loader(true);
-    $.ajax({
-        type: "GET", //rest Type
-        dataType: 'text',
-        url: url_cours_pl + an_att + "/" + semaine_att + "/" + num_copie,
-        async: true,
-        contentType: "text/csv",
-        success: function(msg, ts, req) {
+  var garbage_plot;
 
-            go_regen(null);
-            go_alarm_pref();
+  ack.more = "";
 
-            var day_arr = JSON.parse(req.getResponseHeader('jours').replace(/\'/g, '"'));
-	    
-            for (var i = 0; i < day_arr.length; i++) {
-                data_grid_scale_day[i] = data_grid_scale_day_init[i] + " " + day_arr[i];
-            }
-            //console.log(data_grid_scale_day);
-            if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
-                an_att == weeks.init_data[weeks.sel[0]].an) {
+  var exp_week = wdw_weeks.get_selected();
 
-                profs_pl = [];
-                modules.pl = [];
-                salles.pl = [];
+  cours_bouge = {};
 
-                cours_pl = d3.csvParse(msg, translate_cours_pl_from_csv);
+  show_loader(true);
+
+  // Week days
+  $.ajax({
+    type: "GET",
+    dataType: 'text',
+    url: build_url(url_weekdays, context_dept, exp_week.as_context()),
+    async: true,
+    contentType: "application/json",
+    success: function(msg, ts, req) {
+      var sel_week = wdw_weeks.get_selected();
+      if (Week.compare(exp_week, sel_week) === 0) {
+        week_days = new WeekDays(JSON.parse(msg));
+        days_header.mix.days = week_days;
+        days_header.fetch_physical_presence() ;
+      }
+    }
+  });
+
+  $.ajax({
+    type: "GET", //rest Type
+    dataType: 'text',
+    accepts: {
+      text: 'application/json'
+    },
+    url: build_url(
+      url_cours_pl,
+      context_dept,
+      exp_week.as_context(),
+      {'work_copy': num_copie}
+    ),
+    async: true,
+    success: function (msg, ts, req) {
+
+      const parsed_msg = JSON.parse(msg);
+
+      go_regen(null);
+      go_alarm_pref();
+
+      var sel_week = wdw_weeks.get_selected();
+      if (Week.compare(exp_week, sel_week) == 0) {
+
+        tutors.pl = [];
+        modules.pl = [];
+        salles.pl = [];
+
+        cours_pl = [] ;
+
+        parsed_msg.forEach(function(sched_course) {
+          translate_cours_pl_from_json(sched_course, cours_pl);
+        });
+
+        fetch_status.ongoing_cours_pl = false;
+        fetch_ended(false);
+      }
+      show_loader(false);
+    },
+    error: function (msg) {
+      console.log("error");
+      show_loader(false);
+    }
+  });
 
 
-                fetch.ongoing_cours_pl = false;
-                fetch_ended();
-            }
-            show_loader(false);
-        },
-        error: function(msg) {
-            console.log("error");
-            show_loader(false);
-        }
-    });
+
+  if (cours_pp.length > 0) {
+    garbage_plot = true;
+  } else {
+    garbage_plot = false;
+  }
 
 
+  show_loader(true);
+  $.ajax({
+    type: "GET", //rest Type
+    dataType: 'text',
+    accepts: {
+      text: 'application/json'
+    },
+    url: build_url(
+      url_cours_pp,
+      context_dept,
+      exp_week.as_context(),
+      {'work_copy': num_copie}
+    ),
+    async: true,
+    success: function (msg, ts, req) {
+      msg = JSON.parse(msg) ;
 
-    if (cours_pp.length > 0){
-	garbage_plot = true ;
+      var sel_week = wdw_weeks.get_selected();
+      if (Week.compare(exp_week, sel_week) == 0) {
+
+        tutors.pp = [];
+        modules.pp = [];
+        salles.pp = [];
+
+        // console.log(exp_week,num_copie);
+
+        cours_pp = [] ;
+        msg.forEach(function(sched_course) {
+          translate_cours_pp_from_json(sched_course, cours_pp);
+        });
+
+
+        go_grid(true);
+
+        fetch_status.ongoing_cours_pp = false;
+        fetch_ended(false);
+        show_loader(false);
+      }
+    },
+    error: function (msg) {
+      console.log("error");
+      show_loader(false);
+    }
+  });
+
+}
+
+function translate_cours_pl_from_json(d, result) {
+  if (modules.pl.indexOf(d.course.module.abbrev) === -1) {
+    modules.pl.push(d.course.module.abbrev);
+  }
+  if (salles.pl.indexOf(d.room) === -1) {
+    salles.pl.push(d.room);
+  }
+  for (let i = 0 ; i < d.course.groups.length ; i++)
+  {
+    let new_course = {
+      id_course: +d.course.id,
+      no_course: +d.course.id,
+      //        prof_full_name: d.prof_first_name + " " + d.prof_last_name,
+      group: translate_gp_name(d.course.groups[i].name),
+      promo: set_promos.indexOf(d.course.groups[i].train_prog),
+      mod: d.course.module.abbrev,
+      c_type: d.course.type,
+      day: d.day,
+      start: +d.start_time,
+      duration: constraints[d.course.type].duration,
+      room: d.room,
+      room_type: d.course.room_type,
+      display: true,
+      id_visio: d.room===null?(d.id_visio===null?-1:+d.id_visio):-1,
+      graded: d.course.is_graded
+    } ;
+
+    new_course.color_bg = 'white' ;
+    new_course.color_txt = 'black' ;
+    new_course.prof = '?' ;
+    if (department_settings.mode.cosmo!==1) {
+      new_course.prof = d.tutor ;
+      if(d.course.module !== null && d.course.module.display !== null) {
+        new_course.color_bg = d.course.module.display.color_bg ;
+        new_course.color_txt = d.course.module.display.color_txt ;
+      }
     } else {
-	garbage_plot = false ;
+      if(d.tutor !== null && d.tutor.display !== null) {
+        new_course.prof = d.tutor.username ;
+        new_course.color_bg = d.tutor.display.color_bg ;
+        new_course.color_txt = d.tutor.display.color_txt ;
+      }
     }
 
-    
-    show_loader(true);
+    if (new_course.prof != '?' &&
+        tutors.pl.indexOf(new_course.prof) === -1) {
+      tutors.pl.push(new_course.prof);
+    }
+    result.push(new_course);
+  }
+}
+
+function translate_cours_pp_from_json(d, result) {
+  if (tutors.pp.indexOf(d.tutor) === -1) {
+    tutors.pp.push(d.tutor);
+  }
+  if (modules.pp.indexOf(d.module.abbrev) === -1) {
+    modules.pp.push(d.module.abbrev);
+  }
+  if (salles.pp.indexOf(d.room) === -1) {
+    salles.pp.push(d.room);
+  }
+  for (let i = 0 ; i < d.groups.length ; i++)
+  {
+    result.push({
+      id_course: +d.id,
+      no_course: +d.no,
+      prof: d.tutor,
+      group: translate_gp_name(d.groups[i].name),
+      promo: set_promos.indexOf(d.groups[i].train_prog),
+      mod: d.module.abbrev,
+      c_type: d.type.name,
+      day: garbage.day,
+      start: garbage.start,
+      duration: constraints[d.type.name].duration,
+      room: null,
+      id_visio: -1,
+      room_type: d.room_type,
+      color_bg: d.module.display.color_bg,
+      color_txt: d.module.display.color_txt,
+      display: true,
+      graded: d.is_graded
+    });
+  }
+}
+
+
+// insert the given week in the side weeks
+function insert_side_week(week, days_, courses_) {
+  var found = side_courses.find(function (d) {
+    return Week.compare(d, week) == 0;
+  });
+  if (typeof found === 'undefined') {
+    side_courses.push({
+      week: week,
+      days: days_,
+      courses: courses_
+    });
+  }
+}
+
+// insert in week_set the week of index iweek in weeks.init_data if possible
+// return true if it hase been inserted
+function insert_in_week_set(week_set, iweek) {
+  if (iweek < 0 || iweek >= weeks.init_data.length) {
+    return false;
+  }
+  var week = weeks.init_data[iweek].week;
+  var year = weeks.init_data[iweek].year;
+  var found = week_set.find(function (d) {
+    return d.year == year && d.week == week;
+  });
+  if (typeof found === 'undefined') {
+    week_set.push({
+      year: year,
+      week: week,
+    });
+    return true;
+  }
+  return false;
+}
+
+
+// compute which weeks are needed to check the constraints
+function which_side_weeks() {
+  var week_set = new Weeks();
+  var fweeks = wdw_weeks.full_weeks;
+
+  var cur_week_index = wdw_weeks.get_iselected_pure();
+
+  // constraint: 'sleep'
+  week_set.add_by_index(fweeks, cur_week_index - 1);
+  week_set.add_by_index(fweeks, cur_week_index + 1);
+
+  // constraint: 'monthly'
+  // note: load too much if empty weeks (not in weak_year_init)
+  // until day 1 of the month of the first day of the week
+  var first_day = week_days.day_by_num(0);
+  var cur_extremum = first_day.day - 1;
+  var iextrem = cur_week_index - 1;
+  while (cur_extremum >= 1) {
+    week_set.add_by_index(fweeks, iextrem);
+    cur_extremum -= 7;
+    iextrem -= 1;
+  }
+
+  // until final day of the month of the last day of the week
+  var last_day = week_days.day_by_num(week_days.day_list.length - 1);
+  cur_extremum = last_day.day + week_jump;
+  iextrem = cur_week_index + 1;
+  while (cur_extremum <= last_day.max_days_in_month()) {
+    console.log(iextrem);
+    week_set.add_by_index(fweeks, iextrem);
+    cur_extremum += 7;
+    iextrem += 1;
+  }
+
+  return week_set;
+}
+
+
+
+function side_week_rcv(side_week) {
+  return function (msg, ts, req) {
+
+
+    var side_days = new WeekDays(JSON.parse(req.getResponseHeader('days').replace(/'/g, '"')));
+
+    side_cours_pl = [] ;
+    var side_cours_pl = d3.csvParse(
+      msg,
+      function(d) {
+        translate_cours_pl_from_csv(d, side_cours_pl) ;
+      }
+    );
+
+    insert_side_week(side_week, side_days, side_cours_pl);
+
+  };
+}
+
+
+// fetches courses of the weeks before and after the current week
+function fetch_side_weeks() {
+
+  // shunt it for now
+  var needed_weeks = [] ; // which_side_weeks();
+
+  for (var i = 0; i < needed_weeks.data.length; i++) {
+    console.log(url_cours_pl + needed_weeks.data[i].url() + "/" + 0);
     $.ajax({
-        type: "GET", //rest Type
-        dataType: 'text',
-        url: url_cours_pp  + an_att + "/" + semaine_att + "/" + num_copie,
-        async: true,
-        contentType: "text/csv",
-        success: function(msg, ts, req) {
-            //console.log(msg);
-
-            if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
-                an_att == weeks.init_data[weeks.sel[0]].an) {
-
-                profs_pp = [];
-                modules.pp = [];
-                salles.pp = [];
-
-                //console.log(msg);
-    		console.log(semaine_att,an_att,num_copie);
-
-                cours_pp = d3.csvParse(msg, translate_cours_pp_from_csv);
-
-    		if (cours_pp.length > 0 && !garbage_plot){
-    		    garbage_plot = true ;
-    		    add_garbage();
-    		    go_grid(true);
-    		} else if (cours_pp.length == 0 && garbage_plot) {
-    		    garbage_plot = false ;
-    		    remove_garbage();
-    		    go_grid(true);
-    		}
-
-                //console.log(msg);
-
-                fetch.ongoing_cours_pp = false;
-                fetch_ended();
-                show_loader(false);
-            }
-        },
-        error: function(msg) {
-            console.log("error");
-            show_loader(false);
-        }
+      type: "GET", //rest Type
+      dataType: 'text',
+      url: build_url(
+        url_cours_pl,
+        context_dept,
+        needed_weeks.data[i].as_context(),
+        {'work_copy': num_copie}
+      ),
+      async: true,
+      contentType: "text/csv",
+      success: side_week_rcv(needed_weeks.data[i]),
+      error: function (msg) {
+        console.log("error");
+      }
     });
 
+  }
+
 
 }
 
 
-function translate_cours_pl_from_csv(d) {
-    var ind = profs_pl.indexOf(d.prof_nom);
-    if (ind == -1) {
-        profs_pl.push(d.prof_nom);
-    }
-    if (modules.pl.indexOf(d.module) == -1) {
-        modules.pl.push(d.module);
-    }
-    if (salles.pl.indexOf(d.room) == -1) {
-        salles.pl.push(d.room);
-    }
-    var co = {
-        id_cours: +d.id_cours,
-        no_cours: +d.num_cours,
-        prof: d.prof_nom,
-//        prof_full_name: d.prof_first_name + " " + d.prof_last_name,
-        group: translate_gp_name(d.gpe_nom),
-        promo: set_promos.indexOf(d.gpe_promo),
-        mod: d.module,
-        day: +d.jour,
-        slot: +d.heure,
-        room: d.room,
-	room_type: d.room_type,
-	color_bg: d.color_bg,
-	color_txt: d.color_txt,
-    };
-    return co;
-}
-
-
-function translate_cours_pp_from_csv(d) {
-    if (profs_pp.indexOf(d.prof) == -1) {
-        profs_pp.push(d.prof);
-    }
-    if (modules.pp.indexOf(d.module) == -1) {
-        modules.pp.push(d.module);
-    }
-    if (salles.pp.indexOf(d.room) == -1) {
-        salles.pp.push(d.room);
-    }
-    var co = {
-        id_cours: +d.id,
-        no_cours: +d.no,
-        prof: d.prof,
-        group: translate_gp_name(d.groupe),
-        promo: set_promos.indexOf(d.promo),
-        mod: d.module,
-        day: garbage.day,
-        slot: garbage.slot,
-        room: une_salle,
-	room_type: d.room_type,
-	color_bg: d.color_bg,
-	color_txt: d.color_txt,
-    };
-    console.log(co);
-    return co;
-}
 
 
 
 // Add pseudo-courses that do not appear in the database //
 function add_exception_course(cur_week, cur_year, targ_week, targ_year,
-			      day, slot, group, promo, l1, l2, l3) {
-    if (cur_week == targ_week && cur_year == targ_year) {
-	cours.push({day: day,
-		    slot: slot,
-		    group: group,
-		    promo: set_promos.indexOf(promo),
-		    id_cours: -1,
-		    no_cours: -1,
-		    mod: l1,
-		    prof: l2,
-		    room: l3
-		   });
-    }
+  day, slot, group, promo, l1, l2, l3) {
+  if (cur_week == targ_week && cur_year == targ_year) {
+    cours.push({
+      day: day,
+      slot: slot,
+      group: group,
+      promo: set_promos.indexOf(promo),
+      id_course: -1,
+      no_course: -1,
+      mod: l1,
+      prof: l2,
+      room: l3
+    });
+  }
 }
 
 
 
 // Pseudo fonction pour des possibles exceptions //
-/*
-"Passeport Avenir (Bénéficiaires d'une bourse)"
-"--- 13h30 ---"
-"Amphi 1"
-"exception"
-function add_exception(sem_att, an_att, sem_voulue, an_voulu, nom, l1, l2, l3){
-    if(sem_att==sem_voulue && an_att==an_voulu){
-	var gro = dg.append("g")
-	    .attr("class",nom);
+//
+// "Passeport Avenir (Bénéficiaires d'une bourse)"
+// "--- 13h30 ---"
+// "Amphi 1"
+// "exception"
+// function add_exception(sem_att, an_att, sem_voulue, an_voulu, nom, l1, l2, l3){
+//     if(sem_att==sem_voulue && an_att==an_voulu){
+// 	var gro = svg.get_dom("dg").append("g")
+// 	    .attr("class",nom);
 
-	var tlx = 3*(rootgp_width*labgp.width
-		     + dim_dispo.plot*(dim_dispo.width+dim_dispo.right))
-	    + groups[0]["P"].x*labgp.width ;
-	var tlx2 = tlx + .5*groups[0]["P"].width*labgp.width;
+// 	var tlx = 3*(rootgp_width*labgp.width
+// 		     + dim_dispo.plot*(dim_dispo.width+dim_dispo.right))
+// 	    + groups[0]["P"].x*labgp.width ;
+// 	var tlx2 = tlx + .5*groups[0]["P"].width*labgp.width;
 
-	var tly = (3*nbPromos + row_gp[0].y)*(labgp.height) ;
-	
-	gro
-	    .append("rect")
-	    .attr("x", tlx  )
-	    .attr("y", tly )
-	    .attr("fill","red")
-	    .attr("width",groups[0]["P"].width*labgp.width)
-	    .attr("height",labgp.height);
+// 	var tly = (3*nbPromos + row_gp[0].y)*(labgp.height) ;
 
-	gro.append("text")
-	    .text(l1)
-	    .attr("font-weight","bold")
-	    .attr("x",tlx2 )
-	    .attr("y",tly + labgp.height/4);
-	gro.append("text")
-	    .text(l2)
-	    .attr("font-weight","bold")
-	    .attr("x",tlx2 )
-	    .attr("y",tly + 2*labgp.height/4);
-	gro.append("text")
-	    .text(l3)
-	    .attr("font-weight","bold")
-	    .attr("x",tlx2 )
-	    .attr("y",tly + 3*labgp.height/4);
-	
-    } else {
-	d3.select("."+nom).remove();
+// 	gro
+// 	    .append("rect")
+// 	    .attr("x", tlx  )
+// 	    .attr("y", tly )
+// 	    .attr("fill","red")
+// 	    .attr("width",groups[0]["P"].width*labgp.width)
+// 	    .attr("height",labgp.height);
+
+// 	gro.append("text")
+// 	    .text(l1)
+// 	    .attr("font-weight","bold")
+// 	    .attr("x",tlx2 )
+// 	    .attr("y",tly + labgp.height/4);
+// 	gro.append("text")
+// 	    .text(l2)
+// 	    .attr("font-weight","bold")
+// 	    .attr("x",tlx2 )
+// 	    .attr("y",tly + 2*labgp.height/4);
+// 	gro.append("text")
+// 	    .text(l3)
+// 	    .attr("font-weight","bold")
+// 	    .attr("x",tlx2 )
+// 	    .attr("y",tly + 3*labgp.height/4);
+
+//     } else {
+// 	d3.select("."+nom).remove();
+//     }
+// }
+
+
+function clean_prof_displayed(light) {
+
+  var tutor_names = tutors.pl;
+  for (var i = 0; i < tutors.pp.length; i++) {
+    var ind = tutor_names.indexOf(tutors.pp[i]);
+    if (ind == -1) {
+      tutor_names.push(tutors.pp[i]);
     }
-}
-*/
+  }
 
-function clean_prof_displayed() {
+  tutor_names.sort();
 
-    var all = (profs.length == prof_displayed.length);
+  update_selection();
 
-    profs = profs_pl;
-    for (var i = 0; i < profs_pp.length; i++) {
-        var ind = profs.indexOf(profs_pp[i]);
-        if (ind == -1) {
-            profs.push(profs_pp[i]);
-        }
+  swap_data(tutor_names, tutors, "tutor");
+
+  // relevant tutors
+  tutors.all.forEach(function (t) {
+    t.relevant = false;
+    if (t.name == user.name) {
+      t.relevant = true;
     }
+  });
 
+  if (!light) {
+    go_selection_popup();
+  }
 
-
-    if (all) {
-        prof_displayed = profs.slice(0);
-    } else {
-
-        var ndi = prof_displayed.filter(function(d) {
-            return profs.indexOf(d) > -1;
-        });
-
-        if (ndi.length == 0) {
-            prof_displayed = profs.slice(0);
-        } else {
-            prof_displayed = ndi;
-        }
-
-    }
 }
 
 function translate_gp_name(gp) {
-    /*
-    var ret = gp.slice(2);
-    if (ret == "") {
-        ret = "P";
-    }
-    return ret;
-    */
-    return gp ;
+  /*
+  var ret = gp.slice(2);
+  if (ret == "") {
+      ret = "P";
+  }
+  return ret;
+  */
+  return gp;
 }
 
 
 
 /*--------------------
    ------ ROOMS ------
-  --------------------*/
-function fetch_unavailable_rooms() {
-    fetch.ongoing_un_rooms = true;
-    
-    var semaine_att = weeks.init_data[weeks.sel[0]].semaine;
-    var an_att = weeks.init_data[weeks.sel[0]].an;
+   --------------------*/
 
-    show_loader(true);
-    $.ajax({
-        type: "GET", //rest Type
-        dataType: 'text',
-        url: url_unavailable_rooms + an_att + "/" + semaine_att ,
-        async: true,
-        contentType: "text/csv",
-        success: function(msg, ts, req) {
-            if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
-                an_att == weeks.init_data[weeks.sel[0]].an) {
+function fetch_room_preferences_unavailability() {
+  fetch_room_preferences();
+  fetch_room_extra_unavailability();
+}
 
-		console.log(msg);
+// fetch room preferences
+function fetch_room_preferences() {
+  fetch_status.ongoing_un_rooms = true;
 
-		clean_unavailable_rooms();
-                d3.csvParse(msg, translate_unavailable_rooms);
+  var exp_week = wdw_weeks.get_selected();
 
-            }
-            show_loader(false);
-	    fetch.ongoing_un_rooms = false;
-        },
-        error: function(msg) {
-            console.log("error");
-            show_loader(false);
-        }
-    });
+  show_loader(true);
+  $.ajax({
+    type: "GET", //rest Type
+    dataType: 'text',
+    url: build_url(url_unavailable_rooms, context_dept, exp_week.as_context()),
+    async: true,
+    contentType: "text/csv",
+    success: function (msg, ts, req) {
+      var sel_week = wdw_weeks.get_selected();
+      if (Week.compare(exp_week, sel_week) == 0) {
+        clean_unavailable_rooms();
+        d3.csvParse(msg, translate_unavailable_rooms);
+      }
+      show_loader(false);
+      fetch_status.ongoing_un_rooms = false;
+      fetch_ended(false);
+    },
+    error: function (msg) {
+      console.log("error");
+      show_loader(false);
+    }
+  });
 }
 
 function translate_unavailable_rooms(d) {
-    console.log(d);
-    var slot = +d.heure ;
-    var day = +d.jour ;
-    unavailable_rooms[day][slot].push(d.room);
+  var i;
+  //console.log(d);
+  if (Object.keys(unavailable_rooms).indexOf(d.room) == -1) {
+    unavailable_rooms[d.room] = {};
+    week_days.forEach(function (day) {
+      unavailable_rooms[d.room][day.ref] = [];
+    });
+  }
+  unavailable_rooms[d.room][d.day].push({
+    start_time: +d.start_time,
+    duration: +d.duration
+  });
 }
+
+// fetch the moments where a room is occupied in another departement
+function fetch_room_extra_unavailability() {
+
+  var exp_week = wdw_weeks.get_selected();
+
+  show_loader(true);
+  $.ajax({
+    type: "GET", //rest Type
+    dataType: 'text',
+    url: url_fetch_shared_rooms + exp_week.url(),
+    async: true,
+    contentType: "text/csv",
+    success: function (msg) {
+      var sel_week = wdw_weeks.get_selected();
+      if (Week.compare(exp_week, sel_week) == 0) {
+        extra_pref.rooms = {};
+        d3.csvParse(msg, translate_extra_pref_room_from_csv);
+        sort_preferences(extra_pref.rooms);
+        var shared_rooms = Object.keys(extra_pref.rooms);
+        for (i = 0; i < shared_rooms.length; i++) {
+          var busy_days = Object.keys(extra_pref.rooms[shared_rooms[i]]);
+          for (d = 0; d < busy_days.length; d++) {
+            fill_holes(extra_pref.rooms[shared_rooms[i]][busy_days[d]], 1);
+          }
+        }
+      }
+      show_loader(false);
+
+    },
+    error: function (xhr, error) {
+      console.log("error");
+      console.log(xhr);
+      console.log(error);
+      console.log(xhr.responseText);
+      show_loader(false);
+      // window.location.href = url_login;
+      window.location.replace(url_login + "?next=" + url_edt + exp_week.url());
+    }
+  });
+}
+
+function translate_extra_pref_room_from_csv(d) {
+  if (Object.keys(extra_pref.rooms).indexOf(d.room) == -1) {
+    extra_pref.rooms[d.room] = {};
+    for (var i = 0; i < days.length; i++) {
+      extra_pref.rooms[d.room][days[i].ref] = [];
+    }
+  }
+  extra_pref.rooms[d.room][d.day].push({
+    start_time: +d.start_time,
+    duration: +d.duration,
+    value: 0
+  });
+}
+
+
+
 
 /*--------------------
    ------ ALL -------
    --------------------*/
 
-function fetch_all(first){
-    fetch.done = false;
+function fetch_all(first, fetch_work_copies) {
 
-    fetch.ongoing_cours_pp = true;
-    fetch.ongoing_cours_pl = true;
-    if (ckbox["dis-mod"].cked || ckbox["edt-mod"].cked) {
-	fetch.ongoing_dispos = true;
-    }
-    if (ckbox["edt-mod"].cked) {
-	fetch.ongoing_un_rooms = true;
-    }
-    fetch.ongoing_bknews = true;
+  if (is_side_panel_open && fetch_work_copies) {
+    fetch_work_copy_numbers(true, first);
+    return ;
+  }
 
-    fetch_version();
+
+  fetch_status.done = false;
+
+  if (!fetch_status.course_saved) {
+    fetch_status.ongoing_cours_pp = true;
+    fetch_status.ongoing_cours_pl = true;
+    fetch_status.ongoing_bknews = true;
+    fetch_ongoing_colors = true;
+  }
+  if (!fetch_status.pref_saved &&
+    (ckbox["dis-mod"].cked
+      || ckbox["edt-mod"].cked)) {
+    fetch_status.ongoing_dispos = true;
+  }
+  if (ckbox["edt-mod"].cked) {
+    fetch_status.ongoing_un_rooms = true;
+  }
+
+  fetch_version();
+
+  if (!fetch_status.course_saved) {
+    fetch_module();
+    fetch_tutor();
     fetch_cours();
-    if (ckbox["dis-mod"].cked || ckbox["edt-mod"].cked) {
-        fetch_dispos();
+    fetch_colors();
+  }
+  if (!fetch_status.pref_saved &&
+    (ckbox["dis-mod"].cked
+      || ckbox["edt-mod"].cked)) {
+    fetch_tutor_preferences();
+  }
+  if (ckbox["edt-mod"].cked) {
+    fetch_tutor_extra_unavailability();
+    fetch_room_preferences_unavailability();
+    if (department_settings.mode.cosmo) {
+      fetch_side_weeks();
     }
-    if (ckbox["edt-mod"].cked) {
-	fetch_unavailable_rooms() ;
-    }
-    fetch_bknews(first);
+  }
+  fetch_bknews(first);
+
 }
 
 
 function fetch_version() {
-    var semaine_att = weeks.init_data[weeks.sel[0]].semaine;
-    var an_att = weeks.init_data[weeks.sel[0]].an;
+  var exp_week = wdw_weeks.get_selected();
+  let context = {dept: department};
+  exp_week.add_to_context(context);
 
-    show_loader(true);
-    $.ajax({
-        type: "GET", //rest Type
-        dataType: 'text',
-        url: url_week_infos  + an_att + "/" + semaine_att,
-        async: true,
-        contentType: "text/json",
-//        contentType: "text/json",
-        success: function(msg) {
-	    //            bknews.cont = JSON.parse(msg) ;
-	    var parsed = JSON.parse(msg);
+  show_loader(true);
+  $.ajax({
+    type: "GET", //rest Type
+    dataType: 'text',
+    url: build_url(url_week_infos, context),
+    async: true,
+    success: function (msg) {
+      var parsed = JSON.parse(msg);
+      var sel_week = wdw_weeks.get_selected();
+      if (Week.compare(exp_week, sel_week) == 0) {
+        version = parsed.version;
+        filled_dispos = parsed.proposed_pref;
+        required_dispos = parsed.required_pref;
+        go_regen(parsed.regen);
+      }
 
-            if (semaine_att == weeks.init_data[weeks.sel[0]].semaine &&
-                an_att == weeks.init_data[weeks.sel[0]].an) {
-		version = parsed.version ;
-		filled_dispos = parsed.proposed_pref ;
-		required_dispos = parsed.required_pref ;
-		go_regen(parsed.regen);
-            }
-	    
-            show_loader(false);
-        },
-        error: function(msg) {
-            console.log("error");
-            show_loader(false);
-        }
-    });
+      show_loader(false);
+    },
+    error: function (msg) {
+      console.log("error");
+      show_loader(false);
+    }
+  });
 
 }
 
-function translate_version_from_csv(d){
-    return +d.version ;
+function translate_version_from_csv(d) {
+  return +d.version;
 }
 
 
-function fetch_ended() {
-    if (!fetch.ongoing_cours_pl &&
-        !fetch.ongoing_cours_pp) {
-        cours = cours_pl.concat(cours_pp);
+function fetch_ended(light) {
+  if (!fetch_status.ongoing_cours_pl &&
+    !fetch_status.ongoing_cours_pp &&
+    !fetch_status.course_saved) {
 
-        modules.all = [""].concat(modules.pl);
-        for (var i = 0; i < modules.pp.length; i++) {
-            if (modules.all.indexOf(modules.pp[i]) == -1) {
-                modules.all.push(modules.pp[i]);
-            }
-        }
+    fetch_status.course_saved = true;
 
-        modules.all.sort();
+    cours = cours_pl.concat(cours_pp);
 
-        if (modules.all.indexOf(modules.sel) == -1) {
-            modules.sel = "";
-        }
-
-
-        salles.all = [""].concat(salles.pl);
-        for (var i = 0; i < salles.pp.length; i++) {
-            if (salles.all.indexOf(salles.pp[i]) == -1) {
-                salles.all.push(salles.pp[i]);
-            }
-        }
-
-        salles.all.sort();
-
-        if (salles.all.indexOf(salles.sel) == -1) {
-            salles.sel = "";
-        }
-
-        create_mod_dd();
-        create_sal_dd();
-        clean_prof_displayed();
+    var module_names = modules.pl;
+    for (var i = 0; i < modules.pp.length; i++) {
+      if (module_names.indexOf(modules.pp[i]) == -1) {
+        module_names.push(modules.pp[i]);
+      }
     }
 
-    if (!fetch.ongoing_cours_pp &&
-        !fetch.ongoing_cours_pl &&
-        !fetch.ongoing_dispos   &&
-        !fetch.ongoing_un_rooms &&
-        !fetch.ongoing_bknews) {
+    module_names.sort();
 
-        fetch.done = true;
-        go_edt(false);
+    update_selection();
 
-	if (fig === undefined) {
-            fig = svg_cont.append("g")
-		.attr("id", "lay-final");
-	}
+    swap_data(module_names, modules, "module");
 
+    update_active();
+    update_relevant();
+
+    salles.all = [""].concat(salles.pl);
+    for (let i = 0; i < salles.pp.length; i++) {
+      if (salles.all.indexOf(salles.pp[i]) == -1) {
+        salles.all.push(salles.pp[i]);
+      }
     }
-    //go_gp_buttons();
-    create_pr_buttons();
-    go_tutors();
+
+    salles.all.sort();
+
+    if (salles.all.indexOf(salles.sel) == -1) {
+      salles.sel = "";
+    }
+
+    clean_prof_displayed(light);
+  }
+
+  if (fetch_status.course_saved &&
+    !fetch_status.ongoing_dispos &&
+    !fetch_status.ongoing_un_rooms &&
+    !fetch_status.ongoing_bknews &&
+    !fetch_status.ongoing_colors) {
+    ping_colors();
+    fetch_status.done = true;
+    go_edt(false);
+
+  }
+}
+
+// - store old data in old
+// - translate fetched into current (keeping display values)
+function swap_data(fetched, current, type) {
+  current.old = current.all;
+  current.all = fetched.map(
+    function (m) {
+      var em = {};
+      em.name = m;
+      var oldf = current.old.find(function (mo) {
+        return mo.name == m;
+      });
+      var avail = sel_popup.get_available(type);
+      if (typeof avail === 'undefined') {
+        em.display = true;
+      } else {
+        em.display = !(avail.active);
+      }
+      if (typeof oldf !== 'undefined') {
+        em.display = oldf.display;
+      }
+      return em;
+    }
+  );
+  var panel = sel_popup.panels.find(function (p) {
+    return p.type == type;
+  });
+  if (typeof panel !== 'undefined') {
+    panel.list = current.all;
+  }
+}
 
 
+/*-----------------
+  ------Module-----
+  -----------------*/
+// Get all the information of the module present in the week and stored him in a dictionary of Module_info
+function fetch_module() {
+  var exp_week = wdw_weeks.get_selected();
+  let context = {dept: department};
+  exp_week.add_to_context(context);
+  
+  show_loader(true);
+  $.ajax({
+    type: "GET",
+    dataType: 'text',
+    headers: {Accept: 'text/csv'},
+    url: build_url(url_module, context),
+    async: true,
+    success: function (msg, ts, req) {
+      var sel_week = wdw_weeks.get_selected();
+      if (Week.compare(exp_week, sel_week) == 0) {
+        d3.csvParse(msg, translate_module_from_csv);
+      }
+      show_loader(false);
+    },
+    error: function (msg) {
+      console.log("error");
+      show_loader(false);
+    }
+  });
+}
+function translate_module_from_csv(d) {
+  //console.log(d);
+  if (Object.keys(modules_info).indexOf(d.abbrev) == -1) {
+    modules_info[d.abbrev] = {
+      name: d.name,
+      url: d.url
+    };
+  }
+}
 
+/*-----------------
+  ------Tutor------
+  -----------------*/
+// Get all the information of the Tutor present in the week and stored him in a dictionary of Tutor_info
+function fetch_tutor() {
+  var exp_week = wdw_weeks.get_selected();
+  let context = {dept: department};
+  exp_week.add_to_context(context);
+
+  show_loader(true);
+  $.ajax({
+    type: "GET",
+    headers: {Accept: 'text/csv'},
+    dataType: 'text',
+    url: build_url(url_tutor, context),
+    async: true,
+    success: function (msg, ts, req) {
+      var sel_week = wdw_weeks.get_selected();
+      if (Week.compare(exp_week, sel_week) == 0) {
+        d3.csvParse(msg, translate_tutor_from_csv);
+      }
+      show_loader(false);
+    },
+    error: function (xhr, status, msg) {
+      console.log("error");
+      console.log(msg);
+      show_loader(false);
+    }
+  });
+}
+function translate_tutor_from_csv(d) {
+  if (Object.keys(tutors_info).indexOf(d.username) == -1) {
+    tutors_info[d.username] = {
+      full_name: d.first_name + " " + d.last_name,
+      email: d.email
+    };
+  }
 }
 
 
 
 
-
-
-
-
-
-/* 
+/*
 Reste :
   x couleur modules
   x display filtre prof
-  x semaines (fetch, go_course, go_dispo)
-  x base edt (d&d, struct edt, check, display conflits, semaine pro)
-  o base dispos (simple, 0-9, semaine type)
+  x weeks (fetch, go_course, go_dispo)
+  x base edt (d&d, struct edt, check, display conflits, week pro)
+  o base dispos (simple, 0-9, week type)
   o plot par défaut
   x move next week
 */
@@ -888,8 +1441,8 @@ Fichiers :
 -> better-groupes.json -- static
 -> better-cours.csv    -- dynamic
 -> better-dispos.json  -- dynamic
--> better-salles.json  -- 
-<-  
+-> better-salles.json  --
+<-
 */
 
 /*

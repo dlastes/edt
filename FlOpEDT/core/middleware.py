@@ -3,6 +3,7 @@ import logging
 from django.shortcuts import render, redirect
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.cache import cache
+from django.http import HttpResponseForbidden
 
 from base.models import Department
 
@@ -25,9 +26,7 @@ class EdtContextMiddleware:
 
         return response
 
-    def process_view(self, request, view_func, view_args, view_kwargs):
-
-        department_key = 'department'
+    def process_view(self, request, view_func, view_args, view_kwargs):     
 
         def del_request_department():
             try:
@@ -48,6 +47,12 @@ class EdtContextMiddleware:
                 logger.debug(f'store department [{department.abbrev}] in cache with key [{department_key}]')
                 cache.set(department_key, department)
 
+        def set_request_department_prop(req):
+            dept = req.department if hasattr(req, 'department') else None
+            req.has_department_perm = req.user.is_authenticated \
+                and req.user.has_department_perm(dept)
+            req.is_department_admin = req.user.is_authenticated \
+                and req.user.has_department_perm(dept, admin=True)
 
         def get_department_abbrev(lookup_items):
             #
@@ -63,6 +68,9 @@ class EdtContextMiddleware:
 
             return department_abbrev
 
+
+        department = None
+        department_key = 'department'
 
         if request.path == '/':
             del_request_department()
@@ -85,4 +93,16 @@ class EdtContextMiddleware:
                         logger.warning(f'wrong department value : [{department_abbrev}]')
                         return redirect('/')
 
+        set_request_department_prop(request)
 
+        if request.path.startswith('/admin'):
+            if not department:
+                # Check if the user is a superuser in order to 
+                # access global admin mode
+                if request.user.is_authenticated and not request.user.is_superuser:
+                    return redirect('/')
+            else:
+                # Check if the user is associated with the 
+                # requested department
+                if not request.is_department_admin:
+                    return HttpResponseForbidden()
