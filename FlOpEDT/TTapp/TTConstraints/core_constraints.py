@@ -259,16 +259,20 @@ class ScheduleAllCourses(TTConstraint):
 class AssignAllCourses(TTConstraint):
     """
     The considered courses are assigned to a tutor
+    If pre_assigned_only, it does assign a tutor only to courses that already have one
     """
     modules = models.ManyToManyField('base.Module', blank=True)
     groups = models.ManyToManyField('base.StructuralGroup',
                                     blank=True)
     course_types = models.ManyToManyField('base.CourseType', blank=True)
+    pre_assigned_only = models.BooleanField(default=False, verbose_name=_('Pre-assigned courses only'))
 
     def enrich_model(self, ttmodel, week, ponderation=1):
         relevant_basic_groups = considered_basic_groups(self, ttmodel)
         considered_courses = set(c for bg in relevant_basic_groups
                                  for c in ttmodel.wdb.all_courses_for_basic_group[bg])
+        if self.pre_assigned_only:
+            considered_courses = set(c for c in considered_courses if c.tutor is not None)
         if self.modules.exists():
             considered_courses = set(c for c in considered_courses if c.module in self.modules.all())
         if self.course_types.exists():
