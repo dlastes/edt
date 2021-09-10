@@ -533,7 +533,7 @@ class ScheduledCourse(models.Model):
                               related_name='taught_scheduled_courses',
                               null=True,
                               default=None,
-                              on_delete=models.CASCADE)
+                              on_delete=models.SET_NULL)
 
     # les utilisateurs auront acces à la copie publique (0)
 
