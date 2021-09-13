@@ -228,7 +228,8 @@ class UserPreferenceActualViewSet(UserPreferenceViewSet):
         if len(users) != 0:
             self.params['user__id__in'] = list(users)
             self.set_default_params()
-            qs = list(qs) + list(super().get_queryset())
+            qs_def = super().get_queryset()
+            qs = qs | qs_def
 
         return qs
 
