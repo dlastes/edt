@@ -105,7 +105,10 @@ class UserPreferenceViewSet(viewsets.ModelViewSet):
     def unset_singular_params(self):
         self.params.pop('week__nb', None)
         self.params.pop('week__year', None)
-        self.select.remove('week')
+        try:
+            self.select.remove('week')
+        except ValueError:
+            pass
 
     def get_queryset(self):
         self.set_common_params()
