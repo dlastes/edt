@@ -254,18 +254,21 @@ def change_physical_presence(req, year, week, user):
     # Default week at None
     if week == 0 or year == 0:
         week = None
-        year = None
+        
+    try:
+        week = Week.objects.get(nb=week, year=year)
+    except Week.DoesNotExist:
+        bad_response['more'] = 'Wrong week'
+        return JsonResponse(bad_response)
 
     for change in changes:
         logger.info(f"Change {change}")
         if not change['force_here']:
             PhysicalPresence.objects.filter(week=week,
-                                            year=year,
                                             day=change['day'],
                                             user=user).delete()
         else:
             PhysicalPresence.objects.create(week=week,
-                                            year=year,
                                             day=change['day'],
                                             user=user)
 
