@@ -471,7 +471,9 @@ function select_tutor_change(f) {
 
 
 function confirm_tutor_change(d) {
-  Object.assign(pending.wanted_course, { prof: d.content });
+
+  pending.wanted_course.tutors.shift();
+  pending.wanted_course.tutors.unshift(d.content);
 
   room_tutor_change.proposal = [];
 
@@ -1963,7 +1965,7 @@ function add_bouge(pending) {
       day: pending.init_course.day,
       start: pending.init_course.start,
       room: pending.init_course.room,
-      prof: pending.init_course.prof,
+      tutors: pending.init_course.tutors.slice(),
       id_visio: pending.init_course.id_visio
     };
     cours.forEach(function(c) {
@@ -1971,7 +1973,7 @@ function add_bouge(pending) {
         c.day = pending.wanted_course.day ;
         c.start = pending.wanted_course.start ;
         c.room = pending.wanted_course.room ;
-        c.prof = pending.wanted_course.prof ;
+        c.tutors = pending.wanted_course.tutors.slice() ;
         id_visio = pending.wanted_course.id_visio ;
       }
     });
