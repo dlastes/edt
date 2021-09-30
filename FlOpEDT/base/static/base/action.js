@@ -2096,15 +2096,16 @@ function show_detailed_courses(cours) {
       modinfo.name = 'Module inconnu';
     }
   }
-  if (cours.prof in tutors_info){
-    tutinfo.name = tutors_info[cours.prof].full_name;
-    tutinfo.mail = tutors_info[cours.prof].email;
-  } else {
-    if (cours.prof == null) {
-      tutinfo.name = 'Pas de prof attitré·e';
+  if (cours.tutors.length > 0) {
+    let tutor = cours.tutors[0] ;
+    if (tutor in tutors_info) {
+      tutinfo.name = tutors_info[tutor].full_name;
+      tutinfo.mail = tutors_info[tutor].email;
     } else {
-      tutinfo.name = 'Prof inconnu·e';
+      tutinfo.name = 'Prof inconnu·e' ;
     }
+  } else {
+    tutinfo.name = 'Pas de prof attitré·e';
   }
   
   // TBD supp_tutor
