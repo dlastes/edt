@@ -1153,7 +1153,7 @@ function go_courses(quick) {
       && logged_usr.dispo_all_see) {
     d3.selectAll("rect.crect").attr("fill", function (d) {
       try {
-        lDis = get_preference(dispos[d.prof][d.day], d.duration);
+        lDis = get_preference(dispos[d.tutors[0]][d.day], d.duration);
       } catch (e) {
         lDis = par_dispos.nmax;
       }
