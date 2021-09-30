@@ -937,10 +937,13 @@ function compute_changes(changes, conc_tutors, gps) {
         day: cur_course.day,
         start: cur_course.start,
         room: cur_course.room,
-        tutor: cur_course.prof,
+        tutor: null, 
         id_visio: cur_course.id_visio
       };
 
+      if (cur_course.tutors.length > 0) {
+        change.tutor = cur_course.tutors[0] ;
+      }
 
       console.log("change", change);
       changes.push(change);
