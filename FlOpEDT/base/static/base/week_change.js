@@ -1012,7 +1012,7 @@ function add_exception_course(cur_week, cur_year, targ_week, targ_year,
       id_course: -1,
       no_course: -1,
       mod: l1,
-      prof: l2,
+      tutors: [l2],
       room: l3
     });
   }
