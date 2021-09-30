@@ -853,7 +853,7 @@ function translate_cours_pp_from_json(d, result) {
   }
   for (let i = 0 ; i < d.groups.length ; i++) {
     if (d.groups[i].is_structural) {
-      let new_course = course_canevas_json_to_obj(d) ;
+      let new_course = course_pp_canevas_json_to_obj(d) ;
       new_course.group = translate_gp_name(d.groups[i].name) ;
       new_course.promo = set_promos.indexOf(d.groups[i].train_prog) ;
       new_course.from_transversal = null ;
@@ -861,6 +861,7 @@ function translate_cours_pp_from_json(d, result) {
     } else {
       let conflicting_groups = groups[set_promos.indexOf(d.groups[i].train_prog)]["transversal"][d.groups[i].name]["conflicting_groups"];
       for (let j=0 ; j < conflicting_groups.length; j++) {
+        let new_course = course_pp_canevas_json_to_obj(d) ;
         new_course.group = translate_gp_name(conflicting_groups[j].name) ;
         new_course.promo = set_promos.indexOf(d.groups[i].train_prog) ;
         new_course.from_transversal = translate_gp_name(d.groups[i].name) ;
