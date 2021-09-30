@@ -1889,8 +1889,12 @@ function select_pref_links_change() {
   ["users", "groups"].forEach(function(link_type) {
     switch(link_type) {
     case 'users':
-      key = pending.wanted_course.prof ;
       pref_links = preferred_links.users ;
+      //TBD supp_tutor
+      key = Object.keys(pref_links)[0];
+      if (pending.wanted_course.tutors.length > 0) {
+        key = pending.wanted_course.tutors[0] ;
+      }
       break;
     case 'groups':
       key = gp_training_prog_to_str(pending.wanted_course) ;
