@@ -762,8 +762,8 @@ function translate_cours_pl_from_json(d, result) {
 
   // TBD: add also supp_tutors
   for(let ip = 0 ; ip < Math.max(d.tutors.length, 1) ; ip++) {
-    if (tutors.pl.indexOf(d.course.supp_tutor[ip]) == -1) {
-      tutors.pl.push(d.course.supp_tutor[ip]) ;
+    if (tutors.pl.indexOf(d.tutors[ip]) == -1) {
+      tutors.pl.push(d.tutors[ip]) ;
     }
   }
 
@@ -840,8 +840,8 @@ function translate_cours_pp_from_json(d, result) {
 
   // TBD: add also supp_tutors
   for(let ip = 0 ; ip < Math.max(d.tutors.length, 1) ; ip++) {
-    if (tutors.pp.indexOf(d.supp_tutor[ip]) == -1) {
-      tutors.pp.push(d.supp_tutor[ip]) ;
+    if (tutors.pp.indexOf(d.tutors[ip]) == -1) {
+      tutors.pp.push(d.tutors[ip]) ;
     }
   }
 
