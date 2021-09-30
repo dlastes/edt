@@ -1025,7 +1025,7 @@ function update_selection() {
       return d.name == c.mod ;
     });
     var tut = tutors.all.find(function(d) {
-      return d.name == c.prof ;
+      return c.tutors.includes(d.name) ;
     });
     var roo = rooms_sel.all.find(function(d) {
       // visio room
@@ -1450,10 +1450,10 @@ function update_relevant() {
       return d.name == c.mod;
     });
     var tut = tutors.all.find(function (d) {
-      return d.name == c.prof;
+      return c.tutors.includes(d.name);
     });
     if (!tut_act) {
-      if (c.prof == user.name) {
+      if (c.tutors.includes(user.name)) {
         mod.relevant = true;
       }
     } else if (typeof mod !== 'undefined'

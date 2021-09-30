@@ -1197,15 +1197,21 @@ function gp_courses(target_course) {
   return ret ;
 }
 
-// return courses that involve the tutor of target_course during
+// return courses that involve the tutors of target_course during
 // during the same day
 function tutor_courses(target_course) {
   return cours.filter(function (c) {
-    return (
-      c.day == target_course.day
-        && c.id_course != target_course.id_course
-        && c.prof == target_course.prof
-    ) ;
+    let day_id = c.day == target_course.day
+      && c.id_course != target_course.id_course ;
+    if (!day_id) {
+      return false ;
+    }
+    for (let it = 0 ; it < c.tutors.length ; it++) {
+      if (target_course.includes(c.tutors[it])) {
+        return true ;
+      }
+    }
+    return false ;
   });
 }
 

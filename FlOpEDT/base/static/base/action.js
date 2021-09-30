@@ -349,10 +349,15 @@ function select_tutor_module_change() {
   }
   room_tutor_change.cur_value = room_tutor_change.old_value ;
 
+  let courses_same_module = cours
     .filter(function (oth_c) {
       return oth_c.mod == c.mod;
-    })
-    .map(function (oth_c) { return oth_c.prof; });
+    }) ;
+
+  let tutor_same_module = [] ;
+  for (let ic = 0 ; ic < courses_same_module.length ; ic++) {
+    Array.prototype.push.apply(tutor_same_module, courses_same_module[ic].tutors) ;
+  }
 
   // remove duplicate 
   tutor_same_module = tutor_same_module.filter(function (t, i) {
@@ -414,7 +419,7 @@ function select_salarie_change() {
     var possibles = new Set();
     cours.forEach(function (c) {
       if (c.group == tache.group) {
-        possibles.add(c.prof);
+        Set.prototype.add.apply(possibles, c.tutors);
       }
     });
     room_tutor_change.proposal = Array.from(possibles);
@@ -902,13 +907,19 @@ function compute_changes(changes, conc_tutors, gps) {
       /* Compute who is concerned by the change */
 
       // add instructor if never seen
-      if (conc_tutors.indexOf(cur_course.prof) == -1
-        && cur_course.prof != logged_usr.name && cur_course.prof != null) {
-        conc_tutors.push(cur_course.prof);
+      let it ;
+      for (it = 0 ; it < cur_course.tutors.length ; it++) {
+        if (conc_tutors.indexOf(cur_course.tutors[it]) == -1
+            && cur_course.tutors[it] != logged_usr.name) {
+          conc_tutors.push(cur_course.tutors[it]);
+        }
       }
-      if (conc_tutors.indexOf(cb.prof) == -1
-        && cur_course.prof != logged_usr.name && cb.prof != null) {
-        conc_tutors.push(cb.prof);
+      for (it = 0 ; it < cb.tutors.length ; it++) {
+        if (conc_tutors.indexOf(cb.tutors[it]) == -1
+            && cb.tutors[it] != logged_usr.name
+            && cb.tutors[it] != null) {
+          conc_tutors.push(cb.tutors[it]);
+        }
       }
 
       // add group if never seen
@@ -1019,7 +1030,7 @@ function get_courses(tutor, day_desc) {
   });
   if (typeof full_week !== 'undefined') {
     return full_week.courses.filter(function (d) {
-      return d.day == day_desc.ref && d.prof == tutor;
+      return d.day == day_desc.ref && d.tutors.includes(tutor);
     });
   }
   return [];
@@ -1090,7 +1101,7 @@ function aggregate_hours(tutor, iweek) {
   }
 
   week_desc.courses.filter(function (d) {
-    return d.prof == tutor;
+    return d.tutors.includes(tutor) ;
   }).forEach(function (d) {
     ret[day_shifts[d.day]].duration += d.duration;
   });
@@ -1199,7 +1210,7 @@ function check_constraints_tutor(tutor) {
   var issues = [];
 
   var tut_courses = cours.filter(function (d) {
-    d.prof == tutor;
+    d.tutors.includes(tutor) ;
   });
 
   var icur_week = wdw_weeks.get_iselected_pure();
@@ -1960,11 +1971,24 @@ function add_bouge(pending) {
 }
 
 function has_changed(cb, c) {
-  return cb.day != c.day
+  let except_tutors = cb.day != c.day
     || cb.start != c.start
     || cb.room != c.room
-    || cb.prof != c.prof
     || cb.id_visio != c.id_visio;
+  if (except_tutors) {
+    return true;
+  } else {
+    if (cb.tutors.length != c.tutors.length) {
+      return true ;
+    } else {
+      for (let it = 0 ; it < cb.tutors.length ; it++) {
+        if (cb.tutors[it] != c.tutors[it]) {
+          return true ;
+        }
+      }
+      return false ;
+    }
+  }
 }
 
 

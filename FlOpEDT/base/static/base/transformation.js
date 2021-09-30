@@ -825,7 +825,7 @@ function cours_txt_mid_y(c) {
   return cours_y(c) + .5 * cours_height(c);
 }
 function cours_txt_mid_txt(c) {
-  return c.prof;
+  return c.tutors.join(',');
 }
 function cours_txt_bot_y(c) {
   return cours_y(c) + .75 * cours_height(c);
