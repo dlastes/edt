@@ -1925,8 +1925,10 @@ function select_pref_links_change() {
 
   if (room_tutor_change.proposal.length == 0) {
     console.log('Pas de lien...');
-    window.location.href =
-      url_change_preferred_links + pending.wanted_course.prof ;
+    if (pending.wanted_course.tutors.length > 0) {
+      window.location.href =
+        url_change_preferred_links + pending.wanted_course.tutors[0] ;
+    }
   }
   
   
