@@ -95,7 +95,7 @@ class StabilizeTutorsCourses(TTConstraint):
     def one_line_description(self):
         text = "Minimiser les changements"
         if self.tutors.exists():
-            text += ' pour ' ', '.join([t.username for t in self.tutors.all()])
+            text += ' de ' + ', '.join([t.username for t in self.tutors.all()])
         if self.train_progs.count():
             text += ' en ' + ', '.join([train_prog.abbrev for train_prog in self.train_progs.all()])
         text += ': copie ' + str(self.work_copy)
@@ -150,8 +150,8 @@ class StabilizeGroupsCourses(TTConstraint):
 
     def one_line_description(self):
         text = "Minimiser les changements"
-        if self.tutors.exists():
-            text += ' pour ' ', '.join([t.username for t in self.tutors.all()])
+        if self.groups.exists():
+            text += ' des groupes ' + ', '.join([g.full_name for g in self.groups.all()])
         if self.train_progs.count():
             text += ' en ' + ', '.join([train_prog.abbrev for train_prog in self.train_progs.all()])
         text += ': copie ' + str(self.work_copy)
