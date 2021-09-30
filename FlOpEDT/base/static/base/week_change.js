@@ -736,89 +736,87 @@ function translate_cours_pl_from_json(d, result) {
   if (salles.pl.indexOf(d.room) === -1) {
     salles.pl.push(d.room);
   }
-  for (let i = 0 ; i < d.course.groups.length ; i++)
-  {
-  	if (d.course.groups[i].is_structural==true){
-		  let new_course = {
-		    id_course: +d.course.id,
-		    no_course: +d.course.id,
-		    //        prof_full_name: d.prof_first_name + " " + d.prof_last_name,
-		    group: translate_gp_name(d.course.groups[i].name),
-		    promo: set_promos.indexOf(d.course.groups[i].train_prog),
-		    mod: d.course.module.abbrev,
-		    c_type: d.course.type,
-		    day: d.day,
-		    start: +d.start_time,
-		    duration: constraints[d.course.type].duration,
-		    room: d.room,
-		    room_type: d.course.room_type,
-		    display: true,
-		    id_visio: d.room===null?(d.id_visio===null?-1:+d.id_visio):-1,
-		    graded: d.course.is_graded,
-		    from_transversal: null
-		  } ;
+  for (let i = 0 ; i < d.course.groups.length ; i++) {
+    if (d.course.groups[i].is_structural) {
+      let new_course = {
+        id_course: d.course.id,
+        //        prof_full_name: d.prof_first_name + " " + d.prof_last_name,
+        group: translate_gp_name(d.course.groups[i].name),
+        promo: set_promos.indexOf(d.course.groups[i].train_prog),
+        mod: d.course.module.abbrev,
+        c_type: d.course.type,
+        day: d.day,
+        start: +d.start_time,
+        duration: constraints[d.course.type].duration,
+        room: d.room,
+        room_type: d.course.room_type,
+        display: true,
+        id_visio: d.room===null?(d.id_visio===null?-1:+d.id_visio):-1,
+        graded: d.course.is_graded,
+        from_transversal: null
+      } ;
 
-		  new_course.color_bg = 'white' ;
-		  new_course.color_txt = 'black' ;
-		  new_course.prof = '?' ;
+      new_course.color_bg = 'white' ;
+      new_course.color_txt = 'black' ;
+      new_course.prof = '?' ;
 
-		  if (department_settings.mode.cosmo!==1) {
-		    new_course.prof = d.tutor ;
-		    if(d.course.module !== null && d.course.module.display !== null) {
-		      new_course.color_bg = d.course.module.display.color_bg ;
-		      new_course.color_txt = d.course.module.display.color_txt ;
-		    }
-		  } else {
-		    if(d.tutor !== null && d.tutor.display !== null) {
-		      new_course.prof = d.tutor.username ;
-		      new_course.color_bg = d.tutor.display.color_bg ;
-		      new_course.color_txt = d.tutor.display.color_txt ;
-		    }
-		  }
+      if (department_settings.mode.cosmo !== 1) {
+        new_course.prof = d.tutor ;
+        if(d.course.module !== null && d.course.module.display !== null) {
+          new_course.color_bg = d.course.module.display.color_bg ;
+          new_course.color_txt = d.course.module.display.color_txt ;
+        }
+      } else {
+        if(d.tutor !== null && d.tutor.display !== null) {
+          new_course.prof = d.tutor.username ;
+          new_course.color_bg = d.tutor.display.color_bg ;
+          new_course.color_txt = d.tutor.display.color_txt ;
+        }
+      }
 
-		  if (new_course.prof != '?' &&
-		      tutors.pl.indexOf(new_course.prof) === -1) {
-		    tutors.pl.push(new_course.prof);
-		  }
-		  result.push(new_course);
-		}
-		else{
-			let conflicting_groups = groups[set_promos.indexOf(d.course.groups[i].train_prog)]["transversal"][d.course.groups[i].name]["conflicting_groups"];
-			console.log(conflicting_groups);
-			for (let j=0 ; j < conflicting_groups.length; j++) {
-				let new_course = {
-					id_course: +d.course.id,
-					no_course: +d.course.id,
-					group: translate_gp_name(conflicting_groups[j].name),
-					promo: set_promos.indexOf(d.course.groups[i].train_prog),
-					mod: d.course.module.abbrev,
-					c_type: d.course.type,
-					day: d.day,
-					start: +d.start_time,
-					duration: constraints[d.course.type].duration,
-					room: d.room,
-		    	room_type: d.course.room_type,
-		    	display: true,
-		    	id_visio: d.room===null?(d.id_visio===null?-1:+d.id_visio):-1,
-		    	graded: d.course.is_graded,
-		    	color_bg : 'white',
-		  		color_txt : 'black',
-		  		prof : d.tutor,
-		  		from_transversal: translate_gp_name(d.course.groups[i].name)
-		  	};
-				
-				if(d.course.module !== null && d.course.module.display !== null) {		//Je n'ai pas mis la verification du mode cosmopolitain pour le moment car je pense que ça ne leur servira à rien
-		      new_course.color_bg = d.course.module.display.color_bg ;
-		      new_course.color_txt = d.course.module.display.color_txt ;
-		    }
-				
-				if (new_course.prof != '?' &&
-		      tutors.pl.indexOf(new_course.prof) === -1) {
-		    	tutors.pl.push(new_course.prof);
-		  	}
-				result.push(new_course);
-			}
-		}
+      if (new_course.prof != '?' &&
+          tutors.pl.indexOf(new_course.prof) === -1) {
+        tutors.pl.push(new_course.prof);
+      }
+      result.push(new_course);
+    }
+    else{
+      let conflicting_groups = groups[set_promos.indexOf(d.course.groups[i].train_prog)]["transversal"][d.course.groups[i].name]["conflicting_groups"];
+      console.log(conflicting_groups);
+      for (let j=0 ; j < conflicting_groups.length; j++) {
+        let new_course = {
+          id_course: +d.course.id,
+          no_course: +d.course.id,
+          group: translate_gp_name(conflicting_groups[j].name),
+          promo: set_promos.indexOf(d.course.groups[i].train_prog),
+          mod: d.course.module.abbrev,
+          c_type: d.course.type,
+          day: d.day,
+          start: +d.start_time,
+          duration: constraints[d.course.type].duration,
+          room: d.room,
+          room_type: d.course.room_type,
+          display: true,
+          id_visio: d.room===null?(d.id_visio===null?-1:+d.id_visio):-1,
+          graded: d.course.is_graded,
+          color_bg : 'white',
+          color_txt : 'black',
+          prof : d.tutor,
+          from_transversal: translate_gp_name(d.course.groups[i].name)
+        };
+        
+        if(d.course.module !== null && d.course.module.display !== null) {        	//Je n'ai pas mis la verification du mode cosmopolitain pour le moment car je pense que ça ne leur servira à rien
+          new_course.color_bg = d.course.module.display.color_bg ;
+          new_course.color_txt = d.course.module.display.color_txt ;
+        }
+        
+        if (new_course.prof != '?' &&
+            tutors.pl.indexOf(new_course.prof) === -1) {
+          tutors.pl.push(new_course.prof);
+        }
+        result.push(new_course);
+      }
+    }
   }
 }
 
@@ -833,53 +831,53 @@ function translate_cours_pp_from_json(d, result) {
     salles.pp.push(d.room);
   }
   for (let i = 0 ; i < d.groups.length ; i++) {
-  	if (d.groups[i].is_structural==true) {
-			let new_course = {
-				id_course: +d.id,
-                no_course: +d.no,
-                prof: d.tutor,
-                group: translate_gp_name(d.groups[i].name),
-                promo: set_promos.indexOf(d.groups[i].train_prog),
-                mod: d.module.abbrev,
-                c_type: d.type.name,
-                day: garbage.day,
-                start: garbage.start,
-                duration: constraints[d.type.name].duration,
-                room: null,
-                id_visio: -1,
-                room_type: d.room_type,
-                color_bg: d.module.display.color_bg,
-                color_txt: d.module.display.color_txt,
-                display: true,
-                graded: d.is_graded,
-                from_transversal: null
-			}
-			result.push(new_course);
+    if (d.groups[i].is_structural==true) {
+      let new_course = {
+        id_course: +d.id,
+        no_course: +d.no,
+        prof: d.tutor,
+        group: translate_gp_name(d.groups[i].name),
+        promo: set_promos.indexOf(d.groups[i].train_prog),
+        mod: d.module.abbrev,
+        c_type: d.type.name,
+        day: garbage.day,
+        start: garbage.start,
+        duration: constraints[d.type.name].duration,
+        room: null,
+        id_visio: -1,
+        room_type: d.room_type,
+        color_bg: d.module.display.color_bg,
+        color_txt: d.module.display.color_txt,
+        display: true,
+        graded: d.is_graded,
+        from_transversal: null
+      } ;
+      result.push(new_course);
     } else {
-			let conflicting_groups = groups[set_promos.indexOf(d.groups[i].train_prog)]["transversal"][d.groups[i].name]["conflicting_groups"];
-			for (let j=0 ; j < conflicting_groups.length; j++) {
-				let new_course = {
-					id_course: +d.id,
-					no_course: +d.id,
-					group: translate_gp_name(conflicting_groups[j].name),
-					promo: set_promos.indexOf(d.groups[i].train_prog),
-					mod: d.module.abbrev,
-					c_type: d.type.name,
-					day: garbage.day,
-					start: garbage.start,  
-					duration: d.type.duration,
-                	room: null,
-                    id_visio: -1,
-					room_type: d.room_type,
-		    	    display: true,
-		    	    graded: d.is_graded,
-                    color_bg: d.module.display.color_bg,
-                    color_txt: d.module.display.color_txt,
-                    prof : d.tutor,
-                    from_transversal: translate_gp_name(d.groups[i].name)
-				}
-				result.push(new_course);	
-			}
+      let conflicting_groups = groups[set_promos.indexOf(d.groups[i].train_prog)]["transversal"][d.groups[i].name]["conflicting_groups"];
+      for (let j=0 ; j < conflicting_groups.length; j++) {
+        let new_course = {
+          id_course: +d.id,
+          no_course: +d.id,
+          group: translate_gp_name(conflicting_groups[j].name),
+          promo: set_promos.indexOf(d.groups[i].train_prog),
+          mod: d.module.abbrev,
+          c_type: d.type.name,
+          day: garbage.day,
+          start: garbage.start,  
+          duration: d.type.duration,
+          room: null,
+          id_visio: -1,
+          room_type: d.room_type,
+          display: true,
+          graded: d.is_graded,
+          color_bg: d.module.display.color_bg,
+          color_txt: d.module.display.color_txt,
+          prof : d.tutor,
+          from_transversal: translate_gp_name(d.groups[i].name)
+        } ;
+        result.push(new_course);        
+      }
     }
   }
 }
