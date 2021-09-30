@@ -342,10 +342,13 @@ function select_tutor_module_change() {
   room_tutor_change.cm_settings = tutor_module_cm_settings;
 
   var c = pending.wanted_course;
-  room_tutor_change.old_value = c.prof;
-  room_tutor_change.cur_value = c.prof;
 
-  var tutor_same_module = cours
+  room_tutor_change.old_value = null ;
+  if (c.tutors.length > 0) {
+    room_tutor_change.old_value = c.tutors[0];
+  }
+  room_tutor_change.cur_value = room_tutor_change.old_value ;
+
     .filter(function (oth_c) {
       return oth_c.mod == c.mod;
     })
