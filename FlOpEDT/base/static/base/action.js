@@ -2107,6 +2107,11 @@ function show_detailed_courses(cours) {
     }
   }
   
+  // TBD supp_tutor
+  let tutor = null ;
+  if (cours.tutors.length > 0) {
+    tutor = cours.tutors[0] ;
+  }
   let infos = [
     {
       'txt': modinfo.name,
@@ -2117,7 +2122,7 @@ function show_detailed_courses(cours) {
     {'txt': tutinfo.name},
     {
       'txt': tutinfo.mail,
-      'url': url_contact + cours.prof
+      'url': tutor==null?url_contact:(url_contact + tutor)
     },
   ]; 
   
