@@ -1024,6 +1024,13 @@ function update_selection() {
     var mod = modules.all.find(function(d) {
       return d.name == c.mod ;
     });
+    let tut_display = false ;
+    for(let it = 0 ; it < tutors.all.length && !tut_display ; it++) {
+      if (c.tutors.includes(tutors.all[it].name) &&
+         tutors.all[it].display) {
+        tut_display = true ;
+      }
+    }
     var tut = tutors.all.find(function(d) {
       return c.tutors.includes(d.name) ;
     });
@@ -1039,11 +1046,11 @@ function update_selection() {
         return false;
       }
     });
-    if (typeof mod === 'undefined' || typeof tut === 'undefined'
+    if (typeof mod === 'undefined'
         || typeof roo === 'undefined') {
       c.display = false ;
     } else {
-      c.display = mod.display && tut.display && roo.display ;
+      c.display = mod.display && tut_display && roo.display ;
     }
   });
 }
