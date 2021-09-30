@@ -1376,7 +1376,7 @@ function check_course() {
       
       // tutor availability
       if (!check_tutor_free_week(ret, tutor)) {
-        check_tutor_preferences(ret) ;
+        check_tutor_preferences(ret, tutor) ;
         check_tutor_busy_other_departments(ret, tutor) ;
       }
     }
@@ -1470,7 +1470,7 @@ function check_tutor_busy(issues, possible_conflicts, tutor) {
 
 
 // tutor teaches already in another department
-function check_tutor_busy_other_departments(issues) {
+function check_tutor_busy_other_departments(issues, tutor) {
   let extra_unavailable = find_in_pref(
     extra_pref.tutors,
     tutor,
