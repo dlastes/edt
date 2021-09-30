@@ -2134,7 +2134,11 @@ function show_detailed_courses(cours) {
     
     for (let i=1; i<overlapping_courses.length; i++) {
       infos.push( {'txt':overlapping_courses[i]["mod"] + ' - '
-                   + overlapping_courses[i]["from_transversal"] + ' - ' +overlapping_courses[i]["prof"] + ' - '+overlapping_courses[i]["start"]/60+"h à "+(overlapping_courses[i]["start"]+overlapping_courses[i]["duration"])/60+"h"} );
+                   + overlapping_courses[i]["from_transversal"] + ' - '
+                   + overlapping_courses[i]["prof"] + ' - '
+                   + overlapping_courses[i]["start"]/60+"h à "
+                   +(overlapping_courses[i]["start"]
+                     +overlapping_courses[i]["duration"])/60+"h"} );
       infos.push( {'txt':''});
     }
   }
