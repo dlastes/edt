@@ -112,7 +112,7 @@ class ScheduledCoursesViewSet(viewsets.ReadOnlyModelViewSet):
                                                    'course__module__display')\
                                    .prefetch_related('course__groups__train_prog',
                                                      'room',
-                                                     'course__supp_tutor__username')
+                                                     'course__supp_tutor')
         queryset = queryset.filter(work_copy=work_copy)
         # sanity check
         if group_name is not None and self.train_prog is None:
