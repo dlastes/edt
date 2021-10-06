@@ -1083,6 +1083,7 @@ function fetch_room_preferences() {
       if (Week.compare(exp_week, sel_week) == 0) {
         clean_unavailable_rooms();
         d3.csvParse(msg, translate_unavailable_rooms);
+        sort_preferences(unavailable_rooms);
       }
       show_loader(false);
       fetch_status.ongoing_un_rooms = false;
