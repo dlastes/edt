@@ -738,10 +738,15 @@ function translate_cours_pl_from_json(d, result) {
   }
 
 
-  // pre-process supplementary tutors
-  d.tutors = d.course.supp_tutor.map(function(st) {
-    return st.username ;
-  });
+  if (department_settings.mode.cosmo==0) {
+      // pre-process supplementary tutors
+      d.tutors = d.course.supp_tutor.map(function (st) {
+        return st.username;
+      });
+  }
+  else{
+    d.tutors=[];
+  }
 
   // pre-process colors
   d.color_bg = 'white' ;
