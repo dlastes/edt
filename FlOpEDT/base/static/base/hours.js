@@ -87,6 +87,8 @@ function HourHeader(svg, layout_name, hours) {
   this.layout = svg.get_dom(layout_name).append("g").attr("class", "hour-scale");
   this.hours = hours;
   this.mix = new HourMix(this.hours.settings);
+  // free_text: list of {texts: list of string, time: {min: int, hd }}
+  this.free_text = [] ;
   hard_bind(this.mix);
 }
 
