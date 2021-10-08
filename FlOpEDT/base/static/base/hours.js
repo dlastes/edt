@@ -23,7 +23,7 @@
 
 
 function Hours(settings) {
-  // side time scale: list of {h: int, hd:('am'|'pm')}
+  // side time scale: list of {min: int, hd:('am'|'pm')}
   this.data = [];
   this.settings = settings ;
 
