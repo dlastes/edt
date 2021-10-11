@@ -49,17 +49,17 @@ pour une promotion particulière ou pour toutes (laisser vide), etc...
 
 ### Contraintes de base
 Ces contraintes sont enregistrées automatiquement à la première génération puis appliquées par défaut (il est possible néanmoins de les désactiver):
-- Assign all courses :
+- Assign all courses : affecter un prof à chaque cours (ou seulement à ceux correspondants aux filtres)
 - ConsiderDependencies : prend en compte les dépendance entre cours (Dependecy) enregistrées en base
-- Consider pivots :
-- Consider tutors unavailabilities :
+- Consider pivots :prend en compte les pivots enregistrées en base
+- Consider tutors unavailabilities : prend en compte les indispos (sens interdits) des profs
 - Min groups half days : tente de libérer une/plusieurs demie-journées aux étudiant⋅e⋅s
 - Min non prefered train progs slots : considère les indisponibilités et minimise les créneaux non préférés pour les groupes
 - Min non prefered tutors slots	: minimise les créneaux non préférés pour les profs
 - Minimize busy days: minimise les jours de présence des profs (en respectant leur journée idéale)
-- No simultaneous group courses :
+- No simultaneous group courses : évite qu'un groupe ait 2 cours en même temps
 - Respecter les limites horaires : respecte la limite maximale définie par les profs
-- Schedule all courses :
+- Schedule all courses : planifie tous les cours (ou seulement à ceux correspondants aux filtres)
 
 ### Autres contraintes génériques
 
@@ -69,7 +69,7 @@ Ces contraintes sont enregistrées automatiquement à la première génération 
 un ou plusieurs groupes.
 - Limit modules time per periods : idem pour une ou plusieurs matières (éventuellement par promo) 
 - Limit tutors time per periods	: idem, pour les enseignant⋅e⋅s / salarié⋅e⋅s
-- Limit undesired slots per weeks :
+- Limit undesired slots per weeks : limite le nombre d'utilisation d'un certain créneau par semaine
 - Limited room choices	: limite les salles possibles (pour un enseignant, un module, ...)
 - Limited start time choices: limite les heures de début possible 
 - Min modules half days : minimise les demie-journées pour les modules choisis
@@ -77,8 +77,9 @@ un ou plusieurs groupes.
 - No group course on day: permet d'interdire tout cours sur une journée/demie-journée
 - No tutor course on day: idem, pour les enseignant⋅e⋅s / salarié⋅e⋅s
 - Simultaneous courses : impose qu'un ensemble de cours donnés soient simultanés
-- Stabilize groups courses :
-- Stabilize tutors courses :
+- Stabilize groups courses : évite de changer l'occupation du temps des groupes
+- Stabilize tutors courses : évite de changer l'occupation du temps des profs
+- Lower bound busy days : assure qu'un prof vienne au moins n jours
 
 ### Contraintes spécifiques au mode Visio
 - Bound Physical presence half days: met des bornes (min/max) sur le nombre de demies-journées de présene sur site pour les groupes d'étudiant⋅e⋅s
@@ -87,11 +88,12 @@ un ou plusieurs groupes.
 - No Visio: force les cours concernés à être en présentiel
 - Visio Only: force les cours concernés à être en visio
 
-### Contraintes très spécifiques
-- Break around course types 
+### Contraintes spécifiques au mode Cosmo
 - Limit holes :
 - Limit tutor time per weeks :
-- Lower bound busy days :
+
+### Contraintes très spécifiques
+- Break around course types :
 - Modules by blocs :
 
 
