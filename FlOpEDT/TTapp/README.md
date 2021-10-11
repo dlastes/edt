@@ -6,8 +6,12 @@ ses indisponibilités et préférences de créneaux, ainsi que quelques autres p
 2. La personne responsable de l'emploi du temps d'un département peut ajouter des contraintes/préférences
 générales ou spécifiques en appliquant une des contraintes paramétrables présentes dans l'interface d'administration.
 
-En fait il y'en aurait une troisième, qui consiste en la définition de nouvelles contraintes ad hoc, 
-mais cela nécessite de mettre les mains dans le code...
+En fait il y'en aurait une troisième, qui consiste en la définition de nouvelles contraintes ad hoc, qui une fois
+définies serait accessibles à tou⋅te⋅s via le 2., mais cela nécessite de mettre les mains dans le code... 
+Si vous êtes intéressé⋅e par ça, regardez [cette vidéo](https://link.infini.fr/creer-ses-contraintes-dans-flopedt) 
+(un peu longue, mais détaillée) et n'hésitez pas à 
+[nous rejoindre sur framateam](https://framateam.org/signup_user_complete/?id=6bf6j8kzbpbfdye6uy3646p7ya) pour qu'on
+puisse vous aider...
 
 
 ## Saisie des indisponibilités et préférences par les utilisateur⋅ice⋅s
@@ -45,27 +49,36 @@ pour une promotion particulière ou pour toutes (laisser vide), etc...
 
 ### Contraintes de base
 Ces contraintes sont enregistrées automatiquement à la première génération puis appliquées par défaut (il est possible néanmoins de les désactiver):
+- Assign all courses :
+- ConsiderDependencies : prend en compte les dépendance entre cours (Dependecy) enregistrées en base
+- Consider pivots :
+- Consider tutors unavailabilities :
+- Min groups half days : tente de libérer une/plusieurs demie-journées aux étudiant⋅e⋅s
 - Min non prefered train progs slots : considère les indisponibilités et minimise les créneaux non préférés pour les groupes
 - Min non prefered tutors slots	: minimise les créneaux non préférés pour les profs
 - Minimize busy days: minimise les jours de présence des profs (en respectant leur journée idéale)
-- Respecter les limites horaires: respecte la limite maximale définie par les profs
-- Min groups half days: tente de libérer une/plusieurs demie-journées aux étudiant⋅e⋅s 
-- ConsiderDependencies: prend en compte les dépendance entre cours (Dependecy) enregistrées en base
+- No simultaneous group courses :
+- Respecter les limites horaires : respecte la limite maximale définie par les profs
+- Schedule all courses :
 
 ### Autres contraintes génériques
 
-- Groups lunch breaks: force une pause d'une durée définie entre telle heure et telle heure pour les groupes choisis
-- Tutors lunch breaks: idem, pour les enseignant⋅e⋅s / salarié⋅e⋅s
+- Groups lunch breaks : force une pause d'une durée définie entre telle heure et telle heure pour les groupes choisis
+- Tutors lunch breaks : idem, pour les enseignant⋅e⋅s / salarié⋅e⋅s
 - Limit groups time per periods	: limite le nombre d'heures (d'un type donné) par jour/demie-journée pour
 un ou plusieurs groupes.
 - Limit modules time per periods : idem pour une ou plusieurs matières (éventuellement par promo) 
 - Limit tutors time per periods	: idem, pour les enseignant⋅e⋅s / salarié⋅e⋅s
+- Limit undesired slots per weeks :
 - Limited room choices	: limite les salles possibles (pour un enseignant, un module, ...)
 - Limited start time choices: limite les heures de début possible 
+- Min modules half days : minimise les demie-journées pour les modules choisis
 - Min tutors half days : minimise les demie-journées de présence/cours pour les profs choisis
-- Simultaneous courses : impose qu'un ensemble de cours donnés soient simultanés
 - No group course on day: permet d'interdire tout cours sur une journée/demie-journée
 - No tutor course on day: idem, pour les enseignant⋅e⋅s / salarié⋅e⋅s
+- Simultaneous courses : impose qu'un ensemble de cours donnés soient simultanés
+- Stabilize groups courses :
+- Stabilize tutors courses :
 
 ### Contraintes spécifiques au mode Visio
 - Bound Physical presence half days: met des bornes (min/max) sur le nombre de demies-journées de présene sur site pour les groupes d'étudiant⋅e⋅s
@@ -74,11 +87,24 @@ un ou plusieurs groupes.
 - No Visio: force les cours concernés à être en présentiel
 - Visio Only: force les cours concernés à être en visio
 
+### Contraintes très spécifiques
+- Break around course types 
+- Limit holes :
+- Limit tutor time per weeks :
+- Lower bound busy days :
+- Modules by blocs :
+
 
 ### Spoiler alert
 Vous ne trouverez probablement pas toutes les contraintes qui vous intéresseront dans cette liste. 
 De nombreuses autres contraintes sont sur le point d'être ajoutées (on y travaille!). Si vous voulez nous y aider,
-ou simplement nous proposer une nouvelle contrainte qui vous serez utile, [contactez-nous!](mailto:contact@flopedt.org) 
+vous pouvez 
+- simplement nous proposer une nouvelle contrainte qui vous serait utile en 
+[nous envoyant un mail](mailto:contact@flopedt.org) 
+- tenter d'en coder une vous-même en regardant [cette vidéo](https://link.infini.fr/creer-ses-contraintes-dans-flopedt) 
+(un peu longue, mais détaillée) et en
+[nous rejoignant sur framateam](https://framateam.org/signup_user_complete/?id=6bf6j8kzbpbfdye6uy3646p7ya) pour qu'on
+puisse vous aider.
 
 
 ## Vérifier que les contraintes sont bien prises en compte
@@ -87,5 +113,3 @@ Dans l'onglet `Générer` elles apparaîtront en une phrase compréhensible, lor
 concerne uniquement cette semaine, ou qu'elles les concernent toutes.)
 
 ![Solve board](static/TTapp/solve_board.gif)
-
-:bulb: Dans le cas de choix de semaines multiples, les contraintes n'apparaissent pas mais sont prises en compte.
