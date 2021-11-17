@@ -1423,8 +1423,9 @@ def send_email_proposal(req, **kwargs):
         return bad_response
 
     try:
-        week = json.loads(req.POST.get('week'))
+        week_nb = json.loads(req.POST.get('week'))
         year = json.loads(req.POST.get('year'))
+        week = Week.objects.get(nb=week_nb, year=year)
         work_copy = json.loads(req.POST.get('work_copy'))
         initiator = User.objects.get(username=req.user.username)
     except:
@@ -1446,7 +1447,7 @@ def send_email_proposal(req, **kwargs):
     
     try:
         for change in recv_changes:
-            new_courses = clean_change(year, week, 0, change, work_copy=work_copy,
+            new_courses = clean_change(week, 0, change, work_copy=work_copy,
                                        initiator=initiator, apply=False)
             same, changed = new_courses['log'].strs_course_changes(course=new_courses['course'],
                                                                    sched_course=new_courses['sched'])
