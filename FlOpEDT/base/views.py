@@ -601,7 +601,6 @@ def fetch_decale(req, **kwargs):
     department = req.department
 
     try:
-        print(group_name, training_programme)
         group = StructuralGroup.objects.get(
             name=group_name,
             train_prog__abbrev=training_programme,
