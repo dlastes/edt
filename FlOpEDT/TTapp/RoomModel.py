@@ -238,6 +238,18 @@ class RoomModel(FlopModel):
 
         return cost_I, cost_G, cost_SL, generic_cost
 
+    def add_to_slot_cost(self, slot, cost):
+        self.cost_SL[slot] += cost
+
+    def add_to_inst_cost(self, instructor, cost, week=None):
+        self.cost_I[instructor][week] += cost
+
+    def add_to_group_cost(self, group, cost, week=None):
+        self.cost_G[group][week] += cost
+
+    def add_to_generic_cost(self, cost, week=None):
+        self.generic_cost[week] += cost
+
     @timer
     def add_rooms_constraints(self):
         # constraint : each Room is used at most once, if available, on every slot

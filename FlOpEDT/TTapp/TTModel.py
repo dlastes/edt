@@ -23,7 +23,6 @@
 # a commercial license. Buying such a license is mandatory as soon as
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
-import os, fnmatch, re
 
 from django.core.mail import EmailMessage
 
@@ -41,7 +40,7 @@ from TTapp.models import MinNonPreferedTutorsSlot, StabilizeTutorsCourses, MinNo
 from TTapp.TTConstraint import max_weight
 from TTapp.slots import slots_filter, days_filter
 
-from TTapp.weeks_database import WeeksDatabase
+from TTapp.WeeksDatabase import WeeksDatabase
 
 
 from django.db import close_old_connections

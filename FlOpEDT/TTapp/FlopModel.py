@@ -23,59 +23,18 @@
 # a commercial license. Buying such a license is mandatory as soon as
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
-import os, fnmatch, re
+import os, fnmatch
 
-from django.core.mail import EmailMessage
 from pulp import LpVariable, LpConstraint, LpBinary, LpConstraintEQ, \
     LpConstraintGE, LpConstraintLE, LpAffineExpression, LpProblem, LpStatus, \
     LpMinimize, lpSum, LpStatusOptimal, LpStatusNotSolved
-
 import pulp
 from pulp import GUROBI_CMD
-
-from base.models import StructuralGroup, \
-    Room, RoomSort, RoomType, RoomPreference, \
-    Course, ScheduledCourse, UserPreference, CoursePreference, \
-    Department, Module, TrainingProgramme, CourseType, \
-    Dependency, TutorCost, GroupFreeHalfDay, GroupCost, Holiday, TrainingHalfDay, \
-    CourseStartTimeConstraint, TimeGeneralSettings, ModulePossibleTutors, CoursePossibleTutors, \
-    ModuleTutorRepartition, ScheduledCourseAdditional
-
-from base.timing import Time
-
-from people.models import Tutor
-
-from TTapp.models import MinNonPreferedTutorsSlot, StabilizeTutorsCourses, MinNonPreferedTrainProgsSlot, \
-    NoSimultaneousGroupCourses, ScheduleAllCourses, AssignAllCourses, ConsiderTutorsUnavailability, \
-    MinimizeBusyDays, MinGroupsHalfDays, RespectBoundPerDay, ConsiderDependencies, ConsiderPivots, \
-    StabilizeGroupsCourses
-from TTapp.TTConstraint import max_weight
-from TTapp.slots import slots_filter, days_filter
-
-from TTapp.weeks_database import WeeksDatabase
-
-from MyFlOp.MyTTUtils import reassign_rooms
-
 import signal
-
-from django.db import close_old_connections
-from django.db.models import Q, Max, F
-from django.conf import settings
-
-import datetime
-
 import logging
-
 from TTapp.ilp_constraints.constraintManager import ConstraintManager
 from TTapp.ilp_constraints.constraint import Constraint
 from TTapp.ilp_constraints.constraint_type import ConstraintType
-from TTapp.ilp_constraints.constraints.courseConstraint import CourseConstraint
-
-
-from TTapp.ilp_constraints.constraints.dependencyConstraint import DependencyConstraint
-from TTapp.ilp_constraints.constraints.instructorConstraint import InstructorConstraint
-from TTapp.ilp_constraints.constraints.simulSlotGroupConstraint import SimulSlotGroupConstraint
-from TTapp.ilp_constraints.constraints.slotInstructorConstraint import SlotInstructorConstraint
 
 from FlOpEDT.decorators import timer
 
@@ -203,9 +162,6 @@ class FlopModel(object):
             self.warnings[key].append(warning)
         else:
             self.warnings[key] = [warning]
-
-    def update_objective(self):
-        self.set_objective(self.obj)
 
     def solution_files_prefix(self):
         raise NotImplementedError
