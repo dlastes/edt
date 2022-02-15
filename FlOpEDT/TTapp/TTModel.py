@@ -26,12 +26,6 @@
 import os, fnmatch, re
 
 from django.core.mail import EmailMessage
-from pulp import LpVariable, LpConstraint, LpBinary, LpConstraintEQ, \
-    LpConstraintGE, LpConstraintLE, LpAffineExpression, LpProblem, LpStatus, \
-    LpMinimize, lpSum, LpStatusOptimal, LpStatusNotSolved
-
-import pulp
-from pulp import GUROBI_CMD
 
 from base.models import RoomType, RoomPreference, ScheduledCourse, Department, TrainingProgramme, \
     TutorCost, GroupFreeHalfDay, GroupCost, TimeGeneralSettings, ModuleTutorRepartition, ScheduledCourseAdditional
@@ -49,16 +43,12 @@ from TTapp.slots import slots_filter, days_filter
 
 from TTapp.weeks_database import WeeksDatabase
 
-import signal
 
 from django.db import close_old_connections
 from django.db.models import Q, Max, F
 
 import datetime
 
-import logging
-
-from TTapp.ilp_constraints.constraintManager import ConstraintManager
 from TTapp.ilp_constraints.constraint import Constraint
 from TTapp.ilp_constraints.constraint_type import ConstraintType
 from TTapp.ilp_constraints.constraints.courseConstraint import CourseConstraint
@@ -67,14 +57,7 @@ from TTapp.ilp_constraints.constraints.slotInstructorConstraint import SlotInstr
 
 from FlOpEDT.decorators import timer
 
-from TTapp.FlopModel import FlopModel
-
-logger = logging.getLogger(__name__)
-pattern = r".+: (.|\s)+ (=|>=|<=) \d*"
-GUROBI = 'GUROBI'
-GUROBI_NAME = 'GUROBI_CMD'
-solution_files_path = "misc/logs/solutions"
-
+from TTapp.FlopModel import FlopModel, GUROBI_NAME, solution_files_path
 
 class TTModel(FlopModel):
     @timer
@@ -514,6 +497,10 @@ class TTModel(FlopModel):
 
     @timer
     def add_rooms_ponderations_constraints(self):
+        considered_courses = set(self.wdb.courses)
+        if self.department.mode.visio:
+            considered_courses -= set(self.wdb.visio_courses)
+
         for rooms_ponderation in self.wdb.rooms_ponderations:
             room_types_id_list = rooms_ponderation.room_types
             room_types_list = [RoomType.objects.get(id=id) for id in room_types_id_list]
@@ -531,8 +518,8 @@ class TTModel(FlopModel):
                     expr += ponderation * self.sum(self.TT[s_sl, c]
                                                    for s_sl in slots_filter(self.wdb.courses_slots, simultaneous_to=sl)
                                                    for c in self.wdb.courses_for_room_type[room_type]
+                                                   & considered_courses
                                                    & self.wdb.compatible_courses[s_sl]
-
                                                    )
                 self.add_constraint(
                     expr, '<=', bound, Constraint()
