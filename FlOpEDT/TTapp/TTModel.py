@@ -37,7 +37,10 @@ from TTapp.models import MinNonPreferedTutorsSlot, StabilizeTutorsCourses, MinNo
     NoSimultaneousGroupCourses, ScheduleAllCourses, AssignAllCourses, ConsiderTutorsUnavailability, \
     MinimizeBusyDays, MinGroupsHalfDays, RespectBoundPerDay, ConsiderDependencies, ConsiderPivots, \
     StabilizeGroupsCourses
-from TTapp.TTConstraint import max_weight
+
+from TTapp.TTConstraints.TTConstraint import TTConstraint
+from TTapp.FlopConstraint import max_weight, all_subclasses
+
 from TTapp.slots import slots_filter, days_filter
 
 from TTapp.WeeksDatabase import WeeksDatabase
@@ -56,7 +59,8 @@ from TTapp.ilp_constraints.constraints.slotInstructorConstraint import SlotInstr
 
 from FlOpEDT.decorators import timer
 
-from TTapp.FlopModel import FlopModel, GUROBI_NAME, solution_files_path
+from TTapp.FlopModel import FlopModel, GUROBI_NAME
+
 
 class TTModel(FlopModel):
     @timer
@@ -1131,7 +1135,6 @@ def get_constraints(department, week=None, train_prog=None, is_active=None):
         query &= Q(weeks=week) | Q(weeks__isnull=True)
 
     # Look up the TTConstraint subclasses records to update
-    from TTapp.TTConstraint import TTConstraint, all_subclasses
     types = all_subclasses(TTConstraint)
     for t in types:
         queryset = t.objects.filter(query)
