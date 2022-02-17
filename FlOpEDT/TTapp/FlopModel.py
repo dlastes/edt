@@ -49,7 +49,6 @@ solution_files_path = "misc/logs/solutions"
 
 
 class FlopModel(object):
-    @timer
     def __init__(self, department_abbrev, weeks, keep_many_solution_files=False):
         self.department = Department.objects.get(abbrev=department_abbrev)
         self.weeks = weeks

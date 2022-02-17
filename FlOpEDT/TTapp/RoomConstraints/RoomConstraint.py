@@ -205,12 +205,17 @@ class LocateAllCourses(RoomConstraint):
         for course in considered_courses:
             relevant_sum = room_model.sum(room_model.TTrooms[(course, room)]
                                           for room in room_model.course_room_compat[course])
-            room_model.add_constraint(relevant_sum, '==', 1, Constraint(constraint_type=ConstraintType.CORE_ROOMS))
+            room_model.add_constraint(relevant_sum, '==', 1, Constraint(constraint_type=ConstraintType.CORE_ROOMS,
+                                                                        courses=course.course))
 
 
 class LimitMoves(RoomConstraint):
     class Meta:
         abstract = True
+
+    @property
+    def ponderation(self):
+        raise NotImplementedError
 
     def objects_to_consider(self, room_model):
         raise NotImplementedError
@@ -232,7 +237,7 @@ class LimitMoves(RoomConstraint):
                     same = room_model.sum(room_model.add_conjunct(room_model.TTrooms[(course, room)],
                                                                   room_model.TTrooms[(successor, room)])
                                           for room in common_rooms)
-                    cost = - self.local_weight() * ponderation * same
+                    cost = - self.ponderation * self.local_weight() * ponderation * same
                     self.add_to_obj_method(room_model)(thing, cost, week)
 
 
@@ -248,6 +253,9 @@ class LimitGroupMoves(LimitMoves):
     def add_to_obj_method(self, room_model):
         return room_model.add_to_group_cost
 
+    @property
+    def ponderation(self):
+        return 2
 
 class LimitTutorMoves(LimitMoves):
     tutors = models.ManyToManyField('people.Tutor', blank=True)
@@ -260,6 +268,10 @@ class LimitTutorMoves(LimitMoves):
 
     def add_to_obj_method(self, room_model):
         return room_model.add_to_inst_cost
+
+    @property
+    def ponderation(self):
+        return 1
 
 def considered_tutors(tutors_room_constraint, room_model):
     tutors_to_consider = set(room_model.tutors)

@@ -60,7 +60,9 @@ from TTapp.ilp_constraints.constraints.slotInstructorConstraint import SlotInstr
 from FlOpEDT.decorators import timer
 
 from TTapp.FlopModel import FlopModel, GUROBI_NAME
+from TTapp.RoomModel import RoomModel
 
+from misc.room_types_constraints import register_ponderations_in_database
 
 class TTModel(FlopModel):
     @timer
@@ -79,7 +81,8 @@ class TTModel(FlopModel):
                  slots_step=None,
                  keep_many_solution_files=False,
                  min_visio=0.5,
-                 with_rooms=True):
+                 pre_assign_rooms=True,
+                 post_assign_rooms=True):
         # beg_file = os.path.join('logs',"FlOpTT")
         super(TTModel, self).__init__(department_abbrev, weeks, keep_many_solution_files=keep_many_solution_files)
         # Create the PuLP model, giving the name of the lp file
@@ -94,7 +97,8 @@ class TTModel(FlopModel):
         self.send_mails = send_mails
         self.slots_step = slots_step
         self.min_visio = min_visio
-        self.with_rooms = with_rooms
+        self.pre_assign_rooms = pre_assign_rooms
+        self.post_assign_rooms = post_assign_rooms
 
         print("\nLet's start weeks #%s" % self.weeks)
 
@@ -117,10 +121,10 @@ class TTModel(FlopModel):
         self.possible_apms = self.wdb.possible_apms
         self.cost_I, self.FHD_G, self.cost_G, self.cost_SL, self.generic_cost = self.costs_init()
         self.TT, self.TTinstructors = self.TT_vars_init()
-        if self.with_rooms:
+        if self.pre_assign_rooms:
             self.TTrooms = self.TTrooms_init()
         self.IBD, self.IBD_GTE, self.IBHD, self.GBHD, self.IBS, self.forced_IBD = self.busy_vars_init()
-        if self.with_rooms:
+        if self.pre_assign_rooms:
             if self.department.mode.visio:
                 self.physical_presence, self.has_visio = self.visio_vars_init()
         self.avail_instr, self.avail_at_school_instr, self.unp_slot_cost \
@@ -365,8 +369,6 @@ class TTModel(FlopModel):
                   self.stabilize_work_copy)
             st.delete()
             sg.delete()
-        else:
-            print('No stabilization')
 
     @timer
     def add_core_constraints(self):
@@ -436,7 +438,7 @@ class TTModel(FlopModel):
                     # avail_at_school_instr consideration...
                     relevant_courses = set(c for c in self.wdb.possible_courses[i]
                                            if None in self.wdb.course_rg_compat[c])
-                    if self.with_rooms:
+                    if self.pre_assign_rooms:
                         self.add_constraint(
                             self.sum(self.TTinstructors[(sl2, c2, i)] - self.TTrooms[(sl2, c2, None)]
                                      for sl2 in slots_filter(self.wdb.courses_slots, simultaneous_to=sl)
@@ -501,6 +503,9 @@ class TTModel(FlopModel):
         considered_courses = set(self.wdb.courses)
         if self.department.mode.visio:
             considered_courses -= set(self.wdb.visio_courses)
+
+        if not self.wdb.rooms_ponderations:
+            register_ponderations_in_database(self.department)
 
         for rooms_ponderation in self.wdb.rooms_ponderations:
             room_types_id_list = rooms_ponderation.room_types
@@ -883,7 +888,7 @@ class TTModel(FlopModel):
         # Has to be before add_rooms_constraints and add_instructors_constraints
         # because it contains rooms/instructors availability modification...
         self.add_other_departments_constraints()
-        if self.with_rooms:
+        if self.pre_assign_rooms:
             if not self.department.mode.cosmo:
                 self.add_rooms_constraints()
         else:
@@ -893,7 +898,7 @@ class TTModel(FlopModel):
 
         if self.core_only:
             return
-        if self.with_rooms:
+        if self.pre_assign_rooms:
             if self.department.mode.visio:
                 self.add_visio_room_constraints()
 
@@ -932,7 +937,7 @@ class TTModel(FlopModel):
                                 c.groups.add(corresponding_group[i])
                             break
                     if not self.department.mode.cosmo:
-                        if self.with_rooms:
+                        if self.pre_assign_rooms:
                             for rg in self.wdb.course_rg_compat[c]:
                                 if self.get_var_value(self.TTrooms[(sl, c, rg)]) == 1:
                                     cp.room = rg
@@ -1020,7 +1025,7 @@ class TTModel(FlopModel):
                                              start_time=sl.start_time,
                                              day=sl.day.day,
                                              work_copy=target_work_copy)
-                        if self.with_rooms:
+                        if self.pre_assign_rooms:
                             for rg in self.wdb.course_rg_compat[c]:
                                 if self.TTrooms[(sl, c, rg)].getName() in solution_file_one_vars_set:
                                     cp.room = rg
@@ -1057,11 +1062,7 @@ class TTModel(FlopModel):
 
         self.update_objective()
 
-        print("Optimization started at", \
-              datetime.datetime.today().strftime('%Hh%M'))
         result = self.optimize(time_limit, solver, threads=threads)
-        print("Optimization ended at", \
-              datetime.datetime.today().strftime('%Hh%M'))
 
         if result is not None:
 
@@ -1072,9 +1073,10 @@ class TTModel(FlopModel):
                     target_work_copy = self.choose_free_work_copy()
 
             self.add_tt_to_db(target_work_copy)
-            # for week in self.weeks:
-                # reassign_rooms(self.department, week, target_work_copy)
             print("Added work copy N°%g" % target_work_copy)
+            if self.post_assign_rooms:
+                RoomModel(self.department.abbrev, self.weeks, target_work_copy).solve()
+                print("Rooms assigned")
             return target_work_copy
 
     def find_same_course_slot_in_other_week(self, slot, week):

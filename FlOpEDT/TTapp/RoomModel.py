@@ -235,7 +235,7 @@ class RoomModel(FlopModel):
                 other_dep_located_courses = self.other_departments_located_courses_for_room[basic_room] \
                                               & self.other_departments_located_courses_for_slot[sl]
                 if other_dep_located_courses:
-                    self.avail_room[basic_room][sl] = 0
+                    avail_room[basic_room][sl] = 0
         return avail_room
 
     @timer
@@ -349,18 +349,21 @@ class RoomModel(FlopModel):
             return result
 
     def add_rooms_in_db(self, new_work_copy):
-        if new_work_copy is None:
+        if new_work_copy:
             target_work_copy = self.choose_free_work_copy()
         else:
             target_work_copy = self.work_copy
+        course_location_list = []
         for course in self.courses:
             for room in self.course_room_compat[course]:
                 if self.get_var_value(self.TTrooms[(course, room)]) == 1:
-                    if new_work_copy:
-                        course.pk = None
-                        course.work_copy = target_work_copy
-                    course.room = room
-                    course.save()
+                    course_location_list.append((course, room))
+        for course, room in course_location_list:
+            if new_work_copy:
+                course.pk = None
+                course.work_copy = target_work_copy
+            course.room = room
+            course.save()
 
 def get_constraints(department, week=None, is_active=None):
     #

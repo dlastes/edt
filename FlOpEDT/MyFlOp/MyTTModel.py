@@ -47,7 +47,8 @@ class MyTTModel(TTModel):
                  slots_step=None,
                  keep_many_solution_files=False,
                  min_visio=0.5,
-                 with_rooms=True):
+                 pre_assign_rooms=True,
+                 post_assign_rooms=True):
         """
         If you shall change something in the database ahead of creating the
         problem, you must write it here, before calling TTModel's constructor.
@@ -68,7 +69,8 @@ class MyTTModel(TTModel):
                          slots_step=slots_step,
                          keep_many_solution_files=keep_many_solution_files,
                          min_visio=min_visio,
-                         with_rooms=with_rooms)
+                         pre_assign_rooms=pre_assign_rooms,
+                         post_assign_rooms=post_assign_rooms)
 
     def add_specific_constraints(self):
         """
