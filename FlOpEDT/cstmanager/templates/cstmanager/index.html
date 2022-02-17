@@ -58,7 +58,7 @@
                     </div>
                     <div class="info-content">
                         <div class="divslider">
-                            <input type="range" value=5 min="1" max="8" step="1" list="steplist" oninput="outputSlider('poidsvalue1', value)">
+                            <input id="slider-one" type="range" value=5 min="1" max="8" step="1" list="steplist" oninput="outputSlider('poidsvalue1', value)">
                             <datalist id="steplist">
                                 <option>1</option>
                                 <option>2</option>
@@ -84,12 +84,12 @@
         <div class="footer-element pad-top-bottom">
             <div>Séléctionner<br>tout</div>
             <div>
-                <input type="checkbox" name="selectall" id="id1">
+                <input type="checkbox" name="selectall" id="cb1">
             </div>
         </div>
         <div class="footer-element pad-top-bottom">
             <div>Contraintes<br>séléctionnées:</div>
-            <div>0</div>
+            <div id="num-selected-constraints">0</div>
         </div>
         <div class="footer-element">
             <div class="divbutton">
@@ -132,7 +132,7 @@
         Poids
     </div> -->
             <div class="divslider">
-                <input type="range" value=5 min="1" max="8" step="1" list="steplist" oninput="outputSlider('poidsvalue2', value)">
+                <input id="slider-all" type="range" value=5 min="1" max="8" step="1" list="steplist" oninput="outputSlider('poidsvalue2', value)">
                 <datalist id="steplist">
             <option>1</option>
             <option>2</option>
@@ -148,7 +148,7 @@
                 </div>
             </div>
             <div class="divbutton">
-                <button class="transition neutral">
+                <button class="transition neutral" id="update-weight-all">
             MAJ Poids
         </button>
             </div>

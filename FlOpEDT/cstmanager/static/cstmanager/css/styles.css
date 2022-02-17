@@ -9,7 +9,9 @@
 
 :root {
     --whitish: #f7f8f3;
+    /* --whitish: transparent; */
     --white: #fff;
+    /* --white: transparent; */
     --primary1: #2c83c6;
     --primary2: #39a8f0;
     --primary3: #62beef;
@@ -183,6 +185,7 @@ body>div {
 
 .selected:hover {
     background-color: var(--primary1);
+    border-color: var(--primary1);
 }
 
 .unselected {
@@ -197,6 +200,7 @@ body>div {
     font-weight: bold;
     font-size: 120%;
     padding-bottom: 10px;
+    text-align: center;
 }
 
 .constraint-card-description {
@@ -210,6 +214,7 @@ body>div {
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
+    text-align: center;
 }
 
 .constraint-card-additional {

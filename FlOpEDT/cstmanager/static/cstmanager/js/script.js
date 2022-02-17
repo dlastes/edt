@@ -1,74 +1,3 @@
-let outputSlider = (id, val) => {
-    val = val == 8 ? 0 : val;
-    let ele = document.getElementById(id);
-    ele.innerHTML = val;
-}
-
-let URLWeightIcon = document.getElementById('icon-weight').src;
-let URLGearsIcon = document.getElementById('icon-gears').src;
-let URLCheckIcon = document.getElementById('icon-check').src;
-
-`<div class="constraint-card">
-    <div class="constraint-card-info transition selected">
-        <div class="constraint-card-title">
-            Minimize groups half-days
-        </div>
-        <div class="constraint-card-description">
-            Minimise les demi-journées des groupes: 1A, 1B, 2A, 2B, 3A, 3B, 4A, 4B, 4, 2A, 3B
-        </div>
-        <div class="constraint-card-additional">
-            <div class=""icon-text>
-            <span class="icon"><img src="blabla.png"></span>
-            <span class="icon"><img src="blabla.png"></span>
-            </div>
-        </div>
-    </div>
-</div>`
-
-let divBuilder = (args = {}) => {
-    let div = document.createElement('div');
-    for (let [key, value] of Object.entries(args)) {
-        div.setAttribute(key, value);
-    }
-    return div;
-}
-
-let iconTextBuilder = (imgurl, value) => {
-    let div = divBuilder({ 'class': 'icon-text' });
-    let icondiv = divBuilder({ 'class': 'icon-div' });
-    let img = document.createElement('img');
-    img.setAttribute('class', 'icon-info');
-    img.src = imgurl;
-    let strong = document.createElement('strong');
-    strong.innerText = value;
-    icondiv.append(img);
-    div.append(icondiv, strong)
-
-    return div;
-}
-
-let additionalInfoBuilder = (cst_obj) => {
-    let div = divBuilder({ 'class': 'constraint-card-additional' });
-    let params = iconTextBuilder(URLGearsIcon, cst_obj.parameters.length);
-    let weight = iconTextBuilder(URLWeightIcon, cst_obj.weight)
-    div.append(params, weight);
-    return div;
-}
-
-let constraintCardBuilder = (cst_obj) => {
-    let divCard = divBuilder({ 'class': 'constraint-card transition' });
-    divCard.setAttribute('cst-id', cst_obj['id']);
-    let divCardInfo = divBuilder({ 'class': 'constraint-card-info transition' });
-    let divTitle = divBuilder({ 'class': 'constraint-card-title' });
-    divTitle.innerHTML = cst_obj['name'];
-    let divDesc = divBuilder({ 'class': 'constraint-card-description' });
-    divDesc.innerHTML = cst_obj['comment'];
-    let divAdd = additionalInfoBuilder(cst_obj);
-    divCardInfo.append(divTitle, divDesc, divAdd);
-    divCard.append(divCardInfo);
-    return divCard;
-}
-
 let constraints = {
     8: {
         id: 8, // id de la TTC
@@ -154,7 +83,7 @@ let constraints = {
         }, ]
     },
     11: {
-        id: 10, // id de la TTC
+        id: 11, // id de la TTC
         name: "Grève", // nom du type de TTC
         weight: 6, // poids de la TTC
         is_active: true, // contrainte active ?
@@ -196,7 +125,7 @@ let constraints = {
         }, ]
     },
     12: {
-        id: 10, // id de la TTC
+        id: 12, // id de la TTC
         name: "Vote", // nom du type de TTC
         weight: 4, // poids de la TTC
         is_active: true, // contrainte active ?
@@ -262,7 +191,7 @@ let constraints = {
         }, ]
     },
     13: {
-        id: 10, // id de la TTC
+        id: 13, // id de la TTC
         name: "Match", // nom du type de TTC
         weight: 1, // poids de la TTC
         is_active: true, // contrainte active ?
@@ -288,7 +217,7 @@ let constraints = {
         }, ]
     },
     14: {
-        id: 10, // id de la TTC
+        id: 14, // id de la TTC
         name: "Conférence", // nom du type de TTC
         weight: 5, // poids de la TTC
         is_active: true, // contrainte active ?
@@ -307,16 +236,153 @@ let constraints = {
     },
 }
 
+let outputSlider = (id, val) => {
+    val = val == 8 ? 0 : val;
+    let ele = document.getElementById(id);
+    ele.innerHTML = val;
+}
+
+let URLWeightIcon = document.getElementById('icon-weight').src;
+let URLGearsIcon = document.getElementById('icon-gears').src;
+let URLCheckIcon = document.getElementById('icon-check').src;
+
+let selected_constraints = [];
+let last_selected_constraint = null;
+
+let updateNumberConstraints = () => {
+    let ele = document.getElementById('num-selected-constraints');
+    ele.innerText = selected_constraints.length;
+}
+
+let rerender = () => {
+    Array.from(document.getElementById('constraints-list').children).forEach(node => {
+        let obj = constraints[node.getAttribute('cst-id')];
+        node.querySelector('input').checked = obj.is_active;
+        node.querySelector('.icon-text.weight').querySelector('strong').innerText = obj.weight;
+        node.querySelector('.icon-text.parameters').querySelector('strong').innerText = obj.parameters.length;
+    });
+}
+
+let constraintClicked = (e) => {
+    let id = e.currentTarget.parentElement.getAttribute('cst-id')
+    if (e.currentTarget.classList.contains('selected')) {
+        e.currentTarget.classList.remove("selected");
+        e.currentTarget.classList.add("unselected");
+        selected_constraints = selected_constraints.filter(ele => ele != id);
+        let cb_selected_all = document.getElementById('cb1');
+        if (cb_selected_all.checked) {
+            cb_selected_all.checked = false;
+        }
+    } else {
+        e.currentTarget.classList.remove("unselected");
+        e.currentTarget.classList.add("selected");
+        selected_constraints.push(id);
+
+        last_selected_constraint = id;
+        if (Object.keys(constraints).length == selected_constraints.length) {
+            document.getElementById('cb1').checked = true;
+        }
+    }
+    e.stopPropagation();
+    updateNumberConstraints();
+}
+
+
+let refreshSelectedFromList = (list) => {
+    let l = document.getElementById('constraints-list');
+    (Array.from(l.children)).forEach(node => {
+        let child = node.children[0];
+        if (list.includes(node.getAttribute('cst-id'))) {
+            child.classList.remove('unselected');
+            child.classList.add('selected');
+        }
+    });
+    updateNumberConstraints();
+}
+
+let selectAll = (e) => {
+    if (selected_constraints.length == Object.keys(constraints).length) {
+        e.currentTarget.checked = true;
+    } else {
+        selected_constraints = Object.keys(constraints);
+        refreshSelectedFromList(selected_constraints);
+    }
+    updateNumberConstraints();
+}
+
+document.getElementById('cb1').checked = false;
+document.getElementById('cb1').onchange = selectAll;
+
+let divBuilder = (args = {}) => {
+    let div = document.createElement('div');
+    for (let [key, value] of Object.entries(args)) {
+        div.setAttribute(key, value);
+    }
+    return div;
+}
+
+let iconTextBuilder = (imgurl, value, attr) => {
+    let div = divBuilder({ 'class': 'icon-text ' + attr });
+    let icondiv = divBuilder({ 'class': 'icon-div' });
+    let img = document.createElement('img');
+    img.setAttribute('class', 'icon-info');
+    img.src = imgurl;
+    let strong = document.createElement('strong');
+    strong.innerText = value;
+    icondiv.append(img);
+    div.append(icondiv, strong)
+
+    return div;
+}
+
+let activateConstraint = (e) => {
+    let id = e.currentTarget.getAttribute('cst-id');
+    let ele = constraints[e.currentTarget.getAttribute('cst-id')]
+    ele.is_active = !ele.is_active;
+    e.currentTarget.checked = ele.is_active;
+    let str = 'div[cst-id="' + id + '"]';
+    document.getElementById('constraints-list').querySelector(str).click();
+}
+
+let additionalInfoBuilder = (cst_obj) => {
+    let div = divBuilder({ 'class': 'constraint-card-additional' });
+    let params = iconTextBuilder(URLGearsIcon, cst_obj.parameters.length, "parameters");
+    let enabled = document.createElement('input');
+    enabled.setAttribute('type', 'checkbox');
+    enabled.setAttribute('checked', cst_obj.is_active);
+    enabled.setAttribute('cst-id', cst_obj.id);
+    enabled.onchange = activateConstraint;
+    let weight = iconTextBuilder(URLWeightIcon, cst_obj.weight, "weight")
+    div.append(params, enabled, weight);
+    return div;
+}
+
+let constraintCardBuilder = (cst_obj) => {
+    let divCard = divBuilder({ 'class': 'constraint-card transition' });
+    divCard.setAttribute('cst-id', cst_obj['id']);
+    let divCardInfo = divBuilder({ 'class': 'constraint-card-info transition unselected' });
+    divCardInfo.addEventListener('click', constraintClicked, false);
+    let divTitle = divBuilder({ 'class': 'constraint-card-title' });
+    divTitle.innerHTML = cst_obj['name'];
+    let divDesc = divBuilder({ 'class': 'constraint-card-description' });
+    divDesc.innerHTML = cst_obj['comment'];
+    let divAdd = additionalInfoBuilder(cst_obj);
+    divCardInfo.append(divTitle, divDesc, divAdd);
+    divCard.append(divCardInfo);
+    return divCard;
+}
+
 let renderConstraints = (cst_list = []) => {
     let body = document.getElementById('constraints-list');
     body.innerHTML = "";
     for (let id of cst_list) {
         body.append(constraintCardBuilder(constraints[id]));
     }
+    updateNumberConstraints();
+    refreshSelectedFromList(selected_constraints);
 }
 
 let sortConstraintsBy = (cst_list, arg) => {
-    // TODO: implement empty list verification
     if (!constraints[cst_list[0]].hasOwnProperty(arg)) {
         return;
     }
@@ -332,9 +398,16 @@ let sortConstraintsBy = (cst_list, arg) => {
     return cst_list;
 }
 
-// let filterConstraintsBy = (cst_list, arg) => {
-//     return cst_list;
-// }
+let updateWeightAll = (e) => {
+    let weight = document.getElementById('slider-all').value;
+    selected_constraints.forEach(id => {
+        constraints[id].weight = weight;
+    });
+    rerender();
+}
+
+document.getElementById('update-weight-all').onclick = updateWeightAll;
+
 
 let constraint_list = Object.keys(constraints);
 renderConstraints(constraint_list);
