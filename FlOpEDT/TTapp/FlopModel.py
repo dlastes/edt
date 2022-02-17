@@ -35,8 +35,11 @@ import logging
 from TTapp.ilp_constraints.constraintManager import ConstraintManager
 from TTapp.ilp_constraints.constraint import Constraint
 from TTapp.ilp_constraints.constraint_type import ConstraintType
+from base.models import Department, ScheduledCourse
 
 from FlOpEDT.decorators import timer
+from django.db import close_old_connections
+from django.db.models import Q, Max, F
 
 logger = logging.getLogger(__name__)
 pattern = r".+: (.|\s)+ (=|>=|<=) \d*"
@@ -47,7 +50,9 @@ solution_files_path = "misc/logs/solutions"
 
 class FlopModel(object):
     @timer
-    def __init__(self, keep_many_solution_files=False):
+    def __init__(self, department_abbrev, weeks, keep_many_solution_files=False):
+        self.department = Department.objects.get(abbrev=department_abbrev)
+        self.weeks = weeks
         self.model = LpProblem(self.solution_files_prefix(), LpMinimize)
         self.keep_many_solution_files = keep_many_solution_files
         self.var_nb = 0
@@ -199,9 +204,35 @@ class FlopModel(object):
                     one_vars.add(r[0])
         return one_vars
 
-    def write_infaisability(self, write_iis=True, write_analysis=True):
-        raise NotImplementedError
+    def choose_free_work_copy(self):
+        close_old_connections()
 
+        local_max_wc = ScheduledCourse \
+            .objects \
+            .filter(course__module__train_prog__department=self.department,
+                    course__week__in=self.weeks) \
+            .aggregate(Max('work_copy'))['work_copy__max']
+
+        if local_max_wc is None:
+            local_max_wc = -1
+
+        return local_max_wc + 1
+
+    def write_infaisability(self, write_iis=True, write_analysis=True):
+        close_old_connections()
+        file_path = "misc/logs/iis"
+        filename_suffixe = "_%s_%s" % (self.department.abbrev, self.weeks)
+        iis_filename = "%s/IIS%s.ilp" % (file_path, filename_suffixe)
+        if write_iis:
+            from gurobipy import read
+            lp = f"{self.solution_files_prefix()}-pulp.lp"
+            m = read(lp)
+            m.computeIIS()
+            m.write(iis_filename)
+        if write_analysis:
+            self.constraintManager.handle_reduced_result(iis_filename, file_path, filename_suffixe)
+
+    @timer
     def optimize(self, time_limit, solver, presolve=2, threads=None):
         # The solver value shall be one of the available
         # solver corresponding pulp command or contain

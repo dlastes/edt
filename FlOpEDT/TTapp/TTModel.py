@@ -47,7 +47,7 @@ from TTapp.WeeksDatabase import WeeksDatabase
 
 
 from django.db import close_old_connections
-from django.db.models import Q, Max, F
+from django.db.models import Q, F
 
 import datetime
 
@@ -81,9 +81,7 @@ class TTModel(FlopModel):
                  min_visio=0.5,
                  with_rooms=True):
         # beg_file = os.path.join('logs',"FlOpTT")
-        self.department = Department.objects.get(abbrev=department_abbrev)
-        self.weeks = weeks
-        super(TTModel, self).__init__(keep_many_solution_files=keep_many_solution_files )
+        super(TTModel, self).__init__(department_abbrev, weeks, keep_many_solution_files=keep_many_solution_files)
         # Create the PuLP model, giving the name of the lp file
         self.min_ups_i = min_nps_i
         self.min_bhd_g = min_bhd_g
@@ -98,7 +96,7 @@ class TTModel(FlopModel):
         self.min_visio = min_visio
         self.with_rooms = with_rooms
 
-        print("\nLet's start weeks #%s" % weeks)
+        print("\nLet's start weeks #%s" % self.weeks)
 
         print("Initialisation...")
 
@@ -994,7 +992,6 @@ class TTModel(FlopModel):
                 cg.save()
 
     # Some extra Utils
-
     def solution_files_prefix(self):
         return f"flopmodel_{self.department.abbrev}_{'_'.join(str(w) for w in self.weeks)}"
 
@@ -1038,35 +1035,6 @@ class TTModel(FlopModel):
                                  work_copy=target_work_copy,
                                  tutor=fc.tutor)
             cp.save()
-
-    def choose_free_work_copy(self):
-        close_old_connections()
-
-        local_max_wc = ScheduledCourse \
-            .objects \
-            .filter(
-            course__module__train_prog__department=self.department,
-            course__week__in=self.weeks) \
-            .aggregate(Max('work_copy'))['work_copy__max']
-
-        if local_max_wc is None:
-            local_max_wc = -1
-
-        return local_max_wc + 1
-
-    def write_infaisability(self, write_iis=True, write_analysis=True):
-        close_old_connections()
-        file_path = "misc/logs/iis"
-        filename_suffixe = "_%s_%s" % (self.department.abbrev, self.weeks)
-        iis_filename = "%s/IIS%s.ilp" % (file_path, filename_suffixe)
-        if write_iis:
-            from gurobipy import read
-            lp = f"{self.solution_files_prefix()}-pulp.lp"
-            m = read(lp)
-            m.computeIIS()
-            m.write(iis_filename)
-        if write_analysis:
-            self.constraintManager.handle_reduced_result(iis_filename, file_path, filename_suffixe)
 
     def solve(self, time_limit=None, target_work_copy=None, solver=GUROBI_NAME, threads=None):
         """

@@ -33,6 +33,10 @@ from django.db import models
 from FlOpEDT.decorators import timer
 
 from TTapp.FlopConstraint import FlopConstraint
+from TTapp.slots import slot_pause
+
+from TTapp.ilp_constraints.constraint_type import ConstraintType
+from TTapp.ilp_constraints.constraint import Constraint
 
 
 class RoomConstraint(FlopConstraint):
@@ -103,7 +107,7 @@ class RoomConstraint(FlopConstraint):
         return self.get_courses_queryset_by_parameters(room_model, week, **kwargs)
 
 
-class LimitedRoomChoices(RoomConstraint):
+class LimitRoomChoices(RoomConstraint):
     """
     Limit the possible rooms for the courses
     Attributes are cumulative :
@@ -130,30 +134,21 @@ class LimitedRoomChoices(RoomConstraint):
                               blank=True,
                               on_delete=models.CASCADE)
     possible_rooms = models.ManyToManyField('base.Room',
-                                            related_name="limited_rooms")
+                                            related_name="limited_rooms_for_room_model")
 
     def enrich_model(self, room_model, week, ponderation=1.):
-        fc = self.get_courses_queryset_by_attributes(room_model, week)
+        filtered_courses = self.get_courses_queryset_by_attributes(room_model, week)
         possible_rooms = self.possible_rooms.values_list()
-        if self.tutor is None:
-            relevant_var_dic = ttmodel.TTrooms
-        else:
-            relevant_var_dic = {(sl, c, rg): ttmodel.add_conjunct(ttmodel.TTrooms[(sl, c, rg)],
-                                                                  ttmodel.TTinstructors[sl, c, self.tutor])
-                            for c in fc
-                            for sl in ttmodel.wdb.compatible_slots[c]
-                            for rg in ttmodel.wdb.course_rg_compat[c] if rg not in possible_rooms }
-        relevant_sum = ttmodel.sum(relevant_var_dic[(sl, c, rg)]
-                                   for c in fc
-                                   for sl in ttmodel.wdb.compatible_slots[c]
-                                   for rg in ttmodel.wdb.course_rg_compat[c] if rg not in possible_rooms)
+        relevant_sum = room_model.sum(room_model.TTrooms[(course, room)]
+                                      for course in filtered_courses
+                                      for room in room_model.course_room_compat[course] if room not in possible_rooms)
         if self.weight is not None:
-            ttmodel.add_to_generic_cost(self.local_weight() * ponderation * relevant_sum, week=week)
+            room_model.add_to_generic_cost(self.local_weight() * ponderation * relevant_sum, week=week)
         else:
-            ttmodel.add_constraint(relevant_sum, '==', 0,
-                                   Constraint(constraint_type=ConstraintType.LIMITED_ROOM_CHOICES,
-                                              instructors=self.tutor, groups=self.group, modules=self.module,
-                                              rooms=possible_rooms))
+            room_model.add_constraint(relevant_sum, '==', 0,
+                                      Constraint(constraint_type=ConstraintType.LIMITED_ROOM_CHOICES,
+                                                 instructors=self.tutor, groups=self.group, modules=self.module,
+                                                 rooms=possible_rooms))
 
     def one_line_description(self):
         text = "Les "
@@ -165,11 +160,119 @@ class LimitedRoomChoices(RoomConstraint):
             text += " de " + str(self.module)
         if self.tutor:
             text += ' de ' + str(self.tutor)
-        if self.train_progs.exists():
-            text += ' en ' + str(self.train_progs.all())
         if self.group:
             text += ' avec le groupe ' + str(self.group)
         text += " ne peuvent avoir lieu qu'en salle "
         for sl in self.possible_rooms.values_list():
             text += str(sl) + ', '
         return text
+
+
+class ConsiderRoomSorts(RoomConstraint):
+    tutors = models.ManyToManyField('people.Tutor', blank=True)
+
+    def enrich_model(self, room_model, week, ponderation=1.):
+        for tutor in considered_tutors(self, room_model):
+            tutor_courses = room_model.courses_for_tutor[tutor] & room_model.courses_for_week[week]
+            room_sorts = room_model.tutor_room_sorts[tutor]
+            for room_sort in room_sorts:
+                room_type = room_sort.for_type
+                if room_type not in room_model.courses_for_room_type:
+                    continue
+                considered_courses = tutor_courses & room_model.courses_for_room_type[room_type]
+                preferred = room_sort.prefer
+                unpreferred = room_sort.unprefer
+                preferred_sum = room_model.sum(room_model.TTrooms[(course, preferred)]
+                                               for course in considered_courses)
+                unpreferred_sum = room_model.sum(room_model.TTrooms[(course, unpreferred)]
+                                                 for course in considered_courses)
+                room_model.add_to_inst_cost(tutor,
+                                            self.local_weight() * ponderation * (unpreferred_sum - preferred_sum),
+                                            week=week)
+
+
+class LocateAllCourses(RoomConstraint):
+    modules = models.ManyToManyField('base.Module', blank=True)
+    groups = models.ManyToManyField('base.StructuralGroup', blank=True)
+    course_types = models.ManyToManyField('base.CourseType', blank=True)
+
+    def enrich_model(self, room_model, week, ponderation=1):
+        considered_courses = room_model.courses_for_week[week]
+        if self.modules.exists():
+            considered_courses = set(c for c in considered_courses if c.course.module in self.modules.all())
+        if self.course_types.exists():
+            considered_courses = set(c for c in considered_courses if c.course.type in self.course_types.all())
+        for course in considered_courses:
+            relevant_sum = room_model.sum(room_model.TTrooms[(course, room)]
+                                          for room in room_model.course_room_compat[course])
+            room_model.add_constraint(relevant_sum, '==', 1, Constraint(constraint_type=ConstraintType.CORE_ROOMS))
+
+
+class LimitMoves(RoomConstraint):
+    class Meta:
+        abstract = True
+
+    def objects_to_consider(self, room_model):
+        raise NotImplementedError
+
+    def courses_dict(self, room_model):
+        raise NotImplementedError
+
+    def add_to_obj_method(self, room_model):
+        raise NotImplementedError
+
+    def enrich_model(self, room_model, week, ponderation=1):
+        for thing in self.objects_to_consider(room_model):
+            considered_courses = self.courses_dict(room_model)[thing] & room_model.courses_for_week[week]
+            for course in considered_courses:
+                successors = set(c for c in considered_courses if c.is_successor_of(course))
+                if successors:
+                    successor = successors.pop()
+                    common_rooms = room_model.course_room_compat[course] & room_model.course_room_compat[successor]
+                    same = room_model.sum(room_model.add_conjunct(room_model.TTrooms[(course, room)],
+                                                                  room_model.TTrooms[(successor, room)])
+                                          for room in common_rooms)
+                    cost = - self.local_weight() * ponderation * same
+                    self.add_to_obj_method(room_model)(thing, cost, week)
+
+
+class LimitGroupMoves(LimitMoves):
+    groups = models.ManyToManyField('base.StructuralGroup', blank=True)
+
+    def objects_to_consider(self, room_model):
+        return considered_basic_groups(self, room_model)
+
+    def courses_dict(self, room_model):
+        return room_model.courses_for_basic_group
+
+    def add_to_obj_method(self, room_model):
+        return room_model.add_to_group_cost
+
+
+class LimitTutorMoves(LimitMoves):
+    tutors = models.ManyToManyField('people.Tutor', blank=True)
+
+    def objects_to_consider(self, room_model):
+        return considered_tutors(self, room_model)
+
+    def courses_dict(self, room_model):
+        return room_model.courses_for_tutor
+
+    def add_to_obj_method(self, room_model):
+        return room_model.add_to_inst_cost
+
+def considered_tutors(tutors_room_constraint, room_model):
+    tutors_to_consider = set(room_model.tutors)
+    if tutors_room_constraint.tutors.exists():
+        tutors_to_consider &= set(tutors_room_constraint.tutors.all())
+    return tutors_to_consider
+
+
+def considered_basic_groups(group_room_constraint, room_model):
+    room_model_basic_groups = set(room_model.basic_groups)
+    if group_room_constraint.groups.exists():
+        basic_groups = set()
+        for g in group_room_constraint.groups.all():
+            basic_groups |= g.basic_groups()
+        room_model_basic_groups &= basic_groups
+    return room_model_basic_groups
