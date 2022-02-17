@@ -9,7 +9,7 @@
 
 :root {
     --whitish: #f7f8f3;
-    --white: transparent;
+    --white: #fff;
     --primary1: #2c83c6;
     --primary2: #39a8f0;
     --primary3: #62beef;
@@ -22,7 +22,7 @@
     --dark: #333;
 }
 
-body > div {
+body>div {
     margin: 0;
     min-height: 100vh;
 }
@@ -167,7 +167,10 @@ body > div {
     max-width: 250px;
     max-height: 200px;
     height: 50px;
-    /* min-width: auto; */
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: space-between;
 }
 
 .constraint-card-info:hover {
@@ -198,9 +201,41 @@ body > div {
 
 .constraint-card-description {
     padding-bottom: 5px;
+    flex-grow: 2;
+    /* overflow: hidden;
+    text-overflow: ellipsis; */
+    min-height: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.constraint-card-additional {}
+.constraint-card-additional {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-around;
+}
+
+.icon-text {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+}
+
+.icon-div {
+    height: 32px;
+    width: 32px;
+}
+
+.icon-info {
+    height: 32px;
+    width: 32px;
+}
 
 .constraint-group-modifier {
     padding: 10px 30px 10px 30px;
@@ -304,3 +339,14 @@ button:hover {
 input:hover {
     cursor: pointer;
 }
+
+input[type="checkbox"] {
+    transform: scale(1.5);
+}
+
+.icon-checkbox {
+    background-color: transparent;
+}
+
+
+/* img.icon */
