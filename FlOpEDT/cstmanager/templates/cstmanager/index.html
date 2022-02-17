@@ -1,0 +1,453 @@
+{% extends "base.html" %}
+{% block title %} EDT {% endblock %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'cstmanager/css/styles.css' %}">
+<div class="page">
+    <div class="search-body">
+        <div class="search-bar">
+            <div class="hor-sep"></div>
+            <div class="label">Rechercher:</div>
+            <div class="hor-sep"></div>
+            <input type="text" class="text-field">
+        </div>
+        <div class="hor-sep"></div>
+        <div class="hor-sep"></div>
+        <div class="search-modifier-list pad-children">
+            <div class="divbutton">
+                <button class="transition neutral">Trier</button>
+            </div>
+            <div class="divbutton">
+                <button class="transition neutral">Filtrer</button>
+            </div>
+        </div>
+    </div>
+    <div class="constraints-body">
+        <div class="constraint-info">
+            <div class="constraint-info-body">
+                <div class="element-info">
+                    <div class="info-title">
+                        Type
+                    </div>
+                    <div class="info-content">
+                        Some text
+                    </div>
+                </div>
+                <div class="element-info grow">
+                    <div class="info-title">
+                        Paramètres
+                    </div>
+                    <div class="info-content">
+                        <div>Text1</div>
+                        <div>Text2</div>
+                        <div>Text3</div>
+                        <div>Text4</div>
+                        <div>Text5</div>
+                    </div>
+                </div>
+                <div class="element-info">
+                    <div class="info-title">
+                        Activation
+                    </div>
+                    <div class="info-content">
+                        <div>
+                            <input type="checkbox" name="selectall" id="id2">
+                        </div>
+                    </div>
+                </div>
+                <div class="element-info">
+                    <div class="info-title">
+                        Poids
+                    </div>
+                    <div class="info-content">
+                        <div class="divslider">
+                            <input type="range" value=5 min="1" max="8" step="1" list="steplist" oninput="outputSlider('poidsvalue1', value)">
+                            <datalist id="steplist">
+                                <option>1</option>
+                                <option>2</option>
+                                <option>3</option>
+                                <option>4</option>
+                                <option>5</option>
+                                <option>6</option>
+                                <option>7</option>
+                                <option>8</option>
+                            </datalist>
+                            <div id="poidsvalue1" class="divtext">
+                                <span>5</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="constraints-list">
+            <div class="constraint-card">
+                <div class="constraint-card-info transition selected">
+                    <div class="constraint-card-title">
+                        Minimize groups half-days
+                    </div>
+                    <div class="constraint-card-description">
+                        Minimise les demi-journées des groupes: 1A, 1B, 2A, 2B, 3A, 3B, 4A, 4B, 4, 2A, 3B
+                    </div>
+                    <div class="constraint-card-additional">
+                        All courses will fit in a minimum of half days
+                    </div>
+                </div>
+            </div>
+            <div class="constraint-card">
+                <div class="constraint-card-info transition selected">
+                    <div class="constraint-card-title">
+                        Minimize groups half-days bla bla bla
+                    </div>
+                    <div class="constraint-card-description">
+                        Minimise les demi-journées des groupes: 1A, 1B, 2A, 2B, 3A, 3B, 4A, 4B, 4, 2A, 3B
+                    </div>
+                    <div class="constraint-card-additional">
+                        All courses will fit in a minimum of half days
+                    </div>
+                </div>
+            </div>
+            <div class="constraint-card">
+                <div class="constraint-card-info transition unselected">
+                    <div class="constraint-card-title">
+                        Some big title to make sure overflow is working correctly
+                    </div>
+                    <div class="constraint-card-description">
+                        Test overflow hidden hidden hidden hidden hidden hidden hidden hidden hidden hidden hidden hidden
+                    </div>
+                    <div class="constraint-card-additional">
+                        All courses will fit in a minimum of half days
+                    </div>
+                </div>
+            </div>
+            <div class="constraint-card">
+                <div class="constraint-card-info transition selected">
+                    <div class="constraint-card-title">
+                        Minimize groups half-days
+                    </div>
+                    <div class="constraint-card-description">
+                        Minimise les demi-journées des groupes: 1A, 1B, 2A, 2B, 3A, 3B, 4A, 4B, 4, 2A, 3B
+                    </div>
+                    <div class="constraint-card-additional">
+                        All courses will fit in a minimum of half days
+                    </div>
+                </div>
+            </div>
+            <div class="constraint-card">
+                <div class="constraint-card-info transition unselected">
+                    <div class="constraint-card-title">
+                        Minimize groups half-days
+                    </div>
+                    <div class="constraint-card-description">
+                        Minimise les demi-journées des groupes: 1A, 1B, 2A, 2B, 3A, 3B, 4A, 4B, 4, 2A, 3B
+                    </div>
+                    <div class="constraint-card-additional">
+                        All courses will fit in a minimum of half days
+                    </div>
+                </div>
+            </div>
+            <div class="constraint-card">
+                <div class="constraint-card-info transition selected">
+                    <div class="constraint-card-title">
+                        Minimize groups half-days
+                    </div>
+                    <div class="constraint-card-description">
+                        Minimise les demi-journées des groupes: 1A, 1B, 2A, 2B, 3A, 3B, 4A, 4B, 4, 2A, 3B
+                    </div>
+                    <div class="constraint-card-additional">
+                        All courses will fit in a minimum of half days
+                    </div>
+                </div>
+            </div>
+            <div class="constraint-card">
+                <div class="constraint-card-info transition selected">
+                    <div class="constraint-card-title">
+                        Minimize groups half-days
+                    </div>
+                    <div class="constraint-card-description">
+                        Minimise les demi-journées des groupes: 1A, 1B, 2A, 2B, 3A, 3B, 4A, 4B, 4, 2A, 3B
+                    </div>
+                    <div class="constraint-card-additional">
+                        All courses will fit in a minimum of half days
+                    </div>
+                </div>
+            </div>
+            <div class="constraint-card">
+                <div class="constraint-card-info transition selected">
+                    <div class="constraint-card-title">
+                        Minimize groups half-days
+                    </div>
+                    <div class="constraint-card-description">
+                        Minimise les demi-journées des groupes: 1A, 1B, 2A, 2B, 3A, 3B, 4A, 4B, 4, 2A, 3B
+                    </div>
+                    <div class="constraint-card-additional">
+                        All courses will fit in a minimum of half days
+                    </div>
+                </div>
+            </div>
+            <div class="constraint-card">
+                <div class="constraint-card-info transition unselected">
+                    <div class="constraint-card-title">
+                        Minimize groups half-days
+                    </div>
+                    <div class="constraint-card-description">
+                        Minimise les demi-journées des groupes: 1A, 1B, 2A, 2B, 3A, 3B, 4A, 4B, 4, 2A, 3B
+                    </div>
+                    <div class="constraint-card-additional">
+                        All courses will fit in a minimum of half days
+                    </div>
+                </div>
+            </div>
+            <div class="constraint-card">
+                <div class="constraint-card-info transition unselected">
+                    <div class="constraint-card-title">
+                        Minimize groups half-days
+                    </div>
+                    <div class="constraint-card-description">
+                        Minimise les demi-journées des groupes: 1A, 1B, 2A, 2B, 3A, 3B, 4A, 4B, 4, 2A, 3B
+                    </div>
+                    <div class="constraint-card-additional">
+                        All courses will fit in a minimum of half days
+                    </div>
+                </div>
+            </div>
+            <div class="constraint-card">
+                <div class="constraint-card-info transition selected">
+                    <div class="constraint-card-title">
+                        Minimize groups half-days
+                    </div>
+                    <div class="constraint-card-description">
+                        Minimise les demi-journées des groupes: 1A, 1B, 2A, 2B, 3A, 3B, 4A, 4B, 4, 2A, 3B
+                    </div>
+                    <div class="constraint-card-additional">
+                        All courses will fit in a minimum of half days
+                    </div>
+                </div>
+            </div>
+            <div class="constraint-card">
+                <div class="constraint-card-info transition selected">
+                    <div class="constraint-card-title">
+                        Minimize groups half-days
+                    </div>
+                    <div class="constraint-card-description">
+                        Minimise les demi-journées des groupes: 1A, 1B, 2A, 2B, 3A, 3B, 4A, 4B, 4, 2A, 3B
+                    </div>
+                    <div class="constraint-card-additional">
+                        All courses will fit in a minimum of half days
+                    </div>
+                </div>
+            </div>
+            <div class="constraint-card">
+                <div class="constraint-card-info transition selected">
+                    <div class="constraint-card-title">
+                        Minimize groups half-days
+                    </div>
+                    <div class="constraint-card-description">
+                        Minimise les demi-journées des groupes: 1A, 1B, 2A, 2B, 3A, 3B, 4A, 4B, 4, 2A, 3B
+                    </div>
+                    <div class="constraint-card-additional">
+                        All courses will fit in a minimum of half days
+                    </div>
+                </div>
+            </div>
+            <div class="constraint-card">
+                <div class="constraint-card-info transition selected">
+                    <div class="constraint-card-title">
+                        Minimize groups half-days
+                    </div>
+                    <div class="constraint-card-description">
+                        Minimise les demi-journées des groupes: 1A, 1B, 2A, 2B, 3A, 3B, 4A, 4B, 4, 2A, 3B
+                    </div>
+                    <div class="constraint-card-additional">
+                        All courses will fit in a minimum of half days
+                    </div>
+                </div>
+            </div>
+            <div class="constraint-card">
+                <div class="constraint-card-info transition selected">
+                    <div class="constraint-card-title">
+                        Minimize groups half-days
+                    </div>
+                    <div class="constraint-card-description">
+                        Minimise les demi-journées des groupes: 1A, 1B, 2A, 2B, 3A, 3B, 4A, 4B, 4, 2A, 3B
+                    </div>
+                    <div class="constraint-card-additional">
+                        All courses will fit in a minimum of half days
+                    </div>
+                </div>
+            </div>
+            <div class="constraint-card">
+                <div class="constraint-card-info transition selected">
+                    <div class="constraint-card-title">
+                        Minimize groups half-days
+                    </div>
+                    <div class="constraint-card-description">
+                        Minimise les demi-journées des groupes: 1A, 1B, 2A, 2B, 3A, 3B, 4A, 4B, 4, 2A, 3B
+                    </div>
+                    <div class="constraint-card-additional">
+                        All courses will fit in a minimum of half days
+                    </div>
+                </div>
+            </div>
+            <div class="constraint-card">
+                <div class="constraint-card-info transition selected">
+                    <div class="constraint-card-title">
+                        Minimize groups half-days
+                    </div>
+                    <div class="constraint-card-description">
+                        Minimise les demi-journées des groupes: 1A, 1B, 2A, 2B, 3A, 3B, 4A, 4B, 4, 2A, 3B
+                    </div>
+                    <div class="constraint-card-additional">
+                        All courses will fit in a minimum of half days
+                    </div>
+                </div>
+            </div>
+            <div class="constraint-card">
+                <div class="constraint-card-info transition selected">
+                    <div class="constraint-card-title">
+                        Minimize groups half-days
+                    </div>
+                    <div class="constraint-card-description">
+                        Minimise les demi-journées des groupes: 1A, 1B, 2A, 2B, 3A, 3B, 4A, 4B, 4, 2A, 3B
+                    </div>
+                    <div class="constraint-card-additional">
+                        All courses will fit in a minimum of half days
+                    </div>
+                </div>
+            </div>
+            <div class="constraint-card">
+                <div class="constraint-card-info transition selected">
+                    <div class="constraint-card-title">
+                        Minimize groups half-days
+                    </div>
+                    <div class="constraint-card-description">
+                        Minimise les demi-journées des groupes: 1A, 1B, 2A, 2B, 3A, 3B, 4A, 4B, 4, 2A, 3B
+                    </div>
+                    <div class="constraint-card-additional">
+                        All courses will fit in a minimum of half days
+                    </div>
+                </div>
+            </div>
+            <div class="constraint-card">
+                <div class="constraint-card-info transition selected">
+                    <div class="constraint-card-title">
+                        Minimize groups half-days
+                    </div>
+                    <div class="constraint-card-description">
+                        Minimise les demi-journées des groupes: 1A, 1B, 2A, 2B, 3A, 3B, 4A, 4B, 4, 2A, 3B
+                    </div>
+                    <div class="constraint-card-additional">
+                        All courses will fit in a minimum of half days
+                    </div>
+                </div>
+            </div>
+            <div class="constraint-card">
+                <div class="constraint-card-info transition selected">
+                    <div class="constraint-card-title">
+                        Minimize groups half-days
+                    </div>
+                    <div class="constraint-card-description">
+                        Minimise les demi-journées des groupes: 1A, 1B, 2A, 2B, 3A, 3B, 4A, 4B, 4, 2A, 3B
+                    </div>
+                    <div class="constraint-card-additional">
+                        All courses will fit in a minimum of half days
+                    </div>
+                </div>
+            </div>
+            <div class="constraint-card">
+                <div class="constraint-card-info transition selected">
+                    <div class="constraint-card-title">
+                        Minimize groups half-days
+                    </div>
+                    <div class="constraint-card-description">
+                        Minimise les demi-journées des groupes: 1A, 1B, 2A, 2B, 3A, 3B, 4A, 4B, 4, 2A, 3B
+                    </div>
+                    <div class="constraint-card-additional">
+                        All courses will fit in a minimum of half days
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="constraint-group-modifier">
+        <div class="footer-element pad-top-bottom">
+            <div>Séléctionner<br>tout</div>
+            <div>
+                <input type="checkbox" name="selectall" id="id1">
+            </div>
+        </div>
+        <div class="footer-element pad-top-bottom">
+            <div>Contraintes<br>séléctionnées:</div>
+            <div>0</div>
+        </div>
+        <div class="footer-element">
+            <div class="divbutton">
+                <button class="transition neutral">
+                Switch
+            </button>
+            </div>
+            <div class="divbutton">
+                <button class="transition danger">
+                Supprimer
+            </button>
+            </div>
+        </div>
+        <div class="footer-element">
+            <div class="divbutton">
+                <button class="transition neutral">
+                Button1
+            </button>
+            </div>
+            <div class="divbutton">
+                <button class="transition neutral">
+                Button2
+            </button>
+            </div>
+        </div>
+        <div class="footer-element">
+            <div class="divbutton">
+                <button class="transition neutral">
+                Button3
+            </button>
+            </div>
+            <div class="divbutton">
+                <button class="transition neutral">
+                Button4
+            </button>
+            </div>
+        </div>
+        <div class="footer-element">
+            <!-- <div>
+            Poids
+        </div> -->
+            <div class="divslider">
+                <input type="range" value=5 min="1" max="8" step="1" list="steplist" oninput="outputSlider('poidsvalue2', value)">
+                <datalist id="steplist">
+                <option>1</option>
+                <option>2</option>
+                <option>3</option>
+                <option>4</option>
+                <option>5</option>
+                <option>6</option>
+                <option>7</option>
+                <option>8</option>
+            </datalist>
+                <div id="poidsvalue2" class="divtext">
+                    <span>5</span>
+                </div>
+            </div>
+            <div class="divbutton">
+                <button class="transition neutral">
+                MAJ Poids
+            </button>
+            </div>
+        </div>
+        <div class="footer-element"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script type="text/javascript" src="{% static 'cstmanager/js/script.js' %}"></script>
+{% endblock %}
