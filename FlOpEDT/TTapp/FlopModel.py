@@ -232,15 +232,16 @@ class FlopModel(object):
             self.constraintManager.handle_reduced_result(iis_filename, file_path, filename_suffixe)
 
     @timer
-    def optimize(self, time_limit, solver, presolve=2, threads=None):
+    def optimize(self, time_limit, solver, presolve=2, threads=None, ignore_sigint=True):
         # The solver value shall be one of the available
         # solver corresponding pulp command or contain
         # gurobi
         if 'gurobi' in solver.lower() and hasattr(pulp, GUROBI_NAME):
-            # ignore SIGINT while solver is running
-            # => SIGINT is still delivered to the solver, which is what we want
             self.delete_solution_files(all=True)
-            signal.signal(signal.SIGINT, signal.SIG_IGN)
+            if ignore_sigint:
+                # ignore SIGINT while solver is running
+                # => SIGINT is still delivered to the solver, which is what we want
+                signal.signal(signal.SIGINT, signal.SIG_IGN)
             solver = GUROBI_NAME
             options = [("Presolve", presolve),
                        ("MIPGapAbs", 0.2)]

@@ -1041,7 +1041,7 @@ class TTModel(FlopModel):
                                  tutor=fc.tutor)
             cp.save()
 
-    def solve(self, time_limit=None, target_work_copy=None, solver=GUROBI_NAME, threads=None):
+    def solve(self, time_limit=None, target_work_copy=None, solver=GUROBI_NAME, threads=None, ignore_sigint=True):
         """
         Generates a schedule from the TTModel
         The solver stops either when the best schedule is obtained or timeLimit
@@ -1062,7 +1062,7 @@ class TTModel(FlopModel):
 
         self.update_objective()
 
-        result = self.optimize(time_limit, solver, threads=threads)
+        result = self.optimize(time_limit, solver, threads=threads, ignore_sigint=ignore_sigint)
 
         if result is not None:
 

@@ -74,6 +74,7 @@ class RoomModel(FlopModel):
     def solution_files_prefix(self):
         return f"room_model_{self.department.abbrev}_{'_'.join(str(w) for w in self.weeks)}"
 
+    @timer
     def slots_init(self):
         days = [Day(week=week, day=day)
                 for week in self.weeks
@@ -94,6 +95,7 @@ class RoomModel(FlopModel):
                                   end_time=times_list[i+1]))
         return days, slots
 
+    @timer
     def courses_init(self):
         courses = ScheduledCourse.objects.filter(course__week__in=self.weeks,
                                                  work_copy=self.work_copy,
@@ -104,6 +106,7 @@ class RoomModel(FlopModel):
             courses_for_week[week] = set(courses.filter(course__week=week))
         return courses, courses_for_week
 
+    @timer
     def located_courses_init(self):
         all_courses = ScheduledCourse.objects.filter(course__week__in=self.weeks,
                                                      work_copy=self.work_copy)\
@@ -117,6 +120,7 @@ class RoomModel(FlopModel):
                     if sl.is_simultaneous_to(lc))
         return other_departments_located_courses, other_departments_located_courses_for_slot
 
+    @timer
     def users_init(self):
         # USERS
         tutors = set(c.course.tutor for c in self.courses.distinct("course__tutor"))
@@ -165,6 +169,7 @@ class RoomModel(FlopModel):
         return tutors, courses_for_tutor, tutor_room_sorts, groups, basic_groups, all_groups_of, \
                basic_groups_of, structural_groups, transversal_groups, courses_for_group, courses_for_basic_group
 
+    @timer
     def rooms_init(self):
         # ROOMS
         room_types = set(c.course.room_type for c in self.courses.distinct('course__room_type'))
@@ -214,6 +219,7 @@ class RoomModel(FlopModel):
                 TTrooms[(course, room)] = self.add_var("TTroom(%s,%s)" % (course, room))
         return TTrooms
 
+    @timer
     def compute_avail_room(self):
         avail_room = {}
         for room in self.basic_rooms:
@@ -321,7 +327,7 @@ class RoomModel(FlopModel):
         self.set_objective(self.obj)
 
 
-    def solve(self, time_limit=None, solver=GUROBI_NAME, threads=None, new_cork_copy=False):
+    def solve(self, time_limit=None, solver=GUROBI_NAME, threads=None, ignore_sigint=False, new_cork_copy=False):
         """
         Generates a schedule from the TTModel
         The solver stops either when the best schedule is obtained or timeLimit
@@ -342,7 +348,7 @@ class RoomModel(FlopModel):
 
         self.update_objective()
 
-        result = self.optimize(time_limit, solver, threads=threads)
+        result = self.optimize(time_limit, solver, threads=threads, ignore_sigint=ignore_sigint)
 
         if result is not None:
             self.add_rooms_in_db(new_cork_copy)

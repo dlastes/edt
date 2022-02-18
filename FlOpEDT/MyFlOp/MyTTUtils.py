@@ -70,9 +70,8 @@ def print_differences(department, weeks, old_copy, new_copy, tutors=Tutor.object
 
 @resolve_department
 def reassign_rooms(department, week_nb, year, target_work_copy):
-    result = {'status':'OK', 'more':''}
     week = Week.objects.get(nb=week_nb, year=year)
-    basic_reassign_rooms(department, week, target_work_copy)
+    result = basic_reassign_rooms(department, week, target_work_copy)
     return result
 
 

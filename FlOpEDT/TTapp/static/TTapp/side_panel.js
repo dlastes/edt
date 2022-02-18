@@ -262,10 +262,13 @@ function reassign_rooms() {
     async: true,
     contentType: "application/json; charset=utf-8",
     success: function (msg) {
+      console.log(msg);
+      format_acks(msg, 'reassign_rooms');
       fetch_all(false, false);
       show_loader(false);
     },
     error: function (msg) {
+      ack_side_panel['reassign_rooms'].txt = 'Problème côté serveur';
       console.log("error");
       show_loader(false);
     }
@@ -279,7 +282,8 @@ var ack_side_panel = {
   'check-swap': { id: 'check-swap' },
   'delete':{id:'delete'},
   'delete_all_unused':{id: 'delete_all_unused'},
-  'duplicate': {id: 'duplicate'}
+  'duplicate': {id: 'duplicate'},
+  'reassign_rooms': {id: 'reassign_rooms'}
 };
 for (key in ack_side_panel) {
   ack_side_panel[key].id = '#ack-' + ack_side_panel[key].id;
