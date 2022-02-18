@@ -62,7 +62,7 @@ from FlOpEDT.decorators import timer
 from TTapp.FlopModel import FlopModel, GUROBI_NAME
 from TTapp.RoomModel import RoomModel
 
-from misc.room_types_constraints import register_ponderations_in_database
+from misc.manage_rooms_ponderations import register_ponderations_in_database
 
 class TTModel(FlopModel):
     @timer
