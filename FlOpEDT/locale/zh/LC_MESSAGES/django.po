@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-19 10:15+0000\n"
+"POT-Creation-Date: 2022-02-19 10:37+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -596,13 +596,13 @@ msgstr "从周开始"
 
 #: base/templates/base/show-stype.html:98
 #: base/templates/base/show-stype.html:101
-#: configuration/templates/configuration/configuration.html:87
-#: configuration/templates/configuration/configuration.html:92
+#: configuration/templates/configuration/configuration.html:89
+#: configuration/templates/configuration/configuration.html:94
 msgid "year"
 msgstr "年"
 
 #: base/templates/base/show-stype.html:100
-#: configuration/templates/configuration/configuration.html:90
+#: configuration/templates/configuration/configuration.html:92
 msgid "until week"
 msgstr "到周"
 
@@ -790,13 +790,13 @@ msgid "Edit"
 msgstr "编辑"
 
 #: configuration/templates/configuration/configuration.html:36
-#: configuration/templates/configuration/configuration.html:110
+#: configuration/templates/configuration/configuration.html:116
 #: templates/base.html:95
 msgid "Import"
 msgstr "输入"
 
 #: configuration/templates/configuration/configuration.html:41
-#: configuration/templates/configuration/configuration.html:114
+#: configuration/templates/configuration/configuration.html:120
 msgid "Verdict :"
 msgstr "定论："
 
@@ -842,17 +842,17 @@ msgstr "完成的计划文件"
 msgid "Upload the completed planning file."
 msgstr "上传完成的计划文件。"
 
-#: configuration/templates/configuration/configuration.html:85
+#: configuration/templates/configuration/configuration.html:87
 #, fuzzy
 #| msgid "from week"
 msgid "From week"
 msgstr "从周开始"
 
-#: configuration/templates/configuration/configuration.html:97
+#: configuration/templates/configuration/configuration.html:101
 msgid "Only for periods "
 msgstr ""
 
-#: configuration/templates/configuration/configuration.html:101
+#: configuration/templates/configuration/configuration.html:107
 msgid "Stabilization ?"
 msgstr "稳定？"
 

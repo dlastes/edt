@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-19 10:15+0000\n"
+"POT-Creation-Date: 2022-02-19 10:37+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -589,13 +589,13 @@ msgstr ""
 
 #: base/templates/base/show-stype.html:98
 #: base/templates/base/show-stype.html:101
-#: configuration/templates/configuration/configuration.html:87
-#: configuration/templates/configuration/configuration.html:92
+#: configuration/templates/configuration/configuration.html:89
+#: configuration/templates/configuration/configuration.html:94
 msgid "year"
 msgstr ""
 
 #: base/templates/base/show-stype.html:100
-#: configuration/templates/configuration/configuration.html:90
+#: configuration/templates/configuration/configuration.html:92
 msgid "until week"
 msgstr ""
 
@@ -783,13 +783,13 @@ msgid "Edit"
 msgstr ""
 
 #: configuration/templates/configuration/configuration.html:36
-#: configuration/templates/configuration/configuration.html:110
+#: configuration/templates/configuration/configuration.html:116
 #: templates/base.html:95
 msgid "Import"
 msgstr ""
 
 #: configuration/templates/configuration/configuration.html:41
-#: configuration/templates/configuration/configuration.html:114
+#: configuration/templates/configuration/configuration.html:120
 msgid "Verdict :"
 msgstr ""
 
@@ -835,15 +835,15 @@ msgstr ""
 msgid "Upload the completed planning file."
 msgstr ""
 
-#: configuration/templates/configuration/configuration.html:85
+#: configuration/templates/configuration/configuration.html:87
 msgid "From week"
 msgstr ""
 
-#: configuration/templates/configuration/configuration.html:97
+#: configuration/templates/configuration/configuration.html:101
 msgid "Only for periods "
 msgstr ""
 
-#: configuration/templates/configuration/configuration.html:101
+#: configuration/templates/configuration/configuration.html:107
 msgid "Stabilization ?"
 msgstr ""
 

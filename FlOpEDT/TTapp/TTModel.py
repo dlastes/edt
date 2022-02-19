@@ -113,7 +113,7 @@ class TTModel(FlopModel):
             assignment_text += 'post'
         else:
             assignment_text += 'no'
-        print(_("Rooms assignment :", assignment_text))
+        print(_("Rooms assignment :"), assignment_text)
 
 
 

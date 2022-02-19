@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-19 10:15+0000\n"
+"POT-Creation-Date: 2022-02-19 10:37+0000\n"
 "PO-Revision-Date: 2021-03-14 13:02+0000\n"
 "Last-Translator: b'prenom_de_QTF nom_de_QTF <QTF@mail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -284,7 +284,8 @@ msgstr "Un des cours n'a pas de professeur attribué. {dependency}"
 msgid ""
 "\n"
 "Let's start weeks #{self.weeks}"
-msgstr "\n"
+msgstr ""
+"\n"
 "C'est parti pour les semaines suivantes: {self.weeks}"
 
 #: TTapp/TTModel.py:116
@@ -614,13 +615,13 @@ msgstr "de la semaine"
 
 #: base/templates/base/show-stype.html:98
 #: base/templates/base/show-stype.html:101
-#: configuration/templates/configuration/configuration.html:87
-#: configuration/templates/configuration/configuration.html:92
+#: configuration/templates/configuration/configuration.html:89
+#: configuration/templates/configuration/configuration.html:94
 msgid "year"
 msgstr "année"
 
 #: base/templates/base/show-stype.html:100
-#: configuration/templates/configuration/configuration.html:90
+#: configuration/templates/configuration/configuration.html:92
 msgid "until week"
 msgstr "à la semaine"
 
@@ -811,13 +812,13 @@ msgid "Edit"
 msgstr "Modifier"
 
 #: configuration/templates/configuration/configuration.html:36
-#: configuration/templates/configuration/configuration.html:110
+#: configuration/templates/configuration/configuration.html:116
 #: templates/base.html:95
 msgid "Import"
 msgstr "Importer"
 
 #: configuration/templates/configuration/configuration.html:41
-#: configuration/templates/configuration/configuration.html:114
+#: configuration/templates/configuration/configuration.html:120
 msgid "Verdict :"
 msgstr "Verdict :"
 
@@ -868,15 +869,15 @@ msgstr "Fichier de planification des cours complété"
 msgid "Upload the completed planning file."
 msgstr "Téléversez le fichier de planification rempli."
 
-#: configuration/templates/configuration/configuration.html:85
+#: configuration/templates/configuration/configuration.html:87
 msgid "From week"
 msgstr "De la semaine"
 
-#: configuration/templates/configuration/configuration.html:97
+#: configuration/templates/configuration/configuration.html:101
 msgid "Only for periods "
 msgstr "Uniquement les périodes "
 
-#: configuration/templates/configuration/configuration.html:101
+#: configuration/templates/configuration/configuration.html:107
 msgid "Stabilization ?"
 msgstr "Stabilisation ?"
 
