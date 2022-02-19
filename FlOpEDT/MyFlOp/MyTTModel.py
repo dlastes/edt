@@ -48,7 +48,7 @@ class MyTTModel(TTModel):
                  keep_many_solution_files=False,
                  min_visio=0.5,
                  pre_assign_rooms=True,
-                 post_assign_rooms=True):
+                 post_assign_rooms=False):
         """
         If you shall change something in the database ahead of creating the
         problem, you must write it here, before calling TTModel's constructor.

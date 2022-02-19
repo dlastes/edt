@@ -85,7 +85,7 @@ class TTModel(FlopModel):
                  keep_many_solution_files=False,
                  min_visio=0.5,
                  pre_assign_rooms=True,
-                 post_assign_rooms=True):
+                 post_assign_rooms=False):
         # beg_file = os.path.join('logs',"FlOpTT")
         super(TTModel, self).__init__(department_abbrev, weeks, keep_many_solution_files=keep_many_solution_files)
         # Create the PuLP model, giving the name of the lp file
