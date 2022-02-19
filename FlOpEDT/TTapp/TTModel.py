@@ -64,6 +64,9 @@ from TTapp.RoomModel import RoomModel
 
 from misc.manage_rooms_ponderations import register_ponderations_in_database
 
+from django.utils.translation import gettext_lazy as _
+
+
 class TTModel(FlopModel):
     @timer
     def __init__(self, department_abbrev, weeks,
@@ -100,18 +103,28 @@ class TTModel(FlopModel):
         self.pre_assign_rooms = pre_assign_rooms
         self.post_assign_rooms = post_assign_rooms
 
-        print("\nLet's start weeks #%s" % self.weeks)
+        print(_(f"\nLet's start weeks #{self.weeks}"))
+        assignment_text = ""
+        if self.pre_assign_rooms:
+            assignment_text += 'pre'
+            if self.post_assign_rooms:
+                assignment_text += ' & post'
+        elif self.post_assign_rooms:
+            assignment_text += 'post'
+        else:
+            assignment_text += 'no'
+        print(_("Rooms assignment :", assignment_text))
 
-        print("Initialisation...")
+
 
         if train_prog is None:
             train_prog = TrainingProgramme.objects.filter(department=self.department)
         else:
             try:
-                _ = iter(train_prog)
+                iter(train_prog)
             except TypeError:
                 train_prog = TrainingProgramme.objects.filter(id=train_prog.id)
-            print('Will modify only courses of training programme(s) ', train_prog)
+            print(_(f'Will modify only courses of training programme(s) {train_prog}'))
         self.train_prog = train_prog
         self.stabilize_work_copy = stabilize_work_copy
         self.wdb = self.wdb_init()
@@ -144,7 +157,7 @@ class TTModel(FlopModel):
         self.add_TT_constraints()
 
         if self.warnings:
-            print("Relevant warnings :")
+            print(_("Relevant warnings :"))
             for key, key_warnings in self.warnings.items():
                 print("%s : %s" % (key, ", ".join([str(x) for x in key_warnings])))
 
