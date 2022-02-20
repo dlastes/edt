@@ -47,8 +47,8 @@ class MyTTModel(TTModel):
                  slots_step=None,
                  keep_many_solution_files=False,
                  min_visio=0.5,
-                 pre_assign_rooms=True,
-                 post_assign_rooms=False):
+                 pre_assign_rooms=False,
+                 post_assign_rooms=True):
         """
         If you shall change something in the database ahead of creating the
         problem, you must write it here, before calling TTModel's constructor.
@@ -86,11 +86,13 @@ class MyTTModel(TTModel):
         If you shall add pre (or post) processing apps, you may write them down
         here.
         """
-        result = TTModel.solve(self,
-                               time_limit=time_limit,
-                               target_work_copy=target_work_copy,
-                               solver=solver,
-                               threads=None)
-        if result is not None and self.stabilize_work_copy is not None:
+        result_work_copy = TTModel.solve(self,
+                                         time_limit=time_limit,
+                                         target_work_copy=target_work_copy,
+                                         solver=solver,
+                                         threads=None)
+        if result_work_copy is not None and self.stabilize_work_copy is not None:
             print_differences(self.department, self.weeks,
                               self.stabilize_work_copy, target_work_copy, self.wdb.instructors)
+        return result_work_copy
+

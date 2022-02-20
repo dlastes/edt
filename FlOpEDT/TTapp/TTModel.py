@@ -84,8 +84,8 @@ class TTModel(FlopModel):
                  slots_step=None,
                  keep_many_solution_files=False,
                  min_visio=0.5,
-                 pre_assign_rooms=True,
-                 post_assign_rooms=False):
+                 pre_assign_rooms=False,
+                 post_assign_rooms=True):
         # beg_file = os.path.join('logs',"FlOpTT")
         super(TTModel, self).__init__(department_abbrev, weeks, keep_many_solution_files=keep_many_solution_files)
         # Create the PuLP model, giving the name of the lp file
@@ -1081,7 +1081,7 @@ class TTModel(FlopModel):
 
             if target_work_copy is None:
                 if self.department.mode.cosmo == 2:
-                    target_work_copy =0
+                    target_work_copy = 0
                 else:
                     target_work_copy = self.choose_free_work_copy()
 
