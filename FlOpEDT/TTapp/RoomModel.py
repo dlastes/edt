@@ -351,8 +351,8 @@ class RoomModel(FlopModel):
         result = self.optimize(time_limit, solver, threads=threads, ignore_sigint=ignore_sigint)
 
         if result is not None:
-            self.add_rooms_in_db(new_cork_copy)
-            return result
+            result_work_copy = self.add_rooms_in_db(new_cork_copy)
+            return result_work_copy
 
     def add_rooms_in_db(self, new_work_copy):
         if new_work_copy:
@@ -370,6 +370,7 @@ class RoomModel(FlopModel):
                 course.work_copy = target_work_copy
             course.room = room
             course.save()
+        return target_work_copy
 
 def get_constraints(department, week=None, is_active=None):
     #

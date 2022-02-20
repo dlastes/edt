@@ -17,9 +17,9 @@ function empty_acks() {
 // receive results and display in ack sections
 function format_acks(msg, key_ack) {
   if (msg.status == 'OK') {
-    ack_side_panel[key_ack].txt = 'OK';
+    ack_side_panel[key_ack].txt = 'OK. ' + msg.more;
   } else {
-    ack_side_panel[key_ack].txt = 'KO ! ' + msg.more;
+    ack_side_panel[key_ack].txt = 'KO! ' + msg.more;
   }
   update_acks();
 }
@@ -264,7 +264,7 @@ function reassign_rooms() {
     success: function (msg) {
       console.log(msg);
       format_acks(msg, 'reassign_rooms');
-      fetch_all(false, false);
+      fetch_all(false, true);
       show_loader(false);
     },
     error: function (msg) {

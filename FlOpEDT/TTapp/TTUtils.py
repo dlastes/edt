@@ -40,13 +40,16 @@ import json
 from django.utils.translation import gettext_lazy as _
 
 
-def basic_reassign_rooms(department, week, target_work_copy):
+def basic_reassign_rooms(department, week, work_copy, new_work_copy):
     msg = {'status':'OK', 'more':_('Reload...')}
-    result = RoomModel(department.abbrev, [week], target_work_copy).solve()
-    if result is not None:
-        cache.delete(get_key_course_pl(department.abbrev,
-                                       week,
-                                       target_work_copy))
+    result_work_copy = RoomModel(department.abbrev, [week], work_copy).solve(new_cork_copy=new_work_copy)
+    if result_work_copy is not None:
+        if new_work_copy:
+            msg['more'] = _(f'Saved in copy {result_work_copy}')
+        else:
+            cache.delete(get_key_course_pl(department.abbrev,
+                                           week,
+                                           work_copy))
     else:
         msg['status'] = 'KO'
         msg['more'] = _("Impossible to assign rooms")
