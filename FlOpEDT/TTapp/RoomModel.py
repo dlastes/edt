@@ -327,7 +327,7 @@ class RoomModel(FlopModel):
         self.set_objective(self.obj)
 
 
-    def solve(self, time_limit=None, solver=GUROBI_NAME, threads=None, ignore_sigint=False, new_cork_copy=False):
+    def solve(self, time_limit=None, solver=GUROBI_NAME, threads=None, ignore_sigint=False, create_new_work_copy=False):
         """
         Generates a schedule from the TTModel
         The solver stops either when the best schedule is obtained or timeLimit
@@ -351,11 +351,11 @@ class RoomModel(FlopModel):
         result = self.optimize(time_limit, solver, threads=threads, ignore_sigint=ignore_sigint)
 
         if result is not None:
-            result_work_copy = self.add_rooms_in_db(new_cork_copy)
+            result_work_copy = self.add_rooms_in_db(create_new_work_copy)
             return result_work_copy
 
-    def add_rooms_in_db(self, new_work_copy):
-        if new_work_copy:
+    def add_rooms_in_db(self, create_new_work_copy):
+        if create_new_work_copy:
             target_work_copy = self.choose_free_work_copy()
         else:
             target_work_copy = self.work_copy
@@ -365,7 +365,7 @@ class RoomModel(FlopModel):
                 if self.get_var_value(self.TTrooms[(course, room)]) == 1:
                     course_location_list.append((course, room))
         for course, room in course_location_list:
-            if new_work_copy:
+            if create_new_work_copy:
                 course.pk = None
                 course.work_copy = target_work_copy
             course.room = room
