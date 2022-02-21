@@ -46,7 +46,6 @@ class FlopConstraint(models.Model):
 
     Attributes:
         department : the department concerned by the constraint. Has to be filled.
-        train_progs : the training programs concerned by the constraint. All of self.department if None
         weeks : the weeks for which the constraint should be applied. All if None.
         weight : from 1 to max_weight if the constraint is optional, depending on its importance
                  None if the constraint is necessary
