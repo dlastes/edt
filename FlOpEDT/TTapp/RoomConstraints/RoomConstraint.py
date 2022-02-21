@@ -65,7 +65,7 @@ class RoomConstraint(FlopConstraint):
     def possible_tutor_courses_id_dict(self, room_model):
         result = {}
         for tutor in Tutor.objects.filter(departments=room_model.department):
-            result[tutor] = [c.id for c in room_model if c.tutor == tutor or tutor in c.supp_tutor.all()]
+            result[tutor] = [c.id for c in room_model.courses if c.tutor == tutor or tutor in c.supp_tutor.all()]
         return result
 
 

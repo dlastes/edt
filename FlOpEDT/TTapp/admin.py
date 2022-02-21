@@ -230,7 +230,6 @@ class LimitRoomChoicesAdmin(DepartmentModelAdmin):
                     'is_active')
     ordering = ()
     list_filter = (('weeks__nb', DropdownFilterAll),
-                   ('train_progs', DropdownFilterRel),
                    ('group', DropdownFilterRel),
                    ('tutor', DropdownFilterRel),
                    ('module', DropdownFilterRel),
