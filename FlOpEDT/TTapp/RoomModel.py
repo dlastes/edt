@@ -190,7 +190,7 @@ class RoomModel(FlopModel):
         for course in self.courses:
             course_room_compat[course] = set(course.room_type.members.all())
 
-        # for each Room, build the list of courses that may use it
+        # for each basic room, build the list of courses that may use it, in couple with the corresponding room
         room_course_compat = {}
         for basic_room in basic_rooms:
             room_course_compat[basic_room] = []
