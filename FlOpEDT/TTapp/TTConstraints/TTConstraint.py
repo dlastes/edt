@@ -34,6 +34,7 @@ from FlOpEDT.decorators import timer
 
 from TTapp.FlopConstraint import FlopConstraint
 
+from people.models import Tutor
 
 class TTConstraint(FlopConstraint):
     """
@@ -54,7 +55,7 @@ class TTConstraint(FlopConstraint):
         abstract = True
 
     @timer
-    def enrich_model(self, ttmodel, week, ponderation=1):
+    def enrich_ttmodel(self, ttmodel, week, ponderation=1):
         raise NotImplementedError
 
     def get_viewmodel(self):
@@ -75,47 +76,17 @@ class TTConstraint(FlopConstraint):
     def get_viewmodel_prefetch_attributes(cls):
         return ['train_progs', 'department',]
 
-    @staticmethod
-    def get_courses_queryset_by_parameters(ttmodel, week,
-                                           train_progs=None,
-                                           train_prog=None,
-                                           module=None,
-                                           group=None,
-                                           course_type=None,
-                                           room_type=None,
-                                           tutor=None):
-        """
-        Filter courses depending on constraints parameters
-        :parameter group : if not None, return all courses that has one group connected to group
-        """
-        courses_qs = ttmodel.wdb.courses.filter(week=week)
-        courses_filter = {}
+    def week_courses_queryset(self, ttmodel, week):
+        return ttmodel.wdb.courses.filter(week=week)
 
-        if train_progs is not None:
-            courses_filter['module__train_prog__in'] = train_progs
-
-        if train_prog is not None:
-            courses_filter['module__train_prog'] = train_prog
-
-        if module is not None:
-            courses_filter['module'] = module
-
-        if group is not None:
-            courses_filter['groups__in'] = group.connected_groups()
-
-        if course_type is not None:
-            courses_filter['type'] = course_type
-
-        if room_type is not None:
-            courses_filter['room_type'] = room_type
-
-        if tutor is not None:
+    def possible_tutor_courses_id_dict(self, ttmodel):
+        result = {}
+        for tutor in Tutor.objects.filter(departments=ttmodel.department):
             if tutor in ttmodel.wdb.instructors:
-                courses_filter['id__in'] = [c.id for c in ttmodel.wdb.possible_courses[tutor]]
+                result[tutor] = [c.id for c in ttmodel.wdb.possible_courses[tutor]]
             else:
-                courses_filter['id__in'] = []
-
-        return courses_qs.filter(**courses_filter)
+                result[tutor] = []
+        return result
 
     def get_courses_queryset_by_attributes(self, ttmodel, week, **kwargs):
         """
@@ -123,7 +94,4 @@ class TTConstraint(FlopConstraint):
         """
         if self.train_progs.exists() and 'train_progs' not in kwargs:
             kwargs['train_progs'] = self.train_progs.all()
-        for attr in ['train_prog', 'module', 'group', 'course_type', 'tutor', 'room_type']:
-            if hasattr(self, attr) and attr not in kwargs:
-                kwargs[attr] = getattr(self, attr)
-        return self.get_courses_queryset_by_parameters(ttmodel, week, **kwargs)
+        return FlopConstraint.get_courses_queryset_by_parameters(self, ttmodel, week, **kwargs)

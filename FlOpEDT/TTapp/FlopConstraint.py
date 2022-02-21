@@ -69,10 +69,6 @@ class FlopConstraint(models.Model):
     class Meta:
         abstract = True
 
-    @timer
-    def enrich_model(self, flop_model, week, ponderation=1):
-        raise NotImplementedError
-
     def full_name(self):
         # Return a human readable constraint name
         return str(self)
@@ -119,3 +115,56 @@ class FlopConstraint(models.Model):
             return TimeGeneralSettings.objects.get(department = department)
         else:
             return TimeGeneralSettings.objects.get(department = self.department)
+
+    def week_courses_queryset(self, flopmodel, week):
+        raise NotImplementedError
+
+    def possible_tutor_courses_id_dict(self, flopmodel):
+        raise NotImplementedError
+
+    def get_courses_queryset_by_parameters(self, flopmodel, week,
+                                           train_progs=None,
+                                           train_prog=None,
+                                           module=None,
+                                           group=None,
+                                           course_type=None,
+                                           room_type=None,
+                                           tutor=None):
+        """
+        Filter courses depending on constraints parameters
+        parameter group : if not None, return all courses that has one group connected to group
+        """
+        courses_qs = self.week_courses_queryset(flopmodel, week)
+        courses_filter = {}
+
+        if train_progs is not None:
+            courses_filter['module__train_prog__in'] = train_progs
+
+        if train_prog is not None:
+            courses_filter['module__train_prog'] = train_prog
+
+        if module is not None:
+            courses_filter['module'] = module
+
+        if group is not None:
+            courses_filter['groups__in'] = group.connected_groups()
+
+        if course_type is not None:
+            courses_filter['type'] = course_type
+
+        if room_type is not None:
+            courses_filter['room_type'] = room_type
+
+        if tutor is not None:
+            courses_filter['id__in'] = self.possible_tutor_courses_id_dict(flopmodel)[tutor]
+
+        return courses_qs.filter(**courses_filter)
+
+    def get_courses_queryset_by_attributes(self, flopmodel, week, **kwargs):
+        """
+        Filter courses depending constraint attributes
+        """
+        for attr in ['train_prog', 'module', 'group', 'course_type', 'tutor', 'room_type']:
+            if hasattr(self, attr) and attr not in kwargs:
+                kwargs[attr] = getattr(self, attr)
+        return self.get_courses_queryset_by_parameters(flopmodel, week, **kwargs)

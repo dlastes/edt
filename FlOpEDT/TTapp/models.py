@@ -44,7 +44,6 @@ from TTapp.TTConstraints.tutors_constraints import MinTutorsHalfDays, MinNonPref
 from TTapp.TTConstraints.modules_constraints import MinModulesHalfDays
 from TTapp.TTConstraints.slots_constraints import SimultaneousCourses, AvoidBothTimes, LimitedStartTimeChoices, \
     ConsiderDependencies, ConsiderPivots, LimitUndesiredSlotsPerWeek, LimitSimultaneousCoursesNumber
-from TTapp.TTConstraints.rooms_constraints import LimitedRoomChoices
 from TTapp.TTConstraints.limit_time_constraints import LimitModulesTimePerPeriod, \
     LimitGroupsTimePerPeriod, LimitTutorsTimePerPeriod, LimitTimePerPeriod
 from TTapp.TTConstraints.orsay_constraints import GroupsLunchBreak, BreakAroundCourseType, TutorsLunchBreak
@@ -137,7 +136,7 @@ class CustomConstraint(TTConstraint):
         return _wrapper
 
     @inject_method
-    def enrich_model(self, ttmodel, week, ponderation=1, injected_method=None):
+    def enrich_ttmodel(self, ttmodel, week, ponderation=1, injected_method=None):
         """
         Call custom constraint method
         """
