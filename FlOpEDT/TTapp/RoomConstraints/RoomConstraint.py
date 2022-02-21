@@ -189,8 +189,9 @@ class LocateAllCourses(RoomConstraint):
         for course in considered_courses:
             relevant_sum = room_model.sum(room_model.TTrooms[(course, room)]
                                           for room in room_model.course_room_compat[course])
-            room_model.add_constraint(relevant_sum, '==', 1, Constraint(constraint_type=ConstraintType.CORE_ROOMS,
-                                                                        courses=course))
+            room_model.add_constraint(relevant_sum, '==', 1,
+                                      Constraint(constraint_type=ConstraintType.LOCATE_ALL_COURSES,
+                                                 courses=course))
 
 
 class LimitMoves(RoomConstraint):
