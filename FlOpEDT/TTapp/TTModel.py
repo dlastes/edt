@@ -128,6 +128,7 @@ class TTModel(FlopModel):
         self.train_prog = train_prog
         self.stabilize_work_copy = stabilize_work_copy
         self.wdb = self.wdb_init()
+        self.courses = self.wdb.courses
         if not self.wdb.courses.exists():
             print('There are no course to be scheduled...')
             return
@@ -881,14 +882,16 @@ class TTModel(FlopModel):
                 print(constr.__class__.__name__, constr.id, end=' - ')
                 timer(constr.enrich_ttmodel)(self, week)
 
-            #Consider RoomConstraints that have enrich_ttmodel method
-            for constr in get_room_constraints(
-                    self.department,
-                    week=week,
-                    is_active=True):
-                if hasattr(constr, 'enrich_ttmodel'):
-                    print(constr.__class__.__name__, constr.id, end=' - ')
-                    timer(constr.enrich_room_model)(self, week)
+        if self.pre_assign_rooms:
+            for week in self.weeks:
+                #Consider RoomConstraints that have enrich_ttmodel method
+                for constr in get_room_constraints(
+                        self.department,
+                        week=week,
+                        is_active=True):
+                    if hasattr(constr, 'enrich_ttmodel'):
+                        print(constr.__class__.__name__, constr.id, end=' - ')
+                        timer(constr.enrich_ttmodel)(self, week)
 
     def update_objective(self):
         self.obj = self.lin_expr()

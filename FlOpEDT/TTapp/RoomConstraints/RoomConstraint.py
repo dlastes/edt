@@ -29,11 +29,13 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.translation import gettext_lazy as _
 
 from django.db import models
+from django.db.models import Q
 
 from FlOpEDT.decorators import timer
 
 from TTapp.FlopConstraint import FlopConstraint
 from TTapp.slots import slot_pause
+from TTapp.TTConstraints.TTConstraint import TTConstraint
 
 from TTapp.ilp_constraints.constraint_type import ConstraintType
 from TTapp.ilp_constraints.constraint import Constraint
@@ -62,11 +64,43 @@ class RoomConstraint(FlopConstraint):
     def week_courses_queryset(self, room_model, week):
         return room_model.courses.filter(week=week)
 
-    def possible_tutor_courses_id_dict(self, room_model):
-        result = {}
-        for tutor in Tutor.objects.filter(departments=room_model.department):
-            result[tutor] = [c.id for c in room_model.courses if c.tutor == tutor or tutor in c.supp_tutor.all()]
-        return result
+    def get_courses_queryset_by_parameters(self, room_model, week,
+                                           train_progs=None,
+                                           train_prog=None,
+                                           module=None,
+                                           group=None,
+                                           course_type=None,
+                                           room_type=None,
+                                           tutor=None):
+
+        courses_qs = FlopConstraint.get_courses_queryset_by_parameters(self, room_model, week,
+                                                                       train_progs=train_progs,
+                                                                       train_prog=train_prog,
+                                                                       module=module,
+                                                                       group=group,
+                                                                       course_type=course_type,
+                                                                       room_type=room_type)
+
+        return courses_qs.filter(Q(tutor=tutor) | Q(supp_tutor=tutor))
+
+    def get_ttmodel_courses_queryset_by_parameters(self, ttmodel, week,
+                                                   train_progs=None,
+                                                   train_prog=None,
+                                                   module=None,
+                                                   group=None,
+                                                   course_type=None,
+                                                   room_type=None,
+                                                   tutor=None):
+
+        return TTConstraint.get_courses_queryset_by_parameters(self, ttmodel, week,
+                                                               train_progs=train_progs,
+                                                               train_prog=train_prog,
+                                                               module=module,
+                                                               group=group,
+                                                               course_type=course_type,
+                                                               room_type=room_type,
+                                                               tutor=None)
+
 
 
 class LimitRoomChoices(RoomConstraint):
@@ -99,7 +133,7 @@ class LimitRoomChoices(RoomConstraint):
 
     def enrich_room_model(self, room_model, week, ponderation=1.):
         filtered_courses = self.get_courses_queryset_by_attributes(room_model, week)
-        possible_rooms = self.possible_rooms.values_list()
+        possible_rooms = self.possible_rooms.all()
         relevant_sum = room_model.sum(room_model.TTrooms[(course, room)]
                                       for course in filtered_courses
                                       for room in room_model.course_room_compat[course] if room not in possible_rooms)
@@ -112,16 +146,16 @@ class LimitRoomChoices(RoomConstraint):
                                                  rooms=possible_rooms))
 
     def enrich_ttmodel(self, ttmodel, week, ponderation=1.):
-        fc = self.get_courses_queryset_by_attributes(ttmodel, week)
-        possible_rooms = self.possible_rooms.values_list()
+        fc = self.get_ttmodel_courses_queryset_by_parameters(ttmodel, week)
+        possible_rooms = self.possible_rooms.all()
         if self.tutor is None:
             relevant_var_dic = ttmodel.TTrooms
         else:
             relevant_var_dic = {(sl, c, rg): ttmodel.add_conjunct(ttmodel.TTrooms[(sl, c, rg)],
                                                                   ttmodel.TTinstructors[sl, c, self.tutor])
-                            for c in fc
-                            for sl in ttmodel.wdb.compatible_slots[c]
-                            for rg in ttmodel.wdb.course_rg_compat[c] if rg not in possible_rooms }
+                                for c in fc
+                                for sl in ttmodel.wdb.compatible_slots[c]
+                                for rg in ttmodel.wdb.course_rg_compat[c] if rg not in possible_rooms }
         relevant_sum = ttmodel.sum(relevant_var_dic[(sl, c, rg)]
                                    for c in fc
                                    for sl in ttmodel.wdb.compatible_slots[c]

@@ -76,17 +76,26 @@ class TTConstraint(FlopConstraint):
     def get_viewmodel_prefetch_attributes(cls):
         return ['train_progs', 'department',]
 
-    def week_courses_queryset(self, ttmodel, week):
-        return ttmodel.wdb.courses.filter(week=week)
+    def get_courses_queryset_by_parameters(self, ttmodel, week,
+                                           train_progs=None,
+                                           train_prog=None,
+                                           module=None,
+                                           group=None,
+                                           course_type=None,
+                                           room_type=None,
+                                           tutor=None):
+        courses_qs = FlopConstraint.get_courses_queryset_by_parameters(self, ttmodel, week,
+                                                                       train_progs=train_progs,
+                                                                       train_prog=train_prog,
+                                                                       module=module,
+                                                                       group=group,
+                                                                       course_type=course_type,
+                                                                       room_type=room_type)
 
-    def possible_tutor_courses_id_dict(self, ttmodel):
-        result = {}
-        for tutor in Tutor.objects.filter(departments=ttmodel.department):
-            if tutor in ttmodel.wdb.instructors:
-                result[tutor] = [c.id for c in ttmodel.wdb.possible_courses[tutor]]
-            else:
-                result[tutor] = []
-        return result
+        if tutor in ttmodel.wdb.instructors:
+            return courses_qs.filter(id__in = [c.id for c in ttmodel.wdb.possible_courses[tutor]])
+        else:
+            return courses_qs.filter(id__in = [])
 
     def get_courses_queryset_by_attributes(self, ttmodel, week, **kwargs):
         """

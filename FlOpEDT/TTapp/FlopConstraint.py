@@ -115,25 +115,18 @@ class FlopConstraint(models.Model):
         else:
             return TimeGeneralSettings.objects.get(department = self.department)
 
-    def week_courses_queryset(self, flopmodel, week):
-        raise NotImplementedError
-
-    def possible_tutor_courses_id_dict(self, flopmodel):
-        raise NotImplementedError
-
     def get_courses_queryset_by_parameters(self, flopmodel, week,
                                            train_progs=None,
                                            train_prog=None,
                                            module=None,
                                            group=None,
                                            course_type=None,
-                                           room_type=None,
-                                           tutor=None):
+                                           room_type=None):
         """
         Filter courses depending on constraints parameters
         parameter group : if not None, return all courses that has one group connected to group
         """
-        courses_qs = self.week_courses_queryset(flopmodel, week)
+        courses_qs = flopmodel.courses.filter(week=week)
         courses_filter = {}
 
         if train_progs is not None:
@@ -153,9 +146,6 @@ class FlopConstraint(models.Model):
 
         if room_type is not None:
             courses_filter['room_type'] = room_type
-
-        if tutor is not None:
-            courses_filter['id__in'] = self.possible_tutor_courses_id_dict(flopmodel)[tutor]
 
         return courses_qs.filter(**courses_filter)
 
