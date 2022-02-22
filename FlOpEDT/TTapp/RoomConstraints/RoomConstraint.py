@@ -103,12 +103,14 @@ class RoomConstraint(FlopConstraint):
 
 
 
-class LimitRoomChoices(RoomConstraint):
+class LimitedRoomChoices(RoomConstraint):
     """
     Limit the possible rooms for the courses
     Attributes are cumulative :
-        limit the room choice for the courses of this/every tutor, of this/every module, for this/every group ...
+        limit the room choice for the courses o f this/every tutor, of this/every module, for this/every group ...
     """
+    train_progs = models.ManyToManyField('base.TrainingProgramme',
+                                         blank=True)
     module = models.ForeignKey('base.Module',
                                null=True,
                                default=None,
