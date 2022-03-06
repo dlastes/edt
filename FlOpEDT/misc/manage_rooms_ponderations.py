@@ -18,7 +18,7 @@ def all_room_types_subsets_with_corresponding_basic_rooms(room_types_query_set):
         rt_tuple = convert_rt_set_to_sorted_tuple(rt_set)
         result['new'][rt_tuple] = basic_rooms
 
-    # Then unit tuples that have common AND distinct rooms
+    # Then unit tuples that have common AND distinct rooms in a new tuple
     again = True
     while again:
         again = False
@@ -36,15 +36,10 @@ def all_room_types_subsets_with_corresponding_basic_rooms(room_types_query_set):
                 # else, create a new rt_tuple that unite previous ones, and unite basic_rooms
                 else:
                     new_rt_tuple = unite_two_rt_tuples(rt_tuple1, rt_tuple2)
-                    new_basic_rooms = basic_rooms_rt_tuple1 | basic_rooms_rt_tuple2
-                    for old_tuple in set(result["old"].keys()):
-                        old_basic_rooms = result["old"][old_tuple]
-                        if old_basic_rooms == new_basic_rooms:
-                            result['old'].pop(old_tuple)
-                            new_rt_tuple = unite_two_rt_tuples(new_rt_tuple, old_tuple)
                     result["new"][new_rt_tuple] = basic_rooms_rt_tuple1 | basic_rooms_rt_tuple2
                     again = True
 
+    # Finally, join tuples that have same basic rooms
     final_result = join_rt_tuples_in_dict_if_same_rooms(result['old'])
 
     return final_result
@@ -67,7 +62,7 @@ def room_types_subsets_with_ponderations_for_constraints(room_types_subsets_with
 
 @transaction.atomic
 @timer
-def register_ponderations_in_database(department):
+def register_ponderations_in_database(department, delete_unused_room_types=False):
     RoomPonderation.objects.filter(department=department).delete()
     room_types_query_set = RoomType.objects.filter(department=department)
     ARTS = all_room_types_subsets_with_corresponding_basic_rooms(room_types_query_set)
@@ -77,8 +72,9 @@ def register_ponderations_in_database(department):
         RP.ponderations = RTSWP[rtswp]
         RP.save()
     print(f"{len(RTSWP)} rooms ponderations created in database")
-    # room_types_to_delete = room_types_query_set.filter(course__isnull=True)
-    # room_types_to_delete.delete()
+    if delete_unused_room_types:
+        room_types_to_delete = room_types_query_set.filter(course__isnull=True)
+        room_types_to_delete.delete()
 
 
 def unite_two_rt_tuples(tuple1, tuple2):
@@ -117,15 +113,3 @@ def join_rt_tuples_in_dict_if_same_rooms(rt_tuples_dict):
             rt_tuples_dict[new_tuple] = basic_rooms_to_consider
 
     return rt_tuples_dict
-
-
-
-    # for i, rt1 in enumerate(rt_tuples):
-    #     basic_rooms_to_consider = result['new'][rt1]
-    #      = set()
-    #     for rt2 in rt_tuples[i+1:]:
-    #         if result['new'][rt2] == basic_rooms_to_consider:
-    #             tuples_to_merge =
-    #
-    #
-    #     new_rt_tuple = unite_two_rt_tuples(new_rt_tuple, rt2)
