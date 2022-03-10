@@ -23,6 +23,7 @@
 # a commercial license. Buying such a license is mandatory as soon as
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
+from enum import Enum
 
 from django.core.checks.messages import Error
 from colorfield.fields import ColorField
@@ -40,6 +41,12 @@ import base.weeks
 from django.utils.translation import gettext_lazy as _
 
 slot_pause = 30
+
+class Theme(Enum):
+    WHITE = 'White'
+    DARK = 'Dark'
+    SYNTH_WAVE = 'SynthWave'
+    BRUME = 'Brume'
 
 # <editor-fold desc="GROUPS">
 # ------------
