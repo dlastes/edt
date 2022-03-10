@@ -22,7 +22,6 @@
 <!-- without disclosing the source code of your own applications.          -->
 
 
-
 {% extends "base.html" %}
 
 {% load static %}
@@ -35,66 +34,92 @@
 
 {% block content %}
 
-</br></br></br>
+    </br></br></br>
 
-<form action="{% url 'people:student_preferences' %}" method="post" id="form_pref">
-  {% csrf_token %}
-  <fieldset>
-    <legend>{% trans "Preferences for your group" %}</legend>
-      </br>
-      <div><b> {% trans "Morning or evening?" %}</b></div>
-      <div>
+    <form action="{% url 'people:student_preferences' %}" method="post" id="form_pref">
+        {% csrf_token %}
+        <fieldset>
+            <legend>{% trans "Preferences for your group" %}</legend>
+            </br>
+            <div><b> {% trans "Morning or evening?" %}</b></div>
+            <div>
 
-        <input type="range" id="morning" name="morning_evening" min="0" max="1" step="0.25" value="{{ morning|stringformat:'.2f' }}"/>
-        <output name="result">{{ morning_txt }}</output>
-      </div>
-        </br>
-      <div><b>{% trans "Busy days VS Free half-days" %}</b></div>
+                <input type="range" id="morning" name="morning_evening" min="0" max="1" step="0.25"
+                       value="{{ morning|stringformat:'.2f' }}"/>
+                <output name="result">{{ morning_txt }}</output>
+            </div>
+            </br>
+            <div><b>{% trans "Busy days VS Free half-days" %}</b></div>
 
-      <div>
+            <div>
+                <input type="range" id="free_half_day" name="light_free" min="0" max="1" step="0.25"
+                       value="{{ free_half_day|stringformat:'.2f' }}"/>
+                <output name="resultdeux">{{ free_half_day_txt }}</output>
+            </div>
+            </br>
+            <div><b>{% trans "Holes?" %}</b></div>
+            <div>
+                <input type="range" id="hole" name="hole_nothole" min="0" max="1" step="0.5"
+                       value="{{ hole|stringformat:'.2f' }}"/>
+                <output name="resulthole">{{ hole_txt }}</output>
+            </div>
+            <br/>
+            <div><b>{% trans "Eat early or late?" %}</b></div>
 
-        <input type="range" id="free_half_day" name="light_free" min="0" max="1" step="0.25" value="{{ free_half_day|stringformat:'.2f' }}"/>
-        <output name="resultdeux">{{ free_half_day_txt }}</output>
-      </div>
-        </br>
-      <div><b>{% trans "Holes?" %}</b></div>
-      <div>
-        <input type="range" id="hole" name="hole_nothole" min="0" max="1" step="0.5" value="{{ hole|stringformat:'.2f' }}"/>
-        <output name="resulthole">{{ hole_txt }}</output>
-      </div>
-        <br/>
-      <div><b>{% trans "Eat early or late?" %}</b></div>
+            <div>
+                <input type="range" id="selfeat" name="eat" min="0" max="1" step="0.5"
+                       value="{{ selfeat|stringformat:'.2f' }}"/>
+                <output name="resulteat">{{ eat_txt }}</output>
+            </div>
+            <br/><br/>
+            <button type="submit" form="form_pref" value="Submit">Valider</button>
+        </fieldset>
 
-      <div>
-        <input type="range" id="selfeat" name="eat" min="0" max="1" step="0.5"
-        value="{{ selfeat|stringformat:'.2f' }}"/>
-        <output name="resulteat">{{ eat_txt }}</output>
-      </div>
-        <br/><br/>
-      <button type="submit" form="form_pref" value="Submit">Valider</button>
-  </fieldset>
+        {% comment %}
+            <fieldset class="twofieldset">
+                <legend>Préférences demi-journée libre</legend>
+                <br/>
+                <div>Indiquez <b>en rouge</b> les demies-journées pour lesquels avoir cours est <b>moins souhaitable</b>...
+                </div>
+                <div align="center">
+                    <svg id="grille">
 
-{% comment %}
-    <fieldset class="twofieldset">
-      <legend>Préférences demi-journée libre</legend>
-        <br/>
-      <div>Indiquez <b>en rouge</b> les demies-journées pour lesquels avoir cours est <b>moins souhaitable</b>...</div>
-        <div align="center">
-          <svg id="grille">
+                    </svg>
+                </div>
+                <button class="rightbutton" type="submit" form="form_pref" value="Submit">Valider</button>
+            </fieldset>
+        {% endcomment %}
 
-          </svg>
-        </div>
-        <button class="rightbutton" type="submit" form="form_pref" value="Submit">Valider</button>
-    </fieldset>
- {% endcomment %}
-
-</form>
+    </form>
 
 
-<br/><br/>
-{% include 'base/notification.html' %}
+    <br/><br/>
+    {% include 'base/notification.html' %}
 
-<link rel="stylesheet" type="text/css" href="{% static 'people/student_preferences.css' %}"/>
-<script src="{% static 'people/student_preferences.js' %}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'people/student_preferences.css' %}"/>
+    <script src="{% static 'people/student_preferences.js' %}"></script>
+
+    <br/><br/>
+
+    {# Themes #}
+    <form action="{% url 'people:student_preferences' %}" method="post" id="form_pref">
+        {% csrf_token %}
+        <fieldset>
+            <legend>{% trans "Preferences for your themes" %}</legend>
+            <br>
+            <div><b> {% trans "Your themes" %}</b></div>
+            <div>
+                <label>
+                    <select>
+                        {% for a in themes %}
+                            <option name="theme" value={{ a }} >{{ a }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+            </div>
+            <br/><br/>
+            <button type="submit" form="form_pref" value="Submit">Valider</button>
+        </fieldset>
+    </form>
 
 {% endblock %}

@@ -38,10 +38,11 @@ from FlOpEDT.decorators import tutor_or_superuser_required
 import base.queries as queries
 
 from people.models import Tutor, GroupPreferences, StudentPreferences, Student,\
-    NotificationsPreferences, UserPreferredLinks, PhysicalPresence, User
+    NotificationsPreferences, UserPreferredLinks, PhysicalPresence, User, Theme
 from people.admin import TutorResource, GroupPreferencesResource, \
     StudentPreferencesResource, UserPreferredLinksResource, PhysicalPresenceResource
 from base.models import TimeGeneralSettings, Department, Week
+
 
 logger = logging.getLogger(__name__)
 
@@ -105,6 +106,7 @@ def student_preferences(req):
             free_half_day_weight = req.POST['light_free']
             hole_weight = req.POST['hole_nothole']
             eat_weight = req.POST['eat']
+            # theme = req.POST['theme']
 
             student = Student.objects.get(username=user.username)
             student_pref, created = StudentPreferences.objects.get_or_create(student=student)
@@ -183,7 +185,9 @@ def student_preferences(req):
 
             day = Department.objects.get(abbrev='INFO')
 
-
+            themes = []
+            for theme in Theme:
+                themes.append(theme.value)
 
             return TemplateResponse(
                 req,
@@ -197,7 +201,8 @@ def student_preferences(req):
                  'selfeat': eat,
                  'eat_txt': eat_txt,
                  'user_notifications_pref':
-                 queries.get_notification_preference(req.user)
+                 queries.get_notification_preference(req.user),
+                 'themes': themes,
                 })
         else:
             # Make a decorator instead

@@ -38,7 +38,7 @@ from enum import Enum
 class User(AbstractUser):
     is_student = models.BooleanField(default=False)
     is_tutor = models.BooleanField(default=False)
-    preffered_theme = models.CharField(default='WHITE')
+    preffered_theme = models.CharField(default='WHITE', max_length=20)
     rights = models.PositiveSmallIntegerField(verbose_name="Droits particuliers",
                                               default=0)
     departments = models.ManyToManyField(
@@ -104,9 +104,10 @@ class User(AbstractUser):
 
 
 class Theme(Enum):
-    WHITE = 'WHITE'
-    Dark = 'DARK'
-    Synth_Wave = 'SYNTH_WAVE'
+    WHITE = 'White'
+    DARK = 'Dark'
+    SYNTH_WAVE = 'SynthWave'
+    BRUME = 'Brume'
 
 
 class UserDepartmentSettings(models.Model):
