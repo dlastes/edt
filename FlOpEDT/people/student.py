@@ -53,3 +53,4 @@ class ChangeStudent(UpdateView):
     def get_object(self, queryset=None):
         return self.request.user if self.request.user.is_authenticated else None
          
+#1
