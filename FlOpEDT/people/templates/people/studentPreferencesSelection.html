@@ -112,7 +112,7 @@
                 <label>
                     <select name="theme">
                         {% for a in themes %}
-                            <option value="{{ a }}" >{{ a }}</option>
+                            <option value="{{ a }}" {% if a == theme %}selected{% endif %}>{{ a }}</option>
                         {% endfor %}
                     </select>
                 </label>
