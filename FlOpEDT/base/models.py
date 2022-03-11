@@ -47,6 +47,7 @@ class Theme(Enum):
     DARK = 'Dark'
     SYNTH_WAVE = 'SynthWave'
     BRUME = 'Brume'
+    PRESTIGE = 'Prestige Edition'
 
 # <editor-fold desc="GROUPS">
 # ------------

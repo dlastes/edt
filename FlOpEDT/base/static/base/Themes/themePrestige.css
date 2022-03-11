@@ -1,108 +1,135 @@
-#full_logo{
-    background:#B89B6F;
-}
-
-body{
+body {
     background: #0D1826;
 }
 
-#edt-main{
-    background: #0D1826
-}
-
-.hour-scale{
-    opacity: 0;
-    fill: #B89B6F;
-}
-
-ul{
-    background: #00010D;
-
-}
-
-.day_am{
-    stroke:#B89B6F;
-    font-family: Arial, sans-serif;
-    alignment-baseline: middle;
-    dominant-baseline: middle;
-    stroke-width: 2;
-    fill: none;
-}
-.day_pm{
-    stroke:#B89B6F;
-    stroke-width: 2;
-    fill: none;
-}
-
-.cst{
-    fill:#B89B6F;
-}
-
-.layout-edt-bg{
-    fill:#B89B6F;
-    font-family: Arial, sans-serif;
-    alignment-baseline: middle;
-    dominant-baseline: middle;
-}
-
-.txt_scl{
-    fill:#7a7a7a;
-    font-size: 20px;
-    font-weight: bold;
-}
-
-#logo_svg{
+#menu-edt ul {
+    fill: black;
     background: #B89B6F;
 }
 
-.menu{
-
+.cir_wk, .rec_wk {
+    fill: #7d6a4a !important;
 }
 
-.rec_wk {
-    fill: #6a573a;
-    cursor: pointer;
-    font-size: 1.2em;
+svg text {
+    fill: white;
 }
 
-.cir_wk{
-    fill: #6a573a;
-    cursor: pointer;
-    font-size: 2em;
-    font-weight: bold;
+svg circle {
+    stroke: #FFFFFF;
 }
 
-.circle{
-
-    fill:#6a573a;
-    stroke: white;
-    stroke-width: 1;
-    cx: 0;
-    cy: 15;
-    r: 18;
+.gridsckd .day_am, .gridsckd .day_pm {
+    stroke: #B89B6F;
 }
 
-#flopGreen{
-    color: #0D1826;
-    font-family: inherit;
-    font-size: inherit;
+.hour-scale .hour-scale-item {
+    fill-opacity: 0 !important;
 }
 
-#EDTRed{
-    color: #0D1826;
-    font-family: inherit;
-    font-size: inherit;
+
+#layout-meg {
+    fill : #B89B6F;
+    color : black;
 }
 
-.sel-pop-bg{
+.sel_forall {
     fill: #B89B6F;
-    x: -5;
-    y: -35;
-    width: 260;
-    height: 190;
-
+    color: black;
 }
 
-.ack-reg{
-  fill: #B89B6F;
+#layout-catg rect {
+    fill: #B89B6F;
+    color: black;
+}
+
+#popup-group rect, #popup-tutor rect, #popup-module rect, #popup-room rect{
+    fill: #B89B6F !important;
+}
+
+#popup-group text, #popup-tutor text, #popup-module text, #popup-room text{
+    fill: white !important;
+}
+
+.sel-button {
+    fill: #B89B6F;
+    color: black;
+}
+
+.sel-pop-all {
+    fill: #7d6a4a;
+    color: black;
+}
+
+section, font {
+    color: white;
+}
+
+.dept_list li {
+    color: black;
+}
+
+#head_logo {
+    color: white;
+}
+
+g.hour-scale rect {
+    fill: none;
+}
+
+.hour-scale .hour-scale-item {
+    fill-opacity: 0 !important;
+}
+
+.cours {
+    color: white;
+}
+
+g#layout-meg text {
+    fill : #B89B6F;
+    color : black !important;
+}
+
+.sel_forall {
+    fill: #B89B6F;
+    color: black;
+}
+
+#layout-catg rect {
+    fill: #B89B6F;
+    color: black;
+}
+
+#popup-group rect, #popup-tutor rect, #popup-module rect, #popup-room rect{
+    fill: #B89B6F !important;
+}
+
+#popup-group text, #popup-tutor text, #popup-module text, #popup-room text{
+    fill: white !important;
+}
+
+.sel-button {
+    fill: #B89B6F;
+    color: black;
+}
+
+.sel-pop-all {
+    fill: #7d6a4a;
+    color: black;
+}
+
+section, font {
+    color: white;
+}
+
+.dept_list li {
+    color: black;
+}
+
+#head_logo {
+    color: white;
+}
+
+g.hour-scale rect {
+    fill: none;
 }
