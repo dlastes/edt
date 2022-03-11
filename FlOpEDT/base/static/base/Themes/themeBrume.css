@@ -1,0 +1,32 @@
+body {
+    background: linear-gradient(-30deg, #111b24, 90%, #2a5e5e);
+}
+
+#menu-edt ul {
+    fill: #1b3438;
+    background: #1b3438;
+}
+
+.cir_wk, .rec_wk {
+    fill: #132028 !important;
+}
+
+svg text {
+    fill: #68aeac;
+}
+
+svg circle {
+    stroke: #68aeac;
+}
+
+g#layout-catg {
+    fill: #3d7b6e;
+}
+
+#EDTRed, #flopGreen {
+    color: white;
+}
+
+.gridsckd .day_am, .gridsckd .day_pm {
+    stroke: #3d7b6e;
+}
