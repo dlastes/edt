@@ -84,7 +84,7 @@ class EdtContextMiddleware:
                 logger.debug(f'get department from cache : {department}')
                 if department and department.abbrev == department_abbrev:
                     set_request_department(request, department)
-                else: 
+                else:
                     try:        
                         logger.debug(f'load department from database : [{department_abbrev}]')
                         department = Department.objects.get(abbrev=department_abbrev)

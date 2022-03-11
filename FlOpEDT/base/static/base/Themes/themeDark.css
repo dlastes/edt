@@ -1,57 +1,51 @@
 body {
-    background: linear-gradient(-30deg, #111b24, 90%, #2a5e5e);
+    background: #0D0009;
 }
 
 #menu-edt ul {
-    fill: #2a5e5e;
-    background: #1b3438;
+    fill: #0D0009;
+    background: #131313;
+
 }
 
 .cir_wk, .rec_wk {
-    fill: #132028 !important;
+    fill: #404040 !important;
 }
 
 svg text {
-    fill: #68aeac;
+    fill: white;
 }
 
 svg circle {
-    stroke: #68aeac;
-}
-
-#EDTRed, #flopGreen {
-    color: white;
+    stroke: white;
 }
 
 .gridsckd .day_am, .gridsckd .day_pm {
-    stroke: #3d7b6e;
+    stroke: #A6A6A6;
 }
 
 .hour-scale .hour-scale-item {
     fill-opacity: 0 !important;
 }
 
-.cours {
-    color: white;
-}
 
 #layout-meg {
-    fill : #3d7b6e;
-    color : black;
+    fill : #5a5a5a;
+    color : white;
 }
 
 .sel_forall {
-    fill: #3d7b6e;
-    color: black;
+    fill: #5a5a5a;
+    color: white;
 }
 
 #layout-catg rect {
-    fill: #3d7b6e;
-    color: black;
+    fill: #5a5a5a;
+    color: white;
 }
 
 #popup-group rect, #popup-tutor rect, #popup-module rect, #popup-room rect{
-    fill: #3d7b6e !important;
+    fill: #5a5a5a !important;
 }
 
 #popup-group text, #popup-tutor text, #popup-module text, #popup-room text{
@@ -59,13 +53,13 @@ svg circle {
 }
 
 .sel-button {
-    fill: #3d7b6e;
-    color: black;
+    fill: #282828;
+    color: white;
 }
 
 .sel-pop-all {
-    fill: #48796f;
-    color: black;
+    fill: #0D0009;
+    color: white;
 }
 
 section, font {
@@ -73,7 +67,7 @@ section, font {
 }
 
 .dept_list li {
-    color: black;
+    color: white;
 }
 
 #head_logo {
@@ -92,23 +86,23 @@ g.hour-scale rect {
     color: white;
 }
 
-#layout-meg {
-    fill : #3d7b6e;
-    color : black;
+g#layout-meg text {
+    fill : #282828;
+    color : white !important;
 }
 
 .sel_forall {
-    fill: #3d7b6e;
-    color: black;
+    fill: #282828;
+    color: white;
 }
 
 #layout-catg rect {
-    fill: #3d7b6e;
-    color: black;
+    fill: #282828;
+    color: white;
 }
 
 #popup-group rect, #popup-tutor rect, #popup-module rect, #popup-room rect{
-    fill: #3d7b6e !important;
+    fill: #282828 !important;
 }
 
 #popup-group text, #popup-tutor text, #popup-module text, #popup-room text{
@@ -116,13 +110,13 @@ g.hour-scale rect {
 }
 
 .sel-button {
-    fill: #3d7b6e;
-    color: black;
+    fill: #282828;
+    color: white;
 }
 
 .sel-pop-all {
-    fill: #48796f;
-    color: black;
+    fill: #5a5a5a;
+    color: white;
 }
 
 section, font {
@@ -130,7 +124,7 @@ section, font {
 }
 
 .dept_list li {
-    color: black;
+    color: white;
 }
 
 #head_logo {

@@ -95,7 +95,9 @@ class User(AbstractUser):
         ret += '(' + str(self.rights) + ')'
         return ret
 
-
+    @property
+    def get_theme(self):
+        return self.themes_preference.theme
 
     class Meta:
         ordering = ['username', ]
@@ -235,9 +237,6 @@ class Preferences(models.Model):
 
     def get_light_day_weight(self):
         return float(1 - self.free_half_day_weight)
-
-    def get_theme(self):
-        return self.theme
 
     class Meta:
         abstract = True

@@ -50,19 +50,19 @@
     <!-- script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script -->
     <title>{% block title %}{% trans "Schedule_title" %}{% endblock %}</title>
 
-    {% if request.user.preferred_theme == "Brume" %}
+    {#merci à PSO le boss#}
+    {% if request.user.get_theme == "Brume" %}
         <link rel="stylesheet" href="{% static 'base/Themes/themeBrume.css' %}"/>
-    {% elif request.user.preferred_theme == "Prestige" %}
+    {% elif request.user.get_theme == "Prestige Edition" %}
         <link rel="stylesheet" href="{% static 'base/Themes/themePrestige.css' %}"/>
-    {% elif request.user.preferred_theme == "SynthWave" %}
+    {% elif request.user.get_theme == "SynthWave" %}
         <link rel="stylesheet" href="{% static 'base/Themes/themeSynthWave.css' %}"/>
+    {% elif request.user.get_theme == "Dark" %}
+        <link rel="stylesheet" href="{% static 'base/Themes/themeDark.css' %}"/>
     {% endif %}
-
-    {% block additionalCSS %}
-    {% endblock %}
-
 </head>
 <body>
+
 {% block loader %}
     <div id="loader" class="loader" style="visibility:hidden;"></div>
 {% endblock %}
