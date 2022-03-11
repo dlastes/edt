@@ -294,7 +294,7 @@ class ThemesPreferences(models.Model):
     user = models.OneToOneField('User',
                                 on_delete=models.CASCADE,
                                 related_name='themes_preference')
-    theme = models.CharField(max_length=50, default='default')
+    theme = models.CharField(max_length=50, default='White')
 
 
 class UserPreferredLinks(models.Model):

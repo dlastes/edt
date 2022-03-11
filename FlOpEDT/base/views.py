@@ -65,7 +65,7 @@ from base.models import Course, UserPreference, ScheduledCourse, EdtVersion, \
     CourseModification, Day, Time, Room, RoomType, RoomSort, \
     Regen, RoomPreference, Department, TimeGeneralSettings, CoursePreference, \
     TrainingProgramme, CourseType, Module, StructuralGroup, EnrichedLink, \
-    ScheduledCourseAdditional, GroupPreferredLinks, Week
+    ScheduledCourseAdditional, GroupPreferredLinks, Week, Theme
 import base.queries as queries
 from base.weeks import *
 
@@ -221,7 +221,9 @@ def preferences(req, **kwargs):
 def stype(req, *args, **kwargs):
     err = ''
     user_notifications_pref = queries.get_notification_preference(req.user)
-    user_themes_pref = queries.get_theme_preference(req.user)
+    themes = []
+    for a in Theme:
+        themes.append(a.value)
     if req.method == 'GET':
         return TemplateResponse(req,
                                 'base/show-stype.html',
@@ -231,7 +233,8 @@ def stype(req, *args, **kwargs):
                                  'usr_pref_hours': req.user.tutor.pref_hours_per_day,
                                  'usr_max_hours': req.user.tutor.max_hours_per_day,
                                  'user_notifications_pref': user_notifications_pref,
-                                 'user_themes_pref': user_themes_pref,
+                                 'themes': themes,
+                                 'theme': queries.get_theme_preference(req.user),
                                  'err': err,
                                  'current_year': current_year,
                                  'department_settings': queries.get_department_settings(req.department),
@@ -267,7 +270,7 @@ def stype(req, *args, **kwargs):
                                  'usr_pref_hours': req.user.tutor.pref_hours_per_day,
                                  'usr_max_hours': req.user.tutor.max_hours_per_day,
                                  'user_notifications_pref': user_notifications_pref,
-                                 'user_themes_pref': user_themes_pref,
+                                 'user_themes_pref': queries.get_theme_preference(req.user),
                                  'err': err,
                                  'current_year': current_year,
                                  'department_settings': queries.get_department_settings(req.department),

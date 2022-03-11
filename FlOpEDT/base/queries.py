@@ -355,5 +355,9 @@ def get_notification_preference(user):
 
 def get_theme_preference(user):
     if user is not None:
-        return user.themes_preference.theme
-    return 'default'
+        try:
+            return user.get_theme
+        except ThemesPreferences.DoesNotExist:
+            return 'White'
+
+    return 'White'
