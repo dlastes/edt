@@ -48,7 +48,7 @@ from django.views.generic import RedirectView
 from FlOpEDT.decorators import dept_admin_required, tutor_required
 
 from people.models import Tutor, UserDepartmentSettings, User, \
-    NotificationsPreferences, UserPreferredLinks
+    NotificationsPreferences, UserPreferredLinks, ThemesPreferences
 
 from displayweb.admin import BreakingNewsResource
 from displayweb.models import BreakingNews
@@ -70,7 +70,6 @@ import base.queries as queries
 from base.weeks import *
 
 logger = logging.getLogger(__name__)
-
 
 # <editor-fold desc="FAVICON">
 # ----------
@@ -107,7 +106,7 @@ def index(req):
 
     def redirect_to_edt(department):
         reverse_url = reverse('base:edt', kwargs={
-                              'department': department.abbrev})
+            'department': department.abbrev})
         # reverse_url = reverse('base:edt', department=department.abbrev)
         return reverse_url
 
@@ -222,6 +221,7 @@ def preferences(req, **kwargs):
 def stype(req, *args, **kwargs):
     err = ''
     user_notifications_pref = queries.get_notification_preference(req.user)
+    user_themes_pref = queries.get_theme_preference(req.user)
     if req.method == 'GET':
         return TemplateResponse(req,
                                 'base/show-stype.html',
@@ -231,6 +231,7 @@ def stype(req, *args, **kwargs):
                                  'usr_pref_hours': req.user.tutor.pref_hours_per_day,
                                  'usr_max_hours': req.user.tutor.max_hours_per_day,
                                  'user_notifications_pref': user_notifications_pref,
+                                 'user_themes_pref': user_themes_pref,
                                  'err': err,
                                  'current_year': current_year,
                                  'department_settings': queries.get_department_settings(req.department),
@@ -266,6 +267,7 @@ def stype(req, *args, **kwargs):
                                  'usr_pref_hours': req.user.tutor.pref_hours_per_day,
                                  'usr_max_hours': req.user.tutor.max_hours_per_day,
                                  'user_notifications_pref': user_notifications_pref,
+                                 'user_themes_pref': user_themes_pref,
                                  'err': err,
                                  'current_year': current_year,
                                  'department_settings': queries.get_department_settings(req.department),
@@ -275,8 +277,8 @@ def stype(req, *args, **kwargs):
 
 @tutor_required
 def room_preference(req, department, tutor=None):
-    roomtypes = RoomType.objects.filter(department=req.department)\
-                                .prefetch_related('members')
+    roomtypes = RoomType.objects.filter(department=req.department) \
+        .prefetch_related('members')
     roomgroups = Room.objects.filter(types__in=roomtypes)
     rt_dict = {rt.id: rt.name for rt in roomtypes}
     rg_dict = {rg.id: rg.name for rg in roomgroups}
@@ -388,6 +390,17 @@ def user_notifications_pref_changes(req, username=None, *args, **kwargs):
     return redirect('base:preferences', req.department)
 
 
+@login_required
+def user_themes_pref_changes(req, username=None, *args, **kwargs):
+    if username is not None:
+        u = User.objects.get(username=username)
+        t, created = ThemesPreferences.objects.get_or_create(user=u)
+        user_theme_pref = req.POST['user_themes_pref']
+        t.theme = user_theme_pref
+        t.save()
+    return redirect('base:preferences', req.department)
+
+
 def aide(req, **kwargs):
     return TemplateResponse(req, 'base/help.html')
 
@@ -419,7 +432,7 @@ def decale(req, **kwargs):
 def all_modules_with_desc(req, **kwargs):
     return TemplateResponse(req, 'base/modules.html',
                             {'is_tutor': req.user.is_tutor
-                             if req.user.is_authenticated else False})
+                            if req.user.is_authenticated else False})
 
 
 # </editor-fold desc="VIEWERS">
@@ -551,8 +564,8 @@ def fetch_all_tutors(req, **kwargs):
         return cached
     tutor_list = [t.user.username
                   for t in UserDepartmentSettings.objects
-                  .filter(department=req.department,
-                          user__is_tutor=True)]
+                      .filter(department=req.department,
+                              user__is_tutor=True)]
     response = JsonResponse(tutor_list, safe=False)
     cache.set(cache_key, response)
     return response
@@ -655,9 +668,9 @@ def fetch_decale(req, **kwargs):
             tutors.append('')
 
     if module != '':
-        course_queryset = Course\
-            .objects\
-            .filter(module__train_prog__department=department)\
+        course_queryset = Course \
+            .objects \
+            .filter(module__train_prog__department=department) \
             .select_related('module__train_prog__department')
         course = filt_m(course_queryset, module) \
             .order_by('tutor__username') \
@@ -689,9 +702,9 @@ def fetch_decale(req, **kwargs):
 def fetch_bknews(req, year, week, **kwargs):
     dataset = BreakingNewsResource() \
         .export(BreakingNews.objects.filter(
-            department=req.department,
-            year=year,
-            week=week))
+        department=req.department,
+        year=year,
+        week=week))
     response = HttpResponse(dataset.csv,
                             content_type='text/csv')
     response['week'] = week
@@ -776,11 +789,11 @@ def fetch_tutor_courses(req, year, week, tutor, **kwargs):
     logger.info(f"Fetch {tutor} courses")
     dataset = TutorCoursesResource() \
         .export(ScheduledCourse.objects
-                .filter(
-                    course__week=week,
-                    course__year=year,
-                    work_copy=0,
-                    course__tutor__username=tutor))
+        .filter(
+        course__week=week,
+        course__year=year,
+        work_copy=0,
+        course__tutor__username=tutor))
     return HttpResponse(dataset.csv, content_type='text/csv')
 
 
@@ -801,11 +814,11 @@ def fetch_extra_sched(req, year, week, **kwargs):
     dataset = MultiDepartmentTutorResource() \
         .export(ScheduledCourse.objects
                 .filter(
-                    course__week=week,
-                    course__year=year,
-                    work_copy=0,
-                    course__tutor__in=tutors,
-                )
+        course__week=week,
+        course__year=year,
+        work_copy=0,
+        course__tutor__in=tutors,
+    )
                 .exclude(course__room_type__department=req.department))
     return HttpResponse(dataset.csv, content_type='text/csv')
 
@@ -823,20 +836,20 @@ def fetch_shared_rooms(req, year, week, **kwargs):
     # courses in any shared room
     courses = ScheduledCourse.objects \
         .filter(
-            course__week__nb=week,
-            course__week__year=year,
-            work_copy=0,
-            room__in=shared_rooms,
-        ) \
+        course__week__nb=week,
+        course__week__year=year,
+        work_copy=0,
+        room__in=shared_rooms,
+    ) \
         .select_related('course__room_type__department', 'room',
-                        'course__type__department')\
+                        'course__type__department') \
         .exclude(course__room_type__department=req.department)
     dataset = SharedRoomsResource().export(courses)
     return HttpResponse(dataset.csv, content_type='text/csv')
 
 
 def fetch_all_modules_with_desc(req, **kwargs):
-    data = Module.objects.filter(period__department=req.department)\
+    data = Module.objects.filter(period__department=req.department) \
         .select_related('period__department')
     res = ModuleDescriptionResource().export(
         data.select_related('head', 'display', 'train_prog'))
@@ -851,7 +864,6 @@ def fetch_all_modules_with_desc(req, **kwargs):
 # ----------
 
 def clean_change(week, old_version, change, work_copy=0, initiator=None, apply=False):
-
     scheduled_before = True
     course = Course.objects.get(id=change['id'])
     try:
@@ -1012,7 +1024,7 @@ def edt_changes(req, **kwargs):
 
         if work_copy == 0:
             subject = '[Modif sur tierce] ' + \
-                initiator.username + ' a déplacé '
+                      initiator.username + ' a déplacé '
             for inst in impacted_inst:
                 subject += inst.username + ' '
 
@@ -1098,9 +1110,9 @@ def room_preferences_changes_per_tutor(req, tutor, **kwargs):
         return bad_response
 
     if tutor != req.user.username \
-       and not req.user.has_department_perm(req.department, admin=True):
-        bad_response['more'] = "Vous ne pouvez pas changez les préférences " +\
-            "de quelqu'un·e d'autre sans être responsable d'emplois du temps."
+            and not req.user.has_department_perm(req.department, admin=True):
+        bad_response['more'] = "Vous ne pouvez pas changez les préférences " + \
+                               "de quelqu'un·e d'autre sans être responsable d'emplois du temps."
         return bad_response
 
     try:
@@ -1116,13 +1128,13 @@ def room_preferences_changes_per_tutor(req, tutor, **kwargs):
             = "Problème format."
         return JsonResponse(bad_response)
 
-    roomtypes = RoomType.objects.filter(department=req.department)\
-                                .prefetch_related('members')
+    roomtypes = RoomType.objects.filter(department=req.department) \
+        .prefetch_related('members')
 
     pref_list = {roomtypes.get(id=rt_id):
-                 [{'rg': Room.objects.get(id=rg_id),
-                   'rank': val} for rg_id, val in rg_val_dict.items()
-                  if val != 0]
+                     [{'rg': Room.objects.get(id=rg_id),
+                       'rank': val} for rg_id, val in rg_val_dict.items()
+                      if val != 0]
                  for rt_id, rg_val_dict in recv_pref.items()}
 
     bulk = []
@@ -1146,8 +1158,8 @@ def room_preferences_changes_per_tutor(req, tutor, **kwargs):
                 ))
 
     RoomSort.objects.filter(for_type__department=req.department,
-                            tutor=tutor)\
-        .select_related('for_type')\
+                            tutor=tutor) \
+        .select_related('for_type') \
         .delete()
 
     RoomSort.objects.bulk_create(bulk)
@@ -1480,7 +1492,7 @@ def send_email_proposal(req, **kwargs):
         impacted_inst.remove(initiator)
     if len(impacted_inst) > 0:
         msg += "\nQu'en dites-vous ?\n\n-- \n" + \
-            f"Envoyé de mon flop!EDT\n"
+               f"Envoyé de mon flop!EDT\n"
 
         try:
             subject = '[flop!EDT] Proposition de modification'
@@ -1499,6 +1511,7 @@ def send_email_proposal(req, **kwargs):
             return JsonResponse(bad_response)
 
     return JsonResponse(good_response)
+
 
 # </editor-fold desc="EMAILS">
 
@@ -1519,7 +1532,7 @@ def visio_preference(req, tutor=None, id=None, **kwargs):
         try:
             instance = EnrichedLink.objects.get(id=id)
             if not req.user.has_department_perm(req.department, admin=True):
-                pref, created = UserPreferredLinks.objects\
+                pref, created = UserPreferredLinks.objects \
                     .get_or_create(user=req.user)
                 if created or instance not in pref.links.all():
                     instance = None
@@ -1534,7 +1547,7 @@ def visio_preference(req, tutor=None, id=None, **kwargs):
 
         try:
             user = User.objects.get(username=tutor)
-            pref, created = UserPreferredLinks.objects\
+            pref, created = UserPreferredLinks.objects \
                 .get_or_create(user=user)
             if created or link not in pref.links.all():
                 pref.links.add(link)
@@ -1553,8 +1566,8 @@ def visio_preference(req, tutor=None, id=None, **kwargs):
 
 
 def fetch_group_preferred_links(req, **kwargs):
-    pref = GroupPreferredLinks.objects\
-        .select_related('group__train_prog__department')\
+    pref = GroupPreferredLinks.objects \
+        .select_related('group__train_prog__department') \
         .filter(group__train_prog__department=req.department)
     dataset = GroupPreferredLinksResource().export(pref)
     response = HttpResponse(dataset.csv,
@@ -1571,7 +1584,6 @@ def fetch_group_preferred_links(req, **kwargs):
 # ---------
 @tutor_required
 def module_description(req, module, **kwargs):
-
     if req.method == 'POST':
         form = ModuleDescriptionForm(module, req.department, req.POST)
         if form.is_valid():

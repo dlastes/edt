@@ -38,7 +38,7 @@ from FlOpEDT.decorators import tutor_or_superuser_required
 import base.queries as queries
 
 from people.models import Tutor, GroupPreferences, StudentPreferences, Student, NotificationsPreferences, \
-    UserPreferredLinks, PhysicalPresence, User
+    UserPreferredLinks, PhysicalPresence, User, ThemesPreferences
 from people.admin import TutorResource, GroupPreferencesResource, StudentPreferencesResource, \
     UserPreferredLinksResource, PhysicalPresenceResource
 from base.models import TimeGeneralSettings, Department, Week, Theme
@@ -99,38 +99,28 @@ def student_preferences(req):
         if req.user.is_authenticated and req.user.is_student:
             user = req.user
             # check if the "them" is get from the request
-            if 'theme' in req.POST:
-                theme = req.POST['theme']
-                student = Student.objects.get(username=user.username)
-                student_pref, created = StudentPreferences.objects.get_or_create(student=student)
-                if created:
-                    student_pref.save()
-                student_pref.theme = theme
-                student_pref.save()
-            else:
-                morning_weight = req.POST['morning_evening']
-                free_half_day_weight = req.POST['light_free']
-                hole_weight = req.POST['hole_nothole']
-                eat_weight = req.POST['eat']
 
-                student = Student.objects.get(username=user.username)
-                student_pref, created = StudentPreferences.objects.get_or_create(student=student)
-                if created:
-                    student_pref.save()
-                student_pref.morning_weight = morning_weight
-                student_pref.free_half_day_weight = free_half_day_weight
-                student_pref.hole_weight = hole_weight
-                student_pref.eat_weight = eat_weight
-
+            morning_weight = req.POST['morning_evening']
+            free_half_day_weight = req.POST['light_free']
+            hole_weight = req.POST['hole_nothole']
+            eat_weight = req.POST['eat']
+            student = Student.objects.get(username=user.username)
+            student_pref, created = StudentPreferences.objects.get_or_create(student=student)
+            if created:
                 student_pref.save()
-                group_pref = None
-                for group in student.belong_to.all():
-                    group_pref, created = GroupPreferences.objects.get_or_create(group=group)
-                    if created:
-                        group_pref.save()
-                if group_pref is not None:
-                    group_pref.calculate_fields()
+            student_pref.morning_weight = morning_weight
+            student_pref.free_half_day_weight = free_half_day_weight
+            student_pref.hole_weight = hole_weight
+            student_pref.eat_weight = eat_weight
+            student_pref.save()
+            group_pref = None
+            for group in student.belong_to.all():
+                group_pref, created = GroupPreferences.objects.get_or_create(group=group)
+                if created:
                     group_pref.save()
+            if group_pref is not None:
+                group_pref.calculate_fields()
+                group_pref.save()
             return redirect("people:student_preferences")
         else:
             raise Http404("Who are you?")
@@ -188,17 +178,6 @@ def student_preferences(req):
             if eat == 1:
                 eat_txt = 'Manger plus tard'
 
-            themeSelected = student_pref.theme
-            theme_txt = ""
-            if themeSelected == 'White':
-                theme_txt = 'White'
-            if themeSelected == 'Dark':
-                theme_txt = 'Dark'
-            if themeSelected == 'SynthWave':
-                theme_txt = 'SynthWave'
-            if themeSelected == 'Brume':
-                theme_txt = 'Brume'
-
             day = Department.objects.get(abbrev='INFO')
 
             themes = []
@@ -219,7 +198,7 @@ def student_preferences(req):
                  'user_notifications_pref':
                      queries.get_notification_preference(req.user),
                  'themes': themes,
-                 'theme': theme_txt,
+                 'theme': queries.get_theme_preference(req.user),
                  })
         else:
             # Make a decorator instead

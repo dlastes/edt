@@ -38,7 +38,6 @@ from enum import Enum
 class User(AbstractUser):
     is_student = models.BooleanField(default=False)
     is_tutor = models.BooleanField(default=False)
-    preferred_theme = models.CharField(default='WHITE', max_length=20)
     rights = models.PositiveSmallIntegerField(verbose_name="Droits particuliers",
                                               default=0)
     departments = models.ManyToManyField(
@@ -96,9 +95,10 @@ class User(AbstractUser):
         ret += '(' + str(self.rights) + ')'
         return ret
 
+
+
     class Meta:
         ordering = ['username', ]
-
 
 
 class UserDepartmentSettings(models.Model):
@@ -223,7 +223,6 @@ class Preferences(models.Model):
         default=.5, blank=True, max_digits=3, decimal_places=2)
     eat_weight = models.DecimalField(
         default=.5, blank=True, max_digits=3, decimal_places=2)
-    theme = models.CharField(max_length=20, default='default')
 
     def get_morning_weight(self):
         return float(self.morning_weight)
@@ -290,6 +289,13 @@ class NotificationsPreferences(models.Model):
                                 on_delete=models.CASCADE,
                                 related_name='notifications_preference')
     nb_of_notified_weeks = models.PositiveSmallIntegerField(default=0)
+
+
+class ThemesPreferences(models.Model):
+    user = models.OneToOneField('User',
+                                on_delete=models.CASCADE,
+                                related_name='themes_preference')
+    theme = models.CharField(max_length=50, default='default')
 
 
 class UserPreferredLinks(models.Model):

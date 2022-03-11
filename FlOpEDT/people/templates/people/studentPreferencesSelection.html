@@ -96,30 +96,13 @@
     <br/><br/>
     {% include 'base/notification.html' %}
 
-    <link rel="stylesheet" type="text/css" href="{% static 'people/student_preferences.css' %}"/>
-    <script src="{% static 'people/student_preferences.js' %}"></script>
-
     <br/><br/>
 
     {# Themes #}
-    <form action="{% url 'people:student_preferences' %}" method="post" id="form_pref_2">
-        {% csrf_token %}
-        <fieldset>
-            <legend>{% trans "Preferences for your themes" %}</legend>
-            <br>
-            <div>{% trans "Your themes is" %}<b> {{ theme }}</b></div>
-            <div>
-                <label>
-                    <select name="theme">
-                        {% for a in themes %}
-                            <option value="{{ a }}" {% if a == theme %}selected{% endif %}>{{ a }}</option>
-                        {% endfor %}
-                    </select>
-                </label>
-            </div>
-            <br/><br/>
-            <button type="submit" form="form_pref_2" value="Submit">Valider</button>
-        </fieldset>
-    </form>
+    {% include 'base/themes.html' %}
+
+    <link rel="stylesheet" type="text/css" href="{% static 'people/student_preferences.css' %}"/>
+    <script src="{% static 'people/student_preferences.js' %}"></script>
+
 
 {% endblock %}
