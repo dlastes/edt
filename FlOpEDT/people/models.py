@@ -96,13 +96,6 @@ class User(AbstractUser):
         ret += '(' + str(self.rights) + ')'
         return ret
 
-    def get_theme(self):
-        return self.preferred_theme
-
-    def set_theme(self, theme):
-        self.preferred_theme = theme
-        self.save()
-
     class Meta:
         ordering = ['username', ]
 
@@ -230,6 +223,7 @@ class Preferences(models.Model):
         default=.5, blank=True, max_digits=3, decimal_places=2)
     eat_weight = models.DecimalField(
         default=.5, blank=True, max_digits=3, decimal_places=2)
+    theme = models.CharField(max_length=20, default='default')
 
     def get_morning_weight(self):
         return float(self.morning_weight)
@@ -242,6 +236,9 @@ class Preferences(models.Model):
 
     def get_light_day_weight(self):
         return float(1 - self.free_half_day_weight)
+
+    def get_theme(self):
+        return self.theme
 
     class Meta:
         abstract = True
