@@ -102,23 +102,23 @@
     <br/><br/>
 
     {# Themes #}
-    <form action="{% url 'people:student_preferences' %}" method="post" id="form_pref">
+    <form action="{% url 'people:student_preferences' %}" method="post" id="form_pref_2">
         {% csrf_token %}
         <fieldset>
             <legend>{% trans "Preferences for your themes" %}</legend>
             <br>
-            <div><b> {% trans "Your themes" %}</b></div>
+            <div>{% trans "Your themes is" %}<b> {{ theme }}</b></div>
             <div>
                 <label>
-                    <select>
+                    <select name="theme">
                         {% for a in themes %}
-                            <option name="theme" value={{ a }} >{{ a }}</option>
+                            <option value="{{ a }}" >{{ a }}</option>
                         {% endfor %}
                     </select>
                 </label>
             </div>
             <br/><br/>
-            <button type="submit" form="form_pref" value="Submit">Valider</button>
+            <button type="submit" form="form_pref_2" value="Submit">Valider</button>
         </fieldset>
     </form>
 
