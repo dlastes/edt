@@ -59,6 +59,8 @@
         <link rel="stylesheet" href="{% static 'base/Themes/themeSynthWave.css' %}"/>
     {% elif request.user.get_theme == "Dark" %}
         <link rel="stylesheet" href="{% static 'base/Themes/themeDark.css' %}"/>
+    {% elif request.user.get_theme == "Pink" %}
+        <link rel="stylesheet" href="{% static 'base/Themes/themePink.css' %}"/>
     {% endif %}
 </head>
 <body>
