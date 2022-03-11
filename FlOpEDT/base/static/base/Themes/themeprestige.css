@@ -1,0 +1,108 @@
+#full_logo{
+    background:#B89B6F;
+}
+
+body{
+    background: #0D1826;
+}
+
+#edt-main{
+    background: #0D1826
+}
+
+.hour-scale{
+    opacity: 0;
+    fill: #B89B6F;
+}
+
+ul{
+    background: #00010D;
+
+}
+
+.day_am{
+    stroke:#B89B6F;
+    font-family: Arial, sans-serif;
+    alignment-baseline: middle;
+    dominant-baseline: middle;
+    stroke-width: 2;
+    fill: none;
+}
+.day_pm{
+    stroke:#B89B6F;
+    stroke-width: 2;
+    fill: none;
+}
+
+.cst{
+    fill:#B89B6F;
+}
+
+.layout-edt-bg{
+    fill:#B89B6F;
+    font-family: Arial, sans-serif;
+    alignment-baseline: middle;
+    dominant-baseline: middle;
+}
+
+.txt_scl{
+    fill:#7a7a7a;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+#logo_svg{
+    background: #B89B6F;
+}
+
+.menu{
+
+}
+
+.rec_wk {
+    fill: #6a573a;
+    cursor: pointer;
+    font-size: 1.2em;
+}
+
+.cir_wk{
+    fill: #6a573a;
+    cursor: pointer;
+    font-size: 2em;
+    font-weight: bold;
+}
+
+.circle{
+
+    fill:#6a573a;
+    stroke: white;
+    stroke-width: 1;
+    cx: 0;
+    cy: 15;
+    r: 18;
+}
+
+#flopGreen{
+    color: #0D1826;
+    font-family: inherit;
+    font-size: inherit;
+}
+
+#EDTRed{
+    color: #0D1826;
+    font-family: inherit;
+    font-size: inherit;
+}
+
+.sel-pop-bg{
+    fill: #B89B6F;
+    x: -5;
+    y: -35;
+    width: 260;
+    height: 190;
+
+}
+
+.ack-reg{
+  fill: #B89B6F;
+}
