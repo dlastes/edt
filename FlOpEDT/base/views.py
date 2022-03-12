@@ -1357,9 +1357,13 @@ def decale_changes(req, **kwargs):
             changing_course.week = new_week
             changing_course.year = new_year
             if new_year != 0:
-                changing_course.tutor = Tutor.objects.get(
-                    username=new_assignment['np']
-                )
+                new_tutor_username = new_assignment['np']
+                if new_tutor_username:
+                    changing_course.tutor = Tutor.objects.get(
+                        username=new_tutor_username
+                    )
+                else:
+                    changing_course.tutor=None
             cache.delete(get_key_course_pp(req.department.abbrev,
                                            new_week,
                                            0))
