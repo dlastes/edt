@@ -1,32 +1,29 @@
 {% extends "base.html" %} {% block title %} EDT {% endblock %} {% load static %} {% block content %}
-<link rel="stylesheet" href="{% static 'cstmanager/css/styles.css' %}">
+<link rel="stylesheet" href="{% static 'cstmanager/css/bootstrap-material-design.min.css' %}">
+<!-- <link rel="stylesheet" href="{% static 'cstmanager/css/styles.css' %}"> -->
+<link rel="stylesheet" href="{% static 'cstmanager/css/styles2.css' %}">
 <div class="page">
     <div class="search-body">
         <div class="search-bar">
             <div class="hor-sep"></div>
-            <div class="label">Rechercher:</div>
+            <!-- <div class="label">Rechercher:</div> -->
             <div class="hor-sep"></div>
-            <input type="text" class="text-field">
+            <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Rechercher">
         </div>
         <div class="hor-sep"></div>
         <div class="hor-sep"></div>
         <div class="search-modifier-list pad-children">
-            <div class="divbutton">
-                <button class="transition neutral">Trier</button>
-            </div>
-            <div class="divbutton">
-                <button class="transition neutral">Filtrer</button>
-            </div>
+
         </div>
     </div>
     <div class="constraints-body">
         <div class="constraint-info">
             <div class="constraint-info-body">
-                <div class="element-info">
-                    <div class="info-title">
+                <div class="element-info title">
+                    <div class="info-title title">
                         Type
                     </div>
-                    <div class="info-content">
+                    <div class="info-content description">
                         Some text
                     </div>
                 </div>
@@ -35,11 +32,9 @@
                         Paramètres
                     </div>
                     <div class="info-content">
-                        <div>Text1</div>
-                        <div>Text2</div>
-                        <div>Text3</div>
-                        <div>Text4</div>
-                        <div>Text5</div>
+                        <div class="invo-param">Text1</div>
+                        <div class="invo-param">Text2</div>
+                        <div class="invo-param">Text3</div>
                     </div>
                 </div>
                 <div class="element-info">
@@ -75,9 +70,17 @@
                         </div>
                     </div>
                 </div>
+                <div class="divbutton">
+                    <button class="transition neutral" id="update-all-constraints">
+                    Update
+                </button>
+                </div>
             </div>
         </div>
-        <div id="constraints-list" class="constraints-list"></div>
+        <div id="constraints-all" class="constraints-all">
+            <div id="constraints-list" class="constraints-list"></div>
+            <div id="constraints-disabled" class="constraints-disabled"></div>
+        </div>
 
     </div>
     <div class="constraint-group-modifier">
@@ -91,49 +94,9 @@
             <div>Contraintes<br>séléctionnées:</div>
             <div id="num-selected-constraints">0</div>
         </div>
-        <div class="footer-element">
-            <div class="divbutton">
-                <button class="transition neutral">
-            Switch
-        </button>
-            </div>
-            <div class="divbutton">
-                <button class="transition danger">
-            Supprimer
-        </button>
-            </div>
-        </div>
-        <div class="footer-element">
-            <div class="divbutton">
-                <button class="transition neutral">
-            Button1
-        </button>
-            </div>
-            <div class="divbutton">
-                <button class="transition neutral">
-            Button2
-        </button>
-            </div>
-        </div>
-        <div class="footer-element">
-            <div class="divbutton">
-                <button class="transition neutral">
-            Button3
-        </button>
-            </div>
-            <div class="divbutton">
-                <button class="transition neutral">
-            Button4
-        </button>
-            </div>
-        </div>
-        <div class="footer-element">
-            <!-- <div>
-        Poids
-    </div> -->
-            <div class="divslider">
-                <input id="slider-all" type="range" value=5 min="1" max="8" step="1" list="steplist" oninput="outputSlider('poidsvalue2', value)">
-                <datalist id="steplist">
+        <div class="divslider">
+            <input id="slider-all" type="range" value=5 min="1" max="8" step="1" list="steplist" oninput="outputSlider('poidsvalue2', value)">
+            <datalist id="steplist">
             <option>1</option>
             <option>2</option>
             <option>3</option>
@@ -143,21 +106,26 @@
             <option>7</option>
             <option>8</option>
         </datalist>
-                <div id="poidsvalue2" class="divtext">
-                    <span>5</span>
-                </div>
-            </div>
-            <div class="divbutton">
-                <button class="transition neutral" id="update-weight-all">
-            MAJ Poids
-        </button>
+            <div id="poidsvalue2" class="divtext">
+                <span>5</span>
             </div>
         </div>
-        <div class="footer-element"></div>
+        <div class="divbutton">
+            <button class="transition neutral" id="update-weight-all">
+            MAJ Poids
+        </button>
+        </div>
+        <div class="divbutton">
+            <button class="transition neutral" id="update-all-constraints">
+            Update
+        </button>
+        </div>
     </div>
-    <img id="icon-weight" style="display: none;" src="{% static 'cstmanager/icons/icon_weight.png' %}">
-    <img id="icon-gears" style="display: none;" src="{% static 'cstmanager/icons/icon_gears.png' %}">
-    <img id="icon-check" style="display: none;" src="{% static 'cstmanager/icons/icon_check.png' %}">
+    <div class="footer-element"></div>
+</div>
+<img id="icon-weight" style="display: none;" src="{% static 'cstmanager/icons/icon_weight.png' %}">
+<img id="icon-gears" style="display: none;" src="{% static 'cstmanager/icons/icon_gears.png' %}">
+<img id="icon-check" style="display: none;" src="{% static 'cstmanager/icons/icon_check.png' %}">
 
 </div>
 {% endblock %} {% block javascript %}

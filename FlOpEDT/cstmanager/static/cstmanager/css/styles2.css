@@ -130,6 +130,10 @@ body>div {
     justify-content: space-evenly;
 }
 
+.element-info.title {
+    width: 250px;
+}
+
 .element-info.grow {
     flex-grow: 1;
     margin: 0 20px;
@@ -211,9 +215,10 @@ body>div {
 
 .constraint-card-title {
     font-weight: bold;
-    font-size: 120%;
+    font-size: 110%;
     padding-bottom: 10px;
-    text-align: center;
+    text-align: left;
+    overflow: hidden;
 }
 
 .constraint-card-description {
@@ -239,20 +244,24 @@ body>div {
 
 .icon-text {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     flex-wrap: nowrap;
     justify-content: center;
     align-items: center;
 }
 
 .icon-div {
-    height: 32px;
-    width: 32px;
+    height: 24px;
+    width: 24px;
+}
+
+.icon-div * {
+    padding: 2px;
 }
 
 .icon-info {
-    height: 32px;
-    width: 32px;
+    height: 24px;
+    width: 24px;
 }
 
 .constraint-group-modifier {
@@ -303,6 +312,7 @@ body>div {
 button {
     width: 100px;
     min-height: 30px;
+    max-height: 50px;
     border: none;
     border-radius: 5px;
     font-weight: bold;
