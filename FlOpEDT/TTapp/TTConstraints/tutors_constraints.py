@@ -32,6 +32,7 @@ from TTapp.ilp_constraints.constraint import Constraint
 from TTapp.slots import days_filter, slots_filter
 from TTapp.TTConstraints.TTConstraint import TTConstraint
 from TTapp.FlopConstraint import max_weight
+from django.utils.translation import gettext_lazy as _
 
 
 def considered_tutors(tutors_ttconstraint, ttmodel):
@@ -185,7 +186,7 @@ class MinimizeBusyDays(TTConstraint):
         verbose_name_plural = "Minimize busy days"
 
 
-class RespectBoundPerDay(TTConstraint):
+class RespectMaxHoursPerDay(TTConstraint):
     """
     Respect the max_hours_per_day declared
     """
@@ -231,10 +232,10 @@ class RespectBoundPerDay(TTConstraint):
         """
         You can give a contextual explanation about what this constraint doesnt
         """
-        return "RespectBoundPerDay online description"
+        return _("Respect max hours per day")
 
     class Meta:
-        verbose_name_plural = "Respecter les limites horaires"
+        verbose_name_plural = _("Respect max hours per day")
 
 
 class LowerBoundBusyDays(TTConstraint):
