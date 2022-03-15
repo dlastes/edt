@@ -28,11 +28,10 @@ from FlOpEDT.decorators import timer
 from TTapp.TTConstraints.no_course_constraints import NoTutorCourseOnDay
 from django.http.response import JsonResponse
 from base.timing import TimeInterval
-from base.models import CourseStartTimeConstraint, Department, TimeGeneralSettings, TransversalGroup
+from base.models import CourseStartTimeConstraint
 from django.db import models
 
-from TTapp.TTConstraint import TTConstraint
-from TTapp.ilp_constraints.constraint import Constraint
+from TTapp.TTConstraints.TTConstraint import TTConstraint
 from TTapp.ilp_constraints.constraint_type import ConstraintType
 from TTapp.ilp_constraints.constraints.instructorConstraint import InstructorConstraint
 from TTapp.ilp_constraints.constraints.slotInstructorConstraint import SlotInstructorConstraint
@@ -144,7 +143,7 @@ class NoSimultaneousGroupCourses(TTConstraint):
                                                         "group": bg.id, "type": "NoSimultaneousGroupCourses"}) 
         return jsondict
 
-    def enrich_model(self, ttmodel, week, ponderation=1):
+    def enrich_ttmodel(self, ttmodel, week, ponderation=1):
         relevant_slots = slots_filter(ttmodel.wdb.availability_slots, week=week)
         relevant_basic_groups = considered_basic_groups(self, ttmodel)
         # Count the number of transversal groups
@@ -217,7 +216,7 @@ class ScheduleAllCourses(TTConstraint):
     tutors = models.ManyToManyField('people.Tutor', blank=True)
     course_types = models.ManyToManyField('base.CourseType', blank=True)
                                 
-    def enrich_model(self, ttmodel, week, ponderation=1):
+    def enrich_ttmodel(self, ttmodel, week, ponderation=1):
         relevant_basic_groups = considered_basic_groups(self, ttmodel)
         considered_courses = set(c for bg in relevant_basic_groups
                                  for c in ttmodel.wdb.all_courses_for_basic_group[bg])
@@ -267,7 +266,7 @@ class AssignAllCourses(TTConstraint):
     course_types = models.ManyToManyField('base.CourseType', blank=True)
     pre_assigned_only = models.BooleanField(default=False, verbose_name=_('Pre-assigned courses only'))
 
-    def enrich_model(self, ttmodel, week, ponderation=1):
+    def enrich_ttmodel(self, ttmodel, week, ponderation=1):
         relevant_basic_groups = considered_basic_groups(self, ttmodel)
         considered_courses = set(c for bg in relevant_basic_groups
                                  for c in ttmodel.wdb.all_courses_for_basic_group[bg])
@@ -440,7 +439,7 @@ class ConsiderTutorsUnavailability(TTConstraint):
                             jsondict["status"] = _("KO")
         return jsondict
 
-    def enrich_model(self, ttmodel, week, ponderation=1):
+    def enrich_ttmodel(self, ttmodel, week, ponderation=1):
         considered_tutors = set(ttmodel.wdb.instructors)
         if self.tutors.exists():
             considered_tutors &= set(self.tutors.all())
