@@ -128,6 +128,7 @@ body>div {
     display: flex;
     flex-direction: column;
     justify-content: space-evenly;
+    margin-left: 5px;
 }
 
 .element-info.title {
@@ -139,6 +140,14 @@ body>div {
     margin: 0 20px;
     border-left: solid 1px var(--dark);
     border-right: solid 1px var(--dark);
+}
+
+#constraint-header-title {
+    font-weight: bold;
+}
+
+#constraint-header-comment {
+    font-size: 80% !important;
 }
 
 .info-content {
@@ -154,12 +163,19 @@ body>div {
     justify-content: space-evenly;
     align-content: stretch;
     align-items: stretch;
+    flex-grow: 1;
     padding-bottom: 30px;
     background-color: var(--white);
 }
 
 .constraint-card {
     padding-top: 20px;
+    padding-right: 10px;
+    padding-left: 10px;
+}
+
+.constraint-card-disabled {
+    padding-top: 10px;
     padding-right: 10px;
     padding-left: 10px;
 }
@@ -174,25 +190,52 @@ body>div {
 .constraints-disabled {
     display: flex;
     flex-flow: column nowrap;
-    min-width: 270px;
+    align-items: center;
+    min-width: 373px;
+    border-left: solid 1px black;
 }
 
 .constraint-card-info {
     padding: 5px;
     border: solid 3px var(--primary2);
     border-radius: 5px;
-    min-width: 250px;
+    min-width: 300px;
     min-height: 100px;
-    max-width: 250px;
+    max-width: 300px;
     max-height: 100px;
     height: 50px;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+}
+
+.constraint-card-text {
+    display: flex;
+    flex-flow: column nowrap;
+    flex-grow: 1;
+}
+
+.constraint-card-info-disabled {
+    padding: 5px;
+    border: solid 3px var(--neutral);
+    border-radius: 5px;
+    min-width: 300px;
+    min-height: 70px;
+    max-width: 300px;
+    max-height: 70px;
+    height: 50px;
+    display: flex;
+    flex-direction: row;
     flex-wrap: nowrap;
     justify-content: space-between;
 }
 
 .constraint-card-info:hover {
+    cursor: pointer;
+}
+
+.constraint-card-info-disabled:hover {
     cursor: pointer;
 }
 
@@ -215,10 +258,11 @@ body>div {
 
 .constraint-card-title {
     font-weight: bold;
-    font-size: 110%;
+    font-size: 120%;
     padding-bottom: 10px;
     text-align: left;
     overflow: hidden;
+    max-width: 250px;
 }
 
 .constraint-card-description {
@@ -232,14 +276,15 @@ body>div {
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
-    text-align: center;
+    text-align: start;
 }
 
 .constraint-card-additional {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     flex-wrap: nowrap;
     justify-content: space-around;
+    align-items: center;
 }
 
 .icon-text {
@@ -378,3 +423,13 @@ input[type="checkbox"] {
 
 
 /* img.icon */
+
+#params {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: center;
+}
+
+#params * {
+    margin: 2px
+}

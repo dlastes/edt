@@ -4,6 +4,13 @@
 <link rel="stylesheet" href="{% static 'cstmanager/css/styles2.css' %}">
 <div class="page">
     <div class="search-body">
+        <div class="hor-sep"></div>
+        <div class="hor-sep"></div>
+        <div class="divbutton">
+            <button class="transition neutral" id="new-constraint">
+            New Constraint
+        </button>
+        </div>
         <div class="search-bar">
             <div class="hor-sep"></div>
             <!-- <div class="label">Rechercher:</div> -->
@@ -20,21 +27,16 @@
         <div class="constraint-info">
             <div class="constraint-info-body">
                 <div class="element-info title">
-                    <div class="info-title title">
-                        Type
+                    <div id="constraint-header-title" class="info-title title">
+
                     </div>
-                    <div class="info-content description">
-                        Some text
+                    <div id="constraint-header-comment" class="info-content description">
+
                     </div>
                 </div>
                 <div class="element-info grow">
-                    <div class="info-title">
-                        Paramètres
-                    </div>
-                    <div class="info-content">
-                        <div class="invo-param">Text1</div>
-                        <div class="invo-param">Text2</div>
-                        <div class="invo-param">Text3</div>
+                    <div id="params" class="info-content">
+
                     </div>
                 </div>
                 <div class="element-info">
@@ -70,10 +72,17 @@
                         </div>
                     </div>
                 </div>
-                <div class="divbutton">
-                    <button class="transition neutral" id="update-all-constraints">
-                    Update
-                </button>
+                <div class="element-info">
+                    <div class="divbutton">
+                        <button class="transition neutral" id="update-one-constraint">
+                        Update
+                    </button>
+                    </div>
+                    <div class="divbutton">
+                        <button class="transition neutral" id="duplicate-constraint">
+                        Duplicate
+                    </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -121,7 +130,6 @@
         </button>
         </div>
     </div>
-    <div class="footer-element"></div>
 </div>
 <img id="icon-weight" style="display: none;" src="{% static 'cstmanager/icons/icon_weight.png' %}">
 <img id="icon-gears" style="display: none;" src="{% static 'cstmanager/icons/icon_gears.png' %}">
