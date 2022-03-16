@@ -45,9 +45,9 @@ slot_pause = 30
 ###
 #
 # Theme
-# permet de définir un thème pour un utilisateur,
-# la valeur sera celle affiché dans les préférences utilisateur (dans le menu déroulant)
-# elle sera aussi utilisé dans le code du fichier "base.html" dans les conditions des if
+# Allows to define a theme for a user,
+# The value will be the one showed in the user preferrences (in the menu)
+# It will also be used by the "base.html" file in the "if" conditions
 #
 ###
 class Theme(Enum):

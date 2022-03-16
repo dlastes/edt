@@ -402,7 +402,7 @@ def user_notifications_pref_changes(req, username=None, *args, **kwargs):
 
 ###
 #
-#   Permet de enregistrer le thème d'un utilisateur
+#   #Allows to save a user's theme
 #
 ###
 @login_required

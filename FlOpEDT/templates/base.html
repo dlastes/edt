@@ -51,9 +51,9 @@
     <title>{% block title %}{% trans "Schedule_title" %}{% endblock %}</title>
 
     {#
-    # permet d'afficher un thème en fonction des préférences utilisateurs,
-    # si l'utilisateur n'a pas de thème aucu, fichier sera surchargé
-    # le thème white ne surcharge lui aussi aucun fichier
+    # Allows to display a theme according to the user's preferences
+    # If the user doesn't have a preferred theme yet, no css file will be overloaded
+    # The white theme doesn't overload any file
     #}
     {% if request.user.get_theme == "Brume" %}
         <link rel="stylesheet" href="{% static 'base/Themes/themeBrume.css' %}"/>

@@ -96,7 +96,7 @@ class User(AbstractUser):
         return ret
 
     ###
-    #   permet de récupérer le thème de l'utilisateur dans le fichier "base.html"
+    #   #Allows to get the user's preferred theme in the "base.html" file
     ###
     @property
     def get_theme(self):
@@ -305,8 +305,9 @@ class NotificationsPreferences(models.Model):
                                 related_name='notifications_preference')
     nb_of_notified_weeks = models.PositiveSmallIntegerField(default=0)
 
+
 ###
-#   Enregistre dans la base de donnée les thème d'un utilisateur
+# Save the user's preferred theme in the data base
 ###
 class ThemesPreferences(models.Model):
     user = models.OneToOneField('User',
