@@ -12,10 +12,6 @@ body {
     fill: #404040 !important;
 }
 
-svg text {
-    fill: white;
-}
-
 svg circle {
     stroke: white;
 }
@@ -45,11 +41,11 @@ svg circle {
 }
 
 #popup-group rect, #popup-tutor rect, #popup-module rect, #popup-room rect{
-    fill: #5a5a5a !important;
+    fill: #5a5a5a;
 }
 
 #popup-group text, #popup-tutor text, #popup-module text, #popup-room text{
-    fill: white !important;
+    fill: white;
 }
 
 .sel-button {
@@ -78,59 +74,10 @@ g.hour-scale rect {
     fill: none;
 }
 
-.hour-scale .hour-scale-item {
-    fill-opacity: 0 !important;
+rect.active {
+    fill: #483f45 !important;
 }
 
-.cours {
-    color: white;
-}
-
-g#layout-meg text {
-    fill : #282828;
-    color : white !important;
-}
-
-.sel_forall {
-    fill: #282828;
-    color: white;
-}
-
-#layout-catg rect {
-    fill: #282828;
-    color: white;
-}
-
-#popup-group rect, #popup-tutor rect, #popup-module rect, #popup-room rect{
-    fill: #282828 !important;
-}
-
-#popup-group text, #popup-tutor text, #popup-module text, #popup-room text{
-    fill: white !important;
-}
-
-.sel-button {
-    fill: #282828;
-    color: white;
-}
-
-.sel-pop-all {
-    fill: #5a5a5a;
-    color: white;
-}
-
-section, font {
-    color: white;
-}
-
-.dept_list li {
-    color: white;
-}
-
-#head_logo {
-    color: white;
-}
-
-g.hour-scale rect {
-    fill: none;
+.txt_scl, .gridscg, .gridsckh, .sel_forall  {
+    fill: white;
 }
