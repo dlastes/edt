@@ -348,14 +348,15 @@ def room_preference(req, department, tutor=None):
 def user_perfect_day_changes(req, username=None, *args, **kwargs):
     if username is not None:
         t = Tutor.objects.get(username=username)
-        preferences = TutorPreference.objects.get_or_create(tutor=t)
+        preferences, created = TutorPreference.objects.get_or_create(tutor=t)
         data = req.POST
         user_pref_hours = int(data['user_pref_hours'][0])
         user_max_hours = int(data['user_max_hours'][0])
-        user_min_hours = int(data['user_min_hours'][0])
         preferences.pref_hours_per_day = user_pref_hours
         preferences.max_hours_per_day = user_max_hours
-        preferences.user_min_hours = user_min_hours
+        # not used for now --> neither in base/show-stype.html
+        # user_min_hours = int(data['user_min_hours'][0])
+        # preferences.min_hours_per_day = user_min_hours
         preferences.save()
     return redirect('base:preferences', req.department)
 
@@ -365,7 +366,7 @@ def fetch_perfect_day(req, username=None, *args, **kwargs):
     perfect_day = {'pref': 4, 'max': 9, 'min': 0}
     if username is not None:
         t = Tutor.objects.get(username=username)
-        preferences = TutorPreference.objects.get_or_create(tutor=t)
+        preferences, created = TutorPreference.objects.get_or_create(tutor=t)
         perfect_day['pref'] = preferences.pref_hours_per_day
         perfect_day['max'] = preferences.max_hours_per_day
         perfect_day['min'] = preferences.min_hours_per_day
