@@ -400,7 +400,11 @@ def user_notifications_pref_changes(req, username=None, *args, **kwargs):
         n.save()
     return redirect('base:preferences', req.department)
 
-
+###
+#
+#   Permet de enregistrer le thème d'un utilisateur
+#
+###
 @login_required
 def user_themes_pref_changes(req, username=None, *args, **kwargs):
     if username is not None:

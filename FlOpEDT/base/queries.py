@@ -352,7 +352,14 @@ def get_notification_preference(user):
                 pass
     return 0
 
-
+###
+#
+#  Permet de récupérer le thèmme d'un utilisateur
+#  si l'utilisateur n'a pas de thème préféré, on renvoie le thème par défaut : "White"
+#  @param user : l'utilisateur
+#  @return : le thème
+#
+###
 def get_theme_preference(user):
     if user is not None:
         try:

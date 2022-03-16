@@ -50,6 +50,11 @@
     <!-- script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script -->
     <title>{% block title %}{% trans "Schedule_title" %}{% endblock %}</title>
 
+    {#
+    # permet d'afficher un thème en fonction des préférences utilisateurs,
+    # si l'utilisateur n'a pas de thème aucu, fichier sera surchargé
+    # le thème white ne surcharge lui aussi aucun fichier
+    #}
     {% if request.user.get_theme == "Brume" %}
         <link rel="stylesheet" href="{% static 'base/Themes/themeBrume.css' %}"/>
     {% elif request.user.get_theme == "Prestige Edition" %}

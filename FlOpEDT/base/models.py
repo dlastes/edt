@@ -42,7 +42,14 @@ from django.utils.translation import gettext_lazy as _
 
 slot_pause = 30
 
-
+###
+#
+# Theme
+# permet de définir un thème pour un utilisateur,
+# la valeur sera celle affiché dans les préférences utilisateur (dans le menu déroulant)
+# elle sera aussi utilisé dans le code du fichier "base.html" dans les conditions des if
+#
+###
 class Theme(Enum):
     WHITE = 'White'
     DARK = 'Dark'
