@@ -352,10 +352,11 @@ def user_perfect_day_changes(req, username=None, *args, **kwargs):
         data = req.POST
         user_pref_hours = int(data['user_pref_hours'][0])
         user_max_hours = int(data['user_max_hours'][0])
-        user_min_hours = int(data['user_min_hours'][0])
         preferences.pref_hours_per_day = user_pref_hours
         preferences.max_hours_per_day = user_max_hours
-        preferences.user_min_hours = user_min_hours
+        # not used for now --> neither in base/show-stype.html
+        # user_min_hours = int(data['user_min_hours'][0])
+        # preferences.min_hours_per_day = user_min_hours
         preferences.save()
     return redirect('base:preferences', req.department)
 
