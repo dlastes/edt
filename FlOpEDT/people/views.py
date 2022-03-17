@@ -37,10 +37,10 @@ from FlOpEDT.decorators import tutor_or_superuser_required
 
 import base.queries as queries
 
-from people.models import Tutor, GroupPreferences, StudentPreferences, Student, NotificationsPreferences, \
-    UserPreferredLinks, PhysicalPresence, User, ThemesPreferences
-from people.admin import TutorResource, GroupPreferencesResource, StudentPreferencesResource, \
-    UserPreferredLinksResource, PhysicalPresenceResource
+from people.models import Tutor, GroupPreferences, StudentPreferences, Student, \
+    NotificationsPreferences, UserPreferredLinks, PhysicalPresence, User, ThemesPreferences
+from people.admin import TutorResource, GroupPreferencesResource, \
+    StudentPreferencesResource, UserPreferredLinksResource, PhysicalPresenceResource
 from base.models import TimeGeneralSettings, Department, Week, Theme
 
 logger = logging.getLogger(__name__)
@@ -76,19 +76,22 @@ def redirect_change_people_kind(req):
 
 def fetch_tutors(req):
     dataset = TutorResource().export(Tutor.objects.all())
-    response = HttpResponse(dataset.csv, content_type='text/csv')
+    response = HttpResponse(dataset.csv,
+                            content_type='text/csv')
     return response
 
 
 def fetch_preferences_group(req):
     dataset = GroupPreferencesResource().export(GroupPreferences.objects.all())
-    response = HttpResponse(dataset.csv, content_type='text/csv')
+    response = HttpResponse(dataset.csv,
+                            content_type='text/csv')
     return response
 
 
 def fetch_preferences_students(req):
     dataset = StudentPreferencesResource().export(StudentPreferences.objects.all())
-    response = HttpResponse(dataset.csv, content_type='text/csv')
+    response = HttpResponse(dataset.csv,
+                            content_type='text/csv')
     return response
 
 
@@ -98,12 +101,11 @@ def student_preferences(req):
         logger.info(f'REQ: student preferences {req}')
         if req.user.is_authenticated and req.user.is_student:
             user = req.user
-            # check if the "them" is get from the request
-
             morning_weight = req.POST['morning_evening']
             free_half_day_weight = req.POST['light_free']
             hole_weight = req.POST['hole_nothole']
             eat_weight = req.POST['eat']
+
             student = Student.objects.get(username=user.username)
             student_pref, created = StudentPreferences.objects.get_or_create(student=student)
             if created:
@@ -112,6 +114,7 @@ def student_preferences(req):
             student_pref.free_half_day_weight = free_half_day_weight
             student_pref.hole_weight = hole_weight
             student_pref.eat_weight = eat_weight
+
             student_pref.save()
             group_pref = None
             for group in student.belong_to.all():

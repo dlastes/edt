@@ -248,7 +248,7 @@ def get_room_types_groups(department_abbrev):
 
 def get_rooms(department_abbrev, basic=False):
     """
-    :return: 
+    :return:
     """
     if department_abbrev is not None:
         dept = Department.objects.get(abbrev=department_abbrev)

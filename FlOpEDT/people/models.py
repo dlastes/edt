@@ -29,7 +29,6 @@ from django.contrib.auth.models import AbstractUser
 from base.models import Department
 from base.timing import Day
 from django.core.validators import MinValueValidator, MaxValueValidator
-from enum import Enum
 
 
 # Create your models here.
@@ -57,8 +56,8 @@ class User(AbstractUser):
     def has_department_perm(self, department, admin=False):
         """
         Does the user have access to a specific department
-        
-        admin=True    Check if the user can access to the 
+
+        admin=True    Check if the user can access to the
                       department admin
         """
         if self.is_superuser:
@@ -108,7 +107,7 @@ class User(AbstractUser):
 
 class UserDepartmentSettings(models.Model):
     """
-    This model allows to add additionnal settings to the 
+    This model allows to add additionnal settings to the
     relation between User and Department
     """
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -305,7 +304,6 @@ class NotificationsPreferences(models.Model):
                                 related_name='notifications_preference')
     nb_of_notified_weeks = models.PositiveSmallIntegerField(default=0)
 
-
 ###
 # Save the user's preferred theme in the data base
 ###
@@ -314,7 +312,6 @@ class ThemesPreferences(models.Model):
                                 on_delete=models.CASCADE,
                                 related_name='themes_preference')
     theme = models.CharField(max_length=50, default='White')
-
 
 class UserPreferredLinks(models.Model):
     user = models.OneToOneField('User',
