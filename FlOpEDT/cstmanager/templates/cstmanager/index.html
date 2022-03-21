@@ -25,6 +25,7 @@
     </div>
     <div class="constraints-body">
         <div class="constraint-info">
+            <button id="show-disabled" class="float-disabled"></button>
             <div class="constraint-info-body">
                 <div class="element-info title">
                     <div id="constraint-header-title" class="info-title title">
@@ -137,5 +138,6 @@
 
 </div>
 {% endblock %} {% block javascript %}
+<script type="text/javascript" src="{% static 'cstmanager/js/reqs.js' %}"></script>
 <script type="text/javascript" src="{% static 'cstmanager/js/script.js' %}"></script>
 {% endblock %}

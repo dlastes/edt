@@ -22,6 +22,8 @@
     --danger4: #e1a793;
     --neutral: #e3e3e3;
     --dark: #333;
+    --green: #2ec229;
+    --greeny: #259e21;
 }
 
 body>div {
@@ -133,6 +135,7 @@ body>div {
 
 .element-info.title {
     width: 250px;
+    justify-content: space-between;
 }
 
 .element-info.grow {
@@ -185,6 +188,7 @@ body>div {
     flex-direction: row;
     flex-wrap: nowrap;
     justify-content: center;
+    padding: 20px;
 }
 
 .constraints-disabled {
@@ -354,6 +358,14 @@ body>div {
     background-color: var(--danger1);
 }
 
+.green {
+    background-color: var(--green);
+}
+
+.green:hover {
+    background-color: var(--greeny);
+}
+
 button {
     width: 100px;
     min-height: 30px;
@@ -432,4 +444,16 @@ input[type="checkbox"] {
 
 #params * {
     margin: 2px
+}
+
+#show-disabled {
+    position: fixed;
+    right: -15px;
+    top: 320px;
+    width: 40px;
+    height: 40px;
+}
+
+.display-none {
+    display: none;
 }
