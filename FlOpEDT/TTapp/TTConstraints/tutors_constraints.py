@@ -204,7 +204,7 @@ class RespectMaxHoursPerDay(TTConstraint):
                 other_departments_hours_nb = sum(sc.course.type.duration
                                                  for sc in ttmodel.wdb.other_departments_scheduled_courses_for_tutor[tutor]
                                                  if sc.course.week == week and sc.day == d.day) / 60
-                max_hours_nb = max(tutor.max_hours_per_day - other_departments_hours_nb, 0)
+                max_hours_nb = max(tutor.preferences.max_hours_per_day - other_departments_hours_nb, 0)
                 ttmodel.add_constraint(ttmodel.sum(ttmodel.TTinstructors[sl, c, tutor] * sl.duration / 60
                                                    for c in ttmodel.wdb.possible_courses[tutor]
                                                    for sl in slots_filter(ttmodel.wdb.compatible_slots[c], day=d)) +
