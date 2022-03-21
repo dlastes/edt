@@ -149,7 +149,7 @@ class MinimizeBusyDays(TTConstraint):
             # for any number of days inferior to nb_days
             for d in range(nb_days, 0, -1):
                 # if courses fit in d-1 days
-                if courses_hours <= tutor.pref_hours_per_day * (d-1):
+                if courses_hours <= tutor.preferences.pref_hours_per_day * (d-1):
                     # multiply the previous cost by 2
                     slot_by_day_cost *= 2
                     # add a cost for having d busy days
