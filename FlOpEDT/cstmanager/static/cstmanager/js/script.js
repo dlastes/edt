@@ -29,6 +29,7 @@ let clickConstraint = (id) => {
 
 let originalConstraints = responseToDict(responseConstraints);
 let constraints = copyFromOriginalConstraints();
+let tables = new Set(Object.values(originalConstraints).map(n => n["name"]))
 
 let outputSlider = (id, val) => {
     val = val == 8 ? 0 : val;
@@ -52,6 +53,10 @@ let applyChanges = (e) => {
 }
 
 document.getElementById('apply-changes').addEventListener('click', applyChanges);
+
+let fetchConstraints = (e) => {
+
+}
 
 let URLWeightIcon = document.getElementById('icon-weight').src;
 let URLGearsIcon = document.getElementById('icon-gears').src;
@@ -155,12 +160,52 @@ let constraintUnhovered = (e) => {
     updateBroadcastConstraint(lastSelectedConstraint);
 }
 
+let buildMetadata = () => {
+    
+}
+
+let buildSection = (name, list) => {
+    let ret = divBuilder({ 'class': 'constraints-section-full'});
+    let title = divBuilder({ 'class': 'constraints-section-title'});
+    let cards = divBuilder({ 'class': 'constraints-section ', 'id': "section-"+name });
+    let map = list.map(id => constraintCardBuilder(constraints[id]));
+    title.innerText = name;
+    cards.append(...map)
+    ret.append(title, cards);
+    return ret;
+}
+
+let buildSections = () => {
+    let dict = {};
+    tables.forEach(name => {
+        dict[name] = [];
+    });
+    Object.values(constraints).forEach(cst => {
+        if(cst['is_active']) {
+            dict[cst["name"]].push(cst["pageid"])
+        }
+    });
+    let keys = Object.keys(dict);
+    let dictDiv = {};
+    for(let k of keys) {
+        if(dict[k].length == 0) {
+            delete dict[k];
+        }
+        else {
+            dictDiv[k] = buildSection(k, dict[k]);
+        }
+    }
+    constList.append(...Object.values(dictDiv));
+}
+
 let rerender = () => {
-    Array.from(constList.children).forEach(node => {
-        let obj = constraints[node.getAttribute('cst-id')];
-        node.querySelector('input').checked = obj.is_active;
-        node.querySelector('.icon-text.weight').querySelector('strong').innerText = obj.weight;
-        node.querySelector('.icon-text.parameters').querySelector('strong').innerText = obj.parameters.length;
+    Array.from(constList.children).forEach(section => {
+        Array.from(section.children).forEach(node => {
+            let obj = constraints[node.getAttribute('cst-id')];
+            node.querySelector('input').checked = obj.is_active;
+            node.querySelector('.icon-text.weight').querySelector('strong').innerText = obj.weight;
+            node.querySelector('.icon-text.parameters').querySelector('strong').innerText = obj.parameters.length;
+        });
     });
     Array.from(document.getElementById('constraints-disabled').children).forEach(node => {
         let obj = constraints[node.getAttribute('cst-id')];
@@ -178,11 +223,12 @@ let rearrange = () => {
     bodyDisabled.innerHTML = "";
     for(let id of constraint_list) {
         if(constraints[id]['is_active']) {
-            body.append(constraintCardBuilder(constraints[id]));
+            // body.append(constraintCardBuilder(constraints[id]));
         } else {
             bodyDisabled.append(disabledConstraintCardBuilder(constraints[id]));
         }
     }
+    buildSections();
 }
 
 let constraintClicked = (e) => {
@@ -218,12 +264,14 @@ let constraintClicked = (e) => {
 
 let refreshSelectedFromList = (list) => {
     let l = constList;
-    (Array.from(l.children)).forEach(node => {
-        let child = node.children[0];
-        if(list.has(node.getAttribute('cst-id'))) {
-            child.classList.remove('unselected');
-            child.classList.add('selected');
-        }
+    (Array.from(l.children)).forEach(section => {
+        (Array.from(section.children)).forEach(node => {
+            let child = node.children[0];
+            if(list.has(node.getAttribute('cst-id'))) {
+                child.classList.remove('unselected');
+                child.classList.add('selected');
+            }
+        });
     });
     updateNumberConstraints();
 }
@@ -270,6 +318,7 @@ let activateConstraint = (e) => {
     e.currentTarget.checked = ele.is_active;
     let str = 'div[cst-id="' + id + '"]';
     let d = constList.querySelector(str);
+    console.log(d);
     if(!d) {
         d = document.getElementById('constraints-disabled').querySelector(str);
     }
@@ -349,11 +398,12 @@ let renderConstraints = (cst_list = []) => {
     bodyDisabled.innerHTML = "";
     for(let id of cst_list) {
         if(constraints[id]['is_active']) {
-            body.append(constraintCardBuilder(constraints[id]));
+            // body.append(constraintCardBuilder(constraints[id]));
         } else {
             bodyDisabled.append(disabledConstraintCardBuilder(constraints[id]));
         }
     }
+    buildSections();
     updateNumberConstraints();
     refreshSelectedFromList(selected_constraints);
 }
@@ -398,6 +448,7 @@ document.getElementById('duplicate-constraint').addEventListener('click', (e) =>
 });
 
 let constraint_list = Object.keys(constraints);
+let constraint_metadata = buildMetadata();
 renderConstraints(constraint_list);
 
 // var abc;

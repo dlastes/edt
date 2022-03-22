@@ -165,9 +165,9 @@ body>div {
 
 .constraints-list {
     display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: space-evenly;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
     align-content: stretch;
     align-items: stretch;
     flex-grow: 1;
@@ -464,4 +464,22 @@ input[type="checkbox"] {
 
 .bar-button {
     width: 150px;
+}
+
+.constraints-section {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-content: stretch;
+    align-items: stretch;
+}
+
+.constraints-section-title {
+    font-size: 140%;
+    font-weight: bold;
+}
+
+.constraints-section-full {
+    margin-bottom: 40px;
 }
