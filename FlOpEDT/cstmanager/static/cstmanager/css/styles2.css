@@ -140,9 +140,13 @@ body>div {
 
 .element-info.grow {
     flex-grow: 1;
+    /* width: 600px; */
     margin: 0 20px;
     border-left: solid 1px var(--dark);
     border-right: solid 1px var(--dark);
+    min-width: max-content;
+    /* width: max-content; */
+    max-width: 960px;
 }
 
 #constraint-header-title {
@@ -456,4 +460,8 @@ input[type="checkbox"] {
 
 .display-none {
     display: none;
+}
+
+.bar-button {
+    width: 150px;
 }

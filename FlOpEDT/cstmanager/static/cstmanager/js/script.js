@@ -14,8 +14,9 @@ let toggleDisabledDiv = (e) => {
 
 document.getElementById('show-disabled').addEventListener('click', toggleDisabledDiv);
 
-let copyConstraints = (obj) => {
-
+let copyFromOriginalConstraints = () => {
+    let copy = Object.assign({}, originalConstraints);
+    return copy;
 }
 
 function getRandomInt(max) {
@@ -26,7 +27,8 @@ let clickConstraint = (id) => {
     document.getElementById('constraints-all').querySelector(`.constraint-card[cst-id=${id}]`).children[0].click();
 }
 
-let constraints = responseToDict(responseConstraints);
+let originalConstraints = responseToDict(responseConstraints);
+let constraints = copyFromOriginalConstraints();
 
 let outputSlider = (id, val) => {
     val = val == 8 ? 0 : val;
@@ -34,6 +36,22 @@ let outputSlider = (id, val) => {
     ele.innerHTML = val;
 }
 
+let discardChanges = (e) => {
+    constraints = copyFromOriginalConstraints();
+    constraint_list = Object.keys(constraints);
+    selected_constraints.clear();
+    lastSelectedConstraint = null;
+    updateBroadcastConstraint(null);
+    renderConstraints(constraint_list);
+}
+
+document.getElementById('discard-changes').addEventListener('click', discardChanges);
+
+let applyChanges = (e) => {
+
+}
+
+document.getElementById('apply-changes').addEventListener('click', applyChanges);
 
 let URLWeightIcon = document.getElementById('icon-weight').src;
 let URLGearsIcon = document.getElementById('icon-gears').src;
@@ -43,6 +61,7 @@ let constraintComment = document.getElementById('constraint-header-comment');
 let paramsDiv = document.getElementById('params');
 let activatedEle = document.getElementById('id2');
 let sliderOne = document.getElementById('slider-one');
+let constList = document.getElementById('constraints-list');
 
 activatedEle.addEventListener('change', () => {
     if(!broadcastConstraint) {
@@ -115,8 +134,8 @@ let updateBroadcastConstraint = (id) => {
     constraintComment.innerText = obj['comment'];
     paramsDiv.innerHTML = "";
     activatedEle.checked = obj['is_active'];
-    sliderOne.value = obj['weight'];
-    outputSlider('poidsvalue1', obj['weight']);
+    sliderOne.value = obj['weight'] ?? 0;
+    outputSlider('poidsvalue1', obj['weight'] ?? 0);
     let buttWeeks = buttonWeeks(obj['weeks']);
     paramsDiv.append(buttWeeks);
     obj['parameters'].forEach(param => {
@@ -137,7 +156,7 @@ let constraintUnhovered = (e) => {
 }
 
 let rerender = () => {
-    Array.from(document.getElementById('constraints-list').children).forEach(node => {
+    Array.from(constList.children).forEach(node => {
         let obj = constraints[node.getAttribute('cst-id')];
         node.querySelector('input').checked = obj.is_active;
         node.querySelector('.icon-text.weight').querySelector('strong').innerText = obj.weight;
@@ -146,14 +165,14 @@ let rerender = () => {
     Array.from(document.getElementById('constraints-disabled').children).forEach(node => {
         let obj = constraints[node.getAttribute('cst-id')];
         node.querySelector('input').checked = obj.is_active;
-        node.querySelector('.icon-text.weight').querySelector('strong').innerText = obj.weight;
-        node.querySelector('.icon-text.parameters').querySelector('strong').innerText = obj.parameters.length;
+        // node.querySelector('.icon-text.weight').querySelector('strong').innerText = obj.weight;
+        // node.querySelector('.icon-text.parameters').querySelector('strong').innerText = obj.parameters.length;
     });
 }
 
 let rearrange = () => {
     let constraint_list = Object.keys(constraints);
-    let body = document.getElementById('constraints-list');
+    let body = constList;
     let bodyDisabled = document.getElementById('constraints-disabled');
     body.innerHTML = "";
     bodyDisabled.innerHTML = "";
@@ -198,7 +217,7 @@ let constraintClicked = (e) => {
 
 
 let refreshSelectedFromList = (list) => {
-    let l = document.getElementById('constraints-list');
+    let l = constList;
     (Array.from(l.children)).forEach(node => {
         let child = node.children[0];
         if(list.has(node.getAttribute('cst-id'))) {
@@ -250,7 +269,7 @@ let activateConstraint = (e) => {
     ele.is_active = !ele.is_active;
     e.currentTarget.checked = ele.is_active;
     let str = 'div[cst-id="' + id + '"]';
-    let d = document.getElementById('constraints-list').querySelector(str);
+    let d = constList.querySelector(str);
     if(!d) {
         d = document.getElementById('constraints-disabled').querySelector(str);
     }
@@ -306,7 +325,7 @@ let disabledConstraintCardBuilder = (cst_obj) => {
     let divTitle = divBuilder({ 'class': 'constraint-card-title' });
     divTitle.innerHTML = cst_obj['title'] ?? "No Title";
     let divDesc = divBuilder({ 'class': 'constraint-card-description' });
-    divDesc.innerHTML = cst_obj['comment'];
+    divDesc.innerHTML = cst_obj['comment'] ?? "No Comment";
     // divDesc.innerHTML = cst_obj['parameters'].reduce((a, b) => {
     //     return a + b['name'] + ', ';
     // }, "")
@@ -324,7 +343,7 @@ let disabledConstraintCardBuilder = (cst_obj) => {
 }
 
 let renderConstraints = (cst_list = []) => {
-    let body = document.getElementById('constraints-list');
+    let body = constList;
     let bodyDisabled = document.getElementById('constraints-disabled');
     body.innerHTML = "";
     bodyDisabled.innerHTML = "";
