@@ -765,8 +765,6 @@ class TTModel(FlopModel):
                         for cv in courses_avail:
                             cv.week = week
                     if not courses_avail:
-                        print("Course availability problem for %s - %s !" % (
-                            course_type, promo))
                         for availability_slot in week_availability_slots:
                             avail_course[(course_type, promo)][availability_slot] = 1
                             non_preferred_cost_course[(course_type,
