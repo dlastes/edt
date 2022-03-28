@@ -87,3 +87,7 @@ rect.active {
 .sel_forall {
     fill: black;
 }
+
+.sel-pop-bg, .sel-pop-exit {
+    fill:#F8EDEB  !important;
+}

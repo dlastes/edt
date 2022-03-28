@@ -91,3 +91,7 @@ rect.active {
 .txt_scl, .gridscg, .gridsckh {
     fill: white;
 }
+
+.sel-pop-bg, .sel-pop-exit {
+    fill:#1b3438  !important;
+}
