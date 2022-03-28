@@ -59,15 +59,15 @@
 {#    The white theme doesn't overload any file#}
 
 {% if request.user.get_theme == "Brume" %}
-    <link rel="stylesheet" href="{% static 'base/Themes/themeBrume.css' %}"/>
+    <link rel="stylesheet" href="{% static 'base/themes/themeBrume.css' %}"/>
 {% elif request.user.get_theme == "Prestige Edition" %}
-    <link rel="stylesheet" href="{% static 'base/Themes/themePrestige.css' %}"/>
+    <link rel="stylesheet" href="{% static 'base/themes/themePrestige.css' %}"/>
 {% elif request.user.get_theme == "SynthWave" %}
-    <link rel="stylesheet" href="{% static 'base/Themes/themeSynthWave.css' %}"/>
+    <link rel="stylesheet" href="{% static 'base/themes/themeSynthWave.css' %}"/>
 {% elif request.user.get_theme == "Dark" %}
-    <link rel="stylesheet" href="{% static 'base/Themes/themeDark.css' %}"/>
+    <link rel="stylesheet" href="{% static 'base/themes/themeDark.css' %}"/>
 {% elif request.user.get_theme == "Pink" %}
-    <link rel="stylesheet" href="{% static 'base/Themes/themePink.css' %}"/>
+    <link rel="stylesheet" href="{% static 'base/themes/themePink.css' %}"/>
 {% endif %}
 
 
