@@ -9,7 +9,6 @@ from base.models import Department
 
 logger = logging.getLogger(__name__)
 
-
 class EdtContextMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
@@ -27,7 +26,7 @@ class EdtContextMiddleware:
 
         return response
 
-    def process_view(self, request, view_func, view_args, view_kwargs):
+    def process_view(self, request, view_func, view_args, view_kwargs):     
 
         def del_request_department():
             try:
@@ -43,7 +42,7 @@ class EdtContextMiddleware:
                 if not session == department.abbrev:
                     logger.debug(f'store department [{department.abbrev}] in session with key [{department_key}]')
                     request.session[department_key] = department.abbrev
-
+            
             if set_cache:
                 logger.debug(f'store department [{department.abbrev}] in cache with key [{department_key}]')
                 cache.set(department_key, department)
@@ -51,9 +50,9 @@ class EdtContextMiddleware:
         def set_request_department_prop(req):
             dept = req.department if hasattr(req, 'department') else None
             req.has_department_perm = req.user.is_authenticated \
-                                      and req.user.has_department_perm(dept)
+                and req.user.has_department_perm(dept)
             req.is_department_admin = req.user.is_authenticated \
-                                      and req.user.has_department_perm(dept, admin=True)
+                and req.user.has_department_perm(dept, admin=True)
 
         def get_department_abbrev(lookup_items):
             #
@@ -69,6 +68,7 @@ class EdtContextMiddleware:
 
             return department_abbrev
 
+
         department = None
         department_key = 'department'
 
@@ -77,15 +77,15 @@ class EdtContextMiddleware:
         else:
             # Lookup department abbrev
             department_abbrev = get_department_abbrev((view_kwargs, request.GET, request.session,))
-
-            if department_abbrev:
+            
+            if department_abbrev:            
                 # Lookup for a department cached item
                 department = cache.get(department_key)
                 logger.debug(f'get department from cache : {department}')
                 if department and department.abbrev == department_abbrev:
                     set_request_department(request, department)
-                else:
-                    try:
+                else: 
+                    try:        
                         logger.debug(f'load department from database : [{department_abbrev}]')
                         department = Department.objects.get(abbrev=department_abbrev)
                         set_request_department(request, department, set_cache=True)
@@ -97,12 +97,12 @@ class EdtContextMiddleware:
 
         if request.path.startswith('/admin'):
             if not department:
-                # Check if the user is a superuser in order to
+                # Check if the user is a superuser in order to 
                 # access global admin mode
                 if request.user.is_authenticated and not request.user.is_superuser:
                     return redirect('/')
             else:
-                # Check if the user is associated with the
+                # Check if the user is associated with the 
                 # requested department
                 if not request.is_department_admin:
                     return HttpResponseForbidden()
