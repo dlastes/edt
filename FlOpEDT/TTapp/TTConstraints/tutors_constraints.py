@@ -232,10 +232,10 @@ class RespectMaxHoursPerDay(TTConstraint):
         """
         You can give a contextual explanation about what this constraint doesnt
         """
-        return _("Respect max hours per day")
+        return "Respect max hours per day"
 
     class Meta:
-        verbose_name_plural = _("Respect max hours per day")
+        verbose_name_plural = "Respect max hours per day"
 
 
 class LowerBoundBusyDays(TTConstraint):
