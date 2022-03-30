@@ -37,3 +37,4 @@ routerTTapp = routers.SimpleRouter()
 # routerTTapp.register(r'limitedstarttimechoices', views.TTLimitedStartTimeChoicesViewSet) # TODO: Fix
 routerTTapp.register(r'constraint', views.FlopConstraintViewSet, basename ="constraint")
 routerTTapp.register(r'novisio', views.NoVisioViewSet, basename ="novisio")
+routerTTapp.register(r'constraints_parameters', views.FlopConstraintParamatersView, basename ="constraints_parameters")

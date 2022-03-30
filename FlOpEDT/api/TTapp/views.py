@@ -26,11 +26,12 @@ from django.utils.decorators import method_decorator
 from drf_yasg.utils import swagger_auto_schema
 from django.apps import apps
 from TTapp.FlopConstraint import FlopConstraint, all_subclasses
-from TTapp.TTConstraints.TTConstraint import TTConstraint
+from base.models import Department
 import TTapp.TTConstraints.visio_constraints as ttv
 
 from drf_yasg import openapi
-from rest_framework import viewsets
+from rest_framework import viewsets, views
+import django_filters.rest_framework as filters
 from rest_framework.response import Response
 from api.TTapp import serializers
 from api.permissions import IsAdminOrReadOnly
@@ -257,7 +258,27 @@ class FlopConstraintViewSet(viewsets.ViewSet):
 
         return Response(serializer.data)
 
+
 class NoVisioViewSet(viewsets.ModelViewSet):
     queryset = ttv.NoVisio.objects.all()
     serializer_class = serializers.NoVisioSerializer
     permission_classes = [IsAdminOrReadOnly]
+
+
+class FlopConstraintParametersFilterSet(filters.FilterSet):
+    dept = filters.CharFilter(field_name='abbrev', required=True)
+
+    class Meta:
+        model = Department
+        fields = ['dept']
+
+
+class FlopConstraintParamatersView(viewsets.ModelViewSet):
+    permission_classes = [IsAdminOrReadOnly]
+    serializer_class = serializers.FlopConstraintParametersSerializer
+    filter_class = FlopConstraintParametersFilterSet
+
+    def get_queryset(self):
+        # Get the filters from the request
+        dept_abbrev = self.request.query_params.get('dept', None)
+        return Department.objects.filter(abbrev=dept_abbrev)
