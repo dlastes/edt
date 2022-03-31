@@ -284,11 +284,15 @@ class FlopConstraintFieldView(viewsets.ViewSet):
             except Department.DoesNotExist:
                 raise APIException(detail='Unknown department')
         flop_constraints_fields = set()
+        # exclude useless fields
+        excluded_fields = {'id', 'class_name',
+                           'department', 'weight', 'title', 'comment',
+                           'is_active', 'modified_at', 'weeks', 'train_progs', 'courses'}
+
         for constraint_class in all_subclasses(FlopConstraint):
             fields = constraint_class._meta.get_fields()
-            excluded_fields = ['id', 'class_name',
-                               'department', 'weight', 'title', 'comment',
-                               'is_active', 'modified_at', 'weeks', 'train_progs', 'courses']
+            # Exclude already considered fields
+            excluded_fields |= set(f.name for f in flop_constraints_fields)
             parameters_fields = set([f for f in fields
                                      if f.name not in excluded_fields
                                      and 'IntegerField' not in type(f).__name__])
@@ -346,6 +350,6 @@ class FlopConstraintFieldView(viewsets.ViewSet):
                     acceptable.append(element["id"])
 
             field.type = typename
-            field.acceptable =  acceptable
+            field.acceptable = acceptable
         serializer = serializers.FlopConstraintFieldSerializer(fields_list, many=True)
         return Response(serializer.data)
