@@ -23,7 +23,7 @@
 
 from django.contrib.postgres.fields.array import ArrayField
 from rest_framework.fields import empty
-from TTapp.FlopConstraint import FlopConstraint, all_subclasses
+from TTapp.FlopConstraint import FlopConstraint
 import TTapp.TTConstraints.tutors_constraints as ttt
 import TTapp.TTConstraints.visio_constraints as ttv
 from rest_framework import serializers
@@ -218,10 +218,12 @@ class FlopConstraintSerializer(serializers.ModelSerializer):
 
         return(paramlist)
 
+
 class TTConstraintSerializer(FlopConstraintSerializer):
     class Meta:
         model = ttt.MinTutorsHalfDays
         fields = ['id', 'title', 'name', 'weight', 'is_active', 'comment', "modified_at", 'weeks', 'parameters']
+
 
 class NoVisioSerializer(serializers.ModelSerializer):
     class Meta:
@@ -229,76 +231,7 @@ class NoVisioSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class FlopConstraintParametersSerializer(serializers.Serializer):
-    """Your data serializer, define your fields here."""
-    constraints_parameters = serializers.SerializerMethodField()
-
-    def get_constraints_parameters(self, department):
-        result = {}
-        paramlist = set()
-        for constraint_class in all_subclasses(FlopConstraint):
-            fields = constraint_class._meta.get_fields()
-            excluded_fields = ['id', 'class_name',
-                               'department', 'weight', 'title', 'comment',
-                               'is_active', 'modified_at', 'weeks', 'train_progs', 'courses']
-            parameters_fields = set([f for f in fields
-                                     if f.name not in excluded_fields
-                                     and 'IntegerField' not in type(f).__name__])
-            paramlist |= parameters_fields
-        print(paramlist)
-
-
-        for field in paramlist:
-            acceptable = []
-
-            if (not field.many_to_one and not field.many_to_many):
-                typename = type(field).__name__
-
-                # Récupère les validators dans acceptable
-                if typename == 'CharField':
-                    choices = field.choices
-                    if "day" in field.name:
-                        acceptable = department.timegeneralsettings.days
-                    elif choices is not None:
-                        acceptable = [c[0] for c in choices]
-                if typename == 'BooleanField':
-                    acceptable = [True, False]
-
-                if type(field) is ArrayField:
-                    typename = type(field.base_field).__name__
-                    # Récupère les choices de l'arrayfield dans acceptable
-                    choices = field.base_field.choices
-                    if field.name == "possible_start_times":
-                        acceptable = all_possible_start_times(department)
-                    elif "day" in field.name:
-                        acceptable = department.timegeneralsettings.days
-                    elif choices is not None:
-                        acceptable = choices
-
-            else:
-                # Récupère le modele en relation avec un ManyToManyField ou un ForeignKey
-                mod = field.related_model
-                typenamesplit = str(mod)[8:-2].split(".")
-                typename = typenamesplit[0] + "." + typenamesplit[2]
-                acceptablelist = mod.objects.values("id")
-
-                # Filtre les ID dans acceptable list en fonction du department
-                if (field.name == "tutors"):
-                    acceptablelist = acceptablelist.filter(departments=department)
-
-                elif (field.name == "train_progs"):
-                    acceptablelist = acceptablelist.filter(department=department)
-
-                elif (field.name == "modules"):
-                    acceptablelist = acceptablelist.filter(train_prog__department=department)
-
-                elif (field.name == "groups"):
-                    acceptablelist = acceptablelist.filter(train_prog__department=department)
-
-                for element in acceptablelist:
-                    acceptable.append(element["id"])
-
-            result[field.name] = {"type": typename,
-                                  "acceptable": acceptable}
-
-        return result
+class FlopConstraintFieldSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    type = serializers.CharField()
+    acceptable = serializers.ListField(child=serializers.CharField())
