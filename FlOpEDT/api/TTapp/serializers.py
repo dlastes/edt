@@ -23,7 +23,7 @@
 
 from django.contrib.postgres.fields.array import ArrayField
 from rest_framework.fields import empty
-import TTapp.TTConstraints.TTConstraint as ttc
+from TTapp.FlopConstraint import FlopConstraint
 import TTapp.TTConstraints.tutors_constraints as ttt
 import TTapp.TTConstraints.visio_constraints as ttv
 from rest_framework import serializers
@@ -100,7 +100,7 @@ class FlopConstraintSerializer(serializers.ModelSerializer):
 
     class Meta:
         abstract = True
-        model = ttc.TTConstraint
+        model = FlopConstraint
         fields = '__all__'
 
     def get_name(self, obj):

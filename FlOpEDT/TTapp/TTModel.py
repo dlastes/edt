@@ -35,7 +35,7 @@ from people.models import Tutor
 
 from TTapp.models import MinNonPreferedTutorsSlot, StabilizeTutorsCourses, MinNonPreferedTrainProgsSlot, \
     NoSimultaneousGroupCourses, ScheduleAllCourses, AssignAllCourses, ConsiderTutorsUnavailability, \
-    MinimizeBusyDays, MinGroupsHalfDays, RespectBoundPerDay, ConsiderDependencies, ConsiderPivots, \
+    MinimizeBusyDays, MinGroupsHalfDays, RespectMaxHoursPerDay, ConsiderDependencies, ConsiderPivots, \
     StabilizeGroupsCourses
 
 from TTapp.TTConstraints.TTConstraint import TTConstraint
@@ -409,8 +409,8 @@ class TTModel(FlopModel):
             ScheduleAllCourses.objects.create(department=self.department)
 
         # Check if RespectBound constraint is in database, and add it if not
-        if not RespectBoundPerDay.objects.filter(department=self.department).exists():
-            RespectBoundPerDay.objects.create(department=self.department)
+        if not RespectMaxHoursPerDay.objects.filter(department=self.department).exists():
+            RespectMaxHoursPerDay.objects.create(department=self.department)
 
         # Check if MinimizeBusyDays constraint is in database, and add it if not
         if not MinimizeBusyDays.objects.filter(department=self.department).exists():
