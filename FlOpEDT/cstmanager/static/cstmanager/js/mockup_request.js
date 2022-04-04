@@ -92,7 +92,7 @@ let changesMockup = [
 
 let blablablabla = [
     'base.Department', // /fetch/alldepts/
-    'base.TrainingProgramme',
+    'base.TrainingProgramme', // /fetch,
     'base.StructuralGroup', // /groups/structural/?dept=INFO
     'people.Tutor', // /fetch/idtutor/?dept=INFO
     'base.Module', // /fetch/idmodule/?dept=INFO

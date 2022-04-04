@@ -55,12 +55,12 @@ let fetchers = {
             });
     },
     fetchTutors: (e) => {
-        fetch("http://127.0.0.1:8000/en/api/fetch/idtutor/?dept=INFO")
+        fetch("http://127.0.0.1:8000/en/api/user/tutor/?dept=INFO")
             .then(resp => resp.json())
             .then(jsonObj => {
                 database['tutors'] = {};
                 Object.values(jsonObj).forEach(obj => {
-                    database['tutors'][obj['id']] = obj['name'];
+                    database['tutors'][obj['username']] = obj;
                 });
             })
             .catch(err => {
@@ -98,7 +98,10 @@ let fetchers = {
     },
     fetchCourses: (e) => {
         // TOO BIG
-    }
+    },
+    fetchRooms: (e) => {
+        // TODO
+    },
 }
 
 let responseToDict = (resp) => {
