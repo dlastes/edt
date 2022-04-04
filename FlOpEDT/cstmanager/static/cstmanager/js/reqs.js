@@ -1,4 +1,4 @@
-var responseConstraints = [{
+var responseConstraintsMockup = [{
         "id": 4,
         "title": null,
         "name": "LimitModulesTimePerPeriod",

@@ -1,3 +1,106 @@
+let fetchers = {
+    fetchConstraints: (e) => {
+        emptyPage();
+        fetch("http://127.0.0.1:8000/en/api/ttapp/constraint/?dept=INFO")
+            .then(resp => resp.json())
+            .then(jsonObj => {
+                responseConstraints = responseToDict(Object.values(jsonObj));
+                originalConstraints = copyObj(responseConstraints);
+                constraints = copyFromOriginalConstraints();
+                tables = new Set(Object.values(originalConstraints).map(n => n["name"]));
+                actionChanges = emptyChangesDict();
+                selected_constraints = new Set();
+                lastSelectedConstraint = null;
+                constraint_list = Object.keys(constraints);
+                constraint_metadata = buildMetadata();
+                renderConstraints(constraint_list);
+            })
+            .catch(err => {
+                console.error("something went wrong while fetching constraints");
+                console.error(err);
+            });
+    },
+    fetchDepartments: (e) => {
+        fetch("http://127.0.0.1:8000/en/api/fetch/alldepts/")
+            .then(resp => resp.json())
+            .then(jsonObj => {
+                database['departments'] = jsonObj.reduce((obj, next) => {
+                    let id = next['id'].toString();
+                    let abbrev = next['abbrev'];
+                    ret = obj;
+                    ret[id] = abbrev;
+                    return ret;
+                }, {})
+            })
+            .catch(err => {
+                console.error("something went wrong while fetching departments");
+                console.error(err);
+            });
+    },
+    fetchTrainingPrograms: (e) => {
+        
+    },
+    fetchStructuralGroups: (e) => {
+        fetch("http://127.0.0.1:8000/en/api/groups/structural/?dept=INFO")
+            .then(resp => resp.json())
+            .then(jsonObj => {
+                database['structuralGroups'] = {};
+                Object.values(jsonObj).forEach(obj => {
+                    database['structuralGroups'][obj['id']] = obj;
+                });
+            })
+            .catch(err => {
+                console.error("something went wrong while fetching structural groups");
+                console.error(err);
+            });
+    },
+    fetchTutors: (e) => {
+        fetch("http://127.0.0.1:8000/en/api/fetch/idtutor/?dept=INFO")
+            .then(resp => resp.json())
+            .then(jsonObj => {
+                database['tutors'] = {};
+                Object.values(jsonObj).forEach(obj => {
+                    database['tutors'][obj['id']] = obj['name'];
+                });
+            })
+            .catch(err => {
+                console.error("something went wrong while fetching tutors");
+                console.error(err);
+            });
+    },
+    fetchModules: (e) => {
+        fetch("http://127.0.0.1:8000/en/api/fetch/idmodule/?dept=INFO")
+            .then(resp => resp.json())
+            .then(jsonObj => {
+                database['modules'] = {};
+                Object.values(jsonObj).forEach(obj => {
+                    database['modules'][obj['id']] = obj['name'];
+                });
+            })
+            .catch(err => {
+                console.error("something went wrong while fetching modules");
+                console.error(err);
+            });
+    },
+    fetchCourseTypes: (e) => {
+        fetch("http://127.0.0.1:8000/en/api/fetch/idcoursetype/")
+            .then(resp => resp.json())
+            .then(jsonObj => {
+                database['courseTypes'] = {};
+                Object.values(jsonObj).forEach(obj => {
+                    database['courseTypes'][obj['id']] = obj['name'];
+                });
+            })
+            .catch(err => {
+                console.error("something went wrong while fetching modules");
+                console.error(err);
+            });
+    },
+    fetchCourses: (e) => {
+        // TOO BIG
+    }
+}
+
 let responseToDict = (resp) => {
     let = ret = {};
     resp.forEach(cst => {
@@ -8,6 +111,10 @@ let responseToDict = (resp) => {
     return ret;
 }
 
+let copyObj = (obj) => {
+    return JSON.parse(JSON.stringify(obj));
+}
+
 let toggleDisabledDiv = (e) => {
     document.getElementById('constraints-disabled').classList.toggle('display-none');
 }
@@ -15,11 +122,11 @@ let toggleDisabledDiv = (e) => {
 document.getElementById('show-disabled').addEventListener('click', toggleDisabledDiv);
 
 let copyFromOriginalConstraints = () => {
-    let copy = Object.assign({}, originalConstraints);
+    let copy = copyObj(originalConstraints);
     return copy;
 }
 
-function getRandomInt(max) {
+let getRandomInt = (max) => {
     return Math.floor(Math.random() * max);
 }
 
@@ -27,9 +134,32 @@ let clickConstraint = (id) => {
     document.getElementById('constraints-all').querySelector(`.constraint-card[cst-id=${id}]`).children[0].click();
 }
 
-let originalConstraints = responseToDict(responseConstraints);
-let constraints = copyFromOriginalConstraints();
-let tables = new Set(Object.values(originalConstraints).map(n => n["name"]))
+let emptyChangesDict = () => {
+    return {
+        'ADD': [],
+        'DELETE': [],
+        'EDIT': [],
+    };
+}
+
+// let originalConstraints = responseToDict(responseConstraints);
+// let constraints = copyFromOriginalConstraints();
+// let tables = new Set(Object.values(originalConstraints).map(n => n["name"]));
+// let actionChanges = {};
+let originalConstraints;
+let constraints;
+let tables;
+let actionChanges = emptyChangesDict();
+let responseConstraints;
+let database = {
+    'departments': null,
+    'trainingPrograms': null,
+    'structuralGroups': null,
+    'tutors': null,
+    'modules': null,
+    'courseTypes': null,
+    'courses': null,
+}
 
 let outputSlider = (id, val) => {
     val = val == 8 ? 0 : val;
@@ -49,14 +179,12 @@ let discardChanges = (e) => {
 document.getElementById('discard-changes').addEventListener('click', discardChanges);
 
 let applyChanges = (e) => {
-
+    actionChanges.normalizeActionChanges();
 }
 
 document.getElementById('apply-changes').addEventListener('click', applyChanges);
 
-let fetchConstraints = (e) => {
-
-}
+document.getElementById('new-constraint').addEventListener('click', fetchers.fetchConstraints);
 
 let URLWeightIcon = document.getElementById('icon-weight').src;
 let URLGearsIcon = document.getElementById('icon-gears').src;
@@ -95,12 +223,175 @@ let elementBuilder = (tag, args = {}) => {
     return ele;
 }
 
-let buttonWithDropBuilder = (obj) => {
-    let butt = elementBuilder("button", { "class": "transition neutral", "style": "width: auto" });
-    butt.innerText = obj["name"];
-    let dropMenu = divBuilder({});
-    butt.addEventListener('click', (e) => {
+let getCorrespondantDatabase = (param) => {
+    switch(param) {
+        case 'base.Department': return database['departments'];
+        case 'base.TrainingProgramme': return database['trainingPrograms'];
+        case 'base.StructuralGroup': return database['structuralGroups'];
+        case 'base.Module': return database['modules'];
+        case 'base.CourseType': return database['courseTypes'];
+        case 'base.Course': return database['courses'];
+        case 'people.Tutor': return database['tutors'];
+        default:
+            console.error("something went wrong while getting correspondant database");
+    }
+    return null;
+}
 
+let getCorrespondantInfo = (id, param, db) => {
+    switch(param) {
+        case 'base.Department': return db[id];
+        case 'base.TrainingProgramme': return "Not Assigned Yet";
+        case 'base.StructuralGroup': return db[id]['name'];
+        case 'base.Module': return db[id];
+        case 'base.CourseType': return db[id];
+        case 'base.Course': return "Not Assigned Yet";
+        case 'people.Tutor': return db[id];
+        default:
+            console.error("something went wrong while getting correspondant information");
+    }
+    return null;
+}
+
+let getParamObj = (cst_id, param) => {
+    for(p of constraints[cst_id]['parameters']) {
+        if(p['type'] == param) {
+            return p;
+        }
+    }
+}
+
+let deleteConstraintParameter = (e) => {
+    let div = document.getElementById('parameter-screen');
+    let cst_id = div.attributes['cst-id'].value;
+    let param = div.attributes['parameter'].value;
+    changeEvents.deleteConstraintParameter(
+        constraints[cst_id]['name'], 
+        constraints[cst_id]['id'], 
+        param, 
+        constraints[cst_id]['pageid'],
+    );
+    document.getElementById('parameter-screen').parentElement.remove();
+}
+
+let updateConstraintParameter = (e) => {
+    let div = document.getElementById('parameter-screen');
+    let cst_id = div.attributes['cst-id'].value;
+    let param = div.attributes['parameter'].value;
+    let paramObj = getParamObj(cst_id, param);
+    let new_list = [];
+    document.querySelectorAll('.form-check').forEach(node => {
+        let input = node.querySelector('input');
+        if(input.checked) {
+            new_list.push(input.attributes['element-id'].value);
+        }
+    });
+    if(paramObj['required'] && new_list.length == 0) {
+        window.alert('You must specify at least one choice!');
+        return;
+    }
+    changeEvents.editConstraintParameter(
+        constraints[cst_id]['name'], 
+        constraints[cst_id]['id'], 
+        param, 
+        constraints[cst_id]['pageid'],
+        new_list,
+    );
+}
+
+let cancelConstraintParameter = (e) => {
+    document.querySelectorAll('#parameter-screen').forEach(node => {
+        node.remove();
+    });
+}
+
+let getElementsToFillParameterPopup = (cst_id, parameter) => {
+    let param_obj = (constraints[cst_id]['parameters'].filter(o => o['type'] == parameter))[0];
+    let divs = [];
+
+    param_obj['acceptable'].forEach(ele => {
+        let temp_id = 'acceptable' + ele.toString();
+        let db = getCorrespondantDatabase(parameter);
+        let str = getCorrespondantInfo(ele, parameter, db);
+        let form = divBuilder({
+            class: 'form-check',
+        });
+        let input = elementBuilder('input', {
+            'class': 'form-check-input',
+            'type': param_obj['multiple'] ? 'checkbox' : 'radio',
+            'id': temp_id,
+            'element-id': ele,
+            'name': 'elementsParameter',
+        });
+        form.addEventListener('click', (e) => {
+            if(e.currentTarget != e.target) {
+                return;
+            }
+            form.querySelector('input').checked = !form.querySelector('input').checked;
+        })
+        let label = elementBuilder('label', {
+            'class': 'form-check-label',
+            'for': temp_id,
+        });
+        label.innerHTML = str;
+        form.append(input, label);
+        divs.push(form);
+    });
+
+    let divButtons = divBuilder({
+        class: 'buttons-for-parameters',
+    });
+
+    let deleteButton = elementBuilder('button', {
+        type: 'button',
+        class: 'btn btn-danger',
+    });
+    deleteButton.innerHTML = 'Delete';
+    deleteButton.addEventListener('click', deleteConstraintParameter);
+
+    let updateButton = elementBuilder('button', {
+        type: 'button',
+        class: 'btn btn-primary',
+    });
+    updateButton.innerHTML = 'Update';
+    updateButton.addEventListener('click', updateConstraintParameter);
+
+    let cancelButton = elementBuilder('button', {
+        type: 'button',
+        class: 'btn btn-secondary',
+    });
+    cancelButton.innerHTML = 'Cancel';
+    cancelButton.addEventListener('click', cancelConstraintParameter);
+
+    divButtons.append(deleteButton, updateButton, cancelButton);
+
+    divs.push(divButtons);
+
+    return divs;
+}
+
+let buttonWithDropBuilder = (obj) => {
+    let butt = elementBuilder("button", { 
+        "class": "transition neutral", 
+        "style": "width: auto",
+        'id': 'parameter-' + obj['type'],
+    });
+    butt.innerText = obj["name"];
+    butt.addEventListener('click', (e) => {
+        if(e.currentTarget != e.target) {
+            return;
+        }
+        cancelConstraintParameter(null);
+        // if()
+        let tempScreen = divBuilder({
+            'class': 'div-popup',
+            'cst-id': lastSelectedConstraint,
+            'parameter': obj['type'],
+            'id': 'parameter-screen'
+        });
+        let elements = getElementsToFillParameterPopup(lastSelectedConstraint, obj['type']);
+        tempScreen.append(...elements);
+        butt.append(tempScreen);
     });
     return butt;
 }
@@ -318,7 +609,6 @@ let activateConstraint = (e) => {
     e.currentTarget.checked = ele.is_active;
     let str = 'div[cst-id="' + id + '"]';
     let d = constList.querySelector(str);
-    console.log(d);
     if(!d) {
         d = document.getElementById('constraints-disabled').querySelector(str);
     }
@@ -391,6 +681,13 @@ let disabledConstraintCardBuilder = (cst_obj) => {
     return divCard;
 }
 
+let emptyPage = () => {
+    let body = constList;
+    let bodyDisabled = document.getElementById('constraints-disabled');
+    body.innerHTML = "";
+    bodyDisabled.innerHTML = "";
+}
+
 let renderConstraints = (cst_list = []) => {
     let body = constList;
     let bodyDisabled = document.getElementById('constraints-disabled');
@@ -429,46 +726,177 @@ let updateWeightAll = (e) => {
     selected_constraints.forEach(id => {
         constraints[id].weight = weight;
     });
-    rerender();
+    renderConstraints();
 }
 
 document.getElementById('update-weight-all').onclick = updateWeightAll;
 
-document.getElementById('duplicate-constraint').addEventListener('click', (e) => {
+let duplicateSelectedConstraint = (e) => {
     if(!lastSelectedConstraint) {
         return;
     }
     let constr = constraints[`${lastSelectedConstraint}`];
-    let copy = Object.assign({}, constr);
-    // copy['id'] = Math.max(...Object.keys(constraints)) + 1;
-    copy['pageid'] = copy['name'] + getRandomInt(10000).toString();
-    constraints[copy['pageid']] = copy;
+    let newid = changeEvents.duplicateConstraint(constr['pageid']);
+    // constraints[copy['pageid']] = copy;
+    selected_constraints.clear();
     rearrange();
-    clickConstraint(copy['pageid']);
-});
+    clickConstraint(newid);
+}
 
-let constraint_list = Object.keys(constraints);
-let constraint_metadata = buildMetadata();
-renderConstraints(constraint_list);
+document.getElementById('duplicate-constraint').addEventListener('click', duplicateSelectedConstraint);
 
-// var abc;
+let constraint_list = null;
+let constraint_metadata = null;
 
-// abc = fetch("http://127.0.0.1:8000/en/api/ttapp/constraint/", {
-//     method: 'GET',
-//     headers: {
-//         'Content-Type': 'application/json',
-//         'X-CSRFToken': '5eBpvLT3nsTv6ySJ2J2L3S4lAnhb1E9SnC3rUDc01EahAP75Y3wf3K5nxOTaUQZg',
-//     },
-// }).then((res) => {
-//     return res.json()
-// }).then((json) => {
-//     ret = {}
+let changeEvents = {
+    addNewConstraint: (args = {
+        name: null,
+        title: null,
+    }) => {
+        let rand = getRandomInt(100000);
+        let id = "-ADD-" + tableName + rand.toString();
+        let obj = {
+            policy: 'ADD',
+            table: tableName,
+            tempid: id,
+            constraint: {
+                is_active: args['is_active'] ?? false,
+                comment: args['comment'],
+                title: args['title'],
+                weeks: copyObj(args['weeks']),
+                parameters: null,
+                weight: args['weight'] ?? 0,
+            },
+        }
+        actionChanges['ADD'].push(obj);
+        constraints[id] = {
+            ...copyObj(obj['constraint']),
+            id: rand,
+            pageid: id,
+            name: obj['table'],
+        }
+        constraint_list = Object.keys(constraints);
+        return id;
+    },
+    duplicateConstraint: (pageid) => {
+        let copy_org_cst = copyObj(constraints[pageid]);
+        let rand = getRandomInt(100000);
+        let id = "-ADD-" + copy_org_cst['name'] + rand.toString();
+        let obj = {
+            policy: 'ADD',
+            table: copy_org_cst['name'],
+            tempid: id,
+            constraint: {
+                is_active: copy_org_cst['is_active'],
+                comment: copy_org_cst['comment'],
+                title: copy_org_cst['title'],
+                weeks: copyObj(copy_org_cst['weeks']),
+                parameters: copyObj(copy_org_cst['parameters']),
+                weight: copy_org_cst['weight'],
+            },
+        };
+        actionChanges['ADD'].push(obj);
+        constraints[id] = {
+            ...copyObj(obj['constraint']),
+            id: rand,
+            pageid: id,
+            name: obj['table'],
+        };
+        constraint_list = Object.keys(constraints);
+        return id;
+    },
+    deleteConstraint: (tableName, id) => {
+        let obj = {
+            policy: "DELETE",
+            table: tableName,
+            id: id,
+        };
+        actionChanges['DELETE'].push(obj);
+        delete constraints[id];
+        constraint_list = Object.keys(constraints);
+        renderConstraints();
+    },
+    editConstraintAttr: (tableName, id, actions={}) => {
+        return true;
+    },
+    deleteConstraintParameter: (tableName, id, param, pageid) => {
+        if(pageid.startsWith('-ADD-')) {
+            for(let ele of actionChanges['ADD']) {
+                if(ele['tempid'] == pageid) {
+                    ele['constraint']['parameters'] = ele['constraint']['parameters'].filter(paramObj => {
+                        return paramObj['type'] != param;
+                    });
+                    break;
+                }
+            }
+            constraints[pageid]['parameters'] = constraints[pageid]['parameters'].filter(paramObj => {
+                return paramObj['type'] != param;
+            });
+            return;
+        }
+        let obj = {
+            policy: 'EDIT',
+            table: tableName,
+            id: id,
+            constraint: {
+                action: 'DELETE',
+                parameter: param,
+            },
+        };
+        actionChanges['EDIT'].push(obj);
+        constraints[pageid]['parameters'] = constraints[pageid]['parameters'].filter(paramObj => {
+            return paramObj['type'] != param;
+        });
+    },
+    editConstraintParameter: (tableName, id, param, pageid, new_list) => {
+        if(pageid.startsWith('-ADD-')) {
+            for(let ele of actionChanges['ADD']) {
+                if(ele['tempid'] == pageid) {
+                    for(let p of ele['parameters']) {
+                        if(p['type'] == param) {
+                            p['id_list'] = new_list;
+                            break;
+                        }
+                    }
+                }
+            }
+            for(let p of constraints[pageid]['parameters']) {
+                if(p['type'] == param) {
+                    p['id_list'] = new_list;
+                    break;
+                }
+            }
+            
+            return;
+        }
+        let obj = {
+            policy: 'EDIT',
+            table: tableName,
+            id: id,
+            constraint: {
+                action: 'EDIT',
+                parameter: param,
+                id_list: new_list,
+            },
+        };
+        actionChanges['EDIT'].push(obj);
+        for(let p of constraints[pageid]['parameters']) {
+            if(p['type'] == param) {
+                p['id_list'] = new_list;
+                break;
+            }
+        }
+    },
+    normalizeActionChanges: () => {
+        return true;
+    },
+}
 
-//     for(let ele of json) {
-//         ret[ele["id"]] = ele
-//     }
-//     constraints2 = ret;
-//     renderConstraints();
-//     return json;
-// })  return json;
-// })
+fetchers.fetchConstraints(null);
+fetchers.fetchDepartments(null);
+// fetchers.fetchTrainingPrograms(null);
+fetchers.fetchStructuralGroups(null);
+fetchers.fetchTutors(null);
+fetchers.fetchModules(null);
+fetchers.fetchCourseTypes(null);
+// fetchers.fetchCourses(null);

@@ -116,6 +116,7 @@ body>div {
     /* align-content: stretch; */
     align-items: stretch;
     justify-content: space-between;
+    z-index: 100;
 }
 
 .constraint-info-body {
@@ -135,6 +136,8 @@ body>div {
 
 .element-info.title {
     width: 250px;
+    min-width: 250px;
+    max-width: 250px;
     justify-content: space-between;
 }
 
@@ -142,8 +145,8 @@ body>div {
     flex-grow: 1;
     /* width: 600px; */
     margin: 0 20px;
-    border-left: solid 1px var(--dark);
-    border-right: solid 1px var(--dark);
+    /* border-left: solid 1px var(--dark);
+    border-right: solid 1px var(--dark); */
     min-width: max-content;
     /* width: max-content; */
     max-width: 960px;
@@ -446,7 +449,7 @@ input[type="checkbox"] {
     justify-content: center;
 }
 
-#params * {
+#params > * {
     margin: 2px
 }
 
@@ -482,4 +485,39 @@ input[type="checkbox"] {
 
 .constraints-section-full {
     margin-bottom: 40px;
+}
+
+.div-popup {
+    position: absolute;
+    z-index: 100;
+    width: 400px;
+    left: -160px;
+    top: 35px;
+    min-height: 100px;
+    background-color: var(--white);
+    border: 2px solid var(--dark);
+    border-radius: 5px;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    /* align-items: center; */
+    padding: 5px;
+}
+
+.buttons-for-parameters {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-around;
+}
+
+.form-check:hover {
+    cursor: pointer;
+}
+
+.form-check *:hover {
+    cursor: pointer;
+}
+
+#params button {
+    position: relative;
 }
