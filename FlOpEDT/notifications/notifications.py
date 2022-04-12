@@ -275,7 +275,7 @@ def send_changes_email(subject, intro_text, html_msg, to_email, from_email=""):
 
 if __name__ == "__main__":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "FlOpEDT.settings.local")
-    django.utils.translation.activate('fr')
     django.setup()
+    django.utils.translation.activate('fr')
     backup()
     send_notifications()
