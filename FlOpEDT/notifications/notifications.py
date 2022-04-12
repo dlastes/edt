@@ -32,6 +32,7 @@ from notifications.models import BackUpModif
 from base.timing import flopdate_to_datetime, Day, french_format
 from people.models import Tutor, NotificationsPreferences
 from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext
 
 from django.core.mail import send_mail
 from django.utils.html import strip_tags
@@ -137,12 +138,12 @@ def check_modifs():
             dict_modif_student[department][train_prog] = {}
         if group not in dict_modif_student[department][train_prog]:
             dict_modif_student[department][train_prog][group] = []
-        student_object = {_('Mode'): mode,
-                          _('Date'): datetime.date(),
-                          _('Start time'): french_format(start_time),
-                          _('Module'): module,
-                          _('Tutor'): tutor_username,
-                          _('Room'): room}
+        student_object = {gettext('Mode'): mode,
+                          gettext('Date'): datetime.date(),
+                          gettext('Start time'): french_format(start_time),
+                          gettext('Module'): module,
+                          gettext('Tutor'): tutor_username,
+                          gettext('Room'): room}
         dict_modif_student[department][train_prog][group].append(student_object)
 
         # Store all changes for tutors
@@ -150,13 +151,13 @@ def check_modifs():
             dict_modif_tutor[tutor_username] = {}
         if department not in dict_modif_tutor[tutor_username]:
             dict_modif_tutor[tutor_username][department] = []
-        tutor_object = {_('Mode'): mode,
-                        _('Date'): datetime.date(),
-                        _('Start time'): french_format(start_time),
-                        _('Module'): module,
-                        _('Train_prog'): train_prog,
-                        _('Group'): group,
-                        _('Room'): room}
+        tutor_object = {gettext('Mode'): mode,
+                        gettext('Date'): datetime.date(),
+                        gettext('Start time'): french_format(start_time),
+                        gettext('Module'): module,
+                        gettext('Train_prog'): train_prog,
+                        gettext('Group'): group,
+                        gettext('Room'): room}
         dict_modif_tutor[tutor_username][department].append(tutor_object)
     return dict_modif_student, dict_modif_tutor
 
@@ -164,7 +165,7 @@ def check_modifs():
 def send_notifications():
     today = date.today()
     dict_modif_student, dict_modif_tutor = check_modifs()
-
+    cpt = 0
     subject = _("[flop!Scheduler] Changes on your planning")
 
     for tutor_username, dic in dict_modif_tutor.items():
@@ -182,12 +183,12 @@ def send_notifications():
         html_msg = ""
         for department, changes in dic.items():
             filtered_changes = [change for change in changes
-                                if 0 <= (change[_('Date')] - today).days <= nb_of_notified_days]
+                                if 0 <= (change[gettext('Date')] - today).days <= nb_of_notified_days]
 
             if not filtered_changes:
                 continue
 
-            filtered_changes.sort(key=lambda x: (x[_('Date')], x[_('Start time')]))
+            filtered_changes.sort(key=lambda x: (x[gettext('Date')], x[gettext('Start time')]))
             html_msg += _("For the department %s :") % department + "<br />"
             html_msg += changes_in_html_string(filtered_changes)
         send_changes_email(subject, intro_text, html_msg, to_email=tutor.email)
@@ -220,7 +221,7 @@ def send_notifications():
                             if 0 <= (change['date'] - today).days <= nb_of_notified_days]
         if not filtered_changes:
             continue
-        filtered_changes.sort(key=lambda x: (x[_('Date')], x[_('Start time')]))
+        filtered_changes.sort(key=lambda x: (x[gettext('Date')], x[gettext('Start time')]))
         html_msg = changes_in_html_string(filtered_changes)
         send_changes_email(subject, intro_text, html_msg, to_email=student.email)
 
@@ -251,8 +252,13 @@ def send_changes_email(subject, intro_text, html_msg, to_email, from_email=""):
          <html>
            <head>
             <style type="text/css">
-            table {{border-collapse:collapse;}}
-            th, td {{border:1px solid black; text-align:center; margin: 1em;}}
+            table {{border-collapse:collapse; margin:1em}}
+            th, td {{
+                border:1px solid black; 
+                text-align:center;
+                padding-right:10px; 
+                padding-left:10px;
+            }}
             .create {{background-color:lightgreen;}}
             .delete {{background-color:#ffcccb;}}
             </style>
@@ -263,13 +269,13 @@ def send_changes_email(subject, intro_text, html_msg, to_email, from_email=""):
            </body>
          </html>
          """
-
     plain_message = strip_tags(html_message)
     send_mail(subject, plain_message, from_email, [to_email], html_message=html_message)
 
+
 if __name__ == "__main__":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "FlOpEDT.settings.local")
-    os.environ["LANGUAGE_CODE"] = "fr"
+    django.utils.translation.activate('fr')
     django.setup()
     backup()
     send_notifications()
