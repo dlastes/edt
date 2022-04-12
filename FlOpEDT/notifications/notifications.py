@@ -26,11 +26,6 @@
 import django
 import os
 from datetime import date
-from FlOpEDT.decorators import timer
-from base.models import Course, ScheduledCourse, Week, GenericGroup
-from notifications.models import BackUpModif
-from base.timing import flopdate_to_datetime, Day, french_format
-from people.models import Tutor, NotificationsPreferences
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import gettext
 
@@ -38,7 +33,6 @@ from django.core.mail import send_mail
 from django.utils.html import strip_tags
 
 
-@timer
 def backup():
     print("Deleting old backup")
     BackUpModif.objects.filter(new=False).delete()
@@ -99,7 +93,7 @@ def backup():
     print("Backup done")
     print("Number of courses saved : " + str(BackUpModif.objects.filter(new=True).count()))
 
-@timer
+
 def check_modifs():
     new_backup = set(BackUpModif.objects.filter(new=True))
     old_backup = set(BackUpModif.objects.filter(new=False))
@@ -161,7 +155,7 @@ def check_modifs():
         dict_modif_tutor[tutor_username][department].append(tutor_object)
     return dict_modif_student, dict_modif_tutor
 
-@timer
+
 def send_notifications():
     today = date.today()
     dict_modif_student, dict_modif_tutor = check_modifs()
@@ -177,7 +171,7 @@ def send_notifications():
         if not nb_of_notified_weeks:
             continue
         nb_of_notified_days = 7 * nb_of_notified_weeks
-        intro_text = _("Hi ") + tutor.first_name + "<br />"
+        intro_text = _("Hi ") + tutor.first_name + "<br /> <br />"
         intro_text += _("Here are the changes of your planning for the %g following days :") % nb_of_notified_days
         intro_text += "<br /> <br />"
         html_msg = ""
@@ -210,7 +204,7 @@ def send_notifications():
         if not nb_of_notified_weeks:
             continue
         nb_of_notified_days = 7 * nb_of_notified_weeks
-        intro_text = _("Hi ") + student.first_name + "<br />"
+        intro_text = _("Hi ") + student.first_name + "<br /> <br />"
         intro_text += _("Here are the changes of your planning for the %g following days :") % nb_of_notified_days
         intro_text += "<br /> <br />"
         groups = student.belong_to.all()
@@ -276,6 +270,11 @@ def send_changes_email(subject, intro_text, html_msg, to_email, from_email=""):
 if __name__ == "__main__":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "FlOpEDT.settings.local")
     django.setup()
+    from core.decorators import timer
+    from base.models import Course, ScheduledCourse, Week, GenericGroup
+    from notifications.models import BackUpModif
+    from base.timing import flopdate_to_datetime, Day, french_format
+    from people.models import Tutor, NotificationsPreferences
     django.utils.translation.activate('fr')
-    backup()
-    send_notifications()
+    timer(backup)()
+    timer(send_notifications)()
