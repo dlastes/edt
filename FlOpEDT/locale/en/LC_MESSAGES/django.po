@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.3.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-12 15:11+0000\n"
+"POT-Creation-Date: 2022-04-12 19:23+0000\n"
 "PO-Revision-Date: 2020-04-05 18:44+0200\n"
 "Last-Translator: Benoît Roche (benoit.roche@esrf.fr)\n"
 "Language-Team: none\n"
@@ -344,7 +344,7 @@ msgstr ""
 msgid "Half day"
 msgstr ""
 
-#: base/models.py:253 notifications/models.py:16
+#: base/models.py:253 notifications/models.py:41
 msgid "Week number"
 msgstr ""
 
@@ -360,7 +360,7 @@ msgstr ""
 msgid "Coop. (worker)"
 msgstr ""
 
-#: base/models.py:455 notifications/models.py:22
+#: base/models.py:455 notifications/models.py:47
 msgid "Abbreviation"
 msgstr ""
 
@@ -927,24 +927,60 @@ msgstr ""
 msgid "Planned generations"
 msgstr ""
 
-#: notifications/backup_to_notifications.py:142
+#: notifications/backup_to_notifications.py:169
+#: notifications/notifications.py:168
 msgid "[flop!Scheduler] Changes on your planning"
 msgstr ""
 
-#: notifications/backup_to_notifications.py:153
-#: notifications/backup_to_notifications.py:186
+#: notifications/backup_to_notifications.py:180
+#: notifications/backup_to_notifications.py:213
+#: notifications/notifications.py:179 notifications/notifications.py:212
 msgid "Hi "
 msgstr ""
 
-#: notifications/backup_to_notifications.py:154
-#: notifications/backup_to_notifications.py:187
+#: notifications/backup_to_notifications.py:181
+#: notifications/backup_to_notifications.py:214
+#: notifications/notifications.py:180 notifications/notifications.py:213
 #, python-format
 msgid "Here are the changes of your planning for the %g following days :"
 msgstr ""
 
-#: notifications/backup_to_notifications.py:165
+#: notifications/backup_to_notifications.py:192
+#: notifications/notifications.py:191
 #, python-format
 msgid "For the department %s :"
+msgstr ""
+
+#: notifications/notifications.py:140 notifications/notifications.py:153
+msgid "Mode"
+msgstr ""
+
+#: notifications/notifications.py:141 notifications/notifications.py:154
+msgid "Date"
+msgstr ""
+
+#: notifications/notifications.py:142 notifications/notifications.py:155
+msgid "Start time"
+msgstr ""
+
+#: notifications/notifications.py:143 notifications/notifications.py:156
+msgid "Module"
+msgstr ""
+
+#: notifications/notifications.py:144
+msgid "Tutor"
+msgstr ""
+
+#: notifications/notifications.py:145 notifications/notifications.py:159
+msgid "Room"
+msgstr ""
+
+#: notifications/notifications.py:157
+msgid "Train_prog"
+msgstr ""
+
+#: notifications/notifications.py:158
+msgid "Group"
 msgstr ""
 
 #: people/templates/people/login.html:55

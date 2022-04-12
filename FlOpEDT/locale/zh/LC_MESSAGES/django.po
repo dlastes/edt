@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-12 15:11+0000\n"
+"POT-Creation-Date: 2022-04-12 19:23+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -349,7 +349,7 @@ msgstr "基本组？"
 msgid "Half day"
 msgstr "半天"
 
-#: base/models.py:253 notifications/models.py:16
+#: base/models.py:253 notifications/models.py:41
 msgid "Week number"
 msgstr ""
 
@@ -365,7 +365,7 @@ msgstr ""
 msgid "Coop. (worker)"
 msgstr ""
 
-#: base/models.py:455 notifications/models.py:22
+#: base/models.py:455 notifications/models.py:47
 msgid "Abbreviation"
 msgstr "缩写"
 
@@ -945,25 +945,73 @@ msgstr "名字"
 msgid "Planned generations"
 msgstr "计划好的生成"
 
-#: notifications/backup_to_notifications.py:142
+#: notifications/backup_to_notifications.py:169
+#: notifications/notifications.py:168
 msgid "[flop!Scheduler] Changes on your planning"
 msgstr ""
 
-#: notifications/backup_to_notifications.py:153
-#: notifications/backup_to_notifications.py:186
+#: notifications/backup_to_notifications.py:180
+#: notifications/backup_to_notifications.py:213
+#: notifications/notifications.py:179 notifications/notifications.py:212
 msgid "Hi "
 msgstr ""
 
-#: notifications/backup_to_notifications.py:154
-#: notifications/backup_to_notifications.py:187
+#: notifications/backup_to_notifications.py:181
+#: notifications/backup_to_notifications.py:214
+#: notifications/notifications.py:180 notifications/notifications.py:213
 #, python-format
 msgid "Here are the changes of your planning for the %g following days :"
 msgstr ""
 
-#: notifications/backup_to_notifications.py:165
+#: notifications/backup_to_notifications.py:192
+#: notifications/notifications.py:191
 #, python-format
 msgid "For the department %s :"
 msgstr ""
+
+#: notifications/notifications.py:140 notifications/notifications.py:153
+msgid "Mode"
+msgstr ""
+
+#: notifications/notifications.py:141 notifications/notifications.py:154
+#, fuzzy
+#| msgid "Date "
+msgid "Date"
+msgstr "日期 "
+
+#: notifications/notifications.py:142 notifications/notifications.py:155
+msgid "Start time"
+msgstr ""
+
+#: notifications/notifications.py:143 notifications/notifications.py:156
+#, fuzzy
+#| msgid "Modules"
+msgid "Module"
+msgstr "模块"
+
+#: notifications/notifications.py:144
+#, fuzzy
+#| msgid "Tutors"
+msgid "Tutor"
+msgstr "教师"
+
+#: notifications/notifications.py:145 notifications/notifications.py:159
+#, fuzzy
+#| msgid "Rooms"
+msgid "Room"
+msgstr "教室"
+
+#: notifications/notifications.py:157
+#, fuzzy
+#| msgid "Training program"
+msgid "Train_prog"
+msgstr "培训项目"
+
+#: notifications/notifications.py:158
+#, fuzzy
+#| msgid "Groups"
+msgid "Group"
+msgstr "组"
 
 #: people/templates/people/login.html:55
 msgid "Forgot password?"
@@ -1171,6 +1219,21 @@ msgstr "登出"
 #: templates/base.html:133
 msgid "Signed in as "
 msgstr "登入为"
+
+#, fuzzy
+#~| msgid "Modules"
+#~ msgid "module"
+#~ msgstr "模块"
+
+#, fuzzy
+#~| msgid "Tutors"
+#~ msgid "tutor"
+#~ msgstr "教师"
+
+#, fuzzy
+#~| msgid "Groups"
+#~ msgid "group"
+#~ msgstr "组"
 
 #~ msgid "Maximum time limit for resolution (minuts)"
 #~ msgstr "解析的最大时间限制（分钟）"

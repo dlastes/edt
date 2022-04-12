@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-12 15:11+0000\n"
+"POT-Creation-Date: 2022-04-12 19:23+0000\n"
 "PO-Revision-Date: 2021-03-14 13:02+0000\n"
 "Last-Translator: b'prenom_de_QTF nom_de_QTF <QTF@mail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -367,7 +367,7 @@ msgstr "Groupe basique?"
 msgid "Half day"
 msgstr "Demie-journée"
 
-#: base/models.py:253 notifications/models.py:16
+#: base/models.py:253 notifications/models.py:41
 msgid "Week number"
 msgstr "Numéro de semaine"
 
@@ -383,7 +383,7 @@ msgstr "Coop. (poste)"
 msgid "Coop. (worker)"
 msgstr "Coop. (salarié)"
 
-#: base/models.py:455 notifications/models.py:22
+#: base/models.py:455 notifications/models.py:47
 msgid "Abbreviation"
 msgstr "Abbréviation"
 
@@ -968,25 +968,63 @@ msgstr "Nom"
 msgid "Planned generations"
 msgstr "Générations prévues"
 
-#: notifications/backup_to_notifications.py:142
+#: notifications/backup_to_notifications.py:169
+#: notifications/notifications.py:168
 msgid "[flop!Scheduler] Changes on your planning"
 msgstr "[flop!EDT] Modifications de votre planning"
 
-#: notifications/backup_to_notifications.py:153
-#: notifications/backup_to_notifications.py:186
+#: notifications/backup_to_notifications.py:180
+#: notifications/backup_to_notifications.py:213
+#: notifications/notifications.py:179 notifications/notifications.py:212
 msgid "Hi "
 msgstr "Bonjour "
 
-#: notifications/backup_to_notifications.py:154
-#: notifications/backup_to_notifications.py:187
+#: notifications/backup_to_notifications.py:181
+#: notifications/backup_to_notifications.py:214
+#: notifications/notifications.py:180 notifications/notifications.py:213
 #, python-format
 msgid "Here are the changes of your planning for the %g following days :"
-msgstr "Voici les changements dans votre emploi du temps pour les %g prochains jours :"
+msgstr ""
+"Voici les changements dans votre emploi du temps pour les %g prochains "
+"jours :"
 
-#: notifications/backup_to_notifications.py:165
+#: notifications/backup_to_notifications.py:192
+#: notifications/notifications.py:191
 #, python-format
 msgid "For the department %s :"
 msgstr "Concernant le département %s"
+
+#: notifications/notifications.py:140 notifications/notifications.py:153
+msgid "Mode"
+msgstr "Mode"
+
+#: notifications/notifications.py:141 notifications/notifications.py:154
+msgid "Date"
+msgstr "Date "
+
+#: notifications/notifications.py:142 notifications/notifications.py:155
+msgid "Start time"
+msgstr "Heure"
+
+#: notifications/notifications.py:143 notifications/notifications.py:156
+msgid "Module"
+msgstr "Module"
+
+#: notifications/notifications.py:144
+msgid "Tutor"
+msgstr "Prof"
+
+#: notifications/notifications.py:145 notifications/notifications.py:159
+msgid "Room"
+msgstr "Salle"
+
+#: notifications/notifications.py:157
+msgid "Train_prog"
+msgstr "Promo"
+
+#: notifications/notifications.py:158
+msgid "Group"
+msgstr "Groupe"
 
 #: people/templates/people/login.html:55
 msgid "Forgot password?"
@@ -1193,6 +1231,24 @@ msgstr "Déconnexion"
 #: templates/base.html:133
 msgid "Signed in as "
 msgstr "Connecté·e sous "
+
+#~ msgid "mode"
+#~ msgstr "mode"
+
+#~ msgid "date"
+#~ msgstr "date"
+
+#~ msgid "module"
+#~ msgstr "module"
+
+#~ msgid "tutor"
+#~ msgstr "prof"
+
+#~ msgid "room"
+#~ msgstr "salle"
+
+#~ msgid "group"
+#~ msgstr "groupe"
 
 #~ msgid "There is no tutor assigned to {self.course1.full_name()}"
 #~ msgstr "Il n'y a pas d'enseignant⋅e assignée à {self.course1.full_name()}"
