@@ -1,4 +1,5 @@
-
+import django
+import os
 from datetime import date
 from FlOpEDT.decorators import timer
 from base.models import Course, ScheduledCourse, Week, GenericGroup
@@ -136,6 +137,7 @@ def check_modifs():
 
 @timer
 def send_notifications():
+    backup()
     today = date.today()
     dict_modif_student, dict_modif_tutor = check_modifs()
 
@@ -240,3 +242,8 @@ def send_changes_email(subject, intro_text, html_msg, to_email, from_email=""):
 
     plain_message = strip_tags(html_message)
     send_mail(subject, plain_message, from_email, [to_email], html_message=html_message)
+
+if __name__ == "__main__":
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "FlOpEDT.settings.local")
+    django.setup()
+    send_notifications()
