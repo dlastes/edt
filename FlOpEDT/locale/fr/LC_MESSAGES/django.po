@@ -992,7 +992,7 @@ msgstr ""
 #: notifications/notifications.py:191
 #, python-format
 msgid "For the department %s :"
-msgstr "Concernant le département %s"
+msgstr "Concernant le département %s :"
 
 #: notifications/notifications.py:140 notifications/notifications.py:153
 msgid "Mode"

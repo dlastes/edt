@@ -252,7 +252,7 @@ def send_changes_email(subject, intro_text, html_msg, to_email, from_email=""):
          <html>
            <head>
             <style type="text/css">
-            table {{border-collapse:collapse; margin:1em}}
+            table {{border-collapse:collapse; margin:1em;}}
             th, td {{
                 border:1px solid black; 
                 text-align:center;
