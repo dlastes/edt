@@ -137,12 +137,12 @@ def check_modifs():
             dict_modif_student[department][train_prog] = {}
         if group not in dict_modif_student[department][train_prog]:
             dict_modif_student[department][train_prog][group] = []
-        student_object = {'mode': mode,
-                          'date': datetime.date(),
-                          'start_time': french_format(start_time),
-                          'module': module,
-                          'tutor_username': tutor_username,
-                          'room': room}
+        student_object = {_('Mode'): mode,
+                          _('Date'): datetime.date(),
+                          _('Start time'): french_format(start_time),
+                          _('Module'): module,
+                          _('Tutor'): tutor_username,
+                          _('Room'): room}
         dict_modif_student[department][train_prog][group].append(student_object)
 
         # Store all changes for tutors
@@ -150,19 +150,18 @@ def check_modifs():
             dict_modif_tutor[tutor_username] = {}
         if department not in dict_modif_tutor[tutor_username]:
             dict_modif_tutor[tutor_username][department] = []
-        tutor_object = {'mode': mode,
-                        'date': datetime.date(),
-                        'start_time': french_format(start_time),
-                        'module': module,
-                        'train_prog': train_prog,
-                        'group': group,
-                        'room': room}
+        tutor_object = {_('Mode'): mode,
+                        _('Date'): datetime.date(),
+                        _('Start time'): french_format(start_time),
+                        _('Module'): module,
+                        _('Train_prog'): train_prog,
+                        _('Group'): group,
+                        _('Room'): room}
         dict_modif_tutor[tutor_username][department].append(tutor_object)
     return dict_modif_student, dict_modif_tutor
 
 @timer
 def send_notifications():
-    backup()
     today = date.today()
     dict_modif_student, dict_modif_tutor = check_modifs()
 
@@ -183,12 +182,12 @@ def send_notifications():
         html_msg = ""
         for department, changes in dic.items():
             filtered_changes = [change for change in changes
-                                if 0 <= (change['date'] - today).days <= nb_of_notified_days]
+                                if 0 <= (change[_('Date')] - today).days <= nb_of_notified_days]
 
             if not filtered_changes:
                 continue
 
-            filtered_changes.sort(key=lambda x: (x['date'], x["start_time"]))
+            filtered_changes.sort(key=lambda x: (x[_('Date')], x[_('Start time')]))
             html_msg += _("For the department %s :") % department + "<br />"
             html_msg += changes_in_html_string(filtered_changes)
         send_changes_email(subject, intro_text, html_msg, to_email=tutor.email)
@@ -221,7 +220,7 @@ def send_notifications():
                             if 0 <= (change['date'] - today).days <= nb_of_notified_days]
         if not filtered_changes:
             continue
-        filtered_changes.sort(key=lambda x: (x['date'], x["start_time"]))
+        filtered_changes.sort(key=lambda x: (x[_('Date')], x[_('Start time')]))
         html_msg = changes_in_html_string(filtered_changes)
         send_changes_email(subject, intro_text, html_msg, to_email=student.email)
 
@@ -231,7 +230,7 @@ def changes_in_html_string(filtered_changes):
     titles = filtered_changes[0].keys()
     msg += f"<tr> "
     for title in list(titles)[1:]:
-        msg += f"<th> {title} </th>"
+        msg += f"<th> {_(title)} </th>"
     msg+= "</tr>\n"
     for fc in filtered_changes:
         values = list(fc.values())
@@ -253,7 +252,7 @@ def send_changes_email(subject, intro_text, html_msg, to_email, from_email=""):
            <head>
             <style type="text/css">
             table {{border-collapse:collapse;}}
-            th, td {{border:1px solid black; text-align:center;}}
+            th, td {{border:1px solid black; text-align:center; margin: 1em;}}
             .create {{background-color:lightgreen;}}
             .delete {{background-color:#ffcccb;}}
             </style>
@@ -270,5 +269,7 @@ def send_changes_email(subject, intro_text, html_msg, to_email, from_email=""):
 
 if __name__ == "__main__":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "FlOpEDT.settings.local")
+    os.environ["LANGUAGE_CODE"] = "fr"
     django.setup()
+    backup()
     send_notifications()
