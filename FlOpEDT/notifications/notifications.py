@@ -100,7 +100,7 @@ def backup():
     print("Number of courses saved : " + str(BackUpModif.objects.filter(new=True).count()))
 
 
-def check_modifs():
+def check_changes(save_json_files=False):
     new_backup = set(BackUpModif.objects.filter(new=True))
     old_backup = set(BackUpModif.objects.filter(new=False))
     news = new_backup - old_backup
@@ -108,14 +108,14 @@ def check_modifs():
     changes = olds | news
 
     # Create two dict that will be save as JSON at the end
-    dict_modif_student = {}
-    dict_modif_tutor = {}
+    student_changes_dict = {}
+    tutor_changes_dict = {}
 
     departments = {change.department_abbrev for change in changes}
 
     # Initialise user dict with all departments
     for department in departments:
-        dict_modif_student[department] = {}
+        student_changes_dict[department] = {}
 
     for change in changes:
         if change in olds:
@@ -134,23 +134,23 @@ def check_modifs():
         change_datetime = flopdate_to_datetime(day, change.start_time)
 
         # Store all changes for users
-        if train_prog not in dict_modif_student[department]:
-            dict_modif_student[department][train_prog] = {}
-        if group not in dict_modif_student[department][train_prog]:
-            dict_modif_student[department][train_prog][group] = []
+        if train_prog not in student_changes_dict[department]:
+            student_changes_dict[department][train_prog] = {}
+        if group not in student_changes_dict[department][train_prog]:
+            student_changes_dict[department][train_prog][group] = []
         student_object = {gettext('Mode'): mode,
                           gettext('Date'): change_datetime.date().strftime('%d/%m/%Y'),
                           gettext('Start time'): french_format(start_time),
                           gettext('Module'): module,
                           gettext('Tutor'): tutor_username,
                           gettext('Room'): room}
-        dict_modif_student[department][train_prog][group].append(student_object)
+        student_changes_dict[department][train_prog][group].append(student_object)
 
         # Store all changes for tutors
-        if tutor_username not in dict_modif_tutor:
-            dict_modif_tutor[tutor_username] = {}
-        if department not in dict_modif_tutor[tutor_username]:
-            dict_modif_tutor[tutor_username][department] = []
+        if tutor_username not in tutor_changes_dict:
+            tutor_changes_dict[tutor_username] = {}
+        if department not in tutor_changes_dict[tutor_username]:
+            tutor_changes_dict[tutor_username][department] = []
         tutor_object = {gettext('Mode'): mode,
                         gettext('Date'): change_datetime.date().strftime('%d/%m/%Y'),
                         gettext('Start time'): french_format(start_time),
@@ -158,22 +158,23 @@ def check_modifs():
                         gettext('Train_prog'): train_prog,
                         gettext('Group'): group,
                         gettext('Room'): room}
-        dict_modif_tutor[tutor_username][department].append(tutor_object)
+        tutor_changes_dict[tutor_username][department].append(tutor_object)
 
-        # Save users changes as JSON
-        with open("notifications/modifs_student.json", "w") as outfile:
-            json.dump(dict_modif_student, outfile)
+        if save_json_files:
+            # Save users changes as JSON
+            with open("notifications/modifs_student.json", "w") as outfile:
+                json.dump(student_changes_dict, outfile)
 
-        # Save tutors changes as JSON
-        with open("notifications/modifs_tutor.json", "w") as outfile:
-            json.dump(dict_modif_tutor, outfile)
+            # Save tutors changes as JSON
+            with open("notifications/modifs_tutor.json", "w") as outfile:
+                json.dump(tutor_changes_dict, outfile)
 
-    return dict_modif_student, dict_modif_tutor
+    return student_changes_dict, tutor_changes_dict
 
 
 def send_notifications():
     today = date.today()
-    dict_modif_student, dict_modif_tutor = check_modifs()
+    student_changes_dict, tutor_changes_dict = check_changes()
     subject = _("[flop!Scheduler] Changes on your planning")
 
     def days_nb_from_today(change):
@@ -181,7 +182,7 @@ def send_notifications():
         datetime_date = datetime.strptime(string_date, "%d/%m/%Y").date()
         return (datetime_date - today).days
 
-    for tutor_username, dic in dict_modif_tutor.items():
+    for tutor_username, dic in tutor_changes_dict.items():
         if tutor_username is None:
             continue
         tutor = Tutor.objects.get(username=tutor_username)
@@ -208,9 +209,9 @@ def send_notifications():
 
     students = set()
 
-    for dept_abbrev in dict_modif_student:
-        for train_prog in dict_modif_student[dept_abbrev]:
-            for group_name in dict_modif_student[dept_abbrev][train_prog]:
+    for dept_abbrev in student_changes_dict:
+        for train_prog in student_changes_dict[dept_abbrev]:
+            for group_name in student_changes_dict[dept_abbrev][train_prog]:
                 group = GenericGroup.objects.get(name=group_name, train_prog__abbrev=train_prog,
                                                  train_prog__department__abbrev=dept_abbrev)
                 students |= set(group.student_set.all())
@@ -229,7 +230,7 @@ def send_notifications():
         groups = student.belong_to.all()
         student_changes = []
         for group in groups:
-            student_changes += dict_modif_student[group.train_prog.department.abbrev][group.train_prog.abbrev][group.name]
+            student_changes += student_changes_dict[group.train_prog.department.abbrev][group.train_prog.abbrev][group.name]
 
         filtered_changes = [change for change in changes
                             if 0 <= days_nb_from_today(change) <= nb_of_notified_days]
