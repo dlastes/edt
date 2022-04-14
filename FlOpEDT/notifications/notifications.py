@@ -23,9 +23,15 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
+from core.decorators import timer
+from base.models import Course, ScheduledCourse, Week, GenericGroup
+from notifications.models import BackUpModif
+from base.timing import flopdate_to_datetime, Day, french_format
+from people.models import Tutor, NotificationsPreferences
 import django
 import os
-from datetime import date
+import json
+from datetime import date, datetime
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import gettext
 
@@ -125,7 +131,7 @@ def check_modifs():
         start_time = change.start_time
         week = Week.objects.get(year=change.year, nb=change.week)
         day = Day(week=week, day=change.day)
-        datetime = flopdate_to_datetime(day, change.start_time)
+        change_datetime = flopdate_to_datetime(day, change.start_time)
 
         # Store all changes for users
         if train_prog not in dict_modif_student[department]:
@@ -133,7 +139,7 @@ def check_modifs():
         if group not in dict_modif_student[department][train_prog]:
             dict_modif_student[department][train_prog][group] = []
         student_object = {gettext('Mode'): mode,
-                          gettext('Date'): datetime.date(),
+                          gettext('Date'): change_datetime.date().strftime('%d/%m/%Y'),
                           gettext('Start time'): french_format(start_time),
                           gettext('Module'): module,
                           gettext('Tutor'): tutor_username,
@@ -146,21 +152,34 @@ def check_modifs():
         if department not in dict_modif_tutor[tutor_username]:
             dict_modif_tutor[tutor_username][department] = []
         tutor_object = {gettext('Mode'): mode,
-                        gettext('Date'): datetime.date(),
+                        gettext('Date'): change_datetime.date().strftime('%d/%m/%Y'),
                         gettext('Start time'): french_format(start_time),
                         gettext('Module'): module,
                         gettext('Train_prog'): train_prog,
                         gettext('Group'): group,
                         gettext('Room'): room}
         dict_modif_tutor[tutor_username][department].append(tutor_object)
+
+        # Save users changes as JSON
+        with open("notifications/modifs_student.json", "w") as outfile:
+            json.dump(dict_modif_student, outfile)
+
+        # Save tutors changes as JSON
+        with open("notifications/modifs_tutor.json", "w") as outfile:
+            json.dump(dict_modif_tutor, outfile)
+
     return dict_modif_student, dict_modif_tutor
 
 
 def send_notifications():
     today = date.today()
     dict_modif_student, dict_modif_tutor = check_modifs()
-    cpt = 0
     subject = _("[flop!Scheduler] Changes on your planning")
+
+    def days_nb_from_today(change):
+        string_date = change[gettext('Date')]
+        datetime_date = datetime.strptime(string_date, "%d/%m/%Y").date()
+        return (datetime_date - today).days
 
     for tutor_username, dic in dict_modif_tutor.items():
         if tutor_username is None:
@@ -177,14 +196,14 @@ def send_notifications():
         html_msg = ""
         for department, changes in dic.items():
             filtered_changes = [change for change in changes
-                                if 0 <= (change[gettext('Date')] - today).days <= nb_of_notified_days]
+                                if 0 <= days_nb_from_today(change) <= nb_of_notified_days]
 
             if not filtered_changes:
                 continue
 
             filtered_changes.sort(key=lambda x: (x[gettext('Date')], x[gettext('Start time')]))
             html_msg += _("For the department %s :") % department + "<br />"
-            html_msg += changes_in_html_string(filtered_changes)
+            html_msg += html_table_with_changes(filtered_changes)
         send_changes_email(subject, intro_text, html_msg, to_email=tutor.email)
 
     students = set()
@@ -211,16 +230,17 @@ def send_notifications():
         student_changes = []
         for group in groups:
             student_changes += dict_modif_student[group.train_prog.department.abbrev][group.train_prog.abbrev][group.name]
-        filtered_changes = [change for change in student_changes
-                            if 0 <= (change['date'] - today).days <= nb_of_notified_days]
+
+        filtered_changes = [change for change in changes
+                            if 0 <= days_nb_from_today(change) <= nb_of_notified_days]
         if not filtered_changes:
             continue
         filtered_changes.sort(key=lambda x: (x[gettext('Date')], x[gettext('Start time')]))
-        html_msg = changes_in_html_string(filtered_changes)
+        html_msg = html_table_with_changes(filtered_changes)
         send_changes_email(subject, intro_text, html_msg, to_email=student.email)
 
 
-def changes_in_html_string(filtered_changes):
+def html_table_with_changes(filtered_changes):
     msg = "<table>"
     titles = filtered_changes[0].keys()
     msg += f"<tr> "
@@ -232,8 +252,7 @@ def changes_in_html_string(filtered_changes):
         mode = values[0]
         date = values[1]
         msg += f"<tr class='{mode}'>"
-        msg += f"<td> {date.strftime('%d/%m/%Y')} </td>"
-        for value in values[2:]:
+        for value in values[1:]:
             msg += f"<td> {value} </td>"
         msg += "</tr>\n"
     msg += "</table> <br /><br />"
@@ -241,7 +260,6 @@ def changes_in_html_string(filtered_changes):
 
 
 def send_changes_email(subject, intro_text, html_msg, to_email, from_email=""):
-
     html_message = f"""
          <html>
            <head>
@@ -265,16 +283,3 @@ def send_changes_email(subject, intro_text, html_msg, to_email, from_email=""):
          """
     plain_message = strip_tags(html_message)
     send_mail(subject, plain_message, from_email, [to_email], html_message=html_message)
-
-
-if __name__ == "__main__":
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "FlOpEDT.settings.local")
-    django.setup()
-    from core.decorators import timer
-    from base.models import Course, ScheduledCourse, Week, GenericGroup
-    from notifications.models import BackUpModif
-    from base.timing import flopdate_to_datetime, Day, french_format
-    from people.models import Tutor, NotificationsPreferences
-    django.utils.translation.activate('fr')
-    timer(backup)()
-    timer(send_notifications)()
