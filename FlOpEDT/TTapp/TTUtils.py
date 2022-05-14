@@ -395,6 +395,7 @@ def duplicate_what_can_be_in_other_weeks(department, week, work_copy=0):
         other_weeks = set(c.week for c in other_weeks_courses.distinct('week'))
         new_dico = {}
         for ow in other_weeks:
+            done = False
             target_work_copy = first_free_work_copy(department, ow)
             courses_ow = set(other_weeks_courses.filter(week=ow))
             new_dico[ow] = []
@@ -407,7 +408,9 @@ def duplicate_what_can_be_in_other_weeks(department, week, work_copy=0):
                     sc.course=corresponding_course
                     sc.work_copy=target_work_copy
                     sc.save()
-            result['more'] += _('Week %s Ok, ') % ow
+                    done = True
+            if done:
+                result['more'] += _('%s, ') % ow
         return result
     except:
         result['status'] = 'KO'

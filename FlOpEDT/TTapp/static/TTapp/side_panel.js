@@ -280,7 +280,6 @@ function duplicate_in_other_weeks() {
   var cur_week = wdw_weeks.get_selected();
 
   show_loader(true);
-  console.log(url_duplicate_in_other_weeks + cur_week.url() + '/' + num_copie);
   $.ajax({
     type: "GET",
     dataType: 'json',
@@ -289,7 +288,7 @@ function duplicate_in_other_weeks() {
     contentType: "application/json; charset=utf-8",
     success: function (msg) {
       console.log(msg);
-      format_acks(msg, 'reassign_rooms');
+      format_acks(msg, 'duplicate_in_other_weeks');
       fetch_all(false, true);
       show_loader(false);
     },
