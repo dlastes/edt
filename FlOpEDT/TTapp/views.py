@@ -98,6 +98,14 @@ def reassign_rooms(req, department, year, week, work_copy, create_new_work_copy=
                                                  create_new_work_copy=create_new_work_copy))
 
 
+def duplicate_in_other_weeks(req, department, year, week, work_copy):
+    '''
+    Duplicate all scheduled courses in other weeks (for courses that are equals than this week's ones)
+    '''
+    print(department, year, week, work_copy)
+    return JsonResponse(MyTTUtils.duplicate_in_other_weeks(department, week, year, work_copy))
+
+
 def fetch_group_lunch(req, **kwargs):
     dataset = GroupsLunchBreakResource().export(
         GroupsLunchBreak.objects.filter(department=req.department))
