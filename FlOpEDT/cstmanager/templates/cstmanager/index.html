@@ -33,17 +33,39 @@
             <div class="hor-sep"></div>
             <!-- <div class="label">Rechercher:</div> -->
             <div class="hor-sep"></div>
-            <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Rechercher">
+            <input type="text" class="form-control" id="input-search" placeholder="Rechercher">
         </div>
         <div class="hor-sep"></div>
         <div class="hor-sep"></div>
-        <div class="search-modifier-list pad-children">
-
+        <div id="filters" class="search-bar pad-children">
+            <input type="text" class="form-control" id="input-tutor" placeholder="Tutor">
+            <div class="hor-sep"></div>
+            <input type="text" class="form-control" id="input-module" placeholder="Module">
+            <div class="hor-sep"></div>
+            <input type="text" class="form-control" id="input-course" placeholder="Course">
+            <div class="hor-sep"></div>
+            <input type="date" class="form-control" id="input-date" placeholder="Date">
+        </div>
+        <div class="hor-sep"></div>
+        <div class="hor-sep"></div>
+        <div class="divbutton">
+            <button class="transition neutral bar-button" id="clear-filters">
+            Clear Filters
+        </button>
+        </div>
+        <div class="hor-sep"></div>
+        <div class="search-bar pad-children">
+            <div>
+                <label for="show-sections">Show Sections</label>
+                <input type="checkbox" id="show-sections" name="show-sections"
+                checked>
+            </div>
         </div>
     </div>
     <div class="constraints-body">
         <div class="constraint-info">
-            <button id="show-disabled" class="float-disabled"></button>
+            <button id="show-disabled" class="float">Show Disabled</button>
+            <button id="show-solver" class="float">Préanalyse</button>
             <div class="constraint-info-body">
                 <div class="element-info title">
                     <div id="constraint-header-title" class="info-title title">

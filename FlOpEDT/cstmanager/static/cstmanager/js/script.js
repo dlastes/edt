@@ -1,3 +1,233 @@
+let get_parameter_from_constraint = (cst, name) => {
+    let ret = {};
+    let l = cst.parameters.filter(obj => obj['name'] == name);
+    return l.length == 0 ? ret : l[0];
+}
+
+let filter_functions = {
+    tutor: (str) => {
+        str = str.toLowerCase();
+        ret = [];
+        keys = Object.keys(database.tutors).filter((key) => {
+            obj = database.tutors[key];
+            return obj['username'].toLowerCase().includes(str) 
+            || obj['first_name'].toLowerCase().includes(str)
+            || obj['last_name'].toLowerCase().includes(str);
+        });
+        return Object.values(database['tutors_ids']).filter(tut => {
+            return keys.includes(tut['name']);
+        }).map(obj => obj['id']);
+    },
+    module: (str) => {
+        str = str.toLowerCase();
+        return Object.keys(database.modules).filter(key => {
+            return database.modules[key].toLowerCase().includes(str);
+        });
+    },
+    course: (str) => {
+        str = str.toLowerCase();
+        return Object.keys(database.courses).filter(key => {
+            return database.courses[key].toLowerCase().includes(str);
+        });
+    },
+    reset_filtered_constraint_list: () => {
+        filtered_constraint_list = [...constraint_list];
+    },
+    filter_constraints_by_tutor: (keys, exclusion) => {
+        if(!keys || keys.length == 0) {
+            filtered_constraint_list = [];
+            renderConstraints(filtered_constraint_list);
+            return;
+        }
+        filtered_constraint_list = filtered_constraint_list.filter(cst_id => {
+            let param = get_parameter_from_constraint(constraints[cst_id], 'tutor');
+            if(Object.keys(param).length == 0) {
+                return true;
+            }
+            if(param.id_list.length == 0 && !exclusion) {
+                return true;
+            }
+            keys.forEach(k => {
+                if(param.id_list.includes(k)) {
+                    return true;
+                }
+            });
+            return false;
+        });
+        renderConstraints(filtered_constraint_list);
+    },
+    filter_constraints_by_module: (keys, exclusion) => {
+        if(!keys || keys.length == 0) {
+            filtered_constraint_list = [];
+            renderConstraints(filtered_constraint_list);
+            return;
+        }
+        filtered_constraint_list = filtered_constraint_list.filter(cst_id => {
+            let param = get_parameter_from_constraint(constraints[cst_id], 'module');
+            if(Object.keys(param).length == 0) {
+                return true;
+            }
+            if(param.id_list.length == 0 && !exclusion) {
+                return true;
+            }
+            keys.forEach(k => {
+                if(param.id_list.includes(k)) {
+                    return true;
+                }
+            });
+            return false;
+        });
+        renderConstraints(filtered_constraint_list);
+    },
+}
+
+let changeEvents = {
+    addNewConstraint: (args = {
+        name: null,
+        title: null,
+    }) => {
+        let rand = getRandomInt(100000);
+        let id = "-ADD-" + tableName + rand.toString();
+        let obj = {
+            policy: 'ADD',
+            table: tableName,
+            tempid: id,
+            constraint: {
+                is_active: args['is_active'] ?? false,
+                comment: args['comment'],
+                title: args['title'],
+                weeks: copyObj(args['weeks']),
+                parameters: null,
+                weight: args['weight'] ?? 0,
+            },
+        }
+        actionChanges['ADD'].push(obj);
+        constraints[id] = {
+            ...copyObj(obj['constraint']),
+            id: rand,
+            pageid: id,
+            name: obj['table'],
+        }
+        constraint_list = Object.keys(constraints);
+        filter_functions.reset_filtered_constraint_list();
+        return id;
+    },
+    duplicateConstraint: (pageid) => {
+        let copy_org_cst = copyObj(constraints[pageid]);
+        let rand = getRandomInt(100000);
+        let id = "-ADD-" + copy_org_cst['name'] + rand.toString();
+        let obj = {
+            policy: 'ADD',
+            table: copy_org_cst['name'],
+            tempid: id,
+            constraint: {
+                is_active: copy_org_cst['is_active'],
+                comment: copy_org_cst['comment'],
+                title: copy_org_cst['title'],
+                weeks: copyObj(copy_org_cst['weeks']),
+                parameters: copyObj(copy_org_cst['parameters']),
+                weight: copy_org_cst['weight'],
+            },
+        };
+        actionChanges['ADD'].push(obj);
+        constraints[id] = {
+            ...copyObj(obj['constraint']),
+            id: rand,
+            pageid: id,
+            name: obj['table'],
+        };
+        constraint_list = Object.keys(constraints);
+        filter_functions.reset_filtered_constraint_list();
+        return id;
+    },
+    deleteConstraint: (tableName, id) => {
+        let obj = {
+            policy: "DELETE",
+            table: tableName,
+            id: id,
+        };
+        actionChanges['DELETE'].push(obj);
+        delete constraints[id];
+        constraint_list = Object.keys(constraints);
+        filter_functions.reset_filtered_constraint_list();
+        renderConstraints();
+    },
+    editConstraintAttr: (tableName, id, actions={}) => {
+        return true;
+    },
+    deleteConstraintParameter: (tableName, id, param, pageid) => {
+        if(pageid.startsWith('-ADD-')) {
+            for(let ele of actionChanges['ADD']) {
+                if(ele['tempid'] == pageid) {
+                    ele['constraint']['parameters'] = ele['constraint']['parameters'].filter(paramObj => {
+                        return paramObj['type'] != param;
+                    });
+                    break;
+                }
+            }
+            constraints[pageid]['parameters'] = constraints[pageid]['parameters'].filter(paramObj => {
+                return paramObj['type'] != param;
+            });
+            return;
+        }
+        let obj = {
+            policy: 'EDIT',
+            table: tableName,
+            id: id,
+            constraint: {
+                action: 'DELETE',
+                parameter: param,
+            },
+        };
+        actionChanges['EDIT'].push(obj);
+        constraints[pageid]['parameters'] = constraints[pageid]['parameters'].filter(paramObj => {
+            return paramObj['type'] != param;
+        });
+    },
+    editConstraintParameter: (tableName, id, param, pageid, new_list) => {
+        if(pageid.startsWith('-ADD-')) {
+            for(let ele of actionChanges['ADD']) {
+                if(ele['tempid'] == pageid) {
+                    for(let p of ele['parameters']) {
+                        if(p['type'] == param) {
+                            p['id_list'] = new_list;
+                            break;
+                        }
+                    }
+                }
+            }
+            for(let p of constraints[pageid]['parameters']) {
+                if(p['type'] == param) {
+                    p['id_list'] = new_list;
+                    break;
+                }
+            }
+            
+            return;
+        }
+        let obj = {
+            policy: 'EDIT',
+            table: tableName,
+            id: id,
+            constraint: {
+                action: 'EDIT',
+                parameter: param,
+                id_list: new_list,
+            },
+        };
+        actionChanges['EDIT'].push(obj);
+        for(let p of constraints[pageid]['parameters']) {
+            if(p['type'] == param) {
+                p['id_list'] = new_list;
+                break;
+            }
+        }
+    },
+    normalizeActionChanges: () => {
+        return true;
+    },
+}
+
 let fetchers = {
     fetchConstraints: (e) => {
         emptyPage();
@@ -12,6 +242,7 @@ let fetchers = {
                 selected_constraints = new Set();
                 lastSelectedConstraint = null;
                 constraint_list = Object.keys(constraints);
+                filter_functions.reset_filtered_constraint_list();
                 constraint_metadata = buildMetadata();
                 renderConstraints(constraint_list);
             })
@@ -74,7 +305,7 @@ let fetchers = {
             .then(jsonObj => {
                 database['modules'] = {};
                 Object.values(jsonObj).forEach(obj => {
-                    database['modules'][obj['id']] = obj['name'];
+                    database['modules'][obj['id']] = obj; //TODO:
                 });
             })
             .catch(err => {
@@ -102,7 +333,23 @@ let fetchers = {
     fetchRooms: (e) => {
         // TODO
     },
+    fetchTutorsIDs: (e) => {
+        fetch("http://127.0.0.1:8000/en/api/fetch/idtutor/?dept=INFO")
+            .then(resp => resp.json())
+            .then(jsonObj => {
+                database['tutors_ids'] = {};
+                Object.values(jsonObj).forEach(obj => {
+                    database['tutors_ids'][obj['name']] = obj;
+                });
+            })
+            .catch(err => {
+                console.error("something went wrong while fetching tutors_ids");
+                console.error(err);
+            });
+    }
 }
+
+
 
 let responseToDict = (resp) => {
     let = ret = {};
@@ -159,6 +406,7 @@ let database = {
     'trainingPrograms': null,
     'structuralGroups': null,
     'tutors': null,
+    'tutors_ids': null,
     'modules': null,
     'courseTypes': null,
     'courses': null,
@@ -173,6 +421,7 @@ let outputSlider = (id, val) => {
 let discardChanges = (e) => {
     constraints = copyFromOriginalConstraints();
     constraint_list = Object.keys(constraints);
+    filter_functions.reset_filtered_constraint_list();
     selected_constraints.clear();
     lastSelectedConstraint = null;
     updateBroadcastConstraint(null);
@@ -182,12 +431,23 @@ let discardChanges = (e) => {
 document.getElementById('discard-changes').addEventListener('click', discardChanges);
 
 let applyChanges = (e) => {
-    actionChanges.normalizeActionChanges();
+    changeEvents.normalizeActionChanges();
+}
+
+let clearFilters = (e) => {
+    document.getElementById('input-search').value = '';
+    document.getElementById('input-tutor').value = '';
+    document.getElementById('input-module').value = '';
+    document.getElementById('input-date').value = '';
+    filtered_constraint_list = [...constraint_list]
+    renderConstraints(constraint_list)
 }
 
 document.getElementById('apply-changes').addEventListener('click', applyChanges);
 
 document.getElementById('new-constraint').addEventListener('click', fetchers.fetchConstraints);
+
+document.getElementById('clear-filters').addEventListener('click', clearFilters);
 
 let URLWeightIcon = document.getElementById('icon-weight').src;
 let URLGearsIcon = document.getElementById('icon-gears').src;
@@ -198,6 +458,7 @@ let paramsDiv = document.getElementById('params');
 let activatedEle = document.getElementById('id2');
 let sliderOne = document.getElementById('slider-one');
 let constList = document.getElementById('constraints-list');
+let filtersElement = document.getElementById('filters');
 
 activatedEle.addEventListener('change', () => {
     if(!broadcastConstraint) {
@@ -246,7 +507,7 @@ let getCorrespondantInfo = (id, param, db) => {
         case 'base.Department': return db[id];
         case 'base.TrainingProgramme': return "Not Assigned Yet";
         case 'base.StructuralGroup': return db[id]['name'];
-        case 'base.Module': return db[id];
+        case 'base.Module': return db[id]['abbrev'];
         case 'base.CourseType': return db[id];
         case 'base.Course': return "Not Assigned Yet";
         case 'people.Tutor': return db[id];
@@ -311,7 +572,7 @@ let cancelConstraintParameter = (e) => {
 let getElementsToFillParameterPopup = (cst_id, parameter) => {
     let param_obj = (constraints[cst_id]['parameters'].filter(o => o['type'] == parameter))[0];
     let divs = [];
-
+    
     param_obj['acceptable'].forEach(ele => {
         let temp_id = 'acceptable' + ele.toString();
         let db = getCorrespondantDatabase(parameter);
@@ -470,13 +731,18 @@ let buildSection = (name, list) => {
 }
 
 let buildSections = () => {
+    if(filtered_constraint_list == null) {
+        filter_functions.reset_filtered_constraint_list();
+    }
     let dict = {};
     tables.forEach(name => {
         dict[name] = [];
     });
     Object.values(constraints).forEach(cst => {
-        if(cst['is_active']) {
-            dict[cst["name"]].push(cst["pageid"])
+        if(filtered_constraint_list.includes(cst['pageid'])) {
+            if(cst['is_active']) {
+                dict[cst["name"]].push(cst["pageid"])
+            }
         }
     });
     let keys = Object.keys(dict);
@@ -511,6 +777,7 @@ let rerender = () => {
 
 let rearrange = () => {
     let constraint_list = Object.keys(constraints);
+    filter_functions.reset_filtered_constraint_list();
     let body = constList;
     let bodyDisabled = document.getElementById('constraints-disabled');
     body.innerHTML = "";
@@ -529,7 +796,7 @@ let constraintClicked = (e) => {
     if(e.target.type == "checkbox") {
         return;
     }
-    let id = e.currentTarget.parentElement.getAttribute('cst-id')
+    let id = e.currentTarget.parentElement.getAttribute('cst-id');
     if(e.currentTarget.classList.contains('selected')) {
         e.currentTarget.classList.remove("selected");
         e.currentTarget.classList.add("unselected");
@@ -749,151 +1016,9 @@ let duplicateSelectedConstraint = (e) => {
 document.getElementById('duplicate-constraint').addEventListener('click', duplicateSelectedConstraint);
 
 let constraint_list = null;
+let filtered_constraint_list = null;
 let constraint_metadata = null;
 
-let changeEvents = {
-    addNewConstraint: (args = {
-        name: null,
-        title: null,
-    }) => {
-        let rand = getRandomInt(100000);
-        let id = "-ADD-" + tableName + rand.toString();
-        let obj = {
-            policy: 'ADD',
-            table: tableName,
-            tempid: id,
-            constraint: {
-                is_active: args['is_active'] ?? false,
-                comment: args['comment'],
-                title: args['title'],
-                weeks: copyObj(args['weeks']),
-                parameters: null,
-                weight: args['weight'] ?? 0,
-            },
-        }
-        actionChanges['ADD'].push(obj);
-        constraints[id] = {
-            ...copyObj(obj['constraint']),
-            id: rand,
-            pageid: id,
-            name: obj['table'],
-        }
-        constraint_list = Object.keys(constraints);
-        return id;
-    },
-    duplicateConstraint: (pageid) => {
-        let copy_org_cst = copyObj(constraints[pageid]);
-        let rand = getRandomInt(100000);
-        let id = "-ADD-" + copy_org_cst['name'] + rand.toString();
-        let obj = {
-            policy: 'ADD',
-            table: copy_org_cst['name'],
-            tempid: id,
-            constraint: {
-                is_active: copy_org_cst['is_active'],
-                comment: copy_org_cst['comment'],
-                title: copy_org_cst['title'],
-                weeks: copyObj(copy_org_cst['weeks']),
-                parameters: copyObj(copy_org_cst['parameters']),
-                weight: copy_org_cst['weight'],
-            },
-        };
-        actionChanges['ADD'].push(obj);
-        constraints[id] = {
-            ...copyObj(obj['constraint']),
-            id: rand,
-            pageid: id,
-            name: obj['table'],
-        };
-        constraint_list = Object.keys(constraints);
-        return id;
-    },
-    deleteConstraint: (tableName, id) => {
-        let obj = {
-            policy: "DELETE",
-            table: tableName,
-            id: id,
-        };
-        actionChanges['DELETE'].push(obj);
-        delete constraints[id];
-        constraint_list = Object.keys(constraints);
-        renderConstraints();
-    },
-    editConstraintAttr: (tableName, id, actions={}) => {
-        return true;
-    },
-    deleteConstraintParameter: (tableName, id, param, pageid) => {
-        if(pageid.startsWith('-ADD-')) {
-            for(let ele of actionChanges['ADD']) {
-                if(ele['tempid'] == pageid) {
-                    ele['constraint']['parameters'] = ele['constraint']['parameters'].filter(paramObj => {
-                        return paramObj['type'] != param;
-                    });
-                    break;
-                }
-            }
-            constraints[pageid]['parameters'] = constraints[pageid]['parameters'].filter(paramObj => {
-                return paramObj['type'] != param;
-            });
-            return;
-        }
-        let obj = {
-            policy: 'EDIT',
-            table: tableName,
-            id: id,
-            constraint: {
-                action: 'DELETE',
-                parameter: param,
-            },
-        };
-        actionChanges['EDIT'].push(obj);
-        constraints[pageid]['parameters'] = constraints[pageid]['parameters'].filter(paramObj => {
-            return paramObj['type'] != param;
-        });
-    },
-    editConstraintParameter: (tableName, id, param, pageid, new_list) => {
-        if(pageid.startsWith('-ADD-')) {
-            for(let ele of actionChanges['ADD']) {
-                if(ele['tempid'] == pageid) {
-                    for(let p of ele['parameters']) {
-                        if(p['type'] == param) {
-                            p['id_list'] = new_list;
-                            break;
-                        }
-                    }
-                }
-            }
-            for(let p of constraints[pageid]['parameters']) {
-                if(p['type'] == param) {
-                    p['id_list'] = new_list;
-                    break;
-                }
-            }
-            
-            return;
-        }
-        let obj = {
-            policy: 'EDIT',
-            table: tableName,
-            id: id,
-            constraint: {
-                action: 'EDIT',
-                parameter: param,
-                id_list: new_list,
-            },
-        };
-        actionChanges['EDIT'].push(obj);
-        for(let p of constraints[pageid]['parameters']) {
-            if(p['type'] == param) {
-                p['id_list'] = new_list;
-                break;
-            }
-        }
-    },
-    normalizeActionChanges: () => {
-        return true;
-    },
-}
 
 fetchers.fetchConstraints(null);
 fetchers.fetchDepartments(null);
@@ -902,4 +1027,5 @@ fetchers.fetchStructuralGroups(null);
 fetchers.fetchTutors(null);
 fetchers.fetchModules(null);
 fetchers.fetchCourseTypes(null);
+fetchers.fetchTutorsIDs(null);
 // fetchers.fetchCourses(null);

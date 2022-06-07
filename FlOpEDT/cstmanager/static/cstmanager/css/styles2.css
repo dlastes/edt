@@ -58,7 +58,7 @@ body>div {
     align-items: center;
 }
 
-.search-modifier-list {
+.filters {
     display: flex;
     flex-direction: column;
     align-items: stretch;
@@ -453,12 +453,26 @@ input[type="checkbox"] {
     margin: 2px
 }
 
-#show-disabled {
+.float {
     position: fixed;
-    right: -15px;
+    right: -125px;
+    width: 150px;
+    height: 80px;
+    background-color: var(--greeny);
+    transition: 0.1s;
+    text-align: left;
+}
+
+.float:hover {
+    right: -10px;
+}
+
+#show-disabled {
     top: 320px;
-    width: 40px;
-    height: 40px;
+}
+
+#show-solver {
+    top: 380px;
 }
 
 .display-none {
