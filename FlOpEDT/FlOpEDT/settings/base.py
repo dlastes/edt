@@ -78,6 +78,8 @@ INSTALLED_APPS = [
     'drf_yasg',
     'corsheaders',
     'cstmanager',
+    'notifications',
+    'django_crontab'
 ]
 
 MIDDLEWARE = [

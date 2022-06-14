@@ -43,6 +43,8 @@ class ConstraintType(Enum):
     GBHD_SUP = "GBHD_supérieur"
     CONJONCTION = "Conjonction"
     SEUIL = "Seuil"
+    CEILING_BOUND = "CEILING_BOUND"
+    FLOOR_BOUND = "FLOOR_BOUND"
     SI_A_ALORS_NON_B = "Si a alors non b"
 
     # CORE
@@ -65,6 +67,8 @@ class ConstraintType(Enum):
     DEPARTEMENT_BLOQUE_SLOT = "Les autres départements bloquent le slot"
     PROFESSEUR_A_DEJA_COURS_EN_AUTRE_DEPARTEMENT = "Le professeur a déjà un cours dans un autre département"
     PROFESSEUR_A_DEJA_COURS_EN_AUTRE_DEPARTEMENT_IBD = "Le professeur a déjà un cours dans un autre département IBD"
+    MODULETUTORREPARTITION = "Module Tutor Repartition"
+    ROOMTYPE_BOUND = "ROOMTYPE_BOUND"
 
     # Visio
     VISIO = "Visio"
@@ -82,7 +86,8 @@ class ConstraintType(Enum):
 
 
     # From iut
-    BOUND_HOURS_PER_DAY = "Bound_hours per day"
+    MAX_HOURS_PER_DAY = "Max hours per day"
+    MIN_HOURS_PER_DAY = "Min hours per day"
     PAS_COURS_JEUDI_APREM = "Pas_de_cours_le_jeudi_aprem"
     PAS_SPORT_SAUF_LUNDI_ET_MARDI = "Pas de sport sauf lundi et mardi"
     PAS_COURS_PROMO1_SPORT = "pas de cours de promo1 sur un creneau de sport"
@@ -131,7 +136,8 @@ class ConstraintType(Enum):
     LowerBoundBusyDays = "LowerBoundBusyDays"
     LUNCH_BREAK = "Lunch Breaks"
     BREAK_AROUND_COURSE = "Break around course"
-    NO_COURSE_ON_DAY = "No Course on day"
+    NO_TUTOR_COURSE_ON_DAY = "No tutor course on day"
+    NO_GROUP_COURSE_ON_DAY = "No group course on day"
     TRAIN_PROG_FORBIDDEN_SLOT = "TRAIN_PROG_FORBIDDEN_SLOT"
     Undesired_slots_limit = "Undesired_slots_limit"
     LimitSimultaneousCoursesNumber = "LimitSimultaneousCoursesNumber"
@@ -150,6 +156,7 @@ class ConstraintType(Enum):
     jours_de_repos_par_semaine = "jours_de_repos_par_semaine"
     COSMO = "Cosmo - to be defined"
     TRAVAILLE_ASSEZ = "TRAVAILLE_ASSEZ"
+    TRAVAILLE_ASSEZ_PAR_SEMAINE = "TRAVAILLE_ASSEZ_PAR_SEMAINE"
     MOD_PER_DAY = "MOD_PER_DAY"
     TUTOR_PER_DAY = "TUTOR_PER_DAY"
     module_by_bloc = "module_by_bloc"

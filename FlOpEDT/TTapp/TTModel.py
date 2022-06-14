@@ -26,7 +26,7 @@
 
 from django.core.mail import EmailMessage
 
-from base.models import RoomType, RoomPreference, ScheduledCourse, Department, TrainingProgramme, \
+from base.models import RoomType, RoomPreference, ScheduledCourse, TrainingProgramme, \
     TutorCost, GroupFreeHalfDay, GroupCost, TimeGeneralSettings, ModuleTutorRepartition, ScheduledCourseAdditional
 
 from base.timing import Time
@@ -36,10 +36,9 @@ from people.models import Tutor
 from TTapp.models import MinNonPreferedTutorsSlot, StabilizeTutorsCourses, MinNonPreferedTrainProgsSlot, \
     NoSimultaneousGroupCourses, ScheduleAllCourses, AssignAllCourses, ConsiderTutorsUnavailability, \
     MinimizeBusyDays, MinGroupsHalfDays, RespectMaxHoursPerDay, ConsiderDependencies, ConsiderPivots, \
-    StabilizeGroupsCourses
+    StabilizeGroupsCourses, RespectMinHoursPerDay
 
-from TTapp.TTConstraints.TTConstraint import TTConstraint
-from TTapp.FlopConstraint import max_weight, all_subclasses
+from TTapp.FlopConstraint import max_weight
 
 from TTapp.slots import slots_filter, days_filter
 
@@ -47,9 +46,7 @@ from TTapp.WeeksDatabase import WeeksDatabase
 
 
 from django.db import close_old_connections
-from django.db.models import Q, F
-
-import datetime
+from django.db.models import F
 
 from TTapp.ilp_constraints.constraint import Constraint
 from TTapp.ilp_constraints.constraint_type import ConstraintType
@@ -57,7 +54,7 @@ from TTapp.ilp_constraints.constraints.courseConstraint import CourseConstraint
 
 from TTapp.ilp_constraints.constraints.slotInstructorConstraint import SlotInstructorConstraint
 
-from FlOpEDT.decorators import timer
+from core.decorators import timer
 
 from TTapp.FlopModel import FlopModel, GUROBI_NAME, get_ttconstraints, get_room_constraints
 from TTapp.RoomModel import RoomModel
@@ -412,6 +409,10 @@ class TTModel(FlopModel):
         if not RespectMaxHoursPerDay.objects.filter(department=self.department).exists():
             RespectMaxHoursPerDay.objects.create(department=self.department)
 
+        # Check if RespectMinHours constraint is in database, and add it if not
+        if not RespectMinHoursPerDay.objects.filter(department=self.department).exists():
+            RespectMinHoursPerDay.objects.create(department=self.department)
+
         # Check if MinimizeBusyDays constraint is in database, and add it if not
         if not MinimizeBusyDays.objects.filter(department=self.department).exists():
             MinimizeBusyDays.objects.create(department=self.department, weight=max_weight)
@@ -434,9 +435,6 @@ class TTModel(FlopModel):
         # Each course is assigned to a unique tutor
         if not AssignAllCourses.objects.filter(department=self.department).exists():
             AssignAllCourses.objects.create(department=self.department)
-
-        if self.core_only:
-            return
 
         if not ConsiderTutorsUnavailability.objects.filter(department=self.department).exists():
             ConsiderTutorsUnavailability.objects.create(department=self.department)
@@ -467,7 +465,7 @@ class TTModel(FlopModel):
                          for sl in slots_filter(self.wdb.compatible_slots[c],
                                                 week=mtr.week)
                          ),
-                '==', mtr.courses_nb, Constraint()
+                '==', mtr.courses_nb, Constraint(constraint_type=ConstraintType.MODULETUTORREPARTITION)
             )
 
     @timer
@@ -536,7 +534,7 @@ class TTModel(FlopModel):
                                                    & self.wdb.compatible_courses[s_sl]
                                                    )
                 self.add_constraint(
-                    expr, '<=', bound, Constraint()
+                    expr, '<=', bound, Constraint(constraint_type=ConstraintType.ROOMTYPE_BOUND)
                 )
 
     @timer
@@ -842,9 +840,6 @@ class TTModel(FlopModel):
                 if other_dep_sched_courses:
                     self.avail_room[r][sl] = 0
 
-        if self.core_only:
-            return
-
         for sl in self.wdb.availability_slots:
             # constraint : other_departments_sched_courses instructors are not available
             for i in self.wdb.instructors:
@@ -866,10 +861,12 @@ class TTModel(FlopModel):
                     week=week,
                     # train_prog=promo,
                     is_active=True):
-                print(constr.__class__.__name__, constr.id, end=' - ')
-                timer(constr.enrich_ttmodel)(self, week)
+                if not self.core_only or constr.__class__ in [AssignAllCourses, ScheduleAllCourses,
+                                                              NoSimultaneousGroupCourses]:
+                    print(constr.__class__.__name__, constr.id, end=' - ')
+                    timer(constr.enrich_ttmodel)(self, week)
 
-        if self.pre_assign_rooms:
+        if self.pre_assign_rooms and not self.core_only:
             for week in self.weeks:
                 #Consider RoomConstraints that have enrich_ttmodel method
                 for constr in get_room_constraints(
@@ -908,8 +905,6 @@ class TTModel(FlopModel):
 
         self.add_instructors_constraints()
 
-        if self.core_only:
-            return
         if self.pre_assign_rooms:
             if self.department.mode.visio:
                 self.add_visio_room_constraints()
