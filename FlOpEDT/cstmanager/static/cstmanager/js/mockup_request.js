@@ -89,18 +89,3 @@ let changesMockup = [
         }
     }
 ]
-
-let blablablabla = [
-    'base.Department', // /fetch/alldepts/
-    'base.TrainingProgramme', // /fetch,
-    'base.StructuralGroup', // /groups/structural/?dept=INFO
-    'people.Tutor', // /fetch/idtutor/?dept=INFO
-    'base.Module', // /fetch/idmodule/?dept=INFO
-    'base.CourseType', // /fetch/idcoursetype/?dept=INFO
-    // 'PositiveSmallIntegerField',
-    // 'CharField',
-    // 'BooleanField',
-    'base.Course', // too big ?
-]
-
-weeks = [2, 5, 6-9, 14]

@@ -1,9 +1,11 @@
+// helper function to extract a parameter object from a given constraint
 let get_parameter_from_constraint = (cst, name) => {
     let ret = {};
     let l = cst.parameters.filter(obj => obj['name'] == name);
     return l.length == 0 ? ret : l[0];
 }
 
+// object containing functions that involve filtering
 let filter_functions = {
     tutor: (str) => {
         str = str.toLowerCase();
@@ -81,6 +83,7 @@ let filter_functions = {
     },
 }
 
+// object containing event listeners for constraint management (to prepare for the request)
 let changeEvents = {
     addNewConstraint: (args = {
         name: null,
@@ -228,6 +231,7 @@ let changeEvents = {
     },
 }
 
+// object containing functions that fetch data from the database
 let fetchers = {
     fetchConstraints: (e) => {
         emptyPage();
@@ -349,8 +353,7 @@ let fetchers = {
     }
 }
 
-
-
+// transform DB response to a JSON object
 let responseToDict = (resp) => {
     let = ret = {};
     resp.forEach(cst => {
@@ -361,29 +364,34 @@ let responseToDict = (resp) => {
     return ret;
 }
 
+// a simple way to make a copy of a JSON object
 let copyObj = (obj) => {
     return JSON.parse(JSON.stringify(obj));
 }
 
+// toggle the tab for disabled constraints
 let toggleDisabledDiv = (e) => {
     document.getElementById('constraints-disabled').classList.toggle('display-none');
 }
-
 document.getElementById('show-disabled').addEventListener('click', toggleDisabledDiv);
 
+// returns a copy of the original constraints
 let copyFromOriginalConstraints = () => {
     let copy = copyObj(originalConstraints);
     return copy;
 }
 
+// helper random integer generator function
 let getRandomInt = (max) => {
     return Math.floor(Math.random() * max);
 }
 
+// constraint clicked simulator
 let clickConstraint = (id) => {
     document.getElementById('constraints-all').querySelector(`.constraint-card[cst-id=${id}]`).children[0].click();
 }
 
+// returns an empty JSON object for tracking changes on constraints
 let emptyChangesDict = () => {
     return {
         'ADD': [],
@@ -392,10 +400,7 @@ let emptyChangesDict = () => {
     };
 }
 
-// let originalConstraints = responseToDict(responseConstraints);
-// let constraints = copyFromOriginalConstraints();
-// let tables = new Set(Object.values(originalConstraints).map(n => n["name"]));
-// let actionChanges = {};
+// some variable assignments
 let originalConstraints;
 let constraints;
 let tables;
@@ -412,12 +417,15 @@ let database = {
     'courses': null,
 }
 
+// render the value beside the slider
 let outputSlider = (id, val) => {
     val = val == 8 ? 0 : val;
     let ele = document.getElementById(id);
     ele.innerHTML = val;
 }
 
+// event handler that discard constraint changes and restore 
+// data to the original state
 let discardChanges = (e) => {
     constraints = copyFromOriginalConstraints();
     constraint_list = Object.keys(constraints);
@@ -427,13 +435,14 @@ let discardChanges = (e) => {
     updateBroadcastConstraint(null);
     renderConstraints(constraint_list);
 }
-
 document.getElementById('discard-changes').addEventListener('click', discardChanges);
 
+// shortcut function
 let applyChanges = (e) => {
     changeEvents.normalizeActionChanges();
 }
 
+// clear input fields for filters
 let clearFilters = (e) => {
     document.getElementById('input-search').value = '';
     document.getElementById('input-tutor').value = '';
@@ -444,9 +453,7 @@ let clearFilters = (e) => {
 }
 
 document.getElementById('apply-changes').addEventListener('click', applyChanges);
-
 document.getElementById('new-constraint').addEventListener('click', fetchers.fetchConstraints);
-
 document.getElementById('clear-filters').addEventListener('click', clearFilters);
 
 let URLWeightIcon = document.getElementById('icon-weight').src;
@@ -472,6 +479,7 @@ activatedEle.addEventListener('change', () => {
 let selected_constraints = new Set();
 let lastSelectedConstraint = null;
 
+// number of constraints selected updater
 let updateNumberConstraints = () => {
     let ele = document.getElementById('num-selected-constraints');
     ele.innerText = selected_constraints.size;
@@ -479,6 +487,7 @@ let updateNumberConstraints = () => {
 
 let broadcastConstraint = undefined;
 
+// HTML element builder to help with the code
 let elementBuilder = (tag, args = {}) => {
     let ele = document.createElement(tag);
     for(let [key, value] of Object.entries(args)) {
@@ -487,6 +496,7 @@ let elementBuilder = (tag, args = {}) => {
     return ele;
 }
 
+// returns the corresponding database table based on the parameter given
 let getCorrespondantDatabase = (param) => {
     switch(param) {
         case 'base.Department': return database['departments'];
@@ -502,6 +512,7 @@ let getCorrespondantDatabase = (param) => {
     return null;
 }
 
+// returns the information needed from a parameter and a constraint id given
 let getCorrespondantInfo = (id, param, db) => {
     switch(param) {
         case 'base.Department': return db[id];
@@ -517,6 +528,7 @@ let getCorrespondantInfo = (id, param, db) => {
     return null;
 }
 
+// returns the parameter object from a constraint obejct
 let getParamObj = (cst_id, param) => {
     for(p of constraints[cst_id]['parameters']) {
         if(p['type'] == param) {
@@ -525,6 +537,7 @@ let getParamObj = (cst_id, param) => {
     }
 }
 
+// event handler that deletes a constraint's parameter
 let deleteConstraintParameter = (e) => {
     let div = document.getElementById('parameter-screen');
     let cst_id = div.attributes['cst-id'].value;
@@ -538,6 +551,7 @@ let deleteConstraintParameter = (e) => {
     document.getElementById('parameter-screen').parentElement.remove();
 }
 
+// event handler that updates a constraint's parameter
 let updateConstraintParameter = (e) => {
     let div = document.getElementById('parameter-screen');
     let cst_id = div.attributes['cst-id'].value;
@@ -563,12 +577,14 @@ let updateConstraintParameter = (e) => {
     );
 }
 
+// remove the display on constraint parameters
 let cancelConstraintParameter = (e) => {
     document.querySelectorAll('#parameter-screen').forEach(node => {
         node.remove();
     });
 }
 
+// returns elements that make part of the parameter screen
 let getElementsToFillParameterPopup = (cst_id, parameter) => {
     let param_obj = (constraints[cst_id]['parameters'].filter(o => o['type'] == parameter))[0];
     let divs = [];
@@ -634,6 +650,7 @@ let getElementsToFillParameterPopup = (cst_id, parameter) => {
     return divs;
 }
 
+// builds a button that shows a drop menu after clicking on it
 let buttonWithDropBuilder = (obj) => {
     let butt = elementBuilder("button", { 
         "class": "transition neutral", 
@@ -660,6 +677,7 @@ let buttonWithDropBuilder = (obj) => {
     return butt;
 }
 
+// weeks button builder
 let buttonWeeks = (obj) => {
     let color = obj.length > 0 ? "neutral" : "green";
     let butt = elementBuilder("button", {
@@ -674,6 +692,7 @@ let buttonWeeks = (obj) => {
     return butt;
 }
 
+// update the header info by showing the selected constraint's info
 let updateBroadcastConstraint = (id) => {
     if(!id) {
         if(!lastSelectedConstraint) {
@@ -704,10 +723,12 @@ let updateBroadcastConstraint = (id) => {
     });
 }
 
+// event handler that fires the update broadcast constraint event handler
 let constraintHovered = (e) => {
     updateBroadcastConstraint(e.currentTarget.parentElement.getAttribute('cst-id'));
 }
 
+// event handler that resets the update broadcast constraint event handler
 let constraintUnhovered = (e) => {
     if(!lastSelectedConstraint) {
         broadcastConstraint = null;
@@ -715,10 +736,12 @@ let constraintUnhovered = (e) => {
     updateBroadcastConstraint(lastSelectedConstraint);
 }
 
+// Unimplemented functionality
 let buildMetadata = () => {
     
 }
 
+// main section builder
 let buildSection = (name, list) => {
     let ret = divBuilder({ 'class': 'constraints-section-full'});
     let title = divBuilder({ 'class': 'constraints-section-title'});
@@ -730,6 +753,7 @@ let buildSection = (name, list) => {
     return ret;
 }
 
+// helps with the generation of the page's sections
 let buildSections = () => {
     if(filtered_constraint_list == null) {
         filter_functions.reset_filtered_constraint_list();
@@ -758,6 +782,7 @@ let buildSections = () => {
     constList.append(...Object.values(dictDiv));
 }
 
+// rerender the constraints on the page (in case of a modification)
 let rerender = () => {
     Array.from(constList.children).forEach(section => {
         Array.from(section.children).forEach(node => {
@@ -775,6 +800,7 @@ let rerender = () => {
     });
 }
 
+// rearrange constraints based on activation...etc
 let rearrange = () => {
     let constraint_list = Object.keys(constraints);
     filter_functions.reset_filtered_constraint_list();
@@ -792,6 +818,7 @@ let rearrange = () => {
     buildSections();
 }
 
+// event handler when clicking on a constraint
 let constraintClicked = (e) => {
     if(e.target.type == "checkbox") {
         return;
@@ -822,7 +849,7 @@ let constraintClicked = (e) => {
     updateBroadcastConstraint(id);
 }
 
-
+// color selected constraints
 let refreshSelectedFromList = (list) => {
     let l = constList;
     (Array.from(l.children)).forEach(section => {
@@ -837,6 +864,7 @@ let refreshSelectedFromList = (list) => {
     updateNumberConstraints();
 }
 
+// select all constraint simulator
 let selectAll = (e) => {
     if(selected_constraints.size == Object.keys(constraints).length) {
         e.currentTarget.checked = true;
@@ -850,6 +878,7 @@ let selectAll = (e) => {
 document.getElementById('cb1').checked = false;
 document.getElementById('cb1').onchange = selectAll;
 
+// builds a div... helps with the code
 let divBuilder = (args = {}) => {
     let div = document.createElement('div');
     for(let [key, value] of Object.entries(args)) {
@@ -858,6 +887,7 @@ let divBuilder = (args = {}) => {
     return div;
 }
 
+// builds a div that contains an icon and text
 let iconTextBuilder = (imgurl, value, attr) => {
     let div = divBuilder({ 'class': 'icon-text ' + attr });
     let icondiv = divBuilder({ 'class': 'icon-div' });
@@ -872,6 +902,7 @@ let iconTextBuilder = (imgurl, value, attr) => {
     return div;
 }
 
+// event handler that activates a constraint
 let activateConstraint = (e) => {
     let id = e.currentTarget.getAttribute('cst-id');
     let ele = constraints[e.currentTarget.getAttribute('cst-id')]
@@ -885,6 +916,7 @@ let activateConstraint = (e) => {
     rearrange();
 }
 
+// div for additional info
 let additionalInfoBuilder = (cst_obj) => {
     let div = divBuilder({ 'class': 'constraint-card-additional' });
     let params = iconTextBuilder(URLGearsIcon, cst_obj.parameters.length, "parameters");
@@ -898,6 +930,7 @@ let additionalInfoBuilder = (cst_obj) => {
     return div;
 }
 
+// builds the card for the constraint
 let constraintCardBuilder = (cst_obj) => {
     let selected = selected_constraints.has(`${cst_obj.pageid}`) ? "selected" : "unselected";
     let divCard = divBuilder({ 'class': 'constraint-card transition' });
@@ -922,6 +955,7 @@ let constraintCardBuilder = (cst_obj) => {
     return divCard;
 }
 
+// builds a card for the disabled constraint
 let disabledConstraintCardBuilder = (cst_obj) => {
     let selected = selected_constraints.has(`${cst_obj.pageid}`) ? "selected" : "unselected";
     let divCard = divBuilder({ 'class': 'constraint-card-disabled transition' });
@@ -951,6 +985,7 @@ let disabledConstraintCardBuilder = (cst_obj) => {
     return divCard;
 }
 
+// empty the page
 let emptyPage = () => {
     let body = constList;
     let bodyDisabled = document.getElementById('constraints-disabled');
@@ -958,6 +993,7 @@ let emptyPage = () => {
     bodyDisabled.innerHTML = "";
 }
 
+// render the constraints on the page
 let renderConstraints = (cst_list = []) => {
     let body = constList;
     let bodyDisabled = document.getElementById('constraints-disabled');
@@ -975,6 +1011,7 @@ let renderConstraints = (cst_list = []) => {
     refreshSelectedFromList(selected_constraints);
 }
 
+// constranit sorting based on argument
 let sortConstraintsBy = (cst_list, arg) => {
     if(!constraints[cst_list[0]].hasOwnProperty(arg)) {
         return;
@@ -991,6 +1028,7 @@ let sortConstraintsBy = (cst_list, arg) => {
     return cst_list;
 }
 
+// updates the weight for all constraints
 let updateWeightAll = (e) => {
     let weight = document.getElementById('slider-all').value;
     selected_constraints.forEach(id => {
@@ -1001,6 +1039,7 @@ let updateWeightAll = (e) => {
 
 document.getElementById('update-weight-all').onclick = updateWeightAll;
 
+// duplicate a cosntraint
 let duplicateSelectedConstraint = (e) => {
     if(!lastSelectedConstraint) {
         return;
@@ -1020,6 +1059,7 @@ let filtered_constraint_list = null;
 let constraint_metadata = null;
 
 
+// fetch data from database
 fetchers.fetchConstraints(null);
 fetchers.fetchDepartments(null);
 // fetchers.fetchTrainingPrograms(null);
