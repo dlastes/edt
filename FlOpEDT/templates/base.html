@@ -115,6 +115,7 @@
           <li><a href="{% url "configuration:configuration" %}">{% trans 'Import'%}</a></li>
           <li><a href="{% url "admin:index" %}">{% trans 'Admin'%}</a></li>
       {% endif %}
+      <li><a href="{% url "cstmanager:cstmanager" %}">{% trans 'MyApp'%}</a></li>
       {% endif %}
       <li style="float:right">
 	{% if user.is_authenticated %}

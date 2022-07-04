@@ -218,12 +218,20 @@ class FlopConstraintSerializer(serializers.ModelSerializer):
 
         return(paramlist)
 
+
 class TTConstraintSerializer(FlopConstraintSerializer):
     class Meta:
         model = ttt.MinTutorsHalfDays
         fields = ['id', 'title', 'name', 'weight', 'is_active', 'comment', "modified_at", 'weeks', 'parameters']
 
+
 class NoVisioSerializer(serializers.ModelSerializer):
     class Meta:
         model = ttv.NoVisio
         fields = '__all__'
+
+
+class FlopConstraintFieldSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    type = serializers.CharField()
+    acceptable = serializers.ListField(child=serializers.CharField())

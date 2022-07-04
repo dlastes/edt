@@ -26,12 +26,15 @@ from django.utils.decorators import method_decorator
 from drf_yasg.utils import swagger_auto_schema
 from django.apps import apps
 from TTapp.FlopConstraint import FlopConstraint, all_subclasses
-from TTapp.TTConstraints.TTConstraint import TTConstraint
+from base.models import Department
 import TTapp.TTConstraints.visio_constraints as ttv
+from django.contrib.postgres.fields.array import ArrayField
+from base.timing import all_possible_start_times
 
 from drf_yasg import openapi
-from rest_framework import viewsets
+from rest_framework import viewsets, views
 from rest_framework.response import Response
+from rest_framework.exceptions import APIException
 from api.TTapp import serializers
 from api.permissions import IsAdminOrReadOnly
 
@@ -256,7 +259,97 @@ class FlopConstraintViewSet(viewsets.ViewSet):
 
         return Response(serializer.data)
 
+
 class NoVisioViewSet(viewsets.ModelViewSet):
     queryset = ttv.NoVisio.objects.all()
     serializer_class = serializers.NoVisioSerializer
     permission_classes = [IsAdminOrReadOnly]
+
+
+
+@method_decorator(name='list',
+                  decorator=swagger_auto_schema(
+                      manual_parameters=[
+                          dept_param(required=True)
+                      ])
+                  )
+class FlopConstraintFieldView(viewsets.ViewSet):
+    permission_classes = [IsAdminOrReadOnly]
+
+    def list(self, request):
+        dept = self.request.query_params.get('dept', None)
+        if dept is not None:
+            try:
+                department = Department.objects.get(abbrev=dept)
+            except Department.DoesNotExist:
+                raise APIException(detail='Unknown department')
+        flop_constraints_fields = set()
+        # exclude useless fields
+        excluded_fields = {'id', 'class_name',
+                           'department', 'weight', 'title', 'comment',
+                           'is_active', 'modified_at', 'weeks', 'train_progs', 'courses'}
+
+        for constraint_class in all_subclasses(FlopConstraint):
+            fields = constraint_class._meta.get_fields()
+            # Exclude already considered fields
+            excluded_fields |= set(f.name for f in flop_constraints_fields)
+            parameters_fields = set([f for f in fields
+                                     if f.name not in excluded_fields
+                                     and 'IntegerField' not in type(f).__name__])
+            flop_constraints_fields |= parameters_fields
+
+        fields_list = list(flop_constraints_fields)
+
+        for field in fields_list:
+            acceptable = []
+            if (not field.many_to_one and not field.many_to_many):
+                typename = type(field).__name__
+
+                # Récupère les validators dans acceptable
+                if typename == 'CharField':
+                    choices = field.choices
+                    if "day" in field.name:
+                        acceptable = department.timegeneralsettings.days
+                    elif choices is not None:
+                        acceptable = [c[0] for c in choices]
+                if typename == 'BooleanField':
+                    acceptable = [True, False]
+
+                if type(field) is ArrayField:
+                    typename = type(field.base_field).__name__
+                    # Récupère les choices de l'arrayfield dans acceptable
+                    choices = field.base_field.choices
+                    if field.name == "possible_start_times":
+                        acceptable = all_possible_start_times(department)
+                    elif "day" in field.name:
+                        acceptable = department.timegeneralsettings.days
+                    elif choices is not None:
+                        acceptable = choices
+
+            else:
+                # Récupère le modele en relation avec un ManyToManyField ou un ForeignKey
+                mod = field.related_model
+                typenamesplit = str(mod)[8:-2].split(".")
+                typename = typenamesplit[0] + "." + typenamesplit[2]
+                acceptablelist = mod.objects.values("id")
+
+                # Filtre les ID dans acceptable list en fonction du department
+                if (field.name == "tutors"):
+                    acceptablelist = acceptablelist.filter(departments=department)
+
+                elif (field.name == "train_progs"):
+                    acceptablelist = acceptablelist.filter(department=department)
+
+                elif (field.name == "modules"):
+                    acceptablelist = acceptablelist.filter(train_prog__department=department)
+
+                elif (field.name == "groups"):
+                    acceptablelist = acceptablelist.filter(train_prog__department=department)
+
+                for element in acceptablelist:
+                    acceptable.append(element["id"])
+
+            field.type = typename
+            field.acceptable = acceptable
+        serializer = serializers.FlopConstraintFieldSerializer(fields_list, many=True)
+        return Response(serializer.data)
