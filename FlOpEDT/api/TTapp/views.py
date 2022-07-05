@@ -294,8 +294,7 @@ class FlopConstraintFieldView(viewsets.ViewSet):
             # Exclude already considered fields
             excluded_fields |= set(f.name for f in flop_constraints_fields)
             parameters_fields = set([f for f in fields
-                                     if f.name not in excluded_fields
-                                     and 'IntegerField' not in type(f).__name__])
+                                     if f.name not in excluded_fields])
             flop_constraints_fields |= parameters_fields
 
         fields_list = list(flop_constraints_fields)
