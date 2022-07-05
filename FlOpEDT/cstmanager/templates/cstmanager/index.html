@@ -2,6 +2,16 @@
 <link rel="stylesheet" href="{% static 'cstmanager/css/bootstrap-material-design.min.css' %}">
 <!-- <link rel="stylesheet" href="{% static 'cstmanager/css/styles.css' %}"> -->
 <link rel="stylesheet" href="{% static 'cstmanager/css/styles2.css' %}">
+<script>
+    let department = "{{ dept }}";
+    let urlConstraints = "{% url 'api:ttapp:constraint-list' %}";
+    let urlDepartments = "{% url 'api:fetch:dept-list' %}";
+    let urlGroups = "{% url 'api:fetch:idgroup-list' %}";
+    let urlTutors = "{% url 'api:people:tutor-list' %}";
+    let urlModules = "{% url 'api:fetch:idmodule-list' %}";
+    let urlCourseTypes = "{% url 'api:fetch:idcoursetype-list' %}";
+    let urlTutorsID = "{% url 'api:fetch:idtutor-list' %}";
+</script>
 <div class="page">
     <div class="search-body">
         <div class="hor-sep"></div>
@@ -178,9 +188,8 @@
 <img id="icon-gears" style="display: none;" src="{% static 'cstmanager/icons/icon_gears.png' %}">
 <img id="icon-check" style="display: none;" src="{% static 'cstmanager/icons/icon_check.png' %}">
 
-</div>
 {% endblock %} {% block javascript %}
-<script type="text/javascript" src="{% static 'cstmanager/js/reqs.js' %}"></script>
+<script type="text/javascript" src="{% static 'base/helpers.js' %}"></script>
 <script type="text/javascript" src="{% static 'cstmanager/js/mockup_request.js' %}"></script>
 <script type="text/javascript" src="{% static 'cstmanager/js/script.js' %}"></script>
 {% endblock %}

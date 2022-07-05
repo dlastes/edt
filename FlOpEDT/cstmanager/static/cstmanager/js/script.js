@@ -235,7 +235,7 @@ let changeEvents = {
 let fetchers = {
     fetchConstraints: (e) => {
         emptyPage();
-        fetch("http://127.0.0.1:8000/en/api/ttapp/constraint/?dept=INFO")
+        fetch(build_url(urlConstraints, {"dept": department}))
             .then(resp => resp.json())
             .then(jsonObj => {
                 responseConstraints = responseToDict(Object.values(jsonObj));
@@ -256,7 +256,7 @@ let fetchers = {
             });
     },
     fetchDepartments: (e) => {
-        fetch("http://127.0.0.1:8000/en/api/fetch/alldepts/")
+        fetch(build_url(urlDepartments))
             .then(resp => resp.json())
             .then(jsonObj => {
                 database['departments'] = jsonObj.reduce((obj, next) => {
@@ -276,7 +276,7 @@ let fetchers = {
         
     },
     fetchStructuralGroups: (e) => {
-        fetch("http://127.0.0.1:8000/en/api/groups/structural/?dept=INFO")
+        fetch(build_url(urlGroups, {"dept": department}))
             .then(resp => resp.json())
             .then(jsonObj => {
                 database['structuralGroups'] = {};
@@ -290,7 +290,7 @@ let fetchers = {
             });
     },
     fetchTutors: (e) => {
-        fetch("http://127.0.0.1:8000/en/api/user/tutor/?dept=INFO")
+        fetch(build_url(urlTutors, {"dept": department}))
             .then(resp => resp.json())
             .then(jsonObj => {
                 database['tutors'] = {};
@@ -304,12 +304,12 @@ let fetchers = {
             });
     },
     fetchModules: (e) => {
-        fetch("http://127.0.0.1:8000/en/api/fetch/idmodule/?dept=INFO")
+        fetch(build_url(urlModules, {"dept": department}))
             .then(resp => resp.json())
             .then(jsonObj => {
                 database['modules'] = {};
                 Object.values(jsonObj).forEach(obj => {
-                    database['modules'][obj['id']] = obj; //TODO:
+                    database['modules'][obj['id']] = obj;
                 });
             })
             .catch(err => {
@@ -318,7 +318,7 @@ let fetchers = {
             });
     },
     fetchCourseTypes: (e) => {
-        fetch("http://127.0.0.1:8000/en/api/fetch/idcoursetype/")
+        fetch(build_url(urlCourseTypes, {"dept": department}))
             .then(resp => resp.json())
             .then(jsonObj => {
                 database['courseTypes'] = {};
@@ -338,7 +338,7 @@ let fetchers = {
         // TODO
     },
     fetchTutorsIDs: (e) => {
-        fetch("http://127.0.0.1:8000/en/api/fetch/idtutor/?dept=INFO")
+        fetch(build_url(urlTutorsID, {"dept": department}))
             .then(resp => resp.json())
             .then(jsonObj => {
                 database['tutors_ids'] = {};
@@ -355,7 +355,7 @@ let fetchers = {
 
 // transform DB response to a JSON object
 let responseToDict = (resp) => {
-    let = ret = {};
+    let ret = {};
     resp.forEach(cst => {
         let id = cst['name'] + cst['id'];
         ret[id] = cst;

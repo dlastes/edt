@@ -4,4 +4,4 @@ from django.template.response import TemplateResponse
 # Create your views here.
 def manager(req, **kwargs):
     
-    return TemplateResponse(req, 'cstmanager/index.html')
+    return TemplateResponse(req, 'cstmanager/index.html', {"dept": req.department.abbrev})
