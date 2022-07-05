@@ -332,7 +332,18 @@ let fetchers = {
             });
     },
     fetchCourses: (e) => {
-        // TOO BIG
+         fetch(build_url(urlCourses, {"dept": department}))
+            .then(resp => resp.json())
+            .then(jsonObj => {
+                database['courses'] = {};
+                Object.values(jsonObj).forEach(obj => {
+                    database['courses'][obj['id']] = obj;
+                });
+            })
+            .catch(err => {
+                console.error("something went wrong while fetching courses");
+                console.error(err);
+            });
     },
     fetchRooms: (e) => {
         // TODO
@@ -1068,4 +1079,4 @@ fetchers.fetchTutors(null);
 fetchers.fetchModules(null);
 fetchers.fetchCourseTypes(null);
 fetchers.fetchTutorsIDs(null);
-// fetchers.fetchCourses(null);
+fetchers.fetchCourses(null);
