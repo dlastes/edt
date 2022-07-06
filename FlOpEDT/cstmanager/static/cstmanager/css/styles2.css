@@ -512,8 +512,8 @@ input[type="checkbox"] {
     border: 2px solid var(--dark);
     border-radius: 5px;
     display: flex;
-    flex-flow: column nowrap;
-    justify-content: center;
+    flex-flow: row wrap;
+    justify-content: space-around;
     /* align-items: center; */
     padding: 5px;
 }
@@ -522,6 +522,10 @@ input[type="checkbox"] {
     display: flex;
     flex-flow: row nowrap;
     justify-content: space-around;
+}
+
+.form-check{
+    margin: 2px
 }
 
 .form-check:hover {
