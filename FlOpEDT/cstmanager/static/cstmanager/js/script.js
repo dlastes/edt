@@ -811,21 +811,36 @@ let buildSection = (name, list) => {
 }
 
 // helps with the generation of the page's sections
+
 let buildSections = () => {
+    constList.innerHTML="";
     if (filtered_constraint_list == null) {
         filter_functions.reset_filtered_constraint_list();
     }
+    let order_by_class = document.getElementById('show-sections').checked;
     let dict = {};
-    tables.forEach(name => {
-        dict[name] = [];
-    });
-    Object.values(constraints).forEach(cst => {
-        if (filtered_constraint_list.includes(cst['pageid'])) {
-            if (cst['is_active']) {
-                dict[cst["name"]].push(cst["pageid"])
+    if (order_by_class){
+        tables.forEach(name => {
+            dict[name] = [];
+        });
+        Object.values(constraints).forEach(cst => {
+            if (filtered_constraint_list.includes(cst['pageid'])) {
+                if (cst['is_active']) {
+                    dict[cst["name"]].push(cst["pageid"])
+                }
             }
-        }
-    });
+        });
+    }
+    else {
+        dict['All constraints'] = [];
+        Object.values(constraints).forEach(cst => {
+            if (filtered_constraint_list.includes(cst['pageid'])) {
+                if (cst['is_active']) {
+                    dict["All constraints"].push(cst["pageid"])
+                }
+            }
+        });
+    }
     let keys = Object.keys(dict);
     let dictDiv = {};
     for (let k of keys) {
@@ -835,8 +850,11 @@ let buildSections = () => {
             dictDiv[k] = buildSection(k, dict[k]);
         }
     }
+
     constList.append(...Object.values(dictDiv));
 }
+
+document.getElementById('show-sections').addEventListener('click', buildSections);
 
 // rerender the constraints on the page (in case of a modification)
 let rerender = () => {
@@ -871,7 +889,7 @@ let rearrange = () => {
             bodyDisabled.append(disabledConstraintCardBuilder(constraints[id]));
         }
     }
-    buildSections();
+    buildSections(false);
 }
 
 // event handler when clicking on a constraint
@@ -1062,7 +1080,7 @@ let renderConstraints = (cst_list = []) => {
             bodyDisabled.append(disabledConstraintCardBuilder(constraints[id]));
         }
     }
-    buildSections();
+    buildSections(false);
     updateNumberConstraints();
     refreshSelectedFromList(selected_constraints);
 }
