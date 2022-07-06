@@ -522,9 +522,14 @@ class IDCourseTypeSerializer(serializers.ModelSerializer):
 
 
 class IDGroupSerializer(serializers.ModelSerializer):
+    train_prog = serializers.CharField()
+
+    def get_train_ptorg(self, obj):
+        return obj.train_prog.abbrev
+
     class Meta:
         model = bm.GenericGroup
-        fields = ['id', 'name'] 
+        fields = ['id', 'name', 'train_prog']
 
 
 class IDGroupTypeSerializer(serializers.ModelSerializer):

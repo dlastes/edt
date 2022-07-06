@@ -589,7 +589,7 @@ let getCorrespondantInfo = (id, param, db) => {
     switch (param) {
         case 'group':
         case 'groups':
-            return db[id]['name'];
+            return `${db[id]['train_prog']}-${db[id]['name']}`;
         case 'module':
         case 'modules':
         case 'train_prog':
