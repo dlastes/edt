@@ -1018,7 +1018,7 @@ let constraintCardBuilder = (cst_obj) => {
     let divTitle = divBuilder({'class': 'constraint-card-title'});
     divTitle.innerHTML = cst_obj['title'] ?? cst_obj["name"];
     let divDesc = divBuilder({'class': 'constraint-card-description'});
-    divDesc.innerHTML = cst_obj['comment'] ?? "No Comment";
+    divDesc.innerHTML = cst_obj['comment'] ?? "";
     // divDesc.innerHTML = cst_obj['parameters'].reduce((a, b) => {
     //     return a + b['name'] + ', ';
     // }, "")
