@@ -729,6 +729,10 @@ let updateBroadcastConstraint = (id) => {
     let buttWeeks = buttonWeeks(obj['weeks']);
     paramsDiv.append(buttWeeks);
     obj['parameters'].forEach(param => {
+        // hide the department parameter
+        if (param.name === 'department') {
+            return;
+        }
         let butt = buttonWithDropBuilder(param);
         paramsDiv.append(butt);
     });
