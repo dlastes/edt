@@ -12,9 +12,9 @@ let filter_functions = {
         ret = [];
         keys = Object.keys(database.tutors).filter((key) => {
             obj = database.tutors[key];
-            return obj['username'].toLowerCase().includes(str) 
-            || obj['first_name'].toLowerCase().includes(str)
-            || obj['last_name'].toLowerCase().includes(str);
+            return obj['username'].toLowerCase().includes(str)
+                || obj['first_name'].toLowerCase().includes(str)
+                || obj['last_name'].toLowerCase().includes(str);
         });
         return Object.values(database['tutors_ids']).filter(tut => {
             return keys.includes(tut['name']);
@@ -36,21 +36,21 @@ let filter_functions = {
         filtered_constraint_list = [...constraint_list];
     },
     filter_constraints_by_tutor: (keys, exclusion) => {
-        if(!keys || keys.length == 0) {
+        if (!keys || keys.length == 0) {
             filtered_constraint_list = [];
             renderConstraints(filtered_constraint_list);
             return;
         }
         filtered_constraint_list = filtered_constraint_list.filter(cst_id => {
             let param = get_parameter_from_constraint(constraints[cst_id], 'tutor');
-            if(Object.keys(param).length == 0) {
+            if (Object.keys(param).length == 0) {
                 return true;
             }
-            if(param.id_list.length == 0 && !exclusion) {
+            if (param.id_list.length == 0 && !exclusion) {
                 return true;
             }
             keys.forEach(k => {
-                if(param.id_list.includes(k)) {
+                if (param.id_list.includes(k)) {
                     return true;
                 }
             });
@@ -59,21 +59,21 @@ let filter_functions = {
         renderConstraints(filtered_constraint_list);
     },
     filter_constraints_by_module: (keys, exclusion) => {
-        if(!keys || keys.length == 0) {
+        if (!keys || keys.length == 0) {
             filtered_constraint_list = [];
             renderConstraints(filtered_constraint_list);
             return;
         }
         filtered_constraint_list = filtered_constraint_list.filter(cst_id => {
             let param = get_parameter_from_constraint(constraints[cst_id], 'module');
-            if(Object.keys(param).length == 0) {
+            if (Object.keys(param).length == 0) {
                 return true;
             }
-            if(param.id_list.length == 0 && !exclusion) {
+            if (param.id_list.length == 0 && !exclusion) {
                 return true;
             }
             keys.forEach(k => {
-                if(param.id_list.includes(k)) {
+                if (param.id_list.includes(k)) {
                     return true;
                 }
             });
@@ -99,7 +99,6 @@ let changeEvents = {
                 is_active: args['is_active'] ?? false,
                 comment: args['comment'],
                 title: args['title'],
-                weeks: copyObj(args['weeks']),
                 parameters: null,
                 weight: args['weight'] ?? 0,
             },
@@ -127,7 +126,6 @@ let changeEvents = {
                 is_active: copy_org_cst['is_active'],
                 comment: copy_org_cst['comment'],
                 title: copy_org_cst['title'],
-                weeks: copyObj(copy_org_cst['weeks']),
                 parameters: copyObj(copy_org_cst['parameters']),
                 weight: copy_org_cst['weight'],
             },
@@ -155,13 +153,13 @@ let changeEvents = {
         filter_functions.reset_filtered_constraint_list();
         renderConstraints();
     },
-    editConstraintAttr: (tableName, id, actions={}) => {
+    editConstraintAttr: (tableName, id, actions = {}) => {
         return true;
     },
     deleteConstraintParameter: (tableName, id, param, pageid) => {
-        if(pageid.startsWith('-ADD-')) {
-            for(let ele of actionChanges['ADD']) {
-                if(ele['tempid'] == pageid) {
+        if (pageid.startsWith('-ADD-')) {
+            for (let ele of actionChanges['ADD']) {
+                if (ele['tempid'] == pageid) {
                     ele['constraint']['parameters'] = ele['constraint']['parameters'].filter(paramObj => {
                         return paramObj['type'] != param;
                     });
@@ -188,24 +186,24 @@ let changeEvents = {
         });
     },
     editConstraintParameter: (tableName, id, param, pageid, new_list) => {
-        if(pageid.startsWith('-ADD-')) {
-            for(let ele of actionChanges['ADD']) {
-                if(ele['tempid'] == pageid) {
-                    for(let p of ele['parameters']) {
-                        if(p['type'] == param) {
+        if (pageid.startsWith('-ADD-')) {
+            for (let ele of actionChanges['ADD']) {
+                if (ele['tempid'] == pageid) {
+                    for (let p of ele['parameters']) {
+                        if (p['type'] == param) {
                             p['id_list'] = new_list;
                             break;
                         }
                     }
                 }
             }
-            for(let p of constraints[pageid]['parameters']) {
-                if(p['type'] == param) {
+            for (let p of constraints[pageid]['parameters']) {
+                if (p['type'] == param) {
                     p['id_list'] = new_list;
                     break;
                 }
             }
-            
+
             return;
         }
         let obj = {
@@ -219,8 +217,8 @@ let changeEvents = {
             },
         };
         actionChanges['EDIT'].push(obj);
-        for(let p of constraints[pageid]['parameters']) {
-            if(p['type'] == param) {
+        for (let p of constraints[pageid]['parameters']) {
+            if (p['type'] == param) {
                 p['id_list'] = new_list;
                 break;
             }
@@ -233,14 +231,36 @@ let changeEvents = {
 
 // object containing functions that fetch data from the database
 let fetchers = {
+    fetchAcceptableValues: (e) => {
+        fetch(build_url(urlAcceptableValues, {"dept": department}))
+            .then(resp => resp.json())
+            .then(jsonObj => {
+                database['acceptableValues'] = {};
+                Object.values(jsonObj).forEach(obj => {
+                    database['acceptableValues'][obj['name']] = obj;
+                });
+            })
+            .catch(err => {
+                console.error("something went wrong while fetching acceptable values");
+                console.error(err);
+            });
+    },
     fetchConstraints: (e) => {
         emptyPage();
+        fetchers.fetchAcceptableValues();
         fetch(build_url(urlConstraints, {"dept": department}))
             .then(resp => resp.json())
             .then(jsonObj => {
                 responseConstraints = responseToDict(Object.values(jsonObj));
                 originalConstraints = copyObj(responseConstraints);
                 constraints = copyFromOriginalConstraints();
+                Object.values(constraints).forEach((constraint) => {
+                    constraint['parameters'].forEach( (param) => {
+                        if (param.name in database['acceptableValues']) {
+                            param['acceptable'] = database['acceptableValues'][param.name]['acceptable'];
+                        }
+                    });
+                });
                 tables = new Set(Object.values(originalConstraints).map(n => n["name"]));
                 actionChanges = emptyChangesDict();
                 selected_constraints = new Set();
@@ -273,7 +293,7 @@ let fetchers = {
             });
     },
     fetchTrainingPrograms: (e) => {
-        
+
     },
     fetchStructuralGroups: (e) => {
         fetch(build_url(urlGroups, {"dept": department}))
@@ -332,7 +352,7 @@ let fetchers = {
             });
     },
     fetchCourses: (e) => {
-         fetch(build_url(urlCourses, {"dept": department}))
+        fetch(build_url(urlCourses, {"dept": department}))
             .then(resp => resp.json())
             .then(jsonObj => {
                 database['courses'] = {};
@@ -446,6 +466,7 @@ let database = {
     'courseTypes': null,
     'courses': null,
     'weeks': null,
+    'acceptableValues': null,
 }
 
 // render the value beside the slider
@@ -499,7 +520,7 @@ let constList = document.getElementById('constraints-list');
 let filtersElement = document.getElementById('filters');
 
 activatedEle.addEventListener('change', () => {
-    if(!broadcastConstraint) {
+    if (!broadcastConstraint) {
         return;
     }
     let obj = constraints[`${broadcastConstraint}`];
@@ -521,7 +542,7 @@ let broadcastConstraint = undefined;
 // HTML element builder to help with the code
 let elementBuilder = (tag, args = {}) => {
     let ele = document.createElement(tag);
-    for(let [key, value] of Object.entries(args)) {
+    for (let [key, value] of Object.entries(args)) {
         ele.setAttribute(key, value);
     }
     return ele;
@@ -529,14 +550,23 @@ let elementBuilder = (tag, args = {}) => {
 
 // returns the corresponding database table based on the parameter given
 let getCorrespondantDatabase = (param) => {
-    switch(param) {
-        case 'base.Department': return database['departments'];
-        case 'base.TrainingProgramme': return database['trainingPrograms'];
-        case 'base.StructuralGroup': return database['structuralGroups'];
-        case 'base.Module': return database['modules'];
-        case 'base.CourseType': return database['courseTypes'];
-        case 'base.Course': return database['courses'];
-        case 'people.Tutor': return database['tutors'];
+    switch (param) {
+        case 'base.Department':
+            return database['departments'];
+        case 'base.TrainingProgramme':
+            return database['trainingPrograms'];
+        case 'base.StructuralGroup':
+            return database['structuralGroups'];
+        case 'base.Module':
+            return database['modules'];
+        case 'base.CourseType':
+            return database['courseTypes'];
+        case 'base.Course':
+            return database['courses'];
+        case 'people.Tutor':
+            return database['tutors'];
+        case 'base.Week':
+            return database['weeks'];
         default:
             console.error("something went wrong while getting correspondant database");
     }
@@ -545,24 +575,33 @@ let getCorrespondantDatabase = (param) => {
 
 // returns the information needed from a parameter and a constraint id given
 let getCorrespondantInfo = (id, param, db) => {
-    switch(param) {
-        case 'base.Department': return db[id];
-        case 'base.TrainingProgramme': return "Not Assigned Yet";
-        case 'base.StructuralGroup': return db[id]['name'];
-        case 'base.Module': return db[id]['abbrev'];
-        case 'base.CourseType': return db[id];
-        case 'base.Course': return "Not Assigned Yet";
-        case 'people.Tutor': return db[id];
+    switch (param) {
+        case 'base.Department':
+            return db[id];
+        case 'base.TrainingProgramme':
+            return "Not Assigned Yet";
+        case 'base.StructuralGroup':
+            return db[id]['name'];
+        case 'base.Module':
+            return db[id]['abbrev'];
+        case 'base.CourseType':
+            return db[id];
+        case 'base.Course':
+            return "Not Assigned Yet";
+        case 'people.Tutor':
+            return db[id];
+        case 'base.Week':
+            return `${db[id]['year']}-${db[id]['nb']}`;
         default:
-            console.error("something went wrong while getting correspondant information");
+            console.error(`something went wrong while getting correspondant information (${param})`);
     }
     return null;
 }
 
 // returns the parameter object from a constraint obejct
 let getParamObj = (cst_id, param) => {
-    for(p of constraints[cst_id]['parameters']) {
-        if(p['type'] == param) {
+    for (p of constraints[cst_id]['parameters']) {
+        if (p['type'] == param) {
             return p;
         }
     }
@@ -574,9 +613,9 @@ let deleteConstraintParameter = (e) => {
     let cst_id = div.attributes['cst-id'].value;
     let param = div.attributes['parameter'].value;
     changeEvents.deleteConstraintParameter(
-        constraints[cst_id]['name'], 
-        constraints[cst_id]['id'], 
-        param, 
+        constraints[cst_id]['name'],
+        constraints[cst_id]['id'],
+        param,
         constraints[cst_id]['pageid'],
     );
     document.getElementById('parameter-screen').parentElement.remove();
@@ -591,18 +630,18 @@ let updateConstraintParameter = (e) => {
     let new_list = [];
     document.querySelectorAll('.form-check').forEach(node => {
         let input = node.querySelector('input');
-        if(input.checked) {
+        if (input.checked) {
             new_list.push(input.attributes['element-id'].value);
         }
     });
-    if(paramObj['required'] && new_list.length == 0) {
+    if (paramObj['required'] && new_list.length == 0) {
         window.alert('You must specify at least one choice!');
         return;
     }
     changeEvents.editConstraintParameter(
-        constraints[cst_id]['name'], 
-        constraints[cst_id]['id'], 
-        param, 
+        constraints[cst_id]['name'],
+        constraints[cst_id]['id'],
+        param,
         constraints[cst_id]['pageid'],
         new_list,
     );
@@ -619,7 +658,7 @@ let cancelConstraintParameter = (e) => {
 let getElementsToFillParameterPopup = (cst_id, parameter) => {
     let param_obj = (constraints[cst_id]['parameters'].filter(o => o['type'] == parameter))[0];
     let divs = [];
-    
+
     param_obj['acceptable'].forEach(ele => {
         let temp_id = 'acceptable' + ele.toString();
         let db = getCorrespondantDatabase(parameter);
@@ -635,7 +674,7 @@ let getElementsToFillParameterPopup = (cst_id, parameter) => {
             'name': 'elementsParameter',
         });
         form.addEventListener('click', (e) => {
-            if(e.currentTarget != e.target) {
+            if (e.currentTarget != e.target) {
                 return;
             }
             form.querySelector('input').checked = !form.querySelector('input').checked;
@@ -683,14 +722,14 @@ let getElementsToFillParameterPopup = (cst_id, parameter) => {
 
 // builds a button that shows a drop menu after clicking on it
 let buttonWithDropBuilder = (obj) => {
-    let butt = elementBuilder("button", { 
-        "class": "transition neutral", 
+    let butt = elementBuilder("button", {
+        "class": "transition neutral",
         "style": "width: auto",
         'id': 'parameter-' + obj['type'],
     });
     butt.innerText = obj["name"];
     butt.addEventListener('click', (e) => {
-        if(e.currentTarget != e.target) {
+        if (e.currentTarget != e.target) {
             return;
         }
         cancelConstraintParameter(null);
@@ -708,25 +747,10 @@ let buttonWithDropBuilder = (obj) => {
     return butt;
 }
 
-// weeks button builder
-let buttonWeeks = (obj) => {
-    let color = obj.length > 0 ? "neutral" : "green";
-    let butt = elementBuilder("button", {
-        "class": "transition " + color,
-        "style": "width: auto",
-    });
-    butt.innerText = "Weeks"
-    let dropMenu = divBuilder({});
-    butt.addEventListener('click', (e) => {
-
-    });
-    return butt;
-}
-
 // update the header info by showing the selected constraint's info
 let updateBroadcastConstraint = (id) => {
-    if(!id) {
-        if(!lastSelectedConstraint) {
+    if (!id) {
+        if (!lastSelectedConstraint) {
             constraintTitle.innerText = "";
             constraintComment.innerText = "";
             paramsDiv.innerHTML = "";
@@ -735,7 +759,7 @@ let updateBroadcastConstraint = (id) => {
             outputSlider('poidsvalue1', 0);
             return;
         }
-    } else if(broadcastConstraint == id) {
+    } else if (broadcastConstraint == id) {
         return;
     }
     broadcastConstraint = id;
@@ -746,8 +770,6 @@ let updateBroadcastConstraint = (id) => {
     activatedEle.checked = obj['is_active'];
     sliderOne.value = obj['weight'] ?? 0;
     outputSlider('poidsvalue1', obj['weight'] ?? 0);
-    let buttWeeks = buttonWeeks(obj['weeks']);
-    paramsDiv.append(buttWeeks);
     obj['parameters'].forEach(param => {
         // hide the department parameter
         if (param.name === 'department') {
@@ -765,7 +787,7 @@ let constraintHovered = (e) => {
 
 // event handler that resets the update broadcast constraint event handler
 let constraintUnhovered = (e) => {
-    if(!lastSelectedConstraint) {
+    if (!lastSelectedConstraint) {
         broadcastConstraint = null;
     }
     updateBroadcastConstraint(lastSelectedConstraint);
@@ -773,14 +795,14 @@ let constraintUnhovered = (e) => {
 
 // Unimplemented functionality
 let buildMetadata = () => {
-    
+
 }
 
 // main section builder
 let buildSection = (name, list) => {
-    let ret = divBuilder({ 'class': 'constraints-section-full'});
-    let title = divBuilder({ 'class': 'constraints-section-title'});
-    let cards = divBuilder({ 'class': 'constraints-section ', 'id': "section-"+name });
+    let ret = divBuilder({'class': 'constraints-section-full'});
+    let title = divBuilder({'class': 'constraints-section-title'});
+    let cards = divBuilder({'class': 'constraints-section ', 'id': "section-" + name});
     let map = list.map(id => constraintCardBuilder(constraints[id]));
     title.innerText = name;
     cards.append(...map)
@@ -790,7 +812,7 @@ let buildSection = (name, list) => {
 
 // helps with the generation of the page's sections
 let buildSections = () => {
-    if(filtered_constraint_list == null) {
+    if (filtered_constraint_list == null) {
         filter_functions.reset_filtered_constraint_list();
     }
     let dict = {};
@@ -798,19 +820,18 @@ let buildSections = () => {
         dict[name] = [];
     });
     Object.values(constraints).forEach(cst => {
-        if(filtered_constraint_list.includes(cst['pageid'])) {
-            if(cst['is_active']) {
+        if (filtered_constraint_list.includes(cst['pageid'])) {
+            if (cst['is_active']) {
                 dict[cst["name"]].push(cst["pageid"])
             }
         }
     });
     let keys = Object.keys(dict);
     let dictDiv = {};
-    for(let k of keys) {
-        if(dict[k].length == 0) {
+    for (let k of keys) {
+        if (dict[k].length == 0) {
             delete dict[k];
-        }
-        else {
+        } else {
             dictDiv[k] = buildSection(k, dict[k]);
         }
     }
@@ -843,8 +864,8 @@ let rearrange = () => {
     let bodyDisabled = document.getElementById('constraints-disabled');
     body.innerHTML = "";
     bodyDisabled.innerHTML = "";
-    for(let id of constraint_list) {
-        if(constraints[id]['is_active']) {
+    for (let id of constraint_list) {
+        if (constraints[id]['is_active']) {
             // body.append(constraintCardBuilder(constraints[id]));
         } else {
             bodyDisabled.append(disabledConstraintCardBuilder(constraints[id]));
@@ -855,17 +876,17 @@ let rearrange = () => {
 
 // event handler when clicking on a constraint
 let constraintClicked = (e) => {
-    if(e.target.type == "checkbox") {
+    if (e.target.type == "checkbox") {
         return;
     }
     let id = e.currentTarget.parentElement.getAttribute('cst-id');
-    if(e.currentTarget.classList.contains('selected')) {
+    if (e.currentTarget.classList.contains('selected')) {
         e.currentTarget.classList.remove("selected");
         e.currentTarget.classList.add("unselected");
         // selected_constraints = selected_constraints.filter(ele => ele != id);
         selected_constraints.delete(id);
         let cb_selected_all = document.getElementById('cb1');
-        if(cb_selected_all.checked) {
+        if (cb_selected_all.checked) {
             cb_selected_all.checked = false;
         }
         lastSelectedConstraint = null;
@@ -875,7 +896,7 @@ let constraintClicked = (e) => {
         selected_constraints.add(id);
 
         lastSelectedConstraint = id;
-        if(Object.keys(constraints).length == selected_constraints.size) {
+        if (Object.keys(constraints).length == selected_constraints.size) {
             document.getElementById('cb1').checked = true;
         }
     }
@@ -890,7 +911,7 @@ let refreshSelectedFromList = (list) => {
     (Array.from(l.children)).forEach(section => {
         (Array.from(section.children)).forEach(node => {
             let child = node.children[0];
-            if(list.has(node.getAttribute('cst-id'))) {
+            if (list.has(node.getAttribute('cst-id'))) {
                 child.classList.remove('unselected');
                 child.classList.add('selected');
             }
@@ -901,7 +922,7 @@ let refreshSelectedFromList = (list) => {
 
 // select all constraint simulator
 let selectAll = (e) => {
-    if(selected_constraints.size == Object.keys(constraints).length) {
+    if (selected_constraints.size == Object.keys(constraints).length) {
         e.currentTarget.checked = true;
     } else {
         selected_constraints = new Set(Object.keys(constraints));
@@ -916,7 +937,7 @@ document.getElementById('cb1').onchange = selectAll;
 // builds a div... helps with the code
 let divBuilder = (args = {}) => {
     let div = document.createElement('div');
-    for(let [key, value] of Object.entries(args)) {
+    for (let [key, value] of Object.entries(args)) {
         div.setAttribute(key, value);
     }
     return div;
@@ -924,8 +945,8 @@ let divBuilder = (args = {}) => {
 
 // builds a div that contains an icon and text
 let iconTextBuilder = (imgurl, value, attr) => {
-    let div = divBuilder({ 'class': 'icon-text ' + attr });
-    let icondiv = divBuilder({ 'class': 'icon-div' });
+    let div = divBuilder({'class': 'icon-text ' + attr});
+    let icondiv = divBuilder({'class': 'icon-div'});
     let img = document.createElement('img');
     img.setAttribute('class', 'icon-info');
     img.src = imgurl;
@@ -945,7 +966,7 @@ let activateConstraint = (e) => {
     e.currentTarget.checked = ele.is_active;
     let str = 'div[cst-id="' + id + '"]';
     let d = constList.querySelector(str);
-    if(!d) {
+    if (!d) {
         d = document.getElementById('constraints-disabled').querySelector(str);
     }
     rearrange();
@@ -953,7 +974,7 @@ let activateConstraint = (e) => {
 
 // div for additional info
 let additionalInfoBuilder = (cst_obj) => {
-    let div = divBuilder({ 'class': 'constraint-card-additional' });
+    let div = divBuilder({'class': 'constraint-card-additional'});
     let params = iconTextBuilder(URLGearsIcon, cst_obj.parameters.length, "parameters");
     let enabled = document.createElement('input');
     enabled.setAttribute('type', 'checkbox');
@@ -968,17 +989,17 @@ let additionalInfoBuilder = (cst_obj) => {
 // builds the card for the constraint
 let constraintCardBuilder = (cst_obj) => {
     let selected = selected_constraints.has(`${cst_obj.pageid}`) ? "selected" : "unselected";
-    let divCard = divBuilder({ 'class': 'constraint-card transition' });
+    let divCard = divBuilder({'class': 'constraint-card transition'});
 
     divCard.setAttribute('cst-id', cst_obj['pageid']);
-    let divCardInfo = divBuilder({ 'class': 'constraint-card-info transition ' + selected });
-    let divCardText = divBuilder({ 'class': 'constraint-card-text ' });
+    let divCardInfo = divBuilder({'class': 'constraint-card-info transition ' + selected});
+    let divCardText = divBuilder({'class': 'constraint-card-text '});
     divCardInfo.addEventListener('click', constraintClicked, false);
     divCardInfo.addEventListener('mouseenter', constraintHovered, false);
     divCardInfo.addEventListener('mouseleave', constraintUnhovered, false);
-    let divTitle = divBuilder({ 'class': 'constraint-card-title' });
+    let divTitle = divBuilder({'class': 'constraint-card-title'});
     divTitle.innerHTML = cst_obj['title'] ?? "No Title";
-    let divDesc = divBuilder({ 'class': 'constraint-card-description' });
+    let divDesc = divBuilder({'class': 'constraint-card-description'});
     divDesc.innerHTML = cst_obj['comment'] ?? "No Comment";
     // divDesc.innerHTML = cst_obj['parameters'].reduce((a, b) => {
     //     return a + b['name'] + ', ';
@@ -993,21 +1014,21 @@ let constraintCardBuilder = (cst_obj) => {
 // builds a card for the disabled constraint
 let disabledConstraintCardBuilder = (cst_obj) => {
     let selected = selected_constraints.has(`${cst_obj.pageid}`) ? "selected" : "unselected";
-    let divCard = divBuilder({ 'class': 'constraint-card-disabled transition' });
+    let divCard = divBuilder({'class': 'constraint-card-disabled transition'});
     divCard.setAttribute('cst-id', cst_obj['pageid']);
-    let divCardInfo = divBuilder({ 'class': 'constraint-card-info-disabled transition ' + selected });
-    let divCardText = divBuilder({ 'class': 'constraint-card-text ' });
+    let divCardInfo = divBuilder({'class': 'constraint-card-info-disabled transition ' + selected});
+    let divCardText = divBuilder({'class': 'constraint-card-text '});
     divCardInfo.addEventListener('click', constraintClicked, false);
     divCardInfo.addEventListener('mouseenter', constraintHovered, false);
     divCardInfo.addEventListener('mouseleave', constraintUnhovered, false);
-    let divTitle = divBuilder({ 'class': 'constraint-card-title' });
+    let divTitle = divBuilder({'class': 'constraint-card-title'});
     divTitle.innerHTML = cst_obj['title'] ?? "No Title";
-    let divDesc = divBuilder({ 'class': 'constraint-card-description' });
+    let divDesc = divBuilder({'class': 'constraint-card-description'});
     divDesc.innerHTML = cst_obj['comment'] ?? "No Comment";
     // divDesc.innerHTML = cst_obj['parameters'].reduce((a, b) => {
     //     return a + b['name'] + ', ';
     // }, "")
-    let divAdd = divBuilder({ 'class': 'constraint-card-additional' });
+    let divAdd = divBuilder({'class': 'constraint-card-additional'});
     divCardText.append(divTitle, divDesc);
     let enabled = document.createElement('input');
     enabled.setAttribute('type', 'checkbox');
@@ -1034,8 +1055,8 @@ let renderConstraints = (cst_list = []) => {
     let bodyDisabled = document.getElementById('constraints-disabled');
     body.innerHTML = "";
     bodyDisabled.innerHTML = "";
-    for(let id of cst_list) {
-        if(constraints[id]['is_active']) {
+    for (let id of cst_list) {
+        if (constraints[id]['is_active']) {
             // body.append(constraintCardBuilder(constraints[id]));
         } else {
             bodyDisabled.append(disabledConstraintCardBuilder(constraints[id]));
@@ -1048,10 +1069,10 @@ let renderConstraints = (cst_list = []) => {
 
 // constranit sorting based on argument
 let sortConstraintsBy = (cst_list, arg) => {
-    if(!constraints[cst_list[0]].hasOwnProperty(arg)) {
+    if (!constraints[cst_list[0]].hasOwnProperty(arg)) {
         return;
     }
-    if(typeof constraints[cst_list[0]][arg] == "object") {
+    if (typeof constraints[cst_list[0]][arg] == "object") {
         cst_list.sort((x, y) => {
             return constraints[x][arg].length < constraints[y][arg].length ? 1 : -1;
         });
@@ -1076,7 +1097,7 @@ document.getElementById('update-weight-all').onclick = updateWeightAll;
 
 // duplicate a cosntraint
 let duplicateSelectedConstraint = (e) => {
-    if(!lastSelectedConstraint) {
+    if (!lastSelectedConstraint) {
         return;
     }
     let constr = constraints[`${lastSelectedConstraint}`];

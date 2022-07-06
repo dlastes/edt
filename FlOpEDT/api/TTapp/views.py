@@ -37,6 +37,7 @@ from rest_framework.response import Response
 from rest_framework.exceptions import APIException
 from api.TTapp import serializers
 from api.permissions import IsAdminOrReadOnly
+from base.weeks import current_year
 
 # ---------------
 # ---- TTAPP ----
@@ -273,7 +274,7 @@ class NoVisioViewSet(viewsets.ModelViewSet):
                           dept_param(required=True)
                       ])
                   )
-class FlopConstraintFieldView(viewsets.ViewSet):
+class FlopConstraintFieldViewSet(viewsets.ViewSet):
     permission_classes = [IsAdminOrReadOnly]
 
     def list(self, request):
@@ -287,7 +288,7 @@ class FlopConstraintFieldView(viewsets.ViewSet):
         # exclude useless fields
         excluded_fields = {'id', 'class_name',
                            'department', 'weight', 'title', 'comment',
-                           'is_active', 'modified_at', 'weeks', 'train_progs', 'courses'}
+                           'is_active', 'modified_at', 'courses'}
 
         for constraint_class in all_subclasses(FlopConstraint):
             fields = constraint_class._meta.get_fields()
@@ -344,6 +345,9 @@ class FlopConstraintFieldView(viewsets.ViewSet):
 
                 elif (field.name == "groups"):
                     acceptablelist = acceptablelist.filter(train_prog__department=department)
+
+                elif (field.name == "weeks"):
+                    acceptablelist = acceptablelist.filter(year__in=[current_year, current_year + 1])
 
                 for element in acceptablelist:
                     acceptable.append(element["id"])

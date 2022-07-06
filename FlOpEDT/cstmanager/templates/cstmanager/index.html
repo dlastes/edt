@@ -4,6 +4,7 @@
 <link rel="stylesheet" href="{% static 'cstmanager/css/styles2.css' %}">
 <script>
     let department = "{{ dept }}";
+    let urlAcceptableValues = "{% url 'api:ttapp:constraints_fields-list' %}";
     let urlConstraints = "{% url 'api:ttapp:constraint-list' %}";
     let urlDepartments = "{% url 'api:fetch:dept-list' %}";
     let urlGroups = "{% url 'api:fetch:idgroup-list' %}";
