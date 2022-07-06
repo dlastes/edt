@@ -345,6 +345,25 @@ let fetchers = {
                 console.error(err);
             });
     },
+    fetchWeeks: (e) => {
+        fetch(urlWeeks)
+            .then(resp => resp.json())
+            .then(jsonObj => {
+                database['weeks'] = {};
+                Object.values(jsonObj).forEach(obj => {
+                    let currentYear = new Date().getFullYear();
+                    let year = obj['year'];
+                    if (year < currentYear || year > currentYear + 1) {
+                        return;
+                    }
+                    database['weeks'][obj['id']] = obj;
+                });
+            })
+            .catch(err => {
+                console.error("something went wrong while fetching weeks");
+                console.error(err);
+            });
+    },
     fetchRooms: (e) => {
         // TODO
     },
@@ -426,6 +445,7 @@ let database = {
     'modules': null,
     'courseTypes': null,
     'courses': null,
+    'weeks': null,
 }
 
 // render the value beside the slider
@@ -1083,4 +1103,5 @@ fetchers.fetchTutors(null);
 fetchers.fetchModules(null);
 fetchers.fetchCourseTypes(null);
 fetchers.fetchTutorsIDs(null);
-fetchers.fetchCourses(null);
+//fetchers.fetchCourses(null);
+fetchers.fetchWeeks();
