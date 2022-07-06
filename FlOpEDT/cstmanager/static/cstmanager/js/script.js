@@ -1016,7 +1016,7 @@ let constraintCardBuilder = (cst_obj) => {
     divCardInfo.addEventListener('mouseenter', constraintHovered, false);
     divCardInfo.addEventListener('mouseleave', constraintUnhovered, false);
     let divTitle = divBuilder({'class': 'constraint-card-title'});
-    divTitle.innerHTML = cst_obj['title'] ?? "No Title";
+    divTitle.innerHTML = cst_obj['title'] ?? cst_obj["name"];
     let divDesc = divBuilder({'class': 'constraint-card-description'});
     divDesc.innerHTML = cst_obj['comment'] ?? "No Comment";
     // divDesc.innerHTML = cst_obj['parameters'].reduce((a, b) => {
