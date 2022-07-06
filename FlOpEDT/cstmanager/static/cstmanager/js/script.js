@@ -235,9 +235,9 @@ let fetchers = {
         fetch(build_url(urlAcceptableValues, {"dept": department}))
             .then(resp => resp.json())
             .then(jsonObj => {
-                database['acceptableValues'] = {};
+                database['acceptable_values'] = {};
                 Object.values(jsonObj).forEach(obj => {
-                    database['acceptableValues'][obj['name']] = obj;
+                    database['acceptable_values'][obj['name']] = obj;
                 });
             })
             .catch(err => {
@@ -256,8 +256,8 @@ let fetchers = {
                 constraints = copyFromOriginalConstraints();
                 Object.values(constraints).forEach((constraint) => {
                     constraint['parameters'].forEach( (param) => {
-                        if (param.name in database['acceptableValues']) {
-                            param['acceptable'] = database['acceptableValues'][param.name]['acceptable'];
+                        if (param.name in database['acceptable_values']) {
+                            param['acceptable'] = database['acceptable_values'][param.name]['acceptable'];
                         }
                     });
                 });
@@ -293,15 +293,26 @@ let fetchers = {
             });
     },
     fetchTrainingPrograms: (e) => {
-
+        fetch(build_url(urlTrainingPrograms, {"dept": department}))
+            .then(resp => resp.json())
+            .then(jsonObj => {
+                database['train_progs'] = {};
+                Object.values(jsonObj).forEach(obj => {
+                    database['train_progs'][obj['id']] = obj;
+                });
+            })
+            .catch(err => {
+                console.error("something went wrong while fetching training programs");
+                console.error(err);
+            });
     },
     fetchStructuralGroups: (e) => {
         fetch(build_url(urlGroups, {"dept": department}))
             .then(resp => resp.json())
             .then(jsonObj => {
-                database['structuralGroups'] = {};
+                database['groups'] = {};
                 Object.values(jsonObj).forEach(obj => {
-                    database['structuralGroups'][obj['id']] = obj;
+                    database['groups'][obj['id']] = obj;
                 });
             })
             .catch(err => {
@@ -341,9 +352,9 @@ let fetchers = {
         fetch(build_url(urlCourseTypes, {"dept": department}))
             .then(resp => resp.json())
             .then(jsonObj => {
-                database['courseTypes'] = {};
+                database['course_types'] = {};
                 Object.values(jsonObj).forEach(obj => {
-                    database['courseTypes'][obj['id']] = obj['name'];
+                    database['course_types'][obj['id']] = obj['name'];
                 });
             })
             .catch(err => {
@@ -393,7 +404,7 @@ let fetchers = {
             .then(jsonObj => {
                 database['tutors_ids'] = {};
                 Object.values(jsonObj).forEach(obj => {
-                    database['tutors_ids'][obj['name']] = obj;
+                    database['tutors_ids'][obj['id']] = obj;
                 });
             })
             .catch(err => {
@@ -458,15 +469,15 @@ let actionChanges = emptyChangesDict();
 let responseConstraints;
 let database = {
     'departments': null,
-    'trainingPrograms': null,
-    'structuralGroups': null,
+    'train_progs': null,
+    'groups': null,
     'tutors': null,
     'tutors_ids': null,
     'modules': null,
-    'courseTypes': null,
+    'course_types': null,
     'courses': null,
     'weeks': null,
-    'acceptableValues': null,
+    'acceptable_values': null,
 }
 
 // render the value beside the slider
@@ -551,51 +562,50 @@ let elementBuilder = (tag, args = {}) => {
 // returns the corresponding database table based on the parameter given
 let getCorrespondantDatabase = (param) => {
     switch (param) {
-        case 'base.Department':
-            return database['departments'];
-        case 'base.TrainingProgramme':
-            return database['trainingPrograms'];
-        case 'base.StructuralGroup':
-            return database['structuralGroups'];
-        case 'base.Module':
+        case 'group':
+        case 'groups':
+            return database['groups'];
+        case 'module':
+        case 'modules':
             return database['modules'];
-        case 'base.CourseType':
-            return database['courseTypes'];
-        case 'base.Course':
-            return database['courses'];
-        case 'people.Tutor':
-            return database['tutors'];
-        case 'base.Week':
+        case 'course_type':
+        case 'course_types':
+            return database['course_types'];
+        case 'train_prog':
+        case 'train_progs':
+            return database['train_progs'];
+        case 'tutor':
+        case 'tutors':
+            return database['tutors_ids'];
+        case 'weeks':
             return database['weeks'];
         default:
-            console.error("something went wrong while getting correspondant database");
+            return database['acceptable_values'][param];
     }
-    return null;
 }
 
 // returns the information needed from a parameter and a constraint id given
 let getCorrespondantInfo = (id, param, db) => {
     switch (param) {
-        case 'base.Department':
-            return db[id];
-        case 'base.TrainingProgramme':
-            return "Not Assigned Yet";
-        case 'base.StructuralGroup':
+        case 'group':
+        case 'groups':
             return db[id]['name'];
-        case 'base.Module':
+        case 'module':
+        case 'modules':
+        case 'train_prog':
+        case 'train_progs':
             return db[id]['abbrev'];
-        case 'base.CourseType':
+        case 'tutors':
+        case 'tutor':
+            return db[id]['name'];
+        case 'course_type':
+        case 'course_types':
             return db[id];
-        case 'base.Course':
-            return "Not Assigned Yet";
-        case 'people.Tutor':
-            return db[id];
-        case 'base.Week':
+        case 'weeks':
             return `${db[id]['year']}-${db[id]['nb']}`;
         default:
-            console.error(`something went wrong while getting correspondant information (${param})`);
+            return id;
     }
-    return null;
 }
 
 // returns the parameter object from a constraint obejct
@@ -656,9 +666,8 @@ let cancelConstraintParameter = (e) => {
 
 // returns elements that make part of the parameter screen
 let getElementsToFillParameterPopup = (cst_id, parameter) => {
-    let param_obj = (constraints[cst_id]['parameters'].filter(o => o['type'] == parameter))[0];
+    let param_obj = (constraints[cst_id]['parameters'].filter(o => o['name'] == parameter))[0];
     let divs = [];
-
     param_obj['acceptable'].forEach(ele => {
         let temp_id = 'acceptable' + ele.toString();
         let db = getCorrespondantDatabase(parameter);
@@ -740,7 +749,7 @@ let buttonWithDropBuilder = (obj) => {
             'parameter': obj['type'],
             'id': 'parameter-screen'
         });
-        let elements = getElementsToFillParameterPopup(lastSelectedConstraint, obj['type']);
+        let elements = getElementsToFillParameterPopup(lastSelectedConstraint, obj['name']);
         tempScreen.append(...elements);
         butt.append(tempScreen);
     });
@@ -1136,7 +1145,7 @@ let constraint_metadata = null;
 // fetch data from database
 fetchers.fetchConstraints(null);
 fetchers.fetchDepartments(null);
-// fetchers.fetchTrainingPrograms(null);
+fetchers.fetchTrainingPrograms(null);
 fetchers.fetchStructuralGroups(null);
 fetchers.fetchTutors(null);
 fetchers.fetchModules(null);
