@@ -334,16 +334,13 @@ class FlopConstraintFieldViewSet(viewsets.ViewSet):
                 acceptablelist = mod.objects.values("id")
 
                 # Filtre les ID dans acceptable list en fonction du department
-                if (field.name == "tutors"):
+                if (field.name in ["tutor", "tutors"]):
                     acceptablelist = acceptablelist.filter(departments=department)
 
-                elif (field.name == "train_progs"):
+                elif (field.name in ["train_progs", "course_type", "course_types"]):
                     acceptablelist = acceptablelist.filter(department=department)
 
-                elif (field.name == "modules"):
-                    acceptablelist = acceptablelist.filter(train_prog__department=department)
-
-                elif (field.name == "groups"):
+                elif (field.name in ["modules", "module", "groups", "group"]):
                     acceptablelist = acceptablelist.filter(train_prog__department=department)
 
                 elif (field.name == "weeks"):
