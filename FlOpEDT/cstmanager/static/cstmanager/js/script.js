@@ -557,7 +557,7 @@ let broadcastConstraint = undefined;
 // HTML element builder to help with the code
 let elementBuilder = (tag, args = {}) => {
     let ele = document.createElement(tag);
-    for (let [key, value] of Object.entries(args)) {
+    for (const [key, value] of Object.entries(args)) {
         ele.setAttribute(key, value);
     }
     return ele;
@@ -611,6 +611,10 @@ let getCorrespondantInfo = (id, param, db) => {
             return id;
     }
 }
+
+let isParameterValueSelectedInConstraint = (constraintName, parameter, value) => {
+    return constraints[constraintName].parameters.find(param => param.name === parameter).id_list.includes(value);
+};
 
 // returns the parameter object from a constraint obejct
 let getParamObj = (cst_id, param) => {
@@ -670,22 +674,24 @@ let cancelConstraintParameter = (e) => {
 
 // returns elements that make part of the parameter screen
 let getElementsToFillParameterPopup = (cst_id, parameter) => {
-    let param_obj = (constraints[cst_id]['parameters'].filter(o => o['name'] == parameter))[0];
+    let param_obj = (constraints[cst_id].parameters.filter(o => o.name === parameter))[0];
     let divs = [];
-    param_obj['acceptable'].forEach(ele => {
+    param_obj.acceptable.forEach(ele => {
         let temp_id = 'acceptable' + ele.toString();
         let db = getCorrespondantDatabase(parameter);
         let str = getCorrespondantInfo(ele, parameter, db);
+        let checked = isParameterValueSelectedInConstraint(cst_id, parameter, ele);
         let form = divBuilder({
             class: 'form-check',
         });
         let input = elementBuilder('input', {
             'class': 'form-check-input',
-            'type': param_obj['multiple'] ? 'checkbox' : 'radio',
+            'type': param_obj.multiple ? 'checkbox' : 'radio',
             'id': temp_id,
             'element-id': ele,
             'name': 'elementsParameter',
         });
+        input.checked = checked;
         form.addEventListener('click', (e) => {
             if (e.currentTarget != e.target) {
                 return;
