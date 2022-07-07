@@ -187,25 +187,28 @@ let changeEvents = {
     },
     editConstraintParameter: (tableName, id, param, pageid, new_list) => {
         if (pageid.startsWith('-ADD-')) {
-            for (let ele of actionChanges['ADD']) {
-                if (ele['tempid'] == pageid) {
-                    for (let p of ele['parameters']) {
-                        if (p['type'] == param) {
-                            p['id_list'] = new_list;
+            for (let ele of actionChanges.ADD) {
+                if (ele.tempid === pageid) {
+                    for (let p of ele.parameters) {
+                        if (p.type === param) {
+                            p.id_list = new_list;
                             break;
                         }
                     }
                 }
             }
-            for (let p of constraints[pageid]['parameters']) {
-                if (p['type'] == param) {
-                    p['id_list'] = new_list;
-                    break;
+
+            // also edit the locally stored constraint
+            constraints[pageid].parameters.forEach((p) => {
+                if (p.type === param) {
+                    p.id_list = new_list;
                 }
-            }
+            });
 
             return;
         }
+
+        // add the changes to history
         let obj = {
             policy: 'EDIT',
             table: tableName,
@@ -216,13 +219,14 @@ let changeEvents = {
                 id_list: new_list,
             },
         };
-        actionChanges['EDIT'].push(obj);
-        for (let p of constraints[pageid]['parameters']) {
-            if (p['type'] == param) {
-                p['id_list'] = new_list;
-                break;
+        actionChanges.EDIT.push(obj);
+
+        // also edit the locally stored constraint
+        constraints[pageid].parameters.forEach((p) => {
+            if (p.type === param) {
+                p.id_list = new_list;
             }
-        }
+        });
     },
     normalizeActionChanges: () => {
         return true;
@@ -255,7 +259,7 @@ let fetchers = {
                 originalConstraints = copyObj(responseConstraints);
                 constraints = copyFromOriginalConstraints();
                 Object.values(constraints).forEach((constraint) => {
-                    constraint['parameters'].forEach( (param) => {
+                    constraint['parameters'].forEach((param) => {
                         if (param.name in database['acceptable_values']) {
                             param['acceptable'] = database['acceptable_values'][param.name]['acceptable'];
                         }
@@ -822,13 +826,13 @@ let buildSection = (name, list) => {
 // helps with the generation of the page's sections
 
 let buildSections = () => {
-    constList.innerHTML="";
+    constList.innerHTML = "";
     if (filtered_constraint_list == null) {
         filter_functions.reset_filtered_constraint_list();
     }
     let order_by_class = document.getElementById('show-sections').checked;
     let dict = {};
-    if (order_by_class){
+    if (order_by_class) {
         tables.forEach(name => {
             dict[name] = [];
         });
@@ -839,8 +843,7 @@ let buildSections = () => {
                 }
             }
         });
-    }
-    else {
+    } else {
         dict['All constraints'] = [];
         Object.values(constraints).forEach(cst => {
             if (filtered_constraint_list.includes(cst['pageid'])) {
@@ -898,7 +901,7 @@ let rearrange = () => {
             bodyDisabled.append(disabledConstraintCardBuilder(constraints[id]));
         }
     }
-    buildSections(false);
+    buildSections();
 }
 
 // event handler when clicking on a constraint
@@ -1089,7 +1092,7 @@ let renderConstraints = (cst_list = []) => {
             bodyDisabled.append(disabledConstraintCardBuilder(constraints[id]));
         }
     }
-    buildSections(false);
+    buildSections();
     updateNumberConstraints();
     refreshSelectedFromList(selected_constraints);
 }
