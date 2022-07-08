@@ -129,7 +129,7 @@ class FlopConstraintSerializer(serializers.ModelSerializer):
 
                 if(not field.many_to_one and not field.many_to_many):
                     typename = type(field).__name__
-                    
+
                     if(type(field)==ArrayField):
                         multiple = True
                         typename = type(field.base_field).__name__
@@ -160,6 +160,30 @@ class FlopConstraintSerializer(serializers.ModelSerializer):
                 paramlist.append(parameters)
 
         return(paramlist)
+
+
+class FlopConstraintTypeSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    parameters = serializers.SerializerMethodField()
+
+    def get_parameters(self, obj):
+        fields = []
+        for field in obj['parameters']:
+            multiple = False
+            if not (field.many_to_one or field.many_to_many):
+                typename = type(field).__name__
+
+                if type(field) == ArrayField:
+                    multiple = True
+                    typename = type(field.base_field).__name__
+            else:
+                mod = field.related_model
+                typenamesplit = str(mod)[8:-2].split(".")
+                typename = typenamesplit[0] + "." + typenamesplit[2]
+                if field.many_to_many:
+                    multiple = True
+            fields.append({'name': field.name, 'type': typename, 'multiple': multiple})
+        return fields
 
 
 class TTConstraintSerializer(FlopConstraintSerializer):

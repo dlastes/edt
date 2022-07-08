@@ -36,5 +36,6 @@ routerTTapp = routers.SimpleRouter()
 # routerTTapp.register(r'simultaneouscourses', views.TTSimultaneousCoursesViewSet)
 # routerTTapp.register(r'limitedstarttimechoices', views.TTLimitedStartTimeChoicesViewSet) # TODO: Fix
 routerTTapp.register(r'constraint', views.FlopConstraintViewSet, basename ="constraint")
+routerTTapp.register(r'constraint_types', views.FlopConstraintTypeViewSet, basename ="constraint_types")
 routerTTapp.register(r'novisio', views.NoVisioViewSet, basename ="novisio")
 routerTTapp.register(r'constraints_fields', views.FlopConstraintFieldViewSet, basename ="constraints_fields")

@@ -1,17 +1,43 @@
 // helper function to extract a parameter object from a given constraint
 let get_parameter_from_constraint = (cst, name) => {
     let ret = {};
-    let l = cst.parameters.filter(obj => obj['name'] == name);
-    return l.length == 0 ? ret : l[0];
+    let l = cst.parameters.filter(obj => obj['name'] === name);
+    return l.length === 0 ? ret : l[0];
 }
+
+let htmlElements = {
+    URLWeightIcon: document.getElementById('icon-weight').src,
+    URLGearsIcon: document.getElementById('icon-gears').src,
+    URLCheckIcon: document.getElementById('icon-check').src,
+    constraintsInfo: document.getElementById('constraint-info'),
+    constraintsInfoBody: document.getElementById('constraint-info-body'),
+    constraintsEdit: document.getElementById('constraint-edit'),
+    constraintTitle: document.getElementById('constraint-header-title'),
+    constraintComment: document.getElementById('constraint-header-comment'),
+    paramsDiv: document.getElementById('params'),
+    activatedEle: document.getElementById('id2'),
+    constraintEditType: document.getElementById('constraint-edit-type'),
+    constraintEditParamsList: document.getElementById('constraint-edit-params'),
+    constraintEditWeightSlider: document.getElementById('constraint-edit-weight-slider'),
+    constraintEditWeightValue: document.getElementById('constraint-edit-weight-value'),
+    constList: document.getElementById('constraints-list'),
+    filtersElement: document.getElementById('filters'),
+    numberSelectedConstraints: document.getElementById('num-selected-constraints'),
+    constraintsDisabled: document.getElementById('constraints-disabled'),
+    newConstraintButton: document.getElementById('new-constraint'),
+    commitChangesButton: document.getElementById('apply-changes'),
+    fetchConstraintsButton: document.getElementById('fetch-constraints'),
+    applyFiltersButton: document.getElementById('clear-filters'),
+    saveNewConstraintButton: document.getElementById('save-new-constraint'),
+};
 
 // object containing functions that involve filtering
 let filter_functions = {
     tutor: (str) => {
         str = str.toLowerCase();
-        ret = [];
-        keys = Object.keys(database.tutors).filter((key) => {
-            obj = database.tutors[key];
+        let ret = [];
+        let keys = Object.keys(database.tutors).filter((key) => {
+            let obj = database.tutors[key];
             return obj['username'].toLowerCase().includes(str)
                 || obj['first_name'].toLowerCase().includes(str)
                 || obj['last_name'].toLowerCase().includes(str);
@@ -36,17 +62,17 @@ let filter_functions = {
         filtered_constraint_list = [...constraint_list];
     },
     filter_constraints_by_tutor: (keys, exclusion) => {
-        if (!keys || keys.length == 0) {
+        if (!keys || keys.length === 0) {
             filtered_constraint_list = [];
             renderConstraints(filtered_constraint_list);
             return;
         }
         filtered_constraint_list = filtered_constraint_list.filter(cst_id => {
             let param = get_parameter_from_constraint(constraints[cst_id], 'tutor');
-            if (Object.keys(param).length == 0) {
+            if (Object.keys(param).length === 0) {
                 return true;
             }
-            if (param.id_list.length == 0 && !exclusion) {
+            if (param.id_list.length === 0 && !exclusion) {
                 return true;
             }
             keys.forEach(k => {
@@ -59,17 +85,17 @@ let filter_functions = {
         renderConstraints(filtered_constraint_list);
     },
     filter_constraints_by_module: (keys, exclusion) => {
-        if (!keys || keys.length == 0) {
+        if (!keys || keys.length === 0) {
             filtered_constraint_list = [];
             renderConstraints(filtered_constraint_list);
             return;
         }
         filtered_constraint_list = filtered_constraint_list.filter(cst_id => {
             let param = get_parameter_from_constraint(constraints[cst_id], 'module');
-            if (Object.keys(param).length == 0) {
+            if (Object.keys(param).length === 0) {
                 return true;
             }
-            if (param.id_list.length == 0 && !exclusion) {
+            if (param.id_list.length === 0 && !exclusion) {
                 return true;
             }
             keys.forEach(k => {
@@ -83,6 +109,40 @@ let filter_functions = {
     },
 }
 
+let isHeaderLocked = false;
+
+let visibility = {
+    setElementVisible: (htmlElement, isVisible) => {
+        htmlElement.hidden = !isVisible;
+    },
+    lock: _ => {
+        isHeaderLocked = true;
+    },
+    unlock: _ => {
+        isHeaderLocked = false;
+    },
+    showConstraintInfo: _ => {
+        if (isHeaderLocked) {
+            return;
+        }
+        visibility.setElementVisible(htmlElements.constraintsInfo, true);
+        visibility.hideConstraintEdit();
+    },
+    hideConstraintInfo: _ => {
+        visibility.setElementVisible(htmlElements.constraintsInfo, false);
+    },
+    showConstraintEdit: _ => {
+        if (isHeaderLocked) {
+            return;
+        }
+        visibility.setElementVisible(htmlElements.constraintsEdit, true);
+        visibility.hideConstraintInfo();
+    },
+    hideConstraintEdit: _ => {
+        visibility.setElementVisible(htmlElements.constraintsEdit, false);
+    },
+};
+
 // object containing event listeners for constraint management (to prepare for the request)
 let changeEvents = {
     addNewConstraint: (args = {
@@ -90,15 +150,15 @@ let changeEvents = {
         title: null,
     }) => {
         let rand = getRandomInt(100000);
-        let id = "-ADD-" + tableName + rand.toString();
+        let id = "-ADD-" + name + rand.toString();
         let obj = {
             policy: 'ADD',
-            table: tableName,
+            table: name,
             tempid: id,
             constraint: {
-                is_active: args['is_active'] ?? false,
-                comment: args['comment'],
-                title: args['title'],
+                is_active: args.is_active ?? false,
+                comment: args.comment,
+                title: args.title,
                 parameters: null,
                 weight: args['weight'] ?? 0,
             },
@@ -159,15 +219,15 @@ let changeEvents = {
     deleteConstraintParameter: (tableName, id, param, pageid) => {
         if (pageid.startsWith('-ADD-')) {
             for (let ele of actionChanges['ADD']) {
-                if (ele['tempid'] == pageid) {
+                if (ele['tempid'] === pageid) {
                     ele['constraint']['parameters'] = ele['constraint']['parameters'].filter(paramObj => {
-                        return paramObj['type'] != param;
+                        return paramObj['type'] !== param;
                     });
                     break;
                 }
             }
             constraints[pageid]['parameters'] = constraints[pageid]['parameters'].filter(paramObj => {
-                return paramObj['type'] != param;
+                return paramObj['type'] !== param;
             });
             return;
         }
@@ -182,7 +242,7 @@ let changeEvents = {
         };
         actionChanges['EDIT'].push(obj);
         constraints[pageid]['parameters'] = constraints[pageid]['parameters'].filter(paramObj => {
-            return paramObj['type'] != param;
+            return paramObj['type'] !== param;
         });
     },
     editConstraintParameter: (tableName, id, param, pageid, new_list) => {
@@ -286,7 +346,7 @@ let fetchers = {
                 database['departments'] = jsonObj.reduce((obj, next) => {
                     let id = next['id'].toString();
                     let abbrev = next['abbrev'];
-                    ret = obj;
+                    let ret = obj;
                     ret[id] = abbrev;
                     return ret;
                 }, {})
@@ -415,7 +475,26 @@ let fetchers = {
                 console.error("something went wrong while fetching tutors_ids");
                 console.error(err);
             });
-    }
+    },
+    fetchConstraintTypes: (e) => {
+        fetch(urlConstraintTypes)
+            .then(resp => resp.json())
+            .then(jsonObj => {
+                database.constraint_types = {};
+                Object.values(jsonObj).forEach(obj => {
+                    database.constraint_types[obj.name] = obj;
+
+                    // fill the types in type selection
+                    let option = elementBuilder('option', {});
+                    option.text = obj.name.toString();
+                    htmlElements.constraintEditType.add(option);
+                });
+            })
+            .catch(err => {
+                console.error("something went wrong while fetching constraint types");
+                console.error(err);
+            });
+    },
 }
 
 // transform DB response to a JSON object
@@ -436,7 +515,7 @@ let copyObj = (obj) => {
 
 // toggle the tab for disabled constraints
 let toggleDisabledDiv = (e) => {
-    document.getElementById('constraints-disabled').classList.toggle('display-none');
+    htmlElements.constraintsDisabled.classList.toggle('display-none');
 }
 document.getElementById('show-disabled').addEventListener('click', toggleDisabledDiv);
 
@@ -482,13 +561,47 @@ let database = {
     'courses': null,
     'weeks': null,
     'acceptable_values': null,
+    'constraint_types': null,
 }
 
 // render the value beside the slider
 let outputSlider = (id, val) => {
-    val = val == 8 ? 0 : val;
+    /*val = val % 8;
     let ele = document.getElementById(id);
-    ele.innerHTML = val;
+    ele.innerHTML = val;*/
+}
+
+let updateEditConstraintParamsDisplay = (constraintName) => {
+    let div = htmlElements.constraintEditParamsList;
+    let child = div.lastElementChild;
+    while (child) {
+        div.removeChild(child);
+        child = div.lastElementChild;
+        div.removeChild(child);
+    }
+    let className = constraintName.split('-')[0];
+    let parameters = database.acceptable_values[className];
+    let constraint = constraints['NEW'] = {
+        comment: null,
+        id: 1,
+        is_active: false,
+        modified_at: "",
+        name: className,
+        pageid: constraintName,
+        parameters: parameters,
+        title: null,
+        weight: 1,
+    };
+    database.constraint_types[className].parameters.forEach(param => {
+        let button = buttonWithDropBuilder(constraint, param);
+        div.append(button);
+    })
+}
+
+
+let updateEditConstraintWeightDisplay = (value) => {
+    value = value % 8;
+    htmlElements.constraintEditWeightValue.innerText = value.toString();
 }
 
 // event handler that discard constraint changes and restore 
@@ -519,27 +632,24 @@ let clearFilters = (e) => {
     renderConstraints(constraint_list)
 }
 
-document.getElementById('apply-changes').addEventListener('click', applyChanges);
-document.getElementById('new-constraint').addEventListener('click', fetchers.fetchConstraints);
-document.getElementById('clear-filters').addEventListener('click', clearFilters);
+// creates a temporary constraint which can be edited. This constraint is added after pressing the save button.
+let createNewConstraint = () => {
+    visibility.showConstraintEdit();
+    visibility.lock();
+};
+htmlElements.newConstraintButton.addEventListener('click', createNewConstraint);
+htmlElements.saveNewConstraintButton.addEventListener('click', visibility.unlock);
 
-let URLWeightIcon = document.getElementById('icon-weight').src;
-let URLGearsIcon = document.getElementById('icon-gears').src;
-let URLCheckIcon = document.getElementById('icon-check').src;
-let constraintTitle = document.getElementById('constraint-header-title');
-let constraintComment = document.getElementById('constraint-header-comment');
-let paramsDiv = document.getElementById('params');
-let activatedEle = document.getElementById('id2');
-let sliderOne = document.getElementById('slider-one');
-let constList = document.getElementById('constraints-list');
-let filtersElement = document.getElementById('filters');
+htmlElements.commitChangesButton.addEventListener('click', applyChanges);
+htmlElements.fetchConstraintsButton.addEventListener('click', fetchers.fetchConstraints);
+htmlElements.applyFiltersButton.addEventListener('click', clearFilters);
 
-activatedEle.addEventListener('change', () => {
+htmlElements.activatedEle.addEventListener('change', () => {
     if (!broadcastConstraint) {
         return;
     }
     let obj = constraints[`${broadcastConstraint}`];
-    obj.is_active = activatedEle.checked;
+    obj.is_active = htmlElements.activatedEle.checked;
     rearrange();
 })
 
@@ -548,8 +658,7 @@ let lastSelectedConstraint = null;
 
 // number of constraints selected updater
 let updateNumberConstraints = () => {
-    let ele = document.getElementById('num-selected-constraints');
-    ele.innerText = selected_constraints.size;
+    htmlElements.numberSelectedConstraints.innerText = selected_constraints.size.toString();
 }
 
 let broadcastConstraint = undefined;
@@ -612,14 +721,14 @@ let getCorrespondantInfo = (id, param, db) => {
     }
 }
 
-let isParameterValueSelectedInConstraint = (constraintName, parameter, value) => {
-    return constraints[constraintName].parameters.find(param => param.name === parameter).id_list.includes(value);
+let isParameterValueSelectedInConstraint = (constraint, parameter, value) => {
+    return constraint.parameters.find(param => param.name === parameter).id_list.includes(value);
 };
 
 // returns the parameter object from a constraint obejct
-let getParamObj = (cst_id, param) => {
-    for (p of constraints[cst_id]['parameters']) {
-        if (p['type'] == param) {
+let getParamObj = (constraint, param) => {
+    for (p of constraint.parameters) {
+        if (p.type === param) {
             return p;
         }
     }
@@ -629,12 +738,13 @@ let getParamObj = (cst_id, param) => {
 let deleteConstraintParameter = (e) => {
     let div = document.getElementById('parameter-screen');
     let cst_id = div.attributes['cst-id'].value;
+    let constraint = constraints[cst_id];
     let param = div.attributes['parameter'].value;
     changeEvents.deleteConstraintParameter(
-        constraints[cst_id]['name'],
-        constraints[cst_id]['id'],
+        constraint.name,
+        constraint.id,
         param,
-        constraints[cst_id]['pageid'],
+        constraint.pageid,
     );
     document.getElementById('parameter-screen').parentElement.remove();
 }
@@ -644,7 +754,8 @@ let updateConstraintParameter = (e) => {
     let div = document.getElementById('parameter-screen');
     let cst_id = div.attributes['cst-id'].value;
     let param = div.attributes['parameter'].value;
-    let paramObj = getParamObj(cst_id, param);
+    let constraint = constraints[cst_id];
+    let paramObj = getParamObj(constraint, param);
     let new_list = [];
     document.querySelectorAll('.form-check').forEach(node => {
         let input = node.querySelector('input');
@@ -652,15 +763,15 @@ let updateConstraintParameter = (e) => {
             new_list.push(input.attributes['element-id'].value);
         }
     });
-    if (paramObj['required'] && new_list.length == 0) {
+    if (paramObj['required'] && new_list.length === 0) {
         window.alert('You must specify at least one choice!');
         return;
     }
     changeEvents.editConstraintParameter(
-        constraints[cst_id]['name'],
-        constraints[cst_id]['id'],
+        constraint.name,
+        constraint.id,
         param,
-        constraints[cst_id]['pageid'],
+        constraint.pageid,
         new_list,
     );
 }
@@ -673,14 +784,15 @@ let cancelConstraintParameter = (e) => {
 }
 
 // returns elements that make part of the parameter screen
-let getElementsToFillParameterPopup = (cst_id, parameter) => {
-    let param_obj = (constraints[cst_id].parameters.filter(o => o.name === parameter))[0];
+let getElementsToFillParameterPopup = (constraint, parameter) => {
+    console.log(constraint, parameter);
+    let param_obj = (constraint.parameters.filter(o => o.name === parameter))[0];
     let divs = [];
     param_obj.acceptable.forEach(ele => {
         let temp_id = 'acceptable' + ele.toString();
         let db = getCorrespondantDatabase(parameter);
         let str = getCorrespondantInfo(ele, parameter, db);
-        let checked = isParameterValueSelectedInConstraint(cst_id, parameter, ele);
+        let checked = isParameterValueSelectedInConstraint(constraint, parameter, ele);
         let form = divBuilder({
             class: 'form-check',
         });
@@ -693,7 +805,7 @@ let getElementsToFillParameterPopup = (cst_id, parameter) => {
         });
         input.checked = checked;
         form.addEventListener('click', (e) => {
-            if (e.currentTarget != e.target) {
+            if (e.currentTarget !== e.target) {
                 return;
             }
             form.querySelector('input').checked = !form.querySelector('input').checked;
@@ -740,26 +852,24 @@ let getElementsToFillParameterPopup = (cst_id, parameter) => {
 }
 
 // builds a button that shows a drop menu after clicking on it
-let buttonWithDropBuilder = (obj) => {
+let buttonWithDropBuilder = (constraint, parameter) => {
     let butt = elementBuilder("button", {
-        "class": "transition neutral",
-        "style": "width: auto",
-        'id': 'parameter-' + obj['type'],
+        "class": "btn btn-primary",
+        'id': 'parameter-' + parameter.type,
     });
-    butt.innerText = obj["name"];
+    butt.innerText = parameter.name;
     butt.addEventListener('click', (e) => {
-        if (e.currentTarget != e.target) {
+        if (e.currentTarget !== e.target) {
             return;
         }
         cancelConstraintParameter(null);
-        // if()
         let tempScreen = divBuilder({
             'class': 'div-popup',
-            'cst-id': lastSelectedConstraint,
-            'parameter': obj['type'],
+            'cst-id': constraint.pageid,
+            'parameter': parameter.type,
             'id': 'parameter-screen'
         });
-        let elements = getElementsToFillParameterPopup(lastSelectedConstraint, obj['name']);
+        let elements = getElementsToFillParameterPopup(constraint, parameter.name);
         tempScreen.append(...elements);
         butt.append(tempScreen);
     });
@@ -770,32 +880,35 @@ let buttonWithDropBuilder = (obj) => {
 let updateBroadcastConstraint = (id) => {
     if (!id) {
         if (!lastSelectedConstraint) {
-            constraintTitle.innerText = "";
-            constraintComment.innerText = "";
-            paramsDiv.innerHTML = "";
-            activatedEle.checked = false;
-            sliderOne.value = 0;
+            htmlElements.constraintTitle.innerText = "";
+            htmlElements.constraintComment.innerText = "";
+            htmlElements.paramsDiv.innerHTML = "";
+            htmlElements.activatedEle.checked = false;
+            htmlElements.constraintEditWeightSlider.value = 0;
             outputSlider('poidsvalue1', 0);
+            visibility.hideConstraintInfo();
             return;
         }
-    } else if (broadcastConstraint == id) {
+    } else if (broadcastConstraint === id) {
         return;
     }
+    visibility.showConstraintInfo();
+
     broadcastConstraint = id;
     let obj = constraints[id];
-    constraintTitle.innerText = obj['title'] ?? "No Title";
-    constraintComment.innerText = obj['comment'];
-    paramsDiv.innerHTML = "";
-    activatedEle.checked = obj['is_active'];
-    sliderOne.value = obj['weight'] ?? 0;
-    outputSlider('poidsvalue1', obj['weight'] ?? 0);
-    obj['parameters'].forEach(param => {
+    htmlElements.constraintTitle.innerText = obj.title ?? "No Title";
+    htmlElements.constraintComment.innerText = obj.comment;
+    htmlElements.paramsDiv.innerHTML = "";
+    htmlElements.activatedEle.checked = obj.is_active;
+    htmlElements.constraintEditWeightSlider.value = obj.weight ?? 0;
+    outputSlider('poidsvalue1', obj.weight ?? 0);
+    obj.parameters.forEach(param => {
         // hide the department parameter
         if (param.name === 'department') {
             return;
         }
-        let butt = buttonWithDropBuilder(param);
-        paramsDiv.append(butt);
+        let butt = buttonWithDropBuilder(obj, param);
+        htmlElements.paramsDiv.append(butt);
     });
 }
 
@@ -832,7 +945,7 @@ let buildSection = (name, list) => {
 // helps with the generation of the page's sections
 
 let buildSections = () => {
-    constList.innerHTML = "";
+    htmlElements.constList.innerHTML = "";
     if (filtered_constraint_list == null) {
         filter_functions.reset_filtered_constraint_list();
     }
@@ -862,21 +975,21 @@ let buildSections = () => {
     let keys = Object.keys(dict);
     let dictDiv = {};
     for (let k of keys) {
-        if (dict[k].length == 0) {
+        if (dict[k].length === 0) {
             delete dict[k];
         } else {
             dictDiv[k] = buildSection(k, dict[k]);
         }
     }
 
-    constList.append(...Object.values(dictDiv));
+    htmlElements.constList.append(...Object.values(dictDiv));
 }
 
 document.getElementById('show-sections').addEventListener('click', buildSections);
 
 // rerender the constraints on the page (in case of a modification)
 let rerender = () => {
-    Array.from(constList.children).forEach(section => {
+    Array.from(htmlElements.constList.children).forEach(section => {
         Array.from(section.children).forEach(node => {
             let obj = constraints[node.getAttribute('cst-id')];
             node.querySelector('input').checked = obj.is_active;
@@ -884,7 +997,7 @@ let rerender = () => {
             node.querySelector('.icon-text.parameters').querySelector('strong').innerText = obj.parameters.length;
         });
     });
-    Array.from(document.getElementById('constraints-disabled').children).forEach(node => {
+    Array.from(htmlElements.constraintsDisabled.children).forEach(node => {
         let obj = constraints[node.getAttribute('cst-id')];
         node.querySelector('input').checked = obj.is_active;
         // node.querySelector('.icon-text.weight').querySelector('strong').innerText = obj.weight;
@@ -896,8 +1009,8 @@ let rerender = () => {
 let rearrange = () => {
     let constraint_list = Object.keys(constraints);
     filter_functions.reset_filtered_constraint_list();
-    let body = constList;
-    let bodyDisabled = document.getElementById('constraints-disabled');
+    let body = htmlElements.constList;
+    let bodyDisabled = htmlElements.constraintsDisabled;
     body.innerHTML = "";
     bodyDisabled.innerHTML = "";
     for (let id of constraint_list) {
@@ -912,7 +1025,7 @@ let rearrange = () => {
 
 // event handler when clicking on a constraint
 let constraintClicked = (e) => {
-    if (e.target.type == "checkbox") {
+    if (e.target.type === "checkbox") {
         return;
     }
     let id = e.currentTarget.parentElement.getAttribute('cst-id');
@@ -932,7 +1045,7 @@ let constraintClicked = (e) => {
         selected_constraints.add(id);
 
         lastSelectedConstraint = id;
-        if (Object.keys(constraints).length == selected_constraints.size) {
+        if (Object.keys(constraints).length === selected_constraints.size) {
             document.getElementById('cb1').checked = true;
         }
     }
@@ -943,7 +1056,7 @@ let constraintClicked = (e) => {
 
 // color selected constraints
 let refreshSelectedFromList = (list) => {
-    let l = constList;
+    let l = htmlElements.constList;
     (Array.from(l.children)).forEach(section => {
         (Array.from(section.children)).forEach(node => {
             let child = node.children[0];
@@ -958,7 +1071,7 @@ let refreshSelectedFromList = (list) => {
 
 // select all constraint simulator
 let selectAll = (e) => {
-    if (selected_constraints.size == Object.keys(constraints).length) {
+    if (selected_constraints.size === Object.keys(constraints).length) {
         e.currentTarget.checked = true;
     } else {
         selected_constraints = new Set(Object.keys(constraints));
@@ -1001,9 +1114,9 @@ let activateConstraint = (e) => {
     ele.is_active = !ele.is_active;
     e.currentTarget.checked = ele.is_active;
     let str = 'div[cst-id="' + id + '"]';
-    let d = constList.querySelector(str);
+    let d = htmlElements.constList.querySelector(str);
     if (!d) {
-        d = document.getElementById('constraints-disabled').querySelector(str);
+        d = htmlElements.constraintsDisabled.querySelector(str);
     }
     rearrange();
 }
@@ -1011,13 +1124,13 @@ let activateConstraint = (e) => {
 // div for additional info
 let additionalInfoBuilder = (cst_obj) => {
     let div = divBuilder({'class': 'constraint-card-additional'});
-    let params = iconTextBuilder(URLGearsIcon, cst_obj.parameters.length, "parameters");
+    let params = iconTextBuilder(htmlElements.URLGearsIcon, cst_obj.parameters.length, "parameters");
     let enabled = document.createElement('input');
     enabled.setAttribute('type', 'checkbox');
     enabled.setAttribute('checked', cst_obj.is_active);
     enabled.setAttribute('cst-id', cst_obj.pageid);
     enabled.onchange = activateConstraint;
-    let weight = iconTextBuilder(URLWeightIcon, cst_obj.weight, "weight")
+    let weight = iconTextBuilder(htmlElements.URLWeightIcon, cst_obj.weight, "weight")
     div.append(params, weight, enabled);
     return div;
 }
@@ -1079,16 +1192,16 @@ let disabledConstraintCardBuilder = (cst_obj) => {
 
 // empty the page
 let emptyPage = () => {
-    let body = constList;
-    let bodyDisabled = document.getElementById('constraints-disabled');
+    let body = htmlElements.constList;
+    let bodyDisabled = htmlElements.constraintsDisabled;
     body.innerHTML = "";
     bodyDisabled.innerHTML = "";
 }
 
 // render the constraints on the page
 let renderConstraints = (cst_list = []) => {
-    let body = constList;
-    let bodyDisabled = document.getElementById('constraints-disabled');
+    let body = htmlElements.constList;
+    let bodyDisabled = htmlElements.constraintsDisabled;
     body.innerHTML = "";
     bodyDisabled.innerHTML = "";
     for (let id of cst_list) {
@@ -1131,7 +1244,7 @@ let updateWeightAll = (e) => {
 
 document.getElementById('update-weight-all').onclick = updateWeightAll;
 
-// duplicate a cosntraint
+// duplicate a constraint
 let duplicateSelectedConstraint = (e) => {
     if (!lastSelectedConstraint) {
         return;
@@ -1150,7 +1263,6 @@ let constraint_list = null;
 let filtered_constraint_list = null;
 let constraint_metadata = null;
 
-
 // fetch data from database
 fetchers.fetchConstraints(null);
 fetchers.fetchDepartments(null);
@@ -1162,3 +1274,4 @@ fetchers.fetchCourseTypes(null);
 fetchers.fetchTutorsIDs(null);
 //fetchers.fetchCourses(null);
 fetchers.fetchWeeks();
+fetchers.fetchConstraintTypes();

@@ -261,6 +261,30 @@ class FlopConstraintViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
 
+@method_decorator(name='list',
+                  decorator=swagger_auto_schema(
+                      )
+                  )
+class FlopConstraintTypeViewSet(viewsets.ViewSet):
+    permission_classes = [IsAdminOrReadOnly]
+
+    def list(self, request):
+        classes = []
+        excluded_fields = {'id', 'class_name',
+                           'department', 'weight', 'title', 'comment',
+                           'is_active', 'modified_at', 'courses'}
+
+        for constraint_class in all_subclasses(FlopConstraint):
+            fields = constraint_class._meta.get_fields()
+
+            parameters_fields = set([f for f in fields
+                                     if f.name not in excluded_fields])
+            classes.append({'name': constraint_class.__name__, 'parameters': parameters_fields})
+
+        serializer = serializers.FlopConstraintTypeSerializer(classes, many=True)
+        return Response(serializer.data)
+
+
 class NoVisioViewSet(viewsets.ModelViewSet):
     queryset = ttv.NoVisio.objects.all()
     serializer_class = serializers.NoVisioSerializer

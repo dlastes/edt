@@ -96,7 +96,7 @@ body>div {
     
 } */
 
-.constraints-body {
+#constraints-body {
     display: flex;
     flex-direction: column;
     justify-content: stretch;
@@ -105,21 +105,21 @@ body>div {
     flex-grow: 1;
 }
 
-.constraint-info {
+#constraint-header {
     position: sticky;
     height: 100px;
     top: 0px;
     background-color: var(--white);
-    border-bottom: solid 2px var(--dark);
-    display: flex;
-    flex-direction: row;
-    /* align-content: stretch; */
-    align-items: stretch;
-    justify-content: space-between;
-    z-index: 100;
 }
 
-.constraint-info-body {
+#constraint-info, #constraint-edit {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: space-between;
+}
+
+#constraint-info-body {
     display: flex;
     flex-direction: row;
     margin: 10px 30px;
@@ -371,15 +371,6 @@ body>div {
 
 .green:hover {
     background-color: var(--greeny);
-}
-
-button {
-    width: 100px;
-    min-height: 30px;
-    max-height: 50px;
-    border: none;
-    border-radius: 5px;
-    font-weight: bold;
 }
 
 button:hover {

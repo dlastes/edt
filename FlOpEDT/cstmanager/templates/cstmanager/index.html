@@ -1,197 +1,250 @@
 {% extends "base.html" %} {% block title %} EDT {% endblock %} {% load static %} {% block content %}
-<link rel="stylesheet" href="{% static 'cstmanager/css/bootstrap-material-design.min.css' %}">
-<!-- <link rel="stylesheet" href="{% static 'cstmanager/css/styles.css' %}"> -->
-<link rel="stylesheet" href="{% static 'cstmanager/css/styles2.css' %}">
-<script>
-    let department = "{{ dept }}";
-    let urlAcceptableValues = "{% url 'api:ttapp:constraints_fields-list' %}";
-    let urlConstraints = "{% url 'api:ttapp:constraint-list' %}";
-    let urlDepartments = "{% url 'api:fetch:dept-list' %}";
-    let urlGroups = "{% url 'api:fetch:idgroup-list' %}";
-    let urlTutors = "{% url 'api:people:tutor-list' %}";
-    let urlModules = "{% url 'api:fetch:idmodule-list' %}";
-    let urlCourseTypes = "{% url 'api:fetch:idcoursetype-list' %}";
-    let urlTutorsID = "{% url 'api:fetch:idtutor-list' %}";
-    let urlWeeks = "{% url 'api:base:weeks-list' %}"
-    let urlTrainingPrograms = "{% url 'api:fetch:idtrainprog-list' %}"
-</script>
-<div class="page">
-    <div class="search-body">
-        <div class="hor-sep"></div>
-        <div class="hor-sep"></div>
-        <div class="divbutton">
-            <button class="transition green bar-button" id="new-constraint">
-            Fetch Constraints
-        </button>
-        </div>
-        <div class="hor-sep"></div>
-        <div class="divbutton">
-            <button class="transition green bar-button" id="new-constraint">
-            New Constraint
-        </button>
-        </div>
-        <div class="hor-sep"></div>
-        <div class="divbutton">
-            <button class="transition danger bar-button" id="discard-changes">
-            Discard Changes
-        </button>
-        </div>
-        <div class="hor-sep"></div>
-        <div class="divbutton">
-            <button class="transition neutral bar-button" id="apply-changes">
-            Commit Changes
-        </button>
-        </div>
-        <div class="search-bar">
+    <link rel="stylesheet" href="{% static 'cstmanager/css/bootstrap.min.css' %}">
+    <!-- <link rel="stylesheet" href="{% static 'cstmanager/css/styles.css' %}"> -->
+    <link rel="stylesheet" href="{% static 'cstmanager/css/styles2.css' %}">
+    <script>
+        let department = "{{ dept }}";
+        let urlAcceptableValues = "{% url 'api:ttapp:constraints_fields-list' %}";
+        let urlConstraints = "{% url 'api:ttapp:constraint-list' %}";
+        let urlDepartments = "{% url 'api:fetch:dept-list' %}";
+        let urlGroups = "{% url 'api:fetch:idgroup-list' %}";
+        let urlTutors = "{% url 'api:people:tutor-list' %}";
+        let urlModules = "{% url 'api:fetch:idmodule-list' %}";
+        let urlCourseTypes = "{% url 'api:fetch:idcoursetype-list' %}";
+        let urlTutorsID = "{% url 'api:fetch:idtutor-list' %}";
+        let urlWeeks = "{% url 'api:base:weeks-list' %}";
+        let urlTrainingPrograms = "{% url 'api:fetch:idtrainprog-list' %}";
+        let urlConstraintTypes = "{% url 'api:ttapp:constraint_types-list' %}";
+    </script>
+    <div class="page">
+        <div class="search-body">
             <div class="hor-sep"></div>
-            <!-- <div class="label">Rechercher:</div> -->
             <div class="hor-sep"></div>
-            <input type="text" class="form-control" id="input-search" placeholder="Rechercher">
-        </div>
-        <div class="hor-sep"></div>
-        <div class="hor-sep"></div>
-        <div id="filters" class="search-bar pad-children">
-            <input type="text" class="form-control" id="input-tutor" placeholder="Tutor">
+            <div class="divbutton">
+                <button class="transition green bar-button" id="fetch-constraints">
+                    Fetch Constraints
+                </button>
+            </div>
             <div class="hor-sep"></div>
-            <input type="text" class="form-control" id="input-module" placeholder="Module">
+            <div class="divbutton">
+                <button class="transition green bar-button" id="new-constraint">
+                    New Constraint
+                </button>
+            </div>
             <div class="hor-sep"></div>
-            <input type="text" class="form-control" id="input-course" placeholder="Course">
+            <div class="divbutton">
+                <button class="transition danger bar-button" id="discard-changes">
+                    Discard Changes
+                </button>
+            </div>
             <div class="hor-sep"></div>
-            <input type="date" class="form-control" id="input-date" placeholder="Date">
-        </div>
-        <div class="hor-sep"></div>
-        <div class="hor-sep"></div>
-        <div class="divbutton">
-            <button class="transition neutral bar-button" id="clear-filters">
-            Clear Filters
-        </button>
-        </div>
-        <div class="hor-sep"></div>
-        <div class="search-bar pad-children">
-            <div>
-                <label for="show-sections">Show Sections</label>
-                <input type="checkbox" id="show-sections" name="show-sections">
+            <div class="divbutton">
+                <button class="transition neutral bar-button" id="apply-changes">
+                    Commit Changes
+                </button>
+            </div>
+            <div class="search-bar">
+                <div class="hor-sep"></div>
+                <!-- <div class="label">Rechercher:</div> -->
+                <div class="hor-sep"></div>
+                <input type="text" class="form-control" id="input-search" placeholder="Rechercher">
+            </div>
+            <div class="hor-sep"></div>
+            <div class="hor-sep"></div>
+            <div id="filters" class="search-bar pad-children">
+                <input type="text" class="form-control" id="input-tutor" placeholder="Tutor">
+                <div class="hor-sep"></div>
+                <input type="text" class="form-control" id="input-module" placeholder="Module">
+                <div class="hor-sep"></div>
+                <input type="text" class="form-control" id="input-course" placeholder="Course">
+                <div class="hor-sep"></div>
+                <input type="date" class="form-control" id="input-date" placeholder="Date">
+            </div>
+            <div class="hor-sep"></div>
+            <div class="hor-sep"></div>
+            <div class="divbutton">
+                <button class="transition neutral bar-button" id="clear-filters">
+                    Clear Filters
+                </button>
+            </div>
+            <div class="hor-sep"></div>
+            <div class="search-bar pad-children">
+                <div>
+                    <label for="show-sections">Show Sections</label>
+                    <input type="checkbox" id="show-sections" name="show-sections">
+                </div>
             </div>
         </div>
-    </div>
-    <div class="constraints-body">
-        <div class="constraint-info">
+        <div id="constraints-body">
             <button id="show-disabled" class="float">Show Disabled</button>
             <button id="show-solver" class="float">Préanalyse</button>
-            <div class="constraint-info-body">
-                <div class="element-info title">
-                    <div id="constraint-header-title" class="info-title title">
+            <div id="constraint-header" class="border-bottom border-dark">
+                <div id="constraint-info" hidden="hidden">
+                    <div id="constraint-info-body">
+                        <div class="element-info title">
+                            <div id="constraint-header-title" class="info-title title">
 
-                    </div>
-                    <div id="constraint-header-comment" class="info-content description">
+                            </div>
+                            <div id="constraint-header-comment" class="info-content description">
 
-                    </div>
-                </div>
-                <div class="element-info grow"></div>
-                <div class="element-info">
-                    <div id="params" class="info-content">
-
-                    </div>
-                </div>
-                <div class="element-info grow"></div>
-                <div class="element-info">
-                    <div class="info-title">
-                        Activation
-                    </div>
-                    <div class="info-content">
-                        <div>
-                            <input type="checkbox" name="selectall" id="id2">
+                            </div>
                         </div>
-                    </div>
-                </div>
-                <div class="element-info">
-                    <div class="info-title">
-                        Poids
-                    </div>
-                    <div class="info-content">
-                        <div class="divslider">
-                            <input id="slider-one" type="range" value=5 min="1" max="8" step="1" list="steplist" oninput="outputSlider('poidsvalue1', value)">
-                            <datalist id="steplist">
-                                <option>1</option>
-                                <option>2</option>
-                                <option>3</option>
-                                <option>4</option>
-                                <option>5</option>
-                                <option>6</option>
-                                <option>7</option>
-                                <option>8</option>
-                            </datalist>
-                            <div id="poidsvalue1" class="divtext">
-                                <span>5</span>
+                        <div class="element-info grow"></div>
+                        <div class="element-info">
+                            <div id="params" class="info-content">
+
+                            </div>
+                        </div>
+                        <div class="element-info grow"></div>
+                        <div class="element-info">
+                            <div class="info-title">
+                                Activation
+                            </div>
+                            <div class="info-content">
+                                <div>
+                                    <input type="checkbox" name="selectall" id="id2">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="element-info">
+                            <div class="info-title">
+                                Poids
+                            </div>
+                            <div class="info-content">
+                                <div class="divslider">
+                                    <input id="slider-one" type="range" value=5 min="1" max="8" step="1" list="steplist"
+                                           oninput="outputSlider('poidsvalue1', value)">
+                                    <datalist id="steplist">
+                                        <option>1</option>
+                                        <option>2</option>
+                                        <option>3</option>
+                                        <option>4</option>
+                                        <option>5</option>
+                                        <option>6</option>
+                                        <option>7</option>
+                                        <option>8</option>
+                                    </datalist>
+                                    <div id="poidsvalue1" class="divtext">
+                                        <span>5</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="element-info">
+                            <div class="divbutton">
+                                <button class="transition neutral" id="update-one-constraint">
+                                    Update
+                                </button>
+                            </div>
+                            <div class="divbutton">
+                                <button class="transition neutral" id="duplicate-constraint">
+                                    Duplicate
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="element-info">
-                    <div class="divbutton">
-                        <button class="transition neutral" id="update-one-constraint">
-                        Update
-                    </button>
-                    </div>
-                    <div class="divbutton">
-                        <button class="transition neutral" id="duplicate-constraint">
-                        Duplicate
-                    </button>
+                <div id="constraint-edit" hidden="hidden">
+                    <div id="constraint-edit-body" class="container-fluid">
+                        <div class="row gx-2">
+                            <div class="col-2 my-auto">
+                                <select id="constraint-edit-type" class="form-select" aria-label="Type de contrainte"
+                                        onchange="updateEditConstraintParamsDisplay(value+'-NEW')">
+                                    <option selected>Choisir le type...</option>
+                                </select>
+                            </div>
+                            <div class="col-2 my-auto">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="constraint-edit-title">
+                                    <label for="constraint-edit-title">Titre</label>
+                                </div>
+                            </div>
+                            <div class="col-2 my-auto">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="constraint-edit-comment"></input>
+                                    <label for="constraint-edit-comment">Commentaire</label>
+                                </div>
+                            </div>
+                            <div id="constraint-edit-params" class="col w-auto h-auto my-auto">
+                            </div>
+                            <div class="col-1 my-auto">
+                                <div class="form-check-reverse">
+                                    <input class="form-check-input" type="checkbox" value=""
+                                           id="constraint-edit-activation">
+                                    <label class="form-check-label" for="constraint-edit-activation">
+                                        Activée ?
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-1 my-auto">
+                                <label for="constraint-edit-weight-slider" class="form-label text-center">Poids
+                                    :</label>
+                                <input type="range" class="form-range" min="1" max="8" step="1"
+                                       id="constraint-edit-weight-slider"
+                                       oninput="updateEditConstraintWeightDisplay(value)">
+                                <div id="constraint-edit-weight-value" class="text-center">1</div>
+                            </div>
+                            <div class="col-1 my-auto">
+                                <button class="btn btn-success" id="save-new-constraint">
+                                    Enregistrer
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div id="constraints-all" class="constraints-all">
-            <div id="constraints-list" class="constraints-list"></div>
-            <div id="constraints-disabled" class="constraints-disabled"></div>
-        </div>
+            <div id="constraints-all" class="constraints-all">
+                <div id="constraints-list" class="constraints-list"></div>
+                <div id="constraints-disabled" class="constraints-disabled"></div>
+            </div>
 
-    </div>
-    <div class="constraint-group-modifier">
-        <div class="footer-element pad-top-bottom">
-            <div>Séléctionner<br>tout</div>
-            <div>
-                <input type="checkbox" name="selectall" id="cb1">
+        </div>
+        <div class="constraint-group-modifier">
+            <div class="footer-element pad-top-bottom">
+                <div>Séléctionner<br>tout</div>
+                <div>
+                    <input type="checkbox" name="selectall" id="cb1">
+                </div>
+            </div>
+            <div class="footer-element pad-top-bottom">
+                <div>Contraintes<br>séléctionnées:</div>
+                <div id="num-selected-constraints">0</div>
+            </div>
+            <div class="divslider">
+                <input id="slider-all" type="range" value=5 min="1" max="8" step="1" list="steplist"
+                       oninput="outputSlider('poidsvalue2', value)">
+                <datalist id="steplist">
+                    <option>1</option>
+                    <option>2</option>
+                    <option>3</option>
+                    <option>4</option>
+                    <option>5</option>
+                    <option>6</option>
+                    <option>7</option>
+                    <option>8</option>
+                </datalist>
+                <div id="poidsvalue2" class="divtext">
+                    <span>5</span>
+                </div>
+            </div>
+            <div class="divbutton">
+                <button class="transition neutral" id="update-weight-all">
+                    MAJ Poids
+                </button>
+            </div>
+            <div class="divbutton">
+                <button class="transition neutral" id="update-all-constraints">
+                    Update
+                </button>
             </div>
         </div>
-        <div class="footer-element pad-top-bottom">
-            <div>Contraintes<br>séléctionnées:</div>
-            <div id="num-selected-constraints">0</div>
-        </div>
-        <div class="divslider">
-            <input id="slider-all" type="range" value=5 min="1" max="8" step="1" list="steplist" oninput="outputSlider('poidsvalue2', value)">
-            <datalist id="steplist">
-            <option>1</option>
-            <option>2</option>
-            <option>3</option>
-            <option>4</option>
-            <option>5</option>
-            <option>6</option>
-            <option>7</option>
-            <option>8</option>
-        </datalist>
-            <div id="poidsvalue2" class="divtext">
-                <span>5</span>
-            </div>
-        </div>
-        <div class="divbutton">
-            <button class="transition neutral" id="update-weight-all">
-            MAJ Poids
-        </button>
-        </div>
-        <div class="divbutton">
-            <button class="transition neutral" id="update-all-constraints">
-            Update
-        </button>
-        </div>
     </div>
-</div>
-<img id="icon-weight" style="display: none;" src="{% static 'cstmanager/icons/icon_weight.png' %}">
-<img id="icon-gears" style="display: none;" src="{% static 'cstmanager/icons/icon_gears.png' %}">
-<img id="icon-check" style="display: none;" src="{% static 'cstmanager/icons/icon_check.png' %}">
+    <img id="icon-weight" style="display: none;" src="{% static 'cstmanager/icons/icon_weight.png' %}">
+    <img id="icon-gears" style="display: none;" src="{% static 'cstmanager/icons/icon_gears.png' %}">
+    <img id="icon-check" style="display: none;" src="{% static 'cstmanager/icons/icon_check.png' %}">
 
 {% endblock %} {% block javascript %}
-<script type="text/javascript" src="{% static 'base/helpers.js' %}"></script>
-<script type="text/javascript" src="{% static 'cstmanager/js/mockup_request.js' %}"></script>
-<script type="text/javascript" src="{% static 'cstmanager/js/script.js' %}"></script>
+    <script type="text/javascript" src="{% static 'base/helpers.js' %}"></script>
+    <script type="text/javascript" src="{% static 'cstmanager/js/mockup_request.js' %}"></script>
+    <script type="text/javascript" src="{% static 'cstmanager/js/script.js' %}"></script>
 {% endblock %}
