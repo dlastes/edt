@@ -679,6 +679,7 @@ let saveNewConstraint = () => {
     });
 
     console.log(constraints.NEW);
+    constraints.NEW = null;
 
     // TODO: Validate the data (check required values and accepted formats)
 };
