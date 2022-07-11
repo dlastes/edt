@@ -27,7 +27,7 @@
             </div>
             <div class="hor-sep"></div>
             <div class="divbutton">
-                <button class="transition green bar-button" id="new-constraint">
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#edit-constraint-popup">
                     New Constraint
                 </button>
             </div>
@@ -75,6 +75,63 @@
                 </div>
             </div>
         </div>
+        <!-- Edit constraint modal -->
+        <div class="modal fade" id="edit-constraint-popup" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+             aria-labelledby="edit-constraint-popup-label" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="edit-constraint-popup-label">Nouvelle contrainte</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Type -->
+                        <div class="mb-3">
+                            <select id="constraint-edit-type" class="form-select" aria-label="Type de contrainte"
+                                    onchange="updateEditConstraintParamsDisplay(value+'-NEW')">
+                                <option selected>Choisir le type...</option>
+                            </select>
+                        </div>
+                        <!-- Title -->
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="constraint-edit-title">
+                            <label for="constraint-edit-title">Titre</label>
+                        </div>
+                        <!-- Comment -->
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="constraint-edit-comment"></input>
+                            <label for="constraint-edit-comment">Commentaire</label>
+                        </div>
+                        <!-- Parameters -->
+                        <div id="constraint-edit-params" class="accordion mb-3">
+
+                        </div>
+                        <!-- Activation -->
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" value=""
+                                   id="constraint-edit-activation">
+                            <label class="form-check-label ps-3" for="constraint-edit-activation">
+                                Activée ?
+                            </label>
+                        </div>
+                        <!-- Weight -->
+                        <div class="mb-3">
+                            <label for="constraint-edit-weight-slider" class="form-label text-center">Poids
+                                :</label>
+                            <input type="range" class="form-range" min="0" max="9" step="1"
+                                   id="constraint-edit-weight-slider"
+                                   oninput="updateEditConstraintWeightDisplay(value)" value="1">
+                            <div id="constraint-edit-weight-value" class="text-center">1</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" id="save-new-constraint" class="btn btn-primary">Save changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div id="constraints-body">
             <button id="show-disabled" class="float">Show Disabled</button>
             <button id="show-solver" class="float">Préanalyse</button>
@@ -147,43 +204,8 @@
                 <div id="constraint-edit" hidden="hidden">
                     <div id="constraint-edit-body" class="container-fluid">
                         <div class="row gx-2">
-                            <div class="col-2 my-auto">
-                                <select id="constraint-edit-type" class="form-select" aria-label="Type de contrainte"
-                                        onchange="updateEditConstraintParamsDisplay(value+'-NEW')">
-                                    <option selected>Choisir le type...</option>
-                                </select>
-                            </div>
-                            <div class="col-2 my-auto">
-                                <div class="form-floating">
-                                    <input type="text" class="form-control" id="constraint-edit-title">
-                                    <label for="constraint-edit-title">Titre</label>
-                                </div>
-                            </div>
-                            <div class="col-2 my-auto">
-                                <div class="form-floating">
-                                    <input type="text" class="form-control" id="constraint-edit-comment"></input>
-                                    <label for="constraint-edit-comment">Commentaire</label>
-                                </div>
-                            </div>
-                            <div id="constraint-edit-params" class="col w-auto h-auto my-auto">
-                            </div>
-                            <div class="col-1 my-auto">
-                                <div class="form-check-reverse">
-                                    <input class="form-check-input" type="checkbox" value=""
-                                           id="constraint-edit-activation">
-                                    <label class="form-check-label" for="constraint-edit-activation">
-                                        Activée ?
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="col-1 my-auto">
-                                <label for="constraint-edit-weight-slider" class="form-label text-center">Poids
-                                    :</label>
-                                <input type="range" class="form-range" min="1" max="8" step="1"
-                                       id="constraint-edit-weight-slider"
-                                       oninput="updateEditConstraintWeightDisplay(value)">
-                                <div id="constraint-edit-weight-value" class="text-center">1</div>
-                            </div>
+
+
                             <div class="col-1 my-auto">
                                 <button class="btn btn-success" id="save-new-constraint">
                                     Enregistrer
@@ -244,6 +266,7 @@
     <img id="icon-check" style="display: none;" src="{% static 'cstmanager/icons/icon_check.png' %}">
 
 {% endblock %} {% block javascript %}
+    <script type="text/javascript" src="{% static 'cstmanager/js/bootstrap.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'base/helpers.js' %}"></script>
     <script type="text/javascript" src="{% static 'cstmanager/js/mockup_request.js' %}"></script>
     <script type="text/javascript" src="{% static 'cstmanager/js/script.js' %}"></script>

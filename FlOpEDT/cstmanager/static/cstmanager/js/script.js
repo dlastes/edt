@@ -11,15 +11,18 @@ let htmlElements = {
     URLCheckIcon: document.getElementById('icon-check').src,
     constraintsInfo: document.getElementById('constraint-info'),
     constraintsInfoBody: document.getElementById('constraint-info-body'),
-    constraintsEdit: document.getElementById('constraint-edit'),
     constraintTitle: document.getElementById('constraint-header-title'),
     constraintComment: document.getElementById('constraint-header-comment'),
     paramsDiv: document.getElementById('params'),
     activatedEle: document.getElementById('id2'),
+    constraintsEdit: document.getElementById('constraint-edit'),
+    constraintEditTitle: document.getElementById('constraint-edit-title'),
+    constraintEditComment: document.getElementById('constraint-edit-comment'),
     constraintEditType: document.getElementById('constraint-edit-type'),
-    constraintEditParamsList: document.getElementById('constraint-edit-params'),
+    constraintEditParams: document.getElementById('constraint-edit-params'),
     constraintEditWeightSlider: document.getElementById('constraint-edit-weight-slider'),
     constraintEditWeightValue: document.getElementById('constraint-edit-weight-value'),
+    constraintEditActivation: document.getElementById('constraint-edit-activation'),
     constList: document.getElementById('constraints-list'),
     filtersElement: document.getElementById('filters'),
     numberSelectedConstraints: document.getElementById('num-selected-constraints'),
@@ -477,7 +480,7 @@ let fetchers = {
             });
     },
     fetchConstraintTypes: (e) => {
-        fetch(urlConstraintTypes)
+        fetch(build_url(urlConstraintTypes, {"dept": department}))
             .then(resp => resp.json())
             .then(jsonObj => {
                 database.constraint_types = {};
@@ -486,7 +489,7 @@ let fetchers = {
 
                     // fill the types in type selection
                     let option = elementBuilder('option', {});
-                    option.text = obj.name.toString();
+                    option.text = obj.local_name.toString();
                     htmlElements.constraintEditType.add(option);
                 });
             })
@@ -571,28 +574,39 @@ let outputSlider = (id, val) => {
     ele.innerHTML = val;*/
 }
 
+let findConstraintClassFromLocalName = (localName) => {
+    return Object.values(database.constraint_types).find(obj => {
+        return obj.local_name === localName;
+    });
+}
+
 let updateEditConstraintParamsDisplay = (constraintName) => {
-    let div = htmlElements.constraintEditParamsList;
+    let div = htmlElements.constraintEditParams;
     let child = div.lastElementChild;
     while (child) {
         div.removeChild(child);
         child = div.lastElementChild;
         div.removeChild(child);
     }
-    let className = constraintName.split('-')[0];
-    let parameters = database.acceptable_values[className];
-    let constraint = constraints['NEW'] = {
+    let localName = constraintName.split('-')[0];
+    let className = findConstraintClassFromLocalName(localName).name;
+    let parameters = database.constraint_types[className].parameters;
+    let constraint = constraints.NEW = {
         comment: null,
         id: 1,
         is_active: false,
         modified_at: "",
         name: className,
-        pageid: constraintName,
+        local_name: localName,
+        pageid: className,
         parameters: parameters,
         title: null,
         weight: 1,
     };
     database.constraint_types[className].parameters.forEach(param => {
+        // Add empty id_list as selected elements (none when constraint has just been created)
+        param.id_list = [];
+
         let button = buttonWithDropBuilder(constraint, param);
         div.append(button);
     })
@@ -600,8 +614,11 @@ let updateEditConstraintParamsDisplay = (constraintName) => {
 
 
 let updateEditConstraintWeightDisplay = (value) => {
-    value = value % 8;
-    htmlElements.constraintEditWeightValue.innerText = value.toString();
+    let weightText = "Unwanted";
+    if (value <= 8) {
+        weightText = value.toString();
+    }
+    htmlElements.constraintEditWeightValue.innerText = weightText;
 }
 
 // event handler that discard constraint changes and restore 
@@ -633,12 +650,41 @@ let clearFilters = (e) => {
 }
 
 // creates a temporary constraint which can be edited. This constraint is added after pressing the save button.
-let createNewConstraint = () => {
-    visibility.showConstraintEdit();
-    visibility.lock();
+let saveNewConstraint = () => {
+    let newConstraint = constraints.NEW;
+    newConstraint.title = htmlElements.constraintEditTitle.value;
+    newConstraint.comment = htmlElements.constraintEditComment.value;
+    newConstraint.is_active = htmlElements.constraintEditActivation.checked;
+    newConstraint.weight = htmlElements.constraintEditWeightSlider.value;
+    let currentDate = new Date();
+    const offset = currentDate.getTimezoneOffset();
+    currentDate = new Date(currentDate.getTime() - (offset * 60 * 1000));
+    newConstraint.modified_at = currentDate.toISOString().split('T')[0];
+
+    newConstraint.parameters.forEach(param => {
+        let tag = document.getElementById('collapse-parameter-' + param.name + '-NEW');
+        tag.querySelectorAll('input').forEach((value, key, parent) => {
+            if (value.type === 'text') {
+                param.id_list.push(value.value);
+            } else {
+                if (value.checked) {
+                    let valueToSave = '';
+                    if (param.type.includes('Boolean')) {
+                        valueToSave = 'true';
+                    } else {
+                        valueToSave = value.getAttribute('element-id');
+                    }
+                    param.id_list.push(valueToSave);
+                }
+            }
+        });
+    });
+
+    console.log(constraints.NEW);
+
+    // TODO: Validate the data (check required values and accepted formats)
 };
-htmlElements.newConstraintButton.addEventListener('click', createNewConstraint);
-htmlElements.saveNewConstraintButton.addEventListener('click', visibility.unlock);
+htmlElements.saveNewConstraintButton.addEventListener('click', saveNewConstraint);
 
 htmlElements.commitChangesButton.addEventListener('click', applyChanges);
 htmlElements.fetchConstraintsButton.addEventListener('click', fetchers.fetchConstraints);
@@ -784,40 +830,67 @@ let cancelConstraintParameter = (e) => {
 }
 
 // returns elements that make part of the parameter screen
-let getElementsToFillParameterPopup = (constraint, parameter) => {
-    console.log(constraint, parameter);
+let createSelectedParameterPopup = (constraint, parameter) => {
     let param_obj = (constraint.parameters.filter(o => o.name === parameter))[0];
-    let divs = [];
-    param_obj.acceptable.forEach(ele => {
+    let divs = divBuilder();
+
+    let createCheckboxAndLabel = (ele, inputType) => {
         let temp_id = 'acceptable' + ele.toString();
         let db = getCorrespondantDatabase(parameter);
         let str = getCorrespondantInfo(ele, parameter, db);
         let checked = isParameterValueSelectedInConstraint(constraint, parameter, ele);
+
         let form = divBuilder({
-            class: 'form-check',
+            'class': 'form-check form-check-inline',
         });
+
         let input = elementBuilder('input', {
-            'class': 'form-check-input',
-            'type': param_obj.multiple ? 'checkbox' : 'radio',
+            'class': 'form-check-input me-1',
+            'type': inputType,
             'id': temp_id,
             'element-id': ele,
             'name': 'elementsParameter',
         });
         input.checked = checked;
-        form.addEventListener('click', (e) => {
-            if (e.currentTarget !== e.target) {
-                return;
-            }
-            form.querySelector('input').checked = !form.querySelector('input').checked;
-        })
         let label = elementBuilder('label', {
-            'class': 'form-check-label',
+            'class': 'form-check-label ms-1 me-3',
             'for': temp_id,
         });
         label.innerHTML = str;
         form.append(input, label);
-        divs.push(form);
-    });
+        divs.append(form);
+    };
+
+    if (param_obj.multiple) {
+        let acceptableValues = database.acceptable_values[parameter].acceptable;
+        acceptableValues.forEach(ele => {
+            createCheckboxAndLabel(ele, 'checkbox');
+        });
+    } else if (param_obj.type.includes('Boolean')) {
+        createCheckboxAndLabel('Activate?', 'checkbox');
+    } else {
+        let temp_id = parameter + '-value';
+
+        let form = divBuilder({
+            'class': 'form-floating',
+        })
+
+        let input = elementBuilder('input', {
+            'class': 'form-control',
+            'id': temp_id,
+            'element-id': 0,
+            'name': 'elementsParameter',
+        });
+
+        let label = elementBuilder('label', {
+            'for': temp_id,
+        });
+
+        label.innerHTML = 'Valeur';
+
+        form.append(input, label);
+        divs.append(form);
+    }
 
     let divButtons = divBuilder({
         class: 'buttons-for-parameters',
@@ -830,13 +903,6 @@ let getElementsToFillParameterPopup = (constraint, parameter) => {
     deleteButton.innerHTML = 'Delete';
     deleteButton.addEventListener('click', deleteConstraintParameter);
 
-    let updateButton = elementBuilder('button', {
-        type: 'button',
-        class: 'btn btn-primary',
-    });
-    updateButton.innerHTML = 'Update';
-    updateButton.addEventListener('click', updateConstraintParameter);
-
     let cancelButton = elementBuilder('button', {
         type: 'button',
         class: 'btn btn-secondary',
@@ -844,36 +910,55 @@ let getElementsToFillParameterPopup = (constraint, parameter) => {
     cancelButton.innerHTML = 'Cancel';
     cancelButton.addEventListener('click', cancelConstraintParameter);
 
-    divButtons.append(deleteButton, updateButton, cancelButton);
+    divButtons.append(cancelButton, deleteButton);
 
-    divs.push(divButtons);
+    divs.append(divButtons);
 
     return divs;
 }
 
 // builds a button that shows a drop menu after clicking on it
 let buttonWithDropBuilder = (constraint, parameter) => {
-    let butt = elementBuilder("button", {
-        "class": "btn btn-primary",
-        'id': 'parameter-' + parameter.type,
+    let buttonID = 'parameter-' + parameter.name + '-NEW';
+    let collapseID = 'collapse-' + buttonID;
+
+    let button = elementBuilder("button", {
+        'class': 'accordion-button',
+        'type': 'button',
+        'data-bs-toggle': 'collapse',
+        'data-bs-target': '#' + collapseID,
+        'aria-expanded': 'false',
+        'aria-controls': collapseID,
     });
-    butt.innerText = parameter.name;
-    butt.addEventListener('click', (e) => {
-        if (e.currentTarget !== e.target) {
-            return;
-        }
-        cancelConstraintParameter(null);
-        let tempScreen = divBuilder({
-            'class': 'div-popup',
-            'cst-id': constraint.pageid,
-            'parameter': parameter.type,
-            'id': 'parameter-screen'
-        });
-        let elements = getElementsToFillParameterPopup(constraint, parameter.name);
-        tempScreen.append(...elements);
-        butt.append(tempScreen);
+    button.innerText = parameter.name;
+
+    let buttonHeader = divBuilder({
+        'class': 'accordion-header',
+        'id': buttonID,
     });
-    return butt;
+
+    let elements = createSelectedParameterPopup(constraint, parameter.name);
+
+    let body = divBuilder({
+        'class': 'accordion-body',
+    });
+
+    let collapse = divBuilder({
+        'class': 'accordion-collapse collapse',
+        'id': collapseID,
+        'labelledby': buttonID,
+        'data-bs-parent': '#' + htmlElements.constraintEditParams.id,
+    });
+
+    let itemContainer = divBuilder({
+        'class': 'accordion-item',
+    })
+
+    body.append(elements);
+    collapse.append(body);
+    buttonHeader.append(button);
+    itemContainer.append(buttonHeader, collapse);
+    return itemContainer;
 }
 
 // update the header info by showing the selected constraint's info
@@ -907,8 +992,8 @@ let updateBroadcastConstraint = (id) => {
         if (param.name === 'department') {
             return;
         }
-        let butt = buttonWithDropBuilder(obj, param);
-        htmlElements.paramsDiv.append(butt);
+        let button = buttonWithDropBuilder(obj, param);
+        htmlElements.paramsDiv.append(button);
     });
 }
 
