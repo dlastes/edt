@@ -484,12 +484,13 @@ let fetchers = {
             .then(resp => resp.json())
             .then(jsonObj => {
                 database.constraint_types = {};
-                Object.values(jsonObj).forEach(obj => {
-                    database.constraint_types[obj.name] = obj;
+                let constraints = Object.values(jsonObj).sort((a, b) => a.local_name.toString().localeCompare(b.local_name.toString()));
 
+                constraints.forEach(constraint => {
+                    database.constraint_types[constraint.name] = constraint;
                     // fill the types in type selection
                     let option = elementBuilder('option', {});
-                    option.text = obj.local_name.toString();
+                    option.text = constraint.local_name.toString();
                     htmlElements.constraintEditType.add(option);
                 });
             })
