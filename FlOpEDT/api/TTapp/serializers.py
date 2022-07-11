@@ -164,6 +164,7 @@ class FlopConstraintSerializer(serializers.ModelSerializer):
 
 class FlopConstraintTypeSerializer(serializers.Serializer):
     name = serializers.CharField()
+    local_name = serializers.CharField()
     parameters = serializers.SerializerMethodField()
 
     def get_parameters(self, obj):

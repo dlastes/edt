@@ -41,7 +41,7 @@ from TTapp.ilp_constraints.constraint import Constraint
 from TTapp.slots import days_filter, slots_filter, Slot
 from TTapp.TTConstraints.TTConstraint import TTConstraint
 from TTapp.ilp_constraints.constraints.dependencyConstraint import DependencyConstraint
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy as _
 from django.core.validators import MaxValueValidator
 from TTapp.TTConstraints.tutors_constraints import considered_tutors
 
@@ -520,10 +520,13 @@ class LimitUndesiredSlotsPerWeek(TTConstraint):
     start_time and end_time are in minuts from 0:00 AM
     """
 
-    tutors = models.ManyToManyField('people.Tutor', blank=True)
+    tutors = models.ManyToManyField('people.Tutor', blank=True, verbose_name=_('Tutors'))
     slot_start_time = models.PositiveSmallIntegerField()
     slot_end_time = models.PositiveSmallIntegerField()
     max_number = models.PositiveSmallIntegerField(validators=[MaxValueValidator(7)])
+
+    class Meta:
+        verbose_name = _('Limit undesired slots per week')
 
     def enrich_ttmodel(self, ttmodel, week, ponderation=1):
         tutor_to_be_considered = considered_tutors(self, ttmodel)

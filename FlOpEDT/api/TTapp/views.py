@@ -279,7 +279,7 @@ class FlopConstraintTypeViewSet(viewsets.ViewSet):
 
             parameters_fields = set([f for f in fields
                                      if f.name not in excluded_fields])
-            classes.append({'name': constraint_class.__name__, 'parameters': parameters_fields})
+            classes.append({'name': constraint_class.__name__, 'local_name': constraint_class._meta.verbose_name, 'parameters': parameters_fields})
 
         serializer = serializers.FlopConstraintTypeSerializer(classes, many=True)
         return Response(serializer.data)
