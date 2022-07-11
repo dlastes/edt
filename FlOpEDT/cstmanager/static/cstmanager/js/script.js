@@ -582,11 +582,8 @@ let findConstraintClassFromLocalName = (localName) => {
 
 let updateEditConstraintParamsDisplay = (constraintName) => {
     let div = htmlElements.constraintEditParams;
-    let child = div.lastElementChild;
-    while (child) {
-        div.removeChild(child);
-        child = div.lastElementChild;
-        div.removeChild(child);
+    while (div.firstChild) {
+        div.removeChild(div.lastChild);
     }
     let localName = constraintName.split('-')[0];
     let className = findConstraintClassFromLocalName(localName).name;
