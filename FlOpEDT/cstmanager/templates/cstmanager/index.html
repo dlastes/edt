@@ -27,7 +27,7 @@
             </div>
             <div class="hor-sep"></div>
             <div class="divbutton">
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#edit-constraint-popup">
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#constraint-edit-popup">
                     New Constraint
                 </button>
             </div>
@@ -76,20 +76,21 @@
             </div>
         </div>
         <!-- Edit constraint modal -->
-        <div class="modal fade" id="edit-constraint-popup" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-             aria-labelledby="edit-constraint-popup-label" aria-hidden="true">
+        <div class="modal fade" id="constraint-edit-popup" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+             aria-labelledby="constraint-edit-popup-label" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="edit-constraint-popup-label">Nouvelle contrainte</h5>
+                        <h5 class="modal-title" id="constraint-edit-popup-label">Nouvelle contrainte</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
+                        <div id="constraint-edit-alert-container"></div>
                         <!-- Type -->
                         <div class="mb-3">
                             <select id="constraint-edit-type" class="form-select" aria-label="Type de contrainte"
                                     onchange="updateEditConstraintParamsDisplay(value+'-NEW')">
-                                <option selected>Choisir le type...</option>
+                                <option selected disabled>Choisir le type...</option>
                             </select>
                         </div>
                         <!-- Title -->

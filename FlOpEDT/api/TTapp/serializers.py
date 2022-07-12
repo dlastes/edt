@@ -183,7 +183,7 @@ class FlopConstraintTypeSerializer(serializers.Serializer):
                 typename = typenamesplit[0] + "." + typenamesplit[2]
                 if field.many_to_many:
                     multiple = True
-            fields.append({'name': field.name, 'type': typename, 'multiple': multiple})
+            fields.append({'name': field.name, 'type': typename, 'multiple': multiple, 'required': not field.blank})
         return fields
 
 

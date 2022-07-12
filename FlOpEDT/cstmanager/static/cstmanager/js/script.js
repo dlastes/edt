@@ -16,6 +16,7 @@ let htmlElements = {
     paramsDiv: document.getElementById('params'),
     activatedEle: document.getElementById('id2'),
     constraintsEdit: document.getElementById('constraint-edit'),
+    constraintsEditPopup: document.getElementById('constraint-edit-popup'),
     constraintEditTitle: document.getElementById('constraint-edit-title'),
     constraintEditComment: document.getElementById('constraint-edit-comment'),
     constraintEditType: document.getElementById('constraint-edit-type'),
@@ -23,6 +24,7 @@ let htmlElements = {
     constraintEditWeightSlider: document.getElementById('constraint-edit-weight-slider'),
     constraintEditWeightValue: document.getElementById('constraint-edit-weight-value'),
     constraintEditActivation: document.getElementById('constraint-edit-activation'),
+    constraintEditAlert: document.getElementById('constraint-edit-alert-container'),
     constList: document.getElementById('constraints-list'),
     filtersElement: document.getElementById('filters'),
     numberSelectedConstraints: document.getElementById('num-selected-constraints'),
@@ -579,7 +581,21 @@ let findConstraintClassFromLocalName = (localName) => {
     return Object.values(database.constraint_types).find(obj => {
         return obj.local_name === localName;
     });
-}
+};
+
+let getNewConstraintID = (className) => {
+    let filteredByClassName = Object.values(constraints).filter(constraint => constraint.name === className);
+    if (filteredByClassName.length === 0) {
+        return 1;
+    }
+
+    // Extract each constraint's pageid their number and return the max + 1
+    return parseInt(filteredByClassName.reduce((constraint1, constraint2) => {
+        let cst1 = constraint1.pageid.match(/\d+/)[0];
+        let cst2 = constraint2.pageid.match(/\d+/)[0];
+        return (cst1 > cst2 ? constraint1 : constraint2);
+    }, filteredByClassName[0]).pageid.match(/\d+/)[0]) + 1;
+};
 
 let updateEditConstraintParamsDisplay = (constraintName) => {
     let div = htmlElements.constraintEditParams;
@@ -589,18 +605,22 @@ let updateEditConstraintParamsDisplay = (constraintName) => {
     let localName = constraintName.split('-')[0];
     let className = findConstraintClassFromLocalName(localName).name;
     let parameters = database.constraint_types[className].parameters;
+
+    let pageid = getNewConstraintID(className);
+
     let constraint = constraints.NEW = {
         comment: null,
-        id: 1,
+        id: pageid,
         is_active: false,
         modified_at: "",
         name: className,
         local_name: localName,
-        pageid: className,
+        pageid: className + pageid,
         parameters: parameters,
         title: null,
         weight: 1,
     };
+    database.constraint_types[className].parameters.sort((a, b) => (a.required && !b.required) ? -1 : (!a.required && b.required) ? 1 : 0);
     database.constraint_types[className].parameters.forEach(param => {
         // Add empty id_list as selected elements (none when constraint has just been created)
         param.id_list = [];
@@ -649,17 +669,42 @@ let clearFilters = (e) => {
 
 // creates a temporary constraint which can be edited. This constraint is added after pressing the save button.
 let saveNewConstraint = () => {
+    const alert = (message, type) => {
+        const wrapper = document.createElement('div');
+
+        wrapper.innerHTML = [
+            `<div class="alert alert-${type} alert-dismissible" role="alert">`,
+            `   <div>${message}</div>`,
+            '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
+            '</div>',
+        ].join('');
+        htmlElements.constraintEditAlert.append(wrapper);
+    }
+
+    if (htmlElements.constraintEditType.selectedIndex === 0) {
+        alert('Type is required!', 'danger');
+        return;
+    }
+
     let newConstraint = constraints.NEW;
+
     newConstraint.title = htmlElements.constraintEditTitle.value;
+
     newConstraint.comment = htmlElements.constraintEditComment.value;
     newConstraint.is_active = htmlElements.constraintEditActivation.checked;
-    newConstraint.weight = htmlElements.constraintEditWeightSlider.value;
+    newConstraint.weight = parseInt(htmlElements.constraintEditWeightSlider.value);
     let currentDate = new Date();
     const offset = currentDate.getTimezoneOffset();
     currentDate = new Date(currentDate.getTime() - (offset * 60 * 1000));
     newConstraint.modified_at = currentDate.toISOString().split('T')[0];
 
+    let isValid = true;
+
     newConstraint.parameters.forEach(param => {
+        // Clear the previously selected values (only keep the latest save)
+        param.id_list = [];
+
+        // Store the selected values
         let tag = document.getElementById('collapse-parameter-' + param.name + '-NEW');
         tag.querySelectorAll('input').forEach((value, key, parent) => {
             if (value.type === 'text') {
@@ -676,12 +721,36 @@ let saveNewConstraint = () => {
                 }
             }
         });
+
+        if (param.required && param.id_list.length === 0) {
+            isValid = false;
+            alert(`Parameter ${param.name} is required!`, 'danger');
+        }
     });
 
-    console.log(constraints.NEW);
-    constraints.NEW = null;
+    if (!isValid) {
+        return;
+    }
 
-    // TODO: Validate the data (check required values and accepted formats)
+    constraints[newConstraint.pageid] = newConstraint;
+
+    // Clear alerts
+    htmlElements.constraintEditAlert.innerHTML = '';
+
+    // Hide popup
+    const modal = bootstrap.Modal.getInstance(htmlElements.constraintsEditPopup);
+    modal.hide();
+
+    // Reset fields
+    htmlElements.constraintEditType.selectedIndex = 0;
+    htmlElements.constraintEditTitle.value = '';
+    htmlElements.constraintEditComment.value = '';
+    htmlElements.constraintEditParams.innerHTML = '';
+    htmlElements.constraintEditActivation.checked = false;
+    htmlElements.constraintEditWeightSlider.value = 0;
+    htmlElements.constraintEditWeightValue.innerText = '0';
+
+    rerender();
 };
 htmlElements.saveNewConstraintButton.addEventListener('click', saveNewConstraint);
 
@@ -921,6 +990,15 @@ let buttonWithDropBuilder = (constraint, parameter) => {
     let buttonID = 'parameter-' + parameter.name + '-NEW';
     let collapseID = 'collapse-' + buttonID;
 
+    let badge = '';
+
+    if (parameter.required) {
+        badge = elementBuilder('span', {
+            'class': 'badge text-bg-danger ms-1',
+        });
+        badge.innerText = "Requis";
+    }
+
     let button = elementBuilder("button", {
         'class': 'accordion-button',
         'type': 'button',
@@ -930,6 +1008,7 @@ let buttonWithDropBuilder = (constraint, parameter) => {
         'aria-controls': collapseID,
     });
     button.innerText = parameter.name;
+    button.append(badge);
 
     let buttonHeader = divBuilder({
         'class': 'accordion-header',
