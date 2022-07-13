@@ -27,8 +27,7 @@
                     </button>
                 </div>
                 <div class="divbutton mb-3">
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal"
-                            data-bs-target="#constraint-edit-popup">
+                    <button id="nav-new-constraint" type="button" class="btn btn-primary">
                         New Constraint
                     </button>
                 </div>
@@ -70,15 +69,14 @@
                 <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="constraint-edit-popup-label">Nouvelle contrainte</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <h5 class="modal-title" id="constraint-edit-popup-label">Edit constraint</h5>
                         </div>
                         <div class="modal-body">
                             <div id="constraint-edit-alert-container"></div>
                             <!-- Type -->
                             <div class="mb-3">
                                 <select id="constraint-edit-type" class="form-select" aria-label="Type de contrainte"
-                                        onchange="updateEditConstraintParamsDisplay(value+'-NEW')">
+                                        onchange="updateParamsListNewConstraint()">
                                     <option selected disabled>Choisir le type...</option>
                                 </select>
                             </div>
@@ -115,8 +113,8 @@
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="button" id="save-new-constraint" class="btn btn-primary">Save changes</button>
+                            <button type="button" id="cancel-edit-constraint" class="btn btn-secondary">Cancel</button>
+                            <button type="button" id="confirm-edit-constraint" class="btn btn-primary">Save changes</button>
                         </div>
                     </div>
                 </div>
@@ -124,70 +122,52 @@
             <!-- Constraints column -->
             <div class="col container w-auto" id="constraints-body">
                 <button id="show-disabled" class="float">Show Disabled</button>
-                <button id="show-solver" class="float">Préanalyse</button>
+                <button id="show-solver" class="float">Preanalyse</button>
+                <!-- Header -->
                 <div id="constraint-header" class="row border-bottom border-dark">
                     <div id="constraint-info" hidden="hidden">
-                        <div id="constraint-info-body">
-                            <div class="element-info title">
-                                <div id="constraint-header-title" class="info-title title">
-
+                        <div id="constraint-info-body container-fluid" class="h-100">
+                            <div class="row h-100">
+                                <!-- Title -->
+                                <div class="col-auto border border-dark">
+                                    <label for="constraint-header-title" class="form-label">Title</label>
+                                    <input type="text" readonly id="constraint-header-title"
+                                           class="form-control-plaintext">
                                 </div>
-                                <div id="constraint-header-comment" class="info-content description">
-
+                                <!-- Comment -->
+                                <div class="col-auto border border-dark">
+                                    <label for="constraint-header-comment" class="form-label">Comments</label>
+                                    <input type="text" readonly id="constraint-header-comment"
+                                           class="form-control-plaintext">
                                 </div>
-                            </div>
-                            <div class="element-info grow"></div>
-                            <div class="element-info">
-                                <div id="params" class="info-content">
-
-                                </div>
-                            </div>
-                            <div class="element-info grow"></div>
-                            <div class="element-info">
-                                <div class="info-title">
-                                    Activation
-                                </div>
-                                <div class="info-content">
-                                    <div>
-                                        <input type="checkbox" name="selectall" id="id2">
+                                <!-- Parameters -->
+                                <div class="col border border-dark">
+                                    <label class="form-label">Parameters</label>
+                                    <div id="params" class="form">
                                     </div>
                                 </div>
-                            </div>
-                            <div class="element-info">
-                                <div class="info-title">
-                                    Poids
-                                </div>
-                                <div class="info-content">
-                                    <div class="divslider">
-                                        <input id="slider-one" type="range" value=5 min="1" max="8" step="1"
-                                               list="steplist"
-                                               oninput="outputSlider('poidsvalue1', value)">
-                                        <datalist id="steplist">
-                                            <option>1</option>
-                                            <option>2</option>
-                                            <option>3</option>
-                                            <option>4</option>
-                                            <option>5</option>
-                                            <option>6</option>
-                                            <option>7</option>
-                                            <option>8</option>
-                                        </datalist>
-                                        <div id="poidsvalue1" class="divtext">
-                                            <span>5</span>
-                                        </div>
+                                <!-- Activation -->
+                                <div class="col-auto border border-dark d-flex align-items-center">
+                                    <div class="form">
+                                        <label id="constraint-header-activation" class="form-label">
+                                        </label>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="element-info">
-                                <div class="divbutton">
-                                    <button class="transition neutral" id="update-one-constraint">
-                                        Update
-                                    </button>
+                                <!-- Weight -->
+                                <div class="col-auto border border-dark text-center">
+                                    <div class="form">
+                                        <label class="form-label">Weight</label>
+                                        <br/>
+                                        <label id="constraint-header-weight" class="form-label">
+                                        </label>
+                                    </div>
                                 </div>
-                                <div class="divbutton">
-                                    <button class="transition neutral" id="duplicate-constraint">
-                                        Duplicate
-                                    </button>
+                                <!-- Control buttons -->
+                                <div class="col-auto border border-dark d-flex align-items-center">
+                                    <div class="btn-group" role="group" aria-label="Control selected contraint">
+                                        <button id="constraint-header-edit" type="button" class="btn btn-primary">Edit</button>
+                                        <button id="constraint-header-delete" type="button" class="btn btn-danger">Delete</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
