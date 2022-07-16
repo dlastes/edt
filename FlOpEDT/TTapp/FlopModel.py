@@ -271,7 +271,7 @@ class FlopModel(object):
                 m.write(iis_filename)
         if write_analysis:
             self.constraintManager.handle_reduced_result(iis_filename,
-                                                         iis_files_path(),
+                                                         iis_files_path,
                                                          self.iis_filename_suffixe())
 
     @timer
