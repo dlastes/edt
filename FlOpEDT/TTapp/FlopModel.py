@@ -180,7 +180,7 @@ class FlopModel(object):
         l_floor = self.add_var(name)
         self.add_constraint(expr - l_floor * floor, '>=', 0,
                             Constraint(constraint_type=ConstraintType.FLOOR_BOUND))
-        self.add_constraint(expr - l_floor * bound, '<=', floor - 1,
+        self.add_constraint(expr - l_floor * bound, '<=', floor - 0.001,
                             Constraint(constraint_type=ConstraintType.CEILING_BOUND))
         return l_floor
 
