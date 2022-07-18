@@ -126,28 +126,10 @@ body>div {
     justify-content: space-evenly;
 }
 
-.constraints-list {
-    display: flex;
-    flex-direction: column;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    align-content: stretch;
-    align-items: stretch;
-    flex-grow: 1;
-    padding-bottom: 30px;
-}
-
 .constraint-card-disabled {
     padding-top: 10px;
     padding-right: 10px;
     padding-left: 10px;
-}
-
-.constraints-disabled {
-    display: flex;
-    flex-flow: column nowrap;
-    align-items: center;
-    min-width: 373px;
 }
 
 .constraint-card-info-disabled {
@@ -328,10 +310,6 @@ input:hover {
 .constraints-section-title {
     font-size: 140%;
     font-weight: bold;
-}
-
-.constraints-section-full {
-    margin-bottom: 40px;
 }
 
 .div-popup {

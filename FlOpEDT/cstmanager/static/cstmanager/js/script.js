@@ -30,10 +30,10 @@ let htmlElements = {
     constraintEditWeightValue: document.getElementById('constraint-edit-weight-value'),
     constraintEditActivation: document.getElementById('constraint-edit-activation'),
     constraintEditAlert: document.getElementById('constraint-edit-alert-container'),
-    constList: document.getElementById('constraints-list'),
+    enabledConstraintsList: document.getElementById('constraints-enabled'),
+    disabledConstraintsList: document.getElementById('constraints-disabled'),
     filtersElement: document.getElementById('filters'),
     numberSelectedConstraints: document.getElementById('num-selected-constraints'),
-    constraintsDisabled: document.getElementById('constraints-disabled'),
     commitChangesButton: document.getElementById('apply-changes'),
     fetchConstraintsButton: document.getElementById('fetch-constraints'),
     applyFiltersButton: document.getElementById('clear-filters'),
@@ -439,7 +439,7 @@ let copyObj = (obj) => {
 
 // toggle the tab for disabled constraints
 let toggleDisabledDiv = (e) => {
-    htmlElements.constraintsDisabled.classList.toggle('display-none');
+    htmlElements.disabledConstraintsList.classList.toggle('display-none');
 }
 document.getElementById('show-disabled').addEventListener('click', toggleDisabledDiv);
 
@@ -853,7 +853,7 @@ let getParamObj = (constraint, param) => {
 // event handler that deletes a constraint's parameter
 let deleteConstraintParameter = (e) => {
     let div = document.getElementById('parameter-screen');
-    let cst_id = div.attributes['cst-id'].value;
+    let cst_id = div.attributes['data-cst-id'].value;
     let constraint = constraints[cst_id];
     let param = div.attributes['parameter'].value;
     changeEvents.deleteConstraintParameter(
@@ -1078,7 +1078,7 @@ let updateBroadcastConstraint = (id) => {
 
 // event handler that fires the update broadcast constraint event handler
 let constraintHovered = (e) => {
-    updateBroadcastConstraint(e.currentTarget.getAttribute('cst-id'));
+    updateBroadcastConstraint(e.currentTarget.getAttribute('data-cst-id'));
 }
 
 // event handler that resets the update broadcast constraint event handler
@@ -1096,17 +1096,17 @@ let buildMetadata = () => {
 
 // rerender the constraints on the page (in case of a modification)
 let refreshConstraints = () => {
-    htmlElements.constList.innerHTML = '';
-    htmlElements.constraintsDisabled.innerHTML = '';
+    htmlElements.enabledConstraintsList.innerHTML = '';
+    htmlElements.disabledConstraintsList.innerHTML = '';
     lastSelectedConstraint = null;
 
-    buildActivatedConstraintsSections();
+    buildConstraintsSections();
     refreshSelectedFromList(selected_constraints);
 }
 
 // main section builder
 let buildSection = (name, list) => {
-    let ret = divBuilder({'class': 'constraints-section-full'});
+    let ret = divBuilder({'class': 'constraints-section-full mb-2'});
     let title = divBuilder({'class': 'constraints-section-title'});
     let cards = divBuilder({'class': 'constraints-section ', 'id': "section-" + name});
     let map = list.map(id => constraintCardBuilder(constraints[id]));
@@ -1117,8 +1117,8 @@ let buildSection = (name, list) => {
 }
 
 // helps with the generation of the page's sections
-let buildActivatedConstraintsSections = () => {
-    htmlElements.constList.innerHTML = "";
+let buildConstraintsSections = () => {
+    htmlElements.enabledConstraintsList.innerHTML = "";
 
     if (filtered_constraint_list == null) {
         filter_functions.reset_filtered_constraint_list();
@@ -1130,35 +1130,46 @@ let buildActivatedConstraintsSections = () => {
     if (group_by_class) {
         Object.values(constraints).forEach(cst => {
             if (filtered_constraint_list.includes(cst.pageid)) {
-                if (cst['is_active']) {
-                    if (!dict[cst.name]) {
-                        dict[cst.name] = [];
-                    }
-                    dict[cst.name].push(cst.pageid);
+                if (!dict[cst.name]) {
+                    dict[cst.name] = {
+                        'active': [],
+                        'inactive': [],
+                    };
                 }
+                dict[cst.name][cst.is_active ? 'active' : 'inactive'].push(cst.pageid);
             }
         });
     } else {
-        dict['All constraints'] = [];
+        dict['All constraints'] = {
+            'active': [],
+            'inactive': [],
+        };
         Object.values(constraints).forEach(cst => {
             if (filtered_constraint_list.includes(cst.pageid)) {
-                if (cst['is_active']) {
-                    dict["All constraints"].push(cst.pageid);
-                }
+                dict["All constraints"][cst.is_active ? 'active' : 'inactive'].push(cst.pageid);
             }
         });
     }
-    let keys = Object.keys(dict);
-    let dictDiv = {};
-    for (let k of keys) {
-        if (dict[k].length === 0) {
-            delete dict[k];
-        } else {
-            dictDiv[k] = buildSection(k, dict[k]);
-        }
-    }
 
-    htmlElements.constList.append(...Object.values(dictDiv));
+    // build active constraints section
+    let activeConstraintsElements = {};
+    Object.keys(dict).forEach(key => {
+        if (dict[key].active.length === 0) {
+            return;
+        }
+        activeConstraintsElements[key] = buildSection(key, dict[key].active);
+    });
+    htmlElements.enabledConstraintsList.append(...Object.values(activeConstraintsElements));
+
+    // build inactive constraints section
+    let inactiveConstraintsElements = {};
+    Object.keys(dict).forEach(key => {
+        if (dict[key].inactive.length === 0) {
+            return;
+        }
+        inactiveConstraintsElements[key] = buildSection(key, dict[key].inactive);
+    });
+    htmlElements.disabledConstraintsList.append(...Object.values(inactiveConstraintsElements));
 }
 htmlElements.constraintsGroupByClass.addEventListener('click', refreshConstraints);
 
@@ -1167,7 +1178,7 @@ let constraintClicked = (e) => {
     if (e.target.type === "checkbox") {
         return;
     }
-    let id = e.currentTarget.getAttribute('cst-id');
+    let id = e.currentTarget.getAttribute('data-cst-id');
     if (e.currentTarget.classList.contains('selected')) {
         e.currentTarget.classList.remove("selected");
         e.currentTarget.classList.add("unselected");
@@ -1191,11 +1202,11 @@ let constraintClicked = (e) => {
 
 // color selected constraints
 let refreshSelectedFromList = (list) => {
-    let cardList = htmlElements.constList;
+    let cardList = htmlElements.enabledConstraintsList;
     let allSelected = true;
 
     cardList.querySelectorAll('.constraint-card').forEach(constraintCard => {
-        if (list.indexOf(constraintCard.getAttribute('cst-id')) < 0) {
+        if (list.indexOf(constraintCard.getAttribute('data-cst-id')) < 0) {
             constraintCard.classList.remove('selected');
             constraintCard.classList.add('unselected');
             allSelected = false;
@@ -1247,16 +1258,17 @@ let iconTextBuilder = (imgurl, value, attr) => {
 }
 
 // event handler that activates a constraint
-let activateConstraint = (e) => {
-    let id = e.currentTarget.getAttribute('cst-id');
-    let ele = constraints[e.currentTarget.getAttribute('cst-id')]
+let toggleConstraint = (e) => {
+    // Get constraint's id as in the constraints object
+    let pageid = e.getAttribute('data-cst-id');
+
+    // Get its constraint object
+    let ele = constraints[pageid];
+
+    // Toggle its activation
     ele.is_active = !ele.is_active;
-    e.currentTarget.checked = ele.is_active;
-    let str = 'div[cst-id="' + id + '"]';
-    let d = htmlElements.constList.querySelector(str);
-    if (!d) {
-        d = htmlElements.constraintsDisabled.querySelector(str);
-    }
+
+    console.log(ele);
     refreshConstraints();
 }
 
@@ -1303,11 +1315,13 @@ let constraintCardBuilder = (constraint) => {
     const wrapper = divBuilder({
         'class': 'card border border-3 border-primary me-1 mb-1 constraint-card h-25',
         'style': 'width: 18rem;',
-        'cst-id': constraint.pageid,
+        'data-cst-id': constraint.pageid,
         'draggable': true,
     });
 
     let localName = findConstraintLocalNameFromClass(constraint.name);
+
+    let checkText = constraint.is_active ? 'checked' : "";
 
     wrapper.innerHTML = [
         `<h6 class="card-header py-1">${constraint.title || localName}</h6>`,
@@ -1317,7 +1331,7 @@ let constraintCardBuilder = (constraint) => {
         '        <div class="row">',
         `        <div class="col">${iconTextBuilder(htmlElements.iconGears.src, constraint.parameters.length, 'parameters').outerHTML}</div>`,
         `        <div class="col">${iconTextBuilder(htmlElements.iconWeight.src, constraint.weight, 'weight').outerHTML}</div>`,
-        `        <div class="col text-end"><input type="checkbox" "cst-id"="${constraint.pageid}" ${constraint.is_active ? "checked" : ""} onchange="activateConstraint"></div>`,
+        `        <div class="col text-end"><input type="checkbox" data-cst-id="${constraint.pageid}" ${checkText} onchange="toggleConstraint(this)"></div>`,
         '</div>',
     ].join('');
 
@@ -1334,8 +1348,8 @@ let constraintCardBuilder = (constraint) => {
 
 // empty the page
 let emptyPage = () => {
-    let body = htmlElements.constList;
-    let bodyDisabled = htmlElements.constraintsDisabled;
+    let body = htmlElements.enabledConstraintsList;
+    let bodyDisabled = htmlElements.disabledConstraintsList;
     body.innerHTML = "";
     bodyDisabled.innerHTML = "";
 }
