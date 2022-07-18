@@ -108,13 +108,15 @@
                                     :</label>
                                 <input type="range" class="form-range" min="0" max="9" step="1"
                                        id="constraint-edit-weight-slider"
-                                       oninput="updateEditConstraintWeightDisplay(value)" value="1">
+                                       oninput="updateEditConstraintWeightDisplay('constraint-edit-weight-value', value)"
+                                       value="1">
                                 <div id="constraint-edit-weight-value" class="text-center">1</div>
                             </div>
                         </div>
                         <div class="modal-footer">
                             <button type="button" id="cancel-edit-constraint" class="btn btn-secondary">Cancel</button>
-                            <button type="button" id="confirm-edit-constraint" class="btn btn-primary">Save changes</button>
+                            <button type="button" id="confirm-edit-constraint" class="btn btn-primary">Save changes
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -195,29 +197,30 @@
                 <div>Contraintes<br>sélectionnées :</div>
                 <div id="num-selected-constraints">0</div>
             </div>
-            <div class="col">
-                <div class="divslider">
-                    <input id="slider-all" type="range" value=5 min="1" max="8" step="1" list="steplist"
-                           oninput="outputSlider('poidsvalue2', value)">
-                    <datalist id="steplist">
-                        <option>1</option>
-                        <option>2</option>
-                        <option>3</option>
-                        <option>4</option>
-                        <option>5</option>
-                        <option>6</option>
-                        <option>7</option>
-                        <option>8</option>
-                    </datalist>
-                    <div id="poidsvalue2" class="divtext">
-                        <span>5</span>
+            <div class="col-auto">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-auto">
+                            <label for="selected-constraints-edit-weight-slider" class="form-label text-center">Poids
+                                :</label>
+                        </div>
+                        <div class="col-auto">
+                            <div id="selected-constraints-edit-weight-value" class="text-center">1</div>
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <input type="range" class="form-range" min="0" max="9" step="1"
+                               id="selected-constraints-edit-weight-slider"
+                               oninput="updateEditConstraintWeightDisplay('selected-constraints-edit-weight-value', value)"
+                               value="1">
                     </div>
                 </div>
             </div>
             <div class="col">
                 <div class="divbutton">
-                    <button class="transition neutral" id="update-weight-all">
-                        MAJ Poids
+                    <button class="transition neutral" id="selected-constraints-edit-weight">
+                        Set weight
                     </button>
                 </div>
                 <div class="divbutton">

@@ -39,6 +39,8 @@ let htmlElements = {
     applyFiltersButton: document.getElementById('clear-filters'),
     cancelEditConstraintButton: document.getElementById('cancel-edit-constraint'),
     confirmEditConstraintButton: document.getElementById('confirm-edit-constraint'),
+    selectedConstraintsEditWeightSlider: document.getElementById('selected-constraints-edit-weight-slider'),
+    selectedConstraintsEditWeightButton: document.getElementById('selected-constraints-edit-weight'),
 };
 
 const State = Object.freeze({
@@ -478,12 +480,6 @@ let database = {
     'constraint_types': null,
 }
 
-// render the value beside the slider
-let outputSlider = (id, val) => {
-    /*val = val % 8;
-    let ele = document.getElementById(id);
-    ele.innerHTML = val;*/
-}
 
 let findConstraintClassFromLocalName = (localName) => {
     return Object.values(database.constraint_types).find(obj => {
@@ -659,12 +655,13 @@ let extractConstraintFromPopup = (constraint) => {
     return isValid;
 };
 
-let updateEditConstraintWeightDisplay = (value) => {
+let updateEditConstraintWeightDisplay = (labelID, value) => {
     let weightText = "Unwanted";
     if (value <= 8) {
         weightText = value.toString();
     }
-    htmlElements.constraintEditWeightValue.innerText = weightText;
+
+    document.getElementById(labelID).innerText = weightText;
 }
 
 // event handler that discard constraint changes and restore
@@ -1087,7 +1084,6 @@ let buildActivatedConstraintsSections = () => {
     if (filtered_constraint_list == null) {
         filter_functions.reset_filtered_constraint_list();
     }
-    console.log(filtered_constraint_list);
 
     let dict = {};
 
@@ -1318,15 +1314,15 @@ let sortConstraintsBy = (cst_list, arg) => {
 }
 
 // updates the weight for all constraints
-let updateWeightAll = (e) => {
-    let weight = document.getElementById('slider-all').value;
+let editSelectedConstraintsWeight = () => {
+    let weight = htmlElements.selectedConstraintsEditWeightSlider.value;
     selected_constraints.forEach(id => {
         constraints[id].weight = weight;
     });
     refreshConstraints();
 }
 
-document.getElementById('update-weight-all').onclick = updateWeightAll;
+htmlElements.selectedConstraintsEditWeightButton.onclick = editSelectedConstraintsWeight;
 
 htmlElements.constraintHeaderDeleteButton.onclick = deleteSelectedConstraint;
 htmlElements.constraintHeaderEditButton.onclick = editSelectedConstraint;
