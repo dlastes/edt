@@ -1176,10 +1176,10 @@ let refreshSelectedFromList = (list) => {
 
 // select all constraint simulator
 let selectAll = (e) => {
-    if (selected_constraints.size === Object.keys(constraints).length) {
+    if (selected_constraints.length === Object.keys(constraints).length) {
         selected_constraints = [];
     } else {
-        selected_constraints = [Object.keys(constraints)];
+        selected_constraints = Object.keys(constraints);
     }
     refreshSelectedFromList(selected_constraints);
 }
