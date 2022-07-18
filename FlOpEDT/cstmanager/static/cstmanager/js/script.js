@@ -41,6 +41,7 @@ let htmlElements = {
     confirmEditConstraintButton: document.getElementById('confirm-edit-constraint'),
     selectedConstraintsEditWeightSlider: document.getElementById('selected-constraints-edit-weight-slider'),
     selectedConstraintsEditWeightButton: document.getElementById('selected-constraints-edit-weight'),
+    selectedConstraintsDeleteButton: document.getElementById('selected-constraints-delete'),
 };
 
 const State = Object.freeze({
@@ -189,17 +190,23 @@ let changeEvents = {
         filter_functions.reset_filtered_constraint_list();
         return id;
     },
-    deleteConstraint: (tableName, id) => {
+    deleteConstraint: (pageid) => {
+        let constraint = constraints[pageid];
+        if (!constraint) {
+            console.log(`Constraint not found for deletion: ${pageid}`);
+            return;
+        }
         let obj = {
             policy: "DELETE",
-            table: tableName,
-            id: id,
+            table: constraint.name,
+            id: constraint.id,
         };
         actionChanges['DELETE'].push(obj);
-        delete constraints[id];
+        delete constraints[pageid];
         constraint_list = Object.keys(constraints);
         filter_functions.reset_filtered_constraint_list();
         refreshConstraints();
+        updateBroadcastConstraint(null);
     },
     editConstraint: (constraint) => {
         constraints[constraint.pageid] = constraint;
@@ -1020,6 +1027,11 @@ let updateBroadcastConstraint = (id) => {
 
     broadcastConstraint = id;
     let obj = constraints[id];
+
+    if (!obj) {
+        console.log(`Constraint not found for display: ${id}`);
+        return;
+    }
     htmlElements.constraintHeaderTitle.value = obj.title || findConstraintLocalNameFromClass(obj.name);
     htmlElements.constraintHeaderComment.value = obj.comment;
     htmlElements.constraintHeaderActivation.innerText = obj.is_active ? "Active" : "Inactive";
@@ -1060,6 +1072,7 @@ let buildMetadata = () => {
 let refreshConstraints = () => {
     htmlElements.constList.innerHTML = '';
     htmlElements.constraintsDisabled.innerHTML = '';
+    lastSelectedConstraint = null;
 
     buildActivatedConstraintsSections();
     refreshSelectedFromList(selected_constraints);
@@ -1250,8 +1263,13 @@ let deleteSelectedConstraint = () => {
     if (!lastSelectedConstraint) {
         return;
     }
-    delete constraints[lastSelectedConstraint];
-    refreshConstraints();
+    changeEvents.deleteConstraint(lastSelectedConstraint);
+};
+
+let deleteSelectedConstraints = () => {
+    selected_constraints.forEach(pageid => {
+       changeEvents.deleteConstraint(pageid);
+    });
 };
 
 // builds the card for the constraint
@@ -1323,6 +1341,7 @@ let editSelectedConstraintsWeight = () => {
 }
 
 htmlElements.selectedConstraintsEditWeightButton.onclick = editSelectedConstraintsWeight;
+htmlElements.selectedConstraintsDeleteButton.onclick = deleteSelectedConstraints;
 
 htmlElements.constraintHeaderDeleteButton.onclick = deleteSelectedConstraint;
 htmlElements.constraintHeaderEditButton.onclick = editSelectedConstraint;
