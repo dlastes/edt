@@ -162,6 +162,7 @@ let changeEvents = {
         actionChanges['ADD'].push(obj);
         constraints[constraint.pageid] = constraint;
         constraint_list = Object.keys(constraints);
+        filter_functions.reset_filtered_constraint_list();
     },
     duplicateConstraint: (pageid) => {
         let copy_org_cst = copyObj(constraints[pageid]);
