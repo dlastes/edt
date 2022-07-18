@@ -637,21 +637,22 @@ let extractConstraintFromPopup = (constraint) => {
         // Clear the previously selected values (only keep the latest save)
         param.id_list = [];
 
-        // Store the selected values
-        let tag = document.getElementById('collapse-parameter-' + param.name);
-        tag.querySelectorAll('input').forEach((value, key, parent) => {
-            if (value.type === 'text') {
-                param.id_list.push(value.value);
-            } else {
-                if (param.type.includes('Boolean')) {
-                    param.id_list.push(value.checked);
+        if (param.type.includes('Boolean')) {
+            let tag = document.getElementById('param-check-' + param.name);
+            param.id_list.push(tag.checked);
+        } else {
+            // Store the selected values
+            let tag = document.getElementById('collapse-parameter-' + param.name);
+            tag.querySelectorAll('input').forEach((value, key, parent) => {
+                if (value.type === 'text') {
+                    param.id_list.push(value.value);
                 } else {
                     if (value.checked) {
                         param.id_list.push(value.getAttribute('element-id'));
                     }
                 }
-            }
-        });
+            });
+        }
 
         if (param.required && param.id_list.length === 0) {
             isValid = false;
@@ -907,8 +908,6 @@ let createSelectedParameterPopup = (constraint, parameter) => {
         acceptableValues.forEach(ele => {
             createCheckboxAndLabel(ele, 'checkbox');
         });
-    } else if (param_obj.type.includes('Boolean')) {
-        createCheckboxAndLabel('Activate?', 'checkbox');
     } else {
         let temp_id = parameter + '-value';
 
@@ -969,29 +968,14 @@ let buttonWithDropBuilder = (constraint, parameter) => {
         badge = elementBuilder('span', {
             'class': 'badge text-bg-danger ms-1',
         });
-        badge.innerText = "Requis";
+        badge.innerText = "Required";
     }
 
-    let button = elementBuilder("button", {
-        'class': 'accordion-button',
-        'type': 'button',
-        'data-bs-toggle': 'collapse',
-        'data-bs-target': '#' + collapseID,
-        'aria-expanded': 'false',
-        'aria-controls': collapseID,
-    });
-    button.innerText = parameter.name;
-    button.append(badge);
+    let button;
 
     let buttonHeader = divBuilder({
         'class': 'accordion-header',
         'id': buttonID,
-    });
-
-    let elements = createSelectedParameterPopup(constraint, parameter.name);
-
-    let body = divBuilder({
-        'class': 'accordion-body',
     });
 
     let collapse = divBuilder({
@@ -1001,12 +985,53 @@ let buttonWithDropBuilder = (constraint, parameter) => {
         'data-bs-parent': '#' + htmlElements.constraintEditParams.id,
     });
 
+    // Different display for boolean parameters
+    if (parameter.type.includes('Boolean')) {
+        button = divBuilder({
+            'class': 'form-check form-switch m-3',
+        });
+
+        let checkID = `param-check-${parameter.name}`;
+
+        let check = elementBuilder('input', {
+            'class': 'form-check-input',
+            'type': 'checkbox',
+            'role': 'switch',
+            'id': checkID,
+        });
+
+        let label = elementBuilder('label', {
+            'class': 'form-check-label',
+            'for': checkID,
+        });
+        label.innerText = parameter.name;
+        button.append(check, label, badge);
+    } else {
+        button = elementBuilder('button', {
+            'class': 'accordion-button collapsed',
+            'type': 'button',
+            'data-bs-toggle': 'collapse',
+            'data-bs-target': '#' + collapseID,
+            'aria-expanded': 'false',
+            'aria-controls': collapseID,
+        });
+        button.innerText = parameter.name;
+        button.append(badge);
+
+        let elements = createSelectedParameterPopup(constraint, parameter.name);
+
+        let body = divBuilder({
+            'class': 'accordion-body',
+        });
+
+        body.append(elements);
+        collapse.append(body);
+    }
+
     let itemContainer = divBuilder({
         'class': 'accordion-item',
     })
 
-    body.append(elements);
-    collapse.append(body);
     buttonHeader.append(button);
     itemContainer.append(buttonHeader, collapse);
     return itemContainer;
@@ -1268,7 +1293,7 @@ let deleteSelectedConstraint = () => {
 
 let deleteSelectedConstraints = () => {
     selected_constraints.forEach(pageid => {
-       changeEvents.deleteConstraint(pageid);
+        changeEvents.deleteConstraint(pageid);
     });
 };
 

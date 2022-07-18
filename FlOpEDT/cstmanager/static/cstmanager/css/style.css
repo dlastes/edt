@@ -360,3 +360,7 @@ input:hover {
 #params button {
     position: relative;
 }
+
+.accordion-button-no-icon:after {
+    content: none;
+}

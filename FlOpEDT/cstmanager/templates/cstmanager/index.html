@@ -95,10 +95,10 @@
 
                             </div>
                             <!-- Activation -->
-                            <div class="form-check mb-3">
-                                <input class="form-check-input" type="checkbox" value=""
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" role="switch" value=""
                                        id="constraint-edit-activation">
-                                <label class="form-check-label ps-3" for="constraint-edit-activation">
+                                <label class="form-check-label ps-1" for="constraint-edit-activation">
                                     Activated?
                                 </label>
                             </div>
@@ -204,8 +204,8 @@
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-auto">
-                            <label for="selected-constraints-edit-weight-slider" class="form-label text-center">Poids
-                                :</label>
+                            <label for="selected-constraints-edit-weight-slider"
+                                   class="form-label text-center">Weight:</label>
                         </div>
                         <div class="col-auto">
                             <div id="selected-constraints-edit-weight-value" class="text-center">1</div>
@@ -221,13 +221,11 @@
                 </div>
             </div>
             <div class="col-auto">
-                <div class="divbutton">
-                    <button class="transition neutral" id="selected-constraints-edit-weight">
+                <div class="btn-group" role="group" aria-label="Edit selected constraints">
+                    <button class="btn btn-primary w-auto" id="selected-constraints-edit-weight">
                         Set weight
                     </button>
-                </div>
-                <div class="divbutton">
-                    <button class="transition neutral" id="selected-constraints-delete">
+                    <button class="btn btn-danger w-auto" id="selected-constraints-delete">
                         Delete
                     </button>
                 </div>
