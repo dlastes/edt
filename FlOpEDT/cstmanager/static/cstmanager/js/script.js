@@ -152,15 +152,8 @@ let visibility = {
 // object containing event listeners for constraint management (to prepare for the request)
 let changeEvents = {
     addNewConstraint: (constraint) => {
-        let obj = {
-            policy: 'ADD',
-            table: constraint.name,
-            constraint: {
-                constraint,
-            },
-        }
-        actionChanges['ADD'].push(obj);
         constraints[constraint.pageid] = constraint;
+        actionChanges.add[constraint.pageid] = constraint;
         constraint_list = Object.keys(constraints);
         filter_functions.reset_filtered_constraint_list();
     },
@@ -197,13 +190,19 @@ let changeEvents = {
             console.log(`Constraint not found for deletion: ${pageid}`);
             return;
         }
-        let obj = {
-            policy: "DELETE",
-            table: constraint.name,
-            id: constraint.id,
-        };
-        actionChanges['DELETE'].push(obj);
+
         delete constraints[pageid];
+
+        // Check if the constraint is already in the database
+        if (!actionChanges.add[pageid]) {
+            // Register it for removal
+            actionChanges.delete[pageid] = constraint;
+        }
+
+        // Remove the constraint from being added or edited
+        delete actionChanges.add[pageid];
+        delete actionChanges.edit[pageid];
+
         constraint_list = Object.keys(constraints);
         filter_functions.reset_filtered_constraint_list();
         refreshConstraints();
@@ -211,10 +210,24 @@ let changeEvents = {
     },
     editConstraint: (constraint) => {
         constraints[constraint.pageid] = constraint;
-        //TODO: Add diff to actionChanges
+
+        // Check if the constraint has just been added
+        if (actionChanges.add[constraint.pageid]) {
+            // Directly edit the constraint in the add list
+            actionChanges.add[constraint.pageid] = constraint;
+            return;
+        }
+        // Else add the changes in the edit list (or replace if existing)
+        actionChanges.edit[constraint.pageid] = constraint;
     },
     normalizeActionChanges: () => {
-        return true;
+        // If the changes are stored as diffs (like a version control system),
+        // this function cumulates the diffs before committing.
+    },
+    commitChanges: () => {
+        Object.entries(actionChanges.add).forEach((entry, value) => {
+            console.log(entry, value);
+        });
     },
 }
 
@@ -462,9 +475,9 @@ let clickConstraint = (id) => {
 // returns an empty JSON object for tracking changes on constraints
 let emptyChangesDict = () => {
     return {
-        'ADD': [],
-        'DELETE': [],
-        'EDIT': [],
+        'add': {},
+        'delete': {},
+        'edit': {},
     };
 }
 
@@ -689,6 +702,7 @@ document.getElementById('discard-changes').addEventListener('click', discardChan
 // shortcut function
 let applyChanges = (e) => {
     changeEvents.normalizeActionChanges();
+    changeEvents.commitChanges();
 }
 
 // clear input fields for filters
