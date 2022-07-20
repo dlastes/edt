@@ -29,6 +29,12 @@ import TTapp.TTConstraints.visio_constraints as ttv
 from rest_framework import serializers
 from base.timing import all_possible_start_times
 
+from collections import OrderedDict
+from rest_framework.serializers import ModelSerializer
+from rest_framework.fields import Field
+from django.db import models
+from base.models import Department
+
 # ---------------
 # ---- TTAPP ----
 # ---------------
@@ -93,9 +99,72 @@ class TTLimitedRoomChoicesSerializer(serializers.ModelSerializer):
         model = ttm.LimitedRoomChoices
         fields = '__all__' """
 
+def serializer_factory(mdl: models.Model, fields=None, **kwargss):
+    """
+    Taken and adapted from Sebastian Wozny at https://stackoverflow.com/a/33137535
+
+    Generalized serializer factory to increase DRYness of code.
+
+    :param mdl: The model class that should be instanciated
+    :param fields: the fields that should be exclusively present on the serializer
+    :param kwargss: optional additional field specifications
+    :return: An awesome serializer
+    """
+
+    def _get_declared_fields(attrs):
+        declared_fields = [(field_name, attrs.pop(field_name))
+                           for field_name, obj in list(attrs.items())
+                           if isinstance(obj, Field)]
+        declared_fields.sort(key=lambda x: x[1]._creation_counter)
+        return OrderedDict(declared_fields)
+
+    # Create an object that will look like a base serializer
+    class Base(object):
+        pass
+
+    Base._declared_fields = _get_declared_fields(kwargss)
+
+    class MySerializer(Base, ModelSerializer):
+        class Meta:
+            model = mdl
+
+        meta_fields = []
+        if fields:
+            meta_fields = fields
+        setattr(Meta, "fields", meta_fields)
+
+        def to_internal_value(self, data):
+            formatted_data = {}
+            # Replace department string by its id (i.e 'INFO' by 2)
+            data['department'] = Department.objects.get(abbrev=data['department']).id
+
+            meta_fields = getattr(self.Meta, "fields")
+            for field in meta_fields:
+                if field in data:
+                    formatted_data[field] = data[field]
+            parameters = data['parameters']
+            for parameter in parameters:
+                if 'id_list' in parameter:
+                    # Handle single value parameters
+                    if not parameter['multiple']:
+                        value = parameter['id_list'][0]
+                    else:
+                        value = parameter['id_list']
+                    formatted_data[parameter['name']] = value
+
+            return super().to_internal_value(formatted_data)
+
+    return MySerializer
+
+
+def flopconstraint_serializer_factory(mdl: models.Model):
+    fields = [field.name for field in mdl._meta.get_fields()]
+    myserializer = serializer_factory(mdl, fields=fields)
+    return myserializer
+
+
 class FlopConstraintSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
-    #weeks = serializers.SerializerMethodField()
     parameters = serializers.SerializerMethodField()
 
     class Meta:
@@ -104,7 +173,7 @@ class FlopConstraintSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def get_name(self, obj):
-        return(obj.__class__.__name__)
+        return obj.__class__.__name__
 
     def get_weeks(self, obj):
         weeklist = []
@@ -159,7 +228,7 @@ class FlopConstraintSerializer(serializers.ModelSerializer):
 
                 paramlist.append(parameters)
 
-        return(paramlist)
+        return paramlist
 
 
 class FlopConstraintTypeSerializer(serializers.Serializer):

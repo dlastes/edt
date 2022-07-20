@@ -225,9 +225,31 @@ let changeEvents = {
         // this function cumulates the diffs before committing.
     },
     commitChanges: () => {
-        Object.entries(actionChanges.add).forEach((entry, value) => {
-            console.log(entry, value);
+        let success = true;
+        let toAdd = Object.values(actionChanges.add);
+        let toEdit = Object.values(actionChanges.edit);
+        let toDelete = Object.values(actionChanges.delete);
+        if (toAdd.length === 0 && toEdit.length === 0 && toDelete.length === 0) {
+            console.log('Nothing to commit');
+            return;
+        }
+
+        // Send new constraints
+        toAdd.forEach((constraint) => {
+            constraint.department = department;
+            postData(urlConstraints, constraint).catch(reason => {
+                console.error(reason);
+                success = false;
+            });
         });
+
+        if (!success) {
+            console.error('Commit aborted');
+        }
+        console.log('Commit succeeded');
+
+        // Reset changes as everything has been accepted
+        resetActionChanges();
     },
 }
 
@@ -256,10 +278,11 @@ let fetchers = {
                 originalConstraints = responseToDict(Object.values(jsonObj));
                 constraints = copyFromOriginalConstraints();
                 Object.values(constraints).forEach((constraint) => {
-                    constraint['parameters'].forEach((param) => {
-                        if (param.name in database['acceptable_values']) {
-                            param['acceptable'] = database['acceptable_values'][param.name]['acceptable'];
+                    constraint.parameters.forEach((param) => {
+                        if (param.name in database.acceptable_values) {
+                            param.acceptable = database.acceptable_values[param.name].acceptable;
                         }
+                        param.id_list = param.id_list.map(String);
                     });
                 });
                 actionChanges = emptyChangesDict();
@@ -486,7 +509,12 @@ let originalConstraints;
 let constraints;
 let newConstraint;
 let editConstraint;
-let actionChanges = emptyChangesDict();
+let actionChanges;
+let resetActionChanges = () => {
+    actionChanges = emptyChangesDict();
+};
+resetActionChanges();
+
 let database = {
     'departments': null,
     'train_progs': null,
@@ -532,7 +560,6 @@ let resetNewConstraint = () => {
         comment: '',
         id: '',
         is_active: false,
-        modified_at: '',
         name: '',
         local_name: '',
         pageid: '',
@@ -584,8 +611,8 @@ let fillEditConstraintPopup = constraint => {
         title.value = "";
         comment.value = "";
         activation.checked = false;
-        weightSlider.value = 0;
-        weightValue.innerText = '0';
+        weightSlider.value = 1;
+        weightValue.innerText = weightSlider.value;
         params.innerHTML = '';
     } else {
         let localName = findConstraintLocalNameFromClass(constraint.name);
@@ -635,10 +662,6 @@ let extractConstraintFromPopup = (constraint) => {
     constraint.comment = htmlElements.constraintEditComment.value;
     constraint.is_active = htmlElements.constraintEditActivation.checked;
     constraint.weight = parseInt(htmlElements.constraintEditWeightSlider.value);
-    let currentDate = new Date();
-    const offset = currentDate.getTimezoneOffset();
-    currentDate = new Date(currentDate.getTime() - (offset * 60 * 1000));
-    constraint.modified_at = currentDate.toISOString().split('T')[0];
 
     let isValid = true;
 

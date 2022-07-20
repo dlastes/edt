@@ -23,6 +23,7 @@
 
 from api.shared.params import dept_param, week_param, year_param
 from django.utils.decorators import method_decorator
+from django.utils import module_loading
 from drf_yasg.utils import swagger_auto_schema
 from django.apps import apps
 from TTapp.FlopConstraint import FlopConstraint, all_subclasses
@@ -32,7 +33,7 @@ from django.contrib.postgres.fields.array import ArrayField
 from base.timing import all_possible_start_times
 
 from drf_yasg import openapi
-from rest_framework import viewsets, views
+from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.exceptions import APIException
 from api.TTapp import serializers
@@ -205,24 +206,24 @@ class TTLimitedRoomChoicesViewSet(viewsets.ModelViewSet):
 @method_decorator(name='retrieve',
                   decorator=swagger_auto_schema(
                       manual_parameters=[
-                            openapi.Parameter('name',
+                          openapi.Parameter('name',
                                             openapi.IN_QUERY,
                                             description="Name of constraint",
-                                            type=openapi.TYPE_STRING, required = True),
+                                            type=openapi.TYPE_STRING, required=True),
                       ])
                   )
 class FlopConstraintViewSet(viewsets.ViewSet):
     """
     ViewSet to see all the constraints and their parameters
-    
+
     Result can be filtered by week, year and dept
     """
     permission_classes = [IsAdminOrReadOnly]
-    filterset_fields = '__all__' 
-    serializer_class = serializers.TTConstraintSerializer
+    filterset_fields = '__all__'
+    lookup_field = 'id'
+    lookup_value_regex = '[0-9]{1,32}'
 
-
-    def list(self, request):
+    def list(self, request, **kwargs):
         # Getting all the filters
         week = self.request.query_params.get('week', None)
         year = self.request.query_params.get('year', None)
@@ -230,17 +231,17 @@ class FlopConstraintViewSet(viewsets.ViewSet):
         data = list()
         constraintlist = all_subclasses(FlopConstraint)
 
-        for constraint in constraintlist :
+        for constraint in constraintlist:
 
             if (constraint._meta.abstract == False):
                 queryset = constraint.objects.all().select_related('department')
 
                 if week is not None:
-                    queryset = queryset.filter(weeks__nb = week)
+                    queryset = queryset.filter(weeks__nb=week)
 
                 if year is not None:
                     queryset = queryset.filter(weeks__year=year)
-                
+
                 if dept is not None:
                     queryset = queryset.filter(department__abbrev=dept)
 
@@ -252,7 +253,7 @@ class FlopConstraintViewSet(viewsets.ViewSet):
 
     def retrieve(self, request, pk):
         name = request.query_params.get('name', None)
-        #Obtenir la contrainte à partir du nom
+        # Obtenir la contrainte à partir du nom
         constraint = apps.get_model('TTapp', name)
 
         instance = constraint.objects.get(pk=pk)
@@ -260,10 +261,17 @@ class FlopConstraintViewSet(viewsets.ViewSet):
 
         return Response(serializer.data)
 
+    def create(self, request, *args, **kwargs):
+        model = module_loading.import_string(f"TTapp.models.{request.data['name']}")
+        serializer = serializers.flopconstraint_serializer_factory(model)(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
 
 @method_decorator(name='list',
                   decorator=swagger_auto_schema(
-                      )
+                  )
                   )
 class FlopConstraintTypeViewSet(viewsets.ViewSet):
     permission_classes = [IsAdminOrReadOnly]
@@ -279,7 +287,8 @@ class FlopConstraintTypeViewSet(viewsets.ViewSet):
 
             parameters_fields = set([f for f in fields
                                      if f.name not in excluded_fields])
-            classes.append({'name': constraint_class.__name__, 'local_name': constraint_class._meta.verbose_name, 'parameters': parameters_fields})
+            classes.append({'name': constraint_class.__name__, 'local_name': constraint_class._meta.verbose_name,
+                            'parameters': parameters_fields})
 
         serializer = serializers.FlopConstraintTypeSerializer(classes, many=True)
         return Response(serializer.data)
@@ -289,7 +298,6 @@ class NoVisioViewSet(viewsets.ModelViewSet):
     queryset = ttv.NoVisio.objects.all()
     serializer_class = serializers.NoVisioSerializer
     permission_classes = [IsAdminOrReadOnly]
-
 
 
 @method_decorator(name='list',
@@ -303,11 +311,12 @@ class FlopConstraintFieldViewSet(viewsets.ViewSet):
 
     def list(self, request):
         dept = self.request.query_params.get('dept', None)
-        if dept is not None:
-            try:
-                department = Department.objects.get(abbrev=dept)
-            except Department.DoesNotExist:
-                raise APIException(detail='Unknown department')
+        if dept is None:
+            raise APIException(detail='Department not provided')
+        try:
+            department = Department.objects.get(abbrev=dept)
+        except Department.DoesNotExist:
+            raise APIException(detail='Unknown department')
         flop_constraints_fields = set()
         # exclude useless fields
         excluded_fields = {'id', 'class_name',
@@ -326,7 +335,7 @@ class FlopConstraintFieldViewSet(viewsets.ViewSet):
 
         for field in fields_list:
             acceptable = []
-            if (not field.many_to_one and not field.many_to_many):
+            if not field.many_to_one and not field.many_to_many:
                 typename = type(field).__name__
 
                 # Récupère les validators dans acceptable
@@ -358,16 +367,16 @@ class FlopConstraintFieldViewSet(viewsets.ViewSet):
                 acceptablelist = mod.objects.values("id")
 
                 # Filtre les ID dans acceptable list en fonction du department
-                if (field.name in ["tutor", "tutors"]):
+                if field.name in ["tutor", "tutors"]:
                     acceptablelist = acceptablelist.filter(departments=department)
 
-                elif (field.name in ["train_progs", "course_type", "course_types"]):
+                elif field.name in ["train_progs", "course_type", "course_types"]:
                     acceptablelist = acceptablelist.filter(department=department)
 
-                elif (field.name in ["modules", "module", "groups", "group"]):
+                elif field.name in ["modules", "module", "groups", "group"]:
                     acceptablelist = acceptablelist.filter(train_prog__department=department)
 
-                elif (field.name == "weeks"):
+                elif field.name == "weeks":
                     acceptablelist = acceptablelist.filter(year__in=[current_year, current_year + 1])
 
                 for element in acceptablelist:
