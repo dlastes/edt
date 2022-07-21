@@ -23,7 +23,6 @@
 
 from api.shared.params import dept_param, week_param, year_param
 from django.utils.decorators import method_decorator
-from django.utils import module_loading
 from drf_yasg.utils import swagger_auto_schema
 from django.apps import apps
 from TTapp.FlopConstraint import FlopConstraint, all_subclasses
@@ -199,20 +198,14 @@ class TTLimitedRoomChoicesViewSet(viewsets.ModelViewSet):
     filterset_fields = '__all__'
  """
 
+
 @method_decorator(name='list',
                   decorator=swagger_auto_schema(
-                      manual_parameters=[week_param(), year_param(), dept_param()])
+                      manual_parameters=[week_param(),
+                                         year_param(),
+                                         dept_param()])
                   )
-@method_decorator(name='retrieve',
-                  decorator=swagger_auto_schema(
-                      manual_parameters=[
-                          openapi.Parameter('name',
-                                            openapi.IN_QUERY,
-                                            description="Name of constraint",
-                                            type=openapi.TYPE_STRING, required=True),
-                      ])
-                  )
-class FlopConstraintViewSet(viewsets.ViewSet):
+class FlopConstraintListViewSet(viewsets.ViewSet):
     """
     ViewSet to see all the constraints and their parameters
 
@@ -220,8 +213,6 @@ class FlopConstraintViewSet(viewsets.ViewSet):
     """
     permission_classes = [IsAdminOrReadOnly]
     filterset_fields = '__all__'
-    lookup_field = 'id'
-    lookup_value_regex = '[0-9]{1,32}'
 
     def list(self, request, **kwargs):
         # Getting all the filters
@@ -233,7 +224,7 @@ class FlopConstraintViewSet(viewsets.ViewSet):
 
         for constraint in constraintlist:
 
-            if (constraint._meta.abstract == False):
+            if constraint._meta.abstract == False:
                 queryset = constraint.objects.all().select_related('department')
 
                 if week is not None:
@@ -251,22 +242,84 @@ class FlopConstraintViewSet(viewsets.ViewSet):
 
         return Response(data)
 
-    def retrieve(self, request, pk):
-        name = request.query_params.get('name', None)
+
+@method_decorator(name='list',
+                  decorator=swagger_auto_schema(
+                      manual_parameters=[week_param(), year_param(), dept_param()])
+                  )
+@method_decorator(name='retrieve',
+                  decorator=swagger_auto_schema(
+                      manual_parameters=[week_param(),
+                                         year_param(),
+                                         dept_param()])
+                  )
+class FlopConstraintViewSet(viewsets.ViewSet):
+    """
+    ViewSet to see all the constraints and their parameters
+
+    Result can be filtered by week, year and dept
+    """
+    permission_classes = [IsAdminOrReadOnly]
+    filterset_fields = '__all__'
+    lookup_field = 'id'
+    lookup_value_regex = '[0-9]{1,32}'
+
+    def list(self, request, **kwargs):
+        name = kwargs['name']
+        # Getting all the filters
+        week = self.request.query_params.get('week', None)
+        year = self.request.query_params.get('year', None)
+        dept = self.request.query_params.get('dept', None)
+        data = list()
+
+        constraint = apps.get_model('TTapp', name)
+        if constraint._meta.abstract == False:
+            queryset = constraint.objects.all().select_related('department')
+
+            if week is not None:
+                queryset = queryset.filter(weeks__nb=week)
+
+            if year is not None:
+                queryset = queryset.filter(weeks__year=year)
+
+            if dept is not None:
+                queryset = queryset.filter(department__abbrev=dept)
+
+            for object in queryset:
+                serializer = serializers.TTConstraintSerializer(object)
+                data.append(serializer.data)
+        return Response(data)
+
+    def retrieve(self, request, name, id):
+        #name = request.query_params.get('name', None)
         # Obtenir la contrainte à partir du nom
         constraint = apps.get_model('TTapp', name)
 
-        instance = constraint.objects.get(pk=pk)
+        instance = constraint.objects.get(pk=id)
         serializer = serializers.TTConstraintSerializer(instance)
 
         return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
-        model = module_loading.import_string(f"TTapp.models.{request.data['name']}")
+        model = apps.get_model('TTapp', request.data['name'])
         serializer = serializers.flopconstraint_serializer_factory(model)(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
+
+    def destroy(self, request, name, id):
+        response = "{{'message': '{}'}}"
+
+        try:
+            model = apps.get_model('TTapp', name)
+        except LookupError:
+            return Response(response.format('Given constraint name does not exist'))
+        try:
+            instance = model.objects.get(id=id)
+        except:
+            return Response(response.format(f'Could not find constraint {name} with id {id}'))
+        instance.delete()
+        return Response(response.format('Deleted successfully'))
 
 
 @method_decorator(name='list',

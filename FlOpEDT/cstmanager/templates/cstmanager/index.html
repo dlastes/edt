@@ -5,6 +5,7 @@
         let department = "{{ dept }}";
         let urlAcceptableValues = "{% url 'api:ttapp:constraints_fields-list' %}";
         let urlConstraints = "{% url 'api:ttapp:constraint-list' %}";
+        let urlDetailConstraint = "{% url 'api:ttapp:constraint-detail' 'a' 0 %}".replace('/a/0', '');
         let urlDepartments = "{% url 'api:fetch:dept-list' %}";
         let urlGroups = "{% url 'api:fetch:idgroup-list' %}";
         let urlTutors = "{% url 'api:people:tutor-list' %}";

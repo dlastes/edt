@@ -205,6 +205,7 @@ let changeEvents = {
 
         constraint_list = Object.keys(constraints);
         filter_functions.reset_filtered_constraint_list();
+        selected_constraints = selected_constraints.filter(id => id !== pageid);
         refreshConstraints();
         updateBroadcastConstraint(null);
     },
@@ -224,8 +225,7 @@ let changeEvents = {
         // If the changes are stored as diffs (like a version control system),
         // this function cumulates the diffs before committing.
     },
-    commitChanges: () => {
-        let success = true;
+    commitChanges: async () => {
         let toAdd = Object.values(actionChanges.add);
         let toEdit = Object.values(actionChanges.edit);
         let toDelete = Object.values(actionChanges.delete);
@@ -235,21 +235,28 @@ let changeEvents = {
         }
 
         // Send new constraints
-        toAdd.forEach((constraint) => {
+        await Promise.all(toAdd.map(async (constraint) => {
             constraint.department = department;
-            postData(urlConstraints, constraint).catch(reason => {
+            await postData(urlConstraints, constraint).then(r => console.log(r)).catch(reason => {
                 console.error(reason);
-                success = false;
             });
-        });
+        }));
 
-        if (!success) {
-            console.error('Commit aborted');
-        }
-        console.log('Commit succeeded');
+        // Send constraint deletions
+        await Promise.all(toDelete.map(async (constraint) => {
+            await deleteData(urlDetailConstraint, {
+                'name': constraint.name,
+                'id': constraint.id
+            }).then(r => console.log(r)).catch(reason => {
+                console.error(reason);
+            });
+        }));
 
         // Reset changes as everything has been accepted
         resetActionChanges();
+
+        // Reload the constraints (new constraints can have different IDs when inserted)
+        fetchers.fetchConstraints();
     },
 }
 
