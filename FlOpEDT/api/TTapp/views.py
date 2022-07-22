@@ -307,6 +307,22 @@ class FlopConstraintViewSet(viewsets.ViewSet):
         serializer.save()
         return Response(serializer.data)
 
+    def update(self, request, name, id):
+        response = "{{'message': '{}'}}"
+
+        try:
+            model = apps.get_model('TTapp', name)
+        except LookupError:
+            return Response(response.format('Given constraint name does not exist'))
+        try:
+            instance = model.objects.get(id=id)
+        except:
+            return Response(response.format(f'Could not find constraint {name} with id {id}'))
+        serializer = serializers.flopconstraint_serializer_factory(model)(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
     def destroy(self, request, name, id):
         response = "{{'message': '{}'}}"
 

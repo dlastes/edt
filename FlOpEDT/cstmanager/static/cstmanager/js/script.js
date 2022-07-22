@@ -242,6 +242,14 @@ let changeEvents = {
             });
         }));
 
+        // Send existing constraints updates
+        await Promise.all(toEdit.map(async (constraint) => {
+            constraint.department = department;
+            await putData(urlConstraints, constraint).then(r => console.log(r)).catch(reason => {
+                console.error(reason);
+            });
+        }));
+
         // Send constraint deletions
         await Promise.all(toDelete.map(async (constraint) => {
             await deleteData(urlDetailConstraint, {
@@ -1312,7 +1320,8 @@ let toggleConstraint = (e) => {
     // Toggle its activation
     ele.is_active = !ele.is_active;
 
-    console.log(ele);
+    actionChanges.edit[pageid] = ele;
+
     refreshConstraints();
 }
 

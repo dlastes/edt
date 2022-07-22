@@ -107,3 +107,20 @@ async function deleteData(url = '', data = {}) {
     });
     return response.json();
 }
+
+async function putData(url = '', data = {}) {
+    const response = await fetch(`${url}${data.name}/${data.id}/`, {
+        method: 'PUT',
+        mode: 'cors',
+        cache: 'no-cache',
+        credentials: 'same-origin',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken,
+        },
+        redirect: 'follow',
+        referrerPolicy: 'no-referrer',
+        body: JSON.stringify(data),
+    });
+    return response.json();
+}
