@@ -93,7 +93,8 @@ let visibility = {
     },
     hidePopover: _ => {
         if (currentPopover) {
-            currentPopover.hide();
+            currentPopover.dispose();
+            currentPopover = null;
         }
     },
 };
