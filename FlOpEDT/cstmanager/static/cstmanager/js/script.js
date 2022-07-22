@@ -17,14 +17,6 @@ let htmlElements = {
     newConstraintButton: document.getElementById('nav-new-constraint'),
     constraintsGroupMode: document.getElementById('constraints-group-mode'),
     constraintsSelectAll: document.getElementById('constraints-select-all'),
-    constraintsInfo: document.getElementById('constraint-info'),
-    constraintsInfoBody: document.getElementById('constraint-info-body'),
-    constraintHeaderTitle: document.getElementById('constraint-header-title'),
-    constraintHeaderComment: document.getElementById('constraint-header-comment'),
-    constraintHeaderActivation: document.getElementById('constraint-header-activation'),
-    constraintHeaderWeight: document.getElementById('constraint-header-weight'),
-    constraintHeaderEditButton: document.getElementById('constraint-header-edit'),
-    constraintHeaderDeleteButton: document.getElementById('constraint-header-delete'),
     paramsDiv: document.getElementById('params'),
     constraintsEditPopup: document.getElementById('constraint-edit-popup'),
     constraintEditTitle: document.getElementById('constraint-edit-title'),
@@ -38,6 +30,7 @@ let htmlElements = {
     enabledConstraintsList: document.getElementById('constraints-enabled'),
     disabledConstraintsList: document.getElementById('constraints-disabled'),
     filtersElement: document.getElementById('filters'),
+    filterAllWeeks: document.getElementById('filter-all-weeks'),
     numberSelectedConstraints: document.getElementById('num-selected-constraints'),
     commitChangesButton: document.getElementById('apply-changes'),
     fetchConstraintsButton: document.getElementById('fetch-constraints'),
@@ -67,92 +60,25 @@ let setState = (newState) => {
 let currentPopover;
 
 // object containing functions that involve filtering
-let filter_functions = {
-    tutor: (str) => {
-        str = str.toLowerCase();
-        let ret = [];
-        let keys = Object.keys(database.tutors).filter((key) => {
-            let obj = database.tutors[key];
-            return obj['username'].toLowerCase().includes(str)
-                || obj['first_name'].toLowerCase().includes(str)
-                || obj['last_name'].toLowerCase().includes(str);
-        });
-        return Object.values(database['tutors_ids']).filter(tut => {
-            return keys.includes(tut['name']);
-        }).map(obj => obj['id']);
-    },
-    module: (str) => {
-        str = str.toLowerCase();
-        return Object.keys(database.modules).filter(key => {
-            return database.modules[key].toLowerCase().includes(str);
-        });
-    },
-    course: (str) => {
-        str = str.toLowerCase();
-        return Object.keys(database.courses).filter(key => {
-            return database.courses[key].toLowerCase().includes(str);
-        });
-    },
-    reset_filtered_constraint_list: () => {
+let filter = {
+    reset: () => {
         filtered_constraint_list = [...constraint_list];
     },
-    filter_constraints_by_tutor: (keys, exclusion) => {
-        if (!keys || keys.length === 0) {
-            filtered_constraint_list = [];
-            refreshConstraints();
-            return;
-        }
-        filtered_constraint_list = filtered_constraint_list.filter(cst_id => {
-            let param = get_parameter_from_constraint(constraints[cst_id], 'tutor');
-            if (Object.keys(param).length === 0) {
-                return true;
-            }
-            if (param.id_list.length === 0 && !exclusion) {
-                return true;
-            }
-            keys.forEach(k => {
-                if (param.id_list.includes(k)) {
-                    return true;
-                }
+    by_week: week_id => {
+        if (htmlElements.filterAllWeeks.checked) {
+            filter.reset();
+        } else {
+            filtered_constraint_list = constraint_list.filter(pageid => {
+                let param = constraints[pageid].parameters.find(parameter => parameter.name === 'weeks');
+                return (param.id_list.length === 0 || param.id_list.includes('' + week_id));
             });
-            return false;
-        });
-        refreshConstraints();
-    },
-    filter_constraints_by_module: (keys, exclusion) => {
-        if (!keys || keys.length === 0) {
-            filtered_constraint_list = [];
-            refreshConstraints();
-            return;
         }
-        filtered_constraint_list = filtered_constraint_list.filter(cst_id => {
-            let param = get_parameter_from_constraint(constraints[cst_id], 'module');
-            if (Object.keys(param).length === 0) {
-                return true;
-            }
-            if (param.id_list.length === 0 && !exclusion) {
-                return true;
-            }
-            keys.forEach(k => {
-                if (param.id_list.includes(k)) {
-                    return true;
-                }
-            });
-            return false;
-        });
-        refreshConstraints();
     },
 }
 
 let visibility = {
     setElementVisible: (htmlElement, isVisible) => {
         htmlElement.hidden = !isVisible;
-    },
-    showConstraintInfo: _ => {
-        visibility.setElementVisible(htmlElements.constraintsInfo, true);
-    },
-    hideConstraintInfo: _ => {
-        visibility.setElementVisible(htmlElements.constraintsInfo, false);
     },
     showPopover: (popover) => {
         if (!popover) {
@@ -178,7 +104,7 @@ let changeEvents = {
         constraints[constraint.pageid] = constraint;
         actionChanges.add[constraint.pageid] = constraint;
         constraint_list = Object.keys(constraints);
-        filter_functions.reset_filtered_constraint_list();
+        filter.reset();
     },
     deleteConstraint: (pageid) => {
         let constraint = constraints[pageid];
@@ -200,10 +126,9 @@ let changeEvents = {
         delete actionChanges.edit[pageid];
 
         constraint_list = Object.keys(constraints);
-        filter_functions.reset_filtered_constraint_list();
         selected_constraints = selected_constraints.filter(id => id !== pageid);
+        filter.reset();
         refreshConstraints();
-        updateBroadcastConstraint(null);
     },
     editConstraint: (constraint) => {
         constraints[constraint.pageid] = constraint;
@@ -300,8 +225,7 @@ let fetchers = {
                 selected_constraints = [];
                 lastSelectedConstraint = null;
                 constraint_list = Object.keys(constraints);
-                filter_functions.reset_filtered_constraint_list();
-                constraint_metadata = buildMetadata();
+                filter.by_week(getWeek(year_init, week_init));
                 refreshConstraints();
             })
             .catch(err => {
@@ -479,6 +403,13 @@ let responseToDict = (resp) => {
     return ret;
 }
 
+// returns week object from week and year numbers
+let getWeek = (year, week) => {
+    return Object.values(database.weeks).find(week_object => {
+        return (week_object.nb === week && week_object.year === year);
+    })
+};
+
 // a simple way to make a copy of a JSON object
 let copyObj = (obj) => {
     return JSON.parse(JSON.stringify(obj));
@@ -645,9 +576,9 @@ let fillEditConstraintPopup = constraint => {
     }
 };
 
-let updateEditConstraintPopup = constraint => {
-    fillEditConstraintPopup(constraint);
-    updateParamsListExistingConstraint(constraint);
+let onChangeAllWeeksFilter = () => {
+    filter.by_week(selected_week);
+    refreshConstraints();
 };
 
 // Replaces given constraint's values with entered from user
@@ -726,10 +657,9 @@ let updateEditConstraintWeightDisplay = (labelID, value) => {
 let discardChanges = (e) => {
     constraints = copyFromOriginalConstraints();
     constraint_list = Object.keys(constraints);
-    filter_functions.reset_filtered_constraint_list();
     selected_constraints = [];
     lastSelectedConstraint = null;
-    updateBroadcastConstraint(null);
+    filter.reset();
     refreshConstraints();
 }
 document.getElementById('discard-changes').addEventListener('click', discardChanges);
@@ -792,9 +722,6 @@ let saveConstraintChanges = () => {
     // Reset selected constraints
     lastSelectedConstraint = null;
     selected_constraints = [];
-
-    // Reset header
-    updateBroadcastConstraint(null);
 
     // Reset current state
     setState(State.Nothing);
@@ -1087,62 +1014,6 @@ let buttonWithDropBuilder = (constraint, parameter) => {
     return itemContainer;
 }
 
-// update the header info by showing the selected constraint's info
-let updateBroadcastConstraint = (id) => {
-    if (!id) {
-        htmlElements.constraintHeaderTitle.value = "";
-        htmlElements.constraintHeaderComment.value = "";
-        htmlElements.constraintHeaderActivation.innerText = "";
-        htmlElements.constraintHeaderWeight.innerText = "";
-        htmlElements.paramsDiv.innerHTML = "";
-        visibility.hideConstraintInfo();
-        return;
-    }
-    visibility.showConstraintInfo();
-
-    broadcastConstraint = id;
-    let obj = constraints[id];
-
-    if (!obj) {
-        console.log(`Constraint not found for display: ${id}`);
-        return;
-    }
-    htmlElements.constraintHeaderTitle.value = obj.title || findConstraintLocalNameFromClass(obj.name);
-    htmlElements.constraintHeaderComment.value = obj.comment;
-    htmlElements.constraintHeaderActivation.innerText = obj.is_active ? "Active" : "Inactive";
-    htmlElements.constraintHeaderWeight.innerText = obj.weight;
-    htmlElements.paramsDiv.innerHTML = "";
-    obj.parameters.forEach(param => {
-        // hide the department parameter
-        if (param.name === 'department') {
-            return;
-        }
-        let paramDiv = elementBuilder("label", {
-            class: "form-label rounded border border-dark p-1",
-        });
-        paramDiv.innerText = param.name;
-        htmlElements.paramsDiv.append(paramDiv);
-    });
-}
-
-// event handler that fires the update broadcast constraint event handler
-let constraintHovered = (e) => {
-    updateBroadcastConstraint(e.currentTarget.getAttribute('data-cst-id'));
-}
-
-// event handler that resets the update broadcast constraint event handler
-let constraintUnhovered = (e) => {
-    if (!lastSelectedConstraint) {
-        broadcastConstraint = null;
-    }
-    updateBroadcastConstraint(lastSelectedConstraint);
-}
-
-// Unimplemented functionality
-let buildMetadata = () => {
-
-}
-
 // rerender the constraints on the page (in case of a modification)
 let refreshConstraints = () => {
     htmlElements.enabledConstraintsList.innerHTML = '';
@@ -1171,7 +1042,7 @@ let buildConstraintsSections = () => {
     htmlElements.enabledConstraintsList.innerHTML = "";
 
     if (filtered_constraint_list == null) {
-        filter_functions.reset_filtered_constraint_list();
+        filter.reset();
     }
 
     let dict = {};
@@ -1271,7 +1142,6 @@ let constraintClicked = (e) => {
         lastSelectedConstraint = id;
     }
     refreshSelectedFromList(selected_constraints);
-    updateBroadcastConstraint(id);
 }
 
 // color selected constraints
@@ -1448,8 +1318,6 @@ let constraintCardBuilder = (constraint) => {
     ].join('');
 
     wrapper.addEventListener('click', constraintClicked, false);
-    wrapper.addEventListener('mouseenter', constraintHovered, false);
-    wrapper.addEventListener('mouseleave', constraintUnhovered, false);
     wrapper.addEventListener("dragstart", (ev) => {
         // Add the target element's id to the data transfer object
         ev.dataTransfer.setData("text/plain", ev.target.id);

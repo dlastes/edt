@@ -333,3 +333,24 @@ input:hover {
 .accordion-button-no-icon:after {
     content: none;
 }
+
+/* Weeks banner */
+
+.cir_wk {
+  fill: darkgreen;
+  cursor: pointer;
+  font-size: 2em;
+  font-weight: bold
+}
+
+.rec_wk {
+  fill: darkgreen;
+  cursor: pointer;
+  font-size: 1.2em;
+}
+
+.sel_wk {
+  fill: none;
+  stroke: darkkhaki;
+  stroke-width: 4
+}

@@ -6,19 +6,22 @@
     <link rel="stylesheet" href="{% static 'cstmanager/css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'cstmanager/css/style.css' %}">
     <script>
-        let department = "{{ dept }}";
-        let urlAcceptableValues = "{% url 'api:ttapp:constraints_fields-list' %}";
-        let urlConstraints = "{% url 'api:ttapp:constraint-list' %}";
-        let urlDetailConstraint = "{% url 'api:ttapp:constraint-detail' 'a' 0 %}".replace('/a/0', '');
-        let urlDepartments = "{% url 'api:fetch:dept-list' %}";
-        let urlGroups = "{% url 'api:fetch:idgroup-list' %}";
-        let urlTutors = "{% url 'api:people:tutor-list' %}";
-        let urlModules = "{% url 'api:fetch:idmodule-list' %}";
-        let urlCourseTypes = "{% url 'api:fetch:idcoursetype-list' %}";
-        let urlTutorsID = "{% url 'api:fetch:idtutor-list' %}";
-        let urlWeeks = "{% url 'api:base:weeks-list' %}";
-        let urlTrainingPrograms = "{% url 'api:fetch:idtrainprog-list' %}";
-        let urlConstraintTypes = "{% url 'api:ttapp:constraint_types-list' %}";
+        const department = "{{ dept }}";
+        const urlAcceptableValues = "{% url 'api:ttapp:constraints_fields-list' %}";
+        const urlConstraints = "{% url 'api:ttapp:constraint-list' %}";
+        const urlDetailConstraint = "{% url 'api:ttapp:constraint-detail' 'a' 0 %}".replace('/a/0', '');
+        const urlDepartments = "{% url 'api:fetch:dept-list' %}";
+        const urlGroups = "{% url 'api:fetch:idgroup-list' %}";
+        const urlTutors = "{% url 'api:people:tutor-list' %}";
+        const urlModules = "{% url 'api:fetch:idmodule-list' %}";
+        const urlCourseTypes = "{% url 'api:fetch:idcoursetype-list' %}";
+        const urlTutorsID = "{% url 'api:fetch:idtutor-list' %}";
+        const urlWeeks = "{% url 'api:base:weeks-list' %}";
+        const urlTrainingPrograms = "{% url 'api:fetch:idtrainprog-list' %}";
+        const urlConstraintTypes = "{% url 'api:ttapp:constraint_types-list' %}";
+        const weeks = {{ all_weeks | safe }};
+        const week_init = {{ week}};
+        const year_init = {{ year }};
     </script>
     <div class="container-fluid">
         <!-- Content -->
@@ -52,7 +55,11 @@
                     <input type="text" class="form-control mb-3" id="input-tutor" placeholder="Tutor">
                     <input type="text" class="form-control mb-3" id="input-module" placeholder="Module">
                     <input type="text" class="form-control mb-3" id="input-course" placeholder="Course">
-                    <input type="date" class="form-control mb-3" id="input-date" placeholder="Date">
+                    <!-- See all weeks -->
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="filter-all-weeks" onchange="onChangeAllWeeksFilter()">
+                        <label class="form-check-label" for="filter-all-weeks">{% trans "See all weeks" %}</label>
+                    </div>
                 </div>
                 <div class="mb-3 text-center">
                     <button class="btn btn-info" id="clear-filters">
@@ -136,48 +143,8 @@
             <div class="col container w-auto" id="constraints-body">
                 <button id="show-disabled" class="float">{% trans "Show Disabled" %}</button>
                 <button id="show-solver" class="float">{% trans "Preanalyse" %}</button>
-                <!-- Header -->
-                <div id="constraints-header" class="row border-top border-bottom border-dark">
-                    <div id="constraint-info" hidden="hidden">
-                        <div id="constraint-info-body container-fluid" class="h-100">
-                            <div class="row h-100">
-                                <!-- Title -->
-                                <div class="col-auto border border-dark">
-                                    <label for="constraint-header-title" class="form-label">{% trans "Title" %}</label>
-                                    <input type="text" readonly id="constraint-header-title"
-                                           class="form-control-plaintext">
-                                </div>
-                                <!-- Comment -->
-                                <div class="col-auto border border-dark">
-                                    <label for="constraint-header-comment" class="form-label">{% trans "Comments" %}</label>
-                                    <input type="text" readonly id="constraint-header-comment"
-                                           class="form-control-plaintext">
-                                </div>
-                                <!-- Parameters -->
-                                <div class="col border border-dark">
-                                    <label class="form-label">{% trans "Parameters" %}</label>
-                                    <div id="params" class="form">
-                                    </div>
-                                </div>
-                                <!-- Activation -->
-                                <div class="col-auto border border-dark d-flex align-items-center">
-                                    <div class="form">
-                                        <label id="constraint-header-activation" class="form-label">
-                                        </label>
-                                    </div>
-                                </div>
-                                <!-- Weight -->
-                                <div class="col-auto border border-dark text-center">
-                                    <div class="form">
-                                        <label class="form-label">{% trans "Weight" %}</label>
-                                        <br/>
-                                        <label id="constraint-header-weight" class="form-label">
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <!-- Weeks banner -->
+                <div id="svg" class="text-center py-2">
                 </div>
                 <div id="constraints-all" class="row container-fluid">
                     <div class="row">
@@ -237,9 +204,12 @@
         <img id="icon-check" style="display: none;" src="{% static 'cstmanager/icons/icon_check.png' %}">
     </div>
 {% endblock %} {% block javascript %}
+    <script type="text/javascript" src="{% static 'base/helpers.js' %}"></script>
+    <script type="text/javascript" src="{% static 'base/svg.js' %}"></script>
+    <script type="text/javascript" src="{% static 'base/weeks.js' %}"></script>
+    <script type="text/javascript" src="{% static 'cstmanager/js/weeks_banner.js' %}"></script>
     <script type="text/javascript" src="{% static 'cstmanager/js/popper.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'cstmanager/js/bootstrap.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'base/helpers.js' %}"></script>
     <script type="text/javascript" src="{% static 'cstmanager/js/mockup_request.js' %}"></script>
     <script type="text/javascript" src="{% static 'cstmanager/js/script.js' %}"></script>
 {% endblock %}
